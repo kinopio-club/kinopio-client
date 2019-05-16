@@ -1,8 +1,7 @@
-<template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+<template lang="pug">
+  .home
+    img(alt="logo" src="@/assets/logo.png" width="50")
+    HelloWorld(msg="helloooo")
 </template>
 
 <script>

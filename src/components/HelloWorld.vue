@@ -1,4 +1,10 @@
-<template>
+<template lang="pug">
+  #hello
+    h1 hello {{ msg }}
+    p sup sup
+</template>
+
+<!-- <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
     <p>
@@ -29,7 +35,7 @@
     </ul>
   </div>
 </template>
-
+ -->
 <script>
 export default {
   name: 'HelloWorld',

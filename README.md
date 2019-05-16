@@ -1,5 +1,21 @@
 # kinopio-client
 
+<img src="./src/assets/logo.png" alt="logo" width="200">
+
+The place for people to tap, tap, tap.
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/f8ef64eb-39f9-46c6-b042-635a8704cc42/deploy-status)](https://app.netlify.com/sites/kinopio-client/deploys)
+
+## Quick start
+
+```
+vue ui
+http://localhost:8080
+```
+
+p.s. use `vue ui` to add dependencies too
+
+
 ## Project setup
 ```
 npm install
@@ -32,3 +48,8 @@ npm run test:unit
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+### Team Links
+
+- [Are.na](https://www.are.na/kinopio)
+- [Github](https://github.com/kinopio-club)
