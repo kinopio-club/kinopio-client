@@ -1,6 +1,6 @@
 <template lang='pug'>
   .costs
-    h1 Kinopio Service Costs
+    h1 Running Costs
     p like https://cushionapp.com/running-costs
 
     p filter [all |capital|recurring (month,year)]

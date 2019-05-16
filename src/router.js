@@ -22,9 +22,9 @@ export default new Router({
       component: () => import(/* webpackChunkName: "costs" */ './views/About.vue')
     },
     {
-      path: '/costs',
-      name: 'costs',
-      component: () => import(/* webpackChunkName: "costs" */ './views/Costs.vue')
+      path: '/running-costs',
+      name: 'running-costs',
+      component: () => import(/* webpackChunkName: "costs" */ './views/RunningCosts.vue')
     }
   ]
 })

@@ -3,7 +3,7 @@
     nav
       router-link(to="/") /
       router-link(to="/about") About
-      router-link(to="/costs") Costs
+      router-link(to="/running-costs") Running Costs
     router-view
 </template>
 

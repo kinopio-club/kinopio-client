@@ -1,10 +1,10 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/f8ef64eb-39f9-46c6-b042-635a8704cc42/deploy-status)](https://app.netlify.com/sites/kinopio-client/deploys)
+
 # kinopio-client
 
 <img src="./src/assets/logo.png" alt="logo" width="200">
 
-The place for people to tap, tap, tap.
-
-[![Netlify Status](https://api.netlify.com/api/v1/badges/f8ef64eb-39f9-46c6-b042-635a8704cc42/deploy-status)](https://app.netlify.com/sites/kinopio-client/deploys)
+The place for people to tap and smile.
 
 ## Quick start
 
