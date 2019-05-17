@@ -1,7 +1,7 @@
 <template lang='pug'>
   .app
     Header
-    Space(msg="helloooo")
+    Space(msg="space")
     canvas#painting
 </template>
 
