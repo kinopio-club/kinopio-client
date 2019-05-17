@@ -1,26 +1,32 @@
 <template lang='pug'>
-  span
-    nav
+  .app
+    header
       router-link(to="/") /
       router-link(to="/about") About
       router-link(to="/running-costs") Running Costs
     router-view
+    canvas#drawing
 </template>
 
 <style lang="stylus">
+
+primary-background = cyan
+primary = black
+
 *
-  -webkit-overflow-scrolling: touch
-  -webkit-tap-highlight-color: transparent
-  box-sizing: border-box
+  -webkit-overflow-scrolling touch
+  -webkit-tap-highlight-color transparent
+  box-sizing border-box
 
 body
-  background-color: cyan
-  margin: 0
+  margin 0
+  color primary
 
-// header
+.app
+  background-color primary-background
 
-nav
-  margin-bottom: 1rem
+header
+  margin-bottom 1rem
   a
-    margin-right: 5px
+    margin-right 5px
 </style>
