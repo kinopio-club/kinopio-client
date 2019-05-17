@@ -12,8 +12,8 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only, no-scope = part of the global css -->
-<style scoped lang="stylus">
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style lang="stylus">
 header
-  background-color: pink
+  background-color: var(--violet)
 </style>

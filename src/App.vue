@@ -16,12 +16,13 @@ export default {
     Space
   }
 }
-
 </script>
 
 <style lang="stylus">
-primary-background = cyan
-primary = black
+:root
+  --primary-background cyan
+  --primary black
+  --violet violet
 
 *
   -webkit-overflow-scrolling touch
@@ -30,10 +31,10 @@ primary = black
 
 body
   margin 0
-  color primary
+  color var(--primary)
 
 .app
-  background-color primary-background
+  background-color var(--primary-background)
 
 header
   margin-bottom 1rem
