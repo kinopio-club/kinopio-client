@@ -6,20 +6,34 @@
 
 The place for people to tap and smile.
 
-## Quick start
+## Install
+
+```
+git clone https://github.com/kinopio-club/kinopio-client.git
+cd kinopio-client
+npm install
+```
+
+## Run
 
 ```
 vue ui
-http://localhost:8080
 ```
 
-p.s. use `vue ui` to add dependencies too
-
-
-## Project setup
+Run tasks and update packages
 ```
-npm install
+http://localhost:8000
 ```
+
+View app
+```
+tasks → serve → open app 
+(or localhost:8080)
+```
+
+## Tasks
+
+You can do all these through `vue ui`
 
 ### Compiles and hot-reloads for development
 ```
@@ -49,7 +63,7 @@ npm run test:unit
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
 
-### Team Links
+## Team Links
 
 - [Are.na](https://www.are.na/kinopio)
 - [Github](https://github.com/kinopio-club)
