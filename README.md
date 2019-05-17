@@ -10,11 +10,18 @@ The place for people to tap and smile.
 
 ```
 vue ui
-http://localhost:8080
 ```
 
-p.s. use `vue ui` to add dependencies too
+Run tasks and update packages
+```
+http://localhost:8000
+```
 
+View app
+```
+tasks → serve → open app 
+(or localhost:8080)
+```
 
 ## Project setup
 ```
