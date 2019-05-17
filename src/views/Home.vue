@@ -1,17 +1,17 @@
 <template lang="pug">
   .home
     img(alt="logo" src="@/assets/logo.png" width="50")
-    HelloWorld(msg="helloooo")
+    Space(msg="helloooo")
 </template>
 
 <script>
 // @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
+import Space from '@/components/Space.vue'
 
 export default {
   name: 'home',
   components: {
-    HelloWorld
+    Space
   }
 }
 </script>
