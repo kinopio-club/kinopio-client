@@ -1,15 +1,25 @@
 <template lang='pug'>
   .app
-    header
-      router-link(to="/") /
-      router-link(to="/about") About
-      router-link(to="/running-costs") Running Costs
-    router-view
-    canvas#drawing
+    Header
+    Space(msg="helloooo")
+    canvas#painting
 </template>
 
-<style lang="stylus">
+<script>
+import Header from '@/components/Header.vue'
+import Space from '@/components/Space.vue'
 
+export default {
+  name: 'app',
+  components: {
+    Header,
+    Space
+  }
+}
+
+</script>
+
+<style lang="stylus">
 primary-background = cyan
 primary = black
 
