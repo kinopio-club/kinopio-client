@@ -1,5 +1,9 @@
 <template lang="pug">
-  canvas#painting.painting
+  canvas#painting.painting(
+    @mousedown="startPainting"
+    @touchstart="startPainting"
+    @mouseup="stopPainting"
+  )
 </template>
 
 <script>
@@ -11,7 +15,8 @@ export default {
       maxBrushSize: 20,
       consecutiveBrushSizeMultiplier: 0.05,
       canvas: undefined,
-      context: undefined
+      context: undefined,
+      isPainting: false
     }
   },
   mounted () {
@@ -26,6 +31,14 @@ export default {
       this.canvas.height = window.innerHeight
       this.context.clearRect(0, 0, window.innerWidth, window.innerHeight)
       console.log('🌹', this.canvas, this.context)
+    },
+    startPainting (event) {
+      this.isPainting = true
+      console.log('blahhhh', event)
+    },
+    stopPainting (event) {
+      this.isPainting = false
+      console.log('💼', event)
     }
   }
 }
