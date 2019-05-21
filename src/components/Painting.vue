@@ -19,7 +19,8 @@ export default {
       consecutiveSizeMultiplier: 0.05,
       consecutivePaints: 1,
       canvas: undefined,
-      context: undefined
+      context: undefined,
+      isPainting: false
     }
   },
   mounted () {
@@ -36,15 +37,17 @@ export default {
       this.context.clearRect(0, 0, window.innerWidth, window.innerHeight)
     },
     startPainting () {
-      this.$store.state.isPainting = true
+      // this.$store.commit('toggleIsPainting')
+      this.isPainting = true
       this.paint(event)
     },
     stopPainting () {
-      this.$store.state.isPainting = false
+      // this.$store.commit('toggleIsPainting')
+      this.isPainting = false
       this.consecutivePaints = 1
     },
     paint (event) {
-      if (!this.$store.state.isPainting) { return }
+      if (!this.isPainting) { return }
       let x, y
       if (event.touches) {
         x = event.touches[0].clientX
@@ -55,13 +58,17 @@ export default {
       }
       let size = Math.round(this.initialSize * (this.consecutivePaints * this.consecutiveSizeMultiplier))
       let color = this.$store.state.currentUser().color
-      console.log('PAINT', x, y, size, color)
+      this.$store.dispatch('broadcast/paint', {
+        x, y, size, color
+      })
       this.addPaintCircle(x, y, size, color)
-      // ADD: send to broadcast event
       this.consecutivePaints++
     },
+
     addPaintCircle (x, y, size, color) {
-      size = Math.max(size || this.maxSize)
+      console.log(this.maxSize)
+      size = Math.min(size, this.maxSize)
+      console.log('PAINT', x, y, size, color)
     }
   }
 }
