@@ -3,6 +3,9 @@
     @mousedown="startPainting"
     @touchstart="startPainting"
     @mouseup="stopPainting"
+    @touchend="stopPainting"
+    @mousemove="paint"
+    @touchmove="paint"
   )
 </template>
 
@@ -34,11 +37,16 @@ export default {
     },
     startPainting (event) {
       this.isPainting = true
-      console.log('blahhhh', event)
+      console.log('START 🌷', event)
     },
     stopPainting (event) {
       this.isPainting = false
-      console.log('💼', event)
+      console.log('STOP 👼', event)
+    },
+    paint (event) {
+      if (this.isPainting) {
+        console.log('💐', event)
+      }
     }
   }
 }
