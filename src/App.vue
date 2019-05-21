@@ -22,7 +22,7 @@ export default {
 
 <style lang="stylus">
 :root
-  --primary-background cyan
+  --primary-background pink
   --primary black
   --violet violet
 
@@ -34,9 +34,7 @@ export default {
 body
   margin 0
   color var(--primary)
-
-// .app
-  // background-color var(--primary-background)
+  background-color var(--primary-background)
 
 header
   margin-bottom 1rem
