@@ -33,19 +33,20 @@ export default {
       this.canvas.width = window.innerWidth
       this.canvas.height = window.innerHeight
       this.context.clearRect(0, 0, window.innerWidth, window.innerHeight)
-      console.log('🌹', this.canvas, this.context)
+      console.log('UPDATE SIZE 🌹', this.canvas, this.context)
     },
-    startPainting (event) {
+    startPainting () {
       this.isPainting = true
-      console.log('START 🌷', event)
+      this.paint(event)
+      console.log('💐 START', event)
     },
-    stopPainting (event) {
+    stopPainting () {
       this.isPainting = false
-      console.log('STOP 👼', event)
+      console.log('🛑 STOP', event)
     },
     paint (event) {
       if (this.isPainting) {
-        console.log('💐', event)
+        console.log('- PAINT', event)
       }
     }
   }
