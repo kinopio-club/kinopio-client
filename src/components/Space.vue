@@ -3,7 +3,7 @@
     h1 hello {{ msg }}
     p {{math}}
     p(:alt="color" @click="hello") {{color}}
-    p(@click="test") c3 graph click meee
+    p(@click="test") console.log click meee
     p(v-if="show") table show {{yolo}}
 </template>
 
