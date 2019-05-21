@@ -1,5 +1,5 @@
 <template lang="pug">
-  main
+  main.space
     h1 hello {{ msg }}
     p {{math}}
     p(:alt="color" @click="hello") {{color}}
