@@ -35,8 +35,8 @@ body
   margin 0
   color var(--primary)
 
-.app
-  background-color var(--primary-background)
+// .app
+  // background-color var(--primary-background)
 
 header
   margin-bottom 1rem

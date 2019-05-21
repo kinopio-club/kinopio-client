@@ -14,9 +14,10 @@ export default {
   name: 'Painting',
   data () {
     return {
-      initialSize: 25,
-      maxSize: 50,
-      consecutiveSizeMultiplier: 0.05,
+      // initialSize: 15,
+      // maxSize: 20,
+      size: 20,
+      // consecutiveSizeMultiplier: 0.05,
       consecutivePaints: 1,
       canvas: undefined,
       context: undefined,
@@ -36,8 +37,9 @@ export default {
       this.canvas.height = window.innerHeight
       this.context.clearRect(0, 0, window.innerWidth, window.innerHeight)
     },
-    startPainting () {
+    startPainting (event) {
       // this.$store.commit('toggleIsPainting')
+      console.log(event)
       this.isPainting = true
       this.paint(event)
     },
@@ -56,19 +58,24 @@ export default {
         x = event.clientX
         y = event.clientY
       }
-      let size = Math.round(this.initialSize * (this.consecutivePaints * this.consecutiveSizeMultiplier))
+      // let size = Math.round(this.initialSize * this.consecutivePaints)
       let color = this.$store.state.currentUser().color
       this.$store.dispatch('broadcast/paint', {
-        x, y, size, color
+        x, y, color
       })
-      this.addPaintCircle(x, y, size, color)
+      this.addPaintCircle(x, y, color)
       this.consecutivePaints++
     },
 
-    addPaintCircle (x, y, size, color) {
-      console.log(this.maxSize)
-      size = Math.min(size, this.maxSize)
-      console.log('PAINT', x, y, size, color)
+    addPaintCircle (x, y, color) {
+      // size = Math.min(size, this.maxSize)
+      console.log('PAINT', x, y, color)
+      this.context.beginPath()
+      // this.context.globalCompositeOperation = 'normal';
+      this.context.arc(x, y, this.size, 0, 2 * Math.PI)
+      this.context.closePath()
+      this.context.fillStyle = color
+      this.context.fill()
     }
   }
 }
@@ -76,5 +83,8 @@ export default {
 
 <style lang="stylus">
 .painting
-  background-color pink
+  // background-color pink
+  position absolute
+  top 0
+  // z-index -1
 </style>

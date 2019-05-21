@@ -16,4 +16,7 @@ export default {
 <style lang="stylus">
 header
   background-color: var(--violet)
+  position: fixed
+  padding-right 1rem
+  z-index 1
 </style>

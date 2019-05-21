@@ -29,7 +29,7 @@ const broadcast = {
     isBroadcasting: false
   },
   actions: {
-    paint (context, { x, y, size, color }) {
+    paint (context, { x, y, color }) {
       // console.log('broadcast paint', x,y,size,color)
     }
   }
