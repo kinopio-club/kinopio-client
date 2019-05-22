@@ -27,8 +27,14 @@ http://localhost:8000
 
 View app
 ```
-tasks → serve → open app 
+tasks → serve → open app
 (or localhost:8080)
+```
+
+## Program Flow
+
+```
+App.vue → /views → /components
 ```
 
 ## Tasks
