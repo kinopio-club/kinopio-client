@@ -5,7 +5,7 @@
     p I'll only email you once.
 
     .form-wrap
-      form(netlify)
+      form(data-netlify="true")
         input(type="email" name="email" placeholder="space@jam.com")
         button(type="submit") Send
 
