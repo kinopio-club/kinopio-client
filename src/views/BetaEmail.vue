@@ -1,6 +1,10 @@
 <template lang='pug'>
   .meta-page
-    p Sign up to get notified when Kinopio is in Beta
+
+    .iframe-wrap(style='padding:51.9% 0 0 0;position:relative;')
+      iframe(src='https://player.vimeo.com/video/337869697?autoplay=1&loop=1&title=0&byline=0&portrait=0' style='position:absolute;top:0;left:0;width:100%;height:100%;' frameborder='0' allow='autoplay')
+
+    p Get notified when Kinopio is in Beta
     p I'll only email you once.
 
     form(
@@ -16,7 +20,7 @@
 
     p= "While you wait, enjoy some "
       a(href="http://mac.are.na/playlist/kinopio-bae-tracks") bae tracks
-    img(alt="bless this mess" src="@/assets/froggo-wip.png" width="150")
+    // img(alt="bless this mess" src="@/assets/froggo-wip.png" width="150")
 
 </template>
 
@@ -40,10 +44,10 @@ export default {
 <style scoped lang="stylus">
 .meta-page
   max-width 600px
+  width 100%
   margin 8px
   margin-top 60px
   position absolute
-  z-index 1
   pointer-events none
   img
     max-width 100%
@@ -56,6 +60,9 @@ form
 input
   margin-right 5px
 a,
-form
+form,
+iframe
   pointer-events all
+.iframe-wrap
+  max-width 95% !important
 </style>
