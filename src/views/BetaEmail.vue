@@ -5,14 +5,14 @@
     p I'll only email you once.
 
     .form-wrap
-      form(data-netlify="true" method="POST" name="beta-email")
+      form(data-netlify="true" name="beta-email")
         input(type="email" name="email" placeholder="space@jam.com")
         button(type="submit") Send
 
+    img(alt="bless this mess" src="@/assets/froggo-wip.png")
+
     p= "🎹 while you wait, enjoy some "
       a(href="http://mac.are.na/playlist/kinopio-bae-tracks") bae tracks
-
-    img(alt="bless this mess" src="@/assets/froggo-wip.png")
 
 </template>
 
@@ -44,6 +44,7 @@ form
   background-color var(--secondary-background)
   border-radius 3px
   display inline-block
+  margin-bottom 1.5rem
 input
   margin-right 5px
 a,
