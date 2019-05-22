@@ -5,11 +5,11 @@
     p I'll only email you once.
 
     .form-wrap
-      form(data-netlify="true")
+      form(data-netlify="true" method="POST" name="beta-email")
         input(type="email" name="email" placeholder="space@jam.com")
         button(type="submit") Send
 
-    p= "while you wait, enjoy some "
+    p= "🎹 while you wait, enjoy some "
       a(href="http://mac.are.na/playlist/kinopio-bae-tracks") bae tracks
 
     img(alt="bless this mess" src="@/assets/froggo-wip.png")
@@ -18,7 +18,12 @@
 
 <script>
 export default {
-  name: 'newsletter'
+  name: 'beta-email',
+  data () {
+    return {
+      isFormSubmitted: false
+    }
+  }
 }
 </script>
 

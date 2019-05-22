@@ -14,12 +14,12 @@ export default new Router({
       component: Home
     },
     {
-      path: '/newsletter',
-      name: 'newsletter',
+      path: '/beta-email',
+      name: 'beta-email',
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "newsletter" */ './views/Newsletter.vue')
+      component: () => import(/* webpackChunkName: "newsletter" */ './views/BetaEmail.vue')
     }
   ]
 })
