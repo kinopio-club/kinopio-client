@@ -13,5 +13,11 @@
     </noscript>
     <div id="app"></div>
     <!-- built files will be auto injected -->
+
+    <!-- hidden form for use by netlify with /beta-email -->
+    <form name="beta-email" netlify netlify-honeypot="bot-field" hidden>
+      <input type="email" name="email" />
+    </form>
+
   </body>
 </html>
