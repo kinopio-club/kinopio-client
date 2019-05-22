@@ -12,11 +12,8 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="stylus">
 header
-  background-color: var(--violet)
-  position: fixed
-  padding-right 1rem
-  z-index 1
+  position fixed
+  top 0
 </style>

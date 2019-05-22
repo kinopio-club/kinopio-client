@@ -56,8 +56,15 @@ export default {
 <style lang="stylus">
 .space
   position absolute
+  top 0
+  left 0
+  width: 100%
+  height: 100%
+  pointer-events none
+.item
+  pointer-events all
   background-color lightgrey
-  left 30px
+  position absolute
   top 80px
-  z-index: 1 // remove this to show drawing above item
+  left 80px
 </style>

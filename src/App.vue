@@ -1,8 +1,8 @@
 <template lang='pug'>
   .app
-    Header
-    Space(msg="space")
     Painting
+    Header
+    router-view
 </template>
 
 <script>
@@ -22,9 +22,9 @@ export default {
 
 <style lang="stylus">
 :root
-  --primary-background pink
+  --primary-background white
   --primary black
-  --violet violet
+  --secondary-background #e3e3e3
 
 *
   -webkit-overflow-scrolling touch
@@ -36,8 +36,4 @@ body
   color var(--primary)
   background-color var(--primary-background)
 
-header
-  margin-bottom 1rem
-  a
-    margin-right 5px
 </style>
