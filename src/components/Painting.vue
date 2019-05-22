@@ -15,7 +15,6 @@ export default {
   data () {
     return {
       size: 20,
-      consecutivePaints: 1,
       canvas: undefined,
       context: undefined,
       isPainting: false
@@ -41,7 +40,6 @@ export default {
     },
     stopPainting () {
       this.isPainting = false
-      this.consecutivePaints = 1
     },
     paint (event) {
       if (!this.isPainting) { return }
@@ -58,7 +56,6 @@ export default {
         x, y, color
       })
       this.addPaintCircle(x, y, color)
-      this.consecutivePaints++
     },
 
     addPaintCircle (x, y, color) {
