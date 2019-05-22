@@ -1,6 +1,6 @@
 <template lang="pug">
   main.space
-    .item(style={top: '80px', left: '80px'})
+    .card(style={top: '80px', left: '80px'})
       p hello {{ msg }} and math time
       .connector O
 
@@ -62,7 +62,7 @@ export default {
   width: 100%
   height: 100%
   pointer-events none
-.item
+.card
   display flex
   pointer-events all
   background-color var(--secondary-background)

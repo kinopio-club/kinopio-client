@@ -15,7 +15,8 @@ export default {
   data () {
     return {
       size: 20,
-      maxCircles: 50,
+      maxCircles: 100,
+      rateOfCircleDecay: 0.05,
       canvas: undefined,
       context: undefined,
       isPainting: false,
@@ -34,7 +35,6 @@ export default {
     updateCanvasSize () {
       this.canvas.width = window.innerWidth
       this.canvas.height = window.innerHeight
-      this.context.clearRect(0, 0, window.innerWidth, window.innerHeight)
     },
     startPainting (event) {
       this.isPainting = true
@@ -54,30 +54,35 @@ export default {
         y = event.clientY
       }
       let color = this.$store.state.currentUser().color
-      let paintCircle = { x, y, color, iteration: 1 }
-      this.$store.dispatch('broadcast/paint', paintCircle)
-
-      this.circles.push(paintCircle)
-      this.addPaintCircle(paintCircle)
+      let circle = { x, y, color, iteration: 0 }
+      this.$store.dispatch('broadcast/paint', circle)
+      this.circles.push(circle)
     },
-    addPaintCircle (paintCircle) {
-      const { x, y, color, iteration } = paintCircle
+    exponentialDecay (iteration) {
+      return Math.exp(-(this.rateOfCircleDecay * iteration))
+    },
+    paintCircle (circle) {
+      const { x, y, color, iteration } = circle
       this.context.beginPath()
       this.context.arc(x, y, this.size, 0, 2 * Math.PI)
       this.context.closePath()
-      this.context.globalAlpha = 1 / iteration
+      this.context.globalAlpha = this.exponentialDecay(iteration)
       this.context.fillStyle = color
-      console.log(1 / iteration)
       this.context.fill()
     },
-    paintCirclesPerFrame () {
+    filterCircles () {
       this.circles = this.circles.filter(circle => circle.iteration < this.maxCircles)
+    },
+    clearCanvas () {
       this.context.clearRect(0, 0, window.innerWidth, window.innerHeight)
-
-      this.circles.forEach(circle => {
-        circle.iteration++
-        let paintCircle = JSON.parse(JSON.stringify(circle))
-        this.addPaintCircle(paintCircle)
+    },
+    paintCirclesPerFrame () {
+      this.filterCircles()
+      this.clearCanvas()
+      this.circles.forEach(item => {
+        item.iteration++
+        let circle = JSON.parse(JSON.stringify(item))
+        this.paintCircle(circle)
       })
     }
 
