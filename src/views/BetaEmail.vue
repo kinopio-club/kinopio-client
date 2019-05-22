@@ -5,7 +5,7 @@
       iframe(src='https://player.vimeo.com/video/337869697?autoplay=1&loop=1&title=0&byline=0&portrait=0' style='position:absolute;top:0;left:0;width:100%;height:100%;' frameborder='0' allow='autoplay')
 
     p Get notified when Kinopio is in Beta
-    p I'll only email you once.
+    p (I'll only email you once)
 
     form(
       name="beta-email"
@@ -44,7 +44,7 @@ export default {
 <style scoped lang="stylus">
 .meta-page
   max-width 600px
-  width 100%
+  width 95%
   margin 8px
   margin-top 60px
   position absolute
@@ -64,5 +64,5 @@ form,
 iframe
   pointer-events all
 .iframe-wrap
-  max-width 95% !important
+  max-width 100% !important
 </style>
