@@ -1,11 +1,13 @@
 <template lang="pug">
   main.space
-    .item
-      p hello {{ msg }}
-      p {{math}}
-      p(:alt="color" @click="hello") {{color}}
-      p(@click="test") console.log click meee
-      p(v-if="show") table show {{yolo}}
+    .item(style={top: '80px', left: '80px'})
+      p hello {{ msg }} and math time
+      .connector O
+
+      // p {{math}}
+      // p(:alt="color" @click="hello") {{color}}
+      // p(@click="test") console.log click meee
+      // p(v-if="show") table show {{yolo}}
 </template>
 
 <script>
@@ -52,7 +54,6 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only, no-scope = part of the global css -->
 <style lang="stylus">
 .space
   position absolute
@@ -62,9 +63,18 @@ export default {
   height: 100%
   pointer-events none
 .item
+  display flex
   pointer-events all
-  background-color lightgrey
+  background-color var(--secondary-background)
   position absolute
-  top 80px
-  left 80px
+  max-width 235px
+  cursor pointer
+  > p
+    align-self stretch
+    margin 8px
+  .connector
+    background-color pink
+    padding 8px
+    align-self right
+    cursor cell
 </style>

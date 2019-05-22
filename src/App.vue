@@ -1,8 +1,8 @@
 <template lang='pug'>
   .app
     Painting
-    Header
     router-view
+    Header
 </template>
 
 <script>
