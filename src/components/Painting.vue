@@ -14,9 +14,9 @@ export default {
   name: 'Painting',
   data () {
     return {
-      size: 20,
-      maxCircles: 100,
-      rateOfCircleDecay: 0.05,
+      circleSize: 20,
+      maxIterationsToPaint: 200, // higher is longer paint fade time
+      rateOfIterationDecay: 0.03, // lower is slower decay
       canvas: undefined,
       context: undefined,
       isPainting: false,
@@ -59,19 +59,19 @@ export default {
       this.circles.push(circle)
     },
     exponentialDecay (iteration) {
-      return Math.exp(-(this.rateOfCircleDecay * iteration))
+      return Math.exp(-(this.rateOfIterationDecay * iteration))
     },
     paintCircle (circle) {
       const { x, y, color, iteration } = circle
       this.context.beginPath()
-      this.context.arc(x, y, this.size, 0, 2 * Math.PI)
+      this.context.arc(x, y, this.circleSize, 0, 2 * Math.PI)
       this.context.closePath()
       this.context.globalAlpha = this.exponentialDecay(iteration)
       this.context.fillStyle = color
       this.context.fill()
     },
     filterCircles () {
-      this.circles = this.circles.filter(circle => circle.iteration < this.maxCircles)
+      this.circles = this.circles.filter(circle => circle.iteration < this.maxIterationsToPaint)
     },
     clearCanvas () {
       this.context.clearRect(0, 0, window.innerWidth, window.innerHeight)
