@@ -15,9 +15,11 @@ export default {
   data () {
     return {
       size: 20,
+      maxCircles: 50,
       canvas: undefined,
       context: undefined,
-      isPainting: false
+      isPainting: false,
+      circles: []
     }
   },
   mounted () {
@@ -26,6 +28,7 @@ export default {
     this.context.scale(window.devicePixelRatio, window.devicePixelRatio)
     this.updateCanvasSize()
     window.addEventListener('resize', this.updateCanvasSize)
+    setInterval(this.paintCirclesPerFrame, 16) // 16ms ~= 60fps
   },
   methods: {
     updateCanvasSize () {
@@ -34,7 +37,6 @@ export default {
       this.context.clearRect(0, 0, window.innerWidth, window.innerHeight)
     },
     startPainting (event) {
-      console.log(event)
       this.isPainting = true
       this.paint(event)
     },
@@ -52,21 +54,33 @@ export default {
         y = event.clientY
       }
       let color = this.$store.state.currentUser().color
-      let paintCircle = { x, y, color }
+      let paintCircle = { x, y, color, iteration: 1 }
       this.$store.dispatch('broadcast/paint', paintCircle)
 
-      // this.circles.push(paintCircle)
+      this.circles.push(paintCircle)
       this.addPaintCircle(paintCircle)
     },
-
     addPaintCircle (paintCircle) {
-      const { x, y, color } = paintCircle
+      const { x, y, color, iteration } = paintCircle
       this.context.beginPath()
       this.context.arc(x, y, this.size, 0, 2 * Math.PI)
       this.context.closePath()
+      this.context.globalAlpha = 1 / iteration
       this.context.fillStyle = color
+      console.log(1 / iteration)
       this.context.fill()
+    },
+    paintCirclesPerFrame () {
+      this.circles = this.circles.filter(circle => circle.iteration < this.maxCircles)
+      this.context.clearRect(0, 0, window.innerWidth, window.innerHeight)
+
+      this.circles.forEach(circle => {
+        circle.iteration++
+        let paintCircle = JSON.parse(JSON.stringify(circle))
+        this.addPaintCircle(paintCircle)
+      })
     }
+
   }
 }
 </script>
