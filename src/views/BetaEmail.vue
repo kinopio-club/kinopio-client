@@ -5,6 +5,7 @@
 
     form(
       name="beta-email"
+      method="post"
       data-netlify="true"
     )
       input(
