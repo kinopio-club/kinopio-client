@@ -5,20 +5,18 @@
 
     form(
       name="beta-email"
-      method="post"
       data-netlify="true"
-      data-netlify-honeypot="bot-field"
     )
       input(
         type="email"
         name="email"
         placeholder="space@jam.com"
       )
-      button(type="submit") Send
+      button Send
 
     p= "While you wait, enjoy some "
       a(href="http://mac.are.na/playlist/kinopio-bae-tracks") bae tracks
-    img(alt="bless this mess" src="@/assets/froggo-wip.png")
+    img(alt="bless this mess" src="@/assets/froggo-wip.png" width="150")
 
 </template>
 
