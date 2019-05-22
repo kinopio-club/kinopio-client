@@ -52,14 +52,15 @@ export default {
         y = event.clientY
       }
       let color = this.$store.state.currentUser().color
-      this.$store.dispatch('broadcast/paint', {
-        x, y, color
-      })
-      this.addPaintCircle(x, y, color)
+      let paintCircle = { x, y, color }
+      this.$store.dispatch('broadcast/paint', paintCircle)
+
+      // this.circles.push(paintCircle)
+      this.addPaintCircle(paintCircle)
     },
 
-    addPaintCircle (x, y, color) {
-      console.log('PAINT', x, y, color)
+    addPaintCircle (paintCircle) {
+      const { x, y, color } = paintCircle
       this.context.beginPath()
       this.context.arc(x, y, this.size, 0, 2 * Math.PI)
       this.context.closePath()
