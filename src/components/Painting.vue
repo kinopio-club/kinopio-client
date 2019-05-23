@@ -14,6 +14,7 @@ const circleSize = 20
 const maxIterationsToPaint = 200 // higher is longer paint fade time
 const rateOfIterationDecay = 0.03 // lower is slower decay
 let circles = []
+
 export default {
   name: 'Painting',
   data () {

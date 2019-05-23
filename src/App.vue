@@ -45,7 +45,6 @@ body
   color var(--primary)
   background-color var(--primary-background)
 
-.hidden
-  display none !important
-
+.interactable
+  pointer-events all !important
 </style>
