@@ -86,6 +86,7 @@ export default {
   height: 100%
   pointer-events none
 .card
+  user-select: none
   display flex
   pointer-events all
   background-color var(--secondary-background)

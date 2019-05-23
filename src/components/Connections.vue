@@ -1,15 +1,17 @@
 <template lang="pug">
-  svg.connections(
-    :class="{interactable: isDrawingConnection}"
-    @mousemove="drawConnection"
-    @touchmove="drawConnection"
-  )
-    // Manipulating the first and last sets of values, M20,50 and 100,50, impacts the positioning of the beginning and end points of the curve. The center set of values, Q40,5, define the control point for the curve, establishing its shape.
-    // d = first two x,y = start point
-    // last two x,y = end point (but halved?)
-    path.id1(fill="none" stroke="#333333" stroke-width="3" d="m10,10 q90,40 200,10")
+  span
+    svg.connections
+      // Manipulating the first and last sets of values, M20,50 and 100,50, impacts the positioning of the beginning and end points of the curve. The center set of values, Q40,5, define the control point for the curve, establishing its shape.
+      // d = first two x,y = start point
+      // last two x,y = end point (but halved?)
+      path.id1(fill="none" stroke="#333333" stroke-width="3" d="m10,10 q90,40 200,10")
 
-    path.id2(fill="none" stroke="#333333" stroke-width="3" :d="currentConnectionPathDefinition") // second point is relative to the first - not absolute x,y of end point
+    svg.draw-connection(
+      :class="{interactable: isDrawingConnection}"
+      @mousemove="drawConnection"
+      @touchmove="drawConnection"
+    )
+      path.id2(fill="none" stroke="#333333" stroke-width="3" :d="currentConnectionPathDefinition") // second point is relative to the first - not absolute x,y of end point
 </template>
 
 <script>
@@ -17,7 +19,6 @@ export default {
   name: 'Connections',
   data () {
     return {
-      // drawingConnectionDelta: {}
       currentConnectionPathDefinition: ''
     }
   },
@@ -45,18 +46,22 @@ export default {
       }
       const curveControlPoint = 'q90,40'
       this.currentConnectionPathDefinition = `m${origin.x},${origin.y} ${curveControlPoint} ${delta.x},${delta.y}`
+      // if a connection is formed on end drawing .. then move the path into .connections
+      // update the data model
     }
   }
 }
 </script>
 
 <style lang="stylus">
-svg
+.draw-connection
   position absolute
   top 0
   left 0
   width 100%
   height 100vh
+  &.interactable
+    z-index: 1
 path
   pointer-events all
   cursor pointer
