@@ -1,5 +1,14 @@
 <template lang="pug">
-  p connections
+  svg.connections(
+    @mousemove="drawConnection"
+    @touchmove="drawConnection"
+  )
+    // Manipulating the first and last sets of values, M20,50 and 100,50, impacts the positioning of the beginning and end points of the curve. The center set of values, Q40,5, define the control point for the curve, establishing its shape.
+    // d = first two x,y = start point
+    // last two x,y = end point (but halved?)
+    path.id1(fill="none" stroke="#333333" stroke-width="3" d="m10,10 q90,40 200,10")
+
+    path.id2(fill="none" stroke="#333333" stroke-width="3" d="M100,100 q90,40 200,400") // second point is relative to the first - not absolute x,y of end point
 </template>
 
 <script>
@@ -7,11 +16,11 @@ export default {
   name: 'Connections',
   data () {
     return {
-      circleSize: 20
+      svg: undefined
     }
   },
   mounted () {
-    // this.canvas = document.getElementById('painting')
+    // this.connections = document.getElementById('connections')
     // this.context = this.canvas.getContext('2d')
     // this.context.scale(window.devicePixelRatio, window.devicePixelRatio)
     // this.updateCanvasSize()
@@ -19,7 +28,7 @@ export default {
     // setInterval(this.paintCirclesPerFrame, 16) // 16ms ~= 60fps
   },
   methods: {
-    // updateCanvasSize () {
+    // updateCanvasSize () { //
     //   this.canvas.width = window.innerWidth
     //   this.canvas.height = window.innerHeight
     // },
@@ -30,21 +39,23 @@ export default {
     // stopPainting () {
     //   this.isPainting = false
     // },
-    // paint (event) {
-    //   if (!this.isPainting) { return }
-    //   let x, y
-    //   if (event.touches) {
-    //     x = event.touches[0].clientX
-    //     y = event.touches[0].clientY
-    //   } else {
-    //     x = event.clientX
-    //     y = event.clientY
-    //   }
-    //   let color = this.$store.state.currentUser().color
-    //   let circle = { x, y, color, iteration: 0 }
-    //   this.$store.dispatch('broadcast/paint', circle)
-    //   this.circles.push(circle)
-    // },
+    drawConnection (event) {
+      console.log('hi')
+      // if (this.$store.state.isConnecting) { return }
+      // let x, y
+      // if (event.touches) {
+      //   x = event.touches[0].clientX
+      //   y = event.touches[0].clientY
+      // } else {
+      //   x = event.clientX
+      //   y = event.clientY
+      // }
+      // let color = this.$store.state.currentUser().color
+      // let circle = { x, y, color, iteration: 0 }
+      // this.$store.dispatch('broadcast/paint', circle)
+      // this.circles.push(circle)
+    }
+
     // exponentialDecay (iteration) {
     //   return Math.exp(-(this.rateOfIterationDecay * iteration))
     // },
@@ -77,7 +88,13 @@ export default {
 </script>
 
 <style lang="stylus">
-.painting
+svg
   position absolute
   top 0
+  left 0
+  width 100%
+  height 100vh
+path
+  pointer-events all
+  cursor pointer
 </style>

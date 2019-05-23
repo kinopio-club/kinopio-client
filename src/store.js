@@ -4,10 +4,40 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 // can make these seperate files with `export default {}` instead of const
-const users = {
+// const users = {
+//   namespaced: true,
+//   state: {
+//     users: [
+//       {
+//         id: 1,
+//         color: 'cyan'
+//       },
+//       {
+//         id: 2,
+//         color: 'pink'
+//       }
+//     ],
+//   },
+//   actions: {
+//     // get users in a space?
+//   }
+// }
+
+const currentUser = {
   namespaced: true,
   state: {
-    inSpace: [
+    id: 1,
+    color: 'cyan'
+  },
+  actions: {
+    // get users in a space?
+  }
+}
+
+const currentSpace = {
+  namespaced: true,
+  state: {
+    users: [
       {
         id: 1,
         color: 'cyan'
@@ -46,12 +76,11 @@ export default new Vuex.Store({
   // bool states for visibility etc
   strict: process.env.NODE_ENV !== 'production',
   state: {
-    lollipops: 'lollipops',
-    currentSpace: {},
-    currentUser () {
-      // TODO get current user id from localstorage
-      return this.users.inSpace.find(user => user.id === 1)
-    }
+    isConnecting: false
+    // currentUser () {
+    //   // TODO get current user id from localstorage, restore cached state from ls
+    //   return this.users.inSpace.find(user => user.id === 1)
+    // }
   },
   // use these for helper methods that take params
   // eg increment: state => state.count++
@@ -78,7 +107,8 @@ export default new Vuex.Store({
   // can add helper module utils for additional global methods https://vuex.vuejs.org/guide/modules.html
   // maybe use a module for each model type? users Module, spaces Module etc.
   modules: {
-    users,
+    currentUser,
+    currentSpace,
     broadcast
   }
 })

@@ -53,7 +53,7 @@ export default {
         x = event.clientX
         y = event.clientY
       }
-      let color = this.$store.state.currentUser().color
+      let color = this.$store.state.currentUser.color
       let circle = { x, y, color, iteration: 0 }
       this.$store.dispatch('broadcast/paint', circle)
       this.circles.push(circle)

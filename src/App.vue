@@ -1,5 +1,8 @@
 <template lang='pug'>
-  .app
+  .app(
+    @mouseup="stopConnecting"
+    @touchend="stopConnecting"
+  )
     Painting
     router-view
     Header
@@ -16,6 +19,11 @@ export default {
     Header,
     Space,
     Painting
+  },
+  methods: {
+    stopConnecting () {
+      console.log('stopConnecting')
+    }
   }
 }
 </script>
@@ -35,5 +43,8 @@ body
   margin 0
   color var(--primary)
   background-color var(--primary-background)
+
+.hidden
+  display none !important
 
 </style>

@@ -2,18 +2,24 @@
   main.space
     Connections
 
-    .card#id1(style={top: '80px', left: '80px'})
+    // TODO: instantiate these as card.vue instances with props
+
+    .card#id1(
+      style={top: '80px', left: '80px'}
+      @mousedown="startConnecting"
+      @touchstart="startConnecting"
+    )
       p hello {{ msg }} and math time
       .connector(:style="testcolor") O
 
-    .card#id2(style={top: '200px', left: '250px'})
+    .card#id2(
+      style={top: '200px', left: '250px'}
+      @mousedown="startConnecting"
+      @touchstart="startConnecting"
+    )
       p connect me!
       .connector(:style="testcolor") O
 
-      // p {{math}}
-      // p(:alt="color" @click="hello") {{color}}
-      // p(@click="test") console.log click meee
-      // p(v-if="show") table show {{yolo}}
 </template>
 
 <script>
@@ -29,24 +35,24 @@ export default {
     msg: String
   },
   created () {
-    console.log('its me', this.math)
+    // console.log('its me', this.math)
     this.color = randomcolor({ luminosity: 'light' })
   },
   // a component’s data option must be a function, so that each instance can maintain an independent copy of the returned data object
   data () {
     return {
       show: true,
-      math: 12 + 101,
-      color: ''
+      // math: 12 + 101,
+      color: undefined
     }
   },
 
   // a value that updates when anything in it gets updated,
   // use this whenever you want to filter or transform Data
   computed: {
-    yolo () {
-      return this.$store.state.lollipops
-    },
+    // yolo () {
+    //   return this.$store.state.lollipops
+    // },
     testcolor () {
       return { background: this.color }
     }
@@ -56,13 +62,16 @@ export default {
   // re-evaluated each time it's called
   // https://stackoverflow.com/questions/44350862/method-vs-computed-in-vue
   methods: {
-    hello () {
-      console.log('hello!', this.math)
-      this.color = randomcolor()
-    },
-    test () {
-      console.log(123)
+    startConnecting () {
+      console.log('startConnecting')
     }
+    // hello () {
+    //   console.log('hello!', this.math)
+    //   this.color = randomcolor()
+    // },
+    // test () {
+    //   console.log(123)
+    // }
   }
 }
 </script>
