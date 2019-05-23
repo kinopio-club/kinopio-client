@@ -1,6 +1,6 @@
 <template lang="pug">
   svg.connections(
-    :class="{interactable: isDrawing}"
+    :class="{interactable: isDrawingConnection}"
     @mousemove="drawConnection"
     @touchmove="drawConnection"
   )
@@ -9,29 +9,41 @@
     // last two x,y = end point (but halved?)
     path.id1(fill="none" stroke="#333333" stroke-width="3" d="m10,10 q90,40 200,10")
 
-    path.id2(fill="none" stroke="#333333" stroke-width="3" d="M100,100 q90,40 200,400") // second point is relative to the first - not absolute x,y of end point
+    path.id2(fill="none" stroke="#333333" stroke-width="3" d="M100,120 q90,40 -10,400") // second point is relative to the first - not absolute x,y of end point
 </template>
 
 <script>
 export default {
   name: 'Connections',
-  // data () {
-  //   return {
-  //     test: true
-  //   }
-  // },
+  data () {
+    return {
+      drawingConnectionDelta: {}
+    }
+  },
   computed: {
-    isDrawing () {
+    isDrawingConnection () {
       if (this.$store.state.currentUserIsDrawingConnection) {
         return true
       } else { return false }
     }
   },
   methods: {
+    setDrawingConnectionDelta (currentPosition) {
+      const x = this.$store.state.drawingConnectionOrigin.x - currentPosition.x
+      const y = this.$store.state.drawingConnectionOrigin.y - currentPosition.y
+      this.drawingConnectionDelta = { x, y }
+    },
     drawConnection (event) {
-      if (this.$store.state.currentUserIsDrawingConnection) {
-        console.log('drawConnection')
+      if (!this.$store.state.currentUserIsDrawingConnection) { return }
+      let currentPosition = {
+        x: event.clientX,
+        y: event.clientY
       }
+      // origin
+      // console.log(this.$store.state.drawingConnectionOrigin)
+      // console.log('drawConnection', currentPosition.x, currentPosition.y)
+      this.setDrawingConnectionDelta(currentPosition)
+      // console.log('drawConnection', this.drawingConnectionDelta.x, this.drawingConnectionDelta.y)
     }
   }
 }

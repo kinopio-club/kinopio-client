@@ -59,7 +59,7 @@ export default new Vuex.Store({
   state: {
     currentUserIsDrawingConnection: false,
     currentUserIsPainting: false,
-    drawingConnectionOriginRect: {}
+    drawingConnectionOrigin: {}
     // currentUserIsDraggingCard: false
   },
   mutations: {
@@ -69,8 +69,8 @@ export default new Vuex.Store({
     currentUserIsPainting: (state, value) => {
       state.currentUserIsPainting = value
     },
-    drawingConnectionOriginRect: (state, value) => {
-      state.drawingConnectionOriginRect = value
+    drawingConnectionOrigin: (state, value) => {
+      state.drawingConnectionOrigin = value
     }
   },
   //   toggleIsPainting(state) {

@@ -64,7 +64,7 @@ export default {
     startConnecting () {
       console.log('startConnecting')
       this.$store.commit('currentUserIsDrawingConnection', true)
-      this.$store.commit('drawingConnectionOriginRect', event.srcElement.getBoundingClientRect())
+      this.$store.commit('drawingConnectionOrigin', event.srcElement.getBoundingClientRect())
     }
     // hello () {
     //   console.log('hello!', this.math)
