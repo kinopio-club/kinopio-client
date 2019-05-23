@@ -40,7 +40,7 @@ export default {
     //   this.isPainting = false
     // },
     drawConnection (event) {
-      if (this.$store.state.currentUserIsConnecting) {
+      if (this.$store.state.currentUserIsDrawingConnection) {
         console.log('drawConnection')
       }
       // if (this.$store.state.isConnecting) { return }

@@ -57,7 +57,7 @@ const broadcast = {
 export default new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production',
   state: {
-    currentUserIsConnecting: false,
+    currentUserIsDrawingConnection: false,
     currentUserIsPainting: false,
     currentUserIsDraggingCard: false,
     paintCircles: []
