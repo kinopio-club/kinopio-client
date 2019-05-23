@@ -1,7 +1,7 @@
 <template lang='pug'>
   .app(
-    @mouseup="stopConnecting"
-    @touchend="stopConnecting"
+    @mouseup="stopInteractions"
+    @touchend="stopInteractions"
   )
     Painting
     router-view
@@ -21,8 +21,9 @@ export default {
     Painting
   },
   methods: {
-    stopConnecting () {
+    stopInteractions () {
       this.$store.commit('currentUserIsDrawingConnection', false)
+      this.$store.commit('currentUserIsPainting', false)
     }
   }
 }

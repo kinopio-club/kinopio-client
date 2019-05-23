@@ -58,16 +58,15 @@ export default new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production',
   state: {
     currentUserIsDrawingConnection: false,
-    currentUserIsPainting: false,
-    currentUserIsDraggingCard: false
+    currentUserIsPainting: false
+    // currentUserIsDraggingCard: false
   },
-  // use these for helper methods that take params
-  // eg increment: state => state.count++
-  // You cannot directly call a mutation handler
-  // store.commit('increment') // https://vuex.vuejs.org/guide/mutations.html
   mutations: {
     currentUserIsDrawingConnection: (state, value) => {
       state.currentUserIsDrawingConnection = value
+    },
+    currentUserIsPainting: (state, value) => {
+      state.currentUserIsPainting = value
     }
   },
   //   toggleIsPainting(state) {

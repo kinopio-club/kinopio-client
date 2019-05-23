@@ -19,7 +19,7 @@ export default {
       rateOfIterationDecay: 0.03, // lower is slower decay
       canvas: undefined,
       context: undefined,
-      isPainting: false,
+      // isPainting: false,
       circles: []
     }
   },
@@ -37,14 +37,14 @@ export default {
       this.canvas.height = window.innerHeight
     },
     startPainting (event) {
-      this.isPainting = true
+      this.$store.commit('currentUserIsPainting', true)
       this.paint(event)
     },
     stopPainting () {
-      this.isPainting = false
+      this.$store.commit('currentUserIsPainting', false)
     },
     paint (event) {
-      if (!this.isPainting) { return }
+      if (!this.$store.state.currentUserIsPainting) { return }
       let x, y
       if (event.touches) {
         x = event.touches[0].clientX
