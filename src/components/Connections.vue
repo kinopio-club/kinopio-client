@@ -9,7 +9,7 @@
     // last two x,y = end point (but halved?)
     path.id1(fill="none" stroke="#333333" stroke-width="3" d="m10,10 q90,40 200,10")
 
-    path.id2(fill="none" stroke="#333333" stroke-width="3" d="M100,120 q90,40 -10,400") // second point is relative to the first - not absolute x,y of end point
+    path.id2(fill="none" stroke="#333333" stroke-width="3" :d="currentConnectionPathDefinition") // second point is relative to the first - not absolute x,y of end point
 </template>
 
 <script>
@@ -17,7 +17,8 @@ export default {
   name: 'Connections',
   data () {
     return {
-      drawingConnectionDelta: {}
+      // drawingConnectionDelta: {}
+      currentConnectionPathDefinition: ''
     }
   },
   computed: {
@@ -28,22 +29,22 @@ export default {
     }
   },
   methods: {
-    setDrawingConnectionDelta (currentPosition) {
-      const x = this.$store.state.drawingConnectionOrigin.x - currentPosition.x
-      const y = this.$store.state.drawingConnectionOrigin.y - currentPosition.y
-      this.drawingConnectionDelta = { x, y }
-    },
     drawConnection (event) {
       if (!this.$store.state.currentUserIsDrawingConnection) { return }
-      let currentPosition = {
+      const current = {
         x: event.clientX,
         y: event.clientY
       }
-      // origin
-      // console.log(this.$store.state.drawingConnectionOrigin)
-      // console.log('drawConnection', currentPosition.x, currentPosition.y)
-      this.setDrawingConnectionDelta(currentPosition)
-      // console.log('drawConnection', this.drawingConnectionDelta.x, this.drawingConnectionDelta.y)
+      const origin = {
+        x: this.$store.state.drawingConnectionOrigin.x,
+        y: this.$store.state.drawingConnectionOrigin.y
+      }
+      const delta = {
+        x: current.x - origin.x,
+        y: current.y - origin.y
+      }
+      const curveControlPoint = 'q90,40'
+      this.currentConnectionPathDefinition = `m${origin.x},${origin.y} ${curveControlPoint} ${delta.x},${delta.y}`
     }
   }
 }
