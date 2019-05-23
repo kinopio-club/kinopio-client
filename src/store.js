@@ -4,24 +4,6 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 // can make these seperate files with `export default {}` instead of const
-// const users = {
-//   namespaced: true,
-//   state: {
-//     users: [
-//       {
-//         id: 1,
-//         color: 'cyan'
-//       },
-//       {
-//         id: 2,
-//         color: 'pink'
-//       }
-//     ],
-//   },
-//   actions: {
-//     // get users in a space?
-//   }
-// }
 
 const currentUser = {
   namespaced: true,
@@ -73,14 +55,12 @@ const broadcast = {
 // }
 
 export default new Vuex.Store({
-  // bool states for visibility etc
   strict: process.env.NODE_ENV !== 'production',
   state: {
-    isConnecting: false
-    // currentUser () {
-    //   // TODO get current user id from localstorage, restore cached state from ls
-    //   return this.users.inSpace.find(user => user.id === 1)
-    // }
+    currentUserIsConnecting: false,
+    currentUserIsPainting: false,
+    currentUserIsDraggingCard: false,
+    paintCircles: []
   },
   // use these for helper methods that take params
   // eg increment: state => state.count++
@@ -98,6 +78,17 @@ export default new Vuex.Store({
   // Actions are similar to mutations, the differences being that:
   // Instead of mutating the state, actions commit mutations.
   // Actions can contain arbitrary asynchronous operations. https://vuex.vuejs.org/guide/actions.html
+  getters: {
+    currentUserIsInteracting: state => {
+      if (
+        state.currentUserIsConnecting ||
+        state.currentUserIsPainting ||
+        state.currentUserIsDraggingCard
+      ) {
+        return true
+      }
+    }
+  },
   actions: {
     // paint(x, y, size, color) {
     //   console.log('asldfkjasdf', this)
