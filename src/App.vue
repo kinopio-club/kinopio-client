@@ -22,7 +22,7 @@ export default {
   },
   methods: {
     stopConnecting () {
-      console.log('stopConnecting')
+      this.$store.commit('currentUserIsDrawingConnection', false)
     }
   }
 }
