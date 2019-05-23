@@ -4,21 +4,21 @@
 
     // TODO: instantiate these as card.vue instances with props
 
-    .card#id1(
-      style={top: '80px', left: '80px'}
-      @mousedown="startConnecting"
-      @touchstart="startConnecting"
-    )
+    .card#id1(style={top: '80px', left: '80px'})
       p hello {{ msg }} and math time
-      .connector(:style="testcolor") O
+      .connector(
+        :style="testcolor"
+        @mousedown="startConnecting"
+        @touchstart="startConnecting"
+      ) O
 
-    .card#id2(
-      style={top: '200px', left: '250px'}
-      @mousedown="startConnecting"
-      @touchstart="startConnecting"
-    )
+    .card#id2(style={top: '200px', left: '250px'})
       p connect me!
-      .connector(:style="testcolor") O
+      .connector(
+        :style="testcolor"
+        @mousedown="startConnecting"
+        @touchstart="startConnecting"
+      ) O
 
 </template>
 
@@ -38,7 +38,6 @@ export default {
     // console.log('its me', this.math)
     this.color = randomcolor({ luminosity: 'light' })
   },
-  // a component’s data option must be a function, so that each instance can maintain an independent copy of the returned data object
   data () {
     return {
       show: true,
