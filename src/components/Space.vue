@@ -1,8 +1,14 @@
 <template lang="pug">
   main.space
-    .card(style={top: '80px', left: '80px'})
+    Connections
+
+    .card#id1(style={top: '80px', left: '80px'})
       p hello {{ msg }} and math time
-      .connector O
+      .connector(:style="testcolor") O
+
+    .card#id2(style={top: '200px', left: '250px'})
+      p connect me!
+      .connector(:style="testcolor") O
 
       // p {{math}}
       // p(:alt="color" @click="hello") {{color}}
@@ -11,16 +17,20 @@
 </template>
 
 <script>
+import Connections from '@/components/Connections.vue'
 import randomcolor from 'randomcolor'
 
 export default {
   name: 'Space',
+  components: {
+    Connections
+  },
   props: {
     msg: String
   },
   created () {
     console.log('its me', this.math)
-    this.color = randomcolor()
+    this.color = randomcolor({ luminosity: 'light' })
   },
   // a component’s data option must be a function, so that each instance can maintain an independent copy of the returned data object
   data () {
@@ -36,6 +46,9 @@ export default {
   computed: {
     yolo () {
       return this.$store.state.lollipops
+    },
+    testcolor () {
+      return { background: this.color }
     }
   },
 

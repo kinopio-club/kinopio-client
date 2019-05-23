@@ -85,7 +85,6 @@ export default {
         this.paintCircle(circle)
       })
     }
-
   }
 }
 </script>
