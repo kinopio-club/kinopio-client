@@ -62,7 +62,9 @@ export default {
   // https://stackoverflow.com/questions/44350862/method-vs-computed-in-vue
   methods: {
     startConnecting () {
+      console.log('startConnecting')
       this.$store.commit('currentUserIsDrawingConnection', true)
+      this.$store.commit('drawingConnectionOriginRect', event.srcElement.getBoundingClientRect())
     }
     // hello () {
     //   console.log('hello!', this.math)

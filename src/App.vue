@@ -23,6 +23,7 @@ export default {
   methods: {
     stopInteractions () {
       this.$store.commit('currentUserIsDrawingConnection', false)
+      this.$store.commit('drawingConnectionOriginRect', {})
       this.$store.commit('currentUserIsPainting', false)
     }
   }

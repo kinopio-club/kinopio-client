@@ -58,7 +58,8 @@ export default new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production',
   state: {
     currentUserIsDrawingConnection: false,
-    currentUserIsPainting: false
+    currentUserIsPainting: false,
+    drawingConnectionOriginRect: {}
     // currentUserIsDraggingCard: false
   },
   mutations: {
@@ -67,6 +68,9 @@ export default new Vuex.Store({
     },
     currentUserIsPainting: (state, value) => {
       state.currentUserIsPainting = value
+    },
+    drawingConnectionOriginRect: (state, value) => {
+      state.drawingConnectionOriginRect = value
     }
   },
   //   toggleIsPainting(state) {
