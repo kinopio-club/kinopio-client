@@ -10,17 +10,16 @@
 </template>
 
 <script>
+const circleSize = 20
+const maxIterationsToPaint = 200 // higher is longer paint fade time
+const rateOfIterationDecay = 0.03 // lower is slower decay
+let circles = []
 export default {
   name: 'Painting',
   data () {
     return {
-      circleSize: 20,
-      maxIterationsToPaint: 200, // higher is longer paint fade time
-      rateOfIterationDecay: 0.03, // lower is slower decay
       canvas: undefined,
-      context: undefined,
-      // isPainting: false,
-      circles: []
+      context: undefined
     }
   },
   mounted () {
@@ -56,22 +55,22 @@ export default {
       let color = this.$store.state.currentUser.color
       let circle = { x, y, color, iteration: 0 }
       this.$store.dispatch('broadcast/paint', circle)
-      this.circles.push(circle)
+      circles.push(circle)
     },
     exponentialDecay (iteration) {
-      return Math.exp(-(this.rateOfIterationDecay * iteration))
+      return Math.exp(-(rateOfIterationDecay * iteration))
     },
     paintCircle (circle) {
       const { x, y, color, iteration } = circle
       this.context.beginPath()
-      this.context.arc(x, y, this.circleSize, 0, 2 * Math.PI)
+      this.context.arc(x, y, circleSize, 0, 2 * Math.PI)
       this.context.closePath()
       this.context.globalAlpha = this.exponentialDecay(iteration)
       this.context.fillStyle = color
       this.context.fill()
     },
     filterCircles () {
-      this.circles = this.circles.filter(circle => circle.iteration < this.maxIterationsToPaint)
+      circles = circles.filter(circle => circle.iteration < maxIterationsToPaint)
     },
     clearCanvas () {
       this.context.clearRect(0, 0, window.innerWidth, window.innerHeight)
@@ -79,7 +78,7 @@ export default {
     paintCirclesPerFrame () {
       this.filterCircles()
       this.clearCanvas()
-      this.circles.forEach(item => {
+      circles.forEach(item => {
         item.iteration++
         let circle = JSON.parse(JSON.stringify(item))
         this.paintCircle(circle)
