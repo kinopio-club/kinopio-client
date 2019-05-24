@@ -33,8 +33,8 @@ export default {
   },
   methods: {
     updateCanvasSize () {
-      this.canvas.width = window.innerWidth
-      this.canvas.height = window.innerHeight
+      this.canvas.width = window.outerWidth
+      this.canvas.height = window.outerHeight
     },
     startPainting (event) {
       this.$store.commit('currentUserIsPainting', true)
@@ -47,11 +47,11 @@ export default {
       if (!this.$store.state.currentUserIsPainting) { return }
       let x, y
       if (event.touches) {
-        x = event.touches[0].clientX
-        y = event.touches[0].clientY
+        x = event.touches[0].pageX
+        y = event.touches[0].pageY
       } else {
-        x = event.clientX
-        y = event.clientY
+        x = event.pageX
+        y = event.pageY
       }
       let color = this.$store.state.currentUser.color
       let circle = { x, y, color, iteration: 0 }
@@ -74,7 +74,7 @@ export default {
       circles = circles.filter(circle => circle.iteration < maxIterationsToPaint)
     },
     clearCanvas () {
-      this.context.clearRect(0, 0, window.innerWidth, window.innerHeight)
+      this.context.clearRect(0, 0, window.outerWidth, window.outerHeight)
     },
     paintCirclesPerFrame () {
       this.filterCircles()
