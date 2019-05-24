@@ -38,12 +38,13 @@ export default {
   },
   methods: {
     updateCanvasSize () {
-      this.width = document.documentElement.scrollWidth
-      this.height = document.documentElement.scrollHeight
+      const body = document.body
+      const html = document.documentElement
+      this.width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
+      this.height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
     },
     startPainting (event) {
       this.$store.commit('currentUserIsPainting', true)
-      this.paint(event)
     },
     stopPainting () {
       this.$store.commit('currentUserIsPainting', false)
