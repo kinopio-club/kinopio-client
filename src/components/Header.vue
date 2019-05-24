@@ -13,4 +13,5 @@ export default {
 header
   position fixed
   top 0
+  user-select: none
 </style>

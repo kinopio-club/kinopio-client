@@ -1,6 +1,6 @@
 <template lang="pug">
-.card#id1(style={top: '80px', left: '80px'})
-  p hello {{ msg }} and math time
+.card#id1(:style="position")
+  p {{name}}
   .connector(
     :style="testcolor"
     @mousedown="startConnecting"
@@ -15,6 +15,8 @@ export default {
   name: 'Card',
   props: {
     id: Number,
+    x: Number,
+    y: Number,
     name: String
   },
   created () {
@@ -25,21 +27,17 @@ export default {
       color: undefined
     }
   },
-
-  // a value that updates when anything in it gets updated,
-  // use this whenever you want to filter or transform Data
   computed: {
-    // yolo () {
-    //   return this.$store.state.lollipops
-    // },
     testcolor () {
       return { background: this.color }
+    },
+    position () {
+      return {
+        left: `${this.x}px`,
+        top: `${this.y}px`
+      }
     }
   },
-
-  // a function bound to the component, only run when explicitly called
-  // re-evaluated each time it's called
-  // https://stackoverflow.com/questions/44350862/method-vs-computed-in-vue
   methods: {
     startConnecting () {
       this.$store.commit('currentUserIsDrawingConnection', true)
@@ -50,13 +48,6 @@ export default {
 </script>
 
 <style lang="stylus">
-.space
-  position absolute
-  top 0
-  left 0
-  width: 100%
-  height: 100%
-  pointer-events none
 .card
   user-select: none
   display flex

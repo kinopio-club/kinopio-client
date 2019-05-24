@@ -12,7 +12,7 @@ const currentUser = {
     color: 'cyan'
   },
   actions: {
-    // get users in a space?
+    // get users in a space from api
   }
 }
 
@@ -32,19 +32,36 @@ const currentSpace = {
     cards: [
       {
         id: 1,
-        name: 'hello space and time',
-        connections: [] // connectionTypeId, to Card,
+        x: 80,
+        y: 80,
+        name: 'hello space and time'
       },
       {
         id: 2,
-        name: 'connect me!',
-        connections: [] // connectionTypeId, to Card,
+        x: 200,
+        y: 250,
+        name: 'connect me!'
       }
     ],
-    connections: []
+    connectors: [
+      {
+        id: 1,
+        name: 'connection 1',
+        color: 'pink'
+      }
+    ],
+    connections: [
+      {
+        id: 1,
+        connector: 1,
+        startCard: 1,
+        endCard: 2
+      }
+    ]
   },
   actions: {
-    // get users in a space?
+    // get space from api, then muttate
+    // get card convo details on click, then mutate
   }
 }
 
