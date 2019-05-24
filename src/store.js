@@ -28,7 +28,20 @@ const currentSpace = {
         id: 2,
         color: 'pink'
       }
-    ]
+    ],
+    cards: [
+      {
+        id: 1,
+        name: 'hello space and time',
+        connections: [] // connectionTypeId, to Card,
+      },
+      {
+        id: 2,
+        name: 'connect me!',
+        connections: [] // connectionTypeId, to Card,
+      }
+    ],
+    connections: []
   },
   actions: {
     // get users in a space?

@@ -1,12 +1,12 @@
 <template lang="pug">
-  canvas#painting.painting(
-    @mousedown="startPainting"
-    @touchstart="startPainting"
-    @mouseup="stopPainting"
-    @touchend="stopPainting"
-    @mousemove="paint"
-    @touchmove="paint"
-  )
+canvas#painting.painting(
+  @mousedown="startPainting"
+  @touchstart="startPainting"
+  @mouseup="stopPainting"
+  @touchend="stopPainting"
+  @mousemove="paint"
+  @touchmove="paint"
+)
 </template>
 
 <script>

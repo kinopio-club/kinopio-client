@@ -1,17 +1,17 @@
 <template lang="pug">
-  span
-    svg.connections
-      // Manipulating the first and last sets of values, M20,50 and 100,50, impacts the positioning of the beginning and end points of the curve. The center set of values, Q40,5, define the control point for the curve, establishing its shape.
-      // d = first two x,y = start point
-      // last two x,y = end point (but halved?)
-      path.id1(fill="none" stroke="#333333" stroke-width="3" d="m10,10 q90,40 200,10")
+span
+  svg.connections
+    // Manipulating the first and last sets of values, M20,50 and 100,50, impacts the positioning of the beginning and end points of the curve. The center set of values, Q40,5, define the control point for the curve, establishing its shape.
+    // d = first two x,y = start point
+    // last two x,y = end point (but halved?)
+    path.id1(fill="none" stroke="#333333" stroke-width="3" d="m10,10 q90,40 200,10")
 
-    svg.draw-connection(
-      :class="{'can-draw-connections': isDrawingConnection}"
-      @mousemove="drawConnection"
-      @touchmove="drawConnection"
-    )
-      path.id2(fill="none" stroke="#333333" stroke-width="3" :d="currentConnectionPath") // second point is relative to the first - not absolute x,y of end point
+  svg.draw-connection(
+    :class="{'can-draw-connections': isDrawingConnection}"
+    @mousemove="drawConnection"
+    @touchmove="drawConnection"
+  )
+    path.id2(fill="none" stroke="#333333" stroke-width="3" :d="currentConnectionPath") // second point is relative to the first - not absolute x,y of end point
 </template>
 
 <script>

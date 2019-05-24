@@ -1,27 +1,26 @@
 <template lang='pug'>
-  .meta-page
+.meta-page
 
-    .iframe-wrap(style='padding:51.9% 0 0 0;position:relative;')
-      iframe(src='https://player.vimeo.com/video/337869697?autoplay=1&loop=1&title=0&byline=0&portrait=0' style='position:absolute;top:0;left:0;width:100%;height:100%;' frameborder='0' allow='autoplay')
+  .iframe-wrap(style='padding:51.9% 0 0 0;position:relative;')
+    iframe(src='https://player.vimeo.com/video/337869697?autoplay=1&loop=1&title=0&byline=0&portrait=0' style='position:absolute;top:0;left:0;width:100%;height:100%;' frameborder='0' allow='autoplay')
 
-    p Get notified when Kinopio is in Beta
-    p (I'll only email you once)
+  p Get notified when Kinopio is in Beta
+  p (I'll only email you once)
 
-    form(
-      name="beta-email"
-      method="post"
+  form(
+    name="beta-email"
+    method="post"
+  )
+    input(
+      type="email"
+      name="email"
+      placeholder="space@jam.com"
     )
-      input(
-        type="email"
-        name="email"
-        placeholder="space@jam.com"
-      )
-      button Send
+    button Send
 
-    p= "While you wait, enjoy some "
-      a(href="http://mac.are.na/playlist/kinopio-bae-tracks") bae tracks
-    // img(alt="bless this mess" src="@/assets/froggo-wip.png" width="150")
-
+  p= "While you wait, enjoy some "
+    a(href="http://mac.are.na/playlist/kinopio-bae-tracks") bae tracks
+  // img(alt="bless this mess" src="@/assets/froggo-wip.png" width="150")
 </template>
 
 <script>

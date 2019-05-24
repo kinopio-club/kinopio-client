@@ -1,11 +1,11 @@
 <template lang='pug'>
-  .app(
-    @mouseup="stopInteractions"
-    @touchend="stopInteractions"
-  )
-    Painting
-    router-view
-    Header
+.app(
+  @mouseup="stopInteractions"
+  @touchend="stopInteractions"
+)
+  Painting
+  router-view
+  Header
 </template>
 
 <script>

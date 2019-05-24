@@ -35,7 +35,6 @@ export default {
     msg: String
   },
   created () {
-    // console.log('its me', this.math)
     this.color = randomcolor({ luminosity: 'light' })
   },
   data () {

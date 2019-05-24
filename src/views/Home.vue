@@ -1,5 +1,5 @@
 <template lang='pug'>
-  Space(msg="space")
+Space
 </template>
 
 <script>
