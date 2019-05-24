@@ -41,7 +41,6 @@ export default {
   data () {
     return {
       show: true,
-      // math: 12 + 101,
       color: undefined
     }
   },
@@ -62,17 +61,9 @@ export default {
   // https://stackoverflow.com/questions/44350862/method-vs-computed-in-vue
   methods: {
     startConnecting () {
-      console.log('startConnecting')
       this.$store.commit('currentUserIsDrawingConnection', true)
       this.$store.commit('drawingConnectionOrigin', event.srcElement.getBoundingClientRect())
     }
-    // hello () {
-    //   console.log('hello!', this.math)
-    //   this.color = randomcolor()
-    // },
-    // test () {
-    //   console.log(123)
-    // }
   }
 }
 </script>

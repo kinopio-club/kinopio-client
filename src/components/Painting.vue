@@ -55,7 +55,7 @@ export default {
       }
       let color = this.$store.state.currentUser.color
       let circle = { x, y, color, iteration: 0 }
-      this.$store.dispatch('broadcast/paint', circle)
+      this.$store.dispatch('broadcast/painting', circle)
       circles.push(circle)
     },
     exponentialDecay (iteration) {

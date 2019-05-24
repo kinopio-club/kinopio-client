@@ -41,8 +41,11 @@ const broadcast = {
     isBroadcasting: false
   },
   actions: {
-    paint (context, circle) {
-      // console.log('broadcast paint', circle)
+    painting (context, circle) {
+      // console.log('broadcast painting', circle)
+    },
+    connectingPaths (context, connectionPath) {
+      // console.log('broadcast drawing connection path', connectionPath)
     }
   }
 }

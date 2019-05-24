@@ -11,7 +11,7 @@
       @mousemove="drawConnection"
       @touchmove="drawConnection"
     )
-      path.id2(fill="none" stroke="#333333" stroke-width="3" :d="currentConnectionPathDefinition") // second point is relative to the first - not absolute x,y of end point
+      path.id2(fill="none" stroke="#333333" stroke-width="3" :d="currentConnectionPath") // second point is relative to the first - not absolute x,y of end point
 </template>
 
 <script>
@@ -19,7 +19,8 @@ export default {
   name: 'Connections',
   data () {
     return {
-      currentConnectionPathDefinition: ''
+      currentConnectionPath: '',
+      currentUserIsPainting: this.$store.state.currentUserIsPainting
     }
   },
   computed: {
@@ -45,7 +46,8 @@ export default {
         y: current.y - origin.y
       }
       let curveControlPoint = 'q90,40' // TODO: as you're drawing, manipulate the curvecontrolpoint to be more pleasing
-      this.currentConnectionPathDefinition = `m${origin.x},${origin.y} ${curveControlPoint} ${delta.x},${delta.y}`
+      this.currentConnectionPath = `m${origin.x},${origin.y} ${curveControlPoint} ${delta.x},${delta.y}`
+      this.$store.dispatch('broadcast/connectingPaths', this.currentConnectionPath)
 
       // ?detect whether current position is atop any connectors (might get for free w :hover)
 
@@ -64,6 +66,8 @@ export default {
   left 0
   width 100%
   height 100vh
+// .no-events-while-painting
+//   pointer-events none
 .can-draw-connections
   pointer-events all
   z-index: 1
