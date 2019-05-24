@@ -10,14 +10,12 @@
 
 <script>
 import Header from '@/components/Header.vue'
-import Space from '@/components/Space.vue'
 import Painting from '@/components/Painting.vue'
 
 export default {
   name: 'app',
   components: {
     Header,
-    Space,
     Painting
   },
   methods: {
