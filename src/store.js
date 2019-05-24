@@ -3,7 +3,7 @@ import Vuex from 'vuex'
 
 Vue.use(Vuex)
 
-// can make these seperate files with `export default {}` instead of const
+// todo? seperate files into modules (w `export defaults and imports` instead of const)
 
 const currentUser = {
   namespaced: true,
@@ -11,9 +11,19 @@ const currentUser = {
     id: 1,
     color: 'cyan'
   },
-  actions: {
-    // get users in a space from api
+  getters: {
+    isMember (state, getters, rootState) {
+      const inCurrentSpace = rootState.currentSpace.users.some(user => {
+        return user.id === state.id
+      })
+      if (inCurrentSpace) {
+        return true
+      } else { return false }
+    }
   }
+  // actions: {
+  // get users in a space from api
+  // },
 }
 
 const currentSpace = {
@@ -58,11 +68,11 @@ const currentSpace = {
         endCard: 2
       }
     ]
-  },
-  actions: {
-    // get space from api, then muttate
-    // get card convo details on click, then mutate
   }
+  // actions: {
+  // get space from api, then muttate
+  // get card convo details on click, then mutate
+  // }
 }
 
 const broadcast = {
@@ -79,13 +89,6 @@ const broadcast = {
     }
   }
 }
-
-// const api = {
-//   namespaced: true,
-//   actions: {
-//     updatePaint
-//   }
-// }
 
 export default new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production',
@@ -106,36 +109,6 @@ export default new Vuex.Store({
       state.drawingConnectionOrigin = value
     }
   },
-  //   toggleIsPainting(state) {
-  //     console.log('🌍',state)
-  //     // let isPainting = this.state.isPainting
-  //     state.isPainting = !state.isPainting
-  //   }
-  // },
-  // actions can be async
-  // used these to boot and do server things
-  // Actions are similar to mutations, the differences being that:
-  // Instead of mutating the state, actions commit mutations.
-  // Actions can contain arbitrary asynchronous operations. https://vuex.vuejs.org/guide/actions.html
-  // getters: {
-  // currentUserIsInteracting: state => {
-  //   if (
-  //     state.currentUserIsDrawingConnection ||
-  //     state.currentUserIsPainting ||
-  //     state.currentUserIsDraggingCard
-  //   ) {
-  //     return true
-  //   }
-  // }
-  // },
-  // actions: {
-  // paint(x, y, size, color) {
-  //   console.log('asldfkjasdf', this)
-  //   // broadcast.actions.paint(x, y, size, color)
-  // }
-  // },
-  // can add helper module utils for additional global methods https://vuex.vuejs.org/guide/modules.html
-  // maybe use a module for each model type? users Module, spaces Module etc.
   modules: {
     currentUser,
     currentSpace,
