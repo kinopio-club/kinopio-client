@@ -8,6 +8,8 @@ main.space
       :y="card.y"
       :name="card.name"
     )
+  footer
+    .badge.beta Engineering Prototype
 </template>
 
 <script>

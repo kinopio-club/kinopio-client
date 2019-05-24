@@ -43,4 +43,9 @@ body
   margin 0
   color var(--primary)
   background-color var(--primary-background)
+
+footer
+  position fixed
+  right 0
+  bottom 0
 </style>

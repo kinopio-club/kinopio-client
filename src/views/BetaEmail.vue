@@ -1,26 +1,39 @@
 <template lang='pug'>
 .meta-page
 
-  .iframe-wrap(style='padding:51.9% 0 0 0;position:relative;')
-    iframe(src='https://player.vimeo.com/video/337869697?autoplay=1&loop=1&title=0&byline=0&portrait=0' style='position:absolute;top:0;left:0;width:100%;height:100%;' frameborder='0' allow='autoplay')
+  h1 hello kinopio
 
-  p Get notified when Kinopio is in Beta
-  p (I'll only email you once)
+  p modular synthesis
+
+  h2 Get notified when Kinopio is in Beta
 
   form(
     name="beta-email"
     method="post"
   )
+
+    // p Thanks, you're subscribed! (disable button)
+
     input(
       type="email"
       name="email"
       placeholder="space@jam.com"
     )
-    button Send
+
+    label(for='newStuffInterest') Send me future updates too
+      input(type="checkbox" id="newStuffInterest" name="newStuffInterest")
+
+    button(type='submit') Notify Me
+
+  h2 follow along with progress
+  p are.na design
 
   p= "While you wait, enjoy some "
     a(href="http://mac.are.na/playlist/kinopio-bae-tracks") bae tracks
-  // img(alt="bless this mess" src="@/assets/froggo-wip.png" width="150")
+
+  .iframe-wrap(style='padding:51.9% 0 0 0;position:relative;' height="275")
+    iframe(src='https://player.vimeo.com/video/337868593?autoplay=1&loop=1&title=0&byline=0&portrait=0' style='position:absolute;top:0;left:0;width:100%;height:100%;' frameborder='0' allow='autoplay')
+
 </template>
 
 <script>

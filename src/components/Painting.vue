@@ -6,6 +6,8 @@ canvas#painting.painting(
   @touchend="stopPainting"
   @mousemove="paint"
   @touchmove="paint"
+  :width="width"
+  :height="height"
 )
 </template>
 
@@ -20,7 +22,9 @@ export default {
   data () {
     return {
       canvas: undefined,
-      context: undefined
+      context: undefined,
+      height: 0,
+      width: 0
     }
   },
   mounted () {
@@ -29,12 +33,13 @@ export default {
     this.context.scale(window.devicePixelRatio, window.devicePixelRatio)
     this.updateCanvasSize()
     window.addEventListener('resize', this.updateCanvasSize)
+    window.addEventListener('scroll', this.updateCanvasSize)
     setInterval(this.paintCirclesPerFrame, 16) // 16ms ~= 60fps
   },
   methods: {
     updateCanvasSize () {
-      this.canvas.width = window.outerWidth
-      this.canvas.height = window.outerHeight
+      this.width = document.documentElement.scrollWidth
+      this.height = document.documentElement.scrollHeight
     },
     startPainting (event) {
       this.$store.commit('currentUserIsPainting', true)
@@ -74,7 +79,7 @@ export default {
       circles = circles.filter(circle => circle.iteration < maxIterationsToPaint)
     },
     clearCanvas () {
-      this.context.clearRect(0, 0, window.outerWidth, window.outerHeight)
+      this.context.clearRect(0, 0, this.width, this.height)
     },
     paintCirclesPerFrame () {
       this.filterCircles()
