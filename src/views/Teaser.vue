@@ -20,8 +20,8 @@
       placeholder="space@jam.com"
     )
 
+    input(type="checkbox" id="newStuffInterest" name="newStuffInterest")
     label(for='newStuffInterest') Send me future updates too
-      input(type="checkbox" id="newStuffInterest" name="newStuffInterest")
 
     button(type='submit') Notify Me
 
@@ -31,8 +31,8 @@
   p= "While you wait, enjoy some "
     a(href="http://mac.are.na/playlist/kinopio-bae-tracks") bae tracks
 
-  .iframe-wrap(style='padding:51.9% 0 0 0;position:relative;' height="275")
-    iframe(src='https://player.vimeo.com/video/337868593?autoplay=1&loop=1&title=0&byline=0&portrait=0' style='position:absolute;top:0;left:0;width:100%;height:100%;' frameborder='0' allow='autoplay')
+  //.iframe-wrap(style='padding:51.9% 0 0 0;position:relative;' height="275")
+  //  iframe(src='https://player.vimeo.com/video/337868593?autoplay=1&loop=1&title=0&byline=0&portrait=0' style='position:absolute;top:0;left:0;width:100%;height:100%;' frameborder='0' allow='autoplay')
 
 </template>
 
