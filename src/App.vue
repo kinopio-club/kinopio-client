@@ -45,7 +45,4 @@ body
   margin 0
   color var(--primary)
   background-color var(--primary-background)
-
-.interactable
-  pointer-events all !important
 </style>

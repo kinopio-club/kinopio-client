@@ -7,7 +7,7 @@
       path.id1(fill="none" stroke="#333333" stroke-width="3" d="m10,10 q90,40 200,10")
 
     svg.draw-connection(
-      :class="{interactable: isDrawingConnection}"
+      :class="{'can-draw-connections': isDrawingConnection}"
       @mousemove="drawConnection"
       @touchmove="drawConnection"
     )
@@ -44,8 +44,12 @@ export default {
         x: current.x - origin.x,
         y: current.y - origin.y
       }
-      const curveControlPoint = 'q90,40'
+      let curveControlPoint = 'q90,40' // TODO: as you're drawing, manipulate the curvecontrolpoint to be more pleasing
       this.currentConnectionPathDefinition = `m${origin.x},${origin.y} ${curveControlPoint} ${delta.x},${delta.y}`
+
+      // ?detect whether current position is atop any connectors (might get for free w :hover)
+
+      // end connection -> app.vue / stopInteractions
       // if a connection is formed on end drawing .. then move the path into .connections
       // update the data model
     }
@@ -60,8 +64,9 @@ export default {
   left 0
   width 100%
   height 100vh
-  &.interactable
-    z-index: 1
+.can-draw-connections
+  pointer-events all
+  z-index: 1
 path
   pointer-events all
   cursor pointer
