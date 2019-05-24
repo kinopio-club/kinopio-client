@@ -4,7 +4,8 @@ import {
   shallowMount
 } from '@vue/test-utils'
 
-import Space from '@/components/Space.vue'
+import Space from '@/views/Space.vue'
+import Card from '@/components/Card.vue'
 
 const localVue = createLocalVue()
 localVue.use(Vuex)
@@ -18,18 +19,24 @@ describe('Space.vue', () => {
     //   actionInput: jest.fn()
     // }
     store = new Vuex.Store({
-      state: {},
+      state: {
+        currentSpace: {
+          cards: [
+            { id: 1 }
+          ]
+        }
+      },
       actions
     })
   })
 
-  it('renders props.msg when passed', () => {
-    const msg = 'new message'
+  it('renders cards when passed', () => {
     const wrapper = shallowMount(Space, {
-      propsData: { msg },
+      // propsData: { msg },
       store,
       localVue
     })
-    expect(wrapper.text()).toMatch(msg)
+    // expect(wrapper.text()).toMatch(msg)
+    expect(wrapper.contains(Card)).toBe(true)
   })
 })
