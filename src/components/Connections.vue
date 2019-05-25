@@ -1,12 +1,12 @@
 <template lang="pug">
-span
-  svg.connections
+.connections
+  svg.existing
     // Manipulating the first and last sets of values, M20,50 and 100,50, impacts the positioning of the beginning and end points of the curve. The center set of values, Q40,5, define the control point for the curve, establishing its shape.
     // d = first two x,y = start point
     // last two x,y = end point (but halved?)
     path.id1(fill="none" stroke="#333333" stroke-width="3" d="m10,10 q90,40 200,10")
 
-  svg.draw-connection(
+  svg.new(
     :class="{'can-draw-connections': isDrawingConnection}"
     @mousemove="drawConnection"
     @touchmove="drawConnection"
@@ -60,12 +60,13 @@ export default {
 </script>
 
 <style lang="stylus">
-.draw-connection
-  position absolute
-  top 0
-  left 0
-  width 100%
-  height 100vh
+connections
+  svg
+    position absolute
+    top 0
+    left 0
+    width 100%
+    height 100vh
 // .no-events-while-painting
 //   pointer-events none
 .can-draw-connections
