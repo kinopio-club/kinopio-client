@@ -61,7 +61,7 @@ export default {
 
 <style lang="stylus">
 connections
-  svg
+  .new
     position absolute
     top 0
     left 0
