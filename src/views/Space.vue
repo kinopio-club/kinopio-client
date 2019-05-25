@@ -1,7 +1,7 @@
 <template lang="pug">
 main.space
   Connections
-  span(v-for="card in cards")
+  .cards(v-for="card in cards")
     Card(
       :id="card.id"
       :x="card.x"
