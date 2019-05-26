@@ -13,7 +13,6 @@ import Header from '@/components/Header.vue'
 import Painting from '@/components/Painting.vue'
 
 export default {
-  name: 'app',
   components: {
     Header,
     Painting
@@ -24,6 +23,7 @@ export default {
       this.$store.commit('currentUserIsDrawingConnection', false)
       this.$store.commit('drawingConnectionOrigin', {})
       this.$store.commit('currentUserIsPainting', false)
+      this.$store.commit('viewportIsLocked', false)
     }
   }
 }
@@ -45,8 +45,4 @@ body
   color var(--primary)
   background-color var(--primary-background)
 
-footer
-  position fixed
-  right 0
-  bottom 0
 </style>

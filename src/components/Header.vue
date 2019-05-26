@@ -1,12 +1,10 @@
 <template lang="pug">
 header
   img(alt="logo" src="@/assets/logo.png" width="50")
+  p Engineering Prototype
 </template>
 
 <script>
-export default {
-  name: 'Header'
-}
 </script>
 
 <style lang="stylus">

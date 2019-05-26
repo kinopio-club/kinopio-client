@@ -11,22 +11,22 @@ main.space(
       :y="card.y"
       :name="card.name"
     )
-  footer
-    span(:v-if="viewportIsLocked")= "Locked "
-    span Engineering Prototype
-
+  Footer
 </template>
 
 <script>
 import utils from '@/utils.js'
+
 import Connections from '@/components/Connections.vue'
 import Card from '@/components/Card.vue'
+import Footer from '@/components/Footer.vue'
 
 export default {
   name: 'Space',
   components: {
     Connections,
-    Card
+    Card,
+    Footer
   },
   computed: {
     cards () {
@@ -37,7 +37,6 @@ export default {
   methods: {
     drawConnection (event) {
       if (!this.$store.state.currentUserIsDrawingConnection) { return }
-      console.log('drawConnection')
       const current = utils.cursorPosition(event)
       const origin = {
         x: this.$store.state.drawingConnectionOrigin.x,
@@ -49,7 +48,6 @@ export default {
       }
       let curveControlPoint = 'q90,40' // TODO: as you're drawing, manipulate the curvecontrolpoint to be more pleasing
       const path = `m${origin.x},${origin.y} ${curveControlPoint} ${delta.x},${delta.y}`
-      console.log('path', path)
       this.$store.commit('currentConnectionPath', path)
       this.$store.dispatch('broadcast/connectingPaths', path)
 

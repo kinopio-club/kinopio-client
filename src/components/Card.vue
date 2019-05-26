@@ -4,7 +4,7 @@
   .connector(
     :style="testcolor"
     @mousedown="startConnecting"
-    @touchstart="startConnecting"
+    @touchstart="startConnectingTouch"
   ) O
 </template>
 
@@ -43,6 +43,10 @@ export default {
       console.log('startConnecting')
       this.$store.commit('currentUserIsDrawingConnection', true)
       this.$store.commit('drawingConnectionOrigin', event.srcElement.getBoundingClientRect())
+    },
+    startConnectingTouch () {
+      this.$store.commit('viewportIsLocked', true)
+      this.startConnecting()
     }
   }
 }
