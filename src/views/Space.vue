@@ -1,5 +1,8 @@
 <template lang="pug">
-main.space
+main.space(
+  @mousemove="drawConnection"
+  @touchmove="drawConnection"
+)
   Connections
   article(v-for="card in cards")
     Card(
@@ -26,7 +29,36 @@ export default {
     cards () {
       return this.$store.state.currentSpace.cards
     }
+  },
+
+  methods: {
+    drawConnection (event) {
+      if (!this.$store.state.currentUserIsDrawingConnection) { return }
+      console.log('drawConnection')
+      const current = {
+        x: event.clientX,
+        y: event.clientY
+      }
+      const origin = {
+        x: this.$store.state.drawingConnectionOrigin.x,
+        y: this.$store.state.drawingConnectionOrigin.y
+      }
+      const delta = {
+        x: current.x - origin.x,
+        y: current.y - origin.y
+      }
+      let curveControlPoint = 'q90,40' // TODO: as you're drawing, manipulate the curvecontrolpoint to be more pleasing
+      this.currentConnectionPath = `m${origin.x},${origin.y} ${curveControlPoint} ${delta.x},${delta.y}`
+      this.$store.dispatch('broadcast/connectingPaths', this.currentConnectionPath)
+
+      // ?detect whether current position is atop any connectors (might get for free w :hover)
+
+      // end connection -> app.vue / stopInteractions
+      // if a connection is formed on end drawing .. then move the path into .connections
+      // update the data model
+    }
   }
+
 }
 </script>
 
