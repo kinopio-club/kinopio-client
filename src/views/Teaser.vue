@@ -38,7 +38,6 @@
 
 <script>
 export default {
-  name: 'beta-email'
   // data () {
   //   return {
   //     notSent: true

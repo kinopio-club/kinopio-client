@@ -22,7 +22,6 @@ import Card from '@/components/Card.vue'
 import Footer from '@/components/Footer.vue'
 
 export default {
-  name: 'Space',
   components: {
     Connections,
     Card,

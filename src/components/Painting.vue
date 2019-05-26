@@ -18,7 +18,6 @@ const rateOfIterationDecay = 0.03 // lower is slower decay
 let circles = []
 
 export default {
-  name: 'Painting',
   data () {
     return {
       canvas: undefined,

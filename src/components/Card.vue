@@ -12,7 +12,6 @@
 import randomcolor from 'randomcolor'
 
 export default {
-  name: 'Card',
   props: {
     id: Number,
     x: Number,
@@ -40,7 +39,6 @@ export default {
   },
   methods: {
     startConnecting () {
-      console.log('startConnecting')
       this.$store.commit('currentUserIsDrawingConnection', true)
       this.$store.commit('drawingConnectionOrigin', event.srcElement.getBoundingClientRect())
     },

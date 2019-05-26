@@ -12,12 +12,6 @@
 
 <script>
 export default {
-  name: 'Connections',
-  // data () {
-  // return {
-  // currentConnectionPath: this.$store.state.currentConnectionPath,
-  // }
-  // },
   computed: {
     isDrawingConnection () {
       if (this.$store.state.currentUserIsDrawingConnection) {
