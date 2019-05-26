@@ -33,6 +33,7 @@ export default {
   methods: {
     drawConnection (event) {
       if (!this.$store.state.currentUserIsDrawingConnection) { return }
+      console.log('drawConnection')
       const current = {
         x: event.clientX,
         y: event.clientY
@@ -60,13 +61,14 @@ export default {
 </script>
 
 <style lang="stylus">
-connections
+.connections
   .new
     position absolute
     top 0
     left 0
     width 100%
     height 100vh
+    background-color: pink
 // .no-events-while-painting
 //   pointer-events none
 .can-draw-connections

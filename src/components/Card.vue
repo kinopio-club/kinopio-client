@@ -40,6 +40,7 @@ export default {
   },
   methods: {
     startConnecting () {
+      console.log('startConnecting')
       this.$store.commit('currentUserIsDrawingConnection', true)
       this.$store.commit('drawingConnectionOrigin', event.srcElement.getBoundingClientRect())
     }
