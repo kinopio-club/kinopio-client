@@ -95,7 +95,9 @@ export default new Vuex.Store({
   state: {
     currentUserIsDrawingConnection: false,
     currentUserIsPainting: false,
-    drawingConnectionOrigin: {}
+    drawingConnectionOrigin: {},
+    currentConnectionPath: '',
+    viewportIsLocked: false
     // currentUserIsDraggingCard: false
   },
   mutations: {
@@ -107,7 +109,14 @@ export default new Vuex.Store({
     },
     drawingConnectionOrigin: (state, value) => {
       state.drawingConnectionOrigin = value
+    },
+    currentConnectionPath: (state, value) => {
+      state.currentConnectionPath = value
+    },
+    viewportIsLocked: (state, value) => {
+      state.viewportIsLocked = value
     }
+
   },
   modules: {
     currentUser,

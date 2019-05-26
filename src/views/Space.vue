@@ -12,10 +12,13 @@ main.space(
       :name="card.name"
     )
   footer
-    .badge.beta Engineering Prototype
+    span(:v-if="viewportIsLocked")= "Locked "
+    span Engineering Prototype
+
 </template>
 
 <script>
+import utils from '@/utils.js'
 import Connections from '@/components/Connections.vue'
 import Card from '@/components/Card.vue'
 
@@ -35,10 +38,7 @@ export default {
     drawConnection (event) {
       if (!this.$store.state.currentUserIsDrawingConnection) { return }
       console.log('drawConnection')
-      const current = {
-        x: event.clientX,
-        y: event.clientY
-      }
+      const current = utils.cursorPosition(event)
       const origin = {
         x: this.$store.state.drawingConnectionOrigin.x,
         y: this.$store.state.drawingConnectionOrigin.y
@@ -48,8 +48,10 @@ export default {
         y: current.y - origin.y
       }
       let curveControlPoint = 'q90,40' // TODO: as you're drawing, manipulate the curvecontrolpoint to be more pleasing
-      this.currentConnectionPath = `m${origin.x},${origin.y} ${curveControlPoint} ${delta.x},${delta.y}`
-      this.$store.dispatch('broadcast/connectingPaths', this.currentConnectionPath)
+      const path = `m${origin.x},${origin.y} ${curveControlPoint} ${delta.x},${delta.y}`
+      console.log('path', path)
+      this.$store.commit('currentConnectionPath', path)
+      this.$store.dispatch('broadcast/connectingPaths', path)
 
       // ?detect whether current position is atop any connectors (might get for free w :hover)
 

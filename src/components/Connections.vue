@@ -7,23 +7,25 @@
     path.id1(fill="none" stroke="#333333" stroke-width="3" d="m10,10 q90,40 200,10")
 
   svg.new(:class="{'can-draw-connections': isDrawingConnection}")
-    path.id2(fill="none" stroke="#333333" stroke-width="3" :d="currentConnectionPath") // second point is relative to the first - not absolute x,y of end point
+    path.id2(fill="none" stroke="#333333" stroke-width="3" :d="currentConnectionPath")
 </template>
 
 <script>
 export default {
   name: 'Connections',
-  data () {
-    return {
-      currentConnectionPath: '',
-      currentUserIsPainting: this.$store.state.currentUserIsPainting
-    }
-  },
+  // data () {
+  // return {
+  // currentConnectionPath: this.$store.state.currentConnectionPath,
+  // }
+  // },
   computed: {
     isDrawingConnection () {
       if (this.$store.state.currentUserIsDrawingConnection) {
         return true
       } else { return false }
+    },
+    currentConnectionPath () {
+      return this.$store.state.currentConnectionPath
     }
   }
 }
@@ -37,6 +39,7 @@ export default {
     left 0
     width 100%
     height 100vh
+    // background-color pink
 // .no-events-while-painting
 //   pointer-events none
 .can-draw-connections
