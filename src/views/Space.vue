@@ -2,6 +2,8 @@
 main.space(
   @mousemove="drawConnection"
   @touchmove="drawConnection"
+  @mouseup="stopConnecting"
+  @touchend="stopConnecting"
 )
   Connections
   article(v-for="card in cards")
@@ -49,12 +51,21 @@ export default {
       const path = `m${origin.x},${origin.y} ${curveControlPoint} ${delta.x},${delta.y}`
       this.$store.commit('currentConnectionPath', path)
       this.$store.dispatch('broadcast/connectingPaths', path)
+    },
+    stopConnecting (event) {
+      console.log('stopConnecting', event)
+      this.$store.commit('currentConnectionPath', '')
 
-      // ?detect whether current position is atop any connectors (might get for free w :hover)
+      console.log(utils.associatedConnector(event))
+      // ?detect whether the event is associated with a connector
 
-      // end connection -> app.vue / stopInteractions
+      // if associated connector do ... connection
+
+      // else kill line and do nothing (default, implicit)
+
       // if a connection is formed on end drawing .. then move the path into .connections
       // update the data model
+      // broadcast stopconnecting
     }
   }
 
@@ -68,5 +79,5 @@ export default {
   left 0
   width: 100%
   height: 100%
-  pointer-events none
+  pointer-events none // so that painting can receive events
 </style>

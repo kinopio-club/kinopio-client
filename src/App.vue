@@ -21,7 +21,6 @@ export default {
     stopInteractions () {
       console.log('stopInteractions')
       this.$store.commit('currentUserIsDrawingConnection', false)
-      this.$store.commit('drawingConnectionOrigin', {})
       this.$store.commit('currentUserIsPainting', false)
       this.$store.commit('viewportIsLocked', false)
     }

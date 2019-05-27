@@ -1,10 +1,14 @@
 <template lang="pug">
-.card#id1(:style="position")
+.card(
+  :style="position"
+  :data-card-id="id"
+)
   p {{name}}
   .connector(
     :style="testcolor"
     @mousedown="startConnecting"
     @touchstart="startConnectingTouch"
+    :data-card-id="id"
   ) O
 </template>
 
@@ -67,4 +71,6 @@ export default {
     padding 8px
     align-self right
     cursor cell
+    &:hover
+      background-color grey !important //temp
 </style>

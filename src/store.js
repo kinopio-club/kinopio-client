@@ -48,7 +48,7 @@ const currentSpace = {
       },
       {
         id: 2,
-        x: 200,
+        x: 250,
         y: 250,
         name: 'connect me!'
       }
