@@ -39,24 +39,21 @@ export default {
     drawConnection (event) {
       if (!this.$store.state.currentUserIsDrawingConnection) { return }
       const current = utils.cursorPosition(event)
-      const origin = {
-        x: this.$store.state.drawingConnectionOrigin.x,
-        y: this.$store.state.drawingConnectionOrigin.y
-      }
+      const origin = utils.elementCenter(this.$store.state.drawingConnectionOrigin)
       const delta = {
         x: current.x - origin.x,
         y: current.y - origin.y
       }
-      let curveControlPoint = 'q90,40' // TODO: as you're drawing, manipulate the curvecontrolpoint to be more pleasing
-      const path = `m${origin.x},${origin.y} ${curveControlPoint} ${delta.x},${delta.y}`
+      let curve = utils.curveControlPoint(origin, delta)
+      const path = `m${origin.x},${origin.y} ${curve} ${delta.x},${delta.y}`
       this.$store.commit('currentConnectionPath', path)
       this.$store.dispatch('broadcast/connectingPaths', path)
     },
     stopConnecting (event) {
-      console.log('stopConnecting', event)
+      console.log('👼 stopConnecting', event)
       this.$store.commit('currentConnectionPath', '')
 
-      console.log(utils.associatedConnector(event))
+      utils.associatedConnector(event)
       // ?detect whether the event is associated with a connector
 
       // if associated connector do ... connection
