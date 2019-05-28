@@ -71,7 +71,7 @@ const currentSpace = {
   mutations: {
     addConnection: (state, connection) => {
       connection.id = 123 // temp
-      connection.connectionType = 456 // temp
+      connection.connectionType = 1 // temp
       state.connections.push(connection)
       console.log(state.connections)
     }
