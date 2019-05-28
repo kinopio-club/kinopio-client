@@ -19,11 +19,6 @@ export default {
 
   between (value, min, max) {
     if (min <= value && value <= max) { return true }
-  },
-
-  curveControlPoint (origin, delta) { // move out?
-    // TODO: as you're drawing, manipulate the curvecontrolpoint to be more pleasing
-    return 'q90,40'
   }
 
 }

@@ -36,6 +36,11 @@ export default {
   },
 
   methods: {
+    curveControlPoint (origin, delta) {
+      // TODO: as you're drawing, manipulate the curvecontrolpoint to be more pleasing
+      return 'q90,40'
+    },
+
     drawConnection (event) {
       if (!this.$store.state.currentUserIsDrawingConnection) { return }
       const current = utils.cursorPosition(event)
@@ -44,7 +49,7 @@ export default {
         x: current.x - origin.x,
         y: current.y - origin.y
       }
-      let curve = utils.curveControlPoint(origin, delta)
+      let curve = this.curveControlPoint(origin, delta)
       const path = `m${origin.x},${origin.y} ${curve} ${delta.x},${delta.y}`
       this.$store.commit('currentConnectionPath', path)
       this.$store.dispatch('broadcast/connectingPaths', path)
