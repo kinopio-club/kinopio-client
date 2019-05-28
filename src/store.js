@@ -73,7 +73,7 @@ const currentSpace = {
       connection.id = 123 // temp
       connection.connectionType = 1 // temp
       state.connections.push(connection)
-      console.log(state.connections)
+      console.log(state.connections) // temp
     }
   }
 }

@@ -87,6 +87,7 @@ export default {
         let connection = {}
         connection.startCard = this.$store.state.currentConnectionOrigin.cardId
         connection.endCard = currentConnection.cardId
+        connection.path = this.$store.state.currentConnectionPath
         this.$store.commit('currentSpace/addConnection', connection)
       }
       this.clearConnection()
