@@ -56,14 +56,22 @@ const currentSpace = {
     connections: [
       // {
       //   id: 1,
-      //   connector: 1,
+      //   connectionType: 1,
       //   startCard: 1,
       //   endCard: 2
       // }
+    ],
+    connectionTypes: [
+      {
+        id: 1,
+        name: 'connection 1'
+      }
     ]
   },
   mutations: {
     addConnection: (state, connection) => {
+      connection.id = 123 // temp
+      connection.connectionType = 456 // temp
       state.connections.push(connection)
       console.log(state.connections)
     }

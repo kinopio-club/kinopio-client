@@ -41,7 +41,7 @@ export default {
       const origin = utils.elementCenter(this.$store.state.currentConnectionOrigin)
       const current = utils.cursorPosition(event)
       const path = utils.connectionPathBetweenCoords(origin, current)
-      this.currentConnection(event)
+      this.getCurrentConnection(event)
       this.$store.commit('currentConnectionPath', path)
       this.$store.dispatch('broadcast/connectingPaths', path)
     },
@@ -61,7 +61,7 @@ export default {
       })
     },
 
-    currentConnection (event) {
+    getCurrentConnection (event) {
       const cursor = utils.cursorPosition(event)
       const currentConnection = this.connectors().find(connector => {
         const inXRange = utils.between(cursor.x, connector.x, connector.x + connector.width)
@@ -74,7 +74,6 @@ export default {
       } else {
         this.$store.commit('currentConnection', undefined)
       }
-      return currentConnection
     },
 
     clearConnection () {
@@ -86,8 +85,8 @@ export default {
       const currentConnection = this.$store.state.currentConnection
       if (currentConnection) {
         let connection = {}
-        connection.origin = this.$store.state.currentConnectionOrigin.cardId
-        connection.destination = currentConnection.cardId
+        connection.startCard = this.$store.state.currentConnectionOrigin.cardId
+        connection.endCard = currentConnection.cardId
         this.$store.commit('currentSpace/addConnection', connection)
       }
       this.clearConnection()
