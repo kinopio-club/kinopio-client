@@ -93,12 +93,18 @@ const broadcast = {
 export default new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production',
   state: {
+    // user state
     currentUserIsDrawingConnection: false,
     currentUserIsPainting: false,
-    drawingConnectionOrigin: {},
+    // currentUserIsDraggingCard: false,
+
+    // drawing connections
+    currentConnectionOrigin: {},
     currentConnectionPath: '',
+    currentConnection: {},
+
+    // app state
     viewportIsLocked: false
-    // currentUserIsDraggingCard: false
   },
   mutations: {
     currentUserIsDrawingConnection: (state, value) => {
@@ -107,14 +113,17 @@ export default new Vuex.Store({
     currentUserIsPainting: (state, value) => {
       state.currentUserIsPainting = value
     },
-    drawingConnectionOrigin: (state, value) => {
-      state.drawingConnectionOrigin = value
+    currentConnectionOrigin: (state, value) => {
+      state.currentConnectionOrigin = value
     },
     currentConnectionPath: (state, value) => {
       state.currentConnectionPath = value
     },
     viewportIsLocked: (state, value) => {
       state.viewportIsLocked = value
+    },
+    currentConnection: (state, value) => {
+      state.currentConnection = value
     }
 
   },

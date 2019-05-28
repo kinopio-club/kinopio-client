@@ -9,6 +9,7 @@
     @mousedown="startConnecting"
     @touchstart="startConnectingTouch"
     :data-card-id="id"
+    :class="{ active: isActive }"
   ) O
 </template>
 
@@ -40,6 +41,14 @@ export default {
         left: `${this.x}px`,
         top: `${this.y}px`
       }
+    },
+    isActive () {
+      const currentConnection = this.$store.state.currentConnection
+      if (currentConnection) {
+        return parseInt(currentConnection.cardId) === this.id
+      } else {
+        return undefined
+      }
     }
   },
   methods: {
@@ -47,7 +56,7 @@ export default {
       this.$store.commit('currentUserIsDrawingConnection', true)
       let origin = utils.clone(event.srcElement.getBoundingClientRect())
       origin.cardId = event.target.dataset.cardId
-      this.$store.commit('drawingConnectionOrigin', origin)
+      this.$store.commit('currentConnectionOrigin', origin)
     },
     startConnectingTouch () {
       this.$store.commit('viewportIsLocked', true)
@@ -75,8 +84,8 @@ export default {
     align-self right
     cursor cell
     &:hover
-      background-color grey !important //temp
+      background-color lightgrey !important //temp
     &:active,
     &.active
-      background-color lightgrey !important //temp
+      background-color grey !important //temp
 </style>

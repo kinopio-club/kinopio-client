@@ -43,13 +43,14 @@ export default {
     drawConnection (event) {
       if (!this.$store.state.currentUserIsDrawingConnection) { return }
       const current = utils.cursorPosition(event)
-      const origin = utils.elementCenter(this.$store.state.drawingConnectionOrigin)
+      const origin = utils.elementCenter(this.$store.state.currentConnectionOrigin)
       const delta = {
         x: current.x - origin.x,
         y: current.y - origin.y
       }
       let curve = this.curveControlPoint(origin, delta)
       const path = `m${origin.x},${origin.y} ${curve} ${delta.x},${delta.y}`
+      this.currentConnection(event)
       this.$store.commit('currentConnectionPath', path)
       this.$store.dispatch('broadcast/connectingPaths', path)
     },
@@ -69,25 +70,29 @@ export default {
       })
     },
 
-    connectedConnector (event) {
+    currentConnection (event) {
       const cursor = utils.cursorPosition(event)
-      const connectedConnector = this.connectors().find(connector => {
+      const currentConnection = this.connectors().find(connector => {
         const inXRange = utils.between(cursor.x, connector.x, connector.x + connector.width)
         const inYRange = utils.between(cursor.y, connector.y, connector.y + connector.height)
-        const connectedToNewCard = connector.cardId !== this.$store.state.drawingConnectionOrigin.cardId
+        const connectedToNewCard = connector.cardId !== this.$store.state.currentConnectionOrigin.cardId
         return inXRange && inYRange && connectedToNewCard
       })
-      return connectedConnector
+      if (currentConnection) {
+        this.$store.commit('currentConnection', currentConnection)
+      } else {
+        this.$store.commit('currentConnection', undefined)
+      }
+      return currentConnection
     },
 
     stopConnecting (event) {
-      const connectedConnector = (this.connectedConnector(event))
-      console.log('🌹', connectedConnector)
-
+      console.log('stopConnecting connection', this.$store.state.currentConnection)
       // if associated connector do ... connection
-
       // else kill line and do nothing (default, implicit)
       this.$store.commit('currentConnectionPath', '')
+
+      this.$store.commit('currentConnection', undefined)
 
       // if a connection is formed on end drawing .. then move the path into .connections
       // update the data model
