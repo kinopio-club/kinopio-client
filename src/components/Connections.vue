@@ -6,7 +6,7 @@
     // last two x,y = end point (but halved?)
     path.id1(fill="none" stroke="#333333" stroke-width="3" d="m10,10 q90,40 200,10")
 
-  svg.new(:class="{'can-draw-connections': isDrawingConnection}")
+  svg.current(:class="{'can-draw-connections': isDrawingConnection}")
     path.id2(fill="none" stroke="#333333" stroke-width="3" :d="currentConnectionPath")
 </template>
 
@@ -27,7 +27,7 @@ export default {
 
 <style lang="stylus">
 .connections
-  .new
+  .current
     position absolute
     top 0
     left 0

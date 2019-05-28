@@ -25,6 +25,24 @@ export default {
     let cloned = JSON.stringify(object)
     cloned = JSON.parse(cloned)
     return cloned
+  },
+
+  createConnection (origin, connection) {
+    console.log('createConnection', origin, connection)
+  },
+
+  curveControlPoint (origin, delta) {
+    // TODO: as you're drawing, manipulate the curvecontrolpoint to be more pleasing
+    return 'q90,40'
+  },
+
+  connectionPathBetweenCoords (origin, destination) {
+    const delta = {
+      x: destination.x - origin.x,
+      y: destination.y - origin.y
+    }
+    let curve = this.curveControlPoint(origin, delta)
+    return `m${origin.x},${origin.y} ${curve} ${delta.x},${delta.y}`
   }
 
 }

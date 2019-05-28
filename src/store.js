@@ -53,26 +53,21 @@ const currentSpace = {
         name: 'connect me!'
       }
     ],
-    connectors: [
-      {
-        id: 1,
-        name: 'connection 1',
-        color: 'pink'
-      }
-    ],
     connections: [
-      {
-        id: 1,
-        connector: 1,
-        startCard: 1,
-        endCard: 2
-      }
+      // {
+      //   id: 1,
+      //   connector: 1,
+      //   startCard: 1,
+      //   endCard: 2
+      // }
     ]
+  },
+  mutations: {
+    addConnection: (state, connection) => {
+      state.connections.push(connection)
+      console.log(state.connections)
+    }
   }
-  // actions: {
-  // get space from api, then muttate
-  // get card convo details on click, then mutate
-  // }
 }
 
 const broadcast = {

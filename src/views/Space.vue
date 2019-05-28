@@ -35,21 +35,12 @@ export default {
   },
 
   methods: {
-    curveControlPoint (origin, delta) {
-      // TODO: as you're drawing, manipulate the curvecontrolpoint to be more pleasing
-      return 'q90,40'
-    },
 
     drawConnection (event) {
       if (!this.$store.state.currentUserIsDrawingConnection) { return }
-      const current = utils.cursorPosition(event)
       const origin = utils.elementCenter(this.$store.state.currentConnectionOrigin)
-      const delta = {
-        x: current.x - origin.x,
-        y: current.y - origin.y
-      }
-      let curve = this.curveControlPoint(origin, delta)
-      const path = `m${origin.x},${origin.y} ${curve} ${delta.x},${delta.y}`
+      const current = utils.cursorPosition(event)
+      const path = utils.connectionPathBetweenCoords(origin, current)
       this.currentConnection(event)
       this.$store.commit('currentConnectionPath', path)
       this.$store.dispatch('broadcast/connectingPaths', path)
@@ -86,14 +77,20 @@ export default {
       return currentConnection
     },
 
-    stopConnecting (event) {
-      console.log('stopConnecting connection', this.$store.state.currentConnection)
-      // if associated connector do ... connection
-      // else kill line and do nothing (default, implicit)
+    clearConnection () {
       this.$store.commit('currentConnectionPath', '')
-
       this.$store.commit('currentConnection', undefined)
+    },
 
+    stopConnecting () {
+      const currentConnection = this.$store.state.currentConnection
+      if (currentConnection) {
+        let connection = {}
+        connection.origin = this.$store.state.currentConnectionOrigin.cardId
+        connection.destination = currentConnection.cardId
+        this.$store.commit('currentSpace/addConnection', connection)
+      }
+      this.clearConnection()
       // if a connection is formed on end drawing .. then move the path into .connections
       // update the data model
       // broadcast stopconnecting
