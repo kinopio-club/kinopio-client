@@ -49,12 +49,35 @@ export default {
       this.$store.commit('currentConnectionPath', path)
       this.$store.dispatch('broadcast/connectingPaths', path)
     },
-    stopConnecting (event) {
-      console.log('👼 stopConnecting', event)
-      this.$store.commit('currentConnectionPath', '')
 
-      utils.associatedConnector(event)
-      // ?detect whether the event is associated with a connector
+    connectors () {
+      const connectorElements = document.querySelectorAll('.connector')
+      const connectors = Array.from(connectorElements)
+      return connectors.map(connector => {
+        const element = connector.getBoundingClientRect()
+        return {
+          id: connector.dataset.cardId,
+          x: element.x,
+          y: element.y,
+          width: element.width,
+          height: element.height
+        }
+      })
+    },
+
+    connectedConnector (event) {
+      const cursor = utils.cursorPosition(event)
+      const connectedConnector = this.connectors().find(connector => {
+        const inXRange = utils.between(cursor.x, connector.x, connector.x + connector.width)
+        const inYRange = utils.between(cursor.y, connector.y, connector.y + connector.height)
+        return inXRange && inYRange
+      })
+      return connectedConnector
+    },
+
+    stopConnecting (event) {
+      this.$store.commit('currentConnectionPath', '') // temp
+      console.log(this.connectedConnector(event))
 
       // if associated connector do ... connection
 
