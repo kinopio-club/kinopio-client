@@ -18,7 +18,6 @@ main.space(
 
 <script>
 import utils from '@/utils.js'
-
 import Connections from '@/components/Connections.vue'
 import Card from '@/components/Card.vue'
 import Footer from '@/components/Footer.vue'
@@ -61,7 +60,7 @@ export default {
       return connectors.map(connector => {
         const element = connector.getBoundingClientRect()
         return {
-          id: connector.dataset.cardId,
+          cardId: connector.dataset.cardId,
           x: element.x,
           y: element.y,
           width: element.width,
@@ -75,18 +74,20 @@ export default {
       const connectedConnector = this.connectors().find(connector => {
         const inXRange = utils.between(cursor.x, connector.x, connector.x + connector.width)
         const inYRange = utils.between(cursor.y, connector.y, connector.y + connector.height)
-        return inXRange && inYRange
+        const connectedToNewCard = connector.cardId !== this.$store.state.drawingConnectionOrigin.cardId
+        return inXRange && inYRange && connectedToNewCard
       })
       return connectedConnector
     },
 
     stopConnecting (event) {
-      this.$store.commit('currentConnectionPath', '') // temp
-      console.log(this.connectedConnector(event))
+      const connectedConnector = (this.connectedConnector(event))
+      console.log('🌹', connectedConnector)
 
       // if associated connector do ... connection
 
       // else kill line and do nothing (default, implicit)
+      this.$store.commit('currentConnectionPath', '')
 
       // if a connection is formed on end drawing .. then move the path into .connections
       // update the data model

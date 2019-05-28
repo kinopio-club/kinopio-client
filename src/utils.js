@@ -19,6 +19,12 @@ export default {
 
   between (value, min, max) {
     if (min <= value && value <= max) { return true }
+  },
+
+  clone (object) {
+    let cloned = JSON.stringify(object)
+    cloned = JSON.parse(cloned)
+    return cloned
   }
 
 }

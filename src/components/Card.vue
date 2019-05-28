@@ -14,6 +14,7 @@
 
 <script>
 import randomcolor from 'randomcolor'
+import utils from '@/utils.js'
 
 export default {
   props: {
@@ -44,7 +45,9 @@ export default {
   methods: {
     startConnecting () {
       this.$store.commit('currentUserIsDrawingConnection', true)
-      this.$store.commit('drawingConnectionOrigin', event.srcElement.getBoundingClientRect())
+      let origin = utils.clone(event.srcElement.getBoundingClientRect())
+      origin.cardId = event.target.dataset.cardId
+      this.$store.commit('drawingConnectionOrigin', origin)
     },
     startConnectingTouch () {
       this.$store.commit('viewportIsLocked', true)
@@ -73,4 +76,7 @@ export default {
     cursor cell
     &:hover
       background-color grey !important //temp
+    &:active,
+    &.active
+      background-color lightgrey !important //temp
 </style>
