@@ -75,6 +75,7 @@ export default {
   position absolute
   max-width 235px
   cursor pointer
+  white-space nowrap
   > p
     align-self stretch
     margin 8px
