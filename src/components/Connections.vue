@@ -10,8 +10,8 @@
       :d="connection.path"
     )
 
-  svg.current(:class="{'can-draw-connections': isDrawingConnection}")
-    path.id2(
+  svg.current(v-if="isDrawingConnection")
+    path(
       fill="none"
       stroke="#333333"
       stroke-width="3"
@@ -51,7 +51,7 @@ svg
   left 0
   width 100%
   height 100vh
-.can-draw-connections
+svg.current
   pointer-events all
   z-index: 1
 path
