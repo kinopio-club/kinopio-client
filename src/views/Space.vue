@@ -88,6 +88,7 @@ export default {
         connection.startCardId = this.$store.state.currentConnectionStart.cardId
         connection.endCardId = currentConnection.cardId
         this.$store.commit('currentSpace/addConnection', connection)
+        this.$store.dispatch('broadcast/addConnection', connection)
       }
       this.clearConnection()
       // if a connection is formed on end drawing .. then move the path into .connections

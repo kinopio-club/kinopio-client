@@ -94,6 +94,9 @@ const broadcast = {
     },
     connectingPaths (context, connectionPath) {
       // console.log('broadcast drawing connection path', connectionPath)
+    },
+    addConnection (context, connection) {
+      // console.log('broadcast add connection', connection)
     }
   }
 }

@@ -33,7 +33,6 @@ export default {
   },
 
   connectionBetweenCards (startId, endId) {
-    console.log(startId, endId)
     let start = this.connectorCoords(startId)
     let end = this.connectorCoords(endId)
     return this.connectionPathBetweenCoords(start, end)
