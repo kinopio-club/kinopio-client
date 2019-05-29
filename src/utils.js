@@ -27,6 +27,8 @@ export default {
     return cloned
   },
 
+  // connection path utils
+
   connectorCoords (cardId) {
     let rect = document.querySelector(`.connector[data-card-id="${cardId}"]`).getBoundingClientRect()
     return this.elementCenter(rect)

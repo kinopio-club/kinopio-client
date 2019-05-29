@@ -52,7 +52,6 @@ svg
   width 100%
   height 100vh
 svg.current
-  pointer-events all
   z-index: 1
 path
   pointer-events all

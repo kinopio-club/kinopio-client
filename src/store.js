@@ -76,7 +76,7 @@ const currentSpace = {
   },
   mutations: {
     addConnection: (state, connection) => {
-      connection.id = 123 // temp hardcoded
+      connection.id = 123 // temp hardcoded, nanoid
       connection.connectionTypeId = 1 // temp hardcoded
       state.connections.push(connection)
     }
@@ -114,6 +114,9 @@ export default new Vuex.Store({
     currentConnectionPath: '',
     currentConnection: {},
 
+    // dragging card
+    currentDraggingCardId: '',
+
     // app state
     viewportIsLocked: false
   },
@@ -138,6 +141,9 @@ export default new Vuex.Store({
     },
     currentUserIsDraggingCard: (state, value) => {
       state.currentUserIsDraggingCard = value
+    },
+    currentDraggingCardId: (state, value) => {
+      state.currentDraggingCardId = value
     }
 
   },

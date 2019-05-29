@@ -1,8 +1,5 @@
 <template lang='pug'>
-.app(
-  @mouseup="stopInteractions"
-  @touchend="stopInteractions"
-)
+.app
   Painting
   router-view
   Header
@@ -18,13 +15,6 @@ export default {
     Painting
   },
   methods: {
-    stopInteractions () {
-      console.log('stopInteractions')
-      this.$store.commit('currentUserIsDrawingConnection', false)
-      this.$store.commit('currentUserIsPainting', false)
-      this.$store.commit('viewportIsLocked', false)
-      this.$store.commit('currentUserIsDraggingCard', false)
-    }
   }
 }
 </script>

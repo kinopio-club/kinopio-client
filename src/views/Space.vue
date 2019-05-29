@@ -2,8 +2,9 @@
 main.space(
   @mousemove="interact"
   @touchmove="interact"
-  @mouseup="stopConnecting"
-  @touchend="stopConnecting"
+  @mouseup="stopInteractions"
+  @touchend="stopInteractions"
+  :class="{interacting: isInteracting}"
 )
   Connections
   article(v-for="card in cards")
@@ -31,18 +32,34 @@ export default {
   computed: {
     cards () {
       return this.$store.state.currentSpace.cards
+    },
+    isInteracting () {
+      const draggingCard = this.$store.state.currentUserIsDraggingCard
+      const drawingConnection = this.$store.state.currentUserIsDrawingConnection
+      if (draggingCard || drawingConnection) {
+        return true
+      } else { return false }
     }
   },
 
   methods: {
-
     interact (event) {
+      if (this.$store.state.currentUserIsDraggingCard) {
+        this.dragCard(event)
+      }
       if (this.$store.state.currentUserIsDrawingConnection) {
         this.drawConnection(event)
       }
     },
 
+    dragCard (event) {
+      // console.log ('🏃‍♂️ dragging card', event)
+      console.log(utils.cursorPosition(event))
+      console.log('currentDraggingCardId', this.$store.state.currentDraggingCardId)
+    },
+
     drawConnection (event) {
+      console.log('draw connection')
       const start = utils.elementCenter(this.$store.state.currentConnectionStart)
       const current = utils.cursorPosition(event)
       const path = utils.connectionPathBetweenCoords(start, current)
@@ -103,13 +120,19 @@ export default {
       }
     },
 
-    clearConnection () {
-      this.$store.commit('currentConnectionPath', '')
+    stopInteractions () {
+      console.log('💣 stopInteractions')
+      if (this.$store.state.currentUserIsDrawingConnection) {
+        this.createConnection()
+      }
+      this.$store.commit('currentUserIsDrawingConnection', false)
+      this.$store.commit('viewportIsLocked', false)
+      this.$store.commit('currentUserIsDraggingCard', false)
+      this.$store.commit('currentConnectionPath', undefined)
       this.$store.commit('currentConnection', undefined)
     },
 
-    stopConnecting () {
-      if (!this.$store.state.currentUserIsDrawingConnection) { return }
+    createConnection () {
       const currentConnection = this.$store.state.currentConnection
       if (currentConnection) {
         let connection = {}
@@ -118,10 +141,6 @@ export default {
         this.$store.commit('currentSpace/addConnection', connection)
         this.$store.dispatch('broadcast/addConnection', connection)
       }
-      this.clearConnection()
-      // if a connection is formed on end drawing .. then move the path into .connections
-      // update the data model
-      // broadcast stopconnecting
     }
   }
 
@@ -136,4 +155,7 @@ export default {
   width: 100%
   height: 100%
   pointer-events none // so that painting can receive events
+.interacting
+  pointer-events all
+// TODO space not-interactable !important if painting
 </style>

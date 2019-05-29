@@ -3,7 +3,7 @@
   :style="position"
   :data-card-id="id"
   @mousedown="startDraggingCard"
-  @touchstart="startDraggingCard"
+  @touchstart="startDraggingCardTouch"
   @click="showCardDetailsPop"
 )
   p {{name}}
@@ -56,9 +56,10 @@ export default {
   },
   methods: {
     startConnecting () {
+      console.log('🚒startConnecting')
       this.$store.commit('currentUserIsDrawingConnection', true)
       let start = utils.clone(event.srcElement.getBoundingClientRect())
-      start.cardId = event.target.dataset.cardId
+      start.cardId = this.id
       this.$store.commit('currentConnectionStart', start)
     },
     startConnectingTouch () {
@@ -69,8 +70,13 @@ export default {
       console.log('🌸 showCardDetailsPop')
     },
     startDraggingCard () {
+      console.log('🌍🌍🌍start drag')
       this.$store.commit('currentUserIsDraggingCard', true)
-      console.log('start drag')
+      this.$store.commit('currentDraggingCardId', this.id)
+    },
+    startDraggingCardTouch () {
+      this.$store.commit('viewportIsLocked', true)
+      this.startDraggingCard()
     }
 
   }
