@@ -53,7 +53,7 @@ const currentSpace = {
         name: 'connect me!'
       },
       {
-        id: 2,
+        id: 3,
         x: 400,
         y: 150,
         name: 'click and drag me'

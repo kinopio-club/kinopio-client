@@ -61,13 +61,35 @@ export default {
       })
     },
 
+    isNewConnection (connector) {
+      const connections = this.$store.state.currentSpace.connections
+      const startId = this.$store.state.currentConnectionStart.cardId
+      const endId = connector.cardId
+      const connectedToSelf = startId === endId
+      const connectionAlreadyExists = connections.find(connection => {
+        let forwardMatch, backwardsMatch
+        if (connection.startCardId === startId && connection.endCardId === endId) {
+          forwardMatch = true
+        }
+        if (connection.startCardId === endId && connection.endCardId === startId) {
+          backwardsMatch = true
+        }
+        if (forwardMatch || backwardsMatch) {
+          return true
+        }
+      })
+      if (!connectedToSelf && !connectionAlreadyExists) {
+        return true
+      }
+    },
+
     getCurrentConnection (event) {
       const cursor = utils.cursorPosition(event)
       const currentConnection = this.connectors().find(connector => {
         const inXRange = utils.between(cursor.x, connector.x, connector.x + connector.width)
         const inYRange = utils.between(cursor.y, connector.y, connector.y + connector.height)
-        const connectedToNewCard = connector.cardId !== this.$store.state.currentConnectionStart.cardId
-        return inXRange && inYRange && connectedToNewCard
+        const isNewConnection = this.isNewConnection(connector)
+        return inXRange && inYRange && isNewConnection
       })
       if (currentConnection) {
         this.$store.commit('currentConnection', currentConnection)
