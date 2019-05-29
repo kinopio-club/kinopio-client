@@ -2,13 +2,15 @@
 .card(
   :style="position"
   :data-card-id="id"
+  @mousedown="startDraggingCard"
+  @touchstart="startDraggingCard"
   @click="showCardDetailsPop"
 )
   p {{name}}
   .connector(
     :style="testcolor"
-    @mousedown="startConnecting"
-    @touchstart="startConnectingTouch"
+    @mousedown.stop="startConnecting"
+    @touchstart.stop="startConnectingTouch"
     :data-card-id="id"
     :class="{ active: isActive }"
   ) O
@@ -65,7 +67,12 @@ export default {
     },
     showCardDetailsPop () {
       console.log('🌸 showCardDetailsPop')
+    },
+    startDraggingCard () {
+      this.$store.commit('currentUserIsDraggingCard', true)
+      console.log('start drag')
     }
+
   }
 }
 </script>

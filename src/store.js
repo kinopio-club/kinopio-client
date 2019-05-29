@@ -107,7 +107,7 @@ export default new Vuex.Store({
     // user state
     currentUserIsDrawingConnection: false,
     currentUserIsPainting: false,
-    // currentUserIsDraggingCard: false,
+    currentUserIsDraggingCard: false,
 
     // drawing connections
     currentConnectionStart: {},
@@ -135,6 +135,9 @@ export default new Vuex.Store({
     },
     currentConnection: (state, value) => {
       state.currentConnection = value
+    },
+    currentUserIsDraggingCard: (state, value) => {
+      state.currentUserIsDraggingCard = value
     }
 
   },

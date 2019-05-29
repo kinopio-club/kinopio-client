@@ -23,6 +23,7 @@ export default {
       this.$store.commit('currentUserIsDrawingConnection', false)
       this.$store.commit('currentUserIsPainting', false)
       this.$store.commit('viewportIsLocked', false)
+      this.$store.commit('currentUserIsDraggingCard', false)
     }
   }
 }
