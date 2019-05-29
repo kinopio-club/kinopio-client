@@ -1,7 +1,7 @@
 <template lang="pug">
 main.space(
-  @mousemove="drawConnection"
-  @touchmove="drawConnection"
+  @mousemove="interact"
+  @touchmove="interact"
   @mouseup="stopConnecting"
   @touchend="stopConnecting"
 )
@@ -36,8 +36,13 @@ export default {
 
   methods: {
 
+    interact (event) {
+      if (this.$store.state.currentUserIsDrawingConnection) {
+        this.drawConnection(event)
+      }
+    },
+
     drawConnection (event) {
-      if (!this.$store.state.currentUserIsDrawingConnection) { return }
       const start = utils.elementCenter(this.$store.state.currentConnectionStart)
       const current = utils.cursorPosition(event)
       const path = utils.connectionPathBetweenCoords(start, current)
