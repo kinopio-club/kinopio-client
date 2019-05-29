@@ -104,6 +104,7 @@ export default {
     },
 
     stopConnecting () {
+      if (!this.$store.state.currentUserIsDrawingConnection) { return }
       const currentConnection = this.$store.state.currentConnection
       if (currentConnection) {
         let connection = {}

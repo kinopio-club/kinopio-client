@@ -2,6 +2,7 @@
 .card(
   :style="position"
   :data-card-id="id"
+  @click="showCardDetailsPop"
 )
   p {{name}}
   .connector(
@@ -61,6 +62,9 @@ export default {
     startConnectingTouch () {
       this.$store.commit('viewportIsLocked', true)
       this.startConnecting()
+    },
+    showCardDetailsPop () {
+      console.log('🌸 showCardDetailsPop')
     }
   }
 }
