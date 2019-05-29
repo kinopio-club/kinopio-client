@@ -54,9 +54,9 @@ export default {
   methods: {
     startConnecting () {
       this.$store.commit('currentUserIsDrawingConnection', true)
-      let origin = utils.clone(event.srcElement.getBoundingClientRect())
-      origin.cardId = event.target.dataset.cardId
-      this.$store.commit('currentConnectionOrigin', origin)
+      let start = utils.clone(event.srcElement.getBoundingClientRect())
+      start.cardId = event.target.dataset.cardId
+      this.$store.commit('currentConnectionStart', start)
     },
     startConnectingTouch () {
       this.$store.commit('viewportIsLocked', true)

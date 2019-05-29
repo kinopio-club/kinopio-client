@@ -27,22 +27,30 @@ export default {
     return cloned
   },
 
-  createConnection (origin, connection) {
-    console.log('createConnection', origin, connection)
+  connectorCoords (cardId) {
+    let rect = document.querySelector(`.connector[data-card-id="${cardId}"]`).getBoundingClientRect()
+    return this.elementCenter(rect)
   },
 
-  curveControlPoint (origin, delta) {
+  connectionBetweenCards (startId, endId) {
+    console.log(startId, endId)
+    let start = this.connectorCoords(startId)
+    let end = this.connectorCoords(endId)
+    return this.connectionPathBetweenCoords(start, end)
+  },
+
+  curveControlPoint (start, end) {
     // TODO: as you're drawing, manipulate the curvecontrolpoint to be more pleasing
     return 'q90,40'
   },
 
-  connectionPathBetweenCoords (origin, destination) {
+  connectionPathBetweenCoords (start, end) {
     const delta = {
-      x: destination.x - origin.x,
-      y: destination.y - origin.y
+      x: end.x - start.x,
+      y: end.y - start.y
     }
-    let curve = this.curveControlPoint(origin, delta)
-    return `m${origin.x},${origin.y} ${curve} ${delta.x},${delta.y}`
+    let curve = this.curveControlPoint(start, delta)
+    return `m${start.x},${start.y} ${curve} ${delta.x},${delta.y}`
   }
 
 }

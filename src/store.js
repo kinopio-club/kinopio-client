@@ -58,7 +58,6 @@ const currentSpace = {
         y: 150,
         name: 'click and drag me'
       }
-
     ],
     connections: [
       // {
@@ -77,10 +76,9 @@ const currentSpace = {
   },
   mutations: {
     addConnection: (state, connection) => {
-      connection.id = 123 // temp
-      connection.connectionType = 1 // temp
+      connection.id = 123 // temp hardcoded
+      connection.connectionTypeId = 1 // temp hardcoded
       state.connections.push(connection)
-      console.log(state.connections) // temp
     }
   }
 }
@@ -109,7 +107,7 @@ export default new Vuex.Store({
     // currentUserIsDraggingCard: false,
 
     // drawing connections
-    currentConnectionOrigin: {},
+    currentConnectionStart: {},
     currentConnectionPath: '',
     currentConnection: {},
 
@@ -123,8 +121,8 @@ export default new Vuex.Store({
     currentUserIsPainting: (state, value) => {
       state.currentUserIsPainting = value
     },
-    currentConnectionOrigin: (state, value) => {
-      state.currentConnectionOrigin = value
+    currentConnectionStart: (state, value) => {
+      state.currentConnectionStart = value
     },
     currentConnectionPath: (state, value) => {
       state.currentConnectionPath = value
