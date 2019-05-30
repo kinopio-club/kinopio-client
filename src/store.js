@@ -135,6 +135,7 @@ export default new Vuex.Store({
     // dragging card
     currentDraggingCardId: '',
     currentDragCardStartPosition: {},
+    preventDraggedCardFromClicking: false,
 
     // app state
     viewportIsLocked: false
@@ -166,8 +167,10 @@ export default new Vuex.Store({
     },
     currentDragCardStartPosition: (state, value) => {
       state.currentDragCardStartPosition = value
+    },
+    preventDraggedCardFromClicking: (state, value) => {
+      state.preventDraggedCardFromClicking = value
     }
-
   },
   modules: {
     currentUser,

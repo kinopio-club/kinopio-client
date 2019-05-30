@@ -67,9 +67,13 @@ export default {
       this.startConnecting()
     },
     showCardDetailsPop () {
+      if (this.$store.state.preventDraggedCardFromClicking) {
+        this.$store.commit('preventDraggedCardFromClicking', false)
+        return
+      }
+      console.log('🌸 showCardDetailsPop')
     },
     startDraggingCard () {
-      console.log('🌍🌍🌍start drag')
       this.$store.commit('currentUserIsDraggingCard', true)
       this.$store.commit('currentDraggingCardId', this.id)
       this.$store.commit('currentDragCardStartPosition', utils.cursorPosition(event))
@@ -78,7 +82,6 @@ export default {
       this.$store.commit('viewportIsLocked', true)
       this.startDraggingCard()
     }
-
   }
 }
 </script>
