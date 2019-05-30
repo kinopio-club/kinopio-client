@@ -20,8 +20,6 @@
 </template>
 
 <script>
-import utils from '@/utils.js'
-
 export default {
   computed: {
     isDrawingConnection () {
@@ -33,12 +31,7 @@ export default {
       return this.$store.state.currentConnectionPath
     },
     connections () {
-      let connections = utils.clone(this.$store.state.currentSpace.connections)
-      connections = connections.map(connection => {
-        connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
-        return connection
-      })
-      return connections
+      return this.$store.state.currentSpace.connections
     }
   }
 }

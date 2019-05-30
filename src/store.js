@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import utils from '@/utils.js'
 
 Vue.use(Vuex)
 
@@ -21,9 +22,6 @@ const currentUser = {
       } else { return false }
     }
   }
-  // actions: {
-  // get users in a space from api
-  // },
 }
 
 const currentSpace = {
@@ -63,8 +61,9 @@ const currentSpace = {
       // {
       //   id: 1,
       //   connectionType: 1,
-      //   startCard: 1,
-      //   endCard: 2
+      //   startCardId: 1,
+      //   endCardId: 2,
+      //   path: ''
       // }
     ],
     connectionTypes: [
@@ -86,6 +85,12 @@ const currentSpace = {
           card.x += delta.x
           card.y += delta.y
         }
+      })
+      const connections = state.connections.filter(connection => {
+        return (connection.startCardId === cardId || connection.endCardId === cardId)
+      })
+      connections.forEach(connection => {
+        connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
       })
     }
   },

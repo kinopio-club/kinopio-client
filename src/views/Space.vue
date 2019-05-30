@@ -138,7 +138,8 @@ export default {
       if (currentConnection) {
         let connection = {}
         connection.startCardId = this.$store.state.currentConnectionStart.cardId
-        connection.endCardId = currentConnection.cardId
+        connection.endCardId = parseInt(currentConnection.cardId)
+        connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
         this.$store.commit('currentSpace/addConnection', connection)
         this.$store.dispatch('broadcast/addConnection', connection)
       }
