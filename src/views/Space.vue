@@ -55,6 +55,7 @@ export default {
     dragCard (event) {
       const endPosition = utils.cursorPosition(event)
       this.$store.dispatch('currentSpace/dragCard', endPosition)
+      this.$store.commit('currentDragCardStartPosition', { x: endPosition.x, y: endPosition.y })
     },
 
     drawConnection (event) {

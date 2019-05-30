@@ -81,7 +81,12 @@ const currentSpace = {
       state.connections.push(connection)
     },
     updateCardPosition: (state, { cardId, delta }) => {
-      console.log('💐', cardId, delta)
+      state.cards.map(card => {
+        if (card.id === cardId) {
+          card.x += delta.x
+          card.y += delta.y
+        }
+      })
     }
   },
   actions: {
@@ -90,7 +95,7 @@ const currentSpace = {
       const cardId = rootState.rootState.currentDraggingCardId
       const deltaX = endPosition.x - startPosition.x
       const deltaY = endPosition.y - startPosition.y
-      const delta = { deltaX, deltaY }
+      const delta = { x: deltaX, y: deltaY }
       rootState.commit('updateCardPosition', { cardId, delta })
     }
   }

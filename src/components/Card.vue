@@ -67,7 +67,6 @@ export default {
       this.startConnecting()
     },
     showCardDetailsPop () {
-      console.log('🌸 showCardDetailsPop')
     },
     startDraggingCard () {
       console.log('🌍🌍🌍start drag')
