@@ -73,6 +73,7 @@ export default {
       console.log('🌍🌍🌍start drag')
       this.$store.commit('currentUserIsDraggingCard', true)
       this.$store.commit('currentDraggingCardId', this.id)
+      this.$store.commit('currentDragCardStartPosition', utils.cursorPosition(event))
     },
     startDraggingCardTouch () {
       this.$store.commit('viewportIsLocked', true)

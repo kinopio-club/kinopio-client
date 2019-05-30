@@ -79,6 +79,19 @@ const currentSpace = {
       connection.id = 123 // temp hardcoded, nanoid
       connection.connectionTypeId = 1 // temp hardcoded
       state.connections.push(connection)
+    },
+    updateCardPosition: (state, { cardId, delta }) => {
+      console.log('💐', cardId, delta)
+    }
+  },
+  actions: {
+    dragCard: (rootState, endPosition) => {
+      const startPosition = rootState.rootState.currentDragCardStartPosition
+      const cardId = rootState.rootState.currentDraggingCardId
+      const deltaX = endPosition.x - startPosition.x
+      const deltaY = endPosition.y - startPosition.y
+      const delta = { deltaX, deltaY }
+      rootState.commit('updateCardPosition', { cardId, delta })
     }
   }
 }
@@ -116,6 +129,7 @@ export default new Vuex.Store({
 
     // dragging card
     currentDraggingCardId: '',
+    currentDragCardStartPosition: {},
 
     // app state
     viewportIsLocked: false
@@ -144,6 +158,9 @@ export default new Vuex.Store({
     },
     currentDraggingCardId: (state, value) => {
       state.currentDraggingCardId = value
+    },
+    currentDragCardStartPosition: (state, value) => {
+      state.currentDragCardStartPosition = value
     }
 
   },

@@ -53,9 +53,8 @@ export default {
     },
 
     dragCard (event) {
-      // console.log ('🏃‍♂️ dragging card', event)
-      console.log(utils.cursorPosition(event))
-      console.log('currentDraggingCardId', this.$store.state.currentDraggingCardId)
+      const endPosition = utils.cursorPosition(event)
+      this.$store.dispatch('currentSpace/dragCard', endPosition)
     },
 
     drawConnection (event) {
