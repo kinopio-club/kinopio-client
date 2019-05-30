@@ -53,16 +53,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="stylus">
-.meta-page
-  max-width 600px
-  width 95%
-  margin 8px
-  margin-top 60px
-  position absolute
-  pointer-events none
-  img
-    max-width 100%
-    border-radius: 3px
 form
   padding 8px
   background-color var(--secondary-background)

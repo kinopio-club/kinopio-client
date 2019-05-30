@@ -6,6 +6,7 @@ canvas#painting.painting(
   @touchend="stopPainting"
   @mousemove="paint"
   @touchmove="paint"
+  @click="showNewCardDetailsPop"
   :width="width"
   :height="height"
 )
@@ -61,6 +62,7 @@ export default {
       let color = this.$store.state.currentUser.color
       let circle = { x, y, color, iteration: 0 }
       this.$store.dispatch('broadcast/painting', circle)
+      this.$store.commit('preventPaintingFromClicking', true)
       circles.push(circle)
     },
     exponentialDecay (iteration) {
@@ -89,6 +91,14 @@ export default {
         let circle = JSON.parse(JSON.stringify(item))
         this.paintCircle(circle)
       })
+    },
+    showNewCardDetailsPop () {
+      if (this.$store.state.preventPaintingFromClicking) {
+        this.$store.commit('preventPaintingFromClicking', false)
+        return
+      }
+      // only create new cards if router-view is Space
+      console.log('🌸🌸 showNewCardDetailsPop')
     }
   }
 }

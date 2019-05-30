@@ -35,4 +35,15 @@ body
   color var(--primary)
   background-color var(--primary-background)
 
+.meta-page
+  max-width 600px
+  width 95%
+  margin 8px
+  margin-top 60px
+  position absolute
+  pointer-events none
+  img
+    max-width 100%
+    border-radius: 3px
+
 </style>
