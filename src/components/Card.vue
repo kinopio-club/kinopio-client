@@ -1,5 +1,5 @@
 <template lang="pug">
-.card(
+article.card(
   :style="position"
   :data-card-id="id"
   @mousedown="startDraggingCard"

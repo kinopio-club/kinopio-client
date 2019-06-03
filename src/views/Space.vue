@@ -6,34 +6,43 @@ main.space(
   @touchend="stopInteractions"
   :class="{interacting: isInteracting}"
 )
-  svg.current(v-if="isDrawingConnection")
+  svg.connections
     path(
+      v-if="isDrawingConnection"
       fill="none"
       stroke="#333333"
       stroke-width="3"
       :d="currentConnectionPath"
     )
-  Connections
-  article(v-for="card in cards")
-    Card(
-      :id="card.id"
-      :x="card.x"
-      :y="card.y"
-      :name="card.name"
-    )
+    template(v-for="connection in connections")
+      Connection(
+        :id="connection.id"
+        :connectionType="connection.connectionType"
+        :startCardId="connection.startCardId",
+        :endCardId="connection.endCardId",
+        :path="connection.path"
+      )
+  .cards
+    template(v-for="card in cards")
+      Card(
+        :id="card.id"
+        :x="card.x"
+        :y="card.y"
+        :name="card.name"
+      )
   Footer
 </template>
 
 <script>
 import utils from '@/utils.js'
-import Connections from '@/components/Connections.vue'
+import Connection from '@/components/Connection.vue'
 import Card from '@/components/Card.vue'
 import Footer from '@/components/Footer.vue'
 
 export default {
   components: {
-    Connections,
     Card,
+    Connection,
     Footer
   },
   computed: {
@@ -54,8 +63,10 @@ export default {
     },
     currentConnectionPath () {
       return this.$store.state.currentConnectionPath
+    },
+    connections () {
+      return this.$store.state.currentSpace.connections
     }
-
   },
 
   methods: {
