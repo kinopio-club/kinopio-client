@@ -1,5 +1,7 @@
 <template lang='pug'>
-.app
+#app.app(
+  :style="elementSize"
+)
   MagicInk
   router-view
   Header
@@ -14,7 +16,32 @@ export default {
     Header,
     MagicInk
   },
+  data () {
+    return {
+      width: 0,
+      height: 0
+    }
+  },
+  mounted () {
+    this.updateAppElementSize()
+    window.addEventListener('resize', this.updateAppElementSize)
+    window.addEventListener('scroll', this.updateAppElementSize)
+  },
+  computed: {
+    elementSize () {
+      return {
+        width: `${this.width}px`,
+        height: `${this.height}px`
+      }
+    }
+  },
   methods: {
+    updateAppElementSize () {
+      const body = document.body
+      const html = document.documentElement
+      this.width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
+      this.height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
+    }
   }
 }
 </script>
@@ -34,6 +61,9 @@ body
   margin 0
   color var(--primary)
   background-color var(--primary-background)
+
+.app
+  position relative
 
 .meta-page
   max-width 600px
