@@ -111,8 +111,8 @@ export default {
     getCurrentConnection (event) {
       const cursor = utils.cursorPosition(event)
       const currentConnection = this.connectors().find(connector => {
-        const inXRange = utils.between(cursor.x, connector.x, connector.x + connector.width)
-        const inYRange = utils.between(cursor.y, connector.y, connector.y + connector.height)
+        const inXRange = utils.between(cursor.x, connector.x, (connector.x + connector.width))
+        const inYRange = utils.between(cursor.y, connector.y, (connector.y + connector.height))
         const isNewConnection = this.isNewConnection(connector)
         return inXRange && inYRange && isNewConnection
       })

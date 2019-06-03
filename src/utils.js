@@ -2,11 +2,11 @@ export default {
   cursorPosition (event) {
     let x, y
     if (event.touches) {
-      x = event.touches[0].pageX
-      y = event.touches[0].pageY
+      x = event.touches[0].clientX
+      y = event.touches[0].clientY
     } else {
-      x = event.pageX
-      y = event.pageY
+      x = event.clientX
+      y = event.clientY
     }
     return { x, y }
   },
