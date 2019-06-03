@@ -63,7 +63,6 @@ export default {
       this.$store.commit('currentConnectionStart', start)
     },
     startConnectingTouch () {
-      this.$store.commit('scrollOnViewportEdges', true)
       this.startConnecting()
     },
     startDraggingCard () {
@@ -72,7 +71,6 @@ export default {
       this.$store.commit('currentDragCardStartPosition', utils.cursorPosition(event))
     },
     startDraggingCardTouch () {
-      this.$store.commit('scrollOnViewportEdges', true)
       this.startDraggingCard()
     },
     showCardDetailsPop () {

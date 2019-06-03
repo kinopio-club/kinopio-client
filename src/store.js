@@ -127,12 +127,10 @@ const broadcast = {
 export default new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production',
   state: {
-    // app state
-    scrollOnViewportEdges: false,
-
     // current user state
     currentUserIsDrawingConnection: false,
     currentUserIsInking: false,
+    currentUserIsInkingLocked: false,
     currentUserIsDraggingCard: false,
 
     // drawing connections
@@ -158,9 +156,6 @@ export default new Vuex.Store({
     currentConnectionPath: (state, value) => {
       state.currentConnectionPath = value
     },
-    scrollOnViewportEdges: (state, value) => {
-      state.scrollOnViewportEdges = value
-    },
     currentConnection: (state, value) => {
       state.currentConnection = value
     },
@@ -175,8 +170,10 @@ export default new Vuex.Store({
     },
     preventDraggedCardFromClicking: (state, value) => {
       state.preventDraggedCardFromClicking = value
+    },
+    currentUserIsInkingLocked: (state, value) => {
+      state.currentUserIsInkingLocked = value
     }
-
   },
   modules: {
     currentUser,

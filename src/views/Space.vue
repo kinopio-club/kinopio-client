@@ -93,7 +93,6 @@ export default {
     },
 
     drawConnection (event) {
-      console.log('draw connection')
       const start = utils.elementCenter(this.$store.state.currentConnectionStart)
       const current = utils.cursorPosition(event)
       const path = utils.connectionPathBetweenCoords(start, current)
@@ -159,7 +158,7 @@ export default {
         this.createConnection()
       }
       this.$store.commit('currentUserIsDrawingConnection', false)
-      this.$store.commit('scrollOnViewportEdges', false)
+      this.$store.commit('currentUserIsInkingLocked', false)
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.commit('currentConnectionPath', undefined)
       this.$store.commit('currentConnection', undefined)

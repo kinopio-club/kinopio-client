@@ -1,6 +1,8 @@
 <template lang='pug'>
 #app.app(
   :style="elementSize"
+  @mousemove="lockViewport"
+  @touchmove="lockViewport"
 )
   MagicInk
   router-view
@@ -41,7 +43,26 @@ export default {
       const html = document.documentElement
       this.width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
       this.height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
+    },
+    shouldOnlyScrollAtEdges () {
+      if (
+        this.$store.state.currentUserIsDrawingConnection ||
+        this.$store.state.currentUserIsInkingLocked ||
+        this.$store.state.currentUserIsDraggingCard
+      ) {
+        return true
+      } else { return false }
+    },
+    lockViewport (event) {
+      if (this.shouldOnlyScrollAtEdges()) {
+        event.preventDefault()
+      }
     }
+    // scrollAtEdges(event) {
+    //   console.log('scrollAtEdges', event)
+    //   // eval every 15ms
+    // }
+
   }
 }
 </script>
