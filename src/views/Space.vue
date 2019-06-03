@@ -4,7 +4,7 @@ main.space(
   @touchmove="interact"
   @mouseup="stopInteractions"
   @touchend="stopInteractions"
-  :class="{interacting: isInteracting}"
+  :class="{'is-interacting': isInteracting, 'is-inking': isInking}"
 )
   svg.connections
     path(
@@ -49,6 +49,13 @@ export default {
     cards () {
       return this.$store.state.currentSpace.cards
     },
+    isInking () {
+      const currentUserIsInking = this.$store.state.currentUserIsInking
+      if (currentUserIsInking) {
+        return true
+      } else { return false }
+    },
+
     isInteracting () {
       const draggingCard = this.$store.state.currentUserIsDraggingCard
       const drawingConnection = this.$store.state.currentUserIsDrawingConnection
@@ -68,7 +75,6 @@ export default {
       return this.$store.state.currentSpace.connections
     }
   },
-
   methods: {
     interact (event) {
       if (this.$store.state.currentUserIsDraggingCard) {
@@ -83,8 +89,6 @@ export default {
       const endPosition = utils.cursorPosition(event)
       this.$store.dispatch('currentSpace/dragCard', endPosition)
       this.$store.commit('preventDraggedCardFromClicking', true)
-      // ?create offset based on scrollto position
-
       this.$store.commit('currentDragCardStartPosition', { x: endPosition.x, y: endPosition.y })
     },
 
@@ -172,9 +176,11 @@ export default {
   pointer-events none // so that inking can receive events
   width 100%
   height 100%
-.interacting
+.is-interacting
   pointer-events all
-// TODO space not-interactable !important if inking
+.is-inking
+  *
+    pointer-events: none !important
 
 svg
   position absolute

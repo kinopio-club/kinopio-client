@@ -62,7 +62,6 @@ export default {
       let color = this.$store.state.currentUser.color
       let circle = { x, y, color, iteration: 0 }
       this.$store.dispatch('broadcast/inking', circle)
-      this.$store.commit('preventInkingFromClicking', true)
       circles.push(circle)
     },
     exponentialDecay (iteration) {
@@ -93,8 +92,8 @@ export default {
       })
     },
     showNewCardDetailsPop () {
-      if (this.$store.state.preventInkingFromClicking) {
-        this.$store.commit('preventInkingFromClicking', false)
+      if (this.$store.state.currentUserIsInking) {
+        this.$store.commit('currentUserIsInking', false)
         return
       }
       // only create new cards if router-view is Space

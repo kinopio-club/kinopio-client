@@ -127,7 +127,10 @@ const broadcast = {
 export default new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production',
   state: {
-    // user state
+    // app state
+    scrollOnViewportEdges: false,
+
+    // current user state
     currentUserIsDrawingConnection: false,
     currentUserIsInking: false,
     currentUserIsDraggingCard: false,
@@ -140,13 +143,7 @@ export default new Vuex.Store({
     // dragging card
     currentDraggingCardId: undefined, // ''
     currentDragCardStartPosition: undefined, // {}
-    preventDraggedCardFromClicking: false,
-
-    // inking
-    preventInkingFromClicking: false,
-
-    // app state
-    scrollOnViewportEdges: false
+    preventDraggedCardFromClicking: false
   },
   mutations: {
     currentUserIsDrawingConnection: (state, value) => {
@@ -178,9 +175,6 @@ export default new Vuex.Store({
     },
     preventDraggedCardFromClicking: (state, value) => {
       state.preventDraggedCardFromClicking = value
-    },
-    preventInkingFromClicking: (state, value) => {
-      state.preventInkingFromClicking = value
     }
 
   },
