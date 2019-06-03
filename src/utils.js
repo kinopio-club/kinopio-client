@@ -17,7 +17,7 @@ export default {
     return { x, y }
   },
 
-  between (value, min, max) {
+  between ({ value, min, max }) {
     if (min <= value && value <= max) { return true }
   },
 
