@@ -52,7 +52,7 @@ const currentSpace = {
       },
       {
         id: 3,
-        x: 400,
+        x: 500,
         y: 150,
         name: 'click and drag me'
       }
@@ -146,7 +146,7 @@ export default new Vuex.Store({
     preventPaintingFromClicking: false,
 
     // app state
-    viewportIsLocked: false
+    scrollOnViewportEdges: false
   },
   mutations: {
     currentUserIsDrawingConnection: (state, value) => {
@@ -161,8 +161,8 @@ export default new Vuex.Store({
     currentConnectionPath: (state, value) => {
       state.currentConnectionPath = value
     },
-    viewportIsLocked: (state, value) => {
-      state.viewportIsLocked = value
+    scrollOnViewportEdges: (state, value) => {
+      state.scrollOnViewportEdges = value
     },
     currentConnection: (state, value) => {
       state.currentConnection = value

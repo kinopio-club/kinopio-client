@@ -34,6 +34,12 @@ export default {
     return this.elementCenter(rect)
   },
 
+  coordsWithCurrentScrollOffset ({ x, y }) {
+    const offsetX = x + window.scrollX
+    const offsetY = y + window.scrollY
+    return { x: offsetX, y: offsetY }
+  },
+
   connectionBetweenCards (startId, endId) {
     let start = this.connectorCoords(startId)
     let end = this.connectorCoords(endId)
@@ -46,12 +52,16 @@ export default {
   },
 
   connectionPathBetweenCoords (start, end) {
+    // console.log(start, this.coordsWithCurrentScrollOffset(start))
+    const offsetStart = this.coordsWithCurrentScrollOffset(start)
+    const offsetEnd = this.coordsWithCurrentScrollOffset(end)
+
     const delta = {
-      x: end.x - start.x,
-      y: end.y - start.y
+      x: (offsetEnd.x - offsetStart.x),
+      y: (offsetEnd.y - offsetStart.y)
     }
-    let curve = this.curveControlPoint(start, delta)
-    return `m${start.x},${start.y} ${curve} ${delta.x},${delta.y}`
+    let curve = this.curveControlPoint(offsetStart, delta)
+    return `m${offsetStart.x},${offsetStart.y} ${curve} ${delta.x},${delta.y}`
   }
 
 }

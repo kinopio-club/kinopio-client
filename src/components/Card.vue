@@ -60,18 +60,12 @@ export default {
       this.$store.commit('currentUserIsDrawingConnection', true)
       let start = utils.clone(event.srcElement.getBoundingClientRect())
       start.cardId = this.id
+      console.log(start)
       this.$store.commit('currentConnectionStart', start)
     },
     startConnectingTouch () {
-      this.$store.commit('viewportIsLocked', true)
+      this.$store.commit('scrollOnViewportEdges', true)
       this.startConnecting()
-    },
-    showCardDetailsPop () {
-      if (this.$store.state.preventDraggedCardFromClicking) {
-        this.$store.commit('preventDraggedCardFromClicking', false)
-        return
-      }
-      console.log('🌸 showCardDetailsPop')
     },
     startDraggingCard () {
       this.$store.commit('currentUserIsDraggingCard', true)
@@ -79,8 +73,15 @@ export default {
       this.$store.commit('currentDragCardStartPosition', utils.cursorPosition(event))
     },
     startDraggingCardTouch () {
-      this.$store.commit('viewportIsLocked', true)
+      this.$store.commit('scrollOnViewportEdges', true)
       this.startDraggingCard()
+    },
+    showCardDetailsPop () {
+      if (this.$store.state.preventDraggedCardFromClicking) {
+        this.$store.commit('preventDraggedCardFromClicking', false)
+        return
+      }
+      console.log('🌸 showCardDetailsPop')
     }
   }
 }

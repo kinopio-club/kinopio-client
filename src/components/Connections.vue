@@ -38,6 +38,15 @@ export default {
 </script>
 
 <style lang="stylus">
+// .connections
+//   background-color: pink
+//   position: relative
+// .space
+//   background yellow
+// .app
+//   background grey
+// .painting
+//   background-color cyan
 svg
   position absolute
   top 0

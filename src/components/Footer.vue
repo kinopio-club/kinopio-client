@@ -1,14 +1,15 @@
 <template lang="pug">
 footer
-  span(v-if="viewportIsLocked")= "Locked "
+  span(v-if="scrollOnViewportEdges")= "Locked "
+  span Prototype
 </template>
 
 <script>
 export default {
   name: 'Footer',
   computed: {
-    viewportIsLocked () {
-      return this.$store.state.viewportIsLocked
+    scrollOnViewportEdges () {
+      return this.$store.state.scrollOnViewportEdges
     }
   }
 }

@@ -56,6 +56,8 @@ export default {
       const endPosition = utils.cursorPosition(event)
       this.$store.dispatch('currentSpace/dragCard', endPosition)
       this.$store.commit('preventDraggedCardFromClicking', true)
+      // ?create offset based on scrollto position
+
       this.$store.commit('currentDragCardStartPosition', { x: endPosition.x, y: endPosition.y })
     },
 
@@ -127,7 +129,7 @@ export default {
         this.createConnection()
       }
       this.$store.commit('currentUserIsDrawingConnection', false)
-      this.$store.commit('viewportIsLocked', false)
+      this.$store.commit('scrollOnViewportEdges', false)
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.commit('currentConnectionPath', undefined)
       this.$store.commit('currentConnection', undefined)
