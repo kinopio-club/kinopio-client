@@ -1,10 +1,11 @@
 <template lang="pug">
-main.space(
+main#space.space(
   @mousemove="interact"
   @touchmove="interact"
   @mouseup="stopInteractions"
   @touchend="stopInteractions"
   :class="{interacting: isInteracting}"
+  :style="elementSize"
 )
   Connections
   article(v-for="card in cards")
@@ -29,6 +30,21 @@ export default {
     Card,
     Footer
   },
+  data () {
+    return {
+      spaceElement: undefined,
+      width: 0,
+      height: 0
+    }
+  },
+  mounted () {
+    console.log('i am app')
+    this.appElement = document.getElementById('app')
+    this.updateSpaceElementSize()
+    window.addEventListener('resize', this.updateSpaceElementSize)
+    window.addEventListener('scroll', this.updateSpaceElementSize)
+  },
+
   computed: {
     cards () {
       return this.$store.state.currentSpace.cards
@@ -39,10 +55,23 @@ export default {
       if (draggingCard || drawingConnection) {
         return true
       } else { return false }
+    },
+    elementSize () {
+      return {
+        width: `${this.width}px`,
+        height: `${this.height}px`
+      }
     }
   },
 
   methods: {
+    updateSpaceElementSize () {
+      const body = document.body
+      const html = document.documentElement
+      this.width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
+      this.height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
+    },
+
     interact (event) {
       if (this.$store.state.currentUserIsDraggingCard) {
         this.dragCard(event)
@@ -142,10 +171,6 @@ export default {
 <style lang="stylus">
 .space
   position absolute
-  top 0
-  left 0
-  width: 100%
-  height: 100%
   pointer-events none // so that inking can receive events
 .interacting
   pointer-events all
