@@ -133,13 +133,13 @@ export default new Vuex.Store({
     currentUserIsDraggingCard: false,
 
     // drawing connections
-    currentConnectionStart: {},
-    currentConnectionPath: '',
-    currentConnection: {},
+    currentConnectionStart: undefined, // {}
+    currentConnectionPath: undefined, // ''
+    currentConnection: undefined, // {}
 
     // dragging card
-    currentDraggingCardId: '',
-    currentDragCardStartPosition: {},
+    currentDraggingCardId: undefined, // ''
+    currentDragCardStartPosition: undefined, // {}
     preventDraggedCardFromClicking: false,
 
     // painting

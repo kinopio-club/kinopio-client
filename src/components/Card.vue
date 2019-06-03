@@ -60,7 +60,6 @@ export default {
       this.$store.commit('currentUserIsDrawingConnection', true)
       let start = utils.clone(event.srcElement.getBoundingClientRect())
       start.cardId = this.id
-      console.log(start)
       this.$store.commit('currentConnectionStart', start)
     },
     startConnectingTouch () {

@@ -123,18 +123,6 @@ export default {
       }
     },
 
-    stopInteractions () {
-      console.log('💣 stopInteractions')
-      if (this.$store.state.currentUserIsDrawingConnection) {
-        this.createConnection()
-      }
-      this.$store.commit('currentUserIsDrawingConnection', false)
-      this.$store.commit('scrollOnViewportEdges', false)
-      this.$store.commit('currentUserIsDraggingCard', false)
-      this.$store.commit('currentConnectionPath', undefined)
-      this.$store.commit('currentConnection', undefined)
-    },
-
     createConnection () {
       const currentConnection = this.$store.state.currentConnection
       if (currentConnection) {
@@ -145,7 +133,20 @@ export default {
         this.$store.commit('currentSpace/addConnection', connection)
         this.$store.dispatch('broadcast/addConnection', connection)
       }
+    },
+
+    stopInteractions () {
+      console.log('💣 stopInteractions')
+      if (this.$store.state.currentUserIsDrawingConnection) {
+        this.createConnection()
+      }
+      this.$store.commit('currentUserIsDrawingConnection', false)
+      this.$store.commit('scrollOnViewportEdges', false)
+      this.$store.commit('currentUserIsDraggingCard', false)
+      this.$store.commit('currentConnectionPath', undefined)
+      this.$store.commit('currentConnection', undefined)
     }
+
   }
 
 }
