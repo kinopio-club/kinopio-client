@@ -1,18 +1,18 @@
 <template lang='pug'>
 .app
-  MagicPaint
+  MagicInk
   router-view
   Header
 </template>
 
 <script>
 import Header from '@/components/Header.vue'
-import MagicPaint from '@/components/MagicPaint.vue'
+import MagicInk from '@/components/MagicInk.vue'
 
 export default {
   components: {
     Header,
-    MagicPaint
+    MagicInk
   },
   methods: {
   }

@@ -112,8 +112,8 @@ const broadcast = {
     isBroadcasting: false
   },
   actions: {
-    painting (context, circle) {
-      // console.log('broadcast painting', circle)
+    inking (context, circle) {
+      // console.log('broadcast inking', circle)
     },
     connectingPaths (context, connectionPath) {
       // console.log('broadcast drawing connection path', connectionPath)
@@ -129,7 +129,7 @@ export default new Vuex.Store({
   state: {
     // user state
     currentUserIsDrawingConnection: false,
-    currentUserIsPainting: false,
+    currentUserIsInking: false,
     currentUserIsDraggingCard: false,
 
     // drawing connections
@@ -142,8 +142,8 @@ export default new Vuex.Store({
     currentDragCardStartPosition: undefined, // {}
     preventDraggedCardFromClicking: false,
 
-    // painting
-    preventPaintingFromClicking: false,
+    // inking
+    preventInkingFromClicking: false,
 
     // app state
     scrollOnViewportEdges: false
@@ -152,8 +152,8 @@ export default new Vuex.Store({
     currentUserIsDrawingConnection: (state, value) => {
       state.currentUserIsDrawingConnection = value
     },
-    currentUserIsPainting: (state, value) => {
-      state.currentUserIsPainting = value
+    currentUserIsInking: (state, value) => {
+      state.currentUserIsInking = value
     },
     currentConnectionStart: (state, value) => {
       state.currentConnectionStart = value
@@ -179,8 +179,8 @@ export default new Vuex.Store({
     preventDraggedCardFromClicking: (state, value) => {
       state.preventDraggedCardFromClicking = value
     },
-    preventPaintingFromClicking: (state, value) => {
-      state.preventPaintingFromClicking = value
+    preventInkingFromClicking: (state, value) => {
+      state.preventInkingFromClicking = value
     }
 
   },

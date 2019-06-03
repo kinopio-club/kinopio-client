@@ -159,8 +159,8 @@ export default {
   left 0
   width: 100%
   height: 100%
-  pointer-events none // so that painting can receive events
+  pointer-events none // so that inking can receive events
 .interacting
   pointer-events all
-// TODO space not-interactable !important if painting
+// TODO space not-interactable !important if inking
 </style>

@@ -1,11 +1,11 @@
 <template lang="pug">
-canvas#painting.painting(
-  @mousedown="startPainting"
-  @touchstart="startPainting"
-  @mouseup="stopPainting"
-  @touchend="stopPainting"
-  @mousemove="paint"
-  @touchmove="paint"
+canvas#inking.inking(
+  @mousedown="startinking"
+  @touchstart="startinking"
+  @mouseup="stopinking"
+  @touchend="stopinking"
+  @mousemove="ink"
+  @touchmove="ink"
   @click="showNewCardDetailsPop"
   :width="width"
   :height="height"
@@ -14,7 +14,7 @@ canvas#painting.painting(
 
 <script>
 const circleSize = 20
-const maxIterationsToPaint = 200 // higher is longer paint fade time
+const maxIterationsToInk = 200 // higher is longer ink fade time
 const rateOfIterationDecay = 0.03 // lower is slower decay
 let circles = []
 
@@ -28,13 +28,13 @@ export default {
     }
   },
   mounted () {
-    this.canvas = document.getElementById('painting')
+    this.canvas = document.getElementById('inking')
     this.context = this.canvas.getContext('2d')
     this.context.scale(window.devicePixelRatio, window.devicePixelRatio)
     this.updateCanvasSize()
     window.addEventListener('resize', this.updateCanvasSize)
     window.addEventListener('scroll', this.updateCanvasSize)
-    setInterval(this.paintCirclesPerFrame, 16) // 16ms ~= 60fps
+    setInterval(this.inkCirclesPerFrame, 16) // 16ms ~= 60fps
   },
   methods: {
     updateCanvasSize () {
@@ -43,14 +43,14 @@ export default {
       this.width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
       this.height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
     },
-    startPainting (event) {
-      this.$store.commit('currentUserIsPainting', true)
+    startinking (event) {
+      this.$store.commit('currentUserIsInking', true)
     },
-    stopPainting () {
-      this.$store.commit('currentUserIsPainting', false)
+    stopinking () {
+      this.$store.commit('currentUserIsInking', false)
     },
-    paint (event) {
-      if (!this.$store.state.currentUserIsPainting) { return }
+    ink (event) {
+      if (!this.$store.state.currentUserIsInking) { return }
       let x, y
       if (event.touches) {
         x = event.touches[0].pageX
@@ -61,14 +61,14 @@ export default {
       }
       let color = this.$store.state.currentUser.color
       let circle = { x, y, color, iteration: 0 }
-      this.$store.dispatch('broadcast/painting', circle)
-      this.$store.commit('preventPaintingFromClicking', true)
+      this.$store.dispatch('broadcast/inking', circle)
+      this.$store.commit('preventInkingFromClicking', true)
       circles.push(circle)
     },
     exponentialDecay (iteration) {
       return Math.exp(-(rateOfIterationDecay * iteration))
     },
-    paintCircle (circle) {
+    inkCircle (circle) {
       const { x, y, color, iteration } = circle
       this.context.beginPath()
       this.context.arc(x, y, circleSize, 0, 2 * Math.PI)
@@ -78,23 +78,23 @@ export default {
       this.context.fill()
     },
     filterCircles () {
-      circles = circles.filter(circle => circle.iteration < maxIterationsToPaint)
+      circles = circles.filter(circle => circle.iteration < maxIterationsToInk)
     },
     clearCanvas () {
       this.context.clearRect(0, 0, this.width, this.height)
     },
-    paintCirclesPerFrame () {
+    inkCirclesPerFrame () {
       this.filterCircles()
       this.clearCanvas()
       circles.forEach(item => {
         item.iteration++
         let circle = JSON.parse(JSON.stringify(item))
-        this.paintCircle(circle)
+        this.inkCircle(circle)
       })
     },
     showNewCardDetailsPop () {
-      if (this.$store.state.preventPaintingFromClicking) {
-        this.$store.commit('preventPaintingFromClicking', false)
+      if (this.$store.state.preventInkingFromClicking) {
+        this.$store.commit('preventInkingFromClicking', false)
         return
       }
       // only create new cards if router-view is Space
@@ -105,7 +105,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.painting
+.inking
   position absolute
   top 0
 </style>
