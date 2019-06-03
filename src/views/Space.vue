@@ -6,6 +6,13 @@ main.space(
   @touchend="stopInteractions"
   :class="{interacting: isInteracting}"
 )
+  svg.current(v-if="isDrawingConnection")
+    path(
+      fill="none"
+      stroke="#333333"
+      stroke-width="3"
+      :d="currentConnectionPath"
+    )
   Connections
   article(v-for="card in cards")
     Card(
@@ -39,7 +46,16 @@ export default {
       if (draggingCard || drawingConnection) {
         return true
       } else { return false }
+    },
+    isDrawingConnection () {
+      if (this.$store.state.currentUserIsDrawingConnection) {
+        return true
+      } else { return false }
+    },
+    currentConnectionPath () {
+      return this.$store.state.currentConnectionPath
     }
+
   },
 
   methods: {
@@ -148,4 +164,17 @@ export default {
 .interacting
   pointer-events all
 // TODO space not-interactable !important if inking
+
+svg
+  position absolute
+  top 0
+  left 0
+  width 100%
+  height 100vh
+svg.current
+  z-index: 1
+path
+  pointer-events all
+  cursor pointer
+
 </style>

@@ -65,6 +65,7 @@ body
 .app
   position relative
 
+//
 .meta-page
   max-width 600px
   width 95%
