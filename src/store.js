@@ -133,9 +133,9 @@ export default new Vuex.Store({
     currentUserIsInkingLocked: false,
     currentUserIsDraggingCard: false,
 
-    // drawing connections
-    currentConnectionStart: undefined, // {}
-    currentConnectionPath: undefined, // ''
+    // current connection
+    currentConnectionStart: undefined, // {} // redundant? if use a setter to update the currentConnectionObject
+    currentConnectionPath: undefined, // '' // redundant
     currentConnection: undefined, // {}
 
     // dragging card

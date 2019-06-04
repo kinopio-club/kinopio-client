@@ -21,24 +21,28 @@ export default {
   data () {
     return {
       width: 0,
-      height: 0
+      height: 0,
+      overflow: 'visible'
     }
   },
   mounted () {
     this.updateAppElementSize()
     window.addEventListener('resize', this.updateAppElementSize)
     window.addEventListener('scroll', this.updateAppElementSize)
+    setInterval(this.scrollAtEdges, 16) // 16ms ~= 60fps
   },
   computed: {
     elementSize () {
       return {
         width: `${this.width}px`,
-        height: `${this.height}px`
+        height: `${this.height}px`,
+        overflow: `${this.overflow}`
       }
     }
   },
   methods: {
     updateAppElementSize () {
+      console.log('updateAppElementSize')
       const body = document.body
       const html = document.documentElement
       this.width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
@@ -57,11 +61,15 @@ export default {
       if (this.shouldOnlyScrollAtEdges()) {
         event.preventDefault()
       }
+    },
+    scrollAtEdges (event) {
+      if (this.shouldOnlyScrollAtEdges()) {
+        console.log('scrollAtEdges')
+        // is at edges?
+        // do scroll:
+        window.scrollBy(500, 500) // not working unless overflow auto
+      }
     }
-    // scrollAtEdges(event) {
-    //   console.log('scrollAtEdges', event)
-    //   // eval every 15ms
-    // }
 
   }
 }
@@ -83,6 +91,7 @@ body
   color var(--primary)
   background-color var(--primary-background)
   background-image url('assets/background.svg')
+  overflow auto // enables window.scrollBy support
 
 .app
   position relative
