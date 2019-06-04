@@ -29,8 +29,8 @@ export default {
 
   // connection path utils
 
-  connectorCoords (cardId) {
-    let rect = document.querySelector(`.connector[data-card-id="${cardId}"]`).getBoundingClientRect()
+  connectorCoords (blockId) {
+    let rect = document.querySelector(`.connector[data-block-id="${blockId}"]`).getBoundingClientRect()
     return this.elementCenter(rect)
   },
 
@@ -40,7 +40,7 @@ export default {
     return { x: offsetX, y: offsetY }
   },
 
-  connectionBetweenCards (startId, endId) {
+  connectionBetweenBlocks (startId, endId) {
     let start = this.connectorCoords(startId)
     let end = this.connectorCoords(endId)
     return this.connectionPathBetweenCoords(start, end)

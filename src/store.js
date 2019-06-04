@@ -37,7 +37,7 @@ const currentSpace = {
         color: 'pink'
       }
     ],
-    cards: [
+    blocks: [
       {
         id: '1',
         x: 80,
@@ -61,8 +61,8 @@ const currentSpace = {
       // {
       //   id: '1',
       //   connectionType: '1',
-      //   startCardId: '1',
-      //   endCardId: '2',
+      //   startBlockId: '1',
+      //   endBlockId: '2',
       //   path: ''
       // }
     ],
@@ -79,29 +79,29 @@ const currentSpace = {
       connection.connectionTypeId = '1' // temp hardcoded
       state.connections.push(connection)
     },
-    updateCardPosition: (state, { cardId, delta }) => {
-      state.cards.map(card => {
-        if (card.id === cardId) {
-          card.x += delta.x
-          card.y += delta.y
+    updateBlockPosition: (state, { blockId, delta }) => {
+      state.blocks.map(block => {
+        if (block.id === blockId) {
+          block.x += delta.x
+          block.y += delta.y
         }
       })
       const connections = state.connections.filter(connection => {
-        return (connection.startCardId === cardId || connection.endCardId === cardId)
+        return (connection.startBlockId === blockId || connection.endBlockId === blockId)
       })
       connections.forEach(connection => {
-        connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
+        connection.path = utils.connectionBetweenBlocks(connection.startBlockId, connection.endBlockId)
       })
     }
   },
   actions: {
-    dragCard: (rootState, endPosition) => {
-      const startPosition = rootState.rootState.currentDragCardStartPosition
-      const cardId = rootState.rootState.currentDraggingCardId
+    dragBlock: (rootState, endPosition) => {
+      const startPosition = rootState.rootState.currentDragBlockStartPosition
+      const blockId = rootState.rootState.currentDraggingBlockId
       const deltaX = endPosition.x - startPosition.x
       const deltaY = endPosition.y - startPosition.y
       const delta = { x: deltaX, y: deltaY }
-      rootState.commit('updateCardPosition', { cardId, delta })
+      rootState.commit('updateBlockPosition', { blockId, delta })
     }
   }
 }
@@ -131,17 +131,17 @@ export default new Vuex.Store({
     currentUserIsDrawingConnection: false,
     currentUserIsInking: false,
     currentUserIsInkingLocked: false,
-    currentUserIsDraggingCard: false,
+    currentUserIsDraggingBlock: false,
 
     // current connection
     currentConnectionStart: undefined, // {} // redundant? if use a setter to update the currentConnectionObject
     currentConnectionPath: undefined, // '' // redundant
     currentConnection: undefined, // {}
 
-    // dragging card
-    currentDraggingCardId: undefined, // ''
-    currentDragCardStartPosition: undefined, // {}
-    preventDraggedCardFromClicking: false
+    // dragging block
+    currentDraggingBlockId: undefined, // ''
+    currentDragBlockStartPosition: undefined, // {}
+    preventDraggedBlockFromClicking: false
   },
   mutations: {
     currentUserIsDrawingConnection: (state, value) => {
@@ -159,17 +159,17 @@ export default new Vuex.Store({
     currentConnection: (state, value) => {
       state.currentConnection = value
     },
-    currentUserIsDraggingCard: (state, value) => {
-      state.currentUserIsDraggingCard = value
+    currentUserIsDraggingBlock: (state, value) => {
+      state.currentUserIsDraggingBlock = value
     },
-    currentDraggingCardId: (state, value) => {
-      state.currentDraggingCardId = value
+    currentDraggingBlockId: (state, value) => {
+      state.currentDraggingBlockId = value
     },
-    currentDragCardStartPosition: (state, value) => {
-      state.currentDragCardStartPosition = value
+    currentDragBlockStartPosition: (state, value) => {
+      state.currentDragBlockStartPosition = value
     },
-    preventDraggedCardFromClicking: (state, value) => {
-      state.preventDraggedCardFromClicking = value
+    preventDraggedBlockFromClicking: (state, value) => {
+      state.preventDraggedBlockFromClicking = value
     },
     currentUserIsInkingLocked: (state, value) => {
       state.currentUserIsInkingLocked = value

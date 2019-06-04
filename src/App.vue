@@ -15,6 +15,11 @@ import Header from '@/components/Header.vue'
 import MagicInk from '@/components/MagicInk.vue'
 
 let _event
+// const edgeScrollPxPerSecond = {
+//   close: 10,
+//   closer: 20,
+//   closest: 30
+// }
 
 export default {
   components: {
@@ -55,7 +60,7 @@ export default {
       if (
         this.$store.state.currentUserIsDrawingConnection ||
         this.$store.state.currentUserIsInkingLocked ||
-        this.$store.state.currentUserIsDraggingCard
+        this.$store.state.currentUserIsDraggingBlock
       ) {
         return true
       } else { return false }
@@ -72,7 +77,7 @@ export default {
         console.log('scrollAtEdges', x)
         // is at edges?
         // do scroll:
-        window.scrollBy(500, 500) // not working unless overflow auto
+        // window.scrollBy(500, 500) // not working unless overflow auto
       }
     }
 

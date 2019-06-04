@@ -3,8 +3,8 @@ path(
   fill="none"
   stroke="#333333"
   stroke-width="3"
-  :data-start-card="startCardId"
-  :data-end-card="endCardId"
+  :data-start-block="startBlockId"
+  :data-end-block="endBlockId"
   :d="path"
   @click="showConnectionDetailsPop"
 )
@@ -15,8 +15,8 @@ export default {
   props: {
     id: String,
     connectionType: String,
-    startCardId: String,
-    endCardId: String,
+    startBlockId: String,
+    endBlockId: String,
     path: String
   },
   methods: {

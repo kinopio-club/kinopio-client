@@ -6,7 +6,7 @@ canvas#inking.inking(
   @touchend="stopinking"
   @mousemove="ink"
   @touchmove="ink"
-  @click="showNewCardDetailsPop"
+  @click="showNewBlockDetailsPop"
   :width="width"
   :height="height"
 )
@@ -91,13 +91,13 @@ export default {
         this.inkCircle(circle)
       })
     },
-    showNewCardDetailsPop () {
+    showNewBlockDetailsPop () {
       if (this.$store.state.currentUserIsInking) {
         this.$store.commit('currentUserIsInking', false)
         return
       }
-      // only create new cards if router-view is Space
-      console.log('🌸🌸 showNewCardDetailsPop')
+      // only create new blocks if router-view is Space
+      console.log('🌸🌸 showNewBlockDetailsPop')
     }
   }
 }

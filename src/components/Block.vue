@@ -1,17 +1,17 @@
 <template lang="pug">
-article.card(
+article.block(
   :style="position"
-  :data-card-id="id"
-  @mousedown="startDraggingCard"
-  @touchstart="startDraggingCardTouch"
-  @click="showCardDetailsPop"
+  :data-block-id="id"
+  @mousedown="startDraggingBlock"
+  @touchstart="startDraggingBlockTouch"
+  @click="showBlockDetailsPop"
 )
   p {{name}}
   .connector(
     :style="testcolor"
     @mousedown.stop="startConnecting"
     @touchstart.stop="startConnectingTouch"
-    :data-card-id="id"
+    :data-block-id="id"
     :class="{ active: isActive }"
   ) O
 </template>
@@ -48,7 +48,7 @@ export default {
     isActive () {
       const currentConnection = this.$store.state.currentConnection
       if (currentConnection) {
-        return parseInt(currentConnection.cardId) === this.id
+        return parseInt(currentConnection.blockId) === this.id
       } else {
         return undefined
       }
@@ -59,33 +59,33 @@ export default {
       console.log('🚒startConnecting')
       this.$store.commit('currentUserIsDrawingConnection', true)
       let start = utils.clone(event.srcElement.getBoundingClientRect())
-      start.cardId = this.id
+      start.blockId = this.id
       this.$store.commit('currentConnectionStart', start)
     },
     startConnectingTouch () {
       this.startConnecting()
     },
-    startDraggingCard () {
-      this.$store.commit('currentUserIsDraggingCard', true)
-      this.$store.commit('currentDraggingCardId', this.id)
-      this.$store.commit('currentDragCardStartPosition', utils.cursorPosition(event))
+    startDraggingBlock () {
+      this.$store.commit('currentUserIsDraggingBlock', true)
+      this.$store.commit('currentDraggingBlockId', this.id)
+      this.$store.commit('currentDragBlockStartPosition', utils.cursorPosition(event))
     },
-    startDraggingCardTouch () {
-      this.startDraggingCard()
+    startDraggingBlockTouch () {
+      this.startDraggingBlock()
     },
-    showCardDetailsPop () {
-      if (this.$store.state.preventDraggedCardFromClicking) {
-        this.$store.commit('preventDraggedCardFromClicking', false)
+    showBlockDetailsPop () {
+      if (this.$store.state.preventDraggedBlockFromClicking) {
+        this.$store.commit('preventDraggedBlockFromClicking', false)
         return
       }
-      console.log('🌸 showCardDetailsPop')
+      console.log('🌸 showBlockDetailsPop')
     }
   }
 }
 </script>
 
 <style lang="stylus">
-.card
+.block
   user-select: none
   display flex
   pointer-events all

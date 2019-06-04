@@ -18,17 +18,17 @@ main.space(
       Connection(
         :id="connection.id"
         :connectionType="connection.connectionType"
-        :startCardId="connection.startCardId",
-        :endCardId="connection.endCardId",
+        :startBlockId="connection.startBlockId",
+        :endBlockId="connection.endBlockId",
         :path="connection.path"
       )
-  .cards
-    template(v-for="card in cards")
-      Card(
-        :id="card.id"
-        :x="card.x"
-        :y="card.y"
-        :name="card.name"
+  .blocks
+    template(v-for="block in blocks")
+      Block(
+        :id="block.id"
+        :x="block.x"
+        :y="block.y"
+        :name="block.name"
       )
   Footer
 </template>
@@ -36,18 +36,18 @@ main.space(
 <script>
 import utils from '@/utils.js'
 import Connection from '@/components/Connection.vue'
-import Card from '@/components/Card.vue'
+import Block from '@/components/Block.vue'
 import Footer from '@/components/Footer.vue'
 
 export default {
   components: {
-    Card,
+    Block,
     Connection,
     Footer
   },
   computed: {
-    cards () {
-      return this.$store.state.currentSpace.cards
+    blocks () {
+      return this.$store.state.currentSpace.blocks
     },
     isInking () {
       const currentUserIsInking = this.$store.state.currentUserIsInking
@@ -57,9 +57,9 @@ export default {
     },
 
     isInteracting () {
-      const draggingCard = this.$store.state.currentUserIsDraggingCard
+      const draggingBlock = this.$store.state.currentUserIsDraggingBlock
       const drawingConnection = this.$store.state.currentUserIsDrawingConnection
-      if (draggingCard || drawingConnection) {
+      if (draggingBlock || drawingConnection) {
         return true
       } else { return false }
     },
@@ -77,19 +77,19 @@ export default {
   },
   methods: {
     interact (event) {
-      if (this.$store.state.currentUserIsDraggingCard) {
-        this.dragCard(event)
+      if (this.$store.state.currentUserIsDraggingBlock) {
+        this.dragBlock(event)
       }
       if (this.$store.state.currentUserIsDrawingConnection) {
         this.drawConnection(event)
       }
     },
 
-    dragCard (event) {
+    dragBlock (event) {
       const endPosition = utils.cursorPosition(event)
-      this.$store.dispatch('currentSpace/dragCard', endPosition)
-      this.$store.commit('preventDraggedCardFromClicking', true)
-      this.$store.commit('currentDragCardStartPosition', { x: endPosition.x, y: endPosition.y })
+      this.$store.dispatch('currentSpace/dragBlock', endPosition)
+      this.$store.commit('preventDraggedBlockFromClicking', true)
+      this.$store.commit('currentDragBlockStartPosition', { x: endPosition.x, y: endPosition.y })
     },
 
     drawConnection (event) {
@@ -107,7 +107,7 @@ export default {
       return connectors.map(connector => {
         const element = connector.getBoundingClientRect()
         return {
-          cardId: connector.dataset.cardId,
+          blockId: connector.dataset.blockId,
           x: element.x,
           y: element.y,
           width: element.width,
@@ -118,7 +118,7 @@ export default {
 
     isConnectedToSameConnector (currentConnection) {
       if (currentConnection) {
-        return this.$store.state.currentConnectionStart.cardId === currentConnection.cardId
+        return this.$store.state.currentConnectionStart.blockId === currentConnection.blockId
       }
     },
 
@@ -150,9 +150,9 @@ export default {
       const currentConnection = this.$store.state.currentConnection
       if (currentConnection) {
         let connection = {}
-        connection.startCardId = this.$store.state.currentConnectionStart.cardId
-        connection.endCardId = currentConnection.cardId
-        connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
+        connection.startBlockId = this.$store.state.currentConnectionStart.blockId
+        connection.endBlockId = currentConnection.blockId
+        connection.path = utils.connectionBetweenBlocks(connection.startBlockId, connection.endBlockId)
         this.$store.commit('currentSpace/addConnection', connection)
         this.$store.dispatch('broadcast/addConnection', connection)
       }
@@ -165,7 +165,7 @@ export default {
       }
       this.$store.commit('currentUserIsDrawingConnection', false)
       this.$store.commit('currentUserIsInkingLocked', false)
-      this.$store.commit('currentUserIsDraggingCard', false)
+      this.$store.commit('currentUserIsDraggingBlock', false)
       this.$store.commit('currentConnectionPath', undefined)
       this.$store.commit('currentConnection', undefined)
     }
