@@ -82,6 +82,7 @@ body
   margin 0
   color var(--primary)
   background-color var(--primary-background)
+  background-image url('assets/background.svg')
 
 .app
   position relative
