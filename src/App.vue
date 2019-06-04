@@ -10,8 +10,11 @@
 </template>
 
 <script>
+import utils from '@/utils.js'
 import Header from '@/components/Header.vue'
 import MagicInk from '@/components/MagicInk.vue'
+
+let _event
 
 export default {
   components: {
@@ -59,12 +62,14 @@ export default {
     },
     lockViewport (event) {
       if (this.shouldOnlyScrollAtEdges()) {
+        _event = event
         event.preventDefault()
       }
     },
     scrollAtEdges (event) {
-      if (this.shouldOnlyScrollAtEdges()) {
-        console.log('scrollAtEdges')
+      if (this.shouldOnlyScrollAtEdges() && _event) {
+        const x = utils.cursorPosition(_event)
+        console.log('scrollAtEdges', x)
         // is at edges?
         // do scroll:
         window.scrollBy(500, 500) // not working unless overflow auto

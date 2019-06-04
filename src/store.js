@@ -29,29 +29,29 @@ const currentSpace = {
   state: {
     users: [
       {
-        id: 1,
+        id: '1',
         color: 'cyan'
       },
       {
-        id: 2,
+        id: '2',
         color: 'pink'
       }
     ],
     cards: [
       {
-        id: 1,
+        id: '1',
         x: 80,
         y: 80,
         name: 'hello space and time'
       },
       {
-        id: 2,
+        id: '2',
         x: 250,
         y: 250,
         name: 'connect me!'
       },
       {
-        id: 3,
+        id: '3',
         x: 500,
         y: 150,
         name: 'click and drag me'
@@ -59,24 +59,24 @@ const currentSpace = {
     ],
     connections: [
       // {
-      //   id: 1,
-      //   connectionType: 1,
-      //   startCardId: 1,
-      //   endCardId: 2,
+      //   id: '1',
+      //   connectionType: '1',
+      //   startCardId: '1',
+      //   endCardId: '2',
       //   path: ''
       // }
     ],
     connectionTypes: [
       {
-        id: 1,
+        id: '1',
         name: 'connection 1'
       }
     ]
   },
   mutations: {
     addConnection: (state, connection) => {
-      connection.id = 123 // temp hardcoded, nanoid
-      connection.connectionTypeId = 1 // temp hardcoded
+      connection.id = '123' // temp hardcoded, nanoid
+      connection.connectionTypeId = '1' // temp hardcoded
       state.connections.push(connection)
     },
     updateCardPosition: (state, { cardId, delta }) => {

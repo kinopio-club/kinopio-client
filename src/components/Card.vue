@@ -22,7 +22,7 @@ import utils from '@/utils.js'
 
 export default {
   props: {
-    id: Number,
+    id: String,
     x: Number,
     y: Number,
     name: String

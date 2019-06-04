@@ -13,10 +13,10 @@ path(
 <script>
 export default {
   props: {
-    id: Number,
-    connectionType: Number,
-    startCardId: Number,
-    endCardId: Number,
+    id: String,
+    connectionType: String,
+    startCardId: String,
+    endCardId: String,
     path: String
   },
   methods: {

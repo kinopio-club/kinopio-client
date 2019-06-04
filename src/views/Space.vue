@@ -116,6 +116,12 @@ export default {
       })
     },
 
+    isConnectedToSameConnector (currentConnection) {
+      if (currentConnection) {
+        return this.$store.state.currentConnectionStart.cardId === currentConnection.cardId
+      }
+    },
+
     getCurrentConnection (event) {
       const cursor = utils.cursorPosition(event)
       const currentConnection = this.connectors().find(connector => {
@@ -133,7 +139,7 @@ export default {
         const inYRange = utils.between(yValues)
         return inXRange && inYRange
       })
-      if (currentConnection) {
+      if (currentConnection && !this.isConnectedToSameConnector(currentConnection)) {
         this.$store.commit('currentConnection', currentConnection)
       } else {
         this.$store.commit('currentConnection', undefined)
@@ -145,7 +151,7 @@ export default {
       if (currentConnection) {
         let connection = {}
         connection.startCardId = this.$store.state.currentConnectionStart.cardId
-        connection.endCardId = parseInt(currentConnection.cardId)
+        connection.endCardId = currentConnection.cardId
         connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
         this.$store.commit('currentSpace/addConnection', connection)
         this.$store.dispatch('broadcast/addConnection', connection)
