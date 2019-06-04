@@ -15,11 +15,6 @@ import Header from '@/components/Header.vue'
 import MagicInk from '@/components/MagicInk.vue'
 
 let _event
-// const edgeScrollPxPerSecond = {
-//   close: 10,
-//   closer: 20,
-//   closest: 30
-// }
 
 export default {
   components: {
@@ -56,6 +51,7 @@ export default {
       this.width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
       this.height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
     },
+
     shouldOnlyScrollAtEdges () {
       if (
         this.$store.state.currentUserIsDrawingConnection ||
@@ -65,22 +61,60 @@ export default {
         return true
       } else { return false }
     },
+
     lockViewport (event) {
       if (this.shouldOnlyScrollAtEdges()) {
         _event = event
         event.preventDefault()
       }
     },
-    scrollAtEdges (event) {
-      if (this.shouldOnlyScrollAtEdges() && _event) {
-        const x = utils.cursorPosition(_event)
-        console.log('scrollAtEdges', x)
-        // is at edges?
-        // do scroll:
-        // window.scrollBy(500, 500) // not working unless overflow auto
-      }
-    }
 
+    pxToScroll (value, axis) {
+      let viewSize
+      const distance = {
+        closest: 25,
+        closer: 50,
+        close: 100
+      }
+      const scrollBy = {
+        closest: 30,
+        closer: 20,
+        close: 10
+      }
+      if (axis === 'x') {
+        viewSize = document.body.clientWidth
+      } else if (axis === 'y') {
+        viewSize = document.body.clientHeight
+      }
+      if (utils.between({
+        value: value,
+        min: distance.close,
+        max: (viewSize - distance.close)
+      })) { return }
+
+      if (value < distance.closest) {
+        return -scrollBy['closest']
+      } else if (value < distance.closer) {
+        return -scrollBy['closer']
+      } else if (value < distance.close) {
+        return -scrollBy['close']
+      } else if (value > (viewSize - distance.closest)) {
+        return scrollBy['closest']
+      } else if (value > (viewSize - distance.closer)) {
+        return scrollBy['closer']
+      } else if (value > (viewSize - distance.close)) {
+        return scrollBy['close']
+      }
+    },
+
+    scrollAtEdges (event) {
+      if (!this.shouldOnlyScrollAtEdges() || !_event) { return }
+      const position = utils.cursorPosition(_event)
+      const xToScroll = this.pxToScroll(position.x, 'x')
+      const yToScroll = this.pxToScroll(position.y, 'y')
+      console.log('cardid', this.$store.state.currentDraggingBlockId, 'scrollBy', xToScroll, yToScroll)
+      window.scrollBy(xToScroll, yToScroll)
+    }
   }
 }
 </script>
