@@ -46,7 +46,7 @@ const currentSpace = {
       },
       {
         id: '2',
-        x: 250,
+        x: 20,
         y: 250,
         name: 'connect me!'
       },
@@ -55,6 +55,18 @@ const currentSpace = {
         x: 500,
         y: 150,
         name: 'click and drag me'
+      },
+      {
+        id: '4',
+        x: 600,
+        y: 500,
+        name: 'eat your vegetables'
+      },
+      {
+        id: '5',
+        x: 280,
+        y: 280,
+        name: 'go to summer bbq'
       }
     ],
     connections: [
