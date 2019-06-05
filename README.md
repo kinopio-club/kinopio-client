@@ -34,42 +34,10 @@ tasks → serve → open app
 ## Program Flow
 
 ```
-App.vue → /views → /components
+router.js → App.vue → /views → /components
 ```
 
-## Tasks
-
-You can do all these through `vue ui`
-
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Run your tests
-```
-npm run test
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Run your unit tests
-```
-npm run test:unit
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
-
-## Team Links
+## Resources
 
 - [Are.na](https://www.are.na/kinopio)
 - [Github](https://github.com/kinopio-club)
