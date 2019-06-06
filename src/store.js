@@ -4,8 +4,6 @@ import utils from '@/utils.js'
 
 Vue.use(Vuex)
 
-// todo? seperate files into modules (w `export defaults and imports` instead of const)
-
 const currentUser = {
   namespaced: true,
   state: {
@@ -92,7 +90,7 @@ const currentSpace = {
       state.connections.push(connection)
     },
     updateBlockPosition: (state, { blockId, delta }) => {
-      const maxOffset = -20
+      const maxOffset = 0
       state.blocks.map(block => {
         if (block.id === blockId) {
           block.x += delta.x || 0
@@ -149,8 +147,8 @@ export default new Vuex.Store({
     currentUserIsDraggingBlock: false,
 
     // current connection
-    currentConnectionStart: undefined, // {} // redundant? if use a setter to update the currentConnectionObject
-    currentConnectionPath: undefined, // '' // redundant
+    currentConnectionStart: undefined, // {} // TODO redundant? if use a setter to update the currentConnectionObject
+    currentConnectionPath: undefined, // '' // TODO redundant
     currentConnection: undefined, // {}
 
     // dragging block

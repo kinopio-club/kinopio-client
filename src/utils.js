@@ -70,9 +70,9 @@ export default {
     let distancePercents
     if (viewportSize < 500) {
       distancePercents = {
-        close: 20,
-        closer: 15,
-        closest: 10
+        close: 12,
+        closer: 8,
+        closest: 4
       }
     } else {
       distancePercents = {
