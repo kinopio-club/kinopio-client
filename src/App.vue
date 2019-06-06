@@ -112,9 +112,12 @@ export default {
         x: this.pxToScroll(position.x, 'x'),
         y: this.pxToScroll(position.y, 'y')
       }
-      const blockId = this.$store.state.currentDraggingBlockId
       window.scrollBy(delta.x, delta.y)
-      this.$store.commit('currentSpace/updateBlockPosition', { blockId, delta })
+      // console.log(clientWidth, clientHeight)
+      if (this.$store.state.currentUserIsDraggingBlock) {
+        const blockId = this.$store.state.currentDraggingBlockId
+        this.$store.commit('currentSpace/updateBlockPosition', { blockId, delta })
+      }
     }
   }
 }

@@ -97,6 +97,7 @@ const currentSpace = {
           block.y += delta.y || 0
           block.x = Math.max(block.x, maxOffset)
           block.y = Math.max(block.y, maxOffset)
+          // console.log ('💐',delta.x, block.x)
         }
       })
       const connections = state.connections.filter(connection => {
