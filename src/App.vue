@@ -14,7 +14,7 @@ import utils from '@/utils.js'
 import Header from '@/components/Header.vue'
 import MagicInk from '@/components/MagicInk.vue'
 
-let _event, clientWidth, clientHeight, xDistances, yDistances, xScrollBy, yScrollBy
+let _event, clientWidth, clientHeight, xScrollDistancesFromEdge, yScrollDistancesFromEdge, xDistancesToScroll, yDistancesToScroll
 
 export default {
   components: {
@@ -50,10 +50,10 @@ export default {
       const html = document.documentElement
       clientWidth = document.body.clientWidth
       clientHeight = window.innerHeight
-      xDistances = utils.distancesToTriggerScrolling(clientWidth)
-      yDistances = utils.distancesToTriggerScrolling(clientHeight)
-      xScrollBy = utils.distancesToScrollBy(clientWidth)
-      yScrollBy = utils.distancesToScrollBy(clientHeight)
+      xScrollDistancesFromEdge = utils.distancesFromEdge(clientWidth)
+      yScrollDistancesFromEdge = utils.distancesFromEdge(clientHeight)
+      xDistancesToScroll = utils.distancesToScroll(clientWidth)
+      yDistancesToScroll = utils.distancesToScroll(clientHeight)
       this.width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
       this.height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
     },
@@ -76,32 +76,25 @@ export default {
     },
 
     pxToScroll (position, axis) {
-      let distances, scrollBy, viewportSize
+      let distancesFromEdge, scrollByDistance, viewportSize
       if (axis === 'x') {
-        distances = xDistances
-        scrollBy = xScrollBy
+        distancesFromEdge = xScrollDistancesFromEdge
+        scrollByDistance = xDistancesToScroll
         viewportSize = clientWidth
       } else if (axis === 'y') {
-        distances = yDistances
-        scrollBy = yScrollBy
+        distancesFromEdge = yScrollDistancesFromEdge
+        scrollByDistance = yDistancesToScroll
         viewportSize = clientHeight
       }
-      const leftXOrTopY = distances.close
-      const rightXOrBottomY = viewportSize - distances.close
-      if (utils.between({ value: position, min: leftXOrTopY, max: rightXOrBottomY })) { return }
+      const shouldScrollStart = position < distancesFromEdge.far
+      const shouldScrollEnd = position > (viewportSize - distancesFromEdge.far)
+      const proximityTypeStart = utils.proximityTypeFromEdge(position, distancesFromEdge)
+      const proximityTypeEnd = utils.proximityTypeFromEdge(position, distancesFromEdge, viewportSize)
 
-      if (position < distances.closest) {
-        return -scrollBy['closest']
-      } else if (position < distances.closer) {
-        return -scrollBy['closer']
-      } else if (position < distances.close) {
-        return -scrollBy['close']
-      } else if (position > (viewportSize - distances.closest)) {
-        return scrollBy['closest']
-      } else if (position > (viewportSize - distances.closer)) {
-        return scrollBy['closer']
-      } else if (position > (viewportSize - distances.close)) {
-        return scrollBy['close']
+      if (shouldScrollStart) {
+        return -scrollByDistance[proximityTypeStart]
+      } else if (shouldScrollEnd) {
+        return scrollByDistance[proximityTypeEnd]
       }
     },
 
@@ -113,7 +106,6 @@ export default {
         y: this.pxToScroll(position.y, 'y')
       }
       window.scrollBy(delta.x, delta.y)
-      // console.log(clientWidth, clientHeight)
       if (this.$store.state.currentUserIsDraggingBlock) {
         const blockId = this.$store.state.currentDraggingBlockId
         this.$store.commit('currentSpace/updateBlockPosition', { blockId, delta })

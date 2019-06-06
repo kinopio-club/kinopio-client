@@ -66,34 +66,36 @@ export default {
 
   // 👻 Edge Scrolling Utils
 
-  distancesToTriggerScrolling (viewportSize) {
-    let distancePercents
-    if (viewportSize < 500) {
-      distancePercents = {
-        close: 12,
-        closer: 8,
-        closest: 4
-      }
-    } else {
-      distancePercents = {
-        close: 10,
-        closer: 5,
-        closest: 2
-      }
-    }
+  distancesFromEdge (viewportSize) {
     return {
-      close: Math.round((distancePercents.close / 100) * viewportSize),
-      closer: Math.round((distancePercents.closer / 100) * viewportSize),
-      closest: Math.round((distancePercents.closest / 100) * viewportSize)
+      far: Math.round((10 / 100) * viewportSize),
+      medium: Math.round((5 / 100) * viewportSize),
+      close: Math.round((2 / 100) * viewportSize)
     }
   },
 
-  distancesToScrollBy (viewportSize) {
+  distancesToScroll (viewportSize) {
     return {
-      close: Math.round((2 / 100) * viewportSize),
-      closer: Math.round((4 / 100) * viewportSize),
-      closest: Math.round((6 / 100) * viewportSize)
+      far: Math.round((2 / 100) * viewportSize),
+      medium: Math.round((4 / 100) * viewportSize),
+      close: Math.round((6 / 100) * viewportSize)
     }
+  },
+
+  proximityTypeFromEdge (position, distances, viewportSize) {
+    let close, medium, far
+    if (viewportSize) {
+      close = position > (viewportSize - distances.close)
+      medium = position > (viewportSize - distances.medium)
+      far = position > (viewportSize - distances.far)
+    } else {
+      close = position < distances.close
+      medium = position < distances.medium
+      far = position < distances.far
+    }
+    if (close) { return 'close' }
+    if (medium) { return 'medium' }
+    if (far) { return 'far' }
   }
 
 }
