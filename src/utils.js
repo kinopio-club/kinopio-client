@@ -27,7 +27,7 @@ export default {
     return cloned
   },
 
-  // connection path utils
+  // 🐙 Connection Path Utils
 
   connectorCoords (blockId) {
     let rect = document.querySelector(`.connector[data-block-id="${blockId}"]`).getBoundingClientRect()
@@ -62,6 +62,38 @@ export default {
     }
     let curve = this.curveControlPoint(offsetStart, delta)
     return `m${offsetStart.x},${offsetStart.y} ${curve} ${delta.x},${delta.y}`
+  },
+
+  // 👻 Edge Scrolling Utils
+
+  distancesToTriggerScrolling (viewportSize) {
+    let distancePercents
+    if (viewportSize < 500) {
+      distancePercents = {
+        close: 20,
+        closer: 15,
+        closest: 10
+      }
+    } else {
+      distancePercents = {
+        close: 10,
+        closer: 5,
+        closest: 2
+      }
+    }
+    return {
+      close: Math.round((distancePercents.close / 100) * viewportSize),
+      closer: Math.round((distancePercents.closer / 100) * viewportSize),
+      closest: Math.round((distancePercents.closest / 100) * viewportSize)
+    }
+  },
+
+  distancesToScrollBy (viewportSize) {
+    return {
+      close: Math.round((2 / 100) * viewportSize),
+      closer: Math.round((4 / 100) * viewportSize),
+      closest: Math.round((6 / 100) * viewportSize)
+    }
   }
 
 }

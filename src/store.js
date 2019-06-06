@@ -92,10 +92,13 @@ const currentSpace = {
       state.connections.push(connection)
     },
     updateBlockPosition: (state, { blockId, delta }) => {
+      const maxOffset = -20
       state.blocks.map(block => {
         if (block.id === blockId) {
-          block.x += delta.x
-          block.y += delta.y
+          block.x += delta.x || 0
+          block.y += delta.y || 0
+          block.x = Math.max(block.x, maxOffset)
+          block.y = Math.max(block.y, maxOffset)
         }
       })
       const connections = state.connections.filter(connection => {

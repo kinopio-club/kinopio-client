@@ -14,7 +14,7 @@ import utils from '@/utils.js'
 import Header from '@/components/Header.vue'
 import MagicInk from '@/components/MagicInk.vue'
 
-let _event
+let _event, clientWidth, clientHeight, xDistances, yDistances, xScrollBy, yScrollBy
 
 export default {
   components: {
@@ -48,6 +48,12 @@ export default {
       console.log('updateAppElementSize')
       const body = document.body
       const html = document.documentElement
+      clientWidth = document.body.clientWidth
+      clientHeight = window.innerHeight
+      xDistances = utils.distancesToTriggerScrolling(clientWidth)
+      yDistances = utils.distancesToTriggerScrolling(clientHeight)
+      xScrollBy = utils.distancesToScrollBy(clientWidth)
+      yScrollBy = utils.distancesToScrollBy(clientHeight)
       this.width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
       this.height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
     },
@@ -69,40 +75,32 @@ export default {
       }
     },
 
-    pxToScroll (value, axis) {
-      let viewSize
-      const distance = {
-        closest: 25,
-        closer: 50,
-        close: 100
-      }
-      const scrollBy = {
-        closest: 30,
-        closer: 20,
-        close: 10
-      }
+    pxToScroll (position, axis) {
+      let distances, scrollBy, viewportSize
       if (axis === 'x') {
-        viewSize = document.body.clientWidth
+        distances = xDistances
+        scrollBy = xScrollBy
+        viewportSize = clientWidth
       } else if (axis === 'y') {
-        viewSize = document.body.clientHeight
+        distances = yDistances
+        scrollBy = yScrollBy
+        viewportSize = clientHeight
       }
-      if (utils.between({
-        value: value,
-        min: distance.close,
-        max: (viewSize - distance.close)
-      })) { return }
+      const leftXOrTopY = distances.close
+      const rightXOrBottomY = viewportSize - distances.close
+      if (utils.between({ value: position, min: leftXOrTopY, max: rightXOrBottomY })) { return }
 
-      if (value < distance.closest) {
+      if (position < distances.closest) {
         return -scrollBy['closest']
-      } else if (value < distance.closer) {
+      } else if (position < distances.closer) {
         return -scrollBy['closer']
-      } else if (value < distance.close) {
+      } else if (position < distances.close) {
         return -scrollBy['close']
-      } else if (value > (viewSize - distance.closest)) {
+      } else if (position > (viewportSize - distances.closest)) {
         return scrollBy['closest']
-      } else if (value > (viewSize - distance.closer)) {
+      } else if (position > (viewportSize - distances.closer)) {
         return scrollBy['closer']
-      } else if (value > (viewSize - distance.close)) {
+      } else if (position > (viewportSize - distances.close)) {
         return scrollBy['close']
       }
     },
@@ -110,10 +108,13 @@ export default {
     scrollAtEdges (event) {
       if (!this.shouldOnlyScrollAtEdges() || !_event) { return }
       const position = utils.cursorPosition(_event)
-      const xToScroll = this.pxToScroll(position.x, 'x')
-      const yToScroll = this.pxToScroll(position.y, 'y')
-      console.log('cardid', this.$store.state.currentDraggingBlockId, 'scrollBy', xToScroll, yToScroll)
-      window.scrollBy(xToScroll, yToScroll)
+      const delta = {
+        x: this.pxToScroll(position.x, 'x'),
+        y: this.pxToScroll(position.y, 'y')
+      }
+      const blockId = this.$store.state.currentDraggingBlockId
+      window.scrollBy(delta.x, delta.y)
+      this.$store.commit('currentSpace/updateBlockPosition', { blockId, delta })
     }
   }
 }
@@ -135,6 +136,7 @@ body
   color var(--primary)
   background-color var(--primary-background)
   background-image url('assets/background.svg')
+  -webkit-user-select none
   overflow auto // enables window.scrollBy support
 
 .app
