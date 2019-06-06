@@ -37,7 +37,7 @@ tasks → serve → open app
 router.js → App.vue → /views → /components
 ```
 
-## Resources
+## Team Links
 
 - [Are.na](https://www.are.na/kinopio)
 - [Github](https://github.com/kinopio-club)
