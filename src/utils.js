@@ -1,3 +1,5 @@
+// functional methods that can see dom, but can't use vue
+
 export default {
   cursorPosition (event) {
     let x, y
