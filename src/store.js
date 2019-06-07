@@ -164,6 +164,7 @@ export default new Vuex.Store({
 
     // current connection
     currentConnectionStart: undefined,
+    currentConnectionEnd: undefined,
     currentConnectionPath: undefined,
 
     // dragging
@@ -179,6 +180,9 @@ export default new Vuex.Store({
     },
     currentConnectionStart: (state, value) => {
       state.currentConnectionStart = value
+    },
+    currentConnectionEnd: (state, value) => {
+      state.currentConnectionEnd = value
     },
     currentConnectionPath: (state, value) => {
       state.currentConnectionPath = value

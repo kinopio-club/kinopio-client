@@ -50,9 +50,10 @@ export default {
       }
     },
     isActive () {
-      const currentConnection = this.$store.state.currentConnection
-      if (currentConnection) {
-        return currentConnection.blockId === this.id
+      const currentConnectionEnd = this.$store.state.currentConnectionEnd
+      console.log('💈', currentConnectionEnd)
+      if (currentConnectionEnd) {
+        return currentConnectionEnd.blockId === this.id
       } else {
         return undefined
       }

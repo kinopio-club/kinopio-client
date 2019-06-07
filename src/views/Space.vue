@@ -132,8 +132,11 @@ export default {
         const inYRange = utils.between(yValues)
         return inXRange && inYRange
       })
+      this.$store.commit('currentConnectionEnd', successfulConnectionToConnector)
+
       if (this.isConnectedToSameConnector(successfulConnectionToConnector)) {
         successfulConnectionToConnector = undefined
+        this.$store.commit('currentConnectionEnd', undefined)
       }
     },
 
