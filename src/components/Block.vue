@@ -79,8 +79,8 @@ export default {
       this.startDraggingBlock()
     },
     showBlockDetailsPop () {
-      if (this.$store.state.preventDraggedBlockFromClicking) {
-        this.$store.commit('preventDraggedBlockFromClicking', false)
+      if (this.$store.state.preventDraggedBlockFromOpeningAfterDrag) {
+        this.$store.commit('preventDraggedBlockFromOpeningAfterDrag', false)
         return
       }
       console.log('🌸 showBlockDetailsPop')

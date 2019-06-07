@@ -79,7 +79,7 @@ export default {
     dragBlock (event) {
       const endPosition = utils.cursorPosition(event)
       this.$store.dispatch('currentSpace/dragBlock', endPosition)
-      this.$store.commit('preventDraggedBlockFromClicking', true)
+      this.$store.commit('preventDraggedBlockFromOpeningAfterDrag', true)
       this.$store.commit('currentDragBlockStartPosition', { x: endPosition.x, y: endPosition.y })
     },
 
