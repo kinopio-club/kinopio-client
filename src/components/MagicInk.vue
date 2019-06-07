@@ -1,9 +1,9 @@
 <template lang="pug">
 canvas#inking.inking(
-  @mousedown="startinking"
-  @touchstart="startinking"
-  @mouseup="stopinking"
-  @touchend="stopinking"
+  @mousedown="startInking"
+  @touchstart="startInking"
+  @mouseup="stopInking"
+  @touchend="stopInking"
   @mousemove="ink"
   @touchmove="ink"
   @click="showNewBlockDetailsPop"
@@ -43,10 +43,10 @@ export default {
       this.width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
       this.height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
     },
-    startinking (event) {
+    startInking (event) {
       this.$store.commit('currentUserIsInking', true)
     },
-    stopinking () {
+    stopInking () {
       this.$store.commit('currentUserIsInking', false)
     },
     ink (event) {
