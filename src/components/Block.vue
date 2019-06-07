@@ -25,6 +25,7 @@ export default {
     id: String,
     x: Number,
     y: Number,
+    z: Number,
     name: String
   },
   created () {
@@ -42,7 +43,8 @@ export default {
     position () {
       return {
         left: `${this.x}px`,
-        top: `${this.y}px`
+        top: `${this.y}px`,
+        zIndex: this.z
       }
     },
     isActive () {
@@ -66,6 +68,7 @@ export default {
       this.startConnecting()
     },
     startDraggingBlock () {
+      this.$store.commit('currentSpace/incrementBlockZ', this.id)
       this.$store.commit('currentUserIsDraggingBlock', true)
       this.$store.commit('currentDraggingBlockId', this.id)
       this.$store.commit('currentDragBlockStartPosition', utils.cursorPosition(event))

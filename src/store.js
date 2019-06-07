@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import utils from '@/utils.js'
+import randomcolor from 'randomcolor'
+// import nanoid from 'nanoid'
 
 Vue.use(Vuex)
 
@@ -8,7 +10,7 @@ const currentUser = {
   namespaced: true,
   state: {
     id: 1,
-    color: 'cyan'
+    color: randomcolor({ luminosity: 'light' })
   },
   getters: {
     isMember (state, getters, rootState) {
@@ -40,30 +42,35 @@ const currentSpace = {
         id: '1',
         x: 80,
         y: 80,
+        z: 0,
         name: 'hello space and time'
       },
       {
         id: '2',
         x: 20,
         y: 250,
+        z: 1,
         name: 'connect me!'
       },
       {
         id: '3',
         x: 500,
         y: 150,
+        z: 2,
         name: 'click and drag me'
       },
       {
         id: '4',
         x: 600,
         y: 500,
+        z: 3,
         name: 'eat your vegetables'
       },
       {
         id: '5',
         x: 280,
         y: 280,
+        z: 4,
         name: 'go to summer bbq'
       }
     ],
@@ -89,7 +96,7 @@ const currentSpace = {
       connection.connectionTypeId = '1' // temp hardcoded
       state.connections.push(connection)
     },
-    updateBlockPosition: (state, { blockId, delta }) => {
+    moveBlock: (state, { blockId, delta }) => {
       const maxOffset = 0
       state.blocks.map(block => {
         if (block.id === blockId) {
@@ -97,6 +104,7 @@ const currentSpace = {
           block.y += delta.y || 0
           block.x = Math.max(block.x, maxOffset)
           block.y = Math.max(block.y, maxOffset)
+          console.log(block.x, block.y, delta.x, delta.y)
         }
       })
       const connections = state.connections.filter(connection => {
@@ -104,6 +112,14 @@ const currentSpace = {
       })
       connections.forEach(connection => {
         connection.path = utils.connectionBetweenBlocks(connection.startBlockId, connection.endBlockId)
+      })
+    },
+    incrementBlockZ (state, blockId) {
+      state.blocks.map((block, index) => {
+        block.z = index
+        if (block.id === blockId) {
+          block.z = state.blocks.length + 1
+        }
       })
     }
   },
@@ -114,7 +130,7 @@ const currentSpace = {
       const deltaX = endPosition.x - startPosition.x
       const deltaY = endPosition.y - startPosition.y
       const delta = { x: deltaX, y: deltaY }
-      rootState.commit('updateBlockPosition', { blockId, delta })
+      rootState.commit('moveBlock', { blockId, delta })
     }
   }
 }

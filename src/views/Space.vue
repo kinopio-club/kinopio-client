@@ -28,6 +28,7 @@ main.space(
         :id="block.id"
         :x="block.x"
         :y="block.y"
+        :z="block.z"
         :name="block.name"
       )
   Footer

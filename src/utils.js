@@ -70,8 +70,8 @@ export default {
 
   distancesFromEdge (viewportSize) {
     return {
-      far: Math.round((10 / 100) * viewportSize),
-      medium: Math.round((5 / 100) * viewportSize),
+      far: Math.round((8 / 100) * viewportSize),
+      medium: Math.round((4 / 100) * viewportSize),
       close: Math.round((2 / 100) * viewportSize)
     }
   },
