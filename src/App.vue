@@ -3,6 +3,8 @@
   :style="elementSize"
   @mousemove="lockViewport"
   @touchmove="lockViewport"
+  @mouseup="unlockViewport"
+  @touchend="unlockViewport"
 )
   MagicInk
   router-view
@@ -14,7 +16,7 @@ import utils from '@/utils.js'
 import Header from '@/components/Header.vue'
 import MagicInk from '@/components/MagicInk.vue'
 
-let _event, clientWidth, clientHeight, xScrollDistancesFromEdge, yScrollDistancesFromEdge, xDistancesToScroll, yDistancesToScroll
+let _event, clientWidth, clientHeight, xScrollDistancesFromEdge, yScrollDistancesFromEdge, xDistancesToScroll, yDistancesToScroll, scrollAtEdgesTimer
 
 export default {
   components: {
@@ -32,7 +34,6 @@ export default {
     this.updateAppElementSize()
     window.addEventListener('resize', this.updateAppElementSize)
     window.addEventListener('scroll', this.updateAppElementSize)
-    setInterval(this.scrollAtEdges, 16) // 16ms ~= 60fps
   },
   computed: {
     elementSize () {
@@ -63,9 +64,7 @@ export default {
         this.$store.state.currentUserIsDrawingConnection ||
         this.$store.state.currentUserIsInkingLocked ||
         this.$store.state.currentUserIsDraggingBlock
-      ) {
-        return true
-      } else { return false }
+      ) { return true }
     },
 
     lockViewport (event) {
@@ -73,6 +72,14 @@ export default {
         _event = event
         event.preventDefault()
       }
+      if (this.shouldOnlyScrollAtEdges() && !scrollAtEdgesTimer) {
+        scrollAtEdgesTimer = setInterval(this.scrollAtEdges, 16) // 16ms ~= 60fps
+      }
+    },
+
+    unlockViewport () {
+      clearInterval(scrollAtEdgesTimer)
+      scrollAtEdgesTimer = undefined
     },
 
     pxToScroll (position, axis) {
@@ -112,6 +119,9 @@ export default {
       }
     }
   }
+  // watch: {
+
+  // }
 }
 </script>
 
