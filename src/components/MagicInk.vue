@@ -16,25 +16,23 @@ canvas#inking.inking(
 const circleSize = 20
 const maxIterationsToInk = 200 // higher is longer ink fade time
 const rateOfIterationDecay = 0.03 // lower is slower decay
+let canvas, context, inkTimer
 let circles = []
 
 export default {
   data () {
     return {
-      canvas: undefined,
-      context: undefined,
       height: 0,
       width: 0
     }
   },
   mounted () {
-    this.canvas = document.getElementById('inking')
-    this.context = this.canvas.getContext('2d')
-    this.context.scale(window.devicePixelRatio, window.devicePixelRatio)
+    canvas = document.getElementById('inking')
+    context = canvas.getContext('2d')
+    context.scale(window.devicePixelRatio, window.devicePixelRatio)
     this.updateCanvasSize()
     window.addEventListener('resize', this.updateCanvasSize)
     window.addEventListener('scroll', this.updateCanvasSize)
-    setInterval(this.inkCirclesPerFrame, 16) // 16ms ~= 60fps
   },
   methods: {
     updateCanvasSize () {
@@ -43,12 +41,16 @@ export default {
       this.width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
       this.height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
     },
+
     startInking (event) {
       this.$store.commit('currentUserIsInking', true)
+      inkTimer = setInterval(this.inkCirclesPerFrame, 16) // 16ms ~= 60fps
     },
+
     stopInking () {
       this.$store.commit('currentUserIsInking', false)
     },
+
     ink (event) {
       if (!this.$store.state.currentUserIsInking) { return }
       let x, y
@@ -64,24 +66,7 @@ export default {
       this.$store.dispatch('broadcast/inking', circle)
       circles.push(circle)
     },
-    exponentialDecay (iteration) {
-      return Math.exp(-(rateOfIterationDecay * iteration))
-    },
-    inkCircle (circle) {
-      const { x, y, color, iteration } = circle
-      this.context.beginPath()
-      this.context.arc(x, y, circleSize, 0, 2 * Math.PI)
-      this.context.closePath()
-      this.context.globalAlpha = this.exponentialDecay(iteration)
-      this.context.fillStyle = color
-      this.context.fill()
-    },
-    filterCircles () {
-      circles = circles.filter(circle => circle.iteration < maxIterationsToInk)
-    },
-    clearCanvas () {
-      this.context.clearRect(0, 0, this.width, this.height)
-    },
+
     inkCirclesPerFrame () {
       this.filterCircles()
       this.clearCanvas()
@@ -91,6 +76,32 @@ export default {
         this.inkCircle(circle)
       })
     },
+
+    exponentialDecay (iteration) {
+      return Math.exp(-(rateOfIterationDecay * iteration))
+    },
+
+    inkCircle (circle) {
+      const { x, y, color, iteration } = circle
+      context.beginPath()
+      context.arc(x, y, circleSize, 0, 2 * Math.PI)
+      context.closePath()
+      context.globalAlpha = this.exponentialDecay(iteration)
+      context.fillStyle = color
+      context.fill()
+    },
+
+    filterCircles () {
+      circles = circles.filter(circle => circle.iteration < maxIterationsToInk)
+      if (circles.length === 0) {
+        clearInterval(inkTimer)
+      }
+    },
+
+    clearCanvas () {
+      context.clearRect(0, 0, this.width, this.height)
+    },
+
     showNewBlockDetailsPop () {
       if (this.$store.state.currentUserIsInking) {
         this.$store.commit('currentUserIsInking', false)
