@@ -163,9 +163,8 @@ export default new Vuex.Store({
     currentUserIsDraggingBlock: false,
 
     // current connection
-    currentConnectionStart: undefined, // {} // TODO redundant? if use a setter to update the currentConnectionObject
-    currentConnectionPath: undefined, // '' // TODO redundant
-    currentConnection: undefined, // {startId: '', startX, startY, , path:''}
+    currentConnectionStart: undefined,
+    currentConnectionPath: undefined,
 
     // dragging
     currentDraggingBlock: {}, // id, x, y
@@ -183,9 +182,6 @@ export default new Vuex.Store({
     },
     currentConnectionPath: (state, value) => {
       state.currentConnectionPath = value
-    },
-    currentConnection: (state, value) => {
-      state.currentConnection = value
     },
     currentUserIsDraggingBlock: (state, value) => {
       state.currentUserIsDraggingBlock = value

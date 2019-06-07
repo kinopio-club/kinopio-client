@@ -28,6 +28,8 @@ import Connection from '@/components/Connection.vue'
 import Block from '@/components/Block.vue'
 import Footer from '@/components/Footer.vue'
 
+let successfulConnectionToConnector
+
 export default {
   components: {
     Block,
@@ -87,7 +89,7 @@ export default {
       const start = utils.elementCenter(this.$store.state.currentConnectionStart)
       const current = utils.cursorPosition(event)
       const path = utils.connectionPathBetweenCoords(start, current)
-      this.getCurrentConnection(event)
+      this.currentConnectionSuccess(event)
       this.$store.commit('currentConnectionPath', path)
       this.$store.dispatch('broadcast/connectingPaths', path)
     },
@@ -107,15 +109,15 @@ export default {
       })
     },
 
-    isConnectedToSameConnector (currentConnection) {
-      if (currentConnection) {
-        return this.$store.state.currentConnectionStart.blockId === currentConnection.blockId
+    isConnectedToSameConnector (connection) {
+      if (connection) {
+        return this.$store.state.currentConnectionStart.blockId === connection.blockId
       }
     },
 
-    getCurrentConnection (event) {
+    currentConnectionSuccess (event) {
       const cursor = utils.cursorPosition(event)
-      const currentConnection = this.connectors().find(connector => {
+      successfulConnectionToConnector = this.connectors().find(connector => {
         const xValues = {
           value: cursor.x,
           min: connector.x,
@@ -130,19 +132,16 @@ export default {
         const inYRange = utils.between(yValues)
         return inXRange && inYRange
       })
-      if (currentConnection && !this.isConnectedToSameConnector(currentConnection)) {
-        this.$store.commit('currentConnection', currentConnection)
-      } else {
-        this.$store.commit('currentConnection', undefined)
+      if (this.isConnectedToSameConnector(successfulConnectionToConnector)) {
+        successfulConnectionToConnector = undefined
       }
     },
 
     createConnection () {
-      const currentConnection = this.$store.state.currentConnection
-      if (currentConnection) {
+      if (successfulConnectionToConnector) {
         let connection = {}
         connection.startBlockId = this.$store.state.currentConnectionStart.blockId
-        connection.endBlockId = currentConnection.blockId
+        connection.endBlockId = successfulConnectionToConnector.blockId
         connection.path = utils.connectionBetweenBlocks(connection.startBlockId, connection.endBlockId)
         this.$store.commit('currentSpace/addConnection', connection)
         this.$store.dispatch('broadcast/addConnection', connection)
@@ -158,7 +157,7 @@ export default {
       this.$store.commit('currentUserIsInkingLocked', false)
       this.$store.commit('currentUserIsDraggingBlock', false)
       this.$store.commit('currentConnectionPath', undefined)
-      this.$store.commit('currentConnection', undefined)
+      successfulConnectionToConnector = undefined
     }
 
   }
