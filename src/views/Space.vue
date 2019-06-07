@@ -139,10 +139,10 @@ export default {
 
     createConnection () {
       if (successfulConnectionToConnector) {
-        let connection = {}
-        connection.startBlockId = this.$store.state.currentConnectionStart.blockId
-        connection.endBlockId = successfulConnectionToConnector.blockId
-        connection.path = utils.connectionBetweenBlocks(connection.startBlockId, connection.endBlockId)
+        const startBlockId = this.$store.state.currentConnectionStart.blockId
+        const endBlockId = successfulConnectionToConnector.blockId
+        const path = utils.connectionBetweenBlocks(startBlockId, endBlockId)
+        const connection = { startBlockId, endBlockId, path }
         this.$store.commit('currentSpace/addConnection', connection)
         this.$store.dispatch('broadcast/addConnection', connection)
       }
