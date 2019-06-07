@@ -25,11 +25,7 @@ main.space(
   .blocks
     template(v-for="block in blocks")
       Block(
-        :id="block.id"
-        :x="block.x"
-        :y="block.y"
-        :z="block.z"
-        :name="block.name"
+        :block="block"
       )
   Footer
 </template>

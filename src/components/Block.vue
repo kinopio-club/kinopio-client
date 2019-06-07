@@ -22,11 +22,7 @@ import utils from '@/utils.js'
 
 export default {
   props: {
-    id: String,
-    x: Number,
-    y: Number,
-    z: Number,
-    name: String
+    block: Object
   },
   created () {
     this.color = randomcolor({ luminosity: 'light' })
@@ -37,6 +33,12 @@ export default {
     }
   },
   computed: {
+    id () { return this.block.id },
+    x () { return this.block.x },
+    y () { return this.block.y },
+    z () { return this.block.z },
+    name () { return this.block.name },
+
     testcolor () {
       return { background: this.color }
     },
