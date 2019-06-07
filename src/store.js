@@ -162,16 +162,9 @@ export default new Vuex.Store({
     currentUserIsInkingLocked: false,
     currentUserIsDraggingBlock: false,
 
-    // current connection
-    currentConnectionEnd: undefined,
-
-    currentConnection: {}, // startId, x, y, endId // startBlockId,, endBlockId
-    // start:
-    // blockId,
-    // x
-    // y
-    // end
-    // blockId
+    // connecting
+    currentConnection: {}, // startBlockId, startConnectorRect
+    currentConnectionSuccess: {},
 
     // dragging
     currentDraggingBlock: {}, // id, x, y
@@ -185,10 +178,6 @@ export default new Vuex.Store({
       state.currentUserIsInking = value
     },
 
-    currentConnectionEnd: (state, value) => {
-      state.currentConnectionEnd = value
-    },
-
     currentUserIsDraggingBlock: (state, value) => {
       state.currentUserIsDraggingBlock = value
     },
@@ -197,6 +186,9 @@ export default new Vuex.Store({
     },
     currentUserIsInkingLocked: (state, value) => {
       state.currentUserIsInkingLocked = value
+    },
+    currentConnectionSuccess: (state, value) => {
+      state.currentConnectionSuccess = value
     },
     currentDraggingBlock: (state, value) => {
       utils.typeCheck(value, 'object')
@@ -212,10 +204,6 @@ export default new Vuex.Store({
         state.currentConnection[key] = value[key]
       })
     }
-    // clearCurrentConnection: (state) => {
-    //   state.currentConnection = {}
-    // }
-
   },
   modules: {
     currentUser,

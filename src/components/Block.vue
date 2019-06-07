@@ -50,10 +50,9 @@ export default {
       }
     },
     isActive () {
-      const currentConnectionEnd = this.$store.state.currentConnectionEnd
-      console.log('💈', currentConnectionEnd)
-      if (currentConnectionEnd) {
-        return currentConnectionEnd.blockId === this.id
+      const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
+      if (currentConnectionSuccess) {
+        return currentConnectionSuccess.blockId === this.id
       } else {
         return undefined
       }
@@ -61,14 +60,12 @@ export default {
   },
   methods: {
     startConnecting () {
-      console.log('🚒startConnecting')
       this.$store.commit('currentUserIsDrawingConnection', true)
       let connectorRect = utils.clone(event.srcElement.getBoundingClientRect())
       this.$store.commit('currentConnection', {
         startBlockId: this.id,
         startConnectorRect: connectorRect
       })
-      console.log('🦋', this.$store.state.currentConnection)
     },
     startConnectingTouch () {
       this.startConnecting()
