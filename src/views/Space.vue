@@ -12,7 +12,7 @@ main.space(
       fill="none"
       stroke="#333333"
       stroke-width="3"
-      :d="currentConnectionPath"
+      :d="currentPath"
     )
     template(v-for="connection in connections")
       Connection(:connection="connection")
@@ -37,6 +37,11 @@ export default {
     Footer
   },
   name: 'Space',
+  data () {
+    return {
+      currentPath: undefined
+    }
+  },
   computed: {
     blocks () {
       return this.$store.state.currentSpace.blocks
@@ -58,10 +63,6 @@ export default {
 
     isDrawingConnection () {
       return this.$store.state.currentUserIsDrawingConnection
-    },
-
-    currentConnectionPath () {
-      return this.$store.state.currentConnectionPath
     },
 
     connections () {
@@ -91,7 +92,7 @@ export default {
       const current = utils.cursorPosition(event)
       const path = utils.connectionPathBetweenCoords(start, current)
       this.currentConnectionSuccess(event)
-      this.$store.commit('currentConnectionPath', path)
+      this.currentPath = path
       this.$store.dispatch('broadcast/connectingPaths', path)
     },
 
@@ -160,7 +161,9 @@ export default {
       this.$store.commit('currentUserIsDrawingConnection', false)
       this.$store.commit('currentUserIsInkingLocked', false)
       this.$store.commit('currentUserIsDraggingBlock', false)
-      this.$store.commit('currentConnectionPath', undefined)
+      this.currentPath = undefined
+      // this.$store.commit('clearCurrentConnection')
+
       successfulConnectionToConnector = undefined
     }
 
