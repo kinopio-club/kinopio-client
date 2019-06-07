@@ -52,7 +52,7 @@ export default {
     isActive () {
       const currentConnection = this.$store.state.currentConnection
       if (currentConnection) {
-        return parseInt(currentConnection.blockId) === this.id
+        return currentConnection.blockId === this.id
       } else {
         return undefined
       }

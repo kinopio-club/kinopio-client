@@ -7,7 +7,7 @@ main.space(
   :class="{'is-interacting': isInteracting, 'is-inking': isInking}"
 )
   svg.connections
-    .current-connection.path(
+    path.current-connection(
       v-if="isDrawingConnection"
       fill="none"
       stroke="#333333"
@@ -34,6 +34,7 @@ export default {
     Connection,
     Footer
   },
+  name: 'Space',
   computed: {
     blocks () {
       return this.$store.state.currentSpace.blocks
@@ -54,9 +55,7 @@ export default {
     },
 
     isDrawingConnection () {
-      if (this.$store.state.currentUserIsDrawingConnection) {
-        return true
-      } else { return false }
+      return this.$store.state.currentUserIsDrawingConnection
     },
 
     currentConnectionPath () {
@@ -190,5 +189,6 @@ svg.current
 path
   pointer-events all
   cursor pointer
-
+  &.current-connection
+    pointer-events none
 </style>
