@@ -13,15 +13,18 @@ path(
 <script>
 export default {
   props: {
-    id: String,
-    connectionType: String,
-    startBlockId: String,
-    endBlockId: String,
-    path: String
+    connection: Object
+  },
+  computed: {
+    id () { return this.connection.id },
+    connectionType () { return this.connection.connectionType },
+    startBlockId () { return this.connection.startBlockId },
+    endBlockId () { return this.connection.endBlockId },
+    path () { return this.connection.path }
   },
   methods: {
     showConnectionDetailsPop () {
-      console.log('path is clicked') // which path?
+      console.log('path is clicked', this.id)
     }
   }
 }

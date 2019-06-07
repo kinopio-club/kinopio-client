@@ -7,7 +7,7 @@ main.space(
   :class="{'is-interacting': isInteracting, 'is-inking': isInking}"
 )
   svg.connections
-    path(
+    .current-connection.path(
       v-if="isDrawingConnection"
       fill="none"
       stroke="#333333"
@@ -15,18 +15,10 @@ main.space(
       :d="currentConnectionPath"
     )
     template(v-for="connection in connections")
-      Connection(
-        :id="connection.id"
-        :connectionType="connection.connectionType"
-        :startBlockId="connection.startBlockId",
-        :endBlockId="connection.endBlockId",
-        :path="connection.path"
-      )
+      Connection(:connection="connection")
   .blocks
     template(v-for="block in blocks")
-      Block(
-        :block="block"
-      )
+      Block(:block="block")
   Footer
 </template>
 
