@@ -70,10 +70,15 @@ export default {
       this.startConnecting()
     },
     startDraggingBlock () {
+      const cursor = utils.cursorPosition(event)
+      const currentDraggingBlock = {
+        id: this.id,
+        x: cursor.x,
+        y: cursor.y
+      }
       this.$store.commit('currentSpace/incrementBlockZ', this.id)
       this.$store.commit('currentUserIsDraggingBlock', true)
-      this.$store.commit('currentDraggingBlockId', this.id)
-      this.$store.commit('currentDragBlockStartPosition', utils.cursorPosition(event))
+      this.$store.commit('currentDraggingBlock', currentDraggingBlock)
     },
     startDraggingBlockTouch () {
       this.startDraggingBlock()

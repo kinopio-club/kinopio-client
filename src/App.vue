@@ -114,7 +114,7 @@ export default {
       }
       window.scrollBy(delta.x, delta.y)
       if (this.$store.state.currentUserIsDraggingBlock) {
-        const blockId = this.$store.state.currentDraggingBlockId
+        const blockId = this.$store.state.currentDraggingBlock.id
         this.$store.commit('currentSpace/moveBlock', { blockId, delta })
       }
     }

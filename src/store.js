@@ -125,10 +125,10 @@ const currentSpace = {
   },
   actions: {
     dragBlock: (rootState, endPosition) => {
-      const startPosition = rootState.rootState.currentDragBlockStartPosition
-      const blockId = rootState.rootState.currentDraggingBlockId
-      const deltaX = endPosition.x - startPosition.x
-      const deltaY = endPosition.y - startPosition.y
+      const block = rootState.rootState.currentDraggingBlock
+      const blockId = block.id
+      const deltaX = endPosition.x - block.x
+      const deltaY = endPosition.y - block.y
       const delta = { x: deltaX, y: deltaY }
       rootState.commit('moveBlock', { blockId, delta })
     }
@@ -167,11 +167,8 @@ export default new Vuex.Store({
     currentConnectionPath: undefined, // '' // TODO redundant
     currentConnection: undefined, // {startId: '', startX, startY, , path:''}
 
-    // dragging block
-    currentDraggingBlockId: undefined, // ''
-    currentDragBlockStartPosition: undefined, // {}
-    // TODO can consolidate the above in to currentDraggingBlock: {blockId, startX, startY}“
-
+    // dragging
+    currentDraggingBlock: {}, // id, x, y
     preventDraggedBlockFromOpeningAfterDrag: false
   },
   mutations: {
@@ -193,17 +190,18 @@ export default new Vuex.Store({
     currentUserIsDraggingBlock: (state, value) => {
       state.currentUserIsDraggingBlock = value
     },
-    currentDraggingBlockId: (state, value) => {
-      state.currentDraggingBlockId = value
-    },
-    currentDragBlockStartPosition: (state, value) => {
-      state.currentDragBlockStartPosition = value
-    },
     preventDraggedBlockFromOpeningAfterDrag: (state, value) => {
       state.preventDraggedBlockFromOpeningAfterDrag = value
     },
     currentUserIsInkingLocked: (state, value) => {
       state.currentUserIsInkingLocked = value
+    },
+    currentDraggingBlock: (state, value) => {
+      utils.typeCheck(value, 'object')
+      const keys = Object.keys(value)
+      keys.forEach(key => {
+        state.currentDraggingBlock[key] = value[key]
+      })
     }
   },
   modules: {

@@ -29,6 +29,12 @@ export default {
     return cloned
   },
 
+  typeCheck (value, type) {
+    if (typeof value !== type) { // eslint-disable-line valid-typeof
+      console.error(`passed value is not ${type}`, value)
+    }
+  },
+
   // 🐙 Connection Path Utils
 
   connectorCoords (blockId) {
