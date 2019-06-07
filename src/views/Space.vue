@@ -86,7 +86,8 @@ export default {
     },
 
     drawConnection (event) {
-      const start = utils.elementCenter(this.$store.state.currentConnectionStart)
+      const startRect = this.$store.state.currentConnection.startConnectorRect
+      const start = utils.elementCenter(startRect)
       const current = utils.cursorPosition(event)
       const path = utils.connectionPathBetweenCoords(start, current)
       this.currentConnectionSuccess(event)
@@ -111,7 +112,7 @@ export default {
 
     isConnectedToSameConnector (connection) {
       if (connection) {
-        return this.$store.state.currentConnectionStart.blockId === connection.blockId
+        return this.$store.state.currentConnection.startBlockId === connection.blockId
       }
     },
 
@@ -142,7 +143,7 @@ export default {
 
     createConnection () {
       if (successfulConnectionToConnector) {
-        const startBlockId = this.$store.state.currentConnectionStart.blockId
+        const startBlockId = this.$store.state.currentConnection.startBlockId
         const endBlockId = successfulConnectionToConnector.blockId
         const path = utils.connectionBetweenBlocks(startBlockId, endBlockId)
         const connection = { startBlockId, endBlockId, path }

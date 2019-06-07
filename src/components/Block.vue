@@ -63,9 +63,12 @@ export default {
     startConnecting () {
       console.log('🚒startConnecting')
       this.$store.commit('currentUserIsDrawingConnection', true)
-      let start = utils.clone(event.srcElement.getBoundingClientRect())
-      start.blockId = this.id
-      this.$store.commit('currentConnectionStart', start)
+      let connectorRect = utils.clone(event.srcElement.getBoundingClientRect())
+      this.$store.commit('currentConnection', {
+        startBlockId: this.id,
+        startConnectorRect: connectorRect
+      })
+      console.log('🦋', this.$store.state.currentConnection)
     },
     startConnectingTouch () {
       this.startConnecting()
