@@ -1,26 +1,33 @@
 <template lang="pug">
-article.block(
-  :style="position"
-  :data-block-id="id"
-  @mousedown="startDraggingBlock"
-  @touchstart="startDraggingBlockTouch"
-  @click="showBlockDetailsPop"
-)
-  p {{name}}
-  .connector(
-    :style="testcolor"
-    @mousedown.stop="startConnecting"
-    @touchstart.stop="startConnectingTouch"
+article(:style="position")
+  .block(
     :data-block-id="id"
-    :class="{ active: isActive }"
-  ) O
+    @mousedown="startDraggingBlock"
+    @touchstart="startDraggingBlockTouch"
+    @click="showBlockDetails"
+  )
+    p {{name}}
+    .connector(
+      :style="testcolor"
+      @mousedown.stop="startConnecting"
+      @touchstart.stop="startConnectingTouch"
+      :data-block-id="id"
+      :class="{ active: isActive }"
+    ) O
+  BlockDetails(
+    :block="block"
+  )
 </template>
 
 <script>
 import randomcolor from 'randomcolor'
 import utils from '@/utils.js'
+import BlockDetails from '@/components/pop-overs/BlockDetails.vue'
 
 export default {
+  components: {
+    BlockDetails
+  },
   props: {
     block: Object
   },
@@ -38,6 +45,7 @@ export default {
     y () { return this.block.y },
     z () { return this.block.z },
     name () { return this.block.name },
+    blockDetailsVisible () { return this.block.blockDetailsVisible },
 
     testcolor () {
       return { background: this.color }
@@ -84,25 +92,28 @@ export default {
     startDraggingBlockTouch () {
       this.startDraggingBlock()
     },
-    showBlockDetailsPop () {
+    showBlockDetails () {
       if (this.$store.state.preventDraggedBlockFromOpeningAfterDrag) {
         this.$store.commit('preventDraggedBlockFromOpeningAfterDrag', false)
         return
       }
-      console.log('🌸 showBlockDetailsPop')
+      this.$store.commit('closeAllPopOvers')
+      this.$store.commit('currentSpace/blockDetailsVisible', this.id)
     }
   }
 }
 </script>
 
 <style lang="stylus">
+article
+  pointer-events all
+  position absolute
 .block
   user-select: none
   display flex
-  pointer-events all
   background-color var(--secondary-background)
-  position absolute
   max-width 235px
+  position absolute
   cursor pointer
   white-space nowrap
   > p

@@ -123,6 +123,8 @@ export default {
 </script>
 
 <style lang="stylus">
+// global styles
+
 :root
   --primary-background white
   --primary black
@@ -144,8 +146,16 @@ body
 .app
   position relative
 
+dialog
+  max-width: 200px
+  left: 8px
+  top: 8px
+  position: absolute
+  margin 0
+  user-select: normal
+
 //
-.meta-page
+.meta // meta
   max-width 600px
   width 95%
   margin 8px

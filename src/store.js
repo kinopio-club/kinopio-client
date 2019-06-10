@@ -43,35 +43,40 @@ const currentSpace = {
         x: 80,
         y: 80,
         z: 0,
-        name: 'hello space and time'
+        name: 'hello space and time',
+        blockDetailsVisible: false
       },
       {
         id: '2',
         x: 20,
         y: 250,
         z: 1,
-        name: 'connect me!'
+        name: 'connect me!',
+        blockDetailsVisible: false
       },
       {
         id: '3',
         x: 500,
         y: 150,
         z: 2,
-        name: 'click and drag me'
+        name: 'click and drag me',
+        blockDetailsVisible: false
       },
       {
         id: '4',
         x: 600,
         y: 500,
         z: 3,
-        name: 'eat your vegetables'
+        name: 'eat your vegetables',
+        blockDetailsVisible: false
       },
       {
         id: '5',
         x: 280,
         y: 280,
         z: 4,
-        name: 'go to summer bbq'
+        name: 'go to summer bbq',
+        blockDetailsVisible: false
       }
     ],
     connections: [
@@ -121,6 +126,14 @@ const currentSpace = {
           block.z = state.blocks.length + 1
         }
       })
+    },
+    blockDetailsVisible: (state, blockId) => {
+      state.blocks.map(block => {
+        if (block.id === blockId) {
+          block.blockDetailsVisible = true
+        }
+      })
+      console.log('blockDetailsVisible', state.blocks)
     }
   },
   actions: {
@@ -172,22 +185,28 @@ export default new Vuex.Store({
   },
   mutations: {
     currentUserIsDrawingConnection: (state, value) => {
+      utils.typeCheck(value, 'boolean')
       state.currentUserIsDrawingConnection = value
     },
     currentUserIsInking: (state, value) => {
+      utils.typeCheck(value, 'boolean')
       state.currentUserIsInking = value
     },
-
     currentUserIsDraggingBlock: (state, value) => {
+      utils.typeCheck(value, 'boolean')
       state.currentUserIsDraggingBlock = value
     },
     preventDraggedBlockFromOpeningAfterDrag: (state, value) => {
+      utils.typeCheck(value, 'boolean')
       state.preventDraggedBlockFromOpeningAfterDrag = value
     },
     currentUserIsInkingLocked: (state, value) => {
+      utils.typeCheck(value, 'boolean')
       state.currentUserIsInkingLocked = value
     },
     currentConnectionSuccess: (state, value) => {
+      const allowOptional = true
+      utils.typeCheck(value, 'object', allowOptional)
       state.currentConnectionSuccess = value
     },
     currentDraggingBlock: (state, value) => {
@@ -202,6 +221,11 @@ export default new Vuex.Store({
       const keys = Object.keys(value)
       keys.forEach(key => {
         state.currentConnection[key] = value[key]
+      })
+    },
+    closeAllPopOvers: (state) => {
+      state.currentSpace.blocks.map(block => {
+        block.blockDetailsVisible = false
       })
     }
   },

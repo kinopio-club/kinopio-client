@@ -103,6 +103,7 @@ export default {
     },
 
     showNewBlockDetailsPop () {
+      this.$store.commit('closeAllPopOvers')
       if (this.$store.state.currentUserIsInking) {
         this.$store.commit('currentUserIsInking', false)
         return

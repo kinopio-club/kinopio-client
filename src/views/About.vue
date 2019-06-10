@@ -1,5 +1,5 @@
 <template lang='pug'>
-.meta-page
+.meta
 
   h1 hello kinopio
 

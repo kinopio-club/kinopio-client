@@ -29,7 +29,10 @@ export default {
     return cloned
   },
 
-  typeCheck (value, type) {
+  typeCheck (value, type, allowOptional) {
+    if (allowOptional && value === undefined) {
+      return
+    }
     if (typeof value !== type) { // eslint-disable-line valid-typeof
       console.error(`passed value is not ${type}`, value)
     }
