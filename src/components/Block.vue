@@ -5,6 +5,7 @@ article(:style="position")
     @mousedown="startDraggingBlock"
     @touchstart="startDraggingBlockTouch"
     @click="showBlockDetails"
+    :class="{jiggle: connectingToBlock}"
   )
     p {{name}}
     .connector(
@@ -12,7 +13,7 @@ article(:style="position")
       @mousedown.stop="startConnecting"
       @touchstart.stop="startConnectingTouch"
       :data-block-id="id"
-      :class="{ active: isActive }"
+      :class="{ active: connectingToBlock }"
     ) O
   BlockDetails(
     :block="block"
@@ -57,7 +58,7 @@ export default {
         zIndex: this.z
       }
     },
-    isActive () {
+    connectingToBlock () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
       if (currentConnectionSuccess) {
         return currentConnectionSuccess.blockId === this.id
@@ -129,4 +130,17 @@ article
     &:active,
     &.active
       background-color grey !important //temp
+.jiggle
+  animation: jiggle 0.5s infinite ease-out forwards
+@keyframes jiggle
+  0%
+    transform: rotate(0deg)
+  25%
+    transform: rotate(-3deg)
+  50%
+    transform: rotate(3deg)
+  75%
+    transform: rotate(-3deg)
+  100%
+    transform: rotate(0deg)
 </style>
