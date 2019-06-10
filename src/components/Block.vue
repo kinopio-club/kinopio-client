@@ -112,7 +112,7 @@ article
 .block
   user-select: none
   display flex
-  background-color var(--secondary-background)
+  background-color var(--block-background)
   max-width 235px
   position absolute
   cursor pointer

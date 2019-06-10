@@ -177,17 +177,29 @@ export default {
   *
     pointer-events: none !important
 
-svg
+svg.connections
   position absolute
   top 0
   left 0
   width 100%
   height 100%
-svg.current
-  z-index 1
-path
+  path
+    pointer-events all
+    cursor pointer
+    &.current-connection
+      pointer-events none
+
+dialog
+  width: 300px
+  left: 8px
+  top: 8px
+  position: absolute
+  margin 0
+  padding 0
+  user-select auto
   pointer-events all
-  cursor pointer
-  &.current-connection
-    pointer-events none
+  section
+    padding 8px
+  section + section
+    border-bottom: 1px solid var(--primary)
 </style>

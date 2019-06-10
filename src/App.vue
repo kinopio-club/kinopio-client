@@ -128,7 +128,8 @@ export default {
 :root
   --primary-background white
   --primary black
-  --secondary-background #e3e3e3
+  --block-background #e3e3e3
+  --hover-background #d8d8d8
 
 *
   -webkit-overflow-scrolling touch
@@ -146,18 +147,6 @@ body
 .app
   position relative
 
-dialog
-  width: 200px
-  left: 8px
-  top: 8px
-  position: absolute
-  margin 0
-  padding 0
-  user-select auto
-  pointer-events all
-  section
-    padding 8px
-
 //
 .meta
   max-width 600px
@@ -169,5 +158,4 @@ dialog
   img
     max-width 100%
     border-radius: 3px
-
 </style>

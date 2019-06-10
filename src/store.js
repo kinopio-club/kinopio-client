@@ -86,6 +86,7 @@ const currentSpace = {
       //   startBlockId: '1',
       //   endBlockId: '2',
       //   path: ''
+      //   connectionDetailsVisible: false
       // }
     ],
     connectionTypes: [

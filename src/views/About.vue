@@ -55,7 +55,7 @@ export default {
 <style scoped lang="stylus">
 form
   padding 8px
-  background-color var(--secondary-background)
+  background-color var(--block-background)
   border-radius 3px
   display inline-block
 input

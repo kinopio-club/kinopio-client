@@ -1,9 +1,9 @@
 <template lang="pug">
-dialog.pop-over(:open="blockDetailsVisible")
+dialog.pop-over(v-if="blockDetailsVisible" open=true)
   section
     input(placeholder="name" v-model="name")
-    div
-      button hihi
+    // div
+      // button hihi
 </template>
 
 <script>
