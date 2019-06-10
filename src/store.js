@@ -133,7 +133,14 @@ const currentSpace = {
           block.blockDetailsVisible = true
         }
       })
-      console.log('blockDetailsVisible', state.blocks)
+      // console.log('blockDetailsVisible', state.blocks)
+    },
+    updateBlockDetails: (state, { type, value, blockId }) => {
+      state.blocks.map(block => {
+        if (block.id === blockId) {
+          block[type] = value
+        }
+      })
     }
   },
   actions: {

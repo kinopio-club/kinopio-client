@@ -1,6 +1,9 @@
 <template lang="pug">
 dialog.pop-over(:open="blockDetailsVisible")
-  p block details pop over is me
+  section
+    input(placeholder="name" v-model="name")
+    div
+      button hihi
 </template>
 
 <script>
@@ -15,7 +18,7 @@ export default {
   },
   // data () {
   //   return {
-  //     color: undefined,
+  //     name: this.block.name
   //   }
   // },
   computed: {
@@ -23,13 +26,32 @@ export default {
     x () { return this.block.x },
     y () { return this.block.y },
     z () { return this.block.z },
-    name () { return this.block.name },
+    name: {
+      get () {
+        return this.block.name
+      },
+      set (newValue) {
+        const options = {
+          type: 'name',
+          value: newValue,
+          blockId: this.id
+        }
+        this.$store.commit('currentSpace/updateBlockDetails', options)
+      }
+    },
     blockDetailsVisible () {
       console.log('blockDetailsVisible', this.block.blockDetailsVisible)
       return this.block.blockDetailsVisible
     }
   },
   methods: {
+    // update(event) {
+    //   console.log('update',event,this)
+    // }
+    // name() {
+    //   console.log ('🚒', this, this.block)
+    //   return this.block.name
+    // }
   }
 }
 </script>
