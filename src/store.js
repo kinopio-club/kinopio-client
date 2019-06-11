@@ -225,16 +225,24 @@ export default new Vuex.Store({
     currentDraggingBlock: (state, value) => {
       utils.typeCheck(value, 'object')
       const keys = Object.keys(value)
-      keys.forEach(key => {
-        state.currentDraggingBlock[key] = value[key]
-      })
+      if (keys.length === 0) {
+        state.currentDraggingBlock = {}
+      } else {
+        keys.forEach(key => {
+          state.currentDraggingBlock[key] = value[key]
+        })
+      }
     },
     currentConnection: (state, value) => {
       utils.typeCheck(value, 'object')
       const keys = Object.keys(value)
-      keys.forEach(key => {
-        state.currentConnection[key] = value[key]
-      })
+      if (keys.length === 0) {
+        state.currentConnection = {}
+      } else {
+        keys.forEach(key => {
+          state.currentConnection[key] = value[key]
+        })
+      }
     },
     closeAllPopOvers: (state) => {
       state.currentSpace.blocks.map(block => {

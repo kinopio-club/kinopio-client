@@ -158,6 +158,7 @@ export default {
       this.$store.commit('currentUserIsInkingLocked', false)
       this.$store.commit('currentUserIsDraggingBlock', false)
       this.$store.commit('currentConnectionSuccess', {})
+      this.$store.commit('currentConnection', {})
       this.currentPath = undefined
     }
   }

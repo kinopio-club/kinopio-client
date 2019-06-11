@@ -5,7 +5,7 @@ article(:style="position")
     @mousedown="startDraggingBlock"
     @touchstart="startDraggingBlockTouch"
     @click="showBlockDetails"
-    :class="{jiggle: connectingToBlock}"
+    :class="{jiggle: isConnectingTo || isConnectingFrom}"
   )
     p {{name}}
     .connector(
@@ -13,7 +13,7 @@ article(:style="position")
       @mousedown.stop="startConnecting"
       @touchstart.stop="startConnectingTouch"
       :data-block-id="id"
-      :class="{ active: connectingToBlock }"
+      :class="{ active: isConnectingTo }"
     ) O
   BlockDetails(
     :block="block"
@@ -58,10 +58,19 @@ export default {
         zIndex: this.z
       }
     },
-    connectingToBlock () {
+    isConnectingTo () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
       if (currentConnectionSuccess) {
         return currentConnectionSuccess.blockId === this.id
+      } else {
+        return undefined
+      }
+    },
+    isConnectingFrom () {
+      const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
+      const currentConnection = this.$store.state.currentConnection
+      if (currentConnectionSuccess) {
+        return currentConnection.startBlockId === this.id
       } else {
         return undefined
       }
