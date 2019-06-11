@@ -44,7 +44,8 @@ const currentSpace = {
         y: 80,
         z: 0,
         name: 'hello space and time',
-        blockDetailsVisible: false
+        blockDetailsVisible: false,
+        archived: false
       },
       {
         id: '2',
@@ -52,7 +53,8 @@ const currentSpace = {
         y: 250,
         z: 1,
         name: 'connect me!',
-        blockDetailsVisible: false
+        blockDetailsVisible: false,
+        archived: false
       },
       {
         id: '3',
@@ -60,7 +62,8 @@ const currentSpace = {
         y: 150,
         z: 2,
         name: 'click and drag me',
-        blockDetailsVisible: false
+        blockDetailsVisible: false,
+        archived: false
       },
       {
         id: '4',
@@ -68,7 +71,8 @@ const currentSpace = {
         y: 500,
         z: 3,
         name: 'eat your vegetables',
-        blockDetailsVisible: false
+        blockDetailsVisible: false,
+        archived: false
       },
       {
         id: '5',
@@ -76,7 +80,8 @@ const currentSpace = {
         y: 280,
         z: 4,
         name: 'go to summer bbq',
-        blockDetailsVisible: false
+        blockDetailsVisible: false,
+        archived: false
       }
     ],
     connections: [
