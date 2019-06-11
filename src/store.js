@@ -218,31 +218,19 @@ export default new Vuex.Store({
       state.currentUserIsInkingLocked = value
     },
     currentConnectionSuccess: (state, value) => {
-      const allowOptional = true
-      utils.typeCheck(value, 'object', allowOptional)
+      const allowUndefined = true
+      utils.typeCheck(value, 'object', allowUndefined)
       state.currentConnectionSuccess = value
     },
     currentDraggingBlock: (state, value) => {
-      utils.typeCheck(value, 'object')
-      const keys = Object.keys(value)
-      if (keys.length === 0) {
-        state.currentDraggingBlock = {}
-      } else {
-        keys.forEach(key => {
-          state.currentDraggingBlock[key] = value[key]
-        })
-      }
+      let object = state.currentConnection
+      object = utils.updateObject(object, value)
+      state.currentDraggingBlock = object
     },
     currentConnection: (state, value) => {
-      utils.typeCheck(value, 'object')
-      const keys = Object.keys(value)
-      if (keys.length === 0) {
-        state.currentConnection = {}
-      } else {
-        keys.forEach(key => {
-          state.currentConnection[key] = value[key]
-        })
-      }
+      let object = state.currentConnection
+      object = utils.updateObject(object, value)
+      state.currentConnection = object
     },
     closeAllPopOvers: (state) => {
       state.currentSpace.blocks.map(block => {

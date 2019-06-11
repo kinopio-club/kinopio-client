@@ -29,13 +29,26 @@ export default {
     return cloned
   },
 
-  typeCheck (value, type, allowOptional) {
-    if (allowOptional && value === undefined) {
+  typeCheck (value, type, allowUndefined) {
+    if (allowUndefined && value === undefined) {
       return
     }
     if (typeof value !== type) { // eslint-disable-line valid-typeof
       console.error(`passed value is not ${type}`, value)
     }
+  },
+
+  updateObject (object, value) {
+    this.typeCheck(value, 'object')
+    const keys = Object.keys(value)
+    if (keys.length === 0) {
+      object = {}
+    } else {
+      keys.forEach(key => {
+        object[key] = value[key]
+      })
+    }
+    return object
   },
 
   // 🐙 Connection Path Utils
