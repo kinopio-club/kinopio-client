@@ -77,9 +77,9 @@ export default {
   },
   methods: {
     startConnecting () {
+      let connectorRect = utils.clone(event.srcElement.getBoundingClientRect())
       this.$store.commit('closeAllPopOvers')
       this.$store.commit('currentUserIsDrawingConnection', true)
-      let connectorRect = utils.clone(event.srcElement.getBoundingClientRect())
       this.$store.commit('currentConnection', {
         startBlockId: this.id,
         startConnectorRect: connectorRect
@@ -95,6 +95,7 @@ export default {
         x: cursor.x,
         y: cursor.y
       }
+      this.$store.commit('closeAllPopOvers')
       this.$store.commit('currentSpace/incrementBlockZ', this.id)
       this.$store.commit('currentUserIsDraggingBlock', true)
       this.$store.commit('currentDraggingBlock', currentDraggingBlock)
