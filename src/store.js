@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import utils from '@/utils.js'
 import randomcolor from 'randomcolor'
-// import nanoid from 'nanoid'
+import nanoid from 'nanoid'
 
 Vue.use(Vuex)
 
@@ -91,7 +91,7 @@ const currentSpace = {
       //   startBlockId: '1',
       //   endBlockId: '2',
       //   path: ''
-      //   connectionDetailsVisible: false
+      //   connectionDetailsVisible: false,
       // }
     ],
     connectionTypes: [
@@ -103,8 +103,9 @@ const currentSpace = {
   },
   mutations: {
     addConnection: (state, connection) => {
-      connection.id = '123' // temp hardcoded, nanoid
-      connection.connectionTypeId = '1' // temp hardcoded
+      connection.id = nanoid()
+      // connection.connectionTypeId = '1' // temp hardcoded
+      connection.connectionDetailsVisible = false
       state.connections.push(connection)
     },
     moveBlock: (state, { blockId, delta }) => {
@@ -139,15 +140,33 @@ const currentSpace = {
           block.blockDetailsVisible = true
         }
       })
-      // console.log('blockDetailsVisible', state.blocks)
     },
     updateBlockDetails: (state, { type, value, blockId }) => {
+      utils.typeCheck(type, 'string')
       state.blocks.map(block => {
         if (block.id === blockId) {
           block[type] = value
         }
       })
+    },
+    connectionDetailsVisible: (state, connectionId) => {
+      state.connections.map(connection => {
+        if (connection.id === connectionId) {
+          connection.connectionDetailsVisible = true
+        }
+      })
     }
+    // updateConnectionDetails: (state, { type, value, connectionId }) => {
+    //   utils.typeCheck(type, 'string')
+    //   state.connections.map(connection => {
+    //     if (connection.id === connectionId) {
+    //       console.log('old',connection[type], 'new', value)
+    //       connection[type] = value
+    //     }
+    //   })
+    //   console.log('🦚', state.connections)
+    // },
+
   },
   actions: {
     dragBlock: (rootState, endPosition) => {
@@ -235,6 +254,9 @@ export default new Vuex.Store({
     closeAllPopOvers: (state) => {
       state.currentSpace.blocks.map(block => {
         block.blockDetailsVisible = false
+      })
+      state.currentSpace.connections.map(connection => {
+        connection.connectionDetailsVisible = false
       })
     }
   },

@@ -46,7 +46,6 @@ export default {
     y () { return this.block.y },
     z () { return this.block.z },
     name () { return this.block.name },
-    blockDetailsVisible () { return this.block.blockDetailsVisible },
 
     testcolor () {
       return { background: this.color }

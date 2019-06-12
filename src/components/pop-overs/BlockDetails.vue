@@ -12,20 +12,12 @@ export default {
   props: {
     block: Object
   },
-  created () {
-    console.log('hello!')
-    // scroll teh window if required
-  },
-  // data () {
-  //   return {
-  //     name: this.block.name
-  //   }
-  // },
   computed: {
     id () { return this.block.id },
     x () { return this.block.x },
     y () { return this.block.y },
     z () { return this.block.z },
+    blockDetailsVisible () { return this.block.blockDetailsVisible },
     name: {
       get () {
         return this.block.name
@@ -38,20 +30,7 @@ export default {
         }
         this.$store.commit('currentSpace/updateBlockDetails', options)
       }
-    },
-    blockDetailsVisible () {
-      console.log('blockDetailsVisible', this.block.blockDetailsVisible)
-      return this.block.blockDetailsVisible
     }
-  },
-  methods: {
-    // update(event) {
-    //   console.log('update',event,this)
-    // }
-    // name() {
-    //   console.log ('🚒', this, this.block)
-    //   return this.block.name
-    // }
   }
 }
 </script>

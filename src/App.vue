@@ -147,6 +147,20 @@ body
 .app
   position relative
 
+dialog
+  width: 300px
+  left: 8px
+  top: 8px
+  position: absolute
+  margin 0
+  padding 0
+  user-select auto
+  pointer-events all
+  section
+    padding 8px
+  section + section
+    border-bottom: 1px solid var(--primary)
+
 //
 .meta
   max-width 600px
