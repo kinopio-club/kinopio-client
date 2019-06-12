@@ -161,6 +161,9 @@ dialog
   section + section
     border-bottom: 1px solid var(--primary)
 
+.max-z
+  z-index 2147483647
+
 //
 .meta
   max-width 600px

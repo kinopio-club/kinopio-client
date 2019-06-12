@@ -104,7 +104,7 @@ const currentSpace = {
   mutations: {
     addConnection: (state, connection) => {
       connection.id = nanoid()
-      // connection.connectionTypeId = '1' // temp hardcoded
+      // connection.connectionTypeId = '1' // TODO: create new connections each time or use last def on user prefs
       connection.connectionDetailsVisible = false
       state.connections.push(connection)
     },
@@ -156,17 +156,6 @@ const currentSpace = {
         }
       })
     }
-    // updateConnectionDetails: (state, { type, value, connectionId }) => {
-    //   utils.typeCheck(type, 'string')
-    //   state.connections.map(connection => {
-    //     if (connection.id === connectionId) {
-    //       console.log('old',connection[type], 'new', value)
-    //       connection[type] = value
-    //     }
-    //   })
-    //   console.log('🦚', state.connections)
-    // },
-
   },
   actions: {
     dragBlock: (rootState, endPosition) => {
@@ -211,6 +200,7 @@ export default new Vuex.Store({
     currentConnection: {}, // startBlockId, startConnectorRect
     currentConnectionSuccess: {},
     connectionDetailsIsVisible: false,
+    connectionDetailsPosition: {},
 
     // dragging
     currentDraggingBlock: {}, // id, x, y
@@ -238,13 +228,16 @@ export default new Vuex.Store({
       state.currentUserIsInkingLocked = value
     },
     currentConnectionSuccess: (state, value) => {
-      const allowUndefined = true
-      utils.typeCheck(value, 'object', allowUndefined)
+      utils.typeCheck(value, 'object', true)
       state.currentConnectionSuccess = value
     },
     connectionDetailsIsVisible: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.connectionDetailsIsVisible = value
+    },
+    connectionDetailsPosition: (state, position) => {
+      utils.typeCheck(position, 'object')
+      state.connectionDetailsPosition = position
     },
     currentDraggingBlock: (state, value) => {
       let object = state.currentConnection
@@ -263,6 +256,7 @@ export default new Vuex.Store({
       state.currentSpace.connections.map(connection => {
         connection.connectionDetailsVisible = false
       })
+      state.connectionDetailsIsVisible = false
     }
   },
   modules: {

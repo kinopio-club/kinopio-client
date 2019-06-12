@@ -77,6 +77,7 @@ export default {
   },
   methods: {
     startConnecting () {
+      this.$store.commit('closeAllPopOvers')
       this.$store.commit('currentUserIsDrawingConnection', true)
       let connectorRect = utils.clone(event.srcElement.getBoundingClientRect())
       this.$store.commit('currentConnection', {

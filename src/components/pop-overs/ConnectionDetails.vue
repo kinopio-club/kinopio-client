@@ -1,26 +1,29 @@
 <template lang="pug">
-foreignObject(:x="position.x" :y="position.y" width="100%" height="100%" v-if="connectionDetailsVisible")
-  dialog.pop-over(:open="connectionDetailsVisible")
-    section
-      p connection details
-      // input(placeholder="name" v-model="name")
-      button hiyo
+dialog.pop-over.max-z(v-if="visible" :open="visible" :style="position")
+  section
+    p details for connection from block {{connection.startBlockId}} to {{connection.endBlockId}}
+    // input(placeholder="name" v-model="name")
+    button hiyo
 </template>
 
 <script>
 export default {
   name: 'ConnectionDetails',
-  props: {
-    connection: Object,
-    position: Object
-  },
   computed: {
-    id () { return this.connection.id },
-    connectionType () { return this.connection.connectionType },
-    startBlockId () { return this.connection.startBlockId },
-    endBlockId () { return this.connection.endBlockId },
-    path () { return this.connection.path },
-    connectionDetailsVisible () { return this.connection.connectionDetailsVisible }
+    visible () { return this.$store.state.connectionDetailsIsVisible },
+    position () {
+      const cursor = this.$store.state.connectionDetailsPosition
+      return {
+        left: `${cursor.x}px`,
+        top: `${cursor.y}px`
+      }
+    },
+    connection () {
+      let connections = this.$store.state.currentSpace.connections
+      return connections.find(connection => {
+        return connection.connectionDetailsVisible === true
+      })
+    }
     // name: {
     //   get () {
     //     return this.connection.name
@@ -39,8 +42,4 @@ export default {
 </script>
 
 <style lang="stylus">
-foreignObject
-  dialog
-    top 0
-    left 0
 </style>

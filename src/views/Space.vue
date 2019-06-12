@@ -19,12 +19,14 @@ main.space(
   .blocks
     template(v-for="block in blocks")
       Block(:block="block")
+  ConnectionDetails
   Footer
 </template>
 
 <script>
 import utils from '@/utils.js'
 import Connection from '@/components/Connection.vue'
+import ConnectionDetails from '@/components/pop-overs/ConnectionDetails.vue'
 import Block from '@/components/Block.vue'
 import Footer from '@/components/Footer.vue'
 
@@ -32,6 +34,7 @@ export default {
   components: {
     Block,
     Connection,
+    ConnectionDetails,
     Footer
   },
   name: 'Space',
