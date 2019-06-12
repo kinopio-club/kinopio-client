@@ -210,6 +210,7 @@ export default new Vuex.Store({
     // connecting
     currentConnection: {}, // startBlockId, startConnectorRect
     currentConnectionSuccess: {},
+    connectionDetailsIsVisible: false,
 
     // dragging
     currentDraggingBlock: {}, // id, x, y
@@ -240,6 +241,10 @@ export default new Vuex.Store({
       const allowUndefined = true
       utils.typeCheck(value, 'object', allowUndefined)
       state.currentConnectionSuccess = value
+    },
+    connectionDetailsIsVisible: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.connectionDetailsIsVisible = value
     },
     currentDraggingBlock: (state, value) => {
       let object = state.currentConnection

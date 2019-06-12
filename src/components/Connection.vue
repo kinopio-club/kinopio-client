@@ -44,6 +44,7 @@ export default {
       this.detailsPosition = utils.cursorPosition(event)
       this.$store.commit('closeAllPopOvers')
       this.$store.commit('currentSpace/connectionDetailsVisible', this.id)
+      this.$store.commit('connectionDetailsIsVisible', true)
     }
   }
 
