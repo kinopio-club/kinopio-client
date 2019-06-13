@@ -274,13 +274,14 @@ export default new Vuex.Store({
 
     // multiple blocks
     multipleBlocksSelected: (state, blocks) => {
-      console.log(blocks)
       utils.typeCheck(blocks, 'array')
       state.multipleBlocksSelected = blocks
     },
-    addMultipleBlocksSelected: (state, blockId) => {
+    addToMultipleBlocksSelected: (state, blockId) => {
       utils.typeCheck(blockId, 'string')
-      state.multipleBlocksSelected.push(blockId)
+      if (!state.multipleBlocksSelected.includes(blockId)) {
+        state.multipleBlocksSelected.push(blockId)
+      }
     },
     multipleBlockActionsIsVisible: (state, value) => {
       utils.typeCheck(value, 'boolean')

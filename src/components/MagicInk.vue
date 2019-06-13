@@ -13,6 +13,8 @@ canvas#inking.inking(
 </template>
 
 <script>
+import utils from '@/utils.js'
+
 const circleSize = 20
 const maxIterationsToInk = 200 // higher is longer ink fade time
 const rateOfIterationDecay = 0.03 // lower is slower decay
@@ -44,27 +46,35 @@ export default {
 
     startInking (event) {
       this.$store.commit('currentUserIsInking', true)
+      this.$store.commit('generateBlockMap')
       inkTimer = window.setInterval(this.inkCirclesPerFrame, 16) // 16ms ~= 60fps
     },
 
     stopInking () {
       this.$store.commit('currentUserIsInking', false)
-      // if store.multipleBlocksSelected.length
-      // show MultipleBlockActions popover, similar summon to the
+      if (this.$store.state.multipleBlocksSelected.length) {
+        this.$store.commit('multipleBlockActionsIsVisible', true)
+      }
     },
 
     selectBlocks (circle) {
-      console.log('⏺', circle)
-      // async action: get dimensions of all blocks, [works w scrolling],
-      // when? not per circle, do it when inking starts? or after each drag/new block
-      // blockMap (x,y,width,height) would be in $store (also used in the future for space thumbnail generation)
-
-      // X OR watch: update width and height for each block during change actions? might be annoying to remember which block transformations lead to a recalc
-
-      // then:
-      // if circle x,y is in a block x,y,width,height store.addMultipleBlocksSelected(blockId)
-
-      // update block.vue based on store.multipleBlocksSelected
+      this.$store.state.blockMap.map(block => {
+        const x = {
+          value: circle.x,
+          min: block.x,
+          max: block.x + block.width
+        }
+        const y = {
+          value: circle.y,
+          min: block.y,
+          max: block.y + block.height
+        }
+        const isBetweenX = utils.between(x)
+        const isBetweenY = utils.between(y)
+        if (isBetweenX && isBetweenY) {
+          this.$store.commit('addToMultipleBlocksSelected', block.blockId)
+        }
+      })
     },
 
     ink (event) {
@@ -125,7 +135,7 @@ export default {
         this.$store.commit('currentUserIsInking', false)
         return
       }
-      // only create new blocks if router-view is Space
+      // only create new blocks if router-view is Space? || dont have magicInk on the meta pages?
       console.log('🌸🌸 showNewBlockDetailsPop')
     }
   }
