@@ -158,13 +158,13 @@ const currentSpace = {
     }
   },
   actions: {
-    dragBlock: (rootState, endPosition) => {
-      const block = rootState.rootState.currentDraggingBlock
+    dragBlock: (context, endPosition) => {
+      const block = context.rootState.currentDraggingBlock
       const blockId = block.id
       const deltaX = endPosition.x - block.x
       const deltaY = endPosition.y - block.y
       const delta = { x: deltaX, y: deltaY }
-      rootState.commit('moveBlock', { blockId, delta })
+      context.commit('moveBlock', { blockId, delta })
     }
   }
 }
