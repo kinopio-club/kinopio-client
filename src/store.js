@@ -208,7 +208,8 @@ export default new Vuex.Store({
 
     // multiple blocks
     multipleBlocksSelected: [],
-    multipleBlockActionsIsVisible: false
+    multipleBlockActionsIsVisible: false,
+    blockMap: []
   },
   mutations: {
     closeAllPopOvers: (state) => {
@@ -284,8 +285,21 @@ export default new Vuex.Store({
     multipleBlockActionsIsVisible: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.multipleBlockActionsIsVisible = value
+    },
+    generateBlockMap: (state) => {
+      const blocks = document.querySelectorAll('.block')
+      state.blockMap = []
+      blocks.forEach(block => {
+        const rect = block.getBoundingClientRect()
+        state.blockMap.push({
+          blockId: block.dataset.blockId,
+          x: rect.left,
+          y: rect.top,
+          width: rect.width,
+          height: rect.height
+        })
+      })
     }
-
   },
   modules: {
     currentUser,
