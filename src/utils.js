@@ -51,7 +51,37 @@ export default {
     return object
   },
 
-  // 🐙 Connection Path Utils
+  // User Prefs
+
+  storeLocal (key, value) {
+    try {
+      window.localStorage[key] = JSON.stringify(value)
+    } catch (error) {
+      console.warn('Could not save to localStorage. (localStorage is disabled in private Safari windows)')
+    }
+  },
+
+  getLocal (key) {
+    try {
+      return JSON.parse(window.localStorage[key])
+    } catch (error) {}
+  },
+
+  getUserPrefs () {
+    return this.getLocal('userPrefs') || {}
+  },
+
+  getUserPref (key) {
+    return this.getUserPrefs()[key]
+  },
+
+  updateUserPrefs (key, value) {
+    let prefs = this.getUserPrefs()
+    prefs[key] = value
+    this.storeLocal('userPrefs', prefs)
+  },
+
+  // Connection Path Utils 🐙
 
   connectorCoords (blockId) {
     let rect = document.querySelector(`.connector[data-block-id="${blockId}"]`).getBoundingClientRect()
@@ -88,7 +118,7 @@ export default {
     return `m${offsetStart.x},${offsetStart.y} ${curve} ${delta.x},${delta.y}`
   },
 
-  // 👻 Edge Scrolling Utils
+  // Edge Scrolling Utils 👻
 
   distancesFromEdge (viewportSize) {
     return {
