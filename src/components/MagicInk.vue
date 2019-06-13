@@ -44,7 +44,7 @@ export default {
 
     startInking (event) {
       this.$store.commit('currentUserIsInking', true)
-      inkTimer = setInterval(this.inkCirclesPerFrame, 16) // 16ms ~= 60fps
+      inkTimer = window.setInterval(this.inkCirclesPerFrame, 16) // 16ms ~= 60fps
     },
 
     stopInking () {
@@ -111,7 +111,7 @@ export default {
     filterCircles () {
       circles = circles.filter(circle => circle.iteration < maxIterationsToInk)
       if (circles.length === 0) {
-        clearInterval(inkTimer)
+        window.clearInterval(inkTimer)
       }
     },
 
