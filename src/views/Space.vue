@@ -12,7 +12,7 @@ main.space(
       fill="none"
       stroke="#333333"
       stroke-width="3"
-      :d="currentPath"
+      :d="currentConnectionPath"
     )
     template(v-for="connection in connections")
       Connection(:connection="connection")
@@ -20,6 +20,7 @@ main.space(
     template(v-for="block in blocks")
       Block(:block="block")
   ConnectionDetails
+  // MultipleBlockActions
   Footer
 </template>
 
@@ -40,7 +41,7 @@ export default {
   name: 'Space',
   data () {
     return {
-      currentPath: undefined
+      currentConnectionPath: undefined
     }
   },
   computed: {
@@ -93,7 +94,7 @@ export default {
       const current = utils.cursorPosition(event)
       const path = utils.connectionPathBetweenCoords(start, current)
       this.checkCurrentConnectionSuccess(event)
-      this.currentPath = path
+      this.currentConnectionPath = path
       this.$store.dispatch('broadcast/connectingPaths', path)
     },
 
@@ -162,7 +163,8 @@ export default {
       this.$store.commit('currentUserIsDraggingBlock', false)
       this.$store.commit('currentConnectionSuccess', {})
       this.$store.commit('currentConnection', {})
-      this.currentPath = undefined
+      this.$store.commit('multipleBlocksSelected', [])
+      this.currentConnectionPath = undefined
     }
   }
 

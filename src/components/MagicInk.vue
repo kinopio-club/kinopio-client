@@ -49,6 +49,22 @@ export default {
 
     stopInking () {
       this.$store.commit('currentUserIsInking', false)
+      // if store.multipleBlocksSelected.length
+      // show MultipleBlockActions popover, similar summon to the
+    },
+
+    selectBlocks (circle) {
+      console.log('⏺', circle)
+      // async action: get dimensions of all blocks, [works w scrolling],
+      // when? not per circle, do it when inking starts? or after each drag/new block
+      // blockMap (x,y,width,height) would be in $store (also used in the future for space thumbnail generation)
+
+      // X OR watch: update width and height for each block during change actions? might be annoying to remember which block transformations lead to a recalc
+
+      // then:
+      // if circle x,y is in a block x,y,width,height store.addMultipleBlocksSelected(blockId)
+
+      // update block.vue based on store.multipleBlocksSelected
     },
 
     ink (event) {
@@ -64,6 +80,7 @@ export default {
       let color = this.$store.state.currentUser.color
       let circle = { x, y, color, iteration: 0 }
       this.$store.dispatch('broadcast/inking', circle)
+      this.selectBlocks(circle)
       circles.push(circle)
     },
 

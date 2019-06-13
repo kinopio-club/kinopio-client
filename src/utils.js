@@ -33,6 +33,9 @@ export default {
     if (allowUndefined && value === undefined) {
       return
     }
+    if (type === 'array' && Array.isArray(value)) {
+      return
+    }
     if (typeof value !== type) { // eslint-disable-line valid-typeof
       console.error(`passed value is not ${type}`, value)
     }

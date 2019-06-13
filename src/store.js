@@ -204,51 +204,13 @@ export default new Vuex.Store({
 
     // dragging
     currentDraggingBlock: {}, // id, x, y
-    preventDraggedBlockFromOpeningAfterDrag: false
+    preventDraggedBlockFromOpeningAfterDrag: false,
+
+    // multiple blocks
+    multipleBlocksSelected: [],
+    multipleBlockActionsIsVisible: false
   },
   mutations: {
-    currentUserIsDrawingConnection: (state, value) => {
-      utils.typeCheck(value, 'boolean')
-      state.currentUserIsDrawingConnection = value
-    },
-    currentUserIsInking: (state, value) => {
-      utils.typeCheck(value, 'boolean')
-      state.currentUserIsInking = value
-    },
-    currentUserIsDraggingBlock: (state, value) => {
-      utils.typeCheck(value, 'boolean')
-      state.currentUserIsDraggingBlock = value
-    },
-    preventDraggedBlockFromOpeningAfterDrag: (state, value) => {
-      utils.typeCheck(value, 'boolean')
-      state.preventDraggedBlockFromOpeningAfterDrag = value
-    },
-    currentUserIsInkingLocked: (state, value) => {
-      utils.typeCheck(value, 'boolean')
-      state.currentUserIsInkingLocked = value
-    },
-    currentConnectionSuccess: (state, value) => {
-      utils.typeCheck(value, 'object', true)
-      state.currentConnectionSuccess = value
-    },
-    connectionDetailsIsVisible: (state, value) => {
-      utils.typeCheck(value, 'boolean')
-      state.connectionDetailsIsVisible = value
-    },
-    connectionDetailsPosition: (state, position) => {
-      utils.typeCheck(position, 'object')
-      state.connectionDetailsPosition = position
-    },
-    currentDraggingBlock: (state, value) => {
-      let object = state.currentConnection
-      object = utils.updateObject(object, value)
-      state.currentDraggingBlock = object
-    },
-    currentConnection: (state, value) => {
-      let object = state.currentConnection
-      object = utils.updateObject(object, value)
-      state.currentConnection = object
-    },
     closeAllPopOvers: (state) => {
       state.currentSpace.blocks.map(block => {
         block.blockDetailsVisible = false
@@ -257,7 +219,73 @@ export default new Vuex.Store({
         connection.connectionDetailsVisible = false
       })
       state.connectionDetailsIsVisible = false
+    },
+
+    // connecting
+    currentUserIsDrawingConnection: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.currentUserIsDrawingConnection = value
+    },
+    currentConnectionSuccess: (state, object) => {
+      utils.typeCheck(object, 'object', true)
+      state.currentConnectionSuccess = object
+    },
+    currentConnection: (state, updates) => {
+      let object = state.currentConnection
+      object = utils.updateObject(object, updates)
+      state.currentConnection = object
+    },
+
+    // inking
+    currentUserIsInking: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.currentUserIsInking = value
+    },
+    currentUserIsInkingLocked: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.currentUserIsInkingLocked = value
+    },
+
+    // dragging
+    currentUserIsDraggingBlock: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.currentUserIsDraggingBlock = value
+    },
+    preventDraggedBlockFromOpeningAfterDrag: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.preventDraggedBlockFromOpeningAfterDrag = value
+    },
+    currentDraggingBlock: (state, block) => {
+      let object = state.currentConnection
+      object = utils.updateObject(object, block)
+      state.currentDraggingBlock = object
+    },
+
+    // connection details
+    connectionDetailsIsVisible: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.connectionDetailsIsVisible = value
+    },
+    connectionDetailsPosition: (state, position) => {
+      utils.typeCheck(position, 'object')
+      state.connectionDetailsPosition = position
+    },
+
+    // multiple blocks
+    multipleBlocksSelected: (state, blocks) => {
+      console.log(blocks)
+      utils.typeCheck(blocks, 'array')
+      state.multipleBlocksSelected = blocks
+    },
+    addMultipleBlocksSelected: (state, blockId) => {
+      utils.typeCheck(blockId, 'string')
+      state.multipleBlocksSelected.push(blockId)
+    },
+    multipleBlockActionsIsVisible: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.multipleBlockActionsIsVisible = value
     }
+
   },
   modules: {
     currentUser,
