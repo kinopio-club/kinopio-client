@@ -1,4 +1,4 @@
-// functional methods that can see dom, but can't use vue
+// functional methods that can see dom, but can't access components or store
 
 export default {
   cursorPosition (event) {
@@ -69,13 +69,13 @@ export default {
     return this.between(xRange) && this.between(yRange)
   },
 
-  objectIsEmpty (object) {
-    if (Object.getOwnPropertyNames(object).length) {
-      return false
-    } else {
-      return true
-    }
-  },
+  // objectIsEmpty (object) {
+  //   if (Object.getOwnPropertyNames(object).length) {
+  //     return false
+  //   } else {
+  //     return true
+  //   }
+  // },
 
   // User Prefs
 

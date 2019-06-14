@@ -125,15 +125,9 @@ export default {
       })
     },
 
-    isConnectedToDifferentConnector (connection) {
-      if (connection) {
-        return this.$store.state.currentConnection.startBlockId !== connection.blockId
-      }
-    },
-
     checkCurrentConnectionSuccess (event) {
       const cursor = utils.cursorPosition(event)
-      const successfulConnectionToConnector = this.connectors().find(connector => {
+      const connection = this.connectors().find(connector => {
         const xValues = {
           value: cursor.x,
           min: connector.x,
@@ -148,14 +142,17 @@ export default {
         const inYRange = utils.between(yValues)
         return inXRange && inYRange
       })
-      if (!this.isConnectedToSameConnector(successfulConnectionToConnector)) {
-        this.$store.commit('currentConnectionSuccess', successfulConnectionToConnector)
+      if (!connection) { return }
+      if (this.$store.state.currentConnection.startBlockId !== connection.blockId) {
+        this.$store.commit('currentConnectionSuccess', connection)
+      } else {
+        this.$store.commit('currentConnectionSuccess', {})
       }
     },
 
     createConnection () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
-      if (currentConnectionSuccess) {
+      if (currentConnectionSuccess.blockId) {
         const startBlockId = this.$store.state.currentConnection.startBlockId
         const endBlockId = currentConnectionSuccess.blockId
         const path = utils.connectionBetweenBlocks(startBlockId, endBlockId)
