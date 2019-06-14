@@ -60,6 +60,7 @@ export default {
         this.$store.commit('multipleBlockActionsIsVisible', true)
       }
       if (utils.cursorsAreClose(startCursor, endCursor)) {
+        console.log('🌸🌸 showNewBlockDetailsPop')
       }
     },
 

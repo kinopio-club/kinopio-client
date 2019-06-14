@@ -5,7 +5,8 @@ article(:style="position")
     @mousedown="startDraggingBlock"
     @touchstart="startDraggingBlockTouch"
     @click="showBlockDetails"
-    :class="{jiggle: isConnectingTo || isConnectingFrom}"
+    :class="{jiggle: isConnectingTo || isConnectingFrom}",
+    :style="selectedColor"
   )
     p {{name}}
     .connector(
@@ -70,6 +71,15 @@ export default {
       const currentConnection = this.$store.state.currentConnection
       if (currentConnectionSuccess) {
         return currentConnection.startBlockId === this.id
+      } else {
+        return undefined
+      }
+    },
+    selectedColor () {
+      const multipleBlocksSelected = this.$store.state.multipleBlocksSelected
+      const color = this.$store.state.currentUser.color
+      if (multipleBlocksSelected.includes(this.id)) {
+        return { background: color }
       } else {
         return undefined
       }
