@@ -126,10 +126,13 @@ export default {
 // global styles
 
 :root
+  // theme vars
   --primary-background white
   --primary black
   --block-background #e3e3e3
   --hover-background #d8d8d8
+  // non-theme vars
+  --max-z 2147483647
 
 *
   -webkit-overflow-scrolling touch
@@ -156,7 +159,7 @@ dialog
   padding 0
   user-select auto
   pointer-events all
-  z-index 2147483647
+  z-index var(--max-z)
   section
     padding 8px
   section + section

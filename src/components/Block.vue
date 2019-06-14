@@ -87,16 +87,19 @@ export default {
     }
   },
   methods: {
-    startConnecting (event) {
+    createCurrentConnection (event) {
       const cursor = utils.cursorPositionInViewport(event)
       let connectorRect = utils.clone(event.srcElement.getBoundingClientRect())
+      this.$store.commit('currentConnection', {
+        startBlockId: this.id,
+        startConnectorRect: connectorRect
+      })
+      this.$store.commit('currentConnectionCursorStart', cursor)
+    },
+    startConnecting (event) {
       this.$store.commit('closeAllPopOvers')
       if (!this.$store.state.currentUserIsDrawingConnection) {
-        this.$store.commit('currentConnection', {
-          startBlockId: this.id,
-          startConnectorRect: connectorRect
-        })
-        this.$store.commit('currentConnectionCursorStart', cursor)
+        this.createCurrentConnection(event)
       }
       this.$store.commit('currentUserIsDrawingConnection', true)
     },

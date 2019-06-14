@@ -10,6 +10,6 @@ header
 header
   position fixed
   top 0
-  user-select: none
-  z-index 2147483647
+  user-select none
+  z-index calc(var(--max-z) - 1)
 </style>

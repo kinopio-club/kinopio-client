@@ -165,11 +165,10 @@ export default {
       }
     },
 
-    shouldStayConnecting () {
-      if (!this.$store.state.currentUserIsDrawingConnection) { return }
+    shouldContinueConnecting () {
       const cursorStart = this.$store.state.currentConnectionCursorStart
       const cursorEnd = utils.cursorPositionInViewport(event)
-      console.log('🦋', cursorStart, cursorEnd)
+      if (!this.$store.state.currentUserIsDrawingConnection) { return }
       if (cursorStart.x === cursorEnd.x && cursorStart.y === cursorEnd.y) {
         return true
       } else {
@@ -179,8 +178,7 @@ export default {
 
     stopInteractions () {
       console.log('💣 stopInteractions')
-      console.log('👼', this.shouldStayConnecting())
-      if (this.shouldStayConnecting()) { return }
+      if (this.shouldContinueConnecting()) { return }
       if (this.$store.state.currentUserIsDrawingConnection) {
         this.createConnection()
       }
