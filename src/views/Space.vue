@@ -22,7 +22,7 @@ main.space(
     template(v-for="block in blocks")
       Block(:block="block")
   ConnectionDetails
-  // MultipleBlockActions
+  MultipleBlockActions
   Footer
 </template>
 
@@ -31,6 +31,7 @@ import utils from '@/utils.js'
 import Connection from '@/components/Connection.vue'
 import ConnectionDetails from '@/components/pop-overs/ConnectionDetails.vue'
 import Block from '@/components/Block.vue'
+import MultipleBlockActions from '@/components/pop-overs/MultipleBlockActions.vue'
 import Footer from '@/components/Footer.vue'
 
 let startCursor, endCursor
@@ -40,6 +41,7 @@ export default {
     Block,
     Connection,
     ConnectionDetails,
+    MultipleBlockActions,
     Footer
   },
   name: 'Space',
@@ -123,9 +125,9 @@ export default {
       })
     },
 
-    isConnectedToSameConnector (connection) {
+    isConnectedToDifferentConnector (connection) {
       if (connection) {
-        return this.$store.state.currentConnection.startBlockId === connection.blockId
+        return this.$store.state.currentConnection.startBlockId !== connection.blockId
       }
     },
 

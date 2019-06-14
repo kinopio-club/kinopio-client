@@ -1,29 +1,30 @@
 <template lang="pug">
 dialog.pop-over(v-if="visible" :open="visible" :style="position")
   section
-    p details for connection from block {{connection.startBlockId}} to {{connection.endBlockId}}
+    p multi block actions
     // input(placeholder="name" v-model="name")
     button hiyo
 </template>
 
 <script>
 export default {
-  name: 'ConnectionDetails',
+  name: 'MultipleBlockActions',
   computed: {
-    visible () { return this.$store.state.connectionDetailsIsVisible },
+    visible () { return this.$store.state.multipleBlockActionsIsVisible },
     position () {
-      const cursor = this.$store.state.connectionDetailsPosition
+      const cursor = this.$store.state.multipleBlockActionsPosition
+      console.log('📮', cursor)
       return {
         left: `${cursor.x}px`,
         top: `${cursor.y}px`
       }
-    },
-    connection () {
-      let connections = this.$store.state.currentSpace.connections
-      return connections.find(connection => {
-        return connection.connectionDetailsVisible === true
-      })
     }
+    // connection () {
+    //   let connections = this.$store.state.currentSpace.connections
+    //   return connections.find(connection => {
+    //     return connection.connectionDetailsVisible === true
+    //   })
+    // }
     // name: {
     //   get () {
     //     return this.connection.name

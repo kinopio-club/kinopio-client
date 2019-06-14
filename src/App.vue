@@ -156,13 +156,11 @@ dialog
   padding 0
   user-select auto
   pointer-events all
+  z-index 2147483647
   section
     padding 8px
   section + section
     border-bottom: 1px solid var(--primary)
-
-.max-z
-  z-index 2147483647
 
 //
 .meta

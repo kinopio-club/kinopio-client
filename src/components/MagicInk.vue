@@ -56,6 +56,7 @@ export default {
       this.$store.commit('currentUserIsInking', false)
       this.$store.commit('closeAllPopOvers')
       if (this.$store.state.multipleBlocksSelected.length) {
+        console.log('✅multipleBlockActionsIsVisible, multipleBlocksSelected:', this.$store.state.multipleBlocksSelected)
         this.$store.commit('multipleBlockActionsPosition', endCursor)
         this.$store.commit('multipleBlockActionsIsVisible', true)
       }

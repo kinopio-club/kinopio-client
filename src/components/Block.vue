@@ -12,7 +12,8 @@ article(:style="position")
     .connector(
       :style="testcolor"
       @mousedown.stop="startConnecting"
-      @touchstart.stop="startConnectingTouch"
+      @touchstart.stop="startConnecting"
+      @click.stop
       :data-block-id="id"
       :class="{ active: isConnectingTo }"
     ) O
@@ -86,7 +87,7 @@ export default {
     }
   },
   methods: {
-    startConnecting () {
+    startConnecting (event) {
       let connectorRect = utils.clone(event.srcElement.getBoundingClientRect())
       this.$store.commit('closeAllPopOvers')
       this.$store.commit('currentUserIsDrawingConnection', true)
@@ -95,10 +96,7 @@ export default {
         startConnectorRect: connectorRect
       })
     },
-    startConnectingTouch () {
-      this.startConnecting()
-    },
-    startDraggingBlock () {
+    startDraggingBlock (event) {
       const cursor = utils.cursorPosition(event)
       const currentDraggingBlock = {
         id: this.id,
