@@ -2,7 +2,7 @@
 article(:style="position" :data-block-id="id")
   .block(
     @mousedown="startDraggingBlock"
-    @touchstart="startDraggingBlockTouch"
+    @touchstart="startDraggingBlock"
     @click="showBlockDetails"
     :class="{jiggle: isConnectingTo || isConnectingFrom}",
     :style="selectedColor"
@@ -106,9 +106,6 @@ export default {
       this.$store.commit('currentSpace/incrementBlockZ', this.id)
       this.$store.commit('currentUserIsDraggingBlock', true)
       this.$store.commit('currentDraggingBlock', currentDraggingBlock)
-    },
-    startDraggingBlockTouch () {
-      this.startDraggingBlock()
     },
     showBlockDetails () {
       if (this.$store.state.preventDraggedBlockFromOpeningAfterDrag) {
