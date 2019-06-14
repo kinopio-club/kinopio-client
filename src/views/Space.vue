@@ -1,9 +1,11 @@
 <template lang="pug">
 main.space(
-  @mousemove="interact"
-  @touchmove="interact"
+  @mousedown="initInteractions"
+  @touchstart="initInteractions"
   @mouseup="stopInteractions"
   @touchend="stopInteractions"
+  @mousemove="interact"
+  @touchmove="interact"
   :class="{'is-interacting': isInteracting, 'is-inking': isInking}"
 )
   svg.connections
@@ -30,6 +32,8 @@ import Connection from '@/components/Connection.vue'
 import ConnectionDetails from '@/components/pop-overs/ConnectionDetails.vue'
 import Block from '@/components/Block.vue'
 import Footer from '@/components/Footer.vue'
+
+let startCursor, endCursor
 
 export default {
   components: {
@@ -72,8 +76,13 @@ export default {
     }
   },
   methods: {
+    initInteractions (event) {
+      startCursor = utils.cursorPosition(event)
+    },
+
     interact (event) {
       if (this.$store.state.currentUserIsDraggingBlock) {
+        endCursor = utils.cursorPosition(event)
         this.dragBlock(event)
       }
       if (this.$store.state.currentUserIsDrawingConnection) {
@@ -82,10 +91,11 @@ export default {
     },
 
     dragBlock (event) {
-      const endPosition = utils.cursorPosition(event)
-      this.$store.dispatch('currentSpace/dragBlock', endPosition)
-      this.$store.commit('preventDraggedBlockFromOpeningAfterDrag', true)
-      this.$store.commit('currentDraggingBlock', { x: endPosition.x, y: endPosition.y })
+      this.$store.dispatch('currentSpace/dragBlock', endCursor)
+      this.$store.commit('currentDraggingBlock', { x: endCursor.x, y: endCursor.y })
+      if (!utils.cursorsAreClose(startCursor, endCursor)) {
+        this.$store.commit('preventDraggedBlockFromOpeningAfterDrag', true)
+      }
     },
 
     drawConnection (event) {

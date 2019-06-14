@@ -209,6 +209,7 @@ export default new Vuex.Store({
     // multiple blocks
     multipleBlocksSelected: [],
     multipleBlockActionsIsVisible: false,
+    multipleBlockActionsPosition: {},
     blockMap: []
   },
   mutations: {
