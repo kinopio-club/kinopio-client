@@ -26,7 +26,7 @@ export default {
   },
   methods: {
     showConnectionDetails (event) {
-      const detailsPosition = utils.cursorPositionInViewport(event)
+      const detailsPosition = utils.cursorPositionInPage(event)
       this.$store.commit('closeAllPopOvers')
       this.$store.commit('currentSpace/connectionDetailsVisible', this.id)
       this.$store.commit('connectionDetailsIsVisible', true)
