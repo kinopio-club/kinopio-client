@@ -48,6 +48,7 @@ export default {
       this.$store.commit('currentUserIsInking', true)
       this.$store.commit('multipleBlocksSelected', [])
       this.$store.commit('generateBlockMap')
+      this.$store.commit('closeAllPopOvers')
       inkTimer = window.setInterval(this.inkCirclesPerFrame, 16) // 16ms ~= 60fps
     },
 

@@ -6,9 +6,9 @@
   @mouseup="unlockViewport"
   @touchend="unlockViewport"
 )
+  Header
   MagicInk
   router-view
-  Header
 </template>
 
 <script>

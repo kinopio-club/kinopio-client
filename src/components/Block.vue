@@ -60,6 +60,7 @@ export default {
     },
     isConnectingTo () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
+      // console.log('currentConnectionSuccess',currentConnectionSuccess)
       if (currentConnectionSuccess) {
         return currentConnectionSuccess.blockId === this.id
       } else {
@@ -87,13 +88,17 @@ export default {
   },
   methods: {
     startConnecting (event) {
+      const cursor = utils.cursorPositionInViewport(event)
       let connectorRect = utils.clone(event.srcElement.getBoundingClientRect())
       this.$store.commit('closeAllPopOvers')
+      if (!this.$store.state.currentUserIsDrawingConnection) {
+        this.$store.commit('currentConnection', {
+          startBlockId: this.id,
+          startConnectorRect: connectorRect
+        })
+        this.$store.commit('currentConnectionCursorStart', cursor)
+      }
       this.$store.commit('currentUserIsDrawingConnection', true)
-      this.$store.commit('currentConnection', {
-        startBlockId: this.id,
-        startConnectorRect: connectorRect
-      })
     },
     startDraggingBlock (event) {
       const cursor = utils.cursorPositionInViewport(event)

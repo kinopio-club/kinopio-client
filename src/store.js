@@ -199,6 +199,7 @@ export default new Vuex.Store({
     // connecting
     currentConnection: {}, // startBlockId, startConnectorRect
     currentConnectionSuccess: {},
+    currentConnectionCursorStart: {},
     connectionDetailsIsVisible: false,
     connectionDetailsPosition: {},
 
@@ -232,6 +233,10 @@ export default new Vuex.Store({
     currentConnectionSuccess: (state, object) => {
       utils.typeCheck(object, 'object', true)
       state.currentConnectionSuccess = object
+    },
+    currentConnectionCursorStart: (state, object) => {
+      utils.typeCheck(object, 'object')
+      state.currentConnectionCursorStart = object
     },
     currentConnection: (state, updates) => {
       let object = state.currentConnection

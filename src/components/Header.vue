@@ -11,4 +11,5 @@ header
   position fixed
   top 0
   user-select: none
+  z-index 2147483647
 </style>
