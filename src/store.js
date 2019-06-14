@@ -220,6 +220,7 @@ export default new Vuex.Store({
         connection.connectionDetailsVisible = false
       })
       state.connectionDetailsIsVisible = false
+      state.multipleBlockActionsIsVisible = false
     },
 
     // connecting
@@ -300,7 +301,12 @@ export default new Vuex.Store({
           height: rect.height
         })
       })
+    },
+    multipleBlockActionsPosition: (state, position) => {
+      utils.typeCheck(position, 'object')
+      state.multipleBlockActionsPosition = position
     }
+
   },
   modules: {
     currentUser,

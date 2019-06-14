@@ -6,7 +6,6 @@ canvas#inking.inking(
   @touchend="stopInking"
   @mousemove="ink"
   @touchmove="ink"
-  @click="showNewBlockDetailsPop"
   :width="width"
   :height="height"
 )
@@ -18,7 +17,7 @@ import utils from '@/utils.js'
 const circleSize = 20
 const maxIterationsToInk = 200 // higher is longer ink fade time
 const rateOfIterationDecay = 0.03 // lower is slower decay
-let canvas, context, inkTimer
+let canvas, context, inkTimer, startCursor, endCursor
 let circles = []
 
 export default {
@@ -45,15 +44,22 @@ export default {
     },
 
     startInking (event) {
+      startCursor = utils.cursorPosition(event)
       this.$store.commit('currentUserIsInking', true)
+      this.$store.commit('multipleBlocksSelected', [])
       this.$store.commit('generateBlockMap')
       inkTimer = window.setInterval(this.inkCirclesPerFrame, 16) // 16ms ~= 60fps
     },
 
     stopInking () {
+      endCursor = utils.cursorPosition(event)
       this.$store.commit('currentUserIsInking', false)
+      this.$store.commit('closeAllPopOvers')
       if (this.$store.state.multipleBlocksSelected.length) {
+        this.$store.commit('multipleBlockActionsPosition', endCursor)
         this.$store.commit('multipleBlockActionsIsVisible', true)
+      }
+      if (utils.cursorsAreClose(startCursor, endCursor)) {
       }
     },
 
@@ -127,17 +133,8 @@ export default {
 
     clearCanvas () {
       context.clearRect(0, 0, this.width, this.height)
-    },
-
-    showNewBlockDetailsPop () {
-      this.$store.commit('closeAllPopOvers')
-      if (this.$store.state.currentUserIsInking) {
-        this.$store.commit('currentUserIsInking', false)
-        return
-      }
-      // only create new blocks if router-view is Space? || dont have magicInk on the meta pages?
-      console.log('🌸🌸 showNewBlockDetailsPop')
     }
+
   }
 }
 </script>

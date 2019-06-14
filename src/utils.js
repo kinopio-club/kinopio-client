@@ -54,6 +54,21 @@ export default {
     return object
   },
 
+  cursorsAreClose (startCursor, endCursor) {
+    const threshold = 5
+    const xRange = {
+      value: endCursor.x,
+      min: startCursor.x - threshold,
+      max: startCursor.x + threshold
+    }
+    const yRange = {
+      value: endCursor.y,
+      min: startCursor.y - threshold,
+      max: startCursor.y + threshold
+    }
+    return this.between(xRange) && this.between(yRange)
+  },
+
   // User Prefs
 
   storeLocal (key, value) {
