@@ -160,7 +160,7 @@ dialog
   section
     padding 8px
   section + section
-    border-bottom: 1px solid var(--primary)
+    border-top: 1px solid var(--primary)
 
 //
 .meta

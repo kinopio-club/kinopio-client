@@ -2,9 +2,12 @@
 dialog.pop-over(v-if="visible" :open="visible" :style="position")
   section
     p details for connection from block {{connection.startBlockId}} to {{connection.endBlockId}}
-    button connect
+    input(placeholder="name" value="connection name")
     button disconnect
-    button archive
+    button [x] new uses last connection type
+  section
+    button + connection
+    p select existing conneciton type
 </template>
 
 <script>

@@ -2,8 +2,9 @@
 dialog.pop-over(v-if="visible" :open="visible" :style="position")
   section
     p multi actions for block ids: {{blocksSelected}}
-    // input(placeholder="name" v-model="name")
-    button hiyo
+    button connect
+    button disconnect
+    button archive
 </template>
 
 <script>
