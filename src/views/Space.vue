@@ -142,7 +142,10 @@ export default {
         const inYRange = utils.between(yValues)
         return inXRange && inYRange
       })
-      if (!connection) { return }
+      if (!connection) {
+        this.$store.commit('currentConnectionSuccess', {})
+        return
+      }
       if (this.$store.state.currentConnection.startBlockId !== connection.blockId) {
         this.$store.commit('currentConnectionSuccess', connection)
       } else {
