@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.pop-over(v-if="visible" :open="visible" :style="position")
   section
-    p multi block actions
+    p multi actions for block ids: {{blocksSelected}}
     // input(placeholder="name" v-model="name")
     button hiyo
 </template>
@@ -13,18 +13,15 @@ export default {
     visible () { return this.$store.state.multipleBlockActionsIsVisible },
     position () {
       const cursor = this.$store.state.multipleBlockActionsPosition
-      console.log('📮', cursor)
+      console.log('💐', this.$store.state.multipleBlocksSelected)
       return {
         left: `${cursor.x}px`,
         top: `${cursor.y}px`
       }
+    },
+    blocksSelected () {
+      return this.$store.state.multipleBlocksSelected
     }
-    // connection () {
-    //   let connections = this.$store.state.currentSpace.connections
-    //   return connections.find(connection => {
-    //     return connection.connectionDetailsVisible === true
-    //   })
-    // }
     // name: {
     //   get () {
     //     return this.connection.name
