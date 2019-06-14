@@ -1,7 +1,6 @@
 <template lang="pug">
-article(:style="position")
+article(:style="position" :data-block-id="id")
   .block(
-    :data-block-id="id"
     @mousedown="startDraggingBlock"
     @touchstart="startDraggingBlockTouch"
     @click="showBlockDetails"
@@ -97,7 +96,7 @@ export default {
       })
     },
     startDraggingBlock (event) {
-      const cursor = utils.cursorPosition(event)
+      const cursor = utils.cursorPositionInViewport(event)
       const currentDraggingBlock = {
         id: this.id,
         x: cursor.x,

@@ -107,7 +107,7 @@ export default {
 
     scrollAtEdges (event) {
       if (!this.shouldOnlyScrollAtEdges() || !_event) { return }
-      const position = utils.cursorPosition(_event)
+      const position = utils.cursorPositionInViewport(_event)
       const delta = {
         x: this.pxToScroll(position.x, 'x'),
         y: this.pxToScroll(position.y, 'y')

@@ -1,7 +1,7 @@
 // functional methods that can see dom, but can't access components or store
 
 export default {
-  cursorPosition (event) {
+  cursorPositionInViewport (event) {
     let x, y
     if (event.touches) {
       x = event.touches[0].clientX
@@ -9,6 +9,18 @@ export default {
     } else {
       x = event.clientX
       y = event.clientY
+    }
+    return { x, y }
+  },
+
+  cursorPositionInPage (event) {
+    let x, y
+    if (event.touches) {
+      x = event.touches[0].pageX
+      y = event.touches[0].pageY
+    } else {
+      x = event.pageX
+      y = event.pageY
     }
     return { x, y }
   },

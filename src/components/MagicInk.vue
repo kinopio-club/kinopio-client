@@ -44,7 +44,7 @@ export default {
     },
 
     startInking (event) {
-      startCursor = utils.cursorPosition(event)
+      startCursor = utils.cursorPositionInPage(event)
       this.$store.commit('currentUserIsInking', true)
       this.$store.commit('multipleBlocksSelected', [])
       this.$store.commit('generateBlockMap')
@@ -52,7 +52,7 @@ export default {
     },
 
     stopInking () {
-      endCursor = utils.cursorPosition(event)
+      endCursor = utils.cursorPositionInPage(event)
       this.$store.commit('currentUserIsInking', false)
       this.$store.commit('closeAllPopOvers')
       if (this.$store.state.multipleBlocksSelected.length) {

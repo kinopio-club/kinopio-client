@@ -79,12 +79,12 @@ export default {
   },
   methods: {
     initInteractions (event) {
-      startCursor = utils.cursorPosition(event)
+      startCursor = utils.cursorPositionInViewport(event)
     },
 
     interact (event) {
       if (this.$store.state.currentUserIsDraggingBlock) {
-        endCursor = utils.cursorPosition(event)
+        endCursor = utils.cursorPositionInViewport(event)
         this.dragBlock(event)
       }
       if (this.$store.state.currentUserIsDrawingConnection) {
@@ -103,7 +103,7 @@ export default {
     drawConnection (event) {
       const startRect = this.$store.state.currentConnection.startConnectorRect
       const start = utils.elementCenter(startRect)
-      const current = utils.cursorPosition(event)
+      const current = utils.cursorPositionInViewport(event)
       const path = utils.connectionPathBetweenCoords(start, current)
       this.checkCurrentConnectionSuccess(event)
       this.currentConnectionPath = path
@@ -126,7 +126,7 @@ export default {
     },
 
     checkCurrentConnectionSuccess (event) {
-      const cursor = utils.cursorPosition(event)
+      const cursor = utils.cursorPositionInViewport(event)
       const connection = this.connectors().find(connector => {
         const xValues = {
           value: cursor.x,

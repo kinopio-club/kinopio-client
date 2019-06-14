@@ -2,6 +2,7 @@
 dialog.pop-over(v-if="blockDetailsVisible" :open="blockDetailsVisible")
   section
     input(placeholder="name" v-model="name")
+    p blockid {{id}}
     // div
       // button hihi
 </template>

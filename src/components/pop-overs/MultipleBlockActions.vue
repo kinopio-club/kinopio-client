@@ -13,7 +13,7 @@ export default {
     visible () { return this.$store.state.multipleBlockActionsIsVisible },
     position () {
       const cursor = this.$store.state.multipleBlockActionsPosition
-      console.log('💐', this.$store.state.multipleBlocksSelected)
+      console.log('💐', cursor)
       return {
         left: `${cursor.x}px`,
         top: `${cursor.y}px`

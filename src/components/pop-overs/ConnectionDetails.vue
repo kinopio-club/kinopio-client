@@ -13,6 +13,7 @@ export default {
     visible () { return this.$store.state.connectionDetailsIsVisible },
     position () {
       const cursor = this.$store.state.connectionDetailsPosition
+      console.log(cursor)
       return {
         left: `${cursor.x}px`,
         top: `${cursor.y}px`

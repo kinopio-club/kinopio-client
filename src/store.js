@@ -293,11 +293,12 @@ export default new Vuex.Store({
       const blocks = document.querySelectorAll('.block')
       state.blockMap = []
       blocks.forEach(block => {
+        const article = block.closest('article')
         const rect = block.getBoundingClientRect()
         state.blockMap.push({
-          blockId: block.dataset.blockId,
-          x: rect.left,
-          y: rect.top,
+          blockId: article.dataset.blockId,
+          x: parseInt(article.style.left),
+          y: parseInt(article.style.top),
           width: rect.width,
           height: rect.height
         })
