@@ -108,24 +108,6 @@ const currentSpace = {
       connection.connectionDetailsVisible = false
       state.connections.push(connection)
     },
-    moveBlock: (state, { blockId, delta }) => {
-      const maxOffset = 0
-      state.blocks.map(block => {
-        if (block.id === blockId) {
-          block.x += delta.x || 0
-          block.y += delta.y || 0
-          block.x = Math.max(block.x, maxOffset)
-          block.y = Math.max(block.y, maxOffset)
-          // console.log(block.x, block.y, delta.x, delta.y)
-        }
-      })
-      const connections = state.connections.filter(connection => {
-        return (connection.startBlockId === blockId || connection.endBlockId === blockId)
-      })
-      connections.forEach(connection => {
-        connection.path = utils.connectionBetweenBlocks(connection.startBlockId, connection.endBlockId)
-      })
-    },
     incrementBlockZ (state, blockId) {
       state.blocks.map((block, index) => {
         block.z = index
@@ -155,16 +137,59 @@ const currentSpace = {
           connection.connectionDetailsVisible = true
         }
       })
+    },
+
+    moveBlock: (state, { blockId, delta }) => {
+      console.log('moveBlock', blockId, delta)
+      const maxOffset = 0
+      state.blocks.map(block => {
+        if (block.id === blockId) {
+          // console.log('block to move', delta.x, delta.y, maxOffset)
+          block.x += delta.x || 0
+          block.y += delta.y || 0
+          block.x = Math.max(block.x, maxOffset)
+          block.y = Math.max(block.y, maxOffset)
+          // console.log('moved', block)
+        }
+      })
+      const connections = state.connections.filter(connection => {
+        return (connection.startBlockId === blockId || connection.endBlockId === blockId)
+      })
+      connections.forEach(connection => {
+        connection.path = utils.connectionBetweenBlocks(connection.startBlockId, connection.endBlockId)
+      })
     }
   },
   actions: {
-    dragBlock: (context, endPosition) => {
-      const block = context.rootState.currentDraggingBlock
-      const blockId = block.id
-      const deltaX = endPosition.x - block.x
-      const deltaY = endPosition.y - block.y
-      const delta = { x: deltaX, y: deltaY }
-      context.commit('moveBlock', { blockId, delta })
+    dragBlocks: (context, { endCursor, prevCursor }) => {
+      // const multipleBlocksSelected = context.rootState.multipleBlocksSelected
+      const currentDraggingBlockId = context.rootState.currentDraggingBlockId
+      let deltaX, deltaY, delta
+
+      // if (multipleBlocksSelected.length) {
+      //   const blocks = context.rootState.currentSpace.blocks.filter(block => {
+      //     return multipleBlocksSelected.includes(block.id)
+      //   })
+      //   blocks.forEach(block => {
+      //     blockId = block.id
+      //     deltaX = endCursor.x - block.x
+      //     deltaY = endCursor.y - block.y
+      //     delta = { x: deltaX, y: deltaY }
+      //     context.commit('moveBlock', { blockId, delta })
+      //   })
+      // } else {
+
+      // const block = context.rootState.currentSpace.blocks.find(block => {
+      //   return currentDraggingBlockId === block.id
+      // })
+      deltaX = endCursor.x - prevCursor.x
+      deltaY = endCursor.y - prevCursor.y
+      delta = { x: deltaX, y: deltaY }
+      context.commit('moveBlock', {
+        blockId: currentDraggingBlockId,
+        delta
+      })
+      // }
     }
   }
 }
@@ -204,11 +229,11 @@ export default new Vuex.Store({
     connectionDetailsPosition: {},
 
     // dragging
-    currentDraggingBlock: {}, // id, x, y
-    preventDraggedBlockFromOpeningAfterDrag: false,
+    currentDraggingBlockId: '', // id
+    preventDraggedBlockFromShowingDetails: false,
 
     // multiple blocks
-    multipleBlocksSelected: [],
+    multipleBlocksSelected: [], // ids
     multipleBlockActionsIsVisible: false,
     multipleBlockActionsPosition: {},
     blockMap: []
@@ -259,14 +284,13 @@ export default new Vuex.Store({
       utils.typeCheck(value, 'boolean')
       state.currentUserIsDraggingBlock = value
     },
-    preventDraggedBlockFromOpeningAfterDrag: (state, value) => {
+    preventDraggedBlockFromShowingDetails: (state, value) => {
       utils.typeCheck(value, 'boolean')
-      state.preventDraggedBlockFromOpeningAfterDrag = value
+      state.preventDraggedBlockFromShowingDetails = value
     },
-    currentDraggingBlock: (state, block) => {
-      let object = state.currentConnection
-      object = utils.updateObject(object, block)
-      state.currentDraggingBlock = object
+    currentDraggingBlockId: (state, blockId) => {
+      utils.typeCheck(blockId, 'string')
+      state.currentDraggingBlockId = blockId
     },
 
     // connection details
@@ -301,7 +325,7 @@ export default new Vuex.Store({
         const article = block.closest('article')
         const rect = block.getBoundingClientRect()
         state.blockMap.push({
-          blockId: article.dataset.blockId,
+          blockId: block.dataset.blockId,
           x: parseInt(article.style.left),
           y: parseInt(article.style.top),
           width: rect.width,
@@ -313,7 +337,6 @@ export default new Vuex.Store({
       utils.typeCheck(position, 'object')
       state.multipleBlockActionsPosition = position
     }
-
   },
   modules: {
     currentUser,

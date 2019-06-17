@@ -6,6 +6,7 @@ article(:style="position" :data-block-id="id")
     @click="showBlockDetails"
     :class="{jiggle: isConnectingTo || isConnectingFrom}",
     :style="selectedColor"
+    :data-block-id="id"
   )
     p {{name}}
     .connector(
@@ -104,20 +105,14 @@ export default {
       this.$store.commit('currentUserIsDrawingConnection', true)
     },
     startDraggingBlock (event) {
-      const cursor = utils.cursorPositionInViewport(event)
-      const currentDraggingBlock = {
-        id: this.id,
-        x: cursor.x,
-        y: cursor.y
-      }
       this.$store.commit('closeAllPopOvers')
-      this.$store.commit('currentSpace/incrementBlockZ', this.id)
       this.$store.commit('currentUserIsDraggingBlock', true)
-      this.$store.commit('currentDraggingBlock', currentDraggingBlock)
+      this.$store.commit('currentSpace/incrementBlockZ', this.id)
+      this.$store.commit('currentDraggingBlockId', this.id)
     },
     showBlockDetails () {
-      if (this.$store.state.preventDraggedBlockFromOpeningAfterDrag) {
-        this.$store.commit('preventDraggedBlockFromOpeningAfterDrag', false)
+      if (this.$store.state.preventDraggedBlockFromShowingDetails) {
+        this.$store.commit('preventDraggedBlockFromShowingDetails', false)
         return
       }
       this.$store.commit('closeAllPopOvers')

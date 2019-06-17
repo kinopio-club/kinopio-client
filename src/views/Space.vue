@@ -34,7 +34,7 @@ import Block from '@/components/Block.vue'
 import MultipleBlockActions from '@/components/pop-overs/MultipleBlockActions.vue'
 import Footer from '@/components/Footer.vue'
 
-let startCursor, endCursor
+let startCursor, prevCursor, endCursor
 
 export default {
   components: {
@@ -84,7 +84,6 @@ export default {
 
     interact (event) {
       if (this.$store.state.currentUserIsDraggingBlock) {
-        endCursor = utils.cursorPositionInViewport(event)
         this.dragBlock(event)
       }
       if (this.$store.state.currentUserIsDrawingConnection) {
@@ -92,12 +91,21 @@ export default {
       }
     },
 
-    dragBlock (event) {
-      this.$store.dispatch('currentSpace/dragBlock', endCursor)
-      this.$store.commit('currentDraggingBlock', { x: endCursor.x, y: endCursor.y })
+    checkShouldShowDetails () {
       if (!utils.cursorsAreClose(startCursor, endCursor)) {
-        this.$store.commit('preventDraggedBlockFromOpeningAfterDrag', true)
+        this.$store.commit('preventDraggedBlockFromShowingDetails', true)
       }
+    },
+
+    dragBlock (event) {
+      endCursor = utils.cursorPositionInViewport(event)
+      const prev = prevCursor || startCursor
+      this.$store.dispatch('currentSpace/dragBlocks', {
+        endCursor,
+        prevCursor: prev
+      })
+      prevCursor = utils.cursorPositionInViewport(event)
+      this.checkShouldShowDetails()
     },
 
     drawConnection (event) {
@@ -189,6 +197,7 @@ export default {
       this.$store.commit('currentConnection', {})
       this.$store.commit('multipleBlocksSelected', [])
       this.currentConnectionPath = undefined
+      prevCursor = undefined
     }
   }
 
