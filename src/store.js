@@ -144,12 +144,10 @@ const currentSpace = {
       const maxOffset = 0
       state.blocks.map(block => {
         if (block.id === blockId) {
-          // console.log('block to move', delta.x, delta.y, maxOffset)
           block.x += delta.x || 0
           block.y += delta.y || 0
           block.x = Math.max(block.x, maxOffset)
           block.y = Math.max(block.y, maxOffset)
-          // console.log('moved', block)
         }
       })
       const connections = state.connections.filter(connection => {
@@ -162,34 +160,21 @@ const currentSpace = {
   },
   actions: {
     dragBlocks: (context, { endCursor, prevCursor }) => {
-      // const multipleBlocksSelected = context.rootState.multipleBlocksSelected
+      const multipleBlocksSelected = context.rootState.multipleBlocksSelected
       const currentDraggingBlockId = context.rootState.currentDraggingBlockId
-      let deltaX, deltaY, delta
-
-      // if (multipleBlocksSelected.length) {
-      //   const blocks = context.rootState.currentSpace.blocks.filter(block => {
-      //     return multipleBlocksSelected.includes(block.id)
-      //   })
-      //   blocks.forEach(block => {
-      //     blockId = block.id
-      //     deltaX = endCursor.x - block.x
-      //     deltaY = endCursor.y - block.y
-      //     delta = { x: deltaX, y: deltaY }
-      //     context.commit('moveBlock', { blockId, delta })
-      //   })
-      // } else {
-
-      // const block = context.rootState.currentSpace.blocks.find(block => {
-      //   return currentDraggingBlockId === block.id
-      // })
-      deltaX = endCursor.x - prevCursor.x
-      deltaY = endCursor.y - prevCursor.y
-      delta = { x: deltaX, y: deltaY }
-      context.commit('moveBlock', {
-        blockId: currentDraggingBlockId,
-        delta
-      })
-      // }
+      const blocks = context.rootState.currentSpace.blocks
+      const deltaX = endCursor.x - prevCursor.x
+      const deltaY = endCursor.y - prevCursor.y
+      const delta = { x: deltaX, y: deltaY }
+      if (multipleBlocksSelected.length) {
+        blocks.map(block => {
+          if (multipleBlocksSelected.includes(block.id)) {
+            context.commit('moveBlock', { blockId: block.id, delta })
+          }
+        })
+      } else {
+        context.commit('moveBlock', { blockId: currentDraggingBlockId, delta })
+      }
     }
   }
 }
