@@ -1,11 +1,11 @@
 <template lang="pug">
 canvas#inking.inking(
   @mousedown="startInking"
-  @touchstart="startInking"
+  @touchstart="startInkingAndLocking"
+  @mousemove="inking"
+  @touchmove="inking"
   @mouseup="stopInking"
   @touchend="stopInking"
-  @mousemove="ink"
-  @touchmove="ink"
   :width="width"
   :height="height"
 )
@@ -16,8 +16,10 @@ import utils from '@/utils.js'
 
 const circleSize = 20
 const maxIterationsToInk = 200 // higher is longer ink fade time
-const rateOfIterationDecay = 0.03 // lower is slower decay
-let canvas, context, startCursor, endCursor, drawTimer
+const rateOfIterationDecay = 0.03 // higher is faster decay
+const maxIterationsToLock = 12 // higher is slower locking speed
+const initialLockCircleSize = 30 // higher is bigger lock circle sizes
+let canvas, context, startCursor, currentCursor, endCursor, inkingCirclesTimer, lockingAnimationTimer, currentUserIsLocking, lockingIterationFrame
 let circles = []
 
 export default {
@@ -44,8 +46,8 @@ export default {
     },
 
     startInking (event) {
-      if (!drawTimer) {
-        drawTimer = window.requestAnimationFrame(this.inkCirclesPerFrame)
+      if (!inkingCirclesTimer) {
+        inkingCirclesTimer = window.requestAnimationFrame(this.inkCirclesPerFrame)
       }
       startCursor = utils.cursorPositionInPage(event)
       this.$store.commit('currentUserIsInking', true)
@@ -54,9 +56,99 @@ export default {
       this.$store.commit('closeAllPopOvers')
     },
 
+    startInkingAndLocking (event) {
+      this.startInking(event)
+      currentCursor = utils.cursorPositionInPage(event)
+      currentUserIsLocking = true
+      lockingIterationFrame = 1
+      if (!lockingAnimationTimer) {
+        lockingAnimationTimer = window.requestAnimationFrame(this.lockingAnimationPerFrame)
+      }
+    },
+
+    lockingAnimationPerFrame () {
+      if (!utils.cursorsAreClose(startCursor, currentCursor)) {
+        currentUserIsLocking = false
+      }
+
+      if (currentUserIsLocking) {
+        const currentFrame = Math.min(lockingIterationFrame++, maxIterationsToLock)
+        const exponentialDecay = this.exponentialDecay(currentFrame)
+        const radius = initialLockCircleSize * exponentialDecay
+        const color = this.$store.state.currentUser.color
+        context.beginPath()
+        context.arc(startCursor.x, startCursor.y, radius, 0, 2 * Math.PI)
+        context.closePath()
+        context.globalAlpha = currentFrame / maxIterationsToLock
+        context.fillStyle = color
+        context.fill()
+      }
+      if (lockingIterationFrame >= maxIterationsToLock) {
+        window.cancelAnimationFrame(lockingAnimationTimer)
+        this.$store.commit('currentUserIsInkingLocked', true)
+      }
+      window.requestAnimationFrame(this.lockingAnimationPerFrame)
+    },
+
+    inking (event) {
+      currentCursor = utils.cursorPositionInPage(event)
+      if (!this.$store.state.currentUserIsInking) { return }
+      let x, y
+      if (event.touches) {
+        x = event.touches[0].pageX
+        y = event.touches[0].pageY
+      } else {
+        x = event.pageX
+        y = event.pageY
+      }
+      let color = this.$store.state.currentUser.color
+      let circle = { x, y, color, iteration: 0 }
+      this.$store.dispatch('broadcast/inking', circle)
+      this.selectBlocks(circle)
+      circles.push(circle)
+    },
+
+    inkCirclesPerFrame () {
+      this.filterCircles()
+      this.clearInkingCanvas()
+      circles.forEach(item => {
+        item.iteration++
+        let circle = JSON.parse(JSON.stringify(item))
+        this.inkCircle(circle)
+      })
+      window.requestAnimationFrame(this.inkCirclesPerFrame)
+    },
+
+    exponentialDecay (iteration) {
+      return Math.exp(-(rateOfIterationDecay * iteration))
+    },
+
+    inkCircle (circle) {
+      const { x, y, color, iteration } = circle
+      context.beginPath()
+      context.arc(x, y, circleSize, 0, 2 * Math.PI)
+      context.closePath()
+      context.globalAlpha = this.exponentialDecay(iteration)
+      context.fillStyle = color
+      context.fill()
+    },
+
+    filterCircles () {
+      circles = circles.filter(circle => circle.iteration < maxIterationsToInk)
+      if (circles.length === 0) {
+        window.cancelAnimationFrame(inkingCirclesTimer)
+        // lockingAnimationTimer = undefined
+      }
+    },
+
+    clearInkingCanvas () {
+      context.clearRect(0, 0, this.width, this.height)
+    },
+
     stopInking () {
       endCursor = utils.cursorPositionInPage(event)
       this.$store.commit('currentUserIsInking', false)
+      this.$store.commit('currentUserIsInkingLocked', false)
       this.$store.commit('closeAllPopOvers')
       if (this.$store.state.multipleBlocksSelected.length) {
         this.$store.commit('multipleBlockActionsPosition', endCursor)
@@ -85,59 +177,6 @@ export default {
           this.$store.commit('addToMultipleBlocksSelected', block.blockId)
         }
       })
-    },
-
-    ink (event) {
-      if (!this.$store.state.currentUserIsInking) { return }
-      let x, y
-      if (event.touches) {
-        x = event.touches[0].pageX
-        y = event.touches[0].pageY
-      } else {
-        x = event.pageX
-        y = event.pageY
-      }
-      let color = this.$store.state.currentUser.color
-      let circle = { x, y, color, iteration: 0 }
-      this.$store.dispatch('broadcast/inking', circle)
-      this.selectBlocks(circle)
-      circles.push(circle)
-    },
-
-    inkCirclesPerFrame () {
-      this.filterCircles()
-      this.clearCanvas()
-      circles.forEach(item => {
-        item.iteration++
-        let circle = JSON.parse(JSON.stringify(item))
-        this.inkCircle(circle)
-      })
-      window.requestAnimationFrame(this.inkCirclesPerFrame)
-    },
-
-    exponentialDecay (iteration) {
-      return Math.exp(-(rateOfIterationDecay * iteration))
-    },
-
-    inkCircle (circle) {
-      const { x, y, color, iteration } = circle
-      context.beginPath()
-      context.arc(x, y, circleSize, 0, 2 * Math.PI)
-      context.closePath()
-      context.globalAlpha = this.exponentialDecay(iteration)
-      context.fillStyle = color
-      context.fill()
-    },
-
-    filterCircles () {
-      circles = circles.filter(circle => circle.iteration < maxIterationsToInk)
-      if (circles.length === 0) {
-        window.cancelAnimationFrame(drawTimer)
-      }
-    },
-
-    clearCanvas () {
-      context.clearRect(0, 0, this.width, this.height)
     }
 
   }
@@ -145,7 +184,10 @@ export default {
 </script>
 
 <style lang="stylus">
-.inking
+.inking,
+.locking
   position absolute
   top 0
+.locking
+  pointer-events none
 </style>
