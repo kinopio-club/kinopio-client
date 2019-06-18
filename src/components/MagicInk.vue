@@ -17,7 +17,7 @@ import utils from '@/utils.js'
 const circleSize = 20
 const maxIterationsToInk = 200 // higher is longer ink fade time
 const rateOfIterationDecay = 0.03 // lower is slower decay
-let canvas, context, inkTimer, startCursor, endCursor
+let canvas, context, startCursor, endCursor
 let circles = []
 
 export default {
@@ -34,6 +34,7 @@ export default {
     this.updateCanvasSize()
     window.addEventListener('resize', this.updateCanvasSize)
     window.addEventListener('scroll', this.updateCanvasSize)
+    window.requestAnimationFrame(this.inkCirclesPerFrame)
   },
   methods: {
     updateCanvasSize () {
@@ -49,7 +50,6 @@ export default {
       this.$store.commit('multipleBlocksSelected', [])
       this.$store.commit('generateBlockMap')
       this.$store.commit('closeAllPopOvers')
-      inkTimer = window.setInterval(this.inkCirclesPerFrame, 16) // 16ms ~= 60fps
     },
 
     stopInking () {
@@ -57,7 +57,6 @@ export default {
       this.$store.commit('currentUserIsInking', false)
       this.$store.commit('closeAllPopOvers')
       if (this.$store.state.multipleBlocksSelected.length) {
-        console.log('✅multipleBlockActionsIsVisible, multipleBlocksSelected:', this.$store.state.multipleBlocksSelected)
         this.$store.commit('multipleBlockActionsPosition', endCursor)
         this.$store.commit('multipleBlockActionsIsVisible', true)
       }
@@ -111,6 +110,7 @@ export default {
         let circle = JSON.parse(JSON.stringify(item))
         this.inkCircle(circle)
       })
+      window.requestAnimationFrame(this.inkCirclesPerFrame)
     },
 
     exponentialDecay (iteration) {
@@ -129,9 +129,9 @@ export default {
 
     filterCircles () {
       circles = circles.filter(circle => circle.iteration < maxIterationsToInk)
-      if (circles.length === 0) {
-        window.clearInterval(inkTimer)
-      }
+      // if (circles.length === 0) {
+      //   window.clearInterval(inkTimer)
+      // }
     },
 
     clearCanvas () {
