@@ -1,6 +1,6 @@
 <template lang="pug">
 canvas#inking.inking(
-  @mousedown="startInking"
+  @mousedown="startInkingAndLocking"
   @touchstart="startInkingAndLocking"
   @mousemove="inking"
   @touchmove="inking"
@@ -17,8 +17,9 @@ import utils from '@/utils.js'
 const circleSize = 20
 const maxIterationsToInk = 200 // higher is longer ink fade time
 const rateOfIterationDecay = 0.03 // higher is faster decay
-const maxIterationsToLock = 12 // higher is slower locking speed
-const initialLockCircleSize = 30 // higher is bigger lock circle sizes
+const maxIterationsToLock = 24 // higher is slower locking speed
+const initialLockCircleSize = 50 // higher is bigger
+const lockRadiusSpeed = 0.85 // TEMP? modifies the overall speed of locking and allows the end radius to match ink circle size
 let canvas, context, startCursor, currentCursor, inkingCirclesTimer, lockingAnimationTimer, currentUserIsLocking, lockingIterationFrame
 let circles = []
 
@@ -61,20 +62,17 @@ export default {
       currentCursor = utils.cursorPositionInPage(event)
       currentUserIsLocking = true
       lockingIterationFrame = 1
-      if (!lockingAnimationTimer) {
-        lockingAnimationTimer = window.requestAnimationFrame(this.lockingAnimationPerFrame)
-      }
+      lockingAnimationTimer = window.requestAnimationFrame(this.lockingAnimationPerFrame)
     },
 
     lockingAnimationPerFrame () {
       if (!utils.cursorsAreClose(startCursor, currentCursor)) {
         currentUserIsLocking = false
       }
-
       if (currentUserIsLocking) {
         const currentFrame = Math.min(lockingIterationFrame++, maxIterationsToLock)
         const exponentialDecay = this.exponentialDecay(currentFrame)
-        const radius = initialLockCircleSize * exponentialDecay
+        const radius = initialLockCircleSize * (exponentialDecay * lockRadiusSpeed)
         const color = this.$store.state.currentUser.color
         context.beginPath()
         context.arc(startCursor.x, startCursor.y, radius, 0, 2 * Math.PI)
@@ -82,12 +80,13 @@ export default {
         context.globalAlpha = currentFrame / maxIterationsToLock
         context.fillStyle = color
         context.fill()
+        window.requestAnimationFrame(this.lockingAnimationPerFrame)
       }
       if (lockingIterationFrame >= maxIterationsToLock) {
         window.cancelAnimationFrame(lockingAnimationTimer)
         this.$store.commit('currentUserIsInkingLocked', true)
+        console.log('🔒lockingAnimationPerFrame locked')
       }
-      window.requestAnimationFrame(this.lockingAnimationPerFrame)
     },
 
     inking (event) {
@@ -137,7 +136,6 @@ export default {
       circles = circles.filter(circle => circle.iteration < maxIterationsToInk)
       if (circles.length === 0) {
         window.cancelAnimationFrame(inkingCirclesTimer)
-        // lockingAnimationTimer = undefined
       }
     },
 
@@ -146,10 +144,13 @@ export default {
     },
 
     stopInking () {
+      console.log('stopInking')
+      currentUserIsLocking = false
       window.cancelAnimationFrame(lockingAnimationTimer)
+      this.$store.commit('currentUserIsInkingLocked', false)
+
       const endCursor = utils.cursorPositionInPage(event)
       this.$store.commit('currentUserIsInking', false)
-      this.$store.commit('currentUserIsInkingLocked', false)
       this.$store.commit('closeAllPopOvers')
       if (this.$store.state.multipleBlocksSelected.length) {
         this.$store.commit('multipleBlockActionsPosition', endCursor)
