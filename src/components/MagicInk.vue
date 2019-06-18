@@ -17,7 +17,7 @@ import utils from '@/utils.js'
 const circleSize = 20
 const maxIterationsToInk = 200 // higher is longer ink fade time
 const rateOfIterationDecay = 0.03 // lower is slower decay
-let canvas, context, startCursor, endCursor
+let canvas, context, startCursor, endCursor, drawTimer
 let circles = []
 
 export default {
@@ -34,7 +34,6 @@ export default {
     this.updateCanvasSize()
     window.addEventListener('resize', this.updateCanvasSize)
     window.addEventListener('scroll', this.updateCanvasSize)
-    window.requestAnimationFrame(this.inkCirclesPerFrame)
   },
   methods: {
     updateCanvasSize () {
@@ -45,6 +44,9 @@ export default {
     },
 
     startInking (event) {
+      if (!drawTimer) {
+        drawTimer = window.requestAnimationFrame(this.inkCirclesPerFrame)
+      }
       startCursor = utils.cursorPositionInPage(event)
       this.$store.commit('currentUserIsInking', true)
       this.$store.commit('multipleBlocksSelected', [])
@@ -129,9 +131,9 @@ export default {
 
     filterCircles () {
       circles = circles.filter(circle => circle.iteration < maxIterationsToInk)
-      // if (circles.length === 0) {
-      //   window.clearInterval(inkTimer)
-      // }
+      if (circles.length === 0) {
+        window.cancelAnimationFrame(drawTimer)
+      }
     },
 
     clearCanvas () {
