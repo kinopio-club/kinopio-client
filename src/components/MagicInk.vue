@@ -19,7 +19,7 @@ const maxIterationsToInk = 200 // higher is longer ink fade time
 const rateOfIterationDecay = 0.03 // higher is faster decay
 const maxIterationsToLock = 12 // higher is slower locking speed
 const initialLockCircleSize = 30 // higher is bigger lock circle sizes
-let canvas, context, startCursor, currentCursor, endCursor, inkingCirclesTimer, lockingAnimationTimer, currentUserIsLocking, lockingIterationFrame
+let canvas, context, startCursor, currentCursor, inkingCirclesTimer, lockingAnimationTimer, currentUserIsLocking, lockingIterationFrame
 let circles = []
 
 export default {
@@ -146,7 +146,8 @@ export default {
     },
 
     stopInking () {
-      endCursor = utils.cursorPositionInPage(event)
+      window.cancelAnimationFrame(lockingAnimationTimer)
+      const endCursor = utils.cursorPositionInPage(event)
       this.$store.commit('currentUserIsInking', false)
       this.$store.commit('currentUserIsInkingLocked', false)
       this.$store.commit('closeAllPopOvers')
