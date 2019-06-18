@@ -1,6 +1,6 @@
 <template lang="pug">
 canvas#inking.inking(
-  @mousedown="startInkingAndLocking"
+  @mousedown="startInking"
   @touchstart="startInkingAndLocking"
   @mousemove="inking"
   @touchmove="inking"
@@ -19,7 +19,7 @@ const maxIterationsToInk = 200 // higher is longer ink fade time
 const rateOfIterationDecay = 0.03 // higher is faster decay
 const maxIterationsToLock = 24 // higher is slower locking speed
 const initialLockCircleSize = 60 // higher is bigger
-let canvas, context, startCursor, currentCursor, inkingCirclesTimer, lockingAnimationTimer, currentUserIsLocking, lockingIterationFrame
+let canvas, context, currentUserColor, startCursor, currentCursor, inkingCirclesTimer, lockingAnimationTimer, currentUserIsLocking, lockingIterationFrame
 let circles = []
 
 export default {
@@ -32,6 +32,7 @@ export default {
   mounted () {
     canvas = document.getElementById('inking')
     context = canvas.getContext('2d')
+    currentUserColor = this.$store.state.currentUser.color
     context.scale(window.devicePixelRatio, window.devicePixelRatio)
     this.updateCanvasSize()
     window.addEventListener('resize', this.updateCanvasSize)
@@ -46,10 +47,11 @@ export default {
     },
 
     startInking (event) {
+      startCursor = utils.cursorPositionInPage(event)
+      // this.inkCircle(startCursor.x, startCursor.y, currentUserColor, 1)
       if (!inkingCirclesTimer) {
         inkingCirclesTimer = window.requestAnimationFrame(this.inkCirclesPerFrame)
       }
-      startCursor = utils.cursorPositionInPage(event)
       this.$store.commit('currentUserIsInking', true)
       this.$store.commit('multipleBlocksSelected', [])
       this.$store.commit('generateBlockMap')
@@ -72,12 +74,11 @@ export default {
         const currentFrame = Math.min(lockingIterationFrame++, maxIterationsToLock)
         const exponentialDecay = this.exponentialDecay(currentFrame)
         const radius = initialLockCircleSize * exponentialDecay
-        const color = this.$store.state.currentUser.color
         context.beginPath()
         context.arc(startCursor.x, startCursor.y, radius, 0, 2 * Math.PI)
         context.closePath()
         context.globalAlpha = currentFrame / maxIterationsToLock
-        context.fillStyle = color
+        context.fillStyle = currentUserColor
         context.fill()
         window.requestAnimationFrame(this.lockingAnimationPerFrame)
       }
@@ -91,14 +92,8 @@ export default {
     inking (event) {
       currentCursor = utils.cursorPositionInPage(event)
       if (!this.$store.state.currentUserIsInking) { return }
-      let x, y
-      if (event.touches) {
-        x = event.touches[0].pageX
-        y = event.touches[0].pageY
-      } else {
-        x = event.pageX
-        y = event.pageY
-      }
+      const x = currentCursor.x
+      const y = currentCursor.y
       let color = this.$store.state.currentUser.color
       let circle = { x, y, color, iteration: 0 }
       this.$store.dispatch('broadcast/inking', circle)
@@ -108,7 +103,7 @@ export default {
 
     inkCirclesPerFrame () {
       this.filterCircles()
-      this.clearInkingCanvas()
+      this.clearCanvas()
       circles.forEach(item => {
         item.iteration++
         let circle = JSON.parse(JSON.stringify(item))
@@ -138,7 +133,7 @@ export default {
       }
     },
 
-    clearInkingCanvas () {
+    clearCanvas () {
       context.clearRect(0, 0, this.width, this.height)
     },
 
