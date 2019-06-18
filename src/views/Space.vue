@@ -184,8 +184,9 @@ export default {
       }
     },
 
-    stopInteractions () {
+    stopInteractions (event) {
       console.log('💣 stopInteractions')
+      if (event.target.closest('dialog')) { return }
       if (this.shouldContinueConnecting()) { return }
       if (this.$store.state.currentUserIsDrawingConnection) {
         this.createConnection()
