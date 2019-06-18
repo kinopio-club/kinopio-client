@@ -18,8 +18,7 @@ const circleSize = 20
 const maxIterationsToInk = 200 // higher is longer ink fade time
 const rateOfIterationDecay = 0.03 // higher is faster decay
 const maxIterationsToLock = 24 // higher is slower locking speed
-const initialLockCircleSize = 50 // higher is bigger
-const lockRadiusSpeed = 0.85 // TEMP? modifies the overall speed of locking and allows the end radius to match ink circle size
+const initialLockCircleSize = 60 // higher is bigger
 let canvas, context, startCursor, currentCursor, inkingCirclesTimer, lockingAnimationTimer, currentUserIsLocking, lockingIterationFrame
 let circles = []
 
@@ -72,7 +71,7 @@ export default {
       if (currentUserIsLocking) {
         const currentFrame = Math.min(lockingIterationFrame++, maxIterationsToLock)
         const exponentialDecay = this.exponentialDecay(currentFrame)
-        const radius = initialLockCircleSize * (exponentialDecay * lockRadiusSpeed)
+        const radius = initialLockCircleSize * exponentialDecay
         const color = this.$store.state.currentUser.color
         context.beginPath()
         context.arc(startCursor.x, startCursor.y, radius, 0, 2 * Math.PI)
