@@ -26,15 +26,15 @@ App: http://localhost:8080
 
 | File | Description |
 | ------------- |-------------|
-| `router` | client-side routes |
-| `App.vue` | root component, used by all routes|
-| `store.js` | vuex store, contains global observables and methods needed by multiple components |
-| `utils.js` | low-level functional methods that just do dom manipulations or common tasks. These can't access components or store directly |
-| `views/Space.vue` | contains the core interaction layer which sends user inputs to inking, connecting, dragging etc. components |
-| `components/Block.vue` | renders blocks from the `store`, and shows `BlockDetails` |
-| `components/Connection.vue` | renders connections from the `store`, and shows `ConnectionDetails` |
-| `components/Header.vue` | shown on all routes. Used for moving between spaces, searching/filter, shows user presence, changing user prefs, and Kinopio meta options |
-| `components/MagicInk.vue` | the canvas layer used for animating inking, long-press for scroll locking on touch, and multi-selection which reveals `MultipleBlockActions` |
+| `router` | Client-side routes |
+| `App.vue` | Root component, used by all routes|
+| `store.js` | [Vuex](https://vuex.vuejs.org/) store, contains global observables and methods needed by multiple components |
+| `utils.js` | Low-level functional methods that just do dom manipulations or common tasks. These can't access components or store directly |
+| `views/Space.vue` | Contains the core interaction layer which sends user inputs to inking, connecting, dragging etc. components |
+| `components/Block.vue` | Displays blocks from the `store`, and shows `BlockDetails` |
+| `components/Connection.vue` | Displays connections from the `store`, and shows `ConnectionDetails` |
+| `components/Header.vue` | Used for moving between spaces, searching/filter, shows user presence, changing user prefs, and Kinopio meta options. Shown on all routes |
+| `components/MagicInk.vue` | The canvas layer used for animating inking, long-press for scroll locking on touch, and multi-selection which reveals `MultipleBlockActions` |
 
 
 ## See Also
