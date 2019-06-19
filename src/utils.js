@@ -104,7 +104,7 @@ export default {
   //   }
   // },
 
-  // User Prefs
+  // User Prefs 👼
 
   storeLocal (key, value) {
     try {
@@ -169,6 +169,16 @@ export default {
     }
     let curve = this.curveControlPoint(offsetStart, delta)
     return `m${offsetStart.x},${offsetStart.y} ${curve} ${delta.x},${delta.y}`
+  },
+
+  // Inking 🖌
+
+  exponentialDecay (iteration, rateOfIterationDecay) {
+    return Math.exp(-(rateOfIterationDecay * iteration))
+  },
+
+  filterCircles (circles, maxIterationsToInk) {
+    return circles.filter(circle => circle.iteration < maxIterationsToInk)
   },
 
   // Edge Scrolling Utils 👻

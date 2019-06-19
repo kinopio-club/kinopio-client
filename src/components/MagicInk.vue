@@ -102,18 +102,21 @@ export default {
     },
 
     inkCirclesAnimationFrame () {
-      this.filterCircles()
-      this.clearCanvas()
+      circles = utils.filterCircles(circles, maxIterationsToInk)
+      context.clearRect(0, 0, this.width, this.height)
       circles.forEach(item => {
         item.iteration++
         let circle = JSON.parse(JSON.stringify(item))
         this.inkCircle(circle)
       })
-      window.requestAnimationFrame(this.inkCirclesAnimationFrame)
-    },
-
-    exponentialDecay (iteration) {
-      return Math.exp(-(rateOfIterationDecay * iteration))
+      if (circles.length > 0) {
+        window.requestAnimationFrame(this.inkCirclesAnimationFrame)
+      } else {
+        setTimeout(() => {
+          window.cancelAnimationFrame(inkingCirclesTimer)
+          inkingCirclesTimer = undefined
+        }, 0)
+      }
     },
 
     inkCircle (circle) {
@@ -121,24 +124,12 @@ export default {
       context.beginPath()
       context.arc(x, y, circleSize, 0, 2 * Math.PI)
       context.closePath()
-      context.globalAlpha = this.exponentialDecay(iteration)
+      context.globalAlpha = utils.exponentialDecay(iteration, rateOfIterationDecay)
       context.fillStyle = color
       context.fill()
     },
 
-    filterCircles () {
-      circles = circles.filter(circle => circle.iteration < maxIterationsToInk)
-      if (circles.length === 0) {
-        window.cancelAnimationFrame(inkingCirclesTimer)
-      }
-    },
-
-    clearCanvas () {
-      context.clearRect(0, 0, this.width, this.height)
-    },
-
     stopInking () {
-      console.log('stopInking')
       currentUserIsLocking = false
       window.cancelAnimationFrame(lockingAnimationTimer)
       this.$store.commit('currentUserIsInkingLocked', false)
