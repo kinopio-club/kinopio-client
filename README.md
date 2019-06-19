@@ -39,5 +39,5 @@ App: http://localhost:8080
 
 ## See Also
 
-- [Are.na](https://www.are.na/kinopio)
-- [Github](https://github.com/kinopio-club)
+- [are.na/kinopio](https://www.are.na/kinopio)
+- [github.com/kinopio-club](https://github.com/kinopio-club)
