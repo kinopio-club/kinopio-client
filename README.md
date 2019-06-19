@@ -18,26 +18,26 @@ npm install
 
 ```
 vue ui
+Admin: http://localhost:8000
+App: http://localhost:8080
 ```
 
-Run tasks and update packages
-```
-http://localhost:8000
-```
+## Primary Files
 
-View app
-```
-tasks → serve → open app
-(or localhost:8080)
-```
+| File | Description |
+| ------------- |-------------|
+| `router` | client-side routes |
+| `App.vue` | root component, used by all routes|
+| `store.js` | vuex store, contains global observables and methods needed by multiple components |
+| `utils.js` | low-level functional methods that just do dom manipulations or common tasks. These can't access components or store directly |
+| `views/Space.vue` | contains the core interaction layer which sends user inputs to inking, connecting, dragging etc. components |
+| `components/Block.vue` | renders blocks from the `store`, and shows `BlockDetails` |
+| `components/Connection.vue` | renders connections from the `store`, and shows `ConnectionDetails` |
+| `components/Header.vue` | shown on all routes. Used for moving between spaces, searching/filter, shows user presence, changing user prefs, and Kinopio meta options |
+| `components/MagicInk.vue` | the canvas layer used for animating inking, long-press for scroll locking on touch, and multi-selection which reveals `MultipleBlockActions` |
 
-## Program Flow
 
-```
-router.js → App.vue → /views → /components
-```
-
-## Team Links
+## See Also
 
 - [Are.na](https://www.are.na/kinopio)
 - [Github](https://github.com/kinopio-club)
