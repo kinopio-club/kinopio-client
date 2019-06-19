@@ -50,7 +50,7 @@ export default {
       startCursor = utils.cursorPositionInPage(event)
       // this.inkCircle(startCursor.x, startCursor.y, currentUserColor, 1)
       if (!inkingCirclesTimer) {
-        inkingCirclesTimer = window.requestAnimationFrame(this.inkCirclesPerFrame)
+        inkingCirclesTimer = window.requestAnimationFrame(this.inkCirclesAnimationFrame)
       }
       this.$store.commit('currentUserIsInking', true)
       this.$store.commit('multipleBlocksSelected', [])
@@ -63,10 +63,10 @@ export default {
       currentCursor = utils.cursorPositionInPage(event)
       currentUserIsLocking = true
       lockingIterationFrame = 1
-      lockingAnimationTimer = window.requestAnimationFrame(this.lockingAnimationPerFrame)
+      lockingAnimationTimer = window.requestAnimationFrame(this.lockingAnimationFrame)
     },
 
-    lockingAnimationPerFrame () {
+    lockingAnimationFrame () {
       if (!utils.cursorsAreClose(startCursor, currentCursor)) {
         currentUserIsLocking = false
       }
@@ -80,12 +80,12 @@ export default {
         context.globalAlpha = currentFrame / maxIterationsToLock
         context.fillStyle = currentUserColor
         context.fill()
-        window.requestAnimationFrame(this.lockingAnimationPerFrame)
+        window.requestAnimationFrame(this.lockingAnimationFrame)
       }
       if (lockingIterationFrame >= maxIterationsToLock) {
         window.cancelAnimationFrame(lockingAnimationTimer)
         this.$store.commit('currentUserIsInkingLocked', true)
-        console.log('🔒lockingAnimationPerFrame locked')
+        console.log('🔒lockingAnimationFrame locked')
       }
     },
 
@@ -101,7 +101,7 @@ export default {
       circles.push(circle)
     },
 
-    inkCirclesPerFrame () {
+    inkCirclesAnimationFrame () {
       this.filterCircles()
       this.clearCanvas()
       circles.forEach(item => {
@@ -109,7 +109,7 @@ export default {
         let circle = JSON.parse(JSON.stringify(item))
         this.inkCircle(circle)
       })
-      window.requestAnimationFrame(this.inkCirclesPerFrame)
+      window.requestAnimationFrame(this.inkCirclesAnimationFrame)
     },
 
     exponentialDecay (iteration) {
