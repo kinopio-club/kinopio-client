@@ -22,7 +22,7 @@ Admin: http://localhost:8000
 App: http://localhost:8080
 ```
 
-## Root Files
+## Primary Files
 
 | File | Description |
 | ------------- |-------------|
@@ -30,17 +30,7 @@ App: http://localhost:8080
 | `App.vue` | Root component, used by all routes|
 | `store.js` | [Vuex](https://vuex.vuejs.org/) store, contains global observables and methods needed by multiple components |
 | `utils.js` | Low-level functional methods that just do dom manipulations or common tasks. These can't access components or store directly |
-
-## Views
-
-| File | Description |
-| ------------- |-------------|
 | `views/Space.vue` | Contains the core interaction layer which sends user inputs to inking, connecting, dragging etc. components |
-
-## Components
-
-| File | Description |
-| ------------- |-------------|
 | `components/Block.vue` | Displays blocks from the `store`, and shows `BlockDetails` |
 | `components/Connection.vue` | Displays connections from the `store`, and shows `ConnectionDetails` |
 | `components/Header.vue` | Used for moving between spaces, searching/filter, shows user presence, changing user prefs, and Kinopio meta options. Shown on all routes |
