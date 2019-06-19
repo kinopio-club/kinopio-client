@@ -24,7 +24,7 @@ App: http://localhost:8080
 
 ## Primary Files
 
-| ./* | Description |
+| / | Description |
 | ------------- |-------------|
 | `router` | Client-side routes |
 | `App.vue` | Root component, used by all routes|
@@ -34,13 +34,13 @@ App: http://localhost:8080
 ## Views
 Views represent routes
 
-| views/* | Description |
+| views/ | Description |
 | ------------- |-------------|
 | `Space.vue` | Contains the core interaction layer which sends user inputs to inking, connecting, dragging etc. components |
 
 ## Components
 
-| components/* | Description |
+| components/ | Description |
 | ------------- |-------------|
 | `Block.vue` | Displays blocks from the `store`, and shows `BlockDetails` |
 | `Connection.vue` | Displays connections from the `store`, and shows `ConnectionDetails` |
