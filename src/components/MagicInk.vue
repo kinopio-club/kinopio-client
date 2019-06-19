@@ -96,20 +96,19 @@ export default {
     },
 
     lockingAnimationFrame (timestamp) {
-      // let cursorsAreClose
       if (!lockingStartTime) {
         lockingStartTime = timestamp
       }
       const progress = timestamp - lockingStartTime
-      // let progressPercent = (progress / lockingDuration) * 100
+      const progressPercent = (progress / lockingDuration) * 100
 
       if (!utils.cursorsAreClose(startCursor, currentCursor)) {
         currentUserIsLocking = false
       }
 
-      console.log('progress', progress, timestamp)
+      console.log('progress', progress)
 
-      if (currentUserIsLocking && progress <= lockingDuration) {
+      if (currentUserIsLocking && progressPercent <= 100) {
         const iteration = Math.min(lockingIteration++, maxIterationsToLock)
         const exponentialDecay = utils.exponentialDecay(iteration, rateOfIterationDecay)
         const radius = initialLockCircleSize * exponentialDecay
