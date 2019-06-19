@@ -24,17 +24,28 @@ App: http://localhost:8080
 
 ## Primary Files
 
-| File | Description |
+| ./* | Description |
 | ------------- |-------------|
 | `router` | Client-side routes |
 | `App.vue` | Root component, used by all routes|
 | `store.js` | [Vuex](https://vuex.vuejs.org/) store, contains global observables and methods needed by multiple components |
 | `utils.js` | Low-level functional methods that just do dom manipulations or common tasks. These can't access components or store directly |
-| `views/Space.vue` | Contains the core interaction layer which sends user inputs to inking, connecting, dragging etc. components |
-| `components/Block.vue` | Displays blocks from the `store`, and shows `BlockDetails` |
-| `components/Connection.vue` | Displays connections from the `store`, and shows `ConnectionDetails` |
-| `components/Header.vue` | Used for moving between spaces, searching/filter, shows user presence, changing user prefs, and Kinopio meta options. Shown on all routes |
-| `components/MagicInk.vue` | The canvas layer used for animating inking, long-press for scroll locking on touch, and multi-selection which reveals `MultipleBlockActions` |
+
+## Views
+Views represent routes
+
+| views/* | Description |
+| ------------- |-------------|
+| `Space.vue` | Contains the core interaction layer which sends user inputs to inking, connecting, dragging etc. components |
+
+## Components
+
+| components/* | Description |
+| ------------- |-------------|
+| `Block.vue` | Displays blocks from the `store`, and shows `BlockDetails` |
+| `Connection.vue` | Displays connections from the `store`, and shows `ConnectionDetails` |
+| `Header.vue` | Used for moving between spaces, searching/filter, shows user presence, changing user prefs, and Kinopio meta options. Shown on all routes |
+| `MagicInk.vue` | The canvas layer used for animating inking, long-press for scroll locking on touch, and multi-selection which reveals `MultipleBlockActions` |
 
 
 ## See Also
