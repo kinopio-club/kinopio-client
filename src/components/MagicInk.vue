@@ -1,9 +1,8 @@
 <template lang="pug">
-// mousdedown: "startInking"
 aside.magic-ink
   canvas#inking.inking(
-    @mousedown="startInkingAndLocking"
-    @touchstart="startInkingAndLocking"
+    @mousedown="startInking"
+    @touchstart="startInking"
     @mousemove="inking"
     @touchmove="inking"
     @mouseup="stopInking"
@@ -35,7 +34,7 @@ let inkingCanvas, inkingContext, startCursor, currentCursor, inkingCirclesTimer
 
 // locking
 // long press to lock scrolling
-const lockingDuration = 250 // ms
+const lockingDuration = 200 // ms
 const initialLockCircleRadius = 65
 let lockingCanvas, lockingContext, lockingAnimationTimer, currentUserIsLocking, lockingStartTime
 
@@ -79,36 +78,43 @@ export default {
     },
 
     drawCircle (circle, context) {
-      const { x, y, color, iteration } = circle
+      let { x, y, color, iteration, radius, alpha } = circle
+      radius = radius || circleRadius
+      alpha = alpha || utils.exponentialDecay(iteration, rateOfIterationDecay)
       context.beginPath()
-      context.arc(x, y, circleRadius, 0, 2 * Math.PI)
+      context.arc(x, y, radius, 0, 2 * Math.PI)
       context.closePath()
-      context.globalAlpha = utils.exponentialDecay(iteration, rateOfIterationDecay)
+      context.globalAlpha = alpha
       context.fillStyle = color
       context.fill()
     },
 
-    startInking (event) {
-      startCursor = utils.cursorPositionInPage(event)
-      const circle = {
+    startLocking () {
+      currentUserIsLocking = true
+      lockingAnimationTimer = window.requestAnimationFrame(this.lockingAnimationFrame)
+    },
+
+    createInitialCircle () {
+      const initialCircle = {
         x: startCursor.x,
         y: startCursor.y,
         color: this.currentUserColor,
-        iteration: 1
+        iteration: 1,
+        persistent: true
       }
-      initialCircles.push(circle)
+      initialCircles.push(initialCircle)
+      this.drawCircle(initialCircle, initialContext)
+    },
+
+    startInking (event) {
+      startCursor = utils.cursorPositionInPage(event)
+      currentCursor = utils.cursorPositionInPage(event)
+      this.startLocking()
+      this.createInitialCircle()
       this.$store.commit('currentUserIsInking', true)
       this.$store.commit('multipleBlocksSelected', [])
       this.$store.commit('generateBlockMap')
       this.$store.commit('closeAllPopOvers')
-    },
-
-    // temp: touch and mousedown
-    startInkingAndLocking (event) {
-      this.startInking(event)
-      currentCursor = utils.cursorPositionInPage(event)
-      currentUserIsLocking = true
-      lockingAnimationTimer = window.requestAnimationFrame(this.lockingAnimationFrame)
     },
 
     lockingAnimationFrame (timestamp) {
@@ -125,14 +131,16 @@ export default {
         const progressInverted = Math.abs(progress - 1)
         const circleRadiusDelta = initialLockCircleRadius - minSize
         const radius = (circleRadiusDelta * progressInverted) + minSize
-        // console.log('progress values', progress, radius, alpha)
+        const circle = {
+          x: startCursor.x,
+          y: startCursor.y,
+          color: this.currentUserColor,
+          radius,
+          alpha: progress,
+          iteration: 1
+        }
         lockingContext.clearRect(0, 0, this.width, this.height)
-        lockingContext.beginPath()
-        lockingContext.arc(startCursor.x, startCursor.y, radius, 0, 2 * Math.PI)
-        lockingContext.closePath()
-        lockingContext.globalAlpha = progress // 1 // Math.abs(exponentialDecay - 1) ?? // ease out?
-        lockingContext.fillStyle = this.currentUserColor
-        lockingContext.fill()
+        this.drawCircle(circle, lockingContext)
         window.requestAnimationFrame(this.lockingAnimationFrame)
       } else {
         window.cancelAnimationFrame(lockingAnimationTimer)
@@ -153,6 +161,9 @@ export default {
       if (!initialCirclesTimer) {
         initialCirclesTimer = window.requestAnimationFrame(this.initialCirclesAnimationFrame)
       }
+      initialCircles.map(circle => {
+        circle.persistent = false
+      })
       currentCursor = utils.cursorPositionInPage(event)
       if (!this.$store.state.currentUserIsInking) { return }
       const x = currentCursor.x
@@ -186,7 +197,9 @@ export default {
       initialCircles = utils.filterCircles(initialCircles, maxIterationsToInk)
       initialContext.clearRect(0, 0, this.width, this.height)
       initialCircles.forEach(item => {
-        item.iteration++
+        if (!item.persistent) {
+          item.iteration++
+        }
         let circle = JSON.parse(JSON.stringify(item))
         this.drawCircle(circle, initialContext)
       })
