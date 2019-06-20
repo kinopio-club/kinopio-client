@@ -15,7 +15,10 @@ aside.magic-ink
     :width="width"
     :height="height"
   )
-  //canvas#init.init
+  canvas#initial.initial(
+    :width="width"
+    :height="height"
+  )
 </template>
 
 <script>
@@ -34,6 +37,10 @@ const lockingDuration = 250 // ms
 const initialLockCircleRadius = 65
 let lockingCanvas, lockingContext, lockingAnimationTimer, currentUserIsLocking, lockingStartTime
 
+// initial
+let initialCircles = []
+let initialCanvas, initialContext, initialCirclesTimer
+
 export default {
   data () {
     return {
@@ -48,6 +55,9 @@ export default {
     lockingCanvas = document.getElementById('locking')
     lockingContext = lockingCanvas.getContext('2d')
     lockingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
+    initialCanvas = document.getElementById('initial')
+    initialContext = initialCanvas.getContext('2d')
+    initialContext.scale(window.devicePixelRatio, window.devicePixelRatio)
     this.updateCanvasSize()
     window.addEventListener('resize', this.updateCanvasSize)
     window.addEventListener('scroll', this.updateCanvasSize)
@@ -65,30 +75,32 @@ export default {
       this.height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
     },
 
-    inkCircle (circle) {
+    drawCircle (circle, context) {
       const { x, y, color, iteration } = circle
-      inkingContext.beginPath()
-      inkingContext.arc(x, y, circleRadius, 0, 2 * Math.PI)
-      inkingContext.closePath()
-      inkingContext.globalAlpha = utils.exponentialDecay(iteration, rateOfIterationDecay)
-      inkingContext.fillStyle = color
-      inkingContext.fill()
+      context.beginPath()
+      context.arc(x, y, circleRadius, 0, 2 * Math.PI)
+      context.closePath()
+      context.globalAlpha = utils.exponentialDecay(iteration, rateOfIterationDecay)
+      context.fillStyle = color
+      context.fill()
     },
 
     startInking (event) {
       startCursor = utils.cursorPositionInPage(event)
-      this.inkCircle({
+      const circle = {
         x: startCursor.x,
         y: startCursor.y,
         color: this.currentUserColor,
         iteration: 1
-      })
+      }
+      initialCircles.push(circle)
       this.$store.commit('currentUserIsInking', true)
       this.$store.commit('multipleBlocksSelected', [])
       this.$store.commit('generateBlockMap')
       this.$store.commit('closeAllPopOvers')
     },
 
+    // temp: touch and mousedown
     startInkingAndLocking (event) {
       this.startInking(event)
       currentCursor = utils.cursorPositionInPage(event)
@@ -110,13 +122,12 @@ export default {
         const progressInverted = Math.abs(progress - 1)
         const circleRadiusDelta = initialLockCircleRadius - minSize
         const radius = (circleRadiusDelta * progressInverted) + minSize
-
         // console.log('progress values', progress, radius, alpha)
         lockingContext.clearRect(0, 0, this.width, this.height)
         lockingContext.beginPath()
         lockingContext.arc(startCursor.x, startCursor.y, radius, 0, 2 * Math.PI)
         lockingContext.closePath()
-        lockingContext.globalAlpha = 1 // Math.abs(exponentialDecay - 1)
+        lockingContext.globalAlpha = progress // 1 // Math.abs(exponentialDecay - 1) ?? // ease out?
         lockingContext.fillStyle = this.currentUserColor
         lockingContext.fill()
         window.requestAnimationFrame(this.lockingAnimationFrame)
@@ -136,6 +147,9 @@ export default {
       if (!inkingCirclesTimer) {
         inkingCirclesTimer = window.requestAnimationFrame(this.inkCirclesAnimationFrame)
       }
+      if (!initialCirclesTimer) {
+        initialCirclesTimer = window.requestAnimationFrame(this.initialCirclesAnimationFrame)
+      }
       currentCursor = utils.cursorPositionInPage(event)
       if (!this.$store.state.currentUserIsInking) { return }
       const x = currentCursor.x
@@ -153,7 +167,7 @@ export default {
       inkingCircles.forEach(item => {
         item.iteration++
         let circle = JSON.parse(JSON.stringify(item))
-        this.inkCircle(circle)
+        this.drawCircle(circle, inkingContext)
       })
       if (inkingCircles.length > 0) {
         window.requestAnimationFrame(this.inkCirclesAnimationFrame)
@@ -161,6 +175,24 @@ export default {
         setTimeout(() => {
           window.cancelAnimationFrame(inkingCirclesTimer)
           inkingCirclesTimer = undefined
+        }, 0)
+      }
+    },
+
+    initialCirclesAnimationFrame () {
+      initialCircles = utils.filterCircles(initialCircles, maxIterationsToInk)
+      initialContext.clearRect(0, 0, this.width, this.height)
+      initialCircles.forEach(item => {
+        item.iteration++
+        let circle = JSON.parse(JSON.stringify(item))
+        this.drawCircle(circle, initialContext)
+      })
+      if (initialCircles.length > 0) {
+        window.requestAnimationFrame(this.initialCirclesAnimationFrame)
+      } else {
+        setTimeout(() => {
+          window.cancelAnimationFrame(initialCirclesTimer)
+          initialCirclesTimer = undefined
         }, 0)
       }
     },
@@ -211,6 +243,7 @@ export default {
 canvas
   position absolute
   top 0
-.locking
+.locking,
+.initial
   pointer-events none
 </style>
