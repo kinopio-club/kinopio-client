@@ -34,7 +34,7 @@ let inkingCanvas, inkingContext, startCursor, currentCursor, inkingCirclesTimer
 
 // locking
 // long press to lock scrolling
-const lockingDuration = 200 // ms
+const lockingDuration = 500 // ms
 const initialLockCircleRadius = 65
 let lockingCanvas, lockingContext, lockingAnimationTimer, currentUserIsLocking, lockingStartTime
 
@@ -117,6 +117,24 @@ export default {
       this.$store.commit('closeAllPopOvers')
     },
 
+    easing (percentComplete, elaspedTime) {
+      const duration = lockingDuration
+      const startValue = 0
+      const endValue = 1
+      // https://stackoverflow.com/questions/8316882/what-is-an-easing-function
+      // x percentComplete,
+      // t elaspedTime,
+      // b startValue,
+      // c endValue,
+      // d duration
+
+      // quadratic ease in
+      // return endValue * (elaspedTime/=duration)*elaspedTime + startValue
+
+      // ease out
+      return -endValue * (elaspedTime /= duration) * (elaspedTime - 2) + startValue
+    },
+
     lockingAnimationFrame (timestamp) {
       if (!lockingStartTime) {
         lockingStartTime = timestamp
@@ -126,17 +144,22 @@ export default {
       if (!utils.cursorsAreClose(startCursor, currentCursor)) {
         currentUserIsLocking = false
       }
-      if (currentUserIsLocking && percentComplete <= 1) {
+      if (currentUserIsLocking && percentComplete < 0.5) {
+        window.requestAnimationFrame(this.lockingAnimationFrame)
+      } else if (currentUserIsLocking && percentComplete <= 1) {
         const minSize = circleRadius
         const percentRemaining = Math.abs(percentComplete - 1)
         const circleRadiusDelta = initialLockCircleRadius - minSize
         const radius = (circleRadiusDelta * percentRemaining) + minSize
+        const alpha = this.easing(percentComplete, elaspedTime)
+        console.log(percentComplete, alpha)
+
         const circle = {
           x: startCursor.x,
           y: startCursor.y,
           color: this.currentUserColor,
           radius,
-          alpha: percentComplete || 0.01, // to ensure truthyness
+          alpha: alpha || 0.01, // to ensure truthyness
           iteration: 1
         }
         lockingContext.clearRect(0, 0, this.width, this.height)
@@ -214,12 +237,11 @@ export default {
     },
 
     stopInking () {
+      const endCursor = utils.cursorPositionInPage(event)
       currentUserIsLocking = false
       window.cancelAnimationFrame(lockingAnimationTimer)
       lockingContext.clearRect(0, 0, this.width, this.height)
       this.$store.commit('currentUserIsInkingLocked', false)
-
-      const endCursor = utils.cursorPositionInPage(event)
       this.$store.commit('currentUserIsInking', false)
       this.$store.commit('closeAllPopOvers')
       if (this.$store.state.multipleBlocksSelected.length) {
