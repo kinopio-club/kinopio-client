@@ -121,22 +121,22 @@ export default {
       if (!lockingStartTime) {
         lockingStartTime = timestamp
       }
-      let progress = timestamp - lockingStartTime
-      progress = (progress / lockingDuration) // between 0 and 1
+      const elaspedTime = timestamp - lockingStartTime
+      const percentComplete = (elaspedTime / lockingDuration) // between 0 and 1
       if (!utils.cursorsAreClose(startCursor, currentCursor)) {
         currentUserIsLocking = false
       }
-      if (currentUserIsLocking && progress <= 1) {
+      if (currentUserIsLocking && percentComplete <= 1) {
         const minSize = circleRadius
-        const progressInverted = Math.abs(progress - 1)
+        const percentRemaining = Math.abs(percentComplete - 1)
         const circleRadiusDelta = initialLockCircleRadius - minSize
-        const radius = (circleRadiusDelta * progressInverted) + minSize
+        const radius = (circleRadiusDelta * percentRemaining) + minSize
         const circle = {
           x: startCursor.x,
           y: startCursor.y,
           color: this.currentUserColor,
           radius,
-          alpha: progress || 0.01, // to ensure truthyness
+          alpha: percentComplete || 0.01, // to ensure truthyness
           iteration: 1
         }
         lockingContext.clearRect(0, 0, this.width, this.height)
@@ -146,7 +146,7 @@ export default {
         window.cancelAnimationFrame(lockingAnimationTimer)
         lockingStartTime = undefined
       }
-      if (currentUserIsLocking && progress > 1) {
+      if (currentUserIsLocking && percentComplete > 1) {
         this.$store.commit('currentUserIsInkingLocked', true)
         console.log('🔒lockingAnimationFrame locked')
         lockingStartTime = undefined
