@@ -27,17 +27,20 @@ import utils from '@/utils.js'
 const circleRadius = 20
 
 // inking
+// a sequence of circles that's broadcasted to others and is used for multi-block selection
 const maxIterationsToInk = 200 // higher is longer ink fade time
-const rateOfIterationDecay = 0.03 // higher is faster decay
+const rateOfIterationDecay = 0.03 // higher is faster tail decay
 let inkingCircles = []
 let inkingCanvas, inkingContext, startCursor, currentCursor, inkingCirclesTimer
 
 // locking
+// long press to lock scrolling
 const lockingDuration = 250 // ms
 const initialLockCircleRadius = 65
 let lockingCanvas, lockingContext, lockingAnimationTimer, currentUserIsLocking, lockingStartTime
 
 // initial
+// shows immediate feedback without having to move cursor
 let initialCircles = []
 let initialCanvas, initialContext, initialCirclesTimer
 
