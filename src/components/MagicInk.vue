@@ -21,16 +21,18 @@ aside.magic-ink
 <script>
 import utils from '@/utils.js'
 
-const circleSize = 20
+const circleRadius = 20
+
+// inking
 const maxIterationsToInk = 200 // higher is longer ink fade time
 const rateOfIterationDecay = 0.03 // higher is faster decay
+let inkingCircles = []
+let inkingCanvas, inkingContext, startCursor, currentCursor, inkingCirclesTimer
 
-const lockingDuration = 500 // ms
-const maxIterationsToLock = 15 // higher is slower locking speed TEMP
-
-const initialLockCircleSize = 65 // higher is bigger
-let inkingCanvas, inkingContext, lockingCanvas, lockingContext, startCursor, currentCursor, inkingCirclesTimer, lockingAnimationTimer, currentUserIsLocking, lockingIteration, lockingStartTime
-let circles = []
+// locking
+const lockingDuration = 250 // ms
+const initialLockCircleRadius = 65
+let lockingCanvas, lockingContext, lockingAnimationTimer, currentUserIsLocking, lockingStartTime
 
 export default {
   data () {
@@ -66,7 +68,7 @@ export default {
     inkCircle (circle) {
       const { x, y, color, iteration } = circle
       inkingContext.beginPath()
-      inkingContext.arc(x, y, circleSize, 0, 2 * Math.PI)
+      inkingContext.arc(x, y, circleRadius, 0, 2 * Math.PI)
       inkingContext.closePath()
       inkingContext.globalAlpha = utils.exponentialDecay(iteration, rateOfIterationDecay)
       inkingContext.fillStyle = color
@@ -91,39 +93,36 @@ export default {
       this.startInking(event)
       currentCursor = utils.cursorPositionInPage(event)
       currentUserIsLocking = true
-      lockingIteration = 1
       lockingAnimationTimer = window.requestAnimationFrame(this.lockingAnimationFrame)
-      // console.log('lockingAnimationTimer',lockingAnimationTimer)
     },
 
     lockingAnimationFrame (timestamp) {
       if (!lockingStartTime) {
         lockingStartTime = timestamp
       }
-      const progress = timestamp - lockingStartTime
-      const progressPercent = (progress / lockingDuration) * 100
-
+      let progress = timestamp - lockingStartTime
+      progress = (progress / lockingDuration) // a value between 0 and 1
+      const minSize = circleRadius
       if (!utils.cursorsAreClose(startCursor, currentCursor)) {
         currentUserIsLocking = false
       }
+      if (currentUserIsLocking && progress <= 1) {
+        const progressInverted = Math.abs(progress - 1)
+        const circleRadiusDelta = initialLockCircleRadius - minSize
+        const radius = (circleRadiusDelta * progressInverted) + minSize
 
-      console.log('progress', progress)
-
-      if (currentUserIsLocking && progressPercent <= 100) {
-        const iteration = Math.min(lockingIteration++, maxIterationsToLock)
-        const exponentialDecay = utils.exponentialDecay(iteration, rateOfIterationDecay)
-        const radius = initialLockCircleSize * exponentialDecay
+        // console.log('progress values', progress, radius, alpha)
         lockingContext.clearRect(0, 0, this.width, this.height)
         lockingContext.beginPath()
         lockingContext.arc(startCursor.x, startCursor.y, radius, 0, 2 * Math.PI)
         lockingContext.closePath()
-        lockingContext.globalAlpha = Math.abs(exponentialDecay - 1)
+        lockingContext.globalAlpha = 1 // Math.abs(exponentialDecay - 1)
         lockingContext.fillStyle = this.currentUserColor
         lockingContext.fill()
         window.requestAnimationFrame(this.lockingAnimationFrame)
       } else {
         window.cancelAnimationFrame(lockingAnimationTimer)
-        lockingContext.clearRect(0, 0, this.width, this.height)
+        // lockingContext.clearRect(0, 0, this.width, this.height)
         lockingStartTime = undefined
       }
       if (currentUserIsLocking && progress > lockingDuration) {
@@ -134,6 +133,7 @@ export default {
     },
 
     inking (event) {
+      lockingContext.clearRect(0, 0, this.width, this.height)
       if (!inkingCirclesTimer) {
         inkingCirclesTimer = window.requestAnimationFrame(this.inkCirclesAnimationFrame)
       }
@@ -145,18 +145,18 @@ export default {
       let circle = { x, y, color, iteration: 0 }
       this.$store.dispatch('broadcast/inking', circle)
       this.selectBlocks(circle)
-      circles.push(circle)
+      inkingCircles.push(circle)
     },
 
     inkCirclesAnimationFrame () {
-      circles = utils.filterCircles(circles, maxIterationsToInk)
+      inkingCircles = utils.filterCircles(inkingCircles, maxIterationsToInk)
       inkingContext.clearRect(0, 0, this.width, this.height)
-      circles.forEach(item => {
+      inkingCircles.forEach(item => {
         item.iteration++
         let circle = JSON.parse(JSON.stringify(item))
         this.inkCircle(circle)
       })
-      if (circles.length > 0) {
+      if (inkingCircles.length > 0) {
         window.requestAnimationFrame(this.inkCirclesAnimationFrame)
       } else {
         setTimeout(() => {
@@ -169,6 +169,7 @@ export default {
     stopInking () {
       currentUserIsLocking = false
       window.cancelAnimationFrame(lockingAnimationTimer)
+      lockingContext.clearRect(0, 0, this.width, this.height)
       this.$store.commit('currentUserIsInkingLocked', false)
 
       const endCursor = utils.cursorPositionInPage(event)
