@@ -136,7 +136,7 @@ export default {
           y: startCursor.y,
           color: this.currentUserColor,
           radius,
-          alpha: progress,
+          alpha: progress || 0.01, // to ensure truthyness
           iteration: 1
         }
         lockingContext.clearRect(0, 0, this.width, this.height)
