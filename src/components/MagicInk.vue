@@ -1,6 +1,6 @@
 <template lang="pug">
 // mousdedown: "startInking"
-span
+aside.magic-ink
   canvas#inking.inking(
     @mousedown="startInkingAndLocking"
     @touchstart="startInkingAndLocking"
@@ -15,6 +15,7 @@ span
     :width="width"
     :height="height"
   )
+  //canvas#init.init
 </template>
 
 <script>
@@ -206,9 +207,8 @@ export default {
 }
 </script>
 
-<style lang="stylus">
-.inking,
-.locking
+<style lang="stylus" scoped>
+canvas
   position absolute
   top 0
 .locking

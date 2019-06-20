@@ -34,7 +34,7 @@ App: http://localhost:8080
 | `components/Block.vue` | Displays blocks from the `store`, and shows `BlockDetails` |
 | `components/Connection.vue` | Displays connections from the `store`, and shows `ConnectionDetails` |
 | `components/Header.vue` | Used for moving between spaces, searching/filter, shows user presence, changing user prefs, and Kinopio meta options. Shown on all routes |
-| `components/MagicInk.vue` | The canvas layer used for animating inking, long-press for scroll locking on touch, and multi-selection which reveals `MultipleBlockActions` |
+| `components/MagicInk.vue` | The canvas layers used for animating inking, scroll locking on touch, and more. As well as for multi-block selection which reveals `MultipleBlockActions` |
 
 
 ## See Also
