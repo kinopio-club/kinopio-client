@@ -233,9 +233,6 @@ export default {
       this.$store.commit('currentUserIsInkingLocked', false)
       this.$store.commit('currentUserIsInking', false)
       this.$store.commit('closeAllPopOvers')
-      if (!inkingCirclesTimer) {
-        inkingCirclesTimer = window.requestAnimationFrame(this.inkCirclesAnimationFrame)
-      }
       if (this.$store.state.multipleBlocksSelected.length) {
         this.$store.commit('multipleBlockActionsPosition', endCursor)
         this.$store.commit('multipleBlockActionsIsVisible', true)
