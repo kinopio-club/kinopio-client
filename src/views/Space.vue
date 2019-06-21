@@ -196,7 +196,6 @@ export default {
       this.$store.commit('currentUserIsDraggingBlock', false)
       this.$store.commit('currentConnectionSuccess', {})
       this.$store.commit('currentConnection', {})
-      this.$store.commit('multipleBlocksSelected', [])
       this.currentConnectionPath = undefined
       prevCursor = undefined
     }
