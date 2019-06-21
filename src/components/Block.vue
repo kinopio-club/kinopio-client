@@ -90,10 +90,8 @@ export default {
   methods: {
     createCurrentConnection (event) {
       const cursor = utils.cursorPositionInViewport(event)
-      let connectorRect = utils.clone(event.srcElement.getBoundingClientRect())
       this.$store.commit('currentConnection', {
-        startBlockId: this.id,
-        startConnectorRect: connectorRect
+        startBlockId: this.id
       })
       this.$store.commit('currentConnectionCursorStart', cursor)
     },

@@ -159,10 +159,8 @@ export default {
   },
 
   connectionPathBetweenCoords (start, end) {
-    // console.log(start, this.coordsWithCurrentScrollOffset(start))
     const offsetStart = this.coordsWithCurrentScrollOffset(start)
     const offsetEnd = this.coordsWithCurrentScrollOffset(end)
-
     const delta = {
       x: (offsetEnd.x - offsetStart.x),
       y: (offsetEnd.y - offsetStart.y)

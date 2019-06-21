@@ -109,8 +109,8 @@ export default {
     },
 
     drawConnection (event) {
-      const startRect = this.$store.state.currentConnection.startConnectorRect
-      const start = utils.elementCenter(startRect)
+      const startBlockId = this.$store.state.currentConnection.startBlockId
+      const start = utils.connectorCoords(startBlockId)
       const current = utils.cursorPositionInViewport(event)
       const path = utils.connectionPathBetweenCoords(start, current)
       this.checkCurrentConnectionSuccess(event)
