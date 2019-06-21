@@ -120,21 +120,10 @@ export default {
       this.$store.commit('closeAllPopOvers')
     },
 
-    easing (percentComplete, elaspedTime) {
+    easeOut (percentComplete, elaspedTime) {
       const duration = lockingDuration
       const startValue = 0
       const endValue = 1
-      // https://stackoverflow.com/questions/8316882/what-is-an-easing-function
-      // x percentComplete,
-      // t elaspedTime,
-      // b startValue,
-      // c endValue,
-      // d duration
-
-      // quadratic ease in
-      // return endValue * (elaspedTime/=duration)*elaspedTime + startValue
-
-      // ease out
       return -endValue * (elaspedTime /= duration) * (elaspedTime - 2) + startValue
     },
 
@@ -142,31 +131,18 @@ export default {
       if (!lockingStartTime) {
         lockingStartTime = timestamp
       }
-
-      // create a locking lockingPreStartTime
-      // lockingPreDuration
-      // lockingPreStartTime
       const elaspedTime = timestamp - lockingStartTime
-
       const percentComplete = (elaspedTime / lockingDuration) // between 0 and 1
-      // lockingPreDuration
-
       if (!utils.cursorsAreClose(startCursor, currentCursor)) {
         currentUserIsLocking = false
       }
-
-      // split this into a pretimer
-      // if (currentUserIsLocking && percentComplete < 0.5) {
-      //   window.requestAnimationFrame(this.lockingAnimationFrame)
       if (currentUserIsLocking && percentComplete <= 1) {
         const minSize = circleRadius
         const percentRemaining = Math.abs(percentComplete - 1)
         const circleRadiusDelta = initialLockCircleRadius - minSize
         const radius = (circleRadiusDelta * percentRemaining) + minSize
-        const alpha = this.easing(percentComplete, elaspedTime)
-        console.log(percentComplete, alpha) // fix alpha, should start from 0 to 1 (), percentAnimationComplete (1-.5 over 1)
-        // if i take 50% how do i make it 0%? 75% should be 50%
-        // /2
+        const alpha = this.easeOut(percentComplete, elaspedTime)
+        console.log(percentComplete, alpha)
         const circle = {
           x: startCursor.x,
           y: startCursor.y,
