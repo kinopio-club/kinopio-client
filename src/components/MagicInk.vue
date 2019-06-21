@@ -142,7 +142,6 @@ export default {
         const circleRadiusDelta = initialLockCircleRadius - minSize
         const radius = (circleRadiusDelta * percentRemaining) + minSize
         const alpha = this.easeOut(percentComplete, elaspedTime)
-        console.log(percentComplete, alpha)
         const circle = {
           x: startCursor.x,
           y: startCursor.y,
@@ -227,18 +226,19 @@ export default {
 
     stopInking () {
       const endCursor = utils.cursorPositionInPage(event)
+      const isMultipleBlocksSelected = Boolean(this.$store.state.multipleBlocksSelected.length)
       currentUserIsLocking = false
       window.cancelAnimationFrame(lockingAnimationTimer)
       lockingContext.clearRect(0, 0, this.width, this.height)
       this.$store.commit('currentUserIsInkingLocked', false)
       this.$store.commit('currentUserIsInking', false)
       this.$store.commit('closeAllPopOvers')
-      if (this.$store.state.multipleBlocksSelected.length) {
+      if (isMultipleBlocksSelected) {
         this.$store.commit('multipleBlockActionsPosition', endCursor)
         this.$store.commit('multipleBlockActionsIsVisible', true)
       }
       if (utils.cursorsAreClose(startCursor, endCursor)) {
-        console.log('🌸🌸 showNewBlockDetailsPop')
+        console.log('🌸🌸 showNewBlockDetails')
       }
     },
 
