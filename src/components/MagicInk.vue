@@ -34,7 +34,8 @@ let inkingCanvas, inkingContext, startCursor, currentCursor, inkingCirclesTimer
 
 // locking
 // long press to lock scrolling
-const lockingDuration = 500 // ms
+const lockingPreDuration = 150 // ms
+const lockingDuration = 250 // ms
 const initialLockCircleRadius = 65
 let lockingCanvas, lockingContext, lockingAnimationTimer, currentUserIsLocking, lockingStartTime
 
@@ -91,7 +92,9 @@ export default {
 
     startLocking () {
       currentUserIsLocking = true
-      lockingAnimationTimer = window.requestAnimationFrame(this.lockingAnimationFrame)
+      setTimeout(() => {
+        lockingAnimationTimer = window.requestAnimationFrame(this.lockingAnimationFrame)
+      }, lockingPreDuration)
     },
 
     createInitialCircle () {
@@ -139,21 +142,31 @@ export default {
       if (!lockingStartTime) {
         lockingStartTime = timestamp
       }
+
+      // create a locking lockingPreStartTime
+      // lockingPreDuration
+      // lockingPreStartTime
       const elaspedTime = timestamp - lockingStartTime
+
       const percentComplete = (elaspedTime / lockingDuration) // between 0 and 1
+      // lockingPreDuration
+
       if (!utils.cursorsAreClose(startCursor, currentCursor)) {
         currentUserIsLocking = false
       }
-      if (currentUserIsLocking && percentComplete < 0.5) {
-        window.requestAnimationFrame(this.lockingAnimationFrame)
-      } else if (currentUserIsLocking && percentComplete <= 1) {
+
+      // split this into a pretimer
+      // if (currentUserIsLocking && percentComplete < 0.5) {
+      //   window.requestAnimationFrame(this.lockingAnimationFrame)
+      if (currentUserIsLocking && percentComplete <= 1) {
         const minSize = circleRadius
         const percentRemaining = Math.abs(percentComplete - 1)
         const circleRadiusDelta = initialLockCircleRadius - minSize
         const radius = (circleRadiusDelta * percentRemaining) + minSize
         const alpha = this.easing(percentComplete, elaspedTime)
-        console.log(percentComplete, alpha)
-
+        console.log(percentComplete, alpha) // fix alpha, should start from 0 to 1 (), percentAnimationComplete (1-.5 over 1)
+        // if i take 50% how do i make it 0%? 75% should be 50%
+        // /2
         const circle = {
           x: startCursor.x,
           y: startCursor.y,
