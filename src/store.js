@@ -140,7 +140,6 @@ const currentSpace = {
     },
 
     moveBlock: (state, { blockId, delta }) => {
-      console.log('moveBlock', blockId, delta)
       const maxOffset = 0
       state.blocks.map(block => {
         if (block.id === blockId) {
@@ -175,7 +174,20 @@ const currentSpace = {
       } else {
         context.commit('moveBlock', { blockId: currentDraggingBlockId, delta })
       }
+    },
+    incrementSelectedBlocksZ: (context) => {
+      const multipleBlocksSelected = context.rootState.multipleBlocksSelected
+      const currentDraggingBlockId = context.rootState.currentDraggingBlockId
+      const blocks = context.state.blocks
+      if (multipleBlocksSelected.length) {
+        blocks.forEach(blockId => {
+          context.commit('incrementBlockZ', blockId)
+        })
+      } else {
+        context.commit('incrementBlockZ', currentDraggingBlockId)
+      }
     }
+
   }
 }
 

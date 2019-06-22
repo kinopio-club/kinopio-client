@@ -106,8 +106,8 @@ export default {
     startDraggingBlock (event) {
       this.$store.commit('closeAllPopOvers')
       this.$store.commit('currentUserIsDraggingBlock', true)
-      this.$store.commit('currentSpace/incrementBlockZ', this.id)
       this.$store.commit('currentDraggingBlockId', this.id)
+      this.$store.dispatch('currentSpace/incrementSelectedBlocksZ')
     },
     showBlockDetails () {
       if (this.$store.state.preventDraggedBlockFromShowingDetails) {
