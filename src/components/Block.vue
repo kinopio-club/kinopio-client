@@ -97,6 +97,7 @@ export default {
     },
     startConnecting (event) {
       this.$store.commit('closeAllPopOvers')
+      this.$store.commit('multipleBlocksSelected', [])
       if (!this.$store.state.currentUserIsDrawingConnection) {
         this.createCurrentConnection(event)
       }
