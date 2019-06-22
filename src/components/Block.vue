@@ -48,7 +48,6 @@ export default {
     y () { return this.block.y },
     z () { return this.block.z },
     name () { return this.block.name },
-
     testcolor () {
       return { background: this.color }
     },
@@ -103,10 +102,18 @@ export default {
       }
       this.$store.commit('currentUserIsDrawingConnection', true)
     },
+    checkIfShouldDragMultipleBlocks () {
+      const multipleBlocksSelected = this.$store.state.multipleBlocksSelected
+      if (!multipleBlocksSelected.includes(this.id)) {
+        console.log('Deseclt')
+        this.$store.commit('multipleBlocksSelected', [])
+      }
+    },
     startDraggingBlock (event) {
       this.$store.commit('closeAllPopOvers')
       this.$store.commit('currentUserIsDraggingBlock', true)
       this.$store.commit('currentDraggingBlockId', this.id)
+      this.checkIfShouldDragMultipleBlocks()
       this.$store.dispatch('currentSpace/incrementSelectedBlocksZ')
     },
     showBlockDetails () {
