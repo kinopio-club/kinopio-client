@@ -16,7 +16,7 @@ import utils from '@/utils.js'
 import Header from '@/components/Header.vue'
 import MagicInk from '@/components/MagicInk.vue'
 
-let _event, clientWidth, clientHeight, xScrollDistancesFromEdge, yScrollDistancesFromEdge, xDistancesToScroll, yDistancesToScroll, scrollAtEdgesTimer
+let _event, clientWidth, clientHeight, scrollAtEdgesTimer
 
 export default {
   components: {
@@ -51,10 +51,6 @@ export default {
       const html = document.documentElement
       clientWidth = document.body.clientWidth
       clientHeight = window.innerHeight
-      xScrollDistancesFromEdge = utils.distancesFromEdge(clientWidth)
-      yScrollDistancesFromEdge = utils.distancesFromEdge(clientHeight)
-      xDistancesToScroll = utils.distancesToScroll(clientWidth)
-      yDistancesToScroll = utils.distancesToScroll(clientHeight)
       this.width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
       this.height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
     },
@@ -82,6 +78,11 @@ export default {
     },
 
     pxToScroll (position, axis) {
+      const xScrollDistancesFromEdge = utils.distancesFromEdge(clientWidth)
+      const yScrollDistancesFromEdge = utils.distancesFromEdge(clientHeight)
+      const xDistancesToScroll = utils.distancesToScroll(clientWidth)
+      const yDistancesToScroll = utils.distancesToScroll(clientHeight)
+
       let distancesFromEdge, scrollByDistance, viewportSize
       if (axis === 'x') {
         distancesFromEdge = xScrollDistancesFromEdge
@@ -112,9 +113,9 @@ export default {
         y: this.pxToScroll(position.y, 'y')
       }
       window.scrollBy(delta.x, delta.y)
+
       if (this.$store.state.currentUserIsDraggingBlock) {
-        const blockId = this.$store.state.currentDraggingBlockId
-        this.$store.commit('currentSpace/moveBlock', { blockId, delta })
+        this.$store.dispatch('currentSpace/dragBlocks', { delta })
       }
     }
   }

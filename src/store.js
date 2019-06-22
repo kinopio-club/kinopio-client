@@ -158,13 +158,16 @@ const currentSpace = {
     }
   },
   actions: {
-    dragBlocks: (context, { endCursor, prevCursor }) => {
+    dragBlocks: (context, { endCursor, prevCursor, delta }) => {
       const multipleBlocksSelected = context.rootState.multipleBlocksSelected
       const currentDraggingBlockId = context.rootState.currentDraggingBlockId
       const blocks = context.rootState.currentSpace.blocks
-      const deltaX = endCursor.x - prevCursor.x
-      const deltaY = endCursor.y - prevCursor.y
-      const delta = { x: deltaX, y: deltaY }
+      if (!delta) {
+        delta = {
+          x: endCursor.x - prevCursor.x,
+          y: endCursor.y - prevCursor.y
+        }
+      }
       if (multipleBlocksSelected.length) {
         blocks.map(block => {
           if (multipleBlocksSelected.includes(block.id)) {
