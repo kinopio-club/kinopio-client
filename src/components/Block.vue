@@ -60,7 +60,6 @@ export default {
     },
     isConnectingTo () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
-      // console.log('currentConnectionSuccess',currentConnectionSuccess)
       if (currentConnectionSuccess) {
         return currentConnectionSuccess.blockId === this.id
       } else {
@@ -105,7 +104,6 @@ export default {
     checkIfShouldDragMultipleBlocks () {
       const multipleBlocksSelected = this.$store.state.multipleBlocksSelected
       if (!multipleBlocksSelected.includes(this.id)) {
-        console.log('Deseclt')
         this.$store.commit('multipleBlocksSelected', [])
       }
     },

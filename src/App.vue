@@ -72,14 +72,13 @@ export default {
         _event = event
         event.preventDefault()
       }
-      if (this.shouldOnlyScrollAtEdges() && !scrollAtEdgesTimer) {
-        scrollAtEdgesTimer = setInterval(this.scrollAtEdges, 16) // 16ms ~= 60fps
+      if (this.shouldOnlyScrollAtEdges()) {
+        scrollAtEdgesTimer = window.requestAnimationFrame(this.scrollAtEdges)
       }
     },
 
     unlockViewport () {
-      clearInterval(scrollAtEdgesTimer)
-      scrollAtEdgesTimer = undefined
+      window.cancelAnimationFrame(scrollAtEdgesTimer)
     },
 
     pxToScroll (position, axis) {
