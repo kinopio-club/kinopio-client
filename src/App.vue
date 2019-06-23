@@ -1,10 +1,11 @@
 <template lang='pug'>
 #app.app(
   :style="elementSize"
-  @mousemove="lockViewport"
-  @touchmove="lockViewport"
-  @mouseup="unlockViewport"
-  @touchend="unlockViewport"
+  @mousemove="updateViewportScrolling"
+  @touchmove="updateViewportScrolling"
+  @mouseup="endViewportScrolling"
+  @touchend="endViewportScrolling"
+  @mouseleave="endViewportScrolling"
 )
   Header
   MagicInk
@@ -63,18 +64,15 @@ export default {
       ) { return true }
     },
 
-    lockViewport (event) {
+    updateViewportScrolling (event) {
       if (this.shouldOnlyScrollAtEdges()) {
         _event = event
         event.preventDefault()
+        if (!scrollAtEdgesTimer) {
+          scrollAtEdgesTimer = window.requestAnimationFrame(this.scrollAtEdges)
+          console.log(scrollAtEdgesTimer)
+        }
       }
-      if (this.shouldOnlyScrollAtEdges()) {
-        scrollAtEdgesTimer = window.requestAnimationFrame(this.scrollAtEdges)
-      }
-    },
-
-    unlockViewport () {
-      window.cancelAnimationFrame(scrollAtEdgesTimer)
     },
 
     pxToScroll (position, axis) {
@@ -117,6 +115,12 @@ export default {
       if (this.$store.state.currentUserIsDraggingBlock) {
         this.$store.dispatch('currentSpace/dragBlocks', { delta })
       }
+      window.requestAnimationFrame(this.scrollAtEdges)
+    },
+
+    endViewportScrolling () {
+      window.cancelAnimationFrame(scrollAtEdgesTimer)
+      scrollAtEdgesTimer = undefined
     }
   }
 }
