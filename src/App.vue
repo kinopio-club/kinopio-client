@@ -34,14 +34,12 @@ export default {
   mounted () {
     this.updateAppElementSize()
     window.addEventListener('resize', this.updateAppElementSize)
-    window.addEventListener('scroll', this.updateAppElementSize)
   },
   computed: {
     elementSize () {
       return {
         width: `${this.width}px`,
-        height: `${this.height}px`,
-        overflow: `${this.overflow}`
+        height: `${this.height}px`
       }
     }
   },
@@ -104,7 +102,7 @@ export default {
     },
 
     scrollAtEdges (event) {
-      if (!this.shouldOnlyScrollAtEdges() || !_event) { return }
+      if (!this.shouldOnlyScrollAtEdges()) { return }
       const position = utils.cursorPositionInViewport(_event)
       const delta = {
         x: this.pxToScroll(position.x, 'x'),
@@ -114,6 +112,9 @@ export default {
 
       if (this.$store.state.currentUserIsDraggingBlock) {
         this.$store.dispatch('currentSpace/dragBlocks', { delta })
+      }
+      if (delta.x || delta.y) {
+        this.updateAppElementSize()
       }
       window.requestAnimationFrame(this.scrollAtEdges)
     },
