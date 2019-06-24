@@ -1,7 +1,6 @@
 <template lang='pug'>
 #app.app(
-  :width="width"
-  :height="height"
+  :style="elementSize"
 )
   Header
   MagicInk
@@ -40,6 +39,14 @@ export default {
     window.addEventListener('touchmove', this.updateViewportScrolling)
     window.addEventListener('mouseup', this.endViewportScrolling)
     window.addEventListener('touchend', this.endViewportScrolling)
+  },
+  computed: {
+    elementSize () {
+      return {
+        width: `${this.width}px`,
+        height: `${this.height}px`
+      }
+    }
   },
   methods: {
     updateAppElementSize () {
