@@ -132,7 +132,11 @@ export default {
       this.height += delta.y
       // this.width
 
-      window.scrollBy(delta.x, delta.y)
+      window.scrollBy({
+        left: delta.x,
+        top: delta.y,
+        behaviour: 'smooth'
+      })
       if (this.$store.state.currentUserIsDraggingBlock) {
         this.$store.dispatch('currentSpace/dragBlocks', { delta })
       }
