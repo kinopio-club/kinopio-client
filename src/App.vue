@@ -1,11 +1,6 @@
 <template lang='pug'>
 #app.app(
   :style="elementSize"
-  @mousemove="updateViewportScrolling"
-  @touchmove="updateViewportScrolling"
-  @mouseup="endViewportScrolling"
-  @touchend="endViewportScrolling"
-  @mouseleave="endViewportScrolling"
 )
   Header
   MagicInk
@@ -17,7 +12,14 @@ import utils from '@/utils.js'
 import Header from '@/components/Header.vue'
 import MagicInk from '@/components/MagicInk.vue'
 
-let _event, clientWidth, clientHeight, scrollAtEdgesTimer
+const defaultScrollZone = 200
+const scrollSpeeds = {
+  fast: 40,
+  medium: 20,
+  slow: 10
+}
+let _event, viewportWidth, viewportHeight, scrollAtEdgesTimer
+let scrollZone = {}
 
 export default {
   components: {
@@ -27,13 +29,16 @@ export default {
   data () {
     return {
       width: 0,
-      height: 0,
-      overflow: 'visible'
+      height: 0
     }
   },
   mounted () {
     this.updateAppElementSize()
     window.addEventListener('resize', this.updateAppElementSize)
+    window.addEventListener('mousemove', this.updateViewportScrolling)
+    window.addEventListener('touchmove', this.updateViewportScrolling)
+    window.addEventListener('mouseup', this.endViewportScrolling)
+    window.addEventListener('touchend', this.endViewportScrolling)
   },
   computed: {
     elementSize () {
@@ -48,13 +53,23 @@ export default {
       console.log('updateAppElementSize')
       const body = document.body
       const html = document.documentElement
-      clientWidth = document.body.clientWidth
-      clientHeight = window.innerHeight
+      viewportWidth = document.body.clientWidth
+      viewportHeight = window.innerHeight
       this.width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
       this.height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
+      if (viewportWidth < defaultScrollZone * 2) {
+        scrollZone.x = viewportWidth / 2
+      } else {
+        scrollZone.x = defaultScrollZone
+      }
+      if (viewportHeight < defaultScrollZone * 2) {
+        scrollZone.y = viewportHeight / 2
+      } else {
+        scrollZone.y = defaultScrollZone
+      }
     },
 
-    shouldOnlyScrollAtEdges () {
+    shouldScrollAtEdges () {
       if (
         this.$store.state.currentUserIsDrawingConnection ||
         this.$store.state.currentUserIsInkingLocked ||
@@ -63,65 +78,83 @@ export default {
     },
 
     updateViewportScrolling (event) {
-      if (this.shouldOnlyScrollAtEdges()) {
+      if (this.shouldScrollAtEdges()) {
         _event = event
         event.preventDefault()
         if (!scrollAtEdgesTimer) {
           scrollAtEdgesTimer = window.requestAnimationFrame(this.scrollAtEdges)
-          console.log(scrollAtEdgesTimer)
         }
       }
     },
 
-    pxToScroll (position, axis) {
-      const xScrollDistancesFromEdge = utils.distancesFromEdge(clientWidth)
-      const yScrollDistancesFromEdge = utils.distancesFromEdge(clientHeight)
-      const xDistancesToScroll = utils.distancesToScroll(clientWidth)
-      const yDistancesToScroll = utils.distancesToScroll(clientHeight)
-
-      let distancesFromEdge, scrollByDistance, viewportSize
-      if (axis === 'x') {
-        distancesFromEdge = xScrollDistancesFromEdge
-        scrollByDistance = xDistancesToScroll
-        viewportSize = clientWidth
-      } else if (axis === 'y') {
-        distancesFromEdge = yScrollDistancesFromEdge
-        scrollByDistance = yDistancesToScroll
-        viewportSize = clientHeight
-      }
-      const shouldScrollStart = position < distancesFromEdge.far
-      const shouldScrollEnd = position > (viewportSize - distancesFromEdge.far)
-      const proximityTypeStart = utils.proximityTypeFromEdge(position, distancesFromEdge)
-      const proximityTypeEnd = utils.proximityTypeFromEdge(position, distancesFromEdge, viewportSize)
-
-      if (shouldScrollStart) {
-        return -scrollByDistance[proximityTypeStart]
-      } else if (shouldScrollEnd) {
-        return scrollByDistance[proximityTypeEnd]
+    scrollSpeed (value, scrollZoneXY) {
+      // const scrollSpeeds = {
+      //   fast: 50,
+      //   medium: 20,
+      //   slow: 10
+      // }
+      if (value < 0) {
+        return scrollSpeeds['fast']
+      } else if (value < scrollZoneXY / 2) {
+        return scrollSpeeds['medium']
+      } else if (value < scrollZoneXY) {
+        return scrollSpeeds['slow']
       }
     },
 
-    scrollAtEdges (event) {
-      if (!this.shouldOnlyScrollAtEdges()) { return }
-      const position = utils.cursorPositionInViewport(_event)
-      const delta = {
-        x: this.pxToScroll(position.x, 'x'),
-        y: this.pxToScroll(position.y, 'y')
+    distanceToScroll (cursorInWindow) {
+      // cursorInWindow =
+      // {left: 52, top: 180, right: 879, bottom: 301}
+      let x, y
+      const directions = {
+        left: -this.scrollSpeed(cursorInWindow.left, scrollZone.x),
+        top: -this.scrollSpeed(cursorInWindow.top, scrollZone.y),
+        right: this.scrollSpeed((viewportWidth - cursorInWindow.left), scrollZone.x),
+        bottom: this.scrollSpeed((viewportHeight - cursorInWindow.top), scrollZone.y)
       }
-      window.scrollBy(delta.x, delta.y)
+      // right: -175
+      // bottom: -224
+      // right
+      // bottom
+      x = directions.left || directions.right
+      y = directions.top || directions.bottom
+      return { x, y }
+    },
+
+    scrollAtEdges (event) {
+      if (!this.shouldScrollAtEdges()) { return }
+      const cursor = utils.cursorPositionInViewport(_event)
+      const cursorInWindow = {
+        left: cursor.x,
+        top: cursor.y,
+        right: viewportWidth - cursor.x,
+        bottom: viewportHeight - cursor.y
+      }
+      const delta = this.distanceToScroll(cursorInWindow)
+      // const currentCursor = utils.cursorPositionInViewport(_event)
+      console.log('🌍', cursorInWindow, delta, cursor)
 
       if (this.$store.state.currentUserIsDraggingBlock) {
         this.$store.dispatch('currentSpace/dragBlocks', { delta })
       }
-      if (delta.x || delta.y) {
-        this.updateAppElementSize()
-      }
+      window.scrollBy(delta.x, delta.y)
+
+      // Replaced in end scrolling (remove this if that works fine)
+      // // TODO move the blocks by the same amount to expand viewport size
+      // if (delta.x || delta.y) {
+      //   this.updateAppElementSize()
+      // }
       window.requestAnimationFrame(this.scrollAtEdges)
     },
 
     endViewportScrolling () {
+      console.log('endViewportScrolling')
       window.cancelAnimationFrame(scrollAtEdgesTimer)
+      // this.updateAppElementSize()
       scrollAtEdgesTimer = undefined
+      this.$store.commit('currentUserIsDrawingConnection', false)
+      this.$store.commit('currentUserIsInkingLocked', false)
+      this.$store.commit('currentUserIsDraggingBlock', false)
     }
   }
 }

@@ -67,7 +67,7 @@ const currentSpace = {
       },
       {
         id: '4',
-        x: 600,
+        x: 1600,
         y: 500,
         z: 3,
         name: 'eat your vegetables',
