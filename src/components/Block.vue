@@ -94,6 +94,7 @@ export default {
       this.$store.commit('currentConnectionCursorStart', cursor)
     },
     startConnecting (event) {
+      event.preventDefault()
       this.$store.commit('closeAllPopOvers')
       this.$store.commit('multipleBlocksSelected', [])
       if (!this.$store.state.currentUserIsDrawingConnection) {
@@ -108,6 +109,7 @@ export default {
       }
     },
     startDraggingBlock (event) {
+      event.preventDefault()
       this.$store.commit('closeAllPopOvers')
       this.$store.commit('currentUserIsDraggingBlock', true)
       this.$store.commit('currentDraggingBlockId', this.id)

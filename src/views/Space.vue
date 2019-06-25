@@ -1,12 +1,9 @@
 <template lang="pug">
 main.space(
-  :class="{'is-interacting': isInteracting, 'is-inking': isInking}"
+  :class="{'is-interacting': isDraggingBlockOrConnection, 'is-inking': isInking}"
   @mousedown="initInteractions"
   @touchstart="initInteractions"
-  @mousemove="interact"
-  @touchmove="interact"
-  @mouseup="stopInteractions"
-  @touchend="stopInteractions"
+  :style="size"
 )
   svg.connections
     path.current-connection(
@@ -45,12 +42,34 @@ export default {
     Footer
   },
   name: 'Space',
+
   data () {
     return {
-      currentConnectionPath: undefined
+      currentConnectionPath: undefined,
+      width: 0,
+      height: 0
     }
   },
+
+  mounted () {
+    // have to bind events to window to receive events when mouse is outside window
+    window.addEventListener('mousemove', this.interact)
+    window.addEventListener('touchmove', this.interact)
+    window.addEventListener('mouseup', this.stopInteractions)
+    window.addEventListener('touchend', this.stopInteractions)
+    // keep space element updated to viewport size so connections show up
+    this.updateSpaceSize()
+    window.addEventListener('resize', this.updateSpaceSize)
+    window.addEventListener('scroll', this.updateSpaceSize)
+  },
+
   computed: {
+    size () {
+      return {
+        width: `${this.width}px`,
+        height: `${this.height}px`
+      }
+    },
     blocks () {
       return this.$store.state.currentSpace.blocks
     },
@@ -60,8 +79,7 @@ export default {
         return true
       } else { return false }
     },
-
-    isInteracting () {
+    isDraggingBlockOrConnection () {
       const draggingBlock = this.$store.state.currentUserIsDraggingBlock
       const drawingConnection = this.$store.state.currentUserIsDrawingConnection
       if (draggingBlock || drawingConnection) {
@@ -78,14 +96,19 @@ export default {
     }
   },
   methods: {
+    updateSpaceSize () {
+      const body = document.body
+      const html = document.documentElement
+      this.width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
+      this.height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
+    },
+
     initInteractions (event) {
+      console.log('initInteractions')
       startCursor = utils.cursorPositionInViewport(event)
     },
 
     interact (event) {
-      if (this.$store.getters.viewportIsLocked) {
-        event.preventDefault()
-      }
       if (this.$store.state.currentUserIsDraggingBlock) {
         this.dragBlock(event)
       }
@@ -118,6 +141,7 @@ export default {
       const path = utils.connectionPathBetweenCoords(start, current)
       this.checkCurrentConnectionSuccess(event)
       this.currentConnectionPath = path
+      console.log(this.currentConnectionPath)
       this.$store.dispatch('broadcast/connectingPaths', path)
     },
 
@@ -212,7 +236,7 @@ export default {
   position absolute
   pointer-events none // so that inking can receive events
   width 100%
-  height 100%
+  height 100vh
 .is-interacting
   pointer-events all
 .is-inking

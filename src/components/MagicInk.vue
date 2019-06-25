@@ -61,6 +61,7 @@ export default {
     initialCanvas = document.getElementById('initial')
     initialContext = initialCanvas.getContext('2d')
     initialContext.scale(window.devicePixelRatio, window.devicePixelRatio)
+    // keep canvases updated to viewport size so you can draw on newly created areas
     this.updateCanvasSize()
     window.addEventListener('resize', this.updateCanvasSize)
     window.addEventListener('scroll', this.updateCanvasSize)
