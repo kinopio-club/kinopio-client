@@ -20,6 +20,8 @@ const scrollSpeeds = {
 }
 let _event, viewportWidth, viewportHeight, scrollAtEdgesTimer
 let scrollZone = {}
+let prevCursorPosition = {}
+let moveDirection = {}
 
 export default {
   components: {
@@ -80,7 +82,26 @@ export default {
     updateViewportScrolling (event) {
       if (this.shouldScrollAtEdges()) {
         _event = event
-        console.log(event)
+        const currentCursorPosition = utils.cursorPositionInViewport(_event)
+        const xDelta = currentCursorPosition.x - prevCursorPosition.x
+        const yDelta = currentCursorPosition.y - prevCursorPosition.y
+        if (xDelta < 0) {
+          moveDirection.left = true
+          moveDirection.right = false
+        } else if (xDelta > 0) {
+          moveDirection.left = false
+          moveDirection.right = true
+        }
+        if (yDelta < 0) {
+          moveDirection.up = true
+          moveDirection.down = false
+        } else if (yDelta > 0) {
+          moveDirection.up = false
+          moveDirection.down = true
+        }
+        console.log(moveDirection) //
+        prevCursorPosition = currentCursorPosition
+        // dont move unless i have a direction
         this.updateAppElementSize()
         event.preventDefault()
         if (!scrollAtEdgesTimer) {
@@ -100,43 +121,50 @@ export default {
     },
 
     scrollAtEdgesFrame () {
+      let down
+      // let left, top, right, down
       if (!this.shouldScrollAtEdges()) { return }
       const cursorViewport = utils.cursorPositionInViewport(_event)
-      const cursorPage = utils.cursorPositionInPage(_event)
+      // const cursorPage = utils.cursorPositionInPage(_event)
       const positionInViewport = {
         left: cursorViewport.x,
         top: cursorViewport.y,
         right: viewportWidth - cursorViewport.x,
-        bottom: viewportHeight - cursorViewport.y
+        down: viewportHeight - cursorViewport.y
       }
-      const positionInPage = {
-        left: cursorPage.x,
-        top: cursorPage.y,
-        right: this.width - cursorPage.x,
-        bottom: this.height - cursorPage.y
+      // const positionInPage = {
+      //   left: cursorPage.x,
+      //   top: cursorPage.y,
+      //   right: this.width - cursorPage.x,
+      //   down: this.height - cursorPage.y
+      // }
+
+      // const down =
+      if (moveDirection.down) {
+        down = this.distance(positionInViewport.down, scrollZone.y)
       }
 
       const distances = {
         // left: -this.scrollSpeed(positionInViewport.left, scrollZone.x),
         // top: -this.scrollSpeed(positionInViewport.top, scrollZone.y),
         // right: this.scrollSpeed((viewportWidth - positionInViewport.left), scrollZone.x),
-        bottom: this.distance(positionInViewport.bottom, scrollZone.y)
+        down: down
       }
 
       const delta = {
         // x: distances.left || distances.right,
-        y: distances.top || distances.bottom
+        y: distances.top || distances.down || 0
       }
-
-      console.log('💦', positionInPage.bottom, this.height, cursorPage.y, delta.y)
+      // console.log('💦', positionInPage.down, this.height, cursorPage.y, delta.y)
+      // todo only expand this if needed
+      // current viewport
       this.height += delta.y
       // this.width
+      // console.log
 
-      window.scrollBy({
-        left: delta.x,
-        top: delta.y,
-        behaviour: 'smooth'
-      })
+      console.log('🎨', distances, this.height)
+
+      window.scrollBy(delta.x, delta.y)
       if (this.$store.state.currentUserIsDraggingBlock) {
         this.$store.dispatch('currentSpace/dragBlocks', { delta })
       }
@@ -148,6 +176,8 @@ export default {
       window.cancelAnimationFrame(scrollAtEdgesTimer)
       scrollAtEdgesTimer = undefined
       // this.updateAppElementSize()
+      prevCursorPosition = {}
+      moveDirection = {}
       this.$store.commit('currentUserIsDrawingConnection', false)
       this.$store.commit('currentUserIsInkingLocked', false)
       this.$store.commit('currentUserIsDraggingBlock', false)
