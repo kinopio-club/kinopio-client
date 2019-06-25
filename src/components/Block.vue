@@ -1,8 +1,8 @@
 <template lang="pug">
 article(:style="position" :data-block-id="id")
   .block(
-    @mousedown="startDraggingBlock"
-    @touchstart="startDraggingBlock"
+    @mousedown.prevent="startDraggingBlock"
+    @touchstart.prevent="startDraggingBlock"
     @click="showBlockDetails"
     :class="{jiggle: isConnectingTo || isConnectingFrom}",
     :style="selectedColor"
@@ -11,8 +11,8 @@ article(:style="position" :data-block-id="id")
     p {{name}}
     .connector(
       :style="testcolor"
-      @mousedown.stop="startConnecting"
-      @touchstart.stop="startConnecting"
+      @mousedown.stop.prevent="startConnecting"
+      @touchstart.stop.prevent="startConnecting"
       @click.stop
       :data-block-id="id"
       :class="{ active: isConnectingTo }"
@@ -94,7 +94,6 @@ export default {
       this.$store.commit('currentConnectionCursorStart', cursor)
     },
     startConnecting (event) {
-      event.preventDefault()
       this.$store.commit('closeAllPopOvers')
       this.$store.commit('multipleBlocksSelected', [])
       if (!this.$store.state.currentUserIsDrawingConnection) {
@@ -108,8 +107,7 @@ export default {
         this.$store.commit('multipleBlocksSelected', [])
       }
     },
-    startDraggingBlock (event) {
-      event.preventDefault()
+    startDraggingBlock () {
       this.$store.commit('closeAllPopOvers')
       this.$store.commit('currentUserIsDraggingBlock', true)
       this.$store.commit('currentDraggingBlockId', this.id)
