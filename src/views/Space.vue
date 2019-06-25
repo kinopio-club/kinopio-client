@@ -59,7 +59,7 @@ export default {
     window.addEventListener('touchend', this.stopInteractions)
     // keep space element updated to viewport size so connections show up
     window.addEventListener('resize', this.updateSpaceSize)
-    window.addEventListener('scroll', this.updateSpaceSize)
+    window.addEventListener('scroll', this.updateSpaceSize) // potential perf issue during dragging
   },
 
   computed: {
@@ -217,6 +217,7 @@ export default {
       if (this.$store.state.currentUserIsDrawingConnection) {
         this.createConnection()
       }
+      this.$store.commit('preventDraggedBlockFromShowingDetails', false)
       this.$store.commit('currentUserIsDrawingConnection', false)
       this.$store.commit('currentUserIsInkingLocked', false)
       this.$store.commit('currentUserIsDraggingBlock', false)

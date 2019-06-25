@@ -64,7 +64,7 @@ export default {
     // keep canvases updated to viewport size so you can draw on newly created areas
     this.updateCanvasSize()
     window.addEventListener('resize', this.updateCanvasSize)
-    window.addEventListener('scroll', this.updateCanvasSize)
+    window.addEventListener('scroll', this.updateCanvasSize) // potential perf issue during dragging
   },
   computed: {
     currentUserColor () {

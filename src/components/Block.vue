@@ -3,7 +3,8 @@ article(:style="position" :data-block-id="id")
   .block(
     @mousedown.prevent="startDraggingBlock"
     @touchstart.prevent="startDraggingBlock"
-    @click="showBlockDetails"
+    @mouseup="showBlockDetails"
+    @touchend="showBlockDetails"
     :class="{jiggle: isConnectingTo || isConnectingFrom}",
     :style="selectedColor"
     :data-block-id="id"
@@ -95,6 +96,7 @@ export default {
     },
     startConnecting (event) {
       this.$store.commit('closeAllPopOvers')
+      this.$store.commit('preventDraggedBlockFromShowingDetails', true)
       this.$store.commit('multipleBlocksSelected', [])
       if (!this.$store.state.currentUserIsDrawingConnection) {
         this.createCurrentConnection(event)
@@ -116,7 +118,6 @@ export default {
     },
     showBlockDetails () {
       if (this.$store.state.preventDraggedBlockFromShowingDetails) {
-        this.$store.commit('preventDraggedBlockFromShowingDetails', false)
         return
       }
       this.$store.commit('closeAllPopOvers')
