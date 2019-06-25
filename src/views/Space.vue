@@ -1,6 +1,6 @@
 <template lang="pug">
 main.space(
-  :class="{'is-interacting': isDraggingBlockOrConnection, 'is-inking': isInking}"
+  :class="{'is-interacting': isInteracting, 'is-inking': isInking}"
   @mousedown="initInteractions"
   @touchstart="initInteractions"
   :style="size"
@@ -31,7 +31,7 @@ import Block from '@/components/Block.vue'
 import MultipleBlockActions from '@/components/pop-overs/MultipleBlockActions.vue'
 import Footer from '@/components/Footer.vue'
 
-let startCursor, prevCursor, endCursor
+let startCursor, prevCursor, endCursor, scrollTimer
 
 export default {
   components: {
@@ -78,7 +78,7 @@ export default {
         return true
       } else { return false }
     },
-    isDraggingBlockOrConnection () {
+    isInteracting () {
       const draggingBlock = this.$store.state.currentUserIsDraggingBlock
       const drawingConnection = this.$store.state.currentUserIsDrawingConnection
       if (draggingBlock || drawingConnection) {
@@ -103,8 +103,10 @@ export default {
     },
 
     initInteractions (event) {
-      console.log('initInteractions')
       startCursor = utils.cursorPositionInViewport(event)
+      if (this.$store.getters.viewportIsLocked) {
+        scrollTimer = window.requestAnimationFrame(this.scrollFrame)
+      }
     },
 
     interact (event) {
@@ -119,6 +121,13 @@ export default {
     checkShouldShowDetails () {
       if (!utils.cursorsAreClose(startCursor, endCursor)) {
         this.$store.commit('preventDraggedBlockFromShowingDetails', true)
+      }
+    },
+
+    scrollFrame () {
+      console.log('i am scroll frame', scrollTimer)
+      if (scrollTimer) {
+        window.requestAnimationFrame(this.scrollFrame)
       }
     },
 
@@ -140,7 +149,6 @@ export default {
       const path = utils.connectionPathBetweenCoords(start, current)
       this.checkCurrentConnectionSuccess(event)
       this.currentConnectionPath = path
-      console.log(this.currentConnectionPath)
       this.$store.dispatch('broadcast/connectingPaths', path)
     },
 
@@ -212,6 +220,8 @@ export default {
 
     stopInteractions (event) {
       console.log('💣 stopInteractions')
+      window.cancelAnimationFrame(scrollTimer)
+      scrollTimer = undefined
       if (event.target.closest('dialog')) { return }
       if (this.shouldContinueConnecting()) { return }
       if (this.$store.state.currentUserIsDrawingConnection) {
