@@ -1,12 +1,12 @@
 <template lang="pug">
 main.space(
+  :class="{'is-interacting': isInteracting, 'is-inking': isInking}"
   @mousedown="initInteractions"
   @touchstart="initInteractions"
-  @mouseup="stopInteractions"
-  @touchend="stopInteractions"
   @mousemove="interact"
   @touchmove="interact"
-  :class="{'is-interacting': isInteracting, 'is-inking': isInking}"
+  @mouseup="stopInteractions"
+  @touchend="stopInteractions"
 )
   svg.connections
     path.current-connection(
@@ -83,6 +83,9 @@ export default {
     },
 
     interact (event) {
+      if (this.$store.getters.viewportIsLocked) {
+        event.preventDefault()
+      }
       if (this.$store.state.currentUserIsDraggingBlock) {
         this.dragBlock(event)
       }

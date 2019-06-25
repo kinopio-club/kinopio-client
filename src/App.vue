@@ -45,13 +45,13 @@ export default {
   mounted () {
     this.updateAppElementSize()
     window.addEventListener('resize', this.updateAppElementSize)
-    window.addEventListener('mousemove', this.updateViewportScrolling)
-    window.addEventListener('touchmove', this.updateViewportScrolling)
+    // window.addEventListener('mousemove', this.updateViewportScrolling)
+    // window.addEventListener('touchmove', this.updateViewportScrolling)
     window.addEventListener('mouseup', this.endViewportScrolling)
     window.addEventListener('touchend', this.endViewportScrolling)
   },
   methods: {
-    shouldScrollAtEdges () {
+    shouldOnlyScrollAtEdges () {
       if (
         this.$store.state.currentUserIsDrawingConnection ||
         this.$store.state.currentUserIsInkingLocked ||
@@ -90,7 +90,7 @@ export default {
     },
 
     updateViewportScrolling (event) {
-      if (this.shouldScrollAtEdges()) {
+      if (this.shouldOnlyScrollAtEdges()) {
         console.log('updateViewportScrolling')
         _event = event
         const currentCursorPosition = utils.cursorPositionInViewport(_event)
@@ -120,7 +120,7 @@ export default {
     },
 
     scrollAtEdgesFrame () {
-      if (!this.shouldScrollAtEdges()) { return }
+      if (!this.shouldOnlyScrollAtEdges()) { return }
       console.log('🦑 scrollAtEdgesFrame')
 
       let toScroll = {}
@@ -213,7 +213,7 @@ body
 
 .app
   position relative
-  scroll-behavior smooth
+  max-height: 100vh
 
 dialog
   width: 300px
@@ -230,7 +230,7 @@ dialog
   section + section
     border-top: 1px solid var(--primary)
 
-//
+//meta pages
 .meta
   max-width 600px
   width 95%

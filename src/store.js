@@ -338,6 +338,14 @@ export default new Vuex.Store({
       state.multipleBlockActionsPosition = position
     }
   },
+  getters: {
+    viewportIsLocked (state, getters) {
+      const isInkingLocked = state.currentUserIsInkingLocked
+      const isDrawingConnection = state.currentUserIsDrawingConnection
+      const isDraggingBlock = state.currentUserIsDraggingBlock
+      return isInkingLocked || isDrawingConnection || isDraggingBlock
+    }
+  },
   modules: {
     currentUser,
     currentSpace,

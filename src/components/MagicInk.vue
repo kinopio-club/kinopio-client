@@ -35,7 +35,7 @@ let inkingCanvas, inkingContext, startCursor, currentCursor, inkingCirclesTimer
 // locking
 // long press to lock scrolling
 const lockingPreDuration = 150 // ms
-const lockingDuration = 250 // ms
+const lockingDuration = 200 // ms
 const initialLockCircleRadius = 65
 let lockingCanvas, lockingContext, lockingAnimationTimer, currentUserIsLocking, lockingStartTime
 
@@ -165,6 +165,9 @@ export default {
     },
 
     inking (event) {
+      if (this.$store.getters.viewportIsLocked) {
+        event.preventDefault()
+      }
       lockingContext.clearRect(0, 0, this.width, this.height)
       if (!inkingCirclesTimer) {
         inkingCirclesTimer = window.requestAnimationFrame(this.inkCirclesAnimationFrame)
