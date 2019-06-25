@@ -177,40 +177,6 @@ export default {
 
   filterCircles (circles, maxIterationsToInk) {
     return circles.filter(circle => circle.iteration < maxIterationsToInk)
-  },
-
-  // Edge Scrolling Utils 👻
-
-  distancesFromEdge (viewportSize) {
-    return {
-      far: Math.round((8 / 100) * viewportSize),
-      medium: Math.round((4 / 100) * viewportSize),
-      close: Math.round((2 / 100) * viewportSize)
-    }
-  },
-
-  distancesToScroll (viewportSize) {
-    return {
-      far: Math.round((2 / 100) * viewportSize),
-      medium: Math.round((4 / 100) * viewportSize),
-      close: Math.round((6 / 100) * viewportSize)
-    }
-  },
-
-  proximityTypeFromEdge (position, distances, viewportSize) {
-    let close, medium, far
-    if (viewportSize) {
-      close = position > (viewportSize - distances.close)
-      medium = position > (viewportSize - distances.medium)
-      far = position > (viewportSize - distances.far)
-    } else {
-      close = position < distances.close
-      medium = position < distances.medium
-      far = position < distances.far
-    }
-    if (close) { return 'close' }
-    if (medium) { return 'medium' }
-    if (far) { return 'far' }
   }
 
 }

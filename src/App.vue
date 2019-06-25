@@ -1,11 +1,6 @@
 <template lang='pug'>
 #app.app(
   :style="elementSize"
-  @mousemove="updateViewportScrolling"
-  @touchmove="updateViewportScrolling"
-  @mouseup="endViewportScrolling"
-  @touchend="endViewportScrolling"
-  @mouseleave="endViewportScrolling"
 )
   Header
   MagicInk
@@ -17,7 +12,16 @@ import utils from '@/utils.js'
 import Header from '@/components/Header.vue'
 import MagicInk from '@/components/MagicInk.vue'
 
-let _event, clientWidth, clientHeight, scrollAtEdgesTimer
+const defaultScrollZone = 200
+const scrollSpeeds = {
+  fast: 30,
+  medium: 15,
+  slow: 5
+}
+let _event, viewportWidth, viewportHeight, scrollAtEdgesTimer
+let scrollZone = {}
+let prevCursorPosition = {}
+let moveDirection = {}
 
 export default {
   components: {
@@ -27,13 +31,8 @@ export default {
   data () {
     return {
       width: 0,
-      height: 0,
-      overflow: 'visible'
+      height: 0
     }
-  },
-  mounted () {
-    this.updateAppElementSize()
-    window.addEventListener('resize', this.updateAppElementSize)
   },
   computed: {
     elementSize () {
@@ -43,18 +42,16 @@ export default {
       }
     }
   },
+  mounted () {
+    this.updateAppElementSize()
+    window.addEventListener('resize', this.updateAppElementSize)
+    window.addEventListener('mousemove', this.updateViewportScrolling)
+    window.addEventListener('touchmove', this.updateViewportScrolling)
+    window.addEventListener('mouseup', this.endViewportScrolling)
+    window.addEventListener('touchend', this.endViewportScrolling)
+  },
   methods: {
-    updateAppElementSize () {
-      console.log('updateAppElementSize')
-      const body = document.body
-      const html = document.documentElement
-      clientWidth = document.body.clientWidth
-      clientHeight = window.innerHeight
-      this.width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
-      this.height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
-    },
-
-    shouldOnlyScrollAtEdges () {
+    shouldScrollAtEdges () {
       if (
         this.$store.state.currentUserIsDrawingConnection ||
         this.$store.state.currentUserIsInkingLocked ||
@@ -62,66 +59,128 @@ export default {
       ) { return true }
     },
 
+    distance (value, scrollZoneXY) {
+      if (value < 0) {
+        return scrollSpeeds['fast']
+      } else if (value < scrollZoneXY / 2) {
+        return scrollSpeeds['medium']
+      } else if (value < scrollZoneXY) {
+        return scrollSpeeds['slow']
+      }
+    },
+
+    updateAppElementSize () {
+      console.log('🐸 updateAppElementSize')
+      const body = document.body
+      const html = document.documentElement
+      this.width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
+      this.height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
+      viewportWidth = document.body.clientWidth
+      viewportHeight = window.innerHeight
+      if (viewportWidth < defaultScrollZone * 2) {
+        scrollZone.x = viewportWidth / 2
+      } else {
+        scrollZone.x = defaultScrollZone
+      }
+      if (viewportHeight < defaultScrollZone * 2) {
+        scrollZone.y = viewportHeight / 2
+      } else {
+        scrollZone.y = defaultScrollZone
+      }
+    },
+
     updateViewportScrolling (event) {
-      if (this.shouldOnlyScrollAtEdges()) {
+      if (this.shouldScrollAtEdges()) {
+        console.log('updateViewportScrolling')
         _event = event
+        const currentCursorPosition = utils.cursorPositionInViewport(_event)
+        const xDelta = currentCursorPosition.x - prevCursorPosition.x
+        const yDelta = currentCursorPosition.y - prevCursorPosition.y
+        if (xDelta < 0) {
+          moveDirection.left = true
+          moveDirection.right = false
+        } else if (xDelta > 0) {
+          moveDirection.left = false
+          moveDirection.right = true
+        }
+        if (yDelta < 0) {
+          moveDirection.up = true
+          moveDirection.down = false
+        } else if (yDelta > 0) {
+          moveDirection.up = false
+          moveDirection.down = true
+        }
+        prevCursorPosition = currentCursorPosition
+        this.updateAppElementSize()
         event.preventDefault()
         if (!scrollAtEdgesTimer) {
-          scrollAtEdgesTimer = window.requestAnimationFrame(this.scrollAtEdges)
-          console.log(scrollAtEdgesTimer)
+          scrollAtEdgesTimer = window.requestAnimationFrame(this.scrollAtEdgesFrame)
         }
       }
     },
 
-    pxToScroll (position, axis) {
-      const xScrollDistancesFromEdge = utils.distancesFromEdge(clientWidth)
-      const yScrollDistancesFromEdge = utils.distancesFromEdge(clientHeight)
-      const xDistancesToScroll = utils.distancesToScroll(clientWidth)
-      const yDistancesToScroll = utils.distancesToScroll(clientHeight)
+    scrollAtEdgesFrame () {
+      if (!this.shouldScrollAtEdges()) { return }
+      console.log('🦑 scrollAtEdgesFrame')
 
-      let distancesFromEdge, scrollByDistance, viewportSize
-      if (axis === 'x') {
-        distancesFromEdge = xScrollDistancesFromEdge
-        scrollByDistance = xDistancesToScroll
-        viewportSize = clientWidth
-      } else if (axis === 'y') {
-        distancesFromEdge = yScrollDistancesFromEdge
-        scrollByDistance = yDistancesToScroll
-        viewportSize = clientHeight
+      let toScroll = {}
+      const cursorViewport = utils.cursorPositionInViewport(_event)
+      const cursorPage = utils.cursorPositionInPage(_event)
+      const positionInViewport = {
+        left: cursorViewport.x,
+        up: cursorViewport.y,
+        right: viewportWidth - cursorViewport.x,
+        down: viewportHeight - cursorViewport.y
       }
-      const shouldScrollStart = position < distancesFromEdge.far
-      const shouldScrollEnd = position > (viewportSize - distancesFromEdge.far)
-      const proximityTypeStart = utils.proximityTypeFromEdge(position, distancesFromEdge)
-      const proximityTypeEnd = utils.proximityTypeFromEdge(position, distancesFromEdge, viewportSize)
-
-      if (shouldScrollStart) {
-        return -scrollByDistance[proximityTypeStart]
-      } else if (shouldScrollEnd) {
-        return scrollByDistance[proximityTypeEnd]
+      const positionInPage = {
+        left: cursorPage.x,
+        up: cursorPage.y,
+        right: this.width - cursorPage.x,
+        down: this.height - cursorPage.y
       }
-    },
 
-    scrollAtEdges (event) {
-      if (!this.shouldOnlyScrollAtEdges()) { return }
-      const position = utils.cursorPositionInViewport(_event)
-      const delta = {
-        x: this.pxToScroll(position.x, 'x'),
-        y: this.pxToScroll(position.y, 'y')
+      // TODO refactor
+      if (moveDirection.left) {
+        if (positionInPage.left < scrollZone.x && window.scrollX === 0) {
+          toScroll.x = 0
+        } else {
+          toScroll.x = -this.distance(positionInViewport.left, scrollZone.x)
+        }
+      } else if (moveDirection.right) {
+        toScroll.x = this.distance(positionInViewport.right, scrollZone.x)
       }
-      window.scrollBy(delta.x, delta.y)
 
+      if (moveDirection.up) {
+        if (positionInPage.up < scrollZone.y && window.scrollY === 0) {
+          toScroll.y = 0
+        } else {
+          toScroll.y = -this.distance(positionInViewport.up, scrollZone.y)
+        }
+      } else if (moveDirection.down) {
+        toScroll.y = this.distance(positionInViewport.down, scrollZone.y)
+      }
+
+      // TODO only expand this if needed
+      this.height += toScroll.y
+      this.width += toScroll.x
+
+      window.scrollBy(toScroll.x, toScroll.y)
       if (this.$store.state.currentUserIsDraggingBlock) {
-        this.$store.dispatch('currentSpace/dragBlocks', { delta })
+        this.$store.dispatch('currentSpace/dragBlocks', { delta: toScroll })
       }
-      if (delta.x || delta.y) {
-        this.updateAppElementSize()
-      }
-      window.requestAnimationFrame(this.scrollAtEdges)
+      window.requestAnimationFrame(this.scrollAtEdgesFrame)
     },
 
     endViewportScrolling () {
+      console.log('endViewportScrolling')
       window.cancelAnimationFrame(scrollAtEdgesTimer)
       scrollAtEdgesTimer = undefined
+      // this.updateAppElementSize()
+      prevCursorPosition = {}
+      moveDirection = {}
+      this.$store.commit('currentUserIsDrawingConnection', false)
+      this.$store.commit('currentUserIsInkingLocked', false)
+      this.$store.commit('currentUserIsDraggingBlock', false)
     }
   }
 }
@@ -154,6 +213,7 @@ body
 
 .app
   position relative
+  scroll-behavior smooth
 
 dialog
   width: 300px

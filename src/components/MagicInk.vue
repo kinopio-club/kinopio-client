@@ -63,6 +63,7 @@ export default {
     initialContext.scale(window.devicePixelRatio, window.devicePixelRatio)
     this.updateCanvasSize()
     window.addEventListener('resize', this.updateCanvasSize)
+    window.addEventListener('scroll', this.updateCanvasSize)
   },
   computed: {
     currentUserColor () {
