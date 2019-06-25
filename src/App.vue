@@ -14,8 +14,8 @@ import MagicInk from '@/components/MagicInk.vue'
 
 const defaultScrollZone = 200
 const scrollSpeeds = {
-  fast: 40,
-  medium: 20,
+  fast: 30,
+  medium: 15,
   slow: 5
 }
 let _event, viewportWidth, viewportHeight, scrollAtEdgesTimer
@@ -99,9 +99,7 @@ export default {
           moveDirection.up = false
           moveDirection.down = true
         }
-        console.log(moveDirection) //
         prevCursorPosition = currentCursorPosition
-        // dont move unless i have a direction
         this.updateAppElementSize()
         event.preventDefault()
         if (!scrollAtEdgesTimer) {
@@ -121,52 +119,51 @@ export default {
     },
 
     scrollAtEdgesFrame () {
-      let down
-      // let left, top, right, down
       if (!this.shouldScrollAtEdges()) { return }
+      let toScroll = {}
       const cursorViewport = utils.cursorPositionInViewport(_event)
-      // const cursorPage = utils.cursorPositionInPage(_event)
+      const cursorPage = utils.cursorPositionInPage(_event)
       const positionInViewport = {
         left: cursorViewport.x,
-        top: cursorViewport.y,
+        up: cursorViewport.y,
         right: viewportWidth - cursorViewport.x,
         down: viewportHeight - cursorViewport.y
       }
-      // const positionInPage = {
-      //   left: cursorPage.x,
-      //   top: cursorPage.y,
-      //   right: this.width - cursorPage.x,
-      //   down: this.height - cursorPage.y
-      // }
-
-      // const down =
-      if (moveDirection.down) {
-        down = this.distance(positionInViewport.down, scrollZone.y)
+      const positionInPage = {
+        left: cursorPage.x,
+        up: cursorPage.y,
+        right: this.width - cursorPage.x,
+        down: this.height - cursorPage.y
       }
 
-      const distances = {
-        // left: -this.scrollSpeed(positionInViewport.left, scrollZone.x),
-        // top: -this.scrollSpeed(positionInViewport.top, scrollZone.y),
-        // right: this.scrollSpeed((viewportWidth - positionInViewport.left), scrollZone.x),
-        down: down
+      // TODO refactor
+      if (moveDirection.left) {
+        if (positionInPage.left < scrollZone.x && window.scrollX === 0) {
+          toScroll.x = 0
+        } else {
+          toScroll.x = -this.distance(positionInViewport.left, scrollZone.x)
+        }
+      } else if (moveDirection.right) {
+        toScroll.x = this.distance(positionInViewport.right, scrollZone.x)
       }
 
-      const delta = {
-        // x: distances.left || distances.right,
-        y: distances.top || distances.down || 0
+      if (moveDirection.up) {
+        if (positionInPage.up < scrollZone.y && window.scrollY === 0) {
+          toScroll.y = 0
+        } else {
+          toScroll.y = -this.distance(positionInViewport.up, scrollZone.y)
+        }
+      } else if (moveDirection.down) {
+        toScroll.y = this.distance(positionInViewport.down, scrollZone.y)
       }
-      // console.log('💦', positionInPage.down, this.height, cursorPage.y, delta.y)
-      // todo only expand this if needed
-      // current viewport
-      this.height += delta.y
-      // this.width
-      // console.log
 
-      console.log('🎨', distances, this.height)
+      // TODO only expand this if needed
+      this.height += toScroll.y
+      this.width += toScroll.x
 
-      window.scrollBy(delta.x, delta.y)
+      window.scrollBy(toScroll.x, toScroll.y)
       if (this.$store.state.currentUserIsDraggingBlock) {
-        this.$store.dispatch('currentSpace/dragBlocks', { delta })
+        this.$store.dispatch('currentSpace/dragBlocks', { delta: toScroll })
       }
       window.requestAnimationFrame(this.scrollAtEdgesFrame)
     },
