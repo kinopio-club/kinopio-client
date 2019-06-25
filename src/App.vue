@@ -51,14 +51,6 @@ export default {
     window.addEventListener('touchend', this.endViewportScrolling)
   },
   methods: {
-    shouldOnlyScrollAtEdges () {
-      if (
-        this.$store.state.currentUserIsDrawingConnection ||
-        this.$store.state.currentUserIsInkingLocked ||
-        this.$store.state.currentUserIsDraggingBlock
-      ) { return true }
-    },
-
     distance (value, scrollZoneXY) {
       if (value < 0) {
         return scrollSpeeds['fast']
@@ -90,7 +82,7 @@ export default {
     },
 
     updateViewportScrolling (event) {
-      if (this.shouldOnlyScrollAtEdges()) {
+      if (this.$store.getters.viewportIsLocked) {
         console.log('updateViewportScrolling')
         _event = event
         const currentCursorPosition = utils.cursorPositionInViewport(_event)
@@ -120,7 +112,7 @@ export default {
     },
 
     scrollAtEdgesFrame () {
-      if (!this.shouldOnlyScrollAtEdges()) { return }
+      if (!this.$store.getters.viewportIsLocked) { return }
       console.log('🦑 scrollAtEdgesFrame')
 
       let toScroll = {}
