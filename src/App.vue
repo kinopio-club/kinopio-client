@@ -51,14 +51,32 @@ export default {
     window.addEventListener('touchend', this.endViewportScrolling)
   },
   methods: {
+    shouldScrollAtEdges () {
+      if (
+        this.$store.state.currentUserIsDrawingConnection ||
+        this.$store.state.currentUserIsInkingLocked ||
+        this.$store.state.currentUserIsDraggingBlock
+      ) { return true }
+    },
+
+    distance (value, scrollZoneXY) {
+      if (value < 0) {
+        return scrollSpeeds['fast']
+      } else if (value < scrollZoneXY / 2) {
+        return scrollSpeeds['medium']
+      } else if (value < scrollZoneXY) {
+        return scrollSpeeds['slow']
+      }
+    },
+
     updateAppElementSize () {
-      console.log('updateAppElementSize')
+      console.log('🐸 updateAppElementSize')
       const body = document.body
       const html = document.documentElement
-      viewportWidth = document.body.clientWidth
-      viewportHeight = window.innerHeight
       this.width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
       this.height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
+      viewportWidth = document.body.clientWidth
+      viewportHeight = window.innerHeight
       if (viewportWidth < defaultScrollZone * 2) {
         scrollZone.x = viewportWidth / 2
       } else {
@@ -71,16 +89,9 @@ export default {
       }
     },
 
-    shouldScrollAtEdges () {
-      if (
-        this.$store.state.currentUserIsDrawingConnection ||
-        this.$store.state.currentUserIsInkingLocked ||
-        this.$store.state.currentUserIsDraggingBlock
-      ) { return true }
-    },
-
     updateViewportScrolling (event) {
       if (this.shouldScrollAtEdges()) {
+        console.log('updateViewportScrolling')
         _event = event
         const currentCursorPosition = utils.cursorPositionInViewport(_event)
         const xDelta = currentCursorPosition.x - prevCursorPosition.x
@@ -108,18 +119,10 @@ export default {
       }
     },
 
-    distance (value, scrollZoneXY) {
-      if (value < 0) {
-        return scrollSpeeds['fast']
-      } else if (value < scrollZoneXY / 2) {
-        return scrollSpeeds['medium']
-      } else if (value < scrollZoneXY) {
-        return scrollSpeeds['slow']
-      }
-    },
-
     scrollAtEdgesFrame () {
       if (!this.shouldScrollAtEdges()) { return }
+      console.log('🦑 scrollAtEdgesFrame')
+
       let toScroll = {}
       const cursorViewport = utils.cursorPositionInViewport(_event)
       const cursorPage = utils.cursorPositionInPage(_event)
