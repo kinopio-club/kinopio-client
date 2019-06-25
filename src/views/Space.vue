@@ -46,8 +46,8 @@ export default {
   data () {
     return {
       currentConnectionPath: undefined,
-      width: 0,
-      height: 0
+      width: undefined,
+      height: undefined
     }
   },
 
@@ -58,7 +58,6 @@ export default {
     window.addEventListener('mouseup', this.stopInteractions)
     window.addEventListener('touchend', this.stopInteractions)
     // keep space element updated to viewport size so connections show up
-    this.updateSpaceSize()
     window.addEventListener('resize', this.updateSpaceSize)
     window.addEventListener('scroll', this.updateSpaceSize)
   },
@@ -233,7 +232,6 @@ export default {
 
 <style lang="stylus">
 .space
-  position absolute
   pointer-events none // so that inking can receive events
   width 100%
   height 100vh
