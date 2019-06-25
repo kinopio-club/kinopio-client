@@ -45,8 +45,8 @@ export default {
   mounted () {
     this.updateAppElementSize()
     window.addEventListener('resize', this.updateAppElementSize)
-    // window.addEventListener('mousemove', this.updateViewportScrolling)
-    // window.addEventListener('touchmove', this.updateViewportScrolling)
+    window.addEventListener('mousemove', this.updateViewportScrolling)
+    window.addEventListener('touchmove', this.updateViewportScrolling)
     window.addEventListener('mouseup', this.endViewportScrolling)
     window.addEventListener('touchend', this.endViewportScrolling)
   },
