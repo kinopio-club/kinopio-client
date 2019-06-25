@@ -31,7 +31,8 @@ import Block from '@/components/Block.vue'
 import MultipleBlockActions from '@/components/pop-overs/MultipleBlockActions.vue'
 import Footer from '@/components/Footer.vue'
 
-let startCursor, prevCursor, endCursor, scrollTimer
+let startCursor, prevCursor, endCursor, scrollTimer, viewportWidth, viewportHeight, scrollAreaWidth, scrollAreaHeight
+let movementDirection = {}
 
 export default {
   components: {
@@ -58,6 +59,7 @@ export default {
     window.addEventListener('mouseup', this.stopInteractions)
     window.addEventListener('touchend', this.stopInteractions)
     // keep space element updated to viewport size so connections show up
+    this.updateSpaceSize()
     window.addEventListener('resize', this.updateSpaceSize)
     window.addEventListener('scroll', this.updateSpaceSize) // potential perf issue during dragging
   },
@@ -95,16 +97,22 @@ export default {
     }
   },
   methods: {
+    // debounce? https://alligator.io/vuejs/lodash-throttle-debounce/
     updateSpaceSize () {
+      console.log('updateSpaceSize space')
       const body = document.body
       const html = document.documentElement
       this.width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
       this.height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
+      viewportWidth = window.innerWidth
+      viewportHeight = window.innerHeight
+      scrollAreaWidth = viewportWidth / 3
+      scrollAreaHeight = viewportHeight / 3
     },
 
     initInteractions (event) {
       startCursor = utils.cursorPositionInViewport(event)
-      if (this.$store.getters.viewportIsLocked) {
+      if (this.$store.getters.viewportIsLocked && !scrollTimer) {
         scrollTimer = window.requestAnimationFrame(this.scrollFrame)
       }
     },
@@ -116,6 +124,10 @@ export default {
       if (this.$store.state.currentUserIsDrawingConnection) {
         this.drawConnection(event)
       }
+      if (this.$store.getters.viewportIsLocked) {
+        this.updateMovementDirection()
+      }
+      prevCursor = utils.cursorPositionInViewport(event)
     },
 
     checkShouldShowDetails () {
@@ -124,21 +136,67 @@ export default {
       }
     },
 
+    // ✅ calc scrollAreaWidth and scrollAreaHeight = 33% of current viewport size
+
+    // ✅ calc movementDirection
+    // 1 speed for now
+
+    // do the window.scrollBy, based on if positionInPage
+
+    // last stage: experiment with debouncing to improve perf
+
     scrollFrame () {
-      console.log('i am scroll frame', scrollTimer)
+      const cursor = this.cursor()
+      console.log('i am scroll frame', scrollTimer, cursor, scrollAreaHeight, movementDirection) // movementDirection: use Math.sign to check if x,y is pos or negative
+
+      // viewportWidth, viewportHeight, scrollAreaWidth, scrollAreaHeight
+      if (cursor.y <= scrollAreaHeight) {
+        console.log('📮move up')
+      }
+      if (cursor.y >= viewportHeight - scrollAreaHeight) {
+        console.log('📮move down')
+      }
+      if (cursor.x <= scrollAreaWidth) {
+        console.log('📮move left')
+      }
+      if (cursor.x >= viewportWidth - scrollAreaWidth) {
+        console.log('📮move right')
+      }
+
       if (scrollTimer) {
         window.requestAnimationFrame(this.scrollFrame)
       }
     },
 
+    updateMovementDirection () {
+      const cursor = this.cursor()
+      const movementX = endCursor.x - cursor.x
+      const movementY = endCursor.y - cursor.y
+      if (movementX) {
+        movementDirection.x = movementX
+      }
+      if (movementY) {
+        movementDirection.y = movementY
+      }
+    },
+
+    cursor () {
+      if (utils.objectHasProperties(prevCursor)) {
+        return prevCursor
+      } else {
+        return startCursor
+      }
+    },
+
     dragBlock (event) {
+      const cursor = this.cursor()
       endCursor = utils.cursorPositionInViewport(event)
-      const prev = prevCursor || startCursor
+
       this.$store.dispatch('currentSpace/dragBlocks', {
         endCursor,
-        prevCursor: prev
+        prevCursor: cursor
       })
-      prevCursor = utils.cursorPositionInViewport(event)
+
       this.checkShouldShowDetails()
     },
 
@@ -235,6 +293,7 @@ export default {
       this.$store.commit('currentConnection', {})
       this.currentConnectionPath = undefined
       prevCursor = undefined
+      movementDirection = {}
     }
   }
 

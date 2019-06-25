@@ -72,7 +72,9 @@ export default {
     }
   },
   methods: {
+    // debounce? https://alligator.io/vuejs/lodash-throttle-debounce/
     updateCanvasSize () {
+      console.log('updateCanvasSize magicInk')
       const body = document.body
       const html = document.documentElement
       this.width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)

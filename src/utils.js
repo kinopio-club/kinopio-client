@@ -96,13 +96,14 @@ export default {
     return this.between(xRange) && this.between(yRange)
   },
 
-  // objectIsEmpty (object) {
-  //   if (Object.getOwnPropertyNames(object).length) {
-  //     return false
-  //   } else {
-  //     return true
-  //   }
-  // },
+  objectHasProperties (object) {
+    if (!object) { return }
+    if (Object.getOwnPropertyNames(object).length) {
+      return true
+    } else {
+      return false
+    }
+  },
 
   // User Prefs 👼
 
