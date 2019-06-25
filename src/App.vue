@@ -77,13 +77,13 @@ export default {
       this.height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
       viewportWidth = document.body.clientWidth
       viewportHeight = window.innerHeight
-      if (viewportWidth < defaultScrollZone * 2) {
-        scrollZone.x = viewportWidth / 2
+      if (viewportWidth < defaultScrollZone * 4) {
+        scrollZone.x = viewportWidth / 4
       } else {
         scrollZone.x = defaultScrollZone
       }
-      if (viewportHeight < defaultScrollZone * 2) {
-        scrollZone.y = viewportHeight / 2
+      if (viewportHeight < defaultScrollZone * 4) {
+        scrollZone.y = viewportHeight / 4
       } else {
         scrollZone.y = defaultScrollZone
       }
