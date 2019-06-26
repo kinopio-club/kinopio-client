@@ -7,16 +7,16 @@ aside.magic-ink
     @touchmove="inking"
     @mouseup="stopInking"
     @touchend="stopInking"
-    :width="width"
-    :height="height"
+    :width="pageWidth"
+    :height="pageHeight"
   )
   canvas#locking.locking(
-    :width="width"
-    :height="height"
+    :width="pageWidth"
+    :height="pageHeight"
   )
   canvas#initial.initial(
-    :width="width"
-    :height="height"
+    :width="pageWidth"
+    :height="pageHeight"
   )
 </template>
 
@@ -47,8 +47,8 @@ let initialCanvas, initialContext, initialCirclesTimer
 export default {
   data () {
     return {
-      height: 0,
-      width: 0
+      pageHeight: 0,
+      pageWidth: 0
     }
   },
   mounted () {
@@ -77,8 +77,8 @@ export default {
       console.log('updateCanvasSize magicInk')
       const body = document.body
       const html = document.documentElement
-      this.width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
-      this.height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
+      this.pageWidth = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
+      this.pageHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
     },
 
     drawCircle (circle, context) {

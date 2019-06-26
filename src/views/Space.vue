@@ -47,8 +47,8 @@ export default {
   data () {
     return {
       currentConnectionPath: undefined,
-      width: undefined,
-      height: undefined
+      pageWidth: undefined,
+      pageHeight: undefined
     }
   },
 
@@ -67,8 +67,8 @@ export default {
   computed: {
     size () {
       return {
-        width: `${this.width}px`,
-        height: `${this.height}px`
+        width: `${this.pageWidth}px`,
+        height: `${this.pageHeight}px`
       }
     },
     blocks () {
@@ -102,8 +102,8 @@ export default {
       console.log('updateSpaceSize space')
       const body = document.body
       const html = document.documentElement
-      this.width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
-      this.height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
+      this.pageWidth = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
+      this.pageHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
       viewportWidth = window.innerWidth
       viewportHeight = window.innerHeight
       scrollAreaWidth = viewportWidth / 3
@@ -141,27 +141,60 @@ export default {
     // ✅ calc movementDirection
     // 1 speed for now
 
-    // do the window.scrollBy, based on if positionInPage
+    // do the window.scrollBy
 
-    // last stage: experiment with debouncing to improve perf
+    // last stage: experiment with debouncing to improve CPU/repaint perf
+
+    scrollBy (delta) {
+      delta.left = delta.x
+      delta.top = delta.y
+      if (this.$store.state.currentUserIsDraggingBlock) {
+        // delta.x = delta.left / 2
+        // delta.y = delta.top / 2
+        this.$store.dispatch('currentSpace/dragBlocks', { delta })
+      }
+      window.scrollBy(delta)
+    },
 
     scrollFrame () {
+      let delta
       const cursor = this.cursor()
       const cursorIsTopSide = cursor.y <= scrollAreaHeight
       const cursorIsBottomSide = cursor.y >= viewportHeight - scrollAreaHeight
       const cursorIsLeftSide = cursor.x <= scrollAreaWidth
       const cursorIsRightSide = cursor.x >= viewportWidth - scrollAreaWidth
-      const hasSpaceToScrollUp = window.scrollY > 0
-      const hasSpaceToScrollLeft = window.scrollX > 0
-      if (cursorIsTopSide && movementDirection.y === 'up' && hasSpaceToScrollUp) {
-        console.log('📮move up')
+      const hasRoomToScrollUp = window.scrollY > 0
+      const hasRoomToScrollLeft = window.scrollX > 0
+      const speed = 5 // temp, 1 speed for now
+      if (cursorIsTopSide && hasRoomToScrollUp && movementDirection.y === 'up') {
+        console.log('📮move up')// window.scrollBy(x, y)
+        delta = {
+          x: 0,
+          y: -speed
+        }
+        this.scrollBy(delta)
       } else if (cursorIsBottomSide && movementDirection.y === 'down') {
         console.log('📮move down')
+        delta = {
+          x: 0,
+          y: speed
+        }
+        this.scrollBy(delta)
       }
-      if (cursorIsLeftSide && movementDirection.x === 'left' && hasSpaceToScrollLeft) {
+      if (cursorIsLeftSide && hasRoomToScrollLeft && movementDirection.x === 'left') {
         console.log('📮move left')
+        delta = {
+          x: -speed,
+          y: 0
+        }
+        this.scrollBy(delta)
       } else if (cursorIsRightSide && movementDirection.x === 'right') {
         console.log('📮move right')
+        delta = {
+          x: speed,
+          y: 0
+        }
+        this.scrollBy(delta)
       }
 
       if (scrollTimer) {
