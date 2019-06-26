@@ -45,12 +45,6 @@ let initialCircles = []
 let initialCanvas, initialContext, initialCirclesTimer
 
 export default {
-  data () {
-    return {
-      pageHeight: 0,
-      pageWidth: 0
-    }
-  },
   mounted () {
     inkingCanvas = document.getElementById('inking')
     inkingContext = inkingCanvas.getContext('2d')
@@ -61,26 +55,16 @@ export default {
     initialCanvas = document.getElementById('initial')
     initialContext = initialCanvas.getContext('2d')
     initialContext.scale(window.devicePixelRatio, window.devicePixelRatio)
-    // keep canvases updated to viewport size so you can draw on newly created areas
-    this.updateCanvasSize()
-    window.addEventListener('resize', this.updateCanvasSize)
-    window.addEventListener('scroll', this.updateCanvasSize) // potential perf issue during dragging
   },
   computed: {
     currentUserColor () {
       return this.$store.state.currentUser.color
-    }
+    },
+    // keep canvases updated to viewport size so you can draw on newly created areas
+    pageHeight () { return this.$store.state.pageHeight },
+    pageWidth () { return this.$store.state.pageWidth }
   },
   methods: {
-    // debounce? https://alligator.io/vuejs/lodash-throttle-debounce/
-    updateCanvasSize () {
-      console.log('updateCanvasSize magicInk')
-      const body = document.body
-      const html = document.documentElement
-      this.pageWidth = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
-      this.pageHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
-    },
-
     drawCircle (circle, context) {
       let { x, y, color, iteration, radius, alpha } = circle
       radius = radius || circleRadius

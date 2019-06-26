@@ -215,6 +215,11 @@ const broadcast = {
 export default new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production',
   state: {
+    pageHeight: 0,
+    pageWidth: 0,
+    viewportHeight: 0,
+    viewportWidth: 0,
+
     // current user state
     currentUserIsDrawingConnection: false,
     currentUserIsInking: false,
@@ -239,6 +244,22 @@ export default new Vuex.Store({
     blockMap: []
   },
   mutations: {
+    updatePageSizes: (state) => {
+      const body = document.body
+      const html = document.documentElement
+      state.pageWidth = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
+      state.pageHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
+      state.viewportWidth = document.documentElement.clientWidth
+      state.viewportHeight = document.documentElement.clientHeight
+    },
+    pageHeight: (state, height) => {
+      utils.typeCheck(height, 'number')
+      state.pageHeight = height
+    },
+    pageWidth: (state, width) => {
+      utils.typeCheck(width, 'number')
+      state.pageWidth = width
+    },
     closeAllPopOvers: (state) => {
       state.currentSpace.blocks.map(block => {
         block.blockDetailsVisible = false

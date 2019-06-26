@@ -31,7 +31,7 @@ import Block from '@/components/Block.vue'
 import MultipleBlockActions from '@/components/pop-overs/MultipleBlockActions.vue'
 import Footer from '@/components/Footer.vue'
 
-let startCursor, prevCursor, endCursor, scrollTimer, viewportWidth, viewportHeight, scrollAreaWidth, scrollAreaHeight
+let startCursor, prevCursor, endCursor, scrollTimer
 let movementDirection = {}
 
 export default {
@@ -46,22 +46,20 @@ export default {
 
   data () {
     return {
-      currentConnectionPath: undefined,
-      pageWidth: undefined,
-      pageHeight: undefined
+      currentConnectionPath: undefined
     }
   },
 
   mounted () {
+    const updatePageSizes = this.$store.commit('updatePageSizes')
     // have to bind events to window to receive events when mouse is outside window
     window.addEventListener('mousemove', this.interact)
     window.addEventListener('touchmove', this.interact)
     window.addEventListener('mouseup', this.stopInteractions)
     window.addEventListener('touchend', this.stopInteractions)
     // keep space element updated to viewport size so connections show up
-    this.updateSpaceSize()
-    window.addEventListener('resize', this.updateSpaceSize)
-    window.addEventListener('scroll', this.updateSpaceSize) // potential perf issue during dragging
+    this.$store.commit('updatePageSizes')
+    window.addEventListener('resize', updatePageSizes)
   },
 
   computed: {
@@ -71,15 +69,6 @@ export default {
         height: `${this.pageHeight}px`
       }
     },
-    blocks () {
-      return this.$store.state.currentSpace.blocks
-    },
-    isInking () {
-      const currentUserIsInking = this.$store.state.currentUserIsInking
-      if (currentUserIsInking) {
-        return true
-      } else { return false }
-    },
     isInteracting () {
       const draggingBlock = this.$store.state.currentUserIsDraggingBlock
       const drawingConnection = this.$store.state.currentUserIsDrawingConnection
@@ -87,29 +76,19 @@ export default {
         return true
       } else { return false }
     },
-
-    isDrawingConnection () {
-      return this.$store.state.currentUserIsDrawingConnection
-    },
-
-    connections () {
-      return this.$store.state.currentSpace.connections
-    }
+    blocks () { return this.$store.state.currentSpace.blocks },
+    isInking () { return this.$store.state.currentUserIsInking },
+    isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
+    connections () { return this.$store.state.currentSpace.connections },
+    viewportHeight () { return this.$store.state.viewportHeight },
+    viewportWidth () { return this.$store.state.viewportWidth },
+    pageHeight () { return this.$store.state.pageHeight },
+    pageWidth () { return this.$store.state.pageWidth },
+    scrollAreaHeight () { return this.viewportHeight / 3 },
+    scrollAreaWidth () { return this.viewportWidth / 3 }
   },
-  methods: {
-    // debounce? https://alligator.io/vuejs/lodash-throttle-debounce/
-    updateSpaceSize () {
-      console.log('updateSpaceSize space')
-      const body = document.body
-      const html = document.documentElement
-      this.pageWidth = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
-      this.pageHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
-      viewportWidth = document.documentElement.clientWidth
-      viewportHeight = document.documentElement.clientHeight
-      scrollAreaWidth = viewportWidth / 3
-      scrollAreaHeight = viewportHeight / 3
-    },
 
+  methods: {
     initInteractions (event) {
       startCursor = utils.cursorPositionInViewport(event)
       if (this.$store.getters.viewportIsLocked && !scrollTimer) {
@@ -136,20 +115,6 @@ export default {
       }
     },
 
-    // ✅ calc scrollAreaWidth and scrollAreaHeight = 33% of current viewport size
-
-    // ✅ calc movementDirection
-    // ✅ 1 speed for now
-
-    // ✅ do the window.scrollBy
-    // ✅ change to multi speed calc
-
-    // expand the dom as necessary
-
-    // last stage = perf:
-    // remove scroll handlers: instead of costly size update calcs on scroll, actively call update pageheight and width globally only when the dom size actually changes
-    // meh plan b:  experiment with debouncing to improve CPU/repaint perf
-
     scrollBy (delta) {
       delta.left = delta.x
       delta.top = delta.y
@@ -162,6 +127,10 @@ export default {
     speed (cursor, direction) {
       let multiplier
       const base = 25
+      const scrollAreaHeight = this.scrollAreaHeight
+      const scrollAreaWidth = this.scrollAreaWidth
+      const viewportHeight = this.viewportHeight
+      const viewportWidth = this.viewportWidth
       if (direction === 'up') {
         multiplier = (scrollAreaHeight - cursor.y) / scrollAreaHeight
       }
@@ -175,36 +144,32 @@ export default {
         multiplier = (cursor.x - (viewportWidth - scrollAreaWidth) / scrollAreaWidth) / viewportWidth
       }
       return base * multiplier
-      // 5 // temp, 1 speed for now
-      // issues at the edges rn, when i have to create new dom space, the speed of the block moves away from cursor
-      // cuz there's no available existing space to scroll to , and i'm telling the block to go down there
-      // i can have it all pre created
-      // sketch hides scrollbars , pre makes huge canvas space
-      // figma has everything in a canvas that draws custom scrollbars up to a max , when you scroll outside of the canvas viewport. not expanding - or using - the dom
-      // mural shows no scrollbar, relies on zoom ui and a mini map to move around (no mementum, feels gross)
-      // or dynamically
-      // i can do the best of all worlds,
-      // 1. use native viewports, and expand them as necessary
-      // dom only as big as ur content needs = optimal performance
-      //
     },
 
     addPageHeight (cursor, speed) {
       const distanceOffset = 200
       if (cursor.y + window.scrollY + speed >= this.pageHeight - distanceOffset) {
-        this.pageHeight += speed
+        const height = this.pageHeight + speed
+        this.$store.commit('pageHeight', height)
       }
     },
 
     addPageWidth (cursor, speed) {
+      // let width
       const distanceOffset = 200
       if (cursor.x + window.scrollX + speed >= this.pageWidth - distanceOffset) {
-        this.pageWidth += speed
+        const width = this.pageWidth + speed
+        this.$store.commit('pageWidth', width)
+        // this.$store.commit('updatePageSizes')
       }
     },
 
     scrollFrame () {
       let delta, speed
+      const scrollAreaHeight = this.scrollAreaHeight
+      const scrollAreaWidth = this.scrollAreaWidth
+      const viewportHeight = this.viewportHeight
+      const viewportWidth = this.viewportWidth
       const cursor = this.cursor()
       const cursorIsTopSide = cursor.y <= scrollAreaHeight
       const cursorIsBottomSide = cursor.y >= viewportHeight - scrollAreaHeight
