@@ -147,19 +147,20 @@ export default {
 
     scrollFrame () {
       const cursor = this.cursor()
-      console.log('i am scroll frame', scrollTimer, cursor, scrollAreaHeight, movementDirection) // movementDirection: use Math.sign to check if x,y is pos or negative
-
-      // viewportWidth, viewportHeight, scrollAreaWidth, scrollAreaHeight
-      if (cursor.y <= scrollAreaHeight) {
+      const cursorIsTopSide = cursor.y <= scrollAreaHeight
+      const cursorIsBottomSide = cursor.y >= viewportHeight - scrollAreaHeight
+      const cursorIsLeftSide = cursor.x <= scrollAreaWidth
+      const cursorIsRightSide = cursor.x >= viewportWidth - scrollAreaWidth
+      const hasSpaceToScrollUp = window.scrollY > 0
+      const hasSpaceToScrollLeft = window.scrollX > 0
+      if (cursorIsTopSide && movementDirection.y === 'up' && hasSpaceToScrollUp) {
         console.log('📮move up')
-      }
-      if (cursor.y >= viewportHeight - scrollAreaHeight) {
+      } else if (cursorIsBottomSide && movementDirection.y === 'down') {
         console.log('📮move down')
       }
-      if (cursor.x <= scrollAreaWidth) {
+      if (cursorIsLeftSide && movementDirection.x === 'left' && hasSpaceToScrollLeft) {
         console.log('📮move left')
-      }
-      if (cursor.x >= viewportWidth - scrollAreaWidth) {
+      } else if (cursorIsRightSide && movementDirection.x === 'right') {
         console.log('📮move right')
       }
 
@@ -170,13 +171,17 @@ export default {
 
     updateMovementDirection () {
       const cursor = this.cursor()
-      const movementX = endCursor.x - cursor.x
-      const movementY = endCursor.y - cursor.y
-      if (movementX) {
-        movementDirection.x = movementX
+      const xMove = endCursor.x - cursor.x
+      const yMove = endCursor.y - cursor.y
+      if (Math.sign(yMove) === -1) {
+        movementDirection.y = 'up'
+      } else if (Math.sign(yMove) === 1) {
+        movementDirection.y = 'down'
       }
-      if (movementY) {
-        movementDirection.y = movementY
+      if (Math.sign(xMove) === -1) {
+        movementDirection.x = 'left'
+      } else if (Math.sign(xMove) === 1) {
+        movementDirection.x = 'right'
       }
     },
 
