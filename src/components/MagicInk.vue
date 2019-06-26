@@ -153,7 +153,7 @@ export default {
           alpha: alpha || 0.01, // to ensure truthyness
           iteration: 1
         }
-        lockingContext.clearRect(0, 0, this.width, this.height)
+        lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
         this.drawCircle(circle, lockingContext)
         window.requestAnimationFrame(this.lockingAnimationFrame)
       } else {
@@ -171,7 +171,7 @@ export default {
       if (this.$store.getters.viewportIsLocked) {
         event.preventDefault()
       }
-      lockingContext.clearRect(0, 0, this.width, this.height)
+      lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       if (!inkingCirclesTimer) {
         inkingCirclesTimer = window.requestAnimationFrame(this.inkCirclesAnimationFrame)
       }
@@ -194,7 +194,7 @@ export default {
 
     inkCirclesAnimationFrame () {
       inkingCircles = utils.filterCircles(inkingCircles, maxIterationsToInk)
-      inkingContext.clearRect(0, 0, this.width, this.height)
+      inkingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       inkingCircles.forEach(item => {
         item.iteration++
         let circle = JSON.parse(JSON.stringify(item))
@@ -212,7 +212,7 @@ export default {
 
     initialCirclesAnimationFrame () {
       initialCircles = utils.filterCircles(initialCircles, maxIterationsToInk)
-      initialContext.clearRect(0, 0, this.width, this.height)
+      initialContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       initialCircles.forEach(item => {
         if (!item.persistent) {
           item.iteration++
@@ -235,7 +235,7 @@ export default {
       const isMultipleBlocksSelected = Boolean(this.$store.state.multipleBlocksSelected.length)
       currentUserIsLocking = false
       window.cancelAnimationFrame(lockingAnimationTimer)
-      lockingContext.clearRect(0, 0, this.width, this.height)
+      lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       this.$store.commit('currentUserIsInkingLocked', false)
       this.$store.commit('currentUserIsInking', false)
       this.$store.commit('closeAllPopOvers')
