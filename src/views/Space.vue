@@ -144,7 +144,11 @@ export default {
     // ✅ do the window.scrollBy
     // ✅ change to multi speed calc
 
-    // last stage: experiment with debouncing to improve CPU/repaint perf
+    // expand the dom as necessary
+
+    // last stage = perf:
+    // remove scroll handlers: instead of costly size update calcs on scroll, actively call update pageheight and width globally only when the dom size actually changes
+    // meh plan b:  experiment with debouncing to improve CPU/repaint perf
 
     scrollBy (delta) {
       delta.left = delta.x
@@ -157,6 +161,7 @@ export default {
 
     speed (cursor, direction) {
       let multiplier
+      const base = 25
       if (direction === 'up') {
         multiplier = (scrollAreaHeight - cursor.y) / scrollAreaHeight
       }
@@ -169,9 +174,20 @@ export default {
       if (direction === 'right') {
         multiplier = (cursor.x - (viewportWidth - scrollAreaWidth) / scrollAreaWidth) / viewportWidth
       }
-      console.log(multiplier)
-
-      return 5 // temp, 1 speed for now
+      console.log(base * multiplier, multiplier)
+      return base * multiplier
+      // 5 // temp, 1 speed for now
+      // issues at the edges rn, when i have to create new dom space, the speed of the block moves away from cursor
+      // cuz there's no available existing space to scroll to , and i'm telling the block to go down there
+      // i can have it all pre created
+      // sketch hides scrollbars , pre makes huge canvas space
+      // figma has everything in a canvas that draws custom scrollbars up to a max , when you scroll outside of the canvas viewport. not expanding - or using - the dom
+      // mural shows no scrollbar, relies on zoom ui and a mini map to move around (no mementum, feels gross)
+      // or dynamically
+      // i can do the best of all worlds,
+      // 1. use native viewports, and expand them as necessary
+      // dom only as big as ur content needs = optimal performance
+      //
     },
 
     scrollFrame () {
@@ -183,11 +199,8 @@ export default {
       const cursorIsRightSide = cursor.x >= viewportWidth - scrollAreaWidth
       const hasRoomToScrollUp = window.scrollY > 0
       const hasRoomToScrollLeft = window.scrollX > 0
-      // const hasRoomToScrollDown = viewportHeight + window.scrollX > this.pageHeight
-
       // 🔼
       if (cursorIsTopSide && hasRoomToScrollUp && movementDirection.y === 'up') {
-        // console.log('📮move up')// window.scrollBy(x, y)
         speed = this.speed(cursor, 'up')
         delta = {
           x: 0,
@@ -196,11 +209,6 @@ export default {
         this.scrollBy(delta)
       // 🔽
       } else if (cursorIsBottomSide && movementDirection.y === 'down') {
-        // console.log('📮move down', hasRoomToScrollDown)
-        // if (!hasRoomToScrollDown) {
-        //   console.log('🐸🐸🐸🐸at end')
-        // }
-        // this.height += speed
         speed = this.speed(cursor, 'down')
         delta = {
           x: 0,
@@ -210,7 +218,6 @@ export default {
       }
       // ◀️
       if (cursorIsLeftSide && hasRoomToScrollLeft && movementDirection.x === 'left') {
-        // console.log('📮move left')
         speed = this.speed(cursor, 'left')
         delta = {
           x: -speed,
@@ -219,7 +226,6 @@ export default {
         this.scrollBy(delta)
       // ▶️
       } else if (cursorIsRightSide && movementDirection.x === 'right') {
-        // console.log('📮move right')
         speed = this.speed(cursor, 'right')
         delta = {
           x: speed,
