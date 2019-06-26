@@ -174,7 +174,6 @@ export default {
       if (direction === 'right') {
         multiplier = (cursor.x - (viewportWidth - scrollAreaWidth) / scrollAreaWidth) / viewportWidth
       }
-      console.log(base * multiplier, multiplier)
       return base * multiplier
       // 5 // temp, 1 speed for now
       // issues at the edges rn, when i have to create new dom space, the speed of the block moves away from cursor
@@ -188,6 +187,20 @@ export default {
       // 1. use native viewports, and expand them as necessary
       // dom only as big as ur content needs = optimal performance
       //
+    },
+
+    addPageHeight (cursor, speed) {
+      const distanceOffset = 200
+      if (cursor.y + window.scrollY + speed >= this.pageHeight - distanceOffset) {
+        this.pageHeight += speed
+      }
+    },
+
+    addPageWidth (cursor, speed) {
+      const distanceOffset = 200
+      if (cursor.x + window.scrollX + speed >= this.pageWidth - distanceOffset) {
+        this.pageWidth += speed
+      }
     },
 
     scrollFrame () {
@@ -214,6 +227,7 @@ export default {
           x: 0,
           y: speed
         }
+        this.addPageHeight(cursor, speed)
         this.scrollBy(delta)
       }
       // ◀️
@@ -231,6 +245,7 @@ export default {
           x: speed,
           y: 0
         }
+        this.addPageWidth(cursor, speed)
         this.scrollBy(delta)
       }
 
