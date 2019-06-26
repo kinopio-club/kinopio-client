@@ -178,6 +178,13 @@ export default {
 
   filterCircles (circles, maxIterationsToInk) {
     return circles.filter(circle => circle.iteration < maxIterationsToInk)
+  },
+
+  easeOut (percentComplete, elaspedTime, lockingDuration) {
+    const duration = lockingDuration
+    const startValue = 0
+    const endValue = 1
+    return -endValue * (elaspedTime /= duration) * (elaspedTime - 2) + startValue
   }
 
 }

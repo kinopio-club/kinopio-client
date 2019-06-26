@@ -147,18 +147,22 @@ export default {
     },
 
     addPageHeight (cursor, speed) {
-      const distanceOffset = 200
-      if (cursor.y + window.scrollY + speed >= this.pageHeight - distanceOffset) {
-        const height = this.pageHeight + speed
+      const pageHeight = this.pageHeight
+      const scrollAreaHeight = this.scrollAreaHeight
+      if (cursor.y + window.scrollY + speed + scrollAreaHeight >= pageHeight) {
+        console.log('💈')
+        const height = pageHeight + speed
         this.$store.commit('pageHeight', height)
       }
     },
 
     addPageWidth (cursor, speed) {
-      // let width
-      const distanceOffset = 200
-      if (cursor.x + window.scrollX + speed >= this.pageWidth - distanceOffset) {
-        const width = this.pageWidth + speed
+      const pageWidth = this.pageWidth
+      const scrollAreaWidth = this.scrollAreaWidth
+      console.log('🚒', cursor.x, window.scrollX, speed, this.scrollAreaWidth, '🌹:', cursor.x + window.scrollX + speed + scrollAreaWidth, '>=', pageWidth)
+      if (cursor.x + window.scrollX + speed + scrollAreaWidth >= pageWidth) {
+        console.log('💈')
+        const width = pageWidth + speed
         this.$store.commit('pageWidth', width)
         // this.$store.commit('updatePageSizes')
       }
@@ -357,9 +361,10 @@ export default {
 
 <style lang="stylus">
 .space
-  pointer-events none // so that inking can receive events
   width 100%
   height 100vh
+  pointer-events none // so that inking can receive events
+  position relative // used by svg connections
 .is-interacting
   pointer-events all
 .is-inking

@@ -80,7 +80,9 @@ export default {
     startLocking () {
       currentUserIsLocking = true
       setTimeout(() => {
-        lockingAnimationTimer = window.requestAnimationFrame(this.lockingAnimationFrame)
+        if (!lockingAnimationTimer) {
+          lockingAnimationTimer = window.requestAnimationFrame(this.lockingAnimationFrame)
+        }
       }, lockingPreDuration)
     },
 
@@ -96,6 +98,15 @@ export default {
       this.drawCircle(initialCircle, initialContext)
     },
 
+    createInkingCircle () {
+      let color = this.$store.state.currentUser.color
+      currentCursor = utils.cursorPositionInPage(event)
+      let circle = { x: currentCursor.x, y: currentCursor.y, color, iteration: 0 }
+      // this.$store.dispatch('broadcast/inking', circle)
+      this.selectBlocks(circle)
+      inkingCircles.push(circle)
+    },
+
     startInking (event) {
       startCursor = utils.cursorPositionInPage(event)
       currentCursor = utils.cursorPositionInPage(event)
@@ -105,16 +116,27 @@ export default {
       this.$store.commit('multipleBlocksSelected', [])
       this.$store.commit('generateBlockMap')
       this.$store.commit('closeAllPopOvers')
+      initialCircles.map(circle => {
+        circle.persistent = false
+      })
+      if (!initialCirclesTimer) {
+        initialCirclesTimer = window.requestAnimationFrame(this.initialCirclesAnimationFrame)
+      }
     },
 
-    easeOut (percentComplete, elaspedTime) {
-      const duration = lockingDuration
-      const startValue = 0
-      const endValue = 1
-      return -endValue * (elaspedTime /= duration) * (elaspedTime - 2) + startValue
+    inking (event) {
+      if (!this.$store.state.currentUserIsInking) { return }
+      if (this.$store.getters.viewportIsLocked) {
+        event.preventDefault()
+      }
+      if (!inkingCirclesTimer) {
+        inkingCirclesTimer = window.requestAnimationFrame(this.inkCirclesAnimationFrame)
+      }
+      this.createInkingCircle()
     },
 
     lockingAnimationFrame (timestamp) {
+      console.log('lockingAnimationFrame')
       if (!lockingStartTime) {
         lockingStartTime = timestamp
       }
@@ -128,7 +150,7 @@ export default {
         const percentRemaining = Math.abs(percentComplete - 1)
         const circleRadiusDelta = initialLockCircleRadius - minSize
         const radius = (circleRadiusDelta * percentRemaining) + minSize
-        const alpha = this.easeOut(percentComplete, elaspedTime)
+        const alpha = utils.easeOut(percentComplete, elaspedTime, lockingDuration)
         const circle = {
           x: startCursor.x,
           y: startCursor.y,
@@ -142,6 +164,7 @@ export default {
         window.requestAnimationFrame(this.lockingAnimationFrame)
       } else {
         window.cancelAnimationFrame(lockingAnimationTimer)
+        lockingAnimationTimer = undefined
         lockingStartTime = undefined
       }
       if (currentUserIsLocking && percentComplete > 1) {
@@ -151,32 +174,8 @@ export default {
       }
     },
 
-    inking (event) {
-      if (this.$store.getters.viewportIsLocked) {
-        event.preventDefault()
-      }
-      lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
-      if (!inkingCirclesTimer) {
-        inkingCirclesTimer = window.requestAnimationFrame(this.inkCirclesAnimationFrame)
-      }
-      if (!initialCirclesTimer) {
-        initialCirclesTimer = window.requestAnimationFrame(this.initialCirclesAnimationFrame)
-      }
-      initialCircles.map(circle => {
-        circle.persistent = false
-      })
-      currentCursor = utils.cursorPositionInPage(event)
-      if (!this.$store.state.currentUserIsInking) { return }
-      const x = currentCursor.x
-      const y = currentCursor.y
-      let color = this.$store.state.currentUser.color
-      let circle = { x, y, color, iteration: 0 }
-      this.$store.dispatch('broadcast/inking', circle)
-      this.selectBlocks(circle)
-      inkingCircles.push(circle)
-    },
-
     inkCirclesAnimationFrame () {
+      console.log('inkCirclesAnimationFrame') // this shouldn't fire on every move
       inkingCircles = utils.filterCircles(inkingCircles, maxIterationsToInk)
       inkingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       inkingCircles.forEach(item => {
@@ -195,6 +194,7 @@ export default {
     },
 
     initialCirclesAnimationFrame () {
+      console.log('initialCirclesAnimationFrame') // this shouldn't fire on every move
       initialCircles = utils.filterCircles(initialCircles, maxIterationsToInk)
       initialContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       initialCircles.forEach(item => {
@@ -204,13 +204,14 @@ export default {
         let circle = JSON.parse(JSON.stringify(item))
         this.drawCircle(circle, initialContext)
       })
-      if (initialCircles.length > 0) {
+      if (initialCircles.length) {
         window.requestAnimationFrame(this.initialCirclesAnimationFrame)
       } else {
-        setTimeout(() => {
-          window.cancelAnimationFrame(initialCirclesTimer)
-          initialCirclesTimer = undefined
-        }, 0)
+        // setTimeout(() => {
+        console.log('CANCEL initialCirclesTimer')
+        window.cancelAnimationFrame(initialCirclesTimer)
+        initialCirclesTimer = undefined
+        // }, 0)
       }
     },
 
