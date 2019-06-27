@@ -14,9 +14,8 @@ article(:style="position" :data-block-id="id")
       :style="testcolor"
       @mousedown="startConnecting"
       @touchstart="startConnecting"
-      @click.stop="startConnecting"
       :data-block-id="id"
-      :class="{ active: isConnectingTo }"
+      :class="{ active: isConnectingTo || isConnectingFrom}"
     ) O
   BlockDetails(
     :block="block"
