@@ -5,7 +5,7 @@ article(:style="position" :data-block-id="id")
     @touchstart.prevent="startDraggingBlock"
     @mouseup="showBlockDetails"
     @touchend="showBlockDetails"
-    :class="{jiggle: isConnectingTo || isConnectingFrom}",
+    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged}",
     :style="selectedColor"
     :data-block-id="id"
   )
@@ -63,7 +63,7 @@ export default {
       if (currentConnectionSuccess) {
         return currentConnectionSuccess.blockId === this.id
       } else {
-        return undefined
+        return false
       }
     },
     isConnectingFrom () {
@@ -72,7 +72,16 @@ export default {
       if (currentConnectionSuccess) {
         return currentConnection.startBlockId === this.id
       } else {
-        return undefined
+        return false
+      }
+    },
+    isBeingDragged () {
+      const isDraggingBlock = this.$store.state.currentUserIsDraggingBlock
+      const isBlockId = this.$store.state.currentDraggingBlockId === this.id
+      if (isDraggingBlock && isBlockId) {
+        return true
+      } else {
+        return false
       }
     },
     selectedColor () {
