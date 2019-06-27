@@ -164,6 +164,7 @@ export default {
         window.requestAnimationFrame(this.lockingAnimationFrame)
       } else {
         window.cancelAnimationFrame(lockingAnimationTimer)
+        lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
         lockingAnimationTimer = undefined
         lockingStartTime = undefined
       }
@@ -207,11 +208,9 @@ export default {
       if (initialCircles.length) {
         window.requestAnimationFrame(this.initialCirclesAnimationFrame)
       } else {
-        // setTimeout(() => {
         console.log('CANCEL initialCirclesTimer')
         window.cancelAnimationFrame(initialCirclesTimer)
         initialCirclesTimer = undefined
-        // }, 0)
       }
     },
 
