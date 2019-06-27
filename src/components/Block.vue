@@ -12,9 +12,9 @@ article(:style="position" :data-block-id="id")
     p {{name}}
     .connector(
       :style="testcolor"
-      @mousedown.stop.prevent="startConnecting"
-      @touchstart.stop.prevent="startConnecting"
-      @click.stop
+      @mousedown="startConnecting"
+      @touchstart="startConnecting"
+      @click.stop="startConnecting"
       :data-block-id="id"
       :class="{ active: isConnectingTo }"
     ) O
@@ -110,6 +110,7 @@ export default {
       }
     },
     startDraggingBlock () {
+      if (this.$store.state.currentUserIsDrawingConnection) { return }
       this.$store.commit('closeAllPopOvers')
       this.$store.commit('currentUserIsDraggingBlock', true)
       this.$store.commit('currentDraggingBlockId', this.id)

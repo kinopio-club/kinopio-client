@@ -52,7 +52,7 @@ export default {
 
   mounted () {
     const updatePageSizes = this.$store.commit('updatePageSizes')
-    // have to bind events to window to receive events when mouse is outside window
+    // bind events to window to receive events when mouse is outside window
     window.addEventListener('mousemove', this.interact)
     window.addEventListener('touchmove', this.interact)
     window.addEventListener('mouseup', this.stopInteractions)
@@ -150,7 +150,7 @@ export default {
       const pageHeight = this.pageHeight
       const scrollAreaHeight = this.scrollAreaHeight
       if (cursor.y + window.scrollY + speed + scrollAreaHeight >= pageHeight) {
-        console.log('💈')
+        console.log('💈addPageHeight')
         const height = pageHeight + speed
         this.$store.commit('pageHeight', height)
       }
@@ -159,9 +159,9 @@ export default {
     addPageWidth (cursor, speed) {
       const pageWidth = this.pageWidth
       const scrollAreaWidth = this.scrollAreaWidth
-      console.log('🚒', cursor.x, window.scrollX, speed, this.scrollAreaWidth, '🌹:', cursor.x + window.scrollX + speed + scrollAreaWidth, '>=', pageWidth)
+      console.log('🚒addPageWidth', cursor.x, window.scrollX, speed, this.scrollAreaWidth, '🌹:', cursor.x + window.scrollX + speed + scrollAreaWidth, '>=', pageWidth)
       if (cursor.x + window.scrollX + speed + scrollAreaWidth >= pageWidth) {
-        console.log('💈')
+        console.log('💈addPageWidth')
         const width = pageWidth + speed
         this.$store.commit('pageWidth', width)
         // this.$store.commit('updatePageSizes')
@@ -169,6 +169,7 @@ export default {
     },
 
     scrollFrame () {
+      console.log('scrollFrame from scrolltimer')
       let delta, speed
       const scrollAreaHeight = this.scrollAreaHeight
       const scrollAreaWidth = this.scrollAreaWidth
@@ -260,10 +261,10 @@ export default {
     },
 
     drawConnection (event) {
+      endCursor = utils.cursorPositionInViewport(event)
       const startBlockId = this.$store.state.currentConnection.startBlockId
       const start = utils.connectorCoords(startBlockId)
-      const current = utils.cursorPositionInViewport(event)
-      const path = utils.connectionPathBetweenCoords(start, current)
+      const path = utils.connectionPathBetweenCoords(start, endCursor)
       this.checkCurrentConnectionSuccess(event)
       this.currentConnectionPath = path
       this.$store.dispatch('broadcast/connectingPaths', path)
