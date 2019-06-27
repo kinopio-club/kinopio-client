@@ -162,11 +162,9 @@ const currentSpace = {
       const multipleBlocksSelected = context.rootState.multipleBlocksSelected
       const currentDraggingBlockId = context.rootState.currentDraggingBlockId
       const blocks = context.rootState.currentSpace.blocks
-      if (!delta) {
-        delta = {
-          x: endCursor.x - prevCursor.x,
-          y: endCursor.y - prevCursor.y
-        }
+      delta = delta || {
+        x: endCursor.x - prevCursor.x,
+        y: endCursor.y - prevCursor.y
       }
       if (multipleBlocksSelected.length) {
         blocks.map(block => {

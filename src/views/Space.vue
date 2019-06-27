@@ -69,23 +69,22 @@ export default {
         height: `${this.pageHeight}px`
       }
     },
-    isInteracting () {
-      const draggingBlock = this.$store.state.currentUserIsDraggingBlock
-      const drawingConnection = this.$store.state.currentUserIsDrawingConnection
-      if (draggingBlock || drawingConnection) {
-        return true
-      } else { return false }
-    },
     blocks () { return this.$store.state.currentSpace.blocks },
     isInking () { return this.$store.state.currentUserIsInking },
     isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
+    isDraggingBlock () { return this.$store.state.currentUserIsDraggingBlock },
     connections () { return this.$store.state.currentSpace.connections },
     viewportHeight () { return this.$store.state.viewportHeight },
     viewportWidth () { return this.$store.state.viewportWidth },
     pageHeight () { return this.$store.state.pageHeight },
     pageWidth () { return this.$store.state.pageWidth },
     scrollAreaHeight () { return this.viewportHeight / 3 },
-    scrollAreaWidth () { return this.viewportWidth / 3 }
+    scrollAreaWidth () { return this.viewportWidth / 3 },
+    isInteracting () {
+      if (this.isDraggingBlock || this.isDrawingConnection) {
+        return true
+      } else { return false }
+    }
   },
 
   methods: {
@@ -97,11 +96,12 @@ export default {
     },
 
     interact (event) {
-      if (this.$store.state.currentUserIsDraggingBlock) {
-        this.dragBlock(event)
+      endCursor = utils.cursorPositionInViewport(event)
+      if (this.isDraggingBlock) {
+        this.dragBlock()
       }
-      if (this.$store.state.currentUserIsDrawingConnection) {
-        this.drawConnection(event)
+      if (this.isDrawingConnection) {
+        this.drawConnection()
       }
       if (this.$store.getters.viewportIsLocked) {
         this.updateMovementDirection()
@@ -118,7 +118,7 @@ export default {
     scrollBy (delta) {
       delta.left = delta.x
       delta.top = delta.y
-      if (this.$store.state.currentUserIsDraggingBlock) {
+      if (this.isDraggingBlock) {
         this.$store.dispatch('currentSpace/dragBlocks', { delta })
       }
       window.scrollBy(delta)
@@ -218,6 +218,9 @@ export default {
         this.addPageWidth(cursor, speed)
         this.scrollBy(delta)
       }
+      if (this.isDrawingConnection) {
+        this.drawConnection()
+      }
 
       if (scrollTimer) {
         window.requestAnimationFrame(this.scrollFrame)
@@ -248,24 +251,23 @@ export default {
       }
     },
 
-    dragBlock (event) {
-      const cursor = this.cursor()
-      endCursor = utils.cursorPositionInViewport(event)
-
+    dragBlock () {
+      const prevCursor = this.cursor()
       this.$store.dispatch('currentSpace/dragBlocks', {
         endCursor,
-        prevCursor: cursor
+        prevCursor: prevCursor
       })
 
       this.checkShouldShowDetails()
     },
 
-    drawConnection (event) {
-      endCursor = utils.cursorPositionInViewport(event)
+    drawConnection () {
+      const end = this.cursor()
       const startBlockId = this.$store.state.currentConnection.startBlockId
+      console.log('drawing from', startBlockId)
       const start = utils.connectorCoords(startBlockId)
-      const path = utils.connectionPathBetweenCoords(start, endCursor)
-      this.checkCurrentConnectionSuccess(event)
+      const path = utils.connectionPathBetweenCoords(start, end)
+      this.checkCurrentConnectionSuccess()
       this.currentConnectionPath = path
       this.$store.dispatch('broadcast/connectingPaths', path)
     },
@@ -285,8 +287,8 @@ export default {
       })
     },
 
-    checkCurrentConnectionSuccess (event) {
-      const cursor = utils.cursorPositionInViewport(event)
+    checkCurrentConnectionSuccess () {
+      const cursor = this.cursor()
       const connection = this.connectors().find(connector => {
         const xValues = {
           value: cursor.x,
@@ -328,7 +330,7 @@ export default {
     shouldContinueConnecting () {
       const cursorStart = this.$store.state.currentConnectionCursorStart
       const cursorEnd = utils.cursorPositionInViewport(event)
-      if (!this.$store.state.currentUserIsDrawingConnection) { return }
+      if (!this.isDrawingConnection) { return }
       if (cursorStart.x === cursorEnd.x && cursorStart.y === cursorEnd.y) {
         return true
       } else {
@@ -342,7 +344,7 @@ export default {
       scrollTimer = undefined
       if (event.target.closest('dialog')) { return }
       if (this.shouldContinueConnecting()) { return }
-      if (this.$store.state.currentUserIsDrawingConnection) {
+      if (this.isDrawingConnection) {
         this.createConnection()
       }
       this.$store.commit('preventDraggedBlockFromShowingDetails', false)
