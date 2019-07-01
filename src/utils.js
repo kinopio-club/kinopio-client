@@ -170,14 +170,14 @@ export default {
     return `m${offsetStart.x},${offsetStart.y} ${curve} ${delta.x},${delta.y}`
   },
 
-  // Inking 🖌
+  // Painting 🖌
 
   exponentialDecay (iteration, rateOfIterationDecay) {
     return Math.exp(-(rateOfIterationDecay * iteration))
   },
 
-  filterCircles (circles, maxIterationsToInk) {
-    return circles.filter(circle => circle.iteration < maxIterationsToInk)
+  filterCircles (circles, maxIterationsToPaint) {
+    return circles.filter(circle => circle.iteration < maxIterationsToPaint)
   },
 
   easeOut (percentComplete, elaspedTime, lockingDuration) {

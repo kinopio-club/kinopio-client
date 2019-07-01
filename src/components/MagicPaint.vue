@@ -1,12 +1,12 @@
 <template lang="pug">
-aside.magic-ink
-  canvas#inking.inking(
-    @mousedown="startInking"
-    @touchstart="startInking"
-    @mousemove="inking"
-    @touchmove="inking"
-    @mouseup="stopInking"
-    @touchend="stopInking"
+aside.magic-paint
+  canvas#painting.painting(
+    @mousedown="startPainting"
+    @touchstart="startPainting"
+    @mousemove="painting"
+    @touchmove="painting"
+    @mouseup="stopPainting"
+    @touchend="stopPainting"
     :width="pageWidth"
     :height="pageHeight"
   )
@@ -25,12 +25,12 @@ import utils from '@/utils.js'
 
 const circleRadius = 20
 
-// inking
+// painting
 // a sequence of circles that's broadcasted to others and is used for multi-block selection
-const maxIterationsToInk = 200 // higher is longer ink fade time
+const maxIterations = 200 // higher is longer paint fade time
 const rateOfIterationDecay = 0.03 // higher is faster tail decay
-let inkingCircles = []
-let inkingCanvas, inkingContext, startCursor, currentCursor, inkingCirclesTimer
+let paintingCircles = []
+let paintingCanvas, paintingContext, startCursor, currentCursor, paintingCirclesTimer
 
 // locking
 // long press to lock scrolling
@@ -46,9 +46,9 @@ let initialCanvas, initialContext, initialCirclesTimer
 
 export default {
   mounted () {
-    inkingCanvas = document.getElementById('inking')
-    inkingContext = inkingCanvas.getContext('2d')
-    inkingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
+    paintingCanvas = document.getElementById('painting')
+    paintingContext = paintingCanvas.getContext('2d')
+    paintingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
     lockingCanvas = document.getElementById('locking')
     lockingContext = lockingCanvas.getContext('2d')
     lockingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
@@ -98,21 +98,21 @@ export default {
       this.drawCircle(initialCircle, initialContext)
     },
 
-    createInkingCircle () {
+    createPaintingCircle () {
       let color = this.$store.state.currentUser.color
       currentCursor = utils.cursorPositionInPage(event)
       let circle = { x: currentCursor.x, y: currentCursor.y, color, iteration: 0 }
-      // this.$store.dispatch('broadcast/inking', circle)
+      // this.$store.dispatch('broadcast/painting', circle)
       this.selectBlocks(circle)
-      inkingCircles.push(circle)
+      paintingCircles.push(circle)
     },
 
-    startInking (event) {
+    startPainting (event) {
       startCursor = utils.cursorPositionInPage(event)
       currentCursor = utils.cursorPositionInPage(event)
       this.startLocking()
       this.createInitialCircle()
-      this.$store.commit('currentUserIsInking', true)
+      this.$store.commit('currentUserIsPainting', true)
       this.$store.commit('multipleBlocksSelected', [])
       this.$store.commit('generateBlockMap')
       this.$store.commit('closeAllPopOvers')
@@ -124,15 +124,15 @@ export default {
       }
     },
 
-    inking (event) {
-      if (!this.$store.state.currentUserIsInking) { return }
+    painting (event) {
+      if (!this.$store.state.currentUserIsPainting) { return }
       if (this.$store.getters.viewportIsLocked) {
         event.preventDefault()
       }
-      if (!inkingCirclesTimer) {
-        inkingCirclesTimer = window.requestAnimationFrame(this.inkCirclesAnimationFrame)
+      if (!paintingCirclesTimer) {
+        paintingCirclesTimer = window.requestAnimationFrame(this.paintCirclesAnimationFrame)
       }
-      this.createInkingCircle()
+      this.createPaintingCircle()
     },
 
     lockingAnimationFrame (timestamp) {
@@ -169,34 +169,34 @@ export default {
         lockingStartTime = undefined
       }
       if (currentUserIsLocking && percentComplete > 1) {
-        this.$store.commit('currentUserIsInkingLocked', true)
+        this.$store.commit('currentUserIsPaintingLocked', true)
         console.log('🔒lockingAnimationFrame locked')
         lockingStartTime = undefined
       }
     },
 
-    inkCirclesAnimationFrame () {
-      console.log('inkCirclesAnimationFrame') // this shouldn't fire on every move
-      inkingCircles = utils.filterCircles(inkingCircles, maxIterationsToInk)
-      inkingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
-      inkingCircles.forEach(item => {
+    paintCirclesAnimationFrame () {
+      console.log('paintCirclesAnimationFrame')
+      paintingCircles = utils.filterCircles(paintingCircles, maxIterations)
+      paintingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
+      paintingCircles.forEach(item => {
         item.iteration++
         let circle = JSON.parse(JSON.stringify(item))
-        this.drawCircle(circle, inkingContext)
+        this.drawCircle(circle, paintingContext)
       })
-      if (inkingCircles.length > 0) {
-        window.requestAnimationFrame(this.inkCirclesAnimationFrame)
+      if (paintingCircles.length > 0) {
+        window.requestAnimationFrame(this.paintCirclesAnimationFrame)
       } else {
         setTimeout(() => {
-          window.cancelAnimationFrame(inkingCirclesTimer)
-          inkingCirclesTimer = undefined
+          window.cancelAnimationFrame(paintingCirclesTimer)
+          paintingCirclesTimer = undefined
         }, 0)
       }
     },
 
     initialCirclesAnimationFrame () {
-      console.log('initialCirclesAnimationFrame') // this shouldn't fire on every move
-      initialCircles = utils.filterCircles(initialCircles, maxIterationsToInk)
+      console.log('initialCirclesAnimationFrame')
+      initialCircles = utils.filterCircles(initialCircles, maxIterations)
       initialContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       initialCircles.forEach(item => {
         if (!item.persistent) {
@@ -214,14 +214,14 @@ export default {
       }
     },
 
-    stopInking () {
+    stopPainting () {
       const endCursor = utils.cursorPositionInPage(event)
       const isMultipleBlocksSelected = Boolean(this.$store.state.multipleBlocksSelected.length)
       currentUserIsLocking = false
       window.cancelAnimationFrame(lockingAnimationTimer)
       lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
-      this.$store.commit('currentUserIsInkingLocked', false)
-      this.$store.commit('currentUserIsInking', false)
+      this.$store.commit('currentUserIsPaintingLocked', false)
+      this.$store.commit('currentUserIsPainting', false)
       this.$store.commit('closeAllPopOvers')
       if (isMultipleBlocksSelected) {
         this.$store.commit('multipleBlockActionsPosition', endCursor)

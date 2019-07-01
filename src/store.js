@@ -198,8 +198,8 @@ const broadcast = {
     isBroadcasting: false
   },
   actions: {
-    inking (context, circle) {
-      // console.log('broadcast inking', circle)
+    painting (context, circle) {
+      // console.log('broadcast painting', circle)
     },
     connectingPaths (context, connectionPath) {
       // console.log('broadcast drawing connection path', connectionPath)
@@ -220,8 +220,8 @@ export default new Vuex.Store({
 
     // current user state
     currentUserIsDrawingConnection: false,
-    currentUserIsInking: false,
-    currentUserIsInkingLocked: false,
+    currentUserIsPainting: false,
+    currentUserIsPaintingLocked: false,
     currentUserIsDraggingBlock: false,
 
     // connecting
@@ -288,14 +288,14 @@ export default new Vuex.Store({
       state.currentConnection = object
     },
 
-    // inking
-    currentUserIsInking: (state, value) => {
+    // painting
+    currentUserIsPainting: (state, value) => {
       utils.typeCheck(value, 'boolean')
-      state.currentUserIsInking = value
+      state.currentUserIsPainting = value
     },
-    currentUserIsInkingLocked: (state, value) => {
+    currentUserIsPaintingLocked: (state, value) => {
       utils.typeCheck(value, 'boolean')
-      state.currentUserIsInkingLocked = value
+      state.currentUserIsPaintingLocked = value
     },
 
     // dragging
@@ -359,10 +359,10 @@ export default new Vuex.Store({
   },
   getters: {
     viewportIsLocked (state, getters) {
-      const isInkingLocked = state.currentUserIsInkingLocked
+      const isPaintingLocked = state.currentUserIsPaintingLocked
       const isDrawingConnection = state.currentUserIsDrawingConnection
       const isDraggingBlock = state.currentUserIsDraggingBlock
-      return isInkingLocked || isDrawingConnection || isDraggingBlock
+      return isPaintingLocked || isDrawingConnection || isDraggingBlock
     }
   },
   modules: {

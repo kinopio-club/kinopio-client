@@ -1,6 +1,6 @@
 <template lang="pug">
 main.space(
-  :class="{'is-interacting': isInteracting, 'is-inking': isInking}"
+  :class="{'is-interacting': isInteracting, 'is-painting': isPainting}"
   @mousedown="initInteractions"
   @touchstart="initInteractions"
   :style="size"
@@ -69,7 +69,7 @@ export default {
       }
     },
     blocks () { return this.$store.state.currentSpace.blocks },
-    isInking () { return this.$store.state.currentUserIsInking },
+    isPainting () { return this.$store.state.currentUserIsPainting },
     isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
     isDraggingBlock () { return this.$store.state.currentUserIsDraggingBlock },
     connections () { return this.$store.state.currentSpace.connections },
@@ -351,7 +351,7 @@ export default {
       }
       this.$store.commit('preventDraggedBlockFromShowingDetails', false)
       this.$store.commit('currentUserIsDrawingConnection', false)
-      this.$store.commit('currentUserIsInkingLocked', false)
+      this.$store.commit('currentUserIsPaintingLocked', false)
       this.$store.commit('currentUserIsDraggingBlock', false)
       this.$store.commit('currentConnectionSuccess', {})
       this.$store.commit('currentConnection', {})
@@ -368,11 +368,11 @@ export default {
 .space
   width 100%
   height 100vh
-  pointer-events none // so that inking can receive events
+  pointer-events none // so that painting can receive events
   position relative // used by svg connections
 .is-interacting
   pointer-events all
-.is-inking
+.is-painting
   *
     pointer-events: none !important
 
