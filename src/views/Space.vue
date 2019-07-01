@@ -51,15 +51,14 @@ export default {
   },
 
   mounted () {
-    const updatePageSizes = this.$store.commit('updatePageSizes')
     // bind events to window to receive events when mouse is outside window
     window.addEventListener('mousemove', this.interact)
     window.addEventListener('touchmove', this.interact)
     window.addEventListener('mouseup', this.stopInteractions)
     window.addEventListener('touchend', this.stopInteractions)
     // keep space element updated to viewport size so connections show up
-    this.$store.commit('updatePageSizes')
-    window.addEventListener('resize', updatePageSizes)
+    this.updatePageSizes()
+    window.addEventListener('resize', this.updatePageSizes)
   },
 
   computed: {
@@ -88,6 +87,10 @@ export default {
   },
 
   methods: {
+    updatePageSizes () {
+      this.$store.commit('updatePageSizes')
+    },
+
     initInteractions (event) {
       startCursor = utils.cursorPositionInViewport(event)
       if (this.$store.getters.viewportIsLocked && !scrollTimer) {
@@ -164,7 +167,6 @@ export default {
         console.log('💈addPageWidth')
         const width = pageWidth + speed
         this.$store.commit('pageWidth', width)
-        // this.$store.commit('updatePageSizes')
       }
     },
 
