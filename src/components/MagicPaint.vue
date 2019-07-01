@@ -136,7 +136,6 @@ export default {
     },
 
     lockingAnimationFrame (timestamp) {
-      console.log('lockingAnimationFrame')
       if (!lockingStartTime) {
         lockingStartTime = timestamp
       }
@@ -176,7 +175,6 @@ export default {
     },
 
     paintCirclesAnimationFrame () {
-      console.log('paintCirclesAnimationFrame')
       paintingCircles = utils.filterCircles(paintingCircles, maxIterations)
       paintingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       paintingCircles.forEach(item => {
@@ -195,7 +193,6 @@ export default {
     },
 
     initialCirclesAnimationFrame () {
-      console.log('initialCirclesAnimationFrame')
       initialCircles = utils.filterCircles(initialCircles, maxIterations)
       initialContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       initialCircles.forEach(item => {
