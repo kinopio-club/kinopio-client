@@ -26,9 +26,9 @@ main.space(
 <script>
 import utils from '@/utils.js'
 import Connection from '@/components/Connection.vue'
-import ConnectionDetails from '@/components/pop-overs/ConnectionDetails.vue'
+import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import Block from '@/components/Block.vue'
-import MultipleBlockActions from '@/components/pop-overs/MultipleBlockActions.vue'
+import MultipleBlockActions from '@/components/dialogs/MultipleBlockActions.vue'
 import Footer from '@/components/Footer.vue'
 
 let startCursor, prevCursor, endCursor, scrollTimer

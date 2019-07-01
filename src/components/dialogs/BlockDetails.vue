@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.pop-over(v-if="blockDetailsVisible" :open="blockDetailsVisible")
+dialog(v-if="blockDetailsVisible" :open="blockDetailsVisible")
   section
     input(placeholder="name" v-model="name")
     p blockid {{id}}

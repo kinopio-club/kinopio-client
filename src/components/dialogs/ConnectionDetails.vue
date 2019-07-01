@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.pop-over(v-if="visible" :open="visible" :style="position")
+dialog(v-if="visible" :open="visible" :style="position")
   section
     p details for connection from block {{connection.startBlockId}} to {{connection.endBlockId}}
     input(placeholder="name" value="connection name")

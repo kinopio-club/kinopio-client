@@ -121,7 +121,7 @@ export default {
       }
       this.$store.commit('multipleBlocksSelected', [])
       this.$store.commit('generateBlockMap')
-      this.$store.commit('closeAllPopOvers')
+      this.$store.commit('closeAllDialogs')
       initialCircles.map(circle => {
         circle.persistent = false
       })
@@ -225,7 +225,7 @@ export default {
       lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       this.$store.commit('currentUserIsPaintingLocked', false)
       this.$store.commit('currentUserIsPainting', false)
-      this.$store.commit('closeAllPopOvers')
+      this.$store.commit('closeAllDialogs')
       if (isMultipleBlocksSelected) {
         this.$store.commit('multipleBlockActionsPosition', endCursor)
         this.$store.commit('multipleBlockActionsIsVisible', true)

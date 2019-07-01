@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.pop-over(v-if="visible" :open="visible" :style="position")
+dialog(v-if="visible" :open="visible" :style="position")
   section
     p multi actions for block ids: {{blocksSelected}}
     button connect

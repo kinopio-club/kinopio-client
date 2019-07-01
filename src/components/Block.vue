@@ -25,7 +25,7 @@ article(:style="position" :data-block-id="id")
 <script>
 import randomcolor from 'randomcolor'
 import utils from '@/utils.js'
-import BlockDetails from '@/components/pop-overs/BlockDetails.vue'
+import BlockDetails from '@/components/dialogs/BlockDetails.vue'
 
 export default {
   components: {
@@ -103,7 +103,7 @@ export default {
       this.$store.commit('currentConnectionCursorStart', cursor)
     },
     startConnecting (event) {
-      this.$store.commit('closeAllPopOvers')
+      this.$store.commit('closeAllDialogs')
       this.$store.commit('preventDraggedBlockFromShowingDetails', true)
       this.$store.commit('multipleBlocksSelected', [])
       if (!this.$store.state.currentUserIsDrawingConnection) {
@@ -119,7 +119,7 @@ export default {
     },
     startDraggingBlock () {
       if (this.$store.state.currentUserIsDrawingConnection) { return }
-      this.$store.commit('closeAllPopOvers')
+      this.$store.commit('closeAllDialogs')
       this.$store.commit('currentUserIsDraggingBlock', true)
       this.$store.commit('currentDraggingBlockId', this.id)
       this.checkIfShouldDragMultipleBlocks()
@@ -129,7 +129,7 @@ export default {
       if (this.$store.state.preventDraggedBlockFromShowingDetails) {
         return
       }
-      this.$store.commit('closeAllPopOvers')
+      this.$store.commit('closeAllDialogs')
       this.$store.commit('currentSpace/blockDetailsVisible', this.id)
     }
   }

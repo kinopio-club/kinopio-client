@@ -285,7 +285,7 @@ export default new Vuex.Store({
       utils.typeCheck(width, 'number')
       state.pageWidth = width
     },
-    closeAllPopOvers: (state) => {
+    closeAllDialogs: (state) => {
       state.currentSpace.blocks.map(block => {
         block.blockDetailsVisible = false
       })
