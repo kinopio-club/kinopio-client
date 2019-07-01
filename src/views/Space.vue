@@ -246,7 +246,7 @@ export default {
     },
 
     cursor () {
-      if (utils.objectHasProperties(prevCursor)) {
+      if (utils.objectHasKeys(prevCursor)) {
         return prevCursor
       } else {
         return startCursor
@@ -271,7 +271,7 @@ export default {
       const path = utils.connectionPathBetweenCoords(start, end)
       this.checkCurrentConnectionSuccess()
       this.currentConnectionPath = path
-      this.$store.dispatch('broadcast/connectingPaths', path)
+      // this.$store.dispatch('broadcast/connectingPaths', path)
     },
 
     connectors () {
@@ -325,7 +325,7 @@ export default {
         const path = utils.connectionBetweenBlocks(startBlockId, endBlockId)
         const connection = { startBlockId, endBlockId, path }
         this.$store.commit('currentSpace/addConnection', connection)
-        this.$store.dispatch('broadcast/addConnection', connection)
+        // this.$store.dispatch('broadcast/addConnection', connection)
       }
     },
 
@@ -340,8 +340,23 @@ export default {
       }
     },
 
+    addBlock () {
+      // dont do AddBlock if
+      // - a pop over is open (click canvas closes pop over)
+      // any blockDetailsVisible true
+      // - multiselect is active (click canvas should deselect)
+
+      // if (!this.$store.getters.popOverIsVisible) {
+      const position = this.cursor()
+      this.$store.dispatch('currentSpace/addBlock', {
+        position
+      })
+      // }
+    },
+
     stopInteractions (event) {
       console.log('💣 stopInteractions')
+      // const isMultipleBlocksSelected = Boolean(this.$store.state.multipleBlocksSelected.length)
       window.cancelAnimationFrame(scrollTimer)
       scrollTimer = undefined
       if (event.target.closest('dialog')) { return }
@@ -349,6 +364,10 @@ export default {
       if (this.isDrawingConnection) {
         this.createConnection()
       }
+      if (this.$store.state.currentUserClickIsCloseToOrigin) {
+        this.addBlock()
+      }
+      this.$store.commit('currentUserClickIsCloseToOrigin', false)
       this.$store.commit('preventDraggedBlockFromShowingDetails', false)
       this.$store.commit('currentUserIsDrawingConnection', false)
       this.$store.commit('currentUserIsPaintingLocked', false)

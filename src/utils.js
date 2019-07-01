@@ -96,9 +96,9 @@ export default {
     return this.between(xRange) && this.between(yRange)
   },
 
-  objectHasProperties (object) {
+  objectHasKeys (object) {
     if (!object) { return }
-    if (Object.getOwnPropertyNames(object).length) {
+    if (Object.keys(object).length) {
       return true
     } else {
       return false

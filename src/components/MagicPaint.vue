@@ -113,6 +113,9 @@ export default {
       this.startLocking()
       this.createInitialCircle()
       this.$store.commit('currentUserIsPainting', true)
+      if (!this.$store.state.multipleBlocksSelected.length) {
+        console.log('🌸')
+      }
       this.$store.commit('multipleBlocksSelected', [])
       this.$store.commit('generateBlockMap')
       this.$store.commit('closeAllPopOvers')
@@ -211,7 +214,7 @@ export default {
       }
     },
 
-    stopPainting () {
+    stopPainting (event) {
       const endCursor = utils.cursorPositionInPage(event)
       const isMultipleBlocksSelected = Boolean(this.$store.state.multipleBlocksSelected.length)
       currentUserIsLocking = false
@@ -224,8 +227,10 @@ export default {
         this.$store.commit('multipleBlockActionsPosition', endCursor)
         this.$store.commit('multipleBlockActionsIsVisible', true)
       }
+
       if (utils.cursorsAreClose(startCursor, endCursor)) {
-        console.log('🌸🌸 showNewBlockDetails')
+        console.log('🌸🌸 cursrs are close')
+        this.$store.commit('currentUserClickIsCloseToOrigin', true)
       }
     },
 

@@ -138,7 +138,6 @@ const currentSpace = {
         }
       })
     },
-
     moveBlock: (state, { blockId, delta }) => {
       const maxOffset = 0
       state.blocks.map(block => {
@@ -155,6 +154,9 @@ const currentSpace = {
       connections.forEach(connection => {
         connection.path = utils.connectionBetweenBlocks(connection.startBlockId, connection.endBlockId)
       })
+    },
+    addBlock: (state, block) => {
+      state.blocks.push(block)
     }
   },
   actions: {
@@ -187,28 +189,49 @@ const currentSpace = {
       } else {
         context.commit('incrementBlockZ', currentDraggingBlockId)
       }
+    },
+    addBlock: (context, { position, contents }) => {
+      utils.typeCheck(position, 'object')
+      utils.typeCheck(contents, 'object', true)
+      let block = {
+        id: nanoid(),
+        x: position.x,
+        y: position.y,
+        name: '',
+        blockDetailsVisible: false,
+        archived: false
+      }
+      if (utils.objectHasKeys(contents)) {
+        block = utils.updateObject(block, contents)
+      } else {
+        block.blockDetailsVisible = true
+      }
+      context.commit('addBlock', block)
+      context.commit('incrementBlockZ', block.id)
     }
-
   }
 }
 
-const broadcast = {
-  namespaced: true,
-  state: {
-    isBroadcasting: false
-  },
-  actions: {
-    painting (context, circle) {
-      // console.log('broadcast painting', circle)
-    },
-    connectingPaths (context, connectionPath) {
-      // console.log('broadcast drawing connection path', connectionPath)
-    },
-    addConnection (context, connection) {
-      // console.log('broadcast add connection', connection)
-    }
-  }
-}
+// const broadcast = {
+//   namespaced: true,
+//   state: {
+//     isBroadcasting: false
+//   },
+//   actions: {
+//     painting (context, circle) {
+//       // console.log('broadcast painting', circle)
+//     },
+//     connectingPaths (context, connectionPath) {
+//       // console.log('broadcast drawing connection path', connectionPath)
+//     },
+//     addConnection (context, connection) {
+//       // console.log('broadcast add connection', connection)
+//     },
+//     addBlock (context, connection) {
+//       // console.log('broadcast add connection', connection)
+//     },
+//   }
+// }
 
 export default new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production',
@@ -224,11 +247,15 @@ export default new Vuex.Store({
     currentUserIsPaintingLocked: false,
     currentUserIsDraggingBlock: false,
 
+    // add block
+    currentUserClickIsCloseToOrigin: false,
+    // position
+
     // connecting
     currentConnection: {}, // startBlockId, startConnectorRect
     currentConnectionSuccess: {},
     currentConnectionCursorStart: {},
-    connectionDetailsIsVisible: false,
+    connectionDetailsIsVisible: false, // TODO remove this, use proper nested state for this
     connectionDetailsPosition: {},
 
     // dragging
@@ -267,6 +294,10 @@ export default new Vuex.Store({
       })
       state.connectionDetailsIsVisible = false
       state.multipleBlockActionsIsVisible = false
+    },
+    currentUserClickIsCloseToOrigin: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.currentUserClickIsCloseToOrigin = value
     },
 
     // connecting
@@ -363,11 +394,24 @@ export default new Vuex.Store({
       const isDrawingConnection = state.currentUserIsDrawingConnection
       const isDraggingBlock = state.currentUserIsDraggingBlock
       return isPaintingLocked || isDrawingConnection || isDraggingBlock
+    },
+
+    popOverIsVisible: (state) => {
+      // space getter
+      const blockDetailsVisible = state.currentSpace.blocks.some(block => {
+        console.log(block)
+        return block.blockDetailsVisible === true
+      })
+      // space getter
+      const connectionDetailsVisible = state.currentSpace.connections.some(connection => {
+        return connection.connectionDetailsVisible === true
+      })
+      return blockDetailsVisible || connectionDetailsVisible || state.connectionDetailsIsVisible || state.multipleBlockActionsIsVisible
     }
   },
   modules: {
     currentUser,
-    currentSpace,
-    broadcast
+    currentSpace
+    // broadcast
   }
 })
