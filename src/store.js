@@ -155,8 +155,12 @@ const currentSpace = {
         connection.path = utils.connectionBetweenBlocks(connection.startBlockId, connection.endBlockId)
       })
     },
-    addBlock: (state, block) => {
+    createBlock: (state, block) => {
       state.blocks.push(block)
+    },
+    deleteBlock: (state, blockId) => {
+      const index = state.blocks.findIndex(block => block.id === blockId)
+      state.blocks.splice(index, 1)
     }
   },
   actions: {
@@ -206,7 +210,7 @@ const currentSpace = {
       } else {
         block.blockDetailsVisible = true
       }
-      context.commit('addBlock', block)
+      context.commit('createBlock', block)
       context.commit('incrementBlockZ', block.id)
     }
   }

@@ -32,6 +32,15 @@ export default {
         this.$store.commit('currentSpace/updateBlockDetails', options)
       }
     }
+  },
+  watch: {
+    blockDetailsVisible (state) {
+      const dismissed = !state
+      const noContent = !this.block.name
+      if (dismissed && noContent) {
+        this.$store.commit('currentSpace/deleteBlock', this.block.id)
+      }
+    }
   }
 }
 </script>
