@@ -364,10 +364,10 @@ export default {
       if (this.isDrawingConnection) {
         this.createConnection()
       }
-      if (this.$store.state.currentUserClickIsCloseToOrigin) {
+      if (this.$store.state.shouldAddNewBlock) {
         this.addBlock()
       }
-      this.$store.commit('currentUserClickIsCloseToOrigin', false)
+      this.$store.commit('shouldAddNewBlock', false)
       this.$store.commit('preventDraggedBlockFromShowingDetails', false)
       this.$store.commit('currentUserIsDrawingConnection', false)
       this.$store.commit('currentUserIsPaintingLocked', false)

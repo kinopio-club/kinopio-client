@@ -115,7 +115,7 @@ export default {
       this.$store.commit('currentUserIsPainting', true)
       if (!this.$store.state.multipleBlocksSelected.length) {
         console.log('🌸 only open if not multi selected')
-        this.$store.commit('currentUserClickIsCloseToOrigin', true)
+        this.$store.commit('shouldAddNewBlock', true)
       }
       this.$store.commit('multipleBlocksSelected', [])
       this.$store.commit('generateBlockMap')
@@ -209,7 +209,6 @@ export default {
       if (initialCircles.length) {
         window.requestAnimationFrame(this.initialCirclesAnimationFrame)
       } else {
-        console.log('CANCEL initialCirclesTimer')
         window.cancelAnimationFrame(initialCirclesTimer)
         initialCirclesTimer = undefined
       }
@@ -218,7 +217,7 @@ export default {
     stopPainting (event) {
       const endCursor = utils.cursorPositionInPage(event)
       const isMultipleBlocksSelected = Boolean(this.$store.state.multipleBlocksSelected.length)
-      const shouldAddNewBlock = this.$store.state.currentUserClickIsCloseToOrigin
+      const shouldAddNewBlock = this.$store.state.shouldAddNewBlock
       currentUserIsLocking = false
       window.cancelAnimationFrame(lockingAnimationTimer)
       lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
@@ -232,9 +231,9 @@ export default {
 
       if (utils.cursorsAreClose(startCursor, endCursor) && shouldAddNewBlock) {
         console.log('🌸🌸 cursrs are close')
-        this.$store.commit('currentUserClickIsCloseToOrigin', true)
+        this.$store.commit('shouldAddNewBlock', true)
       } else {
-        this.$store.commit('currentUserClickIsCloseToOrigin', false)
+        this.$store.commit('shouldAddNewBlock', false)
       }
     },
 

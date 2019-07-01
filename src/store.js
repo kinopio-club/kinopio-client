@@ -248,7 +248,7 @@ export default new Vuex.Store({
     currentUserIsDraggingBlock: false,
 
     // add block
-    currentUserClickIsCloseToOrigin: false,
+    shouldAddNewBlock: false,
     // position
 
     // connecting
@@ -295,9 +295,9 @@ export default new Vuex.Store({
       state.connectionDetailsIsVisible = false
       state.multipleBlockActionsIsVisible = false
     },
-    currentUserClickIsCloseToOrigin: (state, value) => {
+    shouldAddNewBlock: (state, value) => {
       utils.typeCheck(value, 'boolean')
-      state.currentUserClickIsCloseToOrigin = value
+      state.shouldAddNewBlock = value
     },
 
     // connecting

@@ -9,7 +9,7 @@ article(:style="position" :data-block-id="id")
     :style="selectedColor"
     :data-block-id="id"
   )
-    p {{name}}
+    p.name {{name}}
     .connector(
       :style="testcolor"
       @mousedown="startConnecting"
@@ -148,9 +148,10 @@ article
   position absolute
   cursor pointer
   white-space nowrap
-  > p
+  .name
     align-self stretch
     margin 8px
+    min-width: 50px
   .connector
     background-color pink
     padding 8px
