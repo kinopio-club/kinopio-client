@@ -77,8 +77,8 @@ export default {
     viewportWidth () { return this.$store.state.viewportWidth },
     pageHeight () { return this.$store.state.pageHeight },
     pageWidth () { return this.$store.state.pageWidth },
-    scrollAreaHeight () { return this.viewportHeight / 3 },
-    scrollAreaWidth () { return this.viewportWidth / 3 },
+    scrollAreaHeight () { return this.viewportHeight / 4 },
+    scrollAreaWidth () { return this.viewportWidth / 4 },
     isInteracting () {
       if (this.isDraggingBlock || this.isDrawingConnection) {
         return true
