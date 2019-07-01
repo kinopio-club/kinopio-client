@@ -153,7 +153,6 @@ export default {
       const pageHeight = this.pageHeight
       const scrollAreaHeight = this.scrollAreaHeight
       if (cursor.y + window.scrollY + speed + scrollAreaHeight >= pageHeight) {
-        console.log('💈addPageHeight')
         const height = pageHeight + speed
         this.$store.commit('pageHeight', height)
       }
@@ -162,16 +161,13 @@ export default {
     addPageWidth (cursor, speed) {
       const pageWidth = this.pageWidth
       const scrollAreaWidth = this.scrollAreaWidth
-      console.log('🚒addPageWidth', cursor.x, window.scrollX, speed, this.scrollAreaWidth, '🌹:', cursor.x + window.scrollX + speed + scrollAreaWidth, '>=', pageWidth)
       if (cursor.x + window.scrollX + speed + scrollAreaWidth >= pageWidth) {
-        console.log('💈addPageWidth')
         const width = pageWidth + speed
         this.$store.commit('pageWidth', width)
       }
     },
 
     scrollFrame () {
-      console.log('scrollFrame from scrolltimer')
       let delta, speed
       const scrollAreaHeight = this.scrollAreaHeight
       const scrollAreaWidth = this.scrollAreaWidth
@@ -266,7 +262,6 @@ export default {
     drawConnection () {
       const end = this.cursor()
       const startBlockId = this.$store.state.currentConnection.startBlockId
-      console.log('drawing from', startBlockId)
       const start = utils.connectorCoords(startBlockId)
       const path = utils.connectionPathBetweenCoords(start, end)
       this.checkCurrentConnectionSuccess()
@@ -340,23 +335,15 @@ export default {
       }
     },
 
-    addBlock () {
-      // dont do AddBlock if
-      // - a pop over is open (click canvas closes pop over)
-      // any blockDetailsVisible true
-      // - multiselect is active (click canvas should deselect)
-
-      // if (!this.$store.getters.popOverIsVisible) {
+    addNewBlock () {
       const position = this.cursor()
       this.$store.dispatch('currentSpace/addBlock', {
         position
       })
-      // }
     },
 
     stopInteractions (event) {
       console.log('💣 stopInteractions')
-      // const isMultipleBlocksSelected = Boolean(this.$store.state.multipleBlocksSelected.length)
       window.cancelAnimationFrame(scrollTimer)
       scrollTimer = undefined
       if (event.target.closest('dialog')) { return }
@@ -365,7 +352,7 @@ export default {
         this.createConnection()
       }
       if (this.$store.state.shouldAddNewBlock) {
-        this.addBlock()
+        this.addNewBlock()
       }
       this.$store.commit('shouldAddNewBlock', false)
       this.$store.commit('preventDraggedBlockFromShowingDetails', false)

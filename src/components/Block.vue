@@ -151,7 +151,7 @@ article
   .name
     align-self stretch
     margin 8px
-    min-width: 50px
+    min-width: 25px
   .connector
     background-color pink
     padding 8px

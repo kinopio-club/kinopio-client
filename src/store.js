@@ -255,7 +255,7 @@ export default new Vuex.Store({
     currentConnection: {}, // startBlockId, startConnectorRect
     currentConnectionSuccess: {},
     currentConnectionCursorStart: {},
-    connectionDetailsIsVisible: false, // TODO remove this, use proper nested state for this
+    connectionDetailsIsVisible: false,
     connectionDetailsPosition: {},
 
     // dragging
@@ -394,19 +394,6 @@ export default new Vuex.Store({
       const isDrawingConnection = state.currentUserIsDrawingConnection
       const isDraggingBlock = state.currentUserIsDraggingBlock
       return isPaintingLocked || isDrawingConnection || isDraggingBlock
-    },
-
-    popOverIsVisible: (state) => {
-      // space getter
-      const blockDetailsVisible = state.currentSpace.blocks.some(block => {
-        console.log(block)
-        return block.blockDetailsVisible === true
-      })
-      // space getter
-      const connectionDetailsVisible = state.currentSpace.connections.some(connection => {
-        return connection.connectionDetailsVisible === true
-      })
-      return blockDetailsVisible || connectionDetailsVisible || state.connectionDetailsIsVisible || state.multipleBlockActionsIsVisible
     }
   },
   modules: {
