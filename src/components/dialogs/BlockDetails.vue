@@ -35,8 +35,8 @@ export default {
   },
   watch: {
     blockDetailsVisible (visible) {
-      const noContent = !this.block.name // in the future expand this to inlcude other metadata content
-      if (!visible && noContent) {
+      const isEmpty = !this.block.name // TODO: expand isEmpty to inlcude other metadata content (images etc)
+      if (!visible && isEmpty) {
         this.$store.commit('currentSpace/deleteBlock', this.block.id)
       }
     }
