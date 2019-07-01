@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog(v-if="blockDetailsVisible" :open="blockDetailsVisible")
   section
-    input(placeholder="name" v-model="name")
+    input.name(placeholder="name" v-model="name" autofocus)
     p blockid {{id}}
     // div
       // button hihi
@@ -34,10 +34,9 @@ export default {
     }
   },
   watch: {
-    blockDetailsVisible (state) {
-      const dismissed = !state
-      const noContent = !this.block.name
-      if (dismissed && noContent) {
+    blockDetailsVisible (visible) {
+      const noContent = !this.block.name // in the future expand this to inlcude other metadata content
+      if (!visible && noContent) {
         this.$store.commit('currentSpace/deleteBlock', this.block.id)
       }
     }
