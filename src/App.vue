@@ -43,6 +43,10 @@ body
 .app
   position relative
 
+input,
+textarea
+  font-size: 1em // required to disable ios input zooming
+
 dialog
   width: 300px
   left: 8px

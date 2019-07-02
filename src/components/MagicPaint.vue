@@ -5,8 +5,6 @@ aside.magic-paint
     @touchstart="startPainting"
     @mousemove="painting"
     @touchmove="painting"
-    @mouseup="stopPainting"
-    @touchend="stopPainting"
     :width="pageWidth"
     :height="pageHeight"
   )
@@ -55,6 +53,7 @@ export default {
     initialCanvas = document.getElementById('initial')
     initialContext = initialCanvas.getContext('2d')
     initialContext.scale(window.devicePixelRatio, window.devicePixelRatio)
+    // trigger stopPainting even if mouse is outside window
     window.addEventListener('mouseup', this.stopPainting)
     window.addEventListener('touchend', this.stopPainting)
   },
@@ -132,9 +131,6 @@ export default {
 
     painting (event) {
       if (!this.$store.state.currentUserIsPainting) { return }
-      if (this.$store.getters.viewportIsLocked) {
-        event.preventDefault()
-      }
       if (!paintingCirclesTimer) {
         paintingCirclesTimer = window.requestAnimationFrame(this.paintCirclesAnimationFrame)
       }
@@ -230,9 +226,7 @@ export default {
         this.$store.commit('multipleBlockActionsPosition', endCursor)
         this.$store.commit('multipleBlockActionsIsVisible', true)
       }
-
       if (utils.cursorsAreClose(startCursor, endCursor) && shouldAddNewBlock) {
-        console.log('🌸🌸 cursrs are close')
         this.$store.commit('shouldAddNewBlock', true)
       } else {
         this.$store.commit('shouldAddNewBlock', false)

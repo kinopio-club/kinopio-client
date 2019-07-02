@@ -125,12 +125,12 @@ export default {
       this.checkIfShouldDragMultipleBlocks()
       this.$store.dispatch('currentSpace/incrementSelectedBlocksZ')
     },
-    showBlockDetails () {
-      if (this.$store.state.preventDraggedBlockFromShowingDetails) {
-        return
-      }
+    showBlockDetails (event) {
+      if (this.$store.state.preventDraggedBlockFromShowingDetails) { return }
+      this.$store.commit('currentUserIsDraggingBlock', false)
       this.$store.commit('closeAllDialogs')
       this.$store.commit('currentSpace/blockDetailsVisible', this.id)
+      event.stopPropagation() // only stop propagation if blockDetailsVisible
     }
   }
 }
