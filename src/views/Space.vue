@@ -366,6 +366,7 @@ export default {
       this.$store.commit('currentUserIsDraggingBlock', false)
       this.$store.commit('currentConnectionSuccess', {})
       this.$store.commit('currentConnection', {})
+      this.updatePageSizes()
       this.currentConnectionPath = undefined
       prevCursor = undefined
       movementDirection = {}
