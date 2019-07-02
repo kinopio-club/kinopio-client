@@ -105,6 +105,11 @@ export default {
     }
   },
 
+  resizeTextArea (event) {
+    event.target.style.height = 'auto'
+    event.target.style.height = event.target.scrollHeight + 2 + 'px'
+  },
+
   // User Prefs 👼
 
   // storeLocal (key, value) {

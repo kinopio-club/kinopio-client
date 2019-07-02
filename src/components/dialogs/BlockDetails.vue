@@ -1,13 +1,22 @@
 <template lang="pug">
 dialog(v-if="blockDetailsVisible" :open="blockDetailsVisible")
   section
-    textarea.name(placeholder="New cool thought" v-model="name" autofocus="true")
+    textarea.name(
+      rows="1"
+      placeholder="name"
+      v-model="name"
+      autofocus="true"
+      @focus="resizeTextArea"
+      @input="resizeTextArea"
+    )
     p blockid {{id}}
     // div
       // button hihi
 </template>
 
 <script>
+import utils from '@/utils.js'
+
 export default {
   name: 'BlockDetails',
   props: {
@@ -31,6 +40,11 @@ export default {
         }
         this.$store.commit('currentSpace/updateBlockDetails', options)
       }
+    }
+  },
+  methods: {
+    resizeTextArea (event) {
+      utils.resizeTextArea(event)
     }
   },
   watch: {
