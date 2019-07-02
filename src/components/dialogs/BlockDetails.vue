@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog(v-if="blockDetailsVisible" :open="blockDetailsVisible")
   section
-    input.name(placeholder="name" v-model="name" autofocus="true" autocomplete="false")
+    textarea.name(placeholder="New cool thought" v-model="name" autofocus="true")
     p blockid {{id}}
     // div
       // button hihi
