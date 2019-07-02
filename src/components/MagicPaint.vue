@@ -55,6 +55,8 @@ export default {
     initialCanvas = document.getElementById('initial')
     initialContext = initialCanvas.getContext('2d')
     initialContext.scale(window.devicePixelRatio, window.devicePixelRatio)
+    window.addEventListener('mouseup', this.stopPainting)
+    window.addEventListener('touchend', this.stopPainting)
   },
   computed: {
     currentUserColor () {
