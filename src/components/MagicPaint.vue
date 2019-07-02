@@ -131,6 +131,9 @@ export default {
 
     painting (event) {
       if (!this.$store.state.currentUserIsPainting) { return }
+      if (this.$store.getters.viewportIsLocked) {
+        event.preventDefault() // prevents touch swipe viewport scrolling
+      }
       if (!paintingCirclesTimer) {
         paintingCirclesTimer = window.requestAnimationFrame(this.paintCirclesAnimationFrame)
       }
