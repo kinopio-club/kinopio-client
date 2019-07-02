@@ -336,9 +336,13 @@ export default {
     },
 
     addNewBlock (position) {
-      this.$store.dispatch('currentSpace/addBlock', {
-        position
-      })
+      const withinX = position.x > 0 && position.x < this.$store.state.pageWidth
+      const withinY = position.y > 0 && position.y < this.$store.state.pageHeight
+      if (withinX && withinY) {
+        this.$store.dispatch('currentSpace/addBlock', {
+          position
+        })
+      }
     },
 
     stopInteractions (event) {
