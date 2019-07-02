@@ -232,6 +232,7 @@ export default {
       }
       if (utils.cursorsAreClose(startCursor, endCursor) && shouldAddNewBlock) {
         this.$store.commit('shouldAddNewBlock', true)
+        event.preventDefault()
       } else {
         this.$store.commit('shouldAddNewBlock', false)
       }
