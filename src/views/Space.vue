@@ -361,6 +361,7 @@ export default {
       this.$store.commit('shouldAddNewBlock', false)
       this.$store.commit('preventDraggedBlockFromShowingDetails', false)
       this.$store.commit('currentUserIsDrawingConnection', false)
+      this.$store.commit('currentUserIsPainting', false)
       this.$store.commit('currentUserIsPaintingLocked', false)
       this.$store.commit('currentUserIsDraggingBlock', false)
       this.$store.commit('currentConnectionSuccess', {})
