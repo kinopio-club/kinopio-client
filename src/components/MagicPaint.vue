@@ -216,6 +216,7 @@ export default {
     },
 
     stopPainting (event) {
+      if (event.target.closest('dialog')) { return }
       startCursor = startCursor || {}
       const endCursor = utils.cursorPositionInPage(event)
       const isMultipleBlocksSelected = Boolean(this.$store.state.multipleBlocksSelected.length)
