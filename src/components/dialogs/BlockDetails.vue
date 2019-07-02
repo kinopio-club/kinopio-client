@@ -35,6 +35,7 @@ export default {
   },
   watch: {
     blockDetailsVisible (visible) {
+      this.$store.commit('updatePageSizes')
       const isEmpty = !this.block.name // TODO: expand isEmpty to inlcude other metadata content (images etc)
       if (!visible && isEmpty) {
         this.$store.commit('currentSpace/deleteBlock', this.block.id)
