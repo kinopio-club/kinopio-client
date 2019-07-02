@@ -77,8 +77,8 @@ export default {
     viewportWidth () { return this.$store.state.viewportWidth },
     pageHeight () { return this.$store.state.pageHeight },
     pageWidth () { return this.$store.state.pageWidth },
-    scrollAreaHeight () { return Math.min(100, this.viewportHeight / 4) },
-    scrollAreaWidth () { return Math.min(100, this.viewportWidth / 4) },
+    scrollAreaHeight () { return Math.min(100, this.viewportHeight / 5) },
+    scrollAreaWidth () { return Math.min(100, this.viewportWidth / 5) },
     isInteracting () {
       if (this.isDraggingBlock || this.isDrawingConnection) {
         return true
@@ -335,8 +335,7 @@ export default {
       }
     },
 
-    addNewBlock () {
-      const position = this.cursor()
+    addNewBlock (position) {
       this.$store.dispatch('currentSpace/addBlock', {
         position
       })
@@ -352,7 +351,8 @@ export default {
         this.createConnection()
       }
       if (this.$store.state.shouldAddNewBlock) {
-        this.addNewBlock()
+        const position = utils.cursorPositionInPage(event)
+        this.addNewBlock(position)
       }
       this.$store.commit('shouldAddNewBlock', false)
       this.$store.commit('preventDraggedBlockFromShowingDetails', false)
