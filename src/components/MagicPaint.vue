@@ -213,6 +213,7 @@ export default {
     },
 
     stopPainting (event) {
+      startCursor = startCursor || {}
       const endCursor = utils.cursorPositionInPage(event)
       const isMultipleBlocksSelected = Boolean(this.$store.state.multipleBlocksSelected.length)
       const shouldAddNewBlock = this.$store.state.shouldAddNewBlock
