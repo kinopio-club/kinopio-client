@@ -46,6 +46,7 @@ body
 input,
 textarea
   font-size: 1em // required to disable ios input zooming
+  resize none
 
 dialog
   width: 300px
