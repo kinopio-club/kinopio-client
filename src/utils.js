@@ -143,7 +143,7 @@ export default {
   // Connection Path Utils 🐙
 
   connectorCoords (blockId) {
-    let rect = document.querySelector(`.connector[data-block-id="${blockId}"]`).getBoundingClientRect()
+    let rect = document.querySelector(`.connector[data-block-id="${blockId}"] button`).getBoundingClientRect()
     return this.elementCenter(rect)
   },
 

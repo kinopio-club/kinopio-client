@@ -5,25 +5,25 @@ article(:style="position" :data-block-id="id")
     @touchstart.prevent="startDraggingBlock"
     @mouseup="showBlockDetails"
     @touchend="showBlockDetails"
-    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged}",
+    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, hover: isConnectingTo || isConnectingFrom, active: isBeingDragged}",
     :style="selectedColor"
     :data-block-id="id"
   )
     p.name {{name}}
     .connector(
-      :style="testcolor"
+      :data-block-id="id"
       @mousedown="startConnecting"
       @touchstart="startConnecting"
-      :data-block-id="id"
-      :class="{ active: isConnectingTo || isConnectingFrom}"
-    ) O
+    )
+      button(
+        :class="{ active: isConnectingTo || isConnectingFrom}"
+      ) O
   BlockDetails(
     :block="block"
   )
 </template>
 
 <script>
-import randomcolor from 'randomcolor'
 import utils from '@/utils.js'
 import BlockDetails from '@/components/dialogs/BlockDetails.vue'
 
@@ -33,9 +33,6 @@ export default {
   },
   props: {
     block: Object
-  },
-  created () {
-    this.color = randomcolor({ luminosity: 'light' })
   },
   data () {
     return {
@@ -48,9 +45,6 @@ export default {
     y () { return this.block.y },
     z () { return this.block.z },
     name () { return this.block.name },
-    testcolor () {
-      return { background: this.color }
-    },
     position () {
       return {
         left: `${this.x}px`,
@@ -141,14 +135,26 @@ article
   pointer-events all
   position absolute
 .block
+  border-radius 3px
   user-select: none
   display flex
   background-color var(--block-background)
   max-width 235px
   cursor pointer
-  padding 8px
+  border 1px solid transparent
+  &:hover,
+  &.hover
+    box-shadow 3px 3px 0 rgba(0,0,0,0.25)
+    background var(--hover-background)
+    border 1px solid var(--primary)
+  &:active,
+  &.active
+    box-shadow none
+    box-shadow 5px 5px 0 rgba(0,0,0,0.25)
+    background var(--active-background)
+    border 1px solid var(--primary)
   .name
-    margin 0
+    margin 8px
     margin-right 5px
     align-self stretch
     min-width: 25px
@@ -157,17 +163,22 @@ article
     -webkit-box-orient vertical
     -webkit-line-clamp 3
     overflow hidden
-
   .connector
-    background-color pink
     padding 8px
     align-self right
     cursor cell
+    button
+      cursor cell
     &:hover
-      background-color lightgrey !important //temp
-    &:active,
-    &.active
-      background-color grey !important //temp
+      button
+        box-shadow 3px 3px 0 rgba(0,0,0,0.25)
+        background var(--hover-background)
+    &:active
+      button
+        box-shadow none
+        color var(--primary)
+        background var(--active-background)
+
 .jiggle
   animation: jiggle 0.5s infinite ease-out forwards
 @keyframes jiggle

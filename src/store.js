@@ -43,7 +43,7 @@ const currentSpace = {
         x: 80,
         y: 80,
         z: 0,
-        name: 'hello space and time and other things, that should make this wrap, and truncate too',
+        name: 'Kinopio is a Collaborative Thinking Tool',
         blockDetailsVisible: false,
         archived: false
       },
@@ -79,7 +79,7 @@ const currentSpace = {
         x: 280,
         y: 280,
         z: 4,
-        name: 'go to summer bbq',
+        name: 'hello space and time',
         blockDetailsVisible: false,
         archived: false
       }
