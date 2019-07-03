@@ -43,7 +43,7 @@ const currentSpace = {
         x: 80,
         y: 80,
         z: 0,
-        name: 'hello space and time',
+        name: 'hello space and time and other things, that should make this wrap, and truncate too',
         blockDetailsVisible: false,
         archived: false
       },

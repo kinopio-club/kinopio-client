@@ -145,13 +145,19 @@ article
   display flex
   background-color var(--block-background)
   max-width 235px
-  position absolute
   cursor pointer
-  white-space nowrap
+  padding 8px
   .name
+    margin 0
+    margin-right 5px
     align-self stretch
-    margin 8px
     min-width: 25px
+    // multi-line wrapping
+    display -webkit-box
+    -webkit-box-orient vertical
+    -webkit-line-clamp 3
+    overflow hidden
+
   .connector
     background-color pink
     padding 8px
