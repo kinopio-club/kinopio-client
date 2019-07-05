@@ -70,8 +70,13 @@ export default {
       }
     },
     isBeingDragged () {
+      let isBlockId
+      const multipleBlocksSelected = this.$store.state.multipleBlocksSelected
+      const currentDraggingBlock = this.$store.state.currentDraggingBlockId
       const isDraggingBlock = this.$store.state.currentUserIsDraggingBlock
-      const isBlockId = this.$store.state.currentDraggingBlockId === this.id
+      if (multipleBlocksSelected.includes(this.id) || currentDraggingBlock === this.id) {
+        isBlockId = true
+      }
       if (isDraggingBlock && isBlockId) {
         return true
       } else {
