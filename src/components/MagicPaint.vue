@@ -111,11 +111,13 @@ export default {
     startPainting (event) {
       startCursor = utils.cursorPositionInPage(event)
       currentCursor = utils.cursorPositionInPage(event)
+      const dialogIsVisible = Boolean(document.querySelector('dialog'))
       const multipleBlocksIsSelected = Boolean(this.$store.state.multipleBlocksSelected.length)
       this.startLocking()
       this.createInitialCircle()
       this.$store.commit('currentUserIsPainting', true)
-      if (!multipleBlocksIsSelected) {
+      if (!multipleBlocksIsSelected && !dialogIsVisible) {
+        console.log('🌸')
         this.$store.commit('shouldAddNewBlock', true)
       }
       this.$store.commit('multipleBlocksSelected', [])
