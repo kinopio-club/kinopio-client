@@ -5,7 +5,7 @@ article(:style="position" :data-block-id="id")
     @touchstart.prevent="startDraggingBlock"
     @mouseup="showBlockDetails"
     @touchend="showBlockDetails"
-    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, hover: isConnectingTo || isConnectingFrom, active: isBeingDragged}",
+    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged}",
     :style="selectedColor"
     :data-block-id="id"
   )
@@ -144,25 +144,17 @@ article
   border 1px solid transparent
   &:hover,
   &.hover
-    box-shadow 3px 3px 0 rgba(0,0,0,0.25)
-    background var(--hover-background)
-    border 1px solid var(--primary)
+    box-shadow var(--block-hover-shadow)
   &:active,
   &.active
-    box-shadow none
-    box-shadow 5px 5px 0 rgba(0,0,0,0.25)
-    background var(--active-background)
-    border 1px solid var(--primary)
+    // box-shadow none
+    box-shadow var(--block-active-shadow)
   .name
     margin 8px
     margin-right 5px
     align-self stretch
     min-width: 25px
-    // multi-line wrapping
-    display -webkit-box
-    -webkit-box-orient vertical
-    -webkit-line-clamp 3
-    overflow hidden
+    multi-line-wrapping(3)
   .connector
     padding 8px
     align-self right
@@ -192,4 +184,10 @@ article
     transform: rotate(-3deg)
   100%
     transform: rotate(0deg)
+
+multi-line-wrapping(lines)
+  display -webkit-box
+  -webkit-box-orient vertical
+  -webkit-line-clamp lines
+  overflow hidden
 </style>

@@ -24,7 +24,10 @@ export default {
   --primary black
   --block-background #e3e3e3
   --hover-background #d8d8d8
-  --active-background #c9c9c9
+  --active-background #cdcdcd
+  --button-hover-shadow 2px 2px 0 rgba(0,0,0,0.25)
+  --block-hover-shadow 3px 3px 0 rgba(0,0,0,0.25)
+  --block-active-shadow 5px 5px 0 rgba(0,0,0,0.20)
   // non-theme vars
   --max-z 2147483647
 
@@ -56,7 +59,7 @@ button
   margin 0
   &:hover,
   &.hover
-    box-shadow 2px 2px 0 rgba(0,0,0,0.25)
+    box-shadow var(--button-hover-shadow)
     background var(--hover-background)
   &:active,
   &.active
