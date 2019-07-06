@@ -146,13 +146,11 @@ article
   background-color var(--block-background)
   max-width 235px
   cursor pointer
-  border 1px solid transparent
   &:hover,
   &.hover
     box-shadow var(--block-hover-shadow)
   &:active,
   &.active
-    // box-shadow none
     box-shadow var(--block-active-shadow)
   .name
     margin 8px

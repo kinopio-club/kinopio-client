@@ -28,6 +28,7 @@ export default {
   --button-hover-shadow 2px 2px 0 rgba(0,0,0,0.25)
   --block-hover-shadow 3px 3px 0 rgba(0,0,0,0.25)
   --block-active-shadow 5px 5px 0 rgba(0,0,0,0.20)
+
   // non-theme vars
   --max-z 2147483647
 
