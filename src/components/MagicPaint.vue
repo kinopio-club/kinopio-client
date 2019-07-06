@@ -239,6 +239,8 @@ export default {
       } else {
         this.$store.commit('shouldAddNewBlock', false)
       }
+      // prevent mouse events from firing after touch events on touch device
+      event.preventDefault()
     },
 
     selectBlocks (circle) {
