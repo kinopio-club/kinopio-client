@@ -9,6 +9,7 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
+    "lodash": "^4.17.11",
     "nanoid": "^2.0.3",
     "randomcolor": "^0.5.4",
     "vue": "^2.6.10",
