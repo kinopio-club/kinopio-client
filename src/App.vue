@@ -32,10 +32,19 @@ export default {
   // non-theme vars
   --max-z 2147483647
 
+@font-face
+  font-family 'OsakaMono'
+  src url("assets/OsakaMono.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+
 *
   -webkit-overflow-scrolling touch
   -webkit-tap-highlight-color transparent
   box-sizing border-box
+  font-family "Osaka-Mono", "OsakaMono", "Osaka−等幅", monospace
+  font-size 14px
+  line-height 1.1
 
 body
   margin 0
