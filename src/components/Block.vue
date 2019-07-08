@@ -157,7 +157,11 @@ article
     margin-right 5px
     align-self stretch
     min-width: 25px
-    multi-line-wrapping(3)
+    // multi-line wrapping
+    display -webkit-box
+    -webkit-box-orient vertical
+    -webkit-line-clamp 3
+    overflow hidden
   .connector
     padding 8px
     align-self right
@@ -188,9 +192,4 @@ article
   100%
     transform: rotate(0deg)
 
-multi-line-wrapping(lines)
-  display -webkit-box
-  -webkit-box-orient vertical
-  -webkit-line-clamp lines
-  overflow hidden
 </style>
