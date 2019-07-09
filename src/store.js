@@ -120,6 +120,15 @@ const currentSpace = {
       }
       state.connectionTypes.push(connectionType)
     },
+    removeUnusedConnectionTypes: (state) => {
+      const connections = state.connections.map(connection => {
+        return connection.connectionTypeId
+      })
+      const usedConnectionTypes = state.connectionTypes.filter(type => {
+        return connections.includes(type.id)
+      })
+      state.connectionTypes = usedConnectionTypes
+    },
     incrementBlockZ: (state, blockId) => {
       state.blocks.map((block, index) => {
         block.z = index

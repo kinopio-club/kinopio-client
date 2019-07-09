@@ -322,6 +322,8 @@ export default {
         const path = utils.connectionBetweenBlocks(startBlockId, endBlockId)
         const connection = { startBlockId, endBlockId, path }
         this.$store.commit('currentSpace/addConnection', connection)
+      } else {
+        this.$store.commit('currentSpace/removeUnusedConnectionTypes')
       }
     },
 
