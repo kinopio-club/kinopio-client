@@ -20,15 +20,15 @@ export default {
 <style lang="stylus">
 :root
   // theme vars
-  --primary-background white
   --primary black
+  --primary-background white
 
   --secondary-background #e3e3e3
   --secondary-hover-background #d8d8d8
   --secondary-active-background #cdcdcd
-  --secondary-hover-shadow 3px 3px 0 rgba(0,0,0,0.25)
-  --secondary-active-shadow 5px 5px 0 rgba(0,0,0,0.20)
 
+  --hover-shadow 3px 3px 0 rgba(0,0,0,0.25)
+  --active-shadow 5px 5px 0 rgba(0,0,0,0.20)
   --button-hover-shadow 2px 2px 0 rgba(0,0,0,0.25)
 
   // non-theme vars
@@ -90,6 +90,10 @@ dialog
   user-select auto
   pointer-events all
   z-index var(--max-z)
+  background-color var(--primary-background)
+  border 1px solid var(--primary)
+  box-shadow var(--hover-shadow)
+  border-radius 3px
   section
     padding 8px
   section + section

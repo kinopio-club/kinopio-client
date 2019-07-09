@@ -163,10 +163,10 @@ article
   cursor pointer
   &:hover,
   &.hover
-    box-shadow var(--secondary-hover-shadow)
+    box-shadow var(--hover-shadow)
   &:active,
   &.active
-    box-shadow var(--secondary-active-shadow)
+    box-shadow var(--active-shadow)
   .name
     margin 8px
     margin-right 5px
