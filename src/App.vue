@@ -22,12 +22,14 @@ export default {
   // theme vars
   --primary-background white
   --primary black
-  --card-background #e3e3e3
-  --hover-background #d8d8d8
-  --active-background #cdcdcd
+
+  --secondary-background #e3e3e3
+  --secondary-hover-background #d8d8d8
+  --secondary-active-background #cdcdcd
+  --secondary-hover-shadow 3px 3px 0 rgba(0,0,0,0.25)
+  --secondary-active-shadow 5px 5px 0 rgba(0,0,0,0.20)
+
   --button-hover-shadow 2px 2px 0 rgba(0,0,0,0.25)
-  --card-hover-shadow 3px 3px 0 rgba(0,0,0,0.25)
-  --card-active-shadow 5px 5px 0 rgba(0,0,0,0.20)
 
   // non-theme vars
   --max-z 2147483647
@@ -71,12 +73,12 @@ button
   &:hover,
   &.hover
     box-shadow var(--button-hover-shadow)
-    background var(--hover-background)
+    background var(--secondary-hover-background)
   &:active,
   &.active
     box-shadow none
     color var(--primary)
-    background var(--active-background)
+    background var(--secondary-active-background)
 
 dialog
   width: 300px

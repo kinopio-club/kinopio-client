@@ -158,15 +158,15 @@ article
   user-select none
   display flex
   align-items flex-start
-  background-color var(--card-background)
+  background-color var(--secondary-background)
   max-width 235px
   cursor pointer
   &:hover,
   &.hover
-    box-shadow var(--card-hover-shadow)
+    box-shadow var(--secondary-hover-shadow)
   &:active,
   &.active
-    box-shadow var(--card-active-shadow)
+    box-shadow var(--secondary-active-shadow)
   .name
     margin 8px
     margin-right 5px
@@ -190,12 +190,12 @@ article
     &:hover
       button
         box-shadow 3px 3px 0 rgba(0,0,0,0.25)
-        background var(--hover-background)
+        background var(--secondary-hover-background)
     &:active
       button
         box-shadow none
         color var(--primary)
-        background var(--active-background)
+        background var(--secondary-active-background)
   .connected-colors
     position absolute
     left 0
