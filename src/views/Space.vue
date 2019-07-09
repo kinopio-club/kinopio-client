@@ -15,11 +15,11 @@ main.space(
     )
     template(v-for="connection in connections")
       Connection(:connection="connection")
-  .blocks
-    template(v-for="block in blocks")
-      Block(:block="block")
+  .cards
+    template(v-for="card in cards")
+      Card(:card="card")
   ConnectionDetails
-  MultipleBlockActions
+  MultipleCardActions
   Footer
 </template>
 
@@ -27,8 +27,8 @@ main.space(
 import utils from '@/utils.js'
 import Connection from '@/components/Connection.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
-import Block from '@/components/Block.vue'
-import MultipleBlockActions from '@/components/dialogs/MultipleBlockActions.vue'
+import Card from '@/components/Card.vue'
+import MultipleCardActions from '@/components/dialogs/MultipleCardActions.vue'
 import Footer from '@/components/Footer.vue'
 
 let startCursor, prevCursor, endCursor, scrollTimer
@@ -36,10 +36,10 @@ let movementDirection = {}
 
 export default {
   components: {
-    Block,
+    Card,
     Connection,
     ConnectionDetails,
-    MultipleBlockActions,
+    MultipleCardActions,
     Footer
   },
   name: 'Space',
@@ -70,10 +70,10 @@ export default {
         height: `${this.pageHeight}px`
       }
     },
-    blocks () { return this.$store.state.currentSpace.blocks },
+    cards () { return this.$store.state.currentSpace.cards },
     isPainting () { return this.$store.state.currentUserIsPainting },
     isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
-    isDraggingBlock () { return this.$store.state.currentUserIsDraggingBlock },
+    isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
     connections () { return this.$store.state.currentSpace.connections },
     viewportHeight () { return this.$store.state.viewportHeight },
     viewportWidth () { return this.$store.state.viewportWidth },
@@ -82,7 +82,7 @@ export default {
     scrollAreaHeight () { return Math.min(100, this.viewportHeight / 5) },
     scrollAreaWidth () { return Math.min(100, this.viewportWidth / 5) },
     isInteracting () {
-      if (this.isDraggingBlock || this.isDrawingConnection) {
+      if (this.isDraggingCard || this.isDrawingConnection) {
         return true
       } else { return false }
     }
@@ -102,8 +102,8 @@ export default {
 
     interact (event) {
       endCursor = utils.cursorPositionInViewport(event)
-      if (this.isDraggingBlock) {
-        this.dragBlock()
+      if (this.isDraggingCard) {
+        this.dragCard()
       }
       if (this.isDrawingConnection) {
         this.drawConnection()
@@ -116,15 +116,15 @@ export default {
 
     checkShouldShowDetails () {
       if (!utils.cursorsAreClose(startCursor, endCursor)) {
-        this.$store.commit('preventDraggedBlockFromShowingDetails', true)
+        this.$store.commit('preventDraggedCardFromShowingDetails', true)
       }
     },
 
     scrollBy (delta) {
       delta.left = delta.x
       delta.top = delta.y
-      if (this.isDraggingBlock) {
-        this.$store.dispatch('currentSpace/dragBlocks', { delta })
+      if (this.isDraggingCard) {
+        this.$store.dispatch('currentSpace/dragCards', { delta })
       }
       window.scrollBy(delta)
     },
@@ -251,9 +251,9 @@ export default {
       }
     },
 
-    dragBlock () {
+    dragCard () {
       const prevCursor = this.cursor()
-      this.$store.dispatch('currentSpace/dragBlocks', {
+      this.$store.dispatch('currentSpace/dragCards', {
         endCursor,
         prevCursor: prevCursor
       })
@@ -263,8 +263,8 @@ export default {
 
     drawConnection () {
       const end = this.cursor()
-      const startBlockId = this.$store.state.currentConnection.startBlockId
-      const start = utils.connectorCoords(startBlockId)
+      const startCardId = this.$store.state.currentConnection.startCardId
+      const start = utils.connectorCoords(startCardId)
       const path = utils.connectionPathBetweenCoords(start, end)
       this.checkCurrentConnectionSuccess()
       this.currentConnectionPath = path
@@ -277,7 +277,7 @@ export default {
       return connectors.map(connector => {
         const element = connector.getBoundingClientRect()
         return {
-          blockId: connector.dataset.blockId,
+          cardId: connector.dataset.cardId,
           x: element.x,
           y: element.y,
           width: element.width,
@@ -307,7 +307,7 @@ export default {
         this.$store.commit('currentConnectionSuccess', {})
         return
       }
-      if (this.$store.state.currentConnection.startBlockId !== connection.blockId) {
+      if (this.$store.state.currentConnection.startCardId !== connection.cardId) {
         this.$store.commit('currentConnectionSuccess', connection)
       } else {
         this.$store.commit('currentConnectionSuccess', {})
@@ -316,13 +316,13 @@ export default {
 
     createConnection () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
-      const startBlockId = this.$store.state.currentConnection.startBlockId
-      const endBlockId = currentConnectionSuccess.blockId
-      const connectionAlreadyExists = this.$store.getters['currentSpace/connectionAlreadyExists']({ startBlockId, endBlockId })
+      const startCardId = this.$store.state.currentConnection.startCardId
+      const endCardId = currentConnectionSuccess.cardId
+      const connectionAlreadyExists = this.$store.getters['currentSpace/connectionAlreadyExists']({ startCardId, endCardId })
       if (connectionAlreadyExists) { return }
-      if (currentConnectionSuccess.blockId) {
-        const path = utils.connectionBetweenBlocks(startBlockId, endBlockId)
-        const connection = { startBlockId, endBlockId, path }
+      if (currentConnectionSuccess.cardId) {
+        const path = utils.connectionBetweenCards(startCardId, endCardId)
+        const connection = { startCardId, endCardId, path }
         this.$store.commit('currentSpace/addConnection', connection)
       } else {
         this.$store.commit('currentSpace/removeUnusedConnectionTypes')
@@ -340,11 +340,11 @@ export default {
       }
     },
 
-    addNewBlock (position) {
+    addNewCard (position) {
       const withinX = position.x > 0 && position.x < this.$store.state.pageWidth
       const withinY = position.y > 0 && position.y < this.$store.state.pageHeight
       if (withinX && withinY) {
-        this.$store.dispatch('currentSpace/addBlock', {
+        this.$store.dispatch('currentSpace/addCard', {
           position
         })
       }
@@ -359,16 +359,16 @@ export default {
       if (this.isDrawingConnection) {
         this.createConnection()
       }
-      if (this.$store.state.shouldAddNewBlock) {
+      if (this.$store.state.shouldAddNewCard) {
         const position = utils.cursorPositionInPage(event)
-        this.addNewBlock(position)
+        this.addNewCard(position)
       }
-      this.$store.commit('shouldAddNewBlock', false)
-      this.$store.commit('preventDraggedBlockFromShowingDetails', false)
+      this.$store.commit('shouldAddNewCard', false)
+      this.$store.commit('preventDraggedCardFromShowingDetails', false)
       this.$store.commit('currentUserIsDrawingConnection', false)
       this.$store.commit('currentUserIsPainting', false)
       this.$store.commit('currentUserIsPaintingLocked', false)
-      this.$store.commit('currentUserIsDraggingBlock', false)
+      this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.commit('currentConnectionSuccess', {})
       this.$store.commit('currentConnection', {})
       this.updatePageSizes()

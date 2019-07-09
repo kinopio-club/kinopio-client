@@ -38,14 +38,14 @@ const currentSpace = {
         color: 'pink'
       }
     ],
-    blocks: [
+    cards: [
       {
         id: '1',
         x: 80,
         y: 80,
         z: 0,
         name: 'Kinopio is a Collaborative Thinking Tool',
-        blockDetailsVisible: false,
+        cardDetailsVisible: false,
         archived: false
       },
       {
@@ -54,7 +54,7 @@ const currentSpace = {
         y: 250,
         z: 1,
         name: 'connect me!',
-        blockDetailsVisible: false,
+        cardDetailsVisible: false,
         archived: false
       },
       {
@@ -63,7 +63,7 @@ const currentSpace = {
         y: 150,
         z: 2,
         name: 'click and drag me',
-        blockDetailsVisible: false,
+        cardDetailsVisible: false,
         archived: false
       },
       {
@@ -72,7 +72,7 @@ const currentSpace = {
         y: 400,
         z: 3,
         name: 'eat your vegetables',
-        blockDetailsVisible: false,
+        cardDetailsVisible: false,
         archived: false
       },
       {
@@ -81,7 +81,7 @@ const currentSpace = {
         y: 280,
         z: 4,
         name: 'hello space and time',
-        blockDetailsVisible: false,
+        cardDetailsVisible: false,
         archived: false
       }
     ],
@@ -89,8 +89,8 @@ const currentSpace = {
       // {
       //   id: '1',
       //   connectionTypeId: '123',
-      //   startBlockId: '1',
-      //   endBlockId: '2',
+      //   startCardId: '1',
+      //   endCardId: '2',
       //   path: ''
       //   connectionDetailsVisible: false,
       // }
@@ -130,26 +130,26 @@ const currentSpace = {
       })
       state.connectionTypes = usedConnectionTypes
     },
-    incrementBlockZ: (state, blockId) => {
-      state.blocks.map((block, index) => {
-        block.z = index
-        if (block.id === blockId) {
-          block.z = state.blocks.length + 1
+    incrementCardZ: (state, cardId) => {
+      state.cards.map((card, index) => {
+        card.z = index
+        if (card.id === cardId) {
+          card.z = state.cards.length + 1
         }
       })
     },
-    blockDetailsVisible: (state, blockId) => {
-      state.blocks.map(block => {
-        if (block.id === blockId) {
-          block.blockDetailsVisible = true
+    cardDetailsVisible: (state, cardId) => {
+      state.cards.map(card => {
+        if (card.id === cardId) {
+          card.cardDetailsVisible = true
         }
       })
     },
-    updateBlockDetails: (state, { type, value, blockId }) => {
+    updateCardDetails: (state, { type, value, cardId }) => {
       utils.typeCheck(type, 'string')
-      state.blocks.map(block => {
-        if (block.id === blockId) {
-          block[type] = value
+      state.cards.map(card => {
+        if (card.id === cardId) {
+          card[type] = value
         }
       })
     },
@@ -160,29 +160,29 @@ const currentSpace = {
         }
       })
     },
-    moveBlock: (state, { blockId, delta }) => {
+    moveCard: (state, { cardId, delta }) => {
       const maxOffset = 0
-      state.blocks.map(block => {
-        if (block.id === blockId) {
-          block.x += delta.x || 0
-          block.y += delta.y || 0
-          block.x = Math.max(block.x, maxOffset)
-          block.y = Math.max(block.y, maxOffset)
+      state.cards.map(card => {
+        if (card.id === cardId) {
+          card.x += delta.x || 0
+          card.y += delta.y || 0
+          card.x = Math.max(card.x, maxOffset)
+          card.y = Math.max(card.y, maxOffset)
         }
       })
       const connections = state.connections.filter(connection => {
-        return (connection.startBlockId === blockId || connection.endBlockId === blockId)
+        return (connection.startCardId === cardId || connection.endCardId === cardId)
       })
       connections.forEach(connection => {
-        connection.path = utils.connectionBetweenBlocks(connection.startBlockId, connection.endBlockId)
+        connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
       })
     },
-    createBlock: (state, block) => {
-      state.blocks.push(block)
+    createCard: (state, card) => {
+      state.cards.push(card)
     },
-    deleteBlock: (state, blockId) => {
-      const index = state.blocks.findIndex(block => block.id === blockId)
-      state.blocks.splice(index, 1)
+    deleteCard: (state, cardId) => {
+      const index = state.cards.findIndex(card => card.id === cardId)
+      state.cards.splice(index, 1)
     }
   },
 
@@ -193,23 +193,23 @@ const currentSpace = {
     lastConnectionType: (state) => {
       return _.last(state.connectionTypes)
     },
-    connectionAlreadyExists: (state) => ({ startBlockId, endBlockId }) => {
+    connectionAlreadyExists: (state) => ({ startCardId, endCardId }) => {
       const existing = state.connections.filter(connection => {
-        let start = connection.startBlockId === startBlockId
-        let end = connection.endBlockId === endBlockId
+        let start = connection.startCardId === startCardId
+        let end = connection.endCardId === endCardId
         return start && end
       })
       return Boolean(existing.length)
     },
-    blockConnections: (state) => (blockId) => {
+    cardConnections: (state) => (cardId) => {
       return state.connections.filter(connection => {
-        let start = connection.startBlockId === blockId
-        let end = connection.endBlockId === blockId
+        let start = connection.startCardId === cardId
+        let end = connection.endCardId === cardId
         return start || end
       })
     },
-    blockConnectionTypes: (state, getters) => (blockId) => {
-      const connections = getters.blockConnections(blockId)
+    cardConnectionTypes: (state, getters) => (cardId) => {
+      const connections = getters.cardConnections(cardId)
       const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
       return state.connectionTypes.filter(type => {
         return connectionTypeIds.includes(type.id)
@@ -218,54 +218,54 @@ const currentSpace = {
   },
 
   actions: {
-    dragBlocks: (context, { endCursor, prevCursor, delta }) => {
-      const multipleBlocksSelected = context.rootState.multipleBlocksSelected
-      const currentDraggingBlockId = context.rootState.currentDraggingBlockId
-      const blocks = context.rootState.currentSpace.blocks
+    dragCards: (context, { endCursor, prevCursor, delta }) => {
+      const multipleCardsSelected = context.rootState.multipleCardsSelected
+      const currentDraggingCardId = context.rootState.currentDraggingCardId
+      const cards = context.rootState.currentSpace.cards
       delta = delta || {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
       }
-      if (multipleBlocksSelected.length) {
-        blocks.map(block => {
-          if (multipleBlocksSelected.includes(block.id)) {
-            context.commit('moveBlock', { blockId: block.id, delta })
+      if (multipleCardsSelected.length) {
+        cards.map(card => {
+          if (multipleCardsSelected.includes(card.id)) {
+            context.commit('moveCard', { cardId: card.id, delta })
           }
         })
       } else {
-        context.commit('moveBlock', { blockId: currentDraggingBlockId, delta })
+        context.commit('moveCard', { cardId: currentDraggingCardId, delta })
       }
     },
-    incrementSelectedBlocksZ: (context) => {
-      const multipleBlocksSelected = context.rootState.multipleBlocksSelected
-      const currentDraggingBlockId = context.rootState.currentDraggingBlockId
-      const blocks = context.state.blocks
-      if (multipleBlocksSelected.length) {
-        blocks.forEach(blockId => {
-          context.commit('incrementBlockZ', blockId)
+    incrementSelectedCardsZ: (context) => {
+      const multipleCardsSelected = context.rootState.multipleCardsSelected
+      const currentDraggingCardId = context.rootState.currentDraggingCardId
+      const cards = context.state.cards
+      if (multipleCardsSelected.length) {
+        cards.forEach(cardId => {
+          context.commit('incrementCardZ', cardId)
         })
       } else {
-        context.commit('incrementBlockZ', currentDraggingBlockId)
+        context.commit('incrementCardZ', currentDraggingCardId)
       }
     },
-    addBlock: (context, { position, contents }) => {
+    addCard: (context, { position, contents }) => {
       utils.typeCheck(position, 'object')
       utils.typeCheck(contents, 'object', true)
-      let block = {
+      let card = {
         id: nanoid(),
         x: position.x,
         y: position.y,
         name: '',
-        blockDetailsVisible: false,
+        cardDetailsVisible: false,
         archived: false
       }
       if (utils.objectHasKeys(contents)) {
-        block = utils.updateObject(block, contents)
+        card = utils.updateObject(card, contents)
       } else {
-        block.blockDetailsVisible = true
+        card.cardDetailsVisible = true
       }
-      context.commit('createBlock', block)
-      context.commit('incrementBlockZ', block.id)
+      context.commit('createCard', card)
+      context.commit('incrementCardZ', card.id)
     }
   }
 }
@@ -285,7 +285,7 @@ const currentSpace = {
 //     addConnection (context, connection) {
 //       // console.log('broadcast add connection', connection)
 //     },
-//     addBlock (context, connection) {
+//     addCard (context, connection) {
 //       // console.log('broadcast add connection', connection)
 //     },
 //   }
@@ -303,28 +303,28 @@ export default new Vuex.Store({
     currentUserIsDrawingConnection: false,
     currentUserIsPainting: false,
     currentUserIsPaintingLocked: false,
-    currentUserIsDraggingBlock: false,
+    currentUserIsDraggingCard: false,
 
-    // add block
-    shouldAddNewBlock: false,
+    // add card
+    shouldAddNewCard: false,
     // position
 
     // connecting
-    currentConnection: {}, // startBlockId, startConnectorRect
+    currentConnection: {}, // startCardId, startConnectorRect
     currentConnectionSuccess: {},
     currentConnectionCursorStart: {},
     connectionDetailsIsVisible: false,
     connectionDetailsPosition: {},
 
     // dragging
-    currentDraggingBlockId: '', // id
-    preventDraggedBlockFromShowingDetails: false,
+    currentDraggingCardId: '', // id
+    preventDraggedCardFromShowingDetails: false,
 
-    // multiple blocks
-    multipleBlocksSelected: [], // ids
-    multipleBlockActionsIsVisible: false,
-    multipleBlockActionsPosition: {},
-    blockMap: []
+    // multiple cards
+    multipleCardsSelected: [], // ids
+    multipleCardActionsIsVisible: false,
+    multipleCardActionsPosition: {},
+    cardMap: []
   },
 
   mutations: {
@@ -345,18 +345,18 @@ export default new Vuex.Store({
       state.pageWidth = width
     },
     closeAllDialogs: (state) => {
-      state.currentSpace.blocks.map(block => {
-        block.blockDetailsVisible = false
+      state.currentSpace.cards.map(card => {
+        card.cardDetailsVisible = false
       })
       state.currentSpace.connections.map(connection => {
         connection.connectionDetailsVisible = false
       })
       state.connectionDetailsIsVisible = false
-      state.multipleBlockActionsIsVisible = false
+      state.multipleCardActionsIsVisible = false
     },
-    shouldAddNewBlock: (state, value) => {
+    shouldAddNewCard: (state, value) => {
       utils.typeCheck(value, 'boolean')
-      state.shouldAddNewBlock = value
+      state.shouldAddNewCard = value
     },
 
     // connecting
@@ -389,17 +389,17 @@ export default new Vuex.Store({
     },
 
     // dragging
-    currentUserIsDraggingBlock: (state, value) => {
+    currentUserIsDraggingCard: (state, value) => {
       utils.typeCheck(value, 'boolean')
-      state.currentUserIsDraggingBlock = value
+      state.currentUserIsDraggingCard = value
     },
-    preventDraggedBlockFromShowingDetails: (state, value) => {
+    preventDraggedCardFromShowingDetails: (state, value) => {
       utils.typeCheck(value, 'boolean')
-      state.preventDraggedBlockFromShowingDetails = value
+      state.preventDraggedCardFromShowingDetails = value
     },
-    currentDraggingBlockId: (state, blockId) => {
-      utils.typeCheck(blockId, 'string')
-      state.currentDraggingBlockId = blockId
+    currentDraggingCardId: (state, cardId) => {
+      utils.typeCheck(cardId, 'string')
+      state.currentDraggingCardId = cardId
     },
 
     // connection details
@@ -412,29 +412,29 @@ export default new Vuex.Store({
       state.connectionDetailsPosition = position
     },
 
-    // multiple blocks
-    multipleBlocksSelected: (state, blocks) => {
-      utils.typeCheck(blocks, 'array')
-      state.multipleBlocksSelected = blocks
+    // multiple cards
+    multipleCardsSelected: (state, cards) => {
+      utils.typeCheck(cards, 'array')
+      state.multipleCardsSelected = cards
     },
-    addToMultipleBlocksSelected: (state, blockId) => {
-      utils.typeCheck(blockId, 'string')
-      if (!state.multipleBlocksSelected.includes(blockId)) {
-        state.multipleBlocksSelected.push(blockId)
+    addToMultipleCardsSelected: (state, cardId) => {
+      utils.typeCheck(cardId, 'string')
+      if (!state.multipleCardsSelected.includes(cardId)) {
+        state.multipleCardsSelected.push(cardId)
       }
     },
-    multipleBlockActionsIsVisible: (state, value) => {
+    multipleCardActionsIsVisible: (state, value) => {
       utils.typeCheck(value, 'boolean')
-      state.multipleBlockActionsIsVisible = value
+      state.multipleCardActionsIsVisible = value
     },
-    generateBlockMap: (state) => {
-      const blocks = document.querySelectorAll('.block')
-      state.blockMap = []
-      blocks.forEach(block => {
-        const article = block.closest('article')
-        const rect = block.getBoundingClientRect()
-        state.blockMap.push({
-          blockId: block.dataset.blockId,
+    generateCardMap: (state) => {
+      const cards = document.querySelectorAll('.card')
+      state.cardMap = []
+      cards.forEach(card => {
+        const article = card.closest('article')
+        const rect = card.getBoundingClientRect()
+        state.cardMap.push({
+          cardId: card.dataset.cardId,
           x: parseInt(article.style.left),
           y: parseInt(article.style.top),
           width: rect.width,
@@ -442,9 +442,9 @@ export default new Vuex.Store({
         })
       })
     },
-    multipleBlockActionsPosition: (state, position) => {
+    multipleCardActionsPosition: (state, position) => {
       utils.typeCheck(position, 'object')
-      state.multipleBlockActionsPosition = position
+      state.multipleCardActionsPosition = position
     }
   },
 
@@ -452,8 +452,8 @@ export default new Vuex.Store({
     viewportIsLocked (state, getters) {
       const isPaintingLocked = state.currentUserIsPaintingLocked
       const isDrawingConnection = state.currentUserIsDrawingConnection
-      const isDraggingBlock = state.currentUserIsDraggingBlock
-      return isPaintingLocked || isDrawingConnection || isDraggingBlock
+      const isDraggingCard = state.currentUserIsDraggingCard
+      return isPaintingLocked || isDrawingConnection || isDraggingCard
     }
   },
 

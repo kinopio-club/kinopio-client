@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog(v-if="visible" :open="visible" :style="position")
   section
-    // p details for connection from block {{connection.startBlockId}} to {{connection.endBlockId}}
+    // p details for connection from card {{connection.startCardId}} to {{connection.endCardId}}
     p {{typeColor}}
     input(placeholder="connection" :value="typeName")
     button Remove

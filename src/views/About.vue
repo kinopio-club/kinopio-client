@@ -65,9 +65,9 @@ export default {
     border-radius: 3px
   form
     padding 8px
-    background-color var(--block-background)
+    background-color var(--card-background)
     border-radius 3px
-    display inline-block
+    display inline-card
   input
     margin-right 5px
   a,

@@ -5,7 +5,7 @@ import {
 } from '@vue/test-utils'
 
 import Space from '@/views/Space.vue'
-import Block from '@/components/Block.vue'
+import Card from '@/components/Card.vue'
 
 const localVue = createLocalVue()
 localVue.use(Vuex)
@@ -21,7 +21,7 @@ describe('Space.vue', () => {
     store = new Vuex.Store({
       state: {
         currentSpace: {
-          blocks: [
+          cards: [
             { id: 1 }
           ]
         }
@@ -30,13 +30,13 @@ describe('Space.vue', () => {
     })
   })
 
-  it('renders blocks when passed', () => {
+  it('renders cards when passed', () => {
     const wrapper = shallowMount(Space, {
       // propsData: { msg },
       store,
       localVue
     })
     // expect(wrapper.text()).toMatch(msg)
-    expect(wrapper.contains(Block)).toBe(true)
+    expect(wrapper.contains(Card)).toBe(true)
   })
 })

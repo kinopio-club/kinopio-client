@@ -1,17 +1,17 @@
 <template lang="pug">
-article(:style="position" :data-block-id="id")
-  .block(
-    @mousedown.prevent="startDraggingBlock"
-    @touchstart.prevent="startDraggingBlock"
-    @mouseup="showBlockDetails"
-    @touchend="showBlockDetails"
+article(:style="position" :data-card-id="id")
+  .card(
+    @mousedown.prevent="startDraggingCard"
+    @touchstart.prevent="startDraggingCard"
+    @mouseup="showCardDetails"
+    @touchend="showCardDetails"
     :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged}",
     :style="selectedColor"
-    :data-block-id="id"
+    :data-card-id="id"
   )
     p.name {{name}}
     .connector(
-      :data-block-id="id"
+      :data-card-id="id"
       @mousedown="startConnecting"
       @touchstart="startConnecting"
     )
@@ -24,21 +24,21 @@ article(:style="position" :data-block-id="id")
         template(v-else)
           img.connector-icon(src="@/assets/connector-open.svg")
 
-  BlockDetails(
-    :block="block"
+  CardDetails(
+    :card="card"
   )
 </template>
 
 <script>
 import utils from '@/utils.js'
-import BlockDetails from '@/components/dialogs/BlockDetails.vue'
+import CardDetails from '@/components/dialogs/CardDetails.vue'
 
 export default {
   components: {
-    BlockDetails
+    CardDetails
   },
   props: {
-    block: Object
+    card: Object
   },
   data () {
     return {
@@ -46,11 +46,11 @@ export default {
     }
   },
   computed: {
-    id () { return this.block.id },
-    x () { return this.block.x },
-    y () { return this.block.y },
-    z () { return this.block.z },
-    name () { return this.block.name },
+    id () { return this.card.id },
+    x () { return this.card.x },
+    y () { return this.card.y },
+    z () { return this.card.z },
+    name () { return this.card.name },
     position () {
       return {
         left: `${this.x}px`,
@@ -61,7 +61,7 @@ export default {
     isConnectingTo () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
       if (currentConnectionSuccess) {
-        return currentConnectionSuccess.blockId === this.id
+        return currentConnectionSuccess.cardId === this.id
       } else {
         return false
       }
@@ -70,35 +70,35 @@ export default {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
       const currentConnection = this.$store.state.currentConnection
       if (currentConnectionSuccess) {
-        return currentConnection.startBlockId === this.id
+        return currentConnection.startCardId === this.id
       } else {
         return false
       }
     },
     isBeingDragged () {
-      let isBlockId
-      const multipleBlocksSelected = this.$store.state.multipleBlocksSelected
-      const currentDraggingBlock = this.$store.state.currentDraggingBlockId
-      const isDraggingBlock = this.$store.state.currentUserIsDraggingBlock
-      if (multipleBlocksSelected.includes(this.id) || currentDraggingBlock === this.id) {
-        isBlockId = true
+      let isCardId
+      const multipleCardsSelected = this.$store.state.multipleCardsSelected
+      const currentDraggingCard = this.$store.state.currentDraggingCardId
+      const isDraggingCard = this.$store.state.currentUserIsDraggingCard
+      if (multipleCardsSelected.includes(this.id) || currentDraggingCard === this.id) {
+        isCardId = true
       }
-      return Boolean(isDraggingBlock && isBlockId)
+      return Boolean(isDraggingCard && isCardId)
     },
     selectedColor () {
-      const multipleBlocksSelected = this.$store.state.multipleBlocksSelected
+      const multipleCardsSelected = this.$store.state.multipleCardsSelected
       const color = this.$store.state.currentUser.color
-      if (multipleBlocksSelected.includes(this.id)) {
+      if (multipleCardsSelected.includes(this.id)) {
         return { background: color }
       } else {
         return undefined
       }
     },
     connectionTypes () {
-      return this.$store.getters['currentSpace/blockConnectionTypes'](this.id)
+      return this.$store.getters['currentSpace/cardConnectionTypes'](this.id)
     },
     hasConnections () {
-      const connections = this.$store.getters['currentSpace/blockConnections'](this.id)
+      const connections = this.$store.getters['currentSpace/cardConnections'](this.id)
       return Boolean(connections.length)
     }
   },
@@ -106,7 +106,7 @@ export default {
     createCurrentConnection (event) {
       const cursor = utils.cursorPositionInViewport(event)
       this.$store.commit('currentConnection', {
-        startBlockId: this.id
+        startCardId: this.id
       })
       this.$store.commit('currentConnectionCursorStart', cursor)
     },
@@ -116,34 +116,34 @@ export default {
     },
     startConnecting (event) {
       this.$store.commit('closeAllDialogs')
-      this.$store.commit('preventDraggedBlockFromShowingDetails', true)
-      this.$store.commit('multipleBlocksSelected', [])
+      this.$store.commit('preventDraggedCardFromShowingDetails', true)
+      this.$store.commit('multipleCardsSelected', [])
       if (!this.$store.state.currentUserIsDrawingConnection) {
         this.addConnectionType()
         this.createCurrentConnection(event)
       }
       this.$store.commit('currentUserIsDrawingConnection', true)
     },
-    checkIfShouldDragMultipleBlocks () {
-      const multipleBlocksSelected = this.$store.state.multipleBlocksSelected
-      if (!multipleBlocksSelected.includes(this.id)) {
-        this.$store.commit('multipleBlocksSelected', [])
+    checkIfShouldDragMultipleCards () {
+      const multipleCardsSelected = this.$store.state.multipleCardsSelected
+      if (!multipleCardsSelected.includes(this.id)) {
+        this.$store.commit('multipleCardsSelected', [])
       }
     },
-    startDraggingBlock () {
+    startDraggingCard () {
       if (this.$store.state.currentUserIsDrawingConnection) { return }
       this.$store.commit('closeAllDialogs')
-      this.$store.commit('currentUserIsDraggingBlock', true)
-      this.$store.commit('currentDraggingBlockId', this.id)
-      this.checkIfShouldDragMultipleBlocks()
-      this.$store.dispatch('currentSpace/incrementSelectedBlocksZ')
+      this.$store.commit('currentUserIsDraggingCard', true)
+      this.$store.commit('currentDraggingCardId', this.id)
+      this.checkIfShouldDragMultipleCards()
+      this.$store.dispatch('currentSpace/incrementSelectedCardsZ')
     },
-    showBlockDetails (event) {
-      if (this.$store.state.preventDraggedBlockFromShowingDetails) { return }
-      this.$store.commit('currentUserIsDraggingBlock', false)
+    showCardDetails (event) {
+      if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
+      this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.commit('closeAllDialogs')
-      this.$store.commit('currentSpace/blockDetailsVisible', this.id)
-      event.stopPropagation() // only stop propagation if blockDetailsVisible
+      this.$store.commit('currentSpace/cardDetailsVisible', this.id)
+      event.stopPropagation() // only stop propagation if cardDetailsVisible
     }
   }
 }
@@ -153,20 +153,20 @@ export default {
 article
   pointer-events all
   position absolute
-.block
+.card
   border-radius 3px
   user-select none
   display flex
   align-items flex-start
-  background-color var(--block-background)
+  background-color var(--card-background)
   max-width 235px
   cursor pointer
   &:hover,
   &.hover
-    box-shadow var(--block-hover-shadow)
+    box-shadow var(--card-hover-shadow)
   &:active,
   &.active
-    box-shadow var(--block-active-shadow)
+    box-shadow var(--card-active-shadow)
   .name
     margin 8px
     margin-right 5px

@@ -24,7 +24,7 @@ import utils from '@/utils.js'
 const circleRadius = 20
 
 // painting
-// a sequence of circles that's broadcasted to others and is used for multi-block selection
+// a sequence of circles that's broadcasted to others and is used for multi-card selection
 const maxIterations = 200 // higher is longer paint fade time
 const rateOfIterationDecay = 0.03 // higher is faster tail decay
 let paintingCircles = []
@@ -104,7 +104,7 @@ export default {
       currentCursor = utils.cursorPositionInPage(event)
       let circle = { x: currentCursor.x, y: currentCursor.y, color, iteration: 0 }
       // this.$store.dispatch('broadcast/painting', circle)
-      this.selectBlocks(circle)
+      this.selectCards(circle)
       paintingCircles.push(circle)
     },
 
@@ -112,16 +112,16 @@ export default {
       startCursor = utils.cursorPositionInPage(event)
       currentCursor = utils.cursorPositionInPage(event)
       const dialogIsVisible = Boolean(document.querySelector('dialog'))
-      const multipleBlocksIsSelected = Boolean(this.$store.state.multipleBlocksSelected.length)
+      const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelected.length)
       this.startLocking()
       this.createInitialCircle()
       this.$store.commit('currentUserIsPainting', true)
-      if (!multipleBlocksIsSelected && !dialogIsVisible) {
+      if (!multipleCardsIsSelected && !dialogIsVisible) {
         console.log('🌸')
-        this.$store.commit('shouldAddNewBlock', true)
+        this.$store.commit('shouldAddNewCard', true)
       }
-      this.$store.commit('multipleBlocksSelected', [])
-      this.$store.commit('generateBlockMap')
+      this.$store.commit('multipleCardsSelected', [])
+      this.$store.commit('generateCardMap')
       this.$store.commit('closeAllDialogs')
       initialCircles.map(circle => {
         circle.persistent = false
@@ -221,44 +221,44 @@ export default {
       if (event.target.closest('dialog')) { return }
       startCursor = startCursor || {}
       const endCursor = utils.cursorPositionInPage(event)
-      const isMultipleBlocksSelected = Boolean(this.$store.state.multipleBlocksSelected.length)
-      const shouldAddNewBlock = this.$store.state.shouldAddNewBlock
+      const isMultipleCardsSelected = Boolean(this.$store.state.multipleCardsSelected.length)
+      const shouldAddNewCard = this.$store.state.shouldAddNewCard
       currentUserIsLocking = false
       window.cancelAnimationFrame(lockingAnimationTimer)
       lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       this.$store.commit('currentUserIsPaintingLocked', false)
       this.$store.commit('currentUserIsPainting', false)
       this.$store.commit('closeAllDialogs')
-      if (isMultipleBlocksSelected) {
-        this.$store.commit('multipleBlockActionsPosition', endCursor)
-        this.$store.commit('multipleBlockActionsIsVisible', true)
+      if (isMultipleCardsSelected) {
+        this.$store.commit('multipleCardActionsPosition', endCursor)
+        this.$store.commit('multipleCardActionsIsVisible', true)
       }
-      if (utils.cursorsAreClose(startCursor, endCursor) && shouldAddNewBlock) {
-        this.$store.commit('shouldAddNewBlock', true)
+      if (utils.cursorsAreClose(startCursor, endCursor) && shouldAddNewCard) {
+        this.$store.commit('shouldAddNewCard', true)
         event.preventDefault()
       } else {
-        this.$store.commit('shouldAddNewBlock', false)
+        this.$store.commit('shouldAddNewCard', false)
       }
       // prevent mouse events from firing after touch events on touch device
       event.preventDefault()
     },
 
-    selectBlocks (circle) {
-      this.$store.state.blockMap.map(block => {
+    selectCards (circle) {
+      this.$store.state.cardMap.map(card => {
         const x = {
           value: circle.x,
-          min: block.x,
-          max: block.x + block.width
+          min: card.x,
+          max: card.x + card.width
         }
         const y = {
           value: circle.y,
-          min: block.y,
-          max: block.y + block.height
+          min: card.y,
+          max: card.y + card.height
         }
         const isBetweenX = utils.between(x)
         const isBetweenY = utils.between(y)
         if (isBetweenX && isBetweenY) {
-          this.$store.commit('addToMultipleBlocksSelected', block.blockId)
+          this.$store.commit('addToMultipleCardsSelected', card.cardId)
         }
       })
     }

@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog(v-if="visible" :open="visible" :style="position")
   section
-    p multi actions for block ids: {{blocksSelected}}
+    p multi actions for card ids: {{cardsSelected}}
     button connect
     button disconnect
     button archive
@@ -9,19 +9,19 @@ dialog(v-if="visible" :open="visible" :style="position")
 
 <script>
 export default {
-  name: 'MultipleBlockActions',
+  name: 'MultipleCardActions',
   computed: {
-    visible () { return this.$store.state.multipleBlockActionsIsVisible },
+    visible () { return this.$store.state.multipleCardActionsIsVisible },
     position () {
-      const cursor = this.$store.state.multipleBlockActionsPosition
+      const cursor = this.$store.state.multipleCardActionsPosition
       console.log('💐', cursor)
       return {
         left: `${cursor.x}px`,
         top: `${cursor.y}px`
       }
     },
-    blocksSelected () {
-      return this.$store.state.multipleBlocksSelected
+    cardsSelected () {
+      return this.$store.state.multipleCardsSelected
     }
     // name: {
     //   get () {

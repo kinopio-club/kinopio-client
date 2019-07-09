@@ -22,12 +22,12 @@ export default {
   // theme vars
   --primary-background white
   --primary black
-  --block-background #e3e3e3
+  --card-background #e3e3e3
   --hover-background #d8d8d8
   --active-background #cdcdcd
   --button-hover-shadow 2px 2px 0 rgba(0,0,0,0.25)
-  --block-hover-shadow 3px 3px 0 rgba(0,0,0,0.25)
-  --block-active-shadow 5px 5px 0 rgba(0,0,0,0.20)
+  --card-hover-shadow 3px 3px 0 rgba(0,0,0,0.25)
+  --card-active-shadow 5px 5px 0 rgba(0,0,0,0.20)
 
   // non-theme vars
   --max-z 2147483647
@@ -61,6 +61,7 @@ input,
 textarea
   font-size: 1em // required to disable ios input zooming
   resize none
+  width: 100%
 
 button
   border 1px solid var(--primary)

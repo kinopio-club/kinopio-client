@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog(v-if="blockDetailsVisible" :open="blockDetailsVisible")
+dialog(v-if="cardDetailsVisible" :open="cardDetailsVisible")
   section
     textarea.name(
       rows="1"
@@ -9,7 +9,7 @@ dialog(v-if="blockDetailsVisible" :open="blockDetailsVisible")
       @focus="resizeTextArea"
       @input="resizeTextArea"
     )
-    p blockid {{id}}
+    p cardid {{id}}
     // div
       // button hihi
 </template>
@@ -18,27 +18,27 @@ dialog(v-if="blockDetailsVisible" :open="blockDetailsVisible")
 import utils from '@/utils.js'
 
 export default {
-  name: 'BlockDetails',
+  name: 'CardDetails',
   props: {
-    block: Object
+    card: Object
   },
   computed: {
-    id () { return this.block.id },
-    x () { return this.block.x },
-    y () { return this.block.y },
-    z () { return this.block.z },
-    blockDetailsVisible () { return this.block.blockDetailsVisible },
+    id () { return this.card.id },
+    x () { return this.card.x },
+    y () { return this.card.y },
+    z () { return this.card.z },
+    cardDetailsVisible () { return this.card.cardDetailsVisible },
     name: {
       get () {
-        return this.block.name
+        return this.card.name
       },
       set (newValue) {
         const options = {
           type: 'name',
           value: newValue,
-          blockId: this.id
+          cardId: this.id
         }
-        this.$store.commit('currentSpace/updateBlockDetails', options)
+        this.$store.commit('currentSpace/updateCardDetails', options)
       }
     }
   },
@@ -48,11 +48,11 @@ export default {
     }
   },
   watch: {
-    blockDetailsVisible (visible) {
+    cardDetailsVisible (visible) {
       this.$store.commit('updatePageSizes')
-      const isEmpty = !this.block.name // TODO: expand isEmpty to inlcude other metadata content (images etc)
+      const isEmpty = !this.card.name // TODO: expand isEmpty to inlcude other metadata content (images etc)
       if (!visible && isEmpty) {
-        this.$store.commit('currentSpace/deleteBlock', this.block.id)
+        this.$store.commit('currentSpace/deleteCard', this.card.id)
       }
     }
   }

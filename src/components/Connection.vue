@@ -3,8 +3,8 @@ path(
   fill="none"
   :stroke="typeColor"
   stroke-width="5"
-  :data-start-block="startBlockId"
-  :data-end-block="endBlockId"
+  :data-start-card="startCardId"
+  :data-end-card="endCardId"
   :d="path"
   @click="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
@@ -21,8 +21,8 @@ export default {
   computed: {
     id () { return this.connection.id },
     connectionTypeId () { return this.connection.connectionTypeId },
-    startBlockId () { return this.connection.startBlockId },
-    endBlockId () { return this.connection.endBlockId },
+    startCardId () { return this.connection.startCardId },
+    endCardId () { return this.connection.endCardId },
     path () { return this.connection.path },
     connectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.connectionTypeId) },
     typeColor () { return this.connectionType.color }

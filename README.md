@@ -31,10 +31,10 @@ App: http://localhost:8080
 | `store.js` | [Vuex](https://vuex.vuejs.org/) store, contains global observables and methods needed by multiple components |
 | `utils.js` | Functional methods that just do dom manipulations or common tasks. These can't access components or store directly |
 | `views/Space.vue` | Contains the core interaction layer which sends user inputs to painting, connecting, dragging etc. components. Also where new connections are created and checked to see if they connect |
-| `components/Block.vue` | Displays blocks from the `store`, and shows `BlockDetails` |
+| `components/Card.vue` | Displays cards from the `store`, and shows `CardDetails` |
 | `components/Connection.vue` | Displays connections from the `store`, and shows `ConnectionDetails` |
 | `components/Header.vue` | Used for moving between spaces, searching/filter, shows user presence, changing user prefs, and Kinopio meta options. Shown on all routes |
-| `components/MagicPaint.vue` | The canvas layers used for animating painting, scroll locking on touch, and more. As well as for multi-block selection which reveals `MultipleBlockActions` |
+| `components/MagicPaint.vue` | The canvas layers used for animating painting, scroll locking on touch, and more. As well as for multi-card selection which reveals `MultipleCardActions` |
 
 
 ## See Also
