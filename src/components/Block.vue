@@ -19,7 +19,10 @@ article(:style="position" :data-block-id="id")
         .connected-colors
           template(v-for="type in connectionTypes")
             .color(:style="{ background: type.color}")
-        span 0
+        template(v-if="hasConnections")
+          img.connector-icon(src="@/assets/connector-closed.svg")
+        template(v-else)
+          img.connector-icon(src="@/assets/connector-open.svg")
 
   BlockDetails(
     :block="block"
@@ -80,11 +83,7 @@ export default {
       if (multipleBlocksSelected.includes(this.id) || currentDraggingBlock === this.id) {
         isBlockId = true
       }
-      if (isDraggingBlock && isBlockId) {
-        return true
-      } else {
-        return false
-      }
+      return Boolean(isDraggingBlock && isBlockId)
     },
     selectedColor () {
       const multipleBlocksSelected = this.$store.state.multipleBlocksSelected
@@ -97,6 +96,10 @@ export default {
     },
     connectionTypes () {
       return this.$store.getters['currentSpace/blockConnectionTypes'](this.id)
+    },
+    hasConnections () {
+      const connections = this.$store.getters['currentSpace/blockConnections'](this.id)
+      return Boolean(connections.length)
     }
   },
   methods: {
@@ -154,6 +157,7 @@ article
   border-radius 3px
   user-select none
   display flex
+  align-items flex-start
   background-color var(--block-background)
   max-width 235px
   cursor pointer
@@ -180,6 +184,9 @@ article
     button
       cursor cell
       position relative
+      width: 20px
+      height: 16px
+      vertical-align top
     &:hover
       button
         box-shadow 3px 3px 0 rgba(0,0,0,0.25)
@@ -200,6 +207,10 @@ article
     overflow hidden
     .color
       width 100%
+  .connector-icon
+    position absolute
+    left 4px
+    top 2px
 .jiggle
   animation jiggle 0.5s infinite ease-out forwards
 @keyframes jiggle
