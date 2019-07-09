@@ -1,9 +1,7 @@
 <template lang="pug">
 dialog(v-if="visible" :open="visible" :style="position")
   section
-    // p details for connection from card {{connection.startCardId}} to {{connection.endCardId}}
-    p {{typeColor}}
-    input(placeholder="connection" :value="typeName")
+    input(placeholder="connection" v-model="typeName")
     button Remove
     button [x] new uses this connection type
   section
@@ -30,22 +28,15 @@ export default {
       })
     },
     connectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.connection.connectionTypeId) },
-    typeName () { return this.connectionType.name },
-    typeColor () { return this.connectionType.color }
+    typeName: {
+      get () { return this.connectionType.name },
+      set (newName) {
+        const connectionTypeId = this.connectionType.id
+        this.$store.commit('currentSpace/updateConnectionTypeName', { connectionTypeId, newName })
+      }
+    }
+    // typeColor () { return this.connectionType.color }
 
-    // name: {
-    //   get () {
-    //     return this.connection.name
-    //   },
-    //   set (newValue) {
-    //     const options = {
-    //       type: 'name',
-    //       value: newValue,
-    //       connectionId: this.id
-    //     }
-    //     this.$store.commit('currentSpace/updateconnectionDetails', options)
-    //   }
-    // },
   }
 }
 </script>

@@ -183,36 +183,12 @@ const currentSpace = {
     deleteCard: (state, cardId) => {
       const index = state.cards.findIndex(card => card.id === cardId)
       state.cards.splice(index, 1)
-    }
-  },
-
-  getters: {
-    connectionTypeById: (state) => (id) => {
-      return state.connectionTypes.find(type => type.id === id)
     },
-    lastConnectionType: (state) => {
-      return _.last(state.connectionTypes)
-    },
-    connectionAlreadyExists: (state) => ({ startCardId, endCardId }) => {
-      const existing = state.connections.filter(connection => {
-        let start = connection.startCardId === startCardId
-        let end = connection.endCardId === endCardId
-        return start && end
-      })
-      return Boolean(existing.length)
-    },
-    cardConnections: (state) => (cardId) => {
-      return state.connections.filter(connection => {
-        let start = connection.startCardId === cardId
-        let end = connection.endCardId === cardId
-        return start || end
-      })
-    },
-    cardConnectionTypes: (state, getters) => (cardId) => {
-      const connections = getters.cardConnections(cardId)
-      const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
-      return state.connectionTypes.filter(type => {
-        return connectionTypeIds.includes(type.id)
+    updateConnectionTypeName: (state, { connectionTypeId, newName }) => {
+      state.connectionTypes.map(type => {
+        if (type.id === connectionTypeId) {
+          type.name = newName
+        }
       })
     }
   },
@@ -266,6 +242,37 @@ const currentSpace = {
       }
       context.commit('createCard', card)
       context.commit('incrementCardZ', card.id)
+    }
+  },
+
+  getters: {
+    connectionTypeById: (state) => (id) => {
+      return state.connectionTypes.find(type => type.id === id)
+    },
+    lastConnectionType: (state) => {
+      return _.last(state.connectionTypes)
+    },
+    connectionAlreadyExists: (state) => ({ startCardId, endCardId }) => {
+      const existing = state.connections.filter(connection => {
+        let start = connection.startCardId === startCardId
+        let end = connection.endCardId === endCardId
+        return start && end
+      })
+      return Boolean(existing.length)
+    },
+    cardConnections: (state) => (cardId) => {
+      return state.connections.filter(connection => {
+        let start = connection.startCardId === cardId
+        let end = connection.endCardId === cardId
+        return start || end
+      })
+    },
+    cardConnectionTypes: (state, getters) => (cardId) => {
+      const connections = getters.cardConnections(cardId)
+      const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
+      return state.connectionTypes.filter(type => {
+        return connectionTypeIds.includes(type.id)
+      })
     }
   }
 }
