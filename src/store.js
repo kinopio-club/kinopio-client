@@ -190,6 +190,14 @@ const currentSpace = {
     },
     lastConnectionType: (state) => {
       return _.last(state.connectionTypes)
+    },
+    connectionAlreadyExists: (state) => ({ startBlockId, endBlockId }) => {
+      const existing = state.connections.filter(connection => {
+        let start = connection.startBlockId === startBlockId
+        let end = connection.endBlockId === endBlockId
+        return start && end
+      })
+      return Boolean(existing.length)
     }
   },
   actions: {
