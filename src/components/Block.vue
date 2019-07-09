@@ -15,9 +15,12 @@ article(:style="position" :data-block-id="id")
       @mousedown="startConnecting"
       @touchstart="startConnecting"
     )
-      button(
-        :class="{ active: isConnectingTo || isConnectingFrom}"
-      ) O
+      button(:class="{ active: isConnectingTo || isConnectingFrom}")
+        .connected-colors
+          template(v-for="type in connectionTypes")
+            .color(:style="{ background: type.color}")
+        span 0
+
   BlockDetails(
     :block="block"
   )
@@ -91,6 +94,9 @@ export default {
       } else {
         return undefined
       }
+    },
+    connectionTypes () {
+      return this.$store.getters['currentSpace/blockConnectionTypes'](this.id)
     }
   },
   methods: {
@@ -146,7 +152,7 @@ article
   position absolute
 .block
   border-radius 3px
-  user-select: none
+  user-select none
   display flex
   background-color var(--block-background)
   max-width 235px
@@ -161,7 +167,7 @@ article
     margin 8px
     margin-right 5px
     align-self stretch
-    min-width: 25px
+    min-width 25px
     // multi-line wrapping
     display -webkit-box
     -webkit-box-orient vertical
@@ -173,6 +179,7 @@ article
     cursor cell
     button
       cursor cell
+      position relative
     &:hover
       button
         box-shadow 3px 3px 0 rgba(0,0,0,0.25)
@@ -182,19 +189,29 @@ article
         box-shadow none
         color var(--primary)
         background var(--active-background)
-
+  .connected-colors
+    position absolute
+    left 0
+    top 0
+    display flex
+    height 100%
+    width 100%
+    border-radius 2px
+    overflow hidden
+    .color
+      width 100%
 .jiggle
-  animation: jiggle 0.5s infinite ease-out forwards
+  animation jiggle 0.5s infinite ease-out forwards
 @keyframes jiggle
   0%
-    transform: rotate(0deg)
+    transform rotate(0deg)
   25%
-    transform: rotate(-3deg)
+    transform rotate(-3deg)
   50%
-    transform: rotate(3deg)
+    transform rotate(3deg)
   75%
-    transform: rotate(-3deg)
+    transform rotate(-3deg)
   100%
-    transform: rotate(0deg)
+    transform rotate(0deg)
 
 </style>
