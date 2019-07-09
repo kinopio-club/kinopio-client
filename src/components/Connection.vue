@@ -7,6 +7,7 @@ path(
   :data-end-block="endBlockId"
   :d="path"
   @click="showConnectionDetails"
+  @touchend.stop="showConnectionDetails"
 )
 </template>
 
