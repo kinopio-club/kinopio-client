@@ -316,11 +316,11 @@ export default {
 
     createConnection () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
+      const startBlockId = this.$store.state.currentConnection.startBlockId
+      const endBlockId = currentConnectionSuccess.blockId
+      const connectionAlreadyExists = this.$store.getters['currentSpace/connectionAlreadyExists']({ startBlockId, endBlockId })
+      if (connectionAlreadyExists) { return }
       if (currentConnectionSuccess.blockId) {
-        const startBlockId = this.$store.state.currentConnection.startBlockId
-        const endBlockId = currentConnectionSuccess.blockId
-        const connectionAlreadyExists = this.$store.getters['currentSpace/connectionAlreadyExists']({ startBlockId, endBlockId })
-        console.log('🔥🔥🔥connectionAlreadyExists', connectionAlreadyExists)
         const path = utils.connectionBetweenBlocks(startBlockId, endBlockId)
         const connection = { startBlockId, endBlockId, path }
         this.$store.commit('currentSpace/addConnection', connection)
