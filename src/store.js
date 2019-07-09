@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 import utils from '@/utils.js'
 import randomcolor from 'randomcolor'
 import nanoid from 'nanoid'
+import _ from 'lodash'
 
 Vue.use(Vuex)
 
@@ -11,17 +12,17 @@ const currentUser = {
   state: {
     id: 1,
     color: randomcolor({ luminosity: 'light' })
-  },
-  getters: {
-    isMember (state, getters, rootState) {
-      const inCurrentSpace = rootState.currentSpace.users.some(user => {
-        return user.id === state.id
-      })
-      if (inCurrentSpace) {
-        return true
-      } else { return false }
-    }
   }
+  // getters: {
+  //   isMember (state, getters, rootState) {
+  //     const inCurrentSpace = rootState.currentSpace.users.some(user => {
+  //       return user.id === state.id
+  //     })
+  //     if (inCurrentSpace) {
+  //       return true
+  //     } else { return false }
+  //   }
+  // }
 }
 
 const currentSpace = {
@@ -87,7 +88,7 @@ const currentSpace = {
     connections: [
       // {
       //   id: '1',
-      //   connectionType: '1',
+      //   connectionTypeId: '123',
       //   startBlockId: '1',
       //   endBlockId: '2',
       //   path: ''
@@ -95,20 +96,31 @@ const currentSpace = {
       // }
     ],
     connectionTypes: [
-      {
-        id: '1',
-        name: 'connection 1'
-      }
+      // {
+      //   id: '123',
+      //   name: 'connection',
+      //   color: 'pink'
+      // }
     ]
   },
   mutations: {
     addConnection: (state, connection) => {
+      const lastConnectionType = _.last(state.connectionTypes)
       connection.id = nanoid()
-      // connection.connectionTypeId = '1' // TODO: create new connections each time or use last def on user prefs
+      connection.connectionTypeId = lastConnectionType.id
+
       connection.connectionDetailsVisible = false
       state.connections.push(connection)
     },
-    incrementBlockZ (state, blockId) {
+    addConnectionType: (state, { id, name, color }) => {
+      const connectionType = {
+        id: id || nanoid(),
+        name: name || 'connection',
+        color: color || randomcolor({ luminosity: 'light' })
+      }
+      state.connectionTypes.push(connectionType)
+    },
+    incrementBlockZ: (state, blockId) => {
       state.blocks.map((block, index) => {
         block.z = index
         if (block.id === blockId) {
@@ -161,6 +173,14 @@ const currentSpace = {
     deleteBlock: (state, blockId) => {
       const index = state.blocks.findIndex(block => block.id === blockId)
       state.blocks.splice(index, 1)
+    }
+  },
+  getters: {
+    connectionTypeById: (state) => (id) => {
+      return state.connectionTypes.find(type => type.id === id)
+    },
+    lastConnectionType: (state) => {
+      return _.last(state.connectionTypes)
     }
   },
   actions: {

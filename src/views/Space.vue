@@ -9,8 +9,8 @@ main.space(
     path.current-connection(
       v-if="isDrawingConnection"
       fill="none"
-      stroke="#333333"
-      stroke-width="3"
+      stroke-width="5"
+      :stroke="currentConnectionColor"
       :d="currentConnectionPath"
     )
     template(v-for="connection in connections")
@@ -46,7 +46,8 @@ export default {
 
   data () {
     return {
-      currentConnectionPath: undefined
+      currentConnectionPath: undefined,
+      currentConnectionColor: undefined
     }
   },
 
@@ -59,6 +60,7 @@ export default {
     // keep space element updated to viewport size so connections show up
     this.updatePageSizes()
     window.addEventListener('resize', this.updatePageSizes)
+    // this.$store
   },
 
   computed: {
@@ -266,7 +268,7 @@ export default {
       const path = utils.connectionPathBetweenCoords(start, end)
       this.checkCurrentConnectionSuccess()
       this.currentConnectionPath = path
-      // this.$store.dispatch('broadcast/connectingPaths', path)
+      this.currentConnectionColor = this.$store.getters['currentSpace/lastConnectionType'].color
     },
 
     connectors () {
@@ -320,7 +322,6 @@ export default {
         const path = utils.connectionBetweenBlocks(startBlockId, endBlockId)
         const connection = { startBlockId, endBlockId, path }
         this.$store.commit('currentSpace/addConnection', connection)
-        // this.$store.dispatch('broadcast/addConnection', connection)
       }
     },
 

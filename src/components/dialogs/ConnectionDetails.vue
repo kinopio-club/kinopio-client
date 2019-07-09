@@ -1,9 +1,10 @@
 <template lang="pug">
 dialog(v-if="visible" :open="visible" :style="position")
   section
-    p details for connection from block {{connection.startBlockId}} to {{connection.endBlockId}}
-    input(placeholder="name" value="connection name")
-    button disconnect
+    // p details for connection from block {{connection.startBlockId}} to {{connection.endBlockId}}
+    p {{typeColor}}
+    input(placeholder="connection" :value="typeName")
+    button Remove
     button [x] new uses last connection type
   section
     button + connection
@@ -17,7 +18,6 @@ export default {
     visible () { return this.$store.state.connectionDetailsIsVisible },
     position () {
       const cursor = this.$store.state.connectionDetailsPosition
-      console.log(cursor)
       return {
         left: `${cursor.x}px`,
         top: `${cursor.y}px`
@@ -28,7 +28,11 @@ export default {
       return connections.find(connection => {
         return connection.connectionDetailsVisible === true
       })
-    }
+    },
+    connectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.connection.connectionTypeId) },
+    typeName () { return this.connectionType.name },
+    typeColor () { return this.connectionType.color }
+
     // name: {
     //   get () {
     //     return this.connection.name

@@ -101,11 +101,16 @@ export default {
       })
       this.$store.commit('currentConnectionCursorStart', cursor)
     },
+    addConnectionType () {
+      // TODO if LS says use last connection, return / do nothing
+      this.$store.commit('currentSpace/addConnectionType', {})
+    },
     startConnecting (event) {
       this.$store.commit('closeAllDialogs')
       this.$store.commit('preventDraggedBlockFromShowingDetails', true)
       this.$store.commit('multipleBlocksSelected', [])
       if (!this.$store.state.currentUserIsDrawingConnection) {
+        this.addConnectionType()
         this.createCurrentConnection(event)
       }
       this.$store.commit('currentUserIsDrawingConnection', true)

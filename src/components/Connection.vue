@@ -1,8 +1,8 @@
 <template lang="pug">
 path(
   fill="none"
-  stroke="#333333"
-  stroke-width="3"
+  :stroke="typeColor"
+  stroke-width="5"
   :data-start-block="startBlockId"
   :data-end-block="endBlockId"
   :d="path"
@@ -19,10 +19,12 @@ export default {
   },
   computed: {
     id () { return this.connection.id },
-    connectionType () { return this.connection.connectionType },
+    connectionTypeId () { return this.connection.connectionTypeId },
     startBlockId () { return this.connection.startBlockId },
     endBlockId () { return this.connection.endBlockId },
-    path () { return this.connection.path }
+    path () { return this.connection.path },
+    connectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.connectionTypeId) },
+    typeColor () { return this.connectionType.color }
   },
   methods: {
     showConnectionDetails (event) {
