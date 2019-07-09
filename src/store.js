@@ -103,6 +103,7 @@ const currentSpace = {
       // }
     ]
   },
+
   mutations: {
     addConnection: (state, connection) => {
       const lastConnectionType = _.last(state.connectionTypes)
@@ -184,6 +185,7 @@ const currentSpace = {
       state.blocks.splice(index, 1)
     }
   },
+
   getters: {
     connectionTypeById: (state) => (id) => {
       return state.connectionTypes.find(type => type.id === id)
@@ -198,8 +200,23 @@ const currentSpace = {
         return start && end
       })
       return Boolean(existing.length)
+    },
+    blockConnections: (state) => (blockId) => {
+      return state.connections.filter(connection => {
+        let start = connection.startBlockId === blockId
+        let end = connection.endBlockId === blockId
+        return start || end
+      })
+    },
+    blockConnectionTypes: (state, getters) => (blockId) => {
+      const connections = getters.blockConnections(blockId)
+      const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
+      return state.connectionTypes.filter(type => {
+        return connectionTypeIds.includes(type.id)
+      })
     }
   },
+
   actions: {
     dragBlocks: (context, { endCursor, prevCursor, delta }) => {
       const multipleBlocksSelected = context.rootState.multipleBlocksSelected
@@ -309,6 +326,7 @@ export default new Vuex.Store({
     multipleBlockActionsPosition: {},
     blockMap: []
   },
+
   mutations: {
     updatePageSizes: (state) => {
       const body = document.body
@@ -429,6 +447,7 @@ export default new Vuex.Store({
       state.multipleBlockActionsPosition = position
     }
   },
+
   getters: {
     viewportIsLocked (state, getters) {
       const isPaintingLocked = state.currentUserIsPaintingLocked
@@ -437,6 +456,7 @@ export default new Vuex.Store({
       return isPaintingLocked || isDrawingConnection || isDraggingBlock
     }
   },
+
   modules: {
     currentUser,
     currentSpace

@@ -5,7 +5,7 @@ dialog(v-if="visible" :open="visible" :style="position")
     p {{typeColor}}
     input(placeholder="connection" :value="typeName")
     button Remove
-    button [x] new uses last connection type
+    button [x] new uses this connection type
   section
     button + connection
     p select existing conneciton type
