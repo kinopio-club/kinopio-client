@@ -60,22 +60,24 @@ body
   position relative
 
 input,
-textarea
-  margin 0
-  font-size: 1em // required to disable ios input zooming
-  resize none
-  width 100%
-  background transparent
-  border 0
-  border-bottom 1px solid black
-
+textarea,
 button
   padding 7px
   padding-top 2px
   padding-bottom 3px
-  margin 0
   border 1px solid var(--primary)
   border-radius 3px
+  margin 0
+
+input,
+textarea
+  font-size: 1em // required to disable ios input zooming
+  resize none
+  width 100%
+  background-color var(--primary-background)
+  box-shadow var(--button-hover-shadow)
+
+button
   background transparent
   &:hover,
   &.hover
