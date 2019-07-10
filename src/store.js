@@ -130,6 +130,12 @@ const currentSpace = {
       })
       state.connectionTypes = usedConnectionTypes
     },
+    removeConnection: (state, connectionId) => {
+      const connections = state.connections.filter(connection => {
+        return connection.id !== connectionId
+      })
+      state.connections = connections
+    },
     incrementCardZ: (state, cardId) => {
       state.cards.map((card, index) => {
         card.z = index

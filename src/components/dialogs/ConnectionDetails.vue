@@ -5,7 +5,7 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="position
     .row
       button.change-color
         .current-color(:style="{backgroundColor: typeColor}")
-      button
+      button(@click="removeConnection")
         img.trash(src="@/assets/trash.svg")
         span Remove
     button [x] Default
@@ -41,7 +41,12 @@ export default {
       }
     },
     typeColor () { return this.connectionType.color }
-
+  },
+  methods: {
+    removeConnection () {
+      this.$store.commit('closeAllDialogs')
+      this.$store.commit('currentSpace/removeConnection', this.connection.id)
+    }
   }
 }
 </script>
