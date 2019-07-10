@@ -79,7 +79,8 @@ button
   background transparent
   cursor pointer
   &:hover,
-  &.hover
+  &.hover,
+  &:focus
     box-shadow var(--button-hover-shadow)
     background var(--secondary-hover-background)
   &:active,
@@ -113,11 +114,15 @@ dialog
   .row
     margin-bottom 10px
     button + button
-      margin-left 10px
+      margin-left 6px
   section
     padding 8px
   section + section
     border-top: 1px solid var(--primary)
   input
     margin-bottom 10px
+  .trash
+    vertical-align -1px
+    margin-right 5px
+
 </style>

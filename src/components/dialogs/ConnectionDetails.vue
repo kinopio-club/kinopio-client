@@ -5,7 +5,9 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="position
     .row
       button.change-color
         .current-color(:style="{backgroundColor: typeColor}")
-      button Remove
+      button
+        img.trash(src="@/assets/trash.svg")
+        span Remove
     button [x] Default
   section
     button + connection
