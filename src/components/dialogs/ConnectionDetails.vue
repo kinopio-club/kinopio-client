@@ -1,12 +1,14 @@
 <template lang="pug">
-dialog(v-if="visible" :open="visible" :style="position")
-  section
+dialog.connection-details(v-if="visible" :open="visible" :style="position")
+  section(:style="{backgroundColor: typeColor}")
     input(placeholder="connection" v-model="typeName")
+    button.change-color
+      .current-color(:style="{backgroundColor: typeColor}")
     button Remove
     button [x] new uses this connection type
   section
     button + connection
-    p select existing conneciton type
+    p select from existing conneciton types
 </template>
 
 <script>
@@ -34,12 +36,21 @@ export default {
         const connectionTypeId = this.connectionType.id
         this.$store.commit('currentSpace/updateConnectionTypeName', { connectionTypeId, newName })
       }
-    }
-    // typeColor () { return this.connectionType.color }
+    },
+    typeColor () { return this.connectionType.color }
 
   }
 }
 </script>
 
 <style lang="stylus">
+.connection-details
+  .change-color
+    padding-top 4px
+    vertical-align top
+    .current-color
+      height 13px
+      width 15px
+      vertical-align top
+      border-radius 3px
 </style>

@@ -61,15 +61,22 @@ body
 
 input,
 textarea
+  margin 0
   font-size: 1em // required to disable ios input zooming
   resize none
-  width: 100%
+  width 100%
+  background transparent
+  border 0
+  border-bottom 1px solid black
 
 button
+  padding 7px
+  padding-top 2px
+  padding-bottom 3px
+  margin 0
   border 1px solid var(--primary)
   border-radius 3px
   background transparent
-  margin 0
   &:hover,
   &.hover
     box-shadow var(--button-hover-shadow)
@@ -94,6 +101,8 @@ dialog
   border 1px solid var(--primary)
   box-shadow var(--hover-shadow)
   border-radius 3px
+  button
+    background-color var(--primary-background)
   section
     padding 8px
   section + section
