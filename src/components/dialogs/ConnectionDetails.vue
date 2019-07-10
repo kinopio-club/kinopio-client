@@ -1,16 +1,20 @@
 <template lang="pug">
 dialog.connection-details.narrow(v-if="visible" :open="visible" :style="position")
   section(:style="{backgroundColor: typeColor}")
-    input(placeholder="connection" v-model="typeName")
     .row
       button.change-color
         .current-color(:style="{backgroundColor: typeColor}")
-      button(@click="removeConnection")
-        img.trash(src="@/assets/trash.svg")
-        span Remove
-    button [x] Default
-  section
-    button + connection
+      input(placeholder="connection" v-model="typeName")
+
+    label(:class="activeIfDefaultChecked")
+      input(type="checkbox" v-model="defaultChecked")
+      span Default
+
+    button(@click="removeConnection")
+      img.icon(src="@/assets/remove.svg")
+      span Remove
+
+  section(v-if="multipleConnectionTypes")
     p select from existing conneciton types
 </template>
 
@@ -33,6 +37,7 @@ export default {
       })
     },
     connectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.connection.connectionTypeId) },
+    typeColor () { return this.connectionType.color },
     typeName: {
       get () { return this.connectionType.name },
       set (newName) {
@@ -40,12 +45,16 @@ export default {
         this.$store.commit('currentSpace/updateConnectionTypeName', { connectionTypeId, newName })
       }
     },
-    typeColor () { return this.connectionType.color }
+    multipleConnectionTypes () {
+      const types = this.$store.getters['currentSpace/connectionTypes']
+      return Boolean(types.length > 1)
+    }
   },
+
   methods: {
     removeConnection () {
-      this.$store.commit('closeAllDialogs')
       this.$store.commit('currentSpace/removeConnection', this.connection.id)
+      this.$store.commit('closeAllDialogs')
     }
   }
 }
@@ -55,7 +64,6 @@ export default {
 .connection-details
   .change-color
     padding-top 4px
-    vertical-align top
     .current-color
       height 13px
       width 14px

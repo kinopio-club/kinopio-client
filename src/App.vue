@@ -69,7 +69,8 @@ textarea
   border 0
   border-bottom 1px solid var(--primary)
 
-button
+button,
+label // used for checkbox buttons
   padding 7px
   padding-top 2px
   padding-bottom 3px
@@ -88,6 +89,7 @@ button
     box-shadow none
     color var(--primary)
     background var(--secondary-active-background)
+
 p
   margin 0
   margin-top 10px
@@ -109,20 +111,33 @@ dialog
   overflow hidden
   &.narrow
     width: 200px
-  button
+  button,
+  label
     background-color var(--primary-background)
+  button + button,
+  button + input,
+  button + label,
+  label + button
+    margin-left 6px
   .row
     margin-bottom 10px
-    button + button
-      margin-left 6px
+    display flex
   section
     padding 8px
   section + section
     border-top: 1px solid var(--primary)
-  input
-    margin-bottom 10px
-  .trash
+  // input
+  //   margin-bottom 10px
+  .icon
     vertical-align -1px
     margin-right 5px
+
+label
+  input
+    width initial
+    margin 0
+    margin-right 5px
+    margin-bottom 5px // so that the label fits in section padding
+    cursor pointer
 
 </style>

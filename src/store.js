@@ -279,6 +279,9 @@ const currentSpace = {
       return state.connectionTypes.filter(type => {
         return connectionTypeIds.includes(type.id)
       })
+    },
+    connectionTypes: (state) => {
+      return state.connectionTypes
     }
   }
 }
