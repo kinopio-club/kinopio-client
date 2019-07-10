@@ -67,7 +67,7 @@ textarea
   width 100%
   background transparent
   border 0
-  border-bottom 1px solid black
+  border-bottom 1px solid var(--primary)
 
 button
   padding 7px
@@ -77,6 +77,7 @@ button
   border 1px solid var(--primary)
   border-radius 3px
   background transparent
+  cursor pointer
   &:hover,
   &.hover
     box-shadow var(--button-hover-shadow)
@@ -86,6 +87,9 @@ button
     box-shadow none
     color var(--primary)
     background var(--secondary-active-background)
+p
+  margin 0
+  margin-top 10px
 
 dialog
   width: 300px
@@ -101,10 +105,19 @@ dialog
   border 1px solid var(--primary)
   box-shadow var(--hover-shadow)
   border-radius 3px
+  overflow hidden
+  &.narrow
+    width: 200px
   button
     background-color var(--primary-background)
+  .row
+    margin-bottom 10px
+    button + button
+      margin-left 10px
   section
     padding 8px
   section + section
     border-top: 1px solid var(--primary)
+  input
+    margin-bottom 10px
 </style>

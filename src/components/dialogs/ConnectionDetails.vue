@@ -1,11 +1,12 @@
 <template lang="pug">
-dialog.connection-details(v-if="visible" :open="visible" :style="position")
+dialog.connection-details.narrow(v-if="visible" :open="visible" :style="position")
   section(:style="{backgroundColor: typeColor}")
     input(placeholder="connection" v-model="typeName")
-    button.change-color
-      .current-color(:style="{backgroundColor: typeColor}")
-    button Remove
-    button [x] new uses this connection type
+    .row
+      button.change-color
+        .current-color(:style="{backgroundColor: typeColor}")
+      button Remove
+    button [x] Default
   section
     button + connection
     p select from existing conneciton types
@@ -50,7 +51,7 @@ export default {
     vertical-align top
     .current-color
       height 13px
-      width 15px
+      width 14px
       vertical-align top
       border-radius 3px
 </style>
