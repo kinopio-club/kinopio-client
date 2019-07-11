@@ -116,7 +116,7 @@ const currentSpace = {
     addConnectionType: (state, { id, name, color }) => {
       const connectionType = {
         id: id || nanoid(),
-        name: name || `connection ${state.connectionTypes.length + 1}`,
+        name: name || `Connection ${state.connectionTypes.length + 1}`,
         color: color || randomcolor({ luminosity: 'light' })
       }
       state.connectionTypes.push(connectionType)

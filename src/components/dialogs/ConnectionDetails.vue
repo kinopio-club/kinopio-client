@@ -4,9 +4,9 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="position
     .row
       button.change-color
         .current-color(:style="{backgroundColor: typeColor}")
-      input(placeholder="connection" v-model="typeName")
+      input(placeholder="Connection" v-model="typeName")
 
-    label(:class="{active : defaultIsChecked}")
+    label(:class="{active : defaultIsCheckedLocal}")
       input(type="checkbox" v-model="defaultIsChecked")
       span Default
 
@@ -24,8 +24,15 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="position
 </template>
 
 <script>
+import utils from '@/utils.js'
+
 export default {
   name: 'ConnectionDetails',
+  data () {
+    return {
+      defaultIsCheckedLocal: false
+    }
+  },
   computed: {
     visible () {
       return this.$store.state.connectionDetailsIsVisible
@@ -37,34 +44,45 @@ export default {
         top: `${cursor.y}px`
       }
     },
-    connection () {
+    currentConnection () {
       let connections = this.$store.state.currentSpace.connections
       return connections.find(connection => {
         return connection.connectionDetailsVisible === true
       })
     },
-    connectionType () {
-      return this.$store.getters['currentSpace/connectionTypeById'](this.connection.connectionTypeId)
+    currentConnectionType () {
+      return this.$store.getters['currentSpace/connectionTypeById'](this.currentConnection.connectionTypeId)
     },
     connectionTypes () {
       return this.$store.state.currentSpace.connectionTypes
     },
     typeColor () {
-      return this.connectionType.color
+      return this.currentConnectionType.color
     },
     typeName: {
       get () {
-        return this.connectionType.name
+        return this.currentConnectionType.name
       },
       set (newName) {
-        const connectionTypeId = this.connectionType.id
+        const connectionTypeId = this.currentConnectionType.id
         this.$store.commit('currentSpace/updateConnectionTypeName', { connectionTypeId, newName })
       }
     },
     defaultIsChecked: {
-      get () { return false },
+      get () {
+        const userpref = utils.getUserPref('defaultConnectionTypeId')
+        const prefIsCurrentType = Boolean(userpref === this.currentConnectionType.id)
+        return prefIsCurrentType || this.defaultIsCheckedLocal
+      },
       set (newValue) {
-        console.log('defaultChecked', newValue)
+        console.log('🐸', newValue)
+        if (newValue) {
+          utils.updateUserPrefs('defaultConnectionTypeId', this.currentConnectionType.id)
+          this.defaultIsCheckedLocal = true
+        } else {
+          utils.updateUserPrefs('defaultConnectionTypeId', '')
+          this.defaultIsCheckedLocal = false
+        }
       }
     },
     multipleConnectionTypes () {
@@ -73,22 +91,33 @@ export default {
     connectionTypesList () {
       let types = this.connectionTypes
       return types.map(type => {
-        type.isActive = Boolean(type.id === this.connection.connectionTypeId)
+        type.isActive = Boolean(type.id === this.currentConnection.connectionTypeId)
         return type
       })
     }
   },
   methods: {
     removeConnection () {
-      this.$store.commit('currentSpace/removeConnection', this.connection.id)
+      this.$store.commit('currentSpace/removeConnection', this.currentConnection.id)
       this.$store.commit('closeAllDialogs')
       this.$store.commit('currentSpace/removeUnusedConnectionTypes')
     },
     changeConnectionType (type) {
       this.$store.commit('currentSpace/changeConnectionType', {
-        connectionId: this.connection.id,
+        connectionId: this.currentConnection.id,
         connectionTypeId: type.id
       })
+      // uncheck 'default'
+      utils.updateUserPrefs('defaultConnectionTypeId', '')
+      this.defaultIsCheckedLocal = false
+    }
+  },
+  watch: {
+    visible (visible) {
+      if (visible) {
+        const userpref = utils.getUserPref('defaultConnectionTypeId')
+        this.defaultIsCheckedLocal = Boolean(userpref === this.currentConnectionType.id)
+      }
     }
   }
 }
