@@ -31,6 +31,8 @@ import Card from '@/components/Card.vue'
 import MultipleCardActions from '@/components/dialogs/MultipleCardActions.vue'
 import Footer from '@/components/Footer.vue'
 
+import _ from 'lodash'
+
 let startCursor, prevCursor, endCursor, scrollTimer
 let movementDirection = {}
 
@@ -268,7 +270,14 @@ export default {
       const path = utils.connectionPathBetweenCoords(start, end)
       this.checkCurrentConnectionSuccess()
       this.currentConnectionPath = path
-      this.currentConnectionColor = this.$store.getters['currentSpace/lastConnectionType'].color
+      // type color
+      const typePref = utils.getUserPref('defaultConnectionTypeId')
+      const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
+      if (defaultType) {
+        this.currentConnectionColor = defaultType.color
+      } else {
+        this.currentConnectionColor = this.$store.getters['currentSpace/lastConnectionType'].color
+      }
     },
 
     connectors () {
@@ -314,6 +323,14 @@ export default {
       }
     },
 
+    addConnection (connection) {
+      const typePref = utils.getUserPref('defaultConnectionTypeId')
+      const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
+      const lastConnectionType = _.last(this.$store.state.currentSpace.connectionTypes)
+      const connectionType = defaultType || lastConnectionType
+      this.$store.commit('currentSpace/addConnection', { connection, connectionType })
+    },
+
     createConnection () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
       const startCardId = this.$store.state.currentConnection.startCardId
@@ -323,7 +340,7 @@ export default {
       if (currentConnectionSuccess.cardId) {
         const path = utils.connectionBetweenCards(startCardId, endCardId)
         const connection = { startCardId, endCardId, path }
-        this.$store.commit('currentSpace/addConnection', connection)
+        this.addConnection(connection)
       } else {
         this.$store.commit('currentSpace/removeUnusedConnectionTypes')
       }

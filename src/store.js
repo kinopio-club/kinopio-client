@@ -105,11 +105,9 @@ const currentSpace = {
   },
 
   mutations: {
-    addConnection: (state, connection) => {
-      const lastConnectionType = _.last(state.connectionTypes)
+    addConnection: (state, { connection, connectionType }) => {
       connection.id = nanoid()
-      connection.connectionTypeId = lastConnectionType.id
-
+      connection.connectionTypeId = connectionType.id
       connection.connectionDetailsVisible = false
       state.connections.push(connection)
     },
@@ -290,27 +288,6 @@ const currentSpace = {
   }
 }
 
-// const broadcast = {
-//   namespaced: true,
-//   state: {
-//     isBroadcasting: false
-//   },
-//   actions: {
-//     painting (context, circle) {
-//       // console.log('broadcast painting', circle)
-//     },
-//     connectingPaths (context, connectionPath) {
-//       // console.log('broadcast drawing connection path', connectionPath)
-//     },
-//     addConnection (context, connection) {
-//       // console.log('broadcast add connection', connection)
-//     },
-//     addCard (context, connection) {
-//       // console.log('broadcast add connection', connection)
-//     },
-//   }
-// }
-
 export default new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production',
   state: {
@@ -480,6 +457,5 @@ export default new Vuex.Store({
   modules: {
     currentUser,
     currentSpace
-    // broadcast
   }
 })

@@ -40,11 +40,6 @@ export default {
   props: {
     card: Object
   },
-  data () {
-    return {
-      color: undefined
-    }
-  },
   computed: {
     id () { return this.card.id },
     x () { return this.card.x },
@@ -111,8 +106,11 @@ export default {
       this.$store.commit('currentConnectionCursorStart', cursor)
     },
     addConnectionType () {
-      // TODO if LS says use last connection, return / do nothing
-      this.$store.commit('currentSpace/addConnectionType', {})
+      const typePref = utils.getUserPref('defaultConnectionTypeId')
+      const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
+      if (!defaultType) {
+        this.$store.commit('currentSpace/addConnectionType', {})
+      }
     },
     startConnecting (event) {
       this.$store.commit('closeAllDialogs')

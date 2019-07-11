@@ -93,8 +93,8 @@ export default {
       this.updateDefaultConnectionType()
     },
     updateDefaultConnectionType () {
-      const prefType = utils.getUserPref('defaultConnectionTypeId')
-      this.defaultIsChecked = Boolean(prefType === this.currentConnectionType.id)
+      const typePref = utils.getUserPref('defaultConnectionTypeId')
+      this.defaultIsChecked = Boolean(typePref === this.currentConnectionType.id)
     },
     toggleDefaultIsChecked () {
       if (this.defaultIsChecked) {
