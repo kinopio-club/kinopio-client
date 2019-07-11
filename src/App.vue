@@ -140,4 +140,32 @@ label
     margin-bottom 5px // so that the label fits in section padding
     cursor pointer
 
+.results-section
+  padding 4px
+ul
+  margin 0
+  padding 0
+  li
+    display flex
+    padding 4px 7px
+    align-items center
+    border-radius 3px
+    user-select none
+    cursor pointer
+    &:hover
+      background-color var(--secondary-hover-background)
+      box-shadow var(--hover-shadow)
+    &:active,
+    &.active
+      background-color var(--secondary-active-background)
+      box-shadow none
+
+.badge
+  min-width 17px
+  min-height 19px
+  border-radius 3px
+  padding 2px 5px
+  margin-right 6px
+  vertical-align -1px
+
 </style>

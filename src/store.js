@@ -196,6 +196,13 @@ const currentSpace = {
           type.name = newName
         }
       })
+    },
+    changeConnectionType: (state, { connectionId, connectionTypeId }) => {
+      state.connections.map(connection => {
+        if (connection.id === connectionId) {
+          connection.connectionTypeId = connectionTypeId
+        }
+      })
     }
   },
 
@@ -279,9 +286,6 @@ const currentSpace = {
       return state.connectionTypes.filter(type => {
         return connectionTypeIds.includes(type.id)
       })
-    },
-    connectionTypes: (state) => {
-      return state.connectionTypes
     }
   }
 }
