@@ -6,8 +6,8 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="position
         .current-color(:style="{backgroundColor: typeColor}")
       input(placeholder="Connection" v-model="typeName")
 
-    label(:class="{active : defaultIsCheckedLocal}")
-      input(type="checkbox" v-model="defaultIsChecked")
+    label(:class="{active : defaultIsChecked}")
+      input(type="checkbox" v-model="defaultIsChecked" @click="toggleDefaultIsChecked")
       span Default
 
     button(@click="removeConnection")
@@ -30,7 +30,7 @@ export default {
   name: 'ConnectionDetails',
   data () {
     return {
-      defaultIsCheckedLocal: false
+      defaultIsChecked: false
     }
   },
   computed: {
@@ -68,23 +68,6 @@ export default {
         this.$store.commit('currentSpace/updateConnectionTypeName', { connectionTypeId, newName })
       }
     },
-    defaultIsChecked: {
-      get () {
-        const userpref = utils.getUserPref('defaultConnectionTypeId')
-        const prefIsCurrentType = Boolean(userpref === this.currentConnectionType.id)
-        return prefIsCurrentType || this.defaultIsCheckedLocal
-      },
-      set (newValue) {
-        console.log('🐸', newValue)
-        if (newValue) {
-          utils.updateUserPrefs('defaultConnectionTypeId', this.currentConnectionType.id)
-          this.defaultIsCheckedLocal = true
-        } else {
-          utils.updateUserPrefs('defaultConnectionTypeId', '')
-          this.defaultIsCheckedLocal = false
-        }
-      }
-    },
     multipleConnectionTypes () {
       return Boolean(this.connectionTypes.length > 1)
     },
@@ -107,16 +90,26 @@ export default {
         connectionId: this.currentConnection.id,
         connectionTypeId: type.id
       })
-      // uncheck 'default'
-      utils.updateUserPrefs('defaultConnectionTypeId', '')
-      this.defaultIsCheckedLocal = false
+      this.updateDefaultConnectionType()
+    },
+    updateDefaultConnectionType () {
+      const prefType = utils.getUserPref('defaultConnectionTypeId')
+      this.defaultIsChecked = Boolean(prefType === this.currentConnectionType.id)
+    },
+    toggleDefaultIsChecked () {
+      if (this.defaultIsChecked) {
+        this.defaultIsChecked = false
+        utils.updateUserPrefs('defaultConnectionTypeId', '')
+      } else {
+        this.defaultIsChecked = true
+        utils.updateUserPrefs('defaultConnectionTypeId', this.currentConnectionType.id)
+      }
     }
   },
   watch: {
-    visible (visible) {
-      if (visible) {
-        const userpref = utils.getUserPref('defaultConnectionTypeId')
-        this.defaultIsCheckedLocal = Boolean(userpref === this.currentConnectionType.id)
+    visible (value) {
+      if (value) {
+        this.updateDefaultConnectionType()
       }
     }
   }
