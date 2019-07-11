@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import utils from '@/utils.js'
-import randomcolor from 'randomcolor'
+import randomColor from 'randomcolor'
 import nanoid from 'nanoid'
 import _ from 'lodash'
 
@@ -11,7 +11,7 @@ const currentUser = {
   namespaced: true,
   state: {
     id: 1,
-    color: randomcolor({ luminosity: 'light' })
+    color: randomColor({ luminosity: 'light' })
   }
   // getters: {
   //   isMember (state, getters, rootState) {
@@ -115,7 +115,7 @@ const currentSpace = {
       const connectionType = {
         id: id || nanoid(),
         name: name || `Connection ${state.connectionTypes.length + 1}`,
-        color: color || randomcolor({ luminosity: 'light' })
+        color: color || randomColor({ luminosity: 'light' })
       }
       state.connectionTypes.push(connectionType)
     },

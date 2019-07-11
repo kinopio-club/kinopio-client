@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog(v-if="cardDetailsVisible" :open="cardDetailsVisible")
+dialog(v-if="visible" :open="visible")
   section
     textarea.name(
       rows="1"
@@ -10,8 +10,6 @@ dialog(v-if="cardDetailsVisible" :open="cardDetailsVisible")
       @input="resizeTextArea"
     )
     p cardid {{id}}
-    // div
-      // button hihi
 </template>
 
 <script>
@@ -27,7 +25,7 @@ export default {
     x () { return this.card.x },
     y () { return this.card.y },
     z () { return this.card.z },
-    cardDetailsVisible () { return this.card.cardDetailsVisible },
+    visible () { return this.card.cardDetailsVisible },
     name: {
       get () {
         return this.card.name
@@ -48,7 +46,7 @@ export default {
     }
   },
   watch: {
-    cardDetailsVisible (visible) {
+    visible (visible) {
       this.$store.commit('updatePageSizes')
       const isEmpty = !this.card.name // TODO: expand isEmpty to inlcude other metadata content (images etc)
       if (!visible && isEmpty) {
