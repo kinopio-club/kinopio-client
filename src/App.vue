@@ -115,7 +115,6 @@ dialog
   border 1px solid var(--primary)
   box-shadow var(--hover-shadow)
   border-radius 3px
-  overflow hidden
   &.narrow
     width: 200px
   button,

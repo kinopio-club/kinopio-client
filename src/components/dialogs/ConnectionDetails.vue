@@ -4,6 +4,7 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="position
     .row
       button.change-color(@click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
         .current-color(:style="{backgroundColor: typeColor}")
+      ColorPicker(:currentColor="typeColor" :colorPickerIsVisible="colorPickerIsVisible" @selectedColor="updateTypeColor")
       input(placeholder="Connection" v-model="typeName")
 
     label(:class="{active: isDefault}" @click.prevent="toggleDefault")
@@ -24,13 +25,18 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="position
 </template>
 
 <script>
+import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
 export default {
+  components: {
+    ColorPicker
+  },
   name: 'ConnectionDetails',
   data () {
     return {
-      isDefault: false
+      isDefault: false,
+      colorPickerIsVisible: false
     }
   },
   computed: {
@@ -77,9 +83,6 @@ export default {
         type.isActive = Boolean(type.id === this.currentConnection.connectionTypeId)
         return type
       })
-    },
-    colorPickerIsVisible () {
-      return this.$store.state.colorPickerIsVisible
     }
   },
   methods: {
@@ -108,23 +111,21 @@ export default {
       }
     },
     toggleColorPicker (event) {
-      let position = event.target.closest('button').getBoundingClientRect()
-      position = {
-        x: position.x + window.scrollX + 8,
-        y: position.y + window.scrollY + 16
-      }
-      this.$store.commit('colorPickerPosition', position)
-      this.$store.commit('colorPickerShouldUpdate', 'connectionType')
-      this.$store.commit('colorPickerIsVisible', !this.$store.state.colorPickerIsVisible)
+      this.colorPickerIsVisible = !this.colorPickerIsVisible
     },
     closeColorPicker () {
-      this.$store.commit('colorPickerIsVisible', false)
+      console.log('closeColorPicker')
+      this.colorPickerIsVisible = false
+    },
+    updateTypeColor (color) {
+      console.log('update color', color)
     }
   },
   watch: {
     visible (value) {
       if (value) {
         this.updateDefaultConnectionType()
+        this.colorPickerIsVisible = false
       }
     }
   }
