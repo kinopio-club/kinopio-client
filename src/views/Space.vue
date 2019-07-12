@@ -19,17 +19,20 @@ main.space(
     template(v-for="card in cards")
       Card(:card="card")
   ConnectionDetails
+  ColorPicker
   MultipleCardActions
   Footer
 </template>
 
 <script>
-import utils from '@/utils.js'
+import Card from '@/components/Card.vue'
+import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import Connection from '@/components/Connection.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
-import Card from '@/components/Card.vue'
 import MultipleCardActions from '@/components/dialogs/MultipleCardActions.vue'
 import Footer from '@/components/Footer.vue'
+
+import utils from '@/utils.js'
 
 import _ from 'lodash'
 
@@ -39,6 +42,7 @@ let movementDirection = {}
 export default {
   components: {
     Card,
+    ColorPicker,
     Connection,
     ConnectionDetails,
     MultipleCardActions,

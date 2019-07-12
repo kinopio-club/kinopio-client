@@ -1,12 +1,12 @@
 <template lang="pug">
-dialog.connection-details.narrow(v-if="visible" :open="visible" :style="position")
+dialog.connection-details.narrow(v-if="visible" :open="visible" :style="position" @click="closeColorPicker")
   section(:style="{backgroundColor: typeColor}")
     .row
-      button.change-color
+      button.change-color(@click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
         .current-color(:style="{backgroundColor: typeColor}")
       input(placeholder="Connection" v-model="typeName")
 
-    label(:class="{active : isDefault}" @click.prevent="toggleDefault")
+    label(:class="{active: isDefault}" @click.prevent="toggleDefault")
       input(type="checkbox" v-model="isDefault")
       span Default
 
@@ -38,10 +38,10 @@ export default {
       return this.$store.state.connectionDetailsIsVisible
     },
     position () {
-      const cursor = this.$store.state.connectionDetailsPosition
+      const position = this.$store.state.connectionDetailsPosition
       return {
-        left: `${cursor.x}px`,
-        top: `${cursor.y}px`
+        left: `${position.x}px`,
+        top: `${position.y}px`
       }
     },
     currentConnection () {
@@ -77,6 +77,9 @@ export default {
         type.isActive = Boolean(type.id === this.currentConnection.connectionTypeId)
         return type
       })
+    },
+    colorPickerIsVisible () {
+      return this.$store.state.colorPickerIsVisible
     }
   },
   methods: {
@@ -96,7 +99,6 @@ export default {
       const typePref = utils.getUserPref('defaultConnectionTypeId')
       this.isDefault = Boolean(typePref === this.currentConnectionType.id)
     },
-
     toggleDefault (event) {
       this.isDefault = !this.isDefault
       if (this.isDefault) {
@@ -104,6 +106,19 @@ export default {
       } else {
         utils.updateUserPrefs('defaultConnectionTypeId', '')
       }
+    },
+    toggleColorPicker (event) {
+      let position = event.target.closest('button').getBoundingClientRect()
+      position = {
+        x: position.x + window.scrollX + 8,
+        y: position.y + window.scrollY + 16
+      }
+      this.$store.commit('colorPickerPosition', position)
+      this.$store.commit('colorPickerShouldUpdate', 'connectionType')
+      this.$store.commit('colorPickerIsVisible', !this.$store.state.colorPickerIsVisible)
+    },
+    closeColorPicker () {
+      this.$store.commit('colorPickerIsVisible', false)
     }
   },
   watch: {

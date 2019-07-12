@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog(v-if="visible" :open="visible")
+dialog.narrow(v-if="visible" :open="visible" :style="position")
   section
     p colors
 </template>
@@ -10,10 +10,6 @@ import randomColor from 'randomcolor'
 
 export default {
   name: 'ColorPicker',
-  props: {
-    parentColor: undefined,
-    parentDialog: undefined
-  },
   data () {
     return {
       currentColor: undefined
@@ -21,8 +17,15 @@ export default {
   },
   computed: {
     visible () { return this.$store.state.colorPickerIsVisible },
-    swatches () { return randomColor({ luminosity: 'light', count: 27 }) }
-    // position based on parentDialog
+    swatches () { return randomColor({ luminosity: 'light', count: 27 }) },
+    position () {
+      const position = this.$store.state.colorPickerPosition
+      return {
+        left: `${position.x}px`,
+        top: `${position.y}px`
+      }
+    }
+
     // name: {
     //   get () {
     //     return this.card.name
@@ -44,9 +47,10 @@ export default {
   },
   watch: {
     visible (visible) {
-      if (visible) {
-        this.currentColor = this.parentColor
-      }
+      console.log('🎨 color picker is visible', visible)
+      // if (visible) {
+      //   this.currentColor = this.parentColor
+      // }
     }
   }
 }

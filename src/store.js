@@ -304,14 +304,13 @@ export default new Vuex.Store({
 
     // add card
     shouldAddNewCard: false,
-    // position
 
     // connecting
     currentConnection: {}, // startCardId, startConnectorRect
     currentConnectionSuccess: {},
     currentConnectionCursorStart: {},
     connectionDetailsIsVisible: false,
-    connectionDetailsPosition: {},
+    connectionDetailsPosition: {}, // x, y
 
     // dragging
     currentDraggingCardId: '', // id
@@ -321,7 +320,15 @@ export default new Vuex.Store({
     multipleCardsSelected: [], // ids
     multipleCardActionsIsVisible: false,
     multipleCardActionsPosition: {},
-    cardMap: []
+    cardMap: [],
+
+    // color picker
+    colorPickerIsVisible: false,
+    colorPickerPosition: {}, // x, y
+    colorPickerShouldUpdate: '' // 'connectionType' || 'user'
+
+    // colorPickerShouldUpdate = which mutation to call with new color
+    // if connection details, then look for which connection has connectionDetailsVisible, and update teh color for that type
   },
 
   mutations: {
@@ -350,6 +357,7 @@ export default new Vuex.Store({
       })
       state.connectionDetailsIsVisible = false
       state.multipleCardActionsIsVisible = false
+      state.colorPickerIsVisible = false
     },
     shouldAddNewCard: (state, value) => {
       utils.typeCheck(value, 'boolean')
@@ -442,7 +450,26 @@ export default new Vuex.Store({
     multipleCardActionsPosition: (state, position) => {
       utils.typeCheck(position, 'object')
       state.multipleCardActionsPosition = position
+    },
+
+    // color picker
+    colorPickerIsVisible: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.colorPickerIsVisible = value
+    },
+    colorPickerPosition: (state, position) => {
+      utils.typeCheck(position, 'object')
+      state.colorPickerPosition = position
+    },
+    colorPickerShouldUpdate: (state, value) => {
+      const updatableColor = ['connectionType', 'user']
+      utils.typeCheck(value, 'string')
+      state.colorPickerShouldUpdate = value
+      if (!updatableColor.includes(value)) {
+        console.warn('colorPickerShouldUpdate value is not an updatableColor')
+      }
     }
+
   },
 
   getters: {
