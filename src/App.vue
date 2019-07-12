@@ -130,6 +130,12 @@ dialog
     display flex
   section
     padding 8px
+    &:first-child
+      border-top-left-radius 2px
+      border-top-right-radius 2px
+    &:last-child
+      border-bottom-left-radius 2px
+      border-bottom-right-radius 2px
   section + section
     border-top: 1px solid var(--primary)
   .icon
