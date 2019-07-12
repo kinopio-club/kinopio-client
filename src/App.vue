@@ -29,7 +29,9 @@ export default {
 
   --hover-shadow 3px 3px 0 rgba(0,0,0,0.25)
   --active-shadow 5px 5px 0 rgba(0,0,0,0.20)
+  --active-inset-shadow inset 0 2px 3px rgba(0,0,0,0.2)
   --button-hover-shadow 2px 2px 0 rgba(0,0,0,0.25)
+  --button-active-inset-shadow inset 0 2px 2px rgba(0,0,0,0.2)
 
   // non-theme vars
   --max-z 2147483647
@@ -86,7 +88,7 @@ label // used for checkbox buttons
     background var(--secondary-hover-background)
   &:active,
   &.active
-    box-shadow none
+    box-shadow var(--button-active-inset-shadow)
     color var(--primary)
     background var(--secondary-active-background)
 
@@ -158,7 +160,7 @@ ul
     &:active,
     &.active
       background-color var(--secondary-active-background)
-      box-shadow none
+      box-shadow var(--active-inset-shadow)
 
 .badge
   min-width 17px
