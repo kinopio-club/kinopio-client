@@ -6,7 +6,7 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="position
         .current-color(:style="{backgroundColor: typeColor}")
       input(placeholder="Connection" v-model="typeName")
 
-    label(:class="{active : defaultIsChecked}")
+    label(:class="{active : defaultIsChecked}" @touchend="toggleDefaultIsChecked")
       input(type="checkbox" v-model="defaultIsChecked" @click="toggleDefaultIsChecked")
       span Default
 
@@ -121,8 +121,9 @@ export default {
   .change-color
     padding-top 4px
     .current-color
-      height 13px
+      height 12px
       width 14px
+      margin-bottom 1px
       vertical-align top
       border-radius 3px
 

@@ -72,6 +72,8 @@ textarea
   background transparent
   border 0
   border-bottom 1px solid var(--primary)
+  border-radius 0
+  padding 0
 
 button,
 label // used for checkbox buttons
