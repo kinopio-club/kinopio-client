@@ -1,7 +1,12 @@
 <template lang="pug">
-dialog.narrow(v-if="visible" :open="visible" :style="position")
+dialog.narrow.color-picker(v-if="visible" :open="visible" :style="position")
   section
-    p colors
+    .swatches
+      template(v-for="swatch in swatches")
+        button.swatch(:style="{backgroundColor: swatch}")
+    .row
+      button(@click="shuffleSwatches") 0
+    input(value="#123xyz")
 </template>
 
 <script>
@@ -12,12 +17,12 @@ export default {
   name: 'ColorPicker',
   data () {
     return {
-      currentColor: undefined
+      currentColor: undefined,
+      swatches: []
     }
   },
   computed: {
     visible () { return this.$store.state.colorPickerIsVisible },
-    swatches () { return randomColor({ luminosity: 'light', count: 27 }) },
     position () {
       const position = this.$store.state.colorPickerPosition
       return {
@@ -41,13 +46,13 @@ export default {
     // }
   },
   methods: {
-    // resizeTextArea (event) {
-    //   utils.resizeTextArea(event)
-    // }
+    shuffleSwatches () {
+      this.swatches = randomColor({ luminosity: 'light', count: 15 })
+    }
   },
   watch: {
     visible (visible) {
-      console.log('🎨 color picker is visible', visible)
+      this.shuffleSwatches()
       // if (visible) {
       //   this.currentColor = this.parentColor
       // }
@@ -57,4 +62,22 @@ export default {
 </script>
 
 <style lang="stylus">
+.color-picker
+  .swatches
+    display flex
+    flex-wrap wrap
+    justify-content space-evenly
+    margin-bottom 8px
+  .swatch
+    width 30px
+    height 22px
+    margin-bottom 5px
+    margin-right 5px
+    // margin-right -1px
+    // margin-bottom -1px
+    // margin-right 5px
+    // margin-bottom 5px
+  button + button
+    margin 0
+
 </style>
