@@ -6,8 +6,8 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="position
         .current-color(:style="{backgroundColor: typeColor}")
       input(placeholder="Connection" v-model="typeName")
 
-    label(:class="{active : defaultIsChecked}" @touchend="toggleDefaultIsChecked")
-      input(type="checkbox" v-model="defaultIsChecked" @click="toggleDefaultIsChecked")
+    label(:class="{active : isDefault}" @click.prevent="toggleDefault")
+      input(type="checkbox" v-model="isDefault")
       span Default
 
     button(@click="removeConnection")
@@ -30,7 +30,7 @@ export default {
   name: 'ConnectionDetails',
   data () {
     return {
-      defaultIsChecked: false
+      isDefault: false
     }
   },
   computed: {
@@ -94,15 +94,15 @@ export default {
     },
     updateDefaultConnectionType () {
       const typePref = utils.getUserPref('defaultConnectionTypeId')
-      this.defaultIsChecked = Boolean(typePref === this.currentConnectionType.id)
+      this.isDefault = Boolean(typePref === this.currentConnectionType.id)
     },
-    toggleDefaultIsChecked () {
-      if (this.defaultIsChecked) {
-        this.defaultIsChecked = false
-        utils.updateUserPrefs('defaultConnectionTypeId', '')
-      } else {
-        this.defaultIsChecked = true
+
+    toggleDefault (event) {
+      this.isDefault = !this.isDefault
+      if (this.isDefault) {
         utils.updateUserPrefs('defaultConnectionTypeId', this.currentConnectionType.id)
+      } else {
+        utils.updateUserPrefs('defaultConnectionTypeId', '')
       }
     }
   },
@@ -126,5 +126,7 @@ export default {
       margin-bottom 1px
       vertical-align top
       border-radius 3px
-
+  label
+    input
+      pointer-events none
 </style>
