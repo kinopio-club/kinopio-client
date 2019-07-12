@@ -195,6 +195,13 @@ const currentSpace = {
         }
       })
     },
+    updateConnectionTypeColor: (state, { connectionTypeId, newColor }) => {
+      state.connectionTypes.map(type => {
+        if (type.id === connectionTypeId) {
+          type.color = newColor
+        }
+      })
+    },
     changeConnectionType: (state, { connectionId, connectionTypeId }) => {
       state.connections.map(connection => {
         if (connection.id === connectionId) {

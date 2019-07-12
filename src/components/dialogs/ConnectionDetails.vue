@@ -117,8 +117,9 @@ export default {
       console.log('closeColorPicker')
       this.colorPickerIsVisible = false
     },
-    updateTypeColor (color) {
-      console.log('update color', color)
+    updateTypeColor (newColor) {
+      const connectionTypeId = this.currentConnectionType.id
+      this.$store.commit('currentSpace/updateConnectionTypeColor', { connectionTypeId, newColor })
     }
   },
   watch: {
