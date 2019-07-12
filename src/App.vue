@@ -36,7 +36,7 @@ export default {
   --active-shadow 5px 5px 0 var(--light-shadow)
   --active-inset-shadow inset 0 2px 3px var(--light-shadow)
   --button-hover-shadow 2px 2px 0 var(--heavy-shadow)
-  --button-active-inset-shadow inset 0 2px 2px var(--light-shadow)
+  --button-active-inset-shadow inset 0 1px 2px var(--light-shadow)
 
 @font-face
   font-family 'OsakaMono'
@@ -83,6 +83,7 @@ label // used for checkbox buttons
   border-radius 3px
   background transparent
   cursor pointer
+  user-select none
   &:hover,
   &.hover,
   &:focus
@@ -130,19 +131,30 @@ dialog
     padding 8px
   section + section
     border-top: 1px solid var(--primary)
-  // input
-  //   margin-bottom 10px
   .icon
     vertical-align -1px
     margin-right 5px
 
+// checkboxes
 label
+  &:hover
+    input
+      background-color var(--secondary-hover-background)
   input
-    width initial
-    margin 0
     margin-right 5px
-    margin-bottom 5px // so that the label fits in section padding
+    vertical-align -2px
     cursor pointer
+    appearance none
+    border 1px solid var(--primary)
+    width 12px
+    height 12px
+    border-radius 3px
+    background-color var(--primary-background)
+    &:checked
+      background-color var(--secondary-active-background)
+      background-image url('assets/checkmark.svg')
+      background-repeat no-repeat
+      background-position center
 
 .results-section
   padding 4px
