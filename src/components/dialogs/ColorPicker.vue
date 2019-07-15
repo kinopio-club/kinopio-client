@@ -7,7 +7,8 @@ dialog.narrow.color-picker(v-if="colorPickerIsVisible" :open="colorPickerIsVisib
     .colors
       template(v-for="color in colors")
         button.color(:style="{backgroundColor: color}" @click="select(color)")
-    button(@click="shuffleColors") 0
+    button(@click="shuffleColors")
+      img.refresh.icon(src="@/assets/refresh.svg")
 </template>
 
 <script>
@@ -57,5 +58,7 @@ export default {
     margin-right 5px
   button + button
     margin 0
-
+  .refresh
+    margin 0
+    height 11px
 </style>
