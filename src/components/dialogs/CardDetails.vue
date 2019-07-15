@@ -5,20 +5,25 @@ dialog(v-if="visible" :open="visible")
       rows="1"
       placeholder="name"
       v-model="name"
-      autofocus="true"
-      @focus="resizeTextArea"
-      @input="resizeTextArea"
     )
     p cardid {{id}}
 </template>
 
 <script>
-import utils from '@/utils.js'
-
 export default {
   name: 'CardDetails',
   props: {
     card: Object
+  },
+  updated () {
+    this.$nextTick(() => {
+      if (this.visible) {
+        let textareas = document.querySelectorAll('dialog textarea')
+        textareas.forEach(textarea => {
+          textarea.style.height = textarea.scrollHeight + 1 + 'px'
+        })
+      }
+    })
   },
   computed: {
     id () { return this.card.id },
@@ -38,11 +43,6 @@ export default {
         }
         this.$store.commit('currentSpace/updateCardDetails', options)
       }
-    }
-  },
-  methods: {
-    resizeTextArea (event) {
-      utils.resizeTextArea(event)
     }
   },
   watch: {

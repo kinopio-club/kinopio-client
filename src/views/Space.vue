@@ -63,7 +63,6 @@ export default {
     // keep space element updated to viewport size so connections show up
     this.updatePageSizes()
     window.addEventListener('resize', this.updatePageSizes)
-    // this.$store
   },
 
   computed: {

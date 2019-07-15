@@ -143,7 +143,4 @@ export default {
       margin-bottom 1px
       vertical-align top
       border-radius 3px
-  label
-    input
-      pointer-events none
 </style>

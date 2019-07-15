@@ -117,7 +117,6 @@ export default {
       this.createInitialCircle()
       this.$store.commit('currentUserIsPainting', true)
       if (!multipleCardsIsSelected && !dialogIsVisible) {
-        console.log('🌸')
         this.$store.commit('shouldAddNewCard', true)
       }
       this.$store.commit('multipleCardsSelected', [])

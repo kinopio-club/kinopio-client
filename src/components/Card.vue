@@ -170,11 +170,11 @@ article
     margin-right 5px
     align-self stretch
     min-width 25px
-    // multi-line wrapping
-    display -webkit-box
-    -webkit-box-orient vertical
-    -webkit-line-clamp 3
     overflow hidden
+    // multi-line wrapping
+    // display -webkit-box
+    // -webkit-box-orient vertical
+    // -webkit-line-clamp 3
   .connector
     padding 8px
     align-self right

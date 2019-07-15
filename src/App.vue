@@ -102,7 +102,7 @@ p
   margin-top 10px
 
 dialog
-  width: 300px
+  width: 250px
   left: 8px
   top: 8px
   position: absolute
@@ -148,6 +148,7 @@ label
     input
       background-color var(--secondary-hover-background)
   input
+    pointer-events none
     margin-right 5px
     vertical-align -2px
     cursor pointer
