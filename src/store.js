@@ -224,6 +224,7 @@ const currentSpace = {
     removeCard: (context, cardId) => {
       context.commit('removeCard', cardId)
       context.commit('removeCardConnections', cardId)
+      context.commit('generateCardMap', null, { root: true })
     },
     dragCards: (context, { endCursor, prevCursor, delta }) => {
       const multipleCardsSelected = context.rootState.multipleCardsSelected
@@ -445,15 +446,15 @@ export default new Vuex.Store({
       state.multipleCardActionsIsVisible = value
     },
     generateCardMap: (state) => {
-      const cards = document.querySelectorAll('.card')
+      const cards = state.currentSpace.cards
       state.cardMap = []
       cards.forEach(card => {
-        const article = card.closest('article')
-        const rect = card.getBoundingClientRect()
+        const element = document.querySelector(`article [data-card-id="${card.id}"]`)
+        const rect = element.getBoundingClientRect()
         state.cardMap.push({
-          cardId: card.dataset.cardId,
-          x: parseInt(article.style.left),
-          y: parseInt(article.style.top),
+          cardId: card.id,
+          x: card.x,
+          y: card.y,
           width: rect.width,
           height: rect.height
         })

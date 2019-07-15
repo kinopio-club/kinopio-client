@@ -103,7 +103,6 @@ export default {
       let color = this.$store.state.currentUser.color
       currentCursor = utils.cursorPositionInPage(event)
       let circle = { x: currentCursor.x, y: currentCursor.y, color, iteration: 0 }
-      // this.$store.dispatch('broadcast/painting', circle)
       this.selectCards(circle)
       paintingCircles.push(circle)
     },
