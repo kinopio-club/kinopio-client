@@ -2,7 +2,7 @@
 dialog.narrow.color-picker(v-if="colorPickerIsVisible" :open="colorPickerIsVisible" @click.stop)
   section
     .badge(:style="{backgroundColor: currentColor}")
-      input(:value="currentColor")
+      input(v-model="hexColor")
   section
     .colors
       template(v-for="color in colors")
@@ -13,6 +13,7 @@ dialog.narrow.color-picker(v-if="colorPickerIsVisible" :open="colorPickerIsVisib
 
 <script>
 import randomColor from 'randomcolor'
+import validHexColor from 'valid-hex-color'
 
 export default {
   name: 'ColorPicker',
@@ -26,6 +27,18 @@ export default {
     }
   },
   computed: {
+    hexColor: {
+      get () {
+        return this.currentColor
+      },
+      set (color) {
+        if (validHexColor.check(color)) {
+          this.updateColorFromInput(color)
+        } else if (validHexColor.check('#' + color)) {
+          this.updateColorFromInput('#' + color)
+        }
+      }
+    }
   },
   methods: {
     shuffleColors () {
@@ -34,6 +47,11 @@ export default {
     },
     select (color) {
       this.$emit('selectedColor', color)
+    },
+    updateColorFromInput (color) {
+      this.select(color)
+      this.colors.pop()
+      this.colors.unshift(color)
     }
   },
   watch: {
