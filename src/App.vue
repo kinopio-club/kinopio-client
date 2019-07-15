@@ -96,6 +96,10 @@ label // used for checkbox buttons
     box-shadow var(--button-active-inset-shadow)
     color var(--primary)
     background var(--secondary-active-background)
+  // &:disabled
+  //   opacity 0.25
+  //   color var(--primary)
+  //   pointer-events none
 
 p
   margin 0

@@ -1,10 +1,12 @@
 <template lang="pug">
 dialog(v-if="visible" :open="visible" :style="position")
-  section
-    p multi actions for card ids: {{cardsSelected}}
-    button connect
-    button disconnect
-    button archive
+  section(:style="{backgroundColor: userColor}")
+    .row(v-if="multipleCardsSelected")
+      button Connect
+      button Disconnect
+    button
+      img.icon(src="@/assets/remove.svg")
+      span Remove
 </template>
 
 <script>
@@ -14,28 +16,18 @@ export default {
     visible () { return this.$store.state.multipleCardActionsIsVisible },
     position () {
       const cursor = this.$store.state.multipleCardActionsPosition
-      console.log('💐', cursor)
       return {
         left: `${cursor.x}px`,
         top: `${cursor.y}px`
       }
     },
-    cardsSelected () {
-      return this.$store.state.multipleCardsSelected
+    userColor () {
+      return this.$store.state.currentUser.color
+    },
+    multipleCardsSelected () {
+      const numberOfCards = this.$store.state.multipleCardsSelected.length
+      return Boolean(numberOfCards > 1)
     }
-    // name: {
-    //   get () {
-    //     return this.connection.name
-    //   },
-    //   set (newValue) {
-    //     const options = {
-    //       type: 'name',
-    //       value: newValue,
-    //       connectionId: this.id
-    //     }
-    //     this.$store.commit('currentSpace/updateconnectionDetails', options)
-    //   }
-    // },
   }
 }
 </script>
