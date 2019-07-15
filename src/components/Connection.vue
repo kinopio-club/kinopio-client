@@ -1,5 +1,5 @@
 <template lang="pug">
-path(
+path.path(
   fill="none"
   :stroke="typeColor"
   stroke-width="5"
@@ -40,4 +40,7 @@ export default {
 </script>
 
 <style lang="stylus">
+.path
+  &:hover
+    stroke-width: 7
 </style>
