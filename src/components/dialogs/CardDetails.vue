@@ -46,7 +46,7 @@ export default {
   },
   methods: {
     removeCard () {
-      this.$store.commit('currentSpace/removeCard', this.card.id)
+      this.$store.dispatch('currentSpace/removeCard', this.card.id)
     }
   },
   watch: {
@@ -54,7 +54,7 @@ export default {
       this.$store.commit('updatePageSizes')
       const isEmpty = !this.card.name // TODO: expand isEmpty to inlcude other metadata content (images etc)
       if (!visible && isEmpty) {
-        this.$store.commit('currentSpace/removeCard', this.card.id)
+        this.$store.dispatch('currentSpace/removeCard', this.card.id)
       }
     }
   }

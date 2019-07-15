@@ -189,7 +189,8 @@ const currentSpace = {
         return card.id !== cardId
       })
       state.cards = cards
-      // remove card connections
+    },
+    removeCardConnections: (state, cardId) => {
       const connections = state.connections.filter(connection => {
         const isConnectedToCard = connection.startCardId === cardId || connection.endCardId === cardId
         return !isConnectedToCard
@@ -220,6 +221,10 @@ const currentSpace = {
   },
 
   actions: {
+    removeCard: (context, cardId) => {
+      context.commit('removeCard', cardId)
+      context.commit('removeCardConnections', cardId)
+    },
     dragCards: (context, { endCursor, prevCursor, delta }) => {
       const multipleCardsSelected = context.rootState.multipleCardsSelected
       const currentDraggingCardId = context.rootState.currentDraggingCardId
