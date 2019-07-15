@@ -1,19 +1,22 @@
 <template lang="pug">
-dialog(v-if="visible" :open="visible")
-  section
-    textarea.name(
-      rows="1"
-      placeholder="name"
-      v-model="name"
-    )
-    p cardid {{id}}
+dialog.card-details(v-if="visible" :open="visible")
+  section.meta-section
+    .row
+      textarea.name(
+        rows="1"
+        placeholder="Tell me your dreams"
+        v-model="name"
+      )
+    button(@click="removeCard")
+      img.icon(src="@/assets/remove.svg")
+      span Remove
 </template>
 
 <script>
 export default {
   name: 'CardDetails',
   props: {
-    card: Object
+    card: Object // name, x, y, z, cardDetailsVisible
   },
   updated () {
     this.$nextTick(() => {
@@ -26,10 +29,6 @@ export default {
     })
   },
   computed: {
-    id () { return this.card.id },
-    x () { return this.card.x },
-    y () { return this.card.y },
-    z () { return this.card.z },
     visible () { return this.card.cardDetailsVisible },
     name: {
       get () {
@@ -39,10 +38,15 @@ export default {
         const options = {
           type: 'name',
           value: newValue,
-          cardId: this.id
+          cardId: this.card.id
         }
         this.$store.commit('currentSpace/updateCardDetails', options)
       }
+    }
+  },
+  methods: {
+    removeCard () {
+      this.$store.commit('currentSpace/deleteCard', this.card.id)
     }
   },
   watch: {
@@ -58,4 +62,7 @@ export default {
 </script>
 
 <style lang="stylus">
+.card-details
+  .meta-section
+    background-color var(--secondary-background)
 </style>
