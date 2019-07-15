@@ -184,9 +184,17 @@ const currentSpace = {
     createCard: (state, card) => {
       state.cards.push(card)
     },
-    deleteCard: (state, cardId) => {
-      const index = state.cards.findIndex(card => card.id === cardId)
-      state.cards.splice(index, 1)
+    removeCard: (state, cardId) => {
+      const cards = state.cards.filter(card => {
+        return card.id !== cardId
+      })
+      state.cards = cards
+      // remove card connections
+      const connections = state.connections.filter(connection => {
+        const isConnectedToCard = connection.startCardId === cardId || connection.endCardId === cardId
+        return !isConnectedToCard
+      })
+      state.connections = connections
     },
     updateConnectionTypeName: (state, { connectionTypeId, newName }) => {
       state.connectionTypes.map(type => {
