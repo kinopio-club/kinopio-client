@@ -1,9 +1,9 @@
 <template lang="pug">
-dialog(v-if="visible" :open="visible" :style="position")
+dialog.narrow(v-if="visible" :open="visible" :style="position")
+  section(:style="{backgroundColor: userColor}" v-if="multipleCardsIsSelected")
+    button(@click="connectCards") Connect
+    button(@click="disconnectCards") Disconnect
   section(:style="{backgroundColor: userColor}")
-    .row(v-if="multipleCardsSelected")
-      button(@click="connectCards") Connect
-      button(@click="disconnectCards") Disconnect
     button(@click="removeCards")
       img.icon(src="@/assets/remove.svg")
       span Remove
@@ -29,7 +29,10 @@ export default {
       return this.$store.state.currentUser.color
     },
     multipleCardsSelected () {
-      const numberOfCards = this.$store.state.multipleCardsSelected.length
+      return this.$store.state.multipleCardsSelected
+    },
+    multipleCardsIsSelected () {
+      const numberOfCards = this.multipleCardsSelected.length
       return Boolean(numberOfCards > 1)
     }
   },
@@ -45,7 +48,7 @@ export default {
     },
     connectCards () {
       const connectionType = this.connectionType()
-      let connections = this.$store.state.multipleCardsSelected.map((cardId, index, array) => {
+      let connections = this.multipleCardsSelected.map((cardId, index, array) => {
         if (index + 1 < array.length) {
           const startCardId = cardId
           const endCardId = array[index + 1]
@@ -61,13 +64,13 @@ export default {
       })
     },
     disconnectCards () {
-      const cardIds = this.$store.state.multipleCardsSelected
+      const cardIds = this.multipleCardsSelected
       cardIds.forEach(cardId => {
-        this.$store.commit('currentSpace/removeConnectionsFromCard', cardId)
+        this.$store.dispatch('currentSpace/removeSelectedConnectionsFromCard', cardId)
       })
     },
     removeCards () {
-      const cardIds = this.$store.state.multipleCardsSelected
+      const cardIds = this.multipleCardsSelected
       cardIds.forEach(cardId => {
         this.$store.dispatch('currentSpace/removeCard', cardId)
       })

@@ -276,7 +276,6 @@ const currentSpace = {
       context.commit('generateCardMap', null, { root: true })
     },
     addConnection: (context, { connection, connectionType }) => {
-      console.log(context)
       const connectionAlreadyExists = context.getters.connectionAlreadyExists({
         startCardId: connection.startCardId,
         endCardId: connection.endCardId
@@ -285,6 +284,17 @@ const currentSpace = {
         context.commit('addConnection', { connection, connectionType })
         context.commit('removeUnusedConnectionTypes')
       }
+    },
+    removeSelectedConnectionsFromCard: (context, cardId) => {
+      const multipleCardsSelected = context.rootState.multipleCardsSelected
+      const connections = context.state.connections
+      connections.map(connection => {
+        const { startCardId, endCardId, id } = connection
+        let connectedToSelected = (startCardId === cardId && multipleCardsSelected.includes(endCardId)) || (endCardId === cardId && multipleCardsSelected.includes(startCardId))
+        if (connectedToSelected) {
+          context.commit('removeConnection', id)
+        }
+      })
     }
   },
 
