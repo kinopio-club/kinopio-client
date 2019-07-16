@@ -81,8 +81,8 @@ export default {
     viewportWidth () { return this.$store.state.viewportWidth },
     pageHeight () { return this.$store.state.pageHeight },
     pageWidth () { return this.$store.state.pageWidth },
-    scrollAreaHeight () { return Math.min(100, this.viewportHeight / 5) },
-    scrollAreaWidth () { return Math.min(100, this.viewportWidth / 5) },
+    scrollAreaHeight () { return Math.min(100, this.viewportHeight / 6) },
+    scrollAreaWidth () { return Math.min(100, this.viewportWidth / 6) },
     isInteracting () {
       if (this.isDraggingCard || this.isDrawingConnection) {
         return true
@@ -133,7 +133,7 @@ export default {
 
     speed (cursor, direction) {
       let multiplier
-      const base = 25
+      const base = 10
       const scrollAreaHeight = this.scrollAreaHeight
       const scrollAreaWidth = this.scrollAreaWidth
       const viewportHeight = this.viewportHeight
@@ -150,7 +150,7 @@ export default {
       if (direction === 'right') {
         multiplier = (cursor.x - (viewportWidth - scrollAreaWidth) / scrollAreaWidth) / viewportWidth
       }
-      return base * multiplier
+      return base * (multiplier + (multiplier * 0.5))
     },
 
     addPageHeight (cursor, speed) {
