@@ -57,16 +57,14 @@ export default {
       })
       connections = connections.filter(Boolean)
       connections.forEach(connection => {
-        this.$store.commit('currentSpace/addConnection', { connection, connectionType })
+        this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
       })
-      this.$store.commit('currentSpace/removeUnusedConnectionTypes')
     },
     disconnectCards () {
       const cardIds = this.$store.state.multipleCardsSelected
       cardIds.forEach(cardId => {
-        this.$store.commit('currentSpace/removeCardConnections', cardId)
+        this.$store.commit('currentSpace/removeConnectionsFromCard', cardId)
       })
-      this.$store.commit('currentSpace/removeUnusedConnectionTypes')
     },
     removeCards () {
       const cardIds = this.$store.state.multipleCardsSelected

@@ -190,7 +190,7 @@ const currentSpace = {
       })
       state.cards = cards
     },
-    removeCardConnections: (state, cardId) => {
+    removeConnectionsFromCard: (state, cardId) => {
       const connections = state.connections.filter(connection => {
         const isConnectedToCard = connection.startCardId === cardId || connection.endCardId === cardId
         return !isConnectedToCard
@@ -221,11 +221,6 @@ const currentSpace = {
   },
 
   actions: {
-    removeCard: (context, cardId) => {
-      context.commit('removeCard', cardId)
-      context.commit('removeCardConnections', cardId)
-      context.commit('generateCardMap', null, { root: true })
-    },
     dragCards: (context, { endCursor, prevCursor, delta }) => {
       const multipleCardsSelected = context.rootState.multipleCardsSelected
       const currentDraggingCardId = context.rootState.currentDraggingCardId
@@ -274,6 +269,22 @@ const currentSpace = {
       }
       context.commit('createCard', card)
       context.commit('incrementCardZ', card.id)
+    },
+    removeCard: (context, cardId) => {
+      context.commit('removeCard', cardId)
+      context.commit('removeConnectionsFromCard', cardId)
+      context.commit('generateCardMap', null, { root: true })
+    },
+    addConnection: (context, { connection, connectionType }) => {
+      console.log(context)
+      const connectionAlreadyExists = context.getters.connectionAlreadyExists({
+        startCardId: connection.startCardId,
+        endCardId: connection.endCardId
+      })
+      if (!connectionAlreadyExists) {
+        context.commit('addConnection', { connection, connectionType })
+        context.commit('removeUnusedConnectionTypes')
+      }
     }
   },
 

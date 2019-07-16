@@ -328,15 +328,13 @@ export default {
       const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
       const lastConnectionType = _.last(this.$store.state.currentSpace.connectionTypes)
       const connectionType = defaultType || lastConnectionType
-      this.$store.commit('currentSpace/addConnection', { connection, connectionType })
+      this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
     },
 
     createConnection () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
       const startCardId = this.$store.state.currentConnection.startCardId
       const endCardId = currentConnectionSuccess.cardId
-      const connectionAlreadyExists = this.$store.getters['currentSpace/connectionAlreadyExists']({ startCardId, endCardId })
-      if (connectionAlreadyExists) { return }
       if (currentConnectionSuccess.cardId) {
         const path = utils.connectionBetweenCards(startCardId, endCardId)
         const connection = { startCardId, endCardId, path }
