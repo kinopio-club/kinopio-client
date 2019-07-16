@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.user-details.right-side(v-if="visible" :open="visible" @click.stop :style="{backgroundColor: color}")
+dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop :style="{backgroundColor: color}" :class="{ 'right-side': detailsIsOnRightSide}")
   section
     button.change-color(@click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
       .current-color(:style="{backgroundColor: color}")
@@ -16,7 +16,8 @@ export default {
     ColorPicker
   },
   props: {
-    user: Object
+    user: Object,
+    detailsIsOnRightSide: Boolean
   },
   data () {
     return {
