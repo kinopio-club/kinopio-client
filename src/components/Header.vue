@@ -3,13 +3,17 @@ header
   nav
     img.logo(alt="logo" src="@/assets/logo.png" width="50" height="45")
   aside
-    .users
-      .user.anon-avatar(:style="{backgroundColor: currentUser.color}")
+    User(:user="currentUser" :clickable="true" :key="currentUser.id")
 </template>
 
 <script>
+import User from '@/components/User.vue'
+
 export default {
   name: 'Header',
+  components: {
+    User
+  },
   computed: {
     currentUser () {
       return this.$store.state.currentUser
@@ -35,4 +39,5 @@ header
   .user
     cursor pointer
     float right
+    position relative
 </style>

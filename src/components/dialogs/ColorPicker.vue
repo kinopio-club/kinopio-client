@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.color-picker(v-if="colorPickerIsVisible" :open="colorPickerIsVisible" @click.stop)
+dialog.narrow.color-picker(v-if="visible" :open="visible" @click.stop)
   section
     .badge(:style="{backgroundColor: currentColor}")
       input(v-model="hexColor")
@@ -19,7 +19,7 @@ export default {
   name: 'ColorPicker',
   props: {
     currentColor: String,
-    colorPickerIsVisible: Boolean
+    visible: Boolean
   },
   data () {
     return {
@@ -55,7 +55,7 @@ export default {
     }
   },
   watch: {
-    colorPickerIsVisible (visible) {
+    visible (visible) {
       this.shuffleColors()
     }
   }

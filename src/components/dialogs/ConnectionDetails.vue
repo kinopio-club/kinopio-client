@@ -1,10 +1,10 @@
 <template lang="pug">
-dialog.connection-details.narrow(v-if="visible" :open="visible" :style="position" @click="closeColorPicker")
+dialog.narrow(v-if="visible" :open="visible" :style="position" @click="closeColorPicker")
   section(:style="{backgroundColor: typeColor}")
     .row
       button.change-color(@click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
         .current-color(:style="{backgroundColor: typeColor}")
-      ColorPicker(:currentColor="typeColor" :colorPickerIsVisible="colorPickerIsVisible" @selectedColor="updateTypeColor")
+      ColorPicker(:currentColor="typeColor" :visible="colorPickerIsVisible" @selectedColor="updateTypeColor")
       input(placeholder="Connection" v-model="typeName")
 
     label(:class="{active: isDefault}" @click.prevent="toggleDefault")
@@ -102,7 +102,7 @@ export default {
       const typePref = utils.getUserPref('defaultConnectionTypeId')
       this.isDefault = Boolean(typePref === this.currentConnectionType.id)
     },
-    toggleDefault (event) {
+    toggleDefault () {
       this.isDefault = !this.isDefault
       if (this.isDefault) {
         utils.updateUserPrefs('defaultConnectionTypeId', this.currentConnectionType.id)
@@ -110,11 +110,10 @@ export default {
         utils.updateUserPrefs('defaultConnectionTypeId', '')
       }
     },
-    toggleColorPicker (event) {
+    toggleColorPicker () {
       this.colorPickerIsVisible = !this.colorPickerIsVisible
     },
     closeColorPicker () {
-      console.log('closeColorPicker')
       this.colorPickerIsVisible = false
     },
     updateTypeColor (newColor) {
@@ -134,13 +133,4 @@ export default {
 </script>
 
 <style lang="stylus">
-.connection-details
-  .change-color
-    padding-top 4px
-    .current-color
-      height 12px
-      width 14px
-      margin-bottom 1px
-      vertical-align top
-      border-radius 3px
 </style>

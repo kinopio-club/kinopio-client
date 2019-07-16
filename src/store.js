@@ -373,7 +373,10 @@ export default new Vuex.Store({
     multipleCardsSelected: [], // ids
     multipleCardActionsIsVisible: false,
     multipleCardActionsPosition: {},
-    cardMap: []
+    cardMap: [],
+
+    // user
+    userDetailsIsVisible: false
   },
 
   mutations: {
@@ -402,7 +405,7 @@ export default new Vuex.Store({
       })
       state.connectionDetailsIsVisible = false
       state.multipleCardActionsIsVisible = false
-      state.colorPickerIsVisible = false
+      state.userDetailsIsVisible = false
     },
     shouldAddNewCard: (state, value) => {
       utils.typeCheck(value, 'boolean')
@@ -495,7 +498,14 @@ export default new Vuex.Store({
     multipleCardActionsPosition: (state, position) => {
       utils.typeCheck(position, 'object')
       state.multipleCardActionsPosition = position
+    },
+
+    // user
+    userDetailsIsVisible: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.userDetailsIsVisible = value
     }
+
   },
 
   getters: {

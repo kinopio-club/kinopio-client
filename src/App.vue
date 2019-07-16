@@ -145,6 +145,13 @@ dialog
   .icon
     vertical-align -1px
     margin-right 5px
+  .change-color
+    padding-top 4px
+    .current-color
+      height 12px
+      width 14px
+      margin-bottom 1px
+      border-radius 3px
 
 // checkboxes
 label
@@ -196,13 +203,7 @@ ul
   margin-right 6px
   vertical-align -1px
 
-.user
-  width 23px
-  height 23px
-  background-repeat no-repeat
-  background-position center
-  border-radius 3px
-  &.anon-avatar
-    background-image url('assets/anon-avatar.svg')
-
+.anon-avatar
+  background-image url('assets/anon-avatar.svg')
+  background-size 70%
 </style>
