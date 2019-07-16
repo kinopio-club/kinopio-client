@@ -196,4 +196,13 @@ ul
   margin-right 6px
   vertical-align -1px
 
+.user
+  width 23px
+  height 23px
+  background-repeat no-repeat
+  background-position center
+  border-radius 3px
+  &.anon-avatar
+    background-image url('assets/anon-avatar.svg')
+
 </style>
