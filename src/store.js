@@ -28,16 +28,16 @@ const currentUser = {
 const currentSpace = {
   namespaced: true,
   state: {
-    users: [
-      {
-        id: '1',
-        color: 'cyan'
-      },
-      {
-        id: '2',
-        color: 'pink'
-      }
-    ],
+    // users: [
+    //   {
+    //     id: '1',
+    //     color: 'cyan'
+    //   },
+    //   {
+    //     id: '2',
+    //     color: 'pink'
+    //   }
+    // ],
     cards: [
       {
         id: '1',
@@ -105,35 +105,7 @@ const currentSpace = {
   },
 
   mutations: {
-    addConnection: (state, { connection, connectionType }) => {
-      connection.id = nanoid()
-      connection.connectionTypeId = connectionType.id
-      connection.connectionDetailsVisible = false
-      state.connections.push(connection)
-    },
-    addConnectionType: (state, { id, name, color }) => {
-      const connectionType = {
-        id: id || nanoid(),
-        name: name || `Connection ${state.connectionTypes.length + 1}`,
-        color: color || randomColor({ luminosity: 'light' })
-      }
-      state.connectionTypes.push(connectionType)
-    },
-    removeUnusedConnectionTypes: (state) => {
-      const connections = state.connections.map(connection => {
-        return connection.connectionTypeId
-      })
-      const usedConnectionTypes = state.connectionTypes.filter(type => {
-        return connections.includes(type.id)
-      })
-      state.connectionTypes = usedConnectionTypes
-    },
-    removeConnection: (state, connectionId) => {
-      const connections = state.connections.filter(connection => {
-        return connection.id !== connectionId
-      })
-      state.connections = connections
-    },
+    // cards
     incrementCardZ: (state, cardId) => {
       state.cards.map((card, index) => {
         card.z = index
@@ -154,13 +126,6 @@ const currentSpace = {
       state.cards.map(card => {
         if (card.id === cardId) {
           card[type] = value
-        }
-      })
-    },
-    connectionDetailsVisible: (state, connectionId) => {
-      state.connections.map(connection => {
-        if (connection.id === connectionId) {
-          connection.connectionDetailsVisible = true
         }
       })
     },
@@ -190,12 +155,52 @@ const currentSpace = {
       })
       state.cards = cards
     },
+
+    // connections
+    addConnection: (state, { connection, connectionType }) => {
+      connection.id = nanoid()
+      connection.connectionTypeId = connectionType.id
+      connection.connectionDetailsVisible = false
+      state.connections.push(connection)
+    },
+    removeConnection: (state, connectionId) => {
+      const connections = state.connections.filter(connection => {
+        return connection.id !== connectionId
+      })
+      state.connections = connections
+    },
+    connectionDetailsVisible: (state, connectionId) => {
+      state.connections.map(connection => {
+        if (connection.id === connectionId) {
+          connection.connectionDetailsVisible = true
+        }
+      })
+    },
     removeConnectionsFromCard: (state, cardId) => {
       const connections = state.connections.filter(connection => {
         const isConnectedToCard = connection.startCardId === cardId || connection.endCardId === cardId
         return !isConnectedToCard
       })
       state.connections = connections
+    },
+
+    // connection types
+    addConnectionType: (state, { id, name, color }) => {
+      const connectionType = {
+        id: id || nanoid(),
+        name: name || `Connection ${state.connectionTypes.length + 1}`,
+        color: color || randomColor({ luminosity: 'light' })
+      }
+      state.connectionTypes.push(connectionType)
+    },
+    removeUnusedConnectionTypes: (state) => {
+      const connections = state.connections.map(connection => {
+        return connection.connectionTypeId
+      })
+      const usedConnectionTypes = state.connectionTypes.filter(type => {
+        return connections.includes(type.id)
+      })
+      state.connectionTypes = usedConnectionTypes
     },
     updateConnectionTypeName: (state, { connectionTypeId, newName }) => {
       state.connectionTypes.map(type => {
@@ -221,6 +226,31 @@ const currentSpace = {
   },
 
   actions: {
+    // cards
+    addCard: (context, { position, contents }) => {
+      utils.typeCheck(position, 'object')
+      utils.typeCheck(contents, 'object', true)
+      let card = {
+        id: nanoid(),
+        x: position.x,
+        y: position.y,
+        name: '',
+        cardDetailsVisible: false,
+        archived: false
+      }
+      if (utils.objectHasKeys(contents)) {
+        card = utils.updateObject(card, contents)
+      } else {
+        card.cardDetailsVisible = true
+      }
+      context.commit('createCard', card)
+      context.commit('incrementCardZ', card.id)
+    },
+    removeCard: (context, cardId) => {
+      context.commit('removeCard', cardId)
+      context.commit('removeConnectionsFromCard', cardId)
+      context.commit('generateCardMap', null, { root: true })
+    },
     dragCards: (context, { endCursor, prevCursor, delta }) => {
       const multipleCardsSelected = context.rootState.multipleCardsSelected
       const currentDraggingCardId = context.rootState.currentDraggingCardId
@@ -251,30 +281,8 @@ const currentSpace = {
         context.commit('incrementCardZ', currentDraggingCardId)
       }
     },
-    addCard: (context, { position, contents }) => {
-      utils.typeCheck(position, 'object')
-      utils.typeCheck(contents, 'object', true)
-      let card = {
-        id: nanoid(),
-        x: position.x,
-        y: position.y,
-        name: '',
-        cardDetailsVisible: false,
-        archived: false
-      }
-      if (utils.objectHasKeys(contents)) {
-        card = utils.updateObject(card, contents)
-      } else {
-        card.cardDetailsVisible = true
-      }
-      context.commit('createCard', card)
-      context.commit('incrementCardZ', card.id)
-    },
-    removeCard: (context, cardId) => {
-      context.commit('removeCard', cardId)
-      context.commit('removeConnectionsFromCard', cardId)
-      context.commit('generateCardMap', null, { root: true })
-    },
+
+    // connection
     addConnection: (context, { connection, connectionType }) => {
       const connectionAlreadyExists = context.getters.connectionAlreadyExists({
         startCardId: connection.startCardId,
@@ -299,12 +307,7 @@ const currentSpace = {
   },
 
   getters: {
-    connectionTypeById: (state) => (id) => {
-      return state.connectionTypes.find(type => type.id === id)
-    },
-    lastConnectionType: (state) => {
-      return _.last(state.connectionTypes)
-    },
+    // connection
     connectionAlreadyExists: (state) => ({ startCardId, endCardId }) => {
       const existing = state.connections.filter(connection => {
         let start = connection.startCardId === startCardId
@@ -319,6 +322,14 @@ const currentSpace = {
         let end = connection.endCardId === cardId
         return start || end
       })
+    },
+
+    // connection types
+    connectionTypeById: (state) => (id) => {
+      return state.connectionTypes.find(type => type.id === id)
+    },
+    lastConnectionType: (state) => {
+      return _.last(state.connectionTypes)
     },
     cardConnectionTypes: (state, getters) => (cardId) => {
       const connections = getters.cardConnections(cardId)
