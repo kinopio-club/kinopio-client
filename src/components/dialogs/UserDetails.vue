@@ -1,10 +1,11 @@
 <template lang="pug">
-dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop :style="{backgroundColor: color}" :class="{ 'right-side': detailsIsOnRightSide}")
+dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeColorPicker" :style="backgroundColor" :class="{'right-side': detailsIsOnRightSide}")
   section
     button.change-color(@click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-      .current-color(:style="{backgroundColor: color}")
-    // ColorPicker(:currentColor="typeColor" :colorPickerIsVisible="colorPickerIsVisible" @selectedColor="updateUserColor")
-    // input(placeholder="Connection" v-model="typeName")
+      .current-color(:style="backgroundColor")
+    ColorPicker(:currentColor="userColor" :visible="colorPickerIsVisible" @selectedColor="updateUserColor")
+
+    // input(placeholder="What's your name?" v-model="userName")
 </template>
 
 <script>
@@ -28,13 +29,35 @@ export default {
     visible () {
       return this.$store.state.userDetailsIsVisible
     },
-    color () {
+    userColor () {
       return this.user.color
+    },
+    backgroundColor () {
+      return {
+        backgroundColor: this.userColor
+      }
     }
   },
-  method: {
-    toggleColorPicker () {},
-    updateUserColor () {}
+  methods: {
+    toggleColorPicker () {
+      this.colorPickerIsVisible = !this.colorPickerIsVisible
+    },
+    closeColorPicker () {
+      this.colorPickerIsVisible = false
+    },
+    updateUserColor (newColor) {
+      this.$store.dispatch('updateUserColor', {
+        userId: this.user.id,
+        newColor
+      })
+    }
+  },
+  watch: {
+    visible (value) {
+      if (value) {
+        this.colorPickerIsVisible = false
+      }
+    }
   }
 }
 </script>

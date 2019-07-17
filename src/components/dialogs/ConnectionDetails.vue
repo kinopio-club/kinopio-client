@@ -21,7 +21,6 @@ dialog.narrow(v-if="visible" :open="visible" :style="position" @click="closeColo
         li(:class="{ active: type.isActive }" @click="changeConnectionType(type)")
           .badge(:style="{backgroundColor: type.color}")
           .name {{type.name}}
-
 </template>
 
 <script>

@@ -12,17 +12,25 @@ const currentUser = {
   state: {
     id: 1,
     color: randomColor({ luminosity: 'light' })
+  },
+  getters: {
+    isCurrentUser: (state) => (userId) => {
+      return Boolean(state.id === userId)
+    }
+    // isMember (state, getters, rootState) {
+    //   const inCurrentSpace = rootState.currentSpace.users.some(user => {
+    //     return user.id === state.id
+    //   })
+    //   if (inCurrentSpace) {
+    //     return true
+    //   } else { return false }
+    // }
+  },
+  mutations: {
+    updateColor: (state, color) => {
+      state.color = color
+    }
   }
-  // getters: {
-  //   isMember (state, getters, rootState) {
-  //     const inCurrentSpace = rootState.currentSpace.users.some(user => {
-  //       return user.id === state.id
-  //     })
-  //     if (inCurrentSpace) {
-  //       return true
-  //     } else { return false }
-  //   }
-  // }
 }
 
 const currentSpace = {
@@ -505,7 +513,16 @@ export default new Vuex.Store({
       utils.typeCheck(value, 'boolean')
       state.userDetailsIsVisible = value
     }
+  },
 
+  actions: {
+    updateUserColor: (context, { userId, newColor }) => {
+      console.log('updateUserColor', userId, newColor, context)
+      const isCurrentUser = context.getters['currentUser/isCurrentUser'](userId)
+      if (isCurrentUser) {
+        context.commit('currentUser/updateColor', newColor)
+      }
+    }
   },
 
   getters: {
