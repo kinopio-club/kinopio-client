@@ -25,9 +25,9 @@ export default {
     showUserDetails () {
       if (this.clickable) {
         const dialogFromRight = this.$refs.user.getBoundingClientRect().right
-        const clientWidth = this.$store.state.pageWidth
+        const viewportWidth = this.$store.state.viewportWidth
         const dialogWidth = 200 + 8
-        this.detailsIsOnRightSide = Boolean((clientWidth - dialogFromRight) < dialogWidth)
+        this.detailsIsOnRightSide = Boolean((viewportWidth - dialogFromRight) < dialogWidth)
         this.$store.commit('userDetailsIsVisible', true)
       }
     }
