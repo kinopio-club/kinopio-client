@@ -531,7 +531,7 @@ export default new Vuex.Store({
     updateUserName: (context, { userId, newName }) => {
       const isCurrentUser = context.getters['currentUser/isCurrentUser'](userId)
       if (isCurrentUser) {
-        context.commit('currentUser/updateColor', newName)
+        context.commit('currentUser/updateName', newName)
       }
     }
   },
