@@ -11,7 +11,8 @@ const currentUser = {
   namespaced: true,
   state: {
     id: 1,
-    color: randomColor({ luminosity: 'light' })
+    color: randomColor({ luminosity: 'light' }),
+    name: undefined
   },
   getters: {
     isCurrentUser: (state) => (userId) => {
@@ -27,8 +28,11 @@ const currentUser = {
     // }
   },
   mutations: {
-    updateColor: (state, color) => {
-      state.color = color
+    updateColor: (state, newColor) => {
+      state.color = newColor
+    },
+    updateName: (state, newName) => {
+      state.name = newName
     }
   }
 }
@@ -40,10 +44,12 @@ const currentSpace = {
     //   {
     //     id: '1',
     //     color: 'cyan'
+    //     name: undefined
     //   },
     //   {
     //     id: '2',
     //     color: 'pink'
+    //     name: 'maya'
     //   }
     // ],
     cards: [
@@ -517,10 +523,15 @@ export default new Vuex.Store({
 
   actions: {
     updateUserColor: (context, { userId, newColor }) => {
-      console.log('updateUserColor', userId, newColor, context)
       const isCurrentUser = context.getters['currentUser/isCurrentUser'](userId)
       if (isCurrentUser) {
         context.commit('currentUser/updateColor', newColor)
+      }
+    },
+    updateUserName: (context, { userId, newName }) => {
+      const isCurrentUser = context.getters['currentUser/isCurrentUser'](userId)
+      if (isCurrentUser) {
+        context.commit('currentUser/updateColor', newName)
       }
     }
   },

@@ -1,11 +1,13 @@
 <template lang="pug">
 dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeColorPicker" :style="backgroundColor" :class="{'right-side': detailsIsOnRightSide}")
-  section
-    button.change-color(@click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-      .current-color(:style="backgroundColor")
-    ColorPicker(:currentColor="userColor" :visible="colorPickerIsVisible" @selectedColor="updateUserColor")
+  section(v-if="isCurrentUser")
+    .row
+      button.change-color(@click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
+        .current-color(:style="backgroundColor")
+      ColorPicker(:currentColor="userColor" :visible="colorPickerIsVisible" @selectedColor="updateUserColor")
+      input(placeholder="What's your name?" v-model="userName" name="Name")
 
-    // input(placeholder="What's your name?" v-model="userName")
+    // button Sign In or Up
 </template>
 
 <script>
@@ -36,6 +38,20 @@ export default {
       return {
         backgroundColor: this.userColor
       }
+    },
+    isCurrentUser () {
+      return this.$store.getters['currentUser/isCurrentUser'](this.user.id)
+    },
+    userName: {
+      get () {
+        return this.user.name
+      },
+      set (newName) {
+        this.$store.dispatch('updateUserName', {
+          userId: this.user.id,
+          newName
+        })
+      }
     }
   },
   methods: {
@@ -64,8 +80,10 @@ export default {
 
 <style lang="stylus">
 .user-details
-  cursor initial
-.right-side
-  left initial
-  right 8px
+  cursor: initial
+  .row
+    margin 0
+  &.right-side
+    left initial
+    right 8px
 </style>
