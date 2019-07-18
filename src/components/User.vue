@@ -1,5 +1,5 @@
 <template lang="pug">
-.user.anon-avatar(:style="{backgroundColor: user.color}" @click="showUserDetails" ref="user")
+.user.anon-avatar(:style="{backgroundColor: user.color}" @click="showUserDetails" @touchend.stop="showUserDetails" ref="user")
   template(v-if="clickable")
     UserDetails(:user="user" :detailsIsOnRightSide="detailsIsOnRightSide")
 </template>
