@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.card-details(v-if="visible" :open="visible")
+dialog.card-details(v-if="visible" :open="visible" ref="card")
   section.meta-section
     .row
       textarea.name(
@@ -21,10 +21,8 @@ export default {
   updated () {
     this.$nextTick(() => {
       if (this.visible) {
-        let textareas = document.querySelectorAll('dialog textarea')
-        textareas.forEach(textarea => {
-          textarea.style.height = textarea.scrollHeight + 1 + 'px'
-        })
+        this.scrollIntoView()
+        this.textareaSizes()
       }
     })
   },
@@ -47,6 +45,17 @@ export default {
   methods: {
     removeCard () {
       this.$store.dispatch('currentSpace/removeCard', this.card.id)
+    },
+    textareaSizes () {
+      let textareas = document.querySelectorAll('dialog textarea')
+      textareas.forEach(textarea => {
+        textarea.style.height = textarea.scrollHeight + 1 + 'px'
+      })
+    },
+    scrollIntoView () {
+      console.log('🌹scrollIntoView', this.$refs.card)
+      const element = this.$refs.card
+      element.scrollIntoView({ behaivior: 'smooth' })
     }
   },
   watch: {

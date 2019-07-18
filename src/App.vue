@@ -9,10 +9,15 @@
 import Header from '@/components/Header.vue'
 import MagicPaint from '@/components/MagicPaint.vue'
 
+import smoothscroll from 'smoothscroll-polyfill'
+
 export default {
   components: {
     Header,
     MagicPaint
+  },
+  mounted () {
+    smoothscroll.polyfill()
   }
 }
 </script>
