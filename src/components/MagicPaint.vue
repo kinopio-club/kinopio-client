@@ -223,6 +223,7 @@ export default {
       const shouldAddNewCard = this.$store.state.shouldAddNewCard
       currentUserIsLocking = false
       window.cancelAnimationFrame(lockingAnimationTimer)
+      lockingAnimationTimer = undefined
       lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       this.$store.commit('currentUserIsPaintingLocked', false)
       this.$store.commit('currentUserIsPainting', false)
