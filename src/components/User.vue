@@ -1,7 +1,7 @@
 <template lang="pug">
 .user.anon-avatar(:style="{backgroundColor: user.color}" @click="showUserDetails" @touchend.stop="showUserDetails" ref="user")
   template(v-if="clickable")
-    UserDetails(:user="user" :detailsIsOnRightSide="detailsIsOnRightSide")
+    UserDetails(:user="user" :detailsOnRight="detailsOnRight")
 </template>
 
 <script>
@@ -14,20 +14,21 @@ export default {
   },
   props: {
     clickable: Boolean,
-    user: Object
-  },
-  data () {
-    return {
-      detailsIsOnRightSide: false
-    }
+    user: Object,
+    detailsOnRight: Boolean
   },
   methods: {
+    // displaySide () {
+    //     //   const dialogFromRight = this.$refs.user.getBoundingClientRect().right
+    //     //   const viewportWidth = this.$store.state.viewportWidth
+    //     //   const dialogWidth = 200 + 8
+    //     //   const isEnoughSpaceOnTheRight = Boolean((viewportWidth - dialogFromRight) < dialogWidth)
+    //     //   this.detailsIsOnRightSide = isEnoughSpaceOnTheRight
+    //     // }
+    // },
+
     showUserDetails () {
       if (this.clickable) {
-        const dialogFromRight = this.$refs.user.getBoundingClientRect().right
-        const viewportWidth = this.$store.state.viewportWidth
-        const dialogWidth = 200 + 8
-        this.detailsIsOnRightSide = Boolean((viewportWidth - dialogFromRight) < dialogWidth)
         this.$store.commit('userDetailsIsVisible', true)
       }
     }

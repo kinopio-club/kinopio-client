@@ -3,7 +3,7 @@ header
   nav
     img.logo(alt="logo" src="@/assets/logo.png" width="50" height="45")
   aside
-    User(:user="currentUser" :clickable="true" :key="currentUser.id")
+    User(:user="currentUser" :clickable="true" :detailsOnRight="true" :key="currentUser.id")
 </template>
 
 <script>
