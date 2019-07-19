@@ -6,6 +6,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="cardDetails")
         rows="1"
         placeholder="Tell me your dreams"
         v-model="name"
+        v-focus
       )
     button(@click="removeCard")
       img.icon(src="@/assets/remove.svg")
@@ -19,6 +20,15 @@ export default {
   name: 'CardDetails',
   props: {
     card: Object // name, x, y, z, cardDetailsVisible
+  },
+  directives: {
+    focus: {
+      inserted (element) {
+        if (element.value.length === 0) {
+          element.focus()
+        }
+      }
+    }
   },
   updated () {
     this.$nextTick(() => {
