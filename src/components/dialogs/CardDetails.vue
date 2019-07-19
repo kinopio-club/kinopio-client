@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.card-details(v-if="visible" :open="visible" ref="cardDetails")
+dialog.card-details(v-if="visible" :open="visible" ref="dialog")
   section.meta-section
     .row
       textarea.name(
@@ -41,8 +41,9 @@ export default {
   },
   mounted () {
     // for new cards
-    const element = this.$refs.cardDetails
+    const element = this.$refs.dialog
     if (element) {
+      if (this.preventScrollIntoView()) { return }
       this.scrollIntoView()
     }
   },
@@ -77,8 +78,7 @@ export default {
       return Boolean(this.cardIsEmpty() && utils.isIOS())
     },
     scrollIntoView () {
-      if (this.preventScrollIntoView()) { return }
-      const element = this.$refs.cardDetails
+      const element = this.$refs.dialog
       observer = new IntersectionObserver((entries, observer) => {
         let top, left
         entries.forEach(entry => {
