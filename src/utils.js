@@ -105,6 +105,10 @@ export default {
     }
   },
 
+  isIOS () {
+    return navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform)
+  },
+
   // User Prefs 👼
 
   storeLocal (key, value) {

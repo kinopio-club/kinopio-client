@@ -14,6 +14,8 @@ dialog.card-details(v-if="visible" :open="visible" ref="cardDetails")
 </template>
 
 <script>
+import utils from '@/utils.js'
+
 let observer
 
 export default {
@@ -70,8 +72,12 @@ export default {
         textarea.style.height = textarea.scrollHeight + 1 + 'px'
       })
     },
+    preventScrollIntoView () {
+      // disable scrolling into view on ios because it conflicts with panning and zooming on focused input
+      return Boolean(this.cardIsEmpty() && utils.isIOS())
+    },
     scrollIntoView () {
-      console.log('🥬 card details visible, scrollIntoView()')
+      if (this.preventScrollIntoView()) { return }
       const element = this.$refs.cardDetails
       observer = new IntersectionObserver((entries, observer) => {
         let top, left
