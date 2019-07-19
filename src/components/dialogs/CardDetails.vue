@@ -91,6 +91,7 @@ export default {
               left = -left
             }
             window.scrollBy({ top, left, behavior: 'smooth' })
+            observer.disconnect()
           }
         })
       }, { threshold: 1 })
@@ -106,8 +107,6 @@ export default {
       this.$nextTick(() => {
         if (visible) {
           this.scrollIntoView()
-        } else {
-          observer.disconnect()
         }
       })
       if (!visible && this.cardIsEmpty()) {
