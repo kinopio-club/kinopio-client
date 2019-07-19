@@ -91,6 +91,7 @@ export default {
               left = -left
             }
             window.scrollBy({ top, left, behavior: 'smooth' })
+          } else {
             observer.disconnect()
           }
         })
