@@ -13,6 +13,8 @@ dialog.card-details(v-if="visible" :open="visible" ref="cardDetails")
 </template>
 
 <script>
+let observer
+
 export default {
   name: 'CardDetails',
   props: {
@@ -21,7 +23,6 @@ export default {
   updated () {
     this.$nextTick(() => {
       if (this.visible) {
-        this.scrollIntoView()
         this.textareaSizes()
       }
     })
@@ -53,13 +54,12 @@ export default {
       })
     },
     scrollIntoView () {
-      let top, left
+      console.log('🥬 card details visible, scrollIntoView()')
       const element = this.$refs.cardDetails
-      // move to visible?
-      let observer = new IntersectionObserver((entries, observer) => {
+      observer = new IntersectionObserver((entries, observer) => {
+        let top, left
         entries.forEach(entry => {
           if (!entry.isIntersecting) {
-            console.log(entry.boundingClientRect, entry.intersectionRect)
             const clientRect = entry.boundingClientRect
             const intersectionRect = entry.intersectionRect
             top = (clientRect.height - intersectionRect.height) + 8
@@ -68,20 +68,26 @@ export default {
           }
         })
       }, { threshold: 1 })
-
       observer.observe(element)
-
-      // observer.unobserve(element)
-      // ^ do in watch when not visible anymore
+    },
+    cardIsEmpty () {
+      // TODO: expand isEmpty to inlcude other metadata content (images etc)
+      return !this.card.name
     }
   },
   watch: {
     visible (visible) {
-      this.$store.commit('updatePageSizes')
-      const isEmpty = !this.card.name // TODO: expand isEmpty to inlcude other metadata content (images etc)
-      if (!visible && isEmpty) {
+      this.$nextTick(() => {
+        if (visible) {
+          this.scrollIntoView()
+        } else {
+          observer.disconnect()
+        }
+      })
+      if (!visible && this.cardIsEmpty()) {
         this.$store.dispatch('currentSpace/removeCard', this.card.id)
       }
+      this.$store.commit('updatePageSizes')
     }
   }
 }
