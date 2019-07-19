@@ -43,5 +43,9 @@ export default {
   background-repeat no-repeat
   background-position center
   border-radius 3px
-
+  &:hover,
+  &:focus
+    box-shadow var(--button-hover-shadow)
+  &:active
+    box-shadow var(--button-active-inset-shadow)
 </style>
