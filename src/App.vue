@@ -17,7 +17,7 @@ export default {
     MagicPaint
   },
   mounted () {
-    smoothscroll.polyfill()
+    smoothscroll.polyfill() // remove when 'smooth' is supported by safari: https://caniuse.com/#search=scroll
   }
 }
 </script>

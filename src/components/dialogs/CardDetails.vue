@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.card-details(v-if="visible" :open="visible" ref="card")
+dialog.card-details(v-if="visible" :open="visible" ref="cardDetails")
   section.meta-section
     .row
       textarea.name(
@@ -53,9 +53,26 @@ export default {
       })
     },
     scrollIntoView () {
-      console.log('🌹scrollIntoView', this.$refs.card)
-      const element = this.$refs.card
-      element.scrollIntoView({ behaivior: 'smooth' })
+      let top, left
+      const element = this.$refs.cardDetails
+      // move to visible?
+      let observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) {
+            console.log(entry.boundingClientRect, entry.intersectionRect)
+            const clientRect = entry.boundingClientRect
+            const intersectionRect = entry.intersectionRect
+            top = (clientRect.height - intersectionRect.height) + 8
+            left = (clientRect.width - intersectionRect.width) + 8
+            window.scrollBy({ top, left, behavior: 'smooth' })
+          }
+        })
+      }, { threshold: 1 })
+
+      observer.observe(element)
+
+      // observer.unobserve(element)
+      // ^ do in watch when not visible anymore
     }
   },
   watch: {
