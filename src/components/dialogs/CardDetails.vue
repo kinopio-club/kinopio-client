@@ -27,6 +27,13 @@ export default {
       }
     })
   },
+  mounted () {
+    // for new cards
+    const element = this.$refs.cardDetails
+    if (element) {
+      this.scrollIntoView()
+    }
+  },
   computed: {
     visible () { return this.card.cardDetailsVisible },
     name: {
