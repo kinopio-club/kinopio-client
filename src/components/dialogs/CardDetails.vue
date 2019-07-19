@@ -87,6 +87,9 @@ export default {
             const intersectionRect = entry.intersectionRect
             top = (clientRect.height - intersectionRect.height) + 8
             left = (clientRect.width - intersectionRect.width) + 8
+            if (clientRect.x < 0) {
+              left = -left
+            }
             window.scrollBy({ top, left, behavior: 'smooth' })
           }
         })
