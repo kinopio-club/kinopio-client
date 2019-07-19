@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow(v-if="visible" :open="visible" :style="position" @click="closeColorPicker")
+dialog.narrow(v-if="visible" :open="visible" :style="position" @click="closeColorPicker" ref="dialog")
   section(:style="{backgroundColor: typeColor}")
     .row
       button.change-color(@click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
@@ -26,6 +26,8 @@ dialog.narrow(v-if="visible" :open="visible" :style="position" @click="closeColo
 <script>
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
+
+let observer
 
 export default {
   components: {
@@ -118,14 +120,38 @@ export default {
     updateTypeColor (newColor) {
       const connectionTypeId = this.currentConnectionType.id
       this.$store.commit('currentSpace/updateConnectionTypeColor', { connectionTypeId, newColor })
+    },
+    scrollIntoView () {
+      const element = this.$refs.dialog
+      observer = new IntersectionObserver((entries, observer) => {
+        let top, left
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) {
+            const clientRect = entry.boundingClientRect
+            const intersectionRect = entry.intersectionRect
+            top = (clientRect.height - intersectionRect.height) + 8
+            left = (clientRect.width - intersectionRect.width) + 8
+            if (clientRect.x < 0) {
+              left = -left
+            }
+            window.scrollBy({ top, left, behavior: 'smooth' })
+          } else {
+            observer.disconnect()
+          }
+        })
+      }, { threshold: 1 })
+      observer.observe(element)
     }
   },
   watch: {
-    visible (value) {
-      if (value) {
-        this.updateDefaultConnectionType()
-        this.colorPickerIsVisible = false
-      }
+    visible (visible) {
+      this.$nextTick(() => {
+        if (visible) {
+          this.updateDefaultConnectionType()
+          this.colorPickerIsVisible = false
+          this.scrollIntoView()
+        }
+      })
     }
   }
 }
