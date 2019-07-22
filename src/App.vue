@@ -28,6 +28,7 @@ export default {
   --primary black
   --primary-background white
 
+  --secondary #818181
   --secondary-background #e3e3e3
   --secondary-hover-background #d8d8d8
   --secondary-active-background #cdcdcd
