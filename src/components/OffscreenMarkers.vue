@@ -102,8 +102,8 @@ export default {
 </script>
 
 <style lang="stylus">
-height = 12px
-width = 7px
+height = 14px
+width = 8px
 edge = 4px
 
 .offscreen-markers
@@ -118,25 +118,32 @@ edge = 4px
   .top
     top edge
     left "calc(50% -  %s)" % (width / 2)
+    transform rotate(90deg)
   .topleft
     top edge
     left edge
+    transform rotate(45deg)
   .topright
     top edge
     right edge
+    transform rotate(135deg)
   .left
     top "calc(50% -  %s)" % (height / 2)
     left edge
   .right
     top "calc(50% -  %s)" % (height / 2)
     right edge
+    transform rotate(180deg)
   .bottom
     bottom edge
     left "calc(50% -  %s)" % (width / 2)
+    transform rotate(-90deg)
   .bottomleft
     bottom edge
     left edge
+    transform rotate(-45deg)
   .bottomright
     bottom edge
     right edge
+    transform rotate(-135deg)
 </style>
