@@ -1,11 +1,16 @@
 <template lang="pug">
-aside
-  .marker yo
+aside.offscreen-markers
+  .marker.top(v-if="hasDirectionTop")
+  .marker.topleft(v-if="hasDirectionTopLeft")
+  .marker.topright(v-if="hasDirectionTopRight")
+  .marker.left(v-if="hasDirectionLeft")
+  .marker.right(v-if="hasDirectionRight")
+  .marker.bottom(v-if="hasDirectionBottom")
+  .marker.bottomleft(v-if="hasDirectionBottomLeft")
+  .marker.bottomright(v-if="hasDirectionBottomRight")
 </template>
 
 <script>
-// will contain toggleable view code for directions/corners based on intersection observed state of all .cards
-
 let observer
 
 export default {
@@ -15,25 +20,27 @@ export default {
   },
   data () {
     return {
-      offscreen: []
+      offscreenCards: []
     }
   },
   computed: {
-    cards () {
-      return this.$store.state.currentSpace.cards
-    }
+    hasDirectionTop () { return this.hasDirection('top') },
+    hasDirectionTopLeft () { return this.hasDirection('topleft') },
+    hasDirectionTopRight () { return this.hasDirection('topright') },
+    hasDirectionLeft () { return this.hasDirection('left') },
+    hasDirectionRight () { return this.hasDirection('right') },
+    hasDirectionBottom () { return this.hasDirection('bottom') },
+    hasDirectionBottomLeft () { return this.hasDirection('bottomleft') },
+    hasDirectionBottomRight () { return this.hasDirection('bottomright') }
   },
   methods: {
-    // bottom
-    // top
-    // left
-    // right
-    // topleft
-    // topright
-    // bottomleft
-    // bottomright
+    hasDirection (direction) {
+      return this.offscreenCards.find(card => {
+        return card.direction === direction
+      })
+    },
     updateDirections () {
-      this.offscreen.map(card => {
+      this.offscreenCards.map(card => {
         let x = ''
         let y = ''
         const scrollX = window.scrollX
@@ -62,7 +69,7 @@ export default {
           const cardX = entry.target.dataset.cardX
           const cardY = entry.target.dataset.cardY
           if (entry.intersectionRatio > 0) {
-            this.offscreen = this.offscreen.filter(card => {
+            this.offscreenCards = this.offscreenCards.filter(card => {
               return card.id !== cardId
             })
           } else {
@@ -71,12 +78,12 @@ export default {
               x: cardX,
               y: cardY
             }
-            this.offscreen.push(card)
+            this.offscreenCards.push(card)
           }
         })
 
         this.updateDirections()
-        console.log('🍆', this.offscreen)
+        console.log('🍆', this.offscreenCards)
       })
       cards.forEach(card => {
         observer.observe(card)
@@ -95,4 +102,41 @@ export default {
 </script>
 
 <style lang="stylus">
+height = 12px
+width = 7px
+edge = 4px
+
+.offscreen-markers
+  pointer-events none
+  .marker
+    width width
+    height height
+    background-repeat no-repeat
+    background-size contain
+    position fixed
+    z-index calc(var(--max-z) - 1)
+  .top
+    top edge
+    left "calc(50% -  %s)" % (width / 2)
+  .topleft
+    top edge
+    left edge
+  .topright
+    top edge
+    right edge
+  .left
+    top "calc(50% -  %s)" % (height / 2)
+    left edge
+  .right
+    top "calc(50% -  %s)" % (height / 2)
+    right edge
+  .bottom
+    bottom edge
+    left "calc(50% -  %s)" % (width / 2)
+  .bottomleft
+    bottom edge
+    left edge
+  .bottomright
+    bottom edge
+    right edge
 </style>

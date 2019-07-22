@@ -212,4 +212,7 @@ ul
 .anon-avatar
   background-image url('assets/anon-avatar.svg')
   background-size 70%
+
+.marker
+  background-image url('assets/marker.svg')
 </style>
