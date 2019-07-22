@@ -7,6 +7,8 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog")
         placeholder="Tell me your dreams"
         v-model="name"
         v-focus
+        @keydown.enter="blurField"
+        @keydown.esc="blurFieldAndHide"
       )
     button(@click="removeCard")
       img.icon(src="@/assets/remove.svg")
@@ -64,6 +66,16 @@ export default {
     }
   },
   methods: {
+    blurField (event) {
+      if (!event.shiftKey) {
+        event.preventDefault()
+        event.target.blur()
+      }
+    },
+    blurFieldAndHide (event) {
+      this.blurField(event)
+      this.$store.commit('closeAllDialogs')
+    },
     removeCard () {
       this.$store.dispatch('currentSpace/removeCard', this.card.id)
     },
