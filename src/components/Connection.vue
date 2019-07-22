@@ -34,6 +34,7 @@ export default {
       this.$store.commit('currentSpace/connectionDetailsVisible', this.id)
       this.$store.commit('connectionDetailsIsVisible', true)
       this.$store.commit('connectionDetailsPosition', detailsPosition)
+      this.$store.commit('multipleCardsSelected', [])
     }
   }
 }

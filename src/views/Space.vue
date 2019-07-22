@@ -359,9 +359,7 @@ export default {
       const withinX = position.x > 0 && position.x < this.$store.state.pageWidth
       const withinY = position.y > 0 && position.y < this.$store.state.pageHeight
       if (withinX && withinY) {
-        this.$store.dispatch('currentSpace/addCard', {
-          position
-        })
+        this.$store.dispatch('currentSpace/addCard', { position })
       }
     },
 
@@ -374,8 +372,12 @@ export default {
       if (this.isDrawingConnection) {
         this.createConnection()
       }
+      // if (this.isDraggingCard) {
+      //   this.$store.commit('multipleCardActionsIsVisible', false)
+      // }
       if (this.$store.state.shouldAddNewCard) {
         const position = utils.cursorPositionInPage(event)
+        // TODO add card defaults to details visible true so you can edit, so why doesn't it trigger the carddetails visibility watcher????
         this.addNewCard(position)
       }
       this.$store.commit('shouldAddNewCard', false)
