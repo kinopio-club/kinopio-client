@@ -7,8 +7,9 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog")
         placeholder="Tell me your dreams"
         v-model="name"
         v-focus
-        @keydown.enter="blurField"
-        @keydown.esc="blurFieldAndHide"
+        @keydown.enter="completeEditing"
+        @keydown.esc="cancelEditing"
+        data-type="name"
       )
     button(@click="removeCard")
       img.icon(src="@/assets/remove.svg")
@@ -18,7 +19,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog")
 <script>
 import utils from '@/utils.js'
 
-let observer
+let observer, isNewCard, previousFieldValue
 
 export default {
   name: 'CardDetails',
@@ -29,7 +30,12 @@ export default {
     focus: {
       inserted (element) {
         if (element.value.length === 0) {
+          isNewCard = true
+          previousFieldValue = undefined
           element.focus()
+        } else {
+          isNewCard = false
+          previousFieldValue = element.value
         }
       }
     }
@@ -72,8 +78,21 @@ export default {
         event.target.blur()
       }
     },
-    blurFieldAndHide (event) {
-      this.blurField(event)
+    completeEditing (event) {
+      if (isNewCard) {
+        this.$store.commit('closeAllDialogs')
+      } else {
+        this.blurField(event)
+      }
+    },
+    cancelEditing (event) {
+      const type = event.target.dataset.type
+      const options = {
+        type: type,
+        value: previousFieldValue,
+        cardId: this.card.id
+      }
+      this.$store.commit('currentSpace/updateCardDetails', options)
       this.$store.commit('closeAllDialogs')
     },
     removeCard () {
