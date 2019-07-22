@@ -81,7 +81,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      observer = new IntersectionObserver((entries, observer) => {
+      observer = new IntersectionObserver((entries) => {
         let top, left
         entries.forEach(entry => {
           if (!entry.isIntersecting) {

@@ -8,6 +8,8 @@ article(:style="position" :data-card-id="id")
     :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged}",
     :style="selectedColor"
     :data-card-id="id"
+    :data-card-x="x"
+    :data-card-y="y"
   )
     p.name {{name}}
     .connector(
