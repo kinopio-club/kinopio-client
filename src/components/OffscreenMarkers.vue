@@ -102,8 +102,8 @@ export default {
 </script>
 
 <style lang="stylus">
-height = 14px
-width = 8px
+height = 18px
+width = 12px
 edge = 4px
 
 .offscreen-markers
@@ -115,6 +115,7 @@ edge = 4px
     background-size contain
     position fixed
     z-index calc(var(--max-z) - 1)
+    opacity 0.3
   .top
     top edge
     left "calc(50% -  %s)" % (width / 2)
