@@ -45,7 +45,9 @@ export default {
   },
   methods: {
     toggleAboutIsVisible () {
-      this.aboutIsVisible = !this.aboutIsVisible
+      const isVisible = this.aboutIsVisible
+      this.$store.commit('closeAllDialogs')
+      this.aboutIsVisible = !isVisible
     }
   }
 }
