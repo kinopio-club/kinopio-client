@@ -56,7 +56,9 @@ export default {
       currentConnectionColor: undefined
     }
   },
-
+  created () {
+    this.$store.commit('currentUser/restoreFromCache')
+  },
   mounted () {
     // bind events to window to receive events when mouse is outside window
     window.addEventListener('mousemove', this.interact)

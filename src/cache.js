@@ -15,17 +15,24 @@ export default {
     } catch (error) {}
   },
 
-  getUser () {
+  // user
+
+  getLocalUser () {
     return this.getLocal('user') || {}
   },
 
-  getUserProperty (key) {
-    return this.getUser()[key]
+  getUser (key) {
+    return this.getLocalUser()[key]
   },
 
-  updateUserProperties (key, value) {
-    let prefs = this.getUser()
+  updateUser (key, value) {
+    let prefs = this.getLocalUser()
     prefs[key] = value
     this.storeLocal('user', prefs)
   }
+
+  // space
+
+  // [have to pass space id to methods]
+
 }

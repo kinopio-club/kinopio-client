@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import utils from '@/utils.js'
+import cache from '@/cache.js'
 import randomColor from 'randomcolor'
 import nanoid from 'nanoid'
 import _ from 'lodash'
@@ -30,9 +31,18 @@ const currentUser = {
   mutations: {
     updateColor: (state, newColor) => {
       state.color = newColor
+      cache.updateUser('color', newColor)
     },
     updateName: (state, newName) => {
       state.name = newName
+      cache.updateUser('name', newName)
+    },
+    restoreFromCache: (state) => {
+      const cachedUser = cache.getLocalUser()
+      if (!cachedUser) { return }
+      Object.keys(cachedUser).forEach(item => {
+        state[item] = cachedUser[item]
+      })
     }
   }
 }
