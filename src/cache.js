@@ -26,13 +26,25 @@ export default {
   },
 
   updateUser (key, value) {
-    let prefs = this.getLocalUser()
-    prefs[key] = value
-    this.storeLocal('user', prefs)
-  }
+    let user = this.getLocalUser()
+    user[key] = value
+    this.storeLocal('user', user)
+  },
 
   // space
 
-  // [have to pass space id to methods]
+  getLocalSpace (spaceId) {
+    return this.getLocal(`space-${spaceId}`) || {}
+  },
+
+  getSpace (key, spaceId) {
+    return this.getLocalSpace(spaceId)[key]
+  },
+
+  updateSpace (key, value, spaceId) {
+    let space = this.getLocalSpace(spaceId)
+    space[key] = value
+    this.storeLocal(`space-${spaceId}`, space)
+  }
 
 }
