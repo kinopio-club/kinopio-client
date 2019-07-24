@@ -143,6 +143,9 @@ const currentSpace = {
       console.log('🚃 restoreSpace', newSpace)
       state = newSpace
     },
+    createSpace: (state) => {
+      cache.createSpace(state)
+    },
 
     // cards
     incrementCardZ: (state, cardId) => {
@@ -272,7 +275,7 @@ const currentSpace = {
       if (utils.objectHasKeys(cachedSpace)) {
         context.commit('restoreSpace', cachedSpace)
       } else {
-        cache.createSpace(context.state)
+        context.commit('createSpace')
       }
     },
 
