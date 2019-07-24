@@ -10,7 +10,7 @@ Vue.use(Vuex)
 const currentUser = {
   namespaced: true,
   state: {
-    id: 1,
+    id: '1',
     color: randomColor({ luminosity: 'light' }),
     name: undefined
   },
@@ -38,6 +38,7 @@ const currentUser = {
 }
 
 const currentSpace = {
+  id: '1',
   namespaced: true,
   state: {
     // users: [
