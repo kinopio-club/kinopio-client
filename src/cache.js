@@ -45,6 +45,10 @@ export default {
     let space = this.getLocalSpace(spaceId)
     space[key] = value
     this.storeLocal(`space-${spaceId}`, space)
+  },
+
+  createSpace (space) {
+    this.storeLocal(`space-${space.id}`, space)
   }
 
 }

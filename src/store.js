@@ -18,15 +18,13 @@ const currentUser = {
   getters: {
     isCurrentUser: (state) => (userId) => {
       return Boolean(state.id === userId)
+    },
+    isMember: (state, getters, rootState) => {
+      const inCurrentSpace = rootState.currentSpace.users.find(user => {
+        return user.id === state.id
+      })
+      return Boolean(inCurrentSpace)
     }
-    // isMember (state, getters, rootState) {
-    //   const inCurrentSpace = rootState.currentSpace.users.some(user => {
-    //     return user.id === state.id
-    //   })
-    //   if (inCurrentSpace) {
-    //     return true
-    //   } else { return false }
-    // }
   },
   mutations: {
     updateColor: (state, newColor) => {
@@ -37,32 +35,38 @@ const currentUser = {
       state.name = newName
       cache.updateUser('name', newName)
     },
-    restoreFromCache: (state) => {
-      const cachedUser = cache.getLocalUser()
-      if (!cachedUser) { return }
-      Object.keys(cachedUser).forEach(item => {
-        state[item] = cachedUser[item]
+    restoreUser: (state, user) => {
+      Object.keys(user).forEach(item => {
+        state[item] = user[item]
       })
+    }
+  },
+  actions: {
+    restoreFromCache: (context) => {
+      const cachedUser = cache.getLocalUser()
+      if (cachedUser) {
+        context.commit('restoreUser', cachedUser)
+      }
     }
   }
 }
 
 const currentSpace = {
-  id: '1',
   namespaced: true,
   state: {
-    // users: [
-    //   {
-    //     id: '1',
-    //     color: 'cyan'
-    //     name: undefined
-    //   },
-    //   {
-    //     id: '2',
-    //     color: 'pink'
-    //     name: 'maya'
-    //   }
-    // ],
+    id: '1',
+    users: [
+      {
+        id: '1',
+        color: 'cyan',
+        name: undefined
+      },
+      {
+        id: '2',
+        color: 'pink',
+        name: 'maya'
+      }
+    ],
     cards: [
       {
         id: '1',
@@ -130,6 +134,11 @@ const currentSpace = {
   },
 
   mutations: {
+    restoreSpace: (state, newSpace) => {
+      console.log('🚃 restoreSpace', newSpace)
+      state = newSpace
+    },
+
     // cards
     incrementCardZ: (state, cardId) => {
       state.cards.map((card, index) => {
@@ -251,6 +260,18 @@ const currentSpace = {
   },
 
   actions: {
+    // cache
+    restoreFromCache: (context) => {
+      const currentUserIsMember = context.rootGetters['currentUser/isMember']
+      if (!currentUserIsMember) { return }
+      const cachedSpace = cache.getLocalSpace(context.state.id)
+      if (utils.objectHasKeys(cachedSpace)) {
+        context.commit('restoreSpace', cachedSpace)
+      } else {
+        cache.createSpace(context.state)
+      }
+    },
+
     // cards
     addCard: (context, { position, contents }) => {
       utils.typeCheck(position, 'object')
