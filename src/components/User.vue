@@ -1,7 +1,13 @@
 <template lang="pug">
-.user.anon-avatar(:style="{backgroundColor: user.color}" @click="showUserDetails" @touchend.stop="showUserDetails" ref="user")
+.user.anon-avatar(
+  @mouseup.stop="toggleUserDetails"
+  @touchend.stop="toggleUserDetails"
+  ref="user"
+  :class="{ clickable: clickable }"
+  :style="{backgroundColor: user.color}"
+)
   template(v-if="clickable")
-    UserDetails(:user="user" :detailsOnRight="detailsOnRight")
+    UserDetails(:visible="userDetailsIsVisible" :user="user" :detailsOnRight="detailsOnRight")
 </template>
 
 <script>
@@ -17,6 +23,18 @@ export default {
     user: Object,
     detailsOnRight: Boolean
   },
+  data () {
+    return {
+      userDetailsIsVisible: false
+    }
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'closeAllDialogs') {
+        this.userDetailsIsVisible = false
+      }
+    })
+  },
   methods: {
     // displaySide () {
     //     //   const dialogFromRight = this.$refs.user.getBoundingClientRect().right
@@ -27,10 +45,9 @@ export default {
     //     // }
     // },
 
-    showUserDetails () {
-      if (this.clickable) {
-        this.$store.commit('userDetailsIsVisible', true)
-      }
+    toggleUserDetails () {
+      if (!this.clickable) { return }
+      this.userDetailsIsVisible = !this.userDetailsIsVisible
     }
   }
 }
@@ -48,4 +65,6 @@ export default {
     box-shadow var(--button-hover-shadow)
   &:active
     box-shadow var(--button-active-inset-shadow)
+  &.clickable
+    cursor pointer
 </style>

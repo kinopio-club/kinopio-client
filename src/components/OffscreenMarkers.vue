@@ -83,7 +83,6 @@ export default {
         })
 
         this.updateDirections()
-        console.log('🍆', this.offscreenCards)
       })
       cards.forEach(card => {
         observer.observe(card)

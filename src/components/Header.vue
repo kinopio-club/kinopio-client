@@ -1,22 +1,51 @@
 <template lang="pug">
 header
   nav
-    img.logo(alt="logo" src="@/assets/logo.png" width="50" height="45")
+    .logo
+      img(
+        alt="kinopio logo"
+        src="@/assets/logo.png"
+        width="50"
+        height="45"
+        @mouseup.stop="toggleAboutIsVisible"
+        @touchend.stop="toggleAboutIsVisible"
+      )
+      About(:visible="aboutIsVisible")
+
   aside
     User(:user="currentUser" :clickable="true" :detailsOnRight="true" :key="currentUser.id")
 </template>
 
 <script>
+import About from '@/components/dialogs/About.vue'
 import User from '@/components/User.vue'
 
 export default {
   name: 'Header',
   components: {
+    About,
     User
+  },
+  data () {
+    return {
+      aboutIsVisible: false
+    }
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'closeAllDialogs') {
+        this.aboutIsVisible = false
+      }
+    })
   },
   computed: {
     currentUser () {
       return this.$store.state.currentUser
+    }
+  },
+  methods: {
+    toggleAboutIsVisible () {
+      this.aboutIsVisible = !this.aboutIsVisible
     }
   }
 }
@@ -37,7 +66,10 @@ header
   aside
     pointer-events all
   .user
-    cursor pointer
     float right
     position relative
+  .logo
+    position relative
+    img
+      cursor pointer
 </style>

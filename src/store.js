@@ -73,7 +73,7 @@ const currentSpace = {
       },
       {
         id: '3',
-        x: 500,
+        x: 550,
         y: 150,
         z: 2,
         name: 'click and drag me',
@@ -387,10 +387,7 @@ export default new Vuex.Store({
     multipleCardsSelected: [], // ids
     multipleCardActionsIsVisible: false,
     multipleCardActionsPosition: {},
-    cardMap: [],
-
-    // user
-    userDetailsIsVisible: false
+    cardMap: []
   },
 
   mutations: {
@@ -419,7 +416,6 @@ export default new Vuex.Store({
       })
       state.connectionDetailsIsVisible = false
       state.multipleCardActionsIsVisible = false
-      state.userDetailsIsVisible = false
     },
     shouldAddNewCard: (state, value) => {
       utils.typeCheck(value, 'boolean')
@@ -512,12 +508,6 @@ export default new Vuex.Store({
     multipleCardActionsPosition: (state, position) => {
       utils.typeCheck(position, 'object')
       state.multipleCardActionsPosition = position
-    },
-
-    // user
-    userDetailsIsVisible: (state, value) => {
-      utils.typeCheck(value, 'boolean')
-      state.userDetailsIsVisible = value
     }
   },
 

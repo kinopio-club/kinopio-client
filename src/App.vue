@@ -83,6 +83,7 @@ textarea
 
 button,
 label // used for checkbox buttons
+  text-align left
   padding 7px
   padding-top 2px
   padding-bottom 3px

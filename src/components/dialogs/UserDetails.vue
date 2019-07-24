@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeColorPicker" :style="backgroundColor" :class="{'right-side': detailsOnRight}")
+dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeColorPicker" :style="backgroundColor" :class="{'right-side': detailsOnRight}")
   section(v-if="isCurrentUser")
     .row
       button.change-color(@click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
@@ -20,7 +20,8 @@ export default {
   },
   props: {
     user: Object,
-    detailsOnRight: Boolean
+    detailsOnRight: Boolean,
+    visible: Boolean
   },
   data () {
     return {
@@ -28,9 +29,6 @@ export default {
     }
   },
   computed: {
-    visible () {
-      return this.$store.state.userDetailsIsVisible
-    },
     userColor () {
       return this.user.color
     },
