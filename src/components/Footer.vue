@@ -1,6 +1,6 @@
 <template lang="pug">
 footer
-  span Prototype {{buildHash}}
+  span Beta {{buildHash}}
 </template>
 
 <script>
