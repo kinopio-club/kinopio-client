@@ -379,6 +379,7 @@ export default new Vuex.Store({
     currentConnectionCursorStart: {},
     connectionDetailsIsVisible: false,
     connectionDetailsPosition: {}, // x, y
+    defaultConnectionTypeId: '', // id
 
     // dragging
     currentDraggingCardId: '', // id
@@ -440,6 +441,10 @@ export default new Vuex.Store({
       let object = state.currentConnection
       object = utils.updateObject(object, updates)
       state.currentConnection = object
+    },
+    defaultConnectionTypeId: (state, value) => {
+      utils.typeCheck(value, 'string')
+      state.defaultConnectionTypeId = value
     },
 
     // painting

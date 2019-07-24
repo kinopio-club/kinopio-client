@@ -25,7 +25,6 @@ dialog.narrow(v-if="visible" :open="visible" :style="position" @click="closeColo
 
 <script>
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import utils from '@/utils.js'
 
 let observer
 
@@ -100,15 +99,15 @@ export default {
       this.updateDefaultConnectionType()
     },
     updateDefaultConnectionType () {
-      const typePref = utils.getUserPref('defaultConnectionTypeId')
+      const typePref = this.$store.state.defaultConnectionTypeId
       this.isDefault = Boolean(typePref === this.currentConnectionType.id)
     },
     toggleDefault () {
       this.isDefault = !this.isDefault
       if (this.isDefault) {
-        utils.updateUserPrefs('defaultConnectionTypeId', this.currentConnectionType.id)
+        this.$store.commit('defaultConnectionTypeId', this.currentConnectionType.id)
       } else {
-        utils.updateUserPrefs('defaultConnectionTypeId', '')
+        this.$store.commit('defaultConnectionTypeId', '')
       }
     },
     toggleColorPicker () {
