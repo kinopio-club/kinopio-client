@@ -1,5 +1,13 @@
 <template lang="pug">
-dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeColorPicker" :style="backgroundColor" :class="{'right-side': detailsOnRight}")
+dialog.narrow.user-details(
+  v-if="visible"
+  :open="visible"
+  @click="closeColorPicker"
+  :style="backgroundColor"
+  :class="{'right-side': detailsOnRight}"
+  @mouseup.stop
+  @touchend.stop
+)
   section(v-if="isCurrentUser")
     .row
       button.change-color(@click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
