@@ -3,7 +3,6 @@ dialog.narrow.user-details(
   v-if="visible"
   :open="visible"
   @click="closeColorPicker"
-  :style="backgroundColor"
   :class="{'right-side': detailsOnRight}"
   @mouseup.stop
   @touchend.stop

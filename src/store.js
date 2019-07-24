@@ -39,13 +39,18 @@ const currentUser = {
       Object.keys(user).forEach(item => {
         state[item] = user[item]
       })
+    },
+    createUser: (state) => {
+      cache.createUser(state)
     }
   },
   actions: {
     restoreFromCache: (context) => {
       const cachedUser = cache.getLocalUser()
-      if (cachedUser) {
+      if (utils.objectHasKeys(cachedUser)) {
         context.commit('restoreUser', cachedUser)
+      } else {
+        context.commit('createUser')
       }
     }
   }
@@ -260,7 +265,6 @@ const currentSpace = {
   },
 
   actions: {
-    // cache
     restoreFromCache: (context) => {
       const currentUserIsMember = context.rootGetters['currentUser/isMember']
       if (!currentUserIsMember) { return }

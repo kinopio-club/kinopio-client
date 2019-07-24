@@ -215,8 +215,15 @@ export default {
       }
     },
 
+    shouldCancel (event) {
+      const fromDialog = event.target.closest('dialog')
+      const fromHeader = event.target.closest('header')
+      const fromFooter = event.target.closest('footer')
+      return fromDialog || fromHeader || fromFooter
+    },
+
     stopPainting (event) {
-      if (event.target.closest('dialog')) { return }
+      if (this.shouldCancel(event)) { return }
       startCursor = startCursor || {}
       const endCursor = utils.cursorPositionInPage(event)
       const isMultipleCardsSelected = Boolean(this.$store.state.multipleCardsSelected.length)
@@ -227,7 +234,6 @@ export default {
       lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       this.$store.commit('currentUserIsPaintingLocked', false)
       this.$store.commit('currentUserIsPainting', false)
-      this.$store.commit('closeAllDialogs')
       if (isMultipleCardsSelected) {
         this.$store.commit('multipleCardActionsPosition', endCursor)
         this.$store.commit('multipleCardActionsIsVisible', true)

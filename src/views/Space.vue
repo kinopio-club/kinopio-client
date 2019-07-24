@@ -369,11 +369,18 @@ export default {
       }
     },
 
+    shouldCancel (event) {
+      const fromDialog = event.target.closest('dialog')
+      const fromHeader = event.target.closest('header')
+      const fromFooter = event.target.closest('footer')
+      return fromDialog || fromHeader || fromFooter
+    },
+
     stopInteractions (event) {
-      console.log('💣 stopInteractions')
+      console.log('💣 stopInteractions') // stopInteractions and Space/stopPainting are run on all mouse and touch end events
       window.cancelAnimationFrame(scrollTimer)
       scrollTimer = undefined
-      if (event.target.closest('dialog')) { return }
+      if (this.shouldCancel(event)) { return }
       if (this.shouldContinueConnecting()) { return }
       if (this.isDrawingConnection) {
         this.createConnection()
@@ -383,7 +390,6 @@ export default {
       // }
       if (this.$store.state.shouldAddNewCard) {
         const position = utils.cursorPositionInPage(event)
-        // TODO add card defaults to details visible true so you can edit, so why doesn't it trigger the carddetails visibility watcher????
         this.addNewCard(position)
       }
       this.$store.commit('shouldAddNewCard', false)

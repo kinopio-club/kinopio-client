@@ -15,8 +15,9 @@ export default {
     exportToJSON () {
       const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.$store.state.currentSpace))
       const downloadAnchor = document.getElementById('downlaod-anchor')
+      const spaceId = this.$store.state.currentSpace.id
       downloadAnchor.setAttribute('href', json)
-      downloadAnchor.setAttribute('download', 'kinopio-space.json')
+      downloadAnchor.setAttribute('download', `kinopio-space-${spaceId}.json`)
       downloadAnchor.click()
     }
   }

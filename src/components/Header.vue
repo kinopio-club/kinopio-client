@@ -7,8 +7,7 @@ header
         src="@/assets/logo.png"
         width="50"
         height="45"
-        @mouseup.stop="toggleAboutIsVisible"
-        @touchend.stop="toggleAboutIsVisible"
+        @click.stop="toggleAboutIsVisible"
       )
       About(:visible="aboutIsVisible")
 
@@ -46,7 +45,6 @@ export default {
   methods: {
     toggleAboutIsVisible () {
       const isVisible = this.aboutIsVisible
-      this.$store.commit('closeAllDialogs')
       this.aboutIsVisible = !isVisible
     }
   }
