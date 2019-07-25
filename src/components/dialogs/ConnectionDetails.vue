@@ -21,10 +21,10 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
         li(:class="{ active: connectionTypeIsActive(type.id) }" @click="changeConnectionType(type)" :key="type.id")
           .badge(:style="{backgroundColor: type.color}" :class="{checked: connectionTypeIsDefault(type.id)}")
           .name {{type.name}}
-
-    button(@click="addConnectionType")
-      img.icon(src="@/assets/add.svg")
-      span Add
+    .results-section-actions
+      button(@click="addConnectionType")
+        img.icon(src="@/assets/add.svg")
+        span Add
 </template>
 
 <script>

@@ -225,12 +225,14 @@ const currentSpace = {
       connection.connectionTypeId = connectionType.id
       connection.connectionDetailsVisible = false
       state.connections.push(connection)
+      cache.saveSpace(state)
     },
     removeConnection: (state, connectionId) => {
       const connections = state.connections.filter(connection => {
         return connection.id !== connectionId
       })
       state.connections = connections
+      cache.saveSpace(state)
     },
     connectionDetailsVisible: (state, connectionId) => {
       state.connections.map(connection => {
@@ -243,6 +245,7 @@ const currentSpace = {
       state.connections.map(connection => {
         connection.connectionDetailsVisible = false
       })
+      cache.saveSpace(state)
     },
     removeConnectionsFromCard: (state, cardId) => {
       const connections = state.connections.filter(connection => {
@@ -250,6 +253,7 @@ const currentSpace = {
         return !isConnectedToCard
       })
       state.connections = connections
+      cache.saveSpace(state)
     },
 
     // connection types
@@ -260,6 +264,7 @@ const currentSpace = {
         color: color || randomColor({ luminosity: 'light' })
       }
       state.connectionTypes.push(connectionType)
+      cache.saveSpace(state)
     },
     removeUnusedConnectionTypes: (state) => {
       const connections = state.connections.map(connection => {
@@ -269,6 +274,7 @@ const currentSpace = {
         return connections.includes(type.id)
       })
       state.connectionTypes = usedConnectionTypes
+      cache.saveSpace(state)
     },
     updateConnectionTypeName: (state, { connectionTypeId, newName }) => {
       state.connectionTypes.map(type => {
@@ -276,6 +282,7 @@ const currentSpace = {
           type.name = newName
         }
       })
+      cache.saveSpace(state)
     },
     updateConnectionTypeColor: (state, { connectionTypeId, newColor }) => {
       state.connectionTypes.map(type => {
@@ -283,6 +290,7 @@ const currentSpace = {
           type.color = newColor
         }
       })
+      cache.saveSpace(state)
     },
     changeConnectionType: (state, { connectionId, connectionTypeId }) => {
       state.connections.map(connection => {
@@ -290,6 +298,7 @@ const currentSpace = {
           connection.connectionTypeId = connectionTypeId
         }
       })
+      cache.saveSpace(state)
     }
   },
 

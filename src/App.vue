@@ -141,8 +141,6 @@ dialog
   p + button,
   button + p
     margin-top 10px
-  ul + button
-    margin-top 3px
   .row
     margin-bottom 10px
     display flex
@@ -191,6 +189,9 @@ label
 
 .results-section
   padding 4px
+  .results-section-actions
+    margin 4px
+    margin-top 3px
 ul
   margin 0
   padding 0
