@@ -277,7 +277,7 @@ export default {
       this.checkCurrentConnectionSuccess()
       this.currentConnectionPath = path
       // type color
-      const typePref = this.$store.state.defaultConnectionTypeId
+      const typePref = this.$store.state.currentUser.defaultConnectionTypeId
       const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
       if (defaultType) {
         this.currentConnectionColor = defaultType.color
@@ -330,7 +330,7 @@ export default {
     },
 
     addConnection (connection) {
-      const typePref = this.$store.state.defaultConnectionTypeId
+      const typePref = this.$store.state.currentUser.defaultConnectionTypeId
       const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
       const lastConnectionType = _.last(this.$store.state.currentSpace.connectionTypes)
       const connectionType = defaultType || lastConnectionType

@@ -108,7 +108,7 @@ export default {
       this.$store.commit('currentConnectionCursorStart', cursor)
     },
     addConnectionType () {
-      const typePref = this.$store.state.defaultConnectionTypeId
+      const typePref = this.$store.state.currentUser.defaultConnectionTypeId
       const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
       if (!defaultType) {
         this.$store.commit('currentSpace/addConnectionType', {})

@@ -13,7 +13,8 @@ const currentUser = {
   state: {
     id: '1',
     color: randomColor({ luminosity: 'light' }),
-    name: undefined
+    name: undefined,
+    defaultConnectionTypeId: ''
   },
   getters: {
     isCurrentUser: (state) => (userId) => {
@@ -34,6 +35,10 @@ const currentUser = {
     updateName: (state, newName) => {
       state.name = newName
       cache.updateUser('name', newName)
+    },
+    defaultConnectionTypeId: (state, typeId) => {
+      state.defaultConnectionTypeId = typeId
+      cache.updateUser('defaultConnectionTypeId', typeId)
     },
     restoreUser: (state, user) => {
       Object.keys(user).forEach(item => {
@@ -437,7 +442,6 @@ export default new Vuex.Store({
     currentConnectionCursorStart: {},
     connectionDetailsIsVisible: false,
     connectionDetailsPosition: {}, // x, y
-    defaultConnectionTypeId: '', // id
 
     // dragging
     currentDraggingCardId: '', // id
@@ -489,10 +493,6 @@ export default new Vuex.Store({
       let object = state.currentConnection
       object = utils.updateObject(object, updates)
       state.currentConnection = object
-    },
-    defaultConnectionTypeId: (state, value) => {
-      utils.typeCheck(value, 'string')
-      state.defaultConnectionTypeId = value
     },
 
     // painting

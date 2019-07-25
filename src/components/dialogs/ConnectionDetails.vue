@@ -95,15 +95,15 @@ export default {
       this.updateDefaultConnectionType()
     },
     updateDefaultConnectionType () {
-      const typePref = this.$store.state.defaultConnectionTypeId
+      const typePref = this.$store.state.currentUser.defaultConnectionTypeId
       this.isDefault = Boolean(typePref === this.currentConnectionType.id)
     },
     toggleDefault () {
       this.isDefault = !this.isDefault
       if (this.isDefault) {
-        this.$store.commit('defaultConnectionTypeId', this.currentConnectionType.id)
+        this.$store.commit('currentUser/defaultConnectionTypeId', this.currentConnectionType.id)
       } else {
-        this.$store.commit('defaultConnectionTypeId', '')
+        this.$store.commit('currentUser/defaultConnectionTypeId', '')
       }
     },
     toggleColorPicker () {
@@ -136,15 +136,25 @@ export default {
         })
       }, { threshold: 1 })
       observer.observe(element)
+    },
+    updateView () {
+      this.updateDefaultConnectionType()
+      this.colorPickerIsVisible = false
+      this.scrollIntoView()
     }
   },
   watch: {
     visible (visible) {
       this.$nextTick(() => {
         if (visible) {
-          this.updateDefaultConnectionType()
-          this.colorPickerIsVisible = false
-          this.scrollIntoView()
+          this.updateView()
+        }
+      })
+    },
+    currentConnection (current) {
+      this.$nextTick(() => {
+        if (this.visible) {
+          this.updateView()
         }
       })
     }
