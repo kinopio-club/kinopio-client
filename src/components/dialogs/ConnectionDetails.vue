@@ -17,8 +17,8 @@ dialog.narrow(v-if="visible" :open="visible" :style="position" @click="closeColo
 
   section.results-section(v-if="multipleConnectionTypes")
     ul
-      template(v-for="(type in connectionTypesList")
-        li(:class="{ active: type.isActive }" @click="changeConnectionType(type)" :key="type.id")
+      template(v-for="(type in connectionTypes")
+        li(:class="{ active: connectionTypeIsActive(type.id) }" @click="changeConnectionType(type)" :key="type.id")
           .badge(:style="{backgroundColor: type.color}")
           .name {{type.name}}
 </template>
@@ -76,16 +76,12 @@ export default {
     },
     multipleConnectionTypes () {
       return Boolean(this.connectionTypes.length > 1)
-    },
-    connectionTypesList () {
-      let types = this.connectionTypes
-      return types.map(type => {
-        type.isActive = Boolean(type.id === this.currentConnection.connectionTypeId)
-        return type
-      })
     }
   },
   methods: {
+    connectionTypeIsActive (typeId) {
+      return Boolean(typeId === this.currentConnection.connectionTypeId)
+    },
     removeConnection () {
       this.$store.commit('currentSpace/removeConnection', this.currentConnection.id)
       this.$store.commit('closeAllDialogs')
