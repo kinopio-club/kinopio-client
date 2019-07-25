@@ -56,7 +56,7 @@ export default {
       currentConnectionColor: undefined
     }
   },
-  created () {
+  beforeCreate () {
     this.$store.dispatch('currentUser/restoreFromCache')
     this.$store.dispatch('currentSpace/restoreFromCache')
   },
