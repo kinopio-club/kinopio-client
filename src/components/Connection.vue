@@ -30,7 +30,7 @@ export default {
   methods: {
     showConnectionDetails (event) {
       const detailsPosition = utils.cursorPositionInPage(event)
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('currentSpace/connectionDetailsVisible', this.id)
       this.$store.commit('connectionDetailsIsVisible', true)
       this.$store.commit('connectionDetailsPosition', detailsPosition)

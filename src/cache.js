@@ -3,7 +3,7 @@ import _ from 'lodash'
 
 const debouncedSaveSpace = _.debounce((space) => {
   cache.storeLocal(`space-${space.id}`, space)
-}, 500)
+}, 200)
 
 const debouncedUpdateUser = _.debounce((key, value) => {
   let user = cache.user()

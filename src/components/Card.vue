@@ -115,7 +115,7 @@ export default {
       }
     },
     startConnecting (event) {
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.commit('multipleCardsSelected', [])
       if (!this.$store.state.currentUserIsDrawingConnection) {
@@ -132,7 +132,7 @@ export default {
     },
     startDraggingCard () {
       if (this.$store.state.currentUserIsDrawingConnection) { return }
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('currentUserIsDraggingCard', true)
       this.$store.commit('currentDraggingCardId', this.id)
       this.checkIfShouldDragMultipleCards()
@@ -141,7 +141,7 @@ export default {
     showCardDetails (event) {
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       this.$store.commit('currentUserIsDraggingCard', false)
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('currentSpace/cardDetailsVisible', this.id)
       event.stopPropagation() // only stop propagation if cardDetailsVisible
     }

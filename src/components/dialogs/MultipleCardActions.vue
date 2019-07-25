@@ -76,7 +76,7 @@ export default {
       cardIds.forEach(cardId => {
         this.$store.dispatch('currentSpace/removeCard', cardId)
       })
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('multipleCardsSelected', [])
     },
     scrollIntoView () {

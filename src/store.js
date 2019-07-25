@@ -158,6 +158,7 @@ const currentSpace = {
           card.z = state.cards.length + 1
         }
       })
+      cache.saveSpace(state)
     },
     cardDetailsVisible: (state, cardId) => {
       state.cards.map(card => {
@@ -165,6 +166,13 @@ const currentSpace = {
           card.cardDetailsVisible = true
         }
       })
+      cache.saveSpace(state)
+    },
+    cardDetailsNotVisible: (state) => {
+      state.cards.map(card => {
+        card.cardDetailsVisible = false
+      })
+      cache.saveSpace(state)
     },
     updateCardDetails: (state, { type, value, cardId }) => {
       utils.typeCheck(type, 'string')
@@ -173,6 +181,7 @@ const currentSpace = {
           card[type] = value
         }
       })
+      cache.saveSpace(state)
     },
     moveCard: (state, { cardId, delta }) => {
       const maxOffset = 0
@@ -190,15 +199,18 @@ const currentSpace = {
       connections.forEach(connection => {
         connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
       })
+      cache.saveSpace(state)
     },
     createCard: (state, card) => {
       state.cards.push(card)
+      cache.saveSpace(state)
     },
     removeCard: (state, cardId) => {
       const cards = state.cards.filter(card => {
         return card.id !== cardId
       })
       state.cards = cards
+      cache.saveSpace(state)
     },
 
     // connections
@@ -219,6 +231,11 @@ const currentSpace = {
         if (connection.id === connectionId) {
           connection.connectionDetailsVisible = true
         }
+      })
+    },
+    connectionDetailsNotVisible: (state) => {
+      state.connections.map(connection => {
+        connection.connectionDetailsVisible = false
       })
     },
     removeConnectionsFromCard: (state, cardId) => {
@@ -450,16 +467,6 @@ export default new Vuex.Store({
       utils.typeCheck(width, 'number')
       state.pageWidth = width
     },
-    closeAllDialogs: (state) => {
-      state.currentSpace.cards.map(card => {
-        card.cardDetailsVisible = false
-      })
-      state.currentSpace.connections.map(connection => {
-        connection.connectionDetailsVisible = false
-      })
-      state.connectionDetailsIsVisible = false
-      state.multipleCardActionsIsVisible = false
-    },
     shouldAddNewCard: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.shouldAddNewCard = value
@@ -555,6 +562,10 @@ export default new Vuex.Store({
     multipleCardActionsPosition: (state, position) => {
       utils.typeCheck(position, 'object')
       state.multipleCardActionsPosition = position
+    },
+    closeAllDialogs: (state) => {
+      state.connectionDetailsIsVisible = false
+      state.multipleCardActionsIsVisible = false
     }
   },
 
@@ -570,7 +581,13 @@ export default new Vuex.Store({
       if (isCurrentUser) {
         context.commit('currentUser/updateName', newName)
       }
+    },
+    closeAllDialogs: (context) => {
+      context.commit('currentSpace/cardDetailsNotVisible')
+      context.commit('currentSpace/connectionDetailsNotVisible')
+      context.commit('closeAllDialogs')
     }
+
   },
 
   getters: {
