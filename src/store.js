@@ -87,7 +87,7 @@ const currentSpace = {
         x: 20,
         y: 250,
         z: 1,
-        name: 'connect me!',
+        name: 'XYZ connect me!',
         cardDetailsVisible: false,
         archived: false
       },
@@ -140,8 +140,11 @@ const currentSpace = {
 
   mutations: {
     restoreSpace: (state, newSpace) => {
-      console.log('🚃 restoreSpace', newSpace)
-      state = newSpace
+      const keys = Object.keys(state)
+      keys.forEach(key => {
+        state[key] = newSpace[key]
+      })
+      console.log('🚃 Restored Space from cache', newSpace)
     },
     cacheSpace: (state) => {
       cache.saveSpace(state)
