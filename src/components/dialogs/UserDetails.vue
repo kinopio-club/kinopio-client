@@ -4,8 +4,6 @@ dialog.narrow.user-details(
   :open="visible"
   @click="closeColorPicker"
   :class="{'right-side': detailsOnRight}"
-  @mouseup.stop
-  @touchend.stop
 )
   section(v-if="isCurrentUser")
     .row

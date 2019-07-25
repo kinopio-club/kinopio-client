@@ -1,11 +1,12 @@
 <template lang="pug">
-.user.anon-avatar(
-  @mouseup.stop="toggleUserDetails"
-  @touchend.stop="toggleUserDetails"
-  ref="user"
-  :class="{ clickable: clickable }"
-  :style="{backgroundColor: user.color}"
-)
+.user
+  .user-avatar.anon-avatar(
+    @mouseup.stop="toggleUserDetails"
+    @touchend.stop="toggleUserDetails"
+    ref="user"
+    :class="{ clickable: clickable }"
+    :style="{backgroundColor: user.color}"
+  )
   template(v-if="clickable")
     UserDetails(:visible="userDetailsIsVisible" :user="user" :detailsOnRight="detailsOnRight")
 </template>
@@ -46,6 +47,7 @@ export default {
     // },
 
     toggleUserDetails () {
+      console.log('toggleUserDetails')
       if (!this.clickable) { return }
       this.userDetailsIsVisible = !this.userDetailsIsVisible
     }
@@ -54,7 +56,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.user
+.user-avatar
   width 22px
   height 22px
   background-repeat no-repeat
