@@ -1,6 +1,7 @@
 <template lang="pug">
 dialog.narrow.about(v-if="visible" :open="visible")
   section
+    p {{kaomoji}}
     button(@click="exportToJSON")
       span Export to JSON
     a#downlaod-anchor.hidden
@@ -11,6 +12,11 @@ export default {
   name: 'About',
   props: {
     visible: Boolean
+  },
+  data () {
+    return {
+      kaomoji: '༼ つ ◕_◕ ༽つ'
+    }
   },
   methods: {
     exportToJSON () {
@@ -28,4 +34,6 @@ export default {
 <style lang="stylus">
 .hidden
   display none
+.about
+  top calc(100% - 8px)
 </style>

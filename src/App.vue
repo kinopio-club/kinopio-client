@@ -136,6 +136,11 @@ dialog
   button + label,
   label + button
     margin-left 6px
+  p
+    margin 0
+  p + button,
+  button + p
+    margin-top 10px
   .row
     margin-bottom 10px
     display flex

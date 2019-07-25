@@ -84,6 +84,7 @@ export default {
 <style lang="stylus">
 .user-details
   cursor: initial
+  top calc(100% - 8px)
   .row
     margin 0
   &.right-side

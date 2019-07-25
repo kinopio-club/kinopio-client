@@ -8,6 +8,8 @@ header
         width="50"
         height="45"
         @click.stop="toggleAboutIsVisible"
+        @touchend.stop
+        @mouseup.stop
       )
       About(:visible="aboutIsVisible")
 
