@@ -1,7 +1,8 @@
 <template lang="pug">
 dialog.narrow.about(v-if="visible" :open="visible")
   section
-    button(@click="exportToJSON") Export to JSON
+    button(@click="exportToJSON")
+      span Export to JSON
     a#downlaod-anchor.hidden
 </template>
 
