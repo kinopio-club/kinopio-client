@@ -1,6 +1,17 @@
-// local storage cache system for currentUser and spaces
+// local storage cache interface for currentUser and spaces
+import _ from 'lodash'
 
-export default {
+const debouncedSaveSpace = _.debounce((space) => {
+  cache.storeLocal(`space-${space.id}`, space)
+}, 500)
+
+const debouncedUpdateUser = _.debounce((key, value) => {
+  let user = cache.user()
+  user[key] = value
+  cache.storeLocal('user', user)
+}, 200, { leading: true })
+
+const cache = {
   storeLocal (key, value) {
     try {
       window.localStorage[key] = JSON.stringify(value)
@@ -16,34 +27,34 @@ export default {
 
   // user
 
-  getLocalUser () {
+  user () {
     return this.getLocal('user') || {}
   },
   getUser (key) {
-    return this.getLocalUser()[key]
+    return this.user()[key]
   },
   updateUser (key, value) {
-    let user = this.getLocalUser()
-    user[key] = value
-    this.storeLocal('user', user)
+    debouncedUpdateUser(key, value)
   },
-  createUser (user) {
-    this.storeLocal('user', user)
+  saveUser (user) {
+    cache.storeLocal('user', user)
   },
 
   // space
-  getLocalSpace (spaceId) {
+  space (spaceId) {
     return this.getLocal(`space-${spaceId}`) || {}
   },
   getSpace (key, spaceId) {
-    return this.getLocalSpace(spaceId)[key]
+    return this.space(spaceId)[key]
   },
-  updateSpace (key, value, spaceId) {
-    let space = this.getLocalSpace(spaceId)
-    space[key] = value
-    this.storeLocal(`space-${spaceId}`, space)
-  },
-  createSpace (space) {
-    this.storeLocal(`space-${space.id}`, space)
+  // updateSpace (key, value, spaceId) {
+  //   let space = this.space(spaceId)
+  //   space[key] = value
+  //   this.storeLocal(`space-${spaceId}`, space)
+  // },
+  saveSpace (space) {
+    debouncedSaveSpace(space)
   }
 }
+
+export default cache

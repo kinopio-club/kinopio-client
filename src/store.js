@@ -40,17 +40,17 @@ const currentUser = {
         state[item] = user[item]
       })
     },
-    createUser: (state) => {
-      cache.createUser(state)
+    cacheUser: (state) => {
+      cache.saveUser(state)
     }
   },
   actions: {
     restoreFromCache: (context) => {
-      const cachedUser = cache.getLocalUser()
+      const cachedUser = cache.user()
       if (utils.objectHasKeys(cachedUser)) {
         context.commit('restoreUser', cachedUser)
       } else {
-        context.commit('createUser')
+        context.commit('cacheUser')
       }
     }
   }
@@ -143,8 +143,8 @@ const currentSpace = {
       console.log('🚃 restoreSpace', newSpace)
       state = newSpace
     },
-    createSpace: (state) => {
-      cache.createSpace(state)
+    cacheSpace: (state) => {
+      cache.saveSpace(state)
     },
 
     // cards
@@ -271,11 +271,11 @@ const currentSpace = {
     restoreFromCache: (context) => {
       const currentUserIsMember = context.rootGetters['currentUser/isMember']
       if (!currentUserIsMember) { return }
-      const cachedSpace = cache.getLocalSpace(context.state.id)
+      const cachedSpace = cache.space(context.state.id)
       if (utils.objectHasKeys(cachedSpace)) {
         context.commit('restoreSpace', cachedSpace)
       } else {
-        context.commit('createSpace')
+        context.commit('cacheSpace')
       }
     },
 
