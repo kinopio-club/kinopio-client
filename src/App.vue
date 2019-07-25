@@ -141,6 +141,8 @@ dialog
   p + button,
   button + p
     margin-top 10px
+  ul + button
+    margin-top 3px
   .row
     margin-bottom 10px
     display flex

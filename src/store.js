@@ -1,10 +1,11 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import utils from '@/utils.js'
-import cache from '@/cache.js'
 import randomColor from 'randomcolor'
 import nanoid from 'nanoid'
 import _ from 'lodash'
+
+import utils from '@/utils.js'
+import cache from '@/cache.js'
 
 Vue.use(Vuex)
 
@@ -92,7 +93,7 @@ const currentSpace = {
         x: 20,
         y: 250,
         z: 1,
-        name: 'XYZ connect me!',
+        name: 'connect me!',
         cardDetailsVisible: false,
         archived: false
       },

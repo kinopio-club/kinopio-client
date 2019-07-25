@@ -21,9 +21,16 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
         li(:class="{ active: connectionTypeIsActive(type.id) }" @click="changeConnectionType(type)" :key="type.id")
           .badge(:style="{backgroundColor: type.color}" :class="{checked: connectionTypeIsDefault(type.id)}")
           .name {{type.name}}
+
+    button(@click="addConnectionType")
+      img.icon(src="@/assets/add.svg")
+      span Add
 </template>
 
 <script>
+import _ from 'lodash'
+
+import utils from '@/utils.js'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 
 let observer
@@ -79,6 +86,12 @@ export default {
     }
   },
   methods: {
+    addConnectionType () {
+      this.$store.commit('currentSpace/addConnectionType', {})
+      const types = utils.clone(this.connectionTypes)
+      const newType = _.last(types)
+      this.changeConnectionType(newType)
+    },
     connectionTypeIsActive (typeId) {
       return Boolean(typeId === this.currentConnection.connectionTypeId)
     },
@@ -142,6 +155,7 @@ export default {
       observer.observe(element)
     },
     updateView () {
+      this.$store.commit('currentSpace/removeUnusedConnectionTypes')
       this.updateDefaultConnectionType()
       this.colorPickerIsVisible = false
       this.scrollIntoView()
