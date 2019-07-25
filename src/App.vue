@@ -214,6 +214,10 @@ ul
   padding 2px 5px
   margin-right 6px
   vertical-align -1px
+  &.checked
+    background-image url('assets/checkmark.svg')
+    background-repeat no-repeat
+    background-position center
 
 .anon-avatar
   background-image url('assets/anon-avatar.svg')

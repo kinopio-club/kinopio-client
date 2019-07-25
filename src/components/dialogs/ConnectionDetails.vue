@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow(v-if="visible" :open="visible" :style="position" @click="closeColorPicker" ref="dialog")
+dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position" @click="closeColorPicker" ref="dialog")
   section(:style="{backgroundColor: typeColor}")
     .row
       button.change-color(@click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
@@ -19,7 +19,7 @@ dialog.narrow(v-if="visible" :open="visible" :style="position" @click="closeColo
     ul
       template(v-for="(type in connectionTypes")
         li(:class="{ active: connectionTypeIsActive(type.id) }" @click="changeConnectionType(type)" :key="type.id")
-          .badge(:style="{backgroundColor: type.color}")
+          .badge(:style="{backgroundColor: type.color}" :class="{checked: connectionTypeIsDefault(type.id)}")
           .name {{type.name}}
 </template>
 
@@ -81,6 +81,10 @@ export default {
   methods: {
     connectionTypeIsActive (typeId) {
       return Boolean(typeId === this.currentConnection.connectionTypeId)
+    },
+    connectionTypeIsDefault (typeId) {
+      const typePref = this.$store.state.currentUser.defaultConnectionTypeId
+      return typePref === typeId
     },
     removeConnection () {
       this.$store.commit('currentSpace/removeConnection', this.currentConnection.id)
@@ -163,4 +167,7 @@ export default {
 </script>
 
 <style lang="stylus">
+.connection-details
+  .checkmark
+    margin 0
 </style>
