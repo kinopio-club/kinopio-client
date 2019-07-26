@@ -99,7 +99,7 @@ export default {
       this.drawCircle(initialCircle, initialContext)
     },
 
-    createPaintingCircle () {
+    createPaintingCircle (event) {
       let color = this.$store.state.currentUser.color
       currentCursor = utils.cursorPositionInPage(event)
       let circle = { x: currentCursor.x, y: currentCursor.y, color, iteration: 0 }
@@ -137,7 +137,7 @@ export default {
       if (!paintingCirclesTimer) {
         paintingCirclesTimer = window.requestAnimationFrame(this.paintCirclesAnimationFrame)
       }
-      this.createPaintingCircle()
+      this.createPaintingCircle(event)
     },
 
     lockingAnimationFrame (timestamp) {

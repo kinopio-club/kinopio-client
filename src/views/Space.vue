@@ -350,7 +350,7 @@ export default {
       }
     },
 
-    shouldContinueConnecting () {
+    shouldContinueConnecting (event) {
       const cursorStart = this.$store.state.currentConnectionCursorStart
       const cursorEnd = utils.cursorPositionInViewport(event)
       if (!this.isDrawingConnection) { return }
@@ -381,7 +381,7 @@ export default {
       window.cancelAnimationFrame(scrollTimer)
       scrollTimer = undefined
       if (this.shouldCancel(event)) { return }
-      if (this.shouldContinueConnecting()) { return }
+      if (this.shouldContinueConnecting(event)) { return }
       if (this.isDrawingConnection) {
         this.createConnection()
       }
