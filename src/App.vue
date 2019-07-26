@@ -45,8 +45,8 @@ export default {
   --button-active-inset-shadow inset 0 1px 2px var(--light-shadow)
 
 @font-face
-  font-family 'OsakaMono'
-  src url("assets/OsakaMono.woff2") format("woff2")
+  font-family 'OsakaMono-Kinopio'
+  src url("assets/OsakaMono-Kinopio.woff2") format("woff2")
   font-weight normal
   font-style normal
 
@@ -54,7 +54,7 @@ export default {
   -webkit-overflow-scrolling touch
   -webkit-tap-highlight-color transparent
   box-sizing border-box
-  font-family "Osaka-Mono", "OsakaMono", "Osaka−等幅", monospace
+  font-family "OsakaMono-Kinopio", "Osaka-Mono", "Osaka−等幅", monospace
   font-size 14px
   line-height 1.1
 
