@@ -184,4 +184,7 @@ export default {
 .connection-details
   .checkmark
     margin 0
+  .results-section-actions
+    margin 4px
+    margin-top 4px
 </style>

@@ -57,6 +57,8 @@ export default {
   font-family "OsakaMono-Kinopio", "Osaka-Mono", "Osaka−等幅", monospace
   font-size 14px
   line-height 1.1
+  button:focus
+    outline none
 
 body
   margin 0
@@ -85,7 +87,7 @@ button,
 label // used for checkbox buttons
   text-align left
   padding 7px
-  padding-top 2px
+  padding-top 4px
   padding-bottom 3px
   margin 0
   border 1px solid var(--primary)
@@ -107,6 +109,9 @@ label // used for checkbox buttons
   //   opacity 0.25
   //   color var(--primary)
   //   pointer-events none
+
+label
+  padding-bottom 4px
 
 p
   margin 0
@@ -144,6 +149,7 @@ dialog
   .row
     margin-bottom 10px
     display flex
+    position relative
   section
     padding 8px
     &:first-child
@@ -160,7 +166,7 @@ dialog
   .change-color
     padding-top 4px
     .current-color
-      height 12px
+      height 14px
       width 14px
       margin-bottom 1px
       border-radius 3px
@@ -189,9 +195,7 @@ label
 
 .results-section
   padding 4px
-  .results-section-actions
-    margin 4px
-    margin-top 3px
+
 ul
   margin 0
   padding 0

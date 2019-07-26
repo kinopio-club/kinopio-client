@@ -1,6 +1,6 @@
 <template lang="pug">
 dialog.narrow.about(v-if="visible" :open="visible")
-  section
+  section.kaomoji-section
     p ༼ つ ◕_◕ ༽つ
     button(@click="exportToJSON")
       span Export to JSON
@@ -27,8 +27,10 @@ export default {
 </script>
 
 <style lang="stylus">
-.hidden
-  display none
 .about
   top calc(100% - 8px)
+  .hidden
+    display none
+  .kaomoji-section
+    padding-top 12px
 </style>

@@ -10,7 +10,7 @@ dialog.narrow.user-details(
       button.change-color(@click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
         .current-color(:style="backgroundColor")
       ColorPicker(:currentColor="userColor" :visible="colorPickerIsVisible" @selectedColor="updateUserColor")
-      input(placeholder="What's your name?" v-model="userName" name="Name")
+      input.name(placeholder="What's your name?" v-model="userName" name="Name")
 
     // button Sign In or Up
 </template>
@@ -90,4 +90,6 @@ export default {
   &.right-side
     left initial
     right 8px
+  .name
+    margin-left 6px
 </style>
