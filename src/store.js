@@ -62,6 +62,26 @@ const currentUser = {
   }
 }
 
+// const customFields = {
+//   namespaced: true,
+//   state: {
+//     fields: [
+//       {
+//         type: 'checkbox',
+//         value: false
+//       },
+//       {
+//         type: 'frames',
+//         value: ''
+//       },
+//       {
+//         type: 'status',
+//         value: ['To Do', 'Doing', 'Done'] // to object with ids
+//       },
+//     ]
+//   },
+// }
+
 const currentSpace = {
   namespaced: true,
   state: {
@@ -141,7 +161,8 @@ const currentSpace = {
       //   name: 'connection',
       //   color: 'pink'
       // }
-    ]
+    ],
+    customFields: []
   },
 
   mutations: {
