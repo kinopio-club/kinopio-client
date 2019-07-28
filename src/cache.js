@@ -25,9 +25,11 @@ export default {
     let user = this.user()
     user[key] = value
     this.storeLocal('user', user)
+    this.saveCacheDate()
   },
   saveUser (user) {
     this.storeLocal('user', user)
+    this.saveCacheDate()
   },
 
   // space
@@ -41,8 +43,18 @@ export default {
     let space = this.space(spaceId)
     space[key] = value
     this.storeLocal(`space-${spaceId}`, space)
+    this.saveCacheDate()
   },
   saveSpace (space) {
     this.storeLocal(`space-${space.id}`, space)
+    this.saveCacheDate()
+  },
+
+  // cache date
+  cacheDate () {
+    return this.getLocal('cache-date') || {}
+  },
+  saveCacheDate () {
+    this.storeLocal('cache-date', Date.now())
   }
 }
