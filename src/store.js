@@ -148,7 +148,7 @@ const currentSpace = {
     restoreSpace: (state, newSpace) => {
       const keys = Object.keys(state)
       keys.forEach(key => {
-        state[key] = newSpace[key]
+        state[key] = newSpace[key] || []
       })
       console.log('🚃 Restored Space from cache', newSpace)
     },
@@ -164,7 +164,7 @@ const currentSpace = {
           card.z = state.cards.length + 1
         }
       })
-      cache.saveSpace(state)
+      cache.updateSpace('cards', state.cards, state.id)
     },
     cardDetailsVisible: (state, cardId) => {
       state.cards.map(card => {
@@ -172,13 +172,11 @@ const currentSpace = {
           card.cardDetailsVisible = true
         }
       })
-      cache.saveSpace(state)
     },
     cardDetailsNotVisible: (state) => {
       state.cards.map(card => {
         card.cardDetailsVisible = false
       })
-      cache.saveSpace(state)
     },
     updateCardDetails: (state, { type, value, cardId }) => {
       utils.typeCheck(type, 'string')
@@ -187,7 +185,7 @@ const currentSpace = {
           card[type] = value
         }
       })
-      cache.saveSpace(state)
+      cache.updateSpace('cards', state.cards, state.id)
     },
     moveCard: (state, { cardId, delta }) => {
       const maxOffset = 0
@@ -199,24 +197,25 @@ const currentSpace = {
           card.y = Math.max(card.y, maxOffset)
         }
       })
+      cache.updateSpace('cards', state.cards, state.id)
       const connections = state.connections.filter(connection => {
         return (connection.startCardId === cardId || connection.endCardId === cardId)
       })
       connections.forEach(connection => {
         connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
       })
-      cache.saveSpace(state)
+      cache.updateSpace('connections', state.connections, state.id)
     },
     createCard: (state, card) => {
       state.cards.push(card)
-      cache.saveSpace(state)
+      cache.updateSpace('cards', state.cards, state.id)
     },
     removeCard: (state, cardId) => {
       const cards = state.cards.filter(card => {
         return card.id !== cardId
       })
       state.cards = cards
-      cache.saveSpace(state)
+      cache.updateSpace('cards', state.cards, state.id)
     },
 
     // connections
@@ -225,14 +224,14 @@ const currentSpace = {
       connection.connectionTypeId = connectionType.id
       connection.connectionDetailsVisible = false
       state.connections.push(connection)
-      cache.saveSpace(state)
+      cache.updateSpace('connections', state.connections, state.id)
     },
     removeConnection: (state, connectionId) => {
       const connections = state.connections.filter(connection => {
         return connection.id !== connectionId
       })
       state.connections = connections
-      cache.saveSpace(state)
+      cache.updateSpace('connections', state.connections, state.id)
     },
     connectionDetailsVisible: (state, connectionId) => {
       state.connections.map(connection => {
@@ -245,7 +244,6 @@ const currentSpace = {
       state.connections.map(connection => {
         connection.connectionDetailsVisible = false
       })
-      cache.saveSpace(state)
     },
     removeConnectionsFromCard: (state, cardId) => {
       const connections = state.connections.filter(connection => {
@@ -253,7 +251,7 @@ const currentSpace = {
         return !isConnectedToCard
       })
       state.connections = connections
-      cache.saveSpace(state)
+      cache.updateSpace('connections', state.connections, state.id)
     },
 
     // connection types
@@ -264,7 +262,7 @@ const currentSpace = {
         color: color || randomColor({ luminosity: 'light' })
       }
       state.connectionTypes.push(connectionType)
-      cache.saveSpace(state)
+      cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
     },
     removeUnusedConnectionTypes: (state) => {
       const connections = state.connections.map(connection => {
@@ -274,7 +272,7 @@ const currentSpace = {
         return connections.includes(type.id)
       })
       state.connectionTypes = usedConnectionTypes
-      cache.saveSpace(state)
+      cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
     },
     updateConnectionTypeName: (state, { connectionTypeId, newName }) => {
       state.connectionTypes.map(type => {
@@ -282,7 +280,7 @@ const currentSpace = {
           type.name = newName
         }
       })
-      cache.saveSpace(state)
+      cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
     },
     updateConnectionTypeColor: (state, { connectionTypeId, newColor }) => {
       state.connectionTypes.map(type => {
@@ -290,7 +288,7 @@ const currentSpace = {
           type.color = newColor
         }
       })
-      cache.saveSpace(state)
+      cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
     },
     changeConnectionType: (state, { connectionId, connectionTypeId }) => {
       state.connections.map(connection => {
@@ -298,7 +296,7 @@ const currentSpace = {
           connection.connectionTypeId = connectionTypeId
         }
       })
-      cache.saveSpace(state)
+      cache.updateSpace('connections', state.connections, state.id)
     }
   },
 
