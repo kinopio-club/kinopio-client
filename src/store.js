@@ -147,7 +147,6 @@ const currentSpace = {
       //   startCardId: '1',
       //   endCardId: '2',
       //   path: ''
-      //   connectionDetailsVisible: false,
       // }
     ],
     connectionTypes: [
@@ -226,7 +225,6 @@ const currentSpace = {
     addConnection: (state, { connection, connectionType }) => {
       connection.id = nanoid()
       connection.connectionTypeId = connectionType.id
-      connection.connectionDetailsVisible = false
       state.connections.push(connection)
       cache.updateSpace('connections', state.connections, state.id)
     },
@@ -236,18 +234,6 @@ const currentSpace = {
       })
       state.connections = connections
       cache.updateSpace('connections', state.connections, state.id)
-    },
-    connectionDetailsVisible: (state, connectionId) => {
-      state.connections.map(connection => {
-        if (connection.id === connectionId) {
-          connection.connectionDetailsVisible = true
-        }
-      })
-    },
-    connectionDetailsNotVisible: (state) => {
-      state.connections.map(connection => {
-        connection.connectionDetailsVisible = false
-      })
     },
     removeConnectionsFromCard: (state, cardId) => {
       const connections = state.connections.filter(connection => {
@@ -452,8 +438,8 @@ export default new Vuex.Store({
     currentConnection: {}, // startCardId, startConnectorRect
     currentConnectionSuccess: {},
     currentConnectionCursorStart: {},
-    connectionDetailsIsVisible: false,
     connectionDetailsPosition: {}, // x, y
+    connectionDetailsIsVisibleForConnection: '', // id
 
     // dragging
     currentDraggingCardId: '', // id
@@ -536,10 +522,9 @@ export default new Vuex.Store({
     },
 
     // connection details
-
-    connectionDetailsIsVisible: (state, value) => {
-      utils.typeCheck(value, 'boolean')
-      state.connectionDetailsIsVisible = value
+    connectionDetailsIsVisibleForConnection: (state, connectionId) => {
+      utils.typeCheck(connectionId, 'string')
+      state.connectionDetailsIsVisibleForConnection = connectionId
     },
     connectionDetailsPosition: (state, position) => {
       utils.typeCheck(position, 'object')
@@ -581,9 +566,9 @@ export default new Vuex.Store({
       state.multipleCardActionsPosition = position
     },
     closeAllDialogs: (state) => {
-      state.connectionDetailsIsVisible = false
       state.multipleCardActionsIsVisible = false
       state.cardDetailsIsVisibleForCard = ''
+      state.connectionDetailsIsVisibleForConnection = ''
     }
   },
 

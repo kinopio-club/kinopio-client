@@ -48,7 +48,7 @@ export default {
   },
   computed: {
     visible () {
-      return this.$store.state.connectionDetailsIsVisible
+      return Boolean(this.$store.state.connectionDetailsIsVisibleForConnection)
     },
     position () {
       const position = this.$store.state.connectionDetailsPosition
@@ -60,7 +60,7 @@ export default {
     currentConnection () {
       let connections = this.$store.state.currentSpace.connections
       return connections.find(connection => {
-        return connection.connectionDetailsVisible === true
+        return connection.id === this.$store.state.connectionDetailsIsVisibleForConnection
       })
     },
     currentConnectionType () {
