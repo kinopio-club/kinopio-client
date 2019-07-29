@@ -30,7 +30,7 @@ export default {
   methods: {
     showConnectionDetails (event) {
       const detailsPosition = utils.cursorPositionInPage(event)
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('closeAllDialogs')
       this.$store.commit('connectionDetailsIsVisibleForConnection', this.id)
       this.$store.commit('connectionDetailsPosition', detailsPosition)
       this.$store.commit('multipleCardsSelected', [])

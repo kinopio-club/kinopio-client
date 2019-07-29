@@ -584,11 +584,7 @@ export default new Vuex.Store({
       if (isCurrentUser) {
         context.commit('currentUser/updateName', newName)
       }
-    },
-    closeAllDialogs: (context) => {
-      context.commit('closeAllDialogs')
     }
-
   },
 
   getters: {

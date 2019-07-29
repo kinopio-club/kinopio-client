@@ -82,7 +82,7 @@ export default {
     },
     completeEditing (event) {
       if (isNewCard) {
-        this.$store.dispatch('closeAllDialogs')
+        this.$store.commit('closeAllDialogs')
       } else {
         this.blurField(event)
       }
@@ -95,7 +95,7 @@ export default {
         cardId: this.card.id
       }
       this.$store.commit('currentSpace/updateCardDetails', options)
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('closeAllDialogs')
     },
     removeCard () {
       this.$store.dispatch('currentSpace/removeCard', this.card.id)
