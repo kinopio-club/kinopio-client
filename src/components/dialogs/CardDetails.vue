@@ -24,7 +24,7 @@ let observer, isNewCard, previousFieldValue
 export default {
   name: 'CardDetails',
   props: {
-    card: Object // name, x, y, z, cardDetailsVisible
+    card: Object // name, x, y, z
   },
   directives: {
     focus: {
@@ -56,7 +56,9 @@ export default {
     }
   },
   computed: {
-    visible () { return this.card.cardDetailsVisible },
+    visible () {
+      return this.$store.state.cardDetailsIsVisibleForCard === this.card.id
+    },
     name: {
       get () {
         return this.card.name

@@ -105,7 +105,6 @@ const currentSpace = {
         y: 80,
         z: 0,
         name: 'Kinopio is a Collaborative Thinking Tool',
-        cardDetailsVisible: false,
         archived: false
       },
       {
@@ -114,7 +113,6 @@ const currentSpace = {
         y: 250,
         z: 1,
         name: 'connect me!',
-        cardDetailsVisible: false,
         archived: false
       },
       {
@@ -123,7 +121,6 @@ const currentSpace = {
         y: 150,
         z: 2,
         name: 'click and drag me',
-        cardDetailsVisible: false,
         archived: false
       },
       {
@@ -132,7 +129,6 @@ const currentSpace = {
         y: 400,
         z: 3,
         name: 'eat your vegetables',
-        cardDetailsVisible: false,
         archived: false
       },
       {
@@ -141,7 +137,6 @@ const currentSpace = {
         y: 280,
         z: 4,
         name: 'hello space and time',
-        cardDetailsVisible: false,
         archived: false
       }
     ],
@@ -186,18 +181,6 @@ const currentSpace = {
         }
       })
       cache.updateSpace('cards', state.cards, state.id)
-    },
-    cardDetailsVisible: (state, cardId) => {
-      state.cards.map(card => {
-        if (card.id === cardId) {
-          card.cardDetailsVisible = true
-        }
-      })
-    },
-    cardDetailsNotVisible: (state) => {
-      state.cards.map(card => {
-        card.cardDetailsVisible = false
-      })
     },
     updateCardDetails: (state, { type, value, cardId }) => {
       utils.typeCheck(type, 'string')
@@ -342,13 +325,12 @@ const currentSpace = {
         x: position.x,
         y: position.y,
         name: '',
-        cardDetailsVisible: false,
         archived: false
       }
       if (utils.objectHasKeys(contents)) {
         card = utils.updateObject(card, contents)
       } else {
-        card.cardDetailsVisible = true
+        context.commit('cardDetailsIsVisibleForCard', card.id, { root: true })
       }
       context.commit('createCard', card)
       context.commit('incrementCardZ', card.id)
@@ -462,8 +444,9 @@ export default new Vuex.Store({
     currentUserIsPaintingLocked: false,
     currentUserIsDraggingCard: false,
 
-    // add card
+    // cards
     shouldAddNewCard: false,
+    cardDetailsIsVisibleForCard: '', // id
 
     // connecting
     currentConnection: {}, // startCardId, startConnectorRect
@@ -503,6 +486,10 @@ export default new Vuex.Store({
     shouldAddNewCard: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.shouldAddNewCard = value
+    },
+    cardDetailsIsVisibleForCard: (state, cardId) => {
+      utils.typeCheck(cardId, 'string')
+      state.cardDetailsIsVisibleForCard = cardId
     },
 
     // connecting
@@ -549,6 +536,7 @@ export default new Vuex.Store({
     },
 
     // connection details
+
     connectionDetailsIsVisible: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.connectionDetailsIsVisible = value
@@ -595,6 +583,7 @@ export default new Vuex.Store({
     closeAllDialogs: (state) => {
       state.connectionDetailsIsVisible = false
       state.multipleCardActionsIsVisible = false
+      state.cardDetailsIsVisibleForCard = ''
     }
   },
 
@@ -612,8 +601,6 @@ export default new Vuex.Store({
       }
     },
     closeAllDialogs: (context) => {
-      context.commit('currentSpace/cardDetailsNotVisible')
-      context.commit('currentSpace/connectionDetailsNotVisible')
       context.commit('closeAllDialogs')
     }
 

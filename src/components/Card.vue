@@ -142,8 +142,9 @@ export default {
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('currentSpace/cardDetailsVisible', this.id)
-      event.stopPropagation() // only stop propagation if cardDetailsVisible
+      this.$store.commit('cardDetailsIsVisibleForCard', this.id)
+      console.log('show card details', this.$store.state.cardDetailsIsVisibleForCard)
+      event.stopPropagation() // only stop propagation if cardDetailsIsVisible
     }
   }
 }
