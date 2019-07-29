@@ -1,16 +1,10 @@
 <template lang="pug">
 header
   nav
-    .logo
-      img(
-        alt="kinopio logo"
-        src="@/assets/logo.png"
-        width="50"
-        height="45"
-        @click.stop="toggleAboutIsVisible"
-        @touchend.stop
-        @mouseup.stop
-      )
+    .logo-about
+      .logo(@click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop)
+        img(src="@/assets/logo.png" width="50" height="45" alt="kinopio logo")
+        img.down-arrow(src="@/assets/down-arrow.svg")
       About(:visible="aboutIsVisible")
 
   aside
@@ -70,8 +64,19 @@ header
   .user
     float right
     position relative
-  .logo
+  .logo-about
     position relative
+  .logo
+    cursor pointer
     img
-      cursor pointer
+      vertical-align middle
+    .down-arrow
+      transition 0.1s transform
+      padding-left 4px
+    &:hover
+      .down-arrow
+        transform translateY(3px)
+    &:active
+      .down-arrow
+        transform translateY(5px)
 </style>
