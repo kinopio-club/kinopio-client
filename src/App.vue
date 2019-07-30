@@ -165,7 +165,7 @@ dialog
       border-bottom-left-radius 2px
       border-bottom-right-radius 2px
     p
-      user-select all
+      user-select auto
       &:first-child
         margin-top 0
   .button-wrap

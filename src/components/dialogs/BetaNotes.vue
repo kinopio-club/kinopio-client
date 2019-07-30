@@ -3,7 +3,16 @@ dialog(v-if="visible" :open="visible" @click.stop)
   section
     p Beta Notes
   section
-    p blah blah
+    p vision
+    p limitations
+    p data loss
+    p roadmap
+    p principles
+  section
+    p Follow @KinopioClub for Updates
+    .button-wrap
+      a(href="https://twitter.com/KinopioClub")
+        button Twitter →
 </template>
 
 <script>

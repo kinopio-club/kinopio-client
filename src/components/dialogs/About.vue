@@ -18,9 +18,6 @@ dialog.about(v-if="visible" :open="visible" @click="closeDialogs")
     button(@click="exportToJSON")
       span Export Data
     a#downlaod-anchor.hidden
-  section
-    a(href="https://twitter.com/KinopioClub")
-      button Twitter →
 </template>
 
 <script>
