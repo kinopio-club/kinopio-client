@@ -4,12 +4,12 @@ dialog.about(v-if="visible" :open="visible")
     p ༼ つ ◕_◕ ༽つ
     p Does it feel good to create, and connect your thoughts, ideas, and plans with Kinopio?
     button
-      span Let Me Know 💌
+      span Feedback 💌
     button Beta Notes
   section
-    button(@click="clearData")
-      img.icon(src="@/assets/remove.svg")
-      span Clear Data
+    // button(@click="clearData")
+    //   img.icon(src="@/assets/remove.svg")
+    //   span Clear Data
     button(@click="exportToJSON")
       span Export Data
     a#downlaod-anchor.hidden
@@ -32,13 +32,13 @@ export default {
       downloadAnchor.setAttribute('href', json)
       downloadAnchor.setAttribute('download', `kinopio-space-${spaceId}.json`)
       downloadAnchor.click()
-    },
-    clearData () {
-      const spaceId = this.$store.state.currentSpace.id.toString()
-      localStorage.removeItem(`space-${spaceId}`)
-      this.$store.commit('currentSpace/restoreSpace', { id: spaceId })
-      this.$store.commit('currentSpace/cacheSpace')
     }
+    // clearData () {
+    //   const spaceId = this.$store.state.currentSpace.id.toString()
+    //   localStorage.removeItem(`space-${spaceId}`)
+    //   this.$store.commit('currentSpace/restoreSpace', { id: spaceId })
+    //   this.$store.commit('currentSpace/cacheSpace')
+    // }
   }
 }
 </script>
