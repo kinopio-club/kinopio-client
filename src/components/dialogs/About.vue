@@ -7,7 +7,10 @@ dialog.about(v-if="visible" :open="visible" @click="closeDialogs")
       button(@click.stop="toggleFeedbackIsVisible" :class="{active: feedbackIsVisible}") Feedback
       Feedback(:visible="feedbackIsVisible")
 
-    button Beta Notes
+    .button-wrap
+      button(@click.stop="toggleBetaNotesIsVisible" :class="{active: betaNotesIsVisible}") Beta Notes
+      BetaNotes(:visible="betaNotesIsVisible")
+
   section
     // button(@click="clearData")
     //   img.icon(src="@/assets/remove.svg")
@@ -22,11 +25,13 @@ dialog.about(v-if="visible" :open="visible" @click="closeDialogs")
 
 <script>
 import Feedback from '@/components/dialogs/Feedback.vue'
+import BetaNotes from '@/components/dialogs/BetaNotes.vue'
 
 export default {
   name: 'About',
   components: {
-    Feedback
+    Feedback,
+    BetaNotes
   },
   props: {
     visible: Boolean
@@ -56,9 +61,15 @@ export default {
     },
     toggleFeedbackIsVisible () {
       const isVisible = this.feedbackIsVisible
+      this.closeDialogs()
       this.feedbackIsVisible = !isVisible
     },
-    closeDialogs (event) {
+    toggleBetaNotesIsVisible () {
+      const isVisible = this.betaNotesIsVisible
+      this.closeDialogs()
+      this.betaNotesIsVisible = !isVisible
+    },
+    closeDialogs () {
       this.feedbackIsVisible = false
       this.betaNotesIsVisible = false
     }

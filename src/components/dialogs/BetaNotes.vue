@@ -1,14 +1,14 @@
 <template lang="pug">
-dialog.narrow(v-if="visible" :open="visible" @click.stop)
+dialog(v-if="visible" :open="visible" @click.stop)
   section
-    p Feedback
+    p Beta Notes
   section
-    p blah blah blah
+    p blah blah
 </template>
 
 <script>
 export default {
-  name: 'Feedback',
+  name: 'BetaNotes',
   props: {
     visible: Boolean
   },

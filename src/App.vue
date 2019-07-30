@@ -143,6 +143,7 @@ dialog
   button + input,
   button + label,
   label + button,
+  .button-wrap + .button-wrap,
   button + .button-wrap,
   .button-wrap + button
     margin-left 6px
