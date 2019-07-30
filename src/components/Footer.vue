@@ -61,5 +61,5 @@ footer
     left initial
     right 8px
     top initial
-    bottom 8px
+    bottom 4px
 </style>

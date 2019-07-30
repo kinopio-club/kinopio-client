@@ -20,7 +20,7 @@ export default {
     Footer
   },
   mounted () {
-    smoothscroll.polyfill() // remove when 'smooth' is supported by safari: https://caniuse.com/#search=scroll
+    smoothscroll.polyfill() // remove when 'smooth' is supported by safari https://caniuse.com/#search=scroll
   }
 }
 </script>
@@ -74,10 +74,13 @@ body
 .app
   position relative
 
+img
+  max-width 100%
+
 input,
 textarea
   margin 0
-  font-size: 1em // required to disable ios input zooming
+  font-size 1em // required to disable ios input zooming
   resize none
   width 100%
   background transparent
@@ -121,10 +124,10 @@ p
   margin-top 10px
 
 dialog
-  width: 250px
-  left: 8px
-  top: 8px
-  position: absolute
+  width 250px
+  left 8px
+  top 8px
+  position absolute
   margin 0
   padding 0
   user-select auto
@@ -135,7 +138,7 @@ dialog
   box-shadow var(--hover-shadow)
   border-radius 3px
   &.narrow
-    width: 200px
+    width 200px
   button,
   label
     background-color var(--primary-background)
@@ -172,7 +175,7 @@ dialog
     display inline-block
     position relative
   section + section
-    border-top: 1px solid var(--primary)
+    border-top 1px solid var(--primary)
   .icon
     vertical-align -1px
     margin-right 5px
