@@ -20,7 +20,6 @@ main.space(
       Card(:card="card")
   ConnectionDetails
   MultipleCardActions
-  Footer
   OffscreenMarkers
 </template>
 
@@ -29,7 +28,6 @@ import Card from '@/components/Card.vue'
 import Connection from '@/components/Connection.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import MultipleCardActions from '@/components/dialogs/MultipleCardActions.vue'
-import Footer from '@/components/Footer.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 
 import utils from '@/utils.js'
@@ -45,7 +43,6 @@ export default {
     Connection,
     ConnectionDetails,
     MultipleCardActions,
-    Footer,
     OffscreenMarkers
   },
   name: 'Space',

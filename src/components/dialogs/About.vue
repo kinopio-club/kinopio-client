@@ -2,9 +2,11 @@
 dialog.about(v-if="visible" :open="visible")
   section.kaomoji-section
     p ༼ つ ◕_◕ ༽つ
-    p Does it feel good to create, and connect your thoughts, ideas, and plans with Kinopio?
-    button
-      span Feedback 💌
+    // p Does it feel good to create, and connect your thoughts, ideas, and plans with Kinopio?
+    .button-wrap
+      button(@click="toggleFeedbackIsVisible" :class="{active: feedbackIsVisible}") Feedback
+      Feedback(:visible="feedbackIsVisible")
+
     button Beta Notes
   section
     // button(@click="clearData")
@@ -19,10 +21,29 @@ dialog.about(v-if="visible" :open="visible")
 </template>
 
 <script>
+import Feedback from '@/components/dialogs/Feedback.vue'
+
 export default {
   name: 'About',
+  components: {
+    Feedback
+  },
   props: {
     visible: Boolean
+  },
+  data () {
+    return {
+      feedbackIsVisible: false,
+      betaNotesIsVisible: false
+    }
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'closeAllDialogs') {
+        this.feedbackIsVisible = false
+        this.betaNotesIsVisible = false
+      }
+    })
   },
   methods: {
     exportToJSON () {
@@ -32,7 +53,12 @@ export default {
       downloadAnchor.setAttribute('href', json)
       downloadAnchor.setAttribute('download', `kinopio-space-${spaceId}.json`)
       downloadAnchor.click()
+    },
+    toggleFeedbackIsVisible () {
+      const isVisible = this.feedbackIsVisible
+      this.feedbackIsVisible = !isVisible
     }
+
     // clearData () {
     //   const spaceId = this.$store.state.currentSpace.id.toString()
     //   localStorage.removeItem(`space-${spaceId}`)

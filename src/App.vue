@@ -3,18 +3,21 @@
   Header
   MagicPaint
   router-view
+  Footer
 </template>
 
 <script>
 import Header from '@/components/Header.vue'
 import MagicPaint from '@/components/MagicPaint.vue'
+import Footer from '@/components/Footer.vue'
 
 import smoothscroll from 'smoothscroll-polyfill'
 
 export default {
   components: {
     Header,
-    MagicPaint
+    MagicPaint,
+    Footer
   },
   mounted () {
     smoothscroll.polyfill() // remove when 'smooth' is supported by safari: https://caniuse.com/#search=scroll
@@ -139,10 +142,14 @@ dialog
   button + button,
   button + input,
   button + label,
-  label + button
+  label + button,
+  button + .button-wrap,
+  .button-wrap + button
     margin-left 6px
   p + button,
-  button + p
+  button + p,
+  p + .button-wrap,
+  .button-wrap + p
     margin-top 10px
   .row
     margin-bottom 10px
@@ -157,8 +164,12 @@ dialog
       border-bottom-left-radius 2px
       border-bottom-right-radius 2px
     p
+      user-select all
       &:first-child
         margin-top 0
+  .button-wrap
+    display inline-block
+    position relative
   section + section
     border-top: 1px solid var(--primary)
   .icon
