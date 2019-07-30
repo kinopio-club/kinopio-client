@@ -8,7 +8,7 @@ dialog.feedback(v-if="visible" :open="visible" @click.stop)
     p Hit me up at hi@pirijan.com
     .button-wrap
       a(href="mailto:hi@pirijan.com?subject=👻 Kinopio Feedback")
-        button Email
+        button Email Me
     //a(href="https://www.are.na/block/2577006")
     img(src="@/assets/bom-marido.jpg")
 
