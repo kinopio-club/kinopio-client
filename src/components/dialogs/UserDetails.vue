@@ -7,9 +7,10 @@ dialog.narrow.user-details(
 )
   section(v-if="isCurrentUser")
     .row
-      button.change-color(@click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-        .current-color(:style="backgroundColor")
-      ColorPicker(:currentColor="userColor" :visible="colorPickerIsVisible" @selectedColor="updateUserColor")
+      .button-wrap
+        button.change-color(@click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
+          .current-color(:style="backgroundColor")
+        ColorPicker(:currentColor="userColor" :visible="colorPickerIsVisible" @selectedColor="updateUserColor")
       input.name(placeholder="What's your name?" v-model="userName" name="Name")
 
     // button Sign In or Up

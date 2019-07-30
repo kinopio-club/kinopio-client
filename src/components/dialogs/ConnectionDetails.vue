@@ -2,10 +2,11 @@
 dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position" @click="closeColorPicker" ref="dialog")
   section(:style="{backgroundColor: typeColor}")
     .row
-      button.change-color(@click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-        .current-color(:style="{backgroundColor: typeColor}")
-      ColorPicker(:currentColor="typeColor" :visible="colorPickerIsVisible" @selectedColor="updateTypeColor")
-      input(placeholder="Connection" v-model="typeName")
+      .button-wrap
+        button.change-color(@click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
+          .current-color(:style="{backgroundColor: typeColor}")
+        ColorPicker(:currentColor="typeColor" :visible="colorPickerIsVisible" @selectedColor="updateTypeColor")
+      input.type-name(placeholder="Connection" v-model="typeName")
 
     label(:class="{active: isDefault}" @click.prevent="toggleDefault")
       input(type="checkbox" v-model="isDefault")
@@ -187,4 +188,6 @@ export default {
   .results-section-actions
     margin 4px
     margin-top 4px
+  .type-name
+    margin-left 6px
 </style>

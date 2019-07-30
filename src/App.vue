@@ -183,6 +183,10 @@ dialog
       margin-bottom 1px
       border-radius 3px
 
+.button-wrap
+  dialog
+    top calc(100% - 8px)
+
 // checkboxes
 label
   &:hover

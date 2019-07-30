@@ -64,7 +64,6 @@ export default {
 
 <style lang="stylus">
 .color-picker
-  top calc(100% - 8px)
   .colors
     display flex
     flex-wrap wrap

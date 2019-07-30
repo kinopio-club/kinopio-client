@@ -1,10 +1,10 @@
 <template lang="pug">
-dialog.about(v-if="visible" :open="visible")
+dialog.about(v-if="visible" :open="visible" @click="closeDialogs")
   section.kaomoji-section
     p ༼ つ ◕_◕ ༽つ
     // p Does it feel good to create, and connect your thoughts, ideas, and plans with Kinopio?
     .button-wrap
-      button(@click="toggleFeedbackIsVisible" :class="{active: feedbackIsVisible}") Feedback
+      button(@click.stop="toggleFeedbackIsVisible" :class="{active: feedbackIsVisible}") Feedback
       Feedback(:visible="feedbackIsVisible")
 
     button Beta Notes
@@ -57,8 +57,11 @@ export default {
     toggleFeedbackIsVisible () {
       const isVisible = this.feedbackIsVisible
       this.feedbackIsVisible = !isVisible
+    },
+    closeDialogs (event) {
+      this.feedbackIsVisible = false
+      this.betaNotesIsVisible = false
     }
-
     // clearData () {
     //   const spaceId = this.$store.state.currentSpace.id.toString()
     //   localStorage.removeItem(`space-${spaceId}`)
