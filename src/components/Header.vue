@@ -2,7 +2,7 @@
 header
   nav
     .logo-about
-      .logo(@click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop)
+      .logo(@click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop :class="{active : aboutIsVisible}")
         img(src="@/assets/logo.png" width="50" height="45" alt="kinopio logo")
         img.down-arrow(src="@/assets/down-arrow.svg")
       About(:visible="aboutIsVisible")
@@ -71,12 +71,13 @@ header
     img
       vertical-align middle
     .down-arrow
-      transition 0.1s transform
       padding-left 4px
     &:hover
       .down-arrow
         transform translateY(3px)
-    &:active
+    &:active,
+    &.active
       .down-arrow
         transform translateY(5px)
+
 </style>
