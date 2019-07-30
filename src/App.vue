@@ -141,8 +141,6 @@ dialog
   button + label,
   label + button
     margin-left 6px
-  p
-    margin 0
   p + button,
   button + p
     margin-top 10px
@@ -158,6 +156,9 @@ dialog
     &:last-child
       border-bottom-left-radius 2px
       border-bottom-right-radius 2px
+    // p
+    //   &:first-child
+    //     margin-top 0
   section + section
     border-top: 1px solid var(--primary)
   .icon

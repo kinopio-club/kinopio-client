@@ -46,6 +46,5 @@ export default {
   saveSpace (space) {
     space.cacheDate = Date.now()
     this.storeLocal(`space-${space.id}`, space)
-    this.saveCacheDate()
   }
 }

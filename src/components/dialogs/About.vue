@@ -1,10 +1,21 @@
 <template lang="pug">
-dialog.narrow.about(v-if="visible" :open="visible")
+dialog.about(v-if="visible" :open="visible")
   section.kaomoji-section
     p ༼ つ ◕_◕ ༽つ
+    p Does it feel good to create, and connect your thoughts, ideas, and plans with Kinopio?
+    button
+      span Let Me Know 💌
+    button Beta Notes
+  section
+    button(@click="clearData")
+      img.icon(src="@/assets/remove.svg")
+      span Clear Data
     button(@click="exportToJSON")
-      span Export to JSON
+      span Export Data
     a#downlaod-anchor.hidden
+  section
+    a(href="https://twitter.com/KinopioClub")
+      button Twitter →
 </template>
 
 <script>
@@ -21,6 +32,12 @@ export default {
       downloadAnchor.setAttribute('href', json)
       downloadAnchor.setAttribute('download', `kinopio-space-${spaceId}.json`)
       downloadAnchor.click()
+    },
+    clearData () {
+      const spaceId = this.$store.state.currentSpace.id.toString()
+      localStorage.removeItem(`space-${spaceId}`)
+      this.$store.commit('currentSpace/restoreSpace', { id: spaceId })
+      this.$store.commit('currentSpace/cacheSpace')
     }
   }
 }
@@ -32,5 +49,5 @@ export default {
   .hidden
     display none
   .kaomoji-section
-    padding-top 12px
+    padding-top 14px
 </style>
