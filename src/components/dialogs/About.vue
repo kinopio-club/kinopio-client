@@ -71,8 +71,12 @@ export default {
     },
     clearData () {
       const spaceId = this.$store.state.currentSpace.id.toString()
+      const spaceName = this.$store.state.currentSpace.name.toString()
       localStorage.removeItem(`space-${spaceId}`)
-      this.$store.commit('currentSpace/restoreSpace', { id: spaceId })
+      this.$store.commit('currentSpace/restoreSpace', {
+        id: spaceId,
+        name: spaceName
+      })
       this.$store.commit('currentSpace/cacheSpace')
     }
   }
