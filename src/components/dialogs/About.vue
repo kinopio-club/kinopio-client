@@ -2,7 +2,6 @@
 dialog.about(v-if="visible" :open="visible" @click="closeDialogs")
   section.kaomoji-section
     p ༼ つ ◕_◕ ༽つ
-    // p Does it feel good to create, and connect your thoughts, ideas, and plans with Kinopio?
     .button-wrap
       button(@click.stop="toggleFeedbackIsVisible" :class="{active: feedbackIsVisible}") Feedback
       Feedback(:visible="feedbackIsVisible")

@@ -33,6 +33,11 @@ export default {
   img
     margin-top 10px
     border-radius 3px
+  @media(max-width 340px)
+    max-height calc(100vh - 200px)
   &.from-footer
     max-height calc(100vh - 75px)
+    @media(max-width 340px)
+      max-height calc(100vh - 150px)
+
 </style>

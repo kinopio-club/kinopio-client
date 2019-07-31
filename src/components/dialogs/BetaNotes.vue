@@ -52,4 +52,8 @@ export default {
       padding-top 10px
       margin-left 5px
       user-select text
+  @media(max-width 340px)
+    left calc(-100% + 16px)
+    max-height calc(100vh - 200px)
+
 </style>
