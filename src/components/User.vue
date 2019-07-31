@@ -46,7 +46,6 @@ export default {
     //     //   this.detailsIsOnRightSide = isEnoughSpaceOnTheRight
     //     // }
     // },
-
     toggleUserDetails () {
       if (!this.clickable) { return }
       if (this.shouldCloseAllDialogs) {

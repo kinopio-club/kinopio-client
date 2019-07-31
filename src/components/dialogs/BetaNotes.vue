@@ -51,4 +51,5 @@ export default {
     li
       padding-top 10px
       margin-left 5px
+      user-select text
 </style>
