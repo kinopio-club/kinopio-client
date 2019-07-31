@@ -84,78 +84,184 @@ const currentUser = {
 
 const currentSpace = {
   namespaced: true,
-  state: {
+  state:
+  {
     id: '1',
     users: [
       {
         id: '1',
-        color: 'cyan',
-        name: undefined
+        color: 'cyan'
       },
       {
         id: '2',
         color: 'pink',
         name: 'maya'
-      }
-    ],
+      }],
     cards: [
       {
         id: '1',
-        x: 80,
-        y: 80,
+        x: 31,
+        y: 85,
         z: 0,
-        name: 'Kinopio is a Collaborative Thinking Tool',
-        archived: false
+        name: 'Kinopio is a Thinking Tool'
       },
       {
-        id: '2',
-        x: 20,
-        y: 250,
-        z: 1,
-        name: 'connect me!',
-        archived: false
+        id: 'osphPWDIpUdEKyPzqjj94',
+        x: 160,
+        y: 390,
+        name: 'Uses',
+        z: 1
       },
       {
-        id: '3',
-        x: 550,
-        y: 150,
-        z: 2,
-        name: 'click and drag me',
-        archived: false
+        id: 'QEl4mjzIJUiJNchzkWZIx',
+        x: 488,
+        y: 505,
+        name: 'Mind maps',
+        z: 2
       },
       {
-        id: '4',
-        x: 300,
-        y: 400,
-        z: 3,
-        name: 'eat your vegetables',
-        archived: false
+        id: 'llZmDtuRtz__8xFanQWlo',
+        x: 214,
+        y: 502,
+        name: 'Brainstorming',
+        z: 3
       },
       {
-        id: '5',
-        x: 280,
-        y: 280,
-        z: 4,
-        name: 'hello space and time',
-        archived: false
-      }
-    ],
+        id: 'R7mS5cOSJpKNa4v5B2APF',
+        x: 336,
+        y: 566,
+        name: 'Project Planning',
+        z: 4
+      },
+      {
+        id: 'Rcb_O9pJqkzW8uGaRZn9e',
+        x: 437,
+        y: 428,
+        name: 'Sorting through feelings',
+        z: 5
+      },
+      {
+        id: 'uCMaAqMQOGevSiTPDvLcc',
+        x: 72,
+        y: 194,
+        name: 'Connect cards together by dragging connectors 🌘',
+        z: 6
+      },
+      {
+        id: 'bCVhqjrPWIknCvMwQnAs1',
+        x: 369,
+        y: 264,
+        name: "I'm connected!",
+        z: 7
+      },
+      {
+        id: 'oEX9a0f_tN0e9NQNrewL9',
+        x: 500,
+        y: 178,
+        name: 'Connect me too!',
+        z: 8
+      },
+      {
+        id: '_OVT_H9ra7BoldfsPUtNj',
+        x: 557,
+        y: 594,
+        name: 'Solving crimes',
+        z: 9
+      },
+      {
+        id: 'MtT5vBskYAlS5aV1BE5bt',
+        x: 719,
+        y: 281,
+        name: 'Tap empty spaces to create new cards',
+        z: 10
+      },
+      {
+        id: '4VPPPDRKTI5mfafPoELrS',
+        x: 788,
+        y: 358,
+        name: 'Paint to select multiple cards',
+        z: 11
+      },
+      {
+        id: 'GaHFz5kjKvX3oZ8id0rqq',
+        x: 852,
+        y: 438,
+        name: 'Click connecting lines to edit them',
+        z: 12
+      }],
     connections: [
-      // {
-      //   id: '1',
-      //   connectionTypeId: '123',
-      //   startCardId: '1',
-      //   endCardId: '2',
-      //   path: ''
-      // }
-    ],
+      {
+        startCardId: 'osphPWDIpUdEKyPzqjj94',
+        endCardId: 'QEl4mjzIJUiJNchzkWZIx',
+        path: 'm219,405 q90,40 359,114',
+        id: 'HUSwn9RZ36Tbl3XlvNRxB',
+        connectionTypeId: 'AR5sv65inSgi12necCYjr'
+      },
+      {
+        startCardId: 'osphPWDIpUdEKyPzqjj94',
+        endCardId: 'llZmDtuRtz__8xFanQWlo',
+        path: 'm219,405 q90,40 117,111',
+        id: 'pmXyhI-ZEh7EAPn5q4CoH',
+        connectionTypeId: 'AR5sv65inSgi12necCYjr'
+      },
+      {
+        startCardId: 'osphPWDIpUdEKyPzqjj94',
+        endCardId: 'R7mS5cOSJpKNa4v5B2APF',
+        path: 'm219,406 q90,40 255,174',
+        id: 'FP2rnsTvrLSepdXZ2oNCy',
+        connectionTypeId: 'AR5sv65inSgi12necCYjr'
+      },
+      {
+        startCardId: 'osphPWDIpUdEKyPzqjj94',
+        endCardId: 'Rcb_O9pJqkzW8uGaRZn9e',
+        path: 'm219,405 q90,40 410,35',
+        id: 'yFqBYMndWXgC7baCRyacV',
+        connectionTypeId: 'AR5sv65inSgi12necCYjr'
+      },
+      {
+        startCardId: 'uCMaAqMQOGevSiTPDvLcc',
+        endCardId: 'bCVhqjrPWIknCvMwQnAs1',
+        path: 'm289,210 q90,40 206,70',
+        id: 'NN6MI1-_-p9bSNk2tfsma',
+        connectionTypeId: '2x1DeNzgcIjQAkZGOgHBn'
+      },
+      {
+        startCardId: 'osphPWDIpUdEKyPzqjj94',
+        endCardId: '_OVT_H9ra7BoldfsPUtNj',
+        path: 'm219,406 q90,40 463,203',
+        id: 'mBEV4VvqwcE7qv-zzvggE',
+        connectionTypeId: 'AR5sv65inSgi12necCYjr'
+      },
+      {
+        startCardId: 'MtT5vBskYAlS5aV1BE5bt',
+        endCardId: '4VPPPDRKTI5mfafPoELrS',
+        path: 'm936,295 q90,40 69,80',
+        id: 'EsEcMPbnqy-mx5WhKyL8g',
+        connectionTypeId: 'VrC69rLjM485_ZmTCIRQ8'
+      },
+      {
+        startCardId: '4VPPPDRKTI5mfafPoELrS',
+        endCardId: 'GaHFz5kjKvX3oZ8id0rqq',
+        path: 'm1005,369 q90,40 64,82',
+        id: 'CICu7lO2VN81sHXmlRV82',
+        connectionTypeId: 'VrC69rLjM485_ZmTCIRQ8'
+      }],
     connectionTypes: [
-      // {
-      //   id: '123',
-      //   name: 'connection',
-      //   color: 'pink'
-      // }
-    ],
+      {
+        id: 'AR5sv65inSgi12necCYjr',
+        name: 'Uses',
+        color: '#c18fef'
+      },
+      {
+        id: '2x1DeNzgcIjQAkZGOgHBn',
+        name: 'Connections',
+        color: '#93f9b5'
+      },
+      {
+        id: 'VrC69rLjM485_ZmTCIRQ8',
+        name: 'Controls',
+        color: '#ffbffc'
+      }],
     customFields: []
   },
 
@@ -310,8 +416,7 @@ const currentSpace = {
         id: nanoid(),
         x: position.x,
         y: position.y,
-        name: '',
-        archived: false
+        name: ''
       }
       if (utils.objectHasKeys(contents)) {
         card = utils.updateObject(card, contents)
