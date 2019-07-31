@@ -11,9 +11,9 @@ dialog.about(v-if="visible" :open="visible" @click="closeDialogs")
       BetaNotes(:visible="betaNotesIsVisible")
 
   section
-    // button(@click="clearData")
-    //   img.icon(src="@/assets/remove.svg")
-    //   span Clear Data
+    button(@click="clearData")
+      img.icon(src="@/assets/remove.svg")
+      span Clear Data
     button(@click="exportToJSON")
       span Export Data
     a#downlaod-anchor.hidden
@@ -68,13 +68,13 @@ export default {
     closeDialogs () {
       this.feedbackIsVisible = false
       this.betaNotesIsVisible = false
+    },
+    clearData () {
+      const spaceId = this.$store.state.currentSpace.id.toString()
+      localStorage.removeItem(`space-${spaceId}`)
+      this.$store.commit('currentSpace/restoreSpace', { id: spaceId })
+      this.$store.commit('currentSpace/cacheSpace')
     }
-    // clearData () {
-    //   const spaceId = this.$store.state.currentSpace.id.toString()
-    //   localStorage.removeItem(`space-${spaceId}`)
-    //   this.$store.commit('currentSpace/restoreSpace', { id: spaceId })
-    //   this.$store.commit('currentSpace/cacheSpace')
-    // }
   }
 }
 </script>
