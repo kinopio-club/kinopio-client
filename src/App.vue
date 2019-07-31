@@ -176,9 +176,6 @@ dialog
     position relative
   section + section
     border-top 1px solid var(--primary)
-  .icon
-    vertical-align -1px
-    margin-right 5px
   .change-color
     padding-top 4px
     .current-color
@@ -186,6 +183,10 @@ dialog
       width 14px
       margin-bottom 1px
       border-radius 3px
+
+.icon
+  vertical-align -1px
+  margin-right 5px
 
 .button-wrap
   dialog
