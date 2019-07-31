@@ -22,7 +22,8 @@ export default {
   props: {
     clickable: Boolean,
     user: Object,
-    detailsOnRight: Boolean
+    detailsOnRight: Boolean,
+    shouldCloseAllDialogs: Boolean
   },
   data () {
     return {
@@ -47,8 +48,10 @@ export default {
     // },
 
     toggleUserDetails () {
-      console.log('toggleUserDetails')
       if (!this.clickable) { return }
+      if (this.shouldCloseAllDialogs) {
+        this.$store.commit('closeAllDialogs')
+      }
       this.userDetailsIsVisible = !this.userDetailsIsVisible
     }
   }

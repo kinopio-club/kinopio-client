@@ -8,7 +8,7 @@ header
       About(:visible="aboutIsVisible")
 
   aside
-    User(:user="currentUser" :clickable="true" :detailsOnRight="true" :key="currentUser.id")
+    User(:user="currentUser" :clickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true")
 </template>
 
 <script>
@@ -41,6 +41,7 @@ export default {
   methods: {
     toggleAboutIsVisible () {
       const isVisible = this.aboutIsVisible
+      this.$store.commit('closeAllDialogs')
       this.aboutIsVisible = !isVisible
     }
   }

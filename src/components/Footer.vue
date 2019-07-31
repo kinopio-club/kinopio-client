@@ -45,6 +45,7 @@ export default {
   methods: {
     toggleFeedbackIsVisible () {
       const isVisible = this.feedbackIsVisible
+      this.$store.commit('closeAllDialogs')
       this.feedbackIsVisible = !isVisible
     }
   }
