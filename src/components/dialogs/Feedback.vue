@@ -3,7 +3,7 @@ dialog.feedback(v-if="visible" :open="visible" @click.stop)
   section
     p Feedback
   section
-    p During the beta I need to know if it's fun to create, and connect your thoughts, ideas, and plans with Kinopio
+    p During this beta I'd love to know if it's fun to create cards, and connect your thoughts, ideas, and plans together.
     p Your feedback right now is invaluably helpful.
     p Hit me up at hi@pirijan.com
     .button-wrap

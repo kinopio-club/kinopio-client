@@ -17,7 +17,7 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
       span Remove
 
   section.results-section(v-if="multipleConnectionTypes")
-    ul
+    ul.results-list
       template(v-for="(type in connectionTypes")
         li(:class="{ active: connectionTypeIsActive(type.id) }" @click="changeConnectionType(type)" :key="type.id")
           .badge(:style="{backgroundColor: type.color}" :class="{checked: connectionTypeIsDefault(type.id)}")

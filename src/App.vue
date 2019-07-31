@@ -216,7 +216,7 @@ label
 .results-section
   padding 4px
 
-ul
+ul.results-list
   margin 0
   padding 0
   li
