@@ -115,6 +115,13 @@
       "name": "Edit connections by tapping lines",
       "archived": false,
       "z": 12
+    },
+    {
+      "id": "ox53D7oYVNigSl5z9DHI8",
+      "x": 415,
+      "y": 117,
+      "name": "Modular synthesis for the mind",
+      "z": 13
     }
   ],
   "connections": [
@@ -151,7 +158,7 @@
       "endCardId": "bCVhqjrPWIknCvMwQnAs1",
       "path": "m309,483 q90,40 140,63",
       "id": "NN6MI1-_-p9bSNk2tfsma",
-      "connectionTypeId": "2x1DeNzgcIjQAkZGOgHBn"
+      "connectionTypeId": "jA4UkODLav-b3BU6fkgHe"
     },
     {
       "startCardId": "osphPWDIpUdEKyPzqjj94",
@@ -173,27 +180,34 @@
       "path": "m332,262 q90,40 51,93",
       "id": "CICu7lO2VN81sHXmlRV82",
       "connectionTypeId": "VrC69rLjM485_ZmTCIRQ8"
+    },
+    {
+      "startCardId": "1",
+      "endCardId": "ox53D7oYVNigSl5z9DHI8",
+      "path": "m230,101 q90,40 403,31",
+      "id": "kRDixyz5eIWuVj7AWEVF0",
+      "connectionTypeId": "jA4UkODLav-b3BU6fkgHe"
     }
   ],
   "connectionTypes": [
     {
       "id": "AR5sv65inSgi12necCYjr",
-      "name": "Uses",
+      "name": "Some Use-Cases",
       "color": "#c18fef"
     },
     {
-      "id": "2x1DeNzgcIjQAkZGOgHBn",
-      "name": "Connections",
-      "color": "#93f9b5"
+      "id": "VrC69rLjM485_ZmTCIRQ8",
+      "name": "Basic Controls",
+      "color": "#ffbffc"
     },
     {
-      "id": "VrC69rLjM485_ZmTCIRQ8",
-      "name": "Controls",
-      "color": "#ffbffc"
+      "id": "jA4UkODLav-b3BU6fkgHe",
+      "name": "Connected Ideas",
+      "color": "#82ffa9"
     }
   ],
   "customFields": [
 
   ],
-  "cacheDate": 1564592615883
+  "cacheDate": 1564592924635
 }
