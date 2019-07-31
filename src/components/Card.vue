@@ -143,7 +143,6 @@ export default {
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.commit('closeAllDialogs')
       this.$store.commit('cardDetailsIsVisibleForCard', this.id)
-      console.log('show card details', this.$store.state.cardDetailsIsVisibleForCard)
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
     }
   }

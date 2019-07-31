@@ -1,8 +1,9 @@
 <template lang="pug">
 footer
   span Beta {{buildHash}}
-  button(@click="toggleFeedbackIsVisible" :class="{active: feedbackIsVisible}") Feedback
-  Feedback(:visible="feedbackIsVisible")
+  .button-wrap
+    button(@click="toggleFeedbackIsVisible" :class="{active: feedbackIsVisible}") Feedback
+    Feedback(:visible="feedbackIsVisible" :fromFooter="true")
 
 </template>
 
@@ -52,14 +53,16 @@ export default {
 
 <style lang="stylus">
 footer
+  z-index var(--max-z)
   position fixed
   right 8px
   bottom 8px
-  button
+  > .button-wrap
     margin-left 6px
-  dialog
-    left initial
-    right 8px
-    top initial
-    bottom calc(100% - 4px)
+    display inline-block
+    dialog
+      left initial
+      right 8px
+      top initial
+      bottom calc(100% - 4px)
 </style>

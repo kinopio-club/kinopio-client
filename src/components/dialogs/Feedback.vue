@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.feedback(v-if="visible" :open="visible" @click.stop)
+dialog.feedback(v-if="visible" :open="visible" @click.stop :class="{'from-footer': fromFooter}")
   section
     p Feedback
   section
@@ -18,7 +18,8 @@ dialog.feedback(v-if="visible" :open="visible" @click.stop)
 export default {
   name: 'Feedback',
   props: {
-    visible: Boolean
+    visible: Boolean,
+    fromFooter: Boolean
   },
   methods: {
   }
@@ -32,4 +33,6 @@ export default {
   img
     margin-top 10px
     border-radius 3px
+  &.from-footer
+    max-height calc(100vh - 75px)
 </style>
