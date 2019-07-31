@@ -1,0 +1,166 @@
+{
+    "id": "1",
+    "users": [{
+        "id": "1",
+        "color": "cyan"
+    }, {
+        "id": "2",
+        "color": "pink",
+        "name": "maya"
+    }],
+    "cards": [{
+        "id": "1",
+        "x": 31,
+        "y": 85,
+        "z": 0,
+        "name": "Kinopio is a Thinking Tool",
+        "archived": false
+    }, {
+        "id": "osphPWDIpUdEKyPzqjj94",
+        "x": 594,
+        "y": 359,
+        "name": "Uses",
+        "archived": false,
+        "z": 1
+    }, {
+        "id": "QEl4mjzIJUiJNchzkWZIx",
+        "x": 888,
+        "y": 472,
+        "name": "Mind maps",
+        "archived": false,
+        "z": 2
+    }, {
+        "id": "llZmDtuRtz__8xFanQWlo",
+        "x": 634,
+        "y": 499,
+        "name": "Brainstorming",
+        "archived": false,
+        "z": 3
+    }, {
+        "id": "R7mS5cOSJpKNa4v5B2APF",
+        "x": 751,
+        "y": 568,
+        "name": "Project Planning",
+        "archived": false,
+        "z": 4
+    }, {
+        "id": "Rcb_O9pJqkzW8uGaRZn9e",
+        "x": 837,
+        "y": 395,
+        "name": "Sorting through feelings",
+        "archived": false,
+        "z": 5
+    }, {
+        "id": "uCMaAqMQOGevSiTPDvLcc",
+        "x": 72,
+        "y": 194,
+        "name": "Connect cards together by dragging connectors 🌘",
+        "archived": false,
+        "z": 14
+    }, {
+        "id": "bCVhqjrPWIknCvMwQnAs1",
+        "x": 364,
+        "y": 265,
+        "name": "like this",
+        "archived": false,
+        "z": 7
+    }, {
+        "id": "oEX9a0f_tN0e9NQNrewL9",
+        "x": 478,
+        "y": 192,
+        "name": "Connect me too!",
+        "archived": false,
+        "z": 8
+    }, {
+        "id": "_OVT_H9ra7BoldfsPUtNj",
+        "x": 957,
+        "y": 561,
+        "name": "Solving crimes",
+        "archived": false,
+        "z": 9
+    }, {
+        "id": "MtT5vBskYAlS5aV1BE5bt",
+        "x": 89,
+        "y": 369,
+        "name": "create new cards  by tapping empty spaces",
+        "archived": false,
+        "z": 10
+    }, {
+        "id": "4VPPPDRKTI5mfafPoELrS",
+        "x": 158,
+        "y": 446,
+        "name": "Select multiple cards by painting them",
+        "archived": false,
+        "z": 11
+    }, {
+        "id": "GaHFz5kjKvX3oZ8id0rqq",
+        "x": 222,
+        "y": 526,
+        "name": "Edit connections by tapping lines",
+        "archived": false,
+        "z": 12
+    }],
+    "connections": [{
+        "startCardId": "osphPWDIpUdEKyPzqjj94",
+        "endCardId": "QEl4mjzIJUiJNchzkWZIx",
+        "path": "m653,375 q90,40 326,113",
+        "id": "HUSwn9RZ36Tbl3XlvNRxB",
+        "connectionTypeId": "AR5sv65inSgi12necCYjr"
+    }, {
+        "startCardId": "osphPWDIpUdEKyPzqjj94",
+        "endCardId": "llZmDtuRtz__8xFanQWlo",
+        "path": "m653,375 q90,40 103,142",
+        "id": "pmXyhI-ZEh7EAPn5q4CoH",
+        "connectionTypeId": "AR5sv65inSgi12necCYjr"
+    }, {
+        "startCardId": "osphPWDIpUdEKyPzqjj94",
+        "endCardId": "R7mS5cOSJpKNa4v5B2APF",
+        "path": "m653,375 q90,40 237,207",
+        "id": "FP2rnsTvrLSepdXZ2oNCy",
+        "connectionTypeId": "AR5sv65inSgi12necCYjr"
+    }, {
+        "startCardId": "osphPWDIpUdEKyPzqjj94",
+        "endCardId": "Rcb_O9pJqkzW8uGaRZn9e",
+        "path": "m653,375 q90,40 376,36",
+        "id": "yFqBYMndWXgC7baCRyacV",
+        "connectionTypeId": "AR5sv65inSgi12necCYjr"
+    }, {
+        "startCardId": "uCMaAqMQOGevSiTPDvLcc",
+        "endCardId": "bCVhqjrPWIknCvMwQnAs1",
+        "path": "m289,210 q90,40 166,69",
+        "id": "NN6MI1-_-p9bSNk2tfsma",
+        "connectionTypeId": "2x1DeNzgcIjQAkZGOgHBn"
+    }, {
+        "startCardId": "osphPWDIpUdEKyPzqjj94",
+        "endCardId": "_OVT_H9ra7BoldfsPUtNj",
+        "path": "m653,375 q90,40 430,202",
+        "id": "mBEV4VvqwcE7qv-zzvggE",
+        "connectionTypeId": "AR5sv65inSgi12necCYjr"
+    }, {
+        "startCardId": "MtT5vBskYAlS5aV1BE5bt",
+        "endCardId": "4VPPPDRKTI5mfafPoELrS",
+        "path": "m306,379 q90,40 69,77",
+        "id": "EsEcMPbnqy-mx5WhKyL8g",
+        "connectionTypeId": "VrC69rLjM485_ZmTCIRQ8"
+    }, {
+        "startCardId": "4VPPPDRKTI5mfafPoELrS",
+        "endCardId": "GaHFz5kjKvX3oZ8id0rqq",
+        "path": "m375,456 q90,40 64,80",
+        "id": "CICu7lO2VN81sHXmlRV82",
+        "connectionTypeId": "VrC69rLjM485_ZmTCIRQ8"
+    }],
+    "connectionTypes": [{
+        "id": "AR5sv65inSgi12necCYjr",
+        "name": "Uses",
+        "color": "#c18fef"
+    }, {
+        "id": "2x1DeNzgcIjQAkZGOgHBn",
+        "name": "Connections",
+        "color": "#93f9b5"
+    }, {
+        "id": "VrC69rLjM485_ZmTCIRQ8",
+        "name": "Controls",
+        "color": "#ffbffc"
+    }],
+    "customFields": []
+}
