@@ -1,6 +1,6 @@
 <template lang="pug">
 footer
-  span Beta {{buildHash}}
+  span.beta-hash Beta {{buildHash}}
   .button-wrap
     button(@click="toggleFeedbackIsVisible" :class="{active: feedbackIsVisible}") Feedback
     Feedback(:visible="feedbackIsVisible" :fromFooter="true")
@@ -54,10 +54,12 @@ export default {
 
 <style lang="stylus">
 footer
-  z-index var(--max-z)
+  z-index calc(var(--max-z) - 2)
   position fixed
   right 8px
   bottom 8px
+  .beta-hash
+    user-select text
   > .button-wrap
     margin-left 6px
     display inline-block
