@@ -144,6 +144,7 @@ const currentSpace = {
 
     // connections
     updateCardConnections: (state, cardId) => {
+      console.log('updateCardConnections')
       const connections = state.connections.filter(connection => {
         return (connection.startCardId === cardId || connection.endCardId === cardId)
       })

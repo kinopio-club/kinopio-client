@@ -64,12 +64,16 @@ export default {
         return this.card.name
       },
       set (newValue) {
+        console.log(newValue)
         const options = {
           type: 'name',
           value: newValue,
           cardId: this.card.id
         }
         this.$store.commit('currentSpace/updateCardDetails', options)
+        this.$nextTick(() => {
+          this.$store.commit('currentSpace/updateCardConnections', this.card.id)
+        })
       }
     }
   },
