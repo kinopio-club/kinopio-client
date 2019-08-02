@@ -129,13 +129,6 @@ const currentSpace = {
         }
       })
       cache.updateSpace('cards', state.cards, state.id)
-      const connections = state.connections.filter(connection => {
-        return (connection.startCardId === cardId || connection.endCardId === cardId)
-      })
-      connections.forEach(connection => {
-        connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
-      })
-      cache.updateSpace('connections', state.connections, state.id)
     },
     createCard: (state, card) => {
       state.cards.push(card)
@@ -150,6 +143,15 @@ const currentSpace = {
     },
 
     // connections
+    updateCardConnections: (state, cardId) => {
+      const connections = state.connections.filter(connection => {
+        return (connection.startCardId === cardId || connection.endCardId === cardId)
+      })
+      connections.forEach(connection => {
+        connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
+      })
+      cache.updateSpace('connections', state.connections, state.id)
+    },
     addConnection: (state, { connection, connectionType }) => {
       connection.id = nanoid()
       connection.connectionTypeId = connectionType.id
@@ -265,10 +267,12 @@ const currentSpace = {
         cards.map(card => {
           if (multipleCardsSelected.includes(card.id)) {
             context.commit('moveCard', { cardId: card.id, delta })
+            context.commit('updateCardConnections', card.id)
           }
         })
       } else {
         context.commit('moveCard', { cardId: currentDraggingCardId, delta })
+        context.commit('updateCardConnections', currentDraggingCardId)
       }
     },
     incrementSelectedCardsZ: (context) => {
