@@ -373,6 +373,16 @@ export default {
       return fromDialog || fromHeader || fromFooter
     },
 
+    showMultipleCardActions () {
+      const isMultipleCardsSelected = Boolean(this.$store.state.multipleCardsSelected.length)
+      const preventDraggedCardFromShowingDetails = this.$store.state.preventDraggedCardFromShowingDetails
+      if (preventDraggedCardFromShowingDetails) { return }
+      if (isMultipleCardsSelected) {
+        this.$store.commit('multipleCardActionsPosition', endCursor)
+        this.$store.commit('multipleCardActionsIsVisible', true)
+      }
+    },
+
     stopInteractions (event) {
       console.log('💣 stopInteractions') // stopInteractions and Space/stopPainting are run on all mouse and touch end events
       window.cancelAnimationFrame(scrollTimer)
@@ -382,13 +392,11 @@ export default {
       if (this.isDrawingConnection) {
         this.createConnection()
       }
-      // if (this.isDraggingCard) {
-      //   this.$store.commit('multipleCardActionsIsVisible', false)
-      // }
       if (this.$store.state.shouldAddNewCard) {
         const position = utils.cursorPositionInPage(event)
         this.addNewCard(position)
       }
+      this.showMultipleCardActions()
       this.$store.commit('shouldAddNewCard', false)
       this.$store.commit('preventDraggedCardFromShowingDetails', false)
       this.$store.commit('currentUserIsDrawingConnection', false)

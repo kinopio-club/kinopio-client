@@ -226,7 +226,6 @@ export default {
       if (this.shouldCancel(event)) { return }
       startCursor = startCursor || {}
       const endCursor = utils.cursorPositionInPage(event)
-      const isMultipleCardsSelected = Boolean(this.$store.state.multipleCardsSelected.length)
       const shouldAddNewCard = this.$store.state.shouldAddNewCard
       currentUserIsLocking = false
       window.cancelAnimationFrame(lockingAnimationTimer)
@@ -234,10 +233,6 @@ export default {
       lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       this.$store.commit('currentUserIsPaintingLocked', false)
       this.$store.commit('currentUserIsPainting', false)
-      if (isMultipleCardsSelected) {
-        this.$store.commit('multipleCardActionsPosition', endCursor)
-        this.$store.commit('multipleCardActionsIsVisible', true)
-      }
       if (utils.cursorsAreClose(startCursor, endCursor) && shouldAddNewCard) {
         this.$store.commit('shouldAddNewCard', true)
         event.preventDefault()
