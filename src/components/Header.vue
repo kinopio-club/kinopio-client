@@ -7,9 +7,7 @@ header
         img.down-arrow(src="@/assets/down-arrow.svg")
       About(:visible="aboutIsVisible")
     .button-wrap
-      button
-        span yolofds
-        img.down-arrow(src="@/assets/down-arrow.svg")
+      button {{currentSpaceName}}
 
   aside
     User(:user="currentUser" :clickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true")
@@ -40,6 +38,11 @@ export default {
   computed: {
     currentUser () {
       return this.$store.state.currentUser
+    },
+    currentSpaceName () {
+      const id = this.$store.state.currentSpace.id
+      const name = this.$store.state.currentSpace.name
+      return name || `space-${id}`
     }
   },
   methods: {

@@ -110,15 +110,15 @@ label // used for checkbox buttons
   &:focus
     box-shadow var(--button-hover-shadow)
     background var(--secondary-hover-background)
-    .down-arrow
-      transform translateY(1px)
+    // .down-arrow
+    //   transform translateY(1px)
   &:active,
   &.active
     box-shadow var(--button-active-inset-shadow)
     color var(--primary)
     background var(--secondary-active-background)
-    .down-arrow
-      transform translateY(2px)
+    // .down-arrow
+    //   transform translateY(2px)
 
   // &:disabled
   //   opacity 0.25
