@@ -6,7 +6,7 @@ import _ from 'lodash'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
-import defaultSpace from '@/spaces/default.json'
+import helloSpace from '@/spaces/hello.json'
 
 Vue.use(Vuex)
 
@@ -85,7 +85,7 @@ const currentUser = {
 
 const currentSpace = {
   namespaced: true,
-  state: defaultSpace,
+  state: helloSpace,
 
   mutations: {
     restoreSpace: (state, newSpace) => {
