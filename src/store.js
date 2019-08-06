@@ -99,6 +99,13 @@ const currentSpace = {
       cache.saveSpace(state)
     },
 
+    // space name
+    updateName: (state, newName) => {
+      newName = newName.replace(/([^a-z0-9-]+)/ig, '-') // same regex as glitch project names
+      state.name = newName
+      cache.updateSpace('name', state.name, state.id)
+    },
+
     // cards
     incrementCardZ: (state, cardId) => {
       state.cards.map((card, index) => {
