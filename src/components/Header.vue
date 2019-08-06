@@ -7,7 +7,7 @@ header
         img.down-arrow(src="@/assets/down-arrow.svg")
       About(:visible="aboutIsVisible")
     .button-wrap
-      button(@click.stop="toggleSpaceDetailsIsVisible") {{currentSpaceName}}
+      button(@click.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}") {{currentSpaceName}}
       SpaceDetails(:visible="spaceDetailsIsVisible")
 
   aside

@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs")
+dialog.narrow.space-details(v-if="visible" :open="visible")
   section
     p supsup
 </template>
