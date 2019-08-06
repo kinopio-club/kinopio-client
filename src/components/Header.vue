@@ -7,7 +7,8 @@ header
         img.down-arrow(src="@/assets/down-arrow.svg")
       About(:visible="aboutIsVisible")
     .button-wrap
-      button {{currentSpaceName}}
+      button(@click.stop="toggleSpaceDetailsIsVisible") {{currentSpaceName}}
+      SpaceDetails(:visible="spaceDetailsIsVisible")
 
   aside
     User(:user="currentUser" :clickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true")
@@ -15,23 +16,27 @@ header
 
 <script>
 import About from '@/components/dialogs/About.vue'
+import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
 import User from '@/components/User.vue'
 
 export default {
   name: 'Header',
   components: {
     About,
+    SpaceDetails,
     User
   },
   data () {
     return {
-      aboutIsVisible: false
+      aboutIsVisible: false,
+      spaceDetailsIsVisible: false
     }
   },
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
         this.aboutIsVisible = false
+        this.spaceDetailsIsVisible = false
       }
     })
   },
@@ -50,6 +55,11 @@ export default {
       const isVisible = this.aboutIsVisible
       this.$store.commit('closeAllDialogs')
       this.aboutIsVisible = !isVisible
+    },
+    toggleSpaceDetailsIsVisible () {
+      const isVisible = this.spaceDetailsIsVisible
+      this.$store.commit('closeAllDialogs')
+      this.spaceDetailsIsVisible = !isVisible
     }
   }
 }
