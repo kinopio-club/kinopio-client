@@ -6,7 +6,7 @@ import _ from 'lodash'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
-import defaultSpace from '@/docs/default-space.json'
+import defaultSpace from '@/spaces/default.json'
 
 Vue.use(Vuex)
 

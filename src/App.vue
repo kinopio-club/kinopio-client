@@ -97,20 +97,29 @@ label // used for checkbox buttons
   padding-bottom 3px
   margin 0
   border 1px solid var(--primary)
+  background-color var(--primary-background)
   border-radius 3px
   background transparent
   cursor pointer
   user-select none
+  .down-arrow
+    padding-left 4px
+    vertical-align middle
   &:hover,
   &.hover,
   &:focus
     box-shadow var(--button-hover-shadow)
     background var(--secondary-hover-background)
+    .down-arrow
+      transform translateY(1px)
   &:active,
   &.active
     box-shadow var(--button-active-inset-shadow)
     color var(--primary)
     background var(--secondary-active-background)
+    .down-arrow
+      transform translateY(2px)
+
   // &:disabled
   //   opacity 0.25
   //   color var(--primary)
@@ -171,9 +180,6 @@ dialog
       user-select text
       &:first-child
         margin-top 0
-  .button-wrap
-    display inline-block
-    position relative
   section + section
     border-top 1px solid var(--primary)
   .change-color
@@ -189,6 +195,9 @@ dialog
   margin-right 5px
 
 .button-wrap
+  display inline-block
+  position relative
+
   dialog
     top calc(100% - 8px)
 

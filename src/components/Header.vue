@@ -6,6 +6,10 @@ header
         img(src="@/assets/logo.png" width="50" height="45" alt="kinopio logo")
         img.down-arrow(src="@/assets/down-arrow.svg")
       About(:visible="aboutIsVisible")
+    .button-wrap
+      button
+        span yolofds
+        img.down-arrow(src="@/assets/down-arrow.svg")
 
   aside
     User(:user="currentUser" :clickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true")
@@ -67,6 +71,8 @@ header
     position relative
   .logo-about
     position relative
+    display inline-block
+    margin-right 6px
   .logo
     cursor pointer
     img
