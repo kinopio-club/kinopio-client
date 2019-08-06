@@ -1,7 +1,25 @@
 <template lang="pug">
 dialog.narrow.space-details(v-if="visible" :open="visible")
   section
-    input(placeholder="name" v-model="spaceName")
+    .row
+      input(placeholder="name" v-model="spaceName")
+
+    button Remix
+    button
+      img.icon(src="@/assets/remove.svg")
+      span Remove
+
+  section
+
+    // TODO results list here
+
+    button
+      img.icon(src="@/assets/add.svg")
+      span Add
+
+  section
+    button Export
+    // TODO new Export dialog, currently just two option: download json: current space, all spaces
 
 </template>
 
