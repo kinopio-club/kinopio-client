@@ -6,7 +6,6 @@ dialog.narrow.space-details(v-if="visible" :open="visible")
 </template>
 
 <script>
-
 export default {
   name: 'SpaceDetails',
   props: {
@@ -21,6 +20,8 @@ export default {
         this.$store.commit('currentSpace/updateName', newName)
       }
     }
+  },
+  methods: {
   }
 }
 </script>

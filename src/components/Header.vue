@@ -47,7 +47,11 @@ export default {
     currentSpaceName () {
       const id = this.$store.state.currentSpace.id
       const name = this.$store.state.currentSpace.name
-      return name || `space-${id}`
+      if (name.length) {
+        return name
+      } else {
+        return `space-${id}`
+      }
     }
   },
   methods: {
