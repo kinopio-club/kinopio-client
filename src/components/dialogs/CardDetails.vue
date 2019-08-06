@@ -3,6 +3,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog")
   section.meta-section
     .row
       textarea.name(
+        ref="name"
         rows="1"
         placeholder="Tell me your dreams"
         v-model="name"
@@ -32,7 +33,6 @@ export default {
         if (element.value.length === 0) {
           isNewCard = true
           previousFieldValue = undefined
-          element.focus()
         } else {
           isNewCard = false
           previousFieldValue = element.value
@@ -51,6 +51,7 @@ export default {
     // for new cards
     const element = this.$refs.dialog
     if (element) {
+      this.focusName()
       if (this.preventScrollIntoView()) { return }
       this.scrollIntoView()
     }
@@ -78,6 +79,14 @@ export default {
     }
   },
   methods: {
+    focusName () {
+      const element = this.$refs.name
+      if (isNewCard) {
+        this.$nextTick(() => {
+          element.focus()
+        })
+      }
+    },
     blurField (event) {
       if (!event.shiftKey) {
         event.preventDefault()
