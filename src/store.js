@@ -89,11 +89,13 @@ const currentSpace = {
       console.log('🚃 Restored Space from cache', newSpace)
     },
     // Added aug 2019, can safely remove this in aug 2020
-    updateBetaSpaceId: (state) => {
+    updateBetaSpace: (state) => {
       if (state.id === '1') {
         const newId = nanoid()
         state.id = newId
+        state.name = 'hello-kinopio'
         cache.updateBetaSpaceId(newId)
+        cache.updateSpace('name', state.name, state.id)
       }
     },
     updateSpaceId: (state, newId) => {
@@ -251,7 +253,7 @@ const currentSpace = {
         spaceToRestore = cache.space(user.lastSpace)
         context.commit('restoreSpace', spaceToRestore)
       } else if (betaSpace) {
-        context.commit('updateBetaSpaceId')
+        context.commit('updateBetaSpace')
         context.commit('addUserToSpace', user)
         spaceToRestore = cache.space(context.state.id)
         context.commit('restoreSpace', spaceToRestore)
