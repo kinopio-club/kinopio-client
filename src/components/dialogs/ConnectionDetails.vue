@@ -16,16 +16,17 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
       img.icon(src="@/assets/remove.svg")
       span Remove
 
-  section.results-section(v-if="multipleConnectionTypes")
+  section
+    button(@click="addConnectionType")
+      img.icon(src="@/assets/add.svg")
+      span Add
+
+  section.results-section
     ul.results-list
       template(v-for="(type in connectionTypes")
         li(:class="{ active: connectionTypeIsActive(type.id) }" @click="changeConnectionType(type)" :key="type.id")
           .badge(:style="{backgroundColor: type.color}" :class="{checked: connectionTypeIsDefault(type.id)}")
           .name {{type.name}}
-    .results-section-actions
-      button(@click="addConnectionType")
-        img.icon(src="@/assets/add.svg")
-        span Add
 </template>
 
 <script>
@@ -81,9 +82,6 @@ export default {
         const connectionTypeId = this.currentConnectionType.id
         this.$store.commit('currentSpace/updateConnectionTypeName', { connectionTypeId, newName })
       }
-    },
-    multipleConnectionTypes () {
-      return Boolean(this.connectionTypes.length > 1)
     }
   },
   methods: {
@@ -183,11 +181,6 @@ export default {
 
 <style lang="stylus">
 .connection-details
-  .checkmark
-    margin 0
-  .results-section-actions
-    margin 4px
-    margin-top 4px
   .type-name
     margin-left 6px
 </style>

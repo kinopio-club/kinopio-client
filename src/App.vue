@@ -225,6 +225,8 @@ label
 
 .results-section
   padding 4px
+  padding-top 0
+  border-top 0
 
 ul.results-list
   margin 0
