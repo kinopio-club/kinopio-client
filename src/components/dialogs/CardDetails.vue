@@ -9,7 +9,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog")
         v-model="name"
         v-focus
         @keydown.enter="completeEditing"
-        @keydown.esc="cancelEditing"
+        @keydown.esc="closeCard"
         data-type="name"
       )
     button(@click="removeCard")
@@ -20,7 +20,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog")
 <script>
 import utils from '@/utils.js'
 
-let observer, isNewCard, previousFieldValue
+let observer, isNewCard
 
 export default {
   name: 'CardDetails',
@@ -32,10 +32,8 @@ export default {
       inserted (element) {
         if (element.value.length === 0) {
           isNewCard = true
-          previousFieldValue = undefined
         } else {
           isNewCard = false
-          previousFieldValue = element.value
         }
       }
     }
@@ -100,14 +98,7 @@ export default {
         this.blurField(event)
       }
     },
-    cancelEditing (event) {
-      const type = event.target.dataset.type
-      const options = {
-        type: type,
-        value: previousFieldValue,
-        cardId: this.card.id
-      }
-      this.$store.commit('currentSpace/updateCardDetails', options)
+    closeCard () {
       this.$store.commit('closeAllDialogs')
     },
     removeCard () {
