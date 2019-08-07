@@ -13,14 +13,16 @@ export default {
       return JSON.parse(window.localStorage[key])
     } catch (error) {}
   },
+  removeLocal (key) {
+    try {
+      window.localStorage.removeItem(key)
+    } catch (error) {}
+  },
 
   // user
 
   user () {
     return this.getLocal('user') || {}
-  },
-  getUser (key) {
-    return this.user()[key]
   },
   updateUser (key, value) {
     let user = this.user()
@@ -34,9 +36,6 @@ export default {
   // space
   space (spaceId) {
     return this.getLocal(`space-${spaceId}`) || {}
-  },
-  getSpace (key, spaceId) {
-    return this.space(spaceId)[key]
   },
   getAllSpaces () {
     const keys = Object.keys(window.localStorage)
@@ -54,11 +53,10 @@ export default {
   },
   // Added aug 2019, can safely remove this in aug 2020
   updateBetaSpaceId (newId) {
-    const betaSpace = 'space-1'
-    const updatedSpace = this.getLocal(betaSpace)
+    const updatedSpace = this.space('1')
     updatedSpace.id = newId
     this.storeLocal(`space-${newId}`, updatedSpace)
-    window.localStorage.removeItem(betaSpace)
+    this.removeLocal('space-1')
   },
   saveSpace (space) {
     space.cacheDate = Date.now()

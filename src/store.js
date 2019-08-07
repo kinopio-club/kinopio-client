@@ -243,26 +243,32 @@ const currentSpace = {
 
   actions: {
     restoreFromCache: (context) => {
-      const userLastSpace = context.rootState.currentUser.lastSpace
-      const cachedSpace = cache.space(userLastSpace)
-      const user = utils.clone(context.rootState.currentUser)
-      if (utils.objectHasKeys(cachedSpace)) {
-        context.commit('restoreSpace', cachedSpace)
+      const user = context.rootState.currentUser
+      let spaceToRestore = {}
+      // betaSpace condition added aug 2019, can safely remove this in aug 2020
+      const betaSpace = cache.space('1')
+      if (user.lastSpace) {
+        spaceToRestore = cache.space(user.lastSpace)
+        context.commit('restoreSpace', spaceToRestore)
+      } else if (betaSpace) {
         context.commit('updateBetaSpaceId')
         context.commit('addUserToSpace', user)
+        spaceToRestore = cache.space(context.state.id)
+        context.commit('restoreSpace', spaceToRestore)
       } else {
         context.dispatch('createNewSpace')
         context.commit('addUserToSpace', user)
       }
+      context.commit('currentUser/updateLastSpace', context.state.id, { root: true })
     },
 
     // spaces
     createNewSpace: (context) => {
+      console.log('createNewSpace')
       const newId = nanoid()
       context.commit('updateSpaceId', newId)
       const space = utils.clone(context.state)
       cache.saveSpace(space)
-      context.commit('currentUser/updateLastSpace', newId, { root: true })
     },
 
     // cards
