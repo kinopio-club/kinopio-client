@@ -13,11 +13,11 @@ Vue.use(Vuex)
 const currentUser = {
   namespaced: true,
   state: {
-    id: '1',
+    id: nanoid(),
+    currentSpace: '',
     color: randomColor({ luminosity: 'light' }),
     name: undefined,
-    defaultConnectionTypeId: '',
-    currentSpace: ''
+    defaultConnectionTypeId: ''
   },
   getters: {
     isCurrentUser: (state) => (userId) => {
@@ -39,6 +39,10 @@ const currentUser = {
       state.name = newName
       cache.updateUser('name', newName)
     },
+    updateCurrentSpace: (state, spaceId) => {
+      state.currentSpace = spaceId
+      cache.updateUser('currentSpace', spaceId)
+    },
     defaultConnectionTypeId: (state, typeId) => {
       state.defaultConnectionTypeId = typeId
       cache.updateUser('defaultConnectionTypeId', typeId)
@@ -47,9 +51,6 @@ const currentUser = {
       Object.keys(user).forEach(item => {
         state[item] = user[item]
       })
-    },
-    cacheUser: (state) => {
-      cache.saveUser(state)
     }
   },
   actions: {
@@ -58,8 +59,11 @@ const currentUser = {
       if (utils.objectHasKeys(cachedUser)) {
         context.commit('restoreUser', cachedUser)
       } else {
-        context.commit('cacheUser')
+        context.dispatch('createNewUser')
       }
+    },
+    createNewUser: (context) => {
+      cache.saveUser(context.state)
     }
   }
 }
