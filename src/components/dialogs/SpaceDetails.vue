@@ -7,7 +7,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible")
     button(@click="removeCurrentSpace")
       img.icon(src="@/assets/remove.svg")
       span Remove
-  section
+  section.results-actions
     button(@click="addSpace")
       img.icon(src="@/assets/add.svg")
       span Add
@@ -69,6 +69,7 @@ export default {
       // dispatch a store action that:
       // update user.currentSpace
       // swap currentSpace with it
+      // commit('currentUser/updateCurrentSpace')
     },
     remixCurrentSpace () {
       console.log('☮️ remixCurrentSpace')

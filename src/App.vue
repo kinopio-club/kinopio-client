@@ -222,6 +222,8 @@ label
       background-repeat no-repeat
       background-position center
 
+.results-actions
+  padding-bottom 4px
 .results-section
   padding 4px
   padding-top 0

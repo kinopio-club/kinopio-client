@@ -16,7 +16,7 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
       img.icon(src="@/assets/remove.svg")
       span Remove
 
-  section
+  section.results-actions
     button(@click="addConnectionType")
       img.icon(src="@/assets/add.svg")
       span Add
