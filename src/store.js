@@ -16,7 +16,8 @@ const currentUser = {
     id: '1',
     color: randomColor({ luminosity: 'light' }),
     name: undefined,
-    defaultConnectionTypeId: ''
+    defaultConnectionTypeId: '',
+    currentSpace: ''
   },
   getters: {
     isCurrentUser: (state) => (userId) => {

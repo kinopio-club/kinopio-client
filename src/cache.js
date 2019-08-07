@@ -1,4 +1,5 @@
 // local storage cache interface for currentUser and spaces
+
 export default {
   storeLocal (key, value) {
     try {
@@ -36,6 +37,14 @@ export default {
   },
   getSpace (key, spaceId) {
     return this.space(spaceId)[key]
+  },
+  getAllSpaces () {
+    const keys = Object.keys(window.localStorage)
+    const spaceKeys = keys.filter(key => key.startsWith('space-'))
+    const spaces = spaceKeys.map(key => {
+      return this.getLocal(key)
+    })
+    return spaces
   },
   updateSpace (key, value, spaceId) {
     let space = this.space(spaceId)
