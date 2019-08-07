@@ -51,10 +51,19 @@ const currentUser = {
       Object.keys(user).forEach(item => {
         state[item] = user[item]
       })
+    },
+    // Added aug 2019, can safely remove this in aug 2020
+    updateBetaUserId: (state) => {
+      if (state.id === '1') {
+        const newId = nanoid()
+        state.id = newId
+        cache.updateUser('id', newId)
+      }
     }
   },
   actions: {
     restoreFromCache: (context) => {
+      context.commit('updateBetaUserId')
       const cachedUser = cache.user()
       if (utils.objectHasKeys(cachedUser)) {
         context.commit('restoreUser', cachedUser)
