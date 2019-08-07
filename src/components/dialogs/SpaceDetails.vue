@@ -16,6 +16,8 @@ dialog.narrow.space-details(v-if="visible" :open="visible")
     ul.results-list
       template(v-for="(space in spaces")
         li(@click="changeSpace(space.id)" :key="space.id")
+          .badge(:style="{backgroundColor: space.color}")
+            img.space-moon(src="@/assets/space-moon.svg")
           .name {{space.name}}
       //  li(:class="{ active: spaceIsActive(space.id) }" @click="changeSpace(space)" :key="space.id")
       //  badge is a compound color based on connection types present

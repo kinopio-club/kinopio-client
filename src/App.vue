@@ -257,6 +257,10 @@ ul.results-list
     background-repeat no-repeat
     background-position center
 
+.space-moon
+  transform rotate(-35deg)
+  vertical-align -3px
+
 .anon-avatar
   background-image url('assets/anon-avatar.svg')
   background-size 70%
