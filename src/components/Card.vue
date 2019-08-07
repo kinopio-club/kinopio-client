@@ -182,10 +182,11 @@ article
     align-self right
     cursor cell
     button
+      background-color transparent
       cursor cell
       position relative
-      width: 20px
-      height: 16px
+      width 20px
+      height 16px
       vertical-align top
     &:hover
       button
