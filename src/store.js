@@ -14,7 +14,7 @@ const currentUser = {
   namespaced: true,
   state: {
     id: nanoid(),
-    currentSpace: '',
+    lastSpace: '',
     color: randomColor({ luminosity: 'light' }),
     name: undefined,
     defaultConnectionTypeId: ''
@@ -22,13 +22,13 @@ const currentUser = {
   getters: {
     isCurrentUser: (state) => (userId) => {
       return Boolean(state.id === userId)
-    },
-    isMember: (state, getters, rootState) => {
-      const inCurrentSpace = rootState.currentSpace.users.find(user => {
-        return user.id === state.id
-      })
-      return Boolean(inCurrentSpace)
     }
+    // isMember: (state, getters, rootState) => {
+    //   const inCurrentSpace = rootState.currentSpace.users.find(user => {
+    //     return user.id === state.id
+    //   })
+    //   return Boolean(inCurrentSpace)
+    // }
   },
   mutations: {
     updateColor: (state, newColor) => {
@@ -39,9 +39,9 @@ const currentUser = {
       state.name = newName
       cache.updateUser('name', newName)
     },
-    updateCurrentSpace: (state, spaceId) => {
-      state.currentSpace = spaceId
-      cache.updateUser('currentSpace', spaceId)
+    updateLastSpace: (state, spaceId) => {
+      state.lastSpace = spaceId
+      cache.updateUser('lastSpace', spaceId)
     },
     defaultConnectionTypeId: (state, typeId) => {
       state.defaultConnectionTypeId = typeId
@@ -53,7 +53,7 @@ const currentUser = {
       })
     },
     // Added aug 2019, can safely remove this in aug 2020
-    updateBetaUserId: (state) => {
+    updateBetaUserId: (state, newId) => {
       if (state.id === '1') {
         const newId = nanoid()
         state.id = newId
@@ -77,30 +77,9 @@ const currentUser = {
   }
 }
 
-// const customFields = {
-//   namespaced: true,
-//   state: {
-//     fields: [
-//       {
-//         type: 'checkbox',
-//         value: false
-//       },
-//       {
-//         type: 'frames',
-//         value: ''
-//       },
-//       {
-//         type: 'status',
-//         value: ['To Do', 'Doing', 'Done'] // to object with ids
-//       },
-//     ]
-//   },
-// }
-
 const currentSpace = {
   namespaced: true,
   state: helloSpace,
-
   mutations: {
     restoreSpace: (state, newSpace) => {
       const keys = Object.keys(state)
@@ -109,8 +88,28 @@ const currentSpace = {
       })
       console.log('🚃 Restored Space from cache', newSpace)
     },
-    cacheSpace: (state) => {
-      cache.saveSpace(state)
+    // Added aug 2019, can safely remove this in aug 2020
+    updateBetaSpaceId: (state) => {
+      if (state.id === '1') {
+        const newId = nanoid()
+        state.id = newId
+        cache.updateBetaSpaceId(newId)
+      }
+    },
+    updateSpaceId: (state, newId) => {
+      state.id = newId
+    },
+
+    // users
+    addUserToSpace: (state, newUser) => {
+      utils.typeCheck(newUser, 'object')
+      const userExists = state.users.find(user => {
+        return user.id === newUser.id
+      })
+      if (!userExists) {
+        state.users.push(newUser)
+        cache.updateSpace('users', state.users, state.id)
+      }
     },
 
     // space name
@@ -244,14 +243,26 @@ const currentSpace = {
 
   actions: {
     restoreFromCache: (context) => {
-      const currentUserIsMember = context.rootGetters['currentUser/isMember']
-      if (!currentUserIsMember) { return }
-      const cachedSpace = cache.space(context.state.id)
+      const userLastSpace = context.rootState.currentUser.lastSpace
+      const cachedSpace = cache.space(userLastSpace)
+      const user = utils.clone(context.rootState.currentUser)
       if (utils.objectHasKeys(cachedSpace)) {
         context.commit('restoreSpace', cachedSpace)
+        context.commit('updateBetaSpaceId')
+        context.commit('addUserToSpace', user)
       } else {
-        context.commit('cacheSpace')
+        context.dispatch('createNewSpace')
+        context.commit('addUserToSpace', user)
       }
+    },
+
+    // spaces
+    createNewSpace: (context) => {
+      const newId = nanoid()
+      context.commit('updateSpaceId', newId)
+      const space = utils.clone(context.state)
+      cache.saveSpace(space)
+      context.commit('currentUser/updateLastSpace', newId, { root: true })
     },
 
     // cards

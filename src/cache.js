@@ -52,6 +52,14 @@ export default {
     space.cacheDate = Date.now()
     this.storeLocal(`space-${spaceId}`, space)
   },
+  // Added aug 2019, can safely remove this in aug 2020
+  updateBetaSpaceId (newId) {
+    const betaSpace = 'space-1'
+    const updatedSpace = this.getLocal(betaSpace)
+    updatedSpace.id = newId
+    this.storeLocal(`space-${newId}`, updatedSpace)
+    window.localStorage.removeItem(betaSpace)
+  },
   saveSpace (space) {
     space.cacheDate = Date.now()
     this.storeLocal(`space-${space.id}`, space)

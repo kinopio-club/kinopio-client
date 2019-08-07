@@ -1,17 +1,7 @@
 {
    "id":"1",
    "name":"hello-kinopio",
-   "users":[
-      {
-         "id":"1",
-         "color":"cyan"
-      },
-      {
-         "id":"2",
-         "color":"pink",
-         "name":"maya"
-      }
-   ],
+   "users":[],
    "cards":[
       {
          "id":"1",
