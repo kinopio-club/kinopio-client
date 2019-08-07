@@ -6,9 +6,9 @@ header
         img(src="@/assets/logo.png" width="50" height="45" alt="kinopio logo")
         img.down-arrow(src="@/assets/down-arrow.svg")
       About(:visible="aboutIsVisible")
-    .button-wrap
-      button(@click.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}") {{currentSpaceName}}
-      SpaceDetails(:visible="spaceDetailsIsVisible")
+    //.button-wrap
+    //  button(@click.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}") {{currentSpaceName}}
+    //  SpaceDetails(:visible="spaceDetailsIsVisible")
 
   aside
     User(:user="currentUser" :clickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true")

@@ -1,8 +1,8 @@
 <template lang='pug'>
 #app.app
-  Header
   MagicPaint
   router-view
+  Header
   Footer
 </template>
 
@@ -99,7 +99,6 @@ label // used for checkbox buttons
   border 1px solid var(--primary)
   background-color var(--primary-background)
   border-radius 3px
-  background transparent
   cursor pointer
   user-select none
   .down-arrow
