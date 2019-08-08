@@ -135,18 +135,11 @@
          "color":"#c18fef"
       },
       {
-         "id":"jA4UkODLav-b3BU6fkgHe",
-         "name":"Connected Ideas",
-         "color":"#82ffa9"
-      },
-      {
          "id":"Rh3PfVdIyovscLIiNTeoB",
-         "name":"Connection 4",
+         "name":"Basics",
          "color":"#f9bbe4"
       }
    ],
-   "customFields":[
-
-   ],
+   "customFields":[],
    "cacheDate":1564969151963
 }

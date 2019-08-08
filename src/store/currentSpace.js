@@ -6,15 +6,16 @@ import utils from '@/utils.js'
 import cache from '@/cache.js'
 
 import helloSpace from '@/spaces/hello.json'
+import newSpace from '@/spaces/new.json'
 
 export default {
   namespaced: true,
   state: helloSpace,
   mutations: {
-    restoreSpace: (state, newSpace) => {
+    restoreSpace: (state, space) => {
       const keys = Object.keys(state)
       keys.forEach(key => {
-        state[key] = newSpace[key] || []
+        state[key] = space[key] || []
       })
     },
     // Added aug 2019, can safely remove this in aug 2020
@@ -27,13 +28,13 @@ export default {
         cache.updateSpace('name', state.name, state.id)
       }
     },
-    updateSpaceId: (state, newId) => {
+    createNewHelloSpace: (state, newId) => {
+      state = helloSpace
       state.id = newId
     },
-    createNewHelloSpace: (state, newId) => {
-      const id = newId || nanoid()
-      state = helloSpace
-      state.id = id
+    createNewSpace: (state, newId) => {
+      Object.assign(state, newSpace)
+      state.id = newId
     },
 
     // users
@@ -206,7 +207,9 @@ export default {
       const user = context.rootState.currentUser
       if (isHelloSpace) {
         context.commit('createNewHelloSpace', newId)
-        context.commit('updateSpaceId', newId)
+      } else {
+        context.commit('createNewSpace', newId)
+        context.commit('currentUser/updateLastSpace', context.state.id, { root: true })
       }
       const space = utils.clone(context.state)
       cache.saveSpace(space)

@@ -66,13 +66,7 @@ export default {
       downloadAnchor.click()
     },
     addSpace () {
-      console.log('🥬 add space')
-      // dispatch a store action that:
-      // create new space from store , using new json data,
-      // and new unique id
-      // default name = low permutation rand name? name based on id
-
-      // this.changeSpace (newSpace.id)
+      this.$store.dispatch('currentSpace/createNewSpace')
     },
     changeSpace (spaceId) {
       console.log('🌸 change space')
