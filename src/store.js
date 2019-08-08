@@ -252,7 +252,7 @@ const currentSpace = {
       if (user.lastSpace) {
         spaceToRestore = cache.space(user.lastSpace)
         context.commit('restoreSpace', spaceToRestore)
-      } else if (betaSpace) {
+      } else if (utils.objectHasKeys(betaSpace)) {
         context.commit('updateBetaSpace')
         context.commit('addUserToSpace', user)
         spaceToRestore = cache.space(context.state.id)
