@@ -54,8 +54,8 @@ export default {
     }
   },
   beforeCreate () {
-    this.$store.dispatch('currentUser/restoreFromCache')
-    this.$store.dispatch('currentSpace/restoreFromCache')
+    this.$store.dispatch('currentUser/init')
+    this.$store.dispatch('currentSpace/init')
   },
   mounted () {
     // bind events to window to receive events when mouse is outside window

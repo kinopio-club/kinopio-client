@@ -62,7 +62,7 @@ const currentUser = {
     }
   },
   actions: {
-    restoreFromCache: (context) => {
+    init: (context) => {
       const cachedUser = cache.user()
       if (utils.objectHasKeys(cachedUser)) {
         context.commit('restoreUser', cachedUser)
@@ -86,7 +86,6 @@ const currentSpace = {
       keys.forEach(key => {
         state[key] = newSpace[key] || []
       })
-      console.log('🚃 Restored Space from cache', newSpace)
     },
     // Added aug 2019, can safely remove this in aug 2020
     updateBetaSpace: (state) => {
@@ -100,6 +99,11 @@ const currentSpace = {
     },
     updateSpaceId: (state, newId) => {
       state.id = newId
+    },
+    createNewHelloSpace: (state, newId) => {
+      const id = newId || nanoid()
+      state = helloSpace
+      state.id = id
     },
 
     // users
@@ -166,7 +170,6 @@ const currentSpace = {
 
     // connections
     updateCardConnections: (state, cardId) => {
-      console.log('updateCardConnections')
       const connections = state.connections.filter(connection => {
         return (connection.startCardId === cardId || connection.endCardId === cardId)
       })
@@ -244,31 +247,37 @@ const currentSpace = {
   },
 
   actions: {
-    restoreFromCache: (context) => {
+    init: (context) => {
       const user = context.rootState.currentUser
       let spaceToRestore = {}
       // betaSpace condition added aug 2019, can safely remove this in aug 2020
       const betaSpace = cache.space('1')
       if (user.lastSpace) {
+        console.log('🚃 Restore Space from cache', user.lastSpace)
         spaceToRestore = cache.space(user.lastSpace)
         context.commit('restoreSpace', spaceToRestore)
       } else if (utils.objectHasKeys(betaSpace)) {
+        console.log('🚃 Migrate data from beta format cache', betaSpace)
         context.commit('updateBetaSpace')
         context.commit('addUserToSpace', user)
         spaceToRestore = cache.space(context.state.id)
         context.commit('restoreSpace', spaceToRestore)
       } else {
-        context.dispatch('createNewSpace')
-        context.commit('addUserToSpace', user)
+        console.log('🚃 New hello-kinopio space')
+        const isHelloSpace = true
+        context.dispatch('createNewSpace', isHelloSpace)
+        context.commit('addUserToSpace', user) // move in to createNewSpace
       }
       context.commit('currentUser/updateLastSpace', context.state.id, { root: true })
     },
 
     // spaces
-    createNewSpace: (context) => {
-      console.log('createNewSpace')
+    createNewSpace: (context, isHelloSpace) => {
       const newId = nanoid()
-      context.commit('updateSpaceId', newId)
+      if (isHelloSpace) {
+        context.commit('createNewHelloSpace', newId)
+        context.commit('updateSpaceId', newId)
+      }
       const space = utils.clone(context.state)
       cache.saveSpace(space)
     },
