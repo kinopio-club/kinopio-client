@@ -253,7 +253,7 @@ const currentSpace = {
       // betaSpace condition added aug 2019, can safely remove this in aug 2020
       const betaSpace = cache.space('1')
       if (user.lastSpace) {
-        console.log('🚃 Restore Space from cache', user.lastSpace)
+        console.log('🚃 Restore last space from cache', user.lastSpace)
         spaceToRestore = cache.space(user.lastSpace)
         context.commit('restoreSpace', spaceToRestore)
       } else if (utils.objectHasKeys(betaSpace)) {
@@ -263,10 +263,9 @@ const currentSpace = {
         spaceToRestore = cache.space(context.state.id)
         context.commit('restoreSpace', spaceToRestore)
       } else {
-        console.log('🚃 New hello-kinopio space')
+        console.log('🚃 Create new hello-kinopio space')
         const isHelloSpace = true
         context.dispatch('createNewSpace', isHelloSpace)
-        context.commit('addUserToSpace', user) // move in to createNewSpace
       }
       context.commit('currentUser/updateLastSpace', context.state.id, { root: true })
     },
@@ -274,12 +273,14 @@ const currentSpace = {
     // spaces
     createNewSpace: (context, isHelloSpace) => {
       const newId = nanoid()
+      const user = context.rootState.currentUser
       if (isHelloSpace) {
         context.commit('createNewHelloSpace', newId)
         context.commit('updateSpaceId', newId)
       }
       const space = utils.clone(context.state)
       cache.saveSpace(space)
+      context.commit('addUserToSpace', user)
     },
 
     // cards
