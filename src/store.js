@@ -63,10 +63,10 @@ const currentUser = {
   },
   actions: {
     restoreFromCache: (context) => {
-      context.commit('updateBetaUserId')
       const cachedUser = cache.user()
       if (utils.objectHasKeys(cachedUser)) {
         context.commit('restoreUser', cachedUser)
+        context.commit('updateBetaUserId')
       } else {
         context.dispatch('createNewUser')
       }
