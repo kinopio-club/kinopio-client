@@ -2,11 +2,18 @@
 dialog.narrow.space-details(v-if="visible" :open="visible")
   section
     .row
+      .badge
+        img.space-moon(src="@/assets/space-moon.svg")
       input(placeholder="name" v-model="spaceName")
-    button(@click="remixCurrentSpace") Remix
-    button(@click="removeCurrentSpace")
-      img.icon(src="@/assets/remove.svg")
-      span Remove
+    .row
+      button(@click="remixCurrentSpace") Remix
+      button(@click="removeCurrentSpace")
+        img.icon(src="@/assets/remove.svg")
+        span Remove
+    button(@click="exportToJSON")
+      span Export
+    a#export-downlaod-anchor.hidden
+
   section.results-actions
     button(@click="addSpace")
       img.icon(src="@/assets/add.svg")
@@ -24,8 +31,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible")
       //    .badge(:style="{backgroundColor: space.color}" :class="{checked: connectionTypeIsDefault(space.id)}")
       //    .name {{space.name}}
 
-  section
-    button Export
+  //section
     // TODO new Export dialog, currently just two option: download json: current space, all spaces
     // will expand the dom downwards, can window.scroll smooth downwards if required
 
@@ -55,6 +61,14 @@ export default {
     }
   },
   methods: {
+    exportToJSON () {
+      const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.$store.state.currentSpace))
+      const downloadAnchor = document.getElementById('export-downlaod-anchor')
+      const spaceId = this.$store.state.currentSpace.id
+      downloadAnchor.setAttribute('href', json)
+      downloadAnchor.setAttribute('download', `kinopio-space-${spaceId}.json`)
+      downloadAnchor.click()
+    },
     addSpace () {
       console.log('🥬 add space')
       // dispatch a store action that:
@@ -101,4 +115,9 @@ export default {
 <style lang="stylus">
 .space-details
   top calc(100% - 8px)
+  .badge
+    background-color #f9bbe4
+  .row
+    .badge
+      width 19px
 </style>
