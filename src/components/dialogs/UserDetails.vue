@@ -18,7 +18,7 @@ dialog.narrow.user-details(
       img.icon(src="@/assets/remove.svg")
       span Remove All Your Data
     span(v-if="removeAllConfirmationVisible")
-      p This will Permanently Remove All your Spaces and User Data
+      p Permanently remove all your spaces and user data?
       .segmented-buttons
         button(@click="toggleremoveAllConfirmationVisible") Cancel
         button.danger(@click="removeAllData")
