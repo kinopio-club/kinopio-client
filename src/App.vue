@@ -39,7 +39,7 @@ export default {
   --light-shadow rgba(0,0,0,0.20)
   --heavy-shadow rgba(0,0,0,0.25)
 
-  --danger #ffe5ce
+  --danger pink
 
   // non-theme vars
   --max-z 2147483647
