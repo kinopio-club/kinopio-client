@@ -39,6 +39,8 @@ export default {
   --light-shadow rgba(0,0,0,0.20)
   --heavy-shadow rgba(0,0,0,0.25)
 
+  --danger #ffe5ce
+
   // non-theme vars
   --max-z 2147483647
   --hover-shadow 3px 3px 0 var(--heavy-shadow)
@@ -161,7 +163,9 @@ dialog
   p + button,
   button + p,
   p + .button-wrap,
-  .button-wrap + p
+  .button-wrap + p,
+  p + .segmented-buttons,
+  button + .segmented-buttons
     margin-top 10px
   .row
     margin-bottom 10px
@@ -188,6 +192,18 @@ dialog
       width 14px
       margin-bottom 1px
       border-radius 3px
+
+.segmented-buttons
+  button
+    margin 0
+    &:first-child
+      border-top-right-radius 0
+      border-bottom-right-radius 0
+    &:last-child
+      border-top-left-radius 0
+      border-bottom-left-radius 0
+  button + button
+    margin-left -1px
 
 .icon
   vertical-align -1px
@@ -246,6 +262,9 @@ ul.results-list
     &.active
       background-color var(--secondary-active-background)
       box-shadow var(--active-inset-shadow)
+
+.danger
+  background-color var(--danger)
 
 .badge
   min-width 17px

@@ -13,11 +13,24 @@ dialog.narrow.user-details(
         ColorPicker(:currentColor="userColor" :visible="colorPickerIsVisible" @selectedColor="updateUserColor")
       input.name(placeholder="What's your name?" v-model="userName" name="Name")
 
+  section(v-if="isCurrentUser")
+    button(v-if="!removeAllConfirmationVisible" @click="toggleremoveAllConfirmationVisible")
+      img.icon(src="@/assets/remove.svg")
+      span Remove All Your Data
+    span(v-if="removeAllConfirmationVisible")
+      p This will Permanently Remove All your Spaces and User Data
+      .segmented-buttons
+        button(@click="toggleremoveAllConfirmationVisible") Cancel
+        button.danger(@click="removeAllData")
+          img.icon(src="@/assets/remove.svg")
+          span Remove All
+
     // button Sign In or Up
 </template>
 
 <script>
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
+import cache from '@/cache.js'
 
 export default {
   name: 'UserDetails',
@@ -31,7 +44,8 @@ export default {
   },
   data () {
     return {
-      colorPickerIsVisible: false
+      colorPickerIsVisible: false,
+      removeAllConfirmationVisible: false
     }
   },
   computed: {
@@ -70,12 +84,24 @@ export default {
         userId: this.user.id,
         newColor
       })
+    },
+    toggleremoveAllConfirmationVisible () {
+      this.removeAllConfirmationVisible = !this.removeAllConfirmationVisible
+    },
+    removeAllData () {
+      const allSpaces = cache.getAllSpaces()
+      allSpaces.forEach(space => {
+        cache.removeLocal(`space-${space.id}`)
+      })
+      cache.removeLocal('user')
+      location.reload()
     }
   },
   watch: {
     visible (value) {
       if (value) {
         this.colorPickerIsVisible = false
+        this.removeAllConfirmationVisible = false
       }
     }
   }
