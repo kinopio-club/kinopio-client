@@ -31,10 +31,6 @@ dialog.narrow.space-details(v-if="visible" :open="visible")
       //    .badge(:style="{backgroundColor: space.color}" :class="{checked: connectionTypeIsDefault(space.id)}")
       //    .name {{space.name}}
 
-  //section
-    // TODO new Export dialog, currently just two option: download json: current space, all spaces
-    // will expand the dom downwards, can window.scroll smooth downwards if required
-
 </template>
 
 <script>
