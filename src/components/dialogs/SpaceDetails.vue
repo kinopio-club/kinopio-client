@@ -22,10 +22,11 @@ dialog.narrow.space-details(v-if="visible" :open="visible")
   section.results-section
     ul.results-list
       template(v-for="(space in spaces")
-        li(@click="changeSpace(space.id)" :key="space.id")
+        li(@click="changeSpace(space.id)" :class="{ active: spaceIsActive(space.id) }" :key="space.id")
           .badge(:style="{backgroundColor: space.color}")
             img.space-moon(src="@/assets/space-moon.svg")
           .name {{space.name}}
+
       //  li(:class="{ active: spaceIsActive(space.id) }" @click="changeSpace(space)" :key="space.id")
       //  badge is a compound color based on connection types present
       //    .badge(:style="{backgroundColor: space.color}" :class="{checked: connectionTypeIsDefault(space.id)}")
@@ -65,12 +66,16 @@ export default {
       downloadAnchor.setAttribute('download', `kinopio-space-${spaceId}.json`)
       downloadAnchor.click()
     },
+    spaceIsActive (spaceId) {
+      const currentSpace = this.$store.state.currentSpace.id
+      return Boolean(currentSpace === spaceId)
+    },
     addSpace () {
       this.$store.dispatch('currentSpace/createNewSpace')
       this.updateSpaces()
     },
     changeSpace (spaceId) {
-      console.log('🌸 change space')
+      console.log('🌸 change space', spaceId)
       // dispatch a store action that:
       // update user.currentSpace
       // swap currentSpace with it
