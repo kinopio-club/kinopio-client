@@ -276,6 +276,7 @@ ul.results-list
   padding 2px 5px
   margin-right 6px
   vertical-align -1px
+  position relative
   &.checked
     background-image url('assets/checkmark.svg')
     background-repeat no-repeat

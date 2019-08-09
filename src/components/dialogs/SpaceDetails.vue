@@ -3,6 +3,9 @@ dialog.narrow.space-details(v-if="visible" :open="visible")
   section
     .row
       .badge
+        .connected-colors
+          template(v-for="type in currentConnectionTypes.slice(0, 5)")
+            .color(:style="{ background: type.color}")
         img.space-moon(src="@/assets/space-moon.svg")
       input(placeholder="name" v-model="spaceName")
     .row
@@ -23,14 +26,12 @@ dialog.narrow.space-details(v-if="visible" :open="visible")
     ul.results-list
       template(v-for="(space in spaces")
         li(@click="changeSpace(space.id)" :class="{ active: spaceIsActive(space.id) }" :key="space.id")
-          .badge(:style="{backgroundColor: space.color}")
+          .badge
+            .connected-colors
+              template(v-for="type in space.connectionTypes.slice(0, 5)")
+                .color(:style="{ background: type.color}")
             img.space-moon(src="@/assets/space-moon.svg")
           .name {{space.name || spaceIdName}}
-
-      //  li(:class="{ active: spaceIsActive(space.id) }" @click="changeSpace(space)" :key="space.id")
-      //  badge is a compound color based on connection types present
-      //    .badge(:style="{backgroundColor: space.color}" :class="{checked: connectionTypeIsDefault(space.id)}")
-      //    .name {{space.name}}
 
 </template>
 
@@ -59,6 +60,9 @@ export default {
     },
     spaceIdName () {
       return `space-${this.$store.state.currentSpace.id}`
+    },
+    currentConnectionTypes () {
+      return this.$store.state.currentSpace.connectionTypes
     }
   },
   methods: {
@@ -101,7 +105,9 @@ export default {
     },
     updateSpaces () {
       const spaces = cache.getAllSpaces()
-      this.spaces = spaces
+      this.spaces = spaces.sort((a, b) => {
+        return b.cacheDate - a.cacheDate
+      })
     }
   },
   watch: {
@@ -117,9 +123,20 @@ export default {
 <style lang="stylus">
 .space-details
   top calc(100% - 8px)
-  .badge
-    background-color #f9bbe4
   .row
     .badge
       width 19px
+
+  .connected-colors
+    position absolute
+    left 0
+    top 0
+    display flex
+    height 100%
+    width 100%
+    border-radius 2px
+    overflow hidden
+    .color
+      width 100%
+
 </style>
