@@ -63,7 +63,6 @@ export default {
         return this.card.name
       },
       set (newValue) {
-        console.log(newValue)
         const options = {
           type: 'name',
           value: newValue,

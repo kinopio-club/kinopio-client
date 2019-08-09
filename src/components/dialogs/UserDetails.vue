@@ -89,11 +89,7 @@ export default {
       this.removeAllConfirmationVisible = !this.removeAllConfirmationVisible
     },
     removeAllData () {
-      const allSpaces = cache.getAllSpaces()
-      allSpaces.forEach(space => {
-        cache.removeLocal(`space-${space.id}`)
-      })
-      cache.removeLocal('user')
+      cache.removeAll()
       location.reload()
     }
   },

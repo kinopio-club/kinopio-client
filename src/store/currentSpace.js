@@ -1,9 +1,11 @@
+import Vue from 'vue'
 import randomColor from 'randomcolor'
 import nanoid from 'nanoid'
 import _ from 'lodash'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import words from '@/words.js'
 
 import helloSpace from '@/spaces/hello.json'
 import newSpace from '@/spaces/new.json'
@@ -34,7 +36,11 @@ export default {
     },
     createNewSpace: (state, newId) => {
       Object.assign(state, newSpace)
+      state.name = words.randomName()
       state.id = newId
+      state.connectionTypes[0].color = randomColor({ luminosity: 'light' })
+      state.cards[1].x = _.random(180, 220)
+      state.cards[1].y = _.random(200, 240)
     },
 
     // users
@@ -209,7 +215,10 @@ export default {
         context.commit('createNewHelloSpace', newId)
       } else {
         context.commit('createNewSpace', newId)
-        context.commit('currentUser/updateLastSpace', context.state.id, { root: true })
+        Vue.nextTick(() => {
+          context.commit('updateCardConnections', context.state.cards[1].id)
+          context.commit('currentUser/updateLastSpace', context.state.id, { root: true })
+        })
       }
       const space = utils.clone(context.state)
       cache.saveSpace(space)

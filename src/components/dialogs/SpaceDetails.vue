@@ -67,6 +67,7 @@ export default {
     },
     addSpace () {
       this.$store.dispatch('currentSpace/createNewSpace')
+      this.updateSpaces()
     },
     changeSpace (spaceId) {
       console.log('🌸 change space')
@@ -88,14 +89,16 @@ export default {
       // else ,
       // make a new space
       // this this.addSpace()
+    },
+    updateSpaces () {
+      const spaces = cache.getAllSpaces()
+      this.spaces = spaces
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
-        const spaces = cache.getAllSpaces()
-        console.log('cached spaces', spaces)
-        this.spaces = spaces
+        this.updateSpaces()
       }
     }
   }

@@ -138,6 +138,7 @@ dialog
   left 8px
   top 8px
   position absolute
+  max-height calc(100vh - 50px)
   margin 0
   padding 0
   user-select auto
@@ -244,6 +245,8 @@ label
   padding 4px
   padding-top 0
   border-top 0
+  overflow auto
+  max-height calc(92vh - 175px)
 
 ul.results-list
   margin 0

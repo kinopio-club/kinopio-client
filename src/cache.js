@@ -18,6 +18,9 @@ export default {
       window.localStorage.removeItem(key)
     } catch (error) {}
   },
+  removeAll () {
+    window.localStorage.clear()
+  },
 
   // user
 
