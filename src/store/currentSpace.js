@@ -15,10 +15,7 @@ export default {
   state: helloSpace,
   mutations: {
     restoreSpace: (state, space) => {
-      const keys = Object.keys(state)
-      keys.forEach(key => {
-        state[key] = space[key] || []
-      })
+      Object.assign(state, space)
     },
     // Added aug 2019, can safely remove this in aug 2020
     updateBetaSpace: (state) => {
@@ -223,6 +220,10 @@ export default {
       const space = utils.clone(context.state)
       cache.saveSpace(space)
       context.commit('addUserToSpace', user)
+    },
+    changeSpace: (context, space) => {
+      context.commit('restoreSpace', space)
+      context.commit('currentUser/updateLastSpace', context.state.id, { root: true })
     },
 
     // cards

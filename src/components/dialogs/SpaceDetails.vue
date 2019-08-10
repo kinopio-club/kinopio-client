@@ -4,7 +4,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible")
     .row
       .badge
         .connected-colors
-          template(v-for="type in currentConnectionTypes.slice(0, 5)")
+          template(v-for="type in currentConnectionTypes.slice(0, 10)")
             .color(:style="{ background: type.color}")
         img.space-moon(src="@/assets/space-moon.svg")
       input(placeholder="name" v-model="spaceName")
@@ -25,14 +25,13 @@ dialog.narrow.space-details(v-if="visible" :open="visible")
   section.results-section
     ul.results-list
       template(v-for="(space in spaces")
-        li(@click="changeSpace(space.id)" :class="{ active: spaceIsActive(space.id) }" :key="space.id")
+        li(@click="changeSpace(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id")
           .badge
             .connected-colors
-              template(v-for="type in space.connectionTypes.slice(0, 5)")
+              template(v-for="type in space.connectionTypes.slice(0, 10)")
                 .color(:style="{ background: type.color}")
             img.space-moon(src="@/assets/space-moon.svg")
           .name {{space.name || spaceIdName}}
-
 </template>
 
 <script>
@@ -82,12 +81,8 @@ export default {
       this.$store.dispatch('currentSpace/createNewSpace')
       this.updateSpaces()
     },
-    changeSpace (spaceId) {
-      console.log('🌸 change space', spaceId)
-      // dispatch a store action that:
-      // update user.currentSpace
-      // swap currentSpace with it
-      // commit('currentUser/updateCurrentSpace')
+    changeSpace (space) {
+      this.$store.dispatch('currentSpace/changeSpace', space)
     },
     remixCurrentSpace () {
       console.log('☮️ remixCurrentSpace')
