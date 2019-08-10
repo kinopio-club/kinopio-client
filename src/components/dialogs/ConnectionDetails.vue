@@ -154,7 +154,6 @@ export default {
       observer.observe(element)
     },
     updateView () {
-      this.$store.commit('currentSpace/removeUnusedConnectionTypes')
       this.updateDefaultConnectionType()
       this.colorPickerIsVisible = false
       this.scrollIntoView()
@@ -165,6 +164,8 @@ export default {
       this.$nextTick(() => {
         if (visible) {
           this.updateView()
+        } else {
+          this.$store.commit('currentSpace/removeUnusedConnectionTypes')
         }
       })
     },
