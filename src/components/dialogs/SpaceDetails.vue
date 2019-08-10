@@ -90,13 +90,14 @@ export default {
       // this.changeSpace(space.id)
     },
     removeCurrentSpace () {
-      console.log('💣 removeCurrentSpace')
-      // remove current space-id from cache
-      // if spaces > 1 ,
-      // use first thing in cache.getAllSpaces
-      // else ,
-      // make a new space
-      // this this.addSpace()
+      const removeSpace = `space-${this.$store.state.currentSpace.id}`
+      cache.removeLocal(removeSpace)
+      this.updateSpaces()
+      if (this.spaces.length) {
+        this.$store.dispatch('currentSpace/changeSpace', this.spaces[0])
+      } else {
+        this.addSpace()
+      }
     },
     updateSpaces () {
       const spaces = cache.getAllSpaces()
