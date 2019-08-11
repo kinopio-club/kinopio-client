@@ -9,7 +9,9 @@ dialog.narrow.space-details(v-if="visible" :open="visible")
         img.space-moon(src="@/assets/space-moon.svg")
       input(placeholder="name" v-model="spaceName")
     .row
-      button(@click="remixCurrentSpace") Remix
+      button(@click="remixCurrentSpace")
+        img.icon(src="@/assets/copy.svg")
+        span Remix
       button(@click="removeCurrentSpace")
         img.icon(src="@/assets/remove.svg")
         span Remove
