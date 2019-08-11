@@ -8,7 +8,7 @@ header
       About(:visible="aboutIsVisible")
     .button-wrap
       button.space-details-button(@click.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
-        img.icon.space-moon(src="@/assets/space-moon.svg")
+        //img.icon.space-moon(src="@/assets/space-moon.svg")
         span {{currentSpaceName}}
       SpaceDetails(:visible="spaceDetailsIsVisible")
 
