@@ -225,14 +225,6 @@ export default {
       context.commit('restoreSpace', space)
       context.commit('currentUser/updateLastSpace', context.state.id, { root: true })
     },
-    remixCurrentSpace: (context) => {
-      const remix = utils.clone(context.state)
-      remix.id = nanoid()
-      remix.name = words.remixName(remix)
-      cache.saveSpace(remix)
-      context.commit('restoreSpace', remix)
-      context.commit('currentUser/updateLastSpace', context.state.id, { root: true })
-    },
 
     // cards
     addCard: (context, { position, contents }) => {

@@ -70,6 +70,7 @@ export default {
       cardIds.forEach(cardId => {
         this.$store.dispatch('currentSpace/removeSelectedConnectionsFromCard', cardId)
       })
+      this.$store.commit('currentSpace/removeUnusedConnectionTypes')
     },
     removeCards () {
       const cardIds = this.multipleCardsSelected

@@ -2,19 +2,14 @@
 dialog.narrow.space-details(v-if="visible" :open="visible")
   section
     .row
-      .badge
-        .connected-colors
-          template(v-for="type in currentConnectionTypes.slice(0, 10)")
-            .color(:style="{ background: type.color}")
+      .badge(:style="typeGradient()")
         img.space-moon(src="@/assets/space-moon.svg")
       input(placeholder="name" v-model="spaceName")
-    .row
-      button(@click="remixCurrentSpace")
-        img.icon(src="@/assets/copy.svg")
-        span Remix
-      button(@click="removeCurrentSpace")
-        img.icon(src="@/assets/remove.svg")
-        span Remove
+
+    button(@click="removeCurrentSpace")
+      img.icon(src="@/assets/remove.svg")
+      span Remove
+
     button(@click="exportToJSON")
       span Export
     a#export-downlaod-anchor.hidden
@@ -24,14 +19,15 @@ dialog.narrow.space-details(v-if="visible" :open="visible")
       img.icon(src="@/assets/add.svg")
       span Add
 
+    //button(@click="remixCurrentSpace")
+    //  img.icon(src="@/assets/copy.svg")
+    //  span Copy
+
   section.results-section
     ul.results-list
       template(v-for="(space in spaces")
         li(@click="changeSpace(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id")
-          .badge
-            .connected-colors
-              template(v-for="type in space.connectionTypes.slice(0, 10)")
-                .color(:style="{ background: type.color}")
+          .badge(:style="typeGradient(space)")
             img.space-moon(src="@/assets/space-moon.svg")
           .name {{space.name || spaceIdName}}
 </template>
@@ -61,9 +57,6 @@ export default {
     },
     spaceIdName () {
       return `space-${this.$store.state.currentSpace.id}`
-    },
-    currentConnectionTypes () {
-      return this.$store.state.currentSpace.connectionTypes
     }
   },
   methods: {
@@ -74,6 +67,21 @@ export default {
       downloadAnchor.setAttribute('href', json)
       downloadAnchor.setAttribute('download', `kinopio-space-${spaceId}.json`)
       downloadAnchor.click()
+    },
+    typeGradient (space) {
+      space = space || this.$store.state.currentSpace
+      const types = space.connectionTypes.slice(0, 5)
+      if (types.length > 1) {
+        const colorPercent = 100 / (types.length - 1)
+        const gradient = types.map((type, index) => {
+          return `${type.color} ${colorPercent * index}%`
+        })
+        return { background: `radial-gradient(circle, ${gradient})` }
+      } else if (types.length === 1) {
+        return { background: types[0].color }
+      } else {
+        return { background: 'transparent' }
+      }
     },
     spaceIsActive (spaceId) {
       const currentSpace = this.$store.state.currentSpace.id
@@ -86,10 +94,10 @@ export default {
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', space)
     },
-    remixCurrentSpace () {
-      this.$store.dispatch('currentSpace/remixCurrentSpace')
-      this.updateSpaces()
-    },
+    // remixCurrentSpace () {
+    //  this.$store.dispatch('currentSpace/remixCurrentSpace')
+    //  this.updateSpaces()
+    // },
     removeCurrentSpace () {
       const removeSpace = `space-${this.$store.state.currentSpace.id}`
       cache.removeLocal(removeSpace)
@@ -123,17 +131,5 @@ export default {
   .row
     .badge
       width 19px
-
-  .connected-colors
-    position absolute
-    left 0
-    top 0
-    display flex
-    height 100%
-    width 100%
-    border-radius 2px
-    overflow hidden
-    .color
-      width 100%
 
 </style>
