@@ -85,9 +85,8 @@ export default {
       this.$store.dispatch('currentSpace/changeSpace', space)
     },
     remixCurrentSpace () {
-      console.log('☮️ remixCurrentSpace')
-      // cope the current space, with new id and name, into a new cache item
-      // this.changeSpace(space.id)
+      this.$store.dispatch('currentSpace/remixCurrentSpace')
+      this.updateSpaces()
     },
     removeCurrentSpace () {
       const removeSpace = `space-${this.$store.state.currentSpace.id}`

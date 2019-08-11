@@ -33,7 +33,7 @@ export default {
     },
     createNewSpace: (state, newId) => {
       Object.assign(state, newSpace)
-      state.name = words.randomName()
+      state.name = words.randomUniqueName()
       state.id = newId
       state.connectionTypes[0].color = randomColor({ luminosity: 'light' })
       state.cards[1].x = _.random(100, 140)
@@ -223,6 +223,14 @@ export default {
     },
     changeSpace: (context, space) => {
       context.commit('restoreSpace', space)
+      context.commit('currentUser/updateLastSpace', context.state.id, { root: true })
+    },
+    remixCurrentSpace: (context) => {
+      const remix = utils.clone(context.state)
+      remix.id = nanoid()
+      remix.name = words.remixName(remix)
+      cache.saveSpace(remix)
+      context.commit('restoreSpace', remix)
       context.commit('currentUser/updateLastSpace', context.state.id, { root: true })
     },
 
