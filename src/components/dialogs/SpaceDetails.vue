@@ -72,7 +72,7 @@ export default {
       space = space || this.$store.state.currentSpace
       const types = space.connectionTypes.slice(0, 5)
       if (types.length > 1) {
-        const colorPercent = 100 / (types.length - 1)
+        const colorPercent = 100 / (types.length)
         const gradient = types.map((type, index) => {
           return `${type.color} ${colorPercent * index}%`
         })
