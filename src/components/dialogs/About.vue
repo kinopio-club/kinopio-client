@@ -9,11 +9,6 @@ dialog.about(v-if="visible" :open="visible" @click="closeDialogs")
     .button-wrap
       button(@click.stop="toggleBetaNotesIsVisible" :class="{active: betaNotesIsVisible}") Beta Notes
       BetaNotes(:visible="betaNotesIsVisible")
-
-  section
-    button(@click="exportToJSON")
-      span Export Data
-    a#downlaod-anchor.hidden
 </template>
 
 <script>
@@ -44,14 +39,6 @@ export default {
     })
   },
   methods: {
-    exportToJSON () {
-      const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.$store.state.currentSpace))
-      const downloadAnchor = document.getElementById('downlaod-anchor')
-      const spaceId = this.$store.state.currentSpace.id
-      downloadAnchor.setAttribute('href', json)
-      downloadAnchor.setAttribute('download', `kinopio-space-${spaceId}.json`)
-      downloadAnchor.click()
-    },
     toggleFeedbackIsVisible () {
       const isVisible = this.feedbackIsVisible
       this.closeDialogs()
