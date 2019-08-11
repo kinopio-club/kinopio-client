@@ -2,7 +2,7 @@
 dialog.beta-notes(v-if="visible" :open="visible" @click.stop)
   section
     p Beta Notes
-      img.icon(src="@/assets/new.gif")
+      img.icon(src="@/assets/updated.gif")
   section
     // https://www.are.na/block/4494653
     img(src="@/assets/photo-convenience-store.jpg")
@@ -13,7 +13,8 @@ dialog.beta-notes(v-if="visible" :open="visible" @click.stop)
     p The Roadmap includes:
     ul
       li Custom fields for cards
-      li Create new spaces
+      li
+        del Create new spaces
       li Logo and illustrations
       li A server enabling login and collaboration
   section
