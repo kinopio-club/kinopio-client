@@ -25,7 +25,11 @@ export default {
     endCardId () { return this.connection.endCardId },
     path () { return this.connection.path },
     connectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.connectionTypeId) },
-    typeColor () { return this.connectionType.color }
+    typeColor () {
+      if (this.connectionType) {
+        return this.connectionType.color
+      } else { return undefined }
+    }
   },
   methods: {
     showConnectionDetails (event) {
