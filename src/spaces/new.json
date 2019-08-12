@@ -5,17 +5,17 @@
    "cards":[
       {
          "id":"1",
-         "x":40,
-         "y":100,
+         "x":20,
+         "y":80,
          "z":0,
-         "name":"Kinopio is a Creative Thinking Tool",
+         "name":"Get your thoughts, ideas and feelings out",
          "archived":false
       },
       {
          "id":"wQ9-NzxQyWoIGGKEgHRMF",
          "x":131,
          "y":194,
-         "name":"Connect your thoughts and ideas together",
+         "name":"Connect them together",
          "z":3
       }
    ],

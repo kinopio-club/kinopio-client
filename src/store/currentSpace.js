@@ -36,8 +36,8 @@ export default {
       state.name = words.randomUniqueName()
       state.id = newId
       state.connectionTypes[0].color = randomColor({ luminosity: 'light' })
-      state.cards[1].x = _.random(100, 140)
-      state.cards[1].y = _.random(180, 220)
+      state.cards[1].x = _.random(180, 200)
+      state.cards[1].y = _.random(160, 180)
     },
 
     // users
