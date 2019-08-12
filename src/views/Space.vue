@@ -126,7 +126,7 @@ export default {
     },
 
     scrollBy (delta) {
-      delta.left = delta.x
+      delta.left = delta.x * 1.1
       delta.top = delta.y
       if (this.isDraggingCard) {
         this.$store.dispatch('currentSpace/dragCards', { delta })
@@ -156,21 +156,16 @@ export default {
       return base * (multiplier + (multiplier * 0.5))
     },
 
-    addPageHeight (cursor, speed) {
-      const pageHeight = this.pageHeight
-      const scrollAreaHeight = this.scrollAreaHeight
-      if (cursor.y + window.scrollY + speed + scrollAreaHeight >= pageHeight) {
-        const height = pageHeight + speed
-        this.$store.commit('pageHeight', height)
-      }
-    },
-
-    addPageWidth (cursor, speed) {
+    increasePageSize (delta) {
       const pageWidth = this.pageWidth
-      const scrollAreaWidth = this.scrollAreaWidth
-      if (cursor.x + window.scrollX + speed + scrollAreaWidth >= pageWidth) {
-        const width = pageWidth + speed
+      const pageHeight = this.pageHeight
+      if (delta.x) {
+        const width = pageWidth + delta.x
         this.$store.commit('pageWidth', width)
+      }
+      if (delta.y) {
+        const height = pageHeight + delta.y
+        this.$store.commit('pageHeight', height)
       }
     },
 
@@ -202,7 +197,7 @@ export default {
           x: 0,
           y: speed
         }
-        this.addPageHeight(cursor, speed)
+        this.increasePageSize(delta)
         this.scrollBy(delta)
       }
       // ◀️
@@ -220,7 +215,7 @@ export default {
           x: speed,
           y: 0
         }
-        this.addPageWidth(cursor, speed)
+        this.increasePageSize(delta)
         this.scrollBy(delta)
       }
       if (this.isDrawingConnection) {
