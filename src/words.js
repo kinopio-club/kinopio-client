@@ -14,7 +14,6 @@ export default {
   nameIsUnique (name) {
     const spaces = cache.getAllSpaces()
     const matchingName = spaces.find(space => {
-      console.log(name, space.name)
       return name === space.name
     })
     if (matchingName) {
