@@ -180,7 +180,7 @@ export default new Vuex.Store({
   },
 
   getters: {
-    viewportIsLocked (state, getters) {
+    shouldScrollAtEdges (state, getters) {
       const isPaintingLocked = state.currentUserIsPaintingLocked
       const isDrawingConnection = state.currentUserIsDrawingConnection
       const isDraggingCard = state.currentUserIsDraggingCard

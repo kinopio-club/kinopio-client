@@ -100,7 +100,7 @@ export default {
 
     initInteractions (event) {
       startCursor = utils.cursorPositionInViewport(event)
-      if (this.$store.getters.viewportIsLocked && !scrollTimer) {
+      if (this.$store.getters.shouldScrollAtEdges && !scrollTimer) {
         scrollTimer = window.requestAnimationFrame(this.scrollFrame)
       }
     },
@@ -113,7 +113,7 @@ export default {
       if (this.isDrawingConnection) {
         this.drawConnection()
       }
-      if (this.$store.getters.viewportIsLocked) {
+      if (this.$store.getters.shouldScrollAtEdges) {
         this.updateMovementDirection()
       }
       prevCursor = utils.cursorPositionInViewport(event)

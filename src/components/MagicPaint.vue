@@ -131,7 +131,7 @@ export default {
 
     painting (event) {
       if (!this.$store.state.currentUserIsPainting) { return }
-      if (this.$store.getters.viewportIsLocked) {
+      if (this.$store.getters.shouldScrollAtEdges) {
         event.preventDefault() // prevents touch swipe viewport scrolling
       }
       if (!paintingCirclesTimer) {
