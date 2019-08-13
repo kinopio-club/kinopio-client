@@ -34,7 +34,7 @@ import utils from '@/utils.js'
 
 import _ from 'lodash'
 
-let startCursor, prevCursor, endCursor, scrollTimer
+let startCursor, prevCursor, endCursor, scrollTimer, scrollAreaHeight, scrollAreaWidth
 let movementDirection = {}
 
 export default {
@@ -84,8 +84,6 @@ export default {
     viewportWidth () { return this.$store.state.viewportWidth },
     pageHeight () { return this.$store.state.pageHeight },
     pageWidth () { return this.$store.state.pageWidth },
-    scrollAreaHeight () { return Math.min(100, this.viewportHeight / 6) },
-    scrollAreaWidth () { return Math.min(100, this.viewportWidth / 6) },
     isInteracting () {
       if (this.isDraggingCard || this.isDrawingConnection) {
         return true
@@ -101,6 +99,8 @@ export default {
     initInteractions (event) {
       startCursor = utils.cursorPositionInViewport(event)
       if (this.$store.getters.shouldScrollAtEdges && !scrollTimer) {
+        scrollAreaHeight = Math.min(100, this.viewportHeight / 6)
+        scrollAreaWidth = Math.min(100, this.viewportWidth / 6)
         scrollTimer = window.requestAnimationFrame(this.scrollFrame)
       }
     },
@@ -137,8 +137,6 @@ export default {
     speed (cursor, direction) {
       let multiplier
       const base = 10
-      const scrollAreaHeight = this.scrollAreaHeight
-      const scrollAreaWidth = this.scrollAreaWidth
       const viewportHeight = this.viewportHeight
       const viewportWidth = this.viewportWidth
       if (direction === 'up') {
@@ -171,26 +169,25 @@ export default {
 
     scrollFrame () {
       let delta, speed
-      const scrollAreaHeight = this.scrollAreaHeight
-      const scrollAreaWidth = this.scrollAreaWidth
       const viewportHeight = this.viewportHeight
       const viewportWidth = this.viewportWidth
       const cursor = this.cursor()
+
       const cursorIsTopSide = cursor.y <= scrollAreaHeight
       const cursorIsBottomSide = cursor.y >= viewportHeight - scrollAreaHeight
+
       const cursorIsLeftSide = cursor.x <= scrollAreaWidth
       const cursorIsRightSide = cursor.x >= viewportWidth - scrollAreaWidth
-      const hasRoomToScrollUp = window.scrollY > 0
-      const hasRoomToScrollLeft = window.scrollX > 0
-      // 🔼
-      if (cursorIsTopSide && hasRoomToScrollUp && movementDirection.y === 'up') {
+
+      // ↑ up
+      if (cursorIsTopSide && window.scrollY && movementDirection.y === 'up') {
         speed = this.speed(cursor, 'up')
         delta = {
           x: 0,
           y: -speed
         }
         this.scrollBy(delta)
-      // 🔽
+      // ↓ down
       } else if (cursorIsBottomSide && movementDirection.y === 'down') {
         speed = this.speed(cursor, 'down')
         delta = {
@@ -200,15 +197,15 @@ export default {
         this.increasePageSize(delta)
         this.scrollBy(delta)
       }
-      // ◀️
-      if (cursorIsLeftSide && hasRoomToScrollLeft && movementDirection.x === 'left') {
+      // ◀ left
+      if (cursorIsLeftSide && window.scrollX && movementDirection.x === 'left') {
         speed = this.speed(cursor, 'left')
         delta = {
           x: -speed,
           y: 0
         }
         this.scrollBy(delta)
-      // ▶️
+      // ▶ right
       } else if (cursorIsRightSide && movementDirection.x === 'right') {
         speed = this.speed(cursor, 'right')
         delta = {
