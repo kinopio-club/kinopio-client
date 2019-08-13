@@ -368,14 +368,10 @@ export default {
       return fromDialog || fromHeader || fromFooter
     },
 
-    showMultipleCardActions () {
-      const isMultipleCardsSelected = Boolean(this.$store.state.multipleCardsSelected.length)
-      const preventDraggedCardFromShowingDetails = this.$store.state.preventDraggedCardFromShowingDetails
-      if (preventDraggedCardFromShowingDetails) { return }
-      if (isMultipleCardsSelected) {
-        this.$store.commit('multipleCardActionsPosition', endCursor)
-        this.$store.commit('multipleCardActionsIsVisible', true)
-      }
+    showMultipleCardActions (position) {
+      if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
+      this.$store.commit('multipleCardActionsPosition', position)
+      this.$store.commit('multipleCardActionsIsVisible', true)
     },
 
     stopInteractions (event) {
@@ -391,7 +387,10 @@ export default {
         const position = utils.cursorPositionInPage(event)
         this.addNewCard(position)
       }
-      this.showMultipleCardActions()
+      if (this.$store.state.multipleCardsSelected.length) {
+        const position = utils.cursorPositionInPage(event)
+        this.showMultipleCardActions(position)
+      }
       this.$store.commit('shouldAddNewCard', false)
       this.$store.commit('preventDraggedCardFromShowingDetails', false)
       this.$store.commit('currentUserIsDrawingConnection', false)
