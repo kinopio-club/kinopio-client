@@ -359,6 +359,7 @@ export default {
     },
 
     shouldCancel (event) {
+      if (event.target.nodeType !== 1) { return } // firefox check
       const fromDialog = event.target.closest('dialog')
       const fromHeader = event.target.closest('header')
       const fromFooter = event.target.closest('footer')
