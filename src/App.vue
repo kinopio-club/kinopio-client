@@ -80,7 +80,11 @@ body
   // -webkit-user-select none
   // overflow auto // enables window.scrollBy support
 
-.app
+html
+  position relative
+
+.app,
+body
   width 100%
   height 100%
 

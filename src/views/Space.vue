@@ -68,12 +68,6 @@ export default {
   },
 
   computed: {
-    size () {
-      return {
-        width: `${this.$store.state.pageHeight}px`,
-        height: `${this.$store.state.pageWidth}px`
-      }
-    },
     cards () { return this.$store.state.currentSpace.cards },
     isPainting () { return this.$store.state.currentUserIsPainting },
     isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
