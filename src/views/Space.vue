@@ -96,18 +96,19 @@ export default {
       startCursor = utils.cursorPositionInViewport(event)
       if (this.$store.getters.shouldScrollAtEdges) {
         const cardId = this.$store.state.currentDraggingCardId
-        const card = document.querySelector(`article [data-card-id="${cardId}"]`)
+        const draggingCard = document.querySelector(`article [data-card-id="${cardId}"]`)
         observer = new IntersectionObserver(entries => {
           entries.forEach(entry => {
             if (!entry.isIntersecting) {
+              console.log(entry)
               scrollTimer = window.requestAnimationFrame(this.scrollFrame)
             } else {
               window.cancelAnimationFrame(scrollTimer)
               scrollTimer = undefined
             }
           })
-        })
-        observer.observe(card)
+        }, { threshold: 1 })
+        observer.observe(draggingCard)
       }
     },
 
