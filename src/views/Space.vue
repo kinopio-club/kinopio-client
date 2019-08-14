@@ -154,17 +154,16 @@ export default {
       return base * (multiplier + (multiplier * 0.5))
     },
 
-    increasePageSize (delta) {
+    increasePageWidth (delta) {
       const pageWidth = this.pageWidth
+      const width = pageWidth + delta.x
+      this.$store.commit('pageWidth', width)
+    },
+
+    increasePageHeight (delta) {
       const pageHeight = this.pageHeight
-      if (delta.x) {
-        const width = pageWidth + delta.x
-        this.$store.commit('pageWidth', width)
-      }
-      if (delta.y) {
-        const height = pageHeight + delta.y
-        this.$store.commit('pageHeight', height)
-      }
+      const height = pageHeight + delta.y
+      this.$store.commit('pageHeight', height)
     },
 
     scrollFrame () {
@@ -194,7 +193,7 @@ export default {
           x: 0,
           y: speed
         }
-        this.increasePageSize(delta)
+        this.increasePageHeight(delta)
         this.scrollBy(delta)
       }
       // ◀ left
@@ -212,7 +211,7 @@ export default {
           x: speed,
           y: 0
         }
-        this.increasePageSize(delta)
+        this.increasePageWidth(delta)
         this.scrollBy(delta)
       }
       if (this.isDrawingConnection) {
