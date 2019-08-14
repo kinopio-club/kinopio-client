@@ -62,8 +62,6 @@ export default {
   font-family "OsakaMono-Kinopio", "Osaka-Mono", "Osaka−等幅", monospace
   font-size 14px
   line-height 1.1
-  button:focus
-    outline none
 
 body
   margin 0
@@ -111,20 +109,13 @@ label // used for checkbox buttons
   &:focus
     box-shadow var(--button-hover-shadow)
     background var(--secondary-hover-background)
-    // .down-arrow
-    //   transform translateY(1px)
   &:active,
   &.active
     box-shadow var(--button-active-inset-shadow)
     color var(--primary)
     background var(--secondary-active-background)
-    // .down-arrow
-    //   transform translateY(2px)
-
-  // &:disabled
-  //   opacity 0.25
-  //   color var(--primary)
-  //   pointer-events none
+  &:focus
+    outline none
 
 label
   padding-bottom 4px
