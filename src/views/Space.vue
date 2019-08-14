@@ -3,7 +3,6 @@ main.space(
   :class="{'is-interacting': isInteracting, 'is-painting': isPainting}"
   @mousedown="initInteractions"
   @touchstart="initInteractions"
-  :style="size"
 )
   svg.connections
     path.current-connection(
@@ -63,7 +62,7 @@ export default {
     window.addEventListener('touchmove', this.interact)
     window.addEventListener('mouseup', this.stopInteractions)
     window.addEventListener('touchend', this.stopInteractions)
-    // keep space element updated to viewport size so connections show up
+    // keep body updated to viewport size so connections show up
     this.updatePageSizes()
     window.addEventListener('resize', this.updatePageSizes)
   },
@@ -308,9 +307,8 @@ export default {
 <style lang="stylus">
 .space
   width 100%
-  height 100vh
+  height 100%
   pointer-events none // so that painting can receive events
-  position relative // used by svg connections
 .is-interacting
   pointer-events all
 .is-painting
@@ -318,9 +316,6 @@ export default {
     pointer-events: none !important
 
 svg.connections
-  position absolute
-  top 0
-  left 0
   width 100%
   height 100%
   path

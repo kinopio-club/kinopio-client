@@ -21,6 +21,15 @@ export default {
   },
   mounted () {
     smoothscroll.polyfill() // remove when 'smooth' is supported by safari https://caniuse.com/#search=scroll
+  },
+  computed: {
+    size () {
+      return {
+        width: `${this.$store.state.pageHeight}px`,
+        height: `${this.$store.state.pageWidth}px`
+      }
+    }
+
   }
 }
 </script>
@@ -68,11 +77,12 @@ body
   color var(--primary)
   background-color var(--primary-background)
   background-image url('assets/background.svg')
-  -webkit-user-select none
-  overflow auto // enables window.scrollBy support
+  // -webkit-user-select none
+  // overflow auto // enables window.scrollBy support
 
 .app
-  position relative
+  width 100%
+  height 100%
 
 img
   max-width 100%

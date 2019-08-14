@@ -52,6 +52,8 @@ export default new Vuex.Store({
       state.pageHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
       state.viewportWidth = document.documentElement.clientWidth
       state.viewportHeight = document.documentElement.clientHeight
+      body.style.width = state.pageWidth + 'px'
+      body.style.height = state.pageHeight + 'px'
     },
     pageHeight: (state, height) => {
       utils.typeCheck(height, 'number')
