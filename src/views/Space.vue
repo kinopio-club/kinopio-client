@@ -33,8 +33,8 @@ import utils from '@/utils.js'
 
 import _ from 'lodash'
 
-let startCursor, prevCursor, endCursor, scrollTimer
-let observer
+let startCursor, prevCursor, endCursor, scrollTimer, scrollAreaHeight, scrollAreaWidth
+let movementDirection = {}
 
 export default {
   components: {
@@ -65,6 +65,8 @@ export default {
     // keep body updated to viewport size so connections show up
     this.updatePageSizes()
     window.addEventListener('resize', this.updatePageSizes)
+    this.updateScrollAreaSizes()
+    window.addEventListener('resize', this.updateScrollAreaSizes)
   },
 
   computed: {
@@ -81,27 +83,19 @@ export default {
   },
 
   methods: {
+    updateScrollAreaSizes () {
+      scrollAreaWidth = Math.max(100, this.$store.state.viewportWidth / 6)
+      scrollAreaHeight = Math.max(100, this.$store.state.viewportHeight / 6)
+    },
+
     updatePageSizes () {
       this.$store.commit('updatePageSizes')
     },
 
     initInteractions (event) {
       startCursor = utils.cursorPositionInViewport(event)
-      if (this.$store.getters.shouldScrollAtEdges) {
-        const cardId = this.$store.state.currentDraggingCardId
-        const draggingCard = document.querySelector(`article [data-card-id="${cardId}"]`)
-        observer = new IntersectionObserver(entries => {
-          entries.forEach(entry => {
-            if (!entry.isIntersecting) {
-              console.log(entry)
-              scrollTimer = window.requestAnimationFrame(this.scrollFrame)
-            } else {
-              window.cancelAnimationFrame(scrollTimer)
-              scrollTimer = undefined
-            }
-          })
-        }, { threshold: 1 })
-        observer.observe(draggingCard)
+      if (this.$store.getters.shouldScrollAtEdges && !scrollTimer) {
+        scrollTimer = window.requestAnimationFrame(this.scrollFrame)
       }
     },
 
@@ -113,6 +107,9 @@ export default {
       if (this.isDrawingConnection) {
         this.drawConnection()
       }
+      if (this.$store.getters.shouldScrollAtEdges) {
+        this.updateMovementDirection()
+      }
       prevCursor = utils.cursorPositionInViewport(event)
     },
 
@@ -122,8 +119,100 @@ export default {
       }
     },
 
+    scrollBy (delta) {
+      delta.left = delta.x // * 1.1
+      delta.top = delta.y
+      if (this.isDraggingCard) {
+        this.$store.dispatch('currentSpace/dragCards', { delta })
+      }
+      window.scrollBy(delta)
+    },
+
+    speed (cursor, direction) {
+      let multiplier
+      const base = 10
+      const viewportHeight = this.$store.state.viewportHeight
+      const viewportWidth = this.$store.state.viewportWidth
+      if (direction === 'up') {
+        multiplier = (scrollAreaHeight - cursor.y) / scrollAreaHeight
+      }
+      if (direction === 'down') {
+        multiplier = (cursor.y - (viewportHeight - scrollAreaHeight) / scrollAreaHeight) / viewportHeight
+      }
+      if (direction === 'left') {
+        multiplier = (scrollAreaWidth - cursor.x) / scrollAreaWidth
+      }
+      if (direction === 'right') {
+        multiplier = (cursor.x - (viewportWidth - scrollAreaWidth) / scrollAreaWidth) / viewportWidth
+      }
+      return base * (multiplier + (multiplier * 0.5))
+    },
+
+    increasePageHeight (delta) {
+      const pageHeight = this.$store.state.pageWidth
+      const height = pageHeight + delta.y
+      this.$store.commit('pageHeight', height)
+    },
+
+    increasePageWidth (delta) {
+      const pageWidth = this.$store.state.pageWidth
+      const width = pageWidth + delta.x
+      this.$store.commit('pageWidth', width)
+    },
+
     scrollFrame () {
-      console.log('🌹')
+      let delta, speed
+      const viewportHeight = this.$store.state.viewportHeight
+      const viewportWidth = this.$store.state.viewportWidth
+      const cursor = this.cursor()
+      const cursorIsTopSide = cursor.y <= scrollAreaHeight
+      const cursorIsBottomSide = cursor.y >= viewportHeight - scrollAreaHeight
+      const cursorIsLeftSide = cursor.x <= scrollAreaWidth
+      const cursorIsRightSide = cursor.x >= viewportWidth - scrollAreaWidth
+
+      // move movement direction into scroll frame
+      console.log('scroll frame down', cursorIsBottomSide, cursor, scrollAreaHeight, movementDirection)
+
+      // 🔼
+      if (cursorIsTopSide && window.scrollY > 0 && movementDirection.y === 'up') {
+        speed = this.speed(cursor, 'up')
+        delta = {
+          x: 0,
+          y: -speed
+        }
+        this.scrollBy(delta)
+      // 🔽
+      } else if (cursorIsBottomSide && movementDirection.y === 'down') {
+        speed = this.speed(cursor, 'down')
+        delta = {
+          x: 0,
+          y: speed
+        }
+        this.increasePageHeight(delta)
+        this.scrollBy(delta)
+      }
+      // ◀️
+      if (cursorIsLeftSide && window.scrollX > 0 && movementDirection.x === 'left') {
+        speed = this.speed(cursor, 'left')
+        delta = {
+          x: -speed,
+          y: 0
+        }
+        this.scrollBy(delta)
+      // ▶️
+      } else if (cursorIsRightSide && movementDirection.x === 'right') {
+        speed = this.speed(cursor, 'right')
+        delta = {
+          x: speed,
+          y: 0
+        }
+        this.increasePageWidth(delta)
+        this.scrollBy(delta)
+      }
+      if (this.isDrawingConnection) {
+        this.drawConnection()
+      }
+
       if (scrollTimer) {
         window.requestAnimationFrame(this.scrollFrame)
       }
@@ -139,6 +228,7 @@ export default {
 
     dragCard () {
       const prevCursor = this.cursor()
+      // console.log('prevCursor', prevCursor)
       this.$store.dispatch('currentSpace/dragCards', {
         endCursor,
         prevCursor: prevCursor
@@ -261,11 +351,24 @@ export default {
       this.$store.commit('multipleCardActionsIsVisible', true)
     },
 
+    updateMovementDirection () {
+      const cursor = this.cursor()
+      const xMove = endCursor.x - cursor.x
+      const yMove = endCursor.y - cursor.y
+      if (Math.sign(yMove) === -1) {
+        movementDirection.y = 'up'
+      } else if (Math.sign(yMove) === 1) {
+        movementDirection.y = 'down'
+      }
+      if (Math.sign(xMove) === -1) {
+        movementDirection.x = 'left'
+      } else if (Math.sign(xMove) === 1) {
+        movementDirection.x = 'right'
+      }
+    },
+
     stopInteractions (event) {
       console.log('💣 stopInteractions') // stopInteractions and Space/stopPainting are run on all mouse and touch end events
-      if (observer) {
-        observer.disconnect()
-      }
       window.cancelAnimationFrame(scrollTimer)
       scrollTimer = undefined
       if (this.shouldCancel(event)) { return }
@@ -292,6 +395,7 @@ export default {
       this.updatePageSizes()
       this.currentConnectionPath = undefined
       prevCursor = undefined
+      movementDirection = {}
     }
   }
 
@@ -304,7 +408,7 @@ export default {
   height 100%
   pointer-events none // so that painting can receive events
 .is-interacting
-  pointer-events all
+  pointer-events all //
 .is-painting
   *
     pointer-events: none !important
@@ -313,7 +417,7 @@ svg.connections
   width 100%
   height 100%
   path
-    pointer-events all
+    pointer-events all //
     cursor pointer
     &.current-connection
       pointer-events none

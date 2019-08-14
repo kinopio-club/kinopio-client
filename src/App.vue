@@ -75,7 +75,7 @@ export default {
 body
   margin 0
   color var(--primary)
-  background-color var(--primary-background)
+  background-color pink//var(--primary-background)
   background-image url('assets/background.svg')
   // -webkit-user-select none
   // overflow auto // enables window.scrollBy support
@@ -94,7 +94,7 @@ img
 input,
 textarea
   margin 0
-  font-size 1em // required to disable ios input zooming
+  font-size 1em
   resize none
   width 100%
   background transparent
@@ -123,23 +123,13 @@ label // used for checkbox buttons
   &:focus
     box-shadow var(--button-hover-shadow)
     background var(--secondary-hover-background)
-    // .down-arrow
-    //   transform translateY(1px)
   &:active,
   &.active
     box-shadow var(--button-active-inset-shadow)
     color var(--primary)
     background var(--secondary-active-background)
-    // .down-arrow
-    //   transform translateY(2px)
-
-button:focus
-  outline none
-
-  // &:disabled
-  //   opacity 0.25
-  //   color var(--primary)
-  //   pointer-events none
+  &:focus
+    outline none
 
 label
   padding-bottom 4px
@@ -297,9 +287,9 @@ ul.results-list
     background-repeat no-repeat
     background-position center
 
-.space-moon
-  transform rotate(-35deg)
-  vertical-align -3px
+// .space-moon
+//   transform rotate(-35deg)
+//   vertical-align -3px
 
 .anon-avatar
   background-image url('assets/anon-avatar.svg')

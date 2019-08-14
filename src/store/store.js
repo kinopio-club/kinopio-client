@@ -56,11 +56,16 @@ export default new Vuex.Store({
       html.style.height = state.pageHeight + 'px'
     },
     pageHeight: (state, height) => {
+      console.log('pageheight', height)
+      const html = document.documentElement
       utils.typeCheck(height, 'number')
+      html.style.height = height + 'px'
       state.pageHeight = height
     },
     pageWidth: (state, width) => {
+      const html = document.documentElement
       utils.typeCheck(width, 'number')
+      html.style.width = width + 'px'
       state.pageWidth = width
     },
     shouldAddNewCard: (state, value) => {
