@@ -63,9 +63,6 @@ export default {
     window.addEventListener('touchmove', this.interact)
     window.addEventListener('mouseup', this.stopInteractions)
     window.addEventListener('touchend', this.stopInteractions)
-    // keep space element updated to viewport size so connections show up
-    this.updatePageSizes()
-    window.addEventListener('resize', this.updatePageSizes)
   },
 
   computed: {
@@ -92,10 +89,6 @@ export default {
   },
 
   methods: {
-    updatePageSizes () {
-      this.$store.commit('updatePageSizes')
-    },
-
     initInteractions (event) {
       startCursor = utils.cursorPositionInViewport(event)
       if (this.$store.getters.shouldScrollAtEdges && !scrollTimer) {
@@ -396,7 +389,7 @@ export default {
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.commit('currentConnectionSuccess', {})
       this.$store.commit('currentConnection', {})
-      this.updatePageSizes()
+      this.$store.commit('updatePageSizes')
       this.currentConnectionPath = undefined
       prevCursor = undefined
       movementDirection = {}
