@@ -41,6 +41,7 @@ let lockingCanvas, lockingContext, lockingAnimationTimer, currentUserIsLocking, 
 // shows immediate feedback without having to move cursor
 let initialCircles = []
 let initialCanvas, initialContext, initialCirclesTimer
+let prevScroll
 
 export default {
   mounted () {
@@ -56,6 +57,9 @@ export default {
     // trigger stopPainting even if mouse is outside window
     window.addEventListener('mouseup', this.stopPainting)
     window.addEventListener('touchend', this.stopPainting)
+    // shift circle positions with scroll to simulate full size canvas
+    this.updatePrevScrollPosition()
+    window.addEventListener('scroll', this.updateCirclesWithScroll)
   },
   computed: {
     currentUserColor () {
@@ -66,10 +70,41 @@ export default {
     pageWidth () { return this.$store.state.pageWidth },
     viewportHeight () { return this.$store.state.viewportHeight },
     viewportWidth () { return this.$store.state.viewportWidth }
-
   },
   methods: {
+    updatePrevScrollPosition () {
+      prevScroll = {
+        x: window.scrollX,
+        y: window.scrollY
+      }
+    },
+
+    updateCirclePositions (circles, scrollDelta) {
+      return circles.map(circle => {
+        circle.x = circle.x - scrollDelta.x
+        circle.y = circle.y - scrollDelta.y
+        return circle
+      })
+    },
+
+    updateCirclesWithScroll () {
+      const scrollDelta = {
+        x: window.scrollX - prevScroll.x,
+        y: window.scrollY - prevScroll.y
+      }
+      if (initialCircles.length) {
+        initialCircles = this.updateCirclePositions(initialCircles, scrollDelta) // covers locking circles of varialbe radius/
+      }
+      if (paintingCircles.length) {
+        paintingCircles = this.updateCirclePositions(paintingCircles, scrollDelta)
+      }
+      this.updatePrevScrollPosition()
+    },
+
     drawCircle (circle, context) {
+      // dont render circle if (circle origin + radius) is outside viewport (on a per frame determination),
+      // handle isRemote circles differently at the edges
+      // or bunch them both up?
       let { x, y, color, iteration, radius, alpha } = circle
       radius = radius || circleRadius
       alpha = alpha || utils.exponentialDecay(iteration, rateOfIterationDecay)

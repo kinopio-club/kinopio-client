@@ -20,7 +20,17 @@ export default {
     Footer
   },
   mounted () {
-    smoothscroll.polyfill() // remove when 'smooth' is supported by safari https://caniuse.com/#search=scroll
+    // remove polyfill when 'smooth' is supported by safari https://caniuse.com/#search=scroll
+    smoothscroll.polyfill()
+    // keep space element updated to viewport size so connections show up
+    // keep magicPaint canvases updated so they fully cover the viewport
+    this.updatePageSizes()
+    window.addEventListener('resize', this.updatePageSizes)
+  },
+  methods: {
+    updatePageSizes () {
+      this.$store.commit('updatePageSizes')
+    }
   }
 }
 </script>
