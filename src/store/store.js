@@ -15,6 +15,8 @@ export default new Vuex.Store({
     pageWidth: 0,
     viewportHeight: 0,
     viewportWidth: 0,
+    scrollX: 0,
+    scrollY: 0,
 
     // current user state
     currentUserIsDrawingConnection: false,
@@ -52,6 +54,11 @@ export default new Vuex.Store({
       state.pageHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
       state.viewportWidth = window.innerWidth || document.documentElement.clientWidth
       state.viewportHeight = window.innerHeight || document.documentElement.clientHeight
+    },
+    updateScrollPosition: (state, { x, y }) => {
+      // use this because window.scrollX directly doesn't work in android
+      state.scrollX = x
+      state.scrollY = y
     },
     pageHeight: (state, height) => {
       utils.typeCheck(height, 'number')

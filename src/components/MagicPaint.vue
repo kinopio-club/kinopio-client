@@ -41,7 +41,6 @@ let lockingCanvas, lockingContext, lockingAnimationTimer, currentUserIsLocking, 
 // shows immediate feedback without having to move cursor
 let initialCircles = []
 let initialCanvas, initialContext, initialCirclesTimer
-let prevScroll
 
 export default {
   mounted () {
@@ -58,7 +57,7 @@ export default {
     window.addEventListener('mouseup', this.stopPainting)
     window.addEventListener('touchend', this.stopPainting)
     // shift circle positions with scroll to simulate full size canvas
-    this.updatePrevScrollPosition()
+    this.updateScrollPosition()
     window.addEventListener('scroll', this.updateCirclesWithScroll)
   },
   computed: {
@@ -72,11 +71,12 @@ export default {
     viewportWidth () { return this.$store.state.viewportWidth }
   },
   methods: {
-    updatePrevScrollPosition () {
-      prevScroll = {
+    updateScrollPosition () {
+      const prevScroll = {
         x: window.scrollX,
         y: window.scrollY
       }
+      this.$store.commit('updateScrollPosition', prevScroll)
     },
 
     updateCirclePositions (circles, scrollDelta) {
@@ -89,8 +89,8 @@ export default {
 
     updateCirclesWithScroll () {
       const scrollDelta = {
-        x: window.scrollX - prevScroll.x,
-        y: window.scrollY - prevScroll.y
+        x: window.scrollX - this.$store.state.scrollX,
+        y: window.scrollY - this.$store.state.scrollY
       }
       if (initialCircles.length) {
         initialCircles = this.updateCirclePositions(initialCircles, scrollDelta) // covers locking circles of varialbe radius/
@@ -98,7 +98,7 @@ export default {
       if (paintingCircles.length) {
         paintingCircles = this.updateCirclePositions(paintingCircles, scrollDelta)
       }
-      this.updatePrevScrollPosition()
+      this.updateScrollPosition()
     },
 
     drawCircle (circle, context) {
