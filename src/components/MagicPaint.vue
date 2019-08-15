@@ -58,7 +58,7 @@ export default {
     window.addEventListener('mouseup', this.stopPainting)
     window.addEventListener('touchend', this.stopPainting)
     // shift circle positions with scroll to simulate full size canvas
-    this.updatePrevScrollPosition()
+    this.updateScrollPosition()
     window.addEventListener('scroll', this.updateCirclesWithScroll)
   },
   computed: {
@@ -72,7 +72,7 @@ export default {
     viewportWidth () { return this.$store.state.viewportWidth }
   },
   methods: {
-    updatePrevScrollPosition () {
+    updateScrollPosition () {
       prevScroll = {
         x: window.scrollX,
         y: window.scrollY
@@ -98,22 +98,37 @@ export default {
       if (paintingCircles.length) {
         paintingCircles = this.updateCirclePositions(paintingCircles, scrollDelta)
       }
-      this.updatePrevScrollPosition()
+      this.updateScrollPosition()
+    },
+
+    isCircleVisible (circle) {
+      let { x, y, radius } = circle
+      radius = radius || circleRadius
+      const circleVisibleX = utils.between({
+        value: x + radius,
+        min: 0,
+        max: this.$store.state.viewportWidth
+      })
+      const circleVisibleY = utils.between({
+        value: y + radius,
+        min: 0,
+        max: this.$store.state.viewportHeight
+      })
+      return Boolean(circleVisibleX && circleVisibleY)
     },
 
     drawCircle (circle, context) {
-      // dont render circle if (circle origin + radius) is outside viewport (on a per frame determination),
-      // handle isRemote circles differently at the edges
-      // or bunch them both up?
       let { x, y, color, iteration, radius, alpha } = circle
       radius = radius || circleRadius
-      alpha = alpha || utils.exponentialDecay(iteration, rateOfIterationDecay)
-      context.beginPath()
-      context.arc(x, y, radius, 0, 2 * Math.PI)
-      context.closePath()
-      context.globalAlpha = alpha
-      context.fillStyle = color
-      context.fill()
+      if (this.isCircleVisible(circle)) {
+        alpha = alpha || utils.exponentialDecay(iteration, rateOfIterationDecay)
+        context.beginPath()
+        context.arc(x, y, radius, 0, 2 * Math.PI)
+        context.closePath()
+        context.globalAlpha = alpha
+        context.fillStyle = color
+        context.fill()
+      }
     },
 
     startLocking () {
