@@ -11,24 +11,24 @@ dialog.about(v-if="visible" :open="visible" @click="closeDialogs")
       BetaNotes(:visible="betaNotesIsVisible")
   section
     .button-wrap
-      button(@click.stop="toggleNewStuffIsVisible" :class="{active: newStuffIsVisible}")
-        span New Stuff
-        template(v-if="newStuffIsNew")
-          img.newStuff-status(src="@/assets/new.gif")
-      NewStuff(:visible="newStuffIsVisible" :newStuff="newStuff")
+      button(@click.stop="toggleUpdatesIsVisible" :class="{active: updatesIsVisible}")
+        span Updates
+        template(v-if="updatesIsNew")
+          img.new-updates(src="@/assets/new.gif")
+      Updates(:visible="updatesIsVisible" :updates="updates")
 </template>
 
 <script>
 import Feedback from '@/components/dialogs/Feedback.vue'
 import BetaNotes from '@/components/dialogs/BetaNotes.vue'
-import NewStuff from '@/components/dialogs/NewStuff.vue'
+import Updates from '@/components/dialogs/Updates.vue'
 
 export default {
   name: 'About',
   components: {
     Feedback,
     BetaNotes,
-    NewStuff
+    Updates
   },
   props: {
     visible: Boolean
@@ -37,9 +37,9 @@ export default {
     return {
       feedbackIsVisible: false,
       betaNotesIsVisible: false,
-      newStuffIsVisible: false,
-      newStuffIsNew: true,
-      newStuff: []
+      updatesIsVisible: false,
+      updatesIsNew: true,
+      updates: []
     }
   },
   created () {
@@ -51,7 +51,7 @@ export default {
     })
   },
   mounted () {
-    this.getNewStuffs()
+    this.getUpdatess()
   },
   methods: {
     toggleFeedbackIsVisible () {
@@ -64,13 +64,13 @@ export default {
       this.closeDialogs()
       this.betaNotesIsVisible = !isVisible
     },
-    toggleNewStuffIsVisible () {
-      const isVisible = this.newStuffIsVisible
+    toggleUpdatesIsVisible () {
+      const isVisible = this.updatesIsVisible
       this.closeDialogs()
-      this.newStuffIsVisible = !isVisible
+      this.updatesIsVisible = !isVisible
     },
-    getNewStuff () {
-      console.log('🌹 fetch are.na and (normalize?) and then pass it through to newStuffs, and then see if its new news')
+    getUpdates () {
+      console.log('🌹 fetch are.na and (normalize?) and then pass it through to updatess, and then see if its new news')
       // https://api.are.na/v2/channels/kinopio-new-stuff/contents
       // last item index is most recent (maybe i can flip the order on the board tho, then i can use per param)
       // otherwise i'll just slice the result from the end and maybe array flip it on my end before doing stuff w it
@@ -78,7 +78,7 @@ export default {
     closeDialogs () {
       this.feedbackIsVisible = false
       this.betaNotesIsVisible = false
-      this.newStuffIsVisible = false
+      this.updatesIsVisible = false
     }
   }
 }
@@ -91,7 +91,7 @@ export default {
     display none
   .kaomoji-section
     padding-top 14px
-  .newStuff-status
+  .new-updates
     vertical-align -1px
     margin-left 3px
 </style>

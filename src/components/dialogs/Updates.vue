@@ -1,15 +1,15 @@
 <template lang="pug">
-dialog.changelog(v-if="visible" :open="visible" @click.stop)
+dialog.updates(v-if="visible" :open="visible" @click.stop)
   section
-    p changelogggg
+    p updatessss
 </template>
 
 <script>
 export default {
-  name: 'Changelog',
+  name: 'Updates',
   props: {
     visible: Boolean,
-    newStuff: Array
+    updates: Array
   },
   methods: {
   }
@@ -17,7 +17,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.changelog
+.updates
   overflow auto
   max-height calc(100vh - 110px)
   // img
