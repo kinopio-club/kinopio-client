@@ -3,7 +3,7 @@ dialog.updates(v-if="visible" :open="visible" @click.stop)
   section
     p Updates
   section
-    p Mood
+    p Latest Mood
     // loading v-if !mood
     img.mood(v-if="mood" :src="mood")
 
