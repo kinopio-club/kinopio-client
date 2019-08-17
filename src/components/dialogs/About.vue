@@ -19,6 +19,8 @@ dialog.about(v-if="visible" :open="visible" @click="closeDialogs")
 </template>
 
 <script>
+import _ from 'lodash'
+
 import Feedback from '@/components/dialogs/Feedback.vue'
 import BetaNotes from '@/components/dialogs/BetaNotes.vue'
 import Updates from '@/components/dialogs/Updates.vue'
@@ -51,7 +53,11 @@ export default {
     })
   },
   mounted () {
-    this.getUpdatess()
+    this.getUpdates().then(data => {
+      console.log(data)
+      const updates = _.reverse(data.contents)
+      this.updates = updates.slice(0, 4)
+    })
   },
   methods: {
     toggleFeedbackIsVisible () {
@@ -69,11 +75,10 @@ export default {
       this.closeDialogs()
       this.updatesIsVisible = !isVisible
     },
-    getUpdates () {
-      console.log('🌹 fetch are.na and (normalize?) and then pass it through to updatess, and then see if its new news')
-      // https://api.are.na/v2/channels/kinopio-new-stuff/contents
-      // last item index is most recent (maybe i can flip the order on the board tho, then i can use per param)
-      // otherwise i'll just slice the result from the end and maybe array flip it on my end before doing stuff w it
+    async getUpdates () {
+      const response = await fetch('https://api.are.na/v2/channels/kinopio-updates/contents')
+      const data = await response.json()
+      return data
     },
     closeDialogs () {
       this.feedbackIsVisible = false

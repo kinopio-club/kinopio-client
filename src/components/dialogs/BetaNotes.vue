@@ -2,7 +2,7 @@
 dialog.beta-notes(v-if="visible" :open="visible" @click.stop)
   section
     p Beta Notes
-      img.icon(src="@/assets/updated.gif")
+      //img.icon(src="@/assets/updated.gif")
   section
     // https://www.are.na/block/4494653
     img(src="@/assets/photo-convenience-store.jpg")
