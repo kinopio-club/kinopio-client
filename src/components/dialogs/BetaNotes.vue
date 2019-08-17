@@ -17,14 +17,6 @@ dialog.beta-notes(v-if="visible" :open="visible" @click.stop)
         del Create new spaces
       li Logo and illustrations
       li A server enabling login and collaboration
-  section
-    p Follow for Updates
-    .button-wrap
-      a(href="https://www.are.na/kinopio")
-        button Are.na →
-    .button-wrap
-      a(href="https://twitter.com/KinopioClub")
-        button Twitter →
 </template>
 
 <script>

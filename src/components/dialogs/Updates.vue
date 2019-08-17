@@ -21,6 +21,15 @@ dialog.updates(v-if="visible" :open="visible" @click.stop)
     .button-wrap
       a(href="https://www.are.na/kinopio/kinopio-updates")
         button All Updates →
+  section
+    p Follow for Updates
+    .button-wrap
+      a(href="https://www.are.na/kinopio")
+        button Are.na →
+    .button-wrap
+      a(href="https://twitter.com/KinopioClub")
+        button Twitter →
+
 </template>
 
 <script>
