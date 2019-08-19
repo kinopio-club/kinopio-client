@@ -22,6 +22,12 @@ Admin: http://localhost:8000
 App: http://localhost:8080
 ```
 
+## Debugging
+Uncomment code in `main.js` then,
+```
+./node_modules/.bin/vue-devtools
+```
+
 ## Primary Files
 
 | File | Description |
