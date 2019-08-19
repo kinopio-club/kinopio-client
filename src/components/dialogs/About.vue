@@ -11,24 +11,24 @@ dialog.about(v-if="visible" :open="visible" @click="closeDialogs")
       BetaNotes(:visible="betaNotesIsVisible")
   section
     .button-wrap
-      button(@click.stop="toggleUpdatesIsVisible" :class="{active: updatesIsVisible}")
-        span Updates
-        template(v-if="updatesIsNew")
-          img.new-updates(src="@/assets/new.gif")
-      Updates(:visible="updatesIsVisible" :updates="updates")
+      button(@click.stop="toggleNewStuffIsVisible" :class="{active: newStuffIsVisible}")
+        span New Stuff
+        template(v-if="newStuffIsNew")
+          img.new.icon(src="@/assets/new.gif")
+      NewStuff(:visible="newStuffIsVisible" :newStuff="newStuff")
 </template>
 
 <script>
 import Feedback from '@/components/dialogs/Feedback.vue'
 import BetaNotes from '@/components/dialogs/BetaNotes.vue'
-import Updates from '@/components/dialogs/Updates.vue'
+import NewStuff from '@/components/dialogs/NewStuff.vue'
 
 export default {
   name: 'About',
   components: {
     Feedback,
     BetaNotes,
-    Updates
+    NewStuff
   },
   props: {
     visible: Boolean
@@ -37,9 +37,9 @@ export default {
     return {
       feedbackIsVisible: false,
       betaNotesIsVisible: false,
-      updatesIsVisible: false,
-      updatesIsNew: false,
-      updates: []
+      newStuffIsVisible: false,
+      newStuffIsNew: false,
+      newStuff: []
     }
   },
   created () {
@@ -47,15 +47,15 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.feedbackIsVisible = false
         this.betaNotesIsVisible = false
-        this.updatesIsVisible = false
+        this.newStuffIsVisible = false
       }
     })
   },
   mounted () {
-    this.getUpdates().then(data => {
-      const updates = data.contents
-      this.updates = updates.slice(0, 4)
-      this.isUpdatesIsNew(updates[0].id)
+    this.getNewStuff().then(data => {
+      const newStuff = data.contents
+      this.newStuff = newStuff.slice(0, 2)
+      this.isNewStuffIsNew(newStuff[0].id)
     })
   },
   methods: {
@@ -69,27 +69,27 @@ export default {
       this.closeDialogs()
       this.betaNotesIsVisible = !isVisible
     },
-    toggleUpdatesIsVisible () {
-      const isVisible = this.updatesIsVisible
+    toggleNewStuffIsVisible () {
+      const isVisible = this.newStuffIsVisible
       this.closeDialogs()
-      this.updatesIsVisible = !isVisible
+      this.newStuffIsVisible = !isVisible
     },
-    async getUpdates () {
+    async getNewStuff () {
       const response = await fetch('https://api.are.na/v2/channels/kinopio-updates/contents?direction=desc')
       const data = await response.json()
       return data
     },
-    isUpdatesIsNew (latestUpdateId) {
-      // this.$store.commit('currentUser/updateLastReadUpdateId', undefined)
-      const userlastRead = this.$store.state.currentUser.lastReadUpdateId
-      if (userlastRead !== latestUpdateId) {
-        this.updatesIsNew = true
+    isNewStuffIsNew (latestUpdateId) {
+      const userlastReadId = this.$store.state.currentUser.lastReadNewStuffId
+      console.log(userlastReadId, latestUpdateId)
+      if (userlastReadId !== latestUpdateId) {
+        this.newStuffIsNew = true
       }
     },
     closeDialogs () {
       this.feedbackIsVisible = false
       this.betaNotesIsVisible = false
-      this.updatesIsVisible = false
+      this.newStuffIsVisible = false
     }
   }
 }
@@ -102,7 +102,7 @@ export default {
     display none
   .kaomoji-section
     padding-top 14px
-  .new-updates
-    vertical-align -1px
+  .new
+    margin 0
     margin-left 3px
 </style>

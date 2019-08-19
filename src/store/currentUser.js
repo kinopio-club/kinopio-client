@@ -12,7 +12,7 @@ export default {
     color: randomColor({ luminosity: 'light' }),
     name: undefined,
     defaultConnectionTypeId: '',
-    lastReadUpdateId: undefined
+    lastReadNewStuffId: undefined
   },
   getters: {
     isCurrentUser: (state) => (userId) => {
@@ -38,9 +38,9 @@ export default {
       state.lastSpace = spaceId
       cache.updateUser('lastSpace', spaceId)
     },
-    updateLastReadUpdateId: (state, updateId) => {
-      state.lastReadUpdateId = updateId
-      cache.updateUser('lastReadUpdateId', updateId)
+    updateLastReadNewStuffId: (state, newStuffId) => {
+      state.lastReadNewStuffId = newStuffId
+      cache.updateUser('lastReadNewStuffId', newStuffId)
     },
     defaultConnectionTypeId: (state, typeId) => {
       state.defaultConnectionTypeId = typeId

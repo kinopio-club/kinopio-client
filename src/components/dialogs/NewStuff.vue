@@ -1,13 +1,13 @@
 <template lang="pug">
-dialog.updates(v-if="visible" :open="visible" @click.stop)
+dialog.new-stuff(v-if="visible" :open="visible" @click.stop)
   section
-    p Updates
+    p New Stuff
 
-  template(v-if="updates.length" v-for="update in updatesWithUserHasRead")
-    section(:key="update.id")
-      p.title {{update.title}}
-        img.icon(src="@/assets/new.gif" v-if="!update.hasRead")
-      span(v-html="update.content_html")
+  template(v-if="newStuff.length" v-for="xyz in newStuffWithUserHasRead")
+    section(:key="xyz.id")
+      p.title {{xyz.title}}
+        img.icon(src="@/assets/new.gif" v-if="!xyz.userHasRead")
+      span(v-html="xyz.content_html")
 
   section
     p Latest Mood
@@ -22,20 +22,19 @@ dialog.updates(v-if="visible" :open="visible" @click.stop)
     .button-wrap
       a(href="https://twitter.com/KinopioClub")
         button Twitter →
-
 </template>
 
 <script>
 import Loader from '@/components/Loader.vue'
 
 export default {
-  name: 'Updates',
+  name: 'NewStuff',
   components: {
     Loader
   },
   props: {
     visible: Boolean,
-    updates: Array
+    newStuff: Array
   },
   data () {
     return {
@@ -56,21 +55,18 @@ export default {
     })
   },
   computed: {
-    updatesWithUserHasRead () {
-      let hasRead
-      const userlastRead = this.$store.state.currentUser.lastReadUpdateId
-      return this.updates.map(update => {
+    newStuffWithUserHasRead () {
+      let userHasRead
+      const userlastRead = this.$store.state.currentUser.lastReadNewStuffId
+      return this.newStuff.map(update => {
         if (userlastRead === update.id) {
-          hasRead = true
+          userHasRead = true
         }
-        if (hasRead) {
-          update.hasRead = true
+        if (userHasRead) {
+          update.userHasRead = true
         }
         return update
       })
-
-      // iterate through each one, until user id is found all entries marked as unread true
-      // return a map of
     }
   },
   methods: {
@@ -80,8 +76,8 @@ export default {
       return data
     },
     updateUserLastRead () {
-      const lastReadUpdateId = this.updates[0].id
-      this.$store.commit('currentUser/updateLastReadUpdateId', lastReadUpdateId)
+      const lastReadNewStuffId = this.newStuff[0].id
+      this.$store.commit('currentUser/updateLastReadNewStuffId', lastReadNewStuffId)
     }
   },
   watch: {
@@ -95,17 +91,15 @@ export default {
 </script>
 
 <style lang="stylus">
-.updates
+.new-stuff
   overflow auto
   max-height calc(100vh - 150px)
+  .loader
+    margin-top 10px
   .icon
-    margin-left 5px
-    vertical-align -2px
+    margin-left 3px
   .title
     margin-bottom 10px
-    // text-decoration underline
-    // &.badge
-    //   background-color var(--secondary-background)
   .mood
     margin-top 10px
   img
