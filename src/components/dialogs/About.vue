@@ -9,17 +9,26 @@ dialog.about(v-if="visible" :open="visible" @click="closeDialogs")
     .button-wrap
       button(@click.stop="toggleBetaNotesIsVisible" :class="{active: betaNotesIsVisible}") Beta Notes
       BetaNotes(:visible="betaNotesIsVisible")
+  section
+    .button-wrap
+      button(@click.stop="toggleNewStuffIsVisible" :class="{active: newStuffIsVisible}")
+        span New Stuff
+        template(v-if="newStuffIsNew")
+          img.new.icon(src="@/assets/new.gif")
+      NewStuff(:visible="newStuffIsVisible" :newStuff="newStuff")
 </template>
 
 <script>
 import Feedback from '@/components/dialogs/Feedback.vue'
 import BetaNotes from '@/components/dialogs/BetaNotes.vue'
+import NewStuff from '@/components/dialogs/NewStuff.vue'
 
 export default {
   name: 'About',
   components: {
     Feedback,
-    BetaNotes
+    BetaNotes,
+    NewStuff
   },
   props: {
     visible: Boolean
@@ -27,7 +36,10 @@ export default {
   data () {
     return {
       feedbackIsVisible: false,
-      betaNotesIsVisible: false
+      betaNotesIsVisible: false,
+      newStuffIsVisible: false,
+      newStuffIsNew: false,
+      newStuff: []
     }
   },
   created () {
@@ -35,7 +47,15 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.feedbackIsVisible = false
         this.betaNotesIsVisible = false
+        this.newStuffIsVisible = false
       }
+    })
+  },
+  mounted () {
+    this.getNewStuff().then(data => {
+      const newStuff = data.contents
+      this.newStuff = newStuff.slice(0, 2)
+      this.isNewStuffIsNew(newStuff[0].id)
     })
   },
   methods: {
@@ -49,9 +69,31 @@ export default {
       this.closeDialogs()
       this.betaNotesIsVisible = !isVisible
     },
+    toggleNewStuffIsVisible () {
+      const isVisible = this.newStuffIsVisible
+      this.closeDialogs()
+      this.newStuffIsVisible = !isVisible
+    },
+    async getNewStuff () {
+      const response = await fetch('https://api.are.na/v2/channels/kinopio-updates/contents?direction=desc')
+      const data = await response.json()
+      return data
+    },
+    isNewStuffIsNew (latestUpdateId) {
+      const userlastReadId = this.$store.state.currentUser.lastReadNewStuffId
+      this.newStuffIsNew = Boolean(userlastReadId !== latestUpdateId)
+    },
     closeDialogs () {
       this.feedbackIsVisible = false
       this.betaNotesIsVisible = false
+      this.newStuffIsVisible = false
+    }
+  },
+  watch: {
+    visible (visible) {
+      if (visible && this.newStuff.length) {
+        this.isNewStuffIsNew(this.newStuff[0].id)
+      }
     }
   }
 }
@@ -64,4 +106,7 @@ export default {
     display none
   .kaomoji-section
     padding-top 14px
+  .new
+    margin 0
+    margin-left 3px
 </style>

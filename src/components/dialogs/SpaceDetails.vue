@@ -63,9 +63,11 @@ export default {
     exportToJSON () {
       const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.$store.state.currentSpace))
       const downloadAnchor = document.getElementById('export-downlaod-anchor')
+      const spaceName = this.$store.state.currentSpace.name
       const spaceId = this.$store.state.currentSpace.id
+      const fileName = spaceName || `kinopio-space-${spaceId}`
       downloadAnchor.setAttribute('href', json)
-      downloadAnchor.setAttribute('download', `kinopio-space-${spaceId}.json`)
+      downloadAnchor.setAttribute('download', `${fileName}.json`)
       downloadAnchor.click()
     },
     // typeGradient (space) {
