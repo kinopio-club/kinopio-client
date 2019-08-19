@@ -81,15 +81,19 @@ export default {
     },
     isNewStuffIsNew (latestUpdateId) {
       const userlastReadId = this.$store.state.currentUser.lastReadNewStuffId
-      console.log(userlastReadId, latestUpdateId)
-      if (userlastReadId !== latestUpdateId) {
-        this.newStuffIsNew = true
-      }
+      this.newStuffIsNew = Boolean(userlastReadId !== latestUpdateId)
     },
     closeDialogs () {
       this.feedbackIsVisible = false
       this.betaNotesIsVisible = false
       this.newStuffIsVisible = false
+    }
+  },
+  watch: {
+    visible (visible) {
+      if (visible && this.newStuff.length) {
+        this.isNewStuffIsNew(this.newStuff[0].id)
+      }
     }
   }
 }

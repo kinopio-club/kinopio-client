@@ -3,6 +3,9 @@ dialog.new-stuff(v-if="visible" :open="visible" @click.stop)
   section
     p New Stuff
 
+  section(v-if="!newStuff.length")
+    Loader(:visible="true")
+
   template(v-if="newStuff.length" v-for="xyz in newStuffWithUserHasRead")
     section(:key="xyz.id")
       p.title {{xyz.title}}
