@@ -80,6 +80,7 @@ export default {
       return data
     },
     isUpdatesIsNew (latestUpdateId) {
+      // this.$store.commit('currentUser/updateLastReadUpdateId', undefined)
       const userlastRead = this.$store.state.currentUser.lastReadUpdateId
       if (userlastRead !== latestUpdateId) {
         this.updatesIsNew = true

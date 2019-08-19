@@ -2,27 +2,18 @@
 dialog.updates(v-if="visible" :open="visible" @click.stop)
   section
     p Updates
-    //img.icon(src="@/assets/new.gif")
 
-  //section
-    //(v-if="!updates.length")
-    // todo a good loader
-    // p loading…
-
-  template(v-if="updates.length" v-for="update in updates")
+  template(v-if="updates.length" v-for="update in updatesWithUserHasRead")
     section(:key="update.id")
-      p.title.badge {{update.title}}
+      p.title {{update.title}}
+        img.icon(src="@/assets/new.gif" v-if="!update.hasRead")
       span(v-html="update.content_html")
 
   section
     p Latest Mood
-    // loading v-if !mood
+    Loader(:visible="!mood")
     img.mood(v-if="mood" :src="mood")
 
-  section
-    .button-wrap
-      a(href="https://www.are.na/kinopio/kinopio-updates")
-        button All Updates →
   section
     p Follow for Updates
     .button-wrap
@@ -35,8 +26,13 @@ dialog.updates(v-if="visible" :open="visible" @click.stop)
 </template>
 
 <script>
+import Loader from '@/components/Loader.vue'
+
 export default {
   name: 'Updates',
+  components: {
+    Loader
+  },
   props: {
     visible: Boolean,
     updates: Array
@@ -58,6 +54,24 @@ export default {
       const moods = data.contents
       this.mood = moods[0].image.large.url
     })
+  },
+  computed: {
+    updatesWithUserHasRead () {
+      let hasRead
+      const userlastRead = this.$store.state.currentUser.lastReadUpdateId
+      return this.updates.map(update => {
+        if (userlastRead === update.id) {
+          hasRead = true
+        }
+        if (hasRead) {
+          update.hasRead = true
+        }
+        return update
+      })
+
+      // iterate through each one, until user id is found all entries marked as unread true
+      // return a map of
+    }
   },
   methods: {
     async getMoods () {
@@ -84,10 +98,14 @@ export default {
 .updates
   overflow auto
   max-height calc(100vh - 150px)
+  .icon
+    margin-left 5px
+    vertical-align -2px
   .title
     margin-bottom 10px
-    &.badge
-      background-color var(--secondary-background)
+    // text-decoration underline
+    // &.badge
+    //   background-color var(--secondary-background)
   .mood
     margin-top 10px
   img
