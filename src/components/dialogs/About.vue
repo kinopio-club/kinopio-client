@@ -19,8 +19,6 @@ dialog.about(v-if="visible" :open="visible" @click="closeDialogs")
 </template>
 
 <script>
-import _ from 'lodash'
-
 import Feedback from '@/components/dialogs/Feedback.vue'
 import BetaNotes from '@/components/dialogs/BetaNotes.vue'
 import Updates from '@/components/dialogs/Updates.vue'
@@ -40,7 +38,7 @@ export default {
       feedbackIsVisible: false,
       betaNotesIsVisible: false,
       updatesIsVisible: false,
-      updatesIsNew: true,
+      updatesIsNew: false,
       updates: []
     }
   },
@@ -49,14 +47,15 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.feedbackIsVisible = false
         this.betaNotesIsVisible = false
+        this.updatesIsVisible = false
       }
     })
   },
   mounted () {
     this.getUpdates().then(data => {
-      console.log(data)
-      const updates = _.reverse(data.contents)
+      const updates = data.contents
       this.updates = updates.slice(0, 4)
+      this.isUpdatesIsNew(updates[0].id)
     })
   },
   methods: {
@@ -76,9 +75,15 @@ export default {
       this.updatesIsVisible = !isVisible
     },
     async getUpdates () {
-      const response = await fetch('https://api.are.na/v2/channels/kinopio-updates/contents')
+      const response = await fetch('https://api.are.na/v2/channels/kinopio-updates/contents?direction=desc')
       const data = await response.json()
       return data
+    },
+    isUpdatesIsNew (latestUpdateId) {
+      const userlastRead = this.$store.state.currentUser.lastReadUpdateId
+      if (userlastRead !== latestUpdateId) {
+        this.updatesIsNew = true
+      }
     },
     closeDialogs () {
       this.feedbackIsVisible = false

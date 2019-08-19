@@ -2,20 +2,22 @@
 dialog.updates(v-if="visible" :open="visible" @click.stop)
   section
     p Updates
-  section
-    p Latest Mood
-    // loading v-if !mood
-    img.mood(v-if="mood" :src="mood")
+    //img.icon(src="@/assets/new.gif")
 
-  section(v-if="!updates.length")
+  //section
+    //(v-if="!updates.length")
     // todo a good loader
     // p loading…
 
   template(v-if="updates.length" v-for="update in updates")
     section(:key="update.id")
-      p.title {{update.title}}
-        img.icon(src="@/assets/new.gif")
+      p.title.badge {{update.title}}
       span(v-html="update.content_html")
+
+  section
+    p Latest Mood
+    // loading v-if !mood
+    img.mood(v-if="mood" :src="mood")
 
   section
     .button-wrap
@@ -33,8 +35,6 @@ dialog.updates(v-if="visible" :open="visible" @click.stop)
 </template>
 
 <script>
-import _ from 'lodash'
-
 export default {
   name: 'Updates',
   props: {
@@ -46,18 +46,35 @@ export default {
       mood: undefined
     }
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'closeAllDialogs' && this.visible) {
+        this.updateUserLastRead()
+      }
+    })
+  },
   mounted () {
     this.getMoods().then(data => {
-      const moods = _.reverse(data.contents)
-      console.log('🌸', moods)
+      const moods = data.contents
       this.mood = moods[0].image.large.url
     })
   },
   methods: {
     async getMoods () {
-      const response = await fetch('https://api.are.na/v2/channels/kinopio-moods/contents')
+      const response = await fetch('https://api.are.na/v2/channels/kinopio-moods/contents?direction=desc')
       const data = await response.json()
       return data
+    },
+    updateUserLastRead () {
+      const lastReadUpdateId = this.updates[0].id
+      this.$store.commit('currentUser/updateLastReadUpdateId', lastReadUpdateId)
+    }
+  },
+  watch: {
+    visible (visible) {
+      if (!visible) {
+        this.updateUserLastRead()
+      }
     }
   }
 }
@@ -67,11 +84,10 @@ export default {
 .updates
   overflow auto
   max-height calc(100vh - 150px)
-  .icon
-    margin-left 5px
-    vertical-align -2px
   .title
     margin-bottom 10px
+    &.badge
+      background-color var(--secondary-background)
   .mood
     margin-top 10px
   img
