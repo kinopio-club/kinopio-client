@@ -140,6 +140,7 @@ export default {
     speed (cursor, direction) {
       let multiplier
       const base = 10
+      const maxSpeed = 30
       const viewportHeight = this.viewportHeight
       const viewportWidth = this.viewportWidth
       if (direction === 'up') {
@@ -154,7 +155,7 @@ export default {
       if (direction === 'right') {
         multiplier = (cursor.x - (viewportWidth - scrollAreaWidth) / scrollAreaWidth) / viewportWidth
       }
-      return Math.min(base * (multiplier + (multiplier * 0.5)), 50)
+      return Math.min(base * (multiplier + (multiplier * 0.5)), maxSpeed)
     },
 
     increasePageWidth (delta) {
