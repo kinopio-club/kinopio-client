@@ -1,6 +1,6 @@
 <template lang="pug">
 footer
-  span.beta-hash Beta {{buildHash}}
+  span Beta {{buildHash}}
   .button-wrap
     button(@click="toggleFeedbackIsVisible" :class="{active: feedbackIsVisible}") Feedback
     Feedback(:visible="feedbackIsVisible" :fromFooter="true")
@@ -58,9 +58,9 @@ footer
   position fixed
   right 8px
   bottom 8px
-  .beta-hash
-    user-select text
+  pointer-events none
   > .button-wrap
+    pointer-events all
     margin-left 6px
     display inline-block
     dialog
