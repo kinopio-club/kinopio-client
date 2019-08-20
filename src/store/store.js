@@ -50,8 +50,8 @@ export default new Vuex.Store({
       const html = document.documentElement
       state.pageWidth = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
       state.pageHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
-      state.viewportWidth = window.innerWidth || document.documentElement.clientWidth
-      state.viewportHeight = window.innerHeight || document.documentElement.clientHeight
+      state.viewportWidth = document.documentElement.clientWidth
+      state.viewportHeight = document.documentElement.clientHeight
     },
     pageHeight: (state, height) => {
       utils.typeCheck(height, 'number')
