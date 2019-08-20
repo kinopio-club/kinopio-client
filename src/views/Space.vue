@@ -34,7 +34,7 @@ import utils from '@/utils.js'
 
 import _ from 'lodash'
 
-let startCursor, prevCursor, endCursor, scrollTimer, scrollAreaHeight, scrollAreaWidth
+let startCursor, prevCursor, prevCursorPage, endCursor, scrollTimer, scrollAreaHeight, scrollAreaWidth, maxHeight, maxWidth
 let movementDirection = {}
 
 export default {
@@ -99,8 +99,10 @@ export default {
     initInteractions (event) {
       startCursor = utils.cursorPositionInViewport(event)
       if (this.$store.getters.shouldScrollAtEdges && !scrollTimer) {
-        scrollAreaHeight = Math.min(100, this.viewportHeight / 6)
-        scrollAreaWidth = Math.min(100, this.viewportWidth / 6)
+        scrollAreaHeight = Math.max(100, this.viewportHeight / 6)
+        scrollAreaWidth = Math.max(100, this.viewportWidth / 6)
+        maxHeight = Math.max(2500, this.$store.state.viewportHeight)
+        maxWidth = Math.max(2500, this.$store.state.viewportWidth)
         scrollTimer = window.requestAnimationFrame(this.scrollFrame)
       }
     },
@@ -117,6 +119,7 @@ export default {
         this.updateMovementDirection()
       }
       prevCursor = utils.cursorPositionInViewport(event)
+      prevCursorPage = utils.cursorPositionInPage(event)
     },
 
     checkShouldShowDetails () {
@@ -155,15 +158,33 @@ export default {
     },
 
     increasePageWidth (delta) {
-      const pageWidth = this.pageWidth
-      const width = pageWidth + delta.x
-      this.$store.commit('pageWidth', width)
+      const cursorIsRightSideOfPage = (this.pageWidth - prevCursorPage.x) < scrollAreaWidth
+      if (cursorIsRightSideOfPage) {
+        const pageWidth = this.pageWidth
+        const width = pageWidth + delta.x
+        this.$store.commit('pageWidth', width)
+      }
     },
 
     increasePageHeight (delta) {
-      const pageHeight = this.pageHeight
-      const height = pageHeight + delta.y
-      this.$store.commit('pageHeight', height)
+      const cursorIsBottomSideOfPage = (this.pageHeight - prevCursorPage.y) < scrollAreaHeight
+      if (cursorIsBottomSideOfPage) {
+        const pageHeight = this.pageHeight
+        const height = pageHeight + delta.y
+        this.$store.commit('pageHeight', height)
+      }
+    },
+
+    shouldScrollRight () {
+      this.updatePageSizes()
+      const scrolledTooFarRight = (window.scrollX + this.viewportWidth) > maxWidth
+      return !scrolledTooFarRight
+    },
+
+    shouldScrollDown () {
+      this.updatePageSizes()
+      const scrolledTooFarDown = (window.scrollY + this.viewportHeight) > maxHeight
+      return !scrolledTooFarDown
     },
 
     scrollFrame () {
@@ -171,23 +192,19 @@ export default {
       const viewportHeight = this.viewportHeight
       const viewportWidth = this.viewportWidth
       const cursor = this.cursor()
-
       const cursorIsTopSide = cursor.y <= scrollAreaHeight
       const cursorIsBottomSide = cursor.y >= viewportHeight - scrollAreaHeight
-
       const cursorIsLeftSide = cursor.x <= scrollAreaWidth
       const cursorIsRightSide = cursor.x >= viewportWidth - scrollAreaWidth
 
-      // ↑ up
-      if (cursorIsTopSide && window.scrollY && movementDirection.y === 'up') {
+      if (movementDirection.y === 'up' && cursorIsTopSide && window.scrollY) {
         speed = this.speed(cursor, 'up')
         delta = {
           x: 0,
           y: -speed
         }
         this.scrollBy(delta)
-      // ↓ down
-      } else if (cursorIsBottomSide && movementDirection.y === 'down') {
+      } else if (movementDirection.y === 'down' && cursorIsBottomSide && this.shouldScrollDown()) {
         speed = this.speed(cursor, 'down')
         delta = {
           x: 0,
@@ -196,16 +213,14 @@ export default {
         this.increasePageHeight(delta)
         this.scrollBy(delta)
       }
-      // ◀ left
-      if (cursorIsLeftSide && window.scrollX && movementDirection.x === 'left') {
+      if (movementDirection.x === 'left' && cursorIsLeftSide && window.scrollX) {
         speed = this.speed(cursor, 'left')
         delta = {
           x: -speed,
           y: 0
         }
         this.scrollBy(delta)
-      // ▶ right
-      } else if (cursorIsRightSide && movementDirection.x === 'right') {
+      } else if (movementDirection.x === 'right' && cursorIsRightSide && this.shouldScrollRight()) {
         speed = this.speed(cursor, 'right')
         delta = {
           x: speed,
