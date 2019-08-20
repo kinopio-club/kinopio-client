@@ -154,7 +154,7 @@ export default {
       if (direction === 'right') {
         multiplier = (cursor.x - (viewportWidth - scrollAreaWidth) / scrollAreaWidth) / viewportWidth
       }
-      return base * (multiplier + (multiplier * 0.5))
+      return Math.max(base * (multiplier + (multiplier * 0.5)), 50)
     },
 
     increasePageWidth (delta) {
