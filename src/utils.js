@@ -6,7 +6,7 @@ export default {
     if (event.touches[0]) {
       touch = event.touches[0]
     } else {
-      // for touchend
+      // touchend
       touch = event.changedTouches[0]
     }
     return {
