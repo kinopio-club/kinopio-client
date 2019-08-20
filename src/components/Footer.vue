@@ -1,5 +1,5 @@
 <template lang="pug">
-footer
+footer(v-if="!cardDetailsVisible")
   span Beta {{buildHash}}
   .button-wrap
     button(@click="toggleFeedbackIsVisible" :class="{active: feedbackIsVisible}") Feedback
@@ -40,6 +40,9 @@ export default {
       })
       let hash = path.src.match(regex)[0] // app.768db305407f4c847d44
       return hash.replace('app.', '') // 768db305407f4c847d44
+    },
+    cardDetailsVisible () {
+      return Boolean(this.$store.state.cardDetailsIsVisibleForCard)
     }
   },
   methods: {
