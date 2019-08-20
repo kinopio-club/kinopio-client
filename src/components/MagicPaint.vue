@@ -5,16 +5,16 @@ aside.magic-paint
     @touchstart="startPainting"
     @mousemove="painting"
     @touchmove="painting"
-    :width="viewportWidth"
-    :height="viewportHeight"
+    :width="pageWidth"
+    :height="pageHeight"
   )
   canvas#locking.locking(
-    :width="viewportWidth"
-    :height="viewportHeight"
+    :width="pageWidth"
+    :height="pageHeight"
   )
   canvas#initial.initial(
-    :width="viewportWidth"
-    :height="viewportHeight"
+    :width="pageWidth"
+    :height="pageHeight"
   )
 </template>
 
@@ -63,10 +63,7 @@ export default {
     },
     // keep canvases updated to viewport size so you can draw on newly created areas
     pageHeight () { return this.$store.state.pageHeight },
-    pageWidth () { return this.$store.state.pageWidth },
-    viewportHeight () { return this.$store.state.viewportHeight },
-    viewportWidth () { return this.$store.state.viewportWidth }
-
+    pageWidth () { return this.$store.state.pageWidth }
   },
   methods: {
     drawCircle (circle, context) {
@@ -104,15 +101,15 @@ export default {
 
     createPaintingCircle (event) {
       let color = this.$store.state.currentUser.color
-      currentCursor = utils.cursorPositionInViewport(event)
+      currentCursor = utils.cursorPositionInPage(event)
       let circle = { x: currentCursor.x, y: currentCursor.y, color, iteration: 0 }
       this.selectCards(circle)
       paintingCircles.push(circle)
     },
 
     startPainting (event) {
-      startCursor = utils.cursorPositionInViewport(event)
-      currentCursor = utils.cursorPositionInViewport(event)
+      startCursor = utils.cursorPositionInPage(event)
+      currentCursor = utils.cursorPositionInPage(event)
       const dialogIsVisible = Boolean(document.querySelector('dialog'))
       const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelected.length)
       this.startLocking()
@@ -228,7 +225,7 @@ export default {
     stopPainting (event) {
       if (this.shouldCancel(event)) { return }
       startCursor = startCursor || {}
-      const endCursor = utils.cursorPositionInViewport(event)
+      const endCursor = utils.cursorPositionInPage(event)
       const shouldAddNewCard = this.$store.state.shouldAddNewCard
       currentUserIsLocking = false
       window.cancelAnimationFrame(lockingAnimationTimer)
@@ -249,12 +246,12 @@ export default {
     selectCards (circle) {
       this.$store.state.cardMap.map(card => {
         const x = {
-          value: circle.x + window.scrollX,
+          value: circle.x,
           min: card.x,
           max: card.x + card.width
         }
         const y = {
-          value: circle.y + window.scrollY,
+          value: circle.y,
           min: card.y,
           max: card.y + card.height
         }
@@ -272,7 +269,8 @@ export default {
 
 <style lang="stylus" scoped>
 canvas
-  position fixed
+  position absolute
+  top 0
 .locking,
 .initial
   pointer-events none
