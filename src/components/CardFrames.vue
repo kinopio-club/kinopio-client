@@ -6,6 +6,8 @@
 
 aside.magical-helper
   img.cat(src="@/assets/frames/magical-helper/cat.png")
+  img.hat(src="@/assets/frames/magical-helper/hat.png")
+  img.moon(src="@/assets/frames/magical-helper/moon.png")
 
 </template>
 
@@ -32,4 +34,12 @@ img
     width 32px
     left -26px
     top -12px
+  .hat
+    width 32px
+    left -25px
+    top -10px
+  .moon
+    width 23px
+    right 28px
+    top -15px
 </style>
