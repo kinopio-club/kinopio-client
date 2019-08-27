@@ -3,14 +3,13 @@ dialog.feedback(v-if="visible" :open="visible" @click.stop :class="{'from-footer
   section
     p Feedback
   section
+    img(src="@/assets/froggo.png")
     p During this beta I'd love to know if it's fun to create cards, and connect your thoughts, ideas, and plans together.
     p Your feedback right now is invaluably helpful.
     p Hit me up at hi@pirijan.com
     .button-wrap
       a(href="mailto:hi@pirijan.com?subject=👻 Kinopio Feedback")
         button Email Me
-    //a(href="https://www.are.na/block/2577006")
-    img(src="@/assets/bom-marido.jpg")
 
 </template>
 
@@ -31,7 +30,7 @@ export default {
   overflow auto
   max-height calc(100vh - 110px)
   img
-    margin-top 10px
+    // margin-top 10px
     border-radius 3px
   @media(max-width 340px)
     max-height calc(100vh - 200px)
