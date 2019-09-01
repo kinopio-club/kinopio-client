@@ -2,6 +2,7 @@
 dialog.new-stuff(v-if="visible" :open="visible" @click.stop)
   section
     p New Stuff
+      img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
 
   section(v-if="!newStuff.length")
     Loader(:visible="true")
@@ -13,9 +14,9 @@ dialog.new-stuff(v-if="visible" :open="visible" @click.stop)
       span(v-html="xyz.content_html")
 
   section
-    p Latest Mood
-    Loader(:visible="!mood")
-    img.mood(v-if="mood" :src="mood")
+    .button-wrap
+      a(href="https://www.are.na/kinopio/kinopio-updates")
+        button Read All →
 
   section
     p Follow for Updates
@@ -41,7 +42,7 @@ export default {
   },
   data () {
     return {
-      mood: undefined
+      newStuffIsUpdated: false
     }
   },
   created () {
@@ -49,12 +50,6 @@ export default {
       if (mutation.type === 'closeAllDialogs' && this.visible) {
         this.updateUserLastRead()
       }
-    })
-  },
-  mounted () {
-    this.getMoods().then(data => {
-      const moods = data.contents
-      this.mood = moods[0].image.large.url
     })
   },
   computed: {
@@ -73,18 +68,22 @@ export default {
     }
   },
   methods: {
-    async getMoods () {
-      const response = await fetch('https://api.are.na/v2/channels/kinopio-moods/contents?direction=desc')
-      const data = await response.json()
-      return data
-    },
     updateUserLastRead () {
       const lastReadNewStuffId = this.newStuff[0].id
       this.$store.commit('currentUser/updateLastReadNewStuffId', lastReadNewStuffId)
+    },
+    checkNewStuffIsUpdated () {
+      const lastReadNewStuffId = this.newStuff[0].id
+      const userlastReadId = this.$store.state.currentUser.lastReadNewStuffId
+      this.newStuffIsUpdated = Boolean(userlastReadId !== lastReadNewStuffId)
     }
+
   },
   watch: {
     visible (visible) {
+      if (visible) {
+        this.checkNewStuffIsUpdated()
+      }
       if (!visible) {
         this.updateUserLastRead()
       }
@@ -103,8 +102,6 @@ export default {
     margin-left 3px
   .title
     margin-bottom 10px
-  .mood
-    margin-top 10px
   img
     border-radius 3px
   ul,
