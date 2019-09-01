@@ -3,11 +3,10 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop)
   section.results-section
     ul.results-list
       template(v-for="(frame in frames")
-        li
+        li(:class="{ active: frameIsCardFrame(frame.id) }" @click="changeCardFrame(frame)" :key="frame.id")
           .name {{frame.name}}
-        //li(:class="{ active: connectionTypeIsActive(type.id) }" @click="changeConnectionType(type)" :key="type.id")
+        //li( }"
         //  .badge(:style="{backgroundColor: type.color}" :class="{checked: connectionTypeIsDefault(type.id)}")
-        //  .name {{type.name}}
 </template>
 
 <script>
@@ -21,6 +20,25 @@ export default {
   computed: {
     frames () {
       return frames
+    }
+  },
+  methods: {
+    changeCardFrame (frame) {
+      const frameId = {
+        type: 'frameId',
+        value: frame.id,
+        cardId: this.card.id
+      }
+      const frameName = {
+        type: 'frameName',
+        value: frame.name,
+        cardId: this.card.id
+      }
+      this.$store.commit('currentSpace/updateCardDetails', frameId)
+      this.$store.commit('currentSpace/updateCardDetails', frameName)
+    },
+    frameIsCardFrame (frameId) {
+      return Boolean(frameId === this.card.frameId)
     }
   }
 }
