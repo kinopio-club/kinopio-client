@@ -15,3 +15,20 @@
   // blank (no image or img-margin,etc. displayed in 'frames' button)
 
 // ALSO remove latest mood from new stuff? (it's fun but kinda jank and not really part of the job to be done for this component and adds noise and hierarchical complexity)
+
+<template lang="pug">
+dialog.narrow(v-if="visible" :open="visible" ref="dialog")
+  section
+    p blah
+</template>
+
+<script>
+export default {
+  props: {
+    visible: Boolean
+  }
+}
+</script>
+
+<style lang="stylus">
+</style>

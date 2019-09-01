@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.card-details(v-if="visible" :open="visible" ref="dialog")
+dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDialogs")
   section.meta-section
     .row
       textarea.name(
@@ -15,17 +15,37 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog")
     button(@click="removeCard")
       img.icon(src="@/assets/remove.svg")
       span Remove
+    .button-wrap
+      button(@click.stop="toggleFrameDetailsIsVisible" :class="{active : frameDetailsIsVisible}")
+        span Frames
+      FrameDetails(:visible="frameDetailsIsVisible")
 </template>
 
 <script>
 import utils from '@/utils.js'
+import FrameDetails from '@/components/dialogs/FrameDetails.vue'
 
 let observer, isNewCard
 
 export default {
   name: 'CardDetails',
+  components: {
+    FrameDetails
+  },
   props: {
     card: Object // name, x, y, z
+  },
+  data () {
+    return {
+      frameDetailsIsVisible: false
+    }
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'closeAllDialogs') {
+        this.frameDetailsIsVisible = false
+      }
+    })
   },
   directives: {
     focus: {
@@ -137,6 +157,14 @@ export default {
     cardIsEmpty () {
       // TODO: expand isEmpty to inlcude other metadata content (images etc)
       return !this.card.name
+    },
+    toggleFrameDetailsIsVisible () {
+      const isVisible = this.frameDetailsIsVisible
+      this.closeDialogs()
+      this.frameDetailsIsVisible = !isVisible
+    },
+    closeDialogs () {
+      this.frameDetailsIsVisible = false
     }
   },
   watch: {
