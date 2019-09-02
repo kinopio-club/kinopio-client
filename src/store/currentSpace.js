@@ -73,7 +73,12 @@ export default {
       utils.typeCheck(type, 'string')
       state.cards.map(card => {
         if (card.id === cardId) {
-          card[type] = value
+          // update properties differently depending on whether it's existing or new
+          if (card[type]) {
+            card[type] = value
+          } else {
+            Vue.set(card, type, value)
+          }
         }
       })
       cache.updateSpace('cards', state.cards, state.id)
@@ -235,6 +240,7 @@ export default {
         x: position.x,
         y: position.y,
         name: ''
+        // frameId: 0
       }
       if (utils.objectHasKeys(contents)) {
         card = utils.updateObject(card, contents)

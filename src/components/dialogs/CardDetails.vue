@@ -18,7 +18,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
     .button-wrap
       button(@click.stop="toggleFrameDetailsIsVisible" :class="{active : frameDetailsIsVisible}")
         span Frames
-      FrameDetails(:visible="frameDetailsIsVisible" :card="card")
+      FrameDetails(:visible="frameDetailsIsVisible" :cardId="card.id")
 </template>
 
 <script>
@@ -130,7 +130,7 @@ export default {
       })
     },
     preventScrollIntoView () {
-      // disable scrolling into view on ios because it conflicts with panning and zooming on focused input
+    // disable scrolling into view on ios because it conflicts with panning and zooming on focused input
       return Boolean(this.cardIsEmpty() && utils.isIOS())
     },
     scrollIntoView () {

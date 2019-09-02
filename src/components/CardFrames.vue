@@ -23,11 +23,8 @@ export default {
   //   }
   // },
 
-  // !!!! pass prop as just cardId and get card from currentSpace based on id, should get property updating for free that way
-
   // mounted () {
-  // console.log('🐢 kinopio-client', this.buildHash)
-  // this.updateCurrentFrame()
+  // // this.updateCurrentFrame()
   // },
 
   computed: {
