@@ -11,7 +11,7 @@ article(:style="position" :data-card-id="id")
     :data-card-x="x"
     :data-card-y="y"
   )
-    CardFrames(:card="card")
+    Frames(:card="card")
     p.name {{name}}
     .connector(
       :data-card-id="id"
@@ -33,12 +33,12 @@ article(:style="position" :data-card-id="id")
 <script>
 import utils from '@/utils.js'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
-import CardFrames from '@/components/CardFrames.vue'
+import Frames from '@/components/Frames.vue'
 
 export default {
   components: {
     CardDetails,
-    CardFrames
+    Frames
   },
   props: {
     card: Object
