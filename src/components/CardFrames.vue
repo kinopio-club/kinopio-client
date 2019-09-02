@@ -14,74 +14,16 @@ aside
 <script>
 export default {
   props: {
-    // cardId: String
     card: Object
   },
-  // data () {
-  //   return {
-  //     currentFrame: {id: 0}
-  //   }
-  // },
-
-  // mounted () {
-  // // this.updateCurrentFrame()
-  // },
-
   computed: {
-    // card () {
-    //   return this.$store.state.currentSpace.cards.find(card => {
-    //     return card.id === this.cardId
-    //   })
-    // },
-    // frames () {
-    //   return frames
-    // }
     isGardenLeaves () {
-      // console.log('isGardenLeaves')
-      // return this.updateCurrentFrame(1)
       return Boolean(this.card.frameId === 1)
-      // return Boolean(this.currentFrame.id === 1)
     },
     isMagicalHelper () {
-      // return this.updateCurrentFrame(2)
-      // console.log(this.currentFrame.id)
-      // return Boolean(this.currentFrame.id === 2)
       return Boolean(this.card.frameId === 2)
     }
-  },
-  // methods: {
-  // updateCurrentFrame (frameId) {
-  //   const cardFrame = this.cardFrame()
-  //   // console.log('updateCurrentFrame',cardFrame)
-  //   if (cardFrame) {
-  //     return Boolean(cardFrame.id === frameId)
-  //   }
-  // },
-  //   updateCurrentFrame () {
-  //     // if (!this.card.frameId) { return }
-  //     // console.log('🍎', this.currentFrame)
-  //     if (!this.card.frameId) {
-  //       this.currentFrame = {id: 0}
-  //     } else {
-  //       this.currentFrame = frames.find(frame => {
-  //         return frame.id === this.card.frameId
-  //       })
-  //     }
-  //   },
-
-  // },
-  watch: {
-    card (newValue) {
-      console.log('🍓', newValue)
-    }
   }
-  //   visible (visible) {
-  //     if (visible) {
-  //       console.log('visible')
-  //       this.updateCurrentFrame()
-  //     }
-  //   }
-  // }
 }
 
 </script>
