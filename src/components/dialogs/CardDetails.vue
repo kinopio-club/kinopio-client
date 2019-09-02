@@ -18,7 +18,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
     .button-wrap
       button(@click.stop="toggleFrameDetailsIsVisible" :class="{active : frameDetailsIsVisible}")
         span Frames
-      FrameDetails(:visible="frameDetailsIsVisible" :cardId="card.id")
+      FrameDetails(:visible="frameDetailsIsVisible" :card="card")
 </template>
 
 <script>
