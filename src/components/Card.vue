@@ -11,7 +11,7 @@ article(:style="position" :data-card-id="id")
     :data-card-x="x"
     :data-card-y="y"
   )
-    CardFrames
+    CardFrames(:cardId="card.id")
     p.name {{name}}
     .connector(
       :data-card-id="id"
@@ -27,9 +27,7 @@ article(:style="position" :data-card-id="id")
         template(v-else)
           img.connector-icon(src="@/assets/connector-open.svg")
 
-  CardDetails(
-    :card="card"
-  )
+  CardDetails(:card="card")
 </template>
 
 <script>

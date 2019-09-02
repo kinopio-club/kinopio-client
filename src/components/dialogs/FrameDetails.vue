@@ -24,6 +24,7 @@ export default {
   },
   methods: {
     changeCardFrame (frame) {
+      console.log('changeCardFrame', frame)
       const frameId = {
         type: 'frameId',
         value: frame.id,
@@ -36,9 +37,11 @@ export default {
       }
       this.$store.commit('currentSpace/updateCardDetails', frameId)
       this.$store.commit('currentSpace/updateCardDetails', frameName)
+      console.log(this.$store.state.currentSpace)
     },
     frameIsCardFrame (frameId) {
-      return Boolean(frameId === this.card.frameId)
+      const cardFrameId = this.card.frameId || 0
+      return Boolean(frameId === cardFrameId)
     }
   }
 }

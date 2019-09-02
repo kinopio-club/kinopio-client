@@ -2,6 +2,10 @@
 
 const frames = [
   {
+    id: 0,
+    name: 'None'
+  },
+  {
     id: 1,
     name: 'Garden Leaves'
   },
