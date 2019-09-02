@@ -14,7 +14,8 @@ aside
 <script>
 export default {
   props: {
-    cardId: String
+    // cardId: String
+    card: Object
   },
   // data () {
   //   return {
@@ -30,11 +31,11 @@ export default {
   // },
 
   computed: {
-    card () {
-      return this.$store.state.currentSpace.cards.find(card => {
-        return card.id === this.cardId
-      })
-    },
+    // card () {
+    //   return this.$store.state.currentSpace.cards.find(card => {
+    //     return card.id === this.cardId
+    //   })
+    // },
     // frames () {
     //   return frames
     // }

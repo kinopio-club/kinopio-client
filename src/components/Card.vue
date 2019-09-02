@@ -11,7 +11,7 @@ article(:style="position" :data-card-id="id")
     :data-card-x="x"
     :data-card-y="y"
   )
-    CardFrames(:cardId="card.id")
+    CardFrames(:card="card")
     p.name {{name}}
     .connector(
       :data-card-id="id"
