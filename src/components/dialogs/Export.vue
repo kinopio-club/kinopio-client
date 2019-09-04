@@ -1,11 +1,11 @@
 <template lang="pug">
-dialog.narrow(v-if="visible" :open="visible" @click.stop)
+dialog.narrow(v-if="visible" :open="visible" @click.stop ref="dialog")
   section
     p Export {{exportTitle}}
     a#export-downlaod-anchor.hidden
   section
     p To paste into other apps
-    button
+    button(@click="exportToTxt")
       span.badge txt
       span Card Names
     p For backups
@@ -16,6 +16,7 @@ dialog.narrow(v-if="visible" :open="visible" @click.stop)
 </template>
 
 <script>
+import _ from 'lodash'
 import utils from '@/utils.js'
 
 export default {
@@ -44,6 +45,29 @@ export default {
       downloadAnchor.setAttribute('href', json)
       downloadAnchor.setAttribute('download', `${fileName}.json`)
       downloadAnchor.click()
+    },
+    exportToTxt () {
+      let data = this.exportData.cards.map(card => { return card.name })
+      data = _.join(data, '\n')
+      const text = 'data:text/plain;charset=utf-8,' + encodeURIComponent(data)
+      const downloadAnchor = document.getElementById('export-downlaod-anchor')
+      const fileName = this.fileName()
+      downloadAnchor.setAttribute('href', text)
+      downloadAnchor.setAttribute('download', `${fileName}.txt`)
+      downloadAnchor.click()
+    },
+    scrollIntoView () {
+      const element = this.$refs.dialog
+      element.scrollIntoView({ behavior: 'smooth' })
+    }
+  },
+  watch: {
+    visible (visible) {
+      this.$nextTick(() => {
+        if (visible) {
+          this.scrollIntoView()
+        }
+      })
     }
   }
 }
