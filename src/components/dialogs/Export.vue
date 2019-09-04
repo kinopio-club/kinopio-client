@@ -16,6 +16,7 @@ dialog.narrow(v-if="visible" :open="visible" @click.stop)
 </template>
 
 <script>
+import utils from '@/utils.js'
 
 export default {
   name: 'Export',
@@ -31,7 +32,7 @@ export default {
       const spaceId = this.$store.state.currentSpace.id
       let fileName = spaceName || `kinopio-space-${spaceId}`
       if (this.exportScope === 'cards') {
-        const cardsCount = this.exportName.replace(/\s+/g, '-').toLowerCase() // '3 Cards' to '3-cards'
+        const cardsCount = utils.normalizeString(this.exportName) // '3 Cards' to '3-cards'
         fileName = `${fileName}-${cardsCount}`
       }
       return fileName
