@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow(v-if="visible" :open="visible" :style="position" ref="dialog")
+dialog.narrow(v-if="visible" :open="visible" :style="position" ref="dialog" @click="closeDialogs")
   section(:style="{backgroundColor: userColor}" v-if="multipleCardsIsSelected")
     button(@click="connectCards") Connect
     button(@click="disconnectCards") Disconnect
@@ -7,10 +7,15 @@ dialog.narrow(v-if="visible" :open="visible" :style="position" ref="dialog")
     button(@click="removeCards")
       img.icon(src="@/assets/remove.svg")
       span Remove
+    .button-wrap
+      button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+        span Export
+      Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
 </template>
 
 <script>
 import utils from '@/utils.js'
+import Export from '@/components/dialogs/Export.vue'
 
 import _ from 'lodash'
 
@@ -18,6 +23,14 @@ let observer
 
 export default {
   name: 'MultipleCardActions',
+  components: {
+    Export
+  },
+  data () {
+    return {
+      exportIsVisible: false
+    }
+  },
   computed: {
     visible () { return this.$store.state.multipleCardActionsIsVisible },
     position () {
@@ -36,9 +49,29 @@ export default {
     multipleCardsIsSelected () {
       const numberOfCards = this.multipleCardsSelected.length
       return Boolean(numberOfCards > 1)
+    },
+    exportScope () {
+      return 'cards'
+    },
+    exportTitle () {
+      const numberOfCards = this.multipleCardsSelected.length
+      let title = 'Card'
+      if (numberOfCards > 1) { title = `${numberOfCards} Cards` }
+      return title
+    },
+    exportData () {
+      return {}
     }
   },
   methods: {
+    toggleExportIsVisible () {
+      const isVisible = this.exportIsVisible
+      this.closeDialogs()
+      this.exportIsVisible = !isVisible
+    },
+    closeDialogs () {
+      this.exportIsVisible = false
+    },
     connectionType () {
       const typePref = this.$store.state.currentUser.defaultConnectionTypeId
       const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
@@ -107,6 +140,7 @@ export default {
       this.$nextTick(() => {
         if (visible) {
           this.scrollIntoView()
+          this.closeDialogs()
         }
       })
     }

@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.narrow(v-if="visible" :open="visible" @click.stop)
   section
-    p Export {{exportName}}
+    p Export {{exportTitle}}
     a#export-downlaod-anchor.hidden
   section
     p To paste into other apps
@@ -22,7 +22,7 @@ export default {
   name: 'Export',
   props: {
     visible: Boolean,
-    exportName: String, // space-name, 3 Cards
+    exportTitle: String, // space-name, 3 Cards
     exportData: Object,
     exportScope: String // space, cards
   },
@@ -32,7 +32,7 @@ export default {
       const spaceId = this.$store.state.currentSpace.id
       let fileName = spaceName || `kinopio-space-${spaceId}`
       if (this.exportScope === 'cards') {
-        const cardsCount = utils.normalizeString(this.exportName) // '3 Cards' to '3-cards'
+        const cardsCount = utils.normalizeString(this.exportTitle) // '3 Cards' to '3-cards'
         fileName = `${fileName}-${cardsCount}`
       }
       return fileName

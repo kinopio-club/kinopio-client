@@ -13,7 +13,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
     .button-wrap
       button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
         span Export
-      Export(:visible="exportIsVisible" :exportName="spaceName" :exportData="currentSpace" :exportScope="exportScope")
+      Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="currentSpace" :exportScope="exportScope")
 
   section.results-actions
     button(@click="addSpace")
