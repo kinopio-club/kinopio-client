@@ -40,6 +40,7 @@ export default {
   --heavy-shadow rgba(0,0,0,0.25)
 
   --danger pink
+  --info #90ffff
 
   // non-theme vars
   --max-z 2147483647
@@ -116,6 +117,10 @@ label // used for checkbox buttons
     background var(--secondary-active-background)
   &:focus
     outline none
+  .badge
+    display inline
+    vertical-align middle
+    background var(--info)
 
 label
   padding-bottom 4px
@@ -123,6 +128,10 @@ label
 p
   margin 0
   margin-top 10px
+  .badge
+    display inline
+    vertical-align middle
+    background var(--info)
 
 dialog
   width 250px
