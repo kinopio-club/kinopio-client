@@ -21,43 +21,30 @@ export default {
   name: 'Export',
   props: {
     visible: Boolean,
-    exportName: String,
+    exportName: String, // space-name, 3 Cards
     exportData: Object,
-    exportType: String
+    exportScope: String // space, cards
   },
-  // data () {
-  //   return {
-  //     spaces: []
-  //   }
-  // },
-  // computed: {
-  // },
   methods: {
+    fileName () {
+      const spaceName = this.$store.state.currentSpace.name
+      const spaceId = this.$store.state.currentSpace.id
+      let fileName = spaceName || `kinopio-space-${spaceId}`
+      if (this.exportScope === 'cards') {
+        const cardsCount = this.exportName.replace(/\s+/g, '-').toLowerCase() // '3 Cards' to '3-cards'
+        fileName = `${fileName}-${cardsCount}`
+      }
+      return fileName
+    },
     exportToJSON () {
       const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.exportData))
       const downloadAnchor = document.getElementById('export-downlaod-anchor')
-
-      // temp condition . move naming for txt and json to seperate funcs
-      // if (this.exportType === 'space') {
-      const spaceName = this.$store.state.currentSpace.name
-      const spaceId = this.$store.state.currentSpace.id
-      const fileName = spaceName || `kinopio-space-${spaceId}`
-      // }
-      // what should the json file name be for cards , hello-kinopio-3-cards?
-
+      const fileName = this.fileName()
       downloadAnchor.setAttribute('href', json)
       downloadAnchor.setAttribute('download', `${fileName}.json`)
       downloadAnchor.click()
     }
-
   }
-  // watch: {
-  //   visible (visible) {
-  //     if (visible) {
-  //       this.updateSpaces()
-  //     }
-  //   }
-  // }
 }
 </script>
 

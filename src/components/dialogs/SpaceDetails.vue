@@ -13,7 +13,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
     .button-wrap
       button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
         span Export
-      Export(:visible="exportIsVisible" :exportName="spaceName" :exportData="currentSpace" :exportType="exportType")
+      Export(:visible="exportIsVisible" :exportName="spaceName" :exportData="currentSpace" :exportScope="exportScope")
 
   section.results-actions
     button(@click="addSpace")
@@ -67,7 +67,7 @@ export default {
     currentSpace () {
       return this.$store.state.currentSpace
     },
-    exportType () {
+    exportScope () {
       return 'space'
     }
   },
@@ -131,6 +131,7 @@ export default {
     visible (visible) {
       if (visible) {
         this.updateSpaces()
+        this.closeDialogs()
       }
     }
   }
