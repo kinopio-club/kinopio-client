@@ -11,16 +11,11 @@ import Header from '@/components/Header.vue'
 import MagicPaint from '@/components/MagicPaint.vue'
 import Footer from '@/components/Footer.vue'
 
-import smoothscroll from 'smoothscroll-polyfill'
-
 export default {
   components: {
     Header,
     MagicPaint,
     Footer
-  },
-  mounted () {
-    smoothscroll.polyfill() // remove when 'smooth' is supported by safari https://caniuse.com/#search=scroll
   }
 }
 </script>

@@ -14,12 +14,11 @@ dialog.narrow(v-if="visible" :open="visible" :style="position" ref="dialog" @cli
 </template>
 
 <script>
+import _ from 'lodash'
+import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
+
 import utils from '@/utils.js'
 import Export from '@/components/dialogs/Export.vue'
-
-import _ from 'lodash'
-
-let observer
 
 export default {
   name: 'MultipleCardActions',
@@ -118,24 +117,10 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      observer = new IntersectionObserver((entries) => {
-        let top, left
-        entries.forEach(entry => {
-          if (!entry.isIntersecting) {
-            const clientRect = entry.boundingClientRect
-            const intersectionRect = entry.intersectionRect
-            top = (clientRect.height - intersectionRect.height) + 8
-            left = (clientRect.width - intersectionRect.width) + 8
-            if (clientRect.x < 0) {
-              left = -left
-            }
-            window.scrollBy({ top, left, behavior: 'smooth' })
-          } else {
-            observer.disconnect()
-          }
-        })
-      }, { threshold: 1 })
-      observer.observe(element)
+      scrollIntoView(element, {
+        behavior: 'smooth',
+        scrollMode: 'if-needed'
+      })
     }
   },
   watch: {
