@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.space-details(v-if="visible" :open="visible")
+dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs")
   section
     .row
       //.badge(:style="typeGradient()")
@@ -10,9 +10,10 @@ dialog.narrow.space-details(v-if="visible" :open="visible")
       img.icon(src="@/assets/remove.svg")
       span Remove
 
-    button(@click="exportToJSON")
-      span Export
-    a#export-downlaod-anchor.hidden
+    .button-wrap
+      button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+        span Export
+      Export(:visible="exportIsVisible" :exportName="spaceName")
 
   section.results-actions
     button(@click="addSpace")
@@ -34,15 +35,20 @@ dialog.narrow.space-details(v-if="visible" :open="visible")
 
 <script>
 import cache from '@/cache.js'
+import Export from '@/components/dialogs/Export.vue'
 
 export default {
   name: 'SpaceDetails',
+  components: {
+    Export
+  },
   props: {
     visible: Boolean
   },
   data () {
     return {
-      spaces: []
+      spaces: [],
+      exportIsVisible: false
     }
   },
   computed: {
@@ -60,15 +66,13 @@ export default {
     }
   },
   methods: {
-    exportToJSON () {
-      const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.$store.state.currentSpace))
-      const downloadAnchor = document.getElementById('export-downlaod-anchor')
-      const spaceName = this.$store.state.currentSpace.name
-      const spaceId = this.$store.state.currentSpace.id
-      const fileName = spaceName || `kinopio-space-${spaceId}`
-      downloadAnchor.setAttribute('href', json)
-      downloadAnchor.setAttribute('download', `${fileName}.json`)
-      downloadAnchor.click()
+    toggleExportIsVisible () {
+      const isVisible = this.exportIsVisible
+      this.closeDialogs()
+      this.exportIsVisible = !isVisible
+    },
+    closeDialogs () {
+      this.exportIsVisible = false
     },
     // typeGradient (space) {
     //   space = space || this.$store.state.currentSpace
