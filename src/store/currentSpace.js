@@ -307,6 +307,11 @@ export default {
   },
 
   getters: {
+    // cards
+    cardById: (state) => (id) => {
+      return state.cards.find(card => card.id === id)
+    },
+
     // connection
     connectionAlreadyExists: (state) => ({ startCardId, endCardId }) => {
       const existing = state.connections.filter(connection => {

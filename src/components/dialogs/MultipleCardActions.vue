@@ -60,7 +60,10 @@ export default {
       return title
     },
     exportData () {
-      return {}
+      const cards = this.multipleCardsSelected.map(cardId => {
+        return this.$store.getters['currentSpace/cardById'](cardId)
+      })
+      return { 'cards': cards }
     }
   },
   methods: {
