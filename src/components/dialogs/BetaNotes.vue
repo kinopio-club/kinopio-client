@@ -12,10 +12,10 @@ dialog.beta-notes(v-if="visible" :open="visible" @click.stop)
       li There's no collaboration features yet
     p The Roadmap includes:
     ul
-      li Custom fields for cards
+      li More options for cards
       li
         del Create new spaces
-      li Logo and illustrations
+      li Updated Logo and illustrations
       li A server enabling login and collaboration
 </template>
 

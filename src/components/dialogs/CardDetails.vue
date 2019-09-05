@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.card-details(v-if="visible" :open="visible" ref="dialog")
+dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDialogs")
   section.meta-section
     .row
       textarea.name(
@@ -15,19 +15,39 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog")
     button(@click="removeCard")
       img.icon(src="@/assets/remove.svg")
       span Remove
+    .button-wrap
+      button(@click.stop="toggleFrameDetailsIsVisible" :class="{active : frameDetailsIsVisible}")
+        span Frames
+      FrameDetails(:visible="frameDetailsIsVisible" :card="card")
 </template>
 
 <script>
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil awaiting 'scrollmode' support for https://github.com/w3c/csswg-drafts/pull/1805
 
 import utils from '@/utils.js'
+import FrameDetails from '@/components/dialogs/FrameDetails.vue'
 
 let isNewCard
 
 export default {
   name: 'CardDetails',
+  components: {
+    FrameDetails
+  },
   props: {
     card: Object // name, x, y, z
+  },
+  data () {
+    return {
+      frameDetailsIsVisible: false
+    }
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'closeAllDialogs') {
+        this.frameDetailsIsVisible = false
+      }
+    })
   },
   directives: {
     focus: {
@@ -112,7 +132,7 @@ export default {
       })
     },
     preventScrollIntoView () {
-      // disable scrolling into view on ios because it conflicts with panning and zooming on focused input
+    // disable scrolling into view on ios because it conflicts with panning and zooming on focused input
       return Boolean(this.cardIsEmpty() && utils.isIOS())
     },
     scrollIntoView () {
@@ -125,6 +145,14 @@ export default {
     cardIsEmpty () {
       // TODO: expand isEmpty to inlcude other metadata content (images etc)
       return !this.card.name
+    },
+    toggleFrameDetailsIsVisible () {
+      const isVisible = this.frameDetailsIsVisible
+      this.closeDialogs()
+      this.frameDetailsIsVisible = !isVisible
+    },
+    closeDialogs () {
+      this.frameDetailsIsVisible = false
     }
   },
   watch: {

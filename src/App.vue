@@ -287,4 +287,7 @@ ul.results-list
 
 .marker
   background-image url('assets/marker.svg')
+
+.updated
+  vertical-align -2px
 </style>

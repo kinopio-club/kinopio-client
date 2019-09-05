@@ -11,6 +11,7 @@ article(:style="position" :data-card-id="id")
     :data-card-x="x"
     :data-card-y="y"
   )
+    Frames(:card="card")
     p.name {{name}}
     .connector(
       :data-card-id="id"
@@ -26,18 +27,18 @@ article(:style="position" :data-card-id="id")
         template(v-else)
           img.connector-icon(src="@/assets/connector-open.svg")
 
-  CardDetails(
-    :card="card"
-  )
+  CardDetails(:card="card")
 </template>
 
 <script>
 import utils from '@/utils.js'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
+import Frames from '@/components/Frames.vue'
 
 export default {
   components: {
-    CardDetails
+    CardDetails,
+    Frames
   },
   props: {
     card: Object

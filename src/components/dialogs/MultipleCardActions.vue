@@ -133,7 +133,6 @@ export default {
       })
     }
   }
-
 }
 </script>
 
