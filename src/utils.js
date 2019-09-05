@@ -110,6 +110,11 @@ export default {
     return navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform)
   },
 
+  normalizeString (string) {
+    // replaces non alphanumeric (spaces, emojis, $%&, etc.) characters with '-'s
+    return string.replace(/([^a-z0-9-]+)/ig, '-').toLowerCase() // same regex as glitch project names
+  },
+
   // Connection Path Utils 🐙
 
   connectorCoords (cardId) {

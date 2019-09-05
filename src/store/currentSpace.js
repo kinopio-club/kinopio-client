@@ -54,7 +54,7 @@ export default {
 
     // space name
     updateName: (state, newName) => {
-      newName = newName.replace(/([^a-z0-9-]+)/ig, '-') // same regex as glitch project names
+      newName = utils.normalizeString(newName)
       state.name = newName
       cache.updateSpace('name', state.name, state.id)
     },
@@ -307,6 +307,11 @@ export default {
   },
 
   getters: {
+    // cards
+    cardById: (state) => (id) => {
+      return state.cards.find(card => card.id === id)
+    },
+
     // connection
     connectionAlreadyExists: (state) => ({ startCardId, endCardId }) => {
       const existing = state.connections.filter(connection => {
