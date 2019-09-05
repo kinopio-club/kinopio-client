@@ -22,10 +22,12 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
 </template>
 
 <script>
+import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil awaiting 'scrollmode' support for https://github.com/w3c/csswg-drafts/pull/1805
+
 import utils from '@/utils.js'
 import FrameDetails from '@/components/dialogs/FrameDetails.vue'
 
-let observer, isNewCard
+let isNewCard
 
 export default {
   name: 'CardDetails',
@@ -135,24 +137,10 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      observer = new IntersectionObserver((entries, observer) => {
-        let top, left
-        entries.forEach(entry => {
-          if (!entry.isIntersecting) {
-            const clientRect = entry.boundingClientRect
-            const intersectionRect = entry.intersectionRect
-            top = (clientRect.height - intersectionRect.height) + 8
-            left = (clientRect.width - intersectionRect.width) + 8
-            if (clientRect.x < 0) {
-              left = -left
-            }
-            window.scrollBy({ top, left, behavior: 'smooth' })
-          } else {
-            observer.disconnect()
-          }
-        })
-      }, { threshold: 1 })
-      observer.observe(element)
+      scrollIntoView(element, {
+        behavior: 'smooth',
+        scrollMode: 'if-needed'
+      })
     },
     cardIsEmpty () {
       // TODO: expand isEmpty to inlcude other metadata content (images etc)

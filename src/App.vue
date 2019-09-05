@@ -11,16 +11,11 @@ import Header from '@/components/Header.vue'
 import MagicPaint from '@/components/MagicPaint.vue'
 import Footer from '@/components/Footer.vue'
 
-import smoothscroll from 'smoothscroll-polyfill'
-
 export default {
   components: {
     Header,
     MagicPaint,
     Footer
-  },
-  mounted () {
-    smoothscroll.polyfill() // remove when 'smooth' is supported by safari https://caniuse.com/#search=scroll
   }
 }
 </script>
@@ -40,6 +35,7 @@ export default {
   --heavy-shadow rgba(0,0,0,0.25)
 
   --danger pink
+  --info #90ffff
 
   // non-theme vars
   --max-z 2147483647
@@ -116,6 +112,10 @@ label // used for checkbox buttons
     background var(--secondary-active-background)
   &:focus
     outline none
+  .badge
+    display inline
+    vertical-align middle
+    background var(--info)
 
 label
   padding-bottom 4px
@@ -123,6 +123,10 @@ label
 p
   margin 0
   margin-top 10px
+  .badge
+    display inline
+    vertical-align middle
+    background var(--info)
 
 dialog
   width 250px
