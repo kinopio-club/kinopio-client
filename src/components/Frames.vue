@@ -1,5 +1,5 @@
 <template lang="pug">
-aside
+aside.frames
   .garden-leaves(v-if="isGardenLeaves")
     img.leaves(src="@/assets/frames/garden-leaves/leaves.png")
     img.ivy(src="@/assets/frames/garden-leaves/ivy.png")
@@ -28,35 +28,35 @@ export default {
 
 </script>
 
-<style lang="stylus" scoped>
-// aside
-//   pointer-events none
-img
-  position absolute
-.garden-leaves
-  .leaves
-    left -20px
-    width 25px
-  .ivy
-    right -23px
-    top -5px
-    width 32px
-  .flower
-    width 20px
-    top -10px
-    right 22px
+<style lang="stylus">
+.frames
+  img
+    pointer-events none
+    position absolute
+  .garden-leaves
+    .leaves
+      left -20px
+      width 25px
+    .ivy
+      right -23px
+      top -5px
+      width 32px
+    .flower
+      width 20px
+      top -10px
+      right 22px
 
-.magical-helper
-  .cat
-    width 32px
-    left -26px
-    top -12px
-  .hat
-    width 32px
-    left -25px
-    top -10px
-  .moon
-    width 23px
-    right 28px
-    top -15px
+  .magical-helper
+    .cat
+      width 32px
+      left -26px
+      top -12px
+    .hat
+      width 32px
+      left -25px
+      top -10px
+    .moon
+      width 23px
+      right 28px
+      top -15px
 </style>
