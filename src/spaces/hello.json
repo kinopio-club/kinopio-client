@@ -1,145 +1,161 @@
 {
-   "id":"1",
-   "name":"hello-kinopio",
-   "users":[],
-   "cards":[
-      {
-         "id":"1",
-         "x":28,
-         "y":91,
-         "z":0,
-         "name":"Kinopio is a Creative Thinking Tool",
-         "archived":false
-      },
-      {
-         "id":"osphPWDIpUdEKyPzqjj94",
-         "x":561,
-         "y":266,
-         "name":"Some uses",
-         "archived":false,
-         "z":1
-      },
-      {
-         "id":"QEl4mjzIJUiJNchzkWZIx",
-         "x":879,
-         "y":364,
-         "name":"Feelings",
-         "archived":false,
-         "z":2
-      },
-      {
-         "id":"llZmDtuRtz__8xFanQWlo",
-         "x":626,
-         "y":379,
-         "name":"Brainstorming",
-         "archived":false,
-         "z":3
-      },
-      {
-         "id":"Rcb_O9pJqkzW8uGaRZn9e",
-         "x":827.3854526958289,
-         "y":279,
-         "name":"Mindmaps",
-         "archived":false,
-         "z":4
-      },
-      {
-         "id":"uCMaAqMQOGevSiTPDvLcc",
-         "x":137,
-         "y":269.58952879581,
-         "name":"Connect cards together by dragging connectors 🌘",
-         "archived":false,
-         "z":5
-      },
-      {
-         "id":"bCVhqjrPWIknCvMwQnAs1",
-         "x":341,
-         "y":340.58952879581,
-         "name":"like this",
-         "archived":false,
-         "z":6
-      },
-      {
-         "id":"oEX9a0f_tN0e9NQNrewL9",
-         "x":361,
-         "y":399.58952879581,
-         "name":"Connect me too!",
-         "archived":false,
-         "z":11
-      },
-      {
-         "id":"_OVT_H9ra7BoldfsPUtNj",
-         "x":789,
-         "y":431,
-         "name":"Crime solving",
-         "archived":false,
-         "z":8
-      },
-      {
-         "id":"MtT5vBskYAlS5aV1BE5bt",
-         "x":96,
-         "y":190,
-         "name":"create new cards  by tapping empty spaces",
-         "archived":false,
-         "z":9
-      }
-   ],
-   "connections":[
-      {
-         "startCardId":"osphPWDIpUdEKyPzqjj94",
-         "endCardId":"QEl4mjzIJUiJNchzkWZIx",
-         "path":"m650,282 q90,40 315,98",
-         "id":"HUSwn9RZ36Tbl3XlvNRxB",
-         "connectionTypeId":"AR5sv65inSgi12necCYjr"
-      },
-      {
-         "startCardId":"osphPWDIpUdEKyPzqjj94",
-         "endCardId":"llZmDtuRtz__8xFanQWlo",
-         "path":"m650,282 q90,40 97,112",
-         "id":"pmXyhI-ZEh7EAPn5q4CoH",
-         "connectionTypeId":"AR5sv65inSgi12necCYjr"
-      },
-      {
-         "startCardId":"osphPWDIpUdEKyPzqjj94",
-         "endCardId":"Rcb_O9pJqkzW8uGaRZn9e",
-         "path":"m650,282 q90,40 263,13",
-         "id":"yFqBYMndWXgC7baCRyacV",
-         "connectionTypeId":"AR5sv65inSgi12necCYjr"
-      },
-      {
-         "startCardId":"uCMaAqMQOGevSiTPDvLcc",
-         "endCardId":"bCVhqjrPWIknCvMwQnAs1",
-         "path":"m354,286 q90,40 77,70",
-         "id":"NN6MI1-_-p9bSNk2tfsma",
-         "connectionTypeId":"Rh3PfVdIyovscLIiNTeoB"
-      },
-      {
-         "startCardId":"osphPWDIpUdEKyPzqjj94",
-         "endCardId":"_OVT_H9ra7BoldfsPUtNj",
-         "path":"m650,282 q90,40 256,164",
-         "id":"mBEV4VvqwcE7qv-zzvggE",
-         "connectionTypeId":"AR5sv65inSgi12necCYjr"
-      },
-      {
-         "startCardId":"MtT5vBskYAlS5aV1BE5bt",
-         "endCardId":"uCMaAqMQOGevSiTPDvLcc",
-         "path":"m313,201 q90,40 41,80",
-         "id":"_U-TU_EH47wErZRndUWIa",
-         "connectionTypeId":"Rh3PfVdIyovscLIiNTeoB"
-      }
-   ],
-   "connectionTypes":[
-      {
-         "id":"AR5sv65inSgi12necCYjr",
-         "name":"Some Use-Cases",
-         "color":"#c18fef"
-      },
-      {
-         "id":"Rh3PfVdIyovscLIiNTeoB",
-         "name":"Basics",
-         "color":"#f9bbe4"
-      }
-   ],
-   "customFields":[],
-   "cacheDate":1564969151963
+  "id": "1",
+  "name": "hello-kinopio",
+  "users": [],
+  "cards": [
+    {
+      "id": "1",
+      "x": 34,
+      "y": 88,
+      "z": 0,
+      "name": "Kinopio helps you think through your hardest problems",
+      "archived": false,
+      "frameId": 1,
+      "frameName": "Garden Leaves"
+    },
+    {
+      "id": "osphPWDIpUdEKyPzqjj94",
+      "x": 596,
+      "y": 269,
+      "name": "Some uses",
+      "archived": false,
+      "z": 1
+    },
+    {
+      "id": "QEl4mjzIJUiJNchzkWZIx",
+      "x": 862,
+      "y": 397,
+      "name": "Feelings",
+      "archived": false,
+      "z": 2
+    },
+    {
+      "id": "llZmDtuRtz__8xFanQWlo",
+      "x": 609,
+      "y": 412,
+      "name": "Brainstorming",
+      "archived": false,
+      "z": 3
+    },
+    {
+      "id": "Rcb_O9pJqkzW8uGaRZn9e",
+      "x": 810.3854526958289,
+      "y": 312,
+      "name": "Mindmaps",
+      "archived": false,
+      "z": 4
+    },
+    {
+      "id": "uCMaAqMQOGevSiTPDvLcc",
+      "x": 137,
+      "y": 269.58952879581,
+      "name": "Connect cards together by dragging connectors 🌘",
+      "archived": false,
+      "z": 5
+    },
+    {
+      "id": "bCVhqjrPWIknCvMwQnAs1",
+      "x": 341,
+      "y": 340.58952879581,
+      "name": "like this",
+      "archived": false,
+      "z": 6
+    },
+    {
+      "id": "oEX9a0f_tN0e9NQNrewL9",
+      "x": 361,
+      "y": 399.58952879581,
+      "name": "Connect me too!",
+      "archived": false,
+      "z": 7
+    },
+    {
+      "id": "_OVT_H9ra7BoldfsPUtNj",
+      "x": 772,
+      "y": 464,
+      "name": "Note Taking",
+      "archived": false,
+      "z": 8
+    },
+    {
+      "id": "MtT5vBskYAlS5aV1BE5bt",
+      "x": 96,
+      "y": 190,
+      "name": "Create new cards  by tapping empty areas",
+      "archived": false,
+      "z": 9
+    },
+    {
+      "id": "opakVpvwB4OOi2-rFkwR8",
+      "x": 358,
+      "y": 76,
+      "name": "↖ Get started by making a new space",
+      "z": 10
+    }
+  ],
+  "connections": [
+    {
+      "startCardId": "osphPWDIpUdEKyPzqjj94",
+      "endCardId": "QEl4mjzIJUiJNchzkWZIx",
+      "path": "m686,283 q90,40 263,128",
+      "id": "HUSwn9RZ36Tbl3XlvNRxB",
+      "connectionTypeId": "AR5sv65inSgi12necCYjr"
+    },
+    {
+      "startCardId": "osphPWDIpUdEKyPzqjj94",
+      "endCardId": "llZmDtuRtz__8xFanQWlo",
+      "path": "m686,283 q90,40 45,143",
+      "id": "pmXyhI-ZEh7EAPn5q4CoH",
+      "connectionTypeId": "AR5sv65inSgi12necCYjr"
+    },
+    {
+      "startCardId": "osphPWDIpUdEKyPzqjj94",
+      "endCardId": "Rcb_O9pJqkzW8uGaRZn9e",
+      "path": "m686,283 q90,40 211,43",
+      "id": "yFqBYMndWXgC7baCRyacV",
+      "connectionTypeId": "AR5sv65inSgi12necCYjr"
+    },
+    {
+      "startCardId": "uCMaAqMQOGevSiTPDvLcc",
+      "endCardId": "bCVhqjrPWIknCvMwQnAs1",
+      "path": "m354,286 q90,40 77,70",
+      "id": "NN6MI1-_-p9bSNk2tfsma",
+      "connectionTypeId": "Rh3PfVdIyovscLIiNTeoB"
+    },
+    {
+      "startCardId": "osphPWDIpUdEKyPzqjj94",
+      "endCardId": "_OVT_H9ra7BoldfsPUtNj",
+      "path": "m686,283 q90,40 190,195",
+      "id": "mBEV4VvqwcE7qv-zzvggE",
+      "connectionTypeId": "AR5sv65inSgi12necCYjr"
+    },
+    {
+      "startCardId": "MtT5vBskYAlS5aV1BE5bt",
+      "endCardId": "uCMaAqMQOGevSiTPDvLcc",
+      "path": "m313,206 q90,40 41,80",
+      "id": "_U-TU_EH47wErZRndUWIa",
+      "connectionTypeId": "Rh3PfVdIyovscLIiNTeoB"
+    },
+    {
+      "startCardId": "bCVhqjrPWIknCvMwQnAs1",
+      "endCardId": "opakVpvwB4OOi2-rFkwR8",
+      "path": "m432,357 q90,40 143,-265",
+      "id": "-jS5w4m1JbNjwjjhoFmcB",
+      "connectionTypeId": "Rh3PfVdIyovscLIiNTeoB"
+    }
+  ],
+  "connectionTypes": [
+    {
+      "id": "AR5sv65inSgi12necCYjr",
+      "name": "Some Use-Cases",
+      "color": "#c18fef"
+    },
+    {
+      "id": "Rh3PfVdIyovscLIiNTeoB",
+      "name": "Basics",
+      "color": "#f9bbe4"
+    }
+  ],
+  "customFields": [],
+  "cacheDate": 1564969151963
 }
