@@ -23,19 +23,19 @@
     },
     {
       "id": "QEl4mjzIJUiJNchzkWZIx",
-      "x": 862,
-      "y": 397,
+      "x": 855,
+      "y": 392,
       "name": "Feelings",
       "archived": false,
       "z": 2
     },
     {
       "id": "llZmDtuRtz__8xFanQWlo",
-      "x": 609,
-      "y": 412,
+      "x": 632,
+      "y": 393,
       "name": "Brainstorming",
       "archived": false,
-      "z": 3
+      "z": 12
     },
     {
       "id": "Rcb_O9pJqkzW8uGaRZn9e",
@@ -67,11 +67,13 @@
       "y": 399.58952879581,
       "name": "Connect me too!",
       "archived": false,
-      "z": 7
+      "z": 7,
+      "frameId": 0,
+      "frameName": "None"
     },
     {
       "id": "_OVT_H9ra7BoldfsPUtNj",
-      "x": 772,
+      "x": 767,
       "y": 464,
       "name": "Note Taking",
       "archived": false,
@@ -97,14 +99,14 @@
     {
       "startCardId": "osphPWDIpUdEKyPzqjj94",
       "endCardId": "QEl4mjzIJUiJNchzkWZIx",
-      "path": "m686,283 q90,40 263,128",
+      "path": "m687,285 q90,40 255,123",
       "id": "HUSwn9RZ36Tbl3XlvNRxB",
       "connectionTypeId": "AR5sv65inSgi12necCYjr"
     },
     {
       "startCardId": "osphPWDIpUdEKyPzqjj94",
       "endCardId": "llZmDtuRtz__8xFanQWlo",
-      "path": "m686,283 q90,40 45,143",
+      "path": "m687,285 q90,40 67,122",
       "id": "pmXyhI-ZEh7EAPn5q4CoH",
       "connectionTypeId": "AR5sv65inSgi12necCYjr"
     },
@@ -125,7 +127,7 @@
     {
       "startCardId": "osphPWDIpUdEKyPzqjj94",
       "endCardId": "_OVT_H9ra7BoldfsPUtNj",
-      "path": "m686,283 q90,40 190,195",
+      "path": "m687,285 q90,40 184,194",
       "id": "mBEV4VvqwcE7qv-zzvggE",
       "connectionTypeId": "AR5sv65inSgi12necCYjr"
     },
