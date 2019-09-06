@@ -7,11 +7,12 @@ dialog.new-stuff(v-if="visible" :open="visible" @click.stop)
   section(v-if="!newStuff.length")
     Loader(:visible="true")
 
-  template(v-if="newStuff.length" v-for="xyz in newStuffWithUserHasRead")
-    section(:key="xyz.id")
-      p.title {{xyz.title}}
-        img.icon(src="@/assets/new.gif" v-if="!xyz.userHasRead")
-      span(v-html="xyz.content_html")
+  section
+    article(v-if="newStuff.length" v-for="post in newStuffWithUserHasRead" :key="post.id")
+      p.title {{post.title}}
+        img.icon(src="@/assets/new.gif" v-if="!post.userHasRead")
+      span(v-html="media(post.description)")
+      span(v-html="post.content_html")
 
   section
     .button-wrap
@@ -76,13 +77,23 @@ export default {
       const lastReadNewStuffId = this.newStuff[0].id
       const userlastReadId = this.$store.state.currentUser.lastReadNewStuffId
       this.newStuffIsUpdated = Boolean(userlastReadId !== lastReadNewStuffId)
+    },
+    media (description) {
+      if (!description) { return }
+      const imageTypes = ['jpg', 'png', 'gif']
+      const isImage = imageTypes.includes(description.slice(-3))
+      if (isImage) {
+        return `<img src="${description}"/>`
+      } else {
+        return `<video autoplay loop muted playsinline><source src="${description}"></video>`
+      }
     }
-
   },
   watch: {
     visible (visible) {
       if (visible) {
         this.checkNewStuffIsUpdated()
+        console.log(this.newStuff)
       }
       if (!visible) {
         this.updateUserLastRead()
@@ -96,13 +107,24 @@ export default {
 .new-stuff
   overflow auto
   max-height calc(100vh - 150px)
+  article
+    position static
+    margin-bottom 10px
+    padding-bottom 10px
+    border-bottom 1px solid var(--primary)
+    &:last-child
+      margin-bottom 0
+      padding-bottom 0
+      border-bottom 0
   .loader
     margin-top 10px
   .icon
     margin-left 3px
   .title
     margin-bottom 10px
-  img
+  img,
+  video
+    max-width 100%
     border-radius 3px
   ul,
   ol
