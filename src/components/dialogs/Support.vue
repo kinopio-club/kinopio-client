@@ -1,21 +1,23 @@
 <template lang="pug">
-dialog.feedback(v-if="visible" :open="visible" @click.stop :class="{'from-footer': fromFooter}")
+dialog.support(v-if="visible" :open="visible" @click.stop :class="{'from-footer': fromFooter}")
   section
-    p Feedback
+    p Support
   section
     img(src="@/assets/froggo.png")
-    p During this beta I'd love to know if it's fun to create cards, and connect your thoughts, ideas, and plans together.
-    p Your feedback right now is invaluably helpful.
-    p Hit me up at hi@pirijan.com
+    p I made Kinopio to be fun to create cards, and connect your thoughts, ideas, and plans together.
+    p Hit me up with any issues or questions at hi@pirijan.com
     .button-wrap
-      a(href="mailto:hi@pirijan.com?subject=👻 Kinopio Feedback")
+      a(href="mailto:hi@pirijan.com?subject=👻 Kinopio Support")
         button Email Me
+    .button-wrap
+      a(href="https://twitter.com/KinopioClub")
+        button Twitter →
 
 </template>
 
 <script>
 export default {
-  name: 'Feedback',
+  name: 'Support',
   props: {
     visible: Boolean,
     fromFooter: Boolean
@@ -26,7 +28,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.feedback
+.support
   overflow auto
   max-height calc(100vh - 110px)
   img

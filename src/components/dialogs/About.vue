@@ -3,8 +3,8 @@ dialog.about(v-if="visible" :open="visible" @click="closeDialogs")
   section.kaomoji-section
     p ༼ つ ◕_◕ ༽つ
     .button-wrap
-      button(@click.stop="toggleFeedbackIsVisible" :class="{active: feedbackIsVisible}") Feedback
-      Feedback(:visible="feedbackIsVisible")
+      button(@click.stop="toggleSupportIsVisible" :class="{active: supportIsVisible}") Support
+      Support(:visible="supportIsVisible")
 
     .button-wrap
       button(@click.stop="toggleBetaNotesIsVisible" :class="{active: betaNotesIsVisible}") Beta Notes
@@ -18,14 +18,14 @@ dialog.about(v-if="visible" :open="visible" @click="closeDialogs")
 </template>
 
 <script>
-import Feedback from '@/components/dialogs/Feedback.vue'
+import Support from '@/components/dialogs/Support.vue'
 import BetaNotes from '@/components/dialogs/BetaNotes.vue'
 import NewStuff from '@/components/dialogs/NewStuff.vue'
 
 export default {
   name: 'About',
   components: {
-    Feedback,
+    Support,
     BetaNotes,
     NewStuff
   },
@@ -34,7 +34,7 @@ export default {
   },
   data () {
     return {
-      feedbackIsVisible: false,
+      supportIsVisible: false,
       betaNotesIsVisible: false,
       newStuffIsVisible: false,
       newStuffIsUpdated: false,
@@ -44,7 +44,7 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
-        this.feedbackIsVisible = false
+        this.supportIsVisible = false
         this.betaNotesIsVisible = false
         this.newStuffIsVisible = false
       }
@@ -58,10 +58,10 @@ export default {
     })
   },
   methods: {
-    toggleFeedbackIsVisible () {
-      const isVisible = this.feedbackIsVisible
+    toggleSupportIsVisible () {
+      const isVisible = this.supportIsVisible
       this.closeDialogs()
-      this.feedbackIsVisible = !isVisible
+      this.supportIsVisible = !isVisible
     },
     toggleBetaNotesIsVisible () {
       const isVisible = this.betaNotesIsVisible
@@ -84,7 +84,7 @@ export default {
       this.newStuffIsUpdated = Boolean(userlastReadId !== latestUpdateId)
     },
     closeDialogs () {
-      this.feedbackIsVisible = false
+      this.supportIsVisible = false
       this.betaNotesIsVisible = false
       this.newStuffIsVisible = false
     }

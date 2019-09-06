@@ -1,32 +1,11 @@
 <template lang="pug">
 footer(v-if="!cardDialogsVisible")
   span Beta {{buildHash}}
-  .button-wrap
-    button(@click="toggleFeedbackIsVisible" :class="{active: feedbackIsVisible}") Feedback
-    Feedback(:visible="feedbackIsVisible" :fromFooter="true")
-
 </template>
 
 <script>
-import Feedback from '@/components/dialogs/Feedback.vue'
-
 export default {
   name: 'Footer',
-  components: {
-    Feedback
-  },
-  data () {
-    return {
-      feedbackIsVisible: false
-    }
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'closeAllDialogs') {
-        this.feedbackIsVisible = false
-      }
-    })
-  },
   mounted () {
     console.log('🐢 kinopio-client', this.buildHash)
   },
@@ -44,13 +23,6 @@ export default {
     cardDialogsVisible () {
       return Boolean(this.$store.state.cardDetailsIsVisibleForCard || this.$store.state.multipleCardActionsIsVisible)
     }
-  },
-  methods: {
-    toggleFeedbackIsVisible () {
-      const isVisible = this.feedbackIsVisible
-      this.$store.commit('closeAllDialogs')
-      this.feedbackIsVisible = !isVisible
-    }
   }
 }
 </script>
@@ -62,13 +34,13 @@ footer
   right 8px
   bottom 8px
   pointer-events none
-  > .button-wrap
-    pointer-events all
-    margin-left 6px
-    display inline-block
-    dialog
-      left initial
-      right 8px
-      top initial
-      bottom calc(100% - 4px)
+  // > .button-wrap
+  //   pointer-events all
+  //   margin-left 6px
+  //   display inline-block
+  //   dialog
+  //     left initial
+  //     right 8px
+  //     top initial
+  //     bottom calc(100% - 4px)
 </style>
