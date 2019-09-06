@@ -46,7 +46,6 @@ export default {
     },
     // frames
     isGardenLeaves (frameId) {
-      console.log(Boolean(frameId === 1))
       return Boolean(frameId === 1)
     },
     isMagicalHelper (frameId) {
