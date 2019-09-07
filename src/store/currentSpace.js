@@ -239,6 +239,7 @@ export default {
         id: nanoid(),
         x: position.x,
         y: position.y,
+        z: 0,
         name: ''
         // frameId: 0
       }
