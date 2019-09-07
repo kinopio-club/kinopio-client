@@ -99,8 +99,9 @@ export default {
     initInteractions (event) {
       startCursor = utils.cursorPositionInViewport(event)
       if (this.$store.getters.shouldScrollAtEdges && !scrollTimer) {
-        scrollAreaHeight = Math.max(100, this.viewportHeight / 6)
-        scrollAreaWidth = Math.max(100, this.viewportWidth / 6)
+        scrollAreaHeight = Math.max(50, this.viewportHeight / 8)
+        scrollAreaWidth = Math.max(50, this.viewportWidth / 8)
+        console.log('🦋', scrollAreaHeight, scrollAreaWidth)
         maxHeight = Math.max(2500, this.$store.state.viewportHeight)
         maxWidth = Math.max(2500, this.$store.state.viewportWidth)
         scrollTimer = window.requestAnimationFrame(this.scrollFrame)
