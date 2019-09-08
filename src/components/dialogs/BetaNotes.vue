@@ -16,7 +16,12 @@ dialog.beta-notes(v-if="visible" :open="visible" @click.stop)
       li
         del Create new spaces
       li Updated Logo and illustrations
-      li A server enabling login and collaboration
+      li Login and collaboration
+  section
+    .button-wrap
+      a(href="http://pketh.org/hello-kinopio")
+        button About →
+
 </template>
 
 <script>
