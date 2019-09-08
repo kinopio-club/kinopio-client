@@ -1,15 +1,33 @@
 <template lang="pug">
 footer(v-if="!cardDialogsVisible")
   //span Beta {{buildHash}}
-  .botton-wrap
-    button Undo
+  .button-wrap
+    button(@click="toggleUndoIsVisible")
+      span Undo
+    Undo(:visible="undoIsVisible")
+
 </template>
 
 <script>
+import Undo from '@/components/dialogs/Undo.vue'
+
 export default {
   name: 'Footer',
+  components: {
+    Undo
+  },
+  data () {
+    return {
+      undoIsVisible: false
+    }
+  },
   mounted () {
     console.log('🐢 kinopio-client', this.buildHash)
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'closeAllDialogs') {
+        this.undoIsVisible = false
+      }
+    })
   },
   computed: {
     buildHash () {
@@ -24,6 +42,12 @@ export default {
     },
     cardDialogsVisible () {
       return Boolean(this.$store.state.cardDetailsIsVisibleForCard || this.$store.state.multipleCardActionsIsVisible)
+    }
+  },
+  methods: {
+    toggleUndoIsVisible () {
+      const isVisible = this.undoIsVisible
+      this.undoIsVisible = !isVisible
     }
   }
 }

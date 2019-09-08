@@ -21,7 +21,6 @@ dialog.beta-notes(v-if="visible" :open="visible" @click.stop)
     .button-wrap
       a(href="http://pketh.org/hello-kinopio")
         button About →
-
 </template>
 
 <script>
