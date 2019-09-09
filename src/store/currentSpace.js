@@ -99,6 +99,16 @@ export default {
       state.cards.push(card)
       cache.updateSpace('cards', state.cards, state.id)
     },
+    copyCardToRemovedCards: (state, cardId) => {
+      const card = state.cards.find(card => {
+        return card.id === cardId
+      })
+      if (!state.removedCards) {
+        Vue.set(state, 'removedCards', [])
+      }
+      state.removedCards.push(card)
+      cache.updateSpace('removedCards', state.removedCards, state.id)
+    },
     removeCard: (state, cardId) => {
       const cards = state.cards.filter(card => {
         return card.id !== cardId
@@ -252,6 +262,7 @@ export default {
       context.commit('incrementCardZ', card.id)
     },
     removeCard: (context, cardId) => {
+      context.commit('copyCardToRemovedCards', cardId)
       context.commit('removeCard', cardId)
       context.commit('removeConnectionsFromCard', cardId)
       context.commit('generateCardMap', null, { root: true })
