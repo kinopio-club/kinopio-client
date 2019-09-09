@@ -106,8 +106,11 @@ export default {
       if (!state.removedCards) {
         Vue.set(state, 'removedCards', [])
       }
-      state.removedCards.push(card)
-      cache.updateSpace('removedCards', state.removedCards, state.id)
+      // card is empty based on name (should match cardIsEmpty() in CardDetails)
+      if (card.name) {
+        state.removedCards.unshift(card)
+        cache.updateSpace('removedCards', state.removedCards, state.id)
+      }
     },
     removeCard: (state, cardId) => {
       const cards = state.cards.filter(card => {
