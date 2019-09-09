@@ -13,15 +13,15 @@ dialog.undo(v-if="visible" :open="visible" @click.stop)
         li(:key="card.id" @click="restoreCard(card)")
           .badge U
           .name {{card.name}}
-          button(@click.stop="showDeleteCardConfirmationVisible(card)" v-if="!isDeleteCardConfirmationVisible(card)")
+          button(@click.stop="showRemoveCardConfirmationVisible(card)" v-if="!isRemoveCardConfirmationVisible(card)")
             img(src="@/assets/remove.svg")
-          p(v-if="isDeleteCardConfirmationVisible(card)") Permanently delete?
-            .segmented-buttons(v-if="isDeleteCardConfirmationVisible(card)")
-              button(@click.stop="hideDeleteCardConfirmationVisible")
+          p(v-if="isRemoveCardConfirmationVisible(card)") Permanently remove?
+            .segmented-buttons(v-if="isRemoveCardConfirmationVisible(card)")
+              button(@click.stop="hideRemoveCardConfirmationVisible")
                 span Cancel
               button.danger
                 img.icon(src="@/assets/remove.svg")
-                span Delete
+                span Remove
 
 //button.danger
         //li(:class="{ active: connectionTypeIsActive(type.id) }" @click="changeConnectionType(type)" :key="type.id")
@@ -38,7 +38,7 @@ export default {
   },
   data () {
     return {
-      deleteCardConfirmationVisibleForCardId: ''
+      removeCardConfirmationVisibleForCardId: ''
       // removedCards: []
     }
   },
@@ -59,23 +59,23 @@ export default {
       console.log('restoreCard', card.id)
     },
 
-    showDeleteCardConfirmationVisible (card) {
-      this.deleteCardConfirmationVisibleForCardId = card.id
-      console.log('toggleDeleteCardConfirmationVisible', this.deleteCardConfirmationVisibleForCardId)
+    showRemoveCardConfirmationVisible (card) {
+      this.removeCardConfirmationVisibleForCardId = card.id
+      console.log('toggleRemoveCardConfirmationVisible', this.removeCardConfirmationVisibleForCardId)
     },
-    hideDeleteCardConfirmationVisible () {
-      this.deleteCardConfirmationVisibleForCardId = ''
+    hideRemoveCardConfirmationVisible () {
+      this.removeCardConfirmationVisibleForCardId = ''
     },
-    isDeleteCardConfirmationVisible (card) {
-      return Boolean(this.deleteCardConfirmationVisibleForCardId === card.id)
+    isRemoveCardConfirmationVisible (card) {
+      return Boolean(this.removeCardConfirmationVisibleForCardId === card.id)
     }
-    // toggleDeleteCardConfirmationIsVisible (card) {
-    //   if (!this.deleteCardConfirmationVisibleForCardId) {
-    //     this.deleteCardConfirmationVisibleForCardId = card.id
+    // toggleRemoveCardConfirmationIsVisible (card) {
+    //   if (!this.removeCardConfirmationVisibleForCardId) {
+    //     this.removeCardConfirmationVisibleForCardId = card.id
     //   } else {
-    //     this.deleteCardConfirmationVisibleForCardId = ''
+    //     this.removeCardConfirmationVisibleForCardId = ''
     //   }
-    //   console.log('toggleDeleteCardConfirmationVisible', this.deleteCardConfirmationVisibleForCardId)
+    //   console.log('toggleRemoveCardConfirmationVisible', this.removeCardConfirmationVisibleForCardId)
     // }
   }
   // watch: {
