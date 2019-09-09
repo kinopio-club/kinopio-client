@@ -2,7 +2,7 @@
 footer(v-if="!dialogsVisible")
   //span Beta {{buildHash}}
   .button-wrap
-    button(@click="toggleUndoIsVisible")
+    button(@click="toggleUndoIsVisible" :class="{ active: undoIsVisible}")
       span U
     Undo(:visible="undoIsVisible")
 
@@ -69,5 +69,5 @@ footer
       left initial
       right 8px
       top initial
-      bottom calc(100% - 4px)
+      bottom calc(100% - 8px)
 </style>
