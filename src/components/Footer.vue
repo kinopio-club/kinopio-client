@@ -1,9 +1,9 @@
 <template lang="pug">
-footer(v-if="!cardDialogsVisible")
+footer(v-if="!dialogsVisible")
   //span Beta {{buildHash}}
   .button-wrap
     button(@click="toggleUndoIsVisible")
-      span Undo
+      span U
     Undo(:visible="undoIsVisible")
 
 </template>
@@ -40,13 +40,14 @@ export default {
       let hash = path.src.match(regex)[0] // app.768db305407f4c847d44
       return hash.replace('app.', '') // 768db305407f4c847d44
     },
-    cardDialogsVisible () {
-      return Boolean(this.$store.state.cardDetailsIsVisibleForCard || this.$store.state.multipleCardActionsIsVisible)
+    dialogsVisible () {
+      return Boolean(this.$store.state.cardDetailsIsVisibleForCard || this.$store.state.multipleCardActionsIsVisible || this.$store.state.connectionDetailsIsVisibleForConnection)
     }
   },
   methods: {
     toggleUndoIsVisible () {
       const isVisible = this.undoIsVisible
+      this.$store.commit('closeAllDialogs')
       this.undoIsVisible = !isVisible
     }
   }
