@@ -11,7 +11,7 @@ dialog.undo(v-if="visible" :open="visible" @click.stop)
     ul.results-list
       template(v-for="(card in removedCards")
         li(:key="card.id" @click="restoreCard(card)")
-          .name {{card.name || "[empty]"}}
+          .name {{card.name}}
           button(@click.stop="showDeleteCardConfirmationVisible(card)" v-if="!isDeleteCardConfirmationVisible(card)")
             img(src="@/assets/remove.svg")
           p(v-if="isDeleteCardConfirmationVisible(card)") Permanently delete?
