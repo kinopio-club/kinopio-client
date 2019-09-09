@@ -14,16 +14,16 @@ dialog.narrow.user-details(
       input.name(placeholder="What's your name?" v-model="userName" name="Name")
 
   section(v-if="isCurrentUser")
-    button(v-if="!removeAllConfirmationVisible" @click="toggleremoveAllConfirmationVisible")
+    button(v-if="!deleteAllConfirmationVisible" @click="toggleDeleteAllConfirmationVisible")
       img.icon(src="@/assets/remove.svg")
-      span Remove All Your Data
-    span(v-if="removeAllConfirmationVisible")
-      p Permanently remove all your spaces and user data?
+      span Delete All Your Data
+    span(v-if="deleteAllConfirmationVisible")
+      p Permanently delete all your spaces and user data?
       .segmented-buttons
-        button(@click="toggleremoveAllConfirmationVisible") Cancel
-        button.danger(@click="removeAllData")
+        button(@click="toggleDeleteAllConfirmationVisible") Cancel
+        button.danger(@click="deleteAllData")
           img.icon(src="@/assets/remove.svg")
-          span Remove All
+          span Delete All
 
     // button Sign In or Up
 </template>
@@ -45,7 +45,7 @@ export default {
   data () {
     return {
       colorPickerIsVisible: false,
-      removeAllConfirmationVisible: false
+      deleteAllConfirmationVisible: false
     }
   },
   computed: {
@@ -85,10 +85,10 @@ export default {
         newColor
       })
     },
-    toggleremoveAllConfirmationVisible () {
-      this.removeAllConfirmationVisible = !this.removeAllConfirmationVisible
+    toggleDeleteAllConfirmationVisible () {
+      this.deleteAllConfirmationVisible = !this.deleteAllConfirmationVisible
     },
-    removeAllData () {
+    deleteAllData () {
       cache.removeAll()
       location.reload()
     }
@@ -97,7 +97,7 @@ export default {
     visible (value) {
       if (value) {
         this.colorPickerIsVisible = false
-        this.removeAllConfirmationVisible = false
+        this.deleteAllConfirmationVisible = false
       }
     }
   }
