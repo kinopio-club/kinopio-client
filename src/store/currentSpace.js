@@ -237,6 +237,7 @@ export default {
       context.commit('addUserToSpace', user)
     },
     changeSpace: (context, space) => {
+      space = utils.migrateSpaceProperties(space)
       context.commit('restoreSpace', space)
       context.commit('currentUser/updateLastSpace', context.state.id, { root: true })
     },
