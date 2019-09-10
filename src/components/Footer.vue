@@ -70,7 +70,7 @@ footer
       right 8px
       top initial
       bottom calc(100% - 8px)
-  .refresh
-    &.icon
-      margin 0
+  .undo
+    margin 0
+    height 11px
 </style>

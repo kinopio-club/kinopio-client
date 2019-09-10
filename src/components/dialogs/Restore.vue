@@ -10,24 +10,22 @@ dialog.restore(v-if="visible" :open="visible" @click.stop)
   section.results-section
     ul.results-list
       template(v-for="(card in removedCards")
-        li(:key="card.id" @click="restoreCard(card)")
+
+        li(:key="card.id" @click="restoreCard(card)" :class="{ 'conformation-visible': isRemoveCardConfirmationVisible(card)}")
           .badge
-            img.refresh.icon(src="@/assets/undo.svg")
+            img.undo.icon(src="@/assets/undo.svg")
           .name {{card.name}}
           button(@click.stop="showRemoveCardConfirmationVisible(card)" v-if="!isRemoveCardConfirmationVisible(card)")
-            img(src="@/assets/remove.svg")
-          p(v-if="isRemoveCardConfirmationVisible(card)") Permanently remove?
+            img.icon(src="@/assets/remove.svg")
+
+          .remove-confirmation(v-if="isRemoveCardConfirmationVisible(card)")
+            p Permanently remove?
             .segmented-buttons(v-if="isRemoveCardConfirmationVisible(card)")
               button(@click.stop="hideRemoveCardConfirmationVisible")
                 span Cancel
-              button.danger
+              button.danger(@click.stop="removeCard(card)")
                 img.icon(src="@/assets/remove.svg")
                 span Remove
-        //button.danger
-        //li(:class="{ active: connectionTypeIsActive(type.id) }" @click="changeConnectionType(type)" :key="type.id")
-        //  .badge(:style="{backgroundColor: type.color}" :class="{checked: connectionTypeIsDefault(type.id)}")
-        //  .name {{type.name}}
-
 </template>
 
 <script>
@@ -39,7 +37,6 @@ export default {
   data () {
     return {
       removeCardConfirmationVisibleForCardId: ''
-      // removedCards: []
     }
   },
   // created(){
@@ -58,7 +55,6 @@ export default {
     restoreCard (card) {
       console.log('restoreCard', card.id)
     },
-
     showRemoveCardConfirmationVisible (card) {
       this.removeCardConfirmationVisibleForCardId = card.id
       console.log('toggleRemoveCardConfirmationVisible', this.removeCardConfirmationVisibleForCardId)
@@ -68,15 +64,10 @@ export default {
     },
     isRemoveCardConfirmationVisible (card) {
       return Boolean(this.removeCardConfirmationVisibleForCardId === card.id)
+    },
+    removeCard (card) {
+      this.$store.commit('currentSpace/removeCardFromRemovedCards', card.id)
     }
-    // toggleRemoveCardConfirmationIsVisible (card) {
-    //   if (!this.removeCardConfirmationVisibleForCardId) {
-    //     this.removeCardConfirmationVisibleForCardId = card.id
-    //   } else {
-    //     this.removeCardConfirmationVisibleForCardId = ''
-    //   }
-    //   console.log('toggleRemoveCardConfirmationVisible', this.removeCardConfirmationVisibleForCardId)
-    // }
   }
   // watch: {
   //   visible (visible) {
@@ -98,4 +89,16 @@ export default {
   li
     button
       margin-left auto
+  .name
+    white-space nowrap
+    overflow hidden
+    text-overflow ellipsis
+    max-width calc(100% - 56px)
+  .remove-confirmation
+    margin-left 6px
+    min-width 130px
+    .segmented-buttons
+      margin-top 5px
+  .badge
+    min-width 19px
 </style>

@@ -173,7 +173,6 @@ article
     margin-right 5px
     align-self stretch
     min-width 25px
-    overflow hidden
     // multi-line wrapping
     // display -webkit-box
     // -webkit-box-orient vertical
