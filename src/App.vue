@@ -34,9 +34,9 @@ export default {
   --light-shadow rgba(0,0,0,0.20)
   --heavy-shadow rgba(0,0,0,0.25)
 
-  --danger-background #ffd2d2
+  --danger-background #ffd1d4
   --danger-hover-background #f5c0c1
-  --danger-active-background #fcbabb
+  --danger-active-background #f2b0b1
 
   --info-background #90ffff
 
