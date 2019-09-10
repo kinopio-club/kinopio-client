@@ -1,7 +1,7 @@
 <template lang="pug">
-dialog.undo(v-if="visible" :open="visible" @click.stop)
+dialog.restore(v-if="visible" :open="visible" @click.stop)
   section
-    p Undo Removed Cards
+    p Restore Cards
   //section
   //  .segmented-buttons
   //    button Cards
@@ -11,7 +11,8 @@ dialog.undo(v-if="visible" :open="visible" @click.stop)
     ul.results-list
       template(v-for="(card in removedCards")
         li(:key="card.id" @click="restoreCard(card)")
-          .badge U
+          .badge
+            img.refresh.icon(src="@/assets/undo.svg")
           .name {{card.name}}
           button(@click.stop="showRemoveCardConfirmationVisible(card)" v-if="!isRemoveCardConfirmationVisible(card)")
             img(src="@/assets/remove.svg")
@@ -22,8 +23,7 @@ dialog.undo(v-if="visible" :open="visible" @click.stop)
               button.danger
                 img.icon(src="@/assets/remove.svg")
                 span Remove
-
-//button.danger
+        //button.danger
         //li(:class="{ active: connectionTypeIsActive(type.id) }" @click="changeConnectionType(type)" :key="type.id")
         //  .badge(:style="{backgroundColor: type.color}" :class="{checked: connectionTypeIsDefault(type.id)}")
         //  .name {{type.name}}
@@ -32,7 +32,7 @@ dialog.undo(v-if="visible" :open="visible" @click.stop)
 
 <script>
 export default {
-  name: 'Undo',
+  name: 'Restore',
   props: {
     visible: Boolean
   },
@@ -89,7 +89,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.undo
+.restore
   overflow auto
   .results-section
     max-height initial

@@ -290,4 +290,9 @@ ul.results-list
 
 .updated
   vertical-align -2px
+
+.undo
+  margin 0
+  height 11px
+
 </style>

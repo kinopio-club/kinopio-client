@@ -2,30 +2,30 @@
 footer(v-if="!dialogsVisible")
   //span Beta {{buildHash}}
   .button-wrap
-    button(@click="toggleUndoIsVisible" :class="{ active: undoIsVisible}")
-      span U
-    Undo(:visible="undoIsVisible")
+    button(@click="toggleRestoreIsVisible" :class="{ active: restoreIsVisible}")
+      img.refresh.icon(src="@/assets/undo.svg")
+    Restore(:visible="restoreIsVisible")
 
 </template>
 
 <script>
-import Undo from '@/components/dialogs/Undo.vue'
+import Restore from '@/components/dialogs/Restore.vue'
 
 export default {
   name: 'Footer',
   components: {
-    Undo
+    Restore
   },
   data () {
     return {
-      undoIsVisible: false
+      restoreIsVisible: false
     }
   },
   mounted () {
     console.log('🐢 kinopio-client', this.buildHash)
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
-        this.undoIsVisible = false
+        this.restoreIsVisible = false
       }
     })
   },
@@ -45,10 +45,10 @@ export default {
     }
   },
   methods: {
-    toggleUndoIsVisible () {
-      const isVisible = this.undoIsVisible
+    toggleRestoreIsVisible () {
+      const isVisible = this.restoreIsVisible
       this.$store.commit('closeAllDialogs')
-      this.undoIsVisible = !isVisible
+      this.restoreIsVisible = !isVisible
     }
   }
 }
@@ -70,4 +70,7 @@ footer
       right 8px
       top initial
       bottom calc(100% - 8px)
+  .refresh
+    &.icon
+      margin 0
 </style>
