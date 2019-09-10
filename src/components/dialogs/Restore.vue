@@ -11,7 +11,7 @@ dialog.restore(v-if="visible" :open="visible" @click.stop)
     ul.results-list
       template(v-for="(card in removedCards")
 
-        li(:key="card.id" @click="restoreCard(card)" :class="{ 'conformation-visible': isRemoveCardConfirmationVisible(card)}")
+        li(:key="card.id" @click="restoreCard(card)")
           .badge
             img.undo.icon(src="@/assets/undo.svg")
           .name {{card.name}}
@@ -53,11 +53,11 @@ export default {
   },
   methods: {
     restoreCard (card) {
-      console.log('restoreCard', card.id)
+      this.$store.dispatch('currentSpace/restoreCard', card.id)
+      // then scroll to it
     },
     showRemoveCardConfirmationVisible (card) {
       this.removeCardConfirmationVisibleForCardId = card.id
-      console.log('toggleRemoveCardConfirmationVisible', this.removeCardConfirmationVisibleForCardId)
     },
     hideRemoveCardConfirmationVisible () {
       this.removeCardConfirmationVisibleForCardId = ''

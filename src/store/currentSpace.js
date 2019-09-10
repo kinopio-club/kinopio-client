@@ -112,6 +112,14 @@ export default {
         cache.updateSpace('removedCards', state.removedCards, state.id)
       }
     },
+    copyCardFromRemovedCards: (state, cardId) => {
+      const card = state.removedCards.find(card => {
+        return card.id === cardId
+      })
+      // createCard
+      state.cards.push(card)
+      cache.updateSpace('cards', state.cards, state.id)
+    },
     removeCard: (state, cardId) => {
       const cards = state.cards.filter(card => {
         return card.id !== cardId
@@ -277,6 +285,11 @@ export default {
       context.commit('removeCard', cardId)
       context.commit('removeConnectionsFromCard', cardId)
       context.commit('generateCardMap', null, { root: true })
+    },
+    restoreCard: (context, cardId) => {
+      console.log('restoreCard', cardId)
+      context.commit('copyCardFromRemovedCards', cardId)
+      context.commit('removeCardFromRemovedCards', cardId)
     },
     dragCards: (context, { endCursor, prevCursor, delta }) => {
       const multipleCardsSelected = context.rootState.multipleCardsSelected
