@@ -80,6 +80,16 @@ export default {
     this.storeLocal(`removed-${spaceKey}`, space)
     this.removeLocal(spaceKey)
   },
+  removeRemovedSpace (spaceId) {
+    const spaceKey = `removed-space-${spaceId}`
+    this.removeLocal(spaceKey)
+  },
+  restoreSpace (spaceId) {
+    const spaceKey = `removed-space-${spaceId}`
+    const space = this.getLocal(spaceKey)
+    this.storeLocal(`space-${spaceId}`, space)
+    this.removeLocal(spaceKey)
+  },
   getAllRemovedSpaces () {
     const keys = Object.keys(window.localStorage)
     const spaceKeys = keys.filter(key => key.startsWith('removed-space-'))

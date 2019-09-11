@@ -1,51 +1,33 @@
 <template lang="pug">
 dialog.restore(v-if="visible" :open="visible" @click.stop)
   section
-    p Restore Removed
+    //p Restore Removed
     .segmented-buttons
-      button(@click="showCardsVisible" :class="{active: cardsVisible}") Cards
-      button(@click="hideCardsVisible" :class="{active: !cardsVisible}") Spaces
+      button(@click="showCards" :class="{active: cardsVisible}")
+        img.icon(src="@/assets/remove.svg")
+        span Cards
+      button(@click="showSpaces" :class="{active: !cardsVisible}")
+        img.icon(src="@/assets/remove.svg")
+        span Spaces
 
   section.results-section
-
-    // cards // ??? refactor into RestoreListItem Component
-    ul.results-list(v-if="cardsVisible")
-      template(v-for="(card in removedCards")
-        li(:key="card.id" @click="restoreCard(card)")
+    ul.results-list
+      template(v-for="(item in items")
+        li(:key="item.id" @click="restore(item)")
           .badge
             img.undo.icon(src="@/assets/undo.svg")
-          .name {{card.name}}
-          button(@click.stop="showRemoveCardConfirmationVisible(card)" v-if="!isRemoveCardConfirmationVisible(card)")
+          .name {{item.name}}
+          button(@click.stop="showRemoveConfirmation(item)" v-if="!isRemoveConfirmationVisible(item)")
             img.icon(src="@/assets/remove.svg")
 
-          .remove-confirmation(v-if="isRemoveCardConfirmationVisible(card)")
+          .remove-confirmation(v-if="isRemoveConfirmationVisible(item)")
             p Permanently remove?
-            .segmented-buttons(v-if="isRemoveCardConfirmationVisible(card)")
-              button(@click.stop="hideRemoveCardConfirmationVisible")
+            .segmented-buttons
+              button(@click.stop="hideRemoveConfirmation")
                 span Cancel
-              button.danger(@click.stop="removeCard(card)")
+              button.danger(@click.stop="remove(item)")
                 img.icon(src="@/assets/remove.svg")
                 span Remove
-
-    // spaces
-    ul.results-list(v-if="!cardsVisible")
-      template(v-for="(space in removedSpaces")
-        li(:key="space.id" @click="restoreSpace(space)")
-          .badge
-            img.undo.icon(src="@/assets/undo.svg")
-          .name {{space.name}}
-          button(@click.stop="showRemoveSpaceConfirmationVisible(space)" v-if="!isRemoveSpaceConfirmationVisible(space)")
-            img.icon(src="@/assets/remove.svg")
-
-          .remove-confirmation(v-if="isRemoveSpaceConfirmationVisible(space)")
-            p Permanently remove?
-            .segmented-buttons(v-if="isRemoveSpaceConfirmationVisible(space)")
-              button(@click.stop="hideRemoveSpaceConfirmationVisible")
-                span Cancel
-              button.danger(@click.stop="removeSpace(space)")
-                img.icon(src="@/assets/remove.svg")
-                span Remove
-
 </template>
 
 <script>
@@ -60,9 +42,7 @@ export default {
   },
   data () {
     return {
-      removeCardConfirmationVisibleForCardId: '',
-      removeSpaceConfirmationVisibleForSpaceId: '',
-
+      removeConfirmationVisibleForId: '',
       cardsVisible: true,
       removedSpaces: []
     }
@@ -70,13 +50,20 @@ export default {
   computed: {
     removedCards () {
       return this.$store.state.currentSpace.removedCards
+    },
+    items () {
+      if (this.cardsVisible) {
+        return this.removedCards
+      } else {
+        return this.removedSpaces
+      }
     }
   },
   methods: {
-    showCardsVisible () {
+    showCards () {
       this.cardsVisible = true
     },
-    hideCardsVisible () {
+    showSpaces () {
       this.cardsVisible = false
       this.updateRemovedSpaces()
     },
@@ -88,43 +75,67 @@ export default {
         scrollMode: 'if-needed'
       })
     },
+    updateRemovedSpaces () {
+      this.removedSpaces = cache.getAllRemovedSpaces()
+    },
+
+    // restore item
+    restore (item) {
+      if (this.cardsVisible) {
+        this.restoreCard(item)
+      } else {
+        this.restoreSpace(item)
+      }
+    },
     restoreCard (card) {
       this.$store.dispatch('currentSpace/restoreCard', card.id)
       this.$nextTick(() => {
         this.scrollIntoView(card)
       })
     },
-    showRemoveCardConfirmationVisible (card) {
-      this.removeCardConfirmationVisibleForCardId = card.id
+    restoreSpace (space) {
+      console.log('restore space', space)
+      cache.restoreSpace(space.id)
+      this.updateRemovedSpaces()
+      this.$store.dispatch('currentSpace/changeSpace', space)
     },
-    hideRemoveCardConfirmationVisible () {
-      this.removeCardConfirmationVisibleForCardId = ''
+
+    // remove confirmation
+    isRemoveConfirmationVisible (item) {
+      return Boolean(this.removeConfirmationVisibleForId === item.id)
     },
-    isRemoveCardConfirmationVisible (card) {
-      return Boolean(this.removeCardConfirmationVisibleForCardId === card.id)
+    showRemoveConfirmation (item) {
+      this.removeConfirmationVisibleForId = item.id
+    },
+    hideRemoveConfirmation () {
+      this.removeConfirmationVisibleForId = ''
+    },
+
+    // remove item
+    remove (item) {
+      if (this.cardsVisible) {
+        this.removeCard(item)
+      } else {
+        this.removeSpace(item)
+      }
     },
     removeCard (card) {
       this.$store.commit('currentSpace/removeCardFromRemovedCards', card.id)
     },
-
-    updateRemovedSpaces () {
-      this.removedSpaces = cache.getAllRemovedSpaces()
-      console.log('🌹', this.removedSpaces)
-    },
-    restoreSpace (space) {
-    },
-    showRemoveSpaceConfirmationVisible (space) {},
-    isRemoveSpaceConfirmationVisible (space) {},
-    hideRemoveSpaceConfirmationVisible () {},
-    removeSpace (space) {}
+    removeSpace (space) {
+      cache.removeRemovedSpace(space.id)
+      this.updateRemovedSpaces()
+    }
+  },
+  watch: {
+    visible (visible) {
+      if (visible) {
+        if (!this.cardsVisible) {
+          this.updateRemovedSpaces()
+        }
+      }
+    }
   }
-  // watch: {
-  //   visible (visible) {
-  //     if (visible) {
-  //       // this.removedCards = this.$store.state.currentSpace.removedCards
-  //     }
-  //   }
-  // }
 }
 </script>
 
