@@ -46,7 +46,10 @@ export default {
     const spaces = spaceKeys.map(key => {
       return this.getLocal(key)
     })
-    return spaces
+    const sortedSpaces = spaces.sort((a, b) => {
+      return b.cacheDate - a.cacheDate
+    })
+    return sortedSpaces
   },
   updateSpace (key, value, spaceId) {
     let space = this.space(spaceId)
@@ -64,5 +67,28 @@ export default {
   saveSpace (space) {
     space.cacheDate = Date.now()
     this.storeLocal(`space-${space.id}`, space)
+  },
+
+  // removed spaces
+  removedSpace (spaceId) {
+    return this.getLocal(`space-${spaceId}`) || {}
+  },
+  removeSpace (spaceId) {
+    this.updateSpace('removeDate', Date.now(), spaceId)
+    const spaceKey = `space-${spaceId}`
+    const space = this.getLocal(spaceKey)
+    this.storeLocal(`removed-${spaceKey}`, space)
+    this.removeLocal(spaceKey)
+  },
+  getAllRemovedSpaces () {
+    const keys = Object.keys(window.localStorage)
+    const spaceKeys = keys.filter(key => key.startsWith('removed-space-'))
+    const spaces = spaceKeys.map(key => {
+      return this.getLocal(key)
+    })
+    const sortedSpaces = spaces.sort((a, b) => {
+      return b.removeDate - a.removeDate
+    })
+    return sortedSpaces
   }
 }
