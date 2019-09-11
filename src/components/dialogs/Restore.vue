@@ -1,16 +1,16 @@
 <template lang="pug">
 dialog.restore(v-if="visible" :open="visible" @click.stop)
   section
-    p Restore Cards
-  //section
-  //  .segmented-buttons
-  //    button Cards
-  //    button Spaces
+    p Restore
+
+    .segmented-buttons
+      button(@click="toggleCardsVisible" :class="{active: cardsVisible}") Cards
+      button(@click="toggleCardsVisible" :class="{active: !cardsVisible}") Spaces
 
   section.results-section
-    ul.results-list
+    // cards // refactor into RestoreListItem Component
+    ul.results-list(v-if="cardsVisible")
       template(v-for="(card in removedCards")
-
         li(:key="card.id" @click="restoreCard(card)")
           .badge
             img.undo.icon(src="@/assets/undo.svg")
@@ -26,6 +26,7 @@ dialog.restore(v-if="visible" :open="visible" @click.stop)
               button.danger(@click.stop="removeCard(card)")
                 img.icon(src="@/assets/remove.svg")
                 span Remove
+
 </template>
 
 <script>
@@ -38,7 +39,8 @@ export default {
   },
   data () {
     return {
-      removeCardConfirmationVisibleForCardId: ''
+      removeCardConfirmationVisibleForCardId: '',
+      cardsVisible: true
     }
   },
   // created(){
@@ -54,6 +56,9 @@ export default {
     }
   },
   methods: {
+    toggleCardsVisible () {
+      this.cardsVisible = !this.cardsVisible
+    },
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
       console.log(document, element, card, card.id)
@@ -99,6 +104,7 @@ export default {
     border-top 1px solid var(--primary)
     padding-top 4px
   li
+    justify-content space-between
     button
       margin-left auto
   .name
