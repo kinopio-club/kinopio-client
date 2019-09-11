@@ -10,7 +10,14 @@ dialog.restore(v-if="visible" :open="visible" @click.stop)
         img.icon(src="@/assets/remove.svg")
         span Spaces
 
-  section.results-section
+  section(v-if="!items.length")
+    p [img]
+    p(v-if="cardsVisible") Removed cards from
+      span !{' '}{{currentSpaceName}}!{' '}
+      span can be restored here
+    p(v-if="!cardsVisible") Removed spaces can be restored here
+
+  section.results-section(v-if="items.length")
     ul.results-list
       template(v-for="(item in items")
         li(:key="item.id" @click="restore(item)")
@@ -57,6 +64,9 @@ export default {
       } else {
         return this.removedSpaces
       }
+    },
+    currentSpaceName () {
+      return this.$store.state.currentSpace.name
     }
   },
   methods: {
