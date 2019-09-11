@@ -1,7 +1,6 @@
 <template lang="pug">
 dialog.restore(v-if="visible" :open="visible" @click.stop)
   section
-    //p Restore Removed
     .segmented-buttons
       button(@click="showCards" :class="{active: cardsVisible}")
         img.icon(src="@/assets/remove.svg")
