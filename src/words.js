@@ -31,13 +31,13 @@ export default {
       }
     }
     return name
-  },
-  remixName (remix) {
-    let remixName = `${remix.name}-remix`
-    if (this.nameIsUnique(remixName)) {
-      return remixName
-    } else {
-      return `${remixName}-${remix.id}`
-    }
   }
+  // remixName (remix) {
+  //   let remixName = `${remix.name}-remix`
+  //   if (this.nameIsUnique(remixName)) {
+  //     return remixName
+  //   } else {
+  //     return `${remixName}-${remix.id}`
+  //   }
+  // }
 }
