@@ -1,14 +1,14 @@
 <template lang="pug">
 dialog.restore(v-if="visible" :open="visible" @click.stop)
   section
-    p Restore
-
+    p Restore Removed
     .segmented-buttons
-      button(@click="toggleCardsVisible" :class="{active: cardsVisible}") Cards
-      button(@click="toggleCardsVisible" :class="{active: !cardsVisible}") Spaces
+      button(@click="showCardsVisible" :class="{active: cardsVisible}") Cards
+      button(@click="hideCardsVisible" :class="{active: !cardsVisible}") Spaces
 
   section.results-section
-    // cards // refactor into RestoreListItem Component
+
+    // cards // ??? refactor into RestoreListItem Component
     ul.results-list(v-if="cardsVisible")
       template(v-for="(card in removedCards")
         li(:key="card.id" @click="restoreCard(card)")
@@ -27,10 +27,31 @@ dialog.restore(v-if="visible" :open="visible" @click.stop)
                 img.icon(src="@/assets/remove.svg")
                 span Remove
 
+    // spaces
+    ul.results-list(v-if="!cardsVisible")
+      template(v-for="(space in removedSpaces")
+        li(:key="space.id" @click="restoreSpace(space)")
+          .badge
+            img.undo.icon(src="@/assets/undo.svg")
+          .name {{space.name}}
+          button(@click.stop="showRemoveSpaceConfirmationVisible(space)" v-if="!isRemoveSpaceConfirmationVisible(space)")
+            img.icon(src="@/assets/remove.svg")
+
+          .remove-confirmation(v-if="isRemoveSpaceConfirmationVisible(space)")
+            p Permanently remove?
+            .segmented-buttons(v-if="isRemoveSpaceConfirmationVisible(space)")
+              button(@click.stop="hideRemoveSpaceConfirmationVisible")
+                span Cancel
+              button.danger(@click.stop="removeSpace(space)")
+                img.icon(src="@/assets/remove.svg")
+                span Remove
+
 </template>
 
 <script>
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfill
+
+import cache from '@/cache.js'
 
 export default {
   name: 'Restore',
@@ -40,24 +61,24 @@ export default {
   data () {
     return {
       removeCardConfirmationVisibleForCardId: '',
-      cardsVisible: true
+      removeSpaceConfirmationVisibleForSpaceId: '',
+
+      cardsVisible: true,
+      removedSpaces: []
     }
   },
-  // created(){
-  //   this.$store.subscribe((mutation, state) => {
-  //     if (mutation.type === 'currentSpace/restoreSpace') {
-  //       console.log('slk',this.$store.state.currentSpace.removedCards)
-  //     }
-  //   })
-  // },
   computed: {
     removedCards () {
       return this.$store.state.currentSpace.removedCards
     }
   },
   methods: {
-    toggleCardsVisible () {
-      this.cardsVisible = !this.cardsVisible
+    showCardsVisible () {
+      this.cardsVisible = true
+    },
+    hideCardsVisible () {
+      this.cardsVisible = false
+      this.updateRemovedSpaces()
     },
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
@@ -84,7 +105,18 @@ export default {
     },
     removeCard (card) {
       this.$store.commit('currentSpace/removeCardFromRemovedCards', card.id)
-    }
+    },
+
+    updateRemovedSpaces () {
+      this.removedSpaces = cache.getAllRemovedSpaces()
+      console.log('🌹', this.removedSpaces)
+    },
+    restoreSpace (space) {
+    },
+    showRemoveSpaceConfirmationVisible (space) {},
+    isRemoveSpaceConfirmationVisible (space) {},
+    hideRemoveSpaceConfirmationVisible () {},
+    removeSpace (space) {}
   }
   // watch: {
   //   visible (visible) {
