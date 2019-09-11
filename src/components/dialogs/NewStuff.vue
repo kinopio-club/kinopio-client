@@ -138,5 +138,6 @@ export default {
   ul
     list-style-type square
   @media(max-width 340px)
+    left calc(-100% + 16px)
     max-height calc(100vh - 200px)
 </style>

@@ -1,0 +1,47 @@
+<template lang="pug">
+dialog.roadmap(v-if="visible" :open="visible" @click.stop)
+  section
+    p Roadmap
+  section
+    ul
+      li
+        del Frames for cards
+      li
+        del Create new spaces
+      li
+        del Cards and spaces are safe to remove because they can be restored
+      li Import exported json files
+      li Login and collaboration
+      li Data also stored on a server for safety
+      li Updated Logo and illustrations
+</template>
+
+<script>
+export default {
+  name: 'Roadmap',
+  props: {
+    visible: Boolean
+  },
+  methods: {
+  }
+}
+</script>
+
+<style lang="stylus">
+.roadmap
+  overflow auto
+  max-height calc(100vh - 150px)
+  img
+    border-radius 3px
+  ul
+    margin 0
+    margin-top 2px
+    padding-left 15px
+    list-style-type square
+    li
+      padding-top 10px
+      margin-left 5px
+      user-select text
+  @media(max-width 340px)
+    max-height calc(100vh - 250px)
+</style>
