@@ -29,6 +29,8 @@ dialog.restore(v-if="visible" :open="visible" @click.stop)
 </template>
 
 <script>
+import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfill
+
 export default {
   name: 'Restore',
   props: {
@@ -52,9 +54,19 @@ export default {
     }
   },
   methods: {
+    scrollIntoView (card) {
+      const element = document.querySelector(`article [data-card-id="${card.id}"]`)
+      console.log(document, element, card, card.id)
+      scrollIntoView(element, {
+        behavior: 'smooth',
+        scrollMode: 'if-needed'
+      })
+    },
     restoreCard (card) {
       this.$store.dispatch('currentSpace/restoreCard', card.id)
-      // then scroll to it
+      this.$nextTick(() => {
+        this.scrollIntoView(card)
+      })
     },
     showRemoveCardConfirmationVisible (card) {
       this.removeCardConfirmationVisibleForCardId = card.id
