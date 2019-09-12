@@ -18,6 +18,8 @@ dialog.roadmap(v-if="visible" :open="visible" @click.stop)
       li Login and collaboration
       li Data also stored on a server for safety
       li Updated Logo and illustrations
+      li Build Billing and Payments (4$/month)
+      li Dark mode 🌙
 </template>
 
 <script>
