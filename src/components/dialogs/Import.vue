@@ -1,12 +1,13 @@
 <template lang="pug">
-dialog.narrow(v-if="visible" :open="visible" @click.stop ref="dialog")
+dialog.import.narrow(v-if="visible" :open="visible" @click.stop ref="dialog")
   section
-    p Import
+    p Import Space
   section
-    p To paste into other apps
-    button
-      span.badge txt
-      span Card Names
+    p Upload an exported Kinopio space
+    button(@click="selectFile")
+      span.badge json
+      span Select space
+    input.hidden(type="file" ref="input" accept=".json" @change="readFile")
 </template>
 
 <script>
@@ -18,6 +19,27 @@ export default {
     visible: Boolean
   },
   methods: {
+    selectFile () {
+      const input = this.$refs.input
+      input.click()
+    },
+    readFile () {
+      const input = this.$refs.input
+      const file = input.files[0]
+      const reader = new FileReader()
+      reader.readAsText(file)
+      reader.onload = event => {
+        const space = JSON.parse(event.target.result)
+        this.importSpace(space)
+      }
+    },
+    importSpace (space) {
+      // if (this.isValidSpace(space)) {} else (show user err)
+      console.log(space)
+    },
+    isValidSpace (space) {
+      // check the space and return true if space has all core fields / types req'd
+    },
     scrollIntoView () {
       const element = this.$refs.dialog
       scrollIntoView(element, {
@@ -39,4 +61,7 @@ export default {
 </script>
 
 <style lang="stylus">
+.import
+  .hidden
+    display none
 </style>
