@@ -2,6 +2,10 @@
 dialog.roadmap(v-if="visible" :open="visible" @click.stop)
   section
     p Roadmap
+    p
+      img.updated.icon(src="@/assets/updated.gif")
+      // manually update me whenever this is updated
+      span Sept, 2019
   section
     ul
       li
