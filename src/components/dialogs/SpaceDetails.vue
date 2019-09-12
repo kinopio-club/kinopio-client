@@ -106,25 +106,25 @@ export default {
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', space)
     },
-    // remixCurrentSpace () {
-    //  this.$store.dispatch('currentSpace/remixCurrentSpace')
-    //  this.updateSpaces()
-    // },
-    removeCurrentSpace () {
-      const removeSpace = `space-${this.$store.state.currentSpace.id}`
-      cache.removeLocal(removeSpace)
-      this.updateSpaces()
+    changeToLastSpace () {
       if (this.spaces.length) {
         this.$store.dispatch('currentSpace/changeSpace', this.spaces[0])
       } else {
         this.addSpace()
       }
     },
+    // remixCurrentSpace () {
+    //  this.$store.dispatch('currentSpace/remixCurrentSpace')
+    //  this.updateSpaces()
+    // },
+    removeCurrentSpace () {
+      const spaceId = this.$store.state.currentSpace.id
+      cache.removeSpace(spaceId)
+      this.updateSpaces()
+      this.changeToLastSpace()
+    },
     updateSpaces () {
-      const spaces = cache.getAllSpaces()
-      this.spaces = spaces.sort((a, b) => {
-        return b.cacheDate - a.cacheDate
-      })
+      this.spaces = cache.getAllSpaces()
     }
   },
   watch: {

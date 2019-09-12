@@ -34,8 +34,11 @@ export default {
   --light-shadow rgba(0,0,0,0.20)
   --heavy-shadow rgba(0,0,0,0.25)
 
-  --danger pink
-  --info #90ffff
+  --danger-background #ffd1d4
+  --danger-hover-background #f5c0c1
+  --danger-active-background #f2b0b1
+
+  --info-background #90ffff
 
   // non-theme vars
   --max-z 2147483647
@@ -43,7 +46,7 @@ export default {
   --active-shadow 5px 5px 0 var(--light-shadow)
   --active-inset-shadow inset 0 2px 3px var(--light-shadow)
   --button-hover-shadow 2px 2px 0 var(--heavy-shadow)
-  --button-active-inset-shadow inset 0 1px 2px var(--light-shadow)
+  --button-active-inset-shadow inset 0 1px 2px var(--heavy-shadow)
 
 @font-face
   font-family 'OsakaMono-Kinopio'
@@ -115,7 +118,15 @@ label // used for checkbox buttons
   .badge
     display inline
     vertical-align middle
-    background var(--info)
+    background var(--info-background)
+  &.danger
+    &:hover,
+    &.hover,
+    &:focus
+      background var(--danger-hover-background)
+    &:active,
+    &.active
+      background var(--danger-active-background)
 
 label
   padding-bottom 4px
@@ -126,7 +137,7 @@ p
   .badge
     display inline
     vertical-align middle
-    background var(--info)
+    background var(--info-background)
 
 dialog
   width 250px
@@ -203,7 +214,9 @@ dialog
 
 .icon
   vertical-align -1px
-  margin-right 5px
+
+.icon + span
+  margin-left 5px
 
 .button-wrap
   display inline-block
@@ -262,7 +275,7 @@ ul.results-list
       box-shadow var(--active-inset-shadow)
 
 .danger
-  background-color var(--danger)
+  background-color var(--danger-background)
 
 .badge
   min-width 17px

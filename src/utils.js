@@ -165,6 +165,15 @@ export default {
     const startValue = 0
     const endValue = 1
     return -endValue * (elaspedTime /= duration) * (elaspedTime - 2) + startValue
+  },
+
+  // Spaces 🌙
+
+  migrateSpaceProperties (space) {
+    if (!space.removedCards) {
+      space.removedCards = []
+    }
+    return space
   }
 
 }

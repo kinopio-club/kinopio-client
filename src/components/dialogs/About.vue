@@ -5,29 +5,34 @@ dialog.about(v-if="visible" :open="visible" @click="closeDialogs")
     .button-wrap
       button(@click.stop="toggleSupportIsVisible" :class="{active: supportIsVisible}") Support
       Support(:visible="supportIsVisible")
-
     .button-wrap
       button(@click.stop="toggleBetaNotesIsVisible" :class="{active: betaNotesIsVisible}") Beta Notes
       BetaNotes(:visible="betaNotesIsVisible")
   section
     .button-wrap
+      button(@click.stop="toggleRoadmapIsVisible" :class="{active: roadmapIsVisible}") Roadmap
+      Roadmap(:visible="roadmapIsVisible")
+    .button-wrap
       button(@click.stop="toggleNewStuffIsVisible" :class="{active: newStuffIsVisible}")
         span New Stuff
         img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
       NewStuff(:visible="newStuffIsVisible" :newStuff="newStuff")
+
 </template>
 
 <script>
 import Support from '@/components/dialogs/Support.vue'
 import BetaNotes from '@/components/dialogs/BetaNotes.vue'
 import NewStuff from '@/components/dialogs/NewStuff.vue'
+import Roadmap from '@/components/dialogs/Roadmap.vue'
 
 export default {
   name: 'About',
   components: {
     Support,
     BetaNotes,
-    NewStuff
+    NewStuff,
+    Roadmap
   },
   props: {
     visible: Boolean
@@ -38,6 +43,7 @@ export default {
       betaNotesIsVisible: false,
       newStuffIsVisible: false,
       newStuffIsUpdated: false,
+      roadmapIsVisible: false,
       newStuff: []
     }
   },
@@ -68,6 +74,11 @@ export default {
       this.closeDialogs()
       this.betaNotesIsVisible = !isVisible
     },
+    toggleRoadmapIsVisible () {
+      const isVisible = this.roadmapIsVisible
+      this.closeDialogs()
+      this.roadmapIsVisible = !isVisible
+    },
     toggleNewStuffIsVisible () {
       const isVisible = this.newStuffIsVisible
       this.closeDialogs()
@@ -87,6 +98,7 @@ export default {
       this.supportIsVisible = false
       this.betaNotesIsVisible = false
       this.newStuffIsVisible = false
+      this.roadmapIsVisible = false
     }
   },
   watch: {

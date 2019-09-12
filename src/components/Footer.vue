@@ -1,13 +1,33 @@
 <template lang="pug">
-footer(v-if="!cardDialogsVisible")
-  span Beta {{buildHash}}
+footer(v-if="!dialogsVisible")
+  //span Beta {{buildHash}}
+  .button-wrap
+    button(@click="toggleRestoreIsVisible" :class="{ active: restoreIsVisible}")
+      img.refresh.icon(src="@/assets/undo.svg")
+    Restore(:visible="restoreIsVisible")
+
 </template>
 
 <script>
+import Restore from '@/components/dialogs/Restore.vue'
+
 export default {
   name: 'Footer',
+  components: {
+    Restore
+  },
+  data () {
+    return {
+      restoreIsVisible: false
+    }
+  },
   mounted () {
     console.log('🐢 kinopio-client', this.buildHash)
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'closeAllDialogs') {
+        this.restoreIsVisible = false
+      }
+    })
   },
   computed: {
     buildHash () {
@@ -20,8 +40,15 @@ export default {
       let hash = path.src.match(regex)[0] // app.768db305407f4c847d44
       return hash.replace('app.', '') // 768db305407f4c847d44
     },
-    cardDialogsVisible () {
-      return Boolean(this.$store.state.cardDetailsIsVisibleForCard || this.$store.state.multipleCardActionsIsVisible)
+    dialogsVisible () {
+      return Boolean(this.$store.state.cardDetailsIsVisibleForCard || this.$store.state.multipleCardActionsIsVisible || this.$store.state.connectionDetailsIsVisibleForConnection)
+    }
+  },
+  methods: {
+    toggleRestoreIsVisible () {
+      const isVisible = this.restoreIsVisible
+      this.$store.commit('closeAllDialogs')
+      this.restoreIsVisible = !isVisible
     }
   }
 }
@@ -34,13 +61,16 @@ footer
   right 8px
   bottom 8px
   pointer-events none
-  // > .button-wrap
-  //   pointer-events all
-  //   margin-left 6px
-  //   display inline-block
-  //   dialog
-  //     left initial
-  //     right 8px
-  //     top initial
-  //     bottom calc(100% - 4px)
+  > .button-wrap
+    pointer-events all
+    margin-left 6px
+    display inline-block
+    dialog
+      left initial
+      right 8px
+      top initial
+      bottom calc(100% - 8px)
+  .undo
+    margin 0
+    height 11px
 </style>

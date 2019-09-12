@@ -124,6 +124,7 @@ export default {
     },
     removeCard () {
       this.$store.dispatch('currentSpace/removeCard', this.card.id)
+      this.$store.commit('cardDetailsIsVisibleForCard', '')
     },
     textareaSizes () {
       let textareas = document.querySelectorAll('dialog textarea')
