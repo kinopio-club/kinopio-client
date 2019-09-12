@@ -3,7 +3,7 @@ dialog.import.narrow(v-if="visible" :open="visible" @click.stop ref="dialog")
   section
     p Import Space
   section
-    p Upload an exported Kinopio space
+    p Upload an exported Kinopio space file
     button(@click="selectFile")
       span.badge json
       span Select space
