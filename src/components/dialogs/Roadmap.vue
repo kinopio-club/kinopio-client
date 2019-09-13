@@ -5,7 +5,7 @@ dialog.roadmap(v-if="visible" :open="visible" @click.stop)
     p
       img.updated.icon(src="@/assets/updated.gif")
       // manually update me whenever this is updated
-      span Sept, 2019
+      span Sept 13, 2019
   section
     ul
       li
@@ -14,7 +14,8 @@ dialog.roadmap(v-if="visible" :open="visible" @click.stop)
         del Create new spaces
       li
         del Cards and spaces are safe to remove because they can be restored
-      li Import exported json files
+      li
+        del Import spaces
       li Login and collaboration
       li Data also stored on a server for safety
       li Updated Logo and illustrations

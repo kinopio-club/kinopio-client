@@ -20,6 +20,11 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
       img.icon(src="@/assets/add.svg")
       span Add
 
+    .button-wrap
+      button(@click.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
+        span Import
+      Import(:visible="importIsVisible" @shouldUpdateSpaces="updateSpaces" @closeDialog="closeDialogs")
+
     //button(@click="remixCurrentSpace")
     //  img.icon(src="@/assets/copy.svg")
     //  span Copy
@@ -36,11 +41,13 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
 <script>
 import cache from '@/cache.js'
 import Export from '@/components/dialogs/Export.vue'
+import Import from '@/components/dialogs/Import.vue'
 
 export default {
   name: 'SpaceDetails',
   components: {
-    Export
+    Export,
+    Import
   },
   props: {
     visible: Boolean
@@ -48,7 +55,8 @@ export default {
   data () {
     return {
       spaces: [],
-      exportIsVisible: false
+      exportIsVisible: false,
+      importIsVisible: false
     }
   },
   computed: {
@@ -77,8 +85,15 @@ export default {
       this.closeDialogs()
       this.exportIsVisible = !isVisible
     },
+    toggleImportIsVisible () {
+      const isVisible = this.importIsVisible
+      this.closeDialogs()
+      this.importIsVisible = !isVisible
+    },
+
     closeDialogs () {
       this.exportIsVisible = false
+      this.importIsVisible = false
     },
     // typeGradient (space) {
     //   space = space || this.$store.state.currentSpace
