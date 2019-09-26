@@ -39,6 +39,7 @@ export default {
   --danger-active-background #f2b0b1
 
   --info-background #90ffff
+  --success-background #98f49f
 
   // non-theme vars
   --max-z 2147483647

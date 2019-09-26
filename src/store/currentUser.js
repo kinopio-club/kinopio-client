@@ -8,7 +8,7 @@ export default {
   namespaced: true,
   state: {
     id: nanoid(),
-    lastSpace: '',
+    lastSpaceId: '',
     color: randomColor({ luminosity: 'light' }),
     name: undefined,
     defaultConnectionTypeId: '',
@@ -34,9 +34,9 @@ export default {
       state.name = newName
       cache.updateUser('name', newName)
     },
-    updateLastSpace: (state, spaceId) => {
-      state.lastSpace = spaceId
-      cache.updateUser('lastSpace', spaceId)
+    updateLastSpaceId: (state, spaceId) => {
+      state.lastSpaceId = spaceId
+      cache.updateUser('lastSpaceId', spaceId)
     },
     updateLastReadNewStuffId: (state, newStuffId) => {
       state.lastReadNewStuffId = newStuffId
