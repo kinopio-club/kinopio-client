@@ -99,6 +99,8 @@ export default {
 
 <style lang="stylus">
 .export
+  overflow scroll
+  max-height calc(100vh - 100px)
   textarea
     background-color var(--secondary-background)
     border 0
