@@ -304,4 +304,7 @@ ul.results-list
 
 .updated
   vertical-align -2px
+
+.move
+  vertical-align 1px
 </style>

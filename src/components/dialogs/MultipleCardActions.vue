@@ -11,6 +11,11 @@ dialog.narrow(v-if="visible" :open="visible" :style="position" ref="dialog" @cli
       button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
         span Export
       Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
+  section(:style="{backgroundColor: userColor}")
+    button()
+      img.icon.move(src="@/assets/move.svg")
+      span Move to Space
+
 </template>
 
 <script>
