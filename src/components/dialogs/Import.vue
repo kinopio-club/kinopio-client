@@ -3,10 +3,10 @@ dialog.import.narrow(v-if="visible" :open="visible" @click.stop ref="dialog")
   section
     p Import Space
   section
-    p Upload an exported space backup file
+    p Upload a space json file
     button(@click="selectFile")
       span.badge json
-      span Select Space File
+      span Select File
     Loader(:visible="loading")
     input.hidden(type="file" ref="input" accept=".json" @change="readFile")
 
@@ -126,6 +126,8 @@ export default {
 
 <style lang="stylus">
 .import
+  max-height calc(100vh - 140px)
+  overflow scroll
   .hidden
     display none
   .loader
