@@ -217,12 +217,19 @@ export default {
     init: (context) => {
       const user = context.rootState.currentUser
       let spaceToRestore = {}
-      // betaSpace condition added aug 2019, can safely remove this in aug 2020
+      // betaSpace condition added aug 2019
       const betaSpace = cache.space('1')
-      if (user.lastSpace) {
+      if (user.lastSpaceId) {
+        console.log('🚃 Restore last space from cache', user.lastSpaceId)
+        spaceToRestore = cache.space(user.lastSpaceId)
+        context.commit('restoreSpace', spaceToRestore)
+      // migration condition added sept 2019
+      } else if (user.lastSpace) {
         console.log('🚃 Restore last space from cache', user.lastSpace)
         spaceToRestore = cache.space(user.lastSpace)
         context.commit('restoreSpace', spaceToRestore)
+        cache.updateUser('lastSpaceId', spaceToRestore.id)
+        cache.updateUser('lastSpace', null)
       } else if (utils.objectHasKeys(betaSpace)) {
         console.log('🚃 Migrate data from beta format cache', betaSpace)
         context.commit('updateBetaSpace')
@@ -234,7 +241,7 @@ export default {
         const isHelloSpace = true
         context.dispatch('createNewSpace', isHelloSpace)
       }
-      context.commit('currentUser/updateLastSpace', context.state.id, { root: true })
+      context.commit('currentUser/updateLastSpaceId', context.state.id, { root: true })
     },
 
     // spaces
@@ -247,7 +254,7 @@ export default {
         context.commit('createNewSpace', newId)
         Vue.nextTick(() => {
           context.commit('updateCardConnections', context.state.cards[1].id)
-          context.commit('currentUser/updateLastSpace', context.state.id, { root: true })
+          context.commit('currentUser/updateLastSpaceId', context.state.id, { root: true })
         })
       }
       const space = utils.clone(context.state)
@@ -257,7 +264,7 @@ export default {
     changeSpace: (context, space) => {
       space = utils.migrateSpaceProperties(space)
       context.commit('restoreSpace', space)
-      context.commit('currentUser/updateLastSpace', context.state.id, { root: true })
+      context.commit('currentUser/updateLastSpaceId', context.state.id, { root: true })
     },
 
     // cards
