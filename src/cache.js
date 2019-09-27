@@ -1,5 +1,4 @@
 // local storage cache interface for currentUser and spaces
-import _ from 'lodash'
 
 export default {
   storeLocal (key, value) {
@@ -64,15 +63,9 @@ export default {
   },
   addToSpace ({ cards, connections, connectionTypes }, spaceId) {
     let space = this.space(spaceId)
-
     cards.forEach(card => space.cards.push(card))
     connections.forEach(connection => space.connections.push(connection))
     connectionTypes.forEach(connectionType => space.connectionTypes.push(connectionType))
-
-    space.cards = _.uniqBy(space.cards, 'id')
-    space.connections = _.uniqBy(space.connections, 'id')
-    space.connectionTypes = _.uniqBy(space.connectionTypes, 'id')
-    console.log(space)
     this.storeLocal(`space-${spaceId}`, space)
   },
   // Added aug 2019, can safely remove this in aug 2020

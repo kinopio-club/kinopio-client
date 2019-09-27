@@ -330,10 +330,10 @@ export default {
         context.commit('incrementCardZ', currentDraggingCardId)
       }
     },
-    copyCardsToAnotherSpace: (context, space) => {
+    moveCardsToAnotherSpace: (context, space) => {
       const multipleCardsSelected = context.rootState.multipleCardsSelected
-      const cards = context.state.cards.filter(card => multipleCardsSelected.includes(card.id))
-      const connections = context.state.connections.filter(connection => {
+      let cards = context.state.cards.filter(card => multipleCardsSelected.includes(card.id))
+      let connections = context.state.connections.filter(connection => {
         return (multipleCardsSelected.includes(connection.startCardId) && multipleCardsSelected.includes(connection.endCardId))
       })
       let connectionTypes = connections.map(connection => {
@@ -342,11 +342,10 @@ export default {
       connectionTypes = context.state.connectionTypes.filter(type => {
         return connectionTypes.includes(type.id)
       })
-      cache.addToSpace({
-        cards: JSON.parse(JSON.stringify(cards)),
-        connections: JSON.parse(JSON.stringify(connections)),
-        connectionTypes: JSON.parse(JSON.stringify(connectionTypes))
-      }, space.id)
+      cards = utils.clone(cards)
+      connections = utils.clone(connections)
+      connectionTypes = utils.clone(connectionTypes)
+      cache.addToSpace({ cards, connections, connectionTypes }, space.id)
       context.commit('removeUnusedConnectionTypes')
     },
 
