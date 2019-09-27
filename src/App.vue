@@ -131,6 +131,7 @@ label // used for checkbox buttons
 
 label
   padding-bottom 4px
+  display inline-block
 
 p
   margin 0

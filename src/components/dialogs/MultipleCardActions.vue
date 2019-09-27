@@ -12,9 +12,11 @@ dialog.narrow(v-if="visible" :open="visible" :style="position" ref="dialog" @cli
         span Export
       Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
   section(:style="{backgroundColor: userColor}")
-    button()
-      img.icon.move(src="@/assets/move.svg")
-      span Move to Space
+    .button-wrap
+      button(@click.stop="toggleToAnotherSpaceIsVisible" :class="{ active: toAnotherSpaceIsVisible }")
+        img.icon.move(src="@/assets/move.svg")
+        span To Another Space
+      ToAnotherSpace(:visible="toAnotherSpaceIsVisible" @shouldRemoveCards="removeCards")
 
 </template>
 
@@ -24,15 +26,18 @@ import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import utils from '@/utils.js'
 import Export from '@/components/dialogs/Export.vue'
+import ToAnotherSpace from '@/components/dialogs/ToAnotherSpace.vue'
 
 export default {
   name: 'MultipleCardActions',
   components: {
-    Export
+    Export,
+    ToAnotherSpace
   },
   data () {
     return {
-      exportIsVisible: false
+      exportIsVisible: false,
+      toAnotherSpaceIsVisible: false
     }
   },
   computed: {
@@ -76,8 +81,14 @@ export default {
       this.closeDialogs()
       this.exportIsVisible = !isVisible
     },
+    toggleToAnotherSpaceIsVisible () {
+      const isVisible = this.toAnotherSpaceIsVisible
+      this.closeDialogs()
+      this.toAnotherSpaceIsVisible = !isVisible
+    },
     closeDialogs () {
       this.exportIsVisible = false
+      this.toAnotherSpaceIsVisible = false
     },
     connectionType () {
       const typePref = this.$store.state.currentUser.defaultConnectionTypeId
