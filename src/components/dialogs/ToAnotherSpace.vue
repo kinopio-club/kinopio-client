@@ -11,8 +11,8 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
       p {{moveOrCopy}} {{cardsCountLabel}} to
     .row
       .button-wrap
-        button(@click.stop="toggleSpacePickerIsVisible") {{selectedSpaceName}}
-        SpacePicker(:visible="spacePickerIsVisible" :selectedSpaceName="selectedSpaceName" @selectedSpace="updateSelectedSpaceName")
+        button(@click.stop="toggleSpacePickerIsVisible") {{selectedSpace.name}}
+        SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" @selectSpace="updateSelectedSpace")
     button
       img.icon.move(src="@/assets/move.svg")
       span {{moveOrCopy}}
@@ -36,13 +36,12 @@ export default {
   props: {
     visible: Boolean
   },
-
   data () {
     return {
       shouldMoveCards: true,
       shouldSwitchToSpace: false,
       spaces: [],
-      selectedSpaceName: '',
+      selectedSpace: {},
       spacePickerIsVisible: false
     }
   },
@@ -84,21 +83,24 @@ export default {
     // removeCards () {
     //   this.$emit('shouldRemoveCards')
     // },
+    // copyCards
+    // moveCards
+    updateSpaces () {
+      this.spaces = cache.getAllSpaces()
+      this.selectedSpace = this.spaces[1]
+    },
+    updateSelectedSpace (space) {
+      // TODO🌹
+      // console.log('TODO')
+      this.selectedSpace = space
+      this.scrollIntoView()
+    },
     scrollIntoView () {
       const element = this.$refs.dialog
       scrollIntoView(element, {
         behavior: 'smooth',
         scrollMode: 'if-needed'
       })
-    },
-    updateSpaces () {
-      this.spaces = cache.getAllSpaces()
-    },
-    updateSelectedSpaceName (name) {
-      // TODO🌹
-      console.log('TODO')
-      this.selectedSpaceName = name
-      this.scrollIntoView()
     },
     closeDialogs () {
       this.spacePickerIsVisible = false

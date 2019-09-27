@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.space-picker(v-if="visible" :open="visible" @click.stop ref="dialog")
+dialog.narrow(v-if="visible" :open="visible" @click.stop ref="dialog")
   section
     p yolo
 </template>
@@ -13,7 +13,7 @@ export default {
   name: 'SpacePicker',
   props: {
     visible: Boolean,
-    selectedSpaceName: String
+    selectedSpace: Object
   },
   data () {
     return {
@@ -24,7 +24,7 @@ export default {
   // },
   methods: {
     select (space) {
-      this.$emit('selectedSpace', space.name)
+      this.$emit('selectSpace', space)
     },
     updateSpaces () {
       this.spaces = cache.getAllSpaces()
