@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop)
+dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDialogs")
   section
     .row
       .segmented-buttons
@@ -11,8 +11,8 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop)
       p {{moveOrCopy}} {{cardsCountLabel}} to
     .row
       .button-wrap
-        button my-cool-last-space
-        // SpacePicker
+        button(@click.stop="toggleSpacePickerIsVisible") {{selectedSpaceName}}
+        SpacePicker(:visible="spacePickerIsVisible" :selectedSpaceName="selectedSpaceName" @selectedSpace="updateSelectedSpaceName")
     button
       img.icon.move(src="@/assets/move.svg")
       span {{moveOrCopy}}
@@ -26,13 +26,13 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop)
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import cache from '@/cache.js'
-// import SpacePicker from '@/components/dialogs/SpacePicker.vue'
+import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 
 export default {
   name: 'ToAnotherSpace',
-  // components: {
-  //   SpacePicker
-  // },
+  components: {
+    SpacePicker
+  },
   props: {
     visible: Boolean
   },
@@ -42,7 +42,8 @@ export default {
       shouldMoveCards: true,
       shouldSwitchToSpace: false,
       spaces: [],
-      selectedSpaceName: ''
+      selectedSpaceName: '',
+      spacePickerIsVisible: false
     }
   },
   computed: {
@@ -74,6 +75,9 @@ export default {
     shouldMoveCardsFalse () {
       this.shouldMoveCards = false
     },
+    toggleSpacePickerIsVisible () {
+      this.spacePickerIsVisible = !this.spacePickerIsVisible
+    },
     toggleShouldSwitchToSpace () {
       this.shouldSwitchToSpace = !this.shouldSwitchToSpace
     },
@@ -90,15 +94,21 @@ export default {
     updateSpaces () {
       this.spaces = cache.getAllSpaces()
     },
-    updateSelectedSpace () {
+    updateSelectedSpaceName (name) {
       // TODO🌹
       console.log('TODO')
+      this.selectedSpaceName = name
+      this.scrollIntoView()
+    },
+    closeDialogs () {
+      this.spacePickerIsVisible = false
     }
   },
   watch: {
     visible (visible) {
       this.$nextTick(() => {
         if (visible) {
+          this.closeDialogs()
           this.scrollIntoView()
           this.updateSpaces()
         }
