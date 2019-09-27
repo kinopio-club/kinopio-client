@@ -1,7 +1,10 @@
 <template lang="pug">
-dialog.narrow(v-if="visible" :open="visible" @click.stop ref="dialog")
-  section
-    p yolo
+dialog.narrow.space-picker(v-if="visible" :open="visible" @click.stop ref="dialog")
+  section.results-section
+    ul.results-list
+      template(v-for="(space in spaces")
+        li(@click="select(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id")
+          .name {{space.name}}
 </template>
 
 <script>
@@ -20,9 +23,10 @@ export default {
       spaces: []
     }
   },
-  // computed: {
-  // },
   methods: {
+    spaceIsActive (spaceId) {
+      return Boolean(this.selectedSpace.id === spaceId)
+    },
     select (space) {
       this.$emit('selectSpace', space)
     },
@@ -52,4 +56,7 @@ export default {
 </script>
 
 <style lang="stylus">
+.space-picker
+  .results-section
+    padding-top 4px
 </style>

@@ -11,9 +11,9 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
       p {{moveOrCopy}} {{cardsCountLabel}} to
     .row
       .button-wrap
-        button(@click.stop="toggleSpacePickerIsVisible") {{selectedSpace.name}}
+        button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}") {{selectedSpace.name}}
         SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" @selectSpace="updateSelectedSpace")
-    button
+    button(@click="actionToAnotherSpace")
       img.icon.move(src="@/assets/move.svg")
       span {{moveOrCopy}}
   section
@@ -83,17 +83,24 @@ export default {
     // removeCards () {
     //   this.$emit('shouldRemoveCards')
     // },
-    // copyCards
-    // moveCards
+    copyCards () {},
+    moveCards () {
+      // this.removeCards()
+    },
+    actionToAnotherSpace () {
+      if (this.shouldMoveCards) {
+        this.moveCards()
+      } else {
+        this.copyCards()
+      }
+      // if shouldSwitchToSpace , then change spaces
+    },
     updateSpaces () {
       this.spaces = cache.getAllSpaces()
       this.selectedSpace = this.spaces[1]
     },
     updateSelectedSpace (space) {
-      // TODO🌹
-      // console.log('TODO')
       this.selectedSpace = space
-      this.scrollIntoView()
     },
     scrollIntoView () {
       const element = this.$refs.dialog
