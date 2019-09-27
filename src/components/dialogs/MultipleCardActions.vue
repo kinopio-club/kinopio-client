@@ -16,7 +16,7 @@ dialog.narrow(v-if="visible" :open="visible" :style="position" ref="dialog" @cli
       button(@click.stop="toggleToAnotherSpaceIsVisible" :class="{ active: toAnotherSpaceIsVisible }")
         img.icon.move(src="@/assets/move.svg")
         span To Another Space
-      ToAnotherSpace(:visible="toAnotherSpaceIsVisible" @shouldRemoveCards="removeCards")
+      ToAnotherSpace(:visible="toAnotherSpaceIsVisible" @removeCards="removeCards")
 
 </template>
 

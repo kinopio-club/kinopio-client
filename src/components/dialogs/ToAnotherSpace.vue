@@ -80,20 +80,22 @@ export default {
     toggleShouldSwitchToSpace () {
       this.shouldSwitchToSpace = !this.shouldSwitchToSpace
     },
-    // removeCards () {
-    //   this.$emit('shouldRemoveCards')
-    // },
-    copyCards () {},
-    moveCards () {
-      // this.removeCards()
+    removeCards () {
+      this.$emit('removeCards')
+    },
+    changeToSelectedSpace () {
+      this.$store.dispatch('currentSpace/changeSpace', this.selectedSpace)
     },
     actionToAnotherSpace () {
+      this.$store.dispatch('currentSpace/copyCardsToAnotherSpace', this.selectedSpace)
       if (this.shouldMoveCards) {
-        this.moveCards()
-      } else {
-        this.copyCards()
+        this.removeCards()
       }
-      // if shouldSwitchToSpace , then change spaces
+      // if (this.shouldSwitchToSpace) {
+      //   this.changeToSelectedSpace()
+      // }
+      this.$store.commit('closeAllDialogs')
+      this.$store.commit('multipleCardsSelected', [])
     },
     updateSpaces () {
       this.spaces = cache.getAllSpaces()

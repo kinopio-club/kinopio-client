@@ -23,7 +23,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
     .button-wrap
       button(@click.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
         span Import
-      Import(:visible="importIsVisible" @shouldUpdateSpaces="updateSpaces" @closeDialog="closeDialogs")
+      Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
 
     //button(@click="remixCurrentSpace")
     //  img.icon(src="@/assets/copy.svg")

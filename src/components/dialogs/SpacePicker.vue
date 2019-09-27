@@ -40,7 +40,6 @@ export default {
         scrollMode: 'if-needed'
       })
     }
-
   },
   watch: {
     visible (visible) {
