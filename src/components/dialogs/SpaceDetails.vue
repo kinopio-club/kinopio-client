@@ -35,7 +35,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
         li(@click="changeSpace(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id")
           //.badge(:style="typeGradient(space)")
           //  img.space-moon(src="@/assets/space-moon.svg")
-          .name {{space.name || spaceIdName(space)}}
+          .name {{space.name}}
 </template>
 
 <script>
@@ -77,9 +77,6 @@ export default {
     }
   },
   methods: {
-    spaceIdName (space) {
-      return `space-${space.id}`
-    },
     toggleExportIsVisible () {
       const isVisible = this.exportIsVisible
       this.closeDialogs()

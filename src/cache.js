@@ -46,7 +46,11 @@ export default {
     const spaces = spaceKeys.map(key => {
       return this.getLocal(key)
     })
-    const sortedSpaces = spaces.sort((a, b) => {
+    const spacesWithNames = spaces.map(space => {
+      space.name = space.name || `space-${space.id}`
+      return space
+    })
+    const sortedSpaces = spacesWithNames.sort((a, b) => {
       return b.cacheDate - a.cacheDate
     })
     return sortedSpaces

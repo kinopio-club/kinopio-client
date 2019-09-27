@@ -88,11 +88,11 @@ export default {
       })
     },
     updateSpaces () {
-      const spaces = cache.getAllSpaces()
-      this.spaces = spaces.map(space => {
-        space.name = space.name || `space-${space.id}`
-        return spaces
-      })
+      this.spaces = cache.getAllSpaces()
+    },
+    updateSelectedSpace () {
+      // TODO🌹
+      console.log('TODO')
     }
   },
   watch: {
