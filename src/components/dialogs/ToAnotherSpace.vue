@@ -6,7 +6,7 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
     .row
       .button-wrap
         button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}") {{selectedSpace.name}}
-        SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" @selectSpace="updateSelectedSpace")
+        SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" :excludeCurrentSpace="true" @selectSpace="updateSelectedSpace")
     button(@click="actionToAnotherSpace")
       img.icon.move(src="@/assets/move.svg")
       span Move
@@ -51,6 +51,9 @@ export default {
       let label = 'card'
       if (numberOfCards > 1) { label = `${numberOfCards} cards` }
       return label
+    },
+    currentSpace () {
+      return this.$store.state.currentSpace
     }
   },
   methods: {
@@ -60,22 +63,23 @@ export default {
     toggleShouldSwitchToSpace () {
       this.shouldSwitchToSpace = !this.shouldSwitchToSpace
     },
-    removeCards () {
-      this.$emit('removeCards')
-    },
     changeToSelectedSpace () {
       this.$store.dispatch('currentSpace/changeSpace', this.selectedSpace)
     },
     actionToAnotherSpace () {
+      if (this.selectedSpace.id === this.currentSpace.id) { return }
       this.$store.dispatch('currentSpace/moveCardsToAnotherSpace', this.selectedSpace)
-      this.removeCards()
+      this.multipleCardsSelected.forEach(cardId => this.$store.commit('currentSpace/removeCard', cardId))
+      this.$store.commit('multipleCardsSelected', [])
+      this.$store.commit('closeAllDialogs')
       // if (this.shouldSwitchToSpace) {
       //   this.changeToSelectedSpace()
       // }
     },
     updateSpaces () {
-      this.spaces = cache.getAllSpaces()
-      this.selectedSpace = this.spaces[1]
+      const spaces = cache.getAllSpaces()
+      this.spaces = spaces.filter(space => space.id !== this.currentSpace.id)
+      this.selectedSpace = this.spaces[0]
     },
     updateSelectedSpace (space) {
       this.selectedSpace = space

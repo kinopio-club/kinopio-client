@@ -16,7 +16,8 @@ export default {
   name: 'SpacePicker',
   props: {
     visible: Boolean,
-    selectedSpace: Object
+    selectedSpace: Object,
+    excludeCurrentSpace: Boolean
   },
   data () {
     return {
@@ -31,7 +32,11 @@ export default {
       this.$emit('selectSpace', space)
     },
     updateSpaces () {
+      const currentSpace = this.$store.state.currentSpace
       this.spaces = cache.getAllSpaces()
+      if (this.excludeCurrentSpace) {
+        this.spaces = this.spaces.filter(space => space.id !== currentSpace.id)
+      }
     },
     scrollIntoView () {
       const element = this.$refs.dialog
