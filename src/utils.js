@@ -82,6 +82,10 @@ export default {
     return object
   },
 
+  findInArrayOfObjects (array, key, value) {
+    return array.find(item => item[key] === value)
+  },
+
   cursorsAreClose (startCursor, endCursor) {
     const threshold = 5
     const xRange = {

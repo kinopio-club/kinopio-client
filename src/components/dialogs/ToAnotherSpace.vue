@@ -2,14 +2,20 @@
 dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDialogs")
   section
     .row
-      p Move {{cardsCountLabel}} to
+      .segmented-buttons
+        button(@click="shouldMoveCardsTrue" :class="{active: shouldMoveCards}")
+          span Move
+        button(@click="shouldMoveCardsFalse" :class="{active: !shouldMoveCards}")
+          span Copy
+    .row
+      p {{moveOrCopy}} {{cardsCountLabel}} to
     .row
       .button-wrap
         button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}") {{selectedSpace.name}}
         SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" :excludeCurrentSpace="true" @selectSpace="updateSelectedSpace")
-    button(@click="actionToAnotherSpace")
+    button(@click="toAnotherSpace")
       img.icon.move(src="@/assets/move.svg")
-      span Move
+      span {{moveOrCopy}}
   section
     label(:class="{active: shouldSwitchToSpace}" @click.prevent="toggleShouldSwitchToSpace")
       input(type="checkbox" v-model="shouldSwitchToSpace")
@@ -32,6 +38,7 @@ export default {
   },
   data () {
     return {
+      shouldMoveCards: true,
       shouldSwitchToSpace: false,
       spaces: [],
       selectedSpace: {},
@@ -54,9 +61,22 @@ export default {
     },
     currentSpace () {
       return this.$store.state.currentSpace
+    },
+    moveOrCopy () {
+      if (this.shouldMoveCards) {
+        return 'Move'
+      } else {
+        return 'Copy'
+      }
     }
   },
   methods: {
+    shouldMoveCardsTrue () {
+      this.shouldMoveCards = true
+    },
+    shouldMoveCardsFalse () {
+      this.shouldMoveCards = false
+    },
     toggleSpacePickerIsVisible () {
       this.spacePickerIsVisible = !this.spacePickerIsVisible
     },
@@ -66,10 +86,14 @@ export default {
     changeToSelectedSpace () {
       this.$store.dispatch('currentSpace/changeSpace', this.selectedSpace)
     },
-    actionToAnotherSpace () {
+
+    toAnotherSpace () {
       if (this.selectedSpace.id === this.currentSpace.id) { return }
-      this.$store.dispatch('currentSpace/moveCardsToAnotherSpace', this.selectedSpace)
-      this.multipleCardsSelected.forEach(cardId => this.$store.commit('currentSpace/removeCard', cardId))
+      this.$store.dispatch('currentSpace/copyCardsToAnotherSpace', {
+        space: this.selectedSpace,
+        shouldRemoveOriginals: this.shouldMoveCards
+      })
+      this.$store.commit('currentSpace/removeUnusedConnectionTypes')
       this.$store.commit('multipleCardsSelected', [])
       this.$store.commit('closeAllDialogs')
       // if (this.shouldSwitchToSpace) {

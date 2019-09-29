@@ -330,10 +330,11 @@ export default {
         context.commit('incrementCardZ', currentDraggingCardId)
       }
     },
-    moveCardsToAnotherSpace: (context, space) => {
+
+    copyCardsToAnotherSpace: (context, { space, shouldRemoveOriginals }) => {
       const multipleCardsSelected = context.rootState.multipleCardsSelected
-      let cards = context.state.cards.filter(card => multipleCardsSelected.includes(card.id))
-      let connections = context.state.connections.filter(connection => {
+      const cards = context.state.cards.filter(card => multipleCardsSelected.includes(card.id))
+      const connections = context.state.connections.filter(connection => {
         return (multipleCardsSelected.includes(connection.startCardId) && multipleCardsSelected.includes(connection.endCardId))
       })
       let connectionTypes = connections.map(connection => {
@@ -342,11 +343,63 @@ export default {
       connectionTypes = context.state.connectionTypes.filter(type => {
         return connectionTypes.includes(type.id)
       })
-      cards = utils.clone(cards)
-      connections = utils.clone(connections)
-      connectionTypes = utils.clone(connectionTypes)
-      cache.addToSpace({ cards, connections, connectionTypes }, space.id)
-      context.commit('removeUnusedConnectionTypes')
+      let newCards = utils.clone(cards)
+      let newConnections = utils.clone(connections)
+      let newConnectionTypes = utils.clone(connectionTypes)
+      // unique – but still connected – ids
+      const cardDeltaIds = []
+      const connectionTypeDeltaIds = []
+      newCards.map(card => {
+        const prevId = card.id
+        const newId = nanoid()
+        const deltaIds = {
+          prev: prevId,
+          new: newId
+        }
+        cardDeltaIds.push(deltaIds)
+        card.id = newId
+        return card
+      })
+      newConnectionTypes.map(type => {
+        const prevId = type.id
+        const newId = nanoid()
+        const deltaIds = {
+          prev: prevId,
+          new: newId
+        }
+        connectionTypeDeltaIds.push(deltaIds)
+        type.id = newId
+        return type
+      })
+      newConnections.map(connection => {
+        const startCardDelta = utils.findInArrayOfObjects(cardDeltaIds, 'prev', connection.startCardId)
+        if (startCardDelta) {
+          connection.startCardId = startCardDelta.new
+        }
+        const endCardDelta = utils.findInArrayOfObjects(cardDeltaIds, 'prev', connection.endCardId)
+        if (endCardDelta) {
+          connection.endCardId = endCardDelta.new
+        }
+        const typeDelta = utils.findInArrayOfObjects(connectionTypeDeltaIds, 'prev', connection.connectionTypeId)
+        if (typeDelta) {
+          connection.connectionTypeId = typeDelta.new
+        }
+        return connection
+      })
+      const newItems = {
+        cards: newCards,
+        connections: newConnections,
+        connectionTypes: newConnectionTypes
+      }
+      cache.addToSpace(newItems, space.id)
+      // TODO API here
+      if (shouldRemoveOriginals) {
+        const multipleCardsSelected = context.rootState.multipleCardsSelected
+        multipleCardsSelected.forEach(cardId => context.dispatch('removeCard', cardId))
+        connections.forEach(connection => {
+          context.commit('removeConnection', connection.id)
+        })
+      }
     },
 
     // connection
