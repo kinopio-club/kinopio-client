@@ -84,9 +84,9 @@ export default {
       this.shouldSwitchToSpace = !this.shouldSwitchToSpace
     },
     changeToSelectedSpace () {
+      this.updateSpaces()
       this.$store.dispatch('currentSpace/changeSpace', this.selectedSpace)
     },
-
     toAnotherSpace () {
       if (this.selectedSpace.id === this.currentSpace.id) { return }
       this.$store.dispatch('currentSpace/copyCardsToAnotherSpace', {
@@ -96,9 +96,9 @@ export default {
       this.$store.commit('currentSpace/removeUnusedConnectionTypes')
       this.$store.commit('multipleCardsSelected', [])
       this.$store.commit('closeAllDialogs')
-      // if (this.shouldSwitchToSpace) {
-      //   this.changeToSelectedSpace()
-      // }
+      if (this.shouldSwitchToSpace) {
+        this.changeToSelectedSpace()
+      }
     },
     updateSpaces () {
       const spaces = cache.getAllSpaces()
