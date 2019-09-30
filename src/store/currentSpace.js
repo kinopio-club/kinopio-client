@@ -39,6 +39,14 @@ export default {
       state.cards[1].x = _.random(180, 200)
       state.cards[1].y = _.random(160, 180)
     },
+    addToAnotherSpace: (state, { newCards, newConnections, newConnectionTypes, space }) => {
+      const newItems = {
+        cards: newCards,
+        connections: newConnections,
+        connectionTypes: newConnectionTypes
+      }
+      cache.addToSpace(newItems, space.id)
+    },
 
     // users
     addUserToSpace: (state, newUser) => {
@@ -386,13 +394,7 @@ export default {
         }
         return connection
       })
-      const newItems = {
-        cards: newCards,
-        connections: newConnections,
-        connectionTypes: newConnectionTypes
-      }
-      cache.addToSpace(newItems, space.id)
-      // TODO API here
+      context.commit('addToAnotherSpace', { newCards, newConnections, newConnectionTypes, space })
       if (shouldRemoveOriginals) {
         const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
         multipleCardsSelectedIds.forEach(cardId => context.dispatch('removeCard', cardId))
