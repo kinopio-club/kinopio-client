@@ -282,7 +282,7 @@ export default {
       if (utils.objectHasKeys(contents)) {
         card = utils.updateObject(card, contents)
       } else {
-        context.commit('cardDetailsIsVisibleForCard', card.id, { root: true })
+        context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       }
       context.commit('createCard', card)
       context.commit('incrementCardZ', card.id)
@@ -299,16 +299,16 @@ export default {
       context.commit('removeCardFromRemovedCards', cardId)
     },
     dragCards: (context, { endCursor, prevCursor, delta }) => {
-      const multipleCardsSelected = context.rootState.multipleCardsSelected
+      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       const currentDraggingCardId = context.rootState.currentDraggingCardId
       const cards = context.rootState.currentSpace.cards
       delta = delta || {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
       }
-      if (multipleCardsSelected.length) {
+      if (multipleCardsSelectedIds.length) {
         cards.map(card => {
-          if (multipleCardsSelected.includes(card.id)) {
+          if (multipleCardsSelectedIds.includes(card.id)) {
             context.commit('moveCard', { cardId: card.id, delta })
             context.commit('updateCardConnections', card.id)
           }
@@ -319,10 +319,10 @@ export default {
       }
     },
     incrementSelectedCardsZ: (context) => {
-      const multipleCardsSelected = context.rootState.multipleCardsSelected
+      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       const currentDraggingCardId = context.rootState.currentDraggingCardId
       const cards = context.state.cards
-      if (multipleCardsSelected.length) {
+      if (multipleCardsSelectedIds.length) {
         cards.forEach(cardId => {
           context.commit('incrementCardZ', cardId)
         })
@@ -332,10 +332,10 @@ export default {
     },
 
     copyCardsToAnotherSpace: (context, { space, shouldRemoveOriginals }) => {
-      const multipleCardsSelected = context.rootState.multipleCardsSelected
-      const cards = context.state.cards.filter(card => multipleCardsSelected.includes(card.id))
+      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
+      const cards = context.state.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
       const connections = context.state.connections.filter(connection => {
-        return (multipleCardsSelected.includes(connection.startCardId) && multipleCardsSelected.includes(connection.endCardId))
+        return (multipleCardsSelectedIds.includes(connection.startCardId) && multipleCardsSelectedIds.includes(connection.endCardId))
       })
       let connectionTypes = connections.map(connection => {
         return connection.connectionTypeId
@@ -394,8 +394,8 @@ export default {
       cache.addToSpace(newItems, space.id)
       // TODO API here
       if (shouldRemoveOriginals) {
-        const multipleCardsSelected = context.rootState.multipleCardsSelected
-        multipleCardsSelected.forEach(cardId => context.dispatch('removeCard', cardId))
+        const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
+        multipleCardsSelectedIds.forEach(cardId => context.dispatch('removeCard', cardId))
         connections.forEach(connection => {
           context.commit('removeConnection', connection.id)
         })
@@ -414,11 +414,11 @@ export default {
       }
     },
     removeSelectedConnectionsFromCard: (context, cardId) => {
-      const multipleCardsSelected = context.rootState.multipleCardsSelected
+      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       const connections = context.state.connections
       connections.map(connection => {
         const { startCardId, endCardId, id } = connection
-        let connectedToSelected = (startCardId === cardId && multipleCardsSelected.includes(endCardId)) || (endCardId === cardId && multipleCardsSelected.includes(startCardId))
+        let connectedToSelected = (startCardId === cardId && multipleCardsSelectedIds.includes(endCardId)) || (endCardId === cardId && multipleCardsSelectedIds.includes(startCardId))
         if (connectedToSelected) {
           context.commit('removeConnection', id)
         }

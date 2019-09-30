@@ -41,7 +41,7 @@ export default {
       return hash.replace('app.', '') // 768db305407f4c847d44
     },
     dialogsVisible () {
-      return Boolean(this.$store.state.cardDetailsIsVisibleForCard || this.$store.state.multipleCardActionsIsVisible || this.$store.state.connectionDetailsIsVisibleForConnection)
+      return Boolean(this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.multipleCardActionsIsVisible || this.$store.state.connectionDetailsIsVisibleForConnectionId)
     }
   },
   methods: {

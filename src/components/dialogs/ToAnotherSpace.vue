@@ -46,15 +46,15 @@ export default {
     }
   },
   computed: {
-    multipleCardsSelected () {
-      return this.$store.state.multipleCardsSelected
+    multipleCardsSelectedIds () {
+      return this.$store.state.multipleCardsSelectedIds
     },
     multipleCardsIsSelected () {
-      const numberOfCards = this.multipleCardsSelected.length
+      const numberOfCards = this.multipleCardsSelectedIds.length
       return Boolean(numberOfCards > 1)
     },
     cardsCountLabel () {
-      const numberOfCards = this.multipleCardsSelected.length
+      const numberOfCards = this.multipleCardsSelectedIds.length
       let label = 'card'
       if (numberOfCards > 1) { label = `${numberOfCards} cards` }
       return label
@@ -94,7 +94,7 @@ export default {
         shouldRemoveOriginals: this.shouldMoveCards
       })
       this.$store.commit('currentSpace/removeUnusedConnectionTypes')
-      this.$store.commit('multipleCardsSelected', [])
+      this.$store.commit('multipleCardsSelectedIds', [])
       this.$store.commit('closeAllDialogs')
       if (this.shouldSwitchToSpace) {
         this.changeToSelectedSpace()

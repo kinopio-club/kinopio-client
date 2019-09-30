@@ -111,14 +111,14 @@ export default {
       startCursor = utils.cursorPositionInPage(event)
       currentCursor = utils.cursorPositionInPage(event)
       const dialogIsVisible = Boolean(document.querySelector('dialog'))
-      const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelected.length)
+      const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)
       this.startLocking()
       this.createInitialCircle()
       this.$store.commit('currentUserIsPainting', true)
       if (!multipleCardsIsSelected && !dialogIsVisible) {
         this.$store.commit('shouldAddNewCard', true)
       }
-      this.$store.commit('multipleCardsSelected', [])
+      this.$store.commit('multipleCardsSelectedIds', [])
       this.$store.commit('generateCardMap')
       this.$store.commit('closeAllDialogs')
       initialCircles.map(circle => {

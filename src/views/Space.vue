@@ -401,7 +401,7 @@ export default {
         const position = utils.cursorPositionInPage(event)
         this.addNewCard(position)
       }
-      if (this.$store.state.multipleCardsSelected.length) {
+      if (this.$store.state.multipleCardsSelectedIds.length) {
         const position = utils.cursorPositionInPage(event)
         this.showMultipleCardActions(position)
       }

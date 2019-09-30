@@ -52,24 +52,24 @@ export default {
     userColor () {
       return this.$store.state.currentUser.color
     },
-    multipleCardsSelected () {
-      return this.$store.state.multipleCardsSelected
+    multipleCardsSelectedIds () {
+      return this.$store.state.multipleCardsSelectedIds
     },
     multipleCardsIsSelected () {
-      const numberOfCards = this.multipleCardsSelected.length
+      const numberOfCards = this.multipleCardsSelectedIds.length
       return Boolean(numberOfCards > 1)
     },
     exportScope () {
       return 'cards'
     },
     exportTitle () {
-      const numberOfCards = this.multipleCardsSelected.length
+      const numberOfCards = this.multipleCardsSelectedIds.length
       let title = 'Card'
       if (numberOfCards > 1) { title = `${numberOfCards} Cards` }
       return title
     },
     exportData () {
-      const cards = this.multipleCardsSelected.map(cardId => {
+      const cards = this.multipleCardsSelectedIds.map(cardId => {
         return this.$store.getters['currentSpace/cardById'](cardId)
       })
       return { 'cards': cards }
@@ -101,7 +101,7 @@ export default {
     },
     connectCards () {
       const connectionType = this.connectionType()
-      let connections = this.multipleCardsSelected.map((cardId, index, array) => {
+      let connections = this.multipleCardsSelectedIds.map((cardId, index, array) => {
         if (index + 1 < array.length) {
           const startCardId = cardId
           const endCardId = array[index + 1]
@@ -117,19 +117,19 @@ export default {
       })
     },
     disconnectCards () {
-      const cardIds = this.multipleCardsSelected
+      const cardIds = this.multipleCardsSelectedIds
       cardIds.forEach(cardId => {
         this.$store.dispatch('currentSpace/removeSelectedConnectionsFromCard', cardId)
       })
       this.$store.commit('currentSpace/removeUnusedConnectionTypes')
     },
     removeCards () {
-      const cardIds = this.multipleCardsSelected
+      const cardIds = this.multipleCardsSelectedIds
       cardIds.forEach(cardId => {
         this.$store.dispatch('currentSpace/removeCard', cardId)
       })
       this.$store.commit('closeAllDialogs')
-      this.$store.commit('multipleCardsSelected', [])
+      this.$store.commit('multipleCardsSelectedIds', [])
     },
     scrollIntoView () {
       const element = this.$refs.dialog
