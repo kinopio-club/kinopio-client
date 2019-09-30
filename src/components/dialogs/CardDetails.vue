@@ -78,7 +78,7 @@ export default {
   },
   computed: {
     visible () {
-      return this.$store.state.cardDetailsIsVisibleForCard === this.card.id
+      return this.$store.state.cardDetailsIsVisibleForCardId === this.card.id
     },
     name: {
       get () {
@@ -124,7 +124,7 @@ export default {
     },
     removeCard () {
       this.$store.dispatch('currentSpace/removeCard', this.card.id)
-      this.$store.commit('cardDetailsIsVisibleForCard', '')
+      this.$store.commit('cardDetailsIsVisibleForCardId', '')
     },
     textareaSizes () {
       let textareas = document.querySelectorAll('dialog textarea')

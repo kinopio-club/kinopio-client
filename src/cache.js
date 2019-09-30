@@ -46,7 +46,11 @@ export default {
     const spaces = spaceKeys.map(key => {
       return this.getLocal(key)
     })
-    const sortedSpaces = spaces.sort((a, b) => {
+    const spacesWithNames = spaces.map(space => {
+      space.name = space.name || `space-${space.id}`
+      return space
+    })
+    const sortedSpaces = spacesWithNames.sort((a, b) => {
       return b.cacheDate - a.cacheDate
     })
     return sortedSpaces
@@ -55,6 +59,13 @@ export default {
     let space = this.space(spaceId)
     space[key] = value
     space.cacheDate = Date.now()
+    this.storeLocal(`space-${spaceId}`, space)
+  },
+  addToSpace ({ cards, connections, connectionTypes }, spaceId) {
+    let space = this.space(spaceId)
+    cards.forEach(card => space.cards.push(card))
+    connections.forEach(connection => space.connections.push(connection))
+    connectionTypes.forEach(connectionType => space.connectionTypes.push(connectionType))
     this.storeLocal(`space-${spaceId}`, space)
   },
   // Added aug 2019, can safely remove this in aug 2020

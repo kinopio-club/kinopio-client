@@ -75,18 +75,18 @@ export default {
     },
     isBeingDragged () {
       let isCardId
-      const multipleCardsSelected = this.$store.state.multipleCardsSelected
+      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
       const currentDraggingCard = this.$store.state.currentDraggingCardId
       const isDraggingCard = this.$store.state.currentUserIsDraggingCard
-      if (multipleCardsSelected.includes(this.id) || currentDraggingCard === this.id) {
+      if (multipleCardsSelectedIds.includes(this.id) || currentDraggingCard === this.id) {
         isCardId = true
       }
       return Boolean(isDraggingCard && isCardId)
     },
     selectedColor () {
-      const multipleCardsSelected = this.$store.state.multipleCardsSelected
+      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
       const color = this.$store.state.currentUser.color
-      if (multipleCardsSelected.includes(this.id)) {
+      if (multipleCardsSelectedIds.includes(this.id)) {
         return { background: color }
       } else {
         return undefined
@@ -118,7 +118,7 @@ export default {
     startConnecting (event) {
       this.$store.commit('closeAllDialogs')
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
-      this.$store.commit('multipleCardsSelected', [])
+      this.$store.commit('multipleCardsSelectedIds', [])
       if (!this.$store.state.currentUserIsDrawingConnection) {
         this.addConnectionType()
         this.createCurrentConnection(event)
@@ -126,9 +126,9 @@ export default {
       this.$store.commit('currentUserIsDrawingConnection', true)
     },
     checkIfShouldDragMultipleCards () {
-      const multipleCardsSelected = this.$store.state.multipleCardsSelected
-      if (!multipleCardsSelected.includes(this.id)) {
-        this.$store.commit('multipleCardsSelected', [])
+      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
+      if (!multipleCardsSelectedIds.includes(this.id)) {
+        this.$store.commit('multipleCardsSelectedIds', [])
       }
     },
     startDraggingCard () {
@@ -143,7 +143,7 @@ export default {
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.commit('closeAllDialogs')
-      this.$store.commit('cardDetailsIsVisibleForCard', this.id)
+      this.$store.commit('cardDetailsIsVisibleForCardId', this.id)
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
     }
   }

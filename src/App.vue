@@ -131,6 +131,7 @@ label // used for checkbox buttons
 
 label
   padding-bottom 4px
+  display inline-block
 
 p
   margin 0
@@ -304,4 +305,7 @@ ul.results-list
 
 .updated
   vertical-align -2px
+
+.move
+  vertical-align 1px
 </style>

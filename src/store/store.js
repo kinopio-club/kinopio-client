@@ -24,21 +24,21 @@ export default new Vuex.Store({
 
     // cards
     shouldAddNewCard: false,
-    cardDetailsIsVisibleForCard: '', // id
+    cardDetailsIsVisibleForCardId: '',
 
     // connecting
     currentConnection: {}, // startCardId, startConnectorRect
     currentConnectionSuccess: {},
     currentConnectionCursorStart: {},
     connectionDetailsPosition: {}, // x, y
-    connectionDetailsIsVisibleForConnection: '', // id
+    connectionDetailsIsVisibleForConnectionId: '',
 
     // dragging
-    currentDraggingCardId: '', // id
+    currentDraggingCardId: '',
     preventDraggedCardFromShowingDetails: false,
 
     // multiple cards
-    multipleCardsSelected: [], // ids
+    multipleCardsSelectedIds: [],
     multipleCardActionsIsVisible: false,
     multipleCardActionsPosition: {},
     cardMap: []
@@ -65,9 +65,9 @@ export default new Vuex.Store({
       utils.typeCheck(value, 'boolean')
       state.shouldAddNewCard = value
     },
-    cardDetailsIsVisibleForCard: (state, cardId) => {
+    cardDetailsIsVisibleForCardId: (state, cardId) => {
       utils.typeCheck(cardId, 'string')
-      state.cardDetailsIsVisibleForCard = cardId
+      state.cardDetailsIsVisibleForCardId = cardId
     },
 
     // connecting
@@ -114,9 +114,9 @@ export default new Vuex.Store({
     },
 
     // connection details
-    connectionDetailsIsVisibleForConnection: (state, connectionId) => {
+    connectionDetailsIsVisibleForConnectionId: (state, connectionId) => {
       utils.typeCheck(connectionId, 'string')
-      state.connectionDetailsIsVisibleForConnection = connectionId
+      state.connectionDetailsIsVisibleForConnectionId = connectionId
     },
     connectionDetailsPosition: (state, position) => {
       utils.typeCheck(position, 'object')
@@ -124,14 +124,14 @@ export default new Vuex.Store({
     },
 
     // multiple cards
-    multipleCardsSelected: (state, cards) => {
+    multipleCardsSelectedIds: (state, cards) => {
       utils.typeCheck(cards, 'array')
-      state.multipleCardsSelected = cards
+      state.multipleCardsSelectedIds = cards
     },
     addToMultipleCardsSelected: (state, cardId) => {
       utils.typeCheck(cardId, 'string')
-      if (!state.multipleCardsSelected.includes(cardId)) {
-        state.multipleCardsSelected.push(cardId)
+      if (!state.multipleCardsSelectedIds.includes(cardId)) {
+        state.multipleCardsSelectedIds.push(cardId)
       }
     },
     multipleCardActionsIsVisible: (state, value) => {
@@ -159,8 +159,8 @@ export default new Vuex.Store({
     },
     closeAllDialogs: (state) => {
       state.multipleCardActionsIsVisible = false
-      state.cardDetailsIsVisibleForCard = ''
-      state.connectionDetailsIsVisibleForConnection = ''
+      state.cardDetailsIsVisibleForCardId = ''
+      state.connectionDetailsIsVisibleForConnectionId = ''
     }
   },
 

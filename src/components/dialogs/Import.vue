@@ -3,7 +3,7 @@ dialog.import.narrow(v-if="visible" :open="visible" @click.stop ref="dialog")
   section
     p Import Space
   section
-    p Upload a space json file
+    p From an exported space
     button(@click="selectFile")
       span.badge json
       span Select File
@@ -71,7 +71,7 @@ export default {
         space.name = this.uniqueName(space)
         cache.saveSpace(space)
         this.$store.dispatch('currentSpace/changeSpace', space)
-        this.$emit('shouldUpdateSpaces')
+        this.$emit('updateSpaces')
         this.$emit('closeDialog')
       }
     },

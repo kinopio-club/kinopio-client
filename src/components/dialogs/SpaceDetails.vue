@@ -23,7 +23,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
     .button-wrap
       button(@click.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
         span Import
-      Import(:visible="importIsVisible" @shouldUpdateSpaces="updateSpaces" @closeDialog="closeDialogs")
+      Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
 
     //button(@click="remixCurrentSpace")
     //  img.icon(src="@/assets/copy.svg")
@@ -35,7 +35,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
         li(@click="changeSpace(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id")
           //.badge(:style="typeGradient(space)")
           //  img.space-moon(src="@/assets/space-moon.svg")
-          .name {{space.name || spaceIdName}}
+          .name {{space.name}}
 </template>
 
 <script>
@@ -68,9 +68,6 @@ export default {
         this.$store.commit('currentSpace/updateName', newName)
         this.updateSpaces()
       }
-    },
-    spaceIdName () {
-      return `space-${this.$store.state.currentSpace.id}`
     },
     currentSpace () {
       return this.$store.state.currentSpace
