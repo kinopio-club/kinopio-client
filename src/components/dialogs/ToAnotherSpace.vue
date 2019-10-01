@@ -7,19 +7,24 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
           span Move
         button(@click="shouldMoveCardsFalse" :class="{active: !shouldMoveCards}")
           span Copy
-    .row
-      p {{moveOrCopy}} {{cardsCountLabel}} to
-    .row
-      .button-wrap
-        button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}") {{selectedSpace.name}}
-        SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" :excludeCurrentSpace="true" @selectSpace="updateSelectedSpace" @closeDialog="closeDialogs")
-    button(@click="toAnotherSpace")
-      img.icon.move(src="@/assets/move.svg")
-      span {{moveOrCopy}}
-  section
-    label(:class="{active: shouldSwitchToSpace}" @click.prevent="toggleShouldSwitchToSpace")
-      input(type="checkbox" v-model="shouldSwitchToSpace")
-      span Switch to Space
+    template(v-if="spaces.length")
+      .row
+        p {{moveOrCopy}} {{cardsCountLabel}} to
+      .row
+        .button-wrap
+          button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}") {{selectedSpace.name}}
+          SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" :excludeCurrentSpace="true" @selectSpace="updateSelectedSpace" @closeDialog="closeDialogs")
+      button(@click="toAnotherSpace")
+        img.icon.move(src="@/assets/move.svg")
+        span {{moveOrCopy}}
+    template(v-else)
+      span.badge.danger No Other Spaces
+      p Add a Space to {{moveOrCopy.toLowerCase()}} cards there
+  template(v-if="spaces.length")
+    section
+      label(:class="{active: shouldSwitchToSpace}" @click.prevent="toggleShouldSwitchToSpace")
+        input(type="checkbox" v-model="shouldSwitchToSpace")
+        span Switch to Space
 </template>
 
 <script>
