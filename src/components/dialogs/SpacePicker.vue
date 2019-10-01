@@ -30,6 +30,7 @@ export default {
     },
     select (space) {
       this.$emit('selectSpace', space)
+      this.$emit('closeDialog')
     },
     updateSpaces () {
       const currentSpace = this.$store.state.currentSpace
