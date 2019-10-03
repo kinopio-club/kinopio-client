@@ -13,6 +13,9 @@ header
       SpaceDetails(:visible="spaceDetailsIsVisible")
 
   aside
+    .button-wrap.sign-in-or-up-button
+      button(@click.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}") Sign Up or In
+      SignUpOrIn(:visible="signUpOrInIsVisible")
     User(:user="currentUser" :clickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true")
 </template>
 
@@ -20,18 +23,21 @@ header
 import About from '@/components/dialogs/About.vue'
 import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
 import User from '@/components/User.vue'
+import SignUpOrIn from '@/components/dialogs/SignUpOrIn.vue'
 
 export default {
   name: 'Header',
   components: {
     About,
     SpaceDetails,
-    User
+    User,
+    SignUpOrIn
   },
   data () {
     return {
       aboutIsVisible: false,
-      spaceDetailsIsVisible: false
+      spaceDetailsIsVisible: false,
+      signUpOrInIsVisible: false
     }
   },
   created () {
@@ -39,6 +45,7 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.aboutIsVisible = false
         this.spaceDetailsIsVisible = false
+        this.signUpOrInIsVisible = false
       }
     })
   },
@@ -66,6 +73,11 @@ export default {
       const isVisible = this.spaceDetailsIsVisible
       this.$store.commit('closeAllDialogs')
       this.spaceDetailsIsVisible = !isVisible
+    },
+    toggleSignUpOrInIsVisible () {
+      const isVisible = this.signUpOrInIsVisible
+      this.$store.commit('closeAllDialogs')
+      this.signUpOrInIsVisible = !isVisible
     }
   }
 }
@@ -110,5 +122,6 @@ header
     overflow hidden
     text-overflow ellipsis
     max-width 250px
-
+  .sign-in-or-up-button
+    margin-right 6px
 </style>
