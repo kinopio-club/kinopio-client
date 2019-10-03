@@ -9,7 +9,7 @@ The place for people to tap and smile.
 ## Install
 
 ```
-git clone https://github.com/kinopio-club/kinopio-client.git
+git clone https://github.com/pketh/kinopio-client.git
 cd kinopio-client
 npm install
 npm install -g @vue/cli

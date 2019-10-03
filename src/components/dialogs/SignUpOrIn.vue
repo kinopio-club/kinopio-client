@@ -7,17 +7,13 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
   section(v-if="isSigningUp")
     .row
       p Create an account to share your spaces and access them anywhere
-    form
+    form(@submit.prevent="signUp")
       .row
         input(type="email" placeholder="Email" required)
       .row
         input(type="password" placeholder="Password" required)
       .row
         input(type="password" placeholder="Confirm Password" required)
-      //.row
-      //  label(:class="{active: isSignUpForNewsletter}" @click.prevent="toggleDefault")
-      //    input(type="checkbox" v-model="isSignUpForNewsletter")
-      //    span Monthly newsletter?
       button(type="submit") Sign Up
 
   section(v-else)
@@ -28,10 +24,19 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
         input(type="password" placeholder="Password" required)
       button(type="submit") Sign In
 
-  //section
-  //  .button-wrap
-  //    a(href="#")
-  //      button Privacy Policy and TOS →
+  section(v-if="isSigningUp")
+    .button-wrap
+      // TEMP link
+      a(href="http://pketh.org/kinopio-plans")
+        button Privacy Policy and TOS →
+  section(v-else)
+    button(@click="toggleForgotPasswordVisible" :class="{active : forgotPasswordVisible}")
+      span Forgot Password?
+    template(v-if="forgotPasswordVisible")
+      form.reset-form
+        .row
+          input(type="email" placeholder="Email" required)
+        button Reset Password
 
 </template>
 
@@ -45,7 +50,8 @@ export default {
   },
   data () {
     return {
-      isSigningUp: true
+      isSigningUp: true,
+      forgotPasswordVisible: false
       // isSignUpForNewsletter: false
     }
   },
@@ -57,8 +63,19 @@ export default {
     },
     hideIsSigningUp () {
       this.isSigningUp = false
+    },
+    signUp (event) {
+      console.log('🌹', event)
+      // errors
+      // Email is already registered. Try signing in?
+      // passwords dont match, try again
+    },
+    signIn (event) {
+      console.log('🌼', event)
+    },
+    toggleForgotPasswordVisible () {
+      this.forgotPasswordVisible = !this.forgotPasswordVisible
     }
-
   }
   // watch: {
   //   visible (value) {
@@ -75,4 +92,6 @@ export default {
   top calc(100% - 8px)
   left initial
   right 8px
+  .reset-form
+    margin-top 10px
 </style>
