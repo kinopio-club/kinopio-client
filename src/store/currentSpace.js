@@ -62,7 +62,6 @@ export default {
 
     // space name
     updateName: (state, newName) => {
-      newName = utils.normalizeString(newName)
       state.name = newName
       cache.updateSpace('name', state.name, state.id)
     },
