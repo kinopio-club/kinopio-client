@@ -2,6 +2,7 @@
 
 import _ from 'lodash'
 
+import utils from '@/utils.js'
 import cache from '@/cache.js'
 
 export default {
@@ -22,22 +23,23 @@ export default {
       return true
     }
   },
+  randomAdjective () {
+    const adjective = _.sample(this.adjectives())
+    return utils.capitalizeFirstLetter(adjective)
+  },
+  randomNoun () {
+    const noun = _.sample(this.nouns())
+    return utils.capitalizeFirstLetter(noun)
+  },
+
   randomUniqueName () {
     let name
     while (true) {
-      name = `${_.sample(this.adjectives())}-${_.sample(this.nouns())}`
+      name = `${this.randomAdjective()} ${this.randomNoun()}`
       if (name && this.nameIsUnique(name)) {
         break
       }
     }
     return name
   }
-  // remixName (remix) {
-  //   let remixName = `${remix.name}-remix`
-  //   if (this.nameIsUnique(remixName)) {
-  //     return remixName
-  //   } else {
-  //     return `${remixName}-${remix.id}`
-  //   }
-  // }
 }

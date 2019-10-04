@@ -119,6 +119,11 @@ export default {
     return string.replace(/([^a-z0-9-]+)/ig, '-').toLowerCase() // same regex as glitch project names
   },
 
+  capitalizeFirstLetter (string) {
+    // 'dreams' -> 'Dreams'
+    return string.charAt(0).toUpperCase() + string.slice(1)
+  },
+
   // Connection Path Utils 🐙
 
   connectorCoords (cardId) {
