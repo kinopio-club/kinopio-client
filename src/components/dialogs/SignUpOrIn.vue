@@ -14,7 +14,8 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
         input(type="password" placeholder="Password" required)
       .row
         input(type="password" placeholder="Confirm Password" required)
-      button(type="submit") Sign Up
+      button(type="submit")
+        span Sign Up
 
   section(v-else)
     .row
@@ -24,7 +25,8 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
         input(type="email" placeholder="Email" required)
       .row
         input(type="password" placeholder="Password" required)
-      button(type="submit") Sign In
+      button(type="submit")
+        span Sign In
 
   section(v-if="isSigningUp")
     .button-wrap
@@ -44,6 +46,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
 </template>
 
 <script>
+import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 
 export default {
@@ -66,6 +69,7 @@ export default {
     }
   },
   // computed: {
+  // v-models here , see spaceDetails
   // },
   methods: {
     showIsSigningUp () {
@@ -77,31 +81,55 @@ export default {
     toggleResetVisible () {
       this.resetVisible = !this.resetVisible
     },
+    clientValidateSignUp (password, confirmPassword) {
+      if (password !== confirmPassword) {
+        // set error
+        // passwords don't match (or on passconfirm field: "Doesn't match Password")
+        return
+      }
+      return true
+    },
     signUp (event) {
-      console.log('🌹', event)
-      // possible errors
-      // email is invalid format (util: simple regex validator) (browser might prevent this)
+      const email = event.target[0].value
+      const password = event.target[1].value
+      const confirmPassword = event.target[2].value
+      const currentUser = utils.clone(this.$store.state.currentUser) // color, id, defaultConnectionTypeId, name, lastSpaceId, lastReadNewStuffId
+
+      console.log('🌹', email, password, confirmPassword, currentUser)
+
+      const shouldSignUp = this.clientValidateSignUp(password, confirmPassword)
+      if (!shouldSignUp) { return }
+
+      console.log('send sign up to server, fetch POST to user/sign-in')
+
+      // possible server errors
       // An account with this email already exists. Sign In to continue.
-      // on password confirm input: doesn't match Password
+      // (シ_ _)シ Something went wrong. Please try again or contact support.
+
+      // on @change in a field clear the errors for that field (have to use v-model or can change directly?)
+    },
+    signIn (event) {
+      const email = event.target[0].value
+      const password = event.target[1].value
+      console.log('🌼', email, password)
+
+      // possible server errors (all client issues handled by broser)
+      // no account exists with this email
+      // password incorrect
       // (シ_ _)シ Something went wrong. Please try again or contact support.
 
       // on @change in a field clear the errors for that field
     },
-    signIn (event) {
-      console.log('🌼', event)
-      // possible errors
-      // no account exists with this email
-      // password incorrect
-      // (シ_ _)シ Something went wrong. Please try again or contact support.
-    },
     resetPassword (event) {
       console.log('🚗', event)
+
       // success
-      // button.success
+      // button.success (non clickable, null event)
       // An email has been sent to you with a link to reset your password
 
       // possible errors
       // no account exists with this email
+      // on @change in a field clear the errors for that field
     }
   }
   // watch: {
