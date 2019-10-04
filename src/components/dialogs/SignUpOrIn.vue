@@ -2,18 +2,20 @@
 dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
   section
     .segmented-buttons
-      button(@click="showIsSigningUp" :class="{active : isSigningUp}") Sign Up
-      button(@click="hideIsSigningUp" :class="{active : !isSigningUp}") Sign In
-  section(v-if="isSigningUp")
+      button(@click="showSignUpVisible" :class="{active : signUpVisible}") Sign Up
+      button(@click="hideSignUpVisible" :class="{active : !signUpVisible}") Sign In
+  section(v-if="signUpVisible")
     .row
       p Create an account to share your spaces and access them anywhere
     form(@submit.prevent="signUp")
       .row
-        input(type="email" placeholder="Email" required)
+        input(type="email" placeholder="Email" required v-model="email")
       .row
-        input(type="password" placeholder="Password" required)
+        input(type="password" placeholder="Password" required @input="clearErrors" v-model="password")
       .row
-        input(type="password" placeholder="Confirm Password" required)
+        input(type="password" placeholder="Confirm Password" required @input="clearErrors")
+      .row(v-if="error.passwordMatch")
+        p.badge.danger Doesn't match Password
       button(type="submit")
         span Sign Up
 
@@ -22,13 +24,13 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
       p Welcome back
     form(@submit.prevent="signIn")
       .row
-        input(type="email" placeholder="Email" required)
+        input(type="email" placeholder="Email" required v-model="email")
       .row
-        input(type="password" placeholder="Password" required)
+        input(type="password" placeholder="Password" required v-model="password")
       button(type="submit")
         span Sign In
 
-  section(v-if="isSigningUp")
+  section(v-if="signUpVisible")
     .button-wrap
       // TODO TEMP link
       a(href="http://pketh.org/kinopio-plans")
@@ -59,32 +61,38 @@ export default {
   },
   data () {
     return {
-      isSigningUp: true, // switches between sign up or sign in
-      // signUpButtonLoader: false,
-      // signInButtonLoader: false,
-      // forgot password
-      resetVisible: false
+      email: '',
+      password: '',
+      signUpVisible: true,
+      resetVisible: false,
+      error: {
+        passwordMatch: false
+      }
+      // loading: {
+      //   signUpOrIn: false,
+      //   reset: false
+      // },
       // resetSuccess: true,
-      // resetButtonLoader: false
     }
   },
-  // computed: {
-  // v-models here , see spaceDetails
-  // },
   methods: {
-    showIsSigningUp () {
-      this.isSigningUp = true
+    showSignUpVisible () {
+      this.signUpVisible = true
+      this.clearErrors()
     },
-    hideIsSigningUp () {
-      this.isSigningUp = false
+    hideSignUpVisible () {
+      this.signUpVisible = false
+      this.clearErrors()
     },
     toggleResetVisible () {
       this.resetVisible = !this.resetVisible
     },
+    clearErrors () {
+      this.error.passwordMatch = false
+    },
     clientValidateSignUp (password, confirmPassword) {
       if (password !== confirmPassword) {
-        // set error
-        // passwords don't match (or on passconfirm field: "Doesn't match Password")
+        this.error.passwordMatch = true
         return
       }
       return true
@@ -105,8 +113,6 @@ export default {
       // possible server errors
       // An account with this email already exists. Sign In to continue.
       // (シ_ _)シ Something went wrong. Please try again or contact support.
-
-      // on @change in a field clear the errors for that field (have to use v-model or can change directly?)
     },
     signIn (event) {
       const email = event.target[0].value
@@ -135,7 +141,7 @@ export default {
   // watch: {
   //   visible (value) {
   //     if (value) {
-  //       this.removeAllConfirmationVisible = false
+  //       clear errors and inputs?
   //     }
   //   }
   // }
