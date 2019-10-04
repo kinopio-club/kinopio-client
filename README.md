@@ -13,14 +13,16 @@ git clone https://github.com/pketh/kinopio-client.git
 cd kinopio-client
 npm install
 npm install -g @vue/cli
+npm install -g hostile
+hostile set localhost kinopio.local
 ```
 
 ## Run
 
 ```
 vue ui
-Admin: http://localhost:8000
-App: http://localhost:8080
+Admin: http://kinopio.local:8000
+App: http://kinopio.local:8080
 ```
 
 ## Debugging
