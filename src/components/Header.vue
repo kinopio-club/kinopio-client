@@ -13,7 +13,9 @@ header
       SpaceDetails(:visible="spaceDetailsIsVisible")
 
   aside
-    .button-wrap.sign-in-or-up-button
+    //.button-wrap
+    //  button Share
+    .button-wrap
       button(@click.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}") Sign Up or In
       SignUpOrIn(:visible="signUpOrInIsVisible")
     User(:user="currentUser" :clickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true")
@@ -122,6 +124,7 @@ header
     overflow hidden
     text-overflow ellipsis
     max-width 250px
-  .sign-in-or-up-button
-    margin-right 6px
+  aside
+    > .button-wrap
+      margin-right 6px
 </style>
