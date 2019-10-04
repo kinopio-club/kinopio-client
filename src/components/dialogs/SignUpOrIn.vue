@@ -49,6 +49,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
 
 <script>
 import utils from '@/utils.js'
+import api from '@/api.js'
 import Loader from '@/components/Loader.vue'
 
 export default {
@@ -97,24 +98,24 @@ export default {
       }
       return true
     },
-    signUp (event) {
+    async signUp (event) {
       const email = event.target[0].value
       const password = event.target[1].value
       const confirmPassword = event.target[2].value
       const currentUser = utils.clone(this.$store.state.currentUser) // color, id, defaultConnectionTypeId, name, lastSpaceId, lastReadNewStuffId
-
-      console.log('🌹', email, password, confirmPassword, currentUser)
-
       const shouldSignUp = this.clientValidateSignUp(password, confirmPassword)
       if (!shouldSignUp) { return }
-
+      console.log('🌹', email, password, confirmPassword, currentUser)
       console.log('send sign up to server, fetch POST to user/sign-in')
+      // call API.js from a currentUser dispatch or commit instead?
+      const test = await api.hello()
+      console.log('🌷', test)
 
       // possible server errors
       // An account with this email already exists. Sign In to continue.
       // (シ_ _)シ Something went wrong. Please try again or contact support.
     },
-    signIn (event) {
+    async signIn (event) {
       const email = event.target[0].value
       const password = event.target[1].value
       console.log('🌼', email, password)
