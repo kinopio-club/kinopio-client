@@ -14,17 +14,17 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
         .button-wrap
           button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}") {{selectedSpace.name}}
           SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" :excludeCurrentSpace="true" @selectSpace="updateSelectedSpace" @closeDialog="closeDialogs")
+      .row(v-if="spaces.length")
+        label(:class="{active: shouldSwitchToSpace}" @click.prevent="toggleShouldSwitchToSpace")
+          input(type="checkbox" v-model="shouldSwitchToSpace")
+          span Switch to Space
       button(@click="toAnotherSpace")
         img.icon.move(src="@/assets/move.svg")
         span {{moveOrCopy}}
-    template(v-else)
+
+    template(v-if="!spaces.length")
       span.badge.danger No Other Spaces
       p Add a Space to {{moveOrCopy.toLowerCase()}} cards there
-  template(v-if="spaces.length")
-    section
-      label(:class="{active: shouldSwitchToSpace}" @click.prevent="toggleShouldSwitchToSpace")
-        input(type="checkbox" v-model="shouldSwitchToSpace")
-        span Switch to Space
 </template>
 
 <script>
