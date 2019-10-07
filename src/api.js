@@ -1,6 +1,7 @@
-// for queued and unqueued kinopio api requests
+// kinopio api interface
 
 // https://www.notion.so/kinopio/API-docs
+// TODO meta page url
 
 let host = 'https://api.kinopio.club'
 if (process.env.NODE_ENV === 'development') {
@@ -18,33 +19,29 @@ export default {
       console.error(error)
     }
   },
+  options (body, apiKey) {
+    const headers = new Headers({ 'Content-Type': 'application/json' })
+    if (apiKey) {
+      headers.append('Authorization', apiKey)
+    }
+    return {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body)
+    }
+  },
   async signUp (email, password, currentUser) {
-    // try catch
-    console.log('send sign up to server, fetch POST to user/sign-up')
-    console.log('🌹', email, password, currentUser)
     const body = currentUser
     body.email = email
     body.password = password
+    const options = this.options(body)
     try {
-      const response = await fetch(`${host}/user/sign-up`, {
-        method: 'POST',
-        body: body
-      })
+      const response = await fetch(`${host}/user`, options)
       const data = await response.json()
-      console.log('🌸', response, data)
       return data
     } catch (error) {
       console.error(error)
     }
-
-    // format response into a thing i can return for signUpOrIn
-    // return response // (might be a error one)
-
-    // eg response = {
-    //   success: false, if true the api should do all the new account set up stuff like uploading spaces
-    //   error: true,
-    //   message: ''
-    // }
   }
 
   // queue:

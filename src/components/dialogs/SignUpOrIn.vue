@@ -10,17 +10,17 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
       p Create an account to share your spaces and access them anywhere
     form(@submit.prevent="signUp")
       .row
-        input(type="email" placeholder="Email" required v-model="email")
+        input(type="email" placeholder="Email" required v-model="email" @input="clearErrors")
       .row(v-if="error.emailAlreadyExists")
-        p (シ_ _)シ Something went wrong, Please try again or contact support
+        .badge.info An account with this email already exists, Sign In instead
       .row
         input(type="password" placeholder="Password" required @input="clearErrors" v-model="password")
       .row
         input(type="password" placeholder="Confirm Password" required @input="clearErrors")
       .row(v-if="error.passwordMatch")
-        p.badge.danger Doesn't match Password
+        .badge.danger Doesn't match Password
       .row(v-if="error.unknownServerError")
-        p (シ_ _)シ Something went wrong, Please try again or contact support
+        .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
       button(type="submit" :class="{active : loading.signUpOrIn}")
         span Sign Up
         Loader(:visible="loading.signUpOrIn")
@@ -30,9 +30,9 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
       p Welcome back
     form(@submit.prevent="signIn")
       .row
-        input(type="email" placeholder="Email" required v-model="email")
+        input(type="email" placeholder="Email" required v-model="email" @input="clearErrors")
       .row
-        input(type="password" placeholder="Password" required v-model="password")
+        input(type="password" placeholder="Password" required v-model="password" @input="clearErrors")
       button(type="submit" :class="{active : loading.signUpOrIn}")
         span Sign In
         Loader(:visible="loading.signUpOrIn")
@@ -87,6 +87,11 @@ export default {
     }
   },
   methods: {
+    clearErrors () {
+      for (const errorType in this.error) {
+        this.error[errorType] = false
+      }
+    },
     showSignUpVisible () {
       this.signUpVisible = true
       this.clearErrors()
@@ -98,33 +103,37 @@ export default {
     toggleResetVisible () {
       this.resetVisible = !this.resetVisible
     },
-    clearErrors () {
-      this.error.passwordMatch = false
+    parseError (response) {
+      const error = response.errors[0]
+      const existingUserMessages = [
+        'email must be unique',
+        'id must be unique'
+      ]
+      if (existingUserMessages.includes(error.message)) {
+        this.error.emailAlreadyExists = true
+      } else {
+        this.error.unknownServerError = true
+      }
     },
-    clientValidateSignUp (password, confirmPassword) {
+    async signUp (event) {
+      if (this.loading.signUpOrIn) { return }
+      this.clearErrors()
+      const email = event.target[0].value
+      const password = event.target[1].value
+      const confirmPassword = event.target[2].value
+      const currentUser = utils.clone(this.$store.state.currentUser)
       if (password !== confirmPassword) {
         this.error.passwordMatch = true
         return
       }
-      return true
-    },
-    async signUp (event) {
-      if (this.loading.signUpOrIn) { return }
       this.loading.signUpOrIn = true
-      const email = event.target[0].value
-      const password = event.target[1].value
-      const confirmPassword = event.target[2].value
-      const currentUser = utils.clone(this.$store.state.currentUser) // color, id, defaultConnectionTypeId, name, lastSpaceId, lastReadNewStuffId
-      const shouldSignUp = this.clientValidateSignUp(password, confirmPassword)
-      if (!shouldSignUp) { return }
-      const signUp = await api.signUp(email, password, currentUser)
-
-      console.log('🌷', signUp)
+      const response = await api.signUp(email, password, currentUser)
       this.loading.signUpOrIn = false
-
-      // possible server errors
-      // error.emailAlreadyExists: An account with this email already exists. Sign In to continue.
-      // error.unknownServerError: (シ_ _)シ Something went wrong. Please try again or contact support.
+      if (response.errors) {
+        this.parseError(response)
+      } else {
+        console.log('❇️ create new user account, sign in', response)
+      }
     },
     async signIn (event) {
       if (this.loading.signUpOrIn) { return }
@@ -159,14 +168,14 @@ export default {
 
       this.loading.reset = false
     }
+  },
+  watch: {
+    visible (value) {
+      if (value) {
+        this.clearErrors()
+      }
+    }
   }
-  // watch: {
-  //   visible (value) {
-  //     if (value) {
-  //       clear errors and inputs?
-  //     }
-  //   }
-  // }
 }
 </script>
 

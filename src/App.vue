@@ -119,7 +119,6 @@ label // used for checkbox buttons
   .badge
     display inline
     vertical-align middle
-    background var(--info-background)
   &.danger
     &:hover,
     &.hover,
@@ -143,7 +142,6 @@ p
   .badge
     display inline
     vertical-align middle
-    background var(--info-background)
 
 dialog
   width 250px
@@ -280,9 +278,6 @@ ul.results-list
       background-color var(--secondary-active-background)
       box-shadow var(--active-inset-shadow)
 
-.danger
-  background-color var(--danger-background)
-
 .badge
   min-width 17px
   min-height 19px
@@ -291,10 +286,14 @@ ul.results-list
   margin-right 6px
   vertical-align -1px
   position relative
+  background var(--info-background)
   &.checked
     background-image url('assets/checkmark.svg')
     background-repeat no-repeat
     background-position center
+
+.danger
+  background-color var(--danger-background)
 
 .space-moon
   transform rotate(-35deg)
