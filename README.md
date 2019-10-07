@@ -4,7 +4,7 @@
 
 <img src="./src/assets/logo.png" alt="logo" width="200">
 
-The place for people to tap and smile.
+The place for people to tap, drag, and smile.
 
 ## Install
 

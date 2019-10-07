@@ -10,7 +10,6 @@ if (process.env.NODE_ENV === 'development') {
 export default {
   async hello () {
     try {
-      console.log('✨', process.env, process.env.NODE_ENV)
       const response = await fetch(`${host}/`)
       const data = await response.json()
       console.log('🌸', response, data)
@@ -21,6 +20,23 @@ export default {
   },
   async signUp (email, password, currentUser) {
     // try catch
+    console.log('send sign up to server, fetch POST to user/sign-up')
+    console.log('🌹', email, password, currentUser)
+    const body = currentUser
+    body.email = email
+    body.password = password
+    try {
+      const response = await fetch(`${host}/user/sign-up`, {
+        method: 'POST',
+        body: body
+      })
+      const data = await response.json()
+      console.log('🌸', response, data)
+      return data
+    } catch (error) {
+      console.error(error)
+    }
+
     // format response into a thing i can return for signUpOrIn
     // return response // (might be a error one)
 

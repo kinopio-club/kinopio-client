@@ -128,7 +128,11 @@ label // used for checkbox buttons
     &:active,
     &.active
       background var(--danger-active-background)
-
+  .loader
+    height 14px
+    width 14px
+    vertical-align -3px
+    margin-left 3px
 label
   padding-bottom 4px
   display inline-block

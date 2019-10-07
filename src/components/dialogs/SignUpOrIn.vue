@@ -4,20 +4,26 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
     .segmented-buttons
       button(@click="showSignUpVisible" :class="{active : signUpVisible}") Sign Up
       button(@click="hideSignUpVisible" :class="{active : !signUpVisible}") Sign In
+
   section(v-if="signUpVisible")
     .row
       p Create an account to share your spaces and access them anywhere
     form(@submit.prevent="signUp")
       .row
         input(type="email" placeholder="Email" required v-model="email")
+      .row(v-if="error.emailAlreadyExists")
+        p (シ_ _)シ Something went wrong, Please try again or contact support
       .row
         input(type="password" placeholder="Password" required @input="clearErrors" v-model="password")
       .row
         input(type="password" placeholder="Confirm Password" required @input="clearErrors")
       .row(v-if="error.passwordMatch")
         p.badge.danger Doesn't match Password
-      button(type="submit")
+      .row(v-if="error.unknownServerError")
+        p (シ_ _)シ Something went wrong, Please try again or contact support
+      button(type="submit" :class="{active : loading.signUpOrIn}")
         span Sign Up
+        Loader(:visible="loading.signUpOrIn")
 
   section(v-else)
     .row
@@ -27,8 +33,9 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
         input(type="email" placeholder="Email" required v-model="email")
       .row
         input(type="password" placeholder="Password" required v-model="password")
-      button(type="submit")
+      button(type="submit" :class="{active : loading.signUpOrIn}")
         span Sign In
+        Loader(:visible="loading.signUpOrIn")
 
   section(v-if="signUpVisible")
     .button-wrap
@@ -42,8 +49,9 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
       form.reset-form(@submit.prevent="resetPassword")
         .row
           input(type="email" placeholder="Email" required)
-        button
+        button(:class="{active : loading.reset}")
           span Reset Password
+          Loader(:visible="loading.reset")
 
 </template>
 
@@ -67,13 +75,15 @@ export default {
       signUpVisible: true,
       resetVisible: false,
       error: {
-        passwordMatch: false
-      }
-      // loading: {
-      //   signUpOrIn: false,
-      //   reset: false
-      // },
-      // resetSuccess: true,
+        passwordMatch: false,
+        unknownServerError: false,
+        emailAlreadyExists: false
+      },
+      loading: {
+        signUpOrIn: false,
+        reset: false
+      },
+      resetSuccess: true
     }
   },
   methods: {
@@ -99,26 +109,34 @@ export default {
       return true
     },
     async signUp (event) {
+      if (this.loading.signUpOrIn) { return }
+      this.loading.signUpOrIn = true
       const email = event.target[0].value
       const password = event.target[1].value
       const confirmPassword = event.target[2].value
       const currentUser = utils.clone(this.$store.state.currentUser) // color, id, defaultConnectionTypeId, name, lastSpaceId, lastReadNewStuffId
       const shouldSignUp = this.clientValidateSignUp(password, confirmPassword)
       if (!shouldSignUp) { return }
-      console.log('🌹', email, password, confirmPassword, currentUser)
-      console.log('send sign up to server, fetch POST to user/sign-in')
-      // call API.js from a currentUser dispatch or commit instead?
-      const test = await api.hello()
-      console.log('🌷', test)
+      const signUp = await api.signUp(email, password, currentUser)
+
+      console.log('🌷', signUp)
+      this.loading.signUpOrIn = false
 
       // possible server errors
-      // An account with this email already exists. Sign In to continue.
-      // (シ_ _)シ Something went wrong. Please try again or contact support.
+      // error.emailAlreadyExists: An account with this email already exists. Sign In to continue.
+      // error.unknownServerError: (シ_ _)シ Something went wrong. Please try again or contact support.
     },
     async signIn (event) {
+      if (this.loading.signUpOrIn) { return }
+      this.loading.signUpOrIn = true
+
       const email = event.target[0].value
       const password = event.target[1].value
       console.log('🌼', email, password)
+
+      const test = await api.hello()
+      console.log('🌷', test)
+      this.loading.signUpOrIn = false
 
       // possible server errors (all client issues handled by broser)
       // no account exists with this email
@@ -128,7 +146,8 @@ export default {
       // on @change in a field clear the errors for that field
     },
     resetPassword (event) {
-      console.log('🚗', event)
+      if (this.loading.reset) { return }
+      this.loading.reset = true
 
       // success
       // button.success (non clickable, null event)
@@ -137,6 +156,8 @@ export default {
       // possible errors
       // no account exists with this email
       // on @change in a field clear the errors for that field
+
+      this.loading.reset = false
     }
   }
   // watch: {
