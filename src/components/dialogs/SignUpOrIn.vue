@@ -5,13 +5,14 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
       button(@click="showSignUpVisible" :class="{active : signUpVisible}") Sign Up
       button(@click="hideSignUpVisible" :class="{active : !signUpVisible}") Sign In
 
+  // Sign Up
   section(v-if="signUpVisible")
     .row
       p Create an account to share your spaces and access them anywhere
     form(@submit.prevent="signUp")
       .row
         input(type="email" placeholder="Email" required v-model="email" @input="clearErrors")
-      .row(v-if="error.emailAlreadyExists")
+      .row(v-if="error.accountAlreadyExists")
         .badge.info An account with this email already exists, Sign In instead
       .row
         input(type="password" placeholder="Password" required @input="clearErrors" v-model="password")
@@ -25,6 +26,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
         span Sign Up
         Loader(:visible="loading.signUpOrIn")
 
+  // Sign In
   section(v-else)
     .row
       p Welcome back
@@ -33,15 +35,22 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
         input(type="email" placeholder="Email" required v-model="email" @input="clearErrors")
       .row
         input(type="password" placeholder="Password" required v-model="password" @input="clearErrors")
+      .row(v-if="error.unknownServerError")
+        .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+      .row(v-if="error.signInCredentials")
+        .badge.danger Could not sign in, incorrect email or password
       button(type="submit" :class="{active : loading.signUpOrIn}")
         span Sign In
         Loader(:visible="loading.signUpOrIn")
 
+  // Privacy Policy
   section(v-if="signUpVisible")
     .button-wrap
       // TODO TEMP link
       a(href="http://pketh.org/kinopio-plans")
         button Privacy Policy and TOS →
+
+  // Forgot Password
   section(v-else)
     button(@click="toggleResetVisible" :class="{active : resetVisible}")
       span Forgot Password?
@@ -77,7 +86,8 @@ export default {
       error: {
         passwordMatch: false,
         unknownServerError: false,
-        emailAlreadyExists: false
+        accountAlreadyExists: false,
+        signInCredentials: false
       },
       loading: {
         signUpOrIn: false,
@@ -92,29 +102,50 @@ export default {
         this.error[errorType] = false
       }
     },
+
+    hasErrors () {
+      let hasErrors
+      for (const errorType in this.error) {
+        if (this.error[errorType] === true) {
+          hasErrors = true
+        }
+      }
+      return hasErrors
+    },
+
     showSignUpVisible () {
       this.signUpVisible = true
       this.clearErrors()
     },
+
     hideSignUpVisible () {
       this.signUpVisible = false
       this.clearErrors()
     },
+
     toggleResetVisible () {
       this.resetVisible = !this.resetVisible
+      this.clearErrors()
     },
-    parseError (response) {
-      const error = response.errors[0]
-      const existingUserMessages = [
-        'email must be unique',
-        'id must be unique'
-      ]
-      if (existingUserMessages.includes(error.message)) {
-        this.error.emailAlreadyExists = true
+
+    parseErrors (response) {
+      if (response.type === 'unique violation') {
+        this.error.accountAlreadyExists = true
+      } else if (response.status === 401) {
+        this.error.signInCredentials = true
       } else {
         this.error.unknownServerError = true
       }
     },
+
+    signUpPasswordsIsMatch (password, confirmPassword) {
+      if (password !== confirmPassword) {
+        this.error.passwordMatch = true
+        return
+      }
+      return true
+    },
+
     async signUp (event) {
       if (this.loading.signUpOrIn) { return }
       this.clearErrors()
@@ -122,38 +153,35 @@ export default {
       const password = event.target[1].value
       const confirmPassword = event.target[2].value
       const currentUser = utils.clone(this.$store.state.currentUser)
-      if (password !== confirmPassword) {
-        this.error.passwordMatch = true
-        return
-      }
+      if (!this.signUpPasswordsIsMatch(password, confirmPassword)) { return }
       this.loading.signUpOrIn = true
       const response = await api.signUp(email, password, currentUser)
       this.loading.signUpOrIn = false
-      if (response.errors) {
-        this.parseError(response)
+      if (response.error) {
+        this.parseErrors(response)
       } else {
         console.log('❇️ create new user account, sign in', response)
+        // update currentUser(and cache) w apikey, sign in dialog/button should be hidden
+        // upload spaces/server handles unique ids
       }
     },
+
     async signIn (event) {
       if (this.loading.signUpOrIn) { return }
-      this.loading.signUpOrIn = true
-
       const email = event.target[0].value
       const password = event.target[1].value
-      console.log('🌼', email, password)
-
-      const test = await api.hello()
-      console.log('🌷', test)
+      this.loading.signUpOrIn = true
+      const response = await api.signIn(email, password)
       this.loading.signUpOrIn = false
-
-      // possible server errors (all client issues handled by broser)
-      // no account exists with this email
-      // password incorrect
-      // (シ_ _)シ Something went wrong. Please try again or contact support.
-
-      // on @change in a field clear the errors for that field
+      if (response.error) {
+        this.parseErrors(response)
+      } else {
+        console.log('❇️ sign in', response)
+        // do sign in things, upload local spaces, like fetch spaces
+        // if syncing spaces with the same id, use the lastcached version (think through w offline/multiuser sync scenarios)
+      }
     },
+
     resetPassword (event) {
       if (this.loading.reset) { return }
       this.loading.reset = true
@@ -168,6 +196,7 @@ export default {
 
       this.loading.reset = false
     }
+
   },
   watch: {
     visible (value) {

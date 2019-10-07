@@ -2,6 +2,7 @@
 
 // https://www.notion.so/kinopio/API-docs
 // TODO meta page url
+// import cache from '@/cache.js' use for getting apikey to use in options
 
 let host = 'https://api.kinopio.club'
 if (process.env.NODE_ENV === 'development') {
@@ -9,27 +10,38 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 export default {
-  async hello () {
-    try {
-      const response = await fetch(`${host}/`)
-      const data = await response.json()
-      console.log('🌸', response, data)
-      return data
-    } catch (error) {
-      console.error(error)
-    }
-  },
-  options (body, apiKey) {
+  options (body) {
     const headers = new Headers({ 'Content-Type': 'application/json' })
-    if (apiKey) {
-      headers.append('Authorization', apiKey)
-    }
+    // if (apiKey in session(can i access currentuser store here) or localstorage cached user) {
+    //   headers.append('Authorization', apiKey)
+    // }
     return {
       method: 'POST',
       headers,
       body: JSON.stringify(body)
     }
   },
+
+  async normalizedResponse (response) {
+    const success = [200, 201, 202, 204]
+    if (success.includes(response.status)) {
+      const data = await response.json()
+      return data
+    } else {
+      const data = await response.json()
+      let error = {
+        status: response.status,
+        statusText: response.statusText,
+        error: true
+      }
+      if (data.errors) {
+        error.message = data.errors[0].message
+        error.type = data.errors[0].type
+      }
+      return error
+    }
+  },
+
   async signUp (email, password, currentUser) {
     const body = currentUser
     body.email = email
@@ -37,8 +49,23 @@ export default {
     const options = this.options(body)
     try {
       const response = await fetch(`${host}/user`, options)
-      const data = await response.json()
-      return data
+      const normalizedResponse = await this.normalizedResponse(response)
+      return normalizedResponse
+    } catch (error) {
+      console.error(error)
+    }
+  },
+
+  async signIn (email, password) {
+    const body = {
+      email: email,
+      password: password
+    }
+    const options = this.options(body)
+    try {
+      const response = await fetch(`${host}/user/sign-in`, options)
+      const normalizedResponse = await this.normalizedResponse(response)
+      return normalizedResponse
     } catch (error) {
       console.error(error)
     }
