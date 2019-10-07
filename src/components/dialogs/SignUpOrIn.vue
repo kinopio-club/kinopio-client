@@ -125,7 +125,6 @@ export default {
 
     toggleResetVisible () {
       this.resetVisible = !this.resetVisible
-      this.clearErrors()
     },
 
     parseErrors (response) {

@@ -22,7 +22,7 @@ export default {
     }
   },
 
-  async normalizedResponse (response) {
+  async normalizeResponse (response) {
     const success = [200, 201, 202, 204]
     if (success.includes(response.status)) {
       const data = await response.json()
@@ -49,7 +49,7 @@ export default {
     const options = this.options(body)
     try {
       const response = await fetch(`${host}/user`, options)
-      const normalizedResponse = await this.normalizedResponse(response)
+      const normalizedResponse = await this.normalizeResponse(response)
       return normalizedResponse
     } catch (error) {
       console.error(error)
@@ -64,7 +64,7 @@ export default {
     const options = this.options(body)
     try {
       const response = await fetch(`${host}/user/sign-in`, options)
-      const normalizedResponse = await this.normalizedResponse(response)
+      const normalizedResponse = await this.normalizeResponse(response)
       return normalizedResponse
     } catch (error) {
       console.error(error)
