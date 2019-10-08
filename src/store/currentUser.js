@@ -12,7 +12,8 @@ export default {
     color: randomColor({ luminosity: 'light' }),
     name: undefined,
     defaultConnectionTypeId: '',
-    lastReadNewStuffId: undefined
+    lastReadNewStuffId: undefined,
+    prefersDarkTheme: false
   },
   getters: {
     isCurrentUser: (state) => (userId) => {

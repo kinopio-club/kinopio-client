@@ -61,7 +61,7 @@ export default {
       if (name.length) {
         return name
       } else {
-        return `space-${id}`
+        return `Space ${id}`
       }
     }
   },

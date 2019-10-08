@@ -111,6 +111,7 @@ export default {
 
     hideSignUpVisible () {
       this.signUpVisible = false
+      this.resetVisible = false
       this.clearErrors()
     },
 
