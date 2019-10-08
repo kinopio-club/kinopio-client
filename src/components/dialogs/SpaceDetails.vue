@@ -1,10 +1,9 @@
 <template lang="pug">
 dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs")
   section
-    .row
-      //.badge(:style="typeGradient()")
-      //  img.space-moon(src="@/assets/space-moon.svg")
-      input(placeholder="name" v-model="spaceName")
+    //.badge(:style="typeGradient()")
+    //  img.space-moon(src="@/assets/space-moon.svg")
+    input(placeholder="name" v-model="spaceName")
 
     button(@click="removeCurrentSpace")
       img.icon(src="@/assets/remove.svg")
@@ -153,8 +152,8 @@ export default {
 <style lang="stylus">
 .space-details
   top calc(100% - 8px)
-  .row
-    .badge
-      width 19px
+  // .row
+  //   .badge
+  //     width 19px
 
 </style>

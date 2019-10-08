@@ -1,17 +1,16 @@
 <template lang="pug">
 dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDialogs")
   section.meta-section
-    .row
-      textarea.name(
-        ref="name"
-        rows="1"
-        placeholder="Tell me your dreams"
-        v-model="name"
-        v-focus
-        @keydown.enter="completeEditing"
-        @keydown.esc="closeCard"
-        data-type="name"
-      )
+    textarea.name(
+      ref="name"
+      rows="1"
+      placeholder="Tell me your dreams"
+      v-model="name"
+      v-focus
+      @keydown.enter="completeEditing"
+      @keydown.esc="closeCard"
+      data-type="name"
+    )
     button(@click="removeCard")
       img.icon(src="@/assets/remove.svg")
       span Remove
@@ -176,4 +175,6 @@ export default {
 .card-details
   .meta-section
     background-color var(--secondary-background)
+  textarea
+    margin-bottom 5px
 </style>

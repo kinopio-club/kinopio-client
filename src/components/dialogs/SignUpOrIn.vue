@@ -7,38 +7,28 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
 
   // Sign Up
   section(v-if="signUpVisible")
-    .row
-      p Create an account to share your spaces and access them anywhere
+    p Create an account to share your spaces and access them anywhere
     form(@submit.prevent="signUp")
-      .row
-        input(type="email" placeholder="Email" required v-model="email" @input="clearErrors")
-      .row(v-if="error.accountAlreadyExists")
-        .badge.info An account with this email already exists, Sign In instead
-      .row
-        input(type="password" placeholder="Password" required @input="clearErrors" v-model="password")
-      .row
-        input(type="password" placeholder="Confirm Password" required @input="clearErrors")
-      .row(v-if="error.passwordMatch")
-        .badge.danger Doesn't match Password
-      .row(v-if="error.unknownServerError")
-        .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+      input(type="email" placeholder="Email" required v-model="email" @input="clearErrors")
+      .badge.info(v-if="error.accountAlreadyExists") An account with this email already exists, Sign In instead
+      input(type="password" placeholder="Password" required @input="clearErrors" v-model="password")
+      input(type="password" placeholder="Confirm Password" required @input="clearErrors")
+      .badge.danger(v-if="error.passwordMatch") Doesn't match Password
+      .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
+      .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
       button(type="submit" :class="{active : loading.signUpOrIn}")
         span Sign Up
         Loader(:visible="loading.signUpOrIn")
 
   // Sign In
   section(v-else)
-    .row
-      p Welcome back
+    p Welcome back
     form(@submit.prevent="signIn")
-      .row
-        input(type="email" placeholder="Email" required v-model="email" @input="clearErrors")
-      .row
-        input(type="password" placeholder="Password" required v-model="password" @input="clearErrors")
-      .row(v-if="error.unknownServerError")
-        .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-      .row(v-if="error.signInCredentials")
-        .badge.danger Could not sign in, incorrect email or password
+      input(type="email" placeholder="Email" required v-model="email" @input="clearErrors")
+      input(type="password" placeholder="Password" required v-model="password" @input="clearErrors")
+      .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
+      .badge.danger(v-if="error.signInCredentials") Could not sign in, incorrect email or password
+      .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
       button(type="submit" :class="{active : loading.signUpOrIn}")
         span Sign In
         Loader(:visible="loading.signUpOrIn")
@@ -54,13 +44,13 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
   section(v-else)
     button(@click="toggleResetVisible" :class="{active : resetVisible}")
       span Forgot Password?
-    template(v-if="resetVisible")
+    div(v-show="resetVisible")
       form.reset-form(@submit.prevent="resetPassword")
-        .row
-          input(type="email" placeholder="Email" required)
-        button(:class="{active : loading.reset}")
-          span Reset Password
-          Loader(:visible="loading.reset")
+        input(type="email" placeholder="Email" ref="resetPasswordEmail" required)
+        button(type="submit" :class="{active : loading.resetPassword, success : resetSuccess}")
+          span(v-if="resetSuccess") Password Reset Email Sent
+          span(v-else) Reset Password
+          Loader(:visible="loading.resetPassword")
 
 </template>
 
@@ -87,13 +77,14 @@ export default {
         passwordMatch: false,
         unknownServerError: false,
         accountAlreadyExists: false,
-        signInCredentials: false
+        signInCredentials: false,
+        tooManyAttempts: false
       },
       loading: {
         signUpOrIn: false,
-        reset: false
+        resetPassword: false
       },
-      resetSuccess: true
+      resetSuccess: false
     }
   },
   methods: {
@@ -132,6 +123,8 @@ export default {
         this.error.accountAlreadyExists = true
       } else if (response.status === 401) {
         this.error.signInCredentials = true
+      } else if (response.status === 429) {
+        this.error.tooManyAttempts = true
       } else {
         this.error.unknownServerError = true
       }
@@ -181,19 +174,13 @@ export default {
       }
     },
 
-    resetPassword (event) {
-      if (this.loading.reset) { return }
-      this.loading.reset = true
-
-      // success
-      // button.success (non clickable, null event)
-      // An email has been sent to you with a link to reset your password
-
-      // possible errors
-      // no account exists with this email
-      // on @change in a field clear the errors for that field
-
-      this.loading.reset = false
+    async resetPassword (event) {
+      if (this.loading.resetPassword || this.resetSuccess) { return }
+      const email = event.target[0].value
+      this.loading.resetPassword = true
+      await api.resetPassword(email)
+      this.loading.resetPassword = false
+      this.resetSuccess = true
     }
 
   },
@@ -214,4 +201,7 @@ export default {
   right 8px
   .reset-form
     margin-top 10px
+  p,
+  .badge
+    margin-bottom 10px
 </style>

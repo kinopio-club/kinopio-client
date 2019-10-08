@@ -113,6 +113,4 @@ export default {
     margin-left 0
   button + button
     margin-top 10px
-  .success
-    background-color var(--success-background)
 </style>

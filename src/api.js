@@ -48,7 +48,7 @@ export default {
     body.password = password
     const options = this.options(body)
     try {
-      const response = await fetch(`${host}/user`, options)
+      const response = await fetch(`${host}/user/sign-up`, options)
       const normalizedResponse = await this.normalizeResponse(response)
       return normalizedResponse
     } catch (error) {
@@ -64,6 +64,20 @@ export default {
     const options = this.options(body)
     try {
       const response = await fetch(`${host}/user/sign-in`, options)
+      const normalizedResponse = await this.normalizeResponse(response)
+      return normalizedResponse
+    } catch (error) {
+      console.error(error)
+    }
+  },
+
+  async resetPassword (email) {
+    const body = {
+      email
+    }
+    const options = this.options(body)
+    try {
+      const response = await fetch(`${host}/user/reset-password`, options)
       const normalizedResponse = await this.normalizeResponse(response)
       return normalizedResponse
     } catch (error) {

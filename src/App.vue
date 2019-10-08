@@ -88,6 +88,7 @@ textarea
   border-bottom 1px solid var(--primary)
   border-radius 0
   padding 0
+  margin-bottom 10px
 
 button,
 label // used for checkbox buttons
@@ -127,6 +128,8 @@ label // used for checkbox buttons
     &:active,
     &.active
       background var(--danger-active-background)
+  &.success
+    background var(--success-background)
   .loader
     height 14px
     width 14px
@@ -135,6 +138,8 @@ label // used for checkbox buttons
 label
   padding-bottom 4px
   display inline-block
+  input
+    margin 0
 
 p
   margin 0
@@ -182,6 +187,8 @@ dialog
     margin-bottom 10px
     display flex
     position relative
+    input
+      margin-bottom 0
   section
     padding 8px
     &:first-child
