@@ -293,7 +293,8 @@ ul.results-list
   margin-right 6px
   vertical-align -1px
   position relative
-  background var(--info-background)
+  &.info
+    background var(--info-background)
   &.checked
     background-image url('assets/checkmark.svg')
     background-repeat no-repeat

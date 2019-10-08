@@ -9,10 +9,10 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.stop ref="dialog")
   section
     p Download
     button(@click="downloadTxt")
-      span.badge txt
+      span.badge.info txt
       span Card Names
     button(@click="downloadJSON")
-      span.badge json
+      span.badge.info json
       span All Data
     a#export-downlaod-anchor.hidden
 

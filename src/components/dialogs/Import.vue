@@ -5,7 +5,7 @@ dialog.import.narrow(v-if="visible" :open="visible" @click.stop ref="dialog")
   section
     p From an exported space
     button(@click="selectFile")
-      span.badge json
+      span.badge.info json
       span Select File
     Loader(:visible="loading")
     input.hidden(type="file" ref="input" accept=".json" @change="readFile")
