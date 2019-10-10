@@ -22,6 +22,15 @@ export default {
     window.localStorage.clear()
   },
 
+  // queue
+
+  queue () {
+    return this.getLocal('queue') || []
+  },
+  saveQueue (queue) {
+    this.storeLocal('queue', queue)
+  },
+
   // user
 
   user () {
