@@ -22,15 +22,6 @@ export default {
     window.localStorage.clear()
   },
 
-  // queue
-
-  queue () {
-    return this.getLocal('queue') || []
-  },
-  saveQueue (queue) {
-    this.storeLocal('queue', queue)
-  },
-
   // user
 
   user () {
@@ -46,6 +37,7 @@ export default {
   },
 
   // space
+
   space (spaceId) {
     return this.getLocal(`space-${spaceId}`) || {}
   },
@@ -90,6 +82,7 @@ export default {
   },
 
   // removed spaces
+
   removedSpace (spaceId) {
     return this.getLocal(`space-${spaceId}`) || {}
   },
@@ -120,5 +113,15 @@ export default {
       return b.removeDate - a.removeDate
     })
     return sortedSpaces
+  },
+
+  // api queue
+
+  queue () {
+    return this.getLocal('queue') || []
+  },
+  saveQueue (queue) {
+    this.storeLocal('queue', queue)
   }
+
 }

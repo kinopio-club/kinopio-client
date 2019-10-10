@@ -55,9 +55,12 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
 </template>
 
 <script>
+import nanoid from 'nanoid'
+
 import utils from '@/utils.js'
 import api from '@/api.js'
 import Loader from '@/components/Loader.vue'
+import cache from '@/cache.js'
 
 export default {
   name: 'SignUpOrIn',
@@ -120,6 +123,13 @@ export default {
     },
 
     parseErrors (response) {
+      console.warn(response)
+      this.loading.signUpOrIn = false
+      this.loading.resetPassword = false
+      if (!response) {
+        this.error.unknownServerError = true
+        return
+      }
       if (response.type === 'unique violation') {
         this.error.accountAlreadyExists = true
       } else if (response.status === 401) {
@@ -141,7 +151,6 @@ export default {
 
     async signUp (event) {
       if (this.loading.signUpOrIn) { return }
-      this.clearErrors()
       const email = event.target[0].value
       const password = event.target[1].value
       const confirmPassword = event.target[2].value
@@ -149,13 +158,10 @@ export default {
       if (!this.signUpPasswordsIsMatch(password, confirmPassword)) { return }
       this.loading.signUpOrIn = true
       const response = await api.signUp(email, password, currentUser)
-      this.loading.signUpOrIn = false
-      if (response.error) {
+      if (!response || response.error) {
         this.parseErrors(response)
       } else {
-        console.log('❇️ create new user account, sign in', response)
-        // update currentUser(and cache) w apikey, sign in dialog/button should be hidden
-        // upload spaces/server handles unique ids
+        await this.signInOrUp(response.apiKey)
       }
     },
 
@@ -165,13 +171,24 @@ export default {
       const password = event.target[1].value
       this.loading.signUpOrIn = true
       const response = await api.signIn(email, password)
-      this.loading.signUpOrIn = false
-      if (response.error) {
+      if (!response || response.error) {
         this.parseErrors(response)
       } else {
-        console.log('❇️ sign in', response)
-        // do sign in things, upload local spaces, like fetch spaces
-        // if syncing spaces with the same id, use the lastcached version (think through w offline/multiuser sync scenarios)
+        await this.signInOrUp(response.apiKey)
+        // get /user which should include spaces
+        // update any spaces which dont exist in ls (for spaceDetails)
+      }
+    },
+
+    async signInOrUp (apiKey) {
+      this.updateIdsInSpacesToEnsureUniqueForeignKeys()
+      const response = await api.postMultipleSpaces(apiKey)
+      this.loading.signUpOrIn = false
+      if (!response || response.error) {
+        this.parseErrors(response)
+      } else {
+        this.$store.commit('currentUser/apiKey', apiKey)
+        this.$store.commit('closeAllDialogs')
       }
     },
 
@@ -182,6 +199,53 @@ export default {
       await api.resetPassword(email)
       this.loading.resetPassword = false
       this.resetSuccess = true
+    },
+
+    updateIds (object, key, idDeltas) {
+      const index = idDeltas.findIndex(id => object[key] === id.prevId)
+      if (index >= 0) {
+        return idDeltas[index].newId
+      } else {
+        return object[key]
+      }
+    },
+
+    updateIdsInSpacesToEnsureUniqueForeignKeys () {
+      let spaces = cache.getAllSpaces()
+      spaces.map(space => {
+        const cardIdDeltas = []
+        const connectionTypeIdDeltas = []
+        space.cards = space.cards.map(card => {
+          const newId = nanoid()
+          cardIdDeltas.push({
+            prevId: card.id,
+            newId
+          })
+          card.id = newId
+          return card
+        })
+        space.connectionTypes = space.connectionTypes.map(type => {
+          const newId = nanoid()
+          connectionTypeIdDeltas.push({
+            prevId: type.id,
+            newId
+          })
+          type.id = newId
+          return type
+        })
+        space.connections = space.connections.map(connection => {
+          connection.id = nanoid()
+          connection.connectionTypeId = this.updateIds(connection, 'connectionTypeId', connectionTypeIdDeltas)
+          connection.startCardId = this.updateIds(connection, 'startCardId', cardIdDeltas)
+          connection.endCardId = this.updateIds(connection, 'endCardId', cardIdDeltas)
+          return connection
+        })
+        cache.storeLocal(`space-${space.id}`, space)
+        if (space.id === this.$store.state.currentSpace.id) {
+          this.$store.commit('currentSpace/restoreSpace', space)
+        }
+        return space
+      })
     }
 
   },

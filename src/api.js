@@ -11,9 +11,11 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 export default {
-  options (body) {
+  options (body, apiKey) {
     const headers = new Headers({ 'Content-Type': 'application/json' })
-    const apiKey = cache.user().apiKey
+
+    apiKey = apiKey || cache.user().apiKey
+
     if (apiKey) {
       headers.append('Authorization', apiKey)
     }
@@ -87,22 +89,19 @@ export default {
     }
   },
 
-  async postSpaces (request) {
-    console.log('🌸', request)
-    // id findone
-    // POST /spaces
-    // runs on completion of task with matching task name `this[taskName](response)`
-
-    // after remove item from queue
-
-    // run the request (by taskId) (will run if concurrency is less than threshold)
+  async postMultipleSpaces (apiKey) {
+    try {
+      const spaces = cache.getAllSpaces()
+      const options = this.options(spaces, apiKey)
+      const response = await fetch(`${host}/space/multiple`, options)
+      const normalizedResponse = await this.normalizeResponse(response)
+      return normalizedResponse
+    } catch (error) {
+      console.error(error)
+    }
   },
 
-  // queue items have to do distinct things when they're done
-  // so add them to queue, and then have them run a private function here (api.queue ({taskName:uploadAllSpaces})) ,
-
-  // taskName shøuld be based on route
-
+  // TODO unused yet (use for mutations)
   async addToQueue (name) {
     const request = {
       id: nanoid(),
@@ -126,26 +125,9 @@ export default {
       return request
     })
     cache.saveQueue(queue)
-
-    // on request completion, remove it from the request (removeFromQueue), or change the state if fails in a catch
-
-    // check concurrency filter length (>3 things) {return}
-    //
   },
 
-  // when ur offline? might not be needed cuz catch will set isActive: false
-  // async pause () {
-  // isActive: false all
-  // }
-  // change state
-  // cache.saveQueue(queue)
-  // },
-  // }
-  // queue:
-  // see npm queue and kinopio space
-  // process/draim queue, handles reconnecting (see are.na/airtable/trello api client?)
-
-  handleQueueError (requestId) {
+  queueError (requestId) {
     const index = queue.findIndex(request => request.id === requestId)
     if (index >= 0) {
       queue[index].isActive = false

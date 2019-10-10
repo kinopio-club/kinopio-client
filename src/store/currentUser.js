@@ -13,11 +13,15 @@ export default {
     name: undefined,
     defaultConnectionTypeId: '',
     lastReadNewStuffId: undefined,
-    prefersDarkTheme: false
+    prefersDarkTheme: false,
+    apiKey: ''
   },
   getters: {
     isCurrentUser: (state) => (userId) => {
       return Boolean(state.id === userId)
+    },
+    isSignedIn: (state) => {
+      return Boolean(state.apiKey)
     }
     // isMember: (state, getters, rootState) => {
     //   const inCurrentSpace = rootState.currentSpace.users.find(user => {
@@ -47,6 +51,10 @@ export default {
       state.defaultConnectionTypeId = typeId
       cache.updateUser('defaultConnectionTypeId', typeId)
     },
+    apiKey: (state, apiKey) => {
+      state.apiKey = apiKey
+      cache.updateUser('apiKey', apiKey)
+    },
     restoreUser: (state, user) => {
       Object.keys(user).forEach(item => {
         state[item] = user[item]
@@ -58,6 +66,9 @@ export default {
         const newId = nanoid()
         state.id = newId
         cache.updateUser('id', newId)
+      }
+      if (!state.apiKey) {
+        state.apiKey = ''
       }
     }
   },
