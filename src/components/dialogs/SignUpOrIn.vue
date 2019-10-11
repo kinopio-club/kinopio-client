@@ -189,7 +189,7 @@ export default {
       cache.updateIdsInAllSpaces()
       const updatedSpace = cache.space(this.$store.state.currentSpace.id)
       this.$store.commit('currentSpace/restoreSpace', updatedSpace)
-      const response = await api.postMultipleSpaces(apiKey)
+      const response = await api.saveAllSpaces(apiKey)
       this.loading.signUpOrIn = false
       if (!response || response.error) {
         this.parseErrors(response)

@@ -49,6 +49,8 @@ export default {
     }
   },
 
+  // Sign In or Up
+
   async signUp (email, password, currentUser) {
     const body = currentUser
     body.email = email
@@ -92,19 +94,9 @@ export default {
     }
   },
 
-  async postMultipleSpaces (apiKey) {
-    try {
-      const spaces = cache.getSpaces()
-      const options = this.options(spaces, { apiKey })
-      const response = await fetch(`${host}/space/multiple`, options)
-      const normalizedResponse = await this.normalizeResponse(response)
-      return normalizedResponse
-    } catch (error) {
-      console.error(error)
-    }
-  },
+  // User
 
-  async permanentlyDeleteUser () {
+  async removeUserPermanently () {
     try {
       const options = this.options(undefined, { method: 'DELETE' })
       await fetch(`${host}/user/permanent`, options)
@@ -124,6 +116,21 @@ export default {
     }
   },
 
+  // Space
+
+  async saveAllSpaces (apiKey) {
+    try {
+      const spaces = cache.getSpaces()
+      const options = this.options(spaces, { apiKey })
+      const response = await fetch(`${host}/space/multiple`, options)
+      const normalizedResponse = await this.normalizeResponse(response)
+      return normalizedResponse
+    } catch (error) {
+      console.error(error)
+    }
+  },
+
+  // Queue
   // TODO unused yet (use for card etc. mutations)
   async addToQueue (name) {
     const request = {

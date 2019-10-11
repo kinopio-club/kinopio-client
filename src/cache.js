@@ -26,7 +26,7 @@ export default {
     window.localStorage.clear()
   },
 
-  // user
+  // User
 
   user () {
     return this.getLocal('user') || {}
@@ -40,7 +40,7 @@ export default {
     this.storeLocal('user', user)
   },
 
-  // space
+  // Space
 
   space (spaceId) {
     return this.getLocal(`space-${spaceId}`) || {}
@@ -133,7 +133,7 @@ export default {
     })
   },
 
-  // removed spaces
+  // Removed Spaces
 
   removedSpace (spaceId) {
     return this.getLocal(`space-${spaceId}`) || {}
@@ -167,7 +167,7 @@ export default {
     return sortedSpaces
   },
 
-  // api queue
+  // API Queue
 
   queue () {
     return this.getLocal('queue') || []

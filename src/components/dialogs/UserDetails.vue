@@ -28,10 +28,10 @@ dialog.narrow.user-details(
       .segmented-buttons
         button(@click="toggleRemoveAllConfirmationVisible")
           span Cancel
-        button.danger(@click="permanentlyRemoveUser")
+        button.danger(@click="removeUserPermanently")
           img.icon(src="@/assets/remove.svg")
           span Remove All
-          Loader(:visible="loading.permanentlyRemoveUser")
+          Loader(:visible="loading.removeUserPermanently")
 </template>
 
 <script>
@@ -56,7 +56,7 @@ export default {
       colorPickerIsVisible: false,
       removeAllConfirmationVisible: false,
       loading: {
-        permanentlyRemoveUser: false
+        removeUserPermanently: false
       }
     }
   },
@@ -107,10 +107,10 @@ export default {
       cache.removeAll()
       location.reload()
     },
-    async permanentlyRemoveUser () {
-      this.loading.permanentlyRemoveUser = true
-      await api.permanentlyDeleteUser()
-      this.loading.permanentlyRemoveUser = false
+    async removeUserPermanently () {
+      this.loading.removeUserPermanently = true
+      await api.removeUserPermanently()
+      this.loading.removeUserPermanently = false
       this.signOut()
     }
 
