@@ -1,8 +1,6 @@
 <template lang="pug">
 dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs")
   section
-    //.badge(:style="typeGradient()")
-    //  img.space-moon(src="@/assets/space-moon.svg")
     input(placeholder="name" v-model="spaceName")
 
     button(@click="removeCurrentSpace")
@@ -24,16 +22,10 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
         span Import
       Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
 
-    //button(@click="remixCurrentSpace")
-    //  img.icon(src="@/assets/copy.svg")
-    //  span Copy
-
   section.results-section
     ul.results-list
       template(v-for="(space in spaces")
         li(@click="changeSpace(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id")
-          //.badge(:style="typeGradient(space)")
-          //  img.space-moon(src="@/assets/space-moon.svg")
           .name {{space.name}}
 </template>
 
@@ -91,21 +83,6 @@ export default {
       this.exportIsVisible = false
       this.importIsVisible = false
     },
-    // typeGradient (space) {
-    //   space = space || this.$store.state.currentSpace
-    //   const types = space.connectionTypes.slice(0, 5)
-    //   if (types.length > 1) {
-    //     const colorPercent = 100 / (types.length)
-    //     const gradient = types.map((type, index) => {
-    //       return `${type.color} ${colorPercent * index}%`
-    //     })
-    //     return { background: `radial-gradient(circle, ${gradient})` }
-    //   } else if (types.length === 1) {
-    //     return { background: types[0].color }
-    //   } else {
-    //     return { background: 'transparent' }
-    //   }
-    // },
     spaceIsActive (spaceId) {
       const currentSpace = this.$store.state.currentSpace.id
       return Boolean(currentSpace === spaceId)

@@ -176,6 +176,12 @@ export default {
         await this.signInOrUp(response.apiKey)
         const currentUser = await api.getCurrentUser()
         cache.updateCurrentUserSpaces(currentUser.spaces)
+        // console.log('🍄', currentUser)
+        // SEE currentUser.lastSpaceId
+        // this.$store.commit('currentSpace/updateLastSpaceId', currentUser.lastSpaceId)
+        // TODO THEN switch to last space
+        // get complete space from ls
+        // this.$store.dispatch('currentSpace/changeSpace', space)
       }
     },
 
