@@ -32,8 +32,6 @@ dialog.narrow.user-details(
           img.icon(src="@/assets/remove.svg")
           span Remove All
           Loader(:visible="loading.permanentlyRemoveUser")
-
-    // button Sign In or Up
 </template>
 
 <script>
