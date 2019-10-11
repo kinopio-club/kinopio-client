@@ -124,6 +124,15 @@ export default {
     return string.charAt(0).toUpperCase() + string.slice(1)
   },
 
+  updateAllIds (object, key, idDeltas) {
+    const index = idDeltas.findIndex(id => object[key] === id.prevId)
+    if (index >= 0) {
+      return idDeltas[index].newId
+    } else {
+      return object[key]
+    }
+  },
+
   // Connection Path Utils 🐙
 
   connectorCoords (cardId) {

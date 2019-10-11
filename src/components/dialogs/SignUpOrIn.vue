@@ -55,8 +55,6 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
 </template>
 
 <script>
-import nanoid from 'nanoid'
-
 import utils from '@/utils.js'
 import api from '@/api.js'
 import Loader from '@/components/Loader.vue'
@@ -181,7 +179,9 @@ export default {
     },
 
     async signInOrUp (apiKey) {
-      this.updateIdsInSpacesToEnsureUniqueForeignKeys()
+      cache.updateIdsInAllSpaces()
+      const updatedSpace = cache.space(this.$store.state.currentSpace.id)
+      this.$store.commit('currentSpace/restoreSpace', updatedSpace)
       const response = await api.postMultipleSpaces(apiKey)
       this.loading.signUpOrIn = false
       if (!response || response.error) {
@@ -199,53 +199,6 @@ export default {
       await api.resetPassword(email)
       this.loading.resetPassword = false
       this.resetSuccess = true
-    },
-
-    updateIds (object, key, idDeltas) {
-      const index = idDeltas.findIndex(id => object[key] === id.prevId)
-      if (index >= 0) {
-        return idDeltas[index].newId
-      } else {
-        return object[key]
-      }
-    },
-
-    updateIdsInSpacesToEnsureUniqueForeignKeys () {
-      let spaces = cache.getAllSpaces()
-      spaces.map(space => {
-        const cardIdDeltas = []
-        const connectionTypeIdDeltas = []
-        space.cards = space.cards.map(card => {
-          const newId = nanoid()
-          cardIdDeltas.push({
-            prevId: card.id,
-            newId
-          })
-          card.id = newId
-          return card
-        })
-        space.connectionTypes = space.connectionTypes.map(type => {
-          const newId = nanoid()
-          connectionTypeIdDeltas.push({
-            prevId: type.id,
-            newId
-          })
-          type.id = newId
-          return type
-        })
-        space.connections = space.connections.map(connection => {
-          connection.id = nanoid()
-          connection.connectionTypeId = this.updateIds(connection, 'connectionTypeId', connectionTypeIdDeltas)
-          connection.startCardId = this.updateIds(connection, 'startCardId', cardIdDeltas)
-          connection.endCardId = this.updateIds(connection, 'endCardId', cardIdDeltas)
-          return connection
-        })
-        cache.storeLocal(`space-${space.id}`, space)
-        if (space.id === this.$store.state.currentSpace.id) {
-          this.$store.commit('currentSpace/restoreSpace', space)
-        }
-        return space
-      })
     }
 
   },
