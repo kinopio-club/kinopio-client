@@ -172,6 +172,7 @@ export default {
       if (!response || response.error) {
         this.parseErrors(response)
       } else {
+        this.$store.commit('currentUser/updateUser', response)
         await this.signInOrUp(response.apiKey)
         // get /user which should include spaces
         // update any spaces which dont exist in ls (for spaceDetails)

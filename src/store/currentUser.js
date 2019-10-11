@@ -60,6 +60,14 @@ export default {
         state[item] = user[item]
       })
     },
+    updateUser: (state, user) => {
+      Object.keys(state).forEach(item => {
+        if (user[item]) {
+          state[item] = user[item]
+        }
+      })
+      cache.saveUser(user)
+    },
     // Added aug 2019, can safely remove this in aug 2020
     updateBetaUserId: (state, newId) => {
       if (state.id === '1') {
