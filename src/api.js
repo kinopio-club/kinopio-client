@@ -11,16 +11,19 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 export default {
-  options (body, apiKey) {
+  options (body, options) {
     const headers = new Headers({ 'Content-Type': 'application/json' })
-
-    apiKey = apiKey || cache.user().apiKey
-
+    let method = 'POST'
+    let apiKey = cache.user().apiKey
+    if (options) {
+      method = options.method || method
+      apiKey = options.apiKey || apiKey
+    }
     if (apiKey) {
       headers.append('Authorization', apiKey)
     }
     return {
-      method: 'POST',
+      method: method,
       headers,
       body: JSON.stringify(body)
     }
@@ -92,7 +95,7 @@ export default {
   async postMultipleSpaces (apiKey) {
     try {
       const spaces = cache.getAllSpaces()
-      const options = this.options(spaces, apiKey)
+      const options = this.options(spaces, { apiKey })
       const response = await fetch(`${host}/space/multiple`, options)
       const normalizedResponse = await this.normalizeResponse(response)
       return normalizedResponse
@@ -101,7 +104,16 @@ export default {
     }
   },
 
-  // TODO unused yet (use for mutations)
+  async permanentlyDeleteUser () {
+    try {
+      const options = this.options(undefined, { method: 'DELETE' })
+      await fetch(`${host}/user/permanent`, options)
+    } catch (error) {
+      console.error(error)
+    }
+  },
+
+  // TODO unused yet (use for card etc. mutations)
   async addToQueue (name) {
     const request = {
       id: nanoid(),
