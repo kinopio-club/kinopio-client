@@ -48,10 +48,11 @@ export default {
     // },
     toggleUserDetails () {
       if (!this.clickable) { return }
+      const isVisible = this.userDetailsIsVisible
       if (this.shouldCloseAllDialogs) {
         this.$store.commit('closeAllDialogs')
       }
-      this.userDetailsIsVisible = !this.userDetailsIsVisible
+      this.userDetailsIsVisible = !isVisible
     }
   }
 }
