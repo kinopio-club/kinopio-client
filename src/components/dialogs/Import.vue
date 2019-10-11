@@ -57,7 +57,7 @@ export default {
       }
     },
     uniqueName (space) {
-      const spaces = cache.getSpaces()
+      const spaces = cache.getAllSpaces()
       const spaceNames = spaces.map(space => space.name)
       if (spaceNames.includes(space.name)) {
         return `${space.name}-${space.id}`

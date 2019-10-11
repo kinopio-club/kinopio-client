@@ -120,7 +120,7 @@ export default {
 
   async saveAllSpaces (apiKey) {
     try {
-      const spaces = cache.getSpaces()
+      const spaces = cache.getAllSpaces()
       const options = this.options(spaces, { apiKey })
       const response = await fetch(`${host}/space/multiple`, options)
       const normalizedResponse = await this.normalizeResponse(response)

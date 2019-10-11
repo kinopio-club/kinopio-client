@@ -106,7 +106,7 @@ export default {
       }
     },
     updateSpaces () {
-      const spaces = cache.getSpaces()
+      const spaces = cache.getAllSpaces()
       this.spaces = spaces.filter(space => space.id !== this.currentSpace.id)
       this.selectedSpace = this.spaces[0]
     },

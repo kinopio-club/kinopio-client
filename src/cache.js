@@ -45,7 +45,7 @@ export default {
   space (spaceId) {
     return this.getLocal(`space-${spaceId}`) || {}
   },
-  getSpaces () {
+  getAllSpaces () {
     const keys = Object.keys(window.localStorage)
     const spaceKeys = keys.filter(key => key.startsWith('space-'))
     const spaces = spaceKeys.map(key => {
@@ -85,7 +85,7 @@ export default {
     this.storeLocal(`space-${space.id}`, space)
   },
   updateIdsInAllSpaces () {
-    let spaces = this.getSpaces()
+    let spaces = this.getAllSpaces()
     spaces.map(space => {
       const cardIdDeltas = []
       const connectionTypeIdDeltas = []

@@ -34,7 +34,7 @@ export default {
     },
     updateSpaces () {
       const currentSpace = this.$store.state.currentSpace
-      this.spaces = cache.getSpaces()
+      this.spaces = cache.getAllSpaces()
       if (this.excludeCurrentSpace) {
         this.spaces = this.spaces.filter(space => space.id !== currentSpace.id)
       }
