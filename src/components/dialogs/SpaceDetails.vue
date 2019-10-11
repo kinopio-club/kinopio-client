@@ -135,7 +135,7 @@ export default {
       this.changeToLastSpace()
     },
     updateSpaces () {
-      this.spaces = cache.getAllSpaces()
+      this.spaces = cache.getSpaces()
     }
   },
   watch: {

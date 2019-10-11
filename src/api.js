@@ -94,7 +94,7 @@ export default {
 
   async postMultipleSpaces (apiKey) {
     try {
-      const spaces = cache.getAllSpaces()
+      const spaces = cache.getSpaces()
       const options = this.options(spaces, { apiKey })
       const response = await fetch(`${host}/space/multiple`, options)
       const normalizedResponse = await this.normalizeResponse(response)
@@ -108,6 +108,17 @@ export default {
     try {
       const options = this.options(undefined, { method: 'DELETE' })
       await fetch(`${host}/user/permanent`, options)
+    } catch (error) {
+      console.error(error)
+    }
+  },
+
+  async getCurrentUser () {
+    try {
+      const options = this.options(undefined, { method: 'GET' })
+      const response = await fetch(`${host}/user`, options)
+      const normalizedResponse = await this.normalizeResponse(response)
+      return normalizedResponse
     } catch (error) {
       console.error(error)
     }
