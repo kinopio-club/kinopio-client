@@ -87,36 +87,39 @@ export default {
   updateIdsInAllSpaces () {
     let spaces = this.getAllSpaces()
     spaces.map(space => {
-      const cardIdDeltas = []
-      const connectionTypeIdDeltas = []
-      space.cards = space.cards.map(card => {
-        const newId = nanoid()
-        cardIdDeltas.push({
-          prevId: card.id,
-          newId
-        })
-        card.id = newId
-        return card
-      })
-      space.connectionTypes = space.connectionTypes.map(type => {
-        const newId = nanoid()
-        connectionTypeIdDeltas.push({
-          prevId: type.id,
-          newId
-        })
-        type.id = newId
-        return type
-      })
-      space.connections = space.connections.map(connection => {
-        connection.id = nanoid()
-        connection.connectionTypeId = utils.updateAllIds(connection, 'connectionTypeId', connectionTypeIdDeltas)
-        connection.startCardId = utils.updateAllIds(connection, 'startCardId', cardIdDeltas)
-        connection.endCardId = utils.updateAllIds(connection, 'endCardId', cardIdDeltas)
-        return connection
-      })
-      this.storeLocal(`space-${space.id}`, space)
-      return space
+      this.updateIdsInSpace(space)
     })
+  },
+  updateIdsInSpace (space) {
+    const cardIdDeltas = []
+    const connectionTypeIdDeltas = []
+    space.cards = space.cards.map(card => {
+      const newId = nanoid()
+      cardIdDeltas.push({
+        prevId: card.id,
+        newId
+      })
+      card.id = newId
+      return card
+    })
+    space.connectionTypes = space.connectionTypes.map(type => {
+      const newId = nanoid()
+      connectionTypeIdDeltas.push({
+        prevId: type.id,
+        newId
+      })
+      type.id = newId
+      return type
+    })
+    space.connections = space.connections.map(connection => {
+      connection.id = nanoid()
+      connection.connectionTypeId = utils.updateAllIds(connection, 'connectionTypeId', connectionTypeIdDeltas)
+      connection.startCardId = utils.updateAllIds(connection, 'startCardId', cardIdDeltas)
+      connection.endCardId = utils.updateAllIds(connection, 'endCardId', cardIdDeltas)
+      return connection
+    })
+    this.storeLocal(`space-${space.id}`, space)
+    return space
   },
   updateCurrentUserSpaces (newSpaces) {
     newSpaces.forEach(newSpace => {

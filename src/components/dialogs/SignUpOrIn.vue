@@ -186,7 +186,7 @@ export default {
     },
 
     async signInOrUp (apiKey) {
-      cache.updateIdsInAllSpaces()
+      cache.updateIdsInAllSpaces() // added Oct 2019 for legacy spaces, can safely remove this in Oct 2020
       const updatedSpace = cache.space(this.$store.state.currentSpace.id)
       this.$store.commit('currentSpace/restoreSpace', updatedSpace)
       const response = await api.saveAllSpaces(apiKey)

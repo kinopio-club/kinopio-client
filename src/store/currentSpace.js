@@ -5,6 +5,7 @@ import _ from 'lodash'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import api from '@/api.js'
 import words from '@/words.js'
 
 import helloSpace from '@/spaces/hello.json'
@@ -28,16 +29,22 @@ export default {
       }
     },
     createNewHelloSpace: (state, newId) => {
-      state = helloSpace
-      state.id = newId
+      let space = utils.clone(helloSpace)
+      space.id = newId
+      space = cache.updateIdsInSpace(space)
+      Object.assign(state, space)
+      api.addToQueue('saveSpace', space)
     },
     createNewSpace: (state, newId) => {
-      Object.assign(state, newSpace)
+      const uniqueNewSpace = cache.updateIdsInSpace(newSpace)
+      Object.assign(state, uniqueNewSpace)
       state.name = words.randomUniqueName()
       state.id = newId
       state.connectionTypes[0].color = randomColor({ luminosity: 'light' })
       state.cards[1].x = _.random(180, 200)
       state.cards[1].y = _.random(160, 180)
+      const space = utils.clone(state)
+      api.addToQueue('saveSpace', space)
     },
     addToAnotherSpace: (state, { newCards, newConnections, newConnectionTypes, space }) => {
       const newItems = {

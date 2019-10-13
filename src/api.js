@@ -4,7 +4,6 @@ import nanoid from 'nanoid'
 
 import cache from '@/cache.js'
 
-let queue = cache.queue() // []
 let host = 'https://api.kinopio.club'
 if (process.env.NODE_ENV === 'development') {
   host = 'http://kinopio.local:3000'
@@ -118,6 +117,18 @@ export default {
 
   // Space
 
+  async saveSpace (space) {
+    console.log('🍄', space)
+    try {
+      const options = this.options(space)
+      const response = await fetch(`${host}/space`, options)
+      const normalizedResponse = await this.normalizeResponse(response)
+      return normalizedResponse
+    } catch (error) {
+      console.error(error)
+    }
+  },
+
   async saveAllSpaces (apiKey) {
     try {
       const spaces = cache.getAllSpaces()
@@ -131,26 +142,34 @@ export default {
   },
 
   // Queue
-  // TODO unused yet (use for card etc. mutations)
-  async addToQueue (name) {
+
+  async addToQueue (name, body) {
+    const userIsSignedIn = cache.user().apiKey
+    if (!userIsSignedIn) { return }
+    let queue = cache.queue()
     const request = {
       id: nanoid(),
+      isActive: false,
       name,
-      isActive: false
+      body
     }
     queue.push(request)
     cache.saveQueue(queue)
-    await this.processQueue()
+    this.processQueue() // TODO debounce 1000?
   },
 
   processQueue () {
     const maxConcurrency = 3
-    queue = queue.map(request => {
-      const activeRequests = queue.filter(request => request.isActive === true).length
-      const shouldProcess = activeRequests < maxConcurrency
-      if (shouldProcess) {
+    let queue = cache.queue()
+    console.log('🌙', queue)
+    queue = queue.map(async request => {
+      const activeRequests = cache.queue().filter(req => req.isActive === true).length
+      console.log('activeRequests', activeRequests, request)
+      if (activeRequests < maxConcurrency) { // might not be running in parallel cuz asnyc https://stackoverflow.com/questions/42489918/async-await-inside-arraymap
         request.isActive = true
-        this[request.name](request)
+        const response = await this[request.name](request.body)
+        // const normalizedResponse = await this.normalizeResponse(response)
+        console.warn('remove request w id from queue if response 200', request, response)
       }
       return request
     })
@@ -158,6 +177,7 @@ export default {
   },
 
   queueError (requestId) {
+    const queue = cache.queue()
     const index = queue.findIndex(request => request.id === requestId)
     if (index >= 0) {
       queue[index].isActive = false
