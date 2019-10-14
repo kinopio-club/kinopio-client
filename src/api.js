@@ -1,5 +1,7 @@
 // https://www.notion.so/kinopio/API-docs
 
+import _ from 'lodash'
+
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 
@@ -126,6 +128,11 @@ const api = {
     return utils.timeout(5000, fetch(`${host}/space`, options))
   },
 
+  async removeSpace (space) {
+    const options = this.options(space, { method: 'DELETE' })
+    return utils.timeout(5000, fetch(`${host}/space/${space.id}`, options))
+  },
+
   async saveAllSpaces (apiKey) {
     try {
       const spaces = cache.getAllSpaces()
@@ -139,15 +146,11 @@ const api = {
   },
 
   // Queue
-  // Queue requests are designed to fail and retry silently
-  // processQueue stops if a queue request fails
-  // processQueue will retry every minute
-  // processQueue will retry when a request is added to the queue
 
   async addToQueue (name, body) {
     const userIsSignedIn = cache.user().apiKey
     if (!userIsSignedIn) { return }
-    const queue = cache.queue()
+    const queue = this.queue()
     const request = {
       name,
       body
@@ -157,16 +160,33 @@ const api = {
     this.processQueue()
   },
 
+  request () {
+    const queue = this.queue()
+    const request = queue.shift()
+    cache.saveQueue(queue)
+    return request
+  },
+
+  queue () {
+    let queue = cache.queue()
+    queue = queue.filter(request => !_.isNil(request))
+    cache.saveQueue(queue)
+    return queue
+  },
+
+  // processQueue stops if a queue request fails
+  // retries every minute
+  // retries when a request is added to the queue
   async processQueue () {
     if (queueIsRunning) { return }
     if (!window.navigator.onLine) { return }
+    let queue = this.queue()
+    if (!queue.length) { return }
     queueIsRunning = true
-    let queue = cache.queue()
     let request
     do {
       try {
-        request = queue.shift()
-        cache.saveQueue(queue)
+        request = this.request()
         await this.processRequest(request)
       } catch (error) {
         console.error(error)
@@ -175,7 +195,7 @@ const api = {
         queueIsRunning = false
         break
       }
-      queue = cache.queue()
+      queue = this.queue()
     } while (queue.length > 0)
     queueIsRunning = false
   },
@@ -187,7 +207,7 @@ const api = {
   },
 
   queueError (requestId) {
-    const queue = cache.queue()
+    const queue = this.queue()
     const index = queue.findIndex(request => request.id === requestId)
     if (index >= 0) {
       queue[index].isActive = false

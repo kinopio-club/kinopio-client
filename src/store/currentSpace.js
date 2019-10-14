@@ -36,15 +36,16 @@ export default {
       api.addToQueue('saveSpace', space)
     },
     createNewSpace: (state, newId) => {
-      const uniqueNewSpace = cache.updateIdsInSpace(newSpace)
-      Object.assign(state, uniqueNewSpace)
+      Object.assign(state, newSpace)
       state.name = words.randomUniqueName()
       state.id = newId
       state.connectionTypes[0].color = randomColor({ luminosity: 'light' })
       state.cards[1].x = _.random(180, 200)
       state.cards[1].y = _.random(160, 180)
       const space = utils.clone(state)
-      api.addToQueue('saveSpace', space)
+      const uniqueNewSpace = cache.updateIdsInSpace(space)
+      Object.assign(state, uniqueNewSpace)
+      api.addToQueue('saveSpace', uniqueNewSpace)
     },
     addToAnotherSpace: (state, { newCards, newConnections, newConnectionTypes, space }) => {
       const newItems = {
@@ -279,6 +280,11 @@ export default {
       space = utils.migrateSpaceProperties(space)
       context.commit('restoreSpace', space)
       context.commit('currentUser/updateLastSpaceId', context.state.id, { root: true })
+    },
+    removeCurrentSpace: (context) => {
+      const space = utils.clone(context.state)
+      cache.removeSpace(space.id)
+      api.addToQueue('removeSpace', space)
     },
 
     // cards

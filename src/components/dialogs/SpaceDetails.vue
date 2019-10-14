@@ -101,13 +101,8 @@ export default {
         this.addSpace()
       }
     },
-    // remixCurrentSpace () {
-    //  this.$store.dispatch('currentSpace/remixCurrentSpace')
-    //  this.updateSpaces()
-    // },
     removeCurrentSpace () {
-      const spaceId = this.$store.state.currentSpace.id
-      cache.removeSpace(spaceId)
+      this.$store.dispatch('currentSpace/removeCurrentSpace')
       this.updateSpaces()
       this.changeToLastSpace()
     },
