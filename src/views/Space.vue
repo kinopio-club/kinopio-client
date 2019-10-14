@@ -66,6 +66,8 @@ export default {
     // keep space element updated to viewport size so connections show up
     this.updatePageSizes()
     window.addEventListener('resize', this.updatePageSizes)
+    window.addEventListener('online', this.isOnline)
+    window.addEventListener('offline', this.isOffline)
   },
 
   computed: {
@@ -418,6 +420,13 @@ export default {
       prevCursor = undefined
       movementDirection = {}
     }
+  },
+
+  isOnline () {
+    this.$store.commit('isOnline', true)
+  },
+  isOffline () {
+    this.$store.commit('isOnline', false)
   }
 
 }

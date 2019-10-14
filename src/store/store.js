@@ -15,6 +15,7 @@ export default new Vuex.Store({
     pageWidth: 0,
     viewportHeight: 0,
     viewportWidth: 0,
+    isOnline: false,
 
     // current user state
     currentUserIsDrawingConnection: false,
@@ -68,6 +69,15 @@ export default new Vuex.Store({
     cardDetailsIsVisibleForCardId: (state, cardId) => {
       utils.typeCheck(cardId, 'string')
       state.cardDetailsIsVisibleForCardId = cardId
+    },
+    closeAllDialogs: (state) => {
+      state.multipleCardActionsIsVisible = false
+      state.cardDetailsIsVisibleForCardId = ''
+      state.connectionDetailsIsVisibleForConnectionId = ''
+    },
+    isOnline: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.isOnline = value
     },
 
     // connecting
@@ -156,11 +166,6 @@ export default new Vuex.Store({
     multipleCardActionsPosition: (state, position) => {
       utils.typeCheck(position, 'object')
       state.multipleCardActionsPosition = position
-    },
-    closeAllDialogs: (state) => {
-      state.multipleCardActionsIsVisible = false
-      state.cardDetailsIsVisibleForCardId = ''
-      state.connectionDetailsIsVisibleForConnectionId = ''
     }
   },
 
