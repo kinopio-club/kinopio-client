@@ -15,7 +15,7 @@ export default new Vuex.Store({
     pageWidth: 0,
     viewportHeight: 0,
     viewportWidth: 0,
-    isOnline: false,
+    isOnline: true,
 
     // current user state
     currentUserIsDrawingConnection: false,

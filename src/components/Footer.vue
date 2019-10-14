@@ -2,6 +2,11 @@
 footer(v-if="!dialogsVisible")
   //span Beta {{buildHash}}
   .button-wrap
+    //(v-if="isOffline")
+    button(@click="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
+      span Offline
+    Offline(:visible="offlineIsVisible")
+  .button-wrap
     button(@click="toggleRestoreIsVisible" :class="{ active: restoreIsVisible}")
       img.refresh.icon(src="@/assets/undo.svg")
     Restore(:visible="restoreIsVisible")
@@ -10,15 +15,18 @@ footer(v-if="!dialogsVisible")
 
 <script>
 import Restore from '@/components/dialogs/Restore.vue'
+import Offline from '@/components/dialogs/Offline.vue'
 
 export default {
   name: 'Footer',
   components: {
-    Restore
+    Restore,
+    Offline
   },
   data () {
     return {
-      restoreIsVisible: false
+      restoreIsVisible: false,
+      offlineIsVisible: false
     }
   },
   mounted () {
@@ -26,6 +34,7 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
         this.restoreIsVisible = false
+        this.offlineIsVisible = false
       }
     })
   },
@@ -42,6 +51,9 @@ export default {
     },
     dialogsVisible () {
       return Boolean(this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.multipleCardActionsIsVisible || this.$store.state.connectionDetailsIsVisibleForConnectionId)
+    },
+    isOffline () {
+      return !this.$store.state.isOnline
     }
   },
   methods: {
@@ -49,7 +61,13 @@ export default {
       const isVisible = this.restoreIsVisible
       this.$store.commit('closeAllDialogs')
       this.restoreIsVisible = !isVisible
+    },
+    toggleOfflineIsVisible () {
+      const isVisible = this.offlineIsVisible
+      this.$store.commit('closeAllDialogs')
+      this.offlineIsVisible = !isVisible
     }
+
   }
 }
 </script>
