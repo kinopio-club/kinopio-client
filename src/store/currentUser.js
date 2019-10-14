@@ -14,7 +14,8 @@ export default {
     defaultConnectionTypeId: '',
     lastReadNewStuffId: undefined,
     prefersDarkTheme: false,
-    apiKey: ''
+    apiKey: '',
+    numberOfCardsCreated: 0
   },
   getters: {
     isCurrentUser: (state) => (userId) => {

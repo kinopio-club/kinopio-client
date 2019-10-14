@@ -1,15 +1,19 @@
 // https://www.notion.so/kinopio/API-docs
 
-import nanoid from 'nanoid'
-
 import cache from '@/cache.js'
+import utils from '@/utils.js'
 
 let host = 'https://api.kinopio.club'
 if (process.env.NODE_ENV === 'development') {
   host = 'http://kinopio.local:3000'
 }
+let queueIsRunning = false
 
-export default {
+setInterval(() => {
+  api.processQueue()
+}, 60 * 1000)
+
+const api = {
   options (body, options) {
     const headers = new Headers({ 'Content-Type': 'application/json' })
     let method = 'POST'
@@ -118,15 +122,8 @@ export default {
   // Space
 
   async saveSpace (space) {
-    console.log('🍄', space)
-    try {
-      const options = this.options(space)
-      const response = await fetch(`${host}/space`, options)
-      const normalizedResponse = await this.normalizeResponse(response)
-      return normalizedResponse
-    } catch (error) {
-      console.error(error)
-    }
+    const options = this.options(space)
+    return utils.timeout(5000, fetch(`${host}/space`, options))
   },
 
   async saveAllSpaces (apiKey) {
@@ -142,38 +139,52 @@ export default {
   },
 
   // Queue
+  // Queue requests are designed to fail and retry silently
+  // processQueue stops if a queue request fails
+  // processQueue will retry every minute
+  // processQueue will retry when a request is added to the queue
 
   async addToQueue (name, body) {
     const userIsSignedIn = cache.user().apiKey
     if (!userIsSignedIn) { return }
-    let queue = cache.queue()
+    const queue = cache.queue()
     const request = {
-      id: nanoid(),
-      isActive: false,
       name,
       body
     }
     queue.push(request)
     cache.saveQueue(queue)
-    this.processQueue() // TODO debounce 1000?
+    this.processQueue()
   },
 
-  processQueue () {
-    const maxConcurrency = 3
+  async processQueue () {
+    if (queueIsRunning) { return }
+    if (!window.navigator.onLine) { return }
+    queueIsRunning = true
     let queue = cache.queue()
-    console.log('🌙', queue)
-    queue = queue.map(async request => {
-      const activeRequests = cache.queue().filter(req => req.isActive === true).length
-      console.log('activeRequests', activeRequests, request)
-      if (activeRequests < maxConcurrency) { // might not be running in parallel cuz asnyc https://stackoverflow.com/questions/42489918/async-await-inside-arraymap
-        request.isActive = true
-        const response = await this[request.name](request.body)
-        // const normalizedResponse = await this.normalizeResponse(response)
-        console.warn('remove request w id from queue if response 200', request, response)
+    let request
+    do {
+      try {
+        request = queue.shift()
+        cache.saveQueue(queue)
+        await this.processRequest(request)
+      } catch (error) {
+        console.error(error)
+        queue.push(request)
+        cache.saveQueue(queue)
+        queueIsRunning = false
+        break
       }
-      return request
-    })
-    cache.saveQueue(queue)
+      queue = cache.queue()
+    } while (queue.length > 0)
+    queueIsRunning = false
+  },
+
+  async processRequest (request) {
+    const response = await this[request.name](request.body)
+    const normalizedResponse = await this.normalizeResponse(response)
+    console.log('🌹 res may be err', normalizedResponse)
+    return normalizedResponse
   },
 
   queueError (requestId) {
@@ -186,3 +197,5 @@ export default {
   }
 
 }
+
+export default api
