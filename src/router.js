@@ -12,14 +12,14 @@ export default new Router({
       path: '/',
       name: 'space',
       component: Space
-    },
-    {
-      path: '/legal',
-      name: 'legal',
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "newsletter" */ './views/Legal.vue')
     }
+    // {
+    //   path: '/legal',
+    //   name: 'legal',
+    //   // route level code-splitting
+    //   // this generates a separate chunk (about.[hash].js) for this route
+    //   // which is lazy-loaded when the route is visited.
+    //   component: () => import(/* webpackChunkName: "legal" */ './views/Legal.vue')
+    // }
   ]
 })
