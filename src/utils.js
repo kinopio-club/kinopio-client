@@ -142,6 +142,13 @@ export default {
     })
   },
 
+  pluralize (word, condition) {
+    if (condition) {
+      word = word + 's'
+    }
+    return word
+  },
+
   // Connection Path Utils 🐙
 
   connectorCoords (cardId) {
