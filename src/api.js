@@ -183,7 +183,6 @@ const api = {
   async processRequest (request) {
     const response = await this[request.name](request.body)
     const normalizedResponse = await this.normalizeResponse(response)
-    console.log('🌹 res may be err', normalizedResponse)
     return normalizedResponse
   },
 

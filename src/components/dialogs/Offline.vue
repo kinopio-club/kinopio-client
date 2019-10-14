@@ -24,7 +24,7 @@ export default {
       return cache.queue()
     },
     pluralChanges () {
-      const condition = this.queue.length > 1
+      const condition = this.queue.length !== 1
       return utils.pluralize('change', condition)
     }
   }
