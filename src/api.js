@@ -121,7 +121,14 @@ const api = {
   },
 
   // Card
-
+  async createCard (card) {
+    const options = this.options(card)
+    return utils.timeout(5000, fetch(`${host}/card`, options))
+  },
+  async updateCard (card) {
+    const options = this.options(card, { method: 'PATCH' })
+    return utils.timeout(5000, fetch(`${host}/card/${card.id}`, options))
+  },
   async restoreCard (cardId) {
     const options = this.options(undefined, { method: 'PATCH' })
     return utils.timeout(5000, fetch(`${host}/card/${cardId}/restore`, options))
