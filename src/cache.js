@@ -148,7 +148,7 @@ export default {
     this.storeLocal(`removed-${spaceKey}`, space)
     this.removeLocal(spaceKey)
   },
-  removeRemovedSpace (spaceId) {
+  removeSpacePermanently (spaceId) {
     const spaceKey = `removed-space-${spaceId}`
     this.removeLocal(spaceKey)
   },

@@ -78,7 +78,6 @@ export default {
     },
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
-      console.log(document, element, card, card.id)
       scrollIntoView(element, {
         behavior: 'smooth',
         scrollMode: 'if-needed'
@@ -132,7 +131,7 @@ export default {
       this.$store.commit('currentSpace/removeCardPermanently', card.id)
     },
     removeSpace (space) {
-      cache.removeRemovedSpace(space.id)
+      this.$store.dispatch('currentSpace/removeSpacePermanently', space.id)
       this.updateRemovedSpaces()
     }
   },

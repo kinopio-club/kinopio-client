@@ -281,7 +281,11 @@ export default {
     removeCurrentSpace: (context) => {
       const space = utils.clone(context.state)
       cache.removeSpace(space.id)
-      api.addToQueue('removeSpace', space)
+      api.addToQueue('removeSpace', space.id)
+    },
+    removeSpacePermanently: (context, spaceId) => {
+      cache.removeSpacePermanently(spaceId)
+      api.addToQueue('removeSpacePermanently', spaceId)
     },
 
     // cards

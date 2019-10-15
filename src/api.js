@@ -141,10 +141,6 @@ const api = {
     const options = this.options(space)
     return utils.timeout(5000, fetch(`${host}/space`, options))
   },
-  async removeSpace (space) {
-    const options = this.options(space, { method: 'DELETE' })
-    return utils.timeout(5000, fetch(`${host}/space/${space.id}`, options))
-  },
   async saveAllSpaces (apiKey) {
     try {
       const spaces = cache.getAllSpaces()
@@ -155,6 +151,14 @@ const api = {
     } catch (error) {
       console.error(error)
     }
+  },
+  async removeSpace (spaceId) {
+    const options = this.options(undefined, { method: 'DELETE' })
+    return utils.timeout(5000, fetch(`${host}/space/${spaceId}`, options))
+  },
+  async removeSpacePermanently (spaceId) {
+    const options = this.options(undefined, { method: 'DELETE' })
+    return utils.timeout(5000, fetch(`${host}/space/${spaceId}/permanent`, options))
   },
 
   // Queue
