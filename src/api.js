@@ -13,7 +13,7 @@ let queueIsRunning = false
 
 setInterval(() => {
   api.processQueue()
-}, 60 * 1000)
+}, 60 * 1000) // 1 minute
 
 const api = {
   options (body, options) {
@@ -33,7 +33,6 @@ const api = {
       body: JSON.stringify(body)
     }
   },
-
   async normalizeResponse (response) {
     const success = [200, 201, 202, 204]
     if (success.includes(response.status)) {
@@ -69,7 +68,6 @@ const api = {
       console.error(error)
     }
   },
-
   async signIn (email, password) {
     const body = {
       email: email,
@@ -84,7 +82,6 @@ const api = {
       console.error(error)
     }
   },
-
   async resetPassword (email) {
     const body = {
       email
@@ -109,7 +106,6 @@ const api = {
       console.error(error)
     }
   },
-
   async getCurrentUser () {
     try {
       const options = this.options(undefined, { method: 'GET' })
@@ -123,10 +119,18 @@ const api = {
 
   // Card
 
-  // api.addToQueue('restoreCard', cardId)
-  // api.addToQueue('removeCard', cardId)
-
-  // api.addToQueue('removeCardPermanently', cardId)
+  async restoreCard (cardId) {
+    const options = this.options(undefined, { method: 'PATCH' })
+    return utils.timeout(5000, fetch(`${host}/card/${cardId}/restore`, options))
+  },
+  async removeCard (cardId) {
+    const options = this.options(undefined, { method: 'DELETE' })
+    return utils.timeout(5000, fetch(`${host}/card/${cardId}`, options))
+  },
+  async removeCardPermanently (cardId) {
+    const options = this.options(undefined, { method: 'DELETE' })
+    return utils.timeout(5000, fetch(`${host}/card/${cardId}/permanent`, options))
+  },
 
   // Space
 
@@ -134,12 +138,10 @@ const api = {
     const options = this.options(space)
     return utils.timeout(5000, fetch(`${host}/space`, options))
   },
-
   async removeSpace (space) {
     const options = this.options(space, { method: 'DELETE' })
     return utils.timeout(5000, fetch(`${host}/space/${space.id}`, options))
   },
-
   async saveAllSpaces (apiKey) {
     try {
       const spaces = cache.getAllSpaces()
@@ -166,24 +168,18 @@ const api = {
     cache.saveQueue(queue)
     this.processQueue()
   },
-
   request () {
     const queue = this.queue()
     const request = queue.shift()
     cache.saveQueue(queue)
     return request
   },
-
   queue () {
     let queue = cache.queue()
     queue = queue.filter(request => !_.isNil(request))
     cache.saveQueue(queue)
     return queue
   },
-
-  // processQueue stops if a queue request fails
-  // retries every minute
-  // retries when a request is added to the queue
   async processQueue () {
     if (queueIsRunning) { return }
     if (!window.navigator.onLine) { return }
@@ -206,13 +202,11 @@ const api = {
     } while (queue.length > 0)
     queueIsRunning = false
   },
-
   async processRequest (request) {
     const response = await this[request.name](request.body)
     const normalizedResponse = await this.normalizeResponse(response)
     return normalizedResponse
   },
-
   queueError (requestId) {
     const queue = this.queue()
     const index = queue.findIndex(request => request.id === requestId)
@@ -221,7 +215,6 @@ const api = {
       cache.saveQueue(queue)
     }
   }
-
 }
 
 export default api
