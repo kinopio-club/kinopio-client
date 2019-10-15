@@ -138,14 +138,10 @@ export default {
       api.addToQueue('removeCardPermanently', cardId)
     },
     restoreCard: (state, cardId) => {
-      const card = state.removedCards.find(card => {
-        return card.id === cardId
-      })
-      const removedCards = state.removedCards.filter(card => {
-        return card.id !== cardId
-      })
+      const index = state.removedCards.findIndex(card => card.id === cardId)
+      const card = state.removedCards[index]
       state.cards.push(card)
-      state.removedCards = removedCards
+      state.removedCards.splice(index, 1)
       cache.updateSpace('cards', state.cards, state.id)
       cache.updateSpace('removedCards', state.removedCards, state.id)
       api.addToQueue('restoreCard', cardId)
