@@ -33,7 +33,6 @@ export default {
       space.id = newId
       space = cache.updateIdsInSpace(space)
       Object.assign(state, space)
-      api.addToQueue('saveSpace', space)
     },
     createNewSpace: (state, newId) => {
       Object.assign(state, newSpace)
@@ -45,7 +44,6 @@ export default {
       const space = utils.clone(state)
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       Object.assign(state, uniqueNewSpace)
-      api.addToQueue('saveSpace', uniqueNewSpace)
     },
     addToAnotherSpace: (state, { newCards, newConnections, newConnectionTypes, space }) => {
       const newItems = {
@@ -119,8 +117,6 @@ export default {
     createCard: (state, card) => {
       state.cards.push(card)
       cache.updateSpace('cards', state.cards, state.id)
-      card.spaceId = state.id
-      api.addToQueue('createCard', card)
     },
     removeCard: (state, cardId) => {
       const index = state.cards.findIndex(card => card.id === cardId)
@@ -268,16 +264,20 @@ export default {
     createNewSpace: (context, isHelloSpace) => {
       const newId = nanoid()
       const user = context.rootState.currentUser
+      let space
       if (isHelloSpace) {
         context.commit('createNewHelloSpace', newId)
+        space = utils.clone(context.state)
+        api.addToQueue('saveSpace', space)
       } else {
         context.commit('createNewSpace', newId)
+        space = utils.clone(context.state)
+        api.addToQueue('saveSpace', space)
         Vue.nextTick(() => {
           context.commit('updateCardConnections', context.state.cards[1].id)
           context.commit('currentUser/updateLastSpaceId', context.state.id, { root: true })
         })
       }
-      const space = utils.clone(context.state)
       cache.saveSpace(space)
       context.commit('addUserToSpace', user)
     },
@@ -314,7 +314,18 @@ export default {
         context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       }
       context.commit('createCard', card)
-      context.commit('incrementCardZ', card.id)
+      card.spaceId = context.state.id
+      api.addToQueue('createCard', card)
+      context.dispatch('incrementCardZ', card.id)
+    },
+    incrementCardZ: (context, cardId) => {
+      const cards = context.rootState.currentSpace.cards
+      const card = {
+        id: cardId,
+        z: cards.length + 1
+      }
+      context.commit('incrementCardZ', cardId)
+      api.addToQueue('updateCard', card)
     },
     removeCard: (context, cardId) => {
       context.commit('removeCard', cardId)
@@ -347,10 +358,10 @@ export default {
       const cards = context.state.cards
       if (multipleCardsSelectedIds.length) {
         cards.forEach(cardId => {
-          context.commit('incrementCardZ', cardId)
+          context.dispatch('incrementCardZ', cardId)
         })
       } else {
-        context.commit('incrementCardZ', currentDraggingCardId)
+        context.dispatch('incrementCardZ', currentDraggingCardId)
       }
     },
 
