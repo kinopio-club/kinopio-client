@@ -11,9 +11,12 @@ if (process.env.NODE_ENV === 'development') {
 }
 let queueIsRunning = false
 
-setInterval(() => {
+window.onload = () => {
   api.processQueue()
-}, 60 * 1000) // 1 minute
+  setInterval(() => {
+    api.processQueue()
+  }, 60 * 1000) // 60 seconds
+}
 
 const api = {
   options (body, options) {
