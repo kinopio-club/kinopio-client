@@ -89,7 +89,7 @@ export default {
           value: newValue,
           cardId: this.card.id
         }
-        this.$store.commit('currentSpace/updateCardDetails', options)
+        this.$store.commit('currentSpace/updateCard', options)
         this.$nextTick(() => {
           this.$store.commit('currentSpace/updateCardConnections', this.card.id)
         })

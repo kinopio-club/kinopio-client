@@ -84,7 +84,7 @@ export default {
       })
       cache.updateSpace('cards', state.cards, state.id)
     },
-    updateCardDetails: (state, { type, value, cardId }) => {
+    updateCard: (state, { type, value, cardId }) => {
       utils.typeCheck(type, 'string')
       state.cards.map(card => {
         if (card.id === cardId) {
@@ -97,6 +97,12 @@ export default {
         }
       })
       cache.updateSpace('cards', state.cards, state.id)
+      const card = {
+        id: cardId,
+        spaceId: state.id
+      }
+      card[type] = value
+      api.addToQueue('updateCard', card)
     },
     moveCard: (state, { cardId, delta }) => {
       const maxOffset = 0
@@ -113,6 +119,8 @@ export default {
     createCard: (state, card) => {
       state.cards.push(card)
       cache.updateSpace('cards', state.cards, state.id)
+      card.spaceId = state.id
+      api.addToQueue('createCard', card)
     },
     removeCard: (state, cardId) => {
       const index = state.cards.findIndex(card => card.id === cardId)
@@ -297,8 +305,8 @@ export default {
         x: position.x,
         y: position.y,
         z: 0,
-        name: ''
-        // frameId: 0
+        name: '',
+        frameId: 0
       }
       if (utils.objectHasKeys(contents)) {
         card = utils.updateObject(card, contents)

@@ -37,8 +37,8 @@ export default {
         value: frame.name,
         cardId: this.card.id
       }
-      this.$store.commit('currentSpace/updateCardDetails', frameId)
-      this.$store.commit('currentSpace/updateCardDetails', frameName)
+      this.$store.commit('currentSpace/updateCard', frameId)
+      this.$store.commit('currentSpace/updateCard', frameName)
     },
     frameIsCardFrame (frameId) {
       const cardFrameId = this.card.frameId || 0
