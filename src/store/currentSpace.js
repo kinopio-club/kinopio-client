@@ -115,9 +115,8 @@ export default {
       cache.updateSpace('cards', state.cards, state.id)
     },
     removeCard: (state, cardId) => {
-      const card = state.cards.find(card => {
-        return card.id === cardId
-      })
+      const index = state.cards.findIndex(card => card.id === cardId)
+      const card = state.cards[index]
       if (!state.removedCards) {
         Vue.set(state, 'removedCards', [])
       }
@@ -126,10 +125,7 @@ export default {
         state.removedCards.unshift(card) // prepend card to removedCards
         cache.updateSpace('removedCards', state.removedCards, state.id)
       }
-      const cards = state.cards.filter(card => {
-        return card.id !== cardId
-      })
-      state.cards = cards
+      state.cards.splice(index, 1)
       cache.updateSpace('cards', state.cards, state.id)
       api.addToQueue('removeCard', cardId)
     },
