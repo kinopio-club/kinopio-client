@@ -121,6 +121,13 @@ const api = {
     }
   },
 
+  // Card
+
+  // api.addToQueue('restoreCard', cardId)
+  // api.addToQueue('removeCard', cardId)
+
+  // api.addToQueue('removeCardPermanently', cardId)
+
   // Space
 
   async saveSpace (space) {

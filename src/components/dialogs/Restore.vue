@@ -97,7 +97,7 @@ export default {
       }
     },
     restoreCard (card) {
-      this.$store.dispatch('currentSpace/restoreCard', card.id)
+      this.$store.commit('currentSpace/restoreCard', card.id)
       this.$nextTick(() => {
         this.scrollIntoView(card)
       })
@@ -129,7 +129,7 @@ export default {
       }
     },
     removeCard (card) {
-      this.$store.commit('currentSpace/removeCardFromRemovedCards', card.id)
+      this.$store.commit('currentSpace/removeCardPermanently', card.id)
     },
     removeSpace (space) {
       cache.removeRemovedSpace(space.id)

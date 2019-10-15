@@ -114,7 +114,7 @@ export default {
       state.cards.push(card)
       cache.updateSpace('cards', state.cards, state.id)
     },
-    copyCardToRemovedCards: (state, cardId) => {
+    removeCard: (state, cardId) => {
       const card = state.cards.find(card => {
         return card.id === cardId
       })
@@ -126,28 +126,33 @@ export default {
         state.removedCards.unshift(card) // prepend card to removedCards
         cache.updateSpace('removedCards', state.removedCards, state.id)
       }
-    },
-    copyCardFromRemovedCards: (state, cardId) => {
-      const card = state.removedCards.find(card => {
-        return card.id === cardId
-      })
-      // createCard
-      state.cards.push(card)
-      cache.updateSpace('cards', state.cards, state.id)
-    },
-    removeCard: (state, cardId) => {
       const cards = state.cards.filter(card => {
         return card.id !== cardId
       })
       state.cards = cards
       cache.updateSpace('cards', state.cards, state.id)
+      api.addToQueue('removeCard', cardId)
     },
-    removeCardFromRemovedCards: (state, cardId) => {
+    removeCardPermanently: (state, cardId) => {
       const removedCards = state.removedCards.filter(card => {
         return card.id !== cardId
       })
       state.removedCards = removedCards
       cache.updateSpace('removedCards', state.removedCards, state.id)
+      api.addToQueue('removeCardPermanently', cardId)
+    },
+    restoreCard: (state, cardId) => {
+      const card = state.removedCards.find(card => {
+        return card.id === cardId
+      })
+      const removedCards = state.removedCards.filter(card => {
+        return card.id !== cardId
+      })
+      state.cards.push(card)
+      state.removedCards = removedCards
+      cache.updateSpace('cards', state.cards, state.id)
+      cache.updateSpace('removedCards', state.removedCards, state.id)
+      api.addToQueue('restoreCard', cardId)
     },
 
     // connections
@@ -308,15 +313,9 @@ export default {
       context.commit('incrementCardZ', card.id)
     },
     removeCard: (context, cardId) => {
-      context.commit('copyCardToRemovedCards', cardId)
       context.commit('removeCard', cardId)
       context.commit('removeConnectionsFromCard', cardId)
       context.commit('generateCardMap', null, { root: true })
-    },
-    restoreCard: (context, cardId) => {
-      console.log('restoreCard', cardId)
-      context.commit('copyCardFromRemovedCards', cardId)
-      context.commit('removeCardFromRemovedCards', cardId)
     },
     dragCards: (context, { endCursor, prevCursor, delta }) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
