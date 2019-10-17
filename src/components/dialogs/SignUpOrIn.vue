@@ -174,7 +174,7 @@ export default {
       } else {
         this.$store.commit('currentUser/updateUser', response)
         await this.signInOrUp(response.apiKey)
-        const currentUser = await api.getCurrentUser()
+        const currentUser = await api.getUser()
         cache.updateCurrentUserSpaces(currentUser.spaces)
         // console.log('🍄', currentUser)
         // SEE currentUser.lastSpaceId

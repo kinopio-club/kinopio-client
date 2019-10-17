@@ -1,8 +1,10 @@
 // local storage cache interface for currentUser and spaces
 
 import nanoid from 'nanoid'
+import _ from 'lodash'
 
 import utils from '@/utils.js'
+import api from '@/api.js'
 
 export default {
   storeLocal (key, value) {
@@ -35,6 +37,9 @@ export default {
     let user = this.user()
     user[key] = value
     this.storeLocal('user', user)
+    let update = {}
+    update[key] = value
+    _.debounce(_.wrap(api.addToQueue('updateUser', update)), 150)
   },
   saveUser (user) {
     this.storeLocal('user', user)
@@ -126,7 +131,7 @@ export default {
       const space = {
         id: newSpace.id,
         name: newSpace.name,
-        cacheDate: new Date(newSpace.userSpace.updatedAt).getTime()
+        cacheDate: utils.normalizeToUnixTime(newSpace.userSpace.updatedAt)
       }
       if (this.space(newSpace.id)) {
         this.updateSpace('name', newSpace.name, newSpace.id)
@@ -147,6 +152,7 @@ export default {
     const space = this.getLocal(spaceKey)
     this.storeLocal(`removed-${spaceKey}`, space)
     this.removeLocal(spaceKey)
+    api.addToQueue('removeSpace', spaceId)
   },
   removeSpacePermanently (spaceId) {
     const spaceKey = `removed-space-${spaceId}`

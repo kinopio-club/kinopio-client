@@ -4,6 +4,9 @@ import nanoid from 'nanoid'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
+// - cache has api calls
+// - mutations dont have cache (make actions for those)
+
 export default {
   namespaced: true,
   state: {
@@ -24,7 +27,7 @@ export default {
     isSignedIn: (state) => {
       return Boolean(state.apiKey)
     }
-    // isMember: (state, getters, rootState) => {
+    // isEditor: (state, getters, rootState) => {
     //   const inCurrentSpace = rootState.currentSpace.users.find(user => {
     //     return user.id === state.id
     //   })
