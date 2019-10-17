@@ -58,7 +58,8 @@ export default {
     currentSpaceName () {
       const id = this.$store.state.currentSpace.id
       const name = this.$store.state.currentSpace.name
-      if (name.length) {
+      console.log(this.$store.state.currentSpace)
+      if (name) {
         return name
       } else {
         return `Space ${id}`

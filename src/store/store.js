@@ -42,7 +42,10 @@ export default new Vuex.Store({
     multipleCardsSelectedIds: [],
     multipleCardActionsIsVisible: false,
     multipleCardActionsPosition: {},
-    cardMap: []
+    cardMap: [],
+
+    // loading
+    loadingSpace: false
   },
 
   mutations: {
@@ -166,6 +169,12 @@ export default new Vuex.Store({
     multipleCardActionsPosition: (state, position) => {
       utils.typeCheck(position, 'object')
       state.multipleCardActionsPosition = position
+    },
+
+    // loading
+    loadingSpace: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.loadingSpace = value
     }
   },
 
