@@ -69,8 +69,9 @@ export default {
       if (this.isValidSpace(space)) {
         space.id = nanoid()
         space.name = this.uniqueName(space)
-        cache.saveSpace(space)
-        this.$store.dispatch('currentSpace/changeSpace', space)
+        const uniqueNewSpace = cache.updateIdsInSpace(space)
+        cache.saveSpace(uniqueNewSpace)
+        this.$store.dispatch('currentSpace/changeSpace', uniqueNewSpace)
         this.$emit('updateSpaces')
         this.$emit('closeDialog')
       }
