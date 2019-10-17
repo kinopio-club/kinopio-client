@@ -121,6 +121,7 @@ const api = {
   },
 
   // Card
+
   async createCard (card) {
     const options = this.options(card)
     return utils.timeout(5000, fetch(`${host}/card`, options))
@@ -143,6 +144,13 @@ const api = {
   },
 
   // Space
+
+  async getSpace (spaceId) {
+    const options = this.options(undefined, { method: 'GET' })
+    const response = await utils.timeout(5000, fetch(`${host}/space/${spaceId}`, options))
+    const normalizedResponse = await this.normalizeResponse(response)
+    return normalizedResponse
+  },
 
   async saveSpace (space) {
     const options = this.options(space)

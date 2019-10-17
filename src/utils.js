@@ -149,6 +149,10 @@ export default {
     return word
   },
 
+  normalizeToUnixTime (date) {
+    return new Date(date).getTime()
+  },
+
   // Connection Path Utils 🐙
 
   connectorCoords (cardId) {

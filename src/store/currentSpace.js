@@ -238,12 +238,12 @@ export default {
       if (user.lastSpaceId) {
         console.log('🚃 Restore last space from cache', user.lastSpaceId)
         spaceToRestore = cache.space(user.lastSpaceId)
-        context.commit('restoreSpace', spaceToRestore)
+        context.dispatch('restoreSpace', spaceToRestore)
       // migration condition added sept 2019
       } else if (user.lastSpace) {
         console.log('🚃 Restore last space from cache', user.lastSpace)
         spaceToRestore = cache.space(user.lastSpace)
-        context.commit('restoreSpace', spaceToRestore)
+        context.dispatch('restoreSpace', spaceToRestore)
         cache.updateUser('lastSpaceId', spaceToRestore.id)
         cache.updateUser('lastSpace', null)
       } else if (utils.objectHasKeys(betaSpace)) {
@@ -251,7 +251,7 @@ export default {
         context.commit('updateBetaSpace')
         context.commit('addUserToSpace', user)
         spaceToRestore = cache.space(context.state.id)
-        context.commit('restoreSpace', spaceToRestore)
+        context.dispatch('restoreSpace', spaceToRestore)
       } else {
         console.log('🚃 Create new hello-kinopio space')
         const isHelloSpace = true
@@ -281,15 +281,27 @@ export default {
       cache.saveSpace(space)
       context.commit('addUserToSpace', user)
     },
+    restoreSpace: async (context, space) => {
+      context.commit('restoreSpace', space)
+      space = utils.clone(space)
+      context.commit('loadingSpace', true, { root: true })
+      const remoteSpace = await api.getSpace(space.id)
+      context.commit('loadingSpace', false, { root: true })
+      const remoteDate = utils.normalizeToUnixTime(remoteSpace.updatedAt)
+      if (remoteDate > space.cacheDate) {
+        console.log('🚋 Restore from remote space', remoteSpace)
+        context.commit('restoreSpace', remoteSpace)
+        cache.saveSpace(remoteSpace)
+      }
+    },
     changeSpace: (context, space) => {
       space = utils.migrateSpaceProperties(space)
-      context.commit('restoreSpace', space)
+      context.dispatch('restoreSpace', space)
       context.commit('currentUser/updateLastSpaceId', context.state.id, { root: true })
     },
     removeCurrentSpace: (context) => {
       const space = utils.clone(context.state)
       cache.removeSpace(space.id)
-      api.addToQueue('removeSpace', space.id)
     },
     removeSpacePermanently: (context, spaceId) => {
       cache.removeSpacePermanently(spaceId)
