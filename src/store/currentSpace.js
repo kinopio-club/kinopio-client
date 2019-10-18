@@ -6,6 +6,7 @@ import _ from 'lodash'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 import api from '@/api.js'
+import queue from '@/queue.js'
 import words from '@/words.js'
 
 import helloSpace from '@/spaces/hello.json'
@@ -113,7 +114,7 @@ export default {
       })
       state.removedCards = removedCards
       cache.updateSpace('removedCards', state.removedCards, state.id)
-      api.addToQueue('removeCardPermanently', cardId)
+      queue.add('removeCardPermanently', cardId)
     },
     restoreCard: (state, cardId) => {
       const index = state.removedCards.findIndex(card => card.id === cardId)
@@ -122,7 +123,7 @@ export default {
       state.removedCards.splice(index, 1)
       cache.updateSpace('cards', state.cards, state.id)
       cache.updateSpace('removedCards', state.removedCards, state.id)
-      api.addToQueue('restoreCard', cardId)
+      queue.add('restoreCard', cardId)
     },
 
     // connections
@@ -254,7 +255,7 @@ export default {
       const space = utils.clone(context.state)
       const user = context.rootState.currentUser
       cache.saveSpace(space)
-      api.addToQueue('createSpace', space)
+      queue.add('createSpace', space)
       context.commit('addUserToSpace', user)
     },
     loadSpace: async (context, space) => {
@@ -276,16 +277,16 @@ export default {
       context.dispatch('loadSpace', space)
       const spaceId = context.state.id
       context.dispatch('currentUser/lastSpaceId', spaceId, { root: true })
-      api.addToQueue('updateUser', { lastSpaceId: spaceId })
+      queue.add('updateUser', { lastSpaceId: spaceId })
     },
     removeCurrentSpace: (context) => {
       const space = utils.clone(context.state)
       cache.removeSpace(space.id)
-      api.addToQueue('removeSpace', space.id)
+      queue.add('removeSpace', space.id)
     },
     removeSpacePermanently: (context, spaceId) => {
       cache.removeSpacePermanently(spaceId)
-      api.addToQueue('removeSpacePermanently', spaceId)
+      queue.add('removeSpacePermanently', spaceId)
     },
     toAnotherSpace: (context, { spaceId, shouldRemoveOriginals }) => {
       const space = utils.clone(context.state)
@@ -337,27 +338,27 @@ export default {
       }
       context.commit('createCard', card)
       card.spaceId = context.state.id
-      api.addToQueue('createCard', card)
+      queue.add('createCard', card)
       context.dispatch('incrementCardZ', card.id)
     },
     updateCard: (context, options) => {
       context.commit('updateCard', options)
       let card = { id: options.cardId }
       card[options.key] = options.value
-      api.addToQueue('updateCard', card)
+      queue.add('updateCard', card)
     },
     incrementCardZ: (context, cardId) => {
-      const cards = context.rootState.currentSpace.cards
-      const card = {
-        id: cardId,
-        z: cards.length + 1
-      }
+      // const cards = context.rootState.currentSpace.cards
+      // const card = {
+      //   id: cardId,
+      //   z: cards.length + 1
+      // }
       context.commit('incrementCardZ', cardId)
-      api.addToQueue('updateCard', { id: card.id, z: card.z })
+      // queue.add('updateCard', {id: card.id, z: card.z})
     },
     removeCard: (context, cardId) => {
       context.commit('removeCard', cardId)
-      api.addToQueue('removeCard', cardId)
+      queue.add('removeCard', cardId)
       context.dispatch('removeConnectionsFromCard', cardId)
       context.commit('generateCardMap', null, { root: true })
     },
@@ -373,13 +374,13 @@ export default {
         cards.map(card => {
           if (multipleCardsSelectedIds.includes(card.id)) {
             context.commit('moveCard', { cardId: card.id, delta })
-            // api.addToQueue('updateCard', {id: card.id, delta})
+            // queue.add('updateCard', {id: card.id, delta})
             context.dispatch('updateCardConnectionPaths', card.id)
           }
         })
       } else {
         context.commit('moveCard', { cardId: currentDraggingCardId, delta })
-        // api.addToQueue('updateCard', {id: currentDraggingCardId, delta})
+        // queue.add('updateCard', {id: currentDraggingCardId, delta})
         context.dispatch('updateCardConnectionPaths', currentDraggingCardId)
       }
     },
@@ -413,7 +414,7 @@ export default {
       connections = connections.map(connection => {
         if (connection.startCardId === cardId || connection.endCardId === cardId) {
           connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
-          // api.addToQueue('updateConnection', {id: connection.id, path: connection.path})
+          // queue.add('updateConnection', {id: connection.id, path: connection.path})
         }
         return connection
       })
@@ -424,7 +425,7 @@ export default {
       context.state.connections.forEach(connection => {
         if (connection.startCardId === cardId || connection.endCardId === cardId) {
           context.commit('removeConnection', connection.id)
-          api.addToQueue('removeConnection', connection.id)
+          queue.add('removeConnection', connection.id)
         }
       })
     },
@@ -438,7 +439,7 @@ export default {
         const connectedToSelected = startMatch || endMatch
         if (connectedToSelected) {
           context.commit('removeConnection', id)
-          api.addToQueue('removeConnection', id)
+          queue.add('removeConnection', id)
         }
       })
     },
@@ -449,11 +450,11 @@ export default {
     //   context.commit('updateCard', options)
     //   let card = { id: options.cardId }
     //   card[options.key] = options.value
-    //   api.addToQueue('updateCard', card)
+    //   queue.add('updateCard', card)
 
     updateConnectionType: (context, connectionType) => {
       context.commit('updateConnectionType', connectionType)
-      api.addToQueue('updateConnectionType', connectionType)
+      queue.add('updateConnectionType', connectionType)
 
       // context.state.connectionTypes.map(type => {
       //   if (type.id === connectionTypeId) {

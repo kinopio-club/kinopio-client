@@ -1,7 +1,5 @@
 // https://www.notion.so/kinopio/API-docs
 
-import _ from 'lodash'
-
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 
@@ -9,7 +7,6 @@ let host = 'https://api.kinopio.club'
 if (process.env.NODE_ENV === 'development') {
   host = 'http://kinopio.local:3000'
 }
-let queueIsRunning = false
 
 window.onload = () => {
   api.processQueue()
@@ -19,6 +16,39 @@ window.onload = () => {
 }
 
 const api = {
+
+  options (options) {
+    const headers = new Headers({ 'Content-Type': 'application/json' })
+    // const contributorKey = cache.space(options.spaceId).contributorKey
+    const apiKey = options.apiKey || cache.user().apiKey // || contributorKey
+    if (apiKey) {
+      headers.append('Authorization', apiKey)
+    }
+    return {
+      method: options.method,
+      headers,
+      body: JSON.stringify(options.body)
+    }
+  },
+  async normalizeResponse (response) {
+    const success = [200, 201, 202, 204]
+    if (success.includes(response.status)) {
+      const data = await response.json()
+      return data
+    } else {
+      const data = await response.json()
+      let error = {
+        status: response.status,
+        statusText: response.statusText,
+        error: true
+      }
+      if (data.errors) {
+        error.message = data.errors[0].message
+        error.type = data.errors[0].type
+      }
+      return error
+    }
+  },
 
   // Sign In or Up
 
@@ -176,112 +206,6 @@ const api = {
   async removeSpacePermanently (spaceId) {
     const options = this.options({ method: 'DELETE' })
     return utils.timeout(5000, fetch(`${host}/space/${spaceId}/permanent`, options))
-  },
-
-  // Queue
-
-  async addToQueue (name, body) {
-    const userIsSignedIn = cache.user().apiKey
-    if (!userIsSignedIn) { return }
-    const queue = this.queue()
-    const request = {
-      name,
-      body
-    }
-    queue.push(request)
-    console.log('🎡 Add to request queue', request)
-    // consolidate
-    // if updateCard , ids are the same,
-
-    // other approach is to only add things to the api queue on stop interactions, when their done/blurred
-    cache.saveQueue(queue)
-    _.debounce(_.wrap(this.processQueue()), 300)
-  },
-  request () {
-    const queue = this.queue()
-    const request = queue.shift()
-    cache.saveQueue(queue)
-    return request
-  },
-  queue () {
-    let queue = cache.queue()
-    queue = queue.filter(request => !_.isNil(request))
-    cache.saveQueue(queue)
-    return queue
-  },
-  async processQueue () {
-    console.log('this should be debounced')
-    if (queueIsRunning) { return }
-    if (!window.navigator.onLine) { return }
-    let queue = this.queue()
-    if (!queue.length) { return }
-    queueIsRunning = true
-    let request
-    do {
-      try {
-        request = this.request()
-        await this.processRequest(request)
-        console.log('✅ completed', request)
-      } catch (error) {
-        queue.push(request)
-        console.error(error)
-        console.log('🔁 Request error. Add back into queue to retry', request)
-        cache.saveQueue(queue)
-        queueIsRunning = false
-        break
-      }
-      queue = this.queue()
-    } while (queue.length > 0)
-    queueIsRunning = false
-  },
-  async processRequest (request) {
-    console.log('🚎 Processing request', request.name, request.body)
-    const response = await this[request.name](request.body)
-    const normalizedResponse = await this.normalizeResponse(response)
-    return normalizedResponse
-  },
-  queueError (requestId) {
-    const queue = this.queue()
-    const index = queue.findIndex(request => request.id === requestId)
-    if (index >= 0) {
-      queue[index].isActive = false
-      cache.saveQueue(queue)
-    }
-  },
-
-  // Request helpers
-
-  options (options) {
-    const headers = new Headers({ 'Content-Type': 'application/json' })
-    // const contributorKey = cache.space(options.spaceId).contributorKey
-    const apiKey = options.apiKey || cache.user().apiKey // || contributorKey
-    if (apiKey) {
-      headers.append('Authorization', apiKey)
-    }
-    return {
-      method: options.method,
-      headers,
-      body: JSON.stringify(options.body)
-    }
-  },
-  async normalizeResponse (response) {
-    const success = [200, 201, 202, 204]
-    if (success.includes(response.status)) {
-      const data = await response.json()
-      return data
-    } else {
-      const data = await response.json()
-      let error = {
-        status: response.status,
-        statusText: response.statusText,
-        error: true
-      }
-      if (data.errors) {
-        error.message = data.errors[0].message
-        error.type = data.errors[0].type
-      }
-      return error
-    }
   }
 
 }

@@ -108,7 +108,7 @@ export default {
       if (this.$store.getters.shouldScrollAtEdges && !scrollTimer) {
         scrollAreaHeight = Math.max(50, this.viewportHeight / 8)
         scrollAreaWidth = Math.max(50, this.viewportWidth / 8)
-        console.log('🦋', scrollAreaHeight, scrollAreaWidth)
+        // console.log('🦋', scrollAreaHeight, scrollAreaWidth)
         maxHeight = Math.max(2500, this.$store.state.viewportHeight)
         maxWidth = Math.max(2500, this.$store.state.viewportWidth)
         scrollTimer = window.requestAnimationFrame(this.scrollFrame)
@@ -411,6 +411,11 @@ export default {
       if (this.$store.state.multipleCardsSelectedIds.length) {
         const position = utils.cursorPositionInPage(event)
         this.showMultipleCardActions(position)
+        console.log('finished dragging cards', this.$store.state.multipleCardsSelectedIds)
+        // if positions are different .. api call updateCard w new pos // bulk multiple cards path
+      } else if (this.isDraggingCard) {
+        console.log('finished dragging a card', this.$store.state.currentDraggingCardId)
+        // if positions are different .. api call updateCard w new pos
       }
       this.$store.commit('shouldAddNewCard', false)
       this.$store.commit('preventDraggedCardFromShowingDetails', false)
