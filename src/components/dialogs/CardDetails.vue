@@ -85,13 +85,13 @@ export default {
       },
       set (newValue) {
         const options = {
-          type: 'name',
+          key: 'name',
           value: newValue,
           cardId: this.card.id
         }
-        this.$store.commit('currentSpace/updateCard', options)
+        this.$store.dispatch('currentSpace/updateCard', options)
         this.$nextTick(() => {
-          this.$store.commit('currentSpace/updateCardConnections', this.card.id)
+          this.$store.dispatch('currentSpace/updateCardConnectionPaths', this.card.id)
         })
       }
     }

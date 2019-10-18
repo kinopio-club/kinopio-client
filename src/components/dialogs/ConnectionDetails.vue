@@ -78,8 +78,12 @@ export default {
         return this.currentConnectionType.name
       },
       set (newName) {
-        const connectionTypeId = this.currentConnectionType.id
-        this.$store.commit('currentSpace/updateConnectionTypeName', { connectionTypeId, newName })
+        const connectionType = {
+          id: this.currentConnectionType.id,
+          key: 'name',
+          value: newName
+        }
+        this.$store.dispatch('currentSpace/updateConnectionType', connectionType)
       }
     }
   },
@@ -128,8 +132,12 @@ export default {
       this.colorPickerIsVisible = false
     },
     updateTypeColor (newColor) {
-      const connectionTypeId = this.currentConnectionType.id
-      this.$store.commit('currentSpace/updateConnectionTypeColor', { connectionTypeId, newColor })
+      const connectionType = {
+        id: this.currentConnectionType.id,
+        key: 'color',
+        value: newColor
+      }
+      this.$store.dispatch('currentSpace/updateConnectionType', connectionType)
     },
     scrollIntoView () {
       const element = this.$refs.dialog

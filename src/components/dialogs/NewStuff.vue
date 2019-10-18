@@ -71,7 +71,7 @@ export default {
   methods: {
     updateUserLastRead () {
       const lastReadNewStuffId = this.newStuff[0].id
-      this.$store.commit('currentUser/updateLastReadNewStuffId', lastReadNewStuffId)
+      this.$store.dispatch('currentUser/lastReadNewStuffId', lastReadNewStuffId)
     },
     checkNewStuffIsUpdated () {
       const lastReadNewStuffId = this.newStuff[0].id

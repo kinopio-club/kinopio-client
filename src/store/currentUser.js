@@ -3,9 +3,7 @@ import nanoid from 'nanoid'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
-
-// - cache has api calls
-// - mutations dont have cache (make actions for those)
+import api from '@/api.js'
 
 export default {
   namespaced: true,
@@ -27,27 +25,28 @@ export default {
     isSignedIn: (state) => {
       return Boolean(state.apiKey)
     }
-    // isEditor: (state, getters, rootState) => {
+    // isContributor: (state, getters, rootState) => {
     //   const inCurrentSpace = rootState.currentSpace.users.find(user => {
     //     return user.id === state.id
     //   })
     //   return Boolean(inCurrentSpace)
     // }
+
   },
   mutations: {
-    updateColor: (state, newColor) => {
+    color: (state, newColor) => {
       state.color = newColor
       cache.updateUser('color', newColor)
     },
-    updateName: (state, newName) => {
+    name: (state, newName) => {
       state.name = newName
       cache.updateUser('name', newName)
     },
-    updateLastSpaceId: (state, spaceId) => {
+    lastSpaceId: (state, spaceId) => {
       state.lastSpaceId = spaceId
       cache.updateUser('lastSpaceId', spaceId)
     },
-    updateLastReadNewStuffId: (state, newStuffId) => {
+    lastReadNewStuffId: (state, newStuffId) => {
       state.lastReadNewStuffId = newStuffId
       cache.updateUser('lastReadNewStuffId', newStuffId)
     },
@@ -98,6 +97,24 @@ export default {
     },
     createNewUser: (context) => {
       cache.saveUser(context.state)
+    },
+    name: (context, newName) => {
+      context.commit('name', newName)
+      api.addToQueue('updateUser', { name: newName })
+    },
+    color: (context, newColor) => {
+      context.commit('color', newColor)
+      api.addToQueue('updateUser', { color: newColor })
+    },
+    lastSpaceId: (context, spaceId) => {
+      context.commit('lastSpaceId', spaceId)
+      cache.updateUser('lastSpaceId', spaceId)
+      api.addToQueue('updateUser', { lastSpaceId: spaceId })
+    },
+    lastReadNewStuffId: (context, newStuffId) => {
+      context.commit('lastReadNewStuffId', newStuffId)
+      api.addToQueue('updateUser', { lastReadNewStuffId: newStuffId })
     }
+
   }
 }

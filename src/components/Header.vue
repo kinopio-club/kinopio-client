@@ -10,6 +10,7 @@ header
       button.space-details-button(@click.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
         //img.icon.space-moon(src="@/assets/space-moon.svg")
         span {{currentSpaceName}}
+        Loader(:visible="loadingSpace")
       SpaceDetails(:visible="spaceDetailsIsVisible")
 
   aside
@@ -26,6 +27,7 @@ import About from '@/components/dialogs/About.vue'
 import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
 import User from '@/components/User.vue'
 import SignUpOrIn from '@/components/dialogs/SignUpOrIn.vue'
+import Loader from '@/components/Loader.vue'
 
 export default {
   name: 'Header',
@@ -33,7 +35,8 @@ export default {
     About,
     SpaceDetails,
     User,
-    SignUpOrIn
+    SignUpOrIn,
+    Loader
   },
   data () {
     return {
@@ -58,7 +61,6 @@ export default {
     currentSpaceName () {
       const id = this.$store.state.currentSpace.id
       const name = this.$store.state.currentSpace.name
-      console.log(this.$store.state.currentSpace)
       if (name) {
         return name
       } else {
@@ -67,6 +69,9 @@ export default {
     },
     userIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
+    },
+    loadingSpace () {
+      return this.$store.state.loadingSpace
     }
   },
   methods: {

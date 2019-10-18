@@ -1,6 +1,5 @@
 <template lang="pug">
 footer(v-if="!dialogsVisible")
-  Loader(:visible="loadingSpace")
   .button-wrap(v-if="isOffline && userIsSignedIn")
     button(@click="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
       span Offline
@@ -15,14 +14,12 @@ footer(v-if="!dialogsVisible")
 <script>
 import Restore from '@/components/dialogs/Restore.vue'
 import Offline from '@/components/dialogs/Offline.vue'
-import Loader from '@/components/Loader.vue'
 
 export default {
   name: 'Footer',
   components: {
     Restore,
-    Offline,
-    Loader
+    Offline
   },
   data () {
     return {
@@ -58,9 +55,6 @@ export default {
     },
     userIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
-    },
-    loadingSpace () {
-      return this.$store.state.loadingSpace
     }
   },
   methods: {
@@ -98,8 +92,4 @@ footer
   .undo
     margin 0
     height 11px
-  .loader
-    height 24px
-    width 24px
-    vertical-align top
 </style>

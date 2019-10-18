@@ -28,17 +28,17 @@ export default {
   methods: {
     changeCardFrame (frame) {
       const frameId = {
-        type: 'frameId',
+        key: 'frameId',
         value: frame.id,
         cardId: this.card.id
       }
       const frameName = {
-        type: 'frameName',
+        key: 'frameName',
         value: frame.name,
         cardId: this.card.id
       }
-      this.$store.commit('currentSpace/updateCard', frameId)
-      this.$store.commit('currentSpace/updateCard', frameName)
+      this.$store.dispatch('currentSpace/updateCard', frameId)
+      this.$store.dispatch('currentSpace/updateCard', frameName)
     },
     frameIsCardFrame (frameId) {
       const cardFrameId = this.card.frameId || 0

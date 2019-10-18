@@ -1,10 +1,6 @@
 // local storage cache interface for currentUser and spaces
 
-import nanoid from 'nanoid'
-import _ from 'lodash'
-
 import utils from '@/utils.js'
-import api from '@/api.js'
 
 export default {
   storeLocal (key, value) {
@@ -37,9 +33,6 @@ export default {
     let user = this.user()
     user[key] = value
     this.storeLocal('user', user)
-    let update = {}
-    update[key] = value
-    _.debounce(_.wrap(api.addToQueue('updateUser', update)), 150)
   },
   saveUser (user) {
     this.storeLocal('user', user)
@@ -96,33 +89,15 @@ export default {
     })
   },
   updateIdsInSpace (space) {
-    const cardIdDeltas = []
-    const connectionTypeIdDeltas = []
-    space.cards = space.cards.map(card => {
-      const newId = nanoid()
-      cardIdDeltas.push({
-        prevId: card.id,
-        newId
-      })
-      card.id = newId
-      return card
-    })
-    space.connectionTypes = space.connectionTypes.map(type => {
-      const newId = nanoid()
-      connectionTypeIdDeltas.push({
-        prevId: type.id,
-        newId
-      })
-      type.id = newId
-      return type
-    })
-    space.connections = space.connections.map(connection => {
-      connection.id = nanoid()
-      connection.connectionTypeId = utils.updateAllIds(connection, 'connectionTypeId', connectionTypeIdDeltas)
-      connection.startCardId = utils.updateAllIds(connection, 'startCardId', cardIdDeltas)
-      connection.endCardId = utils.updateAllIds(connection, 'endCardId', cardIdDeltas)
-      return connection
-    })
+    const items = {
+      cards: space.cards,
+      connectionTypes: space.connectionTypes,
+      connections: space.connections
+    }
+    const uniqueItems = utils.uniqueSpaceItems(items)
+    space.cards = uniqueItems.cards
+    space.connectionTypes = uniqueItems.connectionTypes
+    space.connections = uniqueItems.connections
     this.storeLocal(`space-${space.id}`, space)
     return space
   },
@@ -152,7 +127,6 @@ export default {
     const space = this.getLocal(spaceKey)
     this.storeLocal(`removed-${spaceKey}`, space)
     this.removeLocal(spaceKey)
-    api.addToQueue('removeSpace', spaceId)
   },
   removeSpacePermanently (spaceId) {
     const spaceKey = `removed-space-${spaceId}`

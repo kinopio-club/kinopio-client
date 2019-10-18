@@ -56,7 +56,7 @@ export default {
         return this.$store.state.currentSpace.name
       },
       set (newName) {
-        this.$store.commit('currentSpace/updateName', newName)
+        this.$store.dispatch('currentSpace/name', newName)
         this.updateSpaces()
       }
     },
@@ -88,7 +88,7 @@ export default {
       return Boolean(currentSpace === spaceId)
     },
     addSpace () {
-      this.$store.dispatch('currentSpace/createNewSpace')
+      this.$store.dispatch('currentSpace/addSpace')
       this.updateSpaces()
     },
     changeSpace (space) {
