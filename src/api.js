@@ -8,14 +8,7 @@ if (process.env.NODE_ENV === 'development') {
   host = 'http://kinopio.local:3000'
 }
 
-window.onload = () => {
-  api.processQueue()
-  setInterval(() => {
-    api.processQueue()
-  }, 60 * 1000) // 60 seconds
-}
-
-const api = {
+export default {
 
   options (options) {
     const headers = new Headers({ 'Content-Type': 'application/json' })
@@ -209,5 +202,3 @@ const api = {
   }
 
 }
-
-export default api

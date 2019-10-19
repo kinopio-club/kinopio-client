@@ -53,6 +53,9 @@ export default {
     // cards
     incrementCardZ: (state, cardId) => {
       state.cards.map((card, index) => {
+        card = utils.clone(card)
+        console.log('card', card)
+
         card.z = index
         if (card.id === cardId) {
           card.z = state.cards.length + 1
@@ -348,13 +351,13 @@ export default {
       queue.add('updateCard', card)
     },
     incrementCardZ: (context, cardId) => {
-      // const cards = context.rootState.currentSpace.cards
-      // const card = {
-      //   id: cardId,
-      //   z: cards.length + 1
-      // }
-      context.commit('incrementCardZ', cardId)
-      // queue.add('updateCard', {id: card.id, z: card.z})
+      const cards = context.rootState.currentSpace.cards
+      const card = {
+        id: cardId,
+        z: cards.length + 1
+      }
+      context.commit('incrementCardZ', card.id)
+      queue.add('updateCard', { id: card.id, z: card.z })
     },
     removeCard: (context, cardId) => {
       context.commit('removeCard', cardId)
@@ -374,13 +377,13 @@ export default {
         cards.map(card => {
           if (multipleCardsSelectedIds.includes(card.id)) {
             context.commit('moveCard', { cardId: card.id, delta })
-            // queue.add('updateCard', {id: card.id, delta})
+            queue.add('updateCard', { id: card.id, x: endCursor.x, y: endCursor.y })
             context.dispatch('updateCardConnectionPaths', card.id)
           }
         })
       } else {
         context.commit('moveCard', { cardId: currentDraggingCardId, delta })
-        // queue.add('updateCard', {id: currentDraggingCardId, delta})
+        queue.add('updateCard', { id: currentDraggingCardId, x: endCursor.x, y: endCursor.y })
         context.dispatch('updateCardConnectionPaths', currentDraggingCardId)
       }
     },
@@ -389,9 +392,7 @@ export default {
       const currentDraggingCardId = context.rootState.currentDraggingCardId
       const cards = context.state.cards
       if (multipleCardsSelectedIds.length) {
-        cards.forEach(cardId => {
-          context.dispatch('incrementCardZ', cardId)
-        })
+        cards.forEach(card => context.dispatch('incrementCardZ', card.id))
       } else {
         context.dispatch('incrementCardZ', currentDraggingCardId)
       }
@@ -414,7 +415,7 @@ export default {
       connections = connections.map(connection => {
         if (connection.startCardId === cardId || connection.endCardId === cardId) {
           connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
-          // queue.add('updateConnection', {id: connection.id, path: connection.path})
+          queue.add('updateConnection', { id: connection.id, path: connection.path })
         }
         return connection
       })
