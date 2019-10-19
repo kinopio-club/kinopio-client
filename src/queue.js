@@ -25,28 +25,9 @@ const self = {
       body
     }
     queue.push(request)
-    console.log('💞 Add to queue', request)
-    // queue = queue.reduce(squash)
     cache.saveQueue(queue)
-    console.log('pre squash queue', queue.length, queue)
-    self.squash()
     _.debounce(_.wrap(this.process()), 5000) // 5 seconds
   },
-
-  // TODO squash() test
-
-  // inputs
-  // {name: 'Updatecard', {body: id: 1, name: "add"}
-  // {name: 'Updatecard', {body: id: 1, frameid: 9}
-  // {name: 'yolo', {body: id: 2, prop2: "xyz"}
-  // {name: 'Updatecard', {body: id: 1, prop1: "123", x: 23, y: 12}
-  // {name: 'Updatecard', {body: id: 1, name: "added"}
-  // {name: 'Updatecard', {body: id: 1, name: "added pop"}
-
-  // expected outputs
-  // {name: 'Updatecard', {body: id: 1, prop1: "123", x: 23, y: 12, frameid: 9, name: "added pop"}
-  // {name: 'yolo', {body: id: 2, prop2: "xyz"}
-
   squash () {
     let queue = this.queue()
     let squashed = []
@@ -58,19 +39,16 @@ const self = {
       reduced.name = request.name
       squashed.push(reduced)
     })
-    console.log('✝️ squashed', squashed)
     cache.saveQueue(squashed)
-    // console.log('✝️✝️ squashed cache', cache.queue())
   },
   next () {
+    self.squash()
     const queue = this.queue()
     const request = queue.shift()
     cache.saveQueue(queue)
     return request
   },
   async process () {
-    // console.log('this should be debounced')
-
     if (queueIsRunning) { return }
     if (!window.navigator.onLine) { return }
     let queue = this.queue()
@@ -95,7 +73,7 @@ const self = {
     queueIsRunning = false
   },
   async processRequest (request) {
-    console.log('🚎🚎🚎 Processing request', request.name, request.body)
+    console.log('🚎 Processing request', request.name, request.body)
     const response = await api[request.name](request.body)
     const normalizedResponse = await api.normalizeResponse(response)
     return normalizedResponse

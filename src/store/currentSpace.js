@@ -54,8 +54,6 @@ export default {
     incrementCardZ: (state, cardId) => {
       state.cards.map((card, index) => {
         card = utils.clone(card)
-        console.log('card', card)
-
         card.z = index
         if (card.id === cardId) {
           card.z = state.cards.length + 1
