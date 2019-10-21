@@ -3,14 +3,16 @@ import _ from 'lodash'
 import cache from '@/cache.js'
 import api from '@/api.js'
 
-let queueIsRunning = false
-
 window.onload = () => {
   self.process()
   setInterval(() => {
     self.process()
   }, 60 * 1000) // 60 seconds
 }
+
+const processQueue = _.debounce(async () => {
+  self.process()
+}, 1000)
 
 const self = {
   queue () {
@@ -26,7 +28,7 @@ const self = {
     }
     queue.push(request)
     cache.saveQueue(queue)
-    _.debounce(_.wrap(this.process()), 5000) // 5 seconds
+    processQueue()
   },
   squash () {
     let queue = this.queue()
@@ -42,35 +44,30 @@ const self = {
     cache.saveQueue(squashed)
   },
   next () {
-    self.squash()
     const queue = this.queue()
     const request = queue.shift()
     cache.saveQueue(queue)
     return request
   },
   async process () {
-    if (queueIsRunning) { return }
     if (!window.navigator.onLine) { return }
+    self.squash()
     let queue = this.queue()
     if (!queue.length) { return }
-    queueIsRunning = true
     let request
     do {
       try {
         request = this.next()
         await this.processRequest(request)
-        console.log('✅', request)
       } catch (error) {
         queue.push(request)
         console.error(error)
         console.log('🔁 Request error. Add back into queue to retry', request)
         cache.saveQueue(queue)
-        queueIsRunning = false
         break
       }
       queue = this.queue()
     } while (queue.length > 0)
-    queueIsRunning = false
   },
   async processRequest (request) {
     console.log('🚎 Processing request', request.name, request.body)
