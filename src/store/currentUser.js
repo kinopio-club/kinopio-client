@@ -100,20 +100,20 @@ export default {
     },
     name: (context, newName) => {
       context.commit('name', newName)
-      queue.add('updateUser', { name: newName })
+      queue.add('updateUser', { id: context.state.id, name: newName })
     },
     color: (context, newColor) => {
       context.commit('color', newColor)
-      queue.add('updateUser', { color: newColor })
+      queue.add('updateUser', { id: context.state.id, color: newColor })
     },
     lastSpaceId: (context, spaceId) => {
       context.commit('lastSpaceId', spaceId)
       cache.updateUser('lastSpaceId', spaceId)
-      queue.add('updateUser', { lastSpaceId: spaceId })
+      queue.add('updateUser', { id: context.state.id, lastSpaceId: spaceId })
     },
     lastReadNewStuffId: (context, newStuffId) => {
       context.commit('lastReadNewStuffId', newStuffId)
-      queue.add('updateUser', { lastReadNewStuffId: newStuffId })
+      queue.add('updateUser', { id: context.state.id, lastReadNewStuffId: newStuffId })
     }
 
   }
