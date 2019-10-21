@@ -134,9 +134,7 @@ export default {
       cache.updateSpace('connections', connections, state.id)
     },
 
-    addConnection: (state, { connection, connectionType }) => {
-      connection.id = nanoid()
-      connection.connectionTypeId = connectionType.id
+    addConnection: (state, connection) => {
       state.connections.push(connection)
       cache.updateSpace('connections', state.connections, state.id)
     },
@@ -404,7 +402,11 @@ export default {
         endCardId: connection.endCardId
       })
       if (!connectionAlreadyExists) {
-        context.commit('addConnection', { connection, connectionType })
+        connection.id = nanoid()
+        connection.connectionTypeId = connectionType.id
+        connection.spaceId = context.state.id
+        queue.add('createConnection', connection)
+        context.commit('addConnection', connection)
         context.commit('removeUnusedConnectionTypes')
       }
     },

@@ -137,6 +137,10 @@ export default {
 
   // Connection
 
+  async createConnection (body) {
+    const options = this.options({ body, method: 'POST' })
+    return utils.timeout(5000, fetch(`${host}/connection`, options))
+  },
   async updateConnection (connection) {
     const body = connection
     const options = this.options({ body, method: 'PATCH' })
