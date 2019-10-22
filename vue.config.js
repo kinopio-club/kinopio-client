@@ -5,7 +5,8 @@ module.exports = {
       filename: '[name].[hash].js'
     },
     devServer: {
-      disableHostCheck: true
+      disableHostCheck: true,
+      host: 'localhost'
     }
   }
 }
