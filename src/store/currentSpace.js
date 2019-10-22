@@ -53,7 +53,6 @@ export default {
     // cards
     incrementCardZ: (state, cardId) => {
       state.cards.map((card, index) => {
-        card = utils.clone(card)
         card.z = index
         if (card.id === cardId) {
           card.z = state.cards.length + 1
@@ -303,8 +302,8 @@ export default {
       if (shouldRemoveOriginals) {
         const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
         multipleCardsSelectedIds.forEach(cardId => {
-          context.dispatch('removeCard', cardId)
-          context.dispatch('removeConnectionsFromCard', cardId)
+          context.dispatch('removeCard', { id: cardId })
+          context.dispatch('removeConnectionsFromCard', { id: cardId })
         })
       }
     },
@@ -339,18 +338,22 @@ export default {
       queue.add('updateCard', card)
     },
     incrementCardZ: (context, cardId) => {
-      const cards = context.rootState.currentSpace.cards
-      const card = {
-        id: cardId,
-        z: cards.length + 1
-      }
-      context.commit('incrementCardZ', card.id)
-      queue.add('updateCard', { id: card.id, z: card.z })
+      let cards = context.rootState.currentSpace.cards
+      cards = cards.map((card, index) => {
+        card = utils.clone(card)
+        card.z = index
+        if (card.id === cardId) {
+          card.z = cards.length + 1
+        }
+        queue.add('updateCard', { id: card.id, z: card.z })
+      })
+      context.commit('incrementCardZ', cardId)
     },
-    removeCard: (context, cardId) => {
-      context.commit('removeCard', cardId)
-      queue.add('removeCard', cardId)
-      context.dispatch('removeConnectionsFromCard', cardId)
+    removeCard: (context, card) => {
+      console.log('removeCard', card)
+      context.commit('removeCard', card.id)
+      queue.add('removeCard', card)
+      context.dispatch('removeConnectionsFromCard', card)
       context.commit('generateCardMap', null, { root: true })
     },
     dragCards: (context, { endCursor, prevCursor, delta }) => {
@@ -407,18 +410,18 @@ export default {
       connections = connections.map(connection => {
         if (connection.startCardId === cardId || connection.endCardId === cardId) {
           connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
-          queue.add('updateConnection', { id: connection.id, path: connection.path })
+          queue.add('updateConnection', { id: connection.id, path: connection.path, SpaceId: context.state.id })
         }
         return connection
       })
       context.commit('updateCardConnections', connections)
     },
     // qa test this
-    removeConnectionsFromCard: (context, cardId) => {
+    removeConnectionsFromCard: (context, card) => {
       context.state.connections.forEach(connection => {
-        if (connection.startCardId === cardId || connection.endCardId === cardId) {
+        if (connection.startCardId === card.id || connection.endCardId === card.id) {
           context.commit('removeConnection', connection.id)
-          queue.add('removeConnection', connection.id)
+          queue.add('removeConnection', { id: connection.id })
         }
       })
     },
@@ -435,6 +438,10 @@ export default {
           queue.add('removeConnection', id)
         }
       })
+    },
+    removeConnection: (context, connectionId) => {
+      context.commit('removeConnection', connectionId)
+      queue.add('removeConnection', { id: connectionId })
     },
 
     // Connection Types
