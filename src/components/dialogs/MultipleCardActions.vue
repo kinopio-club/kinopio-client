@@ -94,7 +94,7 @@ export default {
       const typePref = this.$store.state.currentUser.defaultConnectionTypeId
       const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
       if (!defaultType) {
-        this.$store.commit('currentSpace/addConnectionType', {})
+        this.$store.dispatch('currentSpace/addConnectionType')
       }
       const newConnectionType = _.last(this.$store.state.currentSpace.connectionTypes)
       return defaultType || newConnectionType

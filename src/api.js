@@ -151,6 +151,10 @@ export default {
 
   // Connection Type
 
+  async createConnectionType (body) {
+    const options = this.options({ body, method: 'POST' })
+    return utils.timeout(5000, fetch(`${host}/connection-type`, options))
+  },
   async updateConnectionType (body) {
     const options = this.options({ body, method: 'PATCH' })
     return utils.timeout(5000, fetch(`${host}/connection-type`, options))

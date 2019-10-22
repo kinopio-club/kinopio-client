@@ -147,12 +147,7 @@ export default {
 
     // connection types
 
-    addConnectionType: (state, { id, name, color }) => {
-      const connectionType = {
-        id: id || nanoid(),
-        name: name || `Connection ${state.connectionTypes.length + 1}`,
-        color: color || randomColor({ luminosity: 'light' })
-      }
+    addConnectionType: (state, connectionType) => {
       state.connectionTypes.push(connectionType)
       cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
     },
@@ -446,32 +441,21 @@ export default {
 
     // Connection Types
 
-    // updateCard: (context, options) => {
-    //   context.commit('updateCard', options)
-    //   let card = { id: options.cardId }
-    //   card[options.key] = options.value
-    //   queue.add('updateCard', card)
-
+    addConnectionType: (context) => {
+      const types = context.state.connectionTypes
+      const connectionType = {
+        id: nanoid(),
+        name: `Connection ${types.length + 1}`,
+        color: randomColor({ luminosity: 'light' }),
+        spaceId: context.state.id
+      }
+      context.commit('addConnectionType', connectionType)
+      queue.add('createConnectionType', connectionType)
+    },
     updateConnectionType: (context, connectionType) => {
       context.commit('updateConnectionType', connectionType)
       queue.add('updateConnectionType', connectionType)
-
-      // context.state.connectionTypes.map(type => {
-      //   if (type.id === connectionTypeId) {
-      //     type.name = newName
-      //   }
-      // })
-      // cache.updateSpace('connectionTypes', context.state.connectionTypes, context.state.id)
     }
-    // updateConnectionTypeName: (context, { connectionTypeId, newName }) => {
-    //   context.state.connectionTypes.map(type => {
-    //     if (type.id === connectionTypeId) {
-    //       type.name = newName
-    //     }
-    //   })
-    //   cache.updateSpace('connectionTypes', context.state.connectionTypes, context.state.id)
-    //   // context.commit('updateConnectionTypeName', {connectionTypeId, newName} )
-    // },
   },
 
   getters: {

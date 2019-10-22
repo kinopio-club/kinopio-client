@@ -89,7 +89,7 @@ export default {
   },
   methods: {
     addConnectionType () {
-      this.$store.commit('currentSpace/addConnectionType', {})
+      this.$store.dispatch('currentSpace/addConnectionType')
       const types = utils.clone(this.connectionTypes)
       const newType = _.last(types)
       this.changeConnectionType(newType)
