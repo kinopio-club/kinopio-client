@@ -15,9 +15,11 @@ const processQueue = _.debounce(async () => {
 }, 1000)
 
 const self = {
+
   queue () {
     return cache.queue()
   },
+
   async add (name, body) {
     const userIsSignedIn = cache.user().apiKey
     if (!userIsSignedIn) { return }
@@ -30,30 +32,71 @@ const self = {
     cache.saveQueue(queue)
     processQueue()
   },
+
+  idsMatch (item, request) {
+    let itemId, requestId
+    if (item.body) {
+      itemId = item.body.id
+    } else {
+      itemId = item.updates[0].id
+    }
+    if (request.body) {
+      requestId = request.body.id
+    } else {
+      requestId = request.updates[0].id
+    }
+    return itemId === requestId
+  },
+
   squash () {
-    let queue = this.queue()
+    const queue = this.queue()
     let squashed = []
     queue.forEach(request => {
-      const isSquashed = squashed.find(item => item.name === request.name && item.body.id === request.body.id)
+      const isSquashed = squashed.find(item => {
+        return item.name === request.name && this.idsMatch(item, request)
+      })
       if (isSquashed) { return }
-      const matches = queue.filter(item => item.name === request.name && item.body.id === request.body.id)
+      const matches = queue.filter(item => {
+        return item.name === request.name && this.idsMatch(item, request)
+      })
       const reduced = matches.reduce((accumulator, currentValue) => _.merge(accumulator, currentValue))
       reduced.name = request.name
       squashed.push(reduced)
     })
     cache.saveQueue(squashed)
   },
+
+  group () {
+    const queue = this.queue()
+    let grouped = []
+    queue.forEach(request => {
+      const isGrouped = grouped.find(item => item.name === request.name)
+      if (isGrouped) { return }
+      const matches = queue.filter(item => item.name === request.name)
+      const updates = matches.map(item => item.body)
+      const group = {
+        name: request.name,
+        updates
+      }
+      grouped.push(group)
+    })
+    cache.saveQueue(grouped)
+  },
+
   next () {
     const queue = this.queue()
     const request = queue.shift()
     cache.saveQueue(queue)
     return request
   },
+
   async process () {
     if (!window.navigator.onLine) { return }
-    self.squash()
+    this.squash()
+    this.group()
     let queue = this.queue()
     if (!queue.length) { return }
+
     let request
     do {
       try {
@@ -69,9 +112,13 @@ const self = {
       queue = this.queue()
     } while (queue.length > 0)
   },
+
   async processRequest (request) {
-    console.log('🚎 Processing request', request.name, request.body)
-    const response = await api[request.name](request.body)
+    if (request.body) {
+      request.updates = [request.body]
+    }
+    console.log('🚎 Processing request', request)
+    const response = await api[request.name](request.updates)
     const normalizedResponse = await api.normalizeResponse(response)
     return normalizedResponse
   }

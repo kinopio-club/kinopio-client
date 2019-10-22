@@ -117,22 +117,21 @@ export default {
     const options = this.options({ body, method: 'POST' })
     return utils.timeout(5000, fetch(`${host}/card`, options))
   },
-  async updateCard (card) {
-    const body = card
+  async updateCard (body) {
     const options = this.options({ body, method: 'PATCH' })
-    return utils.timeout(5000, fetch(`${host}/card/${card.id}`, options))
+    return utils.timeout(5000, fetch(`${host}/card`, options))
   },
-  async restoreCard (cardId) {
-    const options = this.options({ method: 'PATCH' })
-    return utils.timeout(5000, fetch(`${host}/card/${cardId}/restore`, options))
+  async restoreCard (body) {
+    const options = this.options({ body, method: 'PATCH' })
+    return utils.timeout(5000, fetch(`${host}/card/restore`, options))
   },
-  async removeCard (cardId) {
-    const options = this.options({ method: 'DELETE' })
-    return utils.timeout(5000, fetch(`${host}/card/${cardId}`, options))
+  async removeCard (body) {
+    const options = this.options({ body, method: 'DELETE' })
+    return utils.timeout(5000, fetch(`${host}/card`, options))
   },
-  async removeCardPermanently (cardId) {
-    const options = this.options({ method: 'DELETE' })
-    return utils.timeout(5000, fetch(`${host}/card/${cardId}/permanent`, options))
+  async removeCardPermanently (body) {
+    const options = this.options({ body, method: 'DELETE' })
+    return utils.timeout(5000, fetch(`${host}/card/permanent`, options))
   },
 
   // Connection
@@ -141,16 +140,14 @@ export default {
     const options = this.options({ body, method: 'POST' })
     return utils.timeout(5000, fetch(`${host}/connection`, options))
   },
-  async updateConnection (connection) {
-    const body = connection
+  async updateConnection (body) {
     const options = this.options({ body, method: 'PATCH' })
-    return utils.timeout(5000, fetch(`${host}/connection/${connection.id}`, options))
+    return utils.timeout(5000, fetch(`${host}/connection`, options))
   },
-  // async removeConnections (body) {
-  //   console.log('🚨',body)
-  //   const options = this.options({ body, method: 'DELETE' })
-  //   return utils.timeout(5000, fetch(`${host}/connection/multiple`, options))
-  // },
+  async removeConnection (body) {
+    const options = this.options({ body, method: 'DELETE' })
+    return utils.timeout(5000, fetch(`${host}/connection`, options))
+  },
 
   // Connection Type
 
@@ -185,11 +182,11 @@ export default {
     const options = this.options({ body, method: 'POST' })
     return utils.timeout(5000, fetch(`${host}/space`, options))
   },
-  async saveSpaces (apiKey) {
+  async createSpaces (apiKey) {
     try {
       const body = cache.getAllSpaces()
       const options = this.options({ body, apiKey, method: 'POST' })
-      const response = await fetch(`${host}/space/multiple`, options)
+      const response = await fetch(`${host}/space`, options)
       const normalizedResponse = await this.normalizeResponse(response)
       return normalizedResponse
     } catch (error) {
@@ -198,11 +195,11 @@ export default {
   },
   async removeSpace (spaceId) {
     const options = this.options({ method: 'DELETE' })
-    return utils.timeout(5000, fetch(`${host}/space/${spaceId}`, options))
+    return utils.timeout(5000, fetch(`${host}/space`, options))
   },
   async removeSpacePermanently (spaceId) {
     const options = this.options({ method: 'DELETE' })
-    return utils.timeout(5000, fetch(`${host}/space/${spaceId}/permanent`, options))
+    return utils.timeout(5000, fetch(`${host}/space/permanent`, options))
   }
 
 }

@@ -125,8 +125,8 @@ export default {
     },
     removeCards () {
       const cardIds = this.multipleCardsSelectedIds
-      cardIds.forEach(cardId => {
-        this.$store.dispatch('currentSpace/removeCard', cardId)
+      cardIds.forEach(id => {
+        this.$store.dispatch('currentSpace/removeCard', { id })
       })
       this.$store.commit('closeAllDialogs')
       this.$store.commit('multipleCardsSelectedIds', [])

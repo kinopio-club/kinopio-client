@@ -122,7 +122,7 @@ export default {
       this.$store.commit('closeAllDialogs')
     },
     removeCard () {
-      this.$store.dispatch('currentSpace/removeCard', this.card.id)
+      this.$store.dispatch('currentSpace/removeCard', this.card)
       this.$store.commit('cardDetailsIsVisibleForCardId', '')
     },
     textareaSizes () {
@@ -163,7 +163,7 @@ export default {
         }
       })
       if (!visible && this.cardIsEmpty()) {
-        this.$store.dispatch('currentSpace/removeCard', this.card.id)
+        this.$store.dispatch('currentSpace/removeCard', this.card)
       }
       this.$store.commit('updatePageSizes')
     }

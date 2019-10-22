@@ -145,14 +145,6 @@ export default {
       state.connections = connections
       cache.updateSpace('connections', state.connections, state.id)
     },
-    // removeConnectionsFromCard: (state, cardId) => {
-    //   const connections = state.connections.filter(connection => {
-    //     const isConnectedToCard = connection.startCardId === cardId || connection.endCardId === cardId
-    //     return !isConnectedToCard
-    //   })
-    //   state.connections = connections
-    //   cache.updateSpace('connections', state.connections, state.id)
-    // },
 
     // connection types
 
