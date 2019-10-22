@@ -151,10 +151,9 @@ export default {
 
   // Connection Type
 
-  async updateConnectionType (connectionType) {
-    const body = connectionType
+  async updateConnectionType (body) {
     const options = this.options({ body, method: 'PATCH' })
-    return utils.timeout(5000, fetch(`${host}/connection-type/${connectionType.id}`, options))
+    return utils.timeout(5000, fetch(`${host}/connection-type`, options))
   },
 
   // Space
