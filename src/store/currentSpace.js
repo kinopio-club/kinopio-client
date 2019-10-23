@@ -131,9 +131,9 @@ export default {
       state.connections.push(connection)
       cache.updateSpace('connections', state.connections, state.id)
     },
-    removeConnection: (state, connectionId) => {
+    removeConnection: (state, connectionToRemove) => {
       const connections = state.connections.filter(connection => {
-        return connection.id !== connectionId
+        return connection.id !== connectionToRemove.id
       })
       state.connections = connections
       cache.updateSpace('connections', state.connections, state.id)
@@ -418,8 +418,7 @@ export default {
     removeConnectionsFromCard: (context, card) => {
       context.state.connections.forEach(connection => {
         if (connection.startCardId === card.id || connection.endCardId === card.id) {
-          context.commit('removeConnection', connection.id)
-          apiQueue.add('removeConnection', { id: connection.id })
+          context.dispatch('removeConnection', connection)
         }
       })
     },
@@ -427,19 +426,18 @@ export default {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       const connections = context.state.connections
       connections.map(connection => {
-        const { startCardId, endCardId, id } = connection
+        const { startCardId, endCardId } = connection
         const startMatch = startCardId === cardId && multipleCardsSelectedIds.includes(endCardId)
         const endMatch = endCardId === cardId && multipleCardsSelectedIds.includes(startCardId)
         const connectedToSelected = startMatch || endMatch
         if (connectedToSelected) {
-          context.commit('removeConnection', id)
-          apiQueue.add('removeConnection', id)
+          context.dispatch('removeConnection', connection)
         }
       })
     },
-    removeConnection: (context, connectionId) => {
-      context.commit('removeConnection', connectionId)
-      apiQueue.add('removeConnection', { id: connectionId })
+    removeConnection: (context, connection) => {
+      context.commit('removeConnection', connection)
+      apiQueue.add('removeConnection', connection)
     },
 
     // Connection Types
@@ -464,7 +462,6 @@ export default {
       const connections = context.state.connections
       const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
       const removeConnectionTypes = connectionTypes.filter(type => !connectionTypeIds.includes(type.id))
-      console.log('removeConnectionType', removeConnectionTypes, removeConnectionTypes.length)
       removeConnectionTypes.forEach(type => {
         apiQueue.add('removeConnectionType', type)
         context.commit('removeConnectionType', type)

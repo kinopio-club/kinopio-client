@@ -101,7 +101,7 @@ export default {
       return typePref === typeId
     },
     removeConnection () {
-      this.$store.dispatch('currentSpace/removeConnection', this.currentConnection.id)
+      this.$store.dispatch('currentSpace/removeConnection', this.currentConnection)
       this.$store.commit('closeAllDialogs')
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
     },
