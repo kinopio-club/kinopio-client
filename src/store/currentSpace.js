@@ -32,7 +32,8 @@ export default {
       }
     },
 
-    // users
+    // Users
+
     addUserToSpace: (state, newUser) => {
       utils.typeCheck(newUser, 'object')
       const userExists = state.users.find(user => {
@@ -44,13 +45,15 @@ export default {
       }
     },
 
-    // space name
+    // Space
+
     updateName: (state, newName) => {
       state.name = newName
       cache.updateSpace('name', state.name, state.id)
     },
 
-    // cards
+    // Cards
+
     incrementCardZ: (state, cardId) => {
       state.cards.map((card, index) => {
         card.z = index
@@ -117,7 +120,7 @@ export default {
       cache.updateSpace('removedCards', state.removedCards, state.id)
     },
 
-    // connections
+    // Connections
 
     updateCardConnections: (state, connections) => {
       state.connections = connections
@@ -136,7 +139,7 @@ export default {
       cache.updateSpace('connections', state.connections, state.id)
     },
 
-    // connection types
+    // Connection Types
 
     addConnectionType: (state, connectionType) => {
       state.connectionTypes.push(connectionType)
@@ -201,7 +204,7 @@ export default {
       context.commit('currentUser/lastSpaceId', context.state.id, { root: true })
     },
 
-    // Spaces
+    // Space
 
     createNewHelloSpace: (context) => {
       let space = utils.clone(helloSpace)
