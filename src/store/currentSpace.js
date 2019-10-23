@@ -98,19 +98,14 @@ export default {
         Vue.set(state, 'removedCards', [])
       }
       const card = state.cards.find(card => card.id === cardToRemove.id)
-      state.cards.filter(card => card.id !== cardToRemove.id)
-      const cardHasContent = Boolean(card.name)
-      if (cardHasContent) {
-        state.removedCards.unshift(card) // prepend to removedCards
-        cache.updateSpace('removedCards', state.removedCards, state.id)
-      }
+      state.cards = state.cards.filter(card => card.id !== cardToRemove.id)
+      state.removedCards.unshift(card)
+      cache.updateSpace('removedCards', state.removedCards, state.id)
       cache.updateSpace('cards', state.cards, state.id)
     },
     removeCardPermanently: (state, cardToRemove) => {
-      const removedCards = state.removedCards.filter(card => {
-        return card.id !== cardToRemove.id
-      })
-      state.removedCards = removedCards
+      state.cards = state.cards.filter(card => card.id !== cardToRemove.id)
+      state.removedCards = state.removedCards.filter(card => card.id !== cardToRemove.id)
       cache.updateSpace('removedCards', state.removedCards, state.id)
     },
     restoreCard: (state, cardToRestore) => {
@@ -336,11 +331,11 @@ export default {
     },
     removeCard: (context, card) => {
       const cardHasContent = Boolean(card.name)
-      context.commit('removeCard', card)
       if (cardHasContent) {
+        context.commit('removeCard', card)
         apiQueue.add('removeCard', card)
       } else {
-        apiQueue.add('removeCardPermanently', card)
+        context.dispatch('removeCardPermanently', card)
       }
       context.dispatch('removeConnectionsFromCard', card)
       context.commit('generateCardMap', null, { root: true })
