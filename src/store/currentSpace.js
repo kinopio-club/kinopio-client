@@ -148,10 +148,15 @@ export default {
       })
       cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
     },
-    updateConnectionType: (state, connectionType) => {
+    updateConnectionType: (state, updatedType) => {
       state.connectionTypes.map(type => {
-        if (type.id === connectionType.id) {
-          type[connectionType.key] = connectionType.value
+        if (type.id === updatedType.id) {
+          const updates = Object.keys(updatedType)
+          updates.forEach(key => {
+            if (type[key]) {
+              type[key] = updatedType[key]
+            }
+          })
         }
       })
       cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
