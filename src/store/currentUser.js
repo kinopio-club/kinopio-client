@@ -3,7 +3,7 @@ import nanoid from 'nanoid'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
-import queue from '@/queue.js'
+import apiQueue from '@/apiQueue.js'
 
 export default {
   namespaced: true,
@@ -100,20 +100,20 @@ export default {
     },
     name: (context, newName) => {
       context.commit('name', newName)
-      queue.add('updateUser', { id: context.state.id, name: newName })
+      apiQueue.add('updateUser', { id: context.state.id, name: newName })
     },
     color: (context, newColor) => {
       context.commit('color', newColor)
-      queue.add('updateUser', { id: context.state.id, color: newColor })
+      apiQueue.add('updateUser', { id: context.state.id, color: newColor })
     },
     lastSpaceId: (context, spaceId) => {
       context.commit('lastSpaceId', spaceId)
       cache.updateUser('lastSpaceId', spaceId)
-      queue.add('updateUser', { id: context.state.id, lastSpaceId: spaceId })
+      apiQueue.add('updateUser', { id: context.state.id, lastSpaceId: spaceId })
     },
     lastReadNewStuffId: (context, newStuffId) => {
       context.commit('lastReadNewStuffId', newStuffId)
-      queue.add('updateUser', { id: context.state.id, lastReadNewStuffId: newStuffId })
+      apiQueue.add('updateUser', { id: context.state.id, lastReadNewStuffId: newStuffId })
     }
 
   }
