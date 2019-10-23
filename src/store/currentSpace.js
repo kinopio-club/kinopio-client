@@ -92,36 +92,34 @@ export default {
       state.cards.push(card)
       cache.updateSpace('cards', state.cards, state.id)
     },
-    removeCard: (state, cardId) => {
-      const index = state.cards.findIndex(card => card.id === cardId)
-      const card = state.cards[index]
+    removeCard: (state, cardToRemove) => {
       if (!state.removedCards) {
+        // migration oct 2019
         Vue.set(state, 'removedCards', [])
       }
+      const card = state.cards.find(card => card.id === cardToRemove.id)
+      state.cards.filter(card => card.id !== cardToRemove.id)
       const cardHasContent = Boolean(card.name)
       if (cardHasContent) {
-        state.removedCards.unshift(card) // prepend card to removedCards
+        state.removedCards.unshift(card) // prepend to removedCards
         cache.updateSpace('removedCards', state.removedCards, state.id)
       }
-      state.cards.splice(index, 1)
       cache.updateSpace('cards', state.cards, state.id)
     },
-    removeCardPermanently: (state, cardId) => {
+    removeCardPermanently: (state, cardToRemove) => {
       const removedCards = state.removedCards.filter(card => {
-        return card.id !== cardId
+        return card.id !== cardToRemove.id
       })
       state.removedCards = removedCards
       cache.updateSpace('removedCards', state.removedCards, state.id)
-      apiQueue.add('removeCardPermanently', cardId)
     },
-    restoreCard: (state, cardId) => {
-      const index = state.removedCards.findIndex(card => card.id === cardId)
+    restoreCard: (state, cardToRestore) => {
+      const index = state.removedCards.findIndex(card => card.id === cardToRestore.id)
       const card = state.removedCards[index]
       state.cards.push(card)
       state.removedCards.splice(index, 1)
       cache.updateSpace('cards', state.cards, state.id)
       cache.updateSpace('removedCards', state.removedCards, state.id)
-      apiQueue.add('restoreCard', cardId)
     },
 
     // connections
@@ -263,9 +261,9 @@ export default {
       cache.removeSpace(space.id)
       apiQueue.add('removeSpace', space.id)
     },
-    removeSpacePermanently: (context, spaceId) => {
-      cache.removeSpacePermanently(spaceId)
-      apiQueue.add('removeSpacePermanently', spaceId)
+    removeSpacePermanently: (context, space) => {
+      cache.removeSpacePermanently(space.id)
+      apiQueue.add('removeSpacePermanently', space.id)
     },
     toAnotherSpace: (context, { spaceId, shouldRemoveOriginals }) => {
       const space = utils.clone(context.state)
@@ -337,11 +335,23 @@ export default {
       context.commit('incrementCardZ', cardId)
     },
     removeCard: (context, card) => {
-      console.log('removeCard', card)
-      context.commit('removeCard', card.id)
-      apiQueue.add('removeCard', card)
+      const cardHasContent = Boolean(card.name)
+      context.commit('removeCard', card)
+      if (cardHasContent) {
+        apiQueue.add('removeCard', card)
+      } else {
+        apiQueue.add('removeCardPermanently', card)
+      }
       context.dispatch('removeConnectionsFromCard', card)
       context.commit('generateCardMap', null, { root: true })
+    },
+    removeCardPermanently: (context, card) => {
+      context.commit('removeCardPermanently', card)
+      apiQueue.add('removeCardPermanently', card)
+    },
+    restoreCard: (context, card) => {
+      context.commit('restoreCard', card)
+      apiQueue.add('restoreCard', card)
     },
     dragCards: (context, { endCursor, prevCursor, delta }) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
