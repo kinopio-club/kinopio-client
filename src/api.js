@@ -52,8 +52,7 @@ export default {
     const options = this.options({ body, method: 'POST' })
     try {
       const response = await fetch(`${host}/user/sign-up`, options)
-      const normalizedResponse = await this.normalizeResponse(response)
-      return normalizedResponse
+      return await this.normalizeResponse(response)
     } catch (error) {
       console.error(error)
     }
@@ -66,8 +65,7 @@ export default {
     const options = this.options({ body, method: 'POST' })
     try {
       const response = await fetch(`${host}/user/sign-in`, options)
-      const normalizedResponse = await this.normalizeResponse(response)
-      return normalizedResponse
+      return await this.normalizeResponse(response)
     } catch (error) {
       console.error(error)
     }
@@ -77,8 +75,7 @@ export default {
     const options = this.options({ body, method: 'POST' })
     try {
       const response = await fetch(`${host}/user/reset-password`, options)
-      const normalizedResponse = await this.normalizeResponse(response)
-      return normalizedResponse
+      return await this.normalizeResponse(response)
     } catch (error) {
       console.error(error)
     }
@@ -104,8 +101,7 @@ export default {
     try {
       const options = this.options({ method: 'GET' })
       const response = await fetch(`${host}/user`, options)
-      const normalizedResponse = await this.normalizeResponse(response)
-      return normalizedResponse
+      return await this.normalizeResponse(response)
     } catch (error) {
       console.error(error)
     }
@@ -194,8 +190,7 @@ export default {
       const body = cache.getAllSpaces()
       const options = this.options({ body, apiKey, method: 'POST' })
       const response = await fetch(`${host}/space`, options)
-      const normalizedResponse = await this.normalizeResponse(response)
-      return normalizedResponse
+      return await this.normalizeResponse(response)
     } catch (error) {
       console.error(error)
     }
