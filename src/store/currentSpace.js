@@ -12,12 +12,11 @@ import words from '@/words.js'
 import helloSpace from '@/spaces/hello.json'
 import newSpace from '@/spaces/new.json'
 
-// - todo: remove 'update' (remove or replace w more specificity (eg 'migrate'))
-
 export default {
   namespaced: true,
   state: helloSpace,
   mutations: {
+
     restoreSpace: (state, space) => {
       Object.assign(state, space)
     },
