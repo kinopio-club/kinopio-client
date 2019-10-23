@@ -21,6 +21,7 @@ const self = {
   },
 
   async add (name, body) {
+    // const userIsContributor = cache.space(space.id).contributorKey or key stored in user
     const userIsSignedIn = cache.user().apiKey
     if (!userIsSignedIn) { return }
     let queue = this.queue()

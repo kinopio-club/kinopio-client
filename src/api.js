@@ -52,7 +52,7 @@ export default {
     const options = this.options({ body, method: 'POST' })
     try {
       const response = await fetch(`${host}/user/sign-up`, options)
-      return await this.normalizeResponse(response)
+      return this.normalizeResponse(response)
     } catch (error) {
       console.error(error)
     }
@@ -65,7 +65,7 @@ export default {
     const options = this.options({ body, method: 'POST' })
     try {
       const response = await fetch(`${host}/user/sign-in`, options)
-      return await this.normalizeResponse(response)
+      return this.normalizeResponse(response)
     } catch (error) {
       console.error(error)
     }
@@ -75,7 +75,7 @@ export default {
     const options = this.options({ body, method: 'POST' })
     try {
       const response = await fetch(`${host}/user/reset-password`, options)
-      return await this.normalizeResponse(response)
+      return this.normalizeResponse(response)
     } catch (error) {
       console.error(error)
     }
@@ -101,7 +101,7 @@ export default {
     try {
       const options = this.options({ method: 'GET' })
       const response = await fetch(`${host}/user`, options)
-      return await this.normalizeResponse(response)
+      return this.normalizeResponse(response)
     } catch (error) {
       console.error(error)
     }
@@ -162,24 +162,18 @@ export default {
 
   // Space
 
-  async updateSpace (space) {
-    const userIsSignedIn = cache.user().apiKey
-    // const userIsContributor = cache.space(space.id).contributorKey
-    if (!userIsSignedIn) { return } // (!userIsSignedIn && !userIsContributor)
-    console.log('🌙updateSpace', space)
-    const body = space
-    const options = this.options({ body, method: 'PATCH' })
-    return utils.timeout(5000, fetch(`${host}/card/${space.spaceId}`, options))
-  },
   async getSpace (spaceId) {
     // TODO support getting other people's spaces later
     const userIsSignedIn = cache.user().apiKey
     if (!userIsSignedIn) { return }
-    console.log('🌙 Getting remote space', spaceId)
+    console.log('🚛 Getting remote space', spaceId)
     const options = this.options({ method: 'GET' })
     const response = await utils.timeout(5000, fetch(`${host}/space/${spaceId}`, options))
-    const normalizedResponse = await this.normalizeResponse(response)
-    return normalizedResponse
+    return this.normalizeResponse(response)
+  },
+  async updateSpace (body) {
+    const options = this.options({ body, method: 'PATCH' })
+    return utils.timeout(5000, fetch(`${host}/space`, options))
   },
   async createSpace (body) {
     const options = this.options({ body, method: 'POST' })
@@ -190,7 +184,7 @@ export default {
       const body = cache.getAllSpaces()
       const options = this.options({ body, apiKey, method: 'POST' })
       const response = await fetch(`${host}/space`, options)
-      return await this.normalizeResponse(response)
+      return this.normalizeResponse(response)
     } catch (error) {
       console.error(error)
     }

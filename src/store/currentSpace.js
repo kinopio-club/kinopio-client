@@ -47,9 +47,14 @@ export default {
 
     // Space
 
-    updateName: (state, newName) => {
-      state.name = newName
-      cache.updateSpace('name', state.name, state.id)
+    updateSpace: (state, updatedSpace) => {
+      const updates = Object.keys(updatedSpace)
+      updates.forEach(key => {
+        if (state[key]) {
+          state[key] = updatedSpace[key]
+          cache.updateSpace(key, state[key], state.id)
+        }
+      })
     },
 
     // Cards
@@ -251,6 +256,11 @@ export default {
         context.commit('restoreSpace', remoteSpace)
         cache.saveSpace(remoteSpace)
       }
+    },
+    updateSpace: async (context, updates) => {
+      updates.id = context.state.id
+      context.commit('updateSpace', updates)
+      apiQueue.add('updateSpace', updates)
     },
     changeSpace: (context, space) => {
       space = utils.migrateSpaceProperties(space)

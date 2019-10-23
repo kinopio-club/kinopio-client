@@ -56,7 +56,7 @@ export default {
         return this.$store.state.currentSpace.name
       },
       set (newName) {
-        this.$store.dispatch('currentSpace/name', newName)
+        this.$store.dispatch('currentSpace/updateSpace', { name: newName })
         this.updateSpaces()
       }
     },
