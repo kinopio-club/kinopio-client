@@ -317,7 +317,6 @@ export default {
         context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       }
       context.commit('createCard', card)
-      card.spaceId = context.state.id
       apiQueue.add('createCard', card)
       context.dispatch('incrementCardZ', card.id)
     },
@@ -399,7 +398,6 @@ export default {
       if (!connectionAlreadyExists) {
         connection.id = nanoid()
         connection.connectionTypeId = connectionType.id
-        connection.spaceId = context.state.id
         apiQueue.add('createConnection', connection)
         context.commit('addConnection', connection)
       }
@@ -409,7 +407,7 @@ export default {
       connections = connections.map(connection => {
         if (connection.startCardId === cardId || connection.endCardId === cardId) {
           connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
-          apiQueue.add('updateConnection', { id: connection.id, path: connection.path, SpaceId: context.state.id })
+          apiQueue.add('updateConnection', connection)
         }
         return connection
       })
