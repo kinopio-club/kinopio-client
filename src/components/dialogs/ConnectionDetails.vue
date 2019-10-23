@@ -24,8 +24,8 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
   section.results-section
     ul.results-list
       template(v-for="(type in connectionTypes")
-        li(:class="{ active: connectionTypeIsActive(type.id) }" @click="changeConnectionType(type)" :key="type.id")
-          .badge(:style="{backgroundColor: type.color}" :class="{checked: connectionTypeIsDefault(type.id)}")
+        li(:class="{ active: connectionTypeIsActive(type) }" @click="changeConnectionType(type)" :key="type.id")
+          .badge(:style="{backgroundColor: type.color}" :class="{checked: connectionTypeIsDefault(type)}")
           .name {{type.name}}
 </template>
 
@@ -93,12 +93,12 @@ export default {
       const newType = _.last(types)
       this.changeConnectionType(newType)
     },
-    connectionTypeIsActive (typeId) {
-      return Boolean(typeId === this.currentConnection.connectionTypeId)
+    connectionTypeIsActive (type) {
+      return Boolean(type.id === this.currentConnection.connectionTypeId)
     },
-    connectionTypeIsDefault (typeId) {
+    connectionTypeIsDefault (type) {
       const typePref = this.$store.state.currentUser.defaultConnectionTypeId
-      return typePref === typeId
+      return typePref === type.id
     },
     removeConnection () {
       this.$store.dispatch('currentSpace/removeConnection', this.currentConnection)
