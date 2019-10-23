@@ -159,6 +159,10 @@ export default {
     const options = this.options({ body, method: 'PATCH' })
     return utils.timeout(5000, fetch(`${host}/connection-type`, options))
   },
+  async removeConnectionType (body) {
+    const options = this.options({ body, method: 'DELETE' })
+    return utils.timeout(5000, fetch(`${host}/connection-type`, options))
+  },
 
   // Space
 

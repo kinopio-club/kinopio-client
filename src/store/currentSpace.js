@@ -60,23 +60,21 @@ export default {
       })
       cache.updateSpace('cards', state.cards, state.id)
     },
-    updateCard: (state, { key, value, cardId }) => {
+    updateCard: (state, updatedCard) => {
       state.cards.map(card => {
-        if (card.id === cardId) {
-          // update properties differently depending on whether it's existing or new
-          if (card[key]) {
-            card[key] = value
-          } else {
-            Vue.set(card, key, value)
-          }
+        if (card.id === updatedCard.id) {
+          const updates = Object.keys(updatedCard)
+          updates.forEach(key => {
+            // update properties differently depending on whether it's existing or new
+            if (card[key]) {
+              card[key] = updatedCard[key]
+            } else {
+              Vue.set(card, key, updatedCard[key])
+            }
+          })
         }
       })
       cache.updateSpace('cards', state.cards, state.id)
-      const card = {
-        id: cardId,
-        spaceId: state.id
-      }
-      card[key] = value
     },
     moveCard: (state, { cardId, delta }) => {
       const maxOffset = 0
@@ -151,14 +149,10 @@ export default {
       state.connectionTypes.push(connectionType)
       cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
     },
-    removeUnusedConnectionTypes: (state) => {
-      const connections = state.connections.map(connection => {
-        return connection.connectionTypeId
+    removeConnectionType: (state, connectionType) => {
+      state.connectionTypes = state.connectionTypes.filter(type => {
+        return connectionType.id !== type.id
       })
-      const usedConnectionTypes = state.connectionTypes.filter(type => {
-        return connections.includes(type.id)
-      })
-      state.connectionTypes = usedConnectionTypes
       cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
     },
     updateConnectionType: (state, connectionType) => {
@@ -326,10 +320,8 @@ export default {
       queue.add('createCard', card)
       context.dispatch('incrementCardZ', card.id)
     },
-    updateCard: (context, options) => {
-      context.commit('updateCard', options)
-      let card = { id: options.cardId }
-      card[options.key] = options.value
+    updateCard: (context, card) => {
+      context.commit('updateCard', card)
       queue.add('updateCard', card)
     },
     incrementCardZ: (context, cardId) => {
@@ -397,7 +389,6 @@ export default {
         connection.spaceId = context.state.id
         queue.add('createConnection', connection)
         context.commit('addConnection', connection)
-        context.commit('removeUnusedConnectionTypes')
       }
     },
     updateCardConnectionPaths: (context, cardId) => {
@@ -411,7 +402,6 @@ export default {
       })
       context.commit('updateCardConnections', connections)
     },
-    // qa test this
     removeConnectionsFromCard: (context, card) => {
       context.state.connections.forEach(connection => {
         if (connection.startCardId === card.id || connection.endCardId === card.id) {
@@ -455,6 +445,17 @@ export default {
     updateConnectionType: (context, connectionType) => {
       context.commit('updateConnectionType', connectionType)
       queue.add('updateConnectionType', connectionType)
+    },
+    removeUnusedConnectionTypes: (context) => {
+      const connectionTypes = context.state.connectionTypes
+      const connections = context.state.connections
+      const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
+      const removeConnectionTypes = connectionTypes.filter(type => !connectionTypeIds.includes(type.id))
+      console.log('removeConnectionType', removeConnectionTypes, removeConnectionTypes.length)
+      removeConnectionTypes.forEach(type => {
+        queue.add('removeConnectionType', type)
+        context.commit('removeConnectionType', type)
+      })
     }
   },
 

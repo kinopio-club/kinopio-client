@@ -83,13 +83,12 @@ export default {
       get () {
         return this.card.name
       },
-      set (newValue) {
-        const options = {
-          key: 'name',
-          value: newValue,
-          cardId: this.card.id
+      set (newName) {
+        const card = {
+          name: newName,
+          id: this.card.id
         }
-        this.$store.dispatch('currentSpace/updateCard', options)
+        this.$store.dispatch('currentSpace/updateCard', card)
         this.$nextTick(() => {
           this.$store.dispatch('currentSpace/updateCardConnectionPaths', this.card.id)
         })

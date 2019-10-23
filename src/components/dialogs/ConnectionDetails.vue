@@ -80,8 +80,7 @@ export default {
       set (newName) {
         const connectionType = {
           id: this.currentConnectionType.id,
-          key: 'name',
-          value: newName
+          name: newName
         }
         this.$store.dispatch('currentSpace/updateConnectionType', connectionType)
       }
@@ -104,7 +103,7 @@ export default {
     removeConnection () {
       this.$store.dispatch('currentSpace/removeConnection', this.currentConnection.id)
       this.$store.commit('closeAllDialogs')
-      this.$store.commit('currentSpace/removeUnusedConnectionTypes')
+      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
     },
     changeConnectionType (type) {
       this.$store.commit('currentSpace/changeConnectionType', {
@@ -134,8 +133,7 @@ export default {
     updateTypeColor (newColor) {
       const connectionType = {
         id: this.currentConnectionType.id,
-        key: 'color',
-        value: newColor
+        color: newColor
       }
       this.$store.dispatch('currentSpace/updateConnectionType', connectionType)
     },
@@ -158,7 +156,7 @@ export default {
         if (visible) {
           this.updateView()
         } else {
-          this.$store.commit('currentSpace/removeUnusedConnectionTypes')
+          this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
         }
       })
     },

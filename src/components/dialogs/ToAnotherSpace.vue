@@ -98,7 +98,7 @@ export default {
         spaceId: this.selectedSpace.id,
         shouldRemoveOriginals: this.shouldMoveCards
       })
-      this.$store.commit('currentSpace/removeUnusedConnectionTypes')
+      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
       this.$store.commit('multipleCardsSelectedIds', [])
       this.$store.commit('closeAllDialogs')
       if (this.shouldSwitchToSpace) {

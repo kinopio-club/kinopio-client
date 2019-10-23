@@ -358,7 +358,7 @@ export default {
         const connection = { startCardId, endCardId, path }
         this.addConnection(connection)
       } else {
-        this.$store.commit('currentSpace/removeUnusedConnectionTypes')
+        this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
       }
     },
 
