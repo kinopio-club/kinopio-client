@@ -25,7 +25,7 @@ export default {
       if (state.id === '1') {
         const newId = nanoid()
         state.id = newId
-        state.name = 'hello-kinopio'
+        state.name = 'Hello Kinopio'
         cache.updateBetaSpaceId(newId)
         cache.updateSpace('name', state.name, state.id)
       }
@@ -201,11 +201,11 @@ export default {
         spaceToRestore = cache.space(context.state.id)
         context.dispatch('loadSpace', spaceToRestore)
       } else {
-        console.log('🚃 Create new hello-kinopio space')
+        console.log('🚃 Create new Hello Kinopio space')
         const isHelloSpace = true
         context.dispatch('addSpace', isHelloSpace)
       }
-      context.commit('currentUser/lastSpaceId', context.state.id, { root: true })
+      context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
     },
 
     // Space
