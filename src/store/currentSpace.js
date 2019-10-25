@@ -251,7 +251,7 @@ export default {
       if (!remoteSpace) { return }
       const remoteDate = utils.normalizeToUnixTime(remoteSpace.updatedAt)
       if (remoteDate > space.cacheDate) {
-        console.log('🚋 Restore from remote space', remoteSpace)
+        console.log('🚋 Restore space from remote space', remoteSpace)
         context.commit('restoreSpace', remoteSpace)
         cache.saveSpace(remoteSpace)
       }
@@ -262,6 +262,7 @@ export default {
       apiQueue.add('updateSpace', updates)
     },
     changeSpace: (context, space) => {
+      space = utils.clone(space)
       space = utils.migrateSpaceProperties(space)
       context.dispatch('loadSpace', space)
       const spaceId = context.state.id
@@ -326,6 +327,7 @@ export default {
         context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       }
       context.commit('createCard', card)
+      card.spaceId = context.state.id
       apiQueue.add('createCard', card)
       context.dispatch('incrementCardZ', card.id)
     },
@@ -340,8 +342,8 @@ export default {
         card.z = index
         if (card.id === cardId) {
           card.z = cards.length + 1
+          apiQueue.add('updateCard', { id: card.id, z: card.z })
         }
-        apiQueue.add('updateCard', { id: card.id, z: card.z })
       })
       context.commit('incrementCardZ', cardId)
     },
@@ -406,6 +408,7 @@ export default {
       })
       if (!connectionAlreadyExists) {
         connection.id = nanoid()
+        connection.spaceId = context.state.id
         connection.connectionTypeId = connectionType.id
         apiQueue.add('createConnection', connection)
         context.commit('addConnection', connection)
@@ -416,6 +419,7 @@ export default {
       connections = connections.map(connection => {
         if (connection.startCardId === cardId || connection.endCardId === cardId) {
           connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
+          connection.spaceId = context.state.id
           apiQueue.add('updateConnection', connection)
         }
         return connection
