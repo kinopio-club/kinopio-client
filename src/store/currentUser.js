@@ -71,13 +71,14 @@ export default {
       })
       cache.saveUser(user)
     },
-    // Added aug 2019, can safely remove this in aug 2020
+    // Aug 2019 migration
     updateBetaUserId: (state, newId) => {
       if (state.id === '1') {
         const newId = nanoid()
         state.id = newId
         cache.updateUser('id', newId)
       }
+      // Oct 2019 migration
       if (!state.apiKey) {
         state.apiKey = ''
       }
@@ -90,6 +91,7 @@ export default {
         console.log('🌸 Restore user from cache', cachedUser.id)
         context.commit('restoreUser', cachedUser)
         context.commit('updateBetaUserId')
+        context.dispatch('restoreRemoteUser', cachedUser)
       } else {
         console.log('🌸 Create new user')
         context.dispatch('createNewUser')
