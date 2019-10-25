@@ -391,9 +391,8 @@ export default {
     incrementSelectedCardsZ: (context) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       const currentDraggingCardId = context.rootState.currentDraggingCardId
-      const cards = context.state.cards
       if (multipleCardsSelectedIds.length) {
-        cards.forEach(card => context.dispatch('incrementCardZ', card.id))
+        multipleCardsSelectedIds.forEach(cardId => context.dispatch('incrementCardZ', cardId))
       } else {
         context.dispatch('incrementCardZ', currentDraggingCardId)
       }
