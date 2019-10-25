@@ -119,9 +119,9 @@ export default {
     toggleDefault () {
       this.isDefault = !this.isDefault
       if (this.isDefault) {
-        this.$store.commit('currentUser/defaultConnectionTypeId', this.currentConnectionType.id)
+        this.$store.dispatch('currentUser/defaultConnectionTypeId', this.currentConnectionType.id)
       } else {
-        this.$store.commit('currentUser/defaultConnectionTypeId', '')
+        this.$store.dispatch('currentUser/defaultConnectionTypeId', '')
       }
     },
     toggleColorPicker () {

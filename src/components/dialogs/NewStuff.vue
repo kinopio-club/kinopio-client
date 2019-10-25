@@ -93,7 +93,6 @@ export default {
     visible (visible) {
       if (visible) {
         this.checkNewStuffIsUpdated()
-        console.log(this.newStuff)
       }
       if (!visible) {
         this.updateUserLastRead()

@@ -118,6 +118,10 @@ export default {
       context.commit('lastReadNewStuffId', newStuffId)
       apiQueue.add('updateUser', { id: context.state.id, lastReadNewStuffId: newStuffId })
     },
+    defaultConnectionTypeId: (context, typeId) => {
+      context.commit('defaultConnectionTypeId', typeId)
+      apiQueue.add('updateUser', { id: context.state.id, defaultConnectionTypeId: typeId })
+    },
     restoreRemoteUser: async (context, cachedUser) => {
       if (!context.getters.isSignedIn) { return }
       const remoteUser = await api.getUser()
