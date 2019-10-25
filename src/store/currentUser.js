@@ -4,6 +4,7 @@ import nanoid from 'nanoid'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 import apiQueue from '@/apiQueue.js'
+import api from '@/api.js'
 
 export default {
   namespaced: true,
@@ -116,7 +117,13 @@ export default {
     lastReadNewStuffId: (context, newStuffId) => {
       context.commit('lastReadNewStuffId', newStuffId)
       apiQueue.add('updateUser', { id: context.state.id, lastReadNewStuffId: newStuffId })
+    },
+    restoreRemoteUser: async (context, cachedUser) => {
+      if (!context.getters.isSignedIn) { return }
+      const remoteUser = await api.getUser()
+      remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
+      if (remoteUser.updatedAt > cachedUser.cacheDate) { console.log('🌸 Restore user from remote', remoteUser) }
+      context.commit('updateUser', remoteUser)
     }
-
   }
 }
