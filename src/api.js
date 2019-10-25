@@ -189,12 +189,12 @@ export default {
       console.error(error)
     }
   },
-  async removeSpace (spaceId) {
-    const options = this.options({ method: 'DELETE' })
+  async removeSpace (body) {
+    const options = this.options({ body, method: 'DELETE' })
     return utils.timeout(5000, fetch(`${host}/space`, options))
   },
-  async removeSpacePermanently (spaceId) {
-    const options = this.options({ method: 'DELETE' })
+  async removeSpacePermanently (body) {
+    const options = this.options({ body, method: 'DELETE' })
     return utils.timeout(5000, fetch(`${host}/space/permanent`, options))
   }
 

@@ -272,7 +272,7 @@ export default {
     removeCurrentSpace: (context) => {
       const space = utils.clone(context.state)
       cache.removeSpace(space.id)
-      apiQueue.add('removeSpace', space.id)
+      apiQueue.add('removeSpace', { id: space.id })
     },
     removeSpacePermanently: (context, space) => {
       cache.removeSpacePermanently(space.id)
