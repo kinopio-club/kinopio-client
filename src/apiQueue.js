@@ -84,13 +84,6 @@ const self = {
     cache.saveQueue(grouped)
   },
 
-  next () {
-    const queue = this.queue()
-    const request = queue.shift()
-    cache.saveQueue(queue)
-    return request
-  },
-
   async process () {
     if (!window.navigator.onLine) { return }
     this.squash()
@@ -98,16 +91,17 @@ const self = {
     let queue = this.queue()
     if (!queue.length) { return }
 
-    let request
+    // let request
     do {
       try {
-        request = this.next()
-        await this.processRequest(request)
-      } catch (error) {
-        queue.push(request)
-        console.error(error)
-        console.log('🔁 Request error. Add back into queue to retry', request)
+        queue = this.queue()
+        const request = queue[0]
+        const response = await this.processRequest(request)
+        console.log('✅ completed', response)
+        queue = queue.shift
         cache.saveQueue(queue)
+      } catch (error) {
+        console.warn('🔁 Request error. Will retry later', error)
         break
       }
       queue = this.queue()
