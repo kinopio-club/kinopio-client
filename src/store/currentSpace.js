@@ -232,7 +232,7 @@ export default {
       } else {
         context.dispatch('createNewSpace')
         Vue.nextTick(() => {
-          context.dispatch('updateCardConnectionPaths', context.state.cards[1].id)
+          context.dispatch('updateCardConnectionPaths', { cardId: context.state.cards[1].id })
           context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
         })
       }
@@ -366,26 +366,47 @@ export default {
       context.commit('restoreCard', card)
       apiQueue.add('restoreCard', card)
     },
-    dragCards: (context, { endCursor, prevCursor, delta }) => {
+    dragCards: (context, options) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
-      const currentDraggingCardId = context.rootState.currentDraggingCardId
-      const cards = context.rootState.currentSpace.cards
-      delta = delta || {
+      const { delta, endCursor, prevCursor } = options
+      options.delta = delta || {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
       }
       if (multipleCardsSelectedIds.length) {
-        cards.map(card => {
-          if (multipleCardsSelectedIds.includes(card.id)) {
-            context.commit('moveCard', { cardId: card.id, delta })
-            apiQueue.add('updateCard', { id: card.id, x: endCursor.x, y: endCursor.y })
-            context.dispatch('updateCardConnectionPaths', card.id)
-          }
+        context.dispatch('dragMultipleCards', options)
+      } else {
+        context.dispatch('dragSingleCard', options)
+      }
+    },
+    dragMultipleCards: (context, { endCursor, prevCursor, delta }) => {
+      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
+      const cards = context.rootState.currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
+      cards.forEach(card => {
+        context.commit('moveCard', { cardId: card.id, delta })
+        context.dispatch('updateCardConnectionPaths', { cardId: card.id })
+      })
+    },
+    dragSingleCard: (context, { endCursor, delta, shouldUpdateApi }) => {
+      const currentDraggingCardId = context.rootState.currentDraggingCardId
+      context.commit('moveCard', { cardId: currentDraggingCardId, delta })
+      context.dispatch('updateCardConnectionPaths', { cardId: currentDraggingCardId })
+    },
+    updatePositions: (context) => {
+      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
+      if (multipleCardsSelectedIds.length) {
+        const cards = context.rootState.currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
+        cards.forEach(card => {
+          card = utils.clone(card)
+          apiQueue.add('updateCard', { id: card.id, x: card.x, y: card.y })
+          context.dispatch('updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
         })
       } else {
-        context.commit('moveCard', { cardId: currentDraggingCardId, delta })
-        apiQueue.add('updateCard', { id: currentDraggingCardId, x: endCursor.x, y: endCursor.y })
-        context.dispatch('updateCardConnectionPaths', currentDraggingCardId)
+        const currentDraggingCardId = context.rootState.currentDraggingCardId
+        let card = context.rootState.currentSpace.cards.find(card => currentDraggingCardId === card.id)
+        card = utils.clone(card)
+        apiQueue.add('updateCard', { id: card.id, x: card.x, y: card.y })
+        context.dispatch('updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
       }
     },
     incrementSelectedCardsZ: (context) => {
@@ -413,13 +434,15 @@ export default {
         context.commit('addConnection', connection)
       }
     },
-    updateCardConnectionPaths: (context, cardId) => {
+    updateCardConnectionPaths: (context, { cardId, shouldUpdateApi }) => {
       let connections = utils.clone(context.state.connections)
       connections = connections.map(connection => {
         if (connection.startCardId === cardId || connection.endCardId === cardId) {
           connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
           connection.spaceId = context.state.id
-          apiQueue.add('updateConnection', connection)
+          if (shouldUpdateApi) {
+            apiQueue.add('updateConnection', connection)
+          }
         }
         return connection
       })

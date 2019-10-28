@@ -90,7 +90,7 @@ export default {
         }
         this.$store.dispatch('currentSpace/updateCard', card)
         this.$nextTick(() => {
-          this.$store.dispatch('currentSpace/updateCardConnectionPaths', this.card.id)
+          this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.card.id, shouldUpdateApi: true })
         })
       }
     }

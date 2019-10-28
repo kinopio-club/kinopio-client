@@ -277,7 +277,6 @@ export default {
         endCursor,
         prevCursor: prevCursor
       })
-
       this.checkShouldShowDetails()
     },
 
@@ -417,6 +416,9 @@ export default {
       this.$store.commit('currentUserIsDrawingConnection', false)
       this.$store.commit('currentUserIsPainting', false)
       this.$store.commit('currentUserIsPaintingLocked', false)
+      if (this.isDraggingCard) {
+        this.$store.dispatch('currentSpace/updatePositions')
+      }
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.commit('currentConnectionSuccess', {})
       this.$store.commit('currentConnection', {})

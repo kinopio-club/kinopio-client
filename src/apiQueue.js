@@ -109,9 +109,9 @@ const self = {
   },
 
   async processRequest (request) {
-    if (request.body) {
-      request.updates = [request.body]
-    }
+    // if (request.body) {
+    //   request.updates = [request.body]
+    // }
     console.log('🚎 Processing request', request)
     const response = await api[request.name](request.updates)
     const normalizedResponse = await api.normalizeResponse(response)
