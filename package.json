@@ -43,7 +43,9 @@
       "plugin:vue/essential",
       "@vue/standard"
     ],
-    "rules": {},
+    "rules": {
+      "no-throw-literal": "off"
+    },
     "parserOptions": {
       "parser": "babel-eslint"
     }

@@ -90,8 +90,6 @@ const self = {
     this.group()
     let queue = this.queue()
     if (!queue.length) { return }
-
-    // let request
     do {
       try {
         queue = this.queue()
@@ -109,9 +107,6 @@ const self = {
   },
 
   async processRequest (request) {
-    // if (request.body) {
-    //   request.updates = [request.body]
-    // }
     console.log('🚎 Processing request', request)
     const response = await api[request.name](request.updates)
     const normalizedResponse = await api.normalizeResponse(response)

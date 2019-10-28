@@ -7,7 +7,7 @@ export default {
     try {
       window.localStorage[key] = JSON.stringify(value)
     } catch (error) {
-      console.warn('Could not save to localStorage. (localStorage is disabled in private Safari windows)')
+      console.warn('Could not save to localStorage')
     }
   },
   getLocal (key) {

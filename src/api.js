@@ -25,21 +25,11 @@ export default {
   },
   async normalizeResponse (response) {
     const success = [200, 201, 202, 204]
+    const data = await response.json()
     if (success.includes(response.status)) {
-      const data = await response.json()
       return data
     } else {
-      const data = await response.json()
-      let error = {
-        status: response.status,
-        statusText: response.statusText,
-        error: true
-      }
-      if (data.errors) {
-        error.message = data.errors[0].message
-        error.type = data.errors[0].type
-      }
-      return error
+      throw { response, status: response.status }
     }
   },
 
@@ -101,6 +91,15 @@ export default {
     try {
       const options = this.options({ method: 'GET' })
       const response = await fetch(`${host}/user`, options)
+      return this.normalizeResponse(response)
+    } catch (error) {
+      console.error(error)
+    }
+  },
+  async getUserSpaces () {
+    try {
+      const options = this.options({ method: 'GET' })
+      const response = await fetch(`${host}/user/spaces`, options)
       return this.normalizeResponse(response)
     } catch (error) {
       console.error(error)
