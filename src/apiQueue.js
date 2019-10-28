@@ -98,7 +98,7 @@ const self = {
         const request = queue[0]
         const response = await this.processRequest(request)
         console.log('✅ completed', response)
-        queue = queue.shift
+        queue.shift()
         cache.saveQueue(queue)
       } catch (error) {
         console.warn('🔁 Request error. Will retry later', error)
