@@ -106,7 +106,7 @@ export default {
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
     },
     changeConnectionType (type) {
-      this.$store.commit('currentSpace/changeConnectionType', {
+      this.$store.dispatch('currentSpace/updateConnectionTypeForConnection', {
         connectionId: this.currentConnection.id,
         connectionTypeId: type.id
       })

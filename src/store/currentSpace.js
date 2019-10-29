@@ -130,7 +130,6 @@ export default {
       state.connections = connections
       cache.updateSpace('connections', connections, state.id)
     },
-
     addConnection: (state, connection) => {
       state.connections.push(connection)
       cache.updateSpace('connections', state.connections, state.id)
@@ -140,6 +139,14 @@ export default {
         return connection.id !== connectionToRemove.id
       })
       state.connections = connections
+      cache.updateSpace('connections', state.connections, state.id)
+    },
+    updateConnectionTypeForConnection: (state, { connectionId, connectionTypeId }) => {
+      state.connections.map(connection => {
+        if (connection.id === connectionId) {
+          connection.connectionTypeId = connectionTypeId
+        }
+      })
       cache.updateSpace('connections', state.connections, state.id)
     },
 
@@ -167,14 +174,6 @@ export default {
         }
       })
       cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
-    },
-    changeConnectionType: (state, { connectionId, connectionTypeId }) => {
-      state.connections.map(connection => {
-        if (connection.id === connectionId) {
-          connection.connectionTypeId = connectionTypeId
-        }
-      })
-      cache.updateSpace('connections', state.connections, state.id)
     }
   },
 
@@ -243,12 +242,18 @@ export default {
       context.commit('addUserToSpace', user)
     },
     loadSpace: async (context, space) => {
-      context.commit('restoreSpace', space)
-      space = utils.clone(space)
+      const cachedSpace = cache.space(space.id)
+      const emptySpace = { id: space.id, cards: [], connections: [] }
+      if (cachedSpace) {
+        context.commit('restoreSpace', cachedSpace)
+      } else {
+        context.commit('restoreSpace', emptySpace)
+      }
       context.commit('loadingSpace', true, { root: true })
       const remoteSpace = await api.getSpace(space.id)
       context.commit('loadingSpace', false, { root: true })
       if (!remoteSpace) { return }
+      // TODO (if !remoteSpace && !cachedSpace) handle 404 error, may occur for loading from url cases
       const remoteDate = utils.normalizeToUnixTime(remoteSpace.updatedAt)
       if (remoteDate > space.cacheDate) {
         console.log('🚋 Restore space from remote space', remoteSpace)
@@ -263,11 +268,8 @@ export default {
     },
     changeSpace: (context, space) => {
       space = utils.clone(space)
-      space = utils.migrateSpaceProperties(space)
       context.dispatch('loadSpace', space)
-      const spaceId = context.state.id
-      context.dispatch('currentUser/lastSpaceId', spaceId, { root: true })
-      apiQueue.add('updateUser', { lastSpaceId: spaceId })
+      context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
     },
     removeCurrentSpace: (context) => {
       const space = utils.clone(context.state)
@@ -296,8 +298,6 @@ export default {
         connectionTypes,
         connections
       }
-      // const uniqueItems = utils.uniqueSpaceItems(items)
-      console.log(spaceId)
       cache.addToSpace(items, spaceId)
       if (shouldRemoveOriginals) {
         const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
@@ -471,6 +471,14 @@ export default {
     removeConnection: (context, connection) => {
       context.commit('removeConnection', connection)
       apiQueue.add('removeConnection', connection)
+    },
+    updateConnectionTypeForConnection: (context, { connectionId, connectionTypeId }) => {
+      const connection = {
+        id: connectionId,
+        ConnectionTypeId: connectionTypeId
+      }
+      apiQueue.add('updateConnection', connection)
+      context.commit('updateConnectionTypeForConnection', { connectionId, connectionTypeId })
     },
 
     // Connection Types

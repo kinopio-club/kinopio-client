@@ -103,24 +103,24 @@ export default {
     },
     name: (context, newName) => {
       context.commit('name', newName)
-      apiQueue.add('updateUser', { id: context.state.id, name: newName })
+      apiQueue.add('updateUser', { name: newName })
     },
     color: (context, newColor) => {
       context.commit('color', newColor)
-      apiQueue.add('updateUser', { id: context.state.id, color: newColor })
+      apiQueue.add('updateUser', { color: newColor })
     },
     lastSpaceId: (context, spaceId) => {
       context.commit('lastSpaceId', spaceId)
       cache.updateUser('lastSpaceId', spaceId)
-      apiQueue.add('updateUser', { id: context.state.id, lastSpaceId: spaceId })
+      apiQueue.add('updateUser', { lastSpaceId: spaceId })
     },
     lastReadNewStuffId: (context, newStuffId) => {
       context.commit('lastReadNewStuffId', newStuffId)
-      apiQueue.add('updateUser', { id: context.state.id, lastReadNewStuffId: newStuffId })
+      apiQueue.add('updateUser', { lastReadNewStuffId: newStuffId })
     },
     defaultConnectionTypeId: (context, typeId) => {
       context.commit('defaultConnectionTypeId', typeId)
-      apiQueue.add('updateUser', { id: context.state.id, defaultConnectionTypeId: typeId })
+      apiQueue.add('updateUser', { defaultConnectionTypeId: typeId })
     },
     restoreRemoteUser: async (context, cachedUser) => {
       if (!context.getters.isSignedIn) { return }

@@ -1,7 +1,9 @@
-# tests to do
+tests to do
+===========
 
-## queue.js > squash
+# queue.js
 
+## squash()
     // queue []
       // {name: 'UpdateCard', {body: id: 1, name: "add"}
       // {name: 'UpdateCard', {body: id: 1, frameid: 9}
@@ -14,7 +16,7 @@
       // {name: 'yolo', {body: id: 2, prop2: "xyz"}
 
 
-    // multiqueue
+## group()
       // {name: 'UpdateCard', {body: id: 2, name: "add"}
       // {name: 'UpdateCard', {body: id: 1, frameid: 9}
       // {name: 'UpdateCard', {body: id: 1, name: 'yolo'}
