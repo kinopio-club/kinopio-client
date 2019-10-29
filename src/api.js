@@ -10,6 +10,14 @@ if (process.env.NODE_ENV === 'development') {
 
 export default {
 
+  shouldSendRequest () {
+    // TODO support getting other people's spaces later
+    const isOnline = window.navigator.onLine
+    const userIsSignedIn = cache.user().apiKey
+    if (isOnline && userIsSignedIn) {
+      return true
+    }
+  },
   options (options) {
     const headers = new Headers({ 'Content-Type': 'application/json' })
     // const contributorKey = cache.space(options.spaceId).contributorKey
@@ -88,6 +96,7 @@ export default {
     }
   },
   async getUser () {
+    if (!this.shouldSendRequest()) { return }
     try {
       const options = this.options({ method: 'GET' })
       const response = await fetch(`${host}/user`, options)
@@ -97,6 +106,7 @@ export default {
     }
   },
   async getUserSpaces () {
+    if (!this.shouldSendRequest()) { return }
     try {
       const options = this.options({ method: 'GET' })
       const response = await fetch(`${host}/user/spaces`, options)
@@ -184,7 +194,7 @@ export default {
     try {
       const body = cache.getAllSpaces()
       const options = this.options({ body, apiKey, method: 'POST' })
-      const response = await fetch(`${host}/space`, options)
+      const response = await fetch(`${host}/space/multiple`, options)
       return this.normalizeResponse(response)
     } catch (error) {
       console.error(error)
