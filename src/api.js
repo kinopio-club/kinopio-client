@@ -162,13 +162,15 @@ export default {
   // Space
 
   async getSpace (spaceId) {
-    // TODO support getting other people's spaces later
-    const userIsSignedIn = cache.user().apiKey
-    if (!userIsSignedIn) { return }
-    console.log('🚛 Getting remote space', spaceId)
-    const options = this.options({ method: 'GET' })
-    const response = await utils.timeout(5000, fetch(`${host}/space/${spaceId}`, options))
-    return this.normalizeResponse(response)
+    try {
+      if (!this.shouldSendRequest()) { return }
+      console.log('🚛 Getting remote space', spaceId)
+      const options = this.options({ method: 'GET' })
+      const response = await utils.timeout(5000, fetch(`${host}/space/${spaceId}`, options))
+      return this.normalizeResponse(response)
+    } catch (error) {
+      console.error(error)
+    }
   },
   async updateSpace (body) {
     const options = this.options({ body, method: 'PATCH' })

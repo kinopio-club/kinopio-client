@@ -112,7 +112,9 @@ export default {
     },
     async updateWithRemoteSpaces () {
       const spaces = await api.getUserSpaces()
-      this.spaces = spaces
+      if (spaces) {
+        this.spaces = spaces
+      }
     }
   },
   watch: {
