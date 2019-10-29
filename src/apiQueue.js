@@ -91,7 +91,9 @@ const self = {
 
   async processRequest (request) {
     console.log('🚎 Processing request', request)
-    return api[request.name](request.body)
+    const response = await api[request.name](request.body)
+    const normalized = await api.normalizeResponse(response)
+    return normalized
   }
 }
 

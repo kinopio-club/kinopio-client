@@ -310,9 +310,8 @@ export default {
 
     // Cards
 
-    addCard: (context, { position, contents }) => {
+    addCard: (context, position) => {
       utils.typeCheck(position, 'object')
-      utils.typeCheck(contents, 'object', true)
       let card = {
         id: nanoid(),
         x: position.x,
@@ -321,13 +320,10 @@ export default {
         name: '',
         frameId: 0
       }
-      if (utils.objectHasKeys(contents)) {
-        card = utils.updateObject(card, contents)
-      } else {
-        context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
-      }
+      context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       context.commit('createCard', card)
       card.spaceId = context.state.id
+      card = utils.clone(card)
       apiQueue.add('createCard', card)
       context.dispatch('incrementCardZ', card.id)
     },
