@@ -8,7 +8,7 @@ window.onload = () => {
   self.process()
   setInterval(() => {
     self.process()
-  }, 60 * 1000) // 60 seconds
+  }, 20 * 1000) // 20 seconds
 }
 
 const processQueue = _.debounce(async () => {
