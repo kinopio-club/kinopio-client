@@ -208,12 +208,13 @@ export default {
 
   // Spaces 🌙
 
-  migrateSpaceProperties (space) {
-    if (!space.removedCards) {
-      space.removedCards = []
-    }
-    return space
-  },
+  // TODO: remove this, removed cards will no longer be stored locally
+  // migrateSpaceProperties (space) {
+  //   if (!space.removedCards) {
+  //     space.removedCards = []
+  //   }
+  //   return space
+  // },
 
   uniqueSpaceItems (items) {
     const cardIdDeltas = []

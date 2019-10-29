@@ -15,13 +15,3 @@ tests to do
       // {name: 'UpdateCard', {body: id: 1, prop1: "123", x: 23, y: 12, frameid: 9, name: "added pop"}
       // {name: 'yolo', {body: id: 2, prop2: "xyz"}
 
-
-## group()
-      // {name: 'UpdateCard', {body: id: 2, name: "add"}
-      // {name: 'UpdateCard', {body: id: 1, frameid: 9}
-      // {name: 'UpdateCard', {body: id: 1, name: 'yolo'}
-    // asert multi queue []
-      // {name: 'UpdateCard', updates: [
-        {body: {id: 2, name: "add"}},
-        {body: {id: 1, name: 'yolo', frameid: 9}}
-      ] // if updates.length then run a [request.name + multiple]
