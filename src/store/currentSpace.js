@@ -312,11 +312,12 @@ export default {
 
     addCard: (context, position) => {
       utils.typeCheck(position, 'object')
+      let cards = context.rootState.currentSpace.cards
       let card = {
         id: nanoid(),
         x: position.x,
         y: position.y,
-        z: 0,
+        z: cards.length + 1,
         name: '',
         frameId: 0
       }
@@ -325,7 +326,6 @@ export default {
       card.spaceId = context.state.id
       card = utils.clone(card)
       apiQueue.add('createCard', card)
-      context.dispatch('incrementCardZ', card.id)
     },
     updateCard: (context, card) => {
       context.commit('updateCard', card)
