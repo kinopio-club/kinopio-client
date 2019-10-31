@@ -7,6 +7,7 @@ let host = 'https://api.kinopio.club'
 if (process.env.NODE_ENV === 'development') {
   host = 'http://kinopio.local:3000'
 }
+
 const shouldRequest = () => {
   const isOnline = window.navigator.onLine
   const userIsSignedIn = cache.user().apiKey
@@ -14,6 +15,7 @@ const shouldRequest = () => {
     return true
   }
 }
+
 const requestOptions = (options) => {
   const headers = new Headers({ 'Content-Type': 'application/json' })
   // const contributorKey = cache.space(options.spaceId).contributorKey
@@ -27,6 +29,7 @@ const requestOptions = (options) => {
     body: JSON.stringify(options.body)
   }
 }
+
 const normalizeResponse = async (response) => {
   const success = [200, 201, 202, 204]
   const data = await response.json()
@@ -36,13 +39,16 @@ const normalizeResponse = async (response) => {
     throw { response, status: response.status }
   }
 }
-const addBackToQueue = (requests) => {
-  requests.forEach(request => {
-    let queue = cache.queue()
-    queue.unshift(request)
-    cache.saveQueue(queue)
-  })
-}
+
+// const addBackToQueue = (requests) => {
+//   requests.reverse()
+//   requests.forEach(request => {
+//     let queue = cache.queue()
+//     queue.unshift(request)
+//     cache.saveQueue(queue)
+//   })
+//   console.log(cache.queue())
+// }
 
 export default {
 
@@ -90,12 +96,12 @@ export default {
     const options = requestOptions({ body, method: 'POST' })
     try {
       console.log(`🚎 sending operations`, body)
-      await utils.timeout(5000, fetch(`${host}/operations`, options))
+      await fetch(`${host}/operations`, options)
     } catch (error) {
       console.error('🚒', error)
-      if (error.message === 'timeout') {
-        addBackToQueue(body)
-      }
+      // if (error.message === 'timeout') {
+      //   addBackToQueue(body)
+      // }
     }
   },
 
