@@ -6,14 +6,16 @@ import utils from '@/utils.js'
 
 window.onload = () => {
   self.process()
-  setInterval(() => {
-    self.process()
-  }, 20 * 1000) // 20 seconds
+  // setInterval(() => {
+  //   self.process()
+  // }, 5 * 1000) // 5 seconds
 }
 
 const processQueue = _.debounce(async () => {
   self.process()
-}, 1000)
+}, 1000, {
+  leading: true
+})
 
 const self = {
 
@@ -36,65 +38,31 @@ const self = {
     processQueue()
   },
 
-  idsMatch (item, request) {
-    let itemId, requestId
-    if (item.body) {
-      itemId = item.body.id
-    } else {
-      itemId = item.updates[0].id
-    }
-    if (request.body) {
-      requestId = request.body.id
-    } else {
-      requestId = request.updates[0].id
-    }
-    return itemId === requestId
-  },
-
-  squash () {
-    const queue = this.queue()
+  squash (queue) {
     let squashed = []
     queue.forEach(request => {
       const isSquashed = squashed.find(item => {
-        return item.name === request.name && this.idsMatch(item, request)
+        return item.name === request.name && item.body.id === request.body.id
       })
       if (isSquashed) { return }
       const matches = queue.filter(item => {
-        return item.name === request.name && this.idsMatch(item, request)
+        return item.name === request.name && item.body.id === request.body.id
       })
       const reduced = matches.reduce((accumulator, currentValue) => _.merge(accumulator, currentValue))
       reduced.name = request.name
       squashed.push(reduced)
     })
-    cache.saveQueue(squashed)
+    return squashed
   },
 
   async process () {
     if (!window.navigator.onLine) { return }
-    this.squash()
-    let queue = this.queue()
-    if (!queue.length) { return }
-    do {
-      try {
-        queue = this.queue()
-        const request = queue[0]
-        await this.processRequest(request)
-        queue.shift()
-        cache.saveQueue(queue)
-      } catch (error) {
-        console.error('🚒 retry', error)
-        break
-      }
-      queue = this.queue()
-    } while (queue.length > 0)
-  },
-
-  async processRequest (request) {
-    console.log('🚎 Processing request', request)
-    const response = await api[request.name](request.body)
-    const normalized = await api.normalizeResponse(response)
-    return normalized
+    const queue = cache.queue()
+    const squashed = this.squash(queue)
+    cache.clearQueue()
+    await api.processQueue(squashed)
   }
+
 }
 
 export default self

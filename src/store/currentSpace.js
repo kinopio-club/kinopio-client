@@ -110,7 +110,7 @@ export default {
       cache.updateSpace('removedCards', state.removedCards, state.id)
       cache.updateSpace('cards', state.cards, state.id)
     },
-    removeCardPermanently: (state, cardToRemove) => {
+    removeCardPermanent: (state, cardToRemove) => {
       state.cards = state.cards.filter(card => card.id !== cardToRemove.id)
       state.removedCards = state.removedCards.filter(card => card.id !== cardToRemove.id)
       cache.updateSpace('removedCards', state.removedCards, state.id)
@@ -276,9 +276,9 @@ export default {
       cache.removeSpace(space.id)
       apiQueue.add('removeSpace', { id: space.id })
     },
-    removeSpacePermanently: (context, space) => {
-      cache.removeSpacePermanently(space.id)
-      apiQueue.add('removeSpacePermanently', space.id)
+    removeSpacePermanent: (context, space) => {
+      cache.removeSpacePermanent(space.id)
+      apiQueue.add('removeSpacePermanent', space.id)
     },
     toAnotherSpace: (context, { spaceId, shouldRemoveOriginals }) => {
       const space = utils.clone(context.state)
@@ -349,14 +349,14 @@ export default {
         context.commit('removeCard', card)
         apiQueue.add('removeCard', card)
       } else {
-        context.dispatch('removeCardPermanently', card)
+        context.dispatch('removeCardPermanent', card)
       }
       context.dispatch('removeConnectionsFromCard', card)
       context.commit('generateCardMap', null, { root: true })
     },
-    removeCardPermanently: (context, card) => {
-      context.commit('removeCardPermanently', card)
-      apiQueue.add('removeCardPermanently', card)
+    removeCardPermanent: (context, card) => {
+      context.commit('removeCardPermanent', card)
+      apiQueue.add('removeCardPermanent', card)
     },
     restoreCard: (context, card) => {
       context.commit('restoreCard', card)

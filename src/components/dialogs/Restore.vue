@@ -128,10 +128,10 @@ export default {
       }
     },
     removeCard (card) {
-      this.$store.dispatch('currentSpace/removeCardPermanently', card)
+      this.$store.dispatch('currentSpace/removeCardPermanent', card)
     },
     removeSpace (space) {
-      this.$store.dispatch('currentSpace/removeSpacePermanently', space)
+      this.$store.dispatch('currentSpace/removeSpacePermanent', space)
       this.updateRemovedSpaces()
     }
   },

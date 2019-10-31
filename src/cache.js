@@ -128,7 +128,7 @@ export default {
     this.storeLocal(`removed-${spaceKey}`, space)
     this.removeLocal(spaceKey)
   },
-  removeSpacePermanently (spaceId) {
+  removeSpacePermanent (spaceId) {
     const spaceKey = `removed-space-${spaceId}`
     this.removeLocal(spaceKey)
   },
@@ -157,6 +157,9 @@ export default {
   },
   saveQueue (queue) {
     this.storeLocal('queue', queue)
+  },
+  clearQueue () {
+    this.storeLocal('queue', [])
   }
 
 }
