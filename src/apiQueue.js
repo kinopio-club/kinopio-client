@@ -13,22 +13,18 @@ window.onload = () => {
 
 const processQueue = _.debounce(async () => {
   self.process()
-}, 1000, {
+}, 500, {
   leading: true
 })
 
 const self = {
-
-  queue () {
-    return cache.queue()
-  },
 
   async add (name, body) {
     // const userIsContributor = cache.space(space.id).contributorKey or key stored in user
     body = utils.clone(body)
     const userIsSignedIn = cache.user().apiKey
     if (!userIsSignedIn) { return }
-    let queue = this.queue()
+    let queue = cache.queue()
     const request = {
       name,
       body
