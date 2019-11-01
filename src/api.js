@@ -19,7 +19,7 @@ const shouldRequest = () => {
 const requestOptions = (options) => {
   const headers = new Headers({ 'Content-Type': 'application/json' })
   // const contributorKey = cache.space(options.spaceId).contributorKey
-  const apiKey = options.apiKey || cache.user().apiKey // || contributorKey
+  const apiKey = cache.user().apiKey // || contributorKey
   if (apiKey) {
     headers.append('Authorization', apiKey)
   }
@@ -59,12 +59,7 @@ export default {
     body.email = email
     body.password = password
     const options = requestOptions({ body, method: 'POST' })
-    try {
-      const response = await fetch(`${host}/user/sign-up`, options)
-      return normalizeResponse(response)
-    } catch (error) {
-      console.error(error)
-    }
+    return fetch(`${host}/user/sign-up`, options)
   },
   async signIn (email, password) {
     const body = {
@@ -72,22 +67,12 @@ export default {
       password: password
     }
     const options = requestOptions({ body, method: 'POST' })
-    try {
-      const response = await fetch(`${host}/user/sign-in`, options)
-      return normalizeResponse(response)
-    } catch (error) {
-      console.error(error)
-    }
+    return fetch(`${host}/user/sign-in`, options)
   },
   async resetPassword (email) {
     const body = { email }
     const options = requestOptions({ body, method: 'POST' })
-    try {
-      const response = await fetch(`${host}/user/reset-password`, options)
-      return normalizeResponse(response)
-    } catch (error) {
-      console.error(error)
-    }
+    return fetch(`${host}/user/reset-password`, options)
   },
 
   // Operations
@@ -127,6 +112,16 @@ export default {
       console.error(error)
     }
   },
+  async removeUserPermanent () {
+    if (!shouldRequest()) { return }
+    try {
+      const options = requestOptions({ method: 'DELETE' })
+      const response = await fetch(`${host}/user/permanent`, options)
+      return normalizeResponse(response)
+    } catch (error) {
+      console.error(error)
+    }
+  },
 
   // Space
 
@@ -141,10 +136,10 @@ export default {
       console.error(error)
     }
   },
-  async createSpaces (apiKey) {
+  async createSpaces () {
     try {
       const body = cache.getAllSpaces()
-      const options = requestOptions({ body, apiKey, method: 'POST' })
+      const options = requestOptions({ body, method: 'POST' })
       const response = await fetch(`${host}/space/multiple`, options)
       return normalizeResponse(response)
     } catch (error) {

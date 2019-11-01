@@ -27,7 +27,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
       input(type="email" placeholder="Email" required v-model="email" @input="clearErrors")
       input(type="password" placeholder="Password" required v-model="password" @input="clearErrors")
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
-      .badge.danger(v-if="error.signInCredentials") Could not sign in, incorrect email or password
+      .badge.danger(v-if="error.signInCredentials") Incorrect email or password
       .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
       button(type="submit" :class="{active : loading.signUpOrIn}")
         span Sign In
@@ -120,10 +120,20 @@ export default {
       this.resetVisible = !this.resetVisible
     },
 
-    parseErrors (response) {
-      console.warn(response)
+    isSuccess (response) {
+      const success = [200, 201, 202, 204]
+      return Boolean(success.includes(response.status))
+    },
+
+    async handleErrors (response) {
       this.loading.signUpOrIn = false
       this.loading.resetPassword = false
+
+      this.error.signInCredentials = false
+      this.error.accountAlreadyExists = false
+      this.error.tooManyAttempts = false
+      this.error.unknownServerError = false
+
       if (!response) {
         this.error.unknownServerError = true
         return
@@ -156,10 +166,11 @@ export default {
       if (!this.signUpPasswordsIsMatch(password, confirmPassword)) { return }
       this.loading.signUpOrIn = true
       const response = await api.signUp(email, password, currentUser)
-      if (!response || response.error) {
-        this.parseErrors(response)
+      const result = await response.json()
+      if (this.isSuccess(response)) {
+        await this.createSpaces(result.apiKey)
       } else {
-        await this.signInOrUp(response.apiKey)
+        await this.handleErrors(result)
       }
     },
 
@@ -169,34 +180,33 @@ export default {
       const password = event.target[1].value
       this.loading.signUpOrIn = true
       const response = await api.signIn(email, password)
-      if (!response || response.error) {
-        this.parseErrors(response)
-      } else {
-        this.$store.commit('currentUser/updateUser', response)
-        await this.signInOrUp(response.apiKey)
+      const result = await response.json()
+      console.log(response, result)
+      if (this.isSuccess(response)) {
+        this.$store.commit('currentUser/updateUser', result)
+        await this.createSpaces(result.apiKey)
         const currentUser = await api.getUser()
-        cache.updateCurrentUserSpaces(currentUser.spaces)
-        // console.log('🍄', currentUser)
-        // SEE currentUser.lastSpaceId
-        // this.$store.commit('currentSpace/updateLastSpaceId', currentUser.lastSpaceId)
-        // TODO THEN switch to last space
-        // get complete space from ls
-        // this.$store.dispatch('currentSpace/changeSpace', space)
+        console.log(currentUser)
+        const spaces = await api.getUserSpaces()
+        cache.addSpaces(spaces)
+      } else {
+        await this.handleErrors(result)
       }
+      // SEE currentUser.lastSpaceId
+      // this.$store.commit('currentSpace/updateLastSpaceId', currentUser.lastSpaceId)
+      // TODO THEN switch to last space
+      // this.$store.dispatch('currentSpace/changeSpace', space)
     },
 
-    async signInOrUp (apiKey) {
+    async createSpaces (apiKey) {
       cache.updateIdsInAllSpaces() // added Oct 2019 for legacy spaces, can safely remove this in Oct 2020
       const updatedSpace = cache.space(this.$store.state.currentSpace.id)
+      console.log(updatedSpace)
       this.$store.commit('currentSpace/restoreSpace', updatedSpace)
-      const response = await api.createSpaces(apiKey)
+      this.$store.commit('currentUser/apiKey', apiKey)
+      await api.createSpaces()
       this.loading.signUpOrIn = false
-      if (!response || response.error) {
-        this.parseErrors(response)
-      } else {
-        this.$store.commit('currentUser/apiKey', apiKey)
-        this.$store.commit('closeAllDialogs')
-      }
+      this.$store.commit('closeAllDialogs')
     },
 
     async resetPassword (event) {
@@ -207,7 +217,6 @@ export default {
       this.loading.resetPassword = false
       this.resetSuccess = true
     }
-
   },
   watch: {
     visible (value) {
