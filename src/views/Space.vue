@@ -32,7 +32,7 @@ import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 
 import utils from '@/utils.js'
 
-import _ from 'lodash'
+import last from 'lodash-es/last'
 
 let startCursor, prevCursor, prevCursorPage, endCursor, scrollTimer, scrollAreaHeight, scrollAreaWidth, maxHeight, maxWidth
 let movementDirection = {}
@@ -343,7 +343,7 @@ export default {
     addConnection (connection) {
       const typePref = this.$store.state.currentUser.defaultConnectionTypeId
       const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
-      const lastConnectionType = _.last(this.$store.state.currentSpace.connectionTypes)
+      const lastConnectionType = last(this.$store.state.currentSpace.connectionTypes)
       const connectionType = defaultType || lastConnectionType
       this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
     },

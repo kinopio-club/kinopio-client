@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import randomColor from 'randomcolor'
 import nanoid from 'nanoid'
-import _ from 'lodash'
+import random from 'lodash-es/random'
+import last from 'lodash-es/last'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -220,8 +221,8 @@ export default {
       space.name = words.randomUniqueName()
       space.id = nanoid()
       space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
-      space.cards[1].x = _.random(180, 200)
-      space.cards[1].y = _.random(160, 180)
+      space.cards[1].x = random(180, 200)
+      space.cards[1].y = random(160, 180)
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       context.commit('restoreSpace', uniqueNewSpace)
     },
@@ -534,7 +535,7 @@ export default {
       return state.connectionTypes.find(type => type.id === id)
     },
     lastConnectionType: (state) => {
-      return _.last(state.connectionTypes)
+      return last(state.connectionTypes)
     },
     cardConnectionTypes: (state, getters) => (cardId) => {
       const connections = getters.cardConnections(cardId)

@@ -19,7 +19,7 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.stop ref="dialog")
 </template>
 
 <script>
-import _ from 'lodash'
+import join from 'lodash-es/join'
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import utils from '@/utils.js'
@@ -50,7 +50,7 @@ export default {
     },
     text () {
       const data = this.exportData.cards.map(card => { return card.name })
-      return _.join(data, '\n')
+      return join(data, '\n')
     },
     copyText () {
       const element = this.$refs.text

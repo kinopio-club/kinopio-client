@@ -1,6 +1,6 @@
 // small word set for randomly generated space names, allows ~49k permutations
 
-import _ from 'lodash'
+import sample from 'lodash-es/sample'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -24,11 +24,11 @@ export default {
     }
   },
   randomAdjective () {
-    const adjective = _.sample(this.adjectives())
+    const adjective = sample(this.adjectives())
     return utils.capitalizeFirstLetter(adjective)
   },
   randomNoun () {
-    const noun = _.sample(this.nouns())
+    const noun = sample(this.nouns())
     return utils.capitalizeFirstLetter(noun)
   },
 

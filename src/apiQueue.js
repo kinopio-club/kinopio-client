@@ -1,4 +1,5 @@
-import _ from 'lodash'
+import debounce from 'lodash-es/debounce'
+import merge from 'lodash-es/merge'
 
 import api from '@/api.js'
 import cache from '@/cache.js'
@@ -11,7 +12,7 @@ window.onload = () => {
   // }, 5 * 1000) // 5 seconds
 }
 
-const processQueue = _.debounce(async () => {
+const processQueue = debounce(async () => {
   self.process()
 }, 500, {
   leading: true
@@ -44,7 +45,7 @@ const self = {
       const matches = queue.filter(item => {
         return item.name === request.name && item.body.id === request.body.id
       })
-      const reduced = matches.reduce((accumulator, currentValue) => _.merge(accumulator, currentValue))
+      const reduced = matches.reduce((accumulator, currentValue) => merge(accumulator, currentValue))
       reduced.name = request.name
       squashed.push(reduced)
     })

@@ -10,7 +10,7 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "lodash": "^4.17.11",
+    "lodash-es": "^4.17.15",
     "nanoid": "^2.0.3",
     "randomcolor": "^0.5.4",
     "smooth-scroll-into-view-if-needed": "^1.1.23",
@@ -20,6 +20,7 @@
     "vuex": "^3.0.1"
   },
   "devDependencies": {
+    "@types/lodash-es": "^4.17.3",
     "@vue/cli-plugin-eslint": "^3.7.0",
     "@vue/cli-plugin-unit-jest": "^3.7.0",
     "@vue/cli-service": "^3.7.0",

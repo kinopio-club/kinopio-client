@@ -30,7 +30,7 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
 </template>
 
 <script>
-import _ from 'lodash'
+import last from 'lodash-es/last'
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import utils from '@/utils.js'
@@ -90,7 +90,7 @@ export default {
     addConnectionType () {
       this.$store.dispatch('currentSpace/addConnectionType')
       const types = utils.clone(this.connectionTypes)
-      const newType = _.last(types)
+      const newType = last(types)
       this.changeConnectionType(newType)
     },
     connectionTypeIsActive (type) {

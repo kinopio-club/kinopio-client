@@ -21,7 +21,7 @@ dialog.narrow(v-if="visible" :open="visible" :style="position" ref="dialog" @cli
 </template>
 
 <script>
-import _ from 'lodash'
+import last from 'lodash-es/last'
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import utils from '@/utils.js'
@@ -96,7 +96,7 @@ export default {
       if (!defaultType) {
         this.$store.dispatch('currentSpace/addConnectionType')
       }
-      const newConnectionType = _.last(this.$store.state.currentSpace.connectionTypes)
+      const newConnectionType = last(this.$store.state.currentSpace.connectionTypes)
       return defaultType || newConnectionType
     },
     connectCards () {
