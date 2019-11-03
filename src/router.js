@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Space from './views/Space.vue'
+
+import Space from '@/views/Space.vue'
+import store from '@/store/store.js'
 
 Vue.use(Router)
 
@@ -12,6 +14,19 @@ export default new Router({
       path: '/',
       name: 'space',
       component: Space
+    },
+    {
+      path: '/beta',
+      name: 'beta',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        store.commit('isBeta', true)
+        next()
+      }
+      // redirect: to => {
+      //   store.commit('isBeta', true)
+      //   return '/'
+      // }
     }
     // {
     //   path: '/legal',

@@ -16,7 +16,7 @@ header
   aside
     //.button-wrap
     //  button Share
-    .button-wrap(v-if="!userIsSignedIn")
+    .button-wrap(v-if="!userIsSignedIn && isBeta")
       button(@click.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}") Sign Up or In
       SignUpOrIn(:visible="signUpOrInIsVisible")
     User(:user="currentUser" :clickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true")
@@ -72,6 +72,9 @@ export default {
     },
     loadingSpace () {
       return this.$store.state.loadingSpace
+    },
+    isBeta () {
+      return this.$store.state.isBeta
     }
   },
   methods: {

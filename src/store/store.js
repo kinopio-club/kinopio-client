@@ -16,6 +16,7 @@ export default new Vuex.Store({
     viewportHeight: 0,
     viewportWidth: 0,
     isOnline: true,
+    isBeta: false,
 
     // current user state
     currentUserIsDrawingConnection: false,
@@ -81,6 +82,10 @@ export default new Vuex.Store({
     isOnline: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.isOnline = value
+    },
+    isBeta: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.isBeta = value
     },
 
     // connecting
