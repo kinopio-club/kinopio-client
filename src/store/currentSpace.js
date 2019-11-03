@@ -244,22 +244,26 @@ export default {
     loadSpace: async (context, space) => {
       const cachedSpace = cache.space(space.id)
       const emptySpace = { id: space.id, cards: [], connections: [] }
-      if (cachedSpace) {
-        context.commit('restoreSpace', cachedSpace)
-      } else {
-        context.commit('restoreSpace', emptySpace)
-      }
+      context.commit('restoreSpace', emptySpace)
+      context.commit('restoreSpace', cachedSpace)
       context.commit('loadingSpace', true, { root: true })
+      console.log('🚛 Getting remote space', space.id)
       const remoteSpace = await api.getSpace(space.id)
       context.commit('loadingSpace', false, { root: true })
       if (!remoteSpace) { return }
       // TODO (if !remoteSpace && !cachedSpace) handle 404 error, may occur for loading from url cases
       const remoteDate = utils.normalizeToUnixTime(remoteSpace.updatedAt)
-      if (remoteDate > space.cacheDate) {
-        console.log('🚋 Restore space from remote space', remoteSpace)
-        context.commit('restoreSpace', remoteSpace)
-        cache.saveSpace(remoteSpace)
-      }
+      console.log('remote space', remoteSpace, remoteDate, cachedSpace.cacheDate)
+
+      // cached date is newer, and shouldn't be restored, when
+      // - im working offline and i refresh the page. i want to see my latest local version
+
+      // if (remoteDate >= cachedSpace.cacheDate) {
+      // const normalizedSpace = utils.normalizeSpaceKeys(remoteSpace)
+      console.log('🚋 Restore space from remote space', remoteSpace)
+      cache.saveSpace(remoteSpace)
+      context.commit('restoreSpace', remoteSpace)
+      // }
     },
     updateSpace: async (context, updates) => {
       updates.id = context.state.id

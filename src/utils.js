@@ -125,6 +125,11 @@ export default {
     return string.charAt(0).toUpperCase() + string.slice(1)
   },
 
+  lowercaseFirstLetter (string) {
+    // 'Dreams' -> 'dreams'
+    return string.charAt(0).toLowerCase() + string.slice(1)
+  },
+
   updateAllIds (object, key, idDeltas) {
     const index = idDeltas.findIndex(id => object[key] === id.prevId)
     if (index >= 0) {
