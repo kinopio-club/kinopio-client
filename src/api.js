@@ -7,6 +7,7 @@ let host = 'https://api.kinopio.club'
 if (process.env.NODE_ENV === 'development') {
   host = 'http://kinopio.local:3000'
 }
+
 const shouldRequest = () => {
   const isOnline = window.navigator.onLine
   const userIsSignedIn = cache.user().apiKey
@@ -14,10 +15,11 @@ const shouldRequest = () => {
     return true
   }
 }
+
 const requestOptions = (options) => {
   const headers = new Headers({ 'Content-Type': 'application/json' })
   // const contributorKey = cache.space(options.spaceId).contributorKey
-  const apiKey = options.apiKey || cache.user().apiKey // || contributorKey
+  const apiKey = cache.user().apiKey // || contributorKey
   if (apiKey) {
     headers.append('Authorization', apiKey)
   }
@@ -27,6 +29,7 @@ const requestOptions = (options) => {
     body: JSON.stringify(options.body)
   }
 }
+
 const normalizeResponse = async (response) => {
   const success = [200, 201, 202, 204]
   const data = await response.json()
@@ -36,13 +39,16 @@ const normalizeResponse = async (response) => {
     throw { response, status: response.status }
   }
 }
-const addBackToQueue = (requests) => {
-  requests.forEach(request => {
-    let queue = cache.queue()
-    queue.unshift(request)
-    cache.saveQueue(queue)
-  })
-}
+
+// const addBackToQueue = (requests) => {
+//   requests.reverse()
+//   requests.forEach(request => {
+//     let queue = cache.queue()
+//     queue.unshift(request)
+//     cache.saveQueue(queue)
+//   })
+//   console.log(cache.queue())
+// }
 
 export default {
 
@@ -53,12 +59,7 @@ export default {
     body.email = email
     body.password = password
     const options = requestOptions({ body, method: 'POST' })
-    try {
-      const response = await fetch(`${host}/user/sign-up`, options)
-      return normalizeResponse(response)
-    } catch (error) {
-      console.error(error)
-    }
+    return fetch(`${host}/user/sign-up`, options)
   },
   async signIn (email, password) {
     const body = {
@@ -66,22 +67,12 @@ export default {
       password: password
     }
     const options = requestOptions({ body, method: 'POST' })
-    try {
-      const response = await fetch(`${host}/user/sign-in`, options)
-      return normalizeResponse(response)
-    } catch (error) {
-      console.error(error)
-    }
+    return fetch(`${host}/user/sign-in`, options)
   },
   async resetPassword (email) {
     const body = { email }
     const options = requestOptions({ body, method: 'POST' })
-    try {
-      const response = await fetch(`${host}/user/reset-password`, options)
-      return normalizeResponse(response)
-    } catch (error) {
-      console.error(error)
-    }
+    return fetch(`${host}/user/reset-password`, options)
   },
 
   // Operations
@@ -90,12 +81,12 @@ export default {
     const options = requestOptions({ body, method: 'POST' })
     try {
       console.log(`🚎 sending operations`, body)
-      await utils.timeout(5000, fetch(`${host}/operations`, options))
+      await fetch(`${host}/operations`, options)
     } catch (error) {
       console.error('🚒', error)
-      if (error.message === 'timeout') {
-        addBackToQueue(body)
-      }
+      // if (error.message === 'timeout') {
+      //   addBackToQueue(body)
+      // }
     }
   },
 
@@ -121,6 +112,16 @@ export default {
       console.error(error)
     }
   },
+  async removeUserPermanent () {
+    if (!shouldRequest()) { return }
+    try {
+      const options = requestOptions({ method: 'DELETE' })
+      const response = await fetch(`${host}/user/permanent`, options)
+      return normalizeResponse(response)
+    } catch (error) {
+      console.error(error)
+    }
+  },
 
   // Space
 
@@ -135,10 +136,10 @@ export default {
       console.error(error)
     }
   },
-  async createSpaces (apiKey) {
+  async createSpaces () {
     try {
       const body = cache.getAllSpaces()
-      const options = requestOptions({ body, apiKey, method: 'POST' })
+      const options = requestOptions({ body, method: 'POST' })
       const response = await fetch(`${host}/space/multiple`, options)
       return normalizeResponse(response)
     } catch (error) {

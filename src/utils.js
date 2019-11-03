@@ -125,6 +125,11 @@ export default {
     return string.charAt(0).toUpperCase() + string.slice(1)
   },
 
+  lowercaseFirstLetter (string) {
+    // 'Dreams' -> 'dreams'
+    return string.charAt(0).toLowerCase() + string.slice(1)
+  },
+
   updateAllIds (object, key, idDeltas) {
     const index = idDeltas.findIndex(id => object[key] === id.prevId)
     if (index >= 0) {
@@ -208,13 +213,13 @@ export default {
 
   // Spaces 🌙
 
-  // TODO: remove this, removed cards will no longer be stored locally
-  // migrateSpaceProperties (space) {
-  //   if (!space.removedCards) {
-  //     space.removedCards = []
-  //   }
-  //   return space
-  // },
+  // migration added oct 2019
+  ensureRemovedCards (space) {
+    if (!space.removedCards) {
+      space.removedCards = []
+    }
+    return space
+  },
 
   uniqueSpaceItems (items) {
     const cardIdDeltas = []

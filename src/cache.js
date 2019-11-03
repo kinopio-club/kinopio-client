@@ -101,18 +101,10 @@ export default {
     this.storeLocal(`space-${space.id}`, space)
     return space
   },
-  updateCurrentUserSpaces (newSpaces) {
-    newSpaces.forEach(newSpace => {
-      const space = {
-        id: newSpace.id,
-        name: newSpace.name,
-        cacheDate: utils.normalizeToUnixTime(newSpace.userSpace.updatedAt)
-      }
-      if (this.space(newSpace.id)) {
-        this.updateSpace('name', newSpace.name, newSpace.id)
-      } else {
-        this.storeLocal(`space-${newSpace.id}`, space)
-      }
+  addSpaces (spaces) {
+    spaces.forEach(space => {
+      space.cacheDate = utils.normalizeToUnixTime(space.updatedAt)
+      this.storeLocal(`space-${space.id}`, space)
     })
   },
 

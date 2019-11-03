@@ -47,6 +47,7 @@ const self = {
       })
       const reduced = matches.reduce((accumulator, currentValue) => merge(accumulator, currentValue))
       reduced.name = request.name
+      reduced.body.spaceId = reduced.body.spaceId || cache.user().lastSpaceId
       squashed.push(reduced)
     })
     return squashed
