@@ -20,16 +20,19 @@ hostile set localhost kinopio.local
 ## Run
 
 ```
-vue ui
-Admin: http://kinopio.local:8000
-App: http://kinopio.local:8080
+$ npm run start
+$ http://kinopio.local:8080
 ```
 
+You can also run `vue ui`
+
 ## Debugging
+
+	npm run lint
+
 Uncomment code in `main.js` then,
-```
-./node_modules/.bin/vue-devtools
-```
+
+	./node_modules/.bin/vue-devtools
 
 ## Primary Files
 
