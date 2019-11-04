@@ -50,7 +50,7 @@ export default {
     updateSpace: (state, updatedSpace) => {
       const updates = Object.keys(updatedSpace)
       updates.forEach(key => {
-        if (state[key]) {
+        if (state[key] !== undefined) {
           state[key] = updatedSpace[key]
           cache.updateSpace(key, state[key], state.id)
         }
