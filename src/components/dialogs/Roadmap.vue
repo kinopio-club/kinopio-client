@@ -5,7 +5,7 @@ dialog.roadmap(v-if="visible" :open="visible" @click.stop)
     p
       img.updated.icon(src="@/assets/updated.gif")
       // manually update me whenever this is updated
-      span Sept 13, 2019
+      span oct 25, 2019
   section
     ul
       li
@@ -15,12 +15,23 @@ dialog.roadmap(v-if="visible" :open="visible" @click.stop)
       li
         del Cards and spaces are safe to remove because they can be restored
       li
+        del Export spaces and cards
+      li
         del Import spaces
-      li Login and collaboration
-      li Data also stored on a server for safety
+      li
+        del Sign in to access your spaces everywhere
+      li Share your spaces with other people (spaces have urls)
+      li Real time collaboration
       li Updated Logo and illustrations
       li Build Billing and Payments (4$/month)
       li Dark mode 🌙
+      li More frames 🌷
+      li Keyboard Shortcuts
+  //- section
+  //-   .button-wrap
+  //-     a(href="https://www.are.na/kinopio")
+  //-       button Previously Completed →
+
 </template>
 
 <script>

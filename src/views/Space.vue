@@ -32,7 +32,7 @@ import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 
 import utils from '@/utils.js'
 
-import _ from 'lodash'
+import last from 'lodash-es/last'
 
 let startCursor, prevCursor, prevCursorPage, endCursor, scrollTimer, scrollAreaHeight, scrollAreaWidth, maxHeight, maxWidth
 let movementDirection = {}
@@ -66,6 +66,9 @@ export default {
     // keep space element updated to viewport size so connections show up
     this.updatePageSizes()
     window.addEventListener('resize', this.updatePageSizes)
+    this.updateIsOnline()
+    window.addEventListener('online', this.updateIsOnline)
+    window.addEventListener('offline', this.updateIsOnline)
   },
 
   computed: {
@@ -96,12 +99,16 @@ export default {
       this.$store.commit('updatePageSizes')
     },
 
+    updateIsOnline () {
+      this.$store.commit('isOnline', window.navigator.onLine)
+    },
+
     initInteractions (event) {
       startCursor = utils.cursorPositionInViewport(event)
       if (this.$store.getters.shouldScrollAtEdges && !scrollTimer) {
         scrollAreaHeight = Math.max(50, this.viewportHeight / 8)
         scrollAreaWidth = Math.max(50, this.viewportWidth / 8)
-        console.log('🦋', scrollAreaHeight, scrollAreaWidth)
+        // console.log('🦋', scrollAreaHeight, scrollAreaWidth)
         maxHeight = Math.max(2500, this.$store.state.viewportHeight)
         maxWidth = Math.max(2500, this.$store.state.viewportWidth)
         scrollTimer = window.requestAnimationFrame(this.scrollFrame)
@@ -270,7 +277,6 @@ export default {
         endCursor,
         prevCursor: prevCursor
       })
-
       this.checkShouldShowDetails()
     },
 
@@ -337,7 +343,7 @@ export default {
     addConnection (connection) {
       const typePref = this.$store.state.currentUser.defaultConnectionTypeId
       const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
-      const lastConnectionType = _.last(this.$store.state.currentSpace.connectionTypes)
+      const lastConnectionType = last(this.$store.state.currentSpace.connectionTypes)
       const connectionType = defaultType || lastConnectionType
       this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
     },
@@ -351,7 +357,7 @@ export default {
         const connection = { startCardId, endCardId, path }
         this.addConnection(connection)
       } else {
-        this.$store.commit('currentSpace/removeUnusedConnectionTypes')
+        this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
       }
     },
 
@@ -370,7 +376,7 @@ export default {
       const withinX = position.x > 0 && position.x < this.$store.state.pageWidth
       const withinY = position.y > 0 && position.y < this.$store.state.pageHeight
       if (withinX && withinY) {
-        this.$store.dispatch('currentSpace/addCard', { position })
+        this.$store.dispatch('currentSpace/addCard', position)
       }
     },
 
@@ -410,6 +416,9 @@ export default {
       this.$store.commit('currentUserIsDrawingConnection', false)
       this.$store.commit('currentUserIsPainting', false)
       this.$store.commit('currentUserIsPaintingLocked', false)
+      if (this.isDraggingCard) {
+        this.$store.dispatch('currentSpace/updatePositions')
+      }
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.commit('currentConnectionSuccess', {})
       this.$store.commit('currentConnection', {})

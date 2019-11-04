@@ -15,6 +15,8 @@ export default new Vuex.Store({
     pageWidth: 0,
     viewportHeight: 0,
     viewportWidth: 0,
+    isOnline: true,
+    isBeta: false,
 
     // current user state
     currentUserIsDrawingConnection: false,
@@ -41,7 +43,10 @@ export default new Vuex.Store({
     multipleCardsSelectedIds: [],
     multipleCardActionsIsVisible: false,
     multipleCardActionsPosition: {},
-    cardMap: []
+    cardMap: [],
+
+    // loading
+    loadingSpace: false
   },
 
   mutations: {
@@ -68,6 +73,19 @@ export default new Vuex.Store({
     cardDetailsIsVisibleForCardId: (state, cardId) => {
       utils.typeCheck(cardId, 'string')
       state.cardDetailsIsVisibleForCardId = cardId
+    },
+    closeAllDialogs: (state) => {
+      state.multipleCardActionsIsVisible = false
+      state.cardDetailsIsVisibleForCardId = ''
+      state.connectionDetailsIsVisibleForConnectionId = ''
+    },
+    isOnline: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.isOnline = value
+    },
+    isBeta: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.isBeta = value
     },
 
     // connecting
@@ -157,10 +175,11 @@ export default new Vuex.Store({
       utils.typeCheck(position, 'object')
       state.multipleCardActionsPosition = position
     },
-    closeAllDialogs: (state) => {
-      state.multipleCardActionsIsVisible = false
-      state.cardDetailsIsVisibleForCardId = ''
-      state.connectionDetailsIsVisibleForConnectionId = ''
+
+    // loading
+    loadingSpace: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.loadingSpace = value
     }
   },
 
@@ -168,13 +187,13 @@ export default new Vuex.Store({
     updateUserColor: (context, { userId, newColor }) => {
       const isCurrentUser = context.getters['currentUser/isCurrentUser'](userId)
       if (isCurrentUser) {
-        context.commit('currentUser/updateColor', newColor)
+        context.dispatch('currentUser/color', newColor)
       }
     },
     updateUserName: (context, { userId, newName }) => {
       const isCurrentUser = context.getters['currentUser/isCurrentUser'](userId)
       if (isCurrentUser) {
-        context.commit('currentUser/updateName', newName)
+        context.dispatch('currentUser/name', newName)
       }
     }
   },

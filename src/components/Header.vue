@@ -10,9 +10,15 @@ header
       button.space-details-button(@click.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
         //img.icon.space-moon(src="@/assets/space-moon.svg")
         span {{currentSpaceName}}
+        Loader(:visible="loadingSpace")
       SpaceDetails(:visible="spaceDetailsIsVisible")
 
   aside
+    //.button-wrap
+    //  button Share
+    .button-wrap(v-if="!userIsSignedIn && isBeta")
+      button(@click.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}") Sign Up or In
+      SignUpOrIn(:visible="signUpOrInIsVisible")
     User(:user="currentUser" :clickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true")
 </template>
 
@@ -20,18 +26,23 @@ header
 import About from '@/components/dialogs/About.vue'
 import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
 import User from '@/components/User.vue'
+import SignUpOrIn from '@/components/dialogs/SignUpOrIn.vue'
+import Loader from '@/components/Loader.vue'
 
 export default {
   name: 'Header',
   components: {
     About,
     SpaceDetails,
-    User
+    User,
+    SignUpOrIn,
+    Loader
   },
   data () {
     return {
       aboutIsVisible: false,
-      spaceDetailsIsVisible: false
+      spaceDetailsIsVisible: false,
+      signUpOrInIsVisible: false
     }
   },
   created () {
@@ -39,6 +50,7 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.aboutIsVisible = false
         this.spaceDetailsIsVisible = false
+        this.signUpOrInIsVisible = false
       }
     })
   },
@@ -49,11 +61,20 @@ export default {
     currentSpaceName () {
       const id = this.$store.state.currentSpace.id
       const name = this.$store.state.currentSpace.name
-      if (name.length) {
+      if (name) {
         return name
       } else {
-        return `space-${id}`
+        return `Space ${id}`
       }
+    },
+    userIsSignedIn () {
+      return this.$store.getters['currentUser/isSignedIn']
+    },
+    loadingSpace () {
+      return this.$store.state.loadingSpace
+    },
+    isBeta () {
+      return this.$store.state.isBeta
     }
   },
   methods: {
@@ -66,6 +87,11 @@ export default {
       const isVisible = this.spaceDetailsIsVisible
       this.$store.commit('closeAllDialogs')
       this.spaceDetailsIsVisible = !isVisible
+    },
+    toggleSignUpOrInIsVisible () {
+      const isVisible = this.signUpOrInIsVisible
+      this.$store.commit('closeAllDialogs')
+      this.signUpOrInIsVisible = !isVisible
     }
   }
 }
@@ -110,5 +136,7 @@ header
     overflow hidden
     text-overflow ellipsis
     max-width 250px
-
+  aside
+    > .button-wrap
+      margin-right 6px
 </style>

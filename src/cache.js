@@ -1,11 +1,13 @@
 // local storage cache interface for currentUser and spaces
 
+import utils from '@/utils.js'
+
 export default {
   storeLocal (key, value) {
     try {
       window.localStorage[key] = JSON.stringify(value)
     } catch (error) {
-      console.warn('Could not save to localStorage. (localStorage is disabled in private Safari windows)')
+      console.warn('Could not save to localStorage')
     }
   },
   getLocal (key) {
@@ -22,7 +24,7 @@ export default {
     window.localStorage.clear()
   },
 
-  // user
+  // User
 
   user () {
     return this.getLocal('user') || {}
@@ -36,7 +38,8 @@ export default {
     this.storeLocal('user', user)
   },
 
-  // space
+  // Space
+
   space (spaceId) {
     return this.getLocal(`space-${spaceId}`) || {}
   },
@@ -79,8 +82,34 @@ export default {
     space.cacheDate = Date.now()
     this.storeLocal(`space-${space.id}`, space)
   },
+  updateIdsInAllSpaces () {
+    let spaces = this.getAllSpaces()
+    spaces.map(space => {
+      this.updateIdsInSpace(space)
+    })
+  },
+  updateIdsInSpace (space) {
+    const items = {
+      cards: space.cards,
+      connectionTypes: space.connectionTypes,
+      connections: space.connections
+    }
+    const uniqueItems = utils.uniqueSpaceItems(items)
+    space.cards = uniqueItems.cards
+    space.connectionTypes = uniqueItems.connectionTypes
+    space.connections = uniqueItems.connections
+    this.storeLocal(`space-${space.id}`, space)
+    return space
+  },
+  addSpaces (spaces) {
+    spaces.forEach(space => {
+      space.cacheDate = utils.normalizeToUnixTime(space.updatedAt)
+      this.storeLocal(`space-${space.id}`, space)
+    })
+  },
 
-  // removed spaces
+  // Removed Spaces
+
   removedSpace (spaceId) {
     return this.getLocal(`space-${spaceId}`) || {}
   },
@@ -91,7 +120,7 @@ export default {
     this.storeLocal(`removed-${spaceKey}`, space)
     this.removeLocal(spaceKey)
   },
-  removeRemovedSpace (spaceId) {
+  removeSpacePermanent (spaceId) {
     const spaceKey = `removed-space-${spaceId}`
     this.removeLocal(spaceKey)
   },
@@ -111,5 +140,18 @@ export default {
       return b.removeDate - a.removeDate
     })
     return sortedSpaces
+  },
+
+  // API Queue
+
+  queue () {
+    return this.getLocal('queue') || []
+  },
+  saveQueue (queue) {
+    this.storeLocal('queue', queue)
+  },
+  clearQueue () {
+    this.storeLocal('queue', [])
   }
+
 }

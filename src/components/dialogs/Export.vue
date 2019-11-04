@@ -9,17 +9,17 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.stop ref="dialog")
   section
     p Download
     button(@click="downloadTxt")
-      span.badge txt
+      span.badge.info txt
       span Card Names
     button(@click="downloadJSON")
-      span.badge json
+      span.badge.info json
       span All Data
     a#export-downlaod-anchor.hidden
 
 </template>
 
 <script>
-import _ from 'lodash'
+import join from 'lodash-es/join'
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import utils from '@/utils.js'
@@ -50,7 +50,7 @@ export default {
     },
     text () {
       const data = this.exportData.cards.map(card => { return card.name })
-      return _.join(data, '\n')
+      return join(data, '\n')
     },
     copyText () {
       const element = this.$refs.text
@@ -113,6 +113,4 @@ export default {
     margin-left 0
   button + button
     margin-top 10px
-  .success
-    background-color var(--success-background)
 </style>

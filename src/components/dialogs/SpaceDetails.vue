@@ -1,10 +1,7 @@
 <template lang="pug">
 dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs")
   section
-    .row
-      //.badge(:style="typeGradient()")
-      //  img.space-moon(src="@/assets/space-moon.svg")
-      input(placeholder="name" v-model="spaceName")
+    input(placeholder="name" v-model="spaceName")
 
     button(@click="removeCurrentSpace")
       img.icon(src="@/assets/remove.svg")
@@ -25,21 +22,16 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
         span Import
       Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
 
-    //button(@click="remixCurrentSpace")
-    //  img.icon(src="@/assets/copy.svg")
-    //  span Copy
-
   section.results-section
     ul.results-list
       template(v-for="(space in spaces")
         li(@click="changeSpace(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id")
-          //.badge(:style="typeGradient(space)")
-          //  img.space-moon(src="@/assets/space-moon.svg")
           .name {{space.name}}
 </template>
 
 <script>
 import cache from '@/cache.js'
+import api from '@/api.js'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
 
@@ -65,7 +57,7 @@ export default {
         return this.$store.state.currentSpace.name
       },
       set (newName) {
-        this.$store.commit('currentSpace/updateName', newName)
+        this.$store.dispatch('currentSpace/updateSpace', { name: newName })
         this.updateSpaces()
       }
     },
@@ -92,27 +84,12 @@ export default {
       this.exportIsVisible = false
       this.importIsVisible = false
     },
-    // typeGradient (space) {
-    //   space = space || this.$store.state.currentSpace
-    //   const types = space.connectionTypes.slice(0, 5)
-    //   if (types.length > 1) {
-    //     const colorPercent = 100 / (types.length)
-    //     const gradient = types.map((type, index) => {
-    //       return `${type.color} ${colorPercent * index}%`
-    //     })
-    //     return { background: `radial-gradient(circle, ${gradient})` }
-    //   } else if (types.length === 1) {
-    //     return { background: types[0].color }
-    //   } else {
-    //     return { background: 'transparent' }
-    //   }
-    // },
     spaceIsActive (spaceId) {
       const currentSpace = this.$store.state.currentSpace.id
       return Boolean(currentSpace === spaceId)
     },
     addSpace () {
-      this.$store.dispatch('currentSpace/createNewSpace')
+      this.$store.dispatch('currentSpace/addSpace')
       this.updateSpaces()
     },
     changeSpace (space) {
@@ -125,24 +102,26 @@ export default {
         this.addSpace()
       }
     },
-    // remixCurrentSpace () {
-    //  this.$store.dispatch('currentSpace/remixCurrentSpace')
-    //  this.updateSpaces()
-    // },
     removeCurrentSpace () {
-      const spaceId = this.$store.state.currentSpace.id
-      cache.removeSpace(spaceId)
+      this.$store.dispatch('currentSpace/removeCurrentSpace')
       this.updateSpaces()
       this.changeToLastSpace()
     },
-    updateSpaces () {
+    async updateSpaces () {
       this.spaces = cache.getAllSpaces()
+    },
+    async updateWithRemoteSpaces () {
+      const spaces = await api.getUserSpaces()
+      if (spaces) {
+        this.spaces = spaces
+      }
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
         this.updateSpaces()
+        this.updateWithRemoteSpaces()
         this.closeDialogs()
       }
     }
@@ -153,8 +132,8 @@ export default {
 <style lang="stylus">
 .space-details
   top calc(100% - 8px)
-  .row
-    .badge
-      width 19px
+  // .row
+  //   .badge
+  //     width 19px
 
 </style>

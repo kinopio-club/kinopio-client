@@ -94,11 +94,11 @@ export default {
     },
     toAnotherSpace () {
       if (this.selectedSpace.id === this.currentSpace.id) { return }
-      this.$store.dispatch('currentSpace/copyCardsToAnotherSpace', {
-        space: this.selectedSpace,
+      this.$store.dispatch('currentSpace/toAnotherSpace', {
+        spaceId: this.selectedSpace.id,
         shouldRemoveOriginals: this.shouldMoveCards
       })
-      this.$store.commit('currentSpace/removeUnusedConnectionTypes')
+      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
       this.$store.commit('multipleCardsSelectedIds', [])
       this.$store.commit('closeAllDialogs')
       if (this.shouldSwitchToSpace) {

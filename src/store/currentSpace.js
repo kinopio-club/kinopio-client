@@ -1,10 +1,13 @@
 import Vue from 'vue'
 import randomColor from 'randomcolor'
 import nanoid from 'nanoid'
-import _ from 'lodash'
+import random from 'lodash-es/random'
+import last from 'lodash-es/last'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import api from '@/api.js'
+import apiQueue from '@/apiQueue.js'
 import words from '@/words.js'
 
 import helloSpace from '@/spaces/hello.json'
@@ -14,6 +17,7 @@ export default {
   namespaced: true,
   state: helloSpace,
   mutations: {
+
     restoreSpace: (state, space) => {
       Object.assign(state, space)
     },
@@ -22,33 +26,14 @@ export default {
       if (state.id === '1') {
         const newId = nanoid()
         state.id = newId
-        state.name = 'hello-kinopio'
+        state.name = 'Hello Kinopio'
         cache.updateBetaSpaceId(newId)
         cache.updateSpace('name', state.name, state.id)
       }
     },
-    createNewHelloSpace: (state, newId) => {
-      state = helloSpace
-      state.id = newId
-    },
-    createNewSpace: (state, newId) => {
-      Object.assign(state, newSpace)
-      state.name = words.randomUniqueName()
-      state.id = newId
-      state.connectionTypes[0].color = randomColor({ luminosity: 'light' })
-      state.cards[1].x = _.random(180, 200)
-      state.cards[1].y = _.random(160, 180)
-    },
-    addToAnotherSpace: (state, { newCards, newConnections, newConnectionTypes, space }) => {
-      const newItems = {
-        cards: newCards,
-        connections: newConnections,
-        connectionTypes: newConnectionTypes
-      }
-      cache.addToSpace(newItems, space.id)
-    },
 
-    // users
+    // Users
+
     addUserToSpace: (state, newUser) => {
       utils.typeCheck(newUser, 'object')
       const userExists = state.users.find(user => {
@@ -60,14 +45,20 @@ export default {
       }
     },
 
-    // space name
-    updateName: (state, newName) => {
-      newName = utils.normalizeString(newName)
-      state.name = newName
-      cache.updateSpace('name', state.name, state.id)
+    // Space
+
+    updateSpace: (state, updatedSpace) => {
+      const updates = Object.keys(updatedSpace)
+      updates.forEach(key => {
+        if (state[key]) {
+          state[key] = updatedSpace[key]
+          cache.updateSpace(key, state[key], state.id)
+        }
+      })
     },
 
-    // cards
+    // Cards
+
     incrementCardZ: (state, cardId) => {
       state.cards.map((card, index) => {
         card.z = index
@@ -77,16 +68,18 @@ export default {
       })
       cache.updateSpace('cards', state.cards, state.id)
     },
-    updateCardDetails: (state, { type, value, cardId }) => {
-      utils.typeCheck(type, 'string')
+    updateCard: (state, updatedCard) => {
       state.cards.map(card => {
-        if (card.id === cardId) {
-          // update properties differently depending on whether it's existing or new
-          if (card[type]) {
-            card[type] = value
-          } else {
-            Vue.set(card, type, value)
-          }
+        if (card.id === updatedCard.id) {
+          const updates = Object.keys(updatedCard)
+          updates.forEach(key => {
+            // update properties differently depending on whether it's existing or new
+            if (card[key]) {
+              card[key] = updatedCard[key]
+            } else {
+              Vue.set(card, key, updatedCard[key])
+            }
+          })
         }
       })
       cache.updateSpace('cards', state.cards, state.id)
@@ -107,117 +100,81 @@ export default {
       state.cards.push(card)
       cache.updateSpace('cards', state.cards, state.id)
     },
-    copyCardToRemovedCards: (state, cardId) => {
-      const card = state.cards.find(card => {
-        return card.id === cardId
-      })
+    removeCard: (state, cardToRemove) => {
       if (!state.removedCards) {
+        // migration oct 2019
         Vue.set(state, 'removedCards', [])
       }
-      const cardHasContent = Boolean(card.name)
-      if (cardHasContent) {
-        state.removedCards.unshift(card) // prepend card to removedCards
-        cache.updateSpace('removedCards', state.removedCards, state.id)
-      }
+      const card = state.cards.find(card => card.id === cardToRemove.id)
+      state.cards = state.cards.filter(card => card.id !== cardToRemove.id)
+      state.removedCards.unshift(card)
+      cache.updateSpace('removedCards', state.removedCards, state.id)
+      cache.updateSpace('cards', state.cards, state.id)
     },
-    copyCardFromRemovedCards: (state, cardId) => {
-      const card = state.removedCards.find(card => {
-        return card.id === cardId
-      })
-      // createCard
+    removeCardPermanent: (state, cardToRemove) => {
+      state.cards = state.cards.filter(card => card.id !== cardToRemove.id)
+      state.removedCards = state.removedCards.filter(card => card.id !== cardToRemove.id)
+      cache.updateSpace('removedCards', state.removedCards, state.id)
+    },
+    restoreCard: (state, cardToRestore) => {
+      const index = state.removedCards.findIndex(card => card.id === cardToRestore.id)
+      const card = state.removedCards[index]
       state.cards.push(card)
+      state.removedCards.splice(index, 1)
       cache.updateSpace('cards', state.cards, state.id)
-    },
-    removeCard: (state, cardId) => {
-      const cards = state.cards.filter(card => {
-        return card.id !== cardId
-      })
-      state.cards = cards
-      cache.updateSpace('cards', state.cards, state.id)
-    },
-    removeCardFromRemovedCards: (state, cardId) => {
-      const removedCards = state.removedCards.filter(card => {
-        return card.id !== cardId
-      })
-      state.removedCards = removedCards
       cache.updateSpace('removedCards', state.removedCards, state.id)
     },
 
-    // connections
-    updateCardConnections: (state, cardId) => {
-      const connections = state.connections.filter(connection => {
-        return (connection.startCardId === cardId || connection.endCardId === cardId)
-      })
-      connections.forEach(connection => {
-        connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
-      })
-      cache.updateSpace('connections', state.connections, state.id)
+    // Connections
+
+    updateCardConnections: (state, connections) => {
+      state.connections = connections
+      cache.updateSpace('connections', connections, state.id)
     },
-    addConnection: (state, { connection, connectionType }) => {
-      connection.id = nanoid()
-      connection.connectionTypeId = connectionType.id
+    addConnection: (state, connection) => {
       state.connections.push(connection)
       cache.updateSpace('connections', state.connections, state.id)
     },
-    removeConnection: (state, connectionId) => {
+    removeConnection: (state, connectionToRemove) => {
       const connections = state.connections.filter(connection => {
-        return connection.id !== connectionId
+        return connection.id !== connectionToRemove.id
       })
       state.connections = connections
       cache.updateSpace('connections', state.connections, state.id)
     },
-    removeConnectionsFromCard: (state, cardId) => {
-      const connections = state.connections.filter(connection => {
-        const isConnectedToCard = connection.startCardId === cardId || connection.endCardId === cardId
-        return !isConnectedToCard
-      })
-      state.connections = connections
-      cache.updateSpace('connections', state.connections, state.id)
-    },
-
-    // connection types
-    addConnectionType: (state, { id, name, color }) => {
-      const connectionType = {
-        id: id || nanoid(),
-        name: name || `Connection ${state.connectionTypes.length + 1}`,
-        color: color || randomColor({ luminosity: 'light' })
-      }
-      state.connectionTypes.push(connectionType)
-      cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
-    },
-    removeUnusedConnectionTypes: (state) => {
-      const connections = state.connections.map(connection => {
-        return connection.connectionTypeId
-      })
-      const usedConnectionTypes = state.connectionTypes.filter(type => {
-        return connections.includes(type.id)
-      })
-      state.connectionTypes = usedConnectionTypes
-      cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
-    },
-    updateConnectionTypeName: (state, { connectionTypeId, newName }) => {
-      state.connectionTypes.map(type => {
-        if (type.id === connectionTypeId) {
-          type.name = newName
-        }
-      })
-      cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
-    },
-    updateConnectionTypeColor: (state, { connectionTypeId, newColor }) => {
-      state.connectionTypes.map(type => {
-        if (type.id === connectionTypeId) {
-          type.color = newColor
-        }
-      })
-      cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
-    },
-    changeConnectionType: (state, { connectionId, connectionTypeId }) => {
+    updateConnectionTypeForConnection: (state, { connectionId, connectionTypeId }) => {
       state.connections.map(connection => {
         if (connection.id === connectionId) {
           connection.connectionTypeId = connectionTypeId
         }
       })
       cache.updateSpace('connections', state.connections, state.id)
+    },
+
+    // Connection Types
+
+    addConnectionType: (state, connectionType) => {
+      state.connectionTypes.push(connectionType)
+      cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
+    },
+    removeConnectionType: (state, connectionType) => {
+      state.connectionTypes = state.connectionTypes.filter(type => {
+        return connectionType.id !== type.id
+      })
+      cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
+    },
+    updateConnectionType: (state, updatedType) => {
+      state.connectionTypes.map(type => {
+        if (type.id === updatedType.id) {
+          const updates = Object.keys(updatedType)
+          updates.forEach(key => {
+            if (type[key]) {
+              type[key] = updatedType[key]
+            }
+          })
+        }
+      })
+      cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
     }
   },
 
@@ -225,216 +182,343 @@ export default {
     init: (context) => {
       const user = context.rootState.currentUser
       let spaceToRestore = {}
-      // betaSpace condition added aug 2019
       const betaSpace = cache.space('1')
       if (user.lastSpaceId) {
         console.log('🚃 Restore last space from cache', user.lastSpaceId)
         spaceToRestore = cache.space(user.lastSpaceId)
-        context.commit('restoreSpace', spaceToRestore)
-      // migration condition added sept 2019
+        context.dispatch('loadSpace', spaceToRestore)
+      // migration condition (from lastSpace to lastSpaceId) added sept 2019
       } else if (user.lastSpace) {
         console.log('🚃 Restore last space from cache', user.lastSpace)
         spaceToRestore = cache.space(user.lastSpace)
-        context.commit('restoreSpace', spaceToRestore)
-        cache.updateUser('lastSpaceId', spaceToRestore.id)
+        context.dispatch('loadSpace', spaceToRestore)
         cache.updateUser('lastSpace', null)
+      // betaSpace migration condition added aug 2019
       } else if (utils.objectHasKeys(betaSpace)) {
         console.log('🚃 Migrate data from beta format cache', betaSpace)
         context.commit('updateBetaSpace')
         context.commit('addUserToSpace', user)
         spaceToRestore = cache.space(context.state.id)
-        context.commit('restoreSpace', spaceToRestore)
+        context.dispatch('loadSpace', spaceToRestore)
       } else {
-        console.log('🚃 Create new hello-kinopio space')
+        console.log('🚃 Create new Hello Kinopio space')
         const isHelloSpace = true
-        context.dispatch('createNewSpace', isHelloSpace)
+        context.dispatch('addSpace', isHelloSpace)
       }
-      context.commit('currentUser/updateLastSpaceId', context.state.id, { root: true })
+      context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
     },
 
-    // spaces
-    createNewSpace: (context, isHelloSpace) => {
-      const newId = nanoid()
-      const user = context.rootState.currentUser
+    // Space
+
+    createNewHelloSpace: (context) => {
+      let space = utils.clone(helloSpace)
+      space.id = nanoid()
+      space = cache.updateIdsInSpace(space)
+      context.commit('restoreSpace', space)
+    },
+    createNewSpace: (context) => {
+      let space = utils.clone(newSpace)
+      space.name = words.randomUniqueName()
+      space.id = nanoid()
+      space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
+      space.cards[1].x = random(180, 200)
+      space.cards[1].y = random(160, 180)
+      const uniqueNewSpace = cache.updateIdsInSpace(space)
+      context.commit('restoreSpace', uniqueNewSpace)
+    },
+    addSpace: (context, isHelloSpace) => {
       if (isHelloSpace) {
-        context.commit('createNewHelloSpace', newId)
+        context.dispatch('createNewHelloSpace')
       } else {
-        context.commit('createNewSpace', newId)
+        context.dispatch('createNewSpace')
         Vue.nextTick(() => {
-          context.commit('updateCardConnections', context.state.cards[1].id)
-          context.commit('currentUser/updateLastSpaceId', context.state.id, { root: true })
+          context.dispatch('updateCardConnectionPaths', { cardId: context.state.cards[1].id })
+          context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
         })
       }
       const space = utils.clone(context.state)
+      const user = context.rootState.currentUser
       cache.saveSpace(space)
+      apiQueue.add('createSpace', space)
       context.commit('addUserToSpace', user)
     },
+    loadSpace: async (context, space) => {
+      const cachedSpace = cache.space(space.id)
+      const emptySpace = { id: space.id, cards: [], connections: [] }
+      context.commit('restoreSpace', emptySpace)
+      context.commit('restoreSpace', cachedSpace)
+      context.commit('loadingSpace', true, { root: true })
+      console.log('🚛 Getting remote space', space.id)
+      const remoteSpace = await api.getSpace(space.id)
+      context.commit('loadingSpace', false, { root: true })
+      if (!remoteSpace) { return }
+      // TODO (if !remoteSpace && !cachedSpace) handle 404 error, may occur for loading from url cases
+      const remoteDate = utils.normalizeToUnixTime(remoteSpace.updatedAt)
+      console.log('remote space', remoteSpace, remoteDate, cachedSpace.cacheDate)
+
+      // cached date is newer, and shouldn't be restored, when
+      // - im working offline and i refresh the page. i want to see my latest local version
+
+      // if (remoteDate >= cachedSpace.cacheDate) {
+      // const normalizedSpace = utils.normalizeSpaceKeys(remoteSpace)
+      console.log('🚋 Restore space from remote space', remoteSpace)
+      cache.saveSpace(remoteSpace)
+      context.commit('restoreSpace', remoteSpace)
+      // }
+    },
+    updateSpace: async (context, updates) => {
+      updates.id = context.state.id
+      context.commit('updateSpace', updates)
+      apiQueue.add('updateSpace', updates)
+    },
     changeSpace: (context, space) => {
-      space = utils.migrateSpaceProperties(space)
-      context.commit('restoreSpace', space)
-      context.commit('currentUser/updateLastSpaceId', context.state.id, { root: true })
+      space = utils.clone(space)
+      space = utils.ensureRemovedCards(space)
+      context.dispatch('loadSpace', space)
+      context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
+    },
+    removeCurrentSpace: (context) => {
+      const space = utils.clone(context.state)
+      cache.removeSpace(space.id)
+      apiQueue.add('removeSpace', { id: space.id })
+    },
+    removeSpacePermanent: (context, space) => {
+      cache.removeSpacePermanent(space.id)
+      apiQueue.add('removeSpacePermanent', space.id)
+    },
+    toAnotherSpace: (context, { spaceId, shouldRemoveOriginals }) => {
+      const space = utils.clone(context.state)
+      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
+      const cards = space.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
+      const connections = space.connections.filter(connection => {
+        const isStartCardMatch = multipleCardsSelectedIds.includes(connection.startCardId)
+        const isEndCardMatch = multipleCardsSelectedIds.includes(connection.endCardId)
+        return isStartCardMatch && isEndCardMatch
+      })
+      const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
+      const connectionTypes = space.connectionTypes.filter(type => {
+        return connectionTypeIds.includes(type.id)
+      })
+      const items = {
+        cards,
+        connectionTypes,
+        connections
+      }
+      cache.addToSpace(items, spaceId)
+      if (shouldRemoveOriginals) {
+        const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
+        multipleCardsSelectedIds.forEach(cardId => {
+          context.dispatch('removeCard', { id: cardId })
+          context.dispatch('removeConnectionsFromCard', { id: cardId })
+        })
+      }
     },
 
-    // cards
-    addCard: (context, { position, contents }) => {
+    // Cards
+
+    addCard: (context, position) => {
       utils.typeCheck(position, 'object')
-      utils.typeCheck(contents, 'object', true)
+      let cards = context.rootState.currentSpace.cards
       let card = {
         id: nanoid(),
         x: position.x,
         y: position.y,
-        z: 0,
-        name: ''
-        // frameId: 0
+        z: cards.length + 1,
+        name: '',
+        frameId: 0
       }
-      if (utils.objectHasKeys(contents)) {
-        card = utils.updateObject(card, contents)
-      } else {
-        context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
-      }
+      context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       context.commit('createCard', card)
-      context.commit('incrementCardZ', card.id)
+      card.spaceId = context.state.id
+      card = utils.clone(card)
+      apiQueue.add('createCard', card)
     },
-    removeCard: (context, cardId) => {
-      context.commit('copyCardToRemovedCards', cardId)
-      context.commit('removeCard', cardId)
-      context.commit('removeConnectionsFromCard', cardId)
+    updateCard: (context, card) => {
+      context.commit('updateCard', card)
+      apiQueue.add('updateCard', card)
+    },
+    incrementCardZ: (context, cardId) => {
+      let cards = context.rootState.currentSpace.cards
+      cards = cards.map((card, index) => {
+        card = utils.clone(card)
+        card.z = index
+        if (card.id === cardId) {
+          card.z = cards.length + 1
+          apiQueue.add('updateCard', { id: card.id, z: card.z })
+        }
+      })
+      context.commit('incrementCardZ', cardId)
+    },
+    removeCard: (context, card) => {
+      const cardHasContent = Boolean(card.name)
+      if (cardHasContent) {
+        context.commit('removeCard', card)
+        apiQueue.add('removeCard', card)
+      } else {
+        context.dispatch('removeCardPermanent', card)
+      }
+      context.dispatch('removeConnectionsFromCard', card)
       context.commit('generateCardMap', null, { root: true })
     },
-    restoreCard: (context, cardId) => {
-      console.log('restoreCard', cardId)
-      context.commit('copyCardFromRemovedCards', cardId)
-      context.commit('removeCardFromRemovedCards', cardId)
+    removeCardPermanent: (context, card) => {
+      context.commit('removeCardPermanent', card)
+      apiQueue.add('removeCardPermanent', card)
     },
-    dragCards: (context, { endCursor, prevCursor, delta }) => {
+    restoreCard: (context, card) => {
+      context.commit('restoreCard', card)
+      apiQueue.add('restoreCard', card)
+    },
+    dragCards: (context, options) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
-      const currentDraggingCardId = context.rootState.currentDraggingCardId
-      const cards = context.rootState.currentSpace.cards
-      delta = delta || {
+      const { delta, endCursor, prevCursor } = options
+      options.delta = delta || {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
       }
       if (multipleCardsSelectedIds.length) {
-        cards.map(card => {
-          if (multipleCardsSelectedIds.includes(card.id)) {
-            context.commit('moveCard', { cardId: card.id, delta })
-            context.commit('updateCardConnections', card.id)
-          }
+        context.dispatch('dragMultipleCards', options)
+      } else {
+        context.dispatch('dragSingleCard', options)
+      }
+    },
+    dragMultipleCards: (context, { endCursor, prevCursor, delta }) => {
+      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
+      const cards = context.rootState.currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
+      cards.forEach(card => {
+        context.commit('moveCard', { cardId: card.id, delta })
+        context.dispatch('updateCardConnectionPaths', { cardId: card.id })
+      })
+    },
+    dragSingleCard: (context, { endCursor, delta, shouldUpdateApi }) => {
+      const currentDraggingCardId = context.rootState.currentDraggingCardId
+      context.commit('moveCard', { cardId: currentDraggingCardId, delta })
+      context.dispatch('updateCardConnectionPaths', { cardId: currentDraggingCardId })
+    },
+    updatePositions: (context) => {
+      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
+      if (multipleCardsSelectedIds.length) {
+        const cards = context.rootState.currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
+        cards.forEach(card => {
+          card = utils.clone(card)
+          apiQueue.add('updateCard', { id: card.id, x: card.x, y: card.y })
+          context.dispatch('updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
         })
       } else {
-        context.commit('moveCard', { cardId: currentDraggingCardId, delta })
-        context.commit('updateCardConnections', currentDraggingCardId)
+        const currentDraggingCardId = context.rootState.currentDraggingCardId
+        let card = context.rootState.currentSpace.cards.find(card => currentDraggingCardId === card.id)
+        card = utils.clone(card)
+        apiQueue.add('updateCard', { id: card.id, x: card.x, y: card.y })
+        context.dispatch('updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
       }
     },
     incrementSelectedCardsZ: (context) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       const currentDraggingCardId = context.rootState.currentDraggingCardId
-      const cards = context.state.cards
       if (multipleCardsSelectedIds.length) {
-        cards.forEach(cardId => {
-          context.commit('incrementCardZ', cardId)
-        })
+        multipleCardsSelectedIds.forEach(cardId => context.dispatch('incrementCardZ', cardId))
       } else {
-        context.commit('incrementCardZ', currentDraggingCardId)
+        context.dispatch('incrementCardZ', currentDraggingCardId)
       }
     },
 
-    copyCardsToAnotherSpace: (context, { space, shouldRemoveOriginals }) => {
-      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
-      const cards = context.state.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
-      const connections = context.state.connections.filter(connection => {
-        return (multipleCardsSelectedIds.includes(connection.startCardId) && multipleCardsSelectedIds.includes(connection.endCardId))
-      })
-      let connectionTypes = connections.map(connection => {
-        return connection.connectionTypeId
-      })
-      connectionTypes = context.state.connectionTypes.filter(type => {
-        return connectionTypes.includes(type.id)
-      })
-      let newCards = utils.clone(cards)
-      let newConnections = utils.clone(connections)
-      let newConnectionTypes = utils.clone(connectionTypes)
-      // unique – but still connected – ids
-      const cardDeltaIds = []
-      const connectionTypeDeltaIds = []
-      newCards.map(card => {
-        const prevId = card.id
-        const newId = nanoid()
-        const deltaIds = {
-          prev: prevId,
-          new: newId
-        }
-        cardDeltaIds.push(deltaIds)
-        card.id = newId
-        return card
-      })
-      newConnectionTypes.map(type => {
-        const prevId = type.id
-        const newId = nanoid()
-        const deltaIds = {
-          prev: prevId,
-          new: newId
-        }
-        connectionTypeDeltaIds.push(deltaIds)
-        type.id = newId
-        return type
-      })
-      newConnections.map(connection => {
-        const startCardDelta = utils.findInArrayOfObjects(cardDeltaIds, 'prev', connection.startCardId)
-        if (startCardDelta) {
-          connection.startCardId = startCardDelta.new
-        }
-        const endCardDelta = utils.findInArrayOfObjects(cardDeltaIds, 'prev', connection.endCardId)
-        if (endCardDelta) {
-          connection.endCardId = endCardDelta.new
-        }
-        const typeDelta = utils.findInArrayOfObjects(connectionTypeDeltaIds, 'prev', connection.connectionTypeId)
-        if (typeDelta) {
-          connection.connectionTypeId = typeDelta.new
-        }
-        return connection
-      })
-      context.commit('addToAnotherSpace', { newCards, newConnections, newConnectionTypes, space })
-      if (shouldRemoveOriginals) {
-        const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
-        multipleCardsSelectedIds.forEach(cardId => context.dispatch('removeCard', cardId))
-        connections.forEach(connection => {
-          context.commit('removeConnection', connection.id)
-        })
-      }
-    },
+    // Connections
 
-    // connection
     addConnection: (context, { connection, connectionType }) => {
       const connectionAlreadyExists = context.getters.connectionAlreadyExists({
         startCardId: connection.startCardId,
         endCardId: connection.endCardId
       })
       if (!connectionAlreadyExists) {
-        context.commit('addConnection', { connection, connectionType })
-        context.commit('removeUnusedConnectionTypes')
+        connection.id = nanoid()
+        connection.spaceId = context.state.id
+        connection.connectionTypeId = connectionType.id
+        apiQueue.add('createConnection', connection)
+        context.commit('addConnection', connection)
       }
+    },
+    updateCardConnectionPaths: (context, { cardId, shouldUpdateApi }) => {
+      let connections = utils.clone(context.state.connections)
+      connections = connections.map(connection => {
+        if (connection.startCardId === cardId || connection.endCardId === cardId) {
+          connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
+          connection.spaceId = context.state.id
+          if (shouldUpdateApi) {
+            apiQueue.add('updateConnection', connection)
+          }
+        }
+        return connection
+      })
+      context.commit('updateCardConnections', connections)
+    },
+    removeConnectionsFromCard: (context, card) => {
+      context.state.connections.forEach(connection => {
+        if (connection.startCardId === card.id || connection.endCardId === card.id) {
+          context.dispatch('removeConnection', connection)
+        }
+      })
     },
     removeSelectedConnectionsFromCard: (context, cardId) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       const connections = context.state.connections
       connections.map(connection => {
-        const { startCardId, endCardId, id } = connection
-        let connectedToSelected = (startCardId === cardId && multipleCardsSelectedIds.includes(endCardId)) || (endCardId === cardId && multipleCardsSelectedIds.includes(startCardId))
+        const { startCardId, endCardId } = connection
+        const startMatch = startCardId === cardId && multipleCardsSelectedIds.includes(endCardId)
+        const endMatch = endCardId === cardId && multipleCardsSelectedIds.includes(startCardId)
+        const connectedToSelected = startMatch || endMatch
         if (connectedToSelected) {
-          context.commit('removeConnection', id)
+          context.dispatch('removeConnection', connection)
         }
+      })
+    },
+    removeConnection: (context, connection) => {
+      context.commit('removeConnection', connection)
+      apiQueue.add('removeConnection', connection)
+    },
+    updateConnectionTypeForConnection: (context, { connectionId, connectionTypeId }) => {
+      const connection = {
+        id: connectionId,
+        ConnectionTypeId: connectionTypeId
+      }
+      apiQueue.add('updateConnection', connection)
+      context.commit('updateConnectionTypeForConnection', { connectionId, connectionTypeId })
+    },
+
+    // Connection Types
+
+    addConnectionType: (context) => {
+      const types = context.state.connectionTypes
+      const connectionType = {
+        id: nanoid(),
+        name: `Connection ${types.length + 1}`,
+        color: randomColor({ luminosity: 'light' }),
+        spaceId: context.state.id
+      }
+      context.commit('addConnectionType', connectionType)
+      apiQueue.add('createConnectionType', connectionType)
+    },
+    updateConnectionType: (context, connectionType) => {
+      context.commit('updateConnectionType', connectionType)
+      apiQueue.add('updateConnectionType', connectionType)
+    },
+    removeUnusedConnectionTypes: (context) => {
+      const connectionTypes = context.state.connectionTypes
+      const connections = context.state.connections
+      const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
+      const removeConnectionTypes = connectionTypes.filter(type => !connectionTypeIds.includes(type.id))
+      removeConnectionTypes.forEach(type => {
+        apiQueue.add('removeConnectionType', type)
+        context.commit('removeConnectionType', type)
       })
     }
   },
 
   getters: {
-    // cards
+    // Cards
     cardById: (state) => (id) => {
       return state.cards.find(card => card.id === id)
     },
 
-    // connection
+    // Connections
     connectionAlreadyExists: (state) => ({ startCardId, endCardId }) => {
       const existing = state.connections.filter(connection => {
         let start = connection.startCardId === startCardId
@@ -451,12 +535,12 @@ export default {
       })
     },
 
-    // connection types
+    // Connection Types
     connectionTypeById: (state) => (id) => {
       return state.connectionTypes.find(type => type.id === id)
     },
     lastConnectionType: (state) => {
-      return _.last(state.connectionTypes)
+      return last(state.connectionTypes)
     },
     cardConnectionTypes: (state, getters) => (cardId) => {
       const connections = getters.cardConnections(cardId)

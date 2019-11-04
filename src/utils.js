@@ -1,4 +1,5 @@
 // functional methods that can see dom, but can't access components or store
+import nanoid from 'nanoid'
 
 export default {
   mobileTouchPosition (event, type) {
@@ -119,6 +120,45 @@ export default {
     return string.replace(/([^a-z0-9-]+)/ig, '-').toLowerCase() // same regex as glitch project names
   },
 
+  capitalizeFirstLetter (string) {
+    // 'dreams' -> 'Dreams'
+    return string.charAt(0).toUpperCase() + string.slice(1)
+  },
+
+  lowercaseFirstLetter (string) {
+    // 'Dreams' -> 'dreams'
+    return string.charAt(0).toLowerCase() + string.slice(1)
+  },
+
+  updateAllIds (object, key, idDeltas) {
+    const index = idDeltas.findIndex(id => object[key] === id.prevId)
+    if (index >= 0) {
+      return idDeltas[index].newId
+    } else {
+      return object[key]
+    }
+  },
+
+  timeout (ms, promise) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        reject(new Error('timeout'))
+      }, ms)
+      promise.then(resolve, reject)
+    })
+  },
+
+  pluralize (word, condition) {
+    if (condition) {
+      word = word + 's'
+    }
+    return word
+  },
+
+  normalizeToUnixTime (date) {
+    return new Date(date).getTime()
+  },
+
   // Connection Path Utils 🐙
 
   connectorCoords (cardId) {
@@ -173,11 +213,43 @@ export default {
 
   // Spaces 🌙
 
-  migrateSpaceProperties (space) {
+  // migration added oct 2019
+  ensureRemovedCards (space) {
     if (!space.removedCards) {
       space.removedCards = []
     }
     return space
+  },
+
+  uniqueSpaceItems (items) {
+    const cardIdDeltas = []
+    const connectionTypeIdDeltas = []
+    items.cards = items.cards.map(card => {
+      const newId = nanoid()
+      cardIdDeltas.push({
+        prevId: card.id,
+        newId
+      })
+      card.id = newId
+      return card
+    })
+    items.connectionTypes = items.connectionTypes.map(type => {
+      const newId = nanoid()
+      connectionTypeIdDeltas.push({
+        prevId: type.id,
+        newId
+      })
+      type.id = newId
+      return type
+    })
+    items.connections = items.connections.map(connection => {
+      connection.id = nanoid()
+      connection.connectionTypeId = this.updateAllIds(connection, 'connectionTypeId', connectionTypeIdDeltas)
+      connection.startCardId = this.updateAllIds(connection, 'startCardId', cardIdDeltas)
+      connection.endCardId = this.updateAllIds(connection, 'endCardId', cardIdDeltas)
+      return connection
+    })
+    return items
   }
 
 }

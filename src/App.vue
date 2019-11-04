@@ -34,9 +34,9 @@ export default {
   --light-shadow rgba(0,0,0,0.20)
   --heavy-shadow rgba(0,0,0,0.25)
 
-  --danger-background #ffd1d4
-  --danger-hover-background #f5c0c1
-  --danger-active-background #f2b0b1
+  --danger-background #ffb8b3
+  --danger-hover-background #ffa49e
+  --danger-active-background #ff928b
 
   --info-background #90ffff
   --success-background #98f49f
@@ -88,6 +88,7 @@ textarea
   border-bottom 1px solid var(--primary)
   border-radius 0
   padding 0
+  margin-bottom 10px
 
 button,
 label // used for checkbox buttons
@@ -119,7 +120,6 @@ label // used for checkbox buttons
   .badge
     display inline
     vertical-align middle
-    background var(--info-background)
   &.danger
     &:hover,
     &.hover,
@@ -128,10 +128,18 @@ label // used for checkbox buttons
     &:active,
     &.active
       background var(--danger-active-background)
-
+  &.success
+    background var(--success-background)
+  .loader
+    height 14px
+    width 14px
+    vertical-align -3px
+    margin-left 3px
 label
   padding-bottom 4px
   display inline-block
+  input
+    margin 0
 
 p
   margin 0
@@ -139,7 +147,6 @@ p
   .badge
     display inline
     vertical-align middle
-    background var(--info-background)
 
 dialog
   width 250px
@@ -180,6 +187,8 @@ dialog
     margin-bottom 10px
     display flex
     position relative
+    input
+      margin-bottom 0
   section
     padding 8px
     &:first-child
@@ -276,9 +285,6 @@ ul.results-list
       background-color var(--secondary-active-background)
       box-shadow var(--active-inset-shadow)
 
-.danger
-  background-color var(--danger-background)
-
 .badge
   min-width 17px
   min-height 19px
@@ -287,10 +293,15 @@ ul.results-list
   margin-right 6px
   vertical-align -1px
   position relative
+  &.info
+    background var(--info-background)
   &.checked
     background-image url('assets/checkmark.svg')
     background-repeat no-repeat
     background-position center
+
+.danger
+  background-color var(--danger-background)
 
 .space-moon
   transform rotate(-35deg)

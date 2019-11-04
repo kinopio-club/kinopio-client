@@ -21,7 +21,7 @@ dialog.narrow(v-if="visible" :open="visible" :style="position" ref="dialog" @cli
 </template>
 
 <script>
-import _ from 'lodash'
+import last from 'lodash-es/last'
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import utils from '@/utils.js'
@@ -94,9 +94,9 @@ export default {
       const typePref = this.$store.state.currentUser.defaultConnectionTypeId
       const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
       if (!defaultType) {
-        this.$store.commit('currentSpace/addConnectionType', {})
+        this.$store.dispatch('currentSpace/addConnectionType')
       }
-      const newConnectionType = _.last(this.$store.state.currentSpace.connectionTypes)
+      const newConnectionType = last(this.$store.state.currentSpace.connectionTypes)
       return defaultType || newConnectionType
     },
     connectCards () {
@@ -121,12 +121,13 @@ export default {
       cardIds.forEach(cardId => {
         this.$store.dispatch('currentSpace/removeSelectedConnectionsFromCard', cardId)
       })
-      this.$store.commit('currentSpace/removeUnusedConnectionTypes')
+      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
     },
     removeCards () {
       const cardIds = this.multipleCardsSelectedIds
       cardIds.forEach(cardId => {
-        this.$store.dispatch('currentSpace/removeCard', cardId)
+        const card = this.$store.state.currentSpace.cards.find(card => card.id === cardId)
+        this.$store.dispatch('currentSpace/removeCard', card)
       })
       this.$store.commit('closeAllDialogs')
       this.$store.commit('multipleCardsSelectedIds', [])

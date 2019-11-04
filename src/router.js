@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Space from './views/Space.vue'
+
+import Space from '@/views/Space.vue'
+import store from '@/store/store.js'
 
 Vue.use(Router)
 
@@ -14,12 +16,25 @@ export default new Router({
       component: Space
     },
     {
-      path: '/legal',
-      name: 'legal',
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "newsletter" */ './views/Legal.vue')
+      path: '/beta',
+      name: 'beta',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        store.commit('isBeta', true)
+        next()
+      }
+      // redirect: to => {
+      //   store.commit('isBeta', true)
+      //   return '/'
+      // }
     }
+    // {
+    //   path: '/legal',
+    //   name: 'legal',
+    //   // route level code-splitting
+    //   // this generates a separate chunk (about.[hash].js) for this route
+    //   // which is lazy-loaded when the route is visited.
+    //   component: () => import(/* webpackChunkName: "legal" */ './views/Legal.vue')
+    // }
   ]
 })

@@ -53,6 +53,7 @@ export default {
         this.supportIsVisible = false
         this.betaNotesIsVisible = false
         this.newStuffIsVisible = false
+        this.roadmapIsVisible = false
       }
     })
   },

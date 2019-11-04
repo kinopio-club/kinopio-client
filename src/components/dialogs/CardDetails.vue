@@ -1,17 +1,16 @@
 <template lang="pug">
 dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDialogs")
   section.meta-section
-    .row
-      textarea.name(
-        ref="name"
-        rows="1"
-        placeholder="Tell me your dreams"
-        v-model="name"
-        v-focus
-        @keydown.enter="completeEditing"
-        @keydown.esc="closeCard"
-        data-type="name"
-      )
+    textarea.name(
+      ref="name"
+      rows="1"
+      placeholder="Tell me your dreams"
+      v-model="name"
+      v-focus
+      @keydown.enter="completeEditing"
+      @keydown.esc="closeCard"
+      data-type="name"
+    )
     button(@click="removeCard")
       img.icon(src="@/assets/remove.svg")
       span Remove
@@ -84,15 +83,14 @@ export default {
       get () {
         return this.card.name
       },
-      set (newValue) {
-        const options = {
-          type: 'name',
-          value: newValue,
-          cardId: this.card.id
+      set (newName) {
+        const card = {
+          name: newName,
+          id: this.card.id
         }
-        this.$store.commit('currentSpace/updateCardDetails', options)
+        this.$store.dispatch('currentSpace/updateCard', card)
         this.$nextTick(() => {
-          this.$store.commit('currentSpace/updateCardConnections', this.card.id)
+          this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.card.id, shouldUpdateApi: true })
         })
       }
     }
@@ -123,7 +121,7 @@ export default {
       this.$store.commit('closeAllDialogs')
     },
     removeCard () {
-      this.$store.dispatch('currentSpace/removeCard', this.card.id)
+      this.$store.dispatch('currentSpace/removeCard', this.card)
       this.$store.commit('cardDetailsIsVisibleForCardId', '')
     },
     textareaSizes () {
@@ -164,7 +162,7 @@ export default {
         }
       })
       if (!visible && this.cardIsEmpty()) {
-        this.$store.dispatch('currentSpace/removeCard', this.card.id)
+        this.$store.dispatch('currentSpace/removeCard', this.card)
       }
       this.$store.commit('updatePageSizes')
     }
@@ -176,4 +174,6 @@ export default {
 .card-details
   .meta-section
     background-color var(--secondary-background)
+  textarea
+    margin-bottom 5px
 </style>

@@ -24,13 +24,13 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
   section.results-section
     ul.results-list
       template(v-for="(type in connectionTypes")
-        li(:class="{ active: connectionTypeIsActive(type.id) }" @click="changeConnectionType(type)" :key="type.id")
-          .badge(:style="{backgroundColor: type.color}" :class="{checked: connectionTypeIsDefault(type.id)}")
+        li(:class="{ active: connectionTypeIsActive(type) }" @click="changeConnectionType(type)" :key="type.id")
+          .badge(:style="{backgroundColor: type.color}" :class="{checked: connectionTypeIsDefault(type)}")
           .name {{type.name}}
 </template>
 
 <script>
-import _ from 'lodash'
+import last from 'lodash-es/last'
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import utils from '@/utils.js'
@@ -78,32 +78,35 @@ export default {
         return this.currentConnectionType.name
       },
       set (newName) {
-        const connectionTypeId = this.currentConnectionType.id
-        this.$store.commit('currentSpace/updateConnectionTypeName', { connectionTypeId, newName })
+        const connectionType = {
+          id: this.currentConnectionType.id,
+          name: newName
+        }
+        this.$store.dispatch('currentSpace/updateConnectionType', connectionType)
       }
     }
   },
   methods: {
     addConnectionType () {
-      this.$store.commit('currentSpace/addConnectionType', {})
+      this.$store.dispatch('currentSpace/addConnectionType')
       const types = utils.clone(this.connectionTypes)
-      const newType = _.last(types)
+      const newType = last(types)
       this.changeConnectionType(newType)
     },
-    connectionTypeIsActive (typeId) {
-      return Boolean(typeId === this.currentConnection.connectionTypeId)
+    connectionTypeIsActive (type) {
+      return Boolean(type.id === this.currentConnection.connectionTypeId)
     },
-    connectionTypeIsDefault (typeId) {
+    connectionTypeIsDefault (type) {
       const typePref = this.$store.state.currentUser.defaultConnectionTypeId
-      return typePref === typeId
+      return typePref === type.id
     },
     removeConnection () {
-      this.$store.commit('currentSpace/removeConnection', this.currentConnection.id)
+      this.$store.dispatch('currentSpace/removeConnection', this.currentConnection)
       this.$store.commit('closeAllDialogs')
-      this.$store.commit('currentSpace/removeUnusedConnectionTypes')
+      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
     },
     changeConnectionType (type) {
-      this.$store.commit('currentSpace/changeConnectionType', {
+      this.$store.dispatch('currentSpace/updateConnectionTypeForConnection', {
         connectionId: this.currentConnection.id,
         connectionTypeId: type.id
       })
@@ -116,9 +119,9 @@ export default {
     toggleDefault () {
       this.isDefault = !this.isDefault
       if (this.isDefault) {
-        this.$store.commit('currentUser/defaultConnectionTypeId', this.currentConnectionType.id)
+        this.$store.dispatch('currentUser/defaultConnectionTypeId', this.currentConnectionType.id)
       } else {
-        this.$store.commit('currentUser/defaultConnectionTypeId', '')
+        this.$store.dispatch('currentUser/defaultConnectionTypeId', '')
       }
     },
     toggleColorPicker () {
@@ -128,8 +131,11 @@ export default {
       this.colorPickerIsVisible = false
     },
     updateTypeColor (newColor) {
-      const connectionTypeId = this.currentConnectionType.id
-      this.$store.commit('currentSpace/updateConnectionTypeColor', { connectionTypeId, newColor })
+      const connectionType = {
+        id: this.currentConnectionType.id,
+        color: newColor
+      }
+      this.$store.dispatch('currentSpace/updateConnectionType', connectionType)
     },
     scrollIntoView () {
       const element = this.$refs.dialog
@@ -150,7 +156,7 @@ export default {
         if (visible) {
           this.updateView()
         } else {
-          this.$store.commit('currentSpace/removeUnusedConnectionTypes')
+          this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
         }
       })
     },

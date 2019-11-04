@@ -78,7 +78,6 @@ export default {
     },
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
-      console.log(document, element, card, card.id)
       scrollIntoView(element, {
         behavior: 'smooth',
         scrollMode: 'if-needed'
@@ -97,7 +96,7 @@ export default {
       }
     },
     restoreCard (card) {
-      this.$store.dispatch('currentSpace/restoreCard', card.id)
+      this.$store.dispatch('currentSpace/restoreCard', card)
       this.$nextTick(() => {
         this.scrollIntoView(card)
       })
@@ -129,10 +128,10 @@ export default {
       }
     },
     removeCard (card) {
-      this.$store.commit('currentSpace/removeCardFromRemovedCards', card.id)
+      this.$store.dispatch('currentSpace/removeCardPermanent', card)
     },
     removeSpace (space) {
-      cache.removeRemovedSpace(space.id)
+      this.$store.dispatch('currentSpace/removeSpacePermanent', space)
       this.updateRemovedSpaces()
     }
   },
