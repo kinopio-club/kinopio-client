@@ -20,7 +20,7 @@ hostile set localhost kinopio.local
 ## Run
 
 ```
-$ npm run start
+$ npm run serve
 $ http://kinopio.local:8080
 ```
 
