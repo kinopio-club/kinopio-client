@@ -248,20 +248,20 @@ export default {
       context.commit('addUserToSpace', user)
     },
     loadRemoteSpace: async (context, space) => {
-      // const cachedSpace = cache.space(space.id)
+      const cachedSpace = cache.space(space.id)
       context.commit('loadingSpace', true, { root: true })
       const remoteSpace = await api.getSpace(space.id)
       context.commit('loadingSpace', false, { root: true })
       if (!remoteSpace) { return }
       // TODO (if !remoteSpace && !cachedSpace) handle 404 error, may occur for loading from url cases
-      // const remoteDate = utils.normalizeToUnixTime(remoteSpace.updatedAt)
-      // const remoteIsNewer = remoteDate >= cachedSpace.cacheDate
-      // console.log('remoteIsNewer', remoteIsNewer, remoteDate, cachedSpace.cacheDate)
-      // if (remoteIsNewer) {
-      console.log('🚋 Restore space from remote space', remoteSpace)
-      cache.saveSpace(remoteSpace)
-      context.commit('restoreSpace', remoteSpace)
-      // }
+      const remoteDate = utils.normalizeToUnixTime(remoteSpace.updatedAt)
+      const remoteIsNewer = remoteDate >= cachedSpace.cacheDate
+      console.log('remoteIsNewer', remoteIsNewer, 'remoteDate', remoteDate, 'cacheDate', cachedSpace.cacheDate, remoteSpace)
+      if (remoteIsNewer) {
+        console.log('🚋 Restore space from remote space', remoteSpace)
+        cache.saveSpace(remoteSpace)
+        context.commit('restoreSpace', remoteSpace)
+      }
     },
     loadSpace: (context, space) => {
       const cachedSpace = cache.space(space.id)
@@ -289,41 +289,6 @@ export default {
     removeSpacePermanent: (context, space) => {
       cache.removeSpacePermanent(space.id)
       apiQueue.add('removeSpacePermanent', space.id)
-    },
-    toAnotherSpace: (context, { spaceId, shouldRemoveOriginals }) => {
-      const space = utils.clone(context.state)
-      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
-      const cards = space.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
-      const connections = space.connections.filter(connection => {
-        const isStartCardMatch = multipleCardsSelectedIds.includes(connection.startCardId)
-        const isEndCardMatch = multipleCardsSelectedIds.includes(connection.endCardId)
-        return isStartCardMatch && isEndCardMatch
-      })
-      const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
-      const connectionTypes = space.connectionTypes.filter(type => {
-        return connectionTypeIds.includes(type.id)
-      })
-      const prevItems = { cards, connectionTypes, connections }
-      const newItems = utils.uniqueSpaceItems(utils.clone(prevItems))
-      newItems.cards.forEach(card => {
-        card.spaceId = spaceId
-        apiQueue.add('createCard', card)
-      })
-      newItems.connectionTypes.forEach(type => {
-        type.spaceId = spaceId
-        apiQueue.add('createConnectionType', type)
-      })
-      newItems.cards.forEach(connection => {
-        connection.spaceId = spaceId
-        apiQueue.add('createConnection', connection)
-      })
-      cache.addToSpace(newItems, spaceId)
-      if (shouldRemoveOriginals) {
-        cards.forEach(card => {
-          context.dispatch('removeCardPermanent', card)
-          context.dispatch('removeConnectionsFromCard', card)
-        })
-      }
     },
 
     // Cards

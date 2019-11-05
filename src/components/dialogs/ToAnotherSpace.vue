@@ -31,6 +31,8 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import cache from '@/cache.js'
+import utils from '@/utils.js'
+import apiQueue from '@/apiQueue.js'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 
 export default {
@@ -76,28 +78,40 @@ export default {
     }
   },
   methods: {
+
     shouldMoveCardsTrue () {
       this.shouldMoveCards = true
     },
+
     shouldMoveCardsFalse () {
       this.shouldMoveCards = false
     },
+
     toggleSpacePickerIsVisible () {
       this.spacePickerIsVisible = !this.spacePickerIsVisible
     },
+
     toggleShouldSwitchToSpace () {
       this.shouldSwitchToSpace = !this.shouldSwitchToSpace
     },
+
     changeToSelectedSpace () {
       this.updateSpaces()
       this.$store.dispatch('currentSpace/changeSpace', this.selectedSpace)
     },
+
     toAnotherSpace () {
       if (this.selectedSpace.id === this.currentSpace.id) { return }
-      this.$store.dispatch('currentSpace/toAnotherSpace', {
-        spaceId: this.selectedSpace.id,
-        shouldRemoveOriginals: this.shouldMoveCards
-      })
+      this.copyToSelectedSpace()
+      if (this.shouldMoveCards) {
+        const currentSpace = utils.clone(this.$store.state.currentSpace)
+        const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
+        const cards = currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
+        cards.forEach(card => {
+          this.$store.dispatch('currentSpace/removeCardPermanent', card)
+          this.$store.dispatch('currentSpace/removeConnectionsFromCard', card)
+        })
+      }
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
       this.$store.commit('multipleCardsSelectedIds', [])
       this.$store.commit('closeAllDialogs')
@@ -105,14 +119,55 @@ export default {
         this.changeToSelectedSpace()
       }
     },
+
+    copyToSelectedSpace () {
+      const currentSpace = utils.clone(this.$store.state.currentSpace)
+      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
+      const cards = currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
+
+      const connections = currentSpace.connections.filter(connection => {
+        const isStartCardMatch = multipleCardsSelectedIds.includes(connection.startCardId)
+        const isEndCardMatch = multipleCardsSelectedIds.includes(connection.endCardId)
+        return isStartCardMatch && isEndCardMatch
+      })
+
+      const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
+      const connectionTypes = currentSpace.connectionTypes.filter(type => {
+        return connectionTypeIds.includes(type.id)
+      })
+
+      const prevItems = { cards, connectionTypes, connections }
+      const newItems = utils.uniqueSpaceItems(utils.clone(prevItems))
+
+      this.createRemoteItems(newItems)
+      cache.addToSpace(newItems, this.selectedSpace.id)
+    },
+
+    createRemoteItems (newItems) {
+      newItems.cards.forEach(card => {
+        card.spaceId = this.selectedSpace.id
+        apiQueue.add('createCard', card)
+      })
+      newItems.connectionTypes.forEach(type => {
+        type.spaceId = this.selectedSpace.id
+        apiQueue.add('createConnectionType', type)
+      })
+      newItems.cards.forEach(connection => {
+        connection.spaceId = this.selectedSpace.id
+        apiQueue.add('createConnection', connection)
+      })
+    },
+
     updateSpaces () {
       const spaces = cache.getAllSpaces()
       this.spaces = spaces.filter(space => space.id !== this.currentSpace.id)
       this.selectedSpace = this.spaces[0]
     },
+
     updateSelectedSpace (space) {
       this.selectedSpace = space
     },
+
     scrollIntoView () {
       const element = this.$refs.dialog
       scrollIntoView(element, {
@@ -120,9 +175,11 @@ export default {
         scrollMode: 'if-needed'
       })
     },
+
     closeDialogs () {
       this.spacePickerIsVisible = false
     }
+
   },
   watch: {
     visible (visible) {
