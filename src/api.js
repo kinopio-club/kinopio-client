@@ -80,7 +80,7 @@ export default {
   async processQueue (body) {
     const options = requestOptions({ body, method: 'POST' })
     try {
-      console.log(`🚎 sending operations`, body)
+      console.log(`🛫 sending operations`, body)
       await fetch(`${host}/operations`, options)
     } catch (error) {
       console.error('🚒', error)
@@ -128,7 +128,7 @@ export default {
   async getSpace (spaceId) {
     try {
       if (!shouldRequest()) { return }
-      console.log('🚛 Getting remote space', spaceId)
+      console.log('🛬 getting remote space', spaceId)
       const options = requestOptions({ method: 'GET' })
       const response = await utils.timeout(5000, fetch(`${host}/space/${spaceId}`, options))
       return normalizeResponse(response)
