@@ -285,7 +285,8 @@ ul.results-list
       background-color var(--secondary-active-background)
       box-shadow var(--active-inset-shadow)
 
-.badge
+.badge,
+code
   min-width 17px
   min-height 19px
   border-radius 3px

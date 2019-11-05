@@ -139,4 +139,6 @@ export default {
   @media(max-width 340px)
     left calc(-100% + 16px)
     max-height calc(100vh - 200px)
+  code
+    background-color var(--secondary-background)
 </style>
