@@ -112,6 +112,16 @@ export default {
       console.error(error)
     }
   },
+  async getUserRemovedSpaces () {
+    if (!shouldRequest()) { return }
+    try {
+      const options = requestOptions({ method: 'GET' })
+      const response = await fetch(`${host}/user/removed-spaces`, options)
+      return normalizeResponse(response)
+    } catch (error) {
+      console.error(error)
+    }
+  },
   async removeUserPermanent () {
     if (!shouldRequest()) { return }
     try {
