@@ -1,6 +1,6 @@
 <template lang="pug">
 footer(v-if="!dialogsVisible")
-  .button-wrap(v-if="isOffline && userIsSignedIn")
+  .button-wrap(v-if="isOffline")
     button(@click="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
       span Offline
     Offline(:visible="offlineIsVisible")
@@ -52,9 +52,6 @@ export default {
     },
     isOffline () {
       return !this.$store.state.isOnline
-    },
-    userIsSignedIn () {
-      return this.$store.getters['currentUser/isSignedIn']
     }
   },
   methods: {
