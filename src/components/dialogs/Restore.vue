@@ -129,18 +129,15 @@ export default {
     },
     restoreCard (card) {
       this.$store.dispatch('currentSpace/restoreCard', card)
+      // TODO api queue restore card (card)
       this.$nextTick(() => {
         this.scrollIntoView(card)
       })
-      // api queue restore card (card)
     },
     restoreSpace (space) {
       console.log('restore space', space)
-      cache.restoreSpace(space.id) // replace with this.$store.dispatch('currentSpace/restoreSpace', space)
-      // this.updateRemovedSpaces()
-      // api queue restore card (card), updates ls
-      // this.removedSpaces = cache.getAllRemovedSpaces()
-      this.$store.dispatch('currentSpace/changeSpace', space)
+      this.$store.dispatch('currentSpace/restoreSpace', space)
+      this.removedSpaces = cache.getAllRemovedSpaces()
     },
     isRemoveConfirmationVisible (item) {
       return Boolean(this.removeConfirmationVisibleForId === item.id)
@@ -153,15 +150,16 @@ export default {
     },
     remove (item) {
       if (this.cardsVisible) {
-        this.removeCard(item)
+        this.removeCardPermanent(item)
       } else {
-        this.removeSpace(item)
+        this.removeSpacePermanent(item)
       }
     },
-    removeCard (card) {
+    removeCardPermanent (card) {
       this.$store.dispatch('currentSpace/removeCardPermanent', card)
     },
-    removeSpace (space) {
+    removeSpacePermanent (space) {
+      console.log(space)
       this.$store.dispatch('currentSpace/removeSpacePermanent', space)
       this.removedSpaces = cache.getAllRemovedSpaces()
     }

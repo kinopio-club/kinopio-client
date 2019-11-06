@@ -283,12 +283,12 @@ export default {
     },
     removeCurrentSpace: (context) => {
       const space = utils.clone(context.state)
-      cache.removeSpace(space.id)
+      cache.removeSpace(space)
       apiQueue.add('removeSpace', { id: space.id })
     },
     removeSpacePermanent: (context, space) => {
       cache.removeSpacePermanent(space.id)
-      apiQueue.add('removeSpacePermanent', space.id)
+      apiQueue.add('removeSpacePermanent', space)
     },
 
     // Cards
@@ -344,6 +344,11 @@ export default {
     restoreCard: (context, card) => {
       context.commit('restoreCard', card)
       apiQueue.add('restoreCard', card)
+    },
+    restoreSpace: (context, space) => {
+      cache.restoreSpace(space)
+      apiQueue.add('restoreSpace', space)
+      context.dispatch('changeSpace', space)
     },
     dragCards: (context, options) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
