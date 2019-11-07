@@ -231,6 +231,13 @@ export default {
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       context.commit('restoreSpace', uniqueNewSpace)
     },
+    saveNewSpace: (context) => {
+      const space = utils.clone(context.state)
+      const user = context.rootState.currentUser
+      cache.saveSpace(space)
+      apiQueue.add('createSpace', space)
+      context.commit('addUserToSpace', user)
+    },
     addSpace: (context, isHelloSpace) => {
       if (isHelloSpace) {
         context.dispatch('createNewHelloSpace')
@@ -239,13 +246,9 @@ export default {
         Vue.nextTick(() => {
           context.dispatch('updateCardConnectionPaths', { cardId: context.state.cards[1].id })
           context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
+          context.dispatch('saveNewSpace')
         })
       }
-      const space = utils.clone(context.state)
-      const user = context.rootState.currentUser
-      cache.saveSpace(space)
-      apiQueue.add('createSpace', space)
-      context.commit('addUserToSpace', user)
     },
     loadRemoteSpace: async (context, space) => {
       const cachedSpace = cache.space(space.id)
