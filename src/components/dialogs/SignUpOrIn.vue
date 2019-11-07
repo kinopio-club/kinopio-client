@@ -185,17 +185,12 @@ export default {
       if (this.isSuccess(response)) {
         this.$store.commit('currentUser/updateUser', result)
         await this.createSpaces(result.apiKey)
-        const currentUser = await api.getUser()
-        console.log(currentUser)
         const spaces = await api.getUserSpaces()
         cache.addSpaces(spaces)
+        this.$store.commit('triggerSpaceDetailsVisible')
       } else {
         await this.handleErrors(result)
       }
-      // SEE currentUser.lastSpaceId
-      // this.$store.commit('currentSpace/updateLastSpaceId', currentUser.lastSpaceId)
-      // TODO THEN switch to last space
-      // this.$store.dispatch('currentSpace/changeSpace', space)
     },
 
     async createSpaces (apiKey) {
