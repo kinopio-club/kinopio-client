@@ -146,6 +146,16 @@ export default {
       console.error(error)
     }
   },
+  async getSpaceRemovedCards (spaceId) {
+    if (!shouldRequest()) { return }
+    try {
+      const options = requestOptions({ method: 'GET' })
+      const response = await fetch(`${host}/space/${spaceId}/removed-cards`, options)
+      return normalizeResponse(response)
+    } catch (error) {
+      console.error(error)
+    }
+  },
   async createSpaces () {
     try {
       const body = cache.getAllSpaces()

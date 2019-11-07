@@ -103,22 +103,32 @@ export default {
     },
     async loadRemoteRemovedSpaces () {
       this.loading.spaces = true
-      let removedSpaces = await api.getUserRemovedSpaces() // just need the name and id
+      let removedSpaces = await api.getUserRemovedSpaces()
       this.loading.spaces = false
-      removedSpaces = removedSpaces.map(remote => {
-        const localSpace = this.removedSpaces.find(local => local.id === remote.id)
-        if (localSpace) {
-          return merge(remote, localSpace)
+      removedSpaces = removedSpaces.map(remoteSpace => {
+        const cachedSpace = this.removedSpaces.find(cached => cached.id === remoteSpace.id)
+        if (cachedSpace) {
+          return merge(remoteSpace, cachedSpace)
         } else {
-          return remote
+          return remoteSpace
         }
       })
       this.removedSpaces = removedSpaces
     },
     async loadRemoteRemovedCards () {
-    //   this.loading.cards = true
-    //   console.log('cards visible')
-    //   // const remoteSpace = await api.getRemovedSpaceCards(space.id)
+      this.loading.cards = true
+      const spaceId = this.$store.state.currentSpace.id
+      let removedCards = await api.getSpaceRemovedCards(spaceId)
+      this.loading.cards = false
+      removedCards = removedCards.map(remoteCards => {
+        const cachedCards = this.removedCards.find(cached => cached.id === remoteCards.id)
+        if (cachedCards) {
+          return merge(remoteCards, cachedCards)
+        } else {
+          return remoteCards
+        }
+      })
+      this.removedCards = removedCards
     },
     restore (item) {
       if (this.cardsVisible) {
