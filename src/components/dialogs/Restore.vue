@@ -33,7 +33,7 @@ dialog.restore(v-if="visible" :open="visible" @click.stop)
             .segmented-buttons
               button(@click.stop="hideRemoveConfirmation")
                 span Cancel
-              button.danger(@click.stop="remove(item)")
+              button.danger(@click.stop="removePermanent(item)")
                 img.icon(src="@/assets/remove.svg")
                 span Remove
 </template>
@@ -102,7 +102,7 @@ export default {
     hideRemoveConfirmation () {
       this.removeConfirmationVisibleForId = ''
     },
-    remove (item) {
+    removePermanent (item) {
       if (this.cardsVisible) {
         this.removeCardPermanent(item)
       } else {
