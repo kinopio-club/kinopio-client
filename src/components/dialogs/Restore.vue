@@ -79,7 +79,6 @@ export default {
     }
   },
   methods: {
-
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
       scrollIntoView(element, {
