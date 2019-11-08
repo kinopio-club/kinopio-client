@@ -9,7 +9,7 @@ dialog(v-if="visible" :open="visible")
       span.badge.info {{queue.length}} {{pluralChanges}} to sync
   section(v-else)
     p Kinopio works offline,
-    p Your changes are saved locally so keep living your best life.
+    p Your changes are saved locally. It's pretty chill.
 
 </template>
 
