@@ -167,6 +167,7 @@ export default {
     },
     removeCardPermanent (card) {
       this.$store.dispatch('currentSpace/removeCardPermanent', card)
+      this.updateLocalRemovedCards()
     },
     removeSpacePermanent (space) {
       console.log(space)
