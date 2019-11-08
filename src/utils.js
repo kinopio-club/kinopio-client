@@ -214,7 +214,7 @@ export default {
   // Spaces 🌙
 
   // migration added oct 2019
-  ensureRemovedCards (space) {
+  migrationEnsureRemovedCards (space) {
     if (!space.removedCards) {
       space.removedCards = []
     }

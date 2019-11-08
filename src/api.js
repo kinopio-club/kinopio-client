@@ -165,6 +165,10 @@ export default {
         return space
       })
       removedSpaces.forEach(space => spaces.push(space))
+      spaces.map(space => {
+        utils.migrationEnsureRemovedCards(space)
+        return space
+      })
       const body = spaces
       const options = requestOptions({ body, method: 'POST' })
       const response = await fetch(`${host}/space/multiple`, options)

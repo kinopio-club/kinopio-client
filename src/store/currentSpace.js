@@ -280,7 +280,7 @@ export default {
     },
     changeSpace: (context, space) => {
       space = utils.clone(space)
-      space = utils.ensureRemovedCards(space)
+      space = utils.migrationEnsureRemovedCards(space)
       context.dispatch('loadSpace', space)
       context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
     },
