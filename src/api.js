@@ -41,6 +41,7 @@ const normalizeResponse = async (response) => {
 }
 
 const normalizeSpaceToRemote = (space) => {
+  if (!space.removedCards) { return }
   space.removedCards.forEach(card => {
     card.isRemoved = true
     space.cards.push(card)
@@ -143,12 +144,13 @@ export default {
 
   // Space
 
-  async getSpace (spaceId) {
+  async getSpace (space) {
+    console.log('🌸', space)
     try {
       if (!shouldRequest()) { return }
-      console.log('🛬 getting remote space', spaceId)
+      console.log('🛬 getting remote space', space.id)
       const options = requestOptions({ method: 'GET' })
-      const response = await utils.timeout(5000, fetch(`${host}/space/${spaceId}`, options))
+      const response = await utils.timeout(5000, fetch(`${host}/space/${space.id}`, options))
       return normalizeResponse(response)
     } catch (error) {
       console.error(error)

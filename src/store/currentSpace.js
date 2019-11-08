@@ -253,7 +253,7 @@ export default {
     loadRemoteSpace: async (context, space) => {
       const cachedSpace = cache.space(space.id)
       context.commit('loadingSpace', true, { root: true })
-      const remoteSpace = await api.getSpace(space.id)
+      const remoteSpace = await api.getSpace(space)
       context.commit('loadingSpace', false, { root: true })
       if (!remoteSpace) { return }
       // TODO (if !remoteSpace && !cachedSpace) handle 404 error, may occur for loading from url cases
