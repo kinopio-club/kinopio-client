@@ -94,12 +94,18 @@ export default {
         scrollMode: 'if-needed'
       })
     },
-    updateRemovedSpaces () {
+    updateLocalRemovedSpaces () {
       this.removedSpaces = cache.getAllRemovedSpaces()
+    },
+    updateLocalRemovedCards () {
+      this.removedCards = this.$store.state.currentSpace.removedCards
+    },
+    updateRemovedSpaces () {
+      this.updateLocalRemovedSpaces()
       this.loadRemoteRemovedSpaces()
     },
     updateRemovedCards () {
-      this.removedCards = this.$store.state.currentSpace.removedCards
+      this.updateLocalRemovedCards()
       this.loadRemoteRemovedCards()
     },
     async loadRemoteRemovedSpaces () {
@@ -134,15 +140,14 @@ export default {
     },
     restoreCard (card) {
       this.$store.dispatch('currentSpace/restoreCard', card)
-      // TODO api queue restore card (card)
       this.$nextTick(() => {
         this.scrollIntoView(card)
       })
+      this.updateLocalRemovedCards()
     },
     restoreSpace (space) {
-      console.log('restore space', space)
       this.$store.dispatch('currentSpace/restoreSpace', space)
-      this.removedSpaces = cache.getAllRemovedSpaces()
+      this.updateLocalRemovedSpaces()
     },
     isRemoveConfirmationVisible (item) {
       return Boolean(this.removeConfirmationVisibleForId === item.id)
@@ -166,7 +171,7 @@ export default {
     removeSpacePermanent (space) {
       console.log(space)
       this.$store.dispatch('currentSpace/removeSpacePermanent', space)
-      this.removedSpaces = cache.getAllRemovedSpaces()
+      this.updateLocalRemovedSpaces()
     }
   },
   watch: {
