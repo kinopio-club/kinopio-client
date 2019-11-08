@@ -260,26 +260,26 @@ export default {
       }
     },
     loadRemoteSpace: async (context, space) => {
-      const cachedSpace = cache.space(space.id)
+      // const cachedSpace = cache.space(space.id)
       context.commit('loadingSpace', true, { root: true })
       console.log('🍆', space)
       const remoteSpace = await api.getSpace(space)
       context.commit('loadingSpace', false, { root: true })
       if (!remoteSpace) { return }
       // TODO (if !remoteSpace && !cachedSpace) handle 404 error, may occur for loading from url cases
-      const remoteDate = utils.normalizeToUnixTime(remoteSpace.updatedAt)
-      let remoteIsNewer
-      if (!cachedSpace.cacheDate) {
-        remoteIsNewer = true
-      } else {
-        remoteIsNewer = remoteDate >= cachedSpace.cacheDate
-      }
-      console.log('remoteIsNewer', remoteIsNewer, 'remoteDate', remoteDate, 'cacheDate', cachedSpace.cacheDate, remoteSpace)
-      if (remoteIsNewer) {
-        console.log('🚋 Restore space from remote space', remoteSpace)
-        cache.saveSpace(remoteSpace)
-        context.commit('restoreSpace', remoteSpace)
-      }
+      // const remoteDate = utils.normalizeToUnixTime(remoteSpace.updatedAt)
+      // let remoteIsNewer
+      // if (!cachedSpace.cacheDate) {
+      //   remoteIsNewer = true
+      // } else {
+      //   remoteIsNewer = remoteDate >= cachedSpace.cacheDate
+      // }
+      // console.log('remoteIsNewer', remoteIsNewer, 'remoteDate', remoteDate, 'cacheDate', cachedSpace.cacheDate, remoteSpace)
+      // if (remoteIsNewer) {
+      console.log('🚋 Restore space from remote space', remoteSpace)
+      cache.saveSpace(remoteSpace)
+      context.commit('restoreSpace', remoteSpace)
+      // }
     },
     loadSpace: (context, space) => {
       const cachedSpace = cache.space(space.id)
