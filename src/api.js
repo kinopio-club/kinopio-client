@@ -40,6 +40,14 @@ const normalizeResponse = async (response) => {
   }
 }
 
+const normalizeSpaceToRemote = (space) => {
+  space.removedCards.forEach(card => {
+    card.isRemoved = true
+    space.cards.push(card)
+  })
+  return space
+}
+
 // const addBackToQueue = (requests) => {
 //   requests.reverse()
 //   requests.forEach(request => {
@@ -148,7 +156,16 @@ export default {
   },
   async createSpaces () {
     try {
-      const body = cache.getAllSpaces()
+      let spaces = cache.getAllSpaces()
+      spaces = spaces.map(space => normalizeSpaceToRemote(space))
+      let removedSpaces = cache.getAllRemovedSpaces()
+      removedSpaces = removedSpaces.map(space => {
+        space.isRemoved = true
+        space.removedByUserId = cache.user().id
+        return space
+      })
+      removedSpaces.forEach(space => spaces.push(space))
+      const body = spaces
       const options = requestOptions({ body, method: 'POST' })
       const response = await fetch(`${host}/space/multiple`, options)
       return normalizeResponse(response)

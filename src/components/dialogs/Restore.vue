@@ -103,8 +103,9 @@ export default {
     },
     async loadRemoteRemovedSpaces () {
       this.loading.spaces = true
-      let removedSpaces = await api.getUserRemovedSpaces() // just need the name and id
+      let removedSpaces = await api.getUserRemovedSpaces()
       this.loading.spaces = false
+      if (!removedSpaces) { return }
       removedSpaces = removedSpaces.map(remote => {
         const localSpace = this.removedSpaces.find(local => local.id === remote.id)
         if (localSpace) {
