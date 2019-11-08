@@ -81,6 +81,7 @@ export default {
   methods: {
     showCards () {
       this.cardsVisible = true
+      this.updateRemovedCards()
     },
     showSpaces () {
       this.cardsVisible = false
@@ -117,9 +118,12 @@ export default {
       this.removedSpaces = removedSpaces
     },
     async loadRemoteRemovedCards () {
-    //   this.loading.cards = true
-    //   console.log('cards visible')
-    //   // const remoteSpace = await api.getRemovedSpaceCards(space.id)
+      this.loading.cards = true
+      const space = this.$store.state.currentSpace
+      const remoteCards = await api.getSpaceRemovedCards(space)
+      this.loading.cards = false
+      if (!remoteCards) { return }
+      this.removedCards = remoteCards
     },
     restore (item) {
       if (this.cardsVisible) {

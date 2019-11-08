@@ -172,6 +172,16 @@ export default {
     } catch (error) {
       console.error(error)
     }
+  },
+  async getSpaceRemovedCards (space) {
+    if (!shouldRequest()) { return }
+    try {
+      const options = requestOptions({ method: 'GET' })
+      const response = await fetch(`${host}/space/${space.id}/removed-cards`, options)
+      return normalizeResponse(response)
+    } catch (error) {
+      console.error(error)
+    }
   }
 
 }
