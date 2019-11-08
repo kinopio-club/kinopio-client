@@ -145,7 +145,6 @@ export default {
   // Space
 
   async getSpace (space) {
-    console.log('🌸', space)
     try {
       if (!shouldRequest()) { return }
       console.log('🛬 getting remote space', space.id)

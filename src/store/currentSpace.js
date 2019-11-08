@@ -186,24 +186,24 @@ export default {
   actions: {
     init: (context) => {
       const user = context.rootState.currentUser
-      let spaceToRestore = {}
       const betaSpace = cache.space('1')
       if (user.lastSpaceId) {
-        console.log('🚃 Restore last space from cache', user.lastSpaceId)
-        spaceToRestore = cache.space(user.lastSpaceId)
+        console.log('🚃 Restore last space', user.lastSpaceId)
+        const spaceToRestore = cache.space(user.lastSpaceId)
+        console.log('🌹 spaceToRestore', spaceToRestore, user.lastSpaceId)
         context.dispatch('loadSpace', spaceToRestore)
       // migration condition (from lastSpace to lastSpaceId) added sept 2019
       } else if (user.lastSpace) {
-        console.log('🚃 Restore last space from cache', user.lastSpace)
-        spaceToRestore = cache.space(user.lastSpace)
+        console.log('🚃 Migrate data from beta lastSpace key name', user.lastSpace)
+        const spaceToRestore = cache.space(user.lastSpace)
         context.dispatch('loadSpace', spaceToRestore)
         cache.updateUser('lastSpace', null)
       // betaSpace migration condition added aug 2019
       } else if (utils.objectHasKeys(betaSpace)) {
-        console.log('🚃 Migrate data from beta format cache', betaSpace)
+        console.log('🚃 Migrate data from beta format', betaSpace)
         context.commit('updateBetaSpace')
         context.commit('addUserToSpace', user)
-        spaceToRestore = cache.space(context.state.id)
+        const spaceToRestore = cache.space(context.state.id)
         context.dispatch('loadSpace', spaceToRestore)
       } else {
         console.log('🚃 Create new Hello Kinopio space')
@@ -253,6 +253,7 @@ export default {
     loadRemoteSpace: async (context, space) => {
       const cachedSpace = cache.space(space.id)
       context.commit('loadingSpace', true, { root: true })
+      console.log('🍆', space)
       const remoteSpace = await api.getSpace(space)
       context.commit('loadingSpace', false, { root: true })
       if (!remoteSpace) { return }
