@@ -189,13 +189,19 @@ export default {
       const betaSpace = cache.space('1')
       if (user.lastSpaceId) {
         console.log('🚃 Restore last space', user.lastSpaceId)
-        const spaceToRestore = cache.space(user.lastSpaceId)
+        let spaceToRestore = cache.space(user.lastSpaceId)
+        if (!spaceToRestore.id) {
+          spaceToRestore = { id: user.lastSpaceId }
+        }
         console.log('🌹 spaceToRestore', spaceToRestore, user.lastSpaceId)
         context.dispatch('loadSpace', spaceToRestore)
       // migration condition (from lastSpace to lastSpaceId) added sept 2019
       } else if (user.lastSpace) {
         console.log('🚃 Migrate data from beta lastSpace key name', user.lastSpace)
-        const spaceToRestore = cache.space(user.lastSpace)
+        let spaceToRestore = cache.space(user.lastSpace)
+        if (!spaceToRestore.id) {
+          spaceToRestore = { id: user.lastSpace }
+        }
         context.dispatch('loadSpace', spaceToRestore)
         cache.updateUser('lastSpace', null)
       // betaSpace migration condition added aug 2019
@@ -203,7 +209,10 @@ export default {
         console.log('🚃 Migrate data from beta format', betaSpace)
         context.commit('updateBetaSpace')
         context.commit('addUserToSpace', user)
-        const spaceToRestore = cache.space(context.state.id)
+        let spaceToRestore = cache.space(context.state.id)
+        if (!spaceToRestore.id) {
+          spaceToRestore = { id: user.lastSpace }
+        }
         context.dispatch('loadSpace', spaceToRestore)
       } else {
         console.log('🚃 Create new Hello Kinopio space')
