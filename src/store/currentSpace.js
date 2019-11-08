@@ -268,7 +268,12 @@ export default {
       if (!remoteSpace) { return }
       // TODO (if !remoteSpace && !cachedSpace) handle 404 error, may occur for loading from url cases
       const remoteDate = utils.normalizeToUnixTime(remoteSpace.updatedAt)
-      const remoteIsNewer = remoteDate >= cachedSpace.cacheDate
+      let remoteIsNewer
+      if (!cachedSpace.cacheDate) {
+        remoteIsNewer = true
+      } else {
+        remoteIsNewer = remoteDate >= cachedSpace.cacheDate
+      }
       console.log('remoteIsNewer', remoteIsNewer, 'remoteDate', remoteDate, 'cacheDate', cachedSpace.cacheDate, remoteSpace)
       if (remoteIsNewer) {
         console.log('🚋 Restore space from remote space', remoteSpace)
