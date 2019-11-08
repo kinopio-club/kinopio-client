@@ -79,14 +79,7 @@ export default {
     }
   },
   methods: {
-    showCards () {
-      this.cardsVisible = true
-      this.updateRemovedCards()
-    },
-    showSpaces () {
-      this.cardsVisible = false
-      this.updateRemovedSpaces()
-    },
+
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
       scrollIntoView(element, {
@@ -94,60 +87,12 @@ export default {
         scrollMode: 'if-needed'
       })
     },
-    updateLocalRemovedSpaces () {
-      this.removedSpaces = cache.getAllRemovedSpaces()
-    },
-    updateLocalRemovedCards () {
-      this.removedCards = this.$store.state.currentSpace.removedCards
-    },
-    updateRemovedSpaces () {
-      this.updateLocalRemovedSpaces()
-      this.loadRemoteRemovedSpaces()
-    },
-    updateRemovedCards () {
-      this.updateLocalRemovedCards()
-      this.loadRemoteRemovedCards()
-    },
-    async loadRemoteRemovedSpaces () {
-      this.loading.spaces = true
-      let removedSpaces = await api.getUserRemovedSpaces()
-      this.loading.spaces = false
-      if (!removedSpaces) { return }
-      removedSpaces = removedSpaces.map(remote => {
-        const localSpace = this.removedSpaces.find(local => local.id === remote.id)
-        if (localSpace) {
-          return merge(remote, localSpace)
-        } else {
-          return remote
-        }
-      })
-      this.removedSpaces = removedSpaces
-    },
-    async loadRemoteRemovedCards () {
-      this.loading.cards = true
-      const space = this.$store.state.currentSpace
-      const remoteCards = await api.getSpaceRemovedCards(space)
-      this.loading.cards = false
-      if (!remoteCards) { return }
-      this.removedCards = remoteCards
-    },
     restore (item) {
       if (this.cardsVisible) {
         this.restoreCard(item)
       } else {
         this.restoreSpace(item)
       }
-    },
-    restoreCard (card) {
-      this.$store.dispatch('currentSpace/restoreCard', card)
-      this.$nextTick(() => {
-        this.scrollIntoView(card)
-      })
-      this.updateLocalRemovedCards()
-    },
-    restoreSpace (space) {
-      this.$store.dispatch('currentSpace/restoreSpace', space)
-      this.updateLocalRemovedSpaces()
     },
     isRemoveConfirmationVisible (item) {
       return Boolean(this.removeConfirmationVisibleForId === item.id)
@@ -165,9 +110,71 @@ export default {
         this.removeSpacePermanent(item)
       }
     },
+
+    // Cards
+
+    showCards () {
+      this.cardsVisible = true
+      this.updateRemovedCards()
+    },
+    updateLocalRemovedCards () {
+      this.removedCards = this.$store.state.currentSpace.removedCards
+    },
+    updateRemovedCards () {
+      this.updateLocalRemovedCards()
+      this.loadRemoteRemovedCards()
+    },
+    async loadRemoteRemovedCards () {
+      this.loading.cards = true
+      const space = this.$store.state.currentSpace
+      const remoteCards = await api.getSpaceRemovedCards(space)
+      this.loading.cards = false
+      if (!remoteCards) { return }
+      this.removedCards = remoteCards
+    },
+    restoreCard (card) {
+      this.$store.dispatch('currentSpace/restoreCard', card)
+      this.$nextTick(() => {
+        this.scrollIntoView(card)
+      })
+      this.updateLocalRemovedCards()
+    },
     removeCardPermanent (card) {
       this.$store.dispatch('currentSpace/removeCardPermanent', card)
       this.updateLocalRemovedCards()
+    },
+
+    // Spaces
+
+    showSpaces () {
+      this.cardsVisible = false
+      this.updateRemovedSpaces()
+    },
+    updateLocalRemovedSpaces () {
+      this.removedSpaces = cache.getAllRemovedSpaces()
+    },
+    updateRemovedSpaces () {
+      this.updateLocalRemovedSpaces()
+      this.loadRemoteRemovedSpaces()
+    },
+    async loadRemoteRemovedSpaces () {
+      this.loading.spaces = true
+      let removedSpaces = await api.getUserRemovedSpaces()
+      this.loading.spaces = false
+      if (!removedSpaces) { return }
+      removedSpaces = removedSpaces.map(remote => {
+        const localSpace = this.removedSpaces.find(local => local.id === remote.id)
+        if (localSpace) {
+          return merge(remote, localSpace)
+        } else {
+          return remote
+        }
+      })
+      this.removedSpaces = removedSpaces
+    },
+    restoreSpace (space) {
+      this.$store.dispatch('currentSpace/restoreSpace', space)
+      this.updateLocalRemovedSpaces()
     },
     removeSpacePermanent (space) {
       console.log(space)
