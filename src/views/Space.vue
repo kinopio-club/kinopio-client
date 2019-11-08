@@ -24,15 +24,15 @@ main.space(
 </template>
 
 <script>
+import last from 'lodash-es/last'
+
 import Card from '@/components/Card.vue'
 import Connection from '@/components/Connection.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import MultipleCardActions from '@/components/dialogs/MultipleCardActions.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
-
+import apiQueue from '@/apiQueue.js'
 import utils from '@/utils.js'
-
-import last from 'lodash-es/last'
 
 let startCursor, prevCursor, prevCursorPage, endCursor, scrollTimer, scrollAreaHeight, scrollAreaWidth, maxHeight, maxWidth
 let movementDirection = {}
@@ -100,7 +100,11 @@ export default {
     },
 
     updateIsOnline () {
-      this.$store.commit('isOnline', window.navigator.onLine)
+      const status = window.navigator.onLine
+      this.$store.commit('isOnline', status)
+      if (status) {
+        apiQueue.process()
+      }
     },
 
     initInteractions (event) {

@@ -110,24 +110,21 @@ export default {
 
   // Removed Spaces
 
-  removedSpace (spaceId) {
-    return this.getLocal(`space-${spaceId}`) || {}
-  },
-  removeSpace (spaceId) {
-    this.updateSpace('removeDate', Date.now(), spaceId)
-    const spaceKey = `space-${spaceId}`
-    const space = this.getLocal(spaceKey)
+  removeSpace (space) {
+    this.updateSpace('removeDate', Date.now(), space.id)
+    const spaceKey = `space-${space.id}`
+    space = this.getLocal(spaceKey)
     this.storeLocal(`removed-${spaceKey}`, space)
     this.removeLocal(spaceKey)
   },
-  removeSpacePermanent (spaceId) {
-    const spaceKey = `removed-space-${spaceId}`
+  removeSpacePermanent (space) {
+    const spaceKey = `removed-space-${space.id}`
     this.removeLocal(spaceKey)
   },
-  restoreSpace (spaceId) {
-    const spaceKey = `removed-space-${spaceId}`
-    const space = this.getLocal(spaceKey)
-    this.storeLocal(`space-${spaceId}`, space)
+  restoreSpace (space) {
+    const spaceKey = `removed-space-${space.id}`
+    space = this.getLocal(spaceKey)
+    this.storeLocal(`space-${space.id}`, space)
     this.removeLocal(spaceKey)
   },
   getAllRemovedSpaces () {

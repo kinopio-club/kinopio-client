@@ -113,8 +113,13 @@ export default {
     },
     removeCardPermanent: (state, cardToRemove) => {
       state.cards = state.cards.filter(card => card.id !== cardToRemove.id)
-      state.removedCards = state.removedCards.filter(card => card.id !== cardToRemove.id)
-      cache.updateSpace('removedCards', state.removedCards, state.id)
+      const fromRemovedCards = state.removedCards.find(card => card.id === cardToRemove.id)
+      if (fromRemovedCards) {
+        state.removedCards = state.removedCards.filter(card => card.id !== cardToRemove.id)
+        cache.updateSpace('removedCards', state.removedCards, state.id)
+      } else {
+        cache.updateSpace('cards', state.cards, state.id)
+      }
     },
     restoreCard: (state, cardToRestore) => {
       const index = state.removedCards.findIndex(card => card.id === cardToRestore.id)
@@ -226,6 +231,13 @@ export default {
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       context.commit('restoreSpace', uniqueNewSpace)
     },
+    saveNewSpace: (context) => {
+      const space = utils.clone(context.state)
+      const user = context.rootState.currentUser
+      cache.saveSpace(space)
+      apiQueue.add('createSpace', space)
+      context.commit('addUserToSpace', user)
+    },
     addSpace: (context, isHelloSpace) => {
       if (isHelloSpace) {
         context.dispatch('createNewHelloSpace')
@@ -234,37 +246,32 @@ export default {
         Vue.nextTick(() => {
           context.dispatch('updateCardConnectionPaths', { cardId: context.state.cards[1].id })
           context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
+          context.dispatch('saveNewSpace')
         })
       }
-      const space = utils.clone(context.state)
-      const user = context.rootState.currentUser
-      cache.saveSpace(space)
-      apiQueue.add('createSpace', space)
-      context.commit('addUserToSpace', user)
     },
-    loadSpace: async (context, space) => {
+    loadRemoteSpace: async (context, space) => {
       const cachedSpace = cache.space(space.id)
-      const emptySpace = { id: space.id, cards: [], connections: [] }
-      context.commit('restoreSpace', emptySpace)
-      context.commit('restoreSpace', cachedSpace)
       context.commit('loadingSpace', true, { root: true })
-      console.log('🚛 Getting remote space', space.id)
       const remoteSpace = await api.getSpace(space.id)
       context.commit('loadingSpace', false, { root: true })
       if (!remoteSpace) { return }
       // TODO (if !remoteSpace && !cachedSpace) handle 404 error, may occur for loading from url cases
       const remoteDate = utils.normalizeToUnixTime(remoteSpace.updatedAt)
-      console.log('remote space', remoteSpace, remoteDate, cachedSpace.cacheDate)
-
-      // cached date is newer, and shouldn't be restored, when
-      // - im working offline and i refresh the page. i want to see my latest local version
-
-      // if (remoteDate >= cachedSpace.cacheDate) {
-      // const normalizedSpace = utils.normalizeSpaceKeys(remoteSpace)
-      console.log('🚋 Restore space from remote space', remoteSpace)
-      cache.saveSpace(remoteSpace)
-      context.commit('restoreSpace', remoteSpace)
-      // }
+      const remoteIsNewer = remoteDate >= cachedSpace.cacheDate
+      console.log('remoteIsNewer', remoteIsNewer, 'remoteDate', remoteDate, 'cacheDate', cachedSpace.cacheDate, remoteSpace)
+      if (remoteIsNewer) {
+        console.log('🚋 Restore space from remote space', remoteSpace)
+        cache.saveSpace(remoteSpace)
+        context.commit('restoreSpace', remoteSpace)
+      }
+    },
+    loadSpace: (context, space) => {
+      const cachedSpace = cache.space(space.id)
+      const emptySpace = { id: space.id, cards: [], connections: [] }
+      context.commit('restoreSpace', emptySpace)
+      context.commit('restoreSpace', cachedSpace)
+      context.dispatch('loadRemoteSpace', space)
     },
     updateSpace: async (context, updates) => {
       updates.id = context.state.id
@@ -279,39 +286,12 @@ export default {
     },
     removeCurrentSpace: (context) => {
       const space = utils.clone(context.state)
-      cache.removeSpace(space.id)
+      cache.removeSpace(space)
       apiQueue.add('removeSpace', { id: space.id })
     },
     removeSpacePermanent: (context, space) => {
       cache.removeSpacePermanent(space.id)
-      apiQueue.add('removeSpacePermanent', space.id)
-    },
-    toAnotherSpace: (context, { spaceId, shouldRemoveOriginals }) => {
-      const space = utils.clone(context.state)
-      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
-      const cards = space.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
-      const connections = space.connections.filter(connection => {
-        const isStartCardMatch = multipleCardsSelectedIds.includes(connection.startCardId)
-        const isEndCardMatch = multipleCardsSelectedIds.includes(connection.endCardId)
-        return isStartCardMatch && isEndCardMatch
-      })
-      const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
-      const connectionTypes = space.connectionTypes.filter(type => {
-        return connectionTypeIds.includes(type.id)
-      })
-      const items = {
-        cards,
-        connectionTypes,
-        connections
-      }
-      cache.addToSpace(items, spaceId)
-      if (shouldRemoveOriginals) {
-        const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
-        multipleCardsSelectedIds.forEach(cardId => {
-          context.dispatch('removeCard', { id: cardId })
-          context.dispatch('removeConnectionsFromCard', { id: cardId })
-        })
-      }
+      apiQueue.add('removeSpacePermanent', space)
     },
 
     // Cards
@@ -367,6 +347,11 @@ export default {
     restoreCard: (context, card) => {
       context.commit('restoreCard', card)
       apiQueue.add('restoreCard', card)
+    },
+    restoreSpace: (context, space) => {
+      cache.restoreSpace(space)
+      apiQueue.add('restoreSpace', space)
+      context.dispatch('changeSpace', space)
     },
     dragCards: (context, options) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds

@@ -59,7 +59,7 @@ export default {
   -webkit-overflow-scrolling touch
   -webkit-tap-highlight-color transparent
   box-sizing border-box
-  font-family "OsakaMono-Kinopio", "Osaka-Mono", "Osaka−等幅", monospace
+  font-family "OsakaMono-Kinopio", monospace
   font-size 14px
   line-height 1.1
 

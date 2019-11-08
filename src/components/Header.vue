@@ -16,7 +16,7 @@ header
   aside
     //.button-wrap
     //  button Share
-    .button-wrap(v-if="!userIsSignedIn && isBeta")
+    .button-wrap(v-if="!userIsSignedIn && isBeta && isOnline")
       button(@click.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}") Sign Up or In
       SignUpOrIn(:visible="signUpOrInIsVisible")
     User(:user="currentUser" :clickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true")
@@ -52,6 +52,9 @@ export default {
         this.spaceDetailsIsVisible = false
         this.signUpOrInIsVisible = false
       }
+      if (mutation.type === 'triggerSpaceDetailsVisible') {
+        this.spaceDetailsIsVisible = true
+      }
     })
   },
   computed: {
@@ -75,6 +78,9 @@ export default {
     },
     isBeta () {
       return this.$store.state.isBeta
+    },
+    isOnline () {
+      return this.$store.state.isOnline
     }
   },
   methods: {
@@ -136,7 +142,12 @@ header
     overflow hidden
     text-overflow ellipsis
     max-width 250px
+    @media(max-width 460px)
+      max-width 160px
+    @media(max-width 340px)
+      max-width 100px
   aside
+    margin-top 10px
     > .button-wrap
       margin-right 6px
 </style>

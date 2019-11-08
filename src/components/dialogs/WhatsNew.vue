@@ -1,23 +1,37 @@
 <template lang="pug">
-dialog.new-stuff(v-if="visible" :open="visible" @click.stop)
+dialog.whats-new(v-if="visible" :open="visible" @click.stop)
   section
-    p New Stuff
-      img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
+    .segmented-buttons
+      button(@click="showWhatsNewVisible" :class="{active : whatsNewVisible}") What's New?
+      button(@click="hideWhatsNewVisible" :class="{active : !whatsNewVisible}") Coming Up
 
-  section(v-if="!newStuff.length")
+  section(v-if="!newStuff.length && whatsNewVisible")
     Loader(:visible="true")
 
-  section
+  section(v-if="whatsNewVisible")
     article(v-if="newStuff.length" v-for="post in newStuffWithUserHasRead" :key="post.id")
       p.title {{post.title}}
         img.icon(src="@/assets/new.gif" v-if="!post.userHasRead")
       span(v-html="media(post.description)")
       span(v-html="post.content_html")
+    article
+      .button-wrap
+        a(href="https://www.are.na/kinopio/kinopio-updates")
+          button Read All →
 
-  section
-    .button-wrap
-      a(href="https://www.are.na/kinopio/kinopio-updates")
-        button Read All →
+  section.coming-up(v-if="!whatsNewVisible")
+    ul
+      li
+        del Import spaces
+      li Sign in to access your spaces on all your devices 🛫
+      li Share your spaces with other people (space urls)
+      li Real-time collaboration 👯‍♀️
+      li Updated Logo and illustrations
+      li Build Billing and Payments (4$/month) 💞
+      li API Docs and Support Pages
+      li Dark mode 🌙
+      li More frames 🖼
+      li Keyboard Shortcuts
 
   section
     p Follow for Updates
@@ -33,7 +47,7 @@ dialog.new-stuff(v-if="visible" :open="visible" @click.stop)
 import Loader from '@/components/Loader.vue'
 
 export default {
-  name: 'NewStuff',
+  name: 'WhatsNew',
   components: {
     Loader
   },
@@ -43,7 +57,8 @@ export default {
   },
   data () {
     return {
-      newStuffIsUpdated: false
+      whatsNewVisible: true
+      // newStuffIsUpdated: false
     }
   },
   created () {
@@ -56,9 +71,9 @@ export default {
   computed: {
     newStuffWithUserHasRead () {
       let userHasRead
-      const userlastRead = this.$store.state.currentUser.lastReadNewStuffId
+      const userlastReadId = parseInt(this.$store.state.currentUser.lastReadNewStuffId)
       return this.newStuff.map(update => {
-        if (userlastRead === update.id) {
+        if (userlastReadId === update.id) {
           userHasRead = true
         }
         if (userHasRead) {
@@ -69,15 +84,21 @@ export default {
     }
   },
   methods: {
+    showWhatsNewVisible () {
+      this.whatsNewVisible = true
+    },
+    hideWhatsNewVisible () {
+      this.whatsNewVisible = false
+    },
     updateUserLastRead () {
       const lastReadNewStuffId = this.newStuff[0].id
       this.$store.dispatch('currentUser/lastReadNewStuffId', lastReadNewStuffId)
     },
-    checkNewStuffIsUpdated () {
-      const lastReadNewStuffId = this.newStuff[0].id
-      const userlastReadId = this.$store.state.currentUser.lastReadNewStuffId
-      this.newStuffIsUpdated = Boolean(userlastReadId !== lastReadNewStuffId)
-    },
+    // checkNewStuffIsUpdated () {
+    //   const lastReadNewStuffId = this.newStuff[0].id
+    //   const userlastReadId = parseInt(this.$store.state.currentUser.lastReadNewStuffId)
+    //   this.newStuffIsUpdated = Boolean(userlastReadId !== lastReadNewStuffId)
+    // },
     media (description) {
       if (!description) { return }
       const imageTypes = ['jpg', 'png', 'gif']
@@ -92,7 +113,7 @@ export default {
   watch: {
     visible (visible) {
       if (visible) {
-        this.checkNewStuffIsUpdated()
+        // this.checkNewStuffIsUpdated()
       }
       if (!visible) {
         this.updateUserLastRead()
@@ -103,7 +124,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.new-stuff
+.whats-new
   overflow auto
   max-height calc(100vh - 150px)
   article
@@ -141,4 +162,17 @@ export default {
     max-height calc(100vh - 200px)
   code
     background-color var(--secondary-background)
+.coming-up
+  ul
+    margin 0
+    margin-top 2px
+    padding-left 15px
+    list-style-type square
+    li
+      padding-top 10px
+      margin-left 5px
+      user-select text
+      &:first-child
+        padding-top 0
+
 </style>

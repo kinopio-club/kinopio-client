@@ -5,9 +5,11 @@ dialog.restore(v-if="visible" :open="visible" @click.stop)
       button(@click="showCards" :class="{active: cardsVisible}")
         img.icon(src="@/assets/remove.svg")
         span Cards
+        Loader(:visible="loading.cards")
       button(@click="showSpaces" :class="{active: !cardsVisible}")
         img.icon(src="@/assets/remove.svg")
         span Spaces
+        Loader(:visible="loading.spaces")
 
   section(v-if="!items.length")
     img(src="@/assets/photo-empty-meal.png")
@@ -31,18 +33,24 @@ dialog.restore(v-if="visible" :open="visible" @click.stop)
             .segmented-buttons
               button(@click.stop="hideRemoveConfirmation")
                 span Cancel
-              button.danger(@click.stop="remove(item)")
+              button.danger(@click.stop="removePermanent(item)")
                 img.icon(src="@/assets/remove.svg")
                 span Remove
 </template>
 
 <script>
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfill
+import merge from 'lodash-es/merge'
 
+import api from '@/api.js'
 import cache from '@/cache.js'
+import Loader from '@/components/Loader.vue'
 
 export default {
   name: 'Restore',
+  components: {
+    Loader
+  },
   props: {
     visible: Boolean
   },
@@ -50,13 +58,15 @@ export default {
     return {
       removeConfirmationVisibleForId: '',
       cardsVisible: true,
-      removedSpaces: []
+      removedSpaces: [],
+      removedCards: [],
+      loading: {
+        cards: false,
+        spaces: false
+      }
     }
   },
   computed: {
-    removedCards () {
-      return this.$store.state.currentSpace.removedCards
-    },
     items () {
       if (this.cardsVisible) {
         return this.removedCards
@@ -69,13 +79,6 @@ export default {
     }
   },
   methods: {
-    showCards () {
-      this.cardsVisible = true
-    },
-    showSpaces () {
-      this.cardsVisible = false
-      this.updateRemovedSpaces()
-    },
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
       scrollIntoView(element, {
@@ -83,11 +86,6 @@ export default {
         scrollMode: 'if-needed'
       })
     },
-    updateRemovedSpaces () {
-      this.removedSpaces = cache.getAllRemovedSpaces()
-    },
-
-    // restore item
     restore (item) {
       if (this.cardsVisible) {
         this.restoreCard(item)
@@ -95,20 +93,6 @@ export default {
         this.restoreSpace(item)
       }
     },
-    restoreCard (card) {
-      this.$store.dispatch('currentSpace/restoreCard', card)
-      this.$nextTick(() => {
-        this.scrollIntoView(card)
-      })
-    },
-    restoreSpace (space) {
-      console.log('restore space', space)
-      cache.restoreSpace(space.id)
-      this.updateRemovedSpaces()
-      this.$store.dispatch('currentSpace/changeSpace', space)
-    },
-
-    // remove confirmation
     isRemoveConfirmationVisible (item) {
       return Boolean(this.removeConfirmationVisibleForId === item.id)
     },
@@ -118,29 +102,90 @@ export default {
     hideRemoveConfirmation () {
       this.removeConfirmationVisibleForId = ''
     },
-
-    // remove item
-    remove (item) {
+    removePermanent (item) {
       if (this.cardsVisible) {
-        this.removeCard(item)
+        this.removeCardPermanent(item)
       } else {
-        this.removeSpace(item)
+        this.removeSpacePermanent(item)
       }
     },
-    removeCard (card) {
-      this.$store.dispatch('currentSpace/removeCardPermanent', card)
+
+    // Cards
+
+    showCards () {
+      this.cardsVisible = true
+      this.updateRemovedCards()
     },
-    removeSpace (space) {
-      this.$store.dispatch('currentSpace/removeSpacePermanent', space)
+    updateLocalRemovedCards () {
+      this.removedCards = this.$store.state.currentSpace.removedCards
+    },
+    updateRemovedCards () {
+      this.updateLocalRemovedCards()
+      this.loadRemoteRemovedCards()
+    },
+    async loadRemoteRemovedCards () {
+      this.loading.cards = true
+      const space = this.$store.state.currentSpace
+      const remoteCards = await api.getSpaceRemovedCards(space)
+      this.loading.cards = false
+      if (!remoteCards) { return }
+      this.removedCards = remoteCards
+    },
+    restoreCard (card) {
+      this.$store.dispatch('currentSpace/restoreCard', card)
+      this.$nextTick(() => {
+        this.scrollIntoView(card)
+      })
+      this.updateLocalRemovedCards()
+    },
+    removeCardPermanent (card) {
+      this.$store.dispatch('currentSpace/removeCardPermanent', card)
+      this.updateLocalRemovedCards()
+    },
+
+    // Spaces
+
+    showSpaces () {
+      this.cardsVisible = false
       this.updateRemovedSpaces()
+    },
+    updateLocalRemovedSpaces () {
+      this.removedSpaces = cache.getAllRemovedSpaces()
+    },
+    updateRemovedSpaces () {
+      this.updateLocalRemovedSpaces()
+      this.loadRemoteRemovedSpaces()
+    },
+    async loadRemoteRemovedSpaces () {
+      this.loading.spaces = true
+      let removedSpaces = await api.getUserRemovedSpaces()
+      this.loading.spaces = false
+      if (!removedSpaces) { return }
+      removedSpaces = removedSpaces.map(remote => {
+        const localSpace = this.removedSpaces.find(local => local.id === remote.id)
+        if (localSpace) {
+          return merge(remote, localSpace)
+        } else {
+          return remote
+        }
+      })
+      this.removedSpaces = removedSpaces
+    },
+    restoreSpace (space) {
+      this.$store.dispatch('currentSpace/restoreSpace', space)
+      this.updateLocalRemovedSpaces()
+    },
+    removeSpacePermanent (space) {
+      console.log(space)
+      this.$store.dispatch('currentSpace/removeSpacePermanent', space)
+      this.updateLocalRemovedSpaces()
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
-        if (!this.cardsVisible) {
-          this.updateRemovedSpaces()
-        }
+        this.updateRemovedCards()
+        this.updateRemovedSpaces()
       }
     }
   }

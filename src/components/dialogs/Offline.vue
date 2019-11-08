@@ -2,11 +2,14 @@
 dialog(v-if="visible" :open="visible")
   section
     p Offline
-  section
+  section(v-if="userIsSignedIn")
     p Kinopio works offline,
     p Your changes will be saved locally, and synced up once you're back online. It's pretty chill.
     p
       span.badge.info {{queue.length}} {{pluralChanges}} to sync
+  section(v-else)
+    p Kinopio works offline,
+    p Your changes are saved locally. It's pretty chill.
 
 </template>
 
@@ -26,6 +29,9 @@ export default {
     pluralChanges () {
       const condition = this.queue.length !== 1
       return utils.pluralize('change', condition)
+    },
+    userIsSignedIn () {
+      return Boolean(this.$store.getters['currentUser/isSignedIn'])
     }
   }
 }

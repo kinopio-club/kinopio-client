@@ -40,6 +40,14 @@ const normalizeResponse = async (response) => {
   }
 }
 
+const normalizeSpaceToRemote = (space) => {
+  space.removedCards.forEach(card => {
+    card.isRemoved = true
+    space.cards.push(card)
+  })
+  return space
+}
+
 // const addBackToQueue = (requests) => {
 //   requests.reverse()
 //   requests.forEach(request => {
@@ -80,7 +88,7 @@ export default {
   async processQueue (body) {
     const options = requestOptions({ body, method: 'POST' })
     try {
-      console.log(`🚎 sending operations`, body)
+      console.log(`🛫 sending operations`, body)
       await fetch(`${host}/operations`, options)
     } catch (error) {
       console.error('🚒', error)
@@ -112,6 +120,16 @@ export default {
       console.error(error)
     }
   },
+  async getUserRemovedSpaces () {
+    if (!shouldRequest()) { return }
+    try {
+      const options = requestOptions({ method: 'GET' })
+      const response = await fetch(`${host}/user/removed-spaces`, options)
+      return normalizeResponse(response)
+    } catch (error) {
+      console.error(error)
+    }
+  },
   async removeUserPermanent () {
     if (!shouldRequest()) { return }
     try {
@@ -128,7 +146,7 @@ export default {
   async getSpace (spaceId) {
     try {
       if (!shouldRequest()) { return }
-      console.log('🚛 Getting remote space', spaceId)
+      console.log('🛬 getting remote space', spaceId)
       const options = requestOptions({ method: 'GET' })
       const response = await utils.timeout(5000, fetch(`${host}/space/${spaceId}`, options))
       return normalizeResponse(response)
@@ -138,9 +156,28 @@ export default {
   },
   async createSpaces () {
     try {
-      const body = cache.getAllSpaces()
+      let spaces = cache.getAllSpaces()
+      spaces = spaces.map(space => normalizeSpaceToRemote(space))
+      let removedSpaces = cache.getAllRemovedSpaces()
+      removedSpaces = removedSpaces.map(space => {
+        space.isRemoved = true
+        space.removedByUserId = cache.user().id
+        return space
+      })
+      removedSpaces.forEach(space => spaces.push(space))
+      const body = spaces
       const options = requestOptions({ body, method: 'POST' })
       const response = await fetch(`${host}/space/multiple`, options)
+      return normalizeResponse(response)
+    } catch (error) {
+      console.error(error)
+    }
+  },
+  async getSpaceRemovedCards (space) {
+    if (!shouldRequest()) { return }
+    try {
+      const options = requestOptions({ method: 'GET' })
+      const response = await fetch(`${host}/space/${space.id}/removed-cards`, options)
       return normalizeResponse(response)
     } catch (error) {
       console.error(error)

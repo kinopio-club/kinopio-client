@@ -10,29 +10,24 @@ dialog.about(v-if="visible" :open="visible" @click="closeDialogs")
       BetaNotes(:visible="betaNotesIsVisible")
   section
     .button-wrap
-      button(@click.stop="toggleRoadmapIsVisible" :class="{active: roadmapIsVisible}") Roadmap
-      Roadmap(:visible="roadmapIsVisible")
-    .button-wrap
-      button(@click.stop="toggleNewStuffIsVisible" :class="{active: newStuffIsVisible}")
-        span New Stuff
+      button(@click.stop="toggleWhatsNewIsVisible" :class="{active: whatsNewIsVisible}")
+        span What's New?
         img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
-      NewStuff(:visible="newStuffIsVisible" :newStuff="newStuff")
+      WhatsNew(:visible="whatsNewIsVisible" :newStuff="newStuff")
 
 </template>
 
 <script>
 import Support from '@/components/dialogs/Support.vue'
 import BetaNotes from '@/components/dialogs/BetaNotes.vue'
-import NewStuff from '@/components/dialogs/NewStuff.vue'
-import Roadmap from '@/components/dialogs/Roadmap.vue'
+import WhatsNew from '@/components/dialogs/WhatsNew.vue'
 
 export default {
   name: 'About',
   components: {
     Support,
     BetaNotes,
-    NewStuff,
-    Roadmap
+    WhatsNew
   },
   props: {
     visible: Boolean
@@ -41,9 +36,8 @@ export default {
     return {
       supportIsVisible: false,
       betaNotesIsVisible: false,
-      newStuffIsVisible: false,
       newStuffIsUpdated: false,
-      roadmapIsVisible: false,
+      whatsNewIsVisible: false,
       newStuff: []
     }
   },
@@ -52,8 +46,7 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.supportIsVisible = false
         this.betaNotesIsVisible = false
-        this.newStuffIsVisible = false
-        this.roadmapIsVisible = false
+        this.whatsNewIsVisible = false
       }
     })
   },
@@ -75,15 +68,10 @@ export default {
       this.closeDialogs()
       this.betaNotesIsVisible = !isVisible
     },
-    toggleRoadmapIsVisible () {
-      const isVisible = this.roadmapIsVisible
+    toggleWhatsNewIsVisible () {
+      const isVisible = this.whatsNewIsVisible
       this.closeDialogs()
-      this.roadmapIsVisible = !isVisible
-    },
-    toggleNewStuffIsVisible () {
-      const isVisible = this.newStuffIsVisible
-      this.closeDialogs()
-      this.newStuffIsVisible = !isVisible
+      this.whatsNewIsVisible = !isVisible
       this.newStuffIsUpdated = false
     },
     async getNewStuff () {
@@ -92,14 +80,13 @@ export default {
       return data
     },
     checkNewStuffIsUpdated (latestUpdateId) {
-      const userlastReadId = this.$store.state.currentUser.lastReadNewStuffId
+      const userlastReadId = parseInt(this.$store.state.currentUser.lastReadNewStuffId)
       this.newStuffIsUpdated = Boolean(userlastReadId !== latestUpdateId)
     },
     closeDialogs () {
       this.supportIsVisible = false
       this.betaNotesIsVisible = false
-      this.newStuffIsVisible = false
-      this.roadmapIsVisible = false
+      this.whatsNewIsVisible = false
     }
   },
   watch: {

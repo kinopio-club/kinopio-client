@@ -87,6 +87,7 @@ export default new Vuex.Store({
       utils.typeCheck(value, 'boolean')
       state.isBeta = value
     },
+    triggerSpaceDetailsVisible: () => {},
 
     // connecting
     currentUserIsDrawingConnection: (state, value) => {

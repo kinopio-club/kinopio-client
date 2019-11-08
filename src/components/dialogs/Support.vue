@@ -5,9 +5,9 @@ dialog.support(v-if="visible" :open="visible" @click.stop :class="{'from-footer'
   section
     img(src="@/assets/froggo.png")
     p I made Kinopio to be fun to create cards, and connect your thoughts, ideas, and plans together.
-    p Hit me up with any issues or questions at hi@pirijan.com
+    p Hit me up with any issues or questions at hi@kinopio.club
     .button-wrap
-      a(href="mailto:hi@pirijan.com?subject=👻 Kinopio Support")
+      a(href="mailto:hi@kinopio.club?subject=👻 Kinopio Support")
         button Email Me
     .button-wrap
       a(href="https://twitter.com/KinopioClub")
