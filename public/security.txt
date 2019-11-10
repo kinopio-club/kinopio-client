@@ -1,0 +1,3 @@
+Contact: security@kinopio.club
+Preferred-Languages: en
+Canonical: https://kinopio.club/security.txt
