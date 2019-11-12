@@ -71,7 +71,9 @@ export default {
         space.name = this.uniqueName(space)
         const uniqueNewSpace = cache.updateIdsInSpace(space)
         cache.saveSpace(uniqueNewSpace)
-        this.$store.dispatch('currentSpace/changeSpace', uniqueNewSpace)
+        this.$store.commit('currentSpace/restoreSpace', uniqueNewSpace)
+        this.$store.dispatch('currentSpace/saveNewSpace')
+        this.$store.dispatch('currentUser/lastSpaceId', space.id)
         this.$emit('updateSpaces')
         this.$emit('closeDialog')
       }
