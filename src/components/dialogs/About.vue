@@ -50,12 +50,13 @@ export default {
       }
     })
   },
-  mounted () {
-    this.getNewStuff().then(data => {
-      const newStuff = data.contents
-      this.newStuff = newStuff.slice(0, 5)
-      this.checkNewStuffIsUpdated(newStuff[0].id)
-    })
+  async mounted () {
+    const isOffline = !this.$store.state.isOnline
+    if (isOffline) { return }
+    const data = await this.getNewStuff()
+    const newStuff = data.contents
+    this.newStuff = newStuff.slice(0, 5)
+    this.checkNewStuffIsUpdated(newStuff[0].id)
   },
   methods: {
     toggleSupportIsVisible () {

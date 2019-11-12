@@ -119,9 +119,12 @@ header
   justify-content space-between
   nav,
   aside
-    pointer-events all
+    pointer-events none
     position relative
     display -webkit-box
+    > *
+      pointer-events all
+
   nav
     margin-right 6px
     flex-grow 2

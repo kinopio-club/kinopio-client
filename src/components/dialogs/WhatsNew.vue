@@ -91,6 +91,7 @@ export default {
       this.whatsNewVisible = false
     },
     updateUserLastRead () {
+      if (!this.newStuff.length) { return }
       const lastReadNewStuffId = this.newStuff[0].id
       this.$store.dispatch('currentUser/lastReadNewStuffId', lastReadNewStuffId)
     },
@@ -136,8 +137,6 @@ export default {
       margin-bottom 0
       padding-bottom 0
       border-bottom 0
-  .loader
-    margin-top 10px
   .icon
     margin-left 3px
   .title
