@@ -193,7 +193,7 @@ export default {
         if (!spaceToRestore.id) {
           spaceToRestore = { id: user.lastSpaceId }
         }
-        console.log('🌹 spaceToRestore', spaceToRestore, user.lastSpaceId)
+        console.log('🔮 spaceToRestore', spaceToRestore, user.lastSpaceId)
         context.dispatch('loadSpace', spaceToRestore)
       // migration condition (from lastSpace to lastSpaceId) added sept 2019
       } else if (user.lastSpace) {
