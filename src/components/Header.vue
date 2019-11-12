@@ -6,20 +6,23 @@ header
         img(src="@/assets/logo.png" width="50" height="45" alt="kinopio logo")
         img.down-arrow(src="@/assets/down-arrow.svg")
       About(:visible="aboutIsVisible")
-    .button-wrap
-      button.space-details-button(@click.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
+    .button-wrap.space-details
+      button(@click.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
         //img.icon.space-moon(src="@/assets/space-moon.svg")
         span {{currentSpaceName}}
         Loader(:visible="loadingSpace")
       SpaceDetails(:visible="spaceDetailsIsVisible")
 
   aside
-    //.button-wrap
-    //  button Share
-    .button-wrap(v-if="!userIsSignedIn && isBeta && isOnline")
-      button(@click.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}") Sign Up or In
-      SignUpOrIn(:visible="signUpOrInIsVisible")
-    User(:user="currentUser" :clickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true")
+    .top
+      User(:user="currentUser" :clickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true")
+      //- .button-wrap.share
+      //-   button Share
+    .bottom
+      .button-wrap.sign-up-in(v-if="!userIsSignedIn && isBeta && isOnline")
+        button(@click.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}") Sign Up or In
+        SignUpOrIn(:visible="signUpOrInIsVisible")
+
 </template>
 
 <script>
@@ -117,9 +120,15 @@ header
   nav,
   aside
     pointer-events all
+    position relative
+    display -webkit-box
+  nav
+    margin-right 6px
+    flex-grow 2
   .user
     float right
     position relative
+    margin-bottom 5px
   .logo-about
     position relative
     display inline-block
@@ -137,17 +146,23 @@ header
     &.active
       .down-arrow
         transform translateY(5px)
-  .space-details-button
-    white-space nowrap
-    overflow hidden
-    text-overflow ellipsis
+  .space-details
     max-width 250px
-    @media(max-width 460px)
-      max-width 160px
-    @media(max-width 340px)
-      max-width 100px
+    @media(max-width 414px)
+      width calc(100% - 70px)
+    button
+      white-space nowrap
+      overflow hidden
+      text-overflow ellipsis
+      max-width 100%
+    dialog
+      max-width initial
   aside
-    margin-top 10px
-    > .button-wrap
-      margin-right 6px
+    display flex
+    flex-direction column
+  .sign-up-in
+    display block
+  .share
+    float right
+    margin-right 6px
 </style>
