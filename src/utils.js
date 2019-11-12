@@ -250,6 +250,21 @@ export default {
       return connection
     })
     return items
+  },
+
+  normalizeRemoteSpace (remoteSpace) {
+    const removedCards = []
+    const cards = []
+    remoteSpace.cards.forEach(card => {
+      if (card.isRemoved) {
+        removedCards.push(card)
+      } else {
+        cards.push(card)
+      }
+    })
+    remoteSpace.cards = cards
+    remoteSpace.removedCards = removedCards
+    return remoteSpace
   }
 
 }
