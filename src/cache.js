@@ -84,7 +84,7 @@ export default {
   },
   updateIdsInAllSpaces () {
     let spaces = this.getAllSpaces()
-    spaces.map(space => {
+    spaces.forEach(space => {
       this.updateIdsInSpace(space)
     })
   },
