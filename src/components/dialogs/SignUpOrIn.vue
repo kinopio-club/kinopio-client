@@ -13,7 +13,8 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
       .badge.info(v-if="error.accountAlreadyExists") An account with this email already exists, Sign In instead
       input(type="password" placeholder="Password" required @input="clearErrors" v-model="password")
       input(type="password" placeholder="Confirm Password" required @input="clearErrors")
-      .badge.danger(v-if="error.passwordMatch") Doesn't match Password
+      .badge.danger(v-if="error.passwordMatch") Passwords don't match
+      .badge.danger(v-if="error.passwordTooShort") Password is shorter than 4 characters
       .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
       button(type="submit" :class="{active : loading.signUpOrIn}")
@@ -79,7 +80,8 @@ export default {
         unknownServerError: false,
         accountAlreadyExists: false,
         signInCredentials: false,
-        tooManyAttempts: false
+        tooManyAttempts: false,
+        passwordTooShort: false
       },
       loading: {
         signUpOrIn: false,
@@ -157,6 +159,14 @@ export default {
       return true
     },
 
+    signUpPasswordTooShort (password) {
+      if (password.length <= 4) {
+        this.error.passwordTooShort = true
+        return
+      }
+      return true
+    },
+
     async signUp (event) {
       if (this.loading.signUpOrIn) { return }
       const email = event.target[0].value
@@ -164,6 +174,7 @@ export default {
       const confirmPassword = event.target[2].value
       const currentUser = utils.clone(this.$store.state.currentUser)
       if (!this.signUpPasswordsIsMatch(password, confirmPassword)) { return }
+      if (!this.signUpPasswordTooShort(password)) { return }
       this.loading.signUpOrIn = true
       const response = await api.signUp(email, password, currentUser)
       const result = await response.json()
