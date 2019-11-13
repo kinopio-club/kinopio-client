@@ -33,7 +33,7 @@ export default new Router({
       name: 'confirm-email',
       component: Space,
       redirect: to => {
-        // TODO: call api post here addtoqueue
+        store.dispatch('currentUser/confirmEmail')
         store.commit('addNotification', { message: 'Email Confirmed' })
         return '/'
       }

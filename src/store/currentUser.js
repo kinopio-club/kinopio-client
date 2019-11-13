@@ -128,6 +128,9 @@ export default {
       remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
       if (remoteUser.updatedAt > cachedUser.cacheDate) { console.log('🌸 Restore user from remote', remoteUser) }
       context.commit('updateUser', remoteUser)
+    },
+    confirmEmail: (context) => {
+      apiQueue.add('updateUser', { emailIsVerified: true })
     }
   }
 }
