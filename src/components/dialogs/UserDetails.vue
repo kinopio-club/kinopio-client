@@ -13,13 +13,12 @@ dialog.narrow.user-details(
         ColorPicker(:currentColor="userColor" :visible="colorPickerIsVisible" @selectedColor="updateUserColor")
       input.name(placeholder="What's your name?" v-model="userName" name="Name")
 
-  section(v-if="isCurrentUser && isSignedIn")
-    button(@click="signOut") Sign Out
-
   section(v-if="isCurrentUser")
     .button-wrap
       button(@click.stop="toggleSettingsIsVisible" :class="{active: settingsIsVisible}") Settings
       Settings(:visible="settingsIsVisible")
+
+    button(v-if="isSignedIn" @click="signOut") Sign Out
 
     //- button(v-if="!removeAllConfirmationVisible" @click="toggleRemoveAllConfirmationVisible")
     //-   img.icon(src="@/assets/remove.svg")
