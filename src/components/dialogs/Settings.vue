@@ -1,6 +1,8 @@
 <template lang="pug">
 dialog.settings.narrow(v-if="visible" :open="visible" @click.stop)
   section
+    p Settings
+  section
     button(v-if="!removeAllConfirmationVisible" @click="toggleRemoveAllConfirmationVisible")
       img.icon(src="@/assets/remove.svg")
       span Remove All Your Data
@@ -66,13 +68,4 @@ export default {
 </script>
 
 <style lang="stylus">
-.about
-  top calc(100% - 8px)
-  .hidden
-    display none
-  .kaomoji-section
-    padding-top 14px
-  .updated
-    margin 0
-    margin-left 3px
 </style>

@@ -1,10 +1,5 @@
 <template lang="pug">
-dialog.narrow.user-details(
-  v-if="visible"
-  :open="visible"
-  @click="closeDialogs"
-  :class="{'right-side': detailsOnRight}"
-)
+dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeDialogs" :class="{'right-side': detailsOnRight}")
   section(v-if="isCurrentUser")
     .row
       .button-wrap
@@ -13,10 +8,15 @@ dialog.narrow.user-details(
         ColorPicker(:currentColor="userColor" :visible="colorPickerIsVisible" @selectedColor="updateUserColor")
       input.name(placeholder="What's your name?" v-model="userName" name="Name")
 
+  section(v-if="!isCurrentUser")
+    .user-info
+      User(:user="user" :clickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
+      p {{user.name}}
+
   section(v-if="isCurrentUser")
     .button-wrap
       button(@click.stop="toggleSettingsIsVisible" :class="{active: settingsIsVisible}") Settings
-      Settings(:visible="settingsIsVisible" @removeUser="signOut")
+      Settings(:user="user" :visible="settingsIsVisible" @removeUser="signOut")
 
     button(v-if="isSignedIn" @click="signOut") Sign Out
 
@@ -31,7 +31,8 @@ export default {
   name: 'UserDetails',
   components: {
     ColorPicker,
-    Settings
+    Settings,
+    User: () => import('@/components/User.vue')
   },
   props: {
     user: Object,
@@ -112,4 +113,17 @@ export default {
     right 8px
   .name
     margin-left 6px
+
+ .user-info
+   display: flex
+   align-items center
+   margin-bottom 10px
+   p
+     margin 0
+   .user
+     float none
+     pointer-events none
+     margin-bottom 0
+     margin-right 6px
+
 </style>
