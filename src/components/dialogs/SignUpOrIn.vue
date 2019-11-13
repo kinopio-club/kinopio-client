@@ -196,7 +196,7 @@ export default {
     async createSpaces (apiKey) {
       cache.updateIdsInAllSpaces() // added Oct 2019 for legacy spaces, can safely remove this in Oct 2020
       const updatedSpace = cache.space(this.$store.state.currentSpace.id)
-      console.log(updatedSpace)
+      this.$store.commit('addNotification', { message: 'Signed In' })
       this.$store.commit('currentSpace/restoreSpace', updatedSpace)
       this.$store.commit('currentUser/apiKey', apiKey)
       await api.createSpaces()

@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import utils from '@/utils.js'
+import nanoid from 'nanoid'
 
 // store modules
 import currentUser from '@/store/currentUser.js'
@@ -17,6 +18,7 @@ export default new Vuex.Store({
     viewportWidth: 0,
     isOnline: true,
     isBeta: false,
+    notifications: [],
 
     // current user state
     currentUserIsDrawingConnection: false,
@@ -88,6 +90,13 @@ export default new Vuex.Store({
       state.isBeta = value
     },
     triggerSpaceDetailsVisible: () => {},
+    addNotification: (state, notification) => {
+      notification.id = nanoid()
+      state.notifications.push(notification)
+    },
+    removeNotification: (state) => {
+      state.notifications.shift()
+    },
 
     // connecting
     currentUserIsDrawingConnection: (state, value) => {

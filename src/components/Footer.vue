@@ -1,25 +1,29 @@
 <template lang="pug">
 footer(v-if="!dialogsVisible")
-  .button-wrap(v-if="isOffline")
-    button(@click="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
-      span Offline
-    Offline(:visible="offlineIsVisible")
-  .button-wrap
-    button(@click="toggleRestoreIsVisible" :class="{ active: restoreIsVisible}")
-      img.refresh.icon(src="@/assets/undo.svg")
-    Restore(:visible="restoreIsVisible")
+  Notifications
+  section.controls
+    .button-wrap
+      button(@click="toggleRestoreIsVisible" :class="{ active: restoreIsVisible}")
+        img.refresh.icon(src="@/assets/undo.svg")
+      Restore(:visible="restoreIsVisible")
+    .button-wrap(v-if="isOffline")
+      button(@click="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
+        span Offline
+      Offline(:visible="offlineIsVisible")
 
 </template>
 
 <script>
 import Restore from '@/components/dialogs/Restore.vue'
 import Offline from '@/components/dialogs/Offline.vue'
+import Notifications from '@/components/Notifications.vue'
 
 export default {
   name: 'Footer',
   components: {
     Restore,
-    Offline
+    Offline,
+    Notifications
   },
   data () {
     return {
@@ -77,16 +81,20 @@ footer
   right 8px
   bottom 8px
   pointer-events none
-  > .button-wrap
-    pointer-events all
-    margin-left 6px
-    display inline-block
-    dialog
-      left initial
-      right 8px
-      top initial
-      bottom calc(100% - 8px)
   .undo
     margin 0
     height 11px
+  .controls
+    display flex
+    flex-direction row-reverse
+    > .button-wrap
+      pointer-events all
+      margin-left 6px
+      display inline-block
+      dialog
+        left initial
+        right 8px
+        top initial
+        bottom calc(100% - 8px)
+
 </style>

@@ -27,6 +27,16 @@ export default new Router({
       //   store.commit('isBeta', true)
       //   return '/'
       // }
+    },
+    {
+      path: '/confirm-email',
+      name: 'confirm-email',
+      component: Space,
+      redirect: to => {
+        // TODO: call api post here
+        store.commit('addNotification', { message: 'Email Confirmed' })
+        return '/'
+      }
     }
     // {
     //   path: '/legal',
