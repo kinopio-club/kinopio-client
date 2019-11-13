@@ -160,7 +160,7 @@ export default {
     },
 
     signUpPasswordTooShort (password) {
-      if (password.length <= 4) {
+      if (password.length < 4) {
         this.error.passwordTooShort = true
         return
       }

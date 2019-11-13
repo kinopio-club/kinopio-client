@@ -193,21 +193,6 @@ export default new Vuex.Store({
     }
   },
 
-  actions: {
-    updateUserColor: (context, { userId, newColor }) => {
-      const isCurrentUser = context.getters['currentUser/isCurrentUser'](userId)
-      if (isCurrentUser) {
-        context.dispatch('currentUser/color', newColor)
-      }
-    },
-    updateUserName: (context, { userId, newName }) => {
-      const isCurrentUser = context.getters['currentUser/isCurrentUser'](userId)
-      if (isCurrentUser) {
-        context.dispatch('currentUser/name', newName)
-      }
-    }
-  },
-
   getters: {
     shouldScrollAtEdges (state, getters) {
       const isPaintingLocked = state.currentUserIsPaintingLocked

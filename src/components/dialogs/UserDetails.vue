@@ -64,10 +64,7 @@ export default {
         return this.user.name
       },
       set (newName) {
-        this.$store.dispatch('updateUserName', {
-          userId: this.user.id,
-          newName
-        })
+        this.$store.dispatch('currentUser/name', newName)
       }
     }
   },
@@ -87,10 +84,7 @@ export default {
       this.settingsIsVisible = false
     },
     updateUserColor (newColor) {
-      this.$store.dispatch('updateUserColor', {
-        userId: this.user.id,
-        newColor
-      })
+      this.$store.dispatch('currentUser/color', newColor)
     },
     signOut () {
       cache.removeAll()
