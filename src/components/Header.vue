@@ -19,7 +19,7 @@ header
       //- .button-wrap.share
       //-   button Share
     .bottom
-      .button-wrap.sign-up-in(v-if="!userIsSignedIn && isBeta && isOnline")
+      .button-wrap.sign-up-in(v-if="!userIsSignedIn && isOnline")
         button(@click.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}") Sign Up or In
         SignUpOrIn(:visible="signUpOrInIsVisible")
 
@@ -78,9 +78,6 @@ export default {
     },
     loadingSpace () {
       return this.$store.state.loadingSpace
-    },
-    isBeta () {
-      return this.$store.state.isBeta
     },
     isOnline () {
       return this.$store.state.isOnline
