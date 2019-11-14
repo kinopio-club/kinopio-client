@@ -130,10 +130,4 @@ export default {
 </script>
 
 <style lang="stylus">
-.space-details
-  top calc(100% - 8px)
-  // .row
-  //   .badge
-  //     width 19px
-
 </style>
