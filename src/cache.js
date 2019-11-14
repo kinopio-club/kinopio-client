@@ -124,6 +124,7 @@ export default {
   restoreSpace (space) {
     const spaceKey = `removed-space-${space.id}`
     space = this.getLocal(spaceKey)
+    if (!space) { return }
     this.storeLocal(`space-${space.id}`, space)
     this.removeLocal(spaceKey)
   },
