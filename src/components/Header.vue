@@ -152,7 +152,7 @@ header
   .space-details-wrap
     max-width 250px
     @media(max-width 414px)
-      width calc(100vw - 220px)
+      width calc(100vw - 200px)
     button
       white-space nowrap
       overflow hidden
