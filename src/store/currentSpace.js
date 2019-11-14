@@ -466,7 +466,7 @@ export default {
     updateConnectionTypeForConnection: (context, { connectionId, connectionTypeId }) => {
       const connection = {
         id: connectionId,
-        ConnectionTypeId: connectionTypeId
+        connectionTypeId
       }
       apiQueue.add('updateConnection', connection)
       context.commit('updateConnectionTypeForConnection', { connectionId, connectionTypeId })
