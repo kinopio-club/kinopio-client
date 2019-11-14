@@ -5,7 +5,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
       button(@click="showSignUpVisible" :class="{active : signUpVisible}") Sign Up
       button(@click="hideSignUpVisible" :class="{active : !signUpVisible}") Sign In
 
-  // Sign Up
+  //- Sign Up
   section(v-if="signUpVisible")
     p Create an account to share your spaces and access them anywhere
     form(@submit.prevent="signUp")
@@ -21,7 +21,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
         span Sign Up
         Loader(:visible="loading.signUpOrIn")
 
-  // Sign In
+  //- Sign In
   section(v-else)
     p Welcome back
     form(@submit.prevent="signIn")
@@ -34,24 +34,25 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
         span Sign In
         Loader(:visible="loading.signUpOrIn")
 
-  // Privacy Policy
+  //- Privacy Policy
   section(v-if="signUpVisible")
     .button-wrap
       // TODO TEMP link
       a(href="http://pketh.org/kinopio-plans")
         button Privacy Policy and TOS →
 
-  // Forgot Password
+  //- Forgot Password
   section(v-else)
     button(@click="toggleResetVisible" :class="{active : resetVisible}")
       span Forgot Password?
-    div(v-show="resetVisible")
-      form.reset-form(@submit.prevent="resetPassword")
-        input(type="email" placeholder="Email" ref="resetPasswordEmail" required)
-        button(type="submit" :class="{active : loading.resetPassword, success : resetSuccess}")
-          span(v-if="resetSuccess") Password Reset Email Sent
-          span(v-else) Reset Password
-          Loader(:visible="loading.resetPassword")
+    p(v-show="resetVisible") Password reset is under active development. In the meantime, please contact support@kinopio.club if you need any help.
+    //- div(v-show="resetVisible")
+      //- form.reset-form(@submit.prevent="resetPassword")
+        //- input(type="email" placeholder="Email" ref="resetPasswordEmail" required)
+        //- button(type="submit" :class="{active : loading.resetPassword, success : resetSuccess}")
+          //- span(v-if="resetSuccess") Password Reset Email Sent
+          //- span(v-else) Reset Password
+          //- Loader(:visible="loading.resetPassword")
 
 </template>
 
