@@ -6,7 +6,7 @@ header
         img(src="@/assets/logo.png" width="50" height="45" alt="kinopio logo")
         img.down-arrow(src="@/assets/down-arrow.svg")
       About(:visible="aboutIsVisible")
-    .button-wrap.space-details
+    .button-wrap.space-details-wrap
       button(@click.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
         //img.icon.space-moon(src="@/assets/space-moon.svg")
         span {{currentSpaceName}}
@@ -149,10 +149,10 @@ header
     &.active
       .down-arrow
         transform translateY(5px)
-  .space-details
+  .space-details-wrap
     max-width 250px
     @media(max-width 414px)
-      width calc(100% - 70px)
+      width calc(100vw - 220px)
     button
       white-space nowrap
       overflow hidden
