@@ -22,8 +22,6 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
         span Import
       Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
 
-    Loader(:visible="loading")
-
   section.results-section
     ul.results-list
       template(v-for="(space in spaces")
@@ -36,14 +34,12 @@ import cache from '@/cache.js'
 import api from '@/api.js'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
-import Loader from '@/components/Loader.vue'
 
 export default {
   name: 'SpaceDetails',
   components: {
     Export,
-    Import,
-    Loader
+    Import
   },
   props: {
     visible: Boolean
@@ -52,8 +48,7 @@ export default {
     return {
       spaces: [],
       exportIsVisible: false,
-      importIsVisible: false,
-      loading: false
+      importIsVisible: false
     }
   },
   computed: {
@@ -116,9 +111,7 @@ export default {
       this.spaces = cache.getAllSpaces()
     },
     async updateWithRemoteSpaces () {
-      this.loading = true
       const spaces = await api.getUserSpaces()
-      this.loading = false
       if (spaces) {
         this.spaces = spaces
       }
@@ -137,9 +130,4 @@ export default {
 </script>
 
 <style lang="stylus">
-.space-details
-  .results-actions
-    > .loader
-      margin-left 6px
-      margin-top -1px
 </style>
