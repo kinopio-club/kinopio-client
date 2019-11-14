@@ -23,7 +23,8 @@ dialog.whats-new(v-if="visible" :open="visible" @click.stop)
     ul
       li
         del Import spaces
-      li Sign in to access your spaces on all your devices 🛫
+      li
+        del Sign in to access your spaces on all your devices 🛫
       li Share your spaces with other people (space urls)
       li Real-time collaboration 👯‍♀️
       li Updated Logo and illustrations
