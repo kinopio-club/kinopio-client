@@ -45,7 +45,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
   section(v-else)
     button(@click="toggleResetVisible" :class="{active : resetVisible}")
       span Forgot Password?
-    p(v-show="resetVisible") Password reset is under active development. In the meantime, please contact support@kinopio.club if you need any help.
+    p(v-show="resetVisible") Password reset is in development. In the meantime, please contact support@kinopio.club if you need any help.
     //- div(v-show="resetVisible")
       //- form.reset-form(@submit.prevent="resetPassword")
         //- input(type="email" placeholder="Email" ref="resetPasswordEmail" required)
