@@ -13,8 +13,9 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
       .badge.info(v-if="error.accountAlreadyExists") An account with this email already exists, Sign In instead
       input(type="password" placeholder="Password" required @input="clearErrors" v-model="password")
       input(type="password" placeholder="Confirm Password" required @input="clearErrors")
-      .badge.danger(v-if="error.passwordMatch") Passwords don't match
-      .badge.danger(v-if="error.passwordTooShort") Password is shorter than 4 characters
+      .badge.danger(v-if="error.passwordMatch") Passwords can't match
+      .badge.danger(v-if="error.passwordMatchesEmail") Password can't be from your email
+      .badge.danger(v-if="error.passwordTooShort") Password must be longer than 4 characters
       .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
       button(type="submit" :class="{active : loading.signUpOrIn}")
@@ -82,7 +83,8 @@ export default {
         accountAlreadyExists: false,
         signInCredentials: false,
         tooManyAttempts: false,
-        passwordTooShort: false
+        passwordTooShort: false,
+        passwordMatchesEmail: false
       },
       loading: {
         signUpOrIn: false,
@@ -152,20 +154,30 @@ export default {
       }
     },
 
-    signUpPasswordsIsMatch (password, confirmPassword) {
-      if (password !== confirmPassword) {
-        this.error.passwordMatch = true
-        return
+    isPasswordMatchesEmail (email, password) {
+      const emailNameIndex = email.indexOf('@')
+      const name = email.slice(0, emailNameIndex)
+      if (email === password || name === password) {
+        this.error.passwordMatchesEmail = true
+      } else {
+        return true
       }
-      return true
     },
 
-    signUpPasswordTooShort (password) {
+    isSignUpPasswordsMatch (password, confirmPassword) {
+      if (password !== confirmPassword) {
+        this.error.passwordMatch = true
+      } else {
+        return true
+      }
+    },
+
+    isSignUpPasswordTooShort (password) {
       if (password.length < 4) {
         this.error.passwordTooShort = true
-        return
+      } else {
+        return true
       }
-      return true
     },
 
     async signUp (event) {
@@ -174,8 +186,9 @@ export default {
       const password = event.target[1].value
       const confirmPassword = event.target[2].value
       const currentUser = utils.clone(this.$store.state.currentUser)
-      if (!this.signUpPasswordsIsMatch(password, confirmPassword)) { return }
-      if (!this.signUpPasswordTooShort(password)) { return }
+      if (!this.isPasswordMatchesEmail(email, password)) { return }
+      if (!this.isSignUpPasswordTooShort(password)) { return }
+      if (!this.isSignUpPasswordsMatch(password, confirmPassword)) { return }
       this.loading.signUpOrIn = true
       const response = await api.signUp(email, password, currentUser)
       const result = await response.json()
