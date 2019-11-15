@@ -17,7 +17,7 @@ article(:style="position" :data-card-id="id")
 
     //- v-if= name contains url
     //- href= url parsed out of name
-    a(href="#" @click.stop)
+    a(:href="url" @click.stop v-if="isNameUrl")
       .link
         button
           span →
@@ -107,6 +107,24 @@ export default {
     hasConnections () {
       const connections = this.$store.getters['currentSpace/cardConnections'](this.id)
       return Boolean(connections.length)
+    },
+    isNameUrl () {
+      // https://www.regextester.com/94502
+      const isUrl = new RegExp(/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/g) // eslint-disable-line no-useless-escape
+      if (this.name.match(isUrl)) {
+        return true
+      } else {
+        return false
+      }
+    },
+    url () {
+      const name = this.name
+      const hasProtocol = name.startsWith('http://') || name.startsWith('https://')
+      if (hasProtocol) {
+        return name
+      } else {
+        return `http://${name}`
+      }
     }
   },
   methods: {
@@ -182,6 +200,7 @@ article
     margin-right 5px
     align-self stretch
     min-width 25px
+    word-break: break-word
     // multi-line wrapping
     // display -webkit-box
     // -webkit-box-orient vertical
@@ -227,6 +246,7 @@ article
     cursor pointer
     padding-right 0
     button
+      background-color var(--secondary-background)
       width initial
       cursor pointer
       span
