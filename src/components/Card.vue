@@ -12,7 +12,16 @@ article(:style="position" :data-card-id="id")
     :data-card-y="y"
   )
     Frames(:card="card")
+
     p.name {{name}}
+
+    //- v-if= name contains url
+    //- href= url parsed out of name
+    a(href="#" @click.stop)
+      .link
+        button
+          span →
+
     .connector(
       :data-card-id="id"
       @mousedown="startConnecting"
@@ -177,7 +186,8 @@ article
     // display -webkit-box
     // -webkit-box-orient vertical
     // -webkit-line-clamp 3
-  .connector
+  .connector,
+  .link
     padding 8px
     align-self right
     cursor cell
@@ -212,6 +222,17 @@ article
     position absolute
     left 4px
     top 2px
+
+  .link
+    cursor pointer
+    padding-right 0
+    button
+      width initial
+      cursor pointer
+      span
+        top -3px
+        position relative
+
 .jiggle
   animation jiggle 0.5s infinite ease-out forwards
 @keyframes jiggle
