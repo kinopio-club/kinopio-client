@@ -20,8 +20,10 @@ header
       //-   button Share
     .bottom
       .button-wrap.sign-up-in(v-if="!userIsSignedIn && isOnline")
-        button(@click.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}") Sign Up or In
-        SignUpOrIn(:visible="signUpOrInIsVisible")
+        button(@click.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}")
+          span Sign Up or In
+          Loader(:visible="loadingSignUpOrIn")
+        SignUpOrIn(:visible="signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
 
 </template>
 
@@ -45,7 +47,8 @@ export default {
     return {
       aboutIsVisible: false,
       spaceDetailsIsVisible: false,
-      signUpOrInIsVisible: false
+      signUpOrInIsVisible: false,
+      loadingSignUpOrIn: false
     }
   },
   created () {
@@ -98,6 +101,9 @@ export default {
       const isVisible = this.signUpOrInIsVisible
       this.$store.commit('closeAllDialogs')
       this.signUpOrInIsVisible = !isVisible
+    },
+    setLoadingSignUpOrIn (value) {
+      this.loadingSignUpOrIn = value
     }
   }
 }

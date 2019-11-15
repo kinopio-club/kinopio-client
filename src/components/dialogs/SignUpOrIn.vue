@@ -193,7 +193,7 @@ export default {
       this.loading.signUpOrIn = true
       const response = await api.signIn(email, password)
       const result = await response.json()
-      console.log(response, result)
+      this.loading.signUpOrIn = false
       if (this.isSuccess(response)) {
         this.$store.commit('currentUser/updateUser', result)
         await this.createSpaces(result.apiKey)
@@ -230,6 +230,9 @@ export default {
       if (value) {
         this.clearErrors()
       }
+    },
+    'loading.signUpOrIn' (value) {
+      this.$emit('loading', value)
     }
   }
 }
