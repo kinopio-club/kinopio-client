@@ -111,6 +111,7 @@ export default {
     isNameUrl () {
       // https://www.regextester.com/94502
       const isUrl = new RegExp(/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/g) // eslint-disable-line no-useless-escape
+      if (!this.name) { return }
       if (this.name.match(isUrl)) {
         return true
       } else {
