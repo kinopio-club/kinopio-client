@@ -29,7 +29,7 @@ import Export from '@/components/dialogs/Export.vue'
 import ToAnotherSpace from '@/components/dialogs/ToAnotherSpace.vue'
 
 export default {
-  name: 'MultipleCardActions',
+  name: 'MultipleSelectedActions',
   components: {
     Export,
     ToAnotherSpace
