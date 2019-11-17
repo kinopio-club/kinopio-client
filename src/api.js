@@ -92,7 +92,7 @@ export default {
       console.log(`🛫 sending operations`, body)
       await fetch(`${host}/operations`, options)
     } catch (error) {
-      console.error('🚒', error)
+      console.error('🚒', error, body)
       // if (error.message === 'timeout') {
       //   addBackToQueue(body)
       // }
