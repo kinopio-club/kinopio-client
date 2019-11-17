@@ -1,17 +1,32 @@
 <template lang="pug">
-dialog.narrow(v-if="visible" :open="visible" :style="position" ref="dialog" @click="closeDialogs")
-  section(:style="{backgroundColor: userColor}" v-if="multipleCardsIsSelected")
-    button(@click="connectCards") Connect
-    button(@click="disconnectCards") Disconnect
+dialog.narrow.multiple-selected-actions(v-if="visible" :open="visible" :style="position" ref="dialog" @click="closeDialogs")
+  section(:style="{backgroundColor: userColor}" v-if="multipleCardsIsSelected || connectionTypes.length")
+    //- p 2 Cards
+    .row(v-if="connectionTypes.length")
+      .button-wrap
+        button.change-color
+          .segmented-colors.icon
+            template(v-for="type in connectionTypes")
+              .current-color(:style="{ background: type.color}")
+
+    .row(v-if="multipleCardsIsSelected")
+      button(@click="connectCards") Connect
+      button(@click="disconnectCards") Disconnect
+    //- TODO if connectionsSelected
+    //- section(:style="{backgroundColor: userColor}" v-if="multipleCardsIsSelected")
+    //- p 2 Connections
+    //- button blue/purp
+        //-span Connections
+
   section(:style="{backgroundColor: userColor}")
-    button(@click="removeCards")
-      img.icon(src="@/assets/remove.svg")
-      span Remove
-    .button-wrap
-      button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
-        span Export
-      Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
-  section(:style="{backgroundColor: userColor}")
+    .row
+      button(@click="removeCards")
+        img.icon(src="@/assets/remove.svg")
+        span {{ removeLabel }}
+      .button-wrap
+        button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+          span Export
+        Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
     .button-wrap
       button(@click.stop="toggleToAnotherSpaceIsVisible" :class="{ active: toAnotherSpaceIsVisible }")
         img.icon.move(src="@/assets/move.svg")
@@ -22,6 +37,7 @@ dialog.narrow(v-if="visible" :open="visible" :style="position" ref="dialog" @cli
 
 <script>
 import last from 'lodash-es/last'
+import uniqBy from 'lodash-es/uniqBy'
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import utils from '@/utils.js'
@@ -55,15 +71,17 @@ export default {
     multipleCardsSelectedIds () {
       return this.$store.state.multipleCardsSelectedIds
     },
+    numberOfCardsSelected () {
+      return this.multipleCardsSelectedIds.length
+    },
     multipleCardsIsSelected () {
-      const numberOfCards = this.multipleCardsSelectedIds.length
-      return Boolean(numberOfCards > 1)
+      return Boolean(this.numberOfCardsSelected > 1)
     },
     exportScope () {
       return 'cards'
     },
     exportTitle () {
-      const numberOfCards = this.multipleCardsSelectedIds.length
+      const numberOfCards = this.numberOfCardsSelected
       let title = 'Card'
       if (numberOfCards > 1) { title = `${numberOfCards} Cards` }
       return title
@@ -73,6 +91,23 @@ export default {
         return this.$store.getters['currentSpace/cardById'](cardId)
       })
       return { 'cards': cards }
+    },
+    removeLabel () {
+      if (this.multipleCardsIsSelected) { // TODO: || multipleConnectionsIsSelected
+        return 'Remove All'
+      } else {
+        return 'Remove'
+      }
+    },
+    connections () {
+      const connections = this.multipleCardsSelectedIds.map(cardId => this.$store.getters['currentSpace/cardConnections'](cardId))
+      let normalized = connections.flat()
+      normalized = uniqBy(normalized, 'id')
+      return normalized
+    },
+    connectionTypes () {
+      const connections = uniqBy(this.connections, 'connectionTypeId')
+      return connections.map(connection => this.$store.getters['currentSpace/connectionTypeById'](connection.connectionTypeId))
     }
   },
   methods: {
@@ -154,4 +189,21 @@ export default {
 </script>
 
 <style lang="stylus">
+.multiple-selected-actions
+  .segmented-colors
+    display: inline-block
+    vertical-align: middle
+    .current-color
+      display inline-block
+      vertical-align bottom
+      // margin-right 3px
+      border-radius 0
+      &:first-child
+        border-top-left-radius 3px
+        border-bottom-left-radius 3px
+      &:last-child
+        border-top-right-radius 3px
+        border-bottom-right-radius 3px
+        margin-right 0
+
 </style>
