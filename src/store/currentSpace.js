@@ -395,6 +395,7 @@ export default {
       } else {
         const currentDraggingCardId = context.rootState.currentDraggingCardId
         let card = context.rootState.currentSpace.cards.find(card => currentDraggingCardId === card.id)
+        if (!card) { return }
         card = utils.clone(card)
         apiQueue.add('updateCard', { id: card.id, x: card.x, y: card.y })
         context.dispatch('updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
