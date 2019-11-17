@@ -287,6 +287,10 @@ export default {
       space = utils.migrationEnsureRemovedCards(space)
       context.dispatch('loadSpace', space)
       context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
+      apiQueue.add('updateSpace', {
+        id: space.id,
+        updatedAt: new Date()
+      })
     },
     removeCurrentSpace: (context) => {
       const space = utils.clone(context.state)
