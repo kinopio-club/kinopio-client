@@ -528,6 +528,9 @@ export default {
         return start || end
       })
     },
+    connectionById: (state) => (id) => {
+      return state.connections.find(connection => connection.id === id)
+    },
 
     // Connection Types
     connectionTypeById: (state) => (id) => {

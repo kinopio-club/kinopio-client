@@ -1,46 +1,41 @@
 <template lang="pug">
-dialog.narrow.multiple-selected-actions(v-if="visible" :open="visible" :style="position" ref="dialog" @click="closeDialogs")
-  section(:style="{backgroundColor: userColor}")
-    //- p 2 Cards
-    //- .row(v-if="connectionTypes.length")
-    //-   .button-wrap
-    //-     button.change-color
-    //-       .segmented-colors.icon
-    //-         template(v-for="type in connectionTypes")
-    //-           .current-color(:style="{ background: type.color}")
+dialog.narrow.multiple-selected-actions(
+  v-if="visible"
+  :open="visible"
+  ref="dialog"
+  @click="closeDialogs"
+  :style="{backgroundColor: userColor, left: position.left, top: position.top}"
+)
 
+  section(v-if="multipleCardsIsSelected || connectionsIsSelected")
     .row(v-if="multipleCardsIsSelected")
       button(@click="connectCards") Connect
       button(@click="disconnectCards") Disconnect
-    //- TODO if connectionsSelected
-    //- section(:style="{backgroundColor: userColor}" v-if="multipleCardsIsSelected")
-    //- p 2 Connections
-    //- button blue/purp
-        //-span Connections
-
-    //- section(:style="{backgroundColor: userColor}")
-    .row
+    .row(v-if="connectionsIsSelected")
       .button-wrap
-        button(@click.stop="toggleToAnotherSpaceIsVisible" :class="{ active: toAnotherSpaceIsVisible }")
-          img.icon.move(src="@/assets/move.svg")
-          span To Another Space
-        ToAnotherSpace(:visible="toAnotherSpaceIsVisible")
-
+        button.change-color
+          .segmented-colors.icon
+            template(v-for="type in connectionTypes")
+              .current-color(:style="{ background: type.color}")
+  section
+    .row
+      button(@click="removeCards")
+        img.icon(src="@/assets/remove.svg")
+        span Remove
+      .button-wrap
+        button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+          span Export
+        Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
     .button-wrap
-      button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
-        span Export
-      Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
-
-  section(:style="{backgroundColor: userColor}")
-    button(@click="removeCards")
-      img.icon(src="@/assets/remove.svg")
-      span {{ removeLabel }}
+      button(@click.stop="toggleToAnotherSpaceIsVisible" :class="{ active: toAnotherSpaceIsVisible }")
+        img.icon.move(src="@/assets/move.svg")
+        span To Another Space
+      ToAnotherSpace(:visible="toAnotherSpaceIsVisible")
 
 </template>
 
 <script>
 import last from 'lodash-es/last'
-import uniqBy from 'lodash-es/uniqBy'
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import utils from '@/utils.js'
@@ -80,6 +75,19 @@ export default {
     multipleCardsIsSelected () {
       return Boolean(this.numberOfCardsSelected > 1)
     },
+
+    multipleSelectedConnectionIds () {
+      return this.$store.state.multipleConnectionsSelectedIds
+    },
+    connectionTypes () {
+      return this.multipleSelectedConnectionIds.map(id => {
+        const connection = this.$store.getters['currentSpace/connectionById'](id)
+        return this.$store.getters['currentSpace/connectionTypeById'](connection.connectionTypeId)
+      })
+    },
+    connectionsIsSelected () {
+      return Boolean(this.multipleSelectedConnectionIds.length)
+    },
     exportScope () {
       return 'cards'
     },
@@ -94,24 +102,14 @@ export default {
         return this.$store.getters['currentSpace/cardById'](cardId)
       })
       return { 'cards': cards }
-    },
-    removeLabel () {
-      if (this.multipleCardsIsSelected) { // TODO: || multipleConnectionsIsSelected
-        return 'Remove All'
-      } else {
-        return 'Remove'
-      }
-    },
-    connections () {
-      const connections = this.multipleCardsSelectedIds.map(cardId => this.$store.getters['currentSpace/cardConnections'](cardId))
-      let normalized = connections.flat()
-      normalized = uniqBy(normalized, 'id')
-      return normalized
-    },
-    connectionTypes () {
-      const connections = uniqBy(this.connections, 'connectionTypeId')
-      return connections.map(connection => this.$store.getters['currentSpace/connectionTypeById'](connection.connectionTypeId))
     }
+    // removeLabel () {
+    //   if (this.multipleCardsIsSelected) { // TODO: || multipleConnectionsIsSelected
+    //     return 'Remove All'
+    //   } else {
+    //     return 'Remove'
+    //   }
+    // },
   },
   methods: {
     toggleExportIsVisible () {
@@ -152,6 +150,7 @@ export default {
       connections = connections.filter(Boolean)
       connections.forEach(connection => {
         this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
+        this.$store.commit('addToMultipleConnectionsSelected', connection.id)
       })
     },
     disconnectCards () {

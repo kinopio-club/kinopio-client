@@ -274,7 +274,6 @@ export default {
           this.$store.commit('addToMultipleConnectionsSelected', pathId)
         }
       })
-      console.log(this.$store.state.multipleConnectionsSelectedIds.length)
     }
 
   }
