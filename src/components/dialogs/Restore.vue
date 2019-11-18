@@ -12,11 +12,11 @@ dialog.restore(v-if="visible" :open="visible" @click.stop)
         Loader(:visible="loading.spaces")
 
   section(v-if="!items.length")
-    img(src="@/assets/photo-empty-meal.png")
     p(v-if="cardsVisible") Removed cards from
       span !{' '}{{currentSpaceName}}!{' '}
       span can be restored here
     p(v-if="!cardsVisible") Removed spaces can be restored here
+    img(src="@/assets/photo-empty-meal.png")
 
   section.results-section(v-if="items.length")
     ul.results-list
