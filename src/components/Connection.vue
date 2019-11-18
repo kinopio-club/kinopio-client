@@ -9,6 +9,7 @@ path.path(
   :d="path"
   @click="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
+  :class="{active: isSelected}"
 )
 </template>
 
@@ -30,6 +31,10 @@ export default {
       if (this.connectionType) {
         return this.connectionType.color
       } else { return undefined }
+    },
+    isSelected () {
+      const selectedIds = this.$store.state.multipleConnectionsSelectedIds
+      return selectedIds.includes(this.id)
     }
   },
   methods: {
@@ -46,6 +51,7 @@ export default {
 
 <style lang="stylus">
 .path
-  &:hover
+  &:hover,
+  &.active
     stroke-width: 7
 </style>

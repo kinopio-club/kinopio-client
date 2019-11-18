@@ -267,10 +267,14 @@ export default {
     selectConnections (circle) {
       const paths = document.querySelectorAll('svg .path')
       paths.forEach(path => {
+        const ids = this.$store.state.multipleConnectionsSelectedIds
+        const pathId = path.dataset.id
+        if (ids.includes(pathId)) { return }
         if (path.isPointInFill(circle)) {
-          console.log('select path', path, path.dataset.id)
+          this.$store.commit('addToMultipleConnectionsSelected', pathId)
         }
       })
+      console.log(this.$store.state.multipleConnectionsSelectedIds.length)
     }
 
   }

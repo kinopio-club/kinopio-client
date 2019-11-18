@@ -153,23 +153,6 @@ export default new Vuex.Store({
     },
 
     // multiple selection
-    addToMultipleCardsSelected: (state, cardId) => {
-      utils.typeCheck(cardId, 'string')
-      if (!state.multipleCardsSelectedIds.includes(cardId)) {
-        state.multipleCardsSelectedIds.push(cardId)
-      }
-    },
-    addToMultipleConnectionsSelected: (state, connectionId) => {
-      utils.typeCheck(connectionId, 'string')
-      if (!state.multipleConnectionsSelectedIds.includes(connectionId)) {
-        state.multipleConnectionsSelectedIds.push(connectionId)
-      }
-    },
-    clearMultipleSelected: (state) => {
-      state.multipleCardsSelectedIds = []
-      state.multipleConnectionsSelectedIds = []
-    },
-
     multipleSelectedActionsIsVisible: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.multipleSelectedActionsIsVisible = value
@@ -192,6 +175,22 @@ export default new Vuex.Store({
     multipleSelectedActionsPosition: (state, position) => {
       utils.typeCheck(position, 'object')
       state.multipleSelectedActionsPosition = position
+    },
+    addToMultipleCardsSelected: (state, cardId) => {
+      utils.typeCheck(cardId, 'string')
+      if (!state.multipleCardsSelectedIds.includes(cardId)) {
+        state.multipleCardsSelectedIds.push(cardId)
+      }
+    },
+    addToMultipleConnectionsSelected: (state, connectionId) => {
+      utils.typeCheck(connectionId, 'string')
+      if (!state.multipleConnectionsSelectedIds.includes(connectionId)) {
+        state.multipleConnectionsSelectedIds.push(connectionId)
+      }
+    },
+    clearMultipleSelected: (state) => {
+      state.multipleCardsSelectedIds = []
+      state.multipleConnectionsSelectedIds = []
     },
 
     // loading
