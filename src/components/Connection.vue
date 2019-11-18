@@ -5,6 +5,7 @@ path.path(
   stroke-width="5"
   :data-start-card="startCardId"
   :data-end-card="endCardId"
+  :data-id="id"
   :d="path"
   @click="showConnectionDetails"
   @touchend.stop="showConnectionDetails"

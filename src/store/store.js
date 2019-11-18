@@ -41,10 +41,10 @@ export default new Vuex.Store({
     currentDraggingCardId: '',
     preventDraggedCardFromShowingDetails: false,
 
-    // multiple cards
+    // multiple selection
+    multipleSelectedActionsIsVisible: false,
+    multipleSelectedActionsPosition: {},
     multipleCardsSelectedIds: [],
-    multipleCardActionsIsVisible: false,
-    multipleCardActionsPosition: {},
     cardMap: [],
 
     // loading
@@ -77,7 +77,7 @@ export default new Vuex.Store({
       state.cardDetailsIsVisibleForCardId = cardId
     },
     closeAllDialogs: (state) => {
-      state.multipleCardActionsIsVisible = false
+      state.multipleSelectedActionsIsVisible = false
       state.cardDetailsIsVisibleForCardId = ''
       state.connectionDetailsIsVisibleForConnectionId = ''
     },
@@ -162,9 +162,9 @@ export default new Vuex.Store({
         state.multipleCardsSelectedIds.push(cardId)
       }
     },
-    multipleCardActionsIsVisible: (state, value) => {
+    multipleSelectedActionsIsVisible: (state, value) => {
       utils.typeCheck(value, 'boolean')
-      state.multipleCardActionsIsVisible = value
+      state.multipleSelectedActionsIsVisible = value
     },
     generateCardMap: (state) => {
       const cards = state.currentSpace.cards
@@ -181,9 +181,9 @@ export default new Vuex.Store({
         })
       })
     },
-    multipleCardActionsPosition: (state, position) => {
+    multipleSelectedActionsPosition: (state, position) => {
       utils.typeCheck(position, 'object')
-      state.multipleCardActionsPosition = position
+      state.multipleSelectedActionsPosition = position
     },
 
     // loading

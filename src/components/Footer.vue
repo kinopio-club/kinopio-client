@@ -52,7 +52,7 @@ export default {
       return hash.replace('app.', '') // 768db305407f4c847d44
     },
     dialogsVisible () {
-      return Boolean(this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.multipleCardActionsIsVisible || this.$store.state.connectionDetailsIsVisibleForConnectionId)
+      return Boolean(this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.multipleSelectedActionsIsVisible || this.$store.state.connectionDetailsIsVisibleForConnectionId)
     },
     isOffline () {
       return !this.$store.state.isOnline

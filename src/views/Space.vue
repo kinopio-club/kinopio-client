@@ -394,8 +394,8 @@ export default {
 
     showMultipleSelectedActions (position) {
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
-      this.$store.commit('multipleCardActionsPosition', position)
-      this.$store.commit('multipleCardActionsIsVisible', true)
+      this.$store.commit('multipleSelectedActionsPosition', position)
+      this.$store.commit('multipleSelectedActionsIsVisible', true)
     },
 
     stopInteractions (event) {

@@ -1,13 +1,13 @@
 <template lang="pug">
 dialog.narrow.multiple-selected-actions(v-if="visible" :open="visible" :style="position" ref="dialog" @click="closeDialogs")
-  section(:style="{backgroundColor: userColor}" v-if="multipleCardsIsSelected || connectionTypes.length")
+  section(:style="{backgroundColor: userColor}")
     //- p 2 Cards
-    .row(v-if="connectionTypes.length")
-      .button-wrap
-        button.change-color
-          .segmented-colors.icon
-            template(v-for="type in connectionTypes")
-              .current-color(:style="{ background: type.color}")
+    //- .row(v-if="connectionTypes.length")
+    //-   .button-wrap
+    //-     button.change-color
+    //-       .segmented-colors.icon
+    //-         template(v-for="type in connectionTypes")
+    //-           .current-color(:style="{ background: type.color}")
 
     .row(v-if="multipleCardsIsSelected")
       button(@click="connectCards") Connect
@@ -18,20 +18,23 @@ dialog.narrow.multiple-selected-actions(v-if="visible" :open="visible" :style="p
     //- button blue/purp
         //-span Connections
 
-  section(:style="{backgroundColor: userColor}")
+    //- section(:style="{backgroundColor: userColor}")
     .row
-      button(@click="removeCards")
-        img.icon(src="@/assets/remove.svg")
-        span {{ removeLabel }}
       .button-wrap
-        button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
-          span Export
-        Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
+        button(@click.stop="toggleToAnotherSpaceIsVisible" :class="{ active: toAnotherSpaceIsVisible }")
+          img.icon.move(src="@/assets/move.svg")
+          span To Another Space
+        ToAnotherSpace(:visible="toAnotherSpaceIsVisible")
+
     .button-wrap
-      button(@click.stop="toggleToAnotherSpaceIsVisible" :class="{ active: toAnotherSpaceIsVisible }")
-        img.icon.move(src="@/assets/move.svg")
-        span To Another Space
-      ToAnotherSpace(:visible="toAnotherSpaceIsVisible")
+      button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+        span Export
+      Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
+
+  section(:style="{backgroundColor: userColor}")
+    button(@click="removeCards")
+      img.icon(src="@/assets/remove.svg")
+      span {{ removeLabel }}
 
 </template>
 
@@ -57,9 +60,9 @@ export default {
     }
   },
   computed: {
-    visible () { return this.$store.state.multipleCardActionsIsVisible },
+    visible () { return this.$store.state.multipleSelectedActionsIsVisible },
     position () {
-      const cursor = this.$store.state.multipleCardActionsPosition
+      const cursor = this.$store.state.multipleSelectedActionsPosition
       return {
         left: `${cursor.x}px`,
         top: `${cursor.y}px`
