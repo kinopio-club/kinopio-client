@@ -119,7 +119,7 @@ export default {
       if (!multipleCardsIsSelected && !dialogIsVisible) {
         this.$store.commit('shouldAddNewCard', true)
       }
-      this.$store.commit('multipleCardsSelectedIds', [])
+      this.$store.commit('clearMultipleSelected')
       this.$store.commit('generateCardMap')
       this.$store.commit('closeAllDialogs')
       initialCircles.map(circle => {
@@ -268,7 +268,7 @@ export default {
       const paths = document.querySelectorAll('svg .path')
       paths.forEach(path => {
         if (path.isPointInFill(circle)) {
-          console.log('select path', path)
+          console.log('select path', path, path.dataset.id)
         }
       })
     }

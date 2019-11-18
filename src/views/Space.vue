@@ -411,7 +411,7 @@ export default {
         const position = utils.cursorPositionInPage(event)
         this.addNewCard(position)
       }
-      if (this.$store.state.multipleCardsSelectedIds.length) {
+      if (this.$store.state.multipleCardsSelectedIds.length || this.$store.state.multipleConnectionsSelectedIds.length) {
         const position = utils.cursorPositionInPage(event)
         this.showMultipleSelectedActions(position)
       }

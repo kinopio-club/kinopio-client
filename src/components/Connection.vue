@@ -38,7 +38,7 @@ export default {
       this.$store.commit('closeAllDialogs')
       this.$store.commit('connectionDetailsIsVisibleForConnectionId', this.id)
       this.$store.commit('connectionDetailsPosition', detailsPosition)
-      this.$store.commit('multipleCardsSelectedIds', [])
+      this.$store.commit('clearMultipleSelected')
     }
   }
 }

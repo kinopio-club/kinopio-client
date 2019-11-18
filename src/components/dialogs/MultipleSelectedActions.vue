@@ -168,7 +168,7 @@ export default {
         this.$store.dispatch('currentSpace/removeCard', card)
       })
       this.$store.commit('closeAllDialogs')
-      this.$store.commit('multipleCardsSelectedIds', [])
+      this.$store.commit('clearMultipleSelected')
     },
     scrollIntoView () {
       const element = this.$refs.dialog
