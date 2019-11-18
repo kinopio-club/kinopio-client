@@ -104,6 +104,7 @@ export default {
       currentCursor = utils.cursorPositionInPage(event)
       let circle = { x: currentCursor.x, y: currentCursor.y, color, iteration: 0 }
       this.selectCards(circle)
+      this.selectConnections(circle)
       paintingCircles.push(circle)
     },
 
@@ -259,6 +260,15 @@ export default {
         const isBetweenY = utils.between(y)
         if (isBetweenX && isBetweenY) {
           this.$store.commit('addToMultipleCardsSelected', card.cardId)
+        }
+      })
+    },
+
+    selectConnections (circle) {
+      const paths = document.querySelectorAll('svg .path')
+      paths.forEach(path => {
+        if (path.isPointInFill(circle)) {
+          console.log('select path', path)
         }
       })
     }
