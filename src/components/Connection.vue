@@ -9,7 +9,7 @@ path.path(
   :d="path"
   @click="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
-  :class="{active: isSelected}"
+  :class="{active: isSelected || detailsIsVisible}"
 )
 </template>
 
@@ -35,6 +35,10 @@ export default {
     isSelected () {
       const selectedIds = this.$store.state.multipleConnectionsSelectedIds
       return selectedIds.includes(this.id)
+    },
+    detailsIsVisible () {
+      const detailsId = this.$store.state.connectionDetailsIsVisibleForConnectionId
+      return detailsId === this.id
     }
   },
   methods: {
