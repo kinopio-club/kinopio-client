@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.multiple-connections-picker(v-if="visible" :open="visible" @click="closeColorPicker" ref="dialog")
+dialog.narrow.multiple-connections-picker(v-if="visible" :open="visible" ref="dialog")
   section
     p hihi
 </template>

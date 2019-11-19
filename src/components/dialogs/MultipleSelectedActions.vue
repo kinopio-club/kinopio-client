@@ -13,7 +13,7 @@ dialog.narrow.multiple-selected-actions(
       button(@click="disconnectCards") Disconnect
     .row(v-if="connectionsIsSelected")
       .button-wrap
-        button.change-color
+        button.change-color(@click.stop="toggleMultipleConnectionsPickerVisible")
           .segmented-colors.icon
             template(v-for="type in connectionTypes")
               .current-color(:style="{ background: type.color}")
