@@ -19,7 +19,7 @@ dialog.narrow.multiple-selected-actions(
               .current-color(:style="{ background: type.color}")
   section
     .row
-      button(@click="removeCards")
+      button(@click="remove")
         img.icon(src="@/assets/remove.svg")
         span {{ removeLabel }}
       .button-wrap
@@ -78,23 +78,23 @@ export default {
 
     // connections
 
-    multipleSelectedConnectionIds () {
+    multipleConnectionsSelectedIds () {
       return this.$store.state.multipleConnectionsSelectedIds
     },
     connectionTypes () {
-      return this.multipleSelectedConnectionIds.map(id => {
+      return this.multipleConnectionsSelectedIds.map(id => {
         const connection = this.$store.getters['currentSpace/connectionById'](id)
         return this.$store.getters['currentSpace/connectionTypeById'](connection.connectionTypeId)
       })
     },
     connectionsIsSelected () {
-      return Boolean(this.multipleSelectedConnectionIds.length)
+      return Boolean(this.multipleConnectionsSelectedIds.length)
     },
 
     // all
 
     multipleItemsSelected () {
-      const total = this.multipleSelectedConnectionIds.length + this.multipleCardsSelectedIds.length
+      const total = this.multipleConnectionsSelectedIds.length + this.multipleCardsSelectedIds.length
       return Boolean(total > 1)
     },
     exportScope () {
@@ -169,11 +169,16 @@ export default {
       })
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
     },
-    removeCards () {
+    remove () {
       const cardIds = this.multipleCardsSelectedIds
+      const connectionIds = this.multipleConnectionsSelectedIds
       cardIds.forEach(cardId => {
-        const card = this.$store.state.currentSpace.cards.find(card => card.id === cardId)
+        const card = this.$store.getters['currentSpace/cardById'](cardId)
         this.$store.dispatch('currentSpace/removeCard', card)
+      })
+      connectionIds.forEach(connectionId => {
+        const connection = this.$store.getters['currentSpace/connectionById'](connectionId)
+        this.$store.dispatch('currentSpace/removeConnection', connection)
       })
       this.$store.commit('closeAllDialogs')
       this.$store.commit('clearMultipleSelected')
