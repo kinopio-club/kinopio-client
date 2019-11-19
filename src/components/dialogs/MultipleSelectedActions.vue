@@ -17,6 +17,7 @@ dialog.narrow.multiple-selected-actions(
           .segmented-colors.icon
             template(v-for="type in connectionTypes")
               .current-color(:style="{ background: type.color}")
+        MultipleConnectionsPicker(:visible="multipleConnectionsPickerVisible")
   section
     .row
       button(@click="remove")
@@ -41,17 +42,20 @@ import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 import utils from '@/utils.js'
 import Export from '@/components/dialogs/Export.vue'
 import ToAnotherSpace from '@/components/dialogs/ToAnotherSpace.vue'
+import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
 
 export default {
   name: 'MultipleSelectedActions',
   components: {
     Export,
-    ToAnotherSpace
+    ToAnotherSpace,
+    MultipleConnectionsPicker
   },
   data () {
     return {
       exportIsVisible: false,
-      toAnotherSpaceIsVisible: false
+      toAnotherSpaceIsVisible: false,
+      multipleConnectionsPickerVisible: false
     }
   },
   computed: {
@@ -131,9 +135,15 @@ export default {
       this.closeDialogs()
       this.toAnotherSpaceIsVisible = !isVisible
     },
+    toggleMultipleConnectionsPickerVisible () {
+      const isVisible = this.multipleConnectionsPickerVisible
+      this.closeDialogs()
+      this.multipleConnectionsPickerVisible = !isVisible
+    },
     closeDialogs () {
       this.exportIsVisible = false
       this.toAnotherSpaceIsVisible = false
+      this.multipleConnectionsPickerVisible = false
     },
     connectionType () {
       const typePref = this.$store.state.currentUser.defaultConnectionTypeId
