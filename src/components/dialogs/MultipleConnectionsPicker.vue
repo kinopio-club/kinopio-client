@@ -1,79 +1,60 @@
 <template lang="pug">
-dialog.narrow.multiple-connections-picker(v-if="visible" :open="visible" ref="dialog")
-  section
-    p hihi
+dialog.narrow.multiple-connections-picker(v-if="visible" :open="visible" ref="dialog" @click.stop)
+  section.results-actions
+    button(@click="addConnectionType")
+      img.icon(src="@/assets/add.svg")
+      span Add
+
+  section.results-section
+    ul.results-list
+      template(v-for="(type in connectionTypes")
+        li(:class="{ active: connectionTypeIsActive(type) }" @click="changeConnectionTypes(type)" :key="type.id")
+          .badge(:style="{backgroundColor: type.color}" :class="{checked: connectionTypeIsDefault(type)}")
+          .name {{type.name}}
 </template>
 
 <script>
+import last from 'lodash-es/last'
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
+
+import utils from '@/utils.js'
 
 export default {
   name: 'MultipleConnectionsPicker',
   props: {
-    visible: Boolean
-  },
-  data () {
-    return {
-      // isDefault: false,
-      // colorPickerIsVisible: false
-    }
+    visible: Boolean,
+    selectedConnections: Array,
+    selectedConnectionTypes: Array
   },
   computed: {
-    // visible () {
-    //   return Boolean(this.$store.state.connectionDetailsIsVisibleForConnectionId)
-    // },
+    connectionTypes () {
+      return this.$store.state.currentSpace.connectionTypes
+    }
   },
   methods: {
-    // addConnectionType () {
-    //   this.$store.dispatch('currentSpace/addConnectionType')
-    //   const types = utils.clone(this.connectionTypes)
-    //   const newType = last(types)
-    //   this.changeConnectionType(newType)
-    // },
-    // connectionTypeIsActive (type) {
-    //   return Boolean(type.id === this.currentConnection.connectionTypeId)
-    // },
-    // connectionTypeIsDefault (type) {
-    //   const typePref = this.$store.state.currentUser.defaultConnectionTypeId
-    //   return typePref === type.id
-    // },
-    // removeConnection () {
-    //   this.$store.dispatch('currentSpace/removeConnection', this.currentConnection)
-    //   this.$store.commit('closeAllDialogs')
-    //   this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
-    // },
-    // changeConnectionType (type) {
-    //   this.$store.dispatch('currentSpace/updateConnectionTypeForConnection', {
-    //     connectionId: this.currentConnection.id,
-    //     connectionTypeId: type.id
-    //   })
-    //   this.updateDefaultConnectionType()
-    // },
-    // updateDefaultConnectionType () {
-    //   const typePref = this.$store.state.currentUser.defaultConnectionTypeId
-    //   this.isDefault = Boolean(typePref === this.currentConnectionType.id)
-    // },
-    // toggleDefault () {
-    //   this.isDefault = !this.isDefault
-    //   if (this.isDefault) {
-    //     this.$store.dispatch('currentUser/defaultConnectionTypeId', this.currentConnectionType.id)
-    //   } else {
-    //     this.$store.dispatch('currentUser/defaultConnectionTypeId', '')
-    //   }
-    // },
-    // toggleColorPicker () {
-    //   this.colorPickerIsVisible = !this.colorPickerIsVisible
-    // },
-    // closeColorPicker () {
-    //   this.colorPickerIsVisible = false
-    // },
-    // updateTypeColor (newColor) {
-    //   const connectionType = {
-    //     id: this.currentConnectionType.id,
-    //     color: newColor
-    //   }
-    //   this.$store.dispatch('currentSpace/updateConnectionType', connectionType)
-    // },
+    changeConnectionTypes (type) {
+      this.selectedConnections.forEach(connection => {
+        this.$store.dispatch('currentSpace/updateConnectionTypeForConnection', {
+          connectionId: connection.id,
+          connectionTypeId: type.id
+        })
+      })
+    },
+    connectionTypeIsDefault (type) {
+      const typePref = this.$store.state.currentUser.defaultConnectionTypeId
+      return typePref === type.id
+    },
+    connectionTypeIsActive (type) {
+      return this.selectedConnections.find(connection => {
+        return connection.connectionTypeId === type.id
+      })
+    },
+    addConnectionType () {
+      this.$store.dispatch('currentSpace/addConnectionType')
+      const types = utils.clone(this.connectionTypes)
+      const newType = last(types)
+      this.changeConnectionTypes(newType)
+    },
     scrollIntoView () {
       const element = this.$refs.dialog
       scrollIntoView(element, {
@@ -81,11 +62,6 @@ export default {
         scrollMode: 'if-needed'
       })
     }
-    // updateView () {
-    //   this.updateDefaultConnectionType()
-    //   this.colorPickerIsVisible = false
-    //   this.scrollIntoView()
-    // }
   },
   watch: {
     visible (visible) {

@@ -17,7 +17,7 @@ dialog.narrow.multiple-selected-actions(
           .segmented-colors.icon
             template(v-for="type in connectionTypes")
               .current-color(:style="{ background: type.color}")
-        MultipleConnectionsPicker(:visible="multipleConnectionsPickerVisible")
+        MultipleConnectionsPicker(:visible="multipleConnectionsPickerVisible" :selectedConnections="connections" :selectedConnectionTypes="connectionTypes")
   section
     .row
       button(@click="remove")
@@ -37,6 +37,7 @@ dialog.narrow.multiple-selected-actions(
 
 <script>
 import last from 'lodash-es/last'
+import uniq from 'lodash-es/uniq'
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import utils from '@/utils.js'
@@ -82,14 +83,19 @@ export default {
 
     // connections
 
+    connections () {
+      return this.multipleConnectionsSelectedIds.map(id => {
+        return this.$store.getters['currentSpace/connectionById'](id)
+      })
+    },
     multipleConnectionsSelectedIds () {
       return this.$store.state.multipleConnectionsSelectedIds
     },
     connectionTypes () {
-      return this.multipleConnectionsSelectedIds.map(id => {
+      return uniq(this.multipleConnectionsSelectedIds.map(id => {
         const connection = this.$store.getters['currentSpace/connectionById'](id)
         return this.$store.getters['currentSpace/connectionTypeById'](connection.connectionTypeId)
-      })
+      }))
     },
     connectionsIsSelected () {
       return Boolean(this.multipleConnectionsSelectedIds.length)
