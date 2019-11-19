@@ -269,8 +269,13 @@ export default {
       paths.forEach(path => {
         const ids = this.$store.state.multipleConnectionsSelectedIds
         const pathId = path.dataset.id
-        if (ids.includes(pathId)) { return }
-        if (path.isPointInFill(circle)) {
+        const svg = document.querySelector('svg.connections')
+        let point = svg.createSVGPoint()
+        point.x = circle.x
+        point.y = circle.y
+        const isAlreadySelected = ids.includes(pathId)
+        if (isAlreadySelected) { return }
+        if (path.isPointInFill(point)) {
           this.$store.commit('addToMultipleConnectionsSelected', pathId)
         }
       })
