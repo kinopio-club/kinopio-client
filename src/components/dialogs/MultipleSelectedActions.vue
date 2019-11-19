@@ -21,7 +21,7 @@ dialog.narrow.multiple-selected-actions(
     .row
       button(@click="removeCards")
         img.icon(src="@/assets/remove.svg")
-        span Remove
+        span {{ removeLabel }}
       .button-wrap
         button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
           span Export
@@ -66,15 +66,17 @@ export default {
     userColor () {
       return this.$store.state.currentUser.color
     },
+
+    // cards
+
     multipleCardsSelectedIds () {
       return this.$store.state.multipleCardsSelectedIds
     },
-    numberOfCardsSelected () {
-      return this.multipleCardsSelectedIds.length
-    },
     multipleCardsIsSelected () {
-      return Boolean(this.numberOfCardsSelected > 1)
+      return Boolean(this.multipleCardsSelectedIds.length > 1)
     },
+
+    // connections
 
     multipleSelectedConnectionIds () {
       return this.$store.state.multipleConnectionsSelectedIds
@@ -87,6 +89,13 @@ export default {
     },
     connectionsIsSelected () {
       return Boolean(this.multipleSelectedConnectionIds.length)
+    },
+
+    // all
+
+    multipleItemsSelected () {
+      const total = this.multipleSelectedConnectionIds.length + this.multipleCardsSelectedIds.length
+      return Boolean(total > 1)
     },
     exportScope () {
       return 'cards'
@@ -102,14 +111,14 @@ export default {
         return this.$store.getters['currentSpace/cardById'](cardId)
       })
       return { 'cards': cards }
+    },
+    removeLabel () {
+      if (this.multipleItemsSelected) {
+        return 'Remove All'
+      } else {
+        return 'Remove'
+      }
     }
-    // removeLabel () {
-    //   if (this.multipleCardsIsSelected) { // TODO: || multipleConnectionsIsSelected
-    //     return 'Remove All'
-    //   } else {
-    //     return 'Remove'
-    //   }
-    // },
   },
   methods: {
     toggleExportIsVisible () {
