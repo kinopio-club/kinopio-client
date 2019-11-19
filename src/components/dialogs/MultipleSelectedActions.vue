@@ -211,6 +211,7 @@ export default {
     visible (visible) {
       this.$nextTick(() => {
         if (visible) {
+          this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
           this.scrollIntoView()
           this.closeDialogs()
         }
