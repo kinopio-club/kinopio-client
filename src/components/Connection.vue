@@ -33,6 +33,8 @@ export default {
       } else { return undefined }
     },
     isSelected () {
+      const isBeta = this.$store.state.isBeta
+      if (!isBeta) { return false }
       const selectedIds = this.$store.state.multipleConnectionsSelectedIds
       return selectedIds.includes(this.id)
     },
