@@ -19,7 +19,7 @@ main.space(
     template(v-for="card in cards")
       Card(:card="card")
   ConnectionDetails
-  MultipleCardActions
+  MultipleSelectedActions
   OffscreenMarkers
 </template>
 
@@ -29,7 +29,7 @@ import last from 'lodash-es/last'
 import Card from '@/components/Card.vue'
 import Connection from '@/components/Connection.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
-import MultipleCardActions from '@/components/dialogs/MultipleCardActions.vue'
+import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import apiQueue from '@/apiQueue.js'
 import utils from '@/utils.js'
@@ -42,7 +42,7 @@ export default {
     Card,
     Connection,
     ConnectionDetails,
-    MultipleCardActions,
+    MultipleSelectedActions,
     OffscreenMarkers
   },
   name: 'Space',
@@ -392,13 +392,14 @@ export default {
       return fromDialog || fromHeader || fromFooter
     },
 
-    showMultipleCardActions (position) {
+    showMultipleSelectedActions (position) {
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
-      this.$store.commit('multipleCardActionsPosition', position)
-      this.$store.commit('multipleCardActionsIsVisible', true)
+      this.$store.commit('multipleSelectedActionsPosition', position)
+      this.$store.commit('multipleSelectedActionsIsVisible', true)
     },
 
     stopInteractions (event) {
+      const isBeta = this.$store.state.isBeta
       console.log('💣 stopInteractions') // stopInteractions and Space/stopPainting are run on all mouse and touch end events
       window.cancelAnimationFrame(scrollTimer)
       scrollTimer = undefined
@@ -411,9 +412,9 @@ export default {
         const position = utils.cursorPositionInPage(event)
         this.addNewCard(position)
       }
-      if (this.$store.state.multipleCardsSelectedIds.length) {
+      if (this.$store.state.multipleCardsSelectedIds.length || Boolean(this.$store.state.multipleConnectionsSelectedIds.length && isBeta)) {
         const position = utils.cursorPositionInPage(event)
-        this.showMultipleCardActions(position)
+        this.showMultipleSelectedActions(position)
       }
       this.$store.commit('shouldAddNewCard', false)
       this.$store.commit('preventDraggedCardFromShowingDetails', false)

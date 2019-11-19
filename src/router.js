@@ -21,6 +21,7 @@ export default new Router({
       component: Space,
       beforeEnter: (to, from, next) => {
         store.commit('isBeta', true)
+        store.commit('addNotification', { message: 'Beta: paint to select connections' })
         next()
       }
       // redirect: to => {

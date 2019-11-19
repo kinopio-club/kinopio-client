@@ -189,6 +189,8 @@ dialog
     position relative
     input
       margin-bottom 0
+    &:last-child
+      margin-bottom 0
   section
     padding 8px
     &:first-child

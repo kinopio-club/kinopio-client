@@ -104,6 +104,7 @@ export default {
       currentCursor = utils.cursorPositionInPage(event)
       let circle = { x: currentCursor.x, y: currentCursor.y, color, iteration: 0 }
       this.selectCards(circle)
+      this.selectConnections(circle)
       paintingCircles.push(circle)
     },
 
@@ -118,7 +119,7 @@ export default {
       if (!multipleCardsIsSelected && !dialogIsVisible) {
         this.$store.commit('shouldAddNewCard', true)
       }
-      this.$store.commit('multipleCardsSelectedIds', [])
+      this.$store.commit('clearMultipleSelected')
       this.$store.commit('generateCardMap')
       this.$store.commit('closeAllDialogs')
       initialCircles.map(circle => {
@@ -259,6 +260,23 @@ export default {
         const isBetweenY = utils.between(y)
         if (isBetweenX && isBetweenY) {
           this.$store.commit('addToMultipleCardsSelected', card.cardId)
+        }
+      })
+    },
+
+    selectConnections (circle) {
+      const paths = document.querySelectorAll('svg .path')
+      paths.forEach(path => {
+        const ids = this.$store.state.multipleConnectionsSelectedIds
+        const pathId = path.dataset.id
+        const svg = document.querySelector('svg.connections')
+        let point = svg.createSVGPoint()
+        point.x = circle.x
+        point.y = circle.y
+        const isAlreadySelected = ids.includes(pathId)
+        if (isAlreadySelected) { return }
+        if (path.isPointInFill(point)) {
+          this.$store.commit('addToMultipleConnectionsSelected', pathId)
         }
       })
     }

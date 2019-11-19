@@ -46,7 +46,7 @@ Uncomment code in `main.js` then,
 | `components/Card.vue` | Displays cards from the `store`, and shows `CardDetails` |
 | `components/Connection.vue` | Displays connections from the `store`, and shows `ConnectionDetails` |
 | `components/Header.vue` | Used for moving between spaces, searching/filter, shows user presence, changing user prefs, and Kinopio meta options. Shown on all routes |
-| `components/MagicPaint.vue` | The canvas layers used for animating painting, scroll locking on touch, and more. As well as for multi-card selection which reveals `MultipleCardActions` |
+| `components/MagicPaint.vue` | The canvas layers used for animating painting, scroll locking on touch, and more. As well as for multiple card and connection selection which reveals `MultipleSelectedActions` |
 
 
 ## See Also

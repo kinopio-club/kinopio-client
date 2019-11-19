@@ -5,9 +5,11 @@ path.path(
   stroke-width="5"
   :data-start-card="startCardId"
   :data-end-card="endCardId"
+  :data-id="id"
   :d="path"
   @click="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
+  :class="{active: isSelected || detailsIsVisible}"
 )
 </template>
 
@@ -29,6 +31,16 @@ export default {
       if (this.connectionType) {
         return this.connectionType.color
       } else { return undefined }
+    },
+    isSelected () {
+      const isBeta = this.$store.state.isBeta
+      if (!isBeta) { return false }
+      const selectedIds = this.$store.state.multipleConnectionsSelectedIds
+      return selectedIds.includes(this.id)
+    },
+    detailsIsVisible () {
+      const detailsId = this.$store.state.connectionDetailsIsVisibleForConnectionId
+      return detailsId === this.id
     }
   },
   methods: {
@@ -37,7 +49,7 @@ export default {
       this.$store.commit('closeAllDialogs')
       this.$store.commit('connectionDetailsIsVisibleForConnectionId', this.id)
       this.$store.commit('connectionDetailsPosition', detailsPosition)
-      this.$store.commit('multipleCardsSelectedIds', [])
+      this.$store.commit('clearMultipleSelected')
     }
   }
 }
@@ -45,6 +57,7 @@ export default {
 
 <style lang="stylus">
 .path
-  &:hover
+  &:hover,
+  &.active
     stroke-width: 7
 </style>
