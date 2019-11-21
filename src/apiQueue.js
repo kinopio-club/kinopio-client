@@ -38,10 +38,12 @@ const self = {
   squash (queue) {
     let squashed = []
     queue.forEach(request => {
+      // check if request has already been squashed
       const isSquashed = squashed.find(item => {
         return item.name === request.name && item.body.id === request.body.id
       })
       if (isSquashed) { return }
+      // merge queue items with the same operation name and matching entity id
       const matches = queue.filter(item => {
         return item.name === request.name && item.body.id === request.body.id
       })
