@@ -260,9 +260,9 @@ export default {
       }
     },
     loadRemoteSpace: async (context, space) => {
-      context.commit('loadingSpace', true, { root: true })
+      context.commit('isLoadingSpace', true, { root: true })
       let remoteSpace = await api.getSpace(space)
-      context.commit('loadingSpace', false, { root: true })
+      context.commit('isLoadingSpace', false, { root: true })
       if (!remoteSpace) { return }
       if (remoteSpace.id !== context.state.id) { return }
       remoteSpace = utils.normalizeRemoteSpace(remoteSpace)

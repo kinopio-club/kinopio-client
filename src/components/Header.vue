@@ -10,7 +10,7 @@ header
       button(@click.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
         //img.icon.space-moon(src="@/assets/space-moon.svg")
         span {{currentSpaceName}}
-        Loader(:visible="loadingSpace")
+        Loader(:visible="isLoadingSpace")
       SpaceDetails(:visible="spaceDetailsIsVisible")
 
   aside
@@ -79,8 +79,8 @@ export default {
     userIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     },
-    loadingSpace () {
-      return this.$store.state.loadingSpace
+    isLoadingSpace () {
+      return this.$store.state.isLoadingSpace
     },
     isOnline () {
       return this.$store.state.isOnline

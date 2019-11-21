@@ -49,7 +49,7 @@ export default new Vuex.Store({
     multipleConnectionsSelectedIds: [],
 
     // loading
-    loadingSpace: false
+    isLoadingSpace: false
   },
 
   mutations: {
@@ -194,9 +194,9 @@ export default new Vuex.Store({
     },
 
     // loading
-    loadingSpace: (state, value) => {
+    isLoadingSpace: (state, value) => {
       utils.typeCheck(value, 'boolean')
-      state.loadingSpace = value
+      state.isLoadingSpace = value
     }
   },
 
