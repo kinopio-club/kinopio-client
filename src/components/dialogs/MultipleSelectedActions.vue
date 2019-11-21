@@ -219,9 +219,10 @@ export default {
           this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
           this.scrollIntoView()
           this.closeDialogs()
-        } else {
-          this.$store.commit('clearMultipleSelected')
         }
+        // else {
+        //   this.$store.commit('clearMultipleSelected')
+        // }
       })
     }
   }
