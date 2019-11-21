@@ -264,6 +264,7 @@ export default {
       let remoteSpace = await api.getSpace(space)
       context.commit('loadingSpace', false, { root: true })
       if (!remoteSpace) { return }
+      if (remoteSpace.id !== context.state.id) { return }
       remoteSpace = utils.normalizeRemoteSpace(remoteSpace)
       // TODO (if !remoteSpace && !cachedSpace) handle 404 error, may occur for loading from url cases
       console.log('🚋 Restore space from remote space', remoteSpace)
