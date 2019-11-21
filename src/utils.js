@@ -162,7 +162,9 @@ export default {
   // Connection Path Utils 🐙
 
   connectorCoords (cardId) {
-    let rect = document.querySelector(`.connector[data-card-id="${cardId}"] button`).getBoundingClientRect()
+    const element = document.querySelector(`.connector[data-card-id="${cardId}"] button`)
+    if (!element) { return }
+    const rect = element.getBoundingClientRect()
     return this.elementCenter(rect)
   },
 
