@@ -359,7 +359,7 @@ export default {
     },
     restoreSpace: (context, space) => {
       cache.restoreSpace(space)
-      apiQueue.add('restoreSpace', space)
+      apiQueue.add('restoreSpace', { id: space.id })
       context.dispatch('changeSpace', space)
     },
     dragCards: (context, options) => {
