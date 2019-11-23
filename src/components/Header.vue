@@ -24,6 +24,7 @@ header
           span Sign Up or In
           Loader(:visible="loadingSignUpOrIn")
         SignUpOrIn(:visible="signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
+      ResetPassword
 
 </template>
 
@@ -32,6 +33,7 @@ import About from '@/components/dialogs/About.vue'
 import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
 import User from '@/components/User.vue'
 import SignUpOrIn from '@/components/dialogs/SignUpOrIn.vue'
+import ResetPassword from '@/components/dialogs/ResetPassword.vue'
 import Loader from '@/components/Loader.vue'
 
 export default {
@@ -41,6 +43,7 @@ export default {
     SpaceDetails,
     User,
     SignUpOrIn,
+    ResetPassword,
     Loader
   },
   data () {
