@@ -68,10 +68,8 @@ export default {
 
     async handleErrors (response) {
       this.loading.updatePassword = false
-
       this.error.tooManyAttempts = false
       this.error.unknownServerError = false
-
       if (!response) {
         this.error.unknownServerError = true
         return
@@ -126,8 +124,6 @@ export default {
   top calc(100% - 8px)
   left initial
   right 8px
-  .reset-form
-    margin-top 10px
   p,
   .badge
     margin-bottom 10px

@@ -83,7 +83,6 @@ export default new Vuex.Store({
     },
     closeAllDialogs: (state) => {
       state.multipleSelectedActionsIsVisible = false
-      // state.passwordResetIsVisible = false
       state.cardDetailsIsVisibleForCardId = ''
       state.connectionDetailsIsVisibleForConnectionId = ''
     },

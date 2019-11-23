@@ -53,7 +53,6 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
           span(v-if="resetSuccess") Password Reset Email Sent
           span(v-else) Reset Password
           Loader(:visible="loading.resetPassword")
-
 </template>
 
 <script>
