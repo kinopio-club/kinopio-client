@@ -19,12 +19,12 @@ header
       //- .button-wrap.share
       //-   button Share
     .bottom
+      ResetPassword
       .button-wrap.sign-up-in(v-if="!userIsSignedIn && isOnline")
         button(@click.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}")
           span Sign Up or In
           Loader(:visible="loadingSignUpOrIn")
         SignUpOrIn(:visible="signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
-      ResetPassword
 
 </template>
 

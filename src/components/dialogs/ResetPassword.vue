@@ -106,7 +106,8 @@ export default {
       if (!this.isPasswordTooShort(password)) { return }
       if (!this.isPasswordsMatch(password, confirmPassword)) { return }
       this.loading.resetPassword = true
-      const response = await api.resetPassword(password)
+      const apiKey = this.$store.state.resetPasswordApiKey
+      const response = await api.updatePassword(password, apiKey)
       const result = await response.json()
       if (this.isSuccess(response)) {
         this.$store.commit('passwordResetIsVisible', false)
