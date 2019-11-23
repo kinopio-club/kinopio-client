@@ -2,16 +2,16 @@
 dialog.narrow.reset-password(v-if="visible" :open="visible")
   section
     p Change your password
-    form(@submit.prevent="resetPassword")
+    form(@submit.prevent="updatePassword")
       input(type="password" placeholder="New Password" required @input="clearErrors" v-model="password")
       input(type="password" placeholder="Confirm New Password" required @input="clearErrors")
       .badge.danger(v-if="error.passwordMatch") Passwords can't match
       .badge.danger(v-if="error.passwordTooShort") Password must be longer than 4 characters
       .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
-      button(type="submit" :class="{active : loading.resetPassword}")
+      button(type="submit" :class="{active : loading.updatePassword}")
         span Reset Password
-        Loader(:visible="loading.resetPassword")
+        Loader(:visible="loading.updatePassword")
 
 </template>
 
@@ -20,7 +20,7 @@ import api from '@/api.js'
 import Loader from '@/components/Loader.vue'
 
 export default {
-  name: 'resetPassword',
+  name: 'updatePassword',
   components: {
     Loader
   },
@@ -34,7 +34,7 @@ export default {
         passwordTooShort: false
       },
       loading: {
-        resetPassword: false
+        updatePassword: false
       },
       resetSuccess: false
     }
@@ -67,7 +67,7 @@ export default {
     },
 
     async handleErrors (response) {
-      this.loading.resetPassword = false
+      this.loading.updatePassword = false
 
       this.error.tooManyAttempts = false
       this.error.unknownServerError = false
@@ -99,13 +99,13 @@ export default {
       }
     },
 
-    async resetPassword (event) {
-      if (this.loading.resetPassword) { return }
+    async updatePassword (event) {
+      if (this.loading.updatePassword) { return }
       const password = event.target[0].value
       const confirmPassword = event.target[1].value
       if (!this.isPasswordTooShort(password)) { return }
       if (!this.isPasswordsMatch(password, confirmPassword)) { return }
-      this.loading.resetPassword = true
+      this.loading.updatePassword = true
       const apiKey = this.$store.state.resetPasswordApiKey
       const response = await api.updatePassword(password, apiKey)
       const result = await response.json()
