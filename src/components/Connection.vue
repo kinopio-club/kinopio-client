@@ -10,6 +10,7 @@ path.path(
   @click="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
   :class="{active: isSelected || detailsIsVisible}"
+  ref="connection"
 )
 </template>
 
@@ -39,6 +40,9 @@ export default {
     detailsIsVisible () {
       const detailsId = this.$store.state.connectionDetailsIsVisibleForConnectionId
       return detailsId === this.id
+    },
+    shouldWiggle () {
+      return Boolean(this.isSelected || this.detailsIsVisible)
     }
   },
   methods: {
