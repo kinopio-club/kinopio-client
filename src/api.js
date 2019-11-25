@@ -78,7 +78,7 @@ export default {
     const options = requestOptions({ body, method: 'POST' })
     return fetch(`${host}/user/sign-in`, options)
   },
-  async resetPasswordEmail (email) {
+  async resetPassword (email) {
     const body = { email }
     const options = requestOptions({ body, method: 'POST' })
     return fetch(`${host}/user/reset-password`, options)

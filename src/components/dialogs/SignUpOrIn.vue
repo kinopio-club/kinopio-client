@@ -231,7 +231,7 @@ export default {
       if (this.loading.resetPassword || this.resetSuccess) { return }
       const email = event.target[0].value
       this.loading.resetPassword = true
-      await api.resetPasswordEmail(email)
+      await api.resetPassword(email)
       this.loading.resetPassword = false
       this.resetSuccess = true
     }
