@@ -298,6 +298,8 @@ code
   position relative
   &.info
     background var(--info-background)
+  &.success
+    background var(--success-background)
   &.checked
     background-image url('assets/checkmark.svg')
     background-repeat no-repeat

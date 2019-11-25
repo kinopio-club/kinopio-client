@@ -20,6 +20,10 @@ export default new Vuex.Store({
     isBeta: false,
     notifications: [],
 
+    // reset password
+    resetPasswordApiKey: '',
+    passwordResetIsVisible: false,
+
     // current user state
     currentUserIsDrawingConnection: false,
     currentUserIsPainting: false,
@@ -89,6 +93,14 @@ export default new Vuex.Store({
     isBeta: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.isBeta = value
+    },
+    resetPasswordApiKey: (state, apiKey) => {
+      utils.typeCheck(apiKey, 'string')
+      state.resetPasswordApiKey = apiKey
+    },
+    passwordResetIsVisible: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.passwordResetIsVisible = value
     },
     triggerSpaceDetailsVisible: () => {},
     addNotification: (state, notification) => {

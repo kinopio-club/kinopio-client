@@ -43,18 +43,18 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
         button Privacy Policy and TOS →
 
   //- Forgot Password
-  section(v-else)
+  section.forgot-password(v-else)
     button(@click="toggleResetVisible" :class="{active : resetVisible}")
       span Forgot Password?
-    p(v-show="resetVisible") Password reset is in development. In the meantime, please contact support@kinopio.club if you need any help.
-    //- div(v-show="resetVisible")
-      //- form.reset-form(@submit.prevent="resetPassword")
-        //- input(type="email" placeholder="Email" ref="resetPasswordEmail" required)
-        //- button(type="submit" :class="{active : loading.resetPassword, success : resetSuccess}")
-          //- span(v-if="resetSuccess") Password Reset Email Sent
-          //- span(v-else) Reset Password
-          //- Loader(:visible="loading.resetPassword")
-
+    div(v-show="resetVisible")
+      form.reset-form(@submit.prevent="resetPassword")
+        input(type="email" placeholder="Email" ref="resetPasswordEmail" required @input="clearErrors")
+        button(type="submit" :class="{active : loading.resetPassword || resetSuccess}")
+          span Reset Password
+          Loader(:visible="loading.resetPassword")
+      .badge.success(v-if="resetSuccess") Password Reset Email Sent
+      .badge.danger(v-if="error.resetUserEmailNotFound") A user with that that email address wasn't found. Try another?
+      .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
 </template>
 
 <script>
@@ -84,7 +84,8 @@ export default {
         signInCredentials: false,
         tooManyAttempts: false,
         passwordTooShort: false,
-        passwordMatchesEmail: false
+        passwordMatchesEmail: false,
+        resetUserEmailNotFound: false
       },
       loading: {
         signUpOrIn: false,
@@ -98,6 +99,7 @@ export default {
       for (const errorType in this.error) {
         this.error[errorType] = false
       }
+      this.resetSuccess = false
     },
 
     hasErrors () {
@@ -133,12 +135,10 @@ export default {
     async handleErrors (response) {
       this.loading.signUpOrIn = false
       this.loading.resetPassword = false
-
       this.error.signInCredentials = false
       this.error.accountAlreadyExists = false
       this.error.tooManyAttempts = false
       this.error.unknownServerError = false
-
       if (!response) {
         this.error.unknownServerError = true
         return
@@ -233,9 +233,15 @@ export default {
       if (this.loading.resetPassword || this.resetSuccess) { return }
       const email = event.target[0].value
       this.loading.resetPassword = true
-      await api.resetPassword(email)
+      const response = await api.resetPassword(email)
       this.loading.resetPassword = false
-      this.resetSuccess = true
+      if (response.status === 404) {
+        this.error.resetUserEmailNotFound = true
+      } else if (response.status === 429) {
+        this.error.tooManyAttempts = true
+      } else {
+        this.resetSuccess = true
+      }
     }
   },
   watch: {
@@ -261,4 +267,8 @@ export default {
   p,
   .badge
     margin-bottom 10px
+  .forgot-password
+    .badge
+      margin 0
+      margin-top 10px
 </style>
