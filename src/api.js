@@ -19,7 +19,7 @@ const shouldRequest = () => {
 const requestOptions = (options) => {
   const headers = new Headers({ 'Content-Type': 'application/json' })
   // const contributorKey = cache.space(options.spaceId).contributorKey
-  const apiKey = cache.user().apiKey // || contributorKey
+  const apiKey = options.apiKey || cache.user().apiKey // || contributorKey
   if (apiKey) {
     headers.append('Authorization', apiKey)
   }
@@ -82,6 +82,11 @@ export default {
     const body = { email }
     const options = requestOptions({ body, method: 'POST' })
     return fetch(`${host}/user/reset-password`, options)
+  },
+  async updatePassword (password, apiKey) {
+    const body = { password }
+    const options = requestOptions({ body, method: 'PATCH', apiKey })
+    return fetch(`${host}/user/update-password`, options)
   },
 
   // Operations

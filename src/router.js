@@ -14,8 +14,7 @@ export default new Router({
       path: '/',
       name: 'space',
       component: Space
-    },
-    {
+    }, {
       path: '/beta',
       name: 'beta',
       component: Space,
@@ -24,12 +23,7 @@ export default new Router({
         store.commit('addNotification', { message: 'Beta: paint to select connections' })
         next()
       }
-      // redirect: to => {
-      //   store.commit('isBeta', true)
-      //   return '/'
-      // }
-    },
-    {
+    }, {
       path: '/confirm-email',
       name: 'confirm-email',
       component: Space,
@@ -37,6 +31,20 @@ export default new Router({
         store.dispatch('currentUser/confirmEmail')
         store.commit('addNotification', { message: 'Email Confirmed' })
         return '/'
+      }
+    }, {
+      path: '/reset-password',
+      name: 'reset-password',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        const urlParams = new URLSearchParams(window.location.search)
+        const apiKey = urlParams.get('apiKey')
+        if (apiKey) {
+          store.commit('resetPasswordApiKey', apiKey)
+          store.commit('passwordResetIsVisible', true)
+        }
+        next()
+        window.history.replaceState({}, document.title, window.location.origin)
       }
     }
     // {
