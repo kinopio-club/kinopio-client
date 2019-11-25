@@ -10,7 +10,7 @@ dialog.narrow.reset-password(v-if="visible" :open="visible")
       .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
       button(type="submit" :class="{active : loading.updatePassword}")
-        span Reset Password
+        span Update Password
         Loader(:visible="loading.updatePassword")
 
 </template>
