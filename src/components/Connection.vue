@@ -53,7 +53,17 @@ export default {
       this.$store.commit('connectionDetailsPosition', detailsPosition)
       this.$store.commit('clearMultipleSelected')
     }
+  },
+  watch: {
+    shouldWiggle (shouldWiggle) {
+      if (shouldWiggle) {
+        console.log('wiggle')
+      } else {
+        console.log('no wiggle')
+      }
+    }
   }
+
 }
 </script>
 
