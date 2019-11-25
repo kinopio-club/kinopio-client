@@ -73,7 +73,30 @@ export default {
       this.$store.commit('clearMultipleSelected')
     },
     wiggleFrame () {
-      console.log('🍆 wiggle', this.id)
+      const curvePattern = new RegExp(/(q[0-9]+,)\w+/) // "q90,40" from "m747,148 q90,40 -85,75"
+      const pointPattern = new RegExp(/([0-9]+)\w+/g) // "90" and "40" from "q90,40"
+      const curveMatch = this.path.match(curvePattern)
+      const pointMatch = curveMatch[0].match(pointPattern)
+      const curve = {
+        path: curveMatch[0],
+        x: pointMatch[0],
+        y: pointMatch[1],
+        index: curveMatch.index,
+        length: curveMatch[0].length
+      }
+      console.log('🍆 wiggle', this.id, curve, this.path)
+      // curve = {
+      // index: 8
+      // length: 6
+      // path: "q90,40"
+      // x: "90"
+      // y: "40"
+      // }
+
+      // move x and y a random +/- 1
+
+      // this.wigglePath = ...
+
       if (this.shouldWiggle) {
         window.requestAnimationFrame(this.wiggleFrame)
       }
