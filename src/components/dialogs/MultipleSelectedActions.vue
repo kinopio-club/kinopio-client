@@ -98,8 +98,6 @@ export default {
       }))
     },
     connectionsIsSelected () {
-      const isBeta = this.$store.state.isBeta
-      if (!isBeta) { return false }
       return Boolean(this.multipleConnectionsSelectedIds.length)
     },
 
@@ -190,17 +188,14 @@ export default {
     remove () {
       const cardIds = this.multipleCardsSelectedIds
       const connectionIds = this.multipleConnectionsSelectedIds
-      const isBeta = this.$store.state.isBeta
       cardIds.forEach(cardId => {
         const card = this.$store.getters['currentSpace/cardById'](cardId)
         this.$store.dispatch('currentSpace/removeCard', card)
       })
-      if (isBeta) {
-        connectionIds.forEach(connectionId => {
-          const connection = this.$store.getters['currentSpace/connectionById'](connectionId)
-          this.$store.dispatch('currentSpace/removeConnection', connection)
-        })
-      }
+      connectionIds.forEach(connectionId => {
+        const connection = this.$store.getters['currentSpace/connectionById'](connectionId)
+        this.$store.dispatch('currentSpace/removeConnection', connection)
+      })
       this.$store.commit('closeAllDialogs')
       this.$store.commit('clearMultipleSelected')
     },

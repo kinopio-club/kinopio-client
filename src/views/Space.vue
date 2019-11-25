@@ -399,7 +399,6 @@ export default {
     },
 
     stopInteractions (event) {
-      const isBeta = this.$store.state.isBeta
       console.log('💣 stopInteractions') // stopInteractions and Space/stopPainting are run on all mouse and touch end events
       window.cancelAnimationFrame(scrollTimer)
       scrollTimer = undefined
@@ -412,7 +411,7 @@ export default {
         const position = utils.cursorPositionInPage(event)
         this.addNewCard(position)
       }
-      if (this.$store.state.multipleCardsSelectedIds.length || Boolean(this.$store.state.multipleConnectionsSelectedIds.length && isBeta)) {
+      if (this.$store.state.multipleCardsSelectedIds.length || this.$store.state.multipleConnectionsSelectedIds.length) {
         const position = utils.cursorPositionInPage(event)
         this.showMultipleSelectedActions(position)
       }
