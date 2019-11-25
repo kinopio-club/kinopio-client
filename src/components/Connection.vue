@@ -6,6 +6,7 @@ path.path(
   :data-start-card="startCardId"
   :data-end-card="endCardId"
   :data-id="id"
+  :key="id"
   :d="path"
   @click="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
@@ -17,9 +18,22 @@ path.path(
 <script>
 import utils from '@/utils.js'
 
+let wiggleTimer
+
 export default {
   props: {
     connection: Object
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'clearMultipleSelected') {
+        const selectedIds = this.$store.state.multipleConnectionsSelectedIds
+        const selected = selectedIds.includes(this.id) || this.$store.state.connectionDetailsIsVisibleForConnectionId === this.id
+        if (!selected) {
+          this.cancelWiggle()
+        }
+      }
+    })
   },
   computed: {
     id () { return this.connection.id },
@@ -52,14 +66,24 @@ export default {
       this.$store.commit('connectionDetailsIsVisibleForConnectionId', this.id)
       this.$store.commit('connectionDetailsPosition', detailsPosition)
       this.$store.commit('clearMultipleSelected')
+    },
+    wiggleFrame () {
+      console.log('🍆 wiggle', this.id)
+      if (this.shouldWiggle) {
+        window.requestAnimationFrame(this.wiggleFrame)
+      }
+    },
+    cancelWiggle () {
+      console.log('🍄no wiggle', this.id)
+      window.cancelAnimationFrame(wiggleTimer)
+      wiggleTimer = undefined
     }
   },
   watch: {
     shouldWiggle (shouldWiggle) {
       if (shouldWiggle) {
         console.log('wiggle')
-      } else {
-        console.log('no wiggle')
+        wiggleTimer = window.requestAnimationFrame(this.wiggleFrame)
       }
     }
   }
