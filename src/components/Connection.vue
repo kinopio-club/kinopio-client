@@ -7,7 +7,7 @@ path.path(
   :data-end-card="endCardId"
   :data-id="id"
   :key="id"
-  :d="path"
+  :d="wigglePath || path"
   @click="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
   :class="{active: isSelected || detailsIsVisible}"
@@ -34,6 +34,11 @@ export default {
         }
       }
     })
+  },
+  data () {
+    return {
+      wigglePath: ''
+    }
   },
   computed: {
     id () { return this.connection.id },
@@ -77,6 +82,7 @@ export default {
       console.log('🍄no wiggle', this.id)
       window.cancelAnimationFrame(wiggleTimer)
       wiggleTimer = undefined
+      this.wigglePath = ''
     }
   },
   watch: {
