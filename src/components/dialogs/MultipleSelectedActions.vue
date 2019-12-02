@@ -188,14 +188,15 @@ export default {
     remove () {
       const cardIds = this.multipleCardsSelectedIds
       const connectionIds = this.multipleConnectionsSelectedIds
-      cardIds.forEach(cardId => {
-        const card = this.$store.getters['currentSpace/cardById'](cardId)
-        this.$store.dispatch('currentSpace/removeCard', card)
-      })
       connectionIds.forEach(connectionId => {
         const connection = this.$store.getters['currentSpace/connectionById'](connectionId)
         this.$store.dispatch('currentSpace/removeConnection', connection)
       })
+      cardIds.forEach(cardId => {
+        const card = this.$store.getters['currentSpace/cardById'](cardId)
+        this.$store.dispatch('currentSpace/removeCard', card)
+      })
+
       this.$store.commit('closeAllDialogs')
       this.$store.commit('clearMultipleSelected')
     },
