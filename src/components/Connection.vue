@@ -89,64 +89,40 @@ export default {
     updatedPath (path, controlPoint, x, y) {
       return path.replace(controlPoint, `q${x},${y}`)
     },
-
-    // isEvenNumber (number) { // in utils.isEvenNumber
-    //   if (number % 2 === 0) {
-    //     return true
-    //   }
-    // },
-
-    ///    // pointDelta () {
-    //   const framesPerDirection = 60 // 60fps
-    //   const completedCycles = Math.floor(frameCount / framesPerDirection)
-    //   const pointPattern = new RegExp(/([0-9]+)\w+/g) // "90" and "40" from "q90,40"
-    //   const point = this.controlPoint.match(pointPattern)
-    //   if (this.isEvenNumber(completedCycles)) {
-    //     // return + object x,y
-    //     return {
-    //       x: point[0] + 1,
-    //       y: point[1] + 1
-    //     }
-    //   } else {
-    //     // return - object x,y
-    //     return {
-    //       x: point[0] - 1,
-    //       y: point[1] - 1
-    //     }
-    //   }
-
-    // },
-
-    controlPointPosition ({ x, y }) {
-      const framesPerDirection = 24
-      const completedCycles = Math.floor(this.frameCount / framesPerDirection)
-      let newPoint
-      if (utils.isEvenNumber(completedCycles)) {
-        newPoint = {
-          x: x + 1,
-          y: y + 1
-        }
+    newPointPosition (base, cycleProgress, isForwardCycle) {
+      if (isForwardCycle) {
+        return Math.round(base + Math.exp(cycleProgress / 6))
       } else {
-        newPoint = {
-          x: x - 1,
-          y: y - 1
-        }
+        return Math.round(base - Math.exp(cycleProgress / 6))
       }
-      return newPoint
+    },
+    controlPointPosition ({ x, y }) {
+      const framesPerDirection = 12
+      const completedCycles = Math.floor(this.frameCount / framesPerDirection)
+      const cycleProgress = (this.frameCount - completedCycles * framesPerDirection) / framesPerDirection
+      const isForwardCycle = utils.isEvenNumber(completedCycles)
+      x = this.newPointPosition(x, cycleProgress, isForwardCycle)
+      y = this.newPointPosition(y, cycleProgress, isForwardCycle)
+      return { x, y }
     },
     animationFrame () {
       this.frameCount++
       this.curvedPath = this.path
-      const curvePattern = new RegExp(/(q[0-9]+,)\w+/) // "q90,40" from "m747,148 q90,40 -85,75"
-      const pointPattern = new RegExp(/([0-9]+)\w+/g) // "90" and "40" from "q90,40"
+      const curvePattern = new RegExp(/(q[-0-9]*),([-0-9]*)\w+/)
+      // "q90,40" from "m747,148 q90,40 -85,75"
+      // "q-90,-40" from "m747,148 q-90,-40 -85,75" (negative)
+      // "q-200,-0" from "m217,409 q200,1 492,-78" (variable length)
       const curveMatch = this.curvedPath.match(curvePattern)
-      const pointMatch = curveMatch[0].match(pointPattern)
+      const points = curveMatch[0].substring(1, curveMatch[0].length).split(',')
+      // ["90", "40"] from "q90,40"
+      // ["90", "-40"] from "q-90,-40" (negative)
+      // ["200", "1"] from "q200,1" (variable length)
       const { x, y } = this.controlPointPosition({
-        x: parseInt(pointMatch[0]),
-        y: parseInt(pointMatch[1])
+        x: parseInt(points[0]),
+        y: parseInt(points[1])
       })
       this.controlCurve = {
-        controlPoint: curveMatch[0], // q90, 40
+        controlPoint: curveMatch[0], // "q90, 40"
         index: curveMatch.index,
         length: curveMatch[0].length,
         x,
