@@ -19,7 +19,6 @@ path.path(
 import utils from '@/utils.js'
 
 let animationTimer
-let frameCount = 0
 
 export default {
   props: {
@@ -42,7 +41,8 @@ export default {
   data () {
     return {
       controlCurve: undefined,
-      curvedPath: ''
+      curvedPath: '',
+      frameCount: 0
     }
   },
   computed: {
@@ -117,32 +117,40 @@ export default {
 
     // },
 
-    controlPointPosition (point) {
-      const framesPerDirection = 60
-      const completedCycles = Math.floor(frameCount / framesPerDirection)
-
-      // this.controlCurve
-
-      // console.log('🌸', parseInt(point), parseInt(point) + 1)
+    controlPointPosition ({ x, y }) {
+      const framesPerDirection = 24
+      const completedCycles = Math.floor(this.frameCount / framesPerDirection)
+      let newPoint
       if (utils.isEvenNumber(completedCycles)) {
-        return parseInt(point) + 1
+        newPoint = {
+          x: x + 1,
+          y: y + 1
+        }
       } else {
-        return parseInt(point) - 1
+        newPoint = {
+          x: x - 1,
+          y: y - 1
+        }
       }
+      return newPoint
     },
     animationFrame () {
-      frameCount++
+      this.frameCount++
       this.curvedPath = this.path
       const curvePattern = new RegExp(/(q[0-9]+,)\w+/) // "q90,40" from "m747,148 q90,40 -85,75"
       const pointPattern = new RegExp(/([0-9]+)\w+/g) // "90" and "40" from "q90,40"
       const curveMatch = this.curvedPath.match(curvePattern)
       const pointMatch = curveMatch[0].match(pointPattern)
+      const { x, y } = this.controlPointPosition({
+        x: parseInt(pointMatch[0]),
+        y: parseInt(pointMatch[1])
+      })
       this.controlCurve = {
         controlPoint: curveMatch[0], // q90, 40
-        x: this.controlPointPosition(pointMatch[0]),
-        y: this.controlPointPosition(pointMatch[1]),
         index: curveMatch.index,
-        length: curveMatch[0].length
+        length: curveMatch[0].length,
+        x,
+        y
       }
       if (this.shouldAnimate) {
         window.requestAnimationFrame(this.animationFrame)
@@ -153,7 +161,7 @@ export default {
       animationTimer = undefined
       this.controlCurve = undefined
       this.curvedPath = undefined
-      frameCount = 0
+      this.frameCount = 0
     }
   },
   watch: {
