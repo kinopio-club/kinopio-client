@@ -7,7 +7,7 @@ path.path(
   :data-end-card="endCardId"
   :data-id="id"
   :key="id"
-  :d="wigglePath || path"
+  :d="path"
   @click="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
   :class="{active: isSelected || detailsIsVisible}"
@@ -33,11 +33,20 @@ export default {
           this.cancelWiggle()
         }
       }
+      if (mutation.type === 'currentSpace/moveCard') {
+        // const currentUserIsDraggingCard = this.$store.state.currentUserIsDraggingCard
+        // if (currentUserIsDraggingCard) {
+        //   console.log('cancelWiggle')
+        // this.curvedPath = undefined
+        this.cancelWiggle()
+        // }
+      }
     })
   },
   data () {
     return {
-      wigglePath: ''
+      controlCurve: undefined,
+      curvedPath: ''
     }
   },
   computed: {
@@ -45,7 +54,16 @@ export default {
     connectionTypeId () { return this.connection.connectionTypeId },
     startCardId () { return this.connection.startCardId },
     endCardId () { return this.connection.endCardId },
-    path () { return this.connection.path },
+    path () {
+      if (this.controlCurve) {
+        const { controlPoint, x, y } = this.controlCurve
+        const path = this.curvedPath || this.connection.path
+        const curvedPath = this.updatedPath(path, controlPoint, x, y)
+        return curvedPath
+      } else {
+        return this.connection.path
+      }
+    },
     connectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.connectionTypeId) },
     typeColor () {
       if (this.connectionType) {
@@ -61,6 +79,8 @@ export default {
       return detailsId === this.id
     },
     shouldWiggle () {
+      // const currentUserIsDraggingCard = this.$store.state.currentUserIsDraggingCard
+      // if (!currentUserIsDraggingCard)
       return Boolean(this.isSelected || this.detailsIsVisible)
     }
   },
@@ -72,46 +92,47 @@ export default {
       this.$store.commit('connectionDetailsPosition', detailsPosition)
       this.$store.commit('clearMultipleSelected')
     },
+    updatedPath (path, controlPoint, x, y) {
+      return path.replace(controlPoint, `q${x},${y}`)
+    },
+    pointPosition (point) {
+      // console.log('🌸', parseInt(point), parseInt(point) + 1)
+      return parseInt(point) + 1
+    },
     wiggleFrame () {
       const curvePattern = new RegExp(/(q[0-9]+,)\w+/) // "q90,40" from "m747,148 q90,40 -85,75"
       const pointPattern = new RegExp(/([0-9]+)\w+/g) // "90" and "40" from "q90,40"
-      const curveMatch = this.path.match(curvePattern)
+
+      // console.log('🍄', this.path, this.path.match(curvePattern), this.path.match(curvePattern)[0])
+      this.curvedPath = this.path
+      const curveMatch = this.curvedPath.match(curvePattern)
       const pointMatch = curveMatch[0].match(pointPattern)
-      const curve = {
-        path: curveMatch[0],
-        x: pointMatch[0],
-        y: pointMatch[1],
+      this.controlCurve = {
+        controlPoint: curveMatch[0], // q90, 40
+        x: this.pointPosition(pointMatch[0]),
+        y: this.pointPosition(pointMatch[1]),
         index: curveMatch.index,
         length: curveMatch[0].length
       }
-      console.log('🍆 wiggle', this.id, curve, this.path)
-      // curve = {
-      // index: 8
-      // length: 6
-      // path: "q90,40"
-      // x: "90"
-      // y: "40"
-      // }
-
-      // move x and y a random +/- 1
-
-      // this.wigglePath = ...
+      // const { controlPoint, x, y } = this.controlCurve
+      // const curvedPath = this.updatedPath(path, controlPoint, x, y)
 
       if (this.shouldWiggle) {
         window.requestAnimationFrame(this.wiggleFrame)
       }
     },
     cancelWiggle () {
-      console.log('🍄no wiggle', this.id)
+      // console.log('🍄no wiggle', this.id)
       window.cancelAnimationFrame(wiggleTimer)
       wiggleTimer = undefined
-      this.wigglePath = ''
+      this.controlCurve = undefined
+      this.curvedPath = undefined
     }
   },
   watch: {
     shouldWiggle (shouldWiggle) {
       if (shouldWiggle) {
-        console.log('wiggle')
+        // console.log('wiggle')
         wiggleTimer = window.requestAnimationFrame(this.wiggleFrame)
       }
     }
