@@ -18,7 +18,7 @@ path.path(
 <script>
 import utils from '@/utils.js'
 
-let wiggleTimer
+let animationTimer
 
 export default {
   props: {
@@ -30,11 +30,11 @@ export default {
         const selectedIds = this.$store.state.multipleConnectionsSelectedIds
         const selected = selectedIds.includes(this.id) || this.$store.state.connectionDetailsIsVisibleForConnectionId === this.id
         if (!selected) {
-          this.cancelWiggle()
+          this.cancelAnimation()
         }
       }
       if (mutation.type === 'currentSpace/moveCard') {
-        this.cancelWiggle()
+        this.cancelAnimation()
       }
     })
   },
@@ -73,7 +73,7 @@ export default {
       const detailsId = this.$store.state.connectionDetailsIsVisibleForConnectionId
       return detailsId === this.id
     },
-    shouldWiggle () {
+    shouldAnimate () {
       return Boolean(this.isSelected || this.detailsIsVisible)
     }
   },
@@ -92,7 +92,7 @@ export default {
       // console.log('🌸', parseInt(point), parseInt(point) + 1)
       return parseInt(point) + 1
     },
-    wiggleFrame () {
+    animationFrame () {
       this.curvedPath = this.path
       const curvePattern = new RegExp(/(q[0-9]+,)\w+/) // "q90,40" from "m747,148 q90,40 -85,75"
       const pointPattern = new RegExp(/([0-9]+)\w+/g) // "90" and "40" from "q90,40"
@@ -105,21 +105,21 @@ export default {
         index: curveMatch.index,
         length: curveMatch[0].length
       }
-      if (this.shouldWiggle) {
-        window.requestAnimationFrame(this.wiggleFrame)
+      if (this.shouldAnimate) {
+        window.requestAnimationFrame(this.animationFrame)
       }
     },
-    cancelWiggle () {
-      window.cancelAnimationFrame(wiggleTimer)
-      wiggleTimer = undefined
+    cancelAnimation () {
+      window.cancelAnimationFrame(animationTimer)
+      animationTimer = undefined
       this.controlCurve = undefined
       this.curvedPath = undefined
     }
   },
   watch: {
-    shouldWiggle (shouldWiggle) {
-      if (shouldWiggle) {
-        wiggleTimer = window.requestAnimationFrame(this.wiggleFrame)
+    shouldAnimate (shouldAnimate) {
+      if (shouldAnimate) {
+        animationTimer = window.requestAnimationFrame(this.animationFrame)
       }
     }
   }
