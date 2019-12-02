@@ -34,12 +34,7 @@ export default {
         }
       }
       if (mutation.type === 'currentSpace/moveCard') {
-        // const currentUserIsDraggingCard = this.$store.state.currentUserIsDraggingCard
-        // if (currentUserIsDraggingCard) {
-        //   console.log('cancelWiggle')
-        // this.curvedPath = undefined
         this.cancelWiggle()
-        // }
       }
     })
   },
@@ -79,8 +74,6 @@ export default {
       return detailsId === this.id
     },
     shouldWiggle () {
-      // const currentUserIsDraggingCard = this.$store.state.currentUserIsDraggingCard
-      // if (!currentUserIsDraggingCard)
       return Boolean(this.isSelected || this.detailsIsVisible)
     }
   },
@@ -100,11 +93,9 @@ export default {
       return parseInt(point) + 1
     },
     wiggleFrame () {
+      this.curvedPath = this.path
       const curvePattern = new RegExp(/(q[0-9]+,)\w+/) // "q90,40" from "m747,148 q90,40 -85,75"
       const pointPattern = new RegExp(/([0-9]+)\w+/g) // "90" and "40" from "q90,40"
-
-      // console.log('🍄', this.path, this.path.match(curvePattern), this.path.match(curvePattern)[0])
-      this.curvedPath = this.path
       const curveMatch = this.curvedPath.match(curvePattern)
       const pointMatch = curveMatch[0].match(pointPattern)
       this.controlCurve = {
@@ -114,15 +105,11 @@ export default {
         index: curveMatch.index,
         length: curveMatch[0].length
       }
-      // const { controlPoint, x, y } = this.controlCurve
-      // const curvedPath = this.updatedPath(path, controlPoint, x, y)
-
       if (this.shouldWiggle) {
         window.requestAnimationFrame(this.wiggleFrame)
       }
     },
     cancelWiggle () {
-      // console.log('🍄no wiggle', this.id)
       window.cancelAnimationFrame(wiggleTimer)
       wiggleTimer = undefined
       this.controlCurve = undefined
@@ -132,7 +119,6 @@ export default {
   watch: {
     shouldWiggle (shouldWiggle) {
       if (shouldWiggle) {
-        // console.log('wiggle')
         wiggleTimer = window.requestAnimationFrame(this.wiggleFrame)
       }
     }
