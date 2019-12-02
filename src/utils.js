@@ -159,6 +159,12 @@ export default {
     return new Date(date).getTime()
   },
 
+  isEvenNumber (number) {
+    if (number % 2 === 0) {
+      return true
+    }
+  },
+
   // Connection Path Utils 🐙
 
   connectorCoords (cardId) {

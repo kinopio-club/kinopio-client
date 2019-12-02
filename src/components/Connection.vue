@@ -19,6 +19,7 @@ path.path(
 import utils from '@/utils.js'
 
 let animationTimer
+let frameCount = 0
 
 export default {
   props: {
@@ -88,11 +89,49 @@ export default {
     updatedPath (path, controlPoint, x, y) {
       return path.replace(controlPoint, `q${x},${y}`)
     },
-    pointPosition (point) {
+
+    // isEvenNumber (number) { // in utils.isEvenNumber
+    //   if (number % 2 === 0) {
+    //     return true
+    //   }
+    // },
+
+    ///    // pointDelta () {
+    //   const framesPerDirection = 60 // 60fps
+    //   const completedCycles = Math.floor(frameCount / framesPerDirection)
+    //   const pointPattern = new RegExp(/([0-9]+)\w+/g) // "90" and "40" from "q90,40"
+    //   const point = this.controlPoint.match(pointPattern)
+    //   if (this.isEvenNumber(completedCycles)) {
+    //     // return + object x,y
+    //     return {
+    //       x: point[0] + 1,
+    //       y: point[1] + 1
+    //     }
+    //   } else {
+    //     // return - object x,y
+    //     return {
+    //       x: point[0] - 1,
+    //       y: point[1] - 1
+    //     }
+    //   }
+
+    // },
+
+    controlPointPosition (point) {
+      const framesPerDirection = 60
+      const completedCycles = Math.floor(frameCount / framesPerDirection)
+
+      // this.controlCurve
+
       // console.log('🌸', parseInt(point), parseInt(point) + 1)
-      return parseInt(point) + 1
+      if (utils.isEvenNumber(completedCycles)) {
+        return parseInt(point) + 1
+      } else {
+        return parseInt(point) - 1
+      }
     },
     animationFrame () {
+      frameCount++
       this.curvedPath = this.path
       const curvePattern = new RegExp(/(q[0-9]+,)\w+/) // "q90,40" from "m747,148 q90,40 -85,75"
       const pointPattern = new RegExp(/([0-9]+)\w+/g) // "90" and "40" from "q90,40"
@@ -100,8 +139,8 @@ export default {
       const pointMatch = curveMatch[0].match(pointPattern)
       this.controlCurve = {
         controlPoint: curveMatch[0], // q90, 40
-        x: this.pointPosition(pointMatch[0]),
-        y: this.pointPosition(pointMatch[1]),
+        x: this.controlPointPosition(pointMatch[0]),
+        y: this.controlPointPosition(pointMatch[1]),
         index: curveMatch.index,
         length: curveMatch[0].length
       }
@@ -114,6 +153,7 @@ export default {
       animationTimer = undefined
       this.controlCurve = undefined
       this.curvedPath = undefined
+      frameCount = 0
     }
   },
   watch: {
