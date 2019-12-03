@@ -165,6 +165,14 @@ export default {
     }
   },
 
+  updatePageTitleWithName (name) {
+    if (name) {
+      document.title = `${name} – Kinopio`
+    } else {
+      document.title = 'Kinopio'
+    }
+  },
+
   // Connection Path Utils 🐙
 
   connectorCoords (cardId) {

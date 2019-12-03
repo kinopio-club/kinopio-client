@@ -20,6 +20,7 @@ export default {
 
     restoreSpace: (state, space) => {
       Object.assign(state, space)
+      utils.updatePageTitleWithName(space.name)
     },
     // Added aug 2019, can safely remove this in aug 2020
     updateBetaSpace: (state) => {
@@ -55,6 +56,7 @@ export default {
           cache.updateSpace(key, state[key], state.id)
         }
       })
+      utils.updatePageTitleWithName(state.name)
     },
 
     // Cards
