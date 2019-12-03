@@ -55,29 +55,27 @@ const self = {
     return squashed
   },
 
-  // const addBackToQueue = (requests) => { // prepend
-  //   requests.reverse()
-  //   requests.forEach(request => {
-  //     let queue = cache.queue()
-  //     queue.unshift(request)
-  //     cache.saveQueue(queue)
-  //   })
-  //   console.log(cache.queue())
-  // }
+  requeue (items) {
+    items.forEach(item => {
+      let queue = cache.queue()
+      queue.push(item)
+      cache.saveQueue(queue)
+    })
+    console.log('🚑 requeue', cache.queue())
+  },
 
   async process () {
     if (!window.navigator.onLine) { return }
     const queue = cache.queue()
-    const body = this.squash(queue)
+    const items = this.squash(queue)
     cache.clearQueue()
-
     try {
-      await api.processQueue(body)
+      await api.processQueue(items)
     } catch (error) {
-      console.error('🚒', error, body)
-      // if (error.message === 'timeout') { // 429
-      //   addBackToQueue(body)
-      // }
+      console.error('🚒', error, items)
+      // todo: sync error notification here
+      // should not shotgun
+      this.requeue(items)
     }
   }
 
