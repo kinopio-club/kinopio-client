@@ -73,8 +73,6 @@ const self = {
       await api.processQueue(items)
     } catch (error) {
       console.error('🚒', error, items)
-      // todo: sync error notification here
-      // should not shotgun
       this.requeue(items)
     }
   }
