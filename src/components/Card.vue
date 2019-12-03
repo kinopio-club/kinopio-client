@@ -59,6 +59,7 @@ export default {
     z () { return this.card.z },
     name () { return this.card.name },
     isWide () {
+      if (!this.name) { return }
       return Boolean(this.name.length > 30)
     },
     position () {
