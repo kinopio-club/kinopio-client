@@ -55,12 +55,30 @@ const self = {
     return squashed
   },
 
+  // const addBackToQueue = (requests) => { // prepend
+  //   requests.reverse()
+  //   requests.forEach(request => {
+  //     let queue = cache.queue()
+  //     queue.unshift(request)
+  //     cache.saveQueue(queue)
+  //   })
+  //   console.log(cache.queue())
+  // }
+
   async process () {
     if (!window.navigator.onLine) { return }
     const queue = cache.queue()
-    const squashed = this.squash(queue)
+    const body = this.squash(queue)
     cache.clearQueue()
-    await api.processQueue(squashed)
+
+    try {
+      await api.processQueue(body)
+    } catch (error) {
+      console.error('🚒', error, body)
+      // if (error.message === 'timeout') { // 429
+      //   addBackToQueue(body)
+      // }
+    }
   }
 
 }
