@@ -9,8 +9,8 @@ dialog.beta-notes(v-if="visible" :open="visible" @click.stop)
     p Kinopio is still in beta so there are a couple limitations:
     ul
       li There's no collaboration features yet
-      li Your data only lives on your current device
-      li If you clear your browser's data you'll wipe out your kinopio data
+      li
+        del Your data only lives on your current device
   section
     .button-wrap
       a(href="http://pketh.org/hello-kinopio")
