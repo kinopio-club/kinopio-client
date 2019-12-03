@@ -5,7 +5,7 @@ article(:style="position" :data-card-id="id")
     @touchstart.prevent="startDraggingCard"
     @mouseup="showCardDetails"
     @touchend="showCardDetails"
-    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged}",
+    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged, wide: isWide}",
     :style="selectedColor"
     :data-card-id="id"
     :data-card-x="x"
@@ -58,6 +58,9 @@ export default {
     y () { return this.card.y },
     z () { return this.card.z },
     name () { return this.card.name },
+    isWide () {
+      return Boolean(this.name.length > 30)
+    },
     position () {
       return {
         left: `${this.x}px`,
@@ -196,6 +199,8 @@ article
   &:active,
   &.active
     box-shadow var(--active-shadow)
+  &.wide
+    width: 235px
   .name
     margin 8px
     margin-right 5px
