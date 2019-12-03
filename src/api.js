@@ -49,16 +49,6 @@ const normalizeSpaceToRemote = (space) => {
   return space
 }
 
-// const addBackToQueue = (requests) => {
-//   requests.reverse()
-//   requests.forEach(request => {
-//     let queue = cache.queue()
-//     queue.unshift(request)
-//     cache.saveQueue(queue)
-//   })
-//   console.log(cache.queue())
-// }
-
 export default {
 
   // Sign In or Up
@@ -93,15 +83,8 @@ export default {
 
   async processQueue (body) {
     const options = requestOptions({ body, method: 'POST' })
-    try {
-      console.log(`🛫 sending operations`, body)
-      await fetch(`${host}/operations`, options)
-    } catch (error) {
-      console.error('🚒', error, body)
-      // if (error.message === 'timeout') {
-      //   addBackToQueue(body)
-      // }
-    }
+    console.log(`🛫 sending operations`, body)
+    await fetch(`${host}/operations`, options)
   },
 
   // User

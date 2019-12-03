@@ -55,12 +55,26 @@ const self = {
     return squashed
   },
 
+  requeue (items) {
+    items.forEach(item => {
+      let queue = cache.queue()
+      queue.push(item)
+      cache.saveQueue(queue)
+    })
+    console.log('🚑 requeue', cache.queue())
+  },
+
   async process () {
     if (!window.navigator.onLine) { return }
     const queue = cache.queue()
-    const squashed = this.squash(queue)
+    const items = this.squash(queue)
     cache.clearQueue()
-    await api.processQueue(squashed)
+    try {
+      await api.processQueue(items)
+    } catch (error) {
+      console.error('🚒', error, items)
+      this.requeue(items)
+    }
   }
 
 }
