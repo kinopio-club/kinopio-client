@@ -23,10 +23,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
 <script>
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil awaiting 'scrollmode' support for https://github.com/w3c/csswg-drafts/pull/1805
 
-import utils from '@/utils.js'
 import FrameDetails from '@/components/dialogs/FrameDetails.vue'
-
-let isNewCard
 
 export default {
   name: 'CardDetails',
@@ -51,10 +48,10 @@ export default {
   directives: {
     focus: {
       inserted (element) {
-        if (element.value.length === 0) {
-          isNewCard = true
-        } else {
-          isNewCard = false
+        const length = element.value.length || 0
+        element.focus()
+        if (length) {
+          element.setSelectionRange(length, length)
         }
       }
     }
@@ -71,7 +68,6 @@ export default {
     const element = this.$refs.dialog
     if (element) {
       this.focusName()
-      if (this.preventScrollIntoView()) { return }
       this.scrollIntoView()
     }
   },
@@ -98,23 +94,13 @@ export default {
   methods: {
     focusName () {
       const element = this.$refs.name
-      if (isNewCard) {
-        this.$nextTick(() => {
-          element.focus()
-        })
-      }
-    },
-    blurField (event) {
-      if (!event.shiftKey) {
-        event.preventDefault()
-        event.target.blur()
-      }
+      this.$nextTick(() => {
+        element.focus()
+      })
     },
     completeEditing (event) {
-      if (isNewCard) {
+      if (!event.shiftKey) {
         this.$store.commit('closeAllDialogs')
-      } else {
-        this.blurField(event)
       }
     },
     closeCard () {
@@ -129,10 +115,6 @@ export default {
       textareas.forEach(textarea => {
         textarea.style.height = textarea.scrollHeight + 1 + 'px'
       })
-    },
-    preventScrollIntoView () {
-    // disable scrolling into view on ios because it conflicts with panning and zooming on focused input
-      return Boolean(this.cardIsEmpty() && utils.isIOS())
     },
     scrollIntoView () {
       const element = this.$refs.dialog
