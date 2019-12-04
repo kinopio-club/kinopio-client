@@ -23,6 +23,7 @@ const self = {
   async add (name, body) {
     // const userIsContributor = cache.space(space.id).contributorKey or key stored in user
     body = utils.clone(body)
+    body.spaceId = body.spaceId || cache.user().lastSpaceId
     const userIsSignedIn = cache.user().apiKey
     if (!userIsSignedIn) { return }
     let queue = cache.queue()
@@ -49,7 +50,6 @@ const self = {
       })
       const reduced = matches.reduce((accumulator, currentValue) => merge(accumulator, currentValue))
       reduced.name = request.name
-      reduced.body.spaceId = reduced.body.spaceId || cache.user().lastSpaceId
       squashed.push(reduced)
     })
     return squashed
