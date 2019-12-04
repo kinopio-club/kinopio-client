@@ -15,12 +15,19 @@ header
 
   aside
     .top
-      User(:user="currentUser" :clickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true")
-      //- .button-wrap.share
-      //-   button Share
+      // Share
+      .button-wrap
+        button(@click.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
+          span Share
+        Share(:visible="shareIsVisible")
+
+      .users
+        User(:user="currentUser" :clickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true")
+
     .bottom
       ResetPassword
-      .button-wrap.sign-up-in(v-if="!userIsSignedIn && isOnline")
+      // Sign Up or In
+      .button-wrap(v-if="!userIsSignedIn && isOnline")
         button(@click.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}")
           span Sign Up or In
           Loader(:visible="loadingSignUpOrIn")
@@ -34,6 +41,7 @@ import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
 import User from '@/components/User.vue'
 import SignUpOrIn from '@/components/dialogs/SignUpOrIn.vue'
 import ResetPassword from '@/components/dialogs/ResetPassword.vue'
+import Share from '@/components/dialogs/Share.vue'
 import Loader from '@/components/Loader.vue'
 
 export default {
@@ -44,6 +52,7 @@ export default {
     User,
     SignUpOrIn,
     ResetPassword,
+    Share,
     Loader
   },
   data () {
@@ -51,6 +60,7 @@ export default {
       aboutIsVisible: false,
       spaceDetailsIsVisible: false,
       signUpOrInIsVisible: false,
+      shareIsVisible: false,
       loadingSignUpOrIn: false
     }
   },
@@ -60,6 +70,7 @@ export default {
         this.aboutIsVisible = false
         this.spaceDetailsIsVisible = false
         this.signUpOrInIsVisible = false
+        this.shareIsVisible = false
       }
       if (mutation.type === 'triggerSpaceDetailsVisible') {
         this.spaceDetailsIsVisible = true
@@ -105,6 +116,11 @@ export default {
       this.$store.commit('closeAllDialogs')
       this.signUpOrInIsVisible = !isVisible
     },
+    toggleShareIsVisible () {
+      const isVisible = this.shareIsVisible
+      this.$store.commit('closeAllDialogs')
+      this.shareIsVisible = !isVisible
+    },
     setLoadingSignUpOrIn (value) {
       this.loadingSignUpOrIn = value
     }
@@ -134,10 +150,11 @@ header
   nav
     margin-right 6px
     flex-grow 2
+  .users
+    display inline-block
   .user
-    float right
+    display inline-block
     position relative
-    margin-bottom 5px
   .logo-about
     position relative
     display inline-block
@@ -169,9 +186,13 @@ header
   aside
     display flex
     flex-direction column
-  .sign-up-in
-    display block
-  .share
-    float right
+  .top
+    display flex
+    flex-direction row-reverse
+  .users
     margin-right 6px
+  .bottom
+    > .button-wrap
+      display inline-block
+
 </style>
