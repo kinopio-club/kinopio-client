@@ -273,6 +273,8 @@ export default {
       cache.saveSpace(remoteSpace)
       context.commit('restoreSpace', remoteSpace)
     },
+    // TODO if store.spaceToLoad , load from there (replaces var 'space')
+    // after requesting it (fail or success) , commit store.spaceToLoad = ''
     loadSpace: (context, space) => {
       const cachedSpace = cache.space(space.id)
       const emptySpace = { id: space.id, cards: [], connections: [] }

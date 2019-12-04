@@ -46,6 +46,14 @@ export default new Router({
         next()
         window.history.replaceState({}, document.title, window.location.origin)
       }
+    }, {
+      path: '/:space',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        const spaceUrl = window.location.pathname.substring(1) // "/space-id" -> "space-id"
+        store.commit('spaceUrlToLoad', spaceUrl)
+        next()
+      }
     }
     // {
     //   path: '/legal',

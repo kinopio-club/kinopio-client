@@ -36,7 +36,7 @@ export default {
     //   return this.$store.getters['currentUser/CanEditCurrentSpace']
     // },
 
-    // TODO if userCanEditCurrentSpace && isNotSignedIn , then
+    // TODO if userCanEditCurrentSpace && isNotSignedIn , then (abstract into if 'SpaceHasUrl')
     // how to determine if
     // TODO only signed in users have space urls. use this as a upsell in teh dialog
     // sign in to be able to share. only signed in users have their data synced to a server (enabled server syncing, which is required to have a url).
