@@ -3,11 +3,14 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop ref="dialog")
   section
     p Share
   section
-    p Everyone can view this space, but only you can edit it
+    p
+      .badge.info Everyone can view
+      //- span {{spaceName}}
+      span but only you can edit
     //- Everyone can view this space but only you and your [collaborators || group] , can edit it
     textarea(ref="url") {{url()}}
     button.success(v-if="urlIsCopied" @click="copyUrl") Copied
-    button(v-else @click="copyUrl") Copy
+    button(v-else @click="copyUrl") Copy Url
 
 </template>
 
@@ -58,12 +61,12 @@ export default {
   top calc(100% - 8px)
   left initial
   right 8px
+  .badge
+    display inline-block
   textarea
     background-color var(--secondary-background)
     border 0
     border-radius 3px
     padding 4px
     margin-bottom 4px
-    margin-top 10px
-    // height 40px
 </style>
