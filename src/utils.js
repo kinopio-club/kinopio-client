@@ -115,6 +115,14 @@ export default {
     return navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform)
   },
 
+  isAndroid () {
+    return navigator.platform && /Android/.test(navigator.platform)
+  },
+
+  isMobile () {
+    return Boolean(this.isIOS || this.isAndroid)
+  },
+
   normalizeString (string) {
     // replaces non alphanumeric (spaces, emojis, $%&, etc.) characters with '-'s
     return string.replace(/([^a-z0-9-]+)/ig, '-').toLowerCase() // same regex as glitch project names

@@ -23,6 +23,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
 <script>
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil awaiting 'scrollmode' support for https://github.com/w3c/csswg-drafts/pull/1805
 
+import utils from '@/utils.js'
 import FrameDetails from '@/components/dialogs/FrameDetails.vue'
 
 export default {
@@ -49,6 +50,7 @@ export default {
     focus: {
       inserted (element) {
         const length = element.value.length || 0
+        if (!length && utils.isMobile()) { return }
         element.focus()
         if (length) {
           element.setSelectionRange(length, length)
