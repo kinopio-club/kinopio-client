@@ -22,24 +22,22 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
 <script>
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil awaiting 'scrollmode' support for https://github.com/w3c/csswg-drafts/pull/1805
 
-// import utils from '@/utils.js'
+import utils from '@/utils.js'
 import FrameDetails from '@/components/dialogs/FrameDetails.vue'
 
-// prevent focus on existing cards on mobile because of keyboard scroll issues when zoomed out
-// const shouldPreventAutofocus = (length) => {
-//   const cardHasName = Boolean(length)
-//   const isMobile = utils.isMobile()
-//   const pinchZoomRatio = document.documentElement.clientWidth / window.innerWidth
-//   const pinchZoomRatioShouldFocusZoom = utils.between({
-//     value: pinchZoomRatio,
-//     min: 0.85,
-//     max: 1.15
-//   })
-//   console.log('is zoomed?', document.documentElement.clientWidth / window.innerWidth, pinchZoomRatioShouldFocusZoom)
-//   if (cardHasName && isMobile && !pinchZoomRatioShouldFocusZoom) {
-//     return true
-//   }
-// }
+// prevents jarring frame skips caused by simultaneously scrolling a card into view, zooming in, and showing an onscreen keyboard
+const shouldPreventAutofocus = () => {
+  const isMobile = utils.isMobile()
+  const pinchZoomRatio = document.documentElement.clientWidth / window.innerWidth
+  const pinchZoomRatioShouldNotFocusZoom = !utils.between({
+    value: pinchZoomRatio,
+    min: 0.8,
+    max: 1.3
+  })
+  if (isMobile && pinchZoomRatioShouldNotFocusZoom) {
+    return true
+  }
+}
 
 export default {
   name: 'CardDetails',
@@ -61,21 +59,6 @@ export default {
       }
     })
   },
-  // directives: {
-  //   focus: {
-  //     inserted (element) {
-  //       const length = element.value.length || 0
-  //       const preventAutofocus = shouldPreventAutofocus(length)
-  //       // if (length && utils.isMobile()) { return }
-  //       console.log('🌹',preventAutofocus)
-  //       if (preventAutofocus) { return }
-  //       element.focus()
-  //       if (length) {
-  //         element.setSelectionRange(length, length)
-  //       }
-  //     }
-  //   }
-  // },
   updated () {
     this.$nextTick(() => {
       if (this.visible) {
@@ -130,7 +113,7 @@ export default {
       })
     },
     cardIsEmpty () {
-      // TODO: expand isEmpty to inlcude other metadata content (images etc)
+      // TODO: expand isEmpty to inlcude other metadata content (images etc)?
       return !this.card.name
     },
     toggleFrameDetailsIsVisible () {
@@ -156,6 +139,7 @@ export default {
       const element = this.$refs.name
       const length = this.name.length
       this.scrollIntoView()
+      if (shouldPreventAutofocus()) { return }
       this.$nextTick(() => {
         this.focusName()
         if (length) {
