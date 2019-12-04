@@ -25,10 +25,12 @@ dialog.whats-new(v-if="visible" :open="visible" @click.stop)
         del Import spaces
       li
         del Sign in to access your spaces on all your devices 🛫
-      li Share your spaces with other people (space urls)
+      li
+        del Share your spaces with other people (space urls)
+      li Sharing privacy controls and inviting
       li Real-time collaboration 👯‍♀️
       li Updated Logo and illustrations
-      li Build Billing and Payments (4$/month) 💞
+      li Billing and Payments (4$/month) 💞
       li API Docs and Support Pages
       li Dark mode 🌙
       li More frames 🖼
@@ -128,7 +130,7 @@ export default {
 <style lang="stylus">
 .whats-new
   overflow auto
-  max-height calc(100vh - 150px)
+  max-height calc(100vh - 210px)
   article
     position static
     margin-bottom 10px

@@ -6,7 +6,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop ref="dialog")
     p
       .badge.info Everyone can view
       //- span {{spaceName}}
-      span but only you can edit
+      span and only you can edit
     //- Everyone can view this space but only you and your [collaborators || group] , can edit it
     textarea(ref="url") {{url()}}
     button.success(v-if="urlIsCopied" @click="copyUrl") Copied
@@ -35,6 +35,11 @@ export default {
     // userCanEditCurrentSpace () {
     //   return this.$store.getters['currentUser/CanEditCurrentSpace']
     // },
+
+    // TODO if userCanEditCurrentSpace && isNotSignedIn , then
+    // how to determine if
+    // TODO only signed in users have space urls. use this as a upsell in teh dialog
+    // sign in to be able to share. only signed in users have their data synced to a server (enabled server syncing, which is required to have a url).
   },
   methods: {
     url () {
