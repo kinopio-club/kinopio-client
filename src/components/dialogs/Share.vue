@@ -2,29 +2,16 @@
 dialog.narrow.share(v-if="visible" :open="visible" @click.stop ref="dialog")
   section
     p Share
-    //- {{spaceName}}
   section
     p Everyone can view this space, but only you can edit it
     //- Everyone can view this space but only you and your [collaborators || group] , can edit it
-  //- section
-  //-   textarea(ref="text") {{text()}}
-  //-   button.success(v-if="urlIsCopied" @click="copyUrl") Copied
-  //-   button(v-else @click="copyUrl") Copy
-  //- section
-  //-   p Download
-  //-   button(@click="downloadTxt")
-  //-     span.badge.info txt
-  //-     span Card Names
-  //-   button(@click="downloadJSON")
-  //-     span.badge.info json
-  //-     span All Data
-  //-   a#export-downlaod-anchor.hidden
+    textarea(ref="url") {{url()}}
+    button.success(v-if="urlIsCopied" @click="copyUrl") Copied
+    button(v-else @click="copyUrl") Copy
 
 </template>
 
 <script>
-// import join from 'lodash-es/join'
-// import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 // import utils from '@/utils.js'
 
@@ -32,9 +19,6 @@ export default {
   name: 'Share',
   props: {
     visible: Boolean
-    // exportTitle: String, // space-name, 3 Cards
-    // exportData: Object,
-    // exportScope: String // space, cards
   },
   data () {
     return {
@@ -42,69 +26,28 @@ export default {
     }
   },
   computed: {
-    spaceName () {
-      return this.$store.state.currentSpace.name
-    }
+    // spaceName () {
+    //   return this.$store.state.currentSpace.name
+    // },
     // userCanEditCurrentSpace () {
     //   return this.$store.getters['currentUser/CanEditCurrentSpace']
     // },
-
   },
   methods: {
-    // fileName () {
-    //   const spaceName = this.$store.state.currentSpace.name
-    //   const spaceId = this.$store.state.currentSpace.id
-    //   let fileName = spaceName || `kinopio-space-${spaceId}`
-    //   if (this.exportScope === 'cards') {
-    //     const cardsCount = utils.normalizeString(this.exportTitle) // '3 Cards' to '3-cards'
-    //     fileName = `${fileName}-${cardsCount}`
-    //   }
-    //   return fileName
-    // },
-    // text () {
-    //   const data = this.exportData.cards.map(card => { return card.name })
-    //   return join(data, '\n')
-    // },
-    // copyUrl () {
-    //   const element = this.$refs.text
-    //   element.select()
-    //   element.setSelectionRange(0, 99999) // for mobile
-    //   document.execCommand('copy')
-    //   this.urlIsCopied = true
-    // },
-    // downloadJSON () {
-    //   const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.exportData))
-    //   const downloadAnchor = document.getElementById('export-downlaod-anchor')
-    //   const fileName = this.fileName()
-    //   downloadAnchor.setAttribute('href', json)
-    //   downloadAnchor.setAttribute('download', `${fileName}.json`)
-    //   downloadAnchor.click()
-    // },
-    // downloadTxt () {
-    //   const data = this.text()
-    //   const text = 'data:text/plain;charset=utf-8,' + encodeURIComponent(data)
-    //   const downloadAnchor = document.getElementById('export-downlaod-anchor')
-    //   const fileName = this.fileName()
-    //   downloadAnchor.setAttribute('href', text)
-    //   downloadAnchor.setAttribute('download', `${fileName}.txt`)
-    //   downloadAnchor.click()
-    // },
-    // scrollIntoView () {
-    //   const element = this.$refs.dialog
-    //   scrollIntoView(element, {
-    //     behavior: 'smooth',
-    //     scrollMode: 'if-needed'
-    //   })
-    // }
+    url () {
+      return 'https://kinopio.club/space-name-id123xyz456popo'
+    },
+    copyUrl () {
+      const element = this.$refs.url
+      element.select()
+      element.setSelectionRange(0, 99999) // for mobile
+      document.execCommand('copy')
+      this.urlIsCopied = true
+    }
   },
   watch: {
     visible (visible) {
-      // this.$nextTick(() => {
-      // if (visible) {
       this.urlIsCopied = false
-      // this.scrollIntoView()
-      // }
-      // })
     }
   }
 }
@@ -115,20 +58,12 @@ export default {
   top calc(100% - 8px)
   left initial
   right 8px
-
-// .share
-//   overflow scroll
-//   max-height calc(100vh - 100px)
-//   textarea
-//     background-color var(--secondary-background)
-//     border 0
-//     border-radius 3px
-//     padding 4px
-//     margin-bottom 4px
-//     height 100px
-//   button
-//     display block
-//     margin-left 0
-//   button + button
-//     margin-top 10px
+  textarea
+    background-color var(--secondary-background)
+    border 0
+    border-radius 3px
+    padding 4px
+    margin-bottom 4px
+    margin-top 10px
+    // height 40px
 </style>
