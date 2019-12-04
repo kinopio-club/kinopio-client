@@ -6,7 +6,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       rows="1"
       placeholder="Tell me your dreams"
       v-model="name"
-      v-focus
       @keydown.enter="completeEditing"
       @keydown.esc="closeCard"
       data-type="name"
@@ -23,7 +22,22 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
 <script>
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil awaiting 'scrollmode' support for https://github.com/w3c/csswg-drafts/pull/1805
 
+import utils from '@/utils.js'
 import FrameDetails from '@/components/dialogs/FrameDetails.vue'
+
+// prevents jarring frame skips caused by simultaneously scrolling a card into view, zooming in, and showing an onscreen keyboard
+const shouldPreventAutofocus = () => {
+  const isMobile = utils.isMobile()
+  const pinchZoomRatio = document.documentElement.clientWidth / window.innerWidth
+  const pinchZoomRatioShouldNotFocusZoom = !utils.between({
+    value: pinchZoomRatio,
+    min: 0.8,
+    max: 1.3
+  })
+  if (isMobile && pinchZoomRatioShouldNotFocusZoom) {
+    return true
+  }
+}
 
 export default {
   name: 'CardDetails',
@@ -45,17 +59,6 @@ export default {
       }
     })
   },
-  directives: {
-    focus: {
-      inserted (element) {
-        const length = element.value.length || 0
-        element.focus()
-        if (length) {
-          element.setSelectionRange(length, length)
-        }
-      }
-    }
-  },
   updated () {
     this.$nextTick(() => {
       if (this.visible) {
@@ -67,8 +70,7 @@ export default {
     // for new cards
     const element = this.$refs.dialog
     if (element) {
-      this.focusName()
-      this.scrollIntoView()
+      this.scrollIntoViewAndFocus()
     }
   },
   computed: {
@@ -92,12 +94,6 @@ export default {
     }
   },
   methods: {
-    focusName () {
-      const element = this.$refs.name
-      this.$nextTick(() => {
-        element.focus()
-      })
-    },
     completeEditing (event) {
       if (!event.shiftKey) {
         this.$store.commit('closeAllDialogs')
@@ -116,6 +112,22 @@ export default {
         textarea.style.height = textarea.scrollHeight + 1 + 'px'
       })
     },
+    cardIsEmpty () {
+      // TODO: expand isEmpty to inlcude other metadata content (images etc)?
+      return !this.card.name
+    },
+    toggleFrameDetailsIsVisible () {
+      const isVisible = this.frameDetailsIsVisible
+      this.closeDialogs()
+      this.frameDetailsIsVisible = !isVisible
+    },
+    focusName () {
+      const element = this.$refs.name
+      console.log('focusname run')
+      this.$nextTick(() => {
+        element.focus()
+      })
+    },
     scrollIntoView () {
       const element = this.$refs.dialog
       scrollIntoView(element, {
@@ -123,14 +135,17 @@ export default {
         scrollMode: 'if-needed'
       })
     },
-    cardIsEmpty () {
-      // TODO: expand isEmpty to inlcude other metadata content (images etc)
-      return !this.card.name
-    },
-    toggleFrameDetailsIsVisible () {
-      const isVisible = this.frameDetailsIsVisible
-      this.closeDialogs()
-      this.frameDetailsIsVisible = !isVisible
+    scrollIntoViewAndFocus () {
+      const element = this.$refs.name
+      const length = this.name.length
+      this.scrollIntoView()
+      if (shouldPreventAutofocus()) { return }
+      this.$nextTick(() => {
+        this.focusName()
+        if (length) {
+          element.setSelectionRange(length, length)
+        }
+      })
     },
     closeDialogs () {
       this.frameDetailsIsVisible = false
@@ -140,7 +155,7 @@ export default {
     visible (visible) {
       this.$nextTick(() => {
         if (visible) {
-          this.scrollIntoView()
+          this.scrollIntoViewAndFocus()
         }
       })
       if (!visible && this.cardIsEmpty()) {
