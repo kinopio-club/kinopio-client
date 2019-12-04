@@ -120,7 +120,7 @@ export default {
   },
 
   isMobile () {
-    return Boolean(this.isIOS || this.isAndroid)
+    return Boolean(this.isIOS() || this.isAndroid())
   },
 
   normalizeString (string) {
