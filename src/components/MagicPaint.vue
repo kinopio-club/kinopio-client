@@ -61,6 +61,7 @@ export default {
     currentUserColor () {
       return this.$store.state.currentUser.color
     },
+    spaceIsReadOnly () { return !this.$store.state.currentSpace.canEditCurrentSpace },
     // keep canvases updated to viewport size so you can draw on newly created areas
     pageHeight () { return this.$store.state.pageHeight },
     pageWidth () { return this.$store.state.pageWidth }
@@ -245,6 +246,7 @@ export default {
     },
 
     selectCards (circle) {
+      if (this.spaceIsReadOnly) { return }
       this.$store.state.cardMap.map(card => {
         const x = {
           value: circle.x,
@@ -265,6 +267,7 @@ export default {
     },
 
     selectConnections (circle) {
+      if (this.spaceIsReadOnly) { return }
       const paths = document.querySelectorAll('svg .path')
       paths.forEach(path => {
         const ids = this.$store.state.multipleConnectionsSelectedIds

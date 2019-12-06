@@ -1,6 +1,6 @@
 <template lang="pug">
 main.space(
-  :class="{'is-interacting': isInteracting, 'is-painting': isPainting}"
+  :class="{'is-interacting': isInteracting, 'is-painting': isPainting, 'is-read-only': spaceIsReadOnly}"
   @mousedown="initInteractions"
   @touchstart="initInteractions"
   :style="size"
@@ -80,6 +80,7 @@ export default {
     },
     cards () { return this.$store.state.currentSpace.cards },
     isPainting () { return this.$store.state.currentUserIsPainting },
+    spaceIsReadOnly () { return !this.$store.state.currentSpace.canEditCurrentSpace },
     isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
     isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
     connections () { return this.$store.state.currentSpace.connections },
@@ -377,6 +378,7 @@ export default {
     },
 
     addNewCard (position) {
+      if (this.spaceIsReadOnly) { return }
       const withinX = position.x > 0 && position.x < this.$store.state.pageWidth
       const withinY = position.y > 0 && position.y < this.$store.state.pageHeight
       if (withinX && withinY) {
@@ -393,6 +395,7 @@ export default {
     },
 
     showMultipleSelectedActions (position) {
+      if (this.spaceIsReadOnly) { return }
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       this.$store.commit('multipleSelectedActionsPosition', position)
       this.$store.commit('multipleSelectedActionsIsVisible', true)
@@ -444,7 +447,8 @@ export default {
   position relative // used by svg connections
 .is-interacting
   pointer-events all
-.is-painting
+.is-painting,
+.is-read-only
   *
     pointer-events: none !important
 
