@@ -187,8 +187,8 @@ export default {
 
   actions: {
     init: (context) => {
-      const user = context.rootState.currentUser
       const spaceUrl = context.rootState.spaceUrlToLoad
+      const user = context.rootState.currentUser
       // restore from url
       if (spaceUrl) {
         console.log('🚃 Restore space from url', spaceUrl)

@@ -55,7 +55,7 @@ export default {
       }
     },
     isCurrentUser () {
-      return this.$store.getters['currentUser/isCurrentUser'](this.user.id)
+      return this.$store.getters['currentUser/isCurrentUser'](this.user)
     },
     isSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']

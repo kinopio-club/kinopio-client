@@ -1,9 +1,10 @@
 <template lang="pug">
 dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs")
   section
-    input(placeholder="name" v-model="spaceName")
+    input(v-if="canEditCurrentSpace" placeholder="name" v-model="spaceName")
+    p(v-else) {{spaceName}}
 
-    button(@click="removeCurrentSpace")
+    button(v-if="canEditCurrentSpace" @click="removeCurrentSpace")
       img.icon(src="@/assets/remove.svg")
       span Remove
 
@@ -66,6 +67,9 @@ export default {
     },
     exportScope () {
       return 'space'
+    },
+    canEditCurrentSpace () {
+      return this.$store.getters['currentUser/canEditCurrentSpace']
     }
   },
   methods: {
@@ -108,7 +112,10 @@ export default {
       this.changeToLastSpace()
     },
     async updateSpaces () {
-      this.spaces = cache.getAllSpaces()
+      const userSpaces = cache.getAllSpaces().filter(space => {
+        return this.$store.getters['currentUser/canEditSpace'](space)
+      })
+      this.spaces = userSpaces
     },
     async updateWithRemoteSpaces () {
       const spaces = await api.getUserSpaces()
