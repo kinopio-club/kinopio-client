@@ -207,8 +207,7 @@ export default {
       // hello kinopio
       } else {
         console.log('🚃 Create new Hello Kinopio space')
-        const isHelloSpace = true
-        context.dispatch('addSpace', isHelloSpace)
+        context.dispatch('createNewHelloSpace')
         context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
       }
     },
@@ -238,17 +237,13 @@ export default {
       apiQueue.add('createSpace', space)
       context.commit('addUserToSpace', user)
     },
-    addSpace: (context, isHelloSpace) => {
-      if (isHelloSpace) {
-        context.dispatch('createNewHelloSpace')
-      } else {
-        context.dispatch('createNewSpace')
-        Vue.nextTick(() => {
-          context.dispatch('updateCardConnectionPaths', { cardId: context.state.cards[1].id })
-          context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
-          context.dispatch('saveNewSpace')
-        })
-      }
+    addSpace: (context) => {
+      context.dispatch('createNewSpace')
+      Vue.nextTick(() => {
+        context.dispatch('updateCardConnectionPaths', { cardId: context.state.cards[1].id })
+        context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
+        context.dispatch('saveNewSpace')
+      })
     },
     loadRemoteSpace: async (context, space) => {
       context.commit('isLoadingSpace', true, { root: true })
@@ -262,8 +257,6 @@ export default {
       cache.saveSpace(remoteSpace)
       context.commit('restoreSpace', remoteSpace)
     },
-    // TODO if store.spaceToLoad , load from there (replaces var 'space')
-    // after requesting it (fail or success) , commit store.spaceToLoad = ''
     loadSpace: (context, space) => {
       const cachedSpace = cache.space(space.id)
       const emptySpace = { id: space.id, cards: [], connections: [] }
