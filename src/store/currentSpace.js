@@ -188,40 +188,29 @@ export default {
   actions: {
     init: (context) => {
       const user = context.rootState.currentUser
-      const betaSpace = cache.space('1')
-      if (user.lastSpaceId) {
+      const spaceUrl = context.rootState.spaceUrlToLoad
+      // restore from url
+      if (spaceUrl) {
+        console.log('🚃 Restore space from url', spaceUrl)
+        const spaceId = spaceUrl.substring(spaceUrl.length - 21, spaceUrl.length)
+        context.commit('spaceUrlToLoad', '', { root: true })
+        context.dispatch('loadSpace', { id: spaceId })
+      // restore last space
+      } else if (user.lastSpaceId) {
         console.log('🚃 Restore last space', user.lastSpaceId)
         let spaceToRestore = cache.space(user.lastSpaceId)
         if (!spaceToRestore.id) {
           spaceToRestore = { id: user.lastSpaceId }
         }
-        console.log('🔮 spaceToRestore', spaceToRestore, user.lastSpaceId)
         context.dispatch('loadSpace', spaceToRestore)
-      // migration condition (from lastSpace to lastSpaceId) added sept 2019
-      } else if (user.lastSpace) {
-        console.log('🚃 Migrate data from beta lastSpace key name', user.lastSpace)
-        let spaceToRestore = cache.space(user.lastSpace)
-        if (!spaceToRestore.id) {
-          spaceToRestore = { id: user.lastSpace }
-        }
-        context.dispatch('loadSpace', spaceToRestore)
-        cache.updateUser('lastSpace', null)
-      // betaSpace migration condition added aug 2019
-      } else if (utils.objectHasKeys(betaSpace)) {
-        console.log('🚃 Migrate data from beta format', betaSpace)
-        context.commit('updateBetaSpace')
-        context.commit('addUserToSpace', user)
-        let spaceToRestore = cache.space(context.state.id)
-        if (!spaceToRestore.id) {
-          spaceToRestore = { id: user.lastSpace }
-        }
-        context.dispatch('loadSpace', spaceToRestore)
+        context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
+      // hello kinopio
       } else {
         console.log('🚃 Create new Hello Kinopio space')
         const isHelloSpace = true
         context.dispatch('addSpace', isHelloSpace)
+        context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
       }
-      context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
     },
 
     // Space

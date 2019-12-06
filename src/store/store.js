@@ -213,7 +213,6 @@ export default new Vuex.Store({
     },
     spaceUrlToLoad: (state, spaceUrl) => {
       utils.typeCheck(spaceUrl, 'string')
-      console.log('🥏🥏🥏 space url to load', spaceUrl)
       state.spaceUrlToLoad = spaceUrl
     }
   },
