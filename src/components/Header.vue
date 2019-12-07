@@ -22,8 +22,7 @@ header
         Share(:visible="shareIsVisible")
 
       .users
-        template(v-for="user in users")
-          User(:user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true")
+        User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true")
 
     .bottom
       ResetPassword
