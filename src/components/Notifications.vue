@@ -60,7 +60,7 @@ export default {
 
 @keyframes hideme
   from
-    opacity: 1
+    opacity 1
   to
-    opacity: 0
+    opacity 0
 </style>

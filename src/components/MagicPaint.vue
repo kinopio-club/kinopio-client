@@ -61,7 +61,7 @@ export default {
     currentUserColor () {
       return this.$store.state.currentUser.color
     },
-    spaceIsReadOnly () { return !this.$store.state.currentSpace.canEditCurrentSpace },
+    spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditCurrentSpace'] },
     // keep canvases updated to viewport size so you can draw on newly created areas
     pageHeight () { return this.$store.state.pageHeight },
     pageWidth () { return this.$store.state.pageWidth }
