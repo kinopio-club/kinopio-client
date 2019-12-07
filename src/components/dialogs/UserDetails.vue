@@ -9,8 +9,8 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeDialogs" 
       input.name(placeholder="What's your name?" v-model="userName" name="Name")
 
   section(v-if="!isCurrentUser")
-    .user-info
-      User(:user="user" :clickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
+    .row
+      User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
       p {{user.name}}
 
   section(v-if="isCurrentUser")

@@ -4,10 +4,10 @@
     @mouseup.stop="toggleUserDetails"
     @touchend.stop="toggleUserDetails"
     ref="user"
-    :class="{ clickable: clickable }"
+    :class="{ clickable: isClickable, active: userDetailsIsVisible }"
     :style="{backgroundColor: user.color}"
   )
-  template(v-if="clickable")
+  template(v-if="isClickable")
     UserDetails(:visible="userDetailsIsVisible" :user="user" :detailsOnRight="detailsOnRight")
 </template>
 
@@ -20,7 +20,7 @@ export default {
     UserDetails
   },
   props: {
-    clickable: Boolean,
+    isClickable: Boolean,
     user: Object,
     detailsOnRight: Boolean,
     shouldCloseAllDialogs: Boolean
@@ -47,7 +47,6 @@ export default {
     //     // }
     // },
     toggleUserDetails () {
-      if (!this.clickable) { return }
       const isVisible = this.userDetailsIsVisible
       if (this.shouldCloseAllDialogs) {
         this.$store.commit('closeAllDialogs')
@@ -68,6 +67,7 @@ export default {
     background-repeat no-repeat
     background-position center
     border-radius 3px
+    pointer-events none
     &:hover,
     &:focus
       box-shadow var(--button-hover-shadow)
@@ -75,5 +75,7 @@ export default {
       box-shadow var(--button-active-inset-shadow)
     &.clickable
       cursor pointer
-
+      pointer-events all
+    &.active
+      box-shadow var(--button-active-inset-shadow)
 </style>

@@ -23,7 +23,7 @@ header
 
       .users
         template(v-for="user in users")
-          User(:user="user" :clickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true")
+          User(:user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true")
 
     .bottom
       ResetPassword
