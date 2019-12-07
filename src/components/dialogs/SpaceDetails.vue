@@ -94,7 +94,9 @@ export default {
     },
     addSpace () {
       this.$store.dispatch('currentSpace/addSpace')
-      this.updateSpaces()
+      this.$nextTick(() => {
+        this.updateSpaces()
+      })
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', space)
