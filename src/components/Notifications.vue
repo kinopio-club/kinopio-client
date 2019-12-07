@@ -1,7 +1,9 @@
 <template lang="pug">
 aside.notifications
   .item(v-for="(item in items" v-bind:key="item.id" :data-notification-id="item.id") {{item.message}}
-  .persistent-item(v-if="notifyReadOnly") sdflk {{spaceName}} asldfk
+  .persistent-item(v-if="notifyReadOnly")
+    span This space is view only
+    button(@click="remixCurrentSpace") Remix Your Own Copy
 </template>
 
 <script>
@@ -39,6 +41,9 @@ export default {
     },
     remove () {
       this.$store.commit('removeNotification')
+    },
+    remixCurrentSpace () {
+      console.log('remixCurrentSpace')
     }
   }
 }
@@ -68,6 +73,8 @@ export default {
     //   background-color var(--danger-background)
   .persistent-item
     animation none
+  button
+    margin-left 6px
 @keyframes hideme
   from
     opacity 1
