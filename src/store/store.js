@@ -18,7 +18,6 @@ export default new Vuex.Store({
     viewportWidth: 0,
     isOnline: true,
     isBeta: false,
-    notifications: [],
 
     // reset password
     resetPasswordApiKey: '',
@@ -54,7 +53,11 @@ export default new Vuex.Store({
 
     // loading
     isLoadingSpace: false,
-    spaceUrlToLoad: ''
+    spaceUrlToLoad: '',
+
+    // notifications
+    notifications: [],
+    notifyReadOnly: false
   },
 
   mutations: {
@@ -104,13 +107,6 @@ export default new Vuex.Store({
       state.passwordResetIsVisible = value
     },
     triggerSpaceDetailsVisible: () => {},
-    addNotification: (state, notification) => {
-      notification.id = nanoid()
-      state.notifications.push(notification)
-    },
-    removeNotification: (state) => {
-      state.notifications.shift()
-    },
 
     // connecting
     currentUserIsDrawingConnection: (state, value) => {
@@ -214,7 +210,21 @@ export default new Vuex.Store({
     spaceUrlToLoad: (state, spaceUrl) => {
       utils.typeCheck(spaceUrl, 'string')
       state.spaceUrlToLoad = spaceUrl
+    },
+
+    // notifications
+    addNotification: (state, notification) => {
+      notification.id = nanoid()
+      state.notifications.push(notification)
+    },
+    removeNotification: (state) => {
+      state.notifications.shift()
+    },
+    notifyReadOnly: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.notifyReadOnly = value
     }
+
   },
 
   getters: {

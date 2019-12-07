@@ -263,6 +263,7 @@ export default {
       context.commit('restoreSpace', emptySpace)
       context.commit('restoreSpace', cachedSpace)
       context.dispatch('loadRemoteSpace', space)
+      context.dispatch('notifyReadOnly')
     },
     updateSpace: async (context, updates) => {
       updates.id = context.state.id
@@ -287,6 +288,14 @@ export default {
     removeSpacePermanent: (context, space) => {
       cache.removeSpacePermanent(space.id)
       apiQueue.add('removeSpacePermanent', space)
+    },
+    notifyReadOnly: (context) => {
+      const CanEditCurrentSpace = context.rootGetters['currentUser/canEditCurrentSpace']
+      if (CanEditCurrentSpace) {
+        context.commit('notifyReadOnly', false, { root: true })
+      } else {
+        context.commit('notifyReadOnly', true, { root: true })
+      }
     },
 
     // Cards

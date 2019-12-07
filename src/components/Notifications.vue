@@ -1,6 +1,7 @@
 <template lang="pug">
 aside.notifications
   .item(v-for="(item in items" v-bind:key="item.id" :data-notification-id="item.id") {{item.message}}
+  .persistent-item(v-if="notifyReadOnly") sdflk {{spaceName}} asldfk
 </template>
 
 <script>
@@ -17,6 +18,12 @@ export default {
   computed: {
     items () {
       return this.$store.state.notifications
+    },
+    notifyReadOnly () {
+      return this.$store.state.notifyReadOnly
+    },
+    spaceName () {
+      return this.$store.state.currentSpace.name
     }
   },
   methods: {
@@ -25,6 +32,7 @@ export default {
       notifications.forEach(item => {
         this.$nextTick(() => {
           const element = document.querySelector(`.notifications .item[data-notification-id="${item.id}"]`)
+          console.log(element)
           element.addEventListener('animationend', this.remove, false)
         })
       })
@@ -40,7 +48,8 @@ export default {
 .notifications
   pointer-events all
   margin-bottom 10px
-  .item
+  .item,
+  .persistent-item
     border-radius 3px
     margin-bottom 10px
     margin-right 0
@@ -57,7 +66,8 @@ export default {
     //   background-color var(--success-background)
     // &.danger
     //   background-color var(--danger-background)
-
+  .persistent-item
+    animation none
 @keyframes hideme
   from
     opacity 1
