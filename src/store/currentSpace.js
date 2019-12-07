@@ -304,7 +304,8 @@ export default {
     },
     notifyReadOnly: (context) => {
       const CanEditCurrentSpace = context.rootGetters['currentUser/canEditCurrentSpace']
-      if (CanEditCurrentSpace) {
+      const isOnline = context.rootState.isOnline
+      if (CanEditCurrentSpace || isOnline) {
         context.commit('notifyReadOnly', false, { root: true })
       } else {
         context.commit('notifyReadOnly', true, { root: true })
