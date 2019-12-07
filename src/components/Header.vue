@@ -22,7 +22,8 @@ header
         Share(:visible="shareIsVisible")
 
       .users
-        User(:user="currentUser" :clickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true")
+        template(v-for="user in users")
+          User(:user="user" :clickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true")
 
     .bottom
       ResetPassword
@@ -78,8 +79,12 @@ export default {
     })
   },
   computed: {
-    currentUser () {
-      return this.$store.state.currentUser
+    users () {
+      const currentUser = this.$store.state.currentUser
+      const spaceUsers = this.$store.state.currentSpace.users
+      const users = spaceUsers.filter(user => user.id !== currentUser.id)
+      users.unshift(currentUser)
+      return users
     },
     currentSpaceName () {
       const id = this.$store.state.currentSpace.id
@@ -151,10 +156,7 @@ header
     margin-right 6px
     flex-grow 2
   .users
-    display inline-block
-  .user
-    display inline-block
-    position relative
+      margin-right 6px
   .logo-about
     position relative
     display inline-block
@@ -189,8 +191,6 @@ header
   .top
     display flex
     flex-direction row-reverse
-  .users
-    margin-right 6px
   .bottom
     > .button-wrap
       display inline-block

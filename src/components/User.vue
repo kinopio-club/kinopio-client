@@ -59,17 +59,21 @@ export default {
 </script>
 
 <style lang="stylus">
-.user-avatar
-  width 24px
-  height 24px
-  background-repeat no-repeat
-  background-position center
-  border-radius 3px
-  &:hover,
-  &:focus
-    box-shadow var(--button-hover-shadow)
-  &:active
-    box-shadow var(--button-active-inset-shadow)
-  &.clickable
-    cursor pointer
+.user
+  display inline-block
+  position relative
+  .user-avatar
+    width 24px
+    height 24px
+    background-repeat no-repeat
+    background-position center
+    border-radius 3px
+    &:hover,
+    &:focus
+      box-shadow var(--button-hover-shadow)
+    &:active
+      box-shadow var(--button-active-inset-shadow)
+    &.clickable
+      cursor pointer
+
 </style>
