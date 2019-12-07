@@ -1,6 +1,6 @@
 <template lang="pug">
 aside.notifications
-  .item(v-for="(item in items" v-bind:key="item.id" :data-notification-id="item.id") {{item.message}}
+  .item(v-for="(item in items" v-bind:key="item.id" :data-notification-id="item.id" :class="item.type") {{item.message}}
   .persistent-item(v-if="notifyReadOnly")
     span This space is view only
     button(@click="remixCurrentSpace") Remix Your Own Copy
@@ -43,7 +43,7 @@ export default {
       this.$store.commit('removeNotification')
     },
     remixCurrentSpace () {
-      console.log('remixCurrentSpace')
+      this.$store.dispatch('currentSpace/remixCurrentSpace')
     }
   }
 }
@@ -67,8 +67,8 @@ export default {
     animation-direction forward
     animation-fill-mode forwards
     animation-timing-function ease-out
-    // &.success
-    //   background-color var(--success-background)
+    &.success
+      background-color var(--success-background)
     // &.danger
     //   background-color var(--danger-background)
   .persistent-item

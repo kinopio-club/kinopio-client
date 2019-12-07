@@ -237,6 +237,19 @@ export default {
       apiQueue.add('createSpace', space)
       context.commit('addUserToSpace', user)
     },
+    remixCurrentSpace: (context) => {
+      let space = utils.clone(context.state)
+      space.id = nanoid()
+      space.users = []
+      const uniqueNewSpace = cache.updateIdsInSpace(space)
+      context.commit('restoreSpace', uniqueNewSpace)
+      Vue.nextTick(() => {
+        context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
+        context.dispatch('saveNewSpace')
+        context.dispatch('notifyReadOnly')
+        context.commit('addNotification', { message: "Space Remixed. It's now yours to edit", type: 'success' }, { root: true })
+      })
+    },
     addSpace: (context) => {
       context.dispatch('createNewSpace')
       Vue.nextTick(() => {
