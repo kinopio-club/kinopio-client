@@ -20,7 +20,6 @@ export default {
 
     restoreSpace: (state, space) => {
       Object.assign(state, space)
-      utils.updatePageTitleWithName(space.name)
     },
     // Added aug 2019, can safely remove this in aug 2020
     updateBetaSpace: (state) => {
@@ -56,7 +55,6 @@ export default {
           cache.updateSpace(key, state[key], state.id)
         }
       })
-      utils.updatePageTitleWithName(state.name)
     },
 
     // Cards
@@ -235,6 +233,7 @@ export default {
       const user = context.rootState.currentUser
       cache.saveSpace(space)
       apiQueue.add('createSpace', space)
+      utils.updateUrlAndTitle(space)
       context.commit('addUserToSpace', user)
     },
     remixCurrentSpace: (context) => {
@@ -270,7 +269,8 @@ export default {
       }
       context.commit('isLoadingSpace', false, { root: true })
       if (!remoteSpace) { return }
-      if (remoteSpace.id !== context.state.id) { return }
+      utils.updateUrlAndTitle(remoteSpace)
+      if (remoteSpace.id !== context.state.id) { return } // only restore current space
       remoteSpace = utils.normalizeRemoteSpace(remoteSpace)
       console.log('🚋 Restore space from remote space', remoteSpace)
       cache.saveSpace(remoteSpace)
@@ -285,7 +285,13 @@ export default {
       context.dispatch('loadRemoteSpace', space)
     },
     updateSpace: async (context, updates) => {
-      updates.id = context.state.id
+      const space = utils.clone(context.state)
+      updates.id = space.id
+      if (updates.name) {
+        const updatedSpace = utils.clone(space)
+        updatedSpace.name = updates.name
+        utils.updateUrlAndTitle(updatedSpace)
+      }
       context.commit('updateSpace', updates)
       apiQueue.add('updateSpace', updates)
     },
