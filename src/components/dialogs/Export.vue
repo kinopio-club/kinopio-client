@@ -4,8 +4,10 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.stop ref="dialog")
     p Export {{exportTitle}}
   section
     textarea(ref="text") {{text()}}
-    button.success(v-if="textIsCopied" @click="copyText") Copied
-    button(v-else @click="copyText") Copy
+    button(@click="copyText") Copy Card Names
+    .row
+      .badge.success(v-if="textIsCopied") Card Names Copied
+
   section
     p Download
     button(@click="downloadTxt")
@@ -112,5 +114,7 @@ export default {
     display block
     margin-left 0
   button + button
+    margin-top 10px
+  .badge.success
     margin-top 10px
 </style>

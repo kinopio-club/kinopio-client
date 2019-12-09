@@ -8,8 +8,10 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop ref="dialog")
       span and only you can edit
     //- Everyone can view this space but only you and your [collaborators || group] , can edit it
     textarea(ref="url") {{url()}}
-    button.success(v-if="urlIsCopied" @click="copyUrl") Copied
-    button(v-else @click="copyUrl") Copy Url
+    button(@click="copyUrl") Copy Url
+    .row
+      .badge.success(v-if="urlIsCopied") Url Copied
+
   section(v-else)
     p
       span To share,
@@ -69,10 +71,13 @@ export default {
   right 8px
   .badge
     display inline-block
+  .badge.success
+    margin-top 10px
   textarea
     background-color var(--secondary-background)
     border 0
     border-radius 3px
     padding 4px
     margin-bottom 4px
+    height 50px
 </style>
