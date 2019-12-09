@@ -260,15 +260,22 @@ export default {
     },
     loadRemoteSpace: async (context, space) => {
       context.commit('isLoadingSpace', true, { root: true })
-      let remoteSpace = await api.getSpace(space)
+      let remoteSpace
+      try {
+        remoteSpace = await api.getSpace(space)
+      } catch (error) {
+        if (error.status === 404) {
+          context.commit('notifySpaceNotFound', true, { root: true })
+        }
+      }
       context.commit('isLoadingSpace', false, { root: true })
       if (!remoteSpace) { return }
       if (remoteSpace.id !== context.state.id) { return }
       remoteSpace = utils.normalizeRemoteSpace(remoteSpace)
-      // TODO (if !remoteSpace && !cachedSpace) handle 404 error, may occur for loading from url cases
       console.log('🚋 Restore space from remote space', remoteSpace)
       cache.saveSpace(remoteSpace)
       context.commit('restoreSpace', remoteSpace)
+      context.dispatch('notifyReadOnly')
     },
     loadSpace: (context, space) => {
       const cachedSpace = cache.space(space.id)
@@ -276,7 +283,6 @@ export default {
       context.commit('restoreSpace', emptySpace)
       context.commit('restoreSpace', cachedSpace)
       context.dispatch('loadRemoteSpace', space)
-      context.dispatch('notifyReadOnly')
     },
     updateSpace: async (context, updates) => {
       updates.id = context.state.id
@@ -304,8 +310,7 @@ export default {
     },
     notifyReadOnly: (context) => {
       const CanEditCurrentSpace = context.rootGetters['currentUser/canEditCurrentSpace']
-      const isOnline = context.rootState.isOnline
-      if (CanEditCurrentSpace || isOnline) {
+      if (CanEditCurrentSpace) {
         context.commit('notifyReadOnly', false, { root: true })
       } else {
         context.commit('notifyReadOnly', true, { root: true })

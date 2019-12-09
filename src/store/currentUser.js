@@ -115,6 +115,7 @@ export default {
       apiQueue.add('updateUser', { color: newColor })
     },
     lastSpaceId: (context, spaceId) => {
+      context.commit('notifySpaceNotFound', false, { root: true })
       context.commit('lastSpaceId', spaceId)
       cache.updateUser('lastSpaceId', spaceId)
       apiQueue.add('updateUser', { lastSpaceId: spaceId })

@@ -5,6 +5,11 @@ aside.notifications
   .persistent-item(v-if="notifyReadOnly" ref="readOnly" :class="{'notification-jiggle': notifyReadOnlyJiggle}")
     span This space is view only
     button(@click="remixCurrentSpace") Remix Your Own Copy
+
+  .persistent-item.danger(v-if="notifySpaceNotFound")
+    span Space could not be found
+    button(@click="triggerSpaceDetailsVisible") My Spaces
+
 </template>
 
 <script>
@@ -22,8 +27,8 @@ export default {
         this.update()
       }
       if (mutation.type === 'currentUserIsPainting') {
-        if (state.currentUserIsPainting) {
-          const element = this.$refs.readOnly
+        const element = this.$refs.readOnly
+        if (state.currentUserIsPainting && element) {
           this.notifyReadOnlyJiggle = true
           element.addEventListener('animationend', this.removeNotifyReadOnlyJiggle, false)
         }
@@ -31,15 +36,10 @@ export default {
     })
   },
   computed: {
-    items () {
-      return this.$store.state.notifications
-    },
-    notifyReadOnly () {
-      return this.$store.state.notifyReadOnly
-    },
-    spaceName () {
-      return this.$store.state.currentSpace.name
-    }
+    items () { return this.$store.state.notifications },
+    notifyReadOnly () { return this.$store.state.notifyReadOnly },
+    notifySpaceNotFound () { return this.$store.state.notifySpaceNotFound },
+    spaceName () { return this.$store.state.currentSpace.name }
   },
   methods: {
     update () {
@@ -60,6 +60,9 @@ export default {
     },
     remixCurrentSpace () {
       this.$store.dispatch('currentSpace/remixCurrentSpace')
+    },
+    triggerSpaceDetailsVisible () {
+      this.$store.commit('triggerSpaceDetailsVisible')
     }
   }
 }
@@ -85,8 +88,8 @@ export default {
     animation-timing-function ease-out
     &.success
       background-color var(--success-background)
-    // &.danger
-    //   background-color var(--danger-background)
+    &.danger
+      background-color var(--danger-background)
   .persistent-item
     animation none
   button

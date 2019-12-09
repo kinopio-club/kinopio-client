@@ -57,7 +57,8 @@ export default new Vuex.Store({
 
     // notifications
     notifications: [],
-    notifyReadOnly: false
+    notifyReadOnly: false,
+    notifySpaceNotFound: false
   },
 
   mutations: {
@@ -223,6 +224,10 @@ export default new Vuex.Store({
     notifyReadOnly: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.notifyReadOnly = value
+    },
+    notifySpaceNotFound: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.notifySpaceNotFound = value
     }
 
   },
