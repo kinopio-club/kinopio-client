@@ -75,6 +75,9 @@ export default {
       if (mutation.type === 'triggerSpaceDetailsVisible') {
         this.spaceDetailsIsVisible = true
       }
+      if (mutation.type === 'triggerSignUpOrInIsVisible') {
+        this.signUpOrInIsVisible = true
+      }
     })
   },
   computed: {

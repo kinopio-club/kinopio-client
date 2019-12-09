@@ -108,6 +108,7 @@ export default new Vuex.Store({
       state.passwordResetIsVisible = value
     },
     triggerSpaceDetailsVisible: () => {},
+    triggerSignUpOrInIsVisible: () => {},
 
     // connecting
     currentUserIsDrawingConnection: (state, value) => {
