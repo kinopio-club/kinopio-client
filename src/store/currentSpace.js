@@ -213,10 +213,12 @@ export default {
     // Space
 
     createNewHelloSpace: (context) => {
+      const user = context.rootState.currentUser
       let space = utils.clone(helloSpace)
       space.id = nanoid()
       space = cache.updateIdsInSpace(space)
       context.commit('restoreSpace', space)
+      context.commit('addUserToSpace', user)
     },
     createNewSpace: (context) => {
       let space = utils.clone(newSpace)
