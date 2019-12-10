@@ -267,10 +267,7 @@ export default {
         if (userIsSignedIn) {
           remoteSpace = await api.getSpace(space)
         } else {
-          // do a diff api request that always goes forward (if user is online)
-          console.log('🍆', remoteSpace)
           remoteSpace = await api.getSpaceAnonymously(space)
-          console.log('🍆', remoteSpace)
         }
       } catch (error) {
         if (error.status === 404) {
