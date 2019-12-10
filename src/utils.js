@@ -280,7 +280,7 @@ export default {
     return remoteSpace
   },
 
-  // urls
+  // urls 🌍
 
   // same as server util
   normalizeString (string) {
@@ -306,11 +306,11 @@ export default {
     }
   },
 
-  updateWindowUrlAndTitle (space) {
+  updateWindowUrlAndTitle (space, shouldUpdateUrl) {
     const title = this.title(space)
     const userIsSignedIn = cache.user().apiKey
     let url = ''
-    if (userIsSignedIn) {
+    if (userIsSignedIn || shouldUpdateUrl) {
       url = this.url(space)
     }
     url = '/' + url
@@ -323,7 +323,13 @@ export default {
   },
 
   idFromUrl (url) {
+    url = url || window.location.href
     return url.substring(url.length - 21, url.length)
+  },
+
+  currentSpaceHasUrl (space) {
+    const id = this.idFromUrl()
+    return Boolean(id === space.id)
   }
 
 }

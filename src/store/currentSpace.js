@@ -191,7 +191,6 @@ export default {
       if (spaceUrl) {
         console.log('🚃 Restore space from url', spaceUrl)
         const spaceId = utils.idFromUrl(spaceUrl)
-        context.commit('spaceUrlToLoad', '', { root: true })
         context.dispatch('loadSpace', { id: spaceId })
       // restore last space
       } else if (user.lastSpaceId) {
@@ -247,7 +246,7 @@ export default {
       Vue.nextTick(() => {
         context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
         context.dispatch('saveNewSpace')
-        context.dispatch('notifyReadOnly')
+        context.dispatch('checkIfShouldNotifyReadOnly')
         context.commit('addNotification', { message: "Space Remixed. It's now yours to edit", type: 'success' }, { root: true })
       })
     },
@@ -261,12 +260,13 @@ export default {
     },
     getRemoteSpace: async (context, space) => {
       const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
-      context.commit('isLoadingSpace', true, { root: true })
+      const currentSpaceHasUrl = utils.currentSpaceHasUrl(space)
       let remoteSpace
       try {
+        context.commit('isLoadingSpace', true, { root: true })
         if (userIsSignedIn) {
           remoteSpace = await api.getSpace(space)
-        } else {
+        } else if (currentSpaceHasUrl) {
           remoteSpace = await api.getSpaceAnonymously(space)
         }
       } catch (error) {
@@ -275,25 +275,29 @@ export default {
         }
       }
       context.commit('isLoadingSpace', false, { root: true })
-      return remoteSpace
-    },
-    loadRemoteSpace: async (context, space) => {
-      let remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (!remoteSpace) { return }
-      utils.updateWindowUrlAndTitle(remoteSpace)
-      if (remoteSpace.id !== context.state.id) { return } // only restore current space
-      remoteSpace = utils.normalizeRemoteSpace(remoteSpace)
-      console.log('🚋 Restore space from remote space', remoteSpace)
-      cache.saveSpace(remoteSpace)
-      context.commit('restoreSpace', remoteSpace)
-      context.dispatch('notifyReadOnly')
+      // only restore current space
+      if (remoteSpace.id !== context.state.id) { return }
+      // only cache spaces you can edit
+      const userCanEditSpace = context.rootGetters['currentUser/canEditSpace'](remoteSpace)
+      if (userCanEditSpace) {
+        cache.saveSpace(remoteSpace)
+      }
+      return utils.normalizeRemoteSpace(remoteSpace)
     },
-    loadSpace: (context, space) => {
-      const cachedSpace = cache.space(space.id)
+    loadSpace: async (context, space) => {
       const emptySpace = { id: space.id, cards: [], connections: [] }
+      const cachedSpace = cache.space(space.id)
       context.commit('restoreSpace', emptySpace)
       context.commit('restoreSpace', cachedSpace)
-      context.dispatch('loadRemoteSpace', space)
+      const remoteSpace = await context.dispatch('getRemoteSpace', space)
+      if (remoteSpace) {
+        context.commit('restoreSpace', remoteSpace)
+      }
+      context.dispatch('checkIfShouldNotifyReadOnly')
+      const shouldUpdateUrl = Boolean(context.rootState.spaceUrlToLoad)
+      utils.updateWindowUrlAndTitle(remoteSpace || cachedSpace, shouldUpdateUrl)
+      context.commit('spaceUrlToLoad', '', { root: true })
     },
     updateSpace: async (context, updates) => {
       const space = utils.clone(context.state)
@@ -325,7 +329,7 @@ export default {
       cache.removeSpacePermanent(space.id)
       apiQueue.add('removeSpacePermanent', space)
     },
-    notifyReadOnly: (context) => {
+    checkIfShouldNotifyReadOnly: (context) => {
       const CanEditCurrentSpace = context.rootGetters['currentUser/canEditCurrentSpace']
       if (CanEditCurrentSpace) {
         context.commit('notifyReadOnly', false, { root: true })

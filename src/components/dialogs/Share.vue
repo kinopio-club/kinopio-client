@@ -3,16 +3,17 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop ref="dialog")
   section
     p Share
   section(v-if="spaceHasUrl")
-    p
-      .badge.info Everyone can view
-      span and only you can edit
-    //- Everyone can view this space but only you and your [collaborators || group] , can edit it
+    template(v-if="canEditSpace")
+      p
+        .badge.info Everyone can view
+        span and only you can edit
+      //- Everyone can view this space but only you and your [collaborators || group] , can edit it
     textarea(ref="url") {{url()}}
     button(@click="copyUrl") Copy Url
     .row
       .badge.success(v-if="urlIsCopied") Url Copied
 
-  section(v-else)
+  section(v-if="!spaceHasUrl")
     p
       span To share,
       span.badge.info you need to Sign Up or In
@@ -34,10 +35,11 @@ export default {
     }
   },
   computed: {
-    spaceName () { return this.$store.state.currentSpace.name }
-    // userCanEditCurrentSpace () {
-    //   return this.$store.getters['currentUser/CanEditCurrentSpace']
-    // },
+    spaceName () { return this.$store.state.currentSpace.name },
+    canEditSpace () {
+      const canEdit = this.$store.getters['currentUser/canEditCurrentSpace']
+      return canEdit
+    }
   },
   methods: {
     url () {
