@@ -235,7 +235,7 @@ export default {
       const user = context.rootState.currentUser
       cache.saveSpace(space)
       apiQueue.add('createSpace', space)
-      utils.updateUrlAndTitle(space)
+      utils.updateWindowUrlAndTitle(space)
       context.commit('addUserToSpace', user)
     },
     remixCurrentSpace: (context) => {
@@ -259,19 +259,31 @@ export default {
         context.dispatch('saveNewSpace')
       })
     },
-    loadRemoteSpace: async (context, space) => {
+    getRemoteSpace: async (context, space) => {
+      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       context.commit('isLoadingSpace', true, { root: true })
       let remoteSpace
       try {
-        remoteSpace = await api.getSpace(space)
+        if (userIsSignedIn) {
+          remoteSpace = await api.getSpace(space)
+        } else {
+          // do a diff api request that always goes forward (if user is online)
+          console.log('🍆', remoteSpace)
+          remoteSpace = await api.getSpaceAnonymously(space)
+          console.log('🍆', remoteSpace)
+        }
       } catch (error) {
         if (error.status === 404) {
           context.commit('notifySpaceNotFound', true, { root: true })
         }
       }
       context.commit('isLoadingSpace', false, { root: true })
+      return remoteSpace
+    },
+    loadRemoteSpace: async (context, space) => {
+      let remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (!remoteSpace) { return }
-      utils.updateUrlAndTitle(remoteSpace)
+      utils.updateWindowUrlAndTitle(remoteSpace)
       if (remoteSpace.id !== context.state.id) { return } // only restore current space
       remoteSpace = utils.normalizeRemoteSpace(remoteSpace)
       console.log('🚋 Restore space from remote space', remoteSpace)
@@ -292,7 +304,7 @@ export default {
       if (updates.name) {
         const updatedSpace = utils.clone(space)
         updatedSpace.name = updates.name
-        utils.updateUrlAndTitle(updatedSpace)
+        utils.updateWindowUrlAndTitle(updatedSpace)
       }
       context.commit('updateSpace', updates)
       apiQueue.add('updateSpace', updates)

@@ -148,7 +148,7 @@ export default {
     }
   },
 
-  updateUrlAndTitle (space) {
+  updateWindowUrlAndTitle (space) {
     const title = this.title(space)
     const userIsSignedIn = cache.user().apiKey
     let url = ''
