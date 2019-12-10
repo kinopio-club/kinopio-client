@@ -124,42 +124,6 @@ export default {
     return Boolean(this.isIOS() || this.isAndroid())
   },
 
-  // same as server util
-  normalizeString (string) {
-    // replaces non alphanumeric (spaces, emojis, $%&, etc.) characters with '-'s
-    return string.replace(/([^a-z0-9-]+)/ig, '-').toLowerCase() // same regex as glitch project names
-  },
-
-  // same as server util
-  url ({ name, id }) {
-    if (name) {
-      const normalizedName = this.normalizeString(name)
-      return `${normalizedName}-${id}`
-    } else {
-      return id
-    }
-  },
-
-  title ({ name }) {
-    if (name) {
-      return `${name} – Kinopio`
-    } else {
-      return 'Kinopio'
-    }
-  },
-
-  updateWindowUrlAndTitle (space) {
-    const title = this.title(space)
-    const userIsSignedIn = cache.user().apiKey
-    let url = ''
-    if (userIsSignedIn) {
-      url = this.url(space)
-    }
-    url = '/' + url
-    window.history.replaceState({}, title, url)
-    document.title = title
-  },
-
   capitalizeFirstLetter (string) {
     // 'dreams' -> 'Dreams'
     return string.charAt(0).toUpperCase() + string.slice(1)
@@ -314,6 +278,52 @@ export default {
     remoteSpace.cards = cards
     remoteSpace.removedCards = removedCards
     return remoteSpace
+  },
+
+  // urls
+
+  // same as server util
+  normalizeString (string) {
+    // replaces non alphanumeric (spaces, emojis, $%&, etc.) characters with '-'s
+    return string.replace(/([^a-z0-9-]+)/ig, '-').toLowerCase() // same regex as glitch project names
+  },
+
+  // same as server util
+  url ({ name, id }) {
+    if (name) {
+      const normalizedName = this.normalizeString(name)
+      return `${normalizedName}-${id}`
+    } else {
+      return id
+    }
+  },
+
+  title ({ name }) {
+    if (name) {
+      return `${name} – Kinopio`
+    } else {
+      return 'Kinopio'
+    }
+  },
+
+  updateWindowUrlAndTitle (space) {
+    const title = this.title(space)
+    const userIsSignedIn = cache.user().apiKey
+    let url = ''
+    if (userIsSignedIn) {
+      url = this.url(space)
+    }
+    url = '/' + url
+    window.history.replaceState({}, title, url)
+    document.title = title
+  },
+
+  spaceHasUrl () {
+    return window.location.href !== (window.location.origin + '/')
+  },
+
+  idFromUrl (url) {
+    return url.substring(url.length - 21, url.length)
   }
 
 }
