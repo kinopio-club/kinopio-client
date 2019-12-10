@@ -1,6 +1,7 @@
 <template lang="pug">
 aside.notifications
-  .item(v-for="(item in items" v-bind:key="item.id" :data-notification-id="item.id" :class="item.type") {{item.message}}
+  .item(v-for="(item in items" v-bind:key="item.id" :data-notification-id="item.id" :class="item.type")
+    span {{item.message}}
 
   .persistent-item(v-if="notifyReadOnly" ref="readOnly" :class="{'notification-jiggle': notifyReadOnlyJiggle}")
     span This space is view only
@@ -72,6 +73,9 @@ export default {
 .notifications
   pointer-events all
   margin-bottom 10px
+  display flex
+  flex-direction column
+  align-items flex-end
   .item,
   .persistent-item
     border-radius 3px
@@ -90,6 +94,8 @@ export default {
       background-color var(--success-background)
     &.danger
       background-color var(--danger-background)
+    span
+      user-select auto
   .persistent-item
     animation none
   button
