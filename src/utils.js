@@ -285,7 +285,7 @@ export default {
   // same as server util
   normalizeString (string) {
     // replaces non alphanumeric (spaces, emojis, $%&, etc.) characters with '-'s
-    return string.replace(/([^a-z0-9-]+)/ig, '-').toLowerCase() // same regex as glitch project names
+    return string.replace(/([^a-z0-9-]+)/ig, '-').toLowerCase()
   },
 
   // same as server util
