@@ -7,7 +7,7 @@ dialog.support(v-if="visible" :open="visible" @click.stop :class="{'from-footer'
     p I made Kinopio to be fun to create cards, and connect your thoughts, ideas, and plans together.
     p Hit me up with any issues or questions at hi@kinopio.club
     .button-wrap
-      a(href="mailto:hi@kinopio.club?subject=👻 Kinopio Support")
+      a(href="mailto:support@kinopio.club?subject=Kinopio Support")
         button Email Me
     .button-wrap
       a(href="https://twitter.com/KinopioClub")
@@ -32,7 +32,6 @@ export default {
   overflow auto
   max-height calc(100vh - 175px)
   img
-    // margin-top 10px
     border-radius 3px
   @media(max-width 340px)
     max-height calc(100vh - 200px)

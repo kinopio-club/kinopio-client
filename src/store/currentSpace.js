@@ -273,6 +273,9 @@ export default {
         if (error.status === 404) {
           context.commit('notifySpaceNotFound', true, { root: true })
         }
+        if (error.status === 500) {
+          context.commit('notifyConnectionError', true, { root: true })
+        }
       }
       context.commit('isLoadingSpace', false, { root: true })
       if (!remoteSpace) { return }

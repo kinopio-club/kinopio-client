@@ -11,6 +11,12 @@ aside.notifications
     span Space could not be found
     button(@click="triggerSpaceDetailsVisible") My Spaces
 
+  .persistent-item.danger(v-if="notifyConnectionError")
+    span A connection error has occured, please refresh
+    .button-wrap
+      a(href="mailto:support@kinopio.club?subject=Connection Error")
+        button Email Support
+
 </template>
 
 <script>
@@ -40,6 +46,7 @@ export default {
     items () { return this.$store.state.notifications },
     notifyReadOnly () { return this.$store.state.notifyReadOnly },
     notifySpaceNotFound () { return this.$store.state.notifySpaceNotFound },
+    notifyConnectionError () { return this.$store.state.notifyConnectionError },
     spaceName () { return this.$store.state.currentSpace.name }
   },
   methods: {
@@ -94,6 +101,8 @@ export default {
       background-color var(--success-background)
     &.danger
       background-color var(--danger-background)
+    &:last-child
+      margin-bottom 0
     span
       user-select auto
   .persistent-item
