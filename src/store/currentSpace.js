@@ -190,7 +190,7 @@ export default {
       // restore from url
       if (spaceUrl) {
         console.log('🚃 Restore space from url', spaceUrl)
-        const spaceId = spaceUrl.substring(spaceUrl.length - 21, spaceUrl.length)
+        const spaceId = utils.idFromUrl(spaceUrl)
         context.commit('spaceUrlToLoad', '', { root: true })
         context.dispatch('loadSpace', { id: spaceId })
       // restore last space
