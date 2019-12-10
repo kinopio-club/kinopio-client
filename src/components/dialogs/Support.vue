@@ -30,7 +30,7 @@ export default {
 <style lang="stylus">
 .support
   overflow auto
-  max-height calc(100vh - 110px)
+  max-height calc(100vh - 175px)
   img
     // margin-top 10px
     border-radius 3px

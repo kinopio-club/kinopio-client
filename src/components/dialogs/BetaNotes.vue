@@ -31,7 +31,7 @@ export default {
 <style lang="stylus">
 .beta-notes
   overflow auto
-  max-height calc(100vh - 110px)
+  max-height calc(100vh - 175px)
   img
     border-radius 3px
   ul
