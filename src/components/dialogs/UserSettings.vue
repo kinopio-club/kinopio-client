@@ -1,7 +1,7 @@
 <template lang="pug">
-dialog.settings.narrow(v-if="visible" :open="visible" @click.stop)
+dialog.narrow(v-if="visible" :open="visible" @click.stop)
   section
-    p Settings
+    p User Settings
   section
     button(v-if="!removeAllConfirmationVisible" @click="toggleRemoveAllConfirmationVisible")
       img.icon(src="@/assets/remove.svg")
@@ -26,7 +26,7 @@ import api from '@/api.js'
 import Loader from '@/components/Loader.vue'
 
 export default {
-  name: 'Settings',
+  name: 'UserSettings',
   components: {
     Loader
   },
