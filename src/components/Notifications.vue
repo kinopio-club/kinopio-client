@@ -55,7 +55,6 @@ export default {
       notifications.forEach(item => {
         this.$nextTick(() => {
           const element = document.querySelector(`.notifications .item[data-notification-id="${item.id}"]`)
-          console.log(element)
           element.addEventListener('animationend', this.remove, false)
         })
       })
