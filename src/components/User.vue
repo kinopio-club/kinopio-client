@@ -91,12 +91,12 @@ export default {
     position absolute
     bottom -7px
     width 100%
-    background var(--primary)
+    background-color var(--primary)
     height 12px
     border-radius 3px
     display flex
     justify-content center
     span
       font-size 12px
-      color: var(--primary-background)
+      color var(--primary-background)
 </style>
