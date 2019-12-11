@@ -87,6 +87,7 @@ export default {
     },
     signOut () {
       cache.removeAll()
+      window.history.replaceState({}, 'Kinopio', '/')
       location.reload()
     }
   },
