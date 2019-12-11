@@ -194,6 +194,9 @@ header
     display flex
     flex-direction row-reverse
   .bottom
+    margin-top 5px
+    display flex
+    justify-content flex-end
     > .button-wrap
       display inline-block
 
