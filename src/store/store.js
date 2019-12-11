@@ -17,7 +17,7 @@ export default new Vuex.Store({
     viewportHeight: 0,
     viewportWidth: 0,
     isOnline: true,
-    isBeta: false,
+    isBeta: false, // todo -> notifyIsBeta ⤵
 
     // reset password
     resetPasswordApiKey: '',

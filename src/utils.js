@@ -310,7 +310,7 @@ export default {
     const title = this.title(space)
     const userIsSignedIn = cache.user().apiKey
     let url = ''
-    if (userIsSignedIn || shouldUpdateUrl) {
+    if (shouldUpdateUrl || userIsSignedIn) {
       url = this.url(space)
     }
     url = '/' + url
