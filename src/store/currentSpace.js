@@ -291,15 +291,17 @@ export default {
     loadSpace: async (context, space) => {
       const emptySpace = { id: space.id, cards: [], connections: [] }
       const cachedSpace = cache.space(space.id)
+      const shouldUpdateUrl = Boolean(context.rootState.spaceUrlToLoad)
+      // restore local
       context.commit('restoreSpace', emptySpace)
       context.commit('restoreSpace', cachedSpace)
+      // restore remote
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (remoteSpace) {
         context.commit('restoreSpace', remoteSpace)
+        utils.updateWindowUrlAndTitle(remoteSpace, shouldUpdateUrl)
       }
       context.dispatch('checkIfShouldNotifyReadOnly')
-      const shouldUpdateUrl = Boolean(context.rootState.spaceUrlToLoad)
-      utils.updateWindowUrlAndTitle(remoteSpace || cachedSpace, shouldUpdateUrl)
       context.commit('spaceUrlToLoad', '', { root: true })
     },
     updateSpace: async (context, updates) => {

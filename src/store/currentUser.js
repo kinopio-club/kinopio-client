@@ -27,9 +27,15 @@ export default {
       return Boolean(state.apiKey)
     },
     canEditSpace: (state) => (space) => {
-      const userIsInSpace = space.users.find(user => {
-        return user.id === state.id
-      })
+      let userIsInSpace
+      // remoteSpace has space.users, cachedSpace has space.userId
+      if (space.users) {
+        userIsInSpace = space.users.find(user => {
+          return user.id === state.id
+        })
+      } else {
+        userIsInSpace = space.userId === state.id
+      }
       return Boolean(userIsInSpace)
     },
     canEditCurrentSpace: (state, getters, rootState) => {

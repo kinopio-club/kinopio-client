@@ -4,8 +4,8 @@ aside.notifications
     span {{item.message}}
 
   .persistent-item(v-if="notifyReadOnly" ref="readOnly" :class="{'notification-jiggle': notifyReadOnlyJiggle}")
-    span This space is view only
-    button(@click="remixCurrentSpace") Remix Your Own Copy
+    span This space belongs to another user, so you can't edit it
+    button(@click="remixCurrentSpace") Save Your Own Copy
 
   .persistent-item.danger(v-if="notifySpaceNotFound")
     span Space could not be found

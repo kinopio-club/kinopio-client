@@ -13,8 +13,8 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeDialogs" 
       input.name(placeholder="What's your name?" v-model="userName" name="Name")
   section(v-if="isCurrentUser")
     .button-wrap
-      button(@click.stop="toggleSettingsIsVisible" :class="{active: settingsIsVisible}") Settings
-      Settings(:user="user" :visible="settingsIsVisible" @removeUser="signOut")
+      button(@click.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}") Settings
+      UserSettings(:user="user" :visible="userSettingsIsVisible" @removeUser="signOut")
 
     button(v-if="isSignedIn" @click="signOut") Sign Out
 
@@ -22,14 +22,14 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeDialogs" 
 
 <script>
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import Settings from '@/components/dialogs/Settings.vue'
+import UserSettings from '@/components/dialogs/UserSettings.vue'
 import cache from '@/cache.js'
 
 export default {
   name: 'UserDetails',
   components: {
     ColorPicker,
-    Settings,
+    UserSettings,
     User: () => import('@/components/User.vue')
   },
   props: {
@@ -40,7 +40,7 @@ export default {
   data () {
     return {
       colorPickerIsVisible: false,
-      settingsIsVisible: false
+      userSettingsIsVisible: false
     }
   },
   computed: {
@@ -68,10 +68,10 @@ export default {
     }
   },
   methods: {
-    toggleSettingsIsVisible () {
-      const isVisible = this.settingsIsVisible
+    toggleUserSettingsIsVisible () {
+      const isVisible = this.userSettingsIsVisible
       this.closeDialogs()
-      this.settingsIsVisible = !isVisible
+      this.userSettingsIsVisible = !isVisible
     },
     toggleColorPicker () {
       const isVisible = this.colorPickerIsVisible
@@ -80,7 +80,7 @@ export default {
     },
     closeDialogs () {
       this.colorPickerIsVisible = false
-      this.settingsIsVisible = false
+      this.userSettingsIsVisible = false
     },
     updateUserColor (newColor) {
       this.$store.dispatch('currentUser/color', newColor)

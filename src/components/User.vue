@@ -7,6 +7,8 @@
     :class="{ clickable: isClickable, active: userDetailsIsVisible }"
     :style="{backgroundColor: user.color}"
   )
+    .current-user-badge(v-if="isCurrentUser")
+      span YOU
   template(v-if="isClickable")
     UserDetails(:visible="userDetailsIsVisible" :user="user" :detailsOnRight="detailsOnRight")
 </template>
@@ -36,6 +38,11 @@ export default {
         this.userDetailsIsVisible = false
       }
     })
+  },
+  computed: {
+    isCurrentUser () {
+      return this.user.id === this.$store.state.currentUser.id
+    }
   },
   methods: {
     // displaySide () {
@@ -71,6 +78,8 @@ export default {
     &:hover,
     &:focus
       box-shadow var(--button-hover-shadow)
+      .current-user-badge
+        bottom -9px
     &:active
       box-shadow var(--button-active-inset-shadow)
     &.clickable
@@ -78,4 +87,16 @@ export default {
       pointer-events all
     &.active
       box-shadow var(--button-active-inset-shadow)
+  .current-user-badge
+    position absolute
+    bottom -7px
+    width 100%
+    background var(--primary)
+    height 12px
+    border-radius 3px
+    display flex
+    justify-content center
+    span
+      font-size 12px
+      color: var(--primary-background)
 </style>

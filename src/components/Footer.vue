@@ -81,6 +81,7 @@ footer
   right 8px
   bottom 8px
   pointer-events none
+  max-width calc(100% - 17px)
   .undo
     margin 0
     height 11px
