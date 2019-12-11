@@ -20,7 +20,6 @@ export default {
 
     restoreSpace: (state, space) => {
       Object.assign(state, space)
-      utils.updatePageTitleWithName(space.name)
     },
     // Added aug 2019, can safely remove this in aug 2020
     updateBetaSpace: (state) => {
@@ -56,7 +55,6 @@ export default {
           cache.updateSpace(key, state[key], state.id)
         }
       })
-      utils.updatePageTitleWithName(state.name)
     },
 
     // Cards
@@ -187,50 +185,39 @@ export default {
 
   actions: {
     init: (context) => {
+      const spaceUrl = context.rootState.spaceUrlToLoad
       const user = context.rootState.currentUser
-      const betaSpace = cache.space('1')
-      if (user.lastSpaceId) {
+      // restore from url
+      if (spaceUrl) {
+        console.log('🚃 Restore space from url', spaceUrl)
+        const spaceId = utils.idFromUrl(spaceUrl)
+        context.dispatch('loadSpace', { id: spaceId })
+      // restore last space
+      } else if (user.lastSpaceId) {
         console.log('🚃 Restore last space', user.lastSpaceId)
         let spaceToRestore = cache.space(user.lastSpaceId)
         if (!spaceToRestore.id) {
           spaceToRestore = { id: user.lastSpaceId }
         }
-        console.log('🔮 spaceToRestore', spaceToRestore, user.lastSpaceId)
         context.dispatch('loadSpace', spaceToRestore)
-      // migration condition (from lastSpace to lastSpaceId) added sept 2019
-      } else if (user.lastSpace) {
-        console.log('🚃 Migrate data from beta lastSpace key name', user.lastSpace)
-        let spaceToRestore = cache.space(user.lastSpace)
-        if (!spaceToRestore.id) {
-          spaceToRestore = { id: user.lastSpace }
-        }
-        context.dispatch('loadSpace', spaceToRestore)
-        cache.updateUser('lastSpace', null)
-      // betaSpace migration condition added aug 2019
-      } else if (utils.objectHasKeys(betaSpace)) {
-        console.log('🚃 Migrate data from beta format', betaSpace)
-        context.commit('updateBetaSpace')
-        context.commit('addUserToSpace', user)
-        let spaceToRestore = cache.space(context.state.id)
-        if (!spaceToRestore.id) {
-          spaceToRestore = { id: user.lastSpace }
-        }
-        context.dispatch('loadSpace', spaceToRestore)
+        context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
+      // hello kinopio
       } else {
         console.log('🚃 Create new Hello Kinopio space')
-        const isHelloSpace = true
-        context.dispatch('addSpace', isHelloSpace)
+        context.dispatch('createNewHelloSpace')
+        context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
       }
-      context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
     },
 
     // Space
 
     createNewHelloSpace: (context) => {
+      const user = context.rootState.currentUser
       let space = utils.clone(helloSpace)
       space.id = nanoid()
       space = cache.updateIdsInSpace(space)
       context.commit('restoreSpace', space)
+      context.commit('addUserToSpace', user)
     },
     createNewSpace: (context) => {
       let space = utils.clone(newSpace)
@@ -247,41 +234,82 @@ export default {
       const user = context.rootState.currentUser
       cache.saveSpace(space)
       apiQueue.add('createSpace', space)
+      utils.updateWindowUrlAndTitle(space)
       context.commit('addUserToSpace', user)
     },
-    addSpace: (context, isHelloSpace) => {
-      if (isHelloSpace) {
-        context.dispatch('createNewHelloSpace')
-      } else {
-        context.dispatch('createNewSpace')
-        Vue.nextTick(() => {
-          context.dispatch('updateCardConnectionPaths', { cardId: context.state.cards[1].id })
-          context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
-          context.dispatch('saveNewSpace')
-        })
-      }
+    remixCurrentSpace: (context) => {
+      let space = utils.clone(context.state)
+      space.id = nanoid()
+      space.users = []
+      const uniqueNewSpace = cache.updateIdsInSpace(space)
+      context.commit('restoreSpace', uniqueNewSpace)
+      Vue.nextTick(() => {
+        context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
+        context.dispatch('saveNewSpace')
+        context.dispatch('checkIfShouldNotifyReadOnly')
+        context.commit('addNotification', { message: "Space Remixed. It's now yours to edit", type: 'success' }, { root: true })
+      })
     },
-    loadRemoteSpace: async (context, space) => {
-      context.commit('isLoadingSpace', true, { root: true })
-      let remoteSpace = await api.getSpace(space)
+    addSpace: (context) => {
+      context.dispatch('createNewSpace')
+      Vue.nextTick(() => {
+        context.dispatch('updateCardConnectionPaths', { cardId: context.state.cards[1].id })
+        context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
+        context.dispatch('saveNewSpace')
+      })
+    },
+    getRemoteSpace: async (context, space) => {
+      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      const currentSpaceHasUrl = utils.currentSpaceHasUrl(space)
+      let remoteSpace
+      try {
+        context.commit('isLoadingSpace', true, { root: true })
+        if (userIsSignedIn) {
+          remoteSpace = await api.getSpace(space)
+        } else if (currentSpaceHasUrl) {
+          remoteSpace = await api.getSpaceAnonymously(space)
+        }
+      } catch (error) {
+        if (error.status === 404) {
+          context.commit('notifySpaceNotFound', true, { root: true })
+        }
+        if (error.status === 500) {
+          context.commit('notifyConnectionError', true, { root: true })
+        }
+      }
       context.commit('isLoadingSpace', false, { root: true })
       if (!remoteSpace) { return }
+      // only restore current space
       if (remoteSpace.id !== context.state.id) { return }
-      remoteSpace = utils.normalizeRemoteSpace(remoteSpace)
-      // TODO (if !remoteSpace && !cachedSpace) handle 404 error, may occur for loading from url cases
-      console.log('🚋 Restore space from remote space', remoteSpace)
-      cache.saveSpace(remoteSpace)
-      context.commit('restoreSpace', remoteSpace)
+      // only cache spaces you can edit
+      const userCanEditSpace = context.rootGetters['currentUser/canEditSpace'](remoteSpace)
+      if (userCanEditSpace) {
+        cache.saveSpace(remoteSpace)
+      }
+      return utils.normalizeRemoteSpace(remoteSpace)
     },
-    loadSpace: (context, space) => {
-      const cachedSpace = cache.space(space.id)
+    loadSpace: async (context, space) => {
       const emptySpace = { id: space.id, cards: [], connections: [] }
+      const cachedSpace = cache.space(space.id)
       context.commit('restoreSpace', emptySpace)
       context.commit('restoreSpace', cachedSpace)
-      context.dispatch('loadRemoteSpace', space)
+      const remoteSpace = await context.dispatch('getRemoteSpace', space)
+      if (remoteSpace) {
+        context.commit('restoreSpace', remoteSpace)
+      }
+      context.dispatch('checkIfShouldNotifyReadOnly')
+      const shouldUpdateUrl = Boolean(context.rootState.spaceUrlToLoad)
+      utils.updateWindowUrlAndTitle(remoteSpace || cachedSpace, shouldUpdateUrl)
+      context.commit('spaceUrlToLoad', '', { root: true })
     },
     updateSpace: async (context, updates) => {
-      updates.id = context.state.id
+      const space = utils.clone(context.state)
+      updates.id = space.id
+      if (updates.name) {
+        const updatedSpace = utils.clone(space)
+        updatedSpace.name = updates.name
+        utils.updateWindowUrlAndTitle(updatedSpace)
+      }
       context.commit('updateSpace', updates)
       apiQueue.add('updateSpace', updates)
     },
@@ -303,6 +331,14 @@ export default {
     removeSpacePermanent: (context, space) => {
       cache.removeSpacePermanent(space.id)
       apiQueue.add('removeSpacePermanent', space)
+    },
+    checkIfShouldNotifyReadOnly: (context) => {
+      const CanEditCurrentSpace = context.rootGetters['currentUser/canEditCurrentSpace']
+      if (CanEditCurrentSpace) {
+        context.commit('notifyReadOnly', false, { root: true })
+      } else {
+        context.commit('notifyReadOnly', true, { root: true })
+      }
     },
 
     // Cards

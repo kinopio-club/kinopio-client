@@ -18,7 +18,6 @@ export default new Vuex.Store({
     viewportWidth: 0,
     isOnline: true,
     isBeta: false,
-    notifications: [],
 
     // reset password
     resetPasswordApiKey: '',
@@ -53,7 +52,14 @@ export default new Vuex.Store({
     multipleConnectionsSelectedIds: [],
 
     // loading
-    isLoadingSpace: false
+    isLoadingSpace: false,
+    spaceUrlToLoad: '',
+
+    // notifications
+    notifications: [],
+    notifyReadOnly: false,
+    notifySpaceNotFound: false,
+    notifyConnectionError: false
   },
 
   mutations: {
@@ -103,13 +109,7 @@ export default new Vuex.Store({
       state.passwordResetIsVisible = value
     },
     triggerSpaceDetailsVisible: () => {},
-    addNotification: (state, notification) => {
-      notification.id = nanoid()
-      state.notifications.push(notification)
-    },
-    removeNotification: (state) => {
-      state.notifications.shift()
-    },
+    triggerSignUpOrInIsVisible: () => {},
 
     // connecting
     currentUserIsDrawingConnection: (state, value) => {
@@ -209,6 +209,31 @@ export default new Vuex.Store({
     isLoadingSpace: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.isLoadingSpace = value
+    },
+    spaceUrlToLoad: (state, spaceUrl) => {
+      utils.typeCheck(spaceUrl, 'string')
+      state.spaceUrlToLoad = spaceUrl
+    },
+
+    // notifications
+    addNotification: (state, notification) => {
+      notification.id = nanoid()
+      state.notifications.push(notification)
+    },
+    removeNotification: (state) => {
+      state.notifications.shift()
+    },
+    notifyReadOnly: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.notifyReadOnly = value
+    },
+    notifySpaceNotFound: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.notifySpaceNotFound = value
+    },
+    notifyConnectionError: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.notifyConnectionError = value
     }
   },
 

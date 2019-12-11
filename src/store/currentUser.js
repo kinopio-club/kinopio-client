@@ -20,19 +20,24 @@ export default {
     numberOfCardsCreated: 0
   },
   getters: {
-    isCurrentUser: (state) => (userId) => {
-      return Boolean(state.id === userId)
+    isCurrentUser: (state) => (user) => {
+      return Boolean(state.id === user.id)
     },
     isSignedIn: (state) => {
       return Boolean(state.apiKey)
+    },
+    canEditSpace: (state) => (space) => {
+      const userIsInSpace = space.users.find(user => {
+        return user.id === state.id
+      })
+      return Boolean(userIsInSpace)
+    },
+    canEditCurrentSpace: (state, getters, rootState) => {
+      const userIsInSpace = rootState.currentSpace.users.find(user => {
+        return user.id === state.id
+      })
+      return Boolean(userIsInSpace)
     }
-    // isContributor: (state, getters, rootState) => {
-    //   const inCurrentSpace = rootState.currentSpace.users.find(user => {
-    //     return user.id === state.id
-    //   })
-    //   return Boolean(inCurrentSpace)
-    // }
-
   },
   mutations: {
     color: (state, newColor) => {
@@ -110,6 +115,7 @@ export default {
       apiQueue.add('updateUser', { color: newColor })
     },
     lastSpaceId: (context, spaceId) => {
+      context.commit('notifySpaceNotFound', false, { root: true })
       context.commit('lastSpaceId', spaceId)
       cache.updateUser('lastSpaceId', spaceId)
       apiQueue.add('updateUser', { lastSpaceId: spaceId })

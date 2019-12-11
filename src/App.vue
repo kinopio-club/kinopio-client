@@ -324,4 +324,19 @@ code
 
 .move
   vertical-align 1px
+
+.users
+  display inline-block
+  > .user
+    > .user-avatar
+      border-radius 0
+    &:first-child
+      > .user-avatar
+        border-top-left-radius 3px
+        border-bottom-left-radius 3px
+    &:last-child
+      > .user-avatar
+        border-top-right-radius 3px
+        border-bottom-right-radius 3px
+
 </style>

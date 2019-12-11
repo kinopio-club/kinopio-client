@@ -1,5 +1,6 @@
 // functional methods that can see dom, but can't access components or store
 import nanoid from 'nanoid'
+import cache from '@/cache.js'
 
 export default {
   mobileTouchPosition (event, type) {
@@ -123,11 +124,6 @@ export default {
     return Boolean(this.isIOS() || this.isAndroid())
   },
 
-  normalizeString (string) {
-    // replaces non alphanumeric (spaces, emojis, $%&, etc.) characters with '-'s
-    return string.replace(/([^a-z0-9-]+)/ig, '-').toLowerCase() // same regex as glitch project names
-  },
-
   capitalizeFirstLetter (string) {
     // 'dreams' -> 'Dreams'
     return string.charAt(0).toUpperCase() + string.slice(1)
@@ -170,14 +166,6 @@ export default {
   isEvenNumber (number) {
     if (number % 2 === 0) {
       return true
-    }
-  },
-
-  updatePageTitleWithName (name) {
-    if (name) {
-      document.title = `${name} – Kinopio`
-    } else {
-      document.title = 'Kinopio'
     }
   },
 
@@ -290,6 +278,58 @@ export default {
     remoteSpace.cards = cards
     remoteSpace.removedCards = removedCards
     return remoteSpace
+  },
+
+  // urls 🌍
+
+  // same as server util
+  normalizeString (string) {
+    // replaces non alphanumeric (spaces, emojis, $%&, etc.) characters with '-'s
+    return string.replace(/([^a-z0-9-]+)/ig, '-').toLowerCase()
+  },
+
+  // same as server util
+  url ({ name, id }) {
+    if (name) {
+      const normalizedName = this.normalizeString(name)
+      return `${normalizedName}-${id}`
+    } else {
+      return id
+    }
+  },
+
+  title ({ name }) {
+    if (name) {
+      return `${name} – Kinopio`
+    } else {
+      return 'Kinopio'
+    }
+  },
+
+  updateWindowUrlAndTitle (space, shouldUpdateUrl) {
+    const title = this.title(space)
+    const userIsSignedIn = cache.user().apiKey
+    let url = ''
+    if (userIsSignedIn || shouldUpdateUrl) {
+      url = this.url(space)
+    }
+    url = '/' + url
+    window.history.replaceState({}, title, url)
+    document.title = title
+  },
+
+  spaceHasUrl () {
+    return window.location.href !== (window.location.origin + '/')
+  },
+
+  idFromUrl (url) {
+    url = url || window.location.href
+    return url.substring(url.length - 21, url.length)
+  },
+
+  currentSpaceHasUrl (space) {
+    const id = this.idFromUrl()
+    return Boolean(id === space.id)
   }
 
 }

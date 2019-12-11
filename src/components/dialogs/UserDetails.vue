@@ -1,5 +1,9 @@
 <template lang="pug">
 dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeDialogs" :class="{'right-side': detailsOnRight}")
+  section.user-info(v-if="!isCurrentUser")
+    .row
+      User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
+      p.name {{user.name}}
   section(v-if="isCurrentUser")
     .row
       .button-wrap
@@ -7,12 +11,6 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeDialogs" 
           .current-color(:style="backgroundColor")
         ColorPicker(:currentColor="userColor" :visible="colorPickerIsVisible" @selectedColor="updateUserColor")
       input.name(placeholder="What's your name?" v-model="userName" name="Name")
-
-  section(v-if="!isCurrentUser")
-    .user-info
-      User(:user="user" :clickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
-      p {{user.name}}
-
   section(v-if="isCurrentUser")
     .button-wrap
       button(@click.stop="toggleSettingsIsVisible" :class="{active: settingsIsVisible}") Settings
@@ -55,7 +53,7 @@ export default {
       }
     },
     isCurrentUser () {
-      return this.$store.getters['currentUser/isCurrentUser'](this.user.id)
+      return this.$store.getters['currentUser/isCurrentUser'](this.user)
     },
     isSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
@@ -114,16 +112,10 @@ export default {
   .name
     margin-left 6px
 
- .user-info
-   display: flex
-   align-items center
-   margin-bottom 10px
-   p
-     margin 0
-   .user
-     float none
-     pointer-events none
-     margin-bottom 0
-     margin-right 6px
-
+.user-info
+  display: flex
+  .row
+    align-items center
+  p
+    margin 0
 </style>
