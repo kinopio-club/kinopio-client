@@ -44,6 +44,13 @@ export default {
         cache.updateSpace('users', state.users, state.id)
       }
     },
+    removeUserFromSpace: (state, oldUser) => {
+      utils.typeCheck(oldUser, 'object')
+      state.users = state.users.filter(user => {
+        return user.id !== oldUser.id
+      })
+      cache.updateSpace('users', state.users, state.id)
+    },
 
     // Space
 

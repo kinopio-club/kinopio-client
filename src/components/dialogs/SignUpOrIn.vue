@@ -201,6 +201,7 @@ export default {
 
     async signIn (event) {
       if (this.loading.signUpOrIn) { return }
+      const previousUser = utils.clone(this.$store.state.currentUser)
       const email = event.target[0].value
       const password = event.target[1].value
       this.loading.signUpOrIn = true
@@ -215,6 +216,7 @@ export default {
         this.$store.commit('triggerSpaceDetailsVisible')
         const currentSpace = this.$store.state.currentSpace
         utils.updateWindowUrlAndTitle(currentSpace)
+        this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
       } else {
         await this.handleErrors(result)
       }
