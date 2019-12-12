@@ -111,8 +111,8 @@ export default {
 
   .notification-jiggle
     animation-name notificationJiggle
-    animation-duration 0.4s
-    animation-iteration-count 1
+    animation-duration 0.2s
+    animation-iteration-count 2
     animation-direction forward
     animation-fill-mode forwards
     animation-timing-function ease-out
@@ -121,11 +121,11 @@ export default {
   0%
     transform rotate(0deg)
   25%
-    transform rotate(-2deg)
+    transform rotate(-3deg)
   50%
     transform rotate(2deg)
   75%
-    transform rotate(-2deg)
+    transform rotate(-3deg)
   100%
     transform rotate(0deg)
 
