@@ -1,21 +1,27 @@
 <template lang="pug">
 aside.notifications
   .item(v-for="(item in items" v-bind:key="item.id" :data-notification-id="item.id" :class="item.type")
-    span {{item.message}}
+    p {{item.message}}
 
   .persistent-item(v-if="notifyReadOnly" ref="readOnly" :class="{'notification-jiggle': notifyReadOnlyJiggle}")
-    span This space belongs to another user, so you can't edit it
-    button(@click="remixCurrentSpace") Save Your Own Copy
+    p {{spaceName}} belongs to another user, so you can't edit it
+    .row
+      button(@click="triggerSpaceDetailsVisible") Your Spaces
+      button(@click="remixCurrentSpace")
+        img.icon(src="@/assets/add.svg")
+        span Save a Copy
 
   .persistent-item.danger(v-if="notifySpaceNotFound")
-    span Space could not be found
-    button(@click="triggerSpaceDetailsVisible") My Spaces
+    p Space could not be found
+    .row
+      button(@click="triggerSpaceDetailsVisible") Your Spaces
 
   .persistent-item.danger(v-if="notifyConnectionError")
-    span A connection error has occured, please refresh
-    .button-wrap
-      a(href="mailto:support@kinopio.club?subject=Connection Error")
-        button Email Support
+    p A connection error has occured, please refresh
+    .row
+      .button-wrap
+        a(href="mailto:support@kinopio.club?subject=Connection Error")
+          button Email Support
 
 </template>
 
@@ -102,10 +108,18 @@ export default {
       background-color var(--danger-background)
     &:last-child
       margin-bottom 0
-    span
+    p
+      margin 0
       user-select auto
   .persistent-item
     animation none
+  .row
+    margin-top 5px
+    display flex
+    align-items flex-end
+    button
+      &:first-child
+        margin-left 0
   button
     margin-left 6px
 
