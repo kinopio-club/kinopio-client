@@ -244,7 +244,7 @@ export default {
       utils.updateWindowUrlAndTitle(space)
       context.commit('addUserToSpace', user)
     },
-    remixCurrentSpace: (context) => {
+    copyCurrentSpace: (context) => {
       let space = utils.clone(context.state)
       space.id = nanoid()
       space.users = []
@@ -254,7 +254,7 @@ export default {
         context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
         context.dispatch('saveNewSpace')
         context.dispatch('checkIfShouldNotifyReadOnly')
-        context.commit('addNotification', { message: "Space Remixed. It's now yours to edit", type: 'success' }, { root: true })
+        context.commit('addNotification', { message: "Space Copied. It's now yours to edit", type: 'success' }, { root: true })
       })
     },
     addSpace: (context) => {

@@ -7,7 +7,7 @@ aside.notifications
     p {{spaceName}} belongs to another user, so you can't edit it
     .row
       button(@click="triggerSpaceDetailsVisible") Your Spaces
-      button(@click="remixCurrentSpace")
+      button(@click="copyCurrentSpace")
         img.icon(src="@/assets/add.svg")
         span Save a Copy
 
@@ -71,8 +71,8 @@ export default {
     removeNotifyReadOnlyJiggle () {
       this.notifyReadOnlyJiggle = false
     },
-    remixCurrentSpace () {
-      this.$store.dispatch('currentSpace/remixCurrentSpace')
+    copyCurrentSpace () {
+      this.$store.dispatch('currentSpace/copyCurrentSpace')
     },
     triggerSpaceDetailsVisible () {
       this.$store.commit('triggerSpaceDetailsVisible')
