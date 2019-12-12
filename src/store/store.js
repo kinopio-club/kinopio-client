@@ -226,6 +226,9 @@ export default new Vuex.Store({
     notifyReadOnly: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.notifyReadOnly = value
+      if (state.notifySpaceNotFound) {
+        state.notifyReadOnly = false
+      }
     },
     notifySpaceNotFound: (state, value) => {
       utils.typeCheck(value, 'boolean')
