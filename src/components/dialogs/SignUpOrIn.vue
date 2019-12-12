@@ -214,10 +214,7 @@ export default {
         cache.addSpaces(spaces)
         this.$store.commit('triggerSpaceDetailsVisible')
         const currentSpace = this.$store.state.currentSpace
-        // load updated remote space
-        this.$nextTick(() => {
-          this.$store.dispatch('currentSpace/changeSpace', currentSpace)
-        })
+        utils.updateWindowUrlAndTitle(currentSpace)
       } else {
         await this.handleErrors(result)
       }
