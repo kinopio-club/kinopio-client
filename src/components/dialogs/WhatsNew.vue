@@ -22,19 +22,20 @@ dialog.whats-new(v-if="visible" :open="visible" @click.stop)
   section.coming-up(v-if="!whatsNewVisible")
     ul
       li
-        del Import spaces
-      li
         del Sign in to access your spaces on all your devices 🛫
       li
         del Share your spaces with other people (space urls)
-      li Sharing privacy controls and inviting
-      li Real-time collaboration 👯‍♀️
-      li Updated Logo and illustrations
+      li Image and video cards 🌸
+      li Filters 👀
+      li Updated logo and illustrations
+      li An explore site to find cool spaces
       li Billing and Payments (4$/month) 💞
-      li API Docs and Support Pages
-      li Dark mode 🌙
       li More frames 🖼
-      li Keyboard Shortcuts
+      li Keyboard shortcuts
+      li Sharing privacy controls and inviting
+      li Real-time collaboration 🌍
+      li API docs and support pages
+      li Dark mode 🌙
 
   section
     p Follow for Updates
