@@ -215,8 +215,10 @@ export default {
         cache.addSpaces(spaces)
         this.$store.commit('triggerSpaceDetailsVisible')
         const currentSpace = this.$store.state.currentSpace
+        const currentUser = this.$store.state.currentUser
         utils.updateWindowUrlAndTitle(currentSpace)
         this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
+        this.$store.commit('currentSpace/addUserToSpace', currentUser)
       } else {
         await this.handleErrors(result)
       }
