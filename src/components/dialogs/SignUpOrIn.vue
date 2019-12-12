@@ -215,6 +215,8 @@ export default {
         this.$store.commit('triggerSpaceDetailsVisible')
         const currentSpace = this.$store.state.currentSpace
         utils.updateWindowUrlAndTitle(currentSpace)
+        // load updated remote space
+        this.$store.dispatch('currentSpace/changeSpace', currentSpace)
       } else {
         await this.handleErrors(result)
       }
