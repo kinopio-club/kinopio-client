@@ -59,7 +59,11 @@ export default new Vuex.Store({
     notifications: [],
     notifyReadOnly: false,
     notifySpaceNotFound: false,
-    notifyConnectionError: false
+    notifyConnectionError: false,
+
+    // filters
+    filteredConnectionTypes: [],
+    filteredFrames: []
   },
 
   mutations: {

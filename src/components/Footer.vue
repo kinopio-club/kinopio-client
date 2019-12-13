@@ -1,11 +1,25 @@
 <template lang="pug">
 footer(v-if="!dialogsVisible")
   Notifications
+  //- todo:
+  //- move to left = footer.advancedControls
+  //- only conditional offline and notifications on right side = footer.stateInformation
   section.controls
+
+    .button-wrap
+      button(@click="toggleFiltersIsVisible" :class="{ active: filtersIsVisible}")
+        .span.badge.info(v-if="totalFilters") {{totalFilters}}
+        span Y Filters
+        //- text is too much?
+        //- show connection colors (might look janky w lots of colors), or filter icon w count (in grey badge)?
+      Filters(:visible="filtersIsVisible")
+
     .button-wrap
       button(@click="toggleRestoreIsVisible" :class="{ active: restoreIsVisible}")
         img.refresh.icon(src="@/assets/undo.svg")
       Restore(:visible="restoreIsVisible")
+
+    //- only conditional offline and notifications on right side = stateInformation
     .button-wrap(v-if="isOffline")
       button(@click="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
         span Offline
@@ -16,6 +30,7 @@ footer(v-if="!dialogsVisible")
 <script>
 import Restore from '@/components/dialogs/Restore.vue'
 import Offline from '@/components/dialogs/Offline.vue'
+import Filters from '@/components/dialogs/Filters.vue'
 import Notifications from '@/components/Notifications.vue'
 
 export default {
@@ -23,20 +38,23 @@ export default {
   components: {
     Restore,
     Offline,
-    Notifications
+    Notifications,
+    Filters
   },
   data () {
     return {
       restoreIsVisible: false,
-      offlineIsVisible: false
+      offlineIsVisible: false,
+      filtersIsVisible: false
     }
   },
   mounted () {
-    console.log('🐢 kinopio-client', this.buildHash)
+    console.log('🐢 kinopio-client', this.buildHash) // TODO move this stuff to store init, or app?
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
         this.restoreIsVisible = false
         this.offlineIsVisible = false
+        this.filtersIsVisible = false
       }
     })
   },
@@ -56,6 +74,11 @@ export default {
     },
     isOffline () {
       return !this.$store.state.isOnline
+    },
+    totalFilters () {
+      const types = this.$store.state.filteredConnectionTypes
+      const frames = this.$store.state.filteredFrames
+      return types.length + frames.length
     }
   },
   methods: {
@@ -68,6 +91,11 @@ export default {
       const isVisible = this.offlineIsVisible
       this.$store.commit('closeAllDialogs')
       this.offlineIsVisible = !isVisible
+    },
+    toggleFiltersIsVisible () {
+      const isVisible = this.filtersIsVisible
+      this.$store.commit('closeAllDialogs')
+      this.filtersIsVisible = !isVisible
     }
 
   }
@@ -97,5 +125,8 @@ footer
         right 8px
         top initial
         bottom calc(100% - 8px)
-
+  // button
+  //   .badge
+  //     margin 0
+  //     margin-left 6px
 </style>
