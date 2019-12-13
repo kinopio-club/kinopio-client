@@ -81,7 +81,8 @@ export default {
 
   // Operations
 
-  async processQueue (body) {
+  // to remove , replaced w try inside processOperations
+  async processQueue (body) { // sendOperations
     const options = requestOptions({ body, method: 'POST' })
     console.log(`🛫 sending operations`, body)
     await fetch(`${host}/operations`, options)

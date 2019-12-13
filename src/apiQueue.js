@@ -7,9 +7,6 @@ import utils from '@/utils.js'
 
 window.onload = () => {
   self.process()
-  // setInterval(() => {
-  //   self.process()
-  // }, 5 * 1000) // 5 seconds
 }
 
 const processQueue = debounce(async () => {
@@ -67,7 +64,7 @@ const self = {
   async process () {
     if (!window.navigator.onLine) { return }
     const queue = cache.queue()
-    const items = this.squash(queue)
+    const items = this.squash(queue) // -> utils.squash(queue)
     cache.clearQueue()
     try {
       await api.processQueue(items)

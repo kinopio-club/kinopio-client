@@ -1,5 +1,6 @@
 // functional methods that can see dom, but can't access components or store
 import nanoid from 'nanoid'
+
 import cache from '@/cache.js'
 
 export default {
