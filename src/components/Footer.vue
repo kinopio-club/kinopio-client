@@ -2,9 +2,15 @@
 footer(v-if="!dialogsVisible")
   Notifications
   //- todo:
-  //- move to left = footer.advancedControls
-  //- only conditional offline and notifications on right side = footer.stateInformation
+  //- move to left = ToolsFooter
+  //- only conditional offline and notifications on right side = footer.stateInfo // InfoFooter
   section.controls
+
+    //- only conditional offline and notifications on right side = stateInformation
+    .button-wrap(v-if="isOffline")
+      button(@click="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
+        span Offline
+      Offline(:visible="offlineIsVisible")
 
     .button-wrap
       button(@click="toggleFiltersIsVisible" :class="{ active: filtersIsVisible}")
@@ -18,12 +24,6 @@ footer(v-if="!dialogsVisible")
       button(@click="toggleRestoreIsVisible" :class="{ active: restoreIsVisible}")
         img.refresh.icon(src="@/assets/undo.svg")
       Restore(:visible="restoreIsVisible")
-
-    //- only conditional offline and notifications on right side = stateInformation
-    .button-wrap(v-if="isOffline")
-      button(@click="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
-        span Offline
-      Offline(:visible="offlineIsVisible")
 
 </template>
 
@@ -115,7 +115,7 @@ footer
     height 11px
   .controls
     display flex
-    flex-direction row-reverse
+    flex-direction row
     > .button-wrap
       pointer-events all
       margin-left 6px

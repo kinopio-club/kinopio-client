@@ -40,8 +40,7 @@ export default {
     },
     frames () {
       // TODO only show the frames that are currently in use by a card
-      frames.shift()
-      return frames
+      return frames.slice(1, frames.length)
     },
     totalFilters () {
       const types = this.$store.state.filteredConnectionTypes
