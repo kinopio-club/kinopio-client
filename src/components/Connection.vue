@@ -93,13 +93,13 @@ export default {
       const endCardInFilter = frameIds.includes(endCard.frameId)
       return startCardInFilter || endCardInFilter
     },
-    isConnectionTypeFiltered () {
+    isConnectionFilteredByType () {
       const typeIds = this.$store.state.filteredConnectionTypeIds
       return typeIds.includes(this.connectionType.id)
     },
     isFilteredOut () {
       if (this.filtersIsActive) {
-        return this.isCardsFilteredByFrames || this.isConnectionTypeFiltered
+        return this.isCardsFilteredByFrames || this.isConnectionFilteredByType
       } else { return false }
     }
   },

@@ -5,7 +5,7 @@ article(:style="position" :data-card-id="id")
     @touchstart.prevent="startDraggingCard"
     @mouseup="showCardDetails"
     @touchend="showCardDetails"
-    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged, wide: isWide}",
+    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged, wide: isWide, 'filtered-out': isFilteredOut}",
     :style="selectedColor"
     :data-card-id="id"
     :data-card-x="x"
@@ -58,6 +58,7 @@ export default {
     y () { return this.card.y },
     z () { return this.card.z },
     name () { return this.card.name },
+    frameId () { return this.card.frameId },
     isWide () {
       if (!this.name) { return }
       return Boolean(this.name.length > 30)
@@ -130,6 +131,29 @@ export default {
       } else {
         return `http://${name}`
       }
+    },
+
+    // filters
+    filtersIsActive () {
+      const types = this.$store.state.filteredConnectionTypeIds
+      const frames = this.$store.state.filteredFrameIds
+      return Boolean(types.length + frames.length)
+    },
+    isConnectionFilteredByType () {
+      const typeIds = this.$store.state.filteredConnectionTypeIds
+      const filteredTypes = this.connectionTypes.filter(type => {
+        return typeIds.includes(type.id)
+      })
+      return Boolean(filteredTypes.length)
+    },
+    isCardFilteredByFrame () {
+      const frameIds = this.$store.state.filteredFrameIds
+      return frameIds.includes(this.frameId)
+    },
+    isFilteredOut () {
+      if (this.filtersIsActive) {
+        return this.isCardFilteredByFrame || this.isConnectionFilteredByType
+      } else { return false }
     }
   },
   methods: {
