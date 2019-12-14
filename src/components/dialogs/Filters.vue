@@ -27,7 +27,10 @@ dialog.filters.narrow(v-if="visible" :open="visible")
 </template>
 
 <script>
+import uniq from 'lodash-es/uniq'
+
 import frames from '@/frames.js'
+import utils from '@/utils.js'
 
 export default {
   name: 'Filters',
@@ -39,8 +42,10 @@ export default {
       return this.$store.state.currentSpace.connectionTypes
     },
     frames () {
-      // TODO only show the frames that are currently in use by a card
-      return frames.slice(1, frames.length)
+      const cards = utils.clone(this.$store.state.currentSpace.cards)
+      let framesInUse = cards.map(card => card.frameId)
+      framesInUse = uniq(framesInUse.filter(frame => frame))
+      return framesInUse.map(frame => frames[frame])
     },
     totalFilters () {
       const types = this.$store.state.filteredConnectionTypes
