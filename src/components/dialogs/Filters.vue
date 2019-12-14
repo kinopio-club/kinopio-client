@@ -8,7 +8,7 @@ dialog.filters.narrow(v-if="visible" :open="visible")
     button(@click="clearAllFilters") Clear all
     //- button has 'cancel' icon
 
-  section.results-section
+  section.results-section.connection-types
     ul.results-list
       template(v-for="(type in connectionTypes")
         li(:class="{ active: connectionTypeIsActive(type) }" @click="toggleFilteredConnectionType(type)" :key="type.id")
@@ -77,7 +77,6 @@ export default {
 
     connectionTypeIsActive (type) {
       const types = this.$store.state.filteredConnectionTypeIds
-      console.log(types)
       return types.includes(type.id)
     },
     frameIsActive (frame) {
@@ -108,4 +107,6 @@ export default {
   .header
     border-bottom 1px solid var(--primary)
     margin-bottom 4px
+  .connection-types
+    padding-bottom 0
 </style>
