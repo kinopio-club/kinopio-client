@@ -20,7 +20,7 @@ dialog.filters.narrow(v-if="visible" :open="visible")
       template(v-for="(frame in frames")
         li(:class="{active: frameIsActive(frame)}" @click="toggleFilteredCardFrame(frame)" :key="frame.id")
           .badge
-            template(v-if="frameHasBadge(frame)")
+            template
               img(:src="frameBadge(frame).path")
           .name {{frame.name}}
 
@@ -48,34 +48,43 @@ export default {
       return framesInUse.map(frame => frames[frame])
     },
     totalFilters () {
-      const types = this.$store.state.filteredConnectionTypes
-      const frames = this.$store.state.filteredFrames
+      const types = this.$store.state.filteredConnectionTypeIds
+      const frames = this.$store.state.filteredFrameIds
       return types.length + frames.length
     }
   },
   methods: {
     clearAllFilters () {
-      // run store mutation clearAllFilters, both arrays = []
+      this.$store.commit('clearAllFilters')
     },
-    connectionTypeIsActive (type) {
-      // const types = this.$store.state.filteredConnectionTypes
-      return false// Boolean(type.id === this.currentConnection.connectionTypeId)
-    },
-    frameIsActive (frame) {
-      // const filtered = this.$store.state.filteredFrames
-      return false
-    },
+
     toggleFilteredConnectionType (type) {
-      const filtered = this.$store.state.filteredConnectionTypes
-      console.log(filtered, type.id)
+      const filtered = this.$store.state.filteredConnectionTypeIds
+      if (filtered.includes(type.id)) {
+        this.$store.commit('removeFromFilteredConnectionTypeId', type.id)
+      } else {
+        this.$store.commit('addToFilteredConnectionTypeId', type.id)
+      }
     },
     toggleFilteredCardFrame (frame) {
-      const filtered = this.$store.state.filteredFrames
-      console.log(filtered, frame.id)
+      const filtered = this.$store.state.filteredFrameIds
+      if (filtered.includes(frame.id)) {
+        this.$store.commit('removeFromFilteredFrameIds', frame.id)
+      } else {
+        this.$store.commit('addToFilteredFrameIds', frame.id)
+      }
     },
-    frameHasBadge (frame) {
-      return Boolean(frame.badge)
+
+    connectionTypeIsActive (type) {
+      const types = this.$store.state.filteredConnectionTypeIds
+      console.log(types)
+      return types.includes(type.id)
     },
+    frameIsActive (frame) {
+      const frames = this.$store.state.filteredFrameIds
+      return frames.includes(frame.id)
+    },
+
     frameBadge (frame) {
       return {
         path: require(`@/assets/frames/${frame.badge}`)

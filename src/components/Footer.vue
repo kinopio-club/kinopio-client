@@ -76,8 +76,8 @@ export default {
       return !this.$store.state.isOnline
     },
     totalFilters () {
-      const types = this.$store.state.filteredConnectionTypes
-      const frames = this.$store.state.filteredFrames
+      const types = this.$store.state.filteredConnectionTypeIds
+      const frames = this.$store.state.filteredFrameIds
       return types.length + frames.length
     }
   },
