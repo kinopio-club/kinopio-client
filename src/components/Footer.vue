@@ -1,29 +1,22 @@
 <template lang="pug">
 footer(v-if="!dialogsVisible")
   Notifications
-  //- todo:
-  //- move to left = ToolsFooter
-  //- only conditional offline and notifications on right side = footer.stateInfo // InfoFooter
   section.controls
-
-    //- only conditional offline and notifications on right side = stateInformation
-    .button-wrap(v-if="isOffline")
-      button(@click="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
-        span Offline
-      Offline(:visible="offlineIsVisible")
-
-    .button-wrap
-      button(@click="toggleFiltersIsVisible" :class="{ active: filtersIsVisible}")
-        .span.badge.info(v-if="totalFilters") {{totalFilters}}
-        span Y Filters
-        //- text is too much?
-        //- show connection colors (might look janky w lots of colors), or filter icon w count (in grey badge)?
-      Filters(:visible="filtersIsVisible")
-
     .button-wrap
       button(@click="toggleRestoreIsVisible" :class="{ active: restoreIsVisible}")
         img.refresh.icon(src="@/assets/undo.svg")
       Restore(:visible="restoreIsVisible")
+
+    .button-wrap(v-if="isBeta")
+      button(@click="toggleFiltersIsVisible" :class="{ active: filtersIsVisible}")
+        .span.badge.info(v-if="totalFilters") {{totalFilters}}
+        span Y Filters
+      Filters(:visible="filtersIsVisible")
+
+    .button-wrap(v-if="isOffline")
+      button(@click="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
+        span Offline
+      Offline(:visible="offlineIsVisible")
 
 </template>
 
@@ -79,6 +72,9 @@ export default {
       const types = this.$store.state.filteredConnectionTypeIds
       const frames = this.$store.state.filteredFrameIds
       return types.length + frames.length
+    },
+    isBeta () {
+      return this.$store.state.isBeta
     }
   },
   methods: {
@@ -115,7 +111,7 @@ footer
     height 11px
   .controls
     display flex
-    flex-direction row
+    flex-direction row-reverse // prevents shifting when notifications displayed
     > .button-wrap
       pointer-events all
       margin-left 6px
