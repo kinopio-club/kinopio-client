@@ -7,10 +7,11 @@ footer(v-if="!dialogsVisible")
         img.refresh.icon(src="@/assets/undo.svg")
       Restore(:visible="restoreIsVisible")
 
-    .button-wrap(v-if="isBeta")
+    .button-wrap
       button(@click="toggleFiltersIsVisible" :class="{ active: filtersIsVisible}")
         .span.badge.info(v-if="totalFilters") {{totalFilters}}
-        span Y Filters
+        img.icon.sunglasses(src="@/assets/sunglasses.svg")
+        span Filters
       Filters(:visible="filtersIsVisible")
 
     .button-wrap(v-if="isOffline")
@@ -72,9 +73,6 @@ export default {
       const types = this.$store.state.filteredConnectionTypeIds
       const frames = this.$store.state.filteredFrameIds
       return types.length + frames.length
-    },
-    isBeta () {
-      return this.$store.state.isBeta
     }
   },
   methods: {
@@ -121,8 +119,6 @@ footer
         right 8px
         top initial
         bottom calc(100% - 8px)
-  // button
-  //   .badge
-  //     margin 0
-  //     margin-left 6px
+  .sunglasses
+    vertical-align middle
 </style>

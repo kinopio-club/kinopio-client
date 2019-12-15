@@ -238,12 +238,12 @@ dialog
   dialog
     top calc(100% - 8px)
 
-// checkboxes
-label
+label,
+li
   &:hover
-    input
+    input[type="checkbox"]
       background-color var(--secondary-hover-background)
-  input
+  input[type="checkbox"]
     pointer-events none
     margin-right 5px
     vertical-align -2px
@@ -259,6 +259,11 @@ label
       background-image url('assets/checkmark.svg')
       background-repeat no-repeat
       background-position center
+
+li
+  input[type="checkbox"]
+    margin 0
+    margin-right 5px
 
 .results-actions
   padding-bottom 4px
@@ -339,7 +344,7 @@ code
         border-top-right-radius 3px
         border-bottom-right-radius 3px
 
-.filtered-out
+.filtered
   opacity 0.5
 
 </style>
