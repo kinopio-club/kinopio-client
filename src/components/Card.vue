@@ -5,7 +5,7 @@ article(:style="position" :data-card-id="id")
     @touchstart.prevent="startDraggingCard"
     @mouseup="showCardDetails"
     @touchend="showCardDetails"
-    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged, wide: isWide, 'filtered-out': isFilteredOut}",
+    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged, wide: isWide, 'filtered': isFiltered}",
     :style="selectedColor"
     :data-card-id="id"
     :data-card-x="x"
@@ -150,9 +150,14 @@ export default {
       const frameIds = this.$store.state.filteredFrameIds
       return frameIds.includes(this.frameId)
     },
-    isFilteredOut () {
+    isFiltered () {
       if (this.filtersIsActive) {
-        return this.isCardFilteredByFrame || this.isConnectionFilteredByType
+        const isInFilter = this.isCardFilteredByFrame || this.isConnectionFilteredByType
+        if (isInFilter) {
+          return false
+        } else {
+          return true
+        }
       } else { return false }
     }
   },

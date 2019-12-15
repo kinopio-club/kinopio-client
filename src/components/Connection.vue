@@ -10,7 +10,7 @@ path.path(
   :d="path"
   @click="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
-  :class="{active: isSelected || detailsIsVisible, 'filtered-out': isFilteredOut}"
+  :class="{active: isSelected || detailsIsVisible, filtered: isFiltered}"
   ref="connection"
 )
 </template>
@@ -84,7 +84,7 @@ export default {
       const frames = this.$store.state.filteredFrameIds
       return Boolean(types.length + frames.length)
     },
-    isCardsFilteredByFrames () {
+    isCardsFilteredByFrame () {
       const frameIds = this.$store.state.filteredFrameIds
       const cards = utils.clone(this.$store.state.currentSpace.cards)
       const startCard = cards.filter(card => card.id === this.startCardId)[0]
@@ -97,9 +97,14 @@ export default {
       const typeIds = this.$store.state.filteredConnectionTypeIds
       return typeIds.includes(this.connectionType.id)
     },
-    isFilteredOut () {
+    isFiltered () {
       if (this.filtersIsActive) {
-        return this.isCardsFilteredByFrames || this.isConnectionFilteredByType
+        const isInFilter = this.isCardsFilteredByFrame || this.isConnectionFilteredByType
+        if (isInFilter) {
+          return false
+        } else {
+          return true
+        }
       } else { return false }
     }
   },

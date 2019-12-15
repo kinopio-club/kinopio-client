@@ -339,7 +339,7 @@ code
         border-top-right-radius 3px
         border-bottom-right-radius 3px
 
-.filtered-out
+.filtered
   opacity 0.5
 
 </style>
