@@ -12,6 +12,7 @@ dialog.filters.narrow(v-if="visible" :open="visible")
     ul.results-list
       template(v-for="(type in connectionTypes")
         li(:class="{ active: connectionTypeIsActive(type) }" @click="toggleFilteredConnectionType(type)" :key="type.id")
+          input(type="checkbox" :checked="isSelected(type)")
           .badge(:style="{backgroundColor: type.color}")
           .name {{type.name}}
 
@@ -19,6 +20,7 @@ dialog.filters.narrow(v-if="visible" :open="visible")
     ul.results-list.frames-list
       template(v-for="(frame in frames")
         li(:class="{active: frameIsActive(frame)}" @click="toggleFilteredCardFrame(frame)" :key="frame.id")
+          input(type="checkbox" :checked="isSelected(frame)")
           .badge
             template
               img(:src="frameBadge(frame).path")
@@ -54,6 +56,12 @@ export default {
     }
   },
   methods: {
+    isSelected ({ id }) {
+      const types = this.$store.state.filteredConnectionTypeIds
+      const frames = this.$store.state.filteredFrameIds
+      return types.includes(id) || frames.includes(id)
+    },
+
     clearAllFilters () {
       this.$store.commit('clearAllFilters')
     },
@@ -109,4 +117,8 @@ export default {
     margin-bottom 4px
   .connection-types
     padding-bottom 0
+  .results-section
+    overflow visible
+  input[type="checkbox"]
+    margin-top 1px
 </style>
