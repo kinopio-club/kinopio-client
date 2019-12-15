@@ -345,6 +345,6 @@ code
         border-bottom-right-radius 3px
 
 .filtered
-  opacity 0.5
+  opacity 0.3
 
 </style>
