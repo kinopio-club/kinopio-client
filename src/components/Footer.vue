@@ -10,7 +10,7 @@ footer(v-if="!dialogsVisible")
     .button-wrap
       button(@click="toggleFiltersIsVisible" :class="{ active: filtersIsVisible}")
         .span.badge.info(v-if="totalFilters") {{totalFilters}}
-        img.icon(src="@/assets/sunglasses.svg")
+        img.icon.sunglasses(src="@/assets/sunglasses.svg")
         span Filters
       Filters(:visible="filtersIsVisible")
 
@@ -119,8 +119,6 @@ footer
         right 8px
         top initial
         bottom calc(100% - 8px)
-  // button
-  //   .badge
-  //     margin 0
-  //     margin-left 6px
+  .sunglasses
+    vertical-align middle
 </style>

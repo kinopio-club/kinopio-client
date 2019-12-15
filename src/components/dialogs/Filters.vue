@@ -5,8 +5,9 @@ dialog.filters.narrow(v-if="visible" :open="visible")
     p
       span.badge.info(v-if="totalFilters") {{totalFilters}}
       span Filters
-    button(@click="clearAllFilters") Clear all
-    //- button has 'cancel' icon
+    button(@click="clearAllFilters")
+      img.icon.cancel(src="@/assets/add.svg")
+      span Clear all
 
   section.results-section.connection-types
     ul.results-list
@@ -121,4 +122,6 @@ export default {
     overflow visible
   input[type="checkbox"]
     margin-top 1px
+  .cancel
+    transform rotate(45deg)
 </style>
