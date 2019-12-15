@@ -9,7 +9,14 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop ref="dialog")
         span and only you can edit
       //- Everyone can view this space but only you and your [collaborators || group] , can edit it
     textarea(ref="url") {{url()}}
-    button(@click="copyUrl") Copy Url
+
+    button(@click="copyUrl" v-if="!canNativeShare") Copy Url
+    // - todo: (v-if="canNativeShare")
+    .segmented-buttons(v-if="!canNativeShare")
+      button(@click="copyUrl")
+        span Copy Url
+      button(@click="shareUrl")
+        img.icon(src="@/assets/share.svg")
     .row
       .badge.success(v-if="urlIsCopied") Url Copied
 
@@ -39,6 +46,10 @@ export default {
     canEditSpace () {
       const canEdit = this.$store.getters['currentUser/canEditCurrentSpace']
       return canEdit
+    },
+    // only works in https, supported by safari and android chrome
+    canNativeShare () {
+      return Boolean(navigator.share)
     }
   },
   methods: {
@@ -55,6 +66,14 @@ export default {
     triggerSignUpOrInIsVisible () {
       this.$store.commit('closeAllDialogs')
       this.$store.commit('triggerSignUpOrInIsVisible')
+    },
+    shareUrl () {
+      const data = {
+        title: 'Kinopio',
+        text: this.spaceName,
+        url: this.url()
+      }
+      navigator.share(data)
     }
   },
   watch: {
