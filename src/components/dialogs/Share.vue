@@ -47,6 +47,7 @@ export default {
       return canEdit
     },
     // only works in https, supported by safari and android chrome
+    // https://caniuse.com/#feat=web-share
     canNativeShare () {
       return Boolean(navigator.share)
     }
