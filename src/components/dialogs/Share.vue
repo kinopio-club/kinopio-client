@@ -11,8 +11,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop ref="dialog")
     textarea(ref="url") {{url()}}
 
     button(@click="copyUrl" v-if="!canNativeShare") Copy Url
-    // - todo: (v-if="canNativeShare")
-    .segmented-buttons(v-if="!canNativeShare")
+    .segmented-buttons(v-if="canNativeShare")
       button(@click="copyUrl")
         span Copy Url
       button(@click="shareUrl")
