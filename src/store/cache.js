@@ -2,6 +2,10 @@
 
 import utils from '@/utils.js'
 
+const localSpaceKey = (id) => {
+  return `space-${id}`
+}
+
 export default {
   namespaced: true,
   state: {},
@@ -46,7 +50,7 @@ export default {
     // Space
 
     space: (context, spaceId) => {
-      const space = context.dispatch('getLocal', `space-${spaceId}`)
+      const space = context.dispatch('getLocal', localSpaceKey(spaceId))
       return space || {}
     },
     getAllSpaces: (context) => {
@@ -56,7 +60,7 @@ export default {
         return context.dispatch('getLocal', key)
       })
       const spacesWithNames = spaces.map(space => {
-        space.name = space.name || `space-${space.id}`
+        space.name = space.name || localSpaceKey(space.id)
         return space
       })
       const sortedSpaces = spacesWithNames.sort((a, b) => {
@@ -69,7 +73,7 @@ export default {
       space[key] = value
       space.cacheDate = Date.now()
       context.dispatch('storeLocal', {
-        key: `space-${spaceId}`,
+        key: localSpaceKey(spaceId),
         value: space
       })
     },
@@ -80,7 +84,7 @@ export default {
       connections.forEach(connection => space.connections.push(connection))
       connectionTypes.forEach(connectionType => space.connectionTypes.push(connectionType))
       context.dispatch('storeLocal', {
-        key: `space-${spaceId}`,
+        key: localSpaceKey(spaceId),
         value: space
       })
     },
@@ -89,7 +93,7 @@ export default {
       const updatedSpace = context.dispatch('space', '1')
       updatedSpace.id = newId
       context.dispatch('storeLocal', {
-        key: `space-${newId}`,
+        key: localSpaceKey(newId),
         value: updatedSpace
       })
       context.dispatch('removeLocal', 'space-1')
@@ -97,7 +101,7 @@ export default {
     saveSpace: (context, space) => {
       space.cacheDate = Date.now()
       context.dispatch('storeLocal', {
-        key: `space-${space.id}`,
+        key: localSpaceKey(space.id),
         value: space
       })
     },
@@ -118,7 +122,7 @@ export default {
       space.connectionTypes = uniqueItems.connectionTypes
       space.connections = uniqueItems.connections
       context.dispatch('storeLocal', {
-        key: `space-${space.id}`,
+        key: localSpaceKey(space.id),
         value: space
       })
 
@@ -128,7 +132,7 @@ export default {
       spaces.forEach(space => {
         space.cacheDate = utils.normalizeToUnixTime(space.updatedAt)
         context.dispatch('storeLocal', {
-          key: `space-${space.id}`,
+          key: localSpaceKey(space.id),
           value: space
         })
       })
@@ -142,7 +146,7 @@ export default {
         value: Date.now(),
         spaceId: space.id
       })
-      const spaceKey = `space-${space.id}`
+      const spaceKey = localSpaceKey(space.id)
       space = context.dispatch('getLocal', spaceKey)
       context.dispatch('storeLocal', {
         key: `removed-${spaceKey}`,
@@ -159,7 +163,7 @@ export default {
       space = context.dispatch('getLocal', spaceKey)
       if (!space) { return }
       context.dispatch('storeLocal', {
-        key: `space-${space.id}`,
+        key: localSpaceKey(space.id),
         value: space
       })
       context.dispatch('removeLocal', spaceKey)
