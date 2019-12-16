@@ -237,12 +237,13 @@ export default {
     saveNewSpace: (context) => {
       const space = utils.clone(context.state)
       const user = context.rootState.currentUser
+      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       cache.saveSpace(space)
       context.dispatch('api/addToQueue', {
         name: 'createSpace',
         body: space
       }, { root: true })
-      utils.updateWindowUrlAndTitle(space)
+      utils.updateWindowUrlAndTitle({ space, userIsSignedIn })
       context.commit('addUserToSpace', user)
     },
     copyCurrentSpace: (context) => {
@@ -300,6 +301,7 @@ export default {
       const emptySpace = { id: space.id, cards: [], connections: [] }
       const cachedSpace = cache.space(space.id)
       const shouldUpdateUrl = Boolean(context.rootState.spaceUrlToLoad)
+      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       // restore local
       context.commit('restoreSpace', emptySpace)
       context.commit('restoreSpace', cachedSpace)
@@ -307,18 +309,26 @@ export default {
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (remoteSpace) {
         context.commit('restoreSpace', remoteSpace)
-        utils.updateWindowUrlAndTitle(remoteSpace, shouldUpdateUrl)
+        utils.updateWindowUrlAndTitle({
+          space: remoteSpace,
+          shouldUpdateUrl,
+          userIsSignedIn
+        })
       }
       context.dispatch('checkIfShouldNotifyReadOnly')
       context.commit('spaceUrlToLoad', '', { root: true })
     },
     updateSpace: async (context, updates) => {
       const space = utils.clone(context.state)
+      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       updates.id = space.id
       if (updates.name) {
         const updatedSpace = utils.clone(space)
         updatedSpace.name = updates.name
-        utils.updateWindowUrlAndTitle(updatedSpace)
+        utils.updateWindowUrlAndTitle({
+          space: updatedSpace,
+          userIsSignedIn
+        })
       }
       context.commit('updateSpace', updates)
       context.dispatch('api/addToQueue', {
