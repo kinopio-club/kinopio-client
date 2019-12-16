@@ -10,7 +10,7 @@ path.path(
   :d="path"
   @click="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
-  :class="{active: isSelected || detailsIsVisible}"
+  :class="{active: isSelected || detailsIsVisible, filtered: isFiltered}"
   ref="connection"
 )
 </template>
@@ -76,6 +76,36 @@ export default {
     },
     shouldAnimate () {
       return Boolean(this.isSelected || this.detailsIsVisible)
+    },
+
+    // filters
+    filtersIsActive () {
+      const types = this.$store.state.filteredConnectionTypeIds
+      const frames = this.$store.state.filteredFrameIds
+      return Boolean(types.length + frames.length)
+    },
+    isCardsFilteredByFrame () {
+      const frameIds = this.$store.state.filteredFrameIds
+      const cards = utils.clone(this.$store.state.currentSpace.cards)
+      const startCard = cards.filter(card => card.id === this.startCardId)[0]
+      const endCard = cards.filter(card => card.id === this.endCardId)[0]
+      const startCardInFilter = frameIds.includes(startCard.frameId)
+      const endCardInFilter = frameIds.includes(endCard.frameId)
+      return startCardInFilter || endCardInFilter
+    },
+    isConnectionFilteredByType () {
+      const typeIds = this.$store.state.filteredConnectionTypeIds
+      return typeIds.includes(this.connectionType.id)
+    },
+    isFiltered () {
+      if (this.filtersIsActive) {
+        const isInFilter = this.isCardsFilteredByFrame || this.isConnectionFilteredByType
+        if (isInFilter) {
+          return false
+        } else {
+          return true
+        }
+      } else { return false }
     }
   },
   methods: {

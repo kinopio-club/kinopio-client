@@ -18,7 +18,7 @@ export default new Vuex.Store({
     viewportHeight: 0,
     viewportWidth: 0,
     isOnline: true,
-    isBeta: false, // todo -> notifyIsBeta ⤵
+    isBeta: false,
 
     // reset password
     resetPasswordApiKey: '',
@@ -60,7 +60,11 @@ export default new Vuex.Store({
     notifications: [],
     notifyReadOnly: false,
     notifySpaceNotFound: false,
-    notifyConnectionError: false
+    notifyConnectionError: false,
+
+    // filters
+    filteredConnectionTypeIds: [],
+    filteredFrameIds: []
   },
 
   mutations: {
@@ -238,7 +242,30 @@ export default new Vuex.Store({
     notifyConnectionError: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.notifyConnectionError = value
+    },
+
+    // filters
+    clearAllFilters: (state) => {
+      state.filteredConnectionTypeIds = []
+      state.filteredFrameIds = []
+    },
+    addToFilteredConnectionTypeId: (state, id) => {
+      utils.typeCheck(id, 'string')
+      state.filteredConnectionTypeIds.push(id)
+    },
+    removeFromFilteredConnectionTypeId: (state, id) => {
+      utils.typeCheck(id, 'string')
+      state.filteredConnectionTypeIds = state.filteredConnectionTypeIds.filter(typeId => typeId !== id)
+    },
+    addToFilteredFrameIds: (state, id) => {
+      utils.typeCheck(id, 'number')
+      state.filteredFrameIds.push(id)
+    },
+    removeFromFilteredFrameIds: (state, id) => {
+      utils.typeCheck(id, 'number')
+      state.filteredFrameIds = state.filteredFrameIds.filter(frameId => frameId !== id)
     }
+
   },
 
   getters: {

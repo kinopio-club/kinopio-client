@@ -25,10 +25,10 @@ dialog.whats-new(v-if="visible" :open="visible" @click.stop)
         del Sign in to access your spaces on all your devices 🛫
       li
         del Share your spaces with other people (space urls)
+      li
+        del Filters 👀
       li Image and video cards 🌸
-      li Filters 👀
-      li Updated logo and illustrations
-      li An explore site to find cool spaces
+      li An explore or template site to find cool spaces
       li Billing and Payments (4$/month) 💞
       li More frames 🖼
       li Keyboard shortcuts

@@ -3,10 +3,10 @@ dialog.narrow.frame-details(v-if="visible" :open="visible" ref="dialog" @click.s
   section.results-section
     ul.results-list
       template(v-for="(frame in frames")
-        li(:class="{ active: frameIsCardFrame(frame.id) }" @click="changeCardFrame(frame)" :key="frame.id")
+        li(:class="{active: frameIsCardFrame(frame)}" @click="changeCardFrame(frame)" :key="frame.id")
           .badge
-            img(v-if="isGardenLeaves(frame.id)" src="@/assets/frames/garden-leaves/flower.png")
-            img(v-if="isMagicalHelper(frame.id)" src="@/assets/frames/magical-helper/hat.png")
+            template(v-if="frameHasBadge(frame)")
+              img(:src="frameBadge(frame).path")
           .name {{frame.name}}
 </template>
 
@@ -34,16 +34,17 @@ export default {
       }
       this.$store.dispatch('currentSpace/updateCard', card)
     },
-    frameIsCardFrame (frameId) {
+    frameIsCardFrame (frame) {
       const cardFrameId = this.card.frameId || 0
-      return Boolean(frameId === cardFrameId)
+      return Boolean(frame.id === cardFrameId)
     },
-    // frames
-    isGardenLeaves (frameId) {
-      return Boolean(frameId === 1)
+    frameHasBadge (frame) {
+      return Boolean(frame.badge)
     },
-    isMagicalHelper (frameId) {
-      return Boolean(frameId === 2)
+    frameBadge (frame) {
+      return {
+        path: require(`@/assets/frames/${frame.badge}`)
+      }
     },
     scrollIntoView () {
       const element = this.$refs.dialog
