@@ -253,6 +253,45 @@ const self = {
       } catch (error) {
         console.error(error)
       }
+    },
+
+    // Card
+
+    createCard: async (context, body) => {
+      if (!shouldRequest()) { return }
+      try {
+        const options = requestOptions({ body, method: 'POST' })
+        const response = await fetch(`${host}/card`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+
+    // ConnectionType
+
+    createConnectionType: async (context, body) => {
+      if (!shouldRequest()) { return }
+      try {
+        const options = requestOptions({ body, method: 'POST' })
+        const response = await fetch(`${host}/connection-type`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+
+    // Connection
+
+    createConnection: async (context, body) => {
+      if (!shouldRequest()) { return }
+      try {
+        const options = requestOptions({ body, method: 'POST' })
+        const response = await fetch(`${host}/connection`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
     }
 
   }
