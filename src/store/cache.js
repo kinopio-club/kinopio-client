@@ -31,27 +31,29 @@ export default {
     // User
 
     user: (context) => {
-      return this.getLocal('user') || {}
+      const user = context.dispatch('getLocal', 'user')
+      return user || {}
     },
     updateUser: (context, { key, value }) => {
-      let user = this.user()
+      let user = context.dispatch('user')
       user[key] = value
-      this.storeLocal('user', user)
+      context.dispatch('saveUser', user)
     },
     saveUser: (context, user) => {
-      this.storeLocal('user', user)
+      context.dispatch('storeLocal', { key: 'user', value: user })
     },
 
     // Space
 
     space: (context, spaceId) => {
-      return this.getLocal(`space-${spaceId}`) || {}
+      const space = context.dispatch('getLocal', `space-${spaceId}`)
+      return space || {}
     },
     getAllSpaces: (context) => {
       const keys = Object.keys(window.localStorage)
       const spaceKeys = keys.filter(key => key.startsWith('space-'))
       const spaces = spaceKeys.map(key => {
-        return this.getLocal(key)
+        return context.dispatch('getLocal', key)
       })
       const spacesWithNames = spaces.map(space => {
         space.name = space.name || `space-${space.id}`
@@ -63,34 +65,46 @@ export default {
       return sortedSpaces
     },
     updateSpace: (context, { key, value, spaceId }) => {
-      let space = this.space(spaceId)
+      let space = context.dispatch('space', spaceId)
       space[key] = value
       space.cacheDate = Date.now()
-      this.storeLocal(`space-${spaceId}`, space)
+      context.dispatch('storeLocal', {
+        key: `space-${spaceId}`,
+        value: space
+      })
     },
     // todo update callees: params format changed for spaceId
     addToSpace: (context, { cards, connections, connectionTypes, spaceId }) => {
-      let space = this.space(spaceId)
+      let space = context.dispatch('space', spaceId)
       cards.forEach(card => space.cards.push(card))
       connections.forEach(connection => space.connections.push(connection))
       connectionTypes.forEach(connectionType => space.connectionTypes.push(connectionType))
-      this.storeLocal(`space-${spaceId}`, space)
+      context.dispatch('storeLocal', {
+        key: `space-${spaceId}`,
+        value: space
+      })
     },
     // Added aug 2019, can safely remove this in aug 2020
     updateBetaSpaceId: (context, newId) => {
-      const updatedSpace = this.space('1')
+      const updatedSpace = context.dispatch('space', '1')
       updatedSpace.id = newId
-      this.storeLocal(`space-${newId}`, updatedSpace)
-      this.removeLocal('space-1')
+      context.dispatch('storeLocal', {
+        key: `space-${newId}`,
+        value: updatedSpace
+      })
+      context.dispatch('removeLocal', 'space-1')
     },
     saveSpace: (context, space) => {
       space.cacheDate = Date.now()
-      this.storeLocal(`space-${space.id}`, space)
+      context.dispatch('storeLocal', {
+        key: `space-${space.id}`,
+        value: space
+      })
     },
     updateIdsInAllSpaces: (context) => {
-      let spaces = this.getAllSpaces()
+      let spaces = context.dispatch('getAllSpaces')
       spaces.forEach(space => {
-        this.updateIdsInSpace(space)
+        context.dispatch('updateIdsInSpace', space)
       })
     },
     updateIdsInSpace: (context, space) => {
@@ -103,41 +117,58 @@ export default {
       space.cards = uniqueItems.cards
       space.connectionTypes = uniqueItems.connectionTypes
       space.connections = uniqueItems.connections
-      this.storeLocal(`space-${space.id}`, space)
+      context.dispatch('storeLocal', {
+        key: `space-${space.id}`,
+        value: space
+      })
+
       return space
     },
     addSpaces: (context, spaces) => {
       spaces.forEach(space => {
         space.cacheDate = utils.normalizeToUnixTime(space.updatedAt)
-        this.storeLocal(`space-${space.id}`, space)
+        context.dispatch('storeLocal', {
+          key: `space-${space.id}`,
+          value: space
+        })
       })
     },
 
     // Removed Spaces
 
     removeSpace: (context, space) => {
-      this.updateSpace('removeDate', Date.now(), space.id)
+      context.dispatch('updateSpace', {
+        key: 'removeDate',
+        value: Date.now(),
+        spaceId: space.id
+      })
       const spaceKey = `space-${space.id}`
-      space = this.getLocal(spaceKey)
-      this.storeLocal(`removed-${spaceKey}`, space)
-      this.removeLocal(spaceKey)
+      space = context.dispatch('getLocal', spaceKey)
+      context.dispatch('storeLocal', {
+        key: `removed-${spaceKey}`,
+        value: space
+      })
+      context.dispatch('removeLocal', spaceKey)
     },
     removeSpacePermanent: (context, space) => {
       const spaceKey = `removed-space-${space.id}`
-      this.removeLocal(spaceKey)
+      context.dispatch('removeLocal', spaceKey)
     },
     restoreSpace: (context, space) => {
       const spaceKey = `removed-space-${space.id}`
-      space = this.getLocal(spaceKey)
+      space = context.dispatch('getLocal', spaceKey)
       if (!space) { return }
-      this.storeLocal(`space-${space.id}`, space)
-      this.removeLocal(spaceKey)
+      context.dispatch('storeLocal', {
+        key: `space-${space.id}`,
+        value: space
+      })
+      context.dispatch('removeLocal', spaceKey)
     },
     getAllRemovedSpaces: (context) => {
       const keys = Object.keys(window.localStorage)
       const spaceKeys = keys.filter(key => key.startsWith('removed-space-'))
       const spaces = spaceKeys.map(key => {
-        return this.getLocal(key)
+        return context.dispatch('getLocal', key)
       })
       const sortedSpaces = spaces.sort((a, b) => {
         return b.removeDate - a.removeDate
@@ -148,13 +179,20 @@ export default {
     // API Queue
 
     queue: (context) => {
-      return this.getLocal('queue') || []
+      const queue = context.dispatch('getLocal', 'queue')
+      return queue || []
     },
     saveQueue: (context, queue) => {
-      this.storeLocal('queue', queue)
+      context.dispatch('storeLocal', {
+        key: 'queue',
+        value: queue
+      })
     },
     clearQueue: (context) => {
-      this.storeLocal('queue', [])
+      context.dispatch('storeLocal', {
+        key: 'queue',
+        value: []
+      })
     }
 
   }
