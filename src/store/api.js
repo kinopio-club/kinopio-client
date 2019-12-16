@@ -1,7 +1,8 @@
+// apiQueue.add('createSpace', space)
 // 🐈 https://www.notion.so/kinopio/API-docs
 
-// apiQueue.add('createSpace', space)
 // dispatch('api/addToQueue' {name, body})
+// this.$store.dispatch('api/addToQueue')
 
 // api.getblah
 // dispatch('api/getblah')
@@ -9,7 +10,6 @@
 import debounce from 'lodash-es/debounce'
 import merge from 'lodash-es/merge'
 
-// import api from '@/api.js'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 
@@ -137,14 +137,14 @@ const self = {
 
     // Sign In or Up
 
-    signUp: async (email, password, currentUser) => {
+    signUp: async (context, { email, password, currentUser }) => {
       const body = currentUser
       body.email = email
       body.password = password
       const options = requestOptions({ body, method: 'POST' })
       return fetch(`${host}/user/sign-up`, options)
     },
-    signIn: async (email, password) => {
+    signIn: async (context, { email, password }) => {
       const body = {
         email: email,
         password: password
@@ -152,12 +152,12 @@ const self = {
       const options = requestOptions({ body, method: 'POST' })
       return fetch(`${host}/user/sign-in`, options)
     },
-    resetPassword: async (email) => {
+    resetPassword: async (context, email) => {
       const body = { email }
       const options = requestOptions({ body, method: 'POST' })
       return fetch(`${host}/user/reset-password`, options)
     },
-    updatePassword: async (password, apiKey) => {
+    updatePassword: async (context, { password, apiKey }) => {
       const body = { password }
       const options = requestOptions({ body, method: 'PATCH', apiKey })
       return fetch(`${host}/user/update-password`, options)
@@ -165,7 +165,7 @@ const self = {
 
     // User
 
-    getUser: async () => {
+    getUser: async (context) => {
       if (!shouldRequest()) { return }
       try {
         const options = requestOptions({ method: 'GET' })
@@ -175,7 +175,7 @@ const self = {
         console.error(error)
       }
     },
-    getUserSpaces: async () => {
+    getUserSpaces: async (context) => {
       if (!shouldRequest()) { return }
       try {
         const options = requestOptions({ method: 'GET' })
@@ -185,7 +185,7 @@ const self = {
         console.error(error)
       }
     },
-    getUserRemovedSpaces: async () => {
+    getUserRemovedSpaces: async (context) => {
       if (!shouldRequest()) { return }
       try {
         const options = requestOptions({ method: 'GET' })
@@ -195,7 +195,7 @@ const self = {
         console.error(error)
       }
     },
-    removeUserPermanent: async () => {
+    removeUserPermanent: async (context) => {
       if (!shouldRequest()) { return }
       try {
         const options = requestOptions({ method: 'DELETE' })
@@ -208,7 +208,7 @@ const self = {
 
     // Space
 
-    getSpace: async (space) => {
+    getSpace: async (context, space) => {
       try {
         if (!shouldRequest()) { return }
         console.log('🛬 getting remote space', space.id)
@@ -219,7 +219,7 @@ const self = {
         console.error(error)
       }
     },
-    getSpaceAnonymously: async (space) => {
+    getSpaceAnonymously: async (context, space) => {
       const isOffline = !window.navigator.onLine
       if (isOffline) { return }
       try {
@@ -231,7 +231,7 @@ const self = {
         console.error(error)
       }
     },
-    createSpaces: async () => {
+    createSpaces: async (context) => {
       try {
         let spaces = cache.getAllSpaces()
         spaces = spaces.map(space => normalizeSpaceToRemote(space))
@@ -254,7 +254,7 @@ const self = {
         console.error(error)
       }
     },
-    getSpaceRemovedCards: async (space) => {
+    getSpaceRemovedCards: async (context, { space }) => {
       if (!shouldRequest()) { return }
       try {
         const options = requestOptions({ method: 'GET' })
