@@ -48,13 +48,13 @@ const squashQueue = (queue) => {
   return squashed
 }
 
-// const shouldRequest = () => {
-//   const isOnline = window.navigator.onLine
-//   const userIsSignedIn = cache.user().apiKey
-//   if (isOnline && userIsSignedIn) {
-//     return true
-//   }
-// }
+const shouldRequest = () => {
+  const isOnline = window.navigator.onLine
+  const userIsSignedIn = cache.user().apiKey // todo use: this.$store.getters['currentUser/isSignedIn']
+  if (isOnline && userIsSignedIn) {
+    return true
+  }
+}
 
 const requestOptions = (options) => {
   const headers = new Headers({ 'Content-Type': 'application/json' })
@@ -69,24 +69,24 @@ const requestOptions = (options) => {
   }
 }
 
-// const normalizeResponse = async (response) => {
-//   const success = [200, 201, 202, 204]
-//   const data = await response.json()
-//   if (success.includes(response.status)) {
-//     return data
-//   } else {
-//     throw { response, status: response.status }
-//   }
-// }
+const normalizeResponse = async (response) => {
+  const success = [200, 201, 202, 204]
+  const data = await response.json()
+  if (success.includes(response.status)) {
+    return data
+  } else {
+    throw { response, status: response.status }
+  }
+}
 
-// const normalizeSpaceToRemote = (space) => {
-//   if (!space.removedCards) { return }
-//   space.removedCards.forEach(card => {
-//     card.isRemoved = true
-//     space.cards.push(card)
-//   })
-//   return space
-// }
+const normalizeSpaceToRemote = (space) => {
+  if (!space.removedCards) { return }
+  space.removedCards.forEach(card => {
+    card.isRemoved = true
+    space.cards.push(card)
+  })
+  return space
+}
 
 const self = {
   namespaced: true,
@@ -133,12 +133,139 @@ const self = {
         console.error('🚒', error, body)
         this.requeue(body)
       }
-    }
+    },
 
     // Sign In or Up
 
-  }
+    signUp: async (email, password, currentUser) => {
+      const body = currentUser
+      body.email = email
+      body.password = password
+      const options = requestOptions({ body, method: 'POST' })
+      return fetch(`${host}/user/sign-up`, options)
+    },
+    signIn: async (email, password) => {
+      const body = {
+        email: email,
+        password: password
+      }
+      const options = requestOptions({ body, method: 'POST' })
+      return fetch(`${host}/user/sign-in`, options)
+    },
+    resetPassword: async (email) => {
+      const body = { email }
+      const options = requestOptions({ body, method: 'POST' })
+      return fetch(`${host}/user/reset-password`, options)
+    },
+    updatePassword: async (password, apiKey) => {
+      const body = { password }
+      const options = requestOptions({ body, method: 'PATCH', apiKey })
+      return fetch(`${host}/user/update-password`, options)
+    },
 
+    // User
+
+    getUser: async () => {
+      if (!shouldRequest()) { return }
+      try {
+        const options = requestOptions({ method: 'GET' })
+        const response = await fetch(`${host}/user`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    getUserSpaces: async () => {
+      if (!shouldRequest()) { return }
+      try {
+        const options = requestOptions({ method: 'GET' })
+        const response = await fetch(`${host}/user/spaces`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    getUserRemovedSpaces: async () => {
+      if (!shouldRequest()) { return }
+      try {
+        const options = requestOptions({ method: 'GET' })
+        const response = await fetch(`${host}/user/removed-spaces`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    removeUserPermanent: async () => {
+      if (!shouldRequest()) { return }
+      try {
+        const options = requestOptions({ method: 'DELETE' })
+        const response = await fetch(`${host}/user/permanent`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+
+    // Space
+
+    getSpace: async (space) => {
+      try {
+        if (!shouldRequest()) { return }
+        console.log('🛬 getting remote space', space.id)
+        const options = requestOptions({ method: 'GET' })
+        const response = await utils.timeout(5000, fetch(`${host}/space/${space.id}`, options))
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    getSpaceAnonymously: async (space) => {
+      const isOffline = !window.navigator.onLine
+      if (isOffline) { return }
+      try {
+        console.log('🛬 getting remote space anonymously', space.id)
+        const options = requestOptions({ method: 'GET' })
+        const response = await utils.timeout(5000, fetch(`${host}/space/${space.id}`, options))
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    createSpaces: async () => {
+      try {
+        let spaces = cache.getAllSpaces()
+        spaces = spaces.map(space => normalizeSpaceToRemote(space))
+        let removedSpaces = cache.getAllRemovedSpaces()
+        removedSpaces = removedSpaces.map(space => {
+          space.isRemoved = true
+          space.removedByUserId = cache.user().id
+          return space
+        })
+        removedSpaces.forEach(space => spaces.push(space))
+        spaces.map(space => {
+          utils.migrationEnsureRemovedCards(space)
+          return space
+        })
+        const body = spaces
+        const options = requestOptions({ body, method: 'POST' })
+        const response = await fetch(`${host}/space/multiple`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    getSpaceRemovedCards: async (space) => {
+      if (!shouldRequest()) { return }
+      try {
+        const options = requestOptions({ method: 'GET' })
+        const response = await fetch(`${host}/space/${space.id}/removed-cards`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+  }
 }
 
 export default self
