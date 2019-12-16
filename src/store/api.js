@@ -122,7 +122,7 @@ const self = {
         await fetch(`${host}/operations`, options)
       } catch (error) {
         console.error('🚒', error, body)
-        this.requeue(body)
+        context.dispatch('requeue', body)
       }
     },
 
