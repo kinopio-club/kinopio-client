@@ -32,7 +32,6 @@ import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import cache from '@/cache.js'
 import utils from '@/utils.js'
-import apiQueue from '@/apiQueue.js'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 
 export default {
@@ -146,15 +145,15 @@ export default {
     createRemoteItems (newItems) {
       newItems.cards.forEach(card => {
         card.spaceId = this.selectedSpace.id
-        apiQueue.add('createCard', card)
+        this.$store.dispatch('api/addToQueue', { name: 'createCard', body: card })
       })
       newItems.connectionTypes.forEach(type => {
         type.spaceId = this.selectedSpace.id
-        apiQueue.add('createConnectionType', type)
+        this.$store.dispatch('api/addToQueue', { name: 'createConnectionType', body: type })
       })
       newItems.cards.forEach(connection => {
         connection.spaceId = this.selectedSpace.id
-        apiQueue.add('createConnection', connection)
+        this.$store.dispatch('api/addToQueue', { name: 'createConnection', body: connection })
       })
     },
 

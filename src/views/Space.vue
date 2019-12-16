@@ -31,7 +31,6 @@ import Connection from '@/components/Connection.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
-import apiQueue from '@/apiQueue.js'
 import utils from '@/utils.js'
 
 let startCursor, prevCursor, prevCursorPage, endCursor, scrollTimer, scrollAreaHeight, scrollAreaWidth, maxHeight, maxWidth
@@ -104,7 +103,7 @@ export default {
       const status = window.navigator.onLine
       this.$store.commit('isOnline', status)
       if (status) {
-        apiQueue.process()
+        this.$store.dispatch('api/processQueueOperations')
       }
     },
 

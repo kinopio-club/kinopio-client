@@ -6,8 +6,6 @@ import last from 'lodash-es/last'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
-import api from '@/api.js'
-import apiQueue from '@/apiQueue.js'
 import words from '@/words.js'
 
 import helloSpace from '@/spaces/hello.json'
@@ -240,7 +238,10 @@ export default {
       const space = utils.clone(context.state)
       const user = context.rootState.currentUser
       cache.saveSpace(space)
-      apiQueue.add('createSpace', space)
+      context.dispatch('api/addToQueue', {
+        name: 'createSpace',
+        body: space
+      }, { root: true })
       utils.updateWindowUrlAndTitle(space)
       context.commit('addUserToSpace', user)
     },
@@ -272,9 +273,9 @@ export default {
       try {
         context.commit('isLoadingSpace', true, { root: true })
         if (userIsSignedIn) {
-          remoteSpace = await api.getSpace(space)
+          remoteSpace = await context.dispatch('api/getSpace', space, { root: true })
         } else if (currentSpaceHasUrl) {
-          remoteSpace = await api.getSpaceAnonymously(space)
+          remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
         }
       } catch (error) {
         if (error.status === 404) {
@@ -320,26 +321,35 @@ export default {
         utils.updateWindowUrlAndTitle(updatedSpace)
       }
       context.commit('updateSpace', updates)
-      apiQueue.add('updateSpace', updates)
+      context.dispatch('api/addToQueue', {
+        name: 'updateSpace',
+        body: updates
+      }, { root: true })
     },
     changeSpace: (context, space) => {
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
       context.dispatch('loadSpace', space)
       context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
-      apiQueue.add('updateSpace', {
-        id: space.id,
-        updatedAt: new Date()
-      })
+      context.dispatch('api/addToQueue', {
+        name: 'updateSpace',
+        body: { id: space.id, updatedAt: new Date() }
+      }, { root: true })
     },
     removeCurrentSpace: (context) => {
       const space = utils.clone(context.state)
       cache.removeSpace(space)
-      apiQueue.add('removeSpace', { id: space.id })
+      context.dispatch('api/addToQueue', {
+        name: 'removeSpace',
+        body: { id: space.id }
+      }, { root: true })
     },
     removeSpacePermanent: (context, space) => {
       cache.removeSpacePermanent(space.id)
-      apiQueue.add('removeSpacePermanent', space)
+      context.dispatch('api/addToQueue', {
+        name: 'removeSpacePermanent',
+        body: space
+      }, { root: true })
     },
     checkIfShouldNotifyReadOnly: (context) => {
       const CanEditCurrentSpace = context.rootGetters['currentUser/canEditCurrentSpace']
@@ -367,11 +377,11 @@ export default {
       context.commit('createCard', card)
       card.spaceId = context.state.id
       card = utils.clone(card)
-      apiQueue.add('createCard', card)
+      context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
     },
     updateCard: (context, card) => {
       context.commit('updateCard', card)
-      apiQueue.add('updateCard', card)
+      context.dispatch('api/addToQueue', { name: 'updateCard', body: card }, { root: true })
     },
     incrementCardZ: (context, cardId) => {
       let cards = context.rootState.currentSpace.cards
@@ -380,7 +390,10 @@ export default {
         card.z = index
         if (card.id === cardId) {
           card.z = cards.length + 1
-          apiQueue.add('updateCard', { id: card.id, z: card.z })
+          context.dispatch('api/addToQueue', {
+            name: 'updateCard',
+            body: { id: card.id, z: card.z }
+          }, { root: true })
         }
       })
       context.commit('incrementCardZ', cardId)
@@ -389,7 +402,7 @@ export default {
       const cardHasContent = Boolean(card.name)
       if (cardHasContent) {
         context.commit('removeCard', card)
-        apiQueue.add('removeCard', card)
+        context.dispatch('api/addToQueue', { name: 'removeCard', body: card }, { root: true })
       } else {
         context.dispatch('removeCardPermanent', card)
       }
@@ -398,15 +411,18 @@ export default {
     },
     removeCardPermanent: (context, card) => {
       context.commit('removeCardPermanent', card)
-      apiQueue.add('removeCardPermanent', card)
+      context.dispatch('api/addToQueue', { name: 'removeCardPermanent', body: card }, { root: true })
     },
     restoreCard: (context, card) => {
       context.commit('restoreCard', card)
-      apiQueue.add('restoreCard', card)
+      context.dispatch('api/addToQueue', { name: 'restoreCard', body: card }, { root: true })
     },
     restoreSpace: (context, space) => {
       cache.restoreSpace(space)
-      apiQueue.add('restoreSpace', { id: space.id })
+      context.dispatch('api/addToQueue', { name: 'restoreSpace',
+        body: {
+          id: space.id
+        } }, { root: true })
       context.dispatch('changeSpace', space)
     },
     dragCards: (context, options) => {
@@ -441,7 +457,12 @@ export default {
         const cards = context.rootState.currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
         cards.forEach(card => {
           card = utils.clone(card)
-          apiQueue.add('updateCard', { id: card.id, x: card.x, y: card.y })
+          context.dispatch('api/addToQueue', { name: 'updateCard',
+            body: {
+              id: card.id,
+              x: card.x,
+              y: card.y
+            } }, { root: true })
           context.dispatch('updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
         })
       } else {
@@ -449,7 +470,12 @@ export default {
         let card = context.rootState.currentSpace.cards.find(card => currentDraggingCardId === card.id)
         if (!card) { return }
         card = utils.clone(card)
-        apiQueue.add('updateCard', { id: card.id, x: card.x, y: card.y })
+        context.dispatch('api/addToQueue', { name: 'updateCard',
+          body: {
+            id: card.id,
+            x: card.x,
+            y: card.y
+          } }, { root: true })
         context.dispatch('updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
       }
     },
@@ -474,7 +500,7 @@ export default {
         connection.id = nanoid()
         connection.spaceId = context.state.id
         connection.connectionTypeId = connectionType.id
-        apiQueue.add('createConnection', connection)
+        context.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
         context.commit('addConnection', connection)
       }
     },
@@ -485,7 +511,7 @@ export default {
           connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
           connection.spaceId = context.state.id
           if (shouldUpdateApi) {
-            apiQueue.add('updateConnection', connection)
+            context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
           }
         }
         return connection
@@ -514,14 +540,14 @@ export default {
     },
     removeConnection: (context, connection) => {
       context.commit('removeConnection', connection)
-      apiQueue.add('removeConnection', connection)
+      context.dispatch('api/addToQueue', { name: 'removeConnection', body: connection }, { root: true })
     },
     updateConnectionTypeForConnection: (context, { connectionId, connectionTypeId }) => {
       const connection = {
         id: connectionId,
         connectionTypeId
       }
-      apiQueue.add('updateConnection', connection)
+      context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
       context.commit('updateConnectionTypeForConnection', { connectionId, connectionTypeId })
     },
 
@@ -536,11 +562,11 @@ export default {
         spaceId: context.state.id
       }
       context.commit('addConnectionType', connectionType)
-      apiQueue.add('createConnectionType', connectionType)
+      context.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
     },
     updateConnectionType: (context, connectionType) => {
       context.commit('updateConnectionType', connectionType)
-      apiQueue.add('updateConnectionType', connectionType)
+      context.dispatch('api/addToQueue', { name: 'updateConnectionType', body: connectionType }, { root: true })
     },
     removeUnusedConnectionTypes: (context) => {
       const connectionTypes = context.state.connectionTypes
@@ -548,7 +574,7 @@ export default {
       const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
       const removeConnectionTypes = connectionTypes.filter(type => !connectionTypeIds.includes(type.id))
       removeConnectionTypes.forEach(type => {
-        apiQueue.add('removeConnectionType', type)
+        context.dispatch('api/addToQueue', { name: 'removeConnectionType', body: type }, { root: true })
         context.commit('removeConnectionType', type)
       })
     }

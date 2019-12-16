@@ -16,7 +16,6 @@ dialog.narrow.reset-password(v-if="visible" :open="visible")
 </template>
 
 <script>
-import api from '@/api.js'
 import Loader from '@/components/Loader.vue'
 
 export default {
@@ -105,7 +104,7 @@ export default {
       if (!this.isPasswordsMatch(password, confirmPassword)) { return }
       this.loading.updatePassword = true
       const apiKey = this.$store.state.resetPasswordApiKey
-      const response = await api.updatePassword(password, apiKey)
+      const response = await this.$store.dispatch('api/updatePassword', { password, apiKey })
       const result = await response.json()
       if (this.isSuccess(response)) {
         this.$store.commit('passwordResetIsVisible', false)
