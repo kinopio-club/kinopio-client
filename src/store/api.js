@@ -10,7 +10,6 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 window.onload = () => {
-  console.log('🍆🍆window onload call api.process')
   self.actions.processQueueOperations()
 }
 
