@@ -3,7 +3,6 @@
 import sample from 'lodash-es/sample'
 
 import utils from '@/utils.js'
-import cache from '@/cache.js'
 
 export default {
   adjectives () {
@@ -11,17 +10,6 @@ export default {
   },
   nouns () {
     return ['crest', 'frill', 'voice', 'eye', 'sight', 'seer', 'singer', 'song', 'fin', 'wing', 'racer', 'runner', 'flier', 'swoop', 'dive', 'diver', 'chest', 'ridge', 'leg', 'legs', 'tail', 'weaver', 'crafter', 'scribe', 'muse', 'tracker', 'healer', 'saver', 'friend', 'cloud', 'forger', 'scale', 'hair', 'braid', 'belly', 'dancer', 'painter', 'drifter', 'knight', 'lady', 'queen', 'prince', 'princess', 'dutchess', 'sage', 'wizard', 'witch', 'panther', 'tiger', 'cougar', 'puma', 'jaguar', 'ocelot', 'lion', 'leopard', 'ferret', 'bear', 'raccoon', 'wolf', 'kitten', 'puppy', 'cub', 'fox', 'coyote', 'zebra', 'antelope', 'gazelle', 'deer', 'elk', 'whale', 'dolphin', 'fish', 'minnow', 'salmon', 'ray', 'otter', 'goose', 'crow', 'raven', 'eagle', 'heron', 'owl', 'stork', 'crane', 'sparrow', 'robin', 'parrot', 'carp', 'iguana', 'oriole', 'toucan', 'bee', 'hornet', 'rabbit', 'bunny', 'hare', 'soarer', 'moth', 'hero', 'chill', 'gem', 'myth', 'elf', 'fairy', 'pixie', 'butterfly', 'wanderer', 'glass', 'crystal', 'lantern', 'cloak', 'bell', 'keeper', 'whimsy', 'quester', 'mouse', 'serpent', 'wyrm', 'thorn', 'rider', 'spirit', 'bat', 'beetle', 'seeker', 'koala', 'kangaroo', 'yak', 'sloth', 'seed', 'goat', 'shift', 'mole', 'llama', 'cap', 'boot', 'drop', 'carpet', 'curtain', 'waterfall', 'river', 'breeze', 'moon', 'rain', 'wind', 'sea', 'morning', 'snow', 'lake', 'sunset', 'pine', 'shadow', 'leaf', 'dawn', 'glitter', 'forest', 'hill', 'meadow', 'glade', 'brook', 'dew', 'dust', 'flower', 'firefly', 'feather', 'grass', 'haze', 'mountain', 'night', 'pond', 'snowflake', 'silence', 'sound', 'sky', 'surf', 'violet', 'water', 'wildflower', 'wave', 'resonance', 'dream', 'frog', 'smoke', 'star']
-  },
-  nameIsUnique (name) {
-    const spaces = cache.getAllSpaces()
-    const matchingName = spaces.find(space => {
-      return name === space.name
-    })
-    if (matchingName) {
-      return false
-    } else {
-      return true
-    }
   },
   randomAdjective () {
     const adjective = sample(this.adjectives())
@@ -33,13 +21,6 @@ export default {
   },
 
   randomUniqueName () {
-    let name
-    while (true) {
-      name = `${this.randomAdjective()} ${this.randomNoun()}`
-      if (name && this.nameIsUnique(name)) {
-        break
-      }
-    }
-    return name
+    return `${this.randomAdjective()} ${this.randomNoun()}`
   }
 }

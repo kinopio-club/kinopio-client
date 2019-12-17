@@ -1,6 +1,5 @@
 // functional methods that can see dom, but can't access components or store
 import nanoid from 'nanoid'
-import cache from '@/cache.js'
 
 export default {
   mobileTouchPosition (event, type) {
@@ -306,9 +305,8 @@ export default {
     }
   },
 
-  updateWindowUrlAndTitle (space, shouldUpdateUrl) {
+  updateWindowUrlAndTitle ({ space, shouldUpdateUrl, userIsSignedIn }) {
     const title = this.title(space)
-    const userIsSignedIn = cache.user().apiKey
     let url = ''
     if (shouldUpdateUrl || userIsSignedIn) {
       url = this.url(space)

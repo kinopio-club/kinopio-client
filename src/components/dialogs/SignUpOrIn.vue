@@ -59,7 +59,6 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
 
 <script>
 import utils from '@/utils.js'
-import api from '@/api.js'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
 
@@ -190,7 +189,7 @@ export default {
       if (!this.isSignUpPasswordTooShort(password)) { return }
       if (!this.isSignUpPasswordsMatch(password, confirmPassword)) { return }
       this.loading.signUpOrIn = true
-      const response = await api.signUp(email, password, currentUser)
+      const response = await this.$store.dispatch('api/signUp', { email, password, currentUser })
       const result = await response.json()
       if (this.isSuccess(response)) {
         await this.createSpaces(result.apiKey)
@@ -205,18 +204,22 @@ export default {
       const email = event.target[0].value
       const password = event.target[1].value
       this.loading.signUpOrIn = true
-      const response = await api.signIn(email, password)
+      const response = await this.$store.dispatch('api/signIn', { email, password })
       const result = await response.json()
       this.loading.signUpOrIn = false
       if (this.isSuccess(response)) {
         this.$store.commit('currentUser/updateUser', result)
         await this.createSpaces(result.apiKey)
-        const spaces = await api.getUserSpaces()
+        const spaces = await this.$store.dispatch('api/getUserSpaces')
         cache.addSpaces(spaces)
         this.$store.commit('triggerSpaceDetailsVisible')
         const currentSpace = this.$store.state.currentSpace
         const currentUser = this.$store.state.currentUser
-        utils.updateWindowUrlAndTitle(currentSpace)
+        const userIsSignedIn = this.$store.getters['currentUser/isSignedIn']
+        utils.updateWindowUrlAndTitle({
+          space: currentSpace,
+          userIsSignedIn
+        })
         this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
         this.$store.commit('currentSpace/addUserToSpace', currentUser)
       } else {
@@ -230,7 +233,7 @@ export default {
       this.$store.commit('addNotification', { message: 'Signed In' })
       this.$store.commit('currentSpace/restoreSpace', updatedSpace)
       this.$store.commit('currentUser/apiKey', apiKey)
-      await api.createSpaces()
+      await this.$store.dispatch('api/createSpaces')
       this.loading.signUpOrIn = false
       this.$store.commit('closeAllDialogs')
     },
@@ -239,7 +242,7 @@ export default {
       if (this.loading.resetPassword || this.resetSuccess) { return }
       const email = event.target[0].value
       this.loading.resetPassword = true
-      const response = await api.resetPassword(email)
+      const response = await this.$store.dispatch('api/resetPassword', email)
       this.loading.resetPassword = false
       if (response.status === 404) {
         this.error.resetUserEmailNotFound = true

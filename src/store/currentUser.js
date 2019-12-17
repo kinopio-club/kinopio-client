@@ -3,8 +3,6 @@ import nanoid from 'nanoid'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
-import apiQueue from '@/apiQueue.js'
-import api from '@/api.js'
 
 export default {
   namespaced: true,
@@ -114,36 +112,54 @@ export default {
     },
     name: (context, newName) => {
       context.commit('name', newName)
-      apiQueue.add('updateUser', { name: newName })
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          name: newName
+        } }, { root: true })
     },
     color: (context, newColor) => {
       context.commit('color', newColor)
-      apiQueue.add('updateUser', { color: newColor })
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          color: newColor
+        } }, { root: true })
     },
     lastSpaceId: (context, spaceId) => {
       context.commit('notifySpaceNotFound', false, { root: true })
       context.commit('lastSpaceId', spaceId)
       cache.updateUser('lastSpaceId', spaceId)
-      apiQueue.add('updateUser', { lastSpaceId: spaceId })
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          lastSpaceId: spaceId
+        } }, { root: true })
     },
     lastReadNewStuffId: (context, newStuffId) => {
       context.commit('lastReadNewStuffId', newStuffId)
-      apiQueue.add('updateUser', { lastReadNewStuffId: newStuffId })
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          lastReadNewStuffId: newStuffId
+        } }, { root: true })
     },
     defaultConnectionTypeId: (context, typeId) => {
       context.commit('defaultConnectionTypeId', typeId)
-      apiQueue.add('updateUser', { defaultConnectionTypeId: typeId })
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          defaultConnectionTypeId: typeId
+        } }, { root: true })
     },
     restoreRemoteUser: async (context, cachedUser) => {
       if (!context.getters.isSignedIn) { return }
-      const remoteUser = await api.getUser()
+      const remoteUser = await context.dispatch('api/getUser', null, { root: true })
       if (!remoteUser) { return }
       remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
       if (remoteUser.updatedAt > cachedUser.cacheDate) { console.log('🌸 Restore user from remote', remoteUser) }
       context.commit('updateUser', remoteUser)
     },
     confirmEmail: (context) => {
-      apiQueue.add('updateUser', { emailIsVerified: true })
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          emailIsVerified: true
+        } }, { root: true })
     }
   }
 }

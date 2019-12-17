@@ -36,6 +36,9 @@ export default {
       if (mutation.type === 'currentSpace/moveCard') {
         this.cancelAnimation()
       }
+      if (mutation.type === 'currentSpace/removeConnection') {
+        this.controlCurve = undefined
+      }
     })
   },
   data () {

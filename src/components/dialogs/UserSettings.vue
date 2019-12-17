@@ -22,7 +22,6 @@ dialog.narrow(v-if="visible" :open="visible" @click.stop)
 </template>
 
 <script>
-import api from '@/api.js'
 import Loader from '@/components/Loader.vue'
 
 export default {
@@ -52,7 +51,7 @@ export default {
     },
     async removeUserPermanent () {
       this.loading.removeUserPermanent = true
-      await api.removeUserPermanent()
+      await this.$store.dispatch('api/removeUserPermanent')
       this.loading.removeUserPermanent = false
       this.$emit('removeUser')
     }

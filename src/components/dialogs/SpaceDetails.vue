@@ -32,7 +32,6 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
 
 <script>
 import cache from '@/cache.js'
-import api from '@/api.js'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
 
@@ -120,7 +119,7 @@ export default {
       this.spaces = userSpaces
     },
     async updateWithRemoteSpaces () {
-      const spaces = await api.getUserSpaces()
+      const spaces = await this.$store.dispatch('api/getUserSpaces')
       if (spaces) {
         this.spaces = spaces
       }

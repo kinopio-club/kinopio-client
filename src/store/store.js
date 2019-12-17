@@ -4,6 +4,8 @@ import utils from '@/utils.js'
 import nanoid from 'nanoid'
 
 // store modules
+import api from '@/store/api.js'
+import cache from '@/store/cache.js'
 import currentUser from '@/store/currentUser.js'
 import currentSpace from '@/store/currentSpace.js'
 
@@ -60,6 +62,7 @@ export default new Vuex.Store({
     notifyReadOnly: false,
     notifySpaceNotFound: false,
     notifyConnectionError: false,
+    notifySpaceIsRemoved: false,
 
     // filters
     filteredConnectionTypeIds: [],
@@ -242,6 +245,10 @@ export default new Vuex.Store({
       utils.typeCheck(value, 'boolean')
       state.notifyConnectionError = value
     },
+    notifySpaceIsRemoved: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.notifySpaceIsRemoved = value
+    },
 
     // filters
     clearAllFilters: (state) => {
@@ -277,6 +284,8 @@ export default new Vuex.Store({
   },
 
   modules: {
+    api,
+    cache,
     currentUser,
     currentSpace
   }

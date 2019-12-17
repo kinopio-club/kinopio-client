@@ -18,9 +18,10 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
         label(:class="{active: shouldSwitchToSpace}" @click.prevent="toggleShouldSwitchToSpace")
           input(type="checkbox" v-model="shouldSwitchToSpace")
           span Switch to Space
-      button(@click="toAnotherSpace")
+      button(@click="toAnotherSpace" :class="{active: loading}")
         img.icon.move(src="@/assets/move.svg")
         span {{moveOrCopy}}
+        Loader(:visible="loading")
 
     template(v-if="!spaces.length")
       span.badge.danger No Other Spaces
@@ -32,13 +33,14 @@ import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import cache from '@/cache.js'
 import utils from '@/utils.js'
-import apiQueue from '@/apiQueue.js'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
+import Loader from '@/components/Loader.vue'
 
 export default {
   name: 'ToAnotherSpace',
   components: {
-    SpacePicker
+    SpacePicker,
+    Loader
   },
   props: {
     visible: Boolean
@@ -49,7 +51,8 @@ export default {
       shouldSwitchToSpace: false,
       spaces: [],
       selectedSpace: {},
-      spacePickerIsVisible: false
+      spacePickerIsVisible: false,
+      loading: false
     }
   },
   computed: {
@@ -78,7 +81,6 @@ export default {
     }
   },
   methods: {
-
     shouldMoveCardsTrue () {
       this.shouldMoveCards = true
     },
@@ -100,18 +102,20 @@ export default {
       this.$store.dispatch('currentSpace/changeSpace', this.selectedSpace)
     },
 
-    toAnotherSpace () {
-      if (this.selectedSpace.id === this.currentSpace.id) { return }
-      this.copyToSelectedSpace()
-      if (this.shouldMoveCards) {
-        const currentSpace = utils.clone(this.$store.state.currentSpace)
-        const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
-        const cards = currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
-        cards.forEach(card => {
-          this.$store.dispatch('currentSpace/removeCardPermanent', card)
-          this.$store.dispatch('currentSpace/removeConnectionsFromCard', card)
-        })
-      }
+    removeCards (cards) {
+      cards.forEach(card => {
+        this.$store.dispatch('currentSpace/removeCardPermanent', card)
+        this.$store.dispatch('currentSpace/removeConnectionsFromCard', card)
+      })
+    },
+
+    async toAnotherSpace () {
+      if (this.loading) { return }
+      const currentSpace = utils.clone(this.$store.state.currentSpace)
+      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
+      const cards = currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
+      await this.copyToSelectedSpace(currentSpace, multipleCardsSelectedIds, cards)
+      if (this.shouldMoveCards) { this.removeCards(cards) }
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
       this.$store.commit('clearMultipleSelected')
       this.$store.commit('closeAllDialogs')
@@ -120,11 +124,7 @@ export default {
       }
     },
 
-    copyToSelectedSpace () {
-      const currentSpace = utils.clone(this.$store.state.currentSpace)
-      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
-      const cards = currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
-
+    async copyToSelectedSpace (currentSpace, multipleCardsSelectedIds, cards) {
       const connections = currentSpace.connections.filter(connection => {
         const isStartCardMatch = multipleCardsSelectedIds.includes(connection.startCardId)
         const isEndCardMatch = multipleCardsSelectedIds.includes(connection.endCardId)
@@ -139,23 +139,27 @@ export default {
       const prevItems = { cards, connectionTypes, connections }
       const newItems = utils.uniqueSpaceItems(utils.clone(prevItems))
 
-      this.createRemoteItems(newItems)
+      await this.createRemoteItems(newItems)
       cache.addToSpace(newItems, this.selectedSpace.id)
     },
 
-    createRemoteItems (newItems) {
-      newItems.cards.forEach(card => {
-        card.spaceId = this.selectedSpace.id
-        apiQueue.add('createCard', card)
-      })
-      newItems.connectionTypes.forEach(type => {
+    async createRemoteItems ({ cards, connectionTypes, connections }) {
+      this.loading = true
+      console.log(cards, connectionTypes, connections)
+      for (const card of cards) {
+        let body = card
+        body.spaceId = this.selectedSpace.id
+        await this.$store.dispatch('api/createCard', card)
+      }
+      for (const type of connectionTypes) {
         type.spaceId = this.selectedSpace.id
-        apiQueue.add('createConnectionType', type)
-      })
-      newItems.cards.forEach(connection => {
+        await this.$store.dispatch('api/createConnectionType', type)
+      }
+      for (const connection of connections) {
         connection.spaceId = this.selectedSpace.id
-        apiQueue.add('createConnection', connection)
-      })
+        await this.$store.dispatch('api/createConnection', connection)
+      }
+      this.loading = false
     },
 
     updateSpaces () {

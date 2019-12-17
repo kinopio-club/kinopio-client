@@ -42,7 +42,6 @@ dialog.restore(v-if="visible" :open="visible" @click.stop)
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfill
 import merge from 'lodash-es/merge'
 
-import api from '@/api.js'
 import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
 
@@ -126,13 +125,13 @@ export default {
     async loadRemoteRemovedCards () {
       this.loading.cards = true
       const space = this.$store.state.currentSpace
-      const remoteCards = await api.getSpaceRemovedCards(space)
+      const remoteCards = await this.$store.dispatch('api/getSpaceRemovedCards', space)
       this.loading.cards = false
       if (!remoteCards) { return }
       this.removedCards = remoteCards
     },
     restoreCard (card) {
-      this.$store.dispatch('currentSpace/restoreCard', card)
+      this.$store.dispatch('currentSpace/restoreRemovedCard', card)
       this.$nextTick(() => {
         this.scrollIntoView(card)
       })
@@ -157,8 +156,9 @@ export default {
       this.loadRemoteRemovedSpaces()
     },
     async loadRemoteRemovedSpaces () {
+      let removedSpaces
       this.loading.spaces = true
-      let removedSpaces = await api.getUserRemovedSpaces()
+      removedSpaces = await this.$store.dispatch('api/getUserRemovedSpaces')
       this.loading.spaces = false
       if (!removedSpaces) { return }
       removedSpaces = removedSpaces.map(remote => {
@@ -172,11 +172,10 @@ export default {
       this.removedSpaces = removedSpaces
     },
     restoreSpace (space) {
-      this.$store.dispatch('currentSpace/restoreSpace', space)
+      this.$store.dispatch('currentSpace/restoreRemovedSpace', space)
       this.updateLocalRemovedSpaces()
     },
     removeSpacePermanent (space) {
-      console.log(space)
       this.$store.dispatch('currentSpace/removeSpacePermanent', space)
       this.updateLocalRemovedSpaces()
     }
