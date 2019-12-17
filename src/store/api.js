@@ -244,7 +244,7 @@ const self = {
         console.error(error)
       }
     },
-    getSpaceRemovedCards: async (context, { space }) => {
+    getSpaceRemovedCards: async (context, space) => {
       if (!shouldRequest()) { return }
       try {
         const options = requestOptions({ method: 'GET' })
