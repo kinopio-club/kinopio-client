@@ -126,7 +126,7 @@ export default {
         cache.updateSpace('cards', state.cards, state.id)
       }
     },
-    restoreCard: (state, cardToRestore) => {
+    restoreRemovedCard: (state, cardToRestore) => {
       const index = state.removedCards.findIndex(card => card.id === cardToRestore.id)
       const card = state.removedCards[index]
       state.cards.push(card)
@@ -205,12 +205,12 @@ export default {
           spaceToRestore = { id: user.lastSpaceId }
         }
         context.dispatch('loadSpace', spaceToRestore)
-        context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
+        context.dispatch('updateUserLastSpaceId')
       // hello kinopio
       } else {
         console.log('🚃 Create new Hello Kinopio space')
         context.dispatch('createNewHelloSpace')
-        context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
+        context.dispatch('updateUserLastSpaceId')
       }
     },
 
@@ -253,7 +253,7 @@ export default {
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       context.commit('restoreSpace', uniqueNewSpace)
       Vue.nextTick(() => {
-        context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
+        context.dispatch('updateUserLastSpaceId')
         context.dispatch('saveNewSpace')
         context.dispatch('checkIfShouldNotifyReadOnly')
         context.commit('addNotification', { message: "Space Copied. It's now yours to edit", type: 'success' }, { root: true })
@@ -263,7 +263,7 @@ export default {
       context.dispatch('createNewSpace')
       Vue.nextTick(() => {
         context.dispatch('updateCardConnectionPaths', { cardId: context.state.cards[1].id })
-        context.dispatch('currentUser/lastSpaceId', context.state.id, { root: true })
+        context.dispatch('updateUserLastSpaceId')
         context.dispatch('saveNewSpace')
       })
     },
@@ -292,7 +292,7 @@ export default {
       if (remoteSpace.id !== context.state.id) { return }
       // only cache spaces you can edit
       const userCanEditSpace = context.rootGetters['currentUser/canEditSpace'](remoteSpace)
-      if (userCanEditSpace) {
+      if (userCanEditSpace && !remoteSpace.isRemoved) {
         cache.saveSpace(remoteSpace)
       }
       return utils.normalizeRemoteSpace(remoteSpace)
@@ -314,6 +314,11 @@ export default {
           shouldUpdateUrl,
           userIsSignedIn
         })
+      }
+      if (space.isRemoved === false && remoteSpace.isRemoved === true) {
+        context.commit('notifySpaceIsRemoved', false, { root: true })
+      } else {
+        context.dispatch('checkIfShouldNotifySpaceIsRemoved', remoteSpace)
       }
       context.dispatch('checkIfShouldNotifyReadOnly')
       context.commit('spaceUrlToLoad', '', { root: true })
@@ -340,11 +345,17 @@ export default {
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
       context.dispatch('loadSpace', space)
-      context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
       context.dispatch('api/addToQueue', {
         name: 'updateSpace',
         body: { id: space.id, updatedAt: new Date() }
       }, { root: true })
+      context.dispatch('updateUserLastSpaceId')
+    },
+    updateUserLastSpaceId: (context) => {
+      const space = context.state
+      const canEdit = context.rootGetters['currentUser/canEditCurrentSpace']
+      if (space.isRemoved || !canEdit) { return }
+      context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
     },
     removeCurrentSpace: (context) => {
       const space = utils.clone(context.state)
@@ -355,7 +366,7 @@ export default {
       }, { root: true })
     },
     removeSpacePermanent: (context, space) => {
-      cache.removeSpacePermanent(space.id)
+      cache.removeSpacePermanent(space)
       context.dispatch('api/addToQueue', {
         name: 'removeSpacePermanent',
         body: space
@@ -367,6 +378,14 @@ export default {
         context.commit('notifyReadOnly', false, { root: true })
       } else {
         context.commit('notifyReadOnly', true, { root: true })
+      }
+    },
+    checkIfShouldNotifySpaceIsRemoved: (context, space) => {
+      const canEdit = context.rootGetters['currentUser/canEditSpace'](space)
+      if (space.isRemoved && canEdit) {
+        context.commit('notifySpaceIsRemoved', true, { root: true })
+      } else {
+        context.commit('notifySpaceIsRemoved', false, { root: true })
       }
     },
 
@@ -423,16 +442,17 @@ export default {
       context.commit('removeCardPermanent', card)
       context.dispatch('api/addToQueue', { name: 'removeCardPermanent', body: card }, { root: true })
     },
-    restoreCard: (context, card) => {
-      context.commit('restoreCard', card)
-      context.dispatch('api/addToQueue', { name: 'restoreCard', body: card }, { root: true })
+    restoreRemovedCard: (context, card) => {
+      context.commit('restoreRemovedCard', card)
+      context.dispatch('api/addToQueue', { name: 'restoreRemovedCard', body: card }, { root: true })
     },
-    restoreSpace: (context, space) => {
-      cache.restoreSpace(space)
-      context.dispatch('api/addToQueue', { name: 'restoreSpace',
+    restoreRemovedSpace: (context, space) => {
+      cache.restoreRemovedSpace(space)
+      context.dispatch('api/addToQueue', { name: 'restoreRemovedSpace',
         body: {
           id: space.id
         } }, { root: true })
+      space.isRemoved = false
       context.dispatch('changeSpace', space)
     },
     dragCards: (context, options) => {

@@ -131,7 +131,7 @@ export default {
       this.removedCards = remoteCards
     },
     restoreCard (card) {
-      this.$store.dispatch('currentSpace/restoreCard', card)
+      this.$store.dispatch('currentSpace/restoreRemovedCard', card)
       this.$nextTick(() => {
         this.scrollIntoView(card)
       })
@@ -172,11 +172,10 @@ export default {
       this.removedSpaces = removedSpaces
     },
     restoreSpace (space) {
-      this.$store.dispatch('currentSpace/restoreSpace', space)
+      this.$store.dispatch('currentSpace/restoreRemovedSpace', space)
       this.updateLocalRemovedSpaces()
     },
     removeSpacePermanent (space) {
-      console.log(space)
       this.$store.dispatch('currentSpace/removeSpacePermanent', space)
       this.updateLocalRemovedSpaces()
     }

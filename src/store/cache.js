@@ -158,7 +158,7 @@ export default {
       const spaceKey = `removed-space-${space.id}`
       context.dispatch('removeLocal', spaceKey)
     },
-    restoreSpace: (context, space) => {
+    restoreRemovedSpace: (context, space) => {
       const spaceKey = `removed-space-${space.id}`
       space = context.dispatch('getLocal', spaceKey)
       if (!space) { return }

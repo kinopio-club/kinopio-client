@@ -16,6 +16,16 @@ aside.notifications
     .row
       button(@click="triggerSpaceDetailsVisible") Your Spaces
 
+  .persistent-item(v-if="notifySpaceIsRemoved")
+    p This space has been removed
+    .row
+      button(@click="restoreSpace")
+        img.icon(src="@/assets/undo.svg")
+        span Restore
+      button.danger(@click="removeSpacePermanent")
+        img.icon(src="@/assets/remove.svg")
+        span Permanently Remove
+
   .persistent-item.danger(v-if="notifyConnectionError")
     p A connection error has occured, please refresh
     .row
@@ -26,6 +36,8 @@ aside.notifications
 </template>
 
 <script>
+import cache from '@/cache.js'
+
 export default {
   name: 'Notifications',
   data () {
@@ -53,6 +65,7 @@ export default {
     notifyReadOnly () { return this.$store.state.notifyReadOnly },
     notifySpaceNotFound () { return this.$store.state.notifySpaceNotFound },
     notifyConnectionError () { return this.$store.state.notifyConnectionError },
+    notifySpaceIsRemoved () { return this.$store.state.notifySpaceIsRemoved },
     spaceName () { return this.$store.state.currentSpace.name }
   },
   methods: {
@@ -76,6 +89,24 @@ export default {
     },
     triggerSpaceDetailsVisible () {
       this.$store.commit('triggerSpaceDetailsVisible')
+    },
+    restoreSpace () {
+      const space = this.$store.state.currentSpace
+      this.$store.dispatch('currentSpace/restoreRemovedSpace', space)
+      this.$store.commit('notifySpaceIsRemoved', false)
+    },
+    removeSpacePermanent () {
+      const space = this.$store.state.currentSpace
+      this.$store.dispatch('currentSpace/removeSpacePermanent', space)
+      this.$store.commit('notifySpaceIsRemoved', false)
+      // load last space
+      const firstSpace = cache.getAllSpaces()[0]
+      // console.log(cache.getAllSpaces(), this.$store.state.currentUser.lastSpaceId)
+      // const lastSpace = {
+      //   id: this.$store.state.currentUser.lastSpaceId
+      // }
+      this.$store.dispatch('currentSpace/loadSpace', firstSpace)
+      // console.log(cache.getAllSpaces()) // load teh first one,
     }
   }
 }
@@ -110,7 +141,7 @@ export default {
       margin-bottom 0
     p
       margin 0
-      user-select auto
+      user-select text
   .persistent-item
     animation none
   .row

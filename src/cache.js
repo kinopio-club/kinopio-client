@@ -13,12 +13,16 @@ export default {
   getLocal (key) {
     try {
       return JSON.parse(window.localStorage[key])
-    } catch (error) {}
+    } catch (error) {
+      console.warn('getLocal', error)
+    }
   },
   removeLocal (key) {
     try {
       window.localStorage.removeItem(key)
-    } catch (error) {}
+    } catch (error) {
+      console.warn('removeLocal', error)
+    }
   },
   removeAll () {
     window.localStorage.clear()
@@ -118,10 +122,10 @@ export default {
     this.removeLocal(spaceKey)
   },
   removeSpacePermanent (space) {
-    const spaceKey = `removed-space-${space.id}`
-    this.removeLocal(spaceKey)
+    this.removeLocal(`removed-space-${space.id}`)
+    this.removeLocal(`space-${space.id}`)
   },
-  restoreSpace (space) {
+  restoreRemovedSpace (space) {
     const spaceKey = `removed-space-${space.id}`
     space = this.getLocal(spaceKey)
     if (!space) { return }
