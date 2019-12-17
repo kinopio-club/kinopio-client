@@ -99,14 +99,8 @@ export default {
       const space = this.$store.state.currentSpace
       this.$store.dispatch('currentSpace/removeSpacePermanent', space)
       this.$store.commit('notifySpaceIsRemoved', false)
-      // load last space
       const firstSpace = cache.getAllSpaces()[0]
-      // console.log(cache.getAllSpaces(), this.$store.state.currentUser.lastSpaceId)
-      // const lastSpace = {
-      //   id: this.$store.state.currentUser.lastSpaceId
-      // }
       this.$store.dispatch('currentSpace/loadSpace', firstSpace)
-      // console.log(cache.getAllSpaces()) // load teh first one,
     }
   }
 }
