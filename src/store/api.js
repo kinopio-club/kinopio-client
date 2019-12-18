@@ -40,7 +40,7 @@ const squashQueue = (queue) => {
 
 const shouldRequest = () => {
   const isOnline = window.navigator.onLine
-  const userIsSignedIn = cache.user().apiKey // todo use: this.$store.getters['currentUser/isSignedIn']
+  const userIsSignedIn = cache.user().apiKey
   if (isOnline && userIsSignedIn) {
     return true
   }
@@ -257,11 +257,11 @@ const self = {
 
     // Card
 
-    createCard: async (context, body) => {
+    updateCards: async (context, body) => {
       if (!shouldRequest()) { return }
       try {
-        const options = requestOptions({ body, method: 'POST' })
-        const response = await fetch(`${host}/card`, options)
+        const options = requestOptions({ body, method: 'PATCH' })
+        const response = await fetch(`${host}/card/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
         console.error(error)
@@ -270,11 +270,11 @@ const self = {
 
     // ConnectionType
 
-    createConnectionType: async (context, body) => {
+    updateConnectionTypes: async (context, body) => {
       if (!shouldRequest()) { return }
       try {
-        const options = requestOptions({ body, method: 'POST' })
-        const response = await fetch(`${host}/connection-type`, options)
+        const options = requestOptions({ body, method: 'PATCH' })
+        const response = await fetch(`${host}/connection-type/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
         console.error(error)
@@ -283,11 +283,11 @@ const self = {
 
     // Connection
 
-    createConnection: async (context, body) => {
+    updateConnections: async (context, body) => {
       if (!shouldRequest()) { return }
       try {
-        const options = requestOptions({ body, method: 'POST' })
-        const response = await fetch(`${host}/connection`, options)
+        const options = requestOptions({ body, method: 'PATCH' })
+        const response = await fetch(`${host}/connection/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
         console.error(error)

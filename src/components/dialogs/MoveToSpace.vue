@@ -3,15 +3,7 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
   section
     p Move {{cardsCount}} Cards To
   section
-    //- .row
-    //-   .segmented-buttons
-    //-     button(@click="shouldMoveCardsTrue" :class="{active: shouldMoveCards}")
-    //-       span Move
-    //-     button(@click="shouldMoveCardsFalse" :class="{active: !shouldMoveCards}")
-    //-       span Copy
     template(v-if="spaces.length")
-      //- .row
-      //-   p To
       .row
         .button-wrap
           button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}") {{selectedSpace.name}}
@@ -49,7 +41,6 @@ export default {
   },
   data () {
     return {
-      // shouldMoveCards: true,
       shouldSwitchToSpace: true,
       spaces: [],
       selectedSpace: {},
@@ -68,52 +59,27 @@ export default {
     cardsCount () {
       return this.multipleCardsSelectedIds.length
     },
-    // cardsCountLabel () {
-    //   const numberOfCards = this.multipleCardsSelectedIds.length
-    //   let label = 'card'
-    //   if (numberOfCards > 1) { label = `${numberOfCards} cards` }
-    //   return label
-    // },
     currentSpace () {
       return this.$store.state.currentSpace
     }
-    // moveOrCopy () {
-    //   if (this.shouldMoveCards) {
-    //     return 'Move'
-    //   } else {
-    //     return 'Copy'
-    //   }
-    // }
   },
   methods: {
-    // shouldMoveCardsTrue () {
-    //   this.shouldMoveCards = true
-    // },
-
-    // shouldMoveCardsFalse () {
-    //   this.shouldMoveCards = false
-    // },
-
     toggleSpacePickerIsVisible () {
       this.spacePickerIsVisible = !this.spacePickerIsVisible
     },
-
     toggleShouldSwitchToSpace () {
       this.shouldSwitchToSpace = !this.shouldSwitchToSpace
     },
-
     changeToSelectedSpace () {
       this.updateSpaces()
       this.$store.dispatch('currentSpace/changeSpace', this.selectedSpace)
     },
-
     removeCards (cards) {
       cards.forEach(card => {
         this.$store.dispatch('currentSpace/removeCardPermanent', card)
         this.$store.dispatch('currentSpace/removeConnectionsFromCard', card)
       })
     },
-
     async moveToSpace () {
       if (this.loading) { return }
       const currentSpace = utils.clone(this.$store.state.currentSpace)
@@ -128,55 +94,47 @@ export default {
         this.changeToSelectedSpace()
       }
     },
-
     async copyToSelectedSpace (currentSpace, multipleCardsSelectedIds, cards) {
       const connections = currentSpace.connections.filter(connection => {
         const isStartCardMatch = multipleCardsSelectedIds.includes(connection.startCardId)
         const isEndCardMatch = multipleCardsSelectedIds.includes(connection.endCardId)
         return isStartCardMatch && isEndCardMatch
       })
-
       const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
       const connectionTypes = currentSpace.connectionTypes.filter(type => {
         return connectionTypeIds.includes(type.id)
       })
-
       const prevItems = { cards, connectionTypes, connections }
       const newItems = utils.uniqueSpaceItems(utils.clone(prevItems))
-
       await this.createRemoteItems(newItems)
       cache.addToSpace(newItems, this.selectedSpace.id)
     },
-
+    mapRemoteItems (items) {
+      const spaceId = this.selectedSpace.id
+      return items.map(item => {
+        item.spaceId = spaceId
+        return item
+      })
+    },
     async createRemoteItems ({ cards, connectionTypes, connections }) {
       this.loading = true
-      console.log('🚚', this.moveOrCopy, ':', cards, connectionTypes, connections)
-      for (const card of cards) {
-        let body = card
-        body.spaceId = this.selectedSpace.id
-        await this.$store.dispatch('api/createCard', card)
-      }
-      for (const type of connectionTypes) {
-        type.spaceId = this.selectedSpace.id
-        await this.$store.dispatch('api/createConnectionType', type)
-      }
-      for (const connection of connections) {
-        connection.spaceId = this.selectedSpace.id
-        await this.$store.dispatch('api/createConnection', connection)
-      }
+      cards = this.mapRemoteItems(cards)
+      connectionTypes = this.mapRemoteItems(connectionTypes)
+      connections = this.mapRemoteItems(connections)
+      console.log('🚚 Move', cards, connectionTypes, connections)
+      await this.$store.dispatch('api/updateCards', cards)
+      await this.$store.dispatch('api/updateConnectionTypes', connectionTypes)
+      await this.$store.dispatch('api/updateConnections', connections)
       this.loading = false
     },
-
     updateSpaces () {
       const spaces = cache.getAllSpaces()
       this.spaces = spaces.filter(space => space.id !== this.currentSpace.id)
       this.selectedSpace = this.spaces[0]
     },
-
     updateSelectedSpace (space) {
       this.selectedSpace = space
     },
-
     scrollIntoView () {
       const element = this.$refs.dialog
       scrollIntoView(element, {
@@ -184,11 +142,9 @@ export default {
         scrollMode: 'if-needed'
       })
     },
-
     closeDialogs () {
       this.spacePickerIsVisible = false
     }
-
   },
   watch: {
     visible (visible) {
