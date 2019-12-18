@@ -17,6 +17,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeDialogs" 
       UserSettings(:user="user" :visible="userSettingsIsVisible" @removeUser="signOut")
 
     button(v-if="isSignedIn" @click="signOut") Sign Out
+    button(v-else @click="triggerSignUpOrInIsVisible") Sign Up or In
 
 </template>
 
@@ -89,6 +90,10 @@ export default {
       cache.removeAll()
       window.history.replaceState({}, 'Kinopio', '/')
       location.reload()
+    },
+    triggerSignUpOrInIsVisible () {
+      this.$store.commit('closeAllDialogs')
+      this.$store.commit('triggerSignUpOrInIsVisible')
     }
   },
   watch: {
