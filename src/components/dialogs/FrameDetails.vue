@@ -3,7 +3,7 @@ dialog.narrow.frame-details(v-if="visible" :open="visible" ref="dialog" @click.s
   section.results-section
     ul.results-list
       template(v-for="(frame in frames")
-        li(:class="{active: frameIsCardFrame(frame)}" @click="changeCardFrame(frame)" :key="frame.id")
+        li(:class="{active: frameIsCardFrame(frame)}" @click="changeCardFrame(frame)" :key="frame.id" tabindex="0" v-on:keyup.enter="changeCardFrame(frame)")
           .badge
             template(v-if="frameHasBadge(frame)")
               img(:src="frameBadge(frame).path")

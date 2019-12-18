@@ -3,7 +3,7 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.stop ref="dialo
   section.results-section
     ul.results-list
       template(v-for="(space in spaces")
-        li(@click="select(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id")
+        li(@click="select(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id" tabindex="0" v-on:keyup.enter="select(space)")
           .name {{space.name}}
 </template>
 
