@@ -28,12 +28,14 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
       img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
       input(placeholder="Filter Spaces" v-model="spaceFilter" ref="filterInput")
     ul.results-list
-      template(v-for="(space in filteredSpaces")
+      template(v-for="(space in spacesFiltered")
         li(@click="changeSpace(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id")
           .name {{space.name}}
 </template>
 
 <script>
+import fuzzy from 'fuzzy'
+
 import cache from '@/cache.js'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
@@ -52,20 +54,11 @@ export default {
       spaces: [],
       exportIsVisible: false,
       importIsVisible: false,
-      filter: ''
+      filter: '',
+      filteredSpaces: []
     }
   },
   computed: {
-    filteredSpaces () {
-      if (this.filter) {
-        return '' // temp
-      } else {
-        return this.spaces
-      }
-
-      // if filter , and 0 matches
-      // show a "No Matching Spaces"
-    },
     spaceName: {
       get () {
         return this.$store.state.currentSpace.name
@@ -75,13 +68,35 @@ export default {
         this.updateSpaces()
       }
     },
+    spacesFiltered () {
+      if (this.filteredSpaces.length) {
+        return this.filteredSpaces
+      } else {
+        return this.spaces
+      }
+    },
     spaceFilter: {
       get () {
-        return ''
+        return this.filter
       },
       set (newValue) {
-        console.log(newValue)
         this.filter = newValue
+        // todo unsafe output in template (only b tag)
+        const options = {
+          pre: '<b>',
+          post: '</b>', // can use a match-badge (yellow highlight) instead if bold looks gross. security = <span>
+          extract: (space) => {
+            return space.name
+          }
+        }
+        const filtered = fuzzy.filter(this.filter, this.spaces, options)
+        const spaces = filtered.map(space => {
+          return {
+            name: space.string,
+            id: space.original.id
+          }
+        })
+        this.filteredSpaces = spaces
       }
     },
     currentSpace () {
@@ -94,7 +109,7 @@ export default {
       return this.$store.getters['currentUser/canEditCurrentSpace']
     },
     isNumerousSpaces () {
-      return Boolean(this.spaces.length > 3)
+      return Boolean(this.spaces.length >= 5)
     }
   },
   methods: {
