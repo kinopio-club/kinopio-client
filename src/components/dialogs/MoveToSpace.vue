@@ -3,12 +3,12 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
   section
     p Move {{cardsCount}} Cards To
   section
-    template(v-if="spaces.length")
+    template
       .row
         .button-wrap
           button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}") {{selectedSpace.name}}
           SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" :excludeCurrentSpace="true" @selectSpace="updateSelectedSpace" @closeDialog="closeDialogs")
-      .row(v-if="spaces.length")
+      .row
         label(:class="{active: shouldSwitchToSpace}" @click.prevent="toggleShouldSwitchToSpace")
           input(type="checkbox" v-model="shouldSwitchToSpace")
           span Switch to Space
@@ -16,10 +16,6 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
         img.icon.move(src="@/assets/move.svg")
         span Move
         Loader(:visible="loading")
-
-    //- template(v-if="!spaces.length")
-    //-   span.badge.danger No Other Spaces
-    //-   p Add a Space to {{moveOrCopy.toLowerCase()}} cards there
 </template>
 
 <script>
