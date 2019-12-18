@@ -24,8 +24,11 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
       Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
 
   section.results-section
+    .filter(v-if="isNumerousSpaces")
+      img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
+      input(placeholder="Filter Spaces" v-model="spaceFilter" ref="filterInput")
     ul.results-list
-      template(v-for="(space in spaces")
+      template(v-for="(space in filteredSpaces")
         li(@click="changeSpace(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id")
           .name {{space.name}}
 </template>
@@ -48,10 +51,21 @@ export default {
     return {
       spaces: [],
       exportIsVisible: false,
-      importIsVisible: false
+      importIsVisible: false,
+      filter: ''
     }
   },
   computed: {
+    filteredSpaces () {
+      if (this.filter) {
+        return '' // temp
+      } else {
+        return this.spaces
+      }
+
+      // if filter , and 0 matches
+      // show a "No Matching Spaces"
+    },
     spaceName: {
       get () {
         return this.$store.state.currentSpace.name
@@ -59,6 +73,15 @@ export default {
       set (newName) {
         this.$store.dispatch('currentSpace/updateSpace', { name: newName })
         this.updateSpaces()
+      }
+    },
+    spaceFilter: {
+      get () {
+        return ''
+      },
+      set (newValue) {
+        console.log(newValue)
+        this.filter = newValue
       }
     },
     currentSpace () {
@@ -69,9 +92,17 @@ export default {
     },
     canEditCurrentSpace () {
       return this.$store.getters['currentUser/canEditCurrentSpace']
+    },
+    isNumerousSpaces () {
+      return Boolean(this.spaces.length > 3)
     }
   },
   methods: {
+    focusFilterInput () {
+      const element = this.$refs.filterInput
+      element.focus()
+      element.setSelectionRange(0, 0)
+    },
     toggleExportIsVisible () {
       const isVisible = this.exportIsVisible
       this.closeDialogs()
