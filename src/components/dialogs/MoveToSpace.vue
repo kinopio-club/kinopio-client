@@ -17,9 +17,10 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
         span Move
         Loader(:visible="loading")
 
-    //- template(v-if="!spaces.length")
-    //-   span.badge.danger No Other Spaces
-    //-   p Add a Space to {{moveOrCopy.toLowerCase()}} cards there
+    template(v-if="!spaces.length")
+      span.badge.danger No Other Spaces
+      p + Add a Space to move cards there
+      button(@click="triggerSpaceDetailsVisible") Your Spaces
 </template>
 
 <script>
@@ -64,6 +65,11 @@ export default {
     }
   },
   methods: {
+    triggerSpaceDetailsVisible () {
+      this.$store.commit('clearMultipleSelected')
+      this.$store.commit('closeAllDialogs')
+      this.$store.commit('triggerSpaceDetailsVisible')
+    },
     toggleSpacePickerIsVisible () {
       this.spacePickerIsVisible = !this.spacePickerIsVisible
     },
