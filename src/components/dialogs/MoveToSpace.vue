@@ -99,6 +99,7 @@ export default {
       if (this.shouldSwitchToSpace) {
         this.changeToSelectedSpace()
       }
+      this.$store.commit('addNotification', { message: `Cards Moved to ${this.selectedSpace.name}`, type: 'success' })
     },
     async copyToSelectedSpace (currentSpace, multipleCardsSelectedIds, cards) {
       const connections = currentSpace.connections.filter(connection => {
