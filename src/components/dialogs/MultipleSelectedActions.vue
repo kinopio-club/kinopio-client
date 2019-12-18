@@ -28,10 +28,10 @@ dialog.narrow.multiple-selected-actions(
           span Export
         Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
     .button-wrap
-      button(@click.stop="toggleToAnotherSpaceIsVisible" :class="{ active: toAnotherSpaceIsVisible }")
+      button(@click.stop="toggleMoveToSpaceIsVisible" :class="{ active: moveToSpaceIsVisible }")
         img.icon.move(src="@/assets/move.svg")
-        span To Another Space
-      ToAnotherSpace(:visible="toAnotherSpaceIsVisible")
+        span Move To Space
+      MoveToSpace(:visible="moveToSpaceIsVisible")
 
 </template>
 
@@ -42,20 +42,20 @@ import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import utils from '@/utils.js'
 import Export from '@/components/dialogs/Export.vue'
-import ToAnotherSpace from '@/components/dialogs/ToAnotherSpace.vue'
+import MoveToSpace from '@/components/dialogs/MoveToSpace.vue'
 import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
 
 export default {
   name: 'MultipleSelectedActions',
   components: {
     Export,
-    ToAnotherSpace,
+    MoveToSpace,
     MultipleConnectionsPicker
   },
   data () {
     return {
       exportIsVisible: false,
-      toAnotherSpaceIsVisible: false,
+      moveToSpaceIsVisible: false,
       multipleConnectionsPickerVisible: false
     }
   },
@@ -136,10 +136,10 @@ export default {
       this.closeDialogs()
       this.exportIsVisible = !isVisible
     },
-    toggleToAnotherSpaceIsVisible () {
-      const isVisible = this.toAnotherSpaceIsVisible
+    toggleMoveToSpaceIsVisible () {
+      const isVisible = this.moveToSpaceIsVisible
       this.closeDialogs()
-      this.toAnotherSpaceIsVisible = !isVisible
+      this.moveToSpaceIsVisible = !isVisible
     },
     toggleMultipleConnectionsPickerVisible () {
       const isVisible = this.multipleConnectionsPickerVisible
@@ -148,7 +148,7 @@ export default {
     },
     closeDialogs () {
       this.exportIsVisible = false
-      this.toAnotherSpaceIsVisible = false
+      this.moveToSpaceIsVisible = false
       this.multipleConnectionsPickerVisible = false
     },
     connectionType () {

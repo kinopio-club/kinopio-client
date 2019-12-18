@@ -1,15 +1,17 @@
 <template lang="pug">
 dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDialogs")
   section
-    .row
-      .segmented-buttons
-        button(@click="shouldMoveCardsTrue" :class="{active: shouldMoveCards}")
-          span Move
-        button(@click="shouldMoveCardsFalse" :class="{active: !shouldMoveCards}")
-          span Copy
+    p Move {{cardsCount}} Cards To
+  section
+    //- .row
+    //-   .segmented-buttons
+    //-     button(@click="shouldMoveCardsTrue" :class="{active: shouldMoveCards}")
+    //-       span Move
+    //-     button(@click="shouldMoveCardsFalse" :class="{active: !shouldMoveCards}")
+    //-       span Copy
     template(v-if="spaces.length")
-      .row
-        p {{moveOrCopy}} {{cardsCountLabel}} to
+      //- .row
+      //-   p To
       .row
         .button-wrap
           button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}") {{selectedSpace.name}}
@@ -18,14 +20,14 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
         label(:class="{active: shouldSwitchToSpace}" @click.prevent="toggleShouldSwitchToSpace")
           input(type="checkbox" v-model="shouldSwitchToSpace")
           span Switch to Space
-      button(@click="toAnotherSpace" :class="{active: loading}")
+      button(@click="moveToSpace" :class="{active: loading}")
         img.icon.move(src="@/assets/move.svg")
-        span {{moveOrCopy}}
+        span Move
         Loader(:visible="loading")
 
-    template(v-if="!spaces.length")
-      span.badge.danger No Other Spaces
-      p Add a Space to {{moveOrCopy.toLowerCase()}} cards there
+    //- template(v-if="!spaces.length")
+    //-   span.badge.danger No Other Spaces
+    //-   p Add a Space to {{moveOrCopy.toLowerCase()}} cards there
 </template>
 
 <script>
@@ -37,7 +39,7 @@ import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
 
 export default {
-  name: 'ToAnotherSpace',
+  name: 'MoveToSpace',
   components: {
     SpacePicker,
     Loader
@@ -47,8 +49,8 @@ export default {
   },
   data () {
     return {
-      shouldMoveCards: true,
-      shouldSwitchToSpace: false,
+      // shouldMoveCards: true,
+      shouldSwitchToSpace: true,
       spaces: [],
       selectedSpace: {},
       spacePickerIsVisible: false,
@@ -63,31 +65,34 @@ export default {
       const numberOfCards = this.multipleCardsSelectedIds.length
       return Boolean(numberOfCards > 1)
     },
-    cardsCountLabel () {
-      const numberOfCards = this.multipleCardsSelectedIds.length
-      let label = 'card'
-      if (numberOfCards > 1) { label = `${numberOfCards} cards` }
-      return label
+    cardsCount () {
+      return this.multipleCardsSelectedIds.length
     },
+    // cardsCountLabel () {
+    //   const numberOfCards = this.multipleCardsSelectedIds.length
+    //   let label = 'card'
+    //   if (numberOfCards > 1) { label = `${numberOfCards} cards` }
+    //   return label
+    // },
     currentSpace () {
       return this.$store.state.currentSpace
-    },
-    moveOrCopy () {
-      if (this.shouldMoveCards) {
-        return 'Move'
-      } else {
-        return 'Copy'
-      }
     }
+    // moveOrCopy () {
+    //   if (this.shouldMoveCards) {
+    //     return 'Move'
+    //   } else {
+    //     return 'Copy'
+    //   }
+    // }
   },
   methods: {
-    shouldMoveCardsTrue () {
-      this.shouldMoveCards = true
-    },
+    // shouldMoveCardsTrue () {
+    //   this.shouldMoveCards = true
+    // },
 
-    shouldMoveCardsFalse () {
-      this.shouldMoveCards = false
-    },
+    // shouldMoveCardsFalse () {
+    //   this.shouldMoveCards = false
+    // },
 
     toggleSpacePickerIsVisible () {
       this.spacePickerIsVisible = !this.spacePickerIsVisible
@@ -109,13 +114,13 @@ export default {
       })
     },
 
-    async toAnotherSpace () {
+    async moveToSpace () {
       if (this.loading) { return }
       const currentSpace = utils.clone(this.$store.state.currentSpace)
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
       const cards = currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
       await this.copyToSelectedSpace(currentSpace, multipleCardsSelectedIds, cards)
-      if (this.shouldMoveCards) { this.removeCards(cards) }
+      this.removeCards(cards)
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
       this.$store.commit('clearMultipleSelected')
       this.$store.commit('closeAllDialogs')
@@ -145,7 +150,7 @@ export default {
 
     async createRemoteItems ({ cards, connectionTypes, connections }) {
       this.loading = true
-      console.log(cards, connectionTypes, connections)
+      console.log('🚚', this.moveOrCopy, ':', cards, connectionTypes, connections)
       for (const card of cards) {
         let body = card
         body.spaceId = this.selectedSpace.id
