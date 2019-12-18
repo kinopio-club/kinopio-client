@@ -29,7 +29,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
       input(placeholder="Filter Spaces" v-model="spaceFilter" ref="filterInput")
     ul.results-list
       template(v-for="(space in spacesFiltered")
-        li(@click="changeSpace(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id")
+        li(@click="changeSpace(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id" tabindex="0" v-on:keyup.enter="changeSpace(space)")
           .name {{space.name}}
 </template>
 
@@ -81,10 +81,9 @@ export default {
       },
       set (newValue) {
         this.filter = newValue
-        // todo unsafe output in template (only b tag)
         const options = {
-          pre: '<b>',
-          post: '</b>', // can use a match-badge (yellow highlight) instead if bold looks gross. security = <span>
+          pre: '',
+          post: '',
           extract: (space) => {
             return space.name
           }
