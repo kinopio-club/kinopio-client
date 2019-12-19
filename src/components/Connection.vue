@@ -21,6 +21,7 @@ import utils from '@/utils.js'
 let animationTimer
 
 export default {
+  name: 'Connection',
   props: {
     connection: Object
   },
@@ -112,6 +113,7 @@ export default {
     }
   },
   methods: {
+    // same as ConnectionLabel method
     showConnectionDetails (event) {
       const detailsPosition = utils.cursorPositionInPage(event)
       this.$store.commit('closeAllDialogs')
