@@ -53,13 +53,16 @@ export default {
     setPosition () {
     //   // const pathElement =
       const element = document.querySelector(`.path[data-id="${this.id}"]`)
-      this.position = element.getBoundingClientRect()
-      console.log('🪀', this.position)
+      const rect = element.getBoundingClientRect()
+      console.log('🪀', rect)
+      this.position = {
+        left: rect.left + (rect.width / 3),
+        top: rect.top + (rect.height / 3)
+      }
     }
   },
   watch: {
     path (value) {
-      console.log('path changed')
       this.setPosition()
       // animationTimer = window.requestAnimationFrame(this.animationFrame)
     }
