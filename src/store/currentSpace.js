@@ -381,6 +381,7 @@ export default {
       }
     },
     checkIfShouldNotifySpaceIsRemoved: (context, space) => {
+      if (!context.rootState.currentUser) { return }
       const canEdit = context.rootGetters['currentUser/canEditSpace'](space)
       if (space.isRemoved && canEdit) {
         context.commit('notifySpaceIsRemoved', true, { root: true })
