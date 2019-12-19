@@ -314,11 +314,11 @@ export default {
           shouldUpdateUrl,
           userIsSignedIn
         })
-      }
-      if (space.isRemoved === false && remoteSpace.isRemoved === true) {
-        context.commit('notifySpaceIsRemoved', false, { root: true })
-      } else {
-        context.dispatch('checkIfShouldNotifySpaceIsRemoved', remoteSpace)
+        if (!space.isRemoved && remoteSpace.isRemoved) {
+          context.commit('notifySpaceIsRemoved', false, { root: true })
+        } else {
+          context.dispatch('checkIfShouldNotifySpaceIsRemoved', remoteSpace)
+        }
       }
       context.dispatch('checkIfShouldNotifyReadOnly')
       context.commit('spaceUrlToLoad', '', { root: true })
@@ -382,7 +382,7 @@ export default {
     },
     checkIfShouldNotifySpaceIsRemoved: (context, space) => {
       if (!context.rootState.currentUser) { return }
-      const canEdit = context.rootGetters['currentUser/canEditSpace'](space)
+      const canEdit = context.rootGetters['currentUser/canEditCurrentSpace']
       if (space.isRemoved && canEdit) {
         context.commit('notifySpaceIsRemoved', true, { root: true })
       } else {
