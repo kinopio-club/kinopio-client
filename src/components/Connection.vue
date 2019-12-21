@@ -10,7 +10,7 @@ path.path(
   :d="path"
   @click="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
-  :class="{active: isSelected || detailsIsVisible, filtered: isFiltered}"
+  :class="{active: isSelected || detailsIsVisible, filtered: isFiltered, hover: isHovered}"
   ref="connection"
 )
 </template>
@@ -80,6 +80,9 @@ export default {
     },
     shouldAnimate () {
       return Boolean(this.isSelected || this.detailsIsVisible)
+    },
+    isHovered () {
+      return this.id === this.$store.state.currentUserIsHoveringOverConnectionId
     },
 
     // filters
@@ -190,6 +193,7 @@ export default {
 .path
   touch-action manipulation
   &:hover,
-  &.active
+  &.active,
+  &.hover
     stroke-width: 7
 </style>

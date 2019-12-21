@@ -3,6 +3,9 @@
   v-if="visible"
   :style="{ background: typeColor, left: position.left, top: position.top }"
   @click="showConnectionDetails"
+  :data-id="id"
+  @mouseover="hover = true"
+  @mouseleave="hover = false"
 )
   span {{typeName}}
 </template>
@@ -21,7 +24,8 @@ export default {
 
   data () {
     return {
-      position: {}
+      position: {},
+      hover: false
     }
   },
   computed: {
@@ -29,18 +33,9 @@ export default {
     id () { return this.connection.id },
     connectionTypeId () { return this.connection.connectionTypeId },
     connectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.connectionTypeId) },
-    typeColor () {
-      // if (this.connectionType) {
-      return this.connectionType.color
-      // } else { return undefined }
-    },
-    typeName () {
-      // remove the null soak on ^ typeColor in connectino.vue too??
-      return this.connectionType.name
-    },
-    path () {
-      return this.connection.path
-    }
+    typeColor () { return this.connectionType.color },
+    typeName () { return this.connectionType.name },
+    path () { return this.connection.path }
   },
   methods: {
     // same as Connection method
@@ -62,6 +57,14 @@ export default {
   watch: {
     path (value) {
       this.setPosition()
+    },
+    hover (value) {
+      console.log('hover', value, this.id)
+      if (value) {
+        this.$store.commit('currentUserIsHoveringOverConnectionId', this.id)
+      } else {
+        this.$store.commit('currentUserIsHoveringOverConnectionId', '')
+      }
     }
   }
 
