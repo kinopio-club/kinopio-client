@@ -1,5 +1,6 @@
 <template lang="pug">
 .connection-label.badge(
+  v-if="visible"
   :style="{ background: typeColor, left: position.left, top: position.top }"
   @click="showConnectionDetails"
 )
@@ -24,7 +25,7 @@ export default {
     }
   },
   computed: {
-    // visible
+    visible () { return this.connection.labelIsVisible },
     id () { return this.connection.id },
     connectionTypeId () { return this.connection.connectionTypeId },
     connectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.connectionTypeId) },
