@@ -1,6 +1,6 @@
 <template lang="pug">
 .connection-label.badge(
-  :style="{ background: typeColor, left: position.left + 'px', top: position.top  + 'px'}"
+  :style="{ background: typeColor, left: position.left, top: position.top }"
   @click="showConnectionDetails"
 )
   span {{typeName}}
@@ -51,20 +51,16 @@ export default {
       this.$store.commit('clearMultipleSelected')
     },
     setPosition () {
-    //   // const pathElement =
-      const element = document.querySelector(`.path[data-id="${this.id}"]`)
-      const rect = element.getBoundingClientRect()
-      console.log('🪀', rect)
+      const connection = document.querySelector(`.path[data-id="${this.id}"]`).getBoundingClientRect()
       this.position = {
-        left: rect.left + (rect.width / 3),
-        top: rect.top + (rect.height / 3)
+        left: (connection.x + window.scrollX) + (connection.width / 2) + 'px',
+        top: (connection.y + window.scrollY) + (connection.height / 2) + 'px'
       }
     }
   },
   watch: {
     path (value) {
       this.setPosition()
-      // animationTimer = window.requestAnimationFrame(this.animationFrame)
     }
   }
 
