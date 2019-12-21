@@ -9,9 +9,8 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
       input.type-name(placeholder="Connection" v-model="typeName")
 
     .row
-      label(:class="{active: labelIsVisible}" @click.prevent="toggleLabelIsVisible")
-        input(type="checkbox" v-model="labelIsVisible")
-        img.icon.eye(src="@/assets/view.svg")
+      button(:class="{active: labelIsVisible}" @click="toggleLabelIsVisible" ref="labelButton")
+        img.icon(src="@/assets/view.svg")
         span Label
 
       label(:class="{active: isDefault}" @click.prevent="toggleDefault")
@@ -134,11 +133,13 @@ export default {
       }
     },
     toggleLabelIsVisible () {
+      const element = this.$refs.labelButton
       const newValue = !this.labelIsVisible
       this.$store.dispatch('currentSpace/updateLabelIsVisibleForConnection', {
         connectionId: this.currentConnection.id,
         labelIsVisible: newValue
       })
+      element.blur()
     },
     toggleColorPicker () {
       this.colorPickerIsVisible = !this.colorPickerIsVisible
@@ -191,7 +192,4 @@ export default {
 .connection-details
   .type-name
     margin-left 6px
-  .eye
-    vertical-align -2px
-    margin-right -1px
 </style>
