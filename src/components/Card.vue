@@ -223,6 +223,7 @@ article
   background-color var(--secondary-background)
   max-width 235px
   cursor pointer
+  touch-action manipulation
   &:hover,
   &.hover
     box-shadow var(--hover-shadow)

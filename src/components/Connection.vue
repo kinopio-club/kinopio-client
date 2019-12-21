@@ -188,6 +188,7 @@ export default {
 
 <style lang="stylus">
 .path
+  touch-action manipulation
   &:hover,
   &.active
     stroke-width: 7
