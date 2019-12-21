@@ -8,9 +8,17 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
         ColorPicker(:currentColor="typeColor" :visible="colorPickerIsVisible" @selectedColor="updateTypeColor")
       input.type-name(placeholder="Connection" v-model="typeName")
 
-    label(:class="{active: isDefault}" @click.prevent="toggleDefault")
-      input(type="checkbox" v-model="isDefault")
-      span Default
+    .row
+      label
+        //- label(:class="{active: labelIsVisible}" @click.prevent="toggleLabelIsVisible")
+        input(type="checkbox")
+          //- v-model="labelIsVisible"
+        img.icon.eye(src="@/assets/view.svg")
+        span Label
+
+      label(:class="{active: isDefault}" @click.prevent="toggleDefault")
+        input(type="checkbox" v-model="isDefault")
+        span Default
 
     button(@click="removeConnection")
       img.icon(src="@/assets/remove.svg")
@@ -175,4 +183,7 @@ export default {
 .connection-details
   .type-name
     margin-left 6px
+  .eye
+    vertical-align -2px
+    margin-right -1px
 </style>

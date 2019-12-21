@@ -176,8 +176,10 @@ dialog
   label + button,
   .button-wrap + .button-wrap,
   button + .button-wrap,
-  .button-wrap + button
+  .button-wrap + button,
+  label + label
     margin-left 6px
+
   p + button,
   button + p,
   p + .button-wrap,
@@ -323,10 +325,6 @@ code
 
 .danger
   background-color var(--danger-background)
-
-.space-moon
-  transform rotate(-35deg)
-  vertical-align -3px
 
 .anon-avatar
   background-image url('assets/anon-avatar.svg')
