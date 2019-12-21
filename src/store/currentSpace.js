@@ -160,6 +160,19 @@ export default {
       })
       cache.updateSpace('connections', state.connections, state.id)
     },
+    updateLabelIsVisibleForConnection: (state, { connectionId, labelIsVisible }) => {
+      state.connections.map(connection => {
+        if (connection.id === connectionId) {
+          // update properties differently depending on whether it's existing or new
+          if (connection.labelIsVisible) {
+            connection.labelIsVisible = labelIsVisible
+          } else {
+            Vue.set(connection, 'labelIsVisible', labelIsVisible)
+          }
+        }
+      })
+      cache.updateSpace('connections', state.connections, state.id)
+    },
 
     // Connection Types
 
@@ -579,6 +592,14 @@ export default {
       }
       context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
       context.commit('updateConnectionTypeForConnection', { connectionId, connectionTypeId })
+    },
+    updateLabelIsVisibleForConnection: (context, { connectionId, labelIsVisible }) => {
+      const connection = {
+        id: connectionId,
+        labelIsVisible
+      }
+      context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
+      context.commit('updateLabelIsVisibleForConnection', { connectionId, labelIsVisible })
     },
 
     // Connection Types

@@ -9,10 +9,8 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
       input.type-name(placeholder="Connection" v-model="typeName")
 
     .row
-      label
-        //- label(:class="{active: labelIsVisible}" @click.prevent="toggleLabelIsVisible")
-        input(type="checkbox")
-          //- v-model="labelIsVisible"
+      label(:class="{active: labelIsVisible}" @click.prevent="toggleLabelIsVisible")
+        input(type="checkbox" v-model="labelIsVisible")
         img.icon.eye(src="@/assets/view.svg")
         span Label
 
@@ -71,6 +69,9 @@ export default {
       return connections.find(connection => {
         return connection.id === this.$store.state.connectionDetailsIsVisibleForConnectionId
       })
+    },
+    labelIsVisible () {
+      return this.currentConnection.labelIsVisible
     },
     currentConnectionType () {
       return this.$store.getters['currentSpace/connectionTypeById'](this.currentConnection.connectionTypeId)
@@ -131,6 +132,13 @@ export default {
       } else {
         this.$store.dispatch('currentUser/defaultConnectionTypeId', '')
       }
+    },
+    toggleLabelIsVisible () {
+      const newValue = !this.labelIsVisible
+      this.$store.dispatch('currentSpace/updateLabelIsVisibleForConnection', {
+        connectionId: this.currentConnection.id,
+        labelIsVisible: newValue
+      })
     },
     toggleColorPicker () {
       this.colorPickerIsVisible = !this.colorPickerIsVisible
