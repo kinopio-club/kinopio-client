@@ -47,11 +47,14 @@ export default {
       this.$store.commit('clearMultipleSelected')
     },
     setPosition () {
-      const connection = document.querySelector(`.path[data-id="${this.id}"]`).getBoundingClientRect()
-      this.position = {
-        left: (connection.x + window.scrollX) + (connection.width / 2) + 'px',
-        top: (connection.y + window.scrollY) + (connection.height / 2) + 'px'
-      }
+      this.$nextTick(() => {
+        let connection = document.querySelector(`.path[data-id="${this.id}"]`)
+        connection = connection.getBoundingClientRect()
+        this.position = {
+          left: (connection.x + window.scrollX) + (connection.width / 2) + 'px',
+          top: (connection.y + window.scrollY) + (connection.height / 2) + 'px'
+        }
+      })
     }
   },
   watch: {
