@@ -6,6 +6,7 @@
   :data-id="id"
   @mouseover="hover = true"
   @mouseleave="hover = false"
+  :class="{filtered: isFiltered}"
 )
   span {{typeName}}
 </template>
@@ -35,7 +36,40 @@ export default {
     connectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.connectionTypeId) },
     typeColor () { return this.connectionType.color },
     typeName () { return this.connectionType.name },
-    path () { return this.connection.path }
+    path () { return this.connection.path },
+
+    // filters
+    filtersIsActive () {
+      const types = this.$store.state.filteredConnectionTypeIds
+      const frames = this.$store.state.filteredFrameIds
+      return Boolean(types.length + frames.length)
+    },
+    isConnectionFilteredByType () {
+      const typeIds = this.$store.state.filteredConnectionTypeIds
+      return typeIds.includes(this.connectionTypeId)
+    },
+    isCardsFilteredByFrame () {
+      const frameIds = this.$store.state.filteredFrameIds
+      const cards = utils.clone(this.$store.state.currentSpace.cards)
+      const startCardId = this.connection.startCardId
+      const endCardId = this.connection.endCardId
+      const startCard = cards.filter(card => card.id === startCardId)[0]
+      const endCard = cards.filter(card => card.id === endCardId)[0]
+      const startCardInFilter = frameIds.includes(startCard.frameId)
+      const endCardInFilter = frameIds.includes(endCard.frameId)
+      return startCardInFilter || endCardInFilter
+    },
+    isFiltered () {
+      if (this.filtersIsActive) {
+        const isInFilter = this.isCardsFilteredByFrame || this.isConnectionFilteredByType
+        if (isInFilter) {
+          return false
+        } else {
+          return true
+        }
+      } else { return false }
+    }
+
   },
   methods: {
     // same as Connection method
