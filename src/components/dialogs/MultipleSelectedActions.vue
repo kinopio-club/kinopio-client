@@ -31,7 +31,7 @@ dialog.narrow.multiple-selected-actions(
         button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
           span Export
         Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
-    .button-wrap
+    .button-wrap(v-if="multipleCardsSelectedIds.length")
       button(@click.stop="toggleMoveToSpaceIsVisible" :class="{ active: moveToSpaceIsVisible }")
         img.icon.move(src="@/assets/move.svg")
         span Move To Space
