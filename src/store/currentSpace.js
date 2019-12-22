@@ -279,8 +279,8 @@ export default {
       context.dispatch('createNewSpace')
       Vue.nextTick(() => {
         context.dispatch('updateCardConnectionPaths', { cardId: context.state.cards[1].id })
-        context.dispatch('updateUserLastSpaceId')
         context.dispatch('saveNewSpace')
+        context.dispatch('updateUserLastSpaceId')
       })
     },
     getRemoteSpace: async (context, space) => {
