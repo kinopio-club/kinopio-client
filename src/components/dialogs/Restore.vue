@@ -129,6 +129,7 @@ export default {
       this.loading.cards = false
       if (!remoteCards) { return }
       this.removedCards = remoteCards
+      this.$store.commit('currentSpace/removedCards', remoteCards)
     },
     restoreCard (card) {
       this.$store.dispatch('currentSpace/restoreRemovedCard', card)

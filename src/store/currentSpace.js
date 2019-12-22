@@ -116,6 +116,9 @@ export default {
       cache.updateSpace('removedCards', state.removedCards, state.id)
       cache.updateSpace('cards', state.cards, state.id)
     },
+    removedCards: (state, removedCards) => {
+      state.removedCards = removedCards
+    },
     removeCardPermanent: (state, cardToRemove) => {
       state.cards = state.cards.filter(card => card.id !== cardToRemove.id)
       const fromRemovedCards = state.removedCards.find(card => card.id === cardToRemove.id)
