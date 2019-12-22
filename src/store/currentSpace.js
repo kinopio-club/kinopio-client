@@ -322,6 +322,7 @@ export default {
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (remoteSpace) {
         context.commit('restoreSpace', remoteSpace)
+        cache.saveSpace(remoteSpace)
         utils.updateWindowUrlAndTitle({
           space: remoteSpace,
           shouldUpdateUrl,
