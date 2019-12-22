@@ -18,6 +18,10 @@ dialog.narrow.multiple-selected-actions(
             template(v-for="type in connectionTypes")
               .current-color(:style="{ background: type.color}")
         MultipleConnectionsPicker(:visible="multipleConnectionsPickerVisible" :selectedConnections="connections" :selectedConnectionTypes="connectionTypes")
+      button(:class="{active: allLabelsAreVisible}" @click="toggleAllLabelsAreVisible")
+        img.icon(src="@/assets/view.svg")
+        span Labels
+
   section
     .row
       button(@click="remove")
@@ -27,7 +31,7 @@ dialog.narrow.multiple-selected-actions(
         button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
           span Export
         Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
-    .button-wrap
+    .button-wrap(v-if="multipleCardsSelectedIds.length")
       button(@click.stop="toggleMoveToSpaceIsVisible" :class="{ active: moveToSpaceIsVisible }")
         img.icon.move(src="@/assets/move.svg")
         span Move To Space
@@ -100,6 +104,10 @@ export default {
     connectionsIsSelected () {
       return Boolean(this.multipleConnectionsSelectedIds.length)
     },
+    allLabelsAreVisible () {
+      const labelled = this.connections.filter(connection => connection.labelIsVisible)
+      return labelled.length === this.connections.length
+    },
 
     // all
 
@@ -131,6 +139,15 @@ export default {
     }
   },
   methods: {
+    toggleAllLabelsAreVisible () {
+      const isVisible = !this.allLabelsAreVisible
+      this.multipleConnectionsSelectedIds.forEach(id => {
+        this.$store.dispatch('currentSpace/updateLabelIsVisibleForConnection', {
+          connectionId: id,
+          labelIsVisible: isVisible
+        })
+      })
+    },
     toggleExportIsVisible () {
       const isVisible = this.exportIsVisible
       this.closeDialogs()

@@ -8,9 +8,14 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
         ColorPicker(:currentColor="typeColor" :visible="colorPickerIsVisible" @selectedColor="updateTypeColor")
       input.type-name(placeholder="Connection" v-model="typeName")
 
-    label(:class="{active: isDefault}" @click.prevent="toggleDefault")
-      input(type="checkbox" v-model="isDefault")
-      span Default
+    .row
+      button(:class="{active: labelIsVisible}" @click="toggleLabelIsVisible")
+        img.icon(src="@/assets/view.svg")
+        span Label
+
+      label(:class="{active: isDefault}" @click.prevent="toggleDefault")
+        input(type="checkbox" v-model="isDefault")
+        span Default
 
     button(@click="removeConnection")
       img.icon(src="@/assets/remove.svg")
@@ -63,6 +68,9 @@ export default {
       return connections.find(connection => {
         return connection.id === this.$store.state.connectionDetailsIsVisibleForConnectionId
       })
+    },
+    labelIsVisible () {
+      return this.currentConnection.labelIsVisible
     },
     currentConnectionType () {
       return this.$store.getters['currentSpace/connectionTypeById'](this.currentConnection.connectionTypeId)
@@ -123,6 +131,13 @@ export default {
       } else {
         this.$store.dispatch('currentUser/defaultConnectionTypeId', '')
       }
+    },
+    toggleLabelIsVisible () {
+      const newValue = !this.labelIsVisible
+      this.$store.dispatch('currentSpace/updateLabelIsVisibleForConnection', {
+        connectionId: this.currentConnection.id,
+        labelIsVisible: newValue
+      })
     },
     toggleColorPicker () {
       this.colorPickerIsVisible = !this.colorPickerIsVisible

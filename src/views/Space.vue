@@ -15,6 +15,8 @@ main.space(
     )
     template(v-for="connection in connections")
       Connection(:connection="connection")
+  template(v-for="connection in connections")
+    ConnectionLabel(:connection="connection")
   .cards
     template(v-for="card in cards")
       Card(:card="card")
@@ -28,6 +30,7 @@ import last from 'lodash-es/last'
 
 import Card from '@/components/Card.vue'
 import Connection from '@/components/Connection.vue'
+import ConnectionLabel from '@/components/ConnectionLabel.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
@@ -40,6 +43,7 @@ export default {
   components: {
     Card,
     Connection,
+    ConnectionLabel,
     ConnectionDetails,
     MultipleSelectedActions,
     OffscreenMarkers
@@ -68,6 +72,7 @@ export default {
     this.updateIsOnline()
     window.addEventListener('online', this.updateIsOnline)
     window.addEventListener('offline', this.updateIsOnline)
+    this.addInteractionBlur()
   },
 
   computed: {
@@ -105,6 +110,15 @@ export default {
       if (status) {
         this.$store.dispatch('api/processQueueOperations')
       }
+    },
+
+    addInteractionBlur () {
+      const elements = document.querySelectorAll('button, li')
+      elements.forEach(element => element.addEventListener('click', this.blur))
+    },
+
+    blur (event) {
+      event.target.blur()
     },
 
     initInteractions (event) {
@@ -402,6 +416,7 @@ export default {
 
     stopInteractions (event) {
       console.log('💣 stopInteractions') // stopInteractions and Space/stopPainting are run on all mouse and touch end events
+      this.addInteractionBlur()
       window.cancelAnimationFrame(scrollTimer)
       scrollTimer = undefined
       if (this.shouldCancel(event)) { return }
@@ -451,7 +466,8 @@ export default {
   *
     pointer-events: none !important
 
-svg.connections
+svg.connections,
+.connection-labels
   position absolute
   top 0
   left 0
@@ -462,4 +478,5 @@ svg.connections
     cursor pointer
     &.current-connection
       pointer-events none
+
 </style>

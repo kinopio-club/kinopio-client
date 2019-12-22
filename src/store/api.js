@@ -111,7 +111,7 @@ const self = {
     },
 
     processQueueOperations: async (context) => {
-      if (!window.navigator.onLine) { return }
+      if (!shouldRequest()) { return }
       const queue = cache.queue()
       const body = squashQueue(queue)
       cache.clearQueue()

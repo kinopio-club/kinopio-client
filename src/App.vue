@@ -79,6 +79,7 @@ img
 
 input,
 textarea
+  touch-action manipulation
   margin 0
   font-size 1em // required to disable ios input zooming
   resize none
@@ -92,6 +93,7 @@ textarea
 
 button,
 label // used for checkbox buttons
+  touch-action manipulation
   text-align left
   padding 7px
   padding-top 4px
@@ -174,8 +176,10 @@ dialog
   label + button,
   .button-wrap + .button-wrap,
   button + .button-wrap,
-  .button-wrap + button
+  .button-wrap + button,
+  label + label
     margin-left 6px
+
   p + button,
   button + p,
   p + .button-wrap,
@@ -321,10 +325,6 @@ code
 
 .danger
   background-color var(--danger-background)
-
-.space-moon
-  transform rotate(-35deg)
-  vertical-align -3px
 
 .anon-avatar
   background-image url('assets/anon-avatar.svg')

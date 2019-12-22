@@ -10,7 +10,7 @@ path.path(
   :d="path"
   @click="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
-  :class="{active: isSelected || detailsIsVisible, filtered: isFiltered}"
+  :class="{active: isSelected || detailsIsVisible, filtered: isFiltered, hover: isHovered}"
   ref="connection"
 )
 </template>
@@ -21,6 +21,7 @@ import utils from '@/utils.js'
 let animationTimer
 
 export default {
+  name: 'Connection',
   props: {
     connection: Object
   },
@@ -80,6 +81,9 @@ export default {
     shouldAnimate () {
       return Boolean(this.isSelected || this.detailsIsVisible)
     },
+    isHovered () {
+      return this.id === this.$store.state.currentUserIsHoveringOverConnectionId
+    },
 
     // filters
     filtersIsActive () {
@@ -112,6 +116,7 @@ export default {
     }
   },
   methods: {
+    // same as ConnectionLabel method
     showConnectionDetails (event) {
       const detailsPosition = utils.cursorPositionInPage(event)
       this.$store.commit('closeAllDialogs')
@@ -186,7 +191,9 @@ export default {
 
 <style lang="stylus">
 .path
+  touch-action manipulation
   &:hover,
-  &.active
+  &.active,
+  &.hover
     stroke-width: 7
 </style>
