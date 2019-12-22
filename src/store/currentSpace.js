@@ -306,6 +306,7 @@ export default {
       // only cache spaces you can edit
       const userCanEditSpace = context.rootGetters['currentUser/canEditSpace'](remoteSpace)
       if (userCanEditSpace && !remoteSpace.isRemoved) {
+        console.log('🌌', remoteSpace)
         cache.saveSpace(remoteSpace)
       }
       return utils.normalizeRemoteSpace(remoteSpace)
@@ -322,7 +323,6 @@ export default {
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (remoteSpace) {
         context.commit('restoreSpace', remoteSpace)
-        cache.saveSpace(remoteSpace)
         utils.updateWindowUrlAndTitle({
           space: remoteSpace,
           shouldUpdateUrl,
