@@ -9,7 +9,7 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
       input.type-name(placeholder="Connection" v-model="typeName")
 
     .row
-      button(:class="{active: labelIsVisible}" @click="toggleLabelIsVisible" ref="labelButton")
+      button(:class="{active: labelIsVisible}" @click="toggleLabelIsVisible")
         img.icon(src="@/assets/view.svg")
         span Label
 
@@ -133,13 +133,11 @@ export default {
       }
     },
     toggleLabelIsVisible () {
-      const element = this.$refs.labelButton
       const newValue = !this.labelIsVisible
       this.$store.dispatch('currentSpace/updateLabelIsVisibleForConnection', {
         connectionId: this.currentConnection.id,
         labelIsVisible: newValue
       })
-      element.blur()
     },
     toggleColorPicker () {
       this.colorPickerIsVisible = !this.colorPickerIsVisible

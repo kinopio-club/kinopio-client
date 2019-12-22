@@ -72,6 +72,7 @@ export default {
     this.updateIsOnline()
     window.addEventListener('online', this.updateIsOnline)
     window.addEventListener('offline', this.updateIsOnline)
+    this.addInteractionBlur()
   },
 
   computed: {
@@ -109,6 +110,15 @@ export default {
       if (status) {
         this.$store.dispatch('api/processQueueOperations')
       }
+    },
+
+    addInteractionBlur () {
+      const elements = document.querySelectorAll('button, li')
+      elements.forEach(element => element.addEventListener('click', this.blur))
+    },
+
+    blur (event) {
+      event.target.blur()
     },
 
     initInteractions (event) {
@@ -406,6 +416,7 @@ export default {
 
     stopInteractions (event) {
       console.log('💣 stopInteractions') // stopInteractions and Space/stopPainting are run on all mouse and touch end events
+      this.addInteractionBlur()
       window.cancelAnimationFrame(scrollTimer)
       scrollTimer = undefined
       if (this.shouldCancel(event)) { return }

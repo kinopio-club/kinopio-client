@@ -59,7 +59,6 @@ export default {
       this.setPosition()
     },
     hover (value) {
-      console.log('hover', value, this.id)
       if (value) {
         this.$store.commit('currentUserIsHoveringOverConnectionId', this.id)
       } else {
