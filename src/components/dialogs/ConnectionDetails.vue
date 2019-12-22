@@ -79,8 +79,11 @@ export default {
       return this.$store.state.currentSpace.connectionTypes
     },
     typeColor () {
-      return this.currentConnectionType.color
+      if (this.currentConnectionType) {
+        return this.currentConnectionType.color
+      } else { return undefined }
     },
+
     typeName: {
       get () {
         return this.currentConnectionType.name

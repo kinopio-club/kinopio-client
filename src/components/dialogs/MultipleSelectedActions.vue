@@ -73,7 +73,9 @@ export default {
       }
     },
     userColor () {
-      return this.$store.state.currentUser.color
+      if (this.$store.state.currentUser) {
+        return this.$store.state.currentUser.color
+      } else { return undefined }
     },
 
     // cards
