@@ -100,7 +100,7 @@ export default {
 footer
   z-index var(--max-z)
   position fixed
-  right 8px
+  left 8px
   bottom 8px
   pointer-events none
   max-width calc(100% - 17px)
@@ -109,14 +109,11 @@ footer
     height 11px
   .controls
     display flex
-    flex-direction row-reverse // prevents shifting when notifications displayed
     > .button-wrap
       pointer-events all
       margin-left 6px
       display inline-block
       dialog
-        left initial
-        right 8px
         top initial
         bottom calc(100% - 8px)
   .sunglasses
