@@ -3,7 +3,28 @@ dialog.templates.narrow(v-if="visible" :open="visible" @click.stop ref="dialog")
   section
     p Templates
   section
-    p from a baked results list
+    .filter-wrap
+      img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
+      input(placeholder="Search")
+
+    //- p from a baked results list
+    details.results-section
+      summary Learning
+      ul.results-list
+        li hello
+        li yoyoas
+
+    details.results-section
+      summary Life
+      ul.results-list
+        li hello
+        li yoyoas
+
+    details.results-section
+      summary Making
+      ul.results-list
+        li hello
+        li yoyoas
 
 </template>
 
@@ -125,4 +146,22 @@ export default {
 .templates
   max-height calc(100vh - 140px)
   overflow scroll
+  details
+    summary
+      // background pink
+      display inline-block
+      cursor pointer
+      outline none
+  details + details
+    margin-top 10px
+  .filter-wrap
+    margin 0
+    margin-bottom 10px
+    margin-left -2px
+    width calc(100% + 4px)
+    img
+      margin 0
+
+  .results-list
+    margin-top 5px
 </style>

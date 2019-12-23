@@ -92,6 +92,7 @@ textarea
   margin-bottom 10px
 
 button,
+summary,
 label // used for checkbox buttons
   touch-action manipulation
   text-align left
@@ -277,15 +278,16 @@ li
   border-top 0
   overflow auto
   max-height calc(92vh - 175px)
-  .filter
-    margin-left 5px
-    width calc(100% - 10px)
-    padding-top 4px
-    display flex
-    img
-      margin-top -11px
-      padding-right 5px
-      cursor text
+
+.filter-wrap
+  margin-left 5px
+  width calc(100% - 10px)
+  padding-top 4px
+  display flex
+  img
+    margin-top -11px
+    padding-right 5px
+    cursor text
 
 ul.results-list
   margin 0

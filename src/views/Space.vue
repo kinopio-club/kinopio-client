@@ -113,7 +113,7 @@ export default {
     },
 
     addInteractionBlur () {
-      const elements = document.querySelectorAll('button, li, label')
+      const elements = document.querySelectorAll('button, li, label, summary')
       elements.forEach(element => element.addEventListener('click', this.blur))
     },
 
