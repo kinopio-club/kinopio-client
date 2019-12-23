@@ -1,30 +1,48 @@
 <template lang="pug">
-dialog.templates.narrow(v-if="visible" :open="visible" @click.stop ref="dialog")
+dialog.templates(v-if="visible" :open="visible" @click.stop ref="dialog")
   section
     p Templates
-  section
+    //- need to make clear somehow that clicking on the space just previews it?? move to be more in context?
+    p Preview and make them your own
+
+  section.results-section
+
     .filter-wrap
-      img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
+      img.icon.search(src="@/assets/search.svg")
       input(placeholder="Search")
 
+    ul.results-list
+      //- populate from json with item={category, name, id}
+      li(data-full-name="Learning - Hello")
+        .badge.info Learning
+        span Note Taking
+      li(data-full-name="Life - ToDo Today")
+        .badge.info Life
+        span ToDo Today
+
     //- p from a baked results list
-    details.results-section
-      summary Learning
-      ul.results-list
-        li hello
-        li yoyoas
+    //- details.results-section
+    //-   summary Learning
+    //-   //- p this is a cool description
+    //-   ul.results-list
+    //-     li
+    //-       img.icon(src="@/assets/view.svg")
+    //-       span hello
+    //-     li
+    //-       img.icon(src="@/assets/view.svg")
+    //-       span yopyooy
 
-    details.results-section
-      summary Life
-      ul.results-list
-        li hello
-        li yoyoas
+    //- details.results-section
+    //-   summary Life
+    //-   ul.results-list
+    //-     li hello
+    //-     li yoyoas
 
-    details.results-section
-      summary Making
-      ul.results-list
-        li hello
-        li yoyoas
+    //- details.results-section
+    //-   summary Making
+    //-   ul.results-list
+    //-     li hello
+    //-     li yoyoas
 
 </template>
 
@@ -146,22 +164,23 @@ export default {
 .templates
   max-height calc(100vh - 140px)
   overflow scroll
-  details
-    summary
-      // background pink
-      display inline-block
-      cursor pointer
-      outline none
-  details + details
-    margin-top 10px
-  .filter-wrap
-    margin 0
-    margin-bottom 10px
-    margin-left -2px
-    width calc(100% + 4px)
-    img
-      margin 0
-
-  .results-list
-    margin-top 5px
+  // details
+  //   summary
+  //     // background pink
+  //     display inline-block
+  //     cursor pointer
+  //     outline none
+  // details + details
+  //   margin-top 10px
+  // .filter-wrap
+  //   margin 0
+  //   margin-bottom 10px
+  //   margin-left -2px
+  //   width calc(100% + 4px)
+  //   img
+  //     margin 0
+  // .results-list
+  //   margin-top 5px
+  // .description
+  //   margin-bottom 10px
 </style>

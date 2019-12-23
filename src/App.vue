@@ -192,7 +192,7 @@ dialog
     margin-bottom 10px
     display flex
     position relative
-    input
+    > input
       margin-bottom 0
     &:last-child
       margin-bottom 0
