@@ -4,7 +4,9 @@ dialog.templates(v-if="visible" :open="visible" @click.stop ref="dialog")
     p Templates
     //- need to make clear somehow that clicking on the space just previews it?? move to be more in context?
     p Preview and make them your own
-
+    button
+      .badge.info All
+      span Categories
   section.results-section
 
     .filter-wrap
@@ -19,144 +21,35 @@ dialog.templates(v-if="visible" :open="visible" @click.stop ref="dialog")
       li(data-full-name="Life - ToDo Today")
         .badge.info Life
         span ToDo Today
-
-    //- p from a baked results list
-    //- details.results-section
-    //-   summary Learning
-    //-   //- p this is a cool description
-    //-   ul.results-list
-    //-     li
-    //-       img.icon(src="@/assets/view.svg")
-    //-       span hello
-    //-     li
-    //-       img.icon(src="@/assets/view.svg")
-    //-       span yopyooy
-
-    //- details.results-section
-    //-   summary Life
-    //-   ul.results-list
-    //-     li hello
-    //-     li yoyoas
-
-    //- details.results-section
-    //-   summary Making
-    //-   ul.results-list
-    //-     li hello
-    //-     li yoyoas
-
 </template>
 
 <script>
-// import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
-// import nanoid from 'nanoid'
-
-// import Loader from '@/components/Loader.vue'
-// import cache from '@/cache.js'
-
 export default {
   name: 'Templates',
-  // components: {
-  //   Loader
-  // },
   props: {
     visible: Boolean
-  }
-
+  },
   //   this.$emit('updateSpaces')
   // this.$emit('closeDialog')
-
-  // data () {
-  //   return {
-  //     loading: false,
-  //     errors: []
-  //   }
-  // },
-  // methods: {
-  //   selectFile () {
-  //     if (this.loading) { return }
-  //     const input = this.$refs.input
-  //     input.click()
-  //   },
-  //   readFile () {
-  //     this.loading = true
-  //     const input = this.$refs.input
-  //     const file = input.files[0]
-  //     const reader = new FileReader()
-  //     reader.readAsText(file)
-  //     reader.onload = event => {
-  //       this.loading = false
-  //       const space = JSON.parse(event.target.result)
-  //       this.importSpace(space)
-  //     }
-  //   },
-  //   uniqueName (space) {
-  //     const spaces = cache.getAllSpaces()
-  //     const spaceNames = spaces.map(space => space.name)
-  //     if (spaceNames.includes(space.name)) {
-  //       return `${space.name}-${space.id}`
-  //     } else {
-  //       return space.name
-  //     }
-  //   },
-  //   importSpace (space) {
-  //     if (this.isValidSpace(space)) {
-  //       space.id = nanoid()
-  //       space.name = this.uniqueName(space)
-  //       const uniqueNewSpace = cache.updateIdsInSpace(space)
-  //       cache.saveSpace(uniqueNewSpace)
-  //       this.$store.commit('currentSpace/restoreSpace', uniqueNewSpace)
-  //       this.$store.dispatch('currentSpace/saveNewSpace')
-  //       this.$store.dispatch('currentUser/lastSpaceId', space.id)
-  //       this.$emit('updateSpaces')
-  //       this.$emit('closeDialog')
-  //     }
-  //   },
-  //   typeCheck (value, type) {
-  //     if (type === 'array') {
-  //       return Array.isArray(value)
-  //     } else {
-  //       return typeof value === type // eslint-disable-line valid-typeof
-  //     }
-  //   },
-  //   isValidSpace (space) {
-  //     this.errors = []
-  //     const schema = {
-  //       'name': 'string',
-  //       'users': 'array',
-  //       'cards': 'array',
-  //       'connections': 'array',
-  //       'connectionTypes': 'array',
-  //       'customFields': 'array'
-  //     }
-  //     Object.keys(schema).forEach(field => {
-  //       if (!this.typeCheck(space[field], schema[field])) {
-  //         let error = `Expected ${field} but didn't get a ${schema[field]}`
-  //         this.errors.push(error)
-  //       }
-  //     })
-  //     if (this.errors.length) {
-  //       return false
-  //     } else {
-  //       return true
-  //     }
-  //   },
-  //   scrollIntoView () {
-  //     const element = this.$refs.dialog
-  //     scrollIntoView(element, {
-  //       behavior: 'smooth',
-  //       scrollMode: 'if-needed'
-  //     })
-  //   }
-  // },
-  // watch: {
-  //   visible (visible) {
-  //     this.$nextTick(() => {
-  //       if (visible) {
-  //         this.scrollIntoView()
-  //       }
-  //     })
-  //   }
-  // }
+  data () {
+    return {
+      filter: ''
+    }
+  },
+  computed: {
+  },
+  methods: {
+    // emitted when cateogryPicker changes???
+    clearFilter () {
+      this.filter = ''
+    }
+  },
+  watch: {
+    visible (visible) {
+      this.clearFilter()
+      // this.filter = ''
+    }
+  }
 }
 </script>
 
@@ -164,23 +57,7 @@ export default {
 .templates
   max-height calc(100vh - 140px)
   overflow scroll
-  // details
-  //   summary
-  //     // background pink
-  //     display inline-block
-  //     cursor pointer
-  //     outline none
-  // details + details
-  //   margin-top 10px
-  // .filter-wrap
-  //   margin 0
-  //   margin-bottom 10px
-  //   margin-left -2px
-  //   width calc(100% + 4px)
-  //   img
-  //     margin 0
-  // .results-list
-  //   margin-top 5px
-  // .description
-  //   margin-bottom 10px
+  // .title-section
+  //   border-bottom 1px solid var(--primary)
+  //   margin-bottom 5px
 </style>

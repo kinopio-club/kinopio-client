@@ -18,7 +18,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
       .button-wrap
         button(@click.stop="toggleTemplatesIsVisible" :class="{ active: templatesIsVisible }")
           span Templates
-        Templates(:visible="templatesIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
+        Templates(:visible="templatesIsVisible")
 
       .button-wrap
         button(@click.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
