@@ -6,7 +6,7 @@ dialog.templates(v-if="visible" :open="visible" @click.stop ref="dialog" @click=
     .button-wrap.category-wrap
       button(@click.stop="toggleTemplateCategoryPickerIsVisible" :class="{active: templateCategoryPickerIsVisible}")
         .badge.info {{filterCategory.name}}
-      TemplateCategoryPicker(:visible="templateCategoryPickerIsVisible" :selectedCategoryId="filterCategoryId" @closeDialog="closeDialogs" )
+      TemplateCategoryPicker(:visible="templateCategoryPickerIsVisible" :selectedCategoryId="filterCategoryId" @closeDialog="closeDialogs" @selectCategory="updateFilteredCategory")
   section.results-section
     .filter-wrap
       img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
@@ -114,6 +114,9 @@ export default {
     },
     closeDialogs () {
       this.templateCategoryPickerIsVisible = false
+    },
+    updateFilteredCategory (category) {
+      this.filterCategoryId = category.id
     }
 
   },
@@ -128,7 +131,7 @@ export default {
 <style lang="stylus">
 .templates
   max-height calc(100vh - 140px)
-  overflow scroll
+  // overflow scroll
   .category-wrap
     > button
       .badge
