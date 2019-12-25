@@ -144,6 +144,10 @@ label
   input
     margin 0
 
+li
+  &:focus
+    outline none
+
 p
   margin 0
   margin-top 10px

@@ -1,11 +1,12 @@
 <template lang="pug">
-dialog.templates(v-if="visible" :open="visible" @click.stop ref="dialog")
+dialog.templates(v-if="visible" :open="visible" @click.stop ref="dialog" @click="closeDialogs")
   section
     p Templates
     p Preview and make them your own
     .button-wrap.category-wrap
-      button
+      button(@click.stop="toggleTemplateCategoryPickerIsVisible" :class="{active: templateCategoryPickerIsVisible}")
         .badge.info {{filterCategory.name}}
+      TemplateCategoryPicker(:visible="templateCategoryPickerIsVisible" :selectedCategoryId="filterCategoryId" @closeDialog="closeDialogs" )
   section.results-section
     .filter-wrap
       img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
@@ -14,7 +15,8 @@ dialog.templates(v-if="visible" :open="visible" @click.stop ref="dialog")
     ul.results-list
       template(v-for="(space in spacesFiltered")
         a(:href="space.id")
-          li(:data-full-name="space.fullName")
+          li(:data-full-name="space.fullName" tabindex="0")
+            //- ^TODO^ v-on:keyup.enter="select(space) method
             .badge.info {{space.category}}
             span {{space.name}}
 </template>
@@ -23,9 +25,13 @@ dialog.templates(v-if="visible" :open="visible" @click.stop ref="dialog")
 import fuzzy from 'fuzzy'
 
 import templates from '@/spaces/templates.js'
+import TemplateCategoryPicker from '@/components/dialogs/TemplateCategoryPicker.vue'
 
 export default {
   name: 'Templates',
+  components: {
+    TemplateCategoryPicker
+  },
   props: {
     visible: Boolean
   },
@@ -33,7 +39,8 @@ export default {
     return {
       filter: '',
       filterCategoryId: 0,
-      filteredSpaces: []
+      filteredSpaces: [],
+      templateCategoryPickerIsVisible: false
     }
   },
   filters: {
@@ -43,14 +50,17 @@ export default {
       return templates.categories()
     },
     spaces () {
-      const spaces = templates.spaces()
-      return spaces.map(space => {
+      let spaces = templates.spaces()
+      spaces = spaces.map(space => {
         const category = this.categories.find(category => category.id === space.categoryId)
         space.category = category.name
         space.fullName = `${space.category} – ${space.name}`
         return space
       })
+      // filter spacesInSelectedCategory here
+      return spaces
     },
+    // spacesInSelectedCategory - stacks BEFORE spacesFiltered
     spacesFiltered () {
       if (this.filteredSpaces.length) {
         return this.filteredSpaces
@@ -98,7 +108,14 @@ export default {
       const element = this.$refs.filterInput
       element.focus()
       element.setSelectionRange(0, 0)
+    },
+    toggleTemplateCategoryPickerIsVisible () {
+      this.templateCategoryPickerIsVisible = !this.templateCategoryPickerIsVisible
+    },
+    closeDialogs () {
+      this.templateCategoryPickerIsVisible = false
     }
+
   },
   watch: {
     visible (visible) {
