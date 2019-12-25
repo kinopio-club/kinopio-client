@@ -6,7 +6,7 @@ dialog.templates(v-if="visible" :open="visible" @click.stop ref="dialog" @click=
     .button-wrap.category-wrap
       button(@click.stop="toggleTemplateCategoryPickerIsVisible" :class="{active: templateCategoryPickerIsVisible}")
         .badge.info {{filterCategory.name}}
-      TemplateCategoryPicker(:visible="templateCategoryPickerIsVisible" :selectedCategoryId="filterCategoryId" @closeDialog="closeDialogs" @selectCategory="updateFilteredCategory")
+      TemplateCategoryPicker(:visible="templateCategoryPickerIsVisible" :selectedCategoryId="filteredCategoryId" @closeDialog="closeDialogs" @selectCategory="updateFilteredCategory")
   section.results-section
     .filter-wrap
       img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
@@ -38,7 +38,7 @@ export default {
   data () {
     return {
       filter: '',
-      filterCategoryId: 0,
+      filteredCategoryId: 0,
       filteredSpaces: [],
       templateCategoryPickerIsVisible: false
     }
@@ -51,58 +51,44 @@ export default {
     },
     spaces () {
       let spaces = templates.spaces()
+      // add category meta to space
       spaces = spaces.map(space => {
         const category = this.categories.find(category => category.id === space.categoryId)
         space.category = category.name
         space.fullName = `${space.category} – ${space.name}`
         return space
       })
-      // filter spacesInSelectedCategory here
-      return spaces
+      // filter by categories
+      if (this.filteredCategoryId === 0) {
+        return spaces
+      } else {
+        return spaces.filter(space => space.categoryId === this.filteredCategoryId)
+      }
     },
-    // spacesInSelectedCategory - stacks BEFORE spacesFiltered
     spacesFiltered () {
-      if (this.filteredSpaces.length) {
+      if (this.filter) {
         return this.filteredSpaces
       } else {
         return this.spaces
       }
     },
     filterCategory () {
-      return this.categories.find(category => category.id === this.filterCategoryId)
+      return this.categories.find(category => category.id === this.filteredCategoryId)
     },
     spaceFilter: {
       get () {
         return this.filter
       },
       set (newValue) {
-        this.filter = newValue
-        const options = {
-          pre: '',
-          post: '',
-          extract: (space) => {
-            return space.fullName
-          }
-        }
-        const filtered = fuzzy.filter(this.filter, this.spaces, options)
-        const spaces = filtered.map(space => {
-          return {
-            name: space.original.name,
-            id: space.original.id,
-            categoryId: space.original.categoryId,
-            category: space.original.category
-          }
-        })
-        this.filteredSpaces = spaces
+        this.updateFilter(newValue)
       }
     }
 
   },
   methods: {
-    // emitted when cateogryPicker changes???
     clearFilter () {
       this.filter = ''
-      this.filterCategoryId = 0
+      this.filteredCategoryId = 0
     },
     focusFilterInput () {
       const element = this.$refs.filterInput
@@ -115,8 +101,29 @@ export default {
     closeDialogs () {
       this.templateCategoryPickerIsVisible = false
     },
+    updateFilter (newValue) {
+      this.filter = newValue
+      const options = {
+        pre: '',
+        post: '',
+        extract: (space) => {
+          return space.fullName
+        }
+      }
+      const filtered = fuzzy.filter(this.filter, this.spaces, options)
+      const spaces = filtered.map(space => {
+        return {
+          name: space.original.name,
+          id: space.original.id,
+          categoryId: space.original.categoryId,
+          category: space.original.category
+        }
+      })
+      this.filteredSpaces = spaces
+    },
     updateFilteredCategory (category) {
-      this.filterCategoryId = category.id
+      this.filteredCategoryId = category.id
+      this.updateFilter(this.filter)
     }
 
   },

@@ -78,7 +78,7 @@ export default {
       }
     },
     spacesFiltered () {
-      if (this.filteredSpaces.length) {
+      if (this.filter) {
         return this.filteredSpaces
       } else {
         return this.spaces
