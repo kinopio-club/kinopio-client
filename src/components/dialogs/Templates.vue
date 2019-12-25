@@ -2,52 +2,65 @@
 dialog.templates(v-if="visible" :open="visible" @click.stop ref="dialog")
   section
     p Templates
-    //- need to make clear somehow that clicking on the space just previews it?? move to be more in context?
     p Preview and make them your own
-    button
-      .badge.info All
-      span Categories
+    .button-wrap.category-wrap
+      button
+        .badge.info {{filterCategory.name}}
   section.results-section
-
     .filter-wrap
       img.icon.search(src="@/assets/search.svg")
       input(placeholder="Search")
 
     ul.results-list
-      //- populate from json with item={category, name, id}
-      li(data-full-name="Learning - Hello")
-        .badge.info Learning
-        span Note Taking
-      li(data-full-name="Life - ToDo Today")
-        .badge.info Life
-        span ToDo Today
+      template(v-for="(space in spaces")
+        a(:href="space.id")
+          li
+            .badge.info {{space.category}}
+            span {{space.name}}
 </template>
 
 <script>
+import templates from '@/spaces/templates.js'
+
 export default {
   name: 'Templates',
   props: {
     visible: Boolean
   },
-  //   this.$emit('updateSpaces')
-  // this.$emit('closeDialog')
   data () {
     return {
-      filter: ''
+      filter: '',
+      filterCategoryId: 0
     }
   },
+  filters: {
+  },
   computed: {
+    categories () {
+      return templates.categories()
+    },
+    spaces () {
+      const spaces = templates.spaces()
+      return spaces.map(space => {
+        const category = this.categories.find(category => category.id === space.categoryId)
+        space.category = category.name
+        return space
+      })
+    },
+    filterCategory () {
+      return this.categories.find(category => category.id === this.filterCategoryId)
+    }
   },
   methods: {
     // emitted when cateogryPicker changes???
     clearFilter () {
       this.filter = ''
+      this.filterCategoryId = 0
     }
   },
   watch: {
     visible (visible) {
       this.clearFilter()
-      // this.filter = ''
     }
   }
 }
@@ -57,7 +70,11 @@ export default {
 .templates
   max-height calc(100vh - 140px)
   overflow scroll
-  // .title-section
-  //   border-bottom 1px solid var(--primary)
-  //   margin-bottom 5px
+  .category-wrap
+    > button
+      .badge
+        margin 0
+  a
+    color var(--primary)
+    text-decoration none
 </style>
