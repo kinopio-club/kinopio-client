@@ -27,8 +27,10 @@ dialog.whats-new(v-if="visible" :open="visible" @click.stop)
         del Share your spaces with other people (space urls)
       li
         del Filters 👀
+      li
+        del Templates to wow and inspire
       li Image and video cards 🌸
-      li An explore or template site to find cool spaces
+      li Updated Logo
       li Billing and Payments (4$/month) 💞
       li More frames 🖼
       li Keyboard shortcuts

@@ -60,7 +60,7 @@ export default {
       {
         spaceId: '123',
         categoryId: 2,
-        name: 'Tracking Mental Health'
+        name: 'Mental Health'
       },
       {
         spaceId: '123',
