@@ -14,7 +14,7 @@ dialog.templates(v-if="visible" :open="visible" @click.stop ref="dialog" @click=
 
     ul.results-list
       template(v-for="(space in spacesFiltered")
-        a(:href="space.id")
+        a(:href="space.spaceId")
           li(:data-full-name="space.fullName" tabindex="0")
             //- ^TODO^ v-on:keyup.enter="select(space) method
             .badge.info {{space.category}}
@@ -114,7 +114,7 @@ export default {
       const spaces = filtered.map(space => {
         return {
           name: space.original.name,
-          id: space.original.id,
+          spaceId: space.original.spaceId,
           categoryId: space.original.categoryId,
           category: space.original.category
         }

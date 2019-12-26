@@ -24,12 +24,27 @@ export default {
   spaces () {
     return [
       {
-        id: '123',
+        spaceId: '123',
         categoryId: 1,
         name: 'Note Taking'
       },
       {
-        id: '323',
+        spaceId: '323',
+        categoryId: 2,
+        name: 'ToDo Today'
+      },
+      {
+        spaceId: '323',
+        categoryId: 2,
+        name: 'ToDo Today'
+      },
+      {
+        spaceId: '323',
+        categoryId: 2,
+        name: 'ToDo Today'
+      },
+      {
+        spaceId: '323',
         categoryId: 2,
         name: 'ToDo Today'
       }
