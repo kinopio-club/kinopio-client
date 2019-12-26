@@ -50,6 +50,11 @@ export default {
       {
         spaceId: '123',
         categoryId: 2,
+        name: 'Career Planning'
+      },
+      {
+        spaceId: '123',
+        categoryId: 2,
         name: 'Making Hard Decisions'
       },
       {

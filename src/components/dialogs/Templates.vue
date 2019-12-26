@@ -2,7 +2,8 @@
 dialog.templates(v-if="visible" :open="visible" @click.stop ref="dialog" @click="closeDialogs")
   section
     p Templates
-    p Preview and make them your own
+  section
+    //- p Preview and make them your own
     .button-wrap.category-wrap
       button(@click.stop="toggleTemplateCategoryPickerIsVisible" :class="{active: templateCategoryPickerIsVisible}")
         .badge.info {{filterCategory.name}}

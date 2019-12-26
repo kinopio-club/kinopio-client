@@ -3,7 +3,7 @@ dialog.narrow.template-category-picker(v-if="visible" :open="visible" @click.sto
   section.results-section
     ul.results-list
       template(v-for="(category in categories")
-        li(@click="select(category)" :key="category.id" tabindex="0" v-on:keyup.enter="select(category)")
+        li(@click="select(category)" :key="category.id" tabindex="0" v-on:keyup.enter="select(category)" :class="{ active: isActive(category) }")
           .badge.info {{category.name}}
 </template>
 
@@ -25,6 +25,9 @@ export default {
     select (category) {
       this.$emit('selectCategory', category)
       this.$emit('closeDialog')
+    },
+    isActive (category) {
+      return this.selectedCategoryId === category.id
     }
   }
 }
