@@ -1,12 +1,13 @@
 <template lang="pug">
 .connection-label.badge(
   v-if="visible"
-  :style="{ background: typeColor, left: position.left, top: position.top }"
+  :style="{ background: typeColor, left: position.left + 'px', top: position.top + 'px'}"
   @click="showConnectionDetails"
   :data-id="id"
   @mouseover="hover = true"
   @mouseleave="hover = false"
   :class="{filtered: isFiltered}"
+  ref="label"
 )
   span {{typeName}}
 </template>
@@ -84,9 +85,28 @@ export default {
       this.$nextTick(() => {
         let connection = document.querySelector(`.path[data-id="${this.id}"]`)
         connection = connection.getBoundingClientRect()
+        let label = this.$refs.label
+        let labelOffset
+        if (label) {
+          label = label.getBoundingClientRect()
+          labelOffset = {
+            left: label.width / 4,
+            top: label.height / 4
+          }
+        } else {
+          labelOffset = { left: 0, top: 0 }
+        }
+        const basePosition = {
+          left: connection.x + window.scrollX,
+          top: connection.y + window.scrollY
+        }
+        const connectionOffset = {
+          left: connection.width / 2,
+          top: connection.height / 2
+        }
         this.position = {
-          left: (connection.x + window.scrollX) + (connection.width / 2) + 'px',
-          top: (connection.y + window.scrollY) + (connection.height / 2) + 'px'
+          left: basePosition.left + connectionOffset.left - labelOffset.left,
+          top: basePosition.top + connectionOffset.top - labelOffset.top
         }
       })
     }
