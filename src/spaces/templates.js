@@ -17,6 +17,10 @@ export default {
       {
         id: 3,
         name: 'Planning'
+      },
+      {
+        id: 4,
+        name: 'Product'
       }
     ]
   },
@@ -26,27 +30,67 @@ export default {
       {
         spaceId: '123',
         categoryId: 1,
-        name: 'Note Taking'
+        name: 'Class Notes'
       },
       {
-        spaceId: '323',
+        spaceId: '123',
+        categoryId: 1,
+        name: 'Book Club'
+      },
+      {
+        spaceId: '123',
+        categoryId: 1,
+        name: 'Assignment Work'
+      },
+      {
+        spaceId: '123',
         categoryId: 2,
         name: 'ToDo Today'
       },
       {
-        spaceId: '323',
+        spaceId: '123',
         categoryId: 2,
-        name: 'ToDo Today'
+        name: 'Making Hard Decisions'
       },
       {
-        spaceId: '323',
+        spaceId: '123',
         categoryId: 2,
-        name: 'ToDo Today'
+        name: 'Tracking Mental Health'
       },
       {
-        spaceId: '323',
-        categoryId: 2,
-        name: 'ToDo Today'
+        spaceId: '123',
+        categoryId: 3,
+        name: 'Brainstorming'
+      },
+      {
+        spaceId: '123',
+        categoryId: 3,
+        name: 'Meeting Notes'
+      },
+      {
+        spaceId: '123',
+        categoryId: 3,
+        name: 'Blog Post'
+      },
+      {
+        spaceId: '123',
+        categoryId: 4,
+        name: 'Architecture'
+      },
+      {
+        spaceId: '123',
+        categoryId: 4,
+        name: 'Roadmap'
+      },
+      {
+        spaceId: '123',
+        categoryId: 4,
+        name: 'New Feature'
+      },
+      {
+        spaceId: '123',
+        categoryId: 4,
+        name: 'Retrospective'
       }
 
     ]
