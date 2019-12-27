@@ -36,6 +36,8 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
     ul.results-list
       template(v-for="(space in spacesFiltered")
         li(@click="changeSpace(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id" tabindex="0" v-on:keyup.enter="changeSpace(space)")
+          .badge.info.template-badge(v-show="spaceIsTemplate(space.id)")
+            span Template
           .name {{space.name}}
 </template>
 
@@ -46,6 +48,7 @@ import cache from '@/cache.js'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
 import Templates from '@/components/dialogs/Templates.vue'
+import templates from '@/spaces/templates.js'
 
 export default {
   name: 'SpaceDetails',
@@ -150,6 +153,11 @@ export default {
       const currentSpace = this.$store.state.currentSpace.id
       return Boolean(currentSpace === spaceId)
     },
+    spaceIsTemplate (spaceId) {
+      console.log(templates.spaces)
+      const templateSpaceIds = templates.spaces().map(space => space.spaceId)
+      return templateSpaceIds.includes(spaceId)
+    },
     addSpace () {
       this.$store.dispatch('currentSpace/addSpace')
       this.$nextTick(() => {
@@ -197,4 +205,6 @@ export default {
 </script>
 
 <style lang="stylus">
+.template-badge
+  flex none
 </style>
