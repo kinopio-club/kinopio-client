@@ -295,6 +295,7 @@ export default {
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
         }
       } catch (error) {
+        console.error(error)
         if (error.status === 404) {
           context.commit('notifySpaceNotFound', true, { root: true })
         }
