@@ -28,32 +28,27 @@ export default {
   spaces () {
     return [
       {
-        spaceId: '123',
+        spaceId: 'BXblLMDGVn-mmRG9IUMeb',
         categoryId: 1,
         name: 'Class Notes'
       },
       {
-        spaceId: '123',
+        spaceId: 'oVBOOfoO4qg7AzzUwweyf',
         categoryId: 1,
         name: 'Book Club'
       },
       {
-        spaceId: '123',
+        spaceId: 'e5z76fEWMq3DQDXYqyjE_',
         categoryId: 1,
-        name: 'Assignment Work'
+        name: 'Class Assignment'
       },
       {
-        spaceId: '123',
+        spaceId: 'a9DYG9qD1QJYngFkuGiEo',
         categoryId: 2,
-        name: 'ToDo Today'
+        name: 'To Dos'
       },
       {
-        spaceId: '123',
-        categoryId: 2,
-        name: 'Career Planning'
-      },
-      {
-        spaceId: '123',
+        spaceId: 'YD_eqjNH7DQpgDKjEDSzu',
         categoryId: 2,
         name: 'Making Hard Decisions'
       },
