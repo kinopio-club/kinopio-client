@@ -203,7 +203,7 @@ const self = {
         if (!shouldRequest()) { return }
         console.log('🛬 getting remote space', space.id)
         const options = requestOptions({ method: 'GET' })
-        const response = await utils.timeout(5000, fetch(`${host}/space/${space.id}`, options))
+        const response = await utils.timeout(10000, fetch(`${host}/space/${space.id}`, options))
         return normalizeResponse(response)
       } catch (error) {
         console.error(error)
@@ -215,7 +215,7 @@ const self = {
       try {
         console.log('🛬 getting remote space anonymously', space.id)
         const options = requestOptions({ method: 'GET' })
-        const response = await utils.timeout(5000, fetch(`${host}/space/${space.id}`, options))
+        const response = await utils.timeout(10000, fetch(`${host}/space/${space.id}`, options))
         return normalizeResponse(response)
       } catch (error) {
         console.error(error)
