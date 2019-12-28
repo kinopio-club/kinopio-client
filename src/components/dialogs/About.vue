@@ -2,7 +2,7 @@
 dialog.about(v-if="visible" :open="visible" @click="closeDialogs")
   section.kaomoji-section
     p ༼ つ ◕_◕ ༽つ
-    p Kinopio is the thinking, diagramming, and planning tool for your hardest problems.
+    p Kinopio is the mind-mapping, diagramming, and planning tool for your hardest problems.
     p It works how our brains work.
     .button-wrap
       button(@click.stop="toggleSupportIsVisible" :class="{active: supportIsVisible}") Support
