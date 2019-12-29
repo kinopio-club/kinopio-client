@@ -102,7 +102,24 @@ export default {
       this.updatePrevScrollPosition()
     },
 
+    isCircleVisible (circle) {
+      let { x, y, radius } = circle
+      radius = radius || circleRadius
+      const circleVisibleX = utils.between({
+        value: x + radius,
+        min: 0,
+        max: this.$store.state.viewportWidth
+      })
+      const circleVisibleY = utils.between({
+        value: y + radius,
+        min: 0,
+        max: this.$store.state.viewportHeight
+      })
+      return Boolean(circleVisibleX && circleVisibleY)
+    },
+
     drawCircle (circle, context) {
+      if (!this.isCircleVisible(circle)) { return }
       let { x, y, color, iteration, radius, alpha } = circle
       radius = radius || circleRadius
       alpha = alpha || utils.exponentialDecay(iteration, rateOfIterationDecay)
