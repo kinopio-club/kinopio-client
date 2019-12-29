@@ -5,16 +5,16 @@ aside.magic-paint
     @touchstart="startPainting"
     @mousemove="painting"
     @touchmove="painting"
-    :width="pageWidth"
-    :height="pageHeight"
+    :width="viewportWidth"
+    :height="viewportHeight"
   )
   canvas#locking.locking(
-    :width="pageWidth"
-    :height="pageHeight"
+    :width="viewportWidth"
+    :height="viewportHeight"
   )
   canvas#initial.initial(
-    :width="pageWidth"
-    :height="pageHeight"
+    :width="viewportWidth"
+    :height="viewportHeight"
   )
 </template>
 
@@ -64,7 +64,9 @@ export default {
     spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditCurrentSpace'] },
     // keep canvases updated to viewport size so you can draw on newly created areas
     pageHeight () { return this.$store.state.pageHeight },
-    pageWidth () { return this.$store.state.pageWidth }
+    pageWidth () { return this.$store.state.pageWidth },
+    viewportHeight () { return this.$store.state.viewportHeight },
+    viewportWidth () { return this.$store.state.viewportWidth }
   },
   methods: {
     drawCircle (circle, context) {
@@ -102,7 +104,7 @@ export default {
 
     createPaintingCircle (event) {
       let color = this.$store.state.currentUser.color
-      currentCursor = utils.cursorPositionInPage(event)
+      currentCursor = utils.cursorPositionInViewport(event)
       let circle = { x: currentCursor.x, y: currentCursor.y, color, iteration: 0 }
       this.selectCards(circle)
       this.selectConnections(circle)
@@ -110,8 +112,8 @@ export default {
     },
 
     startPainting (event) {
-      startCursor = utils.cursorPositionInPage(event)
-      currentCursor = utils.cursorPositionInPage(event)
+      startCursor = utils.cursorPositionInViewport(event)
+      currentCursor = utils.cursorPositionInViewport(event)
       const dialogIsVisible = Boolean(document.querySelector('dialog'))
       const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)
       this.startLocking()
@@ -227,7 +229,7 @@ export default {
     stopPainting (event) {
       if (this.shouldCancel(event)) { return }
       startCursor = startCursor || {}
-      const endCursor = utils.cursorPositionInPage(event)
+      const endCursor = utils.cursorPositionInViewport(event)
       const shouldAddNewCard = this.$store.state.shouldAddNewCard
       currentUserIsLocking = false
       window.cancelAnimationFrame(lockingAnimationTimer)
@@ -249,12 +251,12 @@ export default {
       if (this.spaceIsReadOnly) { return }
       this.$store.state.cardMap.map(card => {
         const x = {
-          value: circle.x,
+          value: circle.x + window.scrollX,
           min: card.x,
           max: card.x + card.width
         }
         const y = {
-          value: circle.y,
+          value: circle.y + window.scrollY,
           min: card.y,
           max: card.y + card.height
         }
@@ -274,8 +276,8 @@ export default {
         const pathId = path.dataset.id
         const svg = document.querySelector('svg.connections')
         let point = svg.createSVGPoint()
-        point.x = circle.x
-        point.y = circle.y
+        point.x = circle.x + window.scrollX
+        point.y = circle.y + window.scrollY
         const isAlreadySelected = ids.includes(pathId)
         if (isAlreadySelected) { return }
         if (path.isPointInFill(point)) {
@@ -290,7 +292,7 @@ export default {
 
 <style lang="stylus" scoped>
 canvas
-  position absolute
+  position fixed
   top 0
 .locking,
 .initial
