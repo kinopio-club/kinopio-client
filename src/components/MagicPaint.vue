@@ -29,6 +29,7 @@ const maxIterations = 200 // higher is longer paint fade time
 const rateOfIterationDecay = 0.03 // higher is faster tail decay
 let paintingCircles = []
 let paintingCanvas, paintingContext, startCursor, currentCursor, paintingCirclesTimer
+let prevScroll
 
 // locking
 // long press to lock scrolling
@@ -56,6 +57,9 @@ export default {
     // trigger stopPainting even if mouse is outside window
     window.addEventListener('mouseup', this.stopPainting)
     window.addEventListener('touchend', this.stopPainting)
+    // shift circle positions with scroll to simulate full size canvas
+    this.updatePrevScrollPosition()
+    window.addEventListener('scroll', this.updateCirclesWithScroll)
   },
   computed: {
     currentUserColor () {
@@ -69,6 +73,35 @@ export default {
     viewportWidth () { return this.$store.state.viewportWidth }
   },
   methods: {
+    updatePrevScrollPosition () {
+      prevScroll = {
+        x: window.scrollX,
+        y: window.scrollY
+      }
+    },
+
+    updateCirclePositions (circles, scrollDelta) {
+      return circles.map(circle => {
+        circle.x = circle.x - scrollDelta.x
+        circle.y = circle.y - scrollDelta.y
+        return circle
+      })
+    },
+
+    updateCirclesWithScroll () {
+      const scrollDelta = {
+        x: window.scrollX - prevScroll.x,
+        y: window.scrollY - prevScroll.y
+      }
+      if (initialCircles.length) {
+        initialCircles = this.updateCirclePositions(initialCircles, scrollDelta) // covers locking circles of varialbe radius/
+      }
+      if (paintingCircles.length) {
+        paintingCircles = this.updateCirclePositions(paintingCircles, scrollDelta)
+      }
+      this.updatePrevScrollPosition()
+    },
+
     drawCircle (circle, context) {
       let { x, y, color, iteration, radius, alpha } = circle
       radius = radius || circleRadius
