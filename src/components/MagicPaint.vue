@@ -7,14 +7,17 @@ aside.magic-paint
     @touchmove="painting"
     :width="viewportWidth"
     :height="viewportHeight"
+    :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
   )
   canvas#locking.locking(
     :width="viewportWidth"
     :height="viewportHeight"
+    :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
   )
   canvas#initial.initial(
     :width="viewportWidth"
     :height="viewportHeight"
+    :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
   )
 </template>
 
@@ -60,6 +63,13 @@ export default {
     // shift circle positions with scroll to simulate full size canvas
     this.updatePrevScrollPosition()
     window.addEventListener('scroll', this.updateCirclesWithScroll)
+    window.addEventListener('scroll', this.updatePositionOffsetByPinchZoom)
+  },
+  data () {
+    return {
+      pinchZoomOffsetTop: 0,
+      pinchZoomOffsetLeft: 0
+    }
   },
   computed: {
     currentUserColor () {
@@ -73,6 +83,12 @@ export default {
     viewportWidth () { return this.$store.state.viewportWidth }
   },
   methods: {
+    updatePositionOffsetByPinchZoom () {
+      if (!window.visualViewport) { return }
+      this.pinchZoomOffsetTop = window.visualViewport.offsetTop
+      this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
+    },
+
     updatePrevScrollPosition () {
       prevScroll = {
         x: window.scrollX,
