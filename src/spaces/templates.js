@@ -53,12 +53,12 @@ export default {
         name: 'Making Hard Decisions'
       },
       {
-        spaceId: '123',
+        spaceId: 'IoH27fnouzCpoSj1vWg3s',
         categoryId: 2,
         name: 'Mental Health'
       },
       {
-        spaceId: '123',
+        spaceId: '85dWJ4_zDipSREM-nllXH',
         categoryId: 3,
         name: 'Brainstorming'
       },
@@ -75,7 +75,12 @@ export default {
       {
         spaceId: '123',
         categoryId: 4,
-        name: 'Architecture'
+        name: 'Architecture Diagram'
+      },
+      {
+        spaceId: '123',
+        categoryId: 4,
+        name: 'Database Schema'
       },
       {
         spaceId: '123',
@@ -92,7 +97,6 @@ export default {
         categoryId: 4,
         name: 'Retrospective'
       }
-
     ]
   }
 
