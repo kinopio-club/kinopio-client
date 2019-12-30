@@ -75,8 +75,14 @@ export default new Vuex.Store({
       const html = document.documentElement
       state.pageWidth = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
       state.pageHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
-      state.viewportWidth = window.visualViewport.width || document.documentElement.clientWidth
-      state.viewportHeight = window.visualViewport.height || document.documentElement.clientHeight
+      if (window.visualViewport) {
+        state.viewportWidth = window.visualViewport.width
+        state.viewportHeight = window.visualViewport.height
+      } else {
+        // firefox fallback
+        state.viewportWidth = window.visualViewport.width
+        state.viewportHeight = window.visualViewport.height
+      }
     },
     pageHeight: (state, height) => {
       utils.typeCheck(height, 'number')
