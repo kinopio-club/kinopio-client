@@ -44,8 +44,6 @@ export default {
       templateCategoryPickerIsVisible: false
     }
   },
-  filters: {
-  },
   computed: {
     categories () {
       return templates.categories()

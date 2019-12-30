@@ -63,9 +63,9 @@ export default {
         name: 'Brainstorming'
       },
       {
-        spaceId: '123',
+        spaceId: 'b87U9WETGvl17BrKNsqDH',
         categoryId: 3,
-        name: 'Meeting Notes'
+        name: 'Meetings'
       },
       {
         spaceId: '123',
