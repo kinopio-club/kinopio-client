@@ -5,16 +5,19 @@ aside.magic-paint
     @touchstart="startPainting"
     @mousemove="painting"
     @touchmove="painting"
-    :width="pageWidth"
-    :height="pageHeight"
+    :width="viewportWidth"
+    :height="viewportHeight"
+    :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
   )
   canvas#locking.locking(
-    :width="pageWidth"
-    :height="pageHeight"
+    :width="viewportWidth"
+    :height="viewportHeight"
+    :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
   )
   canvas#initial.initial(
-    :width="pageWidth"
-    :height="pageHeight"
+    :width="viewportWidth"
+    :height="viewportHeight"
+    :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
   )
 </template>
 
@@ -29,6 +32,7 @@ const maxIterations = 200 // higher is longer paint fade time
 const rateOfIterationDecay = 0.03 // higher is faster tail decay
 let paintingCircles = []
 let paintingCanvas, paintingContext, startCursor, currentCursor, paintingCirclesTimer
+let prevScroll
 
 // locking
 // long press to lock scrolling
@@ -56,6 +60,16 @@ export default {
     // trigger stopPainting even if mouse is outside window
     window.addEventListener('mouseup', this.stopPainting)
     window.addEventListener('touchend', this.stopPainting)
+    // shift circle positions with scroll to simulate full size canvas
+    this.updatePrevScrollPosition()
+    window.addEventListener('scroll', this.updateCirclesWithScroll)
+    window.addEventListener('scroll', this.updatePositionOffsetByPinchZoom)
+  },
+  data () {
+    return {
+      pinchZoomOffsetTop: 0,
+      pinchZoomOffsetLeft: 0
+    }
   },
   computed: {
     currentUserColor () {
@@ -64,10 +78,64 @@ export default {
     spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditCurrentSpace'] },
     // keep canvases updated to viewport size so you can draw on newly created areas
     pageHeight () { return this.$store.state.pageHeight },
-    pageWidth () { return this.$store.state.pageWidth }
+    pageWidth () { return this.$store.state.pageWidth },
+    viewportHeight () { return this.$store.state.viewportHeight },
+    viewportWidth () { return this.$store.state.viewportWidth }
   },
   methods: {
+    updatePositionOffsetByPinchZoom () {
+      if (!window.visualViewport) { return }
+      this.pinchZoomOffsetTop = window.visualViewport.offsetTop
+      this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
+    },
+
+    updatePrevScrollPosition () {
+      prevScroll = {
+        x: window.scrollX,
+        y: window.scrollY
+      }
+    },
+
+    updateCirclePositions (circles, scrollDelta) {
+      return circles.map(circle => {
+        circle.x = circle.x - scrollDelta.x
+        circle.y = circle.y - scrollDelta.y
+        return circle
+      })
+    },
+
+    updateCirclesWithScroll () {
+      const scrollDelta = {
+        x: window.scrollX - prevScroll.x,
+        y: window.scrollY - prevScroll.y
+      }
+      if (initialCircles.length) {
+        initialCircles = this.updateCirclePositions(initialCircles, scrollDelta) // covers locking circles of varialbe radius/
+      }
+      if (paintingCircles.length) {
+        paintingCircles = this.updateCirclePositions(paintingCircles, scrollDelta)
+      }
+      this.updatePrevScrollPosition()
+    },
+
+    isCircleVisible (circle) {
+      let { x, y, radius } = circle
+      radius = radius || circleRadius
+      const circleVisibleX = utils.between({
+        value: x + radius,
+        min: 0,
+        max: this.$store.state.viewportWidth
+      })
+      const circleVisibleY = utils.between({
+        value: y + radius,
+        min: 0,
+        max: this.$store.state.viewportHeight
+      })
+      return Boolean(circleVisibleX && circleVisibleY)
+    },
+
     drawCircle (circle, context) {
+      if (!this.isCircleVisible(circle)) { return }
       let { x, y, color, iteration, radius, alpha } = circle
       radius = radius || circleRadius
       alpha = alpha || utils.exponentialDecay(iteration, rateOfIterationDecay)
@@ -102,7 +170,7 @@ export default {
 
     createPaintingCircle (event) {
       let color = this.$store.state.currentUser.color
-      currentCursor = utils.cursorPositionInPage(event)
+      currentCursor = utils.cursorPositionInViewport(event)
       let circle = { x: currentCursor.x, y: currentCursor.y, color, iteration: 0 }
       this.selectCards(circle)
       this.selectConnections(circle)
@@ -110,8 +178,8 @@ export default {
     },
 
     startPainting (event) {
-      startCursor = utils.cursorPositionInPage(event)
-      currentCursor = utils.cursorPositionInPage(event)
+      startCursor = utils.cursorPositionInViewport(event)
+      currentCursor = utils.cursorPositionInViewport(event)
       const dialogIsVisible = Boolean(document.querySelector('dialog'))
       const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)
       this.startLocking()
@@ -227,7 +295,7 @@ export default {
     stopPainting (event) {
       if (this.shouldCancel(event)) { return }
       startCursor = startCursor || {}
-      const endCursor = utils.cursorPositionInPage(event)
+      const endCursor = utils.cursorPositionInViewport(event)
       const shouldAddNewCard = this.$store.state.shouldAddNewCard
       currentUserIsLocking = false
       window.cancelAnimationFrame(lockingAnimationTimer)
@@ -249,12 +317,12 @@ export default {
       if (this.spaceIsReadOnly) { return }
       this.$store.state.cardMap.map(card => {
         const x = {
-          value: circle.x,
+          value: circle.x + window.scrollX,
           min: card.x,
           max: card.x + card.width
         }
         const y = {
-          value: circle.y,
+          value: circle.y + window.scrollY,
           min: card.y,
           max: card.y + card.height
         }
@@ -274,8 +342,8 @@ export default {
         const pathId = path.dataset.id
         const svg = document.querySelector('svg.connections')
         let point = svg.createSVGPoint()
-        point.x = circle.x
-        point.y = circle.y
+        point.x = circle.x + window.scrollX
+        point.y = circle.y + window.scrollY
         const isAlreadySelected = ids.includes(pathId)
         if (isAlreadySelected) { return }
         if (path.isPointInFill(point)) {
@@ -290,7 +358,7 @@ export default {
 
 <style lang="stylus" scoped>
 canvas
-  position absolute
+  position fixed
   top 0
 .locking,
 .initial
