@@ -181,7 +181,7 @@ export default {
 
     async signUp (event) {
       if (this.loading.signUpOrIn) { return }
-      const email = event.target[0].value
+      const email = event.target[0].value.toLowerCase()
       const password = event.target[1].value
       const confirmPassword = event.target[2].value
       const currentUser = utils.clone(this.$store.state.currentUser)
@@ -201,7 +201,7 @@ export default {
     async signIn (event) {
       if (this.loading.signUpOrIn) { return }
       const previousUser = utils.clone(this.$store.state.currentUser)
-      const email = event.target[0].value
+      const email = event.target[0].value.toLowerCase()
       const password = event.target[1].value
       this.loading.signUpOrIn = true
       const response = await this.$store.dispatch('api/signIn', { email, password })
@@ -240,7 +240,7 @@ export default {
 
     async resetPassword (event) {
       if (this.loading.resetPassword || this.resetSuccess) { return }
-      const email = event.target[0].value
+      const email = event.target[0].value.toLowerCase()
       this.loading.resetPassword = true
       const response = await this.$store.dispatch('api/resetPassword', email)
       this.loading.resetPassword = false
