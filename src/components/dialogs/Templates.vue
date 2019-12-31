@@ -129,6 +129,7 @@ export default {
   watch: {
     visible (visible) {
       this.clearFilter()
+      this.filter = ''
     }
   }
 }

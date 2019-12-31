@@ -197,6 +197,7 @@ export default {
         this.updateSpaces()
         this.updateWithRemoteSpaces()
         this.closeDialogs()
+        this.filter = ''
       }
     }
   }
