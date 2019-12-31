@@ -4,9 +4,8 @@ aside.notifications
     p {{item.message}}
 
   .persistent-item(v-if="notifyReadOnly" ref="readOnly" :class="{'notification-jiggle': notifyReadOnlyJiggle}")
-    p {{spaceName}} belongs to another user, so you can't edit it
+    p You can't edit this space, but you can save your own copy
     .row
-      button(@click="triggerSpaceDetailsVisible") Your Spaces
       button(@click="copyCurrentSpace")
         img.icon(src="@/assets/add.svg")
         span Save a Copy
@@ -65,8 +64,7 @@ export default {
     notifyReadOnly () { return this.$store.state.notifyReadOnly },
     notifySpaceNotFound () { return this.$store.state.notifySpaceNotFound },
     notifyConnectionError () { return this.$store.state.notifyConnectionError },
-    notifySpaceIsRemoved () { return this.$store.state.notifySpaceIsRemoved },
-    spaceName () { return this.$store.state.currentSpace.name }
+    notifySpaceIsRemoved () { return this.$store.state.notifySpaceIsRemoved }
   },
   methods: {
     update () {
