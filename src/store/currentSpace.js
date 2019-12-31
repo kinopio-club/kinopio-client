@@ -336,6 +336,9 @@ export default {
         } else {
           context.dispatch('checkIfShouldNotifySpaceIsRemoved', remoteSpace)
         }
+        if (cache.getAllSpaces().length) { context.commit('notifyNewUser', false, { root: true }) } else {
+          context.commit('notifyNewUser', true, { root: true })
+        }
       }
       context.dispatch('checkIfShouldNotifyReadOnly')
       context.commit('spaceUrlToLoad', '', { root: true })

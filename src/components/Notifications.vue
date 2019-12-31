@@ -32,6 +32,13 @@ aside.notifications
         a(href="mailto:support@kinopio.club?subject=Connection Error")
           button Email Support
 
+  .persistent-item.success(v-if="notifyNewUser")
+    p Welcome to Kinopio
+    .row
+      button
+        img.icon(src="@/assets/add.svg")
+        span How does this work?
+
 </template>
 
 <script>
@@ -64,7 +71,8 @@ export default {
     notifyReadOnly () { return this.$store.state.notifyReadOnly },
     notifySpaceNotFound () { return this.$store.state.notifySpaceNotFound },
     notifyConnectionError () { return this.$store.state.notifyConnectionError },
-    notifySpaceIsRemoved () { return this.$store.state.notifySpaceIsRemoved }
+    notifySpaceIsRemoved () { return this.$store.state.notifySpaceIsRemoved },
+    notifyNewUser () { return this.$store.state.notifyNewUser }
   },
   methods: {
     update () {
@@ -110,7 +118,7 @@ export default {
   margin-bottom 10px
   display flex
   flex-direction column
-  align-items flex-end
+  align-items flex-start
   .item,
   .persistent-item
     box-shadow 3px 3px 0 var(--heavy-shadow)
