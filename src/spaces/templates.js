@@ -65,38 +65,28 @@ export default {
       {
         spaceId: 'b87U9WETGvl17BrKNsqDH',
         categoryId: 3,
-        name: 'Meetings'
+        name: 'Meeting Agenda'
       },
       {
-        spaceId: '123',
-        categoryId: 3,
-        name: 'Blog Post'
-      },
-      {
-        spaceId: '123',
+        spaceId: 'DWCwVJNU8yu1cPs87BEQR',
         categoryId: 4,
-        name: 'Architecture Diagram'
+        name: 'Sofware Architecture'
       },
       {
-        spaceId: '123',
+        spaceId: 'WSzpRkVqSdv8GKCSCrwrg',
         categoryId: 4,
         name: 'Database Schema'
       },
       {
-        spaceId: '123',
+        spaceId: 'J4vbhO646y4296cLRQEU3',
         categoryId: 4,
         name: 'Roadmap'
-      },
-      {
-        spaceId: '123',
-        categoryId: 4,
-        name: 'New Feature'
-      },
-      {
-        spaceId: '123',
-        categoryId: 4,
-        name: 'Retrospective'
       }
+      // {
+      //   spaceId: '123',
+      //   categoryId: 4,
+      //   name: 'Retrospective'
+      // }
     ]
   }
 
