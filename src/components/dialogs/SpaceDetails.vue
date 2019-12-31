@@ -154,7 +154,6 @@ export default {
       return Boolean(currentSpace === spaceId)
     },
     spaceIsTemplate (spaceId) {
-      console.log(templates.spaces)
       const templateSpaceIds = templates.spaces().map(space => space.spaceId)
       return templateSpaceIds.includes(spaceId)
     },

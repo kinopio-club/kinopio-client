@@ -6,6 +6,7 @@ aside.notifications
   .persistent-item(v-if="notifyReadOnly" ref="readOnly" :class="{'notification-jiggle': notifyReadOnlyJiggle}")
     p You can't edit this space, but you can save your own copy
     .row
+      //- button(@click="triggerSpaceDetailsVisible") Your Spaces
       button(@click="copyCurrentSpace")
         img.icon(src="@/assets/add.svg")
         span Save a Copy
@@ -35,7 +36,7 @@ aside.notifications
   .persistent-item.success(v-if="notifyNewUser")
     p Welcome to Kinopio
     .row
-      button
+      button(@click="createNewHelloSpace")
         img.icon(src="@/assets/add.svg")
         span How does this work?
 
@@ -107,6 +108,10 @@ export default {
       this.$store.commit('notifySpaceIsRemoved', false)
       const firstSpace = cache.getAllSpaces()[0]
       this.$store.dispatch('currentSpace/loadSpace', firstSpace)
+    },
+    createNewHelloSpace () {
+      this.$store.commit('notifyNewUser', false)
+      window.location.href = '/'
     }
   }
 }
@@ -114,13 +119,13 @@ export default {
 
 <style lang="stylus">
 .notifications
-  pointer-events all
   margin-bottom 10px
   display flex
   flex-direction column
   align-items flex-start
   .item,
   .persistent-item
+    pointer-events all
     box-shadow 3px 3px 0 var(--heavy-shadow)
     border-radius 3px
     margin-bottom 10px
