@@ -115,6 +115,7 @@ export default {
   align-items flex-end
   .item,
   .persistent-item
+    box-shadow 3px 3px 0 var(--heavy-shadow)
     border-radius 3px
     margin-bottom 10px
     margin-right 0
