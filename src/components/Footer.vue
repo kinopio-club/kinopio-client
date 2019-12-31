@@ -2,7 +2,7 @@
 footer(v-if="!dialogsVisible")
   Notifications
   section.controls
-    .button-wrap
+    .button-wrap(v-if="userCanEditCurrentSpace")
       button(@click="toggleRestoreIsVisible" :class="{ active: restoreIsVisible}")
         img.refresh.icon(src="@/assets/undo.svg")
       Restore(:visible="restoreIsVisible")
@@ -73,7 +73,11 @@ export default {
       const types = this.$store.state.filteredConnectionTypeIds
       const frames = this.$store.state.filteredFrameIds
       return types.length + frames.length
+    },
+    userCanEditCurrentSpace () {
+      return this.$store.getters['currentUser/canEditCurrentSpace']
     }
+
   },
   methods: {
     toggleRestoreIsVisible () {
