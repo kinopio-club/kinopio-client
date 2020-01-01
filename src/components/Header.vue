@@ -8,6 +8,8 @@ header
       About(:visible="aboutIsVisible")
     .button-wrap.space-details-wrap
       button(@click.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
+        .badge.info.template-badge(v-show="currentSpaceIsTemplate")
+          span Template
         span {{currentSpaceName}}
         Loader(:visible="isLoadingSpace")
       SpaceDetails(:visible="spaceDetailsIsVisible")
@@ -42,6 +44,7 @@ import SignUpOrIn from '@/components/dialogs/SignUpOrIn.vue'
 import ResetPassword from '@/components/dialogs/ResetPassword.vue'
 import Share from '@/components/dialogs/Share.vue'
 import Loader from '@/components/Loader.vue'
+import templates from '@/spaces/templates.js'
 
 export default {
   name: 'Header',
@@ -104,7 +107,13 @@ export default {
     },
     isOnline () {
       return this.$store.state.isOnline
+    },
+    currentSpaceIsTemplate () {
+      const id = this.$store.state.currentSpace.id
+      const templateSpaceIds = templates.spaces().map(space => space.spaceId)
+      return templateSpaceIds.includes(id)
     }
+
   },
   methods: {
     toggleAboutIsVisible () {
