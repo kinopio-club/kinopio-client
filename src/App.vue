@@ -92,7 +92,6 @@ textarea
   margin-bottom 10px
 
 button,
-summary,
 label // used for checkbox buttons
   touch-action manipulation
   text-align left
