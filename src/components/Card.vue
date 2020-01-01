@@ -20,7 +20,7 @@ article(:style="position" :data-card-id="id")
     a(:href="url" @click.stop v-if="isNameUrl")
       .link
         button
-          span →
+          img.icon.move.arrow-icon(src="@/assets/move.svg")
 
     .connector(
       :data-card-id="id"
@@ -278,13 +278,16 @@ article
     position absolute
     left 4px
     top 2px
+  .arrow-icon
+    position absolute
+    left 5px
+    top 3.5px
 
   .link
     cursor pointer
     padding-right 0
     button
       background-color var(--secondary-background)
-      width initial
       cursor pointer
       span
         top -3px
