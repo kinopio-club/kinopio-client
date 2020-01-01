@@ -130,6 +130,7 @@ export default {
     visible (visible) {
       this.clearFilter()
       this.filter = ''
+      this.templateCategoryPickerIsVisible = false
     }
   }
 }
