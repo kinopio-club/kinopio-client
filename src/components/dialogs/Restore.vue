@@ -21,7 +21,7 @@ dialog.restore(v-if="visible" :open="visible" @click.stop)
   section.results-section(v-if="items.length")
     ul.results-list
       template(v-for="(item in items")
-        li(:key="item.id" @click="restore(item)" tabindex="0" v-on:keyup.enter="restore(item)")
+        li(:key="item.id" @click="restore(item)" v-on:keyup.enter="restore(item)")
           .badge
             img.undo.icon(src="@/assets/undo.svg")
           .name {{item.name}}

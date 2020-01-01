@@ -73,6 +73,7 @@ export default {
     window.addEventListener('online', this.updateIsOnline)
     window.addEventListener('offline', this.updateIsOnline)
     this.addInteractionBlur()
+    this.updateTabIndexes()
   },
 
   computed: {
@@ -115,6 +116,14 @@ export default {
     addInteractionBlur () {
       const elements = document.querySelectorAll('button, li, label')
       elements.forEach(element => element.addEventListener('click', this.blur))
+    },
+
+    updateTabIndexes () {
+      // todo: move to utils, to call when dialogs watch visible
+      let elements = document.querySelectorAll('button, li, label, input, .card, .logo, .connections path')
+      elements.forEach(element => {
+        element.tabIndex = 0
+      })
     },
 
     blur (event) {
@@ -417,6 +426,7 @@ export default {
     stopInteractions (event) {
       console.log('💣 stopInteractions') // stopInteractions and Space/stopPainting are run on all mouse and touch end events
       this.addInteractionBlur()
+      this.updateTabIndexes()
       window.cancelAnimationFrame(scrollTimer)
       scrollTimer = undefined
       if (this.shouldCancel(event)) { return }

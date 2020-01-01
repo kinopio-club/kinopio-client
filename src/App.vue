@@ -112,13 +112,12 @@ label // used for checkbox buttons
   &:focus
     box-shadow var(--button-hover-shadow)
     background var(--secondary-hover-background)
+    outline none
   &:active,
   &.active
     box-shadow var(--button-active-inset-shadow)
     color var(--primary)
     background var(--secondary-active-background)
-  &:focus
-    outline none
   .badge
     display inline
     vertical-align middle
@@ -302,7 +301,8 @@ ul.results-list
     border-radius 3px
     user-select none
     cursor pointer
-    &:hover
+    &:hover,
+    &:focus
       background-color var(--secondary-hover-background)
       box-shadow var(--hover-shadow)
     &:active,

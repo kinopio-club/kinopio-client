@@ -35,7 +35,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
       input(placeholder="Search" v-model="spaceFilter" ref="filterInput")
     ul.results-list
       template(v-for="(space in spacesFiltered")
-        li(@click="changeSpace(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id" tabindex="0" v-on:keyup.enter="changeSpace(space)")
+        li(@click="changeSpace(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id" v-on:keyup.enter="changeSpace(space)")
           .badge.info.template-badge(v-show="spaceIsTemplate(space.id)")
             span Template
           .name {{space.name}}

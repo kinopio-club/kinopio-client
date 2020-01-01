@@ -15,11 +15,10 @@ dialog.templates(v-if="visible" :open="visible" @click.stop ref="dialog" @click=
 
     ul.results-list
       template(v-for="(space in spacesFiltered")
-        a(:href="space.spaceId")
-          li(:data-full-name="space.fullName" tabindex="0")
-            //- ^TODO^ v-on:keyup.enter="select(space) method
-            .badge.info {{space.category}}
-            span {{space.name}}
+        li(:data-full-name="space.fullName" @click="openSpace(space)")
+          //- ^TODO^ v-on:keyup.enter="select(space) method
+          .badge.info {{space.category}}
+          span {{space.name}}
 </template>
 
 <script>
@@ -123,6 +122,9 @@ export default {
     updateFilteredCategory (category) {
       this.filteredCategoryId = category.id
       this.updateFilter(this.filter)
+    },
+    openSpace (space) {
+      window.location.href = `/${space.spaceId}`
     }
 
   },

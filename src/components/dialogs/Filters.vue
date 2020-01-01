@@ -12,7 +12,7 @@ dialog.filters.narrow(v-if="visible" :open="visible")
   section.results-section.connection-types
     ul.results-list
       template(v-for="(type in connectionTypes")
-        li(:class="{ active: connectionTypeIsActive(type) }" @click="toggleFilteredConnectionType(type)" :key="type.id" tabindex="0" v-on:keyup.enter="toggleFilteredConnectionType(type)")
+        li(:class="{ active: connectionTypeIsActive(type) }" @click="toggleFilteredConnectionType(type)" :key="type.id" v-on:keyup.enter="toggleFilteredConnectionType(type)")
           input(type="checkbox" :checked="isSelected(type)")
           .badge(:style="{backgroundColor: type.color}")
           .name {{type.name}}
@@ -20,7 +20,7 @@ dialog.filters.narrow(v-if="visible" :open="visible")
   section.results-section
     ul.results-list.frames-list
       template(v-for="(frame in frames")
-        li(:class="{active: frameIsActive(frame)}" @click="toggleFilteredCardFrame(frame)" :key="frame.id" tabindex="0" v-on:keyup.enter="toggleFilteredCardFrame(frame)")
+        li(:class="{active: frameIsActive(frame)}" @click="toggleFilteredCardFrame(frame)" :key="frame.id" v-on:keyup.enter="toggleFilteredCardFrame(frame)")
           input(type="checkbox" :checked="isSelected(frame)")
           .badge
             template

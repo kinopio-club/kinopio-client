@@ -225,8 +225,10 @@ article
   cursor pointer
   touch-action manipulation
   &:hover,
-  &.hover
+  &.hover,
+  &:focus
     box-shadow var(--hover-shadow)
+    outline none
   &:active,
   &.active
     box-shadow var(--active-shadow)

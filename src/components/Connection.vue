@@ -194,6 +194,8 @@ export default {
   touch-action manipulation
   &:hover,
   &.active,
-  &.hover
+  &.hover,
+  &:focus
     stroke-width: 7
+    outline: none
 </style>
