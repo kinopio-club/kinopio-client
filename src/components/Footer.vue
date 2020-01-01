@@ -2,7 +2,7 @@
 footer(v-if="!dialogsVisible")
   Notifications
   section.controls
-    .button-wrap
+    .button-wrap(v-if="userCanEditCurrentSpace")
       button(@click="toggleRestoreIsVisible" :class="{ active: restoreIsVisible}")
         img.refresh.icon(src="@/assets/undo.svg")
       Restore(:visible="restoreIsVisible")
@@ -73,7 +73,11 @@ export default {
       const types = this.$store.state.filteredConnectionTypeIds
       const frames = this.$store.state.filteredFrameIds
       return types.length + frames.length
+    },
+    userCanEditCurrentSpace () {
+      return this.$store.getters['currentUser/canEditCurrentSpace']
     }
+
   },
   methods: {
     toggleRestoreIsVisible () {
@@ -100,7 +104,7 @@ export default {
 footer
   z-index var(--max-z)
   position fixed
-  right 8px
+  left 8px
   bottom 8px
   pointer-events none
   max-width calc(100% - 17px)
@@ -109,14 +113,11 @@ footer
     height 11px
   .controls
     display flex
-    flex-direction row-reverse // prevents shifting when notifications displayed
     > .button-wrap
       pointer-events all
       margin-left 6px
       display inline-block
       dialog
-        left initial
-        right 8px
         top initial
         bottom calc(100% - 8px)
   .sunglasses

@@ -256,7 +256,7 @@ article
       vertical-align top
     &:hover
       button
-        box-shadow 3px 3px 0 rgba(0,0,0,0.25)
+        box-shadow 3px 3px 0 var(--heavy-shadow)
         background var(--secondary-hover-background)
     &:active
       button

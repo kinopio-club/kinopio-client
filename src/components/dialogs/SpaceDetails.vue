@@ -14,22 +14,30 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
       Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="currentSpace" :exportScope="exportScope")
 
   section.results-actions
+    .row
+      .button-wrap
+        button(@click.stop="toggleTemplatesIsVisible" :class="{ active: templatesIsVisible }")
+          span Templates
+        Templates(:visible="templatesIsVisible")
+
+      .button-wrap
+        button(@click.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
+          span Import
+        Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
+
     button(@click="addSpace")
       img.icon(src="@/assets/add.svg")
       span Add
 
-    .button-wrap
-      button(@click.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
-        span Import
-      Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
-
   section.results-section
-    .filter(v-if="isNumerousSpaces")
+    .filter-wrap(v-if="isNumerousSpaces")
       img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
-      input(placeholder="Filter Spaces" v-model="spaceFilter" ref="filterInput")
+      input(placeholder="Search" v-model="spaceFilter" ref="filterInput")
     ul.results-list
       template(v-for="(space in spacesFiltered")
         li(@click="changeSpace(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id" tabindex="0" v-on:keyup.enter="changeSpace(space)")
+          .badge.info.template-badge(v-show="spaceIsTemplate(space.id)")
+            span Template
           .name {{space.name}}
 </template>
 
@@ -39,12 +47,15 @@ import fuzzy from 'fuzzy'
 import cache from '@/cache.js'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
+import Templates from '@/components/dialogs/Templates.vue'
+import templates from '@/spaces/templates.js'
 
 export default {
   name: 'SpaceDetails',
   components: {
     Export,
-    Import
+    Import,
+    Templates
   },
   props: {
     visible: Boolean
@@ -54,6 +65,7 @@ export default {
       spaces: [],
       exportIsVisible: false,
       importIsVisible: false,
+      templatesIsVisible: false,
       filter: '',
       filteredSpaces: []
     }
@@ -69,7 +81,7 @@ export default {
       }
     },
     spacesFiltered () {
-      if (this.filteredSpaces.length) {
+      if (this.filter) {
         return this.filteredSpaces
       } else {
         return this.spaces
@@ -127,14 +139,23 @@ export default {
       this.closeDialogs()
       this.importIsVisible = !isVisible
     },
-
+    toggleTemplatesIsVisible () {
+      const isVisible = this.templatesIsVisible
+      this.closeDialogs()
+      this.templatesIsVisible = !isVisible
+    },
     closeDialogs () {
       this.exportIsVisible = false
       this.importIsVisible = false
+      this.templatesIsVisible = false
     },
     spaceIsActive (spaceId) {
       const currentSpace = this.$store.state.currentSpace.id
       return Boolean(currentSpace === spaceId)
+    },
+    spaceIsTemplate (spaceId) {
+      const templateSpaceIds = templates.spaces().map(space => space.spaceId)
+      return templateSpaceIds.includes(spaceId)
     },
     addSpace () {
       this.$store.dispatch('currentSpace/addSpace')
@@ -176,6 +197,7 @@ export default {
         this.updateSpaces()
         this.updateWithRemoteSpaces()
         this.closeDialogs()
+        this.filter = ''
       }
     }
   }
@@ -183,4 +205,6 @@ export default {
 </script>
 
 <style lang="stylus">
+.template-badge
+  flex none
 </style>

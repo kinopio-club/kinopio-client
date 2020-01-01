@@ -63,6 +63,7 @@ export default new Vuex.Store({
     notifySpaceNotFound: false,
     notifyConnectionError: false,
     notifySpaceIsRemoved: false,
+    notifyNewUser: false,
 
     // filters
     filteredConnectionTypeIds: [],
@@ -257,6 +258,10 @@ export default new Vuex.Store({
     notifySpaceIsRemoved: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.notifySpaceIsRemoved = value
+    },
+    notifyNewUser: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.notifyNewUser = value
     },
 
     // filters

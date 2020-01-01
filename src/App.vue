@@ -143,6 +143,10 @@ label
   input
     margin 0
 
+li
+  &:focus
+    outline none
+
 p
   margin 0
   margin-top 10px
@@ -191,7 +195,7 @@ dialog
     margin-bottom 10px
     display flex
     position relative
-    input
+    > input
       margin-bottom 0
     &:last-child
       margin-bottom 0
@@ -277,15 +281,16 @@ li
   border-top 0
   overflow auto
   max-height calc(92vh - 175px)
-  .filter
-    margin-left 5px
-    width calc(100% - 10px)
-    padding-top 4px
-    display flex
-    img
-      margin-top -11px
-      padding-right 5px
-      cursor text
+
+.filter-wrap
+  margin-left 5px
+  width calc(100% - 10px)
+  padding-top 4px
+  display flex
+  img
+    margin-top -11px
+    padding-right 5px
+    cursor text
 
 ul.results-list
   margin 0

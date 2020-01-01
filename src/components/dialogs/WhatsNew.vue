@@ -1,14 +1,15 @@
 <template lang="pug">
 dialog.whats-new(v-if="visible" :open="visible" @click.stop)
   section
-    .segmented-buttons
-      button(@click="showWhatsNewVisible" :class="{active : whatsNewVisible}") What's New?
-      button(@click="hideWhatsNewVisible" :class="{active : !whatsNewVisible}") Coming Up
+    p What's New
+    .button-wrap
+      a(href="https://kinopio.club/-kinopio-roadmap-6TRE21gchHI7alHLuwzd5")
+        button Roadmap →
 
-  section(v-if="!newStuff.length && whatsNewVisible")
+  section(v-if="!newStuff.length")
     Loader(:visible="true")
 
-  section(v-if="whatsNewVisible")
+  section
     article(v-if="newStuff.length" v-for="post in newStuffWithUserHasRead" :key="post.id")
       p.title {{post.title}}
         img.icon(src="@/assets/new.gif" v-if="!post.userHasRead")
@@ -18,24 +19,6 @@ dialog.whats-new(v-if="visible" :open="visible" @click.stop)
       .button-wrap
         a(href="https://www.are.na/kinopio/kinopio-updates")
           button Read All →
-
-  section.coming-up(v-if="!whatsNewVisible")
-    ul
-      li
-        del Sign in to access your spaces on all your devices 🛫
-      li
-        del Share your spaces with other people (space urls)
-      li
-        del Filters 👀
-      li Image and video cards 🌸
-      li An explore or template site to find cool spaces
-      li Billing and Payments (4$/month) 💞
-      li More frames 🖼
-      li Keyboard shortcuts
-      li Sharing privacy controls and inviting
-      li Real-time collaboration 🌍
-      li API docs and support pages
-      li Dark mode 🌙
 
   section
     p Follow for Updates
@@ -61,7 +44,6 @@ export default {
   },
   data () {
     return {
-      whatsNewVisible: true
       // newStuffIsUpdated: false
     }
   },
@@ -88,12 +70,6 @@ export default {
     }
   },
   methods: {
-    showWhatsNewVisible () {
-      this.whatsNewVisible = true
-    },
-    hideWhatsNewVisible () {
-      this.whatsNewVisible = false
-    },
     updateUserLastRead () {
       if (!this.newStuff.length) { return }
       const lastReadNewStuffId = this.newStuff[0].id
@@ -131,7 +107,7 @@ export default {
 <style lang="stylus">
 .whats-new
   overflow auto
-  max-height calc(100vh - 215px)
+  max-height calc(100vh - 265px)
   article
     position static
     margin-bottom 10px
