@@ -33,6 +33,8 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
     .filter-wrap(v-if="isNumerousSpaces")
       img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
       input(placeholder="Search" v-model="spaceFilter" ref="filterInput")
+      button.borderless.clear-input-wrap(@click="clearFilter")
+        img.icon(src="@/assets/add.svg")
     ul.results-list
       template(v-for="(space in spacesFiltered")
         li(@click="changeSpace(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id" tabindex="0" v-on:keyup.enter="changeSpace(space)")
@@ -189,6 +191,9 @@ export default {
       if (spaces) {
         this.spaces = spaces
       }
+    },
+    clearFilter () {
+      this.filter = ''
     }
   },
   watch: {

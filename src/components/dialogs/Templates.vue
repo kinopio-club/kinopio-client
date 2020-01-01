@@ -12,6 +12,8 @@ dialog.templates(v-if="visible" :open="visible" @click.stop ref="dialog" @click=
     .filter-wrap
       img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
       input(placeholder="Search" v-model="spaceFilter" ref="filterInput")
+      button.borderless.clear-input-wrap(@click="clearFilter")
+        img.icon(src="@/assets/add.svg")
 
     ul.results-list
       template(v-for="(space in spacesFiltered")

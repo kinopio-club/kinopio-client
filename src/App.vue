@@ -132,6 +132,8 @@ label // used for checkbox buttons
       background var(--danger-active-background)
   &.success
     background var(--success-background)
+  &.borderless
+    border-color transparent
   .loader
     height 14px
     width 14px
@@ -284,10 +286,9 @@ li
 
 .filter-wrap
   margin-left 5px
-  width calc(100% - 10px)
   padding-top 4px
   display flex
-  img
+  .search
     margin-top -11px
     padding-right 5px
     cursor text
@@ -360,5 +361,17 @@ code
 
 .filtered
   opacity 0.3
+
+.clear-input-wrap
+  cursor pointer
+  border-radius 3px
+  padding-left 5px
+  padding-right 5px
+  margin-top -2px
+  height 20px
+  img
+    padding 0
+    transform rotate(45deg)
+    vertical-align 2px
 
 </style>
