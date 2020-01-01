@@ -36,8 +36,8 @@ let prevScroll
 
 // locking
 // long press to lock scrolling
-const lockingPreDuration = 150 // ms
-const lockingDuration = 200 // ms
+const lockingPreDuration = 100 // ms
+const lockingDuration = 150 // ms
 const initialLockCircleRadius = 65
 let lockingCanvas, lockingContext, lockingAnimationTimer, currentUserIsLocking, lockingStartTime
 
