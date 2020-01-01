@@ -17,7 +17,7 @@ article(:style="position" :data-card-id="id")
 
     //- v-if= name contains url
     //- href= url parsed out of name
-    a(:href="url" @click.stop v-if="isNameUrl")
+    a(:href="url" @click.stop @touchend="openUrl(url)" v-if="isNameUrl")
       .link
         button
           img.icon.move.arrow-icon(src="@/assets/move.svg")
@@ -206,6 +206,9 @@ export default {
       this.$store.commit('closeAllDialogs')
       this.$store.commit('cardDetailsIsVisibleForCardId', this.id)
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
+    },
+    openUrl (url) {
+      window.location.href = url
     }
   }
 }
