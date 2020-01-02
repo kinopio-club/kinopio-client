@@ -6,18 +6,18 @@ article(:style="position" :data-card-id="id")
     @mouseup="showCardDetails"
     @touchend="showCardDetails"
     :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged, wide: isWide, 'filtered': isFiltered}",
-    :style="selectedColor"
+    :style="{background: selectedColor}"
     :data-card-id="id"
     :data-card-x="x"
     :data-card-y="y"
   )
     Frames(:card="card")
 
-    p.name {{name}}
+    p.name(:style="{minWidth: nameLineMinWidth + 'px'}") {{name}}
 
     //- v-if= name contains url
     //- href= url parsed out of name
-    a(:href="url" @click.stop @touchend="openUrl(url)" v-if="isNameUrl")
+    a(:href="url" @click.stop @touchend="openUrl(url)" v-if="nameHasUrl")
       .link
         button
           img.icon.move.arrow-icon(src="@/assets/move.svg")
@@ -70,6 +70,19 @@ export default {
         zIndex: this.z
       }
     },
+    nameLineMinWidth () {
+      const averageCharacterWidth = 7
+      let maxWidth = 186
+      if (this.nameHasUrl) {
+        maxWidth = 160
+      }
+      const width = this.name.trim().length * averageCharacterWidth
+      if (width <= maxWidth) {
+        return width
+      } else {
+        return Math.min(width, maxWidth)
+      }
+    },
     isConnectingTo () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
       if (currentConnectionSuccess) {
@@ -101,7 +114,7 @@ export default {
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
       const color = this.$store.state.currentUser.color
       if (multipleCardsSelectedIds.includes(this.id)) {
-        return { background: color }
+        return color
       } else {
         return undefined
       }
@@ -113,7 +126,7 @@ export default {
       const connections = this.$store.getters['currentSpace/cardConnections'](this.id)
       return Boolean(connections.length)
     },
-    isNameUrl () {
+    nameHasUrl () {
       // https://www.regextester.com/94502
       const isUrl = new RegExp(/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/g) // eslint-disable-line no-useless-escape
       if (!this.name) { return }
