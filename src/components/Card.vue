@@ -290,7 +290,6 @@ article
     cursor pointer
     padding-right 0
     button
-      background-color var(--secondary-background)
       cursor pointer
       span
         top -3px
