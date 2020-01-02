@@ -88,9 +88,7 @@ const self = {
       }
       queue.push(request)
       cache.saveQueue(queue)
-      debounce(() => {
-        context.dispatch('processQueueOperations')
-      }, 1000)()
+      context.dispatch('debouncedProcessQueueOperations')
     },
 
     requeue: (context, items) => {
@@ -101,6 +99,10 @@ const self = {
       })
       console.log('🚑 requeue', cache.queue())
     },
+
+    debouncedProcessQueueOperations: debounce(({ dispatch }) => {
+      dispatch('processQueueOperations')
+    }, 500),
 
     processQueueOperations: async (context) => {
       const queue = cache.queue()
