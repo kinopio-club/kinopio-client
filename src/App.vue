@@ -107,6 +107,9 @@ label // used for checkbox buttons
   .down-arrow
     padding-left 4px
     vertical-align middle
+  &.borderless
+    border-color transparent
+    background-color transparent
   &:hover,
   &.hover,
   &:focus
@@ -132,8 +135,6 @@ label // used for checkbox buttons
       background var(--danger-active-background)
   &.success
     background var(--success-background)
-  &.borderless
-    border-color transparent
   .loader
     height 14px
     width 14px
