@@ -9,16 +9,6 @@ if (process.env.NODE_ENV === 'development') {
   host = 'http://kinopio.local:3000'
 }
 
-window.onload = () => {
-  self.actions.processQueueOperations()
-}
-
-const processQueue = debounce(async () => {
-  self.actions.processQueueOperations()
-}, 500, {
-  leading: true
-})
-
 const squashQueue = (queue) => {
   let squashed = []
   queue.forEach(request => {
@@ -78,15 +68,6 @@ const normalizeSpaceToRemote = (space) => {
   return space
 }
 
-const requeue = (items) => {
-  items.forEach(item => {
-    let queue = cache.queue()
-    queue.push(item)
-    cache.saveQueue(queue)
-  })
-  console.log('🚑 requeue', cache.queue())
-}
-
 const self = {
   namespaced: true,
   state: {},
@@ -107,21 +88,34 @@ const self = {
       }
       queue.push(request)
       cache.saveQueue(queue)
-      processQueue()
+      debounce(() => {
+        context.dispatch('processQueueOperations')
+      }, 1000)()
+    },
+
+    requeue: (context, items) => {
+      items.forEach(item => {
+        let queue = cache.queue()
+        queue.push(item)
+        cache.saveQueue(queue)
+      })
+      console.log('🚑 requeue', cache.queue())
     },
 
     processQueueOperations: async (context) => {
-      if (!shouldRequest()) { return }
       const queue = cache.queue()
       const body = squashQueue(queue)
+      if (!shouldRequest() || !body.length) { return }
       cache.clearQueue()
       try {
         const options = requestOptions({ body, method: 'POST' })
         console.log(`🛫 sending operations`, body)
-        await fetch(`${host}/operations`, options)
+        const response = await fetch(`${host}/operations`, options)
+        if (!response.ok) { throw Error(response.statusText) }
       } catch (error) {
         console.error('🚒', error, body)
-        requeue(body)
+        // context.commit('addNotification', { message: "Syncing Error. Will retry in 10 seconds…", type: 'danger' }, { root: true })
+        context.dispatch('requeue', body)
       }
     },
 

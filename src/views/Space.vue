@@ -73,6 +73,7 @@ export default {
     window.addEventListener('online', this.updateIsOnline)
     window.addEventListener('offline', this.updateIsOnline)
     this.addInteractionBlur()
+    this.startProcessQueueTimer()
   },
 
   computed: {
@@ -119,6 +120,13 @@ export default {
 
     blur (event) {
       event.target.blur()
+    },
+
+    startProcessQueueTimer () {
+      // retry failed sync operations every 5 seconds
+      setInterval(() => {
+        this.$store.dispatch('api/processQueueOperations')
+      }, 5000)
     },
 
     initInteractions (event) {
