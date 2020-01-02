@@ -17,7 +17,7 @@ article(:style="position" :data-card-id="id")
 
     //- v-if= name contains url
     //- href= url parsed out of name
-    a(:href="url" @click.stop @touchend="openUrl(url)" v-if="nameHasUrl")
+    a(:href="url" @click.stop @touchend="openUrl(url)" v-if="url")
       .link
         button
           img.icon.move.arrow-icon(src="@/assets/move.svg")
@@ -73,7 +73,7 @@ export default {
     nameLineMinWidth () {
       const averageCharacterWidth = 7
       let maxWidth = 186
-      if (this.nameHasUrl) {
+      if (this.url) {
         maxWidth = 160
       }
       const width = this.name.trim().length * averageCharacterWidth
@@ -126,24 +126,20 @@ export default {
       const connections = this.$store.getters['currentSpace/cardConnections'](this.id)
       return Boolean(connections.length)
     },
-    nameHasUrl () {
-      // https://www.regextester.com/94502
-      const isUrl = new RegExp(/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/g) // eslint-disable-line no-useless-escape
-      if (!this.name) { return }
-      if (this.name.match(isUrl)) {
-        return true
-      } else {
-        return false
-      }
-    },
     url () {
-      const name = this.name
-      const hasProtocol = name.startsWith('http://') || name.startsWith('https://')
+      if (!this.name) { return }
+      // https://www.regextester.com/1965
+      const findUrls = new RegExp(/(http[s]?:\/\/)?[^\s(["<,>]*\.[^\s[",><]*/igm)
+      const urls = this.name.match(findUrls)
+      if (!urls) { return }
+      const url = urls[0]
+      const hasProtocol = url.startsWith('http://') || url.startsWith('https://')
       if (hasProtocol) {
-        return name
+        return url
       } else {
-        return `http://${name}`
+        return `http://${url}`
       }
+      // return true
     },
 
     // filters
