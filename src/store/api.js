@@ -78,6 +78,15 @@ const normalizeSpaceToRemote = (space) => {
   return space
 }
 
+const requeue = (items) => {
+  items.forEach(item => {
+    let queue = cache.queue()
+    queue.push(item)
+    cache.saveQueue(queue)
+  })
+  console.log('🚑 requeue', cache.queue())
+}
+
 const self = {
   namespaced: true,
   state: {},
@@ -101,15 +110,6 @@ const self = {
       processQueue()
     },
 
-    requeue: (context, items) => {
-      items.forEach(item => {
-        let queue = cache.queue()
-        queue.push(item)
-        cache.saveQueue(queue)
-      })
-      console.log('🚑 requeue', cache.queue())
-    },
-
     processQueueOperations: async (context) => {
       if (!shouldRequest()) { return }
       const queue = cache.queue()
@@ -121,7 +121,7 @@ const self = {
         await fetch(`${host}/operations`, options)
       } catch (error) {
         console.error('🚒', error, body)
-        context.dispatch('requeue', body)
+        requeue(body)
       }
     },
 
