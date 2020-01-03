@@ -128,8 +128,8 @@ export default {
     },
     url () {
       if (!this.name) { return }
-      // https://www.regextester.com/1965
-      const findUrls = new RegExp(/(http[s]?:\/\/)?[^\s(["<,>]*\.[^\s[",><]*/igm)
+      // adapted from https://www.regextester.com/1965
+      const findUrls = new RegExp(/(http[s]?:\/\/)?[^\s(["<,>]*\.[^\s.[",><]+/igm)
       const urls = this.name.match(findUrls)
       if (!urls) { return }
       const url = urls[0]
