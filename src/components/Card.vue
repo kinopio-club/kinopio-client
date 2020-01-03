@@ -139,7 +139,15 @@ export default {
       } else {
         return `http://${url}`
       }
-      // return true
+    },
+    urlIsImage () {
+      // how does are.na handle fake url png: prints 'something went wrong trying to save [input]'
+      const formats = ['gif', 'png', 'jpg', 'jpeg']
+      const isImage = formats.filter(format => this.url.endsWith(`.${format}`))
+      return Boolean(isImage.length)
+    },
+    urlIsPlayableVideo () {
+      return this.url.endsWith('.mp4')
     },
 
     // filters
