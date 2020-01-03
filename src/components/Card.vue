@@ -5,37 +5,37 @@ article(:style="position" :data-card-id="id")
     @touchstart.prevent="startDraggingCard"
     @mouseup="showCardDetails"
     @touchend="showCardDetails"
-    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged, 'filtered': isFiltered, media: isMediaCard}",
+    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged, 'filtered': isFiltered, 'media-card': isMediaCard}",
     :style="{background: selectedColor}"
     :data-card-id="id"
     :data-card-x="x"
     :data-card-y="y"
   )
     Frames(:card="card")
-    img(v-if="urlIsImage" :src="url")
+    img.image(v-if="urlIsImage" :src="url")
 
-    p.name(:style="{minWidth: nameLineMinWidth + 'px'}") {{normalizedName}}
+    span.card-content-wrap
 
-    //- v-if= name contains url
-    //- href= url parsed out of name
-    a(:href="url" @click.stop @touchend="openUrl(url)" v-if="url")
-      .link
-        button
-          img.icon.move.arrow-icon(src="@/assets/move.svg")
+      p.name(:style="{minWidth: nameLineMinWidth + 'px'}") {{normalizedName}}
 
-    .connector(
-      :data-card-id="id"
-      @mousedown="startConnecting"
-      @touchstart="startConnecting"
-    )
-      button(:class="{ active: isConnectingTo || isConnectingFrom}")
-        .connected-colors
-          template(v-for="type in connectionTypes")
-            .color(:style="{ background: type.color}")
-        template(v-if="hasConnections")
-          img.connector-icon(src="@/assets/connector-closed.svg")
-        template(v-else)
-          img.connector-icon(src="@/assets/connector-open.svg")
+      span.card-buttons-wrap
+        a(:href="url" @click.stop @touchend="openUrl(url)" v-if="url")
+          .link
+            button(:style="{background: selectedColor}")
+              img.icon.move.arrow-icon(src="@/assets/move.svg")
+        .connector(
+          :data-card-id="id"
+          @mousedown="startConnecting"
+          @touchstart="startConnecting"
+        )
+          button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: selectedColor}")
+            .connected-colors
+              template(v-for="type in connectionTypes")
+                .color(:style="{ background: type.color}")
+            template(v-if="hasConnections")
+              img.connector-icon(src="@/assets/connector-closed.svg")
+            template(v-else)
+              img.connector-icon(src="@/assets/connector-open.svg")
 
   CardDetails(:card="card")
 </template>
@@ -74,13 +74,12 @@ export default {
       return this.name
     },
     nameLineMinWidth () {
-      if (this.urlIsImage) { return }
       const averageCharacterWidth = 7
       let maxWidth = 186
       if (this.url) {
         maxWidth = 160
       }
-      const width = this.name.trim().length * averageCharacterWidth
+      const width = this.normalizedName.trim().length * averageCharacterWidth
       if (width <= maxWidth) {
         return width
       } else {
@@ -114,10 +113,13 @@ export default {
       }
       return Boolean(isDraggingCard && isCardId)
     },
-    selectedColor () {
+    isSelected () {
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
+      return multipleCardsSelectedIds.includes(this.id)
+    },
+    selectedColor () {
       const color = this.$store.state.currentUser.color
-      if (multipleCardsSelectedIds.includes(this.id)) {
+      if (this.isSelected) {
         return color
       } else {
         return undefined
@@ -253,8 +255,6 @@ article
 .card
   border-radius 3px
   user-select none
-  display flex
-  align-items flex-start
   background-color var(--secondary-background)
   max-width 235px
   cursor pointer
@@ -265,13 +265,15 @@ article
   &:active,
   &.active
     box-shadow var(--active-shadow)
-  // &.wide
-  //   width: 235px
+  .card-content-wrap
+    display flex
+    align-items flex-start
+  .card-buttons-wrap
+    display flex
   .name
     margin 8px
     margin-right 5px
     align-self stretch
-    min-width 25px
     word-break: break-word
     // multi-line wrapping
     // display -webkit-box
@@ -289,6 +291,7 @@ article
       width 20px
       height 16px
       vertical-align top
+      background-color var(--secondary-background)
     &:hover
       button
         box-shadow 3px 3px 0 var(--heavy-shadow)
@@ -317,7 +320,6 @@ article
     position absolute
     left 5px
     top 3.5px
-
   .link
     cursor pointer
     padding-right 0
@@ -326,6 +328,42 @@ article
       span
         top -3px
         position relative
+
+  &.media-card
+    width 235px
+    background-color transparent
+
+    &:hover,
+    &.hover
+      background-color var(--secondary-background)
+      // button
+      //   background-color var(--secondary-background)
+    &:active,
+    &.active
+      background-color var(--secondary-background)
+      // .link
+      //   button
+      //     background-color var(--secondary-background)
+
+    // button
+    //   background-color var(--primary-background)
+    //   &:hover
+    //     background-color var(--secondary-hover-background)
+    //   &:active,
+    //   &.active
+    //     background-color var(--secondary-active-background)
+
+    .image
+      border-radius 3px
+      display block
+    .card-content-wrap
+      position absolute
+      top 0
+      width 100%
+      align-items initial
+      justify-content space-between
+      .name
+        background-color var(--secondary-background)
 
 .jiggle
   animation jiggle 0.5s infinite ease-out forwards
