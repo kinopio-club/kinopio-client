@@ -5,7 +5,7 @@ article(:style="position" :data-card-id="id")
     @touchstart.prevent="startDraggingCard"
     @mouseup="showCardDetails"
     @touchend="showCardDetails"
-    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged, 'filtered': isFiltered}",
+    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged, 'filtered': isFiltered, media: isMediaCard}",
     :style="{background: selectedColor}"
     :data-card-id="id"
     :data-card-x="x"
@@ -125,8 +125,12 @@ export default {
     url () {
       if (!this.name) { return }
       // adapted from https://www.regextester.com/1965
-      const findUrls = new RegExp(/(http[s]?:\/\/)?[^\s(["<,>]*\.[^\s.[",><]+/igm)
-      const urls = this.name.match(findUrls)
+      // optionally starts with http/s protocol
+      // followed by alphanumerics
+      // then '.''
+      // followed by alphanumerics
+      const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<,>]*\.[^\s.[",><]+/igm)
+      const urls = this.name.match(urlPattern)
       if (!urls) { return }
       const url = urls[0]
       const hasProtocol = url.startsWith('http://') || url.startsWith('https://')
@@ -136,13 +140,20 @@ export default {
         return `http://${url}`
       }
     },
+    isMediaCard () {
+      return this.urlIsImage || this.urlIsPlayableVideo
+    },
     urlIsImage () {
-      // how does are.na handle fake url png: prints 'something went wrong trying to save [input]'
-      const formats = ['gif', 'png', 'jpg', 'jpeg']
-      const isImage = formats.filter(format => this.url.endsWith(`.${format}`))
-      return Boolean(isImage.length)
+      if (!this.url) { return }
+      // https://regexr.com/4rjtu
+      // match an extension
+      // which much be followed by either end of line, space, or ? (for qs) char
+      const imageUrlPattern = new RegExp(/(?:\.gif|\.jpg|\.jpeg|\.png)(?:\n| |\?)/igm)
+      const isImage = this.url.match(imageUrlPattern)
+      return Boolean(isImage)
     },
     urlIsPlayableVideo () {
+      if (!this.url) { return }
       return this.url.endsWith('.mp4')
     },
 
