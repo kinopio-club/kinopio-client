@@ -12,12 +12,11 @@ article(:style="position" :data-card-id="id")
     :data-card-y="y"
   )
     Frames(:card="card")
-    img.image(v-if="urlIsImage" :src="url")
+
+    img.image(v-if="urlIsImage" :src="url" :class="{selected: isSelected}")
 
     span.card-content-wrap
-
       p.name(:style="{minWidth: nameLineMinWidth + 'px'}") {{normalizedName}}
-
       span.card-buttons-wrap
         a(:href="url" @click.stop @touchend="openUrl(url)" v-if="url")
           .link
@@ -332,30 +331,17 @@ article
   &.media-card
     width 235px
     background-color transparent
-
     &:hover,
     &.hover
       background-color var(--secondary-background)
-      // button
-      //   background-color var(--secondary-background)
     &:active,
     &.active
       background-color var(--secondary-background)
-      // .link
-      //   button
-      //     background-color var(--secondary-background)
-
-    // button
-    //   background-color var(--primary-background)
-    //   &:hover
-    //     background-color var(--secondary-hover-background)
-    //   &:active,
-    //   &.active
-    //     background-color var(--secondary-active-background)
-
     .image
       border-radius 3px
       display block
+      &.selected
+        mix-blend-mode color-burn
     .card-content-wrap
       position absolute
       top 0
