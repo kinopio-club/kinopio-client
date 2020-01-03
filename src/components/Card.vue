@@ -12,8 +12,9 @@ article(:style="position" :data-card-id="id")
     :data-card-y="y"
   )
     Frames(:card="card")
+    img(v-if="urlIsImage" :src="url")
 
-    p.name(:style="{minWidth: nameLineMinWidth + 'px'}") {{name}}
+    p.name(:style="{minWidth: nameLineMinWidth + 'px'}") {{normalizedName}}
 
     //- v-if= name contains url
     //- href= url parsed out of name
@@ -66,7 +67,14 @@ export default {
         zIndex: this.z
       }
     },
+    normalizedName () {
+      if (this.urlIsImage) {
+        return this.name.replace(this.url, '')
+      }
+      return this.name
+    },
     nameLineMinWidth () {
+      if (this.urlIsImage) { return }
       const averageCharacterWidth = 7
       let maxWidth = 186
       if (this.url) {
