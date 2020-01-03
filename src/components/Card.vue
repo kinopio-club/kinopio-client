@@ -5,7 +5,7 @@ article(:style="position" :data-card-id="id")
     @touchstart.prevent="startDraggingCard"
     @mouseup="showCardDetails"
     @touchend="showCardDetails"
-    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged, wide: isWide, 'filtered': isFiltered}",
+    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged, 'filtered': isFiltered}",
     :style="{background: selectedColor}"
     :data-card-id="id"
     :data-card-x="x"
@@ -59,10 +59,6 @@ export default {
     z () { return this.card.z },
     name () { return this.card.name },
     frameId () { return this.card.frameId },
-    isWide () {
-      if (!this.name) { return }
-      return Boolean(this.name.length > 30)
-    },
     position () {
       return {
         left: `${this.x}px`,
@@ -250,8 +246,8 @@ article
   &:active,
   &.active
     box-shadow var(--active-shadow)
-  &.wide
-    width: 235px
+  // &.wide
+  //   width: 235px
   .name
     margin 8px
     margin-right 5px
