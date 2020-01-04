@@ -13,9 +13,7 @@ export default {
   getLocal (key) {
     try {
       return JSON.parse(window.localStorage[key])
-    } catch (error) {
-      console.warn('getLocal', error)
-    }
+    } catch (error) {}
   },
   removeLocal (key) {
     try {
