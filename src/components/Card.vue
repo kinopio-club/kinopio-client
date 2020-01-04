@@ -16,7 +16,7 @@ article(:style="position" :data-card-id="id")
     img.image(v-if="urlIsImage" :src="url" :class="{selected: isSelected}")
 
     span.card-content-wrap
-      p.name(:style="{minWidth: nameLineMinWidth + 'px'}") {{normalizedName}}
+      p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}") {{normalizedName}}
       span.card-buttons-wrap
         a(:href="url" @click.stop @touchend="openUrl(url)" v-if="url")
           .link
