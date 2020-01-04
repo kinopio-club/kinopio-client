@@ -157,7 +157,7 @@ export default {
       // https://regexr.com/4rjtu
       // match an extension
       // which much be followed by either end of line, space, or ? (for qs) char
-      const imageUrlPattern = new RegExp(/(?:\.gif|\.jpg|\.jpeg|\.png)(?:\n| |\?)/igm)
+      const imageUrlPattern = new RegExp(/(?:\.gif|\.jpg|\.jpeg|\.png)(?:\n| |\?|&)/igm)
       const isImage = this.url.match(imageUrlPattern)
       return Boolean(isImage)
     },
