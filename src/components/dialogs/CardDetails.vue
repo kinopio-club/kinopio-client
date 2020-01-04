@@ -4,7 +4,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
     textarea.name(
       ref="name"
       rows="1"
-      placeholder="Tell me your dreams"
+      placeholder="Type text here, or paste a URL"
       v-model="name"
       @keydown.enter="completeEditing"
       @keydown.esc="closeCard"
