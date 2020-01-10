@@ -69,9 +69,12 @@ export default {
     // keep space element updated to viewport size so connections show up
     this.updatePageSizes()
     window.addEventListener('resize', this.updatePageSizes)
+    window.addEventListener('scroll', this.updatePageSizes)
+
     this.updateIsOnline()
     window.addEventListener('online', this.updateIsOnline)
     window.addEventListener('offline', this.updateIsOnline)
+
     this.addInteractionBlur()
     this.startProcessQueueTimer()
   },
