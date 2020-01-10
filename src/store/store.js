@@ -19,6 +19,7 @@ export default new Vuex.Store({
     viewportWidth: 0,
     isOnline: true,
     isBeta: false,
+    readOnlyExtraHeight: 160,
 
     // reset password
     resetPasswordApiKey: '',
@@ -75,6 +76,10 @@ export default new Vuex.Store({
       const html = document.documentElement
       state.pageWidth = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
       state.pageHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
+      if (state.notifyReadOnly) {
+        state.pageHeight = state.pageHeight + state.readOnlyExtraHeight
+        state.readOnlyExtraHeight = 0
+      }
       if (window.visualViewport) {
         state.viewportWidth = window.visualViewport.width
         state.viewportHeight = window.visualViewport.height
