@@ -273,6 +273,8 @@ export default {
         context.dispatch('saveNewSpace')
         context.dispatch('checkIfShouldNotifyReadOnly')
         context.commit('addNotification', { message: "Space Copied. It's now yours to edit", type: 'success' }, { root: true })
+        context.commit('notifyReadOnly', false, { root: true })
+        context.commit('notifyNewUser', false, { root: true })
       })
     },
     addSpace: (context) => {
@@ -281,6 +283,8 @@ export default {
         context.dispatch('updateCardConnectionPaths', { cardId: context.state.cards[1].id })
         context.dispatch('saveNewSpace')
         context.dispatch('updateUserLastSpaceId')
+        context.commit('notifyReadOnly', false, { root: true })
+        context.commit('notifyNewUser', false, { root: true })
       })
     },
     getRemoteSpace: async (context, space) => {
