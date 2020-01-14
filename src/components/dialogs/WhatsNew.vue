@@ -107,7 +107,7 @@ export default {
 <style lang="stylus">
 .whats-new
   overflow auto
-  max-height calc(100vh - 265px)
+  max-height calc(100vh - 175px)
   article
     position static
     margin-bottom 10px

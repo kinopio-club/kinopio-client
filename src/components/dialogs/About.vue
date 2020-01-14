@@ -2,32 +2,25 @@
 dialog.about(v-if="visible" :open="visible" @click="closeDialogs")
   section
     p Kinopio is the thinking, diagramming, and planning tool for your hardest problems.
-    p It works how our brains work.
-    .button-wrap
-      button(@click.stop="toggleSupportIsVisible" :class="{active: supportIsVisible}") Support
-      Support(:visible="supportIsVisible")
-    .button-wrap
-      button(@click.stop="toggleBetaNotesIsVisible" :class="{active: betaNotesIsVisible}") Beta Notes
-      BetaNotes(:visible="betaNotesIsVisible")
-  section
     .button-wrap
       button(@click.stop="toggleWhatsNewIsVisible" :class="{active: whatsNewIsVisible}")
         span What's New
         img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
       WhatsNew(:visible="whatsNewIsVisible" :newStuff="newStuff")
+    .button-wrap
+      button(@click.stop="toggleSupportIsVisible" :class="{active: supportIsVisible}") Support
+      Support(:visible="supportIsVisible")
 
 </template>
 
 <script>
 import Support from '@/components/dialogs/Support.vue'
-import BetaNotes from '@/components/dialogs/BetaNotes.vue'
 import WhatsNew from '@/components/dialogs/WhatsNew.vue'
 
 export default {
   name: 'About',
   components: {
     Support,
-    BetaNotes,
     WhatsNew
   },
   props: {
@@ -36,7 +29,6 @@ export default {
   data () {
     return {
       supportIsVisible: false,
-      betaNotesIsVisible: false,
       newStuffIsUpdated: false,
       whatsNewIsVisible: false,
       newStuff: []
@@ -46,7 +38,6 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
         this.supportIsVisible = false
-        this.betaNotesIsVisible = false
         this.whatsNewIsVisible = false
       }
     })
@@ -65,11 +56,6 @@ export default {
       this.closeDialogs()
       this.supportIsVisible = !isVisible
     },
-    toggleBetaNotesIsVisible () {
-      const isVisible = this.betaNotesIsVisible
-      this.closeDialogs()
-      this.betaNotesIsVisible = !isVisible
-    },
     toggleWhatsNewIsVisible () {
       const isVisible = this.whatsNewIsVisible
       this.closeDialogs()
@@ -87,7 +73,6 @@ export default {
     },
     closeDialogs () {
       this.supportIsVisible = false
-      this.betaNotesIsVisible = false
       this.whatsNewIsVisible = false
     }
   },
