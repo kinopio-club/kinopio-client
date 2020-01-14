@@ -2,7 +2,7 @@
 header
   nav
     .logo-about
-      .logo(@click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop @mouseenter="enablelogoIsHover" @mouseleave="disablelogoIsHover" :class="{active : aboutIsVisible}")
+      .logo(@click.stop="toggleAboutIsVisible" @touchstart="toggleAboutIsVisible" @touchend.stop @mouseup.stop @mouseenter="enablelogoIsHover" @mouseleave="disablelogoIsHover" :class="{active : aboutIsVisible}")
         img.blob(:src="logoPath" alt="kinopio logo")
         img.down-arrow(src="@/assets/down-arrow.svg")
       About(:visible="aboutIsVisible")
