@@ -2,8 +2,10 @@
 header
   nav
     .logo-about
-      .logo(@click.stop="toggleAboutIsVisible" @touchstart="toggleAboutIsVisible" @touchend.stop @mouseup.stop @mouseenter="enablelogoIsHover" @mouseleave="disablelogoIsHover" :class="{active : aboutIsVisible}")
-        img.blob(:src="logoPath" alt="kinopio logo")
+      .logo(alt="kinopio logo" @click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop @mouseenter="enablelogoIsHover" @mouseleave="disablelogoIsHover" :class="{active : aboutIsVisible}")
+        img.blob(src="@/assets/logo-active.png" v-show="aboutIsVisible")
+        img.blob(src="@/assets/logo-hover.png" v-show="!aboutIsVisible && logoIsHover")
+        img.blob(src="@/assets/logo.png" v-show="!aboutIsVisible && !logoIsHover")
         img.down-arrow(src="@/assets/down-arrow.svg")
       About(:visible="aboutIsVisible")
     .button-wrap.space-details-wrap
@@ -113,17 +115,7 @@ export default {
       const id = this.$store.state.currentSpace.id
       const templateSpaceIds = templates.spaces().map(space => space.spaceId)
       return templateSpaceIds.includes(id)
-    },
-    logoPath () {
-      if (this.aboutIsVisible) {
-        return require('@/assets/logo-active.png')
-      } else if (this.logoIsHover) {
-        return require('@/assets/logo-hover.png')
-      } else {
-        return require('@/assets/logo.png')
-      }
     }
-
   },
   methods: {
     toggleAboutIsVisible () {
