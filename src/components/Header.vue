@@ -2,8 +2,8 @@
 header
   nav
     .logo-about
-      .logo(@click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop :class="{active : aboutIsVisible}")
-        img(src="@/assets/logo.png" width="50" height="45" alt="kinopio logo")
+      .logo(@click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop @mouseenter="enablelogoIsHover" @mouseleave="disablelogoIsHover" :class="{active : aboutIsVisible}")
+        img.blob(:src="logoPath" alt="kinopio logo")
         img.down-arrow(src="@/assets/down-arrow.svg")
       About(:visible="aboutIsVisible")
     .button-wrap.space-details-wrap
@@ -63,7 +63,8 @@ export default {
       spaceDetailsIsVisible: false,
       signUpOrInIsVisible: false,
       shareIsVisible: false,
-      loadingSignUpOrIn: false
+      loadingSignUpOrIn: false,
+      logoIsHover: false
     }
   },
   created () {
@@ -112,6 +113,15 @@ export default {
       const id = this.$store.state.currentSpace.id
       const templateSpaceIds = templates.spaces().map(space => space.spaceId)
       return templateSpaceIds.includes(id)
+    },
+    logoPath () {
+      if (this.aboutIsVisible) {
+        return require('@/assets/logo-active.png')
+      } else if (this.logoIsHover) {
+        return require('@/assets/logo-hover.png')
+      } else {
+        return require('@/assets/logo.png')
+      }
     }
 
   },
@@ -138,6 +148,12 @@ export default {
     },
     setLoadingSignUpOrIn (value) {
       this.loadingSignUpOrIn = value
+    },
+    enablelogoIsHover () {
+      this.logoIsHover = true
+    },
+    disablelogoIsHover () {
+      this.logoIsHover = false
     }
   }
 }
@@ -173,6 +189,8 @@ header
     margin-right 6px
   .logo
     cursor pointer
+    .blob
+      width 45px
     img
       vertical-align middle
     .down-arrow

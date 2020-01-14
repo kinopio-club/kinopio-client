@@ -1,8 +1,7 @@
 <template lang="pug">
 dialog.about(v-if="visible" :open="visible" @click="closeDialogs")
-  section.kaomoji-section
-    p ༼ つ ◕_◕ ༽つ
-    p Kinopio is the brainstorming, diagramming, and planning tool for your hardest problems.
+  section
+    p Kinopio is the thinking, diagramming, and planning tool for your hardest problems.
     p It works how our brains work.
     .button-wrap
       button(@click.stop="toggleSupportIsVisible" :class="{active: supportIsVisible}") Support
@@ -104,11 +103,9 @@ export default {
 
 <style lang="stylus">
 .about
-  top calc(100% - 8px)
+  top calc(100% - 6px)
   .hidden
     display none
-  .kaomoji-section
-    padding-top 14px
   .updated
     margin 0
     margin-left 3px
