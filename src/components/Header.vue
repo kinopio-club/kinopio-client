@@ -76,6 +76,7 @@ export default {
         this.spaceDetailsIsVisible = false
         this.signUpOrInIsVisible = false
         this.shareIsVisible = false
+        this.logoIsHover = false
       }
       if (mutation.type === 'triggerSpaceDetailsVisible') {
         this.spaceDetailsIsVisible = true
