@@ -1,12 +1,15 @@
 <template lang="pug">
-dialog.about(v-if="visible" :open="visible" @click="closeDialogs")
+dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
   section
+    //- .kaomoji-section
+    //- p ༼ つ ◕_◕ ༽つ
     p Kinopio is the thinking, diagramming, and planning tool for your hardest problems.
     .button-wrap
       button(@click.stop="toggleWhatsNewIsVisible" :class="{active: whatsNewIsVisible}")
         span What's New
         img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
       WhatsNew(:visible="whatsNewIsVisible" :newStuff="newStuff")
+  section
     .button-wrap
       button(@click.stop="toggleSupportIsVisible" :class="{active: supportIsVisible}") Support
       Support(:visible="supportIsVisible")
@@ -94,4 +97,7 @@ export default {
   .updated
     margin 0
     margin-left 3px
+  // .kaomoji-section
+  //   padding-top 14px
+
 </style>
