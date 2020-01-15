@@ -3,9 +3,10 @@ header
   nav
     .logo-about
       .logo(alt="kinopio logo" @click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop @mouseenter="enablelogoIsHover" @mouseleave="disablelogoIsHover" :class="{active : aboutIsVisible}")
-        img.blob(src="@/assets/logo-active.png" v-show="aboutIsVisible")
-        img.blob(src="@/assets/logo-hover.png" v-show="!aboutIsVisible && logoIsHover")
-        img.blob(src="@/assets/logo.png" v-show="!aboutIsVisible && !logoIsHover")
+        //- img.blob(src="@/assets/logo-active.png" v-show="aboutIsVisible")
+        //- img.blob(src="@/assets/logo-hover.png" v-show="!aboutIsVisible && logoIsHover")
+        //- img.blob(src="@/assets/logo.png" v-show="!aboutIsVisible && !logoIsHover")
+        img.blob(src="@/assets/logo.png")
         img.down-arrow(src="@/assets/down-arrow.svg")
       About(:visible="aboutIsVisible")
     .button-wrap.space-details-wrap
