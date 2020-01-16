@@ -2,7 +2,7 @@
 
 # kinopio-client
 
-<img src="./src/assets/logo.png" alt="logo" width="200">
+<img src="./src/assets/logo-base.png" alt="logo" width="200">
 
 The place for people to tap, drag, and smile.
 
