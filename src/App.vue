@@ -4,6 +4,9 @@
   router-view
   Header
   Footer
+  .preload
+    .logo-hover
+    .logo-active
 </template>
 
 <script>
@@ -391,5 +394,11 @@ code
   &.active
     .logo-image
       background-image url('assets/logo-active.png')
+
+.preload
+  .logo-hover
+    background-image url('assets/logo-hover.png')
+  .logo-active
+    background-image url('assets/logo-active.png')
 
 </style>
