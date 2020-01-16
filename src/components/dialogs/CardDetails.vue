@@ -9,6 +9,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       @keydown.enter="completeEditing"
       @keydown.esc="closeCard"
       data-type="name"
+      maxlength="250"
     )
     button(@click="removeCard")
       img.icon(src="@/assets/remove.svg")
