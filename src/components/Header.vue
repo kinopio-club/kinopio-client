@@ -2,8 +2,8 @@
 header
   nav
     .logo-about
-      .logo(@click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop :class="{active : aboutIsVisible}")
-        img(src="@/assets/logo.png" width="50" height="45" alt="kinopio logo")
+      .logo(alt="kinopio logo" @click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop :class="{active : aboutIsVisible}")
+        .logo-image
         img.down-arrow(src="@/assets/down-arrow.svg")
       About(:visible="aboutIsVisible")
     .button-wrap.space-details-wrap
@@ -113,7 +113,6 @@ export default {
       const templateSpaceIds = templates.spaces().map(space => space.spaceId)
       return templateSpaceIds.includes(id)
     }
-
   },
   methods: {
     toggleAboutIsVisible () {

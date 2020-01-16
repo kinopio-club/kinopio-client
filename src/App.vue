@@ -4,6 +4,9 @@
   router-view
   Header
   Footer
+  .preload
+    .logo-hover
+    .logo-active
 </template>
 
 <script>
@@ -374,5 +377,28 @@ code
     padding 0
     transform rotate(45deg)
     vertical-align 2px
+
+.logo
+  .logo-image
+    width 45px
+    height 40px
+    background-repeat no-repeat
+    background-image url('assets/logo-base.png')
+    background-size cover
+    display inline-block
+    vertical-align middle
+  &:hover
+    .logo-image
+      background-image url('assets/logo-hover.png')
+  &:active,
+  &.active
+    .logo-image
+      background-image url('assets/logo-active.png')
+
+.preload
+  .logo-hover
+    background-image url('assets/logo-hover.png')
+  .logo-active
+    background-image url('assets/logo-active.png')
 
 </style>
