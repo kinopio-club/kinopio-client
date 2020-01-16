@@ -78,6 +78,7 @@ export default {
       if (this.url) {
         maxWidth = 160
       }
+      if (!this.normalizedName) { return }
       const width = this.normalizedName.trim().length * averageCharacterWidth
       if (width <= maxWidth) {
         return width
