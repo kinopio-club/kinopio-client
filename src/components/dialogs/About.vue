@@ -10,21 +10,38 @@ dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
         img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
       WhatsNew(:visible="whatsNewIsVisible" :newStuff="newStuff")
   section
+    .row
+      .button-wrap
+        button(@click.stop="toggleSupportIsVisible" :class="{active: supportIsVisible}") Support
+        Support(:visible="supportIsVisible")
+
     .button-wrap
-      button(@click.stop="toggleSupportIsVisible" :class="{active: supportIsVisible}") Support
-      Support(:visible="supportIsVisible")
+      //-(v-if="isMobile")
+      button(@click.stop="toggleAddToHomescreenIsVisible")
+        //- (v-if="isIOS")
+        img.icon(src="@/assets/apple.svg")
+        span Kinopio for IOS
+      button(v-if="isAndroid" @click.stop="toggleAddToHomescreenIsVisible")
+        img.icon(src="@/assets/homescreen.svg")
+        span Kinopio for Android
+      AddToHomescreen(:visible="addToHomescreenIsVisible")
+        //- kinopio is a webapp , you dont install it through an app store, just add it yourself here , instantly.
+        //- kinopio is a webapp which means you can download it to your phone without an app store , with these steps
 
 </template>
 
 <script>
 import Support from '@/components/dialogs/Support.vue'
 import WhatsNew from '@/components/dialogs/WhatsNew.vue'
+import AddToHomescreen from '@/components/dialogs/AddToHomescreen.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'About',
   components: {
     Support,
-    WhatsNew
+    WhatsNew,
+    AddToHomescreen
   },
   props: {
     visible: Boolean
@@ -34,7 +51,11 @@ export default {
       supportIsVisible: false,
       newStuffIsUpdated: false,
       whatsNewIsVisible: false,
-      newStuff: []
+      addToHomescreenIsVisible: false,
+      newStuff: [],
+      isIOS: false,
+      isAndroid: false,
+      isMobile: false
     }
   },
   created () {
@@ -52,6 +73,9 @@ export default {
     const newStuff = data.contents
     this.newStuff = newStuff.slice(0, 5)
     this.checkNewStuffIsUpdated(newStuff[0].id)
+    this.isMobile = utils.isMobile()
+    this.isIOS = utils.isIOS()
+    this.isAndroid = utils.isAndroid()
   },
   methods: {
     toggleSupportIsVisible () {
@@ -65,6 +89,11 @@ export default {
       this.whatsNewIsVisible = !isVisible
       this.newStuffIsUpdated = false
     },
+    toggleAddToHomescreenIsVisible () {
+      const isVisible = this.addToHomescreenIsVisible
+      this.closeDialogs()
+      this.addToHomescreenIsVisible = !isVisible
+    },
     async getNewStuff () {
       const response = await fetch('https://api.are.na/v2/channels/kinopio-updates/contents?direction=desc')
       const data = await response.json()
@@ -77,6 +106,7 @@ export default {
     closeDialogs () {
       this.supportIsVisible = false
       this.whatsNewIsVisible = false
+      this.addToHomescreenIsVisible = false
     }
   },
   watch: {
