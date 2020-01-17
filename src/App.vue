@@ -380,12 +380,13 @@ code
     transform rotate(45deg)
     vertical-align 2px
 
+.logo-image
+  background-image url('assets/logo-base.png')
 .logo
   .logo-image
     width 45px
     height 40px
     background-repeat no-repeat
-    background-image url('assets/logo-base.png')
     background-size cover
     display inline-block
     vertical-align middle

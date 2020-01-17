@@ -1,8 +1,6 @@
 <template lang="pug">
 dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
   section
-    //- .kaomoji-section
-    //- p ༼ つ ◕_◕ ༽つ
     p Kinopio is the thinking, diagramming, and planning tool for your hardest problems.
     .button-wrap
       button(@click.stop="toggleWhatsNewIsVisible" :class="{active: whatsNewIsVisible}")
@@ -15,18 +13,15 @@ dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
         button(@click.stop="toggleSupportIsVisible" :class="{active: supportIsVisible}") Support
         Support(:visible="supportIsVisible")
 
-    .button-wrap
-      //-(v-if="isMobile")
-      button(@click.stop="toggleAddToHomescreenIsVisible")
-        //- (v-if="isIOS")
-        img.icon(src="@/assets/apple.svg")
-        span Kinopio for IOS
-      button(v-if="isAndroid" @click.stop="toggleAddToHomescreenIsVisible")
-        img.icon(src="@/assets/homescreen.svg")
-        span Kinopio for Android
+    .button-wrap(v-if="isMobile")
+      button(@click.stop="toggleAddToHomescreenIsVisible" :class="{active: addToHomescreenIsVisible}")
+        span(v-if="isIOS")
+          img.icon(src="@/assets/apple.svg")
+          span Kinopio for IOS
+        span(v-if="isAndroid")
+          img.icon(src="@/assets/homescreen.svg")
+          span Kinopio for Android
       AddToHomescreen(:visible="addToHomescreenIsVisible")
-        //- kinopio is a webapp , you dont install it through an app store, just add it yourself here , instantly.
-        //- kinopio is a webapp which means you can download it to your phone without an app store , with these steps
 
 </template>
 
@@ -63,6 +58,7 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.supportIsVisible = false
         this.whatsNewIsVisible = false
+        this.addToHomescreenIsVisible = false
       }
     })
   },
@@ -127,7 +123,5 @@ export default {
   .updated
     margin 0
     margin-left 3px
-  // .kaomoji-section
-  //   padding-top 14px
 
 </style>
