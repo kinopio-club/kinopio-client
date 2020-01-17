@@ -332,6 +332,8 @@ code
     background-image url('assets/checkmark.svg')
     background-repeat no-repeat
     background-position center
+  input
+    margin 0
 
 .danger
   background-color var(--danger-background)
