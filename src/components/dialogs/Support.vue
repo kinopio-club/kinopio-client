@@ -34,7 +34,7 @@ export default {
   img
     border-radius 3px
   @media(max-width 340px)
-    max-height calc(100vh - 200px)
+    max-height calc(100vh - 220px)
   &.from-footer
     max-height calc(100vh - 75px)
     @media(max-width 340px)

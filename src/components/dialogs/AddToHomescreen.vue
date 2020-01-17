@@ -68,6 +68,7 @@ export default {
   .logo-wrap
     display flex
     align-items center
+    margin-bottom 10px
     .arrow
       margin-left 5px
       margin-right 5px
