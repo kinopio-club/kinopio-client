@@ -1,7 +1,13 @@
 <template lang="pug">
 dialog.add-to-homescreen(v-if="visible" :open="visible" @click.stop)
+  //- span(v-if="isIOS")
   section
-    p AddToHomescreen
+    p Add to Homescreen
+  section
+    p sldkf
+    p
+      .badge.info yo
+    p fdjskl sdf
 
 </template>
 
@@ -34,4 +40,6 @@ export default {
   max-height calc(100vh - 175px)
   @media(max-width 340px)
     max-height calc(100vh - 200px)
+  .badge
+    display inline-block
 </style>
