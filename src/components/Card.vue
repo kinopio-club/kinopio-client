@@ -16,7 +16,7 @@ article(:style="position" :data-card-id="id")
     img.image(v-if="urlIsImage" :src="url" :class="{selected: isSelected}")
 
     span.card-content-wrap
-      p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}") {{normalizedName}}
+      p.name(:style="{background: selectedColor}") {{normalizedName}}
       span.card-buttons-wrap
         a(:href="url" @click.stop @touchend="openUrl(url)" v-if="url")
           .link
@@ -71,20 +71,6 @@ export default {
         return this.name.replace(this.url, '')
       }
       return this.name
-    },
-    nameLineMinWidth () {
-      const averageCharacterWidth = 7
-      let maxWidth = 186
-      if (this.url) {
-        maxWidth = 160
-      }
-      if (!this.normalizedName) { return }
-      const width = this.normalizedName.trim().length * averageCharacterWidth
-      if (width <= maxWidth) {
-        return width
-      } else {
-        return Math.min(width, maxWidth)
-      }
     },
     isConnectingTo () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
