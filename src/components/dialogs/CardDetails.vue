@@ -124,7 +124,6 @@ export default {
     },
     focusName () {
       const element = this.$refs.name
-      console.log('focusname run')
       this.$nextTick(() => {
         element.focus()
       })

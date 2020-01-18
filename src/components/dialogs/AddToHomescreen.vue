@@ -39,6 +39,8 @@ dialog.add-to-homescreen(v-if="visible" :open="visible" @click.stop)
 <script>
 import utils from '@/utils.js'
 
+let shouldRestoreUrl
+
 export default {
   name: 'AddToHomescreen',
   props: {
@@ -53,6 +55,29 @@ export default {
   mounted () {
     this.isIOS = utils.isIOS()
     this.isAndroid = utils.isAndroid()
+    shouldRestoreUrl = true
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'closeAllDialogs') {
+        if (shouldRestoreUrl) {
+          shouldRestoreUrl = false
+          this.restoreUrl()
+        }
+      }
+    })
+  },
+  methods: {
+    restoreUrl () {
+      console.log('🌲restore url')
+    }
+  },
+  watch: {
+    visible (visible) {
+      if (visible) {
+        console.log('🍄strip url')
+      } else {
+        this.restoreUrl()
+      }
+    }
   }
 }
 </script>
