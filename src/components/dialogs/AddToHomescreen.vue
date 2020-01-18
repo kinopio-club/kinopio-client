@@ -20,7 +20,7 @@ dialog.add-to-homescreen(v-if="visible" :open="visible" @click.stop)
               .badge.info
                 span Add to Home Screen
                 img.icon.add(src="@/assets/add.svg")
-              span (You might need to scroll down)
+              span (you might need to scroll down)
 
     span(v-if="isAndroid")
       p Kinopio is a web-app which you can add directly to your Android Phone
@@ -34,7 +34,6 @@ dialog.add-to-homescreen(v-if="visible" :open="visible" @click.stop)
             span Then tap
               .badge.info
                 span Add to Home screen
-
 </template>
 
 <script>
