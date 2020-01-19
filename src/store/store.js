@@ -20,6 +20,7 @@ export default new Vuex.Store({
     isOnline: true,
     isBeta: false,
     initialExtraSize: 160,
+    searchIsVisible: false,
 
     // reset password
     resetPasswordApiKey: '',
@@ -120,6 +121,10 @@ export default new Vuex.Store({
     isBeta: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.isBeta = value
+    },
+    searchIsVisible: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.searchIsVisible = value
     },
     resetPasswordApiKey: (state, apiKey) => {
       utils.typeCheck(apiKey, 'string')

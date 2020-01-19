@@ -11,8 +11,13 @@ header
         .badge.info.template-badge(v-show="currentSpaceIsTemplate")
           span Template
         span {{currentSpaceName}}
+        //- todo abs position on button
         Loader(:visible="isLoadingSpace")
       SpaceDetails(:visible="spaceDetailsIsVisible")
+
+    button.search-button
+      //- todo should click stop???
+      img.icon.search(src="@/assets/search.svg" @click="toggleSearchIsVisible")
 
   aside
     .top
@@ -137,6 +142,12 @@ export default {
     },
     setLoadingSignUpOrIn (value) {
       this.loadingSignUpOrIn = value
+    },
+    toggleSearchIsVisible () {
+      console.log('serach toggled')
+      // subscribe and set a global event
+      const value = this.$store.state.searchIsVisible
+      this.$store.commit('searchIsVisible', !value)
     }
   }
 }
@@ -206,5 +217,8 @@ header
     justify-content flex-end
     > .button-wrap
       display inline-block
+
+  .search-button
+    margin-left 6px
 
 </style>
