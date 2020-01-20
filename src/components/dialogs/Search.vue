@@ -71,16 +71,19 @@ export default {
       this.searchString = ''
     },
     async recentSpaces () {
-      const userSpaces = cache.getAllSpaces().filter(space => {
+      let userSpaces = cache.getAllSpaces().filter(space => {
         return this.$store.getters['currentUser/canEditSpace'](space)
       })
+      userSpaces = userSpaces.slice(0, 5)
       this.spaces = userSpaces
     },
     spaceIsActive (spaceId) {
       const currentSpace = this.$store.state.currentSpace.id
       return Boolean(currentSpace === spaceId)
+    },
+    changeSpace (space) {
+      this.$store.dispatch('currentSpace/changeSpace', space)
     }
-
   },
   watch: {
     visible (visible) {

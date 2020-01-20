@@ -11,7 +11,7 @@ header
         .badge.info.template-badge(v-show="currentSpaceIsTemplate")
           span Template
         span {{currentSpaceName}}
-        //- todo abs position on button
+        //- todo loader abs position on button
         Loader(:visible="isLoadingSpace")
       SpaceDetails(:visible="spaceDetailsIsVisible")
 
@@ -150,8 +150,6 @@ export default {
       this.loadingSignUpOrIn = value
     },
     toggleSearchIsVisible () {
-      console.log('serach toggled')
-      // subscribe and set a global event
       const isVisible = this.$store.state.searchIsVisible
       this.$store.commit('closeAllDialogs')
       this.$store.commit('searchIsVisible', !isVisible)
