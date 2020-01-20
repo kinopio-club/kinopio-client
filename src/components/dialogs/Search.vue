@@ -6,9 +6,9 @@ dialog.search(v-if="visible" :open="visible")
       input(placeholder="Search Spaces and Cards" v-model="searchField" ref="searchInput")
       button.borderless.clear-input-wrap(@click="clearSearch")
         img.icon(src="@/assets/add.svg")
-    .badge.scope-label Recent Spaces
+    .badge.scope-label {{spaceScopeLabel}}
     ul.results-list
-      template(v-for="(space in spaces")
+      template(v-for="(space in spaces" v-if="!searchString")
         li(@click="changeSpace(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id" tabindex="0" v-on:keyup.enter="changeSpace(space)")
           .name {{space.name}}
       //- cards
@@ -59,7 +59,15 @@ export default {
         // })
         // this.filteredSpaces = spaces
       }
+    },
+    spaceScopeLabel () {
+      if (this.searchString) {
+        return 'Matches'
+      } else {
+        return 'Recent Spaces'
+      }
     }
+
   },
   methods: {
     focusSearchInput () {
