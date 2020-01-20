@@ -113,6 +113,7 @@ export default new Vuex.Store({
       state.multipleSelectedActionsIsVisible = false
       state.cardDetailsIsVisibleForCardId = ''
       state.connectionDetailsIsVisibleForConnectionId = ''
+      state.searchIsVisible = false
     },
     isOnline: (state, value) => {
       utils.typeCheck(value, 'boolean')

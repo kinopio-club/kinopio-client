@@ -4,6 +4,7 @@
   router-view
   Header
   Footer
+  Search
   .preload
     .logo-hover
     .logo-active
@@ -13,12 +14,14 @@
 import Header from '@/components/Header.vue'
 import MagicPaint from '@/components/MagicPaint.vue'
 import Footer from '@/components/Footer.vue'
+import Search from '@/components/dialogs/Search.vue'
 
 export default {
   components: {
     Header,
     MagicPaint,
-    Footer
+    Footer,
+    Search
   }
 }
 </script>
@@ -292,10 +295,11 @@ li
   margin-left 5px
   padding-top 4px
   display flex
-  .search
-    margin-top -11px
-    padding-right 5px
-    cursor text
+  .icon
+    &.search
+      margin-top -11px
+      padding-right 5px
+      cursor text
 
 ul.results-list
   margin 0

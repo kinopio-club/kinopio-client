@@ -15,9 +15,8 @@ header
         Loader(:visible="isLoadingSpace")
       SpaceDetails(:visible="spaceDetailsIsVisible")
 
-    button.search-button
-      //- todo should click stop???
-      img.icon.search(src="@/assets/search.svg" @click="toggleSearchIsVisible")
+    button.search-button(@click.stop="toggleSearchIsVisible")
+      img.icon.search(src="@/assets/search.svg")
 
   aside
     .top
@@ -146,8 +145,9 @@ export default {
     toggleSearchIsVisible () {
       console.log('serach toggled')
       // subscribe and set a global event
-      const value = this.$store.state.searchIsVisible
-      this.$store.commit('searchIsVisible', !value)
+      const isVisible = this.$store.state.searchIsVisible
+      this.$store.commit('closeAllDialogs')
+      this.$store.commit('searchIsVisible', !isVisible)
     }
   }
 }
@@ -159,7 +159,7 @@ header
   position fixed
   top 0
   user-select none
-  z-index var(--max-z)
+  z-index 12
   width 100%
   padding 8px
   display flex
