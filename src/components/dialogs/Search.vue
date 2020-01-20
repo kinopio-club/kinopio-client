@@ -4,11 +4,20 @@ dialog.search(v-if="visible" :open="visible")
     .filter-wrap
       img.icon.search(src="@/assets/search.svg" @click="focusSearchInput")
       input(placeholder="Search Spaces and Cards" v-model="searchField" ref="searchInput")
-  p laskjf
+      button.borderless.clear-input-wrap(@click="clearSearch")
+        img.icon(src="@/assets/add.svg")
+    .badge.scope-label Recent Spaces
+    ul.results-list
+      template(v-for="(space in spaces")
+        li(@click="changeSpace(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id" tabindex="0" v-on:keyup.enter="changeSpace(space)")
+          .name {{space.name}}
+      //- cards
 
+//- recent spaces
 </template>
 
 <script>
+import cache from '@/cache.js'
 // import Loader from '@/components/Loader.vue'
 
 export default {
@@ -18,16 +27,12 @@ export default {
   // },
   data () {
     return {
-      searchString: ''
-      // loadingSignUpOrIn: false
+      searchString: '',
+      spaces: []
+      // cards: [], -> open space (if diff space), open card details, scroll to card
+      // loadingSearching: false
     }
   },
-  // created () {
-  //   this.$store.subscribe((mutation, state) => {
-  //     if (mutation.type === 'closeAllDialogs') {
-  //     }
-  //   })
-  // },
   computed: {
     visible () {
       return this.$store.state.searchIsVisible
@@ -55,19 +60,33 @@ export default {
         // this.filteredSpaces = spaces
       }
     }
-
   },
   methods: {
     focusSearchInput () {
       const element = this.$refs.searchInput
       element.focus()
       element.setSelectionRange(0, 0)
+    },
+    clearSearch () {
+      this.searchString = ''
+    },
+    async recentSpaces () {
+      const userSpaces = cache.getAllSpaces().filter(space => {
+        return this.$store.getters['currentUser/canEditSpace'](space)
+      })
+      this.spaces = userSpaces
+    },
+    spaceIsActive (spaceId) {
+      const currentSpace = this.$store.state.currentSpace.id
+      return Boolean(currentSpace === spaceId)
     }
+
   },
   watch: {
     visible (visible) {
       this.$nextTick(() => {
         if (visible) {
+          this.recentSpaces()
           this.focusSearchInput()
         }
       })
@@ -78,15 +97,29 @@ export default {
 
 <style lang="stylus">
 dialog.search
-  width 94%
-  max-width 300px
-  // margin-left auto
-  // margin-right auto
-  position fixed
-  left 25px
-  top 31px
-  padding-top 4px
-  z-index 13
+  // width 94%
+  // max-width 300px
+  // position fixed
+  // left 25px
+  // top 31px
+  // padding-top 4px
+  // z-index 13
 
   // background cyan
+  .filter-wrap
+    margin-top 4px
+    // margin-left 0
+  // input
+  //   margin-top 4px
+  .scope-label
+    margin 0
+    margin-bottom 5px
+    // margin-left 8px
+    background var(--secondary-background)
+    display inline-block
+    // color var(--secondary-background)
+    // opacity 0.5
+  // .badge
+  //   display inline-block
+  //   margin-bottom 10px
 </style>

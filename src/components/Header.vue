@@ -15,8 +15,10 @@ header
         Loader(:visible="isLoadingSpace")
       SpaceDetails(:visible="spaceDetailsIsVisible")
 
-    button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
-      img.icon.search(src="@/assets/search.svg")
+    .button-wrap
+      button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
+        img.icon.search(src="@/assets/search.svg")
+      Search
 
   aside
     .top
@@ -49,6 +51,7 @@ import ResetPassword from '@/components/dialogs/ResetPassword.vue'
 import Share from '@/components/dialogs/Share.vue'
 import Loader from '@/components/Loader.vue'
 import templates from '@/spaces/templates.js'
+import Search from '@/components/dialogs/Search.vue'
 
 export default {
   name: 'Header',
@@ -59,7 +62,8 @@ export default {
     SignUpOrIn,
     ResetPassword,
     Share,
-    Loader
+    Loader,
+    Search
   },
   data () {
     return {
