@@ -83,8 +83,9 @@ dialog.search
   // margin-left auto
   // margin-right auto
   position fixed
-  left 20vw
-  top 20px
+  left 25px
+  top 31px
+  padding-top 4px
   z-index 13
 
   // background cyan

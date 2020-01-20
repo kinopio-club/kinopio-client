@@ -15,7 +15,7 @@ header
         Loader(:visible="isLoadingSpace")
       SpaceDetails(:visible="spaceDetailsIsVisible")
 
-    button.search-button(@click.stop="toggleSearchIsVisible")
+    button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
       img.icon.search(src="@/assets/search.svg")
 
   aside
@@ -116,6 +116,9 @@ export default {
       const id = this.$store.state.currentSpace.id
       const templateSpaceIds = templates.spaces().map(space => space.spaceId)
       return templateSpaceIds.includes(id)
+    },
+    searchIsVisible () {
+      return this.$store.state.searchIsVisible
     }
   },
   methods: {
