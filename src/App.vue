@@ -53,8 +53,9 @@ export default {
   --button-active-inset-shadow inset 0 1px 2px var(--heavy-shadow)
 
 @font-face
-  font-family 'OsakaMono-Kinopio'
-  src url("assets/OsakaMono-Kinopio.woff2") format("woff2")
+  font-family 'alpina'
+  // src url("assets/cinetype.woff2") format("woff2")
+  src url("assets/cinetype.otf") format("opentype")
   font-weight normal
   font-style normal
 
@@ -62,7 +63,9 @@ export default {
   -webkit-overflow-scrolling touch
   -webkit-tap-highlight-color transparent
   box-sizing border-box
-  font-family "OsakaMono-Kinopio", monospace
+  font-family "alpina", monospace
+  // font-synthesis: none;
+  // font-variation-settings: 'opsz' 12;
   font-size 14px
   line-height 1.1
 
