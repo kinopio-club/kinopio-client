@@ -10,8 +10,8 @@ dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
   section
     .row
       .button-wrap
-        button(@click.stop="toggleSupportIsVisible" :class="{active: supportIsVisible}") Support
-        Support(:visible="supportIsVisible")
+        button(@click.stop="toggleContactIsVisible" :class="{active: contactIsVisible}") Contact
+        Contact(:visible="contactIsVisible")
 
     .button-wrap(v-if="isMobile")
       button(@click.stop="toggleAddToHomescreenIsVisible" :class="{active: addToHomescreenIsVisible}")
@@ -26,7 +26,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
 </template>
 
 <script>
-import Support from '@/components/dialogs/Support.vue'
+import Contact from '@/components/dialogs/Contact.vue'
 import WhatsNew from '@/components/dialogs/WhatsNew.vue'
 import AddToHomescreen from '@/components/dialogs/AddToHomescreen.vue'
 import utils from '@/utils.js'
@@ -34,7 +34,7 @@ import utils from '@/utils.js'
 export default {
   name: 'About',
   components: {
-    Support,
+    Contact,
     WhatsNew,
     AddToHomescreen
   },
@@ -43,7 +43,7 @@ export default {
   },
   data () {
     return {
-      supportIsVisible: false,
+      contactIsVisible: false,
       newStuffIsUpdated: false,
       whatsNewIsVisible: false,
       addToHomescreenIsVisible: false,
@@ -56,7 +56,7 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
-        this.supportIsVisible = false
+        this.contactIsVisible = false
         this.whatsNewIsVisible = false
         this.addToHomescreenIsVisible = false
       }
@@ -74,10 +74,10 @@ export default {
     this.isAndroid = utils.isAndroid()
   },
   methods: {
-    toggleSupportIsVisible () {
-      const isVisible = this.supportIsVisible
+    toggleContactIsVisible () {
+      const isVisible = this.contactIsVisible
       this.closeDialogs()
-      this.supportIsVisible = !isVisible
+      this.contactIsVisible = !isVisible
     },
     toggleWhatsNewIsVisible () {
       const isVisible = this.whatsNewIsVisible
@@ -100,7 +100,7 @@ export default {
       this.newStuffIsUpdated = Boolean(userlastReadId !== latestUpdateId)
     },
     closeDialogs () {
-      this.supportIsVisible = false
+      this.contactIsVisible = false
       this.whatsNewIsVisible = false
       this.addToHomescreenIsVisible = false
     }
