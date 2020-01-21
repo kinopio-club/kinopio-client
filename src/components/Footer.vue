@@ -3,9 +3,10 @@ footer(v-if="!dialogsVisible")
   Notifications
   section.controls
     .button-wrap(v-if="userCanEditCurrentSpace")
-      button(@click="toggleRestoreIsVisible" :class="{ active: restoreIsVisible}")
-        img.refresh.icon(src="@/assets/undo.svg")
-      Restore(:visible="restoreIsVisible")
+      button(@click="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
+        img.refresh.icon(src="@/assets/remove.svg")
+        span Removed
+      Removed(:visible="removedIsVisible")
 
     .button-wrap
       button(@click="toggleFiltersIsVisible" :class="{ active: filtersIsVisible}")
@@ -22,7 +23,7 @@ footer(v-if="!dialogsVisible")
 </template>
 
 <script>
-import Restore from '@/components/dialogs/Restore.vue'
+import Removed from '@/components/dialogs/Removed.vue'
 import Offline from '@/components/dialogs/Offline.vue'
 import Filters from '@/components/dialogs/Filters.vue'
 import Notifications from '@/components/Notifications.vue'
@@ -30,14 +31,14 @@ import Notifications from '@/components/Notifications.vue'
 export default {
   name: 'Footer',
   components: {
-    Restore,
+    Removed,
     Offline,
     Notifications,
     Filters
   },
   data () {
     return {
-      restoreIsVisible: false,
+      removedIsVisible: false,
       offlineIsVisible: false,
       filtersIsVisible: false
     }
@@ -46,7 +47,7 @@ export default {
     console.log('🐢 kinopio-client', this.buildHash) // TODO move this stuff to store init, or app?
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
-        this.restoreIsVisible = false
+        this.removedIsVisible = false
         this.offlineIsVisible = false
         this.filtersIsVisible = false
       }
@@ -80,10 +81,10 @@ export default {
 
   },
   methods: {
-    toggleRestoreIsVisible () {
-      const isVisible = this.restoreIsVisible
+    toggleRemovedIsVisible () {
+      const isVisible = this.removedIsVisible
       this.$store.commit('closeAllDialogs')
-      this.restoreIsVisible = !isVisible
+      this.removedIsVisible = !isVisible
     },
     toggleOfflineIsVisible () {
       const isVisible = this.offlineIsVisible
