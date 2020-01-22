@@ -5,18 +5,18 @@ dialog.contact.narrow(v-if="visible" :open="visible" @click.stop)
   section
     img.froggo(src="@/assets/froggo.png" width=100)
 
-    p I made Kinopio to help connect your thoughts, ideas, and plans together.
-    p Hit me up with any questions, comments, or requests at hi@kinopio.club
-    //- p Please send questions, comments, and requests to hi@kinopio.club
+    p I made Kinopio to help you connect your thoughts, ideas, and plans together.
+    p Please send questions, comments, or requests to hi@kinopio.club
     .button-wrap
       a(href="mailto:hi@kinopio.club")
         button Email Me
     .button-wrap
       a(href="https://twitter.com/KinopioClub")
         button Twitter →
-    //- .button-wrap
-    //-   a(href="https://www.are.na/kinopio")
-    //-     button Are.na →
+    .row
+      .button-wrap
+        a(href="https://www.are.na/kinopio")
+          button Are.na →
 
 </template>
 
@@ -39,4 +39,6 @@ export default {
     max-height calc(100vh - 220px)
   .froggo
     width 100px
+  .row
+    margin-top 10px
 </style>
