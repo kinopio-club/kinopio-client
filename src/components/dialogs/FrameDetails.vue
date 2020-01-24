@@ -77,4 +77,5 @@ export default {
     padding 0
     img
       width 100%
+      vertical-align -5px
 </style>
