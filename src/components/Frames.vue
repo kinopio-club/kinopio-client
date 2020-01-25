@@ -11,7 +11,7 @@ aside.frames
     img.moon(src="@/assets/frames/magical-helper/moon.png")
 
   .morning-brew(v-if="isMorningBrew")
-    img.teapot(src="@/assets/frames/morning-brew/pot.png")
+    img.pot(src="@/assets/frames/morning-brew/pot.png")
     img.cup(src="@/assets/frames/morning-brew/cup.png")
     img.cloud(src="@/assets/frames/morning-brew/cloud.png")
     img.ichigotchi(src="@/assets/frames/morning-brew/ichigotchi.png")
@@ -71,19 +71,19 @@ export default {
       top -15px
 
   .morning-brew
-    .teapot
+    .pot
       left -30px
       top -5px
       width 40px
-      transform scaleX(-1) rotate(7deg) // flipped horizontally
+      transform scaleX(-1) rotate(6deg) // flipped horizontally
     .cup
       width 30px
       right 36px
       top -17px
     .cloud
       width 45px
-      top -18px
-      left 12px
+      top -19px
+      left 11px
     .ichigotchi
       width 25px
       right -8px
