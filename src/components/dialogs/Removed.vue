@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.restore(v-if="visible" :open="visible" @click.stop)
+dialog.removed(v-if="visible" :open="visible" @click.stop)
   section
     .segmented-buttons
       button(@click="showCards" :class="{active: cardsVisible}")
@@ -16,7 +16,6 @@ dialog.restore(v-if="visible" :open="visible" @click.stop)
       span !{' '}{{currentSpaceName}}!{' '}
       span can be restored here
     p(v-if="!cardsVisible") Removed spaces can be restored here
-    img(src="@/assets/photo-empty-meal.png")
 
   section.results-section(v-if="items.length")
     ul.results-list
@@ -193,7 +192,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.restore
+.removed
   overflow auto
   .results-section
     max-height initial
