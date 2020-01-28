@@ -219,19 +219,18 @@ export default new Vuex.Store({
     },
     addToMultipleCardsSelected: (state, cardId) => {
       utils.typeCheck(cardId, 'string')
-      if (!state.multipleCardsSelectedIds.includes(cardId)) {
-        state.multipleCardsSelectedIds.push(cardId)
-        // ♨️ set up currentConnectionsDragging
-        let connections = utils.clone(state.currentSpace.connections)
-        connections = connections.filter(connection => {
-          const isStartCard = connection.startCardId === cardId
-          const isEndCard = connection.endCardId === cardId
-          return isStartCard || isEndCard
-        })
-        connections.forEach(connection => {
-          state.currentConnectionsDragging.push(connection)
-        })
-      }
+      if (state.multipleCardsSelectedIds.includes(cardId)) { return }
+      state.multipleCardsSelectedIds.push(cardId)
+      // ♨️ set up currentConnectionsDragging
+      let connections = utils.clone(state.currentSpace.connections)
+      connections = connections.filter(connection => {
+        const isStartCard = connection.startCardId === cardId
+        const isEndCard = connection.endCardId === cardId
+        return isStartCard || isEndCard
+      })
+      connections.forEach(connection => {
+        state.currentConnectionsDragging.push(connection)
+      })
     },
     addToMultipleConnectionsSelected: (state, connectionId) => {
       utils.typeCheck(connectionId, 'string')
