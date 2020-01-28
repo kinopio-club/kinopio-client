@@ -54,8 +54,11 @@ export default {
 
 @font-face
   font-family 'alpina'
-  // src url("assets/GT-Zirkon-Regular.woff2") format("woff2")
-  src url("assets/GT-Haptik-Trial-Regular.otf") format("opentype")
+  // src url("assets/Inter-Regular.woff") format("woff")
+  src url("assets/FavoritTrialStd-Regular.woff2") format("woff2")
+  // src url("assets/lunchtype22-regular-webfont.woff2") format("woff2") // contender
+  // src url("assets/AftenScreenTrial.otf") format("opentype") // a clean drop in replacement (13/1.2), but maybe it's a tad boring?
+  // src url("assets/texgyreschola-regular.otf") format("opentype")
   font-weight normal
   font-style normal
 
