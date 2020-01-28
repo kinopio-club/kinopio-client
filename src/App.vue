@@ -54,8 +54,8 @@ export default {
 
 @font-face
   font-family 'alpina'
-  // src url("assets/cinetype.woff2") format("woff2")
-  src url("assets/cinetype.otf") format("opentype")
+  // src url("assets/GT-Zirkon-Regular.woff2") format("woff2")
+  src url("assets/GT-Haptik-Trial-Regular.otf") format("opentype")
   font-weight normal
   font-style normal
 
@@ -66,7 +66,7 @@ export default {
   font-family "alpina", monospace
   // font-synthesis: none;
   // font-variation-settings: 'opsz' 12;
-  font-size 14px
+  font-size 13px
   line-height 1.1
 
 body
