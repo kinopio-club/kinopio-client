@@ -140,9 +140,21 @@ export default {
 
     // Connections
 
-    updateCardConnections: (state, connections) => {
-      state.connections = connections
-      cache.updateSpace('connections', connections, state.id)
+    updateConnection: (state, updatedConnection) => {
+      state.connections.map(connection => {
+        if (connection.id === updatedConnection.id) {
+          const updates = Object.keys(updatedConnection)
+          updates.forEach(key => {
+            // update properties differently depending on whether it's existing or new
+            if (connection[key]) {
+              connection[key] = updatedConnection[key]
+            } else {
+              Vue.set(connection, key, updatedConnection[key])
+            }
+          })
+        }
+      })
+      cache.updateSpace('connections', state.connections, state.id)
     },
     addConnection: (state, connection) => {
       state.connections.push(connection)
@@ -506,7 +518,7 @@ export default {
       context.commit('moveCard', { cardId: currentDraggingCardId, delta })
       context.dispatch('updateCardConnectionPaths', { cardId: currentDraggingCardId })
     },
-    updatePositions: (context) => {
+    updateCardAndConnectionPositions: (context) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       if (multipleCardsSelectedIds.length) {
         const cards = context.rootState.currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
@@ -560,18 +572,16 @@ export default {
       }
     },
     updateCardConnectionPaths: (context, { cardId, shouldUpdateApi }) => {
-      let connections = utils.clone(context.state.connections)
-      connections = connections.map(connection => {
-        if (connection.startCardId === cardId || connection.endCardId === cardId) {
-          connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
-          connection.spaceId = context.state.id
-          if (shouldUpdateApi) {
-            context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
-          }
+      const spaceId = context.state.id
+      let connections = utils.clone(context.rootState.currentConnectionsDragging)
+      connections.map(connection => {
+        connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
+        connection.spaceId = spaceId
+        if (shouldUpdateApi) {
+          context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
         }
-        return connection
+        context.commit('updateConnection', connection)
       })
-      context.commit('updateCardConnections', connections)
     },
     removeConnectionsFromCard: (context, card) => {
       context.state.connections.forEach(connection => {

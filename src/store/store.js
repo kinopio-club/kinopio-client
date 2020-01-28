@@ -42,6 +42,7 @@ export default new Vuex.Store({
     currentConnectionCursorStart: {},
     connectionDetailsPosition: {}, // x, y
     connectionDetailsIsVisibleForConnectionId: '',
+    currentConnectionsDragging: [],
 
     // dragging
     currentDraggingCardId: '',
@@ -173,6 +174,13 @@ export default new Vuex.Store({
     currentDraggingCardId: (state, cardId) => {
       utils.typeCheck(cardId, 'string')
       state.currentDraggingCardId = cardId
+      if (state.multipleCardsSelectedIds.length) { return }
+      // ♨️ set up currentConnectionsDragging
+      let connections = utils.clone(state.currentSpace.connections)
+      connections = connections.filter(connection => {
+        return (connection.startCardId === cardId || connection.endCardId === cardId)
+      })
+      state.currentConnectionsDragging = connections
     },
 
     // connection details
@@ -213,6 +221,16 @@ export default new Vuex.Store({
       utils.typeCheck(cardId, 'string')
       if (!state.multipleCardsSelectedIds.includes(cardId)) {
         state.multipleCardsSelectedIds.push(cardId)
+        // ♨️ set up currentConnectionsDragging
+        let connections = utils.clone(state.currentSpace.connections)
+        connections = connections.filter(connection => {
+          const isStartCard = connection.startCardId === cardId
+          const isEndCard = connection.endCardId === cardId
+          return isStartCard || isEndCard
+        })
+        connections.forEach(connection => {
+          state.currentConnectionsDragging.push(connection)
+        })
       }
     },
     addToMultipleConnectionsSelected: (state, connectionId) => {
