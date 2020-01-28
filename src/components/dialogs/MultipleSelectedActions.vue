@@ -98,6 +98,7 @@ export default {
     connectionTypes () {
       return uniq(this.multipleConnectionsSelectedIds.map(id => {
         const connection = this.$store.getters['currentSpace/connectionById'](id)
+        if (!connection) { return }
         return this.$store.getters['currentSpace/connectionTypeById'](connection.connectionTypeId)
       }))
     },

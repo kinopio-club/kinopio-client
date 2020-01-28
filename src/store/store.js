@@ -42,11 +42,12 @@ export default new Vuex.Store({
     currentConnectionCursorStart: {},
     connectionDetailsPosition: {}, // x, y
     connectionDetailsIsVisibleForConnectionId: '',
-    currentConnectionsDragging: [],
 
     // dragging
     currentDraggingCardId: '',
     preventDraggedCardFromShowingDetails: false,
+    currentCardsDragging: [],
+    currentConnectionsDragging: [],
 
     // multiple selection
     multipleSelectedActionsIsVisible: false,
@@ -231,6 +232,9 @@ export default new Vuex.Store({
       connections.forEach(connection => {
         state.currentConnectionsDragging.push(connection)
       })
+      // ♨️ set up currentCardsDragging
+      let currentCard = state.currentSpace.cards.filter(card => card.id === cardId)
+      state.currentCardsDragging.push(currentCard)
     },
     addToMultipleConnectionsSelected: (state, connectionId) => {
       utils.typeCheck(connectionId, 'string')

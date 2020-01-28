@@ -260,7 +260,7 @@ article
     display flex
   .name
     margin 8px
-    margin-right 5px
+    margin-right 0
     align-self stretch
     word-break: break-word
     // multi-line wrapping

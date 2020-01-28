@@ -518,24 +518,17 @@ export default {
       context.commit('moveCard', { cardId: currentDraggingCardId, delta })
       context.dispatch('updateCardConnectionPaths', { cardId: currentDraggingCardId })
     },
-    updateCardAndConnectionPositions: (context) => {
+    updateAfterDragWithPositions: (context) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
+      const currentDraggingCardId = context.rootState.currentDraggingCardId
+      let cards = []
       if (multipleCardsSelectedIds.length) {
-        const cards = context.rootState.currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
-        cards.forEach(card => {
-          card = utils.clone(card)
-          context.dispatch('api/addToQueue', { name: 'updateCard',
-            body: {
-              id: card.id,
-              x: card.x,
-              y: card.y
-            } }, { root: true })
-          context.dispatch('updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
-        })
+        cards = context.rootState.currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
       } else {
-        const currentDraggingCardId = context.rootState.currentDraggingCardId
-        let card = context.rootState.currentSpace.cards.find(card => currentDraggingCardId === card.id)
-        if (!card) { return }
+        const card = context.rootState.currentSpace.cards.find(card => currentDraggingCardId === card.id)
+        cards.push(card)
+      }
+      cards.forEach(card => {
         card = utils.clone(card)
         context.dispatch('api/addToQueue', { name: 'updateCard',
           body: {
@@ -544,7 +537,7 @@ export default {
             y: card.y
           } }, { root: true })
         context.dispatch('updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
-      }
+      })
     },
     incrementSelectedCardsZ: (context) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
