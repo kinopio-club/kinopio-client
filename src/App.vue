@@ -83,7 +83,7 @@ export default {
   font-family "alpina", monospace
   // font-synthesis: none;
   // font-variation-settings: 'opsz' 12;
-  font-size 14px
+  font-size 13px
   line-height 1.2
 
 body
