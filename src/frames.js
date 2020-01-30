@@ -17,8 +17,8 @@ const frames = [
   },
   {
     id: 3,
-    name: 'Morning Brew',
-    badge: 'morning-brew/cup.png'
+    name: 'Tea Time',
+    badge: 'tea-time/pot.png'
   }
 ]
 

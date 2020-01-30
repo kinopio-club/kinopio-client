@@ -10,12 +10,10 @@ aside.frames
     img.hat(src="@/assets/frames/magical-helper/hat.png")
     img.moon(src="@/assets/frames/magical-helper/moon.png")
 
-  .morning-brew(v-if="isMorningBrew")
-    img.pot(src="@/assets/frames/morning-brew/pot.png")
-    img.cup(src="@/assets/frames/morning-brew/cup.png")
-    img.cloud(src="@/assets/frames/morning-brew/cloud.png")
-    img.ichigotchi(src="@/assets/frames/morning-brew/ichigotchi.png")
-
+  .morning-brew(v-if="isTeaTime")
+    img.cloud(src="@/assets/frames/tea-time/cloud.png")
+    img.pot(src="@/assets/frames/tea-time/pot.png")
+    img.ichigotchi(src="@/assets/frames/tea-time/ichigotchi.png")
 </template>
 
 <script>
@@ -30,7 +28,7 @@ export default {
     isMagicalHelper () {
       return Boolean(this.card.frameId === 2)
     },
-    isMorningBrew () {
+    isTeaTime () {
       return Boolean(this.card.frameId === 3)
     }
   }
@@ -72,21 +70,16 @@ export default {
 
   .morning-brew
     .pot
-      left -30px
+      left -25px
       top -5px
-      width 40px
-      transform scaleX(-1) rotate(6deg) // flipped horizontally
-    .cup
-      width 30px
-      right 36px
-      top -17px
+      width 31px
     .cloud
       width 45px
       top -19px
-      left 11px
+      left 7px
     .ichigotchi
-      width 25px
-      right -8px
-      top -22px
-      transform rotate(5deg)
+      width 23px
+      right -4px
+      top -19px
+      transform rotate(-10deg)
 </style>
