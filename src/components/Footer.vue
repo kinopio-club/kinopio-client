@@ -1,6 +1,11 @@
 <template lang="pug">
 footer(v-if="!dialogsVisible")
   Notifications
+  section
+    .button-wrap
+      button
+        span Explore Spaces
+
   section.controls
     .button-wrap(v-if="userCanEditCurrentSpace")
       button(@click="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
@@ -113,6 +118,8 @@ footer
     margin 0
     height 11px
   .controls
+    margin-top 6px
+  > section
     display flex
     > .button-wrap
       pointer-events all
