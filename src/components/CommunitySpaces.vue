@@ -2,6 +2,7 @@
 .community-spaces(v-if="visible" :open="visible" @click.stop ref="dialog")
   section
     Loader(:visible="loading")
+
     p hi
   //- section.results-section
   //-   .filter-wrap
@@ -49,14 +50,9 @@ export default {
 </script>
 
 <style lang="stylus">
-.templates
-  .categories
+.community-spaces
+  section
     border-top 1px solid var(--primary)
-  .category-wrap
-    > button
-      .badge
-        margin 0
-  a
-    color var(--primary)
-    text-decoration none
+    border-top-left-radius 0 !important
+    border-top-right-radius 0 !important
 </style>

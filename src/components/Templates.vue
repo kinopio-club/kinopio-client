@@ -140,6 +140,8 @@ export default {
 .templates
   .categories
     border-top 1px solid var(--primary)
+    border-top-left-radius 0 !important
+    border-top-right-radius 0 !important
   .category-wrap
     > button
       .badge

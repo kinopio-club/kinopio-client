@@ -8,9 +8,6 @@ dialog.community(v-if="visible" :open="visible")
       button(@click.stop="showTemplates" :class="{ active: templatesIsVisible }")
         span Templates
 
-    //- temp
-    button(@click="toggleLoad") toggle load
-
   CommunitySpaces(:visible="!templatesIsVisible" :loading="loadingNewSpaces" :spaces="spaces")
   Templates(:visible="templatesIsVisible")
 </template>
@@ -44,10 +41,6 @@ export default {
     hideTemplates () {
       this.templatesIsVisible = false
     },
-    toggleLoad () {
-      const value = this.loadingNewSpaces
-      this.loadingNewSpaces = !value
-    },
     getNewSpaces () {
       if (this.spaces.length || this.loadingNewSpaces) { return }
       this.loadingNewSpaces = true
@@ -56,9 +49,7 @@ export default {
   },
   watch: {
     visible (visible) {
-      // if (!this.spaces.length) {
       this.getNewSpaces()
-      // }
     }
   }
 
