@@ -3,10 +3,9 @@
   section
     Loader(:visible="loading")
 
-    //- p hi
     template(v-if="!loading")
       button(@click="getNewSpaces")
-      img.refresh.icon(src="@/assets/refresh.svg")
+        img.refresh.icon(src="@/assets/refresh.svg")
 
   //- section.results-section
   //-   .filter-wrap
@@ -39,7 +38,7 @@ export default {
   },
   methods: {
     getNewSpaces () {
-      console.log('get new spaces')
+      this.$emit('getNewSpaces')
     }
   }
 }

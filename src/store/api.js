@@ -194,6 +194,17 @@ const self = {
 
     // Space
 
+    getNewSpaces: async (context) => {
+      try {
+        console.log('🛬 getting new spaces')
+        const options = requestOptions({ method: 'GET' })
+        const response = await utils.timeout(10000, fetch(`${host}/space/new-spaces`, options))
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+
     getSpace: async (context, space) => {
       try {
         if (!shouldRequest()) { return }

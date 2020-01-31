@@ -8,7 +8,7 @@ dialog.community(v-if="visible" :open="visible")
       button(@click.stop="showTemplates" :class="{ active: templatesIsVisible }")
         span Templates
 
-  CommunitySpaces(:visible="!templatesIsVisible" :loading="loadingNewSpaces" :spaces="spaces")
+  CommunitySpaces(:visible="!templatesIsVisible" :loading="loadingNewSpaces" :spaces="spaces" @getNewSpaces="getNewSpaces")
   Templates(:visible="templatesIsVisible")
 </template>
 
@@ -41,14 +41,17 @@ export default {
     hideTemplates () {
       this.templatesIsVisible = false
     },
-    getNewSpaces () {
-      if (this.spaces.length || this.loadingNewSpaces) { return }
+    async getNewSpaces () {
       this.loadingNewSpaces = true
-      console.log('🍄🍄🍄🍄🍄🍄 get spaces now', this.spaces)
+      const newSpaces = await this.$store.dispatch('api/getNewSpaces')
+      this.loadingNewSpaces = false
+      this.spaces = newSpaces
+      console.log('🍄 new spaces', this.spaces)
     }
   },
   watch: {
     visible (visible) {
+      if (this.spaces.length || this.loadingNewSpaces) { return }
       this.getNewSpaces()
     }
   }
