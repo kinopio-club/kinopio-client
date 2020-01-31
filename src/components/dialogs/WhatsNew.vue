@@ -11,7 +11,7 @@ dialog.whats-new(v-if="visible" :open="visible" @click.stop)
 
   section
     article(v-if="newStuff.length" v-for="post in newStuffWithUserHasRead" :key="post.id")
-      p.title {{post.title}}
+      .title.badge.info {{post.title}}
         img.icon(src="@/assets/new.gif" v-if="!post.userHasRead")
       span(v-html="media(post.description)")
       span(v-html="post.content_html")
@@ -121,6 +121,7 @@ export default {
     margin-left 3px
   .title
     margin-bottom 10px
+    display inline-block
   img,
   video
     max-width 100%
