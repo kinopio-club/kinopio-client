@@ -278,6 +278,7 @@ export default {
       let space = utils.clone(context.state)
       space.id = nanoid()
       space.users = []
+      space.isRenamed = false
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       context.commit('restoreSpace', uniqueNewSpace)
       Vue.nextTick(() => {
