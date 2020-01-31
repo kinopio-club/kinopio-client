@@ -4,29 +4,37 @@ dialog.community(v-if="visible" :open="visible")
     .segmented-buttons
       button(@click.stop="hideTemplates" :class="{ active: !templatesIsVisible }")
         span New Spaces
-        //- Loader(:visible="loading.cards")
-
+        Loader(:visible="loadingNewSpaces")
       button(@click.stop="showTemplates" :class="{ active: templatesIsVisible }")
         span Templates
 
-  Templates(:visible="templatesIsVisible")
+    //- temp
+    button(@click="toggleLoad") toggle load
 
+  CommunitySpaces(:visible="!templatesIsVisible" :loading="loadingNewSpaces" :spaces="spaces")
+  Templates(:visible="templatesIsVisible")
 </template>
 
 <script>
 import Templates from '@/components/Templates.vue'
+import CommunitySpaces from '@/components/CommunitySpaces.vue'
+import Loader from '@/components/Loader.vue'
 
 export default {
   name: 'Explore',
   components: {
-    Templates
+    Templates,
+    Loader,
+    CommunitySpaces
   },
   props: {
     visible: Boolean
   },
   data () {
     return {
-      templatesIsVisible: false
+      templatesIsVisible: false,
+      loadingNewSpaces: false,
+      spaces: []
     }
   },
   methods: {
@@ -35,8 +43,25 @@ export default {
     },
     hideTemplates () {
       this.templatesIsVisible = false
+    },
+    toggleLoad () {
+      const value = this.loadingNewSpaces
+      this.loadingNewSpaces = !value
+    },
+    getNewSpaces () {
+      if (this.spaces.length || this.loadingNewSpaces) { return }
+      this.loadingNewSpaces = true
+      console.log('🍄🍄🍄🍄🍄🍄 get spaces now', this.spaces)
+    }
+  },
+  watch: {
+    visible (visible) {
+      // if (!this.spaces.length) {
+      this.getNewSpaces()
+      // }
     }
   }
+
 }
 </script>
 
