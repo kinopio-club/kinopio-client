@@ -3,7 +3,11 @@
   section
     Loader(:visible="loading")
 
-    p hi
+    //- p hi
+    template(v-if="!loading")
+      button(@click="getNewSpaces")
+      img.refresh.icon(src="@/assets/refresh.svg")
+
   //- section.results-section
   //-   .filter-wrap
   //-     img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
@@ -32,20 +36,12 @@ export default {
     visible: Boolean,
     loading: Boolean,
     spaces: Array
+  },
+  methods: {
+    getNewSpaces () {
+      console.log('get new spaces')
+    }
   }
-  // data () {
-  //   return {
-  //     spaces: [],
-  //   }
-  // },
-
-  // watch: {
-  // visible (visible) {
-  //   this.clearFilter()
-  //   this.filter = ''
-  //   this.templateCategoryPickerIsVisible = false
-  // }
-  // }
 }
 </script>
 
