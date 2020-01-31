@@ -1,9 +1,7 @@
 <template lang="pug">
-dialog.templates(v-if="visible" :open="visible" @click.stop ref="dialog" @click="closeDialogs")
-  section
-    p Templates
-  section
-    //- p Preview and make them your own
+.templates(v-if="visible" :open="visible" @click.stop ref="dialog" @click="closeDialogs")
+  //- p Preview and make them your own
+  section.categories
     .button-wrap.category-wrap
       button(@click.stop="toggleTemplateCategoryPickerIsVisible" :class="{active: templateCategoryPickerIsVisible}")
         .badge.info {{filterCategory.name}}
@@ -140,8 +138,8 @@ export default {
 
 <style lang="stylus">
 .templates
-  max-height calc(100vh - 140px)
-  // overflow scroll
+  .categories
+    border-top 1px solid var(--primary)
   .category-wrap
     > button
       .badge

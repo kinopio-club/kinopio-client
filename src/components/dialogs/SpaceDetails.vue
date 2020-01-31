@@ -14,20 +14,14 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
       Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="currentSpace" :exportScope="exportScope")
 
   section.results-actions
-    .row
-      .button-wrap
-        button(@click.stop="toggleTemplatesIsVisible" :class="{ active: templatesIsVisible }")
-          span Templates
-        Templates(:visible="templatesIsVisible")
-
-      .button-wrap
-        button(@click.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
-          span Import
-        Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
-
     button(@click="addSpace")
       img.icon(src="@/assets/add.svg")
       span Add
+
+    .button-wrap
+      button(@click.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
+        span Import
+      Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
 
   section.results-section
     .filter-wrap(v-if="isNumerousSpaces")
@@ -49,15 +43,13 @@ import fuzzy from 'fuzzy'
 import cache from '@/cache.js'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
-import Templates from '@/components/dialogs/Templates.vue'
 import templates from '@/spaces/templates.js'
 
 export default {
   name: 'SpaceDetails',
   components: {
     Export,
-    Import,
-    Templates
+    Import
   },
   props: {
     visible: Boolean
@@ -67,7 +59,6 @@ export default {
       spaces: [],
       exportIsVisible: false,
       importIsVisible: false,
-      templatesIsVisible: false,
       filter: '',
       filteredSpaces: []
     }
@@ -141,15 +132,9 @@ export default {
       this.closeDialogs()
       this.importIsVisible = !isVisible
     },
-    toggleTemplatesIsVisible () {
-      const isVisible = this.templatesIsVisible
-      this.closeDialogs()
-      this.templatesIsVisible = !isVisible
-    },
     closeDialogs () {
       this.exportIsVisible = false
       this.importIsVisible = false
-      this.templatesIsVisible = false
     },
     spaceIsActive (spaceId) {
       const currentSpace = this.$store.state.currentSpace.id
