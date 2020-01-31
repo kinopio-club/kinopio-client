@@ -365,6 +365,7 @@ export default {
       const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       updates.id = space.id
       if (updates.name) {
+        updates.isRenamed = true
         const updatedSpace = utils.clone(space)
         updatedSpace.name = updates.name
         utils.updateWindowUrlAndTitle({
