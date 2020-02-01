@@ -1,6 +1,7 @@
 {
   "id": "1",
   "name": "Hello Kinopio",
+  "privacy": "closed",
   "users": [],
   "cards": [
     {

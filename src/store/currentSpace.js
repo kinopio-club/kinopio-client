@@ -55,10 +55,8 @@ export default {
     updateSpace: (state, updatedSpace) => {
       const updates = Object.keys(updatedSpace)
       updates.forEach(key => {
-        if (state[key] !== undefined) {
-          state[key] = updatedSpace[key]
-          cache.updateSpace(key, state[key], state.id)
-        }
+        Vue.set(state, key, updatedSpace[key])
+        cache.updateSpace(key, state[key], state.id)
       })
     },
 
@@ -78,12 +76,7 @@ export default {
         if (card.id === updatedCard.id) {
           const updates = Object.keys(updatedCard)
           updates.forEach(key => {
-            // update properties differently depending on whether it's existing or new
-            if (card[key]) {
-              card[key] = updatedCard[key]
-            } else {
-              Vue.set(card, key, updatedCard[key])
-            }
+            Vue.set(card, key, updatedCard[key])
           })
         }
       })

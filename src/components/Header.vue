@@ -19,6 +19,7 @@ header
       // Share
       .button-wrap
         button(@click.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
+          img.icon(v-if="spaceIsPrivate" src="@/assets/lock.svg")
           span Share
         Share(:visible="shareIsVisible")
 
@@ -112,6 +113,9 @@ export default {
       const id = this.$store.state.currentSpace.id
       const templateSpaceIds = templates.spaces().map(space => space.spaceId)
       return templateSpaceIds.includes(id)
+    },
+    spaceIsPrivate () {
+      return this.$store.state.currentSpace.privacy === 'private'
     }
   },
   methods: {

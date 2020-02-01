@@ -11,7 +11,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
             img.icon(v-else src="@/assets/unlock.svg")
             span {{privacyState.name | capitalize}}
           p.description {{privacyState.description | capitalize}}
-        PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs" @updateCurrentPrivacy="updateCurrentPrivacy")
+        PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs")
 
     template(v-if="!spaceIsPrivate")
       textarea(ref="url") {{url()}}
@@ -49,8 +49,7 @@ export default {
     return {
       urlIsCopied: false,
       spaceHasUrl: false,
-      privacyPickerIsVisible: false,
-      currentPrivacy: ''
+      privacyPickerIsVisible: false
     }
   },
   filters: {
@@ -60,6 +59,7 @@ export default {
   },
   computed: {
     spaceName () { return this.$store.state.currentSpace.name },
+    spacePrivacy () { return this.$store.state.currentSpace.privacy },
     canEditSpace () {
       const canEdit = this.$store.getters['currentUser/canEditCurrentSpace']
       return canEdit
@@ -69,15 +69,13 @@ export default {
     canNativeShare () {
       return Boolean(navigator.share)
     },
-    privacyState: {
-      get () {
-        return privacy.states().find(state => {
-          return state.name === this.currentPrivacy
-        })
-      }
+    privacyState () {
+      return privacy.states().find(state => {
+        return state.name === this.spacePrivacy
+      })
     },
     spaceIsPrivate () {
-      return this.currentPrivacy === 'private'
+      return this.spacePrivacy === 'private'
     }
   },
   methods: {
@@ -108,9 +106,6 @@ export default {
     },
     closeDialogs () {
       this.privacyPickerIsVisible = false
-    },
-    updateCurrentPrivacy () {
-      this.currentPrivacy = this.$store.state.currentSpace.privacy
     }
   },
   watch: {
@@ -118,7 +113,6 @@ export default {
       this.urlIsCopied = false
       this.spaceHasUrl = window.location.href !== (window.location.origin + '/')
       this.closeDialogs()
-      this.updateCurrentPrivacy()
     }
   }
 }

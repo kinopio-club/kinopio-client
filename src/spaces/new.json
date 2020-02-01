@@ -1,6 +1,7 @@
 {
   "id": "1",
   "name": "New Space",
+  "privacy": "closed",
   "users": [],
   "cards": [
     {
