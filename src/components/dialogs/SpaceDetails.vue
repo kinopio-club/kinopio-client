@@ -1,15 +1,16 @@
 <template lang="pug">
 dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs")
   section
-    .row
-      .button-wrap(v-if="userIsSignedIn")
-        button.privacy-button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
-          img.icon(v-if="currentSpaceIsPrivate" src="@/assets/lock.svg")
-          img.icon(v-else src="@/assets/unlock.svg")
-        PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs")
-
-      input(v-if="canEditCurrentSpace" placeholder="name" v-model="spaceName")
-      p(v-else) {{spaceName}}
+    .row.name-row
+      template(v-if="canEditCurrentSpace")
+        input(placeholder="name" v-model="spaceName")
+        .button-wrap(v-if="userIsSignedIn")
+          button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
+            img.icon(v-if="currentSpaceIsPrivate" src="@/assets/lock.svg")
+            img.icon(v-else src="@/assets/unlock.svg")
+          PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs")
+      template(v-else)
+        p {{spaceName}}
 
     button(v-if="canEditCurrentSpace" @click="removeCurrentSpace")
       img.icon(src="@/assets/remove.svg")
@@ -48,8 +49,8 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
           .badge.info.template-badge(v-show="spaceIsTemplate(space.id)")
             span Template
           .name
-            img.icon(v-if="spaceIsPrivate(space)" src="@/assets/lock.svg")
             span {{space.name}}
+            img.icon(v-if="spaceIsPrivate(space)" src="@/assets/lock.svg")
 </template>
 
 <script>
@@ -176,6 +177,7 @@ export default {
       this.importIsVisible = false
       this.templatesIsVisible = false
       this.privacyPickerIsVisible = false
+      this.updateSpaces()
     },
     spaceIsActive (spaceId) {
       const currentSpace = this.$store.state.currentSpace.id
@@ -242,8 +244,14 @@ export default {
 .space-details
   .template-badge
     flex none
-  .privacy-button
-    margin-right 6px
+  .name-row
+    button
+      margin-left 6px
     .icon
-      width 14px
+      width 13px
+      height 11px
+
+  .name // in results list
+    .icon
+      margin-left 6px
 </style>

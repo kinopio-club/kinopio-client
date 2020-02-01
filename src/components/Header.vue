@@ -10,8 +10,8 @@ header
       button(@click.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
         .badge.info.template-badge(v-show="currentSpaceIsTemplate")
           span Template
-        img.icon(v-if="spaceIsPrivate" src="@/assets/lock.svg")
         span {{currentSpaceName}}
+        img.icon.lock(v-if="spaceIsPrivate" src="@/assets/lock.svg")
         Loader(:visible="isLoadingSpace")
       SpaceDetails(:visible="spaceDetailsIsVisible")
 
@@ -210,5 +210,7 @@ header
     justify-content flex-end
     > .button-wrap
       display inline-block
+  .lock
+    margin-left 6px
 
 </style>
