@@ -6,11 +6,20 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop ref="dialog")
     template(v-if="canEditSpace")
       button
         //- TODO img lock or unlock based on spaceIsPrivate
-        span {{privacy}}
+        span {{privacy | capitalize}}
+
+      //-v-if privacy === public
+
+      //-v-if privacy === closed
       p
         .badge.info Everyone can view
         span and only you can edit
       //- Everyone can view this space but only you and your [collaborators || group] , can edit it
+
+      //-v-if privacy === private
+
+      //- todo  PrivacyPicker.vue (based on SpacePicker.vue)
+
     textarea(ref="url") {{url()}}
 
     button(@click="copyUrl" v-if="!canNativeShare") Copy Url
@@ -44,6 +53,11 @@ export default {
       spaceHasUrl: false
     }
   },
+  filters: {
+    capitalize (value) {
+      return utils.capitalizeFirstLetter(value)
+    }
+  },
   computed: {
     spaceName () { return this.$store.state.currentSpace.name },
     canEditSpace () {
@@ -56,7 +70,7 @@ export default {
       return Boolean(navigator.share)
     },
     privacy () {
-      return utils.capitalizeFirstLetter(this.$store.state.currentSpace.privacy)
+      return this.$store.state.currentSpace.privacy
     },
     spaceIsPrivate () {
       return this.privacy === 'Private'
