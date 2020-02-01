@@ -58,23 +58,17 @@ export default {
   // src url("assets/NHaasGroteskDSPro-55Rg.woff2") format("woff2")
   // src url("assets/lunchtype22-regular-webfont.woff2") format("woff2") // contender
   // src url("assets/AftenScreenTrial.otf") format("opentype") // a clean drop in replacement (13/1.2), but maybe it's a tad boring?
-  src url("assets/Scto Grotesk A Demo Regular.otf") format("opentype") // strong candidate, is it a hair too wide? 14/1.2
+  src url("assets/Hugh Textbook Regular 01-29-20.otf") format("opentype") // strong candidate, is it a hair too wide? 14/1.2
   // src url("assets/David-AA-trial-02-Light.otf") format("opentype") // alt candidate to scto, a bit thicker more irregular tho, maybe longer feeling
   // src url("assets/DazzedTRIAL-Regular.otf") format("opentype")
   font-weight normal
   font-style normal
 
-@font-face
-  font-family 'alpina'
-  // src url("assets/Inconsolata.woff") format("woff")
-  // src url("assets/NHaasGroteskDSPro-55Rg.woff2") format("woff2")
-  // src url("assets/lunchtype22-regular-webfont.woff2") format("woff2") // contender
-  // src url("assets/AftenScreenTrial.otf") format("opentype") // a clean drop in replacement (13/1.2), but maybe it's a tad boring?
-  src url("assets/Scto Grotesk A Demo Bold.otf") format("opentype") // strong candidate, is it a hair too wide? 14/1.2
-  // src url("assets/David-AA-trial-02-Light.otf") format("opentype") // alt candidate to scto, a bit thicker more irregular tho, maybe longer feeling
-  // src url("assets/DazzedTRIAL-Regular.otf") format("opentype")
-  font-weight bold
-  font-style normal
+// @font-face
+//   font-family 'alpina'
+//   src url("assets/Scto Grotesk A Demo Bold.otf") format("opentype") // strong candidate, is it a hair too wide? 14/1.2
+//   font-weight bold
+//   font-style normal
 
 *
   -webkit-overflow-scrolling touch
