@@ -2,67 +2,54 @@
 dialog.narrow.privacy-picker(v-if="visible" :open="visible" @click.stop)
   section.results-section
     ul.results-list
-      li hello
-      //- template(v-for="(space in spaces")
-      //-   li(@click="select(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id" tabindex="0" v-on:keyup.enter="select(space)")
-      //-     .name {{space.name}}
+      template(v-for="(privacyState in privacyStates")
+        li(:class="{ active: privacyStateIsActive(privacyState) }" @click="select(privacyState)")
+          .badge(:class="privacyState.color")
+            img.icon(v-if="spaceIsPrivate(privacyState)" src="@/assets/lock.svg")
+            img.icon(v-else src="@/assets/unlock.svg")
+            span {{privacyState.name | capitalize}}
+          p.description {{privacyState.description | capitalize}}
 </template>
 
 <script>
-// import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
-
-// import cache from '@/cache.js'
+import privacy from '@/spaces/privacy.js'
+import utils from '@/utils.js'
 
 export default {
   name: 'SpacePicker',
   props: {
     visible: Boolean
+  },
+  filters: {
+    capitalize (value) {
+      return utils.capitalizeFirstLetter(value)
+    }
+  },
+  computed: {
+    privacyStates () { return privacy.states() }
+  },
+  methods: {
+    spaceIsPrivate (privacyState) {
+      return privacyState.name === 'private'
+    },
+    privacyStateIsActive (privacyState) {
+      const currentPrivacy = this.$store.state.currentSpace.privacy
+      return privacyState.name === currentPrivacy
+    },
+    select (privacyState) {
+      console.log('select', privacyState)
+      this.$emit('closeDialog')
+    }
   }
-  // data () {
-  //   return {
-  //     spaces: []
-  //   }
-  // },
-  // methods: {
-  //   spaceIsActive (spaceId) {
-  //     return Boolean(this.selectedSpace.id === spaceId)
-  //   },
-  //   select (space) {
-  //     this.$emit('selectSpace', space)
-  //     this.$emit('closeDialog')
-  //   },
-  //   updateSpaces () {
-  //     const currentSpace = this.$store.state.currentSpace
-  //     this.spaces = cache.getAllSpaces()
-  //     if (this.excludeCurrentSpace) {
-  //       this.spaces = this.spaces.filter(space => space.id !== currentSpace.id)
-  //     }
-  //   },
-  //   scrollIntoView () {
-  //     const element = this.$refs.dialog
-  //     scrollIntoView(element, {
-  //       behavior: 'smooth',
-  //       scrollMode: 'if-needed'
-  //     })
-  //   }
-  // },
-  // watch: {
-  //   visible (visible) {
-  //     this.$nextTick(() => {
-  //       if (visible) {
-  //         this.scrollIntoView()
-  //         this.updateSpaces()
-  //       }
-  //     })
-  //   }
-  // }
 }
 </script>
 
-<style lang="stylus">
+<style lang="stylus" scoped>
 .privacy-picker
   left initial
   right 8px
+  li
+    display block
   .results-section
     padding-top 4px
 </style>

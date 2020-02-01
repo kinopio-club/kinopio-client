@@ -14,7 +14,7 @@ export default {
         name: 'closed',
         // shortDescription: 'only you can add', // only collaborators can add
         // everyone: 'everyone can view',
-        // collaborators: 'and only you can edit'
+        // collaborators: 'and only you can edit',
         description: 'everyone can view and only you can edit', // only you and your collaborators
         color: 'info'
       },
