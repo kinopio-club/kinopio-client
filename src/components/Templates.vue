@@ -1,6 +1,6 @@
 <template lang="pug">
 .templates(v-if="visible" :open="visible" @click.stop ref="dialog" @click="closeDialogs")
-  //- p Preview and make them your own
+  //- p Make these your own
   section.categories
     .button-wrap.category-wrap
       button(@click.stop="toggleTemplateCategoryPickerIsVisible" :class="{active: templateCategoryPickerIsVisible}")
