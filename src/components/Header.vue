@@ -10,6 +10,7 @@ header
       button(@click.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
         .badge.info.template-badge(v-show="currentSpaceIsTemplate")
           span Template
+        img.icon(v-if="spaceIsPrivate" src="@/assets/lock.svg")
         span {{currentSpaceName}}
         Loader(:visible="isLoadingSpace")
       SpaceDetails(:visible="spaceDetailsIsVisible")
@@ -19,7 +20,6 @@ header
       // Share
       .button-wrap
         button(@click.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
-          img.icon(v-if="spaceIsPrivate" src="@/assets/lock.svg")
           span Share
         Share(:visible="shareIsVisible")
 

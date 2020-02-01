@@ -1,8 +1,14 @@
 <template lang="pug">
 dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs")
   section
-    input(v-if="canEditCurrentSpace" placeholder="name" v-model="spaceName")
-    p(v-else) {{spaceName}}
+    .row
+      .button-wrap(v-if="userIsSignedIn")
+        button.privacy-button
+          img.icon(v-if="currentSpaceIsPrivate" src="@/assets/lock.svg")
+          img.icon(v-else src="@/assets/unlock.svg")
+
+      input(v-if="canEditCurrentSpace" placeholder="name" v-model="spaceName")
+      p(v-else) {{spaceName}}
 
     button(v-if="canEditCurrentSpace" @click="removeCurrentSpace")
       img.icon(src="@/assets/remove.svg")
@@ -125,7 +131,14 @@ export default {
     },
     isNumerousSpaces () {
       return Boolean(this.spaces.length >= 5)
+    },
+    currentSpaceIsPrivate () {
+      return this.$store.state.currentSpace.privacy === 'private'
+    },
+    userIsSignedIn () {
+      return this.$store.getters['currentUser/isSignedIn']
     }
+
   },
   methods: {
     focusFilterInput () {
@@ -215,6 +228,11 @@ export default {
 </script>
 
 <style lang="stylus">
-.template-badge
-  flex none
+.space-details
+  .template-badge
+    flex none
+  .privacy-button
+    margin-right 6px
+    .icon
+      width 14px
 </style>
