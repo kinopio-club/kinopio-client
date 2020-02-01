@@ -5,24 +5,24 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
   section(v-if="spaceHasUrl")
     template(v-if="canEditSpace")
       .button-wrap
-        button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
+        button(v-model="privacyState" @click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
           .badge(:class="privacyState.color")
             img.icon(v-if="spaceIsPrivate" src="@/assets/lock.svg")
             img.icon(v-else src="@/assets/unlock.svg")
             span {{privacyState.name | capitalize}}
           p.description {{privacyState.description | capitalize}}
-        PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs")
+        PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs" @updateCurrentPrivacy="updateCurrentPrivacy")
 
-    textarea(ref="url") {{url()}}
-
-    button(@click="copyUrl" v-if="!canNativeShare") Copy Url
-    .segmented-buttons(v-if="canNativeShare")
-      button(@click="copyUrl")
-        span Copy Url
-      button(@click="shareUrl")
-        img.icon(src="@/assets/share.svg")
-    .row
-      .badge.success.success-message(v-if="urlIsCopied") Url Copied
+    template(v-if="!spaceIsPrivate")
+      textarea(ref="url") {{url()}}
+      button(@click="copyUrl" v-if="!canNativeShare") Copy Url
+      .segmented-buttons(v-if="canNativeShare")
+        button(@click="copyUrl")
+          span Copy Url
+        button(@click="shareUrl")
+          img.icon(src="@/assets/share.svg")
+      .row
+        .badge.success.success-message(v-if="urlIsCopied") Url Copied
 
   section(v-if="!spaceHasUrl")
     p
@@ -49,7 +49,8 @@ export default {
     return {
       urlIsCopied: false,
       spaceHasUrl: false,
-      privacyPickerIsVisible: false
+      privacyPickerIsVisible: false,
+      currentPrivacy: ''
     }
   },
   filters: {
@@ -68,15 +69,15 @@ export default {
     canNativeShare () {
       return Boolean(navigator.share)
     },
-    privacyState () {
-      const currentPrivacy = this.$store.state.currentSpace.privacy
-      return privacy.states().find(state => {
-        return state.name === currentPrivacy
-      })
+    privacyState: {
+      get () {
+        return privacy.states().find(state => {
+          return state.name === this.currentPrivacy
+        })
+      }
     },
     spaceIsPrivate () {
-      const currentPrivacy = this.$store.state.currentSpace.privacy
-      return currentPrivacy === 'private'
+      return this.currentPrivacy === 'private'
     }
   },
   methods: {
@@ -107,6 +108,9 @@ export default {
     },
     closeDialogs () {
       this.privacyPickerIsVisible = false
+    },
+    updateCurrentPrivacy () {
+      this.currentPrivacy = this.$store.state.currentSpace.privacy
     }
   },
   watch: {
@@ -114,6 +118,7 @@ export default {
       this.urlIsCopied = false
       this.spaceHasUrl = window.location.href !== (window.location.origin + '/')
       this.closeDialogs()
+      this.updateCurrentPrivacy()
     }
   }
 }

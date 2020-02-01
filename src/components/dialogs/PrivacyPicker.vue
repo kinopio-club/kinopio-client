@@ -37,8 +37,9 @@ export default {
       return privacyState.name === currentPrivacy
     },
     select (privacyState) {
-      console.log('select', privacyState)
+      this.$store.dispatch('currentSpace/updateSpace', { privacy: privacyState.name })
       this.$emit('closeDialog')
+      this.$emit('updateCurrentPrivacy')
     }
   }
 }
@@ -52,4 +53,5 @@ export default {
     display block
   .results-section
     padding-top 4px
+    max-height calc(92vh - 120px)
 </style>
