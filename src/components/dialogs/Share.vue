@@ -4,7 +4,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
     p Share
   section(v-if="spaceHasUrl")
     template(v-if="canEditSpace")
-      .button-wrap
+      .button-wrap.privacy-wrap
         button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
           .badge(:class="privacyState.color")
             img.icon(v-if="spaceIsPrivate" src="@/assets/lock.svg")
@@ -136,7 +136,8 @@ export default {
     padding 4px
     margin-bottom 4px
     height 50px
-    margin-top 10px
+  .privacy-wrap
+    margin-bottom 10px
   .description
     margin-top 3px
 
