@@ -4,16 +4,23 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop ref="dialog")
     p Share
   section(v-if="spaceHasUrl")
     template(v-if="canEditSpace")
-      button
-        //- TODO img lock or unlock based on spaceIsPrivate
-        span {{privacy | capitalize}}
+      .button-wrap
+        button(@click="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
+          //- TODO img lock or unlock based on spaceIsPrivate
+          .badge(:class="privacyState.color")
+            img.icon(v-if="spaceIsPrivate" src="@/assets/lock.svg")
+            img.icon(v-else src="@/assets/unlock.svg")
+            span {{privacyState.name | capitalize}}
+          p.description {{privacyState.description | capitalize}}
+          //- span
 
+        PrivacyPicker(:visible="privacyPickerIsVisible")
       //-v-if privacy === public
 
       //-v-if privacy === closed
-      p
-        .badge.info Everyone can view
-        span and only you can edit
+      //- p
+      //-   .badge.info Everyone can view
+      //-   span and only you can edit
       //- Everyone can view this space but only you and your [collaborators || group] , can edit it
 
       //-v-if privacy === private
@@ -29,7 +36,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop ref="dialog")
       button(@click="shareUrl")
         img.icon(src="@/assets/share.svg")
     .row
-      .badge.success(v-if="urlIsCopied") Url Copied
+      .badge.success.success-message(v-if="urlIsCopied") Url Copied
 
   section(v-if="!spaceHasUrl")
     p
@@ -40,17 +47,23 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop ref="dialog")
 </template>
 
 <script>
+import PrivacyPicker from '@/components/dialogs/PrivacyPicker.vue'
 import utils from '@/utils.js'
+import privacy from '@/spaces/privacy.js'
 
 export default {
   name: 'Share',
+  components: {
+    PrivacyPicker
+  },
   props: {
     visible: Boolean
   },
   data () {
     return {
       urlIsCopied: false,
-      spaceHasUrl: false
+      spaceHasUrl: false,
+      privacyPickerIsVisible: false
     }
   },
   filters: {
@@ -69,11 +82,17 @@ export default {
     canNativeShare () {
       return Boolean(navigator.share)
     },
-    privacy () {
-      return this.$store.state.currentSpace.privacy
+    privacyState () {
+      const currentPrivacy = this.$store.state.currentSpace.privacy
+      return privacy.states().find(state => {
+        return state.name === currentPrivacy
+      })
+      // console.log(x)
+      // return x
     },
     spaceIsPrivate () {
-      return this.privacy === 'Private'
+      const currentPrivacy = this.$store.state.currentSpace.privacy
+      return currentPrivacy === 'private'
     }
   },
   methods: {
@@ -98,6 +117,9 @@ export default {
         url: this.url()
       }
       navigator.share(data)
+    },
+    togglePrivacyPickerIsVisible () {
+      this.privacyPickerIsVisible = !this.privacyPickerIsVisible
     }
   },
   watch: {
@@ -116,7 +138,9 @@ export default {
   right 8px
   .badge
     display inline-block
-  .badge.success
+    &.danger
+      background-color var(--danger-background)
+  .success-message
     margin-top 10px
   textarea
     background-color var(--secondary-background)
@@ -125,4 +149,7 @@ export default {
     padding 4px
     margin-bottom 4px
     height 50px
+    margin-top 10px
+  .description
+    margin-top 3px
 </style>

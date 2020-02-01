@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="8px" height="11px" viewBox="0 0 8 11" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 62 (91390) - https://sketch.com -->
+    <title>public</title>
+    <desc>Created with Sketch.</desc>
+    <g id="kinopio" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="public">
+            <rect id="Rectangle" fill="#000000" x="0" y="5" width="8" height="6" rx="1"></rect>
+            <path d="M1.235,5.632 L1.235,2.637 C1.235,1.53 2.133,0.632 3.23,0.632 L4.681,0.632 C5.78017749,0.633641612 6.67160011,1.52283009 6.676,2.622 L6.676,5.5" id="Path" stroke="#222222" stroke-linecap="round" stroke-linejoin="round"></path>
+        </g>
+    </g>
+</svg>
