@@ -40,7 +40,9 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
         li(@click="changeSpace(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id" tabindex="0" v-on:keyup.enter="changeSpace(space)")
           .badge.info.template-badge(v-show="spaceIsTemplate(space.id)")
             span Template
-          .name {{space.name}}
+          .name
+            img.icon(v-if="spaceIsPrivate(space)" src="@/assets/lock.svg")
+            span {{space.name}}
 </template>
 
 <script>
@@ -167,6 +169,9 @@ export default {
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', space)
+    },
+    spaceIsPrivate (space) {
+      return space.privacy === 'private'
     },
     changeToLastSpace () {
       if (this.spaces.length) {
