@@ -46,11 +46,13 @@ export default {
 
 <style lang="stylus" scoped>
 .privacy-picker
-  left initial
-  right 8px
+  .badge
+    display inline-block
   li
     display block
   .results-section
     padding-top 4px
     max-height calc(92vh - 120px)
+  .description
+    margin-top 3px
 </style>

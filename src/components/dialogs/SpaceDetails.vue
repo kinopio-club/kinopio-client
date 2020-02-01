@@ -3,9 +3,10 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
   section
     .row
       .button-wrap(v-if="userIsSignedIn")
-        button.privacy-button
+        button.privacy-button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
           img.icon(v-if="currentSpaceIsPrivate" src="@/assets/lock.svg")
           img.icon(v-else src="@/assets/unlock.svg")
+        PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs")
 
       input(v-if="canEditCurrentSpace" placeholder="name" v-model="spaceName")
       p(v-else) {{spaceName}}
@@ -59,13 +60,15 @@ import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
 import Templates from '@/components/dialogs/Templates.vue'
 import templates from '@/spaces/templates.js'
+import PrivacyPicker from '@/components/dialogs/PrivacyPicker.vue'
 
 export default {
   name: 'SpaceDetails',
   components: {
     Export,
     Import,
-    Templates
+    Templates,
+    PrivacyPicker
   },
   props: {
     visible: Boolean
@@ -77,7 +80,8 @@ export default {
       importIsVisible: false,
       templatesIsVisible: false,
       filter: '',
-      filteredSpaces: []
+      filteredSpaces: [],
+      privacyPickerIsVisible: false
     }
   },
   computed: {
@@ -161,10 +165,17 @@ export default {
       this.closeDialogs()
       this.templatesIsVisible = !isVisible
     },
+    togglePrivacyPickerIsVisible () {
+      const isVisible = this.privacyPickerIsVisible
+      this.closeDialogs()
+      this.privacyPickerIsVisible = !isVisible
+    },
+
     closeDialogs () {
       this.exportIsVisible = false
       this.importIsVisible = false
       this.templatesIsVisible = false
+      this.privacyPickerIsVisible = false
     },
     spaceIsActive (spaceId) {
       const currentSpace = this.$store.state.currentSpace.id
