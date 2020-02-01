@@ -136,8 +136,8 @@ export default {
     padding 4px
     margin-bottom 4px
     height 50px
-  .privacy-wrap
-    margin-bottom 10px
+  .privacy-wrap + textarea
+    margin-top 10px
   .description
     margin-top 3px
 

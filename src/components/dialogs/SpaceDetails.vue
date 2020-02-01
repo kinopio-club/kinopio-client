@@ -8,7 +8,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
           button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
             img.icon(v-if="currentSpaceIsPrivate" src="@/assets/lock.svg")
             img.icon(v-else src="@/assets/unlock.svg")
-          PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs")
+          PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs" @updateSpaces="updateSpaces")
       template(v-else)
         p {{spaceName}}
 
@@ -177,7 +177,6 @@ export default {
       this.importIsVisible = false
       this.templatesIsVisible = false
       this.privacyPickerIsVisible = false
-      this.updateSpaces()
     },
     spaceIsActive (spaceId) {
       const currentSpace = this.$store.state.currentSpace.id
