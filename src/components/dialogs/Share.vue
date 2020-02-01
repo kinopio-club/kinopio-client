@@ -4,6 +4,9 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop ref="dialog")
     p Share
   section(v-if="spaceHasUrl")
     template(v-if="canEditSpace")
+      button
+        //- TODO img lock or unlock based on spaceIsPrivate
+        span {{privacy}}
       p
         .badge.info Everyone can view
         span and only you can edit
@@ -28,6 +31,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop ref="dialog")
 </template>
 
 <script>
+import utils from '@/utils.js'
 
 export default {
   name: 'Share',
@@ -50,6 +54,12 @@ export default {
     // https://caniuse.com/#feat=web-share
     canNativeShare () {
       return Boolean(navigator.share)
+    },
+    privacy () {
+      return utils.capitalizeFirstLetter(this.$store.state.currentSpace.privacy)
+    },
+    spaceIsPrivate () {
+      return this.privacy === 'Private'
     }
   },
   methods: {
