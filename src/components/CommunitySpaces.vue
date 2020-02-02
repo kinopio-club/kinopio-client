@@ -7,9 +7,10 @@
       //- p Recently updated public spaces
       button(@click="getNewSpaces")
         img.refresh.icon(src="@/assets/refresh.svg")
+
       a(href="#")
         //- TODO add help link
-        button Help →
+        button Info →
       //- TODO other blockers/QA: https://kinopio.club/-idea-community-spaces-rgvRZ4ttF_4qCw3jIh_CT
 
   section.results-section
@@ -17,19 +18,19 @@
       template(v-for="(space in spaces")
         a(:href="space.url")
           li(tabindex="0")
-            .badge.info(:style="{ background: user(space).color}")
-              .anon-avatar
-              .user-name(v-if="user(space).name") {{user(space).name}}
+            User(:user="user(space)" :isClickable="false" :key="user(space).id")
             span {{space.name}}
 </template>
 
 <script>
 import Loader from '@/components/Loader.vue'
+import User from '@/components/User.vue'
 
 export default {
   name: 'CommunitySpaces',
   components: {
-    Loader
+    Loader,
+    User
   },
   props: {
     visible: Boolean,
@@ -58,19 +59,8 @@ export default {
     text-decoration none
   .badge
     display flex
-  .user-name
-    margin-left 6px
-    max-width 100px
-    white-space nowrap
-    overflow hidden
-    text-overflow ellipsis
-  .anon-avatar
-    background-position center
-    height 15px
-    width 12px
-    display inline-block
-    background-repeat no-repeat
-    background-size contain
   button + a
     margin-left 6px
+  .user
+    margin-right 6px
 </style>
