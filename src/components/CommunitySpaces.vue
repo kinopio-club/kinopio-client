@@ -52,8 +52,8 @@ export default {
 .community-spaces
   .header
     border-top 1px solid var(--primary)
-    border-top-left-radius 0 !important
-    border-top-right-radius 0 !important
+    border-top-left-radius 0
+    border-top-right-radius 0
   a
     color var(--primary)
     text-decoration none
