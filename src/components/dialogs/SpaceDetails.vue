@@ -1,14 +1,16 @@
 <template lang="pug">
 dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs")
   section
-    .row.name-row
+    .row(:class="{ 'name-has-privacy-row': canEditCurrentSpace && userIsSignedIn }")
       template(v-if="canEditCurrentSpace")
         input(placeholder="name" v-model="spaceName")
+
         .button-wrap(v-if="userIsSignedIn")
           button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
             img.icon(v-if="currentSpaceIsPrivate" src="@/assets/lock.svg")
             img.icon(v-else src="@/assets/unlock.svg")
           PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs" @updateSpaces="updateSpaces")
+
       template(v-else)
         p {{spaceName}}
 
@@ -243,7 +245,8 @@ export default {
 .space-details
   .template-badge
     flex none
-  .name-row
+  .name-has-privacy-row
+    margin-bottom 6px
     button
       margin-left 6px
     .icon
