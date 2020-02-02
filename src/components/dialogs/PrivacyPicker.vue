@@ -16,7 +16,7 @@ import privacy from '@/spaces/privacy.js'
 import utils from '@/utils.js'
 
 export default {
-  name: 'SpacePicker',
+  name: 'PrivacyPicker',
   props: {
     visible: Boolean
   },

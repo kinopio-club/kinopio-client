@@ -200,6 +200,7 @@ dialog
   .row
     margin-bottom 10px
     display flex
+    align-items center
     position relative
     > input
       margin-bottom 0
