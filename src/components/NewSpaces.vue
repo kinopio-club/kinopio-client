@@ -1,7 +1,7 @@
 <template lang="pug">
 .new-spaces(v-if="visible" :open="visible" @click.stop ref="dialog")
   section.header
-    p Public spaces by Kinopio friends
+    p Public spaces which have been renamed, made by Kinopio friends
   section.results-section
     Loader(:visible="loading")
     ul.results-list
