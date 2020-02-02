@@ -244,7 +244,6 @@ export default {
   .template-badge
     flex none
   .name-row
-    margin-bottom 6px
     button
       margin-left 6px
     .icon
