@@ -15,6 +15,11 @@ dialog.import.narrow(v-if="visible" :open="visible" @click.stop ref="dialog")
       ul
         li(v-for="(error in errors") {{error}}
 
+  section
+    button
+      img.icon.arena(src="@/assets/arena.svg")
+      span Are.na Channel
+
 </template>
 
 <script>
@@ -147,5 +152,6 @@ export default {
       user-select text
   ul
     list-style-type square
-
+  .arena
+    width 18px
 </style>
