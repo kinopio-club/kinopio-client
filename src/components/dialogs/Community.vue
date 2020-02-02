@@ -8,13 +8,13 @@ dialog.community(v-if="visible" :open="visible")
       button(@click.stop="showTemplates" :class="{ active: templatesIsVisible }")
         span Templates
 
-  CommunitySpaces(:visible="!templatesIsVisible" :loading="loadingNewSpaces" :spaces="spaces" @getNewSpaces="getNewSpaces")
+  NewSpaces(:visible="!templatesIsVisible" :loading="loadingNewSpaces" :spaces="spaces" @getNewSpaces="getNewSpaces")
   Templates(:visible="templatesIsVisible")
 </template>
 
 <script>
 import Templates from '@/components/Templates.vue'
-import CommunitySpaces from '@/components/CommunitySpaces.vue'
+import NewSpaces from '@/components/NewSpaces.vue'
 import Loader from '@/components/Loader.vue'
 
 export default {
@@ -22,7 +22,7 @@ export default {
   components: {
     Templates,
     Loader,
-    CommunitySpaces
+    NewSpaces
   },
   props: {
     visible: Boolean

@@ -1,19 +1,9 @@
 <template lang="pug">
-.community-spaces(v-if="visible" :open="visible" @click.stop ref="dialog")
+.new-spaces(v-if="visible" :open="visible" @click.stop ref="dialog")
   section.header
-    Loader(:visible="loading")
-
-    template(v-if="!loading")
-      //- p Recently updated public spaces
-      button(@click="getNewSpaces")
-        img.refresh.icon(src="@/assets/refresh.svg")
-
-      a(href="#")
-        //- TODO add help link
-        button Info →
-      //- TODO other blockers/QA: https://kinopio.club/-idea-community-spaces-rgvRZ4ttF_4qCw3jIh_CT
-
+    p Public spaces by Kinopio friends
   section.results-section
+    Loader(:visible="loading")
     ul.results-list
       template(v-for="(space in spaces")
         a(:href="space.url")
@@ -27,7 +17,7 @@ import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
 
 export default {
-  name: 'CommunitySpaces',
+  name: 'NewSpaces',
   components: {
     Loader,
     User
@@ -38,9 +28,6 @@ export default {
     spaces: Array
   },
   methods: {
-    getNewSpaces () {
-      this.$emit('getNewSpaces')
-    },
     user (space) {
       return space.users[0]
     }
@@ -49,7 +36,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.community-spaces
+.new-spaces
   .header
     border-top 1px solid var(--primary)
     border-top-left-radius 0
