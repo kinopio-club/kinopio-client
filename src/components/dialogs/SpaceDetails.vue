@@ -1,8 +1,18 @@
 <template lang="pug">
 dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs")
   section
-    input(v-if="canEditCurrentSpace" placeholder="name" v-model="spaceName")
-    p(v-else) {{spaceName}}
+    .row(:class="{ 'privacy-row': canEditCurrentSpace && userIsSignedIn }")
+      template(v-if="canEditCurrentSpace")
+        input(placeholder="name" v-model="spaceName")
+
+        .button-wrap(v-if="userIsSignedIn")
+          button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
+            img.icon(v-if="currentSpaceIsPrivate" src="@/assets/lock.svg")
+            img.icon(v-else src="@/assets/unlock.svg")
+          PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs" @updateSpaces="updateSpaces")
+
+      template(v-else)
+        p {{spaceName}}
 
     button(v-if="canEditCurrentSpace" @click="removeCurrentSpace")
       img.icon(src="@/assets/remove.svg")
@@ -34,7 +44,9 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
         li(@click="changeSpace(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id" tabindex="0" v-on:keyup.enter="changeSpace(space)")
           .badge.info.template-badge(v-show="spaceIsTemplate(space.id)")
             span Template
-          .name {{space.name}}
+          .name
+            span {{space.name}}
+            img.icon(v-if="spaceIsPrivate(space)" src="@/assets/lock.svg")
 </template>
 
 <script>
@@ -44,12 +56,14 @@ import cache from '@/cache.js'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
 import templates from '@/spaces/templates.js'
+import PrivacyPicker from '@/components/dialogs/PrivacyPicker.vue'
 
 export default {
   name: 'SpaceDetails',
   components: {
     Export,
-    Import
+    Import,
+    PrivacyPicker
   },
   props: {
     visible: Boolean
@@ -60,7 +74,8 @@ export default {
       exportIsVisible: false,
       importIsVisible: false,
       filter: '',
-      filteredSpaces: []
+      filteredSpaces: [],
+      privacyPickerIsVisible: false
     }
   },
   computed: {
@@ -114,7 +129,14 @@ export default {
     },
     isNumerousSpaces () {
       return Boolean(this.spaces.length >= 5)
+    },
+    currentSpaceIsPrivate () {
+      return this.$store.state.currentSpace.privacy === 'private'
+    },
+    userIsSignedIn () {
+      return this.$store.getters['currentUser/isSignedIn']
     }
+
   },
   methods: {
     focusFilterInput () {
@@ -135,6 +157,17 @@ export default {
     closeDialogs () {
       this.exportIsVisible = false
       this.importIsVisible = false
+      this.privacyPickerIsVisible = false
+    },
+    toggleTemplatesIsVisible () {
+      const isVisible = this.templatesIsVisible
+      this.closeDialogs()
+      this.templatesIsVisible = !isVisible
+    },
+    togglePrivacyPickerIsVisible () {
+      const isVisible = this.privacyPickerIsVisible
+      this.closeDialogs()
+      this.privacyPickerIsVisible = !isVisible
     },
     spaceIsActive (spaceId) {
       const currentSpace = this.$store.state.currentSpace.id
@@ -152,6 +185,9 @@ export default {
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', space)
+    },
+    spaceIsPrivate (space) {
+      return space.privacy === 'private'
     },
     changeToLastSpace () {
       if (this.spaces.length) {
@@ -195,6 +231,18 @@ export default {
 </script>
 
 <style lang="stylus">
-.template-badge
-  flex none
+.space-details
+  .template-badge
+    flex none
+  .privacy-row
+    margin-bottom 6px
+    button
+      margin-left 6px
+    .icon
+      width 13px
+      height 11px
+
+  .name // in results list
+    .icon
+      margin-left 6px
 </style>

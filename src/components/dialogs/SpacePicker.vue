@@ -4,7 +4,9 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.stop ref="dialo
     ul.results-list
       template(v-for="(space in spaces")
         li(@click="select(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id" tabindex="0" v-on:keyup.enter="select(space)")
-          .name {{space.name}}
+          .name
+            img.icon(v-if="spaceIsPrivate(space)" src="@/assets/lock.svg")
+            span {{space.name}}
 </template>
 
 <script>
@@ -31,6 +33,9 @@ export default {
     select (space) {
       this.$emit('selectSpace', space)
       this.$emit('closeDialog')
+    },
+    spaceIsPrivate (space) {
+      return space.privacy === 'private'
     },
     updateSpaces () {
       const currentSpace = this.$store.state.currentSpace

@@ -11,6 +11,7 @@ header
         .badge.info.template-badge(v-show="currentSpaceIsTemplate")
           span Template
         span {{currentSpaceName}}
+        img.icon.lock(v-if="spaceIsPrivate" src="@/assets/lock.svg")
         Loader(:visible="isLoadingSpace")
       SpaceDetails(:visible="spaceDetailsIsVisible")
 
@@ -112,6 +113,9 @@ export default {
       const id = this.$store.state.currentSpace.id
       const templateSpaceIds = templates.spaces().map(space => space.spaceId)
       return templateSpaceIds.includes(id)
+    },
+    spaceIsPrivate () {
+      return this.$store.state.currentSpace.privacy === 'private'
     }
   },
   methods: {
@@ -206,5 +210,7 @@ header
     justify-content flex-end
     > .button-wrap
       display inline-block
+  .lock
+    margin-left 6px
 
 </style>

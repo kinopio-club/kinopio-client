@@ -1,23 +1,28 @@
 <template lang="pug">
-dialog.narrow.share(v-if="visible" :open="visible" @click.stop ref="dialog")
+dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" ref="dialog")
   section
     p Share
   section(v-if="spaceHasUrl")
     template(v-if="canEditSpace")
-      p
-        .badge.info Everyone can view
-        span and only you can edit
-      //- Everyone can view this space but only you and your [collaborators || group] , can edit it
-    textarea(ref="url") {{url()}}
+      .button-wrap.privacy-wrap
+        button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
+          .badge(:class="privacyState.color")
+            img.icon(v-if="spaceIsPrivate" src="@/assets/lock.svg")
+            img.icon(v-else src="@/assets/unlock.svg")
+            span {{privacyState.name | capitalize}}
+          p.description {{privacyState.description | capitalize}}
+        PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs")
 
-    button(@click="copyUrl" v-if="!canNativeShare") Copy Url
-    .segmented-buttons(v-if="canNativeShare")
-      button(@click="copyUrl")
-        span Copy Url
-      button(@click="shareUrl")
-        img.icon(src="@/assets/share.svg")
-    .row
-      .badge.success(v-if="urlIsCopied") Url Copied
+    template(v-if="!spaceIsPrivate")
+      textarea(ref="url") {{url()}}
+      button(@click="copyUrl" v-if="!canNativeShare") Copy Url
+      .segmented-buttons(v-if="canNativeShare")
+        button(@click="copyUrl")
+          span Copy Url
+        button(@click="shareUrl")
+          img.icon(src="@/assets/share.svg")
+      .row
+        .badge.success.success-message(v-if="urlIsCopied") Url Copied
 
   section(v-if="!spaceHasUrl")
     p
@@ -28,20 +33,33 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop ref="dialog")
 </template>
 
 <script>
+import PrivacyPicker from '@/components/dialogs/PrivacyPicker.vue'
+import utils from '@/utils.js'
+import privacy from '@/spaces/privacy.js'
 
 export default {
   name: 'Share',
+  components: {
+    PrivacyPicker
+  },
   props: {
     visible: Boolean
   },
   data () {
     return {
       urlIsCopied: false,
-      spaceHasUrl: false
+      spaceHasUrl: false,
+      privacyPickerIsVisible: false
+    }
+  },
+  filters: {
+    capitalize (value) {
+      return utils.capitalizeFirstLetter(value)
     }
   },
   computed: {
     spaceName () { return this.$store.state.currentSpace.name },
+    spacePrivacy () { return this.$store.state.currentSpace.privacy },
     canEditSpace () {
       const canEdit = this.$store.getters['currentUser/canEditCurrentSpace']
       return canEdit
@@ -50,6 +68,14 @@ export default {
     // https://caniuse.com/#feat=web-share
     canNativeShare () {
       return Boolean(navigator.share)
+    },
+    privacyState () {
+      return privacy.states().find(state => {
+        return state.name === this.spacePrivacy
+      })
+    },
+    spaceIsPrivate () {
+      return this.spacePrivacy === 'private'
     }
   },
   methods: {
@@ -74,12 +100,19 @@ export default {
         url: this.url()
       }
       navigator.share(data)
+    },
+    togglePrivacyPickerIsVisible () {
+      this.privacyPickerIsVisible = !this.privacyPickerIsVisible
+    },
+    closeDialogs () {
+      this.privacyPickerIsVisible = false
     }
   },
   watch: {
     visible (visible) {
       this.urlIsCopied = false
       this.spaceHasUrl = window.location.href !== (window.location.origin + '/')
+      this.closeDialogs()
     }
   }
 }
@@ -92,7 +125,9 @@ export default {
   right 8px
   .badge
     display inline-block
-  .badge.success
+    &.danger
+      background-color var(--danger-background)
+  .success-message
     margin-top 10px
   textarea
     background-color var(--secondary-background)
@@ -101,4 +136,12 @@ export default {
     padding 4px
     margin-bottom 4px
     height 50px
+  .privacy-wrap + textarea
+    margin-top 10px
+  .description
+    margin-top 3px
+
+  dialog.privacy-picker
+    left initial
+    right 8px
 </style>
