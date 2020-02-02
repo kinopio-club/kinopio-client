@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs")
   section
-    .row(:class="{ 'name-has-privacy-row': canEditCurrentSpace && userIsSignedIn }")
+    .row(:class="{ 'privacy-row': canEditCurrentSpace && userIsSignedIn }")
       template(v-if="canEditCurrentSpace")
         input(placeholder="name" v-model="spaceName")
 
@@ -245,7 +245,7 @@ export default {
 .space-details
   .template-badge
     flex none
-  .name-has-privacy-row
+  .privacy-row
     margin-bottom 6px
     button
       margin-left 6px
