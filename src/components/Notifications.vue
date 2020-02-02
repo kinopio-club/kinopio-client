@@ -12,9 +12,10 @@ aside.notifications
         span Save a Copy
 
   .persistent-item.danger(v-if="notifySpaceNotFound")
-    p Space could not be found
+    p Space could not be found, or is private
     .row
       button(@click="triggerSpaceDetailsVisible") Your Spaces
+      button(v-if="!userIsSignedIn" @click="triggerSignUpOrInIsVisible") Sign Up or In
 
   .persistent-item(v-if="notifySpaceIsRemoved")
     p This space has been removed
@@ -73,7 +74,10 @@ export default {
     notifySpaceNotFound () { return this.$store.state.notifySpaceNotFound },
     notifyConnectionError () { return this.$store.state.notifyConnectionError },
     notifySpaceIsRemoved () { return this.$store.state.notifySpaceIsRemoved },
-    notifyNewUser () { return this.$store.state.notifyNewUser }
+    notifyNewUser () { return this.$store.state.notifyNewUser },
+    userIsSignedIn () {
+      return this.$store.getters['currentUser/isSignedIn']
+    }
   },
   methods: {
     update () {
@@ -96,6 +100,9 @@ export default {
     },
     triggerSpaceDetailsVisible () {
       this.$store.commit('triggerSpaceDetailsVisible')
+    },
+    triggerSignUpOrInIsVisible () {
+      this.$store.commit('triggerSignUpOrInIsVisible')
     },
     restoreSpace () {
       const space = this.$store.state.currentSpace
