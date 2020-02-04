@@ -17,8 +17,8 @@ dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.stop re
     section
       form(@submit.prevent="importChannel")
         .input-wrap
-          input(placeholder="Are.na channel url" required @input="clearErrors" v-model="channelUrl")
-          button.borderless.clear-input-wrap(@click="clearForm")
+          input(type="url" placeholder="Are.na channel url" required @input="clearErrors" v-model="channelUrl")
+          button.borderless.clear-input-wrap(@mouseup="clearForm" @touchend="clearForm")
             img.icon(src="@/assets/add.svg")
 
         .badge.danger.badge-with-url(v-if="error.invalidUrl") Url should look like
@@ -27,7 +27,7 @@ dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.stop re
         .badge.danger(v-if="error.channelNotFound") Could not find {{error.channelNotFoundName}} on Are.na
         .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
 
-        button(:class="{active: loading}")
+        button(:class="{active: loading}" type="submit")
           img.icon.arena(src="@/assets/arena.svg")
           span Import
           Loader(:visible="loading")
