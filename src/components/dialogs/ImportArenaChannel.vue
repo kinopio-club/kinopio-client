@@ -1,6 +1,6 @@
 <template lang="pug">
 dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.stop ref="dialog")
-  //-  height on <400px screens, make scrollable
+  //-  TODO QA height on <400px screens, make scrollable
   section
     p Import Are.na Channel
 
@@ -104,7 +104,7 @@ export default {
         this.loading = false
         return
       }
-      const contents = await this.getChannelContents(channel)
+      let contents = await this.getChannelContents(channel)
       console.log('🔮', contents)
 
       // make the new space (either on server or here on client, whoever is doing the call)
@@ -134,21 +134,20 @@ export default {
 
     async getChannelContents (channel) {
       try {
-        console.log('🍄', this.channelUrl, channel, this.arenaAccessToken)
         const headers = new Headers({ 'Content-Type': 'application/x-www-form-urlencoded' })
         headers.append('Authorization', this.arenaAccessToken)
         const options = {
           method: 'GET',
           headers
         }
+        console.log(options)
         const response = await fetch(`https://api.are.na/v2/channels/${channel}/contents`, options)
-        if (response.statusCode !== 200) {
+        if (response.status !== 200) {
           throw { response, status: response.status }
         }
-        console.log('🌹', response.body)
+        return response.json()
       } catch (error) {
-        console.warn(error)
-        // this.loading = false
+        console.error(error)
         if (error.status === 404) {
           this.error.channelNotFoundName = channel
           this.error.channelNotFound = true

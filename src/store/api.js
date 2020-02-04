@@ -110,8 +110,8 @@ const self = {
       if (!shouldRequest() || !body.length) { return }
       cache.clearQueue()
       try {
-        const options = requestOptions({ body, method: 'POST' })
         console.log(`🛫 sending operations`, body)
+        const options = requestOptions({ body, method: 'POST' })
         const response = await fetch(`${host}/operations`, options)
         if (!response.ok) { throw Error(response.statusText) }
       } catch (error) {
