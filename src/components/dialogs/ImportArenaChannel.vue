@@ -15,6 +15,7 @@ dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.stop re
 
   template(v-if="arenaAccessToken")
     section
+      p Make a moodboard from the newest 100 blocks in an Are.na channel
       form(@submit.prevent="importChannel")
         .input-wrap
           input(type="url" placeholder="Are.na channel url" required @input="clearErrors" v-model="channelUrl")
@@ -96,6 +97,7 @@ export default {
   methods: {
     forgetArenaAccessToken () {
       this.$store.dispatch('currentUser/arenaAccessToken', '')
+      this.$store.commit('addNotification', { message: 'Removed your Are.na access token from Kinopio', type: 'success' })
     },
     async importChannel () {
       if (this.loading) { return }
@@ -108,8 +110,9 @@ export default {
       }
       let channel = await this.getChannelContents(channelPath)
       this.createSpace(channel)
-      // this.channelUrl = ''
+      this.clearForm()
       this.loading = false
+      this.$emit('updateSpaces')
     },
     clearErrors () {
       for (const errorType in this.error) {
@@ -131,14 +134,12 @@ export default {
     async getChannelContents (channel) {
       try {
         const maxBlocks = 100
-        // TODO tell ui that it'll get the latest 100 blocks
         const headers = new Headers({ 'Content-Type': 'application/x-www-form-urlencoded' })
-        headers.append('Authorization', this.arenaAccessToken)
+        headers.append('Authorization', `Bearer ${this.arenaAccessToken}`)
         const options = {
           method: 'GET',
           headers
         }
-        // TODO ASK: get multiple pages, hard limit of blocks, in one req?
         const response = await fetch(`https://api.are.na/v2/channels/${channel}?per=${maxBlocks}`, options)
         if (response.status !== 200) {
           throw { response, status: response.status }
@@ -152,12 +153,10 @@ export default {
         } else {
           this.error.unknownServerError = true
         }
+        this.loading = false
       }
     },
     createSpace (channel) {
-      const cardWidth = '235px'
-      const cardSpacing = '10px'
-      const viewportWidth = this.$store.state.viewportWidth
       let space = {
         id: nanoid(),
         name: channel.title,
@@ -171,31 +170,70 @@ export default {
         id: nanoid(),
         x: 20,
         y: 50,
-        z: 0,
-        name: `${this.channelUrl} ${channel.metadata.description}`
+        z: channel.contents.length + 1,
+        name: `${this.channelUrl} ${channel.metadata.description}`,
+        frameId: 1
       }
       channel.contents.forEach(block => {
-        const card = this.createCard(block)
-        console.log(card)
+        const currentIndex = space.cards.length
+        const lastCard = space.cards[currentIndex - 1]
+        const card = this.createCard(block, { currentIndex, lastCard })
+        space.cards.push(card)
       })
       space.cards.push(meta)
-      console.log('🔮', cardWidth, cardSpacing, channel, viewportWidth, space)
-      // console.log(space)
+      this.importSpace(space)
     },
-    createCard (block) {
-      // which type of block
-      // if block type X(eg attachment/image, text, link, embed/video) then turn into createXcard
-      if (block.class === 'Link') {
-        console.log('🌍 link', block)
-      } else if (block.class === 'Text') {
-        console.log('🃏 text', block)
-      } else if (block.class === 'Media') {
-        console.log('🍆 media', block)
-      } else if (block.class === 'Attachment') {
-        console.log('♨️ attachment/other', block)
+    importSpace (space) {
+      console.log(space)
+    //     cache.saveSpace(space)
+    //     this.$store.commit('currentSpace/restoreSpace', space)
+    //     this.$store.dispatch('currentSpace/saveNewSpace')
+    //     this.$store.dispatch('currentUser/lastSpaceId', space.id)
+    },
+
+    createCard (block, position) {
+      let card = { id: nanoid() }
+      const type = block.class
+      const title = block.title
+      if (type === 'Link') {
+        card.name = `${title} – ${block.source.url} – ${block.image.display.url}`
+      } else if (type === 'Text') {
+        card.name = `${title} – ${block.content}`
+      } else if (type === 'Media') {
+        card.name = `${title} – ${block.image.display.url}`
+      } else if (type === 'Attachment') {
+        card.name = `${title} – ${block.attachment.url}`
       } else {
-        console.log('🌷 image, gifs', block)
+        card.name = block.image.display.url
       }
+      const { x, y, z } = this.cardPositions(position)
+      card.x = x
+      card.y = y
+      card.z = z
+      return card
+    },
+
+    cardPositions ({ currentIndex, lastCard }) {
+      let x, y, z
+      const startX = 40
+      const startY = 50
+      const cardWidth = 235
+      let cardHeight = 235
+      const cardMargin = 20
+      const viewportWidth = this.$store.state.viewportWidth - (cardWidth + cardMargin)
+      x = startX
+      y = startY
+      if (lastCard) {
+        const currentRow = Math.floor((currentIndex * (cardWidth + cardMargin)) / viewportWidth)
+        const lastCardRow = Math.floor(((currentIndex - 1) * (cardWidth + cardMargin)) / viewportWidth)
+        x = lastCard.x + cardWidth + cardMargin + startX
+        y = ((cardHeight + cardMargin) * currentRow) + startY
+        if (lastCardRow !== currentRow) {
+          x = startX
+        }
+      }
+      z = currentIndex
+      return { x, y, z }
     }
   }
 }
@@ -211,6 +249,6 @@ export default {
     word-break break-all
   .input-wrap
     display flex
-  // form
-  //   margin-top 10px
+  form
+    margin-top 10px
 </style>

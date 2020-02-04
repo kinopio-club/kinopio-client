@@ -21,7 +21,7 @@ dialog.import.narrow(v-if="visible" :open="visible" @click.stop="closeDialogs" r
       button(@click.stop="toggleImportArenaChannelIsVisible" :class="{ active: importArenaChannelIsVisible}")
         img.icon.arena(src="@/assets/arena.svg")
         span Are.na Channel
-      ImportArenaChannel(:visible="importArenaChannelIsVisible")
+      ImportArenaChannel(:visible="importArenaChannelIsVisible" @updateSpaces="updateSpaces")
 
 </template>
 
@@ -88,17 +88,20 @@ export default {
       }
     },
     importSpace (space) {
-      if (this.isValidSpace(space)) {
-        space.id = nanoid()
-        space.name = this.uniqueName(space)
-        const uniqueNewSpace = cache.updateIdsInSpace(space)
-        cache.saveSpace(uniqueNewSpace)
-        this.$store.commit('currentSpace/restoreSpace', uniqueNewSpace)
-        this.$store.dispatch('currentSpace/saveNewSpace')
-        this.$store.dispatch('currentUser/lastSpaceId', space.id)
-        this.$emit('updateSpaces')
-        this.$emit('closeDialog')
-      }
+      if (!this.isValidSpace(space)) { return }
+      space.id = nanoid()
+      space.name = this.uniqueName(space)
+      const uniqueNewSpace = cache.updateIdsInSpace(space)
+      cache.saveSpace(uniqueNewSpace)
+      this.$store.commit('currentSpace/restoreSpace', uniqueNewSpace)
+      this.$store.dispatch('currentSpace/saveNewSpace')
+      this.$store.dispatch('currentUser/lastSpaceId', space.id)
+      this.updateSpaces()
+    },
+    updateSpaces () {
+      this.$emit('updateSpaces')
+      this.closeDialogs()
+      this.$emit('closeDialog')
     },
     typeCheck (value, type) {
       if (type === 'array') {
@@ -171,4 +174,10 @@ export default {
     list-style-type square
   .arena
     width 18px
+  .button-wrap
+    dialog
+      @media(max-height 500px)
+        top initial
+        bottom 8px
+
 </style>
