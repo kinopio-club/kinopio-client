@@ -20,7 +20,7 @@ export default new Router({
       component: Space,
       beforeEnter: (to, from, next) => {
         store.commit('isBeta', true)
-        store.commit('addNotification', { message: 'No features currently in Beta' }) // 'No features currently in Beta'
+        store.commit('addNotification', { message: 'Import → Are.na Channel in beta' }) // 'No features currently in Beta'
         next()
       }
     }, {
@@ -43,6 +43,21 @@ export default new Router({
           store.commit('resetPasswordApiKey', apiKey)
           store.commit('passwordResetIsVisible', true)
         }
+        next()
+        window.history.replaceState({}, document.title, window.location.origin)
+      }
+    }, {
+      path: '/arena-access-token',
+      name: 'arena-access-token',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+      // redirect: to => {
+        const urlParams = new URLSearchParams(window.location.search)
+        const arenaAccessToken = urlParams.get('arenaAccessToken')
+        store.commit('currentUser/arenaAccessToken', arenaAccessToken)
+        store.commit('importArenaChannelIsVisible', true)
+        store.commit('addNotification', { message: 'Connected to Are.na', type: 'success' })
+        // return '/'
         next()
         window.history.replaceState({}, document.title, window.location.origin)
       }

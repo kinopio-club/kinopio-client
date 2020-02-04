@@ -15,7 +15,7 @@ export default {
     lastReadNewStuffId: undefined,
     prefersDarkTheme: false,
     apiKey: '',
-    numberOfCardsCreated: 0
+    arenaAccessToken: ''
   },
   getters: {
     isCurrentUser: (state) => (user) => {
@@ -92,6 +92,10 @@ export default {
       if (!state.apiKey) {
         state.apiKey = ''
       }
+    },
+    arenaAccessToken: (state, token) => {
+      state.arenaAccessToken = token
+      cache.updateUser('arenaAccessToken', token)
     }
   },
   actions: {
@@ -159,6 +163,13 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           emailIsVerified: true
+        } }, { root: true })
+    },
+    arenaAccessToken: (context, token) => {
+      context.commit('arenaAccessToken', token)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          arenaAccessToken: token
         } }, { root: true })
     }
   }

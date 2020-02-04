@@ -25,6 +25,9 @@ export default new Vuex.Store({
     resetPasswordApiKey: '',
     passwordResetIsVisible: false,
 
+    // services
+    importArenaChannelIsVisible: false,
+
     // current user state
     currentUserIsDrawingConnection: false,
     currentUserIsPainting: false,
@@ -130,6 +133,10 @@ export default new Vuex.Store({
     passwordResetIsVisible: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.passwordResetIsVisible = value
+    },
+    importArenaChannelIsVisible: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.importArenaChannelIsVisible = value
     },
     triggerSpaceDetailsVisible: () => {},
     triggerSignUpOrInIsVisible: () => {},
