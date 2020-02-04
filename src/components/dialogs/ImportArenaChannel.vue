@@ -41,6 +41,8 @@ dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.stop re
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
+import nanoid from 'nanoid'
+
 let arena = {}
 // arena apps registered to hi@kinopio.club
 if (process.env.NODE_ENV === 'development') {
@@ -98,19 +100,14 @@ export default {
     async importChannel () {
       if (this.loading) { return }
       this.loading = true
-      const channel = this.channelFromUrl()
-      if (!channel) {
+      const channelPath = this.channelPathFromUrl()
+      if (!channelPath) {
         this.error.invalidUrl = true
         this.loading = false
         return
       }
-      let contents = await this.getChannelContents(channel)
-      console.log('🔮', contents)
-
-      // make the new space (either on server or here on client, whoever is doing the call)
-
-      // then (may be redundant)
-
+      let channel = await this.getChannelContents(channelPath)
+      this.createSpace(channel)
       // this.channelUrl = ''
       this.loading = false
     },
@@ -123,7 +120,7 @@ export default {
       this.channelUrl = ''
       this.clearErrors()
     },
-    channelFromUrl () {
+    channelPathFromUrl () {
       const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<,>]*\.[^\s.[",><]+/igm)
       const urls = this.channelUrl.match(urlPattern)
       if (!urls) { return }
@@ -131,17 +128,18 @@ export default {
       const index = url.lastIndexOf('/') + 1
       return url.slice(index, url.length)
     },
-
     async getChannelContents (channel) {
       try {
+        const maxBlocks = 100
+        // TODO tell ui that it'll get the latest 100 blocks
         const headers = new Headers({ 'Content-Type': 'application/x-www-form-urlencoded' })
         headers.append('Authorization', this.arenaAccessToken)
         const options = {
           method: 'GET',
           headers
         }
-        console.log(options)
-        const response = await fetch(`https://api.are.na/v2/channels/${channel}/contents`, options)
+        // TODO ASK: get multiple pages, hard limit of blocks, in one req?
+        const response = await fetch(`https://api.are.na/v2/channels/${channel}?per=${maxBlocks}`, options)
         if (response.status !== 200) {
           throw { response, status: response.status }
         }
@@ -154,6 +152,49 @@ export default {
         } else {
           this.error.unknownServerError = true
         }
+      }
+    },
+    createSpace (channel) {
+      const cardWidth = '235px'
+      const cardSpacing = '10px'
+      const viewportWidth = this.$store.state.viewportWidth
+      let space = {
+        id: nanoid(),
+        name: channel.title,
+        cards: [],
+        connections: [],
+        connectionTypes: [],
+        cacheDate: new Date().getTime(),
+        removedCards: []
+      }
+      const meta = {
+        id: nanoid(),
+        x: 20,
+        y: 50,
+        z: 0,
+        name: `${this.channelUrl} ${channel.metadata.description}`
+      }
+      channel.contents.forEach(block => {
+        const card = this.createCard(block)
+        console.log(card)
+      })
+      space.cards.push(meta)
+      console.log('🔮', cardWidth, cardSpacing, channel, viewportWidth, space)
+      // console.log(space)
+    },
+    createCard (block) {
+      // which type of block
+      // if block type X(eg attachment/image, text, link, embed/video) then turn into createXcard
+      if (block.class === 'Link') {
+        console.log('🌍 link', block)
+      } else if (block.class === 'Text') {
+        console.log('🃏 text', block)
+      } else if (block.class === 'Media') {
+        console.log('🍆 media', block)
+      } else if (block.class === 'Attachment') {
+        console.log('♨️ attachment/other', block)
+      } else {
+        console.log('🌷 image, gifs', block)
       }
     }
   }
