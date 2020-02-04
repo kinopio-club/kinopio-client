@@ -105,14 +105,32 @@ export default {
       }
       const contents = await this.getChannelContents(channel)
       console.log('🔮', contents)
-      // ask arena
+
       // make the new space (either on server or here on client, whoever is doing the call)
 
-      // after
+      // then (may be redundant)
 
       // this.channelUrl = ''
       this.loading = false
     },
+    clearErrors () {
+      for (const errorType in this.error) {
+        this.error[errorType] = false
+      }
+    },
+    clearForm () {
+      this.channelUrl = ''
+      this.clearErrors()
+    },
+    channelFromUrl () {
+      const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<,>]*\.[^\s.[",><]+/igm)
+      const urls = this.channelUrl.match(urlPattern)
+      if (!urls) { return }
+      const url = utils.normalizeUrl(urls[0])
+      const index = url.lastIndexOf('/') + 1
+      return url.slice(index, url.length)
+    },
+
     async getChannelContents (channel) {
       try {
         console.log('🍄', this.channelUrl, channel, this.arenaAccessToken)
@@ -135,25 +153,7 @@ export default {
           this.error.channelNotFound = true
         }
       }
-    },
-    clearErrors () {
-      for (const errorType in this.error) {
-        this.error[errorType] = false
-      }
-    },
-    clearForm () {
-      this.channelUrl = ''
-      this.clearErrors()
-    },
-    channelFromUrl () {
-      const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<,>]*\.[^\s.[",><]+/igm)
-      const urls = this.channelUrl.match(urlPattern)
-      if (!urls) { return }
-      const url = utils.normalizeUrl(urls[0])
-      const index = url.lastIndexOf('/') + 1
-      return url.slice(index, -1)
     }
-
   }
 }
 </script>
