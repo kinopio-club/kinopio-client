@@ -25,6 +25,7 @@ dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.stop re
           br
           span https://www.are.na/user/channel-name
         .badge.danger(v-if="error.channelNotFound") Could not find {{error.channelNotFoundName}} on Are.na
+        .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
 
         button(:class="{active: loading}")
           img.icon.arena(src="@/assets/arena.svg")
@@ -151,6 +152,8 @@ export default {
         if (error.status === 404) {
           this.error.channelNotFoundName = channel
           this.error.channelNotFound = true
+        } else {
+          this.error.unknownServerError = true
         }
       }
     }

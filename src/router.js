@@ -51,13 +51,11 @@ export default new Router({
       name: 'arena-access-token',
       component: Space,
       beforeEnter: (to, from, next) => {
-      // redirect: to => {
         const urlParams = new URLSearchParams(window.location.search)
         const arenaAccessToken = urlParams.get('arenaAccessToken')
         store.commit('currentUser/arenaAccessToken', arenaAccessToken)
         store.commit('importArenaChannelIsVisible', true)
         store.commit('addNotification', { message: 'Connected to Are.na', type: 'success' })
-        // return '/'
         next()
         window.history.replaceState({}, document.title, window.location.origin)
       }
