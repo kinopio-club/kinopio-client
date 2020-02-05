@@ -15,7 +15,7 @@ dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.stop re
 
   template(v-if="arenaAccessToken")
     section
-      p Make a moodboard from the newest 100 blocks in an Are.na channel
+      p Make a moodboard from the newest 100 blocks in a channel
       form(@submit.prevent="importChannel")
         .input-wrap
           input(type="url" placeholder="Are.na channel url" required @input="clearErrors" v-model="channelUrl")
@@ -41,6 +41,7 @@ dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.stop re
 <script>
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
+import cache from '@/cache.js'
 
 import nanoid from 'nanoid'
 
@@ -168,27 +169,27 @@ export default {
       }
       const meta = {
         id: nanoid(),
-        x: 20,
-        y: 50,
+        x: 40,
+        y: 100,
         z: channel.contents.length + 1,
-        name: `${this.channelUrl} ${channel.metadata.description}`,
-        frameId: 1
+        name: this.channelUrl,
+        frameId: 2
       }
+      space.cards.push(meta)
       channel.contents.forEach(block => {
         const currentIndex = space.cards.length
         const lastCard = space.cards[currentIndex - 1]
         const card = this.createCard(block, { currentIndex, lastCard })
         space.cards.push(card)
       })
-      space.cards.push(meta)
       this.importSpace(space)
     },
     importSpace (space) {
       console.log(space)
-    //     cache.saveSpace(space)
-    //     this.$store.commit('currentSpace/restoreSpace', space)
-    //     this.$store.dispatch('currentSpace/saveNewSpace')
-    //     this.$store.dispatch('currentUser/lastSpaceId', space.id)
+      cache.saveSpace(space)
+      this.$store.commit('currentSpace/restoreSpace', space)
+      this.$store.dispatch('currentSpace/saveNewSpace')
+      this.$store.dispatch('currentUser/lastSpaceId', space.id)
     },
 
     createCard (block, position) {
@@ -196,13 +197,13 @@ export default {
       const type = block.class
       const title = block.title
       if (type === 'Link') {
-        card.name = `${title} – ${block.source.url} – ${block.image.display.url}`
+        card.name = `${block.image.display.url} ${block.source.url}`
       } else if (type === 'Text') {
         card.name = `${title} – ${block.content}`
       } else if (type === 'Media') {
         card.name = `${title} – ${block.image.display.url}`
       } else if (type === 'Attachment') {
-        card.name = `${title} – ${block.attachment.url}`
+        card.name = block.attachment.url
       } else {
         card.name = block.image.display.url
       }
