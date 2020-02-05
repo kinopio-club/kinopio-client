@@ -85,11 +85,11 @@ export default {
     },
     authorizeUrl () {
       let redirectUri
-      if (this.userIsSignedIn && process.env.NODE_ENV === 'production') {
+      if (process.env.NODE_ENV === 'production') {
         const userId = this.$store.state.currentUser.id
         redirectUri = `${arena.redirectUri}/update-arena-access-token/${userId}`
       }
-      return `http://dev.are.na/oauth/authorize?client_id=${arena.clientId}&redirect_uri=${redirectUri}&response_type=code`
+      return `http://dev.are.na/oauth/authorize?client_id=${arena.clientId}&redirect_uri=${redirectUri || arena.redirectUri}&response_type=code`
     },
     arenaAccessToken () {
       return this.$store.state.currentUser.arenaAccessToken
