@@ -264,6 +264,7 @@ export default {
         name: 'createSpace',
         body: space
       }, { root: true })
+      console.log('saveNewSpace', space)
       utils.updateWindowUrlAndTitle({ space, userIsSignedIn })
       context.commit('addUserToSpace', user)
     },

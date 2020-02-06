@@ -145,7 +145,7 @@ export default {
           method: 'GET',
           headers
         }
-        const response = await fetch(`https://api.are.na/v2/channels/${channel}?per=${maxBlocks}`, options)
+        const response = await fetch(`https://api.are.na/v2/channels/${channel}?per=${maxBlocks}&sort=position&direction=desc`, options)
         if (response.status !== 200) {
           throw { response, status: response.status }
         }
@@ -212,9 +212,11 @@ export default {
       } else if (type === 'Attachment') {
         card.name = block.attachment.url
       } else if (type === 'Channel') {
-        card.name = `Channel – ${title}`
-      } else {
+        card.name = `${title} – https://are.na/${block.owner_slug}/${block.slug}`
+      } else if (type === 'Image') {
         card.name = block.image.display.url
+      } else {
+        card.name = `${title} ${type}`
       }
       const { x, y, z } = this.cardPositions(position)
       card.x = x
