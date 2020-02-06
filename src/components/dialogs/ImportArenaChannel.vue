@@ -9,9 +9,11 @@ dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.stop re
       p To import channels you need to connect your Are.na account to Kinopio
       .button-wrap
         a(:href="authorizeUrl")
-          button
+          button(:class="{active: isAuthenticatingWithArena}")
             img.icon.arena(src="@/assets/arena.svg")
             span Authorize Kinopio
+            Loader(:visible="isAuthenticatingWithArena")
+      .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
 
   template(v-if="arenaAccessToken")
     section
@@ -55,7 +57,7 @@ if (process.env.NODE_ENV === 'development') {
 } else {
   arena = {
     clientId: 'adadc4aae0148aa84b14c18ce44392a33d1e564996bfcd1cf44d64ca6324c734',
-    redirectUri: 'https://api.kinopio.club'
+    redirectUri: 'https://kinopio.club/update-arena-access-token'
   }
 }
 
@@ -79,21 +81,28 @@ export default {
       }
     }
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerArenaAuthenticationError') {
+        this.error.unknownServerError = true
+      }
+    })
+  },
+
   computed: {
     userIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     },
     authorizeUrl () {
-      let redirectUri
+      if (this.isAuthenticatingWithArena) { return }
       if (process.env.NODE_ENV === 'production') {
         const userId = this.$store.state.currentUser.id
-        redirectUri = `${arena.redirectUri}/update-arena-access-token/${userId}`
+        arena.redirectUri = `${arena.redirectUri}/update-arena-access-token/${userId}`
       }
-      return `http://dev.are.na/oauth/authorize?client_id=${arena.clientId}&redirect_uri=${redirectUri || arena.redirectUri}&response_type=code`
+      return `http://dev.are.na/oauth/authorize?client_id=${arena.clientId}&redirect_uri=${arena.redirectUri}&response_type=code`
     },
-    arenaAccessToken () {
-      return this.$store.state.currentUser.arenaAccessToken
-    }
+    arenaAccessToken () { return this.$store.state.currentUser.arenaAccessToken },
+    isAuthenticatingWithArena () { return this.$store.state.isAuthenticatingWithArena }
   },
   methods: {
     forgetArenaAccessToken () {
@@ -185,11 +194,12 @@ export default {
       this.importSpace(space)
     },
     importSpace (space) {
-      console.log(space)
       cache.saveSpace(space)
       this.$store.commit('currentSpace/restoreSpace', space)
       this.$store.dispatch('currentSpace/saveNewSpace')
       this.$store.dispatch('currentUser/lastSpaceId', space.id)
+      this.$store.commit('addNotification', { message: 'Are.na channel imported', type: 'success' })
+      this.$emit('updateSpaces')
     },
 
     createCard (block, position) {

@@ -47,17 +47,15 @@ export default new Router({
         window.history.replaceState({}, document.title, window.location.origin)
       }
     }, {
-      path: '/arena-access-token',
-      name: 'arena-access-token',
+      path: '/update-arena-access-token',
+      name: 'update-arena-access-token',
       component: Space,
       beforeEnter: (to, from, next) => {
         const urlParams = new URLSearchParams(window.location.search)
-        const arenaAccessToken = urlParams.get('arenaAccessToken')
-        store.commit('currentUser/arenaAccessToken', arenaAccessToken)
-        store.commit('importArenaChannelIsVisible', true)
-        store.commit('addNotification', { message: 'Connected to Are.na', type: 'success' })
+        const arenaReturnedCode = urlParams.get('code')
         next()
         window.history.replaceState({}, document.title, window.location.origin)
+        store.dispatch('currentUser/updateArenaAccessToken', arenaReturnedCode)
       }
     }, {
       path: '/:space',

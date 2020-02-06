@@ -171,6 +171,15 @@ export default {
         body: {
           arenaAccessToken: token
         } }, { root: true })
+    },
+    updateArenaAccessToken: async (context, arenaReturnedCode) => {
+      console.log('updateArenaAccessToken')
+      context.commit('importArenaChannelIsVisible', true, { root: true })
+      context.commit('isAuthenticatingWithArena', true, { root: true })
+      const response = await context.dispatch('api/updateArenaAccessToken', arenaReturnedCode, { root: true })
+      context.commit('arenaAccessToken', response.arenaAccessToken)
+      context.commit('importArenaChannelIsVisible', true, { root: true })
+      context.commit('isAuthenticatingWithArena', false, { root: true })
     }
   }
 }
