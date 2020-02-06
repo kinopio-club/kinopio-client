@@ -20,7 +20,7 @@ export default new Router({
       component: Space,
       beforeEnter: (to, from, next) => {
         store.commit('isBeta', true)
-        store.commit('addNotification', { message: 'No features currently in Beta' }) // 'No features currently in Beta'
+        store.commit('addNotification', { message: 'Import → Are.na Channel in beta' }) // 'No features currently in Beta'
         next()
       }
     }, {
@@ -45,6 +45,17 @@ export default new Router({
         }
         next()
         window.history.replaceState({}, document.title, window.location.origin)
+      }
+    }, {
+      path: '/update-arena-access-token',
+      name: 'update-arena-access-token',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        const urlParams = new URLSearchParams(window.location.search)
+        const arenaReturnedCode = urlParams.get('code')
+        next()
+        window.history.replaceState({}, document.title, window.location.origin)
+        store.dispatch('currentUser/updateArenaAccessToken', arenaReturnedCode)
       }
     }, {
       path: '/:space',

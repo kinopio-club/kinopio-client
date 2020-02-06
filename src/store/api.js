@@ -110,8 +110,8 @@ const self = {
       if (!shouldRequest() || !body.length) { return }
       cache.clearQueue()
       try {
-        const options = requestOptions({ body, method: 'POST' })
         console.log(`🛫 sending operations`, body)
+        const options = requestOptions({ body, method: 'POST' })
         const response = await fetch(`${host}/operations`, options)
         if (!response.ok) { throw Error(response.statusText) }
       } catch (error) {
@@ -287,6 +287,29 @@ const self = {
         return normalizeResponse(response)
       } catch (error) {
         console.error(error)
+      }
+    },
+
+    // Services
+
+    updateArenaAccessToken: async (context, arenaReturnedCode) => {
+      try {
+        const userIsSignedIn = cache.user().apiKey
+        let userId
+        if (userIsSignedIn) {
+          userId = cache.user().id
+        }
+        const body = {
+          userId,
+          arenaReturnedCode: arenaReturnedCode
+        }
+        const options = requestOptions({ body, method: 'PATCH' })
+        const response = await fetch(`${host}/user/update-arena-access-token`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+        context.commit('triggerArenaAuthenticationError', null, { root: true })
+        context.commit('isAuthenticatingWithArena', false, { root: true })
       }
     }
 

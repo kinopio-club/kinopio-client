@@ -14,6 +14,7 @@ header
         img.icon.lock(v-if="spaceIsPrivate" src="@/assets/lock.svg")
         Loader(:visible="isLoadingSpace")
       SpaceDetails(:visible="spaceDetailsIsVisible")
+      ImportArenaChannel(:visible="importArenaChannelIsVisible")
 
   aside
     .top
@@ -46,6 +47,7 @@ import ResetPassword from '@/components/dialogs/ResetPassword.vue'
 import Share from '@/components/dialogs/Share.vue'
 import Loader from '@/components/Loader.vue'
 import templates from '@/spaces/templates.js'
+import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 
 export default {
   name: 'Header',
@@ -56,7 +58,8 @@ export default {
     SignUpOrIn,
     ResetPassword,
     Share,
-    Loader
+    Loader,
+    ImportArenaChannel
   },
   data () {
     return {
@@ -84,6 +87,7 @@ export default {
     })
   },
   computed: {
+    importArenaChannelIsVisible () { return this.$store.state.importArenaChannelIsVisible },
     users () {
       const currentUser = this.$store.state.currentUser
       const spaceUsers = this.$store.state.currentSpace.users
