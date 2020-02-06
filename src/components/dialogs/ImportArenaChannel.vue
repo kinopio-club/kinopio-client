@@ -95,8 +95,7 @@ export default {
     authorizeUrl () {
       if (this.isAuthenticatingWithArena) { return }
       if (process.env.NODE_ENV === 'production') {
-        const userId = this.$store.state.currentUser.id
-        arena.redirectUri = `${arena.redirectUri}/update-arena-access-token/${userId}`
+        arena.redirectUri = `${arena.redirectUri}/update-arena-access-token`
       }
       return `http://dev.are.na/oauth/authorize?client_id=${arena.clientId}&redirect_uri=${arena.redirectUri}&response_type=code`
     },
