@@ -1,6 +1,5 @@
 <template lang="pug">
 dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.stop ref="dialog")
-  //-  TODO QA height on <400px screens, make scrollable
   section
     p Import Are.na Channel
 
@@ -28,7 +27,7 @@ dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.stop re
           br
           span https://www.are.na/user/channel-name
         .badge.danger(v-if="error.channelNotFound") Could not find {{error.channelNotFoundName}} on Are.na
-        .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
+        .badge.danger(v-if="error.unknownServerError") Are.na authentication failed, Please try again or contact support
 
         button(:class="{active: loading}" type="submit")
           img.icon.arena(src="@/assets/arena.svg")
@@ -206,6 +205,7 @@ export default {
       let card = { id: nanoid() }
       const type = block.class
       const title = block.title
+      console.log('🌱', block) // temp beta logging
       if (type === 'Link') {
         card.name = `${block.image.display.url} ${block.source.url}`
       } else if (type === 'Text') {
@@ -214,6 +214,8 @@ export default {
         card.name = `${title} – ${block.image.display.url}`
       } else if (type === 'Attachment') {
         card.name = block.attachment.url
+      } else if (type === 'Channel') {
+        card.name = `Channel – ${title}`
       } else {
         card.name = block.image.display.url
       }
