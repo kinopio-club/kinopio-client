@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.community(v-if="visible" :open="visible")
+dialog.explore(v-if="visible" :open="visible")
   section
     .segmented-buttons
       button(@click.stop="hideTemplates" :class="{ active: !templatesIsVisible }")
@@ -63,6 +63,6 @@ export default {
 </script>
 
 <style lang="stylus">
-.community
+.explore
   max-height calc(100vh - 100px)
 </style>

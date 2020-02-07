@@ -1,7 +1,8 @@
 <template lang="pug">
 .new-spaces(v-if="visible" :open="visible" @click.stop ref="dialog")
   section.header
-    p Public spaces which have been renamed, made by Kinopio friends
+    img.icon(src="@/assets/unlock.svg")
+    span The latest public spaces, which have been renamed
   section.results-section
     Loader(:visible="loading")
     ul.results-list
@@ -38,9 +39,13 @@ export default {
 <style lang="stylus">
 .new-spaces
   .header
+    display flex
+    align-items flex-start
     border-top 1px solid var(--primary)
     border-top-left-radius 0
     border-top-right-radius 0
+    .icon
+      padding-top 2px
   a
     color var(--primary)
     text-decoration none

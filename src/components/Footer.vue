@@ -3,9 +3,9 @@ footer(v-if="!dialogsVisible")
   Notifications
   section
     .button-wrap
-      button(@click="toggleCommunityIsVisible" :class="{ active: communityIsVisible}")
-        span Community Spaces
-      Community(:visible="communityIsVisible")
+      button(@click="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
+        span Explore
+      Explore(:visible="exploreIsVisible")
 
   section.controls
     .button-wrap(v-if="userCanEditCurrentSpace")
@@ -29,7 +29,7 @@ footer(v-if="!dialogsVisible")
 </template>
 
 <script>
-import Community from '@/components/dialogs/Community.vue'
+import Explore from '@/components/dialogs/Explore.vue'
 import Removed from '@/components/dialogs/Removed.vue'
 import Offline from '@/components/dialogs/Offline.vue'
 import Filters from '@/components/dialogs/Filters.vue'
@@ -38,7 +38,7 @@ import Notifications from '@/components/Notifications.vue'
 export default {
   name: 'Footer',
   components: {
-    Community,
+    Explore,
     Removed,
     Offline,
     Notifications,
@@ -49,7 +49,7 @@ export default {
       removedIsVisible: false,
       offlineIsVisible: false,
       filtersIsVisible: false,
-      communityIsVisible: false
+      exploreIsVisible: false
     }
   },
   mounted () {
@@ -59,7 +59,7 @@ export default {
         this.removedIsVisible = false
         this.offlineIsVisible = false
         this.filtersIsVisible = false
-        this.communityIsVisible = false
+        this.exploreIsVisible = false
       }
     })
   },
@@ -106,10 +106,10 @@ export default {
       this.$store.commit('closeAllDialogs')
       this.filtersIsVisible = !isVisible
     },
-    toggleCommunityIsVisible () {
-      const isVisible = this.communityIsVisible
+    toggleExploreIsVisible () {
+      const isVisible = this.exploreIsVisible
       this.$store.commit('closeAllDialogs')
-      this.communityIsVisible = !isVisible
+      this.exploreIsVisible = !isVisible
     }
   }
 }
