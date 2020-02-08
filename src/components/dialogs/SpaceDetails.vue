@@ -14,6 +14,15 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
       template(v-else)
         p {{spaceName}}
 
+    // hide if private, or not signed in
+    .row
+      //- label(:class="{active: isDefault}" @click.prevent="toggleDefault")
+      //-   input(type="checkbox" v-model="isDefault")
+      //-   span Default
+      label.active
+        input(type="checkbox" checked)
+        span Show in Explore
+
     button(v-if="canEditCurrentSpace" @click="removeCurrentSpace")
       img.icon(src="@/assets/remove.svg")
       span Remove
