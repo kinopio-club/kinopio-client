@@ -252,6 +252,7 @@ export default {
       space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
       space.cards[1].x = random(180, 200)
       space.cards[1].y = random(160, 180)
+      space.showInExplore = true
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       context.commit('restoreSpace', uniqueNewSpace)
     },
@@ -271,7 +272,7 @@ export default {
       let space = utils.clone(context.state)
       space.id = nanoid()
       space.users = []
-      space.isRenamed = false
+      space.showInExplore = false
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       context.commit('restoreSpace', uniqueNewSpace)
       Vue.nextTick(() => {
@@ -362,7 +363,6 @@ export default {
       const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       updates.id = space.id
       if (updates.name) {
-        updates.isRenamed = true
         const updatedSpace = utils.clone(space)
         updatedSpace.name = updates.name
         utils.updateWindowUrlAndTitle({

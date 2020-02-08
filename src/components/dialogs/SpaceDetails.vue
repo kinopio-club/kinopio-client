@@ -14,13 +14,9 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
       template(v-else)
         p {{spaceName}}
 
-    // hide if private, or not signed in
-    .row
-      //- label(:class="{active: isDefault}" @click.prevent="toggleDefault")
-      //-   input(type="checkbox" v-model="isDefault")
-      //-   span Default
-      label.active
-        input(type="checkbox" checked)
+    .row(v-if="canEditCurrentSpace && userIsSignedIn && !currentSpaceIsPrivate")
+      label(:class="{active: showInExplore}" @click.prevent="toggleShowInExplore")
+        input(type="checkbox" v-model="showInExplore")
         span Show in Explore
 
     button(v-if="canEditCurrentSpace" @click="removeCurrentSpace")
@@ -142,12 +138,19 @@ export default {
     currentSpaceIsPrivate () {
       return this.$store.state.currentSpace.privacy === 'private'
     },
+    showInExplore () {
+      return this.$store.state.currentSpace.showInExplore
+    },
     userIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     }
-
   },
   methods: {
+    toggleShowInExplore () {
+      const value = !this.showInExplore
+      this.$store.dispatch('currentSpace/updateSpace', { showInExplore: value })
+    },
+
     focusFilterInput () {
       const element = this.$refs.filterInput
       element.focus()

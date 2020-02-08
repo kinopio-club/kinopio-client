@@ -2,6 +2,7 @@
   "id": "1",
   "name": "Hello Kinopio",
   "privacy": "closed",
+  "showInExplore": false,
   "users": [],
   "cards": [
     {
