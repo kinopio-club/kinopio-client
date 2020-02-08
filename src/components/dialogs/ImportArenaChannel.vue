@@ -170,7 +170,7 @@ export default {
         connectionTypes: [],
         cacheDate: new Date().getTime(),
         removedCards: [],
-        isRenamed: true
+        showInExplore: true
       }
       const meta = {
         id: nanoid(),
