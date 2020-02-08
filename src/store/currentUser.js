@@ -15,7 +15,7 @@ export default {
     lastReadNewStuffId: undefined,
     prefersDarkTheme: false,
     apiKey: '',
-    numberOfCardsCreated: 0
+    arenaAccessToken: ''
   },
   getters: {
     isCurrentUser: (state) => (user) => {
@@ -92,6 +92,10 @@ export default {
       if (!state.apiKey) {
         state.apiKey = ''
       }
+    },
+    arenaAccessToken: (state, token) => {
+      state.arenaAccessToken = token
+      cache.updateUser('arenaAccessToken', token)
     }
   },
   actions: {
@@ -160,6 +164,22 @@ export default {
         body: {
           emailIsVerified: true
         } }, { root: true })
+    },
+    arenaAccessToken: (context, token) => {
+      context.commit('arenaAccessToken', token)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          arenaAccessToken: token
+        } }, { root: true })
+    },
+    updateArenaAccessToken: async (context, arenaReturnedCode) => {
+      console.log('updateArenaAccessToken')
+      context.commit('importArenaChannelIsVisible', true, { root: true })
+      context.commit('isAuthenticatingWithArena', true, { root: true })
+      const response = await context.dispatch('api/updateArenaAccessToken', arenaReturnedCode, { root: true })
+      context.commit('arenaAccessToken', response.arenaAccessToken)
+      context.commit('importArenaChannelIsVisible', true, { root: true })
+      context.commit('isAuthenticatingWithArena', false, { root: true })
     }
   }
 }

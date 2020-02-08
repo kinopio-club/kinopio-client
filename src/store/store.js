@@ -25,6 +25,10 @@ export default new Vuex.Store({
     resetPasswordApiKey: '',
     passwordResetIsVisible: false,
 
+    // services
+    importArenaChannelIsVisible: false,
+    isAuthenticatingWithArena: false,
+
     // current user state
     currentUserIsDrawingConnection: false,
     currentUserIsPainting: false,
@@ -131,8 +135,17 @@ export default new Vuex.Store({
       utils.typeCheck(value, 'boolean')
       state.passwordResetIsVisible = value
     },
+    importArenaChannelIsVisible: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.importArenaChannelIsVisible = value
+    },
+    isAuthenticatingWithArena: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.isAuthenticatingWithArena = value
+    },
     triggerSpaceDetailsVisible: () => {},
     triggerSignUpOrInIsVisible: () => {},
+    triggerArenaAuthenticationError: () => {},
 
     // connecting
     currentUserIsDrawingConnection: (state, value) => {
@@ -310,7 +323,6 @@ export default new Vuex.Store({
       utils.typeCheck(id, 'number')
       state.filteredFrameIds = state.filteredFrameIds.filter(frameId => frameId !== id)
     }
-
   },
 
   getters: {

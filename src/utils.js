@@ -328,6 +328,14 @@ export default {
   currentSpaceHasUrl (space) {
     const id = this.idFromUrl()
     return Boolean(id === space.id)
+  },
+
+  normalizeUrl (url) {
+    const lastCharacterPosition = url.length - 1
+    if (url[lastCharacterPosition] === '/') {
+      return url.slice(0, lastCharacterPosition)
+    }
+    return url
   }
 
 }

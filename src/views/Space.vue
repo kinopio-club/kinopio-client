@@ -443,6 +443,7 @@ export default {
         const position = utils.cursorPositionInPage(event)
         this.showMultipleSelectedActions(position)
       }
+      this.$store.commit('importArenaChannelIsVisible', false)
       this.$store.commit('shouldAddNewCard', false)
       this.$store.commit('preventDraggedCardFromShowingDetails', false)
       this.$store.commit('currentUserIsDrawingConnection', false)
