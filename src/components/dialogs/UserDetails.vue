@@ -1,13 +1,21 @@
 <template lang="pug">
 dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeDialogs" :class="{'right-side': detailsOnRight}")
+
+  //- Other User
   section.user-info(v-if="!isCurrentUser")
     .row
       User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
       p.name {{user.name}}
   section(v-if="!isCurrentUser")
-    button
-      User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
-      span Spaces
+    .button-wrap
+      button(@click="getUserSpaces" :class="{active: loadingUserspaces || spacePickerIsVisible}")
+        User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
+        span Spaces
+        Loader(:visible="loadingUserspaces")
+      SpacePicker(:visible="spacePickerIsVisible" :userSpaces="userSpaces" @selectSpace="updateSelectedSpace" @closeDialog="closeDialogs")
+    .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
+
+  //- Current User
   section(v-if="isCurrentUser")
     .row
       .button-wrap
@@ -19,7 +27,6 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeDialogs" 
     .button-wrap
       button(@click.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}") Settings
       UserSettings(:user="user" :visible="userSettingsIsVisible" @removeUser="signOut")
-
     button(v-if="isSignedIn" @click="signOut") Sign Out
     button(v-else @click="triggerSignUpOrInIsVisible") Sign Up or In
 
@@ -28,6 +35,8 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeDialogs" 
 <script>
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
+import SpacePicker from '@/components/dialogs/SpacePicker.vue'
+import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
 
 export default {
@@ -35,7 +44,9 @@ export default {
   components: {
     ColorPicker,
     UserSettings,
-    User: () => import('@/components/User.vue')
+    User: () => import('@/components/User.vue'),
+    Loader,
+    SpacePicker
   },
   props: {
     user: Object,
@@ -45,10 +56,18 @@ export default {
   data () {
     return {
       colorPickerIsVisible: false,
-      userSettingsIsVisible: false
+      userSettingsIsVisible: false,
+      loadingUserspaces: false,
+      userSpaces: [],
+      error: {
+        unknownServerError: false
+      }
     }
   },
   computed: {
+    // isBeta () {
+    //   return this.$store.state.isBeta
+    // },
     userColor () {
       return this.user.color
     },
@@ -70,6 +89,9 @@ export default {
       set (newName) {
         this.$store.dispatch('currentUser/name', newName)
       }
+    },
+    spacePickerIsVisible () {
+      return Boolean(this.userSpaces.length)
     }
   },
   methods: {
@@ -86,6 +108,7 @@ export default {
     closeDialogs () {
       this.colorPickerIsVisible = false
       this.userSettingsIsVisible = false
+      this.clearUserSpaces()
     },
     updateUserColor (newColor) {
       this.$store.dispatch('currentUser/color', newColor)
@@ -98,12 +121,38 @@ export default {
     triggerSignUpOrInIsVisible () {
       this.$store.commit('closeAllDialogs')
       this.$store.commit('triggerSignUpOrInIsVisible')
+    },
+    async getUserSpaces () {
+      this.error.unknownServerError = false
+      if (this.loadingUserspaces) { return }
+      if (this.spacePickerIsVisible) {
+        this.clearUserSpaces()
+        return
+      }
+      this.loadingUserspaces = true
+      try {
+        const publicUser = await this.$store.dispatch('api/getPublicUser', this.user)
+        this.userSpaces = publicUser.spaces
+      } catch (error) {
+        this.error.unknownServerError = true
+        this.clearUserSpaces()
+      }
+      this.loadingUserspaces = false
+    },
+    clearUserSpaces () {
+      this.loadingUserspaces = false
+      this.userSpaces = []
+    },
+    updateSelectedSpace (space) {
+      window.location.href = space.id
     }
   },
   watch: {
     visible (value) {
       if (value) {
         this.colorPickerIsVisible = false
+      } else {
+        this.clearUserSpaces()
       }
     }
   }
@@ -121,6 +170,8 @@ export default {
     right 8px
   .name
     margin-left 6px
+  .danger
+    margin-top 10px
 
 .user-info
   display: flex

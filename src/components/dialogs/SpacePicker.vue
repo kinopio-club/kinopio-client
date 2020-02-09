@@ -19,7 +19,8 @@ export default {
   props: {
     visible: Boolean,
     selectedSpace: Object,
-    excludeCurrentSpace: Boolean
+    excludeCurrentSpace: Boolean,
+    userSpaces: Array
   },
   data () {
     return {
@@ -28,7 +29,11 @@ export default {
   },
   methods: {
     spaceIsActive (spaceId) {
-      return Boolean(this.selectedSpace.id === spaceId)
+      let selectedSpaceId = this.$store.state.currentSpace.id
+      if (this.selectedSpace) {
+        selectedSpaceId = this.selectedSpace.id
+      }
+      return Boolean(selectedSpaceId === spaceId)
     },
     select (space) {
       this.$emit('selectSpace', space)
@@ -38,9 +43,13 @@ export default {
       return space.privacy === 'private'
     },
     updateSpaces () {
-      const currentSpace = this.$store.state.currentSpace
-      this.spaces = cache.getAllSpaces()
+      if (this.userSpaces) {
+        this.spaces = this.userSpaces
+      } else {
+        this.spaces = cache.getAllSpaces()
+      }
       if (this.excludeCurrentSpace) {
+        const currentSpace = this.$store.state.currentSpace
         this.spaces = this.spaces.filter(space => space.id !== currentSpace.id)
       }
     },
