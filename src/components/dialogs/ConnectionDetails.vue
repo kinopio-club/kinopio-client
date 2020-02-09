@@ -168,10 +168,9 @@ export default {
   watch: {
     visible (visible) {
       this.$nextTick(() => {
+        this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
         if (visible) {
           this.updateView()
-        } else {
-          this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
         }
       })
     },
