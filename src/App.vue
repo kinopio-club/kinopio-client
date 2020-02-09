@@ -329,10 +329,12 @@ code
     background var(--info-background)
   &.success
     background var(--success-background)
-  &.checked
-    background-image url('assets/checkmark.svg')
-    background-repeat no-repeat
-    background-position center
+  &.status
+    background var(--secondary-background)
+  // &.checked
+  //   background-image url('assets/checkmark.svg')
+  //   background-repeat no-repeat
+  //   background-position center
   input
     margin 0
 

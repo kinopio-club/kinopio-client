@@ -1,18 +1,21 @@
 <template lang="pug">
 dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs")
   section
-    .row(:class="{ 'privacy-row': canEditCurrentSpace && userIsSignedIn }")
-      template(v-if="canEditCurrentSpace")
-        input(placeholder="name" v-model="spaceName")
+    .row(v-if="canEditCurrentSpace" :class="{ 'privacy-row': canEditCurrentSpace && userIsSignedIn }")
+      input(placeholder="name" v-model="spaceName")
 
-        .button-wrap(v-if="userIsSignedIn")
-          button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
-            img.icon(v-if="currentSpaceIsPrivate" src="@/assets/lock.svg")
-            img.icon(v-else src="@/assets/unlock.svg")
-          PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs" @updateSpaces="updateSpaces")
+      .button-wrap(v-if="userIsSignedIn")
+        button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
+          img.icon(v-if="currentSpaceIsPrivate" src="@/assets/lock.svg")
+          img.icon(v-else src="@/assets/unlock.svg")
+        PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs" @updateSpaces="updateSpaces")
 
-      template(v-else)
-        p {{spaceName}}
+    template(v-if="!canEditCurrentSpace")
+      p {{spaceName}}
+      .row(v-if="showInExplore")
+        .badge.status
+          img.icon(src="@/assets/checkmark.svg")
+          span Shown in Explore
 
     .row(v-if="canEditCurrentSpace && userIsSignedIn && !currentSpaceIsPrivate")
       label(:class="{active: showInExplore}" @click.prevent="toggleShowInExplore")
@@ -254,7 +257,14 @@ export default {
       width 13px
       height 11px
 
+  .badge.status
+    display inline-flex
+    margin-top 8px
+    .icon
+      margin-top -1px
+
   .name // in results list
     .icon
       margin-left 6px
+
 </style>
