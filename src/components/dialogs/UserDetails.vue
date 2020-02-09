@@ -4,6 +4,10 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeDialogs" 
     .row
       User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
       p.name {{user.name}}
+  section(v-if="!isCurrentUser")
+    button
+      User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
+      span Spaces
   section(v-if="isCurrentUser")
     .row
       .button-wrap
