@@ -1,6 +1,7 @@
 <template lang="pug">
 dialog.narrow.space-picker(v-if="visible" :open="visible" @click.stop ref="dialog")
   section.results-section
+    Loader(:visible="loading")
     ul.results-list
       template(v-for="(space in spaces")
         li(@click="select(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id" tabindex="0" v-on:keyup.enter="select(space)")
@@ -13,18 +14,33 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.stop ref="dialo
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import cache from '@/cache.js'
+import Loader from '@/components/Loader.vue'
 
 export default {
   name: 'SpacePicker',
+  components: {
+    Loader
+  },
   props: {
     visible: Boolean,
     selectedSpace: Object,
     excludeCurrentSpace: Boolean,
-    userSpaces: Array
+    userSpaces: Array,
+    loading: Boolean
   },
-  data () {
-    return {
-      spaces: []
+  computed: {
+    spaces () {
+      let spaces
+      if (this.userSpaces) {
+        spaces = this.userSpaces
+      } else {
+        spaces = cache.getAllSpaces()
+      }
+      if (this.excludeCurrentSpace) {
+        const currentSpace = this.$store.state.currentSpace
+        spaces = spaces.filter(space => space.id !== currentSpace.id)
+      }
+      return spaces
     }
   },
   methods: {
@@ -42,17 +58,6 @@ export default {
     spaceIsPrivate (space) {
       return space.privacy === 'private'
     },
-    updateSpaces () {
-      if (this.userSpaces) {
-        this.spaces = this.userSpaces
-      } else {
-        this.spaces = cache.getAllSpaces()
-      }
-      if (this.excludeCurrentSpace) {
-        const currentSpace = this.$store.state.currentSpace
-        this.spaces = this.spaces.filter(space => space.id !== currentSpace.id)
-      }
-    },
     scrollIntoView () {
       const element = this.$refs.dialog
       scrollIntoView(element, {
@@ -66,7 +71,6 @@ export default {
       this.$nextTick(() => {
         if (visible) {
           this.scrollIntoView()
-          this.updateSpaces()
         }
       })
     }

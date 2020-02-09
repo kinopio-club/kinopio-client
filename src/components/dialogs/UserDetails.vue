@@ -8,11 +8,11 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeDialogs" 
       p.name {{user.name}}
   section(v-if="!isCurrentUser")
     .button-wrap
-      button(@click="getUserSpaces" :class="{active: loadingUserspaces || spacePickerIsVisible}")
+      button(@click.stop="getUserSpaces" :class="{active: loadingUserspaces || spacePickerIsVisible}")
         User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
         span Spaces
         Loader(:visible="loadingUserspaces")
-      SpacePicker(:visible="spacePickerIsVisible" :userSpaces="userSpaces" @selectSpace="updateSelectedSpace" @closeDialog="closeDialogs")
+      SpacePicker(:visible="spacePickerIsVisible" :loading="loadingUserspaces" :userSpaces="userSpaces" @selectSpace="updateSelectedSpace" @closeDialog="closeDialogs")
     .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
 
   //- Current User
@@ -58,6 +58,7 @@ export default {
       colorPickerIsVisible: false,
       userSettingsIsVisible: false,
       loadingUserspaces: false,
+      spacePickerIsVisible: false,
       userSpaces: [],
       error: {
         unknownServerError: false
@@ -89,9 +90,6 @@ export default {
       set (newName) {
         this.$store.dispatch('currentUser/name', newName)
       }
-    },
-    spacePickerIsVisible () {
-      return Boolean(this.userSpaces.length)
     }
   },
   methods: {
@@ -108,7 +106,7 @@ export default {
     closeDialogs () {
       this.colorPickerIsVisible = false
       this.userSettingsIsVisible = false
-      this.clearUserSpaces()
+      this.spacePickerIsVisible = false
     },
     updateUserColor (newColor) {
       this.$store.dispatch('currentUser/color', newColor)
@@ -126,10 +124,11 @@ export default {
       this.error.unknownServerError = false
       if (this.loadingUserspaces) { return }
       if (this.spacePickerIsVisible) {
-        this.clearUserSpaces()
+        this.closeDialogs()
         return
       }
       this.loadingUserspaces = true
+      this.spacePickerIsVisible = true
       try {
         const publicUser = await this.$store.dispatch('api/getPublicUser', this.user)
         this.userSpaces = publicUser.spaces
@@ -149,11 +148,8 @@ export default {
   },
   watch: {
     visible (value) {
-      if (value) {
-        this.colorPickerIsVisible = false
-      } else {
-        this.clearUserSpaces()
-      }
+      this.closeDialogs()
+      this.clearUserSpaces()
     }
   }
 }
