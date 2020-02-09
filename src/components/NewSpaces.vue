@@ -2,8 +2,10 @@
 .new-spaces(v-if="visible" :open="visible" @click.stop ref="dialog")
   section.header
     span The newest spaces made by cool people like you
+    p(v-if="loading")
+      Loader(:visible="loading")
+
   section.results-section
-    Loader(:visible="loading")
     ul.results-list
       template(v-for="(space in spaces")
         a(:href="space.url")
