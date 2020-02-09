@@ -231,12 +231,13 @@ dialog
 .segmented-buttons
   button
     margin 0
+    border-radius 0
     &:first-child
-      border-top-right-radius 0
-      border-bottom-right-radius 0
+      border-top-left-radius 3px
+      border-bottom-left-radius 3px
     &:last-child
-      border-top-left-radius 0
-      border-bottom-left-radius 0
+      border-top-right-radius 3px
+      border-bottom-right-radius 3px
   button + button
     margin-left -1px
 

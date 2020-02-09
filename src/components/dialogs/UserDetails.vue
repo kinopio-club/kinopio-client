@@ -13,6 +13,14 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeDialogs" 
         span Spaces
         Loader(:visible="loadingUserspaces")
       SpacePicker(:visible="spacePickerIsVisible" :loading="loadingUserspaces" :userSpaces="userSpaces" @selectSpace="updateSelectedSpace" @closeDialog="closeDialogs")
+    .button-wrap
+      //- label(:class="{active: showInExplore}" @click.prevent="toggleShowInExplore")
+      //-   input(type="checkbox" v-model="showInExplore")
+      //-   span Show in Explore
+      label
+        input(type="checkbox")
+        span Favorite
+
     .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
 
   //- Current User
@@ -23,6 +31,11 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeDialogs" 
           .current-color(:style="backgroundColor")
         ColorPicker(:currentColor="userColor" :visible="colorPickerIsVisible" @selectedColor="updateUserColor")
       input.name(placeholder="What's your name?" v-model="userName" name="Name")
+  section(v-if="isCurrentUser")
+    .button-wrap
+      button(@click.stop="toggleFavoritesIsVisible" :class="{active: favoritesIsVisible}") Favorites
+      Favorites(:visible="favoritesIsVisible")
+
   section(v-if="isCurrentUser")
     .button-wrap
       button(@click.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}") Settings
@@ -36,6 +49,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeDialogs" 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
+import Favorites from '@/components/dialogs/Favorites.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
 
@@ -46,7 +60,8 @@ export default {
     UserSettings,
     User: () => import('@/components/User.vue'),
     Loader,
-    SpacePicker
+    SpacePicker,
+    Favorites
   },
   props: {
     user: Object,
@@ -59,6 +74,7 @@ export default {
       userSettingsIsVisible: false,
       loadingUserspaces: false,
       spacePickerIsVisible: false,
+      favoritesIsVisible: false,
       userSpaces: [],
       error: {
         unknownServerError: false
@@ -103,10 +119,16 @@ export default {
       this.closeDialogs()
       this.colorPickerIsVisible = !isVisible
     },
+    toggleFavoritesIsVisible () {
+      const isVisible = this.favoritesIsVisible
+      this.closeDialogs()
+      this.favoritesIsVisible = !isVisible
+    },
     closeDialogs () {
       this.colorPickerIsVisible = false
       this.userSettingsIsVisible = false
       this.spacePickerIsVisible = false
+      this.favoritesIsVisible = false
     },
     updateUserColor (newColor) {
       this.$store.dispatch('currentUser/color', newColor)
