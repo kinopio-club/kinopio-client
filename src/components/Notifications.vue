@@ -10,6 +10,9 @@ aside.notifications
       button(@click="copyCurrentSpace")
         img.icon(src="@/assets/add.svg")
         span Save a Copy
+      label
+        input(type="checkbox")
+        span Favorite
 
   .persistent-item.danger(v-if="notifySpaceNotFound")
     p Space could not be found, or is private
@@ -165,6 +168,10 @@ export default {
       &:first-child
         margin-left 0
   button
+    margin-left 6px
+
+  button + button,
+  button + label
     margin-left 6px
 
   .notification-jiggle
