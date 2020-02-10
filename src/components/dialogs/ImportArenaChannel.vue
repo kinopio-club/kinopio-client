@@ -202,7 +202,7 @@ export default {
       let card = { id: nanoid() }
       const type = block.class
       const title = block.title
-      console.log('🌱', block) // temp beta logging
+      console.log('**', block) // temp beta logging
       if (type === 'Link') {
         card.name = `${block.image.display.url} ${block.source.url}`
       } else if (type === 'Text') {
