@@ -1,5 +1,6 @@
 // functional methods that can see dom, but can't access components or store
 import nanoid from 'nanoid'
+import _ from 'lodash'
 
 export default {
   mobileTouchPosition (event, type) {
@@ -81,6 +82,17 @@ export default {
       })
     }
     return object
+  },
+
+  mergeArrayOfObjectsById (baseArray, newArray) {
+    baseArray = this.clone(baseArray)
+    newArray.forEach(item => {
+      const existingItem = _.find(baseArray, { id: item.id })
+      if (!existingItem) {
+        baseArray.push(item)
+      }
+    })
+    return baseArray
   },
 
   findInArrayOfObjects (array, key, value) {

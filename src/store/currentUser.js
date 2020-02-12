@@ -72,13 +72,13 @@ export default {
     },
     favoriteUsers: (state, users) => {
       utils.typeCheck(users, 'array')
-      state.users = users
-      cache.updateUser('users', users)
+      state.favoriteUsers = users
+      cache.updateUser('favoriteUsers', users)
     },
     favoriteSpaces: (state, spaces) => {
       utils.typeCheck(spaces, 'array')
-      state.spaces = spaces
-      cache.updateUser('spaces', spaces)
+      state.favoriteSpaces = spaces
+      cache.updateUser('favoriteSpaces', spaces)
     },
     restoreUser: (state, user) => {
       Object.keys(user).forEach(item => {
@@ -183,12 +183,20 @@ export default {
         newFavorites: favorites.favoriteSpaces
       })
     },
-    // addFavorite(type, id)
-    // removeFavorite(type, id)
-    mergeFavorites: (context, type, newFavorites) => {
-      console.log('🧁favs', type, newFavorites)
-      console.log('currentUser', context.state)
-      // merge favorites , if same id uniq it
+    mergeFavorites: (context, { type, newFavorites }) => {
+      newFavorites = newFavorites.map(favorite => {
+        return {
+          id: favorite.id,
+          name: favorite.name
+        }
+      })
+      if (type === 'users') {
+        const favorites = utils.mergeArrayOfObjectsById(context.state.favoriteUsers, newFavorites)
+        context.commit('favoriteUsers', favorites)
+      } else if (type === 'spaces') {
+        const favorites = utils.mergeArrayOfObjectsById(context.state.favoriteSpaces, newFavorites)
+        context.commit('favoriteSpaces', favorites)
+      }
     },
     confirmEmail: (context) => {
       context.dispatch('api/addToQueue', { name: 'updateUser',
