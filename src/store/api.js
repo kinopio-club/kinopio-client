@@ -161,6 +161,16 @@ const self = {
         console.error(error)
       }
     },
+    getUserFavorites: async (context) => {
+      if (!shouldRequest()) { return }
+      try {
+        const options = requestOptions({ method: 'GET' })
+        const response = await fetch(`${host}/user/favorites`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
     getUserSpaces: async (context) => {
       if (!shouldRequest()) { return }
       try {

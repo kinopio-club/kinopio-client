@@ -15,7 +15,9 @@ export default {
     lastReadNewStuffId: undefined,
     prefersDarkTheme: false,
     apiKey: '',
-    arenaAccessToken: ''
+    arenaAccessToken: '',
+    favoriteUsers: [],
+    favoriteSpaces: []
   },
   getters: {
     isCurrentUser: (state) => (user) => {
@@ -67,6 +69,16 @@ export default {
     apiKey: (state, apiKey) => {
       state.apiKey = apiKey
       cache.updateUser('apiKey', apiKey)
+    },
+    favoriteUsers: (state, users) => {
+      utils.typeCheck(users, 'array')
+      state.users = users
+      cache.updateUser('users', users)
+    },
+    favoriteSpaces: (state, spaces) => {
+      utils.typeCheck(spaces, 'array')
+      state.spaces = spaces
+      cache.updateUser('spaces', spaces)
     },
     restoreUser: (state, user) => {
       Object.keys(user).forEach(item => {
@@ -158,6 +170,25 @@ export default {
       remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
       if (remoteUser.updatedAt > cachedUser.cacheDate) { console.log('🌸 Restore user from remote', remoteUser) }
       context.commit('updateUser', remoteUser)
+      context.dispatch('restoreUserFavorites', remoteUser)
+    },
+    restoreUserFavorites: async (context, cachedUser) => {
+      const favorites = await context.dispatch('api/getUserFavorites', null, { root: true })
+      context.dispatch('mergeFavorites', {
+        type: 'users',
+        newFavorites: favorites.favoriteUsers
+      })
+      context.dispatch('mergeFavorites', {
+        type: 'spaces',
+        newFavorites: favorites.favoriteSpaces
+      })
+    },
+    // addFavorite(type, id)
+    // removeFavorite(type, id)
+    mergeFavorites: (context, type, newFavorites) => {
+      console.log('🧁favs', type, newFavorites)
+      console.log('currentUser', context.state)
+      // merge favorites , if same id uniq it
     },
     confirmEmail: (context) => {
       context.dispatch('api/addToQueue', { name: 'updateUser',

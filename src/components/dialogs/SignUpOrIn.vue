@@ -222,6 +222,7 @@ export default {
         })
         this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
         this.$store.commit('currentSpace/addUserToSpace', currentUser)
+        this.$store.dispatch('currentUser/restoreUserFavorites', currentUser)
       } else {
         await this.handleErrors(result)
       }
