@@ -375,10 +375,12 @@ export default {
         body: updates
       }, { root: true })
     },
-    changeSpace: (context, space) => {
+    changeSpace: async (context, space) => {
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
-      context.dispatch('loadSpace', space)
+      await context.dispatch('loadSpace', space)
+      const canEdit = context.rootGetters['currentUser/canEditCurrentSpace']
+      if (!canEdit) { return }
       context.dispatch('api/addToQueue', {
         name: 'updateSpace',
         body: { id: space.id, updatedAt: new Date() }
