@@ -14,13 +14,9 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeDialogs" 
         Loader(:visible="loadingUserspaces")
       SpacePicker(:visible="spacePickerIsVisible" :loading="loadingUserspaces" :userSpaces="userSpaces" @selectSpace="updateSelectedSpace" @closeDialog="closeDialogs")
     .button-wrap
-      //- label(:class="{active: showInExplore}" @click.prevent="toggleShowInExplore")
-      //-   input(type="checkbox" v-model="showInExplore")
-      //-   span Show in Explore
-      label
-        input(type="checkbox")
+      label(:class="{active: isFavoriteUser}" @click.prevent="toggleIsFavoriteUser")
+        input(type="checkbox" v-model="isFavoriteUser")
         span Favorite
-
     .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
 
   //- Current User
@@ -106,9 +102,21 @@ export default {
       set (newName) {
         this.$store.dispatch('currentUser/name', newName)
       }
+    },
+    isFavoriteUser () {
+      const favoriteUsers = this.$store.state.currentUser.favoriteUsers
+      const isFavoriteUser = favoriteUsers.filter(user => user.id === this.user.id)
+      return Boolean(isFavoriteUser.length)
     }
   },
   methods: {
+    toggleIsFavoriteUser () {
+      if (this.isFavoriteUser) {
+        // this.$store.dispatch('currentUser/removeFavorite', {type: 'user', id: this.user.id})
+      } else {
+        this.$store.dispatch('currentUser/addFavorite', { type: 'user', id: this.user.id })
+      }
+    },
     toggleUserSettingsIsVisible () {
       const isVisible = this.userSettingsIsVisible
       this.closeDialogs()

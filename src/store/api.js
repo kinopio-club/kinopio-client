@@ -212,6 +212,16 @@ const self = {
         console.error(error)
       }
     },
+    updateUserFavorites: async (context, body) => {
+      if (!shouldRequest()) { return }
+      try {
+        const options = requestOptions({ body, method: 'PATCH' })
+        const response = await fetch(`${host}/user/favorites`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
 
     // Space
 

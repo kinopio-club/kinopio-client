@@ -175,14 +175,56 @@ export default {
     restoreUserFavorites: async (context, cachedUser) => {
       const favorites = await context.dispatch('api/getUserFavorites', null, { root: true })
       context.dispatch('mergeFavorites', {
-        type: 'users',
+        type: 'user',
         newFavorites: favorites.favoriteUsers
       })
       context.dispatch('mergeFavorites', {
-        type: 'spaces',
+        type: 'space',
         newFavorites: favorites.favoriteSpaces
       })
     },
+
+    // addFavorite: (context, { type, id }) => {
+    //   if (type === 'user') {
+    //     let favorites = context.state.favoriteUsers
+    //     favorites = favorites.push({type, id})
+    //     context.commit('favoriteUsers', favorites)
+
+    //   } else if (type === 'space') {
+
+    //   }
+    // },
+
+    // addFavorite(type, id) push, patch,
+    // context.commit('favoriteSpaces', favorites)
+
+    // removeFavorite(type, id) filter, patch
+
+    addFavorite: (context, { type, id }) => {
+      if (type === 'user') {
+        let favorites = utils.clone(context.state.favoriteUsers)
+        let favorite = { id: id }
+        console.log(context.state, favorites, favorite)
+
+        favorites.push(favorite)
+        console.log(favorites)
+        context.commit('favoriteUsers', favorites)
+      } else if (type === 'space') {}
+
+      // push
+      // commit favs // context.commit('favoriteUsers', favorites)
+
+      // either way send patch ({body.type, body.id}) // dispatch patch api user/favorites
+      context.dispatch('api/addToQueue', { name: 'updateUserFavorites',
+        body: {
+          type,
+          id
+        }
+      }, { root: true })
+    },
+
+    // removeFavorite: (context, {type, id}) => {
+
     mergeFavorites: (context, { type, newFavorites }) => {
       newFavorites = newFavorites.map(favorite => {
         return {
@@ -190,10 +232,10 @@ export default {
           name: favorite.name
         }
       })
-      if (type === 'users') {
+      if (type === 'user') {
         const favorites = utils.mergeArrayOfObjectsById(context.state.favoriteUsers, newFavorites)
         context.commit('favoriteUsers', favorites)
-      } else if (type === 'spaces') {
+      } else if (type === 'space') {
         const favorites = utils.mergeArrayOfObjectsById(context.state.favoriteSpaces, newFavorites)
         context.commit('favoriteSpaces', favorites)
       }
@@ -202,14 +244,16 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           emailIsVerified: true
-        } }, { root: true })
+        }
+      }, { root: true })
     },
     arenaAccessToken: (context, token) => {
       context.commit('arenaAccessToken', token)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           arenaAccessToken: token
-        } }, { root: true })
+        }
+      }, { root: true })
     },
     updateArenaAccessToken: async (context, arenaReturnedCode) => {
       console.log('updateArenaAccessToken')
