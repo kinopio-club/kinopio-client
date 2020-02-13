@@ -15,7 +15,7 @@ dialog.import.narrow(v-if="visible" :open="visible" @click.stop="closeDialogs" r
       ul
         li(v-for="(error in errors") {{error}}
 
-  section(v-if="isBeta")
+  section
     .button-wrap
       button(@click.stop="toggleImportArenaChannelIsVisible" :class="{ active: importArenaChannelIsVisible}")
         img.icon.arena(src="@/assets/arena.svg")
@@ -46,11 +46,6 @@ export default {
       loading: false,
       errors: [],
       importArenaChannelIsVisible: false
-    }
-  },
-  computed: {
-    isBeta () {
-      return this.$store.state.isBeta
     }
   },
   methods: {
