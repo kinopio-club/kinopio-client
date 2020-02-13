@@ -37,7 +37,6 @@ export default {
     },
     spaceIsActive (space) {
       const currentSpace = this.$store.state.currentSpace
-      console.log(currentSpace, space)
       return space.id === currentSpace.id
     }
 
