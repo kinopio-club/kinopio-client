@@ -151,6 +151,9 @@ export default new Vuex.Store({
       utils.typeCheck(user, 'object')
       state.triggeredDetailsForUser = user
     },
+    clearTriggeredDetailsForUser: (state) => {
+      state.triggeredDetailsForUser = {}
+    },
 
     // connecting
     currentUserIsDrawingConnection: (state, value) => {

@@ -67,11 +67,14 @@ export default {
   methods: {
     showSpaces () {
       this.spacesIsVisible = true
+      this.userDetailsIsNotVislble()
     },
     hideSpaces () {
       this.spacesIsVisible = false
+      this.userDetailsIsNotVislble()
     },
     open (item) {
+      this.userDetailsIsNotVislble()
       if (this.spacesIsVisible) {
         this.$store.dispatch('currentSpace/changeSpace', item)
       } else {
@@ -97,9 +100,16 @@ export default {
       this.$store.dispatch('currentUser/removeFavorite', { type, item })
     },
     userDetailsIsNotVislble () {
+      this.$store.commit('clearTriggeredDetailsForUser')
       this.$emit('userDetailsIsNotVislble')
     }
+  },
+  watch: {
+    visible (value) {
+      this.userDetailsIsNotVislble()
+    }
   }
+
 }
 </script>
 
