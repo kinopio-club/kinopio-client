@@ -30,7 +30,8 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeDialogs" 
   section(v-if="isCurrentUser")
     .button-wrap
       button(@click.stop="toggleFavoritesIsVisible" :class="{active: favoritesIsVisible}") Favorites
-      Favorites(:visible="favoritesIsVisible")
+      Favorites(:visible="favoritesIsVisible" @userDetailsIsNotVislble="userDetailsIsNotVislble")
+      UserDetails(:visible="userDetailsIsVisible" :user="triggeredDetailsForUser" :detailsOnRight="true")
 
   section(v-if="isCurrentUser")
     .button-wrap
@@ -55,6 +56,7 @@ export default {
     ColorPicker,
     UserSettings,
     User: () => import('@/components/User.vue'),
+    UserDetails: () => import('@/components/dialogs/UserDetails.vue'),
     Loader,
     SpacePicker,
     Favorites
@@ -71,11 +73,19 @@ export default {
       loadingUserspaces: false,
       spacePickerIsVisible: false,
       favoritesIsVisible: false,
+      userDetailsIsVisible: false,
       userSpaces: [],
       error: {
         unknownServerError: false
       }
     }
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerUserDetailsIsVisibleForUser') {
+        this.userDetailsIsVisible = true
+      }
+    })
   },
   computed: {
     // isBeta () {
@@ -107,6 +117,9 @@ export default {
       const favoriteUsers = this.$store.state.currentUser.favoriteUsers
       const isFavoriteUser = favoriteUsers.filter(user => user.id === this.user.id)
       return Boolean(isFavoriteUser.length)
+    },
+    triggeredDetailsForUser () {
+      return this.$store.state.triggeredDetailsForUser
     }
   },
   methods: {
@@ -137,6 +150,10 @@ export default {
       this.userSettingsIsVisible = false
       this.spacePickerIsVisible = false
       this.favoritesIsVisible = false
+      this.userDetailsIsVisible = false
+    },
+    userDetailsIsNotVislble () {
+      this.userDetailsIsVisible = false
     },
     updateUserColor (newColor) {
       this.$store.dispatch('currentUser/color', newColor)
