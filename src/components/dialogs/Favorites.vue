@@ -38,8 +38,6 @@ export default {
   },
   data () {
     return {
-      loadingSpaces: false,
-      loadingPeople: false,
       spacesIsVisible: true,
       isLoading: false
     }
@@ -78,7 +76,13 @@ export default {
       // dont close dialog
     },
     remove (item) {
-      // remove favorite (item)
+      let type
+      if (this.spacesIsVisible) {
+        type = 'space'
+      } else {
+        type = 'user'
+      }
+      this.$store.dispatch('currentUser/removeFavorite', { type, item })
     }
   }
   // watch: {
