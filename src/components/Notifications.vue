@@ -10,8 +10,8 @@ aside.notifications
       button(@click="copyCurrentSpace")
         img.icon(src="@/assets/add.svg")
         span Save a Copy
-      label
-        input(type="checkbox")
+      label(:class="{active: isFavoriteSpace}" @click.prevent="toggleIsFavoriteSpace")
+        input(type="checkbox" v-model="isFavoriteSpace")
         span Favorite
 
   .persistent-item.danger(v-if="notifySpaceNotFound")
@@ -80,9 +80,23 @@ export default {
     notifyNewUser () { return this.$store.state.notifyNewUser },
     userIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
+    },
+    isFavoriteSpace () {
+      const currentSpace = this.$store.state.currentSpace
+      const favoriteSpaces = this.$store.state.currentUser.favoriteSpaces
+      const isFavoriteSpace = favoriteSpaces.filter(space => space.id === currentSpace.id)
+      return Boolean(isFavoriteSpace.length)
     }
   },
   methods: {
+    toggleIsFavoriteSpace () {
+      const currentSpace = this.$store.state.currentSpace
+      if (this.isFavoriteSpace) {
+        this.$store.dispatch('currentUser/removeFavorite', { type: 'space', id: currentSpace.id })
+      } else {
+        this.$store.dispatch('currentUser/addFavorite', { type: 'space', id: currentSpace.id })
+      }
+    },
     update () {
       const notifications = this.$store.state.notifications
       notifications.forEach(item => {
