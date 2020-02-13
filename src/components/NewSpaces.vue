@@ -8,10 +8,9 @@
   section.results-section
     ul.results-list
       template(v-for="(space in spaces")
-        a(:href="space.url")
-          li(tabindex="0")
-            User(:user="user(space)" :isClickable="false" :key="user(space).id")
-            span {{space.name}}
+        li(tabindex="0" @click.stop="open(space)" :class="{ active: spaceIsActive(space) }")
+          User(:user="user(space)" :isClickable="false" :key="user(space).id")
+          span {{space.name}}
 </template>
 
 <script>
@@ -32,7 +31,16 @@ export default {
   methods: {
     user (space) {
       return space.users[0]
+    },
+    open (space) {
+      this.$store.dispatch('currentSpace/changeSpace', space)
+    },
+    spaceIsActive (space) {
+      const currentSpace = this.$store.state.currentSpace
+      console.log(currentSpace, space)
+      return space.id === currentSpace.id
     }
+
   }
 }
 </script>
@@ -43,9 +51,6 @@ export default {
     border-top 1px solid var(--primary)
     border-top-left-radius 0
     border-top-right-radius 0
-  a
-    color var(--primary)
-    text-decoration none
   .badge
     display flex
   button + a

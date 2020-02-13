@@ -26,7 +26,8 @@ export default {
     selectedSpace: Object,
     excludeCurrentSpace: Boolean,
     userSpaces: Array,
-    loading: Boolean
+    loading: Boolean,
+    shouldCloseWhenSelecting: Boolean
   },
   computed: {
     spaces () {
@@ -53,7 +54,9 @@ export default {
     },
     select (space) {
       this.$emit('selectSpace', space)
-      this.$emit('closeDialog')
+      if (this.shouldCloseWhenSelecting) {
+        this.$emit('closeDialog')
+      }
     },
     spaceIsPrivate (space) {
       return space.privacy === 'private'

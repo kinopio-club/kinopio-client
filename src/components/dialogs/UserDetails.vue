@@ -190,7 +190,7 @@ export default {
       this.userSpaces = []
     },
     updateSelectedSpace (space) {
-      window.location.href = space.id
+      this.$store.dispatch('currentSpace/changeSpace', space)
     }
   },
   watch: {

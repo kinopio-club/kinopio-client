@@ -73,8 +73,7 @@ export default {
     },
     open (item) {
       if (this.spacesIsVisible) {
-        // user opens user details
-        // space = goto the spaceid url (or do a claen restore w just id?)
+        this.$store.dispatch('currentSpace/changeSpace', item)
       } else {
         this.$store.commit('triggerUserDetailsIsVisibleForUser', item)
       }
