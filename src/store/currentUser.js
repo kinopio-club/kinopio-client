@@ -183,39 +183,46 @@ export default {
         newFavorites: favorites.favoriteSpaces
       })
     },
-    addFavorite: (context, { type, id }) => {
+    addFavorite: (context, { type, item }) => {
       if (type === 'user') {
         let favorites = utils.clone(context.state.favoriteUsers)
-        let favorite = { id: id }
+        let favorite = {
+          id: item.id,
+          name: item.name,
+          color: item.color
+        }
         favorites.push(favorite)
         context.commit('favoriteUsers', favorites)
       } else if (type === 'space') {
         let favorites = utils.clone(context.state.favoriteSpaces)
-        let favorite = { id: id }
+        let favorite = {
+          id: item.id,
+          name: item.name
+        }
         favorites.push(favorite)
         context.commit('favoriteSpaces', favorites)
       }
       context.dispatch('api/addToQueue', { name: 'addOrRemoveFavorite',
-        body: { type, id }
+        body: { type, id: item.id }
       }, { root: true })
     },
 
-    removeFavorite: (context, { type, id }) => {
+    removeFavorite: (context, { type, item }) => {
       if (type === 'user') {
         let favorites = utils.clone(context.state.favoriteUsers)
         favorites = favorites.filter(favorite => {
-          return favorite.id !== id
+          return favorite.id !== item.id
         })
         context.commit('favoriteUsers', favorites)
       } else if (type === 'space') {
         let favorites = utils.clone(context.state.favoriteSpaces)
         favorites = favorites.filter(favorite => {
-          return favorite.id !== id
+          return favorite.id !== item.id
         })
         context.commit('favoriteSpaces', favorites)
       }
       context.dispatch('api/addToQueue', { name: 'addOrRemoveFavorite',
-        body: { type, id }
+        body: { type, id: item.id }
       }, { root: true })
     },
 
@@ -223,7 +230,8 @@ export default {
       newFavorites = newFavorites.map(favorite => {
         return {
           id: favorite.id,
-          name: favorite.name
+          name: favorite.name,
+          color: favorite.color
         }
       })
       if (type === 'user') {

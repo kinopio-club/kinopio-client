@@ -339,6 +339,12 @@ code
   //   background-position center
   input
     margin 0
+  .user
+    vertical-align middle
+    margin-right 3px
+    .user-avatar
+      width 16px
+      height 15px
 
 .danger
   background-color var(--danger-background)

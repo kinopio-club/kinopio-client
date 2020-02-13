@@ -1,7 +1,7 @@
 <template lang="pug">
 .new-spaces(v-if="visible" :open="visible" @click.stop ref="dialog")
   section.header
-    span The newest spaces made by cool people like you
+    span Recently updated spaces made by cool people like you
     p(v-if="loading")
       Loader(:visible="loading")
 

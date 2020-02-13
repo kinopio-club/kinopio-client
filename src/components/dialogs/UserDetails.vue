@@ -112,9 +112,9 @@ export default {
   methods: {
     toggleIsFavoriteUser () {
       if (this.isFavoriteUser) {
-        this.$store.dispatch('currentUser/removeFavorite', { type: 'user', id: this.user.id })
+        this.$store.dispatch('currentUser/removeFavorite', { type: 'user', item: this.user })
       } else {
-        this.$store.dispatch('currentUser/addFavorite', { type: 'user', id: this.user.id })
+        this.$store.dispatch('currentUser/addFavorite', { type: 'user', item: this.user })
       }
     },
     toggleUserSettingsIsVisible () {

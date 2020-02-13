@@ -92,9 +92,9 @@ export default {
     toggleIsFavoriteSpace () {
       const currentSpace = this.$store.state.currentSpace
       if (this.isFavoriteSpace) {
-        this.$store.dispatch('currentUser/removeFavorite', { type: 'space', id: currentSpace.id })
+        this.$store.dispatch('currentUser/removeFavorite', { type: 'space', item: currentSpace })
       } else {
-        this.$store.dispatch('currentUser/addFavorite', { type: 'space', id: currentSpace.id })
+        this.$store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
       }
     },
     update () {
