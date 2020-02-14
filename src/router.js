@@ -29,7 +29,7 @@ export default new Router({
       component: Space,
       redirect: to => {
         store.dispatch('currentUser/confirmEmail')
-        store.commit('addNotification', { message: 'Email Confirmed' })
+        store.commit('addNotification', { message: 'Email Confirmed', type: 'success' })
         return '/'
       }
     }, {
