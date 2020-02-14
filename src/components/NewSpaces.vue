@@ -16,6 +16,7 @@
 <script>
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'NewSpaces',
@@ -33,13 +34,16 @@ export default {
       return space.users[0]
     },
     open (space) {
+      utils.updateWindowUrlAndTitle({
+        space: space,
+        shouldUpdateUrl: true
+      })
       this.$store.dispatch('currentSpace/changeSpace', space)
     },
     spaceIsActive (space) {
       const currentSpace = this.$store.state.currentSpace
       return space.id === currentSpace.id
     }
-
   }
 }
 </script>

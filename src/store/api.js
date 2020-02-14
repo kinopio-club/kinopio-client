@@ -202,8 +202,6 @@ const self = {
       }
     },
     getPublicUser: async (context, user) => {
-      const anonUserIsAllowed = true
-      if (!shouldRequest({ anonUserIsAllowed })) { return }
       try {
         const options = requestOptions({ method: 'GET' })
         const response = await fetch(`${host}/user/public/${user.id}`, options)

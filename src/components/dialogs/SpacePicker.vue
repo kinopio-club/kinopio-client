@@ -2,7 +2,7 @@
 dialog.narrow.space-picker(v-if="visible" :open="visible" @click.stop ref="dialog")
   section.results-section
     Loader(:visible="loading")
-    ul.results-list(:style="{maxHeight: maxHeight}")
+    ul.results-list(:style="{'max-height': maxHeight + 'px'}")
       template(v-for="(space in spaces")
         li(@click="select(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id" tabindex="0" v-on:keyup.enter="select(space)")
           .name
@@ -47,10 +47,11 @@ export default {
     },
     maxHeight () {
       const favoritesDialog = document.querySelector('dialog.favorites')
-      let height = '25vh'
+
+      let height = 120
       if (favoritesDialog) {
         const dialogHeight = favoritesDialog.offsetHeight
-        if (dialogHeight > 250) { height = `${dialogHeight}px` }
+        if (dialogHeight > 250) { height = dialogHeight }
       }
       return height
     }
@@ -105,4 +106,6 @@ export default {
     margin-left 6px
     img
       vertical-align middle
+  .name
+    max-width calc(100% - 30px)
 </style>
