@@ -6,6 +6,10 @@ footer(v-if="!dialogsVisible")
       button(@click="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
         span Explore
       Explore(:visible="exploreIsVisible")
+    .button-wrap
+      button(@click.stop="toggleFavoritesIsVisible" :class="{active: favoritesIsVisible}")
+        span Favorites
+      Favorites(:visible="favoritesIsVisible")
 
   section.controls
     .button-wrap(v-if="userCanEditCurrentSpace")
@@ -34,6 +38,7 @@ import Removed from '@/components/dialogs/Removed.vue'
 import Offline from '@/components/dialogs/Offline.vue'
 import Filters from '@/components/dialogs/Filters.vue'
 import Notifications from '@/components/Notifications.vue'
+import Favorites from '@/components/dialogs/Favorites.vue'
 
 export default {
   name: 'Footer',
@@ -42,14 +47,16 @@ export default {
     Removed,
     Offline,
     Notifications,
-    Filters
+    Filters,
+    Favorites
   },
   data () {
     return {
       removedIsVisible: false,
       offlineIsVisible: false,
       filtersIsVisible: false,
-      exploreIsVisible: false
+      exploreIsVisible: false,
+      favoritesIsVisible: false
     }
   },
   mounted () {
@@ -60,6 +67,7 @@ export default {
         this.offlineIsVisible = false
         this.filtersIsVisible = false
         this.exploreIsVisible = false
+        this.favoritesIsVisible = false
       }
     })
   },
@@ -110,6 +118,11 @@ export default {
       const isVisible = this.exploreIsVisible
       this.$store.commit('closeAllDialogs')
       this.exploreIsVisible = !isVisible
+    },
+    toggleFavoritesIsVisible () {
+      const isVisible = this.favoritesIsVisible
+      this.$store.commit('closeAllDialogs')
+      this.favoritesIsVisible = !isVisible
     }
   }
 }

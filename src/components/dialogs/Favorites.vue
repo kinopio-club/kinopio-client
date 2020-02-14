@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.favorites(v-if="visible" :open="visible" @click.stop="userDetailsIsNotVislble")
+dialog.narrow.favorites(v-if="visible" :open="visible" @click.stop="userDetailsIsNotVisible")
   section
     .segmented-buttons
       button(@click.stop="showSpaces" :class="{ active: spacesIsVisible }")
@@ -19,20 +19,25 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.stop="userDetailsI
           .badge(v-else :style="{background: item.color}")
             User(:user="item" :isClickable="false")
             span {{item.name}}
-            // UserDetails
           button(@click.stop="remove(item)")
             img.icon(src="@/assets/remove.svg")
-
+    UserDetails(:visible="userDetailsIsVisible" :user="openedUser")
 </template>
 
 <script>
 import Loader from '@/components/Loader.vue'
+// import User from '@/components/User.vue'
+// import UserDetails from '@/components/dialogs/UserDetails.vue'
 
 export default {
   name: 'Favorites',
   components: {
+    Loader,
+    // User,
+    // UserDetails
     User: () => import('@/components/User.vue'),
-    Loader
+    UserDetails: () => import('@/components/dialogs/UserDetails.vue')
+
   },
   props: {
     visible: Boolean
@@ -40,7 +45,9 @@ export default {
   data () {
     return {
       spacesIsVisible: true,
-      isLoading: false
+      isLoading: false,
+      userDetailsIsVisible: false,
+      openedUser: {}
     }
   },
   computed: {
@@ -67,18 +74,20 @@ export default {
   methods: {
     showSpaces () {
       this.spacesIsVisible = true
-      this.userDetailsIsNotVislble()
+      this.userDetailsIsNotVisible()
     },
     hideSpaces () {
       this.spacesIsVisible = false
-      this.userDetailsIsNotVislble()
+      this.userDetailsIsNotVisible()
     },
     open (item) {
-      this.userDetailsIsNotVislble()
+      this.userDetailsIsNotVisible()
       if (this.spacesIsVisible) {
         this.$store.dispatch('currentSpace/changeSpace', item)
       } else {
-        this.$store.commit('triggerUserDetailsIsVisibleForUser', item)
+        // this.$store.commit('triggerUserDetailsIsVisibleForUser', item)
+        this.openedUser = item
+        this.userDetailsIsVisible = true
       }
     },
     itemIsOpened (item) {
@@ -86,7 +95,8 @@ export default {
       if (this.spacesIsVisible) {
         opened = this.$store.state.currentSpace
       } else {
-        opened = this.$store.state.triggeredDetailsForUser
+        // opened = this.$store.state.triggeredDetailsForUser
+        opened = this.openedUser
       }
       return item.id === opened.id
     },
@@ -99,14 +109,16 @@ export default {
       }
       this.$store.dispatch('currentUser/removeFavorite', { type, item })
     },
-    userDetailsIsNotVislble () {
-      this.$store.commit('clearTriggeredDetailsForUser')
-      this.$emit('userDetailsIsNotVislble')
+    userDetailsIsNotVisible () {
+      // this.$store.commit('clearTriggeredDetailsForUser')
+      // this.$emit('userDetailsIsNotVisible')
+      this.userDetailsIsVisible = false
+      this.openedUser = {}
     }
   },
   watch: {
     visible (value) {
-      this.userDetailsIsNotVislble()
+      this.userDetailsIsNotVisible()
     }
   }
 
@@ -115,7 +127,7 @@ export default {
 
 <style lang="stylus">
 .favorites
-  .results-section
+  > .results-section
     border-top 1px solid var(--primary)
     border-top-left-radius 0
     border-top-right-radius 0
