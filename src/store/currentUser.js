@@ -173,7 +173,9 @@ export default {
       context.dispatch('restoreUserFavorites', remoteUser)
     },
     restoreUserFavorites: async (context, cachedUser) => {
+      context.commit('isLoadingUserFavorites', true, { root: true })
       const favorites = await context.dispatch('api/getUserFavorites', null, { root: true })
+      context.commit('isLoadingUserFavorites', false, { root: true })
       context.dispatch('mergeFavorites', {
         type: 'user',
         newFavorites: favorites.favoriteUsers

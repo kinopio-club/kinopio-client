@@ -42,7 +42,6 @@ export default {
   data () {
     return {
       spacesIsVisible: true,
-      isLoading: false,
       userDetailsIsVisible: false,
       openedUser: {}
     }
@@ -66,6 +65,9 @@ export default {
       } else {
         return this.favoriteUsers
       }
+    },
+    isLoading () {
+      return this.$store.state.isLoadingUserFavorites
     }
   },
   methods: {
