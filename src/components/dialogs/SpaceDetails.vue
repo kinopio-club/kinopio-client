@@ -17,10 +17,17 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
           img.icon(src="@/assets/checkmark.svg")
           span Shown in Explore
 
-    .row(v-if="canEditCurrentSpace && userIsSignedIn && !currentSpaceIsPrivate")
+    .row(v-if="canEditCurrentSpace && !currentSpaceIsPrivate")
       label(:class="{active: showInExplore}" @click.prevent="toggleShowInExplore")
         input(type="checkbox" v-model="showInExplore")
         span Show in Explore
+    template(v-if="showCannotShowInExplore")
+      p.cannot-show-in-explore
+        span To share,
+        span.badge.info you need to Sign Up or In
+        span for your spaces to be accessible to others.
+      .row
+        button(@click="triggerSignUpOrInIsVisible") Sign Up or In
 
     button(v-if="canEditCurrentSpace" @click="removeCurrentSpace")
       img.icon(src="@/assets/remove.svg")
@@ -85,7 +92,8 @@ export default {
       importIsVisible: false,
       filter: '',
       filteredSpaces: [],
-      privacyPickerIsVisible: false
+      privacyPickerIsVisible: false,
+      showCannotShowInExplore: false
     }
   },
   computed: {
@@ -151,7 +159,15 @@ export default {
     }
   },
   methods: {
+    triggerSignUpOrInIsVisible () {
+      this.$store.commit('closeAllDialogs')
+      this.$store.commit('triggerSignUpOrInIsVisible')
+    },
     toggleShowInExplore () {
+      if (!this.userIsSignedIn) {
+        this.showCannotShowInExplore = true
+        return
+      }
       const value = !this.showInExplore
       this.$store.dispatch('currentSpace/updateSpace', { showInExplore: value })
       this.updateSpaces()
@@ -245,6 +261,7 @@ export default {
         this.updateWithRemoteSpaces()
         this.closeDialogs()
         this.filter = ''
+        this.showCannotShowInExplore = false
       }
     }
   }
@@ -281,5 +298,8 @@ export default {
       overflow hidden
       .icon
         margin-left 6px
-
+  .cannot-show-in-explore
+    margin-bottom 10px
+    .badge
+      display inline-block
 </style>
