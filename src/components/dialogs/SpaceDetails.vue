@@ -54,6 +54,8 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
             span Template
           .name
             span {{space.name}}
+            .badge.status(v-if="space.showInExplore")
+              img.icon(src="@/assets/checkmark.svg")
             img.icon(v-if="spaceIsPrivate(space)" src="@/assets/lock.svg")
 </template>
 
@@ -152,8 +154,8 @@ export default {
     toggleShowInExplore () {
       const value = !this.showInExplore
       this.$store.dispatch('currentSpace/updateSpace', { showInExplore: value })
+      this.updateSpaces()
     },
-
     focusFilterInput () {
       const element = this.$refs.filterInput
       element.focus()
@@ -263,8 +265,15 @@ export default {
     .icon
       margin-top -1px
 
-  .name // in results list
-    .icon
+  .results-section
+    .badge.status
+      margin 0
       margin-left 6px
+      vertical-align middle
+      img
+        margin 0
+    .name
+      .icon
+        margin-left 6px
 
 </style>
