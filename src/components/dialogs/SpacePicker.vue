@@ -80,7 +80,6 @@ export default {
       })
     },
     shouldShowInExploreBadge (space) {
-      console.log(space)
       if (space.privacy === 'private') { return }
       return space.showInExplore
     }

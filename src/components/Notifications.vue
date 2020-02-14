@@ -1,5 +1,5 @@
 <template lang="pug">
-aside.notifications
+aside.notifications(@click="closeAllDialogs")
   .item(v-for="(item in items" v-bind:key="item.id" :data-notification-id="item.id" :class="item.type")
     p {{item.message}}
 
@@ -89,6 +89,9 @@ export default {
     }
   },
   methods: {
+    closeAllDialogs () {
+      this.$store.commit('closeAllDialogs')
+    },
     toggleIsFavoriteSpace () {
       const currentSpace = this.$store.state.currentSpace
       if (this.isFavoriteSpace) {

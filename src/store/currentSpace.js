@@ -333,6 +333,7 @@ export default {
       const cachedSpace = cache.space(space.id)
       const shouldUpdateUrl = Boolean(context.rootState.spaceUrlToLoad)
       const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      context.commit('notifySpaceNotFound', false, { root: true })
       // restore local
       context.commit('restoreSpace', emptySpace)
       context.commit('restoreSpace', cachedSpace)
