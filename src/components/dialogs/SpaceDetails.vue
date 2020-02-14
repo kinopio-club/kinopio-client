@@ -277,6 +277,8 @@ export default {
       img
         margin 0
     .name
+      white-space wrap
+      overflow hidden
       .icon
         margin-left 6px
 

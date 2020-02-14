@@ -131,17 +131,15 @@ export default {
     border-top-left-radius 0
     border-top-right-radius 0
     padding-top 4px
-    .name
-      margin-left 0 !important
-      white-space nowrap
-      overflow hidden
-      text-overflow ellipsis
-      max-width calc(100% - 32px)
-    .badge
-      max-width calc(100% - 32px)
     > ul
       li
         justify-content space-between
         button
           margin-left auto
+        .name
+          white-space wrap
+          max-width calc(100% - 32px)
+        .badge
+          max-width calc(100% - 32px)
+
 </style>
