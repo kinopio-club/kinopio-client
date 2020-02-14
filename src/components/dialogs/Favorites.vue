@@ -111,8 +111,6 @@ export default {
       this.$store.dispatch('currentUser/removeFavorite', { type, item })
     },
     userDetailsIsNotVisible () {
-      // this.$store.commit('clearTriggeredDetailsForUser')
-      // this.$emit('userDetailsIsNotVisible')
       this.userDetailsIsVisible = false
       this.openedUser = {}
     }
