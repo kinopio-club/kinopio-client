@@ -52,6 +52,8 @@ export default {
       if (favoritesDialog) {
         const dialogHeight = favoritesDialog.offsetHeight
         if (dialogHeight > 250) { height = dialogHeight }
+      } else {
+        return undefined
       }
       return height
     }
