@@ -134,9 +134,9 @@ export default {
       max-width calc(100% - 32px)
     .badge
       max-width calc(100% - 32px)
-    li
-      justify-content space-between
-      button
-        margin-left auto
-
+    > ul
+      li
+        justify-content space-between
+        button
+          margin-left auto
 </style>

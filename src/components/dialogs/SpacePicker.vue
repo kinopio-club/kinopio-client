@@ -6,8 +6,10 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.stop ref="dialo
       template(v-for="(space in spaces")
         li(@click="select(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id" tabindex="0" v-on:keyup.enter="select(space)")
           .name
-            img.icon(v-if="spaceIsPrivate(space)" src="@/assets/lock.svg")
             span {{space.name}}
+          .badge.status(v-if="shouldShowInExploreBadge(space)")
+            img.icon(src="@/assets/checkmark.svg")
+          img.icon.lock(v-if="spaceIsPrivate(space)" src="@/assets/lock.svg")
 </template>
 
 <script>
@@ -76,6 +78,11 @@ export default {
         behavior: 'smooth',
         scrollMode: 'if-needed'
       })
+    },
+    shouldShowInExploreBadge (space) {
+      console.log(space)
+      if (space.privacy === 'private') { return }
+      return space.showInExplore
     }
   },
   watch: {
@@ -94,4 +101,9 @@ export default {
 .space-picker
   .results-section
     padding-top 4px
+  .lock,
+  .badge
+    margin-left 6px
+    img
+      vertical-align middle
 </style>
