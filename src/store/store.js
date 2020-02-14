@@ -19,7 +19,7 @@ export default new Vuex.Store({
     viewportWidth: 0,
     isOnline: true,
     isBeta: false,
-    initialExtraSize: 160,
+    initialExtraSize: 160, // TODO apply extra size each time you change spaces
 
     // reset password
     resetPasswordApiKey: '',
@@ -63,6 +63,7 @@ export default new Vuex.Store({
     // loading
     isLoadingSpace: false,
     spaceUrlToLoad: '',
+    isLoadingUserFavorites: false,
 
     // notifications
     notifications: [],
@@ -268,6 +269,10 @@ export default new Vuex.Store({
     spaceUrlToLoad: (state, spaceUrl) => {
       utils.typeCheck(spaceUrl, 'string')
       state.spaceUrlToLoad = spaceUrl
+    },
+    isLoadingUserFavorites: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.isLoadingUserFavorites = value
     },
 
     // notifications

@@ -146,6 +146,7 @@ label // used for checkbox buttons
 label
   padding-bottom 4px
   display inline-block
+  height 24px
   input
     margin 0
 
@@ -231,12 +232,13 @@ dialog
 .segmented-buttons
   button
     margin 0
+    border-radius 0
     &:first-child
-      border-top-right-radius 0
-      border-bottom-right-radius 0
+      border-top-left-radius 3px
+      border-bottom-left-radius 3px
     &:last-child
-      border-top-left-radius 0
-      border-bottom-left-radius 0
+      border-top-right-radius 3px
+      border-bottom-right-radius 3px
   button + button
     margin-left -1px
 
@@ -329,12 +331,16 @@ code
     background var(--info-background)
   &.success
     background var(--success-background)
-  &.checked
-    background-image url('assets/checkmark.svg')
-    background-repeat no-repeat
-    background-position center
+  &.status
+    background var(--secondary-background)
   input
     margin 0
+  .user
+    vertical-align middle
+    margin-right 3px
+    .user-avatar
+      width 16px
+      height 15px
 
 .danger
   background-color var(--danger-background)

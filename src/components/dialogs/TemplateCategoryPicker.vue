@@ -35,6 +35,8 @@ export default {
 
 <style lang="stylus">
 .template-category-picker
+  top calc(100% - 8px) !important
+  bottom initial !important
   .results-section
     padding-top 4px
 </style>

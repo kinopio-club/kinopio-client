@@ -1,18 +1,33 @@
 <template lang="pug">
 dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs")
   section
-    .row(:class="{ 'privacy-row': canEditCurrentSpace && userIsSignedIn }")
-      template(v-if="canEditCurrentSpace")
-        input(placeholder="name" v-model="spaceName")
+    .row(v-if="canEditCurrentSpace" :class="{ 'privacy-row': canEditCurrentSpace && userIsSignedIn }")
+      input(placeholder="name" v-model="spaceName")
 
-        .button-wrap(v-if="userIsSignedIn")
-          button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
-            img.icon(v-if="currentSpaceIsPrivate" src="@/assets/lock.svg")
-            img.icon(v-else src="@/assets/unlock.svg")
-          PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs" @updateSpaces="updateSpaces")
+      .button-wrap(v-if="userIsSignedIn")
+        button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
+          img.icon(v-if="currentSpaceIsPrivate" src="@/assets/lock.svg")
+          img.icon(v-else src="@/assets/unlock.svg")
+        PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs" @updateSpaces="updateSpaces")
 
-      template(v-else)
-        p {{spaceName}}
+    template(v-if="!canEditCurrentSpace")
+      p {{spaceName}}
+      .row(v-if="showInExplore")
+        .badge.status
+          img.icon(src="@/assets/checkmark.svg")
+          span Shown in Explore
+
+    .row(v-if="canEditCurrentSpace && !currentSpaceIsPrivate")
+      label(:class="{active: showInExplore}" @click.prevent="toggleShowInExplore")
+        input(type="checkbox" v-model="showInExplore")
+        span Show in Explore
+    template(v-if="showCannotShowInExplore")
+      p.cannot-show-in-explore
+        span To share,
+        span.badge.info you need to Sign Up or In
+        span for your spaces to be accessible to others.
+      .row
+        button(@click="triggerSignUpOrInIsVisible") Sign Up or In
 
     button(v-if="canEditCurrentSpace" @click="removeCurrentSpace")
       img.icon(src="@/assets/remove.svg")
@@ -24,20 +39,14 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
       Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="currentSpace" :exportScope="exportScope")
 
   section.results-actions
-    .row
-      .button-wrap
-        button(@click.stop="toggleTemplatesIsVisible" :class="{ active: templatesIsVisible }")
-          span Templates
-        Templates(:visible="templatesIsVisible")
-
-      .button-wrap
-        button(@click.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
-          span Import
-        Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
-
     button(@click="addSpace")
       img.icon(src="@/assets/add.svg")
       span Add
+
+    .button-wrap
+      button(@click.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
+        span Import
+      Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
 
   section.results-section
     .filter-wrap(v-if="isNumerousSpaces")
@@ -52,6 +61,8 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
             span Template
           .name
             span {{space.name}}
+            .badge.status(v-if="shouldShowInExploreBadge(space)")
+              img.icon(src="@/assets/checkmark.svg")
             img.icon(v-if="spaceIsPrivate(space)" src="@/assets/lock.svg")
 </template>
 
@@ -61,7 +72,6 @@ import fuzzy from 'fuzzy'
 import cache from '@/cache.js'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
-import Templates from '@/components/dialogs/Templates.vue'
 import templates from '@/spaces/templates.js'
 import PrivacyPicker from '@/components/dialogs/PrivacyPicker.vue'
 
@@ -70,7 +80,6 @@ export default {
   components: {
     Export,
     Import,
-    Templates,
     PrivacyPicker
   },
   props: {
@@ -81,10 +90,10 @@ export default {
       spaces: [],
       exportIsVisible: false,
       importIsVisible: false,
-      templatesIsVisible: false,
       filter: '',
       filteredSpaces: [],
-      privacyPickerIsVisible: false
+      privacyPickerIsVisible: false,
+      showCannotShowInExplore: false
     }
   },
   computed: {
@@ -142,12 +151,27 @@ export default {
     currentSpaceIsPrivate () {
       return this.$store.state.currentSpace.privacy === 'private'
     },
+    showInExplore () {
+      return this.$store.state.currentSpace.showInExplore
+    },
     userIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     }
-
   },
   methods: {
+    triggerSignUpOrInIsVisible () {
+      this.$store.commit('closeAllDialogs')
+      this.$store.commit('triggerSignUpOrInIsVisible')
+    },
+    toggleShowInExplore () {
+      if (!this.userIsSignedIn) {
+        this.showCannotShowInExplore = true
+        return
+      }
+      const value = !this.showInExplore
+      this.$store.dispatch('currentSpace/updateSpace', { showInExplore: value })
+      this.updateSpaces()
+    },
     focusFilterInput () {
       const element = this.$refs.filterInput
       element.focus()
@@ -163,6 +187,11 @@ export default {
       this.closeDialogs()
       this.importIsVisible = !isVisible
     },
+    closeDialogs () {
+      this.exportIsVisible = false
+      this.importIsVisible = false
+      this.privacyPickerIsVisible = false
+    },
     toggleTemplatesIsVisible () {
       const isVisible = this.templatesIsVisible
       this.closeDialogs()
@@ -172,13 +201,6 @@ export default {
       const isVisible = this.privacyPickerIsVisible
       this.closeDialogs()
       this.privacyPickerIsVisible = !isVisible
-    },
-
-    closeDialogs () {
-      this.exportIsVisible = false
-      this.importIsVisible = false
-      this.templatesIsVisible = false
-      this.privacyPickerIsVisible = false
     },
     spaceIsActive (spaceId) {
       const currentSpace = this.$store.state.currentSpace.id
@@ -226,6 +248,10 @@ export default {
     },
     clearFilter () {
       this.filter = ''
+    },
+    shouldShowInExploreBadge (space) {
+      if (space.privacy === 'private') { return }
+      return space.showInExplore
     }
   },
   watch: {
@@ -235,6 +261,7 @@ export default {
         this.updateWithRemoteSpaces()
         this.closeDialogs()
         this.filter = ''
+        this.showCannotShowInExplore = false
       }
     }
   }
@@ -253,7 +280,26 @@ export default {
       width 13px
       height 11px
 
-  .name // in results list
+  .badge.status
+    display inline-flex
+    margin-top 8px
     .icon
+      margin-top -1px
+
+  .results-section
+    .badge.status
+      margin 0
       margin-left 6px
+      vertical-align middle
+      img
+        margin 0
+    .name
+      white-space wrap
+      overflow hidden
+      .icon
+        margin-left 6px
+  .cannot-show-in-explore
+    margin-bottom 10px
+    .badge
+      display inline-block
 </style>

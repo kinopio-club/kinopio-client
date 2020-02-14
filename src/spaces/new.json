@@ -2,6 +2,7 @@
   "id": "1",
   "name": "New Space",
   "privacy": "closed",
+  "showInExplore": false,
   "users": [],
   "cards": [
     {

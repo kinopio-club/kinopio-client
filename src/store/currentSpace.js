@@ -271,7 +271,7 @@ export default {
       let space = utils.clone(context.state)
       space.id = nanoid()
       space.users = []
-      space.isRenamed = false
+      space.showInExplore = false
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       context.commit('restoreSpace', uniqueNewSpace)
       Vue.nextTick(() => {
@@ -333,6 +333,7 @@ export default {
       const cachedSpace = cache.space(space.id)
       const shouldUpdateUrl = Boolean(context.rootState.spaceUrlToLoad)
       const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      context.commit('notifySpaceNotFound', false, { root: true })
       // restore local
       context.commit('restoreSpace', emptySpace)
       context.commit('restoreSpace', cachedSpace)
@@ -362,7 +363,6 @@ export default {
       const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       updates.id = space.id
       if (updates.name) {
-        updates.isRenamed = true
         const updatedSpace = utils.clone(space)
         updatedSpace.name = updates.name
         utils.updateWindowUrlAndTitle({
@@ -376,10 +376,12 @@ export default {
         body: updates
       }, { root: true })
     },
-    changeSpace: (context, space) => {
+    changeSpace: async (context, space) => {
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
-      context.dispatch('loadSpace', space)
+      await context.dispatch('loadSpace', space)
+      const canEdit = context.rootGetters['currentUser/canEditCurrentSpace']
+      if (!canEdit) { return }
       context.dispatch('api/addToQueue', {
         name: 'updateSpace',
         body: { id: space.id, updatedAt: new Date() }

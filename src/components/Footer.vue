@@ -1,6 +1,16 @@
 <template lang="pug">
 footer(v-if="!dialogsVisible")
   Notifications
+  section
+    .button-wrap
+      button(@click="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
+        span Explore
+      Explore(:visible="exploreIsVisible")
+    .button-wrap
+      button(@click.stop="toggleFavoritesIsVisible" :class="{active: favoritesIsVisible}")
+        span Favorites
+      Favorites(:visible="favoritesIsVisible")
+
   section.controls
     .button-wrap(v-if="userCanEditCurrentSpace")
       button(@click="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
@@ -23,24 +33,30 @@ footer(v-if="!dialogsVisible")
 </template>
 
 <script>
+import Explore from '@/components/dialogs/Explore.vue'
 import Removed from '@/components/dialogs/Removed.vue'
 import Offline from '@/components/dialogs/Offline.vue'
 import Filters from '@/components/dialogs/Filters.vue'
 import Notifications from '@/components/Notifications.vue'
+import Favorites from '@/components/dialogs/Favorites.vue'
 
 export default {
   name: 'Footer',
   components: {
+    Explore,
     Removed,
     Offline,
     Notifications,
-    Filters
+    Filters,
+    Favorites
   },
   data () {
     return {
       removedIsVisible: false,
       offlineIsVisible: false,
-      filtersIsVisible: false
+      filtersIsVisible: false,
+      exploreIsVisible: false,
+      favoritesIsVisible: false
     }
   },
   mounted () {
@@ -50,6 +66,8 @@ export default {
         this.removedIsVisible = false
         this.offlineIsVisible = false
         this.filtersIsVisible = false
+        this.exploreIsVisible = false
+        this.favoritesIsVisible = false
       }
     })
   },
@@ -95,8 +113,17 @@ export default {
       const isVisible = this.filtersIsVisible
       this.$store.commit('closeAllDialogs')
       this.filtersIsVisible = !isVisible
+    },
+    toggleExploreIsVisible () {
+      const isVisible = this.exploreIsVisible
+      this.$store.commit('closeAllDialogs')
+      this.exploreIsVisible = !isVisible
+    },
+    toggleFavoritesIsVisible () {
+      const isVisible = this.favoritesIsVisible
+      this.$store.commit('closeAllDialogs')
+      this.favoritesIsVisible = !isVisible
     }
-
   }
 }
 </script>
@@ -113,6 +140,8 @@ footer
     margin 0
     height 11px
   .controls
+    margin-top 6px
+  > section
     display flex
     > .button-wrap
       pointer-events all
@@ -123,4 +152,8 @@ footer
         bottom calc(100% - 8px)
   .sunglasses
     vertical-align middle
+  .user-details
+    .space-picker
+      bottom initial
+      top calc(100% - 8px)
 </style>

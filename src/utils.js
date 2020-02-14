@@ -83,6 +83,18 @@ export default {
     return object
   },
 
+  mergeArrayOfObjectsById (baseArray, newArray) {
+    baseArray = this.clone(baseArray)
+    newArray.forEach(item => {
+      const existingItemIndex = baseArray.findIndex(baseItem => baseItem.id === item.id)
+      if (existingItemIndex > -1) {
+        baseArray.splice(existingItemIndex, 1)
+      }
+      baseArray.push(item)
+    })
+    return baseArray
+  },
+
   findInArrayOfObjects (array, key, value) {
     return array.find(item => item[key] === value)
   },
@@ -145,7 +157,7 @@ export default {
   timeout (ms, promise) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        reject(new Error('timeout'))
+        throw (new Error('timeout'))
       }, ms)
       promise.then(resolve, reject)
     })

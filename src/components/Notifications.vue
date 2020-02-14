@@ -1,5 +1,5 @@
 <template lang="pug">
-aside.notifications
+aside.notifications(@click="closeAllDialogs")
   .item(v-for="(item in items" v-bind:key="item.id" :data-notification-id="item.id" :class="item.type")
     p {{item.message}}
 
@@ -10,6 +10,9 @@ aside.notifications
       button(@click="copyCurrentSpace")
         img.icon(src="@/assets/add.svg")
         span Save a Copy
+      label(:class="{active: isFavoriteSpace}" @click.prevent="toggleIsFavoriteSpace")
+        input(type="checkbox" v-model="isFavoriteSpace")
+        span Favorite
 
   .persistent-item.danger(v-if="notifySpaceNotFound")
     p Space could not be found, or is private
@@ -77,9 +80,26 @@ export default {
     notifyNewUser () { return this.$store.state.notifyNewUser },
     userIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
+    },
+    isFavoriteSpace () {
+      const currentSpace = this.$store.state.currentSpace
+      const favoriteSpaces = this.$store.state.currentUser.favoriteSpaces
+      const isFavoriteSpace = favoriteSpaces.filter(space => space.id === currentSpace.id)
+      return Boolean(isFavoriteSpace.length)
     }
   },
   methods: {
+    closeAllDialogs () {
+      this.$store.commit('closeAllDialogs')
+    },
+    toggleIsFavoriteSpace () {
+      const currentSpace = this.$store.state.currentSpace
+      if (this.isFavoriteSpace) {
+        this.$store.dispatch('currentUser/removeFavorite', { type: 'space', item: currentSpace })
+      } else {
+        this.$store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
+      }
+    },
     update () {
       const notifications = this.$store.state.notifications
       notifications.forEach(item => {
@@ -165,6 +185,10 @@ export default {
       &:first-child
         margin-left 0
   button
+    margin-left 6px
+
+  button + button,
+  button + label
     margin-left 6px
 
   .notification-jiggle

@@ -161,6 +161,16 @@ const self = {
         console.error(error)
       }
     },
+    getUserFavorites: async (context) => {
+      if (!shouldRequest()) { return }
+      try {
+        const options = requestOptions({ method: 'GET' })
+        const response = await fetch(`${host}/user/favorites`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
     getUserSpaces: async (context) => {
       if (!shouldRequest()) { return }
       try {
@@ -191,15 +201,45 @@ const self = {
         console.error(error)
       }
     },
+    getPublicUser: async (context, user) => {
+      try {
+        const options = requestOptions({ method: 'GET' })
+        const response = await fetch(`${host}/user/public/${user.id}`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    updateUserFavorites: async (context, body) => {
+      if (!shouldRequest()) { return }
+      try {
+        const options = requestOptions({ body, method: 'PATCH' })
+        const response = await fetch(`${host}/user/favorites`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
 
     // Space
+
+    getNewSpaces: async (context) => {
+      try {
+        console.log('🛬 getting new spaces')
+        const options = requestOptions({ method: 'GET' })
+        const response = await utils.timeout(16000, fetch(`${host}/space/new-spaces`, options))
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
 
     getSpace: async (context, space) => {
       try {
         if (!shouldRequest()) { return }
         console.log('🛬 getting remote space', space.id)
         const options = requestOptions({ method: 'GET' })
-        const response = await utils.timeout(10000, fetch(`${host}/space/${space.id}`, options))
+        const response = await utils.timeout(16000, fetch(`${host}/space/${space.id}`, options))
         return normalizeResponse(response)
       } catch (error) {
         console.error(error)
@@ -211,7 +251,7 @@ const self = {
       try {
         console.log('🛬 getting remote space anonymously', space.id)
         const options = requestOptions({ method: 'GET' })
-        const response = await utils.timeout(10000, fetch(`${host}/space/${space.id}`, options))
+        const response = await utils.timeout(16000, fetch(`${host}/space/${space.id}`, options))
         return normalizeResponse(response)
       } catch (error) {
         console.error(error)

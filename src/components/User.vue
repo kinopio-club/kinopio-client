@@ -99,4 +99,13 @@ export default {
     span
       font-size 12px
       color var(--primary-background)
+button
+  .user
+    margin 0
+    margin-right 6px
+    vertical-align middle
+    .user-avatar
+      width 15px
+      height 15px
+      margin-top -2px
 </style>

@@ -1,9 +1,25 @@
 <template lang="pug">
-dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeDialogs" :class="{'right-side': detailsOnRight}")
+dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDialogs" :class="{'right-side': detailsOnRight}")
+
+  //- Other User
   section.user-info(v-if="!isCurrentUser")
     .row
       User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
       p.name {{user.name}}
+  section(v-if="!isCurrentUser")
+    .button-wrap
+      button(@click.stop="getUserSpaces" :class="{active: loadingUserspaces || spacePickerIsVisible}")
+        User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
+        span Spaces
+        Loader(:visible="loadingUserspaces")
+      SpacePicker(:visible="spacePickerIsVisible" :loading="loadingUserspaces" :userSpaces="userSpaces" @selectSpace="updateSelectedSpace" @closeDialog="closeDialogs")
+    .button-wrap
+      label(:class="{active: isFavoriteUser}" @click.prevent="toggleIsFavoriteUser")
+        input(type="checkbox" v-model="isFavoriteUser")
+        span Favorite
+    .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
+
+  //- Current User
   section(v-if="isCurrentUser")
     .row
       .button-wrap
@@ -15,7 +31,6 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeDialogs" 
     .button-wrap
       button(@click.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}") Settings
       UserSettings(:user="user" :visible="userSettingsIsVisible" @removeUser="signOut")
-
     button(v-if="isSignedIn" @click="signOut") Sign Out
     button(v-else @click="triggerSignUpOrInIsVisible") Sign Up or In
 
@@ -24,14 +39,21 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click="closeDialogs" 
 <script>
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
+import SpacePicker from '@/components/dialogs/SpacePicker.vue'
+import Favorites from '@/components/dialogs/Favorites.vue'
+import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
+import utils from '@/utils.js'
 
 export default {
   name: 'UserDetails',
   components: {
     ColorPicker,
     UserSettings,
-    User: () => import('@/components/User.vue')
+    User: () => import('@/components/User.vue'),
+    Loader,
+    SpacePicker,
+    Favorites
   },
   props: {
     user: Object,
@@ -41,10 +63,19 @@ export default {
   data () {
     return {
       colorPickerIsVisible: false,
-      userSettingsIsVisible: false
+      userSettingsIsVisible: false,
+      loadingUserspaces: false,
+      spacePickerIsVisible: false,
+      userSpaces: [],
+      error: {
+        unknownServerError: false
+      }
     }
   },
   computed: {
+    // isBeta () {
+    //   return this.$store.state.isBeta
+    // },
     userColor () {
       return this.user.color
     },
@@ -66,9 +97,21 @@ export default {
       set (newName) {
         this.$store.dispatch('currentUser/name', newName)
       }
+    },
+    isFavoriteUser () {
+      const favoriteUsers = this.$store.state.currentUser.favoriteUsers
+      const isFavoriteUser = favoriteUsers.filter(user => user.id === this.user.id)
+      return Boolean(isFavoriteUser.length)
     }
   },
   methods: {
+    toggleIsFavoriteUser () {
+      if (this.isFavoriteUser) {
+        this.$store.dispatch('currentUser/removeFavorite', { type: 'user', item: this.user })
+      } else {
+        this.$store.dispatch('currentUser/addFavorite', { type: 'user', item: this.user })
+      }
+    },
     toggleUserSettingsIsVisible () {
       const isVisible = this.userSettingsIsVisible
       this.closeDialogs()
@@ -82,6 +125,7 @@ export default {
     closeDialogs () {
       this.colorPickerIsVisible = false
       this.userSettingsIsVisible = false
+      this.spacePickerIsVisible = false
     },
     updateUserColor (newColor) {
       this.$store.dispatch('currentUser/color', newColor)
@@ -94,13 +138,44 @@ export default {
     triggerSignUpOrInIsVisible () {
       this.$store.commit('closeAllDialogs')
       this.$store.commit('triggerSignUpOrInIsVisible')
+    },
+    async getUserSpaces () {
+      this.error.unknownServerError = false
+      if (this.loadingUserspaces) { return }
+      if (this.spacePickerIsVisible) {
+        this.closeDialogs()
+        return
+      }
+      this.loadingUserspaces = true
+      this.spacePickerIsVisible = true
+      try {
+        const publicUser = await this.$store.dispatch('api/getPublicUser', this.user)
+        this.userSpaces = publicUser.spaces
+      } catch (error) {
+        this.error.unknownServerError = true
+        this.clearUserSpaces()
+      }
+      this.loadingUserspaces = false
+    },
+    clearUserSpaces () {
+      this.loadingUserspaces = false
+      this.userSpaces = []
+    },
+    updateSelectedSpace (space) {
+      utils.updateWindowUrlAndTitle({
+        space: space,
+        shouldUpdateUrl: true
+      })
+      this.$store.dispatch('currentSpace/changeSpace', space)
     }
   },
   watch: {
     visible (value) {
-      if (value) {
-        this.colorPickerIsVisible = false
-      }
+      this.closeDialogs()
+      this.clearUserSpaces()
+    },
+    user (value) {
+      this.closeDialogs()
     }
   }
 }
@@ -117,6 +192,8 @@ export default {
     right 8px
   .name
     margin-left 6px
+  .danger
+    margin-top 10px
 
 .user-info
   display: flex
