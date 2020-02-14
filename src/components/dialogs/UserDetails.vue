@@ -168,6 +168,9 @@ export default {
     visible (value) {
       this.closeDialogs()
       this.clearUserSpaces()
+    },
+    user (value) {
+      this.closeDialogs()
     }
   }
 }

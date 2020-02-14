@@ -2,7 +2,7 @@
 dialog.narrow.space-picker(v-if="visible" :open="visible" @click.stop ref="dialog")
   section.results-section
     Loader(:visible="loading")
-    ul.results-list
+    ul.results-list(:style="{maxHeight: maxHeight}")
       template(v-for="(space in spaces")
         li(@click="select(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id" tabindex="0" v-on:keyup.enter="select(space)")
           .name
@@ -42,6 +42,15 @@ export default {
         spaces = spaces.filter(space => space.id !== currentSpace.id)
       }
       return spaces
+    },
+    maxHeight () {
+      const favoritesDialog = document.querySelector('dialog.favorites')
+      let height = '25vh'
+      if (favoritesDialog) {
+        const dialogHeight = favoritesDialog.offsetHeight
+        if (dialogHeight > 250) { height = `${dialogHeight}px` }
+      }
+      return height
     }
   },
   methods: {

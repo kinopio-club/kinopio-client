@@ -152,4 +152,8 @@ footer
         bottom calc(100% - 8px)
   .sunglasses
     vertical-align middle
+  .user-details
+    .space-picker
+      bottom initial
+      top calc(100% - 8px)
 </style>
