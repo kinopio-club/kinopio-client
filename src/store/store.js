@@ -20,7 +20,6 @@ export default new Vuex.Store({
     isOnline: true,
     isBeta: false,
     initialExtraSize: 160, // TODO apply extra size each time you change spaces
-    triggeredDetailsForUser: {}, // id, name, etc
 
     // reset password
     resetPasswordApiKey: '',
@@ -147,13 +146,6 @@ export default new Vuex.Store({
     triggerSpaceDetailsVisible: () => {},
     triggerSignUpOrInIsVisible: () => {},
     triggerArenaAuthenticationError: () => {},
-    triggerUserDetailsIsVisibleForUser: (state, user) => {
-      utils.typeCheck(user, 'object')
-      state.triggeredDetailsForUser = user
-    },
-    clearTriggeredDetailsForUser: (state) => {
-      state.triggeredDetailsForUser = {}
-    },
 
     // connecting
     currentUserIsDrawingConnection: (state, value) => {

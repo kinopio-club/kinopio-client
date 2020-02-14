@@ -26,15 +26,11 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.stop="userDetailsI
 
 <script>
 import Loader from '@/components/Loader.vue'
-// import User from '@/components/User.vue'
-// import UserDetails from '@/components/dialogs/UserDetails.vue'
 
 export default {
   name: 'Favorites',
   components: {
     Loader,
-    // User,
-    // UserDetails
     User: () => import('@/components/User.vue'),
     UserDetails: () => import('@/components/dialogs/UserDetails.vue')
 
@@ -85,7 +81,6 @@ export default {
       if (this.spacesIsVisible) {
         this.$store.dispatch('currentSpace/changeSpace', item)
       } else {
-        // this.$store.commit('triggerUserDetailsIsVisibleForUser', item)
         this.openedUser = item
         this.userDetailsIsVisible = true
       }
@@ -95,7 +90,6 @@ export default {
       if (this.spacesIsVisible) {
         opened = this.$store.state.currentSpace
       } else {
-        // opened = this.$store.state.triggeredDetailsForUser
         opened = this.openedUser
       }
       return item.id === opened.id
@@ -132,7 +126,7 @@ export default {
     border-top-left-radius 0
     border-top-right-radius 0
     padding-top 4px
-    .name
+    > .name
       margin-left 0 !important
       white-space nowrap
       overflow hidden
