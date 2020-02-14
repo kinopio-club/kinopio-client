@@ -54,7 +54,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
             span Template
           .name
             span {{space.name}}
-            .badge.status(v-if="space.showInExplore")
+            .badge.status(v-if="shouldShowInExploreBadge(space)")
               img.icon(src="@/assets/checkmark.svg")
             img.icon(v-if="spaceIsPrivate(space)" src="@/assets/lock.svg")
 </template>
@@ -232,6 +232,10 @@ export default {
     },
     clearFilter () {
       this.filter = ''
+    },
+    shouldShowInExploreBadge (space) {
+      if (space.privacy === 'private') { return }
+      return space.showInExplore
     }
   },
   watch: {
