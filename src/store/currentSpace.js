@@ -286,7 +286,7 @@ export default {
     addSpace: (context) => {
       context.dispatch('createNewSpace')
       Vue.nextTick(() => {
-        context.dispatch('updateCardConnectionPaths', { cardId: context.state.cards[1].id })
+        context.dispatch('updateCardConnectionPaths', { cardId: context.state.cards[1].id, connections: context.state.connections })
         context.dispatch('saveNewSpace')
         context.dispatch('updateUserLastSpaceId')
         context.commit('notifyReadOnly', false, { root: true })
@@ -564,9 +564,9 @@ export default {
         context.commit('addConnection', connection)
       }
     },
-    updateCardConnectionPaths: (context, { cardId, shouldUpdateApi }) => {
+    updateCardConnectionPaths: (context, { cardId, shouldUpdateApi, connections }) => {
       const spaceId = context.state.id
-      let connections = utils.clone(context.rootState.currentConnectionsDragging)
+      connections = utils.clone(connections || context.rootState.currentConnectionsDragging)
       connections.map(connection => {
         connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
         connection.spaceId = spaceId
