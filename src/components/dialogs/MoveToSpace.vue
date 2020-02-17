@@ -76,10 +76,6 @@ export default {
     toggleShouldSwitchToSpace () {
       this.shouldSwitchToSpace = !this.shouldSwitchToSpace
     },
-    changeToSelectedSpace () {
-      this.updateSpaces()
-      this.$store.dispatch('currentSpace/changeSpace', this.selectedSpace)
-    },
     removeCards (cards) {
       cards.forEach(card => {
         this.$store.dispatch('currentSpace/removeCardPermanent', card)
@@ -97,7 +93,7 @@ export default {
       this.$store.commit('clearMultipleSelected')
       this.$store.commit('closeAllDialogs')
       if (this.shouldSwitchToSpace) {
-        this.changeToSelectedSpace()
+        this.$store.dispatch('currentSpace/changeSpace', this.selectedSpace)
       }
       this.$store.commit('addNotification', { message: `Cards Moved to ${this.selectedSpace.name}`, type: 'success' })
     },
