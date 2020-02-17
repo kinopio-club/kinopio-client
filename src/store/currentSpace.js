@@ -199,9 +199,7 @@ export default {
         if (type.id === updatedType.id) {
           const updates = Object.keys(updatedType)
           updates.forEach(key => {
-            if (type[key]) {
-              type[key] = updatedType[key]
-            }
+            type[key] = updatedType[key]
           })
         }
       })
