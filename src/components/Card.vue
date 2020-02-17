@@ -53,6 +53,7 @@ export default {
     card: Object
   },
   computed: {
+    spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditCurrentSpace'] },
     id () { return this.card.id },
     x () { return this.card.x },
     y () { return this.card.y },
@@ -199,6 +200,7 @@ export default {
       }
     },
     startConnecting (event) {
+      if (this.spaceIsReadOnly) { return }
       this.$store.commit('closeAllDialogs')
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.commit('clearMultipleSelected')
@@ -215,6 +217,7 @@ export default {
       }
     },
     startDraggingCard () {
+      if (this.spaceIsReadOnly) { return }
       if (this.$store.state.currentUserIsDrawingConnection) { return }
       this.$store.commit('closeAllDialogs')
       this.$store.commit('currentUserIsDraggingCard', true)
@@ -223,6 +226,10 @@ export default {
       this.$store.dispatch('currentSpace/incrementSelectedCardsZ')
     },
     showCardDetails (event) {
+      if (this.spaceIsReadOnly) {
+        this.$store.commit('notifyReadOnlyJiggle')
+        return
+      }
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.commit('closeAllDialogs')
@@ -338,6 +345,20 @@ article
       align-items initial
       justify-content space-between
       .name
+        background-color var(--secondary-background)
+
+.is-read-only
+  .card,
+  .connector
+    &:hover,
+    &.hover,
+    &:active,
+    &.active
+      box-shadow none
+      cursor default
+      > button
+        box-shadow none
+        cursor default
         background-color var(--secondary-background)
 
 .jiggle

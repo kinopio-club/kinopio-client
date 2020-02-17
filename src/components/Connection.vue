@@ -50,6 +50,7 @@ export default {
     }
   },
   computed: {
+    spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditCurrentSpace'] },
     id () { return this.connection.id },
     connectionTypeId () { return this.connection.connectionTypeId },
     startCardId () { return this.connection.startCardId },
@@ -118,6 +119,7 @@ export default {
   methods: {
     // same as ConnectionLabel method
     showConnectionDetails (event) {
+      if (this.spaceIsReadOnly) { return }
       const detailsPosition = utils.cursorPositionInPage(event)
       this.$store.commit('closeAllDialogs')
       this.$store.commit('connectionDetailsIsVisibleForConnectionId', this.id)
@@ -195,5 +197,8 @@ export default {
   &:hover,
   &.active,
   &.hover
-    stroke-width: 7
+    stroke-width 7
+.is-read-only
+  .path
+    pointer-events none
 </style>

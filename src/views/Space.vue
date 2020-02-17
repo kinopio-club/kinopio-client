@@ -133,6 +133,7 @@ export default {
     },
 
     initInteractions (event) {
+      if (this.spaceIsReadOnly) { return }
       startCursor = utils.cursorPositionInViewport(event)
       if (this.$store.getters.shouldScrollAtEdges && !scrollTimer) {
         scrollAreaHeight = Math.max(50, this.viewportHeight / 8)
@@ -473,8 +474,7 @@ export default {
   position relative // used by svg connections
 .is-interacting
   pointer-events all
-.is-painting,
-.is-read-only
+.is-painting
   *
     pointer-events: none !important
 

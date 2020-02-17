@@ -69,6 +69,11 @@ export default {
           element.addEventListener('animationend', this.removeNotifyReadOnlyJiggle, false)
         }
       }
+      if (mutation.type === 'notifyReadOnlyJiggle') {
+        const element = this.$refs.readOnly
+        this.notifyReadOnlyJiggle = true
+        element.addEventListener('animationend', this.removeNotifyReadOnlyJiggle, false)
+      }
     })
   },
   computed: {
