@@ -42,6 +42,7 @@ export default {
       this.templatesIsVisible = false
     },
     async getNewSpaces () {
+      if (this.loadingNewSpaces) { return }
       this.loadingNewSpaces = true
       this.spaces = await this.$store.dispatch('api/getNewSpaces')
       this.loadingNewSpaces = false
@@ -49,8 +50,9 @@ export default {
   },
   watch: {
     visible (visible) {
-      if (this.spaces.length || this.loadingNewSpaces) { return }
-      this.getNewSpaces()
+      if (visible) {
+        this.getNewSpaces()
+      }
     }
   }
 
