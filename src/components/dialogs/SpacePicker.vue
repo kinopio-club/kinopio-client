@@ -26,28 +26,19 @@ export default {
   props: {
     visible: Boolean,
     selectedSpace: Object,
-    excludeCurrentSpace: Boolean,
+    shouldExcludeCurrentSpace: Boolean,
     userSpaces: Array,
     loading: Boolean,
     shouldCloseWhenSelecting: Boolean
   },
+  data () {
+    return {
+      spaces: []
+    }
+  },
   computed: {
-    spaces () {
-      let spaces
-      if (this.userSpaces) {
-        spaces = this.userSpaces
-      } else {
-        spaces = cache.getAllSpaces()
-      }
-      if (this.excludeCurrentSpace) {
-        const currentSpace = this.$store.state.currentSpace
-        spaces = spaces.filter(space => space.id !== currentSpace.id)
-      }
-      return spaces
-    },
     maxHeight () {
       const favoritesDialog = document.querySelector('dialog.favorites')
-
       let height = 120
       if (favoritesDialog) {
         const dialogHeight = favoritesDialog.offsetHeight
@@ -59,6 +50,26 @@ export default {
     }
   },
   methods: {
+    excludeCurrentSpace () {
+      if (!this.excludeCurrentSpace) { return }
+      const currentSpace = this.$store.state.currentSpace
+      this.spaces = this.spaces.filter(space => space.id !== currentSpace.id)
+    },
+    updateSpaces () {
+      if (this.userSpaces) {
+        this.spaces = this.userSpaces
+      } else {
+        this.spaces = cache.getAllSpaces()
+        this.updateWithRemoteSpaces()
+      }
+      this.excludeCurrentSpace()
+    },
+    async updateWithRemoteSpaces () {
+      const spaces = await this.$store.dispatch('api/getUserSpaces')
+      if (!spaces) { return }
+      this.spaces = spaces
+      this.excludeCurrentSpace()
+    },
     spaceIsActive (spaceId) {
       let selectedSpaceId = this.$store.state.currentSpace.id
       if (this.selectedSpace) {
@@ -91,9 +102,13 @@ export default {
     visible (visible) {
       this.$nextTick(() => {
         if (visible) {
+          this.updateSpaces()
           this.scrollIntoView()
         }
       })
+    },
+    userSpaces (userSpaces) {
+      this.updateSpaces()
     }
   }
 }

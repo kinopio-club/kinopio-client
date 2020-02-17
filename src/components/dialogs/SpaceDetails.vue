@@ -242,9 +242,8 @@ export default {
     },
     async updateWithRemoteSpaces () {
       const spaces = await this.$store.dispatch('api/getUserSpaces')
-      if (spaces) {
-        this.spaces = spaces
-      }
+      if (!spaces) { return }
+      this.spaces = spaces
     },
     clearFilter () {
       this.filter = ''
