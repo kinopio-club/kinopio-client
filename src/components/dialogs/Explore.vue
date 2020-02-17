@@ -41,15 +41,10 @@ export default {
     hideTemplates () {
       this.templatesIsVisible = false
     },
-    filterUser (spaces) {
-      const id = this.$store.state.currentUser.id
-      return spaces.filter(space => space.users[0].id !== id)
-    },
     async getNewSpaces () {
       this.loadingNewSpaces = true
-      const spaces = await this.$store.dispatch('api/getNewSpaces')
+      this.spaces = await this.$store.dispatch('api/getNewSpaces')
       this.loadingNewSpaces = false
-      this.spaces = this.filterUser(spaces)
     }
   },
   watch: {
