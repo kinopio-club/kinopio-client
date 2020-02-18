@@ -23,12 +23,18 @@ dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
           span Kinopio for Android
       AddToHomescreen(:visible="addToHomescreenIsVisible")
 
+    .button-wrap
+      button(@click.stop="toggleKeyboardShortcutsIsVisible" :class="{active: keyboardShortcutsIsVisible}")
+        span Keyboard Shortcuts
+      KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
+
 </template>
 
 <script>
 import Contact from '@/components/dialogs/Contact.vue'
 import WhatsNew from '@/components/dialogs/WhatsNew.vue'
 import AddToHomescreen from '@/components/dialogs/AddToHomescreen.vue'
+import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import utils from '@/utils.js'
 
 export default {
@@ -36,7 +42,8 @@ export default {
   components: {
     Contact,
     WhatsNew,
-    AddToHomescreen
+    AddToHomescreen,
+    KeyboardShortcuts
   },
   props: {
     visible: Boolean
@@ -47,6 +54,7 @@ export default {
       newStuffIsUpdated: false,
       whatsNewIsVisible: false,
       addToHomescreenIsVisible: false,
+      keyboardShortcutsIsVisible: false,
       newStuff: [],
       isIOS: false,
       isAndroid: false,
@@ -90,6 +98,11 @@ export default {
       this.closeDialogs()
       this.addToHomescreenIsVisible = !isVisible
     },
+    toggleKeyboardShortcutsIsVisible () {
+      const isVisible = this.keyboardShortcutsIsVisible
+      this.closeDialogs()
+      this.keyboardShortcutsIsVisible = !isVisible
+    },
     async getNewStuff () {
       const response = await fetch('https://api.are.na/v2/channels/kinopio-updates/contents?direction=desc')
       const data = await response.json()
@@ -103,6 +116,7 @@ export default {
       this.contactIsVisible = false
       this.whatsNewIsVisible = false
       this.addToHomescreenIsVisible = false
+      this.keyboardShortcutsIsVisible = false
     }
   },
   watch: {
