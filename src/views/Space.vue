@@ -117,6 +117,7 @@ export default {
     },
 
     addInteractionBlur () {
+      if (!utils.isMobile()) { return }
       const elements = document.querySelectorAll('button, li, label')
       elements.forEach(element => element.addEventListener('click', this.blur))
     },

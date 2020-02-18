@@ -2,7 +2,7 @@
 header
   nav
     .logo-about
-      .logo(alt="kinopio logo" @click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop :class="{active : aboutIsVisible}")
+      .logo(alt="kinopio logo" @click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop :class="{active : aboutIsVisible}" tabindex="0")
         .logo-image
         img.down-arrow(src="@/assets/down-arrow.svg")
       About(:visible="aboutIsVisible")
@@ -25,7 +25,7 @@ header
         Share(:visible="shareIsVisible")
 
       .users
-        User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true")
+        User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
 
     .bottom
       ResetPassword

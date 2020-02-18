@@ -10,6 +10,7 @@ article(:style="position" :data-card-id="id")
     :data-card-id="id"
     :data-card-x="x"
     :data-card-y="y"
+    tabindex="0"
   )
     Frames(:card="card")
 

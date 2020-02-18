@@ -12,6 +12,7 @@ path.path(
   @touchend.stop="showConnectionDetails"
   :class="{active: isSelected || detailsIsVisible, filtered: isFiltered, hover: isHovered}"
   ref="connection"
+  tabindex="0"
 )
 </template>
 
@@ -195,8 +196,9 @@ export default {
 .path
   touch-action manipulation
   &:hover,
+  &.hover,
   &.active,
-  &.hover
+  &:focus
     stroke-width 7
 .is-read-only
   .path

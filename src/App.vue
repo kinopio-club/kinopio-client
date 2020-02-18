@@ -123,8 +123,6 @@ label // used for checkbox buttons
     box-shadow var(--button-active-inset-shadow)
     color var(--primary)
     background var(--secondary-active-background)
-  &:focus
-    outline none
   .badge
     display inline
     vertical-align middle
@@ -149,10 +147,6 @@ label
   height 24px
   input
     margin 0
-
-li
-  &:focus
-    outline none
 
 p
   margin 0
@@ -257,7 +251,8 @@ dialog
 
 label,
 li
-  &:hover
+  &:hover,
+  &:focus
     input[type="checkbox"]
       background-color var(--secondary-hover-background)
   input[type="checkbox"]
@@ -310,7 +305,8 @@ ul.results-list
     border-radius 3px
     user-select none
     cursor pointer
-    &:hover
+    &:hover,
+    &:focus
       background-color var(--secondary-hover-background)
       box-shadow var(--hover-shadow)
     &:active,
@@ -397,7 +393,8 @@ code
     background-size cover
     display inline-block
     vertical-align middle
-  &:hover
+  &:hover,
+  &:focus
     .logo-image
       background-image url('assets/logo-hover.png')
   &:active,
