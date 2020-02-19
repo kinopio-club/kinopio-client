@@ -147,6 +147,7 @@ export default new Vuex.Store({
     triggerSpaceDetailsVisible: () => {},
     triggerSignUpOrInIsVisible: () => {},
     triggerArenaAuthenticationError: () => {},
+    triggerKeyboardShortcutsIsVisible: () => {},
     notifyReadOnlyJiggle: () => {},
 
     // connecting

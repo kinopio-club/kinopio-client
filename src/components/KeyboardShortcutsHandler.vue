@@ -18,9 +18,10 @@ export default {
       } else if (key === 'Enter') {
         console.log('add card')
       } else if (key === 'Escape') {
-        console.log('close dialogs, reset parent card')
+        // console.log('close dialogs, reset parent card')
+        this.$store.commit('closeAllDialogs')
       } else if (key === '?') {
-        console.log('show keyboard shortcuts dialog: header')
+        this.$store.commit('triggerKeyboardShortcutsIsVisible')
       } else if (key === 'Backspace') {
         console.log('remove card(s) or connection(s) that mouse is hovered over')
       }

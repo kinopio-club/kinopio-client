@@ -163,7 +163,7 @@ dialog
   left 8px
   top 8px
   position absolute
-  max-height calc(100vh - 50px)
+  max-height calc(100vh - 100px)
   margin 0
   padding 0
   user-select auto
@@ -287,7 +287,7 @@ li
   padding-top 0
   border-top 0
   overflow auto
-  max-height calc(92vh - 175px)
+  max-height calc(92vh - 225px)
 
 .filter-wrap
   margin-left 5px
