@@ -13,7 +13,7 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
         img.icon(src="@/assets/view.svg")
         span Label
 
-      label(:class="{active: isDefault}" @click.prevent="toggleDefault")
+      label(:class="{active: isDefault}" @click.prevent="toggleDefault" @keydown.stop.enter="toggleDefault")
         input(type="checkbox" v-model="isDefault")
         span Default
 

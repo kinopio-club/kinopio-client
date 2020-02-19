@@ -14,7 +14,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
         Loader(:visible="loadingUserspaces")
       SpacePicker(:visible="spacePickerIsVisible" :loading="loadingUserspaces" :userSpaces="userSpaces" @selectSpace="updateSelectedSpace" @closeDialog="closeDialogs")
     .button-wrap
-      label(:class="{active: isFavoriteUser}" @click.prevent="toggleIsFavoriteUser")
+      label(:class="{active: isFavoriteUser}" @click.prevent="toggleIsFavoriteUser" @keydown.stop.enter="toggleIsFavoriteUser")
         input(type="checkbox" v-model="isFavoriteUser")
         span Favorite
     .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support

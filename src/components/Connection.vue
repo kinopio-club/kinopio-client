@@ -10,6 +10,7 @@ path.path(
   :d="path"
   @click="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
+  @keyup.stop.enter="showConnectionDetails"
   :class="{active: isSelected || detailsIsVisible, filtered: isFiltered, hover: isHovered}"
   ref="connection"
   tabindex="0"

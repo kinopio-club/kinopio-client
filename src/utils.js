@@ -35,6 +35,10 @@ export default {
       const touch = this.mobileTouchPosition(event, 'page')
       x = touch.x
       y = touch.y
+    } else if (event.type === 'keyup' || event.type === 'keydown') {
+      const rect = event.target.getBoundingClientRect()
+      x = rect.x
+      y = rect.y
     } else {
       x = event.pageX
       y = event.pageY

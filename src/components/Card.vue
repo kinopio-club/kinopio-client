@@ -5,6 +5,7 @@ article(:style="position" :data-card-id="id")
     @touchstart.prevent="startDraggingCard"
     @mouseup="showCardDetails"
     @touchend="showCardDetails"
+    @keyup.stop.enter="showCardDetails"
     :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged, 'filtered': isFiltered, 'media-card': isMediaCard}",
     :style="{background: selectedColor}"
     :data-card-id="id"
@@ -28,7 +29,7 @@ article(:style="position" :data-card-id="id")
           @mousedown="startConnecting"
           @touchstart="startConnecting"
         )
-          button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: selectedColor}")
+          button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: selectedColor}" tabindex="-1")
             .connected-colors
               template(v-for="type in connectionTypes")
                 .color(:style="{ background: type.color}")

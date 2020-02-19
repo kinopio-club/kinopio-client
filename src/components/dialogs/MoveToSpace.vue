@@ -9,7 +9,7 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
           button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}") {{selectedSpace.name}}
           SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" :shouldExcludeCurrentSpace="true" :shouldCloseWhenSelecting="true" @selectSpace="updateSelectedSpace" @closeDialog="closeDialogs")
       .row(v-if="spaces.length")
-        label(:class="{active: shouldSwitchToSpace}" @click.prevent="toggleShouldSwitchToSpace")
+        label(:class="{active: shouldSwitchToSpace}" @click.prevent="toggleShouldSwitchToSpace" @keydown.stop.enter="toggleShouldSwitchToSpace")
           input(type="checkbox" v-model="shouldSwitchToSpace")
           span Switch to Space
       button(@click="moveToSpace" :class="{active: loading}")
