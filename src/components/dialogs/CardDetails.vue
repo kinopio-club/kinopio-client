@@ -6,8 +6,9 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       rows="1"
       placeholder="Type text here, or paste a URL"
       v-model="name"
-      @keydown.enter="completeEditing"
+      @keydown.exact.enter="closeCard"
       @keydown.esc="closeCard"
+      @keydown.stop
       data-type="name"
       maxlength="250"
     )
@@ -95,11 +96,6 @@ export default {
     }
   },
   methods: {
-    completeEditing (event) {
-      if (!event.shiftKey) {
-        this.$store.commit('closeAllDialogs')
-      }
-    },
     closeCard () {
       this.$store.commit('closeAllDialogs')
     },
