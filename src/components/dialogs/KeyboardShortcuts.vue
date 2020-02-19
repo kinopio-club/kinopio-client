@@ -62,12 +62,6 @@ export default {
       safariInfoIsVisible: false
     }
   },
-  // mounted () {
-  //   this.$store.subscribe((mutation, state) => {
-  //     if (mutation.type === 'closeAllDialogs') {
-  //     }
-  //   })
-  // },
   methods: {
     toggleSafariInfoIsVisible () {
       this.safariInfoIsVisible = !this.safariInfoIsVisible

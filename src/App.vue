@@ -4,6 +4,7 @@
   router-view
   Header
   Footer
+  KeyboardShortcutsHandler
   .preload
     .logo-hover
     .logo-active
@@ -13,12 +14,14 @@
 import Header from '@/components/Header.vue'
 import MagicPaint from '@/components/MagicPaint.vue'
 import Footer from '@/components/Footer.vue'
+import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 
 export default {
   components: {
     Header,
     MagicPaint,
-    Footer
+    Footer,
+    KeyboardShortcutsHandler
   }
 }
 </script>
