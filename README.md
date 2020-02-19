@@ -30,7 +30,7 @@ You can also run `vue ui`
 
 	npm run lint
 
-Uncomment code in `main.js` then,
+Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Chrome. For Safari, uncomment code in `main.js` then,
 
 	./node_modules/.bin/vue-devtools
 
