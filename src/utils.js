@@ -155,11 +155,21 @@ export default {
   },
 
   timeout (ms, promise) {
+    // https://github.com/github/fetch/issues/175#issuecomment-216791333
     return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        throw (new Error('timeout'))
+      const timeoutId = setTimeout(() => {
+        reject(new Error('promise timeout'))
       }, ms)
-      promise.then(resolve, reject)
+      promise.then(
+        (res) => {
+          clearTimeout(timeoutId)
+          resolve(res)
+        },
+        (err) => {
+          clearTimeout(timeoutId)
+          reject(err)
+        }
+      )
     })
   },
 
