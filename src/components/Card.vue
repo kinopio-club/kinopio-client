@@ -235,6 +235,7 @@ export default {
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
       this.$store.commit('cardDetailsIsVisibleForCardId', this.id)
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
     },
