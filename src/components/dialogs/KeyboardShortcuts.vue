@@ -12,7 +12,7 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.stop)
         .badge.info Enter
     article
       .row
-        .badge.title Add child card
+        .badge.title Add Child Card
         .badge.info Shift-Enter
       p Subsequent&nbsp;
         span.badge.info Enters
@@ -24,7 +24,7 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.stop)
       p Also starts a new card tree
     article
       .row
-        .badge.title Focus next/previous
+        .badge.title Focus Next/Previous
         .badge.info Tab/Shift-Tab
       p
         span.badge.info Enter
@@ -38,20 +38,20 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.stop)
         p.badge.info Option-Tab/Option-Shift-Tab
         p Unless you update your Safari preferences:
         p Preferences → Advanced → Press Tab to highlight each item on a webpage
-
-    //- article
-    //-   .row
-    //-     .badge.title Undo/Redo
-    //-     .badge.info Cmd-Z/Cmd-Shift-Z
-    //- SUPER= ${super}, cmd on mac, else ctrl. (both work tho)
-
     article
       .row
-        .badge.title Remove item(s)
+        .badge.title Copy/Cut/Paste Selected Cards
+        .badge.info {{meta}}-C/{{meta}}-X/{{meta}}-V
+      p You can copy and paste cards between spaces
+    article
+      .row
+        .badge.title Remove Selected
         .badge.info Delete
 </template>
 
 <script>
+import utils from '@/utils.js'
+
 export default {
   name: 'KeyboardShortcuts',
   props: {
@@ -60,6 +60,15 @@ export default {
   data () {
     return {
       safariInfoIsVisible: false
+    }
+  },
+  computed: {
+    meta () {
+      if (utils.isMac() || utils.isIOS()) {
+        return 'Cmd'
+      } else {
+        return 'Ctrl'
+      }
     }
   },
   methods: {

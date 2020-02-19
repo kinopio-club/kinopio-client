@@ -135,6 +135,10 @@ export default {
     return Boolean(this.isIOS() || this.isAndroid())
   },
 
+  isMac () {
+    return window.navigator.platform === 'MacIntel'
+  },
+
   capitalizeFirstLetter (string) {
     // 'dreams' -> 'Dreams'
     return string.charAt(0).toUpperCase() + string.slice(1)
