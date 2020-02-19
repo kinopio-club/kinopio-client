@@ -1,42 +1,54 @@
 <template lang="pug">
-dialog.keyboard-shortcuts.narrow(v-if="visible" :open="visible" @click.stop)
+dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.stop)
   section
-    p Keyboard Shortcuts
+    .row
+      .badge.title Keyboard Shortcuts
+      .badge.info ?
+
   section
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
-    p yolo
+    article
+      .row
+        .badge.title Add Card
+        .badge.info Enter
+    article
+      .row
+        .badge.title Add child card
+        .badge.info Shift-Enter
+      p Subsequent&nbsp;
+        span.badge.info Enters
+        span add siblings
+    article
+      .row
+        .badge.title Close Dialogs
+        .badge.info Escape
+      p Also starts a new card tree
+    article
+      .row
+        .badge.title Focus next/previous
+        .badge.info Tab/Shift-Tab
+      p
+        span.badge.info Enter
+        span clicks focused items
+
+      .row
+        button(@click.stop="toggleSafariInfoIsVisible" :class="{ active: safariInfoIsVisible }")
+          span Safari Info
+
+      div(v-if="safariInfoIsVisible")
+        p.badge.info Option-Tab/Option-Shift-Tab
+        p Unless you update your Safari preferences:
+        p Preferences → Advanced → Press Tab to highlight each item on a webpage
+
+    //- article
+    //-   .row
+    //-     .badge.title Undo/Redo
+    //-     .badge.info Cmd-Z/Cmd-Shift-Z
+    //- SUPER= ${super}, cmd on mac, else ctrl. (both work tho)
+
+    article
+      .row
+        .badge.title Remove item(s)
+        .badge.info Delete
 </template>
 
 <script>
@@ -44,45 +56,23 @@ export default {
   name: 'KeyboardShortcuts',
   props: {
     visible: Boolean
-  }
-  // data () {
-  //   return {
-  //     isIOS: false,
-  //     isAndroid: false
-  //   }
-  // },
+  },
+  data () {
+    return {
+      safariInfoIsVisible: false
+    }
+  },
   // mounted () {
-  //   this.isIOS = utils.isIOS()
-  //   this.isAndroid = utils.isAndroid()
-  //   shouldRestoreUrlPath = true
   //   this.$store.subscribe((mutation, state) => {
   //     if (mutation.type === 'closeAllDialogs') {
-  //       if (shouldRestoreUrlPath) {
-  //         shouldRestoreUrlPath = false
-  //         this.restoreUrlPath()
-  //       }
   //     }
   //   })
   // },
-  // methods: {
-  //   stripUrlPath () {
-  //     title = document.title
-  //     pathname = window.location.pathname
-  //     window.history.replaceState({}, title, '/')
-  //   },
-  //   restoreUrlPath () {
-  //     window.history.replaceState({}, title, pathname)
-  //   }
-  // },
-  // watch: {
-  //   visible (visible) {
-  //     if (visible) {
-  //       this.stripUrlPath()
-  //     } else {
-  //       this.restoreUrlPath()
-  //     }
-  //   }
-  // }
+  methods: {
+    toggleSafariInfoIsVisible () {
+      this.safariInfoIsVisible = !this.safariInfoIsVisible
+    }
+  }
 }
 </script>
 
@@ -90,8 +80,22 @@ export default {
 .keyboard-shortcuts
   overflow auto
   max-height calc(100vh - 280px)
-  // @media(max-height 500px)
-  //   top initial !important
-  //   bottom 8px
-
+  .title
+    padding-left 0
+  .badge
+    display inline-block
+  article
+    position static
+    margin-bottom 10px
+    padding-bottom 10px
+    border-bottom 1px solid var(--primary)
+    &:last-child
+      margin-bottom 0
+      padding-bottom 0
+      border-bottom 0
+  .row
+    display flex
+    justify-content space-between
+  button
+    margin-top 10px
 </style>

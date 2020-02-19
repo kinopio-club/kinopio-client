@@ -395,6 +395,7 @@ code
     vertical-align middle
   &:hover,
   &:focus
+    outline none
     .logo-image
       background-image url('assets/logo-hover.png')
   &:active,

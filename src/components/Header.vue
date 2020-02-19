@@ -184,7 +184,8 @@ header
       vertical-align middle
     .down-arrow
       padding-left 4px
-    &:hover
+    &:hover,
+    &:focus
       .down-arrow
         transform translateY(3px)
     &:active,
