@@ -11,13 +11,14 @@ export default {
   methods: {
     handleShortcuts (event) {
       const key = event.key
+      if (key === 'Escape') {
+        this.closeAddDialogsAndClearParentCard()
+      }
       if (event.target.tagName !== 'BODY') { return }
       if (event.shiftKey && key === 'Enter') {
         this.addChildOrParentCard()
       } else if (key === 'Enter') {
         this.addParentOrSiblingCard()
-      } else if (key === 'Escape') {
-        this.closeAddDialogsAndClearParentCard()
       } else if (key === '?') {
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
       } else if (key === 'Backspace') {
