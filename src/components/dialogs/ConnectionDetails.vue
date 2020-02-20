@@ -178,6 +178,8 @@ export default {
       this.$nextTick(() => {
         if (this.visible) {
           this.updateView()
+        } else {
+          this.$store.commit('shouldHideConnectionOutline', false)
         }
       })
     }

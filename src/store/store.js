@@ -20,6 +20,7 @@ export default new Vuex.Store({
     isOnline: true,
     isBeta: false,
     initialExtraSize: 160, // TODO apply extra size each time you change spaces
+    shouldHideConnectionOutline: false,
 
     // reset password
     resetPasswordApiKey: '',
@@ -132,6 +133,10 @@ export default new Vuex.Store({
     isBeta: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.isBeta = value
+    },
+    shouldHideConnectionOutline: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.shouldHideConnectionOutline = value
     },
     resetPasswordApiKey: (state, apiKey) => {
       utils.typeCheck(apiKey, 'string')

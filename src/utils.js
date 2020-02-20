@@ -37,8 +37,8 @@ export default {
       y = touch.y
     } else if (event.type === 'keyup' || event.type === 'keydown') {
       const rect = event.target.getBoundingClientRect()
-      x = rect.x
-      y = rect.y
+      x = rect.x + window.pageXOffset
+      y = rect.y + window.pageYOffset
     } else {
       x = event.pageX
       y = event.pageY
