@@ -45,15 +45,25 @@ export default {
     },
     addParentOrSiblingCard () {
       console.log('add parent or sibling card')
-      // position based on ...
-      const position = {
-        x: 50,
-        y: 100
-      }
-
+      this.$store.commit('generateCardMap')
+      const position = this.cardPosition({
+        x: window.pageXOffset + 40,
+        y: window.pageYOffset + 80
+      })
       const parentCardId = this.$store.state.parentCardId
       const isParentCard = !parentCardId
       this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
+    },
+    cardPosition (position) {
+      const incrementY = 20
+      const cardMap = this.$store.state.cardMap
+      let existingCard = cardMap.find(card => card.x === position.x && card.y === position.y)
+      console.log('🏡', existingCard, position)
+      if (existingCard) {
+        position.y = position.y + existingCard.height + incrementY
+        return this.cardPosition(position)
+      }
+      return position
     },
     addChildOrParentCard () {
       console.log('add child card, or parent if no parent')
