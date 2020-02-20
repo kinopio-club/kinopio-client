@@ -426,7 +426,7 @@ export default {
 
     // Cards
 
-    addCard: (context, position) => {
+    addCard: (context, { position }) => {
       utils.typeCheck(position, 'object')
       let cards = context.rootState.currentSpace.cards
       let card = {
@@ -441,6 +441,7 @@ export default {
       context.commit('createCard', card)
       card.spaceId = context.state.id
       card = utils.clone(card)
+      context.commit('parentCardId', card.id, { root: true })
       context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
     },
     updateCard: (context, card) => {

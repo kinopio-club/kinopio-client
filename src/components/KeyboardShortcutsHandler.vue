@@ -46,10 +46,6 @@ export default {
       }
     }
 
-    // addCard () {
-    //   console.log('🏡 add card')
-    // }
-
   }
 }
 </script>

@@ -403,12 +403,12 @@ export default {
       }
     },
 
-    addNewCard (position) {
+    addNewCard ({ position, isParentCard }) {
       if (this.spaceIsReadOnly) { return }
       const withinX = position.x > 0 && position.x < this.$store.state.pageWidth
       const withinY = position.y > 0 && position.y < this.$store.state.pageHeight
       if (withinX && withinY) {
-        this.$store.dispatch('currentSpace/addCard', position)
+        this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
       }
     },
 
@@ -439,7 +439,7 @@ export default {
       }
       if (this.$store.state.shouldAddNewCard) {
         const position = utils.cursorPositionInPage(event)
-        this.addNewCard(position)
+        this.addNewCard({ position, isParentCard: true })
       }
       if (this.$store.state.multipleCardsSelectedIds.length || this.$store.state.multipleConnectionsSelectedIds.length) {
         const position = utils.cursorPositionInPage(event)
