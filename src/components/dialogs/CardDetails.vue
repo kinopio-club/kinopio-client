@@ -6,9 +6,9 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       rows="1"
       placeholder="Type text here, or paste a URL"
       v-model="name"
-      @keydown.exact.enter="closeCard"
-      @keydown.esc="closeCard"
-      @keydown.stop
+      @keydown.enter.exact="preventDefault"
+      @keyup.stop.enter.exact="closeCard"
+      @keyup.stop.esc="closeCard"
       data-type="name"
       maxlength="250"
     )
@@ -96,6 +96,10 @@ export default {
     }
   },
   methods: {
+    preventDefault (event) {
+      // have to call this explicitly because .prevent doesn't work well with .exact (for shift-enter)
+      event.preventDefault()
+    },
     closeCard () {
       this.$store.commit('closeAllDialogs')
     },

@@ -384,6 +384,7 @@ export default {
         name: 'updateSpace',
         body: { id: space.id, updatedAt: new Date() }
       }, { root: true })
+      context.commit('parentCardId', '', { root: true })
       context.dispatch('updateUserLastSpaceId')
     },
     updateUserLastSpaceId: (context) => {
@@ -426,7 +427,7 @@ export default {
 
     // Cards
 
-    addCard: (context, { position }) => {
+    addCard: (context, { position, isParentCard }) => {
       utils.typeCheck(position, 'object')
       let cards = context.rootState.currentSpace.cards
       let card = {
@@ -441,8 +442,8 @@ export default {
       context.commit('createCard', card)
       card.spaceId = context.state.id
       card = utils.clone(card)
-      context.commit('parentCardId', card.id, { root: true })
       context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
+      if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
     },
     updateCard: (context, card) => {
       context.commit('updateCard', card)

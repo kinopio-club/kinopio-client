@@ -403,7 +403,7 @@ export default {
       }
     },
 
-    addNewCard ({ position, isParentCard }) {
+    addCard ({ position, isParentCard }) {
       if (this.spaceIsReadOnly) { return }
       const withinX = position.x > 0 && position.x < this.$store.state.pageWidth
       const withinY = position.y > 0 && position.y < this.$store.state.pageHeight
@@ -437,16 +437,16 @@ export default {
       if (this.isDrawingConnection) {
         this.createConnection()
       }
-      if (this.$store.state.shouldAddNewCard) {
+      if (this.$store.state.shouldAddCard) {
         const position = utils.cursorPositionInPage(event)
-        this.addNewCard({ position, isParentCard: true })
+        this.addCard({ position, isParentCard: true })
       }
       if (this.$store.state.multipleCardsSelectedIds.length || this.$store.state.multipleConnectionsSelectedIds.length) {
         const position = utils.cursorPositionInPage(event)
         this.showMultipleSelectedActions(position)
       }
       this.$store.commit('importArenaChannelIsVisible', false)
-      this.$store.commit('shouldAddNewCard', false)
+      this.$store.commit('shouldAddCard', false)
       this.$store.commit('preventDraggedCardFromShowingDetails', false)
       this.$store.commit('currentUserIsDrawingConnection', false)
       this.$store.commit('currentUserIsPainting', false)

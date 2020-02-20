@@ -37,7 +37,7 @@ export default new Vuex.Store({
     currentUserIsHoveringOverConnectionId: '',
 
     // cards
-    shouldAddNewCard: false,
+    shouldAddCard: false,
     cardDetailsIsVisibleForCardId: '',
     parentCardId: '',
 
@@ -104,9 +104,9 @@ export default new Vuex.Store({
       utils.typeCheck(width, 'number')
       state.pageWidth = width
     },
-    shouldAddNewCard: (state, value) => {
+    shouldAddCard: (state, value) => {
       utils.typeCheck(value, 'boolean')
-      state.shouldAddNewCard = value
+      state.shouldAddCard = value
     },
     currentUserIsHoveringOverConnectionId: (state, connectionId) => {
       utils.typeCheck(connectionId, 'string')

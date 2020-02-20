@@ -13,20 +13,17 @@ export default {
       const key = event.key
       if (event.target.tagName !== 'BODY') { return }
       if (event.shiftKey && key === 'Enter') {
-        console.log('add child card')
+        this.addChildOrParentCard()
       } else if (key === 'Enter') {
-        console.log('add parent or sibling card')
+        this.addParentOrSiblingCard()
       } else if (key === 'Escape') {
-        console.log('reset parent card')
-        this.$store.commit('closeAllDialogs')
+        this.closeAddDialogsAndClearParentCard()
       } else if (key === '?') {
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
       } else if (key === 'Backspace') {
-        console.log('remove selected , or currentcard/connection w details open')
-        this.$store.commit('closeAllDialogs')
+        this.removeMultipleSelected()
       }
     },
-
     handleMetaKeyShortcuts (event) {
       // get selected card ids from this.$store.state.multipleCardsSelectedIds
       // save copied/cut card info (utils.clone, change id first) to a new store.js [{}] value (copiedCards: [])
@@ -44,6 +41,29 @@ export default {
         event.preventDefault()
         console.log('paste selected cards')
       }
+    },
+    addParentOrSiblingCard () {
+      console.log('add parent or sibling card')
+      // position based on ...
+      const position = {
+        x: 50,
+        y: 100
+      }
+
+      const parentCardId = this.$store.state.parentCardId
+      const isParentCard = !parentCardId
+      this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
+    },
+    addChildOrParentCard () {
+      console.log('add child card, or parent if no parent')
+    },
+    closeAddDialogsAndClearParentCard () {
+      this.$store.commit('closeAllDialogs')
+      this.$store.commit('parentCardId', '', { root: true })
+    },
+    removeMultipleSelected () {
+      console.log('remove selected , or currentcard/connection w details open')
+      this.$store.commit('closeAllDialogs')
     }
 
   }
