@@ -8,13 +8,17 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.stop)
   section
     article
       .row.multiple-items
-        .badge.title Add Card
+        .badge.title
+          img.icon(src="@/assets/add.svg")
+          span Add Card
         .divider.badge or
         .badge.title Click Focused Item
         .badge.info Enter
     article
       .row
-        .badge.title Add Child Card
+        .badge.title
+          img.icon(src="@/assets/add.svg")
+          span Add Child Card
         .badge.info Shift-Enter
       p Subsequent&nbsp;
         span.badge.info Enters
@@ -38,8 +42,8 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.stop)
         p Preferences → Advanced → Press Tab to highlight each item on a webpage
     article
       .row
-        .badge.title Focus Nearest Card
-        .badge.info Shift-Arrow(→↑←↓)
+        .badge.title Focus Nearest Card in
+        .badge.info Arrow(→↑←↓)
     article
       .row
         .badge.title Copy/Cut/Paste Selected Cards
@@ -47,7 +51,9 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.stop)
       p You can copy and paste cards between spaces
     article
       .row
-        .badge.title Remove Selected
+        .badge.title
+          img.icon(src="@/assets/remove.svg")
+          span Remove Selected
         .badge.info Delete
 </template>
 
