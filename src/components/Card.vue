@@ -224,6 +224,7 @@ export default {
       this.$store.commit('closeAllDialogs')
       this.$store.commit('currentUserIsDraggingCard', true)
       this.$store.commit('currentDraggingCardId', this.id)
+      this.$store.commit('parentCardId', this.id)
       this.checkIfShouldDragMultipleCards()
       this.$store.dispatch('currentSpace/incrementSelectedCardsZ')
     },
@@ -237,7 +238,7 @@ export default {
       this.$store.commit('closeAllDialogs')
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
       this.$store.commit('cardDetailsIsVisibleForCardId', this.id)
-      this.$store.commit('parentCardId', this.id, { root: true })
+      this.$store.commit('parentCardId', this.id)
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
     },
     openUrl (url) {
