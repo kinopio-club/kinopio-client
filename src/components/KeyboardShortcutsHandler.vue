@@ -19,7 +19,8 @@ export default {
       if (key === 'Escape') {
         this.closeAddDialogs()
       }
-      if (event.target.tagName !== 'BODY') { return }
+      const shouldHandleShortcut = event.target.tagName === 'BODY' || event.target.closest('dialog.card-details')
+      if (!shouldHandleShortcut) { return }
       if (event.shiftKey && key === 'Enter') {
         this.addChildCard()
       } else if (key === 'Enter') {
@@ -64,7 +65,7 @@ export default {
         initialPosition.y = window.pageYOffset + 80
       }
       const position = this.nonOverlappingCardPosition(initialPosition)
-      // console.log('🎄',position)
+      // console.log('🎄',position, window.pageYOffset)
       const isParentCard = true // temp, cuz sibling
       // const parentCardId = this.$store.state.parentCardId
       // const isParentCard = !parentCardId
