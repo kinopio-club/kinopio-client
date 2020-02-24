@@ -9,6 +9,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       @keydown.prevent.enter.exact
       @keyup.enter.exact="closeCard"
       @keyup.stop.esc="closeCard"
+      @keyup.stop.backspace
       data-type="name"
       maxlength="250"
     )
