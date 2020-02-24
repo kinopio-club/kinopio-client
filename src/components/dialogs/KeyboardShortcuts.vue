@@ -7,8 +7,10 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.stop)
 
   section
     article
-      .row
+      .row.multiple-items
         .badge.title Add Card
+        .divider.badge or
+        .badge.title Click Focused Item
         .badge.info Enter
     article
       .row
@@ -26,18 +28,18 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.stop)
       .row
         .badge.title Focus Next/Previous
         .badge.info Tab/Shift-Tab
-      p
-        span.badge.info Enter
-        span clicks focused items
-
       .row
         button(@click.stop="toggleSafariInfoIsVisible" :class="{ active: safariInfoIsVisible }")
           span Safari Info
-
       div(v-if="safariInfoIsVisible")
+        p Instead of Tab, Safari uses
         p.badge.info Option-Tab/Option-Shift-Tab
         p Unless you update your Safari preferences:
         p Preferences → Advanced → Press Tab to highlight each item on a webpage
+    article
+      .row
+        .badge.title Focus Nearest Card
+        .badge.info Shift-Arrow(→↑←↓)
     article
       .row
         .badge.title Copy/Cut/Paste Selected Cards
@@ -99,6 +101,12 @@ export default {
   .row
     display flex
     justify-content space-between
-  button
-    margin-top 10px
+  .multiple-items
+    .badge
+      margin-right 0
+    .divider
+      padding-left 0
+      margin-right 6px
+  .badge.title + .badge.info
+    margin-right 0
 </style>
