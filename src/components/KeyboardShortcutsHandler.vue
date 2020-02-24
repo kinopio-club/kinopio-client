@@ -2,6 +2,9 @@
 </template>
 
 <script>
+import last from 'lodash-es/last'
+import utils from '@/utils.js'
+
 export default {
   mounted () {
     window.addEventListener('keyup', this.handleShortcuts)
@@ -16,7 +19,7 @@ export default {
       }
       if (event.target.tagName !== 'BODY') { return }
       if (event.shiftKey && key === 'Enter') {
-        this.addChildOrParentCard()
+        this.addChildCard()
       } else if (key === 'Enter') {
         this.addParentOrSiblingCard()
       } else if (key === '?') {
@@ -43,6 +46,7 @@ export default {
         console.log('paste selected cards')
       }
     },
+
     addParentOrSiblingCard () {
       console.log('add parent or sibling card')
       this.$store.commit('generateCardMap')
@@ -50,28 +54,74 @@ export default {
         x: window.pageXOffset + 40,
         y: window.pageYOffset + 80
       })
-      const parentCardId = this.$store.state.parentCardId
-      const isParentCard = !parentCardId
+
+      const isParentCard = true // temp, cuz sibling
+      // const parentCardId = this.$store.state.parentCardId
+      // const isParentCard = !parentCardId
+      // is sibling if childCardId
       this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
     },
     cardPosition (position) {
       const incrementY = 20
       const cardMap = this.$store.state.cardMap
       let existingCard = cardMap.find(card => card.x === position.x && card.y === position.y)
-      console.log('🏡', existingCard, position)
+      // console.log('🍄',existingCard, cardMap)
       if (existingCard) {
         position.y = position.y + existingCard.height + incrementY
         return this.cardPosition(position)
       }
       return position
     },
-    addChildOrParentCard () {
-      console.log('add child card, or parent if no parent')
+
+    // todo refactor into dispatch method shared w space => newCardConnectionType()
+    connectionType () {
+      const typePref = this.$store.state.currentUser.defaultConnectionTypeId
+      const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
+      if (defaultType) {
+        return defaultType
+      } else {
+        this.$store.dispatch('currentSpace/addConnectionType')
+        const lastConnectionType = last(this.$store.state.currentSpace.connectionTypes)
+        return lastConnectionType
+      }
     },
+
+    addConnection () {
+      const parentCardId = this.$store.state.parentCardId
+      const currentCardId = this.$store.state.cardDetailsIsVisibleForCardId
+      let connection = {
+        startCardId: parentCardId,
+        endCardId: currentCardId,
+        path: utils.connectionBetweenCards(parentCardId, currentCardId)
+      }
+      const connectionType = this.connectionType()
+      console.log(connection, connectionType)
+      this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
+    },
+
+    addChildCard () {
+      const parentCardId = this.$store.state.parentCardId
+      const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
+      if (parentCard) {
+        const rect = parentCard.getBoundingClientRect()
+        const position = this.cardPosition({
+          x: window.pageXOffset + rect.x + rect.width + 20,
+          y: window.pageYOffset + rect.y + rect.height + 20
+        })
+        this.$store.dispatch('currentSpace/addCard', { position })
+        this.$nextTick(() => {
+          this.addConnection()
+        })
+      } else {
+        this.addParentOrSiblingCard()
+      }
+    },
+
     closeAddDialogsAndClearParentCard () {
       this.$store.commit('closeAllDialogs')
       this.$store.commit('parentCardId', '', { root: true })
     },
+
     removeMultipleSelected () {
       console.log('remove selected , or currentcard/connection w details open')
       this.$store.commit('closeAllDialogs')

@@ -403,7 +403,8 @@ export default {
       }
     },
 
-    addCard ({ position, isParentCard }) {
+    addCard (position) {
+      const isParentCard = true
       if (this.spaceIsReadOnly) { return }
       const withinX = position.x > 0 && position.x < this.$store.state.pageWidth
       const withinY = position.y > 0 && position.y < this.$store.state.pageHeight
@@ -439,7 +440,7 @@ export default {
       }
       if (this.$store.state.shouldAddCard) {
         const position = utils.cursorPositionInPage(event)
-        this.addCard({ position, isParentCard: true })
+        this.addCard(position)
       }
       if (this.$store.state.multipleCardsSelectedIds.length || this.$store.state.multipleConnectionsSelectedIds.length) {
         const position = utils.cursorPositionInPage(event)

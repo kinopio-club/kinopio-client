@@ -237,6 +237,7 @@ export default {
       this.$store.commit('closeAllDialogs')
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
       this.$store.commit('cardDetailsIsVisibleForCardId', this.id)
+      this.$store.commit('parentCardId', this.id, { root: true })
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
     },
     openUrl (url) {

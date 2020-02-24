@@ -41,6 +41,7 @@ export default new Vuex.Store({
     shouldAddCard: false,
     cardDetailsIsVisibleForCardId: '',
     parentCardId: '',
+    childCardId: '',
 
     // connecting
     currentConnection: {}, // startCardId, startConnectorRect
@@ -120,6 +121,10 @@ export default new Vuex.Store({
     parentCardId: (state, cardId) => {
       utils.typeCheck(cardId, 'string')
       state.parentCardId = cardId
+    },
+    childCardId: (state, cardId) => {
+      utils.typeCheck(cardId, 'string')
+      state.childCardId = cardId
     },
     closeAllDialogs: (state) => {
       state.multipleSelectedActionsIsVisible = false

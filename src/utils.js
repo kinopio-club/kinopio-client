@@ -208,9 +208,9 @@ export default {
   },
 
   coordsWithCurrentScrollOffset ({ x, y }) {
-    const offsetX = x + window.scrollX
-    const offsetY = y + window.scrollY
-    return { x: offsetX, y: offsetY }
+    x = x + window.scrollX
+    y = y + window.scrollY
+    return { x, y }
   },
 
   connectionBetweenCards (startId, endId) {

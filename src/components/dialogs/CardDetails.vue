@@ -123,8 +123,8 @@ export default {
       this.frameDetailsIsVisible = !isVisible
     },
     focusName () {
-      const element = this.$refs.name
       this.$nextTick(() => {
+        const element = this.$refs.name
         element.focus()
       })
     },
