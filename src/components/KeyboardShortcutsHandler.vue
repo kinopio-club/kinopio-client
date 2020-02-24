@@ -2,7 +2,6 @@
 </template>
 
 <script>
-import last from 'lodash-es/last'
 import utils from '@/utils.js'
 
 export default {
@@ -10,12 +9,13 @@ export default {
     window.addEventListener('keyup', this.handleShortcuts)
     // event.metaKey only works on keydown
     window.addEventListener('keydown', this.handleMetaKeyShortcuts)
+    // console.log('🇨🇦', this.$store.state.currentSpace.connectionTypes)
   },
   methods: {
     handleShortcuts (event) {
       const key = event.key
       if (key === 'Escape') {
-        this.closeAddDialogsAndClearParentCard()
+        this.closeAddDialogs()
       }
       if (event.target.tagName !== 'BODY') { return }
       if (event.shiftKey && key === 'Enter') {
@@ -73,19 +73,6 @@ export default {
       return position
     },
 
-    // todo refactor into dispatch method shared w space => newCardConnectionType()
-    connectionType () {
-      const typePref = this.$store.state.currentUser.defaultConnectionTypeId
-      const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
-      if (defaultType) {
-        return defaultType
-      } else {
-        this.$store.dispatch('currentSpace/addConnectionType')
-        const lastConnectionType = last(this.$store.state.currentSpace.connectionTypes)
-        return lastConnectionType
-      }
-    },
-
     addConnection () {
       const parentCardId = this.$store.state.parentCardId
       const currentCardId = this.$store.state.cardDetailsIsVisibleForCardId
@@ -94,8 +81,8 @@ export default {
         endCardId: currentCardId,
         path: utils.connectionBetweenCards(parentCardId, currentCardId)
       }
-      const connectionType = this.connectionType()
-      console.log(connection, connectionType)
+      const connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
+      // console.log(connectionType.color)
       this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
     },
 
@@ -117,9 +104,8 @@ export default {
       }
     },
 
-    closeAddDialogsAndClearParentCard () {
+    closeAddDialogs () {
       this.$store.commit('closeAllDialogs')
-      this.$store.commit('parentCardId', '', { root: true })
     },
 
     removeMultipleSelected () {

@@ -26,8 +26,6 @@ main.space(
 </template>
 
 <script>
-import last from 'lodash-es/last'
-
 import Card from '@/components/Card.vue'
 import Connection from '@/components/Connection.vue'
 import ConnectionLabel from '@/components/ConnectionLabel.vue'
@@ -318,14 +316,8 @@ export default {
       const path = utils.connectionPathBetweenCoords(start, end)
       this.checkCurrentConnectionSuccess()
       this.currentConnectionPath = path
-      // type color
-      const typePref = this.$store.state.currentUser.defaultConnectionTypeId
-      const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
-      if (defaultType) {
-        this.currentConnectionColor = defaultType.color
-      } else {
-        this.currentConnectionColor = this.$store.getters['currentSpace/lastConnectionType'].color
-      }
+      const connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
+      this.currentConnectionColor = connectionType.color
     },
 
     connectors () {
@@ -372,10 +364,7 @@ export default {
     },
 
     addConnection (connection) {
-      const typePref = this.$store.state.currentUser.defaultConnectionTypeId
-      const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
-      const lastConnectionType = last(this.$store.state.currentSpace.connectionTypes)
-      const connectionType = defaultType || lastConnectionType
+      const connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
       this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
     },
 

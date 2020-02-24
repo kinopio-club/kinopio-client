@@ -357,6 +357,9 @@ code
 .move
   vertical-align 1px
 
+.cancel
+  transform rotate(45deg)
+
 .users
   display inline-block
   > .user

@@ -12,6 +12,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       data-type="name"
       maxlength="250"
     )
+    //- todo change esc to keydown if i want to bubble up to also resetting the tree, if it feels better irl
     button(@click="removeCard")
       img.icon(src="@/assets/remove.svg")
       span Remove

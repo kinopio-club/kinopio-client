@@ -25,11 +25,6 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.stop)
         span add siblings
     article
       .row
-        .badge.title Close Dialogs
-        .badge.info Escape
-      p Also starts a new card tree
-    article
-      .row
         .badge.title Focus Next/Previous
         .badge.info Tab/Shift-Tab
       .row
@@ -55,6 +50,13 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.stop)
           img.icon(src="@/assets/remove.svg")
           span Remove Selected
         .badge.info Delete
+    article
+      .row
+        .badge.title
+          img.icon.cancel(src="@/assets/add.svg")
+          span Close Dialogs
+        .badge.info Escape
+
 </template>
 
 <script>

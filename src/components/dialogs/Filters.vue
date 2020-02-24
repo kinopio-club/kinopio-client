@@ -119,6 +119,4 @@ export default {
     overflow scroll
   input[type="checkbox"]
     margin-top 1px
-  .cancel
-    transform rotate(45deg)
 </style>
