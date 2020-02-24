@@ -52,7 +52,7 @@ export default {
     return { x, y }
   },
 
-  between ({ value, min, max }) {
+  isBetween ({ value, min, max }) {
     if (min <= value && value <= max) { return true }
   },
 
@@ -115,7 +115,7 @@ export default {
       min: startCursor.y - threshold,
       max: startCursor.y + threshold
     }
-    return this.between(xRange) && this.between(yRange)
+    return this.isBetween(xRange) && this.isBetween(yRange)
   },
 
   objectHasKeys (object) {

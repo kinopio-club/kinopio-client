@@ -121,12 +121,12 @@ export default {
     isCircleVisible (circle) {
       let { x, y, radius } = circle
       radius = radius || circleRadius
-      const circleVisibleX = utils.between({
+      const circleVisibleX = utils.isBetween({
         value: x + radius,
         min: 0,
         max: this.$store.state.viewportWidth
       })
-      const circleVisibleY = utils.between({
+      const circleVisibleY = utils.isBetween({
         value: y + radius,
         min: 0,
         max: this.$store.state.viewportHeight
@@ -326,8 +326,8 @@ export default {
           min: card.y,
           max: card.y + card.height
         }
-        const isBetweenX = utils.between(x)
-        const isBetweenY = utils.between(y)
+        const isBetweenX = utils.isBetween(x)
+        const isBetweenY = utils.isBetween(y)
         if (isBetweenX && isBetweenY) {
           this.$store.commit('addToMultipleCardsSelected', card.cardId)
         }

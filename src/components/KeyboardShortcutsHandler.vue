@@ -76,12 +76,12 @@ export default {
     nonOverlappingCardPosition (position) {
       const cardMap = this.$store.state.cardMap
       const overlappingCard = cardMap.find(card => {
-        const isBetweenX = utils.between({
+        const isBetweenX = utils.isBetween({
           value: position.x,
           min: card.x,
           max: card.width + card.x
         })
-        const isBetweenY = utils.between({
+        const isBetweenY = utils.isBetween({
           value: position.y,
           min: card.y,
           max: card.height + card.y

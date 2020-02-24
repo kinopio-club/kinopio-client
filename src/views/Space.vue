@@ -348,8 +348,8 @@ export default {
           min: connector.y,
           max: (connector.y + connector.height)
         }
-        const inXRange = utils.between(xValues)
-        const inYRange = utils.between(yValues)
+        const inXRange = utils.isBetween(xValues)
+        const inYRange = utils.isBetween(yValues)
         return inXRange && inYRange
       })
       if (!connection) {

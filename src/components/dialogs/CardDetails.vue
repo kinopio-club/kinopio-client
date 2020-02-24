@@ -32,7 +32,7 @@ import FrameDetails from '@/components/dialogs/FrameDetails.vue'
 const shouldPreventAutofocus = () => {
   const isMobile = utils.isMobile()
   const pinchZoomRatio = document.documentElement.clientWidth / window.innerWidth
-  const pinchZoomRatioShouldNotFocusZoom = !utils.between({
+  const pinchZoomRatioShouldNotFocusZoom = !utils.isBetween({
     value: pinchZoomRatio,
     min: 0.8,
     max: 1.3
