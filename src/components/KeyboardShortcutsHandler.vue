@@ -24,7 +24,7 @@ export default {
       if (event.shiftKey && key === 'Enter') {
         this.addChildCard()
       } else if (key === 'Enter') {
-        this.addParentOrSiblingChildCard()
+        this.addCard()
       } else if (key === '?') {
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
       } else if (key === 'Backspace') {
@@ -50,19 +50,17 @@ export default {
       }
     },
 
-    addParentOrSiblingChildCard () {
+    addCard () {
       console.log('add parent or sibling card')
       this.$store.commit('generateCardMap')
       const parentCardId = this.$store.state.parentCardId
       const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
       const childCardId = this.$store.state.childCardId
       const childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
-      if (childCard) {
-        this.addSiblingChildCard()
-        return
-      }
       let initialPosition = {}
-      if (parentCard) {
+      if (childCard) {
+        this.addChildCard()
+      } else if (parentCard) {
         const rect = parentCard.getBoundingClientRect()
         initialPosition.x = window.pageXOffset + rect.x
         initialPosition.y = window.pageYOffset + rect.y + rect.height + incrementPosition
@@ -70,43 +68,18 @@ export default {
         initialPosition.x = window.pageXOffset + 40
         initialPosition.y = window.pageYOffset + 80
       }
-
-      // addcard({initialPosition, isParentCard})
-
       const position = this.nonOverlappingCardPosition(initialPosition)
       this.$store.dispatch('currentSpace/addCard', { position, isParentCard: true })
-    },
-
-    addSiblingChildCard () {
-      const childCardId = this.$store.state.childCardId
-      const childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
-      const rect = childCard.getBoundingClientRect()
-      const initialPosition = {
-        x: window.pageXOffset + rect.x,
-        y: window.pageYOffset + rect.y + rect.height + incrementPosition
-      }
-
-      // addcard({initialPosition, isParentCard})
-
-      const position = this.nonOverlappingCardPosition(initialPosition)
-      this.$store.dispatch('currentSpace/addCard', { position })
-      this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)
-      this.$nextTick(() => {
-        this.addConnection()
-      })
     },
 
     addChildCard () {
       const parentCardId = this.$store.state.parentCardId
       const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
-      // if (parentCard) {
       const rect = parentCard.getBoundingClientRect()
       const initialPosition = {
         x: window.pageXOffset + rect.x + rect.width + incrementPosition,
         y: window.pageYOffset + rect.y + rect.height + incrementPosition
       }
-      // addcard({initialPosition, isParentCard})
-
       const position = this.nonOverlappingCardPosition(initialPosition)
       this.$store.dispatch('currentSpace/addCard', { position })
       this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)
@@ -114,8 +87,6 @@ export default {
         this.addConnection()
       })
     },
-
-    // addcard({initialPosition, isParentCard})  // sets position, calls dispatch
 
     // recursive
     nonOverlappingCardPosition (position) {
