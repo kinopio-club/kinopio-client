@@ -5,6 +5,8 @@
 import last from 'lodash-es/last'
 import utils from '@/utils.js'
 
+const incrementY = 20
+
 export default {
   mounted () {
     window.addEventListener('keyup', this.handleShortcuts)
@@ -50,24 +52,61 @@ export default {
     addParentOrSiblingCard () {
       console.log('add parent or sibling card')
       this.$store.commit('generateCardMap')
-      const position = this.cardPosition({
-        x: window.pageXOffset + 40,
-        y: window.pageYOffset + 80
-      })
-
+      const parentCardId = this.$store.state.parentCardId
+      const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
+      let initialPosition = {}
+      if (parentCard) {
+        const rect = parentCard.getBoundingClientRect()
+        initialPosition.x = rect.x
+        initialPosition.y = rect.y + rect.height + incrementY
+      } else {
+        initialPosition.x = window.pageXOffset + 40
+        initialPosition.y = window.pageYOffset + 80
+      }
+      const position = this.nonOverlappingCardPosition(initialPosition)
+      // console.log('🎄',position)
       const isParentCard = true // temp, cuz sibling
       // const parentCardId = this.$store.state.parentCardId
       // const isParentCard = !parentCardId
       // is sibling if childCardId
       this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
     },
-    cardPosition (position) {
-      const incrementY = 20
+
+    // recursively called
+    nonOverlappingCardPosition (position) {
       const cardMap = this.$store.state.cardMap
-      let existingCard = cardMap.find(card => card.x === position.x && card.y === position.y)
-      // console.log('🍄',existingCard, cardMap)
-      if (existingCard) {
-        position.y = position.y + existingCard.height + incrementY
+      const overlappingCard = cardMap.find(card => {
+        const isBetweenX = utils.between({
+          value: position.x,
+          min: card.x,
+          max: card.width + card.x
+        })
+        const isBetweenY = utils.between({
+          value: position.y,
+          min: card.y,
+          max: card.height + card.y
+        })
+        return isBetweenX && isBetweenY
+      })
+      console.log('👯‍♂️', overlappingCard)
+      if (overlappingCard) {
+        position.y = position.y + overlappingCard.height + incrementY
+        return this.nonOverlappingCardPosition(position)
+      } else {
+        return position
+      }
+    },
+
+    // temp
+    cardPosition (position) {
+      // const incrementY = 20
+      const cardMap = this.$store.state.cardMap
+      const existingCardRect = cardMap.find(card => card.x === position.x && card.y === position.y)
+      // console.log('🍄',existingCardRect, cardMap)
+      if (existingCardRect) {
+        // update this to not have any overlap, not just x and y origin
+        // isRectsOverlapping() (cardrect1, cardrect2 , or just take one card rect and compare to the map)
+        position.y = position.y + existingCardRect.height + incrementY
         return this.cardPosition(position)
       }
       return position
