@@ -57,8 +57,8 @@ export default {
       let initialPosition = {}
       if (parentCard) {
         const rect = parentCard.getBoundingClientRect()
-        initialPosition.x = rect.x
-        initialPosition.y = rect.y + rect.height + incrementY
+        initialPosition.x = window.pageXOffset + rect.x
+        initialPosition.y = window.pageYOffset + rect.y + rect.height + incrementY
       } else {
         initialPosition.x = window.pageXOffset + 40
         initialPosition.y = window.pageYOffset + 80
@@ -88,7 +88,7 @@ export default {
         })
         return isBetweenX && isBetweenY
       })
-      console.log('👯‍♂️', overlappingCard)
+      // console.log('👯‍♂️', overlappingCard)
       if (overlappingCard) {
         position.y = position.y + overlappingCard.height + incrementY
         return this.nonOverlappingCardPosition(position)
