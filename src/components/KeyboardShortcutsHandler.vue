@@ -2,6 +2,7 @@
 </template>
 
 <script>
+import last from 'lodash-es/last'
 import utils from '@/utils.js'
 
 export default {
@@ -9,7 +10,6 @@ export default {
     window.addEventListener('keyup', this.handleShortcuts)
     // event.metaKey only works on keydown
     window.addEventListener('keydown', this.handleMetaKeyShortcuts)
-    // console.log('🇨🇦', this.$store.state.currentSpace.connectionTypes)
   },
   methods: {
     handleShortcuts (event) {
@@ -81,7 +81,11 @@ export default {
         endCardId: currentCardId,
         path: utils.connectionBetweenCards(parentCardId, currentCardId)
       }
-      const connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
+      let connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
+      if (!connectionType) {
+        this.$store.dispatch('currentSpace/addConnectionType')
+        connectionType = last(this.$store.state.currentSpace.connectionTypes)
+      }
       // console.log(connectionType.color)
       this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
     },
