@@ -399,6 +399,7 @@ export default {
       const withinY = position.y > 0 && position.y < this.$store.state.pageHeight
       if (withinX && withinY) {
         this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
+        this.$store.commit('childCardId', '')
       }
     },
 

@@ -5,7 +5,7 @@
 import last from 'lodash-es/last'
 import utils from '@/utils.js'
 
-const incrementY = 20
+const incrementPosition = 20
 
 export default {
   mounted () {
@@ -24,7 +24,7 @@ export default {
       if (event.shiftKey && key === 'Enter') {
         this.addChildCard()
       } else if (key === 'Enter') {
-        this.addParentOrSiblingCard()
+        this.addParentOrSiblingChildCard()
       } else if (key === '?') {
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
       } else if (key === 'Backspace') {
@@ -32,9 +32,9 @@ export default {
       }
     },
     handleMetaKeyShortcuts (event) {
-      // get selected card ids from this.$store.state.multipleCardsSelectedIds
-      // save copied/cut card info (utils.clone, change id first) to a new store.js [{}] value (copiedCards: [])
-      // to paste, add copiedCards to the currentSpace, then clearCopiedCards
+      // - TODO get selected card ids from this.$store.state.multipleCardsSelectedIds
+      // - TODO save copied/cut card info (utils.clone, change id first) to a new store.js [{}] value (copiedCards: [])
+      // - TODO to paste, add copiedCards to the currentSpace, then clearCopiedCards
       const key = event.key
       const isMeta = event.metaKey || event.ctrlKey
       if (event.target.tagName !== 'BODY') { return }
@@ -50,30 +50,74 @@ export default {
       }
     },
 
-    addParentOrSiblingCard () {
+    addParentOrSiblingChildCard () {
       console.log('add parent or sibling card')
       this.$store.commit('generateCardMap')
       const parentCardId = this.$store.state.parentCardId
       const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
+      const childCardId = this.$store.state.childCardId
+      const childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
+      if (childCard) {
+        this.addSiblingChildCard()
+        return
+      }
       let initialPosition = {}
       if (parentCard) {
         const rect = parentCard.getBoundingClientRect()
         initialPosition.x = window.pageXOffset + rect.x
-        initialPosition.y = window.pageYOffset + rect.y + rect.height + incrementY
+        initialPosition.y = window.pageYOffset + rect.y + rect.height + incrementPosition
       } else {
         initialPosition.x = window.pageXOffset + 40
         initialPosition.y = window.pageYOffset + 80
       }
+
+      // addcard({initialPosition, isParentCard})
+
       const position = this.nonOverlappingCardPosition(initialPosition)
-      // console.log('🎄',position, window.pageYOffset)
-      const isParentCard = true // temp, cuz sibling
-      // const parentCardId = this.$store.state.parentCardId
-      // const isParentCard = !parentCardId
-      // is sibling if childCardId
-      this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
+      this.$store.dispatch('currentSpace/addCard', { position, isParentCard: true })
     },
 
-    // recursively called
+    addSiblingChildCard () {
+      const childCardId = this.$store.state.childCardId
+      const childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
+      const rect = childCard.getBoundingClientRect()
+      const initialPosition = {
+        x: window.pageXOffset + rect.x,
+        y: window.pageYOffset + rect.y + rect.height + incrementPosition
+      }
+
+      // addcard({initialPosition, isParentCard})
+
+      const position = this.nonOverlappingCardPosition(initialPosition)
+      this.$store.dispatch('currentSpace/addCard', { position })
+      this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)
+      this.$nextTick(() => {
+        this.addConnection()
+      })
+    },
+
+    addChildCard () {
+      const parentCardId = this.$store.state.parentCardId
+      const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
+      // if (parentCard) {
+      const rect = parentCard.getBoundingClientRect()
+      const initialPosition = {
+        x: window.pageXOffset + rect.x + rect.width + incrementPosition,
+        y: window.pageYOffset + rect.y + rect.height + incrementPosition
+      }
+      // addcard({initialPosition, isParentCard})
+
+      const position = this.nonOverlappingCardPosition(initialPosition)
+      this.$store.dispatch('currentSpace/addCard', { position })
+      this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)
+      this.$nextTick(() => {
+        this.addConnection()
+      })
+    },
+
+    // addcard({initialPosition, isParentCard})  // sets position, calls dispatch
+
+    // recursive
     nonOverlappingCardPosition (position) {
       const cardMap = this.$store.state.cardMap
       const overlappingCard = cardMap.find(card => {
@@ -89,33 +133,22 @@ export default {
         })
         return isBetweenX && isBetweenY
       })
-      // console.log('👯‍♂️', overlappingCard)
       if (overlappingCard) {
-        position.y = position.y + overlappingCard.height + incrementY
+        position.y = position.y + overlappingCard.height + incrementPosition
         return this.nonOverlappingCardPosition(position)
       } else {
         return position
       }
     },
 
-    // temp
-    cardPosition (position) {
-      // const incrementY = 20
-      const cardMap = this.$store.state.cardMap
-      const existingCardRect = cardMap.find(card => card.x === position.x && card.y === position.y)
-      // console.log('🍄',existingCardRect, cardMap)
-      if (existingCardRect) {
-        // update this to not have any overlap, not just x and y origin
-        // isRectsOverlapping() (cardrect1, cardrect2 , or just take one card rect and compare to the map)
-        position.y = position.y + existingCardRect.height + incrementY
-        return this.cardPosition(position)
-      }
-      return position
-    },
-
     addConnection () {
+      // 🔥 parentcardid wont exist if parent was blank when shift-entered
       const parentCardId = this.$store.state.parentCardId
       const currentCardId = this.$store.state.cardDetailsIsVisibleForCardId
+      const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
+      console.log('🔥', parentCard)
+      if (!parentCard) { return }
+
       let connection = {
         startCardId: parentCardId,
         endCardId: currentCardId,
@@ -128,24 +161,6 @@ export default {
       }
       // console.log(connectionType.color)
       this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
-    },
-
-    addChildCard () {
-      const parentCardId = this.$store.state.parentCardId
-      const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
-      if (parentCard) {
-        const rect = parentCard.getBoundingClientRect()
-        const position = this.cardPosition({
-          x: window.pageXOffset + rect.x + rect.width + 20,
-          y: window.pageYOffset + rect.y + rect.height + 20
-        })
-        this.$store.dispatch('currentSpace/addCard', { position })
-        this.$nextTick(() => {
-          this.addConnection()
-        })
-      } else {
-        this.addParentOrSiblingCard()
-      }
     },
 
     closeAddDialogs () {

@@ -225,6 +225,7 @@ export default {
       this.$store.commit('currentUserIsDraggingCard', true)
       this.$store.commit('currentDraggingCardId', this.id)
       this.$store.commit('parentCardId', this.id)
+      this.$store.commit('childCardId', '')
       this.checkIfShouldDragMultipleCards()
       this.$store.dispatch('currentSpace/incrementSelectedCardsZ')
     },
