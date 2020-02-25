@@ -2,7 +2,6 @@
 </template>
 
 <script>
-import last from 'lodash-es/last'
 import utils from '@/utils.js'
 
 const incrementPosition = 20
@@ -124,23 +123,27 @@ export default {
       }
     },
 
+    addConnectionType () {
+      const typePref = this.$store.state.currentUser.defaultConnectionTypeId
+      const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
+      if (!defaultType) {
+        this.$store.dispatch('currentSpace/addConnectionType')
+      }
+    },
+
     addConnection () {
+      // 🔥 parentcardid wont exist if parent was blank when shift-entered
       const parentCardId = this.$store.state.parentCardId
       const currentCardId = this.$store.state.cardDetailsIsVisibleForCardId
       const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
       if (!parentCard) { return }
-
       let connection = {
         startCardId: parentCardId,
         endCardId: currentCardId,
         path: utils.connectionBetweenCards(parentCardId, currentCardId)
       }
-      let connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
-      if (!connectionType) {
-        this.$store.dispatch('currentSpace/addConnectionType')
-        connectionType = last(this.$store.state.currentSpace.connectionTypes)
-      }
-      // console.log(connectionType.color)
+      this.addConnectionType()
+      const connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
       this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
     },
 

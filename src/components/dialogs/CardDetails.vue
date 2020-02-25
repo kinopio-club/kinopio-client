@@ -123,6 +123,7 @@ export default {
     focusName () {
       this.$nextTick(() => {
         const element = this.$refs.name
+        if (!element) { return }
         element.focus()
       })
     },

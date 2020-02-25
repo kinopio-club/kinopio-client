@@ -689,10 +689,6 @@ export default {
     connectionTypeForNewConnections: (state, getters, rootState) => {
       const typePref = rootState.currentUser.defaultConnectionTypeId
       const defaultType = getters.connectionTypeById(typePref)
-      const hasConnectionTypes = Boolean(state.connectionTypes.length)
-      if (!hasConnectionTypes) {
-        return null
-      }
       if (defaultType) {
         return defaultType
       } else {
