@@ -226,6 +226,7 @@ export default {
   },
 
   connectionPathBetweenCoords (start, end) {
+    if (!start || !end) { return }
     const offsetStart = this.coordsWithCurrentScrollOffset(start)
     const offsetEnd = this.coordsWithCurrentScrollOffset(end)
     const delta = {
