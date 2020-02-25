@@ -87,10 +87,16 @@ export default {
 
     addChildCard () {
       const parentCardId = this.$store.state.parentCardId
-      const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
       const childCardId = this.$store.state.childCardId
+      const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
       const childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
-      const baseCard = childCard || parentCard
+      let baseCard, baseCardId
+      if (childCard) {
+        baseCard = childCard
+        baseCardId = childCardId
+      } else {
+        baseCard = parentCard
+      }
       const rect = baseCard.getBoundingClientRect()
       const initialPosition = {
         x: window.pageXOffset + rect.x + rect.width + incrementPosition,
@@ -100,7 +106,7 @@ export default {
       this.$store.dispatch('currentSpace/addCard', { position })
       this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)
       this.$nextTick(() => {
-        this.addConnection()
+        this.addConnection(baseCardId)
       })
     },
 
@@ -136,16 +142,21 @@ export default {
       }
     },
 
-    addConnection () {
-      // 🔥 parentcardid wont exist if parent was blank when shift-entered
-      const parentCardId = this.$store.state.parentCardId
+    addConnection (cardId) {
       const currentCardId = this.$store.state.cardDetailsIsVisibleForCardId
-      const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
-      if (!parentCard) { return }
+      let baseCardId
+      if (cardId) {
+        baseCardId = cardId
+        this.$store.commit('parentCardId', cardId) // update the parent for sibling children
+      } else {
+        baseCardId = this.$store.state.parentCardId
+      }
+      const baseCard = document.querySelector(`.card[data-card-id="${baseCardId}"]`)
+      if (!baseCard) { return }
       let connection = {
-        startCardId: parentCardId,
+        startCardId: baseCardId,
         endCardId: currentCardId,
-        path: utils.connectionBetweenCards(parentCardId, currentCardId)
+        path: utils.connectionBetweenCards(baseCardId, currentCardId)
       }
       this.addConnectionType()
       const connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
