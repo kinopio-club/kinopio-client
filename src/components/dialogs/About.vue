@@ -13,6 +13,12 @@ dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
         button(@click.stop="toggleContactIsVisible" :class="{active: contactIsVisible}") Contact
         Contact(:visible="contactIsVisible")
 
+    .row
+      .button-wrap
+        button(@click.stop="toggleKeyboardShortcutsIsVisible" :class="{active: keyboardShortcutsIsVisible}")
+          span Keyboard Shortcuts
+        KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
+
     .button-wrap(v-if="isMobile")
       button(@click.stop="toggleAddToHomescreenIsVisible" :class="{active: addToHomescreenIsVisible}")
         span(v-if="isIOS")
@@ -22,11 +28,6 @@ dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
           img.icon(src="@/assets/homescreen.svg")
           span Kinopio for Android
       AddToHomescreen(:visible="addToHomescreenIsVisible")
-
-    .button-wrap
-      button(@click.stop="toggleKeyboardShortcutsIsVisible" :class="{active: keyboardShortcutsIsVisible}")
-        span Keyboard Shortcuts
-      KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
 
 </template>
 
