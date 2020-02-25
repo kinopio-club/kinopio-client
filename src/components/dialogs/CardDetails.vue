@@ -6,11 +6,14 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       rows="1"
       placeholder="Type text here, or paste a URL"
       v-model="name"
-      @keydown.enter="completeEditing"
-      @keydown.esc="closeCard"
+      @keydown.prevent.enter.exact
+      @keyup.enter.exact="closeCard"
+      @keyup.stop.esc="closeCard"
+      @keyup.stop.backspace
       data-type="name"
       maxlength="250"
     )
+    //- todo change esc to keydown if i want to bubble up to also resetting the tree, if it feels better irl
     button(@click="removeCard")
       img.icon(src="@/assets/remove.svg")
       span Remove
@@ -30,7 +33,7 @@ import FrameDetails from '@/components/dialogs/FrameDetails.vue'
 const shouldPreventAutofocus = () => {
   const isMobile = utils.isMobile()
   const pinchZoomRatio = document.documentElement.clientWidth / window.innerWidth
-  const pinchZoomRatioShouldNotFocusZoom = !utils.between({
+  const pinchZoomRatioShouldNotFocusZoom = !utils.isBetween({
     value: pinchZoomRatio,
     min: 0.8,
     max: 1.3
@@ -95,11 +98,6 @@ export default {
     }
   },
   methods: {
-    completeEditing (event) {
-      if (!event.shiftKey) {
-        this.$store.commit('closeAllDialogs')
-      }
-    },
     closeCard () {
       this.$store.commit('closeAllDialogs')
     },
@@ -123,8 +121,9 @@ export default {
       this.frameDetailsIsVisible = !isVisible
     },
     focusName () {
-      const element = this.$refs.name
       this.$nextTick(() => {
+        const element = this.$refs.name
+        if (!element) { return }
         element.focus()
       })
     },

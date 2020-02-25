@@ -1,5 +1,5 @@
 <template lang="pug">
-.user(:data-user-id="user.id")
+.user(:data-user-id="user.id" @keydown.stop.enter="toggleUserDetails")
   .user-avatar.anon-avatar(
     @mouseup.stop="toggleUserDetails"
     @touchend.stop="toggleUserDetails"

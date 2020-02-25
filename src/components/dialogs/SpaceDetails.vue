@@ -18,7 +18,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
           span Shown in Explore
 
     .row(v-if="canEditCurrentSpace && !currentSpaceIsPrivate")
-      label(:class="{active: showInExplore}" @click.prevent="toggleShowInExplore")
+      label(:class="{active: showInExplore}" @click.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
         input(type="checkbox" v-model="showInExplore")
         span Show in Explore
     template(v-if="showCannotShowInExplore")

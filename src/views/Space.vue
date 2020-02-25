@@ -26,8 +26,6 @@ main.space(
 </template>
 
 <script>
-import last from 'lodash-es/last'
-
 import Card from '@/components/Card.vue'
 import Connection from '@/components/Connection.vue'
 import ConnectionLabel from '@/components/ConnectionLabel.vue'
@@ -117,6 +115,7 @@ export default {
     },
 
     addInteractionBlur () {
+      if (!utils.isMobile()) { return }
       const elements = document.querySelectorAll('button, li, label')
       elements.forEach(element => element.addEventListener('click', this.blur))
     },
@@ -317,14 +316,8 @@ export default {
       const path = utils.connectionPathBetweenCoords(start, end)
       this.checkCurrentConnectionSuccess()
       this.currentConnectionPath = path
-      // type color
-      const typePref = this.$store.state.currentUser.defaultConnectionTypeId
-      const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
-      if (defaultType) {
-        this.currentConnectionColor = defaultType.color
-      } else {
-        this.currentConnectionColor = this.$store.getters['currentSpace/lastConnectionType'].color
-      }
+      const connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
+      this.currentConnectionColor = connectionType.color
     },
 
     connectors () {
@@ -355,8 +348,8 @@ export default {
           min: connector.y,
           max: (connector.y + connector.height)
         }
-        const inXRange = utils.between(xValues)
-        const inYRange = utils.between(yValues)
+        const inXRange = utils.isBetween(xValues)
+        const inYRange = utils.isBetween(yValues)
         return inXRange && inYRange
       })
       if (!connection) {
@@ -371,10 +364,7 @@ export default {
     },
 
     addConnection (connection) {
-      const typePref = this.$store.state.currentUser.defaultConnectionTypeId
-      const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
-      const lastConnectionType = last(this.$store.state.currentSpace.connectionTypes)
-      const connectionType = defaultType || lastConnectionType
+      const connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
       this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
     },
 
@@ -402,12 +392,14 @@ export default {
       }
     },
 
-    addNewCard (position) {
+    addCard (position) {
+      const isParentCard = true
       if (this.spaceIsReadOnly) { return }
       const withinX = position.x > 0 && position.x < this.$store.state.pageWidth
       const withinY = position.y > 0 && position.y < this.$store.state.pageHeight
       if (withinX && withinY) {
-        this.$store.dispatch('currentSpace/addCard', position)
+        this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
+        this.$store.commit('childCardId', '')
       }
     },
 
@@ -436,16 +428,16 @@ export default {
       if (this.isDrawingConnection) {
         this.createConnection()
       }
-      if (this.$store.state.shouldAddNewCard) {
+      if (this.$store.state.shouldAddCard) {
         const position = utils.cursorPositionInPage(event)
-        this.addNewCard(position)
+        this.addCard(position)
       }
       if (this.$store.state.multipleCardsSelectedIds.length || this.$store.state.multipleConnectionsSelectedIds.length) {
         const position = utils.cursorPositionInPage(event)
         this.showMultipleSelectedActions(position)
       }
       this.$store.commit('importArenaChannelIsVisible', false)
-      this.$store.commit('shouldAddNewCard', false)
+      this.$store.commit('shouldAddCard', false)
       this.$store.commit('preventDraggedCardFromShowingDetails', false)
       this.$store.commit('currentUserIsDrawingConnection', false)
       this.$store.commit('currentUserIsPainting', false)

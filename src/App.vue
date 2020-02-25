@@ -4,6 +4,7 @@
   router-view
   Header
   Footer
+  KeyboardShortcutsHandler
   .preload
     .logo-hover
     .logo-active
@@ -13,12 +14,14 @@
 import Header from '@/components/Header.vue'
 import MagicPaint from '@/components/MagicPaint.vue'
 import Footer from '@/components/Footer.vue'
+import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 
 export default {
   components: {
     Header,
     MagicPaint,
-    Footer
+    Footer,
+    KeyboardShortcutsHandler
   }
 }
 </script>
@@ -123,8 +126,6 @@ label // used for checkbox buttons
     box-shadow var(--button-active-inset-shadow)
     color var(--primary)
     background var(--secondary-active-background)
-  &:focus
-    outline none
   .badge
     display inline
     vertical-align middle
@@ -150,10 +151,6 @@ label
   input
     margin 0
 
-li
-  &:focus
-    outline none
-
 p
   margin 0
   margin-top 10px
@@ -166,7 +163,7 @@ dialog
   left 8px
   top 8px
   position absolute
-  max-height calc(100vh - 50px)
+  max-height calc(100vh - 100px)
   margin 0
   padding 0
   user-select auto
@@ -257,7 +254,8 @@ dialog
 
 label,
 li
-  &:hover
+  &:hover,
+  &:focus
     input[type="checkbox"]
       background-color var(--secondary-hover-background)
   input[type="checkbox"]
@@ -289,7 +287,7 @@ li
   padding-top 0
   border-top 0
   overflow auto
-  max-height calc(92vh - 175px)
+  max-height calc(92vh - 225px)
 
 .filter-wrap
   margin-left 5px
@@ -310,7 +308,8 @@ ul.results-list
     border-radius 3px
     user-select none
     cursor pointer
-    &:hover
+    &:hover,
+    &:focus
       background-color var(--secondary-hover-background)
       box-shadow var(--hover-shadow)
     &:active,
@@ -358,6 +357,9 @@ code
 .move
   vertical-align 1px
 
+.cancel
+  transform rotate(45deg)
+
 .users
   display inline-block
   > .user
@@ -397,7 +399,9 @@ code
     background-size cover
     display inline-block
     vertical-align middle
-  &:hover
+  &:hover,
+  &:focus
+    outline none
     .logo-image
       background-image url('assets/logo-hover.png')
   &:active,

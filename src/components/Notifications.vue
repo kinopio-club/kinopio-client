@@ -10,7 +10,7 @@ aside.notifications(@click="closeAllDialogs")
       button(@click="copyCurrentSpace")
         img.icon(src="@/assets/add.svg")
         span Save a Copy
-      label(:class="{active: isFavoriteSpace}" @click.prevent="toggleIsFavoriteSpace")
+      label(:class="{active: isFavoriteSpace}" @click.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
         input(type="checkbox" v-model="isFavoriteSpace")
         span Favorite
 

@@ -5,11 +5,13 @@ article(:style="position" :data-card-id="id")
     @touchstart.prevent="startDraggingCard"
     @mouseup="showCardDetails"
     @touchend="showCardDetails"
+    @keyup.stop.enter="showCardDetails"
     :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged, 'filtered': isFiltered, 'media-card': isMediaCard}",
     :style="{background: selectedColor}"
     :data-card-id="id"
     :data-card-x="x"
     :data-card-y="y"
+    tabindex="0"
   )
     Frames(:card="card")
 
@@ -27,7 +29,7 @@ article(:style="position" :data-card-id="id")
           @mousedown="startConnecting"
           @touchstart="startConnecting"
         )
-          button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: selectedColor}")
+          button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: selectedColor}" tabindex="-1")
             .connected-colors
               template(v-for="type in connectionTypes")
                 .color(:style="{ background: type.color}")
@@ -222,6 +224,8 @@ export default {
       this.$store.commit('closeAllDialogs')
       this.$store.commit('currentUserIsDraggingCard', true)
       this.$store.commit('currentDraggingCardId', this.id)
+      this.$store.commit('parentCardId', this.id)
+      this.$store.commit('childCardId', '')
       this.checkIfShouldDragMultipleCards()
       this.$store.dispatch('currentSpace/incrementSelectedCardsZ')
     },
@@ -233,7 +237,9 @@ export default {
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
       this.$store.commit('cardDetailsIsVisibleForCardId', this.id)
+      this.$store.commit('parentCardId', this.id)
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
     },
     openUrl (url) {

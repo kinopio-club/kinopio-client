@@ -384,6 +384,7 @@ export default {
         name: 'updateSpace',
         body: { id: space.id, updatedAt: new Date() }
       }, { root: true })
+      context.commit('parentCardId', '', { root: true })
       context.dispatch('updateUserLastSpaceId')
     },
     updateUserLastSpaceId: (context) => {
@@ -426,7 +427,7 @@ export default {
 
     // Cards
 
-    addCard: (context, position) => {
+    addCard: (context, { position, isParentCard }) => {
       utils.typeCheck(position, 'object')
       let cards = context.rootState.currentSpace.cards
       let card = {
@@ -442,6 +443,7 @@ export default {
       card.spaceId = context.state.id
       card = utils.clone(card)
       context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
+      if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
     },
     updateCard: (context, card) => {
       context.commit('updateCard', card)
@@ -683,6 +685,16 @@ export default {
       return state.connectionTypes.filter(type => {
         return connectionTypeIds.includes(type.id)
       })
+    },
+    connectionTypeForNewConnections: (state, getters, rootState) => {
+      const typePref = rootState.currentUser.defaultConnectionTypeId
+      const defaultType = getters.connectionTypeById(typePref)
+      if (defaultType) {
+        return defaultType
+      } else {
+        const lastConnectionType = getters.lastConnectionType
+        return lastConnectionType
+      }
     }
   }
 }

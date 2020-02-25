@@ -35,6 +35,10 @@ export default {
       const touch = this.mobileTouchPosition(event, 'page')
       x = touch.x
       y = touch.y
+    } else if (event.type === 'keyup' || event.type === 'keydown') {
+      const rect = event.target.getBoundingClientRect()
+      x = rect.x + window.pageXOffset
+      y = rect.y + window.pageYOffset
     } else {
       x = event.pageX
       y = event.pageY
@@ -48,7 +52,7 @@ export default {
     return { x, y }
   },
 
-  between ({ value, min, max }) {
+  isBetween ({ value, min, max }) {
     if (min <= value && value <= max) { return true }
   },
 
@@ -111,7 +115,7 @@ export default {
       min: startCursor.y - threshold,
       max: startCursor.y + threshold
     }
-    return this.between(xRange) && this.between(yRange)
+    return this.isBetween(xRange) && this.isBetween(yRange)
   },
 
   objectHasKeys (object) {
@@ -135,6 +139,10 @@ export default {
     return Boolean(this.isIOS() || this.isAndroid())
   },
 
+  isMac () {
+    return window.navigator.platform === 'MacIntel'
+  },
+
   capitalizeFirstLetter (string) {
     // 'dreams' -> 'Dreams'
     return string.charAt(0).toUpperCase() + string.slice(1)
@@ -155,11 +163,21 @@ export default {
   },
 
   timeout (ms, promise) {
+    // https://github.com/github/fetch/issues/175#issuecomment-216791333
     return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        throw (new Error('timeout'))
+      const timeoutId = setTimeout(() => {
+        reject(new Error('promise timeout'))
       }, ms)
-      promise.then(resolve, reject)
+      promise.then(
+        (res) => {
+          clearTimeout(timeoutId)
+          resolve(res)
+        },
+        (err) => {
+          clearTimeout(timeoutId)
+          reject(err)
+        }
+      )
     })
   },
 
@@ -190,9 +208,9 @@ export default {
   },
 
   coordsWithCurrentScrollOffset ({ x, y }) {
-    const offsetX = x + window.scrollX
-    const offsetY = y + window.scrollY
-    return { x: offsetX, y: offsetY }
+    x = x + window.scrollX
+    y = y + window.scrollY
+    return { x, y }
   },
 
   connectionBetweenCards (startId, endId) {
@@ -208,6 +226,7 @@ export default {
   },
 
   connectionPathBetweenCoords (start, end) {
+    if (!start || !end) { return }
     const offsetStart = this.coordsWithCurrentScrollOffset(start)
     const offsetEnd = this.coordsWithCurrentScrollOffset(end)
     const delta = {

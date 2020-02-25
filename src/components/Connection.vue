@@ -8,10 +8,14 @@ path.path(
   :data-id="id"
   :key="id"
   :d="path"
+  @mousedown="hideConnectionOutline"
+  @touchstart="hideConnectionOutline"
   @click="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
-  :class="{active: isSelected || detailsIsVisible, filtered: isFiltered, hover: isHovered}"
+  @keyup.stop.enter="showConnectionDetailsOnKeyup"
+  :class="{active: isSelected || detailsIsVisible, filtered: isFiltered, hover: isHovered, 'hide-connection-outline': shouldHideConnectionOutline }"
   ref="connection"
+  tabindex="0"
 )
 </template>
 
@@ -85,6 +89,7 @@ export default {
     isHovered () {
       return this.id === this.$store.state.currentUserIsHoveringOverConnectionId
     },
+    shouldHideConnectionOutline () { return this.$store.state.shouldHideConnectionOutline },
 
     // filters
     filtersIsActive () {
@@ -125,6 +130,18 @@ export default {
       this.$store.commit('connectionDetailsIsVisibleForConnectionId', this.id)
       this.$store.commit('connectionDetailsPosition', detailsPosition)
       this.$store.commit('clearMultipleSelected')
+    },
+    hideConnectionOutline () {
+      this.$store.commit('shouldHideConnectionOutline', true)
+    },
+    showConnectionDetailsOnKeyup (event) {
+      this.showConnectionDetails(event)
+      this.focusOnDialog(event)
+    },
+    focusOnDialog (event) {
+      this.$nextTick(() => {
+        document.querySelector('dialog.connection-details button').focus()
+      })
     },
     updatedPath (path, controlPoint, x, y) {
       return path.replace(controlPoint, `q${x},${y}`)
@@ -195,9 +212,12 @@ export default {
 .path
   touch-action manipulation
   &:hover,
+  &.hover,
   &.active,
-  &.hover
+  &:focus
     stroke-width 7
+  &.hide-connection-outline
+    outline none
 .is-read-only
   .path
     pointer-events none

@@ -121,12 +121,12 @@ export default {
     isCircleVisible (circle) {
       let { x, y, radius } = circle
       radius = radius || circleRadius
-      const circleVisibleX = utils.between({
+      const circleVisibleX = utils.isBetween({
         value: x + radius,
         min: 0,
         max: this.$store.state.viewportWidth
       })
-      const circleVisibleY = utils.between({
+      const circleVisibleY = utils.isBetween({
         value: y + radius,
         min: 0,
         max: this.$store.state.viewportHeight
@@ -186,7 +186,7 @@ export default {
       this.createInitialCircle()
       this.$store.commit('currentUserIsPainting', true)
       if (!multipleCardsIsSelected && !dialogIsVisible) {
-        this.$store.commit('shouldAddNewCard', true)
+        this.$store.commit('shouldAddCard', true)
       }
       this.$store.commit('clearMultipleSelected')
       this.$store.commit('generateCardMap')
@@ -296,18 +296,18 @@ export default {
       if (this.shouldCancel(event)) { return }
       startCursor = startCursor || {}
       const endCursor = utils.cursorPositionInViewport(event)
-      const shouldAddNewCard = this.$store.state.shouldAddNewCard
+      const shouldAddCard = this.$store.state.shouldAddCard
       currentUserIsLocking = false
       window.cancelAnimationFrame(lockingAnimationTimer)
       lockingAnimationTimer = undefined
       lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       this.$store.commit('currentUserIsPaintingLocked', false)
       this.$store.commit('currentUserIsPainting', false)
-      if (utils.cursorsAreClose(startCursor, endCursor) && shouldAddNewCard) {
-        this.$store.commit('shouldAddNewCard', true)
+      if (utils.cursorsAreClose(startCursor, endCursor) && shouldAddCard) {
+        this.$store.commit('shouldAddCard', true)
         event.preventDefault()
       } else {
-        this.$store.commit('shouldAddNewCard', false)
+        this.$store.commit('shouldAddCard', false)
       }
       // prevent mouse events from firing after touch events on touch device
       event.preventDefault()
@@ -326,8 +326,8 @@ export default {
           min: card.y,
           max: card.y + card.height
         }
-        const isBetweenX = utils.between(x)
-        const isBetweenY = utils.between(y)
+        const isBetweenX = utils.isBetween(x)
+        const isBetweenY = utils.isBetween(y)
         if (isBetweenX && isBetweenY) {
           this.$store.commit('addToMultipleCardsSelected', card.cardId)
         }

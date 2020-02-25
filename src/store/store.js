@@ -20,6 +20,7 @@ export default new Vuex.Store({
     isOnline: true,
     isBeta: false,
     initialExtraSize: 160, // TODO apply extra size each time you change spaces
+    shouldHideConnectionOutline: false,
 
     // reset password
     resetPasswordApiKey: '',
@@ -37,8 +38,10 @@ export default new Vuex.Store({
     currentUserIsHoveringOverConnectionId: '',
 
     // cards
-    shouldAddNewCard: false,
+    shouldAddCard: false,
     cardDetailsIsVisibleForCardId: '',
+    parentCardId: '',
+    childCardId: '',
 
     // connecting
     currentConnection: {}, // startCardId, startConnectorRect
@@ -103,9 +106,9 @@ export default new Vuex.Store({
       utils.typeCheck(width, 'number')
       state.pageWidth = width
     },
-    shouldAddNewCard: (state, value) => {
+    shouldAddCard: (state, value) => {
       utils.typeCheck(value, 'boolean')
-      state.shouldAddNewCard = value
+      state.shouldAddCard = value
     },
     currentUserIsHoveringOverConnectionId: (state, connectionId) => {
       utils.typeCheck(connectionId, 'string')
@@ -114,6 +117,14 @@ export default new Vuex.Store({
     cardDetailsIsVisibleForCardId: (state, cardId) => {
       utils.typeCheck(cardId, 'string')
       state.cardDetailsIsVisibleForCardId = cardId
+    },
+    parentCardId: (state, cardId) => {
+      utils.typeCheck(cardId, 'string')
+      state.parentCardId = cardId
+    },
+    childCardId: (state, cardId) => {
+      utils.typeCheck(cardId, 'string')
+      state.childCardId = cardId
     },
     closeAllDialogs: (state) => {
       state.multipleSelectedActionsIsVisible = false
@@ -127,6 +138,10 @@ export default new Vuex.Store({
     isBeta: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.isBeta = value
+    },
+    shouldHideConnectionOutline: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.shouldHideConnectionOutline = value
     },
     resetPasswordApiKey: (state, apiKey) => {
       utils.typeCheck(apiKey, 'string')
@@ -147,6 +162,7 @@ export default new Vuex.Store({
     triggerSpaceDetailsVisible: () => {},
     triggerSignUpOrInIsVisible: () => {},
     triggerArenaAuthenticationError: () => {},
+    triggerKeyboardShortcutsIsVisible: () => {},
     notifyReadOnlyJiggle: () => {},
 
     // connecting

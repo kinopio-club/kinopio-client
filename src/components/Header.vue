@@ -2,7 +2,7 @@
 header
   nav
     .logo-about
-      .logo(alt="kinopio logo" @click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop :class="{active : aboutIsVisible}")
+      .logo(alt="kinopio logo" @click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop :class="{active : aboutIsVisible}" tabindex="0")
         .logo-image
         img.down-arrow(src="@/assets/down-arrow.svg")
       About(:visible="aboutIsVisible")
@@ -15,6 +15,7 @@ header
         Loader(:visible="isLoadingSpace")
       SpaceDetails(:visible="spaceDetailsIsVisible")
       ImportArenaChannel(:visible="importArenaChannelIsVisible")
+      KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
 
   aside
     .top
@@ -25,7 +26,7 @@ header
         Share(:visible="shareIsVisible")
 
       .users
-        User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true")
+        User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
 
     .bottom
       ResetPassword
@@ -48,6 +49,7 @@ import Share from '@/components/dialogs/Share.vue'
 import Loader from '@/components/Loader.vue'
 import templates from '@/spaces/templates.js'
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
+import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 
 export default {
   name: 'Header',
@@ -59,7 +61,8 @@ export default {
     ResetPassword,
     Share,
     Loader,
-    ImportArenaChannel
+    ImportArenaChannel,
+    KeyboardShortcuts
   },
   data () {
     return {
@@ -67,7 +70,8 @@ export default {
       spaceDetailsIsVisible: false,
       signUpOrInIsVisible: false,
       shareIsVisible: false,
-      loadingSignUpOrIn: false
+      loadingSignUpOrIn: false,
+      keyboardShortcutsIsVisible: false
     }
   },
   created () {
@@ -77,12 +81,16 @@ export default {
         this.spaceDetailsIsVisible = false
         this.signUpOrInIsVisible = false
         this.shareIsVisible = false
+        this.keyboardShortcutsIsVisible = false
       }
       if (mutation.type === 'triggerSpaceDetailsVisible') {
         this.spaceDetailsIsVisible = true
       }
       if (mutation.type === 'triggerSignUpOrInIsVisible') {
         this.signUpOrInIsVisible = true
+      }
+      if (mutation.type === 'triggerKeyboardShortcutsIsVisible') {
+        this.keyboardShortcutsIsVisible = true
       }
     })
   },
@@ -168,7 +176,6 @@ header
     display -webkit-box
     > *
       pointer-events all
-
   nav
     margin-right 6px
     flex-grow 2
@@ -184,7 +191,8 @@ header
       vertical-align middle
     .down-arrow
       padding-left 4px
-    &:hover
+    &:hover,
+    &:focus
       .down-arrow
         transform translateY(3px)
     &:active,
@@ -202,6 +210,8 @@ header
       max-width 100%
     dialog
       max-width initial
+    > .keyboard-shortcuts
+      max-height calc(100vh - 100px)
   aside
     display flex
     flex-direction column
