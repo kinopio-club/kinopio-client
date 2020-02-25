@@ -51,15 +51,18 @@ export default {
     },
 
     addCard () {
-      console.log('add parent or sibling card')
       this.$store.commit('generateCardMap')
       const parentCardId = this.$store.state.parentCardId
       const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
       const childCardId = this.$store.state.childCardId
       const childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
       let initialPosition = {}
+      let isParentCard = true
       if (childCard) {
-        this.addChildCard()
+        isParentCard = false
+        const rect = childCard.getBoundingClientRect()
+        initialPosition.x = window.pageXOffset + rect.x
+        initialPosition.y = window.pageYOffset + rect.y + rect.height + incrementPosition
       } else if (parentCard) {
         const rect = parentCard.getBoundingClientRect()
         initialPosition.x = window.pageXOffset + rect.x
@@ -69,13 +72,22 @@ export default {
         initialPosition.y = window.pageYOffset + 80
       }
       const position = this.nonOverlappingCardPosition(initialPosition)
-      this.$store.dispatch('currentSpace/addCard', { position, isParentCard: true })
+      this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
+      if (childCard) {
+        this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)
+        this.$nextTick(() => {
+          this.addConnection()
+        })
+      }
     },
 
     addChildCard () {
       const parentCardId = this.$store.state.parentCardId
       const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
-      const rect = parentCard.getBoundingClientRect()
+      const childCardId = this.$store.state.childCardId
+      const childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
+      const baseCard = childCard || parentCard
+      const rect = baseCard.getBoundingClientRect()
       const initialPosition = {
         x: window.pageXOffset + rect.x + rect.width + incrementPosition,
         y: window.pageYOffset + rect.y + rect.height + incrementPosition
@@ -113,11 +125,9 @@ export default {
     },
 
     addConnection () {
-      // 🔥 parentcardid wont exist if parent was blank when shift-entered
       const parentCardId = this.$store.state.parentCardId
       const currentCardId = this.$store.state.cardDetailsIsVisibleForCardId
       const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
-      console.log('🔥', parentCard)
       if (!parentCard) { return }
 
       let connection = {
