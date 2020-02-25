@@ -15,19 +15,24 @@ export default {
   methods: {
     handleShortcuts (event) {
       const key = event.key
-      if (key === 'Escape') {
-        this.closeAddDialogs()
-      }
-      const shouldHandleShortcut = event.target.tagName === 'BODY' || event.target.closest('dialog.card-details')
-      if (!shouldHandleShortcut) { return }
-      if (event.shiftKey && key === 'Enter') {
+      const isFromBody = event.target.tagName === 'BODY'
+      const isFromCardName = event.target.closest('dialog.card-details')
+      const isSpaceScope = isFromBody || isFromCardName
+      if (event.shiftKey && key === 'Enter' && isSpaceScope) {
+        // Shift-Enter
         this.addChildCard()
-      } else if (key === 'Enter') {
+      } else if (key === 'Enter' && isSpaceScope) {
+        // Enter
         this.addCard()
-      } else if (key === '?') {
+      } else if (key === '?' && isSpaceScope) {
+        // ?
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
-      } else if (key === 'Backspace') {
+      } else if (key === 'Backspace' && isSpaceScope) {
+        // Backspace
         this.removeMultipleSelected()
+      } else if (key === 'Escape') {
+        // Escape
+        this.closeAddDialogs()
       }
     },
     handleMetaKeyShortcuts (event) {
