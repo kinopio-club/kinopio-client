@@ -60,4 +60,5 @@ export default {
     margin-left 6px
   .user
     margin-right 6px
+    vertical-align middle
 </style>
