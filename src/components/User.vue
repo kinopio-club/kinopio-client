@@ -7,7 +7,7 @@
     :class="{ clickable: isClickable, active: userDetailsIsVisible }"
     :style="{backgroundColor: user.color}"
   )
-    .current-user-badge(v-if="isCurrentUser")
+    .label-badge(v-if="isCurrentUser")
       span YOU
   template(v-if="isClickable")
     UserDetails(:visible="userDetailsIsVisible" :user="user" :detailsOnRight="detailsOnRight")
@@ -83,7 +83,7 @@ export default {
     &:hover,
     &:focus
       box-shadow var(--button-hover-shadow)
-      .current-user-badge
+      .label-badge
         transform translateY(2px)
     &:active,
     &.active
@@ -91,18 +91,9 @@ export default {
     &.clickable
       cursor pointer
       pointer-events all
-  .current-user-badge
-    position absolute
+  .label-badge
     bottom -7px
     width 100%
-    background-color var(--primary)
-    height 12px
-    border-radius 3px
-    display flex
-    justify-content center
-    span
-      font-size 12px
-      color var(--primary-background)
 button
   .user
     margin 0

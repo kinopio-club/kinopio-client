@@ -341,6 +341,20 @@ code
       width 16px
       height 15px
 
+.label-badge
+  position absolute
+  padding 0 3px
+  height 12px
+  border-radius 3px
+  left 0
+  bottom 9px
+  background-color var(--primary)
+  display flex
+  justify-content center
+  span
+    font-size 12px
+    color var(--primary-background)
+
 .danger
   background-color var(--danger-background)
 
