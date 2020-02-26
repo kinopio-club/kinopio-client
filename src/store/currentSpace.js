@@ -326,6 +326,11 @@ export default {
       }
       return utils.normalizeRemoteSpace(remoteSpace)
     },
+    updateSpacePageSize: (context) => {
+      Vue.nextTick(() => {
+        context.dispatch('updateSpacePageSize', null, { root: true })
+      })
+    },
     loadSpace: async (context, space) => {
       const emptySpace = { id: space.id, cards: [], connections: [] }
       const cachedSpace = cache.space(space.id)
@@ -335,6 +340,7 @@ export default {
       // restore local
       context.commit('restoreSpace', emptySpace)
       context.commit('restoreSpace', cachedSpace)
+      context.dispatch('updateSpacePageSize')
       // restore remote
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (remoteSpace) {
@@ -355,6 +361,7 @@ export default {
       }
       context.dispatch('checkIfShouldNotifyReadOnly')
       context.commit('spaceUrlToLoad', '', { root: true })
+      context.dispatch('updateSpacePageSize')
     },
     updateSpace: async (context, updates) => {
       const space = utils.clone(context.state)

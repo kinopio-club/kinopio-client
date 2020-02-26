@@ -19,7 +19,7 @@ export default new Vuex.Store({
     viewportWidth: 0,
     isOnline: true,
     isBeta: false,
-    initialExtraSize: 160, // TODO apply extra size each time you change spaces
+    // initialExtraSize: 160, // TODO apply extra size each time you change spaces
     shouldHideConnectionOutline: false,
     newStuffIsUpdated: false,
 
@@ -87,9 +87,6 @@ export default new Vuex.Store({
       const html = document.documentElement
       state.pageWidth = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
       state.pageHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
-      state.pageHeight = state.pageHeight + state.initialExtraSize
-      state.pageWidth = state.pageWidth + state.initialExtraSize
-      state.initialExtraSize = 0
       if (window.visualViewport) {
         state.viewportWidth = window.visualViewport.width
         state.viewportHeight = window.visualViewport.height
@@ -99,6 +96,12 @@ export default new Vuex.Store({
         state.viewportHeight = document.documentElement.clientHeight
       }
     },
+    updateSpacePageSize: (state, { maxX, maxY }) => {
+      const extraScrollArea = 160
+      state.pageWidth = maxX + extraScrollArea
+      state.pageHeight = maxY + extraScrollArea
+    },
+
     pageHeight: (state, height) => {
       utils.typeCheck(height, 'number')
       state.pageHeight = height
@@ -349,6 +352,25 @@ export default new Vuex.Store({
     removeFromFilteredFrameIds: (state, id) => {
       utils.typeCheck(id, 'number')
       state.filteredFrameIds = state.filteredFrameIds.filter(frameId => frameId !== id)
+    }
+  },
+
+  actions: {
+    updateSpacePageSize: (context) => {
+      let maxX = 0
+      let maxY = 0
+      context.commit('generateCardMap')
+      context.state.cardMap.forEach(card => {
+        const cardX = card.x + card.width
+        const cardY = card.y + card.height
+        if (cardX > maxX) {
+          maxX = cardX
+        }
+        if (cardY > maxY) {
+          maxY = cardY
+        }
+      })
+      context.commit('updateSpacePageSize', { maxX, maxY })
     }
   },
 
