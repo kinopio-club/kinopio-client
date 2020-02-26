@@ -4,6 +4,8 @@ header
     .logo-about
       .logo(alt="kinopio logo" @click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop :class="{active : aboutIsVisible}" tabindex="0")
         .logo-image
+          .label-badge(v-if="shouldShowNewStuffIsUpdated")
+            span NEW
         img.down-arrow(src="@/assets/down-arrow.svg")
       About(:visible="aboutIsVisible")
     .button-wrap.space-details-wrap
@@ -95,6 +97,12 @@ export default {
     })
   },
   computed: {
+    shouldShowNewStuffIsUpdated () {
+      const newStuffIsUpdated = this.$store.state.newStuffIsUpdated
+      const isNotDefaultSpace = !this.$store.getters['currentSpace/isDefaultSpace']
+      const userCanEditCurrentSpace = this.$store.getters['currentUser/canEditCurrentSpace']
+      return newStuffIsUpdated && isNotDefaultSpace && userCanEditCurrentSpace
+    },
     importArenaChannelIsVisible () { return this.$store.state.importArenaChannelIsVisible },
     users () {
       const currentUser = this.$store.state.currentUser
@@ -181,6 +189,7 @@ header
     flex-grow 2
   .users
       margin-right 6px
+
   .logo-about
     position relative
     display inline-block
@@ -193,6 +202,8 @@ header
       padding-left 4px
     &:hover,
     &:focus
+      .label-badge
+        transform translateY(2px)
       .down-arrow
         transform translateY(3px)
     &:active,
@@ -226,5 +237,4 @@ header
       display inline-block
   .lock
     margin-left 6px
-
 </style>

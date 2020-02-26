@@ -695,6 +695,9 @@ export default {
         const lastConnectionType = getters.lastConnectionType
         return lastConnectionType
       }
+    },
+    isDefaultSpace: (state) => {
+      return state.name === 'Hello Kinopio'
     }
   }
 }
