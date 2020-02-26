@@ -4,7 +4,8 @@ header
     .logo-about
       .logo(alt="kinopio logo" @click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop :class="{active : aboutIsVisible}" tabindex="0")
         .logo-image
-          .notification-badge(v-if="shouldShowNewStuffIsUpdated") !
+          .notification-badge(v-if="shouldShowNewStuffIsUpdated")
+            span NEW
         img.down-arrow(src="@/assets/down-arrow.svg")
       About(:visible="aboutIsVisible")
     .button-wrap.space-details-wrap
@@ -188,14 +189,22 @@ header
     flex-grow 2
   .users
       margin-right 6px
+
+  // todo merge w current user badge
   .notification-badge
     position absolute
-    padding 2px 2px
-    padding-top 3px
+    padding 0 3px
+    height 12px
     border-radius 3px
     left 0
-    top 0
-    background #33ff32 // updated gif green
+    bottom 9px
+    background-color var(--primary)
+    display flex
+    justify-content center
+    span
+      font-size 12px
+      color var(--primary-background)
+
   .logo-about
     position relative
     display inline-block
@@ -208,12 +217,12 @@ header
       padding-left 4px
     &:hover,
     &:focus
-      .notification-badge,
+      .notification-badge
+        transform translateY(2px)
       .down-arrow
         transform translateY(3px)
     &:active,
     &.active
-      .notification-badge,
       .down-arrow
         transform translateY(5px)
   .space-details-wrap
