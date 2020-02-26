@@ -4,7 +4,7 @@ header
     .logo-about
       .logo(alt="kinopio logo" @click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop :class="{active : aboutIsVisible}" tabindex="0")
         .logo-image
-          .notification-badge !
+          .notification-badge(v-if="shouldShowNewStuffIsUpdated") !
         img.down-arrow(src="@/assets/down-arrow.svg")
       About(:visible="aboutIsVisible")
     .button-wrap.space-details-wrap
@@ -96,6 +96,12 @@ export default {
     })
   },
   computed: {
+    shouldShowNewStuffIsUpdated () {
+      const newStuffIsUpdated = this.$store.state.newStuffIsUpdated
+      const isNotDefaultSpace = !this.$store.getters['currentSpace/isDefaultSpace']
+      const userCanEditCurrentSpace = this.$store.getters['currentUser/canEditCurrentSpace']
+      return newStuffIsUpdated && isNotDefaultSpace && userCanEditCurrentSpace
+    },
     importArenaChannelIsVisible () { return this.$store.state.importArenaChannelIsVisible },
     users () {
       const currentUser = this.$store.state.currentUser

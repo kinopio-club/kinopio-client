@@ -52,7 +52,6 @@ export default {
   data () {
     return {
       contactIsVisible: false,
-      newStuffIsUpdated: false,
       whatsNewIsVisible: false,
       addToHomescreenIsVisible: false,
       keyboardShortcutsIsVisible: false,
@@ -82,6 +81,9 @@ export default {
     this.isIOS = utils.isIOS()
     this.isAndroid = utils.isAndroid()
   },
+  computed: {
+    newStuffIsUpdated () { return this.$store.state.newStuffIsUpdated }
+  },
   methods: {
     toggleContactIsVisible () {
       const isVisible = this.contactIsVisible
@@ -92,7 +94,7 @@ export default {
       const isVisible = this.whatsNewIsVisible
       this.closeDialogs()
       this.whatsNewIsVisible = !isVisible
-      this.newStuffIsUpdated = false
+      this.$store.commit('newStuffIsUpdated', false)
     },
     toggleAddToHomescreenIsVisible () {
       const isVisible = this.addToHomescreenIsVisible
@@ -111,7 +113,8 @@ export default {
     },
     checkNewStuffIsUpdated (latestUpdateId) {
       const userlastReadId = parseInt(this.$store.state.currentUser.lastReadNewStuffId)
-      this.newStuffIsUpdated = Boolean(userlastReadId !== latestUpdateId)
+      const newStuffIsUpdated = Boolean(userlastReadId !== latestUpdateId)
+      this.$store.commit('newStuffIsUpdated', newStuffIsUpdated)
     },
     closeDialogs () {
       this.contactIsVisible = false
