@@ -33,6 +33,18 @@ export default {
       } else if (key === 'Escape') {
         // Escape
         this.closeAddDialogs()
+      } else if (key === 'ArrowLeft' && isFromBody) {
+        // → Left
+        this.focusNearestCardLeft()
+      } else if (key === 'ArrowRight' && isFromBody) {
+        // ← Right
+        this.focusNearestCardRight()
+      } else if (key === 'ArrowDown' && isFromBody) {
+        // ↓ Down
+        this.focusNearestCardDown()
+      } else if (key === 'ArrowUp' && isFromBody) {
+        // ↑ Up
+        this.focusNearestCardUp()
       }
     },
     handleMetaKeyShortcuts (event) {
@@ -170,6 +182,19 @@ export default {
     removeMultipleSelected () {
       console.log('remove selected , or currentcard/connection w details open')
       this.$store.commit('closeAllDialogs')
+    },
+
+    focusNearestCardLeft () {
+      console.log('focus nearest card left') // (has to take into account x and y)
+    },
+    focusNearestCardRight () {
+      console.log('focus nearest card Right')
+    },
+    focusNearestCardDown () {
+      console.log('focus nearest card Down')
+    },
+    focusNearestCardUp () {
+      console.log('focus nearest card Up')
     }
 
   }
