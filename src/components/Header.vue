@@ -4,6 +4,7 @@ header
     .logo-about
       .logo(alt="kinopio logo" @click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop :class="{active : aboutIsVisible}" tabindex="0")
         .logo-image
+          .notification-badge !
         img.down-arrow(src="@/assets/down-arrow.svg")
       About(:visible="aboutIsVisible")
     .button-wrap.space-details-wrap
@@ -181,6 +182,14 @@ header
     flex-grow 2
   .users
       margin-right 6px
+  .notification-badge
+    position absolute
+    padding 2px 2px
+    padding-top 3px
+    border-radius 3px
+    left 0
+    top 0
+    background #33ff32 // updated gif green
   .logo-about
     position relative
     display inline-block
@@ -193,10 +202,12 @@ header
       padding-left 4px
     &:hover,
     &:focus
+      .notification-badge,
       .down-arrow
         transform translateY(3px)
     &:active,
     &.active
+      .notification-badge,
       .down-arrow
         transform translateY(5px)
   .space-details-wrap
@@ -226,5 +237,4 @@ header
       display inline-block
   .lock
     margin-left 6px
-
 </style>
