@@ -1,5 +1,5 @@
 <template lang="pug">
-.user(:data-user-id="user.id" @keydown.stop.enter="toggleUserDetails")
+.user(:data-user-id="user.id" @keydown.stop.enter="toggleUserDetails" :class="{ active: userDetailsIsVisible}")
   .user-avatar.anon-avatar(
     @mouseup.stop="toggleUserDetails"
     @touchend.stop="toggleUserDetails"
@@ -68,6 +68,11 @@ export default {
 .user
   display inline-block
   position relative
+  &:hover,
+  &:active
+    outline none
+  &.active
+    outline none
   .user-avatar
     width 24px
     height 24px
@@ -79,14 +84,13 @@ export default {
     &:focus
       box-shadow var(--button-hover-shadow)
       .current-user-badge
-        bottom -9px
-    &:active
+        transform translateY(2px)
+    &:active,
+    &.active
       box-shadow var(--button-active-inset-shadow)
     &.clickable
       cursor pointer
       pointer-events all
-    &.active
-      box-shadow var(--button-active-inset-shadow)
   .current-user-badge
     position absolute
     bottom -7px
