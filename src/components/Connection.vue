@@ -12,6 +12,7 @@ path.path(
   @touchstart="hideConnectionOutline"
   @click="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
+  @keyup.stop.backspace="removeConnection"
   @keyup.stop.enter="showConnectionDetailsOnKeyup"
   :class="{active: isSelected || detailsIsVisible, filtered: isFiltered, hover: isHovered, 'hide-connection-outline': shouldHideConnectionOutline }"
   ref="connection"
@@ -122,6 +123,11 @@ export default {
     }
   },
   methods: {
+    removeConnection () {
+      this.$store.dispatch('currentSpace/removeConnection', this.connection)
+      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
+    },
+
     // same as ConnectionLabel method
     showConnectionDetails (event) {
       if (this.spaceIsReadOnly) { return }
