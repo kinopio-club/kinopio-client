@@ -35,10 +35,10 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.stop)
         p.badge.info Option-Tab/Option-Shift-Tab
         p Unless you update your Safari preferences:
         p Preferences → Advanced → Press Tab to highlight each item on a webpage
-    //- article
-    //-   .row
-    //-     .badge.title Focus Nearest Card in
-    //-     .badge.info Arrow(→↑←↓)
+    article
+      .row
+        .badge.title Focus Nearest Card
+        .badge.info Arrow(→↑←↓)
     //- article
     //-   .row
     //-     .badge.title Copy/Cut/Paste Selected Cards

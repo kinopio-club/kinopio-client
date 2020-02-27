@@ -15,24 +15,38 @@ export default {
   methods: {
     handleShortcuts (event) {
       const key = event.key
-      const isFromBody = event.target.tagName === 'BODY'
+      // console.warn('🎹', key)
       const isFromCardName = event.target.closest('dialog.card-details')
-      const isSpaceScope = isFromBody || isFromCardName
-      if (event.shiftKey && key === 'Enter' && isSpaceScope) {
-        // Shift-Enter
+      const isFromCard = event.target.className === 'card'
+      const isSpaceScope = event.target.tagName === 'BODY'
+      const isCardScope = isFromCard || isFromCardName
+      // Shift-Enter
+      if (event.shiftKey && key === 'Enter' && (isSpaceScope || isCardScope)) {
         this.addChildCard()
-      } else if (key === 'Enter' && isSpaceScope) {
-        // Enter
+      // Enter
+      } else if (key === 'Enter' && (isSpaceScope || isCardScope)) {
         this.addCard()
-      } else if (key === '?' && isFromBody) {
-        // ?
+      // ?
+      } else if (key === '?' && isSpaceScope) {
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
-      } else if (key === 'Backspace' && isSpaceScope) {
-        // Backspace
+      // Backspace
+      } else if (key === 'Backspace' && (isSpaceScope || isFromCard)) { // todo has to also work from multiple selected actions dialog
         this.removeMultipleSelected()
+      // Escape
       } else if (key === 'Escape') {
-        // Escape
         this.closeAddDialogs()
+      // → Left
+      } else if (key === 'ArrowLeft' && (isSpaceScope || isFromCard)) {
+        this.focusNearestCardLeft()
+      // ← Right
+      } else if (key === 'ArrowRight' && (isSpaceScope || isFromCard)) {
+        this.focusNearestCardRight()
+      // ↓ Down
+      } else if (key === 'ArrowDown' && (isSpaceScope || isFromCard)) {
+        this.focusNearestCardDown()
+      // ↑ Up
+      } else if (key === 'ArrowUp' && (isSpaceScope || isFromCard)) {
+        this.focusNearestCardUp()
       }
     },
     handleMetaKeyShortcuts (event) {
@@ -41,13 +55,17 @@ export default {
       // - TODO to paste, add copiedCards to the currentSpace, then clearCopiedCards
       const key = event.key
       const isMeta = event.metaKey || event.ctrlKey
-      if (event.target.tagName !== 'BODY') { return }
+      const isSpaceScope = event.target.tagName === 'BODY'
+      if (!isSpaceScope) { return }
+      // Copy
       if (isMeta && key === 'c') {
         event.preventDefault()
         console.log('copy selected cards', this.$store.state.multipleCardsSelectedIds)
+      // Cut
       } else if (isMeta && key === 'x') {
         event.preventDefault()
         console.log('cut selected cards', this.$store.state.multipleCardsSelectedIds)
+      // Paste
       } else if (isMeta && key === 'v') {
         event.preventDefault()
         console.log('paste selected cards')
@@ -170,8 +188,143 @@ export default {
     removeMultipleSelected () {
       console.log('remove selected , or currentcard/connection w details open')
       this.$store.commit('closeAllDialogs')
-    }
+    },
 
+    closestCardToOrigin (origin, direction, cards) {
+      cards = cards || this.$store.state.cardMap
+      let closestDistanceFromCenter = Math.max(this.$store.state.pageWidth, this.$store.state.pageHeight)
+      let closestCard
+      cards.forEach(card => {
+        let toPosition
+        // To Center
+        if (direction === 'center') {
+          toPosition = utils.rectCenter(card)
+        // To Right
+        } else if (direction === 'left') {
+          toPosition = {
+            x: card.x + card.width,
+            y: card.y - (card.height / 2)
+          }
+        // To Left
+        } else if (direction === 'right') {
+          toPosition = {
+            x: card.x,
+            y: card.y - (card.height / 2)
+          }
+        // To Top
+        } else if (direction === 'down') {
+          toPosition = {
+            x: card.x + (card.width / 2),
+            y: card.y
+          }
+        // To Bottom
+        } else if (direction === 'up') {
+          toPosition = {
+            x: card.x + (card.width / 2),
+            y: card.y + card.height
+          }
+        }
+        const distance = utils.distanceBetweenTwoPoints(origin, toPosition)
+        if (distance < closestDistanceFromCenter) {
+          closestDistanceFromCenter = distance
+          closestCard = card
+        }
+      })
+      if (closestCard) {
+        this.$store.commit('parentCardId', closestCard.cardId)
+        return closestCard
+      } else {
+        return this.currentFocusedCard()
+      }
+    },
+
+    currentFocusedCard () {
+      const viewportWidth = this.$store.state.viewportWidth
+      const viewportHeight = this.$store.state.viewportHeight
+      const cardMap = this.$store.state.cardMap
+      let lastCardId = this.$store.state.parentCardId || this.$store.state.childCardId
+      let closestCard = cardMap.filter(card => card.cardId === lastCardId)
+      if (closestCard.length) {
+        return closestCard[0]
+      } else {
+        const origin = {
+          x: (viewportWidth / 2) + window.scrollX,
+          y: (viewportHeight / 2) + window.scrollY
+        }
+        return this.closestCardToOrigin(origin, 'center')
+      }
+    },
+
+    focusCard (direction) {
+      this.$store.commit('generateCardMap')
+      const cardMap = this.$store.state.cardMap
+      const originCard = this.currentFocusedCard()
+      const yThreshold = originCard.height + 60
+      const xThreshold = originCard.width + 60
+      let focusableCards
+      if (direction === 'left') {
+        focusableCards = cardMap.filter(card => {
+          const yOrigin = originCard.y - (originCard.height / 2)
+          const isOnLeftSide = card.x < originCard.x
+          // todo replace within box calc, w cone calc
+          const isWithinY = utils.isBetween({
+            value: card.y,
+            min: yOrigin - yThreshold,
+            max: yOrigin + yThreshold
+          })
+          return isOnLeftSide && isWithinY
+        })
+      } else if (direction === 'right') {
+        focusableCards = cardMap.filter(card => {
+          const yOrigin = originCard.y - (originCard.height / 2)
+          const isOnRightSide = card.x > originCard.x + originCard.width
+          const isWithinY = utils.isBetween({
+            value: card.y,
+            min: yOrigin - yThreshold,
+            max: yOrigin + yThreshold
+          })
+          return isOnRightSide && isWithinY
+        })
+      } else if (direction === 'down') {
+        focusableCards = cardMap.filter(card => {
+          const xOrigin = originCard.x - (originCard.width / 2)
+          const isOnDownSide = card.y > originCard.y + originCard.height
+          const isWithinX = utils.isBetween({
+            value: card.x,
+            min: xOrigin - xThreshold,
+            max: xOrigin + xThreshold
+          })
+          return isOnDownSide && isWithinX
+        })
+      } else if (direction === 'up') {
+        focusableCards = cardMap.filter(card => {
+          const xOrigin = originCard.x - (originCard.width / 2)
+          const isOnTopSide = card.y < originCard.y
+          const isWithinX = utils.isBetween({
+            value: card.x,
+            min: xOrigin - xThreshold,
+            max: xOrigin + xThreshold
+          })
+          return isOnTopSide && isWithinX
+        })
+      }
+      focusableCards = focusableCards.filter(card => card.cardId !== this.$store.state.parentCardId)
+      const closestCard = this.closestCardToOrigin(originCard, direction, focusableCards)
+      document.querySelector(`.card[data-card-id="${closestCard.cardId}"]`).focus()
+    },
+
+    focusNearestCardLeft () {
+      this.focusCard('left')
+    },
+    focusNearestCardRight () {
+      this.focusCard('right')
+    },
+    focusNearestCardDown () {
+      this.focusCard('down')
+    },
+    focusNearestCardUp () {
+      this.focusCard('up')
+    }
   }
 }
 </script>

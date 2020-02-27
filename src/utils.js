@@ -46,7 +46,7 @@ export default {
     return { x, y }
   },
 
-  elementCenter (rect) {
+  rectCenter (rect) {
     const x = Math.round(rect.x + (rect.width / 2))
     const y = Math.round(rect.y + (rect.height / 2))
     return { x, y }
@@ -198,13 +198,20 @@ export default {
     }
   },
 
+  distanceBetweenTwoPoints (point1, point2) {
+    // https://www.mathwarehouse.com/algebra/distance_formula/index.php
+    const xDelta = point2.x - point1.x
+    const yDelta = point2.y - point1.y
+    return Math.sqrt((xDelta ** 2) + (yDelta ** 2))
+  },
+
   // Connection Path Utils 🐙
 
   connectorCoords (cardId) {
     const element = document.querySelector(`.connector[data-card-id="${cardId}"] button`)
     if (!element) { return }
     const rect = element.getBoundingClientRect()
-    return this.elementCenter(rect)
+    return this.rectCenter(rect)
   },
 
   coordsWithCurrentScrollOffset ({ x, y }) {
