@@ -48,7 +48,7 @@ export default {
 
   rectCenter (rect) {
     const x = Math.round(rect.x + (rect.width / 2))
-    const y = Math.round(rect.y - (rect.height / 2))
+    const y = Math.round(rect.y + (rect.height / 2))
     return { x, y }
   },
 

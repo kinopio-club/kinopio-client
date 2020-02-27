@@ -267,61 +267,64 @@ export default {
       this.$store.commit('generateCardMap')
       const cardMap = this.$store.state.cardMap
       const originCard = this.currentFocusedCard()
-      console.log(originCard, utils.rectCenter(originCard))
-      // const originCenter = utils.rectCenter(originCard)
+      console.log(originCard)
 
-      // const yThreshold = originCard.height + 60
-      // const xThreshold = originCard.width + 60
+      const yThreshold = originCard.height + 60
+      const xThreshold = originCard.width + 60
       let focusableCards
       if (direction === 'left') {
         focusableCards = cardMap.filter(card => {
-          // const yOrigin = originCard.y - (originCard.height / 2)
+          const yOrigin = originCard.y - (originCard.height / 2)
           const isOnLeftSide = card.x < originCard.x
-          // const isWithinY = utils.isBetween ({
-          //   value: card.y,
-          //   min: yOrigin - yThreshold,
-          //   max: yOrigin + yThreshold
-          // })
-          return isOnLeftSide // && isWithinY
+          // replace linear, w coneular
+          const isWithinY = utils.isBetween({
+            value: card.y,
+            min: yOrigin - yThreshold,
+            max: yOrigin + yThreshold
+          })
+          return isOnLeftSide && isWithinY
         })
       } else if (direction === 'right') {
         focusableCards = cardMap.filter(card => {
-          // const yOrigin = originCard.y - (originCard.height / 2)
+          const yOrigin = originCard.y - (originCard.height / 2)
           const isOnRightSide = card.x > originCard.x + originCard.width
-          // const isWithinY = utils.isBetween ({
-          //   value: card.y,
-          //   min: yOrigin - yThreshold,
-          //   max: yOrigin + yThreshold
-          // })
-          return isOnRightSide // && isWithinY
+          const isWithinY = utils.isBetween({
+            value: card.y,
+            min: yOrigin - yThreshold,
+            max: yOrigin + yThreshold
+          })
+          return isOnRightSide && isWithinY
         })
       } else if (direction === 'down') {
         focusableCards = cardMap.filter(card => {
-          // return card.y + card.height < originCard.y
-
-          // const yOrigin = originCard.y - (originCard.height / 2)
+          const xOrigin = originCard.x - (originCard.width / 2)
           const isOnDownSide = card.y > originCard.y + originCard.height
-          // const isWithinY = utils.isBetween ({
-          //   value: card.y,
-          //   min: yOrigin - yThreshold,
-          //   max: yOrigin + yThreshold
-          // })
-          return isOnDownSide // && isWithinY
+          const isWithinX = utils.isBetween({
+            value: card.x,
+            min: xOrigin - xThreshold,
+            max: xOrigin + xThreshold
+          })
+          return isOnDownSide && isWithinX
         })
       } else if (direction === 'up') {
         focusableCards = cardMap.filter(card => {
-          // return card.y > originCard.y
+          const xOrigin = originCard.x - (originCard.width / 2)
           const isOnTopSide = card.y < originCard.y
-          return isOnTopSide
+          const isWithinX = utils.isBetween({
+            value: card.x,
+            min: xOrigin - xThreshold,
+            max: xOrigin + xThreshold
+          })
+          return isOnTopSide && isWithinX
         })
       }
       focusableCards = focusableCards.filter(card => card.cardId !== this.$store.state.parentCardId)
 
       //
-      console.log('focusable ', focusableCards)
-      focusableCards.forEach(card => {
-        console.log('💔', document.querySelector(`.card[data-card-id="${card.cardId}"]`))
-      })
+      // console.log('focusable ', focusableCards)
+      // focusableCards.forEach(card => {
+      //   console.log('💔', document.querySelector(`.card[data-card-id="${card.cardId}"]`))
+      // })
 
       const closestCard = this.closestCardToOrigin(originCard, direction, focusableCards)
       document.querySelector(`.card[data-card-id="${closestCard.cardId}"]`).focus()
