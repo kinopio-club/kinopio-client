@@ -6,6 +6,7 @@ article(:style="position" :data-card-id="id")
     @mouseup="showCardDetails"
     @touchend="showCardDetails"
     @keyup.stop.enter="showCardDetails"
+    @keyup.stop.backspace="removeCard"
     :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged, 'filtered': isFiltered, 'media-card': isMediaCard}",
     :style="{background: selectedColor}"
     :data-card-id="id"
@@ -201,6 +202,9 @@ export default {
     }
   },
   methods: {
+    removeCard () {
+      this.$store.dispatch('currentSpace/removeCard', this.card)
+    },
     createCurrentConnection (event) {
       const cursor = utils.cursorPositionInViewport(event)
       this.$store.commit('currentConnection', {
