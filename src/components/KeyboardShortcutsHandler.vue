@@ -195,35 +195,36 @@ export default {
       let closestDistanceFromCenter = Math.max(this.$store.state.pageWidth, this.$store.state.pageHeight)
       let closestCard
       cards.forEach(card => {
-        let cardPoint
+        let toPosition
+        // To Center
         if (direction === 'center') {
-          cardPoint = utils.rectCenter(card)
+          toPosition = utils.rectCenter(card)
+        // To Right
         } else if (direction === 'left') {
-          // point on right side
-          cardPoint = {
+          toPosition = {
             x: card.x + card.width,
             y: card.y - (card.height / 2)
           }
+        // To Left
         } else if (direction === 'right') {
-          // point on left side
-          cardPoint = {
+          toPosition = {
             x: card.x,
             y: card.y - (card.height / 2)
           }
+        // To Top
         } else if (direction === 'down') {
-          // point on top side
-          cardPoint = {
+          toPosition = {
             x: card.x + (card.width / 2),
             y: card.y
           }
+        // To Bottom
         } else if (direction === 'up') {
-          // point on bottom side
-          cardPoint = {
+          toPosition = {
             x: card.x + (card.width / 2),
             y: card.y + card.height
           }
         }
-        const distance = utils.distanceBetweenTwoPoints(origin, cardPoint)
+        const distance = utils.distanceBetweenTwoPoints(origin, toPosition)
         if (distance < closestDistanceFromCenter) {
           closestDistanceFromCenter = distance
           closestCard = card
