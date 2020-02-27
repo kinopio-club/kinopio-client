@@ -16,36 +16,36 @@ export default {
     handleShortcuts (event) {
       const key = event.key
       console.warn('🎹', key)
-      const isFromBody = event.target.tagName === 'BODY'
       const isFromCardName = event.target.closest('dialog.card-details')
-      const isSpaceScope = isFromBody || isFromCardName
-      const isCardScope = event.target.className === 'card'
-      if (event.shiftKey && key === 'Enter' && isSpaceScope) {
-        // Shift-Enter
+      const isFromCard = event.target.className === 'card'
+      const isSpaceScope = event.target.tagName === 'BODY'
+      const isCardScope = isFromCard || isFromCardName
+      // Shift-Enter
+      if (event.shiftKey && key === 'Enter' && (isSpaceScope || isCardScope)) {
         this.addChildCard()
-      } else if (key === 'Enter' && isSpaceScope) {
-        // Enter
+      // Enter
+      } else if (key === 'Enter' && (isSpaceScope || isCardScope)) {
         this.addCard()
-      } else if (key === '?' && isFromBody) {
-        // ?
+      // ?
+      } else if (key === '?' && isSpaceScope) {
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
-      } else if (key === 'Backspace' && isSpaceScope) {
-        // Backspace
+      // Backspace
+      } else if (key === 'Backspace' && (isSpaceScope || isFromCard)) { // todo has to also work from multiple selected actions dialog
         this.removeMultipleSelected()
+      // Escape
       } else if (key === 'Escape') {
-        // Escape
         this.closeAddDialogs()
-      } else if (key === 'ArrowLeft' && (isFromBody || isCardScope)) {
-        // → Left
+      // → Left
+      } else if (key === 'ArrowLeft' && (isSpaceScope || isFromCard)) {
         this.focusNearestCardLeft()
-      } else if (key === 'ArrowRight' && (isFromBody || isCardScope)) {
-        // ← Right
+      // ← Right
+      } else if (key === 'ArrowRight' && (isSpaceScope || isFromCard)) {
         this.focusNearestCardRight()
-      } else if (key === 'ArrowDown' && (isFromBody || isCardScope)) {
-        // ↓ Down
+      // ↓ Down
+      } else if (key === 'ArrowDown' && (isSpaceScope || isFromCard)) {
         this.focusNearestCardDown()
-      } else if (key === 'ArrowUp' && (isFromBody || isCardScope)) {
-        // ↑ Up
+      // ↑ Up
+      } else if (key === 'ArrowUp' && (isSpaceScope || isFromCard)) {
         this.focusNearestCardUp()
       }
     },
@@ -55,13 +55,17 @@ export default {
       // - TODO to paste, add copiedCards to the currentSpace, then clearCopiedCards
       const key = event.key
       const isMeta = event.metaKey || event.ctrlKey
-      if (event.target.tagName !== 'BODY') { return }
+      const isSpaceScope = event.target.tagName === 'BODY'
+      if (!isSpaceScope) { return }
+      // Copy
       if (isMeta && key === 'c') {
         event.preventDefault()
         console.log('copy selected cards', this.$store.state.multipleCardsSelectedIds)
+      // Cut
       } else if (isMeta && key === 'x') {
         event.preventDefault()
         console.log('cut selected cards', this.$store.state.multipleCardsSelectedIds)
+      // Paste
       } else if (isMeta && key === 'v') {
         event.preventDefault()
         console.log('paste selected cards')
