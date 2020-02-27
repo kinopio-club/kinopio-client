@@ -15,7 +15,7 @@ export default {
   methods: {
     handleShortcuts (event) {
       const key = event.key
-      console.warn('🎹', key)
+      // console.warn('🎹', key)
       const isFromCardName = event.target.closest('dialog.card-details')
       const isFromCard = event.target.className === 'card'
       const isSpaceScope = event.target.tagName === 'BODY'
@@ -192,7 +192,6 @@ export default {
 
     closestCardToOrigin (origin, direction, cards) {
       cards = cards || this.$store.state.cardMap
-      console.log('🍄', cards)
       let closestDistanceFromCenter = Math.max(this.$store.state.pageWidth, this.$store.state.pageHeight)
       let closestCard
       cards.forEach(card => {
@@ -225,25 +224,17 @@ export default {
           }
         }
         const distance = utils.distanceBetweenTwoPoints(origin, cardPoint)
-
-        console.log('🍆', document.querySelector(`.card[data-card-id="${card.cardId}"]`))
-        console.log(distance)
-
         if (distance < closestDistanceFromCenter) {
           closestDistanceFromCenter = distance
           closestCard = card
-          // console.log('🍆',closestCard.cardId)
         }
       })
-      // if (closestCard) {
-      console.log(document.querySelector(`.card[data-card-id="${closestCard.cardId}"]`))
-
-      this.$store.commit('parentCardId', closestCard.cardId)
-
-      return closestCard
-      // } else {
-      //   return this.currentFocusedCard()
-      // }
+      if (closestCard) {
+        this.$store.commit('parentCardId', closestCard.cardId)
+        return closestCard
+      } else {
+        return this.currentFocusedCard()
+      }
     },
 
     currentFocusedCard () {
@@ -267,8 +258,6 @@ export default {
       this.$store.commit('generateCardMap')
       const cardMap = this.$store.state.cardMap
       const originCard = this.currentFocusedCard()
-      console.log(originCard)
-
       const yThreshold = originCard.height + 60
       const xThreshold = originCard.width + 60
       let focusableCards
@@ -276,7 +265,7 @@ export default {
         focusableCards = cardMap.filter(card => {
           const yOrigin = originCard.y - (originCard.height / 2)
           const isOnLeftSide = card.x < originCard.x
-          // replace linear, w coneular
+          // todo replace within box calc, w cone calc
           const isWithinY = utils.isBetween({
             value: card.y,
             min: yOrigin - yThreshold,
@@ -319,13 +308,6 @@ export default {
         })
       }
       focusableCards = focusableCards.filter(card => card.cardId !== this.$store.state.parentCardId)
-
-      //
-      // console.log('focusable ', focusableCards)
-      // focusableCards.forEach(card => {
-      //   console.log('💔', document.querySelector(`.card[data-card-id="${card.cardId}"]`))
-      // })
-
       const closestCard = this.closestCardToOrigin(originCard, direction, focusableCards)
       document.querySelector(`.card[data-card-id="${closestCard.cardId}"]`).focus()
     },
