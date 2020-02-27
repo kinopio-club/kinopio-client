@@ -24,7 +24,7 @@ export default {
       } else if (key === 'Enter' && isSpaceScope) {
         // Enter
         this.addCard()
-      } else if (key === '?' && isSpaceScope) {
+      } else if (key === '?' && isFromBody) {
         // ?
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
       } else if (key === 'Backspace' && isSpaceScope) {
