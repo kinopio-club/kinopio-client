@@ -186,21 +186,22 @@ export default {
     },
 
     removeMultipleSelected () {
-      console.log('remove selected , or currentcard/connection w details open')
-      this.$store.commit('closeAllDialogs')
+      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
+      const cardDetailsIsVisibleForCardId = this.$store.state.cardDetailsIsVisibleForCardId
+      const currentFocusedCard = this.currentFocusedCard()
+      console.log('remove selected , or currentcard/connection w details open', cardDetailsIsVisibleForCardId, multipleCardsSelectedIds, currentFocusedCard)
+      // this.$store.commit('closeAllDialogs')
     },
 
-    closestCardToOrigin (origin, direction, cards) {
-      cards = cards || this.$store.state.cardMap
-      let closestDistanceFromCenter = Math.max(this.$store.state.pageWidth, this.$store.state.pageHeight)
+    closestCardToOriginCard (originCard, direction, cards) {
+      const viewportWidth = this.$store.state.viewportWidth
+      const viewportHeight = this.$store.state.viewportHeight
+      let closestDistanceFromCenter = Math.max(viewportWidth, viewportHeight)
       let closestCard
       cards.forEach(card => {
         let toPosition
-        // To Center
-        if (direction === 'center') {
-          toPosition = utils.rectCenter(card)
         // To Right
-        } else if (direction === 'left') {
+        if (direction === 'left') {
           toPosition = {
             x: card.x + card.width,
             y: card.y - (card.height / 2)
@@ -224,7 +225,8 @@ export default {
             y: card.y + card.height
           }
         }
-        const distance = utils.distanceBetweenTwoPoints(origin, toPosition)
+
+        const distance = utils.distanceBetweenTwoPoints(originCard, toPosition)
         if (distance < closestDistanceFromCenter) {
           closestDistanceFromCenter = distance
           closestCard = card
@@ -234,24 +236,40 @@ export default {
         this.$store.commit('parentCardId', closestCard.cardId)
         return closestCard
       } else {
-        return this.currentFocusedCard()
+        return originCard
       }
     },
 
-    currentFocusedCard () {
+    closestCardToViewportCenter () {
       const viewportWidth = this.$store.state.viewportWidth
       const viewportHeight = this.$store.state.viewportHeight
+      const viewportCenter = {
+        x: (viewportWidth / 2) + window.scrollX,
+        y: (viewportHeight / 2) + window.scrollY
+      }
+      const cardMap = this.$store.state.cardMap
+      let closestDistanceFromCenter = Math.max(viewportWidth, viewportHeight)
+      let closestCard
+      cardMap.forEach(card => {
+        const toPosition = utils.rectCenter(card)
+        const distance = utils.distanceBetweenTwoPoints(viewportCenter, toPosition)
+        if (distance < closestDistanceFromCenter) {
+          closestDistanceFromCenter = distance
+          closestCard = card
+        }
+      })
+      this.$store.commit('parentCardId', closestCard.cardId)
+      return closestCard
+    },
+
+    currentFocusedCard () {
       const cardMap = this.$store.state.cardMap
       let lastCardId = this.$store.state.parentCardId || this.$store.state.childCardId
-      let closestCard = cardMap.filter(card => card.cardId === lastCardId)
-      if (closestCard.length) {
-        return closestCard[0]
+      let lastCard = cardMap.filter(card => card.cardId === lastCardId)
+      if (lastCard.length) {
+        return lastCard[0]
       } else {
-        const origin = {
-          x: (viewportWidth / 2) + window.scrollX,
-          y: (viewportHeight / 2) + window.scrollY
-        }
-        return this.closestCardToOrigin(origin, 'center')
+        return this.closestCardToViewportCenter()
       }
     },
 
@@ -309,7 +327,7 @@ export default {
         })
       }
       focusableCards = focusableCards.filter(card => card.cardId !== this.$store.state.parentCardId)
-      const closestCard = this.closestCardToOrigin(originCard, direction, focusableCards)
+      const closestCard = this.closestCardToOriginCard(originCard, direction, focusableCards)
       document.querySelector(`.card[data-card-id="${closestCard.cardId}"]`).focus()
     },
 
