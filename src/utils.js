@@ -198,6 +198,22 @@ export default {
     }
   },
 
+  distanceBetweenTwoPoints (point1, point2) {
+    // https://www.mathwarehouse.com/algebra/distance_formula/index.php
+    const xDelta = point2.x - point1.x
+    const yDelta = point2.y - point1.y
+    console.log(point1, point2, xDelta, yDelta)
+
+    return Math.sqrt((xDelta ** 2) + (yDelta ** 2))
+  },
+
+  centerPositionFromRect (rect) {
+    return {
+      x: (rect.width / 2) + rect.x,
+      y: rect.y - (rect.height / 2)
+    }
+  },
+
   // Connection Path Utils 🐙
 
   connectorCoords (cardId) {

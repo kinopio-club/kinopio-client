@@ -15,9 +15,11 @@ export default {
   methods: {
     handleShortcuts (event) {
       const key = event.key
+      console.warn('🎹', key)
       const isFromBody = event.target.tagName === 'BODY'
       const isFromCardName = event.target.closest('dialog.card-details')
       const isSpaceScope = isFromBody || isFromCardName
+      const isCardScope = event.target.className === 'card'
       if (event.shiftKey && key === 'Enter' && isSpaceScope) {
         // Shift-Enter
         this.addChildCard()
@@ -33,16 +35,16 @@ export default {
       } else if (key === 'Escape') {
         // Escape
         this.closeAddDialogs()
-      } else if (key === 'ArrowLeft' && isFromBody) {
+      } else if (key === 'ArrowLeft' && (isFromBody || isCardScope)) {
         // → Left
         this.focusNearestCardLeft()
-      } else if (key === 'ArrowRight' && isFromBody) {
+      } else if (key === 'ArrowRight' && (isFromBody || isCardScope)) {
         // ← Right
         this.focusNearestCardRight()
-      } else if (key === 'ArrowDown' && isFromBody) {
+      } else if (key === 'ArrowDown' && (isFromBody || isCardScope)) {
         // ↓ Down
         this.focusNearestCardDown()
-      } else if (key === 'ArrowUp' && isFromBody) {
+      } else if (key === 'ArrowUp' && (isFromBody || isCardScope)) {
         // ↑ Up
         this.focusNearestCardUp()
       }
@@ -184,19 +186,130 @@ export default {
       this.$store.commit('closeAllDialogs')
     },
 
+    closestCardToOrigin (origin, direction, cards) {
+      cards = cards || this.$store.state.cardMap
+      console.log('🍄', cards)
+      let closestDistanceFromCenter = Math.max(this.$store.state.pageWidth, this.$store.state.pageHeight)
+      let closestCard
+      cards.forEach(card => {
+        let cardPoint
+        if (direction === 'center') {
+          cardPoint = utils.centerPositionFromRect(card)
+        } else if (direction === 'left') {
+          // point on right side
+          cardPoint = {
+            x: card.x + card.width,
+            y: card.y - (card.height / 2)
+          }
+        } else if (direction === 'right') {
+          // point on left side
+          cardPoint = {
+            x: card.x,
+            y: card.y - (card.height / 2)
+          }
+        } else if (direction === 'down') {
+          // point on top side
+          cardPoint = {
+            x: card.x + (card.width / 2),
+            y: card.y
+          }
+        } else if (direction === 'up') {
+          // point on bottom side
+          cardPoint = {
+            x: card.x + (card.width / 2),
+            y: card.y + card.height
+          }
+        }
+        const distance = utils.distanceBetweenTwoPoints(origin, cardPoint)
+
+        console.log('🍆', document.querySelector(`.card[data-card-id="${card.cardId}"]`))
+        console.log(distance)
+
+        if (distance < closestDistanceFromCenter) {
+          closestDistanceFromCenter = distance
+          closestCard = card
+          // console.log('🍆',closestCard.cardId)
+        }
+      })
+      // if (closestCard) {
+      console.log(document.querySelector(`.card[data-card-id="${closestCard.cardId}"]`))
+
+      this.$store.commit('parentCardId', closestCard.cardId)
+
+      return closestCard
+      // } else {
+      //   return this.currentFocusedCard()
+      // }
+    },
+
+    currentFocusedCard () {
+      const viewportWidth = this.$store.state.viewportWidth
+      const viewportHeight = this.$store.state.viewportHeight
+      let cardId = this.$store.state.parentCardId || this.$store.state.childCardId
+      let element = document.querySelector(`.card[data-card-id="${cardId}"]`)
+      if (element) {
+        let closestCard = element.getBoundingClientRect()
+        closestCard.cardId = cardId
+        return closestCard
+      } else {
+        const origin = {
+          x: (viewportWidth / 2) + window.scrollX,
+          y: (viewportHeight / 2) + window.scrollY
+        }
+        const closestCard = this.closestCardToOrigin(origin, 'center')
+        return closestCard
+      }
+    },
+
+    focusCard (direction) {
+      this.$store.commit('generateCardMap')
+      const cardMap = this.$store.state.cardMap
+      const originCard = this.currentFocusedCard()
+      // const origin = {
+      //   x: originCard.x + (originCard.width / 2),
+      //   y: originCard.y - (originCard.height / 2)
+      // }
+      let focusableCards
+      if (direction === 'left') {
+        focusableCards = cardMap.filter(card => {
+          return card.x < originCard.x
+        })
+      } else if (direction === 'right') {
+        focusableCards = cardMap.filter(card => {
+          return card.x + card.width > originCard.x
+        })
+      } else if (direction === 'down') {
+        focusableCards = cardMap.filter(card => {
+          return card.y + card.height < originCard.y
+        })
+      } else if (direction === 'up') {
+        focusableCards = cardMap.filter(card => {
+          return card.y > originCard.y
+        })
+      }
+      console.log(focusableCards.length)
+      focusableCards = focusableCards.filter(card => card.cardId !== this.$store.state.parentCardId)
+      console.log(focusableCards.length)
+      // console.log('focusable ',focusableCards)
+      // focusableCards.forEach(card => {
+      //   console.log('🍆',document.querySelector(`.card[data-card-id="${card.cardId}"]`))
+      // })
+      const closestCard = this.closestCardToOrigin(originCard, direction, focusableCards)
+      document.querySelector(`.card[data-card-id="${closestCard.cardId}"]`).focus()
+    },
+
     focusNearestCardLeft () {
-      console.log('focus nearest card left') // (has to take into account x and y)
+      this.focusCard('left')
     },
     focusNearestCardRight () {
-      console.log('focus nearest card Right')
+      this.focusCard('right')
     },
     focusNearestCardDown () {
-      console.log('focus nearest card Down')
+      this.focusCard('down')
     },
     focusNearestCardUp () {
-      console.log('focus nearest card Up')
+      this.focusCard('up')
     }
-
   }
 }
 </script>

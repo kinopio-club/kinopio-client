@@ -76,7 +76,7 @@ export default {
       return this.name
     },
     nameLineMinWidth () {
-      const averageCharacterWidth = 8
+      const averageCharacterWidth = 6.5
       let maxWidth = 190
       if (this.url) {
         maxWidth = 162
