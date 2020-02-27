@@ -198,7 +198,7 @@ export default {
       cards.forEach(card => {
         let cardPoint
         if (direction === 'center') {
-          cardPoint = utils.centerPositionFromRect(card)
+          cardPoint = utils.rectCenter(card)
         } else if (direction === 'left') {
           // point on right side
           cardPoint = {
@@ -249,19 +249,17 @@ export default {
     currentFocusedCard () {
       const viewportWidth = this.$store.state.viewportWidth
       const viewportHeight = this.$store.state.viewportHeight
-      let cardId = this.$store.state.parentCardId || this.$store.state.childCardId
-      let element = document.querySelector(`.card[data-card-id="${cardId}"]`)
-      if (element) {
-        let closestCard = element.getBoundingClientRect()
-        closestCard.cardId = cardId
-        return closestCard
+      const cardMap = this.$store.state.cardMap
+      let lastCardId = this.$store.state.parentCardId || this.$store.state.childCardId
+      let closestCard = cardMap.filter(card => card.cardId === lastCardId)
+      if (closestCard.length) {
+        return closestCard[0]
       } else {
         const origin = {
           x: (viewportWidth / 2) + window.scrollX,
           y: (viewportHeight / 2) + window.scrollY
         }
-        const closestCard = this.closestCardToOrigin(origin, 'center')
-        return closestCard
+        return this.closestCardToOrigin(origin, 'center')
       }
     },
 
@@ -269,35 +267,62 @@ export default {
       this.$store.commit('generateCardMap')
       const cardMap = this.$store.state.cardMap
       const originCard = this.currentFocusedCard()
-      // const origin = {
-      //   x: originCard.x + (originCard.width / 2),
-      //   y: originCard.y - (originCard.height / 2)
-      // }
+      console.log(originCard, utils.rectCenter(originCard))
+      // const originCenter = utils.rectCenter(originCard)
+
+      // const yThreshold = originCard.height + 60
+      // const xThreshold = originCard.width + 60
       let focusableCards
       if (direction === 'left') {
         focusableCards = cardMap.filter(card => {
-          return card.x < originCard.x
+          // const yOrigin = originCard.y - (originCard.height / 2)
+          const isOnLeftSide = card.x < originCard.x
+          // const isWithinY = utils.isBetween ({
+          //   value: card.y,
+          //   min: yOrigin - yThreshold,
+          //   max: yOrigin + yThreshold
+          // })
+          return isOnLeftSide // && isWithinY
         })
       } else if (direction === 'right') {
         focusableCards = cardMap.filter(card => {
-          return card.x + card.width > originCard.x
+          // const yOrigin = originCard.y - (originCard.height / 2)
+          const isOnRightSide = card.x > originCard.x + originCard.width
+          // const isWithinY = utils.isBetween ({
+          //   value: card.y,
+          //   min: yOrigin - yThreshold,
+          //   max: yOrigin + yThreshold
+          // })
+          return isOnRightSide // && isWithinY
         })
       } else if (direction === 'down') {
         focusableCards = cardMap.filter(card => {
-          return card.y + card.height < originCard.y
+          // return card.y + card.height < originCard.y
+
+          // const yOrigin = originCard.y - (originCard.height / 2)
+          const isOnDownSide = card.y > originCard.y + originCard.height
+          // const isWithinY = utils.isBetween ({
+          //   value: card.y,
+          //   min: yOrigin - yThreshold,
+          //   max: yOrigin + yThreshold
+          // })
+          return isOnDownSide // && isWithinY
         })
       } else if (direction === 'up') {
         focusableCards = cardMap.filter(card => {
-          return card.y > originCard.y
+          // return card.y > originCard.y
+          const isOnTopSide = card.y < originCard.y
+          return isOnTopSide
         })
       }
-      console.log(focusableCards.length)
       focusableCards = focusableCards.filter(card => card.cardId !== this.$store.state.parentCardId)
-      console.log(focusableCards.length)
-      // console.log('focusable ',focusableCards)
-      // focusableCards.forEach(card => {
-      //   console.log('🍆',document.querySelector(`.card[data-card-id="${card.cardId}"]`))
-      // })
+
+      //
+      console.log('focusable ', focusableCards)
+      focusableCards.forEach(card => {
+        console.log('💔', document.querySelector(`.card[data-card-id="${card.cardId}"]`))
+      })
+
       const closestCard = this.closestCardToOrigin(originCard, direction, focusableCards)
       document.querySelector(`.card[data-card-id="${closestCard.cardId}"]`).focus()
     },

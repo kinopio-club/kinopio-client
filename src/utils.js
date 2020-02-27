@@ -46,9 +46,9 @@ export default {
     return { x, y }
   },
 
-  elementCenter (rect) {
+  rectCenter (rect) {
     const x = Math.round(rect.x + (rect.width / 2))
-    const y = Math.round(rect.y + (rect.height / 2))
+    const y = Math.round(rect.y - (rect.height / 2))
     return { x, y }
   },
 
@@ -207,20 +207,13 @@ export default {
     return Math.sqrt((xDelta ** 2) + (yDelta ** 2))
   },
 
-  centerPositionFromRect (rect) {
-    return {
-      x: (rect.width / 2) + rect.x,
-      y: rect.y - (rect.height / 2)
-    }
-  },
-
   // Connection Path Utils 🐙
 
   connectorCoords (cardId) {
     const element = document.querySelector(`.connector[data-card-id="${cardId}"] button`)
     if (!element) { return }
     const rect = element.getBoundingClientRect()
-    return this.elementCenter(rect)
+    return this.rectCenter(rect)
   },
 
   coordsWithCurrentScrollOffset ({ x, y }) {
