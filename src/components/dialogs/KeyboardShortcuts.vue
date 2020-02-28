@@ -53,6 +53,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.stop)
     article
       .row
         .badge.title
+          img.icon(src="@/assets/undo.svg")
+          span Restore Last Deleted Card
+        .badge.info {{meta}}-Z
+    article
+      .row
+        .badge.title
           img.icon.cancel(src="@/assets/add.svg")
           span Close Dialogs
         .badge.info Escape
