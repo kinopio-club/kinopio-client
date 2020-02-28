@@ -15,14 +15,11 @@ export default {
   methods: {
     handleShortcuts (event) {
       const key = event.key
+      // console.warn('🎹', key, event)
       const isFromCardName = event.target.closest('dialog.card-details')
       const isFromCard = event.target.className === 'card'
-      // const isFromConnection = event.target.className.baseVal.includes('connection-path')
       const isSpaceScope = event.target.tagName === 'BODY'
       const isCardScope = isFromCard || isFromCardName
-      // const isConnectionScope
-      // console.warn('🎹', key, event)
-
       // Shift-Enter
       if (event.shiftKey && key === 'Enter' && (isSpaceScope || isCardScope)) {
         this.addChildCard()
@@ -240,7 +237,6 @@ export default {
             y: card.y + card.height
           }
         }
-
         const distance = utils.distanceBetweenTwoPoints(originCard, toPosition)
         if (distance < closestDistanceFromCenter) {
           closestDistanceFromCenter = distance
