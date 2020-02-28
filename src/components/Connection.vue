@@ -1,5 +1,5 @@
 <template lang="pug">
-path.path(
+path.connection-path(
   fill="none"
   :stroke="typeColor"
   stroke-width="5"
@@ -215,7 +215,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.path
+.connection-path
   touch-action manipulation
   &:hover,
   &.hover,
@@ -225,6 +225,6 @@ export default {
   &.hide-connection-outline
     outline none
 .is-read-only
-  .path
+  .connection-path
     pointer-events none
 </style>

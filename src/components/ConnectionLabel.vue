@@ -83,7 +83,7 @@ export default {
     },
     setPosition () {
       this.$nextTick(() => {
-        let connection = document.querySelector(`.path[data-id="${this.id}"]`)
+        let connection = document.querySelector(`.connection-path[data-id="${this.id}"]`)
         connection = connection.getBoundingClientRect()
         let label = this.$refs.label
         let labelOffset

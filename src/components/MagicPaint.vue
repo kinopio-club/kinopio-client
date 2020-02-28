@@ -336,7 +336,7 @@ export default {
 
     selectConnections (circle) {
       if (this.spaceIsReadOnly) { return }
-      const paths = document.querySelectorAll('svg .path')
+      const paths = document.querySelectorAll('svg .connection-path')
       paths.forEach(path => {
         const ids = this.$store.state.multipleConnectionsSelectedIds
         const pathId = path.dataset.id

@@ -15,11 +15,14 @@ export default {
   methods: {
     handleShortcuts (event) {
       const key = event.key
-      // console.warn('🎹', key)
       const isFromCardName = event.target.closest('dialog.card-details')
       const isFromCard = event.target.className === 'card'
+      // const isFromConnection = event.target.className.baseVal.includes('connection-path')
       const isSpaceScope = event.target.tagName === 'BODY'
       const isCardScope = isFromCard || isFromCardName
+      // const isConnectionScope
+      console.warn('🎹', key, event)
+
       // Shift-Enter
       if (event.shiftKey && key === 'Enter' && (isSpaceScope || isCardScope)) {
         this.addChildCard()
@@ -29,12 +32,14 @@ export default {
       // ?
       } else if (key === '?' && isSpaceScope) {
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
+
       // Backspace
-      } else if (key === 'Backspace' && (isSpaceScope || isFromCard)) { // todo has to also work from multiple selected actions dialog
-        this.removeMultipleSelected()
+      } else if (key === 'Backspace' && (isSpaceScope)) { // todo has to also work from multiple selected actions dialog
+        this.removeFocused()
+
       // Escape
       } else if (key === 'Escape') {
-        this.closeAddDialogs()
+        this.$store.commit('closeAllDialogs')
       // → Left
       } else if (key === 'ArrowLeft' && (isSpaceScope || isFromCard)) {
         this.focusNearestCardLeft()
@@ -71,6 +76,8 @@ export default {
         console.log('paste selected cards')
       }
     },
+
+    // Add Parent and Child Cards
 
     addCard () {
       this.$store.commit('generateCardMap')
@@ -112,8 +119,11 @@ export default {
       if (childCard) {
         baseCard = childCard
         baseCardId = childCardId
-      } else {
+      } else if (parentCard) {
         baseCard = parentCard
+      } else {
+        this.addCard()
+        return
       }
       const rect = baseCard.getBoundingClientRect()
       const initialPosition = {
@@ -181,16 +191,19 @@ export default {
       this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
     },
 
-    closeAddDialogs () {
-      this.$store.commit('closeAllDialogs')
-    },
+    // Keyboard Arrows
 
-    removeMultipleSelected () {
-      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
-      const cardDetailsIsVisibleForCardId = this.$store.state.cardDetailsIsVisibleForCardId
-      const currentFocusedCard = this.currentFocusedCard()
-      console.log('remove selected , or currentcard/connection w details open', cardDetailsIsVisibleForCardId, multipleCardsSelectedIds, currentFocusedCard)
-      // this.$store.commit('closeAllDialogs')
+    focusNearestCardLeft () {
+      this.focusCard('left')
+    },
+    focusNearestCardRight () {
+      this.focusCard('right')
+    },
+    focusNearestCardDown () {
+      this.focusCard('down')
+    },
+    focusNearestCardUp () {
+      this.focusCard('up')
     },
 
     closestCardToOriginCard (originCard, direction, cards) {
@@ -331,18 +344,29 @@ export default {
       document.querySelector(`.card[data-card-id="${closestCard.cardId}"]`).focus()
     },
 
-    focusNearestCardLeft () {
-      this.focusCard('left')
+    // Remove
+
+    removeCardById (cardId) {
+      console.log('removeCardById', cardId)
+      const card = this.$store.getters['currentSpace/cardById'](cardId)
+      this.$store.dispatch('currentSpace/removeCard', card)
     },
-    focusNearestCardRight () {
-      this.focusCard('right')
-    },
-    focusNearestCardDown () {
-      this.focusCard('down')
-    },
-    focusNearestCardUp () {
-      this.focusCard('up')
+
+    removeFocused () {
+      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
+      const cardId = this.$store.state.cardDetailsIsVisibleForCardId
+      if (multipleCardsSelectedIds.length) {
+        multipleCardsSelectedIds.forEach(cardId => {
+          this.removeCardById(cardId)
+        })
+        this.$store.commit('clearMultipleSelected')
+      } else if (cardId) {
+        this.removeCardById(cardId)
+        this.$store.commit('cardDetailsIsVisibleForCardId', '')
+      }
+      this.$store.commit('closeAllDialogs')
     }
+
   }
 }
 </script>

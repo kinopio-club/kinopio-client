@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDialogs")
+dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDialogs" @keyup.stop.backspace="removeCard")
   section.meta-section
     textarea.name(
       ref="name"
