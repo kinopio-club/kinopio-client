@@ -54,7 +54,7 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.stop)
       .row
         .badge.title
           img.icon(src="@/assets/undo.svg")
-          span Restore Last Deleted Card
+          span Restore Last Removed Card
         .badge.info {{meta}}-Z
     article
       .row

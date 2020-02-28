@@ -32,11 +32,9 @@ export default {
       // ?
       } else if (key === '?' && isSpaceScope) {
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
-
       // Backspace
-      } else if (key === 'Backspace' && (isSpaceScope)) { // todo has to also work from multiple selected actions dialog
+      } else if (key === 'Backspace' && isSpaceScope) {
         this.removeFocused()
-
       // Escape
       } else if (key === 'Escape') {
         this.$store.commit('closeAllDialogs')
@@ -62,8 +60,12 @@ export default {
       const isMeta = event.metaKey || event.ctrlKey
       const isSpaceScope = event.target.tagName === 'BODY'
       if (!isSpaceScope) { return }
+      // Undo
+      if (isMeta && key === 'z') {
+        event.preventDefault()
+        console.log('undo last removed card')
       // Copy
-      if (isMeta && key === 'c') {
+      } else if (isMeta && key === 'c') {
         event.preventDefault()
         console.log('copy selected cards', this.$store.state.multipleCardsSelectedIds)
       // Cut
