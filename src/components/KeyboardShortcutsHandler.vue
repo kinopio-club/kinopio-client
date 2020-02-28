@@ -21,7 +21,7 @@ export default {
       const isSpaceScope = event.target.tagName === 'BODY'
       const isCardScope = isFromCard || isFromCardName
       // const isConnectionScope
-      console.warn('🎹', key, event)
+      // console.warn('🎹', key, event)
 
       // Shift-Enter
       if (event.shiftKey && key === 'Enter' && (isSpaceScope || isCardScope)) {
@@ -63,7 +63,7 @@ export default {
       // Undo
       if (isMeta && key === 'z') {
         event.preventDefault()
-        console.log('undo last removed card')
+        this.restoreLastRemovedCard()
       // Copy
       } else if (isMeta && key === 'c') {
         event.preventDefault()
@@ -367,6 +367,16 @@ export default {
         this.$store.commit('cardDetailsIsVisibleForCardId', '')
       }
       this.$store.commit('closeAllDialogs')
+    },
+
+    // Undo
+
+    restoreLastRemovedCard () {
+      const removedCards = this.$store.state.currentSpace.removedCards
+      if (removedCards.length) {
+        const card = removedCards[0]
+        this.$store.dispatch('currentSpace/restoreRemovedCard', card)
+      }
     }
 
   }
