@@ -17,7 +17,7 @@ export default {
       const key = event.key
       // console.warn('🎹', key)
       const isFromCardName = event.target.closest('dialog.card-details')
-      const isFromCard = event.target.className === 'card'
+      const isFromCard = event.target.className.includes('card')
       const isSpaceScope = event.target.tagName === 'BODY'
       const isCardScope = isFromCard || isFromCardName
       // Shift-Enter
@@ -211,53 +211,10 @@ export default {
       const distanceWeighting = 0.5
       const angleWeighting = 0.5
       cards.forEach(card => {
-        let originPosition, cardPosition
+        const originPosition = utils.rectCenter(originCard)
+        const cardPosition = utils.rectCenter(card)
         let directionAngle = 0
-        if (direction === 'left') {
-          // Left Origin
-          originPosition = {
-            x: card.x,
-            y: card.y + (card.height / 2)
-          }
-          // Right
-          cardPosition = {
-            x: card.x + card.width,
-            y: card.y + (card.height / 2)
-          }
-        } else if (direction === 'right') {
-          // Right Origin
-          originPosition = {
-            x: card.x + card.width,
-            y: card.y + (card.height / 2)
-          }
-          // Left
-          cardPosition = {
-            x: card.x,
-            y: card.y + (card.height / 2)
-          }
-        } else if (direction === 'down') {
-          // Bottom Origin
-          originPosition = {
-            x: card.x + (card.width / 2),
-            y: card.y + card.height
-          }
-          // Top
-          cardPosition = {
-            x: card.x + (card.width / 2),
-            y: card.y
-          }
-          directionAngle = 90
-        } else if (direction === 'up') {
-          // Top Origin
-          originPosition = {
-            x: card.x + (card.width / 2),
-            y: card.y
-          }
-          // Bottom
-          cardPosition = {
-            x: card.x + (card.width / 2),
-            y: card.y + card.height
-          }
+        if (direction === 'up' || direction === 'down') {
           directionAngle = 90
         }
         const distance = utils.distanceBetweenTwoPoints(originPosition, cardPosition)
@@ -322,12 +279,12 @@ export default {
         })
       } else if (direction === 'right') {
         focusableCards = cardMap.filter(card => {
-          const isOnRightSide = card.x > originCard.x + originCard.width
+          const isOnRightSide = card.x > originCard.x
           return isOnRightSide
         })
       } else if (direction === 'down') {
         focusableCards = cardMap.filter(card => {
-          const isOnDownSide = card.y > originCard.y + originCard.height
+          const isOnDownSide = card.y > originCard.y
           return isOnDownSide
         })
       } else if (direction === 'up') {
@@ -344,7 +301,6 @@ export default {
     // Remove
 
     removeCardById (cardId) {
-      console.log('removeCardById', cardId)
       const card = this.$store.getters['currentSpace/cardById'](cardId)
       this.$store.dispatch('currentSpace/removeCard', card)
     },
