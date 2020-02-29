@@ -31,7 +31,7 @@ export default {
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
       // Backspace
       } else if (key === 'Backspace' && isSpaceScope) {
-        this.removeFocused()
+        this.remove()
       // Escape
       } else if (key === 'Escape') {
         this.$store.commit('closeAllDialogs')
@@ -61,14 +61,17 @@ export default {
       if (isMeta && key === 'z') {
         event.preventDefault()
         this.restoreLastRemovedCard()
+
       // Copy
       } else if (isMeta && key === 'c') {
         event.preventDefault()
         console.log('copy selected cards', this.$store.state.multipleCardsSelectedIds)
+
       // Cut
       } else if (isMeta && key === 'x') {
         event.preventDefault()
         console.log('cut selected cards', this.$store.state.multipleCardsSelectedIds)
+
       // Paste
       } else if (isMeta && key === 'v') {
         event.preventDefault()
@@ -305,23 +308,34 @@ export default {
 
     // Remove
 
+    focusedCardIds () {
+      let cards
+      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
+      const selectedCardId = this.$store.state.cardDetailsIsVisibleForCardId
+      if (multipleCardsSelectedIds.length) {
+        cards = multipleCardsSelectedIds
+      } else if (selectedCardId) {
+        cards = [selectedCardId]
+      }
+      return cards
+    },
+
     removeCardById (cardId) {
       const card = this.$store.getters['currentSpace/cardById'](cardId)
       this.$store.dispatch('currentSpace/removeCard', card)
     },
 
-    removeFocused () {
-      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
-      const cardId = this.$store.state.cardDetailsIsVisibleForCardId
-      if (multipleCardsSelectedIds.length) {
-        multipleCardsSelectedIds.forEach(cardId => {
-          this.removeCardById(cardId)
-        })
-        this.$store.commit('clearMultipleSelected')
-      } else if (cardId) {
+    clearAllSelectedCards () {
+      this.$store.commit('clearMultipleSelected')
+      this.$store.commit('cardDetailsIsVisibleForCardId', '')
+    },
+
+    remove () {
+      const cardIds = this.focusedCardIds()
+      cardIds.forEach(cardId => {
         this.removeCardById(cardId)
-        this.$store.commit('cardDetailsIsVisibleForCardId', '')
-      }
+      })
+      this.clearAllSelectedCards()
       this.$store.commit('closeAllDialogs')
     },
 
