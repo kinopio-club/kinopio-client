@@ -211,37 +211,57 @@ export default {
       const distanceWeighting = 0.5
       const angleWeighting = 0.5
       cards.forEach(card => {
-        let toPosition
+        let originPosition, cardPosition
         let directionAngle = 0
-        // To Right
         if (direction === 'left') {
-          toPosition = {
-            x: card.x + card.width,
-            y: card.y - (card.height / 2)
-          }
-        // To Left
-        } else if (direction === 'right') {
-          toPosition = {
+          // Left Origin
+          originPosition = {
             x: card.x,
-            y: card.y - (card.height / 2)
+            y: card.y + (card.height / 2)
           }
-        // To Top
+          // Right
+          cardPosition = {
+            x: card.x + card.width,
+            y: card.y + (card.height / 2)
+          }
+        } else if (direction === 'right') {
+          // Right Origin
+          originPosition = {
+            x: card.x + card.width,
+            y: card.y + (card.height / 2)
+          }
+          // Left
+          cardPosition = {
+            x: card.x,
+            y: card.y + (card.height / 2)
+          }
         } else if (direction === 'down') {
-          toPosition = {
+          // Bottom Origin
+          originPosition = {
+            x: card.x + (card.width / 2),
+            y: card.y + card.height
+          }
+          // Top
+          cardPosition = {
             x: card.x + (card.width / 2),
             y: card.y
           }
           directionAngle = 90
-        // To Bottom
         } else if (direction === 'up') {
-          toPosition = {
+          // Top Origin
+          originPosition = {
+            x: card.x + (card.width / 2),
+            y: card.y
+          }
+          // Bottom
+          cardPosition = {
             x: card.x + (card.width / 2),
             y: card.y + card.height
           }
           directionAngle = 90
         }
-        const distance = utils.distanceBetweenTwoPoints(originCard, toPosition)
-        const angle = utils.angleBetweenTwoPoints(originCard, toPosition)
+        const distance = utils.distanceBetweenTwoPoints(originPosition, cardPosition)
+        const angle = utils.angleBetweenTwoPoints(originPosition, cardPosition)
         const angleDelta = Math.abs(directionAngle - angle)
         const cardCloseness = (distanceWeighting * distance) + (angleWeighting * angleDelta)
         if (cardCloseness < closest) {
