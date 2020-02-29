@@ -50,8 +50,6 @@ export default {
       }
     },
     handleMetaKeyShortcuts (event) {
-      // - TODO get selected card ids from this.$store.state.multipleCardsSelectedIds
-      // - TODO save copied/cut card info (utils.clone, change id first) to a new store.js [{}] value (copiedCards: [])
       // - TODO to paste, add copiedCards to the currentSpace, then clearCopiedCards
       const key = event.key
       const isMeta = event.metaKey || event.ctrlKey
@@ -75,6 +73,7 @@ export default {
       } else if (isMeta && key === 'v' && isSpaceScope) {
         event.preventDefault()
         console.log('paste selected cards')
+        // state.copiedCards change each to current spaceId, add each card
       }
     },
 
@@ -355,7 +354,12 @@ export default {
 
     copyCards () {
       const cardIds = this.focusedCardIds()
-      console.log('copy selected cards', cardIds)
+      const cards = cardIds.map(cardId => {
+        let card = this.$store.getters['currentSpace/cardById'](cardId)
+        return card
+      })
+      this.$store.commit('addToCopiedCards', cards)
+      // console.log('🍛',cards, this.$store.state.copiedCards)
     }
 
   }
