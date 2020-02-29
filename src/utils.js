@@ -200,9 +200,19 @@ export default {
 
   distanceBetweenTwoPoints (point1, point2) {
     // https://www.mathwarehouse.com/algebra/distance_formula/index.php
-    const xDelta = point2.x - point1.x
-    const yDelta = point2.y - point1.y
-    return Math.sqrt((xDelta ** 2) + (yDelta ** 2))
+    const xDelta = Math.abs(point1.x - point2.x)
+    const yDelta = Math.abs(point1.y - point2.y)
+    const distance = Math.sqrt((xDelta ** 2) + (yDelta ** 2))
+    return Math.round(distance)
+  },
+
+  angleBetweenTwoPoints (point1, point2) {
+    // https://www.mathisfunforum.com/viewtopic.php?id=16175
+    const xDelta = Math.abs(point1.x - point2.x)
+    const yDelta = Math.abs(point1.y - point2.y)
+    const angleRadians = Math.atan2(yDelta, xDelta)
+    const angleDegrees = angleRadians * 180 / Math.PI
+    return Math.round(angleDegrees)
   },
 
   // Connection Path Utils 🐙

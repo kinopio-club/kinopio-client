@@ -1,5 +1,5 @@
 <template lang="pug">
-path.path(
+path.connection-path(
   fill="none"
   :stroke="typeColor"
   stroke-width="5"
@@ -12,6 +12,7 @@ path.path(
   @touchstart="hideConnectionOutline"
   @click="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
+  @keyup.stop.backspace="removeConnection"
   @keyup.stop.enter="showConnectionDetailsOnKeyup"
   :class="{active: isSelected || detailsIsVisible, filtered: isFiltered, hover: isHovered, 'hide-connection-outline': shouldHideConnectionOutline }"
   ref="connection"
@@ -122,6 +123,11 @@ export default {
     }
   },
   methods: {
+    removeConnection () {
+      this.$store.dispatch('currentSpace/removeConnection', this.connection)
+      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
+    },
+
     // same as ConnectionLabel method
     showConnectionDetails (event) {
       if (this.spaceIsReadOnly) { return }
@@ -209,7 +215,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.path
+.connection-path
   touch-action manipulation
   &:hover,
   &.hover,
@@ -219,6 +225,6 @@ export default {
   &.hide-connection-outline
     outline none
 .is-read-only
-  .path
+  .connection-path
     pointer-events none
 </style>

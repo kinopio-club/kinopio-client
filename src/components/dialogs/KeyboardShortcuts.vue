@@ -44,12 +44,18 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.stop)
     //-     .badge.title Copy/Cut/Paste Selected Cards
     //-     .badge.info {{meta}}-C/{{meta}}-X/{{meta}}-V
     //-   p You can copy and paste cards between spaces
-    //- article
-    //-   .row
-    //-     .badge.title
-    //-       img.icon(src="@/assets/remove.svg")
-    //-       span Remove Selected
-    //-     .badge.info Delete
+    article
+      .row
+        .badge.title
+          img.icon(src="@/assets/remove.svg")
+          span Remove Selected
+        .badge.info Delete
+    article
+      .row
+        .badge.title
+          img.icon(src="@/assets/undo.svg")
+          span Restore Last Removed Card
+        .badge.info {{meta}}-Z
     article
       .row
         .badge.title

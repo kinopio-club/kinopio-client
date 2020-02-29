@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDialogs")
+dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDialogs" @keyup.stop.backspace="removeCard")
   section.meta-section
     textarea.name(
       ref="name"
@@ -8,7 +8,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       v-model="name"
       @keydown.prevent.enter.exact
       @keyup.enter.exact="closeCard"
-      @keyup.stop.esc="closeCard"
+      @keyup.stop.esc="closeCardAndFocus"
       @keyup.stop.backspace
       data-type="name"
       maxlength="250"
@@ -100,6 +100,10 @@ export default {
   methods: {
     closeCard () {
       this.$store.commit('closeAllDialogs')
+    },
+    closeCardAndFocus () {
+      this.closeCard()
+      document.querySelector(`.card[data-card-id="${this.card.id}"]`).focus()
     },
     removeCard () {
       this.$store.dispatch('currentSpace/removeCard', this.card)
