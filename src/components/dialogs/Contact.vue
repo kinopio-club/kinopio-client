@@ -6,7 +6,7 @@ dialog.contact(v-if="visible" :open="visible" @click.stop)
     .row
       img.froggo(src="@/assets/froggo.png")
       //- p I made Kinopio to help you connect your thoughts, ideas, and plans together.
-      p Please send questions, comments, and requests
+      p Please send questions, comments, and requests to hi@kinopio.club
         //- a(href="mailto:hi@kinopio.club") hi@kinopio.club
         a(href="mailto:hi@kinopio.club")
           button hi@kinopio.club
@@ -41,7 +41,7 @@ export default {
   img
     border-radius 3px
   .froggo
-    width 65px
+    width 60px
     margin-right 6px
   button
     margin-top 10px
