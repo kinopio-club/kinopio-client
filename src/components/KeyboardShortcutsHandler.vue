@@ -15,7 +15,7 @@ export default {
   methods: {
     handleShortcuts (event) {
       const key = event.key
-      // console.warn('🎹', key, event)
+      // console.warn('🎹', key)
       const isFromCardName = event.target.closest('dialog.card-details')
       const isFromCard = event.target.className === 'card'
       const isSpaceScope = event.target.tagName === 'BODY'
@@ -206,12 +206,13 @@ export default {
     },
 
     closestCardToOriginCard (originCard, direction, cards) {
-      const viewportWidth = this.$store.state.viewportWidth
-      const viewportHeight = this.$store.state.viewportHeight
-      let closestDistanceFromCenter = Math.max(viewportWidth, viewportHeight)
+      let closest = Number.MAX_VALUE
       let closestCard
+      const distanceWeighting = 0.5
+      const angleWeighting = 0.5
       cards.forEach(card => {
         let toPosition
+        let directionAngle = 0
         // To Right
         if (direction === 'left') {
           toPosition = {
@@ -230,16 +231,21 @@ export default {
             x: card.x + (card.width / 2),
             y: card.y
           }
+          directionAngle = 90
         // To Bottom
         } else if (direction === 'up') {
           toPosition = {
             x: card.x + (card.width / 2),
             y: card.y + card.height
           }
+          directionAngle = 90
         }
         const distance = utils.distanceBetweenTwoPoints(originCard, toPosition)
-        if (distance < closestDistanceFromCenter) {
-          closestDistanceFromCenter = distance
+        const angle = utils.angleBetweenTwoPoints(originCard, toPosition)
+        const angleDelta = Math.abs(directionAngle - angle)
+        const cardCloseness = (distanceWeighting * distance) + (angleWeighting * angleDelta)
+        if (cardCloseness < closest) {
+          closest = cardCloseness
           closestCard = card
         }
       })
@@ -288,53 +294,26 @@ export default {
       this.$store.commit('generateCardMap')
       const cardMap = this.$store.state.cardMap
       const originCard = this.currentFocusedCard()
-      const yThreshold = originCard.height + 60
-      const xThreshold = originCard.width + 60
       let focusableCards
       if (direction === 'left') {
         focusableCards = cardMap.filter(card => {
-          const yOrigin = originCard.y - (originCard.height / 2)
           const isOnLeftSide = card.x < originCard.x
-          // todo replace within box calc, w cone calc
-          const isWithinY = utils.isBetween({
-            value: card.y,
-            min: yOrigin - yThreshold,
-            max: yOrigin + yThreshold
-          })
-          return isOnLeftSide && isWithinY
+          return isOnLeftSide
         })
       } else if (direction === 'right') {
         focusableCards = cardMap.filter(card => {
-          const yOrigin = originCard.y - (originCard.height / 2)
           const isOnRightSide = card.x > originCard.x + originCard.width
-          const isWithinY = utils.isBetween({
-            value: card.y,
-            min: yOrigin - yThreshold,
-            max: yOrigin + yThreshold
-          })
-          return isOnRightSide && isWithinY
+          return isOnRightSide
         })
       } else if (direction === 'down') {
         focusableCards = cardMap.filter(card => {
-          const xOrigin = originCard.x - (originCard.width / 2)
           const isOnDownSide = card.y > originCard.y + originCard.height
-          const isWithinX = utils.isBetween({
-            value: card.x,
-            min: xOrigin - xThreshold,
-            max: xOrigin + xThreshold
-          })
-          return isOnDownSide && isWithinX
+          return isOnDownSide
         })
       } else if (direction === 'up') {
         focusableCards = cardMap.filter(card => {
-          const xOrigin = originCard.x - (originCard.width / 2)
           const isOnTopSide = card.y < originCard.y
-          const isWithinX = utils.isBetween({
-            value: card.x,
-            min: xOrigin - xThreshold,
-            max: xOrigin + xThreshold
-          })
-          return isOnTopSide && isWithinX
+          return isOnTopSide
         })
       }
       focusableCards = focusableCards.filter(card => card.cardId !== this.$store.state.parentCardId)
