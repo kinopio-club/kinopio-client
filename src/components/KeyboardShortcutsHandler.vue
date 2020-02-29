@@ -17,7 +17,7 @@ export default {
       const key = event.key
       // console.warn('🎹', key)
       const isFromCardName = event.target.closest('dialog.card-details')
-      const isFromCard = event.target.className.includes('card')
+      const isFromCard = event.target.classList[0] === 'card'
       const isSpaceScope = event.target.tagName === 'BODY'
       const isCardScope = isFromCard || isFromCardName
       // Shift-Enter
@@ -31,7 +31,7 @@ export default {
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
       // Backspace
       } else if (key === 'Backspace' && isSpaceScope) {
-        this.remove()
+        this.removeCards()
       // Escape
       } else if (key === 'Escape') {
         this.$store.commit('closeAllDialogs')
@@ -56,24 +56,23 @@ export default {
       const key = event.key
       const isMeta = event.metaKey || event.ctrlKey
       const isSpaceScope = event.target.tagName === 'BODY'
-      if (!isSpaceScope) { return }
+      const isFromCard = event.target.classList[0] === 'card'
       // Undo
-      if (isMeta && key === 'z') {
+      if (isMeta && key === 'z' && isSpaceScope) {
         event.preventDefault()
         this.restoreLastRemovedCard()
-
       // Copy
-      } else if (isMeta && key === 'c') {
+      } else if (isMeta && key === 'c' && (isSpaceScope || isFromCard)) {
         event.preventDefault()
-        console.log('copy selected cards', this.$store.state.multipleCardsSelectedIds)
+        this.copyCards()
 
       // Cut
-      } else if (isMeta && key === 'x') {
+      } else if (isMeta && key === 'x' && isSpaceScope) {
         event.preventDefault()
         console.log('cut selected cards', this.$store.state.multipleCardsSelectedIds)
 
       // Paste
-      } else if (isMeta && key === 'v') {
+      } else if (isMeta && key === 'v' && isSpaceScope) {
         event.preventDefault()
         console.log('paste selected cards')
       }
@@ -312,10 +311,13 @@ export default {
       let cards
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
       const selectedCardId = this.$store.state.cardDetailsIsVisibleForCardId
+      const currentFocusedCard = this.currentFocusedCard()
       if (multipleCardsSelectedIds.length) {
         cards = multipleCardsSelectedIds
       } else if (selectedCardId) {
         cards = [selectedCardId]
+      } else if (currentFocusedCard) {
+        cards = [currentFocusedCard.cardId]
       }
       return cards
     },
@@ -330,7 +332,7 @@ export default {
       this.$store.commit('cardDetailsIsVisibleForCardId', '')
     },
 
-    remove () {
+    removeCards () {
       const cardIds = this.focusedCardIds()
       cardIds.forEach(cardId => {
         this.removeCardById(cardId)
@@ -347,6 +349,13 @@ export default {
         const card = removedCards[0]
         this.$store.dispatch('currentSpace/restoreRemovedCard', card)
       }
+    },
+
+    // Copy
+
+    copyCards () {
+      const cardIds = this.focusedCardIds()
+      console.log('copy selected cards', cardIds)
     }
 
   }
