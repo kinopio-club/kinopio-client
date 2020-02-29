@@ -63,11 +63,10 @@ export default {
       } else if (isMeta && key === 'c' && (isSpaceScope || isFromCard)) {
         event.preventDefault()
         this.copyCards()
-
       // Cut
       } else if (isMeta && key === 'x' && isSpaceScope) {
         event.preventDefault()
-        console.log('cut selected cards', this.$store.state.multipleCardsSelectedIds)
+        this.cutCards()
 
       // Paste
       } else if (isMeta && key === 'v' && isSpaceScope) {
@@ -359,7 +358,14 @@ export default {
         return card
       })
       this.$store.commit('addToCopiedCards', cards)
-      // console.log('🍛',cards, this.$store.state.copiedCards)
+    },
+
+    // Cut
+
+    cutCards () {
+      this.copyCards()
+      this.removeCards()
+      // console.log('🍛',this.$store.state.copiedCards)
     }
 
   }
