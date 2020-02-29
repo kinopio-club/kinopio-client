@@ -213,13 +213,10 @@ export default {
       cards.forEach(card => {
         const originPosition = utils.rectCenter(originCard)
         const cardPosition = utils.rectCenter(card)
-        let directionAngle = 0
-        if (direction === 'up' || direction === 'down') {
-          directionAngle = 90
-        }
         const distance = utils.distanceBetweenTwoPoints(originPosition, cardPosition)
         const angle = utils.angleBetweenTwoPoints(originPosition, cardPosition)
-        const angleDelta = Math.abs(directionAngle - angle)
+        const orientation = this.orientation(direction)
+        const angleDelta = Math.abs(orientation - angle)
         const cardCloseness = (distanceWeighting * distance) + (angleWeighting * angleDelta)
         if (cardCloseness < closest) {
           closest = cardCloseness
@@ -231,6 +228,14 @@ export default {
         return closestCard
       } else {
         return originCard
+      }
+    },
+
+    orientation (direction) {
+      if (direction === 'up' || direction === 'down') {
+        return 90
+      } else {
+        return 0
       }
     },
 
