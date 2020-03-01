@@ -436,7 +436,7 @@ export default {
 
     addCard: (context, { position, isParentCard }) => {
       utils.typeCheck(position, 'object')
-      let cards = context.rootState.currentSpace.cards
+      let cards = context.state.cards
       let card = {
         id: nanoid(),
         x: position.x,

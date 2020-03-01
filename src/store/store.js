@@ -153,11 +153,6 @@ export default new Vuex.Store({
     },
     addToCopiedCards: (state, cards) => {
       utils.typeCheck(cards, 'array')
-      cards = cards.map(card => {
-        card = utils.clone(card)
-        card.id = nanoid()
-        return card
-      })
       state.copiedCards.push(cards)
     },
     clearCopiedCards: (state) => {
