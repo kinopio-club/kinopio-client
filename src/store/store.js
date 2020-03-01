@@ -153,10 +153,11 @@ export default new Vuex.Store({
     },
     addToCopiedCards: (state, cards) => {
       utils.typeCheck(cards, 'array')
-      state.copiedCards.push(cards)
-    },
-    clearCopiedCards: (state) => {
-      state.copiedCards = []
+      cards = cards.map(card => {
+        card = utils.clone(card)
+        return card
+      })
+      state.copiedCards = cards
     },
     resetPasswordApiKey: (state, apiKey) => {
       utils.typeCheck(apiKey, 'string')

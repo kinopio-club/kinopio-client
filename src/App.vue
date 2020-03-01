@@ -368,7 +368,7 @@ code
 .updated
   vertical-align -2px
 
-.move
+.visit
   vertical-align 1px
 
 .cancel

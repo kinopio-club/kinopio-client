@@ -24,7 +24,7 @@ article(:style="position" :data-card-id="id")
         a(:href="url" @click.stop @touchend="openUrl(url)" v-if="url")
           .link
             button(:style="{background: selectedColor}")
-              img.icon.move.arrow-icon(src="@/assets/move.svg")
+              img.icon.visit.arrow-icon(src="@/assets/visit.svg")
         .connector(
           :data-card-id="id"
           @mousedown="startConnecting"

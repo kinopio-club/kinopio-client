@@ -384,6 +384,22 @@ export default {
       return url.slice(0, lastCharacterPosition)
     }
     return url
+  },
+
+  // Paste Card ✂️
+
+  // recursive
+  uniqueCardPosition (point, existingPoints) {
+    const isSamePosition = existingPoints.filter(existingPoint => {
+      return existingPoint.x === point.x && existingPoint.y === point.y
+    })
+    if (isSamePosition.length) {
+      point.x += 20
+      point.y += 20
+      this.uniqueCardPosition(point, existingPoints)
+    } else {
+      return point
+    }
   }
 
 }

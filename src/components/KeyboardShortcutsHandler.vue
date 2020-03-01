@@ -3,6 +3,7 @@
 
 <script>
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfill
+import last from 'lodash-es/last'
 
 import utils from '@/utils.js'
 
@@ -382,7 +383,20 @@ export default {
     cutCards () {
       this.copyCards()
       this.removeCards()
-      // console.log('🍛',this.$store.state.copiedCards)
+    },
+
+    // Paste
+
+    pasteCards () {
+      const cards = this.$store.state.copiedCards
+      if (!cards.length) { return }
+      cards.forEach(card => {
+        this.$store.dispatch('currentSpace/pasteCard', card)
+      })
+      this.$nextTick(() => {
+        const newCard = last(this.$store.state.currentSpace.cards)
+        this.scrollIntoView(newCard)
+      })
     }
 
   }

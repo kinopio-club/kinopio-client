@@ -452,6 +452,16 @@ export default {
       context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
     },
+    pasteCard: (context, card) => {
+      utils.typeCheck(card, 'object')
+      card = utils.clone(card)
+      card.id = nanoid()
+      card.spaceId = context.state.id
+      const existingCards = context.rootState.currentSpace.cards
+      utils.uniqueCardPosition(card, existingCards)
+      context.commit('createCard', card)
+      context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
+    },
     updateCard: (context, card) => {
       context.commit('updateCard', card)
       context.dispatch('api/addToQueue', { name: 'updateCard', body: card }, { root: true })
