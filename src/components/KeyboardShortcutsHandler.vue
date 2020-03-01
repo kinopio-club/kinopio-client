@@ -53,7 +53,6 @@ export default {
       }
     },
     handleMetaKeyShortcuts (event) {
-      // - TODO to paste, add copiedCards to the currentSpace, then clearCopiedCards
       const key = event.key
       const isMeta = event.metaKey || event.ctrlKey
       const isSpaceScope = event.target.tagName === 'BODY'
