@@ -34,7 +34,7 @@ export default {
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
       // Backspace
       } else if (key === 'Backspace' && isSpaceScope) {
-        this.removeCards()
+        this.remove()
       // Escape
       } else if (key === 'Escape') {
         this.$store.commit('closeAllDialogs')
@@ -321,22 +321,19 @@ export default {
       document.querySelector(`.card[data-card-id="${closestCard.cardId}"]`).focus()
     },
 
-    // Remove
-
     focusedCardIds () {
-      let cards
+      let cards = []
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
       const selectedCardId = this.$store.state.cardDetailsIsVisibleForCardId
-      const currentFocusedCard = this.currentFocusedCard()
       if (multipleCardsSelectedIds.length) {
         cards = multipleCardsSelectedIds
       } else if (selectedCardId) {
         cards = [selectedCardId]
-      } else if (currentFocusedCard) {
-        cards = [currentFocusedCard.cardId]
       }
       return cards
     },
+
+    // Remove
 
     removeCardById (cardId) {
       const card = this.$store.getters['currentSpace/cardById'](cardId)
@@ -348,11 +345,17 @@ export default {
       this.$store.commit('cardDetailsIsVisibleForCardId', '')
     },
 
-    removeCards () {
+    remove () {
+      const selectedConnectionIds = this.$store.state.multipleConnectionsSelectedIds
       const cardIds = this.focusedCardIds()
+      selectedConnectionIds.forEach(connectionId => {
+        const connection = this.$store.getters['currentSpace/connectionById'](connectionId)
+        this.$store.dispatch('currentSpace/removeConnection', connection)
+      })
       cardIds.forEach(cardId => {
         this.removeCardById(cardId)
       })
+      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
       this.clearAllSelectedCards()
       this.$store.commit('closeAllDialogs')
     },
@@ -382,7 +385,7 @@ export default {
 
     cutCards () {
       this.copyCards()
-      this.removeCards()
+      this.remove()
     },
 
     // Paste
