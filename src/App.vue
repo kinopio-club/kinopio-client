@@ -371,6 +371,9 @@ code
 .visit
   vertical-align 1px
 
+.cut
+  vertical-align 0
+
 .cancel
   transform rotate(45deg)
 

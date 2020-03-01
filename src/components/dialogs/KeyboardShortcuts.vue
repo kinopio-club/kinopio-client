@@ -42,7 +42,7 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.stop)
     article
       .row
         .badge.title
-          img.icon(src="@/assets/move.svg")
+          img.icon.cut(src="@/assets/cut.svg")
           span Copy/Cut/Paste Selected Cards
         .badge.info {{meta}}-C/{{meta}}-X/{{meta}}-V
       p You can copy and paste cards between spaces
