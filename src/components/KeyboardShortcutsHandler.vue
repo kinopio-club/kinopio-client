@@ -2,6 +2,8 @@
 </template>
 
 <script>
+import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfill
+
 import utils from '@/utils.js'
 
 const incrementPosition = 20
@@ -63,17 +65,32 @@ export default {
       } else if (isMeta && key === 'c' && (isSpaceScope || isFromCard)) {
         event.preventDefault()
         this.copyCards()
+        this.notifyCopyCut('copied')
       // Cut
       } else if (isMeta && key === 'x' && isSpaceScope) {
         event.preventDefault()
         this.cutCards()
+        this.notifyCopyCut('cut')
 
       // Paste
       } else if (isMeta && key === 'v' && isSpaceScope) {
         event.preventDefault()
-        console.log('paste selected cards')
-        // state.copiedCards change each to current spaceId, add each card
+        this.pasteCards()
       }
+    },
+
+    scrollIntoView (card) {
+      const element = document.querySelector(`article [data-card-id="${card.id}"]`)
+      scrollIntoView(element, {
+        behavior: 'smooth',
+        scrollMode: 'if-needed'
+      })
+    },
+
+    notifyCopyCut (word) {
+      const cardIds = this.focusedCardIds()
+      const pluralizedCard = utils.pluralize('Card', cardIds.length > 1)
+      this.$store.commit('addNotification', { message: `${pluralizedCard} ${word}`, type: 'success' })
     },
 
     // Add Parent and Child Cards
