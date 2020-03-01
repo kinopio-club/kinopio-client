@@ -23,7 +23,7 @@ article(:style="position" :data-card-id="id")
       span.card-buttons-wrap
         a(:href="url" @click.stop @touchend="openUrl(url)" v-if="url")
           .link
-            button(:style="{background: selectedColor}")
+            button(:style="{background: selectedColor}" tabindex="-1")
               img.icon.visit.arrow-icon(src="@/assets/visit.svg")
         .connector(
           :data-card-id="id"
