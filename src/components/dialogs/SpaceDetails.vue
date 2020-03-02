@@ -22,12 +22,17 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
         input(type="checkbox" v-model="showInExplore")
         span Show in Explore
     template(v-if="error.signUpToShowInExplore")
-      p.cannot-show-in-explore
-        span To share,
-        span.badge.info you need to Sign Up or In
-        span for your spaces to be accessible to others.
+      .row
+        p.error-message
+          span To show this,
+          span.badge.info you need to Sign Up or In
+          span for your spaces to be accessible anywhere.
       .row
         button(@click="triggerSignUpOrInIsVisible") Sign Up or In
+    template(v-if="error.editSpaceToShowInExplore")
+      p.error-message
+        span To show this,
+        span.badge.info you need to edit and rename this space first
 
     button(v-if="canEditCurrentSpace" @click="removeCurrentSpace")
       img.icon(src="@/assets/remove.svg")
@@ -94,7 +99,8 @@ export default {
       filteredSpaces: [],
       privacyPickerIsVisible: false,
       error: {
-        signUpToShowInExplore: false
+        signUpToShowInExplore: false,
+        editSpaceToShowInExplore: false
       }
     }
   },
@@ -166,10 +172,12 @@ export default {
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     toggleShowInExplore () {
-// const isDefaultSpace = this.$store.getters['currentSpace/isDefaultSpace']
-
+      const isDefaultSpace = this.$store.getters['currentSpace/isDefaultSpace']
       if (!this.userIsSignedIn) {
         this.error.signUpToShowInExplore = true
+        return
+      } else if (isDefaultSpace) {
+        this.error.editSpaceToShowInExplore = true
         return
       }
       const value = !this.showInExplore
@@ -221,6 +229,7 @@ export default {
       })
     },
     changeSpace (space) {
+      this.clearErrors()
       this.$store.dispatch('currentSpace/changeSpace', space)
     },
     spaceIsPrivate (space) {
@@ -239,6 +248,7 @@ export default {
       this.changeToLastSpace()
     },
     async updateSpaces () {
+      this.clearErrors()
       const userSpaces = cache.getAllSpaces().filter(space => {
         return this.$store.getters['currentUser/canEditSpace'](space)
       })
@@ -255,6 +265,10 @@ export default {
     shouldShowInExploreBadge (space) {
       if (space.privacy === 'private') { return }
       return space.showInExplore
+    },
+    clearErrors () {
+      this.error.signUpToShowInExplore = false
+      this.error.editSpaceToShowInExplore = false
     }
   },
   watch: {
@@ -263,8 +277,7 @@ export default {
         this.updateSpaces()
         this.updateWithRemoteSpaces()
         this.closeDialogs()
-        this.filter = ''
-        this.error.signUpToShowInExplore = false
+        this.clearFilter()
       }
     }
   }
@@ -301,8 +314,7 @@ export default {
       overflow hidden
       .icon
         margin-left 6px
-  .cannot-show-in-explore
-    margin-bottom 10px
+  .error-message
     .badge
       display inline-block
 </style>
