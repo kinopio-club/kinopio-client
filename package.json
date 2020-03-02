@@ -46,7 +46,9 @@
       "@vue/standard"
     ],
     "rules": {
-      "no-throw-literal": "off"
+      "no-throw-literal": "off",
+      "indent": "off",
+      "comma-dangle": "off"
     },
     "parserOptions": {
       "parser": "babel-eslint"
