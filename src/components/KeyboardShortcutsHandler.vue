@@ -90,7 +90,7 @@ export default {
     notifyCopyCut (word) {
       const cardIds = this.focusedCardIds()
       const pluralizedCard = utils.pluralize('Card', cardIds.length > 1)
-      this.$store.commit('addNotification', { message: `${pluralizedCard} ${word}`, type: 'success' })
+      this.$store.commit('addNotification', { message: `${pluralizedCard} ${word}`, type: 'success', icon: 'cut' })
     },
 
     // Add Parent and Child Cards
