@@ -21,7 +21,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
       label(:class="{active: showInExplore}" @click.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
         input(type="checkbox" v-model="showInExplore")
         span Show in Explore
-    template(v-if="showCannotShowInExplore")
+    template(v-if="error.signUpToShowInExplore")
       p.cannot-show-in-explore
         span To share,
         span.badge.info you need to Sign Up or In
@@ -93,7 +93,9 @@ export default {
       filter: '',
       filteredSpaces: [],
       privacyPickerIsVisible: false,
-      showCannotShowInExplore: false
+      error: {
+        signUpToShowInExplore: false
+      }
     }
   },
   computed: {
@@ -164,8 +166,10 @@ export default {
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     toggleShowInExplore () {
+// const isDefaultSpace = this.$store.getters['currentSpace/isDefaultSpace']
+
       if (!this.userIsSignedIn) {
-        this.showCannotShowInExplore = true
+        this.error.signUpToShowInExplore = true
         return
       }
       const value = !this.showInExplore
@@ -260,7 +264,7 @@ export default {
         this.updateWithRemoteSpaces()
         this.closeDialogs()
         this.filter = ''
-        this.showCannotShowInExplore = false
+        this.error.signUpToShowInExplore = false
       }
     }
   }
