@@ -96,15 +96,7 @@ export default {
         observer.observe(card)
       })
     }
-  },
-
-  watch: {
-    cards (state) {
-      observer.disconnect()
-      this.updateCardsObserver()
-    }
   }
-
 }
 </script>
 
