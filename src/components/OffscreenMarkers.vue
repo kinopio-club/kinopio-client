@@ -15,13 +15,21 @@ let observer
 
 export default {
   name: 'OffscreenMarkers',
-  mounted () {
-    this.updateCardsObserver()
-  },
   data () {
     return {
       offscreenCards: []
     }
+  },
+  mounted () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'currentSpace/restoreSpace') {
+        if (observer) {
+          this.offscreenCards = []
+          observer.disconnect()
+        }
+        this.updateCardsObserver()
+      }
+    })
   },
   computed: {
     hasDirectionTop () { return this.hasDirection('top') },
