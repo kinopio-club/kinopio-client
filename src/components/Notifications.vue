@@ -2,7 +2,7 @@
 aside.notifications(@click="closeAllDialogs")
   .item(v-for="(item in items" v-bind:key="item.id" :data-notification-id="item.id" :class="item.type")
     p
-      img.icon(v-if="item.icon" :src="icon(item.icon).path")
+      img.icon(v-if="item.icon" :src="icon(item.icon).path" :class="item.icon")
       span {{item.message}}
 
   .persistent-item(v-if="notifyReadOnly" ref="readOnly" :class="{'notification-jiggle': notifyReadOnlyJiggle}")
@@ -202,10 +202,6 @@ export default {
   button + button,
   button + label
     margin-left 6px
-
-  p
-    .icon
-      vertical-align 0px
 
   .notification-jiggle
     animation-name notificationJiggle
