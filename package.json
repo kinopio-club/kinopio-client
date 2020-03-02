@@ -48,7 +48,8 @@
     "rules": {
       "no-throw-literal": "off",
       "indent": "off",
-      "comma-dangle": "off"
+      "comma-dangle": "off",
+      "no-multiple-empty-lines": "off"
     },
     "parserOptions": {
       "parser": "babel-eslint"
