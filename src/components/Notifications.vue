@@ -1,7 +1,9 @@
 <template lang="pug">
 aside.notifications(@click="closeAllDialogs")
   .item(v-for="(item in items" v-bind:key="item.id" :data-notification-id="item.id" :class="item.type")
-    p {{item.message}}
+    p
+      img.icon(v-if="item.icon" :src="icon(item.icon).path" :class="item.icon")
+      span {{item.message}}
 
   .persistent-item(v-if="notifyReadOnly" ref="readOnly" :class="{'notification-jiggle': notifyReadOnlyJiggle}")
     p You can't edit this space, but you can save your own copy
@@ -94,6 +96,11 @@ export default {
     }
   },
   methods: {
+    icon (icon) {
+      return {
+        path: require(`@/assets/${icon}.svg`)
+      }
+    },
     closeAllDialogs () {
       this.$store.commit('closeAllDialogs')
     },

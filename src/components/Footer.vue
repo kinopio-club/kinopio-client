@@ -1,7 +1,7 @@
 <template lang="pug">
-footer(v-if="!dialogsVisible")
+footer
   Notifications
-  section
+  section(v-if="!dialogsVisible")
     .button-wrap
       button(@click="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
         span Explore
@@ -11,7 +11,7 @@ footer(v-if="!dialogsVisible")
         span Favorites
       Favorites(:visible="favoritesIsVisible")
 
-  section.controls
+  section.controls(v-if="!dialogsVisible")
     .button-wrap(v-if="userCanEditCurrentSpace")
       button(@click="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
         img.refresh.icon(src="@/assets/remove.svg")
@@ -130,7 +130,7 @@ export default {
 
 <style lang="stylus">
 footer
-  z-index var(--max-z)
+  z-index 100
   position fixed
   left 8px
   bottom 8px

@@ -2,6 +2,9 @@
 </template>
 
 <script>
+import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfill
+import last from 'lodash-es/last'
+
 import utils from '@/utils.js'
 
 const incrementPosition = 20
@@ -17,7 +20,7 @@ export default {
       const key = event.key
       // console.warn('🎹', key)
       const isFromCardName = event.target.closest('dialog.card-details')
-      const isFromCard = event.target.className.includes('card')
+      const isFromCard = event.target.classList[0] === 'card'
       const isSpaceScope = event.target.tagName === 'BODY'
       const isCardScope = isFromCard || isFromCardName
       // Shift-Enter
@@ -31,7 +34,7 @@ export default {
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
       // Backspace
       } else if (key === 'Backspace' && isSpaceScope) {
-        this.removeFocused()
+        this.remove()
       // Escape
       } else if (key === 'Escape') {
         this.$store.commit('closeAllDialogs')
@@ -50,30 +53,44 @@ export default {
       }
     },
     handleMetaKeyShortcuts (event) {
-      // - TODO get selected card ids from this.$store.state.multipleCardsSelectedIds
-      // - TODO save copied/cut card info (utils.clone, change id first) to a new store.js [{}] value (copiedCards: [])
-      // - TODO to paste, add copiedCards to the currentSpace, then clearCopiedCards
       const key = event.key
       const isMeta = event.metaKey || event.ctrlKey
       const isSpaceScope = event.target.tagName === 'BODY'
-      if (!isSpaceScope) { return }
+      const isFromCard = event.target.classList[0] === 'card'
       // Undo
-      if (isMeta && key === 'z') {
+      if (isMeta && key === 'z' && isSpaceScope) {
         event.preventDefault()
         this.restoreLastRemovedCard()
       // Copy
-      } else if (isMeta && key === 'c') {
+      } else if (isMeta && key === 'c' && (isSpaceScope || isFromCard)) {
         event.preventDefault()
-        console.log('copy selected cards', this.$store.state.multipleCardsSelectedIds)
+        this.copyCards()
+        this.notifyCopyCut('copied')
       // Cut
-      } else if (isMeta && key === 'x') {
+      } else if (isMeta && key === 'x' && isSpaceScope) {
         event.preventDefault()
-        console.log('cut selected cards', this.$store.state.multipleCardsSelectedIds)
+        this.cutCards()
+        this.notifyCopyCut('cut')
+
       // Paste
-      } else if (isMeta && key === 'v') {
+      } else if (isMeta && key === 'v' && isSpaceScope) {
         event.preventDefault()
-        console.log('paste selected cards')
+        this.pasteCards()
       }
+    },
+
+    scrollIntoView (card) {
+      const element = document.querySelector(`article [data-card-id="${card.id}"]`)
+      scrollIntoView(element, {
+        behavior: 'smooth',
+        scrollMode: 'if-needed'
+      })
+    },
+
+    notifyCopyCut (word) {
+      const cardIds = this.focusedCardIds()
+      const pluralizedCard = utils.pluralize('Card', cardIds.length > 1)
+      this.$store.commit('addNotification', { message: `${pluralizedCard} ${word}`, type: 'success', icon: 'cut' })
     },
 
     // Add Parent and Child Cards
@@ -303,6 +320,18 @@ export default {
       document.querySelector(`.card[data-card-id="${closestCard.cardId}"]`).focus()
     },
 
+    focusedCardIds () {
+      let cards = []
+      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
+      const selectedCardId = this.$store.state.cardDetailsIsVisibleForCardId
+      if (multipleCardsSelectedIds.length) {
+        cards = multipleCardsSelectedIds
+      } else if (selectedCardId) {
+        cards = [selectedCardId]
+      }
+      return cards
+    },
+
     // Remove
 
     removeCardById (cardId) {
@@ -310,18 +339,23 @@ export default {
       this.$store.dispatch('currentSpace/removeCard', card)
     },
 
-    removeFocused () {
-      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
-      const cardId = this.$store.state.cardDetailsIsVisibleForCardId
-      if (multipleCardsSelectedIds.length) {
-        multipleCardsSelectedIds.forEach(cardId => {
-          this.removeCardById(cardId)
-        })
-        this.$store.commit('clearMultipleSelected')
-      } else if (cardId) {
+    clearAllSelectedCards () {
+      this.$store.commit('clearMultipleSelected')
+      this.$store.commit('cardDetailsIsVisibleForCardId', '')
+    },
+
+    remove () {
+      const selectedConnectionIds = this.$store.state.multipleConnectionsSelectedIds
+      const cardIds = this.focusedCardIds()
+      selectedConnectionIds.forEach(connectionId => {
+        const connection = this.$store.getters['currentSpace/connectionById'](connectionId)
+        this.$store.dispatch('currentSpace/removeConnection', connection)
+      })
+      cardIds.forEach(cardId => {
         this.removeCardById(cardId)
-        this.$store.commit('cardDetailsIsVisibleForCardId', '')
-      }
+      })
+      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
+      this.clearAllSelectedCards()
       this.$store.commit('closeAllDialogs')
     },
 
@@ -333,6 +367,38 @@ export default {
         const card = removedCards[0]
         this.$store.dispatch('currentSpace/restoreRemovedCard', card)
       }
+    },
+
+    // Copy
+
+    copyCards () {
+      const cardIds = this.focusedCardIds()
+      const cards = cardIds.map(cardId => {
+        let card = this.$store.getters['currentSpace/cardById'](cardId)
+        return card
+      })
+      this.$store.commit('addToCopiedCards', cards)
+    },
+
+    // Cut
+
+    cutCards () {
+      this.copyCards()
+      this.remove()
+    },
+
+    // Paste
+
+    pasteCards () {
+      const cards = this.$store.state.copiedCards
+      if (!cards.length) { return }
+      cards.forEach(card => {
+        this.$store.dispatch('currentSpace/pasteCard', card)
+      })
+      this.$nextTick(() => {
+        const newCard = last(this.$store.state.currentSpace.cards)
+        this.scrollIntoView(newCard)
+      })
     }
 
   }

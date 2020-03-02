@@ -19,9 +19,9 @@ export default new Vuex.Store({
     viewportWidth: 0,
     isOnline: true,
     isBeta: false,
-    // initialExtraSize: 160, // TODO apply extra size each time you change spaces
     shouldHideConnectionOutline: false,
     newStuffIsUpdated: false,
+    copiedCards: [],
 
     // reset password
     resetPasswordApiKey: '',
@@ -150,6 +150,14 @@ export default new Vuex.Store({
     newStuffIsUpdated: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.newStuffIsUpdated = value
+    },
+    addToCopiedCards: (state, cards) => {
+      utils.typeCheck(cards, 'array')
+      cards = cards.map(card => {
+        card = utils.clone(card)
+        return card
+      })
+      state.copiedCards = cards
     },
     resetPasswordApiKey: (state, apiKey) => {
       utils.typeCheck(apiKey, 'string')

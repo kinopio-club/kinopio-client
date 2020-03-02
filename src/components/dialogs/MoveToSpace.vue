@@ -13,7 +13,7 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
           input(type="checkbox" v-model="shouldSwitchToSpace")
           span Switch to Space
       button(@click="moveToSpace" :class="{active: loading}")
-        img.icon.move(src="@/assets/move.svg")
+        img.icon.cut(src="@/assets/cut.svg")
         span Move
         Loader(:visible="loading")
 

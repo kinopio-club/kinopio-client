@@ -368,8 +368,11 @@ code
 .updated
   vertical-align -2px
 
-.move
+.visit
   vertical-align 1px
+
+.cut
+  vertical-align 0
 
 .cancel
   transform rotate(45deg)

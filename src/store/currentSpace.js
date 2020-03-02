@@ -436,7 +436,7 @@ export default {
 
     addCard: (context, { position, isParentCard }) => {
       utils.typeCheck(position, 'object')
-      let cards = context.rootState.currentSpace.cards
+      let cards = context.state.cards
       let card = {
         id: nanoid(),
         x: position.x,
@@ -451,6 +451,16 @@ export default {
       card = utils.clone(card)
       context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
+    },
+    pasteCard: (context, card) => {
+      utils.typeCheck(card, 'object')
+      card = utils.clone(card)
+      card.id = nanoid()
+      card.spaceId = context.state.id
+      const existingCards = context.rootState.currentSpace.cards
+      utils.uniqueCardPosition(card, existingCards)
+      context.commit('createCard', card)
+      context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
     },
     updateCard: (context, card) => {
       context.commit('updateCard', card)
