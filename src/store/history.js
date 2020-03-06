@@ -14,7 +14,7 @@ const self = {
     },
     clear: (state) => {
       state.items = []
-    },
+    }
   },
   actions: {
     playback: (context) => {
