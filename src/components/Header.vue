@@ -15,7 +15,6 @@ header
         span {{currentSpaceName}}
         img.icon.lock(v-if="spaceIsPrivate" src="@/assets/lock.svg")
         Loader(:visible="isLoadingSpace")
-      .badge.info.default-space-badge(v-if="isDefaultSpace") Get started by adding a new space
       SpaceDetails(:visible="spaceDetailsIsVisible")
       ImportArenaChannel(:visible="importArenaChannelIsVisible")
       KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
@@ -98,12 +97,9 @@ export default {
     })
   },
   computed: {
-    isDefaultSpace () {
-      return this.$store.getters['currentSpace/isDefaultSpace']
-    },
     shouldShowNewStuffIsUpdated () {
       const newStuffIsUpdated = this.$store.state.newStuffIsUpdated
-      const isNotDefaultSpace = !this.isDefaultSpace
+      const isNotDefaultSpace = !this.$store.getters['currentSpace/isDefaultSpace']
       const userCanEditCurrentSpace = this.$store.getters['currentUser/canEditCurrentSpace']
       return newStuffIsUpdated && isNotDefaultSpace && userCanEditCurrentSpace
     },
@@ -241,8 +237,4 @@ header
       display inline-block
   .lock
     margin-left 6px
-  .default-space-badge
-    position absolute
-    margin 0
-    width 220px
 </style>

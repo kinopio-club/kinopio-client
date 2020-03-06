@@ -6,8 +6,6 @@ footer
       button(@click="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
         span Explore
       Explore(:visible="exploreIsVisible")
-      .badge.info.default-space-badge(v-if="isDefaultSpace") 👀 community spaces and templates
-
     .button-wrap
       button(@click.stop="toggleFavoritesIsVisible" :class="{active: favoritesIsVisible}")
         span Favorites
@@ -97,10 +95,8 @@ export default {
     },
     userCanEditCurrentSpace () {
       return this.$store.getters['currentUser/canEditCurrentSpace']
-    },
-    isDefaultSpace () {
-      return this.$store.getters['currentSpace/isDefaultSpace']
-    },
+    }
+
   },
   methods: {
     toggleRemovedIsVisible () {
@@ -160,10 +156,4 @@ footer
     .space-picker
       bottom initial
       top calc(100% - 8px)
-  .default-space-badge
-    position absolute
-    margin 0
-    bottom 100%
-    width 232px
-
 </style>
