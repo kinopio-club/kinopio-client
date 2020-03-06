@@ -42,7 +42,8 @@
     "array-filter": "0.0.0",
     "array-map": "0.0.0",
     "array-reduce": "0.0.0",
-    "is-utf8": "^0.2.0"
+    "is-utf8": "^0.2.0",
+    "@hapi/joi": "^15.0.1"
   },
   "eslintConfig": {
     "root": true,
