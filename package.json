@@ -27,16 +27,18 @@
     "@vue/devtools": "^5.3.3",
     "@vue/eslint-config-standard": "^4.0.0",
     "@vue/test-utils": "1.0.0-beta.29",
+    "ajv": "^5.5.2",
     "babel-eslint": "^10.1.0",
+    "bufferutil": "^4.0.1",
+    "canvas": "^2.6.1",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.2.3",
     "lint-staged": "^8.2.1",
     "stylus": "^0.54.7",
     "stylus-loader": "^3.0.2",
+    "utf-8-validate": "^5.0.2",
     "vue-cli-plugin-pug": "^1.0.7",
-    "vue-template-compiler": "^2.6.11",
-    "array-map": "0.0.0",
-    "array-filter": "0.0.0"
+    "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {
     "root": true,
