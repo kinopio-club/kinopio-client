@@ -591,9 +591,8 @@ export default {
         connection.id = nanoid()
         connection.spaceId = context.state.id
         connection.connectionTypeId = connectionType.id
-        const update = { name: 'createConnection', body: connection }
-        context.dispatch('api/addToQueue', update, { root: true })
-        context.commit('history/add', update, { root: true })
+        context.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
+        context.commit('history/add', { name: 'addConnection', body: connection }, { root: true })
         context.commit('addConnection', connection)
       }
     },
@@ -640,7 +639,9 @@ export default {
         id: connectionId,
         connectionTypeId
       }
-      context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
+      const update = { name: 'updateConnection', body: connection }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('history/add', update, { root: true })
       context.commit('updateConnectionTypeForConnection', { connectionId, connectionTypeId })
     },
     updateLabelIsVisibleForConnection: (context, { connectionId, labelIsVisible }) => {
@@ -665,9 +666,8 @@ export default {
         spaceId: context.state.id
       }
       context.commit('addConnectionType', connectionType)
-      const update = { name: 'createConnectionType', body: connectionType }
-      context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('history/add', update, { root: true })
+      context.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
+      context.commit('history/add', { name: 'addConnectionType', body: connectionType }, { root: true })
     },
     updateConnectionType: (context, connectionType) => {
       context.commit('updateConnectionType', connectionType)
