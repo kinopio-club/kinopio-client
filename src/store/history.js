@@ -1,3 +1,5 @@
+import uniq from 'lodash-es/uniq'
+
 import utils from '@/utils.js'
 
 const self = {
@@ -7,7 +9,6 @@ const self = {
   },
   mutations: {
     add: (state, item) => {
-      console.log('💚', item, item.body)
       utils.typeCheck(item, 'object')
       state.items.push(item)
     },
@@ -16,19 +17,19 @@ const self = {
     },
   },
   actions: {
-
-    // clear, restore, undo(restoreToLastSignificantItem) , redo
-
     playback: (context) => {
-      // const history = context.state.history
-      console.log('🍄', context.state.items)
+      let cardIds = []
       context.state.items.forEach(item => {
-        console.log(item)
-        // call the currentspace mutation in name, with the body payload
+        context.dispatch(`currentSpace/${item.name}`, item.body, { root: true })
+        if (item.name === 'updateCard' || item.name === 'updateCard') {
+          cardIds.push(item.body.id)
+        }
       })
-      // upate all paths
+      cardIds = uniq(cardIds)
+      cardIds.forEach(cardId => {
+        context.dispatch('currentSpace/updateCardConnectionPaths', { cardId }, { root: true })
+      })
     }
-
   }
 }
 
