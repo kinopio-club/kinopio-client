@@ -456,6 +456,10 @@ export default {
       context.commit('history/add', update, { root: true })
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
     },
+    // shim for history/playback
+    createCard: (context, card) => {
+      context.commit('createCard', card)
+    },
     pasteCard: (context, card) => {
       utils.typeCheck(card, 'object')
       card = utils.clone(card)
