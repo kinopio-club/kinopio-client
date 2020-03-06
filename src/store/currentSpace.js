@@ -346,6 +346,7 @@ export default {
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (remoteSpace) {
         context.commit('restoreSpace', remoteSpace)
+        context.dispatch('history/playback', null, { root: true })
         utils.updateWindowUrlAndTitle({
           space: remoteSpace,
           shouldUpdateUrl,
@@ -450,7 +451,9 @@ export default {
       context.commit('createCard', card)
       card.spaceId = context.state.id
       card = utils.clone(card)
-      context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
+      const update = { name: 'createCard', body: card }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('history/add', update, { root: true })
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
     },
     pasteCard: (context, card) => {
@@ -461,11 +464,15 @@ export default {
       const existingCards = context.rootState.currentSpace.cards
       utils.uniqueCardPosition(card, existingCards)
       context.commit('createCard', card)
-      context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
+      const update = { name: 'createCard', body: card }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('history/add', update, { root: true })
     },
     updateCard: (context, card) => {
       context.commit('updateCard', card)
-      context.dispatch('api/addToQueue', { name: 'updateCard', body: card }, { root: true })
+      const update = { name: 'updateCard', body: card }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('history/add', update, { root: true })
     },
     incrementCardZ: (context, cardId) => {
       let cards = context.rootState.currentSpace.cards
@@ -474,10 +481,8 @@ export default {
         card.z = index
         if (card.id === cardId) {
           card.z = cards.length + 1
-          context.dispatch('api/addToQueue', {
-            name: 'updateCard',
-            body: { id: card.id, z: card.z }
-          }, { root: true })
+          const update = { name: 'updateCard', body: { id: card.id, z: card.z } }
+          context.dispatch('api/addToQueue', update, { root: true })
         }
       })
       context.commit('incrementCardZ', cardId)
@@ -486,7 +491,9 @@ export default {
       const cardHasContent = Boolean(card.name)
       if (cardHasContent) {
         context.commit('removeCard', card)
-        context.dispatch('api/addToQueue', { name: 'removeCard', body: card }, { root: true })
+        const update = { name: 'removeCard', body: card }
+        context.dispatch('api/addToQueue', update, { root: true })
+        context.commit('history/add', update, { root: true })
       } else {
         context.dispatch('removeCardPermanent', card)
       }
@@ -499,7 +506,9 @@ export default {
     },
     restoreRemovedCard: (context, card) => {
       context.commit('restoreRemovedCard', card)
-      context.dispatch('api/addToQueue', { name: 'restoreRemovedCard', body: card }, { root: true })
+      const update = { name: 'restoreRemovedCard', body: card }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('history/add', update, { root: true })
     },
     restoreRemovedSpace: (context, space) => {
       cache.restoreRemovedSpace(space)
@@ -548,12 +557,16 @@ export default {
       }
       cards.forEach(card => {
         card = utils.clone(card)
-        context.dispatch('api/addToQueue', { name: 'updateCard',
+        const update = { name: 'updateCard',
           body: {
             id: card.id,
             x: card.x,
-            y: card.y
-          } }, { root: true })
+            y: card.y,
+            z: card.z
+          }
+        }
+        context.dispatch('api/addToQueue', update, { root: true })
+        context.commit('history/add', update, { root: true })
         context.dispatch('updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
       })
     },
@@ -578,7 +591,9 @@ export default {
         connection.id = nanoid()
         connection.spaceId = context.state.id
         connection.connectionTypeId = connectionType.id
-        context.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
+        const update = { name: 'createConnection', body: connection }
+        context.dispatch('api/addToQueue', update, { root: true })
+        context.commit('history/add', update, { root: true })
         context.commit('addConnection', connection)
       }
     },
@@ -616,7 +631,9 @@ export default {
     },
     removeConnection: (context, connection) => {
       context.commit('removeConnection', connection)
-      context.dispatch('api/addToQueue', { name: 'removeConnection', body: connection }, { root: true })
+      const update = { name: 'removeConnection', body: connection }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('history/add', update, { root: true })
     },
     updateConnectionTypeForConnection: (context, { connectionId, connectionTypeId }) => {
       const connection = {
@@ -631,7 +648,9 @@ export default {
         id: connectionId,
         labelIsVisible
       }
-      context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
+      const update = { name: 'updateConnection', body: connection }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('history/add', update, { root: true })
       context.commit('updateLabelIsVisibleForConnection', { connectionId, labelIsVisible })
     },
 
@@ -646,11 +665,15 @@ export default {
         spaceId: context.state.id
       }
       context.commit('addConnectionType', connectionType)
-      context.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
+      const update = { name: 'createConnectionType', body: connectionType }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('history/add', update, { root: true })
     },
     updateConnectionType: (context, connectionType) => {
       context.commit('updateConnectionType', connectionType)
-      context.dispatch('api/addToQueue', { name: 'updateConnectionType', body: connectionType }, { root: true })
+      const update = { name: 'updateConnectionType', body: connectionType }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('history/add', update, { root: true })
     },
     removeUnusedConnectionTypes: (context) => {
       const connectionTypes = context.state.connectionTypes
@@ -658,7 +681,9 @@ export default {
       const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
       const removeConnectionTypes = connectionTypes.filter(type => !connectionTypeIds.includes(type.id))
       removeConnectionTypes.forEach(type => {
-        context.dispatch('api/addToQueue', { name: 'removeConnectionType', body: type }, { root: true })
+        const update = { name: 'removeConnectionType', body: type }
+        context.dispatch('api/addToQueue', update, { root: true })
+        context.commit('history/add', update, { root: true })
         context.commit('removeConnectionType', type)
       })
     }

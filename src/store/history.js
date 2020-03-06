@@ -3,28 +3,30 @@ import utils from '@/utils.js'
 const self = {
   namespaced: true,
   state: {
-    history: []
+    items: []
   },
   mutations: {
     add: (state, item) => {
+      console.log('💚', item, item.body)
       utils.typeCheck(item, 'object')
-      state.history.push(item)
+      state.items.push(item)
     },
     clear: (state) => {
-      state.history = []
+      state.items = []
     },
   },
   actions: {
 
-    // clear, restore, undo , redo
+    // clear, restore, undo(restoreToLastSignificantItem) , redo
 
-    restore: (context) => {
+    playback: (context) => {
       // const history = context.state.history
-      console.log(context.state.history)
-      context.state.history.forEach(item => {
+      console.log('🍄', context.state.items)
+      context.state.items.forEach(item => {
         console.log(item)
         // call the currentspace mutation in name, with the body payload
       })
+      // upate all paths
     }
 
   }
