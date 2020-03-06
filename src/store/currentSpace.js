@@ -341,6 +341,7 @@ export default {
       context.commit('restoreSpace', emptySpace)
       context.commit('restoreSpace', cachedSpace)
       context.dispatch('updateSpacePageSize')
+      context.commit('history/clear', null, { root: true })
       // restore remote
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (remoteSpace) {
