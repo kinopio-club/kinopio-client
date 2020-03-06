@@ -38,7 +38,10 @@
     "stylus-loader": "^3.0.2",
     "utf-8-validate": "^5.0.2",
     "vue-cli-plugin-pug": "^1.0.7",
-    "vue-template-compiler": "^2.6.11"
+    "vue-template-compiler": "^2.6.11",
+    "array-filter": "0.0.0",
+    "array-map": "0.0.0",
+    "array-reduce": "0.0.0"
   },
   "eslintConfig": {
     "root": true,
