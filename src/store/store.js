@@ -5,6 +5,7 @@ import nanoid from 'nanoid'
 
 // store modules
 import api from '@/store/api.js'
+import history from '@/store/history.js'
 import currentUser from '@/store/currentUser.js'
 import currentSpace from '@/store/currentSpace.js'
 
@@ -393,6 +394,7 @@ export default new Vuex.Store({
 
   modules: {
     api,
+    history,
     currentUser,
     currentSpace
   }

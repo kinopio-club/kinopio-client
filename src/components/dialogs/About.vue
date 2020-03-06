@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
   section
-    p Kinopio is your visual thinking tool for new ideas and hard problems.
+    p Kinopio is the visual thinking tool for new ideas and hard problems.
     .button-wrap
       button(@click.stop="toggleWhatsNewIsVisible" :class="{active: whatsNewIsVisible}")
         span What's New
