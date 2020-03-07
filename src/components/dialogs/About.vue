@@ -3,6 +3,9 @@ dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
   section
     p Kinopio is the visual thinking tool for new ideas and hard problems.
     .button-wrap
+      a(href="http://pketh.org/hello-kinopio.html")
+        button About →
+    .button-wrap
       button(@click.stop="toggleWhatsNewIsVisible" :class="{active: whatsNewIsVisible}")
         span What's New
         img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
