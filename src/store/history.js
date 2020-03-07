@@ -21,7 +21,9 @@ const self = {
       let cardIds = []
       context.state.items.forEach(item => {
         context.dispatch(`currentSpace/${item.name}`, item.body, { root: true })
-        if (item.name === 'updateCard' || item.name === 'updateCard') {
+        const isCard = item.name === 'updateCard'
+        const cardExists = Boolean(document.querySelector(`article [data-card-id="${item.body.id}"]`))
+        if (isCard && cardExists) {
           cardIds.push(item.body.id)
         }
       })
