@@ -4,12 +4,12 @@ dialog.contact(v-if="visible" :open="visible" @click.stop)
     p Contact
   section
     .row
-      img.froggo(src="@/assets/froggo.png")
+      img.email(src="@/assets/email.gif")
       //- p I made Kinopio to help you connect your thoughts, ideas, and plans together.
       p Please send questions, comments, and requests to hi@kinopio.club
         //- a(href="mailto:hi@kinopio.club") hi@kinopio.club
         a(href="mailto:hi@kinopio.club")
-          button hi@kinopio.club
+          button Email hi@kinopio.club
 
     //- .button-wrap
     //-   a(href="mailto:hi@kinopio.club")
@@ -40,11 +40,9 @@ export default {
       margin-top 0
   img
     border-radius 3px
-  .froggo
+  .email
     width 60px
-    margin-right 6px
+    margin-right 10px
   button
     margin-top 10px
-    // &:hover
-    //   text-decoration none
 </style>
