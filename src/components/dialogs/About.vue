@@ -1,27 +1,28 @@
 <template lang="pug">
 dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
   section
-    p Kinopio is the visual thinking tool for new ideas and hard problems.
-    .button-wrap
-      a(href="http://pketh.org/hello-kinopio.html")
-        button About →
-    .button-wrap
-      button(@click.stop="toggleWhatsNewIsVisible" :class="{active: whatsNewIsVisible}")
-        span What's New
-        img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
-      WhatsNew(:visible="whatsNewIsVisible" :newStuff="newStuff")
+    .row
+      p Kinopio is the visual thinking tool for new ideas and hard problems.
+    .row
+      .button-wrap
+        a(href="http://pketh.org/hello-kinopio.html")
+          button About →
+    .row
+      .button-wrap
+        button(@click.stop="toggleWhatsNewIsVisible" :class="{active: whatsNewIsVisible}")
+          span What's New
+          img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
+        WhatsNew(:visible="whatsNewIsVisible" :newStuff="newStuff")
   section
     .row
       .button-wrap
         button(@click.stop="toggleContactIsVisible" :class="{active: contactIsVisible}") Contact
         Contact(:visible="contactIsVisible")
-
     .row
       .button-wrap
         button(@click.stop="toggleKeyboardShortcutsIsVisible" :class="{active: keyboardShortcutsIsVisible}")
           span Keyboard Shortcuts
         KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
-
     .button-wrap(v-if="isMobile")
       button(@click.stop="toggleAddToHomescreenIsVisible" :class="{active: addToHomescreenIsVisible}")
         span(v-if="isIOS")
