@@ -7,16 +7,16 @@ dialog.contact(v-if="visible" :open="visible" @click.stop)
       img.email(src="@/assets/email.gif")
       //- p I made Kinopio to help you connect your thoughts, ideas, and plans together.
       p Please send questions, comments, and requests to hi@kinopio.club
-        //- a(href="mailto:hi@kinopio.club") hi@kinopio.club
         a(href="mailto:hi@kinopio.club")
           button Email hi@kinopio.club
 
-    //- .button-wrap
-    //-   a(href="mailto:hi@kinopio.club")
-    //-     button Email
-    //- .button-wrap
-    //-   a(href="https://twitter.com/KinopioClub")
-    //-     button Twitter →
+  section
+    .button-wrap
+      a(href="https://are.na/kinopio")
+        button Are.na →
+    .button-wrap
+      a(href="https://twitter.com/KinopioClub")
+        button Twitter →
 
 </template>
 
@@ -38,11 +38,9 @@ export default {
     align-items flex-start
     p
       margin-top 0
-  img
-    border-radius 3px
+    button
+      margin-top 10px
   .email
     width 60px
     margin-right 10px
-  button
-    margin-top 10px
 </style>
