@@ -104,7 +104,12 @@ export default {
       })
     },
     insertLineBreak (event) {
-      const newName = this.card.name + '\n'
+      const position = this.$refs.name.selectionEnd
+      const name = this.card.name
+      const newName = name.substring(0, position) + '\n' + name.substring(position)
+      setTimeout(() => {
+        this.$refs.name.setSelectionRange(position + 1, position + 1)
+      })
       this.updateCardName(newName)
     },
     closeCard (event) {
