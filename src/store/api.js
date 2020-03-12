@@ -38,7 +38,7 @@ const shouldRequest = () => {
 
 const requestOptions = (options) => {
   const headers = new Headers({ 'Content-Type': 'application/json' })
-  const apiKey = options.apiKey || cache.user().apiKey // || contributorKey
+  const apiKey = options.apiKey || cache.user().apiKey // || space.collaboratorKey
   if (apiKey) {
     headers.append('Authorization', apiKey)
   }

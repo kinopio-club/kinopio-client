@@ -83,7 +83,7 @@ export default {
         maxWidth = 162
       }
       if (!this.normalizedName) { return 0 }
-      const width = this.normalizedName.trim().length * averageCharacterWidth
+      const width = this.longestNameLineLength() * averageCharacterWidth
       if (width <= maxWidth) {
         return width
       } else {
@@ -202,6 +202,16 @@ export default {
     }
   },
   methods: {
+    longestNameLineLength () {
+      const nameLines = this.normalizedName.match(/[^\n]+/g)
+      let longestLineLength = 0
+      nameLines.forEach(line => {
+        if (line.length > longestLineLength) {
+          longestLineLength = line.length
+        }
+      })
+      return longestLineLength
+    },
     removeCard () {
       this.$store.dispatch('currentSpace/removeCard', this.card)
     },
@@ -293,7 +303,8 @@ article
     margin 8px
     margin-right 0
     align-self stretch
-    word-break: break-word
+    word-break break-word
+    white-space pre-line
     // multi-line wrapping
     // display -webkit-box
     // -webkit-box-orient vertical
