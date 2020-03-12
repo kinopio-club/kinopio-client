@@ -24,23 +24,31 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
       .row
         .badge.success.success-message(v-if="urlIsCopied") Url Copied
 
+  section(v-if="spaceHasUrl && canEditSpace")
+    .button-wrap
+      button(@click.stop="toggleInviteOthersToEditIsVisible" :class="{ active: inviteOthersToEditIsVisible }") Invite Others to Edit
+      InviteOthersToEdit(:visible="inviteOthersToEditIsVisible" @closeDialog="closeDialogs")
+
   section(v-if="!spaceHasUrl")
     p
-      span To share,
+      span To share or invite others,
       span.badge.info you need to Sign Up or In
       span for your spaces to be synced and accessible anywhere.
     button(@click="triggerSignUpOrInIsVisible") Sign Up or In
+
 </template>
 
 <script>
 import PrivacyPicker from '@/components/dialogs/PrivacyPicker.vue'
+import InviteOthersToEdit from '@/components/dialogs/InviteOthersToEdit.vue'
 import utils from '@/utils.js'
 import privacy from '@/spaces/privacy.js'
 
 export default {
   name: 'Share',
   components: {
-    PrivacyPicker
+    PrivacyPicker,
+    InviteOthersToEdit
   },
   props: {
     visible: Boolean
@@ -49,7 +57,8 @@ export default {
     return {
       urlIsCopied: false,
       spaceHasUrl: false,
-      privacyPickerIsVisible: false
+      privacyPickerIsVisible: false,
+      inviteOthersToEditIsVisible: false
     }
   },
   filters: {
@@ -102,10 +111,19 @@ export default {
       navigator.share(data)
     },
     togglePrivacyPickerIsVisible () {
-      this.privacyPickerIsVisible = !this.privacyPickerIsVisible
+      const isVisible = this.privacyPickerIsVisible
+      this.closeDialogs()
+      this.privacyPickerIsVisible = !isVisible
     },
+    toggleInviteOthersToEditIsVisible () {
+      const isVisible = this.inviteOthersToEditIsVisible
+      this.closeDialogs()
+      this.inviteOthersToEditIsVisible = !isVisible
+    },
+
     closeDialogs () {
       this.privacyPickerIsVisible = false
+      this.inviteOthersToEditIsVisible = false
     }
   },
   watch: {
