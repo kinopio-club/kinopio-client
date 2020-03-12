@@ -14,11 +14,14 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
         PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs")
 
     template(v-if="!spaceIsPrivate")
-      textarea(ref="url") {{url()}}
-      button(@click="copyUrl" v-if="!canNativeShare") Copy Url
+      input.textarea(ref="url" v-model="url")
+      button(@click="copyUrl" v-if="!canNativeShare")
+        img.icon.cut(src="@/assets/cut.svg")
+        span Copy Space Url
       .segmented-buttons(v-if="canNativeShare")
         button(@click="copyUrl")
-          span Copy Url
+          img.icon.cut(src="@/assets/cut.svg")
+          span Copy Space Url
         button(@click="shareUrl")
           img.icon(src="@/assets/share.svg")
       .row
@@ -27,7 +30,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
   section(v-if="spaceHasUrl && canEditSpace")
     .button-wrap
       button(@click.stop="toggleInviteOthersToEditIsVisible" :class="{ active: inviteOthersToEditIsVisible }") Invite Others to Edit
-      InviteOthersToEdit(:visible="inviteOthersToEditIsVisible" @closeDialog="closeDialogs")
+      InviteOthersToEdit(:visible="inviteOthersToEditIsVisible")
 
   section(v-if="!spaceHasUrl")
     p
@@ -85,12 +88,17 @@ export default {
     },
     spaceIsPrivate () {
       return this.spacePrivacy === 'private'
+    },
+    url: {
+      get () {
+        return window.location.href
+      }
     }
   },
   methods: {
-    url () {
-      return window.location.href
-    },
+    // url () {
+    //   return window.location.href
+    // },
     copyUrl () {
       const element = this.$refs.url
       element.select()
@@ -147,13 +155,17 @@ export default {
       background-color var(--danger-background)
   .success-message
     margin-top 10px
-  textarea
+  .textarea
+    margin-top 10px
+    // border-bottom 0
     background-color var(--secondary-background)
     border 0
     border-radius 3px
     padding 4px
-    margin-bottom 4px
-    height 50px
+
+    // margin-bottom 4px
+    // height 50px
+
   .privacy-wrap + textarea
     margin-top 10px
   .description

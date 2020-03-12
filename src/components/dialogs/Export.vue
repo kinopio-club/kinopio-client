@@ -4,7 +4,9 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.stop ref="dialog")
     p Export {{exportTitle}}
   section
     textarea(ref="text") {{text()}}
-    button(@click="copyText") Copy Card Names
+    button(@click="copyText")
+      img.icon.cut(src="@/assets/cut.svg")
+      span Copy Card Names
     .row
       .badge.success(v-if="textIsCopied") Card Names Copied
 

@@ -1,13 +1,28 @@
 <template lang="pug">
 dialog.narrow.invite-others-to-edit(v-if="visible" :open="visible" @click.stop)
+
+  // add by email
+  // share link
+
   section
-    p Invite blah blah
-  //- section
-  //-   p hello
+    p Invite Others to Edit
+
+  section
+    input.textarea(ref="url" v-model="url")
+
+    button(v-if="!canNativeShare")
+      img.icon.cut(src="@/assets/cut.svg")
+      span Copy Invite Url
+    .segmented-buttons(v-if="canNativeShare")
+      button(@click="copyUrl")
+        img.icon.cut(src="@/assets/cut.svg")
+        span Copy Invite Url
+      button(@click="shareUrl")
+        img.icon(src="@/assets/share.svg")
+
 </template>
 
 <script>
-// import privacy from '@/spaces/privacy.js'
 // import utils from '@/utils.js'
 
 export default {
@@ -15,20 +30,38 @@ export default {
   props: {
     visible: Boolean
   },
+  data () {
+    return {
+      urlIsCopied: false
+    }
+  },
   computed: {
-    // privacyStates () { return privacy.states() }
+    // only works in https, supported by safari and android chrome
+    // https://caniuse.com/#feat=web-share
+    canNativeShare () {
+      return Boolean(navigator.share)
+    },
+    url: {
+      get () {
+        return window.location.href
+      }
+    }
+
   },
   methods: {
-    // select (privacyState) {
-    //   this.$emit('closeDialog')
-    // }
   }
 }
 </script>
 
-<style lang="stylus">
+<style lang="stylus" scoped>
 // todo media query for short screens (SE)?
 .invite-others-to-edit
   left initial
   right 8px
+  .textarea
+    margin-top 0
+  // input
+  //   margin-top 10px
+  // textarea
+  //   margin-top 10px
 </style>
