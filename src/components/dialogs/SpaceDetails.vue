@@ -1,10 +1,10 @@
 <template lang="pug">
 dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs")
   section
-    .row(v-if="canEditCurrentSpace" :class="{ 'privacy-row': canEditCurrentSpace && userIsSignedIn }")
+    .row(v-if="canEditCurrentSpace" :class="{ 'privacy-row': canEditCurrentSpace }")
       input(placeholder="name" v-model="spaceName")
 
-      .button-wrap(v-if="userIsSignedIn")
+      .button-wrap(v-if="canEditCurrentSpace")
         button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
           img.icon(v-if="currentSpaceIsPrivate" src="@/assets/lock.svg")
           img.icon(v-else src="@/assets/unlock.svg")
