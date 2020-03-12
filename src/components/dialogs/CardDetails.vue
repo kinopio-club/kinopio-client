@@ -8,6 +8,8 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       v-model="name"
       @keydown.prevent.enter.exact
       @keyup.enter.exact="closeCard"
+      @keyup.alt.enter.exact.stop="insertLineBreak"
+      @keyup.ctrl.enter.exact.stop="insertLineBreak"
       @keyup.stop.esc="closeCardAndFocus"
       @keyup.stop.backspace
       data-type="name"
@@ -86,19 +88,26 @@ export default {
         return this.card.name
       },
       set (newName) {
-        const card = {
-          name: newName,
-          id: this.card.id
-        }
-        this.$store.dispatch('currentSpace/updateCard', card)
-        this.$nextTick(() => {
-          this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.card.id, shouldUpdateApi: true })
-        })
+        this.updateCardName(newName)
       }
     }
   },
   methods: {
-    closeCard () {
+    updateCardName (newName) {
+      const card = {
+        name: newName,
+        id: this.card.id
+      }
+      this.$store.dispatch('currentSpace/updateCard', card)
+      this.$nextTick(() => {
+        this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.card.id, shouldUpdateApi: true })
+      })
+    },
+    insertLineBreak (event) {
+      const newName = this.card.name + '\n'
+      this.updateCardName(newName)
+    },
+    closeCard (event) {
       this.$store.commit('closeAllDialogs')
     },
     closeCardAndFocus () {
