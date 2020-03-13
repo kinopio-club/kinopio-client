@@ -109,8 +109,6 @@ export default {
 .whats-new
   overflow auto
   max-height calc(100vh - 210px)
-  @media(max-width: 360px)
-    left -50px
   article
     position static
     margin-bottom 10px
