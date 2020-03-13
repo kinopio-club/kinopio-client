@@ -11,11 +11,11 @@ dialog.narrow.invite-others-to-edit(v-if="visible" :open="visible" @click.stop)
     input.textarea(ref="url" v-model="url")
 
     button(v-if="!canNativeShare")
-      img.icon.cut(src="@/assets/cut.svg")
+      img.icon.copy(src="@/assets/copy.svg")
       span Copy Invite Url
     .segmented-buttons(v-if="canNativeShare")
       button(@click="copyUrl")
-        img.icon.cut(src="@/assets/cut.svg")
+        img.icon.copy(src="@/assets/copy.svg")
         span Copy Invite Url
       button(@click="shareUrl")
         img.icon(src="@/assets/share.svg")

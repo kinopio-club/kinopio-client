@@ -16,11 +16,11 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
     template(v-if="!spaceIsPrivate")
       input.textarea(ref="url" v-model="url")
       button(@click="copyUrl" v-if="!canNativeShare")
-        img.icon.cut(src="@/assets/cut.svg")
+        img.icon.copy(src="@/assets/copy.svg")
         span Copy Space Url
       .segmented-buttons(v-if="canNativeShare")
         button(@click="copyUrl")
-          img.icon.cut(src="@/assets/cut.svg")
+          img.icon.copy(src="@/assets/copy.svg")
           span Copy Space Url
         button(@click="shareUrl")
           img.icon(src="@/assets/share.svg")
