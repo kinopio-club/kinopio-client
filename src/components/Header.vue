@@ -131,7 +131,7 @@ export default {
     },
     currentSpaceIsTemplate () {
       const id = this.$store.state.currentSpace.id
-      const templateSpaceIds = templates.spaces().map(space => space.spaceId)
+      const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(id)
     },
     spaceIsPrivate () {
