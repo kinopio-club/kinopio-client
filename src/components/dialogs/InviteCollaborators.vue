@@ -5,9 +5,11 @@ dialog.narrow.invite-others-to-edit(v-if="visible" :open="visible" @click.stop)
   // share link
 
   section
-    p Invite Others to Edit
+    p Invite Collaborators
 
   section
+    p Share this url to edit with others
+
     input.textarea(ref="url" v-model="url")
 
     button(v-if="!canNativeShare")
@@ -26,7 +28,7 @@ dialog.narrow.invite-others-to-edit(v-if="visible" :open="visible" @click.stop)
 // import utils from '@/utils.js'
 
 export default {
-  name: 'InviteOthersToEdit',
+  name: 'InviteCollaborators',
   props: {
     visible: Boolean
   },
@@ -58,8 +60,8 @@ export default {
 .invite-others-to-edit
   left initial
   right 8px
-  .textarea
-    margin-top 0
+  // .textarea
+  //   margin-top 0
   // input
   //   margin-top 10px
   // textarea

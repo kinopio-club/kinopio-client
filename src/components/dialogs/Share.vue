@@ -29,12 +29,13 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
 
   section(v-if="spaceHasUrl && canEditSpace")
     .button-wrap
-      button(@click.stop="toggleInviteOthersToEditIsVisible" :class="{ active: inviteOthersToEditIsVisible }") Invite Others to Edit
-      InviteOthersToEdit(:visible="inviteOthersToEditIsVisible")
+      button(@click.stop="toggleInviteCollaboratorsIsVisible" :class="{ active: inviteCollaboratorsIsVisible }")
+        span Invite Collaborators
+      InviteCollaborators(:visible="inviteCollaboratorsIsVisible")
 
   section(v-if="!spaceHasUrl")
     p
-      span To share or invite others,
+      span To share or invite collaborators,
       span.badge.info you need to Sign Up or In
       span for your spaces to be synced and accessible anywhere.
     button(@click="triggerSignUpOrInIsVisible") Sign Up or In
@@ -43,7 +44,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
 
 <script>
 import PrivacyPicker from '@/components/dialogs/PrivacyPicker.vue'
-import InviteOthersToEdit from '@/components/dialogs/InviteOthersToEdit.vue'
+import InviteCollaborators from '@/components/dialogs/InviteCollaborators.vue'
 import utils from '@/utils.js'
 import privacy from '@/spaces/privacy.js'
 
@@ -51,7 +52,7 @@ export default {
   name: 'Share',
   components: {
     PrivacyPicker,
-    InviteOthersToEdit
+    InviteCollaborators
   },
   props: {
     visible: Boolean
@@ -61,7 +62,7 @@ export default {
       urlIsCopied: false,
       spaceHasUrl: false,
       privacyPickerIsVisible: false,
-      inviteOthersToEditIsVisible: false
+      inviteCollaboratorsIsVisible: false
     }
   },
   filters: {
@@ -123,15 +124,15 @@ export default {
       this.closeDialogs()
       this.privacyPickerIsVisible = !isVisible
     },
-    toggleInviteOthersToEditIsVisible () {
-      const isVisible = this.inviteOthersToEditIsVisible
+    toggleInviteCollaboratorsIsVisible () {
+      const isVisible = this.inviteCollaboratorsIsVisible
       this.closeDialogs()
-      this.inviteOthersToEditIsVisible = !isVisible
+      this.inviteCollaboratorsIsVisible = !isVisible
     },
 
     closeDialogs () {
       this.privacyPickerIsVisible = false
-      this.inviteOthersToEditIsVisible = false
+      this.inviteCollaboratorsIsVisible = false
     }
   },
   watch: {
