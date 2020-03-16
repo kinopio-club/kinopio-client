@@ -12,7 +12,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
     template(v-if="!canEditCurrentSpace")
       p {{spaceName}}
       .row(v-if="showInExplore")
-        .badge.status
+        .badge.status.explore-message
           img.icon(src="@/assets/checkmark.svg")
           span Shown in Explore
 
@@ -277,4 +277,6 @@ export default {
   .error-message
     .badge
       display inline-block
+  .explore-message
+    display flex
 </style>

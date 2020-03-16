@@ -2,7 +2,7 @@
 dialog.narrow.space-picker(v-if="visible" :open="visible" @click.stop ref="dialog")
   section.results-section
     Loader(:visible="loading")
-    SpaceList(:spaces="spaces" @selectSpace="selectSpace" :selectedSpace="selectedSpace")
+    SpaceList(:spaces="spaces" :selectedSpace="selectedSpace" @selectSpace="selectSpace")
 </template>
 
 <script>
