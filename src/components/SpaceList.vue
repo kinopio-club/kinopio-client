@@ -11,7 +11,7 @@ ul.results-list.space-list
         span {{space.name}}
         .badge.status(v-if="showInExplore(space)")
           img.icon(src="@/assets/checkmark.svg")
-        img.icon(v-if="spaceIsNotClosed(space)" :src="privacyIcon(space)")
+        img.icon.privacy-icon(v-if="spaceIsNotClosed(space)" :src="privacyIcon(space)")
 </template>
 
 <script>
@@ -57,8 +57,16 @@ export default {
       const privacyState = privacy.states().find(state => {
         return state.name === space.privacy
       })
-      return require(`@/assets/${privacyState.icon}.svg`)
+      if (privacyState) {
+        return require(`@/assets/${privacyState.icon}.svg`)
+      }
     },
+    // privacyBadgeColor (space) {
+    //   const privacyState = privacy.states().find(state => {
+    //     return state.name === space.privacy
+    //   })
+    //   return privacyState.color
+    // },
     showInExplore (space) {
       if (this.hideExploreBadge) { return }
       if (space.privacy === 'private') { return }
@@ -93,6 +101,9 @@ export default {
     overflow hidden
     .icon
       margin-left 6px
+
+  .privacy-icon
+    height 12px
 
   .user
     margin-right 6px

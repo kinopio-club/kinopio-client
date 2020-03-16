@@ -6,7 +6,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
 
       .button-wrap(v-if="canEditCurrentSpace")
         button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
-          img.icon(:src="privacyIcon")
+          img.icon.privacy-icon(:src="privacyIcon")
         PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs" @updateSpaces="updateSpaces")
 
     template(v-if="!canEditCurrentSpace")
@@ -279,4 +279,7 @@ export default {
       display inline-block
   .explore-message
     display flex
+
+  .privacy-icon
+    height 12px
 </style>
