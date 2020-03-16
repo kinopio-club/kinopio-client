@@ -271,7 +271,7 @@ export default {
       margin-left 6px
       padding 0
       height 24px
-      width 20px
+      width 24px
       display flex
       justify-content center
   .error-message
@@ -279,7 +279,4 @@ export default {
       display inline-block
   .explore-message
     display flex
-
-  .privacy-icon
-    height 12px
 </style>

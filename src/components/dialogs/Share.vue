@@ -7,7 +7,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
       .button-wrap.privacy-wrap
         button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
           .badge(:class="privacyState.color")
-            img.icon(:src="privacyIcon(privacyState).path")
+            img.icon(:src="privacyIcon(privacyState).path" :class="privacyState.name")
             span {{privacyState.name | capitalize}}
           p.description {{privacyState.description | capitalize}}
         PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs")
@@ -166,6 +166,8 @@ export default {
     margin-top 10px
   .description
     margin-top 3px
+  .icon.open
+    vertical-align -2px
 
   dialog.privacy-picker
     left initial

@@ -5,7 +5,7 @@ dialog.narrow.privacy-picker(v-if="visible" :open="visible" @click.stop)
       template(v-for="(privacyState in privacyStates")
         li(:class="{ active: privacyStateIsActive(privacyState) }" @click="select(privacyState)")
           .badge(:class="privacyState.color")
-            img.icon(:src="privacyIcon(privacyState).path")
+            img.icon(:src="privacyIcon(privacyState).path" :class="privacyState.name")
             span {{privacyState.name | capitalize}}
           p.description {{privacyState.description | capitalize}}
 </template>
@@ -60,4 +60,6 @@ export default {
     max-height calc(92vh - 120px)
   .description
     margin-top 3px
+  .icon.open
+    vertical-align -2px
 </style>

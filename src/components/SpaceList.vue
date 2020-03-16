@@ -50,7 +50,6 @@ export default {
       this.$emit('selectSpace', space)
     },
     spaceIsNotClosed (space) {
-      console.log(space.privacy)
       return space.privacy !== 'closed'
     },
     privacyIcon (space) {
@@ -104,6 +103,7 @@ export default {
 
   .privacy-icon
     height 12px
+    vertical-align -2px
 
   .user
     margin-right 6px
