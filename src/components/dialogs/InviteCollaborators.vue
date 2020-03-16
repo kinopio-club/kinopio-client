@@ -13,11 +13,9 @@ dialog.narrow.invite-others-to-edit(v-if="visible" :open="visible" @click.stop)
     input.textarea(ref="url" v-model="url")
 
     button(v-if="!canNativeShare")
-      img.icon.copy(src="@/assets/copy.svg")
       span Copy Invite Url
     .segmented-buttons(v-if="canNativeShare")
       button(@click="copyUrl")
-        img.icon.copy(src="@/assets/copy.svg")
         span Copy Invite Url
       button(@click="shareUrl")
         img.icon(src="@/assets/share.svg")
@@ -60,8 +58,8 @@ export default {
 .invite-others-to-edit
   left initial
   right 8px
-  // .textarea
-  //   margin-top 0
+  .textarea
+    margin-top 10px
   // input
   //   margin-top 10px
   // textarea

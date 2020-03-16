@@ -11,9 +11,7 @@ ul.results-list.space-list
         span {{space.name}}
         .badge.status(v-if="showInExplore(space)")
           img.icon(src="@/assets/checkmark.svg")
-
-        //- todo used modified privacy icon
-        img.icon(v-if="spaceIsPrivate(space)" src="@/assets/lock.svg")
+        img.icon(v-if="spaceIsNotClosed(space)" :src="privacyIcon(space)")
 </template>
 
 <script>
@@ -33,12 +31,6 @@ export default {
     hideExploreBadge: Boolean
   },
   methods: {
-    privacyIcon (space) {
-      const privacyState = privacy.states().find(state => {
-        return state.name === space.privacy
-      })
-      return require(`@/assets/${privacyState.icon}.svg`)
-    },
     spaceIsActive (space) {
       if (this.selectedSpace) {
         return Boolean(this.selectedSpace.id === space.id)
@@ -57,9 +49,15 @@ export default {
     selectSpace (space) {
       this.$emit('selectSpace', space)
     },
-    // todo replace w privacyIcon
-    spaceIsPrivate (space) {
-      return space.privacy === 'private'
+    spaceIsNotClosed (space) {
+      console.log(space.privacy)
+      return space.privacy !== 'closed'
+    },
+    privacyIcon (space) {
+      const privacyState = privacy.states().find(state => {
+        return state.name === space.privacy
+      })
+      return require(`@/assets/${privacyState.icon}.svg`)
     },
     showInExplore (space) {
       if (this.hideExploreBadge) { return }
@@ -69,6 +67,7 @@ export default {
     user (space) {
       return space.users[0]
     }
+
   }
 }
 </script>
