@@ -5,8 +5,7 @@ dialog.narrow.privacy-picker(v-if="visible" :open="visible" @click.stop)
       template(v-for="(privacyState in privacyStates")
         li(:class="{ active: privacyStateIsActive(privacyState) }" @click="select(privacyState)")
           .badge(:class="privacyState.color")
-            img.icon(v-if="spaceIsPrivate(privacyState)" src="@/assets/lock.svg")
-            img.icon(v-else src="@/assets/unlock.svg")
+            img.icon(:src="privacyIcon(privacyState).path")
             span {{privacyState.name | capitalize}}
           p.description {{privacyState.description | capitalize}}
 </template>
@@ -40,6 +39,11 @@ export default {
       this.$store.dispatch('currentSpace/updateSpace', { privacy: privacyState.name })
       this.$emit('closeDialog')
       this.$emit('updateSpaces')
+    },
+    privacyIcon (privacyState) {
+      return {
+        path: require(`@/assets/${privacyState.icon}.svg`)
+      }
     }
   }
 }

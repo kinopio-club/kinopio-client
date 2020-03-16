@@ -5,17 +5,20 @@ export default {
       {
         name: 'open',
         description: 'Everyone can edit',
-        color: 'success'
+        color: 'success',
+        icon: 'open'
       },
       {
         name: 'closed',
         description: 'everyone can view, only you and collaborators can edit',
-        color: 'info'
+        color: 'info',
+        icon: 'unlock'
       },
       {
         name: 'private',
         description: 'only you and collaborators can view and edit',
-        color: 'danger'
+        color: 'danger',
+        icon: 'lock'
       }
     ]
   }

@@ -7,8 +7,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
       .button-wrap.privacy-wrap
         button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
           .badge(:class="privacyState.color")
-            img.icon(v-if="spaceIsPrivate" src="@/assets/lock.svg")
-            img.icon(v-else src="@/assets/unlock.svg")
+            img.icon(:src="privacyIcon(privacyState).path")
             span {{privacyState.name | capitalize}}
           p.description {{privacyState.description | capitalize}}
         PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs")
@@ -129,7 +128,11 @@ export default {
       this.closeDialogs()
       this.inviteCollaboratorsIsVisible = !isVisible
     },
-
+    privacyIcon (privacyState) {
+      return {
+        path: require(`@/assets/${privacyState.icon}.svg`)
+      }
+    },
     closeDialogs () {
       this.privacyPickerIsVisible = false
       this.inviteCollaboratorsIsVisible = false

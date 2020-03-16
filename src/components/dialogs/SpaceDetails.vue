@@ -1,13 +1,16 @@
 <template lang="pug">
 dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs")
   section
-    .row(v-if="canEditCurrentSpace" :class="{ 'privacy-row': canEditCurrentSpace }")
+    .row.privacy-row(v-if="canEditCurrentSpace")
       input(placeholder="name" v-model="spaceName")
 
       .button-wrap(v-if="canEditCurrentSpace")
         button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
-          img.icon(v-if="currentSpaceIsPrivate" src="@/assets/lock.svg")
-          img.icon(v-else src="@/assets/unlock.svg")
+          //- img.icon(v-if="currentSpaceIsPrivate" src="@/assets/lock.svg")
+          //- img.icon(v-else src="@/assets/unlock.svg")
+          //- .badge.info
+          //- .button-wrap
+          img.icon(:src="privacyIcon")
         PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs" @updateSpaces="updateSpaces")
 
     template(v-if="!canEditCurrentSpace")
@@ -79,6 +82,7 @@ import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
 import templates from '@/spaces/templates.js'
 import PrivacyPicker from '@/components/dialogs/PrivacyPicker.vue'
+import privacy from '@/spaces/privacy.js'
 
 export default {
   name: 'SpaceDetails',
@@ -164,6 +168,12 @@ export default {
     },
     userIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
+    },
+    privacyIcon () {
+      const privacyState = privacy.states().find(state => {
+        return state.name === this.$store.state.currentSpace.privacy
+      })
+      return require(`@/assets/${privacyState.icon}.svg`)
     }
   },
   methods: {
@@ -292,9 +302,11 @@ export default {
     margin-bottom 6px
     button
       margin-left 6px
-    .icon
-      width 13px
-      height 11px
+      padding 0
+      height 24px
+      width 20px
+      display flex
+      justify-content center
 
   .badge.status
     display inline-flex
