@@ -1,4 +1,4 @@
-// card frame options for CardFrames and FrameDetails
+// card frame options for CardFrames and FramePicker
 
 const frames = [
   {
