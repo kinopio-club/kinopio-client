@@ -2,7 +2,7 @@
 dialog.narrow.space-picker(v-if="visible" :open="visible" @click.stop ref="dialog")
   section.results-section
     Loader(:visible="loading")
-    SpaceList(:spaces="spaces" @selectSpace="selectSpace")
+    SpaceList(:spaces="spaces" @selectSpace="selectSpace" :selectedSpace="selectedSpace")
 </template>
 
 <script>
@@ -23,8 +23,7 @@ export default {
     selectedSpace: Object,
     shouldExcludeCurrentSpace: Boolean,
     userSpaces: Array,
-    loading: Boolean,
-    shouldCloseWhenSelecting: Boolean
+    loading: Boolean
   },
   data () {
     return {
@@ -46,7 +45,7 @@ export default {
   },
   methods: {
     excludeCurrentSpace () {
-      if (!this.excludeCurrentSpace) { return }
+      if (!this.shouldExcludeCurrentSpace) { return }
       const currentSpace = this.$store.state.currentSpace
       this.spaces = this.spaces.filter(space => space.id !== currentSpace.id)
     },
@@ -67,9 +66,6 @@ export default {
     },
     selectSpace (space) {
       this.$emit('selectSpace', space)
-      if (this.shouldCloseWhenSelecting) {
-        this.$emit('closeDialog')
-      }
     },
     scrollIntoView () {
       const element = this.$refs.dialog

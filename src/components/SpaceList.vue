@@ -1,9 +1,13 @@
 <template lang="pug">
 ul.results-list.space-list
   template(v-for="(space in spaces")
-    li(@click="selectSpace(space)" :class="{ active: spaceIsCurrentSpace(space) }" :key="space.id" tabindex="0" v-on:keyup.enter="selectSpace(space)")
-      .badge.info.template-badge(v-show="spaceIsTemplate(space)")
-        span Template
+    li(@click="selectSpace(space)" :class="{ active: spaceIsActive(space) }" :key="space.id" tabindex="0" v-on:keyup.enter="selectSpace(space)")
+
+      template(v-if="showCategory")
+        .badge.info.template-badge {{space.category}}
+      template(v-else)
+        .badge.info.template-badge(v-show="spaceIsTemplate(space)") Template
+
       .name
         span {{space.name}}
         //-  refine shouldShowInExploreBadge, based on param and state
@@ -20,7 +24,9 @@ import templates from '@/spaces/templates.js'
 export default {
   name: 'SpaceList',
   props: {
-    spaces: Array
+    spaces: Array,
+    showCategory: Boolean,
+    selectedSpace: Object
   },
   methods: {
     privacyIcon (space) {
@@ -28,6 +34,13 @@ export default {
         return state.name === space.privacy
       })
       return require(`@/assets/${privacyState.icon}.svg`)
+    },
+    spaceIsActive (space) {
+      if (this.selectedSpace) {
+        return Boolean(this.selectedSpace.id === space.id)
+      } else {
+        return this.spaceIsCurrentSpace(space)
+      }
     },
     spaceIsCurrentSpace (space) {
       const currentSpace = this.$store.state.currentSpace.id

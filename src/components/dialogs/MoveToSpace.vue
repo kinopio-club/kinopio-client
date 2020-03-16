@@ -7,7 +7,7 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
       .row
         .button-wrap
           button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}") {{selectedSpace.name}}
-          SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" :shouldExcludeCurrentSpace="true" :shouldCloseWhenSelecting="true" @selectSpace="updateSelectedSpace" @closeDialog="closeDialogs")
+          SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" @selectSpace="updateSelectedSpace")
       .row(v-if="spaces.length")
         label(:class="{active: shouldSwitchToSpace}" @click.prevent="toggleShouldSwitchToSpace" @keydown.stop.enter="toggleShouldSwitchToSpace")
           input(type="checkbox" v-model="shouldSwitchToSpace")
@@ -137,6 +137,7 @@ export default {
     },
     updateSelectedSpace (space) {
       this.selectedSpace = space
+      this.spacePickerIsVisible = false
     },
     scrollIntoView () {
       const element = this.$refs.dialog

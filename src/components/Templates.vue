@@ -12,13 +12,7 @@
       input(placeholder="Search" v-model="spaceFilter" ref="filterInput")
       button.borderless.clear-input-wrap(@click="clearFilter")
         img.icon(src="@/assets/add.svg")
-
-    ul.results-list
-      template(v-for="(space in spacesFiltered")
-        li(:data-full-name="space.fullName" tabindex="0" @click="changeSpace(space)")
-          //- ^TODO^ v-on:keyup.enter="select(space) method
-          .badge.info {{space.category}}
-          span {{space.name}}
+    SpaceList(:spaces="spacesFiltered" :showCategory="true" @selectSpace="changeSpace")
 </template>
 
 <script>
@@ -26,11 +20,13 @@ import fuzzy from 'fuzzy'
 
 import templates from '@/spaces/templates.js'
 import TemplateCategoryPicker from '@/components/dialogs/TemplateCategoryPicker.vue'
+import SpaceList from '@/components/SpaceList.vue'
 
 export default {
   name: 'Templates',
   components: {
-    TemplateCategoryPicker
+    TemplateCategoryPicker,
+    SpaceList
   },
   props: {
     visible: Boolean
