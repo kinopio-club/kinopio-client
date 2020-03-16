@@ -6,10 +6,6 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
 
       .button-wrap(v-if="canEditCurrentSpace")
         button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
-          //- img.icon(v-if="currentSpaceIsPrivate" src="@/assets/lock.svg")
-          //- img.icon(v-else src="@/assets/unlock.svg")
-          //- .badge.info
-          //- .button-wrap
           img.icon(:src="privacyIcon")
         PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs" @updateSpaces="updateSpaces")
 
@@ -62,16 +58,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
       input(placeholder="Search" v-model="spaceFilter" ref="filterInput")
       button.borderless.clear-input-wrap(@click="clearFilter")
         img.icon(src="@/assets/add.svg")
-    ul.results-list
-      template(v-for="(space in spacesFiltered")
-        li(@click="changeSpace(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id" tabindex="0" v-on:keyup.enter="changeSpace(space)")
-          .badge.info.template-badge(v-show="spaceIsTemplate(space.id)")
-            span Template
-          .name
-            span {{space.name}}
-            .badge.status(v-if="shouldShowInExploreBadge(space)")
-              img.icon(src="@/assets/checkmark.svg")
-            img.icon(v-if="spaceIsPrivate(space)" src="@/assets/lock.svg")
+    SpaceList(:spaces="spacesFiltered" @selectSpace="changeSpace")
 </template>
 
 <script>
@@ -80,16 +67,17 @@ import fuzzy from 'fuzzy'
 import cache from '@/cache.js'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
-import templates from '@/spaces/templates.js'
 import PrivacyPicker from '@/components/dialogs/PrivacyPicker.vue'
 import privacy from '@/spaces/privacy.js'
+import SpaceList from '@/components/SpaceList.vue'
 
 export default {
   name: 'SpaceDetails',
   components: {
     Export,
     Import,
-    PrivacyPicker
+    PrivacyPicker,
+    SpaceList
   },
   props: {
     visible: Boolean
@@ -214,23 +202,10 @@ export default {
       this.importIsVisible = false
       this.privacyPickerIsVisible = false
     },
-    toggleTemplatesIsVisible () {
-      const isVisible = this.templatesIsVisible
-      this.closeDialogs()
-      this.templatesIsVisible = !isVisible
-    },
     togglePrivacyPickerIsVisible () {
       const isVisible = this.privacyPickerIsVisible
       this.closeDialogs()
       this.privacyPickerIsVisible = !isVisible
-    },
-    spaceIsActive (spaceId) {
-      const currentSpace = this.$store.state.currentSpace.id
-      return Boolean(currentSpace === spaceId)
-    },
-    spaceIsTemplate (spaceId) {
-      const templateSpaceIds = templates.spaces().map(space => space.id)
-      return templateSpaceIds.includes(spaceId)
     },
     addSpace () {
       this.$store.dispatch('currentSpace/addSpace')
@@ -241,9 +216,6 @@ export default {
     changeSpace (space) {
       this.clearErrors()
       this.$store.dispatch('currentSpace/changeSpace', space)
-    },
-    spaceIsPrivate (space) {
-      return space.privacy === 'private'
     },
     changeToLastSpace () {
       if (this.spaces.length) {
@@ -272,10 +244,6 @@ export default {
     clearFilter () {
       this.filter = ''
     },
-    shouldShowInExploreBadge (space) {
-      if (space.privacy === 'private') { return }
-      return space.showInExplore
-    },
     clearErrors () {
       this.error.signUpToShowInExplore = false
       this.error.editSpaceToShowInExplore = false
@@ -295,9 +263,8 @@ export default {
 </script>
 
 <style lang="stylus">
+
 .space-details
-  .template-badge
-    flex none
   .privacy-row
     margin-bottom 6px
     button
@@ -307,25 +274,6 @@ export default {
       width 20px
       display flex
       justify-content center
-
-  .badge.status
-    display inline-flex
-    margin-top 8px
-    .icon
-      margin-top -1px
-
-  .results-section
-    .badge.status
-      margin 0
-      margin-left 6px
-      vertical-align middle
-      img
-        margin 0
-    .name
-      white-space wrap
-      overflow hidden
-      .icon
-        margin-left 6px
   .error-message
     .badge
       display inline-block
