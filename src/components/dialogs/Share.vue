@@ -160,17 +160,11 @@ export default {
   .success-message
     margin-top 10px
   .textarea
-    margin-top 10px
-    // border-bottom 0
     background-color var(--secondary-background)
     border 0
     border-radius 3px
     padding 4px
-
-    // margin-bottom 4px
-    // height 50px
-
-  .privacy-wrap + textarea
+  .privacy-wrap + .textarea
     margin-top 10px
   .description
     margin-top 3px

@@ -10,13 +10,12 @@ import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
-import SpaceList from '@/components/SpaceList.vue'
 
 export default {
   name: 'SpacePicker',
   components: {
     Loader,
-    SpaceList
+    SpaceList: () => import('@/components/SpaceList.vue')
   },
   props: {
     visible: Boolean,

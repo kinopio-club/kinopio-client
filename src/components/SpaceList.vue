@@ -3,17 +3,16 @@ ul.results-list.space-list
   template(v-for="(space in spaces")
     li(@click="selectSpace(space)" :class="{ active: spaceIsActive(space) }" :key="space.id" tabindex="0" v-on:keyup.enter="selectSpace(space)")
 
-      template(v-if="showCategory")
-        .badge.info.template-badge {{space.category}}
-      template(v-else)
-        .badge.info.template-badge(v-show="spaceIsTemplate(space)") Template
+      User(v-if="showUser" :user="user(space)" :isClickable="false" :key="user(space).id")
+      .badge.info.template-badge(v-if="showCategory") {{space.category}}
+      .badge.info.template-badge(v-else-if="spaceIsTemplate(space)") Template
 
       .name
         span {{space.name}}
-        //-  refine shouldShowInExploreBadge, based on param and state
-        .badge.status(v-if="shouldShowInExploreBadge(space)")
+        .badge.status(v-if="showInExplore(space)")
           img.icon(src="@/assets/checkmark.svg")
-        //- used modified privacy icon
+
+        //- todo used modified privacy icon
         img.icon(v-if="spaceIsPrivate(space)" src="@/assets/lock.svg")
 </template>
 
@@ -23,10 +22,15 @@ import templates from '@/spaces/templates.js'
 
 export default {
   name: 'SpaceList',
+  components: {
+    User: () => import('@/components/User.vue')
+  },
   props: {
     spaces: Array,
+    selectedSpace: Object,
     showCategory: Boolean,
-    selectedSpace: Object
+    showUser: Boolean,
+    hideExploreBadge: Boolean
   },
   methods: {
     privacyIcon (space) {
@@ -53,14 +57,17 @@ export default {
     selectSpace (space) {
       this.$emit('selectSpace', space)
     },
-    // replace w privacyIcon
+    // todo replace w privacyIcon
     spaceIsPrivate (space) {
       return space.privacy === 'private'
     },
-    // refine
-    shouldShowInExploreBadge (space) {
+    showInExplore (space) {
+      if (this.hideExploreBadge) { return }
       if (space.privacy === 'private') { return }
       return space.showInExplore
+    },
+    user (space) {
+      return space.users[0]
     }
   }
 }
@@ -69,6 +76,7 @@ export default {
 <style lang="stylus">
 .space-list
   .template-badge
+    margin-left 0
     flex none
 
   .badge.status
@@ -81,9 +89,14 @@ export default {
       margin 0
 
   .name
+    margin 0
     white-space wrap
     overflow hidden
     .icon
       margin-left 6px
+
+  .user
+    margin-right 6px
+    vertical-align middle
 
 </style>
