@@ -43,6 +43,7 @@ import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Favorites from '@/components/dialogs/Favorites.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
+import utils from '@/utils.js'
 
 export default {
   name: 'UserDetails',
@@ -161,6 +162,11 @@ export default {
       this.userSpaces = []
     },
     changeSpace (space) {
+      // fetch remote space even if user is not signed in
+      utils.updateWindowUrlAndTitle({
+        space: space,
+        shouldUpdateUrl: true
+      })
       this.$store.dispatch('currentSpace/changeSpace', space)
     }
   },
