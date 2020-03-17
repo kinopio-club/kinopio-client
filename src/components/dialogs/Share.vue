@@ -3,7 +3,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
   section
     p Share
   section(v-if="spaceHasUrl")
-    template(v-if="canEditSpace")
+    template(v-if="isSpaceUserOrCollaborator")
       .button-wrap.privacy-wrap
         button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
           .badge(:class="privacyState.color")
@@ -92,6 +92,10 @@ export default {
       get () {
         return window.location.href
       }
+    },
+    isSpaceUserOrCollaborator () {
+      const currentSpace = this.$store.state.currentSpace
+      return this.$store.getters['currentUser/isSpaceUserOrCollaborator'](currentSpace)
     }
   },
   methods: {
