@@ -216,11 +216,11 @@ export default {
     },
     changeSpace (space) {
       this.clearErrors()
-      this.$store.dispatch('currentSpace/changeSpace', space)
+      this.$store.dispatch('currentSpace/changeSpace', { space })
     },
     changeToLastSpace () {
       if (this.spaces.length) {
-        this.$store.dispatch('currentSpace/changeSpace', this.spaces[0])
+        this.$store.dispatch('currentSpace/changeSpace', { space: this.spaces[0] })
       } else {
         this.addSpace()
       }

@@ -358,7 +358,9 @@ export default {
         } else {
           context.dispatch('checkIfShouldNotifySpaceIsRemoved', remoteSpace)
         }
-        if (cache.getAllSpaces().length) { context.commit('notifyNewUser', false, { root: true }) } else {
+        if (cache.getAllSpaces().length) {
+          context.commit('notifyNewUser', false, { root: true })
+        } else {
           context.commit('notifyNewUser', true, { root: true })
         }
       }
@@ -384,7 +386,13 @@ export default {
         body: updates
       }, { root: true })
     },
-    changeSpace: async (context, space) => {
+    changeSpace: async (context, { space, isRemote }) => {
+      if (isRemote) {
+        utils.updateWindowUrlAndTitle({
+          space: space,
+          shouldUpdateUrl: true
+        })
+      }
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
       await context.dispatch('loadSpace', space)

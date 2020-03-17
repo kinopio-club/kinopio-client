@@ -11,7 +11,6 @@
 <script>
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
-import utils from '@/utils.js'
 
 export default {
   name: 'NewSpaces',
@@ -26,12 +25,7 @@ export default {
   },
   methods: {
     changeSpace (space) {
-      // fetch remote space even if user is not signed in
-      utils.updateWindowUrlAndTitle({
-        space: space,
-        shouldUpdateUrl: true
-      })
-      this.$store.dispatch('currentSpace/changeSpace', space)
+      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
     }
   }
 }

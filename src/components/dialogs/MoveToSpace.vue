@@ -93,7 +93,7 @@ export default {
       this.$store.commit('clearMultipleSelected')
       this.$store.commit('closeAllDialogs')
       if (this.shouldSwitchToSpace) {
-        this.$store.dispatch('currentSpace/changeSpace', this.selectedSpace)
+        this.$store.dispatch('currentSpace/changeSpace', { space: this.selectedSpace })
       }
       this.$store.commit('addNotification', { message: `Cards Moved to ${this.selectedSpace.name}`, type: 'success' })
     },

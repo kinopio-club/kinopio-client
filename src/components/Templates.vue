@@ -81,7 +81,7 @@ export default {
   },
   methods: {
     changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', space)
+      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
     },
     clearFilter () {
       this.filter = ''
