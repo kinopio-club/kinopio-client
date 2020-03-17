@@ -1,22 +1,22 @@
 <template lang="pug">
 dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs")
   section
-    .row.privacy-row(v-if="canEditCurrentSpace")
+    .row.privacy-row(v-if="isSpaceUserOrCollaborator")
       input(placeholder="name" v-model="spaceName")
 
-      .button-wrap(v-if="canEditCurrentSpace")
+      .button-wrap(v-if="isSpaceUserOrCollaborator")
         button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
           img.icon.privacy-icon(:src="privacyIcon")
         PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs" @updateSpaces="updateSpaces")
 
-    template(v-if="!canEditCurrentSpace")
+    template(v-if="!isSpaceUserOrCollaborator")
       p {{spaceName}}
       .row(v-if="showInExplore")
         .badge.status.explore-message
           img.icon(src="@/assets/checkmark.svg")
           span Shown in Explore
 
-    .row(v-if="canEditCurrentSpace && !currentSpaceIsPrivate")
+    .row(v-if="isSpaceUserOrCollaborator && !currentSpaceIsPrivate")
       label(:class="{active: showInExplore}" @click.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
         input(type="checkbox" v-model="showInExplore")
         span Show in Explore
@@ -33,7 +33,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
         span To show this,
         span.badge.info you need to edit and rename this space first
 
-    button(v-if="canEditCurrentSpace" @click="removeCurrentSpace")
+    button(v-if="isSpaceUserOrCollaborator" @click="removeCurrentSpace")
       img.icon(src="@/assets/remove.svg")
       span Remove
 
@@ -142,8 +142,9 @@ export default {
     exportScope () {
       return 'space'
     },
-    canEditCurrentSpace () {
-      return this.$store.getters['currentUser/canEditCurrentSpace']
+    isSpaceUserOrCollaborator () {
+      const currentSpace = this.$store.state.currentSpace
+      return this.$store.getters['currentUser/isSpaceUserOrCollaborator'](currentSpace)
     },
     isNumerousSpaces () {
       return Boolean(this.spaces.length >= 5)
