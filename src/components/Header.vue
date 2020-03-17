@@ -13,7 +13,7 @@ header
         .badge.info.template-badge(v-show="currentSpaceIsTemplate")
           span Template
         span {{currentSpaceName}}
-        img.icon.lock(v-if="spaceIsPrivate" src="@/assets/lock.svg")
+        img.icon.privacy-icon(v-if="spaceIsNotClosed" :src="privacyIcon" :class="privacyName")
         Loader(:visible="isLoadingSpace")
       SpaceDetails(:visible="spaceDetailsIsVisible")
       ImportArenaChannel(:visible="importArenaChannelIsVisible")
@@ -52,6 +52,7 @@ import Loader from '@/components/Loader.vue'
 import templates from '@/spaces/templates.js'
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
+import privacy from '@/spaces/privacy.js'
 
 export default {
   name: 'Header',
@@ -134,8 +135,25 @@ export default {
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(id)
     },
-    spaceIsPrivate () {
-      return this.$store.state.currentSpace.privacy === 'private'
+    spaceIsNotClosed () {
+      const space = this.$store.state.currentSpace
+      return space.privacy !== 'closed'
+    },
+    privacyIcon () {
+      const space = this.$store.state.currentSpace
+      const privacyState = privacy.states().find(state => {
+        return state.name === space.privacy
+      })
+      if (!privacyState) { return }
+      return require(`@/assets/${privacyState.icon}.svg`)
+    },
+    privacyName () {
+      const space = this.$store.state.currentSpace
+      const privacyState = privacy.states().find(state => {
+        return state.name === space.privacy
+      })
+      if (!privacyState) { return }
+      return privacyState.name
     }
   },
   methods: {
@@ -223,6 +241,12 @@ header
       max-width initial
     > .keyboard-shortcuts
       max-height calc(100vh - 100px)
+    > button
+      .privacy-icon
+        margin-left 3px
+        &.open
+          vertical-align -2px
+
   aside
     display flex
     flex-direction column
@@ -235,6 +259,4 @@ header
     justify-content flex-end
     > .button-wrap
       display inline-block
-  .lock
-    margin-left 6px
 </style>
