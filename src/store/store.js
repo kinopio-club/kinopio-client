@@ -77,7 +77,7 @@ export default new Vuex.Store({
     notifyConnectionError: false,
     notifySpaceIsRemoved: false,
     notifyNewUser: false,
-    notifySignUpToEditOpenSpace: true,
+    notifySignUpToEditOpenSpace: false,
 
     // filters
     filteredConnectionTypeIds: [],

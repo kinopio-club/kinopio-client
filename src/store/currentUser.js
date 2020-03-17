@@ -26,8 +26,10 @@ export default {
     isSignedIn: (state) => {
       return Boolean(state.apiKey)
     },
-    canEditSpace: (state) => (space) => {
+    canEditSpace: (state, getters) => (space) => {
       const spaceIsOpen = space.privacy === 'open'
+      const userIsSignedIn = getters.isSignedIn
+      const canEditOpenSpace = spaceIsOpen && userIsSignedIn
       let userIsInSpace
       // remoteSpace has space.users, cachedSpace has space.userId
       if (space.users) {
@@ -37,14 +39,16 @@ export default {
       } else {
         userIsInSpace = space.userId === state.id
       }
-      return Boolean(spaceIsOpen || userIsInSpace)
+      return Boolean(canEditOpenSpace || userIsInSpace)
     },
     canEditCurrentSpace: (state, getters, rootState) => {
       const spaceIsOpen = rootState.currentSpace.privacy === 'open'
+      const userIsSignedIn = getters.isSignedIn
+      const canEditOpenSpace = spaceIsOpen && userIsSignedIn
       const userIsInSpace = rootState.currentSpace.users.find(user => {
         return user.id === state.id
       })
-      return Boolean(spaceIsOpen || userIsInSpace)
+      return Boolean(canEditOpenSpace || userIsInSpace)
     },
     isSpaceUserOrCollaborator: (state) => (space) => {
       // todo add collaborator

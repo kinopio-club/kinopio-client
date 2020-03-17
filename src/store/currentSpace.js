@@ -346,6 +346,7 @@ export default {
       if (remoteSpace) {
         context.commit('restoreSpace', remoteSpace)
         context.dispatch('history/playback', null, { root: true })
+        context.dispatch('checkIfShouldNotifySignUpToEditOpenSpace', remoteSpace)
         utils.updateWindowUrlAndTitle({
           space: remoteSpace,
           shouldUpdateUrl: true
@@ -442,6 +443,15 @@ export default {
         context.commit('notifySpaceIsRemoved', true, { root: true })
       } else {
         context.commit('notifySpaceIsRemoved', false, { root: true })
+      }
+    },
+    checkIfShouldNotifySignUpToEditOpenSpace: (context, space) => {
+      const spaceIsOpen = space.privacy === 'open'
+      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      if (spaceIsOpen && !userIsSignedIn) {
+        context.commit('notifySignUpToEditOpenSpace', true, { root: true })
+      } else {
+        context.commit('notifySignUpToEditOpenSpace', false, { root: true })
       }
     },
 
