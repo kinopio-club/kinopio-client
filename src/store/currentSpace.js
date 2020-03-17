@@ -319,8 +319,8 @@ export default {
       // only restore current space
       if (remoteSpace.id !== context.state.id) { return }
       // only cache spaces you can edit
-      const userCanEditSpace = context.rootGetters['currentUser/canEditSpace'](remoteSpace)
-      if (userCanEditSpace && !remoteSpace.isRemoved) {
+      const isSpaceUserOrCollaborator = context.rootGetters['currentUser/isSpaceUserOrCollaborator'](remoteSpace)
+      if (isSpaceUserOrCollaborator && !remoteSpace.isRemoved) {
         console.log('🌌', remoteSpace)
         cache.saveSpace(remoteSpace)
       }
@@ -334,8 +334,6 @@ export default {
     loadSpace: async (context, space) => {
       const emptySpace = { id: space.id, cards: [], connections: [] }
       const cachedSpace = cache.space(space.id)
-      const shouldUpdateUrl = Boolean(context.rootState.spaceUrlToLoad)
-      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       context.commit('notifySpaceNotFound', false, { root: true })
       context.commit('notifyConnectionError', false, { root: true })
       // restore local
@@ -350,8 +348,7 @@ export default {
         context.dispatch('history/playback', null, { root: true })
         utils.updateWindowUrlAndTitle({
           space: remoteSpace,
-          shouldUpdateUrl,
-          userIsSignedIn
+          shouldUpdateUrl: true
         })
         if (!space.isRemoved && remoteSpace.isRemoved) {
           context.commit('notifySpaceIsRemoved', false, { root: true })
@@ -363,6 +360,11 @@ export default {
         } else {
           context.commit('notifyNewUser', true, { root: true })
         }
+      } else {
+        utils.updateWindowUrlAndTitle({
+          space,
+          shouldUpdateUrl: false
+        })
       }
       context.dispatch('checkIfShouldNotifyReadOnly')
       context.commit('spaceUrlToLoad', '', { root: true })
