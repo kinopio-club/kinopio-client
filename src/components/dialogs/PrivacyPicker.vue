@@ -25,7 +25,15 @@ export default {
     }
   },
   computed: {
-    privacyStates () { return privacy.states() }
+    privacyStates () {
+      const userIsSignedIn = this.$store.getters['currentUser/isSignedIn']
+      const privacyStates = privacy.states()
+      if (userIsSignedIn) {
+        return privacyStates
+      } else {
+        return privacyStates.slice(1, 3)
+      }
+    }
   },
   methods: {
     spaceIsPrivate (privacyState) {
