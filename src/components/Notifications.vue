@@ -22,10 +22,10 @@ aside.notifications(@click="closeAllDialogs")
       button(@click="triggerSpaceDetailsVisible") Your Spaces
       button(v-if="!userIsSignedIn" @click.stop="triggerSignUpOrInIsVisible") Sign Up or In
 
-  .persistent-item(v-if="notifySignUpToEditOpenSpace")
+  .persistent-item.success(v-if="notifySignUpToEditOpenSpace")
     p
       img.icon.open(src="@/assets/open.svg")
-      span Sign Up or In to edit this open space
+      span This space is open to edits, but you'll need to sign up or in first
     .row
       button(@click.stop="triggerSignUpOrInIsVisible") Sign Up or In
 
@@ -170,6 +170,7 @@ export default {
   display flex
   flex-direction column
   align-items flex-start
+  max-width 260px
   .item,
   .persistent-item
     pointer-events all
