@@ -86,7 +86,7 @@ export default {
     },
     cards () { return this.$store.state.currentSpace.cards },
     isPainting () { return this.$store.state.currentUserIsPainting },
-    spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditCurrentSpace'] },
+    spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
     isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
     isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
     connections () { return this.$store.state.currentSpace.connections },

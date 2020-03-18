@@ -3,7 +3,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
   section
     p Share
   section(v-if="spaceHasUrl")
-    template(v-if="isSpaceUserOrCollaborator")
+    template(v-if="isSpaceMember")
       .button-wrap.privacy-wrap
         button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
           .badge(:class="privacyState.color")
@@ -72,7 +72,7 @@ export default {
     spaceName () { return this.$store.state.currentSpace.name },
     spacePrivacy () { return this.$store.state.currentSpace.privacy },
     canEditSpace () {
-      const canEdit = this.$store.getters['currentUser/canEditCurrentSpace']
+      const canEdit = this.$store.getters['currentUser/canEditSpace']()
       return canEdit
     },
     // only works in https, supported by safari and android chrome
@@ -93,9 +93,9 @@ export default {
         return window.location.href
       }
     },
-    isSpaceUserOrCollaborator () {
+    isSpaceMember () {
       const currentSpace = this.$store.state.currentSpace
-      return this.$store.getters['currentUser/isSpaceUserOrCollaborator'](currentSpace)
+      return this.$store.getters['currentUser/isSpaceMember'](currentSpace)
     }
   },
   methods: {

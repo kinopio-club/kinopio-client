@@ -4,7 +4,7 @@ export default {
     return [
       {
         name: 'open',
-        description: 'Everyone can view and edit',
+        description: 'Everyone can view and edit (add only)',
         color: 'success',
         icon: 'open'
       },

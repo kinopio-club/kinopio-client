@@ -16,7 +16,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       maxlength="250"
     )
     //- todo change esc to keydown if i want to bubble up to also resetting the tree, if it feels better irl
-    button(@click="removeCard")
+    button(v-if="isSpaceMember" @click="removeCard")
       img.icon(src="@/assets/remove.svg")
       span Remove
     .button-wrap
@@ -83,6 +83,9 @@ export default {
     visible () {
       return this.$store.state.cardDetailsIsVisibleForCardId === this.card.id
     },
+    isSpaceMember () {
+      return this.$store.getters['currentUser/isSpaceMember']()
+    },
     name: {
       get () {
         return this.card.name
@@ -120,6 +123,7 @@ export default {
       document.querySelector(`.card[data-card-id="${this.card.id}"]`).focus()
     },
     removeCard () {
+      if (!this.isSpaceMember) { return }
       this.$store.dispatch('currentSpace/removeCard', this.card)
       this.$store.commit('cardDetailsIsVisibleForCardId', '')
     },

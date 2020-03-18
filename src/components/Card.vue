@@ -56,7 +56,7 @@ export default {
     card: Object
   },
   computed: {
-    spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditCurrentSpace'] },
+    spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
     id () { return this.card.id },
     x () { return this.card.x },
     y () { return this.card.y },
@@ -69,6 +69,9 @@ export default {
         top: `${this.y}px`,
         zIndex: this.z
       }
+    },
+    isSpaceMember () {
+      return this.$store.getters['currentUser/isSpaceMember']()
     },
     normalizedName () {
       if (this.urlIsImage) {
@@ -213,6 +216,7 @@ export default {
       return longestLineLength
     },
     removeCard () {
+      if (!this.isSpaceMember) { return }
       this.$store.dispatch('currentSpace/removeCard', this.card)
     },
     createCurrentConnection (event) {

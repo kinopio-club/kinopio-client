@@ -12,7 +12,7 @@ footer
       Favorites(:visible="favoritesIsVisible")
 
   section.controls(v-if="!dialogsVisible")
-    .button-wrap(v-if="userCanEditCurrentSpace")
+    .button-wrap(v-if="userCanEditSpace")
       button(@click="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
         img.refresh.icon(src="@/assets/remove.svg")
         span Removed
@@ -93,8 +93,8 @@ export default {
       const frames = this.$store.state.filteredFrameIds
       return types.length + frames.length
     },
-    userCanEditCurrentSpace () {
-      return this.$store.getters['currentUser/canEditCurrentSpace']
+    userCanEditSpace () {
+      return this.$store.getters['currentUser/canEditSpace']()
     }
 
   },

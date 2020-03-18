@@ -10,7 +10,7 @@ dialog.narrow.multiple-selected-actions(
   section(v-if="multipleCardsIsSelected || connectionsIsSelected")
     .row(v-if="multipleCardsIsSelected")
       button(@click="connectCards") Connect
-      button(@click="disconnectCards") Disconnect
+      button(v-if="userCanRemove" @click="disconnectCards") Disconnect
     .row(v-if="connectionsIsSelected")
       .button-wrap
         button.change-color(@click.stop="toggleMultipleConnectionsPickerVisible")
@@ -24,7 +24,7 @@ dialog.narrow.multiple-selected-actions(
 
   section
     .row
-      button(@click="remove")
+      button(v-if="userCanRemove" @click="remove")
         img.icon(src="@/assets/remove.svg")
         span {{ removeLabel }}
       .button-wrap
@@ -74,6 +74,9 @@ export default {
     },
     userColor () {
       return this.$store.state.currentUser.color
+    },
+    userCanRemove () {
+      return this.$store.getters['currentUser/isSpaceMember']()
     },
 
     // cards

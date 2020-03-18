@@ -319,8 +319,8 @@ export default {
       // only restore current space
       if (remoteSpace.id !== context.state.id) { return }
       // only cache spaces you can edit
-      const isSpaceUserOrCollaborator = context.rootGetters['currentUser/isSpaceUserOrCollaborator'](remoteSpace)
-      if (isSpaceUserOrCollaborator && !remoteSpace.isRemoved) {
+      const isSpaceMember = context.rootGetters['currentUser/isSpaceMember'](remoteSpace)
+      if (isSpaceMember && !remoteSpace.isRemoved) {
         console.log('🌌', remoteSpace)
         cache.saveSpace(remoteSpace)
       }
@@ -401,7 +401,7 @@ export default {
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
       await context.dispatch('loadSpace', space)
-      const canEdit = context.rootGetters['currentUser/canEditCurrentSpace']
+      const canEdit = context.rootGetters['currentUser/canEditSpace']()
       if (!canEdit) { return }
       context.dispatch('api/addToQueue', {
         name: 'updateSpace',
@@ -412,7 +412,7 @@ export default {
     },
     updateUserLastSpaceId: (context) => {
       const space = context.state
-      const canEdit = context.rootGetters['currentUser/canEditCurrentSpace']
+      const canEdit = context.rootGetters['currentUser/canEditSpace']()
       if (space.isRemoved || !canEdit) { return }
       context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
     },
@@ -432,15 +432,15 @@ export default {
       }, { root: true })
     },
     checkIfShouldNotifyReadOnly: (context) => {
-      const CanEditCurrentSpace = context.rootGetters['currentUser/canEditCurrentSpace']
-      if (CanEditCurrentSpace) {
+      const CanEditSpace = context.rootGetters['currentUser/canEditSpace']()
+      if (CanEditSpace) {
         context.commit('notifyReadOnly', false, { root: true })
       } else {
         context.commit('notifyReadOnly', true, { root: true })
       }
     },
     checkIfShouldNotifySpaceIsRemoved: (context, space) => {
-      const canEdit = context.rootGetters['currentUser/canEditCurrentSpace']
+      const canEdit = context.rootGetters['currentUser/canEditSpace']()
       if (space.isRemoved && canEdit) {
         context.commit('notifySpaceIsRemoved', true, { root: true })
       } else {

@@ -17,7 +17,7 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
         input(type="checkbox" v-model="isDefault")
         span Default
 
-    button(@click="removeConnection")
+    button(v-if="isSpaceMember" @click="removeConnection")
       img.icon(src="@/assets/remove.svg")
       span Remove
 
@@ -55,6 +55,9 @@ export default {
   computed: {
     visible () {
       return Boolean(this.$store.state.connectionDetailsIsVisibleForConnectionId)
+    },
+    isSpaceMember () {
+      return this.$store.getters['currentUser/isSpaceMember']()
     },
     position () {
       const position = this.$store.state.connectionDetailsPosition

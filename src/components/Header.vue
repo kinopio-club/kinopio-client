@@ -101,8 +101,8 @@ export default {
     shouldShowNewStuffIsUpdated () {
       const newStuffIsUpdated = this.$store.state.newStuffIsUpdated
       const isNotDefaultSpace = !this.$store.getters['currentSpace/isDefaultSpace']
-      const userCanEditCurrentSpace = this.$store.getters['currentUser/canEditCurrentSpace']
-      return newStuffIsUpdated && isNotDefaultSpace && userCanEditCurrentSpace
+      const userCanEditSpace = this.$store.getters['currentUser/canEditSpace']()
+      return newStuffIsUpdated && isNotDefaultSpace && userCanEditSpace
     },
     importArenaChannelIsVisible () { return this.$store.state.importArenaChannelIsVisible },
     users () {

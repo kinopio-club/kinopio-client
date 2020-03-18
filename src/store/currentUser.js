@@ -26,7 +26,8 @@ export default {
     isSignedIn: (state) => {
       return Boolean(state.apiKey)
     },
-    canEditSpace: (state, getters) => (space) => {
+    canEditSpace: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
       const spaceIsOpen = space.privacy === 'open'
       const userIsSignedIn = getters.isSignedIn
       const canEditOpenSpace = spaceIsOpen && userIsSignedIn
@@ -41,17 +42,9 @@ export default {
       }
       return Boolean(canEditOpenSpace || userIsInSpace)
     },
-    canEditCurrentSpace: (state, getters, rootState) => {
-      const spaceIsOpen = rootState.currentSpace.privacy === 'open'
-      const userIsSignedIn = getters.isSignedIn
-      const canEditOpenSpace = spaceIsOpen && userIsSignedIn
-      const userIsInSpace = rootState.currentSpace.users.find(user => {
-        return user.id === state.id
-      })
-      return Boolean(canEditOpenSpace || userIsInSpace)
-    },
-    isSpaceUserOrCollaborator: (state) => (space) => {
-      // todo add collaborator
+    isSpaceMember: (state, getters, rootState) => (space) => {
+      // todo add is collaborator check
+      space = space || rootState.currentSpace
       const userIsInSpace = space.users.find(user => {
         return user.id === state.id
       })
