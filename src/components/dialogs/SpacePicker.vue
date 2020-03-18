@@ -99,6 +99,4 @@ export default {
     margin-left 6px
     img
       vertical-align middle
-  .name
-    max-width calc(100% - 30px)
 </style>

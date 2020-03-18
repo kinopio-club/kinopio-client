@@ -117,7 +117,7 @@ export default {
       const data = {
         title: 'Kinopio',
         text: this.spaceName,
-        url: this.url()
+        url: this.url
       }
       navigator.share(data)
     },
