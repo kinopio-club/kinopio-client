@@ -5,6 +5,13 @@ aside.notifications(@click="closeAllDialogs")
       img.icon(v-if="item.icon" :src="icon(item.icon).path" :class="item.icon")
       span {{item.message}}
 
+  .persistent-item.success(v-if="notifySignUpToEditOpenSpace")
+    p
+      img.icon.open(src="@/assets/open.svg")
+      span This space is open to edits, but you'll need to sign up or in first
+    .row
+      button(@click.stop="triggerSignUpOrInIsVisible") Sign Up or In
+
   .persistent-item(v-if="notifyReadOnly" ref="readOnly" :class="{'notification-jiggle': notifyReadOnlyJiggle}")
     p You can't edit this space, but you can save your own copy
     .row
@@ -21,13 +28,6 @@ aside.notifications(@click="closeAllDialogs")
     .row
       button(@click="triggerSpaceDetailsVisible") Your Spaces
       button(v-if="!userIsSignedIn" @click.stop="triggerSignUpOrInIsVisible") Sign Up or In
-
-  .persistent-item.success(v-if="notifySignUpToEditOpenSpace")
-    p
-      img.icon.open(src="@/assets/open.svg")
-      span This space is open to edits, but you'll need to sign up or in first
-    .row
-      button(@click.stop="triggerSignUpOrInIsVisible") Sign Up or In
 
   .persistent-item(v-if="notifySpaceIsRemoved")
     p This space has been removed

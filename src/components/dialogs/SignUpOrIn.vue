@@ -223,6 +223,8 @@ export default {
         this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
         this.$store.commit('currentSpace/addUserToSpace', currentUser)
         this.$store.dispatch('currentUser/restoreUserFavorites', currentUser)
+        this.$store.commit('notifySignUpToEditOpenSpace', false, { root: true })
+        this.$store.dispatch('currentSpace/checkIfShouldNotifyReadOnly')
       } else {
         await this.handleErrors(result)
       }
