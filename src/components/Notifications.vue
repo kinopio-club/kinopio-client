@@ -5,6 +5,13 @@ aside.notifications(@click="closeAllDialogs")
       img.icon(v-if="item.icon" :src="icon(item.icon).path" :class="item.icon")
       span {{item.message}}
 
+  .persistent-item.success(v-if="notifySignUpToEditOpenSpace")
+    p
+      img.icon.open(src="@/assets/open.svg")
+      span This space is open to edits, but you'll need to sign up or in first
+    .row
+      button(@click.stop="triggerSignUpOrInIsVisible") Sign Up or In
+
   .persistent-item(v-if="notifyReadOnly" ref="readOnly" :class="{'notification-jiggle': notifyReadOnlyJiggle}")
     p You can't edit this space, but you can save your own copy
     .row
@@ -20,7 +27,7 @@ aside.notifications(@click="closeAllDialogs")
     p Space could not be found, or is private
     .row
       button(@click="triggerSpaceDetailsVisible") Your Spaces
-      button(v-if="!userIsSignedIn" @click="triggerSignUpOrInIsVisible") Sign Up or In
+      button(v-if="!userIsSignedIn" @click.stop="triggerSignUpOrInIsVisible") Sign Up or In
 
   .persistent-item(v-if="notifySpaceIsRemoved")
     p This space has been removed
@@ -85,6 +92,7 @@ export default {
     notifyConnectionError () { return this.$store.state.notifyConnectionError },
     notifySpaceIsRemoved () { return this.$store.state.notifySpaceIsRemoved },
     notifyNewUser () { return this.$store.state.notifyNewUser },
+    notifySignUpToEditOpenSpace () { return this.$store.state.notifySignUpToEditOpenSpace },
     userIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     },
@@ -162,6 +170,7 @@ export default {
   display flex
   flex-direction column
   align-items flex-start
+  max-width 260px
   .item,
   .persistent-item
     pointer-events all
@@ -210,6 +219,9 @@ export default {
     animation-direction forward
     animation-fill-mode forwards
     animation-timing-function ease-out
+
+  .open
+    vertical-align -2px
 
 @keyframes notificationJiggle
   0%

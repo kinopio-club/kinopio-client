@@ -15,6 +15,11 @@ export default {
     // event.metaKey only works on keydown
     window.addEventListener('keydown', this.handleMetaKeyShortcuts)
   },
+  computed: {
+    isSpaceMember () {
+      return this.$store.getters['currentUser/isSpaceMember']()
+    }
+  },
   methods: {
     handleShortcuts (event) {
       const key = event.key
@@ -345,6 +350,7 @@ export default {
     },
 
     remove () {
+      if (!this.isSpaceMember) { return }
       const selectedConnectionIds = this.$store.state.multipleConnectionsSelectedIds
       const cardIds = this.focusedCardIds()
       selectedConnectionIds.forEach(connectionId => {

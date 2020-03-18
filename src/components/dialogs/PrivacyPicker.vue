@@ -5,8 +5,7 @@ dialog.narrow.privacy-picker(v-if="visible" :open="visible" @click.stop)
       template(v-for="(privacyState in privacyStates")
         li(:class="{ active: privacyStateIsActive(privacyState) }" @click="select(privacyState)")
           .badge(:class="privacyState.color")
-            img.icon(v-if="spaceIsPrivate(privacyState)" src="@/assets/lock.svg")
-            img.icon(v-else src="@/assets/unlock.svg")
+            img.icon(:src="privacyIcon(privacyState).path" :class="privacyState.name")
             span {{privacyState.name | capitalize}}
           p.description {{privacyState.description | capitalize}}
 </template>
@@ -26,7 +25,15 @@ export default {
     }
   },
   computed: {
-    privacyStates () { return privacy.states() }
+    privacyStates () {
+      const userIsSignedIn = this.$store.getters['currentUser/isSignedIn']
+      const privacyStates = privacy.states()
+      if (userIsSignedIn) {
+        return privacyStates
+      } else {
+        return privacyStates.slice(1, 3)
+      }
+    }
   },
   methods: {
     spaceIsPrivate (privacyState) {
@@ -40,6 +47,11 @@ export default {
       this.$store.dispatch('currentSpace/updateSpace', { privacy: privacyState.name })
       this.$emit('closeDialog')
       this.$emit('updateSpaces')
+    },
+    privacyIcon (privacyState) {
+      return {
+        path: require(`@/assets/${privacyState.icon}.svg`)
+      }
     }
   }
 }
@@ -56,4 +68,6 @@ export default {
     max-height calc(92vh - 120px)
   .description
     margin-top 3px
+  .icon.open
+    vertical-align -2px
 </style>

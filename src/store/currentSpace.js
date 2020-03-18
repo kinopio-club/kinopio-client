@@ -319,8 +319,8 @@ export default {
       // only restore current space
       if (remoteSpace.id !== context.state.id) { return }
       // only cache spaces you can edit
-      const userCanEditSpace = context.rootGetters['currentUser/canEditSpace'](remoteSpace)
-      if (userCanEditSpace && !remoteSpace.isRemoved) {
+      const isSpaceMember = context.rootGetters['currentUser/isSpaceMember'](remoteSpace)
+      if (isSpaceMember && !remoteSpace.isRemoved) {
         console.log('🌌', remoteSpace)
         cache.saveSpace(remoteSpace)
       }
@@ -334,10 +334,10 @@ export default {
     loadSpace: async (context, space) => {
       const emptySpace = { id: space.id, cards: [], connections: [] }
       const cachedSpace = cache.space(space.id)
-      const shouldUpdateUrl = Boolean(context.rootState.spaceUrlToLoad)
-      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      // reset notifications
       context.commit('notifySpaceNotFound', false, { root: true })
       context.commit('notifyConnectionError', false, { root: true })
+      context.commit('notifySignUpToEditOpenSpace', false, { root: true })
       // restore local
       context.commit('restoreSpace', emptySpace)
       context.commit('restoreSpace', cachedSpace)
@@ -348,19 +348,26 @@ export default {
       if (remoteSpace) {
         context.commit('restoreSpace', remoteSpace)
         context.dispatch('history/playback', null, { root: true })
+        context.dispatch('checkIfShouldNotifySignUpToEditOpenSpace', remoteSpace)
         utils.updateWindowUrlAndTitle({
           space: remoteSpace,
-          shouldUpdateUrl,
-          userIsSignedIn
+          shouldUpdateUrl: true
         })
         if (!space.isRemoved && remoteSpace.isRemoved) {
           context.commit('notifySpaceIsRemoved', false, { root: true })
         } else {
           context.dispatch('checkIfShouldNotifySpaceIsRemoved', remoteSpace)
         }
-        if (cache.getAllSpaces().length) { context.commit('notifyNewUser', false, { root: true }) } else {
+        if (cache.getAllSpaces().length) {
+          context.commit('notifyNewUser', false, { root: true })
+        } else {
           context.commit('notifyNewUser', true, { root: true })
         }
+      } else {
+        utils.updateWindowUrlAndTitle({
+          space,
+          shouldUpdateUrl: false
+        })
       }
       context.dispatch('checkIfShouldNotifyReadOnly')
       context.commit('spaceUrlToLoad', '', { root: true })
@@ -384,11 +391,17 @@ export default {
         body: updates
       }, { root: true })
     },
-    changeSpace: async (context, space) => {
+    changeSpace: async (context, { space, isRemote }) => {
+      if (isRemote) {
+        utils.updateWindowUrlAndTitle({
+          space: space,
+          shouldUpdateUrl: true
+        })
+      }
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
       await context.dispatch('loadSpace', space)
-      const canEdit = context.rootGetters['currentUser/canEditCurrentSpace']
+      const canEdit = context.rootGetters['currentUser/canEditSpace']()
       if (!canEdit) { return }
       context.dispatch('api/addToQueue', {
         name: 'updateSpace',
@@ -399,7 +412,7 @@ export default {
     },
     updateUserLastSpaceId: (context) => {
       const space = context.state
-      const canEdit = context.rootGetters['currentUser/canEditCurrentSpace']
+      const canEdit = context.rootGetters['currentUser/canEditSpace']()
       if (space.isRemoved || !canEdit) { return }
       context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
     },
@@ -419,19 +432,28 @@ export default {
       }, { root: true })
     },
     checkIfShouldNotifyReadOnly: (context) => {
-      const CanEditCurrentSpace = context.rootGetters['currentUser/canEditCurrentSpace']
-      if (CanEditCurrentSpace) {
+      const CanEditSpace = context.rootGetters['currentUser/canEditSpace']()
+      if (CanEditSpace) {
         context.commit('notifyReadOnly', false, { root: true })
       } else {
         context.commit('notifyReadOnly', true, { root: true })
       }
     },
     checkIfShouldNotifySpaceIsRemoved: (context, space) => {
-      const canEdit = context.rootGetters['currentUser/canEditCurrentSpace']
+      const canEdit = context.rootGetters['currentUser/canEditSpace']()
       if (space.isRemoved && canEdit) {
         context.commit('notifySpaceIsRemoved', true, { root: true })
       } else {
         context.commit('notifySpaceIsRemoved', false, { root: true })
+      }
+    },
+    checkIfShouldNotifySignUpToEditOpenSpace: (context, space) => {
+      const spaceIsOpen = space.privacy === 'open'
+      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      if (spaceIsOpen && !userIsSignedIn) {
+        context.commit('notifySignUpToEditOpenSpace', true, { root: true })
+      } else {
+        context.commit('notifySignUpToEditOpenSpace', false, { root: true })
       }
     },
 

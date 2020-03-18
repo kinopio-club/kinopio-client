@@ -12,7 +12,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
         User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
         span Spaces
         Loader(:visible="loadingUserspaces")
-      SpacePicker(:visible="spacePickerIsVisible" :loading="loadingUserspaces" :userSpaces="userSpaces" @selectSpace="updateSelectedSpace" @closeDialog="closeDialogs")
+      SpacePicker(:visible="spacePickerIsVisible" :loading="loadingUserspaces" :userSpaces="userSpaces" @selectSpace="changeSpace")
     .button-wrap
       label(:class="{active: isFavoriteUser}" @click.prevent="toggleIsFavoriteUser" @keydown.stop.enter="toggleIsFavoriteUser")
         input(type="checkbox" v-model="isFavoriteUser")
@@ -43,7 +43,6 @@ import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Favorites from '@/components/dialogs/Favorites.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
-import utils from '@/utils.js'
 
 export default {
   name: 'UserDetails',
@@ -161,21 +160,14 @@ export default {
       this.loadingUserspaces = false
       this.userSpaces = []
     },
-    updateSelectedSpace (space) {
-      utils.updateWindowUrlAndTitle({
-        space: space,
-        shouldUpdateUrl: true
-      })
-      this.$store.dispatch('currentSpace/changeSpace', space)
+    changeSpace (space) {
+      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
     }
   },
   watch: {
     visible (value) {
       this.closeDialogs()
       this.clearUserSpaces()
-    },
-    user (value) {
-      this.closeDialogs()
     }
   }
 }

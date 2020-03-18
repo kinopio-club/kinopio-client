@@ -38,7 +38,7 @@ export default {
     typeColor () { return this.connectionType.color },
     typeName () { return this.connectionType.name },
     path () { return this.connection.path },
-    spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditCurrentSpace'] },
+    spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
 
     // filters
     filtersIsActive () {

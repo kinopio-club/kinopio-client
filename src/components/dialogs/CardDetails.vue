@@ -16,20 +16,20 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       maxlength="250"
     )
     //- todo change esc to keydown if i want to bubble up to also resetting the tree, if it feels better irl
-    button(@click="removeCard")
+    button(v-if="isSpaceMember" @click="removeCard")
       img.icon(src="@/assets/remove.svg")
       span Remove
     .button-wrap
-      button(@click.stop="toggleFrameDetailsIsVisible" :class="{active : frameDetailsIsVisible}")
+      button(@click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
         span Frames
-      FrameDetails(:visible="frameDetailsIsVisible" :card="card")
+      FramePicker(:visible="framePickerIsVisible" :card="card")
 </template>
 
 <script>
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil awaiting 'scrollmode' support for https://github.com/w3c/csswg-drafts/pull/1805
 
 import utils from '@/utils.js'
-import FrameDetails from '@/components/dialogs/FrameDetails.vue'
+import FramePicker from '@/components/dialogs/FramePicker.vue'
 
 // prevents jarring frame skips caused by simultaneously scrolling a card into view, zooming in, and showing an onscreen keyboard
 const shouldPreventAutofocus = () => {
@@ -48,20 +48,20 @@ const shouldPreventAutofocus = () => {
 export default {
   name: 'CardDetails',
   components: {
-    FrameDetails
+    FramePicker
   },
   props: {
     card: Object // name, x, y, z
   },
   data () {
     return {
-      frameDetailsIsVisible: false
+      framePickerIsVisible: false
     }
   },
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
-        this.frameDetailsIsVisible = false
+        this.framePickerIsVisible = false
       }
     })
   },
@@ -82,6 +82,9 @@ export default {
   computed: {
     visible () {
       return this.$store.state.cardDetailsIsVisibleForCardId === this.card.id
+    },
+    isSpaceMember () {
+      return this.$store.getters['currentUser/isSpaceMember']()
     },
     name: {
       get () {
@@ -120,6 +123,7 @@ export default {
       document.querySelector(`.card[data-card-id="${this.card.id}"]`).focus()
     },
     removeCard () {
+      if (!this.isSpaceMember) { return }
       this.$store.dispatch('currentSpace/removeCard', this.card)
       this.$store.commit('cardDetailsIsVisibleForCardId', '')
     },
@@ -133,10 +137,10 @@ export default {
       // TODO: expand isEmpty to inlcude other metadata content (images etc)?
       return !this.card.name
     },
-    toggleFrameDetailsIsVisible () {
-      const isVisible = this.frameDetailsIsVisible
+    toggleFramePickerIsVisible () {
+      const isVisible = this.framePickerIsVisible
       this.closeDialogs()
-      this.frameDetailsIsVisible = !isVisible
+      this.framePickerIsVisible = !isVisible
     },
     focusName () {
       this.$nextTick(() => {
@@ -165,7 +169,7 @@ export default {
       })
     },
     closeDialogs () {
-      this.frameDetailsIsVisible = false
+      this.framePickerIsVisible = false
     }
   },
   watch: {

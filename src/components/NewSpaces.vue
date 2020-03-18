@@ -4,25 +4,19 @@
     span Recently updated spaces made by cool people like you
     p(v-if="loading")
       Loader(:visible="loading")
-
   section.results-section
-    ul.results-list
-      template(v-for="(space in spaces")
-        li(tabindex="0" @click.stop="open(space)" :class="{ active: spaceIsActive(space) }")
-          User(:user="user(space)" :isClickable="false" :key="user(space).id")
-          span {{space.name}}
+    SpaceList(:spaces="spaces" :showUser="true" :hideExploreBadge="true" @selectSpace="changeSpace")
 </template>
 
 <script>
 import Loader from '@/components/Loader.vue'
-import User from '@/components/User.vue'
-import utils from '@/utils.js'
+import SpaceList from '@/components/SpaceList.vue'
 
 export default {
   name: 'NewSpaces',
   components: {
     Loader,
-    User
+    SpaceList
   },
   props: {
     visible: Boolean,
@@ -30,19 +24,8 @@ export default {
     spaces: Array
   },
   methods: {
-    user (space) {
-      return space.users[0]
-    },
-    open (space) {
-      utils.updateWindowUrlAndTitle({
-        space: space,
-        shouldUpdateUrl: true
-      })
-      this.$store.dispatch('currentSpace/changeSpace', space)
-    },
-    spaceIsActive (space) {
-      const currentSpace = this.$store.state.currentSpace
-      return space.id === currentSpace.id
+    changeSpace (space) {
+      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
     }
   }
 }
@@ -58,7 +41,4 @@ export default {
     display flex
   button + a
     margin-left 6px
-  .user
-    margin-right 6px
-    vertical-align middle
 </style>

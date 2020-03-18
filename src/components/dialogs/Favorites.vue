@@ -26,7 +26,6 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.stop="userDetailsI
 
 <script>
 import Loader from '@/components/Loader.vue'
-import utils from '@/utils.js'
 
 export default {
   name: 'Favorites',
@@ -82,11 +81,7 @@ export default {
     open (item) {
       this.userDetailsIsNotVisible()
       if (this.spacesIsVisible) {
-        utils.updateWindowUrlAndTitle({
-          space: item,
-          shouldUpdateUrl: true
-        })
-        this.$store.dispatch('currentSpace/changeSpace', item)
+        this.$store.dispatch('currentSpace/changeSpace', { space: item, isRemote: true })
       } else {
         this.openedUser = item
         this.userDetailsIsVisible = true

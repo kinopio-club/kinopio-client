@@ -55,7 +55,10 @@ export default {
     }
   },
   computed: {
-    spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditCurrentSpace'] },
+    isSpaceMember () {
+      return this.$store.getters['currentUser/isSpaceMember']()
+    },
+    spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
     id () { return this.connection.id },
     connectionTypeId () { return this.connection.connectionTypeId },
     startCardId () { return this.connection.startCardId },
@@ -124,6 +127,7 @@ export default {
   },
   methods: {
     removeConnection () {
+      if (!this.isSpaceMember) { return }
       this.$store.dispatch('currentSpace/removeConnection', this.connection)
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
     },

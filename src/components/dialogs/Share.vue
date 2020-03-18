@@ -3,19 +3,19 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
   section
     p Share
   section(v-if="spaceHasUrl")
-    template(v-if="canEditSpace")
+    template(v-if="isSpaceMember")
       .button-wrap.privacy-wrap
         button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
           .badge(:class="privacyState.color")
-            img.icon(v-if="spaceIsPrivate" src="@/assets/lock.svg")
-            img.icon(v-else src="@/assets/unlock.svg")
+            img.icon(:src="privacyIcon(privacyState).path" :class="privacyState.name")
             span {{privacyState.name | capitalize}}
           p.description {{privacyState.description | capitalize}}
         PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs")
 
     template(v-if="!spaceIsPrivate")
-      textarea(ref="url") {{url()}}
-      button(@click="copyUrl" v-if="!canNativeShare") Copy Url
+      input.textarea(ref="url" v-model="url")
+      button(@click="copyUrl" v-if="!canNativeShare")
+        span Copy Url
       .segmented-buttons(v-if="canNativeShare")
         button(@click="copyUrl")
           span Copy Url
@@ -24,23 +24,33 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
       .row
         .badge.success.success-message(v-if="urlIsCopied") Url Copied
 
+  //- section(v-if="spaceHasUrl && canEditSpace")
+  //-   .button-wrap
+  //-     button(@click.stop="toggleInviteCollaboratorsIsVisible" :class="{ active: inviteCollaboratorsIsVisible }")
+  //-       span Invite Collaborators
+  //-     InviteCollaborators(:visible="inviteCollaboratorsIsVisible")
+
   section(v-if="!spaceHasUrl")
     p
+      //- span To share or invite collaborators,
       span To share,
       span.badge.info you need to Sign Up or In
       span for your spaces to be synced and accessible anywhere.
     button(@click="triggerSignUpOrInIsVisible") Sign Up or In
+
 </template>
 
 <script>
 import PrivacyPicker from '@/components/dialogs/PrivacyPicker.vue'
+import InviteCollaborators from '@/components/dialogs/InviteCollaborators.vue'
 import utils from '@/utils.js'
 import privacy from '@/spaces/privacy.js'
 
 export default {
   name: 'Share',
   components: {
-    PrivacyPicker
+    PrivacyPicker,
+    InviteCollaborators
   },
   props: {
     visible: Boolean
@@ -49,7 +59,8 @@ export default {
     return {
       urlIsCopied: false,
       spaceHasUrl: false,
-      privacyPickerIsVisible: false
+      privacyPickerIsVisible: false,
+      inviteCollaboratorsIsVisible: false
     }
   },
   filters: {
@@ -61,7 +72,7 @@ export default {
     spaceName () { return this.$store.state.currentSpace.name },
     spacePrivacy () { return this.$store.state.currentSpace.privacy },
     canEditSpace () {
-      const canEdit = this.$store.getters['currentUser/canEditCurrentSpace']
+      const canEdit = this.$store.getters['currentUser/canEditSpace']()
       return canEdit
     },
     // only works in https, supported by safari and android chrome
@@ -76,12 +87,21 @@ export default {
     },
     spaceIsPrivate () {
       return this.spacePrivacy === 'private'
+    },
+    url: {
+      get () {
+        return window.location.href
+      }
+    },
+    isSpaceMember () {
+      const currentSpace = this.$store.state.currentSpace
+      return this.$store.getters['currentUser/isSpaceMember'](currentSpace)
     }
   },
   methods: {
-    url () {
-      return window.location.href
-    },
+    // url () {
+    //   return window.location.href
+    // },
     copyUrl () {
       const element = this.$refs.url
       element.select()
@@ -97,15 +117,28 @@ export default {
       const data = {
         title: 'Kinopio',
         text: this.spaceName,
-        url: this.url()
+        url: this.url
       }
       navigator.share(data)
     },
     togglePrivacyPickerIsVisible () {
-      this.privacyPickerIsVisible = !this.privacyPickerIsVisible
+      const isVisible = this.privacyPickerIsVisible
+      this.closeDialogs()
+      this.privacyPickerIsVisible = !isVisible
+    },
+    toggleInviteCollaboratorsIsVisible () {
+      const isVisible = this.inviteCollaboratorsIsVisible
+      this.closeDialogs()
+      this.inviteCollaboratorsIsVisible = !isVisible
+    },
+    privacyIcon (privacyState) {
+      return {
+        path: require(`@/assets/${privacyState.icon}.svg`)
+      }
     },
     closeDialogs () {
       this.privacyPickerIsVisible = false
+      this.inviteCollaboratorsIsVisible = false
     }
   },
   watch: {
@@ -129,17 +162,17 @@ export default {
       background-color var(--danger-background)
   .success-message
     margin-top 10px
-  textarea
+  .textarea
     background-color var(--secondary-background)
     border 0
     border-radius 3px
     padding 4px
-    margin-bottom 4px
-    height 50px
-  .privacy-wrap + textarea
+  .privacy-wrap + .textarea
     margin-top 10px
   .description
     margin-top 3px
+  .icon.open
+    vertical-align -2px
 
   dialog.privacy-picker
     left initial

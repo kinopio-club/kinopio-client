@@ -7,13 +7,13 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
       .row
         .button-wrap
           button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}") {{selectedSpace.name}}
-          SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" :shouldExcludeCurrentSpace="true" :shouldCloseWhenSelecting="true" @selectSpace="updateSelectedSpace" @closeDialog="closeDialogs")
+          SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" @selectSpace="updateSelectedSpace")
       .row(v-if="spaces.length")
         label(:class="{active: shouldSwitchToSpace}" @click.prevent="toggleShouldSwitchToSpace" @keydown.stop.enter="toggleShouldSwitchToSpace")
           input(type="checkbox" v-model="shouldSwitchToSpace")
           span Switch to Space
       button(@click="moveToSpace" :class="{active: loading}")
-        img.icon.cut(src="@/assets/cut.svg")
+        img.icon.visit(src="@/assets/visit.svg")
         span Move
         Loader(:visible="loading")
 
@@ -93,7 +93,7 @@ export default {
       this.$store.commit('clearMultipleSelected')
       this.$store.commit('closeAllDialogs')
       if (this.shouldSwitchToSpace) {
-        this.$store.dispatch('currentSpace/changeSpace', this.selectedSpace)
+        this.$store.dispatch('currentSpace/changeSpace', { space: this.selectedSpace })
       }
       this.$store.commit('addNotification', { message: `Cards Moved to ${this.selectedSpace.name}`, type: 'success' })
     },
@@ -137,6 +137,7 @@ export default {
     },
     updateSelectedSpace (space) {
       this.selectedSpace = space
+      this.spacePickerIsVisible = false
     },
     scrollIntoView () {
       const element = this.$refs.dialog
