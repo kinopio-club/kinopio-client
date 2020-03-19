@@ -78,7 +78,6 @@ const self = {
 
     addToQueue: (context, { name, body }) => {
       body = utils.clone(body)
-      body.userId = context.rootState.currentUser.id
       body.spaceId = context.rootState.currentSpace.id
       const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       if (!userIsSignedIn) { return }

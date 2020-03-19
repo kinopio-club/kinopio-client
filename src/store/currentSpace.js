@@ -469,7 +469,7 @@ export default {
         z: cards.length + 1,
         name: '',
         frameId: 0,
-        userId: null
+        userId: context.rootState.currentUser.id
       }
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       context.commit('createCard', card)
@@ -618,6 +618,7 @@ export default {
       if (!connectionAlreadyExists) {
         connection.id = nanoid()
         connection.spaceId = context.state.id
+        connection.userId = context.rootState.currentUser.id
         connection.connectionTypeId = connectionType.id
         context.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
         context.commit('history/add', { name: 'addConnection', body: connection }, { root: true })
