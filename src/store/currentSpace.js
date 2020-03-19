@@ -468,7 +468,8 @@ export default {
         y: position.y,
         z: cards.length + 1,
         name: '',
-        frameId: 0
+        frameId: 0,
+        userId: null
       }
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       context.commit('createCard', card)
