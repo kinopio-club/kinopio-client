@@ -31,8 +31,19 @@ export default {
       const spaceIsOpen = space.privacy === 'open'
       const userIsSignedIn = getters.isSignedIn
       const canEditOpenSpace = spaceIsOpen && userIsSignedIn
+      const isSpaceMember = getters.isSpaceMember(space)
+      return Boolean(canEditOpenSpace || isSpaceMember)
+    },
+    cardIsCreatedByCurrentUser: (state, getters, rootState) => (card) => {
+      return state.id === card.userId
+    },
+    connectionIsCreatedByCurrentUser: (state, getters, rootState) => (connection) => {
+      return state.id === connection.userId
+    },
+    isSpaceMember: (state, getters, rootState) => (space) => {
+      // todo add is collaborator check
+      space = space || rootState.currentSpace
       let userIsInSpace
-      // remoteSpace has space.users, cachedSpace has space.userId
       if (space.users) {
         userIsInSpace = space.users.find(user => {
           return user.id === state.id
@@ -40,14 +51,7 @@ export default {
       } else {
         userIsInSpace = space.userId === state.id
       }
-      return Boolean(canEditOpenSpace || userIsInSpace)
-    },
-    isSpaceMember: (state, getters, rootState) => (space) => {
-      // todo add is collaborator check
-      space = space || rootState.currentSpace
-      const userIsInSpace = space.users.find(user => {
-        return user.id === state.id
-      })
+
       return Boolean(userIsInSpace)
     }
   },

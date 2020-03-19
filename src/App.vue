@@ -365,7 +365,8 @@ code
 .marker
   background-image url('assets/marker.svg')
 
-.updated
+.updated,
+.open
   vertical-align -2px
 
 .visit

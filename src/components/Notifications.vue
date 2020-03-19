@@ -73,6 +73,7 @@ export default {
       }
       if (mutation.type === 'currentUserIsPainting') {
         const element = this.$refs.readOnly
+        if (!element) { return }
         if (state.currentUserIsPainting && element) {
           this.notifyReadOnlyJiggle = true
           element.addEventListener('animationend', this.removeNotifyReadOnlyJiggle, false)
@@ -80,6 +81,7 @@ export default {
       }
       if (mutation.type === 'notifyReadOnlyJiggle') {
         const element = this.$refs.readOnly
+        if (!element) { return }
         this.notifyReadOnlyJiggle = true
         element.addEventListener('animationend', this.removeNotifyReadOnlyJiggle, false)
       }
@@ -219,9 +221,6 @@ export default {
     animation-direction forward
     animation-fill-mode forwards
     animation-timing-function ease-out
-
-  .open
-    vertical-align -2px
 
 @keyframes notificationJiggle
   0%

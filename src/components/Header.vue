@@ -244,8 +244,6 @@ header
     > button
       .privacy-icon
         margin-left 3px
-        &.open
-          vertical-align -2px
 
   aside
     display flex

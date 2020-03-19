@@ -171,8 +171,6 @@ export default {
     margin-top 10px
   .description
     margin-top 3px
-  .icon.open
-    vertical-align -2px
 
   dialog.privacy-picker
     left initial

@@ -470,6 +470,22 @@ export default {
   *
     pointer-events: none !important
 
+.is-read-only
+  .card,
+  .connector
+    &:hover,
+    &.hover,
+    &:active,
+    &.active
+      box-shadow none
+      cursor default
+      > button
+        box-shadow none
+        cursor default
+        background-color var(--secondary-background)
+  .connection-path
+    pointer-events none
+
 svg.connections,
 .connection-labels
   position absolute

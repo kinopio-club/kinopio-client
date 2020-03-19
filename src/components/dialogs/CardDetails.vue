@@ -1,7 +1,8 @@
 <template lang="pug">
 dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDialogs" @keyup.stop.backspace="removeCard")
-  section.meta-section
+  section
     textarea.name(
+      v-if="canEditCard"
       ref="name"
       rows="1"
       placeholder="Type text here, or paste a URL"
@@ -15,11 +16,18 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       data-type="name"
       maxlength="250"
     )
+    template(v-if="!canEditCard")
+      p {{name}}
+      p
+        span.badge.info
+          img.icon.open(src="@/assets/open.svg")
+          span In open spaces, you can only move and edit cards you've made
+
     //- todo change esc to keydown if i want to bubble up to also resetting the tree, if it feels better irl
-    button(v-if="isSpaceMember" @click="removeCard")
+    button(v-if="canEditCard" @click="removeCard")
       img.icon(src="@/assets/remove.svg")
       span Remove
-    .button-wrap
+    .button-wrap(v-if="canEditCard")
       button(@click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
         span Frames
       FramePicker(:visible="framePickerIsVisible" :card="card")
@@ -80,11 +88,14 @@ export default {
     }
   },
   computed: {
-    visible () {
-      return this.$store.state.cardDetailsIsVisibleForCardId === this.card.id
-    },
-    isSpaceMember () {
-      return this.$store.getters['currentUser/isSpaceMember']()
+    visible () { return this.$store.state.cardDetailsIsVisibleForCardId === this.card.id },
+    isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
+    cardIsCreatedByCurrentUser () { return this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](this.card) },
+    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
+    canEditCard () {
+      if (this.isSpaceMember) { return true }
+      if (this.canEditSpace && this.cardIsCreatedByCurrentUser) { return true }
+      return false
     },
     name: {
       get () {
@@ -163,7 +174,7 @@ export default {
       if (shouldPreventAutofocus()) { return }
       this.$nextTick(() => {
         this.focusName()
-        if (length) {
+        if (length && element) {
           element.setSelectionRange(length, length)
         }
       })
@@ -190,7 +201,7 @@ export default {
 
 <style lang="stylus">
 .card-details
-  .meta-section
+  > section
     background-color var(--secondary-background)
   textarea
     margin-bottom 5px

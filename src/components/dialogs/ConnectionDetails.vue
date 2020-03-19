@@ -1,15 +1,21 @@
 <template lang="pug">
 dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position" @click="closeColorPicker" ref="dialog")
   section(:style="{backgroundColor: typeColor}")
-    .row
+    .row(v-if="canEditConnection")
       .button-wrap
         button.change-color(@click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{backgroundColor: typeColor}")
         ColorPicker(:currentColor="typeColor" :visible="colorPickerIsVisible" @selectedColor="updateTypeColor")
-      input.type-name(placeholder="Connection" v-model="typeName")
+      input.type-name(placeholder="Connection" v-model="typeName" ref="typeName")
+    template(v-if="!canEditConnection")
+      p {{typeName}}
+      p.open-edit-message
+        span.badge.info
+          img.icon.open(src="@/assets/open.svg")
+          span In open spaces, you can only edit connections you've made
 
     .row
-      button(:class="{active: labelIsVisible}" @click="toggleLabelIsVisible")
+      button(v-if="canEditConnection" :class="{active: labelIsVisible}" @click="toggleLabelIsVisible")
         img.icon(src="@/assets/view.svg")
         span Label
 
@@ -17,16 +23,16 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
         input(type="checkbox" v-model="isDefault")
         span Default
 
-    button(v-if="isSpaceMember" @click="removeConnection")
+    button(v-if="canEditConnection" @click="removeConnection")
       img.icon(src="@/assets/remove.svg")
       span Remove
 
-  section.results-actions
+  section.results-actions(v-if="canEditConnection")
     button(@click="addConnectionType")
       img.icon(src="@/assets/add.svg")
       span Add
 
-  section.results-section
+  section.results-section(v-if="canEditConnection")
     ul.results-list
       template(v-for="(type in connectionTypes")
         li(:class="{ active: connectionTypeIsActive(type) }" @click="changeConnectionType(type)" :key="type.id")
@@ -41,6 +47,20 @@ import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 import utils from '@/utils.js'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 
+// prevents jarring frame skips caused by simultaneously scrolling a card into view, zooming in, and showing an onscreen keyboard
+const shouldPreventAutofocus = () => {
+  const isMobile = utils.isMobile()
+  const pinchZoomRatio = document.documentElement.clientWidth / window.innerWidth
+  const pinchZoomRatioShouldNotFocusZoom = !utils.isBetween({
+    value: pinchZoomRatio,
+    min: 0.8,
+    max: 1.3
+  })
+  if (isMobile && pinchZoomRatioShouldNotFocusZoom) {
+    return true
+  }
+}
+
 export default {
   components: {
     ColorPicker
@@ -53,12 +73,11 @@ export default {
     }
   },
   computed: {
-    visible () {
-      return Boolean(this.$store.state.connectionDetailsIsVisibleForConnectionId)
-    },
-    isSpaceMember () {
-      return this.$store.getters['currentUser/isSpaceMember']()
-    },
+    visible () { return Boolean(this.$store.state.connectionDetailsIsVisibleForConnectionId) },
+    labelIsVisible () { return this.currentConnection.labelIsVisible },
+    currentConnectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.currentConnection.connectionTypeId) },
+    connectionTypes () { return this.$store.state.currentSpace.connectionTypes },
+    typeColor () { return this.currentConnectionType.color },
     position () {
       const position = this.$store.state.connectionDetailsPosition
       return {
@@ -72,17 +91,13 @@ export default {
         return connection.id === this.$store.state.connectionDetailsIsVisibleForConnectionId
       })
     },
-    labelIsVisible () {
-      return this.currentConnection.labelIsVisible
-    },
-    currentConnectionType () {
-      return this.$store.getters['currentSpace/connectionTypeById'](this.currentConnection.connectionTypeId)
-    },
-    connectionTypes () {
-      return this.$store.state.currentSpace.connectionTypes
-    },
-    typeColor () {
-      return this.currentConnectionType.color
+    canEditConnection () {
+      const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
+      const connectionIsCreatedByCurrentUser = this.$store.getters['currentUser/connectionIsCreatedByCurrentUser'](this.currentConnection)
+      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
+      if (isSpaceMember) { return true }
+      if (canEditSpace && connectionIsCreatedByCurrentUser) { return true }
+      return false
     },
     typeName: {
       get () {
@@ -155,6 +170,13 @@ export default {
       }
       this.$store.dispatch('currentSpace/updateConnectionType', connectionType)
     },
+    focusName () {
+      this.$nextTick(() => {
+        const element = this.$refs.typeName
+        if (!element) { return }
+        element.focus()
+      })
+    },
     scrollIntoView () {
       const element = this.$refs.dialog
       scrollIntoView(element, {
@@ -162,10 +184,21 @@ export default {
         scrollMode: 'if-needed'
       })
     },
+    scrollIntoViewAndFocus () {
+      const element = this.$refs.typeName
+      const length = this.typeName.length
+      this.scrollIntoView()
+      if (shouldPreventAutofocus()) { return }
+      this.$nextTick(() => {
+        this.focusName()
+        if (length && element) {
+          element.setSelectionRange(length, length)
+        }
+      })
+    },
     updateView () {
       this.updateDefaultConnectionType()
       this.colorPickerIsVisible = false
-      this.scrollIntoView()
     }
   },
   watch: {
@@ -174,6 +207,7 @@ export default {
         this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
         if (visible) {
           this.updateView()
+          this.scrollIntoViewAndFocus()
         }
       })
     },
@@ -181,6 +215,7 @@ export default {
       this.$nextTick(() => {
         if (this.visible) {
           this.updateView()
+          this.scrollIntoView()
         } else {
           this.$store.commit('shouldHideConnectionOutline', false)
         }
@@ -194,4 +229,11 @@ export default {
 .connection-details
   .type-name
     margin-left 6px
+  .open-edit-message
+    margin-bottom 10px
+    .badge
+      margin-right 0
+  // .meta
+    // .badge
+    //   margin-right 0
 </style>

@@ -55,11 +55,10 @@ export default {
     }
   },
   computed: {
-    isSpaceMember () {
-      return this.$store.getters['currentUser/isSpaceMember']()
-    },
-    spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
+    isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
+    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     id () { return this.connection.id },
+    connectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.connectionTypeId) },
     connectionTypeId () { return this.connection.connectionTypeId },
     startCardId () { return this.connection.startCardId },
     endCardId () { return this.connection.endCardId },
@@ -73,7 +72,6 @@ export default {
         return this.connection.path
       }
     },
-    connectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.connectionTypeId) },
     typeColor () {
       if (this.connectionType) {
         return this.connectionType.color
@@ -87,12 +85,8 @@ export default {
       const detailsId = this.$store.state.connectionDetailsIsVisibleForConnectionId
       return detailsId === this.id
     },
-    shouldAnimate () {
-      return Boolean(this.isSelected || this.detailsIsVisible)
-    },
-    isHovered () {
-      return this.id === this.$store.state.currentUserIsHoveringOverConnectionId
-    },
+    shouldAnimate () { return Boolean(this.isSelected || this.detailsIsVisible) },
+    isHovered () { return this.id === this.$store.state.currentUserIsHoveringOverConnectionId },
     shouldHideConnectionOutline () { return this.$store.state.shouldHideConnectionOutline },
 
     // filters
@@ -134,7 +128,7 @@ export default {
 
     // same as ConnectionLabel method
     showConnectionDetails (event) {
-      if (this.spaceIsReadOnly) { return }
+      if (!this.canEditSpace) { return }
       const detailsPosition = utils.cursorPositionInPage(event)
       this.$store.commit('closeAllDialogs')
       this.$store.commit('connectionDetailsIsVisibleForConnectionId', this.id)
@@ -228,7 +222,4 @@ export default {
     stroke-width 7
   &.hide-connection-outline
     outline none
-.is-read-only
-  .connection-path
-    pointer-events none
 </style>
