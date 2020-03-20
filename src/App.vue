@@ -144,6 +144,15 @@ label // used for checkbox buttons
     width 14px
     vertical-align -3px
     margin-left 3px
+  &:disabled
+    cursor default
+    color var(--primary)
+    opacity 0.5
+    &:hover,
+    &:active
+      box-shadow none
+      background-color var(--primary-background)
+
 label
   padding-bottom 4px
   display inline-block
