@@ -16,21 +16,22 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       data-type="name"
       maxlength="250"
     )
-    template(v-if="!canEditCard")
-      p {{name}}
-      p
-        span.badge.info
-          img.icon.open(src="@/assets/open.svg")
-          span In open spaces, you can only move and edit cards you've made
+    p(v-if="!canEditCard") {{name}}
 
     //- todo change esc to keydown if i want to bubble up to also resetting the tree, if it feels better irl
-    button(v-if="canEditCard" @click="removeCard")
+    button(:disabled="!canEditCard" @click="removeCard")
       img.icon(src="@/assets/remove.svg")
       span Remove
-    .button-wrap(v-if="canEditCard")
-      button(@click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
+    .button-wrap
+      button(:disabled="!canEditCard" @click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
         span Frames
       FramePicker(:visible="framePickerIsVisible" :card="card")
+
+    p(v-if="!canEditCard")
+      span.badge.info
+        img.icon.open(src="@/assets/open.svg")
+        span In open spaces, you can only move and edit cards you've made
+
 </template>
 
 <script>

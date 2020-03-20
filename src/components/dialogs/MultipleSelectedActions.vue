@@ -36,11 +36,10 @@ dialog.narrow.multiple-selected-actions(
         span Move
       MoveToSpace(:visible="moveToSpaceIsVisible")
 
-    template(v-if="canEditAsNonMember")
-      p
-        span.badge.info
-          img.icon.open(src="@/assets/open.svg")
-          span In open spaces, you can only edit cards and connections you've made
+    p(v-if="canEditAsNonMember")
+      span.badge.info
+        img.icon.open(src="@/assets/open.svg")
+        span In open spaces, you can only edit cards and connections you've made
 </template>
 
 <script>
