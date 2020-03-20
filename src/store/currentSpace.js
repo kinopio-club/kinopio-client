@@ -320,9 +320,12 @@ export default {
       if (remoteSpace.id !== context.state.id) { return }
       // only cache spaces you can edit
       const isSpaceMember = context.rootGetters['currentUser/isSpaceMember'](remoteSpace)
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace'](remoteSpace)
       if (isSpaceMember && !remoteSpace.isRemoved) {
         console.log('🌌', remoteSpace)
         cache.saveSpace(remoteSpace)
+      } else if (!isSpaceMember && canEditSpace) {
+        context.commit('addNotification', { message: `This space is open, which means you can add to it too`, type: 'success', icon: 'open' }, { root: true })
       }
       return utils.normalizeRemoteSpace(remoteSpace)
     },
