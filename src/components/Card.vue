@@ -7,7 +7,7 @@ article(:style="position" :data-card-id="id")
     @touchend="showCardDetails"
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
-    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged, 'filtered': isFiltered, 'media-card': isMediaCard, 'read-only': !canEditCard}",
+    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged, 'filtered': isFiltered, 'media-card': isMediaCard, 'no-shadow': !canEditCard}",
     :style="{background: selectedColor}"
     :data-card-id="id"
     :data-card-x="x"
@@ -390,7 +390,7 @@ article
       .name
         background-color var(--secondary-background)
 
-  &.read-only
+  &.no-shadow
     &:hover,
     &:focus
       box-shadow none
