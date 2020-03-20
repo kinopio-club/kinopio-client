@@ -343,13 +343,13 @@ export default {
       context.commit('notifySignUpToEditOpenSpace', false, { root: true })
       // restore local
       context.commit('restoreSpace', emptySpace)
-      context.commit('restoreSpace', cachedSpace)
+      context.commit('restoreSpace', utils.normalizeSpace(cachedSpace))
       context.dispatch('updateSpacePageSize')
       context.commit('history/clear', null, { root: true })
       // restore remote
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (remoteSpace) {
-        context.commit('restoreSpace', remoteSpace)
+        context.commit('restoreSpace', utils.normalizeSpace(remoteSpace))
         context.dispatch('history/playback', null, { root: true })
         context.dispatch('checkIfShouldNotifySignUpToEditOpenSpace', remoteSpace)
         utils.updateWindowUrlAndTitle({
