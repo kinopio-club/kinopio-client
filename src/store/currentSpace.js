@@ -616,7 +616,7 @@ export default {
         endCardId: connection.endCardId
       })
       if (!connectionAlreadyExists) {
-        connection.id = nanoid()
+        connection.id = connection.id || nanoid()
         connection.spaceId = context.state.id
         connection.userId = context.rootState.currentUser.id
         connection.connectionTypeId = connectionType.id
@@ -653,6 +653,7 @@ export default {
         const endMatch = endCardId === cardId && multipleCardsSelectedIds.includes(startCardId)
         const connectedToSelected = startMatch || endMatch
         if (connectedToSelected) {
+          context.commit('removeFromMultipleConnectionsSelected', connection.id, { root: true })
           context.dispatch('removeConnection', connection)
         }
       })

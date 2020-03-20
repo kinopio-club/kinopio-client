@@ -48,6 +48,7 @@ dialog.narrow.multiple-selected-actions(
 </template>
 
 <script>
+import nanoid from 'nanoid'
 import last from 'lodash-es/last'
 import uniq from 'lodash-es/uniq'
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
@@ -235,20 +236,32 @@ export default {
       const newConnectionType = last(this.$store.state.currentSpace.connectionTypes)
       return defaultType || newConnectionType
     },
+    connectionAlreadyExists (startCardId, endCardId) {
+      const connections = this.$store.state.currentSpace.connections
+      const existingConnection = connections.find(connection => {
+        const isStart = connection.startCardId === startCardId
+        const isEnd = connection.endCardId === endCardId
+        return isStart && isEnd
+      })
+      return Boolean(existingConnection)
+    },
     connectCards () {
-      const connectionType = this.connectionType()
-      let connections = this.multipleCardsSelectedIds.map((cardId, index, array) => {
-        if (index + 1 < array.length) {
+      const cardIds = this.multipleCardsSelectedIds
+      let connections = cardIds.map((cardId, index) => {
+        if (index + 1 < cardIds.length) { // create connections for middle cards
           const startCardId = cardId
-          const endCardId = array[index + 1]
+          const endCardId = cardIds[index + 1]
+          if (this.connectionAlreadyExists(startCardId, endCardId)) { return }
+          const id = nanoid()
           const path = utils.connectionBetweenCards(startCardId, endCardId)
           return {
-            startCardId, endCardId, path
+            id, startCardId, endCardId, path
           }
         }
       })
       connections = connections.filter(Boolean)
       connections.forEach(connection => {
+        const connectionType = this.connectionType()
         this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
         this.$store.commit('addToMultipleConnectionsSelected', connection.id)
       })
