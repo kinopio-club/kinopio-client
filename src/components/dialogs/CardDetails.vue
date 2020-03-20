@@ -2,7 +2,7 @@
 dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDialogs" @keyup.stop.backspace="removeCard")
   section
     textarea.name(
-      v-if="canEditCard"
+      :disabled="!canEditCard"
       ref="name"
       rows="1"
       placeholder="Type text here, or paste a URL"
@@ -16,8 +16,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       data-type="name"
       maxlength="250"
     )
-    p(v-if="!canEditCard") {{name}}
-
     //- todo change esc to keydown if i want to bubble up to also resetting the tree, if it feels better irl
     button(:disabled="!canEditCard" @click="removeCard")
       img.icon(src="@/assets/remove.svg")
@@ -135,7 +133,7 @@ export default {
       document.querySelector(`.card[data-card-id="${this.card.id}"]`).focus()
     },
     removeCard () {
-      if (!this.isSpaceMember) { return }
+      if (!this.canEditCard) { return }
       this.$store.dispatch('currentSpace/removeCard', this.card)
       this.$store.commit('cardDetailsIsVisibleForCardId', '')
     },
