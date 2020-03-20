@@ -136,7 +136,11 @@ export default {
     },
     updateSpaces () {
       const spaces = cache.getAllSpaces()
-      this.spaces = spaces.filter(space => space.id !== this.currentSpace.id)
+      this.spaces = spaces.filter(space => {
+        const spaceIsNotCurrent = space.id !== this.currentSpace.id
+        const spaceHasId = Boolean(space.id)
+        return spaceIsNotCurrent && spaceHasId
+      })
       this.selectedSpace = this.spaces[0]
     },
     updateSelectedSpace (space) {
