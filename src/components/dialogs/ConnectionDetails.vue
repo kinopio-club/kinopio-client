@@ -1,41 +1,39 @@
 <template lang="pug">
 dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position" @click="closeColorPicker" ref="dialog")
   section(:style="{backgroundColor: typeColor}")
-    .row(v-if="canEditConnection")
+    .row
       .button-wrap
-        button.change-color(@click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
+        button.change-color(:disabled="!canEditConnection" @click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{backgroundColor: typeColor}")
         ColorPicker(:currentColor="typeColor" :visible="colorPickerIsVisible" @selectedColor="updateTypeColor")
-      input.type-name(placeholder="Connection" v-model="typeName" ref="typeName")
-    template(v-if="!canEditConnection")
-      p {{typeName}}
-      p.open-edit-message
-        span.badge.info
-          img.icon.open(src="@/assets/open.svg")
-          span In open spaces, you can only edit connections you've made
-
+      input.type-name(:disabled="!canEditConnection" placeholder="Connection" v-model="typeName" ref="typeName")
+    //- p(v-if="!canEditConnection") {{typeName}}
     .row
-      button(v-if="canEditConnection" :class="{active: labelIsVisible}" @click="toggleLabelIsVisible")
+      button(:disabled="!canEditConnection" :class="{active: labelIsVisible}" @click="toggleLabelIsVisible")
         img.icon(src="@/assets/view.svg")
         span Label
-
       label(:class="{active: isDefault}" @click.prevent="toggleDefault" @keydown.stop.enter="toggleDefault")
         input(type="checkbox" v-model="isDefault")
         span Default
 
-    button(v-if="canEditConnection" @click="removeConnection")
+    button(:disabled="!canEditConnection" @click="removeConnection")
       img.icon(src="@/assets/remove.svg")
       span Remove
 
-  section.results-actions(v-if="canEditConnection")
-    button(@click="addConnectionType")
+    p(v-if="!canEditConnection").open-edit-message
+      span.badge.info
+        img.icon.open(src="@/assets/open.svg")
+        span In open spaces, you can only edit connections you've made
+
+  section.results-actions
+    button(:disabled="!canEditConnection" @click="addConnectionType")
       img.icon(src="@/assets/add.svg")
       span Add
 
-  section.results-section(v-if="canEditConnection")
+  section.results-section
     ul.results-list
       template(v-for="(type in connectionTypes")
-        li(:class="{ active: connectionTypeIsActive(type) }" @click="changeConnectionType(type)" :key="type.id")
+        li(:class="{ active: connectionTypeIsActive(type), disabled: !canEditConnection }" @click="changeConnectionType(type)" :key="type.id")
           .badge(:style="{backgroundColor: type.color}" :class="{checked: connectionTypeIsDefault(type)}")
           .name {{type.name}}
 </template>

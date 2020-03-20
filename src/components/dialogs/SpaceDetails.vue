@@ -280,4 +280,5 @@ export default {
       display inline-block
   .explore-message
     display flex
+    margin-top 6px
 </style>

@@ -328,6 +328,9 @@ ul.results-list
     &.active
       background-color var(--secondary-active-background)
       box-shadow var(--active-inset-shadow)
+    &.disabled
+      opacity 0.5
+      pointer-events none
 
 .badge,
 code
