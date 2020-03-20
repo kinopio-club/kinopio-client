@@ -108,7 +108,7 @@ export default {
       })
     },
     editableConnections () {
-      const connections = this.connections // .filter(Boolean)
+      const connections = this.connections
       if (this.isSpaceMember) {
         return connections
       } else {
@@ -194,6 +194,8 @@ export default {
         return 'Remove All'
       } else if (this.multipleItemsSelected && this.canEditSome.any) {
         return 'Remove Some'
+      } else if (this.multipleItemsSelected) {
+        return 'Remove All'
       } else {
         return 'Remove'
       }
