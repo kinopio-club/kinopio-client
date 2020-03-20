@@ -9,29 +9,29 @@ dialog.narrow.multiple-selected-actions(
   section(v-if="multipleCardsIsSelected || connectionsIsSelected")
     .row(v-if="multipleCardsIsSelected")
       button(@click="connectCards") Connect
-      button(v-if="canEditSome" @click="disconnectCards") Disconnect
-    .row(v-if="connectionsIsSelected && canEditConnections")
+      button(:disabled="!canEditSome.cards" @click="disconnectCards") Disconnect
+    .row(v-if="connectionsIsSelected")
       .button-wrap
-        button.change-color(@click.stop="toggleMultipleConnectionsPickerVisible")
+        button.change-color(:disabled="!canEditSome.connections" @click.stop="toggleMultipleConnectionsPickerVisible")
           .segmented-colors.icon
             template(v-for="type in connectionTypes")
-              .current-color(:style="{ background: type.color}")
+              .current-color(:style="{ background: type.color }")
         MultipleConnectionsPicker(:visible="multipleConnectionsPickerVisible" :selectedConnections="editableConnections" :selectedConnectionTypes="editableConnectionTypes")
-      button(:class="{active: allLabelsAreVisible}" @click="toggleAllLabelsAreVisible")
+      button(:disabled="!canEditSome.connections" :class="{active: allLabelsAreVisible}" @click="toggleAllLabelsAreVisible")
         img.icon(src="@/assets/view.svg")
         span Labels
 
   section
     .row
-      button(v-if="canEditSome" @click="remove")
+      button(:disabled="!canEditSome.any" @click="remove")
         img.icon(src="@/assets/remove.svg")
         span {{ removeLabel }}
       .button-wrap
         button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
           span Export
         Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
-    .button-wrap(v-if="multipleCardsSelectedIds.length && canEditSome")
-      button(@click.stop="toggleMoveToSpaceIsVisible" :class="{ active: moveToSpaceIsVisible }")
+    .button-wrap(v-if="multipleCardsSelectedIds.length")
+      button(:disabled="!canEditAll.cards" @click.stop="toggleMoveToSpaceIsVisible" :class="{ active: moveToSpaceIsVisible }")
         img.icon.visit(src="@/assets/visit.svg")
         span Move
       MoveToSpace(:visible="moveToSpaceIsVisible")
@@ -41,10 +41,6 @@ dialog.narrow.multiple-selected-actions(
         span.badge.info
           img.icon.open(src="@/assets/open.svg")
           span In open spaces, you can only edit cards and connections you've made
-
-        // caneditmultiple space is open, not a member
-    //- [globe] can only perform bulk operations if you made the cards and connections that are selected
-
 </template>
 
 <script>
@@ -93,8 +89,7 @@ export default {
       })
     },
     editableCards () {
-      const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
-      if (isSpaceMember) {
+      if (this.isSpaceMember) {
         return this.cards
       } else {
         return this.cards.filter(card => {
@@ -102,63 +97,43 @@ export default {
         })
       }
     },
-    canEditCards () {
-      const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
-      if (isSpaceMember) { return true }
-      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
-      const cardsCreatedByCurrentUser = this.cards.filter(card => {
-        return this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](card)
-      })
-      if (canEditSpace && Boolean(cardsCreatedByCurrentUser.length)) { return true }
-      return false
-    },
 
     // connections
 
+    multipleConnectionsSelectedIds () { return this.$store.state.multipleConnectionsSelectedIds },
+    connectionsIsSelected () { return Boolean(this.multipleConnectionsSelectedIds.length) },
     connections () {
       return this.multipleConnectionsSelectedIds.map(id => {
         return this.$store.getters['currentSpace/connectionById'](id)
       })
     },
     editableConnections () {
-      const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
-      if (isSpaceMember) {
-        return this.connections
+      const connections = this.connections // .filter(Boolean)
+      if (this.isSpaceMember) {
+        return connections
       } else {
-        return this.connections.filter(connection => {
+        return connections.filter(connection => {
           return this.$store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
         })
       }
     },
-    multipleConnectionsSelectedIds () { return this.$store.state.multipleConnectionsSelectedIds },
     connectionTypes () {
-      return uniq(this.multipleConnectionsSelectedIds.map(id => {
+      const connectionTypes = uniq(this.multipleConnectionsSelectedIds.map(id => {
         const connection = this.$store.getters['currentSpace/connectionById'](id)
-        if (!connection) { return }
         return this.$store.getters['currentSpace/connectionTypeById'](connection.connectionTypeId)
       }))
+      return connectionTypes
     },
     editableConnectionTypes () {
       return uniq(this.editableConnections.map(connection => {
         return this.$store.getters['currentSpace/connectionTypeById'](connection.connectionTypeId)
       }))
     },
-    connectionsIsSelected () { return Boolean(this.multipleConnectionsSelectedIds.length) },
     allLabelsAreVisible () {
+      if (!this.editableConnections.length) { return }
       const connections = this.editableConnections
       const labelled = connections.filter(connection => connection.labelIsVisible)
       return labelled.length === connections.length
-    },
-    canEditConnections () {
-      const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
-      if (isSpaceMember) { return true }
-      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
-      const connectionsCreatedByCurrentUser = this.connections.filter(connection => {
-        return this.$store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
-      })
-      // const allConnectionsCreatedByCurrentUser = Boolean(connectionsCreatedByCurrentUser.length === this.connections.length)
-      if (canEditSpace && Boolean(connectionsCreatedByCurrentUser.length)) { return true }
-      return false
     },
 
     // all
@@ -168,9 +143,34 @@ export default {
       const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
       return spaceIsOpen && !isSpaceMember
     },
-
+    numberOfSelectedItemsCreatedByCurrentUser () {
+      const connections = this.connections.filter(Boolean)
+      const cards = this.cards.filter(Boolean)
+      const connectionsCreatedByCurrentUser = connections.filter(connection => {
+        return this.$store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
+      })
+      const cardsCreatedByCurrentUser = cards.filter(card => {
+        return this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](card)
+      })
+      return {
+        connections: connectionsCreatedByCurrentUser.length,
+        cards: cardsCreatedByCurrentUser.length
+      }
+    },
+    isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     canEditSome () {
-      return this.canEditCards || this.canEditConnections
+      if (this.isSpaceMember) { return { cards: true, connections: true, any: true } }
+      const cards = this.numberOfSelectedItemsCreatedByCurrentUser.cards > 0
+      const connections = this.numberOfSelectedItemsCreatedByCurrentUser.connections > 0
+      const any = cards || connections
+      return { cards, connections, any }
+    },
+    canEditAll () {
+      if (this.isSpaceMember) { return { cards: true, connections: true, all: true } }
+      const cards = this.multipleCardsSelectedIds.length === this.numberOfSelectedItemsCreatedByCurrentUser.cards
+      const connections = this.multipleConnectionsSelectedIds.length === this.numberOfSelectedItemsCreatedByCurrentUser.connections
+      const all = cards && connections
+      return { cards, connections, all }
     },
     multipleItemsSelected () {
       const total = this.multipleConnectionsSelectedIds.length + this.multipleCardsSelectedIds.length
@@ -190,8 +190,10 @@ export default {
       return { 'cards': cards }
     },
     removeLabel () {
-      if (this.multipleItemsSelected) {
+      if (this.multipleItemsSelected && this.canEditAll.all) {
         return 'Remove All'
+      } else if (this.multipleItemsSelected && this.canEditSome.any) {
+        return 'Remove Some'
       } else {
         return 'Remove'
       }
@@ -295,9 +297,6 @@ export default {
           this.scrollIntoView()
           this.closeDialogs()
         }
-        // else {
-        //   this.$store.commit('clearMultipleSelected')
-        // }
       })
     }
   }
