@@ -96,6 +96,9 @@ textarea
   border-radius 0
   padding 0
   margin-bottom 10px
+  &:disabled
+    color var(--primary)
+    border-bottom 0
 
 button,
 label // used for checkbox buttons

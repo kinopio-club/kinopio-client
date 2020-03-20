@@ -16,9 +16,6 @@ export default {
     window.addEventListener('keydown', this.handleMetaKeyShortcuts)
   },
   computed: {
-    isSpaceMember () {
-      return this.$store.getters['currentUser/isSpaceMember']()
-    }
   },
   methods: {
     handleShortcuts (event) {
@@ -349,16 +346,40 @@ export default {
       this.$store.commit('cardDetailsIsVisibleForCardId', '')
     },
 
+    canEditCardById (cardId) {
+      const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
+      const card = this.$store.getters['currentSpace/cardById'](cardId)
+      const cardIsCreatedByCurrentUser = this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](card)
+      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
+      if (isSpaceMember) { return true }
+      if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
+      console.log('canEditCardById false')
+      return false
+    },
+
+    canEditConnectionById (connectionId) {
+      const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
+      const connection = this.$store.getters['currentSpace/connectionById'](connectionId)
+      const connectionIsCreatedByCurrentUser = this.$store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
+      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
+      if (isSpaceMember) { return true }
+      if (canEditSpace && connectionIsCreatedByCurrentUser) { return true }
+      return false
+    },
+
     remove () {
-      if (!this.isSpaceMember) { return }
       const selectedConnectionIds = this.$store.state.multipleConnectionsSelectedIds
       const cardIds = this.focusedCardIds()
       selectedConnectionIds.forEach(connectionId => {
-        const connection = this.$store.getters['currentSpace/connectionById'](connectionId)
-        this.$store.dispatch('currentSpace/removeConnection', connection)
+        if (this.canEditConnectionById(connectionId)) {
+          const connection = this.$store.getters['currentSpace/connectionById'](connectionId)
+          this.$store.dispatch('currentSpace/removeConnection', connection)
+        }
       })
       cardIds.forEach(cardId => {
-        this.removeCardById(cardId)
+        if (this.canEditCardById(cardId)) {
+          this.removeCardById(cardId)
+        }
       })
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
       this.clearAllSelectedCards()
