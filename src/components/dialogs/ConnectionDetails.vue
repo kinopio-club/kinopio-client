@@ -3,33 +3,37 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
   section(:style="{backgroundColor: typeColor}")
     .row
       .button-wrap
-        button.change-color(@click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
+        button.change-color(:disabled="!canEditConnection" @click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{backgroundColor: typeColor}")
         ColorPicker(:currentColor="typeColor" :visible="colorPickerIsVisible" @selectedColor="updateTypeColor")
-      input.type-name(placeholder="Connection" v-model="typeName")
+      input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeName")
 
     .row
-      button(:class="{active: labelIsVisible}" @click="toggleLabelIsVisible")
+      button(:disabled="!canEditConnection" :class="{active: labelIsVisible}" @click="toggleLabelIsVisible")
         img.icon(src="@/assets/view.svg")
         span Label
-
       label(:class="{active: isDefault}" @click.prevent="toggleDefault" @keydown.stop.enter="toggleDefault")
         input(type="checkbox" v-model="isDefault")
         span Default
 
-    button(v-if="isSpaceMember" @click="removeConnection")
+    button(:disabled="!canEditConnection" @click="removeConnection")
       img.icon(src="@/assets/remove.svg")
       span Remove
 
+    p(v-if="!canEditConnection").open-edit-message
+      span.badge.info
+        img.icon.open(src="@/assets/open.svg")
+        span In open spaces, you can only edit connections you've made
+
   section.results-actions
-    button(@click="addConnectionType")
+    button(:disabled="!canEditConnection" @click="addConnectionType")
       img.icon(src="@/assets/add.svg")
       span Add
 
   section.results-section
     ul.results-list
       template(v-for="(type in connectionTypes")
-        li(:class="{ active: connectionTypeIsActive(type) }" @click="changeConnectionType(type)" :key="type.id")
+        li(:class="{ active: connectionTypeIsActive(type), disabled: !canEditConnection }" @click="changeConnectionType(type)" :key="type.id")
           .badge(:style="{backgroundColor: type.color}" :class="{checked: connectionTypeIsDefault(type)}")
           .name {{type.name}}
 </template>
@@ -53,12 +57,11 @@ export default {
     }
   },
   computed: {
-    visible () {
-      return Boolean(this.$store.state.connectionDetailsIsVisibleForConnectionId)
-    },
-    isSpaceMember () {
-      return this.$store.getters['currentUser/isSpaceMember']()
-    },
+    visible () { return Boolean(this.$store.state.connectionDetailsIsVisibleForConnectionId) },
+    labelIsVisible () { return this.currentConnection.labelIsVisible },
+    currentConnectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.currentConnection.connectionTypeId) },
+    connectionTypes () { return this.$store.state.currentSpace.connectionTypes },
+    typeColor () { return this.currentConnectionType.color },
     position () {
       const position = this.$store.state.connectionDetailsPosition
       return {
@@ -72,17 +75,13 @@ export default {
         return connection.id === this.$store.state.connectionDetailsIsVisibleForConnectionId
       })
     },
-    labelIsVisible () {
-      return this.currentConnection.labelIsVisible
-    },
-    currentConnectionType () {
-      return this.$store.getters['currentSpace/connectionTypeById'](this.currentConnection.connectionTypeId)
-    },
-    connectionTypes () {
-      return this.$store.state.currentSpace.connectionTypes
-    },
-    typeColor () {
-      return this.currentConnectionType.color
+    canEditConnection () {
+      const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
+      const connectionIsCreatedByCurrentUser = this.$store.getters['currentUser/connectionIsCreatedByCurrentUser'](this.currentConnection)
+      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
+      if (isSpaceMember) { return true }
+      if (canEditSpace && connectionIsCreatedByCurrentUser) { return true }
+      return false
     },
     typeName: {
       get () {
@@ -155,6 +154,13 @@ export default {
       }
       this.$store.dispatch('currentSpace/updateConnectionType', connectionType)
     },
+    focusName () {
+      this.$nextTick(() => {
+        const element = this.$refs.typeName
+        if (!element) { return }
+        element.focus()
+      })
+    },
     scrollIntoView () {
       const element = this.$refs.dialog
       scrollIntoView(element, {
@@ -162,10 +168,21 @@ export default {
         scrollMode: 'if-needed'
       })
     },
+    scrollIntoViewAndFocus () {
+      const element = this.$refs.typeName
+      const length = this.typeName.length
+      this.scrollIntoView()
+      if (utils.shouldPreventAutofocus()) { return }
+      this.$nextTick(() => {
+        this.focusName()
+        if (length && element) {
+          element.setSelectionRange(length, length)
+        }
+      })
+    },
     updateView () {
       this.updateDefaultConnectionType()
       this.colorPickerIsVisible = false
-      this.scrollIntoView()
     }
   },
   watch: {
@@ -174,6 +191,7 @@ export default {
         this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
         if (visible) {
           this.updateView()
+          this.scrollIntoViewAndFocus()
         }
       })
     },
@@ -181,6 +199,7 @@ export default {
       this.$nextTick(() => {
         if (this.visible) {
           this.updateView()
+          this.scrollIntoView()
         } else {
           this.$store.commit('shouldHideConnectionOutline', false)
         }
@@ -194,4 +213,8 @@ export default {
 .connection-details
   .type-name
     margin-left 6px
+  .open-edit-message
+    margin-bottom 10px
+    .badge
+      margin-right 0
 </style>

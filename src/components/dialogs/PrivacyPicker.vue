@@ -68,6 +68,4 @@ export default {
     max-height calc(92vh - 120px)
   .description
     margin-top 3px
-  .icon.open
-    vertical-align -2px
 </style>

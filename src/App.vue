@@ -96,6 +96,9 @@ textarea
   border-radius 0
   padding 0
   margin-bottom 10px
+  &:disabled
+    color var(--primary)
+    border-bottom 0
 
 button,
 label // used for checkbox buttons
@@ -144,6 +147,20 @@ label // used for checkbox buttons
     width 14px
     vertical-align -3px
     margin-left 3px
+  &:disabled
+    cursor default
+    color var(--primary)
+    opacity 0.5
+    &:hover,
+    &:active
+      box-shadow none
+      background-color var(--primary-background)
+    &.active
+      &:hover,
+      &:active
+        box-shadow var(--button-active-inset-shadow)
+        background var(--secondary-active-background)
+
 label
   padding-bottom 4px
   display inline-block
@@ -316,6 +333,9 @@ ul.results-list
     &.active
       background-color var(--secondary-active-background)
       box-shadow var(--active-inset-shadow)
+    &.disabled
+      opacity 0.5
+      pointer-events none
 
 .badge,
 code
@@ -365,7 +385,8 @@ code
 .marker
   background-image url('assets/marker.svg')
 
-.updated
+.updated,
+.open
   vertical-align -2px
 
 .visit

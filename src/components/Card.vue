@@ -7,7 +7,7 @@ article(:style="position" :data-card-id="id")
     @touchend="showCardDetails"
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
-    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged, 'filtered': isFiltered, 'media-card': isMediaCard}",
+    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged, 'filtered': isFiltered, 'media-card': isMediaCard, 'no-shadow': !canEditCard}",
     :style="{background: selectedColor}"
     :data-card-id="id"
     :data-card-x="x"
@@ -56,11 +56,12 @@ export default {
     card: Object
   },
   computed: {
-    spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
+    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     id () { return this.card.id },
     x () { return this.card.x },
     y () { return this.card.y },
     z () { return this.card.z },
+    connectionTypes () { return this.$store.getters['currentSpace/cardConnectionTypes'](this.id) },
     name () { return this.card.name },
     frameId () { return this.card.frameId },
     position () {
@@ -70,8 +71,12 @@ export default {
         zIndex: this.z
       }
     },
-    isSpaceMember () {
-      return this.$store.getters['currentUser/isSpaceMember']()
+    canEditCard () {
+      const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
+      const cardIsCreatedByCurrentUser = this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](this.card)
+      if (isSpaceMember) { return true }
+      if (this.canEditSpace && cardIsCreatedByCurrentUser) { return true }
+      return false
     },
     normalizedName () {
       if (this.urlIsImage) {
@@ -131,9 +136,6 @@ export default {
       } else {
         return undefined
       }
-    },
-    connectionTypes () {
-      return this.$store.getters['currentSpace/cardConnectionTypes'](this.id)
     },
     hasConnections () {
       const connections = this.$store.getters['currentSpace/cardConnections'](this.id)
@@ -216,8 +218,9 @@ export default {
       return longestLineLength
     },
     removeCard () {
-      if (!this.isSpaceMember) { return }
-      this.$store.dispatch('currentSpace/removeCard', this.card)
+      if (this.canEditCard) {
+        this.$store.dispatch('currentSpace/removeCard', this.card)
+      }
     },
     createCurrentConnection (event) {
       const cursor = utils.cursorPositionInViewport(event)
@@ -234,7 +237,7 @@ export default {
       }
     },
     startConnecting (event) {
-      if (this.spaceIsReadOnly) { return }
+      if (!this.canEditSpace) { return }
       this.$store.commit('closeAllDialogs')
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.commit('clearMultipleSelected')
@@ -251,7 +254,7 @@ export default {
       }
     },
     startDraggingCard () {
-      if (this.spaceIsReadOnly) { return }
+      if (!this.canEditCard) { return }
       if (this.$store.state.currentUserIsDrawingConnection) { return }
       this.$store.commit('closeAllDialogs')
       this.$store.commit('currentUserIsDraggingCard', true)
@@ -262,10 +265,6 @@ export default {
       this.$store.dispatch('currentSpace/incrementSelectedCardsZ')
     },
     showCardDetails (event) {
-      if (this.spaceIsReadOnly) {
-        this.$store.commit('notifyReadOnlyJiggle')
-        return
-      }
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.commit('closeAllDialogs')
@@ -386,19 +385,10 @@ article
       .name
         background-color var(--secondary-background)
 
-.is-read-only
-  .card,
-  .connector
+  &.no-shadow
     &:hover,
-    &.hover,
-    &:active,
-    &.active
+    &:focus
       box-shadow none
-      cursor default
-      > button
-        box-shadow none
-        cursor default
-        background-color var(--secondary-background)
 
 .jiggle
   animation jiggle 0.5s infinite ease-out forwards

@@ -291,6 +291,12 @@ export default new Vuex.Store({
         state.multipleConnectionsSelectedIds.push(connectionId)
       }
     },
+    removeFromMultipleConnectionsSelected: (state, connectionId) => {
+      utils.typeCheck(connectionId, 'string')
+      state.multipleConnectionsSelectedIds = state.multipleConnectionsSelectedIds.filter(id => {
+        return id !== connectionId
+      })
+    },
     clearMultipleSelected: (state) => {
       state.multipleCardsSelectedIds = []
       state.multipleConnectionsSelectedIds = []

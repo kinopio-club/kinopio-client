@@ -1,7 +1,8 @@
 <template lang="pug">
 dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDialogs" @keyup.stop.backspace="removeCard")
-  section.meta-section
+  section
     textarea.name(
+      :disabled="!canEditCard"
       ref="name"
       rows="1"
       placeholder="Type text here, or paste a URL"
@@ -16,13 +17,19 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       maxlength="250"
     )
     //- todo change esc to keydown if i want to bubble up to also resetting the tree, if it feels better irl
-    button(v-if="isSpaceMember" @click="removeCard")
+    button(:disabled="!canEditCard" @click="removeCard")
       img.icon(src="@/assets/remove.svg")
       span Remove
     .button-wrap
-      button(@click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
+      button(:disabled="!canEditCard" @click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
         span Frames
       FramePicker(:visible="framePickerIsVisible" :card="card")
+
+    p(v-if="!canEditCard")
+      span.badge.info
+        img.icon.open(src="@/assets/open.svg")
+        span In open spaces, you can only move and edit cards you've made
+
 </template>
 
 <script>
@@ -30,20 +37,6 @@ import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil awaiti
 
 import utils from '@/utils.js'
 import FramePicker from '@/components/dialogs/FramePicker.vue'
-
-// prevents jarring frame skips caused by simultaneously scrolling a card into view, zooming in, and showing an onscreen keyboard
-const shouldPreventAutofocus = () => {
-  const isMobile = utils.isMobile()
-  const pinchZoomRatio = document.documentElement.clientWidth / window.innerWidth
-  const pinchZoomRatioShouldNotFocusZoom = !utils.isBetween({
-    value: pinchZoomRatio,
-    min: 0.8,
-    max: 1.3
-  })
-  if (isMobile && pinchZoomRatioShouldNotFocusZoom) {
-    return true
-  }
-}
 
 export default {
   name: 'CardDetails',
@@ -80,11 +73,14 @@ export default {
     }
   },
   computed: {
-    visible () {
-      return this.$store.state.cardDetailsIsVisibleForCardId === this.card.id
-    },
-    isSpaceMember () {
-      return this.$store.getters['currentUser/isSpaceMember']()
+    visible () { return this.$store.state.cardDetailsIsVisibleForCardId === this.card.id },
+    isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
+    cardIsCreatedByCurrentUser () { return this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](this.card) },
+    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
+    canEditCard () {
+      if (this.isSpaceMember) { return true }
+      if (this.canEditSpace && this.cardIsCreatedByCurrentUser) { return true }
+      return false
     },
     name: {
       get () {
@@ -123,7 +119,7 @@ export default {
       document.querySelector(`.card[data-card-id="${this.card.id}"]`).focus()
     },
     removeCard () {
-      if (!this.isSpaceMember) { return }
+      if (!this.canEditCard) { return }
       this.$store.dispatch('currentSpace/removeCard', this.card)
       this.$store.commit('cardDetailsIsVisibleForCardId', '')
     },
@@ -160,10 +156,10 @@ export default {
       const element = this.$refs.name
       const length = this.name.length
       this.scrollIntoView()
-      if (shouldPreventAutofocus()) { return }
+      if (utils.shouldPreventAutofocus()) { return }
       this.$nextTick(() => {
         this.focusName()
-        if (length) {
+        if (length && element) {
           element.setSelectionRange(length, length)
         }
       })
@@ -190,7 +186,7 @@ export default {
 
 <style lang="stylus">
 .card-details
-  .meta-section
+  > section
     background-color var(--secondary-background)
   textarea
     margin-bottom 5px

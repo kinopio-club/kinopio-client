@@ -320,9 +320,12 @@ export default {
       if (remoteSpace.id !== context.state.id) { return }
       // only cache spaces you can edit
       const isSpaceMember = context.rootGetters['currentUser/isSpaceMember'](remoteSpace)
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace'](remoteSpace)
       if (isSpaceMember && !remoteSpace.isRemoved) {
         console.log('🌌', remoteSpace)
         cache.saveSpace(remoteSpace)
+      } else if (!isSpaceMember && canEditSpace) {
+        context.commit('addNotification', { message: 'This space is open, which means you can add to it too', type: 'success', icon: 'open' }, { root: true })
       }
       return utils.normalizeRemoteSpace(remoteSpace)
     },
@@ -340,13 +343,13 @@ export default {
       context.commit('notifySignUpToEditOpenSpace', false, { root: true })
       // restore local
       context.commit('restoreSpace', emptySpace)
-      context.commit('restoreSpace', cachedSpace)
+      context.commit('restoreSpace', utils.normalizeSpace(cachedSpace))
       context.dispatch('updateSpacePageSize')
       context.commit('history/clear', null, { root: true })
       // restore remote
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (remoteSpace) {
-        context.commit('restoreSpace', remoteSpace)
+        context.commit('restoreSpace', utils.normalizeSpace(remoteSpace))
         context.dispatch('history/playback', null, { root: true })
         context.dispatch('checkIfShouldNotifySignUpToEditOpenSpace', remoteSpace)
         utils.updateWindowUrlAndTitle({
@@ -468,7 +471,8 @@ export default {
         y: position.y,
         z: cards.length + 1,
         name: '',
-        frameId: 0
+        frameId: 0,
+        userId: context.rootState.currentUser.id
       }
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       context.commit('createCard', card)
@@ -615,8 +619,9 @@ export default {
         endCardId: connection.endCardId
       })
       if (!connectionAlreadyExists) {
-        connection.id = nanoid()
+        connection.id = connection.id || nanoid()
         connection.spaceId = context.state.id
+        connection.userId = context.rootState.currentUser.id
         connection.connectionTypeId = connectionType.id
         context.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
         context.commit('history/add', { name: 'addConnection', body: connection }, { root: true })
@@ -651,6 +656,7 @@ export default {
         const endMatch = endCardId === cardId && multipleCardsSelectedIds.includes(startCardId)
         const connectedToSelected = startMatch || endMatch
         if (connectedToSelected) {
+          context.commit('removeFromMultipleConnectionsSelected', connection.id, { root: true })
           context.dispatch('removeConnection', connection)
         }
       })

@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDialogs")
   section
-    p Move {{cardsCount}} Cards To
+    p Move {{cardsCount}} {{pluralCard}} To
   section
     template(v-if="spaces.length")
       .row
@@ -62,6 +62,10 @@ export default {
     },
     currentSpace () {
       return this.$store.state.currentSpace
+    },
+    pluralCard () {
+      const condition = this.multipleCardsSelectedIds.length !== 1
+      return utils.pluralize('Card', condition)
     }
   },
   methods: {
@@ -132,7 +136,11 @@ export default {
     },
     updateSpaces () {
       const spaces = cache.getAllSpaces()
-      this.spaces = spaces.filter(space => space.id !== this.currentSpace.id)
+      this.spaces = spaces.filter(space => {
+        const spaceIsNotCurrent = space.id !== this.currentSpace.id
+        const spaceHasId = Boolean(space.id)
+        return spaceIsNotCurrent && spaceHasId
+      })
       this.selectedSpace = this.spaces[0]
     },
     updateSelectedSpace (space) {

@@ -85,6 +85,9 @@ export default {
     margin-left 0
     flex none
 
+  .badge
+    margin-left 0
+
   .badge.status
     display inline-flex
     margin 0

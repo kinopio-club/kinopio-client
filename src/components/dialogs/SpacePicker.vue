@@ -94,9 +94,4 @@ export default {
 .space-picker
   .results-section
     padding-top 4px
-  .lock,
-  .badge
-    margin-left 6px
-    img
-      vertical-align middle
 </style>
