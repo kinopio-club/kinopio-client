@@ -315,9 +315,8 @@ export default {
   normalizeSpace (space) {
     const connections = space.connections.filter(connection => {
       // const typeIds = space.connectionTypes.map(type => type.id)
-      const hasId = Boolean(connection.id)
       const hasTypeId = Boolean(connection.connectionTypeId)
-      return hasId && hasTypeId
+      return hasTypeId
     })
     space.connections = connections
     return space

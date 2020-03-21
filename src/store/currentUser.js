@@ -32,7 +32,7 @@ export default {
       const userIsSignedIn = getters.isSignedIn
       const canEditOpenSpace = spaceIsOpen && userIsSignedIn
       const isSpaceMember = getters.isSpaceMember(space)
-      return Boolean(canEditOpenSpace || isSpaceMember)
+      return canEditOpenSpace || isSpaceMember
     },
     cardIsCreatedByCurrentUser: (state, getters, rootState) => (card) => {
       return state.id === card.userId

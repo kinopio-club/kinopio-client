@@ -353,7 +353,6 @@ export default {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (isSpaceMember) { return true }
       if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
-      console.log('canEditCardById false')
       return false
     },
 

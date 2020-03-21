@@ -6,8 +6,8 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
         button.change-color(:disabled="!canEditConnection" @click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{backgroundColor: typeColor}")
         ColorPicker(:currentColor="typeColor" :visible="colorPickerIsVisible" @selectedColor="updateTypeColor")
-      input.type-name(:disabled="!canEditConnection" placeholder="Connection" v-model="typeName" ref="typeName")
-    //- p(v-if="!canEditConnection") {{typeName}}
+      input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeName")
+
     .row
       button(:disabled="!canEditConnection" :class="{active: labelIsVisible}" @click="toggleLabelIsVisible")
         img.icon(src="@/assets/view.svg")
@@ -231,7 +231,4 @@ export default {
     margin-bottom 10px
     .badge
       margin-right 0
-  // .meta
-    // .badge
-    //   margin-right 0
 </style>
