@@ -38,20 +38,6 @@ import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil awaiti
 import utils from '@/utils.js'
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 
-// prevents jarring frame skips caused by simultaneously scrolling a card into view, zooming in, and showing an onscreen keyboard
-const shouldPreventAutofocus = () => {
-  const isMobile = utils.isMobile()
-  const pinchZoomRatio = document.documentElement.clientWidth / window.innerWidth
-  const pinchZoomRatioShouldNotFocusZoom = !utils.isBetween({
-    value: pinchZoomRatio,
-    min: 0.8,
-    max: 1.3
-  })
-  if (isMobile && pinchZoomRatioShouldNotFocusZoom) {
-    return true
-  }
-}
-
 export default {
   name: 'CardDetails',
   components: {
@@ -170,7 +156,7 @@ export default {
       const element = this.$refs.name
       const length = this.name.length
       this.scrollIntoView()
-      if (shouldPreventAutofocus()) { return }
+      if (utils.shouldPreventAutofocus()) { return }
       this.$nextTick(() => {
         this.focusName()
         if (length && element) {

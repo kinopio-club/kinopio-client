@@ -325,7 +325,7 @@ export default {
         console.log('🌌', remoteSpace)
         cache.saveSpace(remoteSpace)
       } else if (!isSpaceMember && canEditSpace) {
-        context.commit('addNotification', { message: `This space is open, which means you can add to it too`, type: 'success', icon: 'open' }, { root: true })
+        context.commit('addNotification', { message: 'This space is open, which means you can add to it too', type: 'success', icon: 'open' }, { root: true })
       }
       return utils.normalizeRemoteSpace(remoteSpace)
     },
