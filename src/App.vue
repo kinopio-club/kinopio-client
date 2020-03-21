@@ -155,6 +155,11 @@ label // used for checkbox buttons
     &:active
       box-shadow none
       background-color var(--primary-background)
+    &.active
+      &:hover,
+      &:active
+        box-shadow var(--button-active-inset-shadow)
+        background var(--secondary-active-background)
 
 label
   padding-bottom 4px
