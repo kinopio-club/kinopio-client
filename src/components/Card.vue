@@ -253,8 +253,7 @@ export default {
         this.$store.commit('clearMultipleSelected')
       }
     },
-    startDraggingCard (event) {
-      event.target.blur()
+    startDraggingCard () {
       if (!this.canEditCard) { return }
       if (this.$store.state.currentUserIsDrawingConnection) { return }
       this.$store.commit('closeAllDialogs')
@@ -266,10 +265,6 @@ export default {
       this.$store.dispatch('currentSpace/incrementSelectedCardsZ')
     },
     showCardDetails (event) {
-      // if (!this.canEditCard) {
-      //   this.$store.commit('notifyReadOnlyJiggle')
-      //   return
-      // }
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.commit('closeAllDialogs')

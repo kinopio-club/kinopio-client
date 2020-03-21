@@ -6,7 +6,7 @@
   :data-id="id"
   @mouseover="hover = true"
   @mouseleave="hover = false"
-  :class="{filtered: isFiltered, 'read-only': spaceIsReadOnly}"
+  :class="{filtered: isFiltered, 'read-only': !canEditSpace}"
   ref="label"
 )
   span {{typeName}}
@@ -38,7 +38,7 @@ export default {
     typeColor () { return this.connectionType.color },
     typeName () { return this.connectionType.name },
     path () { return this.connection.path },
-    spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
+    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
 
     // filters
     filtersIsActive () {
@@ -75,7 +75,7 @@ export default {
   methods: {
     // same as Connection method
     showConnectionDetails (event) {
-      if (this.spaceIsReadOnly) { return }
+      if (!this.canEditSpace) { return }
       const detailsPosition = utils.cursorPositionInPage(event)
       this.$store.commit('closeAllDialogs')
       this.$store.commit('connectionDetailsIsVisibleForConnectionId', this.id)
@@ -117,7 +117,7 @@ export default {
       this.setPosition()
     },
     hover (value) {
-      if (this.spaceIsReadOnly) { return }
+      if (!this.canEditSpace) { return }
       if (value) {
         this.$store.commit('currentUserIsHoveringOverConnectionId', this.id)
       } else {
