@@ -6,7 +6,7 @@
   :data-id="id"
   @mouseover="hover = true"
   @mouseleave="hover = false"
-  :class="{filtered: isFiltered, 'read-only': !canEditSpace}"
+  :class="{filtered: isFiltered, 'cursor-default': !canEditSpace}"
   ref="label"
 )
   span {{typeName}}
@@ -134,6 +134,6 @@ export default {
   pointer-events all
   cursor pointer
   position absolute
-  &.read-only
+  &.cursor-default
     cursor default
 </style>
