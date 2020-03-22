@@ -289,6 +289,7 @@ export default {
         context.dispatch('updateUserLastSpaceId')
         context.commit('notifyReadOnly', false, { root: true })
         context.commit('notifyNewUser', false, { root: true })
+        context.commit('notifySignUpToEditOpenSpace', false, { root: true })
       })
     },
     getRemoteSpace: async (context, space) => {
