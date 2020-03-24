@@ -236,7 +236,7 @@ header
       .down-arrow
         transform translateY(5px)
     .development
-      filter hue-rotate(-290deg)
+      filter hue-rotate(-10deg)
   .space-details-wrap
     max-width 250px
     @media(max-width 414px)
