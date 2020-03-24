@@ -3,7 +3,7 @@ header
   nav
     .logo-about
       .logo(alt="kinopio logo" @click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop :class="{active : aboutIsVisible}" tabindex="0")
-        .logo-image
+        .logo-image(:class="{development: isDevelopment}")
           .label-badge(v-if="shouldShowNewStuffIsUpdated")
             span NEW
         img.down-arrow(src="@/assets/down-arrow.svg")
@@ -154,6 +154,13 @@ export default {
       })
       if (!privacyState) { return }
       return privacyState.name
+    },
+    isDevelopment () {
+      if (process.env.NODE_ENV === 'development') {
+        return true
+      } else {
+        return false
+      }
     }
   },
   methods: {
@@ -228,6 +235,8 @@ header
     &.active
       .down-arrow
         transform translateY(5px)
+    .development
+      filter hue-rotate(-290deg)
   .space-details-wrap
     max-width 250px
     @media(max-width 414px)
