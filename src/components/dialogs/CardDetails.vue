@@ -147,6 +147,8 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
+      const isMobile = utils.isMobile()
+      if (!isMobile) { return }
       scrollIntoView(element, {
         behavior: 'smooth',
         scrollMode: 'if-needed'
@@ -156,7 +158,7 @@ export default {
       const element = this.$refs.name
       const length = this.name.length
       this.scrollIntoView()
-      if (utils.shouldPreventAutofocus()) { return }
+      // if (utils.shouldPreventAutofocus()) { return }
       this.$nextTick(() => {
         this.focusName()
         if (length && element) {
