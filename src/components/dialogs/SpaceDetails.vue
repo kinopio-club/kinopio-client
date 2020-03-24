@@ -237,10 +237,18 @@ export default {
       })
       this.spaces = userSpaces
     },
+    pruneCachedSpaces (remoteSpaces) {
+      const remoteSpaceIds = remoteSpaces.map(space => space.id)
+      const spacesToRemove = this.spaces.filter(space => !remoteSpaceIds.includes(space.id))
+      spacesToRemove.forEach(spaceToRemove => {
+        cache.removeSpace(spaceToRemove)
+      })
+    },
     async updateWithRemoteSpaces () {
-      const spaces = await this.$store.dispatch('api/getUserSpaces')
-      if (!spaces) { return }
-      this.spaces = spaces
+      const remoteSpaces = await this.$store.dispatch('api/getUserSpaces')
+      if (!remoteSpaces) { return }
+      this.pruneCachedSpaces(remoteSpaces)
+      this.spaces = remoteSpaces
     },
     clearFilter () {
       this.filter = ''
