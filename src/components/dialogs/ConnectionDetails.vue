@@ -172,7 +172,7 @@ export default {
       const element = this.$refs.typeName
       const length = this.typeName.length
       this.scrollIntoView()
-      if (utils.shouldPreventAutofocus()) { return }
+      if (utils.isMobile()) { return }
       this.$nextTick(() => {
         this.focusName()
         if (length && element) {
@@ -186,20 +186,12 @@ export default {
     }
   },
   watch: {
-    visible (visible) {
-      this.$nextTick(() => {
-        this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
-        if (visible) {
-          this.updateView()
-          this.scrollIntoViewAndFocus()
-        }
-      })
-    },
     currentConnection (current) {
+      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
       this.$nextTick(() => {
         if (this.visible) {
           this.updateView()
-          this.scrollIntoView()
+          this.scrollIntoViewAndFocus()
         } else {
           this.$store.commit('shouldHideConnectionOutline', false)
         }
