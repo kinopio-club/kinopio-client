@@ -58,6 +58,24 @@ export default new Router({
         store.dispatch('currentUser/updateArenaAccessToken', arenaReturnedCode)
       }
     }, {
+      path: '/invite',
+      name: 'invite',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        const urlParams = new URLSearchParams(window.location.search)
+        const user = store.state.currentUser
+        console.log('🍆invite user to spaceid w collabkey', user, urlParams.get('spaceId'), urlParams.get('collaboratorKey'))
+
+        // const arenaReturnedCode = urlParams.get('code')
+        // ask api: if this collaborator key is a match, then add to space and load space
+
+        next()
+        // window.history.replaceState({}, document.title, window.location.origin)
+
+        // store.dispatch('currentUser/updateArenaAccessToken', arenaReturnedCode)
+      }
+
+    }, {
       path: '/:space',
       component: Space,
       beforeEnter: (to, from, next) => {

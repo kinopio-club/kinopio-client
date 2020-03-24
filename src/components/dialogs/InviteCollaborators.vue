@@ -47,7 +47,8 @@ export default {
     url: {
       get () {
         const collaboratorKey = this.$store.state.currentSpace.collaboratorKey
-        return `${window.location.href}?collaboratorKey=${collaboratorKey}`
+        const spaceId = this.$store.state.currentSpace.id
+        return `${window.location.origin}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}`
       }
     }
 
