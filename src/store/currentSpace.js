@@ -549,7 +549,7 @@ export default {
           id: space.id
         } }, { root: true })
       space.isRemoved = false
-      context.dispatch('changeSpace', space)
+      context.dispatch('changeSpace', { space })
     },
     dragCards: (context, options) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
