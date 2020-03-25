@@ -26,9 +26,12 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       FramePicker(:visible="framePickerIsVisible" :card="card")
 
     p(v-if="!canEditCard")
-      span.badge.info
+      span.badge.info(v-if="spacePrivacyIsOpen")
         img.icon.open(src="@/assets/open.svg")
         span In open spaces, you can only move and edit cards you've made
+      span.badge.info(v-if="spacePrivacyIsClosed")
+        img.icon.unlock(src="@/assets/unlock.svg")
+        span To edit closed spaces, you'll need to be invited
 
 </template>
 
@@ -76,6 +79,8 @@ export default {
     visible () { return this.$store.state.cardDetailsIsVisibleForCardId === this.card.id },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     cardIsCreatedByCurrentUser () { return this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](this.card) },
+    spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
+    spacePrivacyIsClosed () { return this.$store.state.currentSpace.privacy === 'closed' },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     canEditCard () {
       if (this.isSpaceMember) { return true }

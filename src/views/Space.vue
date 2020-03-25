@@ -1,6 +1,6 @@
 <template lang="pug">
 main.space(
-  :class="{'is-interacting': isInteracting, 'is-painting': isPainting, 'is-read-only': spaceIsReadOnly}"
+  :class="{'is-interacting': isInteracting, 'is-painting': isPainting}"
   @mousedown="initInteractions"
   @touchstart="initInteractions"
   :style="size"
@@ -470,21 +470,21 @@ export default {
   *
     pointer-events: none !important
 
-.is-read-only
-  .card,
-  .connector
-    &:hover,
-    &.hover,
-    &:active,
-    &.active
-      box-shadow none
-      cursor default
-      > button
-        box-shadow none
-        cursor default
-        background-color var(--secondary-background)
-  .connection-path
-    pointer-events none
+// .is-read-only
+//   .card,
+//   .connector
+//     &:hover,
+//     &.hover,
+//     &:active,
+//     &.active
+//       box-shadow none
+//       cursor default
+//       > button
+//         box-shadow none
+//         cursor default
+//         background-color var(--secondary-background)
+//   .connection-path
+//     pointer-events none
 
 svg.connections,
 .connection-labels

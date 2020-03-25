@@ -7,7 +7,7 @@ article(:style="position" :data-card-id="id")
     @touchend="showCardDetails"
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
-    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged, 'filtered': isFiltered, 'media-card': isMediaCard, 'no-shadow': !canEditCard}",
+    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged, 'filtered': isFiltered, 'media-card': isMediaCard}",
     :style="{background: selectedColor}"
     :data-card-id="id"
     :data-card-x="x"
@@ -384,12 +384,6 @@ article
       justify-content space-between
       .name
         background-color var(--secondary-background)
-
-  &.no-shadow
-    &:hover,
-    &:focus
-      box-shadow none
-
 .jiggle
   animation jiggle 0.5s infinite ease-out forwards
 @keyframes jiggle
