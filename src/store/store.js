@@ -68,7 +68,6 @@ export default new Vuex.Store({
     // loading
     isLoadingSpace: false,
     spaceUrlToLoad: '',
-    isLoadingUserFavorites: false,
 
     // notifications
     notifications: [],
@@ -310,10 +309,6 @@ export default new Vuex.Store({
     spaceUrlToLoad: (state, spaceUrl) => {
       utils.typeCheck(spaceUrl, 'string')
       state.spaceUrlToLoad = spaceUrl
-    },
-    isLoadingUserFavorites: (state, value) => {
-      utils.typeCheck(value, 'boolean')
-      state.isLoadingUserFavorites = value
     },
 
     // notifications

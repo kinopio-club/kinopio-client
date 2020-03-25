@@ -4,12 +4,14 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.stop="userDetailsI
     .segmented-buttons
       button(@click.stop="showSpaces" :class="{ active: spacesIsVisible }")
         span Spaces
-        Loader(:visible="isLoading")
+        Loader(:visible="loading")
       button(@click.stop="hideSpaces" :class="{ active: !spacesIsVisible }")
         span People
-        Loader(:visible="isLoading")
+        Loader(:visible="loading")
   section(v-if="shouldShowDescription")
     p Spaces and people you favorite can be found here
+    p(v-if="loading")
+      Loader(:visible="loading")
 
   section.results-section(v-else)
     ul.results-list
@@ -42,7 +44,10 @@ export default {
     return {
       spacesIsVisible: true,
       userDetailsIsVisible: false,
-      openedUser: {}
+      openedUser: {},
+      favoriteUsers: [],
+      favoriteSpaces: [],
+      loading: false
     }
   },
   computed: {
@@ -52,24 +57,23 @@ export default {
       if (noSpaces || noPeople) { return true }
       return false
     },
-    favoriteUsers () {
-      return this.$store.state.currentUser.favoriteUsers
-    },
-    favoriteSpaces () {
-      return this.$store.state.currentUser.favoriteSpaces
-    },
     items () {
       if (this.spacesIsVisible) {
         return this.favoriteSpaces
       } else {
         return this.favoriteUsers
       }
-    },
-    isLoading () {
-      return this.$store.state.isLoadingUserFavorites
     }
   },
   methods: {
+    async getFavorites () {
+      if (this.loading) { return }
+      this.loading = true
+      const favorites = await this.$store.dispatch('api/getUserFavorites')
+      this.loading = false
+      this.favoriteUsers = favorites.favoriteUsers
+      this.favoriteSpaces = favorites.favoriteSpaces
+    },
     showSpaces () {
       this.spacesIsVisible = true
       this.userDetailsIsNotVisible()
@@ -111,8 +115,11 @@ export default {
     }
   },
   watch: {
-    visible (value) {
+    visible (visible) {
       this.userDetailsIsNotVisible()
+      if (visible) {
+        this.getFavorites()
+      }
     }
   }
 
