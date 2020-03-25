@@ -12,7 +12,7 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
       button(:disabled="!canEditConnection" :class="{active: labelIsVisible}" @click="toggleLabelIsVisible")
         img.icon(src="@/assets/view.svg")
         span Label
-      label(:class="{active: isDefault}" @click.prevent="toggleDefault" @keydown.stop.enter="toggleDefault")
+      label(:class="{active: isDefault, disabled: !canEditSpace}" @click.prevent="toggleDefault" @keydown.stop.enter="toggleDefault")
         input(type="checkbox" v-model="isDefault")
         span Default
 
@@ -20,10 +20,13 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
       img.icon(src="@/assets/remove.svg")
       span Remove
 
-    p(v-if="!canEditConnection").open-edit-message
-      span.badge.info
+    p(v-if="!canEditConnection")
+      span.badge.info(v-if="spacePrivacyIsOpen")
         img.icon.open(src="@/assets/open.svg")
         span In open spaces, you can only edit connections you've made
+      span.badge.info(v-if="spacePrivacyIsClosed")
+        img.icon.unlock(src="@/assets/unlock.svg")
+        span To edit closed spaces, you'll need to be invited
 
   section.results-actions
     button(:disabled="!canEditConnection" @click="addConnectionType")
@@ -62,6 +65,9 @@ export default {
     currentConnectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.currentConnection.connectionTypeId) },
     connectionTypes () { return this.$store.state.currentSpace.connectionTypes },
     typeColor () { return this.currentConnectionType.color },
+    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
+    spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
+    spacePrivacyIsClosed () { return this.$store.state.currentSpace.privacy === 'closed' },
     position () {
       const position = this.$store.state.connectionDetailsPosition
       return {
@@ -205,8 +211,4 @@ export default {
 .connection-details
   .type-name
     margin-left 6px
-  .open-edit-message
-    margin-bottom 10px
-    .badge
-      margin-right 0
 </style>

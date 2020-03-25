@@ -167,6 +167,11 @@ label
   height 24px
   input
     margin 0
+  &.disabled
+    cursor default
+    color var(--primary)
+    opacity 0.5
+    pointer-events none
 
 p
   margin 0

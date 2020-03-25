@@ -128,7 +128,6 @@ export default {
 
     // same as ConnectionLabel method
     showConnectionDetails (event) {
-      if (!this.canEditSpace) { return }
       const detailsPosition = utils.cursorPositionInPage(event)
       this.$store.commit('closeAllDialogs')
       this.$store.commit('connectionDetailsIsVisibleForConnectionId', this.id)
