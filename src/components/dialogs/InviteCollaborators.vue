@@ -51,7 +51,6 @@ export default {
         return `${window.location.origin}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}`
       }
     }
-
   },
   methods: {
     copyUrl () {

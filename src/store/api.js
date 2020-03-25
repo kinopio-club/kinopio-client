@@ -290,6 +290,29 @@ const self = {
         console.error(error)
       }
     },
+    addSpaceCollaborator: async (context, { spaceId, collaboratorKey }) => {
+      if (!shouldRequest()) { return }
+      const userId = context.rootState.currentUser.id
+      try {
+        const body = { userId, spaceId, collaboratorKey }
+        const options = requestOptions({ body, method: 'PATCH' })
+        const response = await fetch(`${host}/space/collaborator`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    // removeSpaceCollaborator: async (context, {spaceId, userId}) => {
+    //   if (!shouldRequest()) { return }
+    //   try {
+    //     const body = {spaceId, userId }
+    //     const options = requestOptions({ body, method: 'DELETE' })
+    //     const response = await fetch(`${host}/space/collaborator`, options)
+    //     return normalizeResponse(response)
+    //   } catch (error) {
+    //     console.error(error)
+    //   }
+    // },
 
     // Card
 

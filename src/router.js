@@ -62,17 +62,22 @@ export default new Router({
       name: 'invite',
       component: Space,
       beforeEnter: (to, from, next) => {
+        store.dispatch('currentUser/init')
         const urlParams = new URLSearchParams(window.location.search)
-        const user = store.state.currentUser
-        console.log('🍆invite user to spaceid w collabkey', user, urlParams.get('spaceId'), urlParams.get('collaboratorKey'))
-
-        // const arenaReturnedCode = urlParams.get('code')
-        // ask api: if this collaborator key is a match, then add to space and load space
-
+        const spaceId = urlParams.get('spaceId')
+        const collaboratorKey = urlParams.get('collaboratorKey')
+        if (!spaceId || !collaboratorKey) { return }
+        console.log('🌸🌸🌸🌸🌸🌸', spaceId, collaboratorKey)
+        // temp: wont call if not signed in
+        store.dispatch('api/addSpaceCollaborator', { spaceId, collaboratorKey }).then(response => {
+          // the above state is not available here, since it
+          // it is resolved asynchronously in the store action
+          console.log('🍆', response)
+        })
+        // , error => {
+        // handle error here
+        // })
         next()
-        // window.history.replaceState({}, document.title, window.location.origin)
-
-        // store.dispatch('currentUser/updateArenaAccessToken', arenaReturnedCode)
       }
 
     }, {
