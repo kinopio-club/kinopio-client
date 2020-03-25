@@ -13,7 +13,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
       .badge.info(v-if="error.accountAlreadyExists") An account with this email already exists, Sign In instead
       input(type="password" placeholder="Password" required @input="clearErrors" v-model="password")
       input(type="password" placeholder="Confirm Password" required @input="clearErrors")
-      .badge.danger(v-if="error.passwordMatch") Passwords can't match
+      .badge.danger(v-if="error.passwordMatch") Passwords must match
       .badge.danger(v-if="error.passwordMatchesEmail") Password can't be from your email
       .badge.danger(v-if="error.passwordTooShort") Password must be longer than 4 characters
       .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
