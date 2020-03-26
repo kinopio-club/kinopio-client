@@ -13,16 +13,16 @@
     p(v-if="loading")
       Loader(:visible="loading")
 
-  section.results-section(v-else)
+  section.results-section(v-if="!shouldShowDescription")
+    template(v-if="spacesIsVisible")
+      .filter-wrap(v-if="isManySpaces")
+        img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
+        input(placeholder="Search" v-model="spaceFilter" ref="filterInput")
+        button.borderless.clear-input-wrap(@click="clearFilter")
+          img.icon(src="@/assets/add.svg")
+      SpaceList(:spaces="spacesFiltered" :showUser="true" :selectedSpace="currentSpace" @selectSpace="changeSpace")
 
     //- make userlist for users
-    .filter-wrap(v-if="isManySpaces")
-      img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
-      input(placeholder="Search" v-model="spaceFilter" ref="filterInput")
-      button.borderless.clear-input-wrap(@click="clearFilter")
-        img.icon(src="@/assets/add.svg")
-
-    SpaceList(:spaces="spacesFiltered" :showUser="true" :selectedSpace="currentSpace" @selectSpace="changeSpace")
 
     //- ul.results-list
     //-   template(v-for="(item in items")
