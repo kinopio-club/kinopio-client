@@ -326,7 +326,7 @@ export default {
         console.log('🌌', remoteSpace)
         cache.saveSpace(remoteSpace)
       } else if (!isSpaceMember && canEditSpace) {
-        context.commit('addNotification', { message: 'This space is open, which means you can add to it too', type: 'success', icon: 'open' }, { root: true })
+        context.commit('notifySpaceIsOpenAndEditable', true, { root: true })
       }
       return utils.normalizeRemoteSpace(remoteSpace)
     },
@@ -342,6 +342,8 @@ export default {
       context.commit('notifySpaceNotFound', false, { root: true })
       context.commit('notifyConnectionError', false, { root: true })
       context.commit('notifySignUpToEditOpenSpace', false, { root: true })
+      context.commit('notifySpaceIsOpenAndEditable', false, { root: true })
+
       // restore local
       context.commit('restoreSpace', emptySpace)
       context.commit('restoreSpace', utils.normalizeSpace(cachedSpace))

@@ -5,6 +5,11 @@ aside.notifications(@click="closeAllDialogs")
       img.icon(v-if="item.icon" :src="icon(item.icon).path" :class="item.icon")
       span {{item.message}}
 
+  .item.success(v-if="notifySpaceIsOpenAndEditable")
+    p
+      img.icon.open(src="@/assets/open.svg")
+      span This space is open, which means you can add to it too
+
   .persistent-item.success(v-if="notifySignUpToEditOpenSpace")
     p
       img.icon.open(src="@/assets/open.svg")
@@ -92,6 +97,7 @@ export default {
     notifySpaceIsRemoved () { return this.$store.state.notifySpaceIsRemoved },
     notifyNewUser () { return this.$store.state.notifyNewUser },
     notifySignUpToEditOpenSpace () { return this.$store.state.notifySignUpToEditOpenSpace },
+    notifySpaceIsOpenAndEditable () { return this.$store.state.notifySpaceIsOpenAndEditable },
     userIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     }
