@@ -185,15 +185,9 @@ export default {
     restoreUserFavorites: async (context, cachedUser) => {
       context.commit('isLoadingUserFavorites', true, { root: true })
       const favorites = await context.dispatch('api/getUserFavorites', null, { root: true })
+      context.commit('favoriteUsers', favorites.favoriteUsers)
+      context.commit('favoriteSpaces', favorites.favoriteSpaces)
       context.commit('isLoadingUserFavorites', false, { root: true })
-      context.dispatch('mergeFavorites', {
-        type: 'user',
-        newFavorites: favorites.favoriteUsers
-      })
-      context.dispatch('mergeFavorites', {
-        type: 'space',
-        newFavorites: favorites.favoriteSpaces
-      })
     },
     addFavorite: (context, { type, item }) => {
       if (type === 'user') {
@@ -236,22 +230,22 @@ export default {
         body: { type, id: item.id }
       }, { root: true })
     },
-    mergeFavorites: (context, { type, newFavorites }) => {
-      newFavorites = newFavorites.map(favorite => {
-        return {
-          id: favorite.id,
-          name: favorite.name,
-          color: favorite.color
-        }
-      })
-      if (type === 'user') {
-        const favorites = utils.mergeArrayOfObjectsById(context.state.favoriteUsers, newFavorites)
-        context.commit('favoriteUsers', favorites)
-      } else if (type === 'space') {
-        const favorites = utils.mergeArrayOfObjectsById(context.state.favoriteSpaces, newFavorites)
-        context.commit('favoriteSpaces', favorites)
-      }
-    },
+    // mergeFavorites: (context, { type, newFavorites }) => {
+    //   newFavorites = newFavorites.map(favorite => {
+    //     return {
+    //       id: favorite.id,
+    //       name: favorite.name,
+    //       color: favorite.color
+    //     }
+    //   })
+    //   if (type === 'user') {
+    //     const favorites = utils.mergeArrayOfObjectsById(context.state.favoriteUsers, newFavorites)
+    //     context.commit('favoriteUsers', favorites)
+    //   } else if (type === 'space') {
+    //     const favorites = utils.mergeArrayOfObjectsById(context.state.favoriteSpaces, newFavorites)
+    //     context.commit('favoriteSpaces', favorites)
+    //   }
+    // },
     confirmEmail: (context) => {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {

@@ -296,7 +296,6 @@ export default {
         this.closeDialogs()
         this.clearFilter()
       }
-      this.favoritesIsVisible = false
     }
   }
 }

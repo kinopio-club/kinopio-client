@@ -60,19 +60,13 @@ export default {
         return require(`@/assets/${privacyState.icon}.svg`)
       }
     },
-    // privacyBadgeColor (space) {
-    //   const privacyState = privacy.states().find(state => {
-    //     return state.name === space.privacy
-    //   })
-    //   return privacyState.color
-    // },
     showInExplore (space) {
       if (this.hideExploreBadge) { return }
       if (space.privacy === 'private') { return }
       return space.showInExplore
     },
     user (space) {
-      return space.users[0]
+      return space.user || space.users[0]
     }
 
   }
