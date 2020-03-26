@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.favorites(v-if="visible" :open="visible" @click.stop="userDetailsIsNotVisible")
+.favorites(v-if="visible" :open="visible" @click.stop="userDetailsIsNotVisible")
   section
     .segmented-buttons
       button(@click.stop="showSpaces" :class="{ active: spacesIsVisible }")
@@ -22,7 +22,7 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.stop="userDetailsI
             User(:user="item" :isClickable="false")
             span {{item.name}}
           button(@click.stop="remove(item)")
-            img.icon(src="@/assets/remove.svg")
+            img.icon.cancel(src="@/assets/add.svg")
     UserDetails(:visible="userDetailsIsVisible" :user="openedUser")
 </template>
 
@@ -44,10 +44,7 @@ export default {
     return {
       spacesIsVisible: true,
       userDetailsIsVisible: false,
-      openedUser: {},
-      favoriteUsers: [],
-      favoriteSpaces: [],
-      loading: false
+      openedUser: {}
     }
   },
   computed: {
@@ -57,23 +54,32 @@ export default {
       if (noSpaces || noPeople) { return true }
       return false
     },
+    favoriteUsers () {
+      return this.$store.state.currentUser.favoriteUsers
+    },
+    favoriteSpaces () {
+      return this.$store.state.currentUser.favoriteSpaces
+    },
     items () {
       if (this.spacesIsVisible) {
         return this.favoriteSpaces
       } else {
         return this.favoriteUsers
       }
+    },
+    loading () {
+      return this.$store.state.isLoadingUserFavorites
     }
   },
   methods: {
-    async getFavorites () {
-      if (this.loading) { return }
-      this.loading = true
-      const favorites = await this.$store.dispatch('api/getUserFavorites')
-      this.loading = false
-      this.favoriteUsers = favorites.favoriteUsers
-      this.favoriteSpaces = favorites.favoriteSpaces
-    },
+    // async getFavorites () {
+    //   if (this.loading) { return }
+    //   this.loading = true
+    //   const favorites = await this.$store.dispatch('api/getUserFavorites')
+    //   this.loading = false
+    //   this.favoriteUsers = favorites.favoriteUsers
+    //   this.favoriteSpaces = favorites.favoriteSpaces
+    // },
     showSpaces () {
       this.spacesIsVisible = true
       this.userDetailsIsNotVisible()
@@ -101,12 +107,16 @@ export default {
       return item.id === opened.id
     },
     remove (item) {
+      console.log('remove', item)
       let type
       if (this.spacesIsVisible) {
         type = 'space'
       } else {
         type = 'user'
       }
+      // const favorites = utils.mergeArrayOfObjectsById(context.state.favoriteUsers, newFavorites)
+      //   context.commit('favoriteUsers', favorites)
+
       this.$store.dispatch('currentUser/removeFavorite', { type, item })
     },
     userDetailsIsNotVisible () {
@@ -117,9 +127,9 @@ export default {
   watch: {
     visible (visible) {
       this.userDetailsIsNotVisible()
-      if (visible) {
-        this.getFavorites()
-      }
+      // if (visible) {
+      //   this.getFavorites()
+      // }
     }
   }
 
@@ -128,20 +138,19 @@ export default {
 
 <style lang="stylus">
 .favorites
-  > .results-section
-    border-top 1px solid var(--primary)
-    border-top-left-radius 0
-    border-top-right-radius 0
-    padding-top 4px
-    > ul
-      li
-        justify-content space-between
-        button
-          margin-left auto
-        .name
-          white-space wrap
-          max-width calc(100% - 32px)
-        .badge
-          max-width calc(100% - 32px)
+  // > .results-section
+  //   border-top 1px solid var(--primary)
+  //   border-top-left-radius 0
+  //   border-top-right-radius 0
+  //   padding-top 4px
+  li
+    justify-content space-between
+    button
+      margin-left auto
+    .name
+      white-space wrap
+      max-width calc(100% - 32px)
+    .badge
+      max-width calc(100% - 32px)
 
 </style>

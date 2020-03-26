@@ -19,9 +19,6 @@ aside.notifications(@click="closeAllDialogs")
       button(@click="copyCurrentSpace")
         img.icon(src="@/assets/add.svg")
         span Save a Copy
-      label(:class="{active: isFavoriteSpace}" @click.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
-        input(type="checkbox" v-model="isFavoriteSpace")
-        span Favorite
 
   .persistent-item.danger(v-if="notifySpaceNotFound")
     p Space could not be found, or is private
@@ -97,12 +94,6 @@ export default {
     notifySignUpToEditOpenSpace () { return this.$store.state.notifySignUpToEditOpenSpace },
     userIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
-    },
-    isFavoriteSpace () {
-      const currentSpace = this.$store.state.currentSpace
-      const favoriteSpaces = this.$store.state.currentUser.favoriteSpaces
-      const isFavoriteSpace = favoriteSpaces.filter(space => space.id === currentSpace.id)
-      return Boolean(isFavoriteSpace.length)
     }
   },
   methods: {
@@ -113,14 +104,6 @@ export default {
     },
     closeAllDialogs () {
       this.$store.commit('closeAllDialogs')
-    },
-    toggleIsFavoriteSpace () {
-      const currentSpace = this.$store.state.currentSpace
-      if (this.isFavoriteSpace) {
-        this.$store.dispatch('currentUser/removeFavorite', { type: 'space', item: currentSpace })
-      } else {
-        this.$store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
-      }
     },
     update () {
       const notifications = this.$store.state.notifications

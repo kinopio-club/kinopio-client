@@ -40,7 +40,6 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
-import Favorites from '@/components/dialogs/Favorites.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
 
@@ -51,8 +50,7 @@ export default {
     UserSettings,
     User: () => import('@/components/User.vue'),
     Loader,
-    SpacePicker,
-    Favorites
+    SpacePicker
   },
   props: {
     user: Object,

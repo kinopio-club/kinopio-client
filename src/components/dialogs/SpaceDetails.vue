@@ -43,22 +43,31 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
       Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="currentSpace" :exportScope="exportScope")
 
   section.results-actions
-    button(@click="addSpace")
-      img.icon(src="@/assets/add.svg")
-      span Add
+    .row
+      .segmented-buttons
+        button(@click.stop="hideFavorites" :class="{ active: !favoritesIsVisible }")
+          span Yours
+        button(@click.stop="showFavorites" :class="{ active: favoritesIsVisible }")
+          span Favorites
+    .row(v-if="!favoritesIsVisible")
+      button(@click="addSpace")
+        img.icon(src="@/assets/add.svg")
+        span Add
+      .button-wrap
+        button(@click.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
+          span Import
+        Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
 
-    .button-wrap
-      button(@click.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
-        span Import
-      Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
-
-  section.results-section
-    .filter-wrap(v-if="isNumerousSpaces")
+  section.results-section(v-if="!favoritesIsVisible")
+    .filter-wrap(v-if="isManySpaces")
       img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
       input(placeholder="Search" v-model="spaceFilter" ref="filterInput")
       button.borderless.clear-input-wrap(@click="clearFilter")
         img.icon(src="@/assets/add.svg")
     SpaceList(:spaces="spacesFiltered" @selectSpace="changeSpace")
+
+  Favorites(:visible="favoritesIsVisible")
+
 </template>
 
 <script>
@@ -70,6 +79,7 @@ import Import from '@/components/dialogs/Import.vue'
 import PrivacyPicker from '@/components/dialogs/PrivacyPicker.vue'
 import privacy from '@/spaces/privacy.js'
 import SpaceList from '@/components/SpaceList.vue'
+import Favorites from '@/components/Favorites.vue'
 
 export default {
   name: 'SpaceDetails',
@@ -77,7 +87,8 @@ export default {
     Export,
     Import,
     PrivacyPicker,
-    SpaceList
+    SpaceList,
+    Favorites
   },
   props: {
     visible: Boolean
@@ -85,11 +96,15 @@ export default {
   data () {
     return {
       spaces: [],
+      favoriteSpaces: [],
+      favoriteUsers: [],
       exportIsVisible: false,
       importIsVisible: false,
       filter: '',
       filteredSpaces: [],
       privacyPickerIsVisible: false,
+      favoritesIsVisible: false,
+      favoriteUsersIsVisible: false,
       error: {
         signUpToShowInExplore: false,
         editSpaceToShowInExplore: false
@@ -113,6 +128,17 @@ export default {
         return this.spaces
       }
     },
+    // items () {
+    //   if (this.favoritesIsVisible) {
+    //     if (this.favoriteUsersIsVisible) {
+    //       return this.favoriteUsers
+    //     } else {
+    //       return this.favoriteSpaces
+    //     }
+    //   } else {
+    //     return this.spaces
+    //   }
+    // },
     spaceFilter: {
       get () {
         return this.filter
@@ -146,7 +172,7 @@ export default {
       const currentSpace = this.$store.state.currentSpace
       return this.$store.getters['currentUser/isSpaceMember'](currentSpace)
     },
-    isNumerousSpaces () {
+    isManySpaces () {
       return Boolean(this.spaces.length >= 5)
     },
     currentSpaceIsPrivate () {
@@ -166,6 +192,13 @@ export default {
     }
   },
   methods: {
+    showFavorites () {
+      this.favoritesIsVisible = true
+      // todo getfavs()
+    },
+    hideFavorites () {
+      this.favoritesIsVisible = false
+    },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('closeAllDialogs')
       this.$store.commit('triggerSignUpOrInIsVisible')
@@ -266,6 +299,7 @@ export default {
         this.closeDialogs()
         this.clearFilter()
       }
+      this.favoritesIsVisible = false
     }
   }
 }
