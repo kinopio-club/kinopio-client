@@ -120,6 +120,12 @@ export default {
     })
   },
   computed: {
+    currentSpace () { return this.$store.state.currentSpace },
+    exportScope () { return 'space' },
+    isManySpaces () { return Boolean(this.spaces.length >= 5) },
+    currentSpaceIsPrivate () { return this.$store.state.currentSpace.privacy === 'private' },
+    showInExplore () { return this.$store.state.currentSpace.showInExplore },
+    userIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     spaceName: {
       get () {
         return this.$store.state.currentSpace.name
@@ -159,27 +165,9 @@ export default {
         this.filteredSpaces = spaces
       }
     },
-    currentSpace () {
-      return this.$store.state.currentSpace
-    },
-    exportScope () {
-      return 'space'
-    },
     isSpaceMember () {
       const currentSpace = this.$store.state.currentSpace
       return this.$store.getters['currentUser/isSpaceMember'](currentSpace)
-    },
-    isManySpaces () {
-      return Boolean(this.spaces.length >= 5)
-    },
-    currentSpaceIsPrivate () {
-      return this.$store.state.currentSpace.privacy === 'private'
-    },
-    showInExplore () {
-      return this.$store.state.currentSpace.showInExplore
-    },
-    userIsSignedIn () {
-      return this.$store.getters['currentUser/isSignedIn']
     },
     privacyIcon () {
       const privacyState = privacy.states().find(state => {
@@ -191,7 +179,6 @@ export default {
   methods: {
     showFavorites () {
       this.favoritesIsVisible = true
-      // todo getfavs()
     },
     hideFavorites () {
       this.favoritesIsVisible = false
