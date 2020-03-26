@@ -1,12 +1,13 @@
 <template lang="pug">
 dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs")
   section
-    .row.privacy-row(v-if="isSpaceMember")
+    .row.space-meta(v-if="isSpaceMember")
       input(placeholder="name" v-model="spaceName")
-
       .button-wrap(v-if="isSpaceMember")
-        button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
-          img.icon.privacy-icon(:src="privacyIcon")
+        button.privacy-button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
+          img.icon.privacy-icon(:src="privacyIcon.icon" :class="privacyIcon.name")
+          .badge.status.explore(v-if="showInExplore")
+            img.icon(src="@/assets/checkmark.svg")
         PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs" @updateSpaces="updateSpaces")
 
     template(v-if="!isSpaceMember")
@@ -16,27 +17,9 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
           img.icon(src="@/assets/checkmark.svg")
           span Shown in Explore
 
-    .row(v-if="isSpaceMember && !currentSpaceIsPrivate")
-      label(:class="{active: showInExplore}" @click.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
-        input(type="checkbox" v-model="showInExplore")
-        span Show in Explore
-    template(v-if="error.signUpToShowInExplore")
-      .row
-        p.error-message
-          span To show this,
-          span.badge.info you need to Sign Up or In
-          span for your spaces to be accessible anywhere.
-      .row
-        button(@click="triggerSignUpOrInIsVisible") Sign Up or In
-    template(v-if="error.editSpaceToShowInExplore")
-      p.error-message
-        span To show this,
-        span.badge.info you need to edit and rename this space first
-
     button(v-if="isSpaceMember" @click="removeCurrentSpace")
       img.icon(src="@/assets/remove.svg")
       span Remove
-
     .button-wrap
       button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
         span Export
@@ -104,11 +87,7 @@ export default {
       filteredSpaces: [],
       privacyPickerIsVisible: false,
       favoritesIsVisible: false,
-      favoriteUsersIsVisible: false,
-      error: {
-        signUpToShowInExplore: false,
-        editSpaceToShowInExplore: false
-      }
+      favoriteUsersIsVisible: false
     }
   },
   created () {
@@ -123,7 +102,6 @@ export default {
     currentSpace () { return this.$store.state.currentSpace },
     exportScope () { return 'space' },
     isManySpaces () { return Boolean(this.spaces.length >= 5) },
-    currentSpaceIsPrivate () { return this.$store.state.currentSpace.privacy === 'private' },
     showInExplore () { return this.$store.state.currentSpace.showInExplore },
     userIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     spaceName: {
@@ -173,7 +151,10 @@ export default {
       const privacyState = privacy.states().find(state => {
         return state.name === this.$store.state.currentSpace.privacy
       })
-      return require(`@/assets/${privacyState.icon}.svg`)
+      return {
+        icon: require(`@/assets/${privacyState.icon}.svg`),
+        name: privacyState.icon
+      }
     }
   },
   methods: {
@@ -182,23 +163,6 @@ export default {
     },
     hideFavorites () {
       this.favoritesIsVisible = false
-    },
-    triggerSignUpOrInIsVisible () {
-      this.$store.commit('closeAllDialogs')
-      this.$store.commit('triggerSignUpOrInIsVisible')
-    },
-    toggleShowInExplore () {
-      const isDefaultSpace = this.$store.getters['currentSpace/isDefaultSpace']
-      if (!this.userIsSignedIn) {
-        this.error.signUpToShowInExplore = true
-        return
-      } else if (isDefaultSpace) {
-        this.error.editSpaceToShowInExplore = true
-        return
-      }
-      const value = !this.showInExplore
-      this.$store.dispatch('currentSpace/updateSpace', { showInExplore: value })
-      this.updateSpaces()
     },
     focusFilterInput () {
       const element = this.$refs.filterInput
@@ -232,7 +196,6 @@ export default {
       })
     },
     changeSpace (space) {
-      this.clearErrors()
       this.$store.dispatch('currentSpace/changeSpace', { space })
     },
     changeToLastSpace () {
@@ -248,7 +211,6 @@ export default {
       this.changeToLastSpace()
     },
     async updateSpaces () {
-      this.clearErrors()
       const userSpaces = cache.getAllSpaces().filter(space => {
         return this.$store.getters['currentUser/canEditSpace'](space)
       })
@@ -269,10 +231,6 @@ export default {
     },
     clearFilter () {
       this.filter = ''
-    },
-    clearErrors () {
-      this.error.signUpToShowInExplore = false
-      this.error.editSpaceToShowInExplore = false
     }
   },
   watch: {
@@ -291,19 +249,35 @@ export default {
 <style lang="stylus">
 
 .space-details
-  .privacy-row
+  .space-meta
     margin-bottom 6px
-    button
+    input
+      min-width 1px // firefox flexbox hack
+
+  .privacy-button
+    margin-left 6px
+    height 24px
+    min-width 24px
+    padding-top 3px
+    .privacy-icon
+      max-width none
+      vertical-align middle
+      &.open
+        vertical-align -3px
+    .explore
+      margin 0
       margin-left 6px
-      padding 0
-      height 24px
-      width 24px
-      display flex
-      justify-content center
-  .error-message
-    .badge
       display inline-block
+      min-height 0
+      height 16px
+      .icon
+        max-width 10px
+        vertical-align 2px
+
   .explore-message
     display flex
     margin-top 6px
+
+  .privacy-picker
+    left calc(100% - 24px)
 </style>

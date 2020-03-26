@@ -775,7 +775,7 @@ export default {
         return lastConnectionType
       }
     },
-    isDefaultSpace: (state) => {
+    isHelloKinopio: (state) => {
       return state.name === 'Hello Kinopio'
     }
   }

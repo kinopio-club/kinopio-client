@@ -9,9 +9,9 @@ ul.results-list.space-list
 
       .name
         span {{space.name}}
+        img.icon.privacy-icon(v-if="spaceIsNotClosed(space)" :src="privacyIcon(space)")
         .badge.status(v-if="showInExplore(space)")
           img.icon(src="@/assets/checkmark.svg")
-        img.icon.privacy-icon(v-if="spaceIsNotClosed(space)" :src="privacyIcon(space)")
 </template>
 
 <script>

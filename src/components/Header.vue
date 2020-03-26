@@ -100,7 +100,7 @@ export default {
   computed: {
     shouldShowNewStuffIsUpdated () {
       const newStuffIsUpdated = this.$store.state.newStuffIsUpdated
-      const isNotDefaultSpace = !this.$store.getters['currentSpace/isDefaultSpace']
+      const isNotDefaultSpace = !this.$store.getters['currentSpace/isHelloKinopio']
       const userCanEditSpace = this.$store.getters['currentUser/canEditSpace']()
       return newStuffIsUpdated && isNotDefaultSpace && userCanEditSpace
     },
@@ -252,7 +252,7 @@ header
       max-height calc(100vh - 100px)
     > button
       .privacy-icon
-        margin-left 3px
+        margin-left 6px
 
   aside
     display flex
