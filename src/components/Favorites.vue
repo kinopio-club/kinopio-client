@@ -15,7 +15,6 @@
 
   section.results-section(v-else)
 
-    //- use spacelist for spaces (if spacesIsVisible)
     //- make userlist for users
     .filter-wrap(v-if="isManySpaces")
       img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
@@ -67,14 +66,12 @@ export default {
     favoriteSpaces () { return this.$store.state.currentUser.favoriteSpaces },
     loading () { return this.$store.state.isLoadingUserFavorites },
     currentSpace () { return this.$store.state.currentSpace },
+    isManySpaces () { return Boolean(this.favoriteSpaces.length >= 5) },
     shouldShowDescription () {
       const noSpaces = this.spacesIsVisible && !this.favoriteSpaces.length
       const noPeople = !this.spacesIsVisible && !this.favoriteUsers.length
       if (noSpaces || noPeople) { return true }
       return false
-    },
-    isManySpaces () {
-      return true
     },
     spaceFilter: {
       get () {
