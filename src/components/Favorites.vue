@@ -15,14 +15,18 @@
 
   section.results-section(v-else)
     ul.results-list
+
+      //- use spacelist for spaces (if spacesIsVisible)
+      //- make userlist for users
+
+      //- item -> favorite
       template(v-for="(item in items")
         li(:key="item.id" @click.stop="open(item)" tabindex="0" v-on:keyup.stop.enter="open(item)" :class="{ active: itemIsOpened(item) }")
           .name(v-if="spacesIsVisible") {{item.name}}
           .badge(v-else :style="{background: item.color}")
             User(:user="item" :isClickable="false")
             span {{item.name}}
-          button(@click.stop="remove(item)")
-            img.icon.cancel(src="@/assets/add.svg")
+
     UserDetails(:visible="userDetailsIsVisible" :user="openedUser")
 </template>
 
@@ -62,6 +66,7 @@ export default {
     },
     items () {
       if (this.spacesIsVisible) {
+        console.log('🌷', this.favoriteSpaces)
         return this.favoriteSpaces
       } else {
         return this.favoriteUsers
@@ -106,19 +111,19 @@ export default {
       }
       return item.id === opened.id
     },
-    remove (item) {
-      console.log('remove', item)
-      let type
-      if (this.spacesIsVisible) {
-        type = 'space'
-      } else {
-        type = 'user'
-      }
-      // const favorites = utils.mergeArrayOfObjectsById(context.state.favoriteUsers, newFavorites)
-      //   context.commit('favoriteUsers', favorites)
+    // remove (item) {
+    //   console.log('remove', item)
+    //   let type
+    //   if (this.spacesIsVisible) {
+    //     type = 'space'
+    //   } else {
+    //     type = 'user'
+    //   }
+    //   // const favorites = utils.mergeArrayOfObjectsById(context.state.favoriteUsers, newFavorites)
+    //   //   context.commit('favoriteUsers', favorites)
 
-      this.$store.dispatch('currentUser/removeFavorite', { type, item })
-    },
+    //   this.$store.dispatch('currentUser/removeFavorite', { type, item })
+    // },
     userDetailsIsNotVisible () {
       this.userDetailsIsVisible = false
       this.openedUser = {}
@@ -149,8 +154,8 @@ export default {
       margin-left auto
     .name
       white-space wrap
-      max-width calc(100% - 32px)
-    .badge
-      max-width calc(100% - 32px)
+    //   max-width calc(100% - 32px)
+    // .badge
+    //   max-width calc(100% - 32px)
 
 </style>

@@ -111,6 +111,14 @@ export default {
       }
     }
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerFavoritesIsVisible') {
+        this.favoritesIsVisible = true
+        // todo getfavs()
+      }
+    })
+  },
   computed: {
     spaceName: {
       get () {
@@ -128,17 +136,6 @@ export default {
         return this.spaces
       }
     },
-    // items () {
-    //   if (this.favoritesIsVisible) {
-    //     if (this.favoriteUsersIsVisible) {
-    //       return this.favoriteUsers
-    //     } else {
-    //       return this.favoriteSpaces
-    //     }
-    //   } else {
-    //     return this.spaces
-    //   }
-    // },
     spaceFilter: {
       get () {
         return this.filter
