@@ -22,17 +22,15 @@
           img.icon(src="@/assets/add.svg")
       SpaceList(:spaces="spacesFiltered" :showUser="true" :selectedSpace="currentSpace" @selectSpace="changeSpace")
 
-    //- make userlist for users
-
-    //- ul.results-list
-    //-   template(v-for="(item in items")
-    //-     li(:key="item.id" @click.stop="open(item)" tabindex="0" v-on:keyup.stop.enter="open(item)" :class="{ active: itemIsOpened(item) }")
-    //-       .name(v-if="spacesIsVisible") {{item.name}}
-    //-       .badge(v-else :style="{background: item.color}")
-    //-         User(:user="item" :isClickable="false")
-    //-         span {{item.name}}
-
-    //- UserDetails(:visible="userDetailsIsVisible" :user="openedUser")
+    template(v-if="!spacesIsVisible")
+      ul.results-list
+        template(v-for="(user in favoriteUsers")
+          li(:key="user.id" @click.stop="showUserDetails(user)" tabindex="0" v-on:keyup.stop.enter="showUserDetails(user)" :class="{ active: userIsSelected(user) }")
+            .name(v-if="spacesIsVisible") {{user.name}}
+            .badge(v-else :style="{background: user.color}")
+              User(:user="user" :isClickable="false")
+              span {{user.name}}
+      UserDetails(:visible="userDetailsIsVisible" :user="selectedUser")
 </template>
 
 <script>
@@ -56,7 +54,7 @@ export default {
     return {
       spacesIsVisible: true,
       userDetailsIsVisible: false,
-      openedUser: {},
+      selectedUser: {},
       filter: '',
       filteredSpaces: []
     }
@@ -111,7 +109,6 @@ export default {
     //   this.favoriteUsers = favorites.favoriteUsers
     //   this.favoriteSpaces = favorites.favoriteSpaces
     // },
-
     focusFilterInput () {
       const element = this.$refs.filterInput
       element.focus()
@@ -120,7 +117,6 @@ export default {
     clearFilter () {
       this.filter = ''
     },
-
     showSpaces () {
       this.spacesIsVisible = true
       this.userDetailsIsNotVisible()
@@ -132,43 +128,16 @@ export default {
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space })
     },
-
-    // open (item) {
-    //   this.userDetailsIsNotVisible()
-    //   if (this.spacesIsVisible) {
-    //     this.$store.dispatch('currentSpace/changeSpace', { space: item, isRemote: true })
-    //   } else {
-    //     this.openedUser = item
-    //     this.userDetailsIsVisible = true
-    //   }
-    // },
-
-    // itemIsOpened (item) {
-    //   let opened
-    //   if (this.spacesIsVisible) {
-    //     opened = this.$store.state.currentSpace
-    //   } else {
-    //     opened = this.openedUser
-    //   }
-    //   return item.id === opened.id
-    // },
-
-    // remove (item) {
-    //   console.log('remove', item)
-    //   let type
-    //   if (this.spacesIsVisible) {
-    //     type = 'space'
-    //   } else {
-    //     type = 'user'
-    //   }
-    //   // const favorites = utils.mergeArrayOfObjectsById(context.state.favoriteUsers, newFavorites)
-    //   //   context.commit('favoriteUsers', favorites)
-
-    //   this.$store.dispatch('currentUser/removeFavorite', { type, item })
-    // },
+    showUserDetails (user) {
+      this.selectedUser = user
+      this.userDetailsIsVisible = true
+    },
+    userIsSelected (user) {
+      return this.selectedUser.id === user.id
+    },
     userDetailsIsNotVisible () {
       this.userDetailsIsVisible = false
-      this.openedUser = {}
+      this.selectedUser = {}
     }
   },
   watch: {
@@ -184,17 +153,4 @@ export default {
 </script>
 
 <style lang="stylus">
-// .favorites
-  // > .results-section
-  //   border-top 1px solid var(--primary)
-  //   border-top-left-radius 0
-  //   border-top-right-radius 0
-  //   padding-top 4px
-  // li
-  //   justify-content space-between
-  //   button
-  //     margin-left auto
-  //   .name
-  //     white-space wrap
-
 </style>
