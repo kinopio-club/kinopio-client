@@ -6,10 +6,6 @@ footer
       button(@click="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
         span Explore
       Explore(:visible="exploreIsVisible")
-    //- .button-wrap
-    //-   button(@click.stop="toggleFavoritesIsVisible" :class="{active: favoritesIsVisible}")
-    //-     span Favorites
-    //-   Favorites(:visible="favoritesIsVisible")
 
     .button-wrap
       label(:class="{active: isFavoriteSpace}" @click.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
@@ -43,7 +39,6 @@ import Removed from '@/components/dialogs/Removed.vue'
 import Offline from '@/components/dialogs/Offline.vue'
 import Filters from '@/components/dialogs/Filters.vue'
 import Notifications from '@/components/Notifications.vue'
-// import Favorites from '@/components/dialogs/Favorites.vue'
 
 export default {
   name: 'Footer',
@@ -53,7 +48,6 @@ export default {
     Offline,
     Notifications,
     Filters
-    // Favorites
   },
   data () {
     return {
@@ -61,7 +55,6 @@ export default {
       offlineIsVisible: false,
       filtersIsVisible: false,
       exploreIsVisible: false
-      // favoritesIsVisible: false
     }
   },
   mounted () {
@@ -72,7 +65,6 @@ export default {
         this.offlineIsVisible = false
         this.filtersIsVisible = false
         this.exploreIsVisible = false
-        // this.favoritesIsVisible = false
       }
     })
   },
@@ -137,11 +129,6 @@ export default {
       this.$store.commit('closeAllDialogs')
       this.exploreIsVisible = !isVisible
     }
-    // toggleFavoritesIsVisible () {
-    //   const isVisible = this.favoritesIsVisible
-    //   this.$store.commit('closeAllDialogs')
-    //   this.favoritesIsVisible = !isVisible
-    // }
   }
 }
 </script>
