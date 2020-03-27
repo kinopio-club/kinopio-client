@@ -8,10 +8,10 @@
       button(@click.stop="hideSpaces" :class="{ active: !spacesIsVisible }")
         span People
         Loader(:visible="loading")
-  section(v-if="shouldShowDescription")
-    p Spaces and people you favorite can be found here
-    p(v-if="loading")
-      Loader(:visible="loading")
+    template(v-if="shouldShowDescription")
+      p Spaces and people you favorite can be found here
+      p(v-if="loading")
+        Loader(:visible="loading")
 
   section.results-section(v-if="!shouldShowDescription")
     template(v-if="spacesIsVisible")
@@ -129,6 +129,7 @@ export default {
       this.$store.dispatch('currentSpace/changeSpace', { space })
     },
     showUserDetails (user) {
+      this.userDetailsIsNotVisible()
       this.selectedUser = user
       this.userDetailsIsVisible = true
     },

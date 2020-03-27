@@ -285,4 +285,8 @@ export default {
 
   .privacy-picker
     left calc(100% - 24px)
+    @media(max-width 460px)
+      left initial
+      right -20px
+
 </style>

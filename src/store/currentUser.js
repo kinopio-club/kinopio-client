@@ -205,24 +205,8 @@ export default {
           id: item.id,
           name: item.name,
           privacy: item.privacy,
-          showInExplore: item.showInExplore
-
-          //    "id": "KGlxABAfLzCZs_buTiIna",
-          // "name": "Vanilla Minnow",
-          // "url": "vanilla-minnow-KGlxABAfLzCZs_buTiIna",
-          // "privacy": "open",
-          // "isRemoved": false,
-          // "showInExplore": true,
-          // "removedByUserId": null,
-          // "updateHash": "syWNfwz8beiArpvbbfFia",
-          // "createdAt": "2020-03-25T16:35:22.445Z",
-          // "updatedAt": "2020-03-25T18:03:17.721Z",
-          // "userId": "Qu64-Ds9QXA2pw0TgF1Lb",
-          // "userFavoriteSpace": {
-          //     "createdAt": "2020-03-26T01:55:01.386Z",
-          //     "updatedAt": "2020-03-26T01:55:01.386Z",
-          //     "userId": "O-OS41HQCSYcWYkhZAfG-",
-          //     "spaceId": "KGlxABAfLzCZs_buTiIna"
+          showInExplore: item.showInExplore,
+          users: item.users
         }
         favorites.push(favorite)
         context.commit('favoriteSpaces', favorites)

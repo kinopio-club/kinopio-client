@@ -94,4 +94,7 @@ export default {
 .space-picker
   .results-section
     padding-top 4px
+    @media(max-height 700px)
+      max-height 40vh
+
 </style>
