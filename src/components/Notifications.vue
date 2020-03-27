@@ -10,6 +10,11 @@ aside.notifications(@click="closeAllDialogs")
       img.icon.open(src="@/assets/open.svg")
       span This space is open, which means you can add to it too
 
+  .item.success(v-if="notifyAccessFavorites" @animationend="resetNotifyAccessFavorites")
+    p Access favorites from your spaces
+    .row
+      button(@click.stop="triggerSpaceDetailsFavoritesVisible") Your Spaces
+
   .persistent-item.success(v-if="notifySignUpToEditOpenSpace")
     p
       img.icon.open(src="@/assets/open.svg")
@@ -28,7 +33,7 @@ aside.notifications(@click="closeAllDialogs")
   .persistent-item.danger(v-if="notifySpaceNotFound")
     p Space could not be found, or is private
     .row
-      button(@click="triggerSpaceDetailsVisible") Your Spaces
+      button(@click.stop="triggerSpaceDetailsVisible") Your Spaces
       button(v-if="!userIsSignedIn" @click.stop="triggerSignUpOrInIsVisible") Sign Up or In
 
   .persistent-item(v-if="notifySpaceIsRemoved")
@@ -98,6 +103,7 @@ export default {
     notifyNewUser () { return this.$store.state.notifyNewUser },
     notifySignUpToEditOpenSpace () { return this.$store.state.notifySignUpToEditOpenSpace },
     notifySpaceIsOpenAndEditable () { return this.$store.state.notifySpaceIsOpenAndEditable },
+    notifyAccessFavorites () { return this.$store.state.notifyAccessFavorites },
     userIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     }
@@ -132,6 +138,10 @@ export default {
     triggerSpaceDetailsVisible () {
       this.$store.commit('triggerSpaceDetailsVisible')
     },
+    triggerSpaceDetailsFavoritesVisible () {
+      this.$store.commit('triggerFavoritesIsVisible')
+      this.triggerSpaceDetailsVisible()
+    },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
@@ -150,6 +160,9 @@ export default {
     createNewHelloSpace () {
       this.$store.commit('notifyNewUser', false)
       window.location.href = '/'
+    },
+    resetNotifyAccessFavorites () {
+      this.$store.commit('notifyAccessFavorites', false)
     }
   }
 }
