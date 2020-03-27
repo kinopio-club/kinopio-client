@@ -23,8 +23,14 @@
       SpaceList(:spaces="spacesFiltered" :showUser="true" :selectedSpace="currentSpace" @selectSpace="changeSpace")
 
     template(v-if="!spacesIsVisible")
+      .filter-wrap(v-if="isManyUsers")
+        img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
+        input(placeholder="Search" v-model="userFilter" ref="filterInput")
+        button.borderless.clear-input-wrap(@click="clearFilter")
+          img.icon(src="@/assets/add.svg")
+
       ul.results-list
-        template(v-for="(user in favoriteUsers")
+        template(v-for="(user in usersFiltered")
           li(:key="user.id" @click.stop="showUserDetails(user)" tabindex="0" v-on:keyup.stop.enter="showUserDetails(user)" :class="{ active: userIsSelected(user) }")
             .name(v-if="spacesIsVisible") {{user.name}}
             .badge(v-else :style="{background: user.color}")
@@ -56,7 +62,8 @@ export default {
       userDetailsIsVisible: false,
       selectedUser: {},
       filter: '',
-      filteredSpaces: []
+      filteredSpaces: [],
+      filteredUsers: []
     }
   },
   computed: {
@@ -65,6 +72,7 @@ export default {
     loading () { return this.$store.state.isLoadingUserFavorites },
     currentSpace () { return this.$store.state.currentSpace },
     isManySpaces () { return Boolean(this.favoriteSpaces.length >= 5) },
+    isManyUsers () { return Boolean(this.favoriteUsers.length >= 5) },
     shouldShowDescription () {
       const noSpaces = this.spacesIsVisible && !this.favoriteSpaces.length
       const noPeople = !this.spacesIsVisible && !this.favoriteUsers.length
@@ -91,14 +99,40 @@ export default {
         this.filteredSpaces = spaces
       }
     },
+    userFilter: {
+      get () {
+        return this.filter
+      },
+      set (newValue) {
+        this.filter = newValue
+        const options = {
+          pre: '',
+          post: '',
+          extract: (user) => {
+            return user.name
+          }
+        }
+        const filtered = fuzzy.filter(this.filter, this.favoriteUsers, options)
+        const users = filtered.map(user => {
+          return user.original
+        })
+        this.filteredUsers = users
+      }
+    },
     spacesFiltered () {
       if (this.filter) {
         return this.filteredSpaces
       } else {
         return this.favoriteSpaces
       }
+    },
+    usersFiltered () {
+      if (this.filter) {
+        return this.filteredUsers
+      } else {
+        return this.favoriteUsers
+      }
     }
-
   },
   methods: {
     // async getFavorites () {
@@ -118,10 +152,12 @@ export default {
       this.filter = ''
     },
     showSpaces () {
+      this.clearFilter()
       this.spacesIsVisible = true
       this.userDetailsIsNotVisible()
     },
     hideSpaces () {
+      this.clearFilter()
       this.spacesIsVisible = false
       this.userDetailsIsNotVisible()
     },
