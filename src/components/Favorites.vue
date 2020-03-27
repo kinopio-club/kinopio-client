@@ -135,14 +135,6 @@ export default {
     }
   },
   methods: {
-    // async getFavorites () {
-    //   if (this.loading) { return }
-    //   this.loading = true
-    //   const favorites = await this.$store.dispatch('api/getUserFavorites')
-    //   this.loading = false
-    //   this.favoriteUsers = favorites.favoriteUsers
-    //   this.favoriteSpaces = favorites.favoriteSpaces
-    // },
     focusFilterInput () {
       const element = this.$refs.filterInput
       element.focus()
