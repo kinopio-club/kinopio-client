@@ -8,10 +8,15 @@ dialog.narrow.privacy-picker(v-if="visible" :open="visible" @click.stop)
             img.icon(:src="privacyIcon(privacyState).path" :class="privacyState.name")
             span {{privacyState.name | capitalize}}
           p.description {{privacyState.description | capitalize}}
-  section(v-if="currentPrivacyIsNotPrivate")
+  section
     label(:class="{disabled: exploreIsDisabled, active: showInExplore}" @click.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
       input(type="checkbox" v-model="showInExplore")
       span Show in Explore
+
+    template(v-if="currentPrivacyIsPrivate")
+      p
+        span To show in explore,
+        span.badge.info space can't be private
 
     template(v-if="!this.userIsSignedIn")
       p
@@ -53,12 +58,12 @@ export default {
         return privacyStates.slice(1, 3)
       }
     },
-    currentPrivacyIsNotPrivate () {
+    currentPrivacyIsPrivate () {
       const privacy = this.$store.state.currentSpace.privacy
-      return privacy !== 'private'
+      return privacy === 'private'
     },
     exploreIsDisabled () {
-      if (!this.userIsSignedIn || this.spaceIsHelloKinopio) {
+      if (!this.userIsSignedIn || this.spaceIsHelloKinopio || this.currentPrivacyIsPrivate) {
         return true
       } else {
         return false

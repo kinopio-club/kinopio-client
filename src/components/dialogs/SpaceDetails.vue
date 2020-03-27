@@ -3,16 +3,17 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
   section
     .row.space-meta(v-if="isSpaceMember")
       input(placeholder="name" v-model="spaceName")
+
       .button-wrap(v-if="isSpaceMember")
         button.privacy-button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
           img.icon.privacy-icon(:src="privacyIcon.icon" :class="privacyIcon.name")
-          .badge.status.explore(v-if="showInExplore")
+          .badge.status.explore(v-if="shouldShowInExplore")
             img.icon(src="@/assets/checkmark.svg")
         PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs" @updateSpaces="updateSpaces")
 
     template(v-if="!isSpaceMember")
       p {{spaceName}}
-      .row(v-if="showInExplore")
+      .row(v-if="shouldShowInExplore")
         .badge.status.explore-message
           img.icon(src="@/assets/checkmark.svg")
           span Shown in Explore
@@ -102,8 +103,12 @@ export default {
     currentSpace () { return this.$store.state.currentSpace },
     exportScope () { return 'space' },
     isManySpaces () { return Boolean(this.spaces.length >= 5) },
-    showInExplore () { return this.$store.state.currentSpace.showInExplore },
     userIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    shouldShowInExplore () {
+      const privacy = this.$store.state.currentSpace.privacy
+      if (privacy === 'private') { return false }
+      return this.$store.state.currentSpace.showInExplore
+    },
     spaceName: {
       get () {
         return this.$store.state.currentSpace.name
