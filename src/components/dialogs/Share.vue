@@ -30,12 +30,12 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
   //-       span Invite Collaborators
   //-     InviteCollaborators(:visible="inviteCollaboratorsIsVisible")
 
-  //- section(v-if="!spaceHasUrl")
-  //-   p
-  //-     span To share or invite collaborators,
-  //-     span.badge.info you need to Sign Up or In
-  //-     span for your spaces to be synced and accessible anywhere.
-  //-   button(@click="triggerSignUpOrInIsVisible") Sign Up or In
+  section(v-if="!spaceHasUrl")
+    p
+      span To share or invite collaborators,
+      span.badge.info you need to Sign Up or In
+      span for your spaces to be synced and accessible anywhere.
+    button(@click="triggerSignUpOrInIsVisible") Sign Up or In
 
 </template>
 
