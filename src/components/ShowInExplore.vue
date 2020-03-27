@@ -4,11 +4,6 @@
     input(type="checkbox" v-model="showInExplore")
     span {{showInExploreLabel}}
 
-  template(v-if="currentPrivacyIsPrivate")
-    p
-      span To show in explore,
-      span.badge.info space can't be private
-
   template(v-if="!this.userIsSignedIn")
     p
       span To show in explore,
@@ -19,6 +14,10 @@
     p
       span To show in explore,
       span.badge.info you need to edit and rename this space first
+  template(v-else-if="currentPrivacyIsPrivate")
+    p
+      span To show in explore,
+      span.badge.info space can't be private
 
 </template>
 
