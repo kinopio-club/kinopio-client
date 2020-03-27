@@ -14,6 +14,8 @@ header
           span Template
         span {{currentSpaceName}}
         img.icon.privacy-icon(v-if="spaceIsNotClosed" :src="privacyIcon" :class="privacyName")
+        .badge.status.explore(v-if="shouldShowInExplore")
+          img.icon(src="@/assets/checkmark.svg")
         Loader(:visible="isLoadingSpace")
       SpaceDetails(:visible="spaceDetailsIsVisible")
       ImportArenaChannel(:visible="importArenaChannelIsVisible")
@@ -161,6 +163,11 @@ export default {
       } else {
         return false
       }
+    },
+    shouldShowInExplore () {
+      const privacy = this.$store.state.currentSpace.privacy
+      if (privacy === 'private') { return false }
+      return this.$store.state.currentSpace.showInExplore
     }
   },
   methods: {
@@ -266,4 +273,13 @@ header
     justify-content flex-end
     > .button-wrap
       display inline-block
+
+  button
+    .explore
+      display inline-flex
+      margin 0
+      margin-left 6px
+      min-height auto
+      height 14px
+      vertical-align -1px
 </style>
