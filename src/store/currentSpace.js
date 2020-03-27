@@ -343,6 +343,7 @@ export default {
       context.commit('notifyConnectionError', false, { root: true })
       context.commit('notifySignUpToEditOpenSpace', false, { root: true })
       context.commit('notifySpaceIsOpenAndEditable', false, { root: true })
+      context.commit('notifyAccessFavorites', false, { root: true })
 
       // restore local
       context.commit('restoreSpace', emptySpace)
