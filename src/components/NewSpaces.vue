@@ -1,7 +1,8 @@
 <template lang="pug">
 .new-spaces(v-if="visible" :open="visible" @click.stop ref="dialog")
   section.header
-    span Recently updated spaces made by cool people like you
+    p Recently updated spaces made by cool people like you
+    ShowInExplore(@updateSpaces="updateCurrentSpace" :label="showInExploreLabel")
     p(v-if="loading")
       Loader(:visible="loading")
   section.results-section
@@ -11,21 +12,31 @@
 <script>
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
+import ShowInExplore from '@/components/ShowInExplore.vue'
 
 export default {
   name: 'NewSpaces',
   components: {
     Loader,
-    SpaceList
+    SpaceList,
+    ShowInExplore
   },
   props: {
     visible: Boolean,
     loading: Boolean,
     spaces: Array
   },
+  computed: {
+    showInExploreLabel () {
+      return 'Show my Space in Explore'
+    }
+  },
   methods: {
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+    },
+    updateCurrentSpace () {
+      this.$emit('updateCurrentSpace')
     }
   }
 }
