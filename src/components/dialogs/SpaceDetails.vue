@@ -1,16 +1,11 @@
 <template lang="pug">
 dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs")
   section
-    .row.space-meta(v-if="isSpaceMember")
-      input(placeholder="name" v-model="spaceName")
-
-      .button-wrap(v-if="isSpaceMember")
-        button.privacy-button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
-          img.icon.privacy-icon(:src="privacyIcon.icon" :class="privacyIcon.name")
-          .badge.status.explore(v-if="shouldShowInExplore")
-            img.icon(src="@/assets/checkmark.svg")
-        PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs" @updateSpaces="updateSpaces")
-
+    template(v-if="isSpaceMember")
+      .row
+        input(placeholder="name" v-model="spaceName")
+      .row
+        PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
     template(v-if="!isSpaceMember")
       p {{spaceName}}
       .row(v-if="shouldShowInExplore")
@@ -60,19 +55,18 @@ import fuzzy from 'fuzzy'
 import cache from '@/cache.js'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
-import PrivacyPicker from '@/components/dialogs/PrivacyPicker.vue'
-import privacy from '@/spaces/privacy.js'
 import SpaceList from '@/components/SpaceList.vue'
 import Favorites from '@/components/Favorites.vue'
+import PrivacyButton from '@/components/PrivacyButton.vue'
 
 export default {
   name: 'SpaceDetails',
   components: {
     Export,
     Import,
-    PrivacyPicker,
     SpaceList,
-    Favorites
+    Favorites,
+    PrivacyButton
   },
   props: {
     visible: Boolean
@@ -151,15 +145,6 @@ export default {
     isSpaceMember () {
       const currentSpace = this.$store.state.currentSpace
       return this.$store.getters['currentUser/isSpaceMember'](currentSpace)
-    },
-    privacyIcon () {
-      const privacyState = privacy.states().find(state => {
-        return state.name === this.$store.state.currentSpace.privacy
-      })
-      return {
-        icon: require(`@/assets/${privacyState.icon}.svg`),
-        name: privacyState.icon
-      }
     }
   },
   methods: {
@@ -252,41 +237,22 @@ export default {
 </script>
 
 <style lang="stylus">
-
 .space-details
-  .space-meta
-    margin-bottom 6px
-    input
-      min-width 1px // firefox flexbox hack
-
-  .privacy-button
-    margin-left 6px
-    height 24px
-    min-width 24px
-    padding-top 3px
-    .privacy-icon
-      max-width none
-      vertical-align middle
-      &.open
-        vertical-align -3px
-    .explore
-      margin 0
-      margin-left 6px
-      display inline-block
-      min-height 0
-      height 16px
-      .icon
-        max-width 10px
-        vertical-align 2px
-
   .explore-message
     display flex
     margin-top 6px
-
-  .privacy-picker
-    left calc(100% - 24px)
-    @media(max-width 460px)
-      left initial
-      right -20px
+  .privacy-button
+    > button
+      height 24px
+      padding 3px
+      padding-top 2px
+      padding-bottom 1px
+    .badge.explore-message
+      display inline
+      margin 0
+      img
+        vertical-align 1px
+    .badge + .explore-message
+      margin-left 3px
 
 </style>

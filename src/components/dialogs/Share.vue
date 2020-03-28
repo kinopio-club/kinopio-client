@@ -3,15 +3,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
   section
     p Share
   section(v-if="spaceHasUrl")
-    template(v-if="isSpaceMember")
-      .button-wrap.privacy-wrap
-        button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
-          .badge(:class="privacyState.color")
-            img.icon(:src="privacyIcon(privacyState).path" :class="privacyState.name")
-            span {{privacyState.name | capitalize}}
-          p.description {{privacyState.description | capitalize}}
-        PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs")
-
+    PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
     template(v-if="!spaceIsPrivate")
       input.textarea(ref="url" v-model="url")
       button(@click="copyUrl" v-if="!canNativeShare")
@@ -40,15 +32,13 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
 </template>
 
 <script>
-import PrivacyPicker from '@/components/dialogs/PrivacyPicker.vue'
+import PrivacyButton from '@/components/PrivacyButton.vue'
 import InviteCollaborators from '@/components/dialogs/InviteCollaborators.vue'
-import utils from '@/utils.js'
-import privacy from '@/spaces/privacy.js'
 
 export default {
   name: 'Share',
   components: {
-    PrivacyPicker,
+    PrivacyButton,
     InviteCollaborators
   },
   props: {
@@ -62,11 +52,6 @@ export default {
       inviteCollaboratorsIsVisible: false
     }
   },
-  filters: {
-    capitalize (value) {
-      return utils.capitalizeFirstLetter(value)
-    }
-  },
   computed: {
     spaceName () { return this.$store.state.currentSpace.name },
     spacePrivacy () { return this.$store.state.currentSpace.privacy },
@@ -78,11 +63,6 @@ export default {
     // https://caniuse.com/#feat=web-share
     canNativeShare () {
       return Boolean(navigator.share)
-    },
-    privacyState () {
-      return privacy.states().find(state => {
-        return state.name === this.spacePrivacy
-      })
     },
     spaceIsPrivate () {
       return this.spacePrivacy === 'private'
@@ -98,9 +78,6 @@ export default {
     }
   },
   methods: {
-    // url () {
-    //   return window.location.href
-    // },
     copyUrl () {
       const element = this.$refs.url
       element.select()
@@ -129,11 +106,6 @@ export default {
       const isVisible = this.inviteCollaboratorsIsVisible
       this.closeDialogs()
       this.inviteCollaboratorsIsVisible = !isVisible
-    },
-    privacyIcon (privacyState) {
-      return {
-        path: require(`@/assets/${privacyState.icon}.svg`)
-      }
     },
     closeDialogs () {
       this.privacyPickerIsVisible = false
@@ -166,7 +138,7 @@ export default {
     border 0
     border-radius 3px
     padding 4px
-  .privacy-wrap + .textarea
+  .privacy-button + .textarea
     margin-top 10px
   .description
     margin-top 3px
