@@ -28,7 +28,7 @@ export default {
   },
   computed: {
     showInExploreLabel () {
-      return 'Show my Space in Explore'
+      return 'Show Space in Explore'
     }
   },
   methods: {

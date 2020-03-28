@@ -8,7 +8,7 @@
       img.icon(src="@/assets/checkmark.svg")
       span In Explore
     p.description(v-if="!hideDescription") {{privacyState.description | capitalize}}
-  PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs")
+  PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs" @updateSpaces="updateSpaces")
 
 </template>
 
@@ -52,6 +52,9 @@ export default {
     closeDialogs () {
       this.$emit('closeDialogs')
     },
+    updateSpaces () {
+      this.$emit('updateSpaces')
+    },
     privacyIcon (privacyState) {
       return {
         path: require(`@/assets/${privacyState.icon}.svg`)
@@ -63,8 +66,12 @@ export default {
 
 <style lang="stylus">
 .privacy-button
+  .badge
+    margin 0
   .badge.explore-message
     display inline-flex
     margin 0
+  .badge + .explore-message
+    margin-left 3px
 
 </style>
