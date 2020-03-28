@@ -154,7 +154,7 @@ export default {
       this.userDetailsIsNotVisible()
     },
     changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', { space })
+      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
     },
     showUserDetails (user) {
       this.userDetailsIsNotVisible()
