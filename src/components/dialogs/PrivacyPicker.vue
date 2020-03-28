@@ -9,7 +9,7 @@ dialog.narrow.privacy-picker(v-if="visible" :open="visible" @click.stop)
             span {{privacyState.name | capitalize}}
           p.description {{privacyState.description | capitalize}}
 
-  section
+  section(v-if="!currentSpaceIsPrivate")
     ShowInExplore(@updateSpaces="updateSpaces")
 
 </template>
@@ -42,6 +42,10 @@ export default {
       } else {
         return privacyStates.slice(1, 3)
       }
+    },
+    currentSpaceIsPrivate () {
+      const privacy = this.$store.state.currentSpace.privacy
+      return privacy === 'private'
     }
   },
   methods: {

@@ -14,10 +14,6 @@
     p
       span To show in explore,
       span.badge.info you need to edit and rename this space first
-  template(v-else-if="currentPrivacyIsPrivate")
-    p
-      span To show in explore,
-      span.badge.info space can't be private
 
 </template>
 
@@ -32,12 +28,8 @@ export default {
     showInExplore () { return this.$store.state.currentSpace.showInExplore },
     userIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     spaceIsHelloKinopio () { return this.$store.getters['currentSpace/isHelloKinopio'] },
-    currentPrivacyIsPrivate () {
-      const privacy = this.$store.state.currentSpace.privacy
-      return privacy === 'private'
-    },
     exploreIsDisabled () {
-      if (!this.userIsSignedIn || this.spaceIsHelloKinopio || this.currentPrivacyIsPrivate) {
+      if (!this.userIsSignedIn || this.spaceIsHelloKinopio) {
         return true
       } else {
         return false
