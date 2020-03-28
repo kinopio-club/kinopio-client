@@ -154,7 +154,13 @@ export default {
       this.userDetailsIsNotVisible()
     },
     changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      const isSpaceUser = space.users[0].id === this.$store.state.currentUser.id
+      const isNotSignedIn = !this.$store.getters['currentUser/isSignedIn']
+      if (isSpaceUser && isNotSignedIn) {
+        this.$store.dispatch('currentSpace/changeSpace', { space })
+      } else {
+        this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      }
     },
     showUserDetails (user) {
       this.userDetailsIsNotVisible()
