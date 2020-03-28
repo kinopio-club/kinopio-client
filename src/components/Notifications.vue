@@ -5,6 +5,16 @@ aside.notifications(@click="closeAllDialogs")
       img.icon(v-if="item.icon" :src="icon(item.icon).path" :class="item.icon")
       span {{item.message}}
 
+  .item.success(v-if="notifySpaceIsOpenAndEditable")
+    p
+      img.icon.open(src="@/assets/open.svg")
+      span This space is open, which means you can add to it too
+
+  .item.success(v-if="notifyAccessFavorites" @animationend="resetNotifyAccessFavorites")
+    p Access favorites from your spaces
+    .row
+      button(@click.stop="triggerSpaceDetailsFavoritesVisible") Your Spaces
+
   .persistent-item.success(v-if="notifySignUpToEditOpenSpace")
     p
       img.icon.open(src="@/assets/open.svg")
@@ -19,14 +29,11 @@ aside.notifications(@click="closeAllDialogs")
       button(@click="copyCurrentSpace")
         img.icon(src="@/assets/add.svg")
         span Save a Copy
-      label(:class="{active: isFavoriteSpace}" @click.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
-        input(type="checkbox" v-model="isFavoriteSpace")
-        span Favorite
 
   .persistent-item.danger(v-if="notifySpaceNotFound")
     p Space could not be found, or is private
     .row
-      button(@click="triggerSpaceDetailsVisible") Your Spaces
+      button(@click.stop="triggerSpaceDetailsVisible") Your Spaces
       button(v-if="!userIsSignedIn" @click.stop="triggerSignUpOrInIsVisible") Sign Up or In
 
   .persistent-item(v-if="notifySpaceIsRemoved")
@@ -95,14 +102,10 @@ export default {
     notifySpaceIsRemoved () { return this.$store.state.notifySpaceIsRemoved },
     notifyNewUser () { return this.$store.state.notifyNewUser },
     notifySignUpToEditOpenSpace () { return this.$store.state.notifySignUpToEditOpenSpace },
+    notifySpaceIsOpenAndEditable () { return this.$store.state.notifySpaceIsOpenAndEditable },
+    notifyAccessFavorites () { return this.$store.state.notifyAccessFavorites },
     userIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
-    },
-    isFavoriteSpace () {
-      const currentSpace = this.$store.state.currentSpace
-      const favoriteSpaces = this.$store.state.currentUser.favoriteSpaces
-      const isFavoriteSpace = favoriteSpaces.filter(space => space.id === currentSpace.id)
-      return Boolean(isFavoriteSpace.length)
     }
   },
   methods: {
@@ -113,14 +116,6 @@ export default {
     },
     closeAllDialogs () {
       this.$store.commit('closeAllDialogs')
-    },
-    toggleIsFavoriteSpace () {
-      const currentSpace = this.$store.state.currentSpace
-      if (this.isFavoriteSpace) {
-        this.$store.dispatch('currentUser/removeFavorite', { type: 'space', item: currentSpace })
-      } else {
-        this.$store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
-      }
     },
     update () {
       const notifications = this.$store.state.notifications
@@ -143,6 +138,10 @@ export default {
     triggerSpaceDetailsVisible () {
       this.$store.commit('triggerSpaceDetailsVisible')
     },
+    triggerSpaceDetailsFavoritesVisible () {
+      this.$store.commit('triggerFavoritesIsVisible')
+      this.triggerSpaceDetailsVisible()
+    },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
@@ -161,6 +160,9 @@ export default {
     createNewHelloSpace () {
       this.$store.commit('notifyNewUser', false)
       window.location.href = '/'
+    },
+    resetNotifyAccessFavorites () {
+      this.$store.commit('notifyAccessFavorites', false)
     }
   }
 }

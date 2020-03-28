@@ -24,7 +24,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
       .row
         .badge.success.success-message(v-if="urlIsCopied") Url Copied
 
-  //- section(v-if="spaceHasUrl && canEditSpace")
+  //- section(v-if="spaceHasUrl && isSpaceMember")
   //-   .button-wrap
   //-     button(@click.stop="toggleInviteCollaboratorsIsVisible" :class="{ active: inviteCollaboratorsIsVisible }")
   //-       span Invite Collaborators
@@ -32,8 +32,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
 
   section(v-if="!spaceHasUrl")
     p
-      //- span To share or invite collaborators,
-      span To share,
+      span To share or invite collaborators,
       span.badge.info you need to Sign Up or In
       span for your spaces to be synced and accessible anywhere.
     button(@click="triggerSignUpOrInIsVisible") Sign Up or In

@@ -14,6 +14,8 @@ header
           span Template
         span {{currentSpaceName}}
         img.icon.privacy-icon(v-if="spaceIsNotClosed" :src="privacyIcon" :class="privacyName")
+        .badge.status.explore(v-if="shouldShowInExplore")
+          img.icon(src="@/assets/checkmark.svg")
         Loader(:visible="isLoadingSpace")
       SpaceDetails(:visible="spaceDetailsIsVisible")
       ImportArenaChannel(:visible="importArenaChannelIsVisible")
@@ -100,7 +102,7 @@ export default {
   computed: {
     shouldShowNewStuffIsUpdated () {
       const newStuffIsUpdated = this.$store.state.newStuffIsUpdated
-      const isNotDefaultSpace = !this.$store.getters['currentSpace/isDefaultSpace']
+      const isNotDefaultSpace = !this.$store.getters['currentSpace/isHelloKinopio']
       const userCanEditSpace = this.$store.getters['currentUser/canEditSpace']()
       return newStuffIsUpdated && isNotDefaultSpace && userCanEditSpace
     },
@@ -161,6 +163,11 @@ export default {
       } else {
         return false
       }
+    },
+    shouldShowInExplore () {
+      const privacy = this.$store.state.currentSpace.privacy
+      if (privacy === 'private') { return false }
+      return this.$store.state.currentSpace.showInExplore
     }
   },
   methods: {
@@ -236,7 +243,7 @@ header
       .down-arrow
         transform translateY(5px)
     .development
-      filter hue-rotate(-290deg)
+      filter hue-rotate(-10deg)
   .space-details-wrap
     max-width 250px
     @media(max-width 414px)
@@ -252,7 +259,7 @@ header
       max-height calc(100vh - 100px)
     > button
       .privacy-icon
-        margin-left 3px
+        margin-left 6px
 
   aside
     display flex
@@ -266,4 +273,13 @@ header
     justify-content flex-end
     > .button-wrap
       display inline-block
+
+  button
+    .explore
+      display inline-flex
+      margin 0
+      margin-left 6px
+      min-height auto
+      height 14px
+      vertical-align -1px
 </style>

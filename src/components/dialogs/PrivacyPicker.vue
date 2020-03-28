@@ -8,14 +8,22 @@ dialog.narrow.privacy-picker(v-if="visible" :open="visible" @click.stop)
             img.icon(:src="privacyIcon(privacyState).path" :class="privacyState.name")
             span {{privacyState.name | capitalize}}
           p.description {{privacyState.description | capitalize}}
+
+  section
+    ShowInExplore(@updateSpaces="updateSpaces")
+
 </template>
 
 <script>
+import ShowInExplore from '@/components/ShowInExplore.vue'
 import privacy from '@/spaces/privacy.js'
 import utils from '@/utils.js'
 
 export default {
   name: 'PrivacyPicker',
+  components: {
+    ShowInExplore
+  },
   props: {
     visible: Boolean
   },
@@ -25,6 +33,7 @@ export default {
     }
   },
   computed: {
+    userIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     privacyStates () {
       const userIsSignedIn = this.$store.getters['currentUser/isSignedIn']
       const privacyStates = privacy.states()
@@ -45,13 +54,15 @@ export default {
     },
     select (privacyState) {
       this.$store.dispatch('currentSpace/updateSpace', { privacy: privacyState.name })
-      this.$emit('closeDialog')
-      this.$emit('updateSpaces')
+      this.updateSpaces()
     },
     privacyIcon (privacyState) {
       return {
         path: require(`@/assets/${privacyState.icon}.svg`)
       }
+    },
+    updateSpaces () {
+      this.$emit('updateSpaces')
     }
   }
 }

@@ -104,6 +104,8 @@ export default {
 .export
   overflow scroll
   max-height calc(100vh - 100px)
+  @media(max-width 400px)
+    left calc(-100% - 8px)
   textarea
     background-color var(--secondary-background)
     border 0

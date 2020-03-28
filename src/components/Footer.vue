@@ -6,10 +6,11 @@ footer
       button(@click="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
         span Explore
       Explore(:visible="exploreIsVisible")
+
     .button-wrap
-      button(@click.stop="toggleFavoritesIsVisible" :class="{active: favoritesIsVisible}")
-        span Favorites
-      Favorites(:visible="favoritesIsVisible")
+      label(:class="{active: isFavoriteSpace}" @click.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+        input(type="checkbox" v-model="isFavoriteSpace")
+        span Favorite
 
   section.controls(v-if="!dialogsVisible")
     .button-wrap(v-if="userCanEditSpace")
@@ -38,7 +39,6 @@ import Removed from '@/components/dialogs/Removed.vue'
 import Offline from '@/components/dialogs/Offline.vue'
 import Filters from '@/components/dialogs/Filters.vue'
 import Notifications from '@/components/Notifications.vue'
-import Favorites from '@/components/dialogs/Favorites.vue'
 
 export default {
   name: 'Footer',
@@ -47,16 +47,14 @@ export default {
     Removed,
     Offline,
     Notifications,
-    Filters,
-    Favorites
+    Filters
   },
   data () {
     return {
       removedIsVisible: false,
       offlineIsVisible: false,
       filtersIsVisible: false,
-      exploreIsVisible: false,
-      favoritesIsVisible: false
+      exploreIsVisible: false
     }
   },
   mounted () {
@@ -67,7 +65,6 @@ export default {
         this.offlineIsVisible = false
         this.filtersIsVisible = false
         this.exploreIsVisible = false
-        this.favoritesIsVisible = false
       }
     })
   },
@@ -95,10 +92,23 @@ export default {
     },
     userCanEditSpace () {
       return this.$store.getters['currentUser/canEditSpace']()
+    },
+    isFavoriteSpace () {
+      const currentSpace = this.$store.state.currentSpace
+      const favoriteSpaces = this.$store.state.currentUser.favoriteSpaces
+      const isFavoriteSpace = favoriteSpaces.filter(space => space.id === currentSpace.id)
+      return Boolean(isFavoriteSpace.length)
     }
-
   },
   methods: {
+    toggleIsFavoriteSpace () {
+      const currentSpace = this.$store.state.currentSpace
+      if (this.isFavoriteSpace) {
+        this.$store.dispatch('currentUser/removeFavorite', { type: 'space', item: currentSpace })
+      } else {
+        this.$store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
+      }
+    },
     toggleRemovedIsVisible () {
       const isVisible = this.removedIsVisible
       this.$store.commit('closeAllDialogs')
@@ -118,11 +128,6 @@ export default {
       const isVisible = this.exploreIsVisible
       this.$store.commit('closeAllDialogs')
       this.exploreIsVisible = !isVisible
-    },
-    toggleFavoritesIsVisible () {
-      const isVisible = this.favoritesIsVisible
-      this.$store.commit('closeAllDialogs')
-      this.favoritesIsVisible = !isVisible
     }
   }
 }

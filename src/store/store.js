@@ -78,6 +78,8 @@ export default new Vuex.Store({
     notifySpaceIsRemoved: false,
     notifyNewUser: false,
     notifySignUpToEditOpenSpace: false,
+    notifySpaceIsOpenAndEditable: false,
+    notifyAccessFavorites: false,
 
     // filters
     filteredConnectionTypeIds: [],
@@ -178,6 +180,7 @@ export default new Vuex.Store({
       state.isAuthenticatingWithArena = value
     },
     triggerSpaceDetailsVisible: () => {},
+    triggerFavoritesIsVisible: () => {},
     triggerSignUpOrInIsVisible: () => {},
     triggerArenaAuthenticationError: () => {},
     triggerKeyboardShortcutsIsVisible: () => {},
@@ -350,6 +353,14 @@ export default new Vuex.Store({
     notifySignUpToEditOpenSpace: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.notifySignUpToEditOpenSpace = value
+    },
+    notifySpaceIsOpenAndEditable: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.notifySpaceIsOpenAndEditable = value
+    },
+    notifyAccessFavorites: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.notifyAccessFavorites = value
     },
 
     // filters

@@ -8,7 +8,7 @@ dialog.explore(v-if="visible" :open="visible")
       button(@click.stop="showTemplates" :class="{ active: templatesIsVisible }")
         span Templates
 
-  NewSpaces(:visible="!templatesIsVisible" :loading="loadingNewSpaces" :spaces="spaces" @getNewSpaces="getNewSpaces")
+  NewSpaces(:visible="!templatesIsVisible" :loading="loadingNewSpaces" :spaces="spaces" @updateCurrentSpace="updateCurrentSpace")
   Templates(:visible="templatesIsVisible")
 </template>
 
@@ -46,6 +46,15 @@ export default {
       this.loadingNewSpaces = true
       this.spaces = await this.$store.dispatch('api/getNewSpaces')
       this.loadingNewSpaces = false
+    },
+    updateCurrentSpace () {
+      const currentSpace = this.$store.state.currentSpace
+      const spacesHasCurrentSpace = this.spaces.find(space => space.id === currentSpace.id)
+      if (spacesHasCurrentSpace) {
+        this.spaces = this.spaces.filter(space => space.id !== currentSpace.id)
+      } else {
+        this.spaces.unshift(currentSpace)
+      }
     }
   },
   watch: {
@@ -62,4 +71,5 @@ export default {
 <style lang="stylus">
 .explore
   max-height calc(100vh - 100px)
+
 </style>

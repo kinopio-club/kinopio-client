@@ -58,6 +58,29 @@ export default new Router({
         store.dispatch('currentUser/updateArenaAccessToken', arenaReturnedCode)
       }
     }, {
+      path: '/invite',
+      name: 'invite',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        store.dispatch('currentUser/init')
+        const urlParams = new URLSearchParams(window.location.search)
+        const spaceId = urlParams.get('spaceId')
+        const collaboratorKey = urlParams.get('collaboratorKey')
+        if (!spaceId || !collaboratorKey) { return }
+        console.log('🌸🌸🌸🌸🌸🌸', spaceId, collaboratorKey)
+        // temp: wont call if not signed in
+        store.dispatch('api/addSpaceCollaborator', { spaceId, collaboratorKey }).then(response => {
+          // the above state is not available here, since it
+          // it is resolved asynchronously in the store action
+          console.log('🍆', response)
+        })
+        // , error => {
+        // handle error here
+        // })
+        next()
+      }
+
+    }, {
       path: '/:space',
       component: Space,
       beforeEnter: (to, from, next) => {

@@ -8,17 +8,20 @@ dialog.narrow.invite-others-to-edit(v-if="visible" :open="visible" @click.stop)
     p Invite Collaborators
 
   section
-    p Share this url to edit with others
+    //- p Share this url to edit with others
+    img(src="@/assets/collaborators.jpg")
 
     input.textarea(ref="url" v-model="url")
 
-    button(v-if="!canNativeShare")
+    button(v-if="!canNativeShare" @click="copyUrl")
       span Copy Invite Url
     .segmented-buttons(v-if="canNativeShare")
       button(@click="copyUrl")
         span Copy Invite Url
       button(@click="shareUrl")
         img.icon(src="@/assets/share.svg")
+    .row
+      .badge.success.success-message(v-if="urlIsCopied") Url Copied
 
 </template>
 
@@ -43,12 +46,33 @@ export default {
     },
     url: {
       get () {
-        return window.location.href
+        const collaboratorKey = this.$store.state.currentSpace.collaboratorKey
+        const spaceId = this.$store.state.currentSpace.id
+        return `${window.location.origin}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}`
       }
     }
-
   },
   methods: {
+    copyUrl () {
+      const element = this.$refs.url
+      element.select()
+      element.setSelectionRange(0, 99999) // for mobile
+      document.execCommand('copy')
+      this.urlIsCopied = true
+    },
+    shareUrl () {
+      const data = {
+        title: 'Kinopio Invite',
+        text: this.spaceName,
+        url: this.url
+      }
+      navigator.share(data)
+    }
+  },
+  watch: {
+    visible (visible) {
+      this.urlIsCopied = false
+    }
   }
 }
 </script>
@@ -60,8 +84,4 @@ export default {
   right 8px
   .textarea
     margin-top 10px
-  // input
-  //   margin-top 10px
-  // textarea
-  //   margin-top 10px
 </style>

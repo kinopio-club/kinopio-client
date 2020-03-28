@@ -309,7 +309,7 @@ li
   padding-top 0
   border-top 0
   overflow auto
-  max-height calc(92vh - 225px)
+  max-height calc(92vh - 240px)
 
 .filter-wrap
   margin-left 5px
