@@ -7,7 +7,7 @@
     .badge.status.explore-message(v-if="shouldShowInExplore")
       img.icon(src="@/assets/checkmark.svg")
       span In Explore
-    p.description(v-if="!hideDescription") {{privacyState.description | capitalize}}
+    p.description(v-if="showDescription") {{privacyState.description | capitalize}}
   PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs" @updateSpaces="updateSpaces")
 
 </template>
@@ -23,8 +23,8 @@ export default {
     PrivacyPicker
   },
   props: {
-    hideDescription: Boolean,
-    privacyPickerIsVisible: Boolean
+    privacyPickerIsVisible: Boolean,
+    showDescription: Boolean
   },
   filters: {
     capitalize (value) {

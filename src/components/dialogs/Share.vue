@@ -3,7 +3,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
   section
     p Share
   section(v-if="spaceHasUrl")
-    PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
+    PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
     template(v-if="!spaceIsPrivate")
       input.textarea(ref="url" v-model="url")
       button(@click="copyUrl" v-if="!canNativeShare")
