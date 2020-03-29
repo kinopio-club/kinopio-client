@@ -47,6 +47,7 @@ export default {
     select (privacyState) {
       this.$store.dispatch('currentSpace/updateSpace', { privacy: privacyState.name })
       this.updateSpaces()
+      this.$emit('closeDialogs')
     },
     privacyIcon (privacyState) {
       return {

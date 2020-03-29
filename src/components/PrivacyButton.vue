@@ -8,7 +8,7 @@
         img.icon(:src="privacyIcon(privacyState).path" :class="privacyState.name")
         span {{privacyState.name | capitalize}}
     p.description(v-if="showDescription") {{privacyState.description | capitalize}}
-  PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs" @updateSpaces="updateSpaces")
+  PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
 </template>
 
 <script>
