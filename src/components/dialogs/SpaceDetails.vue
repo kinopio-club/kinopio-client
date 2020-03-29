@@ -4,7 +4,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
     template(v-if="isSpaceMember")
       .row
         input(placeholder="name" v-model="spaceName")
-      .row
+      .row.privacy-row
         PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
         ShowInExploreButton(@updateSpaces="updateSpaces")
 
@@ -242,11 +242,14 @@ export default {
 
 <style lang="stylus">
 .space-details
-  .explore-message
+  .privacy-row
     display flex
-    margin-top 6px
+    align-items flex-start
   .privacy-button
     > button
       height 24px
       min-width 24px
+  .explore-message
+    display flex
+    margin-top 6px
 </style>
