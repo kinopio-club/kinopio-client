@@ -16,7 +16,8 @@ dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
   section
     .row
       .button-wrap
-        button(@click.stop="toggleContactIsVisible" :class="{active: contactIsVisible}") Contact
+        button(@click.stop="toggleContactIsVisible" :class="{active: contactIsVisible}")
+          span Contact and Support
         Contact(:visible="contactIsVisible")
     .row
       .button-wrap

@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.contact(v-if="visible" :open="visible" @click.stop)
   section
-    p Contact
+    p Contact and Support
   section
     .row
       img.email(src="@/assets/email.gif")
