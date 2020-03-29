@@ -154,7 +154,8 @@ export default {
       this.userDetailsIsNotVisible()
     },
     changeSpace (space) {
-      const isSpaceUser = space.users[0].id === this.$store.state.currentUser.id
+      const spaceUser = space.user || space.users[0]
+      const isSpaceUser = spaceUser.id === this.$store.state.currentUser.id
       const isNotSignedIn = !this.$store.getters['currentUser/isSignedIn']
       if (isSpaceUser && isNotSignedIn) {
         this.$store.dispatch('currentSpace/changeSpace', { space })

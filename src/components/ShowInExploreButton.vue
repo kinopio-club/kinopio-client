@@ -1,46 +1,56 @@
 <template lang="pug">
 .button-wrap(v-if="isSpaceMember")
-  label(:class="{disabled: exploreIsDisabled, active: showInExplore}" @click.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
+  label(:class="{active: showInExplore}" @click.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
     input(type="checkbox" v-model="showInExplore")
     span {{showInExploreLabel}}
 
-  template(v-if="!this.userIsSignedIn")
+  template(v-if="error.userNeedsToSignUpOrIn")
     p
-      span To show in explore,
-      span.badge.info you need to Sign Up or In
-      span for your spaces to be accessible anywhere
+      span.badge.info Sign Up or In
+      span for your spaces to be accessible to others
     button(@click="triggerSignUpOrInIsVisible") Sign Up or In
-  template(v-else-if="this.spaceIsHelloKinopio")
+
+  template(v-else-if="error.spaceMustBeEdited")
     p
-      span To show in explore,
-      span.badge.info you need to edit and rename this space first
+      span.badge.info Edit and rename this space
+      span To show in explore
 
 </template>
 
 <script>
 export default {
-  name: 'ShowInExplore',
+  name: 'ShowInExploreButton',
   props: {
     label: String
+  },
+  data () {
+    return {
+      error: {
+        userNeedsToSignUpOrIn: false,
+        spaceMustBeEdited: false
+      }
+    }
   },
   computed: {
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     showInExplore () { return this.$store.state.currentSpace.showInExplore },
     userIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     spaceIsHelloKinopio () { return this.$store.getters['currentSpace/isHelloKinopio'] },
-    exploreIsDisabled () {
-      if (!this.userIsSignedIn || this.spaceIsHelloKinopio) {
-        return true
-      } else {
-        return false
-      }
-    },
     showInExploreLabel () {
       return this.label || 'Show in Explore'
     }
   },
   methods: {
     toggleShowInExplore () {
+      if (!this.userIsSignedIn) {
+        this.error.userNeedsToSignUpOrIn = true
+        return
+      }
+      if (this.spaceIsHelloKinopio) {
+        this.error.spaceMustBeEdited = true
+        return
+      }
+
       const value = !this.showInExplore
       this.$store.dispatch('currentSpace/updateSpace', { showInExplore: value })
       this.$emit('updateSpaces')
@@ -50,6 +60,12 @@ export default {
       this.$store.commit('triggerSignUpOrInIsVisible')
     }
 
+  },
+  watch: {
+    visible (visible) {
+      this.error.userNeedsToSignUpOrIn = false
+      this.error.spaceMustBeEdited = false
+    }
   }
 }
 </script>

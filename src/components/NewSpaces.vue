@@ -2,7 +2,7 @@
 .new-spaces(v-if="visible" :open="visible" @click.stop ref="dialog")
   section.header
     p Recently updated spaces made by cool people like you
-    ShowInExplore(@updateSpaces="updateCurrentSpace" :label="showInExploreLabel")
+    ShowInExploreButton(@updateSpaces="updateCurrentSpace" :label="showInExploreLabel")
     p(v-if="loading")
       Loader(:visible="loading")
   section.results-section
@@ -12,14 +12,14 @@
 <script>
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
-import ShowInExplore from '@/components/ShowInExplore.vue'
+import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
 
 export default {
   name: 'NewSpaces',
   components: {
     Loader,
     SpaceList,
-    ShowInExplore
+    ShowInExploreButton
   },
   props: {
     visible: Boolean,
