@@ -1,15 +1,14 @@
 <template lang="pug">
 .button-wrap.privacy-button(v-if="isSpaceMember")
   button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
-    .badge(:class="privacyState.color")
+    template(v-if="showIconOnly")
       img.icon(:src="privacyIcon(privacyState).path" :class="privacyState.name")
-      span {{privacyState.name | capitalize}}
-    .badge.status.explore-message(v-if="shouldShowInExplore")
-      img.icon(src="@/assets/checkmark.svg")
-      span In Explore
+    template(v-else)
+      .badge(:class="privacyState.color")
+        img.icon(:src="privacyIcon(privacyState).path" :class="privacyState.name")
+        span {{privacyState.name | capitalize}}
     p.description(v-if="showDescription") {{privacyState.description | capitalize}}
   PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialog="closeDialogs" @updateSpaces="updateSpaces")
-
 </template>
 
 <script>
@@ -24,7 +23,8 @@ export default {
   },
   props: {
     privacyPickerIsVisible: Boolean,
-    showDescription: Boolean
+    showDescription: Boolean,
+    showIconOnly: Boolean
   },
   filters: {
     capitalize (value) {
@@ -38,11 +38,6 @@ export default {
       return privacy.states().find(state => {
         return state.name === this.spacePrivacy
       })
-    },
-    shouldShowInExplore () {
-      const privacy = this.$store.state.currentSpace.privacy
-      if (privacy === 'private') { return false }
-      return this.$store.state.currentSpace.showInExplore
     }
   },
   methods: {

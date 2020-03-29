@@ -19,7 +19,7 @@
 
 <script>
 export default {
-  name: 'ShowInExplore',
+  name: 'ShowInExploreButton',
   props: {
     label: String
   },

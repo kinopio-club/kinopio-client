@@ -5,7 +5,9 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
       .row
         input(placeholder="name" v-model="spaceName")
       .row
-        PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
+        PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
+        ShowInExploreButton(@updateSpaces="updateSpaces")
+
     template(v-if="!isSpaceMember")
       p {{spaceName}}
       .row(v-if="shouldShowInExplore")
@@ -58,6 +60,7 @@ import Import from '@/components/dialogs/Import.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import Favorites from '@/components/Favorites.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
+import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
 
 export default {
   name: 'SpaceDetails',
@@ -66,7 +69,8 @@ export default {
     Import,
     SpaceList,
     Favorites,
-    PrivacyButton
+    PrivacyButton,
+    ShowInExploreButton
   },
   props: {
     visible: Boolean
@@ -244,15 +248,5 @@ export default {
   .privacy-button
     > button
       height 24px
-      padding 3px
-      padding-top 2px
-      padding-bottom 1px
-    .badge.explore-message
-      display inline
-      margin 0
-      img
-        vertical-align 1px
-    .badge + .explore-message
-      margin-left 3px
-
+      min-width 24px
 </style>
