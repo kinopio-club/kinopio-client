@@ -112,6 +112,7 @@ export default {
           this.removeSpacePermanent(item)
         }
       })
+      this.hideRemoveAllConfirmation()
     },
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
