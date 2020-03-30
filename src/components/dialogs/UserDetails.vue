@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDialogs" :class="{'right-side': detailsOnRight}")
+dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDialogs" :class="{'right-side': detailsOnRight}" :style="{top: userDetailsPosition.top}")
 
   //- Other User
   section.user-info(v-if="!isCurrentUser")
@@ -55,7 +55,8 @@ export default {
   props: {
     user: Object,
     detailsOnRight: Boolean,
-    visible: Boolean
+    visible: Boolean,
+    userDetailsPosition: Object
   },
   data () {
     return {

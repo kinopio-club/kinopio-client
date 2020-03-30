@@ -29,14 +29,14 @@
         button.borderless.clear-input-wrap(@click="clearFilter")
           img.icon(src="@/assets/add.svg")
 
-      ul.results-list
+      ul.results-list.user-list
         template(v-for="(user in usersFiltered")
-          li(:key="user.id" @click.stop="showUserDetails(user)" tabindex="0" v-on:keyup.stop.enter="showUserDetails(user)" :class="{ active: userIsSelected(user) }")
+          li(:key="user.id" @click.stop="showUserDetails($event, user)" tabindex="0" v-on:keyup.stop.enter="showUserDetails(user)" :class="{ active: userIsSelected(user) }")
             .name(v-if="spacesIsVisible") {{user.name}}
             .badge(v-else :style="{background: user.color}")
               User(:user="user" :isClickable="false")
               span {{user.name}}
-      UserDetails(:visible="userDetailsIsVisible" :user="selectedUser")
+      UserDetails(:visible="userDetailsIsVisible" :user="selectedUser" :userDetailsPosition="userDetailsPosition")
 </template>
 
 <script>
@@ -63,7 +63,8 @@ export default {
       selectedUser: {},
       filter: '',
       filteredSpaces: [],
-      filteredUsers: []
+      filteredUsers: [],
+      userDetailsPosition: {}
     }
   },
   computed: {
@@ -163,8 +164,12 @@ export default {
         this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
       }
     },
-    showUserDetails (user) {
+    showUserDetails (event, user) {
+      const elementRect = event.target.getBoundingClientRect()
       this.userDetailsIsNotVisible()
+      this.userDetailsPosition = {
+        top: elementRect.y - 12 + 'px'
+      }
       this.selectedUser = user
       this.userDetailsIsVisible = true
     },
@@ -189,4 +194,8 @@ export default {
 </script>
 
 <style lang="stylus">
+.favorites
+  .user-details
+    left 50%
+
 </style>
