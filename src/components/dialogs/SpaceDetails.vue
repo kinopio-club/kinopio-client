@@ -234,6 +234,8 @@ export default {
         this.updateWithRemoteSpaces()
         this.closeDialogs()
         this.clearFilter()
+      } else {
+        this.favoritesIsVisible = false
       }
     }
   }
