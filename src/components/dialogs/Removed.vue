@@ -18,13 +18,26 @@ dialog.removed(v-if="visible" :open="visible" @click.stop)
     p(v-if="!cardsVisible") Removed spaces can be restored here
 
   section.results-section(v-if="items.length")
+    .button-wrap
+      button(v-if="!removeAllConfirmationIsVisible" @click.stop="showRemoveAllConfirmation")
+        img.icon(src="@/assets/remove.svg")
+        span Remove All
+      .remove-confirmation(v-if="removeAllConfirmationIsVisible")
+        p Permanently remove all removed {{removeAllTypeLabel}}?
+        .segmented-buttons
+          button(@click.stop="hideRemoveAllConfirmation")
+            span Cancel
+          button.danger(@click.stop="removeAllPermanent")
+            img.icon(src="@/assets/remove.svg")
+            span Remove All
+
     ul.results-list
       template(v-for="(item in items")
         li(:key="item.id" @click="restore(item)" tabindex="0" v-on:keyup.enter="restore(item)")
           .badge
             img.undo.icon(src="@/assets/undo.svg")
           .name {{item.name}}
-          button(@click.stop="showRemoveConfirmation(item)" v-if="!isRemoveConfirmationVisible(item)")
+          button(v-if="!isRemoveConfirmationVisible(item)" @click.stop="showRemoveConfirmation(item)")
             img.icon(src="@/assets/remove.svg")
 
           .remove-confirmation(v-if="isRemoveConfirmationVisible(item)")
@@ -55,6 +68,7 @@ export default {
   data () {
     return {
       removeConfirmationVisibleForId: '',
+      removeAllConfirmationIsVisible: false,
       cardsVisible: true,
       removedSpaces: [],
       removedCards: [],
@@ -74,9 +88,31 @@ export default {
     },
     currentSpaceName () {
       return this.$store.state.currentSpace.name
+    },
+    removeAllTypeLabel () {
+      if (this.cardsVisible) {
+        return 'cards'
+      } else {
+        return 'spaces'
+      }
     }
   },
   methods: {
+    showRemoveAllConfirmation () {
+      this.removeAllConfirmationIsVisible = true
+    },
+    hideRemoveAllConfirmation () {
+      this.removeAllConfirmationIsVisible = false
+    },
+    removeAllPermanent () {
+      this.items.forEach(item => {
+        if (this.cardsVisible) {
+          this.removeCardPermanent(item)
+        } else {
+          this.removeSpacePermanent(item)
+        }
+      })
+    },
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
       scrollIntoView(element, {
@@ -198,6 +234,10 @@ export default {
     max-height initial
     border-top 1px solid var(--primary)
     padding-top 4px
+    .button-wrap
+      margin-left 4px
+      margin-top 4px
+      margin-bottom 8px
   li
     justify-content space-between
     button
