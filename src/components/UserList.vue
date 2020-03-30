@@ -1,12 +1,10 @@
 <template lang="pug">
 ul.results-list.user-list
   template(v-for="(user in users")
-    p {{user.name}}
-    //- li(:key="user.id" @click.stop="showUserDetails($event, user)" tabindex="0" v-on:keyup.stop.enter="showUserDetails(user)" :class="{ active: userIsSelected(user) }")
-    //-   .name(v-if="spacesIsVisible") {{user.name}}
-    //-   .badge(v-else :style="{background: user.color}")
-    //-     User(:user="user" :isClickable="false")
-    //-     span {{user.name}}
+    li(:key="user.id" @click.stop="selectSpace($event, user)" tabindex="0" v-on:keyup.stop.enter="selectSpace($event, user)" :class="{ active: userIsSelected(user) }")
+      .badge(:style="{background: user.color}")
+        User(:user="user" :isClickable="false")
+        span {{user.name}}
 </template>
 
 <script>
@@ -14,29 +12,20 @@ ul.results-list.user-list
 export default {
   name: 'UserList',
   components: {
-    // UserDetails: () => import('@/components/dialogs/UserDetails.vue'),
+    User: () => import('@/components/User.vue')
   },
   props: {
     users: Array,
     selectedUser: Object
   },
-  // data () {
-  //   return {
-  // userDetailsIsVisible: false,
-  // selectedUser: {},
-  // userDetailsPosition: {}
-  //   }
-  // },
   methods: {
-
+    selectSpace (event, user) {
+      this.$emit('selectSpace', event, user)
+    },
+    userIsSelected (user) {
+      return this.selectedUser.id === user.id
+    }
   }
-  // watch: {
-  //   visible (visible) {
-  //     if (visible) {
-  //       console.log('🍆visible')
-  //     }
-  //   }
-  // }
 }
 </script>
 

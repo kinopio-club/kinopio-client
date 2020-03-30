@@ -28,14 +28,6 @@
         input(placeholder="Search" v-model="userFilter" ref="filterInput")
         button.borderless.clear-input-wrap(@click="clearFilter")
           img.icon(src="@/assets/add.svg")
-
-      //- ul.results-list.user-list
-      //-   template(v-for="(user in usersFiltered")
-      //-     li(:key="user.id" @click.stop="showUserDetails($event, user)" tabindex="0" v-on:keyup.stop.enter="showUserDetails(user)" :class="{ active: userIsSelected(user) }")
-      //-       .name(v-if="spacesIsVisible") {{user.name}}
-      //-       .badge(v-else :style="{background: user.color}")
-      //-         User(:user="user" :isClickable="false")
-      //-         span {{user.name}}
       UserList(:users="usersFiltered" :selectedUser="selectedUser" @selectSpace="showUserDetails")
       UserDetails(:visible="userDetailsIsVisible" :user="selectedUser" :userDetailsPosition="userDetailsPosition")
 </template>
@@ -51,7 +43,6 @@ export default {
   name: 'Favorites',
   components: {
     Loader,
-    User: () => import('@/components/User.vue'),
     UserDetails: () => import('@/components/dialogs/UserDetails.vue'),
     SpaceList,
     UserList
@@ -175,9 +166,6 @@ export default {
       }
       this.selectedUser = user
       this.userDetailsIsVisible = true
-    },
-    userIsSelected (user) {
-      return this.selectedUser.id === user.id
     },
     userDetailsIsNotVisible () {
       this.userDetailsIsVisible = false
