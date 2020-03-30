@@ -222,6 +222,7 @@ export default {
       if (visible) {
         this.updateRemovedCards()
         this.updateRemovedSpaces()
+        this.removeAllConfirmationIsVisible = false
       }
     }
   }
