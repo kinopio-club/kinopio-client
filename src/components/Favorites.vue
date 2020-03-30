@@ -29,13 +29,14 @@
         button.borderless.clear-input-wrap(@click="clearFilter")
           img.icon(src="@/assets/add.svg")
 
-      ul.results-list.user-list
-        template(v-for="(user in usersFiltered")
-          li(:key="user.id" @click.stop="showUserDetails($event, user)" tabindex="0" v-on:keyup.stop.enter="showUserDetails(user)" :class="{ active: userIsSelected(user) }")
-            .name(v-if="spacesIsVisible") {{user.name}}
-            .badge(v-else :style="{background: user.color}")
-              User(:user="user" :isClickable="false")
-              span {{user.name}}
+      //- ul.results-list.user-list
+      //-   template(v-for="(user in usersFiltered")
+      //-     li(:key="user.id" @click.stop="showUserDetails($event, user)" tabindex="0" v-on:keyup.stop.enter="showUserDetails(user)" :class="{ active: userIsSelected(user) }")
+      //-       .name(v-if="spacesIsVisible") {{user.name}}
+      //-       .badge(v-else :style="{background: user.color}")
+      //-         User(:user="user" :isClickable="false")
+      //-         span {{user.name}}
+      UserList(:users="usersFiltered" :selectedUser="selectedUser" @selectSpace="showUserDetails")
       UserDetails(:visible="userDetailsIsVisible" :user="selectedUser" :userDetailsPosition="userDetailsPosition")
 </template>
 
@@ -44,6 +45,7 @@ import fuzzy from 'fuzzy'
 
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
+import UserList from '@/components/UserList.vue'
 
 export default {
   name: 'Favorites',
@@ -51,7 +53,8 @@ export default {
     Loader,
     User: () => import('@/components/User.vue'),
     UserDetails: () => import('@/components/dialogs/UserDetails.vue'),
-    SpaceList
+    SpaceList,
+    UserList
   },
   props: {
     visible: Boolean
