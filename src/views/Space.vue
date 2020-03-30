@@ -3,6 +3,8 @@ main.space(
   :class="{'is-interacting': isInteracting, 'is-painting': isPainting}"
   @mousedown="initInteractions"
   @touchstart="initInteractions"
+  @mouseup="stopInteractions"
+  @touchstop="stopInteractions"
   :style="size"
 )
   svg.connections
@@ -133,6 +135,7 @@ export default {
 
     initInteractions (event) {
       if (this.spaceIsReadOnly) { return }
+      this.$store.commit('generateCardMap')
       startCursor = utils.cursorPositionInViewport(event)
       if (this.$store.getters.shouldScrollAtEdges && !scrollTimer) {
         scrollAreaHeight = Math.max(50, this.viewportHeight / 8)
@@ -326,18 +329,19 @@ export default {
       const connection = cardMap.find(card => {
         const xValues = {
           value: cursor.x,
-          min: card.x,
-          max: (card.x + card.width)
+          min: (card.x - window.scrollX),
+          max: (card.x - window.scrollX + card.width)
         }
         const yValues = {
           value: cursor.y,
-          min: card.y,
-          max: (card.y + card.height)
+          min: (card.y - window.scrollY),
+          max: (card.y - window.scrollY + card.height)
         }
         const inXRange = utils.isBetween(xValues)
         const inYRange = utils.isBetween(yValues)
         return inXRange && inYRange
       })
+
       if (!connection) {
         this.$store.commit('currentConnectionSuccess', {})
         return
