@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDialogs" :class="{'right-side': detailsOnRight}" :style="{top: userDetailsPosition.top}")
+dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDialogs" :class="{'right-side': detailsOnRight}" :style="{top: positionTop}")
 
   //- Other User
   section.user-info(v-if="!isCurrentUser")
@@ -42,6 +42,7 @@ import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
+import utils from '@/utils.js'
 
 export default {
   name: 'UserDetails',
@@ -100,6 +101,13 @@ export default {
       const favoriteUsers = this.$store.state.currentUser.favoriteUsers
       const isFavoriteUser = favoriteUsers.filter(user => user.id === this.user.id)
       return Boolean(isFavoriteUser.length)
+    },
+    positionTop () {
+      if (utils.objectHasKeys(this.userDetailsPosition)) {
+        return this.userDetailsPosition.top
+      } else {
+        return null
+      }
     }
   },
   methods: {
