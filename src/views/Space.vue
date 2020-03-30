@@ -320,19 +320,33 @@ export default {
       this.currentConnectionColor = connectionType.color
     },
 
+    connectors () {
+      const connectorElements = document.querySelectorAll('.connector')
+      const connectors = Array.from(connectorElements)
+      return connectors.map(connector => {
+        const element = connector.getBoundingClientRect()
+        return {
+          cardId: connector.dataset.cardId,
+          x: element.x,
+          y: element.y,
+          width: element.width,
+          height: element.height
+        }
+      })
+    },
+
     checkCurrentConnectionSuccess () {
       const cursor = this.cursor()
-      const cardMap = this.$store.state.cardMap
-      const connection = cardMap.find(card => {
+      const connection = this.connectors().find(connector => {
         const xValues = {
           value: cursor.x,
-          min: card.x,
-          max: (card.x + card.width)
+          min: connector.x,
+          max: (connector.x + connector.width)
         }
         const yValues = {
           value: cursor.y,
-          min: card.y,
-          max: (card.y + card.height)
+          min: connector.y,
+          max: (connector.y + connector.height)
         }
         const inXRange = utils.isBetween(xValues)
         const inYRange = utils.isBetween(yValues)
