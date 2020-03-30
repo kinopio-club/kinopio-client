@@ -321,6 +321,7 @@ export default {
       this.currentConnectionPath = path
       const connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
       this.currentConnectionColor = connectionType.color
+      this.$store.commit('currentConnectionColor', connectionType.color)
     },
 
     checkCurrentConnectionSuccess () {

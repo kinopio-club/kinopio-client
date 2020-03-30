@@ -32,8 +32,11 @@ article(:style="position" :data-card-id="id")
         )
           button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: selectedColor}" tabindex="-1")
             .connected-colors
-              template(v-for="type in connectionTypes")
+              template(v-if="isConnectingTo || isConnectingFrom")
+                .color(:style="{ background: newConnectionColor}")
+              template(v-else v-for="type in connectionTypes")
                 .color(:style="{ background: type.color}")
+
             template(v-if="hasConnections")
               img.connector-icon(src="@/assets/connector-closed.svg")
             template(v-else)
@@ -62,6 +65,7 @@ export default {
     y () { return this.card.y },
     z () { return this.card.z },
     connectionTypes () { return this.$store.getters['currentSpace/cardConnectionTypes'](this.id) },
+    newConnectionColor () { return this.$store.state.currentConnectionColor },
     name () { return this.card.name },
     frameId () { return this.card.frameId },
     position () {

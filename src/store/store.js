@@ -51,6 +51,7 @@ export default new Vuex.Store({
     currentConnectionCursorStart: {},
     connectionDetailsPosition: {}, // x, y
     connectionDetailsIsVisibleForConnectionId: '',
+    currentConnectionColor: '',
 
     // dragging
     currentDraggingCardId: '',
@@ -139,6 +140,7 @@ export default new Vuex.Store({
       state.cardDetailsIsVisibleForCardId = ''
       state.connectionDetailsIsVisibleForConnectionId = ''
     },
+
     isOnline: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.isOnline = value
@@ -240,6 +242,10 @@ export default new Vuex.Store({
     connectionDetailsIsVisibleForConnectionId: (state, connectionId) => {
       utils.typeCheck(connectionId, 'string')
       state.connectionDetailsIsVisibleForConnectionId = connectionId
+    },
+    currentConnectionColor: (state, color) => {
+      utils.typeCheck(color, 'string')
+      state.currentConnectionColor = color
     },
     connectionDetailsPosition: (state, position) => {
       utils.typeCheck(position, 'object')
