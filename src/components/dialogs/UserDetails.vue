@@ -164,9 +164,12 @@ export default {
     }
   },
   watch: {
-    visible (value) {
+    visible (visible) {
       this.closeDialogs()
       this.clearUserSpaces()
+    },
+    userDetailsPosition (position) {
+      this.closeDialogs()
     }
   }
 }
