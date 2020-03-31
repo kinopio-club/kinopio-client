@@ -55,6 +55,7 @@ import templates from '@/spaces/templates.js'
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import privacy from '@/spaces/privacy.js'
+import utils from '@/utils.js'
 
 export default {
   name: 'Header',
@@ -109,8 +110,14 @@ export default {
     importArenaChannelIsVisible () { return this.$store.state.importArenaChannelIsVisible },
     users () {
       const currentUser = this.$store.state.currentUser
-      const spaceUsers = this.$store.state.currentSpace.users
-      const users = spaceUsers.filter(user => user.id !== currentUser.id)
+      const currentSpace = this.$store.state.currentSpace
+      const collaborators = utils.clone(currentSpace.collaborators)
+      let users
+      users = utils.clone(currentSpace.users)
+      if (collaborators) {
+        collaborators.forEach(collaborator => users.push(collaborator))
+      }
+      users = users.filter(user => user.id !== currentUser.id)
       users.unshift(currentUser)
       return users
     },
