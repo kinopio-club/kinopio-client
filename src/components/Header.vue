@@ -111,7 +111,7 @@ export default {
     users () {
       const currentUser = this.$store.state.currentUser
       const currentSpace = this.$store.state.currentSpace
-      const collaborators = utils.clone(currentSpace.collaborators)
+      const collaborators = utils.clone(currentSpace.collaborators || [])
       let users
       users = utils.clone(currentSpace.users)
       if (collaborators) {
