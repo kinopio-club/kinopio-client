@@ -30,8 +30,8 @@ export default {
     canEditSpace: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
       const spaceIsOpen = space.privacy === 'open'
-      const userIsSignedIn = getters.isSignedIn
-      const canEditOpenSpace = spaceIsOpen && userIsSignedIn
+      const currentUserIsSignedIn = getters.isSignedIn
+      const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
       const isSpaceMember = getters.isSpaceMember(space)
       return canEditOpenSpace || isSpaceMember
     },

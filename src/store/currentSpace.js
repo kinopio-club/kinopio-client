@@ -256,13 +256,13 @@ export default {
     saveNewSpace: (context) => {
       const space = utils.clone(context.state)
       const user = context.rootState.currentUser
-      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       cache.saveSpace(space)
       context.dispatch('api/addToQueue', {
         name: 'createSpace',
         body: space
       }, { root: true })
-      utils.updateWindowUrlAndTitle({ space, userIsSignedIn })
+      utils.updateWindowUrlAndTitle({ space, currentUserIsSignedIn })
       context.commit('addUserToSpace', user)
     },
     copyCurrentSpace: (context) => {
@@ -293,12 +293,12 @@ export default {
       })
     },
     getRemoteSpace: async (context, space) => {
-      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const currentSpaceHasUrl = utils.currentSpaceHasUrl(space)
       let remoteSpace
       try {
         context.commit('isLoadingSpace', true, { root: true })
-        if (userIsSignedIn) {
+        if (currentUserIsSignedIn) {
           remoteSpace = await context.dispatch('api/getSpace', space, { root: true })
         } else if (currentSpaceHasUrl) {
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
@@ -382,14 +382,14 @@ export default {
     },
     updateSpace: async (context, updates) => {
       const space = utils.clone(context.state)
-      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       updates.id = space.id
       if (updates.name) {
         const updatedSpace = utils.clone(space)
         updatedSpace.name = updates.name
         utils.updateWindowUrlAndTitle({
           space: updatedSpace,
-          userIsSignedIn
+          currentUserIsSignedIn
         })
       }
       context.commit('updateSpace', updates)
@@ -456,8 +456,8 @@ export default {
     },
     checkIfShouldNotifySignUpToEditOpenSpace: (context, space) => {
       const spaceIsOpen = space.privacy === 'open'
-      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
-      if (spaceIsOpen && !userIsSignedIn) {
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      if (spaceIsOpen && !currentUserIsSignedIn) {
         context.commit('notifySignUpToEditOpenSpace', true, { root: true })
       } else {
         context.commit('notifySignUpToEditOpenSpace', false, { root: true })

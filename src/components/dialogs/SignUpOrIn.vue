@@ -215,10 +215,10 @@ export default {
         this.$store.commit('triggerSpaceDetailsVisible')
         const currentSpace = this.$store.state.currentSpace
         const currentUser = this.$store.state.currentUser
-        const userIsSignedIn = this.$store.getters['currentUser/isSignedIn']
+        const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
         utils.updateWindowUrlAndTitle({
           space: currentSpace,
-          userIsSignedIn
+          currentUserIsSignedIn
         })
         this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
         this.$store.commit('currentSpace/addUserToSpace', currentUser)

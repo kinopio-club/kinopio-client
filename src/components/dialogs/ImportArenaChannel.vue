@@ -89,7 +89,7 @@ export default {
   },
 
   computed: {
-    userIsSignedIn () {
+    currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     },
     authorizeUrl () {

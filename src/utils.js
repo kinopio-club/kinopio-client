@@ -379,10 +379,10 @@ export default {
     }
   },
 
-  updateWindowUrlAndTitle ({ space, shouldUpdateUrl, userIsSignedIn }) {
+  updateWindowUrlAndTitle ({ space, shouldUpdateUrl, currentUserIsSignedIn }) {
     const title = this.title(space)
     let url = ''
-    if (shouldUpdateUrl || userIsSignedIn) {
+    if (shouldUpdateUrl || currentUserIsSignedIn) {
       url = this.url(space)
     }
     url = '/' + url

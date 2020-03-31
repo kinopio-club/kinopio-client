@@ -101,7 +101,7 @@ export default {
     currentSpace () { return this.$store.state.currentSpace },
     exportScope () { return 'space' },
     isManySpaces () { return Boolean(this.spaces.length >= 5) },
-    userIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     shouldShowInExplore () {
       const privacy = this.$store.state.currentSpace.privacy
       if (privacy === 'private') { return false }

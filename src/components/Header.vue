@@ -35,7 +35,7 @@ header
     .bottom
       ResetPassword
       // Sign Up or In
-      .button-wrap(v-if="!userIsSignedIn && isOnline")
+      .button-wrap(v-if="!currentUserIsSignedIn && isOnline")
         button(@click.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}")
           span Sign Up or In
           Loader(:visible="loadingSignUpOrIn")
@@ -130,7 +130,7 @@ export default {
         return `Space ${id}`
       }
     },
-    userIsSignedIn () {
+    currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     },
     isLoadingSpace () {

@@ -34,7 +34,7 @@ aside.notifications(@click="closeAllDialogs")
     p Space could not be found, or is private
     .row
       button(@click.stop="triggerSpaceDetailsVisible") Your Spaces
-      button(v-if="!userIsSignedIn" @click.stop="triggerSignUpOrInIsVisible") Sign Up or In
+      button(v-if="!currentUserIsSignedIn" @click.stop="triggerSignUpOrInIsVisible") Sign Up or In
 
   .persistent-item(v-if="notifySpaceIsRemoved")
     p This space has been removed
@@ -104,7 +104,7 @@ export default {
     notifySignUpToEditOpenSpace () { return this.$store.state.notifySignUpToEditOpenSpace },
     notifySpaceIsOpenAndEditable () { return this.$store.state.notifySpaceIsOpenAndEditable },
     notifyAccessFavorites () { return this.$store.state.notifyAccessFavorites },
-    userIsSignedIn () {
+    currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     }
   },

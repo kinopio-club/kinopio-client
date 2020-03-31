@@ -30,8 +30,8 @@ const squashQueue = (queue) => {
 
 const shouldRequest = () => {
   const isOnline = window.navigator.onLine
-  const userIsSignedIn = cache.user().apiKey
-  if (isOnline && userIsSignedIn) {
+  const currentUserIsSignedIn = cache.user().apiKey
+  if (isOnline && currentUserIsSignedIn) {
     return true
   }
 }
@@ -84,8 +84,8 @@ const self = {
     addToQueue: (context, { name, body }) => {
       body = utils.clone(body)
       body.spaceId = context.rootState.currentSpace.id
-      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
-      if (!userIsSignedIn) { return }
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      if (!currentUserIsSignedIn) { return }
       let queue = cache.queue()
       const request = {
         name,
@@ -364,9 +364,9 @@ const self = {
 
     updateArenaAccessToken: async (context, arenaReturnedCode) => {
       try {
-        const userIsSignedIn = cache.user().apiKey
+        const currentUserIsSignedIn = cache.user().apiKey
         let userId
-        if (userIsSignedIn) {
+        if (currentUserIsSignedIn) {
           userId = cache.user().id
         }
         const body = {
