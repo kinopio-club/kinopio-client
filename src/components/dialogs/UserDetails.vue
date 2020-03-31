@@ -29,10 +29,14 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
       input.name(placeholder="What's your name?" v-model="userName" name="Name")
   section(v-if="isCurrentUser")
     .button-wrap
-      button(@click.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}") Settings
+      button(@click.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}")
+        span Settings
       UserSettings(:user="user" :visible="userSettingsIsVisible" @removeUser="signOut")
-    button(v-if="isSignedIn" @click="signOut") Sign Out
-    button(v-else @click="triggerSignUpOrInIsVisible") Sign Up or In
+    button(v-if="isSignedIn" @click="signOut")
+      img.icon.moon(src="@/assets/moon.svg")
+      span Sign Out
+    button(v-else @click="triggerSignUpOrInIsVisible")
+      span Sign Up or In
 
   //- Collaborator
   section(v-if="isCollaborator")
@@ -214,6 +218,8 @@ export default {
     margin-left 6px
   .error-message
     margin-top 10px
+  .moon
+    vertical-align -2px
 
 .user-info
   display: flex
