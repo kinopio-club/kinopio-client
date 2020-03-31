@@ -67,13 +67,11 @@ export default new Router({
         const spaceId = urlParams.get('spaceId')
         const collaboratorKey = urlParams.get('collaboratorKey')
         if (!spaceId || !collaboratorKey) { return }
-        console.log('🌸🌸🌸🌸🌸🌸 invite to space w collabkey', spaceId, collaboratorKey)
         // todo: fix wont call if not signed in
         store.dispatch('api/addSpaceCollaborator', { spaceId, collaboratorKey })
           .then(response => {
-            console.log('🍆', response)
-            // switch space to response.id , response.url
-            store.dispatch('currentSpace/changeSpace', { response, isRemote: true })
+            const space = response
+            store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
           }).catch(error => {
             console.error('💣💣💣', error)
             if (error.status === 401) {
