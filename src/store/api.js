@@ -298,8 +298,9 @@ const self = {
       if (!shouldRequest()) { return }
       const userId = context.rootState.currentUser.id
       try {
-        const body = { userId, spaceId, collaboratorKey }
-        const options = requestOptions({ body, method: 'PATCH', space: context.rootState.currentSpace })
+        const body = { userId, spaceId }
+        const space = { collaboratorKey: collaboratorKey }
+        const options = requestOptions({ body, method: 'PATCH', space })
         const response = await fetch(`${host}/space/collaborator`, options)
         return normalizeResponse(response)
       } catch (error) {
