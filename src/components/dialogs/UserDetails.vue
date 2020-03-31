@@ -17,7 +17,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
       label(:class="{active: isFavoriteUser}" @click.prevent="toggleIsFavoriteUser" @keydown.stop.enter="toggleIsFavoriteUser")
         input(type="checkbox" v-model="isFavoriteUser")
         span Favorite
-    .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
+    .badge.danger.error-message(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
 
   //- Current User
   section(v-if="isCurrentUser")
@@ -38,7 +38,6 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
   section(v-if="isCollaborator")
     template(v-if="isCurrentUser")
       button
-        //- todo leave icon (waving)
         img.icon(src="@/assets/remove.svg")
         span Leave Space
         //- if removing yourself , load last space
@@ -213,7 +212,7 @@ export default {
     right 8px
   .name
     margin-left 6px
-  .danger
+  .error-message
     margin-top 10px
 
 .user-info

@@ -3,7 +3,7 @@ dialog.narrow(v-if="visible" :open="visible" @click.stop)
   section
     p User Settings
   section
-    button(v-if="!removeAllConfirmationVisible" @click="toggleRemoveAllConfirmationVisible")
+    button.danger(v-if="!removeAllConfirmationVisible" @click="toggleRemoveAllConfirmationVisible")
       img.icon(src="@/assets/remove.svg")
       span Remove All Your Data
     span(v-if="removeAllConfirmationVisible")
