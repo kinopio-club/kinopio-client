@@ -34,6 +34,18 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
     button(v-if="isSignedIn" @click="signOut") Sign Out
     button(v-else @click="triggerSignUpOrInIsVisible") Sign Up or In
 
+  //- Collaborator
+  section(v-if="isCollaborator")
+    template(v-if="isCurrentUser")
+      button
+        //- todo leave icon (waving)
+        img.icon(src="@/assets/remove.svg")
+        span Leave Space
+        //- if removing yourself , load last space
+    template(v-if="!isCurrentUser")
+      button
+        img.icon(src="@/assets/remove.svg")
+        span Remove Collaborator
 </template>
 
 <script>
@@ -101,6 +113,13 @@ export default {
       const favoriteUsers = this.$store.state.currentUser.favoriteUsers
       const isFavoriteUser = favoriteUsers.filter(user => user.id === this.user.id)
       return Boolean(isFavoriteUser.length)
+    },
+    isCollaborator () {
+      const currentSpace = this.$store.state.currentSpace
+      const collaborators = utils.clone(currentSpace.collaborators || [])
+      return Boolean(collaborators.find(collaborator => {
+        return collaborator.id === this.user.id
+      }))
     },
     positionTop () {
       if (utils.objectHasKeys(this.userDetailsPosition)) {
