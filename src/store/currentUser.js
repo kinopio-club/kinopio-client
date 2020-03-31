@@ -17,7 +17,8 @@ export default {
     apiKey: '',
     arenaAccessToken: '',
     favoriteUsers: [],
-    favoriteSpaces: []
+    favoriteSpaces: [],
+    collaborators: []
   },
   getters: {
     isCurrentUser: (state) => (user) => {
@@ -41,18 +42,22 @@ export default {
       return state.id === connection.userId
     },
     isSpaceMember: (state, getters, rootState) => (space) => {
-      // todo add is collaborator check
       space = space || rootState.currentSpace
       let userIsInSpace
+      let userIsCollaborator
       if (space.users) {
-        userIsInSpace = space.users.find(user => {
+        userIsInSpace = Boolean(space.users.find(user => {
           return user.id === state.id
-        })
+        }))
       } else {
         userIsInSpace = space.userId === state.id
       }
-
-      return Boolean(userIsInSpace)
+      if (space.collaborators) {
+        userIsCollaborator = Boolean(space.collaborators.find(collaborator => {
+          return collaborator.id === state.id
+        }))
+      }
+      return userIsCollaborator || userIsInSpace
     }
   },
   mutations: {
