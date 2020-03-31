@@ -460,6 +460,7 @@ code
     background-size cover
     display inline-block
     vertical-align middle
+    position relative
   &:hover,
   &:focus
     outline none

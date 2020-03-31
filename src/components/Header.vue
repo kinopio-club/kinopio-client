@@ -217,17 +217,16 @@ header
     > *
       pointer-events all
   nav
-    margin-right 6px
-    flex-grow 2
-  .users
-      margin-right 6px
-
+    display flex
   .logo-about
     position relative
     display inline-block
     margin-right 6px
   .logo
     cursor pointer
+    display flex
+    > .logo-image
+      min-width 45px
     img
       vertical-align middle
     .down-arrow
@@ -244,6 +243,7 @@ header
         transform translateY(5px)
   .space-details-wrap
     max-width 250px
+    margin-top 8px
     @media(max-width 414px)
       width calc(100vw - 200px)
     button
@@ -265,6 +265,13 @@ header
   .top
     display flex
     flex-direction row-reverse
+    > .users
+      padding-right 6px
+      max-width 40vw
+      display flex
+      flex-wrap wrap
+      justify-content flex-end
+
   .bottom
     margin-top 5px
     display flex
