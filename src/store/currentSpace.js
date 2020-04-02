@@ -54,7 +54,13 @@ export default {
       state.collaborators = state.collaborators.filter(user => {
         return user.id !== oldUser.id
       })
-      cache.updateSpace('collaborators', state.collaborators, state.id)
+      const updatedSpace = utils.clone(state)
+      // same as updateSpace() to force reactivity
+      const updates = Object.keys(updatedSpace)
+      updates.forEach(key => {
+        Vue.set(state, key, updatedSpace[key])
+        cache.updateSpace(key, state[key], state.id)
+      })
     },
 
     // Space
