@@ -82,6 +82,8 @@ export default {
 .invite-others-to-edit
   left initial
   right 8px
+  max-height calc(100vh - 180px)
+  overflow auto
   .textarea
     margin-top 10px
 </style>
