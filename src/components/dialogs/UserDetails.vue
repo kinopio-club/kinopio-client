@@ -40,7 +40,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
 
   //- Collaborator
   section(v-if="isCollaborator")
-    template(v-if="isCurrentUser")
+    template(v-if="isCurrentUser && !isSpaceUser")
       button(@click.stop="removeCollaborator")
         img.icon(src="@/assets/remove.svg")
         span Leave Space
@@ -113,14 +113,22 @@ export default {
     },
     isFavoriteUser () {
       const favoriteUsers = this.$store.state.currentUser.favoriteUsers
-      const isFavoriteUser = favoriteUsers.filter(user => user.id === this.user.id)
-      return Boolean(isFavoriteUser.length)
+      const isFavoriteUser = Boolean(favoriteUsers.find(user => {
+        return user.id === this.user.id
+      }))
+      return isFavoriteUser
     },
     isCollaborator () {
       const currentSpace = this.$store.state.currentSpace
       const collaborators = utils.clone(currentSpace.collaborators || [])
       return Boolean(collaborators.find(collaborator => {
         return collaborator.id === this.user.id
+      }))
+    },
+    isSpaceUser () {
+      const currentSpace = this.$store.state.currentSpace
+      return Boolean(currentSpace.users.find(user => {
+        return user.id === this.user.id
       }))
     },
     positionTop () {
