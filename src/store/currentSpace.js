@@ -323,6 +323,7 @@ export default {
         }
         if (error.status === 401) {
           context.commit('notifySpaceNotFound', true, { root: true })
+          context.dispatch('removeLocalSpaceIfUserIsRemoved', space)
         }
         if (error.status === 500) {
           context.commit('notifyConnectionError', true, { root: true })
@@ -342,6 +343,16 @@ export default {
         context.commit('notifySpaceIsOpenAndEditable', true, { root: true })
       }
       return utils.normalizeRemoteSpace(remoteSpace)
+    },
+    removeLocalSpaceIfUserIsRemoved: (context, space) => {
+      const cachedSpace = cache.space(space.id)
+      const userIsRemovedFromSpace = utils.objectHasKeys(cachedSpace)
+      if (userIsRemovedFromSpace) {
+        context.commit('currentUser/resetLastSpaceId', null, { root: true })
+        cache.removeSpacePermanent(space)
+        const emptySpace = { id: space.id, cards: [], connections: [] }
+        context.commit('restoreSpace', emptySpace)
+      }
     },
     updateSpacePageSize: (context) => {
       Vue.nextTick(() => {

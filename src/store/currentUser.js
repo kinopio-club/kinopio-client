@@ -73,6 +73,16 @@ export default {
       state.lastSpaceId = spaceId
       cache.updateUser('lastSpaceId', spaceId)
     },
+    resetLastSpaceId: (state) => {
+      const spaces = cache.getAllSpaces()
+      const lastSpace = spaces[1]
+      if (lastSpace) {
+        state.lastSpaceId = lastSpace.id
+      } else {
+        state.lastSpaceId = ''
+      }
+      cache.updateUser('lastSpaceId', state.lastSpaceId)
+    },
     lastReadNewStuffId: (state, newStuffId) => {
       state.lastReadNewStuffId = newStuffId
       cache.updateUser('lastReadNewStuffId', newStuffId)
