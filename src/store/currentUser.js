@@ -185,14 +185,11 @@ export default {
       remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
       if (remoteUser.updatedAt > cachedUser.cacheDate) { console.log('🌸 Restore user from remote', remoteUser) }
       context.commit('updateUser', remoteUser)
-      context.dispatch('restoreUserFavorites', remoteUser)
     },
-    restoreUserFavorites: async (context, cachedUser) => {
-      context.commit('isLoadingUserFavorites', true, { root: true })
+    restoreUserFavorites: async (context) => {
       const favorites = await context.dispatch('api/getUserFavorites', null, { root: true })
       context.commit('favoriteUsers', favorites.favoriteUsers)
       context.commit('favoriteSpaces', favorites.favoriteSpaces)
-      context.commit('isLoadingUserFavorites', false, { root: true })
     },
     addFavorite: (context, { type, item }) => {
       context.commit('notifyAccessFavorites', true, { root: true })

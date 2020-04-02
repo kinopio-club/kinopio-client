@@ -47,7 +47,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
         img.icon(src="@/assets/add.svg")
     SpaceList(:spaces="spacesFiltered" @selectSpace="changeSpace")
 
-  Favorites(:visible="favoritesIsVisible")
+  Favorites(:visible="favoritesIsVisible" :loading="favoritesIsLoading")
 
 </template>
 
@@ -86,7 +86,9 @@ export default {
       filteredSpaces: [],
       privacyPickerIsVisible: false,
       favoritesIsVisible: false,
-      favoriteUsersIsVisible: false
+      favoriteUsersIsVisible: false,
+      favoritesIsLoading: false,
+      hasUpdatedFavorites: false
     }
   },
   created () {
@@ -225,6 +227,14 @@ export default {
     },
     clearFilter () {
       this.filter = ''
+    },
+    async updateFavorites () {
+      if (this.favoritesIsLoading) { return }
+      if (this.hasUpdatedFavorites) { return }
+      this.favoritesIsLoading = true
+      this.hasUpdatedFavorites = true
+      await this.$store.dispatch('currentUser/restoreUserFavorites')
+      this.favoritesIsLoading = false
     }
   },
   watch: {
@@ -234,6 +244,7 @@ export default {
         this.updateWithRemoteSpaces()
         this.closeDialogs()
         this.clearFilter()
+        this.updateFavorites()
       } else {
         this.favoritesIsVisible = false
       }

@@ -48,7 +48,8 @@ export default {
     UserList
   },
   props: {
-    visible: Boolean
+    visible: Boolean,
+    loading: Boolean
   },
   data () {
     return {
@@ -64,7 +65,6 @@ export default {
   computed: {
     favoriteUsers () { return this.$store.state.currentUser.favoriteUsers },
     favoriteSpaces () { return this.$store.state.currentUser.favoriteSpaces },
-    loading () { return this.$store.state.isLoadingUserFavorites },
     currentSpace () { return this.$store.state.currentSpace },
     isManySpaces () { return Boolean(this.favoriteSpaces.length >= 5) },
     isManyUsers () { return Boolean(this.favoriteUsers.length >= 5) },
@@ -175,9 +175,6 @@ export default {
   watch: {
     visible (visible) {
       this.userDetailsIsNotVisible()
-      // todo if (visible) {
-      //   this.$store.dispatch('currentUser/restoreUserFavorites', currentUser)
-      // }
     }
   }
 
