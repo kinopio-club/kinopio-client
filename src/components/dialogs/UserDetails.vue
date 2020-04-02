@@ -41,12 +41,11 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
   //- Collaborator
   section(v-if="isCollaborator")
     template(v-if="isCurrentUser")
-      button
+      button(@click.stop="removeCollaborator")
         img.icon(src="@/assets/remove.svg")
         span Leave Space
-        //- if removing yourself , load last space
     template(v-if="!isCurrentUser")
-      button
+      button(@click.stop="removeCollaborator")
         img.icon(src="@/assets/remove.svg")
         span Remove Collaborator
 </template>
@@ -191,6 +190,11 @@ export default {
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+    },
+    removeCollaborator () {
+      const user = this.user
+      this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
+      this.$store.commit('closeAllDialogs')
     }
   },
   watch: {

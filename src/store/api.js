@@ -309,17 +309,20 @@ const self = {
         console.error(error)
       }
     },
-    // removeSpaceCollaborator: async (context, {spaceId, userId}) => {
-    //   if (!shouldRequest()) { return }
-    //   try {
-    //     const body = {spaceId, userId }
-    //     const options = await context.dispatch('requestOptions', { body, method: 'DELETE', space: context.rootState.currentSpace })
-    //     const response = await fetch(`${host}/space/collaborator`, options)
-    //     return normalizeResponse(response)
-    //   } catch (error) {
-    //     console.error(error)
-    //   }
-    // },
+    removeSpaceCollaborator: async (context, { space, user }) => {
+      if (!shouldRequest()) { return }
+      try {
+        const body = {
+          spaceId: space.id,
+          userId: user.id
+        }
+        const options = await context.dispatch('requestOptions', { body, method: 'DELETE', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/space/collaborator`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
 
     // Card
 

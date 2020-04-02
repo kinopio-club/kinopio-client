@@ -49,6 +49,13 @@ export default {
       })
       cache.updateSpace('users', state.users, state.id)
     },
+    removeCollaboratorFromSpace: (state, oldUser) => {
+      utils.typeCheck(oldUser, 'object')
+      state.collaborators = state.collaborators.filter(user => {
+        return user.id !== oldUser.id
+      })
+      cache.updateSpace('collaborators', state.collaborators, state.id)
+    },
 
     // Space
 
@@ -462,6 +469,13 @@ export default {
       } else {
         context.commit('notifySignUpToEditOpenSpace', false, { root: true })
       }
+    },
+    removeCollaboratorFromSpace: async (context, user) => {
+      const space = utils.clone(context.state)
+      const userName = user.name || 'User'
+      await context.dispatch('api/removeSpaceCollaborator', { space, user }, { root: true })
+      context.commit('removeCollaboratorFromSpace', user)
+      context.commit('addNotification', { message: `${userName} removed from space`, type: 'success' }, { root: true })
     },
 
     // Cards
