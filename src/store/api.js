@@ -296,6 +296,16 @@ const self = {
         console.error(error)
       }
     },
+    getSpaceCollaboratorKey: async (context, space) => {
+      if (!shouldRequest()) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/space/${space.id}/collaborator-key`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
     addSpaceCollaborator: async (context, { spaceId, collaboratorKey }) => {
       if (!shouldRequest()) { return }
       const userId = context.rootState.currentUser.id

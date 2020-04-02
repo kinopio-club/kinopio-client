@@ -67,11 +67,18 @@ export default {
         url: this.url
       }
       navigator.share(data)
+    },
+    async updateCollaboratorKey () {
+      const space = this.$store.state.currentSpace
+      const collaboratorKey = await this.$store.dispatch('api/getSpaceCollaboratorKey', space)
+      console.log(collaboratorKey)
+      this.$store.commit('currentSpace/updateSpace', { collaboratorKey })
     }
   },
   watch: {
     visible (visible) {
       this.urlIsCopied = false
+      this.updateCollaboratorKey()
     }
   }
 }
