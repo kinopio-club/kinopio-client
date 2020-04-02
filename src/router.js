@@ -67,22 +67,18 @@ export default new Router({
         const spaceId = urlParams.get('spaceId')
         const collaboratorKey = urlParams.get('collaboratorKey')
         if (!spaceId || !collaboratorKey) { return }
-        // todo: fix wont call if not signed in
+        // todo: fix wont call if not signed in (shouldn't. anons can only view)
         store.dispatch('api/addSpaceCollaborator', { spaceId, collaboratorKey })
           .then(response => {
-            const space = response
-            store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+            store.commit('spaceUrlToLoad', spaceId)
           }).catch(error => {
-            console.error('💣💣💣', error)
+            console.error(error)
             if (error.status === 401) {
               store.commit('addNotification', { message: 'Space could not be found, or your invite was invalid', type: 'danger' })
             } else {
               store.commit('addNotification', { message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
             }
           })
-        // , error => {
-        // handle error here
-        // })
         next()
       }
 
