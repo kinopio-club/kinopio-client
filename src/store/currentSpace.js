@@ -306,6 +306,7 @@ export default {
       })
     },
     getRemoteSpace: async (context, space) => {
+      const anonymousCollaboratorKey = context.rootState.anonymousCollaboratorKey
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const currentSpaceHasUrl = utils.currentSpaceHasUrl(space)
       let remoteSpace
@@ -313,6 +314,9 @@ export default {
         context.commit('isLoadingSpace', true, { root: true })
         if (currentUserIsSignedIn) {
           remoteSpace = await context.dispatch('api/getSpace', space, { root: true })
+        } else if (anonymousCollaboratorKey) {
+          space.collaboratorKey = anonymousCollaboratorKey
+          remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
         } else if (currentSpaceHasUrl) {
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
         }

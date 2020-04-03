@@ -64,24 +64,29 @@ export default new Router({
       beforeEnter: (to, from, next) => {
         store.dispatch('currentUser/init')
         const urlParams = new URLSearchParams(window.location.search)
+        const apiKey = store.state.currentUser.apiKey
         const spaceId = urlParams.get('spaceId')
         const collaboratorKey = urlParams.get('collaboratorKey')
         if (!spaceId || !collaboratorKey) { return }
-        // todo: fix wont call if not signed in (shouldn't. anons can only view)
-        store.dispatch('api/addSpaceCollaborator', { spaceId, collaboratorKey })
-          .then(response => {
-            store.commit('spaceUrlToLoad', spaceId)
-          }).catch(error => {
-            console.error(error)
-            if (error.status === 401) {
-              store.commit('addNotification', { message: 'Space could not be found, or your invite was invalid', type: 'danger' })
-            } else {
-              store.commit('addNotification', { message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
-            }
-          })
+        store.commit('isLoadingSpace', true)
+        if (apiKey) {
+          store.dispatch('api/addSpaceCollaborator', { spaceId, collaboratorKey })
+            .then(response => {
+              store.commit('spaceUrlToLoad', spaceId)
+            }).catch(error => {
+              console.error(error)
+              if (error.status === 401) {
+                store.commit('addNotification', { message: 'Space could not be found, or your invite was invalid', type: 'danger' })
+              } else {
+                store.commit('addNotification', { message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
+              }
+            })
+        } else {
+          store.commit('anonymousCollaboratorKey', collaboratorKey)
+          store.commit('spaceUrlToLoad', spaceId)
+        }
         next()
       }
-
     }, {
       path: '/:space',
       component: Space,

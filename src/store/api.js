@@ -255,8 +255,8 @@ const self = {
       const isOffline = !window.navigator.onLine
       if (isOffline) { return }
       try {
-        console.log('🛬 getting remote space anonymously', space.id)
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        console.log('🛬 getting remote space anonymously', space.id, space.collaboratorKey)
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: space })
         const response = await utils.timeout(40000, fetch(`${host}/space/${space.id}`, options))
         return normalizeResponse(response)
       } catch (error) {
