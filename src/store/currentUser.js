@@ -197,7 +197,11 @@ export default {
       context.commit('updateUser', remoteUser)
     },
     restoreUserFavorites: async (context) => {
-      const favorites = await context.dispatch('api/getUserFavorites', null, { root: true })
+      let favorites = {
+        favoriteUsers: [],
+        favoriteSpaces: []
+      }
+      favorites = await context.dispatch('api/getUserFavorites', null, { root: true }) || favorites
       context.commit('favoriteUsers', favorites.favoriteUsers)
       context.commit('favoriteSpaces', favorites.favoriteSpaces)
     },
