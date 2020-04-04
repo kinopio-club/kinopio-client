@@ -222,9 +222,9 @@ export default {
         })
         this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
         this.$store.commit('currentSpace/addUserToSpace', currentUser)
-        this.$store.commit('notifySignUpToEditOpenSpace', false, { root: true })
+        this.$store.commit('notifySignUpToEditOpenSpace', false)
         this.$store.dispatch('currentSpace/checkIfShouldNotifyReadOnly')
-        this.$store.commit('notifyNewUser', false, { root: true })
+        this.$store.commit('notifyNewUser', false)
       } else {
         await this.handleErrors(result)
       }

@@ -81,6 +81,7 @@ export default new Vuex.Store({
     notifySignUpToEditOpenSpace: false,
     notifySpaceIsOpenAndEditable: false,
     notifyAccessFavorites: false,
+    notifySignUpToEditInvitedSpace: false,
 
     // filters
     filteredConnectionTypeIds: [],
@@ -339,6 +340,7 @@ export default new Vuex.Store({
       state.notifySignUpToEditOpenSpace = false
       state.notifySpaceIsOpenAndEditable = false
       state.notifyAccessFavorites = false
+      state.notifySignUpToEditInvitedSpace = false
     },
     notifyReadOnly: (state, value) => {
       utils.typeCheck(value, 'boolean')
@@ -374,6 +376,10 @@ export default new Vuex.Store({
     notifyAccessFavorites: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.notifyAccessFavorites = value
+    },
+    notifySignUpToEditInvitedSpace: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.notifySignUpToEditInvitedSpace = value
     },
 
     // filters

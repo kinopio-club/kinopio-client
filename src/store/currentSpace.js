@@ -380,6 +380,7 @@ export default {
         context.commit('restoreSpace', utils.normalizeSpace(remoteSpace))
         context.dispatch('history/playback', null, { root: true })
         context.dispatch('checkIfShouldNotifySignUpToEditOpenSpace', remoteSpace)
+        context.dispatch('checkIfShouldNotifySignUpToEditInvitedSpace', remoteSpace)
         utils.updateWindowUrlAndTitle({
           space: remoteSpace,
           shouldUpdateUrl: true
@@ -485,6 +486,15 @@ export default {
         context.commit('notifySignUpToEditOpenSpace', true, { root: true })
       } else {
         context.commit('notifySignUpToEditOpenSpace', false, { root: true })
+      }
+    },
+    checkIfShouldNotifySignUpToEditInvitedSpace: (context, space) => {
+      const spaceIsOpen = space.privacy === 'open'
+      const currentUserIsInvitedButCannotEditSpace = context.rootGetters['currentUser/isInvitedButCannotEditSpace'](space)
+      if (!spaceIsOpen && currentUserIsInvitedButCannotEditSpace) {
+        context.commit('notifySignUpToEditInvitedSpace', true, { root: true })
+      } else {
+        context.commit('notifySignUpToEditInvitedSpace', false, { root: true })
       }
     },
     removeCollaboratorFromSpace: async (context, user) => {

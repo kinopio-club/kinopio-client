@@ -22,6 +22,10 @@ aside.notifications(@click="closeAllDialogs")
     .row
       button(@click.stop="triggerSignUpOrInIsVisible") Sign Up or In
 
+  .persistent-item.success(v-if="notifySignUpToEditInvitedSpace")
+    p sign up to edit this space you were invited to…
+    .row
+      button(@click.stop="triggerSignUpOrInIsVisible") Sign Up or In
   .persistent-item(v-if="notifyReadOnly" ref="readOnly" :class="{'notification-jiggle': notifyReadOnlyJiggle}")
     p You can't edit this space, but you can save your own copy
     .row
@@ -104,6 +108,7 @@ export default {
     notifySignUpToEditOpenSpace () { return this.$store.state.notifySignUpToEditOpenSpace },
     notifySpaceIsOpenAndEditable () { return this.$store.state.notifySpaceIsOpenAndEditable },
     notifyAccessFavorites () { return this.$store.state.notifyAccessFavorites },
+    notifySignUpToEditInvitedSpace () { return this.$store.state.notifySignUpToEditInvitedSpace },
     currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     }
