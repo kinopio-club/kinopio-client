@@ -8,6 +8,10 @@ export default {
       window.localStorage[key] = JSON.stringify(value)
     } catch (error) {
       console.warn('storeLocal Could not save to localStorage')
+      // TODO
+      // if user is signed in (has apikey), transparently clean ls by deleting removed cards in currentspace, and all other spaces
+      // else, manually show a warning about needing to sign up or in because the browser is out of localstorage
+      // delete this dom node manually during sign up/in in component
     }
   },
   getLocal (key) {
