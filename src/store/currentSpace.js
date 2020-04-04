@@ -368,13 +368,7 @@ export default {
     loadSpace: async (context, space) => {
       const emptySpace = { id: space.id, cards: [], connections: [] }
       const cachedSpace = cache.space(space.id)
-      // reset notifications
-      context.commit('notifySpaceNotFound', false, { root: true })
-      context.commit('notifyConnectionError', false, { root: true })
-      context.commit('notifySignUpToEditOpenSpace', false, { root: true })
-      context.commit('notifySpaceIsOpenAndEditable', false, { root: true })
-      context.commit('notifyAccessFavorites', false, { root: true })
-
+      context.commit('clearAllNotifications', null, { root: true })
       // restore local
       context.commit('restoreSpace', emptySpace)
       context.commit('restoreSpace', utils.normalizeSpace(cachedSpace))

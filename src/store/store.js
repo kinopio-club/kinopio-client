@@ -333,6 +333,13 @@ export default new Vuex.Store({
     removeNotification: (state) => {
       state.notifications.shift()
     },
+    clearAllNotifications: (state) => {
+      state.notifySpaceNotFound = false
+      state.notifyConnectionError = false
+      state.notifySignUpToEditOpenSpace = false
+      state.notifySpaceIsOpenAndEditable = false
+      state.notifyAccessFavorites = false
+    },
     notifyReadOnly: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.notifyReadOnly = value
