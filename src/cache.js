@@ -156,6 +156,27 @@ export default {
   },
   clearQueue () {
     this.storeLocal('queue', [])
+  },
+
+  // Spaces invited to while not signed up or in
+
+  invitedSpacesNotSignedIn () {
+    return this.getLocal('invitedSpacesNotSignedIn') || []
+  },
+  addToInvitedSpacesNotSignedIn (space) {
+    space = {
+      id: space.id,
+      name: space.name,
+      users: space.users,
+      collaboratorKey: space.collaboratorKey
+    }
+    let invitedSpaces = this.invitedSpacesNotSignedIn()
+    invitedSpaces = invitedSpaces.filter(invitedSpace => {
+      return invitedSpace.id !== space.id
+    })
+    invitedSpaces.push(space)
+    console.log('🎽invitedspaces', invitedSpaces)
+    this.storeLocal('invitedSpacesNotSignedIn', invitedSpaces)
   }
 
 }
