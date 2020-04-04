@@ -39,7 +39,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
       span Sign Up or In
 
   //- Collaborator
-  section(v-if="isCollaborator")
+  section(v-if="isCollaborator && currentUserIsSpaceMember")
     template(v-if="isCurrentUser && !isSpaceUser")
       button(@click.stop="removeCollaborator")
         img.icon(src="@/assets/remove.svg")
@@ -130,6 +130,9 @@ export default {
       return Boolean(currentSpace.users.find(user => {
         return user.id === this.user.id
       }))
+    },
+    currentUserIsSpaceMember () {
+      return this.$store.getters['currentUser/isSpaceMember']()
     },
     positionTop () {
       if (utils.objectHasKeys(this.userDetailsPosition)) {
