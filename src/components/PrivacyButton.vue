@@ -1,6 +1,6 @@
 <template lang="pug">
-.button-wrap.privacy-button(v-if="isSpaceMember")
-  button(@click.stop="togglePrivacyPickerIsVisible" :class="{ active: privacyPickerIsVisible }")
+.button-wrap.privacy-button(v-if="isSpaceMember || isInvitedButCannotEditSpace")
+  button(@click.stop="togglePrivacyPickerIsVisible" :disabled="isInvitedButCannotEditSpace" :class="{ active: privacyPickerIsVisible }")
     template(v-if="showIconOnly")
       img.icon(:src="privacyIcon(privacyState).path" :class="privacyState.name")
     template(v-else)
@@ -33,6 +33,7 @@ export default {
   },
   computed: {
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
+    isInvitedButCannotEditSpace () { return this.$store.getters['currentUser/isInvitedButCannotEditSpace']() },
     spacePrivacy () { return this.$store.state.currentSpace.privacy },
     privacyState () {
       return privacy.states().find(state => {
