@@ -20,11 +20,18 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
       img.icon(src="@/assets/remove.svg")
       span Remove
 
-    p(v-if="!canEditConnection")
+    p.edit-message(v-if="!canEditConnection")
       span.badge.info(v-if="spacePrivacyIsOpen")
         img.icon.open(src="@/assets/open.svg")
         span In open spaces, you can only edit connections you've made
-      span.badge.info(v-if="spacePrivacyIsClosed")
+      template(v-else-if="isInvitedButCannotEditSpace")
+        span.badge.info
+          img.icon.unlock(src="@/assets/unlock.svg")
+          span To edit spaces you've been invited to, you'll need to sign up or in
+        .row
+          .button-wrap
+            button(@click.stop="triggerSignUpOrInIsVisible") Sign Up or In
+      span.badge.info(v-else-if="spacePrivacyIsClosed")
         img.icon.unlock(src="@/assets/unlock.svg")
         span To edit closed spaces, you'll need to be invited
 
@@ -68,6 +75,7 @@ export default {
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
     spacePrivacyIsClosed () { return this.$store.state.currentSpace.privacy === 'closed' },
+    isInvitedButCannotEditSpace () { return this.$store.getters['currentUser/isInvitedButCannotEditSpace']() },
     position () {
       const position = this.$store.state.connectionDetailsPosition
       return {
@@ -189,6 +197,9 @@ export default {
     updateView () {
       this.updateDefaultConnectionType()
       this.colorPickerIsVisible = false
+    },
+    triggerSignUpOrInIsVisible () {
+      this.$store.commit('triggerSignUpOrInIsVisible')
     }
   },
   watch: {
@@ -211,4 +222,8 @@ export default {
 .connection-details
   .type-name
     margin-left 6px
+  .edit-message
+    button
+      margin-top 10px
+
 </style>

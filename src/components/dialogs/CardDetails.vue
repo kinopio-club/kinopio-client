@@ -25,11 +25,18 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
         span Frames
       FramePicker(:visible="framePickerIsVisible" :card="card")
 
-    p(v-if="!canEditCard")
+    p.edit-message(v-if="!canEditCard")
       span.badge.info(v-if="spacePrivacyIsOpen")
         img.icon.open(src="@/assets/open.svg")
         span In open spaces, you can only move and edit cards you've made
-      span.badge.info(v-if="spacePrivacyIsClosed")
+      template(v-else-if="isInvitedButCannotEditSpace")
+        span.badge.info
+          img.icon.unlock(src="@/assets/unlock.svg")
+          span To edit spaces you've been invited to, you'll need to sign up or in
+        .row
+          .button-wrap
+            button(@click.stop="triggerSignUpOrInIsVisible") Sign Up or In
+      span.badge.info(v-else-if="spacePrivacyIsClosed")
         img.icon.unlock(src="@/assets/unlock.svg")
         span To edit closed spaces, you'll need to be invited
 
@@ -87,6 +94,7 @@ export default {
       if (this.canEditSpace && this.cardIsCreatedByCurrentUser) { return true }
       return false
     },
+    isInvitedButCannotEditSpace () { return this.$store.getters['currentUser/isInvitedButCannotEditSpace']() },
     name: {
       get () {
         return this.card.name
@@ -171,6 +179,9 @@ export default {
     },
     closeDialogs () {
       this.framePickerIsVisible = false
+    },
+    triggerSignUpOrInIsVisible () {
+      this.$store.commit('triggerSignUpOrInIsVisible')
     }
   },
   watch: {
@@ -195,4 +206,7 @@ export default {
     background-color var(--secondary-background)
   textarea
     margin-bottom 5px
+  .edit-message
+    button
+      margin-top 10px
 </style>

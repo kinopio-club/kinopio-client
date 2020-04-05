@@ -60,6 +60,7 @@ export default {
       return userIsCollaborator || userIsInSpace
     },
     isInvitedButCannotEditSpace: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
       const currentUserIsSignedIn = getters.isSignedIn
       const isInvitedToSpace = Boolean(cache.invitedSpacesNotSignedIn().find(invitedSpace => invitedSpace.id === space.id))
       return !currentUserIsSignedIn && isInvitedToSpace
