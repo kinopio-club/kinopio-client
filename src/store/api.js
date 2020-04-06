@@ -254,7 +254,7 @@ const self = {
     getSpaceAnonymously: async (context, space) => {
       const isOffline = !window.navigator.onLine
       if (isOffline) { return }
-      const invite = cache.invitedSpacesNotSignedIn().find(invitedSpace => invitedSpace.id === space.id)
+      const invite = cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id) || {}
       space.collaboratorKey = space.collaboratorKey || invite.collaboratorKey
       try {
         console.log('🛬 getting remote space anonymously', space.id, space.collaboratorKey)

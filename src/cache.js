@@ -160,23 +160,23 @@ export default {
 
   // Spaces invited to while not signed up or in
 
-  invitedSpacesNotSignedIn () {
-    return this.getLocal('invitedSpacesNotSignedIn') || []
+  invitedSpaces () {
+    return this.getLocal('invitedSpaces') || []
   },
-  addToInvitedSpacesNotSignedIn (space) {
+  saveInvitedSpace (space) {
     space = {
       id: space.id,
       name: space.name,
       users: space.users,
-      collaboratorKey: space.collaboratorKey
+      collaboratorKey: space.collaboratorKey,
+      updatedAt: space.updatedAt
     }
-    let invitedSpaces = this.invitedSpacesNotSignedIn()
+    let invitedSpaces = this.invitedSpaces()
     invitedSpaces = invitedSpaces.filter(invitedSpace => {
       return invitedSpace.id !== space.id
     })
     invitedSpaces.push(space)
-    console.log('🎽invitedspaces', invitedSpaces)
-    this.storeLocal('invitedSpacesNotSignedIn', invitedSpaces)
+    this.storeLocal('invitedSpaces', invitedSpaces)
   }
 
 }
