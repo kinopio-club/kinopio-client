@@ -2,24 +2,26 @@
 header
   nav
     .logo-about
-      .logo(alt="kinopio logo" @click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop :class="{active : aboutIsVisible}" tabindex="0")
-        .logo-image
-          .label-badge(v-if="shouldShowNewStuffIsUpdated")
-            span NEW
-        img.down-arrow(src="@/assets/down-arrow.svg")
-      About(:visible="aboutIsVisible")
-    .button-wrap.space-details-wrap
-      button(@click.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
-        .badge.info.template-badge(v-show="currentSpaceIsTemplate")
-          span Template
-        span {{currentSpaceName}}
-        img.icon.privacy-icon(v-if="spaceIsNotClosed" :src="privacyIcon" :class="privacyName")
-        .badge.status.explore(v-if="shouldShowInExplore")
-          img.icon(src="@/assets/checkmark.svg")
-        Loader(:visible="isLoadingSpace")
-      SpaceDetails(:visible="spaceDetailsIsVisible")
-      ImportArenaChannel(:visible="importArenaChannelIsVisible")
-      KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
+      .button-wrap
+        .logo(alt="kinopio logo" @click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop :class="{active : aboutIsVisible}" tabindex="0")
+          .logo-image
+            .label-badge(v-if="shouldShowNewStuffIsUpdated")
+              span NEW
+          img.down-arrow(src="@/assets/down-arrow.svg")
+        About(:visible="aboutIsVisible")
+    .space-details-wrap
+      .button-wrap
+        button(@click.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
+          .badge.info.template-badge(v-show="currentSpaceIsTemplate")
+            span Template
+          span {{currentSpaceName}}
+          img.icon.privacy-icon(v-if="spaceIsNotClosed" :src="privacyIcon" :class="privacyName")
+          .badge.status.explore(v-if="shouldShowInExplore")
+            img.icon(src="@/assets/checkmark.svg")
+          Loader(:visible="isLoadingSpace")
+        SpaceDetails(:visible="spaceDetailsIsVisible")
+        ImportArenaChannel(:visible="importArenaChannelIsVisible")
+        KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
 
   aside
     .top
@@ -253,11 +255,12 @@ header
       max-width 100%
     dialog
       max-width initial
-    > .keyboard-shortcuts
-      max-height calc(100vh - 100px)
-    > button
-      .privacy-icon
-        margin-left 6px
+    .button-wrap
+      > .keyboard-shortcuts
+        max-height calc(100vh - 100px)
+      > button
+        .privacy-icon
+          margin-left 6px
 
   aside
     display flex

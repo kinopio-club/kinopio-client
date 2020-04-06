@@ -120,4 +120,6 @@ export default {
     margin-top 10px
   .badge.success
     margin-top 10px
+  .hidden
+    display none
 </style>

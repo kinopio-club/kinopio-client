@@ -140,11 +140,8 @@ export default {
 
 <style lang="stylus">
 .about
-  top calc(100% - 6px)
-  .hidden
-    display none
+  top calc(100% - 6px) !important
   .updated
     margin 0
     margin-left 3px
-
 </style>
