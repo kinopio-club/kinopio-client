@@ -317,7 +317,7 @@ export default {
         } else if (anonymousCollaboratorKey) {
           space.collaboratorKey = anonymousCollaboratorKey
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
-          cache.addToinvitedSpaces(remoteSpace)
+          cache.saveInvitedSpace(remoteSpace)
           context.commit('anonymousCollaboratorKey', '', { root: true })
         } else if (currentSpaceHasUrl) {
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })

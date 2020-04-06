@@ -192,7 +192,9 @@ export default {
       const response = await this.$store.dispatch('api/signUp', { email, password, currentUser })
       const result = await response.json()
       if (this.isSuccess(response)) {
+        this.$store.commit('clearAllNotifications', false)
         await this.createSpaces(result.apiKey)
+        this.addCollaboratorToSpaces()
       } else {
         await this.handleErrors(result)
       }
@@ -222,12 +224,22 @@ export default {
         })
         this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
         this.$store.commit('currentSpace/addUserToSpace', currentUser)
-        this.$store.commit('notifySignUpToEditSpace', false)
+        this.$store.commit('clearAllNotifications', false)
         this.$store.dispatch('currentSpace/checkIfShouldNotifyReadOnly')
         this.$store.commit('notifyNewUser', false)
+        this.addCollaboratorToSpaces()
       } else {
         await this.handleErrors(result)
       }
+    },
+
+    addCollaboratorToSpaces () {
+      let body = cache.invitedSpaces()
+      body = body.map(space => {
+        space.userId = this.$store.state.currentUser.id
+        return space
+      })
+      this.$store.dispatch('api/addToQueue', { name: 'addCollaboratorToSpaces', body })
     },
 
     async createSpaces (apiKey) {
