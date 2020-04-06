@@ -302,7 +302,7 @@ export default {
         context.dispatch('updateUserLastSpaceId')
         context.commit('notifyReadOnly', false, { root: true })
         context.commit('notifyNewUser', false, { root: true })
-        context.commit('notifySignUpToEditOpenSpace', false, { root: true })
+        context.commit('notifySignUpToEditSpace', false, { root: true })
       })
     },
     getRemoteSpace: async (context, space) => {
@@ -379,8 +379,7 @@ export default {
       if (remoteSpace) {
         context.commit('restoreSpace', utils.normalizeSpace(remoteSpace))
         context.dispatch('history/playback', null, { root: true })
-        context.dispatch('checkIfShouldNotifySignUpToEditOpenSpace', remoteSpace)
-        context.dispatch('checkIfShouldNotifySignUpToEditInvitedSpace', remoteSpace)
+        context.dispatch('checkIfShouldNotifySignUpToEditSpace', remoteSpace)
         utils.updateWindowUrlAndTitle({
           space: remoteSpace,
           shouldUpdateUrl: true
@@ -479,22 +478,16 @@ export default {
         context.commit('notifySpaceIsRemoved', false, { root: true })
       }
     },
-    checkIfShouldNotifySignUpToEditOpenSpace: (context, space) => {
+    checkIfShouldNotifySignUpToEditSpace: (context, space) => {
       const spaceIsOpen = space.privacy === 'open'
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
-      if (spaceIsOpen && !currentUserIsSignedIn) {
-        context.commit('notifySignUpToEditOpenSpace', true, { root: true })
-      } else {
-        context.commit('notifySignUpToEditOpenSpace', false, { root: true })
-      }
-    },
-    checkIfShouldNotifySignUpToEditInvitedSpace: (context, space) => {
-      const spaceIsOpen = space.privacy === 'open'
       const currentUserIsInvitedButCannotEditSpace = context.rootGetters['currentUser/isInvitedButCannotEditSpace'](space)
-      if (!spaceIsOpen && currentUserIsInvitedButCannotEditSpace) {
-        context.commit('notifySignUpToEditInvitedSpace', true, { root: true })
+      if (spaceIsOpen && !currentUserIsSignedIn) {
+        context.commit('notifySignUpToEditSpace', true, { root: true })
+      } else if (currentUserIsInvitedButCannotEditSpace) {
+        context.commit('notifySignUpToEditSpace', true, { root: true })
       } else {
-        context.commit('notifySignUpToEditInvitedSpace', false, { root: true })
+        context.commit('notifySignUpToEditSpace', false, { root: true })
       }
     },
     removeCollaboratorFromSpace: async (context, user) => {

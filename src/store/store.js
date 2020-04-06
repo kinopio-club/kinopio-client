@@ -78,10 +78,9 @@ export default new Vuex.Store({
     notifyConnectionError: false,
     notifySpaceIsRemoved: false,
     notifyNewUser: false,
-    notifySignUpToEditOpenSpace: false,
+    notifySignUpToEditSpace: false,
     notifySpaceIsOpenAndEditable: false,
     notifyAccessFavorites: false,
-    notifySignUpToEditInvitedSpace: false,
 
     // filters
     filteredConnectionTypeIds: [],
@@ -337,10 +336,9 @@ export default new Vuex.Store({
     clearAllNotifications: (state) => {
       state.notifySpaceNotFound = false
       state.notifyConnectionError = false
-      state.notifySignUpToEditOpenSpace = false
+      state.notifySignUpToEditSpace = false
       state.notifySpaceIsOpenAndEditable = false
       state.notifyAccessFavorites = false
-      state.notifySignUpToEditInvitedSpace = false
     },
     notifyReadOnly: (state, value) => {
       utils.typeCheck(value, 'boolean')
@@ -365,9 +363,9 @@ export default new Vuex.Store({
       utils.typeCheck(value, 'boolean')
       state.notifyNewUser = value
     },
-    notifySignUpToEditOpenSpace: (state, value) => {
+    notifySignUpToEditSpace: (state, value) => {
       utils.typeCheck(value, 'boolean')
-      state.notifySignUpToEditOpenSpace = value
+      state.notifySignUpToEditSpace = value
     },
     notifySpaceIsOpenAndEditable: (state, value) => {
       utils.typeCheck(value, 'boolean')
@@ -376,10 +374,6 @@ export default new Vuex.Store({
     notifyAccessFavorites: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.notifyAccessFavorites = value
-    },
-    notifySignUpToEditInvitedSpace: (state, value) => {
-      utils.typeCheck(value, 'boolean')
-      state.notifySignUpToEditInvitedSpace = value
     },
 
     // filters
