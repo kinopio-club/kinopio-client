@@ -43,8 +43,8 @@ export default {
     },
     isSpaceMember: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
+      const userIsCollaborator = getters.isSpaceCollaborator(space)
       let userIsInSpace
-      let userIsCollaborator
       if (space.users) {
         userIsInSpace = Boolean(space.users.find(user => {
           return user.id === state.id
@@ -52,12 +52,15 @@ export default {
       } else {
         userIsInSpace = space.userId === state.id
       }
+      return userIsCollaborator || userIsInSpace
+    },
+    isSpaceCollaborator: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
       if (space.collaborators) {
-        userIsCollaborator = Boolean(space.collaborators.find(collaborator => {
+        return Boolean(space.collaborators.find(collaborator => {
           return collaborator.id === state.id
         }))
       }
-      return userIsCollaborator || userIsInSpace
     },
     isInvitedButCannotEditSpace: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace

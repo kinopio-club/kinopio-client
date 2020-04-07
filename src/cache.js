@@ -169,7 +169,8 @@ export default {
       name: space.name,
       users: space.users,
       collaboratorKey: space.collaboratorKey,
-      updatedAt: space.updatedAt
+      updatedAt: space.updatedAt,
+      cacheDate: Date.now()
     }
     let invitedSpaces = this.invitedSpaces()
     invitedSpaces = invitedSpaces.filter(invitedSpace => {
