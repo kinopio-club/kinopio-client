@@ -181,15 +181,9 @@ const self = {
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/user/spaces`, options)
-        const currentUserId = context.rootState.currentUser.id
+        const currentUser = context.rootState.currentUser
         let spaces = await normalizeResponse(response)
-        spaces = spaces.map(space => {
-          if (space.userId !== currentUserId) {
-            space.currentUserIsCollaborator = true
-          }
-          return space
-        })
-        return spaces
+        return utils.labelCollaboratorSpaces(spaces, currentUser)
       } catch (error) {
         console.error(error)
       }

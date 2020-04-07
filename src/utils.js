@@ -353,6 +353,15 @@ export default {
     return remoteSpace
   },
 
+  labelCollaboratorSpaces (spaces, currentUser) {
+    return spaces.map(space => {
+      if (space.userId !== currentUser.id) {
+        space.currentUserIsCollaborator = true
+      }
+      return space
+    })
+  },
+
   // urls 🌍
 
   // same as server util
