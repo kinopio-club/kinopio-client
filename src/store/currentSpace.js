@@ -43,6 +43,16 @@ export default {
         cache.updateSpace('users', state.users, state.id)
       }
     },
+    addCollaboratorToSpace: (state, newUser) => {
+      utils.typeCheck(newUser, 'object')
+      const userExists = state.collaborators.find(collaborator => {
+        return collaborator.id === newUser.id
+      })
+      if (!userExists) {
+        state.collaborators.push(newUser)
+        cache.updateSpace('collaborators', state.collaborators, state.id)
+      }
+    },
     removeUserFromSpace: (state, oldUser) => {
       utils.typeCheck(oldUser, 'object')
       state.users = state.users.filter(user => {
