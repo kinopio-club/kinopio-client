@@ -61,6 +61,7 @@ import SpaceList from '@/components/SpaceList.vue'
 import Favorites from '@/components/Favorites.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'SpaceDetails',
@@ -207,10 +208,11 @@ export default {
       this.changeToLastSpace()
     },
     async updateSpaces () {
+      const currentUser = this.$store.state.currentUser
       const userSpaces = cache.getAllSpaces().filter(space => {
         return this.$store.getters['currentUser/canEditSpace'](space)
       })
-      this.spaces = userSpaces
+      this.spaces = utils.labelCollaboratorSpaces(userSpaces, currentUser)
     },
     pruneCachedSpaces (remoteSpaces) {
       const remoteSpaceIds = remoteSpaces.map(space => space.id)
