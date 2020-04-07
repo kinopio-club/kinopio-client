@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.invite-others-to-edit(v-if="visible" :open="visible" @click.stop)
+dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.stop)
 
   // add by email
   // share link
@@ -85,11 +85,10 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-// todo media query for short screens (SE)?
-.invite-others-to-edit
+.invite-collaborators
   left initial
   right 8px
-  max-height calc(100vh - 180px)
+  max-height calc(100vh - 250px)
   overflow auto
   .textarea
     margin-top 10px
