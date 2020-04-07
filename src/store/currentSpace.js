@@ -17,6 +17,7 @@ export default {
   mutations: {
 
     restoreSpace: (state, space) => {
+      space = utils.removeRemovedCardsFromSpace(space)
       Object.assign(state, space)
     },
     // Added aug 2019, can safely remove this in aug 2020

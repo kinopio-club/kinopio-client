@@ -362,6 +362,17 @@ export default {
     })
   },
 
+  removeRemovedCardsFromSpace (space) {
+    let cards = []
+    space.cards.forEach(card => {
+      if (!card.isRemoved) {
+        cards.push(card)
+      }
+    })
+    space.cards = cards
+    return space
+  },
+
   // urls 🌍
 
   // same as server util
