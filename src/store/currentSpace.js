@@ -263,6 +263,7 @@ export default {
       space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
       space.cards[1].x = random(180, 200)
       space.cards[1].y = random(160, 180)
+      space.userId = context.rootState.currentUser.id
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       context.commit('restoreSpace', uniqueNewSpace)
     },
