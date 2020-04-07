@@ -363,6 +363,7 @@ export default {
   },
 
   removeRemovedCardsFromSpace (space) {
+    if (!space.cards) { return }
     let cards = []
     space.cards.forEach(card => {
       if (!card.isRemoved) {
