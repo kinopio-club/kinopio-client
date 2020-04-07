@@ -45,7 +45,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
       input(placeholder="Search" v-model="spaceFilter" ref="filterInput")
       button.borderless.clear-input-wrap(@click="clearFilter")
         img.icon(src="@/assets/add.svg")
-    SpaceList(:spaces="spacesFiltered" @selectSpace="changeSpace")
+    SpaceList(:spaces="spacesFiltered" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
 
   Favorites(:visible="favoritesIsVisible" :loading="favoritesIsLoading")
 

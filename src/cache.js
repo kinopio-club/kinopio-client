@@ -158,7 +158,7 @@ export default {
     this.storeLocal('queue', [])
   },
 
-  // Spaces invited to while not signed up or in
+  // Invited Spaces
 
   invitedSpaces () {
     return this.getLocal('invitedSpaces') || []
@@ -176,6 +176,13 @@ export default {
       return invitedSpace.id !== space.id
     })
     invitedSpaces.push(space)
+    this.storeLocal('invitedSpaces', invitedSpaces)
+  },
+  removeInvitedSpace (space) {
+    let invitedSpaces = this.invitedSpaces()
+    invitedSpaces = invitedSpaces.filter(invitedSpace => {
+      return invitedSpace.id !== space.id
+    })
     this.storeLocal('invitedSpaces', invitedSpaces)
   }
 

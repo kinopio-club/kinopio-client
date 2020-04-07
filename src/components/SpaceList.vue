@@ -4,6 +4,8 @@ ul.results-list.space-list
     li(@click="selectSpace(space)" :class="{ active: spaceIsActive(space) }" :key="space.id" tabindex="0" v-on:keyup.enter="selectSpace(space)")
 
       User(v-if="showUser" :user="user(space)" :isClickable="false" :key="user(space).id")
+      template(v-else-if="showUserIfCurrentUserIsCollaborator && space.currentUserIsCollaborator")
+        User(:user="user(space)" :isClickable="false" :key="user(space).id")
       .badge.info.template-badge(v-if="showCategory") {{space.category}}
       .badge.info.template-badge(v-else-if="spaceIsTemplate(space)") Template
 
@@ -28,6 +30,7 @@ export default {
     selectedSpace: Object,
     showCategory: Boolean,
     showUser: Boolean,
+    showUserIfCurrentUserIsCollaborator: Boolean,
     hideExploreBadge: Boolean
   },
   methods: {
@@ -68,7 +71,6 @@ export default {
     user (space) {
       return space.user || space.users[0]
     }
-
   }
 }
 </script>
