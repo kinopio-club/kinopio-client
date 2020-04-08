@@ -89,9 +89,6 @@ export default {
   },
 
   computed: {
-    currentUserIsSignedIn () {
-      return this.$store.getters['currentUser/isSignedIn']
-    },
     authorizeUrl () {
       if (this.isAuthenticatingWithArena) { return }
       return `http://dev.are.na/oauth/authorize?client_id=${arena.clientId}&redirect_uri=${arena.redirectUri}&response_type=code`

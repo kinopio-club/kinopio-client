@@ -107,7 +107,6 @@ export default {
     notifySignUpToEditSpace () { return this.$store.state.notifySignUpToEditSpace },
     notifySpaceIsOpenAndEditable () { return this.$store.state.notifySpaceIsOpenAndEditable },
     notifyAccessFavorites () { return this.$store.state.notifyAccessFavorites },
-    // notifySignUpToEditInvitedSpace () { return this.$store.state.notifySignUpToEditInvitedSpace },
     currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     },

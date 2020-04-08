@@ -26,13 +26,13 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
         span In open spaces, you can only edit connections you've made
       template(v-else-if="isInvitedButCannotEditSpace")
         span.badge.info
-          img.icon.unlock(src="@/assets/unlock.svg")
+          img.icon(src="@/assets/unlock.svg")
           span To edit spaces you've been invited to, you'll need to sign up or in
         .row
           .button-wrap
             button(@click.stop="triggerSignUpOrInIsVisible") Sign Up or In
       span.badge.info(v-else-if="spacePrivacyIsClosed")
-        img.icon.unlock(src="@/assets/unlock.svg")
+        img.icon(src="@/assets/unlock.svg")
         span To edit closed spaces, you'll need to be invited
 
   section.results-actions
