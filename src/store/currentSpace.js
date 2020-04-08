@@ -507,6 +507,10 @@ export default {
       const userName = user.name || 'User'
       await context.dispatch('api/removeSpaceCollaborator', { space, user }, { root: true })
       context.commit('removeCollaboratorFromSpace', user)
+      const isCurrentUser = user.id === context.rootState.currentUser.id
+      if (isCurrentUser) {
+        cache.removeinvitedspace(space)
+      }
       context.commit('addNotification', { message: `${userName} removed from space`, type: 'success' }, { root: true })
     },
 

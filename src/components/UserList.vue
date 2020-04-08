@@ -5,7 +5,7 @@ ul.results-list.user-list
       .badge(:style="{background: user.color}" :class="{'narrow-badge': showRemoveUser}")
         User(:user="user" :isClickable="false")
         .name {{user.name}}
-      button.remove-user(v-if="showRemoveUser" @click.stop="removeUser")
+      button.remove-user(v-if="showRemoveUser" @click.stop="removeUser(user)")
         img.icon.remove(src="@/assets/remove.svg")
 </template>
 
