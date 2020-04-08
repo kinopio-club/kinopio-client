@@ -73,6 +73,7 @@ export default new Router({
           store.dispatch('api/addSpaceCollaborator', { spaceId, collaboratorKey })
             .then(response => {
               store.commit('spaceUrlToLoad', spaceId)
+              next()
             }).catch(error => {
               console.error(error)
               if (error.status === 401) {
@@ -84,8 +85,8 @@ export default new Router({
         } else {
           store.commit('anonymousCollaboratorKey', collaboratorKey)
           store.commit('spaceUrlToLoad', spaceId)
+          next()
         }
-        next()
       }
     }, {
       path: '/:space',

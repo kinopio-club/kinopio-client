@@ -243,12 +243,7 @@ export default {
       // restore last space
       } else if (user.lastSpaceId) {
         console.log('🚃 Restore last space', user.lastSpaceId)
-        let spaceToRestore = cache.space(user.lastSpaceId)
-        if (!spaceToRestore.id) {
-          spaceToRestore = { id: user.lastSpaceId }
-        }
-        context.dispatch('loadSpace', spaceToRestore)
-        context.dispatch('updateUserLastSpaceId')
+        context.dispatch('loadLastSpace')
       // hello kinopio
       } else {
         console.log('🚃 Create new Hello Kinopio space')
@@ -417,6 +412,15 @@ export default {
       context.commit('spaceUrlToLoad', '', { root: true })
       context.dispatch('updateSpacePageSize')
     },
+    loadLastSpace: (context) => {
+      const user = context.rootState.currentUser
+      let spaceToRestore = cache.space(user.lastSpaceId)
+      if (!spaceToRestore.id) {
+        spaceToRestore = { id: user.lastSpaceId }
+      }
+      context.dispatch('loadSpace', spaceToRestore)
+      context.dispatch('updateUserLastSpaceId')
+    },
     updateSpace: async (context, updates) => {
       const space = utils.clone(context.state)
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
@@ -510,7 +514,10 @@ export default {
       context.commit('removeCollaboratorFromSpace', user)
       const isCurrentUser = user.id === context.rootState.currentUser.id
       if (isCurrentUser) {
-        cache.removeinvitedspace(space)
+        cache.removeInvitedSpace(space)
+      }
+      if (isCurrentUser && space.privacy === 'private') {
+        context.dispatch('loadLastSpace')
       }
       context.commit('addNotification', { message: `${userName} removed from space`, type: 'success' }, { root: true })
     },
