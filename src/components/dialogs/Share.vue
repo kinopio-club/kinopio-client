@@ -140,6 +140,9 @@ export default {
     },
     removeCollaborator (user) {
       this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
+      this.$nextTick(() => {
+        this.updateSpaceCollaborators()
+      })
     },
     updateSpaceCollaborators () {
       this.spaceCollaborators = this.$store.state.currentSpace.collaborators
