@@ -71,7 +71,8 @@ export default {
     user: Object,
     detailsOnRight: Boolean,
     visible: Boolean,
-    userDetailsPosition: Object
+    userDetailsPosition: Object,
+    userDetailsIsFromList: Boolean
   },
   data () {
     return {
@@ -205,7 +206,10 @@ export default {
     removeCollaborator () {
       const user = this.user
       this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
-      this.$store.commit('closeAllDialogs')
+      this.$emit('updateSpaceCollaborators')
+      if (!this.userDetailsIsFromList) {
+        this.$store.commit('closeAllDialogs')
+      }
     }
   },
   watch: {

@@ -21,9 +21,9 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
       button(@click.stop="toggleInviteCollaboratorsIsVisible" :class="{ active: inviteCollaboratorsIsVisible }")
         span Invite Collaborators
       InviteCollaborators(:visible="inviteCollaboratorsIsVisible")
-  section.results-section(v-if="spaceHasUrl && isSpaceMember && spaceHasCollaborators")
+  section.results-section.collaborators(v-if="spaceHasUrl && isSpaceMember && spaceHasCollaborators")
     UserList(:users="spaceCollaborators" :selectedUser="selectedUser" :showRemoveUser="true" @selectSpace="showUserDetails" @removeUser="removeCollaborator")
-    UserDetails(:visible="userDetailsIsVisible" :user="selectedUser" :userDetailsPosition="userDetailsPosition")
+    UserDetails(:visible="userDetailsIsVisible" :user="selectedUser" :userDetailsPosition="userDetailsPosition" :@userDetailsIsFromList="true" @updateSpaceCollaborators="updateSpaceCollaborators")
 
   section(v-if="!spaceHasUrl")
     p
@@ -166,6 +166,7 @@ export default {
   top calc(100% - 8px)
   left initial
   right 8px
+  max-height calc(100vh - 25px)
   .badge
     display inline-block
     &.danger
@@ -187,4 +188,6 @@ export default {
   dialog.user-details
     left initial
     right calc(100% - 20px)
+  .collaborators
+    max-height calc(100vh - 200px)
 </style>

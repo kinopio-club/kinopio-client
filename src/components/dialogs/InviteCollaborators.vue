@@ -83,11 +83,11 @@ export default {
 }
 </script>
 
-<style lang="stylus" scoped>
+<style lang="stylus">
 .invite-collaborators
   left initial
   right 8px
-  max-height calc(100vh - 250px)
+  max-height calc(100vh - 180px)
   overflow auto
   .textarea
     margin-top 10px
