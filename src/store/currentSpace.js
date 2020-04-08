@@ -513,13 +513,15 @@ export default {
       await context.dispatch('api/removeSpaceCollaborator', { space, user }, { root: true })
       context.commit('removeCollaboratorFromSpace', user)
       const isCurrentUser = user.id === context.rootState.currentUser.id
-      if (isCurrentUser) {
-        cache.removeInvitedSpace(space)
-      }
       if (isCurrentUser && space.privacy === 'private') {
         context.dispatch('loadLastSpace')
       }
-      context.commit('addNotification', { message: `${userName} removed from space`, type: 'success' }, { root: true })
+      if (isCurrentUser) {
+        cache.removeInvitedSpace(space)
+        context.commit('addNotification', { message: `You left ${space.name}`, type: 'success' }, { root: true })
+      } else {
+        context.commit('addNotification', { message: `${userName} removed from space`, type: 'success' }, { root: true })
+      }
     },
 
     // Cards

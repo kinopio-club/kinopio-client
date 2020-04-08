@@ -140,11 +140,17 @@ export default {
     },
     removeCollaborator (user) {
       this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
-      this.$nextTick(() => {
-        this.updateSpaceCollaborators()
-      })
+      // this.$nextTick(() => {
+      this.updateSpaceCollaborators()
+      // })
+      const isCurrentUser = this.$store.state.currentUser.id === user.id
+      if (isCurrentUser) {
+        this.$store.commit('closeAllDialogs')
+      }
     },
     updateSpaceCollaborators () {
+      console.log('updateSpaceCollaborators')
+      this.userDetailsIsNotVisible()
       this.spaceCollaborators = this.$store.state.currentSpace.collaborators
     }
   },
