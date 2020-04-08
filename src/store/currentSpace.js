@@ -342,6 +342,7 @@ export default {
         if (error.status === 401) {
           context.commit('notifySpaceNotFound', true, { root: true })
           context.dispatch('removeLocalSpaceIfUserIsRemoved', space)
+          cache.removeInvitedSpace(space)
         }
         if (error.status === 500) {
           context.commit('notifyConnectionError', true, { root: true })
