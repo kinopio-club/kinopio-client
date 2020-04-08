@@ -71,7 +71,6 @@ export default {
     async updateCollaboratorKey () {
       const space = this.$store.state.currentSpace
       const collaboratorKey = await this.$store.dispatch('api/getSpaceCollaboratorKey', space)
-      console.log(collaboratorKey)
       this.$store.commit('currentSpace/updateSpace', { collaboratorKey })
     }
   },
