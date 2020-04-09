@@ -206,10 +206,12 @@ export default {
     removeCollaborator () {
       const user = this.user
       this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
-      this.$emit('updateSpaceCollaborators')
       if (!this.userDetailsIsFromList) {
         this.$store.commit('closeAllDialogs')
       }
+      this.$nextTick(() => {
+        this.$emit('updateSpaceCollaborators')
+      })
     }
   },
   watch: {

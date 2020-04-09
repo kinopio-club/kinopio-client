@@ -353,7 +353,7 @@ export default {
     return remoteSpace
   },
 
-  labelCollaboratorSpaces (spaces, currentUser) {
+  AddCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
     return spaces.map(space => {
       if (space.userId !== currentUser.id) {
         space.currentUserIsCollaborator = true

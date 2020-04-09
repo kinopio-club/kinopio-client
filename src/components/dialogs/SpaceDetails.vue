@@ -212,7 +212,7 @@ export default {
       const userSpaces = cache.getAllSpaces().filter(space => {
         return this.$store.getters['currentUser/canEditSpace'](space)
       })
-      this.spaces = utils.labelCollaboratorSpaces(userSpaces, currentUser)
+      this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(userSpaces, currentUser)
     },
     pruneCachedSpaces (remoteSpaces) {
       const remoteSpaceIds = remoteSpaces.map(space => space.id)

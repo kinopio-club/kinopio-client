@@ -183,7 +183,7 @@ const self = {
         const response = await fetch(`${host}/user/spaces`, options)
         const currentUser = context.rootState.currentUser
         let spaces = await normalizeResponse(response)
-        return utils.labelCollaboratorSpaces(spaces, currentUser)
+        return utils.AddCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
       } catch (error) {
         console.error(error)
       }
@@ -246,7 +246,6 @@ const self = {
         if (!shouldRequest()) { return }
         console.log('🛬 getting remote space', space.id)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        console.log('☎️get space', space.id, options)
         const response = await utils.timeout(40000, fetch(`${host}/space/${space.id}`, options))
         return normalizeResponse(response)
       } catch (error) {

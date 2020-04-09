@@ -21,9 +21,10 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
       span Remove
 
     p.edit-message(v-if="!canEditConnection")
-      span.badge.info(v-if="spacePrivacyIsOpen")
-        img.icon.open(src="@/assets/open.svg")
-        span In open spaces, you can only edit connections you've made
+      template(v-if="spacePrivacyIsOpen")
+        span.badge.info
+          img.icon.open(src="@/assets/open.svg")
+          span In open spaces, you can only edit connections you've made
       template(v-else-if="isInvitedButCannotEditSpace")
         span.badge.info
           img.icon(src="@/assets/unlock.svg")
@@ -31,9 +32,10 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
         .row
           .button-wrap
             button(@click.stop="triggerSignUpOrInIsVisible") Sign Up or In
-      span.badge.info(v-else-if="spacePrivacyIsClosed")
-        img.icon(src="@/assets/unlock.svg")
-        span To edit closed spaces, you'll need to be invited
+      template(v-else-if="spacePrivacyIsClosed")
+        span.badge.info
+          img.icon(src="@/assets/unlock.svg")
+          span To edit closed spaces, you'll need to be invited
 
   section.results-actions
     button(:disabled="!canEditConnection" @click="addConnectionType")
