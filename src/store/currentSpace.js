@@ -337,6 +337,7 @@ export default {
         if (error.status === 401) {
           context.commit('notifySpaceNotFound', true, { root: true })
           context.dispatch('removeLocalSpaceIfUserIsRemoved', space)
+          context.dispatch('loadLastSpace')
           cache.removeInvitedSpace(space)
         }
         if (error.status === 500) {
@@ -360,8 +361,9 @@ export default {
     },
     removeLocalSpaceIfUserIsRemoved: (context, space) => {
       const cachedSpace = cache.space(space.id)
-      const userIsRemovedFromSpace = utils.objectHasKeys(cachedSpace)
-      if (userIsRemovedFromSpace) {
+      const currentUserIsRemovedFromSpace = utils.objectHasKeys(cachedSpace)
+      context.dispatch('currentUser/removeFavorite', { type: 'space', item: space }, { root: true })
+      if (currentUserIsRemovedFromSpace) {
         context.commit('currentUser/resetLastSpaceId', null, { root: true })
         cache.removeSpacePermanent(space)
         const emptySpace = { id: space.id, cards: [], connections: [] }
