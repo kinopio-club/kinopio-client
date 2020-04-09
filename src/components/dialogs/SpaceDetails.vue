@@ -17,7 +17,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
 
     button(v-if="isSpaceMember" @click="removeCurrentSpace")
       img.icon(src="@/assets/remove.svg")
-      span Remove
+      span {{removeLabel}}
     .button-wrap
       button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
         span Export
@@ -89,7 +89,8 @@ export default {
       favoritesIsVisible: false,
       favoriteUsersIsVisible: false,
       favoritesIsLoading: false,
-      hasUpdatedFavorites: false
+      hasUpdatedFavorites: false,
+      removeLabel: 'Remove'
     }
   },
   created () {
@@ -194,6 +195,7 @@ export default {
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space })
+      this.updateRemoveLabel()
     },
     changeToLastSpace () {
       if (this.spaces.length) {
@@ -201,9 +203,16 @@ export default {
       } else {
         this.addSpace()
       }
+      this.updateRemoveLabel()
     },
     removeCurrentSpace () {
-      this.$store.dispatch('currentSpace/removeCurrentSpace')
+      const currentUser = this.$store.state.currentUser
+      const currentUserIsSpaceCollaborator = this.$store.getters['currentUser/isSpaceCollaborator']()
+      if (currentUserIsSpaceCollaborator) {
+        this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', currentUser)
+      } else {
+        this.$store.dispatch('currentSpace/removeCurrentSpace')
+      }
       this.updateSpaces()
       this.changeToLastSpace()
     },
@@ -229,6 +238,14 @@ export default {
     },
     clearFilter () {
       this.filter = ''
+    },
+    updateRemoveLabel () {
+      const currentUserIsSpaceCollaborator = this.$store.getters['currentUser/isSpaceCollaborator']()
+      if (currentUserIsSpaceCollaborator) {
+        this.removeLabel = 'Leave'
+      } else {
+        this.removeLabel = 'Remove'
+      }
     },
     async updateFavorites () {
       if (this.favoritesIsLoading) { return }
