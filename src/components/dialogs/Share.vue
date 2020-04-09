@@ -146,7 +146,7 @@ export default {
       this.updateSpaceCollaborators()
     },
     async removeCollaborator (user) {
-      await this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
+      this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
       this.removedCollaborator(user)
     },
     updateSpaceCollaborators () {

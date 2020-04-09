@@ -198,7 +198,7 @@ export default {
     },
     async removeCollaborator () {
       const user = this.user
-      await this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
+      this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
       if (!this.userDetailsIsFromList) {
         this.$store.commit('closeAllDialogs')
       }

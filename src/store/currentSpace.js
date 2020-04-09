@@ -511,17 +511,16 @@ export default {
         context.commit('notifySignUpToEditSpace', false, { root: true })
       }
     },
-    removeCollaboratorFromSpace: async (context, user) => {
+    removeCollaboratorFromSpace: (context, user) => {
       const space = utils.clone(context.state)
       const userName = user.name || 'User'
-      await context.dispatch('api/removeSpaceCollaborator', { space, user }, { root: true })
+      context.dispatch('api/removeSpaceCollaborator', { space, user }, { root: true })
       context.commit('removeCollaboratorFromSpace', user)
       const isCurrentUser = user.id === context.rootState.currentUser.id
-      if (isCurrentUser && space.privacy === 'private') {
-        context.dispatch('loadLastSpace')
-      }
       if (isCurrentUser) {
+        context.dispatch('loadLastSpace')
         cache.removeInvitedSpace(space)
+        cache.removeSpacePermanent(space)
         context.commit('addNotification', { message: `You left ${space.name}`, type: 'success' }, { root: true })
       } else {
         context.commit('addNotification', { message: `${userName} removed from space`, type: 'success' }, { root: true })

@@ -222,6 +222,7 @@ export default {
         return this.$store.getters['currentUser/canEditSpace'](space)
       })
       this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(userSpaces, currentUser)
+      this.updateRemoveLabel()
     },
     pruneCachedSpaces (remoteSpaces) {
       const remoteSpaceIds = remoteSpaces.map(space => space.id)
