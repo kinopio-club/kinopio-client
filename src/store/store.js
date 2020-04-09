@@ -69,7 +69,7 @@ export default new Vuex.Store({
     // loading
     isLoadingSpace: false,
     spaceUrlToLoad: '',
-    isLoadingUserFavorites: false,
+    anonymousCollaboratorKey: '',
 
     // notifications
     notifications: [],
@@ -78,7 +78,7 @@ export default new Vuex.Store({
     notifyConnectionError: false,
     notifySpaceIsRemoved: false,
     notifyNewUser: false,
-    notifySignUpToEditOpenSpace: false,
+    notifySignUpToEditSpace: false,
     notifySpaceIsOpenAndEditable: false,
     notifyAccessFavorites: false,
 
@@ -320,9 +320,9 @@ export default new Vuex.Store({
       utils.typeCheck(spaceUrl, 'string')
       state.spaceUrlToLoad = spaceUrl
     },
-    isLoadingUserFavorites: (state, value) => {
-      utils.typeCheck(value, 'boolean')
-      state.isLoadingUserFavorites = value
+    anonymousCollaboratorKey: (state, value) => {
+      utils.typeCheck(value, 'string')
+      state.anonymousCollaboratorKey = value
     },
 
     // notifications
@@ -332,6 +332,13 @@ export default new Vuex.Store({
     },
     removeNotification: (state) => {
       state.notifications.shift()
+    },
+    clearAllNotifications: (state) => {
+      state.notifySpaceNotFound = false
+      state.notifyConnectionError = false
+      state.notifySignUpToEditSpace = false
+      state.notifySpaceIsOpenAndEditable = false
+      state.notifyAccessFavorites = false
     },
     notifyReadOnly: (state, value) => {
       utils.typeCheck(value, 'boolean')
@@ -356,9 +363,9 @@ export default new Vuex.Store({
       utils.typeCheck(value, 'boolean')
       state.notifyNewUser = value
     },
-    notifySignUpToEditOpenSpace: (state, value) => {
+    notifySignUpToEditSpace: (state, value) => {
       utils.typeCheck(value, 'boolean')
-      state.notifySignUpToEditOpenSpace = value
+      state.notifySignUpToEditSpace = value
     },
     notifySpaceIsOpenAndEditable: (state, value) => {
       utils.typeCheck(value, 'boolean')

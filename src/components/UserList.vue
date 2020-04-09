@@ -2,9 +2,11 @@
 ul.results-list.user-list
   template(v-for="(user in users")
     li(:key="user.id" @click.stop="selectSpace($event, user)" tabindex="0" v-on:keyup.stop.enter="selectSpace($event, user)" :class="{ active: userIsSelected(user) }")
-      .badge(:style="{background: user.color}")
+      .badge(:style="{background: user.color}" :class="{'narrow-badge': showRemoveUser}")
         User(:user="user" :isClickable="false")
-        span {{user.name}}
+        .name {{user.name}}
+      button.remove-user(v-if="showRemoveUser" @click.stop="removeUser(user)")
+        img.icon.remove(src="@/assets/remove.svg")
 </template>
 
 <script>
@@ -16,7 +18,8 @@ export default {
   },
   props: {
     users: Array,
-    selectedUser: Object
+    selectedUser: Object,
+    showRemoveUser: Boolean
   },
   methods: {
     selectSpace (event, user) {
@@ -24,10 +27,22 @@ export default {
     },
     userIsSelected (user) {
       return this.selectedUser.id === user.id
+    },
+    removeUser (user) {
+      this.$emit('removeUser', user)
     }
   }
 }
 </script>
 
 <style lang="stylus">
+.user-list
+  li
+    button
+      margin-left auto
+    .name
+      margin-right 0
+      display inline-block
+    .narrow-badge
+      max-width calc(100% - 32px)
 </style>

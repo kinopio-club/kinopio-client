@@ -8,6 +8,10 @@ export default {
       window.localStorage[key] = JSON.stringify(value)
     } catch (error) {
       console.warn('storeLocal Could not save to localStorage')
+      // TODO
+      // if user is signed in (has apikey), transparently clean ls by deleting removed cards in currentspace, and all other spaces
+      // else, manually show a warning about needing to sign up or in because the browser is out of localstorage
+      // delete this dom node manually during sign up/in in component
     }
   },
   getLocal (key) {
@@ -84,12 +88,6 @@ export default {
     space.cacheDate = Date.now()
     this.storeLocal(`space-${space.id}`, space)
   },
-  updateIdsInAllSpaces () {
-    let spaces = this.getAllSpaces()
-    spaces.forEach(space => {
-      this.updateIdsInSpace(space)
-    })
-  },
   updateIdsInSpace (space) {
     const items = {
       cards: space.cards,
@@ -152,6 +150,35 @@ export default {
   },
   clearQueue () {
     this.storeLocal('queue', [])
+  },
+
+  // Invited Spaces
+
+  invitedSpaces () {
+    return this.getLocal('invitedSpaces') || []
+  },
+  saveInvitedSpace (space) {
+    space = {
+      id: space.id,
+      name: space.name,
+      users: space.users,
+      collaboratorKey: space.collaboratorKey,
+      updatedAt: space.updatedAt,
+      cacheDate: Date.now()
+    }
+    let invitedSpaces = this.invitedSpaces()
+    invitedSpaces = invitedSpaces.filter(invitedSpace => {
+      return invitedSpace.id !== space.id
+    })
+    invitedSpaces.push(space)
+    this.storeLocal('invitedSpaces', invitedSpaces)
+  },
+  removeInvitedSpace (space) {
+    let invitedSpaces = this.invitedSpaces()
+    invitedSpaces = invitedSpaces.filter(invitedSpace => {
+      return invitedSpace.id !== space.id
+    })
+    this.storeLocal('invitedSpaces', invitedSpaces)
   }
 
 }

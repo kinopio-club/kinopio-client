@@ -2,24 +2,26 @@
 header
   nav
     .logo-about
-      .logo(alt="kinopio logo" @click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop :class="{active : aboutIsVisible}" tabindex="0")
-        .logo-image(:class="{development: isDevelopment}")
-          .label-badge(v-if="shouldShowNewStuffIsUpdated")
-            span NEW
-        img.down-arrow(src="@/assets/down-arrow.svg")
-      About(:visible="aboutIsVisible")
-    .button-wrap.space-details-wrap
-      button(@click.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
-        .badge.info.template-badge(v-show="currentSpaceIsTemplate")
-          span Template
-        span {{currentSpaceName}}
-        img.icon.privacy-icon(v-if="spaceIsNotClosed" :src="privacyIcon" :class="privacyName")
-        .badge.status.explore(v-if="shouldShowInExplore")
-          img.icon(src="@/assets/checkmark.svg")
-        Loader(:visible="isLoadingSpace")
-      SpaceDetails(:visible="spaceDetailsIsVisible")
-      ImportArenaChannel(:visible="importArenaChannelIsVisible")
-      KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
+      .button-wrap
+        .logo(alt="kinopio logo" @click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop :class="{active : aboutIsVisible}" tabindex="0")
+          .logo-image
+            .label-badge(v-if="shouldShowNewStuffIsUpdated")
+              span NEW
+          img.down-arrow(src="@/assets/down-arrow.svg")
+        About(:visible="aboutIsVisible")
+    .space-details-wrap
+      .button-wrap
+        button(@click.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
+          .badge.info.template-badge(v-show="currentSpaceIsTemplate")
+            span Template
+          span {{currentSpaceName}}
+          img.icon.privacy-icon(v-if="spaceIsNotClosed" :src="privacyIcon" :class="privacyName")
+          .badge.status.explore(v-if="shouldShowInExplore")
+            img.icon(src="@/assets/checkmark.svg")
+          Loader(:visible="isLoadingSpace")
+        SpaceDetails(:visible="spaceDetailsIsVisible")
+        ImportArenaChannel(:visible="importArenaChannelIsVisible")
+        KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
 
   aside
     .top
@@ -35,7 +37,7 @@ header
     .bottom
       ResetPassword
       // Sign Up or In
-      .button-wrap(v-if="!userIsSignedIn && isOnline")
+      .button-wrap(v-if="!currentUserIsSignedIn && isOnline")
         button(@click.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}")
           span Sign Up or In
           Loader(:visible="loadingSignUpOrIn")
@@ -55,6 +57,7 @@ import templates from '@/spaces/templates.js'
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import privacy from '@/spaces/privacy.js'
+import utils from '@/utils.js'
 
 export default {
   name: 'Header',
@@ -109,8 +112,14 @@ export default {
     importArenaChannelIsVisible () { return this.$store.state.importArenaChannelIsVisible },
     users () {
       const currentUser = this.$store.state.currentUser
-      const spaceUsers = this.$store.state.currentSpace.users
-      const users = spaceUsers.filter(user => user.id !== currentUser.id)
+      const currentSpace = this.$store.state.currentSpace
+      const collaborators = currentSpace.collaborators
+      let users
+      users = utils.clone(currentSpace.users)
+      if (collaborators) {
+        collaborators.forEach(collaborator => users.push(collaborator))
+      }
+      users = users.filter(user => user.id !== currentUser.id)
       users.unshift(currentUser)
       return users
     },
@@ -123,7 +132,7 @@ export default {
         return `Space ${id}`
       }
     },
-    userIsSignedIn () {
+    currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     },
     isLoadingSpace () {
@@ -156,13 +165,6 @@ export default {
       })
       if (!privacyState) { return }
       return privacyState.name
-    },
-    isDevelopment () {
-      if (process.env.NODE_ENV === 'development') {
-        return true
-      } else {
-        return false
-      }
     },
     shouldShowInExplore () {
       const privacy = this.$store.state.currentSpace.privacy
@@ -217,17 +219,16 @@ header
     > *
       pointer-events all
   nav
-    margin-right 6px
-    flex-grow 2
-  .users
-      margin-right 6px
-
+    display flex
   .logo-about
     position relative
     display inline-block
     margin-right 6px
   .logo
     cursor pointer
+    display flex
+    > .logo-image
+      min-width 45px
     img
       vertical-align middle
     .down-arrow
@@ -242,10 +243,9 @@ header
     &.active
       .down-arrow
         transform translateY(5px)
-    .development
-      filter hue-rotate(-10deg)
   .space-details-wrap
     max-width 250px
+    margin-top 8px
     @media(max-width 414px)
       width calc(100vw - 200px)
     button
@@ -255,11 +255,12 @@ header
       max-width 100%
     dialog
       max-width initial
-    > .keyboard-shortcuts
-      max-height calc(100vh - 100px)
-    > button
-      .privacy-icon
-        margin-left 6px
+    .button-wrap
+      > .keyboard-shortcuts
+        max-height calc(100vh - 100px)
+      > button
+        .privacy-icon
+          margin-left 6px
 
   aside
     display flex
@@ -267,6 +268,13 @@ header
   .top
     display flex
     flex-direction row-reverse
+    > .users
+      padding-right 6px
+      max-width 40vw
+      display flex
+      flex-wrap wrap
+      justify-content flex-end
+
   .bottom
     margin-top 5px
     display flex

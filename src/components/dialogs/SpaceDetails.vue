@@ -17,7 +17,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
 
     button(v-if="isSpaceMember" @click="removeCurrentSpace")
       img.icon(src="@/assets/remove.svg")
-      span Remove
+      span {{removeLabel}}
     .button-wrap
       button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
         span Export
@@ -45,9 +45,9 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
       input(placeholder="Search" v-model="spaceFilter" ref="filterInput")
       button.borderless.clear-input-wrap(@click="clearFilter")
         img.icon(src="@/assets/add.svg")
-    SpaceList(:spaces="spacesFiltered" @selectSpace="changeSpace")
+    SpaceList(:spaces="spacesFiltered" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
 
-  Favorites(:visible="favoritesIsVisible")
+  Favorites(:visible="favoritesIsVisible" :loading="favoritesIsLoading")
 
 </template>
 
@@ -61,6 +61,7 @@ import SpaceList from '@/components/SpaceList.vue'
 import Favorites from '@/components/Favorites.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'SpaceDetails',
@@ -86,7 +87,10 @@ export default {
       filteredSpaces: [],
       privacyPickerIsVisible: false,
       favoritesIsVisible: false,
-      favoriteUsersIsVisible: false
+      favoriteUsersIsVisible: false,
+      favoritesIsLoading: false,
+      hasUpdatedFavorites: false,
+      removeLabel: 'Remove'
     }
   },
   created () {
@@ -101,7 +105,7 @@ export default {
     currentSpace () { return this.$store.state.currentSpace },
     exportScope () { return 'space' },
     isManySpaces () { return Boolean(this.spaces.length >= 5) },
-    userIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     shouldShowInExplore () {
       const privacy = this.$store.state.currentSpace.privacy
       if (privacy === 'private') { return false }
@@ -191,6 +195,7 @@ export default {
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space })
+      this.updateRemoveLabel()
     },
     changeToLastSpace () {
       if (this.spaces.length) {
@@ -198,23 +203,32 @@ export default {
       } else {
         this.addSpace()
       }
+      this.updateRemoveLabel()
     },
     removeCurrentSpace () {
-      this.$store.dispatch('currentSpace/removeCurrentSpace')
+      const currentUser = this.$store.state.currentUser
+      const currentUserIsSpaceCollaborator = this.$store.getters['currentUser/isSpaceCollaborator']()
+      if (currentUserIsSpaceCollaborator) {
+        this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', currentUser)
+      } else {
+        this.$store.dispatch('currentSpace/removeCurrentSpace')
+      }
       this.updateSpaces()
       this.changeToLastSpace()
     },
     async updateSpaces () {
+      const currentUser = this.$store.state.currentUser
       const userSpaces = cache.getAllSpaces().filter(space => {
         return this.$store.getters['currentUser/canEditSpace'](space)
       })
-      this.spaces = userSpaces
+      this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(userSpaces, currentUser)
+      this.updateRemoveLabel()
     },
     pruneCachedSpaces (remoteSpaces) {
       const remoteSpaceIds = remoteSpaces.map(space => space.id)
       const spacesToRemove = this.spaces.filter(space => !remoteSpaceIds.includes(space.id))
       spacesToRemove.forEach(spaceToRemove => {
-        cache.removeSpace(spaceToRemove)
+        cache.removeSpacePermanent(spaceToRemove)
       })
     },
     async updateWithRemoteSpaces () {
@@ -225,6 +239,22 @@ export default {
     },
     clearFilter () {
       this.filter = ''
+    },
+    updateRemoveLabel () {
+      const currentUserIsSpaceCollaborator = this.$store.getters['currentUser/isSpaceCollaborator']()
+      if (currentUserIsSpaceCollaborator) {
+        this.removeLabel = 'Leave'
+      } else {
+        this.removeLabel = 'Remove'
+      }
+    },
+    async updateFavorites () {
+      if (this.favoritesIsLoading) { return }
+      if (this.hasUpdatedFavorites) { return }
+      this.favoritesIsLoading = true
+      this.hasUpdatedFavorites = true
+      await this.$store.dispatch('currentUser/restoreUserFavorites')
+      this.favoritesIsLoading = false
     }
   },
   watch: {
@@ -234,6 +264,7 @@ export default {
         this.updateWithRemoteSpaces()
         this.closeDialogs()
         this.clearFilter()
+        this.updateFavorites()
       } else {
         this.favoritesIsVisible = false
       }

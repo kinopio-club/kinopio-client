@@ -25,11 +25,11 @@ export default {
     }
   },
   computed: {
-    userIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     privacyStates () {
-      const userIsSignedIn = this.$store.getters['currentUser/isSignedIn']
+      const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
       const privacyStates = privacy.states()
-      if (userIsSignedIn) {
+      if (currentUserIsSignedIn) {
         return privacyStates
       } else {
         return privacyStates.slice(1, 3)

@@ -8,6 +8,7 @@
   .preload
     .logo-hover
     .logo-active
+  .badge.label-badge.development(v-if="isDevelopment") DEV
 </template>
 
 <script>
@@ -22,6 +23,15 @@ export default {
     MagicPaint,
     Footer,
     KeyboardShortcutsHandler
+  },
+  computed: {
+    isDevelopment () {
+      if (process.env.NODE_ENV === 'development') {
+        return true
+      } else {
+        return false
+      }
+    }
   }
 }
 </script>
@@ -79,6 +89,14 @@ body
 
 .app
   position relative
+  > .label-badge
+    color var(--primary-background)
+    min-height initial
+    left initial
+    right 12px
+    bottom 12px
+    position fixed
+    pointer-events none
 
 img
   max-width 100%
@@ -442,6 +460,7 @@ code
     background-size cover
     display inline-block
     vertical-align middle
+    position relative
   &:hover,
   &:focus
     outline none

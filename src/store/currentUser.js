@@ -17,7 +17,8 @@ export default {
     apiKey: '',
     arenaAccessToken: '',
     favoriteUsers: [],
-    favoriteSpaces: []
+    favoriteSpaces: [],
+    collaborators: []
   },
   getters: {
     isCurrentUser: (state) => (user) => {
@@ -29,8 +30,8 @@ export default {
     canEditSpace: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
       const spaceIsOpen = space.privacy === 'open'
-      const userIsSignedIn = getters.isSignedIn
-      const canEditOpenSpace = spaceIsOpen && userIsSignedIn
+      const currentUserIsSignedIn = getters.isSignedIn
+      const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
       const isSpaceMember = getters.isSpaceMember(space)
       return canEditOpenSpace || isSpaceMember
     },
@@ -41,18 +42,31 @@ export default {
       return state.id === connection.userId
     },
     isSpaceMember: (state, getters, rootState) => (space) => {
-      // todo add is collaborator check
       space = space || rootState.currentSpace
+      const userIsCollaborator = getters.isSpaceCollaborator(space)
       let userIsInSpace
       if (space.users) {
-        userIsInSpace = space.users.find(user => {
+        userIsInSpace = Boolean(space.users.find(user => {
           return user.id === state.id
-        })
+        }))
       } else {
         userIsInSpace = space.userId === state.id
       }
-
-      return Boolean(userIsInSpace)
+      return userIsCollaborator || userIsInSpace
+    },
+    isSpaceCollaborator: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
+      if (space.collaborators) {
+        return Boolean(space.collaborators.find(collaborator => {
+          return collaborator.id === state.id
+        }))
+      }
+    },
+    isInvitedButCannotEditSpace: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
+      const currentUserIsSignedIn = getters.isSignedIn
+      const isInvitedToSpace = Boolean(cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id))
+      return !currentUserIsSignedIn && isInvitedToSpace
     }
   },
   mutations: {
@@ -67,6 +81,16 @@ export default {
     lastSpaceId: (state, spaceId) => {
       state.lastSpaceId = spaceId
       cache.updateUser('lastSpaceId', spaceId)
+    },
+    resetLastSpaceId: (state) => {
+      const spaces = cache.getAllSpaces()
+      const lastSpace = spaces[1]
+      if (lastSpace) {
+        state.lastSpaceId = lastSpace.id
+      } else {
+        state.lastSpaceId = ''
+      }
+      cache.updateUser('lastSpaceId', state.lastSpaceId)
     },
     lastReadNewStuffId: (state, newStuffId) => {
       state.lastReadNewStuffId = newStuffId
@@ -180,14 +204,16 @@ export default {
       remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
       if (remoteUser.updatedAt > cachedUser.cacheDate) { console.log('🌸 Restore user from remote', remoteUser) }
       context.commit('updateUser', remoteUser)
-      context.dispatch('restoreUserFavorites', remoteUser)
     },
-    restoreUserFavorites: async (context, cachedUser) => {
-      context.commit('isLoadingUserFavorites', true, { root: true })
-      const favorites = await context.dispatch('api/getUserFavorites', null, { root: true })
+    restoreUserFavorites: async (context) => {
+      if (!context.getters.isSignedIn) { return }
+      let favorites = {
+        favoriteUsers: [],
+        favoriteSpaces: []
+      }
+      favorites = await context.dispatch('api/getUserFavorites', null, { root: true }) || favorites
       context.commit('favoriteUsers', favorites.favoriteUsers)
       context.commit('favoriteSpaces', favorites.favoriteSpaces)
-      context.commit('isLoadingUserFavorites', false, { root: true })
     },
     addFavorite: (context, { type, item }) => {
       context.commit('notifyAccessFavorites', true, { root: true })

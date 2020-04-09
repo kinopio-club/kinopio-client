@@ -353,6 +353,27 @@ export default {
     return remoteSpace
   },
 
+  AddCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
+    return spaces.map(space => {
+      if (space.userId !== currentUser.id) {
+        space.currentUserIsCollaborator = true
+      }
+      return space
+    })
+  },
+
+  removeRemovedCardsFromSpace (space) {
+    if (!space.cards) { return }
+    let cards = []
+    space.cards.forEach(card => {
+      if (!card.isRemoved) {
+        cards.push(card)
+      }
+    })
+    space.cards = cards
+    return space
+  },
+
   // urls 🌍
 
   // same as server util
@@ -379,10 +400,10 @@ export default {
     }
   },
 
-  updateWindowUrlAndTitle ({ space, shouldUpdateUrl, userIsSignedIn }) {
+  updateWindowUrlAndTitle ({ space, shouldUpdateUrl, currentUserIsSignedIn }) {
     const title = this.title(space)
     let url = ''
-    if (shouldUpdateUrl || userIsSignedIn) {
+    if (shouldUpdateUrl || currentUserIsSignedIn) {
       url = this.url(space)
     }
     url = '/' + url

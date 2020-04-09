@@ -16,11 +16,14 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
       .row
         .badge.success.success-message(v-if="urlIsCopied") Url Copied
 
-  //- section(v-if="spaceHasUrl && isSpaceMember")
-  //-   .button-wrap
-  //-     button(@click.stop="toggleInviteCollaboratorsIsVisible" :class="{ active: inviteCollaboratorsIsVisible }")
-  //-       span Invite Collaborators
-  //-     InviteCollaborators(:visible="inviteCollaboratorsIsVisible")
+  section(v-if="spaceHasUrl && isSpaceMember")
+    .button-wrap
+      button(@click.stop="toggleInviteCollaboratorsIsVisible" :class="{ active: inviteCollaboratorsIsVisible }")
+        span Invite Collaborators
+      InviteCollaborators(:visible="inviteCollaboratorsIsVisible")
+  section.results-section.collaborators(v-if="spaceHasUrl && isSpaceMember && spaceHasCollaborators")
+    UserList(:users="spaceCollaborators" :selectedUser="selectedUser" :showRemoveUser="true" @selectSpace="showUserDetails" @removeUser="removeCollaborator")
+    UserDetails(:visible="userDetailsIsVisible" :user="selectedUser" :userDetailsPosition="userDetailsPosition" :userDetailsIsFromList="true" @removedCollaborator="removedCollaborator")
 
   section(v-if="!spaceHasUrl")
     p
@@ -34,12 +37,15 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
 <script>
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import InviteCollaborators from '@/components/dialogs/InviteCollaborators.vue'
+import UserList from '@/components/UserList.vue'
 
 export default {
   name: 'Share',
   components: {
     PrivacyButton,
-    InviteCollaborators
+    InviteCollaborators,
+    UserList,
+    UserDetails: () => import('@/components/dialogs/UserDetails.vue')
   },
   props: {
     visible: Boolean
@@ -49,7 +55,11 @@ export default {
       urlIsCopied: false,
       spaceHasUrl: false,
       privacyPickerIsVisible: false,
-      inviteCollaboratorsIsVisible: false
+      inviteCollaboratorsIsVisible: false,
+      selectedUser: {},
+      userDetailsPosition: {},
+      userDetailsIsVisible: false,
+      spaceCollaborators: []
     }
   },
   computed: {
@@ -75,6 +85,9 @@ export default {
     isSpaceMember () {
       const currentSpace = this.$store.state.currentSpace
       return this.$store.getters['currentUser/isSpaceMember'](currentSpace)
+    },
+    spaceHasCollaborators () {
+      return Boolean(this.spaceCollaborators.length)
     }
   },
   methods: {
@@ -110,6 +123,35 @@ export default {
     closeDialogs () {
       this.privacyPickerIsVisible = false
       this.inviteCollaboratorsIsVisible = false
+      this.userDetailsIsNotVisible()
+    },
+    showUserDetails (event, user) {
+      const elementRect = event.target.getBoundingClientRect()
+      this.userDetailsIsNotVisible()
+      this.userDetailsPosition = {
+        top: elementRect.y - 6 + 'px'
+      }
+      this.selectedUser = user
+      this.userDetailsIsVisible = true
+    },
+    userDetailsIsNotVisible () {
+      this.userDetailsIsVisible = false
+      this.selectedUser = {}
+    },
+    removedCollaborator (user) {
+      const isCurrentUser = this.$store.state.currentUser.id === user.id
+      if (isCurrentUser) {
+        this.$store.commit('closeAllDialogs')
+      }
+      this.updateSpaceCollaborators()
+    },
+    async removeCollaborator (user) {
+      this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
+      this.removedCollaborator(user)
+    },
+    updateSpaceCollaborators () {
+      this.userDetailsIsNotVisible()
+      this.spaceCollaborators = this.$store.state.currentSpace.collaborators
     }
   },
   watch: {
@@ -117,6 +159,9 @@ export default {
       this.urlIsCopied = false
       this.spaceHasUrl = window.location.href !== (window.location.origin + '/')
       this.closeDialogs()
+      if (visible) {
+        this.updateSpaceCollaborators()
+      }
     }
   }
 }
@@ -127,6 +172,7 @@ export default {
   top calc(100% - 8px)
   left initial
   right 8px
+  max-height calc(100vh - 25px)
   .badge
     display inline-block
     &.danger
@@ -142,8 +188,12 @@ export default {
     margin-top 10px
   .description
     margin-top 3px
-
   dialog.privacy-picker
     left initial
     right 8px
+  dialog.user-details
+    left initial
+    right calc(100% - 20px)
+  .collaborators
+    max-height calc(100vh - 200px)
 </style>

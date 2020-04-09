@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.invite-others-to-edit(v-if="visible" :open="visible" @click.stop)
+dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.stop)
 
   // add by email
   // share link
@@ -67,21 +67,28 @@ export default {
         url: this.url
       }
       navigator.share(data)
+    },
+    async updateCollaboratorKey () {
+      const space = this.$store.state.currentSpace
+      const collaboratorKey = await this.$store.dispatch('api/getSpaceCollaboratorKey', space)
+      this.$store.commit('currentSpace/updateSpace', { collaboratorKey })
     }
   },
   watch: {
     visible (visible) {
       this.urlIsCopied = false
+      this.updateCollaboratorKey()
     }
   }
 }
 </script>
 
-<style lang="stylus" scoped>
-// todo media query for short screens (SE)?
-.invite-others-to-edit
+<style lang="stylus">
+.invite-collaborators
   left initial
   right 8px
+  max-height calc(100vh - 180px)
+  overflow auto
   .textarea
     margin-top 10px
 </style>

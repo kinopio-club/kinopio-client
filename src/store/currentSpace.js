@@ -17,6 +17,7 @@ export default {
   mutations: {
 
     restoreSpace: (state, space) => {
+      space = utils.removeRemovedCardsFromSpace(space)
       Object.assign(state, space)
     },
     // Added aug 2019, can safely remove this in aug 2020
@@ -42,12 +43,37 @@ export default {
         cache.updateSpace('users', state.users, state.id)
       }
     },
+    addCollaboratorToSpace: (state, newUser) => {
+      utils.typeCheck(newUser, 'object')
+      const userExists = state.collaborators.find(collaborator => {
+        return collaborator.id === newUser.id
+      })
+      if (!userExists) {
+        state.collaborators.push(newUser)
+        const space = utils.clone(state)
+        cache.saveSpace(space)
+        cache.updateSpace('collaborators', space.collaborators, space.id)
+      }
+    },
     removeUserFromSpace: (state, oldUser) => {
       utils.typeCheck(oldUser, 'object')
       state.users = state.users.filter(user => {
         return user.id !== oldUser.id
       })
       cache.updateSpace('users', state.users, state.id)
+    },
+    removeCollaboratorFromSpace: (state, oldUser) => {
+      utils.typeCheck(oldUser, 'object')
+      state.collaborators = state.collaborators.filter(user => {
+        return user.id !== oldUser.id
+      })
+      const updatedSpace = utils.clone(state)
+      // same as updateSpace() to force reactivity
+      const updates = Object.keys(updatedSpace)
+      updates.forEach(key => {
+        Vue.set(state, key, updatedSpace[key])
+        cache.updateSpace(key, state[key], state.id)
+      })
     },
 
     // Space
@@ -219,12 +245,7 @@ export default {
       // restore last space
       } else if (user.lastSpaceId) {
         console.log('🚃 Restore last space', user.lastSpaceId)
-        let spaceToRestore = cache.space(user.lastSpaceId)
-        if (!spaceToRestore.id) {
-          spaceToRestore = { id: user.lastSpaceId }
-        }
-        context.dispatch('loadSpace', spaceToRestore)
-        context.dispatch('updateUserLastSpaceId')
+        context.dispatch('loadLastSpace')
       // hello kinopio
       } else {
         console.log('🚃 Create new Hello Kinopio space')
@@ -250,19 +271,20 @@ export default {
       space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
       space.cards[1].x = random(180, 200)
       space.cards[1].y = random(160, 180)
+      space.userId = context.rootState.currentUser.id
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       context.commit('restoreSpace', uniqueNewSpace)
     },
     saveNewSpace: (context) => {
       const space = utils.clone(context.state)
       const user = context.rootState.currentUser
-      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       cache.saveSpace(space)
       context.dispatch('api/addToQueue', {
         name: 'createSpace',
         body: space
       }, { root: true })
-      utils.updateWindowUrlAndTitle({ space, userIsSignedIn })
+      utils.updateWindowUrlAndTitle({ space, currentUserIsSignedIn })
       context.commit('addUserToSpace', user)
     },
     copyCurrentSpace: (context) => {
@@ -289,17 +311,23 @@ export default {
         context.dispatch('updateUserLastSpaceId')
         context.commit('notifyReadOnly', false, { root: true })
         context.commit('notifyNewUser', false, { root: true })
-        context.commit('notifySignUpToEditOpenSpace', false, { root: true })
+        context.commit('notifySignUpToEditSpace', false, { root: true })
       })
     },
     getRemoteSpace: async (context, space) => {
-      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      const anonymousCollaboratorKey = context.rootState.anonymousCollaboratorKey
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const currentSpaceHasUrl = utils.currentSpaceHasUrl(space)
       let remoteSpace
       try {
         context.commit('isLoadingSpace', true, { root: true })
-        if (userIsSignedIn) {
+        if (currentUserIsSignedIn) {
           remoteSpace = await context.dispatch('api/getSpace', space, { root: true })
+        } else if (anonymousCollaboratorKey) {
+          space.collaboratorKey = anonymousCollaboratorKey
+          remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
+          cache.saveInvitedSpace(remoteSpace)
+          context.commit('anonymousCollaboratorKey', '', { root: true })
         } else if (currentSpaceHasUrl) {
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
         }
@@ -310,6 +338,9 @@ export default {
         }
         if (error.status === 401) {
           context.commit('notifySpaceNotFound', true, { root: true })
+          context.dispatch('removeLocalSpaceIfUserIsRemoved', space)
+          context.dispatch('loadLastSpace')
+          cache.removeInvitedSpace(space)
         }
         if (error.status === 500) {
           context.commit('notifyConnectionError', true, { root: true })
@@ -330,6 +361,17 @@ export default {
       }
       return utils.normalizeRemoteSpace(remoteSpace)
     },
+    removeLocalSpaceIfUserIsRemoved: (context, space) => {
+      const cachedSpace = cache.space(space.id)
+      const currentUserIsRemovedFromSpace = utils.objectHasKeys(cachedSpace)
+      context.dispatch('currentUser/removeFavorite', { type: 'space', item: space }, { root: true })
+      if (currentUserIsRemovedFromSpace) {
+        context.commit('currentUser/resetLastSpaceId', null, { root: true })
+        cache.removeSpacePermanent(space)
+        const emptySpace = { id: space.id, cards: [], connections: [] }
+        context.commit('restoreSpace', emptySpace)
+      }
+    },
     updateSpacePageSize: (context) => {
       Vue.nextTick(() => {
         context.dispatch('updateSpacePageSize', null, { root: true })
@@ -338,13 +380,7 @@ export default {
     loadSpace: async (context, space) => {
       const emptySpace = { id: space.id, cards: [], connections: [] }
       const cachedSpace = cache.space(space.id)
-      // reset notifications
-      context.commit('notifySpaceNotFound', false, { root: true })
-      context.commit('notifyConnectionError', false, { root: true })
-      context.commit('notifySignUpToEditOpenSpace', false, { root: true })
-      context.commit('notifySpaceIsOpenAndEditable', false, { root: true })
-      context.commit('notifyAccessFavorites', false, { root: true })
-
+      context.commit('clearAllNotifications', null, { root: true })
       // restore local
       context.commit('restoreSpace', emptySpace)
       context.commit('restoreSpace', utils.normalizeSpace(cachedSpace))
@@ -355,7 +391,7 @@ export default {
       if (remoteSpace) {
         context.commit('restoreSpace', utils.normalizeSpace(remoteSpace))
         context.dispatch('history/playback', null, { root: true })
-        context.dispatch('checkIfShouldNotifySignUpToEditOpenSpace', remoteSpace)
+        context.dispatch('checkIfShouldNotifySignUpToEditSpace', remoteSpace)
         utils.updateWindowUrlAndTitle({
           space: remoteSpace,
           shouldUpdateUrl: true
@@ -380,16 +416,25 @@ export default {
       context.commit('spaceUrlToLoad', '', { root: true })
       context.dispatch('updateSpacePageSize')
     },
+    loadLastSpace: (context) => {
+      const user = context.rootState.currentUser
+      let spaceToRestore = cache.space(user.lastSpaceId)
+      if (!spaceToRestore.id) {
+        spaceToRestore = { id: user.lastSpaceId }
+      }
+      context.dispatch('loadSpace', spaceToRestore)
+      context.dispatch('updateUserLastSpaceId')
+    },
     updateSpace: async (context, updates) => {
       const space = utils.clone(context.state)
-      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       updates.id = space.id
       if (updates.name) {
         const updatedSpace = utils.clone(space)
         updatedSpace.name = updates.name
         utils.updateWindowUrlAndTitle({
           space: updatedSpace,
-          userIsSignedIn
+          currentUserIsSignedIn
         })
       }
       context.commit('updateSpace', updates)
@@ -454,13 +499,31 @@ export default {
         context.commit('notifySpaceIsRemoved', false, { root: true })
       }
     },
-    checkIfShouldNotifySignUpToEditOpenSpace: (context, space) => {
+    checkIfShouldNotifySignUpToEditSpace: (context, space) => {
       const spaceIsOpen = space.privacy === 'open'
-      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
-      if (spaceIsOpen && !userIsSignedIn) {
-        context.commit('notifySignUpToEditOpenSpace', true, { root: true })
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      const currentUserIsInvitedButCannotEditSpace = context.rootGetters['currentUser/isInvitedButCannotEditSpace'](space)
+      if (spaceIsOpen && !currentUserIsSignedIn) {
+        context.commit('notifySignUpToEditSpace', true, { root: true })
+      } else if (currentUserIsInvitedButCannotEditSpace) {
+        context.commit('notifySignUpToEditSpace', true, { root: true })
       } else {
-        context.commit('notifySignUpToEditOpenSpace', false, { root: true })
+        context.commit('notifySignUpToEditSpace', false, { root: true })
+      }
+    },
+    removeCollaboratorFromSpace: (context, user) => {
+      const space = utils.clone(context.state)
+      const userName = user.name || 'User'
+      context.dispatch('api/removeSpaceCollaborator', { space, user }, { root: true })
+      context.commit('removeCollaboratorFromSpace', user)
+      const isCurrentUser = user.id === context.rootState.currentUser.id
+      if (isCurrentUser) {
+        context.dispatch('loadLastSpace')
+        cache.removeInvitedSpace(space)
+        cache.removeSpacePermanent(space)
+        context.commit('addNotification', { message: `You left ${space.name}`, type: 'success' }, { root: true })
+      } else {
+        context.commit('addNotification', { message: `${userName} removed from space`, type: 'success' }, { root: true })
       }
     },
 

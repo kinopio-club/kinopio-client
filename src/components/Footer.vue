@@ -58,7 +58,7 @@ export default {
     }
   },
   mounted () {
-    console.log('🐢 kinopio-client', this.buildHash) // TODO move this stuff to store init, or app?
+    console.log('🐢 kinopio-client build', this.buildHash) // TODO move this stuff to store init, or app?
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
         this.removedIsVisible = false

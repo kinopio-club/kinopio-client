@@ -192,7 +192,9 @@ export default {
       const response = await this.$store.dispatch('api/signUp', { email, password, currentUser })
       const result = await response.json()
       if (this.isSuccess(response)) {
+        this.$store.commit('clearAllNotifications', false)
         await this.createSpaces(result.apiKey)
+        this.addCollaboratorToInvitedSpaces()
       } else {
         await this.handleErrors(result)
       }
@@ -212,34 +214,55 @@ export default {
         await this.createSpaces(result.apiKey)
         const spaces = await this.$store.dispatch('api/getUserSpaces')
         cache.addSpaces(spaces)
-        this.$store.commit('triggerSpaceDetailsVisible')
         const currentSpace = this.$store.state.currentSpace
         const currentUser = this.$store.state.currentUser
-        const userIsSignedIn = this.$store.getters['currentUser/isSignedIn']
+        const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
         utils.updateWindowUrlAndTitle({
           space: currentSpace,
-          userIsSignedIn
+          currentUserIsSignedIn
         })
         this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
         this.$store.commit('currentSpace/addUserToSpace', currentUser)
-        this.$store.dispatch('currentUser/restoreUserFavorites', currentUser)
-        this.$store.commit('notifySignUpToEditOpenSpace', false, { root: true })
+        this.$store.commit('clearAllNotifications', false)
         this.$store.dispatch('currentSpace/checkIfShouldNotifyReadOnly')
-        this.$store.commit('notifyNewUser', false, { root: true })
+        this.$store.commit('notifyNewUser', false)
+        this.addCollaboratorToInvitedSpaces()
+        this.$store.commit('triggerSpaceDetailsVisible')
       } else {
         await this.handleErrors(result)
       }
     },
 
+    addCollaboratorToCurrentSpace () {
+      const invitedSpaceIds = cache.invitedSpaces().map(space => space.id)
+      const currentSpace = this.$store.state.currentSpace
+      const currentUser = this.$store.state.currentUser
+      if (invitedSpaceIds.includes(currentSpace.id)) {
+        this.$store.commit('currentSpace/addCollaboratorToSpace', currentUser)
+      }
+    },
+
+    addCollaboratorToInvitedSpaces () {
+      let invitedSpaces = cache.invitedSpaces()
+      invitedSpaces = invitedSpaces.map(space => {
+        space.userId = this.$store.state.currentUser.id
+        return space
+      })
+      this.$store.dispatch('api/addToQueue', { name: 'addCollaboratorToSpaces', body: invitedSpaces })
+      this.addCollaboratorToCurrentSpace()
+    },
+
     async createSpaces (apiKey) {
-      cache.updateIdsInAllSpaces() // added Oct 2019 for legacy spaces, can safely remove this in Oct 2020
-      const updatedSpace = cache.space(this.$store.state.currentSpace.id)
-      this.$store.commit('addNotification', { message: 'Signed In', type: 'success' })
-      this.$store.commit('currentSpace/restoreSpace', updatedSpace)
       this.$store.commit('currentUser/apiKey', apiKey)
-      await this.$store.dispatch('api/createSpaces')
+      const userHasCachedSpaces = cache.getAllSpaces().length
+      if (userHasCachedSpaces) {
+        const updatedCurrentSpace = cache.space(this.$store.state.currentSpace.id)
+        this.$store.commit('currentSpace/restoreSpace', updatedCurrentSpace)
+        await this.$store.dispatch('api/createSpaces')
+      }
       this.loading.signUpOrIn = false
       this.$store.commit('closeAllDialogs')
+      this.$store.commit('addNotification', { message: 'Signed In', type: 'success' })
     },
 
     async resetPassword (event) {
@@ -275,6 +298,7 @@ export default {
   top calc(100% - 8px)
   left initial
   right 8px
+  overflow auto
   .reset-form
     margin-top 10px
   p,

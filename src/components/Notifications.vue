@@ -15,17 +15,19 @@ aside.notifications(@click="closeAllDialogs")
     .row
       button(@click.stop="triggerSpaceDetailsFavoritesVisible") Your Spaces
 
-  .persistent-item.success(v-if="notifySignUpToEditOpenSpace")
+  .persistent-item.success(v-if="notifySignUpToEditSpace" :class="{'notification-jiggle': notifyReadOnlyJiggle}")
     p
-      img.icon.open(src="@/assets/open.svg")
-      span This space is open to edits, but you'll need to sign up or in first
+      img.icon(:src="privacyIcon" :class="privacyName")
+      template(v-if="spacePrivacyIsOpen")
+        span This space is open to edits, but you'll need to sign up or in first
+      template(v-else)
+        span You're invited to edit this space, but you'll need to sign up or in first
     .row
       button(@click.stop="triggerSignUpOrInIsVisible") Sign Up or In
 
   .persistent-item(v-if="notifyReadOnly" ref="readOnly" :class="{'notification-jiggle': notifyReadOnlyJiggle}")
     p You can't edit this space, but you can save your own copy
     .row
-      //- button(@click="triggerSpaceDetailsVisible") Your Spaces
       button(@click="copyCurrentSpace")
         img.icon(src="@/assets/add.svg")
         span Save a Copy
@@ -34,7 +36,7 @@ aside.notifications(@click="closeAllDialogs")
     p Space could not be found, or is private
     .row
       button(@click.stop="triggerSpaceDetailsVisible") Your Spaces
-      button(v-if="!userIsSignedIn" @click.stop="triggerSignUpOrInIsVisible") Sign Up or In
+      button(v-if="!currentUserIsSignedIn" @click.stop="triggerSignUpOrInIsVisible") Sign Up or In
 
   .persistent-item(v-if="notifySpaceIsRemoved")
     p This space has been removed
@@ -64,6 +66,7 @@ aside.notifications(@click="closeAllDialogs")
 
 <script>
 import cache from '@/cache.js'
+import privacy from '@/spaces/privacy.js'
 
 export default {
   name: 'Notifications',
@@ -101,12 +104,20 @@ export default {
     notifyConnectionError () { return this.$store.state.notifyConnectionError },
     notifySpaceIsRemoved () { return this.$store.state.notifySpaceIsRemoved },
     notifyNewUser () { return this.$store.state.notifyNewUser },
-    notifySignUpToEditOpenSpace () { return this.$store.state.notifySignUpToEditOpenSpace },
+    notifySignUpToEditSpace () { return this.$store.state.notifySignUpToEditSpace },
     notifySpaceIsOpenAndEditable () { return this.$store.state.notifySpaceIsOpenAndEditable },
     notifyAccessFavorites () { return this.$store.state.notifyAccessFavorites },
-    userIsSignedIn () {
+    currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
-    }
+    },
+    privacyState () {
+      return privacy.states().find(state => {
+        return state.name === this.$store.state.currentSpace.privacy
+      })
+    },
+    privacyIcon () { return require(`@/assets/${this.privacyState.icon}.svg`) },
+    privacyName () { return this.privacyState.name },
+    spacePrivacyIsOpen () { return this.privacyName === 'open' }
   },
   methods: {
     icon (icon) {

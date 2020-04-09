@@ -34,7 +34,7 @@ export default {
   computed: {
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     showInExplore () { return this.$store.state.currentSpace.showInExplore },
-    userIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     spaceIsHelloKinopio () { return this.$store.getters['currentSpace/isHelloKinopio'] },
     showInExploreLabel () {
       return this.label || 'Show in Explore'
@@ -42,7 +42,7 @@ export default {
   },
   methods: {
     toggleShowInExplore () {
-      if (!this.userIsSignedIn) {
+      if (!this.currentUserIsSignedIn) {
         this.error.userNeedsToSignUpOrIn = true
         return
       }

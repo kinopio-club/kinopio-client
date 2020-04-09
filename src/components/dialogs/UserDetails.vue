@@ -17,7 +17,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
       label(:class="{active: isFavoriteUser}" @click.prevent="toggleIsFavoriteUser" @keydown.stop.enter="toggleIsFavoriteUser")
         input(type="checkbox" v-model="isFavoriteUser")
         span Favorite
-    .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
+    .badge.danger.error-message(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
 
   //- Current User
   section(v-if="isCurrentUser")
@@ -29,11 +29,25 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
       input.name(placeholder="What's your name?" v-model="userName" name="Name")
   section(v-if="isCurrentUser")
     .button-wrap
-      button(@click.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}") Settings
+      button(@click.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}")
+        span Settings
       UserSettings(:user="user" :visible="userSettingsIsVisible" @removeUser="signOut")
-    button(v-if="isSignedIn" @click="signOut") Sign Out
-    button(v-else @click="triggerSignUpOrInIsVisible") Sign Up or In
+    button(v-if="isSignedIn" @click="signOut")
+      img.icon.moon(src="@/assets/moon.svg")
+      span Sign Out
+    button(v-else @click="triggerSignUpOrInIsVisible")
+      span Sign Up or In
 
+  //- Collaborator
+  section(v-if="isCollaborator && currentUserIsSpaceMember")
+    template(v-if="isCurrentUser && isCollaborator")
+      button(@click.stop="removeCollaborator")
+        img.icon(src="@/assets/remove.svg")
+        span Leave Space
+    template(v-if="!isCurrentUser")
+      button(@click.stop="removeCollaborator")
+        img.icon(src="@/assets/remove.svg")
+        span Remove Collaborator
 </template>
 
 <script>
@@ -57,7 +71,8 @@ export default {
     user: Object,
     detailsOnRight: Boolean,
     visible: Boolean,
-    userDetailsPosition: Object
+    userDetailsPosition: Object,
+    userDetailsIsFromList: Boolean
   },
   data () {
     return {
@@ -99,8 +114,19 @@ export default {
     },
     isFavoriteUser () {
       const favoriteUsers = this.$store.state.currentUser.favoriteUsers
-      const isFavoriteUser = favoriteUsers.filter(user => user.id === this.user.id)
-      return Boolean(isFavoriteUser.length)
+      const isFavoriteUser = Boolean(favoriteUsers.find(user => {
+        return user.id === this.user.id
+      }))
+      return isFavoriteUser
+    },
+    isCollaborator () {
+      const currentSpace = this.$store.state.currentSpace
+      return Boolean(currentSpace.collaborators.find(collaborator => {
+        return collaborator.id === this.user.id
+      }))
+    },
+    currentUserIsSpaceMember () {
+      return this.$store.getters['currentUser/isSpaceMember']()
     },
     positionTop () {
       if (utils.objectHasKeys(this.userDetailsPosition)) {
@@ -169,6 +195,14 @@ export default {
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+    },
+    async removeCollaborator () {
+      const user = this.user
+      this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
+      if (!this.userDetailsIsFromList) {
+        this.$store.commit('closeAllDialogs')
+      }
+      this.$emit('removedCollaborator', user)
     }
   },
   watch: {
@@ -194,8 +228,10 @@ export default {
     right 8px
   .name
     margin-left 6px
-  .danger
+  .error-message
     margin-top 10px
+  .moon
+    vertical-align -2px
 
 .user-info
   display: flex
