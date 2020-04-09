@@ -88,12 +88,6 @@ export default {
     space.cacheDate = Date.now()
     this.storeLocal(`space-${space.id}`, space)
   },
-  updateIdsInAllSpaces () {
-    let spaces = this.getAllSpaces()
-    spaces.forEach(space => {
-      this.updateIdsInSpace(space)
-    })
-  },
   updateIdsInSpace (space) {
     const items = {
       cards: space.cards,

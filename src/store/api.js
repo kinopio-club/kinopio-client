@@ -277,10 +277,7 @@ const self = {
           return space
         })
         removedSpaces.forEach(space => spaces.push(space))
-        spaces.map(space => {
-          utils.migrationEnsureRemovedCards(space)
-          return space
-        })
+        spaces = spaces.filter(space => space)
         const body = spaces
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/space/multiple`, options)

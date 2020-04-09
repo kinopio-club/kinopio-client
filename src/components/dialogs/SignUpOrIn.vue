@@ -256,7 +256,6 @@ export default {
       this.$store.commit('currentUser/apiKey', apiKey)
       const userHasCachedSpaces = cache.getAllSpaces().length
       if (userHasCachedSpaces) {
-        cache.updateIdsInAllSpaces() // added Oct 2019 for legacy spaces, can safely remove this in Oct 2020
         const updatedCurrentSpace = cache.space(this.$store.state.currentSpace.id)
         this.$store.commit('currentSpace/restoreSpace', updatedCurrentSpace)
         await this.$store.dispatch('api/createSpaces')
