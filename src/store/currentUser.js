@@ -206,6 +206,7 @@ export default {
       context.commit('updateUser', remoteUser)
     },
     restoreUserFavorites: async (context) => {
+      if (!context.getters.isSignedIn) { return }
       let favorites = {
         favoriteUsers: [],
         favoriteSpaces: []
