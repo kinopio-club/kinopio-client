@@ -203,15 +203,13 @@ export default {
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
     },
-    removeCollaborator () {
+    async removeCollaborator () {
       const user = this.user
-      this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
+      await this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
       if (!this.userDetailsIsFromList) {
         this.$store.commit('closeAllDialogs')
       }
-      this.$nextTick(() => {
-        this.$emit('updateSpaceCollaborators')
-      })
+      this.$emit('removedCollaborator', user)
     }
   },
   watch: {
