@@ -50,7 +50,9 @@ export default {
       })
       if (!userExists) {
         state.collaborators.push(newUser)
-        cache.updateSpace('collaborators', state.collaborators, state.id)
+        const space = utils.clone(state)
+        cache.saveSpace(space)
+        cache.updateSpace('collaborators', space.collaborators, space.id)
       }
     },
     removeUserFromSpace: (state, oldUser) => {

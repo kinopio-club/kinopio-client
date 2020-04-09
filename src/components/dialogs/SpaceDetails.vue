@@ -218,7 +218,7 @@ export default {
       const remoteSpaceIds = remoteSpaces.map(space => space.id)
       const spacesToRemove = this.spaces.filter(space => !remoteSpaceIds.includes(space.id))
       spacesToRemove.forEach(spaceToRemove => {
-        cache.removeSpace(spaceToRemove)
+        cache.removeSpacePermanent(spaceToRemove)
       })
     },
     async updateWithRemoteSpaces () {

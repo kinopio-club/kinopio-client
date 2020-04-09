@@ -299,6 +299,7 @@ export default {
   top calc(100% - 8px)
   left initial
   right 8px
+  overflow auto
   .reset-form
     margin-top 10px
   p,
