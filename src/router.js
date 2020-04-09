@@ -73,6 +73,7 @@ export default new Router({
           store.dispatch('api/addSpaceCollaborator', { spaceId, collaboratorKey })
             .then(response => {
               store.commit('spaceUrlToLoad', spaceId)
+              store.commit('addNotification', { message: 'You can now edit this space', type: 'success' })
               next()
             }).catch(error => {
               console.error(error)
