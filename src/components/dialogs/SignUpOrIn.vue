@@ -214,7 +214,6 @@ export default {
         await this.createSpaces(result.apiKey)
         const spaces = await this.$store.dispatch('api/getUserSpaces')
         cache.addSpaces(spaces)
-        this.$store.commit('triggerSpaceDetailsVisible')
         const currentSpace = this.$store.state.currentSpace
         const currentUser = this.$store.state.currentUser
         const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
@@ -228,6 +227,7 @@ export default {
         this.$store.dispatch('currentSpace/checkIfShouldNotifyReadOnly')
         this.$store.commit('notifyNewUser', false)
         this.addCollaboratorToInvitedSpaces()
+        this.$store.commit('triggerSpaceDetailsVisible')
       } else {
         await this.handleErrors(result)
       }
