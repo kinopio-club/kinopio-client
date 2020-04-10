@@ -6,6 +6,10 @@
       button(@click.stop="toggleTemplateCategoryPickerIsVisible" :class="{active: templateCategoryPickerIsVisible}")
         .badge.info {{filterCategory.name}}
       TemplateCategoryPicker(:visible="templateCategoryPickerIsVisible" :selectedCategoryId="filteredCategoryId" @closeDialog="closeDialogs" @selectCategory="updateFilteredCategory")
+    .button-wrap
+      button(@click.stop="toggleContactIsVisible" :class="{active: contactIsVisible}")
+        span Suggest Templates
+      Contact(:visible="contactIsVisible")
   section.results-section
     .filter-wrap
       img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
@@ -21,12 +25,14 @@ import fuzzy from 'fuzzy'
 import templates from '@/spaces/templates.js'
 import TemplateCategoryPicker from '@/components/dialogs/TemplateCategoryPicker.vue'
 import SpaceList from '@/components/SpaceList.vue'
+import Contact from '@/components/dialogs/Contact.vue'
 
 export default {
   name: 'Templates',
   components: {
     TemplateCategoryPicker,
-    SpaceList
+    SpaceList,
+    Contact
   },
   props: {
     visible: Boolean
@@ -36,7 +42,8 @@ export default {
       filter: '',
       filteredCategoryId: 0,
       filteredSpaces: [],
-      templateCategoryPickerIsVisible: false
+      templateCategoryPickerIsVisible: false,
+      contactIsVisible: false
     }
   },
   computed: {
@@ -92,11 +99,9 @@ export default {
       element.focus()
       element.setSelectionRange(0, 0)
     },
-    toggleTemplateCategoryPickerIsVisible () {
-      this.templateCategoryPickerIsVisible = !this.templateCategoryPickerIsVisible
-    },
     closeDialogs () {
       this.templateCategoryPickerIsVisible = false
+      this.contactIsVisible = false
     },
     updateFilter (newValue) {
       this.filter = newValue
@@ -121,14 +126,24 @@ export default {
     updateFilteredCategory (category) {
       this.filteredCategoryId = category.id
       this.updateFilter(this.filter)
+    },
+    toggleTemplateCategoryPickerIsVisible () {
+      const isVisible = this.templateCategoryPickerIsVisible
+      this.closeDialogs()
+      this.templateCategoryPickerIsVisible = !isVisible
+    },
+    toggleContactIsVisible () {
+      const isVisible = this.contactIsVisible
+      this.closeDialogs()
+      this.contactIsVisible = !isVisible
     }
-
   },
   watch: {
     visible (visible) {
       this.clearFilter()
       this.filter = ''
       this.templateCategoryPickerIsVisible = false
+      this.contactIsVisible = false
     }
   }
 }
@@ -144,4 +159,7 @@ export default {
     > button
       .badge
         margin 0
+  .contact
+    top calc(100% - 8px)
+    bottom initial
 </style>
