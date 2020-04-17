@@ -5,20 +5,21 @@ dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
       p Kinopio is the visual thinking tool for new ideas and hard problems.
     .row
       .button-wrap
-        a(href="http://pketh.org/hello-kinopio.html")
-          button About →
-    .row
-      .button-wrap
         button(@click.stop="toggleWhatsNewIsVisible" :class="{active: whatsNewIsVisible}")
           span What's New
           img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
         WhatsNew(:visible="whatsNewIsVisible" :newStuff="newStuff")
-  section
+    .row
+      .button-wrap
+        a(href="https://help.kinopio.club")
+          button Help and Support →
     .row
       .button-wrap
         button(@click.stop="toggleContactIsVisible" :class="{active: contactIsVisible}")
-          span Contact and Support
+          span Contact
         Contact(:visible="contactIsVisible")
+
+  section
     .row
       .button-wrap
         button(@click.stop="toggleKeyboardShortcutsIsVisible" :class="{active: keyboardShortcutsIsVisible}")

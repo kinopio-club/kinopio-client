@@ -39,7 +39,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
   section(v-if="signUpVisible")
     .button-wrap
       // TODO TEMP link
-      a(href="http://pketh.org/kinopio-plans")
+      a(href="https://help.kinopio.club/posts/privacy-policy")
         button Privacy Policy and TOS →
 
   //- Forgot Password
