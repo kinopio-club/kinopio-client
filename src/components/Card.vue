@@ -147,12 +147,12 @@ export default {
     },
     url () {
       if (!this.name) { return }
-      // adapted from https://www.regextester.com/1965
+      // https://regexr.com/52r0i
       // optionally starts with http/s protocol
       // followed by alphanumerics
       // then '.''
       // followed by alphanumerics
-      const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<,>]*\.[^\s.[",><]+/igm)
+      const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<>]*\.[^\s.[",><]+/igm)
       const urls = this.name.match(urlPattern)
       if (!urls) { return }
       const url = urls[0]
