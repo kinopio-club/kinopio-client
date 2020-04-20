@@ -162,6 +162,18 @@ export default {
     return string.charAt(0).toUpperCase() + string.slice(1)
   },
 
+  pastTense (string) {
+    const lastLetter = string.charAt(string.length - 1)
+    // add test cases ad hoc from https://github.com/boo1ean/tensify
+    if (lastLetter === 'e') {
+      return string + 'd' // move → moved
+    } else if (lastLetter === 'y') {
+      return string.substring(0, string.length - 1) + 'ied' // copy → copied
+    } else {
+      return string + 'ed'
+    }
+  },
+
   lowercaseFirstLetter (string) {
     // 'Dreams' -> 'dreams'
     return string.charAt(0).toLowerCase() + string.slice(1)

@@ -9,7 +9,7 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
 
   section
     .row
-      p {{actionLabel}} {{cardsCount}} {{pluralCard}} To
+      p {{actionLabel | capitalize}} {{cardsCount}} {{pluralCard}} To
     template(v-if="spaces.length")
       .row
         .button-wrap
@@ -21,7 +21,7 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
           span Switch to Space
       button(@click="moveOrCopyToSpace" :class="{active: loading}")
         img.icon.visit(src="@/assets/visit.svg")
-        span {{actionLabel}}
+        span {{actionLabel | capitalize}}
         Loader(:visible="loading")
 
     template(v-if="!spaces.length")
@@ -57,6 +57,14 @@ export default {
       actionIsMove: true
     }
   },
+  filters: {
+    capitalize (value) {
+      return utils.capitalizeFirstLetter(value)
+    },
+    pastTense (value) {
+      return utils.pastTense(value)
+    }
+  },
   computed: {
     multipleCardsSelectedIds () {
       return this.$store.state.multipleCardsSelectedIds
@@ -73,13 +81,13 @@ export default {
     },
     pluralCard () {
       const condition = this.multipleCardsSelectedIds.length !== 1
-      return utils.pluralize('Card', condition)
+      return utils.pluralize('card', condition)
     },
     actionLabel () {
       if (this.actionIsMove) {
-        return 'Move'
+        return 'move'
       } else {
-        return 'Copy'
+        return 'copy'
       }
     }
   },
@@ -107,24 +115,28 @@ export default {
         this.$store.dispatch('currentSpace/removeConnectionsFromCard', card)
       })
     },
+    notifySuccess () {
+      const actionLabel = this.$options.filters.pastTense(this.actionLabel)
+      const message = `${this.cardsCount} ${this.pluralCard} ${actionLabel} to ${this.selectedSpace.name}`
+      this.$store.commit('addNotification', { message, type: 'success' })
+    },
     async moveOrCopyToSpace () {
       if (this.loading) { return }
       const currentSpace = utils.clone(this.$store.state.currentSpace)
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
       const cards = currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
       await this.copyToSelectedSpace(currentSpace, multipleCardsSelectedIds, cards)
+      this.notifySuccess()
       if (this.actionIsMove) {
         this.removeCards(cards)
       }
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
       this.$store.commit('clearMultipleSelected')
       this.$store.commit('closeAllDialogs')
-      this.$store.commit('addNotification', { message: `Cards Moved to ${this.selectedSpace.name}`, type: 'success' })
       if (this.shouldSwitchToSpace) {
         this.$store.dispatch('currentSpace/changeSpace', { space: this.selectedSpace })
       }
     },
-
     async copyToSelectedSpace (currentSpace, multipleCardsSelectedIds, cards) {
       const connections = currentSpace.connections.filter(connection => {
         const isStartCardMatch = multipleCardsSelectedIds.includes(connection.startCardId)
@@ -152,7 +164,7 @@ export default {
       cards = this.mapRemoteItems(cards)
       connectionTypes = this.mapRemoteItems(connectionTypes)
       connections = this.mapRemoteItems(connections)
-      console.log('🚚 Move', cards, connectionTypes, connections)
+      console.log('🚚 copy or move', cards, connectionTypes, connections)
       await this.$store.dispatch('api/updateCards', cards)
       await this.$store.dispatch('api/updateConnectionTypes', connectionTypes)
       await this.$store.dispatch('api/updateConnections', connections)
