@@ -12,7 +12,7 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
         label(:class="{active: shouldSwitchToSpace}" @click.prevent="toggleShouldSwitchToSpace" @keydown.stop.enter="toggleShouldSwitchToSpace")
           input(type="checkbox" v-model="shouldSwitchToSpace")
           span Switch to Space
-      button(@click="moveToSpace" :class="{active: loading}")
+      button(@click="moveOrCopyToSpace" :class="{active: loading}")
         img.icon.visit(src="@/assets/visit.svg")
         span Move
         Loader(:visible="loading")
@@ -47,6 +47,7 @@ export default {
       selectedSpace: {},
       spacePickerIsVisible: false,
       loading: false
+      // actionIsMove: true,
     }
   },
   computed: {
@@ -86,7 +87,7 @@ export default {
         this.$store.dispatch('currentSpace/removeConnectionsFromCard', card)
       })
     },
-    async moveToSpace () {
+    async moveOrCopyToSpace () {
       if (this.loading) { return }
       const currentSpace = utils.clone(this.$store.state.currentSpace)
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds

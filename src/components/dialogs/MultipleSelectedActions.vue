@@ -31,10 +31,10 @@ dialog.narrow.multiple-selected-actions(
           span Export
         Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
     .button-wrap(v-if="multipleCardsSelectedIds.length")
-      button(:disabled="!canEditAll.cards" @click.stop="toggleMoveToSpaceIsVisible" :class="{ active: moveToSpaceIsVisible }")
+      button(:disabled="!canEditAll.cards" @click.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
         img.icon.visit(src="@/assets/visit.svg")
-        span Move
-      MoveToSpace(:visible="moveToSpaceIsVisible")
+        span Move or Copy
+      MoveOrCopyToSpace(:visible="moveOrCopyToSpaceIsVisible")
 
     p(v-if="canEditAsNonMember")
       span.badge.info
@@ -50,20 +50,20 @@ import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import utils from '@/utils.js'
 import Export from '@/components/dialogs/Export.vue'
-import MoveToSpace from '@/components/dialogs/MoveToSpace.vue'
+import MoveOrCopyToSpace from '@/components/dialogs/MoveOrCopyToSpace.vue'
 import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
 
 export default {
   name: 'MultipleSelectedActions',
   components: {
     Export,
-    MoveToSpace,
+    MoveOrCopyToSpace,
     MultipleConnectionsPicker
   },
   data () {
     return {
       exportIsVisible: false,
-      moveToSpaceIsVisible: false,
+      moveOrCopyToSpaceIsVisible: false,
       multipleConnectionsPickerVisible: false
     }
   },
@@ -215,10 +215,10 @@ export default {
       this.closeDialogs()
       this.exportIsVisible = !isVisible
     },
-    toggleMoveToSpaceIsVisible () {
-      const isVisible = this.moveToSpaceIsVisible
+    toggleMoveOrCopyToSpaceIsVisible () {
+      const isVisible = this.moveOrCopyToSpaceIsVisible
       this.closeDialogs()
-      this.moveToSpaceIsVisible = !isVisible
+      this.moveOrCopyToSpaceIsVisible = !isVisible
     },
     toggleMultipleConnectionsPickerVisible () {
       const isVisible = this.multipleConnectionsPickerVisible
@@ -227,7 +227,7 @@ export default {
     },
     closeDialogs () {
       this.exportIsVisible = false
-      this.moveToSpaceIsVisible = false
+      this.moveOrCopyToSpaceIsVisible = false
       this.multipleConnectionsPickerVisible = false
     },
     connectionType () {
