@@ -225,7 +225,8 @@ dialog
   .button-wrap + .button-wrap,
   button + .button-wrap,
   .button-wrap + button,
-  label + label
+  label + label,
+  label + .button-wrap
     margin-left 6px
 
   p + button,

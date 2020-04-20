@@ -6,10 +6,14 @@ dialog.narrow.multiple-selected-actions(
   @click="closeDialogs"
   :style="{backgroundColor: userColor, left: position.left, top: position.top}"
 )
-  section(v-if="multipleCardsIsSelected || connectionsIsSelected")
-    .row(v-if="multipleCardsIsSelected")
-      button(@click="connectCards") Connect
-      button(:disabled="!canEditSome.cards" @click="disconnectCards") Disconnect
+  section(v-if="cardsIsSelected || connectionsIsSelected")
+    .row(v-if="cardsIsSelected")
+      label(v-if="multipleCardsIsSelected" :class="{active: cardsIsConnected}" @click.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards")
+        input(type="checkbox" v-model="cardsIsConnected")
+        span Connect
+      .button-wrap(:class="{active: framePickerIsVisible}" @click.stop="toggleFramePickerIsVisible")
+        button Frames
+        FramePicker(:visible="framePickerIsVisible" :cards="cards")
     .row(v-if="connectionsIsSelected")
       .button-wrap
         button.change-color(:disabled="!canEditSome.connections" @click.stop="toggleMultipleConnectionsPickerVisible")
@@ -20,7 +24,6 @@ dialog.narrow.multiple-selected-actions(
       button(:disabled="!canEditSome.connections" :class="{active: allLabelsAreVisible}" @click="toggleAllLabelsAreVisible")
         img.icon(src="@/assets/view.svg")
         span Labels
-
   section
     .row
       button(:disabled="!canEditSome.any" @click="remove")
@@ -31,10 +34,10 @@ dialog.narrow.multiple-selected-actions(
           span Export
         Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
     .button-wrap(v-if="multipleCardsSelectedIds.length")
-      button(:disabled="!canEditAll.cards" @click.stop="toggleMoveToSpaceIsVisible" :class="{ active: moveToSpaceIsVisible }")
+      button(:disabled="!canEditAll.cards" @click.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
         img.icon.visit(src="@/assets/visit.svg")
-        span Move
-      MoveToSpace(:visible="moveToSpaceIsVisible")
+        span Move or Copy
+      MoveOrCopyToSpace(:visible="moveOrCopyToSpaceIsVisible")
 
     p(v-if="canEditAsNonMember")
       span.badge.info
@@ -50,21 +53,25 @@ import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import utils from '@/utils.js'
 import Export from '@/components/dialogs/Export.vue'
-import MoveToSpace from '@/components/dialogs/MoveToSpace.vue'
+import MoveOrCopyToSpace from '@/components/dialogs/MoveOrCopyToSpace.vue'
 import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
+import FramePicker from '@/components/dialogs/FramePicker.vue'
 
 export default {
   name: 'MultipleSelectedActions',
   components: {
     Export,
-    MoveToSpace,
-    MultipleConnectionsPicker
+    MoveOrCopyToSpace,
+    MultipleConnectionsPicker,
+    FramePicker
   },
   data () {
     return {
       exportIsVisible: false,
-      moveToSpaceIsVisible: false,
-      multipleConnectionsPickerVisible: false
+      moveOrCopyToSpaceIsVisible: false,
+      multipleConnectionsPickerVisible: false,
+      framePickerIsVisible: false,
+      cardsIsConnected: false
     }
   },
   computed: {
@@ -81,6 +88,7 @@ export default {
     // cards
 
     multipleCardsSelectedIds () { return this.$store.state.multipleCardsSelectedIds },
+    cardsIsSelected () { return Boolean(this.multipleCardsSelectedIds.length > 0) },
     multipleCardsIsSelected () { return Boolean(this.multipleCardsSelectedIds.length > 1) },
     cards () {
       return this.multipleCardsSelectedIds.map(cardId => {
@@ -215,20 +223,26 @@ export default {
       this.closeDialogs()
       this.exportIsVisible = !isVisible
     },
-    toggleMoveToSpaceIsVisible () {
-      const isVisible = this.moveToSpaceIsVisible
+    toggleMoveOrCopyToSpaceIsVisible () {
+      const isVisible = this.moveOrCopyToSpaceIsVisible
       this.closeDialogs()
-      this.moveToSpaceIsVisible = !isVisible
+      this.moveOrCopyToSpaceIsVisible = !isVisible
     },
     toggleMultipleConnectionsPickerVisible () {
       const isVisible = this.multipleConnectionsPickerVisible
       this.closeDialogs()
       this.multipleConnectionsPickerVisible = !isVisible
     },
+    toggleFramePickerIsVisible () {
+      const isVisible = this.framePickerIsVisible
+      this.closeDialogs()
+      this.framePickerIsVisible = !isVisible
+    },
     closeDialogs () {
       this.exportIsVisible = false
-      this.moveToSpaceIsVisible = false
+      this.moveOrCopyToSpaceIsVisible = false
       this.multipleConnectionsPickerVisible = false
+      this.framePickerIsVisible = false
     },
     connectionType () {
       const typePref = this.$store.state.currentUser.defaultConnectionTypeId
@@ -247,6 +261,29 @@ export default {
         return isStart && isEnd
       })
       return Boolean(existingConnection)
+    },
+    checkIsCardsConnected () {
+      const selectedCards = this.multipleCardsSelectedIds
+      const connections = selectedCards.filter((cardId, index) => {
+        const startCardId = selectedCards[index - 1]
+        const endCardId = cardId
+        const connectionExists = this.connectionAlreadyExists(startCardId, endCardId)
+        const connectionExistsReverse = this.connectionAlreadyExists(endCardId, startCardId)
+        if (connectionExists || connectionExistsReverse) { return true }
+      })
+      if (connections.length === selectedCards.length - 1) {
+        this.cardsIsConnected = true
+      } else {
+        this.cardsIsConnected = false
+      }
+    },
+    toggleConnectCards () {
+      if (this.cardsIsConnected) {
+        this.disconnectCards()
+      } else {
+        this.connectCards()
+      }
+      this.checkIsCardsConnected()
     },
     connectCards () {
       const cardIds = this.multipleCardsSelectedIds
@@ -294,6 +331,7 @@ export default {
     visible (visible) {
       this.$nextTick(() => {
         if (visible) {
+          this.checkIsCardsConnected()
           this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
           this.scrollIntoView()
           this.closeDialogs()

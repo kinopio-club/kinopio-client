@@ -1,8 +1,15 @@
 <template lang="pug">
 dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDialogs")
   section
-    p Move {{cardsCount}} {{pluralCard}} To
+    .segmented-buttons
+      button(@click.stop="showMove" :class="{ active: actionIsMove }")
+        span Move
+      button(@click.stop="hideMove" :class="{ active: !actionIsMove }")
+        span Copy
+
   section
+    .row
+      p {{actionLabel}} {{cardsCount}} {{pluralCard}} To
     template(v-if="spaces.length")
       .row
         .button-wrap
@@ -12,9 +19,9 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
         label(:class="{active: shouldSwitchToSpace}" @click.prevent="toggleShouldSwitchToSpace" @keydown.stop.enter="toggleShouldSwitchToSpace")
           input(type="checkbox" v-model="shouldSwitchToSpace")
           span Switch to Space
-      button(@click="moveToSpace" :class="{active: loading}")
+      button(@click="moveOrCopyToSpace" :class="{active: loading}")
         img.icon.visit(src="@/assets/visit.svg")
-        span Move
+        span {{actionLabel}}
         Loader(:visible="loading")
 
     template(v-if="!spaces.length")
@@ -46,7 +53,8 @@ export default {
       spaces: [],
       selectedSpace: {},
       spacePickerIsVisible: false,
-      loading: false
+      loading: false,
+      actionIsMove: true
     }
   },
   computed: {
@@ -66,9 +74,22 @@ export default {
     pluralCard () {
       const condition = this.multipleCardsSelectedIds.length !== 1
       return utils.pluralize('Card', condition)
+    },
+    actionLabel () {
+      if (this.actionIsMove) {
+        return 'Move'
+      } else {
+        return 'Copy'
+      }
     }
   },
   methods: {
+    showMove () {
+      this.actionIsMove = true
+    },
+    hideMove () {
+      this.actionIsMove = false
+    },
     triggerSpaceDetailsVisible () {
       this.$store.commit('clearMultipleSelected')
       this.$store.commit('closeAllDialogs')
@@ -86,21 +107,24 @@ export default {
         this.$store.dispatch('currentSpace/removeConnectionsFromCard', card)
       })
     },
-    async moveToSpace () {
+    async moveOrCopyToSpace () {
       if (this.loading) { return }
       const currentSpace = utils.clone(this.$store.state.currentSpace)
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
       const cards = currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
       await this.copyToSelectedSpace(currentSpace, multipleCardsSelectedIds, cards)
-      this.removeCards(cards)
+      if (this.actionIsMove) {
+        this.removeCards(cards)
+      }
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
       this.$store.commit('clearMultipleSelected')
       this.$store.commit('closeAllDialogs')
+      this.$store.commit('addNotification', { message: `Cards Moved to ${this.selectedSpace.name}`, type: 'success' })
       if (this.shouldSwitchToSpace) {
         this.$store.dispatch('currentSpace/changeSpace', { space: this.selectedSpace })
       }
-      this.$store.commit('addNotification', { message: `Cards Moved to ${this.selectedSpace.name}`, type: 'success' })
     },
+
     async copyToSelectedSpace (currentSpace, multipleCardsSelectedIds, cards) {
       const connections = currentSpace.connections.filter(connection => {
         const isStartCardMatch = multipleCardsSelectedIds.includes(connection.startCardId)

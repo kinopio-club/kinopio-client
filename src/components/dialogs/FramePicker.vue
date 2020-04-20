@@ -3,7 +3,7 @@ dialog.narrow.frame-details(v-if="visible" :open="visible" ref="dialog" @click.s
   section.results-section
     ul.results-list
       template(v-for="(frame in frames")
-        li(:class="{active: frameIsCardFrame(frame)}" @click="changeCardFrame(frame)" :key="frame.id" tabindex="0" v-on:keyup.enter="changeCardFrame(frame)")
+        li(:class="{active: frameIsSelected(frame)}" @click="changeCardFrame(frame)" :key="frame.id" tabindex="0" v-on:keyup.enter="changeCardFrame(frame)")
           .badge
             template(v-if="frameHasBadge(frame)")
               img(:src="frameBadge(frame).path")
@@ -18,7 +18,7 @@ import frames from '@/frames.js'
 export default {
   props: {
     visible: Boolean,
-    card: Object
+    cards: Array
   },
   computed: {
     frames () {
@@ -27,16 +27,18 @@ export default {
   },
   methods: {
     changeCardFrame (frame) {
-      const card = {
-        frameId: frame.id,
-        frameName: frame.name,
-        id: this.card.id
-      }
-      this.$store.dispatch('currentSpace/updateCard', card)
+      this.cards.forEach(card => {
+        card = {
+          frameId: frame.id,
+          frameName: frame.name,
+          id: card.id
+        }
+        this.$store.dispatch('currentSpace/updateCard', card)
+      })
     },
-    frameIsCardFrame (frame) {
-      const cardFrameId = this.card.frameId || 0
-      return Boolean(frame.id === cardFrameId)
+    frameIsSelected (frame) {
+      const cardFrameIds = this.cards.map(card => card.frameId)
+      return cardFrameIds.includes(frame.id)
     },
     frameHasBadge (frame) {
       return Boolean(frame.badge)

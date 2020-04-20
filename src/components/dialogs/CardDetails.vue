@@ -23,7 +23,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
     .button-wrap
       button(:disabled="!canEditCard" @click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
         span Frames
-      FramePicker(:visible="framePickerIsVisible" :card="card")
+      FramePicker(:visible="framePickerIsVisible" :cards="[card]")
 
     p.edit-message(v-if="!canEditCard")
       span.badge.info(v-if="spacePrivacyIsOpen")
