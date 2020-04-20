@@ -142,6 +142,7 @@ export default {
     max-height calc(100vh - 200px)
   code
     background-color var(--secondary-background)
+    margin 0
 .coming-up
   ul
     margin 0
