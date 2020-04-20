@@ -135,7 +135,7 @@ export default {
 
 <style lang="stylus">
 footer
-  z-index 100
+  z-index 1000
   position fixed
   left 8px
   bottom 8px
