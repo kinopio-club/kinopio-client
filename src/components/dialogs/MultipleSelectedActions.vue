@@ -6,12 +6,12 @@ dialog.narrow.multiple-selected-actions(
   @click="closeDialogs"
   :style="{backgroundColor: userColor, left: position.left, top: position.top}"
 )
-  section(v-if="multipleCardsIsSelected || connectionsIsSelected")
-    .row(v-if="multipleCardsIsSelected")
-      label(:class="{active: cardsIsConnected}" @click.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards")
+  section(v-if="cardsIsSelected || connectionsIsSelected")
+    .row(v-if="cardsIsSelected")
+      label(v-if="multipleCardsIsSelected" :class="{active: cardsIsConnected}" @click.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards")
         input(type="checkbox" v-model="cardsIsConnected")
-        span Connected
-
+        span Connect
+      button Frames
     .row(v-if="connectionsIsSelected")
       .button-wrap
         button.change-color(:disabled="!canEditSome.connections" @click.stop="toggleMultipleConnectionsPickerVisible")
@@ -22,7 +22,6 @@ dialog.narrow.multiple-selected-actions(
       button(:disabled="!canEditSome.connections" :class="{active: allLabelsAreVisible}" @click="toggleAllLabelsAreVisible")
         img.icon(src="@/assets/view.svg")
         span Labels
-
   section
     .row
       button(:disabled="!canEditSome.any" @click="remove")
@@ -84,6 +83,7 @@ export default {
     // cards
 
     multipleCardsSelectedIds () { return this.$store.state.multipleCardsSelectedIds },
+    cardsIsSelected () { return Boolean(this.multipleCardsSelectedIds.length > 0) },
     multipleCardsIsSelected () { return Boolean(this.multipleCardsSelectedIds.length > 1) },
     cards () {
       return this.multipleCardsSelectedIds.map(cardId => {
