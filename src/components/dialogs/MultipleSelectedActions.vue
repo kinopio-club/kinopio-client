@@ -11,7 +11,9 @@ dialog.narrow.multiple-selected-actions(
       label(v-if="multipleCardsIsSelected" :class="{active: cardsIsConnected}" @click.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards")
         input(type="checkbox" v-model="cardsIsConnected")
         span Connect
-      button Frames
+      .button-wrap(:class="{active: framePickerIsVisible}" @click.stop="toggleFramePickerIsVisible")
+        button Frames
+        FramePicker(:visible="framePickerIsVisible" :cards="cards")
     .row(v-if="connectionsIsSelected")
       .button-wrap
         button.change-color(:disabled="!canEditSome.connections" @click.stop="toggleMultipleConnectionsPickerVisible")
@@ -53,19 +55,22 @@ import utils from '@/utils.js'
 import Export from '@/components/dialogs/Export.vue'
 import MoveOrCopyToSpace from '@/components/dialogs/MoveOrCopyToSpace.vue'
 import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
+import FramePicker from '@/components/dialogs/FramePicker.vue'
 
 export default {
   name: 'MultipleSelectedActions',
   components: {
     Export,
     MoveOrCopyToSpace,
-    MultipleConnectionsPicker
+    MultipleConnectionsPicker,
+    FramePicker
   },
   data () {
     return {
       exportIsVisible: false,
       moveOrCopyToSpaceIsVisible: false,
       multipleConnectionsPickerVisible: false,
+      framePickerIsVisible: false,
       cardsIsConnected: false
     }
   },
@@ -228,10 +233,16 @@ export default {
       this.closeDialogs()
       this.multipleConnectionsPickerVisible = !isVisible
     },
+    toggleFramePickerIsVisible () {
+      const isVisible = this.framePickerIsVisible
+      this.closeDialogs()
+      this.framePickerIsVisible = !isVisible
+    },
     closeDialogs () {
       this.exportIsVisible = false
       this.moveOrCopyToSpaceIsVisible = false
       this.multipleConnectionsPickerVisible = false
+      this.framePickerIsVisible = false
     },
     connectionType () {
       const typePref = this.$store.state.currentUser.defaultConnectionTypeId
