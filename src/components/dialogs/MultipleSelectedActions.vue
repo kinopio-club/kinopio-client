@@ -8,11 +8,6 @@ dialog.narrow.multiple-selected-actions(
 )
   section(v-if="multipleCardsIsSelected || connectionsIsSelected")
     .row(v-if="multipleCardsIsSelected")
-      //- .segmented-buttons
-      //-   button(@click="connectCards" :class="{ active: cardsIsConnected }")
-      //-     span Connect
-      //-   button(:disabled="!canEditSome.cards" @click="disconnectCards" :class="{ active: !cardsIsConnected }")
-      //-     span Disconnect
       label(:class="{active: cardsIsConnected}" @click.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards")
         input(type="checkbox" v-model="cardsIsConnected")
         span Connected
