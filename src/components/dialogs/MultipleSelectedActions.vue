@@ -8,8 +8,15 @@ dialog.narrow.multiple-selected-actions(
 )
   section(v-if="multipleCardsIsSelected || connectionsIsSelected")
     .row(v-if="multipleCardsIsSelected")
-      button(@click="connectCards") Connect
-      button(:disabled="!canEditSome.cards" @click="disconnectCards") Disconnect
+      //- .segmented-buttons
+      //-   button(@click="connectCards" :class="{ active: cardsIsConnected }")
+      //-     span Connect
+      //-   button(:disabled="!canEditSome.cards" @click="disconnectCards" :class="{ active: !cardsIsConnected }")
+      //-     span Disconnect
+      label(:class="{active: cardsIsConnected}" @click.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards")
+        input(type="checkbox" v-model="cardsIsConnected")
+        span Connected
+
     .row(v-if="connectionsIsSelected")
       .button-wrap
         button.change-color(:disabled="!canEditSome.connections" @click.stop="toggleMultipleConnectionsPickerVisible")
@@ -64,7 +71,8 @@ export default {
     return {
       exportIsVisible: false,
       moveOrCopyToSpaceIsVisible: false,
-      multipleConnectionsPickerVisible: false
+      multipleConnectionsPickerVisible: false,
+      cardsIsConnected: false
     }
   },
   computed: {
@@ -248,6 +256,29 @@ export default {
       })
       return Boolean(existingConnection)
     },
+    checkIsCardsConnected () {
+      const selectedCards = this.multipleCardsSelectedIds
+      const connections = selectedCards.filter((cardId, index) => {
+        const startCardId = selectedCards[index - 1]
+        const endCardId = cardId
+        const connectionExists = this.connectionAlreadyExists(startCardId, endCardId)
+        const connectionExistsReverse = this.connectionAlreadyExists(endCardId, startCardId)
+        if (connectionExists || connectionExistsReverse) { return true }
+      })
+      if (connections.length === selectedCards.length - 1) {
+        this.cardsIsConnected = true
+      } else {
+        this.cardsIsConnected = false
+      }
+    },
+    toggleConnectCards () {
+      if (this.cardsIsConnected) {
+        this.disconnectCards()
+      } else {
+        this.connectCards()
+      }
+      this.checkIsCardsConnected()
+    },
     connectCards () {
       const cardIds = this.multipleCardsSelectedIds
       let connections = cardIds.map((cardId, index) => {
@@ -294,6 +325,7 @@ export default {
     visible (visible) {
       this.$nextTick(() => {
         if (visible) {
+          this.checkIsCardsConnected()
           this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
           this.scrollIntoView()
           this.closeDialogs()
