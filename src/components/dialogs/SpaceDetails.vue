@@ -188,6 +188,7 @@ export default {
       this.privacyPickerIsVisible = !isVisible
     },
     addSpace () {
+      window.scrollTo(0, 0)
       this.$store.dispatch('currentSpace/addSpace')
       this.$nextTick(() => {
         this.updateSpaces()
