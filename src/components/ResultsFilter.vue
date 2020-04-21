@@ -1,5 +1,5 @@
 <template lang="pug">
-.filter-wrap
+.filter-wrap(v-if="isManyItems")
   img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
   input(placeholder="Search" v-model="filterItems" ref="filterInput")
   button.borderless.clear-input-wrap(@click="clearFilter")
@@ -31,6 +31,7 @@ export default {
   },
 
   computed: {
+    isManyItems () { return Boolean(this.items.length >= 5) },
     filterItems: {
       get () {
         return this.filter
@@ -42,17 +43,13 @@ export default {
           pre: '',
           post: '',
           extract: (item) => {
-            return item.name
+            let name = item.name || ''
+            return name
           }
         }
         const filtered = fuzzy.filter(this.filter, this.items, options)
-        const items = filtered.map(item => {
-          return {
-            name: item.string,
-            id: item.original.id
-          }
-        })
-        this.$emit('updateFilteredSpaces', items)
+        const items = filtered.map(item => item.original)
+        this.$emit('updateFilteredItems', items)
       }
     }
   },
@@ -65,7 +62,7 @@ export default {
     clearFilter () {
       this.filter = ''
       this.$emit('updateFilter', this.filter)
-      this.$emit('updateFilteredSpaces', [])
+      this.$emit('updateFilteredItems', [])
     }
   }
 }
