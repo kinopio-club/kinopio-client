@@ -340,8 +340,6 @@ ul.results-list
     border-radius 3px
     user-select none
     cursor pointer
-    .highlight
-      background yellow
     &:hover,
     &:focus
       background-color var(--secondary-hover-background)
