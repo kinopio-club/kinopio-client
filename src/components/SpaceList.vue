@@ -1,6 +1,6 @@
 <template lang="pug">
 span
-  ResultsFilter(:items="spaces" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredSpaces")
+  ResultsFilter(:hideFilter="hideFilter" :items="spaces" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredSpaces")
   ul.results-list.space-list
     template(v-for="(space in spacesFiltered")
       li(@click="selectSpace(space)" :class="{ active: spaceIsActive(space) }" :key="space.id" tabindex="0" v-on:keyup.enter="selectSpace(space)")
@@ -33,7 +33,8 @@ export default {
     showCategory: Boolean,
     showUser: Boolean,
     showUserIfCurrentUserIsCollaborator: Boolean,
-    hideExploreBadge: Boolean
+    hideExploreBadge: Boolean,
+    hideFilter: Boolean
   },
   data () {
     return {

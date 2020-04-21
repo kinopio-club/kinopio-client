@@ -11,17 +11,10 @@
         span Suggest Templates
       Contact(:visible="contactIsVisible")
   section.results-section
-    .filter-wrap
-      img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
-      input(placeholder="Search" v-model="spaceFilter" ref="filterInput")
-      button.borderless.clear-input-wrap(@click="clearFilter")
-        img.icon(src="@/assets/add.svg")
     SpaceList(:spaces="spacesFiltered" :showCategory="true" @selectSpace="changeSpace")
 </template>
 
 <script>
-import fuzzy from 'fuzzy'
-
 import templates from '@/spaces/templates.js'
 import TemplateCategoryPicker from '@/components/dialogs/TemplateCategoryPicker.vue'
 import SpaceList from '@/components/SpaceList.vue'
@@ -39,7 +32,6 @@ export default {
   },
   data () {
     return {
-      filter: '',
       filteredCategoryId: 0,
       filteredSpaces: [],
       templateCategoryPickerIsVisible: false,
@@ -75,57 +67,18 @@ export default {
     },
     filterCategory () {
       return this.categories.find(category => category.id === this.filteredCategoryId)
-    },
-    spaceFilter: {
-      get () {
-        return this.filter
-      },
-      set (newValue) {
-        this.updateFilter(newValue)
-      }
     }
-
   },
   methods: {
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
     },
-    clearFilter () {
-      this.filter = ''
-      this.filteredCategoryId = 0
-    },
-    focusFilterInput () {
-      const element = this.$refs.filterInput
-      element.focus()
-      element.setSelectionRange(0, 0)
-    },
     closeDialogs () {
       this.templateCategoryPickerIsVisible = false
       this.contactIsVisible = false
     },
-    updateFilter (newValue) {
-      this.filter = newValue
-      const options = {
-        pre: '',
-        post: '',
-        extract: (space) => {
-          return space.fullName
-        }
-      }
-      const filtered = fuzzy.filter(this.filter, this.spaces, options)
-      const spaces = filtered.map(space => {
-        return {
-          name: space.original.name,
-          spaceId: space.original.spaceId,
-          categoryId: space.original.categoryId,
-          category: space.original.category
-        }
-      })
-      this.filteredSpaces = spaces
-    },
     updateFilteredCategory (category) {
       this.filteredCategoryId = category.id
-      this.updateFilter(this.filter)
     },
     toggleTemplateCategoryPickerIsVisible () {
       const isVisible = this.templateCategoryPickerIsVisible
@@ -140,8 +93,6 @@ export default {
   },
   watch: {
     visible (visible) {
-      this.clearFilter()
-      this.filter = ''
       this.templateCategoryPickerIsVisible = false
       this.contactIsVisible = false
     }

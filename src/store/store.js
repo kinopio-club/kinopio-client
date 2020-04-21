@@ -187,6 +187,7 @@ export default new Vuex.Store({
     triggerArenaAuthenticationError: () => {},
     triggerKeyboardShortcutsIsVisible: () => {},
     notifyReadOnlyJiggle: () => {},
+    triggerSelectTemplateCategory: () => {},
 
     // connecting
     currentUserIsDrawingConnection: (state, value) => {

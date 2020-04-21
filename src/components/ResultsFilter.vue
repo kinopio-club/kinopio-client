@@ -1,5 +1,5 @@
 <template lang="pug">
-.filter-wrap(v-if="isManyItems")
+.filter-wrap(v-if="shouldShowFilter")
   img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
   input(placeholder="Search" v-model="filterItems" ref="filterInput")
   button.borderless.clear-input-wrap(@click="clearFilter")
@@ -13,7 +13,7 @@ import fuzzy from 'fuzzy'
 export default {
   name: 'ResultsFilter',
   props: {
-    visible: Boolean,
+    hideFilter: Boolean,
     items: Array
   },
   data () {
@@ -27,10 +27,20 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.clearFilter()
       }
+      if (mutation.type === 'triggerSelectTemplateCategory') {
+        this.clearFilter()
+      }
     })
   },
-
   computed: {
+    shouldShowFilter () {
+      if (this.hideFilter) {
+        return false
+      } else if (this.isManyItems) {
+        return true
+      }
+      return false
+    },
     isManyItems () { return Boolean(this.items.length >= 5) },
     filterItems: {
       get () {
