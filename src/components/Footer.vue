@@ -13,7 +13,7 @@ footer
         span Favorite
 
   section.controls(v-if="!dialogsVisible")
-    .button-wrap(v-if="userCanEditSpace")
+    .button-wrap
       button(@click="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
         img.refresh.icon(src="@/assets/remove.svg")
         span Removed
@@ -89,9 +89,6 @@ export default {
       const types = this.$store.state.filteredConnectionTypeIds
       const frames = this.$store.state.filteredFrameIds
       return types.length + frames.length
-    },
-    userCanEditSpace () {
-      return this.$store.getters['currentUser/canEditSpace']()
     },
     isFavoriteSpace () {
       const currentSpace = this.$store.state.currentSpace

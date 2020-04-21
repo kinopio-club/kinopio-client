@@ -12,10 +12,16 @@ dialog.removed(v-if="visible" :open="visible" @click.stop)
         Loader(:visible="loading.spaces")
 
   section(v-if="!items.length")
-    p(v-if="cardsVisible") Removed cards from
-      span !{' '}{{currentSpaceName}}!{' '}
-      span can be restored here
-    p(v-if="!cardsVisible") Removed spaces can be restored here
+    template(v-if="cardsVisible")
+      p Removed cards from
+        span !{' '}{{currentSpaceName}}!{' '}
+        span can be restored here
+      p(v-if="!currentUserCanEditSpace")
+        span.badge.info
+          img.icon(:src="privacyIcon" :class="privacyName")
+          span You need to be a collaborator
+    template(v-if="!cardsVisible")
+      p Removed spaces can be restored here
 
   section.results-section(v-if="items.length")
     .button-wrap
@@ -56,6 +62,8 @@ import merge from 'lodash-es/merge'
 
 import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
+import privacy from '@/spaces/privacy.js'
+import utils from '@/utils.js'
 
 export default {
   name: 'Restore',
@@ -95,6 +103,25 @@ export default {
       } else {
         return 'spaces'
       }
+    },
+    currentUserCanEditSpace () {
+      return this.$store.getters['currentUser/canEditSpace']()
+    },
+    privacyIcon () {
+      const space = this.$store.state.currentSpace
+      const privacyState = privacy.states().find(state => {
+        return state.name === space.privacy
+      })
+      if (!privacyState) { return }
+      return require(`@/assets/${privacyState.icon}.svg`)
+    },
+    privacyName () {
+      const space = this.$store.state.currentSpace
+      const privacyState = privacy.states().find(state => {
+        return state.name === space.privacy
+      })
+      if (!privacyState) { return }
+      return privacyState.name
     }
   },
   methods: {
@@ -159,11 +186,13 @@ export default {
       this.loadRemoteRemovedCards()
     },
     async loadRemoteRemovedCards () {
+      if (!this.currentUserCanEditSpace) { return }
       this.loading.cards = true
       const space = this.$store.state.currentSpace
       const remoteCards = await this.$store.dispatch('api/getSpaceRemovedCards', space)
       this.loading.cards = false
-      if (!remoteCards) { return }
+      const remoteCardsIsArray = utils.typeCheck(remoteCards, 'array')
+      if (!remoteCards || !remoteCardsIsArray) { return }
       this.removedCards = remoteCards
       this.$store.commit('currentSpace/removedCards', remoteCards)
     },
