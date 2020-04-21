@@ -8,33 +8,20 @@
       button(@click.stop="hideSpaces" :class="{ active: !spacesIsVisible }")
         span People
         Loader(:visible="loading")
-    template(v-if="shouldShowDescription")
+    template(v-if="isEmpty")
       p Spaces and people you favorite can be found here
       p(v-if="loading")
         Loader(:visible="loading")
 
-  section.results-section(v-if="!shouldShowDescription")
+  section.results-section(v-if="!isEmpty")
     template(v-if="spacesIsVisible")
-      .filter-wrap(v-if="isManySpaces")
-        img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
-        input(placeholder="Search" v-model="spaceFilter" ref="filterInput")
-        button.borderless.clear-input-wrap(@click="clearFilter")
-          img.icon(src="@/assets/add.svg")
-      SpaceList(:spaces="spacesFiltered" :showUser="true" :selectedSpace="currentSpace" @selectSpace="changeSpace")
-
+      SpaceList(:spaces="favoriteSpaces" :showUser="true" @selectSpace="changeSpace")
     template(v-if="!spacesIsVisible")
-      .filter-wrap(v-if="isManyUsers")
-        img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
-        input(placeholder="Search" v-model="userFilter" ref="filterInput")
-        button.borderless.clear-input-wrap(@click="clearFilter")
-          img.icon(src="@/assets/add.svg")
-      UserList(:users="usersFiltered" :selectedUser="selectedUser" @selectSpace="showUserDetails")
+      UserList(:users="favoriteUsers" :selectedUser="selectedUser" @selectSpace="showUserDetails")
       UserDetails(:visible="userDetailsIsVisible" :user="selectedUser" :userDetailsPosition="userDetailsPosition")
 </template>
 
 <script>
-import fuzzy from 'fuzzy'
-
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import UserList from '@/components/UserList.vue'
@@ -56,95 +43,25 @@ export default {
       spacesIsVisible: true,
       userDetailsIsVisible: false,
       selectedUser: {},
-      filter: '',
-      filteredSpaces: [],
-      filteredUsers: [],
       userDetailsPosition: {}
     }
   },
   computed: {
     favoriteUsers () { return this.$store.state.currentUser.favoriteUsers },
     favoriteSpaces () { return this.$store.state.currentUser.favoriteSpaces },
-    currentSpace () { return this.$store.state.currentSpace },
-    isManySpaces () { return Boolean(this.favoriteSpaces.length >= 5) },
-    isManyUsers () { return Boolean(this.favoriteUsers.length >= 5) },
-    shouldShowDescription () {
+    isEmpty () {
       const noSpaces = this.spacesIsVisible && !this.favoriteSpaces.length
       const noPeople = !this.spacesIsVisible && !this.favoriteUsers.length
       if (noSpaces || noPeople) { return true }
       return false
-    },
-    spaceFilter: {
-      get () {
-        return this.filter
-      },
-      set (newValue) {
-        this.filter = newValue
-        const options = {
-          pre: '',
-          post: '',
-          extract: (space) => {
-            return space.name
-          }
-        }
-        const filtered = fuzzy.filter(this.filter, this.favoriteSpaces, options)
-        const spaces = filtered.map(space => {
-          return space.original
-        })
-        this.filteredSpaces = spaces
-      }
-    },
-    userFilter: {
-      get () {
-        return this.filter
-      },
-      set (newValue) {
-        this.filter = newValue
-        const options = {
-          pre: '',
-          post: '',
-          extract: (user) => {
-            return user.name
-          }
-        }
-        const filtered = fuzzy.filter(this.filter, this.favoriteUsers, options)
-        const users = filtered.map(user => {
-          return user.original
-        })
-        this.filteredUsers = users
-      }
-    },
-    spacesFiltered () {
-      if (this.filter) {
-        return this.filteredSpaces
-      } else {
-        return this.favoriteSpaces
-      }
-    },
-    usersFiltered () {
-      if (this.filter) {
-        return this.filteredUsers
-      } else {
-        return this.favoriteUsers
-      }
     }
   },
   methods: {
-    focusFilterInput () {
-      const element = this.$refs.filterInput
-      element.focus()
-      element.setSelectionRange(0, 0)
-    },
-    clearFilter () {
-      this.filter = ''
-    },
     showSpaces () {
-      this.clearFilter()
       this.spacesIsVisible = true
       this.userDetailsIsNotVisible()
     },
     hideSpaces () {
-      this.clearFilter()
       this.spacesIsVisible = false
       this.userDetailsIsNotVisible()
     },
