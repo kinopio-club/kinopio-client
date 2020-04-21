@@ -40,8 +40,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
 
   section.results-section(v-if="!favoritesIsVisible")
-    ResultsFilter(:visible="isManySpaces" :items="spaces" @updateFilter="updateFilter" @updateFilteredSpaces="updateFilteredSpaces")
-    SpaceList(:spaces="spacesFiltered" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
+    SpaceList(:spaces="spaces" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
 
   Favorites(:visible="favoritesIsVisible" :loading="favoritesIsLoading")
 
@@ -55,7 +54,6 @@ import SpaceList from '@/components/SpaceList.vue'
 import Favorites from '@/components/Favorites.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
-import ResultsFilter from '@/components/ResultsFilter.vue'
 import utils from '@/utils.js'
 
 export default {
@@ -66,8 +64,7 @@ export default {
     SpaceList,
     Favorites,
     PrivacyButton,
-    ShowInExploreButton,
-    ResultsFilter
+    ShowInExploreButton
   },
   props: {
     visible: Boolean
@@ -79,8 +76,6 @@ export default {
       favoriteUsers: [],
       exportIsVisible: false,
       importIsVisible: false,
-      filter: '',
-      filteredSpaces: [],
       privacyPickerIsVisible: false,
       favoritesIsVisible: false,
       favoriteUsersIsVisible: false,
@@ -100,7 +95,6 @@ export default {
   computed: {
     currentSpace () { return this.$store.state.currentSpace },
     exportScope () { return 'space' },
-    isManySpaces () { return Boolean(this.spaces.length >= 5) },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     shouldShowInExplore () {
       const privacy = this.$store.state.currentSpace.privacy
@@ -116,25 +110,12 @@ export default {
         this.updateSpaces()
       }
     },
-    spacesFiltered () {
-      if (this.filter) {
-        return this.filteredSpaces
-      } else {
-        return this.spaces
-      }
-    },
     isSpaceMember () {
       const currentSpace = this.$store.state.currentSpace
       return this.$store.getters['currentUser/isSpaceMember'](currentSpace)
     }
   },
   methods: {
-    updateFilteredSpaces (spaces) {
-      this.filteredSpaces = spaces
-    },
-    updateFilter (filter) {
-      this.filter = filter
-    },
     showFavorites () {
       this.favoritesIsVisible = true
     },
