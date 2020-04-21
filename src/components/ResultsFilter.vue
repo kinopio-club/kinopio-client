@@ -1,0 +1,83 @@
+<template lang="pug">
+.filter-wrap
+  img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
+  input(placeholder="Search" v-model="filterItems" ref="filterInput")
+  button.borderless.clear-input-wrap(@click="clearFilter")
+    img.icon(src="@/assets/add.svg")
+
+</template>
+
+<script>
+import fuzzy from 'fuzzy'
+
+export default {
+  name: 'ResultsFilter',
+  props: {
+    visible: Boolean,
+    items: Array
+  },
+  data () {
+    return {
+      filter: '',
+      filteredItems: []
+    }
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'closeAllDialogs') {
+        this.clearFilter()
+      }
+    })
+  },
+
+  computed: {
+    filterItems: {
+      get () {
+        return this.filter
+      },
+      set (newValue) {
+        this.filter = newValue
+        this.$emit('updateFilter', this.filter)
+        const options = {
+          pre: '',
+          post: '',
+          extract: (item) => {
+            return item.name
+          }
+        }
+        const filtered = fuzzy.filter(this.filter, this.items, options)
+        const items = filtered.map(item => {
+          return {
+            name: item.string,
+            id: item.original.id
+          }
+        })
+        this.$emit('updateFilteredSpaces', items)
+      }
+    }
+  },
+  methods: {
+    focusFilterInput () {
+      const element = this.$refs.filterInput
+      element.focus()
+      element.setSelectionRange(0, 0)
+    },
+    clearFilter () {
+      this.filter = ''
+      this.$emit('updateFilter', this.filter)
+      this.$emit('updateFilteredSpaces', [])
+    }
+  }
+}
+</script>
+
+<style lang="stylus">
+.filter-wrap
+  margin-left 5px
+  padding-top 4px
+  display flex
+  .search
+    margin-top -11px
+    padding-right 5px
+    cursor text
+</style>

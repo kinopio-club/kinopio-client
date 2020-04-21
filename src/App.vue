@@ -330,15 +330,6 @@ li
   overflow auto
   max-height calc(92vh - 245px)
 
-.filter-wrap
-  margin-left 5px
-  padding-top 4px
-  display flex
-  .search
-    margin-top -11px
-    padding-right 5px
-    cursor text
-
 ul.results-list
   margin 0
   padding 0
@@ -349,6 +340,8 @@ ul.results-list
     border-radius 3px
     user-select none
     cursor pointer
+    .highlight
+      background yellow
     &:hover,
     &:focus
       background-color var(--secondary-hover-background)
