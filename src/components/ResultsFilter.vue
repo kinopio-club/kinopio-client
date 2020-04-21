@@ -34,12 +34,11 @@ export default {
   },
   computed: {
     shouldShowFilter () {
-      if (this.hideFilter) {
+      if (this.hideFilter || !this.isManyItems) {
         return false
-      } else if (this.isManyItems) {
+      } else {
         return true
       }
-      return false
     },
     isManyItems () { return Boolean(this.items.length >= 5) },
     filterItems: {
