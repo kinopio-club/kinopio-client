@@ -52,6 +52,7 @@ export default new Vuex.Store({
     connectionDetailsPosition: {}, // x, y
     connectionDetailsIsVisibleForConnectionId: '',
     currentConnectionColor: '',
+    triggeredDrawConnectionFrame: {},
 
     // dragging
     currentDraggingCardId: '',
@@ -255,6 +256,9 @@ export default new Vuex.Store({
     connectionDetailsPosition: (state, position) => {
       utils.typeCheck(position, 'object')
       state.connectionDetailsPosition = position
+    },
+    triggeredDrawConnectionFrame: (state, cursor) => {
+      state.triggeredDrawConnectionFrame = cursor
     },
 
     // multiple selection

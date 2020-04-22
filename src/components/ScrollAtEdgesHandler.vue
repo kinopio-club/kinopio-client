@@ -24,7 +24,8 @@ export default {
     pageHeight () { return this.$store.state.pageHeight },
     pageWidth () { return this.$store.state.pageWidth },
     currentUserIsPainting () { return this.$store.state.currentUserIsPainting }, // dont add page size if currentUserIsPainting
-    isDraggingCard () { return this.$store.state.currentUserIsDraggingCard }
+    isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
+    isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection }
   },
   methods: {
     initInteractions (event) {
@@ -91,10 +92,6 @@ export default {
         this.increasePageWidth(delta)
         this.scrollBy(delta)
       }
-      if (this.isDrawingConnection) {
-        this.drawConnection()
-      }
-
       if (scrollTimer) {
         window.requestAnimationFrame(this.scrollFrame)
       }
@@ -122,7 +119,7 @@ export default {
       }
     },
     increasePageWidth (delta) {
-      if (this.currentUserIsPainting) { return }
+      if (this.currentUserIsPainting || this.isDrawingConnection) { return }
       const cursorIsRightSideOfPage = (this.pageWidth - prevCursorPage.x) < scrollAreaWidth
       if (cursorIsRightSideOfPage) {
         const pageWidth = this.pageWidth
@@ -131,7 +128,7 @@ export default {
       }
     },
     increasePageHeight (delta) {
-      if (this.currentUserIsPainting) { return }
+      if (this.currentUserIsPainting || this.isDrawingConnection) { return }
       const cursorIsBottomSideOfPage = (this.pageHeight - prevCursorPage.y) < scrollAreaHeight
       if (cursorIsBottomSideOfPage) {
         const pageHeight = this.pageHeight
@@ -154,7 +151,10 @@ export default {
       delta.top = delta.y
       const cursor = this.cursor()
       if (this.isDraggingCard) {
-        this.$store.dispatch('currentSpace/dragCards', { cursor })
+        this.$store.dispatch('currentSpace/dragCards', { delta })
+      }
+      if (this.isDrawingConnection) {
+        this.$store.commit('triggeredDrawConnectionFrame', cursor)
       }
       if (this.currentUserIsPainting) {
         this.$store.commit('triggeredPaintFramePosition', cursor)

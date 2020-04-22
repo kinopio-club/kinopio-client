@@ -51,15 +51,25 @@ export default {
     OffscreenMarkers,
     ScrollAtEdgesHandler
   },
-  data () {
-    return {
-      currentConnectionPath: undefined,
-      currentConnectionColor: undefined
-    }
-  },
   beforeCreate () {
     this.$store.dispatch('currentUser/init')
     this.$store.dispatch('currentSpace/init')
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggeredPaintFramePosition') {
+        const position = this.$store.state.triggeredPaintFramePosition
+        const event = {
+          clientX: position.x,
+          clientY: position.y
+        }
+        this.createPaintingCircle(event)
+      }
+      if (mutation.type === 'triggeredDrawConnectionFrame') {
+        prevCursor = this.$store.state.triggeredDrawConnectionFrame
+        this.drawConnection()
+      }
+    })
   },
   mounted () {
     // bind events to window to receive events when mouse is outside window
@@ -78,6 +88,12 @@ export default {
 
     this.addInteractionBlur()
     this.startProcessQueueTimer()
+  },
+  data () {
+    return {
+      currentConnectionPath: undefined,
+      currentConnectionColor: undefined
+    }
   },
   computed: {
     size () {
