@@ -70,7 +70,7 @@ export default {
       return
     }
     if (typeof value !== type) { // eslint-disable-line valid-typeof
-      console.error(`passed value is not ${type}`, value)
+      console.warn(`passed value is not ${type}`, value)
     }
   },
 

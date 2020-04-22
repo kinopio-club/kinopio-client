@@ -1,29 +1,31 @@
 <template lang="pug">
-ul.results-list.space-list
-  template(v-for="(space in spaces")
-    li(@click="selectSpace(space)" :class="{ active: spaceIsActive(space) }" :key="space.id" tabindex="0" v-on:keyup.enter="selectSpace(space)")
-
-      User(v-if="showUser" :user="user(space)" :isClickable="false" :key="user(space).id")
-      template(v-else-if="showUserIfCurrentUserIsCollaborator && space.currentUserIsCollaborator")
-        User(:user="user(space)" :isClickable="false" :key="user(space).id")
-      .badge.info.template-badge(v-if="showCategory") {{space.category}}
-      .badge.info.template-badge(v-else-if="spaceIsTemplate(space)") Template
-
-      .name
-        span {{space.name}}
-        img.icon.privacy-icon(v-if="spaceIsNotClosed(space)" :src="privacyIcon(space)")
-        .badge.status(v-if="showInExplore(space)")
-          img.icon(src="@/assets/checkmark.svg")
+span
+  ResultsFilter(:hideFilter="hideFilter" :items="spaces" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredSpaces")
+  ul.results-list.space-list
+    template(v-for="(space in spacesFiltered")
+      li(@click="selectSpace(space)" :class="{ active: spaceIsActive(space) }" :key="space.id" tabindex="0" v-on:keyup.enter="selectSpace(space)")
+        User(v-if="showUser" :user="user(space)" :isClickable="false" :key="user(space).id")
+        template(v-else-if="showUserIfCurrentUserIsCollaborator && space.currentUserIsCollaborator")
+          User(:user="user(space)" :isClickable="false" :key="user(space).id")
+        .badge.info.template-badge(v-if="showCategory") {{space.category}}
+        .badge.info.template-badge(v-else-if="spaceIsTemplate(space)") Template
+        .name
+          span {{space.name}}
+          img.icon.privacy-icon(v-if="spaceIsNotClosed(space)" :src="privacyIcon(space)")
+          .badge.status(v-if="showInExplore(space)")
+            img.icon(src="@/assets/checkmark.svg")
 </template>
 
 <script>
 import privacy from '@/spaces/privacy.js'
 import templates from '@/spaces/templates.js'
+import ResultsFilter from '@/components/ResultsFilter.vue'
 
 export default {
   name: 'SpaceList',
   components: {
-    User: () => import('@/components/User.vue')
+    User: () => import('@/components/User.vue'),
+    ResultsFilter
   },
   props: {
     spaces: Array,
@@ -31,9 +33,31 @@ export default {
     showCategory: Boolean,
     showUser: Boolean,
     showUserIfCurrentUserIsCollaborator: Boolean,
-    hideExploreBadge: Boolean
+    hideExploreBadge: Boolean,
+    hideFilter: Boolean
+  },
+  data () {
+    return {
+      filter: '',
+      filteredSpaces: []
+    }
+  },
+  computed: {
+    spacesFiltered () {
+      if (this.filter) {
+        return this.filteredSpaces
+      } else {
+        return this.spaces
+      }
+    }
   },
   methods: {
+    updateFilteredSpaces (spaces) {
+      this.filteredSpaces = spaces
+    },
+    updateFilter (filter) {
+      this.filter = filter
+    },
     spaceIsActive (space) {
       if (this.selectedSpace) {
         return Boolean(this.selectedSpace.id === space.id)

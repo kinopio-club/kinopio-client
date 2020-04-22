@@ -40,20 +40,13 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
 
   section.results-section(v-if="!favoritesIsVisible")
-    .filter-wrap(v-if="isManySpaces")
-      img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
-      input(placeholder="Search" v-model="spaceFilter" ref="filterInput")
-      button.borderless.clear-input-wrap(@click="clearFilter")
-        img.icon(src="@/assets/add.svg")
-    SpaceList(:spaces="spacesFiltered" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
+    SpaceList(:spaces="spaces" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
 
   Favorites(:visible="favoritesIsVisible" :loading="favoritesIsLoading")
 
 </template>
 
 <script>
-import fuzzy from 'fuzzy'
-
 import cache from '@/cache.js'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
@@ -83,8 +76,6 @@ export default {
       favoriteUsers: [],
       exportIsVisible: false,
       importIsVisible: false,
-      filter: '',
-      filteredSpaces: [],
       privacyPickerIsVisible: false,
       favoritesIsVisible: false,
       favoriteUsersIsVisible: false,
@@ -104,7 +95,6 @@ export default {
   computed: {
     currentSpace () { return this.$store.state.currentSpace },
     exportScope () { return 'space' },
-    isManySpaces () { return Boolean(this.spaces.length >= 5) },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     shouldShowInExplore () {
       const privacy = this.$store.state.currentSpace.privacy
@@ -120,36 +110,6 @@ export default {
         this.updateSpaces()
       }
     },
-    spacesFiltered () {
-      if (this.filter) {
-        return this.filteredSpaces
-      } else {
-        return this.spaces
-      }
-    },
-    spaceFilter: {
-      get () {
-        return this.filter
-      },
-      set (newValue) {
-        this.filter = newValue
-        const options = {
-          pre: '',
-          post: '',
-          extract: (space) => {
-            return space.name
-          }
-        }
-        const filtered = fuzzy.filter(this.filter, this.spaces, options)
-        const spaces = filtered.map(space => {
-          return {
-            name: space.string,
-            id: space.original.id
-          }
-        })
-        this.filteredSpaces = spaces
-      }
-    },
     isSpaceMember () {
       const currentSpace = this.$store.state.currentSpace
       return this.$store.getters['currentUser/isSpaceMember'](currentSpace)
@@ -161,11 +121,6 @@ export default {
     },
     hideFavorites () {
       this.favoritesIsVisible = false
-    },
-    focusFilterInput () {
-      const element = this.$refs.filterInput
-      element.focus()
-      element.setSelectionRange(0, 0)
     },
     toggleExportIsVisible () {
       const isVisible = this.exportIsVisible
@@ -238,9 +193,6 @@ export default {
       this.pruneCachedSpaces(remoteSpaces)
       this.spaces = remoteSpaces
     },
-    clearFilter () {
-      this.filter = ''
-    },
     updateRemoveLabel () {
       const currentUserIsSpaceCollaborator = this.$store.getters['currentUser/isSpaceCollaborator']()
       if (currentUserIsSpaceCollaborator) {
@@ -264,7 +216,6 @@ export default {
         this.updateSpaces()
         this.updateWithRemoteSpaces()
         this.closeDialogs()
-        this.clearFilter()
         this.updateFavorites()
       } else {
         this.favoritesIsVisible = false

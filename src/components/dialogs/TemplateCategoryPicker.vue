@@ -23,6 +23,7 @@ export default {
   },
   methods: {
     select (category) {
+      this.$store.commit('triggerSelectTemplateCategory')
       this.$emit('selectCategory', category)
       this.$emit('closeDialog')
     },

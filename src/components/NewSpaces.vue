@@ -6,7 +6,7 @@
     p(v-if="loading")
       Loader(:visible="loading")
   section.results-section
-    SpaceList(:spaces="spaces" :showUser="true" :hideExploreBadge="true" @selectSpace="changeSpace")
+    SpaceList(:hideFilter="true" :spaces="spaces" :showUser="true" :hideExploreBadge="true" @selectSpace="changeSpace")
 </template>
 
 <script>
