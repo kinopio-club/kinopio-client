@@ -190,7 +190,6 @@ export default new Vuex.Store({
     notifyReadOnlyJiggle: () => {},
     triggerSelectTemplateCategory: () => {},
     triggeredPaintFramePosition: (state, cursor) => {
-      console.log('🌷', cursor)
       state.triggeredPaintFramePosition = cursor
     },
 
