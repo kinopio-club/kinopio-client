@@ -65,6 +65,18 @@ export default {
     window.addEventListener('scroll', this.updateCirclesWithScroll)
     window.addEventListener('scroll', this.updatePositionOffsetByPinchZoom)
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggeredPaintFramePosition') {
+        const position = this.$store.state.triggeredPaintFramePosition
+        const event = {
+          clientX: position.x,
+          clientY: position.y
+        }
+        this.createPaintingCircle(event)
+      }
+    })
+  },
   data () {
     return {
       pinchZoomOffsetTop: 0,
@@ -88,14 +100,12 @@ export default {
       this.pinchZoomOffsetTop = window.visualViewport.offsetTop
       this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
     },
-
     updatePrevScrollPosition () {
       prevScroll = {
         x: window.scrollX,
         y: window.scrollY
       }
     },
-
     updateCirclePositions (circles, scrollDelta) {
       return circles.map(circle => {
         circle.x = circle.x - scrollDelta.x
@@ -103,7 +113,6 @@ export default {
         return circle
       })
     },
-
     updateCirclesWithScroll () {
       const scrollDelta = {
         x: window.scrollX - prevScroll.x,
@@ -117,7 +126,6 @@ export default {
       }
       this.updatePrevScrollPosition()
     },
-
     isCircleVisible (circle) {
       let { x, y, radius } = circle
       radius = radius || circleRadius
@@ -133,7 +141,6 @@ export default {
       })
       return Boolean(circleVisibleX && circleVisibleY)
     },
-
     drawCircle (circle, context) {
       if (!this.isCircleVisible(circle)) { return }
       let { x, y, color, iteration, radius, alpha } = circle
@@ -146,7 +153,6 @@ export default {
       context.fillStyle = color
       context.fill()
     },
-
     startLocking () {
       currentUserIsLocking = true
       setTimeout(() => {
@@ -155,7 +161,6 @@ export default {
         }
       }, lockingPreDuration)
     },
-
     createInitialCircle () {
       const initialCircle = {
         x: startCursor.x,
@@ -167,7 +172,6 @@ export default {
       initialCircles.push(initialCircle)
       this.drawCircle(initialCircle, initialContext)
     },
-
     createPaintingCircle (event) {
       let color = this.$store.state.currentUser.color
       currentCursor = utils.cursorPositionInViewport(event)
@@ -176,7 +180,6 @@ export default {
       this.selectConnections(circle)
       paintingCircles.push(circle)
     },
-
     startPainting (event) {
       startCursor = utils.cursorPositionInViewport(event)
       currentCursor = utils.cursorPositionInViewport(event)
@@ -198,7 +201,6 @@ export default {
         initialCirclesTimer = window.requestAnimationFrame(this.initialCirclesAnimationFrame)
       }
     },
-
     painting (event) {
       if (!this.$store.state.currentUserIsPainting) { return }
       if (this.$store.getters.shouldScrollAtEdges) {
@@ -209,7 +211,6 @@ export default {
       }
       this.createPaintingCircle(event)
     },
-
     lockingAnimationFrame (timestamp) {
       if (!lockingStartTime) {
         lockingStartTime = timestamp
@@ -248,7 +249,6 @@ export default {
         lockingStartTime = undefined
       }
     },
-
     paintCirclesAnimationFrame () {
       paintingCircles = utils.filterCircles(paintingCircles, maxIterations)
       paintingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
@@ -266,7 +266,6 @@ export default {
         }, 0)
       }
     },
-
     initialCirclesAnimationFrame () {
       initialCircles = utils.filterCircles(initialCircles, maxIterations)
       initialContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
@@ -284,14 +283,12 @@ export default {
         initialCirclesTimer = undefined
       }
     },
-
     shouldCancel (event) {
       const fromDialog = event.target.closest('dialog')
       const fromHeader = event.target.closest('header')
       const fromFooter = event.target.closest('footer')
       return fromDialog || fromHeader || fromFooter
     },
-
     stopPainting (event) {
       if (this.shouldCancel(event)) { return }
       startCursor = startCursor || {}
@@ -312,7 +309,6 @@ export default {
       // prevent mouse events from firing after touch events on touch device
       event.preventDefault()
     },
-
     selectCards (circle) {
       if (this.spaceIsReadOnly) { return }
       this.$store.state.cardMap.map(card => {
@@ -333,7 +329,6 @@ export default {
         }
       })
     },
-
     selectConnections (circle) {
       if (this.spaceIsReadOnly) { return }
       const paths = document.querySelectorAll('svg .connection-path')
@@ -351,7 +346,6 @@ export default {
         }
       })
     }
-
   }
 }
 </script>

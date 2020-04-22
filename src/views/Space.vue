@@ -25,6 +25,7 @@ main.space(
   ConnectionDetails
   MultipleSelectedActions
   OffscreenMarkers
+  ScrollAtEdgesHandler
 </template>
 
 <script>
@@ -34,22 +35,22 @@ import ConnectionLabel from '@/components/ConnectionLabel.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
+import ScrollAtEdgesHandler from '@/components/ScrollAtEdgesHandler.vue'
 import utils from '@/utils.js'
 
-let startCursor, prevCursor, prevCursorPage, endCursor, scrollTimer, scrollAreaHeight, scrollAreaWidth, maxHeight, maxWidth
-let movementDirection = {}
+let startCursor, prevCursor, endCursor
 
 export default {
+  name: 'Space',
   components: {
     Card,
     Connection,
     ConnectionLabel,
     ConnectionDetails,
     MultipleSelectedActions,
-    OffscreenMarkers
+    OffscreenMarkers,
+    ScrollAtEdgesHandler
   },
-  name: 'Space',
-
   data () {
     return {
       currentConnectionPath: undefined,
@@ -78,7 +79,6 @@ export default {
     this.addInteractionBlur()
     this.startProcessQueueTimer()
   },
-
   computed: {
     size () {
       return {
@@ -102,12 +102,10 @@ export default {
       } else { return false }
     }
   },
-
   methods: {
     updatePageSizes () {
       this.$store.commit('updatePageSizes')
     },
-
     updateIsOnline () {
       const status = window.navigator.onLine
       this.$store.commit('isOnline', status)
@@ -115,17 +113,14 @@ export default {
         this.$store.dispatch('api/processQueueOperations')
       }
     },
-
     addInteractionBlur () {
       if (!utils.isMobile()) { return }
       const elements = document.querySelectorAll('button, li, label')
       elements.forEach(element => element.addEventListener('click', this.blur))
     },
-
     blur (event) {
       event.target.blur()
     },
-
     startProcessQueueTimer () {
       // retry failed sync operations every 5 seconds
       setInterval(() => {
@@ -137,14 +132,6 @@ export default {
       if (this.spaceIsReadOnly) { return }
       this.$store.commit('generateCardMap')
       startCursor = utils.cursorPositionInViewport(event)
-      if (this.$store.getters.shouldScrollAtEdges && !scrollTimer) {
-        scrollAreaHeight = Math.max(50, this.viewportHeight / 8)
-        scrollAreaWidth = Math.max(50, this.viewportWidth / 8)
-        // console.log('🦋', scrollAreaHeight, scrollAreaWidth)
-        maxHeight = Math.max(2500, this.$store.state.viewportHeight)
-        maxWidth = Math.max(2500, this.$store.state.viewportWidth)
-        scrollTimer = window.requestAnimationFrame(this.scrollFrame)
-      }
     },
 
     interact (event) {
@@ -155,146 +142,13 @@ export default {
       if (this.isDrawingConnection) {
         this.drawConnection()
       }
-      if (this.$store.getters.shouldScrollAtEdges) {
-        this.updateMovementDirection()
-      }
       prevCursor = utils.cursorPositionInViewport(event)
-      prevCursorPage = utils.cursorPositionInPage(event)
     },
-
     checkShouldShowDetails () {
       if (!utils.cursorsAreClose(startCursor, endCursor)) {
         this.$store.commit('preventDraggedCardFromShowingDetails', true)
       }
     },
-
-    scrollBy (delta) {
-      delta.left = delta.x * 1.1
-      delta.top = delta.y
-      if (this.isDraggingCard) {
-        this.$store.dispatch('currentSpace/dragCards', { delta })
-      }
-      window.scrollBy(delta)
-    },
-
-    speed (cursor, direction) {
-      let multiplier
-      const base = 10
-      const maxSpeed = 30
-      const viewportHeight = this.viewportHeight
-      const viewportWidth = this.viewportWidth
-      if (direction === 'up') {
-        multiplier = (scrollAreaHeight - cursor.y) / scrollAreaHeight
-      }
-      if (direction === 'down') {
-        multiplier = (cursor.y - (viewportHeight - scrollAreaHeight) / scrollAreaHeight) / viewportHeight
-      }
-      if (direction === 'left') {
-        multiplier = (scrollAreaWidth - cursor.x) / scrollAreaWidth
-      }
-      if (direction === 'right') {
-        multiplier = (cursor.x - (viewportWidth - scrollAreaWidth) / scrollAreaWidth) / viewportWidth
-      }
-      return Math.min(base * (multiplier + (multiplier * 0.5)), maxSpeed)
-    },
-
-    increasePageWidth (delta) {
-      const cursorIsRightSideOfPage = (this.pageWidth - prevCursorPage.x) < scrollAreaWidth
-      if (cursorIsRightSideOfPage) {
-        const pageWidth = this.pageWidth
-        const width = pageWidth + delta.x
-        this.$store.commit('pageWidth', width)
-      }
-    },
-
-    increasePageHeight (delta) {
-      const cursorIsBottomSideOfPage = (this.pageHeight - prevCursorPage.y) < scrollAreaHeight
-      if (cursorIsBottomSideOfPage) {
-        const pageHeight = this.pageHeight
-        const height = pageHeight + delta.y
-        this.$store.commit('pageHeight', height)
-      }
-    },
-
-    shouldScrollRight () {
-      this.updatePageSizes()
-      const scrolledTooFarRight = (window.scrollX + this.viewportWidth) > maxWidth
-      return !scrolledTooFarRight
-    },
-
-    shouldScrollDown () {
-      this.updatePageSizes()
-      const scrolledTooFarDown = (window.scrollY + this.viewportHeight) > maxHeight
-      return !scrolledTooFarDown
-    },
-
-    scrollFrame () {
-      let delta, speed
-      const viewportHeight = this.viewportHeight
-      const viewportWidth = this.viewportWidth
-      const cursor = this.cursor()
-      const cursorIsTopSide = cursor.y <= scrollAreaHeight
-      const cursorIsBottomSide = cursor.y >= viewportHeight - scrollAreaHeight
-      const cursorIsLeftSide = cursor.x <= scrollAreaWidth
-      const cursorIsRightSide = cursor.x >= viewportWidth - scrollAreaWidth
-
-      if (movementDirection.y === 'up' && cursorIsTopSide && window.scrollY) {
-        speed = this.speed(cursor, 'up')
-        delta = {
-          x: 0,
-          y: -speed
-        }
-        this.scrollBy(delta)
-      } else if (movementDirection.y === 'down' && cursorIsBottomSide && this.shouldScrollDown()) {
-        speed = this.speed(cursor, 'down')
-        delta = {
-          x: 0,
-          y: speed
-        }
-        this.increasePageHeight(delta)
-        this.scrollBy(delta)
-      }
-      if (movementDirection.x === 'left' && cursorIsLeftSide && window.scrollX) {
-        speed = this.speed(cursor, 'left')
-        delta = {
-          x: -speed,
-          y: 0
-        }
-        this.scrollBy(delta)
-      } else if (movementDirection.x === 'right' && cursorIsRightSide && this.shouldScrollRight()) {
-        speed = this.speed(cursor, 'right')
-        delta = {
-          x: speed,
-          y: 0
-        }
-        this.increasePageWidth(delta)
-        this.scrollBy(delta)
-      }
-      if (this.isDrawingConnection) {
-        this.drawConnection()
-      }
-
-      if (scrollTimer) {
-        window.requestAnimationFrame(this.scrollFrame)
-      }
-    },
-
-    updateMovementDirection () {
-      const cursor = this.cursor()
-      const xMove = endCursor.x - cursor.x
-      const yMove = endCursor.y - cursor.y
-      if (Math.sign(yMove) === -1) {
-        movementDirection.y = 'up'
-      } else if (Math.sign(yMove) === 1) {
-        movementDirection.y = 'down'
-      }
-      if (Math.sign(xMove) === -1) {
-        movementDirection.x = 'left'
-      } else if (Math.sign(xMove) === 1) {
-        movementDirection.x = 'right'
-      }
-    },
-
     cursor () {
       if (utils.objectHasKeys(prevCursor)) {
         return prevCursor
@@ -302,7 +156,6 @@ export default {
         return startCursor
       }
     },
-
     dragCard () {
       const prevCursor = this.cursor()
       this.$store.dispatch('currentSpace/dragCards', {
@@ -311,7 +164,6 @@ export default {
       })
       this.checkShouldShowDetails()
     },
-
     drawConnection () {
       const end = this.cursor()
       const startCardId = this.$store.state.currentConnection.startCardId
@@ -323,7 +175,6 @@ export default {
       this.currentConnectionColor = connectionType.color
       this.$store.commit('currentConnectionColor', connectionType.color)
     },
-
     checkCurrentConnectionSuccess () {
       const cursor = this.cursor()
       const cardMap = this.$store.state.cardMap
@@ -342,7 +193,6 @@ export default {
         const inYRange = utils.isBetween(yValues)
         return inXRange && inYRange
       })
-
       if (!connection) {
         this.$store.commit('currentConnectionSuccess', {})
         return
@@ -353,12 +203,10 @@ export default {
         this.$store.commit('currentConnectionSuccess', {})
       }
     },
-
     addConnection (connection) {
       const connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
       this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
     },
-
     createConnection () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
       const startCardId = this.$store.state.currentConnection.startCardId
@@ -371,7 +219,6 @@ export default {
         this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
       }
     },
-
     shouldContinueConnecting (event) {
       const cursorStart = this.$store.state.currentConnectionCursorStart
       const cursorEnd = utils.cursorPositionInViewport(event)
@@ -382,7 +229,6 @@ export default {
         return false
       }
     },
-
     addCard (position) {
       const isParentCard = true
       if (this.spaceIsReadOnly) { return }
@@ -393,7 +239,6 @@ export default {
         this.$store.commit('childCardId', '')
       }
     },
-
     shouldCancel (event) {
       if (event.target.nodeType !== 1) { return } // firefox check
       const fromDialog = event.target.closest('dialog')
@@ -401,19 +246,15 @@ export default {
       const fromFooter = event.target.closest('footer')
       return fromDialog || fromHeader || fromFooter
     },
-
     showMultipleSelectedActions (position) {
       if (this.spaceIsReadOnly) { return }
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       this.$store.commit('multipleSelectedActionsPosition', position)
       this.$store.commit('multipleSelectedActionsIsVisible', true)
     },
-
     stopInteractions (event) {
       console.log('💣 stopInteractions') // stopInteractions and Space/stopPainting are run on all mouse and touch end events
       this.addInteractionBlur()
-      window.cancelAnimationFrame(scrollTimer)
-      scrollTimer = undefined
       if (this.shouldCancel(event)) { return }
       if (this.shouldContinueConnecting(event)) { return }
       if (this.isDrawingConnection) {
@@ -442,10 +283,8 @@ export default {
       this.updatePageSizes()
       this.currentConnectionPath = undefined
       prevCursor = undefined
-      movementDirection = {}
     }
   }
-
 }
 </script>
 
