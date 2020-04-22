@@ -65,15 +65,18 @@ export default {
         this.restoreLastRemovedCard()
       // Copy
       } else if (isMeta && key === 'c' && (isSpaceScope || isFromCard)) {
-        event.preventDefault()
-        this.copyCards()
-        this.notifyCopyCut('copied')
+        if (this.focusedCardIds().length) {
+          event.preventDefault()
+          this.copyCards()
+          this.notifyCopyCut('copied')
+        }
       // Cut
       } else if (isMeta && key === 'x' && isSpaceScope) {
-        event.preventDefault()
-        this.cutCards()
-        this.notifyCopyCut('cut')
-
+        if (this.focusedCardIds().length) {
+          event.preventDefault()
+          this.cutCards()
+          this.notifyCopyCut('cut')
+        }
       // Paste
       } else if (isMeta && key === 'v' && isSpaceScope) {
         event.preventDefault()
@@ -323,15 +326,7 @@ export default {
     },
 
     focusedCardIds () {
-      let cards = []
-      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
-      const selectedCardId = this.$store.state.cardDetailsIsVisibleForCardId
-      if (multipleCardsSelectedIds.length) {
-        cards = multipleCardsSelectedIds
-      } else if (selectedCardId) {
-        cards = [selectedCardId]
-      }
-      return cards
+      return this.$store.state.multipleCardsSelectedIds || []
     },
 
     // Remove
