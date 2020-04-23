@@ -40,6 +40,9 @@ export default {
       if (this.$store.getters.shouldScrollAtEdges) {
         this.updateMovementDirection()
       }
+      this.initScrollTimer()
+    },
+    initScrollTimer () {
       if (this.$store.getters.shouldScrollAtEdges && !scrollTimer) {
         scrollTimer = window.requestAnimationFrame(this.scrollFrame)
       }

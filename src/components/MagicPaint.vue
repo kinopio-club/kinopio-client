@@ -47,6 +47,19 @@ let initialCircles = []
 let initialCanvas, initialContext, initialCirclesTimer
 
 export default {
+  name: 'MagicPaint',
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggeredPaintFramePosition') {
+        const position = this.$store.state.triggeredPaintFramePosition
+        const event = {
+          clientX: position.x,
+          clientY: position.y
+        }
+        this.createPaintingCircle(event)
+      }
+    })
+  },
   mounted () {
     paintingCanvas = document.getElementById('painting')
     paintingContext = paintingCanvas.getContext('2d')
@@ -64,18 +77,6 @@ export default {
     this.updatePrevScrollPosition()
     window.addEventListener('scroll', this.updateCirclesWithScroll)
     window.addEventListener('scroll', this.updatePositionOffsetByPinchZoom)
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggeredPaintFramePosition') {
-        const position = this.$store.state.triggeredPaintFramePosition
-        const event = {
-          clientX: position.x,
-          clientY: position.y
-        }
-        this.createPaintingCircle(event)
-      }
-    })
   },
   data () {
     return {
