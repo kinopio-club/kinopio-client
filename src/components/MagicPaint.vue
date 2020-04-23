@@ -179,6 +179,7 @@ export default {
       let circle = { x: currentCursor.x, y: currentCursor.y, color, iteration: 0 }
       this.selectCards(circle)
       this.selectConnections(circle)
+      this.selectCardsAndConnectionsBetweenCircles(circle)
       paintingCircles.push(circle)
     },
     startPainting (event) {
@@ -311,16 +312,16 @@ export default {
       // prevent mouse events from firing after touch events on touch device
       event.preventDefault()
     },
-    selectCards (circle) {
+    selectCards (point) {
       if (this.spaceIsReadOnly) { return }
       this.$store.state.cardMap.map(card => {
         const x = {
-          value: circle.x + window.scrollX,
+          value: point.x + window.scrollX,
           min: card.x,
           max: card.x + card.width
         }
         const y = {
-          value: circle.y + window.scrollY,
+          value: point.y + window.scrollY,
           min: card.y,
           max: card.y + card.height
         }
@@ -331,29 +332,46 @@ export default {
         }
       })
     },
-
-    // movementDirection (prevCircle, delta) {
-    //   let movementDirection = {}
-    //   if (delta.xAbsolute > delta.yAbsolute) {
-    //     if (Math.sign(delta.x) === 1) {
-    //       movementDirection.x = 'left'
-    //     } else if (Math.sign(delta.x) === -1) {
-    //       movementDirection.x = 'right'
-    //     }
-    //   } else if (delta.xAbsolute < delta.yAbsolute) {
-    //     if (Math.sign(delta.y) === 1) {
-    //       movementDirection.y = 'up'
-    //     } else if (Math.sign(delta.y) === -1) {
-    //       movementDirection.y = 'down'
-    //     }
-    //   }
-    //   return movementDirection
-    // },
-
+    movementDirection (prevCircle, delta) {
+      let movementDirection = {}
+      if (delta.xAbsolute > delta.yAbsolute) {
+        if (Math.sign(delta.x) === 1) {
+          movementDirection.x = 'left'
+        } else if (Math.sign(delta.x) === -1) {
+          movementDirection.x = 'right'
+        }
+      } else if (delta.xAbsolute < delta.yAbsolute) {
+        if (Math.sign(delta.y) === 1) {
+          movementDirection.y = 'up'
+        } else if (Math.sign(delta.y) === -1) {
+          movementDirection.y = 'down'
+        }
+      }
+      return movementDirection
+    },
+    linearInterpolateY (x, delta, prevCircle, circle) {
+      const slope = delta.y / delta.x
+      const isNoSlope = Math.abs(slope) === Infinity || slope === 0
+      if (isNoSlope) {
+        return circle.y
+      } else {
+        return Math.round((x - prevCircle.x) * slope + prevCircle.y)
+      }
+    },
+    linearInterpolateX (y, delta, prevCircle, circle) {
+      const slope = delta.y / delta.x
+      const isNoSlope = Math.abs(slope) === Infinity || slope === 0
+      if (isNoSlope) {
+        return circle.x
+      } else {
+        return Math.round(prevCircle.x + slope * (y - prevCircle.y))
+      }
+    },
     selectConnections (circle) {
       if (this.spaceIsReadOnly) { return }
       this.selectConnectionPaths(circle)
-      // linear interpolated points between circles also used to select connection paths
+    },
+    selectCardsAndConnectionsBetweenCircles (circle) {
       const prevCircle = paintingCircles[paintingCircles.length - 1] || circle
       const delta = {
         x: prevCircle.x - circle.x,
@@ -362,80 +380,43 @@ export default {
         yAbsolute: Math.abs(prevCircle.y - circle.y)
       }
       const furthestDelta = Math.max(delta.xAbsolute, delta.yAbsolute)
-      if (furthestDelta <= 5 || prevCircle.iteration > 1) { }
-
-      // const slope = delta.y / delta.x
-      // const isNoSlope = Math.abs(slope) === Infinity || slope === 0
-      // const movementDirection = this.movementDirection(prevCircle, delta)
-      // console.log('🤣',circle, delta,movementDirection)
-
-      // const connectionLineStrokeWidth = 5
-
-      // if (movementDirection.y === 'up') {
-
-      // selectConnectionPathPointsY(prevCircle, circle, slope, isNoSlope)
-      // }
-
-      // if (movementDirection === 'x') {
-      //   let x = prevCircle.x + 1 // left- or right+ ?
-      //   while (x < circle.x) {
-      //     let y
-      //     if (isNoSlope) {
-      //       y = x
-      //     } else {
-      //       y = Math.round(x * slope)
-      //       console.log('🍶X: x',x, 'y', y, 'slope', slope)
-      //     }
-      //     x += connectionLineStrokeWidth // left- or right+ ? increment = connectionLineStrokeWidth
-      //   }
-      // } else if (movementDirection === 'y') {
-      //   let y = prevCircle.y + 1 // up- or down+ ?
-      //   console.log('🇦🇪', y)
-      //   while (y < circle.y) {
-      //     let x
-      //     if (isNoSlope) {
-      //       x = y
-      //     } else {
-      //       x = Math.round(y / slope)
-      //       console.log('🍺Y: x',x, 'y', y, 'slope', slope)
-      //     }
-      //     y += connectionLineStrokeWidth // up- or down+ ?
-      //   }
-      // }
-
-      // let furthestDeltaAxis
-      // if (delta.xAbsolute > delta.yAbsolute) {
-      //   furthestDeltaAxis = 'x'
-      // } else {
-      //   furthestDeltaAxis = 'y'
-      // }
-
-      //   console.log('🌿',furthestDelta, prevCircle, circle)
-
-      // if (furthestDelta >= 5 && prevCircle.iteration <= 1) {
-      //   if (delta.x === 0 || delta.y === 0) {
-      //     slope = 0 // otherwise would be Infinity
-      //   } else {
-      //     slope = delta.x / delta.y
-      //   }
-      //   console.log('🌿',furthestDelta, prevCircle, circle)
-      //   console.log(delta.x,delta.y, slope)
-      //   let point = delta[furthestDeltaAxis]
-      //   while (point < furthestDelta) {
-      //     // const y =
-      //     let otherPoint
-      //     if (furthestDeltaAxis === 'y') {
-      //       // otherPoint is x
-      //       otherPoint = prevCircle.x + slope // - y - y1
-      //     }
-      //     console.log('🔮',point, otherPoint)
-      //     point = point +  connectionLineStrokeWidth // (up by 5 , stroke width of conneciotn line)
-      //   }
-      //   // if (furthestDeltaAxis = 'x')
-
-      // }
-
-      // takes a point that's a 'circle'
+      if (furthestDelta <= 5 || prevCircle.iteration > 1) { return }
+      const movementDirection = this.movementDirection(prevCircle, delta)
+      const initialIncrement = 1
+      const increment = 5
+      if (movementDirection.x === 'right') {
+        let x = prevCircle.x + initialIncrement
+        while (x < circle.x) {
+          const y = this.linearInterpolateY(x, delta, prevCircle, circle)
+          this.selectConnectionPaths({ x, y })
+          this.selectCards({ x, y })
+          x += increment
+        }
+      } else if (movementDirection.x === 'left') {
+        let x = prevCircle.x - initialIncrement
+        while (x < circle.x) {
+          const y = this.linearInterpolateY(x, delta, prevCircle, circle)
+          this.selectConnectionPaths({ x, y })
+          this.selectCards({ x, y })
+          x += -increment
+        }
+      } else if (movementDirection.y === 'down') {
+        let y = prevCircle.y + initialIncrement
+        while (y < circle.y) {
+          const x = this.linearInterpolateX(y, delta, prevCircle, circle)
+          this.selectConnectionPaths({ x, y })
+          this.selectCards({ x, y })
+          y += increment
+        }
+      } else if (movementDirection.y === 'up') {
+        let y = prevCircle.y - initialIncrement
+        while (y < circle.y) {
+          const x = this.linearInterpolateX(y, delta, prevCircle, circle)
+          this.selectConnectionPaths({ x, y })
+          this.selectCards({ x, y })
+          y += -increment
+        }
+      }
     },
     selectConnectionPaths (point) {
       const paths = document.querySelectorAll('svg .connection-path')
@@ -446,7 +427,6 @@ export default {
         let svgPoint = svg.createSVGPoint()
         svgPoint.x = point.x + window.scrollX
         svgPoint.y = point.y + window.scrollY
-
         const isAlreadySelected = ids.includes(pathId)
         if (isAlreadySelected) { return }
         if (path.isPointInFill(svgPoint)) {
