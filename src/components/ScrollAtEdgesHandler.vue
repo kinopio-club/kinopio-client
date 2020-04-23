@@ -41,7 +41,6 @@ export default {
   },
   methods: {
     initInteractions (event) {
-      this.$store.commit('generateCardMap')
       const position = utils.cursorPositionInViewport(event)
       startCursor = position
       endCursor = position
