@@ -246,6 +246,7 @@ export default {
       }
       if (currentUserIsLocking && percentComplete > 1) {
         this.$store.commit('currentUserIsPaintingLocked', true)
+        this.$store.commit('triggeredPaintFramePosition', { x: startCursor.x, y: startCursor.y })
         console.log('🔒lockingAnimationFrame locked')
         lockingStartTime = undefined
       }

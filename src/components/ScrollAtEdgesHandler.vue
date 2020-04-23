@@ -9,6 +9,18 @@ let movementDirection = {}
 
 export default {
   name: 'ScrollAtEdgesHandler',
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'currentUserIsPaintingLocked') {
+        const position = this.$store.state.triggeredPaintFramePosition
+        const event = {
+          clientX: position.x,
+          clientY: position.y
+        }
+        this.initInteractions(event)
+      }
+    })
+  },
   mounted () {
     window.addEventListener('mousedown', this.initInteractions)
     window.addEventListener('touchstart', this.initInteractions)
@@ -40,9 +52,6 @@ export default {
       if (this.$store.getters.shouldScrollAtEdges) {
         this.updateMovementDirection()
       }
-      this.initScrollTimer()
-    },
-    initScrollTimer () {
       if (this.$store.getters.shouldScrollAtEdges && !scrollTimer) {
         scrollTimer = window.requestAnimationFrame(this.scrollFrame)
       }
