@@ -383,7 +383,7 @@ export default {
       if (furthestDelta <= 5 || prevCircle.iteration > 1) { return }
       const movementDirection = this.movementDirection(prevCircle, delta)
       const initialIncrement = 1
-      const increment = 5
+      const increment = 4
       if (movementDirection.x === 'right') {
         let x = prevCircle.x + initialIncrement
         while (x < circle.x) {
