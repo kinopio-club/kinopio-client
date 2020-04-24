@@ -35,7 +35,7 @@ export default {
     viewportWidth () { return this.$store.state.viewportWidth },
     pageHeight () { return this.$store.state.pageHeight },
     pageWidth () { return this.$store.state.pageWidth },
-    currentUserIsPainting () { return this.$store.state.currentUserIsPainting }, // dont add page size if currentUserIsPainting
+    currentUserIsPainting () { return this.$store.state.currentUserIsPainting },
     isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
     isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection }
   },
