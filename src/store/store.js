@@ -52,6 +52,7 @@ export default new Vuex.Store({
     connectionDetailsPosition: {}, // x, y
     connectionDetailsIsVisibleForConnectionId: '',
     currentConnectionColor: '',
+    triggeredDrawConnectionFrame: {},
 
     // dragging
     currentDraggingCardId: '',
@@ -65,6 +66,7 @@ export default new Vuex.Store({
     multipleCardsSelectedIds: [],
     cardMap: [],
     multipleConnectionsSelectedIds: [],
+    triggeredPaintFramePosition: {},
 
     // loading
     isLoadingSpace: false,
@@ -188,6 +190,9 @@ export default new Vuex.Store({
     triggerKeyboardShortcutsIsVisible: () => {},
     notifyReadOnlyJiggle: () => {},
     triggerSelectTemplateCategory: () => {},
+    triggeredPaintFramePosition: (state, cursor) => {
+      state.triggeredPaintFramePosition = cursor
+    },
 
     // connecting
     currentUserIsDrawingConnection: (state, value) => {
@@ -251,6 +256,9 @@ export default new Vuex.Store({
     connectionDetailsPosition: (state, position) => {
       utils.typeCheck(position, 'object')
       state.connectionDetailsPosition = position
+    },
+    triggeredDrawConnectionFrame: (state, cursor) => {
+      state.triggeredDrawConnectionFrame = cursor
     },
 
     // multiple selection
@@ -421,10 +429,15 @@ export default new Vuex.Store({
 
   getters: {
     shouldScrollAtEdges (state, getters) {
-      const isPaintingLocked = state.currentUserIsPaintingLocked
+      let isPainting
+      if (utils.isMobile()) {
+        isPainting = state.currentUserIsPaintingLocked
+      } else {
+        isPainting = state.currentUserIsPainting
+      }
       const isDrawingConnection = state.currentUserIsDrawingConnection
       const isDraggingCard = state.currentUserIsDraggingCard
-      return isPaintingLocked || isDrawingConnection || isDraggingCard
+      return isPainting || isDrawingConnection || isDraggingCard
     }
   },
 

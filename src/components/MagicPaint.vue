@@ -47,6 +47,19 @@ let initialCircles = []
 let initialCanvas, initialContext, initialCirclesTimer
 
 export default {
+  name: 'MagicPaint',
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggeredPaintFramePosition') {
+        const position = this.$store.state.triggeredPaintFramePosition
+        const event = {
+          clientX: position.x,
+          clientY: position.y
+        }
+        this.createPaintingCircle(event)
+      }
+    })
+  },
   mounted () {
     paintingCanvas = document.getElementById('painting')
     paintingContext = paintingCanvas.getContext('2d')
@@ -88,14 +101,12 @@ export default {
       this.pinchZoomOffsetTop = window.visualViewport.offsetTop
       this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
     },
-
     updatePrevScrollPosition () {
       prevScroll = {
         x: window.scrollX,
         y: window.scrollY
       }
     },
-
     updateCirclePositions (circles, scrollDelta) {
       return circles.map(circle => {
         circle.x = circle.x - scrollDelta.x
@@ -103,7 +114,6 @@ export default {
         return circle
       })
     },
-
     updateCirclesWithScroll () {
       const scrollDelta = {
         x: window.scrollX - prevScroll.x,
@@ -117,7 +127,6 @@ export default {
       }
       this.updatePrevScrollPosition()
     },
-
     isCircleVisible (circle) {
       let { x, y, radius } = circle
       radius = radius || circleRadius
@@ -133,7 +142,6 @@ export default {
       })
       return Boolean(circleVisibleX && circleVisibleY)
     },
-
     drawCircle (circle, context) {
       if (!this.isCircleVisible(circle)) { return }
       let { x, y, color, iteration, radius, alpha } = circle
@@ -146,7 +154,6 @@ export default {
       context.fillStyle = color
       context.fill()
     },
-
     startLocking () {
       currentUserIsLocking = true
       setTimeout(() => {
@@ -155,7 +162,6 @@ export default {
         }
       }, lockingPreDuration)
     },
-
     createInitialCircle () {
       const initialCircle = {
         x: startCursor.x,
@@ -167,16 +173,15 @@ export default {
       initialCircles.push(initialCircle)
       this.drawCircle(initialCircle, initialContext)
     },
-
     createPaintingCircle (event) {
       let color = this.$store.state.currentUser.color
       currentCursor = utils.cursorPositionInViewport(event)
       let circle = { x: currentCursor.x, y: currentCursor.y, color, iteration: 0 }
       this.selectCards(circle)
       this.selectConnections(circle)
+      this.selectCardsAndConnectionsBetweenCircles(circle)
       paintingCircles.push(circle)
     },
-
     startPainting (event) {
       startCursor = utils.cursorPositionInViewport(event)
       currentCursor = utils.cursorPositionInViewport(event)
@@ -198,7 +203,6 @@ export default {
         initialCirclesTimer = window.requestAnimationFrame(this.initialCirclesAnimationFrame)
       }
     },
-
     painting (event) {
       if (!this.$store.state.currentUserIsPainting) { return }
       if (this.$store.getters.shouldScrollAtEdges) {
@@ -209,7 +213,6 @@ export default {
       }
       this.createPaintingCircle(event)
     },
-
     lockingAnimationFrame (timestamp) {
       if (!lockingStartTime) {
         lockingStartTime = timestamp
@@ -244,11 +247,11 @@ export default {
       }
       if (currentUserIsLocking && percentComplete > 1) {
         this.$store.commit('currentUserIsPaintingLocked', true)
+        this.$store.commit('triggeredPaintFramePosition', { x: startCursor.x, y: startCursor.y })
         console.log('🔒lockingAnimationFrame locked')
         lockingStartTime = undefined
       }
     },
-
     paintCirclesAnimationFrame () {
       paintingCircles = utils.filterCircles(paintingCircles, maxIterations)
       paintingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
@@ -266,7 +269,6 @@ export default {
         }, 0)
       }
     },
-
     initialCirclesAnimationFrame () {
       initialCircles = utils.filterCircles(initialCircles, maxIterations)
       initialContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
@@ -284,14 +286,12 @@ export default {
         initialCirclesTimer = undefined
       }
     },
-
     shouldCancel (event) {
       const fromDialog = event.target.closest('dialog')
       const fromHeader = event.target.closest('header')
       const fromFooter = event.target.closest('footer')
       return fromDialog || fromHeader || fromFooter
     },
-
     stopPainting (event) {
       if (this.shouldCancel(event)) { return }
       startCursor = startCursor || {}
@@ -312,17 +312,16 @@ export default {
       // prevent mouse events from firing after touch events on touch device
       event.preventDefault()
     },
-
-    selectCards (circle) {
+    selectCards (point) {
       if (this.spaceIsReadOnly) { return }
       this.$store.state.cardMap.map(card => {
         const x = {
-          value: circle.x + window.scrollX,
+          value: point.x + window.scrollX,
           min: card.x,
           max: card.x + card.width
         }
         const y = {
-          value: circle.y + window.scrollY,
+          value: point.y + window.scrollY,
           min: card.y,
           max: card.y + card.height
         }
@@ -333,25 +332,108 @@ export default {
         }
       })
     },
-
+    movementDirection (prevCircle, delta) {
+      let movementDirection = {}
+      if (delta.xAbsolute > delta.yAbsolute) {
+        if (Math.sign(delta.x) === 1) {
+          movementDirection.x = 'left'
+        } else if (Math.sign(delta.x) === -1) {
+          movementDirection.x = 'right'
+        }
+      } else if (delta.xAbsolute < delta.yAbsolute) {
+        if (Math.sign(delta.y) === 1) {
+          movementDirection.y = 'up'
+        } else if (Math.sign(delta.y) === -1) {
+          movementDirection.y = 'down'
+        }
+      }
+      return movementDirection
+    },
+    linearInterpolateY (x, delta, prevCircle, circle) {
+      const slope = delta.y / delta.x
+      const isNoSlope = Math.abs(slope) === Infinity || slope === 0
+      if (isNoSlope) {
+        return circle.y
+      } else {
+        return Math.round((x - prevCircle.x) * slope + prevCircle.y)
+      }
+    },
+    linearInterpolateX (y, delta, prevCircle, circle) {
+      const slope = delta.y / delta.x
+      const isNoSlope = Math.abs(slope) === Infinity || slope === 0
+      if (isNoSlope) {
+        return circle.x
+      } else {
+        return Math.round(prevCircle.x + slope * (y - prevCircle.y))
+      }
+    },
     selectConnections (circle) {
       if (this.spaceIsReadOnly) { return }
+      this.selectConnectionPaths(circle)
+    },
+    selectCardsAndConnectionsBetweenCircles (circle) {
+      const prevCircle = paintingCircles[paintingCircles.length - 1] || circle
+      const delta = {
+        x: prevCircle.x - circle.x,
+        y: prevCircle.y - circle.y,
+        xAbsolute: Math.abs(prevCircle.x - circle.x),
+        yAbsolute: Math.abs(prevCircle.y - circle.y)
+      }
+      const furthestDelta = Math.max(delta.xAbsolute, delta.yAbsolute)
+      if (furthestDelta <= 5 || prevCircle.iteration > 1) { return }
+      const movementDirection = this.movementDirection(prevCircle, delta)
+      const initialIncrement = 1
+      const increment = 4
+      if (movementDirection.x === 'right') {
+        let x = prevCircle.x + initialIncrement
+        while (x < circle.x) {
+          const y = this.linearInterpolateY(x, delta, prevCircle, circle)
+          this.selectConnectionPaths({ x, y })
+          this.selectCards({ x, y })
+          x += increment
+        }
+      } else if (movementDirection.x === 'left') {
+        let x = prevCircle.x - initialIncrement
+        while (x < circle.x) {
+          const y = this.linearInterpolateY(x, delta, prevCircle, circle)
+          this.selectConnectionPaths({ x, y })
+          this.selectCards({ x, y })
+          x += -increment
+        }
+      } else if (movementDirection.y === 'down') {
+        let y = prevCircle.y + initialIncrement
+        while (y < circle.y) {
+          const x = this.linearInterpolateX(y, delta, prevCircle, circle)
+          this.selectConnectionPaths({ x, y })
+          this.selectCards({ x, y })
+          y += increment
+        }
+      } else if (movementDirection.y === 'up') {
+        let y = prevCircle.y - initialIncrement
+        while (y < circle.y) {
+          const x = this.linearInterpolateX(y, delta, prevCircle, circle)
+          this.selectConnectionPaths({ x, y })
+          this.selectCards({ x, y })
+          y += -increment
+        }
+      }
+    },
+    selectConnectionPaths (point) {
       const paths = document.querySelectorAll('svg .connection-path')
       paths.forEach(path => {
         const ids = this.$store.state.multipleConnectionsSelectedIds
         const pathId = path.dataset.id
         const svg = document.querySelector('svg.connections')
-        let point = svg.createSVGPoint()
-        point.x = circle.x + window.scrollX
-        point.y = circle.y + window.scrollY
+        let svgPoint = svg.createSVGPoint()
+        svgPoint.x = point.x + window.scrollX
+        svgPoint.y = point.y + window.scrollY
         const isAlreadySelected = ids.includes(pathId)
         if (isAlreadySelected) { return }
-        if (path.isPointInFill(point)) {
+        if (path.isPointInFill(svgPoint)) {
           this.$store.commit('addToMultipleConnectionsSelected', pathId)
         }
       })
     }
-
   }
 }
 </script>
