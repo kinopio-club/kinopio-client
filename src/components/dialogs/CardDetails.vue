@@ -155,11 +155,11 @@ export default {
       this.framePickerIsVisible = !isVisible
     },
     focusName () {
-      // this.$nextTick(() => {
-      const element = this.$refs.name
-      if (!element) { return }
-      element.focus()
-      // })
+      this.$nextTick(() => {
+        const element = this.$refs.name
+        if (!element) { return }
+        element.focus()
+      })
     },
     scrollIntoView () {
       const element = this.$refs.dialog
