@@ -183,6 +183,7 @@ export default {
       paintingCircles.push(circle)
     },
     startPainting (event) {
+      console.log('🌙startPainting detect -> closeAllDialogs')
       startCursor = utils.cursorPositionInViewport(event)
       currentCursor = utils.cursorPositionInViewport(event)
       const dialogIsVisible = Boolean(document.querySelector('dialog'))
@@ -195,7 +196,6 @@ export default {
       }
       this.$store.commit('clearMultipleSelected')
       this.$store.commit('generateCardMap')
-      console.log('startPainting detect -> closeAllDialogs')
 
       this.$store.commit('closeAllDialogs')
       initialCircles.map(circle => {

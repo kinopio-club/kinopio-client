@@ -154,11 +154,11 @@ export default {
       this.framePickerIsVisible = !isVisible
     },
     focusName () {
-      this.$nextTick(() => {
-        const element = this.$refs.name
-        if (!element) { return }
-        element.focus()
-      })
+      // this.$nextTick(() => {
+      const element = this.$refs.name
+      if (!element) { return }
+      element.focus()
+      // })
     },
     scrollIntoView () {
       const element = this.$refs.dialog
@@ -175,6 +175,8 @@ export default {
       this.$nextTick(() => {
         this.$store.commit('updatePageSizes')
         this.focusName()
+        console.log('🍵document.activeElement after focus', document.activeElement)
+        this.$store.commit('updatePageSizes')
         if (length && element) {
           element.setSelectionRange(length, length)
         }
