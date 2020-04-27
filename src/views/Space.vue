@@ -271,6 +271,9 @@ export default {
       if (this.$store.state.shouldAddCard) {
         const position = utils.cursorPositionInPage(event)
         this.addCard(position)
+      } else if (this.$store.state.cardDetailsIsVisibleForCardId) {
+        // this.$store.commit('cardDetailsIsVisibleForCardId', '')
+        this.$store.commit('closeAllDialogs')
       }
       if (this.$store.state.multipleCardsSelectedIds.length || this.$store.state.multipleConnectionsSelectedIds.length) {
         const position = utils.cursorPositionInPage(event)
