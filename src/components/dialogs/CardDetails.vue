@@ -182,7 +182,7 @@ export default {
 
       this.$nextTick(() => {
         this.focusName()
-        this.$store.commit('updateSpacePageSize')
+        // this.$store.commit('updateSpacePageSize')
         this.triggerUpdateMagicPaintPositionOffset()
         console.log('🍵document.activeElement after focus', document.activeElement)
         // this.$store.commit('updatePageSizes')
