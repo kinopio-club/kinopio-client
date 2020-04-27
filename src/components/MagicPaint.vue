@@ -104,7 +104,7 @@ export default {
       if (!window.visualViewport) { return }
       this.pinchZoomOffsetTop = window.visualViewport.offsetTop
       this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
-      console.log('🌷updatePositionOffsetByPinchZoom', this.pinchZoomOffsetTop, this.pinchZoomOffsetLeft)
+      console.log('🌷updatePositionOffsetByPinchZoom', window.scrollY, window.scrollX, this.pinchZoomOffsetTop, this.pinchZoomOffsetLeft)
     },
     updatePrevScrollPosition () {
       prevScroll = {
