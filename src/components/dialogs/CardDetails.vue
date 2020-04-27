@@ -173,10 +173,11 @@ export default {
       // this.scrollIntoView()
       // if (utils.shouldPreventAutofocus()) { return }
       this.$nextTick(() => {
-        this.$store.commit('updatePageSizes')
+        this.$store.commit('updateSpacePageSize')
+        this.$store.commit('triggerUpdateMagicPaintPositionOffset')
         this.focusName()
         console.log('🍵document.activeElement after focus', document.activeElement)
-        this.$store.commit('updatePageSizes')
+        // this.$store.commit('updatePageSizes')
         if (length && element) {
           element.setSelectionRange(length, length)
         }
