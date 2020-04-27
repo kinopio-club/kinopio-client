@@ -173,6 +173,7 @@ export default {
       // this.scrollIntoView()
       // if (utils.shouldPreventAutofocus()) { return }
       this.$nextTick(() => {
+        this.$store.commit('updatePageSizes')
         this.focusName()
         if (length && element) {
           element.setSelectionRange(length, length)
