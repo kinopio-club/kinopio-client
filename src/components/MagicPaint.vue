@@ -59,6 +59,7 @@ export default {
         this.createPaintingCircle(event)
       }
       if (mutation.type === 'triggerUpdateMagicPaintPositionOffset') {
+        console.log('🌷trigger🌷')
         this.updatePositionOffsetByPinchZoom()
       }
     })
