@@ -182,9 +182,10 @@ export default {
 
       this.$nextTick(() => {
         this.focusName()
+        console.log('🍵document.activeElement after focus', document.activeElement)
+
         // this.$store.commit('updateSpacePageSize')
         this.triggerUpdateMagicPaintPositionOffset()
-        console.log('🍵document.activeElement after focus', document.activeElement)
         // this.$store.commit('updatePageSizes')
         if (length && element) {
           element.setSelectionRange(length, length)
