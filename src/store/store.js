@@ -138,6 +138,7 @@ export default new Vuex.Store({
       state.childCardId = cardId
     },
     closeAllDialogs: (state) => {
+      console.log('🌸closeAllDialogs')
       state.multipleSelectedActionsIsVisible = false
       state.cardDetailsIsVisibleForCardId = ''
       state.connectionDetailsIsVisibleForConnectionId = ''

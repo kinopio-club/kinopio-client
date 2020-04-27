@@ -195,6 +195,8 @@ export default {
       }
       this.$store.commit('clearMultipleSelected')
       this.$store.commit('generateCardMap')
+      console.log('startPainting detect -> closeAllDialogs')
+
       this.$store.commit('closeAllDialogs')
       initialCircles.map(circle => {
         circle.persistent = false
