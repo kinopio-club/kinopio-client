@@ -187,12 +187,12 @@ export default {
       this.$nextTick(() => {
         this.focusName()
         // this.$nextTick(() => {
-        setTimeout(() => {
-          console.log('🍵document.activeElement after focus', document.activeElement)
-          // this.$store.commit('updateSpacePageSize')
-          this.triggerUpdateMagicPaintPositionOffset()
-          // this.$store.commit('updatePageSizes')
-        }, 200)
+        // setTimeout(() => {
+        console.log('🍵document.activeElement after focus', document.activeElement)
+        // this.$store.commit('updateSpacePageSize')
+        this.triggerUpdateMagicPaintPositionOffset()
+        // this.$store.commit('updatePageSizes')
+        // }, 400)
 
         // })
       })

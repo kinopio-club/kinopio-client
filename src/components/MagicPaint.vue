@@ -61,6 +61,7 @@ export default {
       if (mutation.type === 'triggerUpdateMagicPaintPositionOffset') {
         console.log('🌷trigger🌷')
         this.updatePositionOffsetByPinchZoom()
+        this.updateCirclesWithScroll()
       }
     })
   },
