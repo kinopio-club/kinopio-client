@@ -155,11 +155,11 @@ export default {
       this.framePickerIsVisible = !isVisible
     },
     focusName () {
-      this.$nextTick(() => {
-        const element = this.$refs.name
-        if (!element) { return }
-        element.focus()
-      })
+      // this.$nextTick(() => {
+      const element = this.$refs.name
+      if (!element) { return }
+      element.focus()
+      // })
     },
     scrollIntoView () {
       const element = this.$refs.dialog
@@ -182,14 +182,15 @@ export default {
 
       this.$nextTick(() => {
         this.focusName()
-        console.log('🍵document.activeElement after focus', document.activeElement)
-
-        // this.$store.commit('updateSpacePageSize')
-        this.triggerUpdateMagicPaintPositionOffset()
-        // this.$store.commit('updatePageSizes')
-        if (length && element) {
-          element.setSelectionRange(length, length)
-        }
+        this.$nextTick(() => {
+          console.log('🍵document.activeElement after focus', document.activeElement)
+          // this.$store.commit('updateSpacePageSize')
+          this.triggerUpdateMagicPaintPositionOffset()
+          // this.$store.commit('updatePageSizes')
+          if (length && element) {
+            element.setSelectionRange(length, length)
+          }
+        })
       })
     },
     triggerUpdateMagicPaintPositionOffset () {
