@@ -47,7 +47,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
 <script>
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil awaiting 'scrollmode' support for https://github.com/w3c/csswg-drafts/pull/1805
 
-import utils from '@/utils.js'
+// import utils from '@/utils.js'
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 
 export default {
@@ -170,8 +170,8 @@ export default {
     scrollIntoViewAndFocus () {
       const element = this.$refs.name
       const length = this.name.length
-      this.scrollIntoView()
-      if (utils.shouldPreventAutofocus()) { return }
+      // this.scrollIntoView()
+      // if (utils.shouldPreventAutofocus()) { return }
       this.$nextTick(() => {
         this.focusName()
         if (length && element) {
