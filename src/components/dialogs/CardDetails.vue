@@ -171,8 +171,15 @@ export default {
     scrollIntoViewAndFocus () {
       const element = this.$refs.name
       const length = this.name.length
-      // this.scrollIntoView()
+      // this.scrollIntoView() // scroll into view if not utils.isMobile
       // if (utils.shouldPreventAutofocus()) { return }
+      // const pinchZoomRatio = document.documentElement.clientWidth / window.innerWidth
+      // const pinchZoomRatioShouldNotFocusZoom = !this.isBetween({
+      //   value: pinchZoomRatio,
+      //   min: 0.8,
+      //   max: 1.3
+      // })
+
       this.$nextTick(() => {
         this.focusName()
         this.$store.commit('updateSpacePageSize')

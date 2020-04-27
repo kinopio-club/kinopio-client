@@ -100,6 +100,7 @@ export default {
   },
   methods: {
     updatePositionOffsetByPinchZoom () {
+      console.log('🌷updatePositionOffsetByPinchZoom')
       if (!window.visualViewport) { return }
       this.pinchZoomOffsetTop = window.visualViewport.offsetTop
       this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
