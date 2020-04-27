@@ -192,7 +192,7 @@ export default {
           // this.$store.commit('updateSpacePageSize')
           this.triggerUpdateMagicPaintPositionOffset()
           // this.$store.commit('updatePageSizes')
-        }, 1000)
+        }, 200)
 
         // })
       })
