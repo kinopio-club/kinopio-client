@@ -291,6 +291,7 @@ export default {
       this.updatePageSizes()
       this.currentConnectionPath = undefined
       prevCursor = undefined
+      console.log('🍆, was not cancelled')
     }
   }
 }
