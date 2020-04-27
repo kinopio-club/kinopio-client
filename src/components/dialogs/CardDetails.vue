@@ -157,8 +157,13 @@ export default {
     focusName () {
       // this.$nextTick(() => {
       const element = this.$refs.name
+      const length = this.name.length
       if (!element) { return }
       element.focus()
+      if (length && element) {
+        element.setSelectionRange(length, length)
+      }
+
       // })
     },
     scrollIntoView () {
@@ -169,8 +174,7 @@ export default {
       })
     },
     scrollIntoViewAndFocus () {
-      const element = this.$refs.name
-      const length = this.name.length
+      // const element = this.$refs.name
       // this.scrollIntoView() // scroll into view if not utils.isMobile
       // if (utils.shouldPreventAutofocus()) { return }
       // const pinchZoomRatio = document.documentElement.clientWidth / window.innerWidth
@@ -182,15 +186,15 @@ export default {
 
       this.$nextTick(() => {
         this.focusName()
-        this.$nextTick(() => {
+        // this.$nextTick(() => {
+        setTimeout(() => {
           console.log('🍵document.activeElement after focus', document.activeElement)
           // this.$store.commit('updateSpacePageSize')
           this.triggerUpdateMagicPaintPositionOffset()
           // this.$store.commit('updatePageSizes')
-          if (length && element) {
-            element.setSelectionRange(length, length)
-          }
-        })
+        }, 1000)
+
+        // })
       })
     },
     triggerUpdateMagicPaintPositionOffset () {
