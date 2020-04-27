@@ -82,7 +82,7 @@ export default {
   },
   computed: {
     meta () {
-      if (utils.isMac() || utils.isIOS()) {
+      if (utils.isMac() || utils.isIPhone()) {
         return 'Cmd'
       } else {
         return 'Ctrl'

@@ -127,8 +127,9 @@ export default {
     }
   },
 
-  isIOS () {
-    return navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform)
+  isIPhone () {
+    // iPads identify as MacIntosh
+    return navigator.platform && /iPhone|iPod/.test(navigator.platform)
   },
 
   isAndroid () {
@@ -136,7 +137,7 @@ export default {
   },
 
   isMobile () {
-    return Boolean(this.isIOS() || this.isAndroid())
+    return Boolean(this.isIPhone() || this.isAndroid())
   },
 
   isMac () {
