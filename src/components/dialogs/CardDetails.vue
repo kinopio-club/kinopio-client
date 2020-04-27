@@ -15,6 +15,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       @keyup.stop.backspace
       data-type="name"
       maxlength="250"
+      @click="triggerUpdateMagicPaintPositionOffset"
     )
     //- todo change esc to keydown if i want to bubble up to also resetting the tree, if it feels better irl
     button(:disabled="!canEditCard" @click="removeCard")
@@ -173,15 +174,18 @@ export default {
       // this.scrollIntoView()
       // if (utils.shouldPreventAutofocus()) { return }
       this.$nextTick(() => {
-        this.$store.commit('updateSpacePageSize')
-        this.$store.commit('triggerUpdateMagicPaintPositionOffset')
         this.focusName()
+        this.$store.commit('updateSpacePageSize')
+        this.triggerUpdateMagicPaintPositionOffset()
         console.log('🍵document.activeElement after focus', document.activeElement)
         // this.$store.commit('updatePageSizes')
         if (length && element) {
           element.setSelectionRange(length, length)
         }
       })
+    },
+    triggerUpdateMagicPaintPositionOffset () {
+      this.$store.commit('triggerUpdateMagicPaintPositionOffset')
     },
     closeDialogs () {
       this.framePickerIsVisible = false
