@@ -144,21 +144,6 @@ export default {
     return window.navigator.platform === 'MacIntel'
   },
 
-  // prevents jarring frame skips caused by simultaneously scrolling a card into view, zooming in, and showing an onscreen keyboard
-  // shouldPreventAutofocus () {
-  //   const isMobile = this.isMobile()
-  //   // const pinchZoomRatio = document.documentElement.clientWidth / window.innerWidth
-  //   // const pinchZoomRatioShouldNotFocusZoom = !this.isBetween({
-  //   //   value: pinchZoomRatio,
-  //   //   min: 0.8,
-  //   //   max: 1.3
-  //   // })
-  //   if (isMobile) { return true }
-  //   // if (isMobile && pinchZoomRatioShouldNotFocusZoom) {
-  //   //   return true
-  //   // }
-  // },
-
   capitalizeFirstLetter (string) {
     // 'dreams' -> 'Dreams'
     return string.charAt(0).toUpperCase() + string.slice(1)
