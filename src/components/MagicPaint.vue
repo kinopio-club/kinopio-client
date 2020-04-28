@@ -94,10 +94,10 @@ export default {
     },
     spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
     // keep canvases updated to viewport size so you can draw on newly created areas
-    pageHeight () { return this.$store.state.pageHeight },
-    pageWidth () { return this.$store.state.pageWidth },
-    viewportHeight () { return this.$store.state.viewportHeight },
-    viewportWidth () { return this.$store.state.viewportWidth }
+    pageHeight () { return this.$store.state.pageHeight * 2 },
+    pageWidth () { return this.$store.state.pageWidth * 2 },
+    viewportHeight () { return this.$store.state.viewportHeight * 2 },
+    viewportWidth () { return this.$store.state.viewportWidth * 2 }
   },
   methods: {
     updatePositionOffsetByPinchZoom () {
@@ -152,7 +152,7 @@ export default {
       radius = radius || circleRadius
       alpha = alpha || utils.exponentialDecay(iteration, rateOfIterationDecay)
       context.beginPath()
-      context.arc(x, y, radius, 0, 2 * Math.PI)
+      context.arc(x * 2, y * 2, radius * 2, 0, 2 * Math.PI)
       context.closePath()
       context.globalAlpha = alpha
       context.fillStyle = color
@@ -180,7 +180,12 @@ export default {
     createPaintingCircle (event) {
       let color = this.$store.state.currentUser.color
       currentCursor = utils.cursorPositionInViewport(event)
-      let circle = { x: currentCursor.x, y: currentCursor.y, color, iteration: 0 }
+      let circle = {
+        x: currentCursor.x,
+        y: currentCursor.y,
+        color,
+        iteration: 0
+      }
       this.selectCards(circle)
       this.selectConnections(circle)
       this.selectCardsAndConnectionsBetweenCircles(circle)
@@ -446,6 +451,8 @@ export default {
 canvas
   position fixed
   top 0
+  width 100vw
+  height 100vh
 .locking,
 .initial
   pointer-events none
