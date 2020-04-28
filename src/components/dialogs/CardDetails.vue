@@ -165,7 +165,6 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      console.log('🍵scrollinto view', element)
       scrollIntoView(element, {
         behavior: 'smooth',
         scrollMode: 'if-needed'
@@ -183,7 +182,6 @@ export default {
         this.scrollIntoView()
       }
       this.focusName()
-      console.log('🍵document.activeElement after focus', document.activeElement)
       this.triggerUpdateMagicPaintPositionOffset()
     },
     triggerUpdateMagicPaintPositionOffset () {

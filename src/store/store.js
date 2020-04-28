@@ -92,7 +92,6 @@ export default new Vuex.Store({
     updatePageSizes: (state) => {
       const body = document.body
       const html = document.documentElement
-      // console.log('❶', state.pageWidth, state.pageHeight, state.viewportWidth, state.viewportHeight)
       state.pageWidth = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
       state.pageHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
       if (window.visualViewport) {
@@ -103,7 +102,6 @@ export default new Vuex.Store({
         state.viewportWidth = document.documentElement.clientWidth
         state.viewportHeight = document.documentElement.clientHeight
       }
-      // console.log('❷', state.pageWidth, state.pageHeight, state.viewportWidth, state.viewportHeight)
     },
     updateSpacePageSize: (state, { maxX, maxY }) => {
       const extraScrollArea = 160
@@ -140,7 +138,6 @@ export default new Vuex.Store({
       state.childCardId = cardId
     },
     closeAllDialogs: (state) => {
-      console.log('🌸closeAllDialogs')
       state.multipleSelectedActionsIsVisible = false
       state.cardDetailsIsVisibleForCardId = ''
       state.connectionDetailsIsVisibleForConnectionId = ''

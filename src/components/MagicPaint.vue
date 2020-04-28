@@ -59,7 +59,6 @@ export default {
         this.createPaintingCircle(event)
       }
       if (mutation.type === 'triggerUpdateMagicPaintPositionOffset') {
-        console.log('🌷trigger🌷')
         this.updatePositionOffsetByPinchZoom()
         this.updateCirclesWithScroll()
       }
@@ -105,7 +104,6 @@ export default {
       if (!window.visualViewport) { return }
       this.pinchZoomOffsetTop = window.visualViewport.offsetTop
       this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
-      console.log('🌷updatePositionOffsetByPinchZoom', window.scrollY, window.scrollX, this.pinchZoomOffsetTop, this.pinchZoomOffsetLeft)
     },
     updatePrevScrollPosition () {
       prevScroll = {
@@ -189,7 +187,6 @@ export default {
       paintingCircles.push(circle)
     },
     startPainting (event) {
-      console.log('🌙startPainting detect -> closeAllDialogs')
       startCursor = utils.cursorPositionInViewport(event)
       currentCursor = utils.cursorPositionInViewport(event)
       const dialogIsVisible = Boolean(document.querySelector('dialog'))
