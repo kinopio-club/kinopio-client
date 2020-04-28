@@ -7,7 +7,7 @@ dialog.add-to-homescreen(v-if="visible" :open="visible" @click.stop)
       span.arrow →
       img.icon(src="@/assets/phone.svg")
 
-    span(v-if="isIOS")
+    span(v-if="isIPhone")
       p Kinopio is a web-app which you can add directly to your iPhone or iPad
         ol
           li
@@ -48,12 +48,12 @@ export default {
   },
   data () {
     return {
-      isIOS: false,
+      isIPhone: false,
       isAndroid: false
     }
   },
   mounted () {
-    this.isIOS = utils.isIOS()
+    this.isIPhone = utils.isIPhone()
     this.isAndroid = utils.isAndroid()
     shouldRestoreUrlPath = true
     this.$store.subscribe((mutation, state) => {

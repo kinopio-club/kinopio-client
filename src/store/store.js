@@ -190,6 +190,7 @@ export default new Vuex.Store({
     triggerKeyboardShortcutsIsVisible: () => {},
     notifyReadOnlyJiggle: () => {},
     triggerSelectTemplateCategory: () => {},
+    triggerUpdateMagicPaintPositionOffset: () => {},
     triggeredPaintFramePosition: (state, cursor) => {
       state.triggeredPaintFramePosition = cursor
     },

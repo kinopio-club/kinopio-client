@@ -27,7 +27,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
         KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
     .button-wrap(v-if="isMobile")
       button(@click.stop="toggleAddToHomescreenIsVisible" :class="{active: addToHomescreenIsVisible}")
-        span(v-if="isIOS")
+        span(v-if="isIPhone")
           img.icon(src="@/assets/apple.svg")
           span Kinopio for IOS
         span(v-if="isAndroid")
@@ -62,7 +62,7 @@ export default {
       addToHomescreenIsVisible: false,
       keyboardShortcutsIsVisible: false,
       newStuff: [],
-      isIOS: false,
+      isIPhone: false,
       isAndroid: false,
       isMobile: false
     }
@@ -84,7 +84,7 @@ export default {
     this.newStuff = newStuff.slice(0, 5)
     this.checkNewStuffIsUpdated(newStuff[0].id)
     this.isMobile = utils.isMobile()
-    this.isIOS = utils.isIOS()
+    this.isIPhone = utils.isIPhone()
     this.isAndroid = utils.isAndroid()
   },
   computed: {

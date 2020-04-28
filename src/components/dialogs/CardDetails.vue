@@ -15,6 +15,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       @keyup.stop.backspace
       data-type="name"
       maxlength="250"
+      @click="triggerUpdateMagicPaintPositionOffset"
     )
     //- todo change esc to keydown if i want to bubble up to also resetting the tree, if it feels better irl
     button(:disabled="!canEditCard" @click="removeCard")
@@ -154,11 +155,13 @@ export default {
       this.framePickerIsVisible = !isVisible
     },
     focusName () {
-      this.$nextTick(() => {
-        const element = this.$refs.name
-        if (!element) { return }
-        element.focus()
-      })
+      const element = this.$refs.name
+      const length = this.name.length
+      if (!element) { return }
+      element.focus()
+      if (length && element) {
+        element.setSelectionRange(length, length)
+      }
     },
     scrollIntoView () {
       const element = this.$refs.dialog
@@ -168,16 +171,21 @@ export default {
       })
     },
     scrollIntoViewAndFocus () {
-      const element = this.$refs.name
-      const length = this.name.length
-      this.scrollIntoView()
-      if (utils.shouldPreventAutofocus()) { return }
-      this.$nextTick(() => {
-        this.focusName()
-        if (length && element) {
-          element.setSelectionRange(length, length)
-        }
+      const pinchZoomRatio = document.documentElement.clientWidth / window.innerWidth
+      const pinchZoomRatioShouldFocus = utils.isBetween({
+        value: pinchZoomRatio,
+        min: 0.8,
+        max: 1.3
       })
+      if (!pinchZoomRatioShouldFocus) { return }
+      if (!utils.isMobile()) {
+        this.scrollIntoView()
+      }
+      this.focusName()
+      this.triggerUpdateMagicPaintPositionOffset()
+    },
+    triggerUpdateMagicPaintPositionOffset () {
+      this.$store.commit('triggerUpdateMagicPaintPositionOffset')
     },
     closeDialogs () {
       this.framePickerIsVisible = false

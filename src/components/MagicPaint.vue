@@ -58,6 +58,10 @@ export default {
         }
         this.createPaintingCircle(event)
       }
+      if (mutation.type === 'triggerUpdateMagicPaintPositionOffset') {
+        this.updatePositionOffsetByPinchZoom()
+        this.updateCirclesWithScroll()
+      }
     })
   },
   mounted () {

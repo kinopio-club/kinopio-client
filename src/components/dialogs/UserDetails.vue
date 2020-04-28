@@ -121,7 +121,8 @@ export default {
     },
     isCollaborator () {
       const currentSpace = this.$store.state.currentSpace
-      return Boolean(currentSpace.collaborators.find(collaborator => {
+      const collaborators = currentSpace.collaborators || []
+      return Boolean(collaborators.find(collaborator => {
         return collaborator.id === this.user.id
       }))
     },
