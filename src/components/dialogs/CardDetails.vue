@@ -48,7 +48,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
 <script>
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil awaiting 'scrollmode' support for https://github.com/w3c/csswg-drafts/pull/1805
 
-// import utils from '@/utils.js'
+import utils from '@/utils.js'
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 
 export default {
@@ -177,25 +177,28 @@ export default {
       // const element = this.$refs.name
       // this.scrollIntoView() // scroll into view if not utils.isMobile
       // if (utils.shouldPreventAutofocus()) { return }
-      // const pinchZoomRatio = document.documentElement.clientWidth / window.innerWidth
-      // const pinchZoomRatioShouldNotFocusZoom = !this.isBetween({
-      //   value: pinchZoomRatio,
-      //   min: 0.8,
-      //   max: 1.3
-      // })
 
-      this.$nextTick(() => {
-        this.focusName()
-        // this.$nextTick(() => {
-        // setTimeout(() => {
-        console.log('🍵document.activeElement after focus', document.activeElement)
-        // this.$store.commit('updateSpacePageSize')
-        this.triggerUpdateMagicPaintPositionOffset()
-        // this.$store.commit('updatePageSizes')
-        // }, 400)
-
-        // })
+      const pinchZoomRatio = document.documentElement.clientWidth / window.innerWidth
+      const pinchZoomRatioShouldNotFocusZoom = !utils.isBetween({
+        value: pinchZoomRatio,
+        min: 0.8,
+        max: 1.3
       })
+      console.log('pinchZoomRatioShouldNotFocusZoom', pinchZoomRatioShouldNotFocusZoom)
+      if (pinchZoomRatioShouldNotFocusZoom) { return }
+
+      // this.$nextTick(() => {
+      this.focusName()
+      // this.$nextTick(() => {
+      // setTimeout(() => {
+      console.log('🍵document.activeElement after focus', document.activeElement)
+      // this.$store.commit('updateSpacePageSize')
+      this.triggerUpdateMagicPaintPositionOffset()
+      // this.$store.commit('updatePageSizes')
+      // }, 400)
+
+      // })
+      // })
     },
     triggerUpdateMagicPaintPositionOffset () {
       this.$store.commit('triggerUpdateMagicPaintPositionOffset')
