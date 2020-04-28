@@ -155,7 +155,6 @@ export default {
       this.framePickerIsVisible = !isVisible
     },
     focusName () {
-      // this.$nextTick(() => {
       const element = this.$refs.name
       const length = this.name.length
       if (!element) { return }
@@ -163,42 +162,29 @@ export default {
       if (length && element) {
         element.setSelectionRange(length, length)
       }
-
-      // })
     },
     scrollIntoView () {
       const element = this.$refs.dialog
+      console.log('🍵scrollinto view', element)
       scrollIntoView(element, {
         behavior: 'smooth',
         scrollMode: 'if-needed'
       })
     },
     scrollIntoViewAndFocus () {
-      // const element = this.$refs.name
-      // this.scrollIntoView() // scroll into view if not utils.isMobile
-      // if (utils.shouldPreventAutofocus()) { return }
-
       const pinchZoomRatio = document.documentElement.clientWidth / window.innerWidth
-      const pinchZoomRatioShouldNotFocusZoom = !utils.isBetween({
+      const pinchZoomRatioShouldFocus = utils.isBetween({
         value: pinchZoomRatio,
         min: 0.8,
         max: 1.3
       })
-      console.log('pinchZoomRatioShouldNotFocusZoom', pinchZoomRatioShouldNotFocusZoom)
-      if (pinchZoomRatioShouldNotFocusZoom) { return }
-
-      // this.$nextTick(() => {
+      if (!pinchZoomRatioShouldFocus) { return }
+      if (!utils.isMobile()) {
+        this.scrollIntoView()
+      }
       this.focusName()
-      // this.$nextTick(() => {
-      // setTimeout(() => {
       console.log('🍵document.activeElement after focus', document.activeElement)
-      // this.$store.commit('updateSpacePageSize')
       this.triggerUpdateMagicPaintPositionOffset()
-      // this.$store.commit('updatePageSizes')
-      // }, 400)
-
-      // })
-      // })
     },
     triggerUpdateMagicPaintPositionOffset () {
       this.$store.commit('triggerUpdateMagicPaintPositionOffset')
