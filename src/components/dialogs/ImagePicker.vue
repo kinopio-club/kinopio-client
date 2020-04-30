@@ -31,8 +31,10 @@ dialog.image-picker(v-if="visible" :open="visible" @click.stop ref="dialog")
     p(v-if="isNoSearchResults") Nothing found on {{service}} for {{search}}
     ul.results-list.image-list
       template(v-for="(image in images")
-        li
+        li(@click="selectImage(image)" tabindex="0" v-on:keyup.enter="selectImage(image)")
           img(:src="image.url")
+          a(:href="image.sourcePageUrl" target="_blank" @click.stop)
+            button {{image.sourceUserName}} →
 
 </template>
 
@@ -116,7 +118,10 @@ export default {
     searchService: debounce(async function () {
       if (this.serviceIsArena) {
         const url = new URL('https://api.are.na/v2/search/blocks')
-        const params = { q: this.search }
+        const params = {
+          q: this.search,
+          'filter[type]': 'image'
+        }
         url.search = new URLSearchParams(params).toString()
         const response = await fetch(url)
         const data = await response.json()
@@ -129,12 +134,10 @@ export default {
     normalizeResults (data, service) {
       console.log(service, this.service)
       if (service === 'Are.na' && this.service === service) {
-        const images = data.blocks.filter(block => block._type === 'image')
-        this.images = images.map(image => {
+        this.images = data.blocks.map(image => {
           return {
-            sourceUrl: `https://www.are.na/block/${image.id}`,
+            sourcePageUrl: `https://www.are.na/block/${image.id}`,
             sourceUserName: image.user.username,
-            sourceUserUrl: `https://www.are.na/${image.user.slug}`,
             url: image.image.large.url
           }
         })
@@ -158,6 +161,7 @@ export default {
       })
     },
     selectImage (image) {
+      console.log('🔮selectImage', image)
       // TODO wire up to carddetails
       // if service is unsplash , then send a download req https://help.unsplash.com/en/articles/2511258-guideline-triggering-a-download
       this.$emit('selectImage', image)
@@ -221,8 +225,12 @@ export default {
       padding-bottom 8px
 
   .image-list
-    img
+    li
       position relative
+    button
+      position absolute
+      top 6px
+      right 6px
 
 // .space-picker
 //   .results-section
