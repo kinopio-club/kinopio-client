@@ -24,7 +24,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
     .button-wrap
       button(:disabled="!canEditCard" @click.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
         span Image
-      //- ImagePicker(:visible="imagePickerIsVisible")
+      ImagePicker(:visible="imagePickerIsVisible")
     .button-wrap
       button(:disabled="!canEditCard" @click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
         span Frames
@@ -54,11 +54,13 @@ import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil awaiti
 
 import utils from '@/utils.js'
 import FramePicker from '@/components/dialogs/FramePicker.vue'
+import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 
 export default {
   name: 'CardDetails',
   components: {
-    FramePicker
+    FramePicker,
+    ImagePicker
   },
   props: {
     card: Object // name, x, y, z
