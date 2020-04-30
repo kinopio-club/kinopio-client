@@ -9,10 +9,11 @@ dialog.image-picker(v-if="visible" :open="visible" @click.stop ref="dialog")
         button(@click.stop="toggleServiceIsGiphy" :class="{active : serviceIsGiphy}")
           //- img.icon.giphy(src="@/assets/giphy.svg")
           span Giphy
-        //- button
-        //-   span Unsplash
-          // dont do if it's the only service that needs a server proxy to use
       //- button.upload-button Upload
+
+    label(v-if="serviceIsGiphy" :class="{active: giphyIsStickers}" @click.prevent="toggleGiphyIsStickers" @keydown.stop.enter="toggleGiphyIsStickers")
+      input(type="checkbox" v-model="giphyIsStickers")
+      span Stickers
 
   section.results-section
     .search-wrap
@@ -31,7 +32,7 @@ dialog.image-picker(v-if="visible" :open="visible" @click.stop ref="dialog")
     p(v-if="isNoSearchResults") Nothing found on {{service}} for {{search}}
     ul.results-list.image-list
       template(v-for="(image in images")
-        li(@click="selectImage(image)" tabindex="0" v-on:keyup.enter="selectImage(image)")
+        li(@click="selectImage(image)" tabindex="0" :key="image.id" v-on:keyup.enter="selectImage(image)")
           img(:src="image.url")
           a(:href="image.sourcePageUrl" target="_blank" @click.stop)
             button {{image.sourceUserName}} →
@@ -57,6 +58,7 @@ export default {
       images: [],
       search: '',
       service: 'Are.na',
+      giphyIsStickers: false,
       loading: false
     }
   },
@@ -113,8 +115,25 @@ export default {
   // }
   },
   methods: {
-    toggleServiceIsArena () { this.service = 'Are.na' },
-    toggleServiceIsGiphy () { this.service = 'Giphy' },
+    toggleServiceIsArena () {
+      this.service = 'Are.na'
+      this.searchAgain()
+    },
+    toggleServiceIsGiphy () {
+      this.service = 'Giphy'
+      this.searchAgain()
+    },
+    toggleGiphyIsStickers () {
+      this.giphyIsStickers = !this.giphyIsStickers
+      this.searchAgain()
+    },
+    searchAgain () {
+      this.images = []
+      if (this.search) {
+        this.loading = true
+        this.searchService()
+      }
+    },
     searchService: debounce(async function () {
       if (this.serviceIsArena) {
         const url = new URL('https://api.are.na/v2/search/blocks')
@@ -127,18 +146,40 @@ export default {
         const data = await response.json()
         this.normalizeResults(data, 'Are.na')
       } else if (this.serviceIsGiphy) {
-        console.log('Giphy', this.search)
+        let url
+        if (this.giphyIsStickers) {
+          url = new URL('https://api.giphy.com/v1/stickers/search')
+        } else {
+          url = new URL('https://api.giphy.com/v1/gifs/search')
+        }
+        const params = {
+          q: this.search,
+          api_key: 'pK3Etx5Jj8IAzUx9Z7H7dUcjD4PazKq7'
+        }
+        url.search = new URLSearchParams(params).toString()
+        const response = await fetch(url)
+        const data = await response.json()
+        this.normalizeResults(data, 'Giphy')
       }
       this.loading = false
-    }, 250),
+    }, 350),
     normalizeResults (data, service) {
-      console.log(service, this.service)
-      if (service === 'Are.na' && this.service === service) {
+      if (service === 'Are.na' && this.serviceIsArena) {
         this.images = data.blocks.map(image => {
           return {
+            id: image.id,
             sourcePageUrl: `https://www.are.na/block/${image.id}`,
             sourceUserName: image.user.username,
             url: image.image.large.url
+          }
+        })
+      } else if (service === 'Giphy' && this.serviceIsGiphy) {
+        this.images = data.data.map(image => {
+          return {
+            id: image.id,
+            sourcePageUrl: image.url,
+            sourceUserName: '',
+            url: image.images.downsized.url
           }
         })
       }
@@ -180,15 +221,11 @@ export default {
     visible (visible) {
       this.$nextTick(() => {
         if (visible) {
-          // this.updateSpaces()
           this.scrollIntoView()
           this.focusSearchInput()
         }
       })
     }
-    // userSpaces (userSpaces) {
-    //   this.updateSpaces()
-    // }
   }
 }
 </script>
@@ -231,7 +268,6 @@ export default {
       position absolute
       top 6px
       right 6px
-
 // .space-picker
 //   .results-section
 //     padding-top 4px

@@ -98,7 +98,8 @@ body
     position fixed
     pointer-events none
 
-img
+img,
+video
   max-width 100%
 
 input,
