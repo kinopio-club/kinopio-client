@@ -202,6 +202,7 @@ export default {
     },
     closeDialogs () {
       this.framePickerIsVisible = false
+      this.imagePickerIsVisible = false
     },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
