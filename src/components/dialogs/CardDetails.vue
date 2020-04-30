@@ -17,10 +17,14 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       maxlength="250"
       @click="triggerUpdateMagicPaintPositionOffset"
     )
-    //- todo change esc to keydown if i want to bubble up to also resetting the tree, if it feels better irl
-    button(:disabled="!canEditCard" @click="removeCard")
-      img.icon(src="@/assets/remove.svg")
-      span Remove
+    .button-wrap
+      button(:disabled="!canEditCard" @click="removeCard")
+        img.icon(src="@/assets/remove.svg")
+        span Remove
+    .button-wrap
+      button(:disabled="!canEditCard" @click.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
+        span Image
+      //- ImagePicker(:visible="imagePickerIsVisible")
     .button-wrap
       button(:disabled="!canEditCard" @click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
         span Frames
@@ -61,13 +65,15 @@ export default {
   },
   data () {
     return {
-      framePickerIsVisible: false
+      framePickerIsVisible: false,
+      imagePickerIsVisible: false
     }
   },
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
         this.framePickerIsVisible = false
+        this.imagePickerIsVisible = false
       }
     })
   },
@@ -153,6 +159,11 @@ export default {
       const isVisible = this.framePickerIsVisible
       this.closeDialogs()
       this.framePickerIsVisible = !isVisible
+    },
+    toggleImagePickerIsVisible () {
+      const isVisible = this.imagePickerIsVisible
+      this.closeDialogs()
+      this.imagePickerIsVisible = !isVisible
     },
     focusName () {
       const element = this.$refs.name
