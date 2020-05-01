@@ -90,9 +90,10 @@ export default {
     },
     normalizedName () {
       if (this.isMediaCard) {
-        return this.name.replace(this.url, '')
+        const name = this.name.replace(this.url, '')
+        return utils.trim(name)
       }
-      return this.name
+      return utils.trim(this.name)
     },
     nameLineMinWidth () {
       const averageCharacterWidth = 6.5

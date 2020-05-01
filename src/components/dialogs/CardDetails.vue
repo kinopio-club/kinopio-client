@@ -219,8 +219,12 @@ export default {
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     selectImage (image) {
-      const newName = `${image.url} ${this.card.name}`
-      console.log('🌸', image, this.card.name, newName) // id, isvideo, url
+      let name = this.card.name
+      const url = utils.urlFromString(name)
+      if (utils.urlIsImage(url) || utils.urlIsVideo(url)) {
+        name = name.replace(url, '')
+      }
+      const newName = `${image.url}\n\n${name}`
       this.updateCardName(newName)
     }
   },

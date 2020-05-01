@@ -267,6 +267,11 @@ export default {
     return `m${offsetStart.x},${offsetStart.y} ${curve} ${delta.x},${delta.y}`
   },
 
+  trim (string) {
+    // unlike string.trim(), this removes line breaks too
+    return string.replace(/^\s+|\s+$/g, '')
+  },
+
   // Painting 🖌
 
   exponentialDecay (iteration, rateOfIterationDecay) {
