@@ -36,7 +36,6 @@ dialog.image-picker(v-if="visible" :open="visible" @click.stop ref="dialog")
           img(v-if="!image.isVideo" :src="image.url")
           a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.stop)
             button {{image.sourceUserName}} →
-
 </template>
 
 <script>
@@ -99,20 +98,6 @@ export default {
         return false
       }
     }
-  // maxHeight () {
-  //   const dialog = this.$refs.dialog
-  //   console.log(dialog)
-  // }
-  //   const favoritesDialog = document.querySelector('dialog.favorites')
-  //   let height = 120
-  //   if (favoritesDialog) {
-  //     const dialogHeight = favoritesDialog.offsetHeight
-  //     if (dialogHeight > 250) { height = dialogHeight }
-  //   } else {
-  //     return undefined
-  //   }
-  //   return height
-  // }
   },
   methods: {
     toggleServiceIsArena () {
@@ -165,7 +150,6 @@ export default {
     normalizeResults (data, service) {
       if (service === 'Are.na' && this.serviceIsArena) {
         this.images = data.blocks.map(image => {
-          console.log(image)
           return {
             id: image.id,
             sourcePageUrl: `https://www.are.na/block/${image.id}`,
@@ -176,17 +160,17 @@ export default {
       } else if (service === 'Gfycat' && this.serviceIsGfycat) {
         this.images = data.gfycats.map(image => {
           console.log(image)
-          console.log('size gif mp4', image.gifSize, image.mp4Size, image.mp4Size / image.gifSize * 100, image.miniUrl)
-          // console.log('gif vs mp4size ', image.images.downsized.size, image.images.preview.mp4_size)
-          // console.log('height and width',image.images.downsized.height, image.images.downsized.width)
-
-          return {
-            isVideo: true,
-            id: image.gfyId,
-            // sourcePageUrl: image.url,
-            // sourceUserName: '',
-            // url: image.max2mbGif
-            url: image.mobileUrl
+          if (this.gfycatIsStickers) {
+            return {
+              id: image.gfyId,
+              url: image.gifUrl
+            }
+          } else {
+            return {
+              isVideo: true,
+              id: image.gfyId,
+              url: image.mobileUrl
+            }
           }
         })
       }
@@ -209,13 +193,8 @@ export default {
       })
     },
     selectImage (image) {
-      console.log('🔮selectImage', image)
-      // TODO wire up to carddetails
-      // if service is unsplash , then send a download req https://help.unsplash.com/en/articles/2511258-guideline-triggering-a-download
       this.$emit('selectImage', image)
     },
-    // TODO might have issues w ios, see carddetails ismobile handling
-    // TODO2 if copying carddetails, ignore pinchzoom stuff, always zoom/focus
     scrollIntoView () {
       const element = this.$refs.dialog
       scrollIntoView(element, {
