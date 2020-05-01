@@ -451,6 +451,26 @@ export default {
     }
   },
 
+  urlIsImage (url) {
+    if (!url) { return }
+    // append space to match as an end character
+    url = url + ' '
+    // https://regexr.com/4rjtu
+    // match an extension
+    // which much be followed by either end of line, space, or ? (for qs) char
+    const imageUrlPattern = new RegExp(/(?:\.gif|\.jpg|\.jpeg|\.png)(?:\n| |\?|&)/igm)
+    const isImage = url.match(imageUrlPattern)
+    return Boolean(isImage)
+  },
+
+  urlIsVideo (url) {
+    if (!url) { return }
+    url = url + ' '
+    const videoUrlPattern = new RegExp(/(?:\.mp4)(?:\n| |\?|&)/igm)
+    const isVideo = url.match(videoUrlPattern)
+    return Boolean(isVideo)
+  },
+
   // Paste Card ✂️
 
   // recursive

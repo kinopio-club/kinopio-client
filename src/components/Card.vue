@@ -70,6 +70,10 @@ export default {
     newConnectionColor () { return this.$store.state.currentConnectionColor },
     name () { return this.card.name },
     frameId () { return this.card.frameId },
+    url () { return utils.urlFromString(this.name) },
+    urlIsImage () { return utils.urlIsImage(this.url) },
+    urlIsVideo () { return utils.urlIsVideo(this.url) },
+    isMediaCard () { return this.urlIsImage || this.urlIsVideo },
     position () {
       return {
         left: `${this.x}px`,
@@ -83,9 +87,6 @@ export default {
       if (isSpaceMember) { return true }
       if (this.canEditSpace && cardIsCreatedByCurrentUser) { return true }
       return false
-    },
-    url () {
-      return utils.urlFromString(this.name)
     },
     normalizedName () {
       if (this.isMediaCard) {
@@ -149,27 +150,6 @@ export default {
     hasConnections () {
       const connections = this.$store.getters['currentSpace/cardConnections'](this.id)
       return Boolean(connections.length)
-    },
-    isMediaCard () {
-      return this.urlIsImage || this.urlIsVideo
-    },
-    urlIsImage () {
-      if (!this.url) { return }
-      // append space to match as an end character
-      const url = this.url + ' '
-      // https://regexr.com/4rjtu
-      // match an extension
-      // which much be followed by either end of line, space, or ? (for qs) char
-      const imageUrlPattern = new RegExp(/(?:\.gif|\.jpg|\.jpeg|\.png)(?:\n| |\?|&)/igm)
-      const isImage = url.match(imageUrlPattern)
-      return Boolean(isImage)
-    },
-    urlIsVideo () {
-      if (!this.url) { return }
-      const url = this.url + ' '
-      const videoUrlPattern = new RegExp(/(?:\.mp4)(?:\n| |\?|&)/igm)
-      const isVideo = url.match(videoUrlPattern)
-      return Boolean(isVideo)
     },
 
     // filters
