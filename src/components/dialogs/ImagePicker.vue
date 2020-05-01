@@ -4,15 +4,12 @@ dialog.image-picker(v-if="visible" :open="visible" @click.stop ref="dialog")
     .row
       .segmented-buttons
         button(@click.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
-          //- img.icon.arena(src="@/assets/arena.svg")
           span Are.na
-        button(@click.stop="toggleServiceIsGiphy" :class="{active : serviceIsGiphy}")
-          //- img.icon.giphy(src="@/assets/giphy.svg")
-          span Giphy
-      //- button.upload-button Upload
+        button(@click.stop="toggleServiceIsGfycat" :class="{active : serviceIsGfycat}")
+          span Gfycat
 
-    label(v-if="serviceIsGiphy" :class="{active: giphyIsStickers}" @click.prevent="toggleGiphyIsStickers" @keydown.stop.enter="toggleGiphyIsStickers")
-      input(type="checkbox" v-model="giphyIsStickers")
+    label(v-if="serviceIsGfycat" :class="{active: gfycatIsStickers}" @click.prevent="toggleGfycatIsStickers" @keydown.stop.enter="toggleGfycatIsStickers")
+      input(type="checkbox" v-model="gfycatIsStickers")
       span Stickers
 
   section.results-section
@@ -29,12 +26,15 @@ dialog.image-picker(v-if="visible" :open="visible" @click.stop ref="dialog")
       button.borderless.clear-input-wrap(@click="clearSearch")
         img.icon(src="@/assets/add.svg")
 
+  section.results-section
     p(v-if="isNoSearchResults") Nothing found on {{service}} for {{search}}
     ul.results-list.image-list
       template(v-for="(image in images")
         li(@click="selectImage(image)" tabindex="0" :key="image.id" v-on:keyup.enter="selectImage(image)")
-          img(:src="image.url")
-          a(:href="image.sourcePageUrl" target="_blank" @click.stop)
+          video(v-if="image.isVideo" autoplay loop muted playsinline)
+            source(:src="image.url")
+          img(v-if="!image.isVideo" :src="image.url")
+          a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.stop)
             button {{image.sourceUserName}} →
 
 </template>
@@ -58,7 +58,7 @@ export default {
       images: [],
       search: '',
       service: 'Are.na',
-      giphyIsStickers: false,
+      gfycatIsStickers: false,
       loading: false
     }
   },
@@ -85,8 +85,8 @@ export default {
         return false
       }
     },
-    serviceIsGiphy () {
-      if (this.service === 'Giphy') {
+    serviceIsGfycat () {
+      if (this.service === 'Gfycat') {
         return true
       } else {
         return false
@@ -119,12 +119,12 @@ export default {
       this.service = 'Are.na'
       this.searchAgain()
     },
-    toggleServiceIsGiphy () {
-      this.service = 'Giphy'
+    toggleServiceIsGfycat () {
+      this.service = 'Gfycat'
       this.searchAgain()
     },
-    toggleGiphyIsStickers () {
-      this.giphyIsStickers = !this.giphyIsStickers
+    toggleGfycatIsStickers () {
+      this.gfycatIsStickers = !this.gfycatIsStickers
       this.searchAgain()
     },
     searchAgain () {
@@ -145,27 +145,27 @@ export default {
         const response = await fetch(url)
         const data = await response.json()
         this.normalizeResults(data, 'Are.na')
-      } else if (this.serviceIsGiphy) {
+      } else if (this.serviceIsGfycat) {
         let url
-        if (this.giphyIsStickers) {
-          url = new URL('https://api.giphy.com/v1/stickers/search')
+        if (this.gfycatIsStickers) {
+          url = new URL('https://api.gfycat.com/v1/stickers/search')
         } else {
-          url = new URL('https://api.giphy.com/v1/gifs/search')
+          url = new URL('https://api.gfycat.com/v1/gfycats/search')
         }
         const params = {
-          q: this.search,
-          api_key: 'pK3Etx5Jj8IAzUx9Z7H7dUcjD4PazKq7'
+          search_text: this.search
         }
         url.search = new URLSearchParams(params).toString()
         const response = await fetch(url)
         const data = await response.json()
-        this.normalizeResults(data, 'Giphy')
+        this.normalizeResults(data, 'Gfycat')
       }
       this.loading = false
     }, 350),
     normalizeResults (data, service) {
       if (service === 'Are.na' && this.serviceIsArena) {
         this.images = data.blocks.map(image => {
+          console.log(image)
           return {
             id: image.id,
             sourcePageUrl: `https://www.are.na/block/${image.id}`,
@@ -173,13 +173,20 @@ export default {
             url: image.image.large.url
           }
         })
-      } else if (service === 'Giphy' && this.serviceIsGiphy) {
-        this.images = data.data.map(image => {
+      } else if (service === 'Gfycat' && this.serviceIsGfycat) {
+        this.images = data.gfycats.map(image => {
+          console.log(image)
+          console.log('size gif mp4', image.gifSize, image.mp4Size, image.mp4Size / image.gifSize * 100, image.miniUrl)
+          // console.log('gif vs mp4size ', image.images.downsized.size, image.images.preview.mp4_size)
+          // console.log('height and width',image.images.downsized.height, image.images.downsized.width)
+
           return {
-            id: image.id,
-            sourcePageUrl: image.url,
-            sourceUserName: '',
-            url: image.images.downsized.url
+            isVideo: true,
+            id: image.gfyId,
+            // sourcePageUrl: image.url,
+            // sourceUserName: '',
+            // url: image.max2mbGif
+            url: image.mobileUrl
           }
         })
       }
@@ -232,6 +239,7 @@ export default {
 
 <style lang="stylus">
 .image-picker
+  max-height 100vh
   .search-wrap
     margin-left 2px
     padding-top 4px
@@ -246,7 +254,7 @@ export default {
       margin-right 3px
   // .arena
   //   width 18px
-  // .giphy
+  // .gfycat
   //   height 12px
   // .segmented-button + button
   //   margin-right 6px
@@ -268,6 +276,7 @@ export default {
       position absolute
       top 6px
       right 6px
+
 // .space-picker
 //   .results-section
 //     padding-top 4px
