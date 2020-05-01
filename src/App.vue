@@ -470,4 +470,14 @@ code
   .logo-active
     background-image url('assets/logo-active.png')
 
+.search-wrap
+  margin-left 5px
+  padding-top 4px
+  display flex
+  .search
+    margin-top -11px
+    padding-right 5px
+    cursor text
+    flex-shrink 0
+
 </style>

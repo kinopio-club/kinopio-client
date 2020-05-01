@@ -220,25 +220,12 @@ export default {
 .image-picker
   max-height 100vh
   .search-wrap
-    margin-left 2px
-    padding-top 4px
-    display flex
-    .search
-      margin-top -11px
-      padding-right 5px
-      cursor text
+    margin-left 0
     .loader
       width 16px
       height 14px
       margin-right 3px
-  // .arena
-  //   width 18px
-  // .gfycat
-  //   height 12px
-  // .segmented-button + button
-  //   margin-right 6px
-  .upload-button
-    margin-left 6px
+      flex-shrink 0
 
   .results-section
     padding 8px
@@ -251,6 +238,7 @@ export default {
   .image-list
     li
       position relative
+      width 100%
     button
       position absolute
       top 6px
