@@ -50,7 +50,8 @@ export default {
     Loader
   },
   props: {
-    visible: Boolean
+    visible: Boolean,
+    initialSearch: String
   },
   data () {
     return {
@@ -120,6 +121,11 @@ export default {
       }
     },
     searchService: debounce(async function () {
+      this.loading = true
+      if (!this.search) {
+        this.loading = false
+        return
+      }
       if (this.serviceIsArena) {
         const url = new URL('https://api.are.na/v2/search/blocks')
         const params = {
@@ -161,7 +167,6 @@ export default {
         })
       } else if (service === 'Gfycat' && this.serviceIsGfycat) {
         this.images = data.gfycats.map(image => {
-          console.log(image)
           if (this.gfycatIsStickers) {
             return {
               id: image.gfyId,
@@ -213,6 +218,8 @@ export default {
         if (visible) {
           this.scrollIntoView()
           this.focusSearchInput()
+          this.search = this.initialSearch
+          this.searchService()
         }
       })
     }

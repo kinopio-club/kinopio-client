@@ -84,10 +84,11 @@ export default {
       if (this.canEditSpace && cardIsCreatedByCurrentUser) { return true }
       return false
     },
+    url () {
+      return utils.urlFromString(this.name)
+    },
     normalizedName () {
-      if (this.urlIsImage) {
-        return this.name.replace(this.url, '')
-      } else if (this.urlIsVideo) {
+      if (this.isMediaCard) {
         return this.name.replace(this.url, '')
       }
       return this.name
@@ -149,26 +150,8 @@ export default {
       const connections = this.$store.getters['currentSpace/cardConnections'](this.id)
       return Boolean(connections.length)
     },
-    url () {
-      if (!this.name) { return }
-      // https://regexr.com/52r0i
-      // optionally starts with http/s protocol
-      // followed by alphanumerics
-      // then '.''
-      // followed by alphanumerics
-      const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<>]*\.[^\s.[",><]+/igm)
-      const urls = this.name.match(urlPattern)
-      if (!urls) { return }
-      const url = urls[0]
-      const hasProtocol = url.startsWith('http://') || url.startsWith('https://')
-      if (hasProtocol) {
-        return url
-      } else {
-        return `http://${url}`
-      }
-    },
     isMediaCard () {
-      return this.urlIsImage || this.urlIsPlayableVideo
+      return this.urlIsImage || this.urlIsVideo
     },
     urlIsImage () {
       if (!this.url) { return }
@@ -187,10 +170,6 @@ export default {
       const videoUrlPattern = new RegExp(/(?:\.mp4)(?:\n| |\?|&)/igm)
       const isVideo = url.match(videoUrlPattern)
       return Boolean(isVideo)
-    },
-    urlIsPlayableVideo () {
-      if (!this.url) { return }
-      return this.url.endsWith('.mp4')
     },
 
     // filters

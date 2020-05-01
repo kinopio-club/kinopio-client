@@ -24,7 +24,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
     .button-wrap
       button(:disabled="!canEditCard" @click.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
         span Image
-      ImagePicker(:visible="imagePickerIsVisible" @selectImage="selectImage")
+      ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" @selectImage="selectImage")
     .button-wrap
       button(:disabled="!canEditCard" @click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
         span Frames
@@ -68,7 +68,8 @@ export default {
   data () {
     return {
       framePickerIsVisible: false,
-      imagePickerIsVisible: false
+      imagePickerIsVisible: false,
+      initialSearch: ''
     }
   },
   created () {
@@ -113,6 +114,16 @@ export default {
       set (newName) {
         this.updateCardName(newName)
       }
+    },
+    url () {
+      return utils.urlFromString(this.name)
+    },
+    normalizedName () {
+      if (this.url) {
+        const name = this.name.replace(this.url, '')
+        return name.trim()
+      }
+      return this.name.trim()
     }
   },
   methods: {
@@ -154,7 +165,6 @@ export default {
       })
     },
     cardIsEmpty () {
-      // TODO: expand isEmpty to inlcude other metadata content (images etc)?
       return !this.card.name
     },
     toggleFramePickerIsVisible () {
@@ -166,6 +176,7 @@ export default {
       const isVisible = this.imagePickerIsVisible
       this.closeDialogs()
       this.imagePickerIsVisible = !isVisible
+      this.initialSearch = this.normalizedName
     },
     focusName () {
       const element = this.$refs.name

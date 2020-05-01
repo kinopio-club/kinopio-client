@@ -432,6 +432,25 @@ export default {
     return url
   },
 
+  urlFromString (string) {
+    if (!string) { return }
+    // https://regexr.com/52r0i
+    // optionally starts with http/s protocol
+    // followed by alphanumerics
+    // then '.''
+    // followed by alphanumerics
+    const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<>]*\.[^\s.[",><]+/igm)
+    const urls = string.match(urlPattern)
+    if (!urls) { return }
+    const url = urls[0]
+    const hasProtocol = url.startsWith('http://') || url.startsWith('https://')
+    if (hasProtocol) {
+      return url
+    } else {
+      return `http://${url}`
+    }
+  },
+
   // Paste Card ✂️
 
   // recursive
