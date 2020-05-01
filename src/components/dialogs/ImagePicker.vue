@@ -224,7 +224,6 @@ export default {
 .image-picker
   max-height 100vh
   .search-wrap
-    margin-left 0
     .loader
       width 16px
       height 14px
@@ -232,7 +231,6 @@ export default {
       flex-shrink 0
 
   .results-section
-    padding 8px
     padding-top 0
     padding-bottom 0
     p
@@ -243,15 +241,10 @@ export default {
     li
       position relative
       width 100%
+      img
+        border-radius 3px
     button
       position absolute
       top 6px
-      right 6px
-
-// .space-picker
-//   .results-section
-//     padding-top 4px
-//     @media(max-height 700px)
-//       max-height 40vh
-
+      right 10px
 </style>
