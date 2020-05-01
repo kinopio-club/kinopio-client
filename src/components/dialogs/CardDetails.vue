@@ -24,7 +24,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
     .button-wrap
       button(:disabled="!canEditCard" @click.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
         span Image
-      ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" @selectImage="selectImage")
+      ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" @selectImage="addImage")
     .button-wrap
       button(:disabled="!canEditCard" @click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
         span Frames
@@ -218,13 +218,14 @@ export default {
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
-    selectImage (image) {
+    addImage (image) {
       let name = this.card.name
       const url = utils.urlFromString(name)
       if (utils.urlIsImage(url) || utils.urlIsVideo(url)) {
         name = name.replace(url, '')
       }
-      const newName = `${image.url}\n\n${name}`
+      name = utils.trim(name)
+      let newName = `${image.url}\n\n${name}`
       this.updateCardName(newName)
     }
   },
