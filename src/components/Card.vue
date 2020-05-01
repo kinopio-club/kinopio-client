@@ -16,6 +16,8 @@ article(:style="position" :data-card-id="id")
   )
     Frames(:card="card")
 
+    video(v-if="urlIsVideo" autoplay loop muted playsinline :class="{selected: isSelected}")
+      source(:src="url")
     img.image(v-if="urlIsImage" :src="url" :class="{selected: isSelected}")
 
     span.card-content-wrap
@@ -85,6 +87,8 @@ export default {
     normalizedName () {
       if (this.urlIsImage) {
         return this.name.replace(this.url, '')
+      } else if (this.urlIsVideo) {
+        return this.name.replace(this.url, '')
       }
       return this.name
     },
@@ -94,7 +98,7 @@ export default {
       if (this.url) {
         maxWidth = 162
       }
-      if (!this.normalizedName) { return 0 }
+      if (!this.normalizedName.trim()) { return 0 }
       const width = this.longestNameLineLength() * averageCharacterWidth
       if (width <= maxWidth) {
         return width
@@ -176,6 +180,13 @@ export default {
       const imageUrlPattern = new RegExp(/(?:\.gif|\.jpg|\.jpeg|\.png)(?:\n| |\?|&)/igm)
       const isImage = url.match(imageUrlPattern)
       return Boolean(isImage)
+    },
+    urlIsVideo () {
+      if (!this.url) { return }
+      const url = this.url + ' '
+      const videoUrlPattern = new RegExp(/(?:\.mp4)(?:\n| |\?|&)/igm)
+      const isVideo = url.match(videoUrlPattern)
+      return Boolean(isVideo)
     },
     urlIsPlayableVideo () {
       if (!this.url) { return }
@@ -375,7 +386,8 @@ article
     &:active,
     &.active
       background-color var(--secondary-background)
-    .image
+    .image,
+    video
       border-radius 3px
       display block
       &.selected
