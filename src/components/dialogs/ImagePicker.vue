@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.image-picker(v-if="visible" :open="visible" @click.stop ref="dialog")
+dialog.narrow.image-picker(v-if="visible" :open="visible" @click.stop ref="dialog")
   section
     .row
       .segmented-buttons
@@ -31,9 +31,9 @@ dialog.image-picker(v-if="visible" :open="visible" @click.stop ref="dialog")
     ul.results-list.image-list
       template(v-for="(image in images")
         li(@click="selectImage(image)" tabindex="0" :key="image.id" v-on:keyup.enter="selectImage(image)")
-          video(v-if="image.isVideo" autoplay loop muted playsinline)
-            source(:src="image.url")
-          img(v-if="!image.isVideo" :src="image.url")
+          //- video(v-if="image.isVideo" autoplay loop muted playsinline)
+          //-   source(:src="image.url")
+          img(:src="image.previewUrl")
           a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.stop)
             button {{image.sourceUserName}} →
 </template>
@@ -138,7 +138,8 @@ export default {
           url = new URL('https://api.gfycat.com/v1/gfycats/search')
         }
         const params = {
-          search_text: this.search
+          search_text: this.search,
+          count: 20
         }
         url.search = new URLSearchParams(params).toString()
         const response = await fetch(url)
@@ -154,6 +155,7 @@ export default {
             id: image.id,
             sourcePageUrl: `https://www.are.na/block/${image.id}`,
             sourceUserName: image.user.username,
+            previewUrl: image.image.large.url,
             url: image.image.large.url
           }
         })
@@ -163,12 +165,14 @@ export default {
           if (this.gfycatIsStickers) {
             return {
               id: image.gfyId,
+              previewUrl: image.gifUrl,
               url: image.gifUrl
             }
           } else {
             return {
               isVideo: true,
               id: image.gfyId,
+              previewUrl: image.max1mbGif,
               url: image.mobileUrl
             }
           }
