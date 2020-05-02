@@ -26,16 +26,21 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.stop ref="dialo
       button.borderless.clear-input-wrap(@click="clearSearch")
         img.icon(src="@/assets/add.svg")
 
+    .error-container
+      p(v-if="isNoSearchResults") Nothing found on {{service}} for {{search}}
+      .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
+      .badge.danger(v-if="error.userIsOffline") Can't search {{service}} while offline, Please try again later
+
   section.results-section
-    p(v-if="isNoSearchResults") Nothing found on {{service}} for {{search}}
     ul.results-list.image-list
       template(v-for="(image in images")
-        li(@click="selectImage(image)" tabindex="0" :key="image.id" v-on:keyup.enter="selectImage(image)")
+        li(@click="selectImage(image)" tabindex="0" :key="image.id" v-on:keydown.enter="selectImage(image)")
           //- video(v-if="image.isVideo" autoplay loop muted playsinline)
           //-   source(:src="image.url")
           img(:src="image.previewUrl")
           a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.stop)
             button {{image.sourceUserName}} →
+
 </template>
 
 <script>
@@ -59,7 +64,11 @@ export default {
       search: '',
       service: 'Are.na',
       gfycatIsStickers: false,
-      loading: false
+      loading: false,
+      error: {
+        unknownServerError: false,
+        userIsOffline: false
+      }
     }
   },
   computed: {
@@ -93,7 +102,9 @@ export default {
       }
     },
     isNoSearchResults () {
-      if (this.search && !this.loading && !this.images.length) {
+      if (this.error.unknownServerError || this.error.userIsOffline) {
+        return false
+      } else if (this.search && !this.loading && !this.images.length) {
         return true
       } else {
         return false
@@ -120,40 +131,63 @@ export default {
         this.searchService()
       }
     },
+    async searchArena () {
+      const url = new URL('https://api.are.na/v2/search/blocks')
+      const params = {
+        q: this.search,
+        'filter[type]': 'image'
+      }
+      url.search = new URLSearchParams(params).toString()
+      const response = await fetch(url)
+      const data = await response.json()
+      this.normalizeResults(data, 'Are.na')
+    },
+    async searchGfycat () {
+      let url
+      if (this.gfycatIsStickers) {
+        url = new URL('https://api.gfycat.com/v1/stickers/search')
+      } else {
+        url = new URL('https://api.gfycat.com/v1/gfycats/search')
+      }
+      const params = {
+        search_text: this.search,
+        count: 20
+      }
+      url.search = new URLSearchParams(params).toString()
+      const response = await fetch(url)
+      const data = await response.json()
+      this.normalizeResults(data, 'Gfycat')
+    },
     searchService: debounce(async function () {
+      this.clearErrors()
       this.loading = true
       if (!this.search) {
         this.loading = false
         return
       }
-      if (this.serviceIsArena) {
-        const url = new URL('https://api.are.na/v2/search/blocks')
-        const params = {
-          q: this.search,
-          'filter[type]': 'image'
+      const isOffline = !this.$store.state.isOnline
+      if (isOffline) {
+        this.loading = false
+        this.error.userIsOffline = true
+        return
+      }
+      try {
+        if (this.serviceIsArena) {
+          await this.searchArena()
+        } else if (this.serviceIsGfycat) {
+          await this.searchGfycat()
         }
-        url.search = new URLSearchParams(params).toString()
-        const response = await fetch(url)
-        const data = await response.json()
-        this.normalizeResults(data, 'Are.na')
-      } else if (this.serviceIsGfycat) {
-        let url
-        if (this.gfycatIsStickers) {
-          url = new URL('https://api.gfycat.com/v1/stickers/search')
-        } else {
-          url = new URL('https://api.gfycat.com/v1/gfycats/search')
-        }
-        const params = {
-          search_text: this.search,
-          count: 20
-        }
-        url.search = new URLSearchParams(params).toString()
-        const response = await fetch(url)
-        const data = await response.json()
-        this.normalizeResults(data, 'Gfycat')
+      } catch (error) {
+        console.error('🚒', error)
+        this.images = []
+        this.error.unknownServerError = true
       }
       this.loading = false
     }, 350),
+    clearErrors () {
+      this.error.unknownServerError = false
+      this.error.userIsOffline = false
+    },
     normalizeResults (data, service) {
       if (service === 'Are.na' && this.serviceIsArena) {
         this.images = data.blocks.map(image => {
@@ -240,9 +274,6 @@ export default {
   .results-section
     padding-top 0
     padding-bottom 0
-    p
-      margin-top 0
-      padding-bottom 8px
 
   .image-list
     li
@@ -254,4 +285,12 @@ export default {
       position absolute
       top 6px
       right 10px
+
+  .error-container
+    p,
+    .badge
+      margin 4px
+      margin-top 0
+      margin-bottom 8px
+
 </style>
