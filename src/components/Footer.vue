@@ -58,7 +58,6 @@ export default {
     }
   },
   mounted () {
-    console.log('🐢 kinopio-client build', this.buildHash) // TODO move this stuff to store init, or app?
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
         this.removedIsVisible = false
@@ -69,17 +68,17 @@ export default {
     })
   },
   computed: {
-    buildHash () {
-      const regex = /(app\.)([a-z0-9])\w+/
-      const scripts = Array.from(document.querySelectorAll('script'))
-      const path = scripts.find(script => {
-        const src = script.src
-        return src.includes('app')
-      })
-      if (!path) { return }
-      let hash = path.src.match(regex)[0] // app.768db305407f4c847d44
-      return hash.replace('app.', '') // 768db305407f4c847d44
-    },
+    // buildHash () {
+    //   const regex = /(app\.)([a-z0-9])\w+/
+    //   const scripts = Array.from(document.querySelectorAll('script'))
+    //   const path = scripts.find(script => {
+    //     const src = script.src
+    //     return src.includes('app')
+    //   })
+    //   if (!path) { return }
+    //   let hash = path.src.match(regex)[0] // app.768db305407f4c847d44
+    //   return hash.replace('app.', '') // 768db305407f4c847d44
+    // },
     dialogsVisible () {
       return Boolean(this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.multipleSelectedActionsIsVisible || this.$store.state.connectionDetailsIsVisibleForConnectionId)
     },
