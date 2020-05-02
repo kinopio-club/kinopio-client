@@ -76,6 +76,7 @@ export default {
         const src = script.src
         return src.includes('app')
       })
+      if (!path.src) { return }
       let hash = path.src.match(regex)[0] // app.768db305407f4c847d44
       return hash.replace('app.', '') // 768db305407f4c847d44
     },
