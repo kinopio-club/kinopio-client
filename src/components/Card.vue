@@ -16,10 +16,13 @@ article(:style="position" :data-card-id="id")
   )
     Frames(:card="card")
 
+    video(v-if="urlIsVideo" autoplay loop muted playsinline :class="{selected: isSelected}" :key="url")
+      source(:src="url")
     img.image(v-if="urlIsImage" :src="url" :class="{selected: isSelected}")
 
     span.card-content-wrap
-      p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}") {{normalizedName}}
+      p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}")
+        span {{normalizedName}}
       span.card-buttons-wrap
         a(:href="url" @click.stop @touchend="openUrl(url)" v-if="url")
           .link
@@ -68,6 +71,10 @@ export default {
     newConnectionColor () { return this.$store.state.currentConnectionColor },
     name () { return this.card.name },
     frameId () { return this.card.frameId },
+    url () { return utils.urlFromString(this.name) },
+    urlIsImage () { return utils.urlIsImage(this.url) },
+    urlIsVideo () { return utils.urlIsVideo(this.url) },
+    isMediaCard () { return this.urlIsImage || this.urlIsVideo },
     position () {
       return {
         left: `${this.x}px`,
@@ -83,10 +90,11 @@ export default {
       return false
     },
     normalizedName () {
-      if (this.urlIsImage) {
-        return this.name.replace(this.url, '')
+      if (this.isMediaCard) {
+        const name = this.name.replace(this.url, '')
+        return utils.trim(name)
       }
-      return this.name
+      return utils.trim(this.name)
     },
     nameLineMinWidth () {
       const averageCharacterWidth = 6.5
@@ -94,7 +102,7 @@ export default {
       if (this.url) {
         maxWidth = 162
       }
-      if (!this.normalizedName) { return 0 }
+      if (!this.normalizedName.trim()) { return 0 }
       const width = this.longestNameLineLength() * averageCharacterWidth
       if (width <= maxWidth) {
         return width
@@ -144,42 +152,6 @@ export default {
     hasConnections () {
       const connections = this.$store.getters['currentSpace/cardConnections'](this.id)
       return Boolean(connections.length)
-    },
-    url () {
-      if (!this.name) { return }
-      // https://regexr.com/52r0i
-      // optionally starts with http/s protocol
-      // followed by alphanumerics
-      // then '.''
-      // followed by alphanumerics
-      const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<>]*\.[^\s.[",><]+/igm)
-      const urls = this.name.match(urlPattern)
-      if (!urls) { return }
-      const url = urls[0]
-      const hasProtocol = url.startsWith('http://') || url.startsWith('https://')
-      if (hasProtocol) {
-        return url
-      } else {
-        return `http://${url}`
-      }
-    },
-    isMediaCard () {
-      return this.urlIsImage || this.urlIsPlayableVideo
-    },
-    urlIsImage () {
-      if (!this.url) { return }
-      // append space to match as an end character
-      const url = this.url + ' '
-      // https://regexr.com/4rjtu
-      // match an extension
-      // which much be followed by either end of line, space, or ? (for qs) char
-      const imageUrlPattern = new RegExp(/(?:\.gif|\.jpg|\.jpeg|\.png)(?:\n| |\?|&)/igm)
-      const isImage = url.match(imageUrlPattern)
-      return Boolean(isImage)
-    },
-    urlIsPlayableVideo () {
-      if (!this.url) { return }
-      return this.url.endsWith('.mp4')
     },
 
     // filters
@@ -375,7 +347,8 @@ article
     &:active,
     &.active
       background-color var(--secondary-background)
-    .image
+    .image,
+    video
       border-radius 3px
       display block
       &.selected

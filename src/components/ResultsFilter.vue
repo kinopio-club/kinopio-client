@@ -1,5 +1,5 @@
 <template lang="pug">
-.filter-wrap(v-if="shouldShowFilter")
+.search-wrap(v-if="shouldShowFilter")
   img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
   input(placeholder="Search" v-model="filterItems" ref="filterInput")
   button.borderless.clear-input-wrap(@click="clearFilter")
@@ -78,12 +78,4 @@ export default {
 </script>
 
 <style lang="stylus">
-.filter-wrap
-  margin-left 5px
-  padding-top 4px
-  display flex
-  .search
-    margin-top -11px
-    padding-right 5px
-    cursor text
 </style>

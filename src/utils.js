@@ -267,6 +267,11 @@ export default {
     return `m${offsetStart.x},${offsetStart.y} ${curve} ${delta.x},${delta.y}`
   },
 
+  trim (string) {
+    // unlike string.trim(), this removes line breaks too
+    return string.replace(/^\s+|\s+$/g, '')
+  },
+
   // Painting 🖌
 
   exponentialDecay (iteration, rateOfIterationDecay) {
@@ -430,6 +435,45 @@ export default {
       return url.slice(0, lastCharacterPosition)
     }
     return url
+  },
+
+  urlFromString (string) {
+    if (!string) { return }
+    // https://regexr.com/52r0i
+    // optionally starts with http/s protocol
+    // followed by alphanumerics
+    // then '.''
+    // followed by alphanumerics
+    const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<>]*\.[^\s.[",><]+/igm)
+    const urls = string.match(urlPattern)
+    if (!urls) { return }
+    const url = urls[0]
+    const hasProtocol = url.startsWith('http://') || url.startsWith('https://')
+    if (hasProtocol) {
+      return url
+    } else {
+      return `http://${url}`
+    }
+  },
+
+  urlIsImage (url) {
+    if (!url) { return }
+    // append space to match as an end character
+    url = url + ' '
+    // https://regexr.com/4rjtu
+    // match an extension
+    // which much be followed by either end of line, space, or ? (for qs) char
+    const imageUrlPattern = new RegExp(/(?:\.gif|\.jpg|\.jpeg|\.png)(?:\n| |\?|&)/igm)
+    const isImage = url.match(imageUrlPattern)
+    return Boolean(isImage)
+  },
+
+  urlIsVideo (url) {
+    if (!url) { return }
+    url = url + ' '
+    const videoUrlPattern = new RegExp(/(?:\.mp4)(?:\n| |\?|&)/igm)
+    const isVideo = url.match(videoUrlPattern)
+    return Boolean(isVideo)
   },
 
   // Paste Card ✂️
