@@ -34,7 +34,7 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.stop ref="dialo
   section.results-section
     ul.results-list.image-list
       template(v-for="(image in images")
-        li(@click="selectImage(image)" tabindex="0" :key="image.id" v-on:keydown.enter="selectImage(image)")
+        li(@click="selectImage(image)" tabindex="0" :key="image.id" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
           //- video(v-if="image.isVideo" autoplay loop muted playsinline)
           //-   source(:src="image.url")
           img(:src="image.previewUrl")
@@ -56,7 +56,8 @@ export default {
   },
   props: {
     visible: Boolean,
-    initialSearch: String
+    initialSearch: String,
+    cardUrl: String
   },
   data () {
     return {
@@ -244,6 +245,9 @@ export default {
         behavior: 'smooth',
         scrollMode: 'if-needed'
       })
+    },
+    isCardUrl (image) {
+      return this.cardUrl === image.url
     }
   },
   watch: {
@@ -253,6 +257,9 @@ export default {
           this.scrollIntoView()
           this.focusSearchInput()
           this.search = this.initialSearch
+          if (this.search) {
+            this.loading = true
+          }
           this.searchService()
         }
       })
@@ -281,6 +288,7 @@ export default {
       width 100%
       img
         border-radius 3px
+        min-height 100px
     button
       position absolute
       top 6px

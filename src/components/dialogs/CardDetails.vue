@@ -24,7 +24,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
     .button-wrap
       button(:disabled="!canEditCard" @click.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
         span Image
-      ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" @selectImage="addImage")
+      ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" @selectImage="addImage")
     .button-wrap
       button(:disabled="!canEditCard" @click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
         span Frames
@@ -115,9 +115,7 @@ export default {
         this.updateCardName(newName)
       }
     },
-    url () {
-      return utils.urlFromString(this.name)
-    },
+    url () { return utils.urlFromString(this.name) },
     normalizedName () {
       if (this.url) {
         const name = this.name.replace(this.url, '')
@@ -219,13 +217,19 @@ export default {
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     addImage (image) {
+      let newName
       let name = this.card.name
       const url = utils.urlFromString(name)
       if (utils.urlIsImage(url) || utils.urlIsVideo(url)) {
         name = name.replace(url, '')
       }
-      name = utils.trim(name)
-      let newName = `${image.url}\n\n${name}`
+      if (image.url === url) {
+        name = name.replace(url, '')
+        newName = utils.trim(name)
+      } else {
+        name = utils.trim(name)
+        newName = `${image.url}\n\n${name}`
+      }
       this.updateCardName(newName)
     }
   },
