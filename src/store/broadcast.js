@@ -1,16 +1,22 @@
+// client ←→ [broadcast] ←→ websocket ←→ server
+
 // sends and receives messages by calling mutations
 // which are subscribed to by websocket.js
 
 const self = {
   namespaced: true,
   // state: {
-  // isConnected: false
+  //   canEditSpace: false
   // },
   mutations: {
     connect: () => {},
     joinSpaceRoom: () => {}
+    // authorizeEdit: () => {
+    //   this.canEditSpace = true
+    // },
   },
   actions: {
+
     // send (context, event) => {
     // event is json, feels like you're sending it to all space friends
     // }
