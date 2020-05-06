@@ -2,9 +2,12 @@
 
 // handles websockets, and delegates events to broadcast
 
+import nanoid from 'nanoid'
+
 import utils from '@/utils.js'
 
 let websocket
+const clientId = nanoid()
 
 export default function createWebSocketPlugin () {
   return store => {
@@ -18,7 +21,7 @@ export default function createWebSocketPlugin () {
         }
         websocket.onmessage = ({ data }) => {
           data = JSON.parse(data)
-          if (data.userId === store.state.currentUser.id) { return }
+          if (data.clientId === clientId) { return }
           console.log('🌛', data)
           // store.dispatch('broadcast/canEditSpace', data.canEditSpace)
         }
@@ -38,7 +41,8 @@ export default function createWebSocketPlugin () {
         websocket.send(JSON.stringify({
           message: 'joinSpaceRoom',
           spaceId: store.state.currentSpace.id,
-          userId: store.state.currentUser.id
+          userId: store.state.currentUser.id,
+          clientId
           // space: {
           //   id: store.state.currentSpace.id,
           //   name: store.state.currentSpace.name
