@@ -18,6 +18,7 @@ export default function createWebSocketPlugin () {
         }
         websocket.onmessage = ({ data }) => {
           data = JSON.parse(data)
+          if (data.userId === store.state.currentUser.id) { return }
           console.log('🌛', data)
           // store.dispatch('broadcast/canEditSpace', data.canEditSpace)
         }
@@ -36,16 +37,18 @@ export default function createWebSocketPlugin () {
         console.log('send joinSpaceRoom')
         websocket.send(JSON.stringify({
           message: 'joinSpaceRoom',
-          space: {
-            id: store.state.currentSpace.id,
-            name: store.state.currentSpace.name
-          },
-          user: {
-            id: store.state.currentUser.id,
-            name: store.state.currentUser.name,
-            color: store.state.currentUser.color
-            // collaboratorKey: store.state.anonymousCollaboratorKey
-          }
+          spaceId: store.state.currentSpace.id,
+          userId: store.state.currentUser.id
+          // space: {
+          //   id: store.state.currentSpace.id,
+          //   name: store.state.currentSpace.name
+          // },
+          // user: {
+          //   id: store.state.currentUser.id,
+          //   name: store.state.currentUser.name,
+          //   color: store.state.currentUser.color
+          //   // collaboratorKey: store.state.anonymousCollaboratorKey
+          // }
         }))
       }
     })
