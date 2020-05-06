@@ -11,13 +11,17 @@ const self = {
   mutations: {
     connect: () => {},
     joinSpaceRoom: () => {}
+    // canEditSpace: (state, canEditSpace) => {
+    //   state.canEditSpace = canEditSpace
+
+    // }
     // authorizeEdit: () => {
     //   this.canEditSpace = true
     // },
   },
   actions: {
 
-    // send (context, event) => {
+    // send: (context, event) => {
     // event is json, feels like you're sending it to all space friends
     // }
 

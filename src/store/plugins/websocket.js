@@ -19,26 +19,32 @@ export default function createWebSocketPlugin () {
         websocket.onmessage = ({ data }) => {
           data = JSON.parse(data)
           console.log('🌛', data)
-
-          // sends to the right dispatch broadcast depending on the message - ?(or direct to currentspcae/user stores?)
-          // store.dispatch('broadcast/receivedMessage', )
+          // store.dispatch('broadcast/canEditSpace', data.canEditSpace)
         }
-        // websocket.onclose 🌚
-        // websocket.onerror 🚒
-        // ??reconnect, increasing time outs
+        websocket.onclose = (event) => {
+          console.error('🌚', event)
+          // ??reconnect, increasing time outs
+        }
+        websocket.onerror = (event) => {
+          console.error('🚒', event)
+          // ??reconnect, increasing time outs
+        }
       }
 
       // join space room
       if (mutation.type === 'broadcast/joinSpaceRoom') {
+        console.log('send joinSpaceRoom')
         websocket.send(JSON.stringify({
           message: 'joinSpaceRoom',
           space: {
-            name: store.state.currentSpace.name,
-            id: store.state.currentSpace.id
+            id: store.state.currentSpace.id,
+            name: store.state.currentSpace.name
           },
           user: {
             id: store.state.currentUser.id,
-            collaboratorKey: store.state.anonymousCollaboratorKey
+            name: store.state.currentUser.name,
+            color: store.state.currentUser.color
+            // collaboratorKey: store.state.anonymousCollaboratorKey
           }
         }))
       }
