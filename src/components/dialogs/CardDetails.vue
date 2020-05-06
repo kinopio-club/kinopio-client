@@ -17,10 +17,14 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       maxlength="250"
       @click="triggerUpdateMagicPaintPositionOffset"
     )
-    //- todo change esc to keydown if i want to bubble up to also resetting the tree, if it feels better irl
-    button(:disabled="!canEditCard" @click="removeCard")
-      img.icon(src="@/assets/remove.svg")
-      span Remove
+    .button-wrap
+      button(:disabled="!canEditCard" @click="removeCard")
+        img.icon(src="@/assets/remove.svg")
+        span Remove
+    .button-wrap
+      button(:disabled="!canEditCard" @click.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
+        span Image
+      ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" @selectImage="addImage")
     .button-wrap
       button(:disabled="!canEditCard" @click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
         span Frames
@@ -50,24 +54,29 @@ import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil awaiti
 
 import utils from '@/utils.js'
 import FramePicker from '@/components/dialogs/FramePicker.vue'
+import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 
 export default {
   name: 'CardDetails',
   components: {
-    FramePicker
+    FramePicker,
+    ImagePicker
   },
   props: {
     card: Object // name, x, y, z
   },
   data () {
     return {
-      framePickerIsVisible: false
+      framePickerIsVisible: false,
+      imagePickerIsVisible: false,
+      initialSearch: ''
     }
   },
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
         this.framePickerIsVisible = false
+        this.imagePickerIsVisible = false
       }
     })
   },
@@ -105,6 +114,14 @@ export default {
       set (newName) {
         this.updateCardName(newName)
       }
+    },
+    url () { return utils.urlFromString(this.name) },
+    normalizedName () {
+      if (this.url) {
+        const name = this.name.replace(this.url, '')
+        return name.trim()
+      }
+      return this.name.trim()
     }
   },
   methods: {
@@ -146,13 +163,18 @@ export default {
       })
     },
     cardIsEmpty () {
-      // TODO: expand isEmpty to inlcude other metadata content (images etc)?
       return !this.card.name
     },
     toggleFramePickerIsVisible () {
       const isVisible = this.framePickerIsVisible
       this.closeDialogs()
       this.framePickerIsVisible = !isVisible
+    },
+    toggleImagePickerIsVisible () {
+      const isVisible = this.imagePickerIsVisible
+      this.closeDialogs()
+      this.imagePickerIsVisible = !isVisible
+      this.initialSearch = this.normalizedName
     },
     focusName () {
       const element = this.$refs.name
@@ -189,9 +211,26 @@ export default {
     },
     closeDialogs () {
       this.framePickerIsVisible = false
+      this.imagePickerIsVisible = false
     },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
+    },
+    addImage (image) {
+      let newName
+      let name = this.card.name
+      const url = utils.urlFromString(name)
+      if (utils.urlIsImage(url) || utils.urlIsVideo(url)) {
+        name = name.replace(url, '')
+      }
+      if (image.url === url) {
+        name = name.replace(url, '')
+        newName = utils.trim(name)
+      } else {
+        name = utils.trim(name)
+        newName = `${image.url}\n\n${name}`
+      }
+      this.updateCardName(newName)
     }
   },
   watch: {
