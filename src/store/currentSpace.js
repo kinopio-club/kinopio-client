@@ -396,7 +396,7 @@ export default {
           space: remoteSpace,
           shouldUpdateUrl: true
         })
-        context.commit('broadcast/connect', null, { root: true })
+        context.commit('broadcast/joinSpaceRoom', null, { root: true })
         if (!space.isRemoved && remoteSpace.isRemoved) {
           context.commit('notifySpaceIsRemoved', false, { root: true })
         } else {

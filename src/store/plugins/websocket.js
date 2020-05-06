@@ -1,27 +1,40 @@
+// handles websockets, and delegates events to broadcast
+
 import utils from '@/utils.js'
+
+let websocket
 
 export default function createWebSocketPlugin () {
   return store => {
     store.subscribe((mutation, state) => {
+      // connect
       if (mutation.type === 'broadcast/connect') {
         const host = utils.websocketHost()
-        // TODO need to disable existing websocket connection before making a new one?
-        console.log('🌿connect time', store.state.currentUser, store.state.currentSpace)
-        const websocket = new WebSocket(host) // + /:spaceId w user info to auth, if private only a member can connect (using user or contributorid). public viewing is reqd for teaching/demo-ing scenarios to users w/o accounts
+        websocket = new WebSocket(host)
         websocket.onopen = (event) => {
-          store.dispatch('broadcast/connectionOpened', event)
+          console.log('🌝', event.target)
         }
         websocket.onmessage = ({ data }) => {
-          store.dispatch('broadcast/receivedMessage', data)
+          data = JSON.parse(data)
+          console.log('🌛', data)
+          // sends to the right dispatch broadcast depending on the message - ?(or direct to currentspcae/user stores?)
+          // store.dispatch('broadcast/receivedMessage', )
         }
-        // onclose
-        // onerror
-        // ??reconnect
+        // websocket.onclose 🌚
+        // websocket.onerror 🚒
+        // ??reconnect, increasing time outs
       }
 
-      // if (mutation.type === 'UPDATE_DATA') {
-      // socket.emit('update', mutation.payload)
-      // }
+      // join space room
+      if (mutation.type === 'broadcast/joinSpaceRoom') {
+        console.log('🌜 joining space room', store.state.currentSpace.name, store.state.currentSpace.id) // temp
+        websocket.send(JSON.stringify({
+          message: 'joinSpaceRoom',
+          spaceId: store.state.currentSpace.id,
+          userApiKey: store.state.currentUser.apiKey,
+          userCollaboratorKey: store.state.anonymousCollaboratorKey
+        }))
+      }
     })
   }
 }

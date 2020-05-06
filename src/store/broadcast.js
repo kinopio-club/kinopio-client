@@ -7,16 +7,17 @@ const self = {
   // isConnected: false
   // },
   mutations: {
-    connect: () => {}
-    // TODO add mutations subscribed to by websocket UPDATE_DATA
+    connect: () => {},
+    joinSpaceRoom: () => {}
   },
   actions: {
-    connectionOpened: (context, event) => {
-      console.log('🔮 broadcast/websocket oopennnn', event.target)
-    },
-    receivedMessage: (context, data) => {
-      console.log('🌍 got broadcast message', data)
-    }
+    // send (context, event) => {
+    // event is json, feels like you're sending it to all space friends
+    // }
+
+    // receivedMessage: (context, data) => {
+    //   console.log('🌛', data)
+    // }
   }
 }
 
