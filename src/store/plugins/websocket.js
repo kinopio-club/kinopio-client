@@ -52,8 +52,13 @@ export default function createWebSocketPlugin () {
         currentSpaceRoom = space.id
         websocket.send(JSON.stringify({
           message: 'joinSpaceRoom',
-          spaceId: store.state.currentSpace.id,
-          userId: store.state.currentUser.id,
+          space: {
+            id: space.id,
+            name: space.name
+          },
+          user: {
+            id: store.state.currentUser.id
+          },
           clientId
         }))
       }
