@@ -146,7 +146,6 @@ export default new Vuex.Store({
       state.cardDetailsIsVisibleForCardId = ''
       state.connectionDetailsIsVisibleForConnectionId = ''
     },
-
     isOnline: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.isOnline = value

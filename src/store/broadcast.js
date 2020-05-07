@@ -3,11 +3,13 @@
 // sends and receives messages by calling mutations
 // which are subscribed to by websocket.js
 
+let reconnectAttempts = 1
+
 const self = {
   namespaced: true,
-  // state: {
-  //   canEditSpace: false
-  // },
+  state: {
+    currentSpaceRoom: ''
+  },
   mutations: {
     connect: () => {},
     joinSpaceRoom: () => {}
@@ -20,7 +22,13 @@ const self = {
     // },
   },
   actions: {
-
+    reconnect: (context) => {
+      // if (context.state.isConnected) { return }
+      setTimeout(() => {
+        context.commit('connect')
+        reconnectAttempts += 1
+      }, 5000 * reconnectAttempts)
+    }
     // send: (context, event) => {
     // event is json, feels like you're sending it to all space friends
     // }

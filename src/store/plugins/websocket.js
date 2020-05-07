@@ -7,7 +7,10 @@ import nanoid from 'nanoid'
 import utils from '@/utils.js'
 
 let websocket
+let currentSpaceRoom
 const clientId = nanoid()
+
+// TODO QA offline -> online, server down -> up (reconnect w one instance back to existing clients)
 
 export default function createWebSocketPlugin () {
   return store => {
@@ -18,41 +21,37 @@ export default function createWebSocketPlugin () {
         websocket = new WebSocket(host)
         websocket.onopen = (event) => {
           console.log('🌝', event.target)
+          store.commit('broadcast/joinSpaceRoom')
         }
         websocket.onmessage = ({ data }) => {
           data = JSON.parse(data)
           if (data.clientId === clientId) { return }
-          console.log('🌛', data)
+          console.log('🌛', data) // temp
           // store.dispatch('broadcast/canEditSpace', data.canEditSpace)
         }
         websocket.onclose = (event) => {
           console.error('🌚', event)
-          // ??reconnect, increasing time outs
+          store.dispatch('broadcast/reconnect')
         }
         websocket.onerror = (event) => {
           console.error('🚒', event)
-          // ??reconnect, increasing time outs
         }
       }
 
       // join space room
       if (mutation.type === 'broadcast/joinSpaceRoom') {
-        console.log('send joinSpaceRoom')
+        const space = utils.clone(store.state.currentSpace)
+        const currentSpaceHasUrl = utils.currentSpaceHasUrl(space)
+        console.log(currentSpaceHasUrl, space)
+        if (!currentSpaceHasUrl) { return }
+        if (currentSpaceRoom === space.id) { return }
+        console.log('🌜 join space room', space.name)
+        currentSpaceRoom = space.id
         websocket.send(JSON.stringify({
           message: 'joinSpaceRoom',
           spaceId: store.state.currentSpace.id,
           userId: store.state.currentUser.id,
           clientId
-          // space: {
-          //   id: store.state.currentSpace.id,
-          //   name: store.state.currentSpace.name
-          // },
-          // user: {
-          //   id: store.state.currentUser.id,
-          //   name: store.state.currentUser.name,
-          //   color: store.state.currentUser.color
-          //   // collaboratorKey: store.state.anonymousCollaboratorKey
-          // }
         }))
       }
     })

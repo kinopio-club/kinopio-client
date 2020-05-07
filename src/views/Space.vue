@@ -52,9 +52,9 @@ export default {
     ScrollAtEdgesHandler
   },
   beforeCreate () {
-    this.$store.commit('broadcast/connect')
     this.$store.dispatch('currentUser/init')
     this.$store.dispatch('currentSpace/init')
+    this.$store.commit('broadcast/connect')
   },
   created () {
     this.$store.subscribe((mutation, state) => {
