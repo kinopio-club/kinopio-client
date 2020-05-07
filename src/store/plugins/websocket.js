@@ -34,6 +34,7 @@ export default function createWebSocketPlugin () {
         websocket.onmessage = ({ data }) => {
           data = JSON.parse(data)
           if (data.clientId === clientId) { return }
+          console.log('💐', data)
           if (data.message === 'userJoinedRoom') {
             store.dispatch('broadcast/userJoinedRoom', data)
           }
@@ -56,7 +57,7 @@ export default function createWebSocketPlugin () {
         websocket.send(JSON.stringify({
           message: 'joinSpaceRoom',
           space: utils.spaceMeta(space),
-          user: utils.userMeta(user),
+          user: utils.userMeta(user, space),
           clientId
         }))
       }

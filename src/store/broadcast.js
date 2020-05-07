@@ -23,9 +23,7 @@ const self = {
       }, 5000 * reconnectAttempts)
     },
     userJoinedRoom: (context, data) => {
-      console.log('💐', data)
-      // add data.user to currentSpace state
-      // method checks that user isn't already in space
+      context.commit('currentSpace/addSpectatorToSpace', data.user, { root: true })
     }
     // userUpdatedMeta
   }

@@ -114,10 +114,14 @@ export default {
       const currentUser = this.$store.state.currentUser
       const currentSpace = this.$store.state.currentSpace
       const collaborators = currentSpace.collaborators
+      const spectators = currentSpace.spectators
       let users
       users = utils.clone(currentSpace.users)
       if (collaborators) {
         collaborators.forEach(collaborator => users.push(collaborator))
+      }
+      if (spectators) {
+        spectators.forEach(spectator => users.push(spectator))
       }
       users = users.filter(user => user.id !== currentUser.id)
       users.unshift(currentUser)
