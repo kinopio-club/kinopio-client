@@ -514,7 +514,8 @@ export default {
     const isSpaceUser = space.users.find(spaceUser => {
       return spaceUser.id === user.id
     })
-    const isSpaceCollaborator = space.collaborators.find(collaborator => {
+    const spaceCollaborators = space.collaborators || []
+    const isSpaceCollaborator = spaceCollaborators.find(collaborator => {
       return collaborator.id === user.id
     })
     const isSpectator = !(isSpaceUser || isSpaceCollaborator)

@@ -34,6 +34,9 @@ header
       .users
         User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
 
+      .users.spectators
+        User(v-for="user in spectators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
+
     .bottom
       ResetPassword
       // Sign Up or In
@@ -114,18 +117,26 @@ export default {
       const currentUser = this.$store.state.currentUser
       const currentSpace = this.$store.state.currentSpace
       const collaborators = currentSpace.collaborators
-      const spectators = currentSpace.spectators
+      const currentUserIsSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
       let users
       users = utils.clone(currentSpace.users)
       if (collaborators) {
         collaborators.forEach(collaborator => users.push(collaborator))
       }
-      if (spectators) {
-        spectators.forEach(spectator => users.push(spectator))
+      if (currentUserIsSpaceMember) {
+        users = users.filter(user => user.id !== currentUser.id)
+        users.unshift(currentUser)
       }
-      users = users.filter(user => user.id !== currentUser.id)
-      users.unshift(currentUser)
       return users
+    },
+    spectators () {
+      const currentUser = this.$store.state.currentUser
+      const currentUserIsSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
+      let spectators = utils.clone(this.$store.state.currentSpace.spectators || [])
+      if (!currentUserIsSpaceMember) {
+        spectators.unshift(currentUser)
+      }
+      return spectators
     },
     currentSpaceName () {
       const id = this.$store.state.currentSpace.id
