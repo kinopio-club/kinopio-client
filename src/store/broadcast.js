@@ -7,9 +7,9 @@ let reconnectAttempts = 1
 
 const self = {
   namespaced: true,
-  state: {
-    currentSpaceRoom: ''
-  },
+  // state: {
+  //   xyz: ''
+  // },
   mutations: {
     connect: () => {},
     joinSpaceRoom: () => {}
@@ -23,7 +23,6 @@ const self = {
   },
   actions: {
     reconnect: (context) => {
-      // if (context.state.isConnected) { return }
       setTimeout(() => {
         context.commit('connect')
         reconnectAttempts += 1
