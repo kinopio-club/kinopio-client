@@ -19,15 +19,9 @@ export default function createWebSocketPlugin () {
         const host = utils.websocketHost()
         websocket = new WebSocket(host)
         websocket.onopen = (event) => {
-          console.log('🌝', event.target)
+          console.log('💐', event.target)
           hasConnected = true
           store.commit('broadcast/joinSpaceRoom')
-        }
-        websocket.onmessage = ({ data }) => {
-          data = JSON.parse(data)
-          if (data.clientId === clientId) { return }
-          console.log('🌛', data) // temp
-          // store.dispatch('broadcast/canEditSpace', data.canEditSpace)
         }
         websocket.onclose = (event) => {
           console.error('🌚', event)
@@ -36,9 +30,17 @@ export default function createWebSocketPlugin () {
         websocket.onerror = (event) => {
           console.error('🚒', event)
         }
+        // respond
+        websocket.onmessage = ({ data }) => {
+          data = JSON.parse(data)
+          if (data.clientId === clientId) { return }
+          if (data.message === 'userJoinedRoom') {
+            store.dispatch('broadcast/userJoinedRoom', data)
+          }
+        }
       }
 
-      // join space room
+      // join
       if (mutation.type === 'broadcast/joinSpaceRoom') {
         if (!hasConnected) {
           store.commit('broadcast/connect')
@@ -49,7 +51,7 @@ export default function createWebSocketPlugin () {
         const currentSpaceHasUrl = utils.currentSpaceHasUrl(space)
         if (!currentSpaceHasUrl) { return }
         if (currentSpaceRoom === space.id) { return }
-        console.log('🌜 join space room', space.name)
+        console.log('🌱 joining space room', space.name)
         currentSpaceRoom = space.id
         websocket.send(JSON.stringify({
           message: 'joinSpaceRoom',

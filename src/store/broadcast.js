@@ -1,7 +1,7 @@
 // client ←→ [broadcast] ←→ websocket ←→ server
 
-// sends and receives messages by calling mutations
-// which are subscribed to by websocket.js
+// mutations send websocket events,
+// actions respond to received websocket events
 
 let reconnectAttempts = 1
 
@@ -13,13 +13,7 @@ const self = {
   mutations: {
     connect: () => {},
     joinSpaceRoom: () => {}
-    // canEditSpace: (state, canEditSpace) => {
-    //   state.canEditSpace = canEditSpace
-
-    // }
-    // authorizeEdit: () => {
-    //   this.canEditSpace = true
-    // },
+    // updateUserMeta: () => {}
   },
   actions: {
     reconnect: (context) => {
@@ -27,14 +21,13 @@ const self = {
         context.commit('connect')
         reconnectAttempts += 1
       }, 5000 * reconnectAttempts)
+    },
+    userJoinedRoom: (context, data) => {
+      console.log('💐', data)
+      // add data.user to currentSpace state
+      // method checks that user isn't already in space
     }
-    // send: (context, event) => {
-    // event is json, feels like you're sending it to all space friends
-    // }
-
-    // receivedMessage: (context, data) => {
-    //   console.log('🌛', data)
-    // }
+    // userUpdatedMeta
   }
 }
 
