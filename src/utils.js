@@ -506,6 +506,24 @@ export default {
     } else {
       return point
     }
+  },
+
+  // Broadcast Websocket 🌝
+
+  userMeta (user) {
+    return {
+      id: user.id,
+      name: user.name,
+      color: user.color,
+      isSignedIn: Boolean(user.apiKey)
+    }
+  },
+
+  spaceMeta (space) {
+    return {
+      id: space.id,
+      name: space.name
+    }
   }
 
 }

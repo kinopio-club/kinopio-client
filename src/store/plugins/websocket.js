@@ -45,6 +45,7 @@ export default function createWebSocketPlugin () {
           return
         }
         const space = utils.clone(store.state.currentSpace)
+        let user = utils.clone(store.state.currentUser)
         const currentSpaceHasUrl = utils.currentSpaceHasUrl(space)
         if (!currentSpaceHasUrl) { return }
         if (currentSpaceRoom === space.id) { return }
@@ -52,13 +53,8 @@ export default function createWebSocketPlugin () {
         currentSpaceRoom = space.id
         websocket.send(JSON.stringify({
           message: 'joinSpaceRoom',
-          space: {
-            id: space.id,
-            name: space.name
-          },
-          user: {
-            id: store.state.currentUser.id
-          },
+          space: utils.spaceMeta(space),
+          user: utils.userMeta(user),
           clientId
         }))
       }
