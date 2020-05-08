@@ -1,16 +1,13 @@
 // client ←→ [broadcast] ←→ websocket ←→ server
 
-// mutations send websocket events,
 // actions respond to received websocket events
 
 let reconnectAttempts = 1
 
 const self = {
   namespaced: true,
-  // state: {
-  //   xyz: ''
-  // },
   mutations: {
+    // watched by websocket.js
     connect: () => {},
     joinSpaceRoom: () => {}
     // updateUserMeta: () => {}
