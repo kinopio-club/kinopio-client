@@ -197,7 +197,7 @@ export default {
             sourcePageUrl: `https://www.are.na/block/${image.id}`,
             sourceUserName: image.user.username,
             previewUrl: image.image.large.url,
-            url: image.image.large.url
+            url: image.image.large.url + '?img=.jpg'
           }
         })
       } else if (service === 'Gfycat' && this.serviceIsGfycat) {

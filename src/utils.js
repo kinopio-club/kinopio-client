@@ -2,6 +2,22 @@
 import nanoid from 'nanoid'
 
 export default {
+  host () {
+    let host = 'https://api.kinopio.club'
+    if (process.env.NODE_ENV === 'development') {
+      host = 'http://kinopio.local:3000'
+    }
+    return host
+  },
+
+  websocketHost () {
+    let host = 'wss://api.kinopio.club:80'
+    if (process.env.NODE_ENV === 'development') {
+      host = 'ws://kinopio.local:80'
+    }
+    return host
+  },
+
   mobileTouchPosition (event, type) {
     let touch
     if (event.touches[0]) {
@@ -489,6 +505,34 @@ export default {
       this.uniqueCardPosition(point, existingPoints)
     } else {
       return point
+    }
+  },
+
+  // Broadcast Websocket 🌝
+
+  userMeta (user, space) {
+    const isSpaceUser = space.users.find(spaceUser => {
+      return spaceUser.id === user.id
+    })
+    const spaceCollaborators = space.collaborators || []
+    const isSpaceCollaborator = spaceCollaborators.find(collaborator => {
+      return collaborator.id === user.id
+    })
+    const isSpectator = !(isSpaceUser || isSpaceCollaborator)
+    const isSignedIn = Boolean(user.apiKey)
+    return {
+      id: user.id,
+      name: user.name,
+      color: user.color,
+      isSignedIn,
+      isSpectator
+    }
+  },
+
+  spaceMeta (space) {
+    return {
+      id: space.id,
+      name: space.name
     }
   }
 

@@ -5,9 +5,13 @@ import nanoid from 'nanoid'
 
 // store modules
 import api from '@/store/api.js'
+import broadcast from '@/store/broadcast.js'
 import history from '@/store/history.js'
 import currentUser from '@/store/currentUser.js'
 import currentSpace from '@/store/currentSpace.js'
+
+// store plugins
+import websocket from '@/store/plugins/websocket.js'
 
 Vue.use(Vuex)
 
@@ -142,7 +146,6 @@ export default new Vuex.Store({
       state.cardDetailsIsVisibleForCardId = ''
       state.connectionDetailsIsVisibleForConnectionId = ''
     },
-
     isOnline: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.isOnline = value
@@ -444,8 +447,10 @@ export default new Vuex.Store({
 
   modules: {
     api,
+    broadcast,
     history,
     currentUser,
     currentSpace
-  }
+  },
+  plugins: [websocket()]
 })

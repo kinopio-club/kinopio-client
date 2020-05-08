@@ -38,22 +38,35 @@ export default {
       const userExists = state.users.find(user => {
         return user.id === newUser.id
       })
-      if (!userExists) {
-        state.users.push(newUser)
-        cache.updateSpace('users', state.users, state.id)
-      }
+      if (userExists) { return }
+      state.users.push(newUser)
+      cache.updateSpace('users', state.users, state.id)
     },
     addCollaboratorToSpace: (state, newUser) => {
       utils.typeCheck(newUser, 'object')
-      const userExists = state.collaborators.find(collaborator => {
+      const collaboratorExists = state.collaborators.find(collaborator => {
         return collaborator.id === newUser.id
       })
-      if (!userExists) {
-        state.collaborators.push(newUser)
-        const space = utils.clone(state)
-        cache.saveSpace(space)
-        cache.updateSpace('collaborators', space.collaborators, space.id)
-      }
+      if (collaboratorExists) { return }
+      state.collaborators.push(newUser)
+      const space = utils.clone(state)
+      cache.saveSpace(space)
+      cache.updateSpace('collaborators', space.collaborators, space.id)
+    },
+    addSpectatorToSpace: (state, newUser) => {
+      utils.typeCheck(newUser, 'object')
+      if (!state.spectators) { Vue.set(state, 'spectators', []) }
+      const userExists = state.users.find(user => {
+        return user.id === newUser.id
+      })
+      const collaboratorExists = state.collaborators.find(collaborator => {
+        return collaborator.id === newUser.id
+      })
+      const spectatorExists = state.spectators.find(spectator => {
+        return spectator.id === newUser.id
+      })
+      if (userExists || collaboratorExists || spectatorExists) { return }
+      state.spectators.push(newUser)
     },
     removeUserFromSpace: (state, oldUser) => {
       utils.typeCheck(oldUser, 'object')
@@ -396,6 +409,7 @@ export default {
           space: remoteSpace,
           shouldUpdateUrl: true
         })
+        context.commit('broadcast/joinSpaceRoom', null, { root: true })
         if (!space.isRemoved && remoteSpace.isRemoved) {
           context.commit('notifySpaceIsRemoved', false, { root: true })
         } else {

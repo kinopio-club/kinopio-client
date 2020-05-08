@@ -17,8 +17,7 @@ export default {
     apiKey: '',
     arenaAccessToken: '',
     favoriteUsers: [],
-    favoriteSpaces: [],
-    collaborators: []
+    favoriteSpaces: []
   },
   getters: {
     isCurrentUser: (state) => (user) => {
