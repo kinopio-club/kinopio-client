@@ -6,10 +6,8 @@ import nanoid from 'nanoid'
 
 import utils from '@/utils.js'
 
-let websocket, currentSpaceRoom, hasConnected
+let websocket, currentSpaceRoom, currentUserIsConnected
 const clientId = nanoid()
-
-// TODO QA offline -> online, server down -> up (reconnect w one instance back to existing clients)
 
 export default function createWebSocketPlugin () {
   return store => {
@@ -20,7 +18,7 @@ export default function createWebSocketPlugin () {
         websocket = new WebSocket(host)
         websocket.onopen = (event) => {
           console.log('💐', event.target)
-          hasConnected = true
+          currentUserIsConnected = true
           store.commit('broadcast/joinSpaceRoom')
         }
         websocket.onclose = (event) => {
@@ -30,7 +28,8 @@ export default function createWebSocketPlugin () {
         websocket.onerror = (event) => {
           console.error('🚒', event)
         }
-        // respond
+
+        // responders
         websocket.onmessage = ({ data }) => {
           data = JSON.parse(data)
           if (data.clientId === clientId) { return }
@@ -43,7 +42,7 @@ export default function createWebSocketPlugin () {
 
       // join
       if (mutation.type === 'broadcast/joinSpaceRoom') {
-        if (!hasConnected) {
+        if (!currentUserIsConnected) {
           store.commit('broadcast/connect')
           return
         }

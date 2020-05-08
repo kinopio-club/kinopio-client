@@ -2,7 +2,7 @@
 
 // actions respond to received websocket events
 
-let reconnectAttempts = 1
+let reconnectAttempts = 0
 
 const self = {
   namespaced: true,
