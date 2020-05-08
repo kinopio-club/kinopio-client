@@ -2,22 +2,13 @@
 dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDialogs" :class="{'right-side': detailsOnRight}" :style="{top: positionTop}")
 
   //- Other User
-  section.user-info(v-if="!isCurrentUser")
-    .row
-      User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
-      p.name {{user.name}}
   section(v-if="!isCurrentUser")
-    .button-wrap
-      button(@click.stop="getUserSpaces" :class="{active: loadingUserspaces || spacePickerIsVisible}")
+    .user-info
+      .row
         User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
-        span Spaces
-        Loader(:visible="loadingUserspaces")
-      SpacePicker(:visible="spacePickerIsVisible" :loading="loadingUserspaces" :userSpaces="userSpaces" @selectSpace="changeSpace")
-    .button-wrap
-      label(:class="{active: isFavoriteUser}" @click.prevent="toggleIsFavoriteUser" @keydown.stop.enter="toggleIsFavoriteUser")
-        input(type="checkbox" v-model="isFavoriteUser")
-        span Favorite
-    .badge.danger.error-message(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
+        p.name {{user.name}}
+    .row.badges(v-if="user.isSpectator")
+      .badge Spectator
 
   //- Current User
   section(v-if="isCurrentUser")
@@ -32,11 +23,25 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
       button(@click.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}")
         span Settings
       UserSettings(:user="user" :visible="userSettingsIsVisible" @removeUser="signOut")
-    button(v-if="isSignedIn" @click="signOut")
+    button(v-if="currentUserIsSignedIn" @click="signOut")
       img.icon.moon(src="@/assets/moon.svg")
       span Sign Out
     button(v-else @click="triggerSignUpOrInIsVisible")
       span Sign Up or In
+
+  //- Other User
+  section(v-if="!isCurrentUser && userIsSignedIn")
+    .button-wrap
+      button(@click.stop="getUserSpaces" :class="{active: loadingUserspaces || spacePickerIsVisible}")
+        User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
+        span Spaces
+        Loader(:visible="loadingUserspaces")
+      SpacePicker(:visible="spacePickerIsVisible" :loading="loadingUserspaces" :userSpaces="userSpaces" @selectSpace="changeSpace")
+    .button-wrap
+      label(:class="{active: isFavoriteUser}" @click.prevent="toggleIsFavoriteUser" @keydown.stop.enter="toggleIsFavoriteUser")
+        input(type="checkbox" v-model="isFavoriteUser")
+        span Favorite
+    .badge.danger.error-message(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
 
   //- Collaborator
   section(v-if="isCollaborator && currentUserIsSpaceMember")
@@ -101,8 +106,14 @@ export default {
     isCurrentUser () {
       return this.$store.getters['currentUser/isCurrentUser'](this.user)
     },
-    isSignedIn () {
+    currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
+    },
+    userIsSignedIn () {
+      if (this.user.isSignedIn === false) {
+        return false
+      }
+      return true
     },
     userName: {
       get () {
@@ -233,6 +244,10 @@ export default {
     margin-top 10px
   .moon
     vertical-align -2px
+  .badges
+    margin-top 8px
+    .badge
+      background-color var(--secondary-background)
 
 .user-info
   display: flex
@@ -240,4 +255,5 @@ export default {
     align-items center
   p
     margin 0
+
 </style>

@@ -22,11 +22,11 @@ export default function createWebSocketPlugin () {
           store.commit('broadcast/joinSpaceRoom')
         }
         websocket.onclose = (event) => {
-          console.error('🌚', event)
+          console.warn('🌚', event)
           store.dispatch('broadcast/reconnect')
         }
         websocket.onerror = (event) => {
-          console.error('🚒', event)
+          console.warn('🚑', event)
         }
 
         // responders

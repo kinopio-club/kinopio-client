@@ -9,7 +9,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
   section(v-if="signUpVisible")
     p Create an account to share your spaces and access them anywhere
     form(@submit.prevent="signUp")
-      input(type="email" placeholder="Email" required v-model="email" @input="clearErrors")
+      input(type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
       .badge.info(v-if="error.accountAlreadyExists") An account with this email already exists, Sign In instead
       input(type="password" placeholder="Password" required @input="clearErrors" v-model="password")
       input(type="password" placeholder="Confirm Password" required @input="clearErrors")
