@@ -11,9 +11,9 @@ export default {
   },
 
   websocketHost () {
-    let host = 'wss://api.kinopio.club:80'
+    let host = 'wss://api.kinopio.club'
     if (process.env.NODE_ENV === 'development') {
-      host = 'ws://kinopio.local:80'
+      host = 'ws://kinopio.local:3000'
     }
     return host
   },
