@@ -35,18 +35,14 @@ export default {
 
     addUserToSpace: (state, newUser) => {
       utils.typeCheck(newUser, 'object')
-      const userExists = state.users.find(user => {
-        return user.id === newUser.id
-      })
+      const userExists = state.users.find(user => user.id === newUser.id)
       if (userExists) { return }
       state.users.push(newUser)
       cache.updateSpace('users', state.users, state.id)
     },
     addCollaboratorToSpace: (state, newUser) => {
       utils.typeCheck(newUser, 'object')
-      const collaboratorExists = state.collaborators.find(collaborator => {
-        return collaborator.id === newUser.id
-      })
+      const collaboratorExists = state.collaborators.find(collaborator => collaborator.id === newUser.id)
       if (collaboratorExists) { return }
       state.collaborators.push(newUser)
       const space = utils.clone(state)
@@ -56,15 +52,9 @@ export default {
     addSpectatorToSpace: (state, newUser) => {
       utils.typeCheck(newUser, 'object')
       if (!state.spectators) { Vue.set(state, 'spectators', []) }
-      const userExists = state.users.find(user => {
-        return user.id === newUser.id
-      })
-      const collaboratorExists = state.collaborators.find(collaborator => {
-        return collaborator.id === newUser.id
-      })
-      const spectatorExists = state.spectators.find(spectator => {
-        return spectator.id === newUser.id
-      })
+      const userExists = state.users.find(user => user.id === newUser.id)
+      const collaboratorExists = state.collaborators.find(collaborator => collaborator.id === newUser.id)
+      const spectatorExists = state.spectators.find(spectator => spectator.id === newUser.id)
       if (userExists || collaboratorExists || spectatorExists) { return }
       state.spectators.push(newUser)
     },
