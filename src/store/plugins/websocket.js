@@ -35,7 +35,9 @@ export default function createWebSocketPlugin () {
           if (data.clientId === clientId) { return }
           console.log('💐', data)
           if (data.message === 'userJoinedRoom') {
-            store.dispatch('broadcast/userJoinedRoom', data)
+            store.commit('currentSpace/addSpectatorToSpace', data.user)
+          } else if (data.message === 'updateSpace') {
+            store.commit('currentSpace/updateSpace', data.updates)
           }
         }
       }
@@ -57,6 +59,18 @@ export default function createWebSocketPlugin () {
           message: 'joinSpaceRoom',
           space: utils.spaceMeta(space),
           user: utils.userMeta(user, space),
+          clientId
+        }))
+      }
+
+      // updateSpace
+      if (mutation.type === 'broadcast/updateSpace') {
+        console.log(mutation.payload)
+        const space = utils.clone(store.state.currentSpace)
+        websocket.send(JSON.stringify({
+          message: 'updateSpace',
+          space: utils.spaceMeta(space),
+          updates: mutation.payload,
           clientId
         }))
       }

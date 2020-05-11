@@ -442,6 +442,7 @@ export default {
         })
       }
       context.commit('updateSpace', updates)
+      context.commit('broadcast/updateSpace', updates, { root: true })
       context.dispatch('api/addToQueue', {
         name: 'updateSpace',
         body: updates
