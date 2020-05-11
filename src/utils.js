@@ -534,6 +534,24 @@ export default {
       id: space.id,
       name: space.name
     }
+  },
+
+  normalizeBroadcastUpdates (updates) {
+    if (updates.body) {
+      const keys = Object.keys(updates.body)
+      keys.forEach(key => {
+        updates[key] = updates.body[key]
+      })
+      delete updates.body
+    }
+    if (updates.updates) {
+      const keys = Object.keys(updates.updates)
+      keys.forEach(key => {
+        updates[key] = updates.updates[key]
+      })
+      delete updates.updates
+    }
+    return updates
   }
 
 }

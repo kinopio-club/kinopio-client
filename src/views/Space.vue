@@ -84,6 +84,8 @@ export default {
 
     this.addInteractionBlur()
     this.startProcessQueueTimer()
+
+    window.addEventListener('unload', this.unloadPage)
   },
   data () {
     return {
@@ -115,6 +117,9 @@ export default {
     }
   },
   methods: {
+    unloadPage () {
+      this.$store.commit('broadcast/close')
+    },
     updatePageSizes () {
       this.$store.commit('updatePageSizes')
     },

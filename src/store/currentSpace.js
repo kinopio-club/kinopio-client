@@ -442,7 +442,7 @@ export default {
         })
       }
       context.commit('updateSpace', updates)
-      context.commit('broadcast/updateSpace', updates, { root: true })
+      context.commit('broadcast/update', { updates, type: 'updateSpace' }, { root: true })
       context.dispatch('api/addToQueue', {
         name: 'updateSpace',
         body: updates
@@ -552,6 +552,7 @@ export default {
       card = utils.clone(card)
       const update = { name: 'createCard', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('broadcast/update', { updates: update.body, type: 'createCard' }, { root: true })
       context.commit('history/add', update, { root: true })
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
     },
@@ -569,12 +570,14 @@ export default {
       context.commit('createCard', card)
       const update = { name: 'createCard', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('broadcast/update', { updates: update.body, type: 'createCard' }, { root: true })
       context.commit('history/add', update, { root: true })
     },
     updateCard: (context, card) => {
       context.commit('updateCard', card)
       const update = { name: 'updateCard', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('broadcast/update', { updates: update.body, type: 'updateCard' }, { root: true })
       context.commit('history/add', update, { root: true })
     },
     incrementCardZ: (context, cardId) => {
@@ -586,6 +589,7 @@ export default {
           card.z = cards.length + 1
           const update = { name: 'updateCard', body: { id: card.id, z: card.z } }
           context.dispatch('api/addToQueue', update, { root: true })
+          context.commit('broadcast/update', { updates: update.body, type: 'updateCard' }, { root: true })
         }
       })
       context.commit('incrementCardZ', cardId)
@@ -600,6 +604,7 @@ export default {
       } else {
         context.dispatch('removeCardPermanent', card)
       }
+      context.commit('broadcast/update', { updates: card, type: 'removeCard' }, { root: true })
       context.dispatch('removeConnectionsFromCard', card)
       context.commit('generateCardMap', null, { root: true })
     },
@@ -611,6 +616,7 @@ export default {
       context.commit('restoreRemovedCard', card)
       const update = { name: 'restoreRemovedCard', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('broadcast/update', { updates: update.body, type: 'restoreRemovedCard' }, { root: true })
       context.commit('history/add', update, { root: true })
     },
     restoreRemovedSpace: (context, space) => {
@@ -639,13 +645,17 @@ export default {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       const cards = context.rootState.currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
       cards.forEach(card => {
-        context.commit('moveCard', { cardId: card.id, delta })
+        const update = { cardId: card.id, delta }
+        context.commit('moveCard', update)
+        context.commit('broadcast/update', { updates: update, type: 'moveCard' }, { root: true })
         context.dispatch('updateCardConnectionPaths', { cardId: card.id })
       })
     },
     dragSingleCard: (context, { endCursor, delta, shouldUpdateApi }) => {
       const currentDraggingCardId = context.rootState.currentDraggingCardId
-      context.commit('moveCard', { cardId: currentDraggingCardId, delta })
+      const update = { cardId: currentDraggingCardId, delta }
+      context.commit('moveCard', update)
+      context.commit('broadcast/update', { updates: update, type: 'moveCard' }, { root: true })
       context.dispatch('updateCardConnectionPaths', { cardId: currentDraggingCardId })
     },
     updateAfterDragWithPositions: (context) => {
