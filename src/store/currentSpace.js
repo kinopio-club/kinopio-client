@@ -707,6 +707,7 @@ export default {
         connection.connectionTypeId = connectionType.id
         context.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
         context.commit('history/add', { name: 'addConnection', body: connection }, { root: true })
+        context.commit('broadcast/update', { updates: connection, type: 'addConnection' }, { root: true })
         context.commit('addConnection', connection)
       }
     },
@@ -719,6 +720,7 @@ export default {
         if (shouldUpdateApi) {
           context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
         }
+        context.commit('broadcast/update', { updates: connection, type: 'updateConnection' }, { root: true })
         context.commit('updateConnection', connection)
       })
     },
@@ -747,9 +749,11 @@ export default {
       context.commit('removeConnection', connection)
       const update = { name: 'removeConnection', body: connection }
       context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('broadcast/update', { updates: connection, type: 'removeConnection' }, { root: true })
       context.commit('history/add', update, { root: true })
     },
     updateConnectionTypeForConnection: (context, { connectionId, connectionTypeId }) => {
+      const updates = { connectionId, connectionTypeId }
       const connection = {
         id: connectionId,
         connectionTypeId
@@ -757,9 +761,11 @@ export default {
       const update = { name: 'updateConnection', body: connection }
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('history/add', update, { root: true })
-      context.commit('updateConnectionTypeForConnection', { connectionId, connectionTypeId })
+      context.commit('updateConnectionTypeForConnection', updates)
+      context.commit('broadcast/update', { updates, type: 'updateConnectionTypeForConnection' }, { root: true })
     },
     updateLabelIsVisibleForConnection: (context, { connectionId, labelIsVisible }) => {
+      const updates = { connectionId, labelIsVisible }
       const connection = {
         id: connectionId,
         labelIsVisible
@@ -767,7 +773,8 @@ export default {
       const update = { name: 'updateConnection', body: connection }
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('history/add', update, { root: true })
-      context.commit('updateLabelIsVisibleForConnection', { connectionId, labelIsVisible })
+      context.commit('updateLabelIsVisibleForConnection', updates)
+      context.commit('broadcast/update', { updates, type: 'updateLabelIsVisibleForConnection' }, { root: true })
     },
 
     // Connection Types
@@ -781,11 +788,13 @@ export default {
         spaceId: context.state.id
       }
       context.commit('addConnectionType', connectionType)
+      context.commit('broadcast/update', { updates: connectionType, type: 'addConnectionType' }, { root: true })
       context.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
       context.commit('history/add', { name: 'addConnectionType', body: connectionType }, { root: true })
     },
     updateConnectionType: (context, connectionType) => {
       context.commit('updateConnectionType', connectionType)
+      context.commit('broadcast/update', { updates: connectionType, type: 'updateConnectionType' }, { root: true })
       const update = { name: 'updateConnectionType', body: connectionType }
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('history/add', update, { root: true })
@@ -800,6 +809,7 @@ export default {
         context.dispatch('api/addToQueue', update, { root: true })
         context.commit('history/add', update, { root: true })
         context.commit('removeConnectionType', type)
+        context.commit('broadcast/update', { updates: type, type: 'removeConnectionType' }, { root: true })
       })
     }
   },
