@@ -15,6 +15,8 @@ main.space(
       :stroke="currentConnectionColor"
       :d="currentConnectionPath"
     )
+    template(v-for="connection in remoteCurrentConnections")
+      Connection(:connection="connection")
     template(v-for="connection in connections")
       Connection(:connection="connection")
   template(v-for="connection in connections")
@@ -114,7 +116,8 @@ export default {
       if (this.isDraggingCard || this.isDrawingConnection) {
         return true
       } else { return false }
-    }
+    },
+    remoteCurrentConnections () { return this.$store.state.remoteCurrentConnections }
   },
   methods: {
     unloadPage () {
@@ -191,6 +194,14 @@ export default {
       const connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
       this.currentConnectionColor = connectionType.color
       this.$store.commit('currentConnectionColor', connectionType.color)
+      const updates = {
+        id: this.$store.state.currentUser.id,
+        connectionTypeId: connectionType.id,
+        color: connectionType.color,
+        startCardId,
+        path
+      }
+      this.$store.commit('broadcast/update', { updates, type: 'updateRemoteCurrentConnection' })
     },
     checkCurrentConnectionSuccess () {
       const cursor = this.cursor()
@@ -210,12 +221,17 @@ export default {
         const inYRange = utils.isBetween(yValues)
         return inXRange && inYRange
       })
+      let updates = { id: this.$store.state.currentUser.id }
       if (!connection) {
         this.$store.commit('currentConnectionSuccess', {})
+        updates.endCardId = null
+        this.$store.commit('broadcast/update', { updates, type: 'updateRemoteCurrentConnection' })
         return
       }
       if (this.$store.state.currentConnection.startCardId !== connection.cardId) {
         this.$store.commit('currentConnectionSuccess', connection)
+        updates.endCardId = connection.cardId
+        this.$store.commit('broadcast/update', { updates, type: 'updateRemoteCurrentConnection' })
       } else {
         this.$store.commit('currentConnectionSuccess', {})
       }
@@ -302,7 +318,11 @@ export default {
       }
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.commit('currentConnectionSuccess', {})
-      this.$store.commit('currentConnection', {})
+      const isCurrentConnection = utils.objectHasKeys(this.$store.state.currentConnection)
+      if (isCurrentConnection) {
+        this.$store.commit('currentConnection', {})
+        this.$store.commit('broadcast/update', { updates: { id: this.$store.state.currentUser.id }, type: 'removeRemoteCurrentConnection' })
+      }
       this.updatePageSizes()
       this.currentConnectionPath = undefined
       prevCursor = undefined

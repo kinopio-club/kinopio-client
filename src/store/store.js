@@ -57,6 +57,7 @@ export default new Vuex.Store({
     connectionDetailsIsVisibleForConnectionId: '',
     currentConnectionColor: '',
     triggeredDrawConnectionFrame: {},
+    remoteCurrentConnections: [],
 
     // dragging
     currentDraggingCardId: '',
@@ -215,6 +216,20 @@ export default new Vuex.Store({
       let object = state.currentConnection
       object = utils.updateObject(object, updates)
       state.currentConnection = object
+    },
+    updateRemoteCurrentConnection: (state, updates) => {
+      const keys = Object.keys(updates)
+      const id = updates.id
+      let connection = state.remoteCurrentConnections.find(remoteConnection => remoteConnection.id === id) || {}
+      state.remoteCurrentConnections = state.remoteCurrentConnections.filter(remoteConnection => remoteConnection.id !== id)
+      keys.forEach(key => {
+        connection[key] = updates[key]
+      })
+      state.remoteCurrentConnections.push(connection)
+    },
+    removeRemoteCurrentConnection: (state, updates) => {
+      const id = updates.id
+      state.remoteCurrentConnections = state.remoteCurrentConnections.filter(remoteConnection => remoteConnection.id !== id)
     },
 
     // painting

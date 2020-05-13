@@ -29,7 +29,7 @@ const sendEvent = (store, mutation) => {
   const message = mutation.payload.type
   let updates = mutation.payload
   updates = utils.normalizeBroadcastUpdates(updates)
-  console.log('🌜', message, updates)
+  // console.log('🌜', message, updates)
   const space = utils.clone(store.state.currentSpace)
   websocket.send(JSON.stringify({
     message,
@@ -75,6 +75,10 @@ export default function createWebSocketPlugin () {
 
           } else if (data.message === 'userJoinedRoom') {
             store.commit('currentSpace/addSpectatorToSpace', data.user)
+          } else if (data.message === 'updateRemoteCurrentConnection') {
+            store.commit('updateRemoteCurrentConnection', data.updates)
+          } else if (data.message === 'removeRemoteCurrentConnection') {
+            store.commit('removeRemoteCurrentConnection', data.updates)
           } else {
             store.commit(`currentSpace/${data.message}`, data.updates)
             checkIfShouldUpdateWindowUrlAndTitle(store, data)

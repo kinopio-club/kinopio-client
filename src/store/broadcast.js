@@ -12,16 +12,6 @@ const self = {
     update: () => {},
     close: () => {}
 
-    // updateConnection updatedConnection
-    // addConnection connection
-    // removeConnection connectionToRemove
-    // updateConnectionTypeForConnection { connectionId, connectionTypeId }
-    // updateLabelIsVisibleForConnection { connectionId, labelIsVisible }
-
-    // addConnectionType connectionType
-    // removeConnectionType connectionType
-    // updateConnectionType updatedType
-
     // magicpaint
     // paintCircle
     // ^ (circle = { color,x,y, username, userid })
