@@ -1,10 +1,16 @@
 <template lang="pug">
 aside.magic-paint
+  //- todo split these up into seperate components
   canvas#painting.painting(
     @mousedown="startPainting"
     @touchstart="startPainting"
     @mousemove="painting"
     @touchmove="painting"
+    :width="viewportWidth"
+    :height="viewportHeight"
+    :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
+  )
+  canvas#remote-painting.remote-painting(
     :width="viewportWidth"
     :height="viewportHeight"
     :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
@@ -34,6 +40,11 @@ let paintingCircles = []
 let paintingCanvas, paintingContext, startCursor, currentCursor, paintingCirclesTimer
 let prevScroll
 
+// remote painting
+// let remotePaintingCircles = []
+let remotePaintingCanvas, remotePaintingContext
+// , remotePaintingCirclesTimer
+
 // locking
 // long press to lock scrolling
 const lockingPreDuration = 100 // ms
@@ -62,12 +73,20 @@ export default {
         this.updatePositionOffsetByPinchZoom()
         this.updateCirclesWithScroll()
       }
+      if (mutation.type === 'triggerAddRemotePaintingCircle') {
+        console.log(mutation)
+        // add to remotePaintingCircles
+        // [{userid, [circles]}]
+      }
     })
   },
   mounted () {
     paintingCanvas = document.getElementById('painting')
     paintingContext = paintingCanvas.getContext('2d')
     paintingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
+    remotePaintingCanvas = document.getElementById('remote-painting')
+    remotePaintingContext = remotePaintingCanvas.getContext('2d')
+    remotePaintingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
     lockingCanvas = document.getElementById('locking')
     lockingContext = lockingCanvas.getContext('2d')
     lockingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
@@ -447,6 +466,7 @@ canvas
   position fixed
   top 0
 .locking,
-.initial
+.initial,
+.remote-painting
   pointer-events none
 </style>
