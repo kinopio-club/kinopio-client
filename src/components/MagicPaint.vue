@@ -1,6 +1,6 @@
 <template lang="pug">
 aside.magic-paint
-  //- todo split these up into seperate components
+  //- todo split these up into seperate magic-paint/*.vue files
   canvas#painting.painting(
     @mousedown="startPainting"
     @touchstart="startPainting"
@@ -41,9 +41,8 @@ let paintingCanvas, paintingContext, startCursor, currentCursor, paintingCircles
 let prevScroll
 
 // remote painting
-// let remotePaintingCircles = []
-let remotePaintingCanvas, remotePaintingContext
-// , remotePaintingCirclesTimer
+let remotePaintingCircles = []
+let remotePaintingCanvas, remotePaintingContext, remotePaintingCirclesTimer
 
 // locking
 // long press to lock scrolling
@@ -74,9 +73,10 @@ export default {
         this.updateCirclesWithScroll()
       }
       if (mutation.type === 'triggerAddRemotePaintingCircle') {
-        console.log(mutation)
-        // add to remotePaintingCircles
-        // [{userid, [circles]}]
+        let circle = mutation.payload
+        delete circle.type
+        this.createRemotePaintingCircle(circle)
+        this.remotePainting()
       }
     })
   },
@@ -196,6 +196,23 @@ export default {
       initialCircles.push(initialCircle)
       this.drawCircle(initialCircle, initialContext)
     },
+    broadcastCircle (circle) {
+      const currentUserCanEdit = this.$store.getters['currentUser/canEditSpace']()
+      if (!currentUserCanEdit) { return }
+      this.$store.commit('broadcast/update', {
+        updates: {
+          id: this.$store.state.currentUser.id,
+          x: circle.x + window.scrollX,
+          y: circle.y + window.scrollY,
+          color: circle.color,
+          iteration: circle.iteration
+        },
+        type: 'addRemotePaintingCircle'
+      })
+    },
+    createRemotePaintingCircle (circle) {
+      remotePaintingCircles.push(circle)
+    },
     createPaintingCircle (event) {
       let color = this.$store.state.currentUser.color
       currentCursor = utils.cursorPositionInViewport(event)
@@ -204,6 +221,7 @@ export default {
       this.selectConnections(circle)
       this.selectCardsAndConnectionsBetweenCircles(circle)
       paintingCircles.push(circle)
+      this.broadcastCircle(circle)
     },
     startPainting (event) {
       startCursor = utils.cursorPositionInViewport(event)
@@ -224,6 +242,11 @@ export default {
       })
       if (!initialCirclesTimer) {
         initialCirclesTimer = window.requestAnimationFrame(this.initialCirclesAnimationFrame)
+      }
+    },
+    remotePainting () {
+      if (!remotePaintingCirclesTimer) {
+        remotePaintingCirclesTimer = window.requestAnimationFrame(this.remotePaintCirclesAnimationFrame)
       }
     },
     painting (event) {
@@ -273,6 +296,23 @@ export default {
         this.$store.commit('triggeredPaintFramePosition', { x: startCursor.x, y: startCursor.y })
         console.log('🔒lockingAnimationFrame locked')
         lockingStartTime = undefined
+      }
+    },
+    remotePaintCirclesAnimationFrame () {
+      remotePaintingCircles = utils.filterCircles(remotePaintingCircles, maxIterations)
+      remotePaintingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
+      remotePaintingCircles.forEach(item => {
+        item.iteration++
+        let circle = JSON.parse(JSON.stringify(item))
+        this.drawCircle(circle, remotePaintingContext)
+      })
+      if (remotePaintingCircles.length > 0) {
+        window.requestAnimationFrame(this.remotePaintCirclesAnimationFrame)
+      } else {
+        setTimeout(() => {
+          window.cancelAnimationFrame(remotePaintingCirclesTimer)
+          remotePaintingCirclesTimer = undefined
+        }, 0)
       }
     },
     paintCirclesAnimationFrame () {

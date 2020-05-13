@@ -12,13 +12,6 @@ const self = {
     update: () => {},
     close: () => {}
 
-    // magicpaint
-    // paintCircle
-    // ^ (circle = { color,x,y, username, userid })
-    // // push into store.addMemberPaintCircles
-    // ^ magicpaint.vue has to subscribe to addBroadcastedPaintCircles, which takes from array to file var like 'paintingCircles'
-    // ^ add broadcast painting to all circle painting methods
-
     // currentuser -> currentspace: IN STASH
     // NEW updateCollaborator updatedCollaborator
     // NEW updateUser updatedUser

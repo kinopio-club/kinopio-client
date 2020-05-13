@@ -70,7 +70,7 @@ export default function createWebSocketPlugin () {
         websocket.onmessage = ({ data }) => {
           data = JSON.parse(data)
           if (data.clientId === clientId) { return }
-          console.log('🌛', data)
+          // console.log('🌛', data)
           if (data.message === 'connected') {
 
           } else if (data.message === 'userJoinedRoom') {
@@ -79,6 +79,8 @@ export default function createWebSocketPlugin () {
             store.commit('updateRemoteCurrentConnection', data.updates)
           } else if (data.message === 'removeRemoteCurrentConnection') {
             store.commit('removeRemoteCurrentConnection', data.updates)
+          } else if (data.message === 'addRemotePaintingCircle') {
+            store.commit('triggerAddRemotePaintingCircle', data.updates)
           } else {
             store.commit(`currentSpace/${data.message}`, data.updates)
             checkIfShouldUpdateWindowUrlAndTitle(store, data)

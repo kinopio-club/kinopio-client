@@ -198,6 +198,7 @@ export default new Vuex.Store({
     triggeredPaintFramePosition: (state, cursor) => {
       state.triggeredPaintFramePosition = cursor
     },
+    triggerAddRemotePaintingCircle: () => {},
 
     // connecting
     currentUserIsDrawingConnection: (state, value) => {
