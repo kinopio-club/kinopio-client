@@ -75,6 +75,8 @@ export default function createWebSocketPlugin () {
 
           } else if (data.message === 'userJoinedRoom') {
             store.commit('currentSpace/addSpectatorToSpace', data.user)
+          } else if (data.message === 'userLeftRoom') {
+            store.commit('currentSpace/removeSpectatorFromSpace', data.user)
           } else if (data.message === 'updateRemoteCurrentConnection') {
             store.commit('updateRemoteCurrentConnection', data.updates)
           } else if (data.message === 'removeRemoteCurrentConnection') {

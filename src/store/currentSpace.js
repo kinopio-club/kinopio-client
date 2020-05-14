@@ -58,6 +58,13 @@ export default {
       if (userExists || collaboratorExists || spectatorExists) { return }
       state.spectators.push(newUser)
     },
+    removeSpectatorFromSpace: (state, oldUser) => {
+      utils.typeCheck(oldUser, 'object')
+      if (!state.spectators) { return }
+      state.spectators = state.spectators.filter(user => {
+        return user.id !== oldUser.id
+      })
+    },
     removeUserFromSpace: (state, oldUser) => {
       utils.typeCheck(oldUser, 'object')
       state.users = state.users.filter(user => {
