@@ -10,6 +10,7 @@ let websocket, currentSpaceRoom, currentUserIsConnected
 const clientId = nanoid()
 
 const joinSpaceRoom = (store, mutation) => {
+  if (!websocket) { return }
   const space = utils.clone(store.state.currentSpace)
   const currentSpaceHasUrl = utils.currentSpaceHasUrl(space)
   let user = utils.clone(store.state.currentUser)
@@ -26,6 +27,7 @@ const joinSpaceRoom = (store, mutation) => {
 }
 
 const sendEvent = (store, mutation) => {
+  if (!websocket) { return }
   const message = mutation.payload.type
   let updates = mutation.payload
   updates = utils.normalizeBroadcastUpdates(updates)
@@ -47,6 +49,11 @@ const checkIfShouldUpdateWindowUrlAndTitle = (store, data) => {
       shouldUpdateUrl: true
     })
   }
+}
+
+const closeWebsocket = () => {
+  if (!websocket) { return }
+  websocket.close()
 }
 
 export default function createWebSocketPlugin () {
@@ -99,9 +106,9 @@ export default function createWebSocketPlugin () {
       } else if (mutation.type === 'broadcast/update') {
         sendEvent(store, mutation)
       } else if (mutation.type === 'broadcast/close') {
-        websocket.close()
+        closeWebsocket()
       } else if (mutation.type === 'broadcast/reconnect') {
-        websocket.close()
+        closeWebsocket()
         currentUserIsConnected = false
         currentSpaceRoom = null
         store.commit('broadcast/joinSpaceRoom')
