@@ -1,11 +1,10 @@
 // client → [broadcast] → websocket → server
 
-// triggers websocket senders
-
 let reconnectAttempts = 0
 
 const self = {
   namespaced: true,
+  // triggers websocket
   mutations: {
     connect: () => {},
     reconnect: () => {},
@@ -13,11 +12,7 @@ const self = {
     update: () => {},
     close: () => {}
 
-    // - 👀 how to do user left room (heartbeat? server sees disconnect sends msg to all clients on spaceid)
-
-    // currentuser -> currentspace: IN STASH
-    // NEW updateCollaborator updatedCollaborator
-    // NEW updateUser updatedUser
+    // cursor name post
 
   },
   actions: {

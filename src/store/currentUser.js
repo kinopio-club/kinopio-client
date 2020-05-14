@@ -42,7 +42,11 @@ export default {
     },
     isSpaceMember: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
-      const userIsCollaborator = getters.isSpaceCollaborator(space)
+      const isSpaceUser = getters.isSpaceUser(space)
+      const isSpaceCollaborator = getters.isSpaceCollaborator(space)
+      return isSpaceUser || isSpaceCollaborator
+    },
+    isSpaceUser: (state, getters, rootState) => (space) => {
       let userIsInSpace
       if (space.users) {
         userIsInSpace = Boolean(space.users.find(user => {
@@ -51,7 +55,7 @@ export default {
       } else {
         userIsInSpace = space.userId === state.id
       }
-      return userIsCollaborator || userIsInSpace
+      return userIsInSpace
     },
     isSpaceCollaborator: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
@@ -59,6 +63,18 @@ export default {
         return Boolean(space.collaborators.find(collaborator => {
           return collaborator.id === state.id
         }))
+      }
+    },
+    spaceUserPermission: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
+      const isSpaceUser = getters.isSpaceUser(space)
+      const isSpaceCollaborator = getters.isSpaceCollaborator(space)
+      if (isSpaceUser) {
+        return 'user'
+      } else if (isSpaceCollaborator) {
+        return 'collaborator'
+      } else {
+        return 'spectator'
       }
     },
     isInvitedButCannotEditSpace: (state, getters, rootState) => (space) => {
@@ -165,6 +181,11 @@ export default {
         body: {
           name: newName
         } }, { root: true })
+      const space = context.rootState.currentSpace
+      const spaceUserPermission = utils.capitalizeFirstLetter(context.getters.spaceUserPermission())
+      const type = `update${spaceUserPermission}`
+      const userId = context.state.id
+      context.commit('broadcast/update', { id: space.id, name: newName, type, userId }, { root: true })
     },
     color: (context, newColor) => {
       context.commit('color', newColor)
@@ -172,6 +193,11 @@ export default {
         body: {
           color: newColor
         } }, { root: true })
+      const space = context.rootState.currentSpace
+      const spaceUserPermission = utils.capitalizeFirstLetter(context.getters.spaceUserPermission())
+      const type = `update${spaceUserPermission}`
+      const userId = context.state.id
+      context.commit('broadcast/update', { id: space.id, color: newColor, type, userId }, { root: true })
     },
     lastSpaceId: (context, spaceId) => {
       context.commit('notifySpaceNotFound', false, { root: true })

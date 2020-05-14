@@ -72,7 +72,6 @@ export default function createWebSocketPlugin () {
           if (data.clientId === clientId) { return }
           console.log('🌛', data)
           if (data.message === 'connected') {
-
           } else if (data.message === 'userJoinedRoom') {
             store.commit('currentSpace/addSpectatorToSpace', data.user)
           } else if (data.message === 'userLeftRoom') {

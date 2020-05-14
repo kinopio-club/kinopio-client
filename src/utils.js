@@ -103,6 +103,20 @@ export default {
     return object
   },
 
+  updateObjectWithKeys (object, value, keys) {
+    this.typeCheck(object, 'object')
+    this.typeCheck(value, 'object')
+    this.typeCheck(keys, 'array')
+    return object.map(item => {
+      if (item.id === value.userId) {
+        keys.forEach(key => {
+          item[key] = value[key] || item[key]
+        })
+      }
+      return item
+    })
+  },
+
   // mergeArrayOfObjectsById (baseArray, newArray) {
   //   baseArray = this.clone(baseArray)
   //   newArray.forEach(item => {

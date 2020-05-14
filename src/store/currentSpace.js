@@ -51,6 +51,7 @@ export default {
     },
     addSpectatorToSpace: (state, newUser) => {
       utils.typeCheck(newUser, 'object')
+      if (!state.collaborators) { Vue.set(state, 'collaborators', []) }
       if (!state.spectators) { Vue.set(state, 'spectators', []) }
       const userExists = state.users.find(user => user.id === newUser.id)
       const collaboratorExists = state.collaborators.find(collaborator => collaborator.id === newUser.id)
@@ -84,6 +85,15 @@ export default {
         Vue.set(state, key, updatedSpace[key])
         cache.updateSpace(key, state[key], state.id)
       })
+    },
+    updateUser: (state, updatedUser) => {
+      state.spectators = utils.updateObjectWithKeys(state.users, updatedUser, ['name', 'color'])
+    },
+    updateCollaborator: (state, updatedUser) => {
+      state.spectators = utils.updateObjectWithKeys(state.collaborators, updatedUser, ['name', 'color'])
+    },
+    updateSpectator: (state, updatedUser) => {
+      state.spectators = utils.updateObjectWithKeys(state.spectators, updatedUser, ['name', 'color'])
     },
 
     // Space
@@ -559,7 +569,7 @@ export default {
       card = utils.clone(card)
       const update = { name: 'createCard', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('broadcast/update', { updates: update.body, type: 'createCard' }, { root: true })
+      context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
       context.commit('history/add', update, { root: true })
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
     },
@@ -577,14 +587,14 @@ export default {
       context.commit('createCard', card)
       const update = { name: 'createCard', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('broadcast/update', { updates: update.body, type: 'createCard' }, { root: true })
+      context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
       context.commit('history/add', update, { root: true })
     },
     updateCard: (context, card) => {
       context.commit('updateCard', card)
       const update = { name: 'updateCard', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('broadcast/update', { updates: update.body, type: 'updateCard' }, { root: true })
+      context.commit('broadcast/update', { updates: card, type: 'updateCard' }, { root: true })
       context.commit('history/add', update, { root: true })
     },
     incrementCardZ: (context, cardId) => {
@@ -623,7 +633,7 @@ export default {
       context.commit('restoreRemovedCard', card)
       const update = { name: 'restoreRemovedCard', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('broadcast/update', { updates: update.body, type: 'restoreRemovedCard' }, { root: true })
+      context.commit('broadcast/update', { updates: card, type: 'restoreRemovedCard' }, { root: true })
       context.commit('history/add', update, { root: true })
     },
     restoreRemovedSpace: (context, space) => {
