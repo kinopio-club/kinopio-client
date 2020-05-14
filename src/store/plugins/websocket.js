@@ -29,7 +29,7 @@ const sendEvent = (store, mutation) => {
   const message = mutation.payload.type
   let updates = mutation.payload
   updates = utils.normalizeBroadcastUpdates(updates)
-  // console.log('🌜', message, updates)
+  console.log('🌜', updates)
   const space = utils.clone(store.state.currentSpace)
   websocket.send(JSON.stringify({
     message,
@@ -70,7 +70,7 @@ export default function createWebSocketPlugin () {
         websocket.onmessage = ({ data }) => {
           data = JSON.parse(data)
           if (data.clientId === clientId) { return }
-          // console.log('🌛', data)
+          console.log('🌛', data)
           if (data.message === 'connected') {
 
           } else if (data.message === 'userJoinedRoom') {
@@ -101,6 +101,11 @@ export default function createWebSocketPlugin () {
         sendEvent(store, mutation)
       } else if (mutation.type === 'broadcast/close') {
         websocket.close()
+      } else if (mutation.type === 'broadcast/reconnect') {
+        websocket.close()
+        currentUserIsConnected = false
+        currentSpaceRoom = null
+        store.commit('broadcast/joinSpaceRoom')
       }
     })
   }

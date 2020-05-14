@@ -8,23 +8,24 @@ const self = {
   namespaced: true,
   mutations: {
     connect: () => {},
+    reconnect: () => {},
     joinSpaceRoom: () => {},
     update: () => {},
     close: () => {}
+
+    // - 👀 how to do user left room (heartbeat? server sees disconnect sends msg to all clients on spaceid)
 
     // currentuser -> currentspace: IN STASH
     // NEW updateCollaborator updatedCollaborator
     // NEW updateUser updatedUser
 
-    // - 👀 how to do user left room (heartbeat? server sees disconnect sends msg to all clients on spaceid)
-
   },
   actions: {
     reconnect: (context) => {
       setTimeout(() => {
-        context.commit('connect')
+        context.commit('reconnect')
         reconnectAttempts += 1
-      }, 5000 * reconnectAttempts)
+      }, Math.min(5000 * reconnectAttempts), 60 * 1000)
     }
   }
 }
