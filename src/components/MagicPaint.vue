@@ -201,7 +201,7 @@ export default {
       if (!currentUserCanEdit) { return }
       this.$store.commit('broadcast/update', {
         updates: {
-          id: this.$store.state.currentUser.id,
+          userId: this.$store.state.currentUser.id,
           x: circle.x + window.scrollX,
           y: circle.y + window.scrollY,
           color: circle.color,

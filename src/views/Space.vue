@@ -21,6 +21,8 @@ main.space(
       Connection(:connection="connection")
   template(v-for="connection in connections")
     ConnectionLabel(:connection="connection")
+  template(v-for="user in spaceMembers")
+    UserLabel(:user="user")
   .cards
     template(v-for="card in cards")
       Card(:card="card")
@@ -34,6 +36,7 @@ main.space(
 import Card from '@/components/Card.vue'
 import Connection from '@/components/Connection.vue'
 import ConnectionLabel from '@/components/ConnectionLabel.vue'
+import UserLabel from '@/components/UserLabel.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
@@ -48,6 +51,7 @@ export default {
     Card,
     Connection,
     ConnectionLabel,
+    UserLabel,
     ConnectionDetails,
     MultipleSelectedActions,
     OffscreenMarkers,
@@ -117,7 +121,11 @@ export default {
         return true
       } else { return false }
     },
-    remoteCurrentConnections () { return this.$store.state.remoteCurrentConnections }
+    remoteCurrentConnections () { return this.$store.state.remoteCurrentConnections },
+    spaceMembers () {
+      const excludeCurrentUser = true
+      return this.$store.getters['currentSpace/members'](excludeCurrentUser)
+    }
   },
   methods: {
     unloadPage () {

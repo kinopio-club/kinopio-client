@@ -832,6 +832,11 @@ export default {
   },
 
   getters: {
+    // Meta
+    isHelloKinopio: (state) => {
+      return state.name === 'Hello Kinopio'
+    },
+
     // Cards
     cardById: (state) => (id) => {
       return state.cards.find(card => card.id === id)
@@ -881,8 +886,22 @@ export default {
         return lastConnectionType
       }
     },
-    isHelloKinopio: (state) => {
-      return state.name === 'Hello Kinopio'
+
+    // Users
+    members: (state, getters, rootState) => (excludeCurrentUser) => {
+      const users = state.users
+      const collaborators = state.collaborators || []
+      let members = []
+      users.forEach(user => {
+        members.push(user)
+      })
+      collaborators.forEach(user => {
+        members.push(user)
+      })
+      if (excludeCurrentUser) {
+        members = members.filter(user => user.id !== rootState.currentUser.id)
+      }
+      return members
     }
   }
 }
