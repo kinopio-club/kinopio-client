@@ -389,7 +389,8 @@ export default {
 
   AddCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
     return spaces.map(space => {
-      if (space.userId !== currentUser.id) {
+      const userId = space.users[0].id || space.userId
+      if (userId !== currentUser.id) {
         space.currentUserIsCollaborator = true
       }
       return space
