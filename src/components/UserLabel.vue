@@ -1,22 +1,12 @@
 <template lang="pug">
-.user-label.badge(:data-id="user.id" :style="{ background: color }")
+.user-label.badge(v-if="visible" :data-id="user.id" :style="{ background: color, left, top }")
   .user-avatar.anon-avatar
   span {{ user.name }}
-//-   (
-//-   v-if="visible"
-//-   :style="{ background: typeColor, left: position.left + 'px', top: position.top + 'px'}"
-//-   @click="showConnectionDetails"
-//-   :data-id="id"
-//-   @mouseover="hover = true"
-//-   @mouseleave="hover = false"
-//-   :class="{filtered: isFiltered, 'cursor-default': !canEditSpace}"
-//-   ref="label"
-//- )
-  span {{typeName}}
 </template>
 
 <script>
-// import utils from '@/utils.js'
+const maxIterations = 200 // same as MagicPaint maxIterations
+let visibleTimer, currentIteration
 
 export default {
   name: 'UserLabel',
@@ -28,80 +18,44 @@ export default {
       if (mutation.type === 'triggerAddRemotePaintingCircle') {
         const circle = mutation.payload
         if (circle.userId === this.user.id) {
-          this.position.x = circle.x
-          this.position.y = circle.y
+          this.left = (circle.x - 5) + 'px'
+          this.top = (circle.y - 10) + 'px'
           this.color = circle.color
+          this.userLabelVisibleTimer()
         }
       }
     })
   },
   data () {
     return {
-      position: {},
-      color: ''
+      left: 0,
+      top: 0,
+      color: '',
+      visible: false
     }
   },
-  // computed: {
-  //   color () {
-  //     const spaceMembers = this.$store.getters['currentSpace/members']()
-  //     const user = spaceMembers.find(member => member.id === this.user.id)
-  //     return user.color
-  //   },
-  // },
   methods: {
-    // same as Connection method
-    // showConnectionDetails (event) {
-    //   if (!this.canEditSpace) { return }
-    //   const detailsPosition = utils.cursorPositionInPage(event)
-    //   this.$store.commit('closeAllDialogs')
-    //   this.$store.commit('connectionDetailsIsVisibleForConnectionId', this.id)
-    //   this.$store.commit('connectionDetailsPosition', detailsPosition)
-    //   this.$store.commit('clearMultipleSelected')
-    // },
-    // setPosition () {
-    //   this.$nextTick(() => {
-    //     let connection = document.querySelector(`.connection-path[data-id="${this.id}"]`)
-    //     connection = connection.getBoundingClientRect()
-    //     let label = this.$refs.label
-    //     let labelOffset
-    //     if (label) {
-    //       label = label.getBoundingClientRect()
-    //       labelOffset = {
-    //         left: label.width / 4,
-    //         top: label.height / 4
-    //       }
-    //     } else {
-    //       labelOffset = { left: 0, top: 0 }
-    //     }
-    //     const basePosition = {
-    //       left: connection.x + window.scrollX,
-    //       top: connection.y + window.scrollY
-    //     }
-    //     const connectionOffset = {
-    //       left: connection.width / 2,
-    //       top: connection.height / 2
-    //     }
-    //     this.position = {
-    //       left: basePosition.left + connectionOffset.left - labelOffset.left,
-    //       top: basePosition.top + connectionOffset.top - labelOffset.top
-    //     }
-    //   })
-    // }
-  }
-  // watch: {
-  //   path (value) {
-  //     this.setPosition()
-  //   },
-  //   hover (value) {
-  //     if (!this.canEditSpace) { return }
-  //     if (value) {
-  //       this.$store.commit('currentUserIsHoveringOverConnectionId', this.id)
-  //     } else {
-  //       this.$store.commit('currentUserIsHoveringOverConnectionId', '')
-  //     }
-  //   }
-  // }
+    userLabelVisibleTimer () {
+      if (!visibleTimer) {
+        this.visible = true
+        currentIteration = 0
+        visibleTimer = window.requestAnimationFrame(this.userLabelVisibleFrame)
+      }
+    },
+    userLabelVisibleFrame () {
+      currentIteration++
+      if (currentIteration < maxIterations) {
+        window.requestAnimationFrame(this.userLabelVisibleFrame)
+      } else {
+        setTimeout(() => {
+          window.cancelAnimationFrame(visibleTimer)
+          visibleTimer = undefined
+          this.visible = false
+        }, 0)
+      }
+    }
 
+  }
 }
 </script>
 

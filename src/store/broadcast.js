@@ -12,8 +12,8 @@ const self = {
     update: () => {},
     close: () => {}
 
-    // cursor name post
-
+    // offscreen user indication (moons?)
+    // from offline to online: .. When you come back online, the client downloads a fresh copy of the document, reconnects to websocket
   },
   actions: {
     reconnect: (context) => {
