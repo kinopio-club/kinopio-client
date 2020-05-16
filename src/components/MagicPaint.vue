@@ -149,41 +149,38 @@ export default {
       }
       this.updatePrevScrollPosition()
     },
-    circleVisible (circle) {
+    isCircleVisible (circle) {
       let { x, y, radius } = circle
       radius = radius || circleRadius
       const isCircleVisibleX = utils.isBetween({
         value: x + radius,
         min: 0,
-        max: this.$store.state.viewportWidth
+        max: this.viewportWidth
       })
       const isCircleVisibleY = utils.isBetween({
         value: y + radius,
         min: 0,
-        max: this.$store.state.viewportHeight
+        max: this.viewportHeight
       })
-      return { isCircleVisibleX, isCircleVisibleY }
+      return Boolean(isCircleVisibleX && isCircleVisibleY)
     },
-    drawOffscreenCircle (circle, context, isCircleVisibleX, isCircleVisibleY) {
-      console.log('👻draw offscreen circle', circle, isCircleVisibleX, isCircleVisibleY)
-
-      // let { x, y, color, iteration, radius, alpha } = circle
-      // radius = radius || circleRadius
-      // alpha = alpha || utils.exponentialDecay(iteration, rateOfIterationDecay)
-      // context.beginPath()
-      // context.arc(x, y, radius, 0, 2 * Math.PI)
-      // context.closePath()
-      // context.globalAlpha = alpha
-      // context.fillStyle = color
-      // context.fill()
-    },
-    drawCircle (circle, context, isOffscreen) {
-      const { isCircleVisibleX, isCircleVisibleY } = this.circleVisible(circle)
-      const isCircleVisible = Boolean(isCircleVisibleX && isCircleVisibleY)
-      if (!isCircleVisible) {
-        if (isOffscreen) { this.drawOffscreenCircle(circle, context, isCircleVisibleX, isCircleVisibleY) }
-        return
+    offscreenCircle (circle) {
+      if (circle.x > this.viewportWidth) {
+        circle.x = this.viewportWidth
+      } else if (circle.x < 0) {
+        circle.x = 0
       }
+      if (circle.y > this.viewportHeight) {
+        circle.y = this.viewportHeight
+      } else if (circle.y < 0) {
+        circle.y = 0
+      }
+      return circle
+    },
+    drawCircle (circle, context, shouldDrawOffscreen) {
+      const isCircleVisible = this.isCircleVisible(circle)
+      if (!isCircleVisible && !shouldDrawOffscreen) { return }
+      if (!isCircleVisible && shouldDrawOffscreen) { circle = this.offscreenCircle(circle) }
       let { x, y, color, iteration, radius, alpha } = circle
       radius = radius || circleRadius
       alpha = alpha || utils.exponentialDecay(iteration, rateOfIterationDecay)
@@ -437,8 +434,10 @@ export default {
       remotePaintingCircles.forEach(item => {
         item.iteration++
         let circle = JSON.parse(JSON.stringify(item))
-        const isOffscreen = true
-        this.drawCircle(circle, remotePaintingContext, isOffscreen)
+        circle.x = circle.x - window.scrollX
+        circle.y = circle.y - window.scrollY
+        const shouldDrawOffscreen = true
+        this.drawCircle(circle, remotePaintingContext, shouldDrawOffscreen)
       })
       if (remotePaintingCircles.length > 0) {
         window.requestAnimationFrame(this.remotePaintCirclesAnimationFrame)

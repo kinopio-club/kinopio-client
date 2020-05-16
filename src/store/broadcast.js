@@ -12,7 +12,6 @@ const self = {
     update: () => {},
     close: () => {}
 
-    // offscreen user indication (moons?)
     // from offline to online: .. When you come back online, the client downloads a fresh copy of the document, reconnects to websocket.
     // works w requeuing offline events
   },
