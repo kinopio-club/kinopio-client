@@ -110,7 +110,7 @@ export default {
     currentUserColor () {
       return this.$store.state.currentUser.color
     },
-    spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
+    userCantEditSpace () { return !this.$store.getters['currentUser/canEditSpace']() },
     // keep canvases updated to viewport size so you can draw on newly created areas
     pageHeight () { return this.$store.state.pageHeight },
     pageWidth () { return this.$store.state.pageWidth },
@@ -282,7 +282,7 @@ export default {
     // Selecting
 
     selectCards (point) {
-      if (this.spaceIsReadOnly) { return }
+      if (this.userCantEditSpace) { return }
       this.$store.state.cardMap.map(card => {
         const x = {
           value: point.x + window.scrollX,
@@ -337,10 +337,11 @@ export default {
       }
     },
     selectConnections (circle) {
-      if (this.spaceIsReadOnly) { return }
+      if (this.userCantEditSpace) { return }
       this.selectConnectionPaths(circle)
     },
     selectCardsAndConnectionsBetweenCircles (circle) {
+      if (this.userCantEditSpace) { return }
       const prevCircle = paintingCircles[paintingCircles.length - 1] || circle
       const delta = {
         x: prevCircle.x - circle.x,
