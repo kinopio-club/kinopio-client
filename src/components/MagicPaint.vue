@@ -20,7 +20,7 @@ aside.magic-paint
     :height="viewportHeight"
     :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
   )
-  canvas#initial.initial(
+  canvas#initial-circle.initial-circle(
     :width="viewportWidth"
     :height="viewportHeight"
     :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
@@ -54,7 +54,7 @@ let lockingCanvas, lockingContext, lockingAnimationTimer, currentUserIsLocking, 
 // initial
 // shows immediate feedback without having to move cursor
 let initialCircles = []
-let initialCanvas, initialContext, initialCirclesTimer
+let initialCircleCanvas, initialCircleContext, initialCirclesTimer
 
 export default {
   name: 'MagicPaint',
@@ -90,9 +90,9 @@ export default {
     lockingCanvas = document.getElementById('locking')
     lockingContext = lockingCanvas.getContext('2d')
     lockingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
-    initialCanvas = document.getElementById('initial')
-    initialContext = initialCanvas.getContext('2d')
-    initialContext.scale(window.devicePixelRatio, window.devicePixelRatio)
+    initialCircleCanvas = document.getElementById('initial-circle')
+    initialCircleContext = initialCircleCanvas.getContext('2d')
+    initialCircleContext.scale(window.devicePixelRatio, window.devicePixelRatio)
     // trigger stopPainting even if mouse is outside window
     window.addEventListener('mouseup', this.stopPainting)
     window.addEventListener('touchend', this.stopPainting)
@@ -194,7 +194,7 @@ export default {
         persistent: true
       }
       initialCircles.push(initialCircle)
-      this.drawCircle(initialCircle, initialContext)
+      this.drawCircle(initialCircle, initialCircleContext)
     },
     broadcastCircle (circle) {
       const currentUserCanEdit = this.$store.getters['currentUser/canEditSpace']()
@@ -334,13 +334,13 @@ export default {
     },
     initialCirclesAnimationFrame () {
       initialCircles = utils.filterCircles(initialCircles, maxIterations)
-      initialContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
+      initialCircleContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
       initialCircles.forEach(item => {
         if (!item.persistent) {
           item.iteration++
         }
         let circle = JSON.parse(JSON.stringify(item))
-        this.drawCircle(circle, initialContext)
+        this.drawCircle(circle, initialCircleContext)
       })
       if (initialCircles.length) {
         window.requestAnimationFrame(this.initialCirclesAnimationFrame)
@@ -506,7 +506,7 @@ canvas
   position fixed
   top 0
 .locking,
-.initial,
+.initial-circle,
 .remote-painting
   pointer-events none
 </style>
