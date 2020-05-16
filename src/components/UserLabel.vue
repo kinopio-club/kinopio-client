@@ -5,7 +5,7 @@
 </template>
 
 <script>
-const maxIterations = 200 // same as MagicPaint maxIterations
+const maxIterations = 180 // 👀 MagicPaint maxIterations
 let visibleTimer, currentIteration
 
 export default {

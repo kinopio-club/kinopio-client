@@ -1,6 +1,5 @@
 <template lang="pug">
 aside.magic-paint
-  //- todo split these up into seperate magic-paint/*.vue files
   canvas#painting.painting(
     @mousedown="startPainting"
     @touchstart="startPainting"
@@ -177,41 +176,44 @@ export default {
       context.fillStyle = color
       context.fill()
     },
-    startLocking () {
-      currentUserIsLocking = true
-      setTimeout(() => {
-        if (!lockingAnimationTimer) {
-          lockingAnimationTimer = window.requestAnimationFrame(this.lockingAnimationFrame)
-        }
-      }, lockingPreDuration)
+    shouldCancel (event) {
+      const fromDialog = event.target.closest('dialog')
+      const fromHeader = event.target.closest('header')
+      const fromFooter = event.target.closest('footer')
+      return fromDialog || fromHeader || fromFooter
     },
-    createInitialCircle () {
-      const initialCircle = {
-        x: startCursor.x,
-        y: startCursor.y,
-        color: this.currentUserColor,
-        iteration: 1,
-        persistent: true
+    stopPainting (event) {
+      if (this.shouldCancel(event)) { return }
+      startCursor = startCursor || {}
+      const endCursor = utils.cursorPositionInViewport(event)
+      const shouldAddCard = this.$store.state.shouldAddCard
+      currentUserIsLocking = false
+      window.cancelAnimationFrame(lockingAnimationTimer)
+      lockingAnimationTimer = undefined
+      lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
+      this.$store.commit('currentUserIsPaintingLocked', false)
+      this.$store.commit('currentUserIsPainting', false)
+      if (utils.cursorsAreClose(startCursor, endCursor) && shouldAddCard) {
+        this.$store.commit('shouldAddCard', true)
+        event.preventDefault()
+      } else {
+        this.$store.commit('shouldAddCard', false)
       }
-      initialCircles.push(initialCircle)
-      this.drawCircle(initialCircle, initialCircleContext)
+      // prevent mouse events from firing after touch events on touch device
+      event.preventDefault()
     },
-    broadcastCircle (circle) {
-      const currentUserCanEdit = this.$store.getters['currentUser/canEditSpace']()
-      if (!currentUserCanEdit) { return }
-      this.$store.commit('broadcast/update', {
-        updates: {
-          userId: this.$store.state.currentUser.id,
-          x: circle.x + window.scrollX,
-          y: circle.y + window.scrollY,
-          color: circle.color,
-          iteration: circle.iteration
-        },
-        type: 'addRemotePaintingCircle'
-      })
-    },
-    createRemotePaintingCircle (circle) {
-      remotePaintingCircles.push(circle)
+
+    // Painting
+
+    painting (event) {
+      if (!this.$store.state.currentUserIsPainting) { return }
+      if (this.$store.getters.shouldScrollAtEdges) {
+        event.preventDefault() // prevents touch swipe viewport scrolling
+      }
+      if (!paintingCirclesTimer) {
+        paintingCirclesTimer = window.requestAnimationFrame(this.paintCirclesAnimationFrame)
+      }
+      this.createPaintingCircle(event)
     },
     createPaintingCircle (event) {
       let color = this.$store.state.currentUser.color
@@ -244,77 +246,6 @@ export default {
         initialCirclesTimer = window.requestAnimationFrame(this.initialCirclesAnimationFrame)
       }
     },
-    remotePainting () {
-      if (!remotePaintingCirclesTimer) {
-        remotePaintingCirclesTimer = window.requestAnimationFrame(this.remotePaintCirclesAnimationFrame)
-      }
-    },
-    painting (event) {
-      if (!this.$store.state.currentUserIsPainting) { return }
-      if (this.$store.getters.shouldScrollAtEdges) {
-        event.preventDefault() // prevents touch swipe viewport scrolling
-      }
-      if (!paintingCirclesTimer) {
-        paintingCirclesTimer = window.requestAnimationFrame(this.paintCirclesAnimationFrame)
-      }
-      this.createPaintingCircle(event)
-    },
-    lockingAnimationFrame (timestamp) {
-      if (!lockingStartTime) {
-        lockingStartTime = timestamp
-      }
-      const elaspedTime = timestamp - lockingStartTime
-      const percentComplete = (elaspedTime / lockingDuration) // between 0 and 1
-      if (!utils.cursorsAreClose(startCursor, currentCursor)) {
-        currentUserIsLocking = false
-      }
-      if (currentUserIsLocking && percentComplete <= 1) {
-        const minSize = circleRadius
-        const percentRemaining = Math.abs(percentComplete - 1)
-        const circleRadiusDelta = initialLockCircleRadius - minSize
-        const radius = (circleRadiusDelta * percentRemaining) + minSize
-        const alpha = utils.easeOut(percentComplete, elaspedTime, lockingDuration)
-        const circle = {
-          x: startCursor.x,
-          y: startCursor.y,
-          color: this.currentUserColor,
-          radius,
-          alpha: alpha || 0.01, // to ensure truthyness
-          iteration: 1
-        }
-        lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
-        this.drawCircle(circle, lockingContext)
-        window.requestAnimationFrame(this.lockingAnimationFrame)
-      } else {
-        window.cancelAnimationFrame(lockingAnimationTimer)
-        lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
-        lockingAnimationTimer = undefined
-        lockingStartTime = undefined
-      }
-      if (currentUserIsLocking && percentComplete > 1) {
-        this.$store.commit('currentUserIsPaintingLocked', true)
-        this.$store.commit('triggeredPaintFramePosition', { x: startCursor.x, y: startCursor.y })
-        console.log('🔒lockingAnimationFrame locked')
-        lockingStartTime = undefined
-      }
-    },
-    remotePaintCirclesAnimationFrame () {
-      remotePaintingCircles = utils.filterCircles(remotePaintingCircles, maxIterations)
-      remotePaintingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
-      remotePaintingCircles.forEach(item => {
-        item.iteration++
-        let circle = JSON.parse(JSON.stringify(item))
-        this.drawCircle(circle, remotePaintingContext)
-      })
-      if (remotePaintingCircles.length > 0) {
-        window.requestAnimationFrame(this.remotePaintCirclesAnimationFrame)
-      } else {
-        setTimeout(() => {
-          window.cancelAnimationFrame(remotePaintingCirclesTimer)
-          remotePaintingCirclesTimer = undefined
-        }, 0)
-      }
-    },
     paintCirclesAnimationFrame () {
       paintingCircles = utils.filterCircles(paintingCircles, maxIterations)
       paintingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
@@ -332,49 +263,9 @@ export default {
         }, 0)
       }
     },
-    initialCirclesAnimationFrame () {
-      initialCircles = utils.filterCircles(initialCircles, maxIterations)
-      initialCircleContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
-      initialCircles.forEach(item => {
-        if (!item.persistent) {
-          item.iteration++
-        }
-        let circle = JSON.parse(JSON.stringify(item))
-        this.drawCircle(circle, initialCircleContext)
-      })
-      if (initialCircles.length) {
-        window.requestAnimationFrame(this.initialCirclesAnimationFrame)
-      } else {
-        window.cancelAnimationFrame(initialCirclesTimer)
-        initialCirclesTimer = undefined
-      }
-    },
-    shouldCancel (event) {
-      const fromDialog = event.target.closest('dialog')
-      const fromHeader = event.target.closest('header')
-      const fromFooter = event.target.closest('footer')
-      return fromDialog || fromHeader || fromFooter
-    },
-    stopPainting (event) {
-      if (this.shouldCancel(event)) { return }
-      startCursor = startCursor || {}
-      const endCursor = utils.cursorPositionInViewport(event)
-      const shouldAddCard = this.$store.state.shouldAddCard
-      currentUserIsLocking = false
-      window.cancelAnimationFrame(lockingAnimationTimer)
-      lockingAnimationTimer = undefined
-      lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
-      this.$store.commit('currentUserIsPaintingLocked', false)
-      this.$store.commit('currentUserIsPainting', false)
-      if (utils.cursorsAreClose(startCursor, endCursor) && shouldAddCard) {
-        this.$store.commit('shouldAddCard', true)
-        event.preventDefault()
-      } else {
-        this.$store.commit('shouldAddCard', false)
-      }
-      // prevent mouse events from firing after touch events on touch device
-      event.preventDefault()
-    },
+
+    // Selecting
+
     selectCards (point) {
       if (this.spaceIsReadOnly) { return }
       this.$store.state.cardMap.map(card => {
@@ -496,6 +387,129 @@ export default {
           this.$store.commit('addToMultipleConnectionsSelected', pathId)
         }
       })
+    },
+
+    // Remote Painting
+
+    broadcastCircle (circle) {
+      const currentUserCanEdit = this.$store.getters['currentUser/canEditSpace']()
+      if (!currentUserCanEdit) { return }
+      this.$store.commit('broadcast/update', {
+        updates: {
+          userId: this.$store.state.currentUser.id,
+          x: circle.x + window.scrollX,
+          y: circle.y + window.scrollY,
+          color: circle.color,
+          iteration: circle.iteration
+        },
+        type: 'addRemotePaintingCircle'
+      })
+    },
+    createRemotePaintingCircle (circle) {
+      remotePaintingCircles.push(circle)
+    },
+    remotePainting () {
+      if (!remotePaintingCirclesTimer) {
+        remotePaintingCirclesTimer = window.requestAnimationFrame(this.remotePaintCirclesAnimationFrame)
+      }
+    },
+    remotePaintCirclesAnimationFrame () {
+      remotePaintingCircles = utils.filterCircles(remotePaintingCircles, maxIterations)
+      remotePaintingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
+      remotePaintingCircles.forEach(item => {
+        item.iteration++
+        let circle = JSON.parse(JSON.stringify(item))
+        this.drawCircle(circle, remotePaintingContext)
+      })
+      if (remotePaintingCircles.length > 0) {
+        window.requestAnimationFrame(this.remotePaintCirclesAnimationFrame)
+      } else {
+        setTimeout(() => {
+          window.cancelAnimationFrame(remotePaintingCirclesTimer)
+          remotePaintingCirclesTimer = undefined
+        }, 0)
+      }
+    },
+
+    // Locking
+
+    startLocking () {
+      currentUserIsLocking = true
+      setTimeout(() => {
+        if (!lockingAnimationTimer) {
+          lockingAnimationTimer = window.requestAnimationFrame(this.lockingAnimationFrame)
+        }
+      }, lockingPreDuration)
+    },
+    lockingAnimationFrame (timestamp) {
+      if (!lockingStartTime) {
+        lockingStartTime = timestamp
+      }
+      const elaspedTime = timestamp - lockingStartTime
+      const percentComplete = (elaspedTime / lockingDuration) // between 0 and 1
+      if (!utils.cursorsAreClose(startCursor, currentCursor)) {
+        currentUserIsLocking = false
+      }
+      if (currentUserIsLocking && percentComplete <= 1) {
+        const minSize = circleRadius
+        const percentRemaining = Math.abs(percentComplete - 1)
+        const circleRadiusDelta = initialLockCircleRadius - minSize
+        const radius = (circleRadiusDelta * percentRemaining) + minSize
+        const alpha = utils.easeOut(percentComplete, elaspedTime, lockingDuration)
+        const circle = {
+          x: startCursor.x,
+          y: startCursor.y,
+          color: this.currentUserColor,
+          radius,
+          alpha: alpha || 0.01, // to ensure truthyness
+          iteration: 1
+        }
+        lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
+        this.drawCircle(circle, lockingContext)
+        window.requestAnimationFrame(this.lockingAnimationFrame)
+      } else {
+        window.cancelAnimationFrame(lockingAnimationTimer)
+        lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
+        lockingAnimationTimer = undefined
+        lockingStartTime = undefined
+      }
+      if (currentUserIsLocking && percentComplete > 1) {
+        this.$store.commit('currentUserIsPaintingLocked', true)
+        this.$store.commit('triggeredPaintFramePosition', { x: startCursor.x, y: startCursor.y })
+        console.log('🔒lockingAnimationFrame locked')
+        lockingStartTime = undefined
+      }
+    },
+
+    // Initial Circles
+
+    createInitialCircle () {
+      const initialCircle = {
+        x: startCursor.x,
+        y: startCursor.y,
+        color: this.currentUserColor,
+        iteration: 1,
+        persistent: true
+      }
+      initialCircles.push(initialCircle)
+      this.drawCircle(initialCircle, initialCircleContext)
+    },
+    initialCirclesAnimationFrame () {
+      initialCircles = utils.filterCircles(initialCircles, maxIterations)
+      initialCircleContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
+      initialCircles.forEach(item => {
+        if (!item.persistent) {
+          item.iteration++
+        }
+        let circle = JSON.parse(JSON.stringify(item))
+        this.drawCircle(circle, initialCircleContext)
+      })
+      if (initialCircles.length) {
+        window.requestAnimationFrame(this.initialCirclesAnimationFrame)
+      } else {
+        window.cancelAnimationFrame(initialCirclesTimer)
+        initialCirclesTimer = undefined
+      }
     }
   }
 }
