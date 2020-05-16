@@ -55,7 +55,6 @@ aside.notifications(@click="closeAllDialogs")
         a(href="mailto:support@kinopio.club?subject=Connection Error")
           button Email Support
         button(@click="refreshBrowser") Refresh
-          // refresh button
 
   .persistent-item.danger(v-if="notifySpaceOutOfSync")
     p Space is out of sync, please refresh

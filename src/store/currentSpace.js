@@ -86,12 +86,15 @@ export default {
         cache.updateSpace(key, state[key], state.id)
       })
     },
+    // websocket receive
     updateUser: (state, updatedUser) => {
       state.spectators = utils.updateObjectWithKeys(state.users, updatedUser, ['name', 'color'])
     },
+    // websocket receive
     updateCollaborator: (state, updatedUser) => {
       state.spectators = utils.updateObjectWithKeys(state.collaborators, updatedUser, ['name', 'color'])
     },
+    // websocket receive
     updateSpectator: (state, updatedUser) => {
       state.spectators = utils.updateObjectWithKeys(state.spectators, updatedUser, ['name', 'color'])
     },
