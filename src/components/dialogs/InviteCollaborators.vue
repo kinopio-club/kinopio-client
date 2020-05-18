@@ -9,7 +9,7 @@ dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.stop)
 
   section
     //- p Share this url to edit with others
-    img(src="@/assets/collaborators.jpg")
+    //- img(src="@/assets/collaborators.jpg")
 
     input.textarea(ref="url" v-model="url")
 
@@ -89,6 +89,6 @@ export default {
   right 8px
   max-height calc(100vh - 180px)
   overflow auto
-  .textarea
-    margin-top 10px
+  // .textarea
+  //   margin-top 10px
 </style>

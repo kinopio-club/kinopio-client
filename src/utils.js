@@ -104,17 +104,18 @@ export default {
     return object
   },
 
-  updateObjectWithKeys (object, value, keys) {
-    this.typeCheck(object, 'object')
-    this.typeCheck(value, 'object')
+  updateUsersWithUser (users, updatedUser, keys) {
+    keys = keys || ['name', 'color']
+    this.typeCheck(users, 'object')
+    this.typeCheck(updatedUser, 'object')
     this.typeCheck(keys, 'array')
-    return object.map(item => {
-      if (item.id === value.userId) {
+    return users.map(user => {
+      if (user.id === updatedUser.userId) {
         keys.forEach(key => {
-          item[key] = value[key] || item[key]
+          user[key] = updatedUser[key] || user[key]
         })
       }
-      return item
+      return user
     })
   },
 

@@ -88,15 +88,15 @@ export default {
     },
     // websocket receive
     updateUser: (state, updatedUser) => {
-      state.spectators = utils.updateObjectWithKeys(state.users, updatedUser, ['name', 'color'])
+      state.users = utils.updateUsersWithUser(state.users, updatedUser)
     },
     // websocket receive
     updateCollaborator: (state, updatedUser) => {
-      state.spectators = utils.updateObjectWithKeys(state.collaborators, updatedUser, ['name', 'color'])
+      state.collaborators = utils.updateUsersWithUser(state.collaborators, updatedUser)
     },
     // websocket receive
     updateSpectator: (state, updatedUser) => {
-      state.spectators = utils.updateObjectWithKeys(state.spectators, updatedUser, ['name', 'color'])
+      state.spectators = utils.updateUsersWithUser(state.spectators, updatedUser)
     },
 
     // Space
@@ -391,7 +391,7 @@ export default {
       if (currentUserIsRemovedFromSpace) {
         context.commit('currentUser/resetLastSpaceId', null, { root: true })
         cache.removeSpacePermanent(space)
-        const emptySpace = { id: space.id, cards: [], connections: [] }
+        const emptySpace = { id: space.id, cards: [], connections: [], users: [], collaborators: [], spectators: [] }
         context.commit('restoreSpace', emptySpace)
       }
     },
