@@ -80,9 +80,11 @@ export default function createWebSocketPlugin () {
           console.log('🌛', data)
           if (data.message === 'connected') {
           } else if (data.message === 'userJoinedRoom') {
-            store.commit('currentSpace/addSpectatorToSpace', data.user)
+            store.dispatch('currentSpace/addUserToJoinedSpace', data.user)
           } else if (data.message === 'userLeftRoom') {
             store.commit('currentSpace/removeSpectatorFromSpace', data.user)
+          } else if (data.message === 'userLeftSpace') {
+            store.commit('currentSpace/removeCollaboratorFromSpace', data.updates.user)
           } else if (data.message === 'updateRemoteCurrentConnection') {
             store.commit('updateRemoteCurrentConnection', data.updates)
           } else if (data.message === 'removeRemoteCurrentConnection') {

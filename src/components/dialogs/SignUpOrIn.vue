@@ -222,7 +222,10 @@ export default {
           currentUserIsSignedIn
         })
         this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
-        this.$store.commit('currentSpace/addUserToSpace', currentUser)
+        const userIsSpaceUser = this.$store.getters['currentUser/spaceUserPermission'](currentSpace) === 'user'
+        if (userIsSpaceUser) {
+          this.$store.commit('currentSpace/addUserToSpace', currentUser)
+        }
         this.$store.commit('clearAllNotifications', false)
         this.$store.dispatch('currentSpace/checkIfShouldNotifyReadOnly')
         this.$store.commit('notifyNewUser', false)

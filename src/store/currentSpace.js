@@ -51,8 +51,6 @@ export default {
     },
     addSpectatorToSpace: (state, newUser) => {
       utils.typeCheck(newUser, 'object')
-      if (!state.collaborators) { Vue.set(state, 'collaborators', []) }
-      if (!state.spectators) { Vue.set(state, 'spectators', []) }
       const userExists = state.users.find(user => user.id === newUser.id)
       const collaboratorExists = state.collaborators.find(collaborator => collaborator.id === newUser.id)
       const spectatorExists = state.spectators.find(spectator => spectator.id === newUser.id)
@@ -274,6 +272,16 @@ export default {
         console.log('🚃 Create new Hello Kinopio space')
         context.dispatch('createNewHelloSpace')
         context.dispatch('updateUserLastSpaceId')
+      }
+    },
+
+    // Users
+
+    addUserToJoinedSpace: (context, newUser) => {
+      if (newUser.isCollaborator) {
+        context.commit('addCollaboratorToSpace', newUser)
+      } else {
+        context.commit('addSpectatorToSpace', newUser)
       }
     },
 
@@ -539,6 +547,7 @@ export default {
     removeCollaboratorFromSpace: (context, user) => {
       const space = utils.clone(context.state)
       const userName = user.name || 'User'
+      context.commit('broadcast/update', { user, type: 'userLeftSpace' }, { root: true })
       context.dispatch('api/removeSpaceCollaborator', { space, user }, { root: true })
       context.commit('removeCollaboratorFromSpace', user)
       const isCurrentUser = user.id === context.rootState.currentUser.id

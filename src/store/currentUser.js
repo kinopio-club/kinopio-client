@@ -69,7 +69,8 @@ export default {
       space = space || rootState.currentSpace
       const isSpaceUser = getters.isSpaceUser(space)
       const isSpaceCollaborator = getters.isSpaceCollaborator(space)
-      if (isSpaceUser) {
+      const spaceHasNoUsers = !space.users.length
+      if (isSpaceUser || spaceHasNoUsers) {
         return 'user'
       } else if (isSpaceCollaborator) {
         return 'collaborator'
@@ -177,7 +178,7 @@ export default {
     },
     broadcastUpdate: (context, updates) => {
       const space = context.rootState.currentSpace
-      const spaceUserPermission = utils.capitalizeFirstLetter(context.getters.spaceUserPermission()) // User, Collaborator, Spectator
+      const spaceUserPermission = utils.capitalizeFirstLetter(context.getters.spaceUserPermission(space)) // User, Collaborator, Spectator
       const type = `update${spaceUserPermission}`
       const userId = context.state.id
       context.commit('broadcast/update', { id: space.id, updates, type, userId }, { root: true })
