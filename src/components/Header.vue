@@ -252,7 +252,7 @@ header
     max-width 250px
     margin-top 8px
     @media(max-width 414px)
-      width calc(100vw - 200px)
+      max-width calc(100vw - 200px)
     button
       white-space nowrap
       overflow hidden
@@ -279,6 +279,7 @@ header
       display flex
       flex-wrap wrap
       justify-content flex-end
+      align-content flex-start
 
   .bottom
     margin-top 5px
