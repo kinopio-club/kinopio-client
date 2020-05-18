@@ -242,6 +242,8 @@ export default {
       const currentUser = this.$store.state.currentUser
       if (invitedSpaceIds.includes(currentSpace.id)) {
         this.$store.commit('currentSpace/addCollaboratorToSpace', currentUser)
+        this.$store.commit('broadcast/close')
+        this.$store.commit('broadcast/joinSpaceRoom')
       }
     },
 
