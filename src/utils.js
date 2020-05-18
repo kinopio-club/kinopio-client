@@ -73,6 +73,7 @@ export default {
   },
 
   clone (object) {
+    this.typeCheck(object, 'object')
     let cloned = JSON.stringify(object)
     cloned = JSON.parse(cloned)
     return cloned

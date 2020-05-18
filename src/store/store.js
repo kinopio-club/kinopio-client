@@ -287,7 +287,7 @@ export default new Vuex.Store({
       state.multipleSelectedActionsIsVisible = value
     },
     generateCardMap: (state) => {
-      const cards = state.currentSpace.cards
+      const cards = state.currentSpace.cards || []
       state.cardMap = []
       cards.forEach(card => {
         const element = document.querySelector(`article [data-card-id="${card.id}"]`)
