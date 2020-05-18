@@ -17,7 +17,7 @@ const self = {
       setTimeout(() => {
         context.commit('reconnect')
         reconnectAttempts += 1
-      }, Math.min(5000 * reconnectAttempts), 60 * 1000)
+      }, Math.min(5000 * reconnectAttempts), 30 * 1000)
     }
   }
 }
