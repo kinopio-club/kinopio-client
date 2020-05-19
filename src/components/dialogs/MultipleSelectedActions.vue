@@ -303,7 +303,7 @@ export default {
       connections.forEach(connection => {
         const connectionType = this.connectionType()
         this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
-        this.$store.commit('addToMultipleConnectionsSelected', connection.id)
+        this.$store.dispatch('addToMultipleConnectionsSelected', connection.id)
       })
     },
     disconnectCards () {

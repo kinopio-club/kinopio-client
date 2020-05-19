@@ -70,6 +70,7 @@ export default new Vuex.Store({
     multipleSelectedActionsPosition: {},
     multipleCardsSelectedIds: [],
     remoteCardsSelected: [],
+    remoteConnectionsSelected: [],
     cardMap: [],
     multipleConnectionsSelectedIds: [],
     triggeredPaintFramePosition: {},
@@ -328,10 +329,7 @@ export default new Vuex.Store({
       state.currentCardsDragging.push(currentCard)
     },
     addToMultipleConnectionsSelected: (state, connectionId) => {
-      utils.typeCheck(connectionId, 'string')
-      if (!state.multipleConnectionsSelectedIds.includes(connectionId)) {
-        state.multipleConnectionsSelectedIds.push(connectionId)
-      }
+      state.multipleConnectionsSelectedIds.push(connectionId)
     },
     removeFromMultipleConnectionsSelected: (state, connectionId) => {
       utils.typeCheck(connectionId, 'string')
@@ -357,9 +355,21 @@ export default new Vuex.Store({
       if (isSelected) { return }
       state.remoteCardsSelected.push(update)
     },
-    clearRemoteCardsSelected: (state, user) => {
+    addToRemoteConnectionsSelected: (state, update) => {
+      utils.typeCheck(update, 'object')
+      delete update.type
+      const isSelected = state.remoteConnectionsSelected.find(connection => {
+        const connectionIsSelected = connection.connectionId === update.connectionId
+        const selectedByUser = connection.userId === update.userId
+        return connectionIsSelected && selectedByUser
+      })
+      if (isSelected) { return }
+      state.remoteConnectionsSelected.push(update)
+    },
+    clearRemoteMultipleSelected: (state, user) => {
       utils.typeCheck(user, 'object')
       state.remoteCardsSelected = state.remoteCardsSelected.filter(card => card.userId !== user.id)
+      state.remoteConnectionsSelected = state.remoteConnectionsSelected.filter(connection => connection.userId !== user.id)
     },
 
     // Loading
@@ -482,11 +492,21 @@ export default new Vuex.Store({
     },
     clearMultipleSelected: (context) => {
       context.commit('clearMultipleSelected')
-      const user = { id: context.rootState.currentUser.id }
-      context.commit('broadcast/update', { user, type: 'clearRemoteCardsSelected' }, { root: true })
+      const space = utils.clone(context.rootState.currentSpace)
+      const user = utils.clone(context.rootState.currentUser)
+      context.commit('broadcast/update', { user: utils.userMeta(user, space), type: 'clearRemoteMultipleSelected' }, { root: true })
+    },
+    addToMultipleConnectionsSelected: (context, connectionId) => {
+      utils.typeCheck(connectionId, 'string')
+      if (context.state.multipleConnectionsSelectedIds.includes(connectionId)) { return }
+      context.commit('addToMultipleConnectionsSelected', connectionId)
+      const updates = {
+        userId: context.rootState.currentUser.id,
+        connectionId
+      }
+      context.commit('broadcast/update', { updates, type: 'addToRemoteConnectionsSelected' }, { root: true })
     }
   },
-
   getters: {
     shouldScrollAtEdges (state, getters) {
       let isPainting

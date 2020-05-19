@@ -14,7 +14,7 @@ path.connection-path(
   @touchend.stop="showConnectionDetails"
   @keyup.stop.backspace="removeConnection"
   @keyup.stop.enter="showConnectionDetailsOnKeyup"
-  :class="{active: isSelected || detailsIsVisible, filtered: isFiltered, hover: isHovered, 'hide-connection-outline': shouldHideConnectionOutline }"
+  :class="{active: isSelected || detailsIsVisible || isRemoteSelected, filtered: isFiltered, hover: isHovered, 'hide-connection-outline': shouldHideConnectionOutline }"
   ref="connection"
   tabindex="0"
 )
@@ -81,11 +81,16 @@ export default {
       const selectedIds = this.$store.state.multipleConnectionsSelectedIds
       return selectedIds.includes(this.id)
     },
+    isRemoteSelected () {
+      const remoteConnections = this.$store.state.remoteConnectionsSelected
+      const isSelected = remoteConnections.find(connection => connection.connectionId === this.id)
+      return isSelected
+    },
     detailsIsVisible () {
       const detailsId = this.$store.state.connectionDetailsIsVisibleForConnectionId
       return detailsId === this.id
     },
-    shouldAnimate () { return Boolean(this.isSelected || this.detailsIsVisible) },
+    shouldAnimate () { return Boolean(this.isSelected || this.detailsIsVisible || this.isRemoteSelected) },
     isHovered () { return this.id === this.$store.state.currentUserIsHoveringOverConnectionId },
     shouldHideConnectionOutline () { return this.$store.state.shouldHideConnectionOutline },
 

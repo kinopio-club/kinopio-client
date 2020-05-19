@@ -400,7 +400,7 @@ export default {
         const isAlreadySelected = ids.includes(pathId)
         if (isAlreadySelected) { return }
         if (path.isPointInFill(svgPoint)) {
-          this.$store.commit('addToMultipleConnectionsSelected', pathId)
+          this.$store.dispatch('addToMultipleConnectionsSelected', pathId)
         }
       })
     },

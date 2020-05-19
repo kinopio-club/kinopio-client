@@ -101,6 +101,8 @@ export default {
     // Add Parent and Child Cards
 
     addCard () {
+      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
+      if (!canEditSpace) { return }
       this.$store.commit('generateCardMap')
       const parentCardId = this.$store.state.parentCardId
       const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
