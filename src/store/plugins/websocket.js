@@ -13,7 +13,7 @@ const joinSpaceRoom = (store, mutation) => {
   if (!websocket) { return }
   const space = utils.clone(store.state.currentSpace)
   const currentSpaceHasUrl = utils.currentSpaceHasUrl(space)
-  let user = utils.clone(store.state.currentUser)
+  const user = utils.clone(store.state.currentUser)
   if (!currentSpaceHasUrl) { return }
   if (currentSpaceRoom === space.id) { return }
   console.log('🌜 joinSpaceRoom', space.name)
@@ -98,6 +98,7 @@ export default function createWebSocketPlugin () {
             store.commit('addToRemoteConnectionsSelected', updates)
           } else if (message === 'clearRemoteMultipleSelected') {
             store.commit('clearRemoteMultipleSelected', updates.user)
+            store.commit('currentSpace/addSpectatorToSpace', updates.user)
           } else {
             store.commit(`currentSpace/${message}`, updates)
             checkIfShouldUpdateWindowUrlAndTitle(store, data)
