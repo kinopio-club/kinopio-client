@@ -94,8 +94,10 @@ export default function createWebSocketPlugin () {
             store.commit('triggerAddRemotePaintingCircle', updates)
           } else if (message === 'addToRemoteCardsSelected') {
             store.commit('addToRemoteCardsSelected', updates)
-          } else if (message === 'clearRemoteCardsSelected') {
-            store.commit('clearRemoteCardsSelected', updates.user)
+          } else if (message === 'addToRemoteConnectionsSelected') {
+            store.commit('addToRemoteConnectionsSelected', updates)
+          } else if (message === 'clearRemoteMultipleSelected') {
+            store.commit('clearRemoteMultipleSelected', updates.user)
           } else {
             store.commit(`currentSpace/${message}`, updates)
             checkIfShouldUpdateWindowUrlAndTitle(store, data)
