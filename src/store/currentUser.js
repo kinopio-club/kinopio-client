@@ -42,7 +42,11 @@ export default {
     },
     isSpaceMember: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
-      const userIsCollaborator = getters.isSpaceCollaborator(space)
+      const isSpaceUser = getters.isSpaceUser(space)
+      const isSpaceCollaborator = getters.isSpaceCollaborator(space)
+      return isSpaceUser || isSpaceCollaborator
+    },
+    isSpaceUser: (state, getters, rootState) => (space) => {
       let userIsInSpace
       if (space.users) {
         userIsInSpace = Boolean(space.users.find(user => {
@@ -51,7 +55,7 @@ export default {
       } else {
         userIsInSpace = space.userId === state.id
       }
-      return userIsCollaborator || userIsInSpace
+      return userIsInSpace
     },
     isSpaceCollaborator: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
@@ -59,6 +63,19 @@ export default {
         return Boolean(space.collaborators.find(collaborator => {
           return collaborator.id === state.id
         }))
+      }
+    },
+    spaceUserPermission: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
+      const isSpaceUser = getters.isSpaceUser(space)
+      const isSpaceCollaborator = getters.isSpaceCollaborator(space)
+      const spaceHasNoUsers = !space.users.length
+      if (isSpaceUser || spaceHasNoUsers) {
+        return 'user'
+      } else if (isSpaceCollaborator) {
+        return 'collaborator'
+      } else {
+        return 'spectator'
       }
     },
     isInvitedButCannotEditSpace: (state, getters, rootState) => (space) => {
@@ -159,12 +176,20 @@ export default {
     createNewUser: (context) => {
       cache.saveUser(context.state)
     },
+    broadcastUpdate: (context, updates) => {
+      const space = context.rootState.currentSpace
+      const spaceUserPermission = utils.capitalizeFirstLetter(context.getters.spaceUserPermission(space)) // User, Collaborator, Spectator
+      const type = `update${spaceUserPermission}`
+      const userId = context.state.id
+      context.commit('broadcast/update', { id: space.id, updates, type, userId }, { root: true })
+    },
     name: (context, newName) => {
       context.commit('name', newName)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           name: newName
         } }, { root: true })
+      context.dispatch('broadcastUpdate', { name: newName })
     },
     color: (context, newColor) => {
       context.commit('color', newColor)
@@ -172,6 +197,7 @@ export default {
         body: {
           color: newColor
         } }, { root: true })
+      context.dispatch('broadcastUpdate', { color: newColor })
     },
     lastSpaceId: (context, spaceId) => {
       context.commit('notifySpaceNotFound', false, { root: true })

@@ -35,18 +35,14 @@ export default {
 
     addUserToSpace: (state, newUser) => {
       utils.typeCheck(newUser, 'object')
-      const userExists = state.users.find(user => {
-        return user.id === newUser.id
-      })
+      const userExists = state.users.find(user => user.id === newUser.id)
       if (userExists) { return }
       state.users.push(newUser)
       cache.updateSpace('users', state.users, state.id)
     },
     addCollaboratorToSpace: (state, newUser) => {
       utils.typeCheck(newUser, 'object')
-      const collaboratorExists = state.collaborators.find(collaborator => {
-        return collaborator.id === newUser.id
-      })
+      const collaboratorExists = state.collaborators.find(collaborator => collaborator.id === newUser.id)
       if (collaboratorExists) { return }
       state.collaborators.push(newUser)
       const space = utils.clone(state)
@@ -55,18 +51,18 @@ export default {
     },
     addSpectatorToSpace: (state, newUser) => {
       utils.typeCheck(newUser, 'object')
-      if (!state.spectators) { Vue.set(state, 'spectators', []) }
-      const userExists = state.users.find(user => {
-        return user.id === newUser.id
-      })
-      const collaboratorExists = state.collaborators.find(collaborator => {
-        return collaborator.id === newUser.id
-      })
-      const spectatorExists = state.spectators.find(spectator => {
-        return spectator.id === newUser.id
-      })
+      const userExists = state.users.find(user => user.id === newUser.id)
+      const collaboratorExists = state.collaborators.find(collaborator => collaborator.id === newUser.id)
+      const spectatorExists = state.spectators.find(spectator => spectator.id === newUser.id)
       if (userExists || collaboratorExists || spectatorExists) { return }
       state.spectators.push(newUser)
+    },
+    removeSpectatorFromSpace: (state, oldUser) => {
+      utils.typeCheck(oldUser, 'object')
+      if (!state.spectators) { return }
+      state.spectators = state.spectators.filter(user => {
+        return user.id !== oldUser.id
+      })
     },
     removeUserFromSpace: (state, oldUser) => {
       utils.typeCheck(oldUser, 'object')
@@ -87,6 +83,18 @@ export default {
         Vue.set(state, key, updatedSpace[key])
         cache.updateSpace(key, state[key], state.id)
       })
+    },
+    // websocket receive
+    updateUser: (state, updatedUser) => {
+      state.users = utils.updateUsersWithUser(state.users, updatedUser)
+    },
+    // websocket receive
+    updateCollaborator: (state, updatedUser) => {
+      state.collaborators = utils.updateUsersWithUser(state.collaborators, updatedUser)
+    },
+    // websocket receive
+    updateSpectator: (state, updatedUser) => {
+      state.spectators = utils.updateUsersWithUser(state.spectators, updatedUser)
     },
 
     // Space
@@ -267,6 +275,16 @@ export default {
       }
     },
 
+    // Users
+
+    addUserToJoinedSpace: (context, newUser) => {
+      if (newUser.isCollaborator) {
+        context.commit('addCollaboratorToSpace', newUser)
+      } else {
+        context.commit('addSpectatorToSpace', newUser)
+      }
+    },
+
     // Space
 
     createNewHelloSpace: (context) => {
@@ -381,7 +399,7 @@ export default {
       if (currentUserIsRemovedFromSpace) {
         context.commit('currentUser/resetLastSpaceId', null, { root: true })
         cache.removeSpacePermanent(space)
-        const emptySpace = { id: space.id, cards: [], connections: [] }
+        const emptySpace = { id: space.id, cards: [], connections: [], users: [], collaborators: [], spectators: [] }
         context.commit('restoreSpace', emptySpace)
       }
     },
@@ -452,6 +470,7 @@ export default {
         })
       }
       context.commit('updateSpace', updates)
+      context.commit('broadcast/update', { updates, type: 'updateSpace' }, { root: true })
       context.dispatch('api/addToQueue', {
         name: 'updateSpace',
         body: updates
@@ -528,6 +547,7 @@ export default {
     removeCollaboratorFromSpace: (context, user) => {
       const space = utils.clone(context.state)
       const userName = user.name || 'User'
+      context.commit('broadcast/update', { user, type: 'userLeftSpace' }, { root: true })
       context.dispatch('api/removeSpaceCollaborator', { space, user }, { root: true })
       context.commit('removeCollaboratorFromSpace', user)
       const isCurrentUser = user.id === context.rootState.currentUser.id
@@ -561,6 +581,7 @@ export default {
       card = utils.clone(card)
       const update = { name: 'createCard', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
       context.commit('history/add', update, { root: true })
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
     },
@@ -578,12 +599,14 @@ export default {
       context.commit('createCard', card)
       const update = { name: 'createCard', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
       context.commit('history/add', update, { root: true })
     },
     updateCard: (context, card) => {
       context.commit('updateCard', card)
       const update = { name: 'updateCard', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('broadcast/update', { updates: card, type: 'updateCard' }, { root: true })
       context.commit('history/add', update, { root: true })
     },
     incrementCardZ: (context, cardId) => {
@@ -595,6 +618,7 @@ export default {
           card.z = cards.length + 1
           const update = { name: 'updateCard', body: { id: card.id, z: card.z } }
           context.dispatch('api/addToQueue', update, { root: true })
+          context.commit('broadcast/update', { updates: update.body, type: 'updateCard' }, { root: true })
         }
       })
       context.commit('incrementCardZ', cardId)
@@ -609,6 +633,7 @@ export default {
       } else {
         context.dispatch('removeCardPermanent', card)
       }
+      context.commit('broadcast/update', { updates: card, type: 'removeCard' }, { root: true })
       context.dispatch('removeConnectionsFromCard', card)
       context.commit('generateCardMap', null, { root: true })
     },
@@ -620,6 +645,7 @@ export default {
       context.commit('restoreRemovedCard', card)
       const update = { name: 'restoreRemovedCard', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('broadcast/update', { updates: card, type: 'restoreRemovedCard' }, { root: true })
       context.commit('history/add', update, { root: true })
     },
     restoreRemovedSpace: (context, space) => {
@@ -648,13 +674,17 @@ export default {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       const cards = context.rootState.currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
       cards.forEach(card => {
-        context.commit('moveCard', { cardId: card.id, delta })
+        const update = { cardId: card.id, delta }
+        context.commit('moveCard', update)
+        context.commit('broadcast/update', { updates: update, type: 'moveCard' }, { root: true })
         context.dispatch('updateCardConnectionPaths', { cardId: card.id })
       })
     },
     dragSingleCard: (context, { endCursor, delta, shouldUpdateApi }) => {
       const currentDraggingCardId = context.rootState.currentDraggingCardId
-      context.commit('moveCard', { cardId: currentDraggingCardId, delta })
+      const update = { cardId: currentDraggingCardId, delta }
+      context.commit('moveCard', update)
+      context.commit('broadcast/update', { updates: update, type: 'moveCard' }, { root: true })
       context.dispatch('updateCardConnectionPaths', { cardId: currentDraggingCardId })
     },
     updateAfterDragWithPositions: (context) => {
@@ -706,6 +736,7 @@ export default {
         connection.connectionTypeId = connectionType.id
         context.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
         context.commit('history/add', { name: 'addConnection', body: connection }, { root: true })
+        context.commit('broadcast/update', { updates: connection, type: 'addConnection' }, { root: true })
         context.commit('addConnection', connection)
       }
     },
@@ -718,6 +749,7 @@ export default {
         if (shouldUpdateApi) {
           context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
         }
+        context.commit('broadcast/update', { updates: connection, type: 'updateConnection' }, { root: true })
         context.commit('updateConnection', connection)
       })
     },
@@ -746,9 +778,11 @@ export default {
       context.commit('removeConnection', connection)
       const update = { name: 'removeConnection', body: connection }
       context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('broadcast/update', { updates: connection, type: 'removeConnection' }, { root: true })
       context.commit('history/add', update, { root: true })
     },
     updateConnectionTypeForConnection: (context, { connectionId, connectionTypeId }) => {
+      const updates = { connectionId, connectionTypeId }
       const connection = {
         id: connectionId,
         connectionTypeId
@@ -756,9 +790,11 @@ export default {
       const update = { name: 'updateConnection', body: connection }
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('history/add', update, { root: true })
-      context.commit('updateConnectionTypeForConnection', { connectionId, connectionTypeId })
+      context.commit('updateConnectionTypeForConnection', updates)
+      context.commit('broadcast/update', { updates, type: 'updateConnectionTypeForConnection' }, { root: true })
     },
     updateLabelIsVisibleForConnection: (context, { connectionId, labelIsVisible }) => {
+      const updates = { connectionId, labelIsVisible }
       const connection = {
         id: connectionId,
         labelIsVisible
@@ -766,7 +802,8 @@ export default {
       const update = { name: 'updateConnection', body: connection }
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('history/add', update, { root: true })
-      context.commit('updateLabelIsVisibleForConnection', { connectionId, labelIsVisible })
+      context.commit('updateLabelIsVisibleForConnection', updates)
+      context.commit('broadcast/update', { updates, type: 'updateLabelIsVisibleForConnection' }, { root: true })
     },
 
     // Connection Types
@@ -780,11 +817,13 @@ export default {
         spaceId: context.state.id
       }
       context.commit('addConnectionType', connectionType)
+      context.commit('broadcast/update', { updates: connectionType, type: 'addConnectionType' }, { root: true })
       context.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
       context.commit('history/add', { name: 'addConnectionType', body: connectionType }, { root: true })
     },
     updateConnectionType: (context, connectionType) => {
       context.commit('updateConnectionType', connectionType)
+      context.commit('broadcast/update', { updates: connectionType, type: 'updateConnectionType' }, { root: true })
       const update = { name: 'updateConnectionType', body: connectionType }
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('history/add', update, { root: true })
@@ -799,11 +838,17 @@ export default {
         context.dispatch('api/addToQueue', update, { root: true })
         context.commit('history/add', update, { root: true })
         context.commit('removeConnectionType', type)
+        context.commit('broadcast/update', { updates: type, type: 'removeConnectionType' }, { root: true })
       })
     }
   },
 
   getters: {
+    // Meta
+    isHelloKinopio: (state) => {
+      return state.name === 'Hello Kinopio'
+    },
+
     // Cards
     cardById: (state) => (id) => {
       return state.cards.find(card => card.id === id)
@@ -853,8 +898,22 @@ export default {
         return lastConnectionType
       }
     },
-    isHelloKinopio: (state) => {
-      return state.name === 'Hello Kinopio'
+
+    // Users
+    members: (state, getters, rootState) => (excludeCurrentUser) => {
+      const users = state.users
+      const collaborators = state.collaborators || []
+      let members = []
+      users.forEach(user => {
+        members.push(user)
+      })
+      collaborators.forEach(user => {
+        members.push(user)
+      })
+      if (excludeCurrentUser) {
+        members = members.filter(user => user.id !== rootState.currentUser.id)
+      }
+      return members
     }
   }
 }

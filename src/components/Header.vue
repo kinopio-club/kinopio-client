@@ -32,9 +32,12 @@ header
         Share(:visible="shareIsVisible")
 
       .users
+        User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
         User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
+        User(v-for="user in collaborators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
 
       .users.spectators
+        User(v-if="!currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
         User(v-for="user in spectators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
 
     .bottom
@@ -113,31 +116,18 @@ export default {
       return newStuffIsUpdated && isNotDefaultSpace && userCanEditSpace
     },
     importArenaChannelIsVisible () { return this.$store.state.importArenaChannelIsVisible },
+    currentSpace () { return this.$store.state.currentSpace },
+    currentUser () { return this.$store.state.currentUser },
+    currentUserIsSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     users () {
-      const currentUser = this.$store.state.currentUser
-      const currentSpace = this.$store.state.currentSpace
-      const collaborators = currentSpace.collaborators
-      const currentUserIsSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
-      let users
-      users = utils.clone(currentSpace.users)
-      if (collaborators) {
-        collaborators.forEach(collaborator => users.push(collaborator))
-      }
-      if (currentUserIsSpaceMember) {
-        users = users.filter(user => user.id !== currentUser.id)
-        users.unshift(currentUser)
-      }
-      return users
+      let users = utils.clone(this.currentSpace.users)
+      return users.filter(user => user.id !== this.currentUser.id)
     },
-    spectators () {
-      const currentUser = this.$store.state.currentUser
-      const currentUserIsSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
-      let spectators = utils.clone(this.$store.state.currentSpace.spectators || [])
-      if (!currentUserIsSpaceMember) {
-        spectators.unshift(currentUser)
-      }
-      return spectators
+    collaborators () {
+      let collaborators = this.currentSpace.collaborators
+      return collaborators.filter(user => user.id !== this.currentUser.id)
     },
+    spectators () { return this.currentSpace.spectators },
     currentSpaceName () {
       const id = this.$store.state.currentSpace.id
       const name = this.$store.state.currentSpace.name
@@ -262,7 +252,7 @@ header
     max-width 250px
     margin-top 8px
     @media(max-width 414px)
-      width calc(100vw - 200px)
+      max-width calc(100vw - 200px)
     button
       white-space nowrap
       overflow hidden
@@ -289,6 +279,7 @@ header
       display flex
       flex-wrap wrap
       justify-content flex-end
+      align-content flex-start
 
   .bottom
     margin-top 5px

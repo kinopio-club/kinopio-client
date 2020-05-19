@@ -9,7 +9,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
   section(v-if="signUpVisible")
     p Create an account to share your spaces and access them anywhere
     form(@submit.prevent="signUp")
-      input(type="email" placeholder="Email" required v-model="email" @input="clearErrors")
+      input(type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
       .badge.info(v-if="error.accountAlreadyExists") An account with this email already exists, Sign In instead
       input(type="password" placeholder="Password" required @input="clearErrors" v-model="password")
       input(type="password" placeholder="Confirm Password" required @input="clearErrors")
@@ -222,7 +222,10 @@ export default {
           currentUserIsSignedIn
         })
         this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
-        this.$store.commit('currentSpace/addUserToSpace', currentUser)
+        const userIsSpaceUser = this.$store.getters['currentUser/spaceUserPermission'](currentSpace) === 'user'
+        if (userIsSpaceUser) {
+          this.$store.commit('currentSpace/addUserToSpace', currentUser)
+        }
         this.$store.commit('clearAllNotifications', false)
         this.$store.dispatch('currentSpace/checkIfShouldNotifyReadOnly')
         this.$store.commit('notifyNewUser', false)
@@ -239,6 +242,8 @@ export default {
       const currentUser = this.$store.state.currentUser
       if (invitedSpaceIds.includes(currentSpace.id)) {
         this.$store.commit('currentSpace/addCollaboratorToSpace', currentUser)
+        this.$store.commit('broadcast/close')
+        this.$store.commit('broadcast/joinSpaceRoom')
       }
     },
 

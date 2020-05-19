@@ -7,7 +7,7 @@ article(:style="position" :data-card-id="id")
     @touchend="showCardDetails"
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
-    :class="{jiggle: isConnectingTo || isConnectingFrom || isBeingDragged, active: isConnectingTo || isConnectingFrom || isBeingDragged, 'filtered': isFiltered, 'media-card': isMediaCard}",
+    :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged, 'filtered': isFiltered, 'media-card': isMediaCard}",
     :style="{background: selectedColor}"
     :data-card-id="id"
     :data-card-x="x"
@@ -37,6 +37,8 @@ article(:style="position" :data-card-id="id")
             .connected-colors
               template(v-if="isConnectingTo || isConnectingFrom")
                 .color(:style="{ background: newConnectionColor}")
+              template(v-else-if="isRemoteConnecting")
+                .color(:style="{ background: remoteConnectionColor }")
               template(v-else v-for="type in connectionTypes")
                 .color(:style="{ background: type.color}")
 
@@ -60,6 +62,19 @@ export default {
   },
   props: {
     card: Object
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'updateRemoteCurrentConnection' || mutation.type === 'removeRemoteCurrentConnection') {
+        this.updateRemoteConnections()
+      }
+    })
+  },
+  data () {
+    return {
+      isRemoteConnecting: false,
+      remoteConnectionColor: ''
+    }
   },
   computed: {
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
@@ -183,6 +198,20 @@ export default {
     }
   },
   methods: {
+    updateRemoteConnections () {
+      const remoteCurrentConnections = this.$store.state.remoteCurrentConnections
+      const connection = remoteCurrentConnections.find(remoteConnection => {
+        const isConnectedToStart = remoteConnection.startCardId === this.id
+        const isConnectedToEnd = remoteConnection.endCardId === this.id
+        return isConnectedToStart || isConnectedToEnd
+      })
+      if (connection) {
+        this.isRemoteConnecting = true
+        this.remoteConnectionColor = connection.color
+      } else {
+        this.isRemoteConnecting = false
+      }
+    },
     longestNameLineLength () {
       const nameLines = this.normalizedName.match(/[^\n]+/g)
       let longestLineLength = 0

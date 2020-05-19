@@ -54,6 +54,13 @@ aside.notifications(@click="closeAllDialogs")
       .button-wrap
         a(href="mailto:support@kinopio.club?subject=Connection Error")
           button Email Support
+        button(@click="refreshBrowser") Refresh
+
+  .persistent-item.danger(v-if="notifySpaceOutOfSync")
+    p Space is out of sync, please refresh
+    .row
+      .button-wrap
+        button(@click="refreshBrowser") Refresh
 
   .persistent-item.success(v-if="notifyNewUser")
     p Welcome to Kinopio
@@ -67,12 +74,16 @@ aside.notifications(@click="closeAllDialogs")
 <script>
 import cache from '@/cache.js'
 import privacy from '@/spaces/privacy.js'
+import utils from '@/utils.js'
+
+let wasOffline
 
 export default {
   name: 'Notifications',
   data () {
     return {
-      notifyReadOnlyJiggle: false
+      notifyReadOnlyJiggle: false,
+      notifySpaceOutOfSync: false
     }
   },
   created () {
@@ -94,6 +105,14 @@ export default {
         if (!element) { return }
         this.notifyReadOnlyJiggle = true
         element.addEventListener('animationend', this.removeNotifyReadOnlyJiggle, false)
+      }
+      if (mutation.type === 'isOnline') {
+        const isOnline = Boolean(mutation.payload)
+        if (!isOnline) {
+          wasOffline = true
+        } else if (isOnline && wasOffline) {
+          this.checkIfShouldNotifySpaceOutOfSync()
+        }
       }
     })
   },
@@ -174,6 +193,22 @@ export default {
     },
     resetNotifyAccessFavorites () {
       this.$store.commit('notifyAccessFavorites', false)
+    },
+    async checkIfShouldNotifySpaceOutOfSync () {
+      const space = utils.clone(this.$store.state.currentSpace)
+      const canEditSpace = this.$store.getters['currentUser/canEditSpace'](space)
+      let remoteSpace
+      if (canEditSpace) {
+        remoteSpace = await this.$store.dispatch('api/getSpace', space)
+      } else {
+        remoteSpace = await this.$store.dispatch('api/getSpaceAnonymously', space)
+      }
+      if (space.updatedAt !== remoteSpace.updatedAt) {
+        this.notifySpaceOutOfSync = true
+      }
+    },
+    refreshBrowser () {
+      window.location.reload()
     }
   }
 }

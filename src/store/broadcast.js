@@ -1,28 +1,24 @@
-// client ←→ [broadcast] ←→ websocket ←→ server
-
-// actions respond to received websocket events
+// client → [broadcast] → websocket → server
 
 let reconnectAttempts = 0
 
 const self = {
   namespaced: true,
+  // triggers websocket
   mutations: {
-    // watched by websocket.js
     connect: () => {},
-    joinSpaceRoom: () => {}
-    // updateUserMeta: () => {}
+    reconnect: () => {},
+    joinSpaceRoom: () => {},
+    update: () => {},
+    close: () => {}
   },
   actions: {
     reconnect: (context) => {
       setTimeout(() => {
-        context.commit('connect')
+        context.commit('reconnect')
         reconnectAttempts += 1
-      }, 5000 * reconnectAttempts)
-    },
-    userJoinedRoom: (context, data) => {
-      context.commit('currentSpace/addSpectatorToSpace', data.user, { root: true })
+      }, Math.min(5000 * reconnectAttempts), 30 * 1000)
     }
-    // userUpdatedMeta
   }
 }
 

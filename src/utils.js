@@ -73,6 +73,7 @@ export default {
   },
 
   clone (object) {
+    this.typeCheck(object, 'object')
     let cloned = JSON.stringify(object)
     cloned = JSON.parse(cloned)
     return cloned
@@ -101,6 +102,21 @@ export default {
       })
     }
     return object
+  },
+
+  updateUsersWithUser (users, updatedUser, keys) {
+    keys = keys || ['name', 'color']
+    this.typeCheck(users, 'object')
+    this.typeCheck(updatedUser, 'object')
+    this.typeCheck(keys, 'array')
+    return users.map(user => {
+      if (user.id === updatedUser.userId) {
+        keys.forEach(key => {
+          user[key] = updatedUser[key] || user[key]
+        })
+      }
+      return user
+    })
   },
 
   // mergeArrayOfObjectsById (baseArray, newArray) {
@@ -375,7 +391,8 @@ export default {
 
   AddCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
     return spaces.map(space => {
-      if (space.userId !== currentUser.id) {
+      const userId = space.users[0].id || space.userId
+      if (userId !== currentUser.id) {
         space.currentUserIsCollaborator = true
       }
       return space
@@ -511,21 +528,22 @@ export default {
   // Broadcast Websocket 🌝
 
   userMeta (user, space) {
-    const isSpaceUser = space.users.find(spaceUser => {
+    const isUser = space.users.find(spaceUser => {
       return spaceUser.id === user.id
     })
     const spaceCollaborators = space.collaborators || []
-    const isSpaceCollaborator = spaceCollaborators.find(collaborator => {
+    const isCollaborator = spaceCollaborators.find(collaborator => {
       return collaborator.id === user.id
     })
-    const isSpectator = !(isSpaceUser || isSpaceCollaborator)
+    const isSpectator = !(isUser || isCollaborator)
     const isSignedIn = Boolean(user.apiKey)
     return {
       id: user.id,
       name: user.name,
       color: user.color,
       isSignedIn,
-      isSpectator
+      isSpectator,
+      isCollaborator
     }
   },
 
@@ -534,6 +552,24 @@ export default {
       id: space.id,
       name: space.name
     }
+  },
+
+  normalizeBroadcastUpdates (updates) {
+    if (updates.body) {
+      const keys = Object.keys(updates.body)
+      keys.forEach(key => {
+        updates[key] = updates.body[key]
+      })
+      delete updates.body
+    }
+    if (updates.updates) {
+      const keys = Object.keys(updates.updates)
+      keys.forEach(key => {
+        updates[key] = updates.updates[key]
+      })
+      delete updates.updates
+    }
+    return updates
   }
 
 }
