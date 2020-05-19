@@ -297,7 +297,7 @@ export default {
         const isBetweenX = utils.isBetween(x)
         const isBetweenY = utils.isBetween(y)
         if (isBetweenX && isBetweenY) {
-          this.$store.commit('addToMultipleCardsSelected', card.cardId)
+          this.$store.dispatch('addToMultipleCardsSelected', card.cardId)
         }
       })
     },
