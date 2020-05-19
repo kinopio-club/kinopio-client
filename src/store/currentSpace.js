@@ -914,6 +914,10 @@ export default {
         members = members.filter(user => user.id !== rootState.currentUser.id)
       }
       return members
+    },
+    memberById: (state, getters, rootState) => (id) => {
+      const members = getters.members()
+      return members.find(member => member.id === id)
     }
   }
 }

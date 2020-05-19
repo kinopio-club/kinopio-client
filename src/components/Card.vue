@@ -8,7 +8,7 @@ article(:style="position" :data-card-id="id")
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
     :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged, 'filtered': isFiltered, 'media-card': isMediaCard}",
-    :style="{background: selectedColor}"
+    :style="{background: selectedColor || remoteSelectedColor}"
     :data-card-id="id"
     :data-card-x="x"
     :data-card-y="y"
@@ -164,6 +164,16 @@ export default {
         return undefined
       }
     },
+    remoteSelectedColor () {
+      const remoteCardsSelected = this.$store.state.remoteCardsSelected
+      const selectedCard = remoteCardsSelected.find(card => card.cardId === this.id)
+      if (selectedCard) {
+        const user = this.$store.getters['currentSpace/memberById'](selectedCard.userId)
+        return user.color
+      } else {
+        return undefined
+      }
+    },
     hasConnections () {
       const connections = this.$store.getters['currentSpace/cardConnections'](this.id)
       return Boolean(connections.length)
@@ -245,7 +255,7 @@ export default {
       if (!this.canEditSpace) { return }
       this.$store.commit('closeAllDialogs')
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
-      this.$store.commit('clearMultipleSelected')
+      this.$store.dispatch('clearMultipleSelected')
       if (!this.$store.state.currentUserIsDrawingConnection) {
         this.addConnectionType()
         this.createCurrentConnection(event)
@@ -255,7 +265,7 @@ export default {
     checkIfShouldDragMultipleCards () {
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
       if (!multipleCardsSelectedIds.includes(this.id)) {
-        this.$store.commit('clearMultipleSelected')
+        this.$store.dispatch('clearMultipleSelected')
       }
     },
     startDraggingCard () {

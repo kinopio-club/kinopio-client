@@ -78,21 +78,26 @@ export default function createWebSocketPlugin () {
           data = JSON.parse(data)
           if (data.clientId === clientId) { return }
           console.log('🌛', data)
-          if (data.message === 'connected') {
-          } else if (data.message === 'userJoinedRoom') {
-            store.dispatch('currentSpace/addUserToJoinedSpace', data.user)
-          } else if (data.message === 'userLeftRoom') {
-            store.commit('currentSpace/removeSpectatorFromSpace', data.user)
-          } else if (data.message === 'userLeftSpace') {
-            store.commit('currentSpace/removeCollaboratorFromSpace', data.updates.user)
-          } else if (data.message === 'updateRemoteCurrentConnection') {
-            store.commit('updateRemoteCurrentConnection', data.updates)
-          } else if (data.message === 'removeRemoteCurrentConnection') {
-            store.commit('removeRemoteCurrentConnection', data.updates)
-          } else if (data.message === 'addRemotePaintingCircle') {
-            store.commit('triggerAddRemotePaintingCircle', data.updates)
+          let { message, user, updates } = data
+          if (message === 'connected') {
+          } else if (message === 'userJoinedRoom') {
+            store.dispatch('currentSpace/addUserToJoinedSpace', user)
+          } else if (message === 'userLeftRoom') {
+            store.commit('currentSpace/removeSpectatorFromSpace', user)
+          } else if (message === 'userLeftSpace') {
+            store.commit('currentSpace/removeCollaboratorFromSpace', updates.user)
+          } else if (message === 'updateRemoteCurrentConnection') {
+            store.commit('updateRemoteCurrentConnection', updates)
+          } else if (message === 'removeRemoteCurrentConnection') {
+            store.commit('removeRemoteCurrentConnection', updates)
+          } else if (message === 'addRemotePaintingCircle') {
+            store.commit('triggerAddRemotePaintingCircle', updates)
+          } else if (message === 'addToRemoteCardsSelected') {
+            store.commit('addToRemoteCardsSelected', updates)
+          } else if (message === 'clearRemoteCardsSelected') {
+            store.commit('clearRemoteCardsSelected', updates.user)
           } else {
-            store.commit(`currentSpace/${data.message}`, data.updates)
+            store.commit(`currentSpace/${message}`, updates)
             checkIfShouldUpdateWindowUrlAndTitle(store, data)
           }
         }

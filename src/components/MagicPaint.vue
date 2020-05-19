@@ -251,7 +251,7 @@ export default {
       if (!multipleCardsIsSelected && !dialogIsVisible) {
         this.$store.commit('shouldAddCard', true)
       }
-      this.$store.commit('clearMultipleSelected')
+      this.$store.dispatch('clearMultipleSelected')
       this.$store.commit('generateCardMap')
       this.$store.commit('closeAllDialogs')
       initialCircles.map(circle => {
@@ -297,7 +297,7 @@ export default {
         const isBetweenX = utils.isBetween(x)
         const isBetweenY = utils.isBetween(y)
         if (isBetweenX && isBetweenY) {
-          this.$store.commit('addToMultipleCardsSelected', card.cardId)
+          this.$store.dispatch('addToMultipleCardsSelected', card.cardId)
         }
       })
     },

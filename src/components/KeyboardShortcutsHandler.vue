@@ -337,7 +337,7 @@ export default {
     },
 
     clearAllSelectedCards () {
-      this.$store.commit('clearMultipleSelected')
+      this.$store.dispatch('clearMultipleSelected')
       this.$store.commit('cardDetailsIsVisibleForCardId', '')
     },
 
