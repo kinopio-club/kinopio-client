@@ -8,7 +8,7 @@ article(:style="position" :data-card-id="id")
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
     :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged, 'filtered': isFiltered, 'media-card': isMediaCard}",
-    :style="{background: selectedColor}"
+    :style="{background: selectedColor || remoteSelectedColor}"
     :data-card-id="id"
     :data-card-x="x"
     :data-card-y="y"
@@ -160,6 +160,16 @@ export default {
       const color = this.$store.state.currentUser.color
       if (this.isSelected) {
         return color
+      } else {
+        return undefined
+      }
+    },
+    remoteSelectedColor () {
+      const remoteCardsSelected = this.$store.state.remoteCardsSelected
+      const selectedCard = remoteCardsSelected.find(card => card.cardId === this.id)
+      if (selectedCard) {
+        const user = this.$store.getters['currentSpace/memberById'](selectedCard.userId)
+        return user.color
       } else {
         return undefined
       }

@@ -348,29 +348,18 @@ export default new Vuex.Store({
 
     addToRemoteCardsSelected: (state, update) => {
       utils.typeCheck(update, 'object')
-
-      // {} update.userId, update.cardid
-
-      // const isSelected = state.remoteCardsSelected.find(card => {
-      // x = card.cardId === update.cardId
-      // y= card.userId === update.userId)
-      // return x && y
-      // })
-
-      // if (isSelected) { return }
-
-      // state.remoteCardsSelected.push(update)
-      // [{userid, cardid}]
-
-      console.log('🌹🌹add', update)
+      delete update.type
+      const isSelected = state.remoteCardsSelected.find(card => {
+        const cardIsSelected = card.cardId === update.cardId
+        const selectedByUser = card.userId === update.userId
+        return cardIsSelected && selectedByUser
+      })
+      if (isSelected) { return }
+      state.remoteCardsSelected.push(update)
     },
     clearRemoteCardsSelected: (state, user) => {
       utils.typeCheck(user, 'object')
-
-      console.log('clear', user)
-      // map remoteCardsSelected if .userId === user.id return blank
-      // filter out userid, return
-      // state.remoteCardsSelected = remoteCardsSelected
+      state.remoteCardsSelected = state.remoteCardsSelected.filter(card => card.userId !== user.id)
     },
 
     // Loading
@@ -493,7 +482,7 @@ export default new Vuex.Store({
     },
     clearMultipleSelected: (context) => {
       context.commit('clearMultipleSelected')
-      const user = context.rootState.currentUser
+      const user = { id: context.rootState.currentUser.id }
       context.commit('broadcast/update', { user, type: 'clearRemoteCardsSelected' }, { root: true })
     }
   },
