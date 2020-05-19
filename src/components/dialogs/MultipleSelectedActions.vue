@@ -317,7 +317,7 @@ export default {
       this.editableConnections.forEach(connection => this.$store.dispatch('currentSpace/removeConnection', connection))
       this.editableCards.forEach(card => this.$store.dispatch('currentSpace/removeCard', card))
       this.$store.commit('closeAllDialogs')
-      this.$store.commit('clearMultipleSelected')
+      this.$store.dispatch('clearMultipleSelected')
     },
     scrollIntoView () {
       const element = this.$refs.dialog

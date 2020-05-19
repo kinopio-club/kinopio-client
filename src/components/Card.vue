@@ -245,7 +245,7 @@ export default {
       if (!this.canEditSpace) { return }
       this.$store.commit('closeAllDialogs')
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
-      this.$store.commit('clearMultipleSelected')
+      this.$store.dispatch('clearMultipleSelected')
       if (!this.$store.state.currentUserIsDrawingConnection) {
         this.addConnectionType()
         this.createCurrentConnection(event)
@@ -255,7 +255,7 @@ export default {
     checkIfShouldDragMultipleCards () {
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
       if (!multipleCardsSelectedIds.includes(this.id)) {
-        this.$store.commit('clearMultipleSelected')
+        this.$store.dispatch('clearMultipleSelected')
       }
     },
     startDraggingCard () {

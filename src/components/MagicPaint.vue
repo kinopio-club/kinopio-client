@@ -251,7 +251,7 @@ export default {
       if (!multipleCardsIsSelected && !dialogIsVisible) {
         this.$store.commit('shouldAddCard', true)
       }
-      this.$store.commit('clearMultipleSelected')
+      this.$store.dispatch('clearMultipleSelected')
       this.$store.commit('generateCardMap')
       this.$store.commit('closeAllDialogs')
       initialCircles.map(circle => {
