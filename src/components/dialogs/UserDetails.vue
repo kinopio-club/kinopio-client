@@ -7,7 +7,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
       .row
         User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
         p.name {{user.name}}
-    .row.badges(v-if="user.isSpectator")
+    .row.badges(v-if="user.isSpectator || !userIsMember")
       .badge Spectator
 
   //- Current User
@@ -18,6 +18,8 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
           .current-color(:style="backgroundColor")
         ColorPicker(:currentColor="userColor" :visible="colorPickerIsVisible" @selectedColor="updateUserColor")
       input.name(placeholder="What's your name?" v-model="userName" name="Name")
+    .row.badges(v-if="user.isSpectator || !userIsMember")
+      .badge Spectator
   section(v-if="isCurrentUser")
     .button-wrap
       button(@click.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}")
@@ -97,6 +99,9 @@ export default {
     // },
     userColor () {
       return this.user.color
+    },
+    userIsMember () {
+      return Boolean(this.$store.getters['currentSpace/memberById'](this.user.id))
     },
     backgroundColor () {
       return {
