@@ -102,6 +102,7 @@ export default function createWebSocketPlugin () {
             store.commit('addToRemoteConnectionsSelected', updates)
           } else if (message === 'clearRemoteMultipleSelected') {
             store.commit('clearRemoteMultipleSelected', updates.user)
+          } else if (message === 'addSpectatorToSpace') {
             store.commit('currentSpace/addSpectatorToSpace', updates.user)
           } else if (message === 'updateRemoteUserCursor') {
             store.commit('triggerUpdateRemoteUserCursor', updates)
@@ -124,6 +125,11 @@ export default function createWebSocketPlugin () {
         }
         joinSpaceRoom(store, mutation)
       } else if (mutation.type === 'broadcast/update') {
+        const canEditSpace = store.getters['currentUser/canEditSpace']()
+        if (canEditSpace) {
+          sendEvent(store, mutation)
+        }
+      } else if (mutation.type === 'broadcast/updateUser') {
         sendEvent(store, mutation)
       } else if (mutation.type === 'broadcast/close') {
         closeWebsocket()

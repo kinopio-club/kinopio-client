@@ -512,6 +512,7 @@ export default new Vuex.Store({
       const space = utils.clone(context.rootState.currentSpace)
       const user = utils.clone(context.rootState.currentUser)
       context.commit('broadcast/update', { user: utils.userMeta(user, space), type: 'clearRemoteMultipleSelected' }, { root: true })
+      context.commit('broadcast/updateUser', { user: utils.userMeta(user, space), type: 'addSpectatorToSpace' }, { root: true })
     },
     addToMultipleConnectionsSelected: (context, connectionId) => {
       utils.typeCheck(connectionId, 'string')
