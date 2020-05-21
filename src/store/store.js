@@ -383,8 +383,9 @@ export default new Vuex.Store({
       if (isSelected) { return }
       state.remoteConnectionsSelected.push(update)
     },
-    clearRemoteMultipleSelected: (state, user) => {
-      utils.typeCheck(user, 'object')
+    clearRemoteMultipleSelected: (state, update) => {
+      utils.typeCheck(update, 'object')
+      const user = update.user
       state.remoteCardsSelected = state.remoteCardsSelected.filter(card => card.userId !== user.id)
       state.remoteConnectionsSelected = state.remoteConnectionsSelected.filter(connection => connection.userId !== user.id)
     },
@@ -505,13 +506,13 @@ export default new Vuex.Store({
         userId: context.rootState.currentUser.id,
         cardId
       }
-      context.commit('broadcast/update', { updates, type: 'addToRemoteCardsSelected' }, { root: true })
+      context.commit('broadcast/updateStore', { updates, type: 'addToRemoteCardsSelected' }, { root: true })
     },
     clearMultipleSelected: (context) => {
       context.commit('clearMultipleSelected')
       const space = utils.clone(context.rootState.currentSpace)
       const user = utils.clone(context.rootState.currentUser)
-      context.commit('broadcast/update', { user: utils.userMeta(user, space), type: 'clearRemoteMultipleSelected' }, { root: true })
+      context.commit('broadcast/updateStore', { user: utils.userMeta(user, space), type: 'clearRemoteMultipleSelected' }, { root: true })
       context.commit('broadcast/updateUser', { user: utils.userMeta(user, space), type: 'addSpectatorToSpace' }, { root: true })
     },
     addToMultipleConnectionsSelected: (context, connectionId) => {
@@ -522,7 +523,7 @@ export default new Vuex.Store({
         userId: context.rootState.currentUser.id,
         connectionId
       }
-      context.commit('broadcast/update', { updates, type: 'addToRemoteConnectionsSelected' }, { root: true })
+      context.commit('broadcast/updateStore', { updates, type: 'addToRemoteConnectionsSelected' }, { root: true })
     }
   },
   getters: {

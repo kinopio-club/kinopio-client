@@ -26,7 +26,7 @@ const joinSpaceRoom = (store, mutation) => {
   }))
 }
 
-const sendEvent = (store, mutation) => {
+const sendEvent = (store, mutation, type) => {
   if (!websocket || !currentUserIsConnected) { return }
   const message = mutation.payload.type
   let updates = mutation.payload
@@ -39,7 +39,8 @@ const sendEvent = (store, mutation) => {
     message,
     updates,
     clientId,
-    space: utils.spaceMeta(space)
+    space: utils.spaceMeta(space),
+    type
   }))
 }
 
@@ -90,26 +91,12 @@ export default function createWebSocketPlugin () {
             store.commit('currentSpace/removeSpectatorFromSpace', user)
           } else if (message === 'userLeftSpace') {
             store.commit('currentSpace/removeCollaboratorFromSpace', updates.user)
-          } else if (message === 'updateRemoteCurrentConnection') {
-            store.commit('updateRemoteCurrentConnection', updates)
-          } else if (message === 'removeRemoteCurrentConnection') {
-            store.commit('removeRemoteCurrentConnection', updates)
           } else if (message === 'addRemotePaintingCircle') {
             store.commit('triggerAddRemotePaintingCircle', updates)
-          } else if (message === 'addToRemoteCardsSelected') {
-            store.commit('addToRemoteCardsSelected', updates)
-          } else if (message === 'addToRemoteConnectionsSelected') {
-            store.commit('addToRemoteConnectionsSelected', updates)
-          } else if (message === 'clearRemoteMultipleSelected') {
-            store.commit('clearRemoteMultipleSelected', updates.user)
-          } else if (message === 'addSpectatorToSpace') {
-            store.commit('currentSpace/addSpectatorToSpace', updates.user)
           } else if (message === 'updateRemoteUserCursor') {
             store.commit('triggerUpdateRemoteUserCursor', updates)
-          } else if (message === 'updateRemoteCardDetailsVisible') {
-            store.commit('updateRemoteCardDetailsVisible', updates)
-          } else if (message === 'clearRemoteCardDetailsVisible') {
-            store.commit('clearRemoteCardDetailsVisible', updates)
+          } else if (data.type === 'store') {
+            store.commit(`${message}`, updates)
           } else {
             store.commit(`currentSpace/${message}`, updates)
             checkIfShouldUpdateWindowUrlAndTitle(store, data)
@@ -126,11 +113,12 @@ export default function createWebSocketPlugin () {
         joinSpaceRoom(store, mutation)
       } else if (mutation.type === 'broadcast/update') {
         const canEditSpace = store.getters['currentUser/canEditSpace']()
-        if (canEditSpace) {
-          sendEvent(store, mutation)
-        }
+        if (!canEditSpace) { return }
+        sendEvent(store, mutation)
       } else if (mutation.type === 'broadcast/updateUser') {
         sendEvent(store, mutation)
+      } else if (mutation.type === 'broadcast/updateStore') {
+        sendEvent(store, mutation, 'store')
       } else if (mutation.type === 'broadcast/close') {
         closeWebsocket()
       } else if (mutation.type === 'broadcast/reconnect') {

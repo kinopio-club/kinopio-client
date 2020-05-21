@@ -49,7 +49,8 @@ export default {
       cache.saveSpace(space)
       cache.updateSpace('collaborators', space.collaborators, space.id)
     },
-    addSpectatorToSpace: (state, newUser) => {
+    addSpectatorToSpace: (state, update) => {
+      const newUser = update.user
       utils.typeCheck(newUser, 'object')
       const userExists = state.users.find(user => user.id === newUser.id)
       const collaboratorExists = state.collaborators.find(collaborator => collaborator.id === newUser.id)

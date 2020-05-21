@@ -209,7 +209,7 @@ export default {
         startCardId,
         path
       }
-      this.$store.commit('broadcast/update', { updates, type: 'updateRemoteCurrentConnection' })
+      this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
     },
     checkCurrentConnectionSuccess () {
       const cursor = this.cursor()
@@ -233,13 +233,13 @@ export default {
       if (!connection) {
         this.$store.commit('currentConnectionSuccess', {})
         updates.endCardId = null
-        this.$store.commit('broadcast/update', { updates, type: 'updateRemoteCurrentConnection' })
+        this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
         return
       }
       if (this.$store.state.currentConnection.startCardId !== connection.cardId) {
         this.$store.commit('currentConnectionSuccess', connection)
         updates.endCardId = connection.cardId
-        this.$store.commit('broadcast/update', { updates, type: 'updateRemoteCurrentConnection' })
+        this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
       } else {
         this.$store.commit('currentConnectionSuccess', {})
       }
@@ -329,7 +329,7 @@ export default {
       const isCurrentConnection = utils.objectHasKeys(this.$store.state.currentConnection)
       if (isCurrentConnection) {
         this.$store.commit('currentConnection', {})
-        this.$store.commit('broadcast/update', { updates: { id: this.$store.state.currentUser.id }, type: 'removeRemoteCurrentConnection' })
+        this.$store.commit('broadcast/updateStore', { updates: { id: this.$store.state.currentUser.id }, type: 'removeRemoteCurrentConnection' })
       }
       this.updatePageSizes()
       this.currentConnectionPath = undefined

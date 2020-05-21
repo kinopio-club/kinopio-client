@@ -307,7 +307,7 @@ export default {
         cardId: this.card.id,
         userId: this.$store.state.currentUser.id
       }
-      this.$store.commit('broadcast/update', { updates, type: 'updateRemoteCardDetailsVisible' })
+      this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
     }
 
   }

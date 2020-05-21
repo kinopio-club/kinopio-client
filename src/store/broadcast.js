@@ -11,6 +11,7 @@ const self = {
     joinSpaceRoom: () => {},
     update: () => {},
     updateUser: () => {},
+    updateStore: () => {},
     close: () => {}
   },
   actions: {

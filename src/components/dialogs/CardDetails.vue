@@ -242,7 +242,7 @@ export default {
         }
       })
       if (!visible) {
-        this.$store.commit('broadcast/update', { updates: { userId: this.$store.state.currentUser.id }, type: 'clearRemoteCardDetailsVisible' })
+        this.$store.commit('broadcast/updateStore', { updates: { userId: this.$store.state.currentUser.id }, type: 'clearRemoteCardDetailsVisible' })
       }
       if (!visible && this.cardIsEmpty()) {
         this.$store.dispatch('currentSpace/removeCard', this.card)
