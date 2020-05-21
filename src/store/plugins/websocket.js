@@ -99,6 +99,8 @@ export default function createWebSocketPlugin () {
           } else if (message === 'clearRemoteMultipleSelected') {
             store.commit('clearRemoteMultipleSelected', updates.user)
             store.commit('currentSpace/addSpectatorToSpace', updates.user)
+          } else if (message === 'updateRemoteUserCursor') {
+            store.commit('triggerUpdateRemoteUserCursor', updates)
           } else {
             store.commit(`currentSpace/${message}`, updates)
             checkIfShouldUpdateWindowUrlAndTitle(store, data)

@@ -201,6 +201,7 @@ export default new Vuex.Store({
       state.triggeredPaintFramePosition = cursor
     },
     triggerAddRemotePaintingCircle: () => {},
+    triggerUpdateRemoteUserCursor: () => {},
 
     // Connecting
 

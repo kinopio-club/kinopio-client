@@ -5,7 +5,7 @@
 </template>
 
 <script>
-const maxIterations = 180 // 👀 MagicPaint maxIterations
+const maxIterations = 200 // 👀 MagicPaint maxIterations
 let visibleTimer, currentIteration
 
 export default {
@@ -15,14 +15,14 @@ export default {
   },
   mounted () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerAddRemotePaintingCircle') {
-        const circle = mutation.payload
-        if (circle.userId === this.user.id) {
-          this.left = (circle.x - 5) + 'px'
-          this.top = (circle.y - 10) + 'px'
-          this.color = circle.color
-          this.userLabelVisibleTimer()
-        }
+      if (mutation.type === 'triggerUpdateRemoteUserCursor') {
+        const cursor = mutation.payload
+        if (cursor.userId !== this.user.id) { return }
+        this.left = (cursor.x + 10) + 'px'
+        this.top = (cursor.y - 10) + 'px'
+        this.color = this.user.color
+        currentIteration = 0
+        this.userLabelVisibleTimer()
       }
     })
   },
@@ -63,6 +63,7 @@ export default {
 .user-label
   pointer-events none
   position absolute
+  z-index calc(var(--max-z) - 50)
   .anon-avatar
     width 15px
     height 15px
