@@ -114,6 +114,9 @@ export default {
           this.checkIfShouldNotifySpaceOutOfSync()
         }
       }
+      if (mutation.type === 'currentSpace/restoreSpace') {
+        this.notifySpaceOutOfSync = false
+      }
     })
   },
   computed: {
