@@ -124,26 +124,6 @@ export default new Vuex.Store({
       utils.typeCheck(width, 'number')
       state.pageWidth = width
     },
-    shouldAddCard: (state, value) => {
-      utils.typeCheck(value, 'boolean')
-      state.shouldAddCard = value
-    },
-    currentUserIsHoveringOverConnectionId: (state, connectionId) => {
-      utils.typeCheck(connectionId, 'string')
-      state.currentUserIsHoveringOverConnectionId = connectionId
-    },
-    cardDetailsIsVisibleForCardId: (state, cardId) => {
-      utils.typeCheck(cardId, 'string')
-      state.cardDetailsIsVisibleForCardId = cardId
-    },
-    parentCardId: (state, cardId) => {
-      utils.typeCheck(cardId, 'string')
-      state.parentCardId = cardId
-    },
-    childCardId: (state, cardId) => {
-      utils.typeCheck(cardId, 'string')
-      state.childCardId = cardId
-    },
     closeAllDialogs: (state) => {
       state.multipleSelectedActionsIsVisible = false
       state.cardDetailsIsVisibleForCardId = ''
@@ -164,14 +144,6 @@ export default new Vuex.Store({
     newStuffIsUpdated: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.newStuffIsUpdated = value
-    },
-    addToCopiedCards: (state, cards) => {
-      utils.typeCheck(cards, 'array')
-      cards = cards.map(card => {
-        card = utils.clone(card)
-        return card
-      })
-      state.copiedCards = cards
     },
     resetPasswordApiKey: (state, apiKey) => {
       utils.typeCheck(apiKey, 'string')
@@ -202,6 +174,37 @@ export default new Vuex.Store({
     },
     triggerAddRemotePaintingCircle: () => {},
     triggerUpdateRemoteUserCursor: () => {},
+
+    // Cards
+
+    shouldAddCard: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.shouldAddCard = value
+    },
+    currentUserIsHoveringOverConnectionId: (state, connectionId) => {
+      utils.typeCheck(connectionId, 'string')
+      state.currentUserIsHoveringOverConnectionId = connectionId
+    },
+    cardDetailsIsVisibleForCardId: (state, cardId) => {
+      utils.typeCheck(cardId, 'string')
+      state.cardDetailsIsVisibleForCardId = cardId
+    },
+    parentCardId: (state, cardId) => {
+      utils.typeCheck(cardId, 'string')
+      state.parentCardId = cardId
+    },
+    childCardId: (state, cardId) => {
+      utils.typeCheck(cardId, 'string')
+      state.childCardId = cardId
+    },
+    addToCopiedCards: (state, cards) => {
+      utils.typeCheck(cards, 'array')
+      cards = cards.map(card => {
+        card = utils.clone(card)
+        return card
+      })
+      state.copiedCards = cards
+    },
 
     // Connecting
 
