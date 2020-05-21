@@ -27,11 +27,13 @@ const joinSpaceRoom = (store, mutation) => {
 }
 
 const sendEvent = (store, mutation) => {
-  if (!websocket) { return }
+  if (!websocket || !currentUserIsConnected) { return }
   const message = mutation.payload.type
   let updates = mutation.payload
   updates = utils.normalizeBroadcastUpdates(updates)
-  console.log('🌜', updates)
+  if (updates.type !== 'updateRemoteUserCursor') {
+    console.log('🌜', updates)
+  }
   const space = utils.clone(store.state.currentSpace)
   websocket.send(JSON.stringify({
     message,
@@ -77,7 +79,9 @@ export default function createWebSocketPlugin () {
         websocket.onmessage = ({ data }) => {
           data = JSON.parse(data)
           if (data.clientId === clientId) { return }
-          console.log('🌛', data)
+          if (data.message !== 'updateRemoteUserCursor') {
+            console.log('🌛', data)
+          }
           let { message, user, updates } = data
           if (message === 'connected') {
           } else if (message === 'userJoinedRoom') {
@@ -101,6 +105,10 @@ export default function createWebSocketPlugin () {
             store.commit('currentSpace/addSpectatorToSpace', updates.user)
           } else if (message === 'updateRemoteUserCursor') {
             store.commit('triggerUpdateRemoteUserCursor', updates)
+          } else if (message === 'updateRemoteCardDetailsVisible') {
+            store.commit('updateRemoteCardDetailsVisible', updates)
+          } else if (message === 'clearRemoteCardDetailsVisible') {
+            store.commit('clearRemoteCardDetailsVisible', updates)
           } else {
             store.commit(`currentSpace/${message}`, updates)
             checkIfShouldUpdateWindowUrlAndTitle(store, data)

@@ -8,7 +8,7 @@ article(:style="position" :data-card-id="id")
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
     :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged, 'filtered': isFiltered, 'media-card': isMediaCard}",
-    :style="{background: selectedColor || remoteSelectedColor}"
+    :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor}"
     :data-card-id="id"
     :data-card-x="x"
     :data-card-y="y"
@@ -47,7 +47,7 @@ article(:style="position" :data-card-id="id")
             template(v-else)
               img.connector-icon(src="@/assets/connector-open.svg")
 
-  CardDetails(:card="card")
+  CardDetails(:card="card" @broadcastShowCardDetails="broadcastShowCardDetails")
 </template>
 
 <script>
@@ -160,6 +160,16 @@ export default {
       const color = this.$store.state.currentUser.color
       if (this.isSelected) {
         return color
+      } else {
+        return undefined
+      }
+    },
+    remoteCardDetailsVisibleColor () {
+      const remoteCardDetailsVisible = this.$store.state.remoteCardDetailsVisible
+      const visibleCard = remoteCardDetailsVisible.find(card => card.cardId === this.id)
+      if (visibleCard) {
+        const user = this.$store.getters['currentSpace/memberById'](visibleCard.userId)
+        return user.color
       } else {
         return undefined
       }
@@ -287,10 +297,19 @@ export default {
       this.$store.commit('cardDetailsIsVisibleForCardId', this.id)
       this.$store.commit('parentCardId', this.id)
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
+      this.broadcastShowCardDetails()
     },
     openUrl (url) {
       window.location.href = url
+    },
+    broadcastShowCardDetails () {
+      const updates = {
+        cardId: this.card.id,
+        userId: this.$store.state.currentUser.id
+      }
+      this.$store.commit('broadcast/update', { updates, type: 'updateRemoteCardDetailsVisible' })
     }
+
   }
 }
 </script>

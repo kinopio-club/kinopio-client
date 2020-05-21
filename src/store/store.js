@@ -48,6 +48,7 @@ export default new Vuex.Store({
     cardDetailsIsVisibleForCardId: '',
     parentCardId: '',
     childCardId: '',
+    remoteCardDetailsVisible: [],
 
     // connecting
     currentConnection: {}, // startCardId, startConnectorRect
@@ -204,6 +205,18 @@ export default new Vuex.Store({
         return card
       })
       state.copiedCards = cards
+    },
+    updateRemoteCardDetailsVisible: (state, update) => {
+      utils.typeCheck(update, 'object')
+      delete update.type
+      let cardDetailsVisible = utils.clone(state.remoteCardDetailsVisible)
+      cardDetailsVisible = cardDetailsVisible.filter(card => card.id !== update.cardId) || []
+      cardDetailsVisible.push(update)
+      state.remoteCardDetailsVisible = cardDetailsVisible
+    },
+    clearRemoteCardDetailsVisible: (state, update) => {
+      utils.typeCheck(update, 'object')
+      state.remoteCardDetailsVisible = state.remoteCardDetailsVisible.filter(card => card.userId !== update.userId) || []
     },
 
     // Connecting

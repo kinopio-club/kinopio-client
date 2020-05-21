@@ -92,6 +92,7 @@ export default {
     const element = this.$refs.dialog
     if (element) {
       this.scrollIntoViewAndFocus()
+      this.$emit('broadcastShowCardDetails')
     }
   },
   computed: {
@@ -240,6 +241,9 @@ export default {
           this.scrollIntoViewAndFocus()
         }
       })
+      if (!visible) {
+        this.$store.commit('broadcast/update', { updates: { userId: this.$store.state.currentUser.id }, type: 'clearRemoteCardDetailsVisible' })
+      }
       if (!visible && this.cardIsEmpty()) {
         this.$store.dispatch('currentSpace/removeCard', this.card)
       }
