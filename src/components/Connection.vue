@@ -87,6 +87,8 @@ export default {
       return isSelected
     },
     detailsIsVisible () {
+      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
+      if (!canEditSpace) { return }
       const detailsId = this.$store.state.connectionDetailsIsVisibleForConnectionId
       return detailsId === this.id
     },

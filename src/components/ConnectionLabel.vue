@@ -6,7 +6,7 @@
   :data-id="id"
   @mouseover="hover = true"
   @mouseleave="hover = false"
-  :class="{filtered: isFiltered, 'cursor-default': !canEditSpace}"
+  :class="{filtered: isFiltered}"
   ref="label"
 )
   span {{typeName}}
@@ -75,7 +75,6 @@ export default {
   methods: {
     // same as Connection method
     showConnectionDetails (event) {
-      if (!this.canEditSpace) { return }
       const detailsPosition = utils.cursorPositionInPage(event)
       this.$store.commit('closeAllDialogs')
       this.$store.commit('connectionDetailsIsVisibleForConnectionId', this.id)
@@ -117,7 +116,6 @@ export default {
       this.setPosition()
     },
     hover (value) {
-      if (!this.canEditSpace) { return }
       if (value) {
         this.$store.commit('currentUserIsHoveringOverConnectionId', this.id)
       } else {
