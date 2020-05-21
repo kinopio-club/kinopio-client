@@ -1,10 +1,12 @@
 <template lang="pug">
-.user-label.badge(v-if="visible" :data-id="user.id" :style="{ background: color, left, top }")
+.user-label.badge(v-if="visible" :data-id="user.id" :style="{ background: color, left: left + 'px', top: top + 'px' }")
   .user-avatar.anon-avatar
-  span {{ user.name }}
+  span.user-name(v-if="isOnscreen && userHasName") {{ user.name }}
 </template>
 
 <script>
+import utils from '@/utils.js'
+
 const maxIterations = 200 // 👀 MagicPaint maxIterations
 let visibleTimer, currentIteration
 
@@ -18,11 +20,13 @@ export default {
       if (mutation.type === 'triggerUpdateRemoteUserCursor') {
         const cursor = mutation.payload
         if (cursor.userId !== this.user.id) { return }
-        this.left = (cursor.x + 10) + 'px'
-        this.top = (cursor.y - 10) + 'px'
+        this.left = cursor.x + 10
+        this.top = cursor.y - 10
         this.color = this.user.color
         currentIteration = 0
         this.userLabelVisibleTimer()
+        this.checkIsOnscreen()
+        this.offscreenLabelPosition()
       }
     })
   },
@@ -31,10 +35,33 @@ export default {
       left: 0,
       top: 0,
       color: '',
-      visible: false
+      visible: false,
+      isOnscreen: true,
+      isOffscreenX: false,
+      isOffscreenY: false
+    }
+  },
+  computed: {
+    userHasName () {
+      return Boolean(this.user.name)
     }
   },
   methods: {
+    checkIsOnscreen () {
+      const isBetweenX = utils.isBetween({
+        value: this.left,
+        min: window.scrollX,
+        max: window.scrollX + this.$store.state.viewportWidth
+      })
+      const isBetweenY = utils.isBetween({
+        value: this.top,
+        min: window.scrollY,
+        max: window.scrollY + this.$store.state.viewportHeight
+      })
+      this.isOffscreenX = !isBetweenX
+      this.isOffscreenY = !isBetweenY
+      this.isOnscreen = isBetweenX && isBetweenY
+    },
     userLabelVisibleTimer () {
       if (!visibleTimer) {
         this.visible = true
@@ -52,6 +79,25 @@ export default {
           visibleTimer = undefined
           this.visible = false
         }, 0)
+      }
+    },
+    offscreenLabelPosition () {
+      if (this.isOnscreen) { return }
+      const minX = window.scrollX
+      const maxX = window.scrollX + this.$store.state.viewportWidth
+      const minY = window.scrollY
+      const maxY = window.scrollY + this.$store.state.viewportHeight
+      if (this.isOffscreenX && this.left < minX) {
+        this.left = minX - 4
+      }
+      if (this.isOffscreenX && this.left > maxX) {
+        this.left = maxX - 22
+      }
+      if (this.isOffscreenY && this.top < minY) {
+        this.top = minY - 2
+      }
+      if (this.isOffscreenY && this.top > maxY) {
+        this.top = maxY - 16
       }
     }
 
@@ -71,5 +117,6 @@ export default {
     background-repeat no-repeat
     background-position center
     vertical-align middle
-    margin-right 6px
+  .user-name
+    margin-left 6px
 </style>
