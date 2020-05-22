@@ -849,6 +849,13 @@ export default {
     isHelloKinopio: (state) => {
       return state.name === 'Hello Kinopio'
     },
+    shouldBroadcast: (state) => {
+      const users = state.users.length
+      const collaborators = state.collaborators.length
+      const spectators = state.spectators.length
+      const total = users + collaborators + spectators
+      return Boolean(total > 1)
+    },
 
     // Cards
     cardById: (state) => (id) => {

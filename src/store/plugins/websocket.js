@@ -28,6 +28,8 @@ const joinSpaceRoom = (store, mutation) => {
 
 const sendEvent = (store, mutation, type) => {
   if (!websocket || !currentUserIsConnected) { return }
+  const shouldBroadcast = store.getters['currentSpace/shouldBroadcast']
+  if (!shouldBroadcast) { return }
   const message = mutation.payload.type
   let updates = mutation.payload
   updates = utils.normalizeBroadcastUpdates(updates)
@@ -56,11 +58,7 @@ const checkIfShouldUpdateWindowUrlAndTitle = (store, data) => {
 
 const closeWebsocket = (store) => {
   if (!websocket) { return }
-  const space = utils.clone(store.state.currentSpace)
-  websocket.close(JSON.stringify({
-    clientId,
-    space: utils.spaceMeta(space)
-  }))
+  websocket.close()
 }
 
 export default function createWebSocketPlugin () {
