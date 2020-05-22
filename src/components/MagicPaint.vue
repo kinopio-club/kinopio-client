@@ -253,7 +253,7 @@ export default {
       }
       this.$store.dispatch('clearMultipleSelected')
       this.$store.commit('generateCardMap')
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       initialCircles.map(circle => {
         circle.persistent = false
       })

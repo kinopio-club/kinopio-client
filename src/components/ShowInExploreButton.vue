@@ -56,7 +56,7 @@ export default {
       this.$emit('updateSpaces')
     },
     triggerSignUpOrInIsVisible () {
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerSignUpOrInIsVisible')
     }
 

@@ -263,7 +263,7 @@ export default {
     },
     startConnecting (event) {
       if (!this.canEditSpace) { return }
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.dispatch('clearMultipleSelected')
       if (!this.$store.state.currentUserIsDrawingConnection) {
@@ -281,7 +281,7 @@ export default {
     startDraggingCard () {
       if (!this.canEditCard) { return }
       if (this.$store.state.currentUserIsDrawingConnection) { return }
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('currentUserIsDraggingCard', true)
       this.$store.commit('currentDraggingCardId', this.id)
       this.$store.commit('parentCardId', this.id)
@@ -292,7 +292,7 @@ export default {
     showCardDetails (event) {
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       this.$store.commit('currentUserIsDraggingCard', false)
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
       this.$store.commit('cardDetailsIsVisibleForCardId', this.id)
       this.$store.commit('parentCardId', this.id)

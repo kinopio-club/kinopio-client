@@ -100,7 +100,7 @@ export default {
     },
     triggerSpaceDetailsVisible () {
       this.$store.dispatch('clearMultipleSelected')
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerSpaceDetailsVisible')
     },
     toggleSpacePickerIsVisible () {
@@ -132,7 +132,7 @@ export default {
       }
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
       this.$store.dispatch('clearMultipleSelected')
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       if (this.shouldSwitchToSpace) {
         this.$store.dispatch('currentSpace/changeSpace', { space: this.selectedSpace })
       }

@@ -311,13 +311,11 @@ export default new Vuex.Store({
       connections = connections.filter(connection => connection.userId !== update.userId) || []
       connections.push(update)
       state.remoteConnectionDetailsVisible = connections
-      console.log('🍎', state.remoteConnectionDetailsVisible)
     },
-    // clearRemoteConnectionDetailsVisible: (state, update) => {
-    //   utils.typeCheck(update, 'object')
-    //   state.remoteConnectionDetailsVisible = state.remoteConnectionDetailsVisible.filter(connection => connection.userId !== user.id)
-    //   console.log('🍊', state.remoteConnectionDetailsVisible)
-    // },
+    clearRemoteConnectionDetailsVisible: (state, update) => {
+      utils.typeCheck(update, 'object')
+      state.remoteConnectionDetailsVisible = state.remoteConnectionDetailsVisible.filter(connection => connection.userId !== update.userId)
+    },
 
     // Multiple Selection
 
@@ -494,6 +492,14 @@ export default new Vuex.Store({
   },
 
   actions: {
+    closeAllDialogs: (context) => {
+      context.commit('closeAllDialogs')
+      const space = utils.clone(context.rootState.currentSpace)
+      const user = utils.clone(context.rootState.currentUser)
+      context.commit('broadcast/updateUser', { user: utils.userMeta(user, space), type: 'addSpectatorToSpace' }, { root: true })
+      context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteCardDetailsVisible' })
+      context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteConnectionDetailsVisible' })
+    },
     updateSpacePageSize: (context) => {
       let maxX = 0
       let maxY = 0
@@ -525,7 +531,6 @@ export default new Vuex.Store({
       const space = utils.clone(context.rootState.currentSpace)
       const user = utils.clone(context.rootState.currentUser)
       context.commit('broadcast/updateStore', { user: utils.userMeta(user, space), type: 'clearRemoteMultipleSelected' }, { root: true })
-      context.commit('broadcast/updateUser', { user: utils.userMeta(user, space), type: 'addSpectatorToSpace' }, { root: true })
     },
     addToMultipleConnectionsSelected: (context, connectionId) => {
       utils.typeCheck(connectionId, 'string')

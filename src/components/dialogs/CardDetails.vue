@@ -146,7 +146,7 @@ export default {
       this.updateCardName(newName)
     },
     closeCard (event) {
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
     },
     closeCardAndFocus () {
       this.closeCard()
@@ -241,9 +241,6 @@ export default {
           this.scrollIntoViewAndFocus()
         }
       })
-      if (!visible) {
-        this.$store.commit('broadcast/updateStore', { updates: { userId: this.$store.state.currentUser.id }, type: 'clearRemoteCardDetailsVisible' })
-      }
       if (!visible && this.cardIsEmpty()) {
         this.$store.dispatch('currentSpace/removeCard', this.card)
       }

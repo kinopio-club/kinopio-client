@@ -14,7 +14,7 @@ path.connection-path(
   @touchend.stop="showConnectionDetails"
   @keyup.stop.backspace="removeConnection"
   @keyup.stop.enter="showConnectionDetailsOnKeyup"
-  :class="{active: isSelected || detailsIsVisible || isRemoteSelected, filtered: isFiltered, hover: isHovered, 'hide-connection-outline': shouldHideConnectionOutline }"
+  :class="{active: isSelected || detailsIsVisible || remoteDetailsIsVisible || isRemoteSelected, filtered: isFiltered, hover: isHovered, 'hide-connection-outline': shouldHideConnectionOutline }"
   ref="connection"
   tabindex="0"
 )
@@ -92,7 +92,12 @@ export default {
       const detailsId = this.$store.state.connectionDetailsIsVisibleForConnectionId
       return detailsId === this.id
     },
-    shouldAnimate () { return Boolean(this.isSelected || this.detailsIsVisible || this.isRemoteSelected) },
+    remoteDetailsIsVisible () {
+      const remoteConnections = this.$store.state.remoteConnectionDetailsVisible
+      const isSelected = remoteConnections.find(connection => connection.connectionId === this.id)
+      return isSelected
+    },
+    shouldAnimate () { return Boolean(this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected) },
     isHovered () { return this.id === this.$store.state.currentUserIsHoveringOverConnectionId },
     shouldHideConnectionOutline () { return this.$store.state.shouldHideConnectionOutline },
 
@@ -136,7 +141,7 @@ export default {
     // same as ConnectionLabel method
     showConnectionDetails (event) {
       const detailsPosition = utils.cursorPositionInPage(event)
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('connectionDetailsIsVisibleForConnectionId', this.id)
       this.$store.commit('connectionDetailsPosition', detailsPosition)
       this.$store.dispatch('clearMultipleSelected')

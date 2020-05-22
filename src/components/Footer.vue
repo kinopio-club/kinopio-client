@@ -108,22 +108,22 @@ export default {
     },
     toggleRemovedIsVisible () {
       const isVisible = this.removedIsVisible
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.removedIsVisible = !isVisible
     },
     toggleOfflineIsVisible () {
       const isVisible = this.offlineIsVisible
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.offlineIsVisible = !isVisible
     },
     toggleFiltersIsVisible () {
       const isVisible = this.filtersIsVisible
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.filtersIsVisible = !isVisible
     },
     toggleExploreIsVisible () {
       const isVisible = this.exploreIsVisible
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.exploreIsVisible = !isVisible
     }
   }

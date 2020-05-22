@@ -148,7 +148,7 @@ export default {
       }
     },
     closeAllDialogs () {
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
     },
     update () {
       const notifications = this.$store.state.notifications
