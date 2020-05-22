@@ -137,7 +137,7 @@ export default {
     showConnectionDetails (event) {
       const detailsPosition = utils.cursorPositionInPage(event)
       this.$store.commit('closeAllDialogs')
-      this.$store.commit('connectionDetailsIsVisibleForConnectionId', this.id)
+      this.$store.dispatch('connectionDetailsIsVisibleForConnectionId', this.id)
       this.$store.commit('connectionDetailsPosition', detailsPosition)
       this.$store.dispatch('clearMultipleSelected')
     },

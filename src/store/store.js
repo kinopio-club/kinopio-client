@@ -58,6 +58,7 @@ export default new Vuex.Store({
     connectionDetailsIsVisibleForConnectionId: '',
     currentConnectionColor: '',
     triggeredDrawConnectionFrame: {},
+    remoteConnectionDetailsVisible: [],
     remoteCurrentConnections: [],
 
     // dragging
@@ -303,6 +304,20 @@ export default new Vuex.Store({
     triggeredDrawConnectionFrame: (state, cursor) => {
       state.triggeredDrawConnectionFrame = cursor
     },
+    addToRemoteConnectionDetailsVisible: (state, update) => {
+      utils.typeCheck(update, 'object')
+      delete update.type
+      let connections = utils.clone(state.remoteConnectionDetailsVisible)
+      connections = connections.filter(connection => connection.userId !== update.userId) || []
+      connections.push(update)
+      state.remoteConnectionDetailsVisible = connections
+      console.log('🍎', state.remoteConnectionDetailsVisible)
+    },
+    // clearRemoteConnectionDetailsVisible: (state, update) => {
+    //   utils.typeCheck(update, 'object')
+    //   state.remoteConnectionDetailsVisible = state.remoteConnectionDetailsVisible.filter(connection => connection.userId !== user.id)
+    //   console.log('🍊', state.remoteConnectionDetailsVisible)
+    // },
 
     // Multiple Selection
 
@@ -358,9 +373,6 @@ export default new Vuex.Store({
       state.multipleCardsSelectedIds = []
       state.multipleConnectionsSelectedIds = []
     },
-
-    // Remote Multiple Selection
-
     addToRemoteCardsSelected: (state, update) => {
       utils.typeCheck(update, 'object')
       delete update.type
@@ -524,10 +536,19 @@ export default new Vuex.Store({
         connectionId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteConnectionsSelected' }, { root: true })
+    },
+    connectionDetailsIsVisibleForConnectionId: (context, connectionId) => {
+      context.commit('connectionDetailsIsVisibleForConnectionId', connectionId)
+      const updates = {
+        userId: context.rootState.currentUser.id,
+        connectionId
+      }
+      context.commit('broadcast/updateStore', { updates, type: 'addToRemoteConnectionDetailsVisible' }, { root: true })
     }
   },
+
   getters: {
-    shouldScrollAtEdges (state, getters) {
+    shouldScrollAtEdges: (state, getters) => {
       let isPainting
       if (utils.isMobile()) {
         isPainting = state.currentUserIsPaintingLocked
