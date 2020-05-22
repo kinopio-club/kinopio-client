@@ -54,9 +54,13 @@ const checkIfShouldUpdateWindowUrlAndTitle = (store, data) => {
   }
 }
 
-const closeWebsocket = () => {
+const closeWebsocket = (store) => {
   if (!websocket) { return }
-  websocket.close()
+  const space = utils.clone(store.state.currentSpace)
+  websocket.close(JSON.stringify({
+    clientId,
+    space: utils.spaceMeta(space)
+  }))
 }
 
 export default function createWebSocketPlugin () {
@@ -122,9 +126,9 @@ export default function createWebSocketPlugin () {
         if (!canEditSpace) { return }
         sendEvent(store, mutation, 'store')
       } else if (mutation.type === 'broadcast/close') {
-        closeWebsocket()
+        closeWebsocket(store)
       } else if (mutation.type === 'broadcast/reconnect') {
-        closeWebsocket()
+        closeWebsocket(store)
         currentUserIsConnected = false
         currentSpaceRoom = null
         store.commit('broadcast/joinSpaceRoom')
