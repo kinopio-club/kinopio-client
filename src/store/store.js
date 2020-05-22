@@ -80,7 +80,7 @@ export default new Vuex.Store({
     // loading
     isLoadingSpace: false,
     spaceUrlToLoad: '',
-    anonymousCollaboratorKey: '',
+    spaceCollaboratorKeys: [],
 
     // notifications
     notifications: [],
@@ -410,9 +410,9 @@ export default new Vuex.Store({
       utils.typeCheck(spaceUrl, 'string')
       state.spaceUrlToLoad = spaceUrl
     },
-    anonymousCollaboratorKey: (state, value) => {
-      utils.typeCheck(value, 'string')
-      state.anonymousCollaboratorKey = value
+    addToSpaceCollaboratorKeys: (state, spaceCollaboratorKey) => {
+      utils.typeCheck(spaceCollaboratorKey, 'object')
+      state.spaceCollaboratorKeys.push(spaceCollaboratorKey) // { spaceId, collaboratorKey }
     },
 
     // Notifications
