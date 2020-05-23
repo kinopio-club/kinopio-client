@@ -281,6 +281,7 @@ export default {
     addUserToJoinedSpace: (context, newUser) => {
       if (newUser.isCollaborator) {
         context.commit('addCollaboratorToSpace', newUser)
+        context.commit('removeSpectatorFromSpace', newUser)
       } else {
         context.commit('addSpectatorToSpace', newUser)
       }

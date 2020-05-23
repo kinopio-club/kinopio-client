@@ -63,8 +63,8 @@ export default {
       this.isOnscreen = isBetweenX && isBetweenY
     },
     userLabelVisibleTimer () {
+      this.visible = true
       if (!visibleTimer) {
-        this.visible = true
         currentIteration = 0
         visibleTimer = window.requestAnimationFrame(this.userLabelVisibleFrame)
       }
