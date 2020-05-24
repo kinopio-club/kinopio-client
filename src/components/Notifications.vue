@@ -114,6 +114,9 @@ export default {
           this.checkIfShouldNotifySpaceOutOfSync()
         }
       }
+      if (mutation.type === 'currentSpace/restoreSpace') {
+        this.notifySpaceOutOfSync = false
+      }
     })
   },
   computed: {
@@ -145,7 +148,7 @@ export default {
       }
     },
     closeAllDialogs () {
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
     },
     update () {
       const notifications = this.$store.state.notifications

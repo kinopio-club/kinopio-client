@@ -10,6 +10,8 @@ const self = {
     reconnect: () => {},
     joinSpaceRoom: () => {},
     update: () => {},
+    updateUser: () => {},
+    updateStore: () => {},
     close: () => {}
   },
   actions: {

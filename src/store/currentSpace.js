@@ -49,8 +49,9 @@ export default {
       cache.saveSpace(space)
       cache.updateSpace('collaborators', space.collaborators, space.id)
     },
-    addSpectatorToSpace: (state, newUser) => {
-      utils.typeCheck(newUser, 'object')
+    addSpectatorToSpace: (state, update) => {
+      utils.typeCheck(update, 'object')
+      const newUser = update.user || update
       const userExists = state.users.find(user => user.id === newUser.id)
       const collaboratorExists = state.collaborators.find(collaborator => collaborator.id === newUser.id)
       const spectatorExists = state.spectators.find(spectator => spectator.id === newUser.id)
@@ -280,6 +281,7 @@ export default {
     addUserToJoinedSpace: (context, newUser) => {
       if (newUser.isCollaborator) {
         context.commit('addCollaboratorToSpace', newUser)
+        context.commit('removeSpectatorFromSpace', newUser)
       } else {
         context.commit('addSpectatorToSpace', newUser)
       }
@@ -346,7 +348,7 @@ export default {
       })
     },
     getRemoteSpace: async (context, space) => {
-      const anonymousCollaboratorKey = context.rootState.anonymousCollaboratorKey
+      const collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const currentSpaceHasUrl = utils.currentSpaceHasUrl(space)
       let remoteSpace
@@ -354,11 +356,11 @@ export default {
         context.commit('isLoadingSpace', true, { root: true })
         if (currentUserIsSignedIn) {
           remoteSpace = await context.dispatch('api/getSpace', space, { root: true })
-        } else if (anonymousCollaboratorKey) {
-          space.collaboratorKey = anonymousCollaboratorKey
+        } else if (collaboratorKey) {
+          space.collaboratorKey = collaboratorKey
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
           cache.saveInvitedSpace(remoteSpace)
-          context.commit('anonymousCollaboratorKey', '', { root: true })
+          context.commit('collaboratorKey', '', { root: true })
         } else if (currentSpaceHasUrl) {
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
         }
@@ -847,6 +849,13 @@ export default {
     // Meta
     isHelloKinopio: (state) => {
       return state.name === 'Hello Kinopio'
+    },
+    shouldBroadcast: (state) => {
+      const users = state.users.length
+      const collaborators = state.collaborators.length
+      const spectators = state.spectators.length
+      const total = users + collaborators + spectators
+      return Boolean(total > 1)
     },
 
     // Cards

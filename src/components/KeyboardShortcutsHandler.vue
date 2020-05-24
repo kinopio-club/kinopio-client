@@ -39,7 +39,7 @@ export default {
         this.remove()
       // Escape
       } else if (key === 'Escape') {
-        this.$store.commit('closeAllDialogs')
+        this.$store.dispatch('closeAllDialogs')
       // → Left
       } else if (key === 'ArrowLeft' && (isSpaceScope || isFromCard)) {
         this.focusNearestCardLeft()
@@ -379,7 +379,7 @@ export default {
       })
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
       this.clearAllSelectedCards()
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
     },
 
     // Undo

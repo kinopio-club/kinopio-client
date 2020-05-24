@@ -92,6 +92,7 @@ export default {
     const element = this.$refs.dialog
     if (element) {
       this.scrollIntoViewAndFocus()
+      this.$emit('broadcastShowCardDetails')
     }
   },
   computed: {
@@ -145,7 +146,7 @@ export default {
       this.updateCardName(newName)
     },
     closeCard (event) {
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
     },
     closeCardAndFocus () {
       this.closeCard()

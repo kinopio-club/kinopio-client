@@ -128,7 +128,7 @@ export default {
     },
     removeConnection () {
       this.$store.dispatch('currentSpace/removeConnection', this.currentConnection)
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
     },
     changeConnectionType (type) {

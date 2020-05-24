@@ -1,5 +1,8 @@
 <template lang='pug'>
-#app.app
+#app.app(
+  @mousemove="broadcastCursor"
+  @touchmove="broadcastCursor"
+)
   MagicPaint
   router-view
   Header
@@ -17,6 +20,8 @@ import MagicPaint from '@/components/MagicPaint.vue'
 import Footer from '@/components/Footer.vue'
 import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 
+import utils from '@/utils.js'
+
 export default {
   components: {
     Header,
@@ -32,6 +37,16 @@ export default {
         return false
       }
     }
+  },
+  methods: {
+    broadcastCursor (event) {
+      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
+      if (!canEditSpace) { return }
+      let updates = utils.cursorPositionInPage(event)
+      updates.userId = this.$store.state.currentUser.id
+      this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor' })
+    }
+
   }
 }
 </script>

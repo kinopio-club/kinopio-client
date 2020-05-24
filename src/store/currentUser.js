@@ -181,7 +181,7 @@ export default {
       const spaceUserPermission = utils.capitalizeFirstLetter(context.getters.spaceUserPermission(space)) // User, Collaborator, Spectator
       const type = `update${spaceUserPermission}`
       const userId = context.state.id
-      context.commit('broadcast/update', { id: space.id, updates, type, userId }, { root: true })
+      context.commit('broadcast/updateUser', { id: space.id, updates, type, userId }, { root: true })
     },
     name: (context, newName) => {
       context.commit('name', newName)

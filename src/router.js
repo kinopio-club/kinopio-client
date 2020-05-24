@@ -84,10 +84,10 @@ export default new Router({
               }
             })
         } else {
-          store.commit('anonymousCollaboratorKey', collaboratorKey)
           store.commit('spaceUrlToLoad', spaceId)
           next()
         }
+        store.commit('addToSpaceCollaboratorKeys', { spaceId, collaboratorKey })
       }
     }, {
       path: '/:space',

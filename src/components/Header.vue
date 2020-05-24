@@ -180,22 +180,22 @@ export default {
   methods: {
     toggleAboutIsVisible () {
       const isVisible = this.aboutIsVisible
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.aboutIsVisible = !isVisible
     },
     toggleSpaceDetailsIsVisible () {
       const isVisible = this.spaceDetailsIsVisible
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.spaceDetailsIsVisible = !isVisible
     },
     toggleSignUpOrInIsVisible () {
       const isVisible = this.signUpOrInIsVisible
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.signUpOrInIsVisible = !isVisible
     },
     toggleShareIsVisible () {
       const isVisible = this.shareIsVisible
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.shareIsVisible = !isVisible
     },
     setLoadingSignUpOrIn (value) {

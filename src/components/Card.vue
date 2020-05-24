@@ -7,8 +7,8 @@ article(:style="position" :data-card-id="id")
     @touchend="showCardDetails"
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
-    :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged, 'filtered': isFiltered, 'media-card': isMediaCard}",
-    :style="{background: selectedColor || remoteSelectedColor}"
+    :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || isRemoteCardDragging, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged, 'filtered': isFiltered, 'media-card': isMediaCard}",
+    :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor || remoteCardDraggingColor}"
     :data-card-id="id"
     :data-card-x="x"
     :data-card-y="y"
@@ -16,9 +16,9 @@ article(:style="position" :data-card-id="id")
   )
     Frames(:card="card")
 
-    video(v-if="urlIsVideo" autoplay loop muted playsinline :class="{selected: isSelected}" :key="url")
+    video(v-if="urlIsVideo" autoplay loop muted playsinline :key="url" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging}")
       source(:src="url")
-    img.image(v-if="urlIsImage" :src="url" :class="{selected: isSelected}")
+    img.image(v-if="urlIsImage" :src="url" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging}")
 
     span.card-content-wrap
       p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}")
@@ -47,7 +47,7 @@ article(:style="position" :data-card-id="id")
             template(v-else)
               img.connector-icon(src="@/assets/connector-open.svg")
 
-  CardDetails(:card="card")
+  CardDetails(:card="card" @broadcastShowCardDetails="broadcastShowCardDetails")
 </template>
 
 <script>
@@ -156,10 +156,36 @@ export default {
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
       return multipleCardsSelectedIds.includes(this.id)
     },
+    isRemoteSelected () {
+      const remoteCardsSelected = this.$store.state.remoteCardsSelected
+      const selectedCard = remoteCardsSelected.find(card => card.cardId === this.id)
+      return Boolean(selectedCard)
+    },
+    isRemoteCardDetailsVisible () {
+      const remoteCardDetailsVisible = this.$store.state.remoteCardDetailsVisible
+      const visibleCard = remoteCardDetailsVisible.find(card => card.cardId === this.id)
+      return Boolean(visibleCard)
+    },
+    isRemoteCardDragging () {
+      const remoteCardsDragging = this.$store.state.remoteCardsDragging
+      const isDragging = remoteCardsDragging.find(card => card.cardId === this.id)
+      console.log(Boolean(isDragging), remoteCardsDragging)
+      return Boolean(isDragging)
+    },
     selectedColor () {
       const color = this.$store.state.currentUser.color
       if (this.isSelected) {
         return color
+      } else {
+        return undefined
+      }
+    },
+    remoteCardDetailsVisibleColor () {
+      const remoteCardDetailsVisible = this.$store.state.remoteCardDetailsVisible
+      const visibleCard = remoteCardDetailsVisible.find(card => card.cardId === this.id)
+      if (visibleCard) {
+        const user = this.$store.getters['currentSpace/memberById'](visibleCard.userId)
+        return user.color
       } else {
         return undefined
       }
@@ -169,6 +195,17 @@ export default {
       const selectedCard = remoteCardsSelected.find(card => card.cardId === this.id)
       if (selectedCard) {
         const user = this.$store.getters['currentSpace/memberById'](selectedCard.userId)
+        return user.color
+      } else {
+        return undefined
+      }
+    },
+    remoteCardDraggingColor () {
+      const remoteCardsDragging = this.$store.state.remoteCardsDragging
+      const draggingCard = remoteCardsDragging.find(card => card.cardId === this.id)
+      if (draggingCard) {
+        const user = this.$store.getters['currentSpace/memberById'](draggingCard.userId)
+        console.log(user.color)
         return user.color
       } else {
         return undefined
@@ -253,7 +290,7 @@ export default {
     },
     startConnecting (event) {
       if (!this.canEditSpace) { return }
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.dispatch('clearMultipleSelected')
       if (!this.$store.state.currentUserIsDrawingConnection) {
@@ -271,26 +308,42 @@ export default {
     startDraggingCard () {
       if (!this.canEditCard) { return }
       if (this.$store.state.currentUserIsDrawingConnection) { return }
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.commit('currentUserIsDraggingCard', true)
       this.$store.commit('currentDraggingCardId', this.id)
+      const updates = {
+        cardId: this.card.id,
+        userId: this.$store.state.currentUser.id
+      }
+      this.$store.commit('broadcast/updateStore', { updates, type: 'addToRemoteCardsDragging' })
       this.$store.commit('parentCardId', this.id)
       this.$store.commit('childCardId', '')
       this.checkIfShouldDragMultipleCards()
       this.$store.dispatch('currentSpace/incrementSelectedCardsZ')
     },
     showCardDetails (event) {
+      const userId = this.$store.state.currentUser.id
+      this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       this.$store.commit('currentUserIsDraggingCard', false)
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
       this.$store.commit('cardDetailsIsVisibleForCardId', this.id)
       this.$store.commit('parentCardId', this.id)
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
+      this.broadcastShowCardDetails()
     },
     openUrl (url) {
       window.location.href = url
+    },
+    broadcastShowCardDetails () {
+      const updates = {
+        cardId: this.card.id,
+        userId: this.$store.state.currentUser.id
+      }
+      this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
     }
+
   }
 }
 </script>

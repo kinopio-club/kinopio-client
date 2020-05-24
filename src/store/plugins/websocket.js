@@ -26,18 +26,23 @@ const joinSpaceRoom = (store, mutation) => {
   }))
 }
 
-const sendEvent = (store, mutation) => {
-  if (!websocket) { return }
+const sendEvent = (store, mutation, type) => {
+  if (!websocket || !currentUserIsConnected) { return }
+  const shouldBroadcast = store.getters['currentSpace/shouldBroadcast']
+  if (!shouldBroadcast) { return }
   const message = mutation.payload.type
   let updates = mutation.payload
   updates = utils.normalizeBroadcastUpdates(updates)
-  console.log('🌜', updates)
+  if (updates.type !== 'updateRemoteUserCursor') {
+    console.log('🌜', updates)
+  }
   const space = utils.clone(store.state.currentSpace)
   websocket.send(JSON.stringify({
     message,
     updates,
     clientId,
-    space: utils.spaceMeta(space)
+    space: utils.spaceMeta(space),
+    type
   }))
 }
 
@@ -51,7 +56,7 @@ const checkIfShouldUpdateWindowUrlAndTitle = (store, data) => {
   }
 }
 
-const closeWebsocket = () => {
+const closeWebsocket = (store) => {
   if (!websocket) { return }
   websocket.close()
 }
@@ -77,7 +82,9 @@ export default function createWebSocketPlugin () {
         websocket.onmessage = ({ data }) => {
           data = JSON.parse(data)
           if (data.clientId === clientId) { return }
-          console.log('🌛', data)
+          if (data.message !== 'updateRemoteUserCursor') {
+            console.log('🌛', data)
+          }
           let { message, user, updates } = data
           if (message === 'connected') {
           } else if (message === 'userJoinedRoom') {
@@ -86,19 +93,12 @@ export default function createWebSocketPlugin () {
             store.commit('currentSpace/removeSpectatorFromSpace', user)
           } else if (message === 'userLeftSpace') {
             store.commit('currentSpace/removeCollaboratorFromSpace', updates.user)
-          } else if (message === 'updateRemoteCurrentConnection') {
-            store.commit('updateRemoteCurrentConnection', updates)
-          } else if (message === 'removeRemoteCurrentConnection') {
-            store.commit('removeRemoteCurrentConnection', updates)
           } else if (message === 'addRemotePaintingCircle') {
             store.commit('triggerAddRemotePaintingCircle', updates)
-          } else if (message === 'addToRemoteCardsSelected') {
-            store.commit('addToRemoteCardsSelected', updates)
-          } else if (message === 'addToRemoteConnectionsSelected') {
-            store.commit('addToRemoteConnectionsSelected', updates)
-          } else if (message === 'clearRemoteMultipleSelected') {
-            store.commit('clearRemoteMultipleSelected', updates.user)
-            store.commit('currentSpace/addSpectatorToSpace', updates.user)
+          } else if (message === 'updateRemoteUserCursor') {
+            store.commit('triggerUpdateRemoteUserCursor', updates)
+          } else if (data.type === 'store') {
+            store.commit(`${message}`, updates)
           } else {
             store.commit(`currentSpace/${message}`, updates)
             checkIfShouldUpdateWindowUrlAndTitle(store, data)
@@ -114,11 +114,19 @@ export default function createWebSocketPlugin () {
         }
         joinSpaceRoom(store, mutation)
       } else if (mutation.type === 'broadcast/update') {
+        const canEditSpace = store.getters['currentUser/canEditSpace']()
+        if (!canEditSpace) { return }
         sendEvent(store, mutation)
+      } else if (mutation.type === 'broadcast/updateUser') {
+        sendEvent(store, mutation)
+      } else if (mutation.type === 'broadcast/updateStore') {
+        const canEditSpace = store.getters['currentUser/canEditSpace']()
+        if (!canEditSpace) { return }
+        sendEvent(store, mutation, 'store')
       } else if (mutation.type === 'broadcast/close') {
-        closeWebsocket()
+        closeWebsocket(store)
       } else if (mutation.type === 'broadcast/reconnect') {
-        closeWebsocket()
+        closeWebsocket(store)
         currentUserIsConnected = false
         currentSpaceRoom = null
         store.commit('broadcast/joinSpaceRoom')
