@@ -509,6 +509,24 @@ export default {
     return Boolean(isVideo)
   },
 
+  nameIsIncompleteTask (name) {
+    if (!name) { return }
+    // https://regexr.com/55afe
+    // matches [·] at the start of a string, with optional ·space
+    const taskPattern = new RegExp(/^(\[(\ )?\])/g) // eslint-disable-line no-useless-escape
+    const isTask = name.match(taskPattern)
+    return Boolean(isTask)
+  },
+
+  nameIsCompletedTask (name) {
+    if (!name) { return }
+    // https://regexr.com/55afk
+    // matches [x] at the start of a string
+    const taskPattern = new RegExp(/^(\[[xX]\])/g)
+    const isTask = name.match(taskPattern)
+    return Boolean(isTask)
+  },
+
   // Paste Card ✂️
 
   // recursive

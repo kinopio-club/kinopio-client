@@ -1,5 +1,10 @@
 <template lang="pug">
 article(:style="position" :data-card-id="id")
+
+  div(v-if="isTask")
+    div(v-if="isIncompleteTask") 0
+    div(v-if="isCompletedTask") X
+
   .card(
     @mousedown.prevent="startDraggingCard"
     @touchstart.prevent="startDraggingCard"
@@ -90,6 +95,9 @@ export default {
     urlIsImage () { return utils.urlIsImage(this.url) },
     urlIsVideo () { return utils.urlIsVideo(this.url) },
     isMediaCard () { return this.urlIsImage || this.urlIsVideo },
+    isIncompleteTask () { return utils.nameIsIncompleteTask(this.name) },
+    isCompletedTask () { return utils.nameIsCompletedTask(this.name) },
+    isTask () { return this.isIncompleteTask || this.isCompletedTask },
     position () {
       return {
         left: `${this.x}px`,
