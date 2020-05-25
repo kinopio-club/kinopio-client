@@ -509,7 +509,7 @@ export default {
     return Boolean(isVideo)
   },
 
-  nameIsIncompleteTask (name) {
+  nameIsDoing (name) {
     if (!name) { return }
     // https://regexr.com/55afe
     // matches [·] at the start of a string, with optional ·space
@@ -518,13 +518,25 @@ export default {
     return Boolean(isTask)
   },
 
-  nameIsCompletedTask (name) {
+  nameIsDone (name) {
     if (!name) { return }
     // https://regexr.com/55afk
     // matches [x] at the start of a string
     const taskPattern = new RegExp(/^(\[[xX]\])/g)
     const isTask = name.match(taskPattern)
     return Boolean(isTask)
+  },
+
+  checkboxFromString (name) {
+    if (!name) { return }
+    let match
+    // same as taskPatterns ^^
+    const doing = new RegExp(/^(\[(\ )?\])/g) // eslint-disable-line no-useless-escape
+    match = name.match(doing)
+    if (match) { return match }
+    const done = new RegExp(/^(\[[xX]\])/g)
+    match = name.match(done)
+    if (match) { return match }
   },
 
   // Paste Card ✂️

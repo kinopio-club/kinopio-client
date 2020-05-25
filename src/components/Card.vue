@@ -1,9 +1,9 @@
 <template lang="pug">
 article(:style="position" :data-card-id="id")
 
-  div(v-if="isTask")
-    div(v-if="isIncompleteTask") 0
-    div(v-if="isCompletedTask") X
+  div(v-if="isDoingOrDone")
+    div(v-if="isDoing") 0
+    div(v-if="isDone") X
 
   .card(
     @mousedown.prevent="startDraggingCard"
@@ -95,9 +95,9 @@ export default {
     urlIsImage () { return utils.urlIsImage(this.url) },
     urlIsVideo () { return utils.urlIsVideo(this.url) },
     isMediaCard () { return this.urlIsImage || this.urlIsVideo },
-    isIncompleteTask () { return utils.nameIsIncompleteTask(this.name) },
-    isCompletedTask () { return utils.nameIsCompletedTask(this.name) },
-    isTask () { return this.isIncompleteTask || this.isCompletedTask },
+    isDoing () { return utils.nameIsDoing(this.name) },
+    isDone () { return utils.nameIsDone(this.name) },
+    isDoingOrDone () { return this.isDoing || this.isDone },
     position () {
       return {
         left: `${this.x}px`,
@@ -113,11 +113,15 @@ export default {
       return false
     },
     normalizedName () {
+      let name = this.name
       if (this.isMediaCard) {
-        const name = this.name.replace(this.url, '')
-        return utils.trim(name)
+        name = name.replace(this.url, '')
       }
-      return utils.trim(this.name)
+      if (this.isDoingOrDone) {
+        const checkbox = utils.checkboxFromString(name)
+        name = name.replace(checkbox, '')
+      }
+      return utils.trim(name)
     },
     nameLineMinWidth () {
       const averageCharacterWidth = 6.5
