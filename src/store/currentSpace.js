@@ -611,6 +611,20 @@ export default {
       context.commit('broadcast/update', { updates: card, type: 'updateCard' }, { root: true })
       context.commit('history/add', update, { root: true })
     },
+    toggleCardDoingOrDone (context, { cardId, value }) {
+      utils.typeCheck(value, 'boolean')
+      utils.typeCheck(cardId, 'string')
+      const card = context.getters.cardById(cardId)
+      let name = card.name
+      const checkbox = utils.checkboxFromString(name)
+      name = name.replace(checkbox, '')
+      if (value) {
+        name = `[x] ${name}`
+      } else {
+        name = `[ ] ${name}`
+      }
+      context.dispatch('updateCard', { id: cardId, name })
+    },
     incrementCardZ: (context, cardId) => {
       let cards = context.rootState.currentSpace.cards
       cards = cards.map((card, index) => {
