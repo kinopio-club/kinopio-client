@@ -22,15 +22,15 @@ article(:style="position" :data-card-id="id")
 
     span.card-content-wrap
       .name-wrap
-        .label-wrap(v-if="isDoingOrDone"
+        .label-wrap(v-if="hasCheckbox"
           @mousedown.prevent.stop
           @touchstart.prevent.stop
           @keydown.stop.enter
         )
-          label(:class="{active: isDone, disabled: !canEditSpace}")
-            input(type="checkbox" v-model="isDone")
+          label(:class="{active: isChecked, disabled: !canEditSpace}")
+            input(type="checkbox" v-model="checkboxState")
 
-        p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-done': isDone}")
+        p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked}")
           span {{normalizedName}}
 
       span.card-buttons-wrap
@@ -100,17 +100,20 @@ export default {
     urlIsImage () { return utils.urlIsImage(this.url) },
     urlIsVideo () { return utils.urlIsVideo(this.url) },
     isMediaCard () { return this.urlIsImage || this.urlIsVideo },
-    isDoing () { return utils.nameIsDoing(this.name) },
-    isDone: {
+    isChecked () { return utils.nameIsChecked(this.name) },
+    hasCheckbox () { return utils.checkboxFromString(this.name) },
+    checkboxState: {
       get () {
-        return utils.nameIsDone(this.name)
+        return this.isChecked
       },
       set (value) {
+        // card opened
+        // dont scroll card into view when click checkbox
+        // then closed here
         this.$store.dispatch('closeAllDialogs')
-        this.$store.dispatch('currentSpace/toggleCardDoingOrDone', { cardId: this.id, value })
+        this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.id, value })
       }
     },
-    isDoingOrDone () { return this.isDoing || this.isDone },
     position () {
       return {
         left: `${this.x}px`,
@@ -130,8 +133,8 @@ export default {
       if (this.isMediaCard) {
         name = name.replace(this.url, '')
       }
-      if (this.isDoingOrDone) {
-        const checkbox = utils.checkboxFromString(name)
+      const checkbox = utils.checkboxFromString(name)
+      if (checkbox) {
         name = name.replace(checkbox, '')
       }
       return utils.trim(name)
@@ -413,7 +416,7 @@ article
       align-self stretch
       word-break break-word
       white-space pre-line
-      &.is-done
+      &.is-checked
         text-decoration line-through
   .connector,
   .link

@@ -10,9 +10,9 @@ dialog.narrow.multiple-selected-actions(
     .row(v-if="cardsIsSelected")
       //- [·]
       .button-wrap.cards-checkboxes
-        label(v-if="cardsHaveCheckboxes" :class="{active: cardsIsDone}")
+        label(v-if="cardsHaveCheckboxes" :class="{active: cardsCheckboxIsChecked}")
           input(type="checkbox" v-model="cardCheckboxes")
-        label(v-else @click.prevent="addCardsDoing" @keydown.stop.enter="addCardsDoing")
+        label(v-else @click.prevent="checkCards" @keydown.stop.enter="checkCards")
           input.add(type="checkbox")
       //- Connect
       label(v-if="multipleCardsIsSelected" :class="{active: cardsIsConnected}" @click.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards")
@@ -83,7 +83,7 @@ export default {
       framePickerIsVisible: false,
       cardsIsConnected: false,
       cardsHaveCheckboxes: false,
-      cardsIsDone: false
+      cardsCheckboxIsChecked: false
     }
   },
   computed: {
@@ -119,13 +119,13 @@ export default {
     },
     cardCheckboxes: {
       get () {
-        return this.cardsIsDone
+        return this.cardsCheckboxIsChecked
       },
       set (value) {
         this.cards.forEach(card => {
-          this.$store.dispatch('currentSpace/toggleCardDoingOrDone', { cardId: card.id, value })
+          this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: card.id, value })
         })
-        this.checkCardsIsDone()
+        this.checkCardsCheckboxIsChecked()
       }
     },
 
@@ -290,11 +290,11 @@ export default {
       const cardsWithCheckboxes = this.cards.filter(card => utils.checkboxFromString(card.name))
       this.cardsHaveCheckboxes = cardsWithCheckboxes.length === this.cards.length
     },
-    checkCardsIsDone () {
-      const cardsDone = this.cards.filter(card => utils.nameIsDone(card.name))
-      this.cardsIsDone = cardsDone.length === this.cards.length
+    checkCardsCheckboxIsChecked () {
+      const cardsChecked = this.cards.filter(card => utils.nameIsChecked(card.name))
+      this.cardsCheckboxIsChecked = cardsChecked.length === this.cards.length
     },
-    addCardsDoing () {
+    checkCards () {
       this.cards.forEach(card => {
         if (!utils.checkboxFromString(card.name)) {
           const update = {
@@ -377,7 +377,7 @@ export default {
         if (visible) {
           this.checkIsCardsConnected()
           this.checkCardsHaveCheckboxes()
-          this.checkCardsIsDone()
+          this.checkCardsCheckboxIsChecked()
           this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
           this.scrollIntoView()
           this.closeDialogs()

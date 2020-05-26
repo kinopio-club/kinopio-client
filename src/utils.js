@@ -509,7 +509,7 @@ export default {
     return Boolean(isVideo)
   },
 
-  nameIsDoing (name) {
+  nameIsUnchecked (name) {
     if (!name) { return }
     // https://regexr.com/55afe
     // matches [·]· at the start of a string, with optional ·space inside []s
@@ -518,7 +518,7 @@ export default {
     return Boolean(isTask)
   },
 
-  nameIsDone (name) {
+  nameIsChecked (name) {
     if (!name) { return }
     // https://regexr.com/55afk
     // matches [x] at the start of a string

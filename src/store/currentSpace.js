@@ -611,7 +611,7 @@ export default {
       context.commit('broadcast/update', { updates: card, type: 'updateCard' }, { root: true })
       context.commit('history/add', update, { root: true })
     },
-    toggleCardDoingOrDone (context, { cardId, value }) {
+    toggleCardChecked (context, { cardId, value }) {
       utils.typeCheck(value, 'boolean')
       utils.typeCheck(cardId, 'string')
       const card = context.getters.cardById(cardId)
