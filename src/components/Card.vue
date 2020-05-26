@@ -19,7 +19,6 @@ article(:style="position" :data-card-id="id")
     video(v-if="urlIsVideo" autoplay loop muted playsinline :key="url" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging}")
       source(:src="url")
     img.image(v-if="urlIsImage" :src="url" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging}")
-    //- .media-strikethrough(v-if="isMediaCard && isDone")
 
     span.card-content-wrap
       .name-wrap
@@ -465,16 +464,6 @@ article
       span
         top -3px
         position relative
-
-  // .media-strikethrough
-  //   position absolute
-  //   border-top 1px solid var(--primary)
-  //   mix-blend-mode color-burn
-  //   width calc(100% - 16px)
-  //   left 8px
-  //   top 50%
-  //   transform rotate(45deg)
-  //   pointer-events none
 
   &.media-card
     width 235px
