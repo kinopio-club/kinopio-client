@@ -1,10 +1,5 @@
 <template lang="pug">
 article(:style="position" :data-card-id="id")
-
-  div(v-if="isDoingOrDone")
-    div(v-if="isDoing") 0
-    div(v-if="isDone") X
-
   .card(
     @mousedown.prevent="startDraggingCard"
     @touchstart.prevent="startDraggingCard"
@@ -26,6 +21,14 @@ article(:style="position" :data-card-id="id")
     img.image(v-if="urlIsImage" :src="url" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging}")
 
     span.card-content-wrap
+      .label-wrap(v-if="isDoingOrDone"
+        @mousedown.prevent.stop
+        @touchstart.prevent.stop
+        @keydown.stop.enter
+      )
+        label(:class="{active: isDone, disabled: !canEditSpace}")
+          input(type="checkbox" v-model="isDone")
+
       p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}")
         span {{normalizedName}}
       span.card-buttons-wrap
@@ -96,7 +99,24 @@ export default {
     urlIsVideo () { return utils.urlIsVideo(this.url) },
     isMediaCard () { return this.urlIsImage || this.urlIsVideo },
     isDoing () { return utils.nameIsDoing(this.name) },
-    isDone () { return utils.nameIsDone(this.name) },
+    isDone: {
+      get () {
+        return utils.nameIsDone(this.name)
+      },
+      set (value) {
+        console.log('🌷', value)
+        this.$store.dispatch('closeAllDialogs')
+        // toggleDoingOrDone (value) {
+        //   console.log('🌹toggleDoingOrDone', value)
+        //   this.$store.dispatch('closeAllDialogs')
+        //   this.$store.commit('preventDraggedCardFromShowingDetails', true)
+
+        // todo select a bunch , apply to each
+        // if isdoing, then remove (at the commit lvl)
+        // if isdone then remove, then prepend []· (at the commit lvl)
+        // }
+      }
+    },
     isDoingOrDone () { return this.isDoing || this.isDone },
     position () {
       return {
@@ -181,7 +201,6 @@ export default {
     isRemoteCardDragging () {
       const remoteCardsDragging = this.$store.state.remoteCardsDragging
       const isDragging = remoteCardsDragging.find(card => card.cardId === this.id)
-      console.log(Boolean(isDragging), remoteCardsDragging)
       return Boolean(isDragging)
     },
     selectedColor () {
@@ -217,7 +236,6 @@ export default {
       const draggingCard = remoteCardsDragging.find(card => card.cardId === this.id)
       if (draggingCard) {
         const user = this.$store.getters['currentSpace/memberById'](draggingCard.userId)
-        console.log(user.color)
         return user.color
       } else {
         return undefined
@@ -355,7 +373,6 @@ export default {
       }
       this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
     }
-
   }
 }
 </script>
@@ -380,6 +397,18 @@ article
   .card-content-wrap
     display flex
     align-items flex-start
+    > .label-wrap
+      padding-top 8px
+      padding-left 8px
+      label
+        width 20px
+        height 16px
+        input
+          margin 0
+          transform translateX(-3px) translateY(-5px)
+          width 10px
+          height 10px
+          background-size contain
   .card-buttons-wrap
     display flex
   .name
