@@ -104,17 +104,14 @@ export default {
         return utils.nameIsDone(this.name)
       },
       set (value) {
-        console.log('🌷', value)
+        const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
         this.$store.dispatch('closeAllDialogs')
-        // toggleDoingOrDone (value) {
-        //   console.log('🌹toggleDoingOrDone', value)
-        //   this.$store.dispatch('closeAllDialogs')
-        //   this.$store.commit('preventDraggedCardFromShowingDetails', true)
-
-        // todo select a bunch , apply to each
-        // if isdoing, then remove (at the commit lvl)
-        // if isdone then remove, then prepend []· (at the commit lvl)
-        // }
+        console.log(this.$store.state.multipleCardsSelectedIds)
+        if (multipleCardsSelectedIds.length) {
+          multipleCardsSelectedIds.forEach(id => this.toggleDoingOrDone(value, id))
+        } else {
+          this.toggleDoingOrDone(value)
+        }
       }
     },
     isDoingOrDone () { return this.isDoing || this.isDone },
@@ -372,6 +369,19 @@ export default {
         userId: this.$store.state.currentUser.id
       }
       this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
+    },
+    toggleDoingOrDone (value, id) {
+      id = id || this.id
+      const card = this.$store.getters['currentSpace/cardById'](id)
+      let name = card.name
+      const checkbox = utils.checkboxFromString(name)
+      name = name.replace(checkbox, '')
+      if (value) {
+        name = `[x] ${name}`
+      } else {
+        name = `[ ] ${name}`
+      }
+      this.$store.commit('currentSpace/updateCard', { id, name })
     }
   }
 }
