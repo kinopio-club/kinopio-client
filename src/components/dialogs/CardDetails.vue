@@ -22,6 +22,11 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
         img.icon(src="@/assets/remove.svg")
         span Remove
     .button-wrap
+      label.card-checkbox
+        input(type="checkbox")
+          //- same add type like multipeseelcted dialog
+
+    .button-wrap
       button(:disabled="!canEditCard" @click.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
         span Image
       ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" @selectImage="addImage")
@@ -259,4 +264,7 @@ export default {
   .edit-message
     button
       margin-top 10px
+  .card-checkbox
+    input
+      margin 0
 </style>
