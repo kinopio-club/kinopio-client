@@ -512,8 +512,8 @@ export default {
   nameIsDoing (name) {
     if (!name) { return }
     // https://regexr.com/55afe
-    // matches [·] at the start of a string, with optional ·space
-    const taskPattern = new RegExp(/^(\[(\ )?\])/g) // eslint-disable-line no-useless-escape
+    // matches [·]· at the start of a string, with optional ·space inside []s
+    const taskPattern = new RegExp(/^(\[(\ )?\]\ )/g) // eslint-disable-line no-useless-escape
     const isTask = name.match(taskPattern)
     return Boolean(isTask)
   },
@@ -522,7 +522,7 @@ export default {
     if (!name) { return }
     // https://regexr.com/55afk
     // matches [x] at the start of a string
-    const taskPattern = new RegExp(/^(\[[xX]\])/g)
+    const taskPattern = new RegExp(/^(\[[xX]\]\ )/g) // eslint-disable-line no-useless-escape
     const isTask = name.match(taskPattern)
     return Boolean(isTask)
   },
@@ -531,10 +531,10 @@ export default {
     if (!name) { return }
     let match
     // same as taskPatterns ^^
-    const doing = new RegExp(/^(\[(\ )?\])/g) // eslint-disable-line no-useless-escape
+    const doing = new RegExp(/^(\[(\ )?\]\ )/g) // eslint-disable-line no-useless-escape
     match = name.match(doing)
     if (match) { return match }
-    const done = new RegExp(/^(\[[xX]\])/g)
+    const done = new RegExp(/^(\[[xX]\]\ )/g) // eslint-disable-line no-useless-escape
     match = name.match(done)
     if (match) { return match }
   },
