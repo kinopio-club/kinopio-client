@@ -19,18 +19,21 @@ article(:style="position" :data-card-id="id")
     video(v-if="urlIsVideo" autoplay loop muted playsinline :key="url" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging}")
       source(:src="url")
     img.image(v-if="urlIsImage" :src="url" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging}")
+    //- .media-strikethrough(v-if="isMediaCard && isDone")
 
     span.card-content-wrap
-      .label-wrap(v-if="isDoingOrDone"
-        @mousedown.prevent.stop
-        @touchstart.prevent.stop
-        @keydown.stop.enter
-      )
-        label(:class="{active: isDone, disabled: !canEditSpace}")
-          input(type="checkbox" v-model="isDone")
+      .name-wrap
+        .label-wrap(v-if="isDoingOrDone"
+          @mousedown.prevent.stop
+          @touchstart.prevent.stop
+          @keydown.stop.enter
+        )
+          label(:class="{active: isDone, disabled: !canEditSpace}")
+            input(type="checkbox" v-model="isDone")
 
-      p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}")
-        span {{normalizedName}}
+        p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-done': isDone}")
+          span {{normalizedName}}
+
       span.card-buttons-wrap
         a(:href="url" @click.stop @touchend="openUrl(url)" v-if="url")
           .link
@@ -388,7 +391,12 @@ article
   .card-content-wrap
     display flex
     align-items flex-start
-    > .label-wrap
+  .card-buttons-wrap
+    display flex
+  .name-wrap
+    display flex
+    align-items flex-start
+    .label-wrap
       padding-top 8px
       padding-left 8px
       label
@@ -400,18 +408,14 @@ article
           width 10px
           height 10px
           background-size contain
-  .card-buttons-wrap
-    display flex
-  .name
-    margin 8px
-    margin-right 0
-    align-self stretch
-    word-break break-word
-    white-space pre-line
-    // multi-line wrapping
-    // display -webkit-box
-    // -webkit-box-orient vertical
-    // -webkit-line-clamp 3
+    .name
+      margin 8px
+      margin-right 0
+      align-self stretch
+      word-break break-word
+      white-space pre-line
+      &.is-done
+        text-decoration line-through
   .connector,
   .link
     padding 8px
@@ -461,6 +465,16 @@ article
       span
         top -3px
         position relative
+
+  // .media-strikethrough
+  //   position absolute
+  //   border-top 1px solid var(--primary)
+  //   mix-blend-mode color-burn
+  //   width calc(100% - 16px)
+  //   left 8px
+  //   top 50%
+  //   transform rotate(45deg)
+  //   pointer-events none
 
   &.media-card
     width 235px
