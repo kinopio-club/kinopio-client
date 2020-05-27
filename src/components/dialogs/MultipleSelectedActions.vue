@@ -299,7 +299,7 @@ export default {
         if (!utils.checkboxFromString(card.name)) {
           const update = {
             id: card.id,
-            name: `[ ] ${card.name}`
+            name: `[] ${card.name}`
           }
           this.$store.dispatch('currentSpace/updateCard', update)
         }

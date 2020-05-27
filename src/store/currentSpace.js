@@ -621,7 +621,7 @@ export default {
       if (value) {
         name = `[x] ${name}`
       } else {
-        name = `[ ] ${name}`
+        name = `[] ${name}`
       }
       context.dispatch('updateCard', { id: cardId, name })
     },
