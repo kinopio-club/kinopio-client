@@ -22,6 +22,7 @@ article(:style="position" :data-card-id="id")
 
     span.card-content-wrap
       .name-wrap
+        //- [·]
         .label-wrap(v-if="hasCheckbox"
           @mousedown.prevent.stop
           @touchstart.prevent.stop
@@ -29,15 +30,17 @@ article(:style="position" :data-card-id="id")
         )
           label(:class="{active: isChecked, disabled: !canEditSpace}")
             input(type="checkbox" v-model="checkboxState")
-
+        //- Name
         p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked}")
           span {{normalizedName}}
 
       span.card-buttons-wrap
+        //- Link
         a(:href="url" @click.stop @touchend="openUrl(url)" v-if="url")
           .link
             button(:style="{background: selectedColor}" tabindex="-1")
               img.icon.visit.arrow-icon(src="@/assets/visit.svg")
+        //- Connector
         .connector(
           :data-card-id="id"
           @mousedown="startConnecting"
