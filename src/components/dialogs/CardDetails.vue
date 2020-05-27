@@ -17,19 +17,23 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       maxlength="250"
       @click="triggerUpdateMagicPaintPositionOffset"
     )
+    //- Remove
     .button-wrap
       button(:disabled="!canEditCard" @click="removeCard")
         img.icon(src="@/assets/remove.svg")
         span Remove
-    .button-wrap
-      label.card-checkbox
-        input(type="checkbox")
-          //- same add type like multipeseelcted dialog
-
+    //- [·]
+    .button-wrap.cards-checkboxes
+      label(v-if="checkbox" :class="{active: checkboxIsChecked}")
+        input(type="checkbox" v-model="checkboxIsChecked")
+      label(v-else @click.prevent="addCheckbox" @keydown.stop.enter="addCheckbox")
+        input.add(type="checkbox")
+    //- Image
     .button-wrap
       button(:disabled="!canEditCard" @click.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
         span Image
       ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" @selectImage="addImage")
+    //- Frames
     .button-wrap
       button(:disabled="!canEditCard" @click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
         span Frames
@@ -123,14 +127,31 @@ export default {
     },
     url () { return utils.urlFromString(this.name) },
     normalizedName () {
+      let name = this.name
       if (this.url) {
-        const name = this.name.replace(this.url, '')
-        return name.trim()
+        name = name.replace(this.url, '')
       }
-      return this.name.trim()
+      name = name.replace(utils.checkboxFromString(name), '')
+      return name.trim()
+    },
+    checkbox () { return Boolean(utils.checkboxFromString(this.name)) },
+    checkboxIsChecked: {
+      get () {
+        return utils.nameIsChecked(this.name)
+      },
+      set (value) {
+        this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.card.id, value })
+      }
     }
   },
   methods: {
+    addCheckbox () {
+      const update = {
+        id: this.card.id,
+        name: `[] ${this.card.name}`
+      }
+      this.$store.dispatch('currentSpace/updateCard', update)
+    },
     updateCardName (newName) {
       const card = {
         name: newName,
@@ -223,20 +244,23 @@ export default {
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     addImage (image) {
-      let newName
       let name = this.card.name
+      const checkbox = utils.checkboxFromString(name)
       const url = utils.urlFromString(name)
       if (utils.urlIsImage(url) || utils.urlIsVideo(url)) {
         name = name.replace(url, '')
       }
       if (image.url === url) {
         name = name.replace(url, '')
-        newName = utils.trim(name)
       } else {
         name = utils.trim(name)
-        newName = `${image.url}\n\n${name}`
+        name = `${image.url}\n\n${name}`
       }
-      this.updateCardName(newName)
+      if (checkbox) {
+        name = name.replace(checkbox, '')
+        name = `${checkbox} ${name}`
+      }
+      this.updateCardName(utils.trim(name))
     }
   },
   watch: {
@@ -264,7 +288,7 @@ export default {
   .edit-message
     button
       margin-top 10px
-  .card-checkbox
+  .cards-checkboxes
     input
       margin 0
 </style>

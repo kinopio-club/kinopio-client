@@ -533,10 +533,10 @@ export default {
     // same as taskPatterns ^^
     const doing = new RegExp(/^(\[(\ )?\]\ )/g) // eslint-disable-line no-useless-escape
     match = name.match(doing)
-    if (match) { return match }
+    if (match) { return match[0] }
     const done = new RegExp(/^(\[[xX]\]\ )/g) // eslint-disable-line no-useless-escape
     match = name.match(done)
-    if (match) { return match }
+    if (match) { return match[0] }
   },
 
   // Paste Card ✂️

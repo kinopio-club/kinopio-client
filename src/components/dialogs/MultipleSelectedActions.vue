@@ -12,7 +12,7 @@ dialog.narrow.multiple-selected-actions(
       .button-wrap.cards-checkboxes
         label(v-if="cardsHaveCheckboxes" :class="{active: cardsCheckboxIsChecked}")
           input(type="checkbox" v-model="cardCheckboxes")
-        label(v-else @click.prevent="checkCards" @keydown.stop.enter="checkCards")
+        label(v-else @click.prevent="addCheckboxToCards" @keydown.stop.enter="addCheckboxToCards")
           input.add(type="checkbox")
       //- Connect
       label(v-if="multipleCardsIsSelected" :class="{active: cardsIsConnected}" @click.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards")
@@ -294,7 +294,7 @@ export default {
       const cardsChecked = this.cards.filter(card => utils.nameIsChecked(card.name))
       this.cardsCheckboxIsChecked = cardsChecked.length === this.cards.length
     },
-    checkCards () {
+    addCheckboxToCards () {
       this.cards.forEach(card => {
         if (!utils.checkboxFromString(card.name)) {
           const update = {
