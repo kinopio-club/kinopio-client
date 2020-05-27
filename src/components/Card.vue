@@ -110,9 +110,6 @@ export default {
         return this.isChecked
       },
       set (value) {
-        // card opened
-        // dont scroll card into view when click checkbox
-        // then closed here
         this.$store.dispatch('closeAllDialogs')
         this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.id, value })
       }
@@ -351,6 +348,7 @@ export default {
       this.$store.dispatch('currentSpace/incrementSelectedCardsZ')
     },
     showCardDetails (event) {
+      if (event.target.nodeName === 'LABEL') { return }
       const userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
