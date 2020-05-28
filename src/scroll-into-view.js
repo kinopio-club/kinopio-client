@@ -2,6 +2,7 @@ import utils from '@/utils.js'
 
 const maxIterations = 12 // 12 / 60fps = 200ms
 const padding = 20
+const headerPadding = 40
 
 let viewportWidth, viewportHeight, totalX, totalY, currentIteration, scrollTimer, travelledX, travelledY
 
@@ -37,7 +38,7 @@ const self = {
     if (rect.height > viewportHeight) {
       totalY = (window.scrollY + padding) - rect.top
     } else if (rect.top < 0) {
-      totalY = rect.top - padding
+      totalY = rect.top - padding - headerPadding
     // y ↓
     } else if (rect.bottom > viewportHeight) {
       totalY = rect.bottom - (viewportHeight - padding)
