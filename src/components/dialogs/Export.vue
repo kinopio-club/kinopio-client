@@ -23,7 +23,7 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.stop ref="dialog")
 
 <script>
 import join from 'lodash-es/join'
-import scrollIntoView from '@/scroll-into-view.js'
+import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import utils from '@/utils.js'
 
@@ -81,7 +81,10 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      scrollIntoView.scroll(element)
+      scrollIntoView(element, {
+        behavior: 'smooth',
+        scrollMode: 'if-needed'
+      })
     }
   },
   watch: {

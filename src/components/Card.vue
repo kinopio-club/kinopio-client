@@ -107,7 +107,6 @@ export default {
       },
       set (value) {
         this.$store.dispatch('closeAllDialogs')
-        // this.$store.dispatch('clearMultipleSelected')
         this.toggleCardChecked()
       }
     },
@@ -357,7 +356,7 @@ export default {
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       this.$store.dispatch('closeAllDialogs')
-      // this.$store.dispatch('clearMultipleSelected')
+      this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
       if (event.target.nodeName === 'LABEL') { return }
       this.$store.commit('cardDetailsIsVisibleForCardId', this.id)

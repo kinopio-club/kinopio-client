@@ -314,7 +314,8 @@ export default {
     return circles.filter(circle => circle.iteration < maxIterationsToPaint)
   },
 
-  easeOut (percentComplete, elaspedTime, duration) {
+  easeOut (percentComplete, elaspedTime, lockingDuration) {
+    const duration = lockingDuration
     const startValue = 0
     const endValue = 1
     return -endValue * (elaspedTime /= duration) * (elaspedTime - 2) + startValue

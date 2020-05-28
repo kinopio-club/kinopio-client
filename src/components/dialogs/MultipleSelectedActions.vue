@@ -59,7 +59,7 @@ dialog.narrow.multiple-selected-actions(
 import nanoid from 'nanoid'
 import last from 'lodash-es/last'
 import uniq from 'lodash-es/uniq'
-import scrollIntoView from '@/scroll-into-view.js'
+import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import utils from '@/utils.js'
 import Export from '@/components/dialogs/Export.vue'
@@ -365,7 +365,10 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      scrollIntoView.scroll(element)
+      scrollIntoView(element, {
+        behavior: 'smooth',
+        scrollMode: 'if-needed'
+      })
     }
   },
   watch: {

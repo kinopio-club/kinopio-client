@@ -57,7 +57,7 @@ dialog.removed(v-if="visible" :open="visible" @click.stop)
 </template>
 
 <script>
-import scrollIntoView from '@/scroll-into-view.js'
+import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfill
 import merge from 'lodash-es/merge'
 
 import cache from '@/cache.js'
@@ -143,7 +143,10 @@ export default {
     },
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
-      scrollIntoView.scroll(element)
+      scrollIntoView(element, {
+        behavior: 'smooth',
+        scrollMode: 'if-needed'
+      })
     },
     restore (item) {
       if (this.cardsVisible) {

@@ -31,7 +31,7 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
 </template>
 
 <script>
-import scrollIntoView from '@/scroll-into-view.js'
+import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import cache from '@/cache.js'
 import utils from '@/utils.js'
@@ -185,7 +185,10 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      scrollIntoView.scroll(element)
+      scrollIntoView(element, {
+        behavior: 'smooth',
+        scrollMode: 'if-needed'
+      })
     },
     closeDialogs () {
       this.spacePickerIsVisible = false

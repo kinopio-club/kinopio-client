@@ -11,7 +11,7 @@ dialog.narrow.frame-details(v-if="visible" :open="visible" ref="dialog" @click.s
 </template>
 
 <script>
-import scrollIntoView from '@/scroll-into-view.js'
+import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import frames from '@/frames.js'
 
@@ -50,7 +50,10 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      scrollIntoView.scroll(element)
+      scrollIntoView(element, {
+        behavior: 'smooth',
+        scrollMode: 'if-needed'
+      })
     }
   },
   watch: {

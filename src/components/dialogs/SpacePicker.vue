@@ -6,7 +6,7 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.stop ref="dialo
 </template>
 
 <script>
-import scrollIntoView from '@/scroll-into-view.js'
+import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
@@ -63,14 +63,16 @@ export default {
       if (!spaces) { return }
       this.spaces = spaces
       this.excludeCurrentSpace()
-      this.scrollIntoView()
     },
     selectSpace (space) {
       this.$emit('selectSpace', space)
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      scrollIntoView.scroll(element)
+      scrollIntoView(element, {
+        behavior: 'smooth',
+        scrollMode: 'if-needed'
+      })
     }
   },
   watch: {

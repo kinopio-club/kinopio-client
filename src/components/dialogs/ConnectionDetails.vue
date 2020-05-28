@@ -52,7 +52,7 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
 
 <script>
 import last from 'lodash-es/last'
-import scrollIntoView from '@/scroll-into-view.js'
+import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
 import utils from '@/utils.js'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
@@ -179,7 +179,10 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      scrollIntoView.scroll(element)
+      scrollIntoView(element, {
+        behavior: 'smooth',
+        scrollMode: 'if-needed'
+      })
     },
     scrollIntoViewAndFocus () {
       const element = this.$refs.typeName
