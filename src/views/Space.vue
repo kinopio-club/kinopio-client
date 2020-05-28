@@ -42,6 +42,7 @@ import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedAction
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import ScrollAtEdgesHandler from '@/components/ScrollAtEdgesHandler.vue'
 import utils from '@/utils.js'
+import scrollIntoView from '@/scroll-into-view.js'
 
 let startCursor, prevCursor, endCursor
 
@@ -83,6 +84,7 @@ export default {
     this.updatePageSizes()
     window.addEventListener('resize', this.updatePageSizes)
     window.addEventListener('scroll', this.updatePageSizes)
+    window.addEventListener('scroll', this.cancelScrollIntoView)
 
     this.updateIsOnline()
     window.addEventListener('online', this.updateIsOnline)
@@ -133,6 +135,9 @@ export default {
     },
     updatePageSizes () {
       this.$store.commit('updatePageSizes')
+    },
+    cancelScrollIntoView () {
+      scrollIntoView.cancel()
     },
     updateIsOnline () {
       const status = window.navigator.onLine
