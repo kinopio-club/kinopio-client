@@ -476,7 +476,7 @@ export default {
     // followed by alphanumerics
     // then '.''
     // followed by alphanumerics
-    const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<>]*\.[^\s.[",><]+/igm)
+    const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<>]*\.[^\s.[">,<]+[\n ]*/igm)
     const urls = string.match(urlPattern)
     if (!urls) { return }
     const url = urls[0]
