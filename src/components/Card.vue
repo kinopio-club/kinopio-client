@@ -23,7 +23,7 @@ article(:style="position" :data-card-id="id")
     span.card-content-wrap
       .name-wrap
         //- [·]
-        .label-wrap(v-if="hasCheckbox")
+        .checkbox-wrap(v-if="hasCheckbox")
           label(:class="{active: isChecked, disabled: !canEditSpace}")
             input(type="checkbox" v-model="checkboxState")
         //- Name
@@ -348,14 +348,14 @@ export default {
       this.$store.dispatch('currentSpace/incrementSelectedCardsZ')
     },
     showCardDetails (event) {
-      if (event.target.nodeName === 'LABEL') { return }
+      this.$store.commit('currentUserIsDraggingCard', false)
       const userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
-      this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.dispatch('closeAllDialogs')
       // this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
+      if (event.target.nodeName === 'LABEL') { return }
       this.$store.commit('cardDetailsIsVisibleForCardId', this.id)
       this.$store.commit('parentCardId', this.id)
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
@@ -400,15 +400,18 @@ article
   .name-wrap
     display flex
     align-items flex-start
-    .label-wrap
+    .checkbox-wrap
       padding-top 8px
       padding-left 8px
       label
         width 20px
         height 16px
+        display flex
+        align-items center
+        padding-left 4px
+        padding-right 4px
         input
           margin 0
-          transform translateX(-3px) translateY(-5px)
           width 10px
           height 10px
           background-size contain

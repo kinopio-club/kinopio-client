@@ -17,27 +17,28 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       maxlength="250"
       @click="triggerUpdateMagicPaintPositionOffset"
     )
-    //- Remove
-    .button-wrap
-      button(:disabled="!canEditCard" @click="removeCard")
-        img.icon(src="@/assets/remove.svg")
-        span Remove
-    //- [·]
-    .button-wrap.cards-checkboxes
-      label(v-if="checkbox" :class="{active: checkboxIsChecked, disabled: !canEditCard}")
-        input(type="checkbox" v-model="checkboxIsChecked")
-      label(v-else @click.prevent="addCheckbox" @keydown.stop.enter="addCheckbox" :class="{disabled: !canEditCard}")
-        input.add(type="checkbox")
-    //- Image
-    .button-wrap
-      button(:disabled="!canEditCard" @click.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
-        span Image
-      ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" @selectImage="addImage")
-    //- Frames
-    .button-wrap
-      button(:disabled="!canEditCard" @click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
-        span Frames
-      FramePicker(:visible="framePickerIsVisible" :cards="[card]")
+    .row
+      //- Remove
+      .button-wrap
+        button(:disabled="!canEditCard" @click="removeCard")
+          img.icon(src="@/assets/remove.svg")
+          span Remove
+      //- [·]
+      .button-wrap.cards-checkboxes
+        label(v-if="checkbox" :class="{active: checkboxIsChecked, disabled: !canEditCard}" tabindex="0")
+          input(type="checkbox" v-model="checkboxIsChecked" tabindex="-1")
+        label(v-else @click.prevent="addCheckbox" @keydown.stop.enter="addCheckbox" :class="{disabled: !canEditCard}" tabindex="0")
+          input.add(type="checkbox" tabindex="-1")
+      //- Image
+      .button-wrap
+        button(:disabled="!canEditCard" @click.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
+          span Image
+        ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" @selectImage="addImage")
+      //- Frames
+      .button-wrap
+        button(:disabled="!canEditCard" @click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
+          span Frames
+        FramePicker(:visible="framePickerIsVisible" :cards="[card]")
 
     p.edit-message(v-if="!canEditCard")
       template(v-if="spacePrivacyIsOpen")
@@ -287,6 +288,10 @@ export default {
     button
       margin-top 10px
   .cards-checkboxes
+    label
+      display flex
+      align-items center
     input
       margin 0
+      vertical-align -1px
 </style>

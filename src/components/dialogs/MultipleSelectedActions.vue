@@ -10,10 +10,10 @@ dialog.narrow.multiple-selected-actions(
     .row(v-if="cardsIsSelected")
       //- [·]
       .button-wrap.cards-checkboxes
-        label(v-if="cardsHaveCheckboxes" :class="{active: cardsCheckboxIsChecked}")
-          input(type="checkbox" v-model="cardCheckboxes")
-        label(v-else @click.prevent="addCheckboxToCards" @keydown.stop.enter="addCheckboxToCards")
-          input.add(type="checkbox")
+        label(v-if="cardsHaveCheckboxes" :class="{active: cardsCheckboxIsChecked}" tabindex="0")
+          input(type="checkbox" v-model="cardCheckboxes" tabindex="-1")
+        label(v-else @click.prevent="addCheckboxToCards" @keydown.stop.enter="addCheckboxToCards" tabindex="0")
+          input.add(type="checkbox" tabindex="-1")
       //- Connect
       label(v-if="multipleCardsIsSelected" :class="{active: cardsIsConnected}" @click.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards")
         input(type="checkbox" v-model="cardsIsConnected")

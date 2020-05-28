@@ -158,6 +158,7 @@ label // used for checkbox buttons
   &:focus
     box-shadow var(--button-hover-shadow)
     background var(--secondary-hover-background)
+    outline none
   &:active,
   &.active
     box-shadow var(--button-active-inset-shadow)
@@ -202,6 +203,8 @@ label
   height 24px
   input
     margin 0
+    &:focus
+      outline none
   &.disabled
     cursor default
     color var(--primary)
@@ -337,7 +340,7 @@ li
       background-image url('assets/add.svg')
       background-repeat no-repeat
       background-position center
-      background-size 70%
+      background-size 69%
 
 li
   input[type="checkbox"]
