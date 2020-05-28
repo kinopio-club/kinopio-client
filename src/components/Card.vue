@@ -107,7 +107,7 @@ export default {
       },
       set (value) {
         this.$store.dispatch('closeAllDialogs')
-        this.$store.dispatch('clearMultipleSelected')
+        // this.$store.dispatch('clearMultipleSelected')
         this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.id, value })
       }
     },
@@ -354,7 +354,7 @@ export default {
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.dispatch('closeAllDialogs')
-      this.$store.dispatch('clearMultipleSelected')
+      // this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
       this.$store.commit('cardDetailsIsVisibleForCardId', this.id)
       this.$store.commit('parentCardId', this.id)

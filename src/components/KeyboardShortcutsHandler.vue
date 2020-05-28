@@ -2,7 +2,7 @@
 </template>
 
 <script>
-import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfill
+import scrollIntoView from '@/scroll-into-view.js'
 import last from 'lodash-es/last'
 
 import utils from '@/utils.js'
@@ -86,10 +86,7 @@ export default {
 
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
-      scrollIntoView(element, {
-        behavior: 'smooth',
-        scrollMode: 'if-needed'
-      })
+      scrollIntoView.scroll(element)
     },
 
     notifyCopyCut (word) {

@@ -25,7 +25,7 @@ dialog.import.narrow(v-if="visible" :open="visible" @click.stop="closeDialogs" r
 </template>
 
 <script>
-import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
+import scrollIntoView from '@/scroll-into-view.js'
 import nanoid from 'nanoid'
 
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
@@ -128,10 +128,7 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      scrollIntoView(element, {
-        behavior: 'smooth',
-        scrollMode: 'if-needed'
-      })
+      scrollIntoView.scroll(element)
     }
   },
   watch: {

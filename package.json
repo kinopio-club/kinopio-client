@@ -13,7 +13,6 @@
     "lodash-es": "^4.17.15",
     "nanoid": "^2.0.3",
     "randomcolor": "^0.5.4",
-    "smooth-scroll-into-view-if-needed": "^1.1.23",
     "valid-hex-color": "^1.1.1",
     "vue": "^2.6.10",
     "vue-router": "^3.0.3",
