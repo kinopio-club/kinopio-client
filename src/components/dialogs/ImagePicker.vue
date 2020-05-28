@@ -48,6 +48,7 @@ import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 import debounce from 'lodash-es/debounce'
 
 import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'ImagePicker',
@@ -223,6 +224,7 @@ export default {
       })
     },
     focusSearchInput () {
+      if (utils.isMobile()) { return }
       const element = this.$refs.searchInput
       const length = this.search.length
       element.focus()
