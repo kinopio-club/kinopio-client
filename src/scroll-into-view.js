@@ -43,7 +43,7 @@ const self = {
       totalY = rect.bottom - (viewportHeight - padding)
     }
 
-    console.log('🍆', 'totalX', totalX, 'totalY', totalY)
+    console.log('🍆', 'totalX', totalX, 'totalY', totalY, element, rect)
     scrollTimer = window.requestAnimationFrame(self.scrollFrame)
   },
 

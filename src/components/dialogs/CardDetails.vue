@@ -59,11 +59,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
 </template>
 
 <script>
-import scrollIntoView from '@/scroll-into-view.js'
-
-import utils from '@/utils.js'
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
+import scrollIntoView from '@/scroll-into-view.js'
+import utils from '@/utils.js'
 
 export default {
   name: 'CardDetails',
