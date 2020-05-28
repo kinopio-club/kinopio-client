@@ -33,7 +33,8 @@ const sendEvent = (store, mutation, type) => {
   const message = mutation.payload.type
   let updates = mutation.payload
   updates = utils.normalizeBroadcastUpdates(updates)
-  if (updates.type !== 'updateRemoteUserCursor') {
+  const hidden = ['updateRemoteUserCursor', 'addRemotePaintingCircle', 'addSpectatorToSpace', 'clearRemoteCardDetailsVisible', 'clearRemoteConnectionDetailsVisible']
+  if (!hidden.includes(updates.type)) {
     console.log('🌜', updates)
   }
   const space = utils.clone(store.state.currentSpace)

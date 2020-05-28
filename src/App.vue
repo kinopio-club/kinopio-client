@@ -242,7 +242,8 @@ dialog
   button + .button-wrap,
   .button-wrap + button,
   label + label,
-  label + .button-wrap
+  label + .button-wrap,
+  .button-wrap + label
     margin-left 6px
 
   p + button,
@@ -331,6 +332,11 @@ li
       background-image url('assets/checkmark.svg')
       background-repeat no-repeat
       background-position center
+    &.add
+      background-image url('assets/add.svg')
+      background-repeat no-repeat
+      background-position center
+      background-size 70%
 
 li
   input[type="checkbox"]

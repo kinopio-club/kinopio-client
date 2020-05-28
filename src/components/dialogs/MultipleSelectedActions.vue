@@ -8,22 +8,32 @@ dialog.narrow.multiple-selected-actions(
 )
   section(v-if="cardsIsSelected || connectionsIsSelected")
     .row(v-if="cardsIsSelected")
+      //- [·]
+      .button-wrap.cards-checkboxes
+        label(v-if="cardsHaveCheckboxes" :class="{active: cardsCheckboxIsChecked}")
+          input(type="checkbox" v-model="cardCheckboxes")
+        label(v-else @click.prevent="addCheckboxToCards" @keydown.stop.enter="addCheckboxToCards")
+          input.add(type="checkbox")
+      //- Connect
       label(v-if="multipleCardsIsSelected" :class="{active: cardsIsConnected}" @click.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards")
         input(type="checkbox" v-model="cardsIsConnected")
         span Connect
+      //- Frames
       .button-wrap(:class="{active: framePickerIsVisible}" @click.stop="toggleFramePickerIsVisible")
         button Frames
         FramePicker(:visible="framePickerIsVisible" :cards="cards")
     .row(v-if="connectionsIsSelected")
+      //- Type Color
       .button-wrap
         button.change-color(:disabled="!canEditSome.connections" @click.stop="toggleMultipleConnectionsPickerVisible")
           .segmented-colors.icon
             template(v-for="type in connectionTypes")
               .current-color(:style="{ background: type.color }")
         MultipleConnectionsPicker(:visible="multipleConnectionsPickerVisible" :selectedConnections="editableConnections" :selectedConnectionTypes="editableConnectionTypes")
+      //- Labels
       button(:disabled="!canEditSome.connections" :class="{active: allLabelsAreVisible}" @click="toggleAllLabelsAreVisible")
         img.icon(src="@/assets/view.svg")
-        span Labels
+        span {{ pluralLabels }}
   section
     .row
       button(:disabled="!canEditSome.any" @click="remove")
@@ -71,7 +81,9 @@ export default {
       moveOrCopyToSpaceIsVisible: false,
       multipleConnectionsPickerVisible: false,
       framePickerIsVisible: false,
-      cardsIsConnected: false
+      cardsIsConnected: false,
+      cardsHaveCheckboxes: false,
+      cardsCheckboxIsChecked: false
     }
   },
   computed: {
@@ -84,6 +96,7 @@ export default {
       }
     },
     userColor () { return this.$store.state.currentUser.color },
+    pluralLabels () { return utils.pluralize('Label', this.multipleConnectionsSelectedIds.length > 1) },
 
     // cards
 
@@ -102,6 +115,17 @@ export default {
         return this.cards.filter(card => {
           return this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](card)
         })
+      }
+    },
+    cardCheckboxes: {
+      get () {
+        return this.cardsCheckboxIsChecked
+      },
+      set (value) {
+        this.cards.forEach(card => {
+          this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: card.id, value })
+        })
+        this.checkCardsCheckboxIsChecked()
       }
     },
 
@@ -262,6 +286,26 @@ export default {
       })
       return Boolean(existingConnection)
     },
+    checkCardsHaveCheckboxes () {
+      const cardsWithCheckboxes = this.cards.filter(card => utils.checkboxFromString(card.name))
+      this.cardsHaveCheckboxes = cardsWithCheckboxes.length === this.cards.length
+    },
+    checkCardsCheckboxIsChecked () {
+      const cardsChecked = this.cards.filter(card => utils.nameIsChecked(card.name))
+      this.cardsCheckboxIsChecked = cardsChecked.length === this.cards.length
+    },
+    addCheckboxToCards () {
+      this.cards.forEach(card => {
+        if (!utils.checkboxFromString(card.name)) {
+          const update = {
+            id: card.id,
+            name: `[] ${card.name}`
+          }
+          this.$store.dispatch('currentSpace/updateCard', update)
+        }
+      })
+      this.cardsHaveCheckboxes = true
+    },
     checkIsCardsConnected () {
       const selectedCards = this.multipleCardsSelectedIds
       const connections = selectedCards.filter((cardId, index) => {
@@ -332,6 +376,8 @@ export default {
       this.$nextTick(() => {
         if (visible) {
           this.checkIsCardsConnected()
+          this.checkCardsHaveCheckboxes()
+          this.checkCardsCheckboxIsChecked()
           this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
           this.scrollIntoView()
           this.closeDialogs()
@@ -359,5 +405,8 @@ export default {
         border-top-right-radius 3px
         border-bottom-right-radius 3px
         margin-right 0
+  .cards-checkboxes
+    input
+      margin 0
 
 </style>

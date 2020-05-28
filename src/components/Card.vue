@@ -21,13 +21,22 @@ article(:style="position" :data-card-id="id")
     img.image(v-if="urlIsImage" :src="url" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging}")
 
     span.card-content-wrap
-      p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}")
-        span {{normalizedName}}
+      .name-wrap
+        //- [·]
+        .label-wrap(v-if="hasCheckbox")
+          label(:class="{active: isChecked, disabled: !canEditSpace}")
+            input(type="checkbox" v-model="checkboxState")
+        //- Name
+        p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked}")
+          span {{normalizedName}}
+
       span.card-buttons-wrap
+        //- Link
         a(:href="url" @click.stop @touchend="openUrl(url)" v-if="url")
           .link
             button(:style="{background: selectedColor}" tabindex="-1")
               img.icon.visit.arrow-icon(src="@/assets/visit.svg")
+        //- Connector
         .connector(
           :data-card-id="id"
           @mousedown="startConnecting"
@@ -90,6 +99,17 @@ export default {
     urlIsImage () { return utils.urlIsImage(this.url) },
     urlIsVideo () { return utils.urlIsVideo(this.url) },
     isMediaCard () { return this.urlIsImage || this.urlIsVideo },
+    isChecked () { return utils.nameIsChecked(this.name) },
+    hasCheckbox () { return utils.checkboxFromString(this.name) },
+    checkboxState: {
+      get () {
+        return this.isChecked
+      },
+      set (value) {
+        this.$store.dispatch('closeAllDialogs')
+        this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.id, value })
+      }
+    },
     position () {
       return {
         left: `${this.x}px`,
@@ -105,11 +125,15 @@ export default {
       return false
     },
     normalizedName () {
+      let name = this.name
       if (this.isMediaCard) {
-        const name = this.name.replace(this.url, '')
-        return utils.trim(name)
+        name = name.replace(this.url, '')
       }
-      return utils.trim(this.name)
+      const checkbox = utils.checkboxFromString(name)
+      if (checkbox) {
+        name = name.replace(checkbox, '')
+      }
+      return utils.trim(name)
     },
     nameLineMinWidth () {
       const averageCharacterWidth = 6.5
@@ -169,7 +193,6 @@ export default {
     isRemoteCardDragging () {
       const remoteCardsDragging = this.$store.state.remoteCardsDragging
       const isDragging = remoteCardsDragging.find(card => card.cardId === this.id)
-      console.log(Boolean(isDragging), remoteCardsDragging)
       return Boolean(isDragging)
     },
     selectedColor () {
@@ -205,7 +228,6 @@ export default {
       const draggingCard = remoteCardsDragging.find(card => card.cardId === this.id)
       if (draggingCard) {
         const user = this.$store.getters['currentSpace/memberById'](draggingCard.userId)
-        console.log(user.color)
         return user.color
       } else {
         return undefined
@@ -322,6 +344,7 @@ export default {
       this.$store.dispatch('currentSpace/incrementSelectedCardsZ')
     },
     showCardDetails (event) {
+      if (event.target.nodeName === 'LABEL') { return }
       const userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
@@ -343,7 +366,6 @@ export default {
       }
       this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
     }
-
   }
 }
 </script>
@@ -370,16 +392,29 @@ article
     align-items flex-start
   .card-buttons-wrap
     display flex
-  .name
-    margin 8px
-    margin-right 0
-    align-self stretch
-    word-break break-word
-    white-space pre-line
-    // multi-line wrapping
-    // display -webkit-box
-    // -webkit-box-orient vertical
-    // -webkit-line-clamp 3
+  .name-wrap
+    display flex
+    align-items flex-start
+    .label-wrap
+      padding-top 8px
+      padding-left 8px
+      label
+        width 20px
+        height 16px
+        input
+          margin 0
+          transform translateX(-3px) translateY(-5px)
+          width 10px
+          height 10px
+          background-size contain
+    .name
+      margin 8px
+      margin-right 0
+      align-self stretch
+      word-break break-word
+      white-space pre-line
+      &.is-checked
+        text-decoration line-through
   .connector,
   .link
     padding 8px
