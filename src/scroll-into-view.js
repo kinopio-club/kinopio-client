@@ -1,15 +1,17 @@
-// import utils from '@/utils.js'
+import utils from '@/utils.js'
 
 const maxIterations = 12 // 12 / 60fps = 200ms
 const padding = 20
 
-let viewportWidth, viewportHeight, totalX, totalY, currentIteration, scrollTimer
+let viewportWidth, viewportHeight, totalX, totalY, currentIteration, scrollTimer, travelledX, travelledY
 
 const self = {
   scroll (element) {
     this.cancel()
-    totalX = undefined
-    totalY = undefined
+    totalX = 0
+    totalY = 0
+    travelledX = 0
+    travelledY = 0
     currentIteration = 0
     const rect = element.getBoundingClientRect()
     if (window.visualViewport) {
@@ -28,7 +30,7 @@ const self = {
       totalX = rect.left - padding
     // x →
     } else if (rect.right > viewportWidth) {
-      totalX = rect.right - (viewportWidth + padding)
+      totalX = (rect.right + padding) - viewportWidth
     }
 
     // y ↑
@@ -41,27 +43,42 @@ const self = {
       totalY = rect.bottom - (viewportHeight - padding)
     }
 
+    console.log('🍆', 'totalX', totalX, 'totalY', totalY)
     scrollTimer = window.requestAnimationFrame(self.scrollFrame)
   },
 
   scrollFrame () {
     currentIteration++
-    console.log('🌷', currentIteration, 'totalX', totalX, 'totalY', totalY)
+    const percentComplete = currentIteration / maxIterations * 100
 
-    // utils.easeOut or https://gist.github.com/gre/1650294
-    // const scrollX = .. || 0
-    // const scrollY = .. || 0
+    const scrollX = utils.easeOut(percentComplete, currentIteration, maxIterations) * totalX
+    const scrollByX = scrollX - travelledX
+    travelledX = scrollX
 
-    // scroll page by scrollX and scrollY
+    const scrollY = utils.easeOut(percentComplete, currentIteration, maxIterations) * totalY
+    const scrollByY = scrollY - travelledY
+    travelledY = scrollY
 
-    if (currentIteration < maxIterations) {
+    window.scrollBy(scrollByX, scrollByY)
+    if (currentIteration <= maxIterations) {
       window.requestAnimationFrame(self.scrollFrame)
     } else {
       self.cancel()
+      return
     }
+
+    console.log('💐', currentIteration, scrollByX, scrollByY, travelledX, travelledY)
   },
 
-  cancel () {
+  cancel (event) {
+    if (event) {
+      // console.log('✂️cancel called', event)
+      // called by all scroll dom and user :'(
+      // no way to differentiate user from dom scroll event?
+      // :. cannot interrupt
+      // -> instead: can block interaction , or make scroll so fast it doesn't need interaction
+      return
+    }
     if (scrollTimer) {
       currentIteration = maxIterations + 1
       window.cancelAnimationFrame(scrollTimer)

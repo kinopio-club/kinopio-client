@@ -136,8 +136,8 @@ export default {
     updatePageSizes () {
       this.$store.commit('updatePageSizes')
     },
-    cancelScrollIntoView () {
-      scrollIntoView.cancel()
+    cancelScrollIntoView (event) {
+      scrollIntoView.cancel(event)
     },
     updateIsOnline () {
       const status = window.navigator.onLine
