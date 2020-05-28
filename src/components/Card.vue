@@ -24,7 +24,7 @@ article(:style="position" :data-card-id="id")
       .name-wrap
         //- [·]
         .checkbox-wrap(v-if="hasCheckbox")
-          label(:class="{active: isChecked, disabled: !canEditSpace}")
+          label(:class="{active: isChecked, disabled: !canEditSpace}" @touchend="toggleCardChecked")
             input(type="checkbox" v-model="checkboxState")
         //- Name
         p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked}")
@@ -108,7 +108,7 @@ export default {
       set (value) {
         this.$store.dispatch('closeAllDialogs')
         // this.$store.dispatch('clearMultipleSelected')
-        this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.id, value })
+        this.toggleCardChecked()
       }
     },
     position () {
@@ -271,6 +271,10 @@ export default {
     }
   },
   methods: {
+    toggleCardChecked () {
+      const value = !this.isChecked
+      this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.id, value })
+    },
     updateRemoteConnections () {
       const remoteCurrentConnections = this.$store.state.remoteCurrentConnections
       const connection = remoteCurrentConnections.find(remoteConnection => {
