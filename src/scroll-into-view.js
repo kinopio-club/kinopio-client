@@ -43,7 +43,6 @@ const self = {
       totalY = rect.bottom - (viewportHeight - padding)
     }
 
-    console.log('🍆', 'totalX', totalX, 'totalY', totalY, element, rect)
     scrollTimer = window.requestAnimationFrame(self.scrollFrame)
   },
 
@@ -64,19 +63,11 @@ const self = {
       window.requestAnimationFrame(self.scrollFrame)
     } else {
       self.cancel()
-      return
     }
-
-    console.log('💐', currentIteration, scrollByX, scrollByY, travelledX, travelledY)
   },
 
   cancel (event) {
     if (event) {
-      // console.log('✂️cancel called', event)
-      // called by all scroll dom and user :'(
-      // no way to differentiate user from dom scroll event?
-      // :. cannot interrupt
-      // -> instead: can block interaction , or make scroll so fast it doesn't need interaction
       return
     }
     if (scrollTimer) {
