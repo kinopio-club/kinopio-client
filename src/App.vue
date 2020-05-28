@@ -185,15 +185,16 @@ label // used for checkbox buttons
     cursor default
     color var(--primary)
     opacity 0.5
-    &:hover,
-    &:active
-      box-shadow none
-      background-color var(--primary-background)
-    &.active
-      &:hover,
-      &:active
-        box-shadow var(--button-active-inset-shadow)
-        background var(--secondary-active-background)
+    pointer-events none
+    // &:hover,
+    // &:active
+    //   box-shadow none
+    //   background-color var(--primary-background)
+    // &.active
+    //   &:hover,
+    //   &:active
+    //     box-shadow var(--button-active-inset-shadow)
+    //     background var(--secondary-active-background)
 
 label
   padding-bottom 4px
