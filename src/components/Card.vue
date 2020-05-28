@@ -23,11 +23,7 @@ article(:style="position" :data-card-id="id")
     span.card-content-wrap
       .name-wrap
         //- [·]
-        .label-wrap(v-if="hasCheckbox"
-          @mousedown.prevent.stop
-          @touchstart.prevent.stop
-          @keydown.stop.enter
-        )
+        .label-wrap(v-if="hasCheckbox")
           label(:class="{active: isChecked, disabled: !canEditSpace}")
             input(type="checkbox" v-model="checkboxState")
         //- Name
