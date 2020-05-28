@@ -107,6 +107,7 @@ export default {
       },
       set (value) {
         this.$store.dispatch('closeAllDialogs')
+        this.$store.dispatch('clearMultipleSelected')
         this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.id, value })
       }
     },
@@ -138,8 +139,11 @@ export default {
     nameLineMinWidth () {
       const averageCharacterWidth = 6.5
       let maxWidth = 190
-      if (this.url) {
+      if (this.url || this.hasCheckbox) {
         maxWidth = 162
+      }
+      if (this.url && this.hasCheckbox) {
+        maxWidth = 132
       }
       if (!this.normalizedName.trim()) { return 0 }
       const width = this.longestNameLineLength() * averageCharacterWidth
@@ -350,6 +354,7 @@ export default {
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
       this.$store.commit('cardDetailsIsVisibleForCardId', this.id)
       this.$store.commit('parentCardId', this.id)
