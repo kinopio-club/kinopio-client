@@ -172,7 +172,7 @@ export default {
     return Boolean(this.isIPhone() || this.isAndroid())
   },
 
-  isMac () {
+  isMacOrIpad () {
     return window.navigator.platform === 'MacIntel'
   },
 
