@@ -48,15 +48,15 @@ export default {
       scrollAreaWidth = Math.max(50, this.viewportWidth / 8)
       maxHeight = Math.max(2500, this.$store.state.viewportHeight)
       maxWidth = Math.max(2500, this.$store.state.viewportWidth)
-      if (this.$store.getters.shouldScrollAtEdges) {
+      if (this.$store.getters.shouldScrollAtEdges(event)) {
         this.updateMovementDirection()
       }
-      if (this.$store.getters.shouldScrollAtEdges && !scrollTimer) {
+      if (this.$store.getters.shouldScrollAtEdges(event) && !scrollTimer) {
         scrollTimer = window.requestAnimationFrame(this.scrollFrame)
       }
     },
     interact () {
-      if (this.$store.getters.shouldScrollAtEdges) {
+      if (this.$store.getters.shouldScrollAtEdges(event)) {
         this.updateMovementDirection()
       }
       prevCursor = utils.cursorPositionInViewport(event)
