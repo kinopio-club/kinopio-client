@@ -351,7 +351,6 @@ export default {
       this.$store.dispatch('currentSpace/incrementSelectedCardsZ')
     },
     showCardDetails (event) {
-      this.$store.commit('currentUserIsDraggingCard', false)
       const userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
@@ -362,6 +361,7 @@ export default {
       this.$store.commit('cardDetailsIsVisibleForCardId', this.id)
       this.$store.commit('parentCardId', this.id)
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
+      this.$store.commit('currentUserIsDraggingCard', false)
       this.broadcastShowCardDetails()
     },
     openUrl (url) {
