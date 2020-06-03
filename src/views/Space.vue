@@ -43,6 +43,9 @@ import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import ScrollAtEdgesHandler from '@/components/ScrollAtEdgesHandler.vue'
 import utils from '@/utils.js'
 
+import sortBy from 'lodash-es/sortBy'
+import uniq from 'lodash-es/uniq'
+
 let startCursor, prevCursor, endCursor
 
 export default {
@@ -270,12 +273,22 @@ export default {
         return false
       }
     },
+    normalizeSpaceCardsZ () {
+      const sorted = sortBy(this.cards, ['z'])
+      const zList = sorted.map(card => card.z)
+      const isNormalized = uniq(zList).length === zList.length
+      if (isNormalized) { return }
+      sorted.forEach((card, index) => {
+        this.$store.dispatch('currentSpace/updateCard', { id: card.id, z: index })
+      })
+    },
     addCard (position) {
       const isParentCard = true
       if (this.spaceIsReadOnly) { return }
       const withinX = position.x > 0 && position.x < this.$store.state.pageWidth
       const withinY = position.y > 0 && position.y < this.$store.state.pageHeight
       if (withinX && withinY) {
+        this.normalizeSpaceCardsZ()
         this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
         this.$store.commit('childCardId', '')
       }
