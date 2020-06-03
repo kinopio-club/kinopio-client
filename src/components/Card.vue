@@ -273,6 +273,7 @@ export default {
     toggleCardChecked () {
       const value = !this.isChecked
       this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.id, value })
+      this.$store.commit('currentUserIsDraggingCard', false)
     },
     updateRemoteConnections () {
       const remoteCurrentConnections = this.$store.state.remoteCurrentConnections
