@@ -195,6 +195,12 @@ export default {
         this.$store.commit('clearAllNotifications', false)
         await this.createSpaces(result.apiKey)
         this.addCollaboratorToInvitedSpaces()
+        const currentSpace = this.$store.state.currentSpace
+        const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
+        utils.updateWindowUrlAndTitle({
+          space: currentSpace,
+          currentUserIsSignedIn
+        })
       } else {
         await this.handleErrors(result)
       }
