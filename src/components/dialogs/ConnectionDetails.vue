@@ -43,29 +43,34 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
       span Add
 
   section.results-section
+    ResultsFilter(:items="connectionTypes" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredConnectionTypes")
     ul.results-list
-      template(v-for="(type in connectionTypes")
+      template(v-for="(type in connectionTypesFiltered")
         li(:class="{ active: connectionTypeIsActive(type), disabled: !canEditConnection }" @click="changeConnectionType(type)" :key="type.id")
           .badge(:style="{backgroundColor: type.color}" :class="{checked: connectionTypeIsDefault(type)}")
           .name {{type.name}}
 </template>
 
 <script>
+import ResultsFilter from '@/components/ResultsFilter.vue'
+import ColorPicker from '@/components/dialogs/ColorPicker.vue'
+import utils from '@/utils.js'
+
 import last from 'lodash-es/last'
 import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
-import utils from '@/utils.js'
-import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-
 export default {
   components: {
-    ColorPicker
+    ColorPicker,
+    ResultsFilter
   },
   name: 'ConnectionDetails',
   data () {
     return {
       isDefault: false,
-      colorPickerIsVisible: false
+      colorPickerIsVisible: false,
+      filter: '',
+      filteredConnectionTypes: []
     }
   },
   computed: {
@@ -109,6 +114,13 @@ export default {
           name: newName
         }
         this.$store.dispatch('currentSpace/updateConnectionType', connectionType)
+      }
+    },
+    connectionTypesFiltered () {
+      if (this.filter) {
+        return this.filteredConnectionTypes
+      } else {
+        return this.connectionTypes
       }
     }
   },
@@ -202,6 +214,12 @@ export default {
     },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
+    },
+    updateFilteredConnectionTypes (types) {
+      this.filteredConnectionTypes = types
+    },
+    updateFilter (filter) {
+      this.filter = filter
     }
   },
   watch: {
