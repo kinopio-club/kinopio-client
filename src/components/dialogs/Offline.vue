@@ -22,16 +22,25 @@ export default {
   props: {
     visible: Boolean
   },
+  data () {
+    return {
+      queue: []
+    }
+  },
   computed: {
-    queue () {
-      return cache.queue()
-    },
     pluralChanges () {
       const condition = this.queue.length !== 1
       return utils.pluralize('change', condition)
     },
     currentUserIsSignedIn () {
       return Boolean(this.$store.getters['currentUser/isSignedIn'])
+    }
+  },
+  watch: {
+    visible (visible) {
+      if (visible) {
+        this.queue = cache.queue()
+      }
     }
   }
 }
