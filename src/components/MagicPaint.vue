@@ -246,15 +246,12 @@ export default {
       const dialogIsVisible = Boolean(document.querySelector('dialog'))
       const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)
       this.startLocking()
-      this.createInitialCircle() // move to 257? if it feels weird to have initial circle on mobile
-      // qa mobile collab cursor
-
       if (event.touches) {
         this.$store.commit('currentUserIsPainting', false)
       } else {
         this.$store.commit('currentUserIsPainting', true)
+        this.createInitialCircle()
       }
-
       if (!multipleCardsIsSelected && !dialogIsVisible) {
         this.$store.commit('shouldAddCard', true)
       }
