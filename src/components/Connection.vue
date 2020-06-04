@@ -23,7 +23,7 @@ path.connection-path(
 <script>
 import utils from '@/utils.js'
 
-let animationTimer
+let animationTimer, isMultiTouch
 
 export default {
   name: 'Connection',
@@ -140,6 +140,7 @@ export default {
 
     // same as ConnectionLabel method
     showConnectionDetails (event) {
+      if (isMultiTouch) { return }
       const detailsPosition = utils.cursorPositionInPage(event)
       this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('connectionDetailsIsVisibleForConnectionId', this.id)
@@ -147,6 +148,10 @@ export default {
       this.$store.dispatch('clearMultipleSelected')
     },
     hideConnectionOutline () {
+      isMultiTouch = false
+      if (utils.isMultiTouch(event)) {
+        isMultiTouch = true
+      }
       this.$store.commit('shouldHideConnectionOutline', true)
     },
     showConnectionDetailsOnKeyup (event) {
