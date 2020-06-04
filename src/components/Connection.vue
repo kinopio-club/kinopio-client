@@ -137,7 +137,12 @@ export default {
       this.$store.dispatch('currentSpace/removeConnection', this.connection)
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
     },
-
+    checkIsMultiTouch (event) {
+      isMultiTouch = false
+      if (utils.isMultiTouch(event)) {
+        isMultiTouch = true
+      }
+    },
     // same as ConnectionLabel method
     showConnectionDetails (event) {
       if (isMultiTouch) { return }
@@ -147,11 +152,8 @@ export default {
       this.$store.commit('connectionDetailsPosition', detailsPosition)
       this.$store.dispatch('clearMultipleSelected')
     },
-    hideConnectionOutline () {
-      isMultiTouch = false
-      if (utils.isMultiTouch(event)) {
-        isMultiTouch = true
-      }
+    hideConnectionOutline (event) {
+      this.checkIsMultiTouch(event)
       this.$store.commit('shouldHideConnectionOutline', true)
     },
     showConnectionDetailsOnKeyup (event) {
