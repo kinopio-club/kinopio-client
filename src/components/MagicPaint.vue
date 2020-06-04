@@ -231,6 +231,8 @@ export default {
       this.createPaintingCircle(event)
     },
     createPaintingCircle (event) {
+      const currentUserIsPaintingLocked = this.$store.state.currentUserIsPaintingLocked
+      if (event.touches && !currentUserIsPaintingLocked) { return }
       let color = this.$store.state.currentUser.color
       currentCursor = utils.cursorPositionInViewport(event)
       let circle = { x: currentCursor.x, y: currentCursor.y, color, iteration: 0 }
