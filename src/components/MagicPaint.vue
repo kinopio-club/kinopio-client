@@ -247,6 +247,7 @@ export default {
       currentCursor = utils.cursorPositionInViewport(event)
       const dialogIsVisible = Boolean(document.querySelector('dialog'))
       const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)
+      if (utils.isMultiTouch(event)) { return }
       this.startLocking()
       if (event.touches) {
         this.$store.commit('currentUserIsPainting', false)

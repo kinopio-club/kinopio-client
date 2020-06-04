@@ -172,6 +172,12 @@ export default {
     return Boolean(this.isIPhone() || this.isAndroid())
   },
 
+  isMultiTouch (event) {
+    if (event.touches) {
+      return event.touches.length > 1
+    }
+  },
+
   isMacOrIpad () {
     return window.navigator.platform === 'MacIntel'
   },
