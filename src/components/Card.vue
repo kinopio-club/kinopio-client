@@ -2,7 +2,7 @@
 article(:style="position" :data-card-id="id")
   .card(
     @mousedown.prevent="startDraggingCard"
-    @touchstart.prevent="startDraggingCard"
+    @touchstart="startDraggingCard"
     @mouseup="showCardDetails"
     @touchend="showCardDetails"
     @keyup.stop.enter="showCardDetails"
@@ -63,6 +63,8 @@ article(:style="position" :data-card-id="id")
 import utils from '@/utils.js'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import Frames from '@/components/Frames.vue'
+
+let isMultiTouch
 
 export default {
   components: {
@@ -320,6 +322,7 @@ export default {
     },
     startConnecting (event) {
       if (!this.canEditSpace) { return }
+      if (utils.isMultiTouch(event)) { return }
       this.$store.dispatch('closeAllDialogs')
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.dispatch('clearMultipleSelected')
@@ -335,8 +338,14 @@ export default {
         this.$store.dispatch('clearMultipleSelected')
       }
     },
-    startDraggingCard () {
+    startDraggingCard (event) {
+      isMultiTouch = false
       if (!this.canEditCard) { return }
+      if (utils.isMultiTouch(event)) {
+        isMultiTouch = true
+        return
+      }
+      event.preventDefault()
       if (this.$store.state.currentUserIsDrawingConnection) { return }
       this.$store.dispatch('closeAllDialogs')
       this.$store.commit('currentUserIsDraggingCard', true)
@@ -352,6 +361,7 @@ export default {
       this.$store.dispatch('currentSpace/incrementSelectedCardsZ')
     },
     showCardDetails (event) {
+      if (isMultiTouch) { return }
       const userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }

@@ -3,6 +3,8 @@
   v-if="visible"
   :style="{ background: typeColor, left: position.left + 'px', top: position.top + 'px'}"
   @click="showConnectionDetails"
+  @touchend.stop="showConnectionDetails"
+  @touchstart="checkIsMultiTouch"
   :data-id="id"
   @mouseover="hover = true"
   @mouseleave="hover = false"
@@ -14,6 +16,8 @@
 
 <script>
 import utils from '@/utils.js'
+
+let isMultiTouch
 
 export default {
   name: 'ConnectionLabel',
@@ -73,8 +77,15 @@ export default {
     }
   },
   methods: {
+    checkIsMultiTouch (event) {
+      isMultiTouch = false
+      if (utils.isMultiTouch(event)) {
+        isMultiTouch = true
+      }
+    },
     // same as Connection method
     showConnectionDetails (event) {
+      if (isMultiTouch) { return }
       const detailsPosition = utils.cursorPositionInPage(event)
       this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('connectionDetailsIsVisibleForConnectionId', this.id)

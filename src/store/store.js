@@ -568,7 +568,7 @@ export default new Vuex.Store({
   getters: {
     shouldScrollAtEdges: (state, getters) => (event) => {
       let isPainting
-      if (utils.isMobile() || event.touches) {
+      if (event.touches) {
         isPainting = state.currentUserIsPaintingLocked
       } else {
         isPainting = state.currentUserIsPainting

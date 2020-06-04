@@ -231,6 +231,8 @@ export default {
       this.createPaintingCircle(event)
     },
     createPaintingCircle (event) {
+      const currentUserIsPaintingLocked = this.$store.state.currentUserIsPaintingLocked
+      if (event.touches && !currentUserIsPaintingLocked) { return }
       let color = this.$store.state.currentUser.color
       currentCursor = utils.cursorPositionInViewport(event)
       let circle = { x: currentCursor.x, y: currentCursor.y, color, iteration: 0 }
@@ -245,21 +247,20 @@ export default {
       currentCursor = utils.cursorPositionInViewport(event)
       const dialogIsVisible = Boolean(document.querySelector('dialog'))
       const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)
+      if (utils.isMultiTouch(event)) { return }
       this.startLocking()
-      this.createInitialCircle()
-      this.$store.commit('currentUserIsPainting', true)
+      if (event.touches) {
+        this.$store.commit('currentUserIsPainting', false)
+      } else {
+        this.$store.commit('currentUserIsPainting', true)
+        this.createInitialCircle()
+      }
       if (!multipleCardsIsSelected && !dialogIsVisible) {
         this.$store.commit('shouldAddCard', true)
       }
       this.$store.dispatch('clearMultipleSelected')
       this.$store.commit('generateCardMap')
       this.$store.dispatch('closeAllDialogs')
-      initialCircles.map(circle => {
-        circle.persistent = false
-      })
-      if (!initialCirclesTimer) {
-        initialCirclesTimer = window.requestAnimationFrame(this.initialCirclesAnimationFrame)
-      }
     },
     paintCirclesAnimationFrame () {
       paintingCircles = utils.filterCircles(paintingCircles, maxIterations)
@@ -493,6 +494,7 @@ export default {
         lockingStartTime = undefined
       }
       if (currentUserIsLocking && percentComplete > 1) {
+        this.$store.commit('currentUserIsPainting', true)
         this.$store.commit('currentUserIsPaintingLocked', true)
         this.$store.commit('triggeredPaintFramePosition', { x: startCursor.x, y: startCursor.y })
         console.log('🔒lockingAnimationFrame locked')
@@ -502,6 +504,14 @@ export default {
 
     // Initial Circles
 
+    startInitialCircles () {
+      initialCircles.map(circle => {
+        circle.persistent = false
+      })
+      if (!initialCirclesTimer) {
+        initialCirclesTimer = window.requestAnimationFrame(this.initialCirclesAnimationFrame)
+      }
+    },
     createInitialCircle () {
       const initialCircle = {
         x: startCursor.x,
@@ -512,6 +522,7 @@ export default {
       }
       initialCircles.push(initialCircle)
       this.drawCircle(initialCircle, initialCircleContext)
+      this.startInitialCircles()
     },
     initialCirclesAnimationFrame () {
       initialCircles = utils.filterCircles(initialCircles, maxIterations)
