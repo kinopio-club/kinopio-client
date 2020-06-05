@@ -1,5 +1,5 @@
 <template lang="pug">
-footer
+footer(:style="visualViewportPosition")
   Notifications
   section(v-if="!dialogsVisible")
     .button-wrap
@@ -54,7 +54,9 @@ export default {
       removedIsVisible: false,
       offlineIsVisible: false,
       filtersIsVisible: false,
-      exploreIsVisible: false
+      exploreIsVisible: false,
+      pinchZoomOffsetLeft: 0,
+      pinchZoomScale: 1
     }
   },
   mounted () {
@@ -66,6 +68,7 @@ export default {
         this.exploreIsVisible = false
       }
     })
+    window.addEventListener('scroll', this.updatePositionInVisualViewport)
   },
   computed: {
     // buildHash () {
@@ -95,9 +98,23 @@ export default {
       const favoriteSpaces = this.$store.state.currentUser.favoriteSpaces
       const isFavoriteSpace = favoriteSpaces.filter(space => space.id === currentSpace.id)
       return Boolean(isFavoriteSpace.length)
+    },
+    visualViewportPosition () {
+      if (this.pinchZoomScale <= 1) { return }
+      const viewport = window.visualViewport
+      const layoutViewport = document.getElementById('layout-viewport')
+      const offsetTop = viewport.height - layoutViewport.getBoundingClientRect().height + viewport.offsetTop
+      return {
+        transform: `translate(${this.pinchZoomOffsetLeft}px, ${offsetTop}px) scale(${1 / this.pinchZoomScale})`,
+        'transform-origin': 'left bottom'
+      }
     }
   },
   methods: {
+    updatePositionInVisualViewport () {
+      this.pinchZoomScale = window.visualViewport.scale
+      this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
+    },
     toggleIsFavoriteSpace () {
       const currentSpace = this.$store.state.currentSpace
       if (this.isFavoriteSpace) {
