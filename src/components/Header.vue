@@ -99,6 +99,9 @@ export default {
         this.signUpOrInIsVisible = false
         this.shareIsVisible = false
         this.keyboardShortcutsIsVisible = false
+        // this.$nextTick(() => {
+        //   this.updatePositionInVisualViewport()
+        // })
       }
       if (mutation.type === 'triggerSpaceDetailsVisible') {
         this.spaceDetailsIsVisible = true
@@ -109,11 +112,15 @@ export default {
       if (mutation.type === 'triggerKeyboardShortcutsIsVisible') {
         this.keyboardShortcutsIsVisible = true
       }
+      if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
+        this.$nextTick(() => {
+          this.updatePositionInVisualViewport()
+        })
+      }
     })
   },
   mounted () {
     window.addEventListener('scroll', this.updatePositionInVisualViewport)
-    window.addEventListener('resize', this.updatePositionInVisualViewport)
   },
   computed: {
     shouldShowNewStuffIsUpdated () {
@@ -193,6 +200,7 @@ export default {
   },
   methods: {
     updatePositionInVisualViewport () {
+      console.log('🍓')
       this.pinchZoomScale = window.visualViewport.scale
       this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
       this.pinchZoomOffsetTop = window.visualViewport.offsetTop

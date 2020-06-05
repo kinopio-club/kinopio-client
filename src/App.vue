@@ -511,5 +511,6 @@ code
   width 100%
   height 100%
   visibility hidden
+  pointer-events none
 
 </style>

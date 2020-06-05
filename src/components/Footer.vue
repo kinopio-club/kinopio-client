@@ -66,10 +66,17 @@ export default {
         this.offlineIsVisible = false
         this.filtersIsVisible = false
         this.exploreIsVisible = false
+        // this.$nextTick(() => {
+        //   this.updatePositionInVisualViewport()
+        // })
+      }
+      if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
+        this.$nextTick(() => {
+          this.updatePositionInVisualViewport()
+        })
       }
     })
     window.addEventListener('scroll', this.updatePositionInVisualViewport)
-    window.addEventListener('resize', this.updatePositionInVisualViewport)
   },
   computed: {
     // buildHash () {
