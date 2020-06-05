@@ -1,5 +1,5 @@
 <template lang="pug">
-header
+header(:style="visualViewportPosition")
   nav
     .logo-about
       .button-wrap
@@ -85,7 +85,10 @@ export default {
       signUpOrInIsVisible: false,
       shareIsVisible: false,
       loadingSignUpOrIn: false,
-      keyboardShortcutsIsVisible: false
+      keyboardShortcutsIsVisible: false,
+      pinchZoomOffsetLeft: 0,
+      pinchZoomOffsetTop: 0,
+      pinchZoomScale: 1
     }
   },
   created () {
@@ -107,6 +110,9 @@ export default {
         this.keyboardShortcutsIsVisible = true
       }
     })
+  },
+  mounted () {
+    window.addEventListener('scroll', this.updatePositionInVisualViewport)
   },
   computed: {
     shouldShowNewStuffIsUpdated () {
@@ -175,9 +181,21 @@ export default {
       const privacy = this.$store.state.currentSpace.privacy
       if (privacy === 'private') { return false }
       return this.$store.state.currentSpace.showInExplore
+    },
+    visualViewportPosition () {
+      if (this.pinchZoomScale <= 1) { return }
+      return {
+        transform: `translate(${this.pinchZoomOffsetLeft}px, ${this.pinchZoomOffsetTop}px) scale(${1 / this.pinchZoomScale})`,
+        'transform-origin': 'left top'
+      }
     }
   },
   methods: {
+    updatePositionInVisualViewport () {
+      this.pinchZoomScale = window.visualViewport.scale
+      this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
+      this.pinchZoomOffsetTop = window.visualViewport.offsetTop
+    },
     toggleAboutIsVisible () {
       const isVisible = this.aboutIsVisible
       this.$store.dispatch('closeAllDialogs')
