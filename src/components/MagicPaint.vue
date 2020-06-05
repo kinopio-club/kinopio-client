@@ -48,7 +48,7 @@ let remotePaintingCanvas, remotePaintingContext, remotePaintingCirclesTimer
 const lockingPreDuration = 100 // ms
 const lockingDuration = 150 // ms
 const initialLockCircleRadius = 65
-let lockingCanvas, lockingContext, lockingAnimationTimer, currentUserIsLocking, lockingStartTime
+let lockingCanvas, lockingContext, lockingAnimationTimer, currentUserIsLocking, lockingStartTime, shouldCancelLocking
 
 // initial
 // shows immediate feedback without having to move cursor
@@ -99,6 +99,7 @@ export default {
     this.updatePrevScrollPosition()
     window.addEventListener('scroll', this.updateCirclesWithScroll)
     window.addEventListener('scroll', this.updatePositionOffsetByPinchZoom)
+    window.addEventListener('scroll', this.cancelLocking)
   },
   data () {
     return {
@@ -453,8 +454,12 @@ export default {
 
     // Locking
 
+    cancelLocking () {
+      shouldCancelLocking = true
+    },
     startLocking () {
       currentUserIsLocking = true
+      shouldCancelLocking = false
       setTimeout(() => {
         if (!lockingAnimationTimer) {
           lockingAnimationTimer = window.requestAnimationFrame(this.lockingAnimationFrame)
@@ -469,6 +474,10 @@ export default {
       const percentComplete = (elaspedTime / lockingDuration) // between 0 and 1
       if (!utils.cursorsAreClose(startCursor, currentCursor)) {
         currentUserIsLocking = false
+      }
+      if (shouldCancelLocking) {
+        currentUserIsLocking = false
+        shouldCancelLocking = false
       }
       if (currentUserIsLocking && percentComplete <= 1) {
         const minSize = circleRadius
