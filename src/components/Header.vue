@@ -115,6 +115,9 @@ export default {
             this.updatePositionInVisualViewport()
           })
         })
+        setTimeout(() => {
+          this.updatePositionInVisualViewport()
+        }, 200)
       }
     })
   },

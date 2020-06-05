@@ -66,16 +66,14 @@ export default {
         this.offlineIsVisible = false
         this.filtersIsVisible = false
         this.exploreIsVisible = false
-        // this.$nextTick(() => {
-        //   this.updatePositionInVisualViewport()
-        // })
       }
       if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
         this.$nextTick(() => {
-          this.$nextTick(() => {
-            this.updatePositionInVisualViewport()
-          })
+          this.updatePositionInVisualViewport()
         })
+        setTimeout(() => {
+          this.updatePositionInVisualViewport()
+        }, 200)
       }
     })
     window.addEventListener('scroll', this.updatePositionInVisualViewport)
