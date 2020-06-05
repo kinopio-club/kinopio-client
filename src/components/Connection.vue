@@ -8,9 +8,9 @@ path.connection-path(
   :data-id="id"
   :key="id"
   :d="path"
-  @mousedown="hideConnectionOutline"
-  @touchstart="hideConnectionOutline"
-  @click="showConnectionDetails"
+  @mousedown="startDraggingConnection"
+  @touchstart="startDraggingConnection"
+  @mouseup="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
   @keyup.stop.backspace="removeConnection"
   @keyup.stop.enter="showConnectionDetailsOnKeyup"
@@ -23,7 +23,7 @@ path.connection-path(
 <script>
 import utils from '@/utils.js'
 
-let animationTimer, isMultiTouch
+let animationTimer, isMultiTouch, startCursor, currentCursor
 
 export default {
   name: 'Connection',
@@ -146,15 +146,18 @@ export default {
     // same as ConnectionLabel method
     showConnectionDetails (event) {
       if (isMultiTouch) { return }
+      currentCursor = utils.cursorPositionInViewport(event)
+      if (!utils.cursorsAreClose(startCursor, currentCursor)) { return }
       const detailsPosition = utils.cursorPositionInPage(event)
       this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('connectionDetailsIsVisibleForConnectionId', this.id)
       this.$store.commit('connectionDetailsPosition', detailsPosition)
       this.$store.dispatch('clearMultipleSelected')
     },
-    hideConnectionOutline (event) {
+    startDraggingConnection (event) {
       this.checkIsMultiTouch(event)
       this.$store.commit('shouldHideConnectionOutline', true)
+      startCursor = utils.cursorPositionInViewport(event)
     },
     showConnectionDetailsOnKeyup (event) {
       this.showConnectionDetails(event)
