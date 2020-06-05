@@ -72,7 +72,9 @@ export default {
       }
       if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
         this.$nextTick(() => {
-          this.updatePositionInVisualViewport()
+          this.$nextTick(() => {
+            this.updatePositionInVisualViewport()
+          })
         })
       }
     })

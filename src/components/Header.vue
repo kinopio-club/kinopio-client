@@ -99,9 +99,6 @@ export default {
         this.signUpOrInIsVisible = false
         this.shareIsVisible = false
         this.keyboardShortcutsIsVisible = false
-        // this.$nextTick(() => {
-        //   this.updatePositionInVisualViewport()
-        // })
       }
       if (mutation.type === 'triggerSpaceDetailsVisible') {
         this.spaceDetailsIsVisible = true
@@ -114,7 +111,9 @@ export default {
       }
       if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
         this.$nextTick(() => {
-          this.updatePositionInVisualViewport()
+          this.$nextTick(() => {
+            this.updatePositionInVisualViewport()
+          })
         })
       }
     })
