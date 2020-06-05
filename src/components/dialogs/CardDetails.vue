@@ -217,13 +217,13 @@ export default {
       scrollIntoView.scroll(element)
     },
     scrollIntoViewAndFocus () {
-      const pinchZoomRatio = document.documentElement.clientWidth / window.innerWidth
-      const pinchZoomRatioShouldFocus = utils.isBetween({
-        value: pinchZoomRatio,
+      const pinchZoomScale = window.visualViewport.scale
+      const pinchZoomScaleShouldFocus = utils.isBetween({
+        value: pinchZoomScale,
         min: 0.8,
         max: 1.3
       })
-      if (!pinchZoomRatioShouldFocus) { return }
+      if (!pinchZoomScaleShouldFocus) { return }
       if (!utils.isMobile()) {
         this.scrollIntoView()
       }
