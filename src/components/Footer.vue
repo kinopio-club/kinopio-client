@@ -69,6 +69,7 @@ export default {
       }
     })
     window.addEventListener('scroll', this.updatePositionInVisualViewport)
+    window.addEventListener('resize', this.updatePositionInVisualViewport)
   },
   computed: {
     // buildHash () {
