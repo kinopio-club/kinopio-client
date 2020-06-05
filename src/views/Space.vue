@@ -295,8 +295,10 @@ export default {
     },
     shouldCancel (event) {
       if (event.target.nodeType !== 1) { return } // firefox check
-      const activeNode = document.activeElement.nodeName
-      if (activeNode === 'TEXTAREA' || activeNode === 'INPUT') {
+      const node = event.target.nodeName
+      const isTextarea = node === 'TEXTAREA'
+      const isInput = node === 'INPUT'
+      if (isTextarea || isInput) {
         return true
       }
       const fromDialog = event.target.closest('dialog')
