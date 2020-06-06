@@ -320,13 +320,15 @@ export default {
       if (this.isDrawingConnection) {
         this.createConnection()
       }
+      // add or close card
       if (this.$store.state.shouldAddCard) {
         const position = utils.cursorPositionInPage(event)
         this.addCard(position)
+        this.$store.commit('triggerUpdatePositionInVisualViewport')
       } else if (this.$store.state.cardDetailsIsVisibleForCardId) {
         this.$store.dispatch('closeAllDialogs')
+        this.$store.commit('triggerUpdatePositionInVisualViewport')
       }
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
 
       if (this.$store.state.multipleCardsSelectedIds.length || this.$store.state.multipleConnectionsSelectedIds.length) {
         const position = utils.cursorPositionInPage(event)

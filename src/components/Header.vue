@@ -65,6 +65,8 @@ import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import privacy from '@/spaces/privacy.js'
 import utils from '@/utils.js'
 
+let updatePositionTimer
+
 export default {
   name: 'Header',
   components: {
@@ -88,7 +90,8 @@ export default {
       keyboardShortcutsIsVisible: false,
       pinchZoomOffsetLeft: 0,
       pinchZoomOffsetTop: 0,
-      pinchZoomScale: 1
+      pinchZoomScale: 1,
+      shouldUpdate: false
     }
   },
   created () {
@@ -110,14 +113,12 @@ export default {
         this.keyboardShortcutsIsVisible = true
       }
       if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
-        this.$nextTick(() => {
-          this.$nextTick(() => {
-            this.updatePositionInVisualViewport()
-          })
-        })
+        if (updatePositionTimer) { return }
+        this.shouldUpdate = true
+        updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
         setTimeout(() => {
-          this.updatePositionInVisualViewport()
-        }, 200)
+          this.shouldUpdate = false
+        }, 300)
       }
     })
   },
@@ -201,8 +202,16 @@ export default {
     }
   },
   methods: {
+    updatePositionFrame () {
+      this.updatePositionInVisualViewport()
+      if (this.shouldUpdate) {
+        window.requestAnimationFrame(this.updatePositionFrame)
+      } else {
+        window.cancelAnimationFrame(updatePositionTimer)
+        updatePositionTimer = undefined
+      }
+    },
     updatePositionInVisualViewport () {
-      console.log('🍓')
       this.pinchZoomScale = window.visualViewport.scale
       this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
       this.pinchZoomOffsetTop = window.visualViewport.offsetTop

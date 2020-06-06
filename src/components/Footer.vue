@@ -40,6 +40,8 @@ import Offline from '@/components/dialogs/Offline.vue'
 import Filters from '@/components/dialogs/Filters.vue'
 import Notifications from '@/components/Notifications.vue'
 
+let updatePositionTimer
+
 export default {
   name: 'Footer',
   components: {
@@ -56,7 +58,8 @@ export default {
       filtersIsVisible: false,
       exploreIsVisible: false,
       pinchZoomOffsetLeft: 0,
-      pinchZoomScale: 1
+      pinchZoomScale: 1,
+      shouldUpdate: false
     }
   },
   mounted () {
@@ -68,12 +71,12 @@ export default {
         this.exploreIsVisible = false
       }
       if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
-        this.$nextTick(() => {
-          this.updatePositionInVisualViewport()
-        })
+        if (updatePositionTimer) { return }
+        this.shouldUpdate = true
+        updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
         setTimeout(() => {
-          this.updatePositionInVisualViewport()
-        }, 200)
+          this.shouldUpdate = false
+        }, 300)
       }
     })
     window.addEventListener('scroll', this.updatePositionInVisualViewport)
@@ -119,6 +122,15 @@ export default {
     }
   },
   methods: {
+    updatePositionFrame () {
+      this.updatePositionInVisualViewport()
+      if (this.shouldUpdate) {
+        window.requestAnimationFrame(this.updatePositionFrame)
+      } else {
+        window.cancelAnimationFrame(updatePositionTimer)
+        updatePositionTimer = undefined
+      }
+    },
     updatePositionInVisualViewport () {
       this.pinchZoomScale = window.visualViewport.scale
       this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft

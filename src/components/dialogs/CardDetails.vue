@@ -182,6 +182,7 @@ export default {
       if (!this.canEditCard) { return }
       this.$store.dispatch('currentSpace/removeCard', this.card)
       this.$store.commit('cardDetailsIsVisibleForCardId', '')
+      this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
     textareaSizes () {
       let textareas = document.querySelectorAll('dialog textarea')
@@ -211,6 +212,7 @@ export default {
       if (length && element) {
         element.setSelectionRange(length, length)
       }
+      this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
     scrollIntoView () {
       const element = this.$refs.dialog
@@ -232,6 +234,7 @@ export default {
     },
     triggerUpdateMagicPaintPositionOffset () {
       this.$store.commit('triggerUpdateMagicPaintPositionOffset')
+      this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
     closeDialogs () {
       this.framePickerIsVisible = false

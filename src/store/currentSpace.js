@@ -652,6 +652,7 @@ export default {
       context.commit('broadcast/update', { updates: card, type: 'removeCard' }, { root: true })
       context.dispatch('removeConnectionsFromCard', card)
       context.commit('generateCardMap', null, { root: true })
+      context.commit('triggerUpdatePositionInVisualViewport', null, { root: true })
     },
     removeCardPermanent: (context, card) => {
       context.commit('removeCardPermanent', card)
