@@ -229,6 +229,7 @@ export default {
       const length = this.search.length
       element.focus()
       element.setSelectionRange(length, length)
+      this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
     clearSearch () {
       this.search = ''
@@ -247,6 +248,7 @@ export default {
         behavior: 'smooth',
         scrollMode: 'if-needed'
       })
+      this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
     isCardUrl (image) {
       return this.cardUrl === image.url

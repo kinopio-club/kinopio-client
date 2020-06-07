@@ -231,6 +231,7 @@ export default {
       }
       this.focusName()
       this.triggerUpdateMagicPaintPositionOffset()
+      this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
     triggerUpdateMagicPaintPositionOffset () {
       this.$store.commit('triggerUpdateMagicPaintPositionOffset')
@@ -261,6 +262,7 @@ export default {
         name = `${checkbox} ${name}`
       }
       this.updateCardName(utils.trim(name))
+      this.$store.commit('triggerUpdatePositionInVisualViewport')
     }
   },
   watch: {
