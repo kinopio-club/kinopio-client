@@ -65,7 +65,8 @@ import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import privacy from '@/spaces/privacy.js'
 import utils from '@/utils.js'
 
-let updatePositionTimer
+const maxIterations = 20
+let currentIteration, updatePositionTimer
 
 export default {
   name: 'Header',
@@ -90,8 +91,7 @@ export default {
       keyboardShortcutsIsVisible: false,
       pinchZoomOffsetLeft: 0,
       pinchZoomOffsetTop: 0,
-      pinchZoomScale: 1,
-      shouldUpdate: false
+      pinchZoomScale: 1
     }
   },
   created () {
@@ -113,12 +113,9 @@ export default {
         this.keyboardShortcutsIsVisible = true
       }
       if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
+        currentIteration = 0
         if (updatePositionTimer) { return }
-        this.shouldUpdate = true
         updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
-        setTimeout(() => {
-          this.shouldUpdate = false
-        }, 300)
       }
     })
   },
@@ -203,8 +200,9 @@ export default {
   },
   methods: {
     updatePositionFrame () {
+      currentIteration++
       this.updatePositionInVisualViewport()
-      if (this.shouldUpdate) {
+      if (currentIteration < maxIterations) {
         window.requestAnimationFrame(this.updatePositionFrame)
       } else {
         window.cancelAnimationFrame(updatePositionTimer)

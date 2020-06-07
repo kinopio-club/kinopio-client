@@ -40,7 +40,8 @@ import Offline from '@/components/dialogs/Offline.vue'
 import Filters from '@/components/dialogs/Filters.vue'
 import Notifications from '@/components/Notifications.vue'
 
-let updatePositionTimer
+const maxIterations = 20
+let currentIteration, updatePositionTimer
 
 export default {
   name: 'Footer',
@@ -58,8 +59,7 @@ export default {
       filtersIsVisible: false,
       exploreIsVisible: false,
       pinchZoomOffsetLeft: 0,
-      pinchZoomScale: 1,
-      shouldUpdate: false
+      pinchZoomScale: 1
     }
   },
   mounted () {
@@ -71,12 +71,9 @@ export default {
         this.exploreIsVisible = false
       }
       if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
+        currentIteration = 0
         if (updatePositionTimer) { return }
-        this.shouldUpdate = true
         updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
-        setTimeout(() => {
-          this.shouldUpdate = false
-        }, 300)
       }
     })
     window.addEventListener('scroll', this.updatePositionInVisualViewport)
@@ -123,8 +120,9 @@ export default {
   },
   methods: {
     updatePositionFrame () {
+      currentIteration++
       this.updatePositionInVisualViewport()
-      if (this.shouldUpdate) {
+      if (currentIteration < maxIterations) {
         window.requestAnimationFrame(this.updatePositionFrame)
       } else {
         window.cancelAnimationFrame(updatePositionTimer)
