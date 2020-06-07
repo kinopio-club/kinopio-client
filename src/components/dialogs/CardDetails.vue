@@ -16,6 +16,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       data-type="name"
       maxlength="250"
       @click="triggerUpdateMagicPaintPositionOffset"
+      @blur="triggerUpdatePositionInVisualViewport"
     )
     .row
       //- Remove
@@ -145,6 +146,9 @@ export default {
     }
   },
   methods: {
+    triggerUpdatePositionInVisualViewport () {
+      this.$store.commit('triggerUpdatePositionInVisualViewport')
+    },
     addCheckbox () {
       const update = {
         id: this.card.id,
@@ -182,7 +186,7 @@ export default {
       if (!this.canEditCard) { return }
       this.$store.dispatch('currentSpace/removeCard', this.card)
       this.$store.commit('cardDetailsIsVisibleForCardId', '')
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
+      this.triggerUpdatePositionInVisualViewport()
     },
     textareaSizes () {
       let textareas = document.querySelectorAll('dialog textarea')
@@ -212,7 +216,7 @@ export default {
       if (length && element) {
         element.setSelectionRange(length, length)
       }
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
+      this.triggerUpdatePositionInVisualViewport()
     },
     scrollIntoView () {
       const element = this.$refs.dialog
@@ -231,11 +235,11 @@ export default {
       }
       this.focusName()
       this.triggerUpdateMagicPaintPositionOffset()
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
+      this.triggerUpdatePositionInVisualViewport()
     },
     triggerUpdateMagicPaintPositionOffset () {
       this.$store.commit('triggerUpdateMagicPaintPositionOffset')
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
+      this.triggerUpdatePositionInVisualViewport()
     },
     closeDialogs () {
       this.framePickerIsVisible = false
@@ -262,7 +266,7 @@ export default {
         name = `${checkbox} ${name}`
       }
       this.updateCardName(utils.trim(name))
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
+      this.triggerUpdatePositionInVisualViewport()
     }
   },
   watch: {
