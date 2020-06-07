@@ -177,6 +177,7 @@ export default new Vuex.Store({
     },
     triggerAddRemotePaintingCircle: () => {},
     triggerUpdateRemoteUserCursor: () => {},
+    triggerUpdatePositionInVisualViewport: () => {},
 
     // Cards
 

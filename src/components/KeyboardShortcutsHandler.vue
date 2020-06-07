@@ -341,6 +341,7 @@ export default {
     clearAllSelectedCards () {
       this.$store.dispatch('clearMultipleSelected')
       this.$store.commit('cardDetailsIsVisibleForCardId', '')
+      this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
 
     canEditCardById (cardId) {

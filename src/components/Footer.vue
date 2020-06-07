@@ -1,5 +1,5 @@
 <template lang="pug">
-footer
+footer(:style="visualViewportPosition")
   Notifications
   section(v-if="!dialogsVisible")
     .button-wrap
@@ -40,6 +40,9 @@ import Offline from '@/components/dialogs/Offline.vue'
 import Filters from '@/components/dialogs/Filters.vue'
 import Notifications from '@/components/Notifications.vue'
 
+const maxIterations = 30
+let currentIteration, updatePositionTimer
+
 export default {
   name: 'Footer',
   components: {
@@ -54,7 +57,9 @@ export default {
       removedIsVisible: false,
       offlineIsVisible: false,
       filtersIsVisible: false,
-      exploreIsVisible: false
+      exploreIsVisible: false,
+      pinchZoomOffsetLeft: 0,
+      pinchZoomScale: 1
     }
   },
   mounted () {
@@ -65,7 +70,13 @@ export default {
         this.filtersIsVisible = false
         this.exploreIsVisible = false
       }
+      if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
+        currentIteration = 0
+        if (updatePositionTimer) { return }
+        updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
+      }
     })
+    window.addEventListener('scroll', this.updatePositionInVisualViewport)
   },
   computed: {
     // buildHash () {
@@ -95,9 +106,41 @@ export default {
       const favoriteSpaces = this.$store.state.currentUser.favoriteSpaces
       const isFavoriteSpace = favoriteSpaces.filter(space => space.id === currentSpace.id)
       return Boolean(isFavoriteSpace.length)
+    },
+    visualViewportPosition () {
+      if (this.pinchZoomScale === 1) { return }
+      const viewport = window.visualViewport
+      const layoutViewport = document.getElementById('layout-viewport')
+      const offsetTop = viewport.height - layoutViewport.getBoundingClientRect().height + viewport.offsetTop
+      if (this.pinchZoomScale > 1) {
+        return {
+          transform: `translate(${this.pinchZoomOffsetLeft}px, ${offsetTop}px) scale(${1 / this.pinchZoomScale})`,
+          'transform-origin': 'left bottom'
+        }
+      } else {
+        return {
+          transform: `translate(${this.pinchZoomOffsetLeft}px, ${offsetTop}px)`,
+          zoom: 1 / this.pinchZoomScale,
+          'transform-origin': 'left bottom'
+        }
+      }
     }
   },
   methods: {
+    updatePositionFrame () {
+      currentIteration++
+      this.updatePositionInVisualViewport()
+      if (currentIteration < maxIterations) {
+        window.requestAnimationFrame(this.updatePositionFrame)
+      } else {
+        window.cancelAnimationFrame(updatePositionTimer)
+        updatePositionTimer = undefined
+      }
+    },
+    updatePositionInVisualViewport () {
+      this.pinchZoomScale = window.visualViewport.scale
+      this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
+    },
     toggleIsFavoriteSpace () {
       const currentSpace = this.$store.state.currentSpace
       if (this.isFavoriteSpace) {

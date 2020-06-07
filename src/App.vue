@@ -3,6 +3,7 @@
   @mousemove="broadcastCursor"
   @touchmove="broadcastCursor"
 )
+  #layout-viewport
   MagicPaint
   router-view
   Header
@@ -504,5 +505,12 @@ code
     padding-right 5px
     cursor text
     flex-shrink 0
+
+#layout-viewport
+  position fixed
+  width 100%
+  height 100%
+  visibility hidden
+  pointer-events none
 
 </style>

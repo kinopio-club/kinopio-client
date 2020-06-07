@@ -1,5 +1,5 @@
 <template lang="pug">
-header
+header(:style="visualViewportPosition")
   nav
     .logo-about
       .button-wrap
@@ -65,6 +65,9 @@ import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import privacy from '@/spaces/privacy.js'
 import utils from '@/utils.js'
 
+const maxIterations = 30
+let currentIteration, updatePositionTimer
+
 export default {
   name: 'Header',
   components: {
@@ -85,7 +88,10 @@ export default {
       signUpOrInIsVisible: false,
       shareIsVisible: false,
       loadingSignUpOrIn: false,
-      keyboardShortcutsIsVisible: false
+      keyboardShortcutsIsVisible: false,
+      pinchZoomOffsetLeft: 0,
+      pinchZoomOffsetTop: 0,
+      pinchZoomScale: 1
     }
   },
   created () {
@@ -106,7 +112,15 @@ export default {
       if (mutation.type === 'triggerKeyboardShortcutsIsVisible') {
         this.keyboardShortcutsIsVisible = true
       }
+      if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
+        currentIteration = 0
+        if (updatePositionTimer) { return }
+        updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
+      }
     })
+  },
+  mounted () {
+    window.addEventListener('scroll', this.updatePositionInVisualViewport)
   },
   computed: {
     shouldShowNewStuffIsUpdated () {
@@ -175,9 +189,39 @@ export default {
       const privacy = this.$store.state.currentSpace.privacy
       if (privacy === 'private') { return false }
       return this.$store.state.currentSpace.showInExplore
+    },
+    visualViewportPosition () {
+      if (this.pinchZoomScale === 1) { return }
+      if (this.pinchZoomScale > 1) {
+        return {
+          transform: `translate(${this.pinchZoomOffsetLeft}px, ${this.pinchZoomOffsetTop}px) scale(${1 / this.pinchZoomScale})`,
+          'transform-origin': 'left top'
+        }
+      } else {
+        return {
+          transform: `translate(${this.pinchZoomOffsetLeft}px, ${this.pinchZoomOffsetTop}px)`,
+          zoom: 1 / this.pinchZoomScale,
+          'transform-origin': 'left top'
+        }
+      }
     }
   },
   methods: {
+    updatePositionFrame () {
+      currentIteration++
+      this.updatePositionInVisualViewport()
+      if (currentIteration < maxIterations) {
+        window.requestAnimationFrame(this.updatePositionFrame)
+      } else {
+        window.cancelAnimationFrame(updatePositionTimer)
+        updatePositionTimer = undefined
+      }
+    },
+    updatePositionInVisualViewport () {
+      this.pinchZoomScale = window.visualViewport.scale
+      this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
+      this.pinchZoomOffsetTop = window.visualViewport.offsetTop
+    },
     toggleAboutIsVisible () {
       const isVisible = this.aboutIsVisible
       this.$store.dispatch('closeAllDialogs')

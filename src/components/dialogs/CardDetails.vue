@@ -16,6 +16,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       data-type="name"
       maxlength="250"
       @click="triggerUpdateMagicPaintPositionOffset"
+      @blur="triggerUpdatePositionInVisualViewport"
     )
     .row
       //- Remove
@@ -145,6 +146,9 @@ export default {
     }
   },
   methods: {
+    triggerUpdatePositionInVisualViewport () {
+      this.$store.commit('triggerUpdatePositionInVisualViewport')
+    },
     addCheckbox () {
       const update = {
         id: this.card.id,
@@ -182,6 +186,7 @@ export default {
       if (!this.canEditCard) { return }
       this.$store.dispatch('currentSpace/removeCard', this.card)
       this.$store.commit('cardDetailsIsVisibleForCardId', '')
+      this.triggerUpdatePositionInVisualViewport()
     },
     textareaSizes () {
       let textareas = document.querySelectorAll('dialog textarea')
@@ -211,27 +216,30 @@ export default {
       if (length && element) {
         element.setSelectionRange(length, length)
       }
+      this.triggerUpdatePositionInVisualViewport()
     },
     scrollIntoView () {
       const element = this.$refs.dialog
       scrollIntoView.scroll(element)
     },
     scrollIntoViewAndFocus () {
-      const pinchZoomRatio = document.documentElement.clientWidth / window.innerWidth
-      const pinchZoomRatioShouldFocus = utils.isBetween({
-        value: pinchZoomRatio,
+      const pinchZoomScale = window.visualViewport.scale
+      const pinchZoomScaleShouldFocus = utils.isBetween({
+        value: pinchZoomScale,
         min: 0.8,
         max: 1.3
       })
-      if (!pinchZoomRatioShouldFocus) { return }
+      if (!pinchZoomScaleShouldFocus) { return }
       if (!utils.isMobile()) {
         this.scrollIntoView()
       }
       this.focusName()
       this.triggerUpdateMagicPaintPositionOffset()
+      this.triggerUpdatePositionInVisualViewport()
     },
     triggerUpdateMagicPaintPositionOffset () {
       this.$store.commit('triggerUpdateMagicPaintPositionOffset')
+      this.triggerUpdatePositionInVisualViewport()
     },
     closeDialogs () {
       this.framePickerIsVisible = false
@@ -258,6 +266,7 @@ export default {
         name = `${checkbox} ${name}`
       }
       this.updateCardName(utils.trim(name))
+      this.triggerUpdatePositionInVisualViewport()
     }
   },
   watch: {
