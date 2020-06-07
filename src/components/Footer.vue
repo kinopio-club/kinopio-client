@@ -40,7 +40,7 @@ import Offline from '@/components/dialogs/Offline.vue'
 import Filters from '@/components/dialogs/Filters.vue'
 import Notifications from '@/components/Notifications.vue'
 
-const maxIterations = 20
+const maxIterations = 30
 let currentIteration, updatePositionTimer
 
 export default {
@@ -108,7 +108,7 @@ export default {
       return Boolean(isFavoriteSpace.length)
     },
     visualViewportPosition () {
-      if (this.pinchZoomScale <= 1) { return }
+      if (this.pinchZoomScale === 1) { return }
       const viewport = window.visualViewport
       const layoutViewport = document.getElementById('layout-viewport')
       const offsetTop = viewport.height - layoutViewport.getBoundingClientRect().height + viewport.offsetTop

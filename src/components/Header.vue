@@ -65,7 +65,7 @@ import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import privacy from '@/spaces/privacy.js'
 import utils from '@/utils.js'
 
-const maxIterations = 20
+const maxIterations = 30
 let currentIteration, updatePositionTimer
 
 export default {
@@ -191,7 +191,7 @@ export default {
       return this.$store.state.currentSpace.showInExplore
     },
     visualViewportPosition () {
-      if (this.pinchZoomScale <= 1) { return }
+      if (this.pinchZoomScale === 1) { return }
       return {
         transform: `translate(${this.pinchZoomOffsetLeft}px, ${this.pinchZoomOffsetTop}px) scale(${1 / this.pinchZoomScale})`,
         'transform-origin': 'left top'
