@@ -329,7 +329,6 @@ export default {
         this.$store.dispatch('closeAllDialogs')
         this.$store.commit('triggerUpdatePositionInVisualViewport')
       }
-
       if (this.$store.state.multipleCardsSelectedIds.length || this.$store.state.multipleConnectionsSelectedIds.length) {
         const position = utils.cursorPositionInPage(event)
         this.showMultipleSelectedActions(position)
