@@ -192,9 +192,17 @@ export default {
     },
     visualViewportPosition () {
       if (this.pinchZoomScale === 1) { return }
-      return {
-        transform: `translate(${this.pinchZoomOffsetLeft}px, ${this.pinchZoomOffsetTop}px) scale(${1 / this.pinchZoomScale})`,
-        'transform-origin': 'left top'
+      if (this.pinchZoomScale > 1) {
+        return {
+          transform: `translate(${this.pinchZoomOffsetLeft}px, ${this.pinchZoomOffsetTop}px) scale(${1 / this.pinchZoomScale})`,
+          'transform-origin': 'left top'
+        }
+      } else {
+        return {
+          transform: `translate(${this.pinchZoomOffsetLeft}px, ${this.pinchZoomOffsetTop}px)`,
+          zoom: 1 / this.pinchZoomScale,
+          'transform-origin': 'left top'
+        }
       }
     }
   },

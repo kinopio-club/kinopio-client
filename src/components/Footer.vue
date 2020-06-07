@@ -112,9 +112,17 @@ export default {
       const viewport = window.visualViewport
       const layoutViewport = document.getElementById('layout-viewport')
       const offsetTop = viewport.height - layoutViewport.getBoundingClientRect().height + viewport.offsetTop
-      return {
-        transform: `translate(${this.pinchZoomOffsetLeft}px, ${offsetTop}px) scale(${1 / this.pinchZoomScale})`,
-        'transform-origin': 'left bottom'
+      if (this.pinchZoomScale > 1) {
+        return {
+          transform: `translate(${this.pinchZoomOffsetLeft}px, ${offsetTop}px) scale(${1 / this.pinchZoomScale})`,
+          'transform-origin': 'left bottom'
+        }
+      } else {
+        return {
+          transform: `translate(${this.pinchZoomOffsetLeft}px, ${offsetTop}px)`,
+          zoom: 1 / this.pinchZoomScale,
+          'transform-origin': 'left bottom'
+        }
       }
     }
   },
