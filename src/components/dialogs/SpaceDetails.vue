@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs")
+dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs" ref="dialog" :style="{maxHeight: maxHeightDialog + 'px'}")
   section
     template(v-if="isSpaceMember")
       .row
@@ -39,7 +39,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
           span Import
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
 
-  section.results-section(v-if="!favoritesIsVisible")
+  section.results-section(v-if="!favoritesIsVisible" ref="results" :style="{maxHeight: maxHeightResults + 'px'}")
     SpaceList(:spaces="spaces" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
 
   Favorites(:visible="favoritesIsVisible" :loading="favoritesIsLoading")
@@ -81,16 +81,18 @@ export default {
       favoriteUsersIsVisible: false,
       favoritesIsLoading: false,
       hasUpdatedFavorites: false,
-      removeLabel: 'Remove'
+      removeLabel: 'Remove',
+      maxHeightDialog: 0,
+      maxHeightResults: 0
     }
   },
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerFavoritesIsVisible') {
         this.favoritesIsVisible = true
-        // todo getfavs()
       }
     })
+    window.addEventListener('resize', this.updateMaxHeight)
   },
   computed: {
     currentSpace () { return this.$store.state.currentSpace },
@@ -208,6 +210,14 @@ export default {
       this.hasUpdatedFavorites = true
       await this.$store.dispatch('currentUser/restoreUserFavorites')
       this.favoritesIsLoading = false
+    },
+    updateMaxHeight () {
+      this.$nextTick(() => {
+        const dialog = this.$refs.dialog
+        const section = this.$refs.results
+        this.maxHeightDialog = utils.maxHeightElement(dialog)
+        this.maxHeightResults = utils.maxHeightElement(section, true)
+      })
     }
   },
   watch: {
@@ -217,6 +227,7 @@ export default {
         this.updateWithRemoteSpaces()
         this.closeDialogs()
         this.updateFavorites()
+        this.updateMaxHeight()
       } else {
         this.favoritesIsVisible = false
       }

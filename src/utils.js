@@ -249,6 +249,57 @@ export default {
     }
   },
 
+  maxHeightElement (element, isChild) {
+    if (!element) { return }
+    const scale = window.visualViewport.scale
+    let windowHeight = window.visualViewport.height * scale
+    const footer = document.querySelector('footer')
+    let footerHeight = footer.getBoundingClientRect().height
+
+    const rect = element.getBoundingClientRect()
+    // let elementFromTop
+    // console.log(rect.top, rect.x)
+    // if (rect.top === rect.x) {
+    //   elementFromTop = rect.top
+    // } else {
+    //   elementFromTop = rect.top + rect.x
+    // }
+    let elementFromTop = rect.top // Math.abs(rect.x) + rect.top
+    // let elementFromTop = Math.max(Math.abs(rect.top), Math.abs(rect.x))
+
+    if (isChild) {
+      const parentRect = element.parentElement.getBoundingClientRect()
+      elementFromTop = rect.top + parentRect.top
+      console.log('🍄', rect.top, parentRect.top, elementFromTop)
+    }
+
+    // let elementFromTop = rect.top + (window.scrollY * 1/scale)
+
+    // let elementFromTop = 0
+
+    let padding
+    // if (isSubElement) {
+    //   padding = 40 * 1/scale
+    // }
+    if (scale > 1) {
+      footerHeight = footerHeight * scale
+      elementFromTop = elementFromTop * scale
+      padding = 20 * scale
+    } else {
+      footerHeight = footerHeight * (1 / scale)
+      elementFromTop = elementFromTop * (1 / scale)
+      padding = 20 * (1 / scale)
+    }
+
+    const maxHeight = windowHeight - footerHeight - elementFromTop - padding
+
+    // const maxHeight = window.visualViewport.height - document.querySelector('footer').getBoundingClientRect().height - element.getBoundingClientRect().top
+
+    console.log('🍆', scale, 'windowHeight', windowHeight, 'footerHeight', footerHeight, 'elementFromTop', elementFromTop, 'padding', padding, '🌹', maxHeight)
+
+    return maxHeight
+  },
+
   distanceBetweenTwoPoints (point1, point2) {
     // https://www.mathwarehouse.com/algebra/distance_formula/index.php
     const xDelta = Math.abs(point1.x - point2.x)
