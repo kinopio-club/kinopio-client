@@ -62,7 +62,10 @@ const self = {
   actions: {
 
     requestOptions: (context, options) => {
-      const headers = new Headers({ 'Content-Type': 'application/json' })
+      const headers = new Headers({
+        'Content-Type': 'application/json',
+        'Cache-Control': 'must-revalidate, no-store, no-cache, private'
+      })
       const collaboratorKey = options.space.collaboratorKey
       const apiKey = options.apiKey || cache.user().apiKey
       if (collaboratorKey) {
