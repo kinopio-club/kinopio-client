@@ -223,7 +223,7 @@ export default {
       scrollIntoView.scroll(element)
     },
     scrollIntoViewAndFocus () {
-      const pinchZoomScale = window.visualViewport.scale
+      const pinchZoomScale = utils.visualViewport().scale
       const pinchZoomScaleShouldFocus = utils.isBetween({
         value: pinchZoomScale,
         min: 0.8,

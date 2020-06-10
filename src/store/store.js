@@ -104,14 +104,8 @@ export default new Vuex.Store({
       const html = document.documentElement
       state.pageWidth = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
       state.pageHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
-      if (window.visualViewport) {
-        state.viewportWidth = window.visualViewport.width
-        state.viewportHeight = window.visualViewport.height
-      } else {
-        // firefox fallback
-        state.viewportWidth = document.documentElement.clientWidth
-        state.viewportHeight = document.documentElement.clientHeight
-      }
+      state.viewportWidth = utils.visualViewport().width
+      state.viewportHeight = utils.visualViewport().height
     },
     updateSpacePageSize: (state, { maxX, maxY }) => {
       const extraScrollArea = 160

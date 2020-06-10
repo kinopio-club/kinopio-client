@@ -218,6 +218,7 @@ export default {
       }
     },
     updatePositionInVisualViewport () {
+      if (!window.visualViewport) { return }
       this.pinchZoomScale = window.visualViewport.scale
       this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
       this.pinchZoomOffsetTop = window.visualViewport.offsetTop

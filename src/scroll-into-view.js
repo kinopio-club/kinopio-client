@@ -15,14 +15,8 @@ const self = {
     travelledY = 0
     currentIteration = 0
     const rect = element.getBoundingClientRect()
-    if (window.visualViewport) {
-      viewportWidth = window.visualViewport.width
-      viewportHeight = window.visualViewport.height
-    } else {
-      // firefox fallback
-      viewportWidth = document.documentElement.clientWidth
-      viewportHeight = document.documentElement.clientHeight
-    }
+    viewportWidth = utils.visualViewport().width
+    viewportHeight = utils.visualViewport().height
 
     // x ←
     if (rect.width > viewportWidth) {

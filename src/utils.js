@@ -62,6 +62,21 @@ export default {
     return { x, y }
   },
 
+  visualViewport () {
+    if (window.visualViewport) {
+      return window.visualViewport
+    } else {
+      // firefox fallback, doesn't support pinch zooming
+      return {
+        width: document.documentElement.clientWidth,
+        height: document.documentElement.clientHeight,
+        scale: document.documentElement.clientWidth / window.innerWidth,
+        offsetLeft: 0,
+        offsetRight: 0
+      }
+    }
+  },
+
   rectCenter (rect) {
     const x = Math.round(rect.x + (rect.width / 2))
     const y = Math.round(rect.y + (rect.height / 2))

@@ -39,6 +39,7 @@ import Removed from '@/components/dialogs/Removed.vue'
 import Offline from '@/components/dialogs/Offline.vue'
 import Filters from '@/components/dialogs/Filters.vue'
 import Notifications from '@/components/Notifications.vue'
+import utils from '@/utils.js'
 
 const maxIterations = 30
 let currentIteration, updatePositionTimer
@@ -109,7 +110,7 @@ export default {
     },
     visualViewportPosition () {
       if (this.pinchZoomScale === 1) { return }
-      const viewport = window.visualViewport
+      const viewport = utils.visualViewport()
       const layoutViewport = document.getElementById('layout-viewport')
       const offsetTop = viewport.height - layoutViewport.getBoundingClientRect().height + viewport.offsetTop
       if (this.pinchZoomScale > 1) {
@@ -138,8 +139,8 @@ export default {
       }
     },
     updatePositionInVisualViewport () {
-      this.pinchZoomScale = window.visualViewport.scale
-      this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
+      this.pinchZoomScale = utils.visualViewport().scale
+      this.pinchZoomOffsetLeft = utils.visualViewport().offsetLeft
     },
     toggleIsFavoriteSpace () {
       const currentSpace = this.$store.state.currentSpace
