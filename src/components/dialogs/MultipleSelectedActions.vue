@@ -43,11 +43,14 @@ dialog.narrow.multiple-selected-actions(
         button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
           span Export
         Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
-    .button-wrap(v-if="multipleCardsSelectedIds.length")
-      button(:disabled="!canEditAll.cards" @click.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
-        img.icon.visit(src="@/assets/visit.svg")
-        span Move or Copy
-      MoveOrCopyToSpace(:visible="moveOrCopyToSpaceIsVisible")
+    .row(v-if="multipleCardsSelectedIds.length")
+      button(v-if="multipleCardsIsSelected" :disabled="!canEditSome.cards" @click="alignCards")
+        img.icon(src="@/assets/align.svg")
+      .button-wrap
+        button(:disabled="!canEditAll.cards" @click.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
+          img.icon.visit(src="@/assets/visit.svg")
+          span Move or Copy
+        MoveOrCopyToSpace(:visible="moveOrCopyToSpaceIsVisible")
 
     p(v-if="canEditAsNonMember")
       span.badge.info
@@ -362,6 +365,9 @@ export default {
       this.editableCards.forEach(card => this.$store.dispatch('currentSpace/removeCard', card))
       this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('clearMultipleSelected')
+    },
+    alignCards () {
+      console.log('🍄 alignCards', this.editableCards)
     },
     scrollIntoView () {
       const element = this.$refs.dialog
