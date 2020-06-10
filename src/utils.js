@@ -252,10 +252,10 @@ export default {
   maxHeightElement (element, isChild) {
     if (!element) { return }
     const scale = window.visualViewport.scale
-    let windowHeight = window.visualViewport.height * scale
+    const windowHeight = window.visualViewport.height * scale
+    const rect = element.getBoundingClientRect()
     const footer = document.querySelector('footer')
     let footerHeight = footer.getBoundingClientRect().height
-    const rect = element.getBoundingClientRect()
     let elementFromTop = rect.top
     if (isChild) {
       const parentRect = element.parentElement.getBoundingClientRect()
