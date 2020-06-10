@@ -91,7 +91,8 @@ export default function createWebSocketPlugin () {
           } else if (message === 'userJoinedRoom') {
             store.dispatch('currentSpace/addUserToJoinedSpace', user)
           } else if (message === 'userLeftRoom') {
-            store.commit('currentSpace/removeSpectatorFromSpace', user)
+            store.commit('currentSpace/removeSpectatorFromSpace', user || updates.user)
+            store.commit('clearRemoteMultipleSelected', data)
           } else if (message === 'userLeftSpace') {
             store.commit('currentSpace/removeCollaboratorFromSpace', updates.user)
           } else if (message === 'addRemotePaintingCircle') {

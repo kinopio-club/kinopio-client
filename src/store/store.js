@@ -403,7 +403,7 @@ export default new Vuex.Store({
     },
     clearRemoteMultipleSelected: (state, update) => {
       utils.typeCheck(update, 'object')
-      const user = update.user
+      const user = update.user || update.updates.user
       state.remoteCardsSelected = state.remoteCardsSelected.filter(card => card.userId !== user.id)
       state.remoteConnectionsSelected = state.remoteConnectionsSelected.filter(connection => connection.userId !== user.id)
     },

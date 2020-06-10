@@ -485,6 +485,8 @@ export default {
           shouldUpdateUrl: true
         })
       }
+      const user = context.rootState.currentUser
+      context.commit('broadcast/update', { user, type: 'userLeftRoom' }, { root: true })
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
       await context.dispatch('loadSpace', space)
