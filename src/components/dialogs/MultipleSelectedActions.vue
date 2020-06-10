@@ -367,7 +367,15 @@ export default {
       this.$store.dispatch('clearMultipleSelected')
     },
     alignCards () {
-      console.log('🍄 alignCards', this.editableCards)
+      const x = this.editableCards[0].x
+      this.editableCards.forEach(card => {
+        card = utils.clone(card)
+        card.x = x
+        this.$store.dispatch('currentSpace/updateCard', card)
+        this.$nextTick(() => {
+          this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
+        })
+      })
     },
     scrollIntoView () {
       const element = this.$refs.dialog
