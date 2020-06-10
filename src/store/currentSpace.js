@@ -411,7 +411,7 @@ export default {
       })
     },
     loadSpace: async (context, space) => {
-      const emptySpace = { id: space.id, cards: [], connections: [] }
+      const emptySpace = { id: space.id, cards: [], connections: [], spectators: [] }
       const cachedSpace = cache.space(space.id)
       context.commit('clearAllNotifications', null, { root: true })
       // restore local
