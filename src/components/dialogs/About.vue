@@ -15,6 +15,9 @@ dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
           button Help and Support →
     .row
       .button-wrap
+        a(href="https://help.kinopio.club/api")
+          button API →
+      .button-wrap
         button(@click.stop="toggleContactIsVisible" :class="{active: contactIsVisible}")
           span Contact
         Contact(:visible="contactIsVisible")
