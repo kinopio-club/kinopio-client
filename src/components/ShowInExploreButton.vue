@@ -13,7 +13,12 @@
   template(v-else-if="error.spaceMustBeEdited")
     p
       span.badge.info Edit and rename this space
-      span To show in explore
+      span to show in explore
+
+  template(v-else-if="error.spaceCardsMinimum")
+    p
+      span.badge.info Space needs more than 10 cards
+      span to show in explore
 
 </template>
 
@@ -27,7 +32,8 @@ export default {
     return {
       error: {
         userNeedsToSignUpOrIn: false,
-        spaceMustBeEdited: false
+        spaceMustBeEdited: false,
+        spaceCardsMinimum: false
       }
     }
   },
@@ -36,9 +42,8 @@ export default {
     showInExplore () { return this.$store.state.currentSpace.showInExplore },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     spaceIsHelloKinopio () { return this.$store.getters['currentSpace/isHelloKinopio'] },
-    showInExploreLabel () {
-      return this.label || 'Show in Explore'
-    }
+    showInExploreLabel () { return this.label || 'Show in Explore' },
+    spaceCardsCount () { return this.$store.state.currentSpace.cards.length }
   },
   methods: {
     toggleShowInExplore () {
@@ -50,7 +55,10 @@ export default {
         this.error.spaceMustBeEdited = true
         return
       }
-
+      if (this.spaceCardsCount < 10) {
+        this.error.spaceCardsMinimum = true
+        return
+      }
       const value = !this.showInExplore
       this.$store.dispatch('currentSpace/updateSpace', { showInExplore: value })
       this.$emit('updateSpaces')
@@ -65,6 +73,7 @@ export default {
     visible (visible) {
       this.error.userNeedsToSignUpOrIn = false
       this.error.spaceMustBeEdited = false
+      this.error.spaceCardsMinimum = false
     }
   }
 }
