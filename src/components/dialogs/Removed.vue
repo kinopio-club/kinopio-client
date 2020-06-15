@@ -132,13 +132,11 @@ export default {
       this.removeAllConfirmationIsVisible = false
     },
     removeAllPermanent () {
-      this.items.forEach(item => {
-        if (this.cardsVisible) {
-          this.removeCardPermanent(item)
-        } else {
-          this.removeSpacePermanent(item)
-        }
-      })
+      if (this.cardsVisible) {
+        this.removeAllCardsPermanent()
+      } else {
+        this.removeAllSpacesPermanent()
+      }
       this.hideRemoveAllConfirmation()
     },
     scrollIntoView (card) {
@@ -207,6 +205,10 @@ export default {
       this.$store.dispatch('currentSpace/removeCardPermanent', card)
       this.updateLocalRemovedCards()
     },
+    removeAllCardsPermanent () {
+      this.$store.dispatch('currentSpace/removeAllRemovedCardsPermanent')
+      this.updateLocalRemovedCards()
+    },
 
     // Spaces
 
@@ -243,6 +245,10 @@ export default {
     },
     removeSpacePermanent (space) {
       this.$store.dispatch('currentSpace/removeSpacePermanent', space)
+      this.updateLocalRemovedSpaces()
+    },
+    removeAllSpacesPermanent () {
+      this.$store.dispatch('currentSpace/removeAllRemovedSpacesPermanent')
       this.updateLocalRemovedSpaces()
     }
   },

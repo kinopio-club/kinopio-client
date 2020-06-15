@@ -170,6 +170,10 @@ export default {
         cache.updateSpace('cards', state.cards, state.id)
       }
     },
+    removeAllRemovedCardsPermanent: (state) => {
+      state.removedCards = []
+      cache.updateSpace('removedCards', state.removedCards, state.id)
+    },
     restoreRemovedCard: (state, cardToRestore) => {
       const index = state.removedCards.findIndex(card => card.id === cardToRestore.id)
       const card = state.removedCards[index]
@@ -520,6 +524,12 @@ export default {
         body: space
       }, { root: true })
     },
+    removeAllRemovedSpacesPermanent: (context) => {
+      const userId = context.rootState.currentUser.id
+      const removedSpaces = cache.getAllRemovedSpaces()
+      removedSpaces.forEach(space => cache.removeSpacePermanent(space))
+      context.dispatch('api/addToQueue', { name: 'removeAllRemovedSpacesPermanentFromUser', body: { userId } }, { root: true })
+    },
     checkIfShouldNotifyReadOnly: (context) => {
       const CanEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (CanEditSpace) {
@@ -659,6 +669,10 @@ export default {
     removeCardPermanent: (context, card) => {
       context.commit('removeCardPermanent', card)
       context.dispatch('api/addToQueue', { name: 'removeCardPermanent', body: card }, { root: true })
+    },
+    removeAllRemovedCardsPermanent: (context) => {
+      context.commit('removeAllRemovedCardsPermanent')
+      context.dispatch('api/addToQueue', { name: 'removeAllRemovedCardsPermanentFromSpace', body: {} }, { root: true })
     },
     restoreRemovedCard: (context, card) => {
       context.commit('restoreRemovedCard', card)
