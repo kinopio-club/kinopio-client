@@ -28,6 +28,9 @@ export default {
     isSignedIn: (state) => {
       return Boolean(state.apiKey)
     },
+    shouldPreventAddCard: (state) => {
+      if (!state.isUpgraded && state.cardsCreatedCount > 150) { return true }
+    },
     canEditSpace: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
       const spaceIsOpen = space.privacy === 'open'
@@ -170,6 +173,11 @@ export default {
       }
       cache.updateUser('cardsCreatedCount', state.cardsCreatedCount)
       console.log('🥬 card count', state.cardsCreatedCount)
+    },
+    isUpgraded: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.isUpgraded = value
+      cache.updateUser('isUpgraded', value)
     }
   },
   actions: {
@@ -184,6 +192,10 @@ export default {
         console.log('🌸 Create new user')
         context.dispatch('createNewUser')
       }
+    },
+    isUpgraded: (context, value) => {
+      context.commit('isUpgraded', value)
+      context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
     },
     createNewUser: (context) => {
       cache.saveUser(context.state)

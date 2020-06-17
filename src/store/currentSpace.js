@@ -558,6 +558,14 @@ export default {
         context.commit('notifySignUpToEditSpace', false, { root: true })
       }
     },
+    checkIfShouldnotifyCardsCreatedIsNearLimit: (context) => {
+      const currentUser = context.rootState.currentUser
+      if (currentUser.isUpgraded) { return }
+      if (150 - currentUser.cardsCreatedCount < 10) {
+        console.log('🚑🚑🚑 notifyCardsCreatedIsNearLimit')
+        context.commit('notifyCardsCreatedIsNearLimit', true, { root: true })
+      }
+    },
     removeCollaboratorFromSpace: (context, user) => {
       const space = utils.clone(context.state)
       const userName = user.name || 'User'
@@ -579,6 +587,11 @@ export default {
 
     addCard: (context, { position, isParentCard }) => {
       utils.typeCheck(position, 'object')
+      if (context.rootGetters['currentUser/shouldPreventAddCard']) {
+        console.log('🚒🚒🚒 notifyCardsCreatedIsOverLimit')
+        context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
+        return
+      }
       let cards = context.state.cards
       let card = {
         id: nanoid(),
@@ -599,6 +612,7 @@ export default {
       context.commit('history/add', update, { root: true })
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
       context.commit('currentUser/cardsCreatedCount', { increment: true }, { root: true })
+      context.dispatch('checkIfShouldnotifyCardsCreatedIsNearLimit')
     },
     // shim for history/playback
     createCard: (context, card) => {
@@ -616,6 +630,7 @@ export default {
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
       context.commit('history/add', update, { root: true })
+      context.commit('currentUser/cardsCreatedCount', { increment: true }, { root: true })
     },
     updateCard: (context, card) => {
       context.commit('updateCard', card)

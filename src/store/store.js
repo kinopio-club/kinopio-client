@@ -93,6 +93,8 @@ export default new Vuex.Store({
     notifySignUpToEditSpace: false,
     notifySpaceIsOpenAndEditable: false,
     notifyAccessFavorites: false,
+    notifyCardsCreatedIsNearLimit: false,
+    notifyCardsCreatedIsOverLimit: false,
 
     // filters
     filteredConnectionTypeIds: [],
@@ -172,6 +174,7 @@ export default new Vuex.Store({
     triggerAddRemotePaintingCircle: () => {},
     triggerUpdateRemoteUserCursor: () => {},
     triggerUpdatePositionInVisualViewport: () => {},
+    triggerUpgradeUserIsVisible: () => {},
 
     // Cards
 
@@ -438,6 +441,8 @@ export default new Vuex.Store({
       state.notifySignUpToEditSpace = false
       state.notifySpaceIsOpenAndEditable = false
       state.notifyAccessFavorites = false
+      state.notifyCardsCreatedIsNearLimit = false
+      state.notifyCardsCreatedIsOverLimit = false
     },
     notifyReadOnly: (state, value) => {
       utils.typeCheck(value, 'boolean')
@@ -473,6 +478,14 @@ export default new Vuex.Store({
     notifyAccessFavorites: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.notifyAccessFavorites = value
+    },
+    notifyCardsCreatedIsNearLimit: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.notifyCardsCreatedIsNearLimit = value
+    },
+    notifyCardsCreatedIsOverLimit: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.notifyCardsCreatedIsOverLimit = value
     },
 
     // Filters

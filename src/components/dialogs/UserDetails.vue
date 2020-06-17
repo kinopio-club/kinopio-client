@@ -21,8 +21,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
     .row.badges(v-if="user.isSpectator || !userIsMember")
       .badge Spectator
 
-  section.upgrade(v-if="isCurrentUser")
-    //- TODO ^ && if user is not paid
+  section.upgrade(v-if="isCurrentUser && !currentUserIsUpgraded")
     p {{cardsCreatedCount}}/150 cards created
     progress(:value="cardsCreatedCount" max=150)
     .button-wrap
@@ -102,6 +101,7 @@ export default {
       loadingUserspaces: false,
       spacePickerIsVisible: false,
       userSpaces: [],
+      currentUserIsUpgraded: false,
       error: {
         unknownServerError: false
       }
@@ -225,6 +225,7 @@ export default {
     visible (visible) {
       this.closeDialogs()
       this.clearUserSpaces()
+      this.currentUserIsUpgraded = this.$store.state.currentUser.isUpgraded
     },
     userDetailsPosition (position) {
       this.closeDialogs()
