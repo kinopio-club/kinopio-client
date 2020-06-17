@@ -513,4 +513,21 @@ code
   visibility hidden
   pointer-events none
 
+progress
+  appearance none
+  width 100%
+  height 8px
+  border 1px solid var(--primary)
+  border-radius 3px
+  background-color var(--secondary-background)
+progress::-webkit-progress-bar
+  background-color var(--secondary-background)
+  border-radius 3px
+progress::-webkit-progress-value
+  background-color var(--primary)
+  border-radius 2px
+progress::-moz-progress-bar
+  background-color var(--primary)
+  border-radius 2px
+
 </style>

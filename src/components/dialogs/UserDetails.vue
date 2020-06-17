@@ -20,6 +20,20 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
       input.name(placeholder="What's your name?" v-model="userName" name="Name")
     .row.badges(v-if="user.isSpectator || !userIsMember")
       .badge Spectator
+
+  section.upgrade(v-if="isCurrentUser")
+    //- TODO ^ && if user is not paid
+    p 50/150 cards created
+    progress(value=50 max=150)
+    .button-wrap
+      button
+        span Upgrade for Unlimited
+      //- TODO UpgradeUser dialog
+    .badge.info 4$/month
+    .row
+      a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost")
+        button More Info →
+
   section(v-if="isCurrentUser")
     .button-wrap
       button(@click.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}")
@@ -253,6 +267,19 @@ export default {
     margin-top 8px
     .badge
       background-color var(--secondary-background)
+
+  .upgrade
+    progress
+      margin-top 2px
+      margin-bottom 10px
+    .button-wrap + .row,
+    .row + .button-wrap
+      margin-top 10px
+    .badge
+      // vertical-align 0
+      margin-top 10px
+      margin-bottom 10px
+      display inline-block
 
 .user-info
   display: flex
