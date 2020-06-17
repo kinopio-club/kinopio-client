@@ -15,7 +15,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
     .row
       .button-wrap
         button.change-color(@click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-          .current-color(:style="backgroundColor")
+          .current-color(:style="{ background: userColor }")
         ColorPicker(:currentColor="userColor" :visible="colorPickerIsVisible" @selectedColor="updateUserColor")
       input.name(placeholder="What's your name?" v-model="userName" name="Name")
     .row.badges(v-if="user.isSpectator || !userIsMember")
@@ -23,8 +23,8 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
 
   section.upgrade(v-if="isCurrentUser")
     //- TODO ^ && if user is not paid
-    p 50/150 cards created
-    progress(value=50 max=150)
+    p {{cardsCreatedCount}}/150 cards created
+    progress(:value="cardsCreatedCount" max=150)
     .button-wrap
       button
         span Upgrade for Unlimited
@@ -108,26 +108,11 @@ export default {
     }
   },
   computed: {
-    // isBeta () {
-    //   return this.$store.state.isBeta
-    // },
-    userColor () {
-      return this.user.color
-    },
-    userIsMember () {
-      return Boolean(this.$store.getters['currentSpace/memberById'](this.user.id))
-    },
-    backgroundColor () {
-      return {
-        backgroundColor: this.userColor
-      }
-    },
-    isCurrentUser () {
-      return this.$store.getters['currentUser/isCurrentUser'](this.user)
-    },
-    currentUserIsSignedIn () {
-      return this.$store.getters['currentUser/isSignedIn']
-    },
+    cardsCreatedCount () { return this.$store.state.currentUser.cardsCreatedCount },
+    userColor () { return this.user.color },
+    userIsMember () { return Boolean(this.$store.getters['currentSpace/memberById'](this.user.id)) },
+    isCurrentUser () { return this.$store.getters['currentUser/isCurrentUser'](this.user) },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     userIsSignedIn () {
       if (this.user.isSignedIn === false) {
         return false

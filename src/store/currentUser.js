@@ -17,7 +17,8 @@ export default {
     apiKey: '',
     arenaAccessToken: '',
     favoriteUsers: [],
-    favoriteSpaces: []
+    favoriteSpaces: [],
+    cardsCreatedCount: 0
   },
   getters: {
     isCurrentUser: (state) => (user) => {
