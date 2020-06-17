@@ -18,7 +18,8 @@ export default {
     arenaAccessToken: '',
     favoriteUsers: [],
     favoriteSpaces: [],
-    cardsCreatedCount: 0
+    cardsCreatedCount: 0,
+    isUpgraded: false
   },
   getters: {
     isCurrentUser: (state) => (user) => {
@@ -159,6 +160,16 @@ export default {
     arenaAccessToken: (state, token) => {
       state.arenaAccessToken = token
       cache.updateUser('arenaAccessToken', token)
+    },
+    cardsCreatedCount: (state, { increment }) => {
+      if (state.isUpgraded) { return }
+      if (increment) {
+        state.cardsCreatedCount = Math.max(state.cardsCreatedCount + 1, 0)
+      } else {
+        state.cardsCreatedCount = Math.max(state.cardsCreatedCount - 1, 0)
+      }
+      cache.updateUser('cardsCreatedCount', state.cardsCreatedCount)
+      console.log('🥬 card count', state.cardsCreatedCount)
     }
   },
   actions: {
