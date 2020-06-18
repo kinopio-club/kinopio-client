@@ -16,8 +16,7 @@ aside.notifications(@click="closeAllDialogs")
       button(@click.stop="triggerSpaceDetailsFavoritesVisible") Your Spaces
 
   .persistent-item.danger(v-if="notifyCardsCreatedIsOverLimit" ref="cardsOverLimit" :class="{'notification-jiggle': notifyCardsCreatedIsOverLimitJiggle}" @animationend="resetNotifyCardsCreatedIsOverLimitJiggle")
-    //- todo tweak copy
-    p notifyCardsCreatedIsOverLimit, you'll need to upgrade for $4/month
+    p To add more cards, you'll need to upgrade for $4/month
     .row
       button(@click.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
