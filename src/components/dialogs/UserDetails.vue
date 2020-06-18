@@ -248,8 +248,6 @@ export default {
 .user-details
   cursor: initial
   top calc(100% - 8px)
-  .row
-    margin 0
   &.right-side
     left initial
     right 8px

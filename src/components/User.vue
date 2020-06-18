@@ -7,7 +7,7 @@
     :class="{ clickable: isClickable, active: userDetailsIsVisible }"
     :style="{backgroundColor: user.color}"
   )
-    .label-badge(v-if="isCurrentUser")
+    .label-badge(v-if="isCurrentUser && !hideYouLabel")
       span YOU
   template(v-if="isClickable")
     UserDetails(:visible="userDetailsIsVisible" :user="user" :detailsOnRight="detailsOnRight")
@@ -25,7 +25,8 @@ export default {
     isClickable: Boolean,
     user: Object,
     detailsOnRight: Boolean,
-    shouldCloseAllDialogs: Boolean
+    shouldCloseAllDialogs: Boolean,
+    hideYouLabel: Boolean
   },
   data () {
     return {
