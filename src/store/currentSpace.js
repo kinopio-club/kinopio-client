@@ -611,7 +611,7 @@ export default {
       context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
       context.commit('history/add', update, { root: true })
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
-      context.commit('currentUser/cardsCreatedCount', { increment: true }, { root: true })
+      context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: true }, { root: true })
       context.dispatch('checkIfShouldnotifyCardsCreatedIsNearLimit')
     },
     // shim for history/playback
@@ -630,7 +630,7 @@ export default {
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
       context.commit('history/add', update, { root: true })
-      context.commit('currentUser/cardsCreatedCount', { increment: true }, { root: true })
+      context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: true }, { root: true })
     },
     updateCard: (context, card) => {
       context.commit('updateCard', card)
@@ -681,7 +681,7 @@ export default {
       context.dispatch('removeConnectionsFromCard', card)
       context.commit('generateCardMap', null, { root: true })
       context.commit('triggerUpdatePositionInVisualViewport', null, { root: true })
-      context.commit('currentUser/cardsCreatedCount', { increment: false }, { root: true })
+      context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: false }, { root: true })
     },
     removeCardPermanent: (context, card) => {
       context.commit('removeCardPermanent', card)

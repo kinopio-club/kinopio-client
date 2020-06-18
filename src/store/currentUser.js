@@ -164,15 +164,11 @@ export default {
       state.arenaAccessToken = token
       cache.updateUser('arenaAccessToken', token)
     },
-    cardsCreatedCount: (state, { increment }) => {
-      if (state.isUpgraded) { return }
-      if (increment) {
-        state.cardsCreatedCount = Math.max(state.cardsCreatedCount + 1, 0)
-      } else {
-        state.cardsCreatedCount = Math.max(state.cardsCreatedCount - 1, 0)
-      }
-      cache.updateUser('cardsCreatedCount', state.cardsCreatedCount)
-      console.log('🥬 card count', state.cardsCreatedCount)
+    cardsCreatedCount: (state, count) => {
+      utils.typeCheck(count, 'number')
+      state.cardsCreatedCount = count
+      cache.updateUser('cardsCreatedCount', count)
+      console.log('🥬 card count', count)
     },
     isUpgraded: (state, value) => {
       utils.typeCheck(value, 'boolean')
@@ -192,6 +188,21 @@ export default {
         console.log('🌸 Create new user')
         context.dispatch('createNewUser')
       }
+    },
+    cardsCreatedCount: (context, { shouldIncrement }) => {
+      if (context.state.isUpgraded) { return }
+      let count
+      if (shouldIncrement) {
+        count = Math.max(context.state.cardsCreatedCount + 1, 0)
+      } else {
+        count = Math.max(context.state.cardsCreatedCount - 1, 0)
+      }
+      context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCount',
+        body: {
+          shouldIncrement,
+          userId: context.state.id
+        } }, { root: true })
+      context.commit('cardsCreatedCount', count)
     },
     isUpgraded: (context, value) => {
       context.commit('isUpgraded', value)

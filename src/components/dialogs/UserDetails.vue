@@ -262,7 +262,6 @@ export default {
     .row + .button-wrap
       margin-top 10px
     .badge
-      // vertical-align 0
       margin-top 10px
       margin-bottom 10px
       display inline-block
