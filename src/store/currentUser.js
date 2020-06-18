@@ -28,8 +28,8 @@ export default {
     isSignedIn: (state) => {
       return Boolean(state.apiKey)
     },
-    shouldPreventAddCard: (state) => {
-      if (!state.isUpgraded && state.cardsCreatedCount > 150) { return true }
+    cardsCreatedIsOverLimit: (state) => {
+      if (!state.isUpgraded && state.cardsCreatedCount >= 150) { return true }
     },
     canEditSpace: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace

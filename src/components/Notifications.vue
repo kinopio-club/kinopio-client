@@ -15,13 +15,7 @@ aside.notifications(@click="closeAllDialogs")
     .row
       button(@click.stop="triggerSpaceDetailsFavoritesVisible") Your Spaces
 
-  .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
-    //- todo tweak copy
-    p You can create {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade for $4/month
-    .row
-      button(@click.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
-
-  .persistent-item.danger(v-if="notifyCardsCreatedIsOverLimit")
+  .persistent-item.danger(v-if="notifyCardsCreatedIsOverLimit" ref="cardsOverLimit" :class="{'notification-jiggle': notifyCardsCreatedIsOverLimitJiggle}" @animationend="resetNotifyCardsCreatedIsOverLimitJiggle")
     //- todo tweak copy
     p notifyCardsCreatedIsOverLimit, you'll need to upgrade for $4/month
     .row
@@ -95,6 +89,7 @@ export default {
   data () {
     return {
       notifyReadOnlyJiggle: false,
+      notifyCardsCreatedIsOverLimitJiggle: false,
       notifySpaceOutOfSync: false
     }
   },
@@ -117,6 +112,9 @@ export default {
         if (!element) { return }
         this.notifyReadOnlyJiggle = true
         element.addEventListener('animationend', this.removeNotifyReadOnlyJiggle, false)
+      }
+      if (mutation.type === 'notifyCardsCreatedIsOverLimit') {
+        this.notifyCardsCreatedIsOverLimitJiggle = true
       }
       if (mutation.type === 'isOnline') {
         const isOnline = Boolean(mutation.payload)
@@ -141,7 +139,6 @@ export default {
     notifySignUpToEditSpace () { return this.$store.state.notifySignUpToEditSpace },
     notifySpaceIsOpenAndEditable () { return this.$store.state.notifySpaceIsOpenAndEditable },
     notifyAccessFavorites () { return this.$store.state.notifyAccessFavorites },
-    notifyCardsCreatedIsNearLimit () { return this.$store.state.notifyCardsCreatedIsNearLimit },
     notifyCardsCreatedIsOverLimit () { return this.$store.state.notifyCardsCreatedIsOverLimit },
     currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
@@ -215,8 +212,8 @@ export default {
     resetNotifyAccessFavorites () {
       this.$store.commit('notifyAccessFavorites', false)
     },
-    resetNotifyCardsCreatedIsNearLimit () {
-      this.$store.commit('notifyCardsCreatedIsNearLimit', false)
+    resetNotifyCardsCreatedIsOverLimitJiggle () {
+      this.notifyCardsCreatedIsOverLimitJiggle = false
     },
     triggerUpgradeUserIsVisible () {
       this.$store.commit('triggerUpgradeUserIsVisible')
