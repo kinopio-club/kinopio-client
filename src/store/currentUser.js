@@ -29,7 +29,8 @@ export default {
       return Boolean(state.apiKey)
     },
     cardsCreatedIsOverLimit: (state) => {
-      if (!state.isUpgraded && state.cardsCreatedCount >= 150) { return true }
+      const cardsCreatedLimit = 150
+      if (!state.isUpgraded && state.cardsCreatedCount >= cardsCreatedLimit) { return true }
     },
     canEditSpace: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
@@ -168,7 +169,6 @@ export default {
       utils.typeCheck(count, 'number')
       state.cardsCreatedCount = count
       cache.updateUser('cardsCreatedCount', count)
-      console.log('🥬 card count', count)
     },
     isUpgraded: (state, value) => {
       utils.typeCheck(value, 'boolean')
@@ -189,7 +189,7 @@ export default {
         context.dispatch('createNewUser')
       }
     },
-    cardsCreatedCount: (context, { shouldIncrement }) => {
+    cardsCreatedCount: (context, { shouldIncrement, cardId }) => {
       if (context.state.isUpgraded) { return }
       let count
       if (shouldIncrement) {
@@ -200,7 +200,8 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCount',
         body: {
           shouldIncrement,
-          userId: context.state.id
+          userId: context.state.id,
+          cardId
         } }, { root: true })
       context.commit('cardsCreatedCount', count)
     },

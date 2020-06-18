@@ -22,8 +22,8 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
       .badge Spectator
 
   section.upgrade(v-if="isCurrentUser && !currentUserIsUpgraded")
-    p {{cardsCreatedCount}}/150 cards created
-    progress(:value="cardsCreatedCount" max=150)
+    p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
+    progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
     .button-wrap
       button
         span Upgrade for Unlimited
@@ -102,6 +102,7 @@ export default {
       spacePickerIsVisible: false,
       userSpaces: [],
       currentUserIsUpgraded: false,
+      cardsCreatedLimit: 150,
       error: {
         unknownServerError: false
       }

@@ -15,6 +15,11 @@ aside.notifications(@click="closeAllDialogs")
     .row
       button(@click.stop="triggerSpaceDetailsFavoritesVisible") Your Spaces
 
+  .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
+    p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade for $4/month
+    .row
+      button(@click.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+
   .persistent-item.danger(v-if="notifyCardsCreatedIsOverLimit" ref="cardsOverLimit" :class="{'notification-jiggle': notifyCardsCreatedIsOverLimitJiggle}" @animationend="resetNotifyCardsCreatedIsOverLimitJiggle")
     p To add more cards, you'll need to upgrade for $4/month
     .row
@@ -138,6 +143,7 @@ export default {
     notifySignUpToEditSpace () { return this.$store.state.notifySignUpToEditSpace },
     notifySpaceIsOpenAndEditable () { return this.$store.state.notifySpaceIsOpenAndEditable },
     notifyAccessFavorites () { return this.$store.state.notifyAccessFavorites },
+    notifyCardsCreatedIsNearLimit () { return this.$store.state.notifyCardsCreatedIsNearLimit },
     notifyCardsCreatedIsOverLimit () { return this.$store.state.notifyCardsCreatedIsOverLimit },
     currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
@@ -151,8 +157,9 @@ export default {
     privacyName () { return this.privacyState.name },
     spacePrivacyIsOpen () { return this.privacyName === 'open' },
     cardsCreatedCountFromLimit () {
+      const cardsCreatedLimit = 150
       const cardsCreatedCount = this.$store.state.currentUser.cardsCreatedCount
-      return Math.max(150 - cardsCreatedCount, 0)
+      return Math.max(cardsCreatedLimit - cardsCreatedCount, 0)
     }
   },
   methods: {
@@ -210,6 +217,9 @@ export default {
     },
     resetNotifyAccessFavorites () {
       this.$store.commit('notifyAccessFavorites', false)
+    },
+    resetNotifyCardsCreatedIsNearLimit () {
+      this.$store.commit('notifyCardsCreatedIsNearLimit', false)
     },
     resetNotifyCardsCreatedIsOverLimitJiggle () {
       this.notifyCardsCreatedIsOverLimitJiggle = false

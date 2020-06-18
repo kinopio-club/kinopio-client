@@ -558,6 +558,15 @@ export default {
         context.commit('notifySignUpToEditSpace', false, { root: true })
       }
     },
+    checkIfShouldnotifyCardsCreatedIsNearLimit: (context) => {
+      const currentUser = context.rootState.currentUser
+      if (currentUser.isUpgraded) { return }
+      const cardsCreatedLimit = 150
+      const value = cardsCreatedLimit - currentUser.cardsCreatedCount
+      if (utils.isBetween({ value, min: 0, max: 15 })) {
+        context.commit('notifyCardsCreatedIsNearLimit', true, { root: true })
+      }
+    },
     removeCollaboratorFromSpace: (context, user) => {
       const space = utils.clone(context.state)
       const userName = user.name || 'User'
@@ -581,6 +590,7 @@ export default {
       utils.typeCheck(position, 'object')
       if (context.rootGetters['currentUser/cardsCreatedIsOverLimit']) {
         context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
+        context.commit('notifyCardsCreatedIsNearLimit', false, { root: true })
         return
       }
       let cards = context.state.cards
@@ -602,7 +612,8 @@ export default {
       context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
       context.commit('history/add', update, { root: true })
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
-      context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: true }, { root: true })
+      context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: true, cardId: card.id }, { root: true })
+      context.dispatch('checkIfShouldnotifyCardsCreatedIsNearLimit')
     },
     // shim for history/playback
     createCard: (context, card) => {
@@ -620,7 +631,7 @@ export default {
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
       context.commit('history/add', update, { root: true })
-      context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: true }, { root: true })
+      context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: true, cardId: card.id }, { root: true })
     },
     updateCard: (context, card) => {
       context.commit('updateCard', card)
@@ -671,7 +682,10 @@ export default {
       context.dispatch('removeConnectionsFromCard', card)
       context.commit('generateCardMap', null, { root: true })
       context.commit('triggerUpdatePositionInVisualViewport', null, { root: true })
-      context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: false }, { root: true })
+      context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: false, cardId: card.id }, { root: true })
+      if (!context.rootGetters['currentUser/cardsCreatedIsOverLimit']) {
+        context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
+      }
     },
     removeCardPermanent: (context, card) => {
       context.commit('removeCardPermanent', card)
