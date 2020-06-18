@@ -189,7 +189,7 @@ export default {
         context.dispatch('createNewUser')
       }
     },
-    cardsCreatedCount: (context, { shouldIncrement, cardId }) => {
+    cardsCreatedCount: (context, { shouldIncrement }) => {
       if (context.state.isUpgraded) { return }
       let count
       if (shouldIncrement) {
@@ -197,11 +197,9 @@ export default {
       } else {
         count = Math.max(context.state.cardsCreatedCount - 1, 0)
       }
-      context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCount',
+      context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
-          shouldIncrement,
-          userId: context.state.id,
-          cardId
+          cardsCreatedCount: count
         } }, { root: true })
       context.commit('cardsCreatedCount', count)
     },
