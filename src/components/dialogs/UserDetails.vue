@@ -25,9 +25,9 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
     p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
     progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
     .button-wrap
-      button
+      button(@click.stop="toggleUpgradeUserIsVisible" :class="{active: upgradeUserIsVisible}")
         span Upgrade for Unlimited
-      //- TODO UpgradeUser dialog
+      UpgradeUser(:visible="upgradeUserIsVisible")
     .badge.info 4$/month
     .row
       a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost")
@@ -74,6 +74,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
+import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
@@ -85,7 +86,8 @@ export default {
     UserSettings,
     User: () => import('@/components/User.vue'),
     Loader,
-    SpacePicker
+    SpacePicker,
+    UpgradeUser
   },
   props: {
     user: Object,
@@ -98,6 +100,7 @@ export default {
     return {
       colorPickerIsVisible: false,
       userSettingsIsVisible: false,
+      upgradeUserIsVisible: false,
       loadingUserspaces: false,
       spacePickerIsVisible: false,
       userSpaces: [],
@@ -166,6 +169,11 @@ export default {
       this.closeDialogs()
       this.userSettingsIsVisible = !isVisible
     },
+    toggleUpgradeUserIsVisible () {
+      const isVisible = this.upgradeUserIsVisible
+      this.closeDialogs()
+      this.upgradeUserIsVisible = !isVisible
+    },
     toggleColorPicker () {
       const isVisible = this.colorPickerIsVisible
       this.closeDialogs()
@@ -175,6 +183,7 @@ export default {
       this.colorPickerIsVisible = false
       this.userSettingsIsVisible = false
       this.spacePickerIsVisible = false
+      this.upgradeUserIsVisible = false
     },
     updateUserColor (newColor) {
       this.$store.dispatch('currentUser/color', newColor)
