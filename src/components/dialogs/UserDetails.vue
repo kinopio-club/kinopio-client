@@ -29,7 +29,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
         span Upgrade for Unlimited
       UpgradeUser(:visible="upgradeUserIsVisible")
     p
-      .badge.info 4$/month
+      .badge.info $4/month
     .row
       a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost")
         button More Info →
@@ -182,7 +182,6 @@ export default {
       this.colorPickerIsVisible = !isVisible
     },
     closeDialogs () {
-      console.log('🍆 closeDialogs')
       this.colorPickerIsVisible = false
       this.userSettingsIsVisible = false
       this.spacePickerIsVisible = false

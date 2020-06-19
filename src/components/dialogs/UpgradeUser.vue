@@ -4,19 +4,21 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
     p Upgrade your account for unlimited cards
     .summary
       User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
-      .badge.info 4$/month
+      .badge.info {{product.price}}/{{product.period}}
 
-    //- testing
-    //- name: anything
-    //- card number: 4242424242424242
-    //- card cvc: 123 any three digits
-    //- expiration: 11/22 any date in the future
+    //- name:           any one
+    //- card number:    4242424242424242, 4242 4242 4242 4242
+    //- expiration:     11/22 any date in the future
+    //- card cvc:       123 any three digits
+    //- zip or postal:  11221, m1b5m6
 
     form(@submit.prevent="validateAndProcessPayment")
       input(type="text" placeholder="Name" required v-model="name" @input="clearErrors")
-      input(type="text" placeholder="Card Number" required inputmode="numeric" maxlength="20" v-model="cardNumber" @input="clearErrors")
-      input(type="text" placeholder="CVC" required inputmode="numeric" maxlength="4"  v-model="cardCVC" @input="clearErrors")
-      input(type="text" placeholder="MM/YY" required inputmode="numeric" maxlength="5" v-model="cardExpiration" @input="clearErrors")
+      input(type="text" placeholder="Card Number" required inputmode="numeric" maxlength="20" v-model="card.number" @input="clearErrors")
+      input(type="text" placeholder="MM/YY" required inputmode="numeric" maxlength="5" v-model="card.exp" @input="clearErrors")
+      input(type="text" placeholder="CVC" required inputmode="numeric" maxlength="4"  v-model="card.cvc" @input="clearErrors")
+      //- input(type="text" placeholder="Zip or Postal Code" required maxlength="6" v-model="zipOrPostalCode" @input="clearErrors")
+
       button(type="submit" :class="{active : loading.stripeIsChecking}")
         span Upgrade Account
         Loader(:visible="loading.stripeIsChecking")
@@ -29,6 +31,7 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
 
 <script>
 import Loader from '@/components/Loader.vue'
+// import utils from '@/utils.js'
 
 import { loadStripe } from '@stripe/stripe-js/pure'
 
@@ -44,15 +47,24 @@ export default {
   data () {
     return {
       name: '',
-      cardNumber: '',
-      cardCVC: '',
-      cardExpiration: '',
+      card: {
+        number: '',
+        exp: '',
+        exp_month: 0,
+        exp_year: 0,
+        cvc: ''
+      },
+      product: {
+        price: '$4',
+        period: 'month'
+      },
       loading: {
         stripeIsChecking: false
       },
       error: {
         // fieldsAreRequired: false,
-        unknownServerError: false
+        unknownServerError: false,
+        cardExpiryIsInvalidFormat: false
       }
     }
   },
@@ -62,8 +74,19 @@ export default {
   },
   methods: {
     clearErrors () {
-      this.unknownServerError = false
+      this.error.unknownServerError = false
+      this.error.cardExpiryIsInvalidFormat = false
     },
+    validateCardExpiry () {
+      const exp = this.card.exp.split('/')
+      if (exp.length !== 2) {
+        this.error.cardExpiryIsInvalidFormat = true
+      } else {
+        this.card.exp_month = exp[0]
+        this.card.exp_year = exp[1]
+      }
+    },
+
     async loadStripe () {
       let stripePublishableKey
       if (process.env.NODE_ENV === 'development') {
@@ -72,24 +95,35 @@ export default {
         stripePublishableKey = 'pk_live_51Gv55TL1W0hlm1mq80jsOLNIJEgtPei8OuuW1v9lFV6KbVo7yme2nERsysqYiIpt1BrRvAi860IATF103QNI6FDn00wjUlhOvQ'
       }
       loadStripe.setLoadParameters({ advancedFraudSignals: false })
-      // const stripe = await loadStripe(stripePublishableKey)
       return loadStripe(stripePublishableKey)
-      // return stripe
     },
+
     async validateAndProcessPayment (event) {
       event.preventDefault()
-      console.log(this.name, this.cardNumber, this.cardCVC, this.cardExpiration, this.stripePublishableKey)
-      console.log('validate fields, prevented default', this.loading.stripeIsChecking)
+      this.validateCardExpiry()
       if (this.loading.stripeIsChecking) { return }
       this.loading.stripeIsChecking = true
-      const stripe = await this.loadStripe()
-      console.log('☔️ stripe', stripe)
-      // then send to stripe for token
+      try {
+        const stripe = await this.loadStripe()
+        console.log('☔️ stripe', stripe, this.card)
+        const token = await stripe.createToken(this.card, { name: this.name })
+        console.log('☀️ stripe token', token)
 
-      // after await
-      // this.loading.stripeIsChecking = false
+        // ERR You must provide a Stripe Element or a valid token type to create a Token
+
+        // if the token is cool, then we send the token to the server w the product
+      } catch (error) {
+        console.error('🚒', error)
+      }
+      this.loading.stripeIsChecking = false
     }
   }
+  // watch: {
+  //   visible (visible) {
+  //     if (visible) {
+  //     }
+  //   },
+  // }
 }
 </script>
 
