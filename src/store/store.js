@@ -27,6 +27,7 @@ export default new Vuex.Store({
     shouldHideConnectionOutline: false,
     newStuffIsUpdated: false,
     copiedCards: [],
+    stripeIsLoaded: false,
 
     // reset password
     resetPasswordApiKey: '',
@@ -143,6 +144,10 @@ export default new Vuex.Store({
     newStuffIsUpdated: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.newStuffIsUpdated = value
+    },
+    stripeIsLoaded: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.stripeIsLoaded = value
     },
     resetPasswordApiKey: (state, apiKey) => {
       utils.typeCheck(apiKey, 'string')

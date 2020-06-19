@@ -63,10 +63,9 @@ export default {
         price: '$4',
         period: 'month'
       },
-      hasLoadedStripe: false,
-      loading: {
-        stripeIsChecking: false
-      },
+      // loading: {
+      //   stripeIsChecking: false
+      // },
       error: {
         // fieldsAreRequired: false,
         unknownServerError: false,
@@ -103,8 +102,9 @@ export default {
       } else {
         stripePublishableKey = 'pk_live_51Gv55TL1W0hlm1mq80jsOLNIJEgtPei8OuuW1v9lFV6KbVo7yme2nERsysqYiIpt1BrRvAi860IATF103QNI6FDn00wjUlhOvQ'
       }
-      if (!this.hasLoadedStripe) {
-        this.hasLoadedStripe = true
+      const stripeIsLoaded = this.$store.state.stripeIsLoaded
+      if (!stripeIsLoaded) {
+        this.$store.commit('stripeIsLoaded', true)
         loadStripe.setLoadParameters({ advancedFraudSignals: false })
       }
       const stripe = await loadStripe(stripePublishableKey)
