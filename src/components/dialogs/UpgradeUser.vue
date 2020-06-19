@@ -12,20 +12,18 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
     //- card cvc:       123 any three digits
     //- zip or postal:  11221, m1b5m6
 
+    input(type="text" placeholder="Name" required v-model="name" @input="clearErrors")
     div(ref="card")
+    div
+      Loader(:visible="loading.stripeIsLoading")
 
-    //- form(@submit.prevent="validateAndProcessPayment")
-    //-   input(type="text" placeholder="Name" required v-model="name" @input="clearErrors")
-    //-   input(type="text" placeholder="Card Number" required inputmode="numeric" maxlength="20" v-model="card.number" @input="clearErrors")
-    //-   input(type="text" placeholder="MM/YY" required inputmode="numeric" maxlength="5" v-model="card.exp" @input="clearErrors")
-    //-   input(type="text" placeholder="CVC" required inputmode="numeric" maxlength="4"  v-model="card.cvc" @input="clearErrors")
-    //-   //- input(type="text" placeholder="Zip or Postal Code" required maxlength="6" v-model="zipOrPostalCode" @input="clearErrors")
+    //- TODO errors go here
 
-    //-   button(type="submit" :class="{active : loading.stripeIsChecking}")
-    //-     span Upgrade Account
-    //-     Loader(:visible="loading.stripeIsChecking")
+    button(@click="processPayment" :class="{active : loading.paymentIsProcessing}")
+      span Upgrade Account
+      Loader(:visible="loading.paymentIsProcessing")
 
-    //- p You'll be billed immediately and then each month. You can cancel at anytime.
+    p You'll be billed immediately and then each month. You can cancel at anytime.
 
   section
     p Payment processed by Stripe
@@ -38,7 +36,7 @@ import Loader from '@/components/Loader.vue'
 
 import { loadStripe } from '@stripe/stripe-js/pure'
 
-// let stripe
+let stripe, elements, card
 
 export default {
   name: 'UpgradeUser',
@@ -51,7 +49,7 @@ export default {
   },
   data () {
     return {
-      // name: '',
+      name: '',
       // card: {
       //   number: '',
       //   exp: '',
@@ -63,19 +61,18 @@ export default {
         price: '$4',
         period: 'month'
       },
-      // loading: {
-      //   stripeIsChecking: false
-      // },
+      loading: {
+        paymentIsProcessing: false,
+        stripeIsLoading: false
+      },
       error: {
         // fieldsAreRequired: false,
         unknownServerError: false,
-        cardExpiryIsInvalidFormat: false
+        stripeError: false,
+        stripeErrorMessage: ''
       }
     }
   },
-  // mounted () {
-  //   console.log('🌹🌹🌹🌹🌹🌹')
-  // },
   computed: {
     user () { return this.$store.state.currentUser },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
@@ -83,18 +80,8 @@ export default {
   methods: {
     clearErrors () {
       this.error.unknownServerError = false
-      this.error.cardExpiryIsInvalidFormat = false
+      this.error.stripeError = false
     },
-    // validateCardExpiry () {
-    //   const exp = this.card.exp.split('/')
-    //   if (exp.length !== 2) {
-    //     this.error.cardExpiryIsInvalidFormat = true
-    //   } else {
-    //     this.card.exp_month = exp[0]
-    //     this.card.exp_year = exp[1]
-    //   }
-    // },
-
     async loadStripe () {
       let stripePublishableKey
       if (process.env.NODE_ENV === 'development') {
@@ -107,32 +94,31 @@ export default {
         this.$store.commit('stripeIsLoaded', true)
         loadStripe.setLoadParameters({ advancedFraudSignals: false })
       }
-      const stripe = await loadStripe(stripePublishableKey)
-      const elements = stripe.elements()
-      const card = elements.create('card')
+      stripe = await loadStripe(stripePublishableKey)
+      elements = stripe.elements()
+      card = elements.create('card')
       card.mount(this.$refs.card)
-    }
+      this.loading.stripeIsLoading = false
+    },
+    async processPayment () {
+      try {
+        this.loading.paymentIsProcessing = true
+        const token = await stripe.createToken(card, { name: this.name })
+        console.log('🌷', token)
 
-    // async validateAndProcessPayment (event) {
-    //   event.preventDefault()
-    //   // this.validateCardExpiry()
-    //   if (this.loading.stripeIsChecking) { return }
-    //   this.loading.stripeIsChecking = true
-    //   try {
-    //     const stripe = await this.loadStripe()
-    //     const token = await stripe.createToken(this.card, { name: this.name })
-    //     console.log('☀️ stripe token', token)
-    //     // ERR You must provide a Stripe Element or a valid token type to create a Token
-    //     // if the token is cool, then we send the token to the server w the product
-    //   } catch (error) {
-    //     console.error('🚒', error)
-    //   }
-    //   this.loading.stripeIsChecking = false
-    // }
+        // TODO if the token is cool, then we send the token to the server w the product
+      } catch (error) {
+        console.error('🚒', error)
+        this.error.stripeError = true
+        this.error.stripeErrorMessage = error.message
+      }
+      this.loading.paymentIsProcessing = false
+    }
   },
   watch: {
     visible (visible) {
       if (visible) {
+        this.loading.stripeIsLoading = true
         this.loadStripe()
       }
     }
@@ -149,4 +135,6 @@ export default {
   .summary
     margin-top 10px
     margin-bottom 10px
+  button
+    margin-top 10px
 </style>
