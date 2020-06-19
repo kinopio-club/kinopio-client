@@ -1,56 +1,38 @@
 <template lang="pug">
 dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
   section
-    //- p
-    //-   User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
-    //-   span Upgrade Account
-    //- p 4$/month to be able to create unlimited cards
-
     p Upgrade your account to create unlimited cards
-    .badge.info 4$/month
+    .summary
+      User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
+      .badge.info 4$/month
 
-    form(@submit.prevent="signIn")
+    //- testing
+    //- card number: 4242424242424242
+    //- card cvc: any three digits
+    //- expiration: any date in the future
+
+    form(@submit.prevent="validateAndProcessPayment")
       input(type="text" placeholder="Name" required v-model="name" @input="clearErrors")
-      input(type="email" placeholder="Email" required v-model="email" @input="clearErrors")
-      input(type="text" placeholder="Card Number" inputmode="numeric" pattern="[0-9\s]{13,19}" maxlength="20" autocomplete="off" required v-model="cardNumber" @input="clearErrors")
-      input(type="text" placeholder="CVC" inputmode="numeric" pattern="[0-9\s]{13,19}" autocomplete="off" maxlength="4" required v-model="cardCVC" @input="clearErrors")
-      select(type="text" placeholder="cardExpirationMonth" required v-model="cardExpirationMonth" @input="clearErrors")
-        option(value="1" selected) 1
-        option(value="2") 2
-        option(value="3") 3
-      span /
-      select(type="text" placeholder="cardExpirationYear" required v-model="cardExpirationYear" @input="clearErrors")
-        option(value="2020" selected) 2020
-        option(value="2021") 2021
-        option(value="2022") 2022
-      //- stripetoken derived
-
-      //- .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
-      //- .badge.danger(v-if="error.signInCredentials") Incorrect email or password
-      //- .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
-
-      button(type="submit" :class="{active : loading.paymentProcessing}")
+      input(type="text" placeholder="Card Number" required inputmode="numeric" maxlength="20" v-model="cardNumber" @input="clearErrors")
+      input(type="text" placeholder="CVC" required inputmode="numeric" maxlength="4"  v-model="cardCVC" @input="clearErrors")
+      input(type="text" placeholder="MM/YY" required inputmode="numeric" maxlength="5" v-model="cardExpiration" @input="clearErrors")
+      button(type="submit" :class="{active : loading.stripeIsChecking}")
         span Upgrade Account
-        Loader(:visible="loading.paymentProcessing")
-
+        Loader(:visible="loading.stripeIsChecking")
     p You'll be billed immediately and then each month. You can cancel at anytime.
-    //- and then every 30 days (stripe recurring)
 
   section
-
     p Payment processed by Stripe
 
 </template>
 
 <script>
-// import utils from '@/utils.js'
-// import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 
 export default {
   name: 'UpgradeUser',
   components: {
-    // User: () => import('@/components/User.vue'),
+    User: () => import('@/components/User.vue'),
     Loader
   },
   props: {
@@ -59,51 +41,37 @@ export default {
   data () {
     return {
       name: '',
-      email: '',
       cardNumber: '',
       cardCVC: '',
-      cardExpirationMonth: '',
-      cardExpirationYear: '',
+      cardExpiration: '',
       loading: {
-        paymentProcessing: false
+        stripeIsChecking: false
       },
       error: {
         unknownServerError: false
       }
     }
   },
-  // created () {
-  //   this.$store.subscribe((mutation, state) => {
-  // if (mutation.type === 'closeAllDialogs') {
-  //   this.contactIsVisible = false
-  //   this.whatsNewIsVisible = false
-  //   this.addToHomescreenIsVisible = false
-  // }
-  //   })
-  // },
-  // async mounted () {
-  //   this.isAndroid = utils.isAndroid()
-  // },
   computed: {
-    user () {
-      return this.$store.state.currentUser
-    }
-  // newStuffIsUpdated () { return this.$store.state.newStuffIsUpdated }
+    user () { return this.$store.state.currentUser },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
     clearErrors () {
+      this.unknownServerError = false
+    },
+    async validateAndProcessPayment (event) {
+      event.preventDefault()
+      console.log(this.name, this.cardNumber, this.cardCVC, this.cardExpiration)
+      console.log('validate fields, prevented default', this.loading.stripeIsChecking)
+      if (this.loading.stripeIsChecking) { return }
+      this.loading.stripeIsChecking = true
+      // then send to stripe for token
+
+      // after await
+      // this.loading.stripeIsChecking = false
     }
   }
-  // watch: {
-  //   visible (visible) {
-  //     if (visible) {
-  //       if (this.email) { return }
-  //       const userEmail = this.user.email
-  //       console.log('userEmail', userEmail)
-  //       this.email = userEmail
-  //     }
-  //   }
-  // }
 }
 </script>
 
@@ -114,15 +82,7 @@ export default {
   .user
     margin-right 6px
     vertical-align middle
-    // .user-avatar
-    //   width 16px
-    //   height 15px
-
-  button[type=submit]
+  .summary
     margin-top 10px
-  // .row
-  //   margin-bottom 10px
-//   left initial
-//   right 8px
-//   top calc(100% - 6px) !important
+    margin-bottom 10px
 </style>
