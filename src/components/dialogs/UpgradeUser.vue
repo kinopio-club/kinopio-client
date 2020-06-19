@@ -7,6 +7,7 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
       .badge.info 4$/month
 
     //- testing
+    //- name: anything
     //- card number: 4242424242424242
     //- card cvc: any three digits
     //- expiration: any date in the future
@@ -28,6 +29,8 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
 
 <script>
 import Loader from '@/components/Loader.vue'
+
+import { loadStripe } from '@stripe/stripe-js/pure'
 
 export default {
   name: 'UpgradeUser',
@@ -55,18 +58,23 @@ export default {
   },
   computed: {
     user () { return this.$store.state.currentUser },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    stripePublishableKey () {
-      if (process.env.NODE_ENV === 'development') {
-        return 'pk_test_51Gv55TL1W0hlm1mqF9VvEevFCGr53d0eDUx0VD1tPA8ESuGdTceeoK0hAWaELCmTqkbt3wZqffT0mN41X0Jmlxpe00en3VmODJ'
-      } else {
-        return 'pk_live_51Gv55TL1W0hlm1mq80jsOLNIJEgtPei8OuuW1v9lFV6KbVo7yme2nERsysqYiIpt1BrRvAi860IATF103QNI6FDn00wjUlhOvQ'
-      }
-    }
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
     clearErrors () {
       this.unknownServerError = false
+    },
+    async loadStripe () {
+      let stripePublishableKey
+      if (process.env.NODE_ENV === 'development') {
+        stripePublishableKey = 'pk_test_51Gv55TL1W0hlm1mqF9VvEevFCGr53d0eDUx0VD1tPA8ESuGdTceeoK0hAWaELCmTqkbt3wZqffT0mN41X0Jmlxpe00en3VmODJ'
+      } else {
+        stripePublishableKey = 'pk_live_51Gv55TL1W0hlm1mq80jsOLNIJEgtPei8OuuW1v9lFV6KbVo7yme2nERsysqYiIpt1BrRvAi860IATF103QNI6FDn00wjUlhOvQ'
+      }
+      loadStripe.setLoadParameters({ advancedFraudSignals: false })
+      // const stripe = await loadStripe(stripePublishableKey)
+      return loadStripe(stripePublishableKey)
+      // return stripe
     },
     async validateAndProcessPayment (event) {
       event.preventDefault()
@@ -74,6 +82,8 @@ export default {
       console.log('validate fields, prevented default', this.loading.stripeIsChecking)
       if (this.loading.stripeIsChecking) { return }
       this.loading.stripeIsChecking = true
+      const stripe = await this.loadStripe()
+      console.log('☔️ stripe', stripe)
       // then send to stripe for token
 
       // after await
