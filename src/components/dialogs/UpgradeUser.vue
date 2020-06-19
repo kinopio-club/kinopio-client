@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
   section
-    p Upgrade your account to create unlimited cards
+    p Upgrade your account for unlimited cards
     .summary
       User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
       .badge.info 4$/month
@@ -48,13 +48,21 @@ export default {
         stripeIsChecking: false
       },
       error: {
+        // fieldsAreRequired: false,
         unknownServerError: false
       }
     }
   },
   computed: {
     user () { return this.$store.state.currentUser },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    stripePublishableKey () {
+      if (process.env.NODE_ENV === 'development') {
+        return 'pk_test_51Gv55TL1W0hlm1mqF9VvEevFCGr53d0eDUx0VD1tPA8ESuGdTceeoK0hAWaELCmTqkbt3wZqffT0mN41X0Jmlxpe00en3VmODJ'
+      } else {
+        return 'pk_live_51Gv55TL1W0hlm1mq80jsOLNIJEgtPei8OuuW1v9lFV6KbVo7yme2nERsysqYiIpt1BrRvAi860IATF103QNI6FDn00wjUlhOvQ'
+      }
+    }
   },
   methods: {
     clearErrors () {
@@ -62,7 +70,7 @@ export default {
     },
     async validateAndProcessPayment (event) {
       event.preventDefault()
-      console.log(this.name, this.cardNumber, this.cardCVC, this.cardExpiration)
+      console.log(this.name, this.cardNumber, this.cardCVC, this.cardExpiration, this.stripePublishableKey)
       console.log('validate fields, prevented default', this.loading.stripeIsChecking)
       if (this.loading.stripeIsChecking) { return }
       this.loading.stripeIsChecking = true
@@ -77,7 +85,6 @@ export default {
 
 <style lang="stylus">
 .upgrade-user
-  max-height calc(100vh - 175px)
   overflow auto
   .user
     margin-right 6px

@@ -275,6 +275,9 @@ export default {
     .badge
       display inline-block
 
+  .upgrade-user
+    max-height calc(100vh - 175px)
+
 .user-info
   display: flex
   .row
