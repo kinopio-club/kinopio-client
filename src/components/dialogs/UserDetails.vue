@@ -174,7 +174,6 @@ export default {
       const isVisible = this.upgradeUserIsVisible
       this.closeDialogs()
       this.upgradeUserIsVisible = !isVisible
-      console.log('toggleUpgradeUserIsVisible', this.upgradeUserIsVisible, !isVisible)
     },
     toggleColorPicker () {
       const isVisible = this.colorPickerIsVisible
