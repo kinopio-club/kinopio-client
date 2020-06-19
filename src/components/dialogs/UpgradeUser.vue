@@ -9,8 +9,8 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
     //- testing
     //- name: anything
     //- card number: 4242424242424242
-    //- card cvc: any three digits
-    //- expiration: any date in the future
+    //- card cvc: 123 any three digits
+    //- expiration: 11/22 any date in the future
 
     form(@submit.prevent="validateAndProcessPayment")
       input(type="text" placeholder="Name" required v-model="name" @input="clearErrors")
