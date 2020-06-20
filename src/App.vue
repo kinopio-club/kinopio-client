@@ -119,7 +119,8 @@ video
   max-width 100%
 
 input,
-textarea
+textarea,
+.stripe-element
   touch-action manipulation
   margin 0
   font-size 1em // required to disable ios input zooming

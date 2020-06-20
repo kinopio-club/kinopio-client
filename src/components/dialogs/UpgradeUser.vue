@@ -4,7 +4,7 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
     p Upgrade your account for unlimited cards
     .summary
       User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
-      .badge.info {{product.price}}/{{product.period}}
+      .badge.info $4/month
 
     //- name:           someone
     //- card number:    4242424242424242, 4242 4242 4242 4242
@@ -13,9 +13,16 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
     //- zip or postal:  11221, m1b5m6
 
     input(type="text" placeholder="Name" required v-model="name" @input="clearErrors")
-    div(ref="card")
-    div
-      Loader(:visible="loading.stripeIsLoading")
+
+    div(ref="cardNumber")
+    div(ref="cardExpiry")
+    div(ref="cardCvc")
+    //- zip/postal unless automatically
+    //- input(type="text" placeholder="Zip or Postal Code" required maxlength="6" v-model="zipOrPostalCode" @input="clearErrors")
+
+    //- div(ref="card")
+    .loading-stripe(v-if="loading.stripeIsLoading")
+      Loader(:visible="true")
 
     //- TODO errors go here
 
@@ -32,11 +39,10 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
 
 <script>
 import Loader from '@/components/Loader.vue'
-// import utils from '@/utils.js'
 
 import { loadStripe } from '@stripe/stripe-js/pure'
 
-let stripe, elements, card
+let stripe, elements, cardNumber, cardExpiry, cardCvc
 
 export default {
   name: 'UpgradeUser',
@@ -50,24 +56,13 @@ export default {
   data () {
     return {
       name: '',
-      // card: {
-      //   number: '',
-      //   exp: '',
-      //   exp_month: 0,
-      //   exp_year: 0,
-      //   cvc: ''
-      // },
-      product: {
-        price: '$4',
-        period: 'month'
-      },
       loading: {
         paymentIsProcessing: false,
         stripeIsLoading: false
       },
       error: {
-        // fieldsAreRequired: false,
         unknownServerError: false,
+        nameIsRequired: false,
         stripeError: false,
         stripeErrorMessage: ''
       }
@@ -80,6 +75,7 @@ export default {
   methods: {
     clearErrors () {
       this.error.unknownServerError = false
+      this.error.nameIsRequired = false
       this.error.stripeError = false
     },
     async loadStripe () {
@@ -95,20 +91,50 @@ export default {
         loadStripe.setLoadParameters({ advancedFraudSignals: false })
       }
       stripe = await loadStripe(stripePublishableKey)
-      elements = stripe.elements()
-      card = elements.create('card')
-      card.mount(this.$refs.card)
+      elements = stripe.elements({
+        fonts: [{
+          family: 'OsakaMono-Kinopio',
+          src: 'url(https://kinopio-email.us-east-1.linodeobjects.com/OsakaMono-Kinopio.woff2)',
+          weight: 'normal',
+          style: 'normal'
+        }]
+      })
+      let options = {
+        style: {
+          base: { fontFamily: "'OsakaMono-Kinopio', monospace" },
+          invalid: { color: 'black' } // todo change if dark theme
+        },
+        classes: {
+          base: 'stripe-element',
+          invalid: 'stripe-element-invalid'
+        }
+      }
+      options.placeholder = 'Card Number'
+      cardNumber = elements.create('cardNumber', options)
+      cardNumber.mount(this.$refs.cardNumber)
+      options.placeholder = 'MM/YY'
+      cardExpiry = elements.create('cardExpiry', options)
+      cardExpiry.mount(this.$refs.cardExpiry)
+      options.placeholder = 'CVC'
+      cardCvc = elements.create('cardCvc', options)
+      cardCvc.mount(this.$refs.cardCvc)
       this.loading.stripeIsLoading = false
     },
     async processPayment () {
+      if (!this.name) {
+        this.error.nameIsRequired = true
+        this.loading.paymentIsProcessing = false
+        return
+      }
       try {
         this.loading.paymentIsProcessing = true
-        const token = await stripe.createToken(card, { name: this.name })
+        const token = await stripe.createToken(cardNumber, { name: this.name })
         console.log('🌷', token)
 
         // TODO if the token is cool, then we send the token to the server w the product
       } catch (error) {
         console.error('🚒', error)
+        self.$forceUpdate() // Forcing the DOM to update so the Stripe Element can update
         this.error.stripeError = true
         this.error.stripeErrorMessage = error.message
       }
@@ -135,6 +161,6 @@ export default {
   .summary
     margin-top 10px
     margin-bottom 10px
-  button
-    margin-top 10px
+  .loading-stripe
+    margin-bottom 10px
 </style>
