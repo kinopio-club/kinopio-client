@@ -148,20 +148,74 @@ export default {
       }
       try {
         this.loading.paymentIsProcessing = true
-        // replace createtoken w ..
-        const token = await stripe.createToken(cardNumber, {
-          userId: this.$store.state.currentUser.id,
-          name: this.name,
-          email: this.email
+        const result = await stripe.confirmCardPayment(paymentIntent.client_secret, {
+          payment_method: {
+            card: cardNumber,
+            billing_details: {
+              name: this.name,
+              email: this.email,
+              metadata: {
+                userId: this.$store.state.currentUser.id
+              }
+            }
+          }
         })
 
-        // https://stripe.com/docs/api#errors
-        console.log('🌷', token)
-
-        // TODO if the token is cool, then we send the token to the server w the product
+        console.log('🌷 payemnt success', result)
+        // TODO handle success
+        // {
+        //   "id": "pm_1GxEcj2eZvKYlo2C9StYHZfp",
+        //   "object": "payment_method",
+        //   "billing_details": {
+        //     "address": {
+        //       "city": null,
+        //       "country": null,
+        //       "line1": null,
+        //       "line2": null,
+        //       "postal_code": null,
+        //       "state": null
+        //     },
+        //     "email": null,
+        //     "name": null,
+        //     "phone": null
+        //   },
+        //   "card": {
+        //     "brand": "visa",
+        //     "checks": {
+        //       "address_line1_check": null,
+        //       "address_postal_code_check": null,
+        //       "cvc_check": "pass"
+        //     },
+        //     "country": "US",
+        //     "exp_month": 8,
+        //     "exp_year": 2021,
+        //     "fingerprint": "Xt5EWLLDS7FJjR1c",
+        //     "funding": "credit",
+        //     "generated_from": null,
+        //     "last4": "4242",
+        //     "networks": {
+        //       "available": [
+        //         "visa"
+        //       ],
+        //       "preferred": null
+        //     },
+        //     "three_d_secure_usage": {
+        //       "supported": true
+        //     },
+        //     "wallet": null
+        //   },
+        //   "created": 1592928325,
+        //   "customer": null,
+        //   "livemode": false,
+        //   "metadata": {},
+        //   "type": "card"
+        // }
       } catch (error) {
         console.error('🚒', error)
-        self.$forceUpdate() // Forcing the DOM to update so the Stripe Element can update
+        // self.$forceUpdate() // Forcing the DOM to update so the Stripe Element can update
+
+        // https://stripe.com/docs/api#errors
+        // TODO handle errors
         this.error.stripeError = true
         this.error.stripeErrorMessage = error.message
       }
