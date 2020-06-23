@@ -38,7 +38,8 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
     p You'll be billed immediately and then each month. You can cancel at anytime.
 
   section
-    p Payment processed by Stripe
+    img.icon(src="@/assets/lock.svg")
+    span Payments by Stripe
 
 </template>
 
