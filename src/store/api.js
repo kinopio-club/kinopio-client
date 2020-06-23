@@ -376,6 +376,18 @@ const self = {
       }
     },
 
+    // Billing
+
+    getPaymentIntent: async (context) => {
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/billing/payment-intent`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+
     // Services
 
     updateArenaAccessToken: async (context, arenaReturnedCode) => {

@@ -10,18 +10,23 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
     //- card number:    4242424242424242, 4242 4242 4242 4242
     //- expiration:     11/22 any date in the future
     //- card cvc:       123 any three digits
-    //- zip or postal:  11221, m1b5m6
+    //- ? zip or postal:  11221, m1b5m6
+    //- https://stripe.com/docs/testing#international-cards
 
-    input(type="text" placeholder="Name" required v-model="name" @input="clearErrors")
+    input(type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
 
+    input(type="text" placeholder="Name on Card" required v-model="name" @input="clearErrors")
+    //- TODO add email
+
+    //- Stripe Elements
     div(ref="cardNumber")
     div(ref="cardExpiry")
     div(ref="cardCvc")
-    //- zip/postal unless automatically
+    //- ???zip/postal unless automatically
     //- input(type="text" placeholder="Zip or Postal Code" required maxlength="6" v-model="zipOrPostalCode" @input="clearErrors")
 
     //- div(ref="card")
-    .loading-stripe(v-if="loading.stripeIsLoading")
+    .loading-stripe(v-if="!loading.stripeElementsIsMounted")
       Loader(:visible="true")
 
     //- TODO errors go here
@@ -42,7 +47,12 @@ import Loader from '@/components/Loader.vue'
 
 import { loadStripe } from '@stripe/stripe-js/pure'
 
-let stripe, elements, cardNumber, cardExpiry, cardCvc
+let stripePublishableKey, stripe, elements, cardNumber, cardExpiry, cardCvc, paymentIntent
+if (process.env.NODE_ENV === 'development') {
+  stripePublishableKey = 'pk_test_51Gv55TL1W0hlm1mqF9VvEevFCGr53d0eDUx0VD1tPA8ESuGdTceeoK0hAWaELCmTqkbt3wZqffT0mN41X0Jmlxpe00en3VmODJ'
+} else {
+  stripePublishableKey = 'pk_live_51Gv55TL1W0hlm1mq80jsOLNIJEgtPei8OuuW1v9lFV6KbVo7yme2nERsysqYiIpt1BrRvAi860IATF103QNI6FDn00wjUlhOvQ'
+}
 
 export default {
   name: 'UpgradeUser',
@@ -56,13 +66,16 @@ export default {
   data () {
     return {
       name: '',
+      email: '',
       loading: {
         paymentIsProcessing: false,
-        stripeIsLoading: false
+        stripeIsLoading: true,
+        isGettingPaymentIntent: true,
+        stripeElementsIsMounted: false
       },
       error: {
         unknownServerError: false,
-        nameIsRequired: false,
+        allFieldsAreRequired: false,
         stripeError: false,
         stripeErrorMessage: ''
       }
@@ -75,22 +88,12 @@ export default {
   methods: {
     clearErrors () {
       this.error.unknownServerError = false
-      this.error.nameIsRequired = false
+      this.error.allFieldsAreRequired = false
       this.error.stripeError = false
     },
-    async loadStripe () {
-      let stripePublishableKey
-      if (process.env.NODE_ENV === 'development') {
-        stripePublishableKey = 'pk_test_51Gv55TL1W0hlm1mqF9VvEevFCGr53d0eDUx0VD1tPA8ESuGdTceeoK0hAWaELCmTqkbt3wZqffT0mN41X0Jmlxpe00en3VmODJ'
-      } else {
-        stripePublishableKey = 'pk_live_51Gv55TL1W0hlm1mq80jsOLNIJEgtPei8OuuW1v9lFV6KbVo7yme2nERsysqYiIpt1BrRvAi860IATF103QNI6FDn00wjUlhOvQ'
-      }
-      const stripeIsLoaded = this.$store.state.stripeIsLoaded
-      if (!stripeIsLoaded) {
-        this.$store.commit('stripeIsLoaded', true)
-        loadStripe.setLoadParameters({ advancedFraudSignals: false })
-      }
-      stripe = await loadStripe(stripePublishableKey)
+    mountStripeElements () {
+      if (this.loading.isGettingPaymentIntent || this.loading.stripeIsLoading) { return }
+      console.log('💸', paymentIntent.client_secret)
       elements = stripe.elements({
         fonts: [{
           family: 'OsakaMono-Kinopio',
@@ -118,17 +121,40 @@ export default {
       options.placeholder = 'CVC'
       cardCvc = elements.create('cardCvc', options)
       cardCvc.mount(this.$refs.cardCvc)
+      this.loading.stripeElementsIsMounted = true
+    },
+    async getPaymentIntent () {
+      this.loading.isGettingPaymentIntent = true
+      paymentIntent = await this.$store.dispatch('api/getPaymentIntent')
+      this.loading.isGettingPaymentIntent = false
+      this.mountStripeElements()
+    },
+    async loadStripe () {
+      this.loading.stripeIsLoading = true
+      if (!this.$store.state.stripeIsLoaded) {
+        this.$store.commit('stripeIsLoaded', true)
+        loadStripe.setLoadParameters({ advancedFraudSignals: false })
+      }
+      stripe = await loadStripe(stripePublishableKey)
       this.loading.stripeIsLoading = false
+      this.mountStripeElements()
     },
     async processPayment () {
-      if (!this.name) {
-        this.error.nameIsRequired = true
+      if (!this.name || !this.email) {
+        this.error.allFieldsAreRequired = true
         this.loading.paymentIsProcessing = false
         return
       }
       try {
         this.loading.paymentIsProcessing = true
-        const token = await stripe.createToken(cardNumber, { name: this.name })
+        // replace createtoken w ..
+        const token = await stripe.createToken(cardNumber, {
+          userId: this.$store.state.currentUser.id,
+          name: this.name,
+          email: this.email
+        })
+
+        // https://stripe.com/docs/api#errors
         console.log('🌷', token)
 
         // TODO if the token is cool, then we send the token to the server w the product
@@ -144,8 +170,9 @@ export default {
   watch: {
     visible (visible) {
       if (visible) {
-        this.loading.stripeIsLoading = true
+        this.getPaymentIntent()
         this.loadStripe()
+        // this.email = this.$store.state.currentUser.email
       }
     }
   }
