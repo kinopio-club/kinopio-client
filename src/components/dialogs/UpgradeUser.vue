@@ -14,22 +14,22 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
     //- https://stripe.com/docs/testing#international-cards
 
     input(type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
-
     input(type="text" placeholder="Name on Card" required v-model="name" @input="clearErrors")
-    //- TODO add email
-
     //- Stripe Elements
     div(ref="cardNumber")
     div(ref="cardExpiry")
     div(ref="cardCvc")
+    //- TODO on elements change events, clearerrors()
+
     //- ???zip/postal unless automatically
     //- input(type="text" placeholder="Zip or Postal Code" required maxlength="6" v-model="zipOrPostalCode" @input="clearErrors")
 
-    //- div(ref="card")
     .loading-stripe(v-if="!loading.stripeElementsIsMounted")
       Loader(:visible="true")
 
-    //- TODO errors go here
+    .badge.danger(v-if="error.allFieldsAreRequired") All fields are required
+    .badge.danger(v-if="error.stripeError") {{error.stripeErrorMessage}}
+    .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
 
     button(@click="processPayment" :class="{active : loading.paymentIsProcessing}")
       span Upgrade Account
@@ -45,6 +45,7 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
 
 <script>
 import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
 
 import { loadStripe } from '@stripe/stripe-js/pure'
 
@@ -113,15 +114,21 @@ export default {
           invalid: 'stripe-element-invalid'
         }
       }
+      // card number
       options.placeholder = 'Card Number'
       cardNumber = elements.create('cardNumber', options)
       cardNumber.mount(this.$refs.cardNumber)
+      cardNumber.on('change', this.clearErrors)
+      // card expiry
       options.placeholder = 'MM/YY'
       cardExpiry = elements.create('cardExpiry', options)
       cardExpiry.mount(this.$refs.cardExpiry)
+      cardExpiry.on('change', this.clearErrors)
+      // card cvc
       options.placeholder = 'CVC'
       cardCvc = elements.create('cardCvc', options)
       cardCvc.mount(this.$refs.cardCvc)
+      cardCvc.on('change', this.clearErrors)
       this.loading.stripeElementsIsMounted = true
     },
     async getPaymentIntent () {
@@ -141,6 +148,7 @@ export default {
       this.mountStripeElements()
     },
     async processPayment () {
+      this.clearErrors()
       if (!this.name || !this.email) {
         this.error.allFieldsAreRequired = true
         this.loading.paymentIsProcessing = false
@@ -153,16 +161,23 @@ export default {
             card: cardNumber,
             billing_details: {
               name: this.name,
-              email: this.email,
-              metadata: {
-                userId: this.$store.state.currentUser.id
-              }
+              email: this.email
+            },
+            metadata: {
+              userId: this.$store.state.currentUser.id
             }
           }
         })
+        console.log('🎡 stripe result', result)
+        if (result.error) {
+          this.error.stripeError = true
+          this.error.stripeErrorMessage = utils.removeTrailingPeriod(result.error.message)
+        }
+        // if (result.paymentIntent)
+        // TODO handle success, this.upgradeUser()
+        // - close dialog, show success notification w instructions , local user.isUpgraded -> userdetails has success badge 'premium?'
+        // - stripe webhook = user.isupgraded (userid), or send user update operation
 
-        console.log('🌷 payemnt success', result)
-        // TODO handle success
         // {
         //   "id": "pm_1GxEcj2eZvKYlo2C9StYHZfp",
         //   "object": "payment_method",
@@ -212,12 +227,7 @@ export default {
         // }
       } catch (error) {
         console.error('🚒', error)
-        // self.$forceUpdate() // Forcing the DOM to update so the Stripe Element can update
-
-        // https://stripe.com/docs/api#errors
-        // TODO handle errors
-        this.error.stripeError = true
-        this.error.stripeErrorMessage = error.message
+        this.error.unknownServerError = true
       }
       this.loading.paymentIsProcessing = false
     }
@@ -243,6 +253,7 @@ export default {
   .summary
     margin-top 10px
     margin-bottom 10px
-  .loading-stripe
+  .loading-stripe,
+  .badge.danger
     margin-bottom 10px
 </style>
