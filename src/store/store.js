@@ -96,6 +96,7 @@ export default new Vuex.Store({
     notifyAccessFavorites: false,
     notifyCardsCreatedIsNearLimit: false,
     notifyCardsCreatedIsOverLimit: false,
+    notifyCurrentUserIsUpgraded: false,
 
     // filters
     filteredConnectionTypeIds: [],
@@ -491,6 +492,10 @@ export default new Vuex.Store({
     notifyCardsCreatedIsOverLimit: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.notifyCardsCreatedIsOverLimit = value
+    },
+    notifyCurrentUserIsUpgraded: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.notifyCurrentUserIsUpgraded = value
     },
 
     // Filters

@@ -10,7 +10,6 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
     //- card number:    4242424242424242, 4242 4242 4242 4242
     //- expiration:     11/22 any date in the future
     //- card cvc:       123 any three digits
-    //- ? zip or postal:  11221, m1b5m6
     //- https://stripe.com/docs/testing#international-cards
 
     input(type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
@@ -148,6 +147,10 @@ export default {
         email: this.email
       })
       console.log('🎡 stripe customer', result)
+      if (result.type === 'StripeInvalidRequestError') {
+        this.error.stripeError = true
+        this.error.stripeErrorMessage = utils.removeTrailingPeriod(result.raw.message)
+      }
       return result
     },
     async createPaymentMethod () {
@@ -159,9 +162,8 @@ export default {
       if (result.error) {
         this.error.stripeError = true
         this.error.stripeErrorMessage = utils.removeTrailingPeriod(result.error.message)
-      } else {
-        return result
       }
+      return result.paymentMethod
     },
     async createSubscription () {
       const result = await this.$store.dispatch('api/createSubscription', {
@@ -173,9 +175,19 @@ export default {
       if (result.error) {
         this.error.stripeError = true
         this.error.stripeErrorMessage = utils.removeTrailingPeriod(result.error.message)
-      } else {
-        return result
       }
+      return result
+    },
+
+    async updateSubscription () {
+      const result = await this.$store.dispatch('api/updateSubscription', {
+        stripeSubscriptionId: subscription.id,
+        stripePriceId: subscription.items.data[0].price.id
+      })
+      console.log('🎡 subscribed', result)
+      this.$store.commit('currentUser/isUpgraded', true)
+      this.$store.commit('notifyCurrentUserIsUpgraded', true)
+      this.$emit('closeDialog')
     },
 
     async subscribe () {
@@ -200,18 +212,18 @@ export default {
         // get a requires_payment_method error.
         // 🎃 => handleRequiresPaymentMethod)
         if (subscription.status === 'active') {
-          const result = await this.$store.dispatch('api/createSubscription', {
-            stripeSubscriptionId: subscription.id,
-            stripePriceId: subscription.items.data[0].price.id
-          })
-          console.log('🎡 subscribed', result)
-          this.$store.commit('currentUser/isUpgraded', true)
-          this.$store.commit('addNotification', { message: 'Your account has been upgraded and you can create unlimited cards', type: 'success' })
-          this.$emit('closeDialog')
+          await this.updateSubscription()
+        } else {
+          console.log('🎡 error', customer, paymentMethod, subscription)
+          if (!this.error.stripeError) {
+            this.error.unknownServerError = true
+          }
         }
       } catch (error) {
         console.error('🚒', error)
-        this.error.unknownServerError = true
+        if (!this.error.stripeError) {
+          this.error.unknownServerError = true
+        }
       }
       this.loading.subscriptionIsBeingCreated = false
     }

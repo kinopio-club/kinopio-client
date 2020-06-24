@@ -7,8 +7,8 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
       .row
         User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
         p.name {{user.name}}
-    .row.badges
-      .badge(v-if="user.isSpectator") Spectator
+    .row.badges(v-if="user.isSpectator || user.isUpgraded")
+      .badge.status(v-if="user.isSpectator") Spectator
       .badge.success(v-if="user.isUpgraded") Upgraded
 
   //- Current User
@@ -19,8 +19,8 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
           .current-color(:style="{ background: userColor }")
         ColorPicker(:currentColor="userColor" :visible="colorPickerIsVisible" @selectedColor="updateUserColor")
       input.name(placeholder="What's your name?" v-model="userName" name="Name")
-    .row.badges
-      .badge(v-if="user.isSpectator") Spectator
+    .row.badges(v-if="user.isSpectator || user.isUpgraded")
+      .badge.status(v-if="user.isSpectator") Spectator
       .badge.success(v-if="user.isUpgraded") Upgraded
 
   section.upgrade(v-if="isCurrentUser && !currentUserIsUpgraded")
@@ -240,6 +240,7 @@ export default {
       this.closeDialogs()
       this.clearUserSpaces()
       this.currentUserIsUpgraded = this.$store.state.currentUser.isUpgraded
+      console.log('🌳 isUpgraded', this.user.isUpgraded)
     },
     userDetailsPosition (position) {
       this.closeDialogs()
@@ -262,9 +263,7 @@ export default {
   .moon
     vertical-align -2px
   .badges
-    .badge
-      margin-top 8px
-      background-color var(--secondary-background)
+    // margin-top 8px
 
   .upgrade
     progress

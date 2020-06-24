@@ -79,6 +79,12 @@ aside.notifications(@click="closeAllDialogs")
         img.icon(src="@/assets/add.svg")
         span How does this work?
 
+  .persistent-item.success(v-if="notifyCurrentUserIsUpgraded")
+    p Your account has been upgraded. Thank you for supporting independent, ad-free, sustainable software
+    .row
+      button(@click="clearNotifyCurrentUserIsUpgraded")
+        span I'm Pretty Awesome
+
 </template>
 
 <script>
@@ -145,6 +151,7 @@ export default {
     notifyAccessFavorites () { return this.$store.state.notifyAccessFavorites },
     notifyCardsCreatedIsNearLimit () { return this.$store.state.notifyCardsCreatedIsNearLimit },
     notifyCardsCreatedIsOverLimit () { return this.$store.state.notifyCardsCreatedIsOverLimit },
+    notifyCurrentUserIsUpgraded () { return this.$store.state.notifyCurrentUserIsUpgraded },
     currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     },
@@ -242,6 +249,9 @@ export default {
     },
     refreshBrowser () {
       window.location.reload()
+    },
+    clearNotifyCurrentUserIsUpgraded () {
+      this.$store.commit('notifyCurrentUserIsUpgraded', false)
     }
   }
 }
