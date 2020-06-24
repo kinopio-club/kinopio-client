@@ -107,7 +107,6 @@ export default {
       loadingUserspaces: false,
       spacePickerIsVisible: false,
       userSpaces: [],
-      currentUserIsUpgraded: false,
       cardsCreatedLimit: 150,
       error: {
         unknownServerError: false
@@ -121,6 +120,7 @@ export default {
     userIsUpgraded () { return this.user.isUpgraded },
     isCurrentUser () { return this.$store.getters['currentUser/isCurrentUser'](this.user) },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
     userIsSignedIn () {
       if (this.user.isSignedIn === false) {
         return false
@@ -239,7 +239,6 @@ export default {
     visible (visible) {
       this.closeDialogs()
       this.clearUserSpaces()
-      this.currentUserIsUpgraded = this.$store.state.currentUser.isUpgraded
       console.log('🌳 isUpgraded', this.user.isUpgraded)
     },
     userDetailsPosition (position) {
