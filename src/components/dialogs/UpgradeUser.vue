@@ -31,9 +31,9 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
     .badge.danger(v-if="error.stripeError") {{error.stripeErrorMessage}}
     .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
 
-    button(@click="processPayment" :class="{active : loading.paymentIsProcessing}")
+    button(@click="subscribe" :class="{active : loading.subscriptionIsBeingCreated}")
       span Upgrade Account
-      Loader(:visible="loading.paymentIsProcessing")
+      Loader(:visible="loading.subscriptionIsBeingCreated")
 
     p You'll be billed immediately and then each month. You can cancel at anytime.
 
@@ -47,13 +47,17 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
+// https://stripe.com/docs/billing/subscriptions/fixed-price
 import { loadStripe } from '@stripe/stripe-js/pure'
 
-let stripePublishableKey, stripe, elements, cardNumber, cardExpiry, cardCvc, paymentIntent
+let stripePublishableKey, priceId, stripe, elements, cardNumber, cardExpiry, cardCvc
+let customer, paymentMethod, subscription
 if (process.env.NODE_ENV === 'development') {
   stripePublishableKey = 'pk_test_51Gv55TL1W0hlm1mqF9VvEevFCGr53d0eDUx0VD1tPA8ESuGdTceeoK0hAWaELCmTqkbt3wZqffT0mN41X0Jmlxpe00en3VmODJ'
+  priceId = 'price_1GxN5tL1W0hlm1mqqbYQjWFz'
 } else {
   stripePublishableKey = 'pk_live_51Gv55TL1W0hlm1mq80jsOLNIJEgtPei8OuuW1v9lFV6KbVo7yme2nERsysqYiIpt1BrRvAi860IATF103QNI6FDn00wjUlhOvQ'
+  priceId = 'price_1Gv5OfL1W0hlm1mqpTfR61iZ'
 }
 
 export default {
@@ -70,9 +74,8 @@ export default {
       name: '',
       email: '',
       loading: {
-        paymentIsProcessing: false,
+        subscriptionIsBeingCreated: false,
         stripeIsLoading: true,
-        isGettingPaymentIntent: true,
         stripeElementsIsMounted: false
       },
       error: {
@@ -94,8 +97,7 @@ export default {
       this.error.stripeError = false
     },
     mountStripeElements () {
-      if (this.loading.isGettingPaymentIntent || this.loading.stripeIsLoading) { return }
-      console.log('💸', paymentIntent.client_secret)
+      if (this.loading.stripeIsLoading) { return }
       elements = stripe.elements({
         fonts: [{
           family: 'OsakaMono-Kinopio',
@@ -131,12 +133,6 @@ export default {
       cardCvc.on('change', this.clearErrors)
       this.loading.stripeElementsIsMounted = true
     },
-    async getPaymentIntent () {
-      this.loading.isGettingPaymentIntent = true
-      paymentIntent = await this.$store.dispatch('api/getPaymentIntent')
-      this.loading.isGettingPaymentIntent = false
-      this.mountStripeElements()
-    },
     async loadStripe () {
       this.loading.stripeIsLoading = true
       if (!this.$store.state.stripeIsLoaded) {
@@ -147,97 +143,84 @@ export default {
       this.loading.stripeIsLoading = false
       this.mountStripeElements()
     },
-    async processPayment () {
+    async createCustomer () {
+      const result = await this.$store.dispatch('api/createCustomer', {
+        email: this.email
+      })
+      console.log('🎡 stripe customer', result)
+      return result
+    },
+    async createPaymentMethod () {
+      const result = await stripe.createPaymentMethod({
+        type: 'card',
+        card: cardNumber
+      })
+      console.log('🎡 stripe payment method', result)
+      if (result.error) {
+        this.error.stripeError = true
+        this.error.stripeErrorMessage = utils.removeTrailingPeriod(result.error.message)
+      } else {
+        return result
+      }
+    },
+    async createSubscription () {
+      const result = await this.$store.dispatch('api/createSubscription', {
+        customerId: customer.id,
+        paymentMethodId: paymentMethod.id,
+        priceId
+      })
+      console.log('🎡 stripe subscription', result)
+      if (result.error) {
+        this.error.stripeError = true
+        this.error.stripeErrorMessage = utils.removeTrailingPeriod(result.error.message)
+      } else {
+        return result
+      }
+    },
+    async provisionService () {
+      console.log('provisionService')
+    },
+
+    async subscribe () {
       this.clearErrors()
       if (!this.name || !this.email) {
         this.error.allFieldsAreRequired = true
-        this.loading.paymentIsProcessing = false
+        this.loading.subscriptionIsBeingCreated = false
         return
       }
+      this.loading.subscriptionIsBeingCreated = true
       try {
-        this.loading.paymentIsProcessing = true
-        const result = await stripe.confirmCardPayment(paymentIntent.client_secret, {
-          payment_method: {
-            card: cardNumber,
-            billing_details: {
-              name: this.name,
-              email: this.email
-            },
-            metadata: {
-              userId: this.$store.state.currentUser.id
-            }
-          }
-        })
-        console.log('🎡 stripe result', result)
-        if (result.error) {
-          this.error.stripeError = true
-          this.error.stripeErrorMessage = utils.removeTrailingPeriod(result.error.message)
+        customer = await this.createCustomer()
+        paymentMethod = await this.createPaymentMethod()
+        subscription = await this.createSubscription()
+        // TODO Errors
+        // Some payment methods require a customer to be on session
+        // to complete the payment process. Check the status of the
+        // payment intent to handle these actions.
+        // 🎃 => handlePaymentThatRequiresCustomerAction)
+        // If attaching this card to a Customer object succeeds,
+        // but attempts to charge the customer fail, you
+        // get a requires_payment_method error.
+        // 🎃 => handleRequiresPaymentMethod)
+
+        console.log('🍆 use this instead?:', subscription.latest_invoice.payment_intent.status, Boolean(subscription.latest_invoice.payment_intent.status))
+        if (customer && paymentMethod && subscription) {
+          this.provisionService()
         }
-        // if (result.paymentIntent)
         // TODO handle success, this.upgradeUser()
         // - close dialog, show success notification w instructions , local user.isUpgraded -> userdetails has success badge 'premium?'
         // - stripe webhook = user.isupgraded (userid), or send user update operation
-
-        // {
-        //   "id": "pm_1GxEcj2eZvKYlo2C9StYHZfp",
-        //   "object": "payment_method",
-        //   "billing_details": {
-        //     "address": {
-        //       "city": null,
-        //       "country": null,
-        //       "line1": null,
-        //       "line2": null,
-        //       "postal_code": null,
-        //       "state": null
-        //     },
-        //     "email": null,
-        //     "name": null,
-        //     "phone": null
-        //   },
-        //   "card": {
-        //     "brand": "visa",
-        //     "checks": {
-        //       "address_line1_check": null,
-        //       "address_postal_code_check": null,
-        //       "cvc_check": "pass"
-        //     },
-        //     "country": "US",
-        //     "exp_month": 8,
-        //     "exp_year": 2021,
-        //     "fingerprint": "Xt5EWLLDS7FJjR1c",
-        //     "funding": "credit",
-        //     "generated_from": null,
-        //     "last4": "4242",
-        //     "networks": {
-        //       "available": [
-        //         "visa"
-        //       ],
-        //       "preferred": null
-        //     },
-        //     "three_d_secure_usage": {
-        //       "supported": true
-        //     },
-        //     "wallet": null
-        //   },
-        //   "created": 1592928325,
-        //   "customer": null,
-        //   "livemode": false,
-        //   "metadata": {},
-        //   "type": "card"
-        // }
       } catch (error) {
         console.error('🚒', error)
         this.error.unknownServerError = true
       }
-      this.loading.paymentIsProcessing = false
+      this.loading.subscriptionIsBeingCreated = false
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
-        this.getPaymentIntent()
         this.loadStripe()
-        // this.email = this.$store.state.currentUser.email
       }
     }
   }

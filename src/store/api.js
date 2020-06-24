@@ -378,10 +378,19 @@ const self = {
 
     // Billing
 
-    getPaymentIntent: async (context) => {
+    createCustomer: async (context, body) => {
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/billing/payment-intent`, options)
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/billing/create-customer`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    createSubscription: async (context, body) => {
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/billing/create-subscription`, options)
         return normalizeResponse(response)
       } catch (error) {
         console.error(error)
