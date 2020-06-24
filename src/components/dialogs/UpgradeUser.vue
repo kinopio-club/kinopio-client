@@ -177,9 +177,6 @@ export default {
         return result
       }
     },
-    async provisionService () {
-      console.log('provisionService')
-    },
 
     async subscribe () {
       this.clearErrors()
@@ -202,14 +199,16 @@ export default {
         // but attempts to charge the customer fail, you
         // get a requires_payment_method error.
         // 🎃 => handleRequiresPaymentMethod)
-
-        console.log('🍆 use this instead?:', subscription.latest_invoice.payment_intent.status, Boolean(subscription.latest_invoice.payment_intent.status))
-        if (customer && paymentMethod && subscription) {
-          this.provisionService()
+        if (subscription.status === 'active') {
+          const result = await this.$store.dispatch('api/createSubscription', {
+            stripeSubscriptionId: subscription.id,
+            stripePriceId: subscription.items.data[0].price.id
+          })
+          console.log('🎡 subscribed', result)
+          this.$store.commit('currentUser/isUpgraded', true)
+          this.$store.commit('addNotification', { message: 'Your account has been upgraded and you can create unlimited cards', type: 'success' })
+          this.$emit('closeDialog')
         }
-        // TODO handle success, this.upgradeUser()
-        // - close dialog, show success notification w instructions , local user.isUpgraded -> userdetails has success badge 'premium?'
-        // - stripe webhook = user.isupgraded (userid), or send user update operation
       } catch (error) {
         console.error('🚒', error)
         this.error.unknownServerError = true

@@ -7,8 +7,9 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
       .row
         User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
         p.name {{user.name}}
-    .row.badges(v-if="user.isSpectator || !userIsMember")
-      .badge Spectator
+    .row.badges
+      .badge(v-if="user.isSpectator") Spectator
+      .badge.success(v-if="user.isUpgraded") Upgraded
 
   //- Current User
   section(v-if="isCurrentUser")
@@ -18,8 +19,9 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
           .current-color(:style="{ background: userColor }")
         ColorPicker(:currentColor="userColor" :visible="colorPickerIsVisible" @selectedColor="updateUserColor")
       input.name(placeholder="What's your name?" v-model="userName" name="Name")
-    .row.badges(v-if="user.isSpectator || !userIsMember")
-      .badge Spectator
+    .row.badges
+      .badge(v-if="user.isSpectator") Spectator
+      .badge.success(v-if="user.isUpgraded") Upgraded
 
   section.upgrade(v-if="isCurrentUser && !currentUserIsUpgraded")
     p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
@@ -27,7 +29,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
     .button-wrap
       button(@click.stop="toggleUpgradeUserIsVisible" :class="{active: upgradeUserIsVisible}")
         span Upgrade for Unlimited
-      UpgradeUser(:visible="upgradeUserIsVisible")
+      UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeDialogs")
     p
       .badge.info $4/month
     .row
@@ -116,6 +118,7 @@ export default {
     cardsCreatedCount () { return this.$store.state.currentUser.cardsCreatedCount },
     userColor () { return this.user.color },
     userIsMember () { return Boolean(this.$store.getters['currentSpace/memberById'](this.user.id)) },
+    userIsUpgraded () { return this.user.isUpgraded },
     isCurrentUser () { return this.$store.getters['currentUser/isCurrentUser'](this.user) },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     userIsSignedIn () {
@@ -259,8 +262,8 @@ export default {
   .moon
     vertical-align -2px
   .badges
-    margin-top 8px
     .badge
+      margin-top 8px
       background-color var(--secondary-background)
 
   .upgrade
