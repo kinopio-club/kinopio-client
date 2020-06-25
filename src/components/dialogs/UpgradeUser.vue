@@ -7,22 +7,19 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
       .badge.info $4/month
 
     //- name:           someone
-    //- card number:    4242424242424242, 4242 4242 4242 4242
+    //- email:          hi@pirijan.com
+    //- card number:    4242424242424242
     //- expiration:     11/22 any date in the future
     //- card cvc:       123 any three digits
     //- https://stripe.com/docs/testing#international-cards
 
     input(type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
     input(type="text" placeholder="Name on Card" required v-model="name" @input="clearErrors")
+
     //- Stripe Elements
     div(ref="cardNumber")
     div(ref="cardExpiry")
     div(ref="cardCvc")
-    //- TODO on elements change events, clearerrors()
-
-    //- ???zip/postal unless automatically
-    //- input(type="text" placeholder="Zip or Postal Code" required maxlength="6" v-model="zipOrPostalCode" @input="clearErrors")
-
     .loading-stripe(v-if="!loading.stripeElementsIsMounted")
       Loader(:visible="true")
 
@@ -46,8 +43,9 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
-// https://stripe.com/docs/billing/subscriptions/fixed-price
 import { loadStripe } from '@stripe/stripe-js/pure'
+
+// https://stripe.com/docs/billing/subscriptions/fixed-price
 
 let stripePublishableKey, priceId, stripe, elements, cardNumber, cardExpiry, cardCvc
 let customer, paymentMethod, subscription
@@ -180,7 +178,6 @@ export default {
       }
       return result
     },
-
     async updateSubscription () {
       const result = await this.$store.dispatch('api/updateSubscription', {
         stripeSubscriptionId: subscription.id,
@@ -191,7 +188,6 @@ export default {
       this.$store.commit('notifyCurrentUserIsUpgraded', true)
       this.$emit('closeDialog')
     },
-
     async subscribe () {
       this.clearErrors()
       if (!this.name || !this.email) {

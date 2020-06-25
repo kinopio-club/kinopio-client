@@ -30,7 +30,8 @@ export default {
     },
     cardsCreatedIsOverLimit: (state) => {
       const cardsCreatedLimit = 150
-      if (!state.isUpgraded && state.cardsCreatedCount >= cardsCreatedLimit) { return true }
+      if (state.isUpgraded) { return }
+      if (state.cardsCreatedCount >= cardsCreatedLimit) { return true }
     },
     canEditSpace: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
