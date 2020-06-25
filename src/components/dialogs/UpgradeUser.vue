@@ -47,8 +47,9 @@ import { loadStripe } from '@stripe/stripe-js/pure'
 
 // https://stripe.com/docs/billing/subscriptions/fixed-price
 
-let stripePublishableKey, priceId, stripe, elements, cardNumber, cardExpiry, cardCvc //, isRetry
+let stripePublishableKey, priceId, stripe, elements, cardNumber, cardExpiry, cardCvc
 let customer, paymentMethod, subscription
+let isRetry, invoice, paymentIntent
 if (process.env.NODE_ENV === 'development') {
   stripePublishableKey = 'pk_test_51Gv55TL1W0hlm1mqF9VvEevFCGr53d0eDUx0VD1tPA8ESuGdTceeoK0hAWaELCmTqkbt3wZqffT0mN41X0Jmlxpe00en3VmODJ'
   priceId = 'price_1GxN5tL1W0hlm1mqqbYQjWFz'
@@ -178,30 +179,48 @@ export default {
       }
       return result
     },
-    async updateSubscription () {
+    async updateSubscriptionSuccess () {
       const result = await this.$store.dispatch('api/updateSubscription', {
         stripeSubscriptionId: subscription.id,
         stripePriceId: subscription.items.data[0].price.id
       })
       console.log('🎡 subscribed', result)
+      this.loading.subscriptionIsBeingCreated = false
       this.$store.commit('currentUser/isUpgraded', true)
       this.$store.commit('notifyCurrentUserIsUpgraded', true)
       this.$emit('closeDialog')
     },
-    async additionalAuthenticationRequired () {
-      this.loading.subscriptionIsBeingCreated = false
-      this.error.stripeError = true
-      this.error.stripeErrorMessage = 'Additional authentication is required to complete payment and upgrade your account'
-
-      // Retrieve the client secret for the payment intent,
-      // and pass it in a call to stripe.confirmCardPayment.
+    paymentIntent () {
+      if (invoice) {
+        return invoice.payment_intent
+      } else {
+        return subscription.latest_invoice.payment_intent
+      }
     },
+    async handleCustomerActionRequired () {
+      const requiresAction = paymentIntent.status === 'requires_action'
+      const requiresRetryPaymentMethod = isRetry === true && paymentIntent.status === 'requires_payment_method'
+      if (requiresAction && requiresRetryPaymentMethod) {
+        const result = await stripe.confirmCardPayment(paymentIntent.client_secret, { payment_method: paymentMethod.id })
+        if (result.error) {
+          console.log('🎡 confirm card payment', result)
+          this.loading.subscriptionIsBeingCreated = false
+          this.error.stripeError = true
+          this.error.stripeErrorMessage = utils.removeTrailingPeriod(result.error.message)
+          throw result
+        } else if (result.paymentIntent.status === 'succeeded') {
+          await this.updateSubscriptionSuccess()
+        }
+      }
+    },
+
     async cardDeclined () {
-      this.loading.subscriptionIsBeingCreated = false
-      this.error.stripeError = true
-      this.error.stripeErrorMessage = 'Your credit card was declined. Try again with a different card?'
+      // this.loading.subscriptionIsBeingCreated = false
+      // this.error.stripeError = true
+      // this.error.stripeErrorMessage = 'Your credit card was declined. Try again with a different card?'
       // and return them to the payment form to try a different card
     },
+
     async subscribe () {
       this.clearErrors()
       if (!this.name || !this.email) {
@@ -214,27 +233,20 @@ export default {
         customer = await this.createCustomer()
         paymentMethod = await this.createPaymentMethod()
         subscription = await this.createSubscription()
-        const paymentStatus = subscription.latest_invoice.payment_intent.status
+        invoice = subscription.latest_invoice
+        paymentIntent = this.paymentIntent()
         if (subscription.status === 'active') {
-          await this.updateSubscription()
-        } else if (paymentStatus === 'incomplete') {
-          this.additionalAuthenticationRequired()
-          return
-        } else if (paymentStatus === 'requires_payment_method') {
-          this.cardDeclined()
-          return
-        } else {
-          console.error('🎡', customer, paymentMethod, subscription, paymentStatus)
-          if (!this.error.stripeError) {
-            this.error.unknownServerError = true
-          }
+          await this.updateSubscriptionSuccess()
         }
+        this.handleCustomerActionRequired()
+        this.handleCardDeclined()
       } catch (error) {
         console.error('🚒', error)
         if (!this.error.stripeError) {
           this.error.unknownServerError = true
         }
       }
+      isRetry = true
       this.loading.subscriptionIsBeingCreated = false
     }
   },
