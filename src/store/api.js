@@ -414,6 +414,15 @@ const self = {
         console.error(error)
       }
     },
+    subscriptionInfo: async (context, body) => {
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/billing/retrieve-subscription-info`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
 
     // Services
 

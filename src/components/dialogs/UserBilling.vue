@@ -3,13 +3,15 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.stop)
   section
     p Billing
   section
-    .loading-stripe(v-if="!loading.stripeInfo")
+    .loading-stripe(v-if="!loading.gettingBillingInfo")
       Loader(:visible="true")
-    .summary(v-if="loading.stripeInfo")
+    .summary(v-if="loading.gettingBillingInfo")
       User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
       p
         span You are paying
-          .badge.info $4/month
+          .badge.info ${{billing.price}}/{{billing.period}}
+    //- VISA **8566 — 10/2020
+    //- Next payment due: $45 on 08/08/20
 
     p Thanks for supporting Kinopio!
 
@@ -27,10 +29,10 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.stop)
             img.icon(src="@/assets/remove.svg")
             span Downgrade
             Loader(:visible="loading.isCancelling")
-
 </template>
 
 <script>
+import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
 
 export default {
@@ -45,9 +47,16 @@ export default {
   data () {
     return {
       cancelSubscriptionVisible: false,
-      stripeSubscriptionId: undefined, // get from load stripeinfo call
+      billing: {
+        price: 4,
+        period: 'month',
+        cardType: '（ﾉ´д｀）',
+        cardLast4: '(シ_ _)シ',
+        cardExpMonth: 0,
+        cardExpYear: 0
+      },
       loading: {
-        stripeInfo: true, // todo default = false
+        gettingBillingInfo: false,
         isCancelling: false
       }
     }
@@ -62,10 +71,11 @@ export default {
     },
     async cancelSubscription () {
       this.loading.isCancelling = true
+      const stripeIds = cache.stripeIds()
       try {
         await this.$store.dispatch('api/cancelSubscription', {
           userId: this.$store.state.currentUser.userId,
-          stripeSubscriptionId: this.stripeSubscriptionId || localStorage.getItem('stripeSubscriptionId')
+          stripeSubscriptionId: stripeIds.stripeSubscriptionId
         })
         this.$store.commit('currentUser/isUpgraded', false)
         this.$store.commit('addNotification', { message: 'Your account has been downgraded, and you will no longer be charged' })
@@ -76,9 +86,35 @@ export default {
       this.loading.isCancelling = false
     }
   },
+  async getBillingInfo () {
+    this.loading.gettingBillingInfo = true
+    const stripeIds = cache.stripeIds()
+    try {
+      const info = await this.$store.dispatch('api/subscriptionInfo', {
+        userId: this.$store.state.currentUser.userId,
+        stripeSubscriptionId: stripeIds.stripeSubscriptionId,
+        stripePaymentMethodId: stripeIds.stripePaymentMethodId
+      })
+      console.log('🎡 billing info', info) // subscription and paymentmethod objects
+      // asign vals
+      // billing: {
+      //   price: 4,
+      //   period: 'month',
+      //   cardType: '（ﾉ´д｀）',
+      //   cardLast4: '(シ_ _)シ',
+      //   cardExpMonth: 0,
+      //   cardExpYear: 0
+      // },
+    } catch (error) {
+      console.error('🚒', error)
+      this.$store.commit('addNotification', { message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
+    }
+    this.loading.gettingBillingInfo = false
+  },
   watch: {
-    visible (value) {
-      if (value) {
+    visible (visible) {
+      if (visible) {
+        this.getBillingInfo()
       }
     }
   }

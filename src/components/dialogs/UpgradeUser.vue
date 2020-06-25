@@ -40,6 +40,7 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
 <script>
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
+import cache from '@/cache.js'
 
 import { loadStripe } from '@stripe/stripe-js/pure'
 
@@ -178,11 +179,15 @@ export default {
       return result
     },
     async handleSubscriptionSuccess () {
-      const result = await this.$store.dispatch('api/updateSubscription', {
+      const stripeIds = {
+        stripeCustomerId: customer.id,
         stripeSubscriptionId: subscription.id,
-        stripePriceId: subscription.items.data[0].price.id
-      })
+        stripePriceId: subscription.items.data[0].price.id,
+        stripePaymentMethodId: paymentMethod.id
+      }
+      const result = await this.$store.dispatch('api/updateSubscription', stripeIds)
       console.log('🎡 subscribed', result)
+      cache.saveStripeIds(stripeIds)
       this.loading.subscriptionIsBeingCreated = false
       this.$store.commit('currentUser/isUpgraded', true)
       this.$store.commit('notifyCurrentUserIsUpgraded', true)
@@ -231,7 +236,6 @@ export default {
         paymentMethod = await this.createPaymentMethod()
         subscription = await this.createSubscription()
         invoice = subscription.latest_invoice
-        localStorage.setItem('stripeSubscriptionId', subscription.id)
         paymentIntent = this.paymentIntent()
         await this.handleCustomerActionRequired()
         await this.handlePaymentMethodRequired()

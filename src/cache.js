@@ -179,6 +179,15 @@ export default {
       return invitedSpace.id !== space.id
     })
     this.storeLocal('invitedSpaces', invitedSpaces)
+  },
+
+  // billing
+
+  saveStripeIds (stripeIds) {
+    this.storeLocal('stripeIds', stripeIds)
+  },
+  stripeIds () {
+    return this.getLocal('stripeIds')
   }
 
 }
