@@ -1,55 +1,62 @@
 <template lang="pug">
-dialog.narrow(v-if="visible" :open="visible" @click.stop)
+dialog.narrow.user-billing(v-if="visible" :open="visible" @click.stop)
   section
-    p User Billing
-    //- billing info, from stripe?
+    p Billing
   section
-    p yolo yolo
+    .summary
+      User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
+      p
+        span You are paying
+          .badge.info $4/month
+
+    p Thanks for supporting Kinopio!
+    button
+      img.icon(src="@/assets/remove.svg")
+      span Cancel Subscription
 
 </template>
 
 <script>
-import Loader from '@/components/Loader.vue'
-
 export default {
   name: 'UserBilling',
   components: {
-    Loader
+    User: () => import('@/components/User.vue')
   },
   props: {
     visible: Boolean
   },
   data () {
     return {
-      loading: {
-        stripeInfo: false
-      }
+      cancelSubscriptionVisible: true
     }
   },
   computed: {
-    // isSignedIn () {
-    //   return this.$store.getters['currentUser/isSignedIn']
-    // }
+    user () { return this.$store.state.currentUser }
   },
   methods: {
-    // toggleRemoveAllConfirmationVisible () {
-    //   this.removeAllConfirmationVisible = !this.removeAllConfirmationVisible
-    // },
-    // async removeUserPermanent () {
-    //   this.loading.removeUserPermanent = true
-    //   await this.$store.dispatch('api/removeUserPermanent')
-    //   this.loading.removeUserPermanent = false
-    //   this.$emit('removeUser')
-    // }
+    toggleCancelSubscriptionVisible () {
+      this.toggleCancelSubscriptionVisible = !this.toggleCancelSubscriptionVisible
+    }
+  },
+  watch: {
+    visible (value) {
+      if (value) {
+      }
+    }
   }
-  // watch: {
-  //   visible (value) {
-  //     if (value) {
-  //     }
-  //   }
-  // }
 }
 </script>
 
 <style lang="stylus">
+.user-billing
+  .summary
+    display flex
+    align-items top
+    .user
+      margin-right 6px
+      vertical-align middle
+    .badge
+      display inline-block
+    p
+      margin 0
 </style>

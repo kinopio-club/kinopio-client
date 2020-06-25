@@ -75,7 +75,6 @@ export default {
       const isVisible = this.userBillingIsVisible
       this.closeDialogs()
       this.userBillingIsVisible = !isVisible
-      console.log('this.userBillingIsVisible', this.userBillingIsVisible)
     }
   },
   watch: {
