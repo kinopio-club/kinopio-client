@@ -47,7 +47,7 @@ import { loadStripe } from '@stripe/stripe-js/pure'
 
 // https://stripe.com/docs/billing/subscriptions/fixed-price
 
-let stripePublishableKey, priceId, stripe, elements, cardNumber, cardExpiry, cardCvc
+let stripePublishableKey, priceId, stripe, elements, cardNumber, cardExpiry, cardCvc //, isRetry
 let customer, paymentMethod, subscription
 if (process.env.NODE_ENV === 'development') {
   stripePublishableKey = 'pk_test_51Gv55TL1W0hlm1mqF9VvEevFCGr53d0eDUx0VD1tPA8ESuGdTceeoK0hAWaELCmTqkbt3wZqffT0mN41X0Jmlxpe00en3VmODJ'
@@ -188,6 +188,20 @@ export default {
       this.$store.commit('notifyCurrentUserIsUpgraded', true)
       this.$emit('closeDialog')
     },
+    async additionalAuthenticationRequired () {
+      this.loading.subscriptionIsBeingCreated = false
+      this.error.stripeError = true
+      this.error.stripeErrorMessage = 'Additional authentication is required to complete payment and upgrade your account'
+
+      // Retrieve the client secret for the payment intent,
+      // and pass it in a call to stripe.confirmCardPayment.
+    },
+    async cardDeclined () {
+      this.loading.subscriptionIsBeingCreated = false
+      this.error.stripeError = true
+      this.error.stripeErrorMessage = 'Your credit card was declined. Try again with a different card?'
+      // and return them to the payment form to try a different card
+    },
     async subscribe () {
       this.clearErrors()
       if (!this.name || !this.email) {
@@ -200,19 +214,17 @@ export default {
         customer = await this.createCustomer()
         paymentMethod = await this.createPaymentMethod()
         subscription = await this.createSubscription()
-        // TODO Errors
-        // Some payment methods require a customer to be on session
-        // to complete the payment process. Check the status of the
-        // payment intent to handle these actions.
-        // 🎃 => handlePaymentThatRequiresCustomerAction)
-        // If attaching this card to a Customer object succeeds,
-        // but attempts to charge the customer fail, you
-        // get a requires_payment_method error.
-        // 🎃 => handleRequiresPaymentMethod)
+        const paymentStatus = subscription.latest_invoice.payment_intent.status
         if (subscription.status === 'active') {
           await this.updateSubscription()
+        } else if (paymentStatus === 'incomplete') {
+          this.additionalAuthenticationRequired()
+          return
+        } else if (paymentStatus === 'requires_payment_method') {
+          this.cardDeclined()
+          return
         } else {
-          console.log('🎡 error', customer, paymentMethod, subscription)
+          console.error('🎡', customer, paymentMethod, subscription, paymentStatus)
           if (!this.error.stripeError) {
             this.error.unknownServerError = true
           }
