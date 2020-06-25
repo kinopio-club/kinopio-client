@@ -6,22 +6,20 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
       User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
       .badge.info $4/month
 
-    //- name:           someone
+    //- https://stripe.com/docs/testing
+    //- name on card:   someone
     //- email:          hi@pirijan.com
     //- card number:    4242424242424242
     //- expiration:     11/22 any date in the future
     //- card cvc:       123 any three digits
-    //- https://stripe.com/docs/testing#international-cards
-
-    input(type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
     input(type="text" placeholder="Name on Card" required v-model="name" @input="clearErrors")
-
+    input(type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
     //- Stripe Elements
+    .loading-stripe(v-if="!loading.stripeElementsIsMounted")
+      Loader(:visible="true")
     div(ref="cardNumber")
     div(ref="cardExpiry")
     div(ref="cardCvc")
-    .loading-stripe(v-if="!loading.stripeElementsIsMounted")
-      Loader(:visible="true")
 
     .badge.danger(v-if="error.allFieldsAreRequired") All fields are required
     .badge.danger(v-if="error.stripeError") {{error.stripeErrorMessage}}
@@ -179,7 +177,7 @@ export default {
       }
       return result
     },
-    async updateSubscriptionSuccess () {
+    async handleSubscriptionSuccess () {
       const result = await this.$store.dispatch('api/updateSubscription', {
         stripeSubscriptionId: subscription.id,
         stripePriceId: subscription.items.data[0].price.id
@@ -209,18 +207,17 @@ export default {
           this.error.stripeErrorMessage = utils.removeTrailingPeriod(result.error.message)
           throw result
         } else if (result.paymentIntent.status === 'succeeded') {
-          await this.updateSubscriptionSuccess()
+          await this.handleSubscriptionSuccess()
         }
       }
     },
-
-    async cardDeclined () {
-      // this.loading.subscriptionIsBeingCreated = false
-      // this.error.stripeError = true
-      // this.error.stripeErrorMessage = 'Your credit card was declined. Try again with a different card?'
-      // and return them to the payment form to try a different card
+    async handlePaymentMethodRequired () {
+      if (paymentIntent.status === 'requires_payment_method') {
+        this.loading.subscriptionIsBeingCreated = false
+        this.error.stripeError = true
+        this.error.stripeErrorMessage = 'Your credit card was declined. Please try again with a different card'
+      }
     },
-
     async subscribe () {
       this.clearErrors()
       if (!this.name || !this.email) {
@@ -234,12 +231,13 @@ export default {
         paymentMethod = await this.createPaymentMethod()
         subscription = await this.createSubscription()
         invoice = subscription.latest_invoice
+        localStorage.setItem('stripeSubscriptionId', subscription.id)
         paymentIntent = this.paymentIntent()
+        await this.handleCustomerActionRequired()
+        await this.handlePaymentMethodRequired()
         if (subscription.status === 'active') {
-          await this.updateSubscriptionSuccess()
+          await this.handleSubscriptionSuccess()
         }
-        this.handleCustomerActionRequired()
-        this.handleCardDeclined()
       } catch (error) {
         console.error('🚒', error)
         if (!this.error.stripeError) {
