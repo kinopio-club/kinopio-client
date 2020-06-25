@@ -45,6 +45,7 @@ export default {
   data () {
     return {
       cancelSubscriptionVisible: false,
+      stripeSubscriptionId: undefined, // get from load stripeinfo call
       loading: {
         stripeInfo: true, // todo default = false
         isCancelling: false
@@ -59,12 +60,20 @@ export default {
       if (this.loading.isCancelling) { return }
       this.cancelSubscriptionVisible = !this.cancelSubscriptionVisible
     },
-    cancelSubscription () {
+    async cancelSubscription () {
       this.loading.isCancelling = true
-      // todo call stripe
-      // this.$store.commit('currentUser/isUpgraded', false)
-      this.$emit('closeDialog')
-      // this.isCancelling = false
+      try {
+        await this.$store.dispatch('api/cancelSubscription', {
+          userId: this.$store.state.currentUser.userId,
+          stripeSubscriptionId: this.stripeSubscriptionId || localStorage.getItem('stripeSubscriptionId')
+        })
+        this.$store.commit('currentUser/isUpgraded', false)
+        this.$store.commit('addNotification', { message: 'Your account has been downgraded, and you will no longer be charged' })
+      } catch (error) {
+        console.error('🚒', error)
+        this.$store.commit('addNotification', { message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
+      }
+      this.loading.isCancelling = false
     }
   },
   watch: {

@@ -124,7 +124,7 @@ const self = {
         if (!response.ok) { throw Error(response.statusText) }
       } catch (error) {
         console.error('🚒', error, body)
-        // context.commit('addNotification', { message: "Syncing Error. Will retry in 10 seconds…", type: 'danger' }, { root: true })
+        // context.commit('addNotification', { message: "Syncing Error. Will retry in 10 seconds…", type: 'danger' })
         context.dispatch('requeue', body)
       }
     },
@@ -400,6 +400,15 @@ const self = {
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/billing/update-subscription`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    cancelSubscription: async (context, body) => {
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/billing/cancel-subscription`, options)
         return normalizeResponse(response)
       } catch (error) {
         console.error(error)
