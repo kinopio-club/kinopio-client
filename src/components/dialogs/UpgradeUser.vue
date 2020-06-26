@@ -51,7 +51,7 @@ let customer, paymentMethod, subscription
 let isRetry, invoice, paymentIntent
 if (process.env.NODE_ENV === 'development') {
   stripePublishableKey = 'pk_test_51Gv55TL1W0hlm1mqF9VvEevFCGr53d0eDUx0VD1tPA8ESuGdTceeoK0hAWaELCmTqkbt3wZqffT0mN41X0Jmlxpe00en3VmODJ'
-  priceId = 'price_1GxN5tL1W0hlm1mqqbYQjWFz'
+  priceId = 'price_1Gy3QWL1W0hlm1mqKLnVVNAd'
 } else {
   stripePublishableKey = 'pk_live_51Gv55TL1W0hlm1mq80jsOLNIJEgtPei8OuuW1v9lFV6KbVo7yme2nERsysqYiIpt1BrRvAi860IATF103QNI6FDn00wjUlhOvQ'
   priceId = 'price_1Gv5OfL1W0hlm1mqpTfR61iZ'
