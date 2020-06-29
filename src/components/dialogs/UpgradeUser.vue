@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop)
+dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop :class="{'right-side': dialogOnRight}")
   section
     p Upgrade your account for unlimited cards
     .summary
@@ -64,7 +64,8 @@ export default {
     Loader
   },
   props: {
-    visible: Boolean
+    visible: Boolean,
+    dialogOnRight: Boolean
   },
   data () {
     return {
@@ -265,6 +266,9 @@ export default {
 <style lang="stylus">
 .upgrade-user
   overflow auto
+  &.right-side
+    left initial
+    right 8px
   .user
     margin-right 6px
     vertical-align middle
@@ -272,6 +276,8 @@ export default {
     margin-top 10px
     margin-bottom 10px
   .loading-stripe,
+  .badge
+    display inline-block
   .badge.danger
     margin-bottom 10px
 </style>
