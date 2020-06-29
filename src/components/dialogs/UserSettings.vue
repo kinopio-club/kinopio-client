@@ -18,6 +18,9 @@ dialog.narrow(v-if="visible" :open="visible" @click.stop="closeDialogs")
           span.badge.danger Permanently remove
           span(v-if="isSignedIn") all your spaces and user data from this computer and Kinopio's servers?
           span(v-else) all your spaces and user data from this computer?
+        p(v-if="isUpgraded")
+          span.badge.info.badge-billing Use Billing ⤴
+          span if you just want to cancel your paid subscription
         .segmented-buttons
           button(@click="toggleRemoveAllConfirmationVisible")
             span Cancel
