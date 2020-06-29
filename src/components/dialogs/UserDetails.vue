@@ -239,7 +239,6 @@ export default {
     visible (visible) {
       this.closeDialogs()
       this.clearUserSpaces()
-      console.log('🌳 isUpgraded', this.user.isUpgraded)
     },
     userDetailsPosition (position) {
       this.closeDialogs()

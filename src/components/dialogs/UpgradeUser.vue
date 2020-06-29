@@ -6,32 +6,37 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop :class="{'
       User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
       .badge.info $4/month
 
-    //- https://stripe.com/docs/testing
-    //- name on card:   someone
-    //- email:          hi@pirijan.com
-    //- card number:    4242424242424242
-    //- expiration:     11/22 any date in the future
-    //- card cvc:       123 any three digits
-    input(type="text" placeholder="Name on Card" required v-model="name" @input="clearErrors")
-    input(type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
-    //- Stripe Elements
-    .loading-stripe(v-if="!loading.stripeElementsIsMounted")
-      Loader(:visible="true")
-    div(ref="cardNumber")
-    div(ref="cardExpiry")
-    div(ref="cardCvc")
+    .should-sign-up(v-if="!currentUserIsSignedIn")
+      p To upgrade your account, you'll need to sign up first
+      button(@click="triggerSignUpOrInIsVisible") Sign Up or In
 
-    .badge.danger(v-if="error.allFieldsAreRequired") All fields are required
-    .badge.danger(v-if="error.stripeError") {{error.stripeErrorMessage}}
-    .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
+    .billing(v-if="currentUserIsSignedIn")
+      //- https://stripe.com/docs/testing
+      //- name on card:   someone
+      //- email:          hi@pirijan.com
+      //- card number:    4242424242424242
+      //- expiration:     11/22 any date in the future
+      //- card cvc:       123 any three digits
+      input(type="text" placeholder="Name on Card" required v-model="name" @input="clearErrors")
+      input(type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
+      //- Stripe Elements
+      .loading-stripe(v-if="!loading.stripeElementsIsMounted")
+        Loader(:visible="true")
+      div(ref="cardNumber")
+      div(ref="cardExpiry")
+      div(ref="cardCvc")
 
-    button(@click="subscribe" :class="{active : loading.subscriptionIsBeingCreated}")
-      span Upgrade Account
-      Loader(:visible="loading.subscriptionIsBeingCreated")
+      .badge.danger(v-if="error.allFieldsAreRequired") All fields are required
+      .badge.danger(v-if="error.stripeError") {{error.stripeErrorMessage}}
+      .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
 
-    p You'll be billed immediately and then each month. You can cancel at anytime.
+      button(@click="subscribe" :class="{active : loading.subscriptionIsBeingCreated}")
+        span Upgrade Account
+        Loader(:visible="loading.subscriptionIsBeingCreated")
 
-  section
+      p You'll be billed immediately and then each month. You can cancel at anytime.
+
+  section(v-if="currentUserIsSignedIn")
     img.icon(src="@/assets/lock.svg")
     span Payments by Stripe
 
@@ -94,6 +99,10 @@ export default {
       this.error.allFieldsAreRequired = false
       this.error.stripeError = false
     },
+    triggerSignUpOrInIsVisible () {
+      this.$store.commit('closeAllDialogs')
+      this.$store.commit('triggerSignUpOrInIsVisible')
+    },
     mountStripeElements () {
       if (this.loading.stripeIsLoading) { return }
       elements = stripe.elements({
@@ -107,7 +116,7 @@ export default {
       let options = {
         style: {
           base: { fontFamily: "'OsakaMono-Kinopio', monospace" },
-          invalid: { color: 'black' } // todo change if dark theme
+          invalid: { color: 'black' } // change if dark theme
         },
         classes: {
           base: 'stripe-element',
@@ -132,6 +141,7 @@ export default {
       this.loading.stripeElementsIsMounted = true
     },
     async loadStripe () {
+      if (!this.currentUserIsSignedIn) { return }
       this.loading.stripeIsLoading = true
       if (!this.$store.state.stripeIsLoaded) {
         this.$store.commit('stripeIsLoaded', true)
@@ -275,9 +285,9 @@ export default {
   .summary
     margin-top 10px
     margin-bottom 10px
-  .loading-stripe,
   .badge
     display inline-block
+  .loading-stripe,
   .badge.danger
     margin-bottom 10px
 </style>
