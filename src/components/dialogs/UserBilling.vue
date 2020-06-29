@@ -38,7 +38,7 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.stop)
 </template>
 
 <script>
-import cache from '@/cache.js'
+// import cache from '@/cache.js'
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 
@@ -84,11 +84,10 @@ export default {
     },
     async cancelSubscription () {
       this.loading.isCancelling = true
-      const stripeIds = cache.stripeIds()
+      // const stripeIds = cache.stripeIds()
       try {
         await this.$store.dispatch('api/cancelSubscription', {
-          userId: this.$store.state.currentUser.userId,
-          stripeSubscriptionId: stripeIds.stripeSubscriptionId
+          userId: this.$store.state.currentUser.id
         })
         this.$store.commit('currentUser/isUpgraded', false)
         this.$store.commit('addNotification', { message: 'Your account has been downgraded, and you will no longer be charged', type: 'success' })
@@ -101,12 +100,10 @@ export default {
     async getBillingInfo () {
       if (!this.isUpgraded) { return }
       this.loading.gettingBillingInfo = true
-      const stripeIds = cache.stripeIds()
+      // const stripeIds = cache.stripeIds()
       try {
         const info = await this.$store.dispatch('api/subscriptionInfo', {
-          userId: this.$store.state.currentUser.userId,
-          stripeSubscriptionId: stripeIds.stripeSubscriptionId,
-          stripePaymentMethodId: stripeIds.stripePaymentMethodId
+          userId: this.$store.state.currentUser.id
         })
         const card = info.paymentMethod.card
         const plan = info.subscription.items.data[0].plan

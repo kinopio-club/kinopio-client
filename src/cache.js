@@ -185,9 +185,9 @@ export default {
 
   saveStripeIds (stripeIds) {
     this.storeLocal('stripeIds', stripeIds)
-  },
-  stripeIds () {
-    return this.getLocal('stripeIds')
   }
+  // stripeIds () {
+  //   return this.getLocal('stripeIds')
+  // }
 
 }

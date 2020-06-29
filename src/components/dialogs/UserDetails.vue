@@ -114,7 +114,7 @@ export default {
     }
   },
   computed: {
-    cardsCreatedCount () { return this.$store.state.currentUser.cardsCreatedCount },
+    cardsCreatedCount () { return this.$store.state.currentUser.cardsCreatedCount || 0 },
     userColor () { return this.user.color },
     userIsMember () { return Boolean(this.$store.getters['currentSpace/memberById'](this.user.id)) },
     userIsUpgraded () { return this.user.isUpgraded },
