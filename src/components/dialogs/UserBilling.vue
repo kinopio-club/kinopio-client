@@ -2,17 +2,20 @@
 dialog.narrow.user-billing(v-if="visible" :open="visible" @click.stop)
   section
     p Billing
-  section
-    .loading-stripe(v-if="!loading.gettingBillingInfo")
+
+  //- section(v-if="!isUpgraded")
+  //-   p yolo
+
+  section(v-if="isUpgraded")
+    .loading-stripe(v-if="loading.gettingBillingInfo")
       Loader(:visible="true")
-    .summary(v-if="loading.gettingBillingInfo")
+    .summary(v-if="!loading.gettingBillingInfo")
       User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
       p
         span You are paying
-          .badge.info ${{billing.price}}/{{billing.period}}
-    //- VISA **8566 — 10/2020
-    //- Next payment due: $45 on 08/08/20
-
+          .badge.info ${{info.price}}/{{info.period}}
+    p(v-if="!loading.gettingBillingInfo") Next payment: {{info.nextBillingDate}}
+    p(v-if="!loading.gettingBillingInfo") {{info.cardType}} ••{{info.cardLast4}} – {{info.cardExpMonth}}/{{info.cardExpYear}}
     p Thanks for supporting Kinopio!
 
     .row
@@ -34,6 +37,7 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.stop)
 
 <script>
 import cache from '@/cache.js'
+import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 
 export default {
@@ -48,13 +52,14 @@ export default {
   data () {
     return {
       cancelSubscriptionVisible: false,
-      billing: {
+      info: {
         price: 4,
         period: 'month',
         cardType: '（ﾉ´д｀）',
         cardLast4: '(シ_ _)シ',
         cardExpMonth: 0,
-        cardExpYear: 0
+        cardExpYear: 0,
+        nextBillingDate: ''
       },
       loading: {
         gettingBillingInfo: false,
@@ -63,7 +68,8 @@ export default {
     }
   },
   computed: {
-    user () { return this.$store.state.currentUser }
+    user () { return this.$store.state.currentUser },
+    isUpgraded () { return this.user.isUpgraded }
   },
   methods: {
     toggleCancelSubscriptionVisible () {
@@ -85,32 +91,35 @@ export default {
         this.$store.commit('addNotification', { message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
       }
       this.loading.isCancelling = false
+    },
+    async getBillingInfo () {
+      if (!this.isUpgraded) { return }
+      this.loading.gettingBillingInfo = true
+      const stripeIds = cache.stripeIds()
+      try {
+        const info = await this.$store.dispatch('api/subscriptionInfo', {
+          userId: this.$store.state.currentUser.userId,
+          stripeSubscriptionId: stripeIds.stripeSubscriptionId,
+          stripePaymentMethodId: stripeIds.stripePaymentMethodId
+        })
+        const card = info.paymentMethod.card
+        const plan = info.subscription.items.data[0].plan
+        this.info = {
+          price: plan.amount / 100,
+          period: plan.interval,
+          cardType: utils.capitalizeFirstLetter(card.brand),
+          cardLast4: card.last4,
+          cardExpMonth: card.exp_month,
+          cardExpYear: card.exp_year,
+          nextBillingDate: info.nextBillingDate
+        }
+        console.log('🎡 stripe info', this.info)
+      } catch (error) {
+        console.error('🚒', error)
+        this.$store.commit('addNotification', { message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
+      }
+      this.loading.gettingBillingInfo = false
     }
-  },
-  async getBillingInfo () {
-    this.loading.gettingBillingInfo = true
-    const stripeIds = cache.stripeIds()
-    try {
-      const info = await this.$store.dispatch('api/subscriptionInfo', {
-        userId: this.$store.state.currentUser.userId,
-        stripeSubscriptionId: stripeIds.stripeSubscriptionId,
-        stripePaymentMethodId: stripeIds.stripePaymentMethodId
-      })
-      console.log('🎡 billing info', info) // subscription and paymentmethod objects
-      // asign vals
-      // billing: {
-      //   price: 4,
-      //   period: 'month',
-      //   cardType: '（ﾉ´д｀）',
-      //   cardLast4: '(シ_ _)シ',
-      //   cardExpMonth: 0,
-      //   cardExpYear: 0
-      // },
-    } catch (error) {
-      console.error('🚒', error)
-      this.$store.commit('addNotification', { message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
-    }
-    this.loading.gettingBillingInfo = false
   },
   watch: {
     visible (visible) {
