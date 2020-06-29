@@ -70,6 +70,11 @@ export default {
     },
     async removeUserPermanent () {
       this.loading.removeUserPermanent = true
+      if (this.$store.state.currentUser.isUpgraded) {
+        await this.$store.dispatch('api/cancelSubscription', {
+          userId: this.$store.state.currentUser.id
+        })
+      }
       await this.$store.dispatch('api/removeUserPermanent')
       this.loading.removeUserPermanent = false
       this.$emit('removeUser')

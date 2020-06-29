@@ -154,8 +154,11 @@ export default {
     async createCustomer () {
       const result = await this.$store.dispatch('api/createCustomer', {
         email: this.email,
-        userId: this.$store.state.currentUser.id,
-        name: this.$store.state.currentUser.name
+        name: this.name,
+        metadata: {
+          userId: this.$store.state.currentUser.id,
+          userName: this.$store.state.currentUser.name
+        }
       })
       console.log('🎡 stripe customer', result)
       if (result.type === 'StripeInvalidRequestError') {

@@ -4,6 +4,8 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.stop)
     p Billing
 
   section(v-if="!isUpgraded")
+    p(v-if="isCancelled")
+      span.badge.success Downgraded to free
     p After you upgrade your account you'll be able to manage your payment details here
     button(@click="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
@@ -54,6 +56,7 @@ export default {
   data () {
     return {
       cancelSubscriptionVisible: false,
+      isCancelled: false,
       info: {
         price: 4,
         period: 'month',
@@ -90,7 +93,9 @@ export default {
           userId: this.$store.state.currentUser.id
         })
         this.$store.commit('currentUser/isUpgraded', false)
+        this.$store.commit('notifyCurrentUserIsUpgraded', false)
         this.$store.commit('addNotification', { message: 'Your account has been downgraded, and you will no longer be charged', type: 'success' })
+        this.isCancelled = true
       } catch (error) {
         console.error('🚒', error)
         this.$store.commit('addNotification', { message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
@@ -128,6 +133,7 @@ export default {
     visible (visible) {
       if (visible) {
         this.getBillingInfo()
+        this.isCancelled = false
       }
     }
   }
