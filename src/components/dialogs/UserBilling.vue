@@ -27,7 +27,7 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.stop)
       span(v-if="cancelSubscriptionVisible")
         p
           span.badge.danger You won't be able to add new cards
-          span unless you upgrade your account again
+          span unless you upgrade your account again. All of your cards and spaces will still be accessible.
         .segmented-buttons
           button(@click="toggleCancelSubscriptionVisible")
             span Cancel
