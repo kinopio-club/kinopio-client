@@ -3,7 +3,7 @@ dialog.narrow(v-if="visible" :open="visible" @click.stop="closeDialogs")
   section
     p User Settings
   section
-    .row(v-if="isUpgraded")
+    .row
       .button-wrap
         button(@click.stop="toggleUserBillingIsVisible" :class="{active: userBillingIsVisible}")
           span Billing

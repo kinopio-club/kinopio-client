@@ -3,8 +3,9 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.stop)
   section
     p Billing
 
-  //- section(v-if="!isUpgraded")
-  //-   p yolo
+  section(v-if="!isUpgraded")
+    p After you upgrade your account you'll be able to manage your payment details here
+    button(@click="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
   section(v-if="isUpgraded")
     .loading-stripe(v-if="loading.gettingBillingInfo")
@@ -16,7 +17,8 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.stop)
           .badge.info ${{info.price}}/{{info.period}}
     p(v-if="!loading.gettingBillingInfo") Next payment: {{info.nextBillingDate}}
     p(v-if="!loading.gettingBillingInfo") {{info.cardType}} ••{{info.cardLast4}} – {{info.cardExpMonth}}/{{info.cardExpYear}}
-    p Thanks for supporting Kinopio!
+    p
+      .badge.success Thanks for supporting Kinopio
 
     .row
       button(v-if="!cancelSubscriptionVisible" @click="toggleCancelSubscriptionVisible")
@@ -75,6 +77,10 @@ export default {
     toggleCancelSubscriptionVisible () {
       if (this.loading.isCancelling) { return }
       this.cancelSubscriptionVisible = !this.cancelSubscriptionVisible
+    },
+    triggerUpgradeUserIsVisible () {
+      this.$store.commit('closeAllDialogs')
+      this.$store.commit('triggerUpgradeUserIsVisible')
     },
     async cancelSubscription () {
       this.loading.isCancelling = true
