@@ -21,7 +21,8 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.stop)
         span Downgrade to Free
       span(v-if="cancelSubscriptionVisible")
         p
-          span blah blah blah 150 cards
+          span.badge.danger You won't be able to add new cards
+          span unless you upgrade your account again
         .segmented-buttons
           button(@click="toggleCancelSubscriptionVisible")
             span Cancel
@@ -78,7 +79,7 @@ export default {
           stripeSubscriptionId: stripeIds.stripeSubscriptionId
         })
         this.$store.commit('currentUser/isUpgraded', false)
-        this.$store.commit('addNotification', { message: 'Your account has been downgraded, and you will no longer be charged' })
+        this.$store.commit('addNotification', { message: 'Your account has been downgraded, and you will no longer be charged', type: 'success' })
       } catch (error) {
         console.error('🚒', error)
         this.$store.commit('addNotification', { message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })

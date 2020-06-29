@@ -261,7 +261,7 @@ export default {
   .moon
     vertical-align -2px
   .badges
-    // margin-top 8px
+    margin-top 8px
 
   .upgrade
     progress
