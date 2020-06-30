@@ -17,8 +17,8 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.stop)
       p
         span You are paying
           .badge.info ${{info.price}}/{{info.period}}
-    p(v-if="!loading.gettingBillingInfo") Next payment: {{info.nextBillingDate}}
-    p(v-if="!loading.gettingBillingInfo") {{info.cardType}} ••{{info.cardLast4}} – {{info.cardExpMonth}}/{{info.cardExpYear}}
+    p(v-if="!loading.gettingBillingInfo && info.nextBillingDate") Next payment: {{info.nextBillingDate}}
+    p(v-if="!loading.gettingBillingInfo && info.cardType") {{info.cardType}} ••{{info.cardLast4}} – {{info.cardExpMonth}}/{{info.cardExpYear}}
     p
       .badge.success Thanks for supporting Kinopio
 
@@ -58,10 +58,10 @@ export default {
       cancelSubscriptionVisible: false,
       isCancelled: false,
       info: {
-        price: 4,
+        price: 0,
         period: 'month',
-        cardType: '（ﾉ´д｀）',
-        cardLast4: '(シ_ _)シ',
+        cardType: '',
+        cardLast4: '',
         cardExpMonth: 0,
         cardExpYear: 0,
         nextBillingDate: ''
@@ -110,6 +110,10 @@ export default {
         const info = await this.$store.dispatch('api/subscriptionInfo', {
           userId: this.$store.state.currentUser.id
         })
+        if (info.message === '🌷free') {
+          this.loading.gettingBillingInfo = false
+          return
+        }
         const card = info.paymentMethod.card
         const plan = info.subscription.items.data[0].plan
         this.info = {
