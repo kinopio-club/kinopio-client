@@ -89,6 +89,7 @@ export default {
     visible (value) {
       if (value) {
         this.removeAllConfirmationVisible = false
+        this.closeDialogs()
       }
     }
   }
