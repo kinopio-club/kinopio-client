@@ -74,7 +74,7 @@ export default {
   --success-background #98f49f
 
   // non-theme vars
-  --max-z 2147483647
+  --max-z 2147483646
   --hover-shadow 3px 3px 0 var(--heavy-shadow)
   --active-shadow 5px 5px 0 var(--light-shadow)
   --active-inset-shadow inset 0 2px 3px var(--light-shadow)

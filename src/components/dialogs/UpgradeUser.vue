@@ -53,7 +53,7 @@ import { loadStripe } from '@stripe/stripe-js/pure'
 
 let stripePublishableKey, priceId, stripe, elements, cardNumber, cardExpiry, cardCvc
 let customer, paymentMethod, subscription
-let isRetry, invoice, paymentIntent
+let invoice, paymentIntent
 if (process.env.NODE_ENV === 'development') {
   stripePublishableKey = 'pk_test_51Gv55TL1W0hlm1mqF9VvEevFCGr53d0eDUx0VD1tPA8ESuGdTceeoK0hAWaELCmTqkbt3wZqffT0mN41X0Jmlxpe00en3VmODJ'
   priceId = 'price_1Gy3QWL1W0hlm1mqKLnVVNAd'
@@ -215,9 +215,7 @@ export default {
       }
     },
     async handleCustomerActionRequired () {
-      const requiresAction = paymentIntent.status === 'requires_action'
-      const requiresRetryPaymentMethod = isRetry === true && paymentIntent.status === 'requires_payment_method'
-      if (requiresAction && requiresRetryPaymentMethod) {
+      if (paymentIntent.status === 'requires_action') {
         const result = await stripe.confirmCardPayment(paymentIntent.client_secret, { payment_method: paymentMethod.id })
         if (result.error) {
           console.log('🎡 confirm card payment', result)
@@ -262,7 +260,6 @@ export default {
           this.error.unknownServerError = true
         }
       }
-      isRetry = true
       this.loading.subscriptionIsBeingCreated = false
     }
   },
