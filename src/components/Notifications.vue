@@ -79,11 +79,8 @@ aside.notifications(@click="closeAllDialogs")
         img.icon(src="@/assets/add.svg")
         span How does this work?
 
-  .persistent-item.success(v-if="notifyCurrentUserIsUpgraded")
+  .item.success(v-if="notifyCurrentUserIsUpgraded")
     p Your account has been upgraded. Thank you for supporting independent, ad-free, sustainable software
-    .row
-      button(@click="clearNotifyCurrentUserIsUpgraded")
-        span I'm Pretty Awesome
 
 </template>
 
@@ -232,6 +229,7 @@ export default {
       this.notifyCardsCreatedIsOverLimitJiggle = false
     },
     triggerUpgradeUserIsVisible () {
+      this.closeAllDialogs()
       this.$store.commit('triggerUpgradeUserIsVisible')
     },
     async checkIfShouldNotifySpaceOutOfSync () {
@@ -249,9 +247,6 @@ export default {
     },
     refreshBrowser () {
       window.location.reload()
-    },
-    clearNotifyCurrentUserIsUpgraded () {
-      this.$store.commit('notifyCurrentUserIsUpgraded', false)
     }
   }
 }

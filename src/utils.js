@@ -602,7 +602,8 @@ export default {
       color: user.color,
       isSignedIn,
       isSpectator,
-      isCollaborator
+      isCollaborator,
+      isUpgraded: user.isUpgraded
     }
   },
 
