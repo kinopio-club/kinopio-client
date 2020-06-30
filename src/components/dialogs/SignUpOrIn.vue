@@ -38,7 +38,6 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
   //- Privacy Policy
   section(v-if="signUpVisible")
     .button-wrap
-      // TODO TEMP link
       a(href="https://help.kinopio.club/posts/privacy-policy")
         button Privacy Policy and TOS →
 

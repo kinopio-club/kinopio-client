@@ -202,6 +202,11 @@ export default {
     return string.charAt(0).toUpperCase() + string.slice(1)
   },
 
+  removeTrailingPeriod (string) {
+    // https://regexr.com/5784j
+    return string.replace(/\.$/g, '')
+  },
+
   pastTense (string) {
     const lastLetter = string.charAt(string.length - 1)
     // add test cases ad hoc from https://github.com/boo1ean/tensify
@@ -597,7 +602,8 @@ export default {
       color: user.color,
       isSignedIn,
       isSpectator,
-      isCollaborator
+      isCollaborator,
+      isUpgraded: user.isUpgraded
     }
   },
 

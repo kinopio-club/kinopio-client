@@ -7,19 +7,35 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
       .row
         User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
         p.name {{user.name}}
-    .row.badges(v-if="user.isSpectator || !userIsMember")
-      .badge Spectator
+    .row.badges(v-if="user.isSpectator || user.isUpgraded")
+      .badge.status(v-if="user.isSpectator") Spectator
+      .badge.success(v-if="user.isUpgraded") Upgraded
 
   //- Current User
   section(v-if="isCurrentUser")
     .row
       .button-wrap
         button.change-color(@click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-          .current-color(:style="backgroundColor")
+          .current-color(:style="{ background: userColor }")
         ColorPicker(:currentColor="userColor" :visible="colorPickerIsVisible" @selectedColor="updateUserColor")
       input.name(placeholder="What's your name?" v-model="userName" name="Name")
-    .row.badges(v-if="user.isSpectator || !userIsMember")
-      .badge Spectator
+    .row.badges(v-if="user.isSpectator || user.isUpgraded")
+      .badge.status(v-if="user.isSpectator") Spectator
+      .badge.success(v-if="user.isUpgraded") Upgraded
+
+  section.upgrade(v-if="isCurrentUser && !currentUserIsUpgraded")
+    p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
+    progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
+    .button-wrap
+      button(@click.stop="toggleUpgradeUserIsVisible" :class="{active: upgradeUserIsVisible}")
+        span Upgrade for Unlimited
+      UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeDialogs")
+    p
+      .badge.info $4/month
+    .row
+      a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost")
+        button More Info →
+
   section(v-if="isCurrentUser")
     .button-wrap
       button(@click.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}")
@@ -61,6 +77,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
+import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
@@ -72,7 +89,8 @@ export default {
     UserSettings,
     User: () => import('@/components/User.vue'),
     Loader,
-    SpacePicker
+    SpacePicker,
+    UpgradeUser
   },
   props: {
     user: Object,
@@ -85,35 +103,24 @@ export default {
     return {
       colorPickerIsVisible: false,
       userSettingsIsVisible: false,
+      upgradeUserIsVisible: false,
       loadingUserspaces: false,
       spacePickerIsVisible: false,
       userSpaces: [],
+      cardsCreatedLimit: 150,
       error: {
         unknownServerError: false
       }
     }
   },
   computed: {
-    // isBeta () {
-    //   return this.$store.state.isBeta
-    // },
-    userColor () {
-      return this.user.color
-    },
-    userIsMember () {
-      return Boolean(this.$store.getters['currentSpace/memberById'](this.user.id))
-    },
-    backgroundColor () {
-      return {
-        backgroundColor: this.userColor
-      }
-    },
-    isCurrentUser () {
-      return this.$store.getters['currentUser/isCurrentUser'](this.user)
-    },
-    currentUserIsSignedIn () {
-      return this.$store.getters['currentUser/isSignedIn']
-    },
+    cardsCreatedCount () { return this.$store.state.currentUser.cardsCreatedCount || 0 },
+    userColor () { return this.user.color },
+    userIsMember () { return Boolean(this.$store.getters['currentSpace/memberById'](this.user.id)) },
+    userIsUpgraded () { return this.user.isUpgraded },
+    isCurrentUser () { return this.$store.getters['currentUser/isCurrentUser'](this.user) },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
     userIsSignedIn () {
       if (this.user.isSignedIn === false) {
         return false
@@ -166,6 +173,11 @@ export default {
       this.closeDialogs()
       this.userSettingsIsVisible = !isVisible
     },
+    toggleUpgradeUserIsVisible () {
+      const isVisible = this.upgradeUserIsVisible
+      this.closeDialogs()
+      this.upgradeUserIsVisible = !isVisible
+    },
     toggleColorPicker () {
       const isVisible = this.colorPickerIsVisible
       this.closeDialogs()
@@ -175,6 +187,7 @@ export default {
       this.colorPickerIsVisible = false
       this.userSettingsIsVisible = false
       this.spacePickerIsVisible = false
+      this.upgradeUserIsVisible = false
     },
     updateUserColor (newColor) {
       this.$store.dispatch('currentUser/color', newColor)
@@ -238,8 +251,6 @@ export default {
 .user-details
   cursor: initial
   top calc(100% - 8px)
-  .row
-    margin 0
   &.right-side
     left initial
     right 8px
@@ -251,8 +262,19 @@ export default {
     vertical-align -2px
   .badges
     margin-top 8px
+
+  .upgrade
+    progress
+      margin-top 2px
+      margin-bottom 10px
+    .button-wrap + .row,
+    .row + .button-wrap
+      margin-top 10px
     .badge
-      background-color var(--secondary-background)
+      display inline-block
+
+  .upgrade-user
+    max-height calc(100vh - 175px)
 
 .user-info
   display: flex

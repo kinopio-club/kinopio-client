@@ -17,7 +17,9 @@ export default {
     apiKey: '',
     arenaAccessToken: '',
     favoriteUsers: [],
-    favoriteSpaces: []
+    favoriteSpaces: [],
+    cardsCreatedCount: 0,
+    isUpgraded: false
   },
   getters: {
     isCurrentUser: (state) => (user) => {
@@ -25,6 +27,11 @@ export default {
     },
     isSignedIn: (state) => {
       return Boolean(state.apiKey)
+    },
+    cardsCreatedIsOverLimit: (state) => {
+      const cardsCreatedLimit = 150
+      if (state.isUpgraded) { return }
+      if (state.cardsCreatedCount >= cardsCreatedLimit) { return true }
     },
     canEditSpace: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
@@ -158,6 +165,16 @@ export default {
     arenaAccessToken: (state, token) => {
       state.arenaAccessToken = token
       cache.updateUser('arenaAccessToken', token)
+    },
+    cardsCreatedCount: (state, count) => {
+      utils.typeCheck(count, 'number')
+      state.cardsCreatedCount = count
+      cache.updateUser('cardsCreatedCount', count)
+    },
+    isUpgraded: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.isUpgraded = value
+      cache.updateUser('isUpgraded', value)
     }
   },
   actions: {
@@ -172,6 +189,24 @@ export default {
         console.log('🌸 Create new user')
         context.dispatch('createNewUser')
       }
+    },
+    cardsCreatedCount: (context, { shouldIncrement }) => {
+      if (context.state.isUpgraded) { return }
+      let count
+      if (shouldIncrement) {
+        count = Math.max(context.state.cardsCreatedCount + 1, 0)
+      } else {
+        count = Math.max(context.state.cardsCreatedCount - 1, 0)
+      }
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          cardsCreatedCount: count
+        } }, { root: true })
+      context.commit('cardsCreatedCount', count)
+    },
+    isUpgraded: (context, value) => {
+      context.commit('isUpgraded', value)
+      context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
     },
     createNewUser: (context) => {
       cache.saveUser(context.state)

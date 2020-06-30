@@ -74,7 +74,7 @@ export default {
   --success-background #98f49f
 
   // non-theme vars
-  --max-z 2147483647
+  --max-z 2147483646
   --hover-shadow 3px 3px 0 var(--heavy-shadow)
   --active-shadow 5px 5px 0 var(--light-shadow)
   --active-inset-shadow inset 0 2px 3px var(--light-shadow)
@@ -119,7 +119,8 @@ video
   max-width 100%
 
 input,
-textarea
+textarea,
+.stripe-element
   touch-action manipulation
   margin 0
   font-size 1em // required to disable ios input zooming
@@ -512,5 +513,22 @@ code
   height 100%
   visibility hidden
   pointer-events none
+
+progress
+  appearance none
+  width 100%
+  height 8px
+  border 1px solid var(--primary)
+  border-radius 3px
+  background-color var(--secondary-background)
+progress::-webkit-progress-bar
+  background-color var(--secondary-background)
+  border-radius 3px
+progress::-webkit-progress-value
+  background-color var(--primary)
+  border-radius 2px
+progress::-moz-progress-bar
+  background-color var(--primary)
+  border-radius 2px
 
 </style>

@@ -15,6 +15,16 @@ aside.notifications(@click="closeAllDialogs")
     .row
       button(@click.stop="triggerSpaceDetailsFavoritesVisible") Your Spaces
 
+  .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
+    p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade for $4/month
+    .row
+      button(@click.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+
+  .persistent-item.danger(v-if="notifyCardsCreatedIsOverLimit" ref="cardsOverLimit" :class="{'notification-jiggle': notifyCardsCreatedIsOverLimitJiggle}" @animationend="resetNotifyCardsCreatedIsOverLimitJiggle")
+    p To add more cards, you'll need to upgrade for $4/month
+    .row
+      button(@click.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+
   .persistent-item.success(v-if="notifySignUpToEditSpace" :class="{'notification-jiggle': notifyReadOnlyJiggle}")
     p
       img.icon(:src="privacyIcon" :class="privacyName")
@@ -68,7 +78,6 @@ aside.notifications(@click="closeAllDialogs")
       button(@click="createNewHelloSpace")
         img.icon(src="@/assets/add.svg")
         span How does this work?
-
 </template>
 
 <script>
@@ -83,6 +92,7 @@ export default {
   data () {
     return {
       notifyReadOnlyJiggle: false,
+      notifyCardsCreatedIsOverLimitJiggle: false,
       notifySpaceOutOfSync: false
     }
   },
@@ -105,6 +115,9 @@ export default {
         if (!element) { return }
         this.notifyReadOnlyJiggle = true
         element.addEventListener('animationend', this.removeNotifyReadOnlyJiggle, false)
+      }
+      if (mutation.type === 'notifyCardsCreatedIsOverLimit') {
+        this.notifyCardsCreatedIsOverLimitJiggle = true
       }
       if (mutation.type === 'isOnline') {
         const isOnline = Boolean(mutation.payload)
@@ -129,6 +142,8 @@ export default {
     notifySignUpToEditSpace () { return this.$store.state.notifySignUpToEditSpace },
     notifySpaceIsOpenAndEditable () { return this.$store.state.notifySpaceIsOpenAndEditable },
     notifyAccessFavorites () { return this.$store.state.notifyAccessFavorites },
+    notifyCardsCreatedIsNearLimit () { return this.$store.state.notifyCardsCreatedIsNearLimit },
+    notifyCardsCreatedIsOverLimit () { return this.$store.state.notifyCardsCreatedIsOverLimit },
     currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     },
@@ -139,7 +154,12 @@ export default {
     },
     privacyIcon () { return require(`@/assets/${this.privacyState.icon}.svg`) },
     privacyName () { return this.privacyState.name },
-    spacePrivacyIsOpen () { return this.privacyName === 'open' }
+    spacePrivacyIsOpen () { return this.privacyName === 'open' },
+    cardsCreatedCountFromLimit () {
+      const cardsCreatedLimit = 150
+      const cardsCreatedCount = this.$store.state.currentUser.cardsCreatedCount
+      return Math.max(cardsCreatedLimit - cardsCreatedCount, 0)
+    }
   },
   methods: {
     icon (icon) {
@@ -196,6 +216,16 @@ export default {
     },
     resetNotifyAccessFavorites () {
       this.$store.commit('notifyAccessFavorites', false)
+    },
+    resetNotifyCardsCreatedIsNearLimit () {
+      this.$store.commit('notifyCardsCreatedIsNearLimit', false)
+    },
+    resetNotifyCardsCreatedIsOverLimitJiggle () {
+      this.notifyCardsCreatedIsOverLimitJiggle = false
+    },
+    triggerUpgradeUserIsVisible () {
+      this.closeAllDialogs()
+      this.$store.commit('triggerUpgradeUserIsVisible')
     },
     async checkIfShouldNotifySpaceOutOfSync () {
       const space = utils.clone(this.$store.state.currentSpace)

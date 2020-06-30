@@ -35,6 +35,7 @@ header(:style="visualViewportPosition")
         User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
         User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
         User(v-for="user in collaborators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
+        UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs" :dialogOnRight="true")
 
       .users.spectators
         User(v-if="!currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
@@ -62,6 +63,7 @@ import Loader from '@/components/Loader.vue'
 import templates from '@/spaces/templates.js'
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
+import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
 import privacy from '@/spaces/privacy.js'
 import utils from '@/utils.js'
 
@@ -79,7 +81,8 @@ export default {
     Share,
     Loader,
     ImportArenaChannel,
-    KeyboardShortcuts
+    KeyboardShortcuts,
+    UpgradeUser
   },
   data () {
     return {
@@ -89,6 +92,7 @@ export default {
       shareIsVisible: false,
       loadingSignUpOrIn: false,
       keyboardShortcutsIsVisible: false,
+      upgradeUserIsVisible: false,
       pinchZoomOffsetLeft: 0,
       pinchZoomOffsetTop: 0,
       pinchZoomScale: 1
@@ -97,11 +101,7 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
-        this.aboutIsVisible = false
-        this.spaceDetailsIsVisible = false
-        this.signUpOrInIsVisible = false
-        this.shareIsVisible = false
-        this.keyboardShortcutsIsVisible = false
+        this.closeAllDialogs()
       }
       if (mutation.type === 'triggerSpaceDetailsVisible') {
         this.spaceDetailsIsVisible = true
@@ -111,6 +111,9 @@ export default {
       }
       if (mutation.type === 'triggerKeyboardShortcutsIsVisible') {
         this.keyboardShortcutsIsVisible = true
+      }
+      if (mutation.type === 'triggerUpgradeUserIsVisible') {
+        this.upgradeUserIsVisible = true
       }
       if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
         currentIteration = 0
@@ -207,6 +210,14 @@ export default {
     }
   },
   methods: {
+    closeAllDialogs () {
+      this.aboutIsVisible = false
+      this.spaceDetailsIsVisible = false
+      this.signUpOrInIsVisible = false
+      this.shareIsVisible = false
+      this.keyboardShortcutsIsVisible = false
+      this.upgradeUserIsVisible = false
+    },
     updatePositionFrame () {
       currentIteration++
       this.updatePositionInVisualViewport()
