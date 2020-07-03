@@ -282,6 +282,7 @@ export default {
 <style lang="stylus">
 .upgrade-user
   overflow auto
+  max-height calc(100vh - 210px)
   &.right-side
     left initial
     right 8px

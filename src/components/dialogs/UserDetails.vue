@@ -174,9 +174,14 @@ export default {
       this.userSettingsIsVisible = !isVisible
     },
     toggleUpgradeUserIsVisible () {
-      const isVisible = this.upgradeUserIsVisible
-      this.closeDialogs()
-      this.upgradeUserIsVisible = !isVisible
+      if (utils.isMobile()) {
+        this.$store.commit('closeAllDialogs')
+        this.$store.commit('triggerUpgradeUserIsVisible')
+      } else {
+        const isVisible = this.upgradeUserIsVisible
+        this.closeDialogs()
+        this.upgradeUserIsVisible = !isVisible
+      }
     },
     toggleColorPicker () {
       const isVisible = this.colorPickerIsVisible
