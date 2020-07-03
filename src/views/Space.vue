@@ -306,6 +306,17 @@ export default {
       const fromFooter = event.target.closest('footer')
       return fromDialog || fromHeader || fromFooter
     },
+    checkIfShouldHideFooter (event) {
+      if (event.target.nodeType !== 1) { return } // firefox check
+      const node = event.target.nodeName
+      const isTextarea = node === 'TEXTAREA'
+      const isInput = node === 'INPUT'
+      if (isTextarea || isInput) {
+        this.$store.commit('shouldHideFooter', true)
+      } else {
+        this.$store.commit('shouldHideFooter', false)
+      }
+    },
     showMultipleSelectedActions (position) {
       if (this.spaceIsReadOnly) { return }
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
@@ -318,6 +329,7 @@ export default {
       if (event.touches) {
         this.$store.commit('triggerUpdatePositionInVisualViewport')
       }
+      this.checkIfShouldHideFooter(event)
       if (this.shouldCancel(event)) { return }
       if (this.shouldContinueConnecting(event)) { return }
       if (this.isDrawingConnection) {

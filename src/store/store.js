@@ -28,6 +28,7 @@ export default new Vuex.Store({
     newStuffIsUpdated: false,
     copiedCards: [],
     stripeIsLoaded: false,
+    shouldHideFooter: false,
 
     // reset password
     resetPasswordApiKey: '',
@@ -148,6 +149,10 @@ export default new Vuex.Store({
     stripeIsLoaded: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.stripeIsLoaded = value
+    },
+    shouldHideFooter: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.shouldHideFooter = value
     },
     resetPasswordApiKey: (state, apiKey) => {
       utils.typeCheck(apiKey, 'string')

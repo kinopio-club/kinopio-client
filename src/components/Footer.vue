@@ -1,7 +1,7 @@
 <template lang="pug">
 footer(:style="visualViewportPosition")
   Notifications
-  section(v-if="!dialogsVisible")
+  section(v-if="isVisible")
     .button-wrap
       button(@click="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
         span Explore
@@ -12,7 +12,7 @@ footer(:style="visualViewportPosition")
         input(type="checkbox" v-model="isFavoriteSpace")
         span Favorite
 
-  section.controls(v-if="!dialogsVisible")
+  section.controls(v-if="isVisible")
     .button-wrap
       button(@click="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
         img.refresh.icon(src="@/assets/remove.svg")
@@ -92,8 +92,17 @@ export default {
     //   let hash = path.src.match(regex)[0] // app.768db305407f4c847d44
     //   return hash.replace('app.', '') // 768db305407f4c847d44
     // },
+    isVisible () {
+      let isVisible = true
+      if (this.dialogsVisible) { isVisible = false }
+      if (this.shouldHideFooter) { isVisible = false }
+      return isVisible
+    },
     dialogsVisible () {
       return Boolean(this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.multipleSelectedActionsIsVisible || this.$store.state.connectionDetailsIsVisibleForConnectionId)
+    },
+    shouldHideFooter () {
+      return this.$store.state.shouldHideFooter
     },
     isOffline () {
       return !this.$store.state.isOnline
