@@ -60,6 +60,7 @@ export default {
       filtersIsVisible: false,
       exploreIsVisible: false,
       pinchZoomOffsetLeft: 0,
+      pinchZoomOffsetTop: 0,
       pinchZoomScale: 1
     }
   },
@@ -110,17 +111,14 @@ export default {
     },
     visualViewportPosition () {
       if (this.pinchZoomScale === 1) { return }
-      const viewport = utils.visualViewport()
-      const layoutViewport = document.getElementById('layout-viewport')
-      const offsetTop = viewport.height - layoutViewport.getBoundingClientRect().height + viewport.offsetTop
       if (this.pinchZoomScale > 1) {
         return {
-          transform: `translate(${this.pinchZoomOffsetLeft}px, ${offsetTop}px) scale(${1 / this.pinchZoomScale})`,
+          transform: `translate(${this.pinchZoomOffsetLeft}px, ${this.pinchZoomOffsetTop}px) scale(${1 / this.pinchZoomScale})`,
           'transform-origin': 'left bottom'
         }
       } else {
         return {
-          transform: `translate(${this.pinchZoomOffsetLeft}px, ${offsetTop}px)`,
+          transform: `translate(${this.pinchZoomOffsetLeft}px, ${this.pinchZoomOffsetTop}px)`,
           zoom: 1 / this.pinchZoomScale,
           'transform-origin': 'left bottom'
         }
@@ -139,8 +137,11 @@ export default {
       }
     },
     updatePositionInVisualViewport () {
-      this.pinchZoomScale = utils.visualViewport().scale
-      this.pinchZoomOffsetLeft = utils.visualViewport().offsetLeft
+      const viewport = utils.visualViewport()
+      const layoutViewport = document.getElementById('layout-viewport')
+      this.pinchZoomScale = viewport.scale
+      this.pinchZoomOffsetLeft = viewport.offsetLeft
+      this.pinchZoomOffsetTop = viewport.height - layoutViewport.getBoundingClientRect().height + viewport.offsetTop
     },
     toggleIsFavoriteSpace () {
       const currentSpace = this.$store.state.currentSpace

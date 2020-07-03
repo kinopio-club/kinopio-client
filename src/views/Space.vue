@@ -315,6 +315,9 @@ export default {
     stopInteractions (event) {
       console.log('💣 stopInteractions') // stopInteractions and Space/stopPainting are run on all mouse and touch end events
       this.addInteractionBlur()
+      if (event.touches) {
+        this.$store.commit('triggerUpdatePositionInVisualViewport')
+      }
       if (this.shouldCancel(event)) { return }
       if (this.shouldContinueConnecting(event)) { return }
       if (this.isDrawingConnection) {
@@ -324,10 +327,8 @@ export default {
       if (this.$store.state.shouldAddCard) {
         const position = utils.cursorPositionInPage(event)
         this.addCard(position)
-        this.$store.commit('triggerUpdatePositionInVisualViewport')
       } else if (this.$store.state.cardDetailsIsVisibleForCardId) {
         this.$store.dispatch('closeAllDialogs')
-        this.$store.commit('triggerUpdatePositionInVisualViewport')
       }
       if (this.$store.state.multipleCardsSelectedIds.length || this.$store.state.multipleConnectionsSelectedIds.length) {
         const position = utils.cursorPositionInPage(event)
