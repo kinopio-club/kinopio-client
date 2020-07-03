@@ -94,6 +94,9 @@ export default {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
+    shouldHideFooter (event) {
+      this.$store.commit('shouldHideFooter', true)
+    },
     clearErrors () {
       this.error.unknownServerError = false
       this.error.allFieldsAreRequired = false
@@ -128,16 +131,19 @@ export default {
       cardNumber = elements.create('cardNumber', options)
       cardNumber.mount(this.$refs.cardNumber)
       cardNumber.on('change', this.clearErrors)
+      cardNumber.on('focus', this.shouldHideFooter)
       // card expiry
       options.placeholder = 'MM/YY'
       cardExpiry = elements.create('cardExpiry', options)
       cardExpiry.mount(this.$refs.cardExpiry)
       cardExpiry.on('change', this.clearErrors)
+      cardExpiry.on('focus', this.shouldHideFooter)
       // card cvc
       options.placeholder = 'CVC'
       cardCvc = elements.create('cardCvc', options)
       cardCvc.mount(this.$refs.cardCvc)
       cardCvc.on('change', this.clearErrors)
+      cardCvc.on('focus', this.shouldHideFooter)
       this.loading.stripeElementsIsMounted = true
     },
     async loadStripe () {
