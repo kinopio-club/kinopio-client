@@ -76,7 +76,6 @@ export default new Vuex.Store({
     multipleCardsSelectedIds: [],
     remoteCardsSelected: [],
     remoteConnectionsSelected: [],
-    cardMap: [],
     multipleConnectionsSelectedIds: [],
     triggeredPaintFramePosition: {},
 
@@ -344,21 +343,6 @@ export default new Vuex.Store({
       utils.typeCheck(value, 'boolean')
       state.multipleSelectedActionsIsVisible = value
     },
-    generateCardMap: (state) => {
-      const cards = state.currentSpace.cards || []
-      state.cardMap = []
-      cards.forEach(card => {
-        const element = document.querySelector(`article [data-card-id="${card.id}"]`)
-        const rect = element.getBoundingClientRect()
-        state.cardMap.push({
-          cardId: card.id,
-          x: card.x,
-          y: card.y,
-          width: rect.width,
-          height: rect.height
-        })
-      })
-    },
     multipleSelectedActionsPosition: (state, position) => {
       utils.typeCheck(position, 'object')
       state.multipleSelectedActionsPosition = position
@@ -534,8 +518,8 @@ export default new Vuex.Store({
     updateSpacePageSize: (context) => {
       let maxX = 0
       let maxY = 0
-      context.commit('generateCardMap')
-      context.state.cardMap.forEach(card => {
+      const cardMap = utils.cardMap()
+      cardMap.forEach(card => {
         const cardX = card.x + card.width
         const cardY = card.y + card.height
         if (cardX > maxX) {
