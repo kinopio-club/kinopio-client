@@ -346,6 +346,23 @@ export default {
     return -endValue * (elaspedTime /= duration) * (elaspedTime - 2) + startValue
   },
 
+  cardMap () {
+    const cards = document.querySelectorAll('.card')
+    let cardMap = []
+    cards.forEach(card => {
+      const rect = card.getBoundingClientRect()
+      const mappedCard = {
+        cardId: card.dataset.cardId,
+        x: window.scrollX + rect.x,
+        y: window.scrollY + rect.y,
+        width: rect.width,
+        height: rect.height
+      }
+      cardMap.push(mappedCard)
+    })
+    return cardMap
+  },
+
   // Spaces 🌙
 
   // migration added oct 2019

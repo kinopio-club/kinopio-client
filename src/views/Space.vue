@@ -46,7 +46,7 @@ import utils from '@/utils.js'
 import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 
-let startCursor, prevCursor, endCursor
+let startCursor, prevCursor, endCursor, cardMap
 
 export default {
   name: 'Space',
@@ -73,6 +73,11 @@ export default {
       if (mutation.type === 'triggeredDrawConnectionFrame') {
         prevCursor = this.$store.state.triggeredDrawConnectionFrame
         this.drawConnection()
+      }
+      if (mutation.type === 'currentUserIsDrawingConnection') {
+        if (mutation.payload === true) {
+          cardMap = utils.cardMap()
+        }
       }
     })
   },
@@ -161,7 +166,6 @@ export default {
 
     initInteractions (event) {
       if (this.spaceIsReadOnly) { return }
-      this.$store.commit('generateCardMap')
       startCursor = utils.cursorPositionInViewport(event)
     },
 
@@ -216,7 +220,6 @@ export default {
     },
     checkCurrentConnectionSuccess () {
       const cursor = this.cursor()
-      const cardMap = this.$store.state.cardMap
       const connection = cardMap.find(card => {
         const xValues = {
           value: cursor.x,

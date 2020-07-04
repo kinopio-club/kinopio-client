@@ -38,6 +38,7 @@ const rateOfIterationDecay = 0.03 // higher is faster tail decay
 let paintingCircles = []
 let paintingCanvas, paintingContext, startCursor, currentCursor, paintingCirclesTimer
 let prevScroll
+let cardMap
 
 // remote painting
 let remotePaintingCircles = []
@@ -244,6 +245,7 @@ export default {
       this.broadcastCircle(circle)
     },
     startPainting (event) {
+      cardMap = utils.cardMap()
       startCursor = utils.cursorPositionInViewport(event)
       currentCursor = utils.cursorPositionInViewport(event)
       const dialogIsVisible = Boolean(document.querySelector('dialog'))
@@ -260,7 +262,6 @@ export default {
         this.$store.commit('shouldAddCard', true)
       }
       this.$store.dispatch('clearMultipleSelected')
-      this.$store.commit('generateCardMap')
       this.$store.dispatch('closeAllDialogs')
     },
     paintCirclesAnimationFrame () {
@@ -285,7 +286,7 @@ export default {
 
     selectCards (point) {
       if (this.userCantEditSpace) { return }
-      this.$store.state.cardMap.map(card => {
+      cardMap.map(card => {
         const x = {
           value: point.x + window.scrollX,
           min: card.x,

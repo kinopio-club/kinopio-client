@@ -8,6 +8,7 @@ import last from 'lodash-es/last'
 import utils from '@/utils.js'
 
 const incrementPosition = 20
+let cardMap
 
 export default {
   mounted () {
@@ -103,7 +104,6 @@ export default {
     addCard () {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
-      this.$store.commit('generateCardMap')
       const parentCardId = this.$store.state.parentCardId
       const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
       const childCardId = this.$store.state.childCardId
@@ -123,6 +123,7 @@ export default {
         initialPosition.x = window.pageXOffset + 40
         initialPosition.y = window.pageYOffset + 80
       }
+      cardMap = utils.cardMap()
       const position = this.nonOverlappingCardPosition(initialPosition)
       this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
       if (childCard) {
@@ -153,6 +154,7 @@ export default {
         x: window.pageXOffset + rect.x + rect.width + incrementPosition,
         y: window.pageYOffset + rect.y + rect.height + incrementPosition
       }
+      cardMap = utils.cardMap()
       const position = this.nonOverlappingCardPosition(initialPosition)
       this.$store.dispatch('currentSpace/addCard', { position })
       this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)
@@ -163,7 +165,6 @@ export default {
 
     // recursive
     nonOverlappingCardPosition (position) {
-      const cardMap = this.$store.state.cardMap
       const overlappingCard = cardMap.find(card => {
         const isBetweenX = utils.isBetween({
           value: position.x,
@@ -270,7 +271,6 @@ export default {
         x: (viewportWidth / 2) + window.scrollX,
         y: (viewportHeight / 2) + window.scrollY
       }
-      const cardMap = this.$store.state.cardMap
       let closestDistanceFromCenter = Math.max(viewportWidth, viewportHeight)
       let closestCard
       cardMap.forEach(card => {
@@ -286,7 +286,6 @@ export default {
     },
 
     currentFocusedCard () {
-      const cardMap = this.$store.state.cardMap
       let lastCardId = this.$store.state.parentCardId || this.$store.state.childCardId
       let lastCard = cardMap.filter(card => card.cardId === lastCardId)
       if (lastCard.length) {
@@ -297,8 +296,7 @@ export default {
     },
 
     focusCard (direction) {
-      this.$store.commit('generateCardMap')
-      const cardMap = this.$store.state.cardMap
+      cardMap = utils.cardMap()
       const originCard = this.currentFocusedCard()
       let focusableCards
       if (direction === 'left') {
