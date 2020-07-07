@@ -249,7 +249,8 @@ dialog
   .button-wrap + button,
   label + label,
   label + .button-wrap,
-  .button-wrap + label
+  .button-wrap + label,
+  .segmented-buttons + .button-wrap
     margin-left 6px
 
   p + button,
@@ -305,6 +306,8 @@ dialog
 
 .icon
   vertical-align -1px
+  &.more
+    vertical-align 3px
 
 .icon + span
   margin-left 5px

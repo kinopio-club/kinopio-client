@@ -43,9 +43,14 @@ dialog.narrow.multiple-selected-actions(
         button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
           span Export
         Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
+
     .row(v-if="multipleCardsSelectedIds.length")
-      button(v-if="multipleCardsIsSelected" :disabled="!canEditSome.cards" @click="alignCards")
-        img.icon(src="@/assets/align.svg")
+      .segmented-buttons(v-if="multipleCardsIsSelected")
+        button(:disabled="!canEditSome.cards" @click="alignCards")
+          img.icon(src="@/assets/align-vertically.svg")
+        button(:disabled="!canEditSome.cards")
+          img.icon.more(src="@/assets/more.svg")
+
       .button-wrap
         button(:disabled="!canEditAll.cards" @click.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
           img.icon.visit(src="@/assets/visit.svg")
