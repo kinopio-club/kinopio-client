@@ -47,9 +47,9 @@ dialog.narrow.multiple-selected-actions(
         Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
     .row(v-if="multipleCardsSelectedIds.length")
       //- Align and Distribute
-      .button-wrap
-        .segmented-buttons(v-if="multipleCardsIsSelected")
-          button(:disabled="!canEditSome.cards" @click="alignCards")
+      .button-wrap(v-if="multipleCardsIsSelected")
+        .segmented-buttons
+          button(:disabled="!canEditSome.cards" @click="alignCardsVertically" :class="{active: isVerticallyAligned}")
             img.icon(src="@/assets/align-vertically.svg")
           button(:disabled="!canEditSome.cards" @click.stop="toggleAlignAndDistributeIsVisible" :class="{ active: alignAndDistributeIsVisible }")
             img.icon.more(src="@/assets/more.svg")
@@ -245,6 +245,10 @@ export default {
       } else {
         return 'Remove'
       }
+    },
+    isVerticallyAligned () {
+      const xValues = this.cards.map(card => card.x)
+      return xValues.every(x => x === xValues[0])
     }
   },
   methods: {
@@ -384,7 +388,7 @@ export default {
       this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('clearMultipleSelected')
     },
-    alignCards () {
+    alignCardsVertically () {
       const x = this.editableCards[0].x
       this.editableCards.forEach(card => {
         card = utils.clone(card)

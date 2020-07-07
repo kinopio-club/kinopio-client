@@ -21,7 +21,7 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
           span Switch to Space
       button(@click="moveOrCopyToSpace" :class="{active: loading}")
         img.icon.visit(src="@/assets/visit.svg")
-        span {{actionLabel | capitalize}}
+        span {{actionLabel | capitalize}} to {{selectedSpace.name}}
         Loader(:visible="loading")
 
     template(v-if="!spaces.length")
