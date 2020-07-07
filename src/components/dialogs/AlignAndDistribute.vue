@@ -1,11 +1,5 @@
 <template lang="pug">
 dialog.narrow.align-and-distribute(v-if="visible" :open="visible" @click.stop ref="dialog")
-  //- section.coordinates
-  //-   label(for="x") X
-  //-   input(name="x" type="text" placeholder="mixed" v-model="x")
-  //-   label(for="x") Y
-  //-   input(name="y" type="text" placeholder="mixed" v-model="y")
-
   section
     p Align {{cardsCount}} Cards
     .row
@@ -16,20 +10,18 @@ dialog.narrow.align-and-distribute(v-if="visible" :open="visible" @click.stop re
       button(@click="alignCardsHorizontally" :class="{active: isHorizontallyAligned}")
         img.icon(src="@/assets/align-horizontally.svg")
         span Horizontally Align
-
   section
     p Evenly space out {{cardsCount}} cards
-    p.badge.info(v-if="cannotDistributeCards") Select 3 or more cards to space out
+    p.badge.info(v-if="cannotSpaceOutCards") Select 3 or more cards to space out
 
     .row
-      button(:disabled="cannotDistributeCards")
-        img.icon(src="@/assets/distribute-evenly-vertically.svg")
-        span Vertically Even
+      button(@click="evenlySpaceTopToBottom" :disabled="cannotSpaceOutCards")
+        img.icon(src="@/assets/space-out-top-to-bottom.svg")
+        span Top to Bottom
     .row
-      button(:disabled="cannotDistributeCards")
-        img.icon.distribute-evenly-horizontally(src="@/assets/distribute-evenly-horizontally.svg")
-        span Horizontal Even
-
+      button(@click="evenlySpaceLeftToRight" :disabled="cannotSpaceOutCards" :class="{active: isEvenlySpacedLeftToRight}")
+        img.icon.space-out-left-to-right(src="@/assets/space-out-left-to-right.svg")
+        span Left to Right
 </template>
 
 <script>
@@ -41,11 +33,6 @@ export default {
   props: {
     visible: Boolean
   },
-  // data () {
-  //   return {
-  //     colors: []
-  //   }
-  // },
   computed: {
     multipleCardsSelectedIds () { return this.$store.state.multipleCardsSelectedIds },
     cardsCount () { return this.multipleCardsSelectedIds.length },
@@ -55,7 +42,7 @@ export default {
         return this.$store.getters['currentSpace/cardById'](cardId)
       })
     },
-    cannotDistributeCards () {
+    cannotSpaceOutCards () {
       return this.editableCards.length < 3
     },
     editableCards () {
@@ -74,23 +61,19 @@ export default {
     isHorizontallyAligned () {
       const yValues = this.cards.map(card => card.y)
       return yValues.every(y => y === yValues[0])
+    },
+    isEvenlySpacedLeftToRight () {
+      const cards = this.cardsSortedByX()
+      const xDistances = this.xDistancesBetweenCards(cards)
+      console.log('xDistances should be equalish', xDistances)
+      return xDistances.every(x => {
+        return utils.isBetween({
+          value: x,
+          min: xDistances[0] - 1,
+          max: xDistances[0] + 1
+        })
+      })
     }
-
-    // x: {
-    //   get () {
-    //     return ''
-    //   },
-    //   // set (newValue) {
-    //   // }
-    // },
-    // y: {
-    //   get () {
-    //     return ''
-    //   },
-    //   // set (newValue) {
-    //   // }
-    // },
-
   },
   methods: {
     scrollIntoView () {
@@ -121,6 +104,60 @@ export default {
           this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
         })
       })
+    },
+    cardsSortedByX () {
+      return this.editableCards.sort((a, b) => {
+        return a.x - b.x
+      })
+    },
+    xDistancesBetweenCards (cards) {
+      let xDistances = []
+      cards.forEach((card, index) => {
+        if (index > 0) {
+          const element = document.querySelector(`article [data-card-id="${card.id}"]`)
+          const rect = element.getBoundingClientRect()
+          const previousElement = document.querySelector(`article [data-card-id="${cards[index - 1].id}"]`)
+          const previousRect = previousElement.getBoundingClientRect()
+          const previousRectRightSide = previousRect.x + previousRect.width + window.scrollX
+          const rectLeftSide = rect.x + window.scrollX
+          xDistances.push(rectLeftSide - previousRectRightSide)
+        }
+      })
+      return xDistances
+    },
+
+    evenlySpaceTopToBottom () {},
+
+    evenlySpaceLeftToRight () {
+      const cards = utils.clone(this.cardsSortedByX())
+      // determine xAverage distance between cards
+      const xDistances = this.xDistancesBetweenCards(cards)
+      const xAverage = utils.averageOfNumbers(xDistances)
+
+      console.log('🎡xAverage', xAverage)
+      // space cards out by xAverage
+      let updatedCards = cards.map((card, index) => {
+        if (index > 0) {
+          const previousCard = cards[index - 1]
+          const previousElement = document.querySelector(`article [data-card-id="${previousCard.id}"]`)
+          const previousRect = previousElement.getBoundingClientRect()
+          const previousRectRightSide = previousCard.x + previousRect.width
+
+          console.log('🌹 used value for calc', previousCard.x, previousRectRightSide)
+          card.x = previousRectRightSide + xAverage
+          console.log('newcardx correct', card.x)
+          return card
+        }
+      })
+      updatedCards.shift()
+      console.log(updatedCards)
+
+      updatedCards.forEach(card => {
+        this.$store.dispatch('currentSpace/updateCard', card)
+        this.$nextTick(() => {
+          this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
+        })
+      })
     }
 
   },
@@ -141,6 +178,6 @@ export default {
   left 32px
   p + .row
     margin-top 10px
-  .distribute-evenly-horizontally
+  .space-out-left-to-right
     vertical-align 1px
 </style>

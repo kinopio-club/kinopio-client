@@ -269,6 +269,15 @@ export default {
     }
   },
 
+  averageOfNumbers (numbers) {
+    this.typeCheck(numbers, 'array')
+    let total = 0
+    numbers.forEach(number => {
+      total += number
+    })
+    return total / numbers.length
+  },
+
   distanceBetweenTwoPoints (point1, point2) {
     // https://www.mathwarehouse.com/algebra/distance_formula/index.php
     const xDelta = Math.abs(point1.x - point2.x)
