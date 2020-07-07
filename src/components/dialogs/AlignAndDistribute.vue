@@ -65,7 +65,6 @@ export default {
     isEvenlySpacedTopToBottom () {
       const cards = this.cardsSortedByY()
       const yDistances = this.yDistancesBetweenCards(cards)
-      console.log('yDistances should be equalish', yDistances)
       return yDistances.every(y => {
         return utils.isBetween({
           value: y,
@@ -99,10 +98,7 @@ export default {
       this.editableCards.forEach(card => {
         card = utils.clone(card)
         card.x = x
-        this.$store.dispatch('currentSpace/updateCard', card)
-        this.$nextTick(() => {
-          this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
-        })
+        this.updateCardPosition(card)
       })
     },
     alignCardsHorizontally () {
@@ -110,10 +106,7 @@ export default {
       this.editableCards.forEach(card => {
         card = utils.clone(card)
         card.y = y
-        this.$store.dispatch('currentSpace/updateCard', card)
-        this.$nextTick(() => {
-          this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
-        })
+        this.updateCardPosition(card)
       })
     },
     cardsSortedByX () {
@@ -156,41 +149,52 @@ export default {
       })
       return yDistances
     },
-
-    evenlySpaceTopToBottom () {},
-
+    updateCardPosition (card) {
+      this.$store.dispatch('currentSpace/updateCard', card)
+      this.$nextTick(() => {
+        this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
+      })
+    },
+    evenlySpaceTopToBottom () {
+      const cards = utils.clone(this.cardsSortedByY())
+      const yDistances = this.yDistancesBetweenCards(cards)
+      const yAverage = utils.averageOfNumbers(yDistances)
+      // update y positions
+      let updatedCards = cards.map((card, index) => {
+        if (index > 0) {
+          const previousCard = cards[index - 1]
+          const previousElement = document.querySelector(`article [data-card-id="${previousCard.id}"]`)
+          const previousRect = previousElement.getBoundingClientRect()
+          const previousRectBottomSide = previousCard.y + previousRect.height
+          card.y = previousRectBottomSide + yAverage
+          return card
+        }
+      })
+      updatedCards.shift()
+      updatedCards.forEach(card => {
+        this.updateCardPosition(card)
+      })
+    },
     evenlySpaceLeftToRight () {
       const cards = utils.clone(this.cardsSortedByX())
-      // determine xAverage distance between cards
       const xDistances = this.xDistancesBetweenCards(cards)
       const xAverage = utils.averageOfNumbers(xDistances)
-
-      console.log('🎡xAverage', xAverage)
-      // space cards out by xAverage
+      // update x positions
       let updatedCards = cards.map((card, index) => {
         if (index > 0) {
           const previousCard = cards[index - 1]
           const previousElement = document.querySelector(`article [data-card-id="${previousCard.id}"]`)
           const previousRect = previousElement.getBoundingClientRect()
           const previousRectRightSide = previousCard.x + previousRect.width
-
-          console.log('🌹 used value for calc', previousCard.x, previousRectRightSide)
           card.x = previousRectRightSide + xAverage
-          console.log('newcardx correct', card.x)
           return card
         }
       })
       updatedCards.shift()
-      console.log(updatedCards)
-
       updatedCards.forEach(card => {
-        this.$store.dispatch('currentSpace/updateCard', card)
-        this.$nextTick(() => {
-          this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
-        })
+        this.updateCardPosition(card)
       })
     }
-
   },
   watch: {
     visible (visible) {
