@@ -5,11 +5,11 @@ dialog.narrow.align-and-distribute(v-if="visible" :open="visible" @click.stop re
     .row
       button(@click="alignCardsVertically" :class="{active: isVerticallyAligned}")
         img.icon(src="@/assets/align-vertically.svg")
-        span Vertically Align
+        span Align Vertically
     .row
       button(@click="alignCardsHorizontally" :class="{active: isHorizontallyAligned}")
         img.icon(src="@/assets/align-horizontally.svg")
-        span Horizontally Align
+        span Align Horizontally
   section
     p Evenly space out {{cardsCount}} cards
     p.badge.info(v-if="cannotSpaceOutCards") Select 3 or more cards to space out
