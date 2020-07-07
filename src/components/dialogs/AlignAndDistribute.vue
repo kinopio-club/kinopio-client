@@ -25,7 +25,7 @@ dialog.narrow.align-and-distribute(v-if="visible" :open="visible" @click.stop re
 </template>
 
 <script>
-import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
+import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
 export default {
@@ -87,11 +87,17 @@ export default {
   },
   methods: {
     scrollIntoView () {
-      const element = this.$refs.dialog
-      scrollIntoView(element, {
-        behavior: 'smooth',
-        scrollMode: 'if-needed'
+      const pinchZoomScale = utils.visualViewport().scale
+      const pinchZoomScaleShouldFocus = utils.isBetween({
+        value: pinchZoomScale,
+        min: 0.8,
+        max: 1.3
       })
+      if (!pinchZoomScaleShouldFocus) { return }
+      if (!utils.isMobile()) {
+        const element = this.$refs.dialog
+        scrollIntoView.scroll(element)
+      }
     },
     alignCardsVertically () {
       const x = this.editableCards[0].x
@@ -158,7 +164,7 @@ export default {
     evenlySpaceTopToBottom () {
       const cards = utils.clone(this.cardsSortedByY())
       const yDistances = this.yDistancesBetweenCards(cards)
-      const yAverage = utils.averageOfNumbers(yDistances)
+      const yAverage = Math.max(utils.averageOfNumbers(yDistances), 20)
       // update y positions
       let updatedCards = cards.map((card, index) => {
         if (index > 0) {
@@ -178,7 +184,7 @@ export default {
     evenlySpaceLeftToRight () {
       const cards = utils.clone(this.cardsSortedByX())
       const xDistances = this.xDistancesBetweenCards(cards)
-      const xAverage = utils.averageOfNumbers(xDistances)
+      const xAverage = Math.max(utils.averageOfNumbers(xDistances), 20)
       // update x positions
       let updatedCards = cards.map((card, index) => {
         if (index > 0) {
