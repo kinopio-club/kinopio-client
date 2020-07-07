@@ -15,7 +15,7 @@ dialog.narrow.align-and-distribute(v-if="visible" :open="visible" @click.stop re
     p.badge.info(v-if="cannotSpaceOutCards") Select 3 or more cards to space out
 
     .row
-      button(@click="evenlySpaceTopToBottom" :disabled="cannotSpaceOutCards")
+      button(@click="evenlySpaceTopToBottom" :disabled="cannotSpaceOutCards" :class="{active: isEvenlySpacedTopToBottom}")
         img.icon(src="@/assets/space-out-top-to-bottom.svg")
         span Top to Bottom
     .row
@@ -62,10 +62,21 @@ export default {
       const yValues = this.cards.map(card => card.y)
       return yValues.every(y => y === yValues[0])
     },
+    isEvenlySpacedTopToBottom () {
+      const cards = this.cardsSortedByY()
+      const yDistances = this.yDistancesBetweenCards(cards)
+      console.log('yDistances should be equalish', yDistances)
+      return yDistances.every(y => {
+        return utils.isBetween({
+          value: y,
+          min: yDistances[0] - 1,
+          max: yDistances[0] + 1
+        })
+      })
+    },
     isEvenlySpacedLeftToRight () {
       const cards = this.cardsSortedByX()
       const xDistances = this.xDistancesBetweenCards(cards)
-      console.log('xDistances should be equalish', xDistances)
       return xDistances.every(x => {
         return utils.isBetween({
           value: x,
@@ -110,6 +121,11 @@ export default {
         return a.x - b.x
       })
     },
+    cardsSortedByY () {
+      return this.editableCards.sort((a, b) => {
+        return a.y - b.y
+      })
+    },
     xDistancesBetweenCards (cards) {
       let xDistances = []
       cards.forEach((card, index) => {
@@ -124,6 +140,21 @@ export default {
         }
       })
       return xDistances
+    },
+    yDistancesBetweenCards (cards) {
+      let yDistances = []
+      cards.forEach((card, index) => {
+        if (index > 0) {
+          const element = document.querySelector(`article [data-card-id="${card.id}"]`)
+          const rect = element.getBoundingClientRect()
+          const previousElement = document.querySelector(`article [data-card-id="${cards[index - 1].id}"]`)
+          const previousRect = previousElement.getBoundingClientRect()
+          const previousRectBottomSide = previousRect.y + previousRect.height + window.scrollY
+          const rectTopSide = rect.y + window.scrollY
+          yDistances.push(rectTopSide - previousRectBottomSide)
+        }
+      })
+      return yDistances
     },
 
     evenlySpaceTopToBottom () {},
