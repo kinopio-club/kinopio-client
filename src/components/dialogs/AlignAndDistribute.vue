@@ -13,7 +13,7 @@ dialog.narrow.align-and-distribute(v-if="visible" :open="visible" @click.stop re
         img.icon(src="@/assets/align-vertically.svg")
         span Vertically Align
     .row
-      button
+      button(@click="alignCardsHorizontally" :class="{active: isHorizontallyAligned}")
         img.icon(src="@/assets/align-horizontally.svg")
         span Horizontally Align
 
@@ -70,7 +70,12 @@ export default {
     isVerticallyAligned () {
       const xValues = this.cards.map(card => card.x)
       return xValues.every(x => x === xValues[0])
+    },
+    isHorizontallyAligned () {
+      const yValues = this.cards.map(card => card.y)
+      return yValues.every(y => y === yValues[0])
     }
+
     // x: {
     //   get () {
     //     return ''
@@ -100,6 +105,17 @@ export default {
       this.editableCards.forEach(card => {
         card = utils.clone(card)
         card.x = x
+        this.$store.dispatch('currentSpace/updateCard', card)
+        this.$nextTick(() => {
+          this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
+        })
+      })
+    },
+    alignCardsHorizontally () {
+      const y = this.editableCards[0].y
+      this.editableCards.forEach(card => {
+        card = utils.clone(card)
+        card.y = y
         this.$store.dispatch('currentSpace/updateCard', card)
         this.$nextTick(() => {
           this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
