@@ -47,11 +47,13 @@ dialog.narrow.multiple-selected-actions(
         Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
     .row(v-if="multipleCardsSelectedIds.length")
       //- Align and Distribute
-      .segmented-buttons(v-if="multipleCardsIsSelected")
-        button(:disabled="!canEditSome.cards" @click="alignCards")
-          img.icon(src="@/assets/align-vertically.svg")
-        button(:disabled="!canEditSome.cards" @click.stop="toggleAlignAndDistributeIsVisible" :class="{ active: alignAndDistributeIsVisible }")
-          img.icon.more(src="@/assets/more.svg")
+      .button-wrap
+        .segmented-buttons(v-if="multipleCardsIsSelected")
+          button(:disabled="!canEditSome.cards" @click="alignCards")
+            img.icon(src="@/assets/align-vertically.svg")
+          button(:disabled="!canEditSome.cards" @click.stop="toggleAlignAndDistributeIsVisible" :class="{ active: alignAndDistributeIsVisible }")
+            img.icon.more(src="@/assets/more.svg")
+        AlignAndDistribute(:visible="alignAndDistributeIsVisible")
       //- Move or Copy
       .button-wrap
         button(:disabled="!canEditAll.cards" @click.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
@@ -76,6 +78,7 @@ import Export from '@/components/dialogs/Export.vue'
 import MoveOrCopyToSpace from '@/components/dialogs/MoveOrCopyToSpace.vue'
 import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
 import FramePicker from '@/components/dialogs/FramePicker.vue'
+import AlignAndDistribute from '@/components/dialogs/AlignAndDistribute.vue'
 
 export default {
   name: 'MultipleSelectedActions',
@@ -83,7 +86,8 @@ export default {
     Export,
     MoveOrCopyToSpace,
     MultipleConnectionsPicker,
-    FramePicker
+    FramePicker,
+    AlignAndDistribute
   },
   data () {
     return {
