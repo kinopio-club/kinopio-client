@@ -36,21 +36,23 @@ dialog.narrow.multiple-selected-actions(
         span {{ pluralLabels }}
   section
     .row
+      //- Remove
       button(:disabled="!canEditSome.any" @click="remove")
         img.icon(src="@/assets/remove.svg")
         span {{ removeLabel }}
+      //- Export
       .button-wrap
         button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
           span Export
         Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
-
     .row(v-if="multipleCardsSelectedIds.length")
+      //- Align and Distribute
       .segmented-buttons(v-if="multipleCardsIsSelected")
         button(:disabled="!canEditSome.cards" @click="alignCards")
           img.icon(src="@/assets/align-vertically.svg")
-        button(:disabled="!canEditSome.cards")
+        button(:disabled="!canEditSome.cards" @click.stop="toggleAlignAndDistributeIsVisible" :class="{ active: alignAndDistributeIsVisible }")
           img.icon.more(src="@/assets/more.svg")
-
+      //- Move or Copy
       .button-wrap
         button(:disabled="!canEditAll.cards" @click.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
           img.icon.visit(src="@/assets/visit.svg")
@@ -91,7 +93,8 @@ export default {
       framePickerIsVisible: false,
       cardsIsConnected: false,
       cardsHaveCheckboxes: false,
-      cardsCheckboxIsChecked: false
+      cardsCheckboxIsChecked: false,
+      alignAndDistributeIsVisible: false
     }
   },
   computed: {
@@ -270,11 +273,17 @@ export default {
       this.closeDialogs()
       this.framePickerIsVisible = !isVisible
     },
+    toggleAlignAndDistributeIsVisible () {
+      const isVisible = this.alignAndDistributeIsVisible
+      this.closeDialogs()
+      this.alignAndDistributeIsVisible = !isVisible
+    },
     closeDialogs () {
       this.exportIsVisible = false
       this.moveOrCopyToSpaceIsVisible = false
       this.multipleConnectionsPickerVisible = false
       this.framePickerIsVisible = false
+      this.alignAndDistributeIsVisible = false
     },
     connectionType () {
       const typePref = this.$store.state.currentUser.defaultConnectionTypeId
