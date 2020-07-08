@@ -797,7 +797,6 @@ export default {
       const spaceId = context.state.id
       connections = utils.clone(connections || context.getters.cardConnections(cardId) || context.rootState.currentConnectionsDragging)
       connections.map(connection => {
-        console.log(connection, connection.path, connections)
         connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
         connection.spaceId = spaceId
         if (shouldUpdateApi) {

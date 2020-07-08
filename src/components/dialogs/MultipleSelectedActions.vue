@@ -238,7 +238,6 @@ export default {
         return 'Remove'
       }
     }
-
   },
   methods: {
     toggleAllLabelsAreVisible () {

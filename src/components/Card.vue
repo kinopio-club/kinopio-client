@@ -128,6 +128,7 @@ export default {
     },
     normalizedName () {
       let name = this.name
+      if (!name) { return }
       if (this.isMediaCard) {
         name = name.replace(this.url, '')
       }
@@ -146,7 +147,7 @@ export default {
       if (this.url && this.hasCheckbox) {
         maxWidth = 132
       }
-      if (!this.normalizedName.trim()) { return 0 }
+      if (!this.normalizedName) { return 0 }
       const width = this.longestNameLineLength() * averageCharacterWidth
       if (width <= maxWidth) {
         return width
