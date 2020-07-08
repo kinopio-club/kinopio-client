@@ -64,8 +64,8 @@ dialog.narrow.multiple-selected-actions(
 import nanoid from 'nanoid'
 import last from 'lodash-es/last'
 import uniq from 'lodash-es/uniq'
+import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
-import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 import Export from '@/components/dialogs/Export.vue'
 import MoveOrCopyToSpace from '@/components/dialogs/MoveOrCopyToSpace.vue'
@@ -371,17 +371,11 @@ export default {
       this.$store.dispatch('clearMultipleSelected')
     },
     scrollIntoView () {
-      const pinchZoomScale = utils.visualViewport().scale
-      const pinchZoomScaleShouldFocus = utils.isBetween({
-        value: pinchZoomScale,
-        min: 0.8,
-        max: 1.3
+      const element = this.$refs.dialog
+      scrollIntoView(element, {
+        behavior: 'smooth',
+        scrollMode: 'if-needed'
       })
-      if (!pinchZoomScaleShouldFocus) { return }
-      if (!utils.isMobile()) {
-        const element = this.$refs.dialog
-        scrollIntoView.scroll(element)
-      }
     }
   },
   watch: {
