@@ -62,8 +62,13 @@ export default {
         return a.x - b.x
       })
     },
+    cardsSortedByY () {
+      return this.editableCards.sort((a, b) => {
+        return a.y - b.y
+      })
+    },
     alignAndDistributeCardsVertically () {
-      const cards = this.cardsSortedByX()
+      const cards = this.cardsSortedByY()
       const origin = cards[0]
       cards.forEach((card, index) => {
         if (index > 0) {
