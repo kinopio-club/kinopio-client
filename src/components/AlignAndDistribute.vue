@@ -19,6 +19,7 @@ export default {
   },
   computed: {
     multipleCardsSelectedIds () { return this.$store.state.multipleCardsSelectedIds },
+    multipleConnectionsSelectedIds () { return this.$store.state.multipleConnectionsSelectedIds },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     cards () {
       return this.multipleCardsSelectedIds.map(cardId => {
@@ -33,6 +34,11 @@ export default {
           return this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](card)
         })
       }
+    },
+    connections () {
+      return this.multipleConnectionsSelectedIds.map(id => {
+        return this.$store.getters['currentSpace/connectionById'](id)
+      })
     },
     isVerticallyAligned () {
       const xValues = this.cards.map(card => card.x)
@@ -49,11 +55,20 @@ export default {
       const any = cards || connections
       return { cards, connections, any }
     }
-
   },
   methods: {
+    cardsSortedByX () {
+      return this.editableCards.sort((a, b) => {
+        return a.x - b.x
+      })
+    },
+    cardsSortedByY () {
+      return this.editableCards.sort((a, b) => {
+        return a.y - b.y
+      })
+    },
     alignAndDistributeCardsVertically () {
-      const cards = this.editableCards
+      const cards = this.cardsSortedByY()
       const origin = cards[0]
       cards.forEach((card, index) => {
         if (index > 0) {
@@ -64,13 +79,14 @@ export default {
           card = utils.clone(card)
           card.x = origin.x
           card.y = previousRectBottomSide + spaceBetweenCards
-          this.updateCardPosition(card)
+          this.$store.dispatch('currentSpace/updateCard', card)
         }
       })
+      this.updateConnectionPaths()
     },
 
     alignAndDistributeCardsHorizontally () {
-      const cards = this.editableCards
+      const cards = this.cardsSortedByX()
       const origin = cards[0]
       cards.forEach((card, index) => {
         if (index > 0) {
@@ -81,9 +97,10 @@ export default {
           card = utils.clone(card)
           card.y = origin.y
           card.x = previousRectRightSide + spaceBetweenCards
-          this.updateCardPosition(card)
+          this.$store.dispatch('currentSpace/updateCard', card)
         }
       })
+      this.updateConnectionPaths()
     },
     xDistancesBetweenCards (cards) {
       let xDistances = []
@@ -115,10 +132,16 @@ export default {
       })
       return yDistances
     },
-    updateCardPosition (card) {
-      this.$store.dispatch('currentSpace/updateCard', card)
+    updateConnectionPaths () {
       this.$nextTick(() => {
-        this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
+        const multipleCardsSelectedIds = utils.clone(this.multipleCardsSelectedIds)
+        const multipleConnectionsSelectedIds = utils.clone(this.multipleConnectionsSelectedIds)
+        this.$store.commit('clearMultipleSelected')
+        multipleCardsSelectedIds.forEach(cardId => {
+          this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId, shouldUpdateApi: true })
+        })
+        this.$store.commit('multipleCardsSelectedIds', multipleCardsSelectedIds)
+        this.$store.commit('multipleConnectionsSelectedIds', multipleConnectionsSelectedIds)
       })
     }
   }
