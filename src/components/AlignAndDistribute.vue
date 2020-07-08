@@ -1,31 +1,37 @@
 <template lang="pug">
-dialog.narrow.align-and-distribute(v-if="visible" :open="visible" @click.stop ref="dialog")
-  section
-    p Align {{cardsCount}} Cards
-    .row
-      button(@click="alignCardsVertically" :class="{active: isVerticallyAligned}")
-        img.icon(src="@/assets/align-vertically.svg")
-        span Align Vertically
-    .row
-      button(@click="alignCardsHorizontally" :class="{active: isHorizontallyAligned}")
-        img.icon(src="@/assets/align-horizontally.svg")
-        span Align Horizontally
-  section
-    p Evenly space out {{cardsCount}} cards
-    p.badge.info(v-if="cannotSpaceOutCards") Select 3 or more cards to space out
+//- dialog.narrow.align-and-distribute(v-if="visible" :open="visible" @click.stop ref="dialog")
+//-   section
+//-     p Align {{cardsCount}} Cards
+//-     .row
+//-       button(@click="alignCardsVertically" :class="{active: isVerticallyAligned}")
+//-         img.icon(src="@/assets/align-vertically.svg")
+//-         span Align Vertically
+//-     .row
+//-       button(@click="alignCardsHorizontally" :class="{active: isHorizontallyAligned}")
+//-         img.icon(src="@/assets/align-horizontally.svg")
+//-         span Align Horizontally
+//-   section
+//-     p Evenly space out {{cardsCount}} cards
+//-     p.badge.info(v-if="cannotSpaceOutCards") Select 3 or more cards to space out
 
-    .row
-      button(@click="evenlySpaceTopToBottom" :disabled="cannotSpaceOutCards" :class="{active: isEvenlySpacedTopToBottom}")
-        img.icon(src="@/assets/space-out-top-to-bottom.svg")
-        span Top to Bottom
-    .row
-      button(@click="evenlySpaceLeftToRight" :disabled="cannotSpaceOutCards" :class="{active: isEvenlySpacedLeftToRight}")
-        img.icon.space-out-left-to-right(src="@/assets/space-out-left-to-right.svg")
-        span Left to Right
+//-     .row
+//-       button(@click="evenlySpaceTopToBottom" :disabled="cannotSpaceOutCards" :class="{active: isEvenlySpacedTopToBottom}")
+//-         img.icon(src="@/assets/space-out-top-to-bottom.svg")
+//-         span Top to Bottom
+//-     .row
+//-       button(@click="evenlySpaceLeftToRight" :disabled="cannotSpaceOutCards" :class="{active: isEvenlySpacedLeftToRight}")
+//-         img.icon.space-out-left-to-right(src="@/assets/space-out-left-to-right.svg")
+//-         span Left to Right
+.button-wrap(v-if="visible")
+  .segmented-buttons
+    button(:disabled="!canEditSome.cards" @click="alignCardsVertically" :class="{active: isVerticallyAligned}")
+      img.icon(src="@/assets/align-vertically.svg")
+    button(:disabled="!canEditSome.cards")
+      img.icon.more(src="@/assets/more.svg")
+
 </template>
 
 <script>
-import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
 export default {
@@ -54,6 +60,11 @@ export default {
         })
       }
     },
+    cardPositionDelta () {
+      console.log('💐', this.cards)
+      return true // {x,y}
+    },
+
     isVerticallyAligned () {
       const xValues = this.cards.map(card => card.x)
       return xValues.every(x => x === xValues[0])
@@ -83,22 +94,17 @@ export default {
           max: xDistances[0] + 1
         })
       })
+    },
+    canEditSome () {
+      if (this.isSpaceMember) { return { cards: true, connections: true, any: true } }
+      const cards = this.numberOfSelectedItemsCreatedByCurrentUser.cards > 0
+      const connections = this.numberOfSelectedItemsCreatedByCurrentUser.connections > 0
+      const any = cards || connections
+      return { cards, connections, any }
     }
+
   },
   methods: {
-    scrollIntoView () {
-      const pinchZoomScale = utils.visualViewport().scale
-      const pinchZoomScaleShouldFocus = utils.isBetween({
-        value: pinchZoomScale,
-        min: 0.8,
-        max: 1.3
-      })
-      if (!pinchZoomScaleShouldFocus) { return }
-      if (!utils.isMobile()) {
-        const element = this.$refs.dialog
-        scrollIntoView.scroll(element)
-      }
-    },
     alignCardsVertically () {
       const x = this.editableCards[0].x
       this.editableCards.forEach(card => {
@@ -206,7 +212,6 @@ export default {
     visible (visible) {
       this.$nextTick(() => {
         if (visible) {
-          this.scrollIntoView()
         }
       })
     }

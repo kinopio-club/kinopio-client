@@ -46,14 +46,7 @@ dialog.narrow.multiple-selected-actions(
           span Export
         Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
     .row(v-if="multipleCardsSelectedIds.length")
-      //- Align and Distribute
-      .button-wrap(v-if="multipleCardsIsSelected")
-        .segmented-buttons
-          button(:disabled="!canEditSome.cards" @click="alignCardsVertically" :class="{active: isVerticallyAligned}")
-            img.icon(src="@/assets/align-vertically.svg")
-          button(:disabled="!canEditSome.cards" @click.stop="toggleAlignAndDistributeIsVisible" :class="{ active: alignAndDistributeIsVisible }")
-            img.icon.more(src="@/assets/more.svg")
-        AlignAndDistribute(:visible="alignAndDistributeIsVisible")
+      AlignAndDistribute(:visible="multipleCardsIsSelected")
       //- Move or Copy
       .button-wrap
         button(:disabled="!canEditAll.cards" @click.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
@@ -78,7 +71,7 @@ import Export from '@/components/dialogs/Export.vue'
 import MoveOrCopyToSpace from '@/components/dialogs/MoveOrCopyToSpace.vue'
 import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
 import FramePicker from '@/components/dialogs/FramePicker.vue'
-import AlignAndDistribute from '@/components/dialogs/AlignAndDistribute.vue'
+import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
 
 export default {
   name: 'MultipleSelectedActions',
@@ -97,8 +90,7 @@ export default {
       framePickerIsVisible: false,
       cardsIsConnected: false,
       cardsHaveCheckboxes: false,
-      cardsCheckboxIsChecked: false,
-      alignAndDistributeIsVisible: false
+      cardsCheckboxIsChecked: false
     }
   },
   computed: {
@@ -245,11 +237,8 @@ export default {
       } else {
         return 'Remove'
       }
-    },
-    isVerticallyAligned () {
-      const xValues = this.cards.map(card => card.x)
-      return xValues.every(x => x === xValues[0])
     }
+
   },
   methods: {
     toggleAllLabelsAreVisible () {
@@ -281,17 +270,11 @@ export default {
       this.closeDialogs()
       this.framePickerIsVisible = !isVisible
     },
-    toggleAlignAndDistributeIsVisible () {
-      const isVisible = this.alignAndDistributeIsVisible
-      this.closeDialogs()
-      this.alignAndDistributeIsVisible = !isVisible
-    },
     closeDialogs () {
       this.exportIsVisible = false
       this.moveOrCopyToSpaceIsVisible = false
       this.multipleConnectionsPickerVisible = false
       this.framePickerIsVisible = false
-      this.alignAndDistributeIsVisible = false
     },
     connectionType () {
       const typePref = this.$store.state.currentUser.defaultConnectionTypeId
@@ -387,17 +370,6 @@ export default {
       this.editableCards.forEach(card => this.$store.dispatch('currentSpace/removeCard', card))
       this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('clearMultipleSelected')
-    },
-    alignCardsVertically () {
-      const x = this.editableCards[0].x
-      this.editableCards.forEach(card => {
-        card = utils.clone(card)
-        card.x = x
-        this.$store.dispatch('currentSpace/updateCard', card)
-        this.$nextTick(() => {
-          this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
-        })
-      })
     },
     scrollIntoView () {
       const pinchZoomScale = utils.visualViewport().scale
