@@ -25,7 +25,7 @@ aside.notifications(@click="closeAllDialogs")
     .row
       button(@click.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
-  .persistent-item.success(v-if="notifySignUpToEditSpace" ref="readOnly" :class="{'notification-jiggle': notifyReadOnlyJiggle}")
+  .persistent-item.success(v-if="notifySignUpToEditSpace" ref="readOnly" :class="{'notification-jiggle': readOnlyJiggle}")
     p
       img.icon(:src="privacyIcon" :class="privacyName")
       template(v-if="spacePrivacyIsOpen")
@@ -84,7 +84,7 @@ export default {
   name: 'Notifications',
   data () {
     return {
-      notifyReadOnlyJiggle: false,
+      readOnlyJiggle: false,
       notifyCardsCreatedIsOverLimitJiggle: false,
       notifySpaceOutOfSync: false
     }
@@ -99,15 +99,15 @@ export default {
         const element = this.$refs.readOnly
         if (!element) { return }
         if (state.currentUserIsPainting && element) {
-          this.notifyReadOnlyJiggle = true
-          element.addEventListener('animationend', this.removeNotifyReadOnlyJiggle, false)
+          this.readOnlyJiggle = true
+          element.addEventListener('animationend', this.removeReadOnlyJiggle, false)
         }
       }
       if (mutation.type === 'triggerReadOnlyJiggle') {
         const element = this.$refs.readOnly
         if (!element) { return }
-        this.notifyReadOnlyJiggle = true
-        element.addEventListener('animationend', this.removeNotifyReadOnlyJiggle, false)
+        this.readOnlyJiggle = true
+        element.addEventListener('animationend', this.removeReadOnlyJiggle, false)
       }
       if (mutation.type === 'notifyCardsCreatedIsOverLimit') {
         this.notifyCardsCreatedIsOverLimitJiggle = true
@@ -174,8 +174,8 @@ export default {
     remove () {
       this.$store.commit('removeNotification')
     },
-    removeNotifyReadOnlyJiggle () {
-      this.notifyReadOnlyJiggle = false
+    removeReadOnlyJiggle () {
+      this.readOnlyJiggle = false
     },
     triggerSpaceDetailsVisible () {
       this.$store.commit('triggerSpaceDetailsVisible')

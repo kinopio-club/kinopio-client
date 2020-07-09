@@ -16,9 +16,9 @@ header(:style="visualViewportPosition")
             span Template
 
           .badge-wrap(v-if="!userCanEditSpace && !currentSpaceIsTemplate")
-            .badge.info(:class="{'invisible': notifyReadOnlyJiggle}")
+            .badge.info(:class="{'invisible': readOnlyJiggle}")
               span Read Only
-            .badge.info.invisible-badge(ref="readOnly" :class="{'badge-jiggle': notifyReadOnlyJiggle, 'invisible': !notifyReadOnlyJiggle}")
+            .badge.info.invisible-badge(ref="readOnly" :class="{'badge-jiggle': readOnlyJiggle, 'invisible': !readOnlyJiggle}")
               span Read Only
 
           span {{currentSpaceName}}
@@ -103,7 +103,7 @@ export default {
       pinchZoomOffsetLeft: 0,
       pinchZoomOffsetTop: 0,
       pinchZoomScale: 1,
-      notifyReadOnlyJiggle: false
+      readOnlyJiggle: false
     }
   },
   created () {
@@ -132,11 +132,11 @@ export default {
         const element = this.$refs.readOnly
         if (!element) { return }
         if (state.currentUserIsPainting && element) {
-          this.addNotifyReadOnlyJiggle()
+          this.addReadOnlyJiggle()
         }
       }
       if (mutation.type === 'triggerReadOnlyJiggle') {
-        this.addNotifyReadOnlyJiggle()
+        this.addReadOnlyJiggle()
       }
     })
   },
@@ -229,14 +229,14 @@ export default {
     }
   },
   methods: {
-    addNotifyReadOnlyJiggle () {
+    addReadOnlyJiggle () {
       const element = this.$refs.readOnly
       if (!element) { return }
-      this.notifyReadOnlyJiggle = true
-      element.addEventListener('animationend', this.removeNotifyReadOnlyJiggle, false)
+      this.readOnlyJiggle = true
+      element.addEventListener('animationend', this.removeReadOnlyJiggle, false)
     },
-    removeNotifyReadOnlyJiggle () {
-      this.notifyReadOnlyJiggle = false
+    removeReadOnlyJiggle () {
+      this.readOnlyJiggle = false
     },
     closeAllDialogs () {
       this.aboutIsVisible = false
