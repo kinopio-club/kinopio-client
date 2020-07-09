@@ -65,7 +65,7 @@ aside.notifications(@click="closeAllDialogs")
       .button-wrap
         button(@click="refreshBrowser") Refresh
 
-  .persistent-item.success(v-if="notifyNewUser")
+  .item.success(ref="newUser" v-if="notifyNewUser && !hasNotifiedNewUser")
     p Welcome to Kinopio
     .row
       button(@click="createNewHelloSpace")
@@ -86,7 +86,8 @@ export default {
     return {
       readOnlyJiggle: false,
       notifyCardsCreatedIsOverLimitJiggle: false,
-      notifySpaceOutOfSync: false
+      notifySpaceOutOfSync: false,
+      hasNotifiedNewUser: false
     }
   },
   created () {
@@ -122,6 +123,13 @@ export default {
       }
       if (mutation.type === 'currentSpace/restoreSpace') {
         this.notifySpaceOutOfSync = false
+      }
+      if (mutation.type === 'notifyNewUser') {
+        this.$nextTick(() => {
+          const element = this.$refs.newUser
+          if (!element) { return }
+          element.addEventListener('animationend', this.removeNotifyNewUser, false)
+        })
       }
     })
   },
@@ -176,6 +184,10 @@ export default {
     },
     removeReadOnlyJiggle () {
       this.readOnlyJiggle = false
+    },
+    removeNotifyNewUser () {
+      this.$store.commit('notifyNewUser', false)
+      this.hasNotifiedNewUser = true
     },
     triggerSpaceDetailsVisible () {
       this.$store.commit('triggerSpaceDetailsVisible')
