@@ -443,6 +443,7 @@ export default {
   AddCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
     return spaces.map(space => {
       let user
+      space.users = space.users || []
       if (space.users.length) {
         user = space.users[0].id
       }
