@@ -18,7 +18,7 @@ header(:style="visualViewportPosition")
           .badge-wrap(v-if="!userCanEditSpace && !currentSpaceIsTemplate")
             .badge.info(:class="{'invisible': notifyReadOnlyJiggle}")
               span Read Only
-            .badge.info.invisible-badge(ref="readOnly" :class="{'notification-jiggle': notifyReadOnlyJiggle, 'invisible': !notifyReadOnlyJiggle}")
+            .badge.info.invisible-badge(ref="readOnly" :class="{'badge-jiggle': notifyReadOnlyJiggle, 'invisible': !notifyReadOnlyJiggle}")
               span Read Only
 
           span {{currentSpaceName}}
@@ -135,7 +135,7 @@ export default {
           this.addNotifyReadOnlyJiggle()
         }
       }
-      if (mutation.type === 'notifyReadOnlyJiggle') {
+      if (mutation.type === 'triggerReadOnlyJiggle') {
         this.addNotifyReadOnlyJiggle()
       }
     })
@@ -394,7 +394,7 @@ header
     left 0
     top -2px
 
-.notification-jiggle
+.badge-jiggle
   animation-name notificationJiggle
   animation-duration 0.2s
   animation-iteration-count 2

@@ -363,6 +363,7 @@ export default {
     },
     showCardDetails (event) {
       if (isMultiTouch) { return }
+      if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
       const userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }

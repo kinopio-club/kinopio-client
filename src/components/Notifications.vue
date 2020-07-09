@@ -25,7 +25,7 @@ aside.notifications(@click="closeAllDialogs")
     .row
       button(@click.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
-  .persistent-item.success(v-if="notifySignUpToEditSpace" :class="{'notification-jiggle': notifyReadOnlyJiggle}")
+  .persistent-item.success(v-if="notifySignUpToEditSpace" ref="readOnly" :class="{'notification-jiggle': notifyReadOnlyJiggle}")
     p
       img.icon(:src="privacyIcon" :class="privacyName")
       template(v-if="spacePrivacyIsOpen")
@@ -34,13 +34,6 @@ aside.notifications(@click="closeAllDialogs")
         span You're invited to edit this space, but you'll need to sign up or in first
     .row
       button(@click.stop="triggerSignUpOrInIsVisible") Sign Up or In
-
-  .persistent-item(v-if="notifyReadOnly" ref="readOnly" :class="{'notification-jiggle': notifyReadOnlyJiggle}")
-    p You can't edit this space, but you can save your own copy
-    .row
-      button(@click="copyCurrentSpace")
-        img.icon(src="@/assets/add.svg")
-        span Save a Copy
 
   .persistent-item.danger(v-if="notifySpaceNotFound")
     p Space could not be found, or is private
@@ -110,7 +103,7 @@ export default {
           element.addEventListener('animationend', this.removeNotifyReadOnlyJiggle, false)
         }
       }
-      if (mutation.type === 'notifyReadOnlyJiggle') {
+      if (mutation.type === 'triggerReadOnlyJiggle') {
         const element = this.$refs.readOnly
         if (!element) { return }
         this.notifyReadOnlyJiggle = true
@@ -134,7 +127,6 @@ export default {
   },
   computed: {
     items () { return this.$store.state.notifications },
-    notifyReadOnly () { return this.$store.state.notifyReadOnly },
     notifySpaceNotFound () { return this.$store.state.notifySpaceNotFound },
     notifyConnectionError () { return this.$store.state.notifyConnectionError },
     notifySpaceIsRemoved () { return this.$store.state.notifySpaceIsRemoved },
@@ -184,9 +176,6 @@ export default {
     },
     removeNotifyReadOnlyJiggle () {
       this.notifyReadOnlyJiggle = false
-    },
-    copyCurrentSpace () {
-      this.$store.dispatch('currentSpace/copyCurrentSpace')
     },
     triggerSpaceDetailsVisible () {
       this.$store.commit('triggerSpaceDetailsVisible')
