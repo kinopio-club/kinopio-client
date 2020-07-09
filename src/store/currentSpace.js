@@ -334,10 +334,8 @@ export default {
       Vue.nextTick(() => {
         context.dispatch('updateUserLastSpaceId')
         context.dispatch('saveNewSpace')
-        context.commit('notifyReadOnly', false, { root: true })
         context.commit('notifyNewUser', false, { root: true })
       })
-      // context.commit('addNotification', { message: "Space Duplicated. It's now yours to edit", type: 'success' }, { root: true })
     },
     addSpace: (context) => {
       context.dispatch('createNewSpace')
@@ -345,7 +343,6 @@ export default {
         context.dispatch('updateCardConnectionPaths', { cardId: context.state.cards[1].id, connections: context.state.connections })
         context.dispatch('saveNewSpace')
         context.dispatch('updateUserLastSpaceId')
-        context.commit('notifyReadOnly', false, { root: true })
         context.commit('notifyNewUser', false, { root: true })
         context.commit('notifySignUpToEditSpace', false, { root: true })
       })

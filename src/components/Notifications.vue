@@ -71,12 +71,18 @@ aside.notifications(@click="closeAllDialogs")
       button(@click="createNewHelloSpace")
         img.icon(src="@/assets/add.svg")
         span How does this work?
+
+  .persistent-item.info(v-if="currentSpaceIsTemplate" ref="template" :class="{'notification-jiggle': readOnlyJiggle}")
+    button(@click="duplicateSpace")
+      img.icon(src="@/assets/add.svg")
+      span Use Template
 </template>
 
 <script>
 import cache from '@/cache.js'
 import privacy from '@/spaces/privacy.js'
 import utils from '@/utils.js'
+import templates from '@/spaces/templates.js'
 
 let wasOffline
 
@@ -97,18 +103,12 @@ export default {
         this.update()
       }
       if (mutation.type === 'currentUserIsPainting') {
-        const element = this.$refs.readOnly
-        if (!element) { return }
-        if (state.currentUserIsPainting && element) {
-          this.readOnlyJiggle = true
-          element.addEventListener('animationend', this.removeReadOnlyJiggle, false)
+        if (state.currentUserIsPainting) {
+          this.addReadOnlyJiggle()
         }
       }
       if (mutation.type === 'triggerReadOnlyJiggle') {
-        const element = this.$refs.readOnly
-        if (!element) { return }
-        this.readOnlyJiggle = true
-        element.addEventListener('animationend', this.removeReadOnlyJiggle, false)
+        this.addReadOnlyJiggle()
       }
       if (mutation.type === 'notifyCardsCreatedIsOverLimit') {
         this.notifyCardsCreatedIsOverLimitJiggle = true
@@ -159,6 +159,11 @@ export default {
       const cardsCreatedLimit = 150
       const cardsCreatedCount = this.$store.state.currentUser.cardsCreatedCount
       return Math.max(cardsCreatedLimit - cardsCreatedCount, 0)
+    },
+    currentSpaceIsTemplate () {
+      const id = this.$store.state.currentSpace.id
+      const templateSpaceIds = templates.spaces().map(space => space.id)
+      return templateSpaceIds.includes(id)
     }
   },
   methods: {
@@ -181,6 +186,12 @@ export default {
     },
     remove () {
       this.$store.commit('removeNotification')
+    },
+    addReadOnlyJiggle () {
+      const element = this.$refs.readOnly || this.$refs.template
+      if (!element) { return }
+      this.readOnlyJiggle = true
+      element.addEventListener('animationend', this.removeReadOnlyJiggle, false)
     },
     removeReadOnlyJiggle () {
       this.readOnlyJiggle = false
@@ -243,6 +254,11 @@ export default {
     },
     refreshBrowser () {
       window.location.reload()
+    },
+    duplicateSpace () {
+      const duplicatedSpaceName = this.$store.state.currentSpace.name
+      this.$store.dispatch('currentSpace/duplicateSpace')
+      this.$store.commit('addNotification', { message: `${duplicatedSpaceName} is now yours to edit`, type: 'success' }, { root: true })
     }
   }
 }

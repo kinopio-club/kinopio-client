@@ -129,9 +129,7 @@ export default {
         updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
       }
       if (mutation.type === 'currentUserIsPainting') {
-        const element = this.$refs.readOnly
-        if (!element) { return }
-        if (state.currentUserIsPainting && element) {
+        if (state.currentUserIsPainting) {
           this.addReadOnlyJiggle()
         }
       }
