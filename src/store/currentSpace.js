@@ -324,7 +324,7 @@ export default {
       utils.updateWindowUrlAndTitle({ space, currentUserIsSignedIn })
       context.commit('addUserToSpace', user)
     },
-    copyCurrentSpace: (context) => {
+    duplicateSpace: (context) => {
       let space = utils.clone(context.state)
       space.id = nanoid()
       space.users = []
