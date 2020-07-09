@@ -12,8 +12,10 @@ header(:style="visualViewportPosition")
     .space-details-wrap
       .button-wrap
         button(@click.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
-          .badge.info.template-badge(v-show="currentSpaceIsTemplate")
+          .badge.info(v-show="currentSpaceIsTemplate")
             span Template
+          .badge.info(v-show="!userCanEditSpace")
+            span Read Only
           span {{currentSpaceName}}
           img.icon.privacy-icon(v-if="spaceIsNotClosed" :src="privacyIcon" :class="privacyName")
           .badge.status.explore(v-if="shouldShowInExplore")
@@ -132,6 +134,7 @@ export default {
       const userCanEditSpace = this.$store.getters['currentUser/canEditSpace']()
       return newStuffIsUpdated && isNotDefaultSpace && userCanEditSpace
     },
+    userCanEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     importArenaChannelIsVisible () { return this.$store.state.importArenaChannelIsVisible },
     currentSpace () { return this.$store.state.currentSpace },
     currentUser () { return this.$store.state.currentUser },
