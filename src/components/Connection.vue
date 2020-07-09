@@ -146,6 +146,7 @@ export default {
     // same as ConnectionLabel method
     showConnectionDetails (event) {
       if (isMultiTouch) { return }
+      if (!this.canEditSpace) { this.$store.commit('triggerReadOnlyJiggle') }
       currentCursor = utils.cursorPositionInViewport(event)
       if (!utils.cursorsAreClose(startCursor, currentCursor)) { return }
       const detailsPosition = utils.cursorPositionInPage(event)

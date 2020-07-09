@@ -12,8 +12,15 @@ header(:style="visualViewportPosition")
     .space-details-wrap
       .button-wrap
         button(@click.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
-          .badge.info.template-badge(v-show="currentSpaceIsTemplate")
+          .badge.info(v-show="currentSpaceIsTemplate")
             span Template
+
+          .badge-wrap(v-if="!userCanEditSpace && !currentSpaceIsTemplate")
+            .badge.info(:class="{'invisible': readOnlyJiggle}")
+              span Read Only
+            .badge.info.invisible-badge(ref="readOnly" :class="{'badge-jiggle': readOnlyJiggle, 'invisible': !readOnlyJiggle}")
+              span Read Only
+
           span {{currentSpaceName}}
           img.icon.privacy-icon(v-if="spaceIsNotClosed" :src="privacyIcon" :class="privacyName")
           .badge.status.explore(v-if="shouldShowInExplore")
@@ -95,7 +102,8 @@ export default {
       upgradeUserIsVisible: false,
       pinchZoomOffsetLeft: 0,
       pinchZoomOffsetTop: 0,
-      pinchZoomScale: 1
+      pinchZoomScale: 1,
+      readOnlyJiggle: false
     }
   },
   created () {
@@ -120,6 +128,14 @@ export default {
         if (updatePositionTimer) { return }
         updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
       }
+      if (mutation.type === 'currentUserIsPainting') {
+        if (state.currentUserIsPainting) {
+          this.addReadOnlyJiggle()
+        }
+      }
+      if (mutation.type === 'triggerReadOnlyJiggle') {
+        this.addReadOnlyJiggle()
+      }
     })
   },
   mounted () {
@@ -132,6 +148,7 @@ export default {
       const userCanEditSpace = this.$store.getters['currentUser/canEditSpace']()
       return newStuffIsUpdated && isNotDefaultSpace && userCanEditSpace
     },
+    userCanEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     importArenaChannelIsVisible () { return this.$store.state.importArenaChannelIsVisible },
     currentSpace () { return this.$store.state.currentSpace },
     currentUser () { return this.$store.state.currentUser },
@@ -210,6 +227,15 @@ export default {
     }
   },
   methods: {
+    addReadOnlyJiggle () {
+      const element = this.$refs.readOnly
+      if (!element) { return }
+      this.readOnlyJiggle = true
+      element.addEventListener('animationend', this.removeReadOnlyJiggle, false)
+    },
+    removeReadOnlyJiggle () {
+      this.readOnlyJiggle = false
+    },
     closeAllDialogs () {
       this.aboutIsVisible = false
       this.spaceDetailsIsVisible = false
@@ -352,4 +378,36 @@ header
       min-height auto
       height 14px
       vertical-align -1px
+
+  .badge-wrap
+    position relative
+    display inline
+
+  .invisible
+    visibility hidden
+
+  .invisible-badge
+    display block !important
+    position absolute
+    left 0
+    top -2px
+
+.badge-jiggle
+  animation-name notificationJiggle
+  animation-duration 0.2s
+  animation-iteration-count 2
+  animation-direction forward
+  animation-fill-mode forwards
+  animation-timing-function ease-out
+@keyframes notificationJiggle
+  0%
+    transform rotate(0deg)
+  25%
+    transform rotate(-3deg)
+  50%
+    transform rotate(2deg)
+  75%
+    transform rotate(-3deg)
+  100%
+    transform rotate(0deg)
 </style>

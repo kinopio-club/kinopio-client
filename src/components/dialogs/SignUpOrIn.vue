@@ -232,7 +232,6 @@ export default {
           this.$store.commit('currentSpace/addUserToSpace', currentUser)
         }
         this.$store.commit('clearAllNotifications', false)
-        this.$store.dispatch('currentSpace/checkIfShouldNotifyReadOnly')
         this.$store.commit('notifyNewUser', false)
         this.addCollaboratorToInvitedSpaces()
         this.$store.commit('triggerSpaceDetailsVisible')

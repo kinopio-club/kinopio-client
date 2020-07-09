@@ -86,7 +86,6 @@ export default new Vuex.Store({
 
     // notifications
     notifications: [],
-    notifyReadOnly: false,
     notifySpaceNotFound: false,
     notifyConnectionError: false,
     notifySpaceIsRemoved: false,
@@ -174,7 +173,7 @@ export default new Vuex.Store({
     triggerSignUpOrInIsVisible: () => {},
     triggerArenaAuthenticationError: () => {},
     triggerKeyboardShortcutsIsVisible: () => {},
-    notifyReadOnlyJiggle: () => {},
+    triggerReadOnlyJiggle: () => {},
     triggerSelectTemplateCategory: () => {},
     triggerUpdateMagicPaintPositionOffset: () => {},
     triggeredPaintFramePosition: (state, cursor) => {
@@ -445,13 +444,6 @@ export default new Vuex.Store({
       state.notifyAccessFavorites = false
       state.notifyCardsCreatedIsNearLimit = false
       state.notifyCardsCreatedIsOverLimit = false
-    },
-    notifyReadOnly: (state, value) => {
-      utils.typeCheck(value, 'boolean')
-      state.notifyReadOnly = value
-      if (state.notifySpaceNotFound) {
-        state.notifyReadOnly = false
-      }
     },
     notifySpaceNotFound: (state, value) => {
       utils.typeCheck(value, 'boolean')

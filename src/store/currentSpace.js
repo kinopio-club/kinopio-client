@@ -324,7 +324,7 @@ export default {
       utils.updateWindowUrlAndTitle({ space, currentUserIsSignedIn })
       context.commit('addUserToSpace', user)
     },
-    copyCurrentSpace: (context) => {
+    duplicateSpace: (context) => {
       let space = utils.clone(context.state)
       space.id = nanoid()
       space.users = []
@@ -334,9 +334,6 @@ export default {
       Vue.nextTick(() => {
         context.dispatch('updateUserLastSpaceId')
         context.dispatch('saveNewSpace')
-        context.dispatch('checkIfShouldNotifyReadOnly')
-        context.commit('addNotification', { message: "Space Copied. It's now yours to edit", type: 'success' }, { root: true })
-        context.commit('notifyReadOnly', false, { root: true })
         context.commit('notifyNewUser', false, { root: true })
       })
     },
@@ -346,7 +343,6 @@ export default {
         context.dispatch('updateCardConnectionPaths', { cardId: context.state.cards[1].id, connections: context.state.connections })
         context.dispatch('saveNewSpace')
         context.dispatch('updateUserLastSpaceId')
-        context.commit('notifyReadOnly', false, { root: true })
         context.commit('notifyNewUser', false, { root: true })
         context.commit('notifySignUpToEditSpace', false, { root: true })
       })
@@ -450,7 +446,6 @@ export default {
           shouldUpdateUrl: false
         })
       }
-      context.dispatch('checkIfShouldNotifyReadOnly')
       context.commit('spaceUrlToLoad', '', { root: true })
       context.dispatch('updateSpacePageSize')
     },
@@ -529,14 +524,6 @@ export default {
       const removedSpaces = cache.getAllRemovedSpaces()
       removedSpaces.forEach(space => cache.removeSpacePermanent(space))
       context.dispatch('api/addToQueue', { name: 'removeAllRemovedSpacesPermanentFromUser', body: { userId } }, { root: true })
-    },
-    checkIfShouldNotifyReadOnly: (context) => {
-      const CanEditSpace = context.rootGetters['currentUser/canEditSpace']()
-      if (CanEditSpace) {
-        context.commit('notifyReadOnly', false, { root: true })
-      } else {
-        context.commit('notifyReadOnly', true, { root: true })
-      }
     },
     checkIfShouldNotifySpaceIsRemoved: (context, space) => {
       const canEdit = context.rootGetters['currentUser/canEditSpace']()

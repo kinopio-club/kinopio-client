@@ -8,7 +8,10 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.stop ref="dialog")
       span Copy Card Names
     .row
       .badge.success(v-if="textIsCopied") Card Names Copied
-
+    button(@click="duplicateSpace")
+      img.icon(src="@/assets/add.svg")
+      span Duplicate Space
+    .badge.success(v-if="spaceIsDuplicated") {{duplicatedSpaceName}} duplicated
   section
     p Download
     button(@click="downloadTxt")
@@ -37,7 +40,9 @@ export default {
   },
   data () {
     return {
-      textIsCopied: false
+      textIsCopied: false,
+      spaceIsDuplicated: false,
+      duplicatedSpaceName: ''
     }
   },
   methods: {
@@ -85,6 +90,11 @@ export default {
         behavior: 'smooth',
         scrollMode: 'if-needed'
       })
+    },
+    duplicateSpace () {
+      this.duplicatedSpaceName = this.$store.state.currentSpace.name
+      this.$store.dispatch('currentSpace/duplicateSpace')
+      this.spaceIsDuplicated = true
     }
   },
   watch: {
@@ -93,6 +103,7 @@ export default {
         if (visible) {
           this.textIsCopied = false
           this.scrollIntoView()
+          this.spaceIsDuplicated = false
         }
       })
     }
