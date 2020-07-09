@@ -36,16 +36,18 @@ dialog.narrow.multiple-selected-actions(
         span {{ pluralLabels }}
   section
     .row
+      //- Remove
       button(:disabled="!canEditSome.any" @click="remove")
         img.icon(src="@/assets/remove.svg")
         span {{ removeLabel }}
+      //- Export
       .button-wrap
         button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
           span Export
         Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
     .row(v-if="multipleCardsSelectedIds.length")
-      button(v-if="multipleCardsIsSelected" :disabled="!canEditSome.cards" @click="alignCards")
-        img.icon(src="@/assets/align.svg")
+      AlignAndDistribute(:visible="multipleCardsIsSelected")
+      //- Move or Copy
       .button-wrap
         button(:disabled="!canEditAll.cards" @click.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
           img.icon.visit(src="@/assets/visit.svg")
@@ -69,6 +71,7 @@ import Export from '@/components/dialogs/Export.vue'
 import MoveOrCopyToSpace from '@/components/dialogs/MoveOrCopyToSpace.vue'
 import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
 import FramePicker from '@/components/dialogs/FramePicker.vue'
+import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
 
 export default {
   name: 'MultipleSelectedActions',
@@ -76,7 +79,8 @@ export default {
     Export,
     MoveOrCopyToSpace,
     MultipleConnectionsPicker,
-    FramePicker
+    FramePicker,
+    AlignAndDistribute
   },
   data () {
     return {
@@ -365,17 +369,6 @@ export default {
       this.editableCards.forEach(card => this.$store.dispatch('currentSpace/removeCard', card))
       this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('clearMultipleSelected')
-    },
-    alignCards () {
-      const x = this.editableCards[0].x
-      this.editableCards.forEach(card => {
-        card = utils.clone(card)
-        card.x = x
-        this.$store.dispatch('currentSpace/updateCard', card)
-        this.$nextTick(() => {
-          this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
-        })
-      })
     },
     scrollIntoView () {
       const element = this.$refs.dialog

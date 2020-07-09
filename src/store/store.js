@@ -376,6 +376,14 @@ export default new Vuex.Store({
       state.multipleCardsSelectedIds = []
       state.multipleConnectionsSelectedIds = []
     },
+    multipleCardsSelectedIds: (state, cardIds) => {
+      utils.typeCheck(cardIds, 'array')
+      state.multipleCardsSelectedIds = cardIds
+    },
+    multipleConnectionsSelectedIds: (state, connectionIds) => {
+      utils.typeCheck(connectionIds, 'array')
+      state.multipleConnectionsSelectedIds = connectionIds
+    },
     addToRemoteCardsSelected: (state, update) => {
       utils.typeCheck(update, 'object')
       delete update.type
