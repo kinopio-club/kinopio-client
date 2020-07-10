@@ -176,7 +176,11 @@ export default {
     async createPaymentMethod () {
       const result = await stripe.createPaymentMethod({
         type: 'card',
-        card: cardNumber
+        card: cardNumber,
+        billing_details: {
+          name: this.name,
+          email: this.email
+        }
       })
       console.log('🎡 stripe payment method', result)
       if (result.error) {
@@ -195,6 +199,10 @@ export default {
       if (result.error) {
         this.error.stripeError = true
         this.error.stripeErrorMessage = utils.removeTrailingPeriod(result.error.message)
+      }
+      if (result.type === 'StripeCardError') {
+        this.error.stripeError = true
+        this.error.stripeErrorMessage = utils.removeTrailingPeriod(result.raw.message)
       }
       return result
     },
