@@ -394,8 +394,8 @@ header
 
 .badge-jiggle
   animation-name notificationJiggle
-  animation-duration 0.2s
-  animation-iteration-count 2
+  animation-duration 0.4s
+  animation-iteration-count 1
   animation-direction forward
   animation-fill-mode forwards
   animation-timing-function ease-out
@@ -403,11 +403,11 @@ header
   0%
     transform rotate(0deg)
   25%
-    transform rotate(-3deg)
+    transform rotate(-4deg)
   50%
-    transform rotate(2deg)
+    transform rotate(3deg)
   75%
-    transform rotate(-3deg)
+    transform rotate(-4deg)
   100%
     transform rotate(0deg)
 </style>
