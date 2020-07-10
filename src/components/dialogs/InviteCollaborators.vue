@@ -35,7 +35,8 @@ export default {
   },
   data () {
     return {
-      urlIsCopied: false
+      urlIsCopied: false,
+      url: ''
     }
   },
   computed: {
@@ -43,13 +44,6 @@ export default {
     // https://caniuse.com/#feat=web-share
     canNativeShare () {
       return Boolean(navigator.share)
-    },
-    url: {
-      get () {
-        const collaboratorKey = this.$store.state.currentSpace.collaboratorKey
-        const spaceId = this.$store.state.currentSpace.id
-        return `${window.location.origin}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}`
-      }
     }
   },
   methods: {
@@ -72,12 +66,20 @@ export default {
       const space = this.$store.state.currentSpace
       const collaboratorKey = await this.$store.dispatch('api/getSpaceCollaboratorKey', space)
       this.$store.commit('currentSpace/updateSpace', { collaboratorKey })
+    },
+    updateInviteUrl () {
+      const collaboratorKey = this.$store.state.currentSpace.collaboratorKey
+      const spaceId = this.$store.state.currentSpace.id
+      this.url = `${window.location.origin}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}`
     }
   },
   watch: {
     visible (visible) {
-      this.urlIsCopied = false
-      this.updateCollaboratorKey()
+      if (visible) {
+        this.urlIsCopied = false
+        this.updateCollaboratorKey()
+        this.updateInviteUrl()
+      }
     }
   }
 }

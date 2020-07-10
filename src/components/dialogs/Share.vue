@@ -59,7 +59,8 @@ export default {
       selectedUser: {},
       userDetailsPosition: {},
       userDetailsIsVisible: false,
-      spaceCollaborators: []
+      spaceCollaborators: [],
+      url: ''
     }
   },
   computed: {
@@ -76,11 +77,6 @@ export default {
     },
     spaceIsPrivate () {
       return this.spacePrivacy === 'private'
-    },
-    url: {
-      get () {
-        return window.location.href
-      }
     },
     isSpaceMember () {
       const currentSpace = this.$store.state.currentSpace
@@ -161,6 +157,7 @@ export default {
       this.closeDialogs()
       if (visible) {
         this.updateSpaceCollaborators()
+        this.url = window.location.href
       }
     }
   }
