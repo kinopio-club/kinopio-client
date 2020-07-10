@@ -116,7 +116,7 @@ export default {
       this.keyboardShortcutsIsVisible = !isVisible
     },
     async getNewStuff () {
-      const response = await fetch('https://api.are.na/v2/channels/kinopio-updates/contents?direction=desc')
+      const response = await fetch('https://api.are.na/v2/channels/kinopio-what-s-new/contents?direction=desc')
       const data = await response.json()
       return data
     },
