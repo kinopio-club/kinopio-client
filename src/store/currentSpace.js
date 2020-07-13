@@ -410,6 +410,14 @@ export default {
         context.dispatch('updateSpacePageSize', null, { root: true })
       })
     },
+    removeEmptyCards: (context) => {
+      let cards = context.state.cards
+      cards.forEach(card => {
+        if (!card.name) {
+          context.dispatch('removeCardPermanent', card)
+        }
+      })
+    },
     loadSpace: async (context, space) => {
       const emptySpace = { id: space.id, cards: [], connections: [], spectators: [] }
       const cachedSpace = cache.space(space.id)
@@ -448,6 +456,7 @@ export default {
       }
       context.commit('spaceUrlToLoad', '', { root: true })
       context.dispatch('updateSpacePageSize')
+      context.dispatch('removeEmptyCards')
     },
     loadLastSpace: (context) => {
       const user = context.rootState.currentUser
