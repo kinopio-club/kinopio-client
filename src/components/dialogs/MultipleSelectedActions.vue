@@ -15,8 +15,9 @@ dialog.narrow.multiple-selected-actions(
         label(v-else @click.prevent="addCheckboxToCards" @keydown.stop.enter="addCheckboxToCards" tabindex="0")
           input.add(type="checkbox" tabindex="-1")
       //- Connect
-      label(v-if="multipleCardsIsSelected" :class="{active: cardsIsConnected}" @click.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards")
-        input(type="checkbox" v-model="cardsIsConnected")
+      button(v-if="multipleCardsIsSelected" :class="{active: cardsIsConnected}" @click.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards")
+        img.icon.connector-icon(v-if="cardsIsConnected" src="@/assets/connector-closed.svg")
+        img.icon.connector-icon(v-else src="@/assets/connector-open.svg")
         span Connect
       //- Frames
       .button-wrap(:class="{active: framePickerIsVisible}" @click.stop="toggleFramePickerIsVisible")
@@ -413,5 +414,6 @@ export default {
   .cards-checkboxes
     input
       margin 0
-
+  .connector-icon
+    width 11px
 </style>
