@@ -9,14 +9,17 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       v-model="name"
       @keydown.prevent.enter.exact
       @keyup.enter.exact="closeCard"
-      @keyup.alt.enter.exact.stop="insertLineBreak"
-      @keyup.ctrl.enter.exact.stop="insertLineBreak"
       @keyup.stop.esc="closeCardAndFocus"
       @keyup.stop.backspace
       data-type="name"
       maxlength="250"
       @click="triggerUpdateMagicPaintPositionOffset"
       @blur="triggerUpdatePositionInVisualViewport"
+
+      @keyup.alt.enter.exact.stop
+      @keyup.ctrl.enter.exact.stop
+      @keydown.alt.enter.exact.stop="insertLineBreak"
+      @keydown.ctrl.enter.exact.stop="insertLineBreak"
     )
     .row
       //- Remove
