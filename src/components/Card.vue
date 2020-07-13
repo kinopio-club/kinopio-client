@@ -314,12 +314,11 @@ export default {
       })
       this.$store.commit('currentConnectionCursorStart', cursor)
     },
-    addConnectionType () {
+    addConnectionType (event) {
       const typePref = this.$store.state.currentUser.defaultConnectionTypeId
       const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
-      if (!defaultType) {
-        this.$store.dispatch('currentSpace/addConnectionType')
-      }
+      if (defaultType || event.shiftKey) { return }
+      this.$store.dispatch('currentSpace/addConnectionType')
     },
     startConnecting (event) {
       if (!this.canEditSpace) { return }
@@ -328,7 +327,7 @@ export default {
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.dispatch('clearMultipleSelected')
       if (!this.$store.state.currentUserIsDrawingConnection) {
-        this.addConnectionType()
+        this.addConnectionType(event)
         this.createCurrentConnection(event)
       }
       this.$store.commit('currentUserIsDrawingConnection', true)
