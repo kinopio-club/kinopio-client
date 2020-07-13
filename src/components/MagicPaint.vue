@@ -253,7 +253,6 @@ export default {
       if (utils.isMultiTouch(event)) { return }
       this.startLocking()
       if (event.touches) {
-        this.$store.commit('isTouchDevice', true)
         this.$store.commit('currentUserIsPainting', false)
       } else {
         this.$store.commit('currentUserIsPainting', true)
