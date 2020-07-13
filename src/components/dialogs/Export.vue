@@ -93,6 +93,7 @@ export default {
       this.duplicatedSpaceName = this.$store.state.currentSpace.name
       this.$store.dispatch('currentSpace/duplicateSpace')
       this.spaceIsDuplicated = true
+      this.$emit('updateSpaces')
     }
   },
   watch: {

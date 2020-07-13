@@ -21,7 +21,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
     .button-wrap
       button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
         span Export
-      Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="currentSpace" :exportScope="exportScope")
+      Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="currentSpace" :exportScope="exportScope" @updateSpaces="updateSpaces")
       button(v-if="!isSpaceMember" @click="duplicateSpace")
         img.icon(src="@/assets/add.svg")
         span Duplicate
