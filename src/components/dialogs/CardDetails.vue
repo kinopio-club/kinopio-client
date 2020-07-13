@@ -219,8 +219,10 @@ export default {
       this.triggerUpdatePositionInVisualViewport()
     },
     scrollIntoView () {
+      if (utils.isMobile()) { return }
       const element = this.$refs.dialog
-      scrollIntoView.scroll(element)
+      const isTouchDevice = this.$store.state.isTouchDevice
+      scrollIntoView.scroll(element, isTouchDevice)
     },
     scrollIntoViewAndFocus () {
       const pinchZoomScale = utils.visualViewport().scale
@@ -230,9 +232,7 @@ export default {
         max: 1.3
       })
       if (!pinchZoomScaleShouldFocus) { return }
-      if (!utils.isMobile()) {
-        this.scrollIntoView()
-      }
+      this.scrollIntoView()
       this.focusName()
       this.triggerUpdateMagicPaintPositionOffset()
       this.triggerUpdatePositionInVisualViewport()

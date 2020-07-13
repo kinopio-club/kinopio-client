@@ -165,6 +165,7 @@ export default {
     },
 
     initInteractions (event) {
+      if (event.touches) { this.$store.commit('isTouchDevice', true) }
       if (this.eventIsFromTextarea(event)) {
         shouldCancel = true
       } else {
@@ -291,6 +292,7 @@ export default {
       })
     },
     addCard (position) {
+      if (event.touches) { this.$store.commit('isTouchDevice', true) }
       const isParentCard = true
       if (this.spaceIsReadOnly) { return }
       const withinX = position.x > 0 && position.x < this.$store.state.pageWidth

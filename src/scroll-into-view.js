@@ -1,3 +1,5 @@
+import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
+
 import utils from '@/utils.js'
 
 const maxIterations = 12 // 12 / 60fps = 200ms
@@ -7,7 +9,15 @@ const headerPadding = 40
 let viewportWidth, viewportHeight, totalX, totalY, currentIteration, scrollTimer, travelledX, travelledY
 
 const self = {
-  scroll (element) {
+  scroll (element, isTouchDevice) {
+    if (isTouchDevice) {
+      console.log('🍆', isTouchDevice)
+      scrollIntoView(element, {
+        behavior: 'smooth',
+        scrollMode: 'if-needed'
+      })
+      return
+    }
     this.cancel()
     totalX = 0
     totalY = 0
