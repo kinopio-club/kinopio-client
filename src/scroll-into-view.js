@@ -10,8 +10,9 @@ let viewportWidth, viewportHeight, totalX, totalY, currentIteration, scrollTimer
 
 const self = {
   scroll (element, isTouchDevice) {
+    console.log('🍆🍆🍆🍆🍆🍆', isTouchDevice)
+
     if (isTouchDevice) {
-      console.log('🍆', isTouchDevice)
       scrollIntoView(element, {
         behavior: 'smooth',
         scrollMode: 'if-needed'
