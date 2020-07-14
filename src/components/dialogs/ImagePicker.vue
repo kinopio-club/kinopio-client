@@ -44,9 +44,9 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.stop ref="dialo
 </template>
 
 <script>
-import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 import debounce from 'lodash-es/debounce'
 
+import scrollIntoView from '@/scroll-into-view.js'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
@@ -244,10 +244,8 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      scrollIntoView(element, {
-        behavior: 'smooth',
-        scrollMode: 'if-needed'
-      })
+      const isTouchDevice = this.$store.state.isTouchDevice
+      scrollIntoView.scroll(element, isTouchDevice)
       this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
     isCardUrl (image) {

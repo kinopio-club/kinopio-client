@@ -49,6 +49,18 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.stop)
     article
       .row
         .badge.title
+          img.icon.connector-icon(src="@/assets/connector-open.svg")
+          span Use Last Connection Type
+        .badge.info Shift-Click on
+          img.icon.connector-icon(src="@/assets/connector-open.svg")
+      p
+        span.badge.info Shift-Drag
+        span card connector or
+        span.badge.info Shift-Click
+        span 'Connect' button to use last connection type
+    article
+      .row
+        .badge.title
           img.icon(src="@/assets/remove.svg")
           span Remove Selected
         .badge.info Delete
@@ -100,11 +112,15 @@ export default {
 <style lang="stylus">
 .keyboard-shortcuts
   overflow auto
-  max-height calc(100vh - 280px)
+  max-height calc(100vh - 300px)
   .title
     padding-left 0
   .badge
     display inline-block
+  .badge.info
+    img
+      margin-left 6px
+
   article
     position static
     margin-bottom 10px
@@ -125,4 +141,6 @@ export default {
       margin-right 6px
   .badge.title + .badge.info
     margin-right 0
+  .connector-icon
+    width 11px
 </style>

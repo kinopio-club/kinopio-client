@@ -57,7 +57,7 @@ import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
 import last from 'lodash-es/last'
-import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
+import scrollIntoView from '@/scroll-into-view.js'
 
 export default {
   components: {
@@ -191,10 +191,8 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      scrollIntoView(element, {
-        behavior: 'smooth',
-        scrollMode: 'if-needed'
-      })
+      const isTouchDevice = this.$store.state.isTouchDevice
+      scrollIntoView.scroll(element, isTouchDevice)
     },
     scrollIntoViewAndFocus () {
       const element = this.$refs.typeName

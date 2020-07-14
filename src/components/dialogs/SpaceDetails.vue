@@ -21,7 +21,10 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
     .button-wrap
       button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
         span Export
-      Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="currentSpace" :exportScope="exportScope")
+      Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="currentSpace" :exportScope="exportScope" @updateSpaces="updateSpaces")
+      button(v-if="!isSpaceMember" @click="duplicateSpace")
+        img.icon(src="@/assets/add.svg")
+        span Duplicate
 
   section.results-actions
     .row
@@ -145,9 +148,7 @@ export default {
     addSpace () {
       window.scrollTo(0, 0)
       this.$store.dispatch('currentSpace/addSpace')
-      this.$nextTick(() => {
-        this.updateSpaces()
-      })
+      this.updateSpaces()
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space })
@@ -173,12 +174,14 @@ export default {
       this.changeToLastSpace()
     },
     async updateSpaces () {
-      const currentUser = this.$store.state.currentUser
-      const userSpaces = cache.getAllSpaces().filter(space => {
-        return this.$store.getters['currentUser/canEditSpace'](space)
+      this.$nextTick(() => {
+        const currentUser = this.$store.state.currentUser
+        const userSpaces = cache.getAllSpaces().filter(space => {
+          return this.$store.getters['currentUser/canEditSpace'](space)
+        })
+        this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(userSpaces, currentUser)
+        this.updateRemoveLabel()
       })
-      this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(userSpaces, currentUser)
-      this.updateRemoveLabel()
     },
     pruneCachedSpaces (remoteSpaces) {
       const remoteSpaceIds = remoteSpaces.map(space => space.id)
@@ -208,6 +211,12 @@ export default {
       this.hasUpdatedFavorites = true
       await this.$store.dispatch('currentUser/restoreUserFavorites')
       this.favoritesIsLoading = false
+    },
+    duplicateSpace () {
+      const duplicatedSpaceName = this.$store.state.currentSpace.name
+      this.$store.dispatch('currentSpace/duplicateSpace')
+      this.$store.commit('addNotification', { message: `${duplicatedSpaceName} is now yours to edit`, type: 'success' })
+      this.updateSpaces()
     }
   },
   watch: {

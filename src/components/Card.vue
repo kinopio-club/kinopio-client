@@ -23,8 +23,8 @@ article(:style="position" :data-card-id="id")
     span.card-content-wrap
       .name-wrap
         //- [·]
-        .checkbox-wrap(v-if="hasCheckbox")
-          label(:class="{active: isChecked, disabled: !canEditSpace}" @touchend="toggleCardChecked")
+        .checkbox-wrap(v-if="hasCheckbox" @click.prevent.stop="toggleCardChecked" @touchend.prevent.stop="toggleCardChecked")
+          label(:class="{active: isChecked, disabled: !canEditSpace}")
             input(type="checkbox" v-model="checkboxState")
         //- Name
         p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked}")
@@ -106,10 +106,6 @@ export default {
     checkboxState: {
       get () {
         return this.isChecked
-      },
-      set (value) {
-        this.$store.dispatch('closeAllDialogs')
-        this.toggleCardChecked()
       }
     },
     position () {
@@ -274,7 +270,9 @@ export default {
   },
   methods: {
     toggleCardChecked () {
+      if (!this.canEditSpace) { return }
       const value = !this.isChecked
+      this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.id, value })
       this.$store.commit('currentUserIsDraggingCard', false)
     },
@@ -314,12 +312,11 @@ export default {
       })
       this.$store.commit('currentConnectionCursorStart', cursor)
     },
-    addConnectionType () {
+    addConnectionType (event) {
       const typePref = this.$store.state.currentUser.defaultConnectionTypeId
       const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
-      if (!defaultType) {
-        this.$store.dispatch('currentSpace/addConnectionType')
-      }
+      if (defaultType || event.shiftKey) { return }
+      this.$store.dispatch('currentSpace/addConnectionType')
     },
     startConnecting (event) {
       if (!this.canEditSpace) { return }
@@ -328,7 +325,7 @@ export default {
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.dispatch('clearMultipleSelected')
       if (!this.$store.state.currentUserIsDrawingConnection) {
-        this.addConnectionType()
+        this.addConnectionType(event)
         this.createCurrentConnection(event)
       }
       this.$store.commit('currentUserIsDrawingConnection', true)
@@ -461,6 +458,25 @@ article
         box-shadow none
         color var(--primary)
         background var(--secondary-active-background)
+  .checkbox-wrap
+    &:hover
+      label
+        box-shadow 3px 3px 0 var(--heavy-shadow)
+        background-color var(--secondary-hover-background)
+        input
+          background-color var(--secondary-hover-background)
+      label.active
+        box-shadow var(--active-inset-shadow)
+        background-color var(--secondary-active-background)
+        input
+          background-color var(--secondary-active-background)
+    &:active
+      label
+        box-shadow none
+        color var(--primary)
+        background-color var(--secondary-active-background)
+      input
+        background-color var(--secondary-active-background)
   .connected-colors
     position absolute
     left 0

@@ -29,6 +29,7 @@ export default new Vuex.Store({
     copiedCards: [],
     stripeIsLoaded: false,
     shouldHideFooter: false,
+    isTouchDevice: false,
 
     // reset password
     resetPasswordApiKey: '',
@@ -151,6 +152,10 @@ export default new Vuex.Store({
     shouldHideFooter: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.shouldHideFooter = value
+    },
+    isTouchDevice: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.isTouchDevice = value
     },
     resetPasswordApiKey: (state, apiKey) => {
       utils.typeCheck(apiKey, 'string')

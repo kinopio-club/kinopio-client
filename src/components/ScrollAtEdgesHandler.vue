@@ -46,8 +46,8 @@ export default {
       endCursor = position
       scrollAreaHeight = Math.max(50, this.viewportHeight / 8)
       scrollAreaWidth = Math.max(50, this.viewportWidth / 8)
-      maxHeight = Math.max(2500, this.$store.state.viewportHeight)
-      maxWidth = Math.max(2500, this.$store.state.viewportWidth)
+      maxHeight = Math.max(6500, this.$store.state.viewportHeight)
+      maxWidth = Math.max(6500, this.$store.state.viewportWidth)
       if (this.$store.getters.shouldScrollAtEdges(event)) {
         this.updateMovementDirection()
       }

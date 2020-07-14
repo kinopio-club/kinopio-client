@@ -15,8 +15,9 @@ dialog.narrow.multiple-selected-actions(
         label(v-else @click.prevent="addCheckboxToCards" @keydown.stop.enter="addCheckboxToCards" tabindex="0")
           input.add(type="checkbox" tabindex="-1")
       //- Connect
-      label(v-if="multipleCardsIsSelected" :class="{active: cardsIsConnected}" @click.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards")
-        input(type="checkbox" v-model="cardsIsConnected")
+      button(v-if="multipleCardsIsSelected" :class="{active: cardsIsConnected}" @click.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards")
+        img.icon.connector-icon(v-if="cardsIsConnected" src="@/assets/connector-closed.svg")
+        img.icon.connector-icon(v-else src="@/assets/connector-open.svg")
         span Connect
       //- Frames
       .button-wrap(:class="{active: framePickerIsVisible}" @click.stop="toggleFramePickerIsVisible")
@@ -64,8 +65,8 @@ dialog.narrow.multiple-selected-actions(
 import nanoid from 'nanoid'
 import last from 'lodash-es/last'
 import uniq from 'lodash-es/uniq'
-import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
+import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 import Export from '@/components/dialogs/Export.vue'
 import MoveOrCopyToSpace from '@/components/dialogs/MoveOrCopyToSpace.vue'
@@ -275,14 +276,14 @@ export default {
       this.multipleConnectionsPickerVisible = false
       this.framePickerIsVisible = false
     },
-    connectionType () {
+    connectionType (event) {
       const typePref = this.$store.state.currentUser.defaultConnectionTypeId
       const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
-      if (!defaultType) {
+      if (!defaultType && !event.shiftKey) {
         this.$store.dispatch('currentSpace/addConnectionType')
       }
-      const newConnectionType = last(this.$store.state.currentSpace.connectionTypes)
-      return defaultType || newConnectionType
+      const connectionType = last(this.$store.state.currentSpace.connectionTypes)
+      return defaultType || connectionType
     },
     connectionAlreadyExists (startCardId, endCardId) {
       const connections = this.$store.state.currentSpace.connections
@@ -328,15 +329,15 @@ export default {
         this.cardsIsConnected = false
       }
     },
-    toggleConnectCards () {
+    toggleConnectCards (event) {
       if (this.cardsIsConnected) {
         this.disconnectCards()
       } else {
-        this.connectCards()
+        this.connectCards(event)
       }
       this.checkIsCardsConnected()
     },
-    connectCards () {
+    connectCards (event) {
       const cardIds = this.multipleCardsSelectedIds
       let connections = cardIds.map((cardId, index) => {
         if (index + 1 < cardIds.length) { // create connections for middle cards
@@ -352,7 +353,7 @@ export default {
       })
       connections = connections.filter(Boolean)
       connections.forEach(connection => {
-        const connectionType = this.connectionType()
+        const connectionType = this.connectionType(event)
         this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
         this.$store.dispatch('addToMultipleConnectionsSelected', connection.id)
       })
@@ -372,10 +373,8 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      scrollIntoView(element, {
-        behavior: 'smooth',
-        scrollMode: 'if-needed'
-      })
+      const isTouchDevice = this.$store.state.isTouchDevice
+      scrollIntoView.scroll(element, isTouchDevice)
     }
   },
   watch: {
@@ -415,5 +414,6 @@ export default {
   .cards-checkboxes
     input
       margin 0
-
+  .connector-icon
+    width 11px
 </style>

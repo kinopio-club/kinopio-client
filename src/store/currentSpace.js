@@ -328,6 +328,7 @@ export default {
       let space = utils.clone(context.state)
       space.id = nanoid()
       space.users = []
+      space.collaborators = []
       space.showInExplore = false
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       context.commit('restoreSpace', uniqueNewSpace)
@@ -410,10 +411,19 @@ export default {
         context.dispatch('updateSpacePageSize', null, { root: true })
       })
     },
+    removeEmptyCards: (context) => {
+      let cards = context.state.cards
+      cards.forEach(card => {
+        if (!card.name) {
+          context.dispatch('removeCardPermanent', card)
+        }
+      })
+    },
     loadSpace: async (context, space) => {
       const emptySpace = { id: space.id, cards: [], connections: [], spectators: [] }
       const cachedSpace = cache.space(space.id)
       context.commit('clearAllNotifications', null, { root: true })
+      context.commit('clearAllFilters', null, { root: true })
       // restore local
       context.commit('restoreSpace', emptySpace)
       context.commit('restoreSpace', utils.normalizeSpace(cachedSpace))
@@ -448,6 +458,7 @@ export default {
       }
       context.commit('spaceUrlToLoad', '', { root: true })
       context.dispatch('updateSpacePageSize')
+      context.dispatch('removeEmptyCards')
     },
     loadLastSpace: (context) => {
       const user = context.rootState.currentUser

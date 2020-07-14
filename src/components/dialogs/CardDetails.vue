@@ -9,14 +9,17 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       v-model="name"
       @keydown.prevent.enter.exact
       @keyup.enter.exact="closeCard"
-      @keyup.alt.enter.exact.stop="insertLineBreak"
-      @keyup.ctrl.enter.exact.stop="insertLineBreak"
       @keyup.stop.esc="closeCardAndFocus"
       @keyup.stop.backspace
       data-type="name"
       maxlength="250"
       @click="triggerUpdateMagicPaintPositionOffset"
       @blur="triggerUpdatePositionInVisualViewport"
+
+      @keyup.alt.enter.exact.stop
+      @keyup.ctrl.enter.exact.stop
+      @keydown.alt.enter.exact.stop="insertLineBreak"
+      @keydown.ctrl.enter.exact.stop="insertLineBreak"
     )
     .row
       //- Remove
@@ -219,8 +222,10 @@ export default {
       this.triggerUpdatePositionInVisualViewport()
     },
     scrollIntoView () {
+      if (utils.isMobile()) { return }
       const element = this.$refs.dialog
-      scrollIntoView.scroll(element)
+      const isTouchDevice = this.$store.state.isTouchDevice
+      scrollIntoView.scroll(element, isTouchDevice)
     },
     scrollIntoViewAndFocus () {
       const pinchZoomScale = utils.visualViewport().scale
@@ -230,9 +235,7 @@ export default {
         max: 1.3
       })
       if (!pinchZoomScaleShouldFocus) { return }
-      if (!utils.isMobile()) {
-        this.scrollIntoView()
-      }
+      this.scrollIntoView()
       this.focusName()
       this.triggerUpdateMagicPaintPositionOffset()
       this.triggerUpdatePositionInVisualViewport()

@@ -2,6 +2,7 @@
 #app.app(
   @mousemove="broadcastCursor"
   @touchmove="broadcastCursor"
+  @touchstart="isTouchDevice"
 )
   #layout-viewport
   MagicPaint
@@ -46,6 +47,9 @@ export default {
       let updates = utils.cursorPositionInPage(event)
       updates.userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor' })
+    },
+    isTouchDevice () {
+      this.$store.commit('isTouchDevice', true)
     }
 
   }

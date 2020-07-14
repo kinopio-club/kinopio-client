@@ -57,9 +57,9 @@ dialog.removed(v-if="visible" :open="visible" @click.stop)
 </template>
 
 <script>
-import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfill
 import merge from 'lodash-es/merge'
 
+import scrollIntoView from '@/scroll-into-view.js'
 import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
 import privacy from '@/spaces/privacy.js'
@@ -141,10 +141,8 @@ export default {
     },
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
-      scrollIntoView(element, {
-        behavior: 'smooth',
-        scrollMode: 'if-needed'
-      })
+      const isTouchDevice = this.$store.state.isTouchDevice
+      scrollIntoView.scroll(element, isTouchDevice)
     },
     restore (item) {
       if (this.cardsVisible) {

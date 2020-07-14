@@ -46,7 +46,7 @@ import utils from '@/utils.js'
 import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 
-let startCursor, prevCursor, endCursor, cardMap
+let startCursor, prevCursor, endCursor, cardMap, shouldCancel
 
 export default {
   name: 'Space',
@@ -165,6 +165,11 @@ export default {
     },
 
     initInteractions (event) {
+      if (this.eventIsFromTextarea(event)) {
+        shouldCancel = true
+      } else {
+        shouldCancel = false
+      }
       if (this.spaceIsReadOnly) { return }
       startCursor = utils.cursorPositionInViewport(event)
     },
@@ -296,7 +301,7 @@ export default {
         this.$store.commit('childCardId', '')
       }
     },
-    shouldCancel (event) {
+    eventIsFromTextarea (event) {
       if (event.target.nodeType !== 1) { return } // firefox check
       const node = event.target.nodeName
       const isTextarea = node === 'TEXTAREA'
@@ -304,6 +309,10 @@ export default {
       if (isTextarea || isInput) {
         return true
       }
+    },
+    shouldCancel (event) {
+      if (shouldCancel) { return true }
+      if (this.eventIsFromTextarea(event)) { return true }
       const fromDialog = event.target.closest('dialog')
       const fromHeader = event.target.closest('header')
       const fromFooter = event.target.closest('footer')

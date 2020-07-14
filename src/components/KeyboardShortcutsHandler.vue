@@ -2,13 +2,13 @@
 </template>
 
 <script>
-import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfill
+import scrollIntoView from '@/scroll-into-view.js'
 import last from 'lodash-es/last'
 
 import utils from '@/utils.js'
 
 const incrementPosition = 20
-let cardMap
+let cardMap, useSiblingConnectionType
 
 export default {
   mounted () {
@@ -87,10 +87,8 @@ export default {
 
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
-      scrollIntoView(element, {
-        behavior: 'smooth',
-        scrollMode: 'if-needed'
-      })
+      const isTouchDevice = this.$store.state.isTouchDevice
+      scrollIntoView.scroll(element, isTouchDevice)
     },
 
     notifyCopyCut (word) {
@@ -135,6 +133,7 @@ export default {
     },
 
     addChildCard () {
+      useSiblingConnectionType = false
       const parentCardId = this.$store.state.parentCardId
       const childCardId = this.$store.state.childCardId
       const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
@@ -189,9 +188,9 @@ export default {
     addConnectionType () {
       const typePref = this.$store.state.currentUser.defaultConnectionTypeId
       const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
-      if (!defaultType) {
-        this.$store.dispatch('currentSpace/addConnectionType')
-      }
+      if (defaultType || useSiblingConnectionType) { return }
+      this.$store.dispatch('currentSpace/addConnectionType')
+      useSiblingConnectionType = true
     },
 
     addConnection (cardId) {
