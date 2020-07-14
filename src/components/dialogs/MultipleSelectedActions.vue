@@ -276,14 +276,14 @@ export default {
       this.multipleConnectionsPickerVisible = false
       this.framePickerIsVisible = false
     },
-    connectionType () {
+    connectionType (event) {
       const typePref = this.$store.state.currentUser.defaultConnectionTypeId
       const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
-      if (!defaultType) {
+      if (!defaultType && !event.shiftKey) {
         this.$store.dispatch('currentSpace/addConnectionType')
       }
-      const newConnectionType = last(this.$store.state.currentSpace.connectionTypes)
-      return defaultType || newConnectionType
+      const connectionType = last(this.$store.state.currentSpace.connectionTypes)
+      return defaultType || connectionType
     },
     connectionAlreadyExists (startCardId, endCardId) {
       const connections = this.$store.state.currentSpace.connections
@@ -329,15 +329,15 @@ export default {
         this.cardsIsConnected = false
       }
     },
-    toggleConnectCards () {
+    toggleConnectCards (event) {
       if (this.cardsIsConnected) {
         this.disconnectCards()
       } else {
-        this.connectCards()
+        this.connectCards(event)
       }
       this.checkIsCardsConnected()
     },
-    connectCards () {
+    connectCards (event) {
       const cardIds = this.multipleCardsSelectedIds
       let connections = cardIds.map((cardId, index) => {
         if (index + 1 < cardIds.length) { // create connections for middle cards
@@ -353,7 +353,7 @@ export default {
       })
       connections = connections.filter(Boolean)
       connections.forEach(connection => {
-        const connectionType = this.connectionType()
+        const connectionType = this.connectionType(event)
         this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
         this.$store.dispatch('addToMultipleConnectionsSelected', connection.id)
       })
