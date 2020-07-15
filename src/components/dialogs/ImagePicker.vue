@@ -7,6 +7,8 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.stop ref="dialo
           span Are.na
         button(@click.stop="toggleServiceIsGfycat" :class="{active : serviceIsGfycat}")
           span Gfycat
+      .button-wrap
+        button(@click.stop="chooseFile") Upload
 
     label(v-if="serviceIsGfycat" :class="{active: gfycatIsStickers}" @click.prevent="toggleGfycatIsStickers" @keydown.stop.enter="toggleGfycatIsStickers")
       input(type="checkbox" v-model="gfycatIsStickers")
@@ -250,7 +252,32 @@ export default {
     },
     isCardUrl (image) {
       return this.cardUrl === image.url
+    },
+    chooseFile (event) {
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.onchange = (event) => {
+        const file = event.target.files[0]
+        if (file) { this.upload(file) }
+      }
+      input.click()
+    },
+
+    upload (file) {
+      console.log('🍡', file)
     }
+    // uploadFile(file) {
+    //   let actionResult;
+    //   if (isTextFile(file)) {
+    //     actionResult = application.uploadNewFile(file);
+    //   } else {
+    //     actionResult = assetUtils.addFile(file);
+    //   }
+    //   return Promise.resolve(actionResult)
+    //     .catch(() => null)
+    //     .then(() => application.closeAllPopOvers());
+    // },
+
   },
   watch: {
     visible (visible) {
@@ -302,5 +329,4 @@ export default {
       margin 4px
       margin-top 0
       margin-bottom 8px
-
 </style>

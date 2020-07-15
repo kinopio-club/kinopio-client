@@ -253,7 +253,8 @@ dialog
   .button-wrap + button,
   label + label,
   label + .button-wrap,
-  .button-wrap + label
+  .button-wrap + label,
+  .segmented-buttons + .button-wrap
     margin-left 6px
 
   p + button,
