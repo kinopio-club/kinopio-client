@@ -321,24 +321,6 @@ export default {
       }
       return movementDirection
     },
-    linearInterpolateY (x, delta, prevCircle, circle) {
-      const slope = delta.y / delta.x
-      const isNoSlope = Math.abs(slope) === Infinity || slope === 0
-      if (isNoSlope) {
-        return circle.y
-      } else {
-        return Math.round((x - prevCircle.x) * slope + prevCircle.y)
-      }
-    },
-    linearInterpolateX (y, delta, prevCircle, circle) {
-      const slope = delta.y / delta.x
-      const isNoSlope = Math.abs(slope) === Infinity || slope === 0
-      if (isNoSlope) {
-        return circle.x
-      } else {
-        return Math.round(prevCircle.x + slope * (y - prevCircle.y))
-      }
-    },
     selectConnections (circle) {
       if (this.userCantEditSpace) { return }
       this.selectConnectionPaths(circle)
@@ -355,39 +337,36 @@ export default {
       const furthestDelta = Math.max(delta.xAbsolute, delta.yAbsolute)
       if (furthestDelta <= 5 || prevCircle.iteration > 1) { return }
       const movementDirection = this.movementDirection(prevCircle, delta)
-      const initialIncrement = 1
-      const increment = 4
+      const increment = 2
+      let x = circle.x
+      let y = circle.y
       if (movementDirection.x === 'right') {
-        let x = prevCircle.x + initialIncrement
+        x = prevCircle.x + increment
         while (x < circle.x) {
-          const y = this.linearInterpolateY(x, delta, prevCircle, circle)
+          x += increment
           this.selectConnectionPaths({ x, y })
           this.selectCards({ x, y })
-          x += increment
         }
       } else if (movementDirection.x === 'left') {
-        let x = prevCircle.x - initialIncrement
-        while (x < circle.x) {
-          const y = this.linearInterpolateY(x, delta, prevCircle, circle)
+        x = prevCircle.x - increment
+        while (x > circle.x) {
+          x += -increment
           this.selectConnectionPaths({ x, y })
           this.selectCards({ x, y })
-          x += -increment
         }
       } else if (movementDirection.y === 'down') {
-        let y = prevCircle.y + initialIncrement
+        y = prevCircle.y + increment
         while (y < circle.y) {
-          const x = this.linearInterpolateX(y, delta, prevCircle, circle)
+          y += increment
           this.selectConnectionPaths({ x, y })
           this.selectCards({ x, y })
-          y += increment
         }
       } else if (movementDirection.y === 'up') {
-        let y = prevCircle.y - initialIncrement
-        while (y < circle.y) {
-          const x = this.linearInterpolateX(y, delta, prevCircle, circle)
+        y = prevCircle.y - increment
+        while (y > circle.y) {
+          y += -increment
           this.selectConnectionPaths({ x, y })
           this.selectCards({ x, y })
-          y += -increment
         }
       }
     },
