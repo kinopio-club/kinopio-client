@@ -1,6 +1,8 @@
 // functional methods that can see dom, but can't access components or store
 import nanoid from 'nanoid'
 
+import cache from '@/cache.js'
+
 export default {
   host () {
     let host = 'https://api.kinopio.club'
@@ -385,6 +387,7 @@ export default {
   uniqueSpaceItems (items) {
     const cardIdDeltas = []
     const connectionTypeIdDeltas = []
+    const user = cache.user()
     items.cards = items.cards.map(card => {
       const newId = nanoid()
       cardIdDeltas.push({
@@ -392,6 +395,7 @@ export default {
         newId
       })
       card.id = newId
+      card.userId = user.id
       return card
     })
     items.connectionTypes = items.connectionTypes.map(type => {
@@ -401,6 +405,7 @@ export default {
         newId
       })
       type.id = newId
+      type.userId = user.id
       return type
     })
     items.connections = items.connections.map(connection => {
@@ -408,6 +413,7 @@ export default {
       connection.connectionTypeId = this.updateAllIds(connection, 'connectionTypeId', connectionTypeIdDeltas)
       connection.startCardId = this.updateAllIds(connection, 'startCardId', cardIdDeltas)
       connection.endCardId = this.updateAllIds(connection, 'endCardId', cardIdDeltas)
+      connection.userId = user.id
       return connection
     })
     return items
