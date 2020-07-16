@@ -263,21 +263,24 @@ export default {
       input.click()
     },
 
+    // move to a global place/plugin/util?
     upload (file) {
+      // try catch
       console.log('🍡', file)
+      // var uploadData = { ratio: Observable(0) };
+      // self.pendingUploads.push(uploadData);
+      // return self.getPolicy()
+      //     .then(function (policy) {
+      //     return S3Uploader(policy).upload({
+      //         key: file.name,
+      //         blob: file
+      //     }).progress(self.generateUploadProgressEventHandler(uploadData));
+      // }).finally(function () {
+      //     self.pendingUploads.remove(uploadData);
+      //     self.currentProject().updatedAt((new Date()).toISOString());
+      //     return self.currentProject().save(self.api());
+      // });
     }
-    // uploadFile(file) {
-    //   let actionResult;
-    //   if (isTextFile(file)) {
-    //     actionResult = application.uploadNewFile(file);
-    //   } else {
-    //     actionResult = assetUtils.addFile(file);
-    //   }
-    //   return Promise.resolve(actionResult)
-    //     .catch(() => null)
-    //     .then(() => application.closeAllPopOvers());
-    // },
-
   },
   watch: {
     visible (visible) {
