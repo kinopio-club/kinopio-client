@@ -256,6 +256,12 @@ export default {
         }
       })
       cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
+    },
+    reorderConnectionTypeToLast: (state, connectionType) => {
+      state.connectionTypes = state.connectionTypes.filter(type => {
+        return connectionType.id !== type.id
+      })
+      state.connectionTypes.push(connectionType)
     }
   },
 
