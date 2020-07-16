@@ -526,6 +526,16 @@ export default {
     return url
   },
 
+  urlIsFloatOrIp (url) {
+    // https://regexr.com/58ii6
+    // matches numbers '.'' numbers ...
+    const floatOrIpPattern = new RegExp(/^(?:[0-9]+\.)+[0-9]+$/igm)
+    console.log('🌸', url, url.match(floatOrIpPattern))
+    if (url.match(floatOrIpPattern)) {
+      return true
+    }
+  },
+
   urlFromString (string) {
     if (!string) { return }
     // https://regexr.com/52r0i
@@ -540,7 +550,7 @@ export default {
     const hasProtocol = url.startsWith('http://') || url.startsWith('https://')
     if (hasProtocol) {
       return url
-    } else {
+    } else if (!this.urlIsFloatOrIp(url)) {
       return `http://${url}`
     }
   },
