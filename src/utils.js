@@ -530,7 +530,6 @@ export default {
     // https://regexr.com/58ii6
     // matches numbers '.'' numbers ...
     const floatOrIpPattern = new RegExp(/^(?:[0-9]+\.)+[0-9]+$/igm)
-    console.log('🌸', url, url.match(floatOrIpPattern))
     if (url.match(floatOrIpPattern)) {
       return true
     }
