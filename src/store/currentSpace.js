@@ -752,6 +752,7 @@ export default {
         cards = context.rootState.currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
       } else {
         const card = context.rootState.currentSpace.cards.find(card => currentDraggingCardId === card.id)
+        if (!card) { return }
         cards.push(card)
       }
       cards.forEach(card => {
