@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop :class="{'right-side': dialogOnRight}")
+dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop @keydown.stop :class="{'right-side': dialogOnRight}")
   section
     p Upgrade your account for unlimited cards
     .summary
