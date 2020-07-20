@@ -15,6 +15,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       maxlength="250"
       @click="triggerUpdateMagicPaintPositionOffset"
       @blur="triggerUpdatePositionInVisualViewport"
+      @paste="updatePastedName"
 
       @keyup.alt.enter.exact.stop
       @keyup.ctrl.enter.exact.stop
@@ -43,6 +44,12 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
         button(:disabled="!canEditCard" @click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
           span Frames
         FramePicker(:visible="framePickerIsVisible" :cards="[card]")
+      //- Seperate
+    .row(v-if="nameHasLineBreaks")
+      .button-wrap
+        button(:disabled="!canEditCard" @click.stop="createSeperateCards")
+          img.icon(src="@/assets/seperate.svg")
+          span Seperate into {{nameLines}} Cards
 
     p.edit-message(v-if="!canEditCard")
       template(v-if="spacePrivacyIsOpen")
@@ -82,7 +89,8 @@ export default {
     return {
       framePickerIsVisible: false,
       imagePickerIsVisible: false,
-      initialSearch: ''
+      initialSearch: '',
+      pastedName: ''
     }
   },
   created () {
@@ -146,9 +154,151 @@ export default {
       set (value) {
         this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.card.id, value })
       }
+    },
+    nameLines () {
+      return this.seperatedLines(this.name).length
+    },
+    nameHasLineBreaks () {
+      if (this.nameLines > 1) {
+        return true
+      } else {
+        return false
+      }
     }
   },
   methods: {
+    seperatedLines (name) {
+      let lines = name.split('\n')
+      lines = lines.filter(line => Boolean(line.length))
+      return lines
+    },
+    // createSeperateCards () {
+    //   const spaceBetweenCards = 12
+    //   let newCard
+    //   let cardNames = this.seperatedLines(this.name)       // todo use this.pastedName (if not cleared by input) or this.name
+    //   const firstCard = {
+    //     name: cardNames[0],
+    //     id: this.card.id
+    //   }
+    //   this.updateCardName(firstCard.name)
+    //   this.closeCard()
+
+    //   let element = document.querySelector(`article [data-card-id="${firstCard.id}"]`)
+    //   let rect = element.getBoundingClientRect()
+    //   let position = {
+    //     x: rect.x + window.scrollX,
+    //     y: rect.y + rect.height + spaceBetweenCards + window.scrollY
+    //   }
+    //   console.log('og rect', rect, rect.y, rect.height)
+    //   cardNames.shift()
+
+    //   cardNames.forEach(name => {
+    //     this.$nextTick(() => {
+
+    //         console.log('🍄 add card', name)
+    //         this.$store.dispatch('currentSpace/addCard', { position, name })
+    //         this.closeCard()
+    //         newCard = last(this.$store.state.currentSpace.cards)
+    //         this.$nextTick(() => {
+
+    //           element = document.querySelector(`article [data-card-id="${newCard.id}"]`)
+    //           console.log('newcard element' , newCard, element)
+    //           rect = element.getBoundingClientRect()
+    //           position.y = rect.y + rect.height + spaceBetweenCards + window.scrollY
+    //           console.log('🥬 rect', rect, position)
+    //         })
+    //     })
+
+    //   })
+
+    //   // then for
+    //   //
+
+    //   // then get the card at x y
+
+    // },
+    createSeperateCards () {
+      const spaceBetweenCards = 12
+      const cardNames = this.seperatedLines(this.name)
+      let newCards = cardNames.map(name => {
+        return {
+          name,
+          x: this.card.x,
+          y: this.card.y,
+          frameId: this.card.frameId
+        }
+      })
+      this.$store.dispatch('currentSpace/addMultipleCards', newCards)
+      this.removeCard()
+      newCards = utils.clone(this.$store.state.currentSpace.cards)
+      newCards = newCards.slice(-cardNames.length)
+      console.log('2', newCards)
+
+      this.$nextTick(() => {
+        let prevCard = {}
+        console.log('🌺', prevCard)
+        newCards = newCards.map(card => {
+          console.log('1 prevCard', prevCard, card)
+          if (utils.objectHasKeys(prevCard)) {
+            const element = document.querySelector(`article [data-card-id="${card.id}"]`)
+            const rect = element.getBoundingClientRect()
+
+            console.log('🍄', card, prevCard, prevCard.y, rect.height, spaceBetweenCards)
+            card.y = prevCard.y + rect.height + spaceBetweenCards
+            console.log(card.y)
+          }
+          prevCard = card
+          console.log('🎡', prevCard)
+
+          return card
+        })
+        console.log('4', newCards)
+        newCards.forEach(card => {
+          this.$store.dispatch('currentSpace/updateCard', {
+            id: card.id,
+            y: card.y
+          })
+        })
+
+        // let previousElement = document.querySelector(`article [data-card-id="${newCards[0].id}"]`)
+        // let previousRect = previousElement.getBoundingClientRect()
+
+        // newCards.forEach((card, index) => {
+        //   if (index > 0) {
+        //     console.log(previousRect, previousRect.y + previousRect.height + spaceBetweenCards)
+        //     this.$store.dispatch('currentSpace/updateCard', {
+        //       id: card.id,
+        //       y: previousRect.y + previousRect.height + spaceBetweenCards
+        //     })
+        //     previousElement = document.querySelector(`article [data-card-id="${newCards[index].id}"]`)
+        //     previousRect = previousElement.getBoundingClientRect()
+        //   }
+
+        // if (position) {
+        //   position = {
+        //     x: rect.x,
+        //     y: rect.y + rect.height + spaceBetweenCards
+        //   }
+        // } else {
+        //   position.y = rect.y + rect.height + spaceBetweenCards
+        // }
+
+        // else
+
+        // this.$store.dispatch('currentSpace/updateCard', card)
+      })
+      // console.log()
+      // loop times cardNames.length
+      // let position inited by first card created
+
+      // update pos value
+      // place next card
+      // ...
+    },
+    updatePastedName (event) {
+      console.log('🏓 updatePastedName', event)
+      // todo save input to this.pastedName
+    },
     triggerUpdatePositionInVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
@@ -241,6 +391,7 @@ export default {
       this.triggerUpdatePositionInVisualViewport()
     },
     triggerUpdateMagicPaintPositionOffset () {
+      console.log('🪀', this.seperatedLines(this.name))
       this.$store.commit('triggerUpdateMagicPaintPositionOffset')
       this.triggerUpdatePositionInVisualViewport()
     },
