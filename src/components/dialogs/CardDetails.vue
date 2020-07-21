@@ -49,7 +49,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       .button-wrap
         button(:disabled="!canEditCard" @click.stop="splitCards")
           img.icon(src="@/assets/split-vertically.svg")
-          span Split Lines to {{nameLines}} Cards
+          span Split into {{nameLines}} Cards
     p.edit-message(v-if="!canEditCard")
       template(v-if="spacePrivacyIsOpen")
         span.badge.info
@@ -89,7 +89,8 @@ export default {
       framePickerIsVisible: false,
       imagePickerIsVisible: false,
       initialSearch: '',
-      pastedName: ''
+      pastedName: '',
+      wasPasted: false
     }
   },
   created () {
@@ -134,6 +135,11 @@ export default {
       },
       set (newName) {
         this.updateCardName(newName)
+        if (this.wasPasted) {
+          this.wasPasted = false
+        } else {
+          this.pastedName = ''
+        }
       }
     },
     url () { return utils.urlFromString(this.name) },
@@ -206,8 +212,8 @@ export default {
       })
     },
     updatePastedName (event) {
-      console.log('🏓 updatePastedName', event)
-      // todo save input to this.pastedName
+      const text = event.clipboardData.getData('text')
+      this.pastedName = text
     },
     triggerUpdatePositionInVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
@@ -301,7 +307,6 @@ export default {
       this.triggerUpdatePositionInVisualViewport()
     },
     triggerUpdateMagicPaintPositionOffset () {
-      console.log('🪀', this.seperatedLines(this.name))
       this.$store.commit('triggerUpdateMagicPaintPositionOffset')
       this.triggerUpdatePositionInVisualViewport()
     },
