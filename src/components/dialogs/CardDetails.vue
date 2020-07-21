@@ -161,7 +161,8 @@ export default {
       }
     },
     nameLines () {
-      return this.seperatedLines(this.name).length
+      const name = this.pastedName || this.name
+      return this.seperatedLines(name).length
     },
     nameHasLineBreaks () {
       if (this.nameLines > 1) {
@@ -214,6 +215,7 @@ export default {
     updatePastedName (event) {
       const text = event.clipboardData.getData('text')
       this.pastedName = text
+      this.wasPasted = true
     },
     triggerUpdatePositionInVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
