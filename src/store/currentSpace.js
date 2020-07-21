@@ -590,7 +590,7 @@ export default {
 
     // Cards
 
-    addCard: (context, { position, name, isParentCard }) => {
+    addCard: (context, { position, isParentCard }) => {
       utils.typeCheck(position, 'object')
       if (context.rootGetters['currentUser/cardsCreatedIsOverLimit']) {
         context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
@@ -603,7 +603,7 @@ export default {
         x: position.x,
         y: position.y,
         z: cards.length + 1,
-        name: name || '',
+        name: '',
         frameId: 0,
         userId: context.rootState.currentUser.id
       }
