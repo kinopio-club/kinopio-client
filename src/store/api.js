@@ -122,9 +122,13 @@ const self = {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/operations`, options)
         if (!response.ok) { throw Error(response.statusText) }
+        if (context.rootState.notifyServerCouldNotSave) {
+          context.commit('notifyServerCouldNotSave', false, { root: true })
+          context.commit('addNotification', { message: 'Reconnected to server', type: 'success' }, { root: true })
+        }
       } catch (error) {
         console.error('🚒', error, body)
-        // context.commit('addNotification', { message: "Syncing Error. Will retry in 10 seconds…", type: 'danger' })
+        context.commit('notifyServerCouldNotSave', true, { root: true })
         context.dispatch('requeue', body)
       }
     },

@@ -59,6 +59,9 @@ aside.notifications(@click="closeAllDialogs")
           button Email Support
         button(@click="refreshBrowser") Refresh
 
+  .persistent-item.danger(v-if="notifyServerCouldNotSave")
+    p Error saving changes to server, retrying…
+
   .persistent-item.danger(v-if="notifySpaceOutOfSync")
     p Space is out of sync, please refresh
     .row
@@ -137,6 +140,7 @@ export default {
     items () { return this.$store.state.notifications },
     notifySpaceNotFound () { return this.$store.state.notifySpaceNotFound },
     notifyConnectionError () { return this.$store.state.notifyConnectionError },
+    notifyServerCouldNotSave () { return this.$store.state.notifyServerCouldNotSave },
     notifySpaceIsRemoved () { return this.$store.state.notifySpaceIsRemoved },
     notifyNewUser () { return this.$store.state.notifyNewUser },
     notifySignUpToEditSpace () { return this.$store.state.notifySignUpToEditSpace },
