@@ -25,7 +25,6 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.stop ref="dialo
       )
       button.borderless.clear-input-wrap(@click="clearSearch")
         img.icon(src="@/assets/add.svg")
-
     .error-container
       p(v-if="isNoSearchResults") Nothing found on {{service}} for {{search}}
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support

@@ -48,8 +48,8 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
     .row(v-if="nameHasLineBreaks")
       .button-wrap
         button(:disabled="!canEditCard" @click.stop="splitCards")
-          img.icon(src="@/assets/seperate.svg")
-          span Split into {{nameLines}} Cards
+          img.icon(src="@/assets/split-vertically.svg")
+          span Split Lines to {{nameLines}} Cards
     p.edit-message(v-if="!canEditCard")
       template(v-if="spacePrivacyIsOpen")
         span.badge.info
