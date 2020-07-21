@@ -155,8 +155,10 @@ export default {
       this.updateRemoveLabel()
     },
     changeToLastSpace () {
-      if (this.spaces.length) {
-        this.$store.dispatch('currentSpace/changeSpace', { space: this.spaces[0] })
+      const currentSpace = this.$store.state.currentSpace
+      const spaces = this.spaces.filter(space => space.id !== currentSpace.id)
+      if (spaces.length) {
+        this.$store.dispatch('currentSpace/changeSpace', { space: spaces[0] })
       } else {
         this.addSpace()
       }
