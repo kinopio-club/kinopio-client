@@ -21,7 +21,7 @@ dialog.whats-new(v-if="visible" :open="visible" @click.stop)
 
   section
     .button-wrap
-      a(href="https://www.are.na/kinopio/kinopio-updates")
+      a(href="https://www.are.na/kinopio/kinopio-what-s-new")
         button Read All →
 
   //- section
