@@ -180,7 +180,7 @@ export default {
     },
     splitCards () {
       const spaceBetweenCards = 12
-      const cardNames = this.seperatedLines(this.name)
+      const cardNames = this.seperatedLines(this.pastedName || this.name)
       let newCards = cardNames.map(name => {
         return {
           name,
