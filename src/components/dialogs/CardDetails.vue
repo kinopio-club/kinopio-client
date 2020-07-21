@@ -180,10 +180,11 @@ export default {
     },
     splitCards () {
       const spaceBetweenCards = 12
+      const maxCardLength = 250
       const cardNames = this.seperatedLines(this.pastedName || this.name)
       let newCards = cardNames.map(name => {
         return {
-          name,
+          name: name.substring(0, maxCardLength),
           x: this.card.x,
           y: this.card.y,
           frameId: this.card.frameId
