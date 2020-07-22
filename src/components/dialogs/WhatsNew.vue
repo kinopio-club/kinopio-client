@@ -5,6 +5,9 @@ dialog.whats-new(v-if="visible" :open="visible" @click.stop)
     .button-wrap
       a(href="https://kinopio.club/-kinopio-roadmap-6TRE21gchHI7alHLuwzd5")
         button Roadmap →
+    .button-wrap
+      a(href="https://www.are.na/kinopio/diary-q6l8pa4a4ye")
+        button Diary →
 
   section(v-if="!newStuff.length")
     Loader(:visible="true")
@@ -18,7 +21,7 @@ dialog.whats-new(v-if="visible" :open="visible" @click.stop)
 
   section
     .button-wrap
-      a(href="https://www.are.na/kinopio/kinopio-updates")
+      a(href="https://www.are.na/kinopio/kinopio-what-s-new")
         button Read All →
 
   //- section

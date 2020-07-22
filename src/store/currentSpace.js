@@ -256,6 +256,12 @@ export default {
         }
       })
       cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
+    },
+    reorderConnectionTypeToLast: (state, connectionType) => {
+      state.connectionTypes = state.connectionTypes.filter(type => {
+        return connectionType.id !== type.id
+      })
+      state.connectionTypes.push(connectionType)
     }
   },
 
@@ -613,6 +619,24 @@ export default {
       context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: true }, { root: true })
       context.dispatch('checkIfShouldnotifyCardsCreatedIsNearLimit')
     },
+    addMultipleCards: (context, newCards) => {
+      newCards.forEach(card => {
+        card = {
+          id: nanoid(),
+          x: card.x,
+          y: card.y,
+          z: context.state.cards.length + 1,
+          name: card.name,
+          frameId: card.frameId || 0,
+          userId: context.rootState.currentUser.id
+        }
+        context.commit('createCard', card)
+        const update = { name: 'createCard', body: card }
+        context.dispatch('api/addToQueue', update, { root: true })
+        context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
+        context.commit('history/add', update, { root: true })
+      })
+    },
     // shim for history/playback
     createCard: (context, card) => {
       context.commit('createCard', card)
@@ -746,6 +770,7 @@ export default {
         cards = context.rootState.currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
       } else {
         const card = context.rootState.currentSpace.cards.find(card => currentDraggingCardId === card.id)
+        if (!card) { return }
         cards.push(card)
       }
       cards.forEach(card => {

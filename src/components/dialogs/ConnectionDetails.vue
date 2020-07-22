@@ -148,6 +148,7 @@ export default {
         connectionId: this.currentConnection.id,
         connectionTypeId: type.id
       })
+      this.$store.commit('currentSpace/reorderConnectionTypeToLast', type)
       this.updateDefaultConnectionType()
     },
     updateDefaultConnectionType () {
@@ -227,6 +228,7 @@ export default {
         if (this.visible) {
           this.updateView()
           this.scrollIntoViewAndFocus()
+          this.$store.commit('currentSpace/reorderConnectionTypeToLast', this.currentConnectionType)
         } else {
           this.$store.commit('shouldHideConnectionOutline', false)
         }

@@ -89,6 +89,7 @@ export default new Vuex.Store({
     notifications: [],
     notifySpaceNotFound: false,
     notifyConnectionError: false,
+    notifyServerCouldNotSave: false,
     notifySpaceIsRemoved: false,
     notifyNewUser: false,
     notifySignUpToEditSpace: false,
@@ -444,6 +445,7 @@ export default new Vuex.Store({
     clearAllNotifications: (state) => {
       state.notifySpaceNotFound = false
       state.notifyConnectionError = false
+      state.notifyServerCouldNotSave = false
       state.notifySignUpToEditSpace = false
       state.notifySpaceIsOpenAndEditable = false
       state.notifyAccessFavorites = false
@@ -457,6 +459,10 @@ export default new Vuex.Store({
     notifyConnectionError: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.notifyConnectionError = value
+    },
+    notifyServerCouldNotSave: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.notifyServerCouldNotSave = value
     },
     notifySpaceIsRemoved: (state, value) => {
       utils.typeCheck(value, 'boolean')

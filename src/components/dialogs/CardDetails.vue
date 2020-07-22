@@ -15,6 +15,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       maxlength="250"
       @click="triggerUpdateMagicPaintPositionOffset"
       @blur="triggerUpdatePositionInVisualViewport"
+      @paste="updatePastedName"
 
       @keyup.alt.enter.exact.stop
       @keyup.ctrl.enter.exact.stop
@@ -43,7 +44,12 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
         button(:disabled="!canEditCard" @click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
           span Frames
         FramePicker(:visible="framePickerIsVisible" :cards="[card]")
-
+      //- Split
+    .row(v-if="nameHasLineBreaks")
+      .button-wrap
+        button(:disabled="!canEditCard" @click.stop="splitCards")
+          img.icon(src="@/assets/split-vertically.svg")
+          span Split into {{nameLines}} Cards
     p.edit-message(v-if="!canEditCard")
       template(v-if="spacePrivacyIsOpen")
         span.badge.info
@@ -82,7 +88,9 @@ export default {
     return {
       framePickerIsVisible: false,
       imagePickerIsVisible: false,
-      initialSearch: ''
+      initialSearch: '',
+      pastedName: '',
+      wasPasted: false
     }
   },
   created () {
@@ -127,6 +135,11 @@ export default {
       },
       set (newName) {
         this.updateCardName(newName)
+        if (this.wasPasted) {
+          this.wasPasted = false
+        } else {
+          this.pastedName = ''
+        }
       }
     },
     url () { return utils.urlFromString(this.name) },
@@ -146,9 +159,65 @@ export default {
       set (value) {
         this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.card.id, value })
       }
+    },
+    nameLines () {
+      const name = this.pastedName || this.name
+      return this.seperatedLines(name).length
+    },
+    nameHasLineBreaks () {
+      if (this.nameLines > 1) {
+        return true
+      } else {
+        return false
+      }
     }
   },
   methods: {
+    seperatedLines (name) {
+      let lines = name.split('\n')
+      lines = lines.filter(line => Boolean(line.length))
+      return lines
+    },
+    splitCards () {
+      const spaceBetweenCards = 12
+      const maxCardLength = 250
+      const cardNames = this.seperatedLines(this.pastedName || this.name)
+      let newCards = cardNames.map(name => {
+        return {
+          name: name.substring(0, maxCardLength),
+          x: this.card.x,
+          y: this.card.y,
+          frameId: this.card.frameId
+        }
+      })
+      this.$store.dispatch('currentSpace/addMultipleCards', newCards)
+      this.removeCard()
+      newCards = utils.clone(this.$store.state.currentSpace.cards)
+      newCards = newCards.slice(-cardNames.length)
+      this.$nextTick(() => {
+        let prevCard = {}
+        newCards = newCards.map(card => {
+          if (utils.objectHasKeys(prevCard)) {
+            const element = document.querySelector(`article [data-card-id="${card.id}"]`)
+            const rect = element.getBoundingClientRect()
+            card.y = prevCard.y + rect.height + spaceBetweenCards
+          }
+          prevCard = card
+          return card
+        })
+        newCards.forEach(card => {
+          this.$store.dispatch('currentSpace/updateCard', {
+            id: card.id,
+            y: card.y
+          })
+        })
+      })
+    },
+    updatePastedName (event) {
+      const text = event.clipboardData.getData('text')
+      this.pastedName = text
+      this.wasPasted = true
+    },
     triggerUpdatePositionInVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
     },

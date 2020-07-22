@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDialogs" :class="{'right-side': detailsOnRight}" :style="{top: positionTop}")
+dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDialogs" @keydown.stop :class="{'right-side': detailsOnRight}" :style="{top: positionTop}")
 
   //- Other User
   section(v-if="!isCurrentUser")

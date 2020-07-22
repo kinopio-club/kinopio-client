@@ -23,6 +23,16 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.stop)
       p Subsequent&nbsp;
         span.badge.info Enters
         span add siblings
+      button(@click.stop="toggleChildCardInfoIsVisible" :class="{ active: childCardInfoIsVisible }") More Info
+      div(v-if="childCardInfoIsVisible")
+        video(autoplay loop muted playsinline)
+          source(src="https://kinopio-updates.us-east-1.linodeobjects.com/keyboard-shortcuts2.mp4")
+    article
+      .row
+        .badge.title
+          img.icon(src="@/assets/line-break.svg")
+          span Line break in card
+        .badge.info Ctrl-Enter
     article
       .row
         .badge.title Focus Next/Previous
@@ -89,7 +99,8 @@ export default {
   },
   data () {
     return {
-      safariInfoIsVisible: false
+      safariInfoIsVisible: false,
+      childCardInfoIsVisible: false
     }
   },
   computed: {
@@ -104,6 +115,9 @@ export default {
   methods: {
     toggleSafariInfoIsVisible () {
       this.safariInfoIsVisible = !this.safariInfoIsVisible
+    },
+    toggleChildCardInfoIsVisible () {
+      this.childCardInfoIsVisible = !this.childCardInfoIsVisible
     }
   }
 }
@@ -143,4 +157,6 @@ export default {
     margin-right 0
   .connector-icon
     width 11px
+  video
+    margin-top 10px
 </style>
