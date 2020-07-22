@@ -152,6 +152,18 @@ export default {
     this.storeLocal('queue', [])
   },
 
+  // API Queue Buffer
+
+  queueBuffer () {
+    return this.getLocal('queueBuffer') || []
+  },
+  saveQueueBuffer (queue) {
+    this.storeLocal('queueBuffer', queue)
+  },
+  clearQueueBuffer () {
+    this.storeLocal('queueBuffer', [])
+  },
+
   // Invited Spaces
 
   invitedSpaces () {

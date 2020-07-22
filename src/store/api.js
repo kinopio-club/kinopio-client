@@ -99,29 +99,33 @@ const self = {
       context.dispatch('debouncedProcessQueueOperations')
     },
 
-    requeue: (context, items) => {
-      items.forEach(item => {
-        let queue = cache.queue()
-        queue.push(item)
-        cache.saveQueue(queue)
-      })
-      console.log('🚑 requeue', cache.queue())
-    },
-
     debouncedProcessQueueOperations: debounce(({ dispatch }) => {
       dispatch('processQueueOperations')
     }, 500),
 
     processQueueOperations: async (context) => {
+      let body
       const queue = cache.queue()
-      const body = squashQueue(queue)
-      if (!shouldRequest() || !body.length) { return }
-      cache.clearQueue()
+      const queueBuffer = cache.queueBuffer()
+      if (!shouldRequest() || !queue.length) { return }
+      if (queueBuffer.length) {
+        body = queueBuffer
+      } else {
+        body = squashQueue(queue)
+        cache.saveQueueBuffer(body)
+        cache.clearQueue()
+      }
+
       try {
         console.log(`🛫 sending operations`, body)
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/operations`, options)
-        if (!response.ok) { throw Error(response.statusText) }
+        if (response.ok) {
+          console.log('🛬 response ok, clearing queueBuffer')
+          cache.clearQueueBuffer()
+        } else {
+          throw Error(response.statusText)
+        }
         if (context.rootState.notifyServerCouldNotSave) {
           context.commit('notifyServerCouldNotSave', false, { root: true })
           context.commit('addNotification', { message: 'Reconnected to server', type: 'success' }, { root: true })
@@ -129,7 +133,6 @@ const self = {
       } catch (error) {
         console.error('🚒', error, body)
         context.commit('notifyServerCouldNotSave', true, { root: true })
-        context.dispatch('requeue', body)
       }
     },
 
