@@ -8,7 +8,8 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.stop ref="dialo
         button(@click.stop="toggleServiceIsGfycat" :class="{active : serviceIsGfycat}")
           span Gfycat
       .button-wrap
-        button(@click.stop="chooseFile") Upload
+        button(@click.stop="selectFile") Upload
+        input.hidden(type="file" ref="input" @change="uploadFile")
 
     label(v-if="serviceIsGfycat" :class="{active: gfycatIsStickers}" @click.prevent="toggleGfycatIsStickers" @keydown.stop.enter="toggleGfycatIsStickers")
       input(type="checkbox" v-model="gfycatIsStickers")
@@ -252,20 +253,23 @@ export default {
     isCardUrl (image) {
       return this.cardUrl === image.url
     },
-    chooseFile (event) {
-      const input = document.createElement('input')
-      input.type = 'file'
-      input.onchange = (event) => {
-        const file = event.target.files[0]
-        if (file) { this.upload(file) }
-      }
+    selectFile (event) {
+      // if (this.loading) { return } this shouldn't matter
+      const input = this.$refs.input
       input.click()
     },
 
     // move to a global place/plugin/util?
-    upload (file) {
+    uploadFile (file) {
       // try catch
       console.log('🍡', file)
+
+      // close dialog
+      // show loader in card, cancellable? (nonlinear uploader)
+      // not cancellable cuz notion, trello and arena aren't cancellable :. not worth the complexity
+
+      // new module currentUploads
+
       // var uploadData = { ratio: Observable(0) };
       // self.pendingUploads.push(uploadData);
       // return self.getPolicy()
@@ -331,4 +335,7 @@ export default {
       margin 4px
       margin-top 0
       margin-bottom 8px
+  .hidden
+    display none
+
 </style>
