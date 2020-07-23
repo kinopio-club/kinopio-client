@@ -60,7 +60,8 @@ export default {
   props: {
     visible: Boolean,
     initialSearch: String,
-    cardUrl: String
+    cardUrl: String,
+    cardId: String
   },
   data () {
     return {
@@ -260,29 +261,11 @@ export default {
     },
 
     // move to a global place/plugin/util?
-    uploadFile (file) {
-      // try catch
-      console.log('🍡', file)
-
-      // close dialog
-      // show loader in card, cancellable? (nonlinear uploader)
-      // not cancellable cuz notion, trello and arena aren't cancellable :. not worth the complexity
-
-      // new module currentUploads
-
-      // var uploadData = { ratio: Observable(0) };
-      // self.pendingUploads.push(uploadData);
-      // return self.getPolicy()
-      //     .then(function (policy) {
-      //     return S3Uploader(policy).upload({
-      //         key: file.name,
-      //         blob: file
-      //     }).progress(self.generateUploadProgressEventHandler(uploadData));
-      // }).finally(function () {
-      //     self.pendingUploads.remove(uploadData);
-      //     self.currentProject().updatedAt((new Date()).toISOString());
-      //     return self.currentProject().save(self.api());
-      // });
+    async uploadFile () {
+      const cardId = this.cardId
+      const input = this.$refs.input
+      const file = input.files[0]
+      await this.$store.dispatch('upload/uploadFile', { file, cardId })
     }
   },
   watch: {
