@@ -264,6 +264,7 @@ export default {
       remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
       if (remoteUser.updatedAt > cachedUser.cacheDate) { console.log('🌸 Restore user from remote', remoteUser) }
       context.commit('updateUser', remoteUser)
+      await context.dispatch('upload/updateS3Policy', null, { root: true })
     },
     restoreUserFavorites: async (context) => {
       if (!context.getters.isSignedIn) { return }

@@ -121,7 +121,7 @@ const self = {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/operations`, options)
         if (response.ok) {
-          console.log('🛬 response ok, clearing queueBuffer')
+          console.log('🛬 operations ok')
           cache.clearQueueBuffer()
         } else {
           throw Error(response.statusText)
@@ -425,6 +425,18 @@ const self = {
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/billing/retrieve-subscription-info`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+
+    // Upload
+
+    getS3Policy: async (context) => {
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/upload/s3-policy`, options)
         return normalizeResponse(response)
       } catch (error) {
         console.error(error)
