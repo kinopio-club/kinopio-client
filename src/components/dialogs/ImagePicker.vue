@@ -255,17 +255,14 @@ export default {
       return this.cardUrl === image.url
     },
     selectFile (event) {
-      // if (this.loading) { return } this shouldn't matter
       const input = this.$refs.input
       input.click()
     },
-
-    // move to a global place/plugin/util?
     async uploadFile () {
       const cardId = this.cardId
       const input = this.$refs.input
       const file = input.files[0]
-      await this.$store.dispatch('upload/uploadFile', { file, cardId })
+      this.$store.dispatch('upload/uploadFile', { file, cardId })
     }
   },
   watch: {

@@ -433,10 +433,10 @@ const self = {
 
     // Upload
 
-    getS3Policy: async (context) => {
+    createPresignedPost: async (context, body) => {
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/upload/s3-policy`, options)
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/upload/presigned-post`, options)
         return normalizeResponse(response)
       } catch (error) {
         console.error(error)

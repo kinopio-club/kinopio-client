@@ -200,7 +200,6 @@ export default {
           space: currentSpace,
           currentUserIsSignedIn
         })
-        this.$store.dispatch('upload/updateS3Policy')
       } else {
         await this.handleErrors(result)
       }
@@ -236,7 +235,6 @@ export default {
         this.$store.commit('notifyNewUser', false)
         this.addCollaboratorToInvitedSpaces()
         this.$store.commit('triggerSpaceDetailsVisible')
-        this.$store.dispatch('upload/updateS3Policy')
       } else {
         await this.handleErrors(result)
       }

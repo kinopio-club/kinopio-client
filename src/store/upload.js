@@ -3,82 +3,87 @@ import utils from '@/utils.js'
 export default {
   namespaced: true,
   state: {
-    s3Policy: {}, // accessKeyId, policy, signature
-    inProgress: []
+    pending: []
   },
   mutations: {
     s3Policy: (state, value) => {
       utils.typeCheck(value, 'object')
       state.s3Policy = value
     }
+    // addPending: (state, pending) => {
+    // dataurl if img filecontenttype
+    //   const fileReader = new FileReader()
+    //   pending.dataUrl = fileReader.readAsDataUrl(pending.file)
+    //   console.log('💽 pending dataurl', pending.dataUrl)
+    //   state.pending.push(pending)
+    //   console.log('🌺 add pending',pending)
+    // should abort and remove matching / duplicate cardId upload
+    // },
+    // updatePending: (state, { cardId, progress }) => {
+    //   let pending = state.pending.filter(upload => upload.cardId !== cardId)
+    //   pending.push({ cardId, progress })
+    //   state.pending = pending
+    // },
+    // removePending: (state, cardId) => {
+    //   let pending = state.pending.filter(upload => upload.cardId !== cardId)
+    //   state.pending = pending
+    // }
+
+    // updateInProgress: (state, progress) => {
+    //   let inProgress = state.pending.filter(upload => upload.cardId !== progress.cardId)
+    //   pending.push(progress)
+    //   state.pending = pending
+    // },
+    // chunk , in progress, pieces
+
   },
   actions: {
-    updateS3Policy: async (context) => {
-      const s3Policy = await context.dispatch('api/getS3Policy', null, { root: true })
-      context.commit('s3Policy', s3Policy)
-    },
+    // updateS3Policy: async (context) => {
+    //   const s3Policy = await context.dispatch('api/getS3Policy', null, { root: true })
+    //   context.commit('s3Policy', s3Policy)
+    //   console.log('🍡 S3Policy', s3Policy)
+    // },
     uploadFile: async (context, { file, cardId }) => {
-      // cardId optional?
+      const key = `${cardId}/${file.name}`
 
-      // store loading upload true
+      // 🌷 get policy, todo: if user is anon , return emit an error
 
-      const policy = context.state.s3Policy
-      const policyData = JSON.parse(atob(policy.policy)) // conditions.{bucket, acl, [content-length, success_action_status]}, expiration
-      // https://kinopio-uploads.us-east-1.linodeobjects.com/43cardIDxyz123/ultraboost-20.png
+      const presignedPostData = await context.dispatch('api/createPresignedPost', { key }, { root: true })
 
-      // put s3 info in formdata
-      // let formData = new formData()
-      // formData.append('')
-
-      // const data = {
-      //   key: `${cardId}/${file.name}`,
-      //   file: file,
-      //   'Content-Type': 'binary/octet-stream',
-      //   'Cache-Control': '',
-      //   AWSAccessKeyId: policy.accessKeyId,
-      //   acl: 'public-read',
-      //   policy: policy.policy,
-      //   signature: policy.signature,
-      // }
-      // console.log(data)
+      console.log('🥦', file, cardId) // todo file shows size, which matches xmlhttp size?
+      console.log('🍡', presignedPostData)
 
       const formData = new FormData()
-      formData.append('key', `${cardId}/${file.name}`)
-      formData.append('file', file)
-      formData.append('Content-Type', file.type)
-      formData.append('Cache-Control', 'max-age=31536000')
-      formData.append('AWSAccessKeyId', policy.accessKeyId)
-      formData.append('acl', 'public-read')
-      formData.append('policy', policy.policy)
-      formData.append('signature', policy.signature)
-
-      console.log(formData.entries())
-      // iterate over everything in data and append formdata
-      // formData.append('name', file, `${cardId}/${file.name}`)
-
-      // const reader = new FileReader()
-      // let blob
-      // reader.readAsBinaryString(file)
-      // reader.onloadend = event => {
-      //   console.log(event)
-      //   blob = event.target.result
-      // console.log('binary blob', blob)
-      const url = 'https://kinopio-uploads.us-east-1.linodeobjects.com'
-
-      console.log('🥦', file, cardId)
-      console.log('🍡', utils.clone(policy), policyData, url, policyData.conditions[0], policy.policy, atob(policy.policy))
-      // }
-
-      // const options = {
-      //   method: 'PUT',
-      // body:
-      // }
-
-      const response = await fetch(url, {
-        method: 'POST',
-        body: formData
+      Object.keys(presignedPostData.fields).forEach(key => {
+        formData.append(key, presignedPostData.fields[key])
       })
-      console.log('🍒', response)
+      formData.append('file', file)
+      const request = new XMLHttpRequest()
+      request.open('POST', presignedPostData.url)
+      request.send(formData)
+      request.onprogress = (event) => {
+        console.log('🍡 progress', event)
+        // todo context.commit('updatePending', {file, cardId, event.loaded, event.total, event.position}) // xmlrequestprogressevent
+      }
+      request.onload = (event) => {
+        console.log('🍒 upload complete', event)
+        // todo removePending
+      }
+
+      // request.onload = (event) => {
+      //   console.log('request loaded', event)
+      // }
+      // request.onprogress = (event) => {
+      //   console.log('progress', event)
+      // }
+
+      // have to use XMLHttpRequest, because fetch doesn't currently support progress
+      // const request = new XMLHttpRequest()
+
+      // Progress events are a high level feature that won't arrive in fetch for now. You can create your own by looking at the Content-Length header and using a pass-through stream to monitor the bytes received.
+      // This means you can explicitly handle responses without a Content-Length differently. And of course, even if Content-Length is there it can be a lie. With streams you can handle these lies however you want.
+
+      // console.log('🍒', response)
       // const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
       // const options = {}
 
