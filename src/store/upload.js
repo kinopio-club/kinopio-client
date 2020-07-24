@@ -52,31 +52,43 @@ export default {
     uploadFile: async (context, { file, cardId }) => {
       const key = `${cardId}/${file.name}`
       const userIsUpgraded = context.rootState.currentUser.isUpgraded
-
-      // 🌷 get policy, todo: if user is anon , return emit an error
-
       context.dispatch('checkIfFileTooBig', file)
+      const presignedPostData = await context.dispatch('api/createPresignedPost', { key, userIsUpgraded, type: file.type }, { root: true })
 
-      const presignedPostData = await context.dispatch('api/createPresignedPost', { key, userIsUpgraded }, { root: true })
-
-      console.log('🥦', file, file.size, cardId, presignedPostData)
+      console.log('🥦', file, file.size, presignedPostData)
 
       const formData = new FormData()
       Object.keys(presignedPostData.fields).forEach(key => {
         formData.append(key, presignedPostData.fields[key])
       })
       formData.append('file', file)
+
+      // console.log(request.getAllResponseHeaders())
+      // why is event.lengthComputable false
+      // XMLHttpRequest upload progress
+
+      // request.upload
+
+      // request.setRequestHeader('Content-Type', file.type)
+
+      // If we’re uploading something big, then we’re surely more interested in tracking the upload progress. But xhr.onprogress doesn’t help here.
+      // request.onprogress = (event) => {
+      //   console.log('🍡 progress', event)
+      //   // todo context.commit('updatePending', {file, cardId, event.loaded, event.total, event.position}) // xmlrequestprogressevent
+      // }
       const request = new XMLHttpRequest()
-      request.open('POST', presignedPostData.url)
-      request.send(formData)
-      request.onprogress = (event) => {
-        console.log('🍡 progress', event)
-        // todo context.commit('updatePending', {file, cardId, event.loaded, event.total, event.position}) // xmlrequestprogressevent
+
+      request.upload.onprogress = function (event) {
+        console.log(`Uploaded ${event.loaded} of ${event.total}`, event)
       }
+
       request.onload = (event) => {
         console.log('🍒 upload complete', event)
         // todo removePending
       }
+
+      request.open('POST', presignedPostData.url)
+      request.send(formData)
 
       // error handling
 
