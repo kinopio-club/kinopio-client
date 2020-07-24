@@ -11,6 +11,12 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.stop ref="dialo
         button(@click.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile")
 
+    .error-container-top(v-if="error.signUpToUpload")
+      p
+        span To upload files,
+        span.badge.info you need to Sign Up or In
+      button(@click="triggerSignUpOrInIsVisible") Sign Up or In
+
     label(v-if="serviceIsGfycat" :class="{active: gfycatIsStickers}" @click.prevent="toggleGfycatIsStickers" @keydown.stop.enter="toggleGfycatIsStickers")
       input(type="checkbox" v-model="gfycatIsStickers")
       span Stickers
@@ -72,7 +78,8 @@ export default {
       loading: false,
       error: {
         unknownServerError: false,
-        userIsOffline: false
+        userIsOffline: false,
+        signUpToUpload: false
       }
     }
   },
@@ -114,9 +121,14 @@ export default {
       } else {
         return false
       }
-    }
+    },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
+    triggerSignUpOrInIsVisible () {
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('triggerSignUpOrInIsVisible')
+    },
     toggleServiceIsArena () {
       this.service = 'Are.na'
       this.searchAgain()
@@ -130,6 +142,7 @@ export default {
       this.searchAgain()
     },
     searchAgain () {
+      this.error.signUpToUpload = false
       this.images = []
       if (this.search) {
         this.loading = true
@@ -255,6 +268,10 @@ export default {
       return this.cardUrl === image.url
     },
     selectFile (event) {
+      if (!this.currentUserIsSignedIn) {
+        this.error.signUpToUpload = true
+        return
+      }
       const input = this.$refs.input
       input.click()
     },
@@ -262,7 +279,11 @@ export default {
       const cardId = this.cardId
       const input = this.$refs.input
       const file = input.files[0]
-      this.$store.dispatch('upload/uploadFile', { file, cardId })
+      try {
+        await this.$store.dispatch('upload/uploadFile', { file, cardId, isFromCard: true })
+      } catch (error) {
+        console.error(error)
+      }
     }
   },
   watch: {
@@ -318,4 +339,6 @@ export default {
   .hidden
     display none
 
+  .error-container-top + label
+    margin-top 10px
 </style>
