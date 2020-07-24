@@ -39,51 +39,15 @@ export default {
 
   },
   actions: {
-    // updateS3Policy: async (context) => {
-    //   const s3Policy = await context.dispatch('api/getS3Policy', null, { root: true })
-    //   context.commit('s3Policy', s3Policy)
-    //   console.log('🍡 S3Policy', s3Policy)
-    // },
-
     checkIfFileTooBig: (context, file) => {
-      // const userIsUpgraded = context.rootState.currentUser.isUpgraded
-      // let maxSize, message, userShouldUpgrade
-      // if (userIsUpgraded) {
-      //   maxSize = 1024 * 1024 * 250
-      //   message = 'File too big, uploads cannot be over 250mb'
-      //   userShouldUpgrade = false
-      // } else {
-      //   maxSize = 1024 * 1024 * 20
-      //   message = 'File too big, upgrade to upload files over 20mb'
-      //   userShouldUpgrade = true
-      // }
       const userIsUpgraded = context.rootState.currentUser.isUpgraded
-      const sizeLimit = 1024 * 1024 * 20
+      const sizeLimit = 1024 * 1024 * 20 // 20mb
       if (file.size > sizeLimit && !userIsUpgraded) {
         throw {
           type: 'sizeLimit',
           message: 'To upload files over 20mb, upgrade for unlimited size uploads'
         }
       }
-
-      // let errorMessage = 'asldkfj'
-
-      // if (context.rootState.currentUser.isUpgraded) {
-      //   // 20mb free, 250mb paid
-      //   maxSize = 250
-      // } else {
-      //   maxSize = 20
-      // }
-      // maxSize = 1024 * 1024 * maxSize
-      // if (file.size > maxSize) {
-      //   if (isFromCard) {
-      //     throw Error({
-      //       type: 'error',
-      //       message: 'xcvbcvb'
-      //     })
-      //   }
-      //   context.commit('addNotification', { message: errorMessage, type: 'danger' }, { root: true })
-      // }
     },
     uploadFile: async (context, { file, cardId }) => {
       const key = `${cardId}/${file.name}`
@@ -92,11 +56,10 @@ export default {
       // 🌷 get policy, todo: if user is anon , return emit an error
 
       context.dispatch('checkIfFileTooBig', file)
-      console.log('🍆this shouldnt run if too big🍆')
 
       const presignedPostData = await context.dispatch('api/createPresignedPost', { key, userIsUpgraded }, { root: true })
 
-      console.log('🥦', file, cardId, presignedPostData) // todo file shows size, which matches xmlhttp size?
+      console.log('🥦', file, file.size, cardId, presignedPostData)
 
       const formData = new FormData()
       Object.keys(presignedPostData.fields).forEach(key => {
@@ -130,25 +93,8 @@ export default {
       // Progress events are a high level feature that won't arrive in fetch for now. You can create your own by looking at the Content-Length header and using a pass-through stream to monitor the bytes received.
       // This means you can explicitly handle responses without a Content-Length differently. And of course, even if Content-Length is there it can be a lie. With streams you can handle these lies however you want.
 
-      // console.log('🍒', response)
       // const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
       // const options = {}
-
-      // const response = await fetch(`${host}/operations`, options)
-
-      // var uploadData = { ratio: Observable(0) };
-      // self.pendingUploads.push(uploadData);
-      // return self.getPolicy()
-      //     .then(function (policy) {
-      //     return S3Uploader(policy).upload({
-      //         key: file.name,
-      //         blob: file
-      //     }).progress(self.generateUploadProgressEventHandler(uploadData));
-      // }).finally(function () {
-      //     self.pendingUploads.remove(uploadData);
-      //     self.currentProject().updatedAt((new Date()).toISOString());
-      //     return self.currentProject().save(self.api());
-      // });
     }
   }
 }
