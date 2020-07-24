@@ -4,6 +4,7 @@ export default {
   namespaced: true,
   state: {
     pending: []
+    // ? pendingBlobs: [] // todo: add/remvoed in pending commits, try to store in pending directly first and see if dataurl big url size causes issues
   },
   mutations: {
     s3Policy: (state, value) => {
@@ -43,15 +44,59 @@ export default {
     //   context.commit('s3Policy', s3Policy)
     //   console.log('🍡 S3Policy', s3Policy)
     // },
+
+    checkIfFileTooBig: (context, file) => {
+      // const userIsUpgraded = context.rootState.currentUser.isUpgraded
+      // let maxSize, message, userShouldUpgrade
+      // if (userIsUpgraded) {
+      //   maxSize = 1024 * 1024 * 250
+      //   message = 'File too big, uploads cannot be over 250mb'
+      //   userShouldUpgrade = false
+      // } else {
+      //   maxSize = 1024 * 1024 * 20
+      //   message = 'File too big, upgrade to upload files over 20mb'
+      //   userShouldUpgrade = true
+      // }
+      const userIsUpgraded = context.rootState.currentUser.isUpgraded
+      const sizeLimit = 1024 * 1024 * 20
+      if (file.size > sizeLimit && !userIsUpgraded) {
+        throw {
+          type: 'sizeLimit',
+          message: 'To upload files over 20mb, upgrade for unlimited size uploads'
+        }
+      }
+
+      // let errorMessage = 'asldkfj'
+
+      // if (context.rootState.currentUser.isUpgraded) {
+      //   // 20mb free, 250mb paid
+      //   maxSize = 250
+      // } else {
+      //   maxSize = 20
+      // }
+      // maxSize = 1024 * 1024 * maxSize
+      // if (file.size > maxSize) {
+      //   if (isFromCard) {
+      //     throw Error({
+      //       type: 'error',
+      //       message: 'xcvbcvb'
+      //     })
+      //   }
+      //   context.commit('addNotification', { message: errorMessage, type: 'danger' }, { root: true })
+      // }
+    },
     uploadFile: async (context, { file, cardId }) => {
       const key = `${cardId}/${file.name}`
+      const userIsUpgraded = context.rootState.currentUser.isUpgraded
 
       // 🌷 get policy, todo: if user is anon , return emit an error
 
-      const presignedPostData = await context.dispatch('api/createPresignedPost', { key }, { root: true })
+      context.dispatch('checkIfFileTooBig', file)
+      console.log('🍆this shouldnt run if too big🍆')
 
-      console.log('🥦', file, cardId) // todo file shows size, which matches xmlhttp size?
-      console.log('🍡', presignedPostData)
+      const presignedPostData = await context.dispatch('api/createPresignedPost', { key, userIsUpgraded }, { root: true })
+
+      console.log('🥦', file, cardId, presignedPostData) // todo file shows size, which matches xmlhttp size?
 
       const formData = new FormData()
       Object.keys(presignedPostData.fields).forEach(key => {
@@ -69,6 +114,8 @@ export default {
         console.log('🍒 upload complete', event)
         // todo removePending
       }
+
+      // error handling
 
       // request.onload = (event) => {
       //   console.log('request loaded', event)

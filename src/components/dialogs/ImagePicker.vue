@@ -16,6 +16,11 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.stop ref="dialo
         span To upload files,
         span.badge.info you need to Sign Up or In
       button(@click="triggerSignUpOrInIsVisible") Sign Up or In
+    .error-container-top(v-if="error.sizeLimit")
+      p
+        span To upload files over 20mb,
+        span.badge.info upgrade for unlimited
+      button(@click="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
     label(v-if="serviceIsGfycat" :class="{active: gfycatIsStickers}" @click.prevent="toggleGfycatIsStickers" @keydown.stop.enter="toggleGfycatIsStickers")
       input(type="checkbox" v-model="gfycatIsStickers")
@@ -79,7 +84,8 @@ export default {
       error: {
         unknownServerError: false,
         userIsOffline: false,
-        signUpToUpload: false
+        signUpToUpload: false,
+        sizeLimit: false
       }
     }
   },
@@ -129,6 +135,10 @@ export default {
       this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
+    triggerUpgradeUserIsVisible () {
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('triggerUpgradeUserIsVisible')
+    },
     toggleServiceIsArena () {
       this.service = 'Are.na'
       this.searchAgain()
@@ -142,7 +152,6 @@ export default {
       this.searchAgain()
     },
     searchAgain () {
-      this.error.signUpToUpload = false
       this.images = []
       if (this.search) {
         this.loading = true
@@ -203,6 +212,8 @@ export default {
       this.loading = false
     }, 350),
     clearErrors () {
+      this.error.signUpToUpload = false
+      this.error.sizeLimit = false
       this.error.unknownServerError = false
       this.error.userIsOffline = false
     },
@@ -280,9 +291,14 @@ export default {
       const input = this.$refs.input
       const file = input.files[0]
       try {
-        await this.$store.dispatch('upload/uploadFile', { file, cardId, isFromCard: true })
+        // show loader
+        await this.$store.dispatch('upload/uploadFile', { file, cardId })
+        // ?close dialog when upload complete?
       } catch (error) {
-        console.error(error)
+        console.warn('🍡', error)
+        if (error.type === 'sizeLimit') {
+          this.error.sizeLimit = true
+        }
       }
     }
   },

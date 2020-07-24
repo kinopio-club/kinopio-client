@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop @keydown.stop :class="{'right-side': dialogOnRight}")
   section
-    p Upgrade your account for unlimited cards
+    p Upgrade your account for unlimited cards and uploads
     .summary
       User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
       .badge.info $4/month
