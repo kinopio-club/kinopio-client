@@ -41,11 +41,11 @@ export default {
   actions: {
     checkIfFileTooBig: (context, file) => {
       const userIsUpgraded = context.rootState.currentUser.isUpgraded
-      const sizeLimit = 1024 * 1024 * 20 // 20mb
+      const sizeLimit = 1024 * 1024 * 10 // 10mb
       if (file.size > sizeLimit && !userIsUpgraded) {
         throw {
           type: 'sizeLimit',
-          message: 'To upload files over 20mb, upgrade for unlimited size uploads'
+          message: 'To upload files over 10mb, upgrade for unlimited size uploads'
         }
       }
     },

@@ -18,7 +18,7 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.stop ref="dialo
       button(@click="triggerSignUpOrInIsVisible") Sign Up or In
     .error-container-top(v-if="error.sizeLimit")
       p
-        span To upload files over 20mb,
+        span To upload files over 10mb,
         span.badge.info upgrade for unlimited
       button(@click="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
