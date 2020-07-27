@@ -9,22 +9,28 @@ export default {
     s3Policy: (state, value) => {
       utils.typeCheck(value, 'object')
       state.s3Policy = value
+    },
+    addPendingUpload: (state, upload) => { // key, fileName, cardId
+      upload.percentComplete = 0
+      state.pendingUploads = state.pendingUploads.filter(item => item.cardId !== upload.cardId)
+      state.pendingUploads.push(upload)
+    },
+    updatePendingUpload: (state, { cardId, percentComplete, imageDataUrl }) => {
+      state.pendingUploads = state.pendingUploads.map(item => {
+        if (percentComplete && item.cardId === cardId) {
+          item.percentComplete = percentComplete
+        }
+        if (imageDataUrl && item.cardId === cardId) {
+          item.imageDataUrl = imageDataUrl
+        }
+        return item
+      })
+      console.log('🌺 updated', state.pendingUploads)
+    },
+    removePendingUpload: (state, cardId) => {
+      state.pendingUploads = state.pendingUploads.filter(item => item.cardId !== cardId)
+      console.log('🍄 removed', state.pendingUploads)
     }
-    // addPendingUpload: (state, { file, imageDataUrl }) => {
-    //   state.pending.push(pending)
-    //   console.log('🌺 add pending',pending)
-    // should abort and remove matching / duplicate cardId upload
-    // },
-    // updatePending: (state, { cardId, progress }) => {
-    //   let pending = state.pending.filter(upload => upload.cardId !== cardId)
-    //   pending.push({ cardId, progress })
-    //   state.pending = pending
-    // },
-    // removePending: (state, cardId) => {
-    //   let pending = state.pending.filter(upload => upload.cardId !== cardId)
-    //   state.pending = pending
-    // }
-
   },
   actions: {
     checkIfFileTooBig: (context, file) => {
@@ -37,18 +43,21 @@ export default {
         }
       }
     },
-    imageDataUrl: (context, file) => {
+    addImageDataUrl: (context, { file, cardId }) => {
       const isImage = file.type.includes('image')
       if (!isImage) { return null }
       const reader = new FileReader()
       console.log(reader, file)
       reader.addEventListener('load', () => {
-        return reader.result
+        context.commit('updatePendingUpload', { cardId,
+          imageDataUrl: reader.result
+        })
       }, false)
       reader.readAsDataURL(file)
     },
     uploadFile: async (context, { file, cardId }) => {
-      const key = `${cardId}/${file.name}`
+      const fileName = file.name
+      const key = `${cardId}/${fileName}`
       const userIsUpgraded = context.rootState.currentUser.isUpgraded
       context.dispatch('checkIfFileTooBig', file)
       const presignedPostData = await context.dispatch('api/createPresignedPost', { key, userIsUpgraded, type: file.type }, { root: true })
@@ -59,19 +68,22 @@ export default {
       })
       formData.append('file', file)
       const request = new XMLHttpRequest()
+      // progress
       request.upload.onprogress = (event) => {
-        console.log(`🛫 Uploaded ${event.loaded} of ${event.total}, percent: ${Math.floor(event.loaded / event.total * 100)}`)
-        // todo updatePending w progress percent
+        const percentComplete = Math.floor(event.loaded / event.total * 100)
+        console.log(`🛫 Uploading ${fileName}, percent: ${percentComplete}`)
+        context.commit('updatePendingUpload', { cardId, percentComplete })
       }
+      // end
       request.onload = (event) => {
-        console.log('🍡 Upload complete or failed', event)
-        // todo removePending
+        console.log('🍡 Upload completed or failed', event)
+        context.commit('removePendingUpload', cardId)
       }
+      // start
       request.open('POST', presignedPostData.url)
       request.send(formData)
-      // const imageDataUrl = context.dispatch('imageDataUrl', file)
-      console.log('🥦', file)
-      // todo addPendingUpload, { percent, imageDataUrl, key, cardId }
+      context.commit('addPendingUpload', { key, fileName, cardId })
+      context.dispatch('addImageDataUrl', { file, cardId })
     }
   }
 }
