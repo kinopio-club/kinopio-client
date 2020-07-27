@@ -11,6 +11,13 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.stop ref="dialo
         button(@click.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile")
 
+    .uploading-container(v-if="cardPendingUpload")
+      //- todo: display image here?
+      img(v-if="cardPendingUpload" :src="cardPendingUpload.imageDataUrl")
+      .badge.status(:class="{absolute : cardPendingUpload.imageDataUrl}")
+        Loader(:visible="true")
+        span {{cardPendingUpload.percentComplete}}%
+
     .error-container-top(v-if="error.signUpToUpload")
       p
         span To upload files,
@@ -108,6 +115,10 @@ export default {
       }
     },
     placeholder () { return `Search ${this.service}` },
+    cardPendingUpload () {
+      const pendingUploads = this.$store.state.upload.pendingUploads
+      return pendingUploads.find(upload => upload.cardId === this.cardId)
+    },
     serviceIsArena () {
       if (this.service === 'Are.na') {
         return true
@@ -283,6 +294,7 @@ export default {
       return this.cardUrl === image.url
     },
     selectFile (event) {
+      this.clearErrors()
       if (!this.currentUserIsSignedIn) {
         this.error.signUpToUpload = true
         return
@@ -331,7 +343,7 @@ export default {
   max-height 100vh
   .search-wrap
     .loader
-      width 16px
+      width 13px
       height 14px
       margin-right 3px
       flex-shrink 0
@@ -363,4 +375,20 @@ export default {
 
   .error-container-top + label
     margin-top 10px
+
+  .uploading-container
+    position relative
+    img
+      border-radius 3px
+    .badge
+      display inline-block
+      &.absolute
+        position absolute
+        top 6px
+        left 6px
+    .loader
+      width 14px
+      height 14px
+      vertical-align -3px
+      margin-right 6px
 </style>
