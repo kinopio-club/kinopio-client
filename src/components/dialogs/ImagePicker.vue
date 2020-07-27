@@ -21,6 +21,8 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.stop ref="dialo
         span To upload files over 10mb,
         span.badge.info upgrade for unlimited
       button(@click="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+    .error-container-top(v-if="error.unknownUploadError")
+      .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
     label(v-if="serviceIsGfycat" :class="{active: gfycatIsStickers}" @click.prevent="toggleGfycatIsStickers" @keydown.stop.enter="toggleGfycatIsStickers")
       input(type="checkbox" v-model="gfycatIsStickers")
@@ -85,7 +87,8 @@ export default {
         unknownServerError: false,
         userIsOffline: false,
         signUpToUpload: false,
-        sizeLimit: false
+        sizeLimit: false,
+        unknownUploadError: false
       }
     }
   },
@@ -216,6 +219,7 @@ export default {
       this.error.sizeLimit = false
       this.error.unknownServerError = false
       this.error.userIsOffline = false
+      this.error.unknownUploadError = false
     },
     normalizeResults (data, service) {
       if (service === 'Are.na' && this.serviceIsArena) {
@@ -295,9 +299,11 @@ export default {
         await this.$store.dispatch('upload/uploadFile', { file, cardId })
         // ?close dialog when upload complete?
       } catch (error) {
-        console.warn('🍡', error)
+        console.warn('🚒', error)
         if (error.type === 'sizeLimit') {
           this.error.sizeLimit = true
+        } else {
+          this.error.unknownUploadError = true
         }
       }
     }
