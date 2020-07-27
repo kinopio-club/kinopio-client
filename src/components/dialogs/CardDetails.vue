@@ -22,6 +22,11 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       @keydown.alt.enter.exact.stop="insertLineBreak"
       @keydown.ctrl.enter.exact.stop="insertLineBreak"
     )
+    .row(v-if="cardPendingUpload")
+      .badge.info
+        Loader(:visible="true")
+        span {{cardPendingUpload.percentComplete}}%
+
     .row
       //- Remove
       .button-wrap
@@ -72,6 +77,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
 <script>
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
+import Loader from '@/components/Loader.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
@@ -79,7 +85,8 @@ export default {
   name: 'CardDetails',
   components: {
     FramePicker,
-    ImagePicker
+    ImagePicker,
+    Loader
   },
   props: {
     card: Object // name, x, y, z
@@ -170,6 +177,10 @@ export default {
       } else {
         return false
       }
+    },
+    cardPendingUpload () {
+      const pendingUploads = this.$store.state.upload.pendingUploads
+      return pendingUploads.find(upload => upload.cardId === this.card.id)
     }
   },
   methods: {
