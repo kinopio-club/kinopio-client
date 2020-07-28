@@ -69,7 +69,7 @@ export default {
       // progress
       request.upload.onprogress = (event) => {
         const percentComplete = Math.floor(event.loaded / event.total * 100)
-        console.log(`🛫 Uploading ${fileName}, percent: ${percentComplete}`)
+        console.log(`🛫 Uploading ${fileName} for card ${cardId}, percent: ${percentComplete}`)
         context.commit('updatePendingUpload', { cardId, percentComplete })
       }
       // end
