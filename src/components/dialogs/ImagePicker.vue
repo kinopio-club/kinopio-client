@@ -307,9 +307,7 @@ export default {
       const input = this.$refs.input
       const file = input.files[0]
       try {
-        // show loader
         await this.$store.dispatch('upload/uploadFile', { file, cardId })
-        // ?close dialog when upload complete?
       } catch (error) {
         console.warn('🚒', error)
         if (error.type === 'sizeLimit') {

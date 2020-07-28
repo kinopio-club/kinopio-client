@@ -190,6 +190,7 @@ export default new Vuex.Store({
     triggerUpdateRemoteUserCursor: () => {},
     triggerUpdatePositionInVisualViewport: () => {},
     triggerUpgradeUserIsVisible: () => {},
+    triggerUploadComplete: () => {},
 
     // Cards
 

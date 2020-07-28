@@ -481,6 +481,11 @@ export default {
     return string.replace(/([^a-z0-9-]+)/ig, '-').toLowerCase()
   },
 
+  normalizeFileUrl (string) {
+    // same as normalizeString^, but keeps '.' and case
+    return string.replace(/([^a-z0-9-.]+)/ig, '-')
+  },
+
   // same as server util
   url ({ name, id }) {
     if (name) {

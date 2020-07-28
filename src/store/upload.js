@@ -25,11 +25,9 @@ export default {
         }
         return item
       })
-      console.log('🌺 updated', state.pendingUploads)
     },
     removePendingUpload: (state, cardId) => {
       state.pendingUploads = state.pendingUploads.filter(item => item.cardId !== cardId)
-      console.log('🍄 removed', state.pendingUploads)
     }
   },
   actions: {
@@ -56,12 +54,12 @@ export default {
       reader.readAsDataURL(file)
     },
     uploadFile: async (context, { file, cardId }) => {
-      const fileName = file.name
+      const fileName = utils.normalizeFileUrl(file.name)
       const key = `${cardId}/${fileName}`
       const userIsUpgraded = context.rootState.currentUser.isUpgraded
       context.dispatch('checkIfFileTooBig', file)
-      const presignedPostData = await context.dispatch('api/createPresignedPost', { key, userIsUpgraded, type: file.type }, { root: true })
 
+      const presignedPostData = await context.dispatch('api/createPresignedPost', { key, userIsUpgraded, type: file.type }, { root: true })
       const formData = new FormData()
       Object.keys(presignedPostData.fields).forEach(key => {
         formData.append(key, presignedPostData.fields[key])
@@ -76,7 +74,11 @@ export default {
       }
       // end
       request.onload = (event) => {
-        console.log('🍡 Upload completed or failed', event)
+        console.log('🛬 Upload completed or failed', event)
+        context.commit('triggerUploadComplete', {
+          cardId,
+          url: `${presignedPostData.url}/${key}`
+        }, { root: true })
         context.commit('removePendingUpload', cardId)
       }
       // start

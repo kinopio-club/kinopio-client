@@ -43,7 +43,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       .button-wrap
         button(:disabled="!canEditCard" @click.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
           span Image
-        ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addImage")
+        ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addFile")
       //- Frames
       .button-wrap
         button(:disabled="!canEditCard" @click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
@@ -105,6 +105,13 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.framePickerIsVisible = false
         this.imagePickerIsVisible = false
+      }
+      if (mutation.type === 'triggerUploadComplete') {
+        let { cardId, url } = mutation.payload
+        if (cardId !== this.card.id) { return }
+        const upload = state.upload.pendingUploads.filter(item => item.cardId === this.card.id)
+        if (upload.percentComplete !== 100) { return }
+        this.addFile({ url })
       }
     })
   },
@@ -331,18 +338,18 @@ export default {
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
-    addImage (image) {
+    addFile (file) {
       let name = this.card.name
       const checkbox = utils.checkboxFromString(name)
       const url = utils.urlFromString(name)
       if (utils.urlIsImage(url) || utils.urlIsVideo(url)) {
         name = name.replace(url, '')
       }
-      if (image.url === url) {
+      if (file.url === url) {
         name = name.replace(url, '')
       } else {
         name = utils.trim(name)
-        name = `${image.url}\n\n${name}`
+        name = `${file.url}\n\n${name}`
       }
       if (checkbox) {
         name = name.replace(checkbox, '')
