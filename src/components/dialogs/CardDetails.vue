@@ -22,6 +22,11 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       @keydown.alt.enter.exact.stop="insertLineBreak"
       @keydown.ctrl.enter.exact.stop="insertLineBreak"
     )
+    .row(v-if="cardPendingUpload")
+      .badge.info
+        Loader(:visible="true")
+        span {{cardPendingUpload.percentComplete}}%
+
     .row
       //- Remove
       .button-wrap
@@ -38,7 +43,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       .button-wrap
         button(:disabled="!canEditCard" @click.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
           span Image
-        ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" @selectImage="addImage")
+        ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addFile")
       //- Frames
       .button-wrap
         button(:disabled="!canEditCard" @click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
@@ -72,6 +77,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
 <script>
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
+import Loader from '@/components/Loader.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
@@ -79,7 +85,8 @@ export default {
   name: 'CardDetails',
   components: {
     FramePicker,
-    ImagePicker
+    ImagePicker,
+    Loader
   },
   props: {
     card: Object // name, x, y, z
@@ -98,6 +105,13 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.framePickerIsVisible = false
         this.imagePickerIsVisible = false
+      }
+      if (mutation.type === 'triggerUploadComplete') {
+        let { cardId, url } = mutation.payload
+        if (cardId !== this.card.id) { return }
+        const upload = state.upload.pendingUploads.filter(item => item.cardId === this.card.id)
+        if (upload.percentComplete !== 100) { return }
+        this.addFile({ url })
       }
     })
   },
@@ -170,6 +184,10 @@ export default {
       } else {
         return false
       }
+    },
+    cardPendingUpload () {
+      const pendingUploads = this.$store.state.upload.pendingUploads
+      return pendingUploads.find(upload => upload.cardId === this.card.id)
     }
   },
   methods: {
@@ -320,18 +338,18 @@ export default {
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
-    addImage (image) {
+    addFile (file) {
       let name = this.card.name
       const checkbox = utils.checkboxFromString(name)
       const url = utils.urlFromString(name)
       if (utils.urlIsImage(url) || utils.urlIsVideo(url)) {
         name = name.replace(url, '')
       }
-      if (image.url === url) {
+      if (file.url === url) {
         name = name.replace(url, '')
       } else {
         name = utils.trim(name)
-        name = `${image.url}\n\n${name}`
+        name = `${file.url}\n\n${name}`
       }
       if (checkbox) {
         name = name.replace(checkbox, '')

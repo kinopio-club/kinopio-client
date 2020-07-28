@@ -7,6 +7,28 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.stop ref="dialo
           span Are.na
         button(@click.stop="toggleServiceIsGfycat" :class="{active : serviceIsGfycat}")
           span Gfycat
+      .button-wrap
+        button(@click.stop="selectFile") Upload
+        input.hidden(type="file" ref="input" @change="uploadFile")
+
+    .uploading-container(v-if="cardPendingUpload")
+      img(v-if="cardPendingUpload" :src="cardPendingUpload.imageDataUrl")
+      .badge.info(:class="{absolute : cardPendingUpload.imageDataUrl}")
+        Loader(:visible="true")
+        span {{cardPendingUpload.percentComplete}}%
+
+    .error-container-top(v-if="error.signUpToUpload")
+      p
+        span To upload files,
+        span.badge.info you need to Sign Up or In
+      button(@click="triggerSignUpOrInIsVisible") Sign Up or In
+    .error-container-top(v-if="error.sizeLimit")
+      p
+        span To upload files over 10mb,
+        span.badge.info upgrade for unlimited
+      button(@click="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+    .error-container-top(v-if="error.unknownUploadError")
+      .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
     label(v-if="serviceIsGfycat" :class="{active: gfycatIsStickers}" @click.prevent="toggleGfycatIsStickers" @keydown.stop.enter="toggleGfycatIsStickers")
       input(type="checkbox" v-model="gfycatIsStickers")
@@ -57,7 +79,8 @@ export default {
   props: {
     visible: Boolean,
     initialSearch: String,
-    cardUrl: String
+    cardUrl: String,
+    cardId: String
   },
   data () {
     return {
@@ -68,7 +91,10 @@ export default {
       loading: false,
       error: {
         unknownServerError: false,
-        userIsOffline: false
+        userIsOffline: false,
+        signUpToUpload: false,
+        sizeLimit: false,
+        unknownUploadError: false
       }
     }
   },
@@ -88,6 +114,10 @@ export default {
       }
     },
     placeholder () { return `Search ${this.service}` },
+    cardPendingUpload () {
+      const pendingUploads = this.$store.state.upload.pendingUploads
+      return pendingUploads.find(upload => upload.cardId === this.cardId)
+    },
     serviceIsArena () {
       if (this.service === 'Are.na') {
         return true
@@ -110,9 +140,18 @@ export default {
       } else {
         return false
       }
-    }
+    },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
+    triggerSignUpOrInIsVisible () {
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('triggerSignUpOrInIsVisible')
+    },
+    triggerUpgradeUserIsVisible () {
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('triggerUpgradeUserIsVisible')
+    },
     toggleServiceIsArena () {
       this.service = 'Are.na'
       this.searchAgain()
@@ -186,8 +225,11 @@ export default {
       this.loading = false
     }, 350),
     clearErrors () {
+      this.error.signUpToUpload = false
+      this.error.sizeLimit = false
       this.error.unknownServerError = false
       this.error.userIsOffline = false
+      this.error.unknownUploadError = false
     },
     normalizeResults (data, service) {
       if (service === 'Are.na' && this.serviceIsArena) {
@@ -249,6 +291,30 @@ export default {
     },
     isCardUrl (image) {
       return this.cardUrl === image.url
+    },
+    selectFile (event) {
+      this.clearErrors()
+      if (!this.currentUserIsSignedIn) {
+        this.error.signUpToUpload = true
+        return
+      }
+      const input = this.$refs.input
+      input.click()
+    },
+    async uploadFile () {
+      const cardId = this.cardId
+      const input = this.$refs.input
+      const file = input.files[0]
+      try {
+        await this.$store.dispatch('upload/uploadFile', { file, cardId })
+      } catch (error) {
+        console.warn('🚒', error)
+        if (error.type === 'sizeLimit') {
+          this.error.sizeLimit = true
+        } else {
+          this.error.unknownUploadError = true
+        }
+      }
     }
   },
   watch: {
@@ -274,7 +340,7 @@ export default {
   max-height 100vh
   .search-wrap
     .loader
-      width 16px
+      width 13px
       height 14px
       margin-right 3px
       flex-shrink 0
@@ -301,5 +367,20 @@ export default {
       margin 4px
       margin-top 0
       margin-bottom 8px
+  .hidden
+    display none
 
+  .error-container-top + label
+    margin-top 10px
+
+  .uploading-container
+    position relative
+    img
+      border-radius 3px
+    .badge
+      display inline-block
+      &.absolute
+        position absolute
+        top 6px
+        left 6px
 </style>

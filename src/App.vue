@@ -253,7 +253,8 @@ dialog
   .button-wrap + button,
   label + label,
   label + .button-wrap,
-  .button-wrap + label
+  .button-wrap + label,
+  .segmented-buttons + .button-wrap
     margin-left 6px
 
   p + button,
@@ -409,6 +410,11 @@ code
     .user-avatar
       width 16px
       height 15px
+  .loader
+    width 14px
+    height 14px
+    vertical-align -3px
+    margin-right 6px
 
 .label-badge
   position absolute

@@ -9,6 +9,7 @@ import broadcast from '@/store/broadcast.js'
 import history from '@/store/history.js'
 import currentUser from '@/store/currentUser.js'
 import currentSpace from '@/store/currentSpace.js'
+import upload from '@/store/upload.js'
 
 // store plugins
 import websocket from '@/store/plugins/websocket.js'
@@ -189,6 +190,7 @@ export default new Vuex.Store({
     triggerUpdateRemoteUserCursor: () => {},
     triggerUpdatePositionInVisualViewport: () => {},
     triggerUpgradeUserIsVisible: () => {},
+    triggerUploadComplete: () => {},
 
     // Cards
 
@@ -597,7 +599,8 @@ export default new Vuex.Store({
     broadcast,
     history,
     currentUser,
-    currentSpace
+    currentSpace,
+    upload
   },
   plugins: [websocket()]
 })

@@ -191,7 +191,6 @@ export default {
       }
     },
     cardsCreatedCount: (context, { shouldIncrement }) => {
-      if (context.state.isUpgraded) { return }
       let count
       if (shouldIncrement) {
         count = Math.max(context.state.cardsCreatedCount + 1, 0)

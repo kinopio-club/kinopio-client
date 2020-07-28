@@ -121,7 +121,7 @@ const self = {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/operations`, options)
         if (response.ok) {
-          console.log('🛬 response ok, clearing queueBuffer')
+          console.log('🛬 operations ok')
           cache.clearQueueBuffer()
         } else {
           throw Error(response.statusText)
@@ -425,6 +425,18 @@ const self = {
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/billing/retrieve-subscription-info`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+
+    // Upload
+
+    createPresignedPost: async (context, body) => {
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/upload/presigned-post`, options)
         return normalizeResponse(response)
       } catch (error) {
         console.error(error)
