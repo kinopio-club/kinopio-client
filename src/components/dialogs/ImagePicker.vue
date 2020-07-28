@@ -12,7 +12,6 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.stop ref="dialo
         input.hidden(type="file" ref="input" @change="uploadFile")
 
     .uploading-container(v-if="cardPendingUpload")
-      //- todo: display image here?
       img(v-if="cardPendingUpload" :src="cardPendingUpload.imageDataUrl")
       .badge.info(:class="{absolute : cardPendingUpload.imageDataUrl}")
         Loader(:visible="true")
