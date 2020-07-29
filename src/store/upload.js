@@ -33,11 +33,11 @@ export default {
   actions: {
     checkIfFileTooBig: (context, file) => {
       const userIsUpgraded = context.rootState.currentUser.isUpgraded
-      const sizeLimit = 1024 * 1024 * 10 // 10mb
+      const sizeLimit = 1024 * 1024 * 5 // 5mb
       if (file.size > sizeLimit && !userIsUpgraded) {
         throw {
           type: 'sizeLimit',
-          message: 'To upload files over 10mb, upgrade for unlimited size uploads'
+          message: 'To upload files over 5mb, upgrade for unlimited size uploads'
         }
       }
     },
@@ -45,7 +45,6 @@ export default {
       const isImage = file.type.includes('image')
       if (!isImage) { return null }
       const reader = new FileReader()
-      console.log(reader, file)
       reader.addEventListener('load', () => {
         context.commit('updatePendingUpload', { cardId,
           imageDataUrl: reader.result
