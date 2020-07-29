@@ -9,18 +9,18 @@ dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
           span What's New
           img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
         WhatsNew(:visible="whatsNewIsVisible" :newStuff="newStuff")
+    .row(v-if="!userIsUpgraded")
+      .button-wrap
+        button(@click.stop="triggerUpgradeUserIsVisible")
+          span Upgrade for Unlimited
     .row
       .button-wrap
-        a(href="https://help.kinopio.club")
-          button Help and Support →
-    .row
+        button(@click.stop="toggleHelpAndSupportIsVisible" :class="{active: helpAndSupportIsVisible}")
+          span Help and Support
+        HelpAndSupport(:visible="helpAndSupportIsVisible")
       .button-wrap
         a(href="https://help.kinopio.club/api")
           button API →
-      .button-wrap
-        button(@click.stop="toggleContactIsVisible" :class="{active: contactIsVisible}")
-          span Contact
-        Contact(:visible="contactIsVisible")
 
   section
     .row
@@ -41,26 +41,26 @@ dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
 </template>
 
 <script>
-import Contact from '@/components/dialogs/Contact.vue'
 import WhatsNew from '@/components/dialogs/WhatsNew.vue'
 import AddToHomescreen from '@/components/dialogs/AddToHomescreen.vue'
 import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
+import HelpAndSupport from '@/components/dialogs/HelpAndSupport.vue'
 import utils from '@/utils.js'
 
 export default {
   name: 'About',
   components: {
-    Contact,
     WhatsNew,
     AddToHomescreen,
-    KeyboardShortcuts
+    KeyboardShortcuts,
+    HelpAndSupport
   },
   props: {
     visible: Boolean
   },
   data () {
     return {
-      contactIsVisible: false,
+      helpAndSupportIsVisible: false,
       whatsNewIsVisible: false,
       addToHomescreenIsVisible: false,
       keyboardShortcutsIsVisible: false,
@@ -73,7 +73,6 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
-        this.contactIsVisible = false
         this.whatsNewIsVisible = false
         this.addToHomescreenIsVisible = false
       }
@@ -91,13 +90,14 @@ export default {
     this.isAndroid = utils.isAndroid()
   },
   computed: {
-    newStuffIsUpdated () { return this.$store.state.newStuffIsUpdated }
+    newStuffIsUpdated () { return this.$store.state.newStuffIsUpdated },
+    userIsUpgraded () { return this.$store.state.currentUser.isUpgraded }
   },
   methods: {
-    toggleContactIsVisible () {
-      const isVisible = this.contactIsVisible
+    toggleHelpAndSupportIsVisible () {
+      const isVisible = this.helpAndSupportIsVisible
       this.closeDialogs()
-      this.contactIsVisible = !isVisible
+      this.helpAndSupportIsVisible = !isVisible
     },
     toggleWhatsNewIsVisible () {
       const isVisible = this.whatsNewIsVisible
@@ -126,16 +126,23 @@ export default {
       this.$store.commit('newStuffIsUpdated', newStuffIsUpdated)
     },
     closeDialogs () {
-      this.contactIsVisible = false
+      this.helpAndSupportIsVisible = false
       this.whatsNewIsVisible = false
       this.addToHomescreenIsVisible = false
       this.keyboardShortcutsIsVisible = false
+    },
+    triggerUpgradeUserIsVisible () {
+      this.$store.commit('closeAllDialogs')
+      this.$store.commit('triggerUpgradeUserIsVisible')
     }
   },
   watch: {
     visible (visible) {
       if (visible && this.newStuff.length) {
         this.checkNewStuffIsUpdated(this.newStuff[0].id)
+      }
+      if (visible) {
+        this.closeDialogs()
       }
     }
   }
@@ -148,4 +155,12 @@ export default {
   .updated
     margin 0
     margin-left 3px
+  .button-wrap
+    .keyboard-shortcuts
+      @media(max-height 500px)
+        top -200px
+        max-height calc(100vh - 100px)
+    .help-and-support
+      @media(max-height 500px)
+        top -50px
 </style>
