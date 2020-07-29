@@ -62,11 +62,24 @@ article(:style="position" :data-card-id="id")
               img.connector-icon(src="@/assets/connector-closed.svg")
             template(v-else)
               img.connector-icon(src="@/assets/connector-open.svg")
-
+    //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
       .badge.info
         Loader(:visible="true")
         span {{cardPendingUpload.percentComplete}}%
+    //- Upload Errors
+    .error-container(v-if="error.sizeLimit" @animationend="clearErrors")
+      span.badge.danger
+        img.icon.cancel(src="@/assets/add.svg")
+        span Too Big
+    .error-container(v-if="error.unknownUploadError" @animationend="clearErrors")
+      span.badge.danger
+        img.icon.cancel(src="@/assets/add.svg")
+        span Error
+    .error-container(v-if="error.signUpToUpload" @animationend="clearErrors")
+      span.badge.info
+        img.icon.cancel(src="@/assets/add.svg")
+        span Sign Up or In
 
   CardDetails(:card="card" @broadcastShowCardDetails="broadcastShowCardDetails")
 </template>
@@ -99,7 +112,12 @@ export default {
     return {
       isRemoteConnecting: false,
       remoteConnectionColor: '',
-      uploadIsDraggedOver: false
+      uploadIsDraggedOver: false,
+      error: {
+        sizeLimit: false,
+        unknownUploadError: false,
+        signUpToUpload: false
+      }
     }
   },
   computed: {
@@ -126,6 +144,7 @@ export default {
     isMediaCard () { return this.urlIsImage || this.urlIsVideo },
     isChecked () { return utils.nameIsChecked(this.name) },
     hasCheckbox () { return utils.checkboxFromString(this.name) },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     checkboxState: {
       get () {
         return this.isChecked
@@ -300,6 +319,11 @@ export default {
     }
   },
   methods: {
+    clearErrors () {
+      this.error.signUpToUpload = false
+      this.error.sizeLimit = false
+      this.error.unknownUploadError = false
+    },
     checkIfUploadIsDraggedOver (event) {
       if (event.dataTransfer.types[0] !== 'Files') { return }
       this.uploadIsDraggedOver = true
@@ -309,22 +333,23 @@ export default {
     },
     async uploadFile (event) {
       this.removeUploadIsDraggedOver()
+      if (!this.currentUserIsSignedIn) {
+        this.error.signUpToUpload = true
+        this.$store.commit('addNotification', { message: 'To upload files, you need to Sign Up or In', type: 'info' })
+        return
+      }
       const file = event.dataTransfer.files[0]
       const cardId = this.card.id
       try {
         await this.$store.dispatch('upload/uploadFile', { file, cardId })
       } catch (error) {
-        console.warn('🚒', error) // type, message
-        // this.$store.commit('upload/removePendingUpload', cardId)
+        console.warn('🚒', error)
         if (error.type === 'sizeLimit') {
-          console.warn('notify')
-          // this.error.sizeLimit = true
-          // notify error.message
+          this.error.sizeLimit = true
         } else {
-          console.warn('notify')
-          // this.error.unknownUploadError = true
-          // notify error.message
+          this.error.unknownUploadError = true
         }
+        this.$store.commit('addNotification', { message: error.message, type: 'danger' })
       }
     },
     toggleCardChecked () {
@@ -591,6 +616,18 @@ article
       justify-content space-between
       .name
         background-color var(--secondary-background)
+  .error-container
+    position absolute
+    top 6px
+    left 6px
+    animation-name hideme
+    animation-delay 5s
+    animation-duration 0.1s
+    animation-iteration-count 1
+    animation-direction forward
+    animation-fill-mode forwards
+    animation-timing-function ease-out
+
 .jiggle
   animation jiggle 0.5s infinite ease-out forwards
 @keyframes jiggle
