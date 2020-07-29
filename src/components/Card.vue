@@ -333,6 +333,7 @@ export default {
     },
     async uploadFile (event) {
       this.removeUploadIsDraggedOver()
+      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
       if (!this.currentUserIsSignedIn) {
         this.error.signUpToUpload = true
         this.$store.commit('addNotification', { message: 'To upload files, you need to Sign Up or In', type: 'info' })
