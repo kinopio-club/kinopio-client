@@ -307,10 +307,25 @@ export default {
     removeUploadIsDraggedOver () {
       this.uploadIsDraggedOver = false
     },
-    uploadFile (event) {
+    async uploadFile (event) {
       this.removeUploadIsDraggedOver()
-      const files = event.dataTransfer.files
-      console.log('💽', event, files)
+      const file = event.dataTransfer.files[0]
+      const cardId = this.card.id
+      try {
+        await this.$store.dispatch('upload/uploadFile', { file, cardId })
+      } catch (error) {
+        console.warn('🚒', error) // type, message
+        // this.$store.commit('upload/removePendingUpload', cardId)
+        if (error.type === 'sizeLimit') {
+          console.warn('notify')
+          // this.error.sizeLimit = true
+          // notify error.message
+        } else {
+          console.warn('notify')
+          // this.error.unknownUploadError = true
+          // notify error.message
+        }
+      }
     },
     toggleCardChecked () {
       if (!this.canEditSpace) { return }

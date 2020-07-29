@@ -45,11 +45,17 @@ export default {
       const isImage = file.type.includes('image')
       if (!isImage) { return null }
       const reader = new FileReader()
-      reader.addEventListener('load', () => {
+      reader.onloadend = (event) => {
         context.commit('updatePendingUpload', { cardId,
           imageDataUrl: reader.result
         })
-      }, false)
+      }
+      reader.onerror = (event) => {
+        throw {
+          type: 'unknownUploadError',
+          message: '(シ_ _)シ Something went wrong, Please try again or contact support'
+        }
+      }
       reader.readAsDataURL(file)
     },
     uploadFile: async (context, { file, cardId }) => {
