@@ -57,7 +57,6 @@ export default {
       const key = `${cardId}/${fileName}`
       const userIsUpgraded = context.rootState.currentUser.isUpgraded
       context.dispatch('checkIfFileTooBig', file)
-
       const presignedPostData = await context.dispatch('api/createPresignedPost', { key, userIsUpgraded, type: file.type }, { root: true })
       const formData = new FormData()
       Object.keys(presignedPostData.fields).forEach(key => {
