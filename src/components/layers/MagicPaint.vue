@@ -35,6 +35,7 @@ aside
     :width="viewportWidth"
     :height="viewportHeight"
     :uploadIsDraggedOver="uploadIsDraggedOver"
+    :filesCount="filesCount"
   )
 </template>
 
@@ -123,7 +124,8 @@ export default {
       pinchZoomOffsetTop: 0,
       pinchZoomOffsetLeft: 0,
       currentCursor: {},
-      uploadIsDraggedOver: false
+      uploadIsDraggedOver: false,
+      filesCount: 0
     }
   },
   computed: {
@@ -553,10 +555,11 @@ export default {
     // Upload Files
 
     checkIfUploadIsDraggedOver (event) {
-      if (event.dataTransfer.types[0] !== 'Files') { return }
+      const uploadIsFiles = event.dataTransfer.types.find(type => type === 'Files')
+      if (!uploadIsFiles) { return }
       this.currentCursor = utils.cursorPositionInViewport(event)
       this.uploadIsDraggedOver = true
-      console.log('🌷', event, this.currentCursor)
+      this.filesCount = Array.from(event.dataTransfer.items).length
     },
     removeUploadIsDraggedOver () {
       console.log('☃️')
@@ -572,7 +575,7 @@ export default {
       const files = event.dataTransfer.files
       console.log(files, event.dataTransfer)
       Array.from(files).forEach((file, index) => {
-        console.log('💦', file, index)
+        console.log('💦', file, index + 1)
         // current pos * (index + 1)
         // make a card
         // this.currentCursor = utils.cursorPositionInViewport(event)
@@ -582,11 +585,6 @@ export default {
       //   await this.$store.dispatch('upload/uploadFile', { file, cardId })
       // } catch (error) {
       //   console.warn('🚒', error)
-      //   if (error.type === 'sizeLimit') {
-      //     this.error.sizeLimit = true
-      //   } else {
-      //     this.error.unknownUploadError = true
-      //   }
       //   this.$store.commit('addNotification', { message: error.message, type: 'danger' })
       // }
     }
