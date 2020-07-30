@@ -1,5 +1,6 @@
 <template lang="pug">
-aside.magic-paint
+aside
+  //- Magic painting is ephemeral brush strokes that select items
   canvas#painting.painting(
     @mousedown="startPainting"
     @touchstart="startPainting"
@@ -8,6 +9,11 @@ aside.magic-paint
     :width="viewportWidth"
     :height="viewportHeight"
     :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
+    @dragenter="checkIfUploadIsDraggedOver"
+    @dragover.prevent="checkIfUploadIsDraggedOver"
+    @dragleave="removeUploadIsDraggedOver"
+    @dragend="removeUploadIsDraggedOver"
+    @drop.prevent.stop="createCardsAndUploadFiles"
   )
   canvas#remote-painting.remote-painting(
     :width="viewportWidth"
@@ -24,6 +30,7 @@ aside.magic-paint
     :height="viewportHeight"
     :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
   )
+  //- canvas that takes pos, props
 </template>
 
 <script>
@@ -57,7 +64,7 @@ let initialCircles = []
 let initialCircleCanvas, initialCircleContext, initialCirclesTimer
 
 export default {
-  name: 'MagicPaint',
+  name: 'CanvasPaintLayers',
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggeredPaintFramePosition') {
@@ -117,7 +124,8 @@ export default {
     pageHeight () { return this.$store.state.pageHeight },
     pageWidth () { return this.$store.state.pageWidth },
     viewportHeight () { return this.$store.state.viewportHeight },
-    viewportWidth () { return this.$store.state.viewportWidth }
+    viewportWidth () { return this.$store.state.viewportWidth },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
     updatePositionOffsetByPinchZoom () {
@@ -529,7 +537,44 @@ export default {
         window.cancelAnimationFrame(initialCirclesTimer)
         initialCirclesTimer = undefined
       }
+    },
+
+    // Upload Files
+
+    checkIfUploadIsDraggedOver (event) {
+      if (event.dataTransfer.types[0] !== 'Files') { return }
+      currentCursor = utils.cursorPositionInViewport(event)
+      console.log('🌷', event, currentCursor)
+    },
+    removeUploadIsDraggedOver (event) { console.log('☃️', event) },
+
+    async createCardsAndUploadFiles (event) {
+      if (!this.currentUserIsSignedIn) {
+        this.$store.commit('addNotification', { message: 'To upload files, you need to Sign Up or In', type: 'info' })
+        return
+      }
+      const files = event.dataTransfer.files
+      console.log(files, event.dataTransfer)
+      Array.from(files).forEach((file, index) => {
+        console.log('💦', file, index)
+        // current pos * (index + 1)
+        // make a card
+        // currentCursor = utils.cursorPositionInViewport(event)
+      })
+      // const cardId = this.card.id
+      // try {
+      //   await this.$store.dispatch('upload/uploadFile', { file, cardId })
+      // } catch (error) {
+      //   console.warn('🚒', error)
+      //   if (error.type === 'sizeLimit') {
+      //     this.error.sizeLimit = true
+      //   } else {
+      //     this.error.unknownUploadError = true
+      //   }
+      //   this.$store.commit('addNotification', { message: error.message, type: 'danger' })
+      // }
     }
+
   }
 }
 </script>
