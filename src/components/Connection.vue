@@ -17,6 +17,8 @@ path.connection-path(
   :class="{active: isSelected || detailsIsVisible || remoteDetailsIsVisible || isRemoteSelected, filtered: isFiltered, hover: isHovered, 'hide-connection-outline': shouldHideConnectionOutline }"
   ref="connection"
   tabindex="0"
+  @dragover.prevent
+  @drop.prevent.stop
 )
 </template>
 
