@@ -15,9 +15,9 @@ dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
           span Upgrade for Unlimited
     .row
       .button-wrap
-        button(@click.stop="toggleHelpAndSupportIsVisible" :class="{active: helpAndSupportIsVisible}")
-          span Help and Support
-        HelpAndSupport(:visible="helpAndSupportIsVisible")
+        button(@click.stop="toggleHelpAndAboutIsVisible" :class="{active: helpAndAboutIsVisible}")
+          span Help and About
+        HelpAndAbout(:visible="helpAndAboutIsVisible")
       .button-wrap
         a(href="https://help.kinopio.club/api")
           button API →
@@ -44,7 +44,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
 import WhatsNew from '@/components/dialogs/WhatsNew.vue'
 import AddToHomescreen from '@/components/dialogs/AddToHomescreen.vue'
 import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
-import HelpAndSupport from '@/components/dialogs/HelpAndSupport.vue'
+import HelpAndAbout from '@/components/dialogs/HelpAndAbout.vue'
 import utils from '@/utils.js'
 
 export default {
@@ -53,14 +53,14 @@ export default {
     WhatsNew,
     AddToHomescreen,
     KeyboardShortcuts,
-    HelpAndSupport
+    HelpAndAbout
   },
   props: {
     visible: Boolean
   },
   data () {
     return {
-      helpAndSupportIsVisible: false,
+      helpAndAboutIsVisible: false,
       whatsNewIsVisible: false,
       addToHomescreenIsVisible: false,
       keyboardShortcutsIsVisible: false,
@@ -94,10 +94,10 @@ export default {
     userIsUpgraded () { return this.$store.state.currentUser.isUpgraded }
   },
   methods: {
-    toggleHelpAndSupportIsVisible () {
-      const isVisible = this.helpAndSupportIsVisible
+    toggleHelpAndAboutIsVisible () {
+      const isVisible = this.helpAndAboutIsVisible
       this.closeDialogs()
-      this.helpAndSupportIsVisible = !isVisible
+      this.helpAndAboutIsVisible = !isVisible
     },
     toggleWhatsNewIsVisible () {
       const isVisible = this.whatsNewIsVisible
@@ -126,7 +126,7 @@ export default {
       this.$store.commit('newStuffIsUpdated', newStuffIsUpdated)
     },
     closeDialogs () {
-      this.helpAndSupportIsVisible = false
+      this.helpAndAboutIsVisible = false
       this.whatsNewIsVisible = false
       this.addToHomescreenIsVisible = false
       this.keyboardShortcutsIsVisible = false
@@ -155,12 +155,4 @@ export default {
   .updated
     margin 0
     margin-left 3px
-  .button-wrap
-    .keyboard-shortcuts
-      @media(max-height 500px)
-        top -200px
-        max-height calc(100vh - 100px)
-    .help-and-support
-      @media(max-height 500px)
-        top -50px
 </style>

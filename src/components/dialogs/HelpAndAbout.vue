@@ -1,13 +1,14 @@
 <template lang="pug">
-dialog.help-and-support.narrow(v-if="visible" :open="visible" @click.stop="closeDialogs")
+dialog.help-and-about.narrow(v-if="visible" :open="visible" @click.stop="closeDialogs" :class="{'child-dialog-is-visible': contactIsVisible}")
   section
-    p Help and Support
+    p Help and About
   section
-    p How to use Kinopio, and other help topics
-    .button-wrap
-      a(href="https://help.kinopio.club")
-        button Help Topics →
-  section
+    .row
+      p How to use Kinopio, and other help topics
+    .row
+      .button-wrap
+        a(href="https://help.kinopio.club")
+          button Help Topics →
     .row
       .button-wrap
         button(@click.stop="toggleContactIsVisible" :class="{active: contactIsVisible}")
@@ -15,9 +16,20 @@ dialog.help-and-support.narrow(v-if="visible" :open="visible" @click.stop="close
         Contact(:visible="contactIsVisible")
     //- .row
     //-   .button-wrap
-    //-     a(href="https://help.kinopio.club")
-    //-       button Community Forum →
+    //-     a(href="#")
+    //-       button Support Forum →
 
+  section
+    .row
+      p Kinopio is self-funded and entirely supported by people like you
+    .row
+      .button-wrap
+        a(href="https://help.kinopio.club/posts/who-makes-kinopio")
+          button Who Makes Kinopio? →
+    //- .row
+    //-   .button-wrap
+    //-     a(href="https://pketh.org")
+    //-       button Blog →
 </template>
 
 <script>
@@ -57,9 +69,9 @@ export default {
 </script>
 
 <style lang="stylus">
-.help-and-support
-  .button-wrap
-    .contact
-      @media(max-height 500px)
-        top -100px
+.help-and-about
+  max-height calc(100vh - 260px)
+  overflow auto
+  &.child-dialog-is-visible
+    overflow initial !important
 </style>
