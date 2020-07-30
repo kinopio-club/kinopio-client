@@ -5,7 +5,7 @@
   @touchstart="isTouchDevice"
 )
   #layout-viewport
-  CanvasPaintLayers
+  MagicPaint
   router-view
   Header
   Footer
@@ -18,7 +18,7 @@
 
 <script>
 import Header from '@/components/Header.vue'
-import CanvasPaintLayers from '@/components/CanvasPaintLayers.vue'
+import MagicPaint from '@/components/layers/MagicPaint.vue'
 import Footer from '@/components/Footer.vue'
 import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 
@@ -27,7 +27,7 @@ import utils from '@/utils.js'
 export default {
   components: {
     Header,
-    CanvasPaintLayers,
+    MagicPaint,
     Footer,
     KeyboardShortcutsHandler
   },
