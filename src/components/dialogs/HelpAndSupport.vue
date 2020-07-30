@@ -3,19 +3,20 @@ dialog.help-and-support.narrow(v-if="visible" :open="visible" @click.stop="close
   section
     p Help and Support
   section
-    p How to use Kinopio, and other help topics
-    .button-wrap
-      a(href="https://help.kinopio.club")
-        button Help Topics →
-  section
     .row
       .button-wrap
         button(@click.stop="toggleContactIsVisible" :class="{active: contactIsVisible}")
           span Contact
         Contact(:visible="contactIsVisible")
+
+    p How to use Kinopio, and other help topics
+    .button-wrap
+      a(href="https://help.kinopio.club")
+        button Help Topics →
+  //- section
     //- .row
     //-   .button-wrap
-    //-     a(href="https://help.kinopio.club")
+    //-     a(href="#")
     //-       button Community Forum →
 
 </template>
@@ -58,8 +59,9 @@ export default {
 
 <style lang="stylus">
 .help-and-support
-  .button-wrap
-    .contact
-      @media(max-height 500px)
-        top -100px
+  max-height calc(100vh - 100px)
+  // .button-wrap
+  //   .contact
+  //     @media(max-height 500px)
+  //       top -100px
 </style>

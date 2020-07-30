@@ -155,12 +155,4 @@ export default {
   .updated
     margin 0
     margin-left 3px
-  .button-wrap
-    .keyboard-shortcuts
-      @media(max-height 500px)
-        top -200px
-        max-height calc(100vh - 100px)
-    .help-and-support
-      @media(max-height 500px)
-        top -50px
 </style>
