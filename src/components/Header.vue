@@ -9,6 +9,7 @@ header(:style="visualViewportPosition")
               span NEW
           img.down-arrow(src="@/assets/down-arrow.svg")
         About(:visible="aboutIsVisible")
+        KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
     .space-details-wrap
       .button-wrap
         button(@click.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
@@ -28,7 +29,6 @@ header(:style="visualViewportPosition")
           Loader(:visible="isLoadingSpace")
         SpaceDetails(:visible="spaceDetailsIsVisible")
         ImportArenaChannel(:visible="importArenaChannelIsVisible")
-        KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
 
   aside
     .top
@@ -311,6 +311,11 @@ header
     position relative
     display inline-block
     margin-right 6px
+    > .button-wrap
+      > .keyboard-shortcuts
+        max-height calc(100vh - 120px)
+        top calc(100% - 6px)
+
   .logo
     cursor pointer
     display flex
@@ -343,8 +348,6 @@ header
     dialog
       max-width initial
     .button-wrap
-      > .keyboard-shortcuts
-        max-height calc(100vh - 100px)
       > button
         .privacy-icon
           margin-left 6px
