@@ -43,6 +43,7 @@ export default {
         x: this.currentCursor.x,
         y: this.currentCursor.y
       }
+
       if (controlPointEvenY <= lineMaxHeight && controlPointOddY >= 0 && !isReverse) {
         if (controlPointEvenY <= 0) {
           controlPointEvenY = 0
@@ -75,16 +76,15 @@ export default {
       const controlPointX4 = endPointX3 + lineSegmentIncrement
       const endPointX4 = startPointX + (lineSegmentLength * 4)
       // 5
-      const endPointY = centerLineY + startPointY + currentCursor.y
+      const endPointY = startPointY + centerLineY
 
       context.beginPath()
       context.moveTo(startPointX, startPointY)
-      console.log('🌸', startPointY, controlPointOddY)
       // quadraticCurveTo(controlPointX, controlPointY, endPointX, endPointY)
-      context.quadraticCurveTo(controlPointX1, controlPointOddY, endPointX1, endPointY)
-      context.quadraticCurveTo(controlPointX2, controlPointEvenY, endPointX2, endPointY)
-      context.quadraticCurveTo(controlPointX3, controlPointOddY, endPointX3, endPointY)
-      context.quadraticCurveTo(controlPointX4, controlPointEvenY, endPointX4, endPointY)
+      context.quadraticCurveTo(controlPointX1, controlPointOddY + startPointY, endPointX1, endPointY)
+      context.quadraticCurveTo(controlPointX2, controlPointEvenY + startPointY, endPointX2, endPointY)
+      context.quadraticCurveTo(controlPointX3, controlPointOddY + startPointY, endPointX3, endPointY)
+      context.quadraticCurveTo(controlPointX4, controlPointEvenY + startPointY, endPointX4, endPointY)
       context.stroke()
       if (paintingGuidesTimer) {
         window.requestAnimationFrame(this.paintGuides)
