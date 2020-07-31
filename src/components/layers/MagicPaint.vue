@@ -31,8 +31,6 @@ aside
     :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
   )
   DropGuideLine(
-    :width="viewportWidth"
-    :height="viewportHeight"
     :currentCursor="currentCursor"
     :uploadIsDraggedOver="uploadIsDraggedOver"
   )

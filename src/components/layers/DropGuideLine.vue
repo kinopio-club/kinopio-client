@@ -1,51 +1,55 @@
 <template lang="pug">
 canvas#drop-guide-line.drop-guide-line(
-  :width="width"
-  :height="height"
+  :width="viewportWidth"
+  :height="viewportHeight"
 )
 </template>
 <script>
-// import times from 'lodash-es/times'
-
 let canvas, context, paintingGuidesTimer
 
-let lineWidth = 100
-let lineMaxHeight = 100
+const lineWidth = 100 / window.devicePixelRatio
+const lineMaxHeight = 25
 let controlPointEvenY = lineMaxHeight / 2
 let controlPointOddY = lineMaxHeight / 2
+const centerLineY = lineMaxHeight / 2
 let isReverse = false
 
 export default {
   name: 'DropGuides',
   props: {
-    width: Number,
-    height: Number,
     currentCursor: Object,
     uploadIsDraggedOver: Boolean
+  },
+  data () {
+    return {
+      retinaWidth: 0,
+      retinaHeight: 0
+    }
   },
   mounted () {
     canvas = document.getElementById('drop-guide-line')
     context = canvas.getContext('2d')
+    this.updateCanvasSize()
+    window.addEventListener('load', this.updateCanvasSize)
+    window.addEventListener('resize', this.updateCanvasSize)
   },
   computed: {
+    viewportWidth () { return this.$store.state.viewportWidth },
+    viewportHeight () { return this.$store.state.viewportHeight },
     currentUserColor () { return this.$store.state.currentUser.color }
   },
   methods: {
-    startPaintingGuides () {
-      if (!paintingGuidesTimer) {
-        paintingGuidesTimer = window.requestAnimationFrame(this.paintGuides)
-      }
-    },
     paintGuides () {
-      // console.log('🌸 paintGuides', this.currentCursor)
-
-      const centerLineY = lineMaxHeight / 2 // todo should be currentcursor.y
       const numberOfControlPoints = 4
       const lineSegmentLength = lineWidth / numberOfControlPoints
-      const lineSegmentIncrement = lineSegmentLength / 2
-
+      const lineSegmentIncrement = (lineSegmentLength / 2)
+      const currentCursor = {
+        x: this.currentCursor.x / window.devicePixelRatio,
+        y: this.currentCursor.y / window.devicePixelRatio
+      }
       if (controlPointEvenY <= lineMaxHeight && controlPointOddY >= 0 && !isReverse) {
         if (controlPointEvenY <= 0) {
+          controlPointEvenY = 0
           isReverse = true
         }
         controlPointEvenY--
@@ -53,56 +57,65 @@ export default {
       } else {
         controlPointEvenY++
         controlPointOddY--
-
         if (controlPointEvenY >= lineMaxHeight) {
+          controlPointEvenY = lineMaxHeight
           isReverse = false
         }
       }
-
-      let startPointX = 0 // temp
-
+      // 0
+      const startPointX = currentCursor.x
+      const startPointY = currentCursor.y
+      // 1
       const controlPointX1 = startPointX + lineSegmentIncrement
       const endPointX1 = startPointX + lineSegmentLength
-
+      // 2
       const controlPointX2 = endPointX1 + lineSegmentIncrement
       const endPointX2 = startPointX + (lineSegmentLength * 2)
-
+      // 3
       const controlPointX3 = endPointX2 + lineSegmentIncrement
       const endPointX3 = startPointX + (lineSegmentLength * 3)
-
+      // 4
       const controlPointX4 = endPointX3 + lineSegmentIncrement
-
-      // const controlPointX2 = endPointX2 + lineSegmentIncrement
-      // const endPointX3 = startPointX + (lineSegmentLength * 3)
-      // const controlPointX3 = endPointX3 + lineSegmentIncrement
-      // const endPointX4 = startPointX + (lineSegmentLength * 4)
-      // const controlPointX4 = endPointX4 + lineSegmentIncrement
+      const endPointX4 = startPointX + (lineSegmentLength * 4)
+      // 5
+      const endPointY = centerLineY + startPointY
 
       context.clearRect(0, 0, canvas.width, canvas.height)
       context.strokeStyle = this.currentUserColor
-      context.lineWidth = 3
+      context.lineWidth = 4
+      context.lineCap = 'round'
+
+      // context.shadowOffsetY = 3
+      // context.shadowColor = 'rgba(0,0,0,0.20)' // "orange" //  rgba(0,0,0,0.20)
+
       context.beginPath()
-
-      context.moveTo(startPointX, centerLineY)
-
+      context.moveTo(startPointX, startPointY)
       // quadraticCurveTo(controlPointX, controlPointY, endPointX, endPointY)
-      context.quadraticCurveTo(controlPointX1, controlPointEvenY, endPointX1, centerLineY)
-      context.quadraticCurveTo(controlPointX2, controlPointOddY, endPointX2, centerLineY)
-      context.quadraticCurveTo(controlPointX3, controlPointEvenY, endPointX3, centerLineY)
-      context.quadraticCurveTo(controlPointX4, controlPointOddY, lineWidth, centerLineY)
-
+      context.quadraticCurveTo(controlPointX1, controlPointOddY, endPointX1, endPointY)
+      context.quadraticCurveTo(controlPointX2, controlPointEvenY, endPointX2, endPointY)
+      context.quadraticCurveTo(controlPointX3, controlPointOddY, endPointX3, endPointY)
+      context.quadraticCurveTo(controlPointX4, controlPointEvenY, endPointX4, endPointY)
       context.stroke()
-
       if (paintingGuidesTimer) {
         window.requestAnimationFrame(this.paintGuides)
       } else {
         this.stopPaintingGuides()
       }
     },
+    startPaintingGuides () {
+      if (!paintingGuidesTimer) {
+        paintingGuidesTimer = window.requestAnimationFrame(this.paintGuides)
+      }
+    },
     stopPaintingGuides () {
       window.cancelAnimationFrame(paintingGuidesTimer)
       paintingGuidesTimer = undefined
       context.clearRect(0, 0, canvas.width, canvas.height)
+    },
+    updateCanvasSize () {
+      canvas.width = this.viewportWidth * window.devicePixelRatio
+      canvas.height = this.viewportHeight * window.devicePixelRatio
+      context.scale(window.devicePixelRatio, window.devicePixelRatio)
     }
   },
   watch: {
