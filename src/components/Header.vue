@@ -56,6 +56,9 @@ header(:style="visualViewportPosition")
           span Sign Up or In
           Loader(:visible="loadingSignUpOrIn")
         SignUpOrIn(:visible="signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
+      .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
+        button(@click.stop="triggerUpgradeUserIsVisible")
+          span Upgrade
 
 </template>
 
@@ -162,6 +165,7 @@ export default {
       return collaborators.filter(user => user.id !== this.currentUser.id)
     },
     spectators () { return this.currentSpace.spectators },
+    userIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
     currentSpaceName () {
       const id = this.$store.state.currentSpace.id
       const name = this.$store.state.currentSpace.name
@@ -282,6 +286,11 @@ export default {
     },
     setLoadingSignUpOrIn (value) {
       this.loadingSignUpOrIn = value
+    },
+    triggerUpgradeUserIsVisible () {
+      const isVisible = this.upgradeUserIsVisible
+      this.$store.dispatch('closeAllDialogs')
+      this.upgradeUserIsVisible = !isVisible
     }
   }
 }
@@ -394,6 +403,10 @@ header
     position absolute
     left 0
     top -2px
+
+  .users
+    > .upgrade-user
+      max-height calc(100vh - 50px)
 
 .badge-jiggle
   animation-name notificationJiggle
