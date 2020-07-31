@@ -9,18 +9,24 @@ canvas#drop-guides.drop-guides(
 
 let canvas, context, paintingGuidesTimer
 
+let curveHeight = 250
+let goUndergroup = 250
+let reverse = false
+
 export default {
   name: 'DropGuides',
   props: {
-    currentCursor: Object,
     width: Number,
     height: Number,
-    uploadIsDraggedOver: Boolean,
-    filesCount: Number // chrome, firefox
+    currentCursor: Object,
+    uploadIsDraggedOver: Boolean
   },
   mounted () {
     canvas = document.getElementById('drop-guides')
     context = canvas.getContext('2d')
+  },
+  computed: {
+    currentUserColor () { return this.$store.state.currentUser.color }
   },
   methods: {
     startPaintingGuides () {
@@ -29,33 +35,49 @@ export default {
       }
     },
     paintGuides () {
-      console.log('🌸 paintDropGuides', this.filesCount) // at currentCursor.x,y
-      // filesCount is 0(always falsey)for safari, accurate (1+ for others)
-      console.log(canvas, context) // temp
+      console.log('🌸 paintGuides', this.currentCursor)
+
+      // sine curve adapted from https://codepen.io/nzamarreno/pen/yXzGgG?editors=0010
+
+      if (curveHeight <= 500 && goUndergroup >= 0 && !reverse) {
+        if (curveHeight === 0) {
+          reverse = true
+        }
+
+        curveHeight--
+        goUndergroup++
+      } else {
+        curveHeight++
+        goUndergroup--
+
+        if (curveHeight === 500) {
+          reverse = false
+        }
+      }
+
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      context.strokeStyle = this.currentUserColor
+      context.lineWidth = 3
+      context.beginPath()
+      context.moveTo(0, 250)
+      context.quadraticCurveTo(100, curveHeight, 200, 250)
+      context.quadraticCurveTo(300, goUndergroup, 400, 250)
+      context.quadraticCurveTo(500, curveHeight, 600, 250)
+      context.stroke()
+
       if (paintingGuidesTimer) {
         window.requestAnimationFrame(this.paintGuides)
+      } else {
+        this.stopPaintingGuides()
       }
     },
     stopPaintingGuides () {
       window.cancelAnimationFrame(paintingGuidesTimer)
       paintingGuidesTimer = undefined
+      context.clearRect(0, 0, canvas.width, canvas.height)
     }
   },
   watch: {
-    // currentCursor (value) {
-    //   console.log('🍡', this.filesCount)
-    // console.log('------')
-    // for(let i=0; i < this.filesCount; i++){
-    //   console.log('🌸', i)
-    // }
-    // console.log('------')
-
-    // const count = times(this.filesCount)
-    // count.forEach(index => {
-    //   console.log('🌹')
-    // })
-    //   console.log('------')
-    // },
     uploadIsDraggedOver (value) {
       if (value) {
         this.startPaintingGuides()

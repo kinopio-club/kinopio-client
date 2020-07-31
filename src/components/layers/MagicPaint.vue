@@ -31,11 +31,10 @@ aside
     :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
   )
   DropGuides(
-    :currentCursor="currentCursor"
     :width="viewportWidth"
     :height="viewportHeight"
+    :currentCursor="currentCursor"
     :uploadIsDraggedOver="uploadIsDraggedOver"
-    :filesCount="filesCount"
   )
 </template>
 
@@ -124,14 +123,11 @@ export default {
       pinchZoomOffsetTop: 0,
       pinchZoomOffsetLeft: 0,
       currentCursor: {},
-      uploadIsDraggedOver: false,
-      filesCount: 0
+      uploadIsDraggedOver: false
     }
   },
   computed: {
-    currentUserColor () {
-      return this.$store.state.currentUser.color
-    },
+    currentUserColor () { return this.$store.state.currentUser.color },
     userCantEditSpace () { return !this.$store.getters['currentUser/canEditSpace']() },
     // keep canvases updated to viewport size so you can draw on newly created areas
     pageHeight () { return this.$store.state.pageHeight },
@@ -559,7 +555,6 @@ export default {
       if (!uploadIsFiles) { return }
       this.currentCursor = utils.cursorPositionInViewport(event)
       this.uploadIsDraggedOver = true
-      this.filesCount = Array.from(event.dataTransfer.items).length
     },
     removeUploadIsDraggedOver () {
       console.log('☃️')
