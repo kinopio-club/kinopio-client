@@ -46,7 +46,6 @@ export default new Vuex.Store({
     currentUserIsPaintingLocked: false,
     currentUserIsDraggingCard: false,
     currentUserIsHoveringOverConnectionId: '',
-    currentUserIsDraggingUploadOverSpace: false,
 
     // cards
     shouldAddCard: false,
@@ -202,10 +201,6 @@ export default new Vuex.Store({
     currentUserIsHoveringOverConnectionId: (state, connectionId) => {
       utils.typeCheck(connectionId, 'string')
       state.currentUserIsHoveringOverConnectionId = connectionId
-    },
-    currentUserIsDraggingUploadOverSpace: (state, value) => {
-      utils.typeCheck(value, 'boolean')
-      state.currentUserIsDraggingUploadOverSpace = value
     },
     cardDetailsIsVisibleForCardId: (state, cardId) => {
       utils.typeCheck(cardId, 'string')

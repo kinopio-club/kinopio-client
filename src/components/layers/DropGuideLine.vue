@@ -14,21 +14,9 @@ let isReverse = false
 export default {
   name: 'DropGuides',
   props: {
-    currentCursor: Object
+    currentCursor: Object,
+    uploadIsDraggedOver: Boolean
   },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'currentUserIsDraggingUploadOverSpace') {
-        if (mutation.payload === true) {
-          this.startPaintingGuides()
-        } else {
-          console.log('☔️ remove guides')
-          this.stopPaintingGuides()
-        }
-      }
-    })
-  },
-
   mounted () {
     canvas = document.getElementById('drop-guide-line')
     context = canvas.getContext('2d')
@@ -120,6 +108,16 @@ export default {
       canvas.style.width = this.viewportWidth + 'px'
       canvas.style.height = this.viewportHeight + 'px'
       context.scale(window.devicePixelRatio, window.devicePixelRatio)
+    }
+  },
+  watch: {
+    uploadIsDraggedOver (value) {
+      if (value) {
+        this.startPaintingGuides()
+      } else {
+        console.log('☔️ remove guides')
+        this.stopPaintingGuides()
+      }
     }
   }
 }
