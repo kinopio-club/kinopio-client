@@ -1,13 +1,10 @@
 <template lang="pug">
-canvas#drop-guide-line.drop-guide-line(
-  :width="viewportWidth"
-  :height="viewportHeight"
-)
+canvas#drop-guide-line.drop-guide-line
 </template>
 <script>
 let canvas, context, paintingGuidesTimer
 
-const lineWidth = 100 / window.devicePixelRatio
+const lineWidth = 100
 const lineMaxHeight = 25
 let controlPointEvenY = lineMaxHeight / 2
 let controlPointOddY = lineMaxHeight / 2
@@ -19,12 +16,6 @@ export default {
   props: {
     currentCursor: Object,
     uploadIsDraggedOver: Boolean
-  },
-  data () {
-    return {
-      retinaWidth: 0,
-      retinaHeight: 0
-    }
   },
   mounted () {
     canvas = document.getElementById('drop-guide-line')
@@ -40,12 +31,17 @@ export default {
   },
   methods: {
     paintGuides () {
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      context.strokeStyle = this.currentUserColor
+      context.lineWidth = 4
+      context.lineCap = 'round'
+
       const numberOfControlPoints = 4
       const lineSegmentLength = lineWidth / numberOfControlPoints
       const lineSegmentIncrement = (lineSegmentLength / 2)
       const currentCursor = {
-        x: this.currentCursor.x / window.devicePixelRatio,
-        y: this.currentCursor.y / window.devicePixelRatio
+        x: this.currentCursor.x,
+        y: this.currentCursor.y
       }
       if (controlPointEvenY <= lineMaxHeight && controlPointOddY >= 0 && !isReverse) {
         if (controlPointEvenY <= 0) {
@@ -62,6 +58,7 @@ export default {
           isReverse = false
         }
       }
+
       // 0
       const startPointX = currentCursor.x
       const startPointY = currentCursor.y
@@ -78,18 +75,11 @@ export default {
       const controlPointX4 = endPointX3 + lineSegmentIncrement
       const endPointX4 = startPointX + (lineSegmentLength * 4)
       // 5
-      const endPointY = centerLineY + startPointY
-
-      context.clearRect(0, 0, canvas.width, canvas.height)
-      context.strokeStyle = this.currentUserColor
-      context.lineWidth = 4
-      context.lineCap = 'round'
-
-      // context.shadowOffsetY = 3
-      // context.shadowColor = 'rgba(0,0,0,0.20)' // "orange" //  rgba(0,0,0,0.20)
+      const endPointY = centerLineY + startPointY + currentCursor.y
 
       context.beginPath()
       context.moveTo(startPointX, startPointY)
+      console.log('🌸', startPointY, controlPointOddY)
       // quadraticCurveTo(controlPointX, controlPointY, endPointX, endPointY)
       context.quadraticCurveTo(controlPointX1, controlPointOddY, endPointX1, endPointY)
       context.quadraticCurveTo(controlPointX2, controlPointEvenY, endPointX2, endPointY)
@@ -115,6 +105,8 @@ export default {
     updateCanvasSize () {
       canvas.width = this.viewportWidth * window.devicePixelRatio
       canvas.height = this.viewportHeight * window.devicePixelRatio
+      canvas.style.width = this.viewportWidth + 'px'
+      canvas.style.height = this.viewportHeight + 'px'
       context.scale(window.devicePixelRatio, window.devicePixelRatio)
     }
   },
