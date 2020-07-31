@@ -30,7 +30,7 @@ aside
     :height="viewportHeight"
     :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
   )
-  DropGuides(
+  DropGuideLine(
     :width="viewportWidth"
     :height="viewportHeight"
     :currentCursor="currentCursor"
@@ -40,7 +40,7 @@ aside
 
 <script>
 import utils from '@/utils.js'
-import DropGuides from '@/components/layers/DropGuides.vue'
+import DropGuideLine from '@/components/layers/DropGuideLine.vue'
 
 const circleRadius = 20
 
@@ -72,7 +72,7 @@ let initialCircleCanvas, initialCircleContext, initialCirclesTimer
 export default {
   name: 'MagicPaint',
   components: {
-    DropGuides
+    DropGuideLine
   },
   created () {
     this.$store.subscribe((mutation, state) => {
