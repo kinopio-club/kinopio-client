@@ -32,7 +32,6 @@ aside
   )
   DropGuideLine(
     :currentCursor="currentCursor"
-    :uploadIsDraggedOver="uploadIsDraggedOver"
   )
 </template>
 
@@ -120,8 +119,7 @@ export default {
     return {
       pinchZoomOffsetTop: 0,
       pinchZoomOffsetLeft: 0,
-      currentCursor: {},
-      uploadIsDraggedOver: false
+      currentCursor: {}
     }
   },
   computed: {
@@ -552,13 +550,12 @@ export default {
       const uploadIsFiles = event.dataTransfer.types.find(type => type === 'Files')
       if (!uploadIsFiles) { return }
       this.currentCursor = utils.cursorPositionInViewport(event)
-      this.uploadIsDraggedOver = true
+      this.$store.commit('currentUserIsDraggingUploadOverSpace', true)
     },
     removeUploadIsDraggedOver () {
       console.log('☃️')
-      this.uploadIsDraggedOver = false
+      this.$store.commit('currentUserIsDraggingUploadOverSpace', false)
     },
-
     async createCardsAndUploadFiles (event) {
       this.removeUploadIsDraggedOver()
       if (!this.currentUserIsSignedIn) {
