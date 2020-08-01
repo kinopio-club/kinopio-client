@@ -1,5 +1,7 @@
 import utils from '@/utils.js'
 
+import nanoid from 'nanoid'
+
 export default {
   namespaced: true,
   state: {
@@ -92,6 +94,51 @@ export default {
         request.send(formData)
         context.commit('addPendingUpload', { key, fileName, cardId })
         context.dispatch('addImageDataUrl', { file, cardId })
+      })
+    },
+    addCardsAndUploadFiles: async (context, { files, currentCursor }) => {
+      let cardIds = []
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      if (!currentUserIsSignedIn) {
+        context.commit('addNotification', { message: 'To upload files, you need to Sign Up or In', type: 'info' }, { root: true })
+        return
+      }
+      // check sizeLimit
+      const filesTooBig = files.find(file => {
+        const userIsUpgraded = context.rootState.currentUser.isUpgraded
+        return utils.isFileTooBig(file, userIsUpgraded)
+      })
+      if (filesTooBig) {
+        context.commit('addNotification', { message: 'To upload files over 5mb, upgrade for unlimited size uploads', type: 'danger' }, { root: true })
+        return
+      }
+      // add cards
+      for (const [index] of files.entries()) {
+        const positionOffset = 20
+        const cardId = nanoid()
+        cardIds.push(cardId)
+        context.dispatch('currentSpace/addCard', {
+          position: {
+            x: currentCursor.x + (index * positionOffset),
+            y: currentCursor.y + (index * positionOffset)
+          },
+          name: '⬬⬭',
+          id: cardId
+        }, { root: true })
+      }
+      // upload files
+      await Promise.all(files.map(async (file, index) => {
+        const cardId = cardIds[index]
+        await context.dispatch('uploadFile', { file, cardId })
+      }))
+      // update card names
+      files.forEach((file, index) => {
+        const cardId = cardIds[index]
+        context.dispatch('currentSpace/repaceInCardName', {
+          cardId,
+          match: '⬬⬭',
+          replace: ''
+        }, { root: true })
       })
     }
   }

@@ -13,7 +13,7 @@ aside
     @dragover.prevent="checkIfUploadIsDraggedOver"
     @dragleave="removeUploadIsDraggedOver"
     @dragend="removeUploadIsDraggedOver"
-    @drop.prevent.stop="createCardsAndUploadFiles"
+    @drop.prevent.stop="addCardsAndUploadFiles"
   )
   canvas#remote-painting.remote-painting(
     :width="viewportWidth"
@@ -39,8 +39,6 @@ aside
 <script>
 import utils from '@/utils.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
-
-import nanoid from 'nanoid'
 
 const circleRadius = 20
 
@@ -133,8 +131,7 @@ export default {
     pageHeight () { return this.$store.state.pageHeight },
     pageWidth () { return this.$store.state.pageWidth },
     viewportHeight () { return this.$store.state.viewportHeight },
-    viewportWidth () { return this.$store.state.viewportWidth },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
+    viewportWidth () { return this.$store.state.viewportWidth }
   },
   methods: {
     updatePositionOffsetByPinchZoom () {
@@ -559,53 +556,14 @@ export default {
     removeUploadIsDraggedOver () {
       this.uploadIsDraggedOver = false
     },
-    async createCardsAndUploadFiles (event) {
-      let cardIds = []
+    addCardsAndUploadFiles (event) {
       let files = event.dataTransfer.files
       files = Array.from(files)
-      this.removeUploadIsDraggedOver()
-      if (!this.currentUserIsSignedIn) {
-        this.$store.commit('addNotification', { message: 'To upload files, you need to Sign Up or In', type: 'info' })
-        return
-      }
-      // check sizeLimit
-      const filesTooBig = files.find(file => {
-        const userIsUpgraded = this.$store.state.currentUser.isUpgraded
-        return utils.isFileTooBig(file, userIsUpgraded)
-      })
-      if (filesTooBig) {
-        this.$store.commit('addNotification', { message: 'To upload files over 5mb, upgrade for unlimited size uploads', type: 'danger' })
-        return
-      }
-      // add cards
       this.currentCursor = utils.cursorPositionInViewport(event)
-      for (const [index] of files.entries()) {
-        const positionOffset = 20
-        const cardId = nanoid()
-        cardIds.push(cardId)
-        this.$store.dispatch('currentSpace/addCard', {
-          position: {
-            x: this.currentCursor.x + (index * positionOffset),
-            y: this.currentCursor.y + (index * positionOffset)
-          },
-          name: '⬬⬭',
-          id: cardId
-        })
-      }
-      // upload files
-      await Promise.all(files.map(async (file, index) => {
-        console.log(file, index)
-        const cardId = cardIds[index]
-        await this.$store.dispatch('upload/uploadFile', { file, cardId })
-      }))
-      // update card names
-      files.forEach((file, index) => {
-        const cardId = cardIds[index]
-        this.$store.dispatch('currentSpace/repaceInCardName', {
-          cardId,
-          match: '⬬⬭',
-          replace: ''
-        }, { root: true })
+      this.removeUploadIsDraggedOver()
+      this.$store.dispatch('upload/addCardsAndUploadFiles', {
+        files,
+        currentCursor: this.currentCursor
       })
     }
   }
