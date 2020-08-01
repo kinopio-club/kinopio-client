@@ -559,7 +559,7 @@ export default {
     addCardsAndUploadFiles (event) {
       let files = event.dataTransfer.files
       files = Array.from(files)
-      this.currentCursor = utils.cursorPositionInViewport(event)
+      this.currentCursor = utils.cursorPositionInPage(event)
       this.removeUploadIsDraggedOver()
       this.$store.dispatch('upload/addCardsAndUploadFiles', {
         files,
