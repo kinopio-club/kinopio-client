@@ -18,7 +18,7 @@ path.connection-path(
   ref="connection"
   tabindex="0"
   @dragover.prevent
-  @drop.prevent.stop
+  @drop.prevent.stop="addCardsAndUploadFiles"
 )
 </template>
 
@@ -223,6 +223,12 @@ export default {
       this.controlCurve = undefined
       this.curvedPath = undefined
       this.frameCount = 0
+    },
+    addCardsAndUploadFiles (event) {
+      let files = event.dataTransfer.files
+      files = Array.from(files)
+      const currentCursor = utils.cursorPositionInViewport(event)
+      this.$store.dispatch('upload/addCardsAndUploadFiles', { files, currentCursor })
     }
   },
   watch: {
