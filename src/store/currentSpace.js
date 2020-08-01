@@ -655,6 +655,14 @@ export default {
       context.commit('history/add', update, { root: true })
       context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: true }, { root: true })
     },
+    repaceInCardName: (context, { cardId, match, replace }) => {
+      const card = context.getters.cardById(cardId)
+      const name = card.name.replace(match, replace)
+      context.dispatch('updateCard', {
+        id: cardId,
+        name
+      })
+    },
     updateCard: (context, card) => {
       context.commit('updateCard', card)
       const update = { name: 'updateCard', body: card }

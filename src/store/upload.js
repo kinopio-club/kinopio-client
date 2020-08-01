@@ -58,13 +58,7 @@ export default {
       }
       reader.readAsDataURL(file)
     },
-    updateCardName: (context, cardId) => {
-      const card = context.rootGetters['currentSpace/cardById'](cardId)
-      console.log('🍄', card, card.id)
-      // then remove '⬬⬭' from name
-      // const card = this.updateCard
-    },
-    uploadFile: async (context, { file, cardId, shouldUpdateCardName }) => {
+    uploadFile: async (context, { file, cardId }) => {
       const fileName = utils.normalizeFileUrl(file.name)
       const key = `${cardId}/${fileName}`
       const userIsUpgraded = context.rootState.currentUser.isUpgraded
@@ -75,33 +69,30 @@ export default {
         formData.append(key, presignedPostData.fields[key])
       })
       formData.append('file', file)
-
-      // return new Promise(resolve => {
-      const request = new XMLHttpRequest()
-      // progress
-      request.upload.onprogress = (event) => {
-        const percentComplete = Math.floor(event.loaded / event.total * 100)
-        console.log(`🛫 Uploading ${fileName} for card ${cardId}, percent: ${percentComplete}`)
-        context.commit('updatePendingUpload', { cardId, percentComplete })
-      }
-      // end
-      request.onload = (event) => {
-        console.log('🛬 Upload completed or failed', event)
-        context.commit('triggerUploadComplete', {
-          cardId,
-          url: `${presignedPostData.url}/${key}`
-        }, { root: true })
-        context.commit('removePendingUpload', cardId)
-        if (!shouldUpdateCardName) { return }
-        context.dispatch('updateCardName', cardId)
-        // resolve(request.response)
-      }
-      // start upload
-      request.open('POST', presignedPostData.url)
-      request.send(formData)
-      context.commit('addPendingUpload', { key, fileName, cardId })
-      context.dispatch('addImageDataUrl', { file, cardId })
-      // })
+      return new Promise(resolve => {
+        const request = new XMLHttpRequest()
+        // progress
+        request.upload.onprogress = (event) => {
+          const percentComplete = Math.floor(event.loaded / event.total * 100)
+          console.log(`🛫 Uploading ${fileName} for card ${cardId}, percent: ${percentComplete}`)
+          context.commit('updatePendingUpload', { cardId, percentComplete })
+        }
+        // end
+        request.onload = (event) => {
+          console.log('🛬 Upload completed or failed', event)
+          context.commit('triggerUploadComplete', {
+            cardId,
+            url: `${presignedPostData.url}/${key}`
+          }, { root: true })
+          context.commit('removePendingUpload', cardId)
+          resolve(request.response)
+        }
+        // start
+        request.open('POST', presignedPostData.url)
+        request.send(formData)
+        context.commit('addPendingUpload', { key, fileName, cardId })
+        context.dispatch('addImageDataUrl', { file, cardId })
+      })
     }
   }
 }
