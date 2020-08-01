@@ -40,6 +40,8 @@ aside
 import utils from '@/utils.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
 
+import nanoid from 'nanoid'
+
 const circleRadius = 20
 
 // painting
@@ -555,7 +557,6 @@ export default {
       this.uploadIsDraggedOver = true
     },
     removeUploadIsDraggedOver () {
-      console.log('☃️')
       this.uploadIsDraggedOver = false
     },
 
@@ -565,21 +566,35 @@ export default {
         this.$store.commit('addNotification', { message: 'To upload files, you need to Sign Up or In', type: 'info' })
         return
       }
-      const files = event.dataTransfer.files
-      console.log(files, event.dataTransfer)
-      Array.from(files).forEach((file, index) => {
-        console.log('💦', file, index + 1)
-        // current pos * (index + 1)
-        // make a card
-        // this.currentCursor = utils.cursorPositionInViewport(event)
-      })
-      // const cardId = this.card.id
-      // try {
-      //   await this.$store.dispatch('upload/uploadFile', { file, cardId })
-      // } catch (error) {
-      //   console.warn('🚒', error)
-      //   this.$store.commit('addNotification', { message: error.message, type: 'danger' })
-      // }
+      this.currentCursor = utils.cursorPositionInViewport(event)
+      let files = event.dataTransfer.files
+      files = Array.from(files)
+      let cardIds = []
+      // add cards
+      for (const [index] of files.entries()) {
+        const positionOffset = 20
+        const cardId = nanoid()
+        cardIds.push(cardId)
+        this.$store.dispatch('currentSpace/addCard', {
+          position: {
+            x: this.currentCursor.x + (index * positionOffset),
+            y: this.currentCursor.y + (index * positionOffset)
+          },
+          name: '⬬⬭',
+          id: cardId
+        })
+      }
+      // upload files
+      for (const [index, file] of files.entries()) {
+        try {
+          const cardId = cardIds[index]
+          this.$store.dispatch('upload/uploadFile', { file, cardId, shouldUpdateCardName: true })
+        } catch (error) {
+          console.warn('🚒', error)
+          // sizeLimit, unknownUploadError, not signed up (add in place (abs pos notification = new type?), 👀 card.vue)
+          this.$store.commit('addNotification', { message: error.message, type: 'danger' })
+        }
+      }
     }
 
   }

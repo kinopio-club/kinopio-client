@@ -115,7 +115,6 @@ export default {
       if (value) {
         this.startPaintingGuides()
       } else {
-        console.log('☔️ remove guides')
         this.stopPaintingGuides()
       }
     }
