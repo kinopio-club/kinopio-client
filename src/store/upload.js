@@ -131,7 +131,13 @@ export default {
       // upload files
       await Promise.all(files.map(async (file, index) => {
         const cardId = cardIds[index]
-        await context.dispatch('uploadFile', { file, cardId })
+        try {
+          await context.dispatch('uploadFile', { file, cardId })
+        } catch (error) {
+          console.error('🚒', error)
+          context.commit('addNotificationWithPosition', { message: error.message, position: currentCursor, type: 'danger' }, { root: true })
+          context.commit('addNotification', { message: error.message, type: 'danger' }, { root: true })
+        }
       }))
       // update card names
       files.forEach((file, index) => {
