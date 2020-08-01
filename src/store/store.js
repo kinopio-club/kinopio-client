@@ -99,6 +99,9 @@ export default new Vuex.Store({
     notifyCardsCreatedIsNearLimit: false,
     notifyCardsCreatedIsOverLimit: false,
 
+    // notifications with position
+    notificationsWithPosition: [],
+
     // filters
     filteredConnectionTypeIds: [],
     filteredFrameIds: []
@@ -493,6 +496,16 @@ export default new Vuex.Store({
     notifyCardsCreatedIsOverLimit: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.notifyCardsCreatedIsOverLimit = value
+    },
+
+    // Notifications with Position
+
+    addNotificationWithPosition: (state, notification) => {
+      notification.id = nanoid()
+      state.notificationsWithPosition.push(notification)
+    },
+    removeNotificationWithPosition: (state) => {
+      state.notificationsWithPosition.shift()
     },
 
     // Filters

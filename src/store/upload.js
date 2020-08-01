@@ -100,6 +100,7 @@ export default {
       let cardIds = []
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       if (!currentUserIsSignedIn) {
+        context.commit('addNotificationWithPosition', { message: 'Sign Up or In', position: currentCursor, type: 'info' }, { root: true })
         context.commit('addNotification', { message: 'To upload files, you need to Sign Up or In', type: 'info' }, { root: true })
         return
       }
@@ -109,6 +110,7 @@ export default {
         return utils.isFileTooBig(file, userIsUpgraded)
       })
       if (filesTooBig) {
+        context.commit('addNotificationWithPosition', { message: 'Too Big', position: currentCursor, type: 'danger' }, { root: true })
         context.commit('addNotification', { message: 'To upload files over 5mb, upgrade for unlimited size uploads', type: 'danger' }, { root: true })
         return
       }
