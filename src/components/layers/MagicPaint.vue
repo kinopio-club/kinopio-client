@@ -560,17 +560,34 @@ export default {
       this.uploadIsDraggedOver = false
     },
 
+    // TODO simplify refactor, split into
+    // checkIfShouldUploda() -> notify notsigned in, sizeLimit
+    // createCards()
+    // uploadfilesAndUpdateNames()
     async createCardsAndUploadFiles (event) {
       this.removeUploadIsDraggedOver()
       if (!this.currentUserIsSignedIn) {
         this.$store.commit('addNotification', { message: 'To upload files, you need to Sign Up or In', type: 'info' })
         return
       }
-      this.currentCursor = utils.cursorPositionInViewport(event)
+
       let files = event.dataTransfer.files
       files = Array.from(files)
-      let cardIds = []
+
+      // check sizeLimit
+      const filesTooBig = files.find(file => {
+        const userIsUpgraded = this.$store.state.currentUser.isUpgraded
+        return utils.isFileTooBig(file, userIsUpgraded)
+      })
+
+      if (filesTooBig) {
+        this.$store.commit('addNotification', { message: 'To upload files over 5mb, upgrade for unlimited size uploads', type: 'danger' })
+        return // MARK: dont do the rest
+      }
+
       // add cards
+      this.currentCursor = utils.cursorPositionInViewport(event)
+      let cardIds = []
       for (const [index] of files.entries()) {
         const positionOffset = 20
         const cardId = nanoid()
@@ -584,19 +601,13 @@ export default {
           id: cardId
         })
       }
-      // upload files
+
+      // upload files and update name
       for (const [index, file] of files.entries()) {
-        try {
-          const cardId = cardIds[index]
-          this.$store.dispatch('upload/uploadFile', { file, cardId, shouldUpdateCardName: true })
-        } catch (error) {
-          console.warn('🚒', error)
-          // sizeLimit, unknownUploadError, not signed up (add in place (abs pos notification = new type?), 👀 card.vue)
-          this.$store.commit('addNotification', { message: error.message, type: 'danger' })
-        }
+        const cardId = cardIds[index]
+        this.$store.dispatch('upload/uploadFile', { file, cardId, shouldUpdateCardName: true })
       }
     }
-
   }
 }
 </script>

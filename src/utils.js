@@ -677,6 +677,15 @@ export default {
       delete updates.updates
     }
     return updates
+  },
+
+  // Upload
+
+  isFileTooBig (file, userIsUpgraded) {
+    const sizeLimit = 1024 * 1024 * 5 // 5mb
+    if (file.size > sizeLimit && !userIsUpgraded) {
+      return true
+    }
   }
 
 }
