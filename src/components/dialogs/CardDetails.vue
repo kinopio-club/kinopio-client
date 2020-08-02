@@ -342,7 +342,7 @@ export default {
       let name = this.card.name
       const checkbox = utils.checkboxFromString(name)
       const url = utils.urlFromString(name)
-      if (utils.urlIsImage(url) || utils.urlIsVideo(url)) {
+      if (utils.urlIsImage(url) || utils.urlIsVideo(url) || utils.urlIsAudio(url)) {
         name = name.replace(url, '')
       }
       if (file.url === url) {

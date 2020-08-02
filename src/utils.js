@@ -585,6 +585,14 @@ export default {
     return Boolean(isVideo)
   },
 
+  urlIsAudio (url) {
+    if (!url) { return }
+    url = url + ' '
+    const audioUrlPattern = new RegExp(/(?:\.mp3)(?:\n| |\?|&)/igm)
+    const isAudio = url.match(audioUrlPattern)
+    return Boolean(isAudio)
+  },
+
   nameIsUnchecked (name) {
     if (!name) { return }
     // https://regexr.com/55afe

@@ -7,7 +7,7 @@ article(:style="position" :data-card-id="id")
     @touchend="showCardDetails"
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
-    :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || isRemoteCardDragging, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isMediaCard || pendingUploadDataUrl}",
+    :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || isRemoteCardDragging, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isMediaCard || pendingUploadDataUrl, 'audio-card': urlIsAudio}",
     :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor || remoteCardDraggingColor || selectedColorUpload }"
     :data-card-id="id"
     :data-card-x="x"
@@ -22,8 +22,10 @@ article(:style="position" :data-card-id="id")
   )
     Frames(:card="card")
 
+    //- Video
     video(v-if="urlIsVideo" autoplay loop muted playsinline :key="url" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver}")
       source(:src="url")
+    //- Image
     img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver}")
     img.image(v-else-if="urlIsImage" :src="url" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver}")
 
@@ -62,6 +64,10 @@ article(:style="position" :data-card-id="id")
               img.connector-icon(src="@/assets/connector-closed.svg")
             template(v-else)
               img.connector-icon(src="@/assets/connector-open.svg")
+
+    //- Audio
+    Audio(:visible="urlIsAudio" url="url")
+
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
       .badge.info
@@ -89,6 +95,7 @@ import utils from '@/utils.js'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import Frames from '@/components/Frames.vue'
 import Loader from '@/components/Loader.vue'
+import Audio from '@/components/Audio.vue'
 
 let isMultiTouch
 
@@ -96,7 +103,8 @@ export default {
   components: {
     CardDetails,
     Frames,
-    Loader
+    Loader,
+    Audio
   },
   props: {
     card: Object
@@ -141,6 +149,7 @@ export default {
     url () { return utils.urlFromString(this.name) },
     urlIsImage () { return utils.urlIsImage(this.url) },
     urlIsVideo () { return utils.urlIsVideo(this.url) },
+    urlIsAudio () { return utils.urlIsAudio(this.url) },
     isMediaCard () { return this.urlIsImage || this.urlIsVideo },
     isChecked () { return utils.nameIsChecked(this.name) },
     hasCheckbox () { return utils.checkboxFromString(this.name) },
@@ -167,7 +176,7 @@ export default {
     normalizedName () {
       let name = this.name
       if (!name) { return }
-      if (this.isMediaCard) {
+      if (this.isMediaCard || this.urlIsAudio) {
         name = name.replace(this.url, '')
       }
       const checkbox = utils.checkboxFromString(name)
@@ -617,6 +626,14 @@ article
       justify-content space-between
       .name
         background-color var(--secondary-background)
+
+  &.audio-card
+    width 235px
+    .card-content-wrap
+      width 100%
+      align-items initial
+      justify-content space-between
+
   .error-container
     position absolute
     top 6px
