@@ -1,20 +1,35 @@
 <template lang="pug">
 .audio(v-if="visible")
-  .controls
+  .controls(
+    @keyup.stop.prevent="cancelClick"
+    @mouseup.stop.prevent="cancelClick"
+    @touchend.stop.prevent="cancelClick"
+  )
     .button-wrap
-      button(@mousedown.stop @touchstart.stop)
-        img.icon.cancel(src="@/assets/add.svg")
-    progress(value="50" max="100" @mousedown.stop @touchstart.stop)
+      button(
+        @click="playPause"
+      )
+        img.icon(src="@/assets/add.svg")
+        //- pause if isPlaying
+    .progress-wrap(@click="movePlayhead")
+      progress(
+        value="50"
+        max="100"
+      )
   .row
-    //- ^ v-if="isPlaying"
-    span.badge.info 0:00/3:33
+    span.badge(:class="{info: isPlaying}")
+      Loader(:visible="isPlaying")
+      span 0:00/3:33
 </template>
 
 <script>
-// import Loader from '@/components/Loader.vue'
+import Loader from '@/components/Loader.vue'
 
 export default {
   name: 'Audio',
+  components: {
+    Loader
+  },
   props: {
     visible: Boolean,
     url: String
@@ -22,6 +37,22 @@ export default {
   data () {
     return {
       isPlaying: false
+    }
+  },
+  methods: {
+    cancelClick () {
+      this.$store.commit('currentUserIsDraggingCard', false)
+      this.$store.dispatch('closeAllDialogs')
+    },
+    playPause (event) {
+      console.log('☔️', event)
+      // this.cancelClick()
+      // toggle isPlaying
+      // emit isPlaying
+    },
+    movePlayhead (event) {
+      console.log('🍄', event)
+      // this.cancelClick()
     }
   }
 }
@@ -36,7 +67,7 @@ export default {
   .controls
     display flex
     align-items center
-    margin-bottom 10px
+    margin-bottom 5px
   .button-wrap
     align-self right
     button
@@ -57,4 +88,8 @@ export default {
         box-shadow none
         color var(--primary)
         background var(--secondary-active-background)
+  .progress-wrap
+    height 100%
+    width 100%
+    padding-bottom 5px
 </style>
