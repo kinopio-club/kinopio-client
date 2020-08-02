@@ -145,6 +145,8 @@ export default {
 
 <style lang="stylus">
 .user-billing
+  max-height calc(100vh - 300px)
+  overflow auto
   .summary
     display flex
     align-items top

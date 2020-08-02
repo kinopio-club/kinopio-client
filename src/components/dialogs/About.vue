@@ -9,10 +9,6 @@ dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
           span What's New
           img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
         WhatsNew(:visible="whatsNewIsVisible" :newStuff="newStuff")
-    .row(v-if="!userIsUpgraded")
-      .button-wrap
-        button(@click.stop="triggerUpgradeUserIsVisible")
-          span Upgrade for Unlimited
     .row
       .button-wrap
         button(@click.stop="toggleHelpAndAboutIsVisible" :class="{active: helpAndAboutIsVisible}")
@@ -90,8 +86,7 @@ export default {
     this.isAndroid = utils.isAndroid()
   },
   computed: {
-    newStuffIsUpdated () { return this.$store.state.newStuffIsUpdated },
-    userIsUpgraded () { return this.$store.state.currentUser.isUpgraded }
+    newStuffIsUpdated () { return this.$store.state.newStuffIsUpdated }
   },
   methods: {
     toggleHelpAndAboutIsVisible () {
@@ -130,10 +125,6 @@ export default {
       this.whatsNewIsVisible = false
       this.addToHomescreenIsVisible = false
       this.keyboardShortcutsIsVisible = false
-    },
-    triggerUpgradeUserIsVisible () {
-      this.$store.commit('closeAllDialogs')
-      this.$store.commit('triggerUpgradeUserIsVisible')
     }
   },
   watch: {

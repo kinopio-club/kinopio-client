@@ -18,7 +18,7 @@
 
 <script>
 import Header from '@/components/Header.vue'
-import MagicPaint from '@/components/MagicPaint.vue'
+import MagicPaint from '@/components/layers/MagicPaint.vue'
 import Footer from '@/components/Footer.vue'
 import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 

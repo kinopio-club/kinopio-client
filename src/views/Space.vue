@@ -30,6 +30,7 @@ main.space(
   MultipleSelectedActions
   OffscreenMarkers
   ScrollAtEdgesHandler
+  NotificationsWithPosition
 </template>
 
 <script>
@@ -41,6 +42,7 @@ import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import ScrollAtEdgesHandler from '@/components/ScrollAtEdgesHandler.vue'
+import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import utils from '@/utils.js'
 
 import sortBy from 'lodash-es/sortBy'
@@ -58,7 +60,8 @@ export default {
     ConnectionDetails,
     MultipleSelectedActions,
     OffscreenMarkers,
-    ScrollAtEdgesHandler
+    ScrollAtEdgesHandler,
+    NotificationsWithPosition
   },
   beforeCreate () {
     this.$store.dispatch('currentUser/init')

@@ -1,6 +1,7 @@
 <template lang="pug">
-aside.magic-paint
-  canvas#painting.painting(
+aside
+  //- Magic painting is ephemeral brush strokes that select items
+  canvas#magic-painting(
     @mousedown="startPainting"
     @touchstart="startPainting"
     @mousemove="painting"
@@ -8,6 +9,11 @@ aside.magic-paint
     :width="viewportWidth"
     :height="viewportHeight"
     :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
+    @dragenter="checkIfUploadIsDraggedOver"
+    @dragover.prevent="checkIfUploadIsDraggedOver"
+    @dragleave="removeUploadIsDraggedOver"
+    @dragend="removeUploadIsDraggedOver"
+    @drop.prevent.stop="addCardsAndUploadFiles"
   )
   canvas#remote-painting.remote-painting(
     :width="viewportWidth"
@@ -24,10 +30,15 @@ aside.magic-paint
     :height="viewportHeight"
     :style="{ top: pinchZoomOffsetTop + 'px', left: pinchZoomOffsetLeft + 'px' }"
   )
+  DropGuideLine(
+    :currentCursor="currentCursor"
+    :uploadIsDraggedOver="uploadIsDraggedOver"
+  )
 </template>
 
 <script>
 import utils from '@/utils.js'
+import DropGuideLine from '@/components/layers/DropGuideLine.vue'
 
 const circleRadius = 20
 
@@ -36,7 +47,7 @@ const circleRadius = 20
 const maxIterations = 200 // higher is longer paint fade time
 const rateOfIterationDecay = 0.03 // higher is faster tail decay
 let paintingCircles = []
-let paintingCanvas, paintingContext, startCursor, currentCursor, paintingCirclesTimer
+let paintingCanvas, paintingContext, startCursor, paintingCirclesTimer
 let prevScroll
 let cardMap
 
@@ -58,6 +69,9 @@ let initialCircleCanvas, initialCircleContext, initialCirclesTimer
 
 export default {
   name: 'MagicPaint',
+  components: {
+    DropGuideLine
+  },
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggeredPaintFramePosition') {
@@ -81,7 +95,7 @@ export default {
     })
   },
   mounted () {
-    paintingCanvas = document.getElementById('painting')
+    paintingCanvas = document.getElementById('magic-painting')
     paintingContext = paintingCanvas.getContext('2d')
     paintingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
     remotePaintingCanvas = document.getElementById('remote-painting')
@@ -105,13 +119,13 @@ export default {
   data () {
     return {
       pinchZoomOffsetTop: 0,
-      pinchZoomOffsetLeft: 0
+      pinchZoomOffsetLeft: 0,
+      currentCursor: {},
+      uploadIsDraggedOver: false
     }
   },
   computed: {
-    currentUserColor () {
-      return this.$store.state.currentUser.color
-    },
+    currentUserColor () { return this.$store.state.currentUser.color },
     userCantEditSpace () { return !this.$store.getters['currentUser/canEditSpace']() },
     // keep canvases updated to viewport size so you can draw on newly created areas
     pageHeight () { return this.$store.state.pageHeight },
@@ -236,8 +250,8 @@ export default {
       const currentUserIsPaintingLocked = this.$store.state.currentUserIsPaintingLocked
       if (event.touches && !currentUserIsPaintingLocked) { return }
       let color = this.$store.state.currentUser.color
-      currentCursor = utils.cursorPositionInViewport(event)
-      let circle = { x: currentCursor.x, y: currentCursor.y, color, iteration: 0 }
+      this.currentCursor = utils.cursorPositionInViewport(event)
+      let circle = { x: this.currentCursor.x, y: this.currentCursor.y, color, iteration: 0 }
       this.selectCards(circle)
       this.selectConnections(circle)
       this.selectCardsAndConnectionsBetweenCircles(circle)
@@ -247,7 +261,7 @@ export default {
     startPainting (event) {
       cardMap = utils.cardMap()
       startCursor = utils.cursorPositionInViewport(event)
-      currentCursor = utils.cursorPositionInViewport(event)
+      this.currentCursor = utils.cursorPositionInViewport(event)
       const dialogIsVisible = Boolean(document.querySelector('dialog'))
       const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)
       if (utils.isMultiTouch(event)) { return }
@@ -452,7 +466,7 @@ export default {
       }
       const elaspedTime = timestamp - lockingStartTime
       const percentComplete = (elaspedTime / lockingDuration) // between 0 and 1
-      if (!utils.cursorsAreClose(startCursor, currentCursor)) {
+      if (!utils.cursorsAreClose(startCursor, this.currentCursor)) {
         currentUserIsLocking = false
       }
       if (shouldCancelLocking) {
@@ -529,6 +543,28 @@ export default {
         window.cancelAnimationFrame(initialCirclesTimer)
         initialCirclesTimer = undefined
       }
+    },
+
+    // Upload Files
+
+    checkIfUploadIsDraggedOver (event) {
+      const uploadIsFiles = event.dataTransfer.types.find(type => type === 'Files')
+      if (!uploadIsFiles) { return }
+      this.currentCursor = utils.cursorPositionInViewport(event)
+      this.uploadIsDraggedOver = true
+    },
+    removeUploadIsDraggedOver () {
+      this.uploadIsDraggedOver = false
+    },
+    addCardsAndUploadFiles (event) {
+      let files = event.dataTransfer.files
+      files = Array.from(files)
+      this.currentCursor = utils.cursorPositionInPage(event)
+      this.removeUploadIsDraggedOver()
+      this.$store.dispatch('upload/addCardsAndUploadFiles', {
+        files,
+        currentCursor: this.currentCursor
+      })
     }
   }
 }

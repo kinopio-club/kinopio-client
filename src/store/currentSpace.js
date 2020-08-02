@@ -590,7 +590,7 @@ export default {
 
     // Cards
 
-    addCard: (context, { position, isParentCard }) => {
+    addCard: (context, { position, isParentCard, name, id }) => {
       utils.typeCheck(position, 'object')
       if (context.rootGetters['currentUser/cardsCreatedIsOverLimit']) {
         context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
@@ -599,11 +599,11 @@ export default {
       }
       let cards = context.state.cards
       let card = {
-        id: nanoid(),
+        id: id || nanoid(),
         x: position.x,
         y: position.y,
         z: cards.length + 1,
-        name: '',
+        name: name || '',
         frameId: 0,
         userId: context.rootState.currentUser.id
       }
@@ -654,6 +654,14 @@ export default {
       context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
       context.commit('history/add', update, { root: true })
       context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: true }, { root: true })
+    },
+    repaceInCardName: (context, { cardId, match, replace }) => {
+      const card = context.getters.cardById(cardId)
+      const name = card.name.replace(match, replace)
+      context.dispatch('updateCard', {
+        id: cardId,
+        name
+      })
     },
     updateCard: (context, card) => {
       context.commit('updateCard', card)
