@@ -66,7 +66,7 @@ const self = {
         'Content-Type': 'application/json',
         'Cache-Control': 'must-revalidate, no-store, no-cache, private'
       })
-      const collaboratorKey = options.space.collaboratorKey
+      const collaboratorKey = options.space.collaboratorKey.collaboratorKey
       const apiKey = options.apiKey || cache.user().apiKey
       if (collaboratorKey) {
         headers.append('Space-Authorization', collaboratorKey)
