@@ -5,8 +5,8 @@
     @mouseup.stop.prevent="cancelClick"
     @touchend.stop.prevent="cancelClick"
   )
-    .button-wrap(:class="{active: isPlaying}")
-      button(@click="playPause")
+    .button-wrap(:class="{active: isPlaying}" @click="playPause")
+      button
         img.icon.play.pause(v-if="isPlaying" src="@/assets/pause.svg")
         img.icon.play(v-else src="@/assets/play.svg")
     .progress-wrap(@click="movePlayhead")
@@ -50,13 +50,11 @@ export default {
     playPause (event) {
       console.log('☔️', event)
       this.isPlaying = !this.isPlaying
-      // this.cancelClick()
       // toggle isPlaying
       // emit isPlaying
     },
     movePlayhead (event) {
       console.log('🍄', event)
-      // this.cancelClick()
     }
   }
 }
@@ -70,21 +68,21 @@ export default {
     mix-blend-mode color-burn
   &.card-has-name
     margin-bottom 8px
-
   .controls
     display flex
     align-items center
     margin-top -2px
-    margin-bottom 5px
   .button-wrap
     align-self right
+    padding-right 6px
+    padding-bottom 8px
+    padding-top 2px
     button
       position relative
       width 20px
       height 16px
       vertical-align top
       background transparent
-      margin-right 6px
       cursor pointer
     &:hover
       button
@@ -99,7 +97,7 @@ export default {
   .progress-wrap
     height 100%
     width 100%
-    padding-bottom 5px
+    padding-bottom 11px
     progress
       background-color transparent
     progress::-webkit-progress-bar
