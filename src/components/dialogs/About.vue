@@ -11,9 +11,9 @@ dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
         WhatsNew(:visible="whatsNewIsVisible" :newStuff="newStuff")
     .row
       .button-wrap
-        button(@click.stop="toggleHelpAndAboutIsVisible" :class="{active: helpAndAboutIsVisible}")
+        button(@click.stop="toggleHelpIsVisible" :class="{active: helpIsVisible}")
           span Help and About
-        HelpAndAbout(:visible="helpAndAboutIsVisible")
+        Help(:visible="helpIsVisible")
       .button-wrap
         a(href="https://help.kinopio.club/api")
           button API →
@@ -40,7 +40,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
 import WhatsNew from '@/components/dialogs/WhatsNew.vue'
 import AddToHomescreen from '@/components/dialogs/AddToHomescreen.vue'
 import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
-import HelpAndAbout from '@/components/dialogs/HelpAndAbout.vue'
+import Help from '@/components/dialogs/Help.vue'
 import utils from '@/utils.js'
 
 export default {
@@ -49,14 +49,14 @@ export default {
     WhatsNew,
     AddToHomescreen,
     KeyboardShortcuts,
-    HelpAndAbout
+    Help
   },
   props: {
     visible: Boolean
   },
   data () {
     return {
-      helpAndAboutIsVisible: false,
+      helpIsVisible: false,
       whatsNewIsVisible: false,
       addToHomescreenIsVisible: false,
       keyboardShortcutsIsVisible: false,
@@ -89,10 +89,10 @@ export default {
     newStuffIsUpdated () { return this.$store.state.newStuffIsUpdated }
   },
   methods: {
-    toggleHelpAndAboutIsVisible () {
-      const isVisible = this.helpAndAboutIsVisible
+    toggleHelpIsVisible () {
+      const isVisible = this.helpIsVisible
       this.closeDialogs()
-      this.helpAndAboutIsVisible = !isVisible
+      this.helpIsVisible = !isVisible
     },
     toggleWhatsNewIsVisible () {
       const isVisible = this.whatsNewIsVisible
@@ -121,7 +121,7 @@ export default {
       this.$store.commit('newStuffIsUpdated', newStuffIsUpdated)
     },
     closeDialogs () {
-      this.helpAndAboutIsVisible = false
+      this.helpIsVisible = false
       this.whatsNewIsVisible = false
       this.addToHomescreenIsVisible = false
       this.keyboardShortcutsIsVisible = false
