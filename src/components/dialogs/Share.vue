@@ -15,6 +15,15 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
           img.icon(src="@/assets/share.svg")
       .row
         .badge.success.success-message(v-if="urlIsCopied") Url Copied
+    p.share-private(v-if="spaceIsPrivate")
+      span To share this space publically, set the privacy to
+      span.badge.info
+        img.icon.closed(src="@/assets/unlock.svg")
+        span Closed
+      span or
+      span.badge.success
+        img.icon.open(src="@/assets/open.svg")
+        span Open
 
   section(v-if="spaceHasUrl && isSpaceMember")
     .button-wrap
@@ -193,4 +202,7 @@ export default {
     right calc(100% - 20px)
   .collaborators
     max-height calc(100vh - 200px)
+  .share-private
+    .badge
+      margin-left 6px
 </style>

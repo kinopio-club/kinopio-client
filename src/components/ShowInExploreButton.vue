@@ -59,6 +59,10 @@ export default {
         this.error.spaceCardsMinimum = true
         return
       }
+      const currentPrivacy = this.$store.state.currentSpace.privacy
+      if (currentPrivacy === 'private') {
+        this.$store.dispatch('currentSpace/updateSpace', { privacy: 'closed' })
+      }
       const value = !this.showInExplore
       this.$store.dispatch('currentSpace/updateSpace', { showInExplore: value })
       this.$emit('updateSpaces')
