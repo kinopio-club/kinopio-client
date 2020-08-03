@@ -37,6 +37,7 @@ article(:style="position" :data-card-id="id")
             input(type="checkbox" v-model="checkboxState")
         //- Name
         p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked}")
+          Audio(:visible="urlIsAudio" url="url")
           span {{normalizedName}}
 
       span.card-buttons-wrap
@@ -64,9 +65,6 @@ article(:style="position" :data-card-id="id")
               img.connector-icon(src="@/assets/connector-closed.svg")
             template(v-else)
               img.connector-icon(src="@/assets/connector-open.svg")
-
-    //- Audio
-    Audio(:visible="urlIsAudio" url="url")
 
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")

@@ -49,12 +49,25 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
         button(:disabled="!canEditCard" @click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
           span Frames
         FramePicker(:visible="framePickerIsVisible" :cards="[card]")
-      //- Split
+    //- Split
     .row(v-if="nameHasLineBreaks")
       .button-wrap
         button(:disabled="!canEditCard" @click.stop="splitCards")
           img.icon(src="@/assets/split-vertically.svg")
           span Split into {{nameLines}} Cards
+    //- Audio
+    .row(v-if="urlIsAudio")
+      .button-wrap
+        //- label(:class="{disabled: !canEditCard}" tabindex="0")
+        //-   input(type="checkbox" tabindex="-1")
+          //- v-model="shouldautoplayaudio"
+          //- span Autoplay Audio
+        button(:disabled="!canEditCard")
+          //- ^ click= toggle, .active= shouldautoplayaudio
+          img.icon(src="@/assets/add.svg")
+            //- temp icon
+          span Autoplay Audio
+
     p.edit-message(v-if="!canEditCard")
       template(v-if="spacePrivacyIsOpen")
         span.badge.info
@@ -157,6 +170,7 @@ export default {
       }
     },
     url () { return utils.urlFromString(this.name) },
+    urlIsAudio () { return utils.urlIsAudio(this.url) },
     normalizedName () {
       let name = this.name
       if (this.url) {

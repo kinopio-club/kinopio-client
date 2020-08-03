@@ -5,21 +5,20 @@
     @mouseup.stop.prevent="cancelClick"
     @touchend.stop.prevent="cancelClick"
   )
-    .button-wrap
-      button(
-        @click="playPause"
-      )
-        img.icon(src="@/assets/add.svg")
-        //- pause if isPlaying
+    .button-wrap(:class="{active: isPlaying}")
+      button(@click="playPause")
+        img.icon.pause(v-if="isPlaying" src="@/assets/pause.svg")
+        img.icon(v-else src="@/assets/play.svg")
     .progress-wrap(@click="movePlayhead")
       progress(
-        value="50"
+        value="0"
         max="100"
       )
   .row
+    span.badge.secondary Autoplay
     span.badge(:class="{info: isPlaying}")
       Loader(:visible="isPlaying")
-      span 0:00/3:33
+      span {{currentTime}}/{{totalTime}}
 </template>
 
 <script>
@@ -36,7 +35,9 @@ export default {
   },
   data () {
     return {
-      isPlaying: false
+      isPlaying: false,
+      totalTime: '3:33',
+      currentTime: '0:00'
     }
   },
   methods: {
@@ -46,6 +47,7 @@ export default {
     },
     playPause (event) {
       console.log('☔️', event)
+      this.isPlaying = !this.isPlaying
       // this.cancelClick()
       // toggle isPlaying
       // emit isPlaying
@@ -61,29 +63,31 @@ export default {
 <style lang="stylus">
 .audio
   display block
-  padding 8px
+  // padding 8px
+  width 160px
   &.selected
     mix-blend-mode color-burn
   .controls
     display flex
     align-items center
+    margin-top -2px
     margin-bottom 5px
   .button-wrap
     align-self right
     button
-      background-color transparent
       position relative
       width 20px
       height 16px
       vertical-align top
-      background-color var(--secondary-background)
+      background transparent
       margin-right 6px
       cursor pointer
     &:hover
       button
         box-shadow 3px 3px 0 var(--heavy-shadow)
         background var(--secondary-hover-background)
-    &:active
+    &:active,
+    &.active
       button
         box-shadow none
         color var(--primary)
@@ -92,4 +96,16 @@ export default {
     height 100%
     width 100%
     padding-bottom 5px
+    progress
+      background-color transparent
+    progress::-webkit-progress-bar
+      background-color transparent
+  .icon
+    position absolute
+    left 6px
+    top 3px
+    &.pause
+      left 5px
+  .secondary
+    background var(--secondary-active-background)
 </style>
