@@ -37,7 +37,7 @@ article(:style="position" :data-card-id="id")
             input(type="checkbox" v-model="checkboxState")
         //- Name
         p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked}")
-          Audio(:visible="urlIsAudio" url="url" :normalizedName="normalizedName")
+          Audio(:visible="urlIsAudio" :url="url" :normalizedName="normalizedName")
           span {{normalizedName}}
 
       span.card-buttons-wrap

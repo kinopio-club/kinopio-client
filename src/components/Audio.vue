@@ -1,5 +1,7 @@
 <template lang="pug">
 .audio(v-if="visible" :class="{'card-has-name': normalizedName}")
+  audio.hidden(ref="audio" controls="controls" :src="url" :autoplay="shouldAutoplay" type="audio/mpeg")
+  //- use controls to playback <audio>
   .controls(
     @keyup.stop.prevent="cancelClick"
     @mouseup.stop.prevent="cancelClick"
@@ -33,7 +35,8 @@ export default {
   props: {
     visible: Boolean,
     url: String,
-    normalizedName: String
+    normalizedName: String,
+    shouldAutoplay: Boolean
   },
   data () {
     return {
@@ -42,16 +45,33 @@ export default {
       currentTime: '0:00'
     }
   },
+  mounted () {
+    const audio = this.$refs.audio
+    console.log('👨‍🎤', audio)
+    if (!audio) { return }
+    audio.addEventListener('play', this.test)
+    // audio.play = (event) => {
+    //   console.log('🍄playing', event)
+    // }
+  },
   methods: {
     cancelClick () {
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.dispatch('closeAllDialogs')
     },
     playPause (event) {
-      console.log('☔️', event)
+      console.log('☔️', event, this.url)
+      const audio = this.$refs.audio
       this.isPlaying = !this.isPlaying
-      // toggle isPlaying
-      // emit isPlaying
+      console.log(this.isPlaying)
+      if (this.isPlaying) {
+        audio.play()
+      } else {
+        audio.pause()
+      }
+    },
+    test (event) {
+      console.log('👍', event)
     },
     movePlayhead (event) {
       console.log('🍄', event)
@@ -108,4 +128,6 @@ export default {
     top 3px
     &.pause
       left 5px
+  .hidden
+    display none
 </style>
