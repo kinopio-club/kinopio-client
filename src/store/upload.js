@@ -97,6 +97,12 @@ export default {
       })
     },
     addCardsAndUploadFiles: async (context, { files, currentCursor }) => {
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace'](context.rootState.currentSpace)
+      if (!canEditSpace) {
+        context.commit('addNotificationWithPosition', { message: 'Space is Read Only', position: currentCursor, type: 'info' }, { root: true })
+        context.commit('addNotification', { message: 'You can only upload files on spaces you can edit', type: 'info' }, { root: true })
+        return
+      }
       let cardIds = []
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       if (!currentUserIsSignedIn) {
