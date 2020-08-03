@@ -53,6 +53,7 @@ export default {
     // audio.play = (event) => {
     //   console.log('🍄playing', event)
     // }
+    // todo when complete reset to 0 pos, isplaying false
   },
   methods: {
     cancelClick () {
