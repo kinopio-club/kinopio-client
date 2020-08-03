@@ -7,15 +7,16 @@
   )
     .button-wrap(:class="{active: isPlaying}")
       button(@click="playPause")
-        img.icon.pause(v-if="isPlaying" src="@/assets/pause.svg")
-        img.icon(v-else src="@/assets/play.svg")
+        img.icon.play.pause(v-if="isPlaying" src="@/assets/pause.svg")
+        img.icon.play(v-else src="@/assets/play.svg")
     .progress-wrap(@click="movePlayhead")
       progress(
         value="0"
         max="100"
       )
-  .row
-    span.badge.secondary Autoplay
+  .row.info
+    span.badge.secondary
+      img.icon(src="@/assets/autoplay-active.svg")
     span.badge(:class="{info: isPlaying}")
       Loader(:visible="isPlaying")
       span {{currentTime}}/{{totalTime}}
@@ -103,12 +104,10 @@ export default {
       background-color transparent
     progress::-webkit-progress-bar
       background-color transparent
-  .icon
+  .play
     position absolute
     left 6px
     top 3px
     &.pause
       left 5px
-  .secondary
-    background var(--secondary-active-background)
 </style>

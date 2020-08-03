@@ -402,6 +402,8 @@ code
     background var(--success-background)
   &.status
     background var(--secondary-background)
+  &.secondary
+    background var(--secondary-active-background)
   input
     margin 0
   .user

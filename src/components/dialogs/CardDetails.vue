@@ -64,9 +64,9 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
           //- span Autoplay Audio
         button(:disabled="!canEditCard")
           //- ^ click= toggle, .active= shouldautoplayaudio
-          img.icon(src="@/assets/add.svg")
-            //- temp icon
-          span Autoplay Audio
+          img.icon(src="@/assets/autoplay.svg")
+            //- v-if active, autoplay-active.svg
+          span Autoplay
 
     p.edit-message(v-if="!canEditCard")
       template(v-if="spacePrivacyIsOpen")
