@@ -331,8 +331,9 @@ export default {
       this.error.spaceIsReadOnly = false
     },
     checkIfUploadIsDraggedOver (event) {
-      if (event.dataTransfer.types[0] !== 'Files') { return }
-      this.uploadIsDraggedOver = true
+      if (event.dataTransfer.types[0] === 'Files' || event.dataTransfer.items[0].kind === 'file') {
+        this.uploadIsDraggedOver = true
+      }
     },
     removeUploadIsDraggedOver () {
       this.uploadIsDraggedOver = false
