@@ -1,5 +1,5 @@
 <template lang="pug">
-.audio(v-if="visible")
+.audio(v-if="visible" :class="{'card-has-name': normalizedName}")
   .controls(
     @keyup.stop.prevent="cancelClick"
     @mouseup.stop.prevent="cancelClick"
@@ -31,7 +31,8 @@ export default {
   },
   props: {
     visible: Boolean,
-    url: String
+    url: String,
+    normalizedName: String
   },
   data () {
     return {
@@ -63,10 +64,12 @@ export default {
 <style lang="stylus">
 .audio
   display block
-  // padding 8px
   width 160px
   &.selected
     mix-blend-mode color-burn
+  &.card-has-name
+    margin-bottom 8px
+
   .controls
     display flex
     align-items center
