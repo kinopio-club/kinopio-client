@@ -7,7 +7,7 @@
     @mouseup.stop.prevent="cancelClick"
     @touchend.stop.prevent="cancelClick"
   )
-    .button-wrap(:class="{active: isPlaying}" @click="playPause")
+    .button-wrap(:class="{active: isPlaying}" @click="togglePlayPause")
       button
         img.icon.play.pause(v-if="isPlaying" src="@/assets/pause.svg")
         img.icon.play(v-else src="@/assets/play.svg")
@@ -46,6 +46,14 @@ export default {
       currentTime: '0:00'
     }
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerPauseAllAudio') {
+        this.isPlaying = false
+      }
+    })
+  },
+
   mounted () {
     const audio = this.$refs.audio
     if (!audio) { return }
@@ -61,16 +69,10 @@ export default {
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.dispatch('closeAllDialogs')
     },
-    playPause (event) {
-      console.log('☔️', event, this.url)
-      const audio = this.$refs.audio
-      this.isPlaying = !this.isPlaying
-      this.$emit('isPlaying', this.isPlaying)
-      if (this.isPlaying) {
-        audio.play()
-      } else {
-        audio.pause()
-      }
+    togglePlayPause (event) {
+      const isPlaying = !this.isPlaying
+      this.$store.commit('triggerPauseAllAudio')
+      this.isPlaying = isPlaying
     },
     convertToTwoDigits (number) {
       if (!number) { return undefined }
@@ -116,6 +118,17 @@ export default {
     },
     movePlayhead (event) {
       console.log('🍄', event)
+    }
+  },
+  watch: {
+    isPlaying (value) {
+      this.$emit('isPlaying', value)
+      const audio = this.$refs.audio
+      if (value) {
+        audio.play()
+      } else {
+        audio.pause()
+      }
     }
   }
 }

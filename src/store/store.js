@@ -194,6 +194,7 @@ export default new Vuex.Store({
     triggerUpdatePositionInVisualViewport: () => {},
     triggerUpgradeUserIsVisible: () => {},
     triggerUploadComplete: () => {},
+    triggerPauseAllAudio: () => {},
 
     // Cards
 
