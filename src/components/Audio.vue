@@ -60,7 +60,8 @@ export default {
       currentTime: '00:00',
       timeFormat: 'seconds',
       progressPercent: 0,
-      playheadIsBeingDragged: false
+      playheadIsBeingDragged: false,
+      canPlay: false
     }
   },
   created () {
@@ -70,14 +71,13 @@ export default {
       }
     })
   },
-
   mounted () {
     const audio = this.$refs.audio
     if (!audio) { return }
+    audio.addEventListener('canplay', this.setCanPlay)
     audio.addEventListener('loadedmetadata', this.getTotalTime)
     audio.addEventListener('timeupdate', this.getCurrentTime)
-
-    // todo when complete reset to 0 pos, isplaying false
+    audio.addEventListener('ended', this.pauseAudio)
   },
   methods: {
     cancelClick () {
@@ -85,10 +85,17 @@ export default {
       this.$store.dispatch('closeAllDialogs')
     },
     togglePlayPause (event) {
+      if (!this.canPlay) { return }
+      const audio = this.$refs.audio
       const isPlaying = !this.isPlaying
       this.$store.commit('triggerPauseAllAudio')
+      if (isPlaying && this.progressPercent >= 98) {
+        this.progressPercent = 0
+        audio.currentTime = 0
+      }
       this.isPlaying = isPlaying
       this.getCurrentTime()
+      this.getTotalTime()
     },
     convertToTwoDigits (number) {
       if (!number) { return undefined }
@@ -138,26 +145,31 @@ export default {
     },
     getTotalTime () {
       const audio = this.$refs.audio
+      if (!audio) { return }
       const seconds = Math.floor(audio.duration)
       const time = this.duration(seconds)
       this.totalTime = this.formatTime(time)
     },
-
     getCurrentTime () {
       const audio = this.$refs.audio
       const seconds = Math.floor(audio.currentTime)
       const time = this.duration(seconds)
       time.format = this.timeFormat
       this.currentTime = this.formatTime(time) || '00:00'
+      this.updateProgressFromTime(audio.currentTime, audio.duration)
+    },
+    updateProgressFromTime (currentTime, duration) {
+      this.progressPercent = (currentTime / duration) * 100
     },
     movePlayhead (event) {
+      if (!this.canPlay) { return }
       const progress = this.$refs.progress
       const rect = progress.getBoundingClientRect()
       const progressStartX = rect.x + window.scrollX
+      const progressWidth = rect.width - 2
       const clickX = utils.cursorPositionInViewport(event).x + window.scrollX
       const progressX = clickX - progressStartX
-      console.log(progressX, rect.width)
-      this.progressPercent = (progressX / rect.width) * 100
+      this.progressPercent = (progressX / progressWidth) * 100
       this.updateCurrentTime()
     },
     dragPlayhead (event) {
@@ -178,6 +190,14 @@ export default {
     updateCurrentTime () {
       const audio = this.$refs.audio
       audio.currentTime = audio.duration * this.progressPercent / 100
+    },
+    setCanPlay () {
+      this.canPlay = true
+    },
+    pauseAudio () {
+      const audio = this.$refs.audio
+      audio.pause()
+      this.isPlaying = false
     }
   },
   watch: {
@@ -189,6 +209,11 @@ export default {
         this.updateCurrentTime()
       } else {
         audio.pause()
+      }
+    },
+    progressPercent (value) {
+      if (value >= 100) {
+        this.pauseAudio()
       }
     }
   }
