@@ -11,13 +11,14 @@ dialog.help-and-about.narrow(v-if="visible" :open="visible" @click.stop="closeDi
           button Help Topics →
     .row
       .button-wrap
+        a(href="https://join.slack.com/t/kinopio-club/shared_invite/zt-garivnp1-qMbj9Nk2bo5wI78hgxkD_A")
+          button
+            span Community Slack →
+    .row
+      .button-wrap
         button(@click.stop="toggleContactIsVisible" :class="{active: contactIsVisible}")
           span Contact
         Contact(:visible="contactIsVisible")
-    //- .row
-    //-   .button-wrap
-    //-     a(href="#")
-    //-       button Support Forum →
 
   section
     .row

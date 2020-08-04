@@ -355,16 +355,12 @@ export default {
     addFile (file) {
       let name = this.card.name
       const checkbox = utils.checkboxFromString(name)
-      const url = utils.urlFromString(name)
-      if (utils.urlIsImage(url) || utils.urlIsVideo(url) || utils.urlIsAudio(url)) {
-        name = name.replace(url, '')
+      const previousUrl = utils.urlFromString(name)
+      if (utils.urlIsImage(previousUrl) || utils.urlIsVideo(previousUrl) || utils.urlIsAudio(previousUrl)) {
+        name = name.replace(previousUrl, '')
       }
-      if (file.url === url) {
-        name = name.replace(url, '')
-      } else {
-        name = utils.trim(name)
-        name = `${file.url}\n\n${name}`
-      }
+      name = utils.trim(name)
+      name = `${file.url}\n\n${name}`
       if (checkbox) {
         name = name.replace(checkbox, '')
         name = `${checkbox} ${name}`

@@ -84,6 +84,10 @@ article(:style="position" :data-card-id="id")
       span.badge.info
         img.icon.cancel(src="@/assets/add.svg")
         span Sign Up or In
+    .error-container(v-if="error.spaceIsReadOnly" @animationend="clearErrors")
+      span.badge.info
+        img.icon.cancel(src="@/assets/add.svg")
+        span Space is Read Only
 
   CardDetails(:card="card" @broadcastShowCardDetails="broadcastShowCardDetails")
 </template>
@@ -122,7 +126,8 @@ export default {
       error: {
         sizeLimit: false,
         unknownUploadError: false,
-        signUpToUpload: false
+        signUpToUpload: false,
+        spaceIsReadOnly: false
       }
     }
   },
@@ -330,10 +335,12 @@ export default {
       this.error.signUpToUpload = false
       this.error.sizeLimit = false
       this.error.unknownUploadError = false
+      this.error.spaceIsReadOnly = false
     },
     checkIfUploadIsDraggedOver (event) {
-      if (event.dataTransfer.types[0] !== 'Files') { return }
-      this.uploadIsDraggedOver = true
+      if (event.dataTransfer.types[0] === 'Files' || event.dataTransfer.items[0].kind === 'file') {
+        this.uploadIsDraggedOver = true
+      }
     },
     removeUploadIsDraggedOver () {
       this.uploadIsDraggedOver = false
@@ -341,13 +348,20 @@ export default {
     async uploadFile (event) {
       this.removeUploadIsDraggedOver()
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
+      // pre-upload errors
       if (!this.currentUserIsSignedIn) {
         this.error.signUpToUpload = true
         this.$store.commit('addNotification', { message: 'To upload files, you need to Sign Up or In', type: 'info' })
         return
       }
+      if (!this.canEditSpace) {
+        this.error.spaceIsReadOnly = true
+        this.$store.commit('addNotification', { message: 'You can only upload files on spaces you can edit', type: 'info' }, { root: true })
+        return
+      }
       const file = event.dataTransfer.files[0]
       const cardId = this.card.id
+      // upload
       try {
         await this.$store.dispatch('upload/uploadFile', { file, cardId })
       } catch (error) {
