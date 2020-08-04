@@ -30,7 +30,7 @@
         ref="progress"
       )
   .row
-    span.badge.secondary(title="Autoplay")
+    span.badge.info(title="Autoplay")
       img.icon(src="@/assets/autoplay-active.svg")
       span AP
     span.badge.time(:class="{info: isPlaying}")
@@ -99,7 +99,7 @@ export default {
     },
     convertToTwoDigits (number) {
       if (!number) { return undefined }
-      if (number < 9) {
+      if (number <= 9) {
         return `0${number}`
       } else {
         return number
