@@ -64,7 +64,7 @@ export default {
       console.log('☔️', event, this.url)
       const audio = this.$refs.audio
       this.isPlaying = !this.isPlaying
-      console.log(this.isPlaying)
+      this.$emit('isPlaying', this.isPlaying)
       if (this.isPlaying) {
         audio.play()
       } else {

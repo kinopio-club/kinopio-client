@@ -7,7 +7,7 @@ article(:style="position" :data-card-id="id")
     @touchend="showCardDetails"
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
-    :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || isRemoteCardDragging, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isMediaCard || pendingUploadDataUrl, 'audio-card': urlIsAudio}",
+    :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || isRemoteCardDragging, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isMediaCard || pendingUploadDataUrl, 'audio-card': urlIsAudio, 'is-playing-audio': isPlayingAudio}",
     :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor || remoteCardDraggingColor || selectedColorUpload }"
     :data-card-id="id"
     :data-card-x="x"
@@ -37,7 +37,7 @@ article(:style="position" :data-card-id="id")
             input(type="checkbox" v-model="checkboxState")
         //- Name
         p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked}")
-          Audio(:visible="urlIsAudio" :url="url" :normalizedName="normalizedName")
+          Audio(:visible="urlIsAudio" :url="url" :normalizedName="normalizedName" @isPlaying="updateIsPlayingAudio")
           span {{normalizedName}}
 
       span.card-buttons-wrap
@@ -123,6 +123,7 @@ export default {
       isRemoteConnecting: false,
       remoteConnectionColor: '',
       uploadIsDraggedOver: false,
+      isPlayingAudio: false,
       error: {
         sizeLimit: false,
         unknownUploadError: false,
@@ -331,6 +332,9 @@ export default {
     }
   },
   methods: {
+    updateIsPlayingAudio (value) {
+      this.isPlayingAudio = value
+    },
     clearErrors () {
       this.error.signUpToUpload = false
       this.error.sizeLimit = false
@@ -657,6 +661,17 @@ article
     animation-direction forward
     animation-fill-mode forwards
     animation-timing-function ease-out
+
+  &.is-playing-audio
+    animation bounce 1.2s infinite ease-in-out forwards
+
+@keyframes bounce
+  0%
+    transform translateY(0)
+  50%
+    transform translateY(4px)
+  100%
+    transform translateY(0)
 
 .jiggle
   animation jiggle 0.5s infinite ease-out forwards
