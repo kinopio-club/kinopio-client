@@ -29,7 +29,7 @@
         max="100"
         ref="progress"
       )
-  .row
+  .row.meta
     span.badge.info(title="Autoplay")
       img.icon(src="@/assets/autoplay-active.svg")
       span AP
@@ -272,4 +272,6 @@ export default {
     display none
   .time
     margin-right 0
+  .meta
+    width 200px
 </style>
