@@ -11,15 +11,22 @@
       button
         img.icon.play.pause(v-if="isPlaying" src="@/assets/pause.svg")
         img.icon.play(v-else src="@/assets/play.svg")
-    .progress-wrap(@click="movePlayhead")
+    .progress-wrap(
+      @mousedown.stop.prevent="movePlayhead"
+      @touchstart.stop.prevent="movePlayhead"
+      @mouseup.stop.prevent="movePlayhead"
+      @touchend.stop.prevent="movePlayhead"
+      @click="movePlayhead"
+    )
       progress(
-        value="0"
+        :value="progressPercent"
         max="100"
+        ref="progress"
       )
   .row
-    span.badge.info
+    span.badge.secondary(title="Autoplay")
       img.icon(src="@/assets/autoplay-active.svg")
-      //- span Autoplay
+      span AP
     span.badge.time(:class="{info: isPlaying}")
       Loader(:visible="isPlaying")
       span {{currentTime}}/{{totalTime}}
@@ -27,6 +34,7 @@
 
 <script>
 import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'Audio',
@@ -44,7 +52,8 @@ export default {
       isPlaying: false,
       totalTime: '--:--',
       currentTime: '00:00',
-      timeFormat: 'seconds'
+      timeFormat: 'seconds',
+      progressPercent: 0
     }
   },
   created () {
@@ -72,6 +81,7 @@ export default {
       const isPlaying = !this.isPlaying
       this.$store.commit('triggerPauseAllAudio')
       this.isPlaying = isPlaying
+      this.setCurrentTime()
     },
     convertToTwoDigits (number) {
       if (!number) { return undefined }
@@ -119,20 +129,30 @@ export default {
         return { hours, minutes, seconds }
       }
     },
-    setTotalTime (event) {
-      const seconds = Math.floor(event.target.duration)
+    setTotalTime () {
+      const audio = this.$refs.audio
+      const seconds = Math.floor(audio.duration)
       const time = this.duration(seconds)
       this.totalTime = this.formatTime(time)
     },
 
-    setCurrentTime (event) {
-      let seconds = Math.floor(event.target.currentTime)
+    setCurrentTime () {
+      const audio = this.$refs.audio
+      const seconds = Math.floor(audio.currentTime)
       const time = this.duration(seconds)
       time.format = this.timeFormat
-      this.currentTime = this.formatTime(time)
+      this.currentTime = this.formatTime(time) || '00:00'
     },
     movePlayhead (event) {
-      console.log('🍄', event)
+      const audio = this.$refs.audio
+      const progress = this.$refs.progress
+      const rect = progress.getBoundingClientRect()
+      const progressStartX = rect.x + window.scrollX
+      const clickX = utils.cursorPositionInViewport(event).x + window.scrollX
+      const progressX = clickX - progressStartX
+      console.log(progressX, rect.width)
+      this.progressPercent = (progressX / rect.width) * 100
+      audio.currentTime = audio.duration * this.progressPercent / 100
     }
   },
   watch: {
