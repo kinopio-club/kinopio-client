@@ -43,7 +43,8 @@ export default {
     return {
       isPlaying: false,
       totalTime: '--:--',
-      currentTime: '0:00'
+      currentTime: '00:00',
+      timeFormat: 'seconds'
     }
   },
   created () {
@@ -57,11 +58,9 @@ export default {
   mounted () {
     const audio = this.$refs.audio
     if (!audio) { return }
-    audio.addEventListener('play', this.test)
-    audio.addEventListener('loadedmetadata', this.getDuration)
-    // audio.play = (event) => {
-    //   console.log('🍄playing', event)
-    // }
+    audio.addEventListener('loadedmetadata', this.setTotalTime)
+    audio.addEventListener('timeupdate', this.setCurrentTime)
+
     // todo when complete reset to 0 pos, isplaying false
   },
   methods: {
@@ -82,39 +81,55 @@ export default {
         return number
       }
     },
-    setTotalTime ({ hours, minutes, seconds }) {
+    formatTime ({ hours, minutes, seconds, format }) {
       hours = this.convertToTwoDigits(hours)
       minutes = this.convertToTwoDigits(minutes)
       seconds = this.convertToTwoDigits(seconds)
-      if (hours) {
-        this.totalTime = `${hours}:${minutes}:${seconds}`
-      } else if (minutes) {
-        this.totalTime = `${minutes}:${seconds}`
+      if (hours || format === 'hours') {
+        this.timeFormat = 'hours'
+        hours = hours || '00'
+        minutes = minutes || '00'
+        seconds = seconds || '00'
+        return `${hours}:${minutes}:${seconds}`
+      } else if (minutes || format === 'minutes') {
+        this.timeFormat = 'minutes'
+        minutes = minutes || '00'
+        seconds = seconds || '00'
+        return `${minutes}:${seconds}`
       } else {
-        this.totalTime = seconds
+        this.timeFormat = 'seconds'
+        return seconds
       }
     },
-    getDuration (event) {
-      let seconds = Math.round(event.target.duration)
+    duration (seconds) {
       const minuteSeconds = 60
       const hourSeconds = 3600
       let minutes, hours
       if (seconds < minuteSeconds) {
-        this.setTotalTime({ seconds })
+        return { seconds }
       } else if (seconds < hourSeconds) {
         minutes = Math.floor(seconds / minuteSeconds)
         seconds = seconds - (minutes * minuteSeconds)
-        this.setTotalTime({ minutes, seconds })
+        return { minutes, seconds }
       } else {
         hours = Math.floor(seconds / hourSeconds)
         seconds = seconds - (hours * hourSeconds)
         minutes = Math.floor(seconds / minuteSeconds)
         seconds = seconds - (minutes * minuteSeconds)
-        this.setTotalTime({ hours, minutes, seconds })
+        return { hours, minutes, seconds }
       }
     },
-    test (event) {
-      console.log('👍', event)
+    setTotalTime (event) {
+      const seconds = Math.floor(event.target.duration)
+      const time = this.duration(seconds)
+      this.totalTime = this.formatTime(time)
+    },
+
+    setCurrentTime (event) {
+      let seconds = Math.floor(event.target.currentTime)
+      const time = this.duration(seconds)
+      time.format = this.timeFormat
+      this.currentTime = this.formatTime(time)
     },
     movePlayhead (event) {
       console.log('🍄', event)
