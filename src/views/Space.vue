@@ -339,7 +339,24 @@ export default {
       this.$store.commit('multipleSelectedActionsIsVisible', true)
     },
     stopInteractions (event) {
-      console.log('💣 stopInteractions') // stopInteractions and Space/stopPainting are run on all mouse and touch end events
+      const debugState = {
+        event: event,
+        shouldCancel: shouldCancel,
+        shouldCancelFromEvent: this.shouldCancel(event),
+        currentUserIsDraggingCard: this.$store.state.currentUserIsDraggingCard,
+        shouldAddCard: this.$store.state.shouldAddCard,
+        cardDetailsIsVisibleForCardId: this.$store.state.cardDetailsIsVisibleForCardId,
+        multipleCardsSelectedIds: this.$store.state.multipleCardsSelectedIds,
+        multipleConnectionsSelectedIds: this.$store.state.multipleConnectionsSelectedIds,
+        preventDraggedCardFromShowingDetails: this.$store.state.preventDraggedCardFromShowingDetails,
+        currentDraggingCardId: this.$store.state.currentDraggingCardId,
+        currentUserIsDrawingConnection: this.$store.state.currentUserIsDrawingConnection,
+        currentUserIsPainting: this.$store.state.currentUserIsPainting,
+        currentUserIsPaintingLocked: this.$store.state.currentUserIsPainting,
+        isDraggingCard: this.isDraggingCard,
+        currentConnection: this.$store.state.currentConnection
+      }
+      console.log('💣 stopInteractions', debugState) // stopInteractions and Space/stopPainting are run on all mouse and touch end events
       this.addInteractionBlur()
       if (event.touches) {
         this.$store.commit('triggerUpdatePositionInVisualViewport')
