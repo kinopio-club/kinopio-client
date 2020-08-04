@@ -16,10 +16,11 @@
         value="0"
         max="100"
       )
-  .row.info
-    span.badge.secondary
+  .row
+    span.badge.info
       img.icon(src="@/assets/autoplay-active.svg")
-    span.badge(:class="{info: isPlaying}")
+      //- span Autoplay
+    span.badge.time(:class="{info: isPlaying}")
       Loader(:visible="isPlaying")
       span {{currentTime}}/{{totalTime}}
 </template>
@@ -41,7 +42,7 @@ export default {
   data () {
     return {
       isPlaying: false,
-      totalTime: '3:33',
+      totalTime: '--:--',
       currentTime: '0:00'
     }
   },
@@ -131,4 +132,6 @@ export default {
       left 5px
   .hidden
     display none
+  .time
+    margin-right 0
 </style>
