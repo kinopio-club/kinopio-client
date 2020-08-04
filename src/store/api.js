@@ -55,6 +55,15 @@ const normalizeSpaceToRemote = (space) => {
   return space
 }
 
+const normalizeCollaboratorKey = (space) => {
+  if (!space.collaboratorKey) { return }
+  if (typeof space.collaboratorKey === 'string') {
+    return space.collaboratorKey
+  } else {
+    return space.collaboratorKey.collaboratorKey
+  }
+}
+
 const self = {
   namespaced: true,
   state: {},
@@ -66,7 +75,7 @@ const self = {
         'Content-Type': 'application/json',
         'Cache-Control': 'must-revalidate, no-store, no-cache, private'
       })
-      const collaboratorKey = options.space.collaboratorKey.collaboratorKey
+      const collaboratorKey = normalizeCollaboratorKey(options.space)
       const apiKey = options.apiKey || cache.user().apiKey
       if (collaboratorKey) {
         headers.append('Space-Authorization', collaboratorKey)
