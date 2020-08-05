@@ -36,13 +36,14 @@ article(:style="position" :data-card-id="id")
           label(:class="{active: isChecked, disabled: !canEditSpace}")
             input(type="checkbox" v-model="checkboxState")
         //- Name
-        p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked}")
+        p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox}")
           Audio(:visible="urlIsAudio" :url="url" :normalizedName="normalizedName" @isPlaying="updateIsPlayingAudio")
+            //- ^ pass prop shouldAutoplay: card.shouldAutoplayAudio
           span {{normalizedName}}
 
       span.card-buttons-wrap
         //- Link
-        a(:href="url" @click.stop @touchend="openUrl(url)" v-if="url")
+        a.link-wrap(:href="url" @click.stop @touchend="openUrl(url)" v-if="url")
           .link
             button(:style="{background: selectedColor}" tabindex="-1")
               img.icon.visit.arrow-icon(src="@/assets/visit.svg")
@@ -545,6 +546,9 @@ article
       white-space pre-line
       &.is-checked
         text-decoration line-through
+      &.has-checkbox
+        .audio
+          width 132px
   .connector,
   .link
     padding 8px
@@ -613,6 +617,9 @@ article
       span
         top -3px
         position relative
+
+  .link-wrap
+    max-height 28px
 
   .uploading-container
     position absolute

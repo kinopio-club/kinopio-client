@@ -1,6 +1,6 @@
 <template lang="pug">
 .audio(v-if="visible" :class="{'card-has-name': normalizedName}")
-  audio.hidden(ref="audio" controls="controls" :src="url" :autoplay="shouldAutoplay" type="audio/mpeg")
+  audio.hidden(ref="audio" controls="controls" :src="url" :autoplay="shouldAutoplay" type="audio/mpeg" preload="metdata")
   //- use controls to playback <audio>
   .controls(
     @keyup.stop.prevent="cancelClick"
@@ -60,8 +60,7 @@ export default {
       currentTime: '00:00',
       timeFormat: 'seconds',
       progressPercent: 0,
-      playheadIsBeingDragged: false,
-      canPlay: false
+      playheadIsBeingDragged: false
     }
   },
   created () {
@@ -74,29 +73,19 @@ export default {
   mounted () {
     const audio = this.$refs.audio
     if (!audio) { return }
-    audio.addEventListener('canplay', this.setCanPlay)
     audio.addEventListener('loadedmetadata', this.getTotalTime)
-    audio.addEventListener('timeupdate', this.getCurrentTime)
-    audio.addEventListener('ended', this.pauseAudio)
   },
   methods: {
     cancelClick () {
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.dispatch('closeAllDialogs')
     },
-    togglePlayPause (event) {
-      if (!this.canPlay) { return }
-      const audio = this.$refs.audio
-      const isPlaying = !this.isPlaying
-      this.$store.commit('triggerPauseAllAudio')
-      if (isPlaying && this.progressPercent >= 98) {
-        this.progressPercent = 0
-        audio.currentTime = 0
-      }
-      this.isPlaying = isPlaying
-      this.getCurrentTime()
-      this.getTotalTime()
+    handleErrors (event) {
+      console.warn('🚒', event)
     },
+
+    // time helpers
+
     convertToTwoDigits (number) {
       if (!number) { return undefined }
       if (number <= 9) {
@@ -143,6 +132,25 @@ export default {
         return { hours, minutes, seconds }
       }
     },
+
+    // controls
+
+    togglePlayPause (event) {
+      const audio = this.$refs.audio
+      const isPlaying = !this.isPlaying
+      this.$store.commit('triggerPauseAllAudio')
+      if (isPlaying && this.progressPercent >= 98) {
+        this.progressPercent = 0
+        audio.currentTime = 0
+      }
+      audio.volume = 0.25
+      this.isPlaying = isPlaying
+      this.getCurrentTime()
+      audio.addEventListener('timeupdate', this.getCurrentTime)
+      this.getTotalTime()
+      audio.addEventListener('ended', this.pauseAudio)
+      audio.addEventListener('error', this.handleErrors)
+    },
     getTotalTime () {
       const audio = this.$refs.audio
       if (!audio) { return }
@@ -161,8 +169,18 @@ export default {
     updateProgressFromTime (currentTime, duration) {
       this.progressPercent = (currentTime / duration) * 100
     },
+    pauseAudio () {
+      const audio = this.$refs.audio
+      audio.pause()
+      this.isPlaying = false
+      audio.removeEventListener('timeupdate')
+      audio.removeEventListener('ended')
+      audio.removeEventListener('error')
+    },
+
+    // playhead progress
+
     movePlayhead (event) {
-      if (!this.canPlay) { return }
       const progress = this.$refs.progress
       const rect = progress.getBoundingClientRect()
       const progressStartX = rect.x + window.scrollX
@@ -190,14 +208,6 @@ export default {
     updateCurrentTime () {
       const audio = this.$refs.audio
       audio.currentTime = audio.duration * this.progressPercent / 100
-    },
-    setCanPlay () {
-      this.canPlay = true
-    },
-    pauseAudio () {
-      const audio = this.$refs.audio
-      audio.pause()
-      this.isPlaying = false
     }
   },
   watch: {
@@ -208,7 +218,7 @@ export default {
         audio.play()
         this.updateCurrentTime()
       } else {
-        audio.pause()
+        this.pauseAudio()
       }
     },
     progressPercent (value) {
@@ -273,5 +283,5 @@ export default {
   .time
     margin-right 0
   .meta
-    width 200px
+    width 190px
 </style>
