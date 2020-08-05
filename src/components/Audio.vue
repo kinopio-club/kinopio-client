@@ -30,9 +30,9 @@
         ref="progress"
       )
   .row
-    span.badge.time(:class="{info: isPlaying}")
+    span.badge(:class="{info: isPlaying, secondary: !isPlaying}")
+      img.icon(v-if="!isPlaying" src="@/assets/autoplay.svg")
       Loader(:visible="isPlaying")
-      img.icon(src="@/assets/autoplay.svg")
       span {{currentTime}}/{{totalTime}}
 </template>
 
@@ -201,6 +201,7 @@ export default {
       const audio = this.$refs.audio
       audio.currentTime = Math.floor(audio.duration * this.progressPercent / 100)
       const time = this.duration(audio.currentTime)
+      time.format = this.timeFormat
       this.currentTime = this.formatTime(time) || '00:00'
     },
     dragPlayhead (event) {
@@ -279,6 +280,4 @@ export default {
       left 5px
   .hidden
     display none
-  .time
-    margin-right 0
 </style>
