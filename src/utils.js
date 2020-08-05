@@ -337,8 +337,9 @@ export default {
   },
 
   trim (string) {
+    // https://regexr.com/59m7a
     // unlike string.trim(), this removes line breaks too
-    return string.replace(/^\s+|\s+$/g, '')
+    return string.replace(/^(\n|\\n|\s)+|(\n|\\n|\s)+$/gm, '')
   },
 
   // Painting 🖌
@@ -563,6 +564,18 @@ export default {
     } else if (!this.urlIsFloatOrIp(url)) {
       return `http://${url}`
     }
+  },
+
+  urlsFromString (string) {
+    if (!string) { return [] }
+    // https://regexr.com/59m5t
+    // same as urlFromString but matches multiple urls and returns [urls]
+    const urlPattern = new RegExp(/((http[s]?:\/\/)?[^\s(["<>]*\.[^\s.[">,<]+[\n ]*)*/igm)
+    let urls = string.match(urlPattern)
+    urls = urls.filter(url => {
+      return Boolean(this.trim(url).length)
+    })
+    return urls
   },
 
   urlIsImage (url) {
