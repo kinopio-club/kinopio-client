@@ -32,6 +32,7 @@
   .row
     span.badge.time(:class="{info: isPlaying}")
       Loader(:visible="isPlaying")
+      img.icon(src="@/assets/autoplay.svg")
       span {{currentTime}}/{{totalTime}}
 </template>
 
@@ -61,8 +62,8 @@ export default {
   },
   created () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerPauseAllAudio') {
-        this.isPlaying = false
+      if (mutation.type === 'triggerPauseAllAudio' && this.isPlaying) {
+        this.pauseAudio()
       }
     })
   },
@@ -132,20 +133,38 @@ export default {
     // controls
 
     togglePlayPause (event) {
-      const audio = this.$refs.audio
-      const isPlaying = !this.isPlaying
+      const isPlaying = this.isPlaying
       this.$store.commit('triggerPauseAllAudio')
-      if (isPlaying && this.progressPercent >= 98) {
+      if (isPlaying) {
+        this.pauseAudio()
+      } else {
+        this.playAudio()
+      }
+    },
+    playAudio () {
+      const audio = this.$refs.audio
+      if (this.progressPercent >= 98) {
         this.progressPercent = 0
         audio.currentTime = 0
       }
       audio.volume = 0.25
-      this.isPlaying = isPlaying
-      this.getCurrentTime()
-      audio.addEventListener('timeupdate', this.getCurrentTime)
+      audio.play()
+      this.isPlaying = true
+      this.updateCurrentTime()
       this.getTotalTime()
+      audio.addEventListener('timeupdate', this.getCurrentTime)
       audio.addEventListener('ended', this.pauseAudio)
       audio.addEventListener('error', this.handleErrors)
+      this.$emit('isPlaying', true)
+    },
+    pauseAudio () {
+      const audio = this.$refs.audio
+      audio.pause()
+      this.isPlaying = false
+      audio.removeEventListener('timeupdate', this.getCurrentTime)
+      audio.removeEventListener('ended', this.pauseAudio)
+      audio.removeEventListener('error', this.handleErrors)
+      this.$emit('isPlaying', false)
     },
     getTotalTime () {
       const audio = this.$refs.audio
@@ -165,14 +184,6 @@ export default {
     updateProgressFromTime (currentTime, duration) {
       this.progressPercent = (currentTime / duration) * 100
     },
-    pauseAudio () {
-      const audio = this.$refs.audio
-      audio.pause()
-      this.isPlaying = false
-      audio.removeEventListener('timeupdate')
-      audio.removeEventListener('ended')
-      audio.removeEventListener('error')
-    },
 
     // playhead progress
 
@@ -185,6 +196,12 @@ export default {
       const progressX = clickX - progressStartX
       this.progressPercent = (progressX / progressWidth) * 100
       this.updateCurrentTime()
+    },
+    updateCurrentTime () {
+      const audio = this.$refs.audio
+      audio.currentTime = Math.floor(audio.duration * this.progressPercent / 100)
+      const time = this.duration(audio.currentTime)
+      this.currentTime = this.formatTime(time) || '00:00'
     },
     dragPlayhead (event) {
       if (!this.playheadIsBeingDragged) { return }
@@ -200,23 +217,9 @@ export default {
     },
     stopMovingPlayhead () {
       this.playheadIsBeingDragged = false
-    },
-    updateCurrentTime () {
-      const audio = this.$refs.audio
-      audio.currentTime = audio.duration * this.progressPercent / 100
     }
   },
   watch: {
-    isPlaying (value) {
-      this.$emit('isPlaying', value)
-      const audio = this.$refs.audio
-      if (value) {
-        audio.play()
-        this.updateCurrentTime()
-      } else {
-        this.pauseAudio()
-      }
-    },
     progressPercent (value) {
       if (value >= 100) {
         this.pauseAudio()
