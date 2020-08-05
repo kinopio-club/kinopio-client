@@ -7,7 +7,7 @@ article(:style="position" :data-card-id="id")
     @touchend="showCardDetails"
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
-    :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || isRemoteCardDragging, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isMediaCard || pendingUploadDataUrl, 'audio-card': urlIsAudio, 'is-playing-audio': isPlayingAudio}",
+    :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || isRemoteCardDragging, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': urlIsAudio, 'is-playing-audio': isPlayingAudio}",
     :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor || remoteCardDraggingColor || selectedColorUpload }"
     :data-card-id="id"
     :data-card-x="x"
@@ -154,7 +154,7 @@ export default {
     urlIsImage () { return utils.urlIsImage(this.url) },
     urlIsVideo () { return utils.urlIsVideo(this.url) },
     urlIsAudio () { return utils.urlIsAudio(this.url) },
-    isMediaCard () { return this.urlIsImage || this.urlIsVideo },
+    isVisualCard () { return this.urlIsImage || this.urlIsVideo },
     isChecked () { return utils.nameIsChecked(this.name) },
     hasCheckbox () { return utils.checkboxFromString(this.name) },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
@@ -180,7 +180,7 @@ export default {
     normalizedName () {
       let name = this.name
       if (!name) { return }
-      if (this.isMediaCard || this.urlIsAudio) {
+      if (this.isVisualCard || this.urlIsAudio) {
         name = name.replace(this.url, '')
       }
       const checkbox = utils.checkboxFromString(name)
