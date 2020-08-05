@@ -1,6 +1,6 @@
 <template lang="pug">
 .audio(v-if="visible" :class="{'card-has-name': normalizedName}")
-  audio.hidden(ref="audio" controls="controls" :src="url" :autoplay="shouldAutoplay" type="audio/mpeg" preload="metdata")
+  audio.hidden(ref="audio" controls="controls" :src="url" type="audio/mpeg" preload="metadata")
   //- use controls to playback <audio>
   .controls(
     @keyup.stop.prevent="cancelClick"
@@ -29,10 +29,7 @@
         max="100"
         ref="progress"
       )
-  .row.meta
-    span.badge.info(title="Autoplay")
-      img.icon(src="@/assets/autoplay-active.svg")
-      span AP
+  .row
     span.badge.time(:class="{info: isPlaying}")
       Loader(:visible="isPlaying")
       span {{currentTime}}/{{totalTime}}
@@ -50,8 +47,7 @@ export default {
   props: {
     visible: Boolean,
     url: String,
-    normalizedName: String,
-    shouldAutoplay: Boolean
+    normalizedName: String
   },
   data () {
     return {
@@ -282,6 +278,4 @@ export default {
     display none
   .time
     margin-right 0
-  .meta
-    width 190px
 </style>

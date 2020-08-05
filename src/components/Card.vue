@@ -38,7 +38,6 @@ article(:style="position" :data-card-id="id")
         //- Name
         p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox}")
           Audio(:visible="urlIsAudio" :url="url" :normalizedName="normalizedName" @isPlaying="updateIsPlayingAudio")
-            //- ^ pass prop shouldAutoplay: card.shouldAutoplayAudio
           span {{normalizedName}}
 
       span.card-buttons-wrap

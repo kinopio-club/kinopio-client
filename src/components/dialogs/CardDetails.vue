@@ -55,18 +55,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
         button(:disabled="!canEditCard" @click.stop="splitCards")
           img.icon(src="@/assets/split-vertically.svg")
           span Split into {{nameLines}} Cards
-    //- Audio
-    .row(v-if="urlIsAudio")
-      .button-wrap
-        //- label(:class="{disabled: !canEditCard}" tabindex="0")
-        //-   input(type="checkbox" tabindex="-1")
-          //- v-model="shouldautoplayaudio"
-          //- span Autoplay Audio
-        button(:disabled="!canEditCard")
-          //- ^ click= toggle, .active= shouldautoplayaudio
-          img.icon(src="@/assets/autoplay.svg")
-            //- v-if active, autoplay-active.svg
-          span Autoplay
 
     p.edit-message(v-if="!canEditCard")
       template(v-if="spacePrivacyIsOpen")
