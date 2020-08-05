@@ -30,16 +30,19 @@ article(:style="position" :data-card-id="id")
     img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver}")
 
     span.card-content-wrap
-      .name-wrap
-        //- [·]
-        .checkbox-wrap(v-if="hasCheckbox" @click.prevent.stop="toggleCardChecked" @touchend.prevent.stop="toggleCardChecked")
-          label(:class="{active: isChecked, disabled: !canEditSpace}")
-            input(type="checkbox" v-model="checkboxState")
-        //- Name
-        p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox}")
-          Audio(:visible="Boolean(formats.audio)" :url="formats.audio" :normalizedName="normalizedName" @isPlaying="updateIsPlayingAudio")
-          span {{normalizedName}}
+      .card-content
+        .audio-wrap(v-if="Boolean(formats.audio)")
+          Audio(:visible="Boolean(formats.audio)" :url="formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
+        .name-wrap
+          //- [·]
+          .checkbox-wrap(v-if="hasCheckbox" @click.prevent.stop="toggleCardChecked" @touchend.prevent.stop="toggleCardChecked")
+            label(:class="{active: isChecked, disabled: !canEditSpace}")
+              input(type="checkbox" v-model="checkboxState")
+          //- Name
+          p.name(v-if="normalizedName" :style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox}")
+            span {{normalizedName}}
 
+      //- Right buttons
       span.card-buttons-wrap
         //- Link
         a.link-wrap(:href="firstUrl" @click.stop @touchend="openUrl(firstUrl)" v-if="firstUrl")
@@ -713,6 +716,10 @@ article
 
   &.is-playing-audio
     animation bounce 1.2s infinite ease-in-out forwards
+
+  .audio-wrap
+    margin-top 8px
+    margin-left 8px
 
 @keyframes bounce
   0%

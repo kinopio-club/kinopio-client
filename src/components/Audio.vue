@@ -1,5 +1,5 @@
 <template lang="pug">
-.audio(v-if="visible" :class="{'card-has-name': normalizedName}")
+.audio(v-if="visible" :class="{'card-has-no-name': !normalizedName}")
   audio.hidden(ref="audio" controls="controls" :src="url" type="audio/mpeg" preload="metadata")
   //- use controls to playback <audio>
   .controls(
@@ -28,9 +28,10 @@
         :value="progressPercent"
         max="100"
         ref="progress"
+        :style="{'background-color': selectedColor}"
       )
   .row
-    span.badge(:class="{info: isPlaying, secondary: !isPlaying}")
+    span.badge(:class="{info: isPlaying, status: !isPlaying}" :style="{background: selectedColor}")
       img.icon(v-if="!isPlaying" src="@/assets/autoplay.svg")
       Loader(:visible="isPlaying")
       span {{currentTime}}/{{totalTime}}
@@ -48,6 +49,7 @@ export default {
   props: {
     visible: Boolean,
     url: String,
+    selectedColor: String,
     normalizedName: String
   },
   data () {
@@ -71,6 +73,9 @@ export default {
     const audio = this.$refs.audio
     if (!audio) { return }
     audio.addEventListener('loadedmetadata', this.getTotalTime)
+  },
+  beforeDestroy () {
+    this.pauseAudio()
   },
   methods: {
     cancelClick () {
@@ -236,8 +241,8 @@ export default {
   width 160px
   &.selected
     mix-blend-mode color-burn
-  &.card-has-name
-    margin-bottom 8px
+  &.card-has-no-name
+    padding-bottom 8px
   .controls
     display flex
     align-items center
@@ -252,7 +257,7 @@ export default {
       width 20px
       height 16px
       vertical-align top
-      background transparent
+      background var(--primary-background)
       cursor pointer
     &:hover
       button
@@ -269,9 +274,9 @@ export default {
     width 100%
     padding-bottom 11px
     progress
-      background-color transparent
+      background-color var(--secondary-background)
     progress::-webkit-progress-bar
-      background-color transparent
+      background-color var(--secondary-background)
   .play
     position absolute
     left 6px
@@ -280,4 +285,7 @@ export default {
       left 5px
   .hidden
     display none
+  .badge
+    &.status
+      background var(--secondary-active-background)
 </style>
