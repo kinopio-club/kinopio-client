@@ -93,8 +93,6 @@ article(:style="position" :data-card-id="id")
         span Space is Read Only
 
   CardDetails(:card="card" @broadcastShowCardDetails="broadcastShowCardDetails")
-
-  //- p {{urls}}
 </template>
 
 <script>
@@ -171,7 +169,6 @@ export default {
       return urls || []
     },
     isVisualCard () { return this.formats.image || this.formats.video },
-    // isAudioVisualCard () { return this.formats.image && this.formats.audio },
     cardHasMedia () { return this.formats.image || this.formats.video || this.formats.audio },
     cardHasUrls () {
       if (!this.urls.length) {
