@@ -139,7 +139,7 @@ export default {
         image: '',
         video: '',
         audio: '',
-        web: ''
+        link: ''
       }
     }
   },
@@ -364,7 +364,7 @@ export default {
       this.formats.image = ''
       this.formats.video = ''
       this.formats.audio = ''
-      this.formats.web = ''
+      this.formats.link = ''
       if (!urls.length) { return }
       urls.forEach(url => {
         if (utils.urlIsImage(url)) {
@@ -374,7 +374,7 @@ export default {
         } else if (utils.urlIsAudio(url)) {
           this.formats.audio = url
         } else {
-          this.formats.web = url
+          this.formats.link = url
         }
       })
     },

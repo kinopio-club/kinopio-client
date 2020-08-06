@@ -340,15 +340,36 @@ export default {
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
+    urlType (url) {
+      if (utils.urlIsImage(url)) {
+        return 'image'
+      } else if (utils.urlIsVideo(url)) {
+        return 'video'
+      } else if (utils.urlIsAudio(url)) {
+        return 'audio'
+      } else {
+        return 'link'
+      }
+    },
     addFile (file) {
       let name = this.card.name
+      const url = file.url
+      const urlType = this.urlType(url)
       const checkbox = utils.checkboxFromString(name)
-      const previousUrl = utils.urlFromString(name)
-      if (utils.urlIsImage(previousUrl) || utils.urlIsVideo(previousUrl) || utils.urlIsAudio(previousUrl)) {
-        name = name.replace(previousUrl, '')
+      const previousUrls = utils.urlsFromString(name)
+      let isReplaced
+      previousUrls.forEach(previousUrl => {
+        if (this.urlType(previousUrl) === urlType) {
+          name = name.replace(previousUrl, url)
+          isReplaced = true
+        }
+      })
+      if (!isReplaced) {
+        // prepend url to name
+        name = utils.trim(name)
+        name = `${url}\n\n${name}`
       }
-      name = utils.trim(name)
-      name = `${file.url}\n\n${name}`
+      // ensure checkbox is first
       if (checkbox) {
         name = name.replace(checkbox, '')
         name = `${checkbox} ${name}`

@@ -339,7 +339,7 @@ export default {
   trim (string) {
     // https://regexr.com/59m7a
     // unlike string.trim(), this removes line breaks too
-    return string.replace(/^(\n|\\n|\s)+|(\n|\\n|\s)+$/gm, '')
+    return string.replace(/^(\n|\\n|\s)+|(\n|\\n|\s)+$/g, '')
   },
 
   // Painting 🖌
