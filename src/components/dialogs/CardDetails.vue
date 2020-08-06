@@ -360,7 +360,7 @@ export default {
       let isReplaced
       previousUrls.forEach(previousUrl => {
         if (this.urlType(previousUrl) === urlType) {
-          name = name.replace(previousUrl, url)
+          name = name.replace(previousUrl.trim(), url)
           isReplaced = true
         }
       })
