@@ -49,12 +49,13 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
         button(:disabled="!canEditCard" @click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
           span Frames
         FramePicker(:visible="framePickerIsVisible" :cards="[card]")
-      //- Split
+    //- Split
     .row(v-if="nameHasLineBreaks")
       .button-wrap
         button(:disabled="!canEditCard" @click.stop="splitCards")
           img.icon(src="@/assets/split-vertically.svg")
           span Split into {{nameLines}} Cards
+
     p.edit-message(v-if="!canEditCard")
       template(v-if="spacePrivacyIsOpen")
         span.badge.info
@@ -157,6 +158,7 @@ export default {
       }
     },
     url () { return utils.urlFromString(this.name) },
+    urlIsAudio () { return utils.urlIsAudio(this.url) },
     normalizedName () {
       let name = this.name
       if (this.url) {
@@ -338,15 +340,36 @@ export default {
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
+    urlType (url) {
+      if (utils.urlIsImage(url)) {
+        return 'image'
+      } else if (utils.urlIsVideo(url)) {
+        return 'video'
+      } else if (utils.urlIsAudio(url)) {
+        return 'audio'
+      } else {
+        return 'link'
+      }
+    },
     addFile (file) {
       let name = this.card.name
+      const url = file.url
+      const urlType = this.urlType(url)
       const checkbox = utils.checkboxFromString(name)
-      const previousUrl = utils.urlFromString(name)
-      if (utils.urlIsImage(previousUrl) || utils.urlIsVideo(previousUrl)) {
-        name = name.replace(previousUrl, '')
+      const previousUrls = utils.urlsFromString(name)
+      let isReplaced
+      previousUrls.forEach(previousUrl => {
+        if (this.urlType(previousUrl) === urlType) {
+          name = name.replace(previousUrl.trim(), url)
+          isReplaced = true
+        }
+      })
+      if (!isReplaced) {
+        // prepend url to name
+        name = utils.trim(name)
+        name = `${url}\n\n${name}`
       }
-      name = utils.trim(name)
-      name = `${file.url}\n\n${name}`
+      // ensure checkbox is first
       if (checkbox) {
         name = name.replace(checkbox, '')
         name = `${checkbox} ${name}`

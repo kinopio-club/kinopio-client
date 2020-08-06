@@ -7,7 +7,7 @@ article(:style="position" :data-card-id="id")
     @touchend="showCardDetails"
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
-    :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || isRemoteCardDragging, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isMediaCard || pendingUploadDataUrl}",
+    :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || isRemoteCardDragging, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': Boolean(formats.audio), 'is-playing-audio': isPlayingAudio}",
     :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor || remoteCardDraggingColor || selectedColorUpload }"
     :data-card-id="id"
     :data-card-x="x"
@@ -22,24 +22,30 @@ article(:style="position" :data-card-id="id")
   )
     Frames(:card="card")
 
-    video(v-if="urlIsVideo" autoplay loop muted playsinline :key="url" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver}")
-      source(:src="url")
+    //- Video
+    video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver}")
+      source(:src="formats.video")
+    //- Image
     img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver}")
-    img.image(v-else-if="urlIsImage" :src="url" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver}")
+    img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver}")
 
     span.card-content-wrap
-      .name-wrap
-        //- [·]
-        .checkbox-wrap(v-if="hasCheckbox" @click.prevent.stop="toggleCardChecked" @touchend.prevent.stop="toggleCardChecked")
-          label(:class="{active: isChecked, disabled: !canEditSpace}")
-            input(type="checkbox" v-model="checkboxState")
-        //- Name
-        p.name(:style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked}")
-          span {{normalizedName}}
+      .card-content
+        .audio-wrap(v-if="Boolean(formats.audio)")
+          Audio(:visible="Boolean(formats.audio)" :url="formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
+        .name-wrap
+          //- [·]
+          .checkbox-wrap(v-if="hasCheckbox" @click.prevent.stop="toggleCardChecked" @touchend.prevent.stop="toggleCardChecked")
+            label(:class="{active: isChecked, disabled: !canEditSpace}")
+              input(type="checkbox" v-model="checkboxState")
+          //- Name
+          p.name(v-if="normalizedName" :style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox}")
+            span {{normalizedName}}
 
+      //- Right buttons
       span.card-buttons-wrap
         //- Link
-        a(:href="url" @click.stop @touchend="openUrl(url)" v-if="url")
+        a.link-wrap(:href="firstUrl" @click.stop @touchend="openUrl(firstUrl)" v-if="firstUrl")
           .link
             button(:style="{background: selectedColor}" tabindex="-1")
               img.icon.visit.arrow-icon(src="@/assets/visit.svg")
@@ -62,6 +68,7 @@ article(:style="position" :data-card-id="id")
               img.connector-icon(src="@/assets/connector-closed.svg")
             template(v-else)
               img.connector-icon(src="@/assets/connector-open.svg")
+
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
       .badge.info
@@ -93,6 +100,7 @@ import utils from '@/utils.js'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import Frames from '@/components/Frames.vue'
 import Loader from '@/components/Loader.vue'
+import Audio from '@/components/Audio.vue'
 
 let isMultiTouch
 
@@ -100,7 +108,8 @@ export default {
   components: {
     CardDetails,
     Frames,
-    Loader
+    Loader,
+    Audio
   },
   props: {
     card: Object
@@ -117,11 +126,18 @@ export default {
       isRemoteConnecting: false,
       remoteConnectionColor: '',
       uploadIsDraggedOver: false,
+      isPlayingAudio: false,
       error: {
         sizeLimit: false,
         unknownUploadError: false,
         signUpToUpload: false,
         spaceIsReadOnly: false
+      },
+      formats: {
+        image: '',
+        video: '',
+        audio: '',
+        link: ''
       }
     }
   },
@@ -143,10 +159,24 @@ export default {
       if (!this.cardPendingUpload) { return }
       return this.cardPendingUpload.imageDataUrl
     },
-    url () { return utils.urlFromString(this.name) },
-    urlIsImage () { return utils.urlIsImage(this.url) },
-    urlIsVideo () { return utils.urlIsVideo(this.url) },
-    isMediaCard () { return this.urlIsImage || this.urlIsVideo },
+    firstUrl () {
+      if (!this.urls.length) { return }
+      return this.urls[0]
+    },
+    urls () {
+      const urls = utils.urlsFromString(this.name)
+      this.updateMediaUrls(urls)
+      return urls || []
+    },
+    isVisualCard () { return this.formats.image || this.formats.video },
+    cardHasMedia () { return this.formats.image || this.formats.video || this.formats.audio },
+    cardHasUrls () {
+      if (!this.urls.length) {
+        return false
+      } else {
+        return true
+      }
+    },
     isChecked () { return utils.nameIsChecked(this.name) },
     hasCheckbox () { return utils.checkboxFromString(this.name) },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
@@ -170,10 +200,13 @@ export default {
       return false
     },
     normalizedName () {
+      // name without urls and checkbox text
       let name = this.name
       if (!name) { return }
-      if (this.isMediaCard) {
-        name = name.replace(this.url, '')
+      if (this.cardHasMedia) {
+        name = name.replace(this.formats.image, '')
+        name = name.replace(this.formats.video, '')
+        name = name.replace(this.formats.audio, '')
       }
       const checkbox = utils.checkboxFromString(name)
       if (checkbox) {
@@ -184,10 +217,10 @@ export default {
     nameLineMinWidth () {
       const averageCharacterWidth = 6.5
       let maxWidth = 190
-      if (this.url || this.hasCheckbox) {
+      if (this.cardHasUrls || this.hasCheckbox) {
         maxWidth = 162
       }
-      if (this.url && this.hasCheckbox) {
+      if (this.cardHasUrls && this.hasCheckbox) {
         maxWidth = 132
       }
       if (!this.normalizedName) { return 0 }
@@ -324,6 +357,27 @@ export default {
     }
   },
   methods: {
+    updateMediaUrls (urls) {
+      this.formats.image = ''
+      this.formats.video = ''
+      this.formats.audio = ''
+      this.formats.link = ''
+      if (!urls.length) { return }
+      urls.forEach(url => {
+        if (utils.urlIsImage(url)) {
+          this.formats.image = url
+        } else if (utils.urlIsVideo(url)) {
+          this.formats.video = url
+        } else if (utils.urlIsAudio(url)) {
+          this.formats.audio = url
+        } else {
+          this.formats.link = url
+        }
+      })
+    },
+    updateIsPlayingAudio (value) {
+      this.isPlayingAudio = value
+    },
     clearErrors () {
       this.error.signUpToUpload = false
       this.error.sizeLimit = false
@@ -534,6 +588,9 @@ article
       white-space pre-line
       &.is-checked
         text-decoration line-through
+      &.has-checkbox
+        .audio
+          width 132px
   .connector,
   .link
     padding 8px
@@ -603,6 +660,9 @@ article
         top -3px
         position relative
 
+  .link-wrap
+    max-height 28px
+
   .uploading-container
     position absolute
     top 6px
@@ -631,6 +691,14 @@ article
       justify-content space-between
       .name
         background-color var(--secondary-background)
+
+  &.audio-card
+    width 235px
+    .card-content-wrap
+      width 100%
+      align-items initial
+      justify-content space-between
+
   .error-container
     position absolute
     top 6px
@@ -642,6 +710,21 @@ article
     animation-direction forward
     animation-fill-mode forwards
     animation-timing-function ease-out
+
+  &.is-playing-audio
+    animation bounce 1.2s infinite ease-in-out forwards
+
+  .audio-wrap
+    margin-top 8px
+    margin-left 8px
+
+@keyframes bounce
+  0%
+    transform translateY(0)
+  50%
+    transform translateY(4px)
+  100%
+    transform translateY(0)
 
 .jiggle
   animation jiggle 0.5s infinite ease-out forwards

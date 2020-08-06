@@ -337,8 +337,9 @@ export default {
   },
 
   trim (string) {
+    // https://regexr.com/59m7a
     // unlike string.trim(), this removes line breaks too
-    return string.replace(/^\s+|\s+$/g, '')
+    return string.replace(/^(\n|\\n|\s)+|(\n|\\n|\s)+$/g, '')
   },
 
   // Painting 🖌
@@ -565,6 +566,18 @@ export default {
     }
   },
 
+  urlsFromString (string) {
+    if (!string) { return [] }
+    // https://regexr.com/59m5t
+    // same as urlFromString but matches multiple urls and returns [urls]
+    const urlPattern = new RegExp(/((http[s]?:\/\/)?[^\s(["<>]*\.[^\s.[">,<]+[ ]*)*/igm)
+    let urls = string.match(urlPattern)
+    urls = urls.filter(url => {
+      return Boolean(this.trim(url).length)
+    })
+    return urls
+  },
+
   urlIsImage (url) {
     if (!url) { return }
     // append space to match as an end character
@@ -583,6 +596,14 @@ export default {
     const videoUrlPattern = new RegExp(/(?:\.mp4)(?:\n| |\?|&)/igm)
     const isVideo = url.match(videoUrlPattern)
     return Boolean(isVideo)
+  },
+
+  urlIsAudio (url) {
+    if (!url) { return }
+    url = url + ' '
+    const audioUrlPattern = new RegExp(/(?:\.mp3)(?:\n| |\?|&)/igm)
+    const isAudio = url.match(audioUrlPattern)
+    return Boolean(isAudio)
   },
 
   nameIsUnchecked (name) {
