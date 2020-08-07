@@ -77,7 +77,13 @@ export default {
         request.upload.onprogress = (event) => {
           const percentComplete = Math.floor(event.loaded / event.total * 100)
           console.log(`🛫 Uploading ${fileName} for card ${cardId}, percent: ${percentComplete}`)
-          context.commit('updatePendingUpload', { cardId, percentComplete })
+          const updates = {
+            cardId,
+            percentComplete,
+            userId: context.rootState.currentUser.id
+          }
+          context.commit('updatePendingUpload', updates)
+          context.commit('broadcast/updateStore', { updates, type: 'updateRemotePendingUploads' }, { root: true })
         }
         // end
         request.onload = (event) => {

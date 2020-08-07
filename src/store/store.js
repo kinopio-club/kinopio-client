@@ -68,6 +68,7 @@ export default new Vuex.Store({
     // dragging
     currentDraggingCardId: '',
     remoteCardsDragging: [],
+    remoteUploadDraggedOverCards: [],
     preventDraggedCardFromShowingDetails: false,
     currentCardsDragging: [],
     currentConnectionsDragging: [],
@@ -85,6 +86,7 @@ export default new Vuex.Store({
     isLoadingSpace: false,
     spaceUrlToLoad: '',
     spaceCollaboratorKeys: [],
+    remotePendingUploads: [],
 
     // notifications
     notifications: [],
@@ -191,6 +193,8 @@ export default new Vuex.Store({
     },
     triggerAddRemotePaintingCircle: () => {},
     triggerUpdateRemoteUserCursor: () => {},
+    triggerUpdateRemoteDropGuideLine: () => {},
+    triggerUpdateStopRemoteUserDropGuideLine: () => {},
     triggerUpdatePositionInVisualViewport: () => {},
     triggerUpgradeUserIsVisible: () => {},
     triggerUploadComplete: () => {},
@@ -317,6 +321,18 @@ export default new Vuex.Store({
       utils.typeCheck(update, 'object')
       state.remoteCardsDragging = state.remoteCardsDragging.filter(card => card.userId !== update.userId)
     },
+    addToRemoteUploadDraggedOverCards: (state, update) => {
+      utils.typeCheck(update, 'object')
+      delete update.type
+      let cards = utils.clone(state.remoteUploadDraggedOverCards)
+      cards = cards.filter(card => card.userId !== update.userId) || []
+      cards.push(update)
+      state.remoteUploadDraggedOverCards = cards
+    },
+    clearRemoteUploadDraggedOverCards: (state, update) => {
+      utils.typeCheck(update, 'object')
+      state.remoteUploadDraggedOverCards = state.remoteUploadDraggedOverCards.filter(card => card.userId !== update.userId)
+    },
 
     // Connection Details
 
@@ -437,6 +453,22 @@ export default new Vuex.Store({
     addToSpaceCollaboratorKeys: (state, spaceCollaboratorKey) => {
       utils.typeCheck(spaceCollaboratorKey, 'object')
       state.spaceCollaboratorKeys.push(spaceCollaboratorKey) // { spaceId, collaboratorKey }
+    },
+    updateRemotePendingUploads: (state, update) => {
+      utils.typeCheck(update, 'object')
+      delete update.type
+      const card = state.remotePendingUploads.find(upload => upload.cardId === update.cardId)
+      if (card) {
+        state.remotePendingUploads.map(upload => {
+          if (upload.cardId) {
+            upload.percentComplete = update.percentComplete
+            upload.userId = update.userId
+          }
+          return upload
+        })
+      } else {
+        state.remotePendingUploads.push(update)
+      }
     },
 
     // Notifications
