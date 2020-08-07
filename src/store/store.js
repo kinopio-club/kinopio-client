@@ -192,6 +192,7 @@ export default new Vuex.Store({
     triggerAddRemotePaintingCircle: () => {},
     triggerUpdateRemoteUserCursor: () => {},
     triggerUpdateRemoteDropGuideLine: () => {},
+    triggerUpdateStopRemoteUserDropGuideLine: () => {},
     triggerUpdatePositionInVisualViewport: () => {},
     triggerUpgradeUserIsVisible: () => {},
     triggerUploadComplete: () => {},

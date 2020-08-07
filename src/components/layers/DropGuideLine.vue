@@ -27,9 +27,12 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerUpdateRemoteDropGuideLine') {
         let curve = mutation.payload
-        console.log('🌚 RemoteDropGuideLine', curve)
         remoteDropGuideLines.push(curve)
         this.remotePainting()
+      }
+      if (mutation.type === 'triggerUpdateStopRemoteUserDropGuideLine') {
+        this.removeRemoteFramesByUser(mutation.payload.userId)
+        remoteContext.clearRect(0, 0, remoteCanvas.width, remoteCanvas.height)
       }
     })
   },
@@ -62,12 +65,16 @@ export default {
         return curve.frameId !== frameId
       })
     },
+    removeRemoteFramesByUser (userId) {
+      remoteDropGuideLines = remoteDropGuideLines.filter(curve => {
+        return curve.userId !== userId
+      })
+    },
     remotePaintGuidesFrame () {
       remoteContext.clearRect(0, 0, remoteCanvas.width, remoteCanvas.height)
       remoteDropGuideLines.forEach(guideLine => {
         this.removeRemoteFrame(guideLine.frameId)
         const { remoteControlPointEvenY, remoteControlPointOddY, startPointX, startPointY, controlPointX1, endPointX1, controlPointX2, endPointX2, controlPointX3, endPointX3, controlPointX4, endPointX4, endPointY } = guideLine.curve
-
         remoteContext.lineWidth = 4
         remoteContext.lineCap = 'round'
         remoteContext.strokeStyle = guideLine.color
@@ -85,7 +92,6 @@ export default {
         setTimeout(() => {
           window.cancelAnimationFrame(remotePaintingGuidesTimer)
           remotePaintingGuidesTimer = undefined
-          // remoteContext.clearRect(0, 0, remoteCanvas.width, remoteCanvas.height)
         }, 0)
       }
     },
@@ -181,6 +187,7 @@ export default {
       window.cancelAnimationFrame(paintingGuidesTimer)
       paintingGuidesTimer = undefined
       context.clearRect(0, 0, canvas.width, canvas.height)
+      this.broadcastStopPaintingGuide()
     },
     updateCanvasSize () {
       canvas.width = this.viewportWidth * window.devicePixelRatio
@@ -205,6 +212,10 @@ export default {
       updates.color = color
       updates.frameId = nanoid()
       this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserDropGuideLine' })
+    },
+    broadcastStopPaintingGuide () {
+      const updates = { userId: this.$store.state.currentUser.id }
+      this.$store.commit('broadcast/update', { updates, type: 'updateStopRemoteUserDropGuideLine' })
     }
   },
   watch: {

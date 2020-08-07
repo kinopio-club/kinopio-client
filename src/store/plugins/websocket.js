@@ -88,6 +88,7 @@ export default function createWebSocketPlugin () {
           }
           let { message, user, updates } = data
           if (message === 'connected') {
+          // presence
           } else if (message === 'userJoinedRoom') {
             store.dispatch('currentSpace/addUserToJoinedSpace', user)
           } else if (message === 'userLeftRoom') {
@@ -95,12 +96,17 @@ export default function createWebSocketPlugin () {
             store.commit('clearRemoteMultipleSelected', data)
           } else if (message === 'userLeftSpace') {
             store.commit('currentSpace/removeCollaboratorFromSpace', updates.user)
+          // circles and position
           } else if (message === 'addRemotePaintingCircle') {
             store.commit('triggerAddRemotePaintingCircle', updates)
           } else if (message === 'updateRemoteUserCursor') {
             store.commit('triggerUpdateRemoteUserCursor', updates)
+          // drop guide lines
           } else if (message === 'updateRemoteUserDropGuideLine') {
             store.commit('triggerUpdateRemoteDropGuideLine', updates)
+          } else if (message === 'updateStopRemoteUserDropGuideLine') {
+            store.commit('triggerUpdateStopRemoteUserDropGuideLine', updates)
+          // other
           } else if (data.type === 'store') {
             store.commit(`${message}`, updates)
           } else {
