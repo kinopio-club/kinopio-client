@@ -1,11 +1,15 @@
 <template lang="pug">
-canvas#drop-guide-line.drop-guide-line
+aside
+  canvas#drop-guide-line.drop-guide-line
+  canvas#remote-drop-guide-line.remote-drop-guide-line
 </template>
 <script>
 import utils from '@/utils.js'
+import nanoid from 'nanoid'
 
-let canvas, context, paintingGuidesTimer
+let canvas, context, remoteCanvas, remoteContext, paintingGuidesTimer, remotePaintingGuidesTimer
 
+let remoteDropGuideLines = []
 const lineWidth = 100
 const lineMaxHeight = 25
 let controlPointEvenY = lineMaxHeight / 2
@@ -22,18 +26,19 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerUpdateRemoteDropGuideLine') {
-        // let { userId, color, position, curve } = mutation.payload
-        console.log('🌚 RemoteDropGuideLine', mutation.payload)
-        // delete circle.type
-        // this.createRemotePaintingCircle(circle)
-        // this.remotePainting()
+        let curve = mutation.payload
+        console.log('🌚 RemoteDropGuideLine', curve)
+        remoteDropGuideLines.push(curve)
+        this.remotePainting()
       }
     })
   },
 
   mounted () {
     canvas = document.getElementById('drop-guide-line')
+    remoteCanvas = document.getElementById('remote-drop-guide-line')
     context = canvas.getContext('2d')
+    remoteContext = remoteCanvas.getContext('2d')
     this.updateCanvasSize()
     window.addEventListener('load', this.updateCanvasSize)
     window.addEventListener('resize', this.updateCanvasSize)
@@ -44,6 +49,49 @@ export default {
     currentUserColor () { return this.$store.state.currentUser.color }
   },
   methods: {
+
+    // Remote Painting
+
+    remotePainting () {
+      if (!remotePaintingGuidesTimer) {
+        remotePaintingGuidesTimer = window.requestAnimationFrame(this.remotePaintGuidesFrame)
+      }
+    },
+    removeRemoteFrame (frameId) {
+      remoteDropGuideLines = remoteDropGuideLines.filter(curve => {
+        return curve.frameId !== frameId
+      })
+    },
+    remotePaintGuidesFrame () {
+      remoteContext.clearRect(0, 0, remoteCanvas.width, remoteCanvas.height)
+      remoteDropGuideLines.forEach(guideLine => {
+        this.removeRemoteFrame(guideLine.frameId)
+        const { remoteControlPointEvenY, remoteControlPointOddY, startPointX, startPointY, controlPointX1, endPointX1, controlPointX2, endPointX2, controlPointX3, endPointX3, controlPointX4, endPointX4, endPointY } = guideLine.curve
+
+        remoteContext.lineWidth = 4
+        remoteContext.lineCap = 'round'
+        remoteContext.strokeStyle = guideLine.color
+        remoteContext.beginPath()
+        remoteContext.moveTo(startPointX, startPointY)
+        remoteContext.quadraticCurveTo(controlPointX1, remoteControlPointOddY + startPointY, endPointX1, endPointY)
+        remoteContext.quadraticCurveTo(controlPointX2, remoteControlPointEvenY + startPointY, endPointX2, endPointY)
+        remoteContext.quadraticCurveTo(controlPointX3, remoteControlPointOddY + startPointY, endPointX3, endPointY)
+        remoteContext.quadraticCurveTo(controlPointX4, remoteControlPointEvenY + startPointY, endPointX4, endPointY)
+        remoteContext.stroke()
+      })
+      if (remoteDropGuideLines.length > 0) {
+        window.requestAnimationFrame(this.remotePaintGuidesFrame)
+      } else {
+        setTimeout(() => {
+          window.cancelAnimationFrame(remotePaintingGuidesTimer)
+          remotePaintingGuidesTimer = undefined
+          // remoteContext.clearRect(0, 0, remoteCanvas.width, remoteCanvas.height)
+        }, 0)
+      }
+    },
+
+    // Painting
+
     paintGuides () {
       context.clearRect(0, 0, canvas.width, canvas.height)
       context.strokeStyle = this.currentUserColor
@@ -102,6 +150,8 @@ export default {
       context.stroke()
       this.broadcastCursorAndCurve({
         curve: {
+          remoteControlPointOddY: controlPointOddY,
+          remoteControlPointEvenY: controlPointEvenY,
           startPointX,
           startPointY,
           controlPointX1,
@@ -113,7 +163,8 @@ export default {
           controlPointX4,
           endPointX4,
           endPointY
-        }
+        },
+        color: this.currentUserColor
       })
       if (paintingGuidesTimer) {
         window.requestAnimationFrame(this.paintGuides)
@@ -137,14 +188,22 @@ export default {
       canvas.style.width = this.viewportWidth + 'px'
       canvas.style.height = this.viewportHeight + 'px'
       context.scale(window.devicePixelRatio, window.devicePixelRatio)
+
+      remoteCanvas.width = this.viewportWidth * window.devicePixelRatio
+      remoteCanvas.height = this.viewportHeight * window.devicePixelRatio
+      remoteCanvas.style.width = this.viewportWidth + 'px'
+      remoteCanvas.style.height = this.viewportHeight + 'px'
+      remoteContext.scale(window.devicePixelRatio, window.devicePixelRatio)
     },
-    broadcastCursorAndCurve ({ curve }) {
+    broadcastCursorAndCurve ({ curve, color }) {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
       let updates = utils.clone(this.currentCursor)
       updates.userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor' })
       updates.curve = curve
+      updates.color = color
+      updates.frameId = nanoid()
       this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserDropGuideLine' })
     }
   },
@@ -160,6 +219,10 @@ export default {
 }
 </script>
 <style lang="stylus" scoped>
-.drop-guide-line
+canvas
+  position fixed
+  top 0
+.drop-guide-line,
+.remote-drop-guide-line
   pointer-events none
 </style>
