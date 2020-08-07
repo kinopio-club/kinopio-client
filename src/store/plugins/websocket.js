@@ -99,6 +99,8 @@ export default function createWebSocketPlugin () {
             store.commit('triggerAddRemotePaintingCircle', updates)
           } else if (message === 'updateRemoteUserCursor') {
             store.commit('triggerUpdateRemoteUserCursor', updates)
+          } else if (message === 'updateRemoteUserDropGuideLine') {
+            store.commit('triggerUpdateRemoteDropGuideLine', updates)
           } else if (data.type === 'store') {
             store.commit(`${message}`, updates)
           } else {

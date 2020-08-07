@@ -19,6 +19,18 @@ export default {
     currentCursor: Object,
     uploadIsDraggedOver: Boolean
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerUpdateRemoteDropGuideLine') {
+        // let { userId, color, position, curve } = mutation.payload
+        console.log('🌚 RemoteDropGuideLine', mutation.payload)
+        // delete circle.type
+        // this.createRemotePaintingCircle(circle)
+        // this.remotePainting()
+      }
+    })
+  },
+
   mounted () {
     canvas = document.getElementById('drop-guide-line')
     context = canvas.getContext('2d')
@@ -88,7 +100,21 @@ export default {
       context.quadraticCurveTo(controlPointX3, controlPointOddY + startPointY, endPointX3, endPointY)
       context.quadraticCurveTo(controlPointX4, controlPointEvenY + startPointY, endPointX4, endPointY)
       context.stroke()
-      this.broadcastCursor()
+      this.broadcastCursorAndCurve({
+        curve: {
+          startPointX,
+          startPointY,
+          controlPointX1,
+          endPointX1,
+          controlPointX2,
+          endPointX2,
+          controlPointX3,
+          endPointX3,
+          controlPointX4,
+          endPointX4,
+          endPointY
+        }
+      })
       if (paintingGuidesTimer) {
         window.requestAnimationFrame(this.paintGuides)
       } else {
@@ -112,12 +138,14 @@ export default {
       canvas.style.height = this.viewportHeight + 'px'
       context.scale(window.devicePixelRatio, window.devicePixelRatio)
     },
-    broadcastCursor (event) {
+    broadcastCursorAndCurve ({ curve }) {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
       let updates = utils.clone(this.currentCursor)
       updates.userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor' })
+      updates.curve = curve
+      this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserDropGuideLine' })
     }
   },
   watch: {
