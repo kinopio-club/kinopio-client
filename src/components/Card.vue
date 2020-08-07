@@ -8,7 +8,7 @@ article(:style="position" :data-card-id="id")
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
     :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || isRemoteCardDragging, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': Boolean(formats.audio), 'is-playing-audio': isPlayingAudio}",
-    :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor || remoteCardDraggingColor || selectedColorUpload }"
+    :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor || selectedColorUpload || remoteCardDraggingColor || remoteUploadDraggedOverCardColor }"
     :data-card-id="id"
     :data-card-x="x"
     :data-card-y="y"
@@ -23,11 +23,11 @@ article(:style="position" :data-card-id="id")
     Frames(:card="card")
 
     //- Video
-    video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver}")
+    video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
       source(:src="formats.video")
     //- Image
-    img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver}")
-    img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver}")
+    img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
+    img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
 
     span.card-content-wrap
       .card-content
@@ -323,6 +323,16 @@ export default {
         return undefined
       }
     },
+    remoteUploadDraggedOverCardColor () {
+      const remoteUploadDraggedOverCards = this.$store.state.remoteUploadDraggedOverCards
+      const draggedOverCard = remoteUploadDraggedOverCards.find(card => card.cardId === this.id)
+      if (draggedOverCard) {
+        const user = this.$store.getters['currentSpace/memberById'](draggedOverCard.userId)
+        return user.color
+      } else {
+        return undefined
+      }
+    },
     hasConnections () {
       const connections = this.$store.getters['currentSpace/cardConnections'](this.id)
       return Boolean(connections.length)
@@ -387,10 +397,17 @@ export default {
     checkIfUploadIsDraggedOver (event) {
       if (event.dataTransfer.types[0] === 'Files' || event.dataTransfer.items[0].kind === 'file') {
         this.uploadIsDraggedOver = true
+        const updates = {
+          cardId: this.card.id,
+          userId: this.$store.state.currentUser.id
+        }
+        this.$store.commit('broadcast/updateStore', { updates, type: 'addToRemoteUploadDraggedOverCards' })
       }
     },
     removeUploadIsDraggedOver () {
       this.uploadIsDraggedOver = false
+      const userId = this.$store.state.currentUser.id
+      this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteUploadDraggedOverCards' })
     },
     async uploadFile (event) {
       this.removeUploadIsDraggedOver()

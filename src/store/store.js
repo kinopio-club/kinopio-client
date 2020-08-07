@@ -68,6 +68,7 @@ export default new Vuex.Store({
     // dragging
     currentDraggingCardId: '',
     remoteCardsDragging: [],
+    remoteUploadDraggedOverCards: [],
     preventDraggedCardFromShowingDetails: false,
     currentCardsDragging: [],
     currentConnectionsDragging: [],
@@ -318,6 +319,18 @@ export default new Vuex.Store({
     clearRemoteCardsDragging: (state, update) => {
       utils.typeCheck(update, 'object')
       state.remoteCardsDragging = state.remoteCardsDragging.filter(card => card.userId !== update.userId)
+    },
+    addToRemoteUploadDraggedOverCards: (state, update) => {
+      utils.typeCheck(update, 'object')
+      delete update.type
+      let cards = utils.clone(state.remoteUploadDraggedOverCards)
+      cards = cards.filter(card => card.userId !== update.userId) || []
+      cards.push(update)
+      state.remoteUploadDraggedOverCards = cards
+    },
+    clearRemoteUploadDraggedOverCards: (state, update) => {
+      utils.typeCheck(update, 'object')
+      state.remoteUploadDraggedOverCards = state.remoteUploadDraggedOverCards.filter(card => card.userId !== update.userId)
     },
 
     // Connection Details
