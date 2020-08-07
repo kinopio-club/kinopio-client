@@ -74,6 +74,11 @@ article(:style="position" :data-card-id="id")
       .badge.info
         Loader(:visible="true")
         span {{cardPendingUpload.percentComplete}}%
+    //- Remote Upload Progress
+    .uploading-container(v-if="remoteCardPendingUpload")
+      .badge.info
+        Loader(:visible="true")
+        span {{remoteCardPendingUpload.percentComplete}}%
     //- Upload Errors
     .error-container(v-if="error.sizeLimit" @animationend="clearErrors")
       span.badge.danger
@@ -154,6 +159,14 @@ export default {
     cardPendingUpload () {
       const pendingUploads = this.$store.state.upload.pendingUploads
       return pendingUploads.find(upload => upload.cardId === this.card.id)
+    },
+    remoteCardPendingUpload () {
+      const remotePendingUploads = this.$store.state.remotePendingUploads
+      return remotePendingUploads.find(upload => {
+        const inProgress = upload.percentComplete < 100
+        const isCard = upload.cardId === this.card.id
+        return inProgress && isCard
+      })
     },
     pendingUploadDataUrl () {
       if (!this.cardPendingUpload) { return }

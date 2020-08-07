@@ -86,6 +86,7 @@ export default new Vuex.Store({
     isLoadingSpace: false,
     spaceUrlToLoad: '',
     spaceCollaboratorKeys: [],
+    remotePendingUploads: [],
 
     // notifications
     notifications: [],
@@ -452,6 +453,22 @@ export default new Vuex.Store({
     addToSpaceCollaboratorKeys: (state, spaceCollaboratorKey) => {
       utils.typeCheck(spaceCollaboratorKey, 'object')
       state.spaceCollaboratorKeys.push(spaceCollaboratorKey) // { spaceId, collaboratorKey }
+    },
+    updateRemotePendingUploads: (state, update) => {
+      utils.typeCheck(update, 'object')
+      delete update.type
+      const card = state.remotePendingUploads.find(upload => upload.cardId === update.cardId)
+      if (card) {
+        state.remotePendingUploads.map(upload => {
+          if (upload.cardId) {
+            upload.percentComplete = update.percentComplete
+            upload.userId = update.userId
+          }
+          return upload
+        })
+      } else {
+        state.remotePendingUploads.push(update)
+      }
     },
 
     // Notifications
