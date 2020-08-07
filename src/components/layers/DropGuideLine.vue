@@ -2,6 +2,8 @@
 canvas#drop-guide-line.drop-guide-line
 </template>
 <script>
+import utils from '@/utils.js'
+
 let canvas, context, paintingGuidesTimer
 
 const lineWidth = 100
@@ -86,6 +88,7 @@ export default {
       context.quadraticCurveTo(controlPointX3, controlPointOddY + startPointY, endPointX3, endPointY)
       context.quadraticCurveTo(controlPointX4, controlPointEvenY + startPointY, endPointX4, endPointY)
       context.stroke()
+      this.broadcastCursor()
       if (paintingGuidesTimer) {
         window.requestAnimationFrame(this.paintGuides)
       } else {
@@ -108,6 +111,13 @@ export default {
       canvas.style.width = this.viewportWidth + 'px'
       canvas.style.height = this.viewportHeight + 'px'
       context.scale(window.devicePixelRatio, window.devicePixelRatio)
+    },
+    broadcastCursor (event) {
+      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
+      if (!canEditSpace) { return }
+      let updates = utils.clone(this.currentCursor)
+      updates.userId = this.$store.state.currentUser.id
+      this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor' })
     }
   },
   watch: {
