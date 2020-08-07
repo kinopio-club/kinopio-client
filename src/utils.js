@@ -572,8 +572,22 @@ export default {
     // same as urlFromString but matches multiple urls and returns [urls]
     const urlPattern = new RegExp(/((http[s]?:\/\/)?[^\s(["<>]*\.[^\s.[">,<]+[ ]*)*/igm)
     let urls = string.match(urlPattern)
+    // filter out empty or non-urls
     urls = urls.filter(url => {
-      return Boolean(this.trim(url).length)
+      const urlHasContent = Boolean(this.trim(url).length)
+      const urlIsFloatOrIp = this.urlIsFloatOrIp(url)
+      if (urlHasContent && !urlIsFloatOrIp) {
+        return true
+      }
+    })
+    // ensure url has protocol
+    urls = urls.map(url => {
+      const hasProtocol = url.startsWith('http://') || url.startsWith('https://')
+      if (hasProtocol) {
+        return url
+      } else {
+        return `http://${url}`
+      }
     })
     return urls
   },
