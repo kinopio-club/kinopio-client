@@ -15,16 +15,18 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
           img.icon(src="@/assets/checkmark.svg")
           span Shown in Explore
 
-    button(v-if="isSpaceMember" @click.left="removeCurrentSpace")
-      img.icon(src="@/assets/remove.svg")
-      span {{removeLabel}}
+    .button-wrap(v-if="isSpaceMember")
+      button(@click.left="removeCurrentSpace")
+        img.icon(src="@/assets/remove.svg")
+        span {{removeLabel}}
+    .button-wrap(v-if="!isSpaceMember")
+      button(@click.left="duplicateSpace")
+        img.icon(src="@/assets/add.svg")
+        span Duplicate
     .button-wrap
       button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
         span Export
       Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="currentSpace" :exportScope="exportScope" @updateSpaces="updateSpaces")
-      button(v-if="!isSpaceMember" @click.left="duplicateSpace")
-        img.icon(src="@/assets/add.svg")
-        span Duplicate
 
   section.results-actions
     .row
