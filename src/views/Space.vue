@@ -274,16 +274,16 @@ export default {
         this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
       }
     },
-    shouldContinueConnecting (event) {
-      const cursorStart = this.$store.state.currentConnectionCursorStart
-      const cursorEnd = utils.cursorPositionInViewport(event)
-      if (!this.isDrawingConnection) { return }
-      if (cursorStart.x === cursorEnd.x && cursorStart.y === cursorEnd.y) {
-        return true
-      } else {
-        return false
-      }
-    },
+    // shouldContinueConnecting (event) {
+    //   const cursorStart = this.$store.state.currentConnectionCursorStart
+    //   const cursorEnd = utils.cursorPositionInViewport(event)
+    //   if (!this.isDrawingConnection) { return }
+    //   if (cursorStart.x === cursorEnd.x && cursorStart.y === cursorEnd.y) {
+    //     return true
+    //   } else {
+    //     return false
+    //   }
+    // },
     normalizeSpaceCardsZ () {
       const sorted = sortBy(this.cards, ['z'])
       const zList = sorted.map(card => card.z)
@@ -366,7 +366,7 @@ export default {
       }
       this.checkIfShouldHideFooter(event)
       if (this.shouldCancel(event)) { return }
-      if (this.shouldContinueConnecting(event)) { return }
+      // if (this.shouldContinueConnecting(event)) { return }
       if (this.isDrawingConnection) {
         this.createConnection()
       }
