@@ -134,7 +134,7 @@ textarea,
   border 0
   border-bottom 1px solid var(--primary)
   border-radius 0
-  padding 0
+  padding 1px
   margin-bottom 10px
   &:disabled
     color var(--primary)
