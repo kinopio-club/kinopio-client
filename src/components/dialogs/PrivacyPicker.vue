@@ -1,9 +1,9 @@
 <template lang="pug">
-dialog.narrow.privacy-picker(v-if="visible" :open="visible" @click.stop)
+dialog.narrow.privacy-picker(v-if="visible" :open="visible" @click.left.stop)
   section.results-section
     ul.results-list
       template(v-for="(privacyState in privacyStates")
-        li(:class="{ active: privacyStateIsActive(privacyState) }" @click="select(privacyState)")
+        li(:class="{ active: privacyStateIsActive(privacyState) }" @click.left="select(privacyState)")
           .badge(:class="privacyState.color")
             img.icon(:src="privacyIcon(privacyState).path" :class="privacyState.name")
             span {{privacyState.name | capitalize}}

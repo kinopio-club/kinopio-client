@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.stop)
+dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop)
   section
     .row
       .badge.title Keyboard Shortcuts
@@ -23,7 +23,7 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.stop)
       p Subsequent&nbsp;
         span.badge.info Enters
         span add siblings
-      button(@click.stop="toggleChildCardInfoIsVisible" :class="{ active: childCardInfoIsVisible }") More Info
+      button(@click.left.stop="toggleChildCardInfoIsVisible" :class="{ active: childCardInfoIsVisible }") More Info
       div(v-if="childCardInfoIsVisible")
         video(autoplay loop muted playsinline)
           source(src="https://kinopio-updates.us-east-1.linodeobjects.com/keyboard-shortcuts2.mp4")
@@ -38,7 +38,7 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.stop)
         .badge.title Focus Next/Previous
         .badge.info Tab/Shift-Tab
       .row
-        button(@click.stop="toggleSafariInfoIsVisible" :class="{ active: safariInfoIsVisible }")
+        button(@click.left.stop="toggleSafariInfoIsVisible" :class="{ active: safariInfoIsVisible }")
           span Safari Info
       div(v-if="safariInfoIsVisible")
         p Instead of Tab, Safari uses

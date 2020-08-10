@@ -2,12 +2,12 @@
 .connection-label.badge(
   v-if="visible"
   :style="{ background: typeColor, left: position.left + 'px', top: position.top + 'px'}"
-  @click="showConnectionDetails"
+  @click.left="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
   @touchstart="checkIsMultiTouch"
   :data-id="id"
-  @mouseover="hover = true"
-  @mouseleave="hover = false"
+  @mouseover.left="hover = true"
+  @mouseleave.left="hover = false"
   :class="{filtered: isFiltered}"
   ref="label"
 )

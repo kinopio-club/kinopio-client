@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.stop)
+dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.left.stop)
 
   // add by email
   // share link
@@ -13,12 +13,12 @@ dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.stop)
 
     input.textarea(ref="url" v-model="url")
 
-    button(v-if="!canNativeShare" @click="copyUrl")
+    button(v-if="!canNativeShare" @click.left="copyUrl")
       span Copy Invite Url
     .segmented-buttons(v-if="canNativeShare")
-      button(@click="copyUrl")
+      button(@click.left="copyUrl")
         span Copy Invite Url
-      button(@click="shareUrl")
+      button(@click.left="shareUrl")
         img.icon(src="@/assets/share.svg")
     .row
       .badge.success.success-message(v-if="urlIsCopied") Url Copied

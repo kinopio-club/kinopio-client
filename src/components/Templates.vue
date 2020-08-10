@@ -1,13 +1,13 @@
 <template lang="pug">
-.templates(v-if="visible" :open="visible" @click.stop ref="dialog" @click="closeDialogs")
+.templates(v-if="visible" :open="visible" @click.left.stop ref="dialog" @click.left="closeDialogs")
   //- p Make these your own
   section.categories
     .button-wrap.category-wrap
-      button(@click.stop="toggleTemplateCategoryPickerIsVisible" :class="{active: templateCategoryPickerIsVisible}")
+      button(@click.left.stop="toggleTemplateCategoryPickerIsVisible" :class="{active: templateCategoryPickerIsVisible}")
         .badge.info {{filterCategory.name}}
       TemplateCategoryPicker(:visible="templateCategoryPickerIsVisible" :selectedCategoryId="filteredCategoryId" @closeDialog="closeDialogs" @selectCategory="updateFilteredCategory")
     .button-wrap
-      button(@click.stop="toggleContactIsVisible" :class="{active: contactIsVisible}")
+      button(@click.left.stop="toggleContactIsVisible" :class="{active: contactIsVisible}")
         span Suggest Templates
       Contact(:visible="contactIsVisible")
   section.results-section

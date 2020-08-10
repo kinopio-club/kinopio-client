@@ -2,8 +2,8 @@
 dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
   section
     .segmented-buttons
-      button(@click="showSignUpVisible" :class="{active : signUpVisible}") Sign Up
-      button(@click="hideSignUpVisible" :class="{active : !signUpVisible}") Sign In
+      button(@click.left="showSignUpVisible" :class="{active : signUpVisible}") Sign Up
+      button(@click.left="hideSignUpVisible" :class="{active : !signUpVisible}") Sign In
 
   //- Sign Up
   section(v-if="signUpVisible")
@@ -43,7 +43,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
 
   //- Forgot Password
   section.forgot-password(v-else)
-    button(@click="toggleResetVisible" :class="{active : resetVisible}")
+    button(@click.left="toggleResetVisible" :class="{active : resetVisible}")
       span Forgot Password?
     div(v-show="resetVisible")
       form.reset-form(@submit.prevent="resetPassword")

@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.help-and-about.narrow(v-if="visible" :open="visible" @click.stop="closeDialogs" :class="{'child-dialog-is-visible': contactIsVisible}")
+dialog.help-and-about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" :class="{'child-dialog-is-visible': contactIsVisible}")
   section
     p Help and About
   section
@@ -16,7 +16,7 @@ dialog.help-and-about.narrow(v-if="visible" :open="visible" @click.stop="closeDi
             span Community Slack →
     .row
       .button-wrap
-        button(@click.stop="toggleContactIsVisible" :class="{active: contactIsVisible}")
+        button(@click.left.stop="toggleContactIsVisible" :class="{active: contactIsVisible}")
           span Contact
         Contact(:visible="contactIsVisible")
 

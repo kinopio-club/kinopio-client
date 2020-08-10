@@ -4,24 +4,24 @@
   //- use controls to playback <audio>
   .controls(
     @keyup.stop.prevent="cancelClick"
-    @mouseup.stop.prevent="cancelClick"
+    @mouseup.left.stop.prevent="cancelClick"
     @touchend.stop.prevent="cancelClick"
   )
-    .button-wrap(:class="{active: isPlaying}" @click="togglePlayPause")
+    .button-wrap(:class="{active: isPlaying}" @click.left="togglePlayPause")
       button
         img.icon.play.pause(v-if="isPlaying" src="@/assets/pause.svg")
         img.icon.play(v-else src="@/assets/play.svg")
     .progress-wrap(
-      @mousedown.stop.prevent="startMovePlayhead"
+      @mousedown.left.stop.prevent="startMovePlayhead"
       @touchstart.stop.prevent="startMovePlayhead"
 
       @mousemove.prevent="dragPlayhead"
       @touchmove.prevent="dragPlayhead"
 
-      @mouseleave.prevent="stopMovingPlayhead"
+      @mouseleave.left.prevent="stopMovingPlayhead"
       @mouseenter.prevent="stopMovingPlayhead"
 
-      @mouseup="endMovePlayhead"
+      @mouseup.left="endMovePlayhead"
       @touchend="endMovePlayhead"
     )
       progress(

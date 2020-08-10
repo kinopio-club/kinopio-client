@@ -1,17 +1,17 @@
 <template lang="pug">
-dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" ref="dialog")
+dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog")
   section
     p Share
   section(v-if="spaceHasUrl")
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
     template(v-if="!spaceIsPrivate")
       input.textarea(ref="url" v-model="url")
-      button(@click="copyUrl" v-if="!canNativeShare")
+      button(@click.left="copyUrl" v-if="!canNativeShare")
         span Copy Url
       .segmented-buttons(v-if="canNativeShare")
-        button(@click="copyUrl")
+        button(@click.left="copyUrl")
           span Copy Url
-        button(@click="shareUrl")
+        button(@click.left="shareUrl")
           img.icon(src="@/assets/share.svg")
       .row
         .badge.success.success-message(v-if="urlIsCopied") Url Copied
@@ -27,7 +27,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
 
   section(v-if="spaceHasUrl && isSpaceMember")
     .button-wrap
-      button(@click.stop="toggleInviteCollaboratorsIsVisible" :class="{ active: inviteCollaboratorsIsVisible }")
+      button(@click.left.stop="toggleInviteCollaboratorsIsVisible" :class="{ active: inviteCollaboratorsIsVisible }")
         span Invite Collaborators
       InviteCollaborators(:visible="inviteCollaboratorsIsVisible")
   section.results-section.collaborators(v-if="spaceHasUrl && isSpaceMember && spaceHasCollaborators")
@@ -39,7 +39,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.stop="closeDialogs" re
       span To share or invite collaborators,
       span.badge.info you need to Sign Up or In
       span for your spaces to be synced and accessible anywhere.
-    button(@click="triggerSignUpOrInIsVisible") Sign Up or In
+    button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
 
 </template>
 

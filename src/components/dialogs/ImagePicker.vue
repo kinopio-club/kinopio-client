@@ -1,14 +1,14 @@
 <template lang="pug">
-dialog.narrow.image-picker(v-if="visible" :open="visible" @click.stop ref="dialog")
+dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
     .row
       .segmented-buttons
-        button(@click.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
+        button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
           span Are.na
-        button(@click.stop="toggleServiceIsGfycat" :class="{active : serviceIsGfycat}")
+        button(@click.left.stop="toggleServiceIsGfycat" :class="{active : serviceIsGfycat}")
           span Gfycat
       .button-wrap
-        button(@click.stop="selectFile") Upload
+        button(@click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile")
 
     .uploading-container(v-if="cardPendingUpload")
@@ -21,7 +21,7 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.stop ref="dialo
       p
         span To upload files,
         span.badge.info you need to Sign Up or In
-      button(@click="triggerSignUpOrInIsVisible") Sign Up or In
+      button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
     .error-container-top(v-if="error.sizeLimit")
       p
         span.badge.danger
@@ -30,17 +30,17 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.stop ref="dialo
       p
         span To upload files over 5mb,
         span.badge.info upgrade for unlimited
-      button(@click="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+      button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
     .error-container-top(v-if="error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
-    label(v-if="serviceIsGfycat" :class="{active: gfycatIsStickers}" @click.prevent="toggleGfycatIsStickers" @keydown.stop.enter="toggleGfycatIsStickers")
+    label(v-if="serviceIsGfycat" :class="{active: gfycatIsStickers}" @click.left.prevent="toggleGfycatIsStickers" @keydown.stop.enter="toggleGfycatIsStickers")
       input(type="checkbox" v-model="gfycatIsStickers")
       span Stickers
 
   section.results-section
     .search-wrap
-      img.icon.search(v-if="!loading" src="@/assets/search.svg" @click="focusSearchInput")
+      img.icon.search(v-if="!loading" src="@/assets/search.svg" @click.left="focusSearchInput")
       Loader(:visible="loading")
       input(
         :placeholder="placeholder"
@@ -49,7 +49,7 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.stop ref="dialo
         @keyup.stop.backspace
         @keyup.stop.enter
       )
-      button.borderless.clear-input-wrap(@click="clearSearch")
+      button.borderless.clear-input-wrap(@click.left="clearSearch")
         img.icon(src="@/assets/add.svg")
     .error-container
       p(v-if="isNoSearchResults") Nothing found on {{service}} for {{search}}
@@ -59,11 +59,11 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.stop ref="dialo
   section.results-section
     ul.results-list.image-list
       template(v-for="(image in images")
-        li(@click="selectImage(image)" tabindex="0" :key="image.id" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
+        li(@click.left="selectImage(image)" tabindex="0" :key="image.id" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
           //- video(v-if="image.isVideo" autoplay loop muted playsinline)
           //-   source(:src="image.url")
           img(:src="image.previewUrl")
-          a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.stop)
+          a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
             button {{image.sourceUserName}} →
 
 </template>

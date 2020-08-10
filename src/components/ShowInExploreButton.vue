@@ -1,6 +1,6 @@
 <template lang="pug">
 .button-wrap(v-if="isSpaceMember")
-  label(:class="{active: showInExplore}" @click.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
+  label(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
     input(type="checkbox" v-model="showInExplore")
     span {{showInExploreLabel}}
 
@@ -8,7 +8,7 @@
     p
       span.badge.info Sign Up or In
       span for your spaces to be accessible to others
-    button(@click="triggerSignUpOrInIsVisible") Sign Up or In
+    button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
 
   template(v-else-if="error.spaceMustBeEdited")
     p

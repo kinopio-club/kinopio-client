@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDialogs" @keyup.stop.backspace="removeCard")
+dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="closeDialogs" @keyup.stop.backspace="removeCard")
   section
     textarea.name(
       :disabled="!canEditCard"
@@ -13,7 +13,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
       @keyup.stop.backspace
       data-type="name"
       maxlength="250"
-      @click="triggerUpdateMagicPaintPositionOffset"
+      @click.left="triggerUpdateMagicPaintPositionOffset"
       @blur="triggerUpdatePositionInVisualViewport"
       @paste="updatePastedName"
 
@@ -30,29 +30,29 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
     .row
       //- Remove
       .button-wrap
-        button(:disabled="!canEditCard" @click="removeCard")
+        button(:disabled="!canEditCard" @click.left="removeCard")
           img.icon(src="@/assets/remove.svg")
           span Remove
       //- [·]
       .button-wrap.cards-checkboxes
         label(v-if="checkbox" :class="{active: checkboxIsChecked, disabled: !canEditCard}" tabindex="0")
           input(type="checkbox" v-model="checkboxIsChecked" tabindex="-1")
-        label(v-else @click.prevent="addCheckbox" @keydown.stop.enter="addCheckbox" :class="{disabled: !canEditCard}" tabindex="0")
+        label(v-else @click.left.prevent="addCheckbox" @keydown.stop.enter="addCheckbox" :class="{disabled: !canEditCard}" tabindex="0")
           input.add(type="checkbox" tabindex="-1")
       //- Image
       .button-wrap
-        button(:disabled="!canEditCard" @click.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
+        button(:disabled="!canEditCard" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
           span Image
         ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addFile")
       //- Frames
       .button-wrap
-        button(:disabled="!canEditCard" @click.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
+        button(:disabled="!canEditCard" @click.left.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
           span Frames
         FramePicker(:visible="framePickerIsVisible" :cards="[card]")
     //- Split
     .row(v-if="nameHasLineBreaks")
       .button-wrap
-        button(:disabled="!canEditCard" @click.stop="splitCards")
+        button(:disabled="!canEditCard" @click.left.stop="splitCards")
           img.icon(src="@/assets/split-vertically.svg")
           span Split into {{nameLines}} Cards
 
@@ -67,7 +67,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click="closeDia
           span To edit spaces you've been invited to, you'll need to sign up or in
         .row
           .button-wrap
-            button(@click.stop="triggerSignUpOrInIsVisible") Sign Up or In
+            button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
       template(v-else-if="spacePrivacyIsClosed")
         span.badge.info
           img.icon(src="@/assets/unlock.svg")

@@ -1,10 +1,10 @@
 <template lang="pug">
-dialog.import.narrow(v-if="visible" :open="visible" @click.stop="closeDialogs" ref="dialog")
+dialog.import.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog")
   section
     p Import Space
   section
     p From an exported space
-    button(@click="selectFile")
+    button(@click.left="selectFile")
       span.badge.info json
       span Select File
     Loader(:visible="loading")
@@ -17,7 +17,7 @@ dialog.import.narrow(v-if="visible" :open="visible" @click.stop="closeDialogs" r
 
   section
     .button-wrap
-      button(@click.stop="toggleImportArenaChannelIsVisible" :class="{ active: importArenaChannelIsVisible}")
+      button(@click.left.stop="toggleImportArenaChannelIsVisible" :class="{ active: importArenaChannelIsVisible}")
         img.icon.arena(src="@/assets/arena.svg")
         span Are.na Channel
       ImportArenaChannel(:visible="importArenaChannelIsVisible" @updateSpaces="updateSpaces")

@@ -1,10 +1,10 @@
 <template lang="pug">
-dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDialogs")
+dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs")
   section
     .segmented-buttons
-      button(@click.stop="showMove" :class="{ active: actionIsMove }")
+      button(@click.left.stop="showMove" :class="{ active: actionIsMove }")
         span Move
-      button(@click.stop="hideMove" :class="{ active: !actionIsMove }")
+      button(@click.left.stop="hideMove" :class="{ active: !actionIsMove }")
         span Copy
 
   section
@@ -13,13 +13,13 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
     template(v-if="spaces.length")
       .row
         .button-wrap
-          button(@click.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}") {{selectedSpace.name}}
+          button(@click.left.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}") {{selectedSpace.name}}
           SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" @selectSpace="updateSelectedSpace")
       .row(v-if="spaces.length")
-        label(:class="{active: shouldSwitchToSpace}" @click.prevent="toggleShouldSwitchToSpace" @keydown.stop.enter="toggleShouldSwitchToSpace")
+        label(:class="{active: shouldSwitchToSpace}" @click.left.prevent="toggleShouldSwitchToSpace" @keydown.stop.enter="toggleShouldSwitchToSpace")
           input(type="checkbox" v-model="shouldSwitchToSpace")
           span Switch to Space
-      button(@click="moveOrCopyToSpace" :class="{active: loading}")
+      button(@click.left="moveOrCopyToSpace" :class="{active: loading}")
         img.icon.visit(src="@/assets/visit.svg")
         span {{actionLabel | capitalize}} to {{selectedSpace.name}}
         Loader(:visible="loading")
@@ -27,7 +27,7 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.stop="closeDial
     template(v-if="!spaces.length")
       span.badge.danger No Other Spaces
       p + Add a Space to move cards there
-      button(@click="triggerSpaceDetailsVisible") Your Spaces
+      button(@click.left="triggerSpaceDetailsVisible") Your Spaces
 </template>
 
 <script>

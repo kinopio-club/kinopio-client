@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop @keydown.stop :class="{'right-side': dialogOnRight}")
+dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keydown.stop :class="{'right-side': dialogOnRight}")
   section
     p Upgrade your account for unlimited cards and uploads
     .summary
@@ -8,7 +8,7 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop @keydown.s
 
     .should-sign-up(v-if="!currentUserIsSignedIn")
       p To upgrade your account, you'll need to sign up first
-      button(@click="triggerSignUpOrInIsVisible") Sign Up or In
+      button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
 
     .billing(v-if="currentUserIsSignedIn")
       //- https://stripe.com/docs/testing
@@ -30,7 +30,7 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.stop @keydown.s
       .badge.danger(v-if="error.stripeError") {{error.stripeErrorMessage}}
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
 
-      button(@click="subscribe" :class="{active : loading.subscriptionIsBeingCreated}")
+      button(@click.left="subscribe" :class="{active : loading.subscriptionIsBeingCreated}")
         span Upgrade Account
         Loader(:visible="loading.subscriptionIsBeingCreated")
 

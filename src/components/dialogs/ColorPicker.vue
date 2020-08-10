@@ -1,13 +1,13 @@
 <template lang="pug">
-dialog.narrow.color-picker(v-if="visible" :open="visible" @click.stop)
+dialog.narrow.color-picker(v-if="visible" :open="visible" @click.left.stop)
   section
     .badge(:style="{backgroundColor: currentColor}")
       input(v-model="hexColor")
   section
     .colors
       template(v-for="color in colors")
-        button.color(:style="{backgroundColor: color}" @click="select(color)")
-    button(@click="shuffleColors")
+        button.color(:style="{backgroundColor: color}" @click.left="select(color)")
+    button(@click.left="shuffleColors")
       img.refresh.icon(src="@/assets/refresh.svg")
 </template>
 

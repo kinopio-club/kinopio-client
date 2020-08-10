@@ -3,31 +3,31 @@ footer(:style="visualViewportPosition")
   Notifications
   section(v-if="isVisible")
     .button-wrap
-      button(@click="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
+      button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
         span Explore
       Explore(:visible="exploreIsVisible")
 
     .button-wrap
-      label(:class="{active: isFavoriteSpace}" @click.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+      label(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
         input(type="checkbox" v-model="isFavoriteSpace")
         span Favorite
 
   section.controls(v-if="isVisible")
     .button-wrap
-      button(@click="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
+      button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
         img.refresh.icon(src="@/assets/remove.svg")
         span Removed
       Removed(:visible="removedIsVisible")
 
     .button-wrap
-      button(@click="toggleFiltersIsVisible" :class="{ active: filtersIsVisible}")
+      button(@click.left="toggleFiltersIsVisible" :class="{ active: filtersIsVisible}")
         .span.badge.info(v-if="totalFilters") {{totalFilters}}
         img.icon.sunglasses(src="@/assets/filter.svg")
         span Filters
       Filters(:visible="filtersIsVisible")
 
     .button-wrap(v-if="isOffline")
-      button(@click="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
+      button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
         span Offline
       Offline(:visible="offlineIsVisible")
 

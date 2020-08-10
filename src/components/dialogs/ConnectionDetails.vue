@@ -1,22 +1,22 @@
 <template lang="pug">
-dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position" @click="closeColorPicker" ref="dialog")
+dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position" @click.left="closeColorPicker" ref="dialog")
   section(:style="{backgroundColor: typeColor}")
     .row
       .button-wrap
-        button.change-color(:disabled="!canEditConnection" @click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
+        button.change-color(:disabled="!canEditConnection" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{backgroundColor: typeColor}")
         ColorPicker(:currentColor="typeColor" :visible="colorPickerIsVisible" @selectedColor="updateTypeColor")
       input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeName")
 
     .row
-      button(:disabled="!canEditConnection" :class="{active: labelIsVisible}" @click="toggleLabelIsVisible")
+      button(:disabled="!canEditConnection" :class="{active: labelIsVisible}" @click.left="toggleLabelIsVisible")
         img.icon(src="@/assets/view.svg")
         span Label
-      label(:class="{active: isDefault, disabled: !canEditSpace}" @click.prevent="toggleDefault" @keydown.stop.enter="toggleDefault")
+      label(:class="{active: isDefault, disabled: !canEditSpace}" @click.left.prevent="toggleDefault" @keydown.stop.enter="toggleDefault")
         input(type="checkbox" v-model="isDefault")
         span Default
 
-    button(:disabled="!canEditConnection" @click="removeConnection")
+    button(:disabled="!canEditConnection" @click.left="removeConnection")
       img.icon(src="@/assets/remove.svg")
       span Remove
 
@@ -31,14 +31,14 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
           span To edit spaces you've been invited to, you'll need to sign up or in
         .row
           .button-wrap
-            button(@click.stop="triggerSignUpOrInIsVisible") Sign Up or In
+            button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
       template(v-else-if="spacePrivacyIsClosed")
         span.badge.info
           img.icon(src="@/assets/unlock.svg")
           span To edit closed spaces, you'll need to be invited
 
   section.results-actions
-    button(:disabled="!canEditConnection" @click="addConnectionType")
+    button(:disabled="!canEditConnection" @click.left="addConnectionType")
       img.icon(src="@/assets/add.svg")
       span Add
 
@@ -46,7 +46,7 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
     ResultsFilter(:items="connectionTypes" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredConnectionTypes")
     ul.results-list
       template(v-for="(type in connectionTypesFiltered")
-        li(:class="{ active: connectionTypeIsActive(type), disabled: !canEditConnection }" @click="changeConnectionType(type)" :key="type.id")
+        li(:class="{ active: connectionTypeIsActive(type), disabled: !canEditConnection }" @click.left="changeConnectionType(type)" :key="type.id")
           .badge(:style="{backgroundColor: type.color}" :class="{checked: connectionTypeIsDefault(type)}")
           .name {{type.name}}
 </template>

@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs")
+dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDialogs")
   section
     template(v-if="isSpaceMember")
       .row
@@ -15,30 +15,30 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs"
           img.icon(src="@/assets/checkmark.svg")
           span Shown in Explore
 
-    button(v-if="isSpaceMember" @click="removeCurrentSpace")
+    button(v-if="isSpaceMember" @click.left="removeCurrentSpace")
       img.icon(src="@/assets/remove.svg")
       span {{removeLabel}}
     .button-wrap
-      button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+      button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
         span Export
       Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="currentSpace" :exportScope="exportScope" @updateSpaces="updateSpaces")
-      button(v-if="!isSpaceMember" @click="duplicateSpace")
+      button(v-if="!isSpaceMember" @click.left="duplicateSpace")
         img.icon(src="@/assets/add.svg")
         span Duplicate
 
   section.results-actions
     .row
       .segmented-buttons
-        button(@click.stop="hideFavorites" :class="{ active: !favoritesIsVisible }")
+        button(@click.left.stop="hideFavorites" :class="{ active: !favoritesIsVisible }")
           span Yours
-        button(@click.stop="showFavorites" :class="{ active: favoritesIsVisible }")
+        button(@click.left.stop="showFavorites" :class="{ active: favoritesIsVisible }")
           span Favorites
     .row(v-if="!favoritesIsVisible")
-      button(@click="addSpace")
+      button(@click.left="addSpace")
         img.icon(src="@/assets/add.svg")
         span Add
       .button-wrap
-        button(@click.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
+        button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
           span Import
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
 

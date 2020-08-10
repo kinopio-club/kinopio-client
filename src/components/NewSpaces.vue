@@ -1,5 +1,5 @@
 <template lang="pug">
-.new-spaces(v-if="visible" :open="visible" @click.stop ref="dialog")
+.new-spaces(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section.header
     p Recently updated spaces made by cool people like you
     ShowInExploreButton(@updateSpaces="updateCurrentSpace" :label="showInExploreLabel")

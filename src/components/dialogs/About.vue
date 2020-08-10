@@ -1,17 +1,17 @@
 <template lang="pug">
-dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
+dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs")
   section
     .row
       p Kinopio is the visual thinking tool for new ideas and hard problems.
     .row
       .button-wrap
-        button(@click.stop="toggleWhatsNewIsVisible" :class="{active: whatsNewIsVisible}")
+        button(@click.left.stop="toggleWhatsNewIsVisible" :class="{active: whatsNewIsVisible}")
           span What's New
           img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
         WhatsNew(:visible="whatsNewIsVisible" :newStuff="newStuff")
     .row
       .button-wrap
-        button(@click.stop="toggleHelpIsVisible" :class="{active: helpIsVisible}")
+        button(@click.left.stop="toggleHelpIsVisible" :class="{active: helpIsVisible}")
           span Help and About
         Help(:visible="helpIsVisible")
       .button-wrap
@@ -21,11 +21,11 @@ dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
   section
     .row
       .button-wrap
-        button(@click.stop="toggleKeyboardShortcutsIsVisible" :class="{active: keyboardShortcutsIsVisible}")
+        button(@click.left.stop="toggleKeyboardShortcutsIsVisible" :class="{active: keyboardShortcutsIsVisible}")
           span Keyboard Shortcuts
         KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
     .button-wrap(v-if="isMobile")
-      button(@click.stop="toggleAddToHomescreenIsVisible" :class="{active: addToHomescreenIsVisible}")
+      button(@click.left.stop="toggleAddToHomescreenIsVisible" :class="{active: addToHomescreenIsVisible}")
         span(v-if="isIPhone")
           img.icon(src="@/assets/apple.svg")
           span Kinopio for IOS

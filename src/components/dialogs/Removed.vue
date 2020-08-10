@@ -1,12 +1,12 @@
 <template lang="pug">
-dialog.removed(v-if="visible" :open="visible" @click.stop)
+dialog.removed(v-if="visible" :open="visible" @click.left.stop)
   section
     .segmented-buttons
-      button(@click="showCards" :class="{active: cardsVisible}")
+      button(@click.left="showCards" :class="{active: cardsVisible}")
         img.icon(src="@/assets/remove.svg")
         span Cards
         Loader(:visible="loading.cards")
-      button(@click="showSpaces" :class="{active: !cardsVisible}")
+      button(@click.left="showSpaces" :class="{active: !cardsVisible}")
         img.icon(src="@/assets/remove.svg")
         span Spaces
         Loader(:visible="loading.spaces")
@@ -25,33 +25,33 @@ dialog.removed(v-if="visible" :open="visible" @click.stop)
 
   section.results-section(v-if="items.length")
     .button-wrap
-      button(v-if="!removeAllConfirmationIsVisible" @click.stop="showRemoveAllConfirmation")
+      button(v-if="!removeAllConfirmationIsVisible" @click.left.stop="showRemoveAllConfirmation")
         img.icon(src="@/assets/remove.svg")
         span Remove All
       .remove-confirmation(v-if="removeAllConfirmationIsVisible")
         p Permanently remove all removed {{removeAllTypeLabel}}?
         .segmented-buttons
-          button(@click.stop="hideRemoveAllConfirmation")
+          button(@click.left.stop="hideRemoveAllConfirmation")
             span Cancel
-          button.danger(@click.stop="removeAllPermanent")
+          button.danger(@click.left.stop="removeAllPermanent")
             img.icon(src="@/assets/remove.svg")
             span Remove All
 
     ul.results-list
       template(v-for="(item in items")
-        li(:key="item.id" @click="restore(item)" tabindex="0" v-on:keyup.enter="restore(item)")
+        li(:key="item.id" @click.left="restore(item)" tabindex="0" v-on:keyup.enter="restore(item)")
           .badge
             img.undo.icon(src="@/assets/undo.svg")
           .name {{item.name}}
-          button(v-if="!isRemoveConfirmationVisible(item)" @click.stop="showRemoveConfirmation(item)")
+          button(v-if="!isRemoveConfirmationVisible(item)" @click.left.stop="showRemoveConfirmation(item)")
             img.icon(src="@/assets/remove.svg")
 
           .remove-confirmation(v-if="isRemoveConfirmationVisible(item)")
             p Permanently remove?
             .segmented-buttons
-              button(@click.stop="hideRemoveConfirmation")
+              button(@click.left.stop="hideRemoveConfirmation")
                 span Cancel
-              button.danger(@click.stop="removePermanent(item)")
+              button.danger(@click.left.stop="removePermanent(item)")
                 img.icon(src="@/assets/remove.svg")
                 span Remove
 </template>

@@ -2,7 +2,7 @@
 aside
   //- Magic painting is ephemeral brush strokes that select items
   canvas#magic-painting(
-    @mousedown="startPainting"
+    @mousedown.left="startPainting"
     @touchstart="startPainting"
     @mousemove="painting"
     @touchmove="painting"

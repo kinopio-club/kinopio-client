@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.contact(v-if="visible" :open="visible" @click.stop)
+dialog.contact(v-if="visible" :open="visible" @click.left.stop)
   section
     p Contact
   section

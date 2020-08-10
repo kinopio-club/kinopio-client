@@ -1,9 +1,9 @@
 <template lang="pug">
 main.space(
   :class="{'is-interacting': isInteracting, 'is-painting': isPainting}"
-  @mousedown="initInteractions"
+  @mousedown.left="initInteractions"
   @touchstart="initInteractions"
-  @mouseup="stopInteractions"
+  @mouseup.left="stopInteractions"
   @touchstop="stopInteractions"
   :style="size"
 )

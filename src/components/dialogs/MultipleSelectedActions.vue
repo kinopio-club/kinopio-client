@@ -3,7 +3,7 @@ dialog.narrow.multiple-selected-actions(
   v-if="visible"
   :open="visible"
   ref="dialog"
-  @click="closeDialogs"
+  @click.left="closeDialogs"
   :style="{backgroundColor: userColor, left: position.left, top: position.top}"
 )
   section(v-if="cardsIsSelected || connectionsIsSelected")
@@ -12,45 +12,45 @@ dialog.narrow.multiple-selected-actions(
       .button-wrap.cards-checkboxes
         label(v-if="cardsHaveCheckboxes" :class="{active: cardsCheckboxIsChecked}" tabindex="0")
           input(type="checkbox" v-model="cardCheckboxes" tabindex="-1")
-        label(v-else @click.prevent="addCheckboxToCards" @keydown.stop.enter="addCheckboxToCards" tabindex="0")
+        label(v-else @click.left.prevent="addCheckboxToCards" @keydown.stop.enter="addCheckboxToCards" tabindex="0")
           input.add(type="checkbox" tabindex="-1")
       //- Connect
-      button(v-if="multipleCardsIsSelected" :class="{active: cardsIsConnected}" @click.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards")
+      button(v-if="multipleCardsIsSelected" :class="{active: cardsIsConnected}" @click.left.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards")
         img.icon.connector-icon(v-if="cardsIsConnected" src="@/assets/connector-closed.svg")
         img.icon.connector-icon(v-else src="@/assets/connector-open.svg")
         span Connect
       //- Frames
-      .button-wrap(:class="{active: framePickerIsVisible}" @click.stop="toggleFramePickerIsVisible")
+      .button-wrap(:class="{active: framePickerIsVisible}" @click.left.stop="toggleFramePickerIsVisible")
         button Frames
         FramePicker(:visible="framePickerIsVisible" :cards="cards")
     .row(v-if="connectionsIsSelected")
       //- Type Color
       .button-wrap
-        button.change-color(:disabled="!canEditSome.connections" @click.stop="toggleMultipleConnectionsPickerVisible")
+        button.change-color(:disabled="!canEditSome.connections" @click.left.stop="toggleMultipleConnectionsPickerVisible")
           .segmented-colors.icon
             template(v-for="type in connectionTypes")
               .current-color(:style="{ background: type.color }")
         MultipleConnectionsPicker(:visible="multipleConnectionsPickerVisible" :selectedConnections="editableConnections" :selectedConnectionTypes="editableConnectionTypes")
       //- Labels
-      button(:disabled="!canEditSome.connections" :class="{active: allLabelsAreVisible}" @click="toggleAllLabelsAreVisible")
+      button(:disabled="!canEditSome.connections" :class="{active: allLabelsAreVisible}" @click.left="toggleAllLabelsAreVisible")
         img.icon(src="@/assets/view.svg")
         span {{ pluralLabels }}
   section
     .row
       //- Remove
-      button(:disabled="!canEditSome.any" @click="remove")
+      button(:disabled="!canEditSome.any" @click.left="remove")
         img.icon(src="@/assets/remove.svg")
         span {{ removeLabel }}
       //- Export
       .button-wrap
-        button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+        button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
           span Export
         Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
     .row(v-if="multipleCardsSelectedIds.length")
       AlignAndDistribute(:visible="multipleCardsIsSelected")
       //- Move or Copy
       .button-wrap
-        button(:disabled="!canEditAll.cards" @click.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
+        button(:disabled="!canEditAll.cards" @click.left.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
           img.icon.visit(src="@/assets/visit.svg")
           span Move or Copy
         MoveOrCopyToSpace(:visible="moveOrCopyToSpaceIsVisible")

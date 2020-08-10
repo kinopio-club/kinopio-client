@@ -1,23 +1,23 @@
 <template lang="pug">
-dialog.narrow.export(v-if="visible" :open="visible" @click.stop ref="dialog")
+dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
     p Export {{exportTitle}}
   section
     textarea(ref="text") {{text()}}
-    button(@click="copyText")
+    button(@click.left="copyText")
       span Copy Card Names
     .row
       .badge.success(v-if="textIsCopied") Card Names Copied
-    button(@click="duplicateSpace")
+    button(@click.left="duplicateSpace")
       img.icon(src="@/assets/add.svg")
       span Duplicate Space
     .badge.success(v-if="spaceIsDuplicated") {{duplicatedSpaceName}} duplicated
   section
     p Download
-    button(@click="downloadTxt")
+    button(@click.left="downloadTxt")
       span.badge.info txt
       span Card Names
-    button(@click="downloadJSON")
+    button(@click.left="downloadJSON")
       span.badge.info json
       span All Data
     a#export-downlaod-anchor.hidden

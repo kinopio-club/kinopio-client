@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.stop ref="dialog")
+dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
     p Import Are.na Channel
 
@@ -20,7 +20,7 @@ dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.stop re
       form(@submit.prevent="importChannel")
         .input-wrap
           input(type="url" placeholder="Are.na channel url" required @input="clearErrors" v-model="channelUrl")
-          button.borderless.clear-input-wrap(@mouseup="clearForm" @touchend="clearForm")
+          button.borderless.clear-input-wrap(@mouseup.left="clearForm" @touchend="clearForm")
             img.icon(src="@/assets/add.svg")
 
         .badge.danger.badge-with-url(v-if="error.invalidUrl") Url should look like
@@ -35,7 +35,7 @@ dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.stop re
           Loader(:visible="loading")
 
     section
-      button(@click="forgetArenaAccessToken") Forget Me
+      button(@click.left="forgetArenaAccessToken") Forget Me
 
 </template>
 

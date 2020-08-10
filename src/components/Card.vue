@@ -1,9 +1,9 @@
 <template lang="pug">
 article(:style="position" :data-card-id="id")
   .card(
-    @mousedown.prevent="startDraggingCard"
+    @mousedown.left.prevent="startDraggingCard"
     @touchstart="startDraggingCard"
-    @mouseup="showCardDetails"
+    @mouseup.left="showCardDetails"
     @touchend="showCardDetails"
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
@@ -35,7 +35,7 @@ article(:style="position" :data-card-id="id")
           Audio(:visible="Boolean(formats.audio)" :url="formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
         .name-wrap
           //- [·]
-          .checkbox-wrap(v-if="hasCheckbox" @click.prevent.stop="toggleCardChecked" @touchend.prevent.stop="toggleCardChecked")
+          .checkbox-wrap(v-if="hasCheckbox" @click.left.prevent.stop="toggleCardChecked" @touchend.prevent.stop="toggleCardChecked")
             label(:class="{active: isChecked, disabled: !canEditSpace}")
               input(type="checkbox" v-model="checkboxState")
           //- Name
@@ -45,14 +45,14 @@ article(:style="position" :data-card-id="id")
       //- Right buttons
       span.card-buttons-wrap
         //- Link
-        a.link-wrap(:href="firstUrl" @click.stop @touchend="openUrl(firstUrl)" v-if="firstUrl")
+        a.link-wrap(:href="firstUrl" @click.left.stop @touchend="openUrl(firstUrl)" v-if="firstUrl")
           .link
             button(:style="{background: selectedColor}" tabindex="-1")
               img.icon.visit.arrow-icon(src="@/assets/visit.svg")
         //- Connector
         .connector(
           :data-card-id="id"
-          @mousedown="startConnecting"
+          @mousedown.left="startConnecting"
           @touchstart="startConnecting"
         )
           button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: selectedColor}" tabindex="-1")

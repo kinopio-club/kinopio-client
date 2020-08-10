@@ -2,10 +2,10 @@
 dialog.explore(v-if="visible" :open="visible")
   section
     .segmented-buttons
-      button(@click.stop="hideTemplates" :class="{ active: !templatesIsVisible }")
+      button(@click.left.stop="hideTemplates" :class="{ active: !templatesIsVisible }")
         span New Spaces
         Loader(:visible="loadingNewSpaces")
-      button(@click.stop="showTemplates" :class="{ active: templatesIsVisible }")
+      button(@click.left.stop="showTemplates" :class="{ active: templatesIsVisible }")
         span Templates
 
   NewSpaces(:visible="!templatesIsVisible" :loading="loadingNewSpaces" :spaces="spaces" @updateCurrentSpace="updateCurrentSpace")

@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDialogs" @keydown.stop :class="{'right-side': detailsOnRight}" :style="{top: positionTop}")
+dialog.narrow.user-details(v-if="visible" :open="visible" @click.left.stop="closeDialogs" @keydown.stop :class="{'right-side': detailsOnRight}" :style="{top: positionTop}")
 
   //- Other User
   section(v-if="!isCurrentUser")
@@ -15,7 +15,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
   section(v-if="isCurrentUser")
     .row
       .button-wrap
-        button.change-color(@click.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
+        button.change-color(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{ background: userColor }")
         ColorPicker(:currentColor="userColor" :visible="colorPickerIsVisible" @selectedColor="updateUserColor")
       input.name(placeholder="What's your name?" v-model="userName" name="Name")
@@ -27,7 +27,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
     p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
     progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
     .button-wrap
-      button(@click.stop="toggleUpgradeUserIsVisible" :class="{active: upgradeUserIsVisible}")
+      button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: upgradeUserIsVisible}")
         span Upgrade for Unlimited
       UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeDialogs")
     p
@@ -38,25 +38,25 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
 
   section(v-if="isCurrentUser")
     .button-wrap
-      button(@click.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}")
+      button(@click.left.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}")
         span Settings
       UserSettings(:user="user" :visible="userSettingsIsVisible" @removeUser="signOut")
-    button(v-if="currentUserIsSignedIn" @click="signOut")
+    button(v-if="currentUserIsSignedIn" @click.left="signOut")
       img.icon.moon(src="@/assets/moon.svg")
       span Sign Out
-    button(v-else @click="triggerSignUpOrInIsVisible")
+    button(v-else @click.left="triggerSignUpOrInIsVisible")
       span Sign Up or In
 
   //- Other User
   section(v-if="!isCurrentUser && userIsSignedIn")
     .button-wrap
-      button(@click.stop="getUserSpaces" :class="{active: loadingUserspaces || spacePickerIsVisible}")
+      button(@click.left.stop="getUserSpaces" :class="{active: loadingUserspaces || spacePickerIsVisible}")
         User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
         span Spaces
         Loader(:visible="loadingUserspaces")
       SpacePicker(:visible="spacePickerIsVisible" :loading="loadingUserspaces" :userSpaces="userSpaces" @selectSpace="changeSpace")
     .button-wrap
-      label(:class="{active: isFavoriteUser}" @click.prevent="toggleIsFavoriteUser" @keydown.stop.enter="toggleIsFavoriteUser")
+      label(:class="{active: isFavoriteUser}" @click.left.prevent="toggleIsFavoriteUser" @keydown.stop.enter="toggleIsFavoriteUser")
         input(type="checkbox" v-model="isFavoriteUser")
         span Favorite
     .badge.danger.error-message(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
@@ -64,11 +64,11 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.stop="closeDial
   //- Collaborator
   section(v-if="isCollaborator && currentUserIsSpaceMember")
     template(v-if="isCurrentUser && isCollaborator")
-      button(@click.stop="removeCollaborator")
+      button(@click.left.stop="removeCollaborator")
         img.icon(src="@/assets/remove.svg")
         span Leave Space
     template(v-if="!isCurrentUser")
-      button(@click.stop="removeCollaborator")
+      button(@click.left.stop="removeCollaborator")
         img.icon(src="@/assets/remove.svg")
         span Remove Collaborator
 </template>

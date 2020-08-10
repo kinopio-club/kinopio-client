@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.user-billing(v-if="visible" :open="visible" @click.stop)
+dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop)
   section
     p Billing
 
@@ -7,7 +7,7 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.stop)
     p(v-if="isCancelled")
       span.badge.success Downgraded to free
     p After you upgrade your account you'll be able to manage your payment details here
-    button(@click="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+    button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
   section(v-if="isUpgraded")
     .loading-stripe(v-if="loading.gettingBillingInfo")
@@ -23,7 +23,7 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.stop)
       .badge.success Thanks for supporting Kinopio
 
     .row
-      button(v-if="!cancelSubscriptionVisible" @click="toggleCancelSubscriptionVisible")
+      button(v-if="!cancelSubscriptionVisible" @click.left="toggleCancelSubscriptionVisible")
         img.icon(src="@/assets/remove.svg")
         span Downgrade to Free
       span(v-if="cancelSubscriptionVisible")
@@ -31,9 +31,9 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.stop)
           span.badge.danger You won't be able to add new cards
           span unless you upgrade your account again. All of your cards and spaces will still be accessible.
         .segmented-buttons
-          button(@click="toggleCancelSubscriptionVisible")
+          button(@click.left="toggleCancelSubscriptionVisible")
             span Cancel
-          button.danger(@click="cancelSubscription")
+          button.danger(@click.left="cancelSubscription")
             img.icon(src="@/assets/remove.svg")
             span Downgrade
             Loader(:visible="loading.isCancelling")

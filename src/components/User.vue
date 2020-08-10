@@ -1,7 +1,7 @@
 <template lang="pug">
 .user(:data-user-id="user.id" @keydown.stop.enter="toggleUserDetails" :class="{ active: userDetailsIsVisible}")
   .user-avatar.anon-avatar(
-    @mouseup.stop="toggleUserDetails"
+    @mouseup.left.stop="toggleUserDetails"
     @touchend.stop="toggleUserDetails"
     ref="user"
     :class="{ clickable: isClickable, active: userDetailsIsVisible }"

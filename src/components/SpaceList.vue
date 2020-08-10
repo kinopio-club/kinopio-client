@@ -3,7 +3,7 @@ span
   ResultsFilter(:hideFilter="hideFilter" :items="spaces" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredSpaces")
   ul.results-list.space-list
     template(v-for="(space in spacesFiltered")
-      li(@click="selectSpace(space)" :class="{ active: spaceIsActive(space) }" :key="space.id" tabindex="0" v-on:keyup.enter="selectSpace(space)")
+      li(@click.left="selectSpace(space)" :class="{ active: spaceIsActive(space) }" :key="space.id" tabindex="0" v-on:keyup.enter="selectSpace(space)")
         User(v-if="showUser" :user="user(space)" :isClickable="false" :key="user(space).id")
         template(v-else-if="showUserIfCurrentUserIsCollaborator && space.currentUserIsCollaborator")
           User(:user="user(space)" :isClickable="false" :key="user(space).id")

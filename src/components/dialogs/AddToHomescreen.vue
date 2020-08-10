@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.add-to-homescreen(v-if="visible" :open="visible" @click.stop)
+dialog.add-to-homescreen(v-if="visible" :open="visible" @click.left.stop)
   section
     .logo-wrap
       .app-frame

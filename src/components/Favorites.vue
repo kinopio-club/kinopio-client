@@ -1,11 +1,11 @@
 <template lang="pug">
-.favorites(v-if="visible" :open="visible" @click.stop="userDetailsIsNotVisible")
+.favorites(v-if="visible" :open="visible" @click.left.stop="userDetailsIsNotVisible")
   section
     .segmented-buttons
-      button(@click.stop="showSpaces" :class="{ active: spacesIsVisible }")
+      button(@click.left.stop="showSpaces" :class="{ active: spacesIsVisible }")
         span Spaces
         Loader(:visible="loading")
-      button(@click.stop="hideSpaces" :class="{ active: !spacesIsVisible }")
+      button(@click.left.stop="hideSpaces" :class="{ active: !spacesIsVisible }")
         span People
         Loader(:visible="loading")
     template(v-if="isEmpty")

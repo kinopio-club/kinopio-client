@@ -1,8 +1,8 @@
 <template lang="pug">
 .search-wrap(v-if="shouldShowFilter")
-  img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
+  img.icon.search(src="@/assets/search.svg" @click.left="focusFilterInput")
   input(placeholder="Search" v-model="filterItems" ref="filterInput")
-  button.borderless.clear-input-wrap(@click="clearFilter")
+  button.borderless.clear-input-wrap(@click.left="clearFilter")
     img.icon(src="@/assets/add.svg")
 
 </template>

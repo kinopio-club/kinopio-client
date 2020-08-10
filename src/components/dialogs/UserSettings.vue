@@ -1,16 +1,16 @@
 <template lang="pug">
-dialog.narrow(v-if="visible" :open="visible" @click.stop="closeDialogs")
+dialog.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
   section
     p User Settings
   section
     .row
       .button-wrap
-        button(@click.stop="toggleUserBillingIsVisible" :class="{active: userBillingIsVisible}")
+        button(@click.left.stop="toggleUserBillingIsVisible" :class="{active: userBillingIsVisible}")
           span Billing
         UserBilling(:visible="userBillingIsVisible")
 
     .row
-      button.danger(v-if="!removeAllConfirmationVisible" @click="toggleRemoveAllConfirmationVisible")
+      button.danger(v-if="!removeAllConfirmationVisible" @click.left="toggleRemoveAllConfirmationVisible")
         img.icon(src="@/assets/remove.svg")
         span Remove All Your Data
       span(v-if="removeAllConfirmationVisible")
@@ -22,9 +22,9 @@ dialog.narrow(v-if="visible" :open="visible" @click.stop="closeDialogs")
           span.badge.info.badge-billing Use Billing ⤴
           span if you just want to cancel your paid subscription
         .segmented-buttons
-          button(@click="toggleRemoveAllConfirmationVisible")
+          button(@click.left="toggleRemoveAllConfirmationVisible")
             span Cancel
-          button.danger(@click="removeUserPermanent")
+          button.danger(@click.left="removeUserPermanent")
             img.icon(src="@/assets/remove.svg")
             span Remove All
             Loader(:visible="loading.removeUserPermanent")

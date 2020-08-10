@@ -1,9 +1,9 @@
 <template lang="pug">
-dialog.narrow.template-category-picker(v-if="visible" :open="visible" @click.stop ref="dialog")
+dialog.narrow.template-category-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section.results-section
     ul.results-list
       template(v-for="(category in categories")
-        li(@click="select(category)" :key="category.id" tabindex="0" v-on:keyup.enter="select(category)" :class="{ active: isActive(category) }")
+        li(@click.left="select(category)" :key="category.id" tabindex="0" v-on:keyup.enter="select(category)" :class="{ active: isActive(category) }")
           .badge.info {{category.name}}
 </template>
 

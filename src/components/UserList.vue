@@ -3,11 +3,11 @@ span
   ResultsFilter(:items="users" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredUsers")
   ul.results-list.user-list
     template(v-for="(user in usersFiltered")
-      li(:key="user.id" @click.stop="selectSpace($event, user)" tabindex="0" v-on:keyup.stop.enter="selectSpace($event, user)" :class="{ active: userIsSelected(user) }")
+      li(:key="user.id" @click.left.stop="selectSpace($event, user)" tabindex="0" v-on:keyup.stop.enter="selectSpace($event, user)" :class="{ active: userIsSelected(user) }")
         .badge(:style="{background: user.color}" :class="{'narrow-badge': showRemoveUser}")
           User(:user="user" :isClickable="false")
           .name {{user.name}}
-        button.remove-user(v-if="showRemoveUser" @click.stop="removeUser(user)")
+        button.remove-user(v-if="showRemoveUser" @click.left.stop="removeUser(user)")
           img.icon.remove(src="@/assets/remove.svg")
 </template>
 

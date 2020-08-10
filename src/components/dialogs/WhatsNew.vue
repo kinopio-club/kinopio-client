@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.whats-new(v-if="visible" :open="visible" @click.stop)
+dialog.whats-new(v-if="visible" :open="visible" @click.left.stop)
   section
     p What's New
     .button-wrap

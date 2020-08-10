@@ -1,5 +1,5 @@
 <template lang="pug">
-aside.notifications(@click="closeAllDialogs")
+aside.notifications(@click.left="closeAllDialogs")
   .item(v-for="item in items" v-bind:key="item.id" :data-notification-id="item.id" :class="item.type")
     p
       img.icon(v-if="item.icon" :src="icon(item.icon).path" :class="item.icon")
@@ -13,17 +13,17 @@ aside.notifications(@click="closeAllDialogs")
   .item.success(v-if="notifyAccessFavorites" @animationend="resetNotifyAccessFavorites")
     p Access favorites from your spaces
     .row
-      button(@click.stop="triggerSpaceDetailsFavoritesVisible") Your Spaces
+      button(@click.left.stop="triggerSpaceDetailsFavoritesVisible") Your Spaces
 
   .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
     p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade for $4/month
     .row
-      button(@click.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+      button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
   .persistent-item.danger(v-if="notifyCardsCreatedIsOverLimit" ref="cardsOverLimit" :class="{'notification-jiggle': notifyCardsCreatedIsOverLimitJiggle}" @animationend="resetNotifyCardsCreatedIsOverLimitJiggle")
     p To add more cards, you'll need to upgrade for $4/month
     .row
-      button(@click.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+      button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
   .persistent-item.success(v-if="notifySignUpToEditSpace" ref="readOnly" :class="{'notification-jiggle': readOnlyJiggle}")
     p
@@ -33,21 +33,21 @@ aside.notifications(@click="closeAllDialogs")
       template(v-else)
         span You're invited to edit this space, but you'll need to sign up or in first
     .row
-      button(@click.stop="triggerSignUpOrInIsVisible") Sign Up or In
+      button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
 
   .persistent-item.danger(v-if="notifySpaceNotFound")
     p Space could not be found, or is private
     .row
-      button(@click.stop="triggerSpaceDetailsVisible") Your Spaces
-      button(v-if="!currentUserIsSignedIn" @click.stop="triggerSignUpOrInIsVisible") Sign Up or In
+      button(@click.left.stop="triggerSpaceDetailsVisible") Your Spaces
+      button(v-if="!currentUserIsSignedIn" @click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
 
   .persistent-item(v-if="notifySpaceIsRemoved")
     p This space has been removed
     .row
-      button(@click="restoreSpace")
+      button(@click.left="restoreSpace")
         img.icon(src="@/assets/undo.svg")
         span Restore
-      button.danger(@click="removeSpacePermanent")
+      button.danger(@click.left="removeSpacePermanent")
         img.icon(src="@/assets/remove.svg")
         span Permanently Remove
 
@@ -57,7 +57,7 @@ aside.notifications(@click="closeAllDialogs")
       .button-wrap
         a(href="mailto:support@kinopio.club?subject=Connection Error")
           button Email Support
-        button(@click="refreshBrowser") Refresh
+        button(@click.left="refreshBrowser") Refresh
 
   .persistent-item.danger(v-if="notifyServerCouldNotSave")
     p Error saving changes to server, retrying…
@@ -66,17 +66,17 @@ aside.notifications(@click="closeAllDialogs")
     p Space is out of sync, please refresh
     .row
       .button-wrap
-        button(@click="refreshBrowser") Refresh
+        button(@click.left="refreshBrowser") Refresh
 
   .item.success(ref="newUser" v-if="notifyNewUser && !hasNotifiedNewUser")
     p Welcome to Kinopio
     .row
-      button(@click="createNewHelloSpace")
+      button(@click.left="createNewHelloSpace")
         img.icon(src="@/assets/add.svg")
         span How does this work?
 
   .persistent-item.info(v-if="currentSpaceIsTemplate" ref="template" :class="{'notification-jiggle': readOnlyJiggle}")
-    button(@click="duplicateSpace")
+    button(@click.left="duplicateSpace")
       img.icon(src="@/assets/add.svg")
       span Use Template
 </template>

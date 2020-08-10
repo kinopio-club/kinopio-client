@@ -1,9 +1,9 @@
 <template lang="pug">
 .button-wrap(v-if="visible")
   .segmented-buttons
-    button(:disabled="!canEditSome.cards" @click="alignAndDistributeCardsVertically" :class="{active: isVerticallyAligned}")
+    button(:disabled="!canEditSome.cards" @click.left="alignAndDistributeCardsVertically" :class="{active: isVerticallyAligned}")
       img.icon(src="@/assets/align-vertically.svg")
-    button(:disabled="!canEditSome.cards" @click="alignAndDistributeCardsHorizontally" :class="{active: isHorizontallyAligned}")
+    button(:disabled="!canEditSome.cards" @click.left="alignAndDistributeCardsHorizontally" :class="{active: isHorizontallyAligned}")
       img.icon(src="@/assets/align-horizontally.svg")
 </template>
 

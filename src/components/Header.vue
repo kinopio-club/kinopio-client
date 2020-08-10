@@ -3,7 +3,7 @@ header(:style="visualViewportPosition")
   nav
     .logo-about
       .button-wrap
-        .logo(alt="kinopio logo" @click.stop="toggleAboutIsVisible" @touchend.stop @mouseup.stop :class="{active : aboutIsVisible}" tabindex="0")
+        .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active : aboutIsVisible}" tabindex="0")
           .logo-image
             .label-badge(v-if="shouldShowNewStuffIsUpdated")
               span NEW
@@ -12,7 +12,7 @@ header(:style="visualViewportPosition")
         KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
     .space-details-wrap
       .button-wrap
-        button(@click.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
+        button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
           .badge.info(v-show="currentSpaceIsTemplate")
             span Template
 
@@ -34,7 +34,7 @@ header(:style="visualViewportPosition")
     .top
       // Share
       .button-wrap
-        button(@click.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
+        button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
           span Share
         Share(:visible="shareIsVisible")
 
@@ -52,12 +52,12 @@ header(:style="visualViewportPosition")
       ResetPassword
       // Sign Up or In
       .button-wrap(v-if="!currentUserIsSignedIn && isOnline")
-        button(@click.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}")
+        button(@click.left.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}")
           span Sign Up or In
           Loader(:visible="loadingSignUpOrIn")
         SignUpOrIn(:visible="signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
       .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
-        button(@click.stop="triggerUpgradeUserIsVisible")
+        button(@click.left.stop="triggerUpgradeUserIsVisible")
           span Upgrade
 
 </template>

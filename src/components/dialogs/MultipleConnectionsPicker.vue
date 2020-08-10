@@ -1,14 +1,14 @@
 <template lang="pug">
-dialog.narrow.multiple-connections-picker(v-if="visible" :open="visible" ref="dialog" @click.stop)
+dialog.narrow.multiple-connections-picker(v-if="visible" :open="visible" ref="dialog" @click.left.stop)
   section.results-actions
-    button(@click="addConnectionType")
+    button(@click.left="addConnectionType")
       img.icon(src="@/assets/add.svg")
       span Add
 
   section.results-section
     ul.results-list
       template(v-for="(type in connectionTypes")
-        li(:class="{ active: connectionTypeIsActive(type) }" @click="changeConnectionTypes(type)" :key="type.id" tabindex="0" v-on:keyup.enter="changeConnectionTypes(type)")
+        li(:class="{ active: connectionTypeIsActive(type) }" @click.left="changeConnectionTypes(type)" :key="type.id" tabindex="0" v-on:keyup.enter="changeConnectionTypes(type)")
           .badge(:style="{backgroundColor: type.color}" :class="{checked: connectionTypeIsDefault(type)}")
           .name {{type.name}}
 </template>
