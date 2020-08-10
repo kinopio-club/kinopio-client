@@ -486,7 +486,7 @@ code
   background-image url('assets/logo-base.png')
 .logo
   .logo-image
-    width 45px
+    width 46px
     height 40px
     background-repeat no-repeat
     background-size cover
