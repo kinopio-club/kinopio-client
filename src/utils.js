@@ -615,7 +615,7 @@ export default {
   urlIsAudio (url) {
     if (!url) { return }
     url = url + ' '
-    const audioUrlPattern = new RegExp(/(?:\.mp3)(?:\n| |\?|&)/igm)
+    const audioUrlPattern = new RegExp(/(?:\.mp3|\.m4a|\.ogg)(?:\n| |\?|&)/igm)
     const isAudio = url.match(audioUrlPattern)
     return Boolean(isAudio)
   },
