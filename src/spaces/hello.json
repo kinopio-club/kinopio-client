@@ -9,7 +9,7 @@
   "spectators": [],
   "cards": [
     {
-      "id": "1",
+      "id": "SEzpFkfGjsoMTvS7buUk2",
       "x": 34,
       "y": 88,
       "z": 0,
@@ -18,142 +18,234 @@
       "frameName": "Garden Leaves"
     },
     {
-      "id": "osphPWDIpUdEKyPzqjj94",
-      "x": 596,
-      "y": 269,
-      "name": "Some uses",
-      "z": 1
-    },
-    {
-      "id": "QEl4mjzIJUiJNchzkWZIx",
-      "x": 855,
-      "y": 392,
-      "name": "Feelings",
-      "z": 2
-    },
-    {
-      "id": "llZmDtuRtz__8xFanQWlo",
-      "x": 632,
-      "y": 393,
-      "name": "Brainstorming",
-      "z": 12
-    },
-    {
-      "id": "Rcb_O9pJqkzW8uGaRZn9e",
-      "x": 810.3854526958289,
-      "y": 312,
-      "name": "Mindmaps",
-      "z": 4
-    },
-    {
-      "id": "uCMaAqMQOGevSiTPDvLcc",
-      "x": 137,
-      "y": 269.58952879581,
-      "name": "Connect cards together by dragging connectors 🌘",
-      "z": 5
-    },
-    {
-      "id": "bCVhqjrPWIknCvMwQnAs1",
-      "x": 341,
-      "y": 340.58952879581,
-      "name": "like this",
-      "z": 6
-    },
-    {
-      "id": "oEX9a0f_tN0e9NQNrewL9",
-      "x": 361,
-      "y": 399.58952879581,
-      "name": "Connect me too!",
-      "z": 7,
+      "id": "R6M5FuYz7Z1O4gcY7meYK",
+      "x": 92.04387568555751,
+      "y": 501,
+      "name": "↙ Explore community spaces and templates",
+      "z": 1,
+      "userId": "7iMc02NgjVZyVyrHoalTI",
       "frameId": 0,
       "frameName": "None"
     },
     {
-      "id": "_OVT_H9ra7BoldfsPUtNj",
-      "x": 767,
-      "y": 464,
+      "id": "UYm1K5sNnEHU8tG5yg2m5",
+      "x": 437.3820840950632,
+      "y": 656,
+      "name": "Feelings",
+      "z": 2
+    },
+    {
+      "id": "PZhmG5PSC1vfZo9Phlxes",
+      "x": 189.04387568555762,
+      "y": 627,
+      "name": "Brainstorming",
+      "z": 3
+    },
+    {
+      "id": "N-eIlkccG8SDMRPmjS4R1",
+      "x": 399.6033304284697,
+      "y": 563,
+      "name": "Mindmaps",
+      "z": 4
+    },
+    {
+      "id": "2S8uWwL2GAMrdQYY305a5",
+      "x": 156,
+      "y": 279.58952879581,
+      "name": "https://us-east-1.linodeobjects.com/kinopio-uploads/upNvukBmA-P9Vz4TioLCs/connect.mp4\n",
+      "z": 5
+    },
+    {
+      "id": "6Ne_OfTeiv_ukqZ1XKwbP",
+      "x": 289.0438756855576,
+      "y": 698,
       "name": "Note Taking",
-      "z": 8
+      "z": 6
     },
     {
-      "id": "MtT5vBskYAlS5aV1BE5bt",
-      "x": 96,
-      "y": 190,
+      "id": "ECj2zRv9-lOWOB3xhOgcQ",
+      "x": 112,
+      "y": 211,
       "name": "Create new cards  by tapping empty areas",
-      "z": 9
+      "z": 15
     },
     {
-      "id": "opakVpvwB4OOi2-rFkwR8",
-      "x": 358,
-      "y": 76,
-      "name": "↖ Get started by making a new space",
-      "z": 10
+      "id": "StP3U1xKDtANJM1eVt-XD",
+      "x": 471.005484460695,
+      "y": 87,
+      "name": " ↖ Get started by adding a new space\n\nhttps://us-east-1.linodeobjects.com/kinopio-uploads/FoZbaMWjzKQ56a7_vUamI/large-63dac7049ffeb54c0c7304bb2a65a568.jpg",
+      "z": 8,
+      "userId": "7iMc02NgjVZyVyrHoalTI",
+      "frameId": 2,
+      "frameName": "Magical Helper"
+    },
+    {
+      "id": "uNDVXvKOaSZybHHltCz1X",
+      "x": 785.9149908592326,
+      "y": 88,
+      "z": 9,
+      "name": "Kinopio is free for 150 cards, afterwards it's 4$/month\n\nhttps://us-east-1.linodeobjects.com/kinopio-uploads/ULVF2EpZiImBb_pG4-Jgk/Wii-Shop-Bling.mp3\n",
+      "frameId": 0,
+      "userId": "7iMc02NgjVZyVyrHoalTI",
+      "spaceId": "m-8hcs0iyI7XiCQEdTQbj"
+    },
+    {
+      "id": "TwPw2M5cmrNG6tWyP4ojb",
+      "x": 706,
+      "y": 382,
+      "z": 10,
+      "name": "Share → Invite to collaborate with your friends or team",
+      "frameId": 0,
+      "userId": "7iMc02NgjVZyVyrHoalTI",
+      "spaceId": "m-8hcs0iyI7XiCQEdTQbj"
+    },
+    {
+      "id": "MmaIZkxuKLV8U3C9CAvnz",
+      "x": 756,
+      "y": 462,
+      "z": 11,
+      "name": "More tips at help.kinopio.club",
+      "frameId": 0,
+      "userId": "7iMc02NgjVZyVyrHoalTI",
+      "spaceId": "m-8hcs0iyI7XiCQEdTQbj"
+    },
+    {
+      "id": "LqgcskcHB813d5A_vsuCX",
+      "x": 388.0438756855576,
+      "y": 755,
+      "z": 12,
+      "name": "Planning and Specs",
+      "frameId": 0,
+      "userId": "7iMc02NgjVZyVyrHoalTI",
+      "spaceId": "m-8hcs0iyI7XiCQEdTQbj"
+    },
+    {
+      "id": "zXBdeNV9hXmIwC2uGT6rv",
+      "x": 704,
+      "y": 325,
+      "z": 13,
+      "name": "[] Use checkbox cards for tasks",
+      "frameId": 0,
+      "userId": "7iMc02NgjVZyVyrHoalTI",
+      "spaceId": "m-8hcs0iyI7XiCQEdTQbj"
     }
   ],
   "connections": [
     {
-      "startCardId": "osphPWDIpUdEKyPzqjj94",
-      "endCardId": "QEl4mjzIJUiJNchzkWZIx",
-      "path": "m687,285 q90,40 255,123",
-      "id": "HUSwn9RZ36Tbl3XlvNRxB",
-      "connectionTypeId": "AR5sv65inSgi12necCYjr"
+      "startCardId": "R6M5FuYz7Z1O4gcY7meYK",
+      "endCardId": "UYm1K5sNnEHU8tG5yg2m5",
+      "path": "m309,517 q90,40 210,155",
+      "id": "HIY20h0Bt_B0UyWpJb-0x",
+      "connectionTypeId": "x391k4r3d4vzjJvf2AN1I",
+      "userId": "7iMc02NgjVZyVyrHoalTI",
+      "spaceId": "m-8hcs0iyI7XiCQEdTQbj"
     },
     {
-      "startCardId": "osphPWDIpUdEKyPzqjj94",
-      "endCardId": "llZmDtuRtz__8xFanQWlo",
-      "path": "m687,285 q90,40 67,122",
-      "id": "pmXyhI-ZEh7EAPn5q4CoH",
-      "connectionTypeId": "AR5sv65inSgi12necCYjr"
+      "startCardId": "R6M5FuYz7Z1O4gcY7meYK",
+      "endCardId": "PZhmG5PSC1vfZo9Phlxes",
+      "path": "m309,517 q90,40 -3,126",
+      "id": "LtluDT9722YJcrpoAXnU7",
+      "connectionTypeId": "x391k4r3d4vzjJvf2AN1I",
+      "userId": "7iMc02NgjVZyVyrHoalTI",
+      "spaceId": "m-8hcs0iyI7XiCQEdTQbj",
+      "labelIsVisible": false
     },
     {
-      "startCardId": "osphPWDIpUdEKyPzqjj94",
-      "endCardId": "Rcb_O9pJqkzW8uGaRZn9e",
-      "path": "m686,283 q90,40 211,43",
-      "id": "yFqBYMndWXgC7baCRyacV",
-      "connectionTypeId": "AR5sv65inSgi12necCYjr"
+      "startCardId": "R6M5FuYz7Z1O4gcY7meYK",
+      "endCardId": "N-eIlkccG8SDMRPmjS4R1",
+      "path": "m309,517 q90,40 173,62",
+      "id": "t8upS9QMQUEv2hzUoU6nq",
+      "connectionTypeId": "x391k4r3d4vzjJvf2AN1I",
+      "userId": "7iMc02NgjVZyVyrHoalTI",
+      "spaceId": "m-8hcs0iyI7XiCQEdTQbj",
+      "labelIsVisible": false
     },
     {
-      "startCardId": "uCMaAqMQOGevSiTPDvLcc",
-      "endCardId": "bCVhqjrPWIknCvMwQnAs1",
-      "path": "m354,286 q90,40 77,70",
-      "id": "NN6MI1-_-p9bSNk2tfsma",
-      "connectionTypeId": "Rh3PfVdIyovscLIiNTeoB"
+      "startCardId": "R6M5FuYz7Z1O4gcY7meYK",
+      "endCardId": "6Ne_OfTeiv_ukqZ1XKwbP",
+      "path": "m309,517 q90,40 80,197",
+      "id": "G3hDD8gEcEDNSSfcrRjwC",
+      "connectionTypeId": "x391k4r3d4vzjJvf2AN1I",
+      "userId": "7iMc02NgjVZyVyrHoalTI",
+      "spaceId": "m-8hcs0iyI7XiCQEdTQbj"
     },
     {
-      "startCardId": "osphPWDIpUdEKyPzqjj94",
-      "endCardId": "_OVT_H9ra7BoldfsPUtNj",
-      "path": "m687,285 q90,40 184,194",
-      "id": "mBEV4VvqwcE7qv-zzvggE",
-      "connectionTypeId": "AR5sv65inSgi12necCYjr"
+      "startCardId": "ECj2zRv9-lOWOB3xhOgcQ",
+      "endCardId": "2S8uWwL2GAMrdQYY305a5",
+      "path": "m329,225 q90,40 44,71",
+      "id": "Pvho5bCgg6JS-7hkvnQNz",
+      "connectionTypeId": "5PxAoEfH0FmwRrU17m_nE",
+      "userId": "7iMc02NgjVZyVyrHoalTI",
+      "labelIsVisible": false,
+      "spaceId": "m-8hcs0iyI7XiCQEdTQbj"
     },
     {
-      "startCardId": "MtT5vBskYAlS5aV1BE5bt",
-      "endCardId": "uCMaAqMQOGevSiTPDvLcc",
-      "path": "m313,206 q90,40 41,80",
-      "id": "_U-TU_EH47wErZRndUWIa",
-      "connectionTypeId": "Rh3PfVdIyovscLIiNTeoB"
+      "startCardId": "TwPw2M5cmrNG6tWyP4ojb",
+      "endCardId": "MmaIZkxuKLV8U3C9CAvnz",
+      "path": "m923,393 q90,40 50,80",
+      "id": "4FEqBRx9X7OjIIkbfWZ98",
+      "spaceId": "m-8hcs0iyI7XiCQEdTQbj",
+      "userId": "7iMc02NgjVZyVyrHoalTI",
+      "connectionTypeId": "vNKWtFMm-W4gTpXS1fopy"
     },
     {
-      "startCardId": "bCVhqjrPWIknCvMwQnAs1",
-      "endCardId": "opakVpvwB4OOi2-rFkwR8",
-      "path": "m432,357 q90,40 143,-265",
-      "id": "-jS5w4m1JbNjwjjhoFmcB",
-      "connectionTypeId": "Rh3PfVdIyovscLIiNTeoB"
+      "startCardId": "R6M5FuYz7Z1O4gcY7meYK",
+      "endCardId": "LqgcskcHB813d5A_vsuCX",
+      "path": "m309,517 q90,40 224,254",
+      "id": "9Oxwggm2OqPObmDLeGzri",
+      "spaceId": "m-8hcs0iyI7XiCQEdTQbj",
+      "userId": "7iMc02NgjVZyVyrHoalTI",
+      "connectionTypeId": "x391k4r3d4vzjJvf2AN1I"
+    },
+    {
+      "startCardId": "2S8uWwL2GAMrdQYY305a5",
+      "endCardId": "StP3U1xKDtANJM1eVt-XD",
+      "path": "m371,292 q90,40 317,-189",
+      "id": "cAs0I6XPHbMTYqJt_Oacs",
+      "spaceId": "m-8hcs0iyI7XiCQEdTQbj",
+      "userId": "7iMc02NgjVZyVyrHoalTI",
+      "connectionTypeId": "5PxAoEfH0FmwRrU17m_nE"
+    },
+    {
+      "startCardId": "zXBdeNV9hXmIwC2uGT6rv",
+      "endCardId": "TwPw2M5cmrNG6tWyP4ojb",
+      "path": "m921,341 q90,40 2,52",
+      "id": "df3u_WuAbQ0eBubW2e435",
+      "spaceId": "m-8hcs0iyI7XiCQEdTQbj",
+      "userId": "7iMc02NgjVZyVyrHoalTI",
+      "connectionTypeId": "vNKWtFMm-W4gTpXS1fopy",
+      "labelIsVisible": false
+    },
+    {
+      "startCardId": "SEzpFkfGjsoMTvS7buUk2",
+      "endCardId": "ECj2zRv9-lOWOB3xhOgcQ",
+      "path": "m251,104 q90,40 78,121",
+      "id": "B30q8mFEHgC_nnq0WdPZ3",
+      "spaceId": "m-8hcs0iyI7XiCQEdTQbj",
+      "userId": "7iMc02NgjVZyVyrHoalTI",
+      "connectionTypeId": "5PxAoEfH0FmwRrU17m_nE",
+      "labelIsVisible": true
     }
   ],
   "connectionTypes": [
     {
-      "id": "AR5sv65inSgi12necCYjr",
-      "name": "Some Use-Cases",
+      "id": "x391k4r3d4vzjJvf2AN1I",
+      "name": "Some Uses",
       "color": "#c18fef"
     },
     {
-      "id": "Rh3PfVdIyovscLIiNTeoB",
-      "name": "Basics",
+      "id": "vNKWtFMm-W4gTpXS1fopy",
+      "name": "Tips",
+      "color": "#9ff9f5",
+      "spaceId": "m-8hcs0iyI7XiCQEdTQbj"
+    },
+    {
+      "id": "5PxAoEfH0FmwRrU17m_nE",
+      "name": "How to Use",
       "color": "#f9bbe4"
     }
   ],
   "customFields": [],
-  "cacheDate": 1564969151963,
+  "cacheDate": 1597156721422,
   "removedCards": []
 }
