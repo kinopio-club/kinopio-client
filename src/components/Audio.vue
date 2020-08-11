@@ -7,7 +7,10 @@
     @mouseup.left.stop.prevent="cancelClick"
     @touchend.stop.prevent="cancelClick"
   )
-    .button-wrap(:class="{active: isPlaying}" @click.left="togglePlayPause")
+    .button-wrap(:class="{active: isPlaying}"
+      @mousedown.left="togglePlayPause"
+      @touchend="togglePlayPause"
+    )
       button
         img.icon.play.pause(v-if="isPlaying" src="@/assets/pause.svg")
         img.icon.play(v-else src="@/assets/play.svg")
