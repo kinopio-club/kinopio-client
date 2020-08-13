@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog" :class="{'is-arena-only' : isArenaOnly}")
-  section.status-container
-    .row(v-if="!isArenaOnly")
+  section.status-container(v-if="!isArenaOnly")
+    .row
       .segmented-buttons
         button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
           span Are.na
@@ -402,10 +402,5 @@ export default {
 
   &.is-arena-only
     padding-top 4px
-    .status-container
-      position absolute
-      width 100%
-      top -12px
-      left 8px
 
 </style>
