@@ -26,6 +26,13 @@ footer(:style="visualViewportPosition")
         span Filters
       Filters(:visible="filtersIsVisible")
 
+    .button-wrap
+      button(@click.left="toggleBackgroundIsVisible" :class="{ active: backgroundIsVisible}")
+        img.icon.image(src="@/assets/image.svg")
+        //- img.icon.image(src="@/assets/image-active.svg") if currentSpace.background
+        span Background
+      Offline(:visible="backgroundIsVisible")
+
     .button-wrap(v-if="isOffline")
       button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
         span Offline
@@ -38,6 +45,7 @@ import Explore from '@/components/dialogs/Explore.vue'
 import Removed from '@/components/dialogs/Removed.vue'
 import Offline from '@/components/dialogs/Offline.vue'
 import Filters from '@/components/dialogs/Filters.vue'
+// import Background from '@/components/dialogs/Background.vue'
 import Notifications from '@/components/Notifications.vue'
 import utils from '@/utils.js'
 
@@ -52,6 +60,7 @@ export default {
     Offline,
     Notifications,
     Filters
+    // Background
   },
   data () {
     return {
@@ -59,6 +68,7 @@ export default {
       offlineIsVisible: false,
       filtersIsVisible: false,
       exploreIsVisible: false,
+      backgroundIsVisible: false,
       pinchZoomOffsetLeft: 0,
       pinchZoomOffsetTop: 0,
       pinchZoomScale: 1
@@ -71,6 +81,7 @@ export default {
         this.offlineIsVisible = false
         this.filtersIsVisible = false
         this.exploreIsVisible = false
+        this.backgroundIsVisible = false
       }
       if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
         currentIteration = 0
@@ -175,6 +186,11 @@ export default {
       this.$store.dispatch('closeAllDialogs')
       this.filtersIsVisible = !isVisible
     },
+    toggleBackgroundIsVisible () {
+      const isVisible = this.backgroundIsVisible
+      this.$store.dispatch('closeAllDialogs')
+      this.backgroundIsVisible = !isVisible
+    },
     toggleExploreIsVisible () {
       const isVisible = this.exploreIsVisible
       this.$store.dispatch('closeAllDialogs')
@@ -208,6 +224,9 @@ footer
         bottom calc(100% - 8px)
   .sunglasses
     vertical-align middle
+  .image
+    vertical-align -2px
+    height 13px
   .user-details
     .space-picker
       bottom initial
