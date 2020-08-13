@@ -385,6 +385,23 @@ export default {
     return space
   },
 
+  updateSpaceUserId (space, userId) {
+    space.cards = space.cards.map(card => {
+      card.userId = userId
+      return card
+    })
+    space.connectionTypes = space.connectionTypes.map(type => {
+      type.userId = userId
+      return type
+    })
+    space.connections = space.connections.map(connection => {
+      connection.userId = userId
+      return connection
+    })
+    console.log(space)
+    return space
+  },
+
   uniqueSpaceItems (items) {
     const cardIdDeltas = []
     const connectionTypeIdDeltas = []

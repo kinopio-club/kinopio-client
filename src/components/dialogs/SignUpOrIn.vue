@@ -205,6 +205,20 @@ export default {
       }
     },
 
+    updateAllSpacesWithNewUserId () {
+      const userId = this.$store.state.currentUser.id
+      const spaces = cache.getAllSpaces()
+      const userHasCachedSpaces = spaces.length
+      if (!userHasCachedSpaces) { return }
+      spaces.forEach(space => {
+        space = utils.updateSpaceUserId(space, userId)
+        cache.updateSpace('userId', userId, space.id)
+        cache.updateSpace('cards', space.cards, space.id)
+        cache.updateSpace('connectionTypes', space.connectionTypes, space.id)
+        cache.updateSpace('connections', space.connections, space.id)
+      })
+    },
+
     async signIn (event) {
       if (this.loading.signUpOrIn) { return }
       const previousUser = utils.clone(this.$store.state.currentUser)
@@ -215,10 +229,15 @@ export default {
       const result = await response.json()
       this.loading.signUpOrIn = false
       if (this.isSuccess(response)) {
+        // update user to remote user
         this.$store.commit('currentUser/updateUser', result)
+        // update local spaces to remote user
+        this.updateAllSpacesWithNewUserId()
         await this.createSpaces(result.apiKey)
+        // add new spaces from remote
         const spaces = await this.$store.dispatch('api/getUserSpaces')
         cache.addSpaces(spaces)
+        // update currentSpace
         const currentSpace = this.$store.state.currentSpace
         const currentUser = this.$store.state.currentUser
         const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
