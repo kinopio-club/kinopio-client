@@ -16,6 +16,11 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left="closeDialog
       data-type="name"
       maxlength="250"
     )
+    .error-container(v-if="error.isNotImageUrl")
+      p
+        span.badge.danger
+          img.icon.cancel(src="@/assets/add.svg")
+          span Is not an image URL
     .row
       button(:disabled="!canEditSpace" @click.left="removeBackground")
         img.icon(src="@/assets/remove.svg")
@@ -116,4 +121,6 @@ export default {
     width 215px
   textarea
     margin-bottom 6px
+  .error-container
+    margin-bottom 10px
 </style>
