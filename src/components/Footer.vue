@@ -31,7 +31,7 @@ footer(:style="visualViewportPosition")
         img.icon.image(src="@/assets/image.svg")
         //- img.icon.image(src="@/assets/image-active.svg") if currentSpace.background
         span Background
-      Offline(:visible="backgroundIsVisible")
+      Background(:visible="backgroundIsVisible")
 
     .button-wrap(v-if="isOffline")
       button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
@@ -45,7 +45,7 @@ import Explore from '@/components/dialogs/Explore.vue'
 import Removed from '@/components/dialogs/Removed.vue'
 import Offline from '@/components/dialogs/Offline.vue'
 import Filters from '@/components/dialogs/Filters.vue'
-// import Background from '@/components/dialogs/Background.vue'
+import Background from '@/components/dialogs/Background.vue'
 import Notifications from '@/components/Notifications.vue'
 import utils from '@/utils.js'
 
@@ -59,8 +59,8 @@ export default {
     Removed,
     Offline,
     Notifications,
-    Filters
-    // Background
+    Filters,
+    Background
   },
   data () {
     return {
