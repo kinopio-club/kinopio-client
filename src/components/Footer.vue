@@ -28,9 +28,7 @@ footer(:style="visualViewportPosition")
 
     .button-wrap
       button(@click.left="toggleBackgroundIsVisible" :class="{ active: backgroundIsVisible}")
-        img.icon.image(src="@/assets/image.svg")
-        //- img.icon.image(src="@/assets/image-active.svg") if currentSpace.background
-        span Background
+        img.icon.image(src="@/assets/landscape.svg")
       Background(:visible="backgroundIsVisible")
 
     .button-wrap(v-if="isOffline")
