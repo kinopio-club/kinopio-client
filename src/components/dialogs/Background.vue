@@ -123,7 +123,12 @@ export default {
     },
     pendingUpload () {
       const pendingUploads = this.$store.state.upload.pendingUploads
-      return pendingUploads.find(upload => upload.spaceId === this.currentSpace.id)
+      const upload = pendingUploads.find(upload => {
+        const isCurrentSpace = upload.spaceId === this.currentSpace.id
+        const isInProgress = upload.percentComplete < 100
+        return isCurrentSpace && isInProgress
+      })
+      return upload
     }
 
   },
@@ -142,6 +147,7 @@ export default {
     },
     addFile (file) {
       this.updateSpaceBackground(file.url)
+      this.textareaSize()
     },
     removeBackground () {
       this.updateSpaceBackground('')
