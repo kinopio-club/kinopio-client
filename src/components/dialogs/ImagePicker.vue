@@ -11,12 +11,14 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="
         button(@click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile")
 
+    //- upload progress
     .uploading-container(v-if="cardPendingUpload")
       img(v-if="cardPendingUpload" :src="cardPendingUpload.imageDataUrl")
       .badge.info(:class="{absolute : cardPendingUpload.imageDataUrl}")
         Loader(:visible="true")
         span {{cardPendingUpload.percentComplete}}%
 
+    //- errors
     .error-container-top(v-if="error.signUpToUpload")
       p
         span To upload files,
@@ -34,10 +36,12 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="
     .error-container-top(v-if="error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
+    //- stickers toggle
     label(v-if="serviceIsGfycat" :class="{active: gfycatIsStickers}" @click.left.prevent="toggleGfycatIsStickers" @keydown.stop.enter="toggleGfycatIsStickers")
       input(type="checkbox" v-model="gfycatIsStickers")
       span Stickers
 
+  //- search results
   section.results-section
     .search-wrap
       img.icon.search(v-if="!loading" src="@/assets/search.svg" @click.left="focusSearchInput")

@@ -457,10 +457,19 @@ export default new Vuex.Store({
     updateRemotePendingUploads: (state, update) => {
       utils.typeCheck(update, 'object')
       delete update.type
-      const card = state.remotePendingUploads.find(upload => upload.cardId === update.cardId)
-      if (card) {
+      const isCardUpload = state.remotePendingUploads.find(upload => upload.cardId === update.cardId)
+      const isSpaceUpload = state.remotePendingUploads.find(upload => upload.spaceId === update.spaceId)
+      if (isCardUpload) {
         state.remotePendingUploads.map(upload => {
           if (upload.cardId) {
+            upload.percentComplete = update.percentComplete
+            upload.userId = update.userId
+          }
+          return upload
+        })
+      } else if (isSpaceUpload) {
+        state.remotePendingUploads.map(upload => {
+          if (upload.spaceId) {
             upload.percentComplete = update.percentComplete
             upload.userId = update.userId
           }

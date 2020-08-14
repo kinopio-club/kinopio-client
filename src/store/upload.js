@@ -12,24 +12,24 @@ export default {
       utils.typeCheck(value, 'object')
       state.s3Policy = value
     },
-    addPendingUpload: (state, upload) => { // key, fileName, cardId
+    addPendingUpload: (state, upload) => { // key, fileName, cardId, spaceId
       upload.percentComplete = 0
-      state.pendingUploads = state.pendingUploads.filter(item => item.cardId !== upload.cardId)
+      state.pendingUploads = state.pendingUploads.filter(item => (item.cardId !== upload.cardId || item.spaceId === upload.spaceId))
       state.pendingUploads.push(upload)
     },
-    updatePendingUpload: (state, { cardId, percentComplete, imageDataUrl }) => {
+    updatePendingUpload: (state, { cardId, spaceId, percentComplete, imageDataUrl }) => {
       state.pendingUploads = state.pendingUploads.map(item => {
-        if (percentComplete && item.cardId === cardId) {
+        if (percentComplete && (item.cardId === cardId || item.spaceId === spaceId)) {
           item.percentComplete = percentComplete
         }
-        if (imageDataUrl && item.cardId === cardId) {
+        if (imageDataUrl && (item.cardId === cardId || item.spaceId === spaceId)) {
           item.imageDataUrl = imageDataUrl
         }
         return item
       })
     },
-    removePendingUpload: (state, cardId) => {
-      state.pendingUploads = state.pendingUploads.filter(item => item.cardId !== cardId)
+    removePendingUpload: (state, { cardId, spaceId }) => {
+      state.pendingUploads = state.pendingUploads.filter(item => (item.cardId !== cardId || item.spaceId === spaceId))
     }
   },
   actions: {
@@ -43,12 +43,14 @@ export default {
         }
       }
     },
-    addImageDataUrl: (context, { file, cardId }) => {
+    addImageDataUrl: (context, { file, cardId, spaceId }) => {
       const isImage = file.type.includes('image')
       if (!isImage) { return null }
       const reader = new FileReader()
       reader.onloadend = (event) => {
-        context.commit('updatePendingUpload', { cardId,
+        context.commit('updatePendingUpload', {
+          cardId,
+          spaceId,
           imageDataUrl: reader.result
         })
       }
@@ -60,9 +62,9 @@ export default {
       }
       reader.readAsDataURL(file)
     },
-    uploadFile: async (context, { file, cardId }) => {
+    uploadFile: async (context, { file, cardId, spaceId }) => {
       const fileName = utils.normalizeFileUrl(file.name)
-      const key = `${cardId}/${fileName}`
+      let key = `${cardId || spaceId}/${fileName}`
       const userIsUpgraded = context.rootState.currentUser.isUpgraded
       context.dispatch('checkIfFileTooBig', file)
       const presignedPostData = await context.dispatch('api/createPresignedPost', { key, userIsUpgraded, type: file.type }, { root: true })
@@ -76,9 +78,10 @@ export default {
         // progress
         request.upload.onprogress = (event) => {
           const percentComplete = Math.floor(event.loaded / event.total * 100)
-          console.log(`🛫 Uploading ${fileName} for card ${cardId}, percent: ${percentComplete}`)
+          console.log(`🛫 Uploading ${fileName} for ${cardId || spaceId}, percent: ${percentComplete}`)
           const updates = {
             cardId,
+            spaceId,
             percentComplete,
             userId: context.rootState.currentUser.id
           }
@@ -90,16 +93,17 @@ export default {
           console.log('🛬 Upload completed or failed', event)
           context.commit('triggerUploadComplete', {
             cardId,
+            spaceId,
             url: `${presignedPostData.url}/${key}`
           }, { root: true })
-          context.commit('removePendingUpload', cardId)
+          context.commit('removePendingUpload', { cardId, spaceId })
           resolve(request.response)
         }
         // start
         request.open('POST', presignedPostData.url)
         request.send(formData)
-        context.commit('addPendingUpload', { key, fileName, cardId })
-        context.dispatch('addImageDataUrl', { file, cardId })
+        context.commit('addPendingUpload', { key, fileName, cardId, spaceId })
+        context.dispatch('addImageDataUrl', { file, cardId, spaceId })
       })
     },
     addCardsAndUploadFiles: async (context, { files, currentCursor }) => {
