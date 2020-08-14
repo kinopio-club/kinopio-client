@@ -94,7 +94,9 @@ export default {
     },
     checkIfImageIsUrl () {
       const url = this.background
-      if (utils.urlIsImage(url)) {
+      if (!url) {
+        this.error.isNotImageUrl = false
+      } else if (utils.urlIsImage(url)) {
         this.error.isNotImageUrl = false
       } else {
         this.error.isNotImageUrl = true

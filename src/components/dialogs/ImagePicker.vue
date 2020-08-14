@@ -53,7 +53,7 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="
       )
       button.borderless.clear-input-wrap(@click.left="clearSearch")
         img.icon(src="@/assets/add.svg")
-    .error-container
+    .error-container(v-if="isNoSearchResults || error.unknownServerError || error.userIsOffline")
       p(v-if="isNoSearchResults") Nothing found on {{service}} for {{search}}
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
       .badge.danger(v-if="error.userIsOffline") Can't search {{service}} while offline, Please try again later
