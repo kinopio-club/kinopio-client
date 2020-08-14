@@ -40,7 +40,7 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left="closeDialog
           img.icon.cancel(src="@/assets/add.svg")
           span Too Big
       p
-        span Background images should be smaller than 250kb
+        span Background images should be smaller than 350kb
     .error-container(v-if="error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
@@ -147,7 +147,6 @@ export default {
     },
     addFile (file) {
       this.updateSpaceBackground(file.url)
-      this.textareaSize()
     },
     removeBackground () {
       this.updateSpaceBackground('')
@@ -179,7 +178,6 @@ export default {
       textarea.style.height = textarea.scrollHeight + 1 + 'px'
     },
     selectFile (event) {
-      this.clearErrors()
       if (!this.currentUserIsSignedIn) {
         this.error.signUpToUpload = true
         return
@@ -187,10 +185,21 @@ export default {
       const input = this.$refs.input
       input.click()
     },
+    isFileTooBig (file) {
+      const sizeLimit = 1024 * 1024 * 0.350 // 350kb
+      if (file.size > sizeLimit) {
+        return true
+      }
+    },
     async uploadFile () {
+      this.clearErrors()
       const spaceId = this.currentSpace.id
       const input = this.$refs.input
       const file = input.files[0]
+      if (this.isFileTooBig(file)) {
+        this.error.sizeLimit = true
+        return
+      }
       try {
         await this.$store.dispatch('upload/uploadFile', { file, spaceId })
       } catch (error) {
