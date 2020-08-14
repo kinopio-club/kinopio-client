@@ -130,7 +130,6 @@ export default {
       })
       return upload
     }
-
   },
   methods: {
     triggerSignUpOrInIsVisible () {

@@ -29,6 +29,10 @@ footer(:style="visualViewportPosition")
     .button-wrap
       button(@click.left="toggleBackgroundIsVisible" :class="{ active: backgroundIsVisible}")
         img.icon.image(src="@/assets/landscape.svg")
+      .uploading-container-footer(v-if="pendingUpload")
+        .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
+          Loader(:visible="true")
+          span {{pendingUpload.percentComplete}}%
       Background(:visible="backgroundIsVisible")
 
     .button-wrap(v-if="isOffline")
@@ -45,6 +49,7 @@ import Offline from '@/components/dialogs/Offline.vue'
 import Filters from '@/components/dialogs/Filters.vue'
 import Background from '@/components/dialogs/Background.vue'
 import Notifications from '@/components/Notifications.vue'
+import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
 const maxIterations = 30
@@ -58,7 +63,8 @@ export default {
     Offline,
     Notifications,
     Filters,
-    Background
+    Background,
+    Loader
   },
   data () {
     return {
@@ -101,6 +107,16 @@ export default {
     //   let hash = path.src.match(regex)[0] // app.768db305407f4c847d44
     //   return hash.replace('app.', '') // 768db305407f4c847d44
     // },
+    pendingUpload () {
+      const currentSpace = this.$store.state.currentSpace
+      const pendingUploads = this.$store.state.upload.pendingUploads
+      const upload = pendingUploads.find(upload => {
+        const isCurrentSpace = upload.spaceId === currentSpace.id
+        const isInProgress = upload.percentComplete < 100
+        return isCurrentSpace && isInProgress
+      })
+      return upload
+    },
     isVisible () {
       let isVisible = true
       if (this.dialogsVisible) { isVisible = false }
@@ -229,4 +245,17 @@ footer
     .space-picker
       bottom initial
       top calc(100% - 8px)
+
+  .uploading-container-footer
+    position absolute
+    top -1px
+    width 100px
+    pointer-events none
+    .badge
+      display inline-block
+      &.absolute
+        position absolute
+        top 6px
+        left 6px
+
 </style>
