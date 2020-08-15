@@ -56,7 +56,7 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left="closeDialog
         ImagePicker(:visible="imagePickerIsVisible" :isArenaOnly="true" :imageIsFullSize="true" @selectImage="addFile")
       .button-wrap
         button(:disabled="!canEditSpace" @click.left.stop="selectFile") Upload
-        input.hidden(type="file" ref="input" @change="uploadFile")
+        input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
 
 </template>
 

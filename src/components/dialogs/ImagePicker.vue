@@ -9,7 +9,7 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="
           span Gfycat
       .button-wrap
         button(@click.left.stop="selectFile") Upload
-        input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
+        input.hidden(type="file" ref="input" @change="uploadFile")
 
     //- upload progress
     .uploading-container(v-if="cardPendingUpload")

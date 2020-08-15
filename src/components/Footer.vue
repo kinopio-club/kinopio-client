@@ -28,7 +28,7 @@ footer(:style="visualViewportPosition")
 
     .button-wrap
       button(@click.left="toggleBackgroundIsVisible" :class="{ active: backgroundIsVisible}")
-        img.icon.image(src="@/assets/landscape.svg")
+        img.icon.macro(src="@/assets/macro.svg")
       .uploading-container-footer(v-if="pendingUpload")
         .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
           Loader(:visible="true")
@@ -238,8 +238,8 @@ footer
         bottom calc(100% - 8px)
   .sunglasses
     vertical-align middle
-  .image
-    vertical-align -2px
+  .macro
+    vertical-align -3px
     height 13px
   .user-details
     .space-picker
