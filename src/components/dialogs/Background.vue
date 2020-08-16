@@ -126,12 +126,11 @@ export default {
     },
     pendingUpload () {
       const pendingUploads = this.$store.state.upload.pendingUploads
-      const upload = pendingUploads.find(upload => {
+      return pendingUploads.find(upload => {
         const isCurrentSpace = upload.spaceId === this.currentSpace.id
         const isInProgress = upload.percentComplete < 100
         return isCurrentSpace && isInProgress
       })
-      return upload
     },
     remotePendingUpload () {
       const currentSpace = this.$store.state.currentSpace
