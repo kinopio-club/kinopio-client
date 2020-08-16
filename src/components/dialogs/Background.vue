@@ -58,7 +58,7 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left="closeDialog
       .button-wrap
         button(:disabled="!canEditSpace" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
           span Image
-        ImagePicker(:visible="imagePickerIsVisible" :isArenaOnly="true" :imageIsFullSize="true" @selectImage="addFile")
+        ImagePicker(:visible="imagePickerIsVisible" :isArenaOnly="true" :imageIsFullSize="true" @selectImage="updateSpaceBackground")
       .button-wrap
         button(:disabled="!canEditSpace" @click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
@@ -98,8 +98,7 @@ export default {
       if (mutation.type === 'triggerUploadComplete') {
         let { spaceId, url } = mutation.payload
         if (spaceId !== this.currentSpace.id) { return }
-        const file = { url }
-        this.addFile(file)
+        this.updateSpaceBackground(url)
       }
     })
   },
@@ -136,9 +135,9 @@ export default {
       const currentSpace = this.$store.state.currentSpace
       let remotePendingUploads = this.$store.state.remotePendingUploads
       return remotePendingUploads.find(upload => {
-        const inProgress = upload.percentComplete < 100
+        const isInProgress = upload.percentComplete < 100
         const isSpace = upload.spaceId === currentSpace.id
-        return inProgress && isSpace
+        return isInProgress && isSpace
       })
     }
   },
@@ -155,13 +154,11 @@ export default {
       this.closeDialogs()
       this.imagePickerIsVisible = !isVisible
     },
-    addFile (file) {
-      this.updateSpaceBackground(file.url)
-    },
     removeBackground () {
       this.updateSpaceBackground('')
     },
     updateSpaceBackground (url) {
+      url = url.url || url
       this.$store.dispatch('currentSpace/updateSpace', { background: url })
       this.$store.dispatch('currentSpace/loadBackground')
     },
