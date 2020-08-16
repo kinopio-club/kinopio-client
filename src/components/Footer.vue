@@ -35,10 +35,10 @@ footer(:style="visualViewportPosition")
           Loader(:visible="true")
           span {{pendingUpload.percentComplete}}%
       //- Remote Upload Progress
-      .uploading-container-footer(v-if="remoteCardPendingUpload")
+      .uploading-container-footer(v-if="remotePendingUpload")
         .badge.info
           Loader(:visible="true")
-          span {{remoteCardPendingUpload.percentComplete}}%
+          span {{remotePendingUpload.percentComplete}}%
 
       Background(:visible="backgroundIsVisible")
     .button-wrap(v-if="isOffline")
@@ -164,7 +164,7 @@ export default {
         }
       }
     },
-    remoteCardPendingUpload () {
+    remotePendingUpload () {
       const currentSpace = this.$store.state.currentSpace
       let remotePendingUploads = this.$store.state.remotePendingUploads
       return remotePendingUploads.find(upload => {
@@ -263,8 +263,8 @@ footer
 
   .uploading-container-footer
     position absolute
-    top 3px
-    left 4px
+    top -11px
+    left 8px
     width 100px
     pointer-events none
     .badge

@@ -22,6 +22,11 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left="closeDialog
       .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
         Loader(:visible="true")
         span {{pendingUpload.percentComplete}}%
+    //- remote upload progress
+    .uploading-container(v-if="remotePendingUpload")
+      .badge.info
+        Loader(:visible="true")
+        span {{remotePendingUpload.percentComplete}}%
 
     //- errors
     .error-container(v-if="error.isNotImageUrl")
@@ -127,6 +132,15 @@ export default {
         return isCurrentSpace && isInProgress
       })
       return upload
+    },
+    remotePendingUpload () {
+      const currentSpace = this.$store.state.currentSpace
+      let remotePendingUploads = this.$store.state.remotePendingUploads
+      return remotePendingUploads.find(upload => {
+        const inProgress = upload.percentComplete < 100
+        const isSpace = upload.spaceId === currentSpace.id
+        return inProgress && isSpace
+      })
     }
   },
   methods: {
