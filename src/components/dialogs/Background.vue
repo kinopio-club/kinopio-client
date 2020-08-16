@@ -93,8 +93,6 @@ export default {
       if (mutation.type === 'triggerUploadComplete') {
         let { spaceId, url } = mutation.payload
         if (spaceId !== this.currentSpace.id) { return }
-        const upload = state.upload.pendingUploads.find(item => item.spaceId === this.currentSpace.id)
-        if (upload.percentComplete !== 100) { return }
         const file = { url }
         this.addFile(file)
       }
@@ -218,6 +216,9 @@ export default {
         this.closeDialogs()
         this.clearErrors()
       }
+    },
+    background (value) {
+      this.$store.dispatch('currentSpace/loadBackground')
     }
   }
 }

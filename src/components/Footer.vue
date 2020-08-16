@@ -29,12 +29,18 @@ footer(:style="visualViewportPosition")
     .button-wrap
       button(@click.left="toggleBackgroundIsVisible" :class="{ active: backgroundIsVisible}")
         img.icon.macro(src="@/assets/macro.svg")
+      //- Upload Progress
       .uploading-container-footer(v-if="pendingUpload")
         .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
           Loader(:visible="true")
           span {{pendingUpload.percentComplete}}%
-      Background(:visible="backgroundIsVisible")
+      //- Remote Upload Progress
+      .uploading-container-footer(v-if="remoteCardPendingUpload")
+        .badge.info
+          Loader(:visible="true")
+          span {{remoteCardPendingUpload.percentComplete}}%
 
+      Background(:visible="backgroundIsVisible")
     .button-wrap(v-if="isOffline")
       button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
         span Offline
@@ -157,6 +163,15 @@ export default {
           'transform-origin': 'left bottom'
         }
       }
+    },
+    remoteCardPendingUpload () {
+      const currentSpace = this.$store.state.currentSpace
+      let remotePendingUploads = this.$store.state.remotePendingUploads
+      return remotePendingUploads.find(upload => {
+        const inProgress = upload.percentComplete < 100
+        const isSpace = upload.spaceId === currentSpace.id
+        return inProgress && isSpace
+      })
     }
   },
   methods: {
@@ -248,7 +263,8 @@ footer
 
   .uploading-container-footer
     position absolute
-    top -1px
+    top 3px
+    left 4px
     width 100px
     pointer-events none
     .badge

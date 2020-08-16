@@ -27,6 +27,7 @@ export default {
         }
         return item
       })
+      state.pendingUploads = state.pendingUploads.filter(item => item.percentComplete !== 100)
     },
     removePendingUpload: (state, { cardId, spaceId }) => {
       state.pendingUploads = state.pendingUploads.filter(item => (item.cardId !== cardId || item.spaceId === spaceId))
@@ -63,6 +64,7 @@ export default {
       reader.readAsDataURL(file)
     },
     uploadFile: async (context, { file, cardId, spaceId }) => {
+      const uploadId = nanoid()
       const fileName = utils.normalizeFileUrl(file.name)
       let key = `${cardId || spaceId}/${fileName}`
       const userIsUpgraded = context.rootState.currentUser.isUpgraded
@@ -83,7 +85,8 @@ export default {
             cardId,
             spaceId,
             percentComplete,
-            userId: context.rootState.currentUser.id
+            userId: context.rootState.currentUser.id,
+            id: uploadId
           }
           context.commit('updatePendingUpload', updates)
           context.commit('broadcast/updateStore', { updates, type: 'updateRemotePendingUploads' }, { root: true })

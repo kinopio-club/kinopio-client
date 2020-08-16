@@ -457,27 +457,23 @@ export default new Vuex.Store({
     updateRemotePendingUploads: (state, update) => {
       utils.typeCheck(update, 'object')
       delete update.type
-      const isCardUpload = state.remotePendingUploads.find(upload => upload.cardId === update.cardId)
-      const isSpaceUpload = state.remotePendingUploads.find(upload => upload.spaceId === update.spaceId)
-      if (isCardUpload) {
-        state.remotePendingUploads.map(upload => {
-          if (upload.cardId) {
-            upload.percentComplete = update.percentComplete
-            upload.userId = update.userId
+      const existingUpload = state.remotePendingUploads.find(item => {
+        const card = item.cardId === update.cardId
+        const space = item.spaceId === update.spaceId
+        return card || space
+      })
+      if (existingUpload) {
+        state.remotePendingUploads = state.remotePendingUploads.map(item => {
+          console.log('item', item, item.id, existingUpload.id, item.id === existingUpload.id)
+          if (item.id === existingUpload.id) {
+            item.percentComplete = update.percentComplete
           }
-          return upload
-        })
-      } else if (isSpaceUpload) {
-        state.remotePendingUploads.map(upload => {
-          if (upload.spaceId) {
-            upload.percentComplete = update.percentComplete
-            upload.userId = update.userId
-          }
-          return upload
+          return item
         })
       } else {
         state.remotePendingUploads.push(update)
       }
+      state.remotePendingUploads = state.remotePendingUploads.filter(item => item.percentComplete !== 100)
     },
 
     // Notifications
