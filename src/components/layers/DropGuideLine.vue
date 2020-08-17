@@ -4,7 +4,6 @@ aside
   canvas#remote-drop-guide-line.remote-drop-guide-line
 </template>
 <script>
-import utils from '@/utils.js'
 import nanoid from 'nanoid'
 
 let canvas, context, remoteCanvas, remoteContext, paintingGuidesTimer, remotePaintingGuidesTimer
@@ -27,7 +26,7 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerUpdateRemoteDropGuideLine') {
         let curve = mutation.payload
-        remoteDropGuideLines.push(curve)
+        this.addRemoteCurve(curve)
         this.remotePainting()
       }
       if (mutation.type === 'triggerUpdateStopRemoteUserDropGuideLine') {
@@ -55,6 +54,9 @@ export default {
 
     // Remote Painting
 
+    addRemoteCurve (curve) {
+      remoteDropGuideLines.push(curve)
+    },
     remotePainting () {
       if (!remotePaintingGuidesTimer) {
         remotePaintingGuidesTimer = window.requestAnimationFrame(this.remotePaintGuidesFrame)
@@ -154,21 +156,24 @@ export default {
       context.quadraticCurveTo(controlPointX3, controlPointOddY + startPointY, endPointX3, endPointY)
       context.quadraticCurveTo(controlPointX4, controlPointEvenY + startPointY, endPointX4, endPointY)
       context.stroke()
+
+      const scrollX = window.scrollX
+      const scrollY = window.scrollY
       this.broadcastCursorAndCurve({
         curve: {
-          remoteControlPointOddY: controlPointOddY,
-          remoteControlPointEvenY: controlPointEvenY,
-          startPointX,
-          startPointY,
-          controlPointX1,
-          endPointX1,
-          controlPointX2,
-          endPointX2,
-          controlPointX3,
-          endPointX3,
-          controlPointX4,
-          endPointX4,
-          endPointY
+          remoteControlPointOddY: controlPointOddY + scrollY,
+          remoteControlPointEvenY: controlPointEvenY + scrollY,
+          startPointX: startPointX + scrollX,
+          startPointY: startPointY + scrollY,
+          controlPointX1: controlPointX1 + scrollX,
+          endPointX1: endPointX1 + scrollX,
+          controlPointX2: controlPointX2 + scrollX,
+          endPointX2: endPointX2 + scrollX,
+          controlPointX3: controlPointX3 + scrollX,
+          endPointX3: endPointX3 + scrollX,
+          controlPointX4: controlPointX4 + scrollX,
+          endPointX4: endPointX4 + scrollX,
+          endPointY: endPointY + scrollY
         },
         color: this.currentUserColor
       })
@@ -205,7 +210,9 @@ export default {
     broadcastCursorAndCurve ({ curve, color }) {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
-      let updates = utils.clone(this.currentCursor)
+      let updates = {}
+      updates.x = this.currentCursor.x + window.scrollX
+      updates.y = this.currentCursor.y + window.scrollY
       updates.userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor' })
       updates.curve = curve

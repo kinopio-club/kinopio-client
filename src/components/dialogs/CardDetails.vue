@@ -110,8 +110,6 @@ export default {
       if (mutation.type === 'triggerUploadComplete') {
         let { cardId, url } = mutation.payload
         if (cardId !== this.card.id) { return }
-        const upload = state.upload.pendingUploads.find(item => item.cardId === this.card.id)
-        if (upload.percentComplete !== 100) { return }
         this.addFile({ url })
       }
     })

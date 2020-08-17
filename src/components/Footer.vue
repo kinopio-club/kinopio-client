@@ -26,6 +26,21 @@ footer(:style="visualViewportPosition")
         span Filters
       Filters(:visible="filtersIsVisible")
 
+    .button-wrap
+      button(@click.left="toggleBackgroundIsVisible" :class="{ active: backgroundIsVisible}")
+        img.icon.macro(src="@/assets/macro.svg")
+      //- Upload Progress
+      .uploading-container-footer(v-if="pendingUpload")
+        .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
+          Loader(:visible="true")
+          span {{pendingUpload.percentComplete}}%
+      //- Remote Upload Progress
+      .uploading-container-footer(v-if="remotePendingUpload")
+        .badge.info
+          Loader(:visible="true")
+          span {{remotePendingUpload.percentComplete}}%
+
+      Background(:visible="backgroundIsVisible")
     .button-wrap(v-if="isOffline")
       button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
         span Offline
@@ -38,7 +53,9 @@ import Explore from '@/components/dialogs/Explore.vue'
 import Removed from '@/components/dialogs/Removed.vue'
 import Offline from '@/components/dialogs/Offline.vue'
 import Filters from '@/components/dialogs/Filters.vue'
+import Background from '@/components/dialogs/Background.vue'
 import Notifications from '@/components/Notifications.vue'
+import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
 const maxIterations = 30
@@ -51,7 +68,9 @@ export default {
     Removed,
     Offline,
     Notifications,
-    Filters
+    Filters,
+    Background,
+    Loader
   },
   data () {
     return {
@@ -59,6 +78,7 @@ export default {
       offlineIsVisible: false,
       filtersIsVisible: false,
       exploreIsVisible: false,
+      backgroundIsVisible: false,
       pinchZoomOffsetLeft: 0,
       pinchZoomOffsetTop: 0,
       pinchZoomScale: 1
@@ -71,6 +91,7 @@ export default {
         this.offlineIsVisible = false
         this.filtersIsVisible = false
         this.exploreIsVisible = false
+        this.backgroundIsVisible = false
       }
       if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
         currentIteration = 0
@@ -92,6 +113,15 @@ export default {
     //   let hash = path.src.match(regex)[0] // app.768db305407f4c847d44
     //   return hash.replace('app.', '') // 768db305407f4c847d44
     // },
+    pendingUpload () {
+      const currentSpace = this.$store.state.currentSpace
+      const pendingUploads = this.$store.state.upload.pendingUploads
+      return pendingUploads.find(upload => {
+        const isCurrentSpace = upload.spaceId === currentSpace.id
+        const isInProgress = upload.percentComplete < 100
+        return isCurrentSpace && isInProgress
+      })
+    },
     isVisible () {
       let isVisible = true
       if (this.dialogsVisible) { isVisible = false }
@@ -132,6 +162,15 @@ export default {
           'transform-origin': 'left bottom'
         }
       }
+    },
+    remotePendingUpload () {
+      const currentSpace = this.$store.state.currentSpace
+      let remotePendingUploads = this.$store.state.remotePendingUploads
+      return remotePendingUploads.find(upload => {
+        const inProgress = upload.percentComplete < 100
+        const isSpace = upload.spaceId === currentSpace.id
+        return inProgress && isSpace
+      })
     }
   },
   methods: {
@@ -175,6 +214,11 @@ export default {
       this.$store.dispatch('closeAllDialogs')
       this.filtersIsVisible = !isVisible
     },
+    toggleBackgroundIsVisible () {
+      const isVisible = this.backgroundIsVisible
+      this.$store.dispatch('closeAllDialogs')
+      this.backgroundIsVisible = !isVisible
+    },
     toggleExploreIsVisible () {
       const isVisible = this.exploreIsVisible
       this.$store.dispatch('closeAllDialogs')
@@ -208,8 +252,25 @@ footer
         bottom calc(100% - 8px)
   .sunglasses
     vertical-align middle
+  .macro
+    vertical-align -3px
+    height 13px
   .user-details
     .space-picker
       bottom initial
       top calc(100% - 8px)
+
+  .uploading-container-footer
+    position absolute
+    top -11px
+    left 8px
+    width 100px
+    pointer-events none
+    .badge
+      display inline-block
+      &.absolute
+        position absolute
+        top 6px
+        left 6px
+
 </style>

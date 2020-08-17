@@ -1,6 +1,6 @@
 <template lang="pug">
-dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog")
-  section
+dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog" :class="{'is-arena-only' : isArenaOnly}")
+  section.status-container(v-if="!isArenaOnly")
     .row
       .segmented-buttons
         button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
@@ -11,12 +11,14 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="
         button(@click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile")
 
+    //- upload progress
     .uploading-container(v-if="cardPendingUpload")
       img(v-if="cardPendingUpload" :src="cardPendingUpload.imageDataUrl")
       .badge.info(:class="{absolute : cardPendingUpload.imageDataUrl}")
         Loader(:visible="true")
         span {{cardPendingUpload.percentComplete}}%
 
+    //- errors
     .error-container-top(v-if="error.signUpToUpload")
       p
         span To upload files,
@@ -34,10 +36,12 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="
     .error-container-top(v-if="error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
+    //- stickers toggle
     label(v-if="serviceIsGfycat" :class="{active: gfycatIsStickers}" @click.left.prevent="toggleGfycatIsStickers" @keydown.stop.enter="toggleGfycatIsStickers")
       input(type="checkbox" v-model="gfycatIsStickers")
       span Stickers
 
+  //- search results
   section.results-section
     .search-wrap
       img.icon.search(v-if="!loading" src="@/assets/search.svg" @click.left="focusSearchInput")
@@ -48,10 +52,12 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="
         ref="searchInput"
         @keyup.stop.backspace
         @keyup.stop.enter
+        @mouseup.prevent.stop
+        @touchend.prevent.stop
       )
       button.borderless.clear-input-wrap(@click.left="clearSearch")
         img.icon(src="@/assets/add.svg")
-    .error-container
+    .error-container(v-if="isNoSearchResults || error.unknownServerError || error.userIsOffline")
       p(v-if="isNoSearchResults") Nothing found on {{service}} for {{search}}
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
       .badge.danger(v-if="error.userIsOffline") Can't search {{service}} while offline, Please try again later
@@ -84,7 +90,9 @@ export default {
     visible: Boolean,
     initialSearch: String,
     cardUrl: String,
-    cardId: String
+    cardId: String,
+    isArenaOnly: Boolean,
+    imageIsFullSize: Boolean
   },
   data () {
     return {
@@ -238,12 +246,18 @@ export default {
     normalizeResults (data, service) {
       if (service === 'Are.na' && this.serviceIsArena) {
         this.images = data.blocks.map(image => {
+          let url
+          if (this.imageIsFullSize) {
+            url = image.image.original.url
+          } else {
+            url = image.image.display.url
+          }
           return {
             id: image.id,
             sourcePageUrl: `https://www.are.na/block/${image.id}`,
             sourceUserName: image.user.username,
-            previewUrl: image.image.large.url,
-            url: image.image.large.url + '?img=.jpg'
+            previewUrl: image.image.display.url,
+            url: url + '?img=.jpg'
           }
         })
       } else if (service === 'Gfycat' && this.serviceIsGfycat) {
@@ -387,4 +401,10 @@ export default {
         position absolute
         top 6px
         left 6px
+  .arena
+    width 18px
+
+  &.is-arena-only
+    padding-top 4px
+
 </style>
