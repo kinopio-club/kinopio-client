@@ -8,16 +8,18 @@ dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.left.st
     p Invite Collaborators
 
   section
-    //- p Share this url to edit with others
-    //- img(src="@/assets/collaborators.jpg")
-
-    input.textarea(ref="url" v-model="url")
+    .row
+      input.textarea(ref="url" v-model="url")
 
     button(v-if="!canNativeShare" @click.left="copyUrl")
       span Copy Invite Url
+      Loader(:visible="loading")
+
     .segmented-buttons(v-if="canNativeShare")
       button(@click.left="copyUrl")
         span Copy Invite Url
+        Loader(:visible="loading")
+
       button(@click.left="shareUrl")
         img.icon(src="@/assets/share.svg")
     .row
@@ -26,17 +28,21 @@ dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.left.st
 </template>
 
 <script>
-// import utils from '@/utils.js'
+import Loader from '@/components/Loader.vue'
 
 export default {
   name: 'InviteCollaborators',
   props: {
     visible: Boolean
   },
+  components: {
+    Loader
+  },
   data () {
     return {
       urlIsCopied: false,
-      url: ''
+      url: '',
+      loading: false
     }
   },
   computed: {
@@ -64,7 +70,9 @@ export default {
     },
     async updateCollaboratorKey () {
       const space = this.$store.state.currentSpace
+      this.loading = true
       const collaboratorKey = await this.$store.dispatch('api/getSpaceCollaboratorKey', space)
+      this.loading = false
       this.$store.commit('currentSpace/updateSpace', { collaboratorKey })
     },
     updateInviteUrl () {
@@ -91,6 +99,4 @@ export default {
   right 8px
   max-height calc(100vh - 180px)
   overflow auto
-  // .textarea
-  //   margin-top 10px
 </style>
