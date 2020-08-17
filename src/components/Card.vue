@@ -19,6 +19,7 @@ article(:style="position" :data-card-id="id")
     @dragleave="removeUploadIsDraggedOver"
     @dragend="removeUploadIsDraggedOver"
     @drop.prevent.stop="uploadFile"
+    @click.shift="selectAllConnectedCards"
   )
     Frames(:card="card")
 
@@ -45,7 +46,7 @@ article(:style="position" :data-card-id="id")
       //- Right buttons
       span.card-buttons-wrap
         //- Link
-        a.link-wrap(:href="firstUrl" @click.left.stop @touchend="openUrl(firstUrl)" v-if="firstUrl")
+        a.link-wrap(:href="firstUrl" @click.left.stop="closeAllDialogs" @touchend="openUrl(firstUrl)" v-if="firstUrl")
           .link
             button(:style="{background: selectedColor}" tabindex="-1")
               img.icon.visit.arrow-icon(src="@/assets/visit.svg")
@@ -380,6 +381,36 @@ export default {
     }
   },
   methods: {
+    selectAllConnectedCards (event) {
+      this.$store.dispatch('closeAllDialogs')
+      const connections = this.$store.state.currentSpace.connections
+      let selectedCards = [this.card.id]
+      let shouldSearch = true
+      while (shouldSearch) {
+        let cancelSearch = true
+        connections.forEach(connection => {
+          const startCard = connection.startCardId
+          const endCard = connection.endCardId
+          const startCardIsConnected = selectedCards.includes(startCard)
+          const endCardIsConnected = selectedCards.includes(endCard)
+          if (!startCardIsConnected && endCardIsConnected) {
+            selectedCards.push(startCard)
+            cancelSearch = false
+          }
+          if (startCardIsConnected && !endCardIsConnected) {
+            selectedCards.push(endCard)
+            cancelSearch = false
+          }
+        })
+        if (cancelSearch) {
+          shouldSearch = false
+        }
+      }
+      const position = utils.cursorPositionInPage(event)
+      this.$store.commit('multipleSelectedActionsPosition', position)
+      this.$store.commit('multipleSelectedActionsIsVisible', true)
+      this.$store.commit('multipleCardsSelectedIds', selectedCards)
+    },
     updateMediaUrls (urls) {
       this.formats.image = ''
       this.formats.video = ''
@@ -486,6 +517,9 @@ export default {
       if (this.canEditCard) {
         this.$store.dispatch('currentSpace/removeCard', this.card)
       }
+    },
+    closeAllDialogs () {
+      this.$store.dispatch('closeAllDialogs')
     },
     createCurrentConnection (event) {
       const cursor = utils.cursorPositionInViewport(event)
