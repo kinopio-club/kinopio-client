@@ -171,6 +171,7 @@ export default {
 
     async createNewSpace (items, newSpaceName) {
       this.loading = true
+      items = utils.clone(items)
       let space = utils.clone(newSpace)
       space.name = newSpaceName
       space.id = nanoid()
