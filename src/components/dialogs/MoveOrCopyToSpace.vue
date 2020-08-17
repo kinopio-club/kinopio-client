@@ -221,9 +221,13 @@ export default {
       this.$store.dispatch('closeAllDialogs')
       if (this.shouldSwitchToSpace) {
         this.$store.dispatch('currentSpace/changeSpace', { space: selectedSpace })
+        if (this.toNewSpace) {
+          this.$nextTick(() => {
+            this.$store.commit('triggerShowCardDetails', selectedSpace.cards[0].id)
+          })
+        }
       }
     },
-
     mapRemoteItems (items) {
       const spaceId = this.selectedSpace.id
       return items.map(item => {

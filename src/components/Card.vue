@@ -125,6 +125,11 @@ export default {
       if (mutation.type === 'updateRemoteCurrentConnection' || mutation.type === 'removeRemoteCurrentConnection') {
         this.updateRemoteConnections()
       }
+      if (mutation.type === 'triggerShowCardDetails') {
+        if (mutation.payload === this.card.id) {
+          this.showCardDetails()
+        }
+      }
     })
   },
   data () {
@@ -583,10 +588,14 @@ export default {
       this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
-      if (event.target.nodeName === 'LABEL') { return }
+      if (event) {
+        if (event.target.nodeName === 'LABEL') { return }
+      }
       this.$store.commit('cardDetailsIsVisibleForCardId', this.id)
       this.$store.commit('parentCardId', this.id)
-      event.stopPropagation() // only stop propagation if cardDetailsIsVisible
+      if (event) {
+        event.stopPropagation() // only stop propagation if cardDetailsIsVisible
+      }
       this.$store.commit('currentUserIsDraggingCard', false)
       this.broadcastShowCardDetails()
     },
