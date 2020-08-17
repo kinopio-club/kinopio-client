@@ -51,6 +51,10 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop)
         .badge.info Arrow(→↑←↓)
     article
       .row
+        .badge.title Select All Cards
+        .badge.info {{meta}}-A
+    article
+      .row
         .badge.title
           img.icon.cut(src="@/assets/cut.svg")
           span Copy/Cut/Paste Selected Cards

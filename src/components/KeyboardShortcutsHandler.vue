@@ -82,6 +82,10 @@ export default {
       } else if (isMeta && key === 'v' && isSpaceScope) {
         event.preventDefault()
         this.pasteCards()
+      // Select All Cards
+      } else if (isMeta && key === 'a' && isSpaceScope) {
+        event.preventDefault()
+        this.selectAllCards()
       }
     },
 
@@ -420,8 +424,25 @@ export default {
         const newCard = last(this.$store.state.currentSpace.cards)
         this.scrollIntoView(newCard)
       })
-    }
+    },
 
+    // Select All Cards
+
+    selectAllCards (event) {
+      let cards = utils.clone(this.$store.state.currentSpace.cards)
+      cards = cards.map(card => card.id)
+      const dialogOffset = {
+        width: 200 / 2,
+        height: 150 / 2
+      }
+      const viewportCenter = {
+        x: (this.$store.state.viewportWidth / 2) + window.scrollX - dialogOffset.width,
+        y: (this.$store.state.viewportHeight / 2) + window.scrollY - dialogOffset.height
+      }
+      this.$store.commit('multipleSelectedActionsPosition', viewportCenter)
+      this.$store.commit('multipleSelectedActionsIsVisible', true)
+      this.$store.commit('multipleCardsSelectedIds', cards)
+    }
   }
 }
 </script>
