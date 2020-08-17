@@ -1,5 +1,5 @@
 <template lang="pug">
-article(:style="position" :data-card-id="id")
+article(:style="position" :data-card-id="id" ref="card")
   .card(
     @mousedown.left.prevent="startDraggingCard"
     @touchstart="startDraggingCard"
@@ -107,6 +107,7 @@ import CardDetails from '@/components/dialogs/CardDetails.vue'
 import Frames from '@/components/Frames.vue'
 import Loader from '@/components/Loader.vue'
 import Audio from '@/components/Audio.vue'
+import scrollIntoView from '@/scroll-into-view.js'
 
 let isMultiTouch
 
@@ -125,9 +126,12 @@ export default {
       if (mutation.type === 'updateRemoteCurrentConnection' || mutation.type === 'removeRemoteCurrentConnection') {
         this.updateRemoteConnections()
       }
-      if (mutation.type === 'triggerShowCardDetails') {
+      if (mutation.type === 'triggerScrollCardIntoView') {
         if (mutation.payload === this.card.id) {
-          this.showCardDetails()
+          const element = this.$refs.card
+          const isTouchDevice = this.$store.state.isTouchDevice
+          scrollIntoView.scroll(element, isTouchDevice)
+          scrollIntoView.scroll(element, isTouchDevice)
         }
       }
     })
@@ -590,14 +594,10 @@ export default {
       this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
-      if (event) {
-        if (event.target.nodeName === 'LABEL') { return }
-      }
+      if (event.target.nodeName === 'LABEL') { return }
       this.$store.commit('cardDetailsIsVisibleForCardId', this.id)
       this.$store.commit('parentCardId', this.id)
-      if (event) {
-        event.stopPropagation() // only stop propagation if cardDetailsIsVisible
-      }
+      event.stopPropagation() // only stop propagation if cardDetailsIsVisible
       this.$store.commit('currentUserIsDraggingCard', false)
       this.broadcastShowCardDetails()
     },

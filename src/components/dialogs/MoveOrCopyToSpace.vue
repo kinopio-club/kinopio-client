@@ -223,7 +223,7 @@ export default {
         this.$store.dispatch('currentSpace/changeSpace', { space: selectedSpace })
         if (this.toNewSpace) {
           this.$nextTick(() => {
-            this.$store.commit('triggerShowCardDetails', selectedSpace.cards[0].id)
+            this.$store.commit('triggerScrollCardIntoView', selectedSpace.cards[0].id)
           })
         }
       }

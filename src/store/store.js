@@ -199,7 +199,7 @@ export default new Vuex.Store({
     triggerUpgradeUserIsVisible: () => {},
     triggerUploadComplete: () => {},
     triggerPauseAllAudio: () => {},
-    triggerShowCardDetails: (state, cardId) => {},
+    triggerScrollCardIntoView: (state, cardId) => {},
 
     // Cards
 
