@@ -60,6 +60,8 @@ import utils from '@/utils.js'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
 import words from '@/words.js'
+import newSpace from '@/spaces/new.json'
+import nanoid from 'nanoid'
 
 export default {
   name: 'MoveToSpace',
@@ -151,7 +153,6 @@ export default {
       const message = `${spaceName} added with ${this.cardsCount} ${this.pluralCard} ${actionLabel} ` // SpacePalace added with 3 cards copied
       this.$store.commit('addNotification', { message, type: 'success' })
     },
-
     selectedItems () {
       const currentSpace = utils.clone(this.$store.state.currentSpace)
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
@@ -168,27 +169,44 @@ export default {
       return { cards, connectionTypes, connections }
     },
 
-    async createNewSpace (items) {
-      // const newItems = utils.uniqueSpaceItems(utils.clone(items))
-      // TODO🏎
-      // createNewSpace : create a space json, add selected connections, types, and cards to it.
-      // create remote space,
-      // then add new space to cache
+    async createNewSpace (items, spaceName) {
+      this.loading = true
+      let space = utils.clone(newSpace)
+      space.name = spaceName
+      space.id = nanoid()
+      space.cards = items.cards
+      space.connectionTypes = items.connectionTypes
+      space.connections = items.connections
+      space.userId = this.$store.state.currentUser.id
+      space = cache.updateIdsInSpace(space)
+      console.log('🚚 create new space', space)
+      await this.$store.dispatch('api/createSpace', space)
+      this.loading = false
+      return space
     },
 
     async copyToSelectedSpace (items) {
+      this.loading = true
       const newItems = utils.uniqueSpaceItems(utils.clone(items))
-      await this.createRemoteItems(newItems)
+      let { cards, connectionTypes, connections } = newItems
+      cards = this.mapRemoteItems(cards)
+      connectionTypes = this.mapRemoteItems(connectionTypes)
+      connections = this.mapRemoteItems(connections)
+      console.log('🚚 copy or move', cards, connectionTypes, connections)
+      await this.$store.dispatch('api/updateCards', cards)
+      await this.$store.dispatch('api/updateConnectionTypes', connectionTypes)
+      await this.$store.dispatch('api/updateConnections', connections)
       cache.addToSpace(newItems, this.selectedSpace.id)
+      this.loading = false
     },
 
     async moveOrCopyToSpace () {
       if (this.loading) { return }
       const spaceName = this.spaceName || words.randomUniqueName()
       const items = this.selectedItems()
+      let selectedSpace = this.selectedSpace
       if (this.toNewSpace) {
-        // TODO
-        await this.createNewSpace(items)
+        selectedSpace = await this.createNewSpace(items, spaceName)
         this.notifyNewSpaceSuccess(spaceName)
       } else {
         await this.copyToSelectedSpace(items)
@@ -201,7 +219,7 @@ export default {
       this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('closeAllDialogs')
       if (this.shouldSwitchToSpace) {
-        this.$store.dispatch('currentSpace/changeSpace', { space: this.selectedSpace })
+        this.$store.dispatch('currentSpace/changeSpace', { space: selectedSpace })
       }
     },
 
@@ -211,17 +229,6 @@ export default {
         item.spaceId = spaceId
         return item
       })
-    },
-    async createRemoteItems ({ cards, connectionTypes, connections }) {
-      this.loading = true
-      cards = this.mapRemoteItems(cards)
-      connectionTypes = this.mapRemoteItems(connectionTypes)
-      connections = this.mapRemoteItems(connections)
-      console.log('🚚 copy or move', cards, connectionTypes, connections)
-      await this.$store.dispatch('api/updateCards', cards)
-      await this.$store.dispatch('api/updateConnectionTypes', connectionTypes)
-      await this.$store.dispatch('api/updateConnections', connections)
-      this.loading = false
     },
     updateSpaces () {
       const spaces = cache.getAllSpaces()
