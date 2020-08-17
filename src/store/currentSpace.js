@@ -434,7 +434,7 @@ export default {
       context.commit('restoreSpace', emptySpace)
       context.commit('restoreSpace', utils.normalizeSpace(cachedSpace))
       context.dispatch('updateSpacePageSize')
-      context.dispatch('loadBackground')
+      context.dispatch('loadBackground', context.state.background)
       context.commit('history/clear', null, { root: true })
       // restore remote
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
@@ -465,7 +465,7 @@ export default {
       }
       context.commit('spaceUrlToLoad', '', { root: true })
       context.dispatch('updateSpacePageSize')
-      context.dispatch('loadBackground')
+      context.dispatch('loadBackground', context.state.background)
       context.dispatch('removeEmptyCards')
     },
     loadLastSpace: (context) => {
@@ -930,10 +930,11 @@ export default {
 
     // background
 
-    loadBackground: (context) => {
-      const background = context.state.background
+    loadBackground: (context, background) => {
+      const currentBackground = utils.urlFromString(document.body.style.backgroundImage)
+      if (background === currentBackground) { return }
       if (utils.urlIsImage(background)) {
-        document.body.style.backgroundImage = `url('${background}')`
+        utils.updateBackground(background)
       } else {
         document.body.style.backgroundImage = ''
       }

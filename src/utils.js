@@ -738,6 +738,118 @@ export default {
     if (file.size > sizeLimit && !userIsUpgraded) {
       return true
     }
+  },
+
+  // Background
+
+  updateBackground (url) {
+    console.log('🐻', url)
+
+    let preloader = document.createElement('img')
+    preloader.src = url
+
+    preloader.addEventListener('load', (event) => {
+      document.body.style.backgroundImage = `url(${url})`
+
+      console.log('image is loaded')
+      // evaluateBackgroundImageBrightness w preloader
+      preloader = null
+    })
+  },
+
+  // Color
+
+  evaluateBackgroundImageBrightness () {
   }
+
+  // async loadImage (imageUrl) {
+  //   const response = await fetch(imageUrl, {mode: 'cors'})
+  //   const blob = await response.blob()
+  //   const reader = new FileReader()
+  //   return new Promise(resolve => {
+  //     reader.onloadend = (event) => {
+  //       console.log('🍎🍎🍎',reader.result)
+  //       resolve(reader.result)
+  //     }
+  //   })
+  // },
+
+  // async toObjectUrl (url) {
+  //   return new Promise(resolve => {
+
+  //     fetch(url)
+  //     .then( response => response.blob() )
+  //     .then( blob =>{
+  //         var reader = new FileReader() ;
+  //         reader.onload = function(){
+  //           console.log('🍆',this.result)
+  //           resolve(this.result)
+  //         } ; // <--- `this.result` contains a base64 data URI
+  //         reader.readAsDataURL(blob) ;
+  //     })
+  //   })
+  // },
+
+  //   async isImageDark (imageUrl) {
+  //     let r, g, b, max_rgb
+  //     let fuzzy = 0.1
+  //     let light = 0
+  //     let dark = 0
+  //     const rgbThreshold = 128
+  //     // create fake image
+  //     let image = document.createElement("img")
+
+  //     // const dataUrl = canvas.toDataURL()
+
+  //     image.src = imageUrl     // image.src should be dataurl base64
+
+  //     let xxx = await this.toObjectUrl(imageUrl)
+  //     console.log(xxx)
+
+  //     image.style.display = "none"
+  //     document.body.appendChild(image)
+
+  //     // image.onload = function() {
+  //     // create canvas
+  //     let canvas = document.createElement("canvas")
+  //     // canvas.width = this.width
+  //     // canvas.height = this.height
+  //     let context = canvas.getContext("2d")
+
+  // // let imageData = await this.loadImage(imageUrl)
+  // // console.log('🥬', imageData)
+  //     // const dataUrl = canvas.toDataURL()
+  //     // console.log('🌸',dataUrl)
+  //     context.drawImage(this, 0, 0)
+
+  // //Unable to get image data from canvas because the canvas has been tainted by cross-origin data
+  //     imageData = context.getImageData(0,0,canvas.width,canvas.height)
+  //     const data = imageData.data
+  //     console.log('🍎 data',data)
+
+  //     for(var x = 0, len = data.length; x < len; x+=4) {
+
+  //       r = data[x]
+  //       g = data[x+1]
+  //       b = data[x+2]
+
+  //       rgbMax = Math.max(Math.max(r, g), b)
+  //       if (rgbMax < rgbThreshold) {
+  //         dark++
+  //       }
+  //       else {
+  //         light++
+  //       }
+  //     }
+
+  //     var dl_diff = ((light - dark) / (this.width*this.height))
+  //     if (dl_diff + fuzzy < 0) {
+  //      return true
+  //     }
+  //     else {
+  //      return false
+  //     }
+
+  //   }
 
 }
