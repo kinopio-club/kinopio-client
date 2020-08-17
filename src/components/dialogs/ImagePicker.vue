@@ -52,8 +52,8 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="
         ref="searchInput"
         @keyup.stop.backspace
         @keyup.stop.enter
-        @mouseup.prevent.stop
-        @touchend.prevent.stop
+        @mouseup.stop
+        @touchend.stop
       )
       button.borderless.clear-input-wrap(@click.left="clearSearch")
         img.icon(src="@/assets/add.svg")
@@ -302,6 +302,7 @@ export default {
       this.$emit('selectImage', image)
     },
     scrollIntoView () {
+      if (this.isArenaOnly) { return }
       const element = this.$refs.dialog
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)

@@ -4,8 +4,8 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left="closeDialog
     p Background
 
   section(
-    @mouseup.prevent.stop
-    @touchend.prevent.stop
+    @mouseup.stop
+    @touchend.stop
   )
     textarea(
       :disabled="!canEditSpace"
@@ -237,6 +237,8 @@ export default {
 .background
   @media(max-width 435px)
     left -100px
+    dialog.image-picker
+      left -20px
   &.narrow
     width 215px
   textarea
