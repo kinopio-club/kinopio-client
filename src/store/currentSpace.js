@@ -934,7 +934,7 @@ export default {
       const currentBackground = utils.urlFromString(document.body.style.backgroundImage)
       if (background === currentBackground) { return }
       if (utils.urlIsImage(background)) {
-        utils.updateBackground(background)
+        document.body.style.backgroundImage = `url(${background})`
       } else {
         document.body.style.backgroundImage = ''
       }
