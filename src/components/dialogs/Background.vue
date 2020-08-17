@@ -225,6 +225,10 @@ export default {
         this.closeDialogs()
         this.clearErrors()
       }
+    },
+    // update background on broadcast
+    background (value) {
+      this.$store.dispatch('currentSpace/loadBackground', value)
     }
   }
 }
