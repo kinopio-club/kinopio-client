@@ -152,29 +152,6 @@ export default {
       this.$store.commit('addNotification', { message, type: 'success' })
     },
 
-    async moveOrCopyToSpace () {
-      if (this.loading) { return }
-      const spaceName = this.spaceName || words.randomUniqueName()
-      const items = this.selectedItems()
-      if (this.toNewSpace) {
-        // TODO
-        await this.createNewSpace(items)
-        this.notifyNewSpaceSuccess(spaceName)
-      } else {
-        await this.copyToSelectedSpace(items)
-        this.notifySuccess()
-      }
-      if (this.actionIsMove) {
-        this.removeCards(items.cards)
-      }
-      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
-      this.$store.dispatch('clearMultipleSelected')
-      this.$store.dispatch('closeAllDialogs')
-      if (this.shouldSwitchToSpace) {
-        this.$store.dispatch('currentSpace/changeSpace', { space: this.selectedSpace })
-      }
-    },
-
     selectedItems () {
       const currentSpace = utils.clone(this.$store.state.currentSpace)
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
@@ -203,6 +180,29 @@ export default {
       const newItems = utils.uniqueSpaceItems(utils.clone(items))
       await this.createRemoteItems(newItems)
       cache.addToSpace(newItems, this.selectedSpace.id)
+    },
+
+    async moveOrCopyToSpace () {
+      if (this.loading) { return }
+      const spaceName = this.spaceName || words.randomUniqueName()
+      const items = this.selectedItems()
+      if (this.toNewSpace) {
+        // TODO
+        await this.createNewSpace(items)
+        this.notifyNewSpaceSuccess(spaceName)
+      } else {
+        await this.copyToSelectedSpace(items)
+        this.notifySuccess()
+      }
+      if (this.actionIsMove) {
+        this.removeCards(items.cards)
+      }
+      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
+      this.$store.dispatch('clearMultipleSelected')
+      this.$store.dispatch('closeAllDialogs')
+      if (this.shouldSwitchToSpace) {
+        this.$store.dispatch('currentSpace/changeSpace', { space: this.selectedSpace })
+      }
     },
 
     mapRemoteItems (items) {
