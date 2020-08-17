@@ -9,7 +9,7 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.left.stop="clos
 
   section
     .row
-      p {{actionLabel | capitalize}} {{cardsCount}} {{pluralCard}} To
+      p {{actionLabel | capitalize}} {{cardsCount}} {{pluralCard}} to
     .row
       .segmented-buttons
         button(@click.left.stop="hideToNewSpace" :class="{active: !toNewSpace}")
