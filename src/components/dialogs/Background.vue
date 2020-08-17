@@ -164,7 +164,6 @@ export default {
     },
     clearErrors () {
       this.error.isNotImageUrl = false
-      // TODO test errors
       this.error.signUpToUpload = false
       this.error.userIsOffline = false
       this.error.sizeLimit = false
@@ -236,6 +235,8 @@ export default {
 
 <style lang="stylus">
 .background
+  @media(max-width 435px)
+    left -100px
   &.narrow
     width 215px
   textarea
