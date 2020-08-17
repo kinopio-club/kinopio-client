@@ -160,7 +160,7 @@ export default {
     updateSpaceBackground (url) {
       url = url.url || url
       this.$store.dispatch('currentSpace/updateSpace', { background: url })
-      this.$store.dispatch('currentSpace/loadBackground')
+      this.$store.dispatch('currentSpace/loadBackground', url)
     },
     clearErrors () {
       this.error.isNotImageUrl = false
@@ -225,9 +225,6 @@ export default {
         this.closeDialogs()
         this.clearErrors()
       }
-    },
-    background (value) {
-      this.$store.dispatch('currentSpace/loadBackground')
     }
   }
 }
