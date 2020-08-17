@@ -19,6 +19,7 @@ article(:style="position" :data-card-id="id")
     @dragleave="removeUploadIsDraggedOver"
     @dragend="removeUploadIsDraggedOver"
     @drop.prevent.stop="uploadFile"
+    @click.shift="selectAllConnectedCards"
   )
     Frames(:card="card")
 
@@ -380,6 +381,33 @@ export default {
     }
   },
   methods: {
+    selectAllConnectedCards () {
+      this.$store.dispatch('closeAllDialogs')
+      const connections = this.$store.state.currentSpace.connections
+      let selectedCards = [this.card.id]
+      let shouldSearch = true
+      while (shouldSearch) {
+        let cancelSearch = true
+        connections.forEach(connection => {
+          const startCard = connection.startCardId
+          const endCard = connection.endCardId
+          const startCardIsConnected = selectedCards.includes(startCard)
+          const endCardIsConnected = selectedCards.includes(endCard)
+          if (!startCardIsConnected && endCardIsConnected) {
+            selectedCards.push(startCard)
+            cancelSearch = false
+          }
+          if (startCardIsConnected && !endCardIsConnected) {
+            selectedCards.push(endCard)
+            cancelSearch = false
+          }
+        })
+        if (cancelSearch) {
+          shouldSearch = false
+        }
+      }
+      console.log('🌹selectAllConnectedCards', selectedCards)
+    },
     updateMediaUrls (urls) {
       this.formats.image = ''
       this.formats.video = ''
