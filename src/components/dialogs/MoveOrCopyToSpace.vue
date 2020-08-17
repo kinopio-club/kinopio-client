@@ -37,12 +37,9 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.left.stop="clos
           img.icon.visit(src="@/assets/visit.svg")
           span {{actionLabel | capitalize}} to {{selectedSpace.name}}
           Loader(:visible="loading")
-
-      //- deafult to 'new space' if no other spaces
       template(v-if="!spaces.length")
         span.badge.danger No Other Spaces
-        p + Add a Space to move cards there
-        button(@click.left="triggerSpaceDetailsVisible") Your Spaces
+
 </template>
 
 <script>
@@ -119,11 +116,6 @@ export default {
     hideMove () {
       this.actionIsMove = false
     },
-    triggerSpaceDetailsVisible () {
-      this.$store.dispatch('clearMultipleSelected')
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerSpaceDetailsVisible')
-    },
     toggleSpacePickerIsVisible () {
       this.spacePickerIsVisible = !this.spacePickerIsVisible
     },
@@ -199,6 +191,9 @@ export default {
         return spaceIsNotCurrent && spaceHasId
       })
       this.selectedSpace = this.spaces[0]
+      if (!this.spaces.length) {
+        this.toNewSpace = true
+      }
     },
     updateSelectedSpace (space) {
       this.selectedSpace = space
