@@ -46,7 +46,7 @@ article(:style="position" :data-card-id="id")
       //- Right buttons
       span.card-buttons-wrap
         //- Link
-        a.link-wrap(:href="firstUrl" @click.left.stop @touchend="openUrl(firstUrl)" v-if="firstUrl")
+        a.link-wrap(:href="firstUrl" @click.left.stop="closeAllDialogs" @touchend="openUrl(firstUrl)" v-if="firstUrl")
           .link
             button(:style="{background: selectedColor}" tabindex="-1")
               img.icon.visit.arrow-icon(src="@/assets/visit.svg")
@@ -381,7 +381,7 @@ export default {
     }
   },
   methods: {
-    selectAllConnectedCards () {
+    selectAllConnectedCards (event) {
       this.$store.dispatch('closeAllDialogs')
       const connections = this.$store.state.currentSpace.connections
       let selectedCards = [this.card.id]
@@ -406,7 +406,10 @@ export default {
           shouldSearch = false
         }
       }
-      console.log('🌹selectAllConnectedCards', selectedCards)
+      const position = utils.cursorPositionInPage(event)
+      this.$store.commit('multipleSelectedActionsPosition', position)
+      this.$store.commit('multipleSelectedActionsIsVisible', true)
+      this.$store.commit('multipleCardsSelectedIds', selectedCards)
     },
     updateMediaUrls (urls) {
       this.formats.image = ''
@@ -514,6 +517,9 @@ export default {
       if (this.canEditCard) {
         this.$store.dispatch('currentSpace/removeCard', this.card)
       }
+    },
+    closeAllDialogs () {
+      this.$store.dispatch('closeAllDialogs')
     },
     createCurrentConnection (event) {
       const cursor = utils.cursorPositionInViewport(event)
