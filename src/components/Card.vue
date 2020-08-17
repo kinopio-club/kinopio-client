@@ -19,7 +19,7 @@ article(:style="position" :data-card-id="id")
     @dragleave="removeUploadIsDraggedOver"
     @dragend="removeUploadIsDraggedOver"
     @drop.prevent.stop="uploadFile"
-    @click.shift="selectAllConnectedCards"
+    @click="selectAllConnectedCards"
   )
     Frames(:card="card")
 
@@ -387,6 +387,8 @@ export default {
   },
   methods: {
     selectAllConnectedCards (event) {
+      const isMeta = event.metaKey || event.ctrlKey
+      if (!isMeta) { return }
       this.$store.dispatch('closeAllDialogs')
       const connections = this.$store.state.currentSpace.connections
       let selectedCards = [this.card.id]
