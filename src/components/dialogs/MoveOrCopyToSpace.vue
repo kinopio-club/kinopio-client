@@ -9,25 +9,48 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.left.stop="clos
 
   section
     .row
-      p {{actionLabel | capitalize}} {{cardsCount}} {{pluralCard}} To
-    template(v-if="spaces.length")
+      p {{actionLabel | capitalize}} {{cardsCount}} {{pluralCard}} to
+    .row
+      .segmented-buttons
+        button(@click.left.stop="hideToNewSpace" :class="{active: !toNewSpace}")
+          span Space
+        button(@click.left.stop="showToNewSpace" :class="{active: toNewSpace}")
+          img.icon(src="@/assets/add.svg")
+          span New Space
+
+    //- To New Space
+    template(v-if="toNewSpace")
       .row
-        .button-wrap
-          button(@click.left.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}") {{selectedSpace.name}}
-          SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" @selectSpace="updateSelectedSpace")
-      .row(v-if="spaces.length")
+        input(placeholder="name" v-model="newSpaceName")
+      .row
         label(:class="{active: shouldSwitchToSpace}" @click.left.prevent="toggleShouldSwitchToSpace" @keydown.stop.enter="toggleShouldSwitchToSpace")
           input(type="checkbox" v-model="shouldSwitchToSpace")
           span Switch to Space
       button(@click.left="moveOrCopyToSpace" :class="{active: loading}")
         img.icon.visit(src="@/assets/visit.svg")
-        span {{actionLabel | capitalize}} to {{selectedSpace.name}}
+        span {{actionLabel | capitalize}} to New Space
         Loader(:visible="loading")
 
-    template(v-if="!spaces.length")
-      span.badge.danger No Other Spaces
-      p + Add a Space to move cards there
-      button(@click.left="triggerSpaceDetailsVisible") Your Spaces
+    //- To Existing Space
+    template(v-if="!toNewSpace")
+      template(v-if="!spaces.length")
+        span.badge.danger No Other Spaces
+      template(v-if="spaces.length")
+        .row
+          .button-wrap
+            button(@click.left.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}")
+              span {{selectedSpace.name}}
+              img.down-arrow(src="@/assets/down-arrow.svg")
+            SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" @selectSpace="updateSelectedSpace")
+        .row(v-if="spaces.length")
+          label(:class="{active: shouldSwitchToSpace}" @click.left.prevent="toggleShouldSwitchToSpace" @keydown.stop.enter="toggleShouldSwitchToSpace")
+            input(type="checkbox" v-model="shouldSwitchToSpace")
+            span Switch to Space
+        button(@click.left="moveOrCopyToSpace" :class="{active: loading}")
+          img.icon.visit(src="@/assets/visit.svg")
+          span {{actionLabel | capitalize}} to {{selectedSpace.name}}
+          Loader(:visible="loading")
+
 </template>
 
 <script>
@@ -36,6 +59,9 @@ import cache from '@/cache.js'
 import utils from '@/utils.js'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
+import words from '@/words.js'
+import newSpace from '@/spaces/new.json'
+import nanoid from 'nanoid'
 
 export default {
   name: 'MoveToSpace',
@@ -53,7 +79,9 @@ export default {
       selectedSpace: {},
       spacePickerIsVisible: false,
       loading: false,
-      actionIsMove: true
+      actionIsMove: true,
+      toNewSpace: false,
+      newSpaceName: ''
     }
   },
   filters: {
@@ -91,16 +119,17 @@ export default {
     }
   },
   methods: {
+    hideToNewSpace () {
+      this.toNewSpace = false
+    },
+    showToNewSpace () {
+      this.toNewSpace = true
+    },
     showMove () {
       this.actionIsMove = true
     },
     hideMove () {
       this.actionIsMove = false
-    },
-    triggerSpaceDetailsVisible () {
-      this.$store.dispatch('clearMultipleSelected')
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerSpaceDetailsVisible')
     },
     toggleSpacePickerIsVisible () {
       this.spacePickerIsVisible = !this.spacePickerIsVisible
@@ -116,27 +145,18 @@ export default {
     },
     notifySuccess () {
       const actionLabel = this.$options.filters.pastTense(this.actionLabel)
-      const message = `${this.cardsCount} ${this.pluralCard} ${actionLabel} to ${this.selectedSpace.name}`
+      const message = `${this.cardsCount} ${this.pluralCard} ${actionLabel} to ${this.selectedSpace.name}` // 3 cards copied to SpacePalace
       this.$store.commit('addNotification', { message, type: 'success' })
     },
-    async moveOrCopyToSpace () {
-      if (this.loading) { return }
+    notifyNewSpaceSuccess (newSpaceName) {
+      const actionLabel = this.$options.filters.pastTense(this.actionLabel)
+      const message = `${newSpaceName} added with ${this.cardsCount} ${this.pluralCard} ${actionLabel} ` // SpacePalace added with 3 cards copied
+      this.$store.commit('addNotification', { message, type: 'success' })
+    },
+    selectedItems () {
       const currentSpace = utils.clone(this.$store.state.currentSpace)
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
       const cards = currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
-      await this.copyToSelectedSpace(currentSpace, multipleCardsSelectedIds, cards)
-      this.notifySuccess()
-      if (this.actionIsMove) {
-        this.removeCards(cards)
-      }
-      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
-      this.$store.dispatch('clearMultipleSelected')
-      this.$store.dispatch('closeAllDialogs')
-      if (this.shouldSwitchToSpace) {
-        this.$store.dispatch('currentSpace/changeSpace', { space: this.selectedSpace })
-      }
-    },
-    async copyToSelectedSpace (currentSpace, multipleCardsSelectedIds, cards) {
       const connections = currentSpace.connections.filter(connection => {
         const isStartCardMatch = multipleCardsSelectedIds.includes(connection.startCardId)
         const isEndCardMatch = multipleCardsSelectedIds.includes(connection.endCardId)
@@ -146,20 +166,29 @@ export default {
       const connectionTypes = currentSpace.connectionTypes.filter(type => {
         return connectionTypeIds.includes(type.id)
       })
-      const prevItems = { cards, connectionTypes, connections }
-      const newItems = utils.uniqueSpaceItems(utils.clone(prevItems))
-      await this.createRemoteItems(newItems)
-      cache.addToSpace(newItems, this.selectedSpace.id)
+      return { cards, connectionTypes, connections }
     },
-    mapRemoteItems (items) {
-      const spaceId = this.selectedSpace.id
-      return items.map(item => {
-        item.spaceId = spaceId
-        return item
-      })
-    },
-    async createRemoteItems ({ cards, connectionTypes, connections }) {
+
+    async createNewSpace (items, newSpaceName) {
       this.loading = true
+      let space = utils.clone(newSpace)
+      space.name = newSpaceName
+      space.id = nanoid()
+      space.cards = items.cards
+      space.connectionTypes = items.connectionTypes
+      space.connections = items.connections
+      space.userId = this.$store.state.currentUser.id
+      space = cache.updateIdsInSpace(space)
+      console.log('🚚 create new space', space)
+      await this.$store.dispatch('api/createSpace', space)
+      this.loading = false
+      return space
+    },
+
+    async copyToSelectedSpace (items) {
+      this.loading = true
+      const newItems = utils.uniqueSpaceItems(utils.clone(items))
+      let { cards, connectionTypes, connections } = newItems
       cards = this.mapRemoteItems(cards)
       connectionTypes = this.mapRemoteItems(connectionTypes)
       connections = this.mapRemoteItems(connections)
@@ -167,7 +196,39 @@ export default {
       await this.$store.dispatch('api/updateCards', cards)
       await this.$store.dispatch('api/updateConnectionTypes', connectionTypes)
       await this.$store.dispatch('api/updateConnections', connections)
+      cache.addToSpace(newItems, this.selectedSpace.id)
       this.loading = false
+    },
+
+    async moveOrCopyToSpace () {
+      if (this.loading) { return }
+      const newSpaceName = this.newSpaceName || words.randomUniqueName()
+      const items = this.selectedItems()
+      let selectedSpace = this.selectedSpace
+      if (this.toNewSpace) {
+        selectedSpace = await this.createNewSpace(items, newSpaceName)
+        this.notifyNewSpaceSuccess(newSpaceName)
+      } else {
+        await this.copyToSelectedSpace(items)
+        this.notifySuccess()
+      }
+      if (this.actionIsMove) {
+        this.removeCards(items.cards)
+      }
+      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
+      this.$store.dispatch('clearMultipleSelected')
+      this.$store.dispatch('closeAllDialogs')
+      if (this.shouldSwitchToSpace) {
+        this.$store.dispatch('currentSpace/changeSpace', { space: selectedSpace })
+      }
+    },
+
+    mapRemoteItems (items) {
+      const spaceId = this.selectedSpace.id
+      return items.map(item => {
+        item.spaceId = spaceId
+        return item
+      })
     },
     updateSpaces () {
       const spaces = cache.getAllSpaces()
@@ -177,6 +238,9 @@ export default {
         return spaceIsNotCurrent && spaceHasId
       })
       this.selectedSpace = this.spaces[0]
+      if (!this.spaces.length) {
+        this.toNewSpace = true
+      }
     },
     updateSelectedSpace (space) {
       this.selectedSpace = space
@@ -198,6 +262,7 @@ export default {
           this.closeDialogs()
           this.scrollIntoView()
           this.updateSpaces()
+          this.newSpaceName = words.randomUniqueName()
         }
       })
     }

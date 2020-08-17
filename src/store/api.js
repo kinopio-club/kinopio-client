@@ -305,6 +305,17 @@ const self = {
         console.error(error)
       }
     },
+    createSpace: async (context, space) => {
+      try {
+        space = normalizeSpaceToRemote(space)
+        const body = space
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/space`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
     getSpaceRemovedCards: async (context, space) => {
       if (!shouldRequest()) { return }
       try {
