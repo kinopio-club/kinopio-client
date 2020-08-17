@@ -114,7 +114,7 @@ export default {
   computed: {
     meta () {
       if (utils.isMacOrIpad() || utils.isIPhone()) {
-        return 'Cmd'
+        return '⌘'
       } else {
         return 'Ctrl'
       }
