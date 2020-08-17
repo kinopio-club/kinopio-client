@@ -10,24 +10,39 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.left.stop="clos
   section
     .row
       p {{actionLabel | capitalize}} {{cardsCount}} {{pluralCard}} To
-    template(v-if="spaces.length")
-      .row
-        .button-wrap
-          button(@click.left.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}") {{selectedSpace.name}}
-          SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" @selectSpace="updateSelectedSpace")
-      .row(v-if="spaces.length")
-        label(:class="{active: shouldSwitchToSpace}" @click.left.prevent="toggleShouldSwitchToSpace" @keydown.stop.enter="toggleShouldSwitchToSpace")
-          input(type="checkbox" v-model="shouldSwitchToSpace")
-          span Switch to Space
-      button(@click.left="moveOrCopyToSpace" :class="{active: loading}")
-        img.icon.visit(src="@/assets/visit.svg")
-        span {{actionLabel | capitalize}} to {{selectedSpace.name}}
-        Loader(:visible="loading")
+    .row
+      .segmented-buttons
+        button(@click.left.stop="hideToNewSpace" :class="{active: !toNewSpace}")
+          span Space
+        button(@click.left.stop="showToNewSpace" :class="{active: toNewSpace}")
+          img.icon(src="@/assets/add.svg")
+          span New Space
 
-    template(v-if="!spaces.length")
-      span.badge.danger No Other Spaces
-      p + Add a Space to move cards there
-      button(@click.left="triggerSpaceDetailsVisible") Your Spaces
+    template(v-if="toNewSpace")
+      p hellooo
+
+    template(v-if="!toNewSpace")
+      template(v-if="spaces.length")
+        .row
+          .button-wrap
+            button(@click.left.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}")
+              span {{selectedSpace.name}}
+              img.down-arrow(src="@/assets/down-arrow.svg")
+            SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" @selectSpace="updateSelectedSpace")
+        .row(v-if="spaces.length")
+          label(:class="{active: shouldSwitchToSpace}" @click.left.prevent="toggleShouldSwitchToSpace" @keydown.stop.enter="toggleShouldSwitchToSpace")
+            input(type="checkbox" v-model="shouldSwitchToSpace")
+            span Switch to Space
+        button(@click.left="moveOrCopyToSpace" :class="{active: loading}")
+          img.icon.visit(src="@/assets/visit.svg")
+          span {{actionLabel | capitalize}} to {{selectedSpace.name}}
+          Loader(:visible="loading")
+
+      //- deafult to 'new space' if no other spaces
+      template(v-if="!spaces.length")
+        span.badge.danger No Other Spaces
+        p + Add a Space to move cards there
+        button(@click.left="triggerSpaceDetailsVisible") Your Spaces
 </template>
 
 <script>
@@ -53,7 +68,8 @@ export default {
       selectedSpace: {},
       spacePickerIsVisible: false,
       loading: false,
-      actionIsMove: true
+      actionIsMove: true,
+      toNewSpace: false
     }
   },
   filters: {
@@ -91,6 +107,12 @@ export default {
     }
   },
   methods: {
+    hideToNewSpace () {
+      this.toNewSpace = false
+    },
+    showToNewSpace () {
+      this.toNewSpace = true
+    },
     showMove () {
       this.actionIsMove = true
     },
