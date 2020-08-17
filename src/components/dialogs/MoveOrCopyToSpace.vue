@@ -21,7 +21,7 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.left.stop="clos
     //- To New Space
     template(v-if="toNewSpace")
       .row
-        input(placeholder="name" v-model="spaceName")
+        input(placeholder="name" v-model="newSpaceName")
       .row
         label(:class="{active: shouldSwitchToSpace}" @click.left.prevent="toggleShouldSwitchToSpace" @keydown.stop.enter="toggleShouldSwitchToSpace")
           input(type="checkbox" v-model="shouldSwitchToSpace")
@@ -81,7 +81,7 @@ export default {
       loading: false,
       actionIsMove: true,
       toNewSpace: false,
-      spaceName: ''
+      newSpaceName: ''
     }
   },
   filters: {
@@ -148,9 +148,9 @@ export default {
       const message = `${this.cardsCount} ${this.pluralCard} ${actionLabel} to ${this.selectedSpace.name}` // 3 cards copied to SpacePalace
       this.$store.commit('addNotification', { message, type: 'success' })
     },
-    notifyNewSpaceSuccess (spaceName) {
+    notifyNewSpaceSuccess (newSpaceName) {
       const actionLabel = this.$options.filters.pastTense(this.actionLabel)
-      const message = `${spaceName} added with ${this.cardsCount} ${this.pluralCard} ${actionLabel} ` // SpacePalace added with 3 cards copied
+      const message = `${newSpaceName} added with ${this.cardsCount} ${this.pluralCard} ${actionLabel} ` // SpacePalace added with 3 cards copied
       this.$store.commit('addNotification', { message, type: 'success' })
     },
     selectedItems () {
@@ -169,10 +169,10 @@ export default {
       return { cards, connectionTypes, connections }
     },
 
-    async createNewSpace (items, spaceName) {
+    async createNewSpace (items, newSpaceName) {
       this.loading = true
       let space = utils.clone(newSpace)
-      space.name = spaceName
+      space.name = newSpaceName
       space.id = nanoid()
       space.cards = items.cards
       space.connectionTypes = items.connectionTypes
@@ -202,12 +202,12 @@ export default {
 
     async moveOrCopyToSpace () {
       if (this.loading) { return }
-      const spaceName = this.spaceName || words.randomUniqueName()
+      const newSpaceName = this.newSpaceName || words.randomUniqueName()
       const items = this.selectedItems()
       let selectedSpace = this.selectedSpace
       if (this.toNewSpace) {
-        selectedSpace = await this.createNewSpace(items, spaceName)
-        this.notifyNewSpaceSuccess(spaceName)
+        selectedSpace = await this.createNewSpace(items, newSpaceName)
+        this.notifyNewSpaceSuccess(newSpaceName)
       } else {
         await this.copyToSelectedSpace(items)
         this.notifySuccess()
@@ -262,7 +262,7 @@ export default {
           this.closeDialogs()
           this.scrollIntoView()
           this.updateSpaces()
-          this.spaceName = words.randomUniqueName()
+          this.newSpaceName = words.randomUniqueName()
         }
       })
     }
