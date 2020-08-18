@@ -393,6 +393,7 @@ export default {
     selectAllConnectedCards (event) {
       const isMeta = event.metaKey || event.ctrlKey
       if (!isMeta) { return }
+      if (!this.canEditSpace) { return }
       this.$store.dispatch('closeAllDialogs')
       const connections = this.$store.state.currentSpace.connections
       let selectedCards = [this.card.id]

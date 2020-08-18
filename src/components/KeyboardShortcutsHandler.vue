@@ -429,6 +429,8 @@ export default {
     // Select All Cards
 
     selectAllCards (event) {
+      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
+      if (!canEditSpace) { return }
       let cards = utils.clone(this.$store.state.currentSpace.cards)
       cards = cards.map(card => card.id)
       const dialogOffset = {
