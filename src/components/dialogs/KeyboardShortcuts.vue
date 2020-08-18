@@ -51,11 +51,15 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop)
         .badge.info Arrow(→↑←↓)
     article
       .row
-        .badge.title Select All Cards
+        .badge.title
+          img.icon(src="@/assets/brush.svg")
+          span Select All Cards
         .badge.info {{meta}}-A
     article
       .row
-        .badge.title Select Connected Cards
+        .badge.title
+          img.icon(src="@/assets/brush.svg")
+          span Select Connected Cards
         .badge.info {{meta}}-Click Card
     article
       .row
