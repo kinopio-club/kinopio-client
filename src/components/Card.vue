@@ -46,7 +46,7 @@ article(:style="position" :data-card-id="id" ref="card")
       //- Right buttons
       span.card-buttons-wrap
         //- Link
-        a.link-wrap(:href="firstUrl" @click.left.stop="closeAllDialogs" @touchend="openUrl(firstUrl)" v-if="firstUrl")
+        a.link-wrap(:href="linkOrUrl" @click.left.stop="closeAllDialogs" @touchend="openUrl(linkOrUrl)" v-if="linkOrUrl")
           .link
             button(:style="{background: selectedColor}" tabindex="-1")
               img.icon.visit.arrow-icon(src="@/assets/visit.svg")
@@ -182,9 +182,13 @@ export default {
       if (!this.cardPendingUpload) { return }
       return this.cardPendingUpload.imageDataUrl
     },
-    firstUrl () {
+    linkOrUrl () {
       if (!this.urls.length) { return }
-      return this.urls[0]
+      if (this.formats.link) {
+        return this.formats.link
+      } else {
+        return this.urls[0]
+      }
     },
     urls () {
       const urls = utils.urlsFromString(this.name)
