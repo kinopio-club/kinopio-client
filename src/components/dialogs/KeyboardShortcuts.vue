@@ -59,7 +59,7 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop)
       .row
         .badge.title
           img.icon(src="@/assets/brush.svg")
-          span Select Connected Cards
+          span Select All Connected Cards
         .badge.info {{meta}}-Click Card
     article
       .row
