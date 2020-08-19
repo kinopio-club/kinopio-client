@@ -345,6 +345,8 @@ export default {
       })
     },
     addSpace: (context) => {
+      const user = context.rootState.currentUser
+      context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       context.dispatch('createNewSpace')
       Vue.nextTick(() => {
         context.dispatch('updateCardConnectionPaths', { cardId: context.state.cards[1].id, connections: context.state.connections })
@@ -504,7 +506,7 @@ export default {
         })
       }
       const user = context.rootState.currentUser
-      context.commit('broadcast/update', { user, type: 'userLeftRoom' }, { root: true })
+      context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
       await context.dispatch('loadSpace', space)

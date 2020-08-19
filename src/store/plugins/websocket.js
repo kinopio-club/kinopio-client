@@ -123,6 +123,8 @@ export default function createWebSocketPlugin () {
           return
         }
         joinSpaceRoom(store, mutation)
+      } else if (mutation.type === 'broadcast/leaveSpaceRoom') {
+        sendEvent(store, mutation)
       } else if (mutation.type === 'broadcast/update') {
         const canEditSpace = store.getters['currentUser/canEditSpace']()
         if (!canEditSpace) { return }

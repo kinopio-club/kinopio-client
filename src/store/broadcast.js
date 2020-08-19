@@ -9,6 +9,7 @@ const self = {
     connect: () => {},
     reconnect: () => {},
     joinSpaceRoom: () => {},
+    leaveSpaceRoom: () => {},
     update: () => {},
     updateUser: () => {},
     updateStore: () => {},
