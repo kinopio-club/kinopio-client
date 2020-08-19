@@ -2,7 +2,10 @@
 dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section.results-section
     Loader(:visible="loading")
-    SpaceList(:spaces="spaces" :showUserIfCurrentUserIsCollaborator="showUserIfCurrentUserIsCollaborator" :selectedSpace="selectedSpace" @selectSpace="selectSpace")
+    SpaceList(v-if="spaces.length" :spaces="spaces" :showUserIfCurrentUserIsCollaborator="showUserIfCurrentUserIsCollaborator" :selectedSpace="selectedSpace" @selectSpace="selectSpace")
+    .error-container(v-if="!spaces.length")
+      User(:user="user" :isClickable="false" :key="user.id")
+      span has no public spaces
 </template>
 
 <script>
@@ -14,13 +17,15 @@ export default {
   name: 'SpacePicker',
   components: {
     Loader,
-    SpaceList: () => import('@/components/SpaceList.vue')
+    SpaceList: () => import('@/components/SpaceList.vue'),
+    User: () => import('@/components/User.vue')
   },
   props: {
     visible: Boolean,
     selectedSpace: Object,
     shouldExcludeCurrentSpace: Boolean,
     userSpaces: Array,
+    user: Object,
     loading: Boolean,
     showUserIfCurrentUserIsCollaborator: Boolean
   },
@@ -94,5 +99,10 @@ export default {
     padding-top 4px
     @media(max-height 700px)
       max-height 40vh
-
+  .error-container
+    padding 4px
+    display flex
+    align-items center
+    .user
+      margin-right 6px
 </style>

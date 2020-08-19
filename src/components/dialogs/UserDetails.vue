@@ -54,7 +54,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.left.stop="clos
         User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
         span Spaces
         Loader(:visible="loadingUserspaces")
-      SpacePicker(:visible="spacePickerIsVisible" :loading="loadingUserspaces" :userSpaces="userSpaces" @selectSpace="changeSpace")
+      SpacePicker(:visible="spacePickerIsVisible" :loading="loadingUserspaces" :user="user" :userSpaces="userSpaces" @selectSpace="changeSpace")
     .button-wrap
       label(:class="{active: isFavoriteUser}" @click.left.prevent="toggleIsFavoriteUser" @keydown.stop.enter="toggleIsFavoriteUser")
         input(type="checkbox" v-model="isFavoriteUser")
