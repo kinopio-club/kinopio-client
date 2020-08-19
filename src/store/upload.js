@@ -69,12 +69,19 @@ export default {
       let key = `${cardId || spaceId}/${fileName}`
       const userIsUpgraded = context.rootState.currentUser.isUpgraded
       context.dispatch('checkIfFileTooBig', file)
-      const presignedPostData = await context.dispatch('api/createPresignedPost', { key, userIsUpgraded, type: file.type }, { root: true })
+      // add presignedPostData to upload
+      let presignedPostData
+      if (file.presignedPostData) {
+        presignedPostData = file.presignedPostData
+      } else {
+        presignedPostData = await context.dispatch('api/createPresignedPost', { key, userIsUpgraded, type: file.type }, { root: true })
+      }
       const formData = new FormData()
       Object.keys(presignedPostData.fields).forEach(key => {
         formData.append(key, presignedPostData.fields[key])
       })
       formData.append('file', file)
+      // upload
       return new Promise(resolve => {
         const request = new XMLHttpRequest()
         // progress
@@ -134,7 +141,8 @@ export default {
         return
       }
       // add cards
-      for (const [index] of files.entries()) {
+      let filesPostData = []
+      for (const [index, file] of files.entries()) {
         const positionOffset = 20
         const cardId = nanoid()
         cardIds.push(cardId)
@@ -146,7 +154,18 @@ export default {
           name: '⬬⬭',
           id: cardId
         }, { root: true })
+        const fileName = utils.normalizeFileUrl(file.name)
+        filesPostData.push({
+          key: `${cardIds[index]}/${fileName}`,
+          type: file.type
+        })
       }
+      // add presignedPostData to files
+      const userIsUpgraded = context.rootState.currentUser.isUpgraded
+      const multiplePresignedPostData = await context.dispatch('api/createMultiplePresignedPosts', { files: filesPostData, userIsUpgraded }, { root: true })
+      files.map((file, index) => {
+        file.presignedPostData = multiplePresignedPostData[index]
+      })
       // upload files
       await Promise.all(files.map(async (file, index) => {
         const cardId = cardIds[index]
