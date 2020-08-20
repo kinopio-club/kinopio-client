@@ -592,7 +592,7 @@ export default {
     // filter out empty or non-urls
     urls = urls.filter(url => {
       const urlHasContent = Boolean(this.trim(url).length)
-      const urlIsFloatOrIp = this.urlIsFloatOrIp(url)
+      const urlIsFloatOrIp = this.urlIsFloatOrIp(url.trim())
       if (urlHasContent && !urlIsFloatOrIp) {
         return true
       }

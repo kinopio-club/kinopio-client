@@ -644,6 +644,8 @@ article
   .card-content-wrap
     display flex
     align-items flex-start
+  .card-content
+    min-width 40px
   .card-buttons-wrap
     display flex
   .name-wrap
