@@ -12,13 +12,35 @@ export default {
       // console.log(this.getAllSpaces())
       // get current space id
       // console.log(utils.spaceHasUrl(), utils.idFromUrl())
-      const currentSpaceId = utils.idFromUrl()
+      if (this.user().apiKey) {
+        const currentSpaceId = utils.idFromUrl()
 
-      let spaces = this.getAllSpaces()
-      console.log('1 spaces', spaces.length, currentSpaceId)
-      spaces = spaces.filter(space => space.id !== currentSpaceId)
-      console.log('2 spaces', spaces.length, spaces)
+        // let spaces = this.getAllSpaces()
+        // console.log('1 spaces', spaces.length, currentSpaceId)
+        // spaces = spaces.filter(space => space.id !== currentSpaceId)
 
+        const keys = Object.keys(window.localStorage)
+        let spaceKeys = keys.filter(key => key.startsWith('space-') || key.startsWith('removed-space-'))
+        console.log('1 spaces', spaceKeys.length, currentSpaceId)
+
+        spaceKeys = spaceKeys.filter(key => key !== `space-${currentSpaceId}`)
+        console.log('2 spaces', spaceKeys.length, currentSpaceId, spaceKeys)
+
+        // foreach removeLocal(key)
+
+        // console.log('2 spaces', spaces.length, spaces)
+        // console.log('removedspaces', this.getAllRemovedSpaces())
+        // spaces.forEach(space => {
+
+        // let key
+        // if (space.id) {
+        //   key = `space-${space.id}`
+        // } else {
+        //   key = name
+        // }
+        //   this.removeLocal(space)
+        // })
+      }
       // if user.apikey
       // console.log('🐢 Cleaning up your localStorage')
       // remove all ls spaces except current one.
