@@ -155,11 +155,14 @@ export default {
           id: cardId
         }, { root: true })
         const fileName = utils.normalizeFileUrl(file.name)
+        const key = `${cardIds[index]}/${fileName}`
         filesPostData.push({
-          key: `${cardIds[index]}/${fileName}`,
+          key,
           type: file.type
         })
+        context.commit('addPendingUpload', { key, fileName, cardId })
       }
+
       // add presignedPostData to files
       const userIsUpgraded = context.rootState.currentUser.isUpgraded
       const multiplePresignedPostData = await context.dispatch('api/createMultiplePresignedPosts', { files: filesPostData, userIsUpgraded }, { root: true })
