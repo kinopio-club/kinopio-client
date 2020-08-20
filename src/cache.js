@@ -7,11 +7,20 @@ export default {
     try {
       window.localStorage[key] = JSON.stringify(value)
     } catch (error) {
-      console.warn('storeLocal Could not save to localStorage')
-      // TODO
-      // if user is signed in (has apikey), transparently clean ls by deleting removed cards in currentspace, and all other spaces
+      console.warn('storeLocal Could not save to localStorage', key, value)
+      console.log(this.user())
+      console.log(this.getAllSpaces())
+      // get current space id
+      console.log(utils.spaceHasUrl(), utils.currentSpaceHasUrl(), utils.idFromUrl())
+
+      // if user.apikey
+      // console.log('🐢 Cleaning up your localStorage')
+      // remove all ls spaces except current one.
+      // Remove ls removed cards in currentspace
+      // else
+      // notify user w manual dom, #local-storage-is-full
       // else, manually show a warning about needing to sign up or in because the browser is out of localstorage
-      // delete this dom node manually during sign up/in in component
+      // dom .hidden on sign up / in
     }
   },
   getLocal (key) {
