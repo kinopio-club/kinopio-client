@@ -235,6 +235,10 @@ export default {
         name = name.replace(this.formats.video, '')
         name = name.replace(this.formats.audio, '')
       }
+      // for music use cases
+      if (this.formats.link.includes('kinopio=hide')) {
+        name = name.replace(this.formats.link, '')
+      }
       const checkbox = utils.checkboxFromString(name)
       if (checkbox) {
         name = name.replace(checkbox, '')
