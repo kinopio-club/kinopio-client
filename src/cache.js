@@ -15,8 +15,8 @@ export default {
       const currentSpaceId = utils.idFromUrl()
 
       let spaces = this.getAllSpaces()
-      console.log('1 spaces', spaces.length)
-      spaces.filter(space => space.id !== currentSpaceId)
+      console.log('1 spaces', spaces.length, currentSpaceId)
+      spaces = spaces.filter(space => space.id !== currentSpaceId)
       console.log('2 spaces', spaces.length, spaces)
 
       // if user.apikey
