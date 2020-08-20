@@ -14,18 +14,22 @@ span
           img.icon.privacy-icon(v-if="spaceIsNotClosed(space)" :src="privacyIcon(space)")
           .badge.status(v-if="showInExplore(space)")
             img.icon(src="@/assets/checkmark.svg")
+    Loader(:visible="isLoading")
+
 </template>
 
 <script>
 import privacy from '@/spaces/privacy.js'
 import templates from '@/spaces/templates.js'
 import ResultsFilter from '@/components/ResultsFilter.vue'
+import Loader from '@/components/Loader.vue'
 
 export default {
   name: 'SpaceList',
   components: {
     User: () => import('@/components/User.vue'),
-    ResultsFilter
+    ResultsFilter,
+    Loader
   },
   props: {
     spaces: Array,
@@ -34,7 +38,8 @@ export default {
     showUser: Boolean,
     showUserIfCurrentUserIsCollaborator: Boolean,
     hideExploreBadge: Boolean,
-    hideFilter: Boolean
+    hideFilter: Boolean,
+    isLoading: Boolean
   },
   data () {
     return {
@@ -132,4 +137,6 @@ export default {
     margin-right 6px
     vertical-align middle
 
+  .loader
+    margin-left 6px
 </style>

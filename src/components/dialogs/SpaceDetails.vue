@@ -45,7 +45,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
 
   section.results-section(v-if="!favoritesIsVisible")
-    SpaceList(:spaces="spaces" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
+    SpaceList(:spaces="spaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
 
   Favorites(:visible="favoritesIsVisible" :loading="favoritesIsLoading")
 
@@ -86,7 +86,8 @@ export default {
       favoriteUsersIsVisible: false,
       favoritesIsLoading: false,
       hasUpdatedFavorites: false,
-      removeLabel: 'Remove'
+      removeLabel: 'Remove',
+      isLoadingRemoteSpaces: false
     }
   },
   created () {
@@ -195,7 +196,9 @@ export default {
       })
     },
     async updateWithRemoteSpaces () {
+      this.isLoadingRemoteSpaces = true
       const remoteSpaces = await this.$store.dispatch('api/getUserSpaces')
+      this.isLoadingRemoteSpaces = false
       if (!remoteSpaces) { return }
       this.pruneCachedSpaces(remoteSpaces)
       this.spaces = remoteSpaces
