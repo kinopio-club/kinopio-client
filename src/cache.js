@@ -8,10 +8,16 @@ export default {
       window.localStorage[key] = JSON.stringify(value)
     } catch (error) {
       console.warn('storeLocal Could not save to localStorage', key, value)
-      console.log(this.user())
-      console.log(this.getAllSpaces())
+      console.log('check: current user has apiKey', this.user().apiKey)
+      // console.log(this.getAllSpaces())
       // get current space id
-      console.log(utils.spaceHasUrl(), utils.idFromUrl())
+      // console.log(utils.spaceHasUrl(), utils.idFromUrl())
+      const currentSpaceId = utils.idFromUrl()
+
+      let spaces = this.getAllSpaces()
+      console.log('1 spaces', spaces.length)
+      spaces.filter(space => space.id !== currentSpaceId)
+      console.log('2 spaces', spaces.length, spaces)
 
       // if user.apikey
       // console.log('🐢 Cleaning up your localStorage')
