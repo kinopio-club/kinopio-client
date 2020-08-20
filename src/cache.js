@@ -11,7 +11,7 @@ export default {
       console.log(this.user())
       console.log(this.getAllSpaces())
       // get current space id
-      console.log(utils.spaceHasUrl(), utils.currentSpaceHasUrl(), utils.idFromUrl())
+      console.log(utils.spaceHasUrl(), utils.idFromUrl())
 
       // if user.apikey
       // console.log('🐢 Cleaning up your localStorage')
