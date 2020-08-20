@@ -5,7 +5,7 @@ import cache from '@/cache.js'
 
 export default {
   host () {
-    let host = 'https://api.kinopio.club'
+    let host = 'https://kinopio-server.herokuapp.com'
     if (process.env.NODE_ENV === 'development') {
       host = 'http://kinopio.local:3000'
     }
@@ -13,7 +13,7 @@ export default {
   },
 
   websocketHost () {
-    let host = 'wss://api.kinopio.club'
+    let host = 'wss://kinopio-server.herokuapp.com'
     if (process.env.NODE_ENV === 'development') {
       host = 'ws://kinopio.local:3000'
     }

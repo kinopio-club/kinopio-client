@@ -4,7 +4,7 @@ import merge from 'lodash-es/merge'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 
-let host = 'https://api.kinopio.club'
+let host = 'https://kinopio-server.herokuapp.com'
 if (process.env.NODE_ENV === 'development') {
   host = 'http://kinopio.local:3000'
 }
