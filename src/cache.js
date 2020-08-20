@@ -7,48 +7,23 @@ export default {
     try {
       window.localStorage[key] = JSON.stringify(value)
     } catch (error) {
-      console.warn('storeLocal Could not save to localStorage', key, value)
-      console.log('check: current user has apiKey', this.user().apiKey)
-      // console.log(this.getAllSpaces())
-      // get current space id
-      // console.log(utils.spaceHasUrl(), utils.idFromUrl())
+      console.warn('storeLocal could not save to localStorage')
       if (this.user().apiKey) {
+        console.log('🐇 pruning localStorage')
         const currentSpaceId = utils.idFromUrl()
-
-        // let spaces = this.getAllSpaces()
-        // console.log('1 spaces', spaces.length, currentSpaceId)
-        // spaces = spaces.filter(space => space.id !== currentSpaceId)
-
         const keys = Object.keys(window.localStorage)
         let spaceKeys = keys.filter(key => key.startsWith('space-') || key.startsWith('removed-space-'))
-        console.log('1 spaces', spaceKeys.length, currentSpaceId)
-
         spaceKeys = spaceKeys.filter(key => key !== `space-${currentSpaceId}`)
-        console.log('2 spaces', spaceKeys.length, currentSpaceId, spaceKeys)
-
-        // foreach removeLocal(key)
-
-        // console.log('2 spaces', spaces.length, spaces)
-        // console.log('removedspaces', this.getAllRemovedSpaces())
-        // spaces.forEach(space => {
-
-        // let key
-        // if (space.id) {
-        //   key = `space-${space.id}`
-        // } else {
-        //   key = name
-        // }
-        //   this.removeLocal(space)
-        // })
-      }
-      // if user.apikey
-      // console.log('🐢 Cleaning up your localStorage')
-      // remove all ls spaces except current one.
-      // Remove ls removed cards in currentspace
-      // else
+        spaceKeys.forEach(key => {
+          this.removeLocal(key)
+        })
+        console.log('🐇 spaces pruned', spaceKeys) // temp
+      } else {
       // notify user w manual dom, #local-storage-is-full
-      // else, manually show a warning about needing to sign up or in because the browser is out of localstorage
+        // about needing to sign up or in because the browser is out of localstorage space, for free
+
       // dom .hidden on sign up / in
+      }
     }
   },
   getLocal (key) {
