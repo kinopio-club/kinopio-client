@@ -79,6 +79,12 @@ aside.notifications(@click.left="closeAllDialogs")
     button(@click.left="duplicateSpace")
       img.icon(src="@/assets/add.svg")
       span Use Template
+
+  .persistent-item.danger.hidden#notify-local-storage-is-full(v-if="!currentUserIsSignedIn")
+    p Cannot save changes because your localStorage is full, sign up to fix
+    .row
+      button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
+
 </template>
 
 <script>
@@ -315,6 +321,9 @@ export default {
   button + button,
   button + label
     margin-left 6px
+
+  .hidden
+    display: none
 
   .notification-jiggle
     animation-name notificationJiggle

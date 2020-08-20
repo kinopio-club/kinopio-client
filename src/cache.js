@@ -9,7 +9,7 @@ export default {
     } catch (error) {
       console.warn('storeLocal could not save to localStorage')
       if (this.user().apiKey) {
-        console.log('🐇 pruning localStorage')
+        console.log('🐇 pruning localStorage spaces')
         const currentSpaceId = utils.idFromUrl()
         const keys = Object.keys(window.localStorage)
         let spaceKeys = keys.filter(key => key.startsWith('space-') || key.startsWith('removed-space-'))
@@ -17,12 +17,9 @@ export default {
         spaceKeys.forEach(key => {
           this.removeLocal(key)
         })
-        console.log('🐇 spaces pruned', spaceKeys) // temp
       } else {
-      // notify user w manual dom, #local-storage-is-full
-        // about needing to sign up or in because the browser is out of localstorage space, for free
-
-      // dom .hidden on sign up / in
+        const element = document.getElementById('notify-local-storage-is-full')
+        element.classList.remove('hidden')
       }
     }
   },
