@@ -7,7 +7,20 @@ export default {
     try {
       window.localStorage[key] = JSON.stringify(value)
     } catch (error) {
-      console.warn('storeLocal Could not save to localStorage')
+      console.warn('storeLocal could not save to localStorage')
+      if (this.user().apiKey) {
+        console.log('🐇 pruning localStorage spaces')
+        const currentSpaceId = utils.idFromUrl()
+        const keys = Object.keys(window.localStorage)
+        let spaceKeys = keys.filter(key => key.startsWith('space-') || key.startsWith('removed-space-'))
+        spaceKeys = spaceKeys.filter(key => key !== `space-${currentSpaceId}`)
+        spaceKeys.forEach(key => {
+          this.removeLocal(key)
+        })
+      } else {
+        const element = document.getElementById('notify-local-storage-is-full')
+        element.classList.remove('hidden')
+      }
     }
   },
   getLocal (key) {
@@ -84,12 +97,6 @@ export default {
     space.cacheDate = Date.now()
     this.storeLocal(`space-${space.id}`, space)
   },
-  updateIdsInAllSpaces () {
-    let spaces = this.getAllSpaces()
-    spaces.forEach(space => {
-      this.updateIdsInSpace(space)
-    })
-  },
   updateIdsInSpace (space) {
     const items = {
       cards: space.cards,
@@ -152,6 +159,56 @@ export default {
   },
   clearQueue () {
     this.storeLocal('queue', [])
+  },
+
+  // API Queue Buffer
+
+  queueBuffer () {
+    return this.getLocal('queueBuffer') || []
+  },
+  saveQueueBuffer (queue) {
+    this.storeLocal('queueBuffer', queue)
+  },
+  clearQueueBuffer () {
+    this.storeLocal('queueBuffer', [])
+  },
+
+  // Invited Spaces
+
+  invitedSpaces () {
+    return this.getLocal('invitedSpaces') || []
+  },
+  saveInvitedSpace (space) {
+    space = {
+      id: space.id,
+      name: space.name,
+      users: space.users,
+      collaboratorKey: space.collaboratorKey,
+      updatedAt: space.updatedAt,
+      cacheDate: Date.now()
+    }
+    let invitedSpaces = this.invitedSpaces()
+    invitedSpaces = invitedSpaces.filter(invitedSpace => {
+      return invitedSpace.id !== space.id
+    })
+    invitedSpaces.push(space)
+    this.storeLocal('invitedSpaces', invitedSpaces)
+  },
+  removeInvitedSpace (space) {
+    let invitedSpaces = this.invitedSpaces()
+    invitedSpaces = invitedSpaces.filter(invitedSpace => {
+      return invitedSpace.id !== space.id
+    })
+    this.storeLocal('invitedSpaces', invitedSpaces)
+  },
+
+  // billing
+
+  saveStripeIds (stripeIds) {
+    this.storeLocal('stripeIds', stripeIds)
   }
+  // stripeIds () {
+  //   return this.getLocal('stripeIds')
+  // }
 
 }

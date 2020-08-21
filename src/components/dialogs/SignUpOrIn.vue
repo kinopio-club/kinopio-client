@@ -2,18 +2,18 @@
 dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
   section
     .segmented-buttons
-      button(@click="showSignUpVisible" :class="{active : signUpVisible}") Sign Up
-      button(@click="hideSignUpVisible" :class="{active : !signUpVisible}") Sign In
+      button(@click.left="showSignUpVisible" :class="{active : signUpVisible}") Sign Up
+      button(@click.left="hideSignUpVisible" :class="{active : !signUpVisible}") Sign In
 
   //- Sign Up
   section(v-if="signUpVisible")
     p Create an account to share your spaces and access them anywhere
     form(@submit.prevent="signUp")
-      input(type="email" placeholder="Email" required v-model="email" @input="clearErrors")
+      input(type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
       .badge.info(v-if="error.accountAlreadyExists") An account with this email already exists, Sign In instead
       input(type="password" placeholder="Password" required @input="clearErrors" v-model="password")
       input(type="password" placeholder="Confirm Password" required @input="clearErrors")
-      .badge.danger(v-if="error.passwordMatch") Passwords can't match
+      .badge.danger(v-if="error.passwordMatch") Passwords must match
       .badge.danger(v-if="error.passwordMatchesEmail") Password can't be from your email
       .badge.danger(v-if="error.passwordTooShort") Password must be longer than 4 characters
       .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
@@ -38,13 +38,12 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
   //- Privacy Policy
   section(v-if="signUpVisible")
     .button-wrap
-      // TODO TEMP link
-      a(href="http://pketh.org/kinopio-plans")
+      a(href="https://help.kinopio.club/posts/privacy-policy")
         button Privacy Policy and TOS →
 
   //- Forgot Password
   section.forgot-password(v-else)
-    button(@click="toggleResetVisible" :class="{active : resetVisible}")
+    button(@click.left="toggleResetVisible" :class="{active : resetVisible}")
       span Forgot Password?
     div(v-show="resetVisible")
       form.reset-form(@submit.prevent="resetPassword")
@@ -192,10 +191,32 @@ export default {
       const response = await this.$store.dispatch('api/signUp', { email, password, currentUser })
       const result = await response.json()
       if (this.isSuccess(response)) {
+        this.$store.commit('clearAllNotifications', false)
         await this.createSpaces(result.apiKey)
+        this.addCollaboratorToInvitedSpaces()
+        const currentSpace = this.$store.state.currentSpace
+        const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
+        utils.updateWindowUrlAndTitle({
+          space: currentSpace,
+          currentUserIsSignedIn
+        })
       } else {
         await this.handleErrors(result)
       }
+    },
+
+    updateAllSpacesWithNewUserId () {
+      const userId = this.$store.state.currentUser.id
+      const spaces = cache.getAllSpaces()
+      const userHasCachedSpaces = spaces.length
+      if (!userHasCachedSpaces) { return }
+      spaces.forEach(space => {
+        space = utils.updateSpaceUserId(space, userId)
+        cache.updateSpace('userId', userId, space.id)
+        cache.updateSpace('cards', space.cards, space.id)
+        cache.updateSpace('connectionTypes', space.connectionTypes, space.id)
+        cache.updateSpace('connections', space.connections, space.id)
+      })
     },
 
     async signIn (event) {
@@ -208,34 +229,68 @@ export default {
       const result = await response.json()
       this.loading.signUpOrIn = false
       if (this.isSuccess(response)) {
+        // update user to remote user
         this.$store.commit('currentUser/updateUser', result)
+        // update local spaces to remote user
+        this.updateAllSpacesWithNewUserId()
         await this.createSpaces(result.apiKey)
+        // add new spaces from remote
         const spaces = await this.$store.dispatch('api/getUserSpaces')
         cache.addSpaces(spaces)
-        this.$store.commit('triggerSpaceDetailsVisible')
+        // update currentSpace
         const currentSpace = this.$store.state.currentSpace
         const currentUser = this.$store.state.currentUser
-        const userIsSignedIn = this.$store.getters['currentUser/isSignedIn']
+        const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
         utils.updateWindowUrlAndTitle({
           space: currentSpace,
-          userIsSignedIn
+          currentUserIsSignedIn
         })
         this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
-        this.$store.commit('currentSpace/addUserToSpace', currentUser)
+        const userIsSpaceUser = this.$store.getters['currentUser/spaceUserPermission'](currentSpace) === 'user'
+        if (userIsSpaceUser) {
+          this.$store.commit('currentSpace/addUserToSpace', currentUser)
+        }
+        this.$store.commit('clearAllNotifications', false)
+        this.$store.commit('notifyNewUser', false)
+        this.addCollaboratorToInvitedSpaces()
+        this.$store.commit('triggerSpaceDetailsVisible')
       } else {
         await this.handleErrors(result)
       }
     },
 
+    addCollaboratorToCurrentSpace () {
+      const invitedSpaceIds = cache.invitedSpaces().map(space => space.id)
+      const currentSpace = this.$store.state.currentSpace
+      const currentUser = this.$store.state.currentUser
+      if (invitedSpaceIds.includes(currentSpace.id)) {
+        this.$store.commit('currentSpace/addCollaboratorToSpace', currentUser)
+        this.$store.commit('broadcast/close')
+        this.$store.commit('broadcast/joinSpaceRoom')
+      }
+    },
+
+    addCollaboratorToInvitedSpaces () {
+      let invitedSpaces = cache.invitedSpaces()
+      invitedSpaces = invitedSpaces.map(space => {
+        space.userId = this.$store.state.currentUser.id
+        return space
+      })
+      this.$store.dispatch('api/addToQueue', { name: 'addCollaboratorToSpaces', body: invitedSpaces })
+      this.addCollaboratorToCurrentSpace()
+    },
+
     async createSpaces (apiKey) {
-      cache.updateIdsInAllSpaces() // added Oct 2019 for legacy spaces, can safely remove this in Oct 2020
-      const updatedSpace = cache.space(this.$store.state.currentSpace.id)
-      this.$store.commit('addNotification', { message: 'Signed In' })
-      this.$store.commit('currentSpace/restoreSpace', updatedSpace)
       this.$store.commit('currentUser/apiKey', apiKey)
-      await this.$store.dispatch('api/createSpaces')
+      const userHasCachedSpaces = cache.getAllSpaces().length
+      if (userHasCachedSpaces) {
+        const updatedCurrentSpace = cache.space(this.$store.state.currentSpace.id)
+        this.$store.commit('currentSpace/restoreSpace', updatedCurrentSpace)
+        await this.$store.dispatch('api/createSpaces')
+      }
       this.loading.signUpOrIn = false
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('addNotification', { message: 'Signed In', type: 'success' })
     },
 
     async resetPassword (event) {
@@ -271,6 +326,7 @@ export default {
   top calc(100% - 8px)
   left initial
   right 8px
+  overflow auto
   .reset-form
     margin-top 10px
   p,

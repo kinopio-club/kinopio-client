@@ -29,7 +29,7 @@ export default new Router({
       component: Space,
       redirect: to => {
         store.dispatch('currentUser/confirmEmail')
-        store.commit('addNotification', { message: 'Email Confirmed' })
+        store.commit('addNotification', { message: 'Email Confirmed', type: 'success' })
         return '/'
       }
     }, {
@@ -45,6 +45,49 @@ export default new Router({
         }
         next()
         window.history.replaceState({}, document.title, window.location.origin)
+      }
+    }, {
+      path: '/update-arena-access-token',
+      name: 'update-arena-access-token',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        const urlParams = new URLSearchParams(window.location.search)
+        const arenaReturnedCode = urlParams.get('code')
+        next()
+        window.history.replaceState({}, document.title, window.location.origin)
+        store.dispatch('currentUser/updateArenaAccessToken', arenaReturnedCode)
+      }
+    }, {
+      path: '/invite',
+      name: 'invite',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        store.dispatch('currentUser/init')
+        const urlParams = new URLSearchParams(window.location.search)
+        const apiKey = store.state.currentUser.apiKey
+        const spaceId = urlParams.get('spaceId')
+        const collaboratorKey = urlParams.get('collaboratorKey')
+        if (!spaceId || !collaboratorKey) { return }
+        store.commit('isLoadingSpace', true)
+        if (apiKey) {
+          store.dispatch('api/addSpaceCollaborator', { spaceId, collaboratorKey })
+            .then(response => {
+              store.commit('spaceUrlToLoad', spaceId)
+              store.commit('addNotification', { message: 'You can now edit this space', type: 'success' })
+              next()
+            }).catch(error => {
+              console.error(error)
+              if (error.status === 401) {
+                store.commit('addNotification', { message: 'Space could not be found, or your invite was invalid', type: 'danger' })
+              } else {
+                store.commit('addNotification', { message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
+              }
+            })
+        } else {
+          store.commit('spaceUrlToLoad', spaceId)
+          next()
+        }
+        store.commit('addToSpaceCollaboratorKeys', { spaceId, collaboratorKey })
       }
     }, {
       path: '/:space',

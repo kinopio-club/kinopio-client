@@ -1,4 +1,4 @@
-// card frame options for CardFrames and FrameDetails
+// card frame options for CardFrames and FramePicker
 
 const frames = [
   {
@@ -14,6 +14,11 @@ const frames = [
     id: 2,
     name: 'Magical Helper',
     badge: 'magical-helper/hat.png'
+  },
+  {
+    id: 3,
+    name: 'Tea Time',
+    badge: 'tea-time/pot.png'
   }
 ]
 

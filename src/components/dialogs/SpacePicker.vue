@@ -1,60 +1,93 @@
 <template lang="pug">
-dialog.narrow.space-picker(v-if="visible" :open="visible" @click.stop ref="dialog")
+dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section.results-section
-    ul.results-list
-      template(v-for="(space in spaces")
-        li(@click="select(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id" tabindex="0" v-on:keyup.enter="select(space)")
-          .name {{space.name}}
+    Loader(:visible="loading")
+    SpaceList(v-if="spaces.length" :spaces="spaces" :showUserIfCurrentUserIsCollaborator="showUserIfCurrentUserIsCollaborator" :selectedSpace="selectedSpace" @selectSpace="selectSpace")
+    .error-container(v-if="!spaces.length")
+      User(:user="user" :isClickable="false" :key="user.id")
+      span has no public spaces
 </template>
 
 <script>
-import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
-
+import scrollIntoView from '@/scroll-into-view.js'
 import cache from '@/cache.js'
+import Loader from '@/components/Loader.vue'
 
 export default {
   name: 'SpacePicker',
+  components: {
+    Loader,
+    SpaceList: () => import('@/components/SpaceList.vue'),
+    User: () => import('@/components/User.vue')
+  },
   props: {
     visible: Boolean,
     selectedSpace: Object,
-    excludeCurrentSpace: Boolean
+    shouldExcludeCurrentSpace: Boolean,
+    userSpaces: Array,
+    user: Object,
+    loading: Boolean,
+    showUserIfCurrentUserIsCollaborator: Boolean
   },
   data () {
     return {
       spaces: []
     }
   },
+  computed: {
+    maxHeight () {
+      const favoritesDialog = document.querySelector('dialog.favorites')
+      let height = 120
+      if (favoritesDialog) {
+        const dialogHeight = favoritesDialog.offsetHeight
+        if (dialogHeight > 250) { height = dialogHeight }
+      } else {
+        return undefined
+      }
+      return height
+    }
+  },
   methods: {
-    spaceIsActive (spaceId) {
-      return Boolean(this.selectedSpace.id === spaceId)
-    },
-    select (space) {
-      this.$emit('selectSpace', space)
-      this.$emit('closeDialog')
+    excludeCurrentSpace () {
+      if (!this.shouldExcludeCurrentSpace) { return }
+      const currentSpace = this.$store.state.currentSpace
+      this.spaces = this.spaces.filter(space => space.id !== currentSpace.id)
     },
     updateSpaces () {
-      const currentSpace = this.$store.state.currentSpace
-      this.spaces = cache.getAllSpaces()
-      if (this.excludeCurrentSpace) {
-        this.spaces = this.spaces.filter(space => space.id !== currentSpace.id)
+      if (this.userSpaces) {
+        this.spaces = this.userSpaces
+      } else {
+        this.spaces = cache.getAllSpaces()
+        this.updateWithRemoteSpaces()
       }
+      this.excludeCurrentSpace()
+    },
+    async updateWithRemoteSpaces () {
+      const spaces = await this.$store.dispatch('api/getUserSpaces')
+      if (!spaces) { return }
+      this.spaces = spaces
+      this.excludeCurrentSpace()
+    },
+    selectSpace (space) {
+      this.$emit('selectSpace', space)
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      scrollIntoView(element, {
-        behavior: 'smooth',
-        scrollMode: 'if-needed'
-      })
+      const isTouchDevice = this.$store.state.isTouchDevice
+      scrollIntoView.scroll(element, isTouchDevice)
     }
   },
   watch: {
     visible (visible) {
       this.$nextTick(() => {
         if (visible) {
-          this.scrollIntoView()
           this.updateSpaces()
+          this.scrollIntoView()
         }
       })
+    },
+    userSpaces (userSpaces) {
+      this.updateSpaces()
     }
   }
 }
@@ -64,4 +97,12 @@ export default {
 .space-picker
   .results-section
     padding-top 4px
+    @media(max-height 700px)
+      max-height 40vh
+  .error-container
+    padding 4px
+    display flex
+    align-items center
+    .user
+      margin-right 6px
 </style>

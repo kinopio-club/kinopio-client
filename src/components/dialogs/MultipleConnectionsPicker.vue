@@ -1,22 +1,22 @@
 <template lang="pug">
-dialog.narrow.multiple-connections-picker(v-if="visible" :open="visible" ref="dialog" @click.stop)
+dialog.narrow.multiple-connections-picker(v-if="visible" :open="visible" ref="dialog" @click.left.stop)
   section.results-actions
-    button(@click="addConnectionType")
+    button(@click.left="addConnectionType")
       img.icon(src="@/assets/add.svg")
       span Add
 
   section.results-section
     ul.results-list
       template(v-for="(type in connectionTypes")
-        li(:class="{ active: connectionTypeIsActive(type) }" @click="changeConnectionTypes(type)" :key="type.id" tabindex="0" v-on:keyup.enter="changeConnectionTypes(type)")
+        li(:class="{ active: connectionTypeIsActive(type) }" @click.left="changeConnectionTypes(type)" :key="type.id" tabindex="0" v-on:keyup.enter="changeConnectionTypes(type)")
           .badge(:style="{backgroundColor: type.color}" :class="{checked: connectionTypeIsDefault(type)}")
           .name {{type.name}}
 </template>
 
 <script>
 import last from 'lodash-es/last'
-import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
+import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
 export default {
@@ -57,10 +57,8 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      scrollIntoView(element, {
-        behavior: 'smooth',
-        scrollMode: 'if-needed'
-      })
+      const isTouchDevice = this.$store.state.isTouchDevice
+      scrollIntoView.scroll(element, isTouchDevice)
     }
   },
   watch: {

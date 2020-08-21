@@ -28,62 +28,62 @@ export default {
   spaces () {
     return [
       {
-        spaceId: 'BXblLMDGVn-mmRG9IUMeb',
+        id: 'BXblLMDGVn-mmRG9IUMeb',
         categoryId: 1,
         name: 'Class Notes'
       },
       {
-        spaceId: 'oVBOOfoO4qg7AzzUwweyf',
+        id: 'oVBOOfoO4qg7AzzUwweyf',
         categoryId: 1,
         name: 'Book Club'
       },
       {
-        spaceId: 'e5z76fEWMq3DQDXYqyjE_',
+        id: 'e5z76fEWMq3DQDXYqyjE_',
         categoryId: 1,
         name: 'Class Assignment'
       },
       {
-        spaceId: 'a9DYG9qD1QJYngFkuGiEo',
+        id: 'a9DYG9qD1QJYngFkuGiEo',
         categoryId: 2,
         name: 'To Dos'
       },
       {
-        spaceId: 'YD_eqjNH7DQpgDKjEDSzu',
+        id: 'YD_eqjNH7DQpgDKjEDSzu',
         categoryId: 2,
         name: 'Making Hard Decisions'
       },
       {
-        spaceId: 'IoH27fnouzCpoSj1vWg3s',
+        id: 'IoH27fnouzCpoSj1vWg3s',
         categoryId: 2,
         name: 'Mental Health'
       },
       {
-        spaceId: '85dWJ4_zDipSREM-nllXH',
+        id: '85dWJ4_zDipSREM-nllXH',
         categoryId: 3,
         name: 'Brainstorming'
       },
       {
-        spaceId: 'b87U9WETGvl17BrKNsqDH',
+        id: 'b87U9WETGvl17BrKNsqDH',
         categoryId: 3,
         name: 'Meeting Agenda'
       },
       {
-        spaceId: 'DWCwVJNU8yu1cPs87BEQR',
+        id: 'DWCwVJNU8yu1cPs87BEQR',
         categoryId: 4,
         name: 'Sofware Architecture'
       },
       {
-        spaceId: 'WSzpRkVqSdv8GKCSCrwrg',
+        id: 'WSzpRkVqSdv8GKCSCrwrg',
         categoryId: 4,
         name: 'Database Schema'
       },
       {
-        spaceId: 'J4vbhO646y4296cLRQEU3',
+        id: 'J4vbhO646y4296cLRQEU3',
         categoryId: 4,
         name: 'Roadmap'
       }
       // {
-      //   spaceId: '123',
+      //   id: '123',
       //   categoryId: 4,
       //   name: 'Retrospective'
       // }

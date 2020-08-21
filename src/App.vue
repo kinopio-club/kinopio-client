@@ -1,24 +1,57 @@
 <template lang='pug'>
-#app.app
+#app.app(
+  @mousemove="broadcastCursor"
+  @touchmove="broadcastCursor"
+  @touchstart="isTouchDevice"
+)
+  #layout-viewport
   MagicPaint
   router-view
   Header
   Footer
+  KeyboardShortcutsHandler
   .preload
     .logo-hover
     .logo-active
+  .badge.label-badge.development(v-if="isDevelopment") DEV
 </template>
 
 <script>
 import Header from '@/components/Header.vue'
-import MagicPaint from '@/components/MagicPaint.vue'
+import MagicPaint from '@/components/layers/MagicPaint.vue'
 import Footer from '@/components/Footer.vue'
+import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
+
+import utils from '@/utils.js'
 
 export default {
   components: {
     Header,
     MagicPaint,
-    Footer
+    Footer,
+    KeyboardShortcutsHandler
+  },
+  computed: {
+    isDevelopment () {
+      if (process.env.NODE_ENV === 'development') {
+        return true
+      } else {
+        return false
+      }
+    }
+  },
+  methods: {
+    broadcastCursor (event) {
+      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
+      if (!canEditSpace) { return }
+      let updates = utils.cursorPositionInPage(event)
+      updates.userId = this.$store.state.currentUser.id
+      this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor' })
+    },
+    isTouchDevice () {
+      this.$store.commit('isTouchDevice', true)
+    }
+
   }
 }
 </script>
@@ -45,7 +78,7 @@ export default {
   --success-background #98f49f
 
   // non-theme vars
-  --max-z 2147483647
+  --max-z 2147483646
   --hover-shadow 3px 3px 0 var(--heavy-shadow)
   --active-shadow 5px 5px 0 var(--light-shadow)
   --active-inset-shadow inset 0 2px 3px var(--light-shadow)
@@ -76,12 +109,22 @@ body
 
 .app
   position relative
+  > .label-badge
+    color var(--primary-background)
+    min-height initial
+    left initial
+    right 12px
+    bottom 12px
+    position fixed
+    pointer-events none
 
-img
+img,
+video
   max-width 100%
 
 input,
-textarea
+textarea,
+.stripe-element
   touch-action manipulation
   margin 0
   font-size 1em // required to disable ios input zooming
@@ -91,8 +134,11 @@ textarea
   border 0
   border-bottom 1px solid var(--primary)
   border-radius 0
-  padding 0
+  padding 1px
   margin-bottom 10px
+  &:disabled
+    color var(--primary)
+    border-bottom 0
 
 button,
 label // used for checkbox buttons
@@ -118,13 +164,12 @@ label // used for checkbox buttons
   &:focus
     box-shadow var(--button-hover-shadow)
     background var(--secondary-hover-background)
+    outline none
   &:active,
   &.active
     box-shadow var(--button-active-inset-shadow)
     color var(--primary)
     background var(--secondary-active-background)
-  &:focus
-    outline none
   .badge
     display inline
     vertical-align middle
@@ -143,15 +188,34 @@ label // used for checkbox buttons
     width 14px
     vertical-align -3px
     margin-left 3px
+  &:disabled
+    cursor default
+    color var(--primary)
+    opacity 0.5
+    pointer-events none
+    // &:hover,
+    // &:active
+    //   box-shadow none
+    //   background-color var(--primary-background)
+    // &.active
+    //   &:hover,
+    //   &:active
+    //     box-shadow var(--button-active-inset-shadow)
+    //     background var(--secondary-active-background)
+
 label
   padding-bottom 4px
   display inline-block
+  height 24px
   input
     margin 0
-
-li
-  &:focus
-    outline none
+    &:focus
+      outline none
+  &.disabled
+    cursor default
+    color var(--primary)
+    opacity 0.5
+    pointer-events none
 
 p
   margin 0
@@ -165,7 +229,7 @@ dialog
   left 8px
   top 8px
   position absolute
-  max-height calc(100vh - 50px)
+  max-height calc(100vh - 100px)
   margin 0
   padding 0
   user-select auto
@@ -187,7 +251,10 @@ dialog
   .button-wrap + .button-wrap,
   button + .button-wrap,
   .button-wrap + button,
-  label + label
+  label + label,
+  label + .button-wrap,
+  .button-wrap + label,
+  .segmented-buttons + .button-wrap
     margin-left 6px
 
   p + button,
@@ -200,6 +267,7 @@ dialog
   .row
     margin-bottom 10px
     display flex
+    align-items center
     position relative
     > input
       margin-bottom 0
@@ -230,17 +298,20 @@ dialog
 .segmented-buttons
   button
     margin 0
+    border-radius 0
     &:first-child
-      border-top-right-radius 0
-      border-bottom-right-radius 0
+      border-top-left-radius 3px
+      border-bottom-left-radius 3px
     &:last-child
-      border-top-left-radius 0
-      border-bottom-left-radius 0
+      border-top-right-radius 3px
+      border-bottom-right-radius 3px
   button + button
     margin-left -1px
 
 .icon
   vertical-align -1px
+  // &.more
+  //   vertical-align 3px
 
 .icon + span
   margin-left 5px
@@ -254,7 +325,8 @@ dialog
 
 label,
 li
-  &:hover
+  &:hover,
+  &:focus
     input[type="checkbox"]
       background-color var(--secondary-hover-background)
   input[type="checkbox"]
@@ -273,6 +345,11 @@ li
       background-image url('assets/checkmark.svg')
       background-repeat no-repeat
       background-position center
+    &.add
+      background-image url('assets/add.svg')
+      background-repeat no-repeat
+      background-position center
+      background-size 69%
 
 li
   input[type="checkbox"]
@@ -286,17 +363,7 @@ li
   padding-top 0
   border-top 0
   overflow auto
-  max-height calc(92vh - 175px)
-
-.filter-wrap
-  margin-left 5px
-  padding-top 4px
-  display flex
-  .icon
-    &.search
-      margin-top -11px
-      padding-right 5px
-      cursor text
+  max-height calc(92vh - 245px)
 
 ul.results-list
   margin 0
@@ -308,13 +375,17 @@ ul.results-list
     border-radius 3px
     user-select none
     cursor pointer
-    &:hover
+    &:hover,
+    &:focus
       background-color var(--secondary-hover-background)
       box-shadow var(--hover-shadow)
     &:active,
     &.active
       background-color var(--secondary-active-background)
       box-shadow var(--active-inset-shadow)
+    &.disabled
+      opacity 0.5
+      pointer-events none
 
 .badge,
 code
@@ -329,12 +400,35 @@ code
     background var(--info-background)
   &.success
     background var(--success-background)
-  &.checked
-    background-image url('assets/checkmark.svg')
-    background-repeat no-repeat
-    background-position center
+  &.status
+    background var(--secondary-background)
   input
     margin 0
+  .user
+    vertical-align middle
+    margin-right 3px
+    .user-avatar
+      width 16px
+      height 15px
+  .loader
+    width 14px
+    height 14px
+    vertical-align -3px
+    margin-right 6px
+
+.label-badge
+  position absolute
+  padding 0 3px
+  height 12px
+  border-radius 3px
+  left 0
+  bottom 9px
+  background-color var(--primary)
+  display flex
+  justify-content center
+  span
+    font-size 12px
+    color var(--primary-background)
 
 .danger
   background-color var(--danger-background)
@@ -346,11 +440,18 @@ code
 .marker
   background-image url('assets/marker.svg')
 
-.updated
+.updated,
+.open
   vertical-align -2px
 
-.move
+.visit
   vertical-align 1px
+
+.cut
+  vertical-align 0
+
+.cancel
+  transform rotate(45deg)
 
 .users
   display inline-block
@@ -385,13 +486,16 @@ code
   background-image url('assets/logo-base.png')
 .logo
   .logo-image
-    width 45px
-    height 40px
+    width 47px
+    height 41px
     background-repeat no-repeat
-    background-size cover
+    background-size contain
     display inline-block
     vertical-align middle
-  &:hover
+    position relative
+  &:hover,
+  &:focus
+    outline none
     .logo-image
       background-image url('assets/logo-hover.png')
   &:active,
@@ -404,5 +508,39 @@ code
     background-image url('assets/logo-hover.png')
   .logo-active
     background-image url('assets/logo-active.png')
+
+.search-wrap
+  margin-left 5px
+  padding-top 4px
+  display flex
+  .search
+    margin-top -11px
+    padding-right 5px
+    cursor text
+    flex-shrink 0
+
+#layout-viewport
+  position fixed
+  width 100%
+  height 100%
+  visibility hidden
+  pointer-events none
+
+progress
+  appearance none
+  width 100%
+  height 8px
+  border 1px solid var(--primary)
+  border-radius 3px
+  background-color var(--secondary-background)
+progress::-webkit-progress-bar
+  background-color var(--secondary-background)
+  border-radius 3px
+progress::-webkit-progress-value
+  background-color var(--primary)
+  border-radius 2px
+progress::-moz-progress-bar
+  background-color var(--primary)
+  border-radius 2px
 
 </style>

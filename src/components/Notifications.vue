@@ -1,28 +1,53 @@
 <template lang="pug">
-aside.notifications
-  .item(v-for="(item in items" v-bind:key="item.id" :data-notification-id="item.id" :class="item.type")
-    p {{item.message}}
+aside.notifications(@click.left="closeAllDialogs")
+  .item(v-for="item in items" v-bind:key="item.id" :data-notification-id="item.id" :class="item.type")
+    p
+      img.icon(v-if="item.icon" :src="icon(item.icon).path" :class="item.icon")
+      span {{item.message}}
 
-  .persistent-item(v-if="notifyReadOnly" ref="readOnly" :class="{'notification-jiggle': notifyReadOnlyJiggle}")
-    p You can't edit this space, but you can save your own copy
+  .item.success(v-if="notifySpaceIsOpenAndEditable")
+    p
+      img.icon.open(src="@/assets/open.svg")
+      span This space is open, which means you can add to it too
+
+  .item.success(v-if="notifyAccessFavorites" @animationend="resetNotifyAccessFavorites")
+    p Access favorites from your spaces
     .row
-      //- button(@click="triggerSpaceDetailsVisible") Your Spaces
-      button(@click="copyCurrentSpace")
-        img.icon(src="@/assets/add.svg")
-        span Save a Copy
+      button(@click.left.stop="triggerSpaceDetailsFavoritesVisible") Your Spaces
+
+  .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
+    p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade for $4/month
+    .row
+      button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+
+  .persistent-item.danger(v-if="notifyCardsCreatedIsOverLimit" ref="cardsOverLimit" :class="{'notification-jiggle': notifyCardsCreatedIsOverLimitJiggle}" @animationend="resetNotifyCardsCreatedIsOverLimitJiggle")
+    p To add more cards, you'll need to upgrade for $4/month
+    .row
+      button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+
+  .persistent-item.success(v-if="notifySignUpToEditSpace" ref="readOnly" :class="{'notification-jiggle': readOnlyJiggle}")
+    p
+      img.icon(:src="privacyIcon" :class="privacyName")
+      template(v-if="spacePrivacyIsOpen")
+        span This space is open to edits, but you'll need to sign up or in first
+      template(v-else)
+        span You're invited to edit this space, but you'll need to sign up or in first
+    .row
+      button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
 
   .persistent-item.danger(v-if="notifySpaceNotFound")
-    p Space could not be found
+    p Space could not be found, or is private
     .row
-      button(@click="triggerSpaceDetailsVisible") Your Spaces
+      button(@click.left.stop="triggerSpaceDetailsVisible") Your Spaces
+      button(v-if="!currentUserIsSignedIn" @click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
 
   .persistent-item(v-if="notifySpaceIsRemoved")
     p This space has been removed
     .row
-      button(@click="restoreSpace")
+      button(@click.left="restoreSpace")
         img.icon(src="@/assets/undo.svg")
         span Restore
-      button.danger(@click="removeSpacePermanent")
+      button.danger(@click.left="removeSpacePermanent")
         img.icon(src="@/assets/remove.svg")
         span Permanently Remove
 
@@ -32,24 +57,52 @@ aside.notifications
       .button-wrap
         a(href="mailto:support@kinopio.club?subject=Connection Error")
           button Email Support
+        button(@click.left="refreshBrowser") Refresh
 
-  .persistent-item.success(v-if="notifyNewUser")
+  .persistent-item.danger(v-if="notifyServerCouldNotSave")
+    p Error saving changes to server, retrying…
+
+  .persistent-item.danger(v-if="notifySpaceOutOfSync")
+    p Space is out of sync, please refresh
+    .row
+      .button-wrap
+        button(@click.left="refreshBrowser") Refresh
+
+  .item.success(ref="newUser" v-if="notifyNewUser && !hasNotifiedNewUser")
     p Welcome to Kinopio
     .row
-      button(@click="createNewHelloSpace")
+      button(@click.left="createNewHelloSpace")
         img.icon(src="@/assets/add.svg")
         span How does this work?
+
+  .persistent-item.info(v-if="currentSpaceIsTemplate" ref="template" :class="{'notification-jiggle': readOnlyJiggle}")
+    button(@click.left="duplicateSpace")
+      img.icon(src="@/assets/add.svg")
+      span Use Template
+
+  .persistent-item.danger.hidden#notify-local-storage-is-full(v-if="!currentUserIsSignedIn")
+    p Cannot save changes because your localStorage is full, sign up to fix
+    .row
+      button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
 
 </template>
 
 <script>
 import cache from '@/cache.js'
+import privacy from '@/spaces/privacy.js'
+import utils from '@/utils.js'
+import templates from '@/spaces/templates.js'
+
+let wasOffline
 
 export default {
   name: 'Notifications',
   data () {
     return {
-      notifyReadOnlyJiggle: false
+      readOnlyJiggle: false,
+      notifyCardsCreatedIsOverLimitJiggle: false,
+      notifySpaceOutOfSync: false,
+      hasNotifiedNewUser: false
     }
   },
   created () {
@@ -59,23 +112,79 @@ export default {
         this.update()
       }
       if (mutation.type === 'currentUserIsPainting') {
-        const element = this.$refs.readOnly
-        if (state.currentUserIsPainting && element) {
-          this.notifyReadOnlyJiggle = true
-          element.addEventListener('animationend', this.removeNotifyReadOnlyJiggle, false)
+        if (state.currentUserIsPainting) {
+          this.addReadOnlyJiggle()
         }
+      }
+      if (mutation.type === 'triggerReadOnlyJiggle') {
+        this.addReadOnlyJiggle()
+      }
+      if (mutation.type === 'notifyCardsCreatedIsOverLimit') {
+        this.notifyCardsCreatedIsOverLimitJiggle = true
+      }
+      if (mutation.type === 'isOnline') {
+        const isOnline = Boolean(mutation.payload)
+        if (!isOnline) {
+          wasOffline = true
+        } else if (isOnline && wasOffline) {
+          this.checkIfShouldNotifySpaceOutOfSync()
+        }
+      }
+      if (mutation.type === 'currentSpace/restoreSpace') {
+        this.notifySpaceOutOfSync = false
+      }
+      if (mutation.type === 'notifyNewUser') {
+        this.$nextTick(() => {
+          const element = this.$refs.newUser
+          if (!element) { return }
+          element.addEventListener('animationend', this.removeNotifyNewUser, false)
+        })
       }
     })
   },
   computed: {
     items () { return this.$store.state.notifications },
-    notifyReadOnly () { return this.$store.state.notifyReadOnly },
     notifySpaceNotFound () { return this.$store.state.notifySpaceNotFound },
     notifyConnectionError () { return this.$store.state.notifyConnectionError },
+    notifyServerCouldNotSave () { return this.$store.state.notifyServerCouldNotSave },
     notifySpaceIsRemoved () { return this.$store.state.notifySpaceIsRemoved },
-    notifyNewUser () { return this.$store.state.notifyNewUser }
+    notifyNewUser () { return this.$store.state.notifyNewUser },
+    notifySignUpToEditSpace () { return this.$store.state.notifySignUpToEditSpace },
+    notifySpaceIsOpenAndEditable () { return this.$store.state.notifySpaceIsOpenAndEditable },
+    notifyAccessFavorites () { return this.$store.state.notifyAccessFavorites },
+    notifyCardsCreatedIsNearLimit () { return this.$store.state.notifyCardsCreatedIsNearLimit },
+    notifyCardsCreatedIsOverLimit () { return this.$store.state.notifyCardsCreatedIsOverLimit },
+    currentUserIsSignedIn () {
+      return this.$store.getters['currentUser/isSignedIn']
+    },
+    privacyState () {
+      return privacy.states().find(state => {
+        return state.name === this.$store.state.currentSpace.privacy
+      })
+    },
+    privacyIcon () { return require(`@/assets/${this.privacyState.icon}.svg`) },
+    privacyName () { return this.privacyState.name },
+    spacePrivacyIsOpen () { return this.privacyName === 'open' },
+    cardsCreatedCountFromLimit () {
+      const cardsCreatedLimit = 150
+      const cardsCreatedCount = this.$store.state.currentUser.cardsCreatedCount
+      return Math.max(cardsCreatedLimit - cardsCreatedCount, 0)
+    },
+    currentSpaceIsTemplate () {
+      const id = this.$store.state.currentSpace.id
+      const templateSpaceIds = templates.spaces().map(space => space.id)
+      return templateSpaceIds.includes(id)
+    }
   },
   methods: {
+    icon (icon) {
+      return {
+        path: require(`@/assets/${icon}.svg`)
+      }
+    },
+    closeAllDialogs () {
+      this.$store.dispatch('closeAllDialogs')
+    },
     update () {
       const notifications = this.$store.state.notifications
       notifications.forEach(item => {
@@ -88,14 +197,28 @@ export default {
     remove () {
       this.$store.commit('removeNotification')
     },
-    removeNotifyReadOnlyJiggle () {
-      this.notifyReadOnlyJiggle = false
+    addReadOnlyJiggle () {
+      const element = this.$refs.readOnly || this.$refs.template
+      if (!element) { return }
+      this.readOnlyJiggle = true
+      element.addEventListener('animationend', this.removeReadOnlyJiggle, false)
     },
-    copyCurrentSpace () {
-      this.$store.dispatch('currentSpace/copyCurrentSpace')
+    removeReadOnlyJiggle () {
+      this.readOnlyJiggle = false
+    },
+    removeNotifyNewUser () {
+      this.$store.commit('notifyNewUser', false)
+      this.hasNotifiedNewUser = true
     },
     triggerSpaceDetailsVisible () {
       this.$store.commit('triggerSpaceDetailsVisible')
+    },
+    triggerSpaceDetailsFavoritesVisible () {
+      this.$store.commit('triggerFavoritesIsVisible')
+      this.triggerSpaceDetailsVisible()
+    },
+    triggerSignUpOrInIsVisible () {
+      this.$store.commit('triggerSignUpOrInIsVisible')
     },
     restoreSpace () {
       const space = this.$store.state.currentSpace
@@ -112,6 +235,40 @@ export default {
     createNewHelloSpace () {
       this.$store.commit('notifyNewUser', false)
       window.location.href = '/'
+    },
+    resetNotifyAccessFavorites () {
+      this.$store.commit('notifyAccessFavorites', false)
+    },
+    resetNotifyCardsCreatedIsNearLimit () {
+      this.$store.commit('notifyCardsCreatedIsNearLimit', false)
+    },
+    resetNotifyCardsCreatedIsOverLimitJiggle () {
+      this.notifyCardsCreatedIsOverLimitJiggle = false
+    },
+    triggerUpgradeUserIsVisible () {
+      this.closeAllDialogs()
+      this.$store.commit('triggerUpgradeUserIsVisible')
+    },
+    async checkIfShouldNotifySpaceOutOfSync () {
+      const space = utils.clone(this.$store.state.currentSpace)
+      const canEditSpace = this.$store.getters['currentUser/canEditSpace'](space)
+      let remoteSpace
+      if (canEditSpace) {
+        remoteSpace = await this.$store.dispatch('api/getSpace', space)
+      } else {
+        remoteSpace = await this.$store.dispatch('api/getSpaceAnonymously', space)
+      }
+      if (space.updatedAt !== remoteSpace.updatedAt) {
+        this.notifySpaceOutOfSync = true
+      }
+    },
+    refreshBrowser () {
+      window.location.reload()
+    },
+    duplicateSpace () {
+      const duplicatedSpaceName = this.$store.state.currentSpace.name
+      this.$store.dispatch('currentSpace/duplicateSpace')
+      this.$store.commit('addNotification', { message: `${duplicatedSpaceName} is now yours to edit`, type: 'success' }, { root: true })
     }
   }
 }
@@ -123,6 +280,7 @@ export default {
   display flex
   flex-direction column
   align-items flex-start
+  max-width 260px
   .item,
   .persistent-item
     pointer-events all
@@ -159,6 +317,13 @@ export default {
         margin-left 0
   button
     margin-left 6px
+
+  button + button,
+  button + label
+    margin-left 6px
+
+  .hidden
+    display: none
 
   .notification-jiggle
     animation-name notificationJiggle

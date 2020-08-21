@@ -17,6 +17,7 @@ export default {
   mutations: {
 
     restoreSpace: (state, space) => {
+      space = utils.removeRemovedCardsFromSpace(space)
       Object.assign(state, space)
     },
     // Added aug 2019, can safely remove this in aug 2020
@@ -34,13 +35,35 @@ export default {
 
     addUserToSpace: (state, newUser) => {
       utils.typeCheck(newUser, 'object')
-      const userExists = state.users.find(user => {
-        return user.id === newUser.id
+      const userExists = state.users.find(user => user.id === newUser.id)
+      if (userExists) { return }
+      state.users.push(newUser)
+      cache.updateSpace('users', state.users, state.id)
+    },
+    addCollaboratorToSpace: (state, newUser) => {
+      utils.typeCheck(newUser, 'object')
+      const collaboratorExists = state.collaborators.find(collaborator => collaborator.id === newUser.id)
+      if (collaboratorExists) { return }
+      state.collaborators.push(newUser)
+      const space = utils.clone(state)
+      cache.saveSpace(space)
+      cache.updateSpace('collaborators', space.collaborators, space.id)
+    },
+    addSpectatorToSpace: (state, update) => {
+      utils.typeCheck(update, 'object')
+      const newUser = update.user || update
+      const userExists = state.users.find(user => user.id === newUser.id)
+      const collaboratorExists = state.collaborators.find(collaborator => collaborator.id === newUser.id)
+      const spectatorExists = state.spectators.find(spectator => spectator.id === newUser.id)
+      if (userExists || collaboratorExists || spectatorExists) { return }
+      state.spectators.push(newUser)
+    },
+    removeSpectatorFromSpace: (state, oldUser) => {
+      utils.typeCheck(oldUser, 'object')
+      if (!state.spectators) { return }
+      state.spectators = state.spectators.filter(user => {
+        return user.id !== oldUser.id
       })
-      if (!userExists) {
-        state.users.push(newUser)
-        cache.updateSpace('users', state.users, state.id)
-      }
     },
     removeUserFromSpace: (state, oldUser) => {
       utils.typeCheck(oldUser, 'object')
@@ -49,16 +72,39 @@ export default {
       })
       cache.updateSpace('users', state.users, state.id)
     },
+    removeCollaboratorFromSpace: (state, oldUser) => {
+      utils.typeCheck(oldUser, 'object')
+      state.collaborators = state.collaborators.filter(user => {
+        return user.id !== oldUser.id
+      })
+      const updatedSpace = utils.clone(state)
+      // same as updateSpace() to force reactivity
+      const updates = Object.keys(updatedSpace)
+      updates.forEach(key => {
+        Vue.set(state, key, updatedSpace[key])
+        cache.updateSpace(key, state[key], state.id)
+      })
+    },
+    // websocket receive
+    updateUser: (state, updatedUser) => {
+      state.users = utils.updateUsersWithUser(state.users, updatedUser)
+    },
+    // websocket receive
+    updateCollaborator: (state, updatedUser) => {
+      state.collaborators = utils.updateUsersWithUser(state.collaborators, updatedUser)
+    },
+    // websocket receive
+    updateSpectator: (state, updatedUser) => {
+      state.spectators = utils.updateUsersWithUser(state.spectators, updatedUser)
+    },
 
     // Space
 
     updateSpace: (state, updatedSpace) => {
       const updates = Object.keys(updatedSpace)
       updates.forEach(key => {
-        if (state[key] !== undefined) {
-          state[key] = updatedSpace[key]
-          cache.updateSpace(key, state[key], state.id)
-        }
+        Vue.set(state, key, updatedSpace[key])
+        cache.updateSpace(key, state[key], state.id)
       })
     },
 
@@ -78,12 +124,7 @@ export default {
         if (card.id === updatedCard.id) {
           const updates = Object.keys(updatedCard)
           updates.forEach(key => {
-            // update properties differently depending on whether it's existing or new
-            if (card[key]) {
-              card[key] = updatedCard[key]
-            } else {
-              Vue.set(card, key, updatedCard[key])
-            }
+            Vue.set(card, key, updatedCard[key])
           })
         }
       })
@@ -129,6 +170,10 @@ export default {
         cache.updateSpace('cards', state.cards, state.id)
       }
     },
+    removeAllRemovedCardsPermanent: (state) => {
+      state.removedCards = []
+      cache.updateSpace('removedCards', state.removedCards, state.id)
+    },
     restoreRemovedCard: (state, cardToRestore) => {
       const index = state.removedCards.findIndex(card => card.id === cardToRestore.id)
       const card = state.removedCards[index]
@@ -140,9 +185,21 @@ export default {
 
     // Connections
 
-    updateCardConnections: (state, connections) => {
-      state.connections = connections
-      cache.updateSpace('connections', connections, state.id)
+    updateConnection: (state, updatedConnection) => {
+      state.connections.map(connection => {
+        if (connection.id === updatedConnection.id) {
+          const updates = Object.keys(updatedConnection)
+          updates.forEach(key => {
+            // update properties differently depending on whether it's existing or new
+            if (connection[key]) {
+              connection[key] = updatedConnection[key]
+            } else {
+              Vue.set(connection, key, updatedConnection[key])
+            }
+          })
+        }
+      })
+      cache.updateSpace('connections', state.connections, state.id)
     },
     addConnection: (state, connection) => {
       state.connections.push(connection)
@@ -194,13 +251,17 @@ export default {
         if (type.id === updatedType.id) {
           const updates = Object.keys(updatedType)
           updates.forEach(key => {
-            if (type[key]) {
-              type[key] = updatedType[key]
-            }
+            type[key] = updatedType[key]
           })
         }
       })
       cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
+    },
+    reorderConnectionTypeToLast: (state, connectionType) => {
+      state.connectionTypes = state.connectionTypes.filter(type => {
+        return connectionType.id !== type.id
+      })
+      state.connectionTypes.push(connectionType)
     }
   },
 
@@ -216,17 +277,23 @@ export default {
       // restore last space
       } else if (user.lastSpaceId) {
         console.log('🚃 Restore last space', user.lastSpaceId)
-        let spaceToRestore = cache.space(user.lastSpaceId)
-        if (!spaceToRestore.id) {
-          spaceToRestore = { id: user.lastSpaceId }
-        }
-        context.dispatch('loadSpace', spaceToRestore)
-        context.dispatch('updateUserLastSpaceId')
+        context.dispatch('loadLastSpace')
       // hello kinopio
       } else {
         console.log('🚃 Create new Hello Kinopio space')
         context.dispatch('createNewHelloSpace')
         context.dispatch('updateUserLastSpaceId')
+      }
+    },
+
+    // Users
+
+    addUserToJoinedSpace: (context, newUser) => {
+      if (newUser.isCollaborator) {
+        context.commit('addCollaboratorToSpace', newUser)
+        context.commit('removeSpectatorFromSpace', newUser)
+      } else {
+        context.commit('addSpectatorToSpace', newUser)
       }
     },
 
@@ -247,54 +314,62 @@ export default {
       space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
       space.cards[1].x = random(180, 200)
       space.cards[1].y = random(160, 180)
+      space.userId = context.rootState.currentUser.id
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       context.commit('restoreSpace', uniqueNewSpace)
     },
     saveNewSpace: (context) => {
       const space = utils.clone(context.state)
       const user = context.rootState.currentUser
-      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       cache.saveSpace(space)
       context.dispatch('api/addToQueue', {
         name: 'createSpace',
         body: space
       }, { root: true })
-      utils.updateWindowUrlAndTitle({ space, userIsSignedIn })
+      utils.updateWindowUrlAndTitle({ space, currentUserIsSignedIn })
       context.commit('addUserToSpace', user)
     },
-    copyCurrentSpace: (context) => {
+    duplicateSpace: (context) => {
       let space = utils.clone(context.state)
       space.id = nanoid()
       space.users = []
+      space.collaborators = []
+      space.showInExplore = false
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       context.commit('restoreSpace', uniqueNewSpace)
       Vue.nextTick(() => {
         context.dispatch('updateUserLastSpaceId')
         context.dispatch('saveNewSpace')
-        context.dispatch('checkIfShouldNotifyReadOnly')
-        context.commit('addNotification', { message: "Space Copied. It's now yours to edit", type: 'success' }, { root: true })
-        context.commit('notifyReadOnly', false, { root: true })
         context.commit('notifyNewUser', false, { root: true })
       })
     },
     addSpace: (context) => {
+      const user = context.rootState.currentUser
+      context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       context.dispatch('createNewSpace')
       Vue.nextTick(() => {
-        context.dispatch('updateCardConnectionPaths', { cardId: context.state.cards[1].id })
+        context.dispatch('updateCardConnectionPaths', { cardId: context.state.cards[1].id, connections: context.state.connections })
         context.dispatch('saveNewSpace')
         context.dispatch('updateUserLastSpaceId')
-        context.commit('notifyReadOnly', false, { root: true })
         context.commit('notifyNewUser', false, { root: true })
+        context.commit('notifySignUpToEditSpace', false, { root: true })
       })
     },
     getRemoteSpace: async (context, space) => {
-      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      const collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const currentSpaceHasUrl = utils.currentSpaceHasUrl(space)
       let remoteSpace
       try {
         context.commit('isLoadingSpace', true, { root: true })
-        if (userIsSignedIn) {
+        if (currentUserIsSignedIn) {
           remoteSpace = await context.dispatch('api/getSpace', space, { root: true })
+        } else if (collaboratorKey) {
+          space.collaboratorKey = collaboratorKey
+          remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
+          cache.saveInvitedSpace(remoteSpace)
+          context.commit('collaboratorKey', '', { root: true })
         } else if (currentSpaceHasUrl) {
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
         }
@@ -302,6 +377,12 @@ export default {
         console.error(error)
         if (error.status === 404) {
           context.commit('notifySpaceNotFound', true, { root: true })
+        }
+        if (error.status === 401) {
+          context.commit('notifySpaceNotFound', true, { root: true })
+          context.dispatch('removeLocalSpaceIfUserIsRemoved', space)
+          context.dispatch('loadLastSpace')
+          cache.removeInvitedSpace(space)
         }
         if (error.status === 500) {
           context.commit('notifyConnectionError', true, { root: true })
@@ -312,73 +393,135 @@ export default {
       // only restore current space
       if (remoteSpace.id !== context.state.id) { return }
       // only cache spaces you can edit
-      const userCanEditSpace = context.rootGetters['currentUser/canEditSpace'](remoteSpace)
-      if (userCanEditSpace && !remoteSpace.isRemoved) {
+      const isSpaceMember = context.rootGetters['currentUser/isSpaceMember'](remoteSpace)
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace'](remoteSpace)
+      if (isSpaceMember && !remoteSpace.isRemoved) {
         console.log('🌌', remoteSpace)
         cache.saveSpace(remoteSpace)
+      } else if (!isSpaceMember && canEditSpace) {
+        context.commit('notifySpaceIsOpenAndEditable', true, { root: true })
       }
       return utils.normalizeRemoteSpace(remoteSpace)
     },
-    loadSpace: async (context, space) => {
-      const emptySpace = { id: space.id, cards: [], connections: [] }
+    removeLocalSpaceIfUserIsRemoved: (context, space) => {
       const cachedSpace = cache.space(space.id)
-      const shouldUpdateUrl = Boolean(context.rootState.spaceUrlToLoad)
-      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      const currentUserIsRemovedFromSpace = utils.objectHasKeys(cachedSpace)
+      context.dispatch('currentUser/removeFavorite', { type: 'space', item: space }, { root: true })
+      if (currentUserIsRemovedFromSpace) {
+        context.commit('currentUser/resetLastSpaceId', null, { root: true })
+        cache.removeSpacePermanent(space)
+        const emptySpace = { id: space.id, cards: [], connections: [], users: [], collaborators: [], spectators: [] }
+        context.commit('restoreSpace', emptySpace)
+      }
+    },
+    updateSpacePageSize: (context) => {
+      Vue.nextTick(() => {
+        context.dispatch('updateSpacePageSize', null, { root: true })
+      })
+    },
+    removeEmptyCards: (context) => {
+      let cards = context.state.cards
+      cards.forEach(card => {
+        if (!card.name) {
+          context.dispatch('removeCardPermanent', card)
+        }
+      })
+    },
+    loadSpace: async (context, space) => {
+      const emptySpace = { id: space.id, cards: [], connections: [], spectators: [] }
+      const cachedSpace = cache.space(space.id)
+      context.commit('clearAllNotifications', null, { root: true })
+      context.commit('clearAllFilters', null, { root: true })
       // restore local
       context.commit('restoreSpace', emptySpace)
-      context.commit('restoreSpace', cachedSpace)
+      context.commit('restoreSpace', utils.normalizeSpace(cachedSpace))
+      context.dispatch('updateSpacePageSize')
+      context.dispatch('loadBackground', context.state.background)
+      context.commit('history/clear', null, { root: true })
       // restore remote
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (remoteSpace) {
-        context.commit('restoreSpace', remoteSpace)
+        context.commit('restoreSpace', utils.normalizeSpace(remoteSpace))
+        context.dispatch('history/playback', null, { root: true })
+        context.dispatch('checkIfShouldNotifySignUpToEditSpace', remoteSpace)
         utils.updateWindowUrlAndTitle({
           space: remoteSpace,
-          shouldUpdateUrl,
-          userIsSignedIn
+          shouldUpdateUrl: true
         })
+        context.commit('broadcast/joinSpaceRoom', null, { root: true })
         if (!space.isRemoved && remoteSpace.isRemoved) {
           context.commit('notifySpaceIsRemoved', false, { root: true })
         } else {
           context.dispatch('checkIfShouldNotifySpaceIsRemoved', remoteSpace)
         }
-        if (cache.getAllSpaces().length) { context.commit('notifyNewUser', false, { root: true }) } else {
+        if (cache.getAllSpaces().length) {
+          context.commit('notifyNewUser', false, { root: true })
+        } else {
           context.commit('notifyNewUser', true, { root: true })
         }
+      } else {
+        utils.updateWindowUrlAndTitle({
+          space,
+          shouldUpdateUrl: false
+        })
       }
-      context.dispatch('checkIfShouldNotifyReadOnly')
       context.commit('spaceUrlToLoad', '', { root: true })
+      context.dispatch('updateSpacePageSize')
+      context.dispatch('loadBackground', context.state.background)
+      context.dispatch('removeEmptyCards')
+    },
+    loadLastSpace: (context) => {
+      const user = context.rootState.currentUser
+      let spaceToRestore = cache.space(user.lastSpaceId)
+      if (!spaceToRestore.id) {
+        spaceToRestore = { id: user.lastSpaceId }
+      }
+      context.dispatch('loadSpace', spaceToRestore)
+      context.dispatch('updateUserLastSpaceId')
     },
     updateSpace: async (context, updates) => {
       const space = utils.clone(context.state)
-      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       updates.id = space.id
       if (updates.name) {
         const updatedSpace = utils.clone(space)
         updatedSpace.name = updates.name
         utils.updateWindowUrlAndTitle({
           space: updatedSpace,
-          userIsSignedIn
+          currentUserIsSignedIn
         })
       }
       context.commit('updateSpace', updates)
+      context.commit('broadcast/update', { updates, type: 'updateSpace' }, { root: true })
       context.dispatch('api/addToQueue', {
         name: 'updateSpace',
         body: updates
       }, { root: true })
     },
-    changeSpace: (context, space) => {
+    changeSpace: async (context, { space, isRemote }) => {
+      if (isRemote) {
+        utils.updateWindowUrlAndTitle({
+          space: space,
+          shouldUpdateUrl: true
+        })
+      }
+      const user = context.rootState.currentUser
+      context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
-      context.dispatch('loadSpace', space)
+      await context.dispatch('loadSpace', space)
+      const canEdit = context.rootGetters['currentUser/canEditSpace']()
+      if (!canEdit) { return }
       context.dispatch('api/addToQueue', {
         name: 'updateSpace',
         body: { id: space.id, updatedAt: new Date() }
       }, { root: true })
+      context.commit('parentCardId', '', { root: true })
       context.dispatch('updateUserLastSpaceId')
     },
     updateUserLastSpaceId: (context) => {
       const space = context.state
-      const canEdit = context.rootGetters['currentUser/canEditCurrentSpace']
+      const canEdit = context.rootGetters['currentUser/canEditSpace']()
       if (space.isRemoved || !canEdit) { return }
       context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
     },
@@ -397,45 +540,153 @@ export default {
         body: space
       }, { root: true })
     },
-    checkIfShouldNotifyReadOnly: (context) => {
-      const CanEditCurrentSpace = context.rootGetters['currentUser/canEditCurrentSpace']
-      if (CanEditCurrentSpace) {
-        context.commit('notifyReadOnly', false, { root: true })
-      } else {
-        context.commit('notifyReadOnly', true, { root: true })
-      }
+    removeAllRemovedSpacesPermanent: (context) => {
+      const userId = context.rootState.currentUser.id
+      const removedSpaces = cache.getAllRemovedSpaces()
+      removedSpaces.forEach(space => cache.removeSpacePermanent(space))
+      context.dispatch('api/addToQueue', { name: 'removeAllRemovedSpacesPermanentFromUser', body: { userId } }, { root: true })
     },
     checkIfShouldNotifySpaceIsRemoved: (context, space) => {
-      const canEdit = context.rootGetters['currentUser/canEditCurrentSpace']
+      const canEdit = context.rootGetters['currentUser/canEditSpace']()
       if (space.isRemoved && canEdit) {
         context.commit('notifySpaceIsRemoved', true, { root: true })
       } else {
         context.commit('notifySpaceIsRemoved', false, { root: true })
       }
     },
+    checkIfShouldNotifySignUpToEditSpace: (context, space) => {
+      const spaceIsOpen = space.privacy === 'open'
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      const currentUserIsInvitedButCannotEditSpace = context.rootGetters['currentUser/isInvitedButCannotEditSpace'](space)
+      if (spaceIsOpen && !currentUserIsSignedIn) {
+        context.commit('notifySignUpToEditSpace', true, { root: true })
+      } else if (currentUserIsInvitedButCannotEditSpace) {
+        context.commit('notifySignUpToEditSpace', true, { root: true })
+      } else {
+        context.commit('notifySignUpToEditSpace', false, { root: true })
+      }
+    },
+    checkIfShouldnotifyCardsCreatedIsNearLimit: (context) => {
+      const currentUser = context.rootState.currentUser
+      if (currentUser.isUpgraded) { return }
+      const cardsCreatedLimit = 150
+      const value = cardsCreatedLimit - currentUser.cardsCreatedCount
+      if (utils.isBetween({ value, min: 0, max: 15 })) {
+        context.commit('notifyCardsCreatedIsNearLimit', true, { root: true })
+      }
+    },
+    removeCollaboratorFromSpace: (context, user) => {
+      const space = utils.clone(context.state)
+      const userName = user.name || 'User'
+      context.commit('broadcast/update', { user, type: 'userLeftSpace' }, { root: true })
+      context.dispatch('api/removeSpaceCollaborator', { space, user }, { root: true })
+      context.commit('removeCollaboratorFromSpace', user)
+      const isCurrentUser = user.id === context.rootState.currentUser.id
+      if (isCurrentUser) {
+        context.dispatch('loadLastSpace')
+        cache.removeInvitedSpace(space)
+        cache.removeSpacePermanent(space)
+        context.commit('addNotification', { message: `You left ${space.name}`, type: 'success' }, { root: true })
+      } else {
+        context.commit('addNotification', { message: `${userName} removed from space`, type: 'success' }, { root: true })
+      }
+    },
 
     // Cards
 
-    addCard: (context, position) => {
+    addCard: (context, { position, isParentCard, name, id }) => {
       utils.typeCheck(position, 'object')
-      let cards = context.rootState.currentSpace.cards
+      if (context.rootGetters['currentUser/cardsCreatedIsOverLimit']) {
+        context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
+        context.commit('notifyCardsCreatedIsNearLimit', false, { root: true })
+        return
+      }
+      let cards = context.state.cards
       let card = {
-        id: nanoid(),
+        id: id || nanoid(),
         x: position.x,
         y: position.y,
         z: cards.length + 1,
-        name: '',
-        frameId: 0
+        name: name || '',
+        frameId: 0,
+        userId: context.rootState.currentUser.id
       }
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       context.commit('createCard', card)
       card.spaceId = context.state.id
       card = utils.clone(card)
-      context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
+      const update = { name: 'createCard', body: card }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
+      context.commit('history/add', update, { root: true })
+      if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
+      context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: true }, { root: true })
+      context.dispatch('checkIfShouldnotifyCardsCreatedIsNearLimit')
+    },
+    addMultipleCards: (context, newCards) => {
+      newCards.forEach(card => {
+        card = {
+          id: nanoid(),
+          x: card.x,
+          y: card.y,
+          z: context.state.cards.length + 1,
+          name: card.name,
+          frameId: card.frameId || 0,
+          userId: context.rootState.currentUser.id
+        }
+        context.commit('createCard', card)
+        const update = { name: 'createCard', body: card }
+        context.dispatch('api/addToQueue', update, { root: true })
+        context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
+        context.commit('history/add', update, { root: true })
+      })
+    },
+    // shim for history/playback
+    createCard: (context, card) => {
+      context.commit('createCard', card)
+    },
+    pasteCard: (context, card) => {
+      utils.typeCheck(card, 'object')
+      card = utils.clone(card)
+      card.id = nanoid()
+      card.spaceId = context.state.id
+      const existingCards = context.rootState.currentSpace.cards
+      utils.uniqueCardPosition(card, existingCards)
+      context.commit('createCard', card)
+      const update = { name: 'createCard', body: card }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
+      context.commit('history/add', update, { root: true })
+      context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: true }, { root: true })
+    },
+    repaceInCardName: (context, { cardId, match, replace }) => {
+      const card = context.getters.cardById(cardId)
+      const name = card.name.replace(match, replace)
+      context.dispatch('updateCard', {
+        id: cardId,
+        name
+      })
     },
     updateCard: (context, card) => {
       context.commit('updateCard', card)
-      context.dispatch('api/addToQueue', { name: 'updateCard', body: card }, { root: true })
+      const update = { name: 'updateCard', body: card }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('broadcast/update', { updates: card, type: 'updateCard' }, { root: true })
+      context.commit('history/add', update, { root: true })
+    },
+    toggleCardChecked (context, { cardId, value }) {
+      utils.typeCheck(value, 'boolean')
+      utils.typeCheck(cardId, 'string')
+      const card = context.getters.cardById(cardId)
+      let name = card.name
+      const checkbox = utils.checkboxFromString(name)
+      name = name.replace(checkbox, '')
+      if (value) {
+        name = `[x] ${name}`
+      } else {
+        name = `[] ${name}`
+      }
+      context.dispatch('updateCard', { id: cardId, name })
     },
     incrementCardZ: (context, cardId) => {
       let cards = context.rootState.currentSpace.cards
@@ -444,10 +695,9 @@ export default {
         card.z = index
         if (card.id === cardId) {
           card.z = cards.length + 1
-          context.dispatch('api/addToQueue', {
-            name: 'updateCard',
-            body: { id: card.id, z: card.z }
-          }, { root: true })
+          const update = { name: 'updateCard', body: { id: card.id, z: card.z } }
+          context.dispatch('api/addToQueue', update, { root: true })
+          context.commit('broadcast/update', { updates: update.body, type: 'updateCard' }, { root: true })
         }
       })
       context.commit('incrementCardZ', cardId)
@@ -456,20 +706,34 @@ export default {
       const cardHasContent = Boolean(card.name)
       if (cardHasContent) {
         context.commit('removeCard', card)
-        context.dispatch('api/addToQueue', { name: 'removeCard', body: card }, { root: true })
+        const update = { name: 'removeCard', body: card }
+        context.dispatch('api/addToQueue', update, { root: true })
+        context.commit('history/add', update, { root: true })
       } else {
         context.dispatch('removeCardPermanent', card)
       }
+      context.commit('broadcast/update', { updates: card, type: 'removeCard' }, { root: true })
       context.dispatch('removeConnectionsFromCard', card)
-      context.commit('generateCardMap', null, { root: true })
+      context.commit('triggerUpdatePositionInVisualViewport', null, { root: true })
+      context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: false }, { root: true })
+      if (!context.rootGetters['currentUser/cardsCreatedIsOverLimit']) {
+        context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
+      }
     },
     removeCardPermanent: (context, card) => {
       context.commit('removeCardPermanent', card)
       context.dispatch('api/addToQueue', { name: 'removeCardPermanent', body: card }, { root: true })
     },
+    removeAllRemovedCardsPermanent: (context) => {
+      context.commit('removeAllRemovedCardsPermanent')
+      context.dispatch('api/addToQueue', { name: 'removeAllRemovedCardsPermanentFromSpace', body: {} }, { root: true })
+    },
     restoreRemovedCard: (context, card) => {
       context.commit('restoreRemovedCard', card)
-      context.dispatch('api/addToQueue', { name: 'restoreRemovedCard', body: card }, { root: true })
+      const update = { name: 'restoreRemovedCard', body: card }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('broadcast/update', { updates: card, type: 'restoreRemovedCard' }, { root: true })
+      context.commit('history/add', update, { root: true })
     },
     restoreRemovedSpace: (context, space) => {
       cache.restoreRemovedSpace(space)
@@ -478,7 +742,7 @@ export default {
           id: space.id
         } }, { root: true })
       space.isRemoved = false
-      context.dispatch('changeSpace', space)
+      context.dispatch('changeSpace', { space })
     },
     dragCards: (context, options) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
@@ -497,42 +761,44 @@ export default {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       const cards = context.rootState.currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
       cards.forEach(card => {
-        context.commit('moveCard', { cardId: card.id, delta })
+        const update = { cardId: card.id, delta }
+        context.commit('moveCard', update)
+        context.commit('broadcast/update', { updates: update, type: 'moveCard' }, { root: true })
         context.dispatch('updateCardConnectionPaths', { cardId: card.id })
       })
     },
     dragSingleCard: (context, { endCursor, delta, shouldUpdateApi }) => {
       const currentDraggingCardId = context.rootState.currentDraggingCardId
-      context.commit('moveCard', { cardId: currentDraggingCardId, delta })
+      const update = { cardId: currentDraggingCardId, delta }
+      context.commit('moveCard', update)
+      context.commit('broadcast/update', { updates: update, type: 'moveCard' }, { root: true })
       context.dispatch('updateCardConnectionPaths', { cardId: currentDraggingCardId })
     },
-    updatePositions: (context) => {
+    updateAfterDragWithPositions: (context) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
+      const currentDraggingCardId = context.rootState.currentDraggingCardId
+      let cards = []
       if (multipleCardsSelectedIds.length) {
-        const cards = context.rootState.currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
-        cards.forEach(card => {
-          card = utils.clone(card)
-          context.dispatch('api/addToQueue', { name: 'updateCard',
-            body: {
-              id: card.id,
-              x: card.x,
-              y: card.y
-            } }, { root: true })
-          context.dispatch('updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
-        })
+        cards = context.rootState.currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
       } else {
-        const currentDraggingCardId = context.rootState.currentDraggingCardId
-        let card = context.rootState.currentSpace.cards.find(card => currentDraggingCardId === card.id)
+        const card = context.rootState.currentSpace.cards.find(card => currentDraggingCardId === card.id)
         if (!card) { return }
+        cards.push(card)
+      }
+      cards.forEach(card => {
         card = utils.clone(card)
-        context.dispatch('api/addToQueue', { name: 'updateCard',
+        const update = { name: 'updateCard',
           body: {
             id: card.id,
             x: card.x,
-            y: card.y
-          } }, { root: true })
+            y: card.y,
+            z: card.z
+          }
+        }
+        context.dispatch('api/addToQueue', update, { root: true })
+        context.commit('history/add', update, { root: true })
         context.dispatch('updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
-      }
+      })
     },
     incrementSelectedCardsZ: (context) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
@@ -552,26 +818,28 @@ export default {
         endCardId: connection.endCardId
       })
       if (!connectionAlreadyExists) {
-        connection.id = nanoid()
+        connection.id = connection.id || nanoid()
         connection.spaceId = context.state.id
+        connection.userId = context.rootState.currentUser.id
         connection.connectionTypeId = connectionType.id
         context.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
+        context.commit('history/add', { name: 'addConnection', body: connection }, { root: true })
+        context.commit('broadcast/update', { updates: connection, type: 'addConnection' }, { root: true })
         context.commit('addConnection', connection)
       }
     },
-    updateCardConnectionPaths: (context, { cardId, shouldUpdateApi }) => {
-      let connections = utils.clone(context.state.connections)
-      connections = connections.map(connection => {
-        if (connection.startCardId === cardId || connection.endCardId === cardId) {
-          connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
-          connection.spaceId = context.state.id
-          if (shouldUpdateApi) {
-            context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
-          }
+    updateCardConnectionPaths: (context, { cardId, shouldUpdateApi, connections }) => {
+      const spaceId = context.state.id
+      connections = utils.clone(connections || context.getters.cardConnections(cardId) || context.rootState.currentConnectionsDragging)
+      connections.map(connection => {
+        connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
+        connection.spaceId = spaceId
+        if (shouldUpdateApi) {
+          context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
         }
-        return connection
+        context.commit('broadcast/update', { updates: connection, type: 'updateConnection' }, { root: true })
+        context.commit('updateConnection', connection)
       })
-      context.commit('updateCardConnections', connections)
     },
     removeConnectionsFromCard: (context, card) => {
       context.state.connections.forEach(connection => {
@@ -589,29 +857,41 @@ export default {
         const endMatch = endCardId === cardId && multipleCardsSelectedIds.includes(startCardId)
         const connectedToSelected = startMatch || endMatch
         if (connectedToSelected) {
+          context.commit('removeFromMultipleConnectionsSelected', connection.id, { root: true })
           context.dispatch('removeConnection', connection)
         }
       })
     },
     removeConnection: (context, connection) => {
       context.commit('removeConnection', connection)
-      context.dispatch('api/addToQueue', { name: 'removeConnection', body: connection }, { root: true })
+      const update = { name: 'removeConnection', body: connection }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('broadcast/update', { updates: connection, type: 'removeConnection' }, { root: true })
+      context.commit('history/add', update, { root: true })
     },
     updateConnectionTypeForConnection: (context, { connectionId, connectionTypeId }) => {
+      const updates = { connectionId, connectionTypeId }
       const connection = {
         id: connectionId,
         connectionTypeId
       }
-      context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
-      context.commit('updateConnectionTypeForConnection', { connectionId, connectionTypeId })
+      const update = { name: 'updateConnection', body: connection }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('history/add', update, { root: true })
+      context.commit('updateConnectionTypeForConnection', updates)
+      context.commit('broadcast/update', { updates, type: 'updateConnectionTypeForConnection' }, { root: true })
     },
     updateLabelIsVisibleForConnection: (context, { connectionId, labelIsVisible }) => {
+      const updates = { connectionId, labelIsVisible }
       const connection = {
         id: connectionId,
         labelIsVisible
       }
-      context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
-      context.commit('updateLabelIsVisibleForConnection', { connectionId, labelIsVisible })
+      const update = { name: 'updateConnection', body: connection }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('history/add', update, { root: true })
+      context.commit('updateLabelIsVisibleForConnection', updates)
+      context.commit('broadcast/update', { updates, type: 'updateLabelIsVisibleForConnection' }, { root: true })
     },
 
     // Connection Types
@@ -625,11 +905,16 @@ export default {
         spaceId: context.state.id
       }
       context.commit('addConnectionType', connectionType)
+      context.commit('broadcast/update', { updates: connectionType, type: 'addConnectionType' }, { root: true })
       context.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
+      context.commit('history/add', { name: 'addConnectionType', body: connectionType }, { root: true })
     },
     updateConnectionType: (context, connectionType) => {
       context.commit('updateConnectionType', connectionType)
-      context.dispatch('api/addToQueue', { name: 'updateConnectionType', body: connectionType }, { root: true })
+      context.commit('broadcast/update', { updates: connectionType, type: 'updateConnectionType' }, { root: true })
+      const update = { name: 'updateConnectionType', body: connectionType }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('history/add', update, { root: true })
     },
     removeUnusedConnectionTypes: (context) => {
       const connectionTypes = context.state.connectionTypes
@@ -637,13 +922,40 @@ export default {
       const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
       const removeConnectionTypes = connectionTypes.filter(type => !connectionTypeIds.includes(type.id))
       removeConnectionTypes.forEach(type => {
-        context.dispatch('api/addToQueue', { name: 'removeConnectionType', body: type }, { root: true })
+        const update = { name: 'removeConnectionType', body: type }
+        context.dispatch('api/addToQueue', update, { root: true })
+        context.commit('history/add', update, { root: true })
         context.commit('removeConnectionType', type)
+        context.commit('broadcast/update', { updates: type, type: 'removeConnectionType' }, { root: true })
       })
+    },
+
+    // background
+
+    loadBackground: (context, background) => {
+      const currentBackground = utils.urlFromString(document.body.style.backgroundImage)
+      if (background === currentBackground) { return }
+      if (utils.urlIsImage(background)) {
+        document.body.style.backgroundImage = `url(${background})`
+      } else {
+        document.body.style.backgroundImage = ''
+      }
     }
   },
 
   getters: {
+    // Meta
+    isHelloKinopio: (state) => {
+      return state.name === 'Hello Kinopio'
+    },
+    shouldBroadcast: (state) => {
+      const users = state.users.length
+      const collaborators = state.collaborators.length
+      const spectators = state.spectators.length
+      const total = users + collaborators + spectators
+      return Boolean(total > 1)
+    },
+
     // Cards
     cardById: (state) => (id) => {
       return state.cards.find(card => card.id === id)
@@ -682,6 +994,37 @@ export default {
       return state.connectionTypes.filter(type => {
         return connectionTypeIds.includes(type.id)
       })
+    },
+    connectionTypeForNewConnections: (state, getters, rootState) => {
+      const typePref = rootState.currentUser.defaultConnectionTypeId
+      const defaultType = getters.connectionTypeById(typePref)
+      if (defaultType) {
+        return defaultType
+      } else {
+        const lastConnectionType = getters.lastConnectionType
+        return lastConnectionType
+      }
+    },
+
+    // Users
+    members: (state, getters, rootState) => (excludeCurrentUser) => {
+      const users = state.users
+      const collaborators = state.collaborators || []
+      let members = []
+      users.forEach(user => {
+        members.push(user)
+      })
+      collaborators.forEach(user => {
+        members.push(user)
+      })
+      if (excludeCurrentUser) {
+        members = members.filter(user => user.id !== rootState.currentUser.id)
+      }
+      return members
+    },
+    memberById: (state, getters, rootState) => (id) => {
+      const members = getters.members()
+      return members.find(member => member.id === id)
     }
   }
 }

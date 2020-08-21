@@ -2,10 +2,12 @@
 .connection-label.badge(
   v-if="visible"
   :style="{ background: typeColor, left: position.left + 'px', top: position.top + 'px'}"
-  @click="showConnectionDetails"
+  @click.left="showConnectionDetails"
+  @touchend.stop="showConnectionDetails"
+  @touchstart="checkIsMultiTouch"
   :data-id="id"
-  @mouseover="hover = true"
-  @mouseleave="hover = false"
+  @mouseover.left="hover = true"
+  @mouseleave.left="hover = false"
   :class="{filtered: isFiltered}"
   ref="label"
 )
@@ -14,6 +16,8 @@
 
 <script>
 import utils from '@/utils.js'
+
+let isMultiTouch
 
 export default {
   name: 'ConnectionLabel',
@@ -38,6 +42,7 @@ export default {
     typeColor () { return this.connectionType.color },
     typeName () { return this.connectionType.name },
     path () { return this.connection.path },
+    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
 
     // filters
     filtersIsActive () {
@@ -70,20 +75,26 @@ export default {
         }
       } else { return false }
     }
-
   },
   methods: {
+    checkIsMultiTouch (event) {
+      isMultiTouch = false
+      if (utils.isMultiTouch(event)) {
+        isMultiTouch = true
+      }
+    },
     // same as Connection method
     showConnectionDetails (event) {
+      if (isMultiTouch) { return }
       const detailsPosition = utils.cursorPositionInPage(event)
-      this.$store.commit('closeAllDialogs')
-      this.$store.commit('connectionDetailsIsVisibleForConnectionId', this.id)
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('connectionDetailsIsVisibleForConnectionId', this.id)
       this.$store.commit('connectionDetailsPosition', detailsPosition)
-      this.$store.commit('clearMultipleSelected')
+      this.$store.dispatch('clearMultipleSelected')
     },
     setPosition () {
       this.$nextTick(() => {
-        let connection = document.querySelector(`.path[data-id="${this.id}"]`)
+        let connection = document.querySelector(`.connection-path[data-id="${this.id}"]`)
         connection = connection.getBoundingClientRect()
         let label = this.$refs.label
         let labelOffset
@@ -132,4 +143,6 @@ export default {
   pointer-events all
   cursor pointer
   position absolute
+  &.cursor-default
+    cursor default
 </style>

@@ -1,5 +1,5 @@
 <template lang="pug">
-path.path(
+path.connection-path(
   fill="none"
   :stroke="typeColor"
   stroke-width="5"
@@ -8,17 +8,24 @@ path.path(
   :data-id="id"
   :key="id"
   :d="path"
-  @click="showConnectionDetails"
+  @mousedown.left="startDraggingConnection"
+  @touchstart="startDraggingConnection"
+  @mouseup.left="showConnectionDetails"
   @touchend.stop="showConnectionDetails"
-  :class="{active: isSelected || detailsIsVisible, filtered: isFiltered, hover: isHovered}"
+  @keyup.stop.backspace="removeConnection"
+  @keyup.stop.enter="showConnectionDetailsOnKeyup"
+  :class="{active: isSelected || detailsIsVisible || remoteDetailsIsVisible || isRemoteSelected, filtered: isFiltered, hover: isHovered, 'hide-connection-outline': shouldHideConnectionOutline }"
   ref="connection"
+  tabindex="0"
+  @dragover.prevent
+  @drop.prevent.stop="addCardsAndUploadFiles"
 )
 </template>
 
 <script>
 import utils from '@/utils.js'
 
-let animationTimer
+let animationTimer, isMultiTouch, startCursor, currentCursor
 
 export default {
   name: 'Connection',
@@ -50,7 +57,10 @@ export default {
     }
   },
   computed: {
+    isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
+    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     id () { return this.connection.id },
+    connectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.connectionTypeId) },
     connectionTypeId () { return this.connection.connectionTypeId },
     startCardId () { return this.connection.startCardId },
     endCardId () { return this.connection.endCardId },
@@ -64,7 +74,6 @@ export default {
         return this.connection.path
       }
     },
-    connectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.connectionTypeId) },
     typeColor () {
       if (this.connectionType) {
         return this.connectionType.color
@@ -74,16 +83,25 @@ export default {
       const selectedIds = this.$store.state.multipleConnectionsSelectedIds
       return selectedIds.includes(this.id)
     },
+    isRemoteSelected () {
+      const remoteConnections = this.$store.state.remoteConnectionsSelected
+      const isSelected = remoteConnections.find(connection => connection.connectionId === this.id)
+      return isSelected
+    },
     detailsIsVisible () {
+      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
+      if (!canEditSpace) { return }
       const detailsId = this.$store.state.connectionDetailsIsVisibleForConnectionId
       return detailsId === this.id
     },
-    shouldAnimate () {
-      return Boolean(this.isSelected || this.detailsIsVisible)
+    remoteDetailsIsVisible () {
+      const remoteConnections = this.$store.state.remoteConnectionDetailsVisible
+      const isSelected = remoteConnections.find(connection => connection.connectionId === this.id)
+      return isSelected
     },
-    isHovered () {
-      return this.id === this.$store.state.currentUserIsHoveringOverConnectionId
-    },
+    shouldAnimate () { return Boolean(this.isSelected || this.detailsIsVisible || this.remoteDetailsIsVisible || this.isRemoteSelected) },
+    isHovered () { return this.id === this.$store.state.currentUserIsHoveringOverConnectionId },
+    shouldHideConnectionOutline () { return this.$store.state.shouldHideConnectionOutline },
 
     // filters
     filtersIsActive () {
@@ -116,13 +134,42 @@ export default {
     }
   },
   methods: {
+    removeConnection () {
+      if (!this.isSpaceMember) { return }
+      this.$store.dispatch('currentSpace/removeConnection', this.connection)
+      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
+    },
+    checkIsMultiTouch (event) {
+      isMultiTouch = false
+      if (utils.isMultiTouch(event)) {
+        isMultiTouch = true
+      }
+    },
     // same as ConnectionLabel method
     showConnectionDetails (event) {
+      if (isMultiTouch) { return }
+      if (!this.canEditSpace) { this.$store.commit('triggerReadOnlyJiggle') }
+      currentCursor = utils.cursorPositionInViewport(event)
+      if (!utils.cursorsAreClose(startCursor, currentCursor)) { return }
       const detailsPosition = utils.cursorPositionInPage(event)
-      this.$store.commit('closeAllDialogs')
-      this.$store.commit('connectionDetailsIsVisibleForConnectionId', this.id)
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('connectionDetailsIsVisibleForConnectionId', this.id)
       this.$store.commit('connectionDetailsPosition', detailsPosition)
-      this.$store.commit('clearMultipleSelected')
+      this.$store.dispatch('clearMultipleSelected')
+    },
+    startDraggingConnection (event) {
+      this.checkIsMultiTouch(event)
+      this.$store.commit('shouldHideConnectionOutline', true)
+      startCursor = utils.cursorPositionInViewport(event)
+    },
+    showConnectionDetailsOnKeyup (event) {
+      this.showConnectionDetails(event)
+      this.focusOnDialog(event)
+    },
+    focusOnDialog (event) {
+      this.$nextTick(() => {
+        document.querySelector('dialog.connection-details button').focus()
+      })
     },
     updatedPath (path, controlPoint, x, y) {
       return path.replace(controlPoint, `q${x},${y}`)
@@ -176,6 +223,12 @@ export default {
       this.controlCurve = undefined
       this.curvedPath = undefined
       this.frameCount = 0
+    },
+    addCardsAndUploadFiles (event) {
+      let files = event.dataTransfer.files
+      files = Array.from(files)
+      const currentCursor = utils.cursorPositionInViewport(event)
+      this.$store.dispatch('upload/addCardsAndUploadFiles', { files, currentCursor })
     }
   },
   watch: {
@@ -190,10 +243,13 @@ export default {
 </script>
 
 <style lang="stylus">
-.path
+.connection-path
   touch-action manipulation
   &:hover,
+  &.hover,
   &.active,
-  &.hover
-    stroke-width: 7
+  &:focus
+    stroke-width 7
+  &.hide-connection-outline
+    outline none
 </style>

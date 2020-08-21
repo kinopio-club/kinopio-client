@@ -1,10 +1,10 @@
 <template lang="pug">
-dialog.import.narrow(v-if="visible" :open="visible" @click.stop ref="dialog")
+dialog.import.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog")
   section
     p Import Space
   section
     p From an exported space
-    button(@click="selectFile")
+    button(@click.left="selectFile")
       span.badge.info json
       span Select File
     Loader(:visible="loading")
@@ -15,19 +15,28 @@ dialog.import.narrow(v-if="visible" :open="visible" @click.stop ref="dialog")
       ul
         li(v-for="(error in errors") {{error}}
 
+  section
+    .button-wrap
+      button(@click.left.stop="toggleImportArenaChannelIsVisible" :class="{ active: importArenaChannelIsVisible}")
+        img.icon.arena(src="@/assets/arena.svg")
+        span Are.na Channel
+      ImportArenaChannel(:visible="importArenaChannelIsVisible" @updateSpaces="updateSpaces")
+
 </template>
 
 <script>
-import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 import nanoid from 'nanoid'
 
+import scrollIntoView from '@/scroll-into-view.js'
+import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
 
 export default {
   name: 'Import',
   components: {
-    Loader
+    Loader,
+    ImportArenaChannel
   },
   props: {
     visible: Boolean
@@ -35,10 +44,17 @@ export default {
   data () {
     return {
       loading: false,
-      errors: []
+      errors: [],
+      importArenaChannelIsVisible: false
     }
   },
   methods: {
+    toggleImportArenaChannelIsVisible () {
+      this.importArenaChannelIsVisible = !this.importArenaChannelIsVisible
+    },
+    closeDialogs () {
+      this.importArenaChannelIsVisible = false
+    },
     selectFile () {
       if (this.loading) { return }
       const input = this.$refs.input
@@ -66,17 +82,20 @@ export default {
       }
     },
     importSpace (space) {
-      if (this.isValidSpace(space)) {
-        space.id = nanoid()
-        space.name = this.uniqueName(space)
-        const uniqueNewSpace = cache.updateIdsInSpace(space)
-        cache.saveSpace(uniqueNewSpace)
-        this.$store.commit('currentSpace/restoreSpace', uniqueNewSpace)
-        this.$store.dispatch('currentSpace/saveNewSpace')
-        this.$store.dispatch('currentUser/lastSpaceId', space.id)
-        this.$emit('updateSpaces')
-        this.$emit('closeDialog')
-      }
+      if (!this.isValidSpace(space)) { return }
+      space.id = nanoid()
+      space.name = this.uniqueName(space)
+      const uniqueNewSpace = cache.updateIdsInSpace(space)
+      cache.saveSpace(uniqueNewSpace)
+      this.$store.commit('currentSpace/restoreSpace', uniqueNewSpace)
+      this.$store.dispatch('currentSpace/saveNewSpace')
+      this.$store.dispatch('currentUser/lastSpaceId', space.id)
+      this.updateSpaces()
+    },
+    updateSpaces () {
+      this.$emit('updateSpaces')
+      this.closeDialogs()
+      this.$emit('closeDialog')
     },
     typeCheck (value, type) {
       if (type === 'array') {
@@ -109,10 +128,8 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      scrollIntoView(element, {
-        behavior: 'smooth',
-        scrollMode: 'if-needed'
-      })
+      const isTouchDevice = this.$store.state.isTouchDevice
+      scrollIntoView.scroll(element, isTouchDevice)
     }
   },
   watch: {
@@ -120,6 +137,7 @@ export default {
       this.$nextTick(() => {
         if (visible) {
           this.scrollIntoView()
+          this.closeDialogs()
         }
       })
     }
@@ -130,7 +148,8 @@ export default {
 <style lang="stylus">
 .import
   max-height calc(100vh - 140px)
-  overflow scroll
+  @media(max-width 360px)
+    left -40px
   .hidden
     display none
   .loader
@@ -147,5 +166,12 @@ export default {
       user-select text
   ul
     list-style-type square
+  .arena
+    width 18px
+  .button-wrap
+    dialog
+      @media(max-height 500px)
+        top initial
+        bottom 8px
 
 </style>

@@ -1,70 +1,138 @@
 <template lang="pug">
-footer(v-if="!dialogsVisible")
+footer(:style="visualViewportPosition")
   Notifications
-  section.controls
-    .button-wrap(v-if="userCanEditCurrentSpace")
-      button(@click="toggleRestoreIsVisible" :class="{ active: restoreIsVisible}")
-        img.refresh.icon(src="@/assets/undo.svg")
-      Restore(:visible="restoreIsVisible")
+  section(v-if="isVisible")
+    .button-wrap
+      button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
+        span Explore
+      Explore(:visible="exploreIsVisible")
 
     .button-wrap
-      button(@click="toggleFiltersIsVisible" :class="{ active: filtersIsVisible}")
+      label(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+        input(type="checkbox" v-model="isFavoriteSpace")
+        span Favorite
+
+  section.controls(v-if="isVisible")
+    .button-wrap
+      button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
+        img.refresh.icon(src="@/assets/remove.svg")
+        span Removed
+      Removed(:visible="removedIsVisible")
+
+    .button-wrap
+      button(@click.left="toggleFiltersIsVisible" :class="{ active: filtersIsVisible}")
         .span.badge.info(v-if="totalFilters") {{totalFilters}}
         img.icon.sunglasses(src="@/assets/filter.svg")
         span Filters
       Filters(:visible="filtersIsVisible")
 
+    .button-wrap
+      button(@click.left="toggleBackgroundIsVisible" :class="{ active: backgroundIsVisible}")
+        img.icon.macro(src="@/assets/macro.svg")
+      //- Upload Progress
+      .uploading-container-footer(v-if="pendingUpload")
+        .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
+          Loader(:visible="true")
+          span {{pendingUpload.percentComplete}}%
+      //- Remote Upload Progress
+      .uploading-container-footer(v-if="remotePendingUpload")
+        .badge.info
+          Loader(:visible="true")
+          span {{remotePendingUpload.percentComplete}}%
+
+      Background(:visible="backgroundIsVisible")
     .button-wrap(v-if="isOffline")
-      button(@click="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
+      button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
         span Offline
       Offline(:visible="offlineIsVisible")
 
 </template>
 
 <script>
-import Restore from '@/components/dialogs/Restore.vue'
+import Explore from '@/components/dialogs/Explore.vue'
+import Removed from '@/components/dialogs/Removed.vue'
 import Offline from '@/components/dialogs/Offline.vue'
 import Filters from '@/components/dialogs/Filters.vue'
+import Background from '@/components/dialogs/Background.vue'
 import Notifications from '@/components/Notifications.vue'
+import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
+
+const maxIterations = 30
+let currentIteration, updatePositionTimer
 
 export default {
   name: 'Footer',
   components: {
-    Restore,
+    Explore,
+    Removed,
     Offline,
     Notifications,
-    Filters
+    Filters,
+    Background,
+    Loader
   },
   data () {
     return {
-      restoreIsVisible: false,
+      removedIsVisible: false,
       offlineIsVisible: false,
-      filtersIsVisible: false
+      filtersIsVisible: false,
+      exploreIsVisible: false,
+      backgroundIsVisible: false,
+      pinchZoomOffsetLeft: 0,
+      pinchZoomOffsetTop: 0,
+      pinchZoomScale: 1
     }
   },
   mounted () {
-    console.log('🐢 kinopio-client', this.buildHash) // TODO move this stuff to store init, or app?
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
-        this.restoreIsVisible = false
+        this.removedIsVisible = false
         this.offlineIsVisible = false
         this.filtersIsVisible = false
+        this.exploreIsVisible = false
+        this.backgroundIsVisible = false
+      }
+      if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
+        currentIteration = 0
+        if (updatePositionTimer) { return }
+        updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
       }
     })
+    window.addEventListener('scroll', this.updatePositionInVisualViewport)
   },
   computed: {
-    buildHash () {
-      const regex = /(app\.)([a-z0-9])\w+/
-      const scripts = Array.from(document.querySelectorAll('script'))
-      const path = scripts.find(script => {
-        const src = script.src
-        return src.includes('app')
+    // buildHash () {
+    //   const regex = /(app\.)([a-z0-9])\w+/
+    //   const scripts = Array.from(document.querySelectorAll('script'))
+    //   const path = scripts.find(script => {
+    //     const src = script.src
+    //     return src.includes('app')
+    //   })
+    //   if (!path) { return }
+    //   let hash = path.src.match(regex)[0] // app.768db305407f4c847d44
+    //   return hash.replace('app.', '') // 768db305407f4c847d44
+    // },
+    pendingUpload () {
+      const currentSpace = this.$store.state.currentSpace
+      const pendingUploads = this.$store.state.upload.pendingUploads
+      return pendingUploads.find(upload => {
+        const isCurrentSpace = upload.spaceId === currentSpace.id
+        const isInProgress = upload.percentComplete < 100
+        return isCurrentSpace && isInProgress
       })
-      let hash = path.src.match(regex)[0] // app.768db305407f4c847d44
-      return hash.replace('app.', '') // 768db305407f4c847d44
+    },
+    isVisible () {
+      let isVisible = true
+      if (this.dialogsVisible) { isVisible = false }
+      if (this.shouldHideFooter) { isVisible = false }
+      return isVisible
     },
     dialogsVisible () {
       return Boolean(this.$store.state.cardDetailsIsVisibleForCardId || this.$store.state.multipleSelectedActionsIsVisible || this.$store.state.connectionDetailsIsVisibleForConnectionId)
+    },
+    shouldHideFooter () {
+      return this.$store.state.shouldHideFooter
     },
     isOffline () {
       return !this.$store.state.isOnline
@@ -74,28 +142,88 @@ export default {
       const frames = this.$store.state.filteredFrameIds
       return types.length + frames.length
     },
-    userCanEditCurrentSpace () {
-      return this.$store.getters['currentUser/canEditCurrentSpace']
+    isFavoriteSpace () {
+      const currentSpace = this.$store.state.currentSpace
+      const favoriteSpaces = this.$store.state.currentUser.favoriteSpaces
+      const isFavoriteSpace = favoriteSpaces.filter(space => space.id === currentSpace.id)
+      return Boolean(isFavoriteSpace.length)
+    },
+    visualViewportPosition () {
+      if (this.pinchZoomScale === 1) { return }
+      if (this.pinchZoomScale > 1) {
+        return {
+          transform: `translate(${this.pinchZoomOffsetLeft}px, ${this.pinchZoomOffsetTop}px) scale(${1 / this.pinchZoomScale})`,
+          'transform-origin': 'left bottom'
+        }
+      } else {
+        return {
+          transform: `translate(${this.pinchZoomOffsetLeft}px, ${this.pinchZoomOffsetTop}px)`,
+          zoom: 1 / this.pinchZoomScale,
+          'transform-origin': 'left bottom'
+        }
+      }
+    },
+    remotePendingUpload () {
+      const currentSpace = this.$store.state.currentSpace
+      let remotePendingUploads = this.$store.state.remotePendingUploads
+      return remotePendingUploads.find(upload => {
+        const inProgress = upload.percentComplete < 100
+        const isSpace = upload.spaceId === currentSpace.id
+        return inProgress && isSpace
+      })
     }
-
   },
   methods: {
-    toggleRestoreIsVisible () {
-      const isVisible = this.restoreIsVisible
-      this.$store.commit('closeAllDialogs')
-      this.restoreIsVisible = !isVisible
+    updatePositionFrame () {
+      currentIteration++
+      this.updatePositionInVisualViewport()
+      if (currentIteration < maxIterations) {
+        window.requestAnimationFrame(this.updatePositionFrame)
+      } else {
+        window.cancelAnimationFrame(updatePositionTimer)
+        updatePositionTimer = undefined
+      }
+    },
+    updatePositionInVisualViewport () {
+      const viewport = utils.visualViewport()
+      const layoutViewport = document.getElementById('layout-viewport')
+      this.pinchZoomScale = viewport.scale
+      this.pinchZoomOffsetLeft = viewport.offsetLeft
+      this.pinchZoomOffsetTop = viewport.height - layoutViewport.getBoundingClientRect().height + viewport.offsetTop
+    },
+    toggleIsFavoriteSpace () {
+      const currentSpace = this.$store.state.currentSpace
+      if (this.isFavoriteSpace) {
+        this.$store.dispatch('currentUser/removeFavorite', { type: 'space', item: currentSpace })
+      } else {
+        this.$store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
+      }
+    },
+    toggleRemovedIsVisible () {
+      const isVisible = this.removedIsVisible
+      this.$store.dispatch('closeAllDialogs')
+      this.removedIsVisible = !isVisible
     },
     toggleOfflineIsVisible () {
       const isVisible = this.offlineIsVisible
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.offlineIsVisible = !isVisible
     },
     toggleFiltersIsVisible () {
       const isVisible = this.filtersIsVisible
-      this.$store.commit('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs')
       this.filtersIsVisible = !isVisible
+    },
+    toggleBackgroundIsVisible () {
+      const isVisible = this.backgroundIsVisible
+      this.$store.dispatch('closeAllDialogs')
+      this.backgroundIsVisible = !isVisible
+    },
+    toggleExploreIsVisible () {
+      const isVisible = this.exploreIsVisible
+      this.$store.dispatch('closeAllDialogs')
+      this.exploreIsVisible = !isVisible
     }
-
   }
 }
 </script>
@@ -112,6 +240,8 @@ footer
     margin 0
     height 11px
   .controls
+    margin-top 6px
+  > section
     display flex
     > .button-wrap
       pointer-events all
@@ -122,4 +252,25 @@ footer
         bottom calc(100% - 8px)
   .sunglasses
     vertical-align middle
+  .macro
+    vertical-align -3px
+    height 13px
+  .user-details
+    .space-picker
+      bottom initial
+      top calc(100% - 8px)
+
+  .uploading-container-footer
+    position absolute
+    top -11px
+    left 8px
+    width 100px
+    pointer-events none
+    .badge
+      display inline-block
+      &.absolute
+        position absolute
+        top 6px
+        left 6px
+
 </style>

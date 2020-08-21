@@ -1,19 +1,23 @@
 <template lang="pug">
-dialog.narrow.export(v-if="visible" :open="visible" @click.stop ref="dialog")
+dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
     p Export {{exportTitle}}
   section
     textarea(ref="text") {{text()}}
-    button(@click="copyText") Copy Card Names
+    button(@click.left="copyText")
+      span Copy Card Names
     .row
       .badge.success(v-if="textIsCopied") Card Names Copied
-
+    button(@click.left="duplicateSpace")
+      img.icon(src="@/assets/add.svg")
+      span Duplicate Space
+    .badge.success(v-if="spaceIsDuplicated") {{duplicatedSpaceName}} duplicated
   section
     p Download
-    button(@click="downloadTxt")
+    button(@click.left="downloadTxt")
       span.badge.info txt
       span Card Names
-    button(@click="downloadJSON")
+    button(@click.left="downloadJSON")
       span.badge.info json
       span All Data
     a#export-downlaod-anchor.hidden
@@ -22,8 +26,8 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.stop ref="dialog")
 
 <script>
 import join from 'lodash-es/join'
-import scrollIntoView from 'smooth-scroll-into-view-if-needed' // polyfil
 
+import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
 export default {
@@ -36,7 +40,9 @@ export default {
   },
   data () {
     return {
-      textIsCopied: false
+      textIsCopied: false,
+      spaceIsDuplicated: false,
+      duplicatedSpaceName: ''
     }
   },
   methods: {
@@ -80,10 +86,14 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      scrollIntoView(element, {
-        behavior: 'smooth',
-        scrollMode: 'if-needed'
-      })
+      const isTouchDevice = this.$store.state.isTouchDevice
+      scrollIntoView.scroll(element, isTouchDevice)
+    },
+    duplicateSpace () {
+      this.duplicatedSpaceName = this.$store.state.currentSpace.name
+      this.$store.dispatch('currentSpace/duplicateSpace')
+      this.spaceIsDuplicated = true
+      this.$emit('updateSpaces')
     }
   },
   watch: {
@@ -92,6 +102,7 @@ export default {
         if (visible) {
           this.textIsCopied = false
           this.scrollIntoView()
+          this.spaceIsDuplicated = false
         }
       })
     }
@@ -103,6 +114,8 @@ export default {
 .export
   overflow scroll
   max-height calc(100vh - 100px)
+  @media(max-width 400px)
+    left calc(-100% - 8px)
   textarea
     background-color var(--secondary-background)
     border 0
@@ -117,4 +130,6 @@ export default {
     margin-top 10px
   .badge.success
     margin-top 10px
+  .hidden
+    display none
 </style>

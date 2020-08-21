@@ -1,7 +1,13 @@
 {
   "id": "1",
   "name": "New Space",
+  "privacy": "private",
+  "showInExplore": false,
+  "collaboratorKey": "",
   "users": [],
+  "collaborators": [],
+  "spectators": [],
+  "background": "",
   "cards": [
     {
       "id": "1",

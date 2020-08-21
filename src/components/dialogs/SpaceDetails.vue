@@ -1,63 +1,75 @@
 <template lang="pug">
-dialog.narrow.space-details(v-if="visible" :open="visible" @click="closeDialogs")
+dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDialogs")
   section
-    input(v-if="canEditCurrentSpace" placeholder="name" v-model="spaceName")
-    p(v-else) {{spaceName}}
+    template(v-if="isSpaceMember")
+      .row
+        input(placeholder="name" v-model="spaceName")
+      .row.privacy-row
+        PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
+        ShowInExploreButton(@updateSpaces="updateSpaces")
 
-    button(v-if="canEditCurrentSpace" @click="removeCurrentSpace")
-      img.icon(src="@/assets/remove.svg")
-      span Remove
+    template(v-if="!isSpaceMember")
+      p {{spaceName}}
+      .row(v-if="shouldShowInExplore")
+        .badge.status.explore-message
+          img.icon(src="@/assets/checkmark.svg")
+          span Shown in Explore
 
+    .button-wrap(v-if="isSpaceMember")
+      button(@click.left="removeCurrentSpace")
+        img.icon(src="@/assets/remove.svg")
+        span {{removeLabel}}
+    .button-wrap(v-if="!isSpaceMember")
+      button(@click.left="duplicateSpace")
+        img.icon(src="@/assets/add.svg")
+        span Duplicate
     .button-wrap
-      button(@click.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+      button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
         span Export
-      Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="currentSpace" :exportScope="exportScope")
+      Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="currentSpace" :exportScope="exportScope" @updateSpaces="updateSpaces")
 
   section.results-actions
     .row
+      .segmented-buttons
+        button(@click.left.stop="hideFavorites" :class="{ active: !favoritesIsVisible }")
+          span Yours
+        button(@click.left.stop="showFavorites" :class="{ active: favoritesIsVisible }")
+          span Favorites
+    .row(v-if="!favoritesIsVisible")
+      button(@click.left="addSpace")
+        img.icon(src="@/assets/add.svg")
+        span Add
       .button-wrap
-        button(@click.stop="toggleTemplatesIsVisible" :class="{ active: templatesIsVisible }")
-          span Templates
-        Templates(:visible="templatesIsVisible")
-
-      .button-wrap
-        button(@click.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
+        button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
           span Import
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
 
-    button(@click="addSpace")
-      img.icon(src="@/assets/add.svg")
-      span Add
+  section.results-section(v-if="!favoritesIsVisible")
+    SpaceList(:spaces="spaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
 
-  section.results-section
-    .filter-wrap(v-if="isNumerousSpaces")
-      img.icon.search(src="@/assets/search.svg" @click="focusFilterInput")
-      input(placeholder="Search" v-model="spaceFilter" ref="filterInput")
-      button.borderless.clear-input-wrap(@click="clearFilter")
-        img.icon(src="@/assets/add.svg")
-    ul.results-list
-      template(v-for="(space in spacesFiltered")
-        li(@click="changeSpace(space)" :class="{ active: spaceIsActive(space.id) }" :key="space.id" tabindex="0" v-on:keyup.enter="changeSpace(space)")
-          .badge.info.template-badge(v-show="spaceIsTemplate(space.id)")
-            span Template
-          .name {{space.name}}
+  Favorites(:visible="favoritesIsVisible" :loading="favoritesIsLoading")
+
 </template>
 
 <script>
-import fuzzy from 'fuzzy'
-
 import cache from '@/cache.js'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
-import Templates from '@/components/dialogs/Templates.vue'
-import templates from '@/spaces/templates.js'
+import SpaceList from '@/components/SpaceList.vue'
+import Favorites from '@/components/Favorites.vue'
+import PrivacyButton from '@/components/PrivacyButton.vue'
+import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'SpaceDetails',
   components: {
     Export,
     Import,
-    Templates
+    SpaceList,
+    Favorites,
+    PrivacyButton,
+    ShowInExploreButton
   },
   props: {
     visible: Boolean
@@ -65,14 +77,36 @@ export default {
   data () {
     return {
       spaces: [],
+      favoriteSpaces: [],
+      favoriteUsers: [],
       exportIsVisible: false,
       importIsVisible: false,
-      templatesIsVisible: false,
-      filter: '',
-      filteredSpaces: []
+      privacyPickerIsVisible: false,
+      favoritesIsVisible: false,
+      favoriteUsersIsVisible: false,
+      favoritesIsLoading: false,
+      hasUpdatedFavorites: false,
+      removeLabel: 'Remove',
+      isLoadingRemoteSpaces: false
     }
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerFavoritesIsVisible') {
+        this.favoritesIsVisible = true
+        // todo getfavs()
+      }
+    })
+  },
   computed: {
+    currentSpace () { return this.$store.state.currentSpace },
+    exportScope () { return 'space' },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    shouldShowInExplore () {
+      const privacy = this.$store.state.currentSpace.privacy
+      if (privacy === 'private') { return false }
+      return this.$store.state.currentSpace.showInExplore
+    },
     spaceName: {
       get () {
         return this.$store.state.currentSpace.name
@@ -82,54 +116,17 @@ export default {
         this.updateSpaces()
       }
     },
-    spacesFiltered () {
-      if (this.filter) {
-        return this.filteredSpaces
-      } else {
-        return this.spaces
-      }
-    },
-    spaceFilter: {
-      get () {
-        return this.filter
-      },
-      set (newValue) {
-        this.filter = newValue
-        const options = {
-          pre: '',
-          post: '',
-          extract: (space) => {
-            return space.name
-          }
-        }
-        const filtered = fuzzy.filter(this.filter, this.spaces, options)
-        const spaces = filtered.map(space => {
-          return {
-            name: space.string,
-            id: space.original.id
-          }
-        })
-        this.filteredSpaces = spaces
-      }
-    },
-    currentSpace () {
-      return this.$store.state.currentSpace
-    },
-    exportScope () {
-      return 'space'
-    },
-    canEditCurrentSpace () {
-      return this.$store.getters['currentUser/canEditCurrentSpace']
-    },
-    isNumerousSpaces () {
-      return Boolean(this.spaces.length >= 5)
+    isSpaceMember () {
+      const currentSpace = this.$store.state.currentSpace
+      return this.$store.getters['currentUser/isSpaceMember'](currentSpace)
     }
   },
   methods: {
-    focusFilterInput () {
-      const element = this.$refs.filterInput
-      element.focus()
-      element.setSelectionRange(0, 0)
+    showFavorites () {
+      this.favoritesIsVisible = true
+    },
+    hideFavorites () {
+      this.favoritesIsVisible = false
     },
     toggleExportIsVisible () {
       const isVisible = this.exportIsVisible
@@ -141,59 +138,92 @@ export default {
       this.closeDialogs()
       this.importIsVisible = !isVisible
     },
-    toggleTemplatesIsVisible () {
-      const isVisible = this.templatesIsVisible
-      this.closeDialogs()
-      this.templatesIsVisible = !isVisible
-    },
     closeDialogs () {
       this.exportIsVisible = false
       this.importIsVisible = false
-      this.templatesIsVisible = false
+      this.privacyPickerIsVisible = false
     },
-    spaceIsActive (spaceId) {
-      const currentSpace = this.$store.state.currentSpace.id
-      return Boolean(currentSpace === spaceId)
-    },
-    spaceIsTemplate (spaceId) {
-      const templateSpaceIds = templates.spaces().map(space => space.spaceId)
-      return templateSpaceIds.includes(spaceId)
+    togglePrivacyPickerIsVisible () {
+      const isVisible = this.privacyPickerIsVisible
+      this.closeDialogs()
+      this.privacyPickerIsVisible = !isVisible
     },
     addSpace () {
+      window.scrollTo(0, 0)
       this.$store.dispatch('currentSpace/addSpace')
-      this.$nextTick(() => {
-        this.updateSpaces()
-      })
+      this.updateSpaces()
     },
     changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', space)
+      this.$store.dispatch('currentSpace/changeSpace', { space })
+      this.updateRemoveLabel()
     },
     changeToLastSpace () {
-      if (this.spaces.length) {
-        this.$store.dispatch('currentSpace/changeSpace', this.spaces[0])
+      const currentSpace = this.$store.state.currentSpace
+      const spaces = this.spaces.filter(space => space.id !== currentSpace.id)
+      if (spaces.length) {
+        this.$store.dispatch('currentSpace/changeSpace', { space: spaces[0] })
       } else {
         this.addSpace()
       }
+      this.updateRemoveLabel()
     },
     removeCurrentSpace () {
-      this.$store.dispatch('currentSpace/removeCurrentSpace')
+      const currentUser = this.$store.state.currentUser
+      const currentUserIsSpaceCollaborator = this.$store.getters['currentUser/isSpaceCollaborator']()
+      if (currentUserIsSpaceCollaborator) {
+        this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', currentUser)
+      } else {
+        this.$store.dispatch('currentSpace/removeCurrentSpace')
+      }
       this.updateSpaces()
       this.changeToLastSpace()
     },
     async updateSpaces () {
-      const userSpaces = cache.getAllSpaces().filter(space => {
-        return this.$store.getters['currentUser/canEditSpace'](space)
+      this.$nextTick(() => {
+        const currentUser = this.$store.state.currentUser
+        const userSpaces = cache.getAllSpaces().filter(space => {
+          return this.$store.getters['currentUser/canEditSpace'](space)
+        })
+        this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(userSpaces, currentUser)
+        this.updateRemoveLabel()
       })
-      this.spaces = userSpaces
+    },
+    pruneCachedSpaces (remoteSpaces) {
+      const remoteSpaceIds = remoteSpaces.map(space => space.id)
+      const spacesToRemove = this.spaces.filter(space => !remoteSpaceIds.includes(space.id))
+      spacesToRemove.forEach(spaceToRemove => {
+        cache.removeSpacePermanent(spaceToRemove)
+      })
     },
     async updateWithRemoteSpaces () {
-      const spaces = await this.$store.dispatch('api/getUserSpaces')
-      if (spaces) {
-        this.spaces = spaces
+      this.isLoadingRemoteSpaces = true
+      const remoteSpaces = await this.$store.dispatch('api/getUserSpaces')
+      this.isLoadingRemoteSpaces = false
+      if (!remoteSpaces) { return }
+      this.pruneCachedSpaces(remoteSpaces)
+      this.spaces = remoteSpaces
+    },
+    updateRemoveLabel () {
+      const currentUserIsSpaceCollaborator = this.$store.getters['currentUser/isSpaceCollaborator']()
+      if (currentUserIsSpaceCollaborator) {
+        this.removeLabel = 'Leave'
+      } else {
+        this.removeLabel = 'Remove'
       }
     },
-    clearFilter () {
-      this.filter = ''
+    async updateFavorites () {
+      if (this.favoritesIsLoading) { return }
+      if (this.hasUpdatedFavorites) { return }
+      this.favoritesIsLoading = true
+      this.hasUpdatedFavorites = true
+      await this.$store.dispatch('currentUser/restoreUserFavorites')
+      this.favoritesIsLoading = false
+    },
+    duplicateSpace () {
+      const duplicatedSpaceName = this.$store.state.currentSpace.name
+      this.$store.dispatch('currentSpace/duplicateSpace')
+      this.$store.commit('addNotification', { message: `${duplicatedSpaceName} is now yours to edit`, type: 'success' })
+      this.updateSpaces()
     }
   },
   watch: {
@@ -202,7 +232,9 @@ export default {
         this.updateSpaces()
         this.updateWithRemoteSpaces()
         this.closeDialogs()
-        this.filter = ''
+        this.updateFavorites()
+      } else {
+        this.favoritesIsVisible = false
       }
     }
   }
@@ -210,6 +242,15 @@ export default {
 </script>
 
 <style lang="stylus">
-.template-badge
-  flex none
+.space-details
+  .privacy-row
+    display flex
+    align-items flex-start
+  .privacy-button
+    > button
+      height 24px
+      min-width 24px
+  .explore-message
+    display flex
+    margin-top 6px
 </style>

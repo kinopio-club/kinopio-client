@@ -1,21 +1,32 @@
 <template lang="pug">
-dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
+dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs")
   section
-    p Kinopio is the thinking, diagramming, and planning tool for your hardest problems.
-    .button-wrap
-      button(@click.stop="toggleWhatsNewIsVisible" :class="{active: whatsNewIsVisible}")
-        span What's New
-        img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
-      WhatsNew(:visible="whatsNewIsVisible" :newStuff="newStuff")
+    .row
+      p Kinopio is the visual thinking tool for new ideas and hard problems.
+    .row
+      .button-wrap
+        button(@click.left.stop="toggleWhatsNewIsVisible" :class="{active: whatsNewIsVisible}")
+          span What's New
+          img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
+        WhatsNew(:visible="whatsNewIsVisible" :newStuff="newStuff")
+    .row
+      .button-wrap
+        button(@click.left.stop="toggleHelpIsVisible" :class="{active: helpIsVisible}")
+          span Help and About
+        Help(:visible="helpIsVisible")
+      .button-wrap
+        a(href="https://help.kinopio.club/api")
+          button API →
+
   section
     .row
       .button-wrap
-        button(@click.stop="toggleSupportIsVisible" :class="{active: supportIsVisible}") Support
-        Support(:visible="supportIsVisible")
-
+        button(@click.left.stop="toggleKeyboardShortcutsIsVisible" :class="{active: keyboardShortcutsIsVisible}")
+          span Keyboard Shortcuts
+        KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
     .button-wrap(v-if="isMobile")
-      button(@click.stop="toggleAddToHomescreenIsVisible" :class="{active: addToHomescreenIsVisible}")
-        span(v-if="isIOS")
+      button(@click.left.stop="toggleAddToHomescreenIsVisible" :class="{active: addToHomescreenIsVisible}")
+        span(v-if="isIPhone")
           img.icon(src="@/assets/apple.svg")
           span Kinopio for IOS
         span(v-if="isAndroid")
@@ -26,29 +37,31 @@ dialog.about.narrow(v-if="visible" :open="visible" @click="closeDialogs")
 </template>
 
 <script>
-import Support from '@/components/dialogs/Support.vue'
 import WhatsNew from '@/components/dialogs/WhatsNew.vue'
 import AddToHomescreen from '@/components/dialogs/AddToHomescreen.vue'
+import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
+import Help from '@/components/dialogs/Help.vue'
 import utils from '@/utils.js'
 
 export default {
   name: 'About',
   components: {
-    Support,
     WhatsNew,
-    AddToHomescreen
+    AddToHomescreen,
+    KeyboardShortcuts,
+    Help
   },
   props: {
     visible: Boolean
   },
   data () {
     return {
-      supportIsVisible: false,
-      newStuffIsUpdated: false,
+      helpIsVisible: false,
       whatsNewIsVisible: false,
       addToHomescreenIsVisible: false,
+      keyboardShortcutsIsVisible: false,
       newStuff: [],
-      isIOS: false,
+      isIPhone: false,
       isAndroid: false,
       isMobile: false
     }
@@ -56,7 +69,6 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
-        this.supportIsVisible = false
         this.whatsNewIsVisible = false
         this.addToHomescreenIsVisible = false
       }
@@ -70,45 +82,58 @@ export default {
     this.newStuff = newStuff.slice(0, 5)
     this.checkNewStuffIsUpdated(newStuff[0].id)
     this.isMobile = utils.isMobile()
-    this.isIOS = utils.isIOS()
+    this.isIPhone = utils.isIPhone()
     this.isAndroid = utils.isAndroid()
   },
+  computed: {
+    newStuffIsUpdated () { return this.$store.state.newStuffIsUpdated }
+  },
   methods: {
-    toggleSupportIsVisible () {
-      const isVisible = this.supportIsVisible
+    toggleHelpIsVisible () {
+      const isVisible = this.helpIsVisible
       this.closeDialogs()
-      this.supportIsVisible = !isVisible
+      this.helpIsVisible = !isVisible
     },
     toggleWhatsNewIsVisible () {
       const isVisible = this.whatsNewIsVisible
       this.closeDialogs()
       this.whatsNewIsVisible = !isVisible
-      this.newStuffIsUpdated = false
+      this.$store.commit('newStuffIsUpdated', false)
     },
     toggleAddToHomescreenIsVisible () {
       const isVisible = this.addToHomescreenIsVisible
       this.closeDialogs()
       this.addToHomescreenIsVisible = !isVisible
     },
+    toggleKeyboardShortcutsIsVisible () {
+      const isVisible = this.keyboardShortcutsIsVisible
+      this.closeDialogs()
+      this.keyboardShortcutsIsVisible = !isVisible
+    },
     async getNewStuff () {
-      const response = await fetch('https://api.are.na/v2/channels/kinopio-updates/contents?direction=desc')
+      const response = await fetch('https://api.are.na/v2/channels/kinopio-what-s-new/contents?direction=desc')
       const data = await response.json()
       return data
     },
     checkNewStuffIsUpdated (latestUpdateId) {
       const userlastReadId = parseInt(this.$store.state.currentUser.lastReadNewStuffId)
-      this.newStuffIsUpdated = Boolean(userlastReadId !== latestUpdateId)
+      const newStuffIsUpdated = Boolean(userlastReadId !== latestUpdateId)
+      this.$store.commit('newStuffIsUpdated', newStuffIsUpdated)
     },
     closeDialogs () {
-      this.supportIsVisible = false
+      this.helpIsVisible = false
       this.whatsNewIsVisible = false
       this.addToHomescreenIsVisible = false
+      this.keyboardShortcutsIsVisible = false
     }
   },
   watch: {
     visible (visible) {
       if (visible && this.newStuff.length) {
         this.checkNewStuffIsUpdated(this.newStuff[0].id)
+      }
+      if (visible) {
+        this.closeDialogs()
       }
     }
   }
@@ -117,11 +142,8 @@ export default {
 
 <style lang="stylus">
 .about
-  top calc(100% - 6px)
-  .hidden
-    display none
+  top calc(100% - 6px) !important
   .updated
     margin 0
     margin-left 3px
-
 </style>

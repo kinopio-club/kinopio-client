@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.add-to-homescreen(v-if="visible" :open="visible" @click.stop)
+dialog.add-to-homescreen(v-if="visible" :open="visible" @click.left.stop)
   section
     .logo-wrap
       .app-frame
@@ -7,7 +7,7 @@ dialog.add-to-homescreen(v-if="visible" :open="visible" @click.stop)
       span.arrow →
       img.icon(src="@/assets/phone.svg")
 
-    span(v-if="isIOS")
+    span(v-if="isIPhone")
       p Kinopio is a web-app which you can add directly to your iPhone or iPad
         ol
           li
@@ -20,7 +20,7 @@ dialog.add-to-homescreen(v-if="visible" :open="visible" @click.stop)
               .badge.info
                 span Add to Home Screen
                 img.icon.add(src="@/assets/add.svg")
-              span (you might need to scroll down)
+              span (you'll need to scroll down)
 
     span(v-if="isAndroid")
       p Kinopio is a web-app which you can add directly to your Android Phone
@@ -48,12 +48,12 @@ export default {
   },
   data () {
     return {
-      isIOS: false,
+      isIPhone: false,
       isAndroid: false
     }
   },
   mounted () {
-    this.isIOS = utils.isIOS()
+    this.isIPhone = utils.isIPhone()
     this.isAndroid = utils.isAndroid()
     shouldRestoreUrlPath = true
     this.$store.subscribe((mutation, state) => {

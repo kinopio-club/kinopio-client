@@ -9,6 +9,11 @@ aside.frames
     img.cat(src="@/assets/frames/magical-helper/cat.png")
     img.hat(src="@/assets/frames/magical-helper/hat.png")
     img.moon(src="@/assets/frames/magical-helper/moon.png")
+
+  .morning-brew(v-if="isTeaTime")
+    img.cloud(src="@/assets/frames/tea-time/cloud.png")
+    img.pot(src="@/assets/frames/tea-time/pot.png")
+    img.ichigotchi(src="@/assets/frames/tea-time/ichigotchi.png")
 </template>
 
 <script>
@@ -22,6 +27,9 @@ export default {
     },
     isMagicalHelper () {
       return Boolean(this.card.frameId === 2)
+    },
+    isTeaTime () {
+      return Boolean(this.card.frameId === 3)
     }
   }
 }
@@ -59,4 +67,19 @@ export default {
       width 23px
       right 28px
       top -15px
+
+  .morning-brew
+    .pot
+      left -25px
+      top -5px
+      width 31px
+    .cloud
+      width 45px
+      top -19px
+      left 7px
+    .ichigotchi
+      width 23px
+      right -4px
+      top -19px
+      transform rotate(-10deg)
 </style>

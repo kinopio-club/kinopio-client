@@ -15,7 +15,11 @@ export default {
     lastReadNewStuffId: undefined,
     prefersDarkTheme: false,
     apiKey: '',
-    numberOfCardsCreated: 0
+    arenaAccessToken: '',
+    favoriteUsers: [],
+    favoriteSpaces: [],
+    cardsCreatedCount: 0,
+    isUpgraded: false
   },
   getters: {
     isCurrentUser: (state) => (user) => {
@@ -24,23 +28,68 @@ export default {
     isSignedIn: (state) => {
       return Boolean(state.apiKey)
     },
-    canEditSpace: (state) => (space) => {
+    cardsCreatedIsOverLimit: (state) => {
+      const cardsCreatedLimit = 150
+      if (state.isUpgraded) { return }
+      if (state.cardsCreatedCount >= cardsCreatedLimit) { return true }
+    },
+    canEditSpace: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
+      const spaceIsOpen = space.privacy === 'open'
+      const currentUserIsSignedIn = getters.isSignedIn
+      const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
+      const isSpaceMember = getters.isSpaceMember(space)
+      return canEditOpenSpace || isSpaceMember
+    },
+    cardIsCreatedByCurrentUser: (state, getters, rootState) => (card) => {
+      return state.id === card.userId
+    },
+    connectionIsCreatedByCurrentUser: (state, getters, rootState) => (connection) => {
+      return state.id === connection.userId
+    },
+    isSpaceMember: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
+      const isSpaceUser = getters.isSpaceUser(space)
+      const isSpaceCollaborator = getters.isSpaceCollaborator(space)
+      return isSpaceUser || isSpaceCollaborator
+    },
+    isSpaceUser: (state, getters, rootState) => (space) => {
       let userIsInSpace
-      // remoteSpace has space.users, cachedSpace has space.userId
       if (space.users) {
-        userIsInSpace = space.users.find(user => {
+        userIsInSpace = Boolean(space.users.find(user => {
           return user.id === state.id
-        })
+        }))
       } else {
         userIsInSpace = space.userId === state.id
       }
-      return Boolean(userIsInSpace)
+      return userIsInSpace
     },
-    canEditCurrentSpace: (state, getters, rootState) => {
-      const userIsInSpace = rootState.currentSpace.users.find(user => {
-        return user.id === state.id
-      })
-      return Boolean(userIsInSpace)
+    isSpaceCollaborator: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
+      if (space.collaborators) {
+        return Boolean(space.collaborators.find(collaborator => {
+          return collaborator.id === state.id
+        }))
+      }
+    },
+    spaceUserPermission: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
+      const isSpaceUser = getters.isSpaceUser(space)
+      const isSpaceCollaborator = getters.isSpaceCollaborator(space)
+      const spaceHasNoUsers = !space.users.length
+      if (isSpaceUser || spaceHasNoUsers) {
+        return 'user'
+      } else if (isSpaceCollaborator) {
+        return 'collaborator'
+      } else {
+        return 'spectator'
+      }
+    },
+    isInvitedButCannotEditSpace: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
+      const currentUserIsSignedIn = getters.isSignedIn
+      const isInvitedToSpace = Boolean(cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id))
+      return !currentUserIsSignedIn && isInvitedToSpace
     }
   },
   mutations: {
@@ -56,6 +105,16 @@ export default {
       state.lastSpaceId = spaceId
       cache.updateUser('lastSpaceId', spaceId)
     },
+    resetLastSpaceId: (state) => {
+      const spaces = cache.getAllSpaces()
+      const lastSpace = spaces[1]
+      if (lastSpace) {
+        state.lastSpaceId = lastSpace.id
+      } else {
+        state.lastSpaceId = ''
+      }
+      cache.updateUser('lastSpaceId', state.lastSpaceId)
+    },
     lastReadNewStuffId: (state, newStuffId) => {
       state.lastReadNewStuffId = newStuffId
       cache.updateUser('lastReadNewStuffId', newStuffId)
@@ -67,6 +126,16 @@ export default {
     apiKey: (state, apiKey) => {
       state.apiKey = apiKey
       cache.updateUser('apiKey', apiKey)
+    },
+    favoriteUsers: (state, users) => {
+      utils.typeCheck(users, 'array')
+      state.favoriteUsers = users
+      cache.updateUser('favoriteUsers', users)
+    },
+    favoriteSpaces: (state, spaces) => {
+      utils.typeCheck(spaces, 'array')
+      state.favoriteSpaces = spaces
+      cache.updateUser('favoriteSpaces', spaces)
     },
     restoreUser: (state, user) => {
       Object.keys(user).forEach(item => {
@@ -92,6 +161,20 @@ export default {
       if (!state.apiKey) {
         state.apiKey = ''
       }
+    },
+    arenaAccessToken: (state, token) => {
+      state.arenaAccessToken = token
+      cache.updateUser('arenaAccessToken', token)
+    },
+    cardsCreatedCount: (state, count) => {
+      utils.typeCheck(count, 'number')
+      state.cardsCreatedCount = count
+      cache.updateUser('cardsCreatedCount', count)
+    },
+    isUpgraded: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.isUpgraded = value
+      cache.updateUser('isUpgraded', value)
     }
   },
   actions: {
@@ -107,8 +190,32 @@ export default {
         context.dispatch('createNewUser')
       }
     },
+    cardsCreatedCount: (context, { shouldIncrement }) => {
+      let count
+      if (shouldIncrement) {
+        count = Math.max(context.state.cardsCreatedCount + 1, 0)
+      } else {
+        count = Math.max(context.state.cardsCreatedCount - 1, 0)
+      }
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          cardsCreatedCount: count
+        } }, { root: true })
+      context.commit('cardsCreatedCount', count)
+    },
+    isUpgraded: (context, value) => {
+      context.commit('isUpgraded', value)
+      context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
+    },
     createNewUser: (context) => {
       cache.saveUser(context.state)
+    },
+    broadcastUpdate: (context, updates) => {
+      const space = context.rootState.currentSpace
+      const spaceUserPermission = utils.capitalizeFirstLetter(context.getters.spaceUserPermission(space)) // User, Collaborator, Spectator
+      const type = `update${spaceUserPermission}`
+      const userId = context.state.id
+      context.commit('broadcast/updateUser', { id: space.id, updates, type, userId }, { root: true })
     },
     name: (context, newName) => {
       context.commit('name', newName)
@@ -116,6 +223,7 @@ export default {
         body: {
           name: newName
         } }, { root: true })
+      context.dispatch('broadcastUpdate', { name: newName })
     },
     color: (context, newColor) => {
       context.commit('color', newColor)
@@ -123,6 +231,7 @@ export default {
         body: {
           color: newColor
         } }, { root: true })
+      context.dispatch('broadcastUpdate', { color: newColor })
     },
     lastSpaceId: (context, spaceId) => {
       context.commit('notifySpaceNotFound', false, { root: true })
@@ -155,11 +264,85 @@ export default {
       if (remoteUser.updatedAt > cachedUser.cacheDate) { console.log('🌸 Restore user from remote', remoteUser) }
       context.commit('updateUser', remoteUser)
     },
+    restoreUserFavorites: async (context) => {
+      if (!context.getters.isSignedIn) { return }
+      let favorites = {
+        favoriteUsers: [],
+        favoriteSpaces: []
+      }
+      favorites = await context.dispatch('api/getUserFavorites', null, { root: true }) || favorites
+      context.commit('favoriteUsers', favorites.favoriteUsers)
+      context.commit('favoriteSpaces', favorites.favoriteSpaces)
+    },
+    addFavorite: (context, { type, item }) => {
+      context.commit('notifyAccessFavorites', true, { root: true })
+      if (type === 'user') {
+        let favorites = utils.clone(context.state.favoriteUsers)
+        let favorite = {
+          id: item.id,
+          name: item.name,
+          color: item.color
+        }
+        favorites.push(favorite)
+        context.commit('favoriteUsers', favorites)
+      } else if (type === 'space') {
+        let favorites = utils.clone(context.state.favoriteSpaces)
+        let favorite = {
+          id: item.id,
+          name: item.name,
+          privacy: item.privacy,
+          showInExplore: item.showInExplore,
+          users: item.users
+        }
+        favorites.push(favorite)
+        context.commit('favoriteSpaces', favorites)
+      }
+      context.dispatch('api/addToQueue', { name: 'addOrRemoveFavorite',
+        body: { type, id: item.id }
+      }, { root: true })
+    },
+    removeFavorite: (context, { type, item }) => {
+      context.commit('notifyAccessFavorites', false, { root: true })
+      if (type === 'user') {
+        let favorites = utils.clone(context.state.favoriteUsers)
+        favorites = favorites.filter(favorite => {
+          return favorite.id !== item.id
+        })
+        context.commit('favoriteUsers', favorites)
+      } else if (type === 'space') {
+        let favorites = utils.clone(context.state.favoriteSpaces)
+        favorites = favorites.filter(favorite => {
+          return favorite.id !== item.id
+        })
+        context.commit('favoriteSpaces', favorites)
+      }
+      context.dispatch('api/addToQueue', { name: 'addOrRemoveFavorite',
+        body: { type, id: item.id }
+      }, { root: true })
+    },
     confirmEmail: (context) => {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           emailIsVerified: true
-        } }, { root: true })
+        }
+      }, { root: true })
+    },
+    arenaAccessToken: (context, token) => {
+      context.commit('arenaAccessToken', token)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          arenaAccessToken: token
+        }
+      }, { root: true })
+    },
+    updateArenaAccessToken: async (context, arenaReturnedCode) => {
+      console.log('updateArenaAccessToken')
+      context.commit('importArenaChannelIsVisible', true, { root: true })
+      context.commit('isAuthenticatingWithArena', true, { root: true })
+      const response = await context.dispatch('api/updateArenaAccessToken', arenaReturnedCode, { root: true })
+      context.commit('arenaAccessToken', response.arenaAccessToken)
+      context.commit('importArenaChannelIsVisible', true, { root: true })
+      context.commit('isAuthenticatingWithArena', false, { root: true })
     }
   }
 }

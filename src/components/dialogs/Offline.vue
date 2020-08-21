@@ -2,7 +2,7 @@
 dialog(v-if="visible" :open="visible")
   section
     p Offline
-  section(v-if="userIsSignedIn")
+  section(v-if="currentUserIsSignedIn")
     p Kinopio works offline,
     p Your changes will be saved locally, and synced up once you're back online. It's pretty chill.
     p
@@ -22,16 +22,25 @@ export default {
   props: {
     visible: Boolean
   },
+  data () {
+    return {
+      queue: []
+    }
+  },
   computed: {
-    queue () {
-      return cache.queue()
-    },
     pluralChanges () {
       const condition = this.queue.length !== 1
       return utils.pluralize('change', condition)
     },
-    userIsSignedIn () {
+    currentUserIsSignedIn () {
       return Boolean(this.$store.getters['currentUser/isSignedIn'])
+    }
+  },
+  watch: {
+    visible (visible) {
+      if (visible) {
+        this.queue = cache.queue()
+      }
     }
   }
 }

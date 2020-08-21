@@ -1,13 +1,13 @@
 <template lang="pug">
-.user(:data-user-id="user.id")
+.user(:data-user-id="user.id" @keydown.stop.enter="toggleUserDetails" :class="{ active: userDetailsIsVisible}")
   .user-avatar.anon-avatar(
-    @mouseup.stop="toggleUserDetails"
+    @mouseup.left.stop="toggleUserDetails"
     @touchend.stop="toggleUserDetails"
     ref="user"
     :class="{ clickable: isClickable, active: userDetailsIsVisible }"
     :style="{backgroundColor: user.color}"
   )
-    .current-user-badge(v-if="isCurrentUser")
+    .label-badge(v-if="isCurrentUser && !hideYouLabel")
       span YOU
   template(v-if="isClickable")
     UserDetails(:visible="userDetailsIsVisible" :user="user" :detailsOnRight="detailsOnRight")
@@ -25,7 +25,8 @@ export default {
     isClickable: Boolean,
     user: Object,
     detailsOnRight: Boolean,
-    shouldCloseAllDialogs: Boolean
+    shouldCloseAllDialogs: Boolean,
+    hideYouLabel: Boolean
   },
   data () {
     return {
@@ -56,7 +57,7 @@ export default {
     toggleUserDetails () {
       const isVisible = this.userDetailsIsVisible
       if (this.shouldCloseAllDialogs) {
-        this.$store.commit('closeAllDialogs')
+        this.$store.dispatch('closeAllDialogs')
       }
       this.userDetailsIsVisible = !isVisible
     }
@@ -68,6 +69,11 @@ export default {
 .user
   display inline-block
   position relative
+  &:hover,
+  &:active
+    outline none
+  &.active
+    outline none
   .user-avatar
     width 24px
     height 24px
@@ -78,25 +84,24 @@ export default {
     &:hover,
     &:focus
       box-shadow var(--button-hover-shadow)
-      .current-user-badge
-        bottom -9px
-    &:active
+      .label-badge
+        transform translateY(2px)
+    &:active,
+    &.active
       box-shadow var(--button-active-inset-shadow)
     &.clickable
       cursor pointer
       pointer-events all
-    &.active
-      box-shadow var(--button-active-inset-shadow)
-  .current-user-badge
-    position absolute
+  .label-badge
     bottom -7px
     width 100%
-    background-color var(--primary)
-    height 12px
-    border-radius 3px
-    display flex
-    justify-content center
-    span
-      font-size 12px
-      color var(--primary-background)
+button
+  .user
+    margin 0
+    margin-right 6px
+    vertical-align middle
+    .user-avatar
+      width 15px
+      height 15px
+      margin-top -2px
 </style>

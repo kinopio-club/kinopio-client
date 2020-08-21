@@ -4,7 +4,7 @@ import merge from 'lodash-es/merge'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 
-let host = 'https://api.kinopio.club'
+let host = 'https://kinopio-server.herokuapp.com'
 if (process.env.NODE_ENV === 'development') {
   host = 'http://kinopio.local:3000'
 }
@@ -30,22 +30,9 @@ const squashQueue = (queue) => {
 
 const shouldRequest = () => {
   const isOnline = window.navigator.onLine
-  const userIsSignedIn = cache.user().apiKey
-  if (isOnline && userIsSignedIn) {
+  const currentUserIsSignedIn = cache.user().apiKey
+  if (isOnline && currentUserIsSignedIn) {
     return true
-  }
-}
-
-const requestOptions = (options) => {
-  const headers = new Headers({ 'Content-Type': 'application/json' })
-  const apiKey = options.apiKey || cache.user().apiKey // || contributorKey
-  if (apiKey) {
-    headers.append('Authorization', apiKey)
-  }
-  return {
-    method: options.method,
-    headers,
-    body: JSON.stringify(options.body)
   }
 }
 
@@ -68,19 +55,49 @@ const normalizeSpaceToRemote = (space) => {
   return space
 }
 
+const normalizeCollaboratorKey = (space) => {
+  if (!space.collaboratorKey) { return }
+  if (typeof space.collaboratorKey === 'string') {
+    return space.collaboratorKey
+  } else {
+    return space.collaboratorKey.collaboratorKey
+  }
+}
+
 const self = {
   namespaced: true,
   state: {},
   mutations: {},
   actions: {
 
+    requestOptions: (context, options) => {
+      const headers = new Headers({
+        'Content-Type': 'application/json',
+        'Cache-Control': 'must-revalidate, no-store, no-cache, private'
+      })
+      const collaboratorKey = normalizeCollaboratorKey(options.space)
+      const apiKey = options.apiKey || cache.user().apiKey
+      if (collaboratorKey) {
+        headers.append('Space-Authorization', collaboratorKey)
+      }
+      if (apiKey) {
+        headers.append('Authorization', apiKey)
+      }
+      headers.append('User-Id', context.rootState.currentUser.id)
+      return {
+        method: options.method,
+        headers,
+        body: JSON.stringify(options.body)
+      }
+    },
+
     // Queue
 
     addToQueue: (context, { name, body }) => {
       body = utils.clone(body)
       body.spaceId = context.rootState.currentSpace.id
-      const userIsSignedIn = context.rootGetters['currentUser/isSignedIn']
-      if (!userIsSignedIn) { return }
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      if (!currentUserIsSignedIn) { return }
       let queue = cache.queue()
       const request = {
         name,
@@ -91,33 +108,40 @@ const self = {
       context.dispatch('debouncedProcessQueueOperations')
     },
 
-    requeue: (context, items) => {
-      items.forEach(item => {
-        let queue = cache.queue()
-        queue.push(item)
-        cache.saveQueue(queue)
-      })
-      console.log('🚑 requeue', cache.queue())
-    },
-
     debouncedProcessQueueOperations: debounce(({ dispatch }) => {
       dispatch('processQueueOperations')
     }, 500),
 
     processQueueOperations: async (context) => {
+      let body
       const queue = cache.queue()
-      const body = squashQueue(queue)
-      if (!shouldRequest() || !body.length) { return }
-      cache.clearQueue()
+      const queueBuffer = cache.queueBuffer()
+      if (!shouldRequest() || !queue.length) { return }
+      if (queueBuffer.length) {
+        body = queueBuffer
+      } else {
+        body = squashQueue(queue)
+        cache.saveQueueBuffer(body)
+        cache.clearQueue()
+      }
+
       try {
-        const options = requestOptions({ body, method: 'POST' })
         console.log(`🛫 sending operations`, body)
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/operations`, options)
-        if (!response.ok) { throw Error(response.statusText) }
+        if (response.ok) {
+          console.log('🛬 operations ok')
+          cache.clearQueueBuffer()
+        } else {
+          throw Error(response.statusText)
+        }
+        if (context.rootState.notifyServerCouldNotSave) {
+          context.commit('notifyServerCouldNotSave', false, { root: true })
+          context.commit('addNotification', { message: 'Reconnected to server', type: 'success' }, { root: true })
+        }
       } catch (error) {
         console.error('🚒', error, body)
-        // context.commit('addNotification', { message: "Syncing Error. Will retry in 10 seconds…", type: 'danger' }, { root: true })
-        context.dispatch('requeue', body)
+        context.commit('notifyServerCouldNotSave', true, { root: true })
       }
     },
 
@@ -127,7 +151,7 @@ const self = {
       const body = currentUser
       body.email = email
       body.password = password
-      const options = requestOptions({ body, method: 'POST' })
+      const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
       return fetch(`${host}/user/sign-up`, options)
     },
     signIn: async (context, { email, password }) => {
@@ -135,17 +159,17 @@ const self = {
         email: email,
         password: password
       }
-      const options = requestOptions({ body, method: 'POST' })
+      const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
       return fetch(`${host}/user/sign-in`, options)
     },
     resetPassword: async (context, email) => {
       const body = { email }
-      const options = requestOptions({ body, method: 'POST' })
+      const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
       return fetch(`${host}/user/reset-password`, options)
     },
     updatePassword: async (context, { password, apiKey }) => {
       const body = { password }
-      const options = requestOptions({ body, method: 'PATCH', apiKey })
+      const options = await context.dispatch('requestOptions', { body, method: 'PATCH', apiKey, space: context.rootState.currentSpace })
       return fetch(`${host}/user/update-password`, options)
     },
 
@@ -154,8 +178,18 @@ const self = {
     getUser: async (context) => {
       if (!shouldRequest()) { return }
       try {
-        const options = requestOptions({ method: 'GET' })
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/user`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    getUserFavorites: async (context) => {
+      if (!shouldRequest()) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/user/favorites`, options)
         return normalizeResponse(response)
       } catch (error) {
         console.error(error)
@@ -164,9 +198,11 @@ const self = {
     getUserSpaces: async (context) => {
       if (!shouldRequest()) { return }
       try {
-        const options = requestOptions({ method: 'GET' })
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/user/spaces`, options)
-        return normalizeResponse(response)
+        const currentUser = context.rootState.currentUser
+        let spaces = await normalizeResponse(response)
+        return utils.AddCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
       } catch (error) {
         console.error(error)
       }
@@ -174,7 +210,7 @@ const self = {
     getUserRemovedSpaces: async (context) => {
       if (!shouldRequest()) { return }
       try {
-        const options = requestOptions({ method: 'GET' })
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/user/removed-spaces`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -184,8 +220,27 @@ const self = {
     removeUserPermanent: async (context) => {
       if (!shouldRequest()) { return }
       try {
-        const options = requestOptions({ method: 'DELETE' })
+        const options = await context.dispatch('requestOptions', { method: 'DELETE', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/user/permanent`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    getPublicUser: async (context, user) => {
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/user/public/${user.id}`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    updateUserFavorites: async (context, body) => {
+      if (!shouldRequest()) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/user/favorites`, options)
         return normalizeResponse(response)
       } catch (error) {
         console.error(error)
@@ -194,12 +249,23 @@ const self = {
 
     // Space
 
+    getNewSpaces: async (context) => {
+      try {
+        console.log('🛬 getting new spaces')
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await utils.timeout(40000, fetch(`${host}/space/new-spaces`, options))
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+
     getSpace: async (context, space) => {
       try {
         if (!shouldRequest()) { return }
         console.log('🛬 getting remote space', space.id)
-        const options = requestOptions({ method: 'GET' })
-        const response = await utils.timeout(10000, fetch(`${host}/space/${space.id}`, options))
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await utils.timeout(40000, fetch(`${host}/space/${space.id}`, options))
         return normalizeResponse(response)
       } catch (error) {
         console.error(error)
@@ -208,10 +274,12 @@ const self = {
     getSpaceAnonymously: async (context, space) => {
       const isOffline = !window.navigator.onLine
       if (isOffline) { return }
+      const invite = cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id) || {}
+      space.collaboratorKey = space.collaboratorKey || invite.collaboratorKey
       try {
-        console.log('🛬 getting remote space anonymously', space.id)
-        const options = requestOptions({ method: 'GET' })
-        const response = await utils.timeout(10000, fetch(`${host}/space/${space.id}`, options))
+        console.log('🛬 getting remote space anonymously', space.id, space.collaboratorKey)
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: space })
+        const response = await utils.timeout(40000, fetch(`${host}/space/${space.id}`, options))
         return normalizeResponse(response)
       } catch (error) {
         console.error(error)
@@ -228,13 +296,21 @@ const self = {
           return space
         })
         removedSpaces.forEach(space => spaces.push(space))
-        spaces.map(space => {
-          utils.migrationEnsureRemovedCards(space)
-          return space
-        })
+        spaces = spaces.filter(space => space)
         const body = spaces
-        const options = requestOptions({ body, method: 'POST' })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/space/multiple`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    createSpace: async (context, space) => {
+      try {
+        space = normalizeSpaceToRemote(space)
+        const body = space
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/space`, options)
         return normalizeResponse(response)
       } catch (error) {
         console.error(error)
@@ -243,8 +319,45 @@ const self = {
     getSpaceRemovedCards: async (context, space) => {
       if (!shouldRequest()) { return }
       try {
-        const options = requestOptions({ method: 'GET' })
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/space/${space.id}/removed-cards`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    getSpaceCollaboratorKey: async (context, space) => {
+      if (!shouldRequest()) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/space/${space.id}/collaborator-key`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    addSpaceCollaborator: async (context, { spaceId, collaboratorKey }) => {
+      if (!shouldRequest()) { return }
+      const userId = context.rootState.currentUser.id
+      try {
+        const body = { userId, spaceId }
+        const space = { collaboratorKey: collaboratorKey }
+        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space })
+        const response = await fetch(`${host}/space/collaborator`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    removeSpaceCollaborator: async (context, { space, user }) => {
+      if (!shouldRequest()) { return }
+      try {
+        const body = {
+          spaceId: space.id,
+          userId: user.id
+        }
+        const options = await context.dispatch('requestOptions', { body, method: 'DELETE', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/space/collaborator`, options)
         return normalizeResponse(response)
       } catch (error) {
         console.error(error)
@@ -256,7 +369,7 @@ const self = {
     updateCards: async (context, body) => {
       if (!shouldRequest()) { return }
       try {
-        const options = requestOptions({ body, method: 'PATCH' })
+        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/card/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -269,7 +382,7 @@ const self = {
     updateConnectionTypes: async (context, body) => {
       if (!shouldRequest()) { return }
       try {
-        const options = requestOptions({ body, method: 'PATCH' })
+        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/connection-type/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -282,11 +395,104 @@ const self = {
     updateConnections: async (context, body) => {
       if (!shouldRequest()) { return }
       try {
-        const options = requestOptions({ body, method: 'PATCH' })
+        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/connection/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
         console.error(error)
+      }
+    },
+
+    // Billing
+
+    createCustomer: async (context, body) => {
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/billing/create-customer`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    createSubscription: async (context, body) => {
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/billing/create-subscription`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    updateSubscription: async (context, body) => {
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/billing/update-subscription`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    cancelSubscription: async (context, body) => {
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/billing/cancel-subscription`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    subscriptionInfo: async (context, body) => {
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/billing/retrieve-subscription-info`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+
+    // Upload
+
+    createPresignedPost: async (context, body) => {
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/upload/presigned-post`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+
+    createMultiplePresignedPosts: async (context, body) => {
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/upload/presigned-post/multiple`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+
+    // Services
+
+    updateArenaAccessToken: async (context, arenaReturnedCode) => {
+      try {
+        const currentUserIsSignedIn = cache.user().apiKey
+        let userId
+        if (currentUserIsSignedIn) {
+          userId = cache.user().id
+        }
+        const body = {
+          userId,
+          arenaReturnedCode: arenaReturnedCode
+        }
+        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/user/update-arena-access-token`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+        context.commit('triggerArenaAuthenticationError', null, { root: true })
+        context.commit('isAuthenticatingWithArena', false, { root: true })
       }
     }
 
