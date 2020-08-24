@@ -49,9 +49,16 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         button(:disabled="!canEditCard" @click.left.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
           span Frames
         FramePicker(:visible="framePickerIsVisible" :cards="[card]")
-    //- Split
-    .row(v-if="nameHasLineBreaks")
-      .button-wrap
+
+    .row(v-if="nameHasLineBreaks || hasLinks")
+      //- Show Link
+      .button-wrap(v-if="hasLinks")
+        button(:disabled="!canEditCard" @click.left.stop="toggleLinksIsVisible" :class="{active: linksIsVisible}")
+          img.icon(v-if="linksIsVisible" src="@/assets/view-active.svg")
+          img.icon(v-else src="@/assets/view.svg")
+          span Link
+      //- Split
+      .button-wrap(v-if="nameHasLineBreaks")
         button(:disabled="!canEditCard" @click.left.stop="splitCards")
           img.icon(src="@/assets/split-vertically.svg")
           span Split into {{nameLines}} Cards
@@ -81,6 +88,8 @@ import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import Loader from '@/components/Loader.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
+
+import qs from '@aguezz/qs-parse'
 
 export default {
   name: 'CardDetails',
@@ -156,6 +165,27 @@ export default {
       }
     },
     url () { return utils.urlFromString(this.name) },
+    urls () { return utils.urlsFromString(this.name, true) },
+    linkUrls () {
+      return this.urls.filter(url => {
+        return this.urlType(url) === 'link'
+      })
+    },
+    hasLinks () {
+      return Boolean(this.linkUrls.length)
+    },
+    linksIsVisible () {
+      const linksVisible = this.linkUrls.filter(url => {
+        const queryString = utils.queryString(url)
+        if (queryString) {
+          const queryObject = qs.decode(queryString)
+          return queryObject.hidden
+        } else {
+          return false
+        }
+      })
+      return linksVisible.length === this.linkUrls.length
+    },
     urlIsAudio () { return utils.urlIsAudio(this.url) },
     normalizedName () {
       let name = this.name
@@ -195,6 +225,43 @@ export default {
       let lines = name.split('\n')
       lines = lines.filter(line => Boolean(line.length))
       return lines
+    },
+    updateLink ({ url, newUrl }) {
+      const newName = this.name.replace(url.trim(), newUrl)
+      this.updateCardName(newName)
+    },
+    toggleLinksIsVisible () {
+      const isVisible = !this.linksIsVisible
+      let newUrls = []
+      this.urls.forEach(url => {
+        url = url.trim()
+        const isLink = this.urlType(url) === 'link'
+        if (!isLink) { return }
+        const queryString = utils.queryString(url)
+        const domain = utils.urlWithoutQueryString(url)
+        let queryObject
+        if (queryString) {
+          queryObject = qs.decode(queryString)
+        } else {
+          queryObject = {}
+        }
+        if (isVisible) {
+          queryObject.hidden = true
+          const newUrl = qs.encode(domain, queryObject)
+          newUrls.push({
+            url,
+            newUrl
+          })
+        } else {
+          delete queryObject.hidden
+          const newUrl = qs.encode(domain, queryObject)
+          newUrls.push({
+            url,
+            newUrl
+          })
+        }
+      })
+      newUrls.forEach(urls => this.updateLink(urls))
     },
     splitCards () {
       const spaceBetweenCards = 12

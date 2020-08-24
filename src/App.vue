@@ -310,8 +310,6 @@ dialog
 
 .icon
   vertical-align -1px
-  &.label
-    width 18px
 
 .icon + span
   margin-left 5px

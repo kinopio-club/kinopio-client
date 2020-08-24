@@ -10,8 +10,8 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
 
     .row
       button(:disabled="!canEditConnection" :class="{active: labelIsVisible}" @click.left="toggleLabelIsVisible")
-        img.icon.label(v-if="labelIsVisible" src="@/assets/label-active.svg")
-        img.icon.label(v-else src="@/assets/label.svg")
+        img.icon(v-if="labelIsVisible" src="@/assets/view-active.svg")
+        img.icon(v-else src="@/assets/view.svg")
 
         span Label
       label(:class="{active: isDefault, disabled: !canEditSpace}" @click.left.prevent="toggleDefault" @keydown.stop.enter="toggleDefault")

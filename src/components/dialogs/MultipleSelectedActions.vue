@@ -33,8 +33,8 @@ dialog.narrow.multiple-selected-actions(
         MultipleConnectionsPicker(:visible="multipleConnectionsPickerVisible" :selectedConnections="editableConnections" :selectedConnectionTypes="editableConnectionTypes")
       //- Labels
       button(:disabled="!canEditSome.connections" :class="{active: allLabelsAreVisible}" @click.left="toggleAllLabelsAreVisible")
-        img.icon.label(v-if="allLabelsAreVisible" src="@/assets/label-active.svg")
-        img.icon.label(v-else src="@/assets/label.svg")
+        img.icon(v-if="allLabelsAreVisible" src="@/assets/view-active.svg")
+        img.icon(v-else src="@/assets/view.svg")
         span {{ pluralLabels }}
   section
     .row
