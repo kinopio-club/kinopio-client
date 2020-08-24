@@ -318,6 +318,26 @@ export default {
       this.pastedName = text
       this.wasPasted = true
     },
+    removeTrackingQueryStrings () {
+      this.linkUrls.forEach(url => {
+        url = url.trim()
+        const queryString = utils.queryString(url)
+        const domain = utils.urlWithoutQueryString(url)
+        if (queryString) {
+          let queryObject = qs.decode(queryString)
+          let keys = Object.keys(queryObject)
+          keys = keys.filter(key => {
+            return key.startsWith('utm_') // google analytics
+          })
+          keys.forEach(key => delete queryObject[key])
+          const newUrl = qs.encode(domain, queryObject)
+          this.updateLink({
+            url,
+            newUrl
+          })
+        }
+      })
+    },
     triggerUpdatePositionInVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
@@ -463,6 +483,8 @@ export default {
       this.$nextTick(() => {
         if (visible) {
           this.scrollIntoViewAndFocus()
+        } else {
+          this.removeTrackingQueryStrings()
         }
       })
       if (!visible && this.cardIsEmpty()) {
