@@ -79,6 +79,12 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         span.badge.info
           img.icon(src="@/assets/unlock.svg")
           span To edit closed spaces, you'll need to be invited
+    //- Errors
+    template(v-if="errorMaxCardLength")
+      span.badge.danger
+        img.icon.cancel(src="@/assets/add.svg")
+        span Max Length
+      p To fit small screens, cards can't be longer than 250 characters
 
 </template>
 
@@ -151,6 +157,14 @@ export default {
       return false
     },
     isInvitedButCannotEditSpace () { return this.$store.getters['currentUser/isInvitedButCannotEditSpace']() },
+    errorMaxCardLength () {
+      const maxCardLength = 250
+      if (this.card.name.length >= maxCardLength) {
+        return true
+      } else {
+        return false
+      }
+    },
     name: {
       get () {
         return this.card.name
