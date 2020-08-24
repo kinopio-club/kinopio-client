@@ -110,15 +110,6 @@ export default {
 
     // Cards
 
-    incrementCardZ: (state, cardId) => {
-      state.cards.map((card, index) => {
-        card.z = index
-        if (card.id === cardId) {
-          card.z = state.cards.length + 1
-        }
-      })
-      cache.updateSpace('cards', state.cards, state.id)
-    },
     updateCard: (state, updatedCard) => {
       state.cards.map(card => {
         if (card.id === updatedCard.id) {
@@ -692,15 +683,17 @@ export default {
       let cards = context.rootState.currentSpace.cards
       cards = cards.map((card, index) => {
         card = utils.clone(card)
-        card.z = index
+        card.z = Math.max(card.z - 1, 0)
+        let body = { id: card.id, z: card.z }
         if (card.id === cardId) {
-          card.z = cards.length + 1
-          const update = { name: 'updateCard', body: { id: card.id, z: card.z } }
+          card.z = cards.length
+          body.z = card.z
+          const update = { name: 'updateCard', body }
           context.dispatch('api/addToQueue', update, { root: true })
-          context.commit('broadcast/update', { updates: update.body, type: 'updateCard' }, { root: true })
+          context.commit('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
         }
+        context.commit('updateCard', body)
       })
-      context.commit('incrementCardZ', cardId)
     },
     removeCard: (context, card) => {
       const cardHasContent = Boolean(card.name)
