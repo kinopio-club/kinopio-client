@@ -179,7 +179,7 @@ export default {
         const queryString = utils.queryString(url)
         if (queryString) {
           const queryObject = qs.decode(queryString)
-          return queryObject.hidden
+          return queryObject.hidden || queryObject.kinopio
         } else {
           return false
         }
@@ -254,6 +254,7 @@ export default {
           })
         } else {
           delete queryObject.hidden
+          delete queryObject.kinopio
           const newUrl = qs.encode(domain, queryObject)
           newUrls.push({
             url,
