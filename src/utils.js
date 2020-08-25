@@ -665,7 +665,7 @@ export default {
     }
   },
 
-  // Checkbox ☑✅
+  // Checkbox ✅
 
   nameIsUnchecked (name) {
     if (!name) { return }
