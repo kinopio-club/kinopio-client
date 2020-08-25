@@ -54,7 +54,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       //- Show Link
       .button-wrap(v-if="hasLinks")
         button(:disabled="!canEditCard" @click.left.stop="toggleLinksIsVisible" :class="{active: linksIsVisible}")
-          img.icon(v-if="linksIsVisible" src="@/assets/view-active.svg")
+          img.icon(v-if="linksIsVisible" src="@/assets/view-hidden.svg")
           img.icon(v-else src="@/assets/view.svg")
           span Link
       //- Split
