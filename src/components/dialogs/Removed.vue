@@ -88,7 +88,9 @@ export default {
   },
   computed: {
     items () {
-      if (this.cardsVisible) {
+      if (this.cardsVisible && !this.currentUserCanEditSpace) {
+        return []
+      } else if (this.cardsVisible) {
         return this.removedCards
       } else {
         return this.removedSpaces

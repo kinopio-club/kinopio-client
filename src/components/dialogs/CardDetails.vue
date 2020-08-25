@@ -49,9 +49,16 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         button(:disabled="!canEditCard" @click.left.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
           span Frames
         FramePicker(:visible="framePickerIsVisible" :cards="[card]")
-    //- Split
-    .row(v-if="nameHasLineBreaks")
-      .button-wrap
+
+    .row(v-if="nameHasLineBreaks || hasLinks")
+      //- Show Link
+      .button-wrap(v-if="hasLinks")
+        button(:disabled="!canEditCard" @click.left.stop="toggleLinksIsVisible" :class="{active: linksIsVisible}")
+          img.icon(v-if="linksIsVisible" src="@/assets/view-active.svg")
+          img.icon(v-else src="@/assets/view.svg")
+          span Link
+      //- Split
+      .button-wrap(v-if="nameHasLineBreaks")
         button(:disabled="!canEditCard" @click.left.stop="splitCards")
           img.icon(src="@/assets/split-vertically.svg")
           span Split into {{nameLines}} Cards
@@ -72,6 +79,12 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         span.badge.info
           img.icon(src="@/assets/unlock.svg")
           span To edit closed spaces, you'll need to be invited
+    //- Errors
+    template(v-if="errorMaxCardLength")
+      span.badge.danger
+        img.icon.cancel(src="@/assets/add.svg")
+        span Max Length
+      p To fit small screens, cards can't be longer than 250 characters
 
 </template>
 
@@ -81,6 +94,8 @@ import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import Loader from '@/components/Loader.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
+
+import qs from '@aguezz/qs-parse'
 
 export default {
   name: 'CardDetails',
@@ -142,6 +157,14 @@ export default {
       return false
     },
     isInvitedButCannotEditSpace () { return this.$store.getters['currentUser/isInvitedButCannotEditSpace']() },
+    errorMaxCardLength () {
+      const maxCardLength = 250
+      if (this.card.name.length >= maxCardLength) {
+        return true
+      } else {
+        return false
+      }
+    },
     name: {
       get () {
         return this.card.name
@@ -156,6 +179,27 @@ export default {
       }
     },
     url () { return utils.urlFromString(this.name) },
+    urls () { return utils.urlsFromString(this.name, true) },
+    linkUrls () {
+      return this.urls.filter(url => {
+        return this.urlType(url) === 'link'
+      })
+    },
+    hasLinks () {
+      return Boolean(this.linkUrls.length)
+    },
+    linksIsVisible () {
+      const linksVisible = this.linkUrls.filter(url => {
+        const queryString = utils.queryString(url)
+        if (queryString) {
+          const queryObject = qs.decode(queryString)
+          return queryObject.hidden || queryObject.kinopio
+        } else {
+          return false
+        }
+      })
+      return linksVisible.length === this.linkUrls.length
+    },
     urlIsAudio () { return utils.urlIsAudio(this.url) },
     normalizedName () {
       let name = this.name
@@ -196,6 +240,44 @@ export default {
       lines = lines.filter(line => Boolean(line.length))
       return lines
     },
+    updateLink ({ url, newUrl }) {
+      const newName = this.name.replace(url.trim(), newUrl)
+      this.updateCardName(newName)
+    },
+    toggleLinksIsVisible () {
+      const isVisible = !this.linksIsVisible
+      let newUrls = []
+      this.urls.forEach(url => {
+        url = url.trim()
+        const isLink = this.urlType(url) === 'link'
+        if (!isLink) { return }
+        const queryString = utils.queryString(url)
+        const domain = utils.urlWithoutQueryString(url)
+        let queryObject
+        if (queryString) {
+          queryObject = qs.decode(queryString)
+        } else {
+          queryObject = {}
+        }
+        if (isVisible) {
+          queryObject.hidden = true
+          const newUrl = qs.encode(domain, queryObject)
+          newUrls.push({
+            url,
+            newUrl
+          })
+        } else {
+          delete queryObject.hidden
+          delete queryObject.kinopio
+          const newUrl = qs.encode(domain, queryObject)
+          newUrls.push({
+            url,
+            newUrl
+          })
+        }
+      })
+      newUrls.forEach(urls => this.updateLink(urls))
+    },
     splitCards () {
       const spaceBetweenCards = 12
       const maxCardLength = 250
@@ -235,6 +317,26 @@ export default {
       const text = event.clipboardData.getData('text')
       this.pastedName = text
       this.wasPasted = true
+    },
+    removeTrackingQueryStrings () {
+      this.linkUrls.forEach(url => {
+        url = url.trim()
+        const queryString = utils.queryString(url)
+        const domain = utils.urlWithoutQueryString(url)
+        if (queryString) {
+          let queryObject = qs.decode(queryString)
+          let keys = Object.keys(queryObject)
+          keys = keys.filter(key => {
+            return key.startsWith('utm_') // google analytics
+          })
+          keys.forEach(key => delete queryObject[key])
+          const newUrl = qs.encode(domain, queryObject)
+          this.updateLink({
+            url,
+            newUrl
+          })
+        }
+      })
     },
     triggerUpdatePositionInVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
@@ -381,6 +483,8 @@ export default {
       this.$nextTick(() => {
         if (visible) {
           this.scrollIntoViewAndFocus()
+        } else {
+          this.removeTrackingQueryStrings()
         }
       })
       if (!visible && this.cardIsEmpty()) {

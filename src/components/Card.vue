@@ -236,8 +236,11 @@ export default {
         name = name.replace(this.formats.audio, '')
       }
       // for music use cases
-      if (this.formats.link.includes('kinopio=hide')) {
+      const isLegacyHidden = this.formats.link.includes('kinopio=hide')
+      const isHidden = this.formats.link.includes('hidden=true')
+      if (isHidden || isLegacyHidden) {
         name = name.replace(this.formats.link, '')
+        name = name.replace(utils.urlWithoutProtocol(this.formats.link), '')
       }
       const checkbox = utils.checkboxFromString(name)
       if (checkbox) {

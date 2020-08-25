@@ -583,7 +583,7 @@ export default {
     }
   },
 
-  urlsFromString (string) {
+  urlsFromString (string, skipProtocolCheck) {
     if (!string) { return [] }
     // https://regexr.com/59m5t
     // same as urlFromString but matches multiple urls and returns [urls]
@@ -597,6 +597,7 @@ export default {
         return true
       }
     })
+    if (skipProtocolCheck) { return urls }
     // ensure url has protocol
     urls = urls.map(url => {
       const hasProtocol = url.startsWith('http://') || url.startsWith('https://')
@@ -607,6 +608,20 @@ export default {
       }
     })
     return urls
+  },
+
+  urlWithoutProtocol (url) {
+    let newUrl
+    const http = 'http://'
+    const https = 'https://'
+    if (url.match(http)) {
+      newUrl = url.replace(http, '')
+    } else if (url.match(https)) {
+      newUrl = url.replace(https, '')
+    } else {
+      newUrl = url
+    }
+    return newUrl
   },
 
   urlIsImage (url) {
@@ -636,6 +651,21 @@ export default {
     const isAudio = url.match(audioUrlPattern)
     return Boolean(isAudio)
   },
+
+  urlWithoutQueryString (url) {
+    return url.split('?')[0]
+  },
+
+  queryString (url) {
+    const split = url.split('?')
+    if (split.length <= 1) {
+      return undefined
+    } else {
+      return split[1]
+    }
+  },
+
+  // Checkbox ✅
 
   nameIsUnchecked (name) {
     if (!name) { return }
