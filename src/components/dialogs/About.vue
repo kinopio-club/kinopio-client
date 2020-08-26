@@ -12,7 +12,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs")
     .row
       .button-wrap
         button(@click.left.stop="toggleHelpIsVisible" :class="{active: helpIsVisible}")
-          span Help and About
+          span Help
         Help(:visible="helpIsVisible")
       .button-wrap
         a(href="https://help.kinopio.club/api")

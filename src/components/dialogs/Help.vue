@@ -1,24 +1,24 @@
 <template lang="pug">
 dialog.help-and-about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" :class="{'child-dialog-is-visible': contactIsVisible}")
   section
-    p Help and About
+    p Help
   section
-    .row
-      p How to use Kinopio, and other help topics
-    .row
-      .button-wrap
-        a(href="https://help.kinopio.club")
-          button Help Topics →
-    .row
-      .button-wrap
-        a(href="https://join.slack.com/t/kinopio-club/shared_invite/zt-garivnp1-qMbj9Nk2bo5wI78hgxkD_A")
-          button
-            span Community Slack →
     .row
       .button-wrap
         button(@click.left.stop="toggleContactIsVisible" :class="{active: contactIsVisible}")
           span Contact
         Contact(:visible="contactIsVisible")
+    .row
+      p Guides, topics, and policies
+    .row
+      .button-wrap
+        a(href="https://help.kinopio.club")
+          button Help Site →
+    .row
+      .button-wrap
+        a(href="https://join.slack.com/t/kinopio-club/shared_invite/zt-garivnp1-qMbj9Nk2bo5wI78hgxkD_A")
+          button
+            span Community Slack →
 
   section
     .row
@@ -27,10 +27,10 @@ dialog.help-and-about.narrow(v-if="visible" :open="visible" @click.left.stop="cl
       .button-wrap
         a(href="https://help.kinopio.club/posts/who-makes-kinopio")
           button Who Makes Kinopio? →
-    //- .row
-    //-   .button-wrap
-    //-     a(href="https://pketh.org")
-    //-       button Blog →
+    .row
+      .button-wrap
+        a(href="https://pketh.org")
+          button Blog →
 </template>
 
 <script>
