@@ -1,13 +1,27 @@
 <template lang="pug">
 dialog.filters.narrow(v-if="visible" :open="visible")
-  section.header
-
+  section
     p
       span.badge.info(v-if="totalFilters") {{totalFilters}}
       span Filters
     button(@click.left="clearAllFilters")
       img.icon.cancel(src="@/assets/add.svg")
       span Clear all
+
+  section
+    .row
+      .button-wrap
+        label.show-users
+          input(type="checkbox")
+          User(:user="currentUser" :key="currentUser.id" :hideYouLabel="true")
+      .button-wrap
+        label
+          input(type="checkbox")
+          span Last Updated
+      //- .button-wrap
+        //- label(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+        //-   input(type="checkbox" v-model="isFavoriteSpace")
+        //-   span Favorite
 
   section.results-section.connection-types
     ul.results-list
@@ -34,6 +48,9 @@ import utils from '@/utils.js'
 
 export default {
   name: 'Filters',
+  components: {
+    User: () => import('@/components/User.vue')
+  },
   props: {
     visible: Boolean
   },
@@ -51,6 +68,9 @@ export default {
       const types = this.$store.state.filteredConnectionTypeIds
       const frames = this.$store.state.filteredFrameIds
       return types.length + frames.length
+    },
+    currentUser () {
+      return this.$store.state.currentUser
     }
   },
   methods: {
@@ -110,13 +130,18 @@ export default {
       padding 0
       img
         width 100%
-  .header
-    border-bottom 1px solid var(--primary)
-    margin-bottom 4px
   .connection-types
     padding-bottom 0
   .results-section
     overflow scroll
   input[type="checkbox"]
     margin-top 1px
+  .show-users
+    width 50px
+  .user
+    position absolute
+    top 4px
+    .user-avatar
+      width 17px
+      height 16px
 </style>
