@@ -70,6 +70,12 @@ article(:style="position" :data-card-id="id" ref="card")
             template(v-else)
               img.connector-icon(src="@/assets/connector-open.svg")
 
+    //- Meta Info
+    .meta-container(v-if="filterShowUsers || filterShowDateUpdated")
+      .badge.user-badge(v-if="cardUpdatedByUser" :style="{background: cardUpdatedByUser.color}")
+        User(:user="cardUpdatedByUser" :isClickable="false")
+        .name {{cardUpdatedByUser.name}}
+
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
       .badge.info
@@ -108,6 +114,7 @@ import Frames from '@/components/Frames.vue'
 import Loader from '@/components/Loader.vue'
 import Audio from '@/components/Audio.vue'
 import scrollIntoView from '@/scroll-into-view.js'
+import User from '@/components/User.vue'
 
 let isMultiTouch
 
@@ -116,7 +123,8 @@ export default {
     CardDetails,
     Frames,
     Loader,
-    Audio
+    Audio,
+    User
   },
   props: {
     card: Object
@@ -166,6 +174,9 @@ export default {
     newConnectionColor () { return this.$store.state.currentConnectionColor },
     name () { return this.card.name },
     frameId () { return this.card.frameId },
+    filterShowUsers () { return this.$store.state.filterShowUsers },
+    filterShowDateUpdated () { return this.$store.state.filterShowDateUpdated },
+    cardUpdatedByUser () { return this.$store.getters['currentSpace/memberById'](this.card.userId) },
     cardPendingUpload () {
       const pendingUploads = this.$store.state.upload.pendingUploads
       return pendingUploads.find(upload => upload.cardId === this.card.id)
@@ -806,6 +817,18 @@ article
   .audio-wrap
     margin-top 8px
     margin-left 8px
+
+  .meta-container
+    display flex
+    padding 8px
+    padding-top 0
+    .user-badge
+      display flex
+      margin 0
+      .label-badge
+        padding 0 10px
+        left -2px
+        bottom -8px
 
 @keyframes bounce
   0%
