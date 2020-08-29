@@ -11,8 +11,8 @@ dialog.filters.narrow(v-if="visible" :open="visible")
   section
     .row
       .button-wrap
-        label.show-users
-          input(type="checkbox")
+        label.show-users(:class="{active: filterShowUsers}" @click.left.prevent="toggleFilterShowUsers" @keydown.stop.enter="toggleFilterShowUsers")
+          input(type="checkbox" v-model="filterShowUsers")
           User(:user="currentUser" :key="currentUser.id" :hideYouLabel="true")
       .button-wrap
         label
@@ -71,9 +71,16 @@ export default {
     },
     currentUser () {
       return this.$store.state.currentUser
+    },
+    filterShowUsers () {
+      return this.$store.state.filterShowUsers
     }
   },
   methods: {
+    toggleFilterShowUsers () {
+      const value = !this.filterShowUsers
+      this.$store.commit('toggleFilterShowUsers', value)
+    },
     isSelected ({ id }) {
       const types = this.$store.state.filteredConnectionTypeIds
       const frames = this.$store.state.filteredFrameIds

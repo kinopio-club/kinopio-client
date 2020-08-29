@@ -106,7 +106,8 @@ export default new Vuex.Store({
 
     // filters
     filteredConnectionTypeIds: [],
-    filteredFrameIds: []
+    filteredFrameIds: [],
+    filterShowUsers: false
   },
   mutations: {
     updatePageSizes: (state) => {
@@ -552,6 +553,7 @@ export default new Vuex.Store({
     clearAllFilters: (state) => {
       state.filteredConnectionTypeIds = []
       state.filteredFrameIds = []
+      state.filterShowUsers = false
     },
     addToFilteredConnectionTypeId: (state, id) => {
       utils.typeCheck(id, 'string')
@@ -568,6 +570,10 @@ export default new Vuex.Store({
     removeFromFilteredFrameIds: (state, id) => {
       utils.typeCheck(id, 'number')
       state.filteredFrameIds = state.filteredFrameIds.filter(frameId => frameId !== id)
+    },
+    toggleFilterShowUsers: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.filterShowUsers = value
     }
   },
 
