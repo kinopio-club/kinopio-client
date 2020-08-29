@@ -108,7 +108,8 @@ export default new Vuex.Store({
     filteredConnectionTypeIds: [],
     filteredFrameIds: [],
     filterShowUsers: false,
-    filterShowDateUpdated: false
+    filterShowDateUpdated: false,
+    totalFilters: 0
   },
   mutations: {
     updatePageSizes: (state) => {
@@ -580,6 +581,10 @@ export default new Vuex.Store({
     toggleFilterShowDateUpdated: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.filterShowDateUpdated = value
+    },
+    totalFilters: (state, value) => {
+      utils.typeCheck(value, 'number')
+      state.totalFilters = value
     }
   },
 

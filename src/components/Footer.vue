@@ -137,11 +137,7 @@ export default {
     isOffline () {
       return !this.$store.state.isOnline
     },
-    totalFilters () {
-      const types = this.$store.state.filteredConnectionTypeIds
-      const frames = this.$store.state.filteredFrameIds
-      return types.length + frames.length
-    },
+    totalFilters () { return this.$store.state.totalFilters },
     isFavoriteSpace () {
       const currentSpace = this.$store.state.currentSpace
       const favoriteSpaces = this.$store.state.currentUser.favoriteSpaces

@@ -64,7 +64,16 @@ export default {
     totalFilters () {
       const types = this.$store.state.filteredConnectionTypeIds
       const frames = this.$store.state.filteredFrameIds
-      return types.length + frames.length
+      let metaFilters = 0
+      if (this.filterShowUsers) {
+        metaFilters += 1
+      }
+      if (this.filterShowDateUpdated) {
+        metaFilters += 1
+      }
+      const totalFilters = types.length + frames.length + metaFilters
+      this.$store.commit('totalFilters', totalFilters)
+      return totalFilters
     },
     currentUser () {
       return this.$store.state.currentUser
