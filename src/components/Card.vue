@@ -72,9 +72,12 @@ article(:style="position" :data-card-id="id" ref="card")
 
     //- Meta Info
     .meta-container(v-if="filterShowUsers || filterShowDateUpdated")
-      .badge.user-badge(v-if="cardUpdatedByUser" :style="{background: cardUpdatedByUser.color}")
+      .badge.user-badge(v-if="filterShowUsers" :style="{background: cardUpdatedByUser.color}")
         User(:user="cardUpdatedByUser" :isClickable="false")
         .name {{cardUpdatedByUser.name}}
+      .badge.secondary(v-if="filterShowDateUpdated")
+        img.icon.time(src="@/assets/time.svg")
+        .name {{card.updatedAt}}
 
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
@@ -828,7 +831,16 @@ article
       .label-badge
         padding 0 10px
         left -2px
-        bottom -8px
+        bottom initial
+        top 12px
+    .badge
+      &.secondary
+        display flex
+        .icon
+          margin-right 5px
+          margin-top 1px
+    .badge + .badge
+      margin-left 6px
 
 @keyframes bounce
   0%
