@@ -121,6 +121,15 @@ export default {
       })
       cache.updateSpace('cards', state.cards, state.id)
     },
+    updateCardUpdatedAt: (state, updatedCard) => {
+      state.cards = state.cards.map(card => {
+        if (card.id === updatedCard.id) {
+          card.updatedAt = new Date()
+        }
+        return card
+      })
+      cache.updateSpace('cards', state.cards, state.id)
+    },
     moveCard: (state, { cardId, delta }) => {
       const maxOffset = 0
       state.cards.map(card => {

@@ -72,9 +72,9 @@ article(:style="position" :data-card-id="id" ref="card")
 
     //- Meta Info
     .meta-container(v-if="filterShowUsers || filterShowDateUpdated")
-      .badge.user-badge(v-if="filterShowUsers" :style="{background: cardUpdatedByUser.color}")
-        User(:user="cardUpdatedByUser" :isClickable="false")
-        .name {{cardUpdatedByUser.name}}
+      .badge.user-badge(v-if="filterShowUsers" :style="{background: updatedByUser.color}")
+        User(:user="updatedByUser" :isClickable="false")
+        .name {{updatedByUser.name}}
       .badge.secondary(v-if="filterShowDateUpdated")
         img.icon.time(src="@/assets/time.svg")
         .name {{updatedAtRelative}}
@@ -181,7 +181,7 @@ export default {
     frameId () { return this.card.frameId },
     filterShowUsers () { return this.$store.state.filterShowUsers },
     filterShowDateUpdated () { return this.$store.state.filterShowDateUpdated },
-    cardUpdatedByUser () { return this.$store.getters['currentSpace/memberById'](this.card.userId) },
+    updatedByUser () { return this.$store.getters['currentSpace/memberById'](this.card.userId) },
     updatedAtRelative () {
       const date = this.card.updatedAt || this.card.createdAt
       if (date) {
