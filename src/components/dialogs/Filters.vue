@@ -15,13 +15,9 @@ dialog.filters.narrow(v-if="visible" :open="visible")
           input(type="checkbox" v-model="filterShowUsers")
           User(:user="currentUser" :key="currentUser.id" :hideYouLabel="true")
       .button-wrap
-        label
-          input(type="checkbox")
-          span Last Updated
-      //- .button-wrap
-        //- label(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
-        //-   input(type="checkbox" v-model="isFavoriteSpace")
-        //-   span Favorite
+        label(:class="{active: filterShowTimeUpdated}" @click.left.prevent="toggleFilterShowTimeUpdated" @keydown.stop.enter="toggleFilterShowTimeUpdated")
+          input(type="checkbox" v-model="filterShowTimeUpdated")
+          span {T} Updated
 
   section.results-section.connection-types
     ul.results-list
@@ -74,12 +70,19 @@ export default {
     },
     filterShowUsers () {
       return this.$store.state.filterShowUsers
+    },
+    filterShowTimeUpdated () {
+      return this.$store.state.filterShowTimeUpdated
     }
   },
   methods: {
     toggleFilterShowUsers () {
       const value = !this.filterShowUsers
       this.$store.commit('toggleFilterShowUsers', value)
+    },
+    toggleFilterShowTimeUpdated () {
+      const value = !this.filterShowTimeUpdated
+      this.$store.commit('toggleFilterShowTimeUpdated', value)
     },
     isSelected ({ id }) {
       const types = this.$store.state.filteredConnectionTypeIds
@@ -90,7 +93,6 @@ export default {
     clearAllFilters () {
       this.$store.commit('clearAllFilters')
     },
-
     toggleFilteredConnectionType (type) {
       const filtered = this.$store.state.filteredConnectionTypeIds
       if (filtered.includes(type.id)) {
