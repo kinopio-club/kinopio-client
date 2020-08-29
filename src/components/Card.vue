@@ -77,7 +77,7 @@ article(:style="position" :data-card-id="id" ref="card")
         .name {{cardUpdatedByUser.name}}
       .badge.secondary(v-if="filterShowDateUpdated")
         img.icon.time(src="@/assets/time.svg")
-        .name {{card.updatedAt}}
+        .name {{updatedAtRelative}}
 
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
@@ -118,6 +118,8 @@ import Loader from '@/components/Loader.vue'
 import Audio from '@/components/Audio.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import User from '@/components/User.vue'
+
+import fromNow from 'fromnow'
 
 let isMultiTouch
 
@@ -180,6 +182,14 @@ export default {
     filterShowUsers () { return this.$store.state.filterShowUsers },
     filterShowDateUpdated () { return this.$store.state.filterShowDateUpdated },
     cardUpdatedByUser () { return this.$store.getters['currentSpace/memberById'](this.card.userId) },
+    updatedAtRelative () {
+      const date = this.card.updatedAt || this.card.createdAt
+      if (date) {
+        return fromNow(date, { max: 1, suffix: true })
+      } else {
+        return 'Just now'
+      }
+    },
     cardPendingUpload () {
       const pendingUploads = this.$store.state.upload.pendingUploads
       return pendingUploads.find(upload => upload.cardId === this.card.id)
