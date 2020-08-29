@@ -557,6 +557,7 @@ export default new Vuex.Store({
       state.filteredFrameIds = []
       state.filterShowUsers = false
       state.filterShowDateUpdated = false
+      state.totalFilters = 0
     },
     addToFilteredConnectionTypeId: (state, id) => {
       utils.typeCheck(id, 'string')
