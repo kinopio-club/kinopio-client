@@ -314,6 +314,10 @@ dialog
 .icon + span
   margin-left 5px
 
+.time
+  height 12px
+  vertical-align -2px
+
 .button-wrap
   display inline-block
   position relative

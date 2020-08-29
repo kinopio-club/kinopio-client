@@ -15,9 +15,10 @@ dialog.filters.narrow(v-if="visible" :open="visible")
           input(type="checkbox" v-model="filterShowUsers")
           User(:user="currentUser" :key="currentUser.id" :hideYouLabel="true")
       .button-wrap
-        label(:class="{active: filterShowTimeUpdated}" @click.left.prevent="toggleFilterShowTimeUpdated" @keydown.stop.enter="toggleFilterShowTimeUpdated")
-          input(type="checkbox" v-model="filterShowTimeUpdated")
-          span {T} Updated
+        label(:class="{active: filterShowDateUpdated}" @click.left.prevent="toggleFilterShowDateUpdated" @keydown.stop.enter="toggleFilterShowDateUpdated")
+          input(type="checkbox" v-model="filterShowDateUpdated")
+          img.icon.time(src="@/assets/time.svg")
+          span Updated
 
   section.results-section.connection-types
     ul.results-list
@@ -71,8 +72,8 @@ export default {
     filterShowUsers () {
       return this.$store.state.filterShowUsers
     },
-    filterShowTimeUpdated () {
-      return this.$store.state.filterShowTimeUpdated
+    filterShowDateUpdated () {
+      return this.$store.state.filterShowDateUpdated
     }
   },
   methods: {
@@ -80,9 +81,9 @@ export default {
       const value = !this.filterShowUsers
       this.$store.commit('toggleFilterShowUsers', value)
     },
-    toggleFilterShowTimeUpdated () {
-      const value = !this.filterShowTimeUpdated
-      this.$store.commit('toggleFilterShowTimeUpdated', value)
+    toggleFilterShowDateUpdated () {
+      const value = !this.filterShowDateUpdated
+      this.$store.commit('toggleFilterShowDateUpdated', value)
     },
     isSelected ({ id }) {
       const types = this.$store.state.filteredConnectionTypeIds
