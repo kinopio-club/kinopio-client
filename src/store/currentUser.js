@@ -181,10 +181,12 @@ export default {
     filterShowUsers: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.filterShowUsers = value
+      cache.updateUser('filterShowUsers', value)
     },
     filterShowDateUpdated: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.filterShowDateUpdated = value
+      cache.updateUser('filterShowDateUpdated', value)
     }
 
   },
@@ -370,8 +372,8 @@ export default {
         } }, { root: true })
     },
     clearUserFilters: (context) => {
-      context.dispatch('filterShowUsers', false)
-      context.dispatch('filterShowDateUpdated', false)
+      context.dispatch('toggleFilterShowUsers', false)
+      context.dispatch('toggleFilterShowDateUpdated', false)
     }
   }
 }

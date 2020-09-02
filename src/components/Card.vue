@@ -183,7 +183,7 @@ export default {
     filterShowDateUpdated () { return this.$store.state.currentUser.filterShowDateUpdated },
     updatedByUser () { return this.$store.getters['currentSpace/memberById'](this.card.userId) },
     updatedAtRelative () {
-      const date = this.card.updatedAt || this.card.createdAt
+      const date = this.card.nameUpdatedAt
       if (date) {
         return fromNow(date, { max: 1, suffix: true })
       } else {

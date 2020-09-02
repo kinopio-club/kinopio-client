@@ -121,10 +121,10 @@ export default {
       })
       cache.updateSpace('cards', state.cards, state.id)
     },
-    updateCardUpdatedAt: (state, updatedCard) => {
+    updateCardNameUpdatedAt: (state, updatedCard) => {
       state.cards = state.cards.map(card => {
         if (card.id === updatedCard.id) {
-          card.updatedAt = new Date()
+          card.nameUpdatedAt = new Date()
         }
         return card
       })

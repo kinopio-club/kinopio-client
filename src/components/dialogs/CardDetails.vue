@@ -354,7 +354,7 @@ export default {
         id: this.card.id
       }
       this.$store.dispatch('currentSpace/updateCard', card)
-      this.$store.commit('currentSpace/updateCardUpdatedAt', card)
+      this.$store.commit('currentSpace/updateCardNameUpdatedAt', card)
       this.$nextTick(() => {
         this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.card.id, shouldUpdateApi: true })
       })
