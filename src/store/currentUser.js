@@ -19,7 +19,9 @@ export default {
     favoriteUsers: [],
     favoriteSpaces: [],
     cardsCreatedCount: 0,
-    isUpgraded: false
+    isUpgraded: false,
+    filterShowUsers: false,
+    filterShowDateUpdated: false
   },
   getters: {
     isCurrentUser: (state) => (user) => {
@@ -175,7 +177,16 @@ export default {
       utils.typeCheck(value, 'boolean')
       state.isUpgraded = value
       cache.updateUser('isUpgraded', value)
+    },
+    filterShowUsers: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.filterShowUsers = value
+    },
+    filterShowDateUpdated: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.filterShowDateUpdated = value
     }
+
   },
   actions: {
     init: (context) => {
@@ -343,6 +354,24 @@ export default {
       context.commit('arenaAccessToken', response.arenaAccessToken)
       context.commit('importArenaChannelIsVisible', true, { root: true })
       context.commit('isAuthenticatingWithArena', false, { root: true })
+    },
+    toggleFilterShowUsers: (context, value) => {
+      context.commit('filterShowUsers', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          filterShowUsers: value
+        } }, { root: true })
+    },
+    toggleFilterShowDateUpdated: (context, value) => {
+      context.commit('filterShowDateUpdated', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          filterShowDateUpdated: value
+        } }, { root: true })
+    },
+    clearUserFilters: (context) => {
+      context.dispatch('filterShowUsers', false)
+      context.dispatch('filterShowDateUpdated', false)
     }
   }
 }

@@ -106,10 +106,7 @@ export default new Vuex.Store({
 
     // filters
     filteredConnectionTypeIds: [],
-    filteredFrameIds: [],
-    filterShowUsers: false,
-    filterShowDateUpdated: false,
-    totalFilters: 0
+    filteredFrameIds: []
   },
   mutations: {
     updatePageSizes: (state) => {
@@ -552,12 +549,9 @@ export default new Vuex.Store({
 
     // Filters
 
-    clearAllFilters: (state) => {
+    clearSpaceFilters: (state) => {
       state.filteredConnectionTypeIds = []
       state.filteredFrameIds = []
-      state.filterShowUsers = false
-      state.filterShowDateUpdated = false
-      state.totalFilters = 0
     },
     addToFilteredConnectionTypeId: (state, id) => {
       utils.typeCheck(id, 'string')
@@ -574,22 +568,17 @@ export default new Vuex.Store({
     removeFromFilteredFrameIds: (state, id) => {
       utils.typeCheck(id, 'number')
       state.filteredFrameIds = state.filteredFrameIds.filter(frameId => frameId !== id)
-    },
-    toggleFilterShowUsers: (state, value) => {
-      utils.typeCheck(value, 'boolean')
-      state.filterShowUsers = value
-    },
-    toggleFilterShowDateUpdated: (state, value) => {
-      utils.typeCheck(value, 'boolean')
-      state.filterShowDateUpdated = value
-    },
-    totalFilters: (state, value) => {
-      utils.typeCheck(value, 'number')
-      state.totalFilters = value
     }
   },
 
   actions: {
+    clearAllFilters: (context) => {
+      context.commit('clearSpaceFilters')
+      context.dispatch('currentUser/clearUserFilters')
+    },
+    clearSpaceFilters: (context) => {
+      context.commit('clearSpaceFilters')
+    },
     closeAllDialogs: (context) => {
       context.commit('closeAllDialogs')
       const space = utils.clone(context.rootState.currentSpace)

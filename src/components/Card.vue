@@ -179,8 +179,8 @@ export default {
     newConnectionColor () { return this.$store.state.currentConnectionColor },
     name () { return this.card.name },
     frameId () { return this.card.frameId },
-    filterShowUsers () { return this.$store.state.filterShowUsers },
-    filterShowDateUpdated () { return this.$store.state.filterShowDateUpdated },
+    filterShowUsers () { return this.$store.state.currentUser.filterShowUsers },
+    filterShowDateUpdated () { return this.$store.state.currentUser.filterShowDateUpdated },
     updatedByUser () { return this.$store.getters['currentSpace/memberById'](this.card.userId) },
     updatedAtRelative () {
       const date = this.card.updatedAt || this.card.createdAt

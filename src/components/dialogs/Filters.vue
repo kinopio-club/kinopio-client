@@ -62,37 +62,37 @@ export default {
       return framesInUse.map(frame => frames[frame])
     },
     totalFilters () {
-      const types = this.$store.state.filteredConnectionTypeIds
-      const frames = this.$store.state.filteredFrameIds
-      let metaFilters = 0
-      if (this.filterShowUsers) {
-        metaFilters += 1
+      const state = this.$store.state
+      const currentUser = state.currentUser
+      const connections = state.filteredConnectionTypeIds.length
+      const frames = state.filteredFrameIds.length
+      let userFilters = 0
+      if (currentUser.filterShowUsers) {
+        userFilters += 1
       }
-      if (this.filterShowDateUpdated) {
-        metaFilters += 1
+      if (currentUser.filterShowDateUpdated) {
+        userFilters += 1
       }
-      const totalFilters = types.length + frames.length + metaFilters
-      this.$store.commit('totalFilters', totalFilters)
-      return totalFilters
+      return connections + frames + userFilters
     },
     currentUser () {
       return this.$store.state.currentUser
     },
     filterShowUsers () {
-      return this.$store.state.filterShowUsers
+      return this.$store.state.currentUser.filterShowUsers
     },
     filterShowDateUpdated () {
-      return this.$store.state.filterShowDateUpdated
+      return this.$store.state.currentUser.filterShowDateUpdated
     }
   },
   methods: {
     toggleFilterShowUsers () {
       const value = !this.filterShowUsers
-      this.$store.commit('toggleFilterShowUsers', value)
+      this.$store.dispatch('currentUser/toggleFilterShowUsers', value)
     },
     toggleFilterShowDateUpdated () {
       const value = !this.filterShowDateUpdated
-      this.$store.commit('toggleFilterShowDateUpdated', value)
+      this.$store.dispatch('currentUser/toggleFilterShowDateUpdated', value)
     },
     isSelected ({ id }) {
       const types = this.$store.state.filteredConnectionTypeIds
@@ -101,7 +101,7 @@ export default {
     },
 
     clearAllFilters () {
-      this.$store.commit('clearAllFilters')
+      this.$store.dispatch('clearAllFilters')
     },
     toggleFilteredConnectionType (type) {
       const filtered = this.$store.state.filteredConnectionTypeIds
