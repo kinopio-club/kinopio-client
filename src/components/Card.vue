@@ -181,7 +181,18 @@ export default {
     frameId () { return this.card.frameId },
     filterShowUsers () { return this.$store.state.currentUser.filterShowUsers },
     filterShowDateUpdated () { return this.$store.state.currentUser.filterShowDateUpdated },
-    updatedByUser () { return this.$store.getters['currentSpace/memberById'](this.card.userId) },
+    updatedByUser () {
+      const userId = this.card.nameUpdatedByUserId || this.card.userId
+      const user = this.$store.getters['currentSpace/memberById'](userId)
+      if (user) {
+        return user
+      } else {
+        return {
+          name: '',
+          color: '#cdcdcd' // secondary-active-background
+        }
+      }
+    },
     updatedAtRelative () {
       const date = this.card.nameUpdatedAt
       if (date) {
