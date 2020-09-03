@@ -52,6 +52,18 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop)
     article
       .row
         .badge.title
+          User(:user="currentUser" :key="currentUser.id" :hideYouLabel="true")
+          span Toggle Card User Filter
+        .badge.info 1
+    article
+      .row
+        .badge.title
+          img.icon.time(src="@/assets/time.svg")
+          span Toggle Card Date Filter
+        .badge.info 2
+    article
+      .row
+        .badge.title
           img.icon(src="@/assets/brush.svg")
           span Select All Cards
         .badge.info {{meta}}-A
@@ -102,12 +114,16 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop)
 </template>
 
 <script>
+import User from '@/components/User.vue'
 import utils from '@/utils.js'
 
 export default {
   name: 'KeyboardShortcuts',
   props: {
     visible: Boolean
+  },
+  components: {
+    User
   },
   data () {
     return {
@@ -122,6 +138,9 @@ export default {
       } else {
         return 'Ctrl'
       }
+    },
+    currentUser () {
+      return this.$store.state.currentUser
     }
   },
   methods: {
@@ -171,4 +190,6 @@ export default {
     width 11px
   video
     margin-top 10px
+  .user
+    margin-right 5px !important
 </style>
