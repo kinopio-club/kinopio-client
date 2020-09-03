@@ -549,7 +549,7 @@ export default new Vuex.Store({
 
     // Filters
 
-    clearAllFilters: (state) => {
+    clearSpaceFilters: (state) => {
       state.filteredConnectionTypeIds = []
       state.filteredFrameIds = []
     },
@@ -572,6 +572,13 @@ export default new Vuex.Store({
   },
 
   actions: {
+    clearAllFilters: (context) => {
+      context.commit('clearSpaceFilters')
+      context.dispatch('currentUser/clearUserFilters')
+    },
+    clearSpaceFilters: (context) => {
+      context.commit('clearSpaceFilters')
+    },
     closeAllDialogs: (context) => {
       context.commit('closeAllDialogs')
       const space = utils.clone(context.rootState.currentSpace)

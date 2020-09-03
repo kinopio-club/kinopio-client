@@ -349,9 +349,12 @@ export default {
       this.$store.dispatch('currentSpace/updateCard', update)
     },
     updateCardName (newName) {
+      const userId = this.$store.state.currentUser.id
       const card = {
         name: newName,
-        id: this.card.id
+        id: this.card.id,
+        nameUpdatedAt: new Date(),
+        nameUpdatedByUserId: userId
       }
       this.$store.dispatch('currentSpace/updateCard', card)
       this.$nextTick(() => {

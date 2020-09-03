@@ -1,13 +1,24 @@
 <template lang="pug">
 dialog.filters.narrow(v-if="visible" :open="visible")
-  section.header
-
+  section
     p
       span.badge.info(v-if="totalFilters") {{totalFilters}}
       span Filters
     button(@click.left="clearAllFilters")
       img.icon.cancel(src="@/assets/add.svg")
       span Clear all
+
+  section
+    .row
+      .button-wrap
+        label.show-users(:class="{active: filterShowUsers}" @click.left.prevent="toggleFilterShowUsers" @keydown.stop.enter="toggleFilterShowUsers")
+          input(type="checkbox" v-model="filterShowUsers")
+          User(:user="currentUser" :key="currentUser.id" :hideYouLabel="true")
+      .button-wrap
+        label(:class="{active: filterShowDateUpdated}" @click.left.prevent="toggleFilterShowDateUpdated" @keydown.stop.enter="toggleFilterShowDateUpdated")
+          input(type="checkbox" v-model="filterShowDateUpdated")
+          img.icon.time(src="@/assets/time.svg")
+          span Updated
 
   section.results-section.connection-types
     ul.results-list
@@ -34,6 +45,9 @@ import utils from '@/utils.js'
 
 export default {
   name: 'Filters',
+  components: {
+    User: () => import('@/components/User.vue')
+  },
   props: {
     visible: Boolean
   },
@@ -48,12 +62,38 @@ export default {
       return framesInUse.map(frame => frames[frame])
     },
     totalFilters () {
-      const types = this.$store.state.filteredConnectionTypeIds
-      const frames = this.$store.state.filteredFrameIds
-      return types.length + frames.length
+      const state = this.$store.state
+      const currentUser = state.currentUser
+      const connections = state.filteredConnectionTypeIds.length
+      const frames = state.filteredFrameIds.length
+      let userFilters = 0
+      if (currentUser.filterShowUsers) {
+        userFilters += 1
+      }
+      if (currentUser.filterShowDateUpdated) {
+        userFilters += 1
+      }
+      return connections + frames + userFilters
+    },
+    currentUser () {
+      return this.$store.state.currentUser
+    },
+    filterShowUsers () {
+      return this.$store.state.currentUser.filterShowUsers
+    },
+    filterShowDateUpdated () {
+      return this.$store.state.currentUser.filterShowDateUpdated
     }
   },
   methods: {
+    toggleFilterShowUsers () {
+      const value = !this.filterShowUsers
+      this.$store.dispatch('currentUser/toggleFilterShowUsers', value)
+    },
+    toggleFilterShowDateUpdated () {
+      const value = !this.filterShowDateUpdated
+      this.$store.dispatch('currentUser/toggleFilterShowDateUpdated', value)
+    },
     isSelected ({ id }) {
       const types = this.$store.state.filteredConnectionTypeIds
       const frames = this.$store.state.filteredFrameIds
@@ -61,9 +101,8 @@ export default {
     },
 
     clearAllFilters () {
-      this.$store.commit('clearAllFilters')
+      this.$store.dispatch('clearAllFilters')
     },
-
     toggleFilteredConnectionType (type) {
       const filtered = this.$store.state.filteredConnectionTypeIds
       if (filtered.includes(type.id)) {
@@ -110,13 +149,18 @@ export default {
       padding 0
       img
         width 100%
-  .header
-    border-bottom 1px solid var(--primary)
-    margin-bottom 4px
   .connection-types
     padding-bottom 0
   .results-section
     overflow scroll
   input[type="checkbox"]
     margin-top 1px
+  .show-users
+    width 50px
+  .user
+    position absolute
+    top 4px
+    .user-avatar
+      width 17px
+      height 16px
 </style>

@@ -314,6 +314,10 @@ dialog
 .icon + span
   margin-left 5px
 
+.time
+  height 12px
+  vertical-align -2px
+
 .button-wrap
   display inline-block
   position relative
@@ -400,6 +404,8 @@ code
     background var(--success-background)
   &.status
     background var(--secondary-background)
+  &.secondary
+    background var(--secondary-active-background)
   input
     margin 0
   .user

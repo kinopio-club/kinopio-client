@@ -70,6 +70,15 @@ article(:style="position" :data-card-id="id" ref="card")
             template(v-else)
               img.connector-icon(src="@/assets/connector-open.svg")
 
+    //- Meta Info
+    .meta-container(v-if="filterShowUsers || filterShowDateUpdated")
+      .badge.user-badge(v-if="filterShowUsers" :style="{background: updatedByUser.color}")
+        User(:user="updatedByUser" :isClickable="false")
+        .name {{updatedByUser.name}}
+      .badge.secondary(v-if="filterShowDateUpdated")
+        img.icon.time(src="@/assets/time.svg")
+        .name {{updatedAtRelative}}
+
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
       .badge.info
@@ -108,6 +117,9 @@ import Frames from '@/components/Frames.vue'
 import Loader from '@/components/Loader.vue'
 import Audio from '@/components/Audio.vue'
 import scrollIntoView from '@/scroll-into-view.js'
+import User from '@/components/User.vue'
+
+import fromNow from 'fromnow'
 
 let isMultiTouch
 
@@ -116,7 +128,8 @@ export default {
     CardDetails,
     Frames,
     Loader,
-    Audio
+    Audio,
+    User
   },
   props: {
     card: Object
@@ -166,6 +179,28 @@ export default {
     newConnectionColor () { return this.$store.state.currentConnectionColor },
     name () { return this.card.name },
     frameId () { return this.card.frameId },
+    filterShowUsers () { return this.$store.state.currentUser.filterShowUsers },
+    filterShowDateUpdated () { return this.$store.state.currentUser.filterShowDateUpdated },
+    updatedByUser () {
+      const userId = this.card.nameUpdatedByUserId || this.card.userId
+      const user = this.$store.getters['currentSpace/memberById'](userId)
+      if (user) {
+        return user
+      } else {
+        return {
+          name: '',
+          color: '#cdcdcd' // secondary-active-background
+        }
+      }
+    },
+    updatedAtRelative () {
+      const date = this.card.nameUpdatedAt
+      if (date) {
+        return fromNow(date, { max: 1, suffix: true })
+      } else {
+        return 'Just now'
+      }
+    },
     cardPendingUpload () {
       const pendingUploads = this.$store.state.upload.pendingUploads
       return pendingUploads.find(upload => upload.cardId === this.card.id)
@@ -806,6 +841,27 @@ article
   .audio-wrap
     margin-top 8px
     margin-left 8px
+
+  .meta-container
+    display flex
+    padding 8px
+    padding-top 0
+    .user-badge
+      display flex
+      margin 0
+      .label-badge
+        padding 0 10px
+        left -2px
+        bottom initial
+        top 12px
+    .badge
+      &.secondary
+        display flex
+        .icon
+          margin-right 5px
+          margin-top 1px
+    .badge + .badge
+      margin-left 6px
 
 @keyframes bounce
   0%

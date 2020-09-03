@@ -422,7 +422,7 @@ export default {
       const emptySpace = { id: space.id, cards: [], connections: [], spectators: [] }
       const cachedSpace = cache.space(space.id)
       context.commit('clearAllNotifications', null, { root: true })
-      context.commit('clearAllFilters', null, { root: true })
+      context.commit('clearSpaceFilters', null, { root: true })
       // restore local
       context.commit('restoreSpace', emptySpace)
       context.commit('restoreSpace', utils.normalizeSpace(cachedSpace))
