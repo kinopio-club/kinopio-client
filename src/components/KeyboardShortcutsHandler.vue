@@ -53,6 +53,16 @@ export default {
       // ↑ Up
       } else if (key === 'ArrowUp' && (isSpaceScope || isFromCard)) {
         this.focusNearestCardUp()
+      // 1
+      } else if (key === '1' && isSpaceScope) {
+        let value = this.$store.state.currentUser.filterShowUsers
+        value = !value
+        this.$store.dispatch('currentUser/toggleFilterShowUsers', value)
+      // 2
+      } else if (key === '2' && isSpaceScope) {
+        let value = this.$store.state.currentUser.filterShowDateUpdated
+        value = !value
+        this.$store.dispatch('currentUser/toggleFilterShowDateUpdated', value)
       }
     },
     handleMetaKeyShortcuts (event) {
