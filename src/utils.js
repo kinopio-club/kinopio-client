@@ -564,6 +564,15 @@ export default {
     }
   },
 
+  urlIsCurrencyFloat (url) {
+    // https://regexr.com/5bfgm
+    // matches currencySymbol numbers '.' numbers
+    const currencyFloatPattern = new RegExp(/^[$€£₾₺₴₦₪R¥元₹¥₱₩฿₫₿ɱŁΞ]{1}[0-9]+\.[0-9]+/g)
+    if (url.match(currencyFloatPattern)) {
+      return true
+    }
+  },
+
   urlFromString (string) {
     if (!string) { return }
     // https://regexr.com/52r0i
@@ -571,14 +580,17 @@ export default {
     // followed by alphanumerics
     // then '.''
     // followed by alphanumerics
-    const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<>]*\.[^\s.[">,<]+[\n ]*/igm)
+    const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+[\n ]*/igm)
     const urls = string.match(urlPattern)
     if (!urls) { return }
     const url = urls[0]
     const hasProtocol = url.startsWith('http://') || url.startsWith('https://')
+    const isInvalidUrl = this.urlIsFloatOrIp(url) || this.urlIsCurrencyFloat(url)
+    console.log(url, this.urlIsFloatOrIp(url), this.urlIsCurrencyFloat(url))
+    if (isInvalidUrl) { return }
     if (hasProtocol) {
       return url
-    } else if (!this.urlIsFloatOrIp(url)) {
+    } else {
       return `http://${url}`
     }
   },
@@ -587,13 +599,13 @@ export default {
     if (!string) { return [] }
     // https://regexr.com/59m5t
     // same as urlFromString but matches multiple urls and returns [urls]
-    const urlPattern = new RegExp(/((http[s]?:\/\/)?[^\s(["<>]*\.[^\s.[">,<]+[ ]*)*/igm)
+    const urlPattern = new RegExp(/((http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+[ ]*)*/igm)
     let urls = string.match(urlPattern)
     // filter out empty or non-urls
     urls = urls.filter(url => {
       const urlHasContent = Boolean(this.trim(url).length)
-      const urlIsFloatOrIp = this.urlIsFloatOrIp(url.trim())
-      if (urlHasContent && !urlIsFloatOrIp) {
+      const isInvalidUrl = this.urlIsFloatOrIp(url.trim()) || this.urlIsCurrencyFloat(url.trim())
+      if (urlHasContent && !isInvalidUrl) {
         return true
       }
     })
