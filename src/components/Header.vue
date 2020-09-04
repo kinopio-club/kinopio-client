@@ -26,7 +26,7 @@ header(:style="visualViewportPosition")
           img.icon.privacy-icon(v-if="spaceIsNotClosed" :src="privacyIcon" :class="privacyName")
           .badge.status.explore(v-if="shouldShowInExplore")
             img.icon(src="@/assets/checkmark.svg")
-          Loader(:visible="isLoadingSpace")
+          Loader(:visible="isLoadingOrJoiningSpace")
         SpaceDetails(:visible="spaceDetailsIsVisible")
         ImportArenaChannel(:visible="importArenaChannelIsVisible")
 
@@ -178,8 +178,10 @@ export default {
     currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     },
-    isLoadingSpace () {
-      return this.$store.state.isLoadingSpace
+    isLoadingOrJoiningSpace () {
+      const isLoadingSpace = this.$store.state.isLoadingSpace
+      const isJoiningSpace = this.$store.state.isJoiningSpace
+      return isLoadingSpace || isJoiningSpace
     },
     isOnline () {
       return this.$store.state.isOnline

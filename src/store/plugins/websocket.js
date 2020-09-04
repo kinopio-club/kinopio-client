@@ -7,6 +7,7 @@ import nanoid from 'nanoid'
 import utils from '@/utils.js'
 
 let websocket, currentSpaceRoom, currentUserIsConnected
+let hadError = false
 const clientId = nanoid()
 
 const joinSpaceRoom = (store, mutation) => {
@@ -16,7 +17,6 @@ const joinSpaceRoom = (store, mutation) => {
   const user = utils.clone(store.state.currentUser)
   if (!currentSpaceHasUrl) { return }
   if (currentSpaceRoom === space.id) { return }
-  console.log('🌜 joinSpaceRoom', space.name)
   currentSpaceRoom = space.id
   websocket.send(JSON.stringify({
     message: 'joinSpaceRoom',
@@ -24,6 +24,8 @@ const joinSpaceRoom = (store, mutation) => {
     user: utils.userMeta(user, space),
     clientId
   }))
+  console.log('🌜 joinSpaceRoom', space.name)
+  store.commit('isJoiningSpace', false)
 }
 
 const sendEvent = (store, mutation, type) => {
@@ -59,6 +61,7 @@ const checkIfShouldUpdateWindowUrlAndTitle = (store, data) => {
 
 const closeWebsocket = (store) => {
   if (!websocket) { return }
+  store.commit('isJoiningSpace', true)
   websocket.close()
 }
 
@@ -66,18 +69,25 @@ export default function createWebSocketPlugin () {
   return store => {
     store.subscribe((mutation, state) => {
       if (mutation.type === 'broadcast/connect') {
+        store.commit('isJoiningSpace', true)
         const host = utils.websocketHost()
         websocket = new WebSocket(host)
         websocket.onopen = (event) => {
           currentUserIsConnected = true
           store.commit('broadcast/joinSpaceRoom')
+          if (hadError) {
+            store.commit('addNotification', { message: 'Broadcast reconnected', type: 'success' })
+          }
         }
         websocket.onclose = (event) => {
           console.warn('🌚', event)
+          store.commit('isJoiningSpace', true)
           store.dispatch('broadcast/reconnect')
         }
         websocket.onerror = (event) => {
           console.warn('🌌', event)
+          hadError = true
+          store.commit('addNotification', { message: 'Broadcast connection error, retrying…', type: 'danger' })
         }
         // receive
         websocket.onmessage = ({ data }) => {
