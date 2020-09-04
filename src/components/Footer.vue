@@ -8,9 +8,12 @@ footer(:style="visualViewportPosition")
       Explore(:visible="exploreIsVisible")
 
     .button-wrap
-      label(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
-        input(type="checkbox" v-model="isFavoriteSpace")
-        img.icon(src="@/assets/heart.svg")
+      .segmented-buttons
+        label(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+          input(type="checkbox" v-model="isFavoriteSpace")
+          img.icon(src="@/assets/heart.svg")
+        button
+          img.down-arrow(src="@/assets/down-arrow.svg")
 
   section.controls(v-if="isVisible")
     .button-wrap
@@ -281,5 +284,9 @@ footer
         position absolute
         top 6px
         left 6px
+
+  .segmented-buttons
+    .down-arrow
+      padding 0
 
 </style>

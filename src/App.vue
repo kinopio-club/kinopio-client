@@ -296,7 +296,8 @@ dialog
       border-radius 3px
 
 .segmented-buttons
-  button
+  button,
+  label
     margin 0
     border-radius 0
     &:first-child
@@ -305,7 +306,8 @@ dialog
     &:last-child
       border-top-right-radius 3px
       border-bottom-right-radius 3px
-  button + button
+  button + button,
+  label + button
     margin-left -1px
 
 .icon
