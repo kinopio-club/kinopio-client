@@ -30,12 +30,6 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
 
   section.results-actions
     .row
-      .segmented-buttons
-        button(@click.left.stop="hideFavorites" :class="{ active: !favoritesIsVisible }")
-          span Yours
-        button(@click.left.stop="showFavorites" :class="{ active: favoritesIsVisible }")
-          span Favorites
-    .row(v-if="!favoritesIsVisible")
       button(@click.left="addSpace")
         img.icon(src="@/assets/add.svg")
         span Add
@@ -44,10 +38,8 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
           span Import
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
 
-  section.results-section(v-if="!favoritesIsVisible")
+  section.results-section
     SpaceList(:spaces="spaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
-
-  Favorites(:visible="favoritesIsVisible" :loading="!hasRestoredFavorites")
 
 </template>
 
@@ -56,7 +48,6 @@ import cache from '@/cache.js'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
 import SpaceList from '@/components/SpaceList.vue'
-import Favorites from '@/components/Favorites.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
 import utils from '@/utils.js'
@@ -67,7 +58,6 @@ export default {
     Export,
     Import,
     SpaceList,
-    Favorites,
     PrivacyButton,
     ShowInExploreButton
   },
@@ -82,8 +72,6 @@ export default {
       exportIsVisible: false,
       importIsVisible: false,
       privacyPickerIsVisible: false,
-      favoritesIsVisible: false,
-      favoriteUsersIsVisible: false,
       removeLabel: 'Remove',
       isLoadingRemoteSpaces: false
     }
@@ -92,7 +80,6 @@ export default {
     currentSpace () { return this.$store.state.currentSpace },
     exportScope () { return 'space' },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    hasRestoredFavorites () { return this.$store.state.hasRestoredFavorites },
     shouldShowInExplore () {
       const privacy = this.$store.state.currentSpace.privacy
       if (privacy === 'private') { return false }
@@ -113,12 +100,6 @@ export default {
     }
   },
   methods: {
-    showFavorites () {
-      this.favoritesIsVisible = true
-    },
-    hideFavorites () {
-      this.favoritesIsVisible = false
-    },
     toggleExportIsVisible () {
       const isVisible = this.exportIsVisible
       this.closeDialogs()
@@ -219,8 +200,6 @@ export default {
         this.updateWithRemoteSpaces()
         this.closeDialogs()
         this.updateFavorites()
-      } else {
-        this.favoritesIsVisible = false
       }
     }
   }
