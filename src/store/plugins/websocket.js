@@ -134,6 +134,7 @@ export default function createWebSocketPlugin () {
         }
         joinSpaceRoom(store, mutation)
       } else if (mutation.type === 'broadcast/leaveSpaceRoom') {
+        store.commit('currentSpace/removeClientsFromSpace')
         sendEvent(store, mutation)
       } else if (mutation.type === 'broadcast/update') {
         const canEditSpace = store.getters['currentUser/canEditSpace']()

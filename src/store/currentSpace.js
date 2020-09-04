@@ -61,6 +61,13 @@ export default {
         state.spectators.push(newUser)
       }
     },
+    updateSpaceClients: (state, updates) => {
+      utils.typeCheck(updates, 'array')
+      state.clients = state.clients.concat(updates)
+    },
+    removeClientsFromSpace: (state) => {
+      state.clients = []
+    },
     removeSpectatorFromSpace: (state, oldUser) => {
       utils.typeCheck(oldUser, 'object')
       if (!state.spectators) { return }
@@ -950,7 +957,9 @@ export default {
       const spectators = state.spectators.length
       const clients = state.clients.length
       const total = users + collaborators + spectators + clients
-      return Boolean(total > 1)
+      const shouldBroadcast = Boolean(total > 2) // currentUser and currentClient
+      console.log('🌺 shouldBroadcast', shouldBroadcast, 'clientCount', total)
+      return shouldBroadcast
     },
 
     // Cards
