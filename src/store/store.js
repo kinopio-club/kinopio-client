@@ -84,6 +84,7 @@ export default new Vuex.Store({
 
     // loading
     isLoadingSpace: false,
+    isJoiningSpace: false, // broadcast
     spaceUrlToLoad: '',
     spaceCollaboratorKeys: [],
     remotePendingUploads: [],
@@ -446,6 +447,10 @@ export default new Vuex.Store({
     isLoadingSpace: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.isLoadingSpace = value
+    },
+    isJoiningSpace: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.isJoiningSpace = value
     },
     spaceUrlToLoad: (state, spaceUrl) => {
       utils.typeCheck(spaceUrl, 'string')

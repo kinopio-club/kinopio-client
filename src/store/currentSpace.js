@@ -55,8 +55,18 @@ export default {
       const userExists = state.users.find(user => user.id === newUser.id)
       const collaboratorExists = state.collaborators.find(collaborator => collaborator.id === newUser.id)
       const spectatorExists = state.spectators.find(spectator => spectator.id === newUser.id)
-      if (userExists || collaboratorExists || spectatorExists) { return }
-      state.spectators.push(newUser)
+      if (userExists || collaboratorExists || spectatorExists) {
+        state.clients.push(newUser)
+      } else {
+        state.spectators.push(newUser)
+      }
+    },
+    updateSpaceClients: (state, updates) => {
+      utils.typeCheck(updates, 'array')
+      state.clients = state.clients.concat(updates)
+    },
+    removeClientsFromSpace: (state) => {
+      state.clients = []
     },
     removeSpectatorFromSpace: (state, oldUser) => {
       utils.typeCheck(oldUser, 'object')
@@ -945,8 +955,11 @@ export default {
       const users = state.users.length
       const collaborators = state.collaborators.length
       const spectators = state.spectators.length
-      const total = users + collaborators + spectators
-      return Boolean(total > 1)
+      const clients = state.clients.length
+      const total = users + collaborators + spectators + clients
+      const shouldBroadcast = Boolean(total > 2) // currentUser and currentClient
+      console.log('🌺 shouldBroadcast', shouldBroadcast, 'clientCount', total)
+      return shouldBroadcast
     },
 
     // Cards
