@@ -109,6 +109,7 @@ export default {
       }
     })
     window.addEventListener('scroll', this.updatePositionInVisualViewport)
+    this.$store.dispatch('currentUser/restoreUserFavorites')
   },
   computed: {
     // buildHash () {

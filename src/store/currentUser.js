@@ -290,7 +290,6 @@ export default {
       context.commit('hasRestoredFavorites', true, { root: true })
     },
     addFavorite: (context, { type, item }) => {
-      context.commit('notifyAccessFavorites', true, { root: true })
       if (type === 'user') {
         let favorites = utils.clone(context.state.favoriteUsers)
         let favorite = {
@@ -317,7 +316,6 @@ export default {
       }, { root: true })
     },
     removeFavorite: (context, { type, item }) => {
-      context.commit('notifyAccessFavorites', false, { root: true })
       if (type === 'user') {
         let favorites = utils.clone(context.state.favoriteUsers)
         favorites = favorites.filter(favorite => {

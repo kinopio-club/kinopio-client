@@ -37,8 +37,7 @@ export default {
     UserList
   },
   props: {
-    visible: Boolean,
-    loading: Boolean
+    visible: Boolean
   },
   data () {
     return {
@@ -51,6 +50,7 @@ export default {
   computed: {
     favoriteUsers () { return this.$store.state.currentUser.favoriteUsers },
     favoriteSpaces () { return this.$store.state.currentUser.favoriteSpaces },
+    loading () { return !this.$store.state.hasRestoredFavorites },
     isEmpty () {
       const noSpaces = this.spacesIsVisible && !this.favoriteSpaces.length
       const noPeople = !this.spacesIsVisible && !this.favoriteUsers.length
@@ -91,11 +91,15 @@ export default {
     userDetailsIsNotVisible () {
       this.userDetailsIsVisible = false
       this.selectedUser = {}
+    },
+    async updateFavorites () {
+      await this.$store.dispatch('currentUser/restoreUserFavorites')
     }
   },
   watch: {
     visible (visible) {
       this.userDetailsIsNotVisible()
+      this.updateFavorites()
     }
   }
 }

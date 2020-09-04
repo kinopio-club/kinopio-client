@@ -10,11 +10,6 @@ aside.notifications(@click.left="closeAllDialogs")
       img.icon.open(src="@/assets/open.svg")
       span This space is open, which means you can add to it too
 
-  .item.success(v-if="notifyAccessFavorites" @animationend="resetNotifyAccessFavorites")
-    p Access favorites from your spaces
-    .row
-      button(@click.left.stop="triggerSpaceDetailsFavoritesVisible") Your Spaces
-
   .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
     p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade for $4/month
     .row
@@ -151,7 +146,6 @@ export default {
     notifyNewUser () { return this.$store.state.notifyNewUser },
     notifySignUpToEditSpace () { return this.$store.state.notifySignUpToEditSpace },
     notifySpaceIsOpenAndEditable () { return this.$store.state.notifySpaceIsOpenAndEditable },
-    notifyAccessFavorites () { return this.$store.state.notifyAccessFavorites },
     notifyCardsCreatedIsNearLimit () { return this.$store.state.notifyCardsCreatedIsNearLimit },
     notifyCardsCreatedIsOverLimit () { return this.$store.state.notifyCardsCreatedIsOverLimit },
     currentUserIsSignedIn () {
@@ -213,10 +207,6 @@ export default {
     triggerSpaceDetailsVisible () {
       this.$store.commit('triggerSpaceDetailsVisible')
     },
-    triggerSpaceDetailsFavoritesVisible () {
-      this.$store.commit('triggerFavoritesIsVisible')
-      this.triggerSpaceDetailsVisible()
-    },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
@@ -235,9 +225,6 @@ export default {
     createNewHelloSpace () {
       this.$store.commit('notifyNewUser', false)
       window.location.href = '/'
-    },
-    resetNotifyAccessFavorites () {
-      this.$store.commit('notifyAccessFavorites', false)
     },
     resetNotifyCardsCreatedIsNearLimit () {
       this.$store.commit('notifyCardsCreatedIsNearLimit', false)

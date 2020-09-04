@@ -88,14 +88,6 @@ export default {
       isLoadingRemoteSpaces: false
     }
   },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerFavoritesIsVisible') {
-        this.favoritesIsVisible = true
-        // todo getfavs()
-      }
-    })
-  },
   computed: {
     currentSpace () { return this.$store.state.currentSpace },
     exportScope () { return 'space' },
