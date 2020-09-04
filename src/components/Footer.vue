@@ -10,7 +10,7 @@ footer(:style="visualViewportPosition")
     .button-wrap
       label(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
         input(type="checkbox" v-model="isFavoriteSpace")
-        span Favorite
+        img.icon(src="@/assets/heart.svg")
 
   section.controls(v-if="isVisible")
     .button-wrap
