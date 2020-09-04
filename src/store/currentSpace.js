@@ -678,6 +678,7 @@ export default {
     toggleCardChecked (context, { cardId, value }) {
       utils.typeCheck(value, 'boolean')
       utils.typeCheck(cardId, 'string')
+      const currentUserId = context.rootState.currentUser.id
       const card = context.getters.cardById(cardId)
       let name = card.name
       const checkbox = utils.checkboxFromString(name)
@@ -687,7 +688,12 @@ export default {
       } else {
         name = `[] ${name}`
       }
-      context.dispatch('updateCard', { id: cardId, name })
+      context.dispatch('updateCard', {
+        id: cardId,
+        name,
+        nameUpdatedAt: new Date(),
+        nameUpdatedByUserId: currentUserId
+      })
     },
     incrementCardZ: (context, cardId) => {
       let cards = context.rootState.currentSpace.cards
