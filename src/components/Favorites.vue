@@ -94,7 +94,6 @@ export default {
       this.userDetailsIsNotVisible()
     }
   }
-
 }
 </script>
 
