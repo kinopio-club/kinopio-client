@@ -278,10 +278,6 @@ footer
   .macro
     vertical-align -3px
     height 13px
-  .user-details
-    .space-picker
-      bottom initial
-      top calc(100% - 8px)
 
   .uploading-container-footer
     position absolute
