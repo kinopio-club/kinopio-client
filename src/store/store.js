@@ -88,6 +88,7 @@ export default new Vuex.Store({
     spaceUrlToLoad: '',
     spaceCollaboratorKeys: [],
     remotePendingUploads: [],
+    hasRestoredFavorites: false,
 
     // notifications
     notifications: [],
@@ -480,6 +481,10 @@ export default new Vuex.Store({
         state.remotePendingUploads.push(update)
       }
       state.remotePendingUploads = state.remotePendingUploads.filter(item => item.percentComplete !== 100)
+    },
+    hasRestoredFavorites: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.hasRestoredFavorites = value
     },
 
     // Notifications

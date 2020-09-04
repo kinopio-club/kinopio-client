@@ -47,7 +47,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
   section.results-section(v-if="!favoritesIsVisible")
     SpaceList(:spaces="spaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
 
-  Favorites(:visible="favoritesIsVisible" :loading="favoritesIsLoading")
+  Favorites(:visible="favoritesIsVisible" :loading="!hasRestoredFavorites")
 
 </template>
 
@@ -84,8 +84,6 @@ export default {
       privacyPickerIsVisible: false,
       favoritesIsVisible: false,
       favoriteUsersIsVisible: false,
-      favoritesIsLoading: false,
-      hasUpdatedFavorites: false,
       removeLabel: 'Remove',
       isLoadingRemoteSpaces: false
     }
@@ -102,6 +100,7 @@ export default {
     currentSpace () { return this.$store.state.currentSpace },
     exportScope () { return 'space' },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    hasRestoredFavorites () { return this.$store.state.hasRestoredFavorites },
     shouldShowInExplore () {
       const privacy = this.$store.state.currentSpace.privacy
       if (privacy === 'private') { return false }
@@ -212,12 +211,7 @@ export default {
       }
     },
     async updateFavorites () {
-      if (this.favoritesIsLoading) { return }
-      if (this.hasUpdatedFavorites) { return }
-      this.favoritesIsLoading = true
-      this.hasUpdatedFavorites = true
       await this.$store.dispatch('currentUser/restoreUserFavorites')
-      this.favoritesIsLoading = false
     },
     duplicateSpace () {
       const duplicatedSpaceName = this.$store.state.currentSpace.name

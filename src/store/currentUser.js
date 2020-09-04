@@ -188,7 +188,6 @@ export default {
       state.filterShowDateUpdated = value
       cache.updateUser('filterShowDateUpdated', value)
     }
-
   },
   actions: {
     init: (context) => {
@@ -278,6 +277,8 @@ export default {
       context.commit('updateUser', remoteUser)
     },
     restoreUserFavorites: async (context) => {
+      const hasRestoredFavorites = context.rootState.hasRestoredFavorites
+      if (hasRestoredFavorites) { return }
       if (!context.getters.isSignedIn) { return }
       let favorites = {
         favoriteUsers: [],
@@ -286,6 +287,7 @@ export default {
       favorites = await context.dispatch('api/getUserFavorites', null, { root: true }) || favorites
       context.commit('favoriteUsers', favorites.favoriteUsers)
       context.commit('favoriteSpaces', favorites.favoriteSpaces)
+      context.commit('hasRestoredFavorites', true, { root: true })
     },
     addFavorite: (context, { type, item }) => {
       context.commit('notifyAccessFavorites', true, { root: true })

@@ -59,6 +59,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.left.stop="clos
       label(:class="{active: isFavoriteUser}" @click.left.prevent="toggleIsFavoriteUser" @keydown.stop.enter="toggleIsFavoriteUser")
         input(type="checkbox" v-model="isFavoriteUser")
         span Favorite
+        Loader(:visible="!hasRestoredFavorites")
     .badge.danger.error-message(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
 
   //- Collaborator
@@ -121,6 +122,7 @@ export default {
     isCurrentUser () { return this.$store.getters['currentUser/isCurrentUser'](this.user) },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
+    hasRestoredFavorites () { return this.$store.state.hasRestoredFavorites },
     userIsSignedIn () {
       if (this.user.isSignedIn === false) {
         return false
@@ -238,12 +240,16 @@ export default {
         this.$store.dispatch('closeAllDialogs')
       }
       this.$emit('removedCollaborator', user)
+    },
+    async updateFavorites () {
+      await this.$store.dispatch('currentUser/restoreUserFavorites')
     }
   },
   watch: {
     visible (visible) {
       this.closeDialogs()
       this.clearUserSpaces()
+      this.updateFavorites()
     },
     userDetailsPosition (position) {
       this.closeDialogs()
