@@ -295,7 +295,10 @@ export default {
     },
     addCard (position) {
       const isParentCard = true
-      if (this.spaceIsReadOnly) { return }
+      if (this.spaceIsReadOnly) {
+        this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info' })
+        return
+      }
       const withinX = position.x > 0 && position.x < this.$store.state.pageWidth
       const withinY = position.y > 0 && position.y < this.$store.state.pageHeight
       if (withinX && withinY) {

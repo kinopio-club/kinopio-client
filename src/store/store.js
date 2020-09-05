@@ -502,6 +502,7 @@ export default new Vuex.Store({
       state.notifySpaceIsOpenAndEditable = false
       state.notifyCardsCreatedIsNearLimit = false
       state.notifyCardsCreatedIsOverLimit = false
+      state.notificationsWithPosition = []
     },
     notifySpaceNotFound: (state, value) => {
       utils.typeCheck(value, 'boolean')
