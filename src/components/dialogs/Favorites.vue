@@ -82,7 +82,7 @@ export default {
       const targetRect = event.target.getBoundingClientRect()
       this.userDetailsIsNotVisible()
       this.userDetailsPosition = {
-        top: Math.min(targetRect.y - dialogRect.y, 67) + 'px',
+        top: targetRect.y - dialogRect.y + 'px',
         bottom: 'initial'
       }
       this.selectedUser = user
