@@ -1,5 +1,5 @@
 <template lang="pug">
-.favorites(v-if="visible" :open="visible" @click.left.stop="userDetailsIsNotVisible")
+dialog.favorites.narrow(v-if="visible" :open="visible" @click.left.stop="userDetailsIsNotVisible" ref="dialog")
   section
     .segmented-buttons
       button(@click.left.stop="showSpaces" :class="{ active: spacesIsVisible }")
@@ -19,24 +19,25 @@
     template(v-if="!spacesIsVisible")
       UserList(:users="favoriteUsers" :selectedUser="selectedUser" @selectSpace="showUserDetails")
       UserDetails(:visible="userDetailsIsVisible" :user="selectedUser" :userDetailsPosition="userDetailsPosition")
+
 </template>
 
 <script>
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import UserList from '@/components/UserList.vue'
+import UserDetails from '@/components/dialogs/UserDetails.vue'
 
 export default {
   name: 'Favorites',
   components: {
     Loader,
-    UserDetails: () => import('@/components/dialogs/UserDetails.vue'),
+    UserDetails,
     SpaceList,
     UserList
   },
   props: {
-    visible: Boolean,
-    loading: Boolean
+    visible: Boolean
   },
   data () {
     return {
@@ -49,6 +50,7 @@ export default {
   computed: {
     favoriteUsers () { return this.$store.state.currentUser.favoriteUsers },
     favoriteSpaces () { return this.$store.state.currentUser.favoriteSpaces },
+    loading () { return !this.$store.state.hasRestoredFavorites },
     isEmpty () {
       const noSpaces = this.spacesIsVisible && !this.favoriteSpaces.length
       const noPeople = !this.spacesIsVisible && !this.favoriteUsers.length
@@ -76,10 +78,12 @@ export default {
       }
     },
     showUserDetails (event, user) {
-      const elementRect = event.target.getBoundingClientRect()
+      const dialogRect = this.$refs.dialog.getBoundingClientRect()
+      const targetRect = event.target.getBoundingClientRect()
       this.userDetailsIsNotVisible()
       this.userDetailsPosition = {
-        top: elementRect.y - 12 + 'px'
+        top: Math.min(targetRect.y - dialogRect.y, 67) + 'px',
+        bottom: 'initial'
       }
       this.selectedUser = user
       this.userDetailsIsVisible = true
@@ -87,14 +91,17 @@ export default {
     userDetailsIsNotVisible () {
       this.userDetailsIsVisible = false
       this.selectedUser = {}
+    },
+    async updateFavorites () {
+      await this.$store.dispatch('currentUser/restoreUserFavorites')
     }
   },
   watch: {
     visible (visible) {
       this.userDetailsIsNotVisible()
+      this.updateFavorites()
     }
   }
-
 }
 </script>
 

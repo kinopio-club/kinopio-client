@@ -7,10 +7,15 @@ footer(:style="visualViewportPosition")
         span Explore
       Explore(:visible="exploreIsVisible")
 
+    //- Favorites
     .button-wrap
-      label(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
-        input(type="checkbox" v-model="isFavoriteSpace")
-        span Favorite
+      .segmented-buttons
+        label(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+          input(type="checkbox" v-model="isFavoriteSpace")
+          img.icon(src="@/assets/heart.svg")
+        button(@click.left="toggleFavoritesIsVisible" :class="{ active: favoritesIsVisible}")
+          img.down-arrow(src="@/assets/down-arrow.svg")
+      Favorites(:visible="favoritesIsVisible")
 
   section.controls(v-if="isVisible")
     .button-wrap
@@ -53,6 +58,7 @@ import Explore from '@/components/dialogs/Explore.vue'
 import Removed from '@/components/dialogs/Removed.vue'
 import Offline from '@/components/dialogs/Offline.vue'
 import Filters from '@/components/dialogs/Filters.vue'
+import Favorites from '@/components/dialogs/Favorites.vue'
 import Background from '@/components/dialogs/Background.vue'
 import Notifications from '@/components/Notifications.vue'
 import Loader from '@/components/Loader.vue'
@@ -69,12 +75,14 @@ export default {
     Offline,
     Notifications,
     Filters,
+    Favorites,
     Background,
     Loader
   },
   data () {
     return {
       removedIsVisible: false,
+      favoritesIsVisible: false,
       offlineIsVisible: false,
       filtersIsVisible: false,
       exploreIsVisible: false,
@@ -88,6 +96,7 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
         this.removedIsVisible = false
+        this.favoritesIsVisible = false
         this.offlineIsVisible = false
         this.filtersIsVisible = false
         this.exploreIsVisible = false
@@ -100,6 +109,7 @@ export default {
       }
     })
     window.addEventListener('scroll', this.updatePositionInVisualViewport)
+    this.$store.dispatch('currentUser/restoreUserFavorites')
   },
   computed: {
     // buildHash () {
@@ -213,6 +223,11 @@ export default {
       this.$store.dispatch('closeAllDialogs')
       this.removedIsVisible = !isVisible
     },
+    toggleFavoritesIsVisible () {
+      const isVisible = this.favoritesIsVisible
+      this.$store.dispatch('closeAllDialogs')
+      this.favoritesIsVisible = !isVisible
+    },
     toggleOfflineIsVisible () {
       const isVisible = this.offlineIsVisible
       this.$store.dispatch('closeAllDialogs')
@@ -264,10 +279,6 @@ footer
   .macro
     vertical-align -3px
     height 13px
-  .user-details
-    .space-picker
-      bottom initial
-      top calc(100% - 8px)
 
   .uploading-container-footer
     position absolute
@@ -281,5 +292,9 @@ footer
         position absolute
         top 6px
         left 6px
+
+  .segmented-buttons
+    .down-arrow
+      padding 0
 
 </style>

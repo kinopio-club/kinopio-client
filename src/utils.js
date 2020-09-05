@@ -586,7 +586,6 @@ export default {
     const url = urls[0]
     const hasProtocol = url.startsWith('http://') || url.startsWith('https://')
     const isInvalidUrl = this.urlIsFloatOrIp(url) || this.urlIsCurrencyFloat(url)
-    console.log(url, this.urlIsFloatOrIp(url), this.urlIsCurrencyFloat(url))
     if (isInvalidUrl) { return }
     if (hasProtocol) {
       return url

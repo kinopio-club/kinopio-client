@@ -88,6 +88,7 @@ export default new Vuex.Store({
     spaceUrlToLoad: '',
     spaceCollaboratorKeys: [],
     remotePendingUploads: [],
+    hasRestoredFavorites: false,
 
     // notifications
     notifications: [],
@@ -98,7 +99,6 @@ export default new Vuex.Store({
     notifyNewUser: false,
     notifySignUpToEditSpace: false,
     notifySpaceIsOpenAndEditable: false,
-    notifyAccessFavorites: false,
     notifyCardsCreatedIsNearLimit: false,
     notifyCardsCreatedIsOverLimit: false,
 
@@ -182,7 +182,6 @@ export default new Vuex.Store({
       state.isAuthenticatingWithArena = value
     },
     triggerSpaceDetailsVisible: () => {},
-    triggerFavoritesIsVisible: () => {},
     triggerSignUpOrInIsVisible: () => {},
     triggerArenaAuthenticationError: () => {},
     triggerKeyboardShortcutsIsVisible: () => {},
@@ -481,6 +480,10 @@ export default new Vuex.Store({
       }
       state.remotePendingUploads = state.remotePendingUploads.filter(item => item.percentComplete !== 100)
     },
+    hasRestoredFavorites: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.hasRestoredFavorites = value
+    },
 
     // Notifications
 
@@ -497,7 +500,6 @@ export default new Vuex.Store({
       state.notifyServerCouldNotSave = false
       state.notifySignUpToEditSpace = false
       state.notifySpaceIsOpenAndEditable = false
-      state.notifyAccessFavorites = false
       state.notifyCardsCreatedIsNearLimit = false
       state.notifyCardsCreatedIsOverLimit = false
     },
@@ -528,10 +530,6 @@ export default new Vuex.Store({
     notifySpaceIsOpenAndEditable: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.notifySpaceIsOpenAndEditable = value
-    },
-    notifyAccessFavorites: (state, value) => {
-      utils.typeCheck(value, 'boolean')
-      state.notifyAccessFavorites = value
     },
     notifyCardsCreatedIsNearLimit: (state, value) => {
       utils.typeCheck(value, 'boolean')
