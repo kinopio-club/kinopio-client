@@ -72,7 +72,6 @@ export default {
       exportIsVisible: false,
       importIsVisible: false,
       privacyPickerIsVisible: false,
-      removeLabel: 'Remove',
       isLoadingRemoteSpaces: false,
       remoteSpaces: []
     }
@@ -98,6 +97,14 @@ export default {
     isSpaceMember () {
       const currentSpace = this.$store.state.currentSpace
       return this.$store.getters['currentUser/isSpaceMember'](currentSpace)
+    },
+    removeLabel () {
+      const currentUserIsSpaceCollaborator = this.$store.getters['currentUser/isSpaceCollaborator']()
+      if (currentUserIsSpaceCollaborator) {
+        return 'Leave'
+      } else {
+        return 'Remove'
+      }
     }
   },
   methods: {
@@ -128,7 +135,6 @@ export default {
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space })
-      this.updateRemoveLabel()
     },
     changeToLastSpace () {
       const currentSpace = this.$store.state.currentSpace
@@ -138,7 +144,6 @@ export default {
       } else {
         this.addSpace()
       }
-      this.updateRemoveLabel()
     },
     removeCurrentSpace () {
       const currentUser = this.$store.state.currentUser
@@ -159,7 +164,6 @@ export default {
         })
         userSpaces = this.updateWithExistingRemoteSpaces(userSpaces)
         this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(userSpaces, currentUser)
-        this.updateRemoveLabel()
       })
     },
     pruneCachedSpaces (remoteSpaces) {
@@ -192,14 +196,6 @@ export default {
       if (!this.remoteSpaces) { return }
       this.pruneCachedSpaces(this.remoteSpaces)
       this.spaces = this.remoteSpaces
-    },
-    updateRemoveLabel () {
-      const currentUserIsSpaceCollaborator = this.$store.getters['currentUser/isSpaceCollaborator']()
-      if (currentUserIsSpaceCollaborator) {
-        this.removeLabel = 'Leave'
-      } else {
-        this.removeLabel = 'Remove'
-      }
     },
     async updateFavorites () {
       await this.$store.dispatch('currentUser/restoreUserFavorites')
