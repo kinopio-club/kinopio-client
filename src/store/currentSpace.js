@@ -333,6 +333,7 @@ export default {
     },
     duplicateSpace: (context) => {
       let space = utils.clone(context.state)
+      space.originSpaceId = space.id
       space.id = nanoid()
       space.users = []
       space.collaborators = []

@@ -83,6 +83,7 @@ export default {
     },
     importSpace (space) {
       if (!this.isValidSpace(space)) { return }
+      space.originSpaceId = space.id
       space.id = nanoid()
       space.name = this.uniqueName(space)
       const uniqueNewSpace = cache.updateIdsInSpace(space)
