@@ -73,7 +73,8 @@ export default {
       importIsVisible: false,
       privacyPickerIsVisible: false,
       removeLabel: 'Remove',
-      isLoadingRemoteSpaces: false
+      isLoadingRemoteSpaces: false,
+      remoteSpaces: []
     }
   },
   computed: {
@@ -153,9 +154,10 @@ export default {
     async updateSpaces () {
       this.$nextTick(() => {
         const currentUser = this.$store.state.currentUser
-        const userSpaces = cache.getAllSpaces().filter(space => {
+        let userSpaces = cache.getAllSpaces().filter(space => {
           return this.$store.getters['currentUser/canEditSpace'](space)
         })
+        userSpaces = this.updateWithExistingRemoteSpaces(userSpaces)
         this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(userSpaces, currentUser)
         this.updateRemoveLabel()
       })
@@ -167,13 +169,29 @@ export default {
         cache.removeSpacePermanent(spaceToRemove)
       })
     },
+    updateWithExistingRemoteSpaces (userSpaces) {
+      if (!this.remoteSpaces.length) { return userSpaces }
+      let spaces = userSpaces
+
+      this.remoteSpaces.forEach(space => {
+        const currentSpace = this.$store.state.currentSpace
+        if (space.id === currentSpace.id) {
+          space = utils.clone(currentSpace)
+        }
+        const spaceExists = userSpaces.find(userSpace => userSpace.id === space.id)
+        if (!spaceExists) {
+          spaces.push(space)
+        }
+      })
+      return spaces
+    },
     async updateWithRemoteSpaces () {
       this.isLoadingRemoteSpaces = true
-      const remoteSpaces = await this.$store.dispatch('api/getUserSpaces')
+      this.remoteSpaces = await this.$store.dispatch('api/getUserSpaces')
       this.isLoadingRemoteSpaces = false
-      if (!remoteSpaces) { return }
-      this.pruneCachedSpaces(remoteSpaces)
-      this.spaces = remoteSpaces
+      if (!this.remoteSpaces) { return }
+      this.pruneCachedSpaces(this.remoteSpaces)
+      this.spaces = this.remoteSpaces
     },
     updateRemoveLabel () {
       const currentUserIsSpaceCollaborator = this.$store.getters['currentUser/isSpaceCollaborator']()
