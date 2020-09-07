@@ -153,8 +153,8 @@ export default {
         this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', currentUser)
       } else {
         this.$store.dispatch('currentSpace/removeCurrentSpace')
-        this.remoteSpaces = this.remoteSpaces.filter(space => space.id !== currentSpaceId)
       }
+      this.remoteSpaces = this.remoteSpaces.filter(space => space.id !== currentSpaceId)
       this.updateSpaces()
       this.changeToLastSpace()
     },
