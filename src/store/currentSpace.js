@@ -302,9 +302,10 @@ export default {
 
     createNewHelloSpace: (context) => {
       const user = context.rootState.currentUser
+      const nullCardUsers = true
       let space = utils.clone(helloSpace)
       space.id = nanoid()
-      space = cache.updateIdsInSpace(space)
+      space = cache.updateIdsInSpace(space, nullCardUsers)
       context.commit('restoreSpace', space)
       context.commit('addUserToSpace', user)
     },
@@ -316,7 +317,8 @@ export default {
       space.cards[1].x = random(180, 200)
       space.cards[1].y = random(160, 180)
       space.userId = context.rootState.currentUser.id
-      const uniqueNewSpace = cache.updateIdsInSpace(space)
+      const nullCardUsers = true
+      const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
       context.commit('restoreSpace', uniqueNewSpace)
     },
     saveNewSpace: (context) => {

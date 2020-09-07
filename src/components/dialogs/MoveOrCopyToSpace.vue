@@ -188,7 +188,8 @@ export default {
 
     async copyToSelectedSpace (items) {
       this.loading = true
-      const newItems = utils.uniqueSpaceItems(utils.clone(items))
+      const nullCardUsers = true
+      const newItems = utils.uniqueSpaceItems(utils.clone(items), nullCardUsers)
       let { cards, connectionTypes, connections } = newItems
       cards = this.mapRemoteItems(cards)
       connectionTypes = this.mapRemoteItems(connectionTypes)

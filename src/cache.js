@@ -97,13 +97,13 @@ export default {
     space.cacheDate = Date.now()
     this.storeLocal(`space-${space.id}`, space)
   },
-  updateIdsInSpace (space) {
+  updateIdsInSpace (space, nullCardUsers) {
     const items = {
       cards: space.cards,
       connectionTypes: space.connectionTypes,
       connections: space.connections
     }
-    const uniqueItems = utils.uniqueSpaceItems(items)
+    const uniqueItems = utils.uniqueSpaceItems(items, nullCardUsers)
     space.cards = uniqueItems.cards
     space.connectionTypes = uniqueItems.connectionTypes
     space.connections = uniqueItems.connections

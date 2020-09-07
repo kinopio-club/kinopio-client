@@ -402,41 +402,53 @@ export default {
     return space
   },
 
-  uniqueSpaceItems (items) {
+  itemUserId (user, item, nullCardUsers) {
+    let userId
+    if (nullCardUsers) {
+      userId = null
+    } else {
+      userId = item.userId || user.id
+    }
+    return userId
+  },
+
+  uniqueSpaceItems (items, nullCardUsers) {
     const cardIdDeltas = []
     const connectionTypeIdDeltas = []
     const user = cache.user()
     items.cards = items.cards.map(card => {
+      const userId = this.itemUserId(user, card, nullCardUsers)
       const newId = nanoid()
       cardIdDeltas.push({
         prevId: card.id,
         newId
       })
       card.id = newId
-      card.userId = user.id
+      card.userId = userId
       return card
     })
     items.connectionTypes = items.connectionTypes.map(type => {
+      const userId = this.itemUserId(user, type, nullCardUsers)
       const newId = nanoid()
       connectionTypeIdDeltas.push({
         prevId: type.id,
         newId
       })
       type.id = newId
-      type.userId = user.id
+      type.userId = userId
       return type
     })
     items.connections = items.connections.map(connection => {
+      const userId = this.itemUserId(user, connection, nullCardUsers)
       connection.id = nanoid()
       connection.connectionTypeId = this.updateAllIds(connection, 'connectionTypeId', connectionTypeIdDeltas)
       connection.startCardId = this.updateAllIds(connection, 'startCardId', cardIdDeltas)
       connection.endCardId = this.updateAllIds(connection, 'endCardId', cardIdDeltas)
-      connection.userId = user.id
+      connection.userId = userId
       return connection
     })
     return items
   },
-
   normalizeSpace (space) {
     if (!this.objectHasKeys(space)) { return space }
     if (!space.connections) { return space }
