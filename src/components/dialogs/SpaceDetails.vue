@@ -202,6 +202,7 @@ export default {
       this.$store.dispatch('currentSpace/duplicateSpace')
       this.$store.commit('addNotification', { message: `${duplicatedSpaceName} is now yours to edit`, type: 'success' })
       this.updateSpaces()
+      this.updateWithRemoteSpaces()
     }
   },
   watch: {
