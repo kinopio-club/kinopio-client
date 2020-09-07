@@ -725,7 +725,9 @@ export default {
       context.commit('broadcast/update', { updates: card, type: 'removeCard' }, { root: true })
       context.dispatch('removeConnectionsFromCard', card)
       context.commit('triggerUpdatePositionInVisualViewport', null, { root: true })
-      if (card.userId === context.rootState.currentUser.id) {
+      const spaceHasNoOrigin = !context.state.originSpaceId
+      const cardIsUpdatedByCurrentUser = card.userId === context.rootState.currentUser.id
+      if (spaceHasNoOrigin && cardIsUpdatedByCurrentUser) {
         context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: false }, { root: true })
       }
       if (!context.rootGetters['currentUser/cardsCreatedIsOverLimit']) {
