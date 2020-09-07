@@ -340,6 +340,7 @@ export default {
       space.users = []
       space.collaborators = []
       space.showInExplore = false
+      space.privacy = 'private'
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       context.commit('restoreSpace', uniqueNewSpace)
       Vue.nextTick(() => {
