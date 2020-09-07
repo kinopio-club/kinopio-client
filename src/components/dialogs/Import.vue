@@ -81,11 +81,19 @@ export default {
         return space.name
       }
     },
+    removeCardUserIds (space) {
+      space.cards = space.cards.map(card => {
+        card.userId = null
+        return card
+      })
+      return space
+    },
     importSpace (space) {
       if (!this.isValidSpace(space)) { return }
       space.id = nanoid()
       space.name = this.uniqueName(space)
-      const uniqueNewSpace = cache.updateIdsInSpace(space)
+      let uniqueNewSpace = cache.updateIdsInSpace(space)
+      uniqueNewSpace = this.removeCardUserIds(uniqueNewSpace)
       cache.saveSpace(uniqueNewSpace)
       this.$store.commit('currentSpace/restoreSpace', uniqueNewSpace)
       this.$store.dispatch('currentSpace/saveNewSpace')
