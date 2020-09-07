@@ -147,11 +147,13 @@ export default {
     },
     removeCurrentSpace () {
       const currentUser = this.$store.state.currentUser
+      const currentSpaceId = this.$store.state.currentSpace.id
       const currentUserIsSpaceCollaborator = this.$store.getters['currentUser/isSpaceCollaborator']()
       if (currentUserIsSpaceCollaborator) {
         this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', currentUser)
       } else {
         this.$store.dispatch('currentSpace/removeCurrentSpace')
+        this.remoteSpaces = this.remoteSpaces.filter(space => space.id !== currentSpaceId)
       }
       this.updateSpaces()
       this.changeToLastSpace()
@@ -176,12 +178,7 @@ export default {
     updateWithExistingRemoteSpaces (userSpaces) {
       if (!this.remoteSpaces.length) { return userSpaces }
       let spaces = userSpaces
-
       this.remoteSpaces.forEach(space => {
-        const currentSpace = this.$store.state.currentSpace
-        if (space.id === currentSpace.id) {
-          space = utils.clone(currentSpace)
-        }
         const spaceExists = userSpaces.find(userSpace => userSpace.id === space.id)
         if (!spaceExists) {
           spaces.push(space)
