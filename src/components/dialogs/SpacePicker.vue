@@ -4,7 +4,7 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
     Loader(:visible="loading")
     SpaceList(v-if="spaces.length" :spaces="spaces" :showUserIfCurrentUserIsCollaborator="showUserIfCurrentUserIsCollaborator" :selectedSpace="selectedSpace" @selectSpace="selectSpace")
     .error-container(v-if="!spaces.length")
-      User(:user="user" :isClickable="false" :key="user.id")
+      User(:user="activeUser" :isClickable="false" :key="activeUser.id")
       span has no public spaces
 </template>
 
@@ -45,6 +45,10 @@ export default {
         return undefined
       }
       return height
+    },
+    activeUser () {
+      const currentUser = this.$store.state.currentUser
+      return this.user || currentUser
     }
   },
   methods: {
