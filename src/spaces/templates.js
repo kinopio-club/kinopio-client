@@ -58,6 +58,11 @@ export default {
         name: 'Mental Health'
       },
       {
+        id: 'HKksDw5m1Mi4xDdscyK2L',
+        categoryId: 2,
+        name: 'Garage Sale'
+      },
+      {
         id: '85dWJ4_zDipSREM-nllXH',
         categoryId: 3,
         name: 'Brainstorming'
