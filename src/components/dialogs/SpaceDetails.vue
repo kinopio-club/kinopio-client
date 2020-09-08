@@ -16,7 +16,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
           span Shown in Explore
 
     .button-wrap(v-if="isSpaceMember")
-      button(@click.left="removeCurrentSpace")
+      button(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
         img.icon(src="@/assets/remove.svg")
         span {{removeLabel}}
     .button-wrap(v-if="!isSpaceMember")
@@ -50,6 +50,7 @@ import Import from '@/components/dialogs/Import.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
+import templates from '@/spaces/templates.js'
 import utils from '@/utils.js'
 
 export default {
@@ -105,6 +106,11 @@ export default {
       } else {
         return 'Remove'
       }
+    },
+    currentSpaceIsTemplate () {
+      const id = this.$store.state.currentSpace.id
+      const templateSpaceIds = templates.spaces().map(space => space.id)
+      return templateSpaceIds.includes(id)
     }
   },
   methods: {
@@ -230,4 +236,7 @@ export default {
   .explore-message
     display flex
     margin-top 6px
+  button.disabled
+    opacity 0.5
+    pointer-events none
 </style>
