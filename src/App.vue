@@ -423,6 +423,7 @@ code
     margin-right 6px
   &.button-badge
     box-shadow var(--button-hover-shadow)
+    cursor pointer
     &:hover
       box-shadow var(--hover-shadow)
     &:active
