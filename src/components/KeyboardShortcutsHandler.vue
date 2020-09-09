@@ -96,6 +96,10 @@ export default {
       } else if (isMeta && key === 'a' && isSpaceScope) {
         event.preventDefault()
         this.selectAllCards()
+      // Jump to Space
+      } else if (isMeta && key === 'k' && isSpaceScope) {
+        event.preventDefault()
+        this.focusOnSpaceDetailsFilter()
       }
     },
 
@@ -454,7 +458,21 @@ export default {
       this.$store.commit('multipleSelectedActionsPosition', viewportCenter)
       this.$store.commit('multipleSelectedActionsIsVisible', true)
       this.$store.commit('multipleCardsSelectedIds', cards)
+    },
+
+    // Jump to Space (temporary?)
+
+    focusOnSpaceDetailsFilter () {
+      this.$store.commit('triggerSpaceDetailsVisible')
+      this.$nextTick(() => {
+        this.$nextTick(() => {
+          this.$nextTick(() => {
+            this.$store.commit('triggerFocusSpaceDetailsFilter')
+          })
+        })
+      })
     }
+
   }
 }
 </script>

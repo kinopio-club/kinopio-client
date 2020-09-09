@@ -182,6 +182,7 @@ export default new Vuex.Store({
       state.isAuthenticatingWithArena = value
     },
     triggerSpaceDetailsVisible: () => {},
+    triggerFocusSpaceDetailsFilter: () => {},
     triggerSignUpOrInIsVisible: () => {},
     triggerArenaAuthenticationError: () => {},
     triggerKeyboardShortcutsIsVisible: () => {},

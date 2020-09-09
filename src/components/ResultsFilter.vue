@@ -30,6 +30,9 @@ export default {
       if (mutation.type === 'triggerSelectTemplateCategory') {
         this.clearFilter()
       }
+      if (mutation.type === 'triggerFocusSpaceDetailsFilter') {
+        this.focusFilterInput()
+      }
     })
   },
   computed: {
@@ -65,6 +68,7 @@ export default {
   methods: {
     focusFilterInput () {
       const element = this.$refs.filterInput
+      if (!element) { return }
       element.focus()
       element.setSelectionRange(0, 0)
     },
