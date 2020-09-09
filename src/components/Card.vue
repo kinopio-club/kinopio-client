@@ -78,9 +78,9 @@ article(:style="position" :data-card-id="id" ref="card")
           .name {{updatedByUser.name}}
         UserDetails(:visible="userDetailsIsVisible" :user="updatedByUser" :dialogIsReadOnly="true")
 
-      .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleUserDetails" @touchend.prevent.stop="toggleUserDetails")
+      .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
         img.icon.time(src="@/assets/time.svg")
-        .name {{updatedAtRelative}}
+        .name {{dateUpdatedAt}}
 
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
@@ -202,10 +202,15 @@ export default {
         }
       }
     },
-    updatedAtRelative () {
+    dateUpdatedAt () {
       const date = this.card.nameUpdatedAt
+      const showAbsoluteDate = this.$store.state.currentUser.filterShowAbsoluteDates
       if (date) {
-        return fromNow(date, { max: 1, suffix: true })
+        if (showAbsoluteDate) {
+          return new Date(date).toLocaleString()
+        } else {
+          return fromNow(date, { max: 1, suffix: true })
+        }
       } else {
         return 'Just now'
       }
@@ -568,6 +573,11 @@ export default {
           scrollIntoView.scroll(element, isTouchDevice)
         }
       })
+    },
+    toggleFilterShowAbsoluteDates () {
+      this.$store.dispatch('closeAllDialogs', 'Card.toggleFilterShowAbsoluteDates')
+      const value = !this.$store.state.currentUser.filterShowAbsoluteDates
+      this.$store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
     },
     updateRemoteConnections () {
       const remoteCurrentConnections = this.$store.state.remoteCurrentConnections

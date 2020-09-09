@@ -21,7 +21,8 @@ export default {
     cardsCreatedCount: 0,
     isUpgraded: false,
     filterShowUsers: false,
-    filterShowDateUpdated: false
+    filterShowDateUpdated: false,
+    filterShowAbsoluteDates: false
   },
   getters: {
     isCurrentUser: (state) => (user) => {
@@ -187,6 +188,11 @@ export default {
       utils.typeCheck(value, 'boolean')
       state.filterShowDateUpdated = value
       cache.updateUser('filterShowDateUpdated', value)
+    },
+    filterShowAbsoluteDates: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.filterShowAbsoluteDates = value
+      cache.updateUser('filterShowAbsoluteDates', value)
     }
   },
   actions: {
@@ -375,9 +381,17 @@ export default {
           filterShowDateUpdated: value
         } }, { root: true })
     },
+    toggleFilterShowAbsoluteDates: (context, value) => {
+      context.commit('filterShowAbsoluteDates', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          filterShowAbsoluteDates: value
+        } }, { root: true })
+    },
     clearUserFilters: (context) => {
       context.dispatch('toggleFilterShowUsers', false)
       context.dispatch('toggleFilterShowDateUpdated', false)
+      context.dispatch('toggleFilterShowAbsoluteDates', false)
     }
   }
 }
