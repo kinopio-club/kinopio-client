@@ -566,6 +566,7 @@ export default {
     toggleUserDetails () {
       const value = !this.userDetailsIsVisible
       this.$store.dispatch('closeAllDialogs', 'Card.toggleUserDetails')
+      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
       this.$store.commit('currentUserIsDraggingCard', false)
       this.userDetailsIsVisible = value
       this.$nextTick(() => {
@@ -577,6 +578,7 @@ export default {
       })
     },
     toggleFilterShowAbsoluteDates () {
+      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
       this.$store.dispatch('closeAllDialogs', 'Card.toggleFilterShowAbsoluteDates')
       const value = !this.$store.state.currentUser.filterShowAbsoluteDates
       this.$store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
