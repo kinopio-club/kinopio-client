@@ -655,9 +655,14 @@ export default {
       this.checkIfShouldDragMultipleCards()
       this.$store.dispatch('currentSpace/incrementSelectedCardsZ')
     },
+    shouldCancel (event) {
+      const element = document.querySelector('dialog.user-details')
+      if (!element) { return }
+      if (element.contains(event.target)) { return true }
+    },
     showCardDetails (event) {
       if (isMultiTouch) { return }
-      if (this.userDetailsIsVisible) { return }
+      if (this.shouldCancel(event)) { return }
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
       const userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
