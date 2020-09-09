@@ -76,7 +76,7 @@ article(:style="position" :data-card-id="id" ref="card")
         .badge.user-badge.button-badge(v-if="filterShowUsers" :style="{background: updatedByUser.color}" @click.left.prevent.stop="toggleUserDetails" @touchend.prevent.stop="toggleUserDetails")
           User(:user="updatedByUser" :isClickable="false")
           .name {{updatedByUser.name}}
-        UserDetails(:visible="userDetailsIsVisible" :user="updatedByUser")
+        UserDetails(:visible="userDetailsIsVisible" :user="updatedByUser" :dialogIsReadOnly="true")
 
       .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleUserDetails" @touchend.prevent.stop="toggleUserDetails")
         img.icon.time(src="@/assets/time.svg")

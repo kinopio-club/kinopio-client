@@ -1,8 +1,8 @@
 <template lang="pug">
 dialog.narrow.user-details(v-if="visible" :open="visible" @click.left.stop="closeDialogs" @keydown.stop :class="{'right-side': detailsOnRight}" :style="userDetailsPosition")
 
-  //- Other User
-  section(v-if="!isCurrentUser")
+  //- Other User or Read Only
+  section(v-if="!isCurrentUser || dialogIsReadOnly")
     .user-info
       .row
         User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
@@ -12,43 +12,44 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.left.stop="clos
       .badge.success(v-if="user.isUpgraded") Upgraded
 
   //- Current User
-  section(v-if="isCurrentUser")
-    .row
+  template(v-if="isCurrentUser && !dialogIsReadOnly")
+    section
+      .row
+        .button-wrap
+          button.change-color(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
+            .current-color(:style="{ background: userColor }")
+          ColorPicker(:currentColor="userColor" :visible="colorPickerIsVisible" @selectedColor="updateUserColor")
+        input.name(placeholder="What's your name?" v-model="userName" name="Name")
+      .row.badges(v-if="user.isSpectator || user.isUpgraded")
+        .badge.status(v-if="user.isSpectator") Spectator
+        .badge.success(v-if="user.isUpgraded") Upgraded
+
+    section.upgrade(v-if="!currentUserIsUpgraded")
+      p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
+      progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
       .button-wrap
-        button.change-color(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-          .current-color(:style="{ background: userColor }")
-        ColorPicker(:currentColor="userColor" :visible="colorPickerIsVisible" @selectedColor="updateUserColor")
-      input.name(placeholder="What's your name?" v-model="userName" name="Name")
-    .row.badges(v-if="user.isSpectator || user.isUpgraded")
-      .badge.status(v-if="user.isSpectator") Spectator
-      .badge.success(v-if="user.isUpgraded") Upgraded
+        button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: upgradeUserIsVisible}")
+          span Upgrade for Unlimited
+        UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeDialogs")
+      p
+        .badge.info $4/month
+      .row
+        a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost")
+          button More Info →
 
-  section.upgrade(v-if="isCurrentUser && !currentUserIsUpgraded")
-    p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
-    progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
-    .button-wrap
-      button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: upgradeUserIsVisible}")
-        span Upgrade for Unlimited
-      UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeDialogs")
-    p
-      .badge.info $4/month
-    .row
-      a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost")
-        button More Info →
-
-  section(v-if="isCurrentUser")
-    .button-wrap
-      button(@click.left.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}")
-        span Settings
-      UserSettings(:user="user" :visible="userSettingsIsVisible" @removeUser="signOut")
-    button(v-if="currentUserIsSignedIn" @click.left="signOut")
-      img.icon.moon(src="@/assets/moon.svg")
-      span Sign Out
-    button(v-else @click.left="triggerSignUpOrInIsVisible")
-      span Sign Up or In
+    section
+      .button-wrap
+        button(@click.left.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}")
+          span Settings
+        UserSettings(:user="user" :visible="userSettingsIsVisible" @removeUser="signOut")
+      button(v-if="currentUserIsSignedIn" @click.left="signOut")
+        img.icon.moon(src="@/assets/moon.svg")
+        span Sign Out
+      button(v-else @click.left="triggerSignUpOrInIsVisible")
+        span Sign Up or In
 
   //- Other User
-  section(v-if="!isCurrentUser && userIsSignedIn")
+  section(v-if="!isCurrentUser && userIsSignedIn && user.id")
     .button-wrap
       button(@click.left.stop="getUserSpaces" :class="{active: loadingUserspaces || spacePickerIsVisible}")
         User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
@@ -63,7 +64,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.left.stop="clos
     .badge.danger.error-message(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
 
   //- Collaborator
-  section(v-if="isCollaborator && currentUserIsSpaceMember")
+  section(v-if="isCollaborator && currentUserIsSpaceMember && !dialogIsReadOnly")
     template(v-if="isCurrentUser && isCollaborator")
       button(@click.left.stop="removeCollaborator")
         img.icon(src="@/assets/remove.svg")
@@ -98,7 +99,8 @@ export default {
     detailsOnRight: Boolean,
     visible: Boolean,
     userDetailsPosition: Object,
-    userDetailsIsFromList: Boolean
+    userDetailsIsFromList: Boolean,
+    dialogIsReadOnly: Boolean
   },
   data () {
     return {
