@@ -421,6 +421,12 @@ code
     height 14px
     vertical-align -3px
     margin-right 6px
+  &.button-badge
+    box-shadow var(--button-hover-shadow)
+    &:hover
+      box-shadow var(--hover-shadow)
+    &:active
+      box-shadow var(--button-active-inset-shadow)
 
 .label-badge
   position absolute

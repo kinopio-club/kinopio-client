@@ -152,7 +152,7 @@ export default {
       currentCursor = utils.cursorPositionInViewport(event)
       if (!utils.cursorsAreClose(startCursor, currentCursor)) { return }
       const detailsPosition = utils.cursorPositionInPage(event)
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Connection.showConnectionDetails')
       this.$store.dispatch('connectionDetailsIsVisibleForConnectionId', this.id)
       this.$store.commit('connectionDetailsPosition', detailsPosition)
       this.$store.dispatch('clearMultipleSelected')

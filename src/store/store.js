@@ -583,8 +583,9 @@ export default new Vuex.Store({
     clearSpaceFilters: (context) => {
       context.commit('clearSpaceFilters')
     },
-    closeAllDialogs: (context) => {
-      context.commit('closeAllDialogs')
+    closeAllDialogs: (context, value) => {
+      const logging = value || 'Store.closeAllDialogs'
+      context.commit('closeAllDialogs', logging)
       const space = utils.clone(context.rootState.currentSpace)
       const user = utils.clone(context.rootState.currentUser)
       context.commit('broadcast/updateUser', { user: utils.userMeta(user, space), type: 'addSpectatorToSpace' }, { root: true })

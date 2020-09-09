@@ -268,22 +268,22 @@ export default {
     },
     toggleAboutIsVisible () {
       const isVisible = this.aboutIsVisible
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleAboutIsVisible')
       this.aboutIsVisible = !isVisible
     },
     toggleSpaceDetailsIsVisible () {
       const isVisible = this.spaceDetailsIsVisible
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleSpaceDetailsIsVisible')
       this.spaceDetailsIsVisible = !isVisible
     },
     toggleSignUpOrInIsVisible () {
       const isVisible = this.signUpOrInIsVisible
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleSignUpOrInIsVisible')
       this.signUpOrInIsVisible = !isVisible
     },
     toggleShareIsVisible () {
       const isVisible = this.shareIsVisible
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleShareIsVisible')
       this.shareIsVisible = !isVisible
     },
     setLoadingSignUpOrIn (value) {
@@ -291,7 +291,7 @@ export default {
     },
     triggerUpgradeUserIsVisible () {
       const isVisible = this.upgradeUserIsVisible
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Header.triggerUpgradeUserIsVisible')
       this.upgradeUserIsVisible = !isVisible
     }
   }

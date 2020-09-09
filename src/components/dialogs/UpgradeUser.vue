@@ -103,7 +103,7 @@ export default {
       this.error.stripeError = false
     },
     triggerSignUpOrInIsVisible () {
-      this.$store.commit('closeAllDialogs')
+      this.$store.commit('closeAllDialogs', 'UpgradeUser.triggerSignUpOrInIsVisible')
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     mountStripeElements () {

@@ -3,7 +3,7 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
   section.results-section
     Loader(:visible="loading")
     SpaceList(v-if="spaces.length" :spaces="spaces" :showUserIfCurrentUserIsCollaborator="showUserIfCurrentUserIsCollaborator" :selectedSpace="selectedSpace" @selectSpace="selectSpace")
-    .error-container(v-if="!spaces.length")
+    .error-container(v-if="!spaces.length && !loading")
       User(:user="activeUser" :isClickable="false" :key="activeUser.id")
       span has no public spaces
 </template>

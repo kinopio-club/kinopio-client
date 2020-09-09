@@ -82,7 +82,7 @@ export default {
       this.cancelSubscriptionVisible = !this.cancelSubscriptionVisible
     },
     triggerUpgradeUserIsVisible () {
-      this.$store.commit('closeAllDialogs')
+      this.$store.commit('closeAllDialogs', 'UserBilling.triggerUpgradeUserIsVisible')
       this.$store.commit('triggerUpgradeUserIsVisible')
     },
     async cancelSubscription () {

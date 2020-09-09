@@ -369,7 +369,7 @@ export default {
     remove () {
       this.editableConnections.forEach(connection => this.$store.dispatch('currentSpace/removeConnection', connection))
       this.editableCards.forEach(card => this.$store.dispatch('currentSpace/removeCard', card))
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'MultipleSelectedActions.remove')
       this.$store.dispatch('clearMultipleSelected')
     },
     scrollIntoView () {

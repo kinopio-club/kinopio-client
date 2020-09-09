@@ -143,7 +143,7 @@ export default {
   },
   methods: {
     triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Background.triggerSignUpOrInIsVisible')
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     closeDialogs () {

@@ -289,7 +289,7 @@ export default {
         await this.$store.dispatch('api/createSpaces')
       }
       this.loading.signUpOrIn = false
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'SignUpOrIn.createSpaces')
       this.$store.commit('addNotification', { message: 'Signed In', type: 'success' })
     },
 

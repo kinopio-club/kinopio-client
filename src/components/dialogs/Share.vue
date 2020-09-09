@@ -104,7 +104,7 @@ export default {
       this.urlIsCopied = true
     },
     triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Share.triggerSignUpOrInIsVisible')
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     shareUrl () {
@@ -146,7 +146,7 @@ export default {
     removedCollaborator (user) {
       const isCurrentUser = this.$store.state.currentUser.id === user.id
       if (isCurrentUser) {
-        this.$store.dispatch('closeAllDialogs')
+        this.$store.dispatch('closeAllDialogs', 'Share.removedCollaborator')
       }
       this.updateSpaceCollaborators()
     },

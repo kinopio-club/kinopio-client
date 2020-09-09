@@ -70,15 +70,6 @@ article(:style="position" :data-card-id="id" ref="card")
             template(v-else)
               img.connector-icon(src="@/assets/connector-open.svg")
 
-    //- Meta Info
-    .meta-container(v-if="filterShowUsers || filterShowDateUpdated")
-      .badge.user-badge(v-if="filterShowUsers" :style="{background: updatedByUser.color}")
-        User(:user="updatedByUser" :isClickable="false")
-        .name {{updatedByUser.name}}
-      .badge.secondary(v-if="filterShowDateUpdated")
-        img.icon.time(src="@/assets/time.svg")
-        .name {{updatedAtRelative}}
-
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
       .badge.info
@@ -108,6 +99,20 @@ article(:style="position" :data-card-id="id" ref="card")
         span Space is Read Only
 
   CardDetails(:card="card" @broadcastShowCardDetails="broadcastShowCardDetails")
+
+  //- Meta Info
+  .meta-container(v-if="filterShowUsers || filterShowDateUpdated")
+    //- User
+    .badge-wrap
+      .badge.user-badge.button-badge(v-if="filterShowUsers" :style="{background: updatedByUser.color}" @click.left.prevent.stop="toggleUserDetails" @touchend.prevent.stop="toggleUserDetails")
+        User(:user="updatedByUser" :isClickable="false")
+        .name {{updatedByUser.name}}
+      UserDetails(:visible="userDetailsIsVisible" :user="updatedByUser" :dialogIsReadOnly="true")
+    //- Date
+    .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
+      img.icon.time(src="@/assets/time.svg")
+      .name {{dateUpdatedAt}}
+
 </template>
 
 <script>
@@ -118,6 +123,7 @@ import Loader from '@/components/Loader.vue'
 import Audio from '@/components/Audio.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import User from '@/components/User.vue'
+import UserDetails from '@/components/dialogs/UserDetails.vue'
 
 import fromNow from 'fromnow'
 
@@ -129,7 +135,8 @@ export default {
     Frames,
     Loader,
     Audio,
-    User
+    User,
+    UserDetails
   },
   props: {
     card: Object
@@ -147,6 +154,9 @@ export default {
           scrollIntoView.scroll(element, isTouchDevice)
         }
       }
+      if (mutation.type === 'closeAllDialogs') {
+        this.userDetailsIsVisible = false
+      }
     })
   },
   data () {
@@ -155,6 +165,7 @@ export default {
       remoteConnectionColor: '',
       uploadIsDraggedOver: false,
       isPlayingAudio: false,
+      userDetailsIsVisible: false,
       error: {
         sizeLimit: false,
         unknownUploadError: false,
@@ -193,10 +204,15 @@ export default {
         }
       }
     },
-    updatedAtRelative () {
+    dateUpdatedAt () {
       const date = this.card.nameUpdatedAt
+      const showAbsoluteDate = this.$store.state.currentUser.filterShowAbsoluteDates
       if (date) {
-        return fromNow(date, { max: 1, suffix: true })
+        if (showAbsoluteDate) {
+          return new Date(date).toLocaleString()
+        } else {
+          return fromNow(date, { max: 1, suffix: true })
+        }
       } else {
         return 'Just now'
       }
@@ -440,7 +456,7 @@ export default {
       const isMeta = event.metaKey || event.ctrlKey
       if (!isMeta) { return }
       if (!this.canEditSpace) { return }
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Card.selectAllConnectedCards')
       const connections = this.$store.state.currentSpace.connections
       let selectedCards = [this.card.id]
       let shouldSearch = true
@@ -543,9 +559,27 @@ export default {
     toggleCardChecked () {
       if (!this.canEditSpace) { return }
       const value = !this.isChecked
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Card.toggleCardChecked')
       this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.id, value })
       this.$store.commit('currentUserIsDraggingCard', false)
+    },
+    toggleUserDetails () {
+      const value = !this.userDetailsIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Card.toggleUserDetails')
+      this.$store.commit('currentUserIsDraggingCard', false)
+      this.userDetailsIsVisible = value
+      this.$nextTick(() => {
+        if (this.userDetailsIsVisible) {
+          const element = document.querySelector('dialog.user-details')
+          const isTouchDevice = this.$store.state.isTouchDevice
+          scrollIntoView.scroll(element, isTouchDevice)
+        }
+      })
+    },
+    toggleFilterShowAbsoluteDates () {
+      this.$store.dispatch('closeAllDialogs', 'Card.toggleFilterShowAbsoluteDates')
+      const value = !this.$store.state.currentUser.filterShowAbsoluteDates
+      this.$store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
     },
     updateRemoteConnections () {
       const remoteCurrentConnections = this.$store.state.remoteCurrentConnections
@@ -577,7 +611,7 @@ export default {
       }
     },
     closeAllDialogs () {
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Card.closeAllDialogs')
     },
     createCurrentConnection (event) {
       const cursor = utils.cursorPositionInViewport(event)
@@ -595,7 +629,7 @@ export default {
     startConnecting (event) {
       if (!this.canEditSpace) { return }
       if (utils.isMultiTouch(event)) { return }
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Card.startConnecting')
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.dispatch('clearMultipleSelected')
       if (!this.$store.state.currentUserIsDrawingConnection) {
@@ -613,13 +647,14 @@ export default {
     startDraggingCard (event) {
       isMultiTouch = false
       if (!this.canEditCard) { return }
+      if (this.userDetailsIsVisible) { return }
       if (utils.isMultiTouch(event)) {
         isMultiTouch = true
         return
       }
       event.preventDefault()
       if (this.$store.state.currentUserIsDrawingConnection) { return }
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Card.startDraggingCard')
       this.$store.commit('currentUserIsDraggingCard', true)
       this.$store.commit('currentDraggingCardId', this.id)
       const updates = {
@@ -632,13 +667,19 @@ export default {
       this.checkIfShouldDragMultipleCards()
       this.$store.dispatch('currentSpace/incrementSelectedCardsZ')
     },
+    shouldCancel (event) {
+      const element = document.querySelector('dialog.user-details')
+      if (!element) { return }
+      if (element.contains(event.target)) { return true }
+    },
     showCardDetails (event) {
       if (isMultiTouch) { return }
+      if (this.shouldCancel(event)) { return }
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
       const userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Card.showCardDetails')
       this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
       if (event.target.nodeName === 'LABEL') { return }
@@ -666,183 +707,184 @@ export default {
 article
   pointer-events all
   position absolute
-.card
-  border-radius 3px
-  user-select none
-  background-color var(--secondary-background)
-  max-width 235px
-  cursor pointer
-  touch-action manipulation
-  &:hover,
-  &.hover
-    box-shadow var(--hover-shadow)
-  &:active,
-  &.active
-    box-shadow var(--active-shadow)
-  .card-content-wrap
-    display flex
-    align-items flex-start
-  .card-content
-    min-width 40px
-  .card-buttons-wrap
-    display flex
-  .name-wrap
-    display flex
-    align-items flex-start
-    .checkbox-wrap
-      padding-top 8px
-      padding-left 8px
-      label
-        width 20px
-        height 16px
-        display flex
-        align-items center
-        padding-left 4px
-        padding-right 4px
-        input
-          margin 0
-          width 10px
-          height 10px
-          background-size contain
-    .name
-      margin 8px
-      margin-right 0
-      align-self stretch
-      word-break break-word
-      white-space pre-line
-      &.is-checked
-        text-decoration line-through
-      &.has-checkbox
-        .audio
-          width 132px
-  .connector,
-  .link
-    padding 8px
-    align-self right
-    cursor cell
-    button
-      background-color transparent
-      cursor cell
-      position relative
-      width 20px
-      height 16px
-      vertical-align top
-      background-color var(--secondary-background)
-    &:hover
-      button
-        box-shadow 3px 3px 0 var(--heavy-shadow)
-        background var(--secondary-hover-background)
-    &:active
-      button
-        box-shadow none
-        color var(--primary)
-        background var(--secondary-active-background)
-  .checkbox-wrap
-    &:hover
-      label
-        box-shadow 3px 3px 0 var(--heavy-shadow)
-        background-color var(--secondary-hover-background)
-        input
-          background-color var(--secondary-hover-background)
-      label.active
-        box-shadow var(--active-inset-shadow)
-        background-color var(--secondary-active-background)
-        input
-          background-color var(--secondary-active-background)
-    &:active
-      label
-        box-shadow none
-        color var(--primary)
-        background-color var(--secondary-active-background)
-      input
-        background-color var(--secondary-active-background)
-  .connected-colors
-    position absolute
-    left 0
-    top 0
-    display flex
-    height 100%
-    width 100%
-    border-radius 2px
-    overflow hidden
-    .color
-      width 100%
-  .connector-icon
-    position absolute
-    left 4px
-    top 2px
-  .arrow-icon
-    position absolute
-    left 5px
-    top 3.5px
-  .link
+  .card
+    border-radius 3px
+    user-select none
+    background-color var(--secondary-background)
+    max-width 235px
     cursor pointer
-    padding-right 0
-    button
-      cursor pointer
-      span
-        top -3px
-        position relative
-
-  .link-wrap
-    max-height 28px
-
-  .uploading-container
-    position absolute
-    top 6px
-    left 6px
-
-  &.media-card
-    width 235px
-    background-color transparent
+    touch-action manipulation
     &:hover,
     &.hover
-      background-color var(--secondary-background)
+      box-shadow var(--hover-shadow)
     &:active,
     &.active
-      background-color var(--secondary-background)
-    .image,
-    video
-      border-radius 3px
-      display block
-      &.selected
-        mix-blend-mode color-burn
+      box-shadow var(--active-shadow)
     .card-content-wrap
-      position absolute
-      top 0
-      width 100%
-      align-items initial
-      justify-content space-between
+      display flex
+      align-items flex-start
+    .card-content
+      min-width 40px
+    .card-buttons-wrap
+      display flex
+    .name-wrap
+      display flex
+      align-items flex-start
+      .checkbox-wrap
+        padding-top 8px
+        padding-left 8px
+        label
+          width 20px
+          height 16px
+          display flex
+          align-items center
+          padding-left 4px
+          padding-right 4px
+          input
+            margin 0
+            width 10px
+            height 10px
+            background-size contain
       .name
+        margin 8px
+        margin-right 0
+        align-self stretch
+        word-break break-word
+        white-space pre-line
+        &.is-checked
+          text-decoration line-through
+        &.has-checkbox
+          .audio
+            width 132px
+    .connector,
+    .link
+      padding 8px
+      align-self right
+      cursor cell
+      button
+        background-color transparent
+        cursor cell
+        position relative
+        width 20px
+        height 16px
+        vertical-align top
         background-color var(--secondary-background)
-
-  &.audio-card
-    width 235px
-    .card-content-wrap
+      &:hover
+        button
+          box-shadow 3px 3px 0 var(--heavy-shadow)
+          background var(--secondary-hover-background)
+      &:active
+        button
+          box-shadow none
+          color var(--primary)
+          background var(--secondary-active-background)
+    .checkbox-wrap
+      &:hover
+        label
+          box-shadow 3px 3px 0 var(--heavy-shadow)
+          background-color var(--secondary-hover-background)
+          input
+            background-color var(--secondary-hover-background)
+        label.active
+          box-shadow var(--active-inset-shadow)
+          background-color var(--secondary-active-background)
+          input
+            background-color var(--secondary-active-background)
+      &:active
+        label
+          box-shadow none
+          color var(--primary)
+          background-color var(--secondary-active-background)
+        input
+          background-color var(--secondary-active-background)
+    .connected-colors
+      position absolute
+      left 0
+      top 0
+      display flex
+      height 100%
       width 100%
-      align-items initial
-      justify-content space-between
+      border-radius 2px
+      overflow hidden
+      .color
+        width 100%
+    .connector-icon
+      position absolute
+      left 4px
+      top 2px
+    .arrow-icon
+      position absolute
+      left 5px
+      top 3.5px
+    .link
+      cursor pointer
+      padding-right 0
+      button
+        cursor pointer
+        span
+          top -3px
+          position relative
 
-  .error-container
-    position absolute
-    top 6px
-    left 6px
-    animation-name hideme
-    animation-delay 5s
-    animation-duration 0.1s
-    animation-iteration-count 1
-    animation-direction forward
-    animation-fill-mode forwards
-    animation-timing-function ease-out
+    .link-wrap
+      max-height 28px
 
-  &.is-playing-audio
-    animation bounce 1.2s infinite ease-in-out forwards
+    .uploading-container
+      position absolute
+      top 6px
+      left 6px
 
-  .audio-wrap
-    margin-top 8px
-    margin-left 8px
+    &.media-card
+      width 235px
+      background-color transparent
+      &:hover,
+      &.hover
+        background-color var(--secondary-background)
+      &:active,
+      &.active
+        background-color var(--secondary-background)
+      .image,
+      video
+        border-radius 3px
+        display block
+        &.selected
+          mix-blend-mode color-burn
+      .card-content-wrap
+        position absolute
+        top 0
+        width 100%
+        align-items initial
+        justify-content space-between
+        .name
+          background-color var(--secondary-background)
+
+    &.audio-card
+      width 235px
+      .card-content-wrap
+        width 100%
+        align-items initial
+        justify-content space-between
+
+    .error-container
+      position absolute
+      top 6px
+      left 6px
+      animation-name hideme
+      animation-delay 5s
+      animation-duration 0.1s
+      animation-iteration-count 1
+      animation-direction forward
+      animation-fill-mode forwards
+      animation-timing-function ease-out
+
+    &.is-playing-audio
+      animation bounce 1.2s infinite ease-in-out forwards
+
+    .audio-wrap
+      margin-top 8px
+      margin-left 8px
 
   .meta-container
+    margin-top -6px
     display flex
     padding 8px
     padding-top 0
@@ -860,7 +902,8 @@ article
         .icon
           margin-right 5px
           margin-top 1px
-    .badge + .badge
+    .badge + .badge,
+    .badge-wrap + .badge
       margin-left 6px
 
 @keyframes bounce

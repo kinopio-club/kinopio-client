@@ -276,7 +276,7 @@ export default {
         this.$store.commit('shouldAddCard', true)
       }
       this.$store.dispatch('clearMultipleSelected')
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'MagicPaint.startPainting')
     },
     paintCirclesAnimationFrame () {
       paintingCircles = utils.filterCircles(paintingCircles, maxIterations)

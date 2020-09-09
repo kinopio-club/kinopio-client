@@ -371,7 +371,7 @@ export default {
       this.updateCardName(newName)
     },
     closeCard (event) {
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCard')
     },
     closeCardAndFocus () {
       this.closeCard()
