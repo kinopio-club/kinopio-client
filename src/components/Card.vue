@@ -72,10 +72,10 @@ article(:style="position" :data-card-id="id" ref="card")
 
     //- Meta Info
     .meta-container(v-if="filterShowUsers || filterShowDateUpdated")
-      .badge.user-badge(v-if="filterShowUsers" :style="{background: updatedByUser.color}")
+      .badge.user-badge.button-badge(v-if="filterShowUsers" :style="{background: updatedByUser.color}" @click.left.prevent.stop="showUserDetails" @touchend.prevent.stop="showUserDetails")
         User(:user="updatedByUser" :isClickable="false")
         .name {{updatedByUser.name}}
-      .badge.secondary(v-if="filterShowDateUpdated")
+      .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="showUserDetails" @touchend.prevent.stop="showUserDetails")
         img.icon.time(src="@/assets/time.svg")
         .name {{updatedAtRelative}}
 
@@ -546,6 +546,10 @@ export default {
       this.$store.dispatch('closeAllDialogs')
       this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.id, value })
       this.$store.commit('currentUserIsDraggingCard', false)
+    },
+    showUserDetails () {
+      this.$store.dispatch('closeAllDialogs')
+      console.log('trigger show user details for user', this.updatedByUser)
     },
     updateRemoteConnections () {
       const remoteCurrentConnections = this.$store.state.remoteCurrentConnections
