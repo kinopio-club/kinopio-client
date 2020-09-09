@@ -72,10 +72,13 @@ article(:style="position" :data-card-id="id" ref="card")
 
     //- Meta Info
     .meta-container(v-if="filterShowUsers || filterShowDateUpdated")
-      .badge.user-badge.button-badge(v-if="filterShowUsers" :style="{background: updatedByUser.color}" @click.left.prevent.stop="showUserDetails" @touchend.prevent.stop="showUserDetails")
-        User(:user="updatedByUser" :isClickable="false")
-        .name {{updatedByUser.name}}
-      .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="showUserDetails" @touchend.prevent.stop="showUserDetails")
+      .badge-wrap
+        .badge.user-badge.button-badge(v-if="filterShowUsers" :style="{background: updatedByUser.color}" @click.left.prevent.stop="toggleUserDetails" @touchend.prevent.stop="toggleUserDetails")
+          User(:user="updatedByUser" :isClickable="false")
+          .name {{updatedByUser.name}}
+        UserDetails(:visible="userDetailsIsVisible" :user="updatedByUser")
+
+      .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleUserDetails" @touchend.prevent.stop="toggleUserDetails")
         img.icon.time(src="@/assets/time.svg")
         .name {{updatedAtRelative}}
 
@@ -118,6 +121,7 @@ import Loader from '@/components/Loader.vue'
 import Audio from '@/components/Audio.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import User from '@/components/User.vue'
+import UserDetails from '@/components/dialogs/UserDetails.vue'
 
 import fromNow from 'fromnow'
 
@@ -129,7 +133,8 @@ export default {
     Frames,
     Loader,
     Audio,
-    User
+    User,
+    UserDetails
   },
   props: {
     card: Object
@@ -147,6 +152,9 @@ export default {
           scrollIntoView.scroll(element, isTouchDevice)
         }
       }
+      if (mutation.type === 'closeAllDialogs') {
+        this.userDetailsIsVisible = false
+      }
     })
   },
   data () {
@@ -155,6 +163,7 @@ export default {
       remoteConnectionColor: '',
       uploadIsDraggedOver: false,
       isPlayingAudio: false,
+      userDetailsIsVisible: false,
       error: {
         sizeLimit: false,
         unknownUploadError: false,
@@ -440,7 +449,7 @@ export default {
       const isMeta = event.metaKey || event.ctrlKey
       if (!isMeta) { return }
       if (!this.canEditSpace) { return }
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Card.selectAllConnectedCards')
       const connections = this.$store.state.currentSpace.connections
       let selectedCards = [this.card.id]
       let shouldSearch = true
@@ -543,13 +552,22 @@ export default {
     toggleCardChecked () {
       if (!this.canEditSpace) { return }
       const value = !this.isChecked
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Card.toggleCardChecked')
       this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.id, value })
       this.$store.commit('currentUserIsDraggingCard', false)
     },
-    showUserDetails () {
-      this.$store.dispatch('closeAllDialogs')
-      console.log('trigger show user details for user', this.updatedByUser)
+    toggleUserDetails () {
+      const value = !this.userDetailsIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Card.toggleUserDetails')
+      this.$store.commit('currentUserIsDraggingCard', false)
+      this.userDetailsIsVisible = value
+      this.$nextTick(() => {
+        if (this.userDetailsIsVisible) {
+          const element = document.querySelector('dialog.user-details')
+          const isTouchDevice = this.$store.state.isTouchDevice
+          scrollIntoView.scroll(element, isTouchDevice)
+        }
+      })
     },
     updateRemoteConnections () {
       const remoteCurrentConnections = this.$store.state.remoteCurrentConnections
@@ -581,7 +599,7 @@ export default {
       }
     },
     closeAllDialogs () {
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Card.closeAllDialogs')
     },
     createCurrentConnection (event) {
       const cursor = utils.cursorPositionInViewport(event)
@@ -599,7 +617,7 @@ export default {
     startConnecting (event) {
       if (!this.canEditSpace) { return }
       if (utils.isMultiTouch(event)) { return }
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Card.startConnecting')
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.dispatch('clearMultipleSelected')
       if (!this.$store.state.currentUserIsDrawingConnection) {
@@ -617,13 +635,14 @@ export default {
     startDraggingCard (event) {
       isMultiTouch = false
       if (!this.canEditCard) { return }
+      if (this.userDetailsIsVisible) { return }
       if (utils.isMultiTouch(event)) {
         isMultiTouch = true
         return
       }
       event.preventDefault()
       if (this.$store.state.currentUserIsDrawingConnection) { return }
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Card.startDraggingCard')
       this.$store.commit('currentUserIsDraggingCard', true)
       this.$store.commit('currentDraggingCardId', this.id)
       const updates = {
@@ -638,11 +657,12 @@ export default {
     },
     showCardDetails (event) {
       if (isMultiTouch) { return }
+      if (this.userDetailsIsVisible) { return }
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
       const userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Card.showCardDetails')
       this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
       if (event.target.nodeName === 'LABEL') { return }
@@ -864,7 +884,8 @@ article
         .icon
           margin-right 5px
           margin-top 1px
-    .badge + .badge
+    .badge + .badge,
+    .badge-wrap + .badge
       margin-left 6px
 
 @keyframes bounce
