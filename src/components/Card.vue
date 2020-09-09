@@ -707,6 +707,7 @@ export default {
 article
   pointer-events all
   position absolute
+  max-width 235px
   .card
     border-radius 3px
     user-select none
