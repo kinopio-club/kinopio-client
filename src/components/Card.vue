@@ -70,18 +70,6 @@ article(:style="position" :data-card-id="id" ref="card")
             template(v-else)
               img.connector-icon(src="@/assets/connector-open.svg")
 
-    //- Meta Info
-    .meta-container(v-if="filterShowUsers || filterShowDateUpdated")
-      .badge-wrap
-        .badge.user-badge.button-badge(v-if="filterShowUsers" :style="{background: updatedByUser.color}" @click.left.prevent.stop="toggleUserDetails" @touchend.prevent.stop="toggleUserDetails")
-          User(:user="updatedByUser" :isClickable="false")
-          .name {{updatedByUser.name}}
-        UserDetails(:visible="userDetailsIsVisible" :user="updatedByUser" :dialogIsReadOnly="true")
-
-      .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
-        img.icon.time(src="@/assets/time.svg")
-        .name {{dateUpdatedAt}}
-
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
       .badge.info
@@ -111,6 +99,20 @@ article(:style="position" :data-card-id="id" ref="card")
         span Space is Read Only
 
   CardDetails(:card="card" @broadcastShowCardDetails="broadcastShowCardDetails")
+
+  //- Meta Info
+  .meta-container(v-if="filterShowUsers || filterShowDateUpdated")
+    //- User
+    .badge-wrap
+      .badge.user-badge.button-badge(v-if="filterShowUsers" :style="{background: updatedByUser.color}" @click.left.prevent.stop="toggleUserDetails" @touchend.prevent.stop="toggleUserDetails")
+        User(:user="updatedByUser" :isClickable="false")
+        .name {{updatedByUser.name}}
+      UserDetails(:visible="userDetailsIsVisible" :user="updatedByUser" :dialogIsReadOnly="true")
+    //- Date
+    .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
+      img.icon.time(src="@/assets/time.svg")
+      .name {{dateUpdatedAt}}
+
 </template>
 
 <script>
@@ -705,183 +707,184 @@ export default {
 article
   pointer-events all
   position absolute
-.card
-  border-radius 3px
-  user-select none
-  background-color var(--secondary-background)
-  max-width 235px
-  cursor pointer
-  touch-action manipulation
-  &:hover,
-  &.hover
-    box-shadow var(--hover-shadow)
-  &:active,
-  &.active
-    box-shadow var(--active-shadow)
-  .card-content-wrap
-    display flex
-    align-items flex-start
-  .card-content
-    min-width 40px
-  .card-buttons-wrap
-    display flex
-  .name-wrap
-    display flex
-    align-items flex-start
-    .checkbox-wrap
-      padding-top 8px
-      padding-left 8px
-      label
-        width 20px
-        height 16px
-        display flex
-        align-items center
-        padding-left 4px
-        padding-right 4px
-        input
-          margin 0
-          width 10px
-          height 10px
-          background-size contain
-    .name
-      margin 8px
-      margin-right 0
-      align-self stretch
-      word-break break-word
-      white-space pre-line
-      &.is-checked
-        text-decoration line-through
-      &.has-checkbox
-        .audio
-          width 132px
-  .connector,
-  .link
-    padding 8px
-    align-self right
-    cursor cell
-    button
-      background-color transparent
-      cursor cell
-      position relative
-      width 20px
-      height 16px
-      vertical-align top
-      background-color var(--secondary-background)
-    &:hover
-      button
-        box-shadow 3px 3px 0 var(--heavy-shadow)
-        background var(--secondary-hover-background)
-    &:active
-      button
-        box-shadow none
-        color var(--primary)
-        background var(--secondary-active-background)
-  .checkbox-wrap
-    &:hover
-      label
-        box-shadow 3px 3px 0 var(--heavy-shadow)
-        background-color var(--secondary-hover-background)
-        input
-          background-color var(--secondary-hover-background)
-      label.active
-        box-shadow var(--active-inset-shadow)
-        background-color var(--secondary-active-background)
-        input
-          background-color var(--secondary-active-background)
-    &:active
-      label
-        box-shadow none
-        color var(--primary)
-        background-color var(--secondary-active-background)
-      input
-        background-color var(--secondary-active-background)
-  .connected-colors
-    position absolute
-    left 0
-    top 0
-    display flex
-    height 100%
-    width 100%
-    border-radius 2px
-    overflow hidden
-    .color
-      width 100%
-  .connector-icon
-    position absolute
-    left 4px
-    top 2px
-  .arrow-icon
-    position absolute
-    left 5px
-    top 3.5px
-  .link
+  .card
+    border-radius 3px
+    user-select none
+    background-color var(--secondary-background)
+    max-width 235px
     cursor pointer
-    padding-right 0
-    button
-      cursor pointer
-      span
-        top -3px
-        position relative
-
-  .link-wrap
-    max-height 28px
-
-  .uploading-container
-    position absolute
-    top 6px
-    left 6px
-
-  &.media-card
-    width 235px
-    background-color transparent
+    touch-action manipulation
     &:hover,
     &.hover
-      background-color var(--secondary-background)
+      box-shadow var(--hover-shadow)
     &:active,
     &.active
-      background-color var(--secondary-background)
-    .image,
-    video
-      border-radius 3px
-      display block
-      &.selected
-        mix-blend-mode color-burn
+      box-shadow var(--active-shadow)
     .card-content-wrap
-      position absolute
-      top 0
-      width 100%
-      align-items initial
-      justify-content space-between
+      display flex
+      align-items flex-start
+    .card-content
+      min-width 40px
+    .card-buttons-wrap
+      display flex
+    .name-wrap
+      display flex
+      align-items flex-start
+      .checkbox-wrap
+        padding-top 8px
+        padding-left 8px
+        label
+          width 20px
+          height 16px
+          display flex
+          align-items center
+          padding-left 4px
+          padding-right 4px
+          input
+            margin 0
+            width 10px
+            height 10px
+            background-size contain
       .name
+        margin 8px
+        margin-right 0
+        align-self stretch
+        word-break break-word
+        white-space pre-line
+        &.is-checked
+          text-decoration line-through
+        &.has-checkbox
+          .audio
+            width 132px
+    .connector,
+    .link
+      padding 8px
+      align-self right
+      cursor cell
+      button
+        background-color transparent
+        cursor cell
+        position relative
+        width 20px
+        height 16px
+        vertical-align top
         background-color var(--secondary-background)
-
-  &.audio-card
-    width 235px
-    .card-content-wrap
+      &:hover
+        button
+          box-shadow 3px 3px 0 var(--heavy-shadow)
+          background var(--secondary-hover-background)
+      &:active
+        button
+          box-shadow none
+          color var(--primary)
+          background var(--secondary-active-background)
+    .checkbox-wrap
+      &:hover
+        label
+          box-shadow 3px 3px 0 var(--heavy-shadow)
+          background-color var(--secondary-hover-background)
+          input
+            background-color var(--secondary-hover-background)
+        label.active
+          box-shadow var(--active-inset-shadow)
+          background-color var(--secondary-active-background)
+          input
+            background-color var(--secondary-active-background)
+      &:active
+        label
+          box-shadow none
+          color var(--primary)
+          background-color var(--secondary-active-background)
+        input
+          background-color var(--secondary-active-background)
+    .connected-colors
+      position absolute
+      left 0
+      top 0
+      display flex
+      height 100%
       width 100%
-      align-items initial
-      justify-content space-between
+      border-radius 2px
+      overflow hidden
+      .color
+        width 100%
+    .connector-icon
+      position absolute
+      left 4px
+      top 2px
+    .arrow-icon
+      position absolute
+      left 5px
+      top 3.5px
+    .link
+      cursor pointer
+      padding-right 0
+      button
+        cursor pointer
+        span
+          top -3px
+          position relative
 
-  .error-container
-    position absolute
-    top 6px
-    left 6px
-    animation-name hideme
-    animation-delay 5s
-    animation-duration 0.1s
-    animation-iteration-count 1
-    animation-direction forward
-    animation-fill-mode forwards
-    animation-timing-function ease-out
+    .link-wrap
+      max-height 28px
 
-  &.is-playing-audio
-    animation bounce 1.2s infinite ease-in-out forwards
+    .uploading-container
+      position absolute
+      top 6px
+      left 6px
 
-  .audio-wrap
-    margin-top 8px
-    margin-left 8px
+    &.media-card
+      width 235px
+      background-color transparent
+      &:hover,
+      &.hover
+        background-color var(--secondary-background)
+      &:active,
+      &.active
+        background-color var(--secondary-background)
+      .image,
+      video
+        border-radius 3px
+        display block
+        &.selected
+          mix-blend-mode color-burn
+      .card-content-wrap
+        position absolute
+        top 0
+        width 100%
+        align-items initial
+        justify-content space-between
+        .name
+          background-color var(--secondary-background)
+
+    &.audio-card
+      width 235px
+      .card-content-wrap
+        width 100%
+        align-items initial
+        justify-content space-between
+
+    .error-container
+      position absolute
+      top 6px
+      left 6px
+      animation-name hideme
+      animation-delay 5s
+      animation-duration 0.1s
+      animation-iteration-count 1
+      animation-direction forward
+      animation-fill-mode forwards
+      animation-timing-function ease-out
+
+    &.is-playing-audio
+      animation bounce 1.2s infinite ease-in-out forwards
+
+    .audio-wrap
+      margin-top 8px
+      margin-left 8px
 
   .meta-container
+    margin-top -6px
     display flex
     padding 8px
     padding-top 0
