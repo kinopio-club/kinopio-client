@@ -220,32 +220,32 @@ export default {
     },
     toggleRemovedIsVisible () {
       const isVisible = this.removedIsVisible
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Footer.toggleRemovedIsVisible')
       this.removedIsVisible = !isVisible
     },
     toggleFavoritesIsVisible () {
       const isVisible = this.favoritesIsVisible
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Footer.toggleFavoritesIsVisible')
       this.favoritesIsVisible = !isVisible
     },
     toggleOfflineIsVisible () {
       const isVisible = this.offlineIsVisible
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Footer.toggleOfflineIsVisible')
       this.offlineIsVisible = !isVisible
     },
     toggleFiltersIsVisible () {
       const isVisible = this.filtersIsVisible
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Footer.toggleFiltersIsVisible')
       this.filtersIsVisible = !isVisible
     },
     toggleBackgroundIsVisible () {
       const isVisible = this.backgroundIsVisible
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Footer.toggleBackgroundIsVisible')
       this.backgroundIsVisible = !isVisible
     },
     toggleExploreIsVisible () {
       const isVisible = this.exploreIsVisible
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Footer.toggleExploreIsVisible')
       this.exploreIsVisible = !isVisible
     }
   }

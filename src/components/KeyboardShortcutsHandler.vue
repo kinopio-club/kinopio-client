@@ -40,7 +40,7 @@ export default {
         this.remove()
       // Escape
       } else if (key === 'Escape') {
-        this.$store.dispatch('closeAllDialogs')
+        this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.escape')
       // → Left
       } else if (key === 'ArrowLeft' && (isSpaceScope || isFromCard)) {
         this.focusNearestCardLeft()
@@ -391,7 +391,7 @@ export default {
       })
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
       this.clearAllSelectedCards()
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.remove')
     },
 
     // Undo

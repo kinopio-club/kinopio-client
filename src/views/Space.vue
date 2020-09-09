@@ -378,7 +378,7 @@ export default {
         const position = utils.cursorPositionInPage(event)
         this.addCard(position)
       } else if (this.$store.state.cardDetailsIsVisibleForCardId) {
-        this.$store.dispatch('closeAllDialogs')
+        this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
       }
       if (this.$store.state.multipleCardsSelectedIds.length || this.$store.state.multipleConnectionsSelectedIds.length) {
         const position = utils.cursorPositionInPage(event)

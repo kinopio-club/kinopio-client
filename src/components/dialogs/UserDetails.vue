@@ -177,7 +177,7 @@ export default {
     },
     toggleUpgradeUserIsVisible () {
       if (utils.isMobile()) {
-        this.$store.commit('closeAllDialogs')
+        this.$store.commit('closeAllDialogs', 'UserDetails.toggleUpgradeUserIsVisible')
         this.$store.commit('triggerUpgradeUserIsVisible')
       } else {
         const isVisible = this.upgradeUserIsVisible
@@ -205,7 +205,7 @@ export default {
       location.reload()
     },
     triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('closeAllDialogs', 'UserDetails.triggerSignUpOrInIsVisible')
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     async getUserSpaces () {
@@ -237,7 +237,7 @@ export default {
       const user = this.user
       this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
       if (!this.userDetailsIsFromList) {
-        this.$store.dispatch('closeAllDialogs')
+        this.$store.commit('closeAllDialogs', 'UserDetails.removeCollaborator')
       }
       this.$emit('removedCollaborator', user)
     },

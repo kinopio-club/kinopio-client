@@ -57,7 +57,7 @@ export default {
     toggleUserDetails () {
       const isVisible = this.userDetailsIsVisible
       if (this.shouldCloseAllDialogs) {
-        this.$store.dispatch('closeAllDialogs')
+        this.$store.dispatch('closeAllDialogs', 'User.toggleUserDetails')
       }
       this.userDetailsIsVisible = !isVisible
     }

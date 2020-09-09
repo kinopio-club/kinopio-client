@@ -83,7 +83,7 @@ export default {
   methods: {
     cancelClick () {
       this.$store.commit('currentUserIsDraggingCard', false)
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Audio.cancelClick')
     },
     handleErrors (event) {
       console.warn('🚒', event)
