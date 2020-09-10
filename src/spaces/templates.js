@@ -73,6 +73,11 @@ export default {
         name: 'Meeting Agenda'
       },
       {
+        id: 'QCtseqHqA1Ib0OwYETk7m',
+        categoryId: 3,
+        name: 'Weekly Planner'
+      },
+      {
         id: 'DWCwVJNU8yu1cPs87BEQR',
         categoryId: 4,
         name: 'Sofware Architecture'
