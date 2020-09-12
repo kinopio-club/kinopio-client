@@ -6,7 +6,8 @@ dialog.narrow.label-picker(v-if="visible" :open="visible" @click.left.stop ref="
       img.icon.search(src="@/assets/search.svg")
       span Type to add label
   section.results-section
-    Loader(:visible="true")
+    Loader(:visible="loading")
+    //- ul.results-list 👀 spacelist
 </template>
 
 <script>
@@ -31,7 +32,8 @@ export default {
   },
   data () {
     return {
-      labels: []
+      labels: [],
+      loading: true
     }
   },
   computed: {

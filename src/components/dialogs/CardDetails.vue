@@ -17,7 +17,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @click.left="triggerUpdateMagicPaintPositionOffset"
         @blur="triggerUpdatePositionInVisualViewport"
         @paste="updatePastedName"
-        @keydown="checkIfShouldShowLabelPicker"
+        @keyup="checkIfShouldShowLabelPicker"
 
         @keyup.alt.enter.exact.stop
         @keyup.ctrl.enter.exact.stop
@@ -244,27 +244,40 @@ export default {
     }
   },
   methods: {
+    showLabelPicker (cursorPosition) {
+      // TODO https://bundlephobia.com/result?p=textarea-caret%403.1.0??
+      const element = this.$refs.name
+      const nameRect = element.getBoundingClientRect()
+      this.labelPickerPosition = {
+        top: nameRect.height - 2
+      }
+      // console.log('🍄 show label picker', this.name, cursorPosition)
+      const name = this.name
+      const newName = `${name.substring(0, cursorPosition)}]]${name.substring(cursorPosition, name.length)}`
+      this.updateCardName(newName)
+      this.$nextTick(() => {
+        element.setSelectionRange(cursorPosition, cursorPosition)
+      })
+      this.labelPickerIsVisible = true
+    },
     checkIfShouldShowLabelPicker (event) {
       const cursorPosition = this.$refs.name.selectionStart
       const key = event.key
-      // const previousName = this.name
-      const previousCharacter = this.name[cursorPosition - 1]
+      const previousCharacter = this.name[cursorPosition - 2]
       if (cursorPosition === 0) { return }
       if (key === '[' && previousCharacter === '[') {
-        console.log('🍄 show label picker')
-        this.labelPickerIsVisible = true
+        console.log('🌲', this.name, cursorPosition, previousCharacter)
+        this.showLabelPicker(cursorPosition)
 
-        // destroy w
-        // X esc
-        // space
-        // backspace when this.currentLabel is ''
-
-        // roam: ??add ]] after the cursor
-        // enter while typing = new label
+      // hide label picker:
+      // X esc
+      // space
+      // backspace when this.currentLabel is ''
       } else if (key === ']' && previousCharacter === ']') {
         console.log('🍆 hide label picker')
         this.labelPickerIsVisible = false
       }
+      // enter while typing = new label
 
       // each label has a id, name, color . 1label:many-cards (how tod?)
       // get spaces should include labels
@@ -396,11 +409,6 @@ export default {
       this.$nextTick(() => {
         this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.card.id, shouldUpdateApi: true })
       })
-      // TODO https://bundlephobia.com/result?p=textarea-caret%403.1.0??
-      const nameRect = this.$refs.name.getBoundingClientRect()
-      this.labelPickerPosition = {
-        top: nameRect.height - 2
-      }
     },
     insertLineBreak (event) {
       const position = this.$refs.name.selectionEnd
