@@ -24,7 +24,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.alt.enter.exact.stop="insertLineBreak"
         @keydown.ctrl.enter.exact.stop="insertLineBreak"
       )
-      LabelPicker(:visible="labelPickerIsVisible" :position="labelPickerPosition")
+      LabelPicker(:visible="labelPickerIsVisible" :position="labelPickerPosition" :search="labelPickerSearch")
         //- @selectLabel="insertLabel"
     .row(v-if="cardPendingUpload")
       .badge.info
@@ -119,6 +119,7 @@ export default {
       imagePickerIsVisible: false,
       labelPickerIsVisible: false,
       labelPickerPosition: {},
+      labelPickerSearch: '',
       initialSearch: '',
       pastedName: '',
       wasPasted: false
@@ -251,19 +252,33 @@ export default {
       this.labelPickerPosition = {
         top: nameRect.height - 2
       }
-      // console.log('🍄 show label picker', this.name, cursorPosition)
       const name = this.name
-      const newName = `${name.substring(0, cursorPosition)}]]${name.substring(cursorPosition, name.length)}`
+      const newName = `${name.substring(0, cursorPosition)}]]${name.substring(cursorPosition)}`
       this.updateCardName(newName)
+      this.labelPickerIsVisible = true
       this.$nextTick(() => {
         element.setSelectionRange(cursorPosition, cursorPosition)
       })
-      this.labelPickerIsVisible = true
+    },
+    updateLabelPickerSearch (cursorPosition) {
+      const name = this.name
+      // ...[[start|
+      let start = name.substring(0, cursorPosition)
+      const startPosition = start.lastIndexOf('[[') + 2
+      start = start.substring(startPosition)
+      // |end]]...
+      let end = name.substring(cursorPosition)
+      const endPosition = end.indexOf(']]')
+      end = end.substring(0, endPosition)
+      this.labelPickerSearch = start + end
     },
     updateLabelPicker (event) {
       const cursorPosition = this.$refs.name.selectionStart
       const key = event.key
       const previousCharacter = this.name[cursorPosition - 2]
+      if (this.labelPickerIsVisible) {
+        this.updateLabelPickerSearch(cursorPosition)
+      }
       if (cursorPosition === 0) { return }
       if (key === '[' && previousCharacter === '[') {
         console.log('🌲', this.name, cursorPosition, previousCharacter)

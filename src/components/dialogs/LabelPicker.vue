@@ -6,6 +6,8 @@ dialog.narrow.label-picker(v-if="visible" :open="visible" @click.left.stop ref="
       img.icon.search(src="@/assets/search.svg")
       span Type to add label
   section.results-section
+    p {{search}}
+    //- ^ temp
     Loader(:visible="loading")
     //- ul.results-list 👀 spacelist
 </template>
@@ -22,7 +24,8 @@ export default {
   },
   props: {
     visible: Boolean,
-    position: Object
+    position: Object,
+    search: String
     // selectedSpace: Object,
     // shouldExcludeCurrentSpace: Boolean,
     // userSpaces: Array,
