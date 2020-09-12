@@ -7,7 +7,7 @@ dialog.narrow.tag-picker(v-if="visible" :open="visible" @click.left.stop ref="di
   section.results-section
     ul.results-list
       li(v-if="search")
-        .badge.info.tag-badge
+        .badge.info.tag-badge(:style="{backgroundColor: currentUserColor}")
           img.icon.add(src="@/assets/add.svg")
           span {{search}}
     Loader(:visible="loading")
@@ -41,6 +41,9 @@ export default {
     }
   },
   computed: {
+    currentUserColor () {
+      return this.$store.state.currentUser.color
+    }
     // activeUser () {
     //   const currentUser = this.$store.state.currentUser
     //   return this.user || currentUser

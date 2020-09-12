@@ -14,7 +14,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keyup.stop.backspace
         data-type="name"
         maxlength="250"
-        @click.left="triggerUpdateMagicPaintPositionOffset"
+        @click.left="clickName"
         @blur="triggerUpdatePositionInVisualViewport"
         @paste="updatePastedName"
         @keyup="updateTagPicker"
@@ -246,48 +246,57 @@ export default {
   },
   methods: {
     showTagPicker (cursorPosition) {
-      // TODO https://bundlephobia.com/result?p=textarea-caret%403.1.0??
-      const element = this.$refs.name
-      const nameRect = element.getBoundingClientRect()
+      const nameRect = this.$refs.name.getBoundingClientRect()
       this.tagPickerPosition = {
         top: nameRect.height - 2
       }
-      const name = this.name
-      const newName = `${name.substring(0, cursorPosition)}]]${name.substring(cursorPosition)}`
-      this.updateCardName(newName)
       this.tagPickerIsVisible = true
-      this.$nextTick(() => {
-        element.setSelectionRange(cursorPosition, cursorPosition)
-      })
+      // console.log('🌹 showTagPicker', cursorPosition, this.tagPickerIsVisible)
     },
     hideTagPicker () {
       this.tagPickerSearch = ''
       this.tagPickerIsVisible = false
     },
-    updateTagPickerSearch (cursorPosition) {
-      const name = this.name
+    tagStartText (cursorPosition) {
       // ...[[start|
-      let start = name.substring(0, cursorPosition)
-      const startPosition = start.lastIndexOf('[[') + 2
-      start = start.substring(startPosition)
+      const start = this.name.substring(0, cursorPosition)
+      let startPosition = start.lastIndexOf('[[')
+      if (startPosition === -1) { return }
+      startPosition = startPosition + 2
+      return start.substring(startPosition)
+    },
+    tagEndText (cursorPosition) {
       // |end]]...
-      let end = name.substring(cursorPosition)
+      const end = this.name.substring(cursorPosition)
       const endPosition = end.indexOf(']]')
-      end = end.substring(0, endPosition)
+      if (endPosition === -1) { return }
+      return end.substring(0, endPosition)
+    },
+    updateTagPickerSearch (cursorPosition) {
+      const start = this.tagStartText(cursorPosition)
+      const end = this.tagEndText(cursorPosition)
       this.tagPickerSearch = start + end
     },
-
     isCursorInsideBrackets (cursorPosition) {
-      return false
+      const start = this.tagStartText(cursorPosition)
+      const end = this.tagEndText(cursorPosition)
+      if (start === undefined || end === undefined) { return }
+      if (!start.includes(']]') && !end.includes('[[')) {
+        return true
+      }
     },
-
+    addClosingBrackets (cursorPosition) {
+      const name = this.name
+      const newName = `${name.substring(0, cursorPosition)}]]${name.substring(cursorPosition)}`
+      this.updateCardName(newName)
+      this.$nextTick(() => {
+        this.$refs.name.setSelectionRange(cursorPosition, cursorPosition)
+      })
+    },
     updateTagPicker (event) {
       const cursorPosition = this.$refs.name.selectionStart
       const key = event.key
       const previousCharacter = this.name[cursorPosition - 2]
-
-      // console.log('⏰',key, previousCharacter, this.name[cursorPosition - 1])
-
       if (this.tagPickerIsVisible) {
         this.updateTagPickerSearch(cursorPosition)
       }
@@ -295,7 +304,12 @@ export default {
       if (key === '[' && previousCharacter === '[') {
         console.log('🌲', this.name, cursorPosition, previousCharacter)
         this.showTagPicker(cursorPosition)
+        this.addClosingBrackets(cursorPosition)
       }
+
+      // else if (this.isCursorInsideBrackets(cursorPosition)) {
+      //   this.showTagPicker(cursorPosition)
+      // }
 
       // hide label picker:
       // X esc
@@ -306,10 +320,6 @@ export default {
       //   console.log('🍆 hide label picker')
       //   this.tagPickerIsVisible = false
       // }
-
-      if (this.isCursorInsideBrackets(cursorPosition)) {
-        this.hideTagPicker()
-      }
 
       // enter while typing = new label
 
@@ -518,6 +528,14 @@ export default {
       this.focusName()
       this.triggerUpdateMagicPaintPositionOffset()
       this.triggerUpdatePositionInVisualViewport()
+    },
+    clickName (event) {
+      this.triggerUpdateMagicPaintPositionOffset()
+      const cursorPosition = this.$refs.name.selectionStart
+      if (this.isCursorInsideBrackets(cursorPosition)) {
+        this.showTagPicker(cursorPosition)
+        event.stopPropagation()
+      }
     },
     triggerUpdateMagicPaintPositionOffset () {
       this.$store.commit('triggerUpdateMagicPaintPositionOffset')
