@@ -17,14 +17,14 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @click.left="triggerUpdateMagicPaintPositionOffset"
         @blur="triggerUpdatePositionInVisualViewport"
         @paste="updatePastedName"
-        @keyup="updateLabelPicker"
+        @keyup="updateTagPicker"
 
         @keyup.alt.enter.exact.stop
         @keyup.ctrl.enter.exact.stop
         @keydown.alt.enter.exact.stop="insertLineBreak"
         @keydown.ctrl.enter.exact.stop="insertLineBreak"
       )
-      LabelPicker(:visible="labelPickerIsVisible" :position="labelPickerPosition" :search="labelPickerSearch")
+      TagPicker(:visible="tagPickerIsVisible" :position="tagPickerPosition" :search="tagPickerSearch")
         //- @selectLabel="insertLabel"
     .row(v-if="cardPendingUpload")
       .badge.info
@@ -95,7 +95,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
 <script>
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
-import LabelPicker from '@/components/dialogs/LabelPicker.vue'
+import TagPicker from '@/components/dialogs/TagPicker.vue'
 import Loader from '@/components/Loader.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
@@ -107,7 +107,7 @@ export default {
   components: {
     FramePicker,
     ImagePicker,
-    LabelPicker,
+    TagPicker,
     Loader
   },
   props: {
@@ -117,9 +117,9 @@ export default {
     return {
       framePickerIsVisible: false,
       imagePickerIsVisible: false,
-      labelPickerIsVisible: false,
-      labelPickerPosition: {},
-      labelPickerSearch: '',
+      tagPickerIsVisible: false,
+      tagPickerPosition: {},
+      tagPickerSearch: '',
       initialSearch: '',
       pastedName: '',
       wasPasted: false
@@ -130,7 +130,7 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.framePickerIsVisible = false
         this.imagePickerIsVisible = false
-        this.labelPickerIsVisible = false
+        this.hideTagPicker()
       }
       if (mutation.type === 'triggerUploadComplete') {
         let { cardId, url } = mutation.payload
@@ -245,22 +245,26 @@ export default {
     }
   },
   methods: {
-    showLabelPicker (cursorPosition) {
+    showTagPicker (cursorPosition) {
       // TODO https://bundlephobia.com/result?p=textarea-caret%403.1.0??
       const element = this.$refs.name
       const nameRect = element.getBoundingClientRect()
-      this.labelPickerPosition = {
+      this.tagPickerPosition = {
         top: nameRect.height - 2
       }
       const name = this.name
       const newName = `${name.substring(0, cursorPosition)}]]${name.substring(cursorPosition)}`
       this.updateCardName(newName)
-      this.labelPickerIsVisible = true
+      this.tagPickerIsVisible = true
       this.$nextTick(() => {
         element.setSelectionRange(cursorPosition, cursorPosition)
       })
     },
-    updateLabelPickerSearch (cursorPosition) {
+    hideTagPicker () {
+      this.tagPickerSearch = ''
+      this.tagPickerIsVisible = false
+    },
+    updateTagPickerSearch (cursorPosition) {
       const name = this.name
       // ...[[start|
       let start = name.substring(0, cursorPosition)
@@ -270,27 +274,27 @@ export default {
       let end = name.substring(cursorPosition)
       const endPosition = end.indexOf(']]')
       end = end.substring(0, endPosition)
-      this.labelPickerSearch = start + end
+      this.tagPickerSearch = start + end
     },
 
     isCursorInsideBrackets (cursorPosition) {
       return false
     },
 
-    updateLabelPicker (event) {
+    updateTagPicker (event) {
       const cursorPosition = this.$refs.name.selectionStart
       const key = event.key
       const previousCharacter = this.name[cursorPosition - 2]
 
       // console.log('⏰',key, previousCharacter, this.name[cursorPosition - 1])
 
-      if (this.labelPickerIsVisible) {
-        this.updateLabelPickerSearch(cursorPosition)
+      if (this.tagPickerIsVisible) {
+        this.updateTagPickerSearch(cursorPosition)
       }
       if (cursorPosition === 0) { return }
       if (key === '[' && previousCharacter === '[') {
         console.log('🌲', this.name, cursorPosition, previousCharacter)
-        this.showLabelPicker(cursorPosition)
+        this.showTagPicker(cursorPosition)
       }
 
       // hide label picker:
@@ -300,11 +304,11 @@ export default {
       // isCursorInsideBrackets(cursorPosition)
       // } else if (key === ']' && previousCharacter === ']') {
       //   console.log('🍆 hide label picker')
-      //   this.labelPickerIsVisible = false
+      //   this.tagPickerIsVisible = false
       // }
 
       if (this.isCursorInsideBrackets(cursorPosition)) {
-        this.labelPickerIsVisible = false
+        this.hideTagPicker()
       }
 
       // enter while typing = new label
@@ -453,8 +457,8 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCard')
     },
     closeCardAndFocus () {
-      if (this.labelPickerIsVisible) {
-        this.labelPickerIsVisible = false
+      if (this.tagPickerIsVisible) {
+        this.hideTagPicker()
         return
       }
       this.closeCard()
@@ -522,7 +526,7 @@ export default {
     closeDialogs () {
       this.framePickerIsVisible = false
       this.imagePickerIsVisible = false
-      this.labelPickerIsVisible = false
+      this.hideTagPicker()
     },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')

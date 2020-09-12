@@ -1,15 +1,16 @@
 <template lang="pug">
-dialog.narrow.label-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{top: position.top + 'px'}")
-  section
+dialog.narrow.tag-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{top: position.top + 'px'}")
+  section(v-if="!search")
     p
-      //- ^ vif !currentLabelName
       img.icon.search(src="@/assets/search.svg")
-      span Type to add label
+      span Type to add or search tags
   section.results-section
-    p {{search}}
-    //- ^ temp
+    ul.results-list
+      li(v-if="search")
+        .badge.info.tag-badge
+          img.icon.add(src="@/assets/add.svg")
+          span {{search}}
     Loader(:visible="loading")
-    //- ul.results-list 👀 spacelist
 </template>
 
 <script>
@@ -18,7 +19,7 @@ dialog.narrow.label-picker(v-if="visible" :open="visible" @click.left.stop ref="
 import Loader from '@/components/Loader.vue'
 
 export default {
-  name: 'LabelPicker',
+  name: 'TagPicker',
   components: {
     Loader
   },
@@ -35,7 +36,7 @@ export default {
   },
   data () {
     return {
-      labels: [],
+      tags: [],
       loading: true
     }
   },
@@ -61,4 +62,9 @@ export default {
 </script>
 
 <style lang="stylus">
+.tag-picker
+  .loader
+    margin-left 6px
+  .results-section
+    margin-top 2px
 </style>
