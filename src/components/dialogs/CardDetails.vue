@@ -17,7 +17,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @click.left="triggerUpdateMagicPaintPositionOffset"
         @blur="triggerUpdatePositionInVisualViewport"
         @paste="updatePastedName"
-        @keyup="checkIfShouldShowLabelPicker"
+        @keyup="updateLabelPicker"
 
         @keyup.alt.enter.exact.stop
         @keyup.ctrl.enter.exact.stop
@@ -260,7 +260,7 @@ export default {
       })
       this.labelPickerIsVisible = true
     },
-    checkIfShouldShowLabelPicker (event) {
+    updateLabelPicker (event) {
       const cursorPosition = this.$refs.name.selectionStart
       const key = event.key
       const previousCharacter = this.name[cursorPosition - 2]
