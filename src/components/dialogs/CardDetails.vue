@@ -1,27 +1,31 @@
 <template lang="pug">
 dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="closeDialogs" @keyup.stop.backspace="removeCard")
   section
-    textarea.name(
-      :disabled="!canEditCard"
-      ref="name"
-      rows="1"
-      placeholder="Type text here, or paste a URL"
-      v-model="name"
-      @keydown.prevent.enter.exact
-      @keyup.enter.exact="closeCard"
-      @keyup.stop.esc="closeCardAndFocus"
-      @keyup.stop.backspace
-      data-type="name"
-      maxlength="250"
-      @click.left="triggerUpdateMagicPaintPositionOffset"
-      @blur="triggerUpdatePositionInVisualViewport"
-      @paste="updatePastedName"
+    .textarea-wrap
+      textarea.name(
+        :disabled="!canEditCard"
+        ref="name"
+        rows="1"
+        placeholder="Type text here, or paste a URL"
+        v-model="name"
+        @keydown.prevent.enter.exact
+        @keyup.enter.exact="closeCard"
+        @keyup.stop.esc="closeCardAndFocus"
+        @keyup.stop.backspace
+        data-type="name"
+        maxlength="250"
+        @click.left="triggerUpdateMagicPaintPositionOffset"
+        @blur="triggerUpdatePositionInVisualViewport"
+        @paste="updatePastedName"
+        @keydown="checkIfShouldShowLabelPicker"
 
-      @keyup.alt.enter.exact.stop
-      @keyup.ctrl.enter.exact.stop
-      @keydown.alt.enter.exact.stop="insertLineBreak"
-      @keydown.ctrl.enter.exact.stop="insertLineBreak"
-    )
+        @keyup.alt.enter.exact.stop
+        @keyup.ctrl.enter.exact.stop
+        @keydown.alt.enter.exact.stop="insertLineBreak"
+        @keydown.ctrl.enter.exact.stop="insertLineBreak"
+      )
+      LabelPicker(:visible="labelPickerIsVisible" :position="labelPickerPosition")
+        //- @selectLabel="insertLabel"
     .row(v-if="cardPendingUpload")
       .badge.info
         Loader(:visible="true")
@@ -91,6 +95,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
 <script>
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
+import LabelPicker from '@/components/dialogs/LabelPicker.vue'
 import Loader from '@/components/Loader.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
@@ -102,6 +107,7 @@ export default {
   components: {
     FramePicker,
     ImagePicker,
+    LabelPicker,
     Loader
   },
   props: {
@@ -111,6 +117,8 @@ export default {
     return {
       framePickerIsVisible: false,
       imagePickerIsVisible: false,
+      labelPickerIsVisible: false,
+      labelPickerPosition: {},
       initialSearch: '',
       pastedName: '',
       wasPasted: false
@@ -121,6 +129,7 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.framePickerIsVisible = false
         this.imagePickerIsVisible = false
+        this.labelPickerIsVisible = false
       }
       if (mutation.type === 'triggerUploadComplete') {
         let { cardId, url } = mutation.payload
@@ -235,6 +244,33 @@ export default {
     }
   },
   methods: {
+    checkIfShouldShowLabelPicker (event) {
+      const cursorPosition = this.$refs.name.selectionStart
+      const key = event.key
+      // const previousName = this.name
+      const previousCharacter = this.name[cursorPosition - 1]
+      if (cursorPosition === 0) { return }
+      if (key === '[' && previousCharacter === '[') {
+        console.log('🍄 show label picker')
+        this.labelPickerIsVisible = true
+
+        // destroy w
+        // X esc
+        // space
+        // backspace when this.currentLabel is ''
+
+        // roam: ??add ]] after the cursor
+        // enter while typing = new label
+      } else if (key === ']' && previousCharacter === ']') {
+        console.log('🍆 hide label picker')
+        this.labelPickerIsVisible = false
+      }
+
+      // each label has a id, name, color . 1label:many-cards (how tod?)
+      // get spaces should include labels
+      // clicking a label opens labelDetails: color, name, list currentspace cards and fetch other spaces that it's linked to (click to scroll/switch)
+    },
+
     seperatedLines (name) {
       let lines = name.split('\n')
       lines = lines.filter(line => Boolean(line.length))
@@ -360,6 +396,11 @@ export default {
       this.$nextTick(() => {
         this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.card.id, shouldUpdateApi: true })
       })
+      // TODO https://bundlephobia.com/result?p=textarea-caret%403.1.0??
+      const nameRect = this.$refs.name.getBoundingClientRect()
+      this.labelPickerPosition = {
+        top: nameRect.height - 2
+      }
     },
     insertLineBreak (event) {
       const position = this.$refs.name.selectionEnd
@@ -374,6 +415,10 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCard')
     },
     closeCardAndFocus () {
+      if (this.labelPickerIsVisible) {
+        this.labelPickerIsVisible = false
+        return
+      }
       this.closeCard()
       document.querySelector(`.card[data-card-id="${this.card.id}"]`).focus()
     },
@@ -439,6 +484,7 @@ export default {
     closeDialogs () {
       this.framePickerIsVisible = false
       this.imagePickerIsVisible = false
+      this.labelPickerIsVisible = false
     },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
@@ -503,6 +549,8 @@ export default {
 .card-details
   > section
     background-color var(--secondary-background)
+  .textarea-wrap
+    position relative
   textarea
     margin-bottom 5px
   .edit-message
