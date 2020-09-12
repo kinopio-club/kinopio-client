@@ -272,10 +272,18 @@ export default {
       end = end.substring(0, endPosition)
       this.labelPickerSearch = start + end
     },
+
+    isCursorInsideBrackets (cursorPosition) {
+      return false
+    },
+
     updateLabelPicker (event) {
       const cursorPosition = this.$refs.name.selectionStart
       const key = event.key
       const previousCharacter = this.name[cursorPosition - 2]
+
+      // console.log('⏰',key, previousCharacter, this.name[cursorPosition - 1])
+
       if (this.labelPickerIsVisible) {
         this.updateLabelPickerSearch(cursorPosition)
       }
@@ -283,15 +291,22 @@ export default {
       if (key === '[' && previousCharacter === '[') {
         console.log('🌲', this.name, cursorPosition, previousCharacter)
         this.showLabelPicker(cursorPosition)
+      }
 
       // hide label picker:
       // X esc
-      // space
       // backspace when this.currentLabel is ''
-      } else if (key === ']' && previousCharacter === ']') {
-        console.log('🍆 hide label picker')
+      // if cursor isn't inside a [[ ]]
+      // isCursorInsideBrackets(cursorPosition)
+      // } else if (key === ']' && previousCharacter === ']') {
+      //   console.log('🍆 hide label picker')
+      //   this.labelPickerIsVisible = false
+      // }
+
+      if (this.isCursorInsideBrackets(cursorPosition)) {
         this.labelPickerIsVisible = false
       }
+
       // enter while typing = new label
 
       // each label has a id, name, color . 1label:many-cards (how tod?)
