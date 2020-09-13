@@ -328,6 +328,21 @@ export default {
       // clicking a label opens labelDetails: color, name, list currentspace cards and fetch other spaces that it's linked to (click to scroll/switch)
     },
 
+    moveCursorPastTagEnd () {
+      const cursorPosition = this.$refs.name.selectionStart
+      let end = this.name.substring(cursorPosition)
+      let newCursorPosition = end.indexOf(']]')
+      if (newCursorPosition === -1) {
+        this.addClosingBrackets(cursorPosition)
+        end = this.name.substring(cursorPosition)
+        newCursorPosition = end.indexOf(']]') + 2
+      } else {
+        newCursorPosition = newCursorPosition + 2
+      }
+      newCursorPosition = newCursorPosition + cursorPosition
+      this.$refs.name.setSelectionRange(newCursorPosition, newCursorPosition)
+    },
+
     seperatedLines (name) {
       let lines = name.split('\n')
       lines = lines.filter(line => Boolean(line.length))
@@ -464,6 +479,12 @@ export default {
       this.updateCardName(newName)
     },
     closeCard (event) {
+      if (this.tagPickerIsVisible) {
+        this.hideTagPicker()
+        this.moveCursorPastTagEnd()
+        event.stopPropagation()
+        return
+      }
       this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCard')
     },
     closeCardAndFocus () {
