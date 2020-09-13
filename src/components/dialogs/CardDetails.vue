@@ -9,9 +9,16 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         placeholder="Type text here, or paste a URL"
         v-model="name"
         @keydown.prevent.enter.exact
+
         @keyup.enter.exact="closeCard"
         @keyup.stop.esc="closeCardAndFocus"
-        @keyup.stop.backspace
+
+        @keyup.stop.backspace="checkIfShouldShowTagPicker"
+        @keyup.stop.up="checkIfShouldShowTagPicker"
+        @keyup.stop.down="checkIfShouldShowTagPicker"
+        @keyup.stop.left="checkIfShouldShowTagPicker"
+        @keyup.stop.right="checkIfShouldShowTagPicker"
+
         data-type="name"
         maxlength="250"
         @click.left="clickName"
@@ -250,8 +257,8 @@ export default {
       this.tagPickerPosition = {
         top: nameRect.height - 2
       }
+      this.updateTagPickerSearch(cursorPosition)
       this.tagPickerIsVisible = true
-      // console.log('🌹 showTagPicker', cursorPosition, this.tagPickerIsVisible)
     },
     hideTagPicker () {
       this.tagPickerSearch = ''
@@ -273,8 +280,8 @@ export default {
       return end.substring(0, endPosition)
     },
     updateTagPickerSearch (cursorPosition) {
-      const start = this.tagStartText(cursorPosition)
-      const end = this.tagEndText(cursorPosition)
+      const start = this.tagStartText(cursorPosition) || ''
+      const end = this.tagEndText(cursorPosition) || ''
       this.tagPickerSearch = start + end
     },
     isCursorInsideBrackets (cursorPosition) {
@@ -283,6 +290,16 @@ export default {
       if (start === undefined || end === undefined) { return }
       if (!start.includes(']]') && !end.includes('[[')) {
         return true
+      }
+    },
+    checkIfShouldShowTagPicker () {
+      const cursorPosition = this.$refs.name.selectionStart
+      const tagPickerIsVisible = this.tagPickerIsVisible
+      const isCursorInsideBrackets = this.isCursorInsideBrackets(cursorPosition)
+      if (isCursorInsideBrackets && !tagPickerIsVisible) {
+        this.showTagPicker(cursorPosition)
+      } else if (!isCursorInsideBrackets && tagPickerIsVisible) {
+        this.hideTagPicker()
       }
     },
     addClosingBrackets (cursorPosition) {
@@ -302,26 +319,16 @@ export default {
       }
       if (cursorPosition === 0) { return }
       if (key === '[' && previousCharacter === '[') {
-        console.log('🌲', this.name, cursorPosition, previousCharacter)
         this.showTagPicker(cursorPosition)
         this.addClosingBrackets(cursorPosition)
       }
 
-      // else if (this.isCursorInsideBrackets(cursorPosition)) {
-      //   this.showTagPicker(cursorPosition)
-      // }
-
       // hide label picker:
       // X esc
-      // backspace when this.currentLabel is ''
-      // if cursor isn't inside a [[ ]]
-      // isCursorInsideBrackets(cursorPosition)
-      // } else if (key === ']' && previousCharacter === ']') {
-      //   console.log('🍆 hide label picker')
-      //   this.tagPickerIsVisible = false
-      // }
-
-      // enter while typing = new label
+      // X enter while typing = new label
+      // X backspace when this.currentLabel is ''
+      // X if cursor isn't inside a [[ ]]
+      // X isCursorInsideBrackets(cursorPosition)
 
       // each label has a id, name, color . 1label:many-cards (how tod?)
       // get spaces should include labels
@@ -481,6 +488,7 @@ export default {
     closeCard (event) {
       if (this.tagPickerIsVisible) {
         this.hideTagPicker()
+        // TODO this.addSelectedTag()
         this.moveCursorPastTagEnd()
         event.stopPropagation()
         return

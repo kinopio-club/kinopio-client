@@ -9,6 +9,7 @@ dialog.narrow.tag-picker(v-if="visible" :open="visible" @click.left.stop ref="di
       li(v-if="search")
         .badge.info.tag-badge(:style="{backgroundColor: currentUserColor}")
           img.icon.add(src="@/assets/add.svg")
+            //- use + only if no other matching tags, else no icon
           span {{search}}
     Loader(:visible="loading")
 </template>
