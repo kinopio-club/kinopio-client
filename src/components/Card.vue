@@ -39,9 +39,15 @@ article(:style="position" :data-card-id="id" ref="card")
           .checkbox-wrap(v-if="hasCheckbox" @click.left.prevent.stop="toggleCardChecked" @touchend.prevent.stop="toggleCardChecked")
             label(:class="{active: isChecked, disabled: !canEditSpace}")
               input(type="checkbox" v-model="checkboxState")
+
           //- Name
-          p.name(v-if="normalizedName" :style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox}")
-            span {{normalizedName}}
+          p.name.name-segments(v-if="normalizedName" :style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox}")
+            template(v-for="segment in nameSegments")
+              span(v-if="segment.isText") {{segment.content}}
+              span.badge.button-badge(
+                v-if="segment.isTag"
+                :style="{backgroundColor: segment.color}"
+              ) {{segment.content}}
 
       //- Right buttons
       span.card-buttons-wrap
@@ -298,6 +304,39 @@ export default {
         name = name.replace(checkbox, '')
       }
       return utils.trim(name)
+    },
+    nameSegments () {
+      const tags = utils.tagsFromString(this.normalizedName)
+      let segments = []
+      let name = this.normalizedName
+      if (tags) {
+        tags.forEach(tag => {
+          const tagStartPosition = name.indexOf(tag)
+          const tagEndPosition = tagStartPosition + tag.length
+          segments.push({
+            isText: true,
+            content: name.substring(0, tagStartPosition)
+          })
+          segments.push({
+            isTag: true,
+            content: tag.substring(2, tag.length - 2),
+            color: 'pink' // TEMP
+          })
+          name = name.substring(tagEndPosition, name.length)
+        })
+        if (name.length) {
+          segments.push({
+            isText: true,
+            content: name
+          })
+        }
+        return segments
+      } else {
+        return [{
+          isText: true,
+          content: name
+        }]
+      }
     },
     nameLineMinWidth () {
       const averageCharacterWidth = 6.5
@@ -598,7 +637,11 @@ export default {
       }
     },
     longestNameLineLength () {
-      const nameLines = this.normalizedName.match(/[^\n]+/g)
+      let name = this.normalizedName
+      name = name.replaceAll('[[', '')
+      name = name.replaceAll(']]', '')
+      name = name || '.'
+      const nameLines = name.match(/[^\n]+/g)
       let longestLineLength = 0
       nameLines.forEach(line => {
         if (line.length > longestLineLength) {
@@ -759,6 +802,11 @@ article
         &.has-checkbox
           .audio
             width 132px
+    .name-segments
+      .badge
+        &:last-child
+          margin 0
+
     .connector,
     .link
       padding 8px

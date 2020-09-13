@@ -633,6 +633,16 @@ export default {
     return urls
   },
 
+  tagsFromString (string) {
+    // https://regexr.com/5bv6b
+    // '[' twice
+    // then anything except line break and ']'
+    // ']' twice
+    const tagPattern = new RegExp(/([[]{2}[^\n(\]\])]+[\]]{2})/gm)
+    const tags = string.match(tagPattern)
+    return tags
+  },
+
   urlWithoutProtocol (url) {
     let newUrl
     const http = 'http://'
