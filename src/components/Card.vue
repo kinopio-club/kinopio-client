@@ -47,7 +47,14 @@ article(:style="position" :data-card-id="id" ref="card")
               span.badge.button-badge(
                 v-if="segment.isTag"
                 :style="{backgroundColor: segment.color}"
-              ) {{segment.content}}
+                :class="{ active: currentSelectedTag.name === segment.name }"
+                :data-tag-id="segment.id"
+                tabindex="0"
+                @click.left="showTagDetailsIsVisible($event, segment)"
+                @touchend="showTagDetailsIsVisible($event, segment)"
+                @keyup.stop.enter="showTagDetailsIsVisible($event, segment)"
+              ) {{segment.name}}
+            TagDetails(:visible="tagDetailsIsVisible" :position="tagDetailsPosition" :tag="currentSelectedTag")
 
       //- Right buttons
       span.card-buttons-wrap
@@ -110,7 +117,14 @@ article(:style="position" :data-card-id="id" ref="card")
   .meta-container(v-if="filterShowUsers || filterShowDateUpdated")
     //- User
     .badge-wrap
-      .badge.user-badge.button-badge(v-if="filterShowUsers" :style="{background: updatedByUser.color}" @click.left.prevent.stop="toggleUserDetails" @touchend.prevent.stop="toggleUserDetails")
+      .badge.user-badge.button-badge(
+        v-if="filterShowUsers"
+        :style="{background: updatedByUser.color}"
+        @mouseup.left.stop
+        @touchend.stop
+        @click.left.prevent.stop="toggleUserDetailsIsVisible"
+        @touchend.prevent.stop="toggleUserDetailsIsVisible"
+      )
         User(:user="updatedByUser" :isClickable="false")
         .name {{updatedByUser.name}}
       UserDetails(:visible="userDetailsIsVisible" :user="updatedByUser" :dialogIsReadOnly="true")
@@ -130,6 +144,7 @@ import Audio from '@/components/Audio.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import User from '@/components/User.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
+import TagDetails from '@/components/dialogs/TagDetails.vue'
 
 import fromNow from 'fromnow'
 
@@ -142,7 +157,8 @@ export default {
     Loader,
     Audio,
     User,
-    UserDetails
+    UserDetails,
+    TagDetails
   },
   props: {
     card: Object
@@ -162,6 +178,8 @@ export default {
       }
       if (mutation.type === 'closeAllDialogs') {
         this.userDetailsIsVisible = false
+        this.tagDetailsIsVisible = false
+        this.currentSelectedTag = {}
       }
     })
   },
@@ -172,6 +190,10 @@ export default {
       uploadIsDraggedOver: false,
       isPlayingAudio: false,
       userDetailsIsVisible: false,
+      tagDetailsIsVisible: false,
+      tagDetailsPosition: {},
+      currentSelectedTag: {},
+      preventDraggedTagFromShowingDetails: false,
       error: {
         sizeLimit: false,
         unknownUploadError: false,
@@ -319,8 +341,9 @@ export default {
           })
           segments.push({
             isTag: true,
-            content: tag.substring(2, tag.length - 2),
-            color: 'pink' // TEMP
+            name: tag.substring(2, tag.length - 2),
+            color: 'pink', // TEMP, get from tags cache, (tags fetch happens on space load which updates †ags cache)
+            id: 1 // TEMP, get from cache, add :key=id to rendering
           })
           name = name.substring(tagEndPosition, name.length)
         })
@@ -602,9 +625,10 @@ export default {
       this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.id, value })
       this.$store.commit('currentUserIsDraggingCard', false)
     },
-    toggleUserDetails () {
+    toggleUserDetailsIsVisible () {
+      if (isMultiTouch) { return }
       const value = !this.userDetailsIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Card.toggleUserDetails')
+      this.$store.dispatch('closeAllDialogs', 'Card.toggleUserDetailsIsVisible')
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
       this.$store.commit('currentUserIsDraggingCard', false)
       this.userDetailsIsVisible = value
@@ -692,7 +716,6 @@ export default {
     startDraggingCard (event) {
       isMultiTouch = false
       if (!this.canEditCard) { return }
-      if (this.userDetailsIsVisible) { return }
       if (utils.isMultiTouch(event)) {
         isMultiTouch = true
         return
@@ -712,17 +735,12 @@ export default {
       this.checkIfShouldDragMultipleCards()
       this.$store.dispatch('currentSpace/incrementSelectedCardsZ')
     },
-    shouldCancel (event) {
-      const element = document.querySelector('dialog.user-details')
-      if (!element) { return }
-      if (element.contains(event.target)) { return true }
-    },
     showCardDetails (event) {
       if (isMultiTouch) { return }
-      if (this.shouldCancel(event)) { return }
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
       const userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
+      this.preventDraggedTagFromShowingDetails = this.$store.state.preventDraggedCardFromShowingDetails
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       this.$store.dispatch('closeAllDialogs', 'Card.showCardDetails')
       this.$store.dispatch('clearMultipleSelected')
@@ -733,6 +751,22 @@ export default {
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
       this.$store.commit('currentUserIsDraggingCard', false)
       this.broadcastShowCardDetails()
+    },
+    showTagDetailsIsVisible (event, tag) {
+      if (isMultiTouch) { return }
+      if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
+      if (this.preventDraggedTagFromShowingDetails) { return }
+      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
+      this.$store.dispatch('closeAllDialogs', 'Card.showTagDetailsIsVisible')
+      this.$store.commit('currentUserIsDraggingCard', false)
+      const cardRect = this.$refs.card.getBoundingClientRect()
+      const tagRect = event.target.getBoundingClientRect()
+      this.tagDetailsPosition = {
+        x: tagRect.x - cardRect.x,
+        y: (tagRect.y + tagRect.height) - cardRect.y - 2
+      }
+      this.currentSelectedTag = tag
+      this.tagDetailsIsVisible = true
     },
     openUrl (url) {
       window.location.href = url

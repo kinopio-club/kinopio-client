@@ -426,7 +426,8 @@ code
     cursor pointer
     &:hover
       box-shadow var(--hover-shadow)
-    &:active
+    &:active,
+    &.active
       box-shadow var(--button-active-inset-shadow)
 
 .label-badge
