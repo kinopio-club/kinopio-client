@@ -1,13 +1,12 @@
 <template lang="pug">
-dialog.narrow.tag-details(v-if="visible" :open="visible" :style="dialogPosition" @click.left="closeColorPicker" ref="dialog")
-  section(:style="{backgroundColor: tag.color}")
-    p {{tag.name}}
-  //-   .row
-  //-     .button-wrap
-  //-       button.change-color(:disabled="!canEditConnection" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-  //-         .current-color(:style="{backgroundColor: tagColor}")
-  //-       ColorPicker(:currentColor="tagColor" :visible="colorPickerIsVisible" @selectedColor="updatetagColor")
-  //-     input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeName")
+dialog.narrow.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="dialog" @click.left="closeDialogs")
+  section(:style="{backgroundColor: color}")
+    .row
+      .button-wrap
+        button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
+          .current-color(:style="{backgroundColor: color}")
+        ColorPicker(:currentColor="color" :visible="colorPickerIsVisible" @selectedColor="updateTagColor")
+      input.tag-name(:disabled="!canEditSpace" placeholder="Tag Name" v-model="name" ref="name")
 
   //-   .row
   //-     button(:disabled="!canEditConnection" :class="{active: labelIsVisible}" @click.left="toggleLabelIsVisible")
@@ -57,10 +56,10 @@ dialog.narrow.tag-details(v-if="visible" :open="visible" :style="dialogPosition"
 <script>
 // import ResultsFilter from '@/components/ResultsFilter.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-// import utils from '@/utils.js'
+import utils from '@/utils.js'
 
 // import last from 'lodash-es/last'
-// import scrollIntoView from '@/scroll-into-view.js'
+import scrollIntoView from '@/scroll-into-view.js'
 
 export default {
   name: 'TagDetails',
@@ -68,33 +67,44 @@ export default {
     ColorPicker
     // ResultsFilter
   },
-  props: {
-    visible: Boolean,
-    tag: Object,
-    position: Object
-  },
   data () {
     return {
-      // isDefault: false,
-      colorPickerIsVisible: false,
-      filter: '',
-      // filteredConnectionTypes: []
-      filteredTags: []
+      colorPickerIsVisible: false
+      // filter: '',
+      // filteredTags: [],
     }
   },
   computed: {
+    visible () { return this.$store.state.tagDetailsIsVisible },
+    tag () { return this.$store.state.currentSelectedTag },
+    position () { return this.$store.state.tagDetailsPosition },
+    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     dialogPosition () {
       return {
         left: `${this.position.x}px`,
         top: `${this.position.y}px`
       }
+    },
+    color () { return this.tag.color },
+    name: {
+      get () {
+        return this.tag.name
+      },
+      set (newName) {
+        console.log('🌺', newName)
+        // const connectionType = {
+        //   id: this.currentConnectionType.id,
+        //   name: newName
+        // }
+        // this.$store.dispatch('currentSpace/updateConnectionType', connectionType)
+      }
     }
+
   //   visible () { return Boolean(this.$store.state.connectionDetailsIsVisibleForConnectionId) },
   //   labelIsVisible () { return this.currentConnection.labelIsVisible },
   //   currentConnectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.currentConnection.connectionTypeId) },
   //   connectionTypes () { return this.$store.state.currentSpace.connectionTypes },
   //   tagColor () { return this.currentConnectionType.color },
-  //   canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
   //   spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
   //   spacePrivacyIsClosed () { return this.$store.state.currentSpace.privacy === 'closed' },
   //   isInvitedButCannotEditSpace () { return this.$store.getters['currentUser/isInvitedButCannotEditSpace']() },
@@ -139,88 +149,90 @@ export default {
   //   }
   },
   methods: {
-  //   addConnectionType () {
-  //     this.$store.dispatch('currentSpace/addConnectionType')
-  //     const types = utils.clone(this.connectionTypes)
-  //     const newType = last(types)
-  //     this.changeConnectionType(newType)
-  //   },
-  //   connectionTypeIsActive (type) {
-  //     return Boolean(type.id === this.currentConnection.connectionTypeId)
-  //   },
-  //   connectionTypeIsDefault (type) {
-  //     const typePref = this.$store.state.currentUser.defaultConnectionTypeId
-  //     return typePref === type.id
-  //   },
-  //   removeConnection () {
-  //     this.$store.dispatch('currentSpace/removeConnection', this.currentConnection)
-  //     this.$store.dispatch('closeAllDialogs', 'ConnectionDetails.removeConnection')
-  //     this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
-  //   },
-  //   changeConnectionType (type) {
-  //     this.$store.dispatch('currentSpace/updateConnectionTypeForConnection', {
-  //       connectionId: this.currentConnection.id,
-  //       connectionTypeId: type.id
-  //     })
-  //     this.$store.commit('currentSpace/reorderConnectionTypeToLast', type)
-  //     this.updateDefaultConnectionType()
-  //   },
-  //   updateDefaultConnectionType () {
-  //     const typePref = this.$store.state.currentUser.defaultConnectionTypeId
-  //     this.isDefault = Boolean(typePref === this.currentConnectionType.id)
-  //   },
-  //   toggleDefault () {
-  //     this.isDefault = !this.isDefault
-  //     if (this.isDefault) {
-  //       this.$store.dispatch('currentUser/defaultConnectionTypeId', this.currentConnectionType.id)
-  //     } else {
-  //       this.$store.dispatch('currentUser/defaultConnectionTypeId', '')
-  //     }
-  //   },
-  //   toggleLabelIsVisible () {
-  //     const newValue = !this.labelIsVisible
-  //     this.$store.dispatch('currentSpace/updateLabelIsVisibleForConnection', {
-  //       connectionId: this.currentConnection.id,
-  //       labelIsVisible: newValue
-  //     })
-  //   },
-  //   toggleColorPicker () {
-  //     this.colorPickerIsVisible = !this.colorPickerIsVisible
-  //   },
-    closeColorPicker () {
+    toggleColorPicker () {
+      this.colorPickerIsVisible = !this.colorPickerIsVisible
+    },
+    closeDialogs () {
       this.colorPickerIsVisible = false
+    },
+    updateTagColor (newColor) {
+      console.log('🎨', newColor)
+      // const connectionType = {
+      //   id: this.currentConnectionType.id,
+      //   color: newColor
+      // }
+      // this.$store.dispatch('currentSpace/updateConnectionType', connectionType)
+    },
+
+    //   addConnectionType () {
+    //     this.$store.dispatch('currentSpace/addConnectionType')
+    //     const types = utils.clone(this.connectionTypes)
+    //     const newType = last(types)
+    //     this.changeConnectionType(newType)
+    //   },
+    //   connectionTypeIsActive (type) {
+    //     return Boolean(type.id === this.currentConnection.connectionTypeId)
+    //   },
+    //   connectionTypeIsDefault (type) {
+    //     const typePref = this.$store.state.currentUser.defaultConnectionTypeId
+    //     return typePref === type.id
+    //   },
+    //   removeConnection () {
+    //     this.$store.dispatch('currentSpace/removeConnection', this.currentConnection)
+    //     this.$store.dispatch('closeAllDialogs', 'ConnectionDetails.removeConnection')
+    //     this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
+    //   },
+    //   changeConnectionType (type) {
+    //     this.$store.dispatch('currentSpace/updateConnectionTypeForConnection', {
+    //       connectionId: this.currentConnection.id,
+    //       connectionTypeId: type.id
+    //     })
+    //     this.$store.commit('currentSpace/reorderConnectionTypeToLast', type)
+    //     this.updateDefaultConnectionType()
+    //   },
+    //   updateDefaultConnectionType () {
+    //     const typePref = this.$store.state.currentUser.defaultConnectionTypeId
+    //     this.isDefault = Boolean(typePref === this.currentConnectionType.id)
+    //   },
+    //   toggleDefault () {
+    //     this.isDefault = !this.isDefault
+    //     if (this.isDefault) {
+    //       this.$store.dispatch('currentUser/defaultConnectionTypeId', this.currentConnectionType.id)
+    //     } else {
+    //       this.$store.dispatch('currentUser/defaultConnectionTypeId', '')
+    //     }
+    //   },
+    //   toggleLabelIsVisible () {
+    //     const newValue = !this.labelIsVisible
+    //     this.$store.dispatch('currentSpace/updateLabelIsVisibleForConnection', {
+    //       connectionId: this.currentConnection.id,
+    //       labelIsVisible: newValue
+    //     })
+    //   },
+    focusName () {
+      this.$nextTick(() => {
+        const element = this.$refs.name
+        if (!element) { return }
+        element.focus()
+      })
+    },
+    scrollIntoView () {
+      const element = this.$refs.dialog
+      const isTouchDevice = this.$store.state.isTouchDevice
+      scrollIntoView.scroll(element, isTouchDevice)
+    },
+    scrollIntoViewAndFocus () {
+      const element = this.$refs.name
+      const length = this.name.length
+      this.scrollIntoView()
+      if (utils.isMobile()) { return }
+      this.$nextTick(() => {
+        this.focusName()
+        if (length && element) {
+          element.setSelectionRange(length, length)
+        }
+      })
     }
-  //   updateTypeColor (newColor) {
-  //     const connectionType = {
-  //       id: this.currentConnectionType.id,
-  //       color: newColor
-  //     }
-  //     this.$store.dispatch('currentSpace/updateConnectionType', connectionType)
-  //   },
-  //   focusName () {
-  //     this.$nextTick(() => {
-  //       const element = this.$refs.typeName
-  //       if (!element) { return }
-  //       element.focus()
-  //     })
-  //   },
-  //   scrollIntoView () {
-  //     const element = this.$refs.dialog
-  //     const isTouchDevice = this.$store.state.isTouchDevice
-  //     scrollIntoView.scroll(element, isTouchDevice)
-  //   },
-  //   scrollIntoViewAndFocus () {
-  //     const element = this.$refs.typeName
-  //     const length = this.typeName.length
-  //     this.scrollIntoView()
-  //     if (utils.isMobile()) { return }
-  //     this.$nextTick(() => {
-  //       this.focusName()
-  //       if (length && element) {
-  //         element.setSelectionRange(length, length)
-  //       }
-  //     })
-  //   },
   //   updateView () {
   //     this.updateDefaultConnectionType()
   //     this.colorPickerIsVisible = false
@@ -234,24 +246,26 @@ export default {
   //   updateFilter (filter) {
   //     this.filter = filter
   //   }
+  },
+  watch: {
+    visible (visible) {
+      this.$nextTick(() => {
+        if (this.visible) {
+          // this.updateView()
+          this.scrollIntoViewAndFocus()
+        } else {
+          this.closeDialogs()
+        }
+      })
+    }
   }
-  // watch: {
-  //   currentConnection (current) {
-  //     this.$nextTick(() => {
-  //       if (this.visible) {
-  //         this.updateView()
-  //         this.scrollIntoViewAndFocus()
-  //       }
-  //     })
-  //   }
-  // }
 }
 </script>
 
 <style lang="stylus">
-// .tag-details
-//   .tag-name
-//     margin-left 6px
+.tag-details
+  .tag-name
+    margin-left 6px
 //   .edit-message
 //     button
 //       margin-top 10px

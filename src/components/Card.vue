@@ -54,7 +54,7 @@ article(:style="position" :data-card-id="id" ref="card")
                 @touchend="showTagDetailsIsVisible($event, segment)"
                 @keyup.stop.enter="showTagDetailsIsVisible($event, segment)"
               ) {{segment.name}}
-            TagDetails(:visible="tagDetailsIsVisible" :position="tagDetailsPosition" :tag="currentSelectedTag")
+              //- ^class TEMP switch to using tag.id?
 
       //- Right buttons
       span.card-buttons-wrap
@@ -144,7 +144,6 @@ import Audio from '@/components/Audio.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import User from '@/components/User.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
-import TagDetails from '@/components/dialogs/TagDetails.vue'
 
 import fromNow from 'fromnow'
 
@@ -157,8 +156,7 @@ export default {
     Loader,
     Audio,
     User,
-    UserDetails,
-    TagDetails
+    UserDetails
   },
   props: {
     card: Object
@@ -178,8 +176,6 @@ export default {
       }
       if (mutation.type === 'closeAllDialogs') {
         this.userDetailsIsVisible = false
-        this.tagDetailsIsVisible = false
-        this.currentSelectedTag = {}
       }
     })
   },
@@ -190,9 +186,6 @@ export default {
       uploadIsDraggedOver: false,
       isPlayingAudio: false,
       userDetailsIsVisible: false,
-      tagDetailsIsVisible: false,
-      tagDetailsPosition: {},
-      currentSelectedTag: {},
       preventDraggedTagFromShowingDetails: false,
       error: {
         sizeLimit: false,
@@ -209,6 +202,7 @@ export default {
     }
   },
   computed: {
+    currentSelectedTag () { return this.$store.state.currentSelectedTag },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     id () { return this.card.id },
     x () { return this.card.x },
@@ -759,14 +753,13 @@ export default {
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
       this.$store.dispatch('closeAllDialogs', 'Card.showTagDetailsIsVisible')
       this.$store.commit('currentUserIsDraggingCard', false)
-      const cardRect = this.$refs.card.getBoundingClientRect()
       const tagRect = event.target.getBoundingClientRect()
-      this.tagDetailsPosition = {
-        x: tagRect.x - cardRect.x,
-        y: (tagRect.y + tagRect.height) - cardRect.y - 2
-      }
-      this.currentSelectedTag = tag
-      this.tagDetailsIsVisible = true
+      this.$store.commit('tagDetailsPosition', {
+        x: window.scrollX + tagRect.x + 2,
+        y: window.scrollY + tagRect.y + tagRect.height - 2
+      })
+      this.$store.commit('currentSelectedTag', tag)
+      this.$store.commit('tagDetailsIsVisible', true)
     },
     openUrl (url) {
       window.location.href = url

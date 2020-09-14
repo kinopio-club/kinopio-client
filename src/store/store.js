@@ -65,6 +65,11 @@ export default new Vuex.Store({
     remoteConnectionDetailsVisible: [],
     remoteCurrentConnections: [],
 
+    // tags
+    tagDetailsIsVisible: false,
+    tagDetailsPosition: {}, // x, y
+    currentSelectedTag: {}, // ?TEMP to currentSelectedTagId: '' ?
+
     // dragging
     currentDraggingCardId: '',
     remoteCardsDragging: [],
@@ -136,6 +141,8 @@ export default new Vuex.Store({
       state.multipleSelectedActionsIsVisible = false
       state.cardDetailsIsVisibleForCardId = ''
       state.connectionDetailsIsVisibleForConnectionId = ''
+      state.tagDetailsIsVisible = false
+      state.currentSelectedTag = {}
     },
     isOnline: (state, value) => {
       utils.typeCheck(value, 'boolean')
@@ -334,6 +341,21 @@ export default new Vuex.Store({
     clearRemoteUploadDraggedOverCards: (state, update) => {
       utils.typeCheck(update, 'object')
       state.remoteUploadDraggedOverCards = state.remoteUploadDraggedOverCards.filter(card => card.userId !== update.userId)
+    },
+
+    // Tag Details
+
+    tagDetailsIsVisible: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.tagDetailsIsVisible = value
+    },
+    tagDetailsPosition: (state, position) => {
+      utils.typeCheck(position, 'object')
+      state.tagDetailsPosition = position
+    },
+    currentSelectedTag: (state, tag) => {
+      utils.typeCheck(tag, 'object')
+      state.currentSelectedTag = tag
     },
 
     // Connection Details
