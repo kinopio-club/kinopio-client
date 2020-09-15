@@ -263,6 +263,24 @@ export default {
         return connectionType.id !== type.id
       })
       state.connectionTypes.push(connectionType)
+    },
+
+    // Tags
+
+    addTag: (state, tag) => {
+      state.tags.push(tag)
+      cache.updateSpace('tags', state.tags, state.id)
+      console.log('🐸🐸 after add tag', state.tags)
+    },
+
+    removeTag: (state, tag) => {
+      state.tags = state.tags.filter(spaceTag => {
+        const name = spaceTag.name === tag.name
+        const cardId = spaceTag.cardId === tag.cardId
+        return !(name && cardId)
+      })
+      cache.updateSpace('tags', state.tags, state.id)
+      console.log('🍆🍆 after remove tag', state.tags)
     }
   },
 
@@ -433,7 +451,7 @@ export default {
       })
     },
     loadSpace: async (context, space) => {
-      const emptySpace = { id: space.id, cards: [], connections: [], spectators: [] }
+      const emptySpace = { id: space.id, cards: [], connections: [], spectators: [], tags: [] }
       const cachedSpace = cache.space(space.id)
       context.commit('clearAllNotifications', null, { root: true })
       context.commit('clearSpaceFilters', null, { root: true })
@@ -958,6 +976,28 @@ export default {
       } else {
         document.body.style.backgroundImage = ''
       }
+    },
+
+    // tags
+
+    addTag: (context, tag) => {
+      tag.color = context.rootState.currentUser.color
+      const existingTag = context.state.tags.find(spaceTag => spaceTag.name === tag.name)
+      if (existingTag) {
+        tag.color = existingTag.color
+      }
+      console.log('🐸 add tag', tag)
+      context.commit('addTag', tag) // name, color, cardId
+      // tag.spaceId = context.state.id
+      //   context.commit('broadcast/update', { updates: tag, type: 'addTag' }, { root: true })
+      //   context.dispatch('api/addToQueue', { name: 'addTag', body: tag }, { root: true })
+      //   context.commit('history/add', { name: 'addTag', body: tag }, { root: true })
+    },
+    removeTag: (context, tag) => {
+      console.log('🍆 remove tag', tag)
+      context.commit('removeTag', tag) // name, color, cardId
+      // tag.spaceId = context.state.id
+      // bradcast, api, history
     }
   },
 

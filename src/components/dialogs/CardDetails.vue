@@ -629,12 +629,10 @@ export default {
     },
     normalizeTags (tags) {
       // ?? tags are the same color in a space, but not necessarily across all spaces
-      // const existingTags =
       return tags.map(tag => {
         return {
           name: tag,
-          cardId: this.card.id,
-          spaceId: this.$store.state.currentSpace.id
+          cardId: this.card.id
           // color added by currentSpace, based on preexisting tags or usercolor
         }
       })
@@ -643,15 +641,14 @@ export default {
       const name = this.card.name
       if (!name) { return }
       const newTags = utils.tagsFromStringWithoutBrackets(name) || []
+      // removed
       let removedTags = previousTags.filter(previousTag => !newTags.includes(previousTag))
       removedTags = this.normalizeTags(removedTags)
+      removedTags.forEach(tag => this.$store.dispatch('currentSpace/removeTag', tag))
+      // added
       let addedTags = newTags.filter(newTag => !previousTags.includes(newTag))
       addedTags = this.normalizeTags(addedTags)
-
-      console.log('🌴', previousTags, 'removedTags:', removedTags, 'addedTags:', addedTags)
-      // this.$store.dispatch('currentSpace/removeTags', removedTags) // each tag has name, cardid, spaceid
-      // this.$store.dispatch('currentSpace/addTags', addedTags)
-
+      addedTags.forEach(tag => this.$store.dispatch('currentSpace/addTag', tag))
       this.savePreviousTags()
     }
   },
