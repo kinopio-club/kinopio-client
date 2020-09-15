@@ -51,9 +51,8 @@ export default {
         cardId: currentCardId
       })
     }
-    // activeUser () {
-    //   const currentUser = this.$store.state.currentUser
-    //   return this.user || currentUser
+    // spaceTags () {
+    //   return this.$store.currentSpace.tags
     // }
   }
   // methods: {

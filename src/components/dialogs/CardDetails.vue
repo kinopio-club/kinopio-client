@@ -268,6 +268,7 @@ export default {
   },
   methods: {
     showTagPicker (cursorPosition) {
+      this.closeDialogs()
       const nameRect = this.$refs.name.getBoundingClientRect()
       this.tagPickerPosition = {
         top: nameRect.height - 2
@@ -667,7 +668,7 @@ export default {
       this.$store.commit('tagDetailsIsVisible', false)
     },
     showTagDetailsIsVisible (event, tag) {
-      console.log(tag)
+      this.closeDialogs()
       const tagRect = event.target.getBoundingClientRect()
       this.$store.commit('tagDetailsPosition', {
         x: window.scrollX + tagRect.x + 2,

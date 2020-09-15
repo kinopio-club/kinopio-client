@@ -9,6 +9,22 @@ dialog.narrow.tag-details(v-if="visible" :open="visible" :style="dialogPosition"
           .current-color(:style="{backgroundColor: color}")
         ColorPicker(:currentColor="color" :visible="colorPickerIsVisible" @selectedColor="updateTagColor")
       input.tag-name(:disabled="!canEditSpace" placeholder="Tag Name" v-model="name" ref="name")
+  //- section.results-header
+  //-   p {{currentSpaceName}}
+  section.results-section
+    //- resultsfilter
+    ul.results-list
+      li
+        .name supsup
+    Loader(:visible="true")
+
+  //- section.results-header
+  //-   p Elsewhere
+  //- section.results-section
+  //-   //- resultsfilter
+  //-   ul.results-list
+  //-     li
+  //-       .name supsup
 
   //-   .row
   //-     button(:disabled="!canEditConnection" :class="{active: labelIsVisible}" @click.left="toggleLabelIsVisible")
@@ -60,13 +76,14 @@ dialog.narrow.tag-details(v-if="visible" :open="visible" :style="dialogPosition"
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
-// import last from 'lodash-es/last'
+import Loader from '@/components/Loader.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 
 export default {
   name: 'TagDetails',
   components: {
-    ColorPicker
+    ColorPicker,
+    Loader
     // ResultsFilter
   },
   data () {
@@ -87,6 +104,7 @@ export default {
         top: `${this.position.y}px`
       }
     },
+    // currentSpaceName () { return this.$store.state.currentSpace.name },
     color () { return this.tag.color },
     cardDetailsIsVisible () { return this.$store.state.cardDetailsIsVisibleForCardId },
     name: {
@@ -103,20 +121,6 @@ export default {
       }
     }
 
-  //   visible () { return Boolean(this.$store.state.connectionDetailsIsVisibleForConnectionId) },
-  //   labelIsVisible () { return this.currentConnection.labelIsVisible },
-  //   currentConnectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.currentConnection.connectionTypeId) },
-  //   connectionTypes () { return this.$store.state.currentSpace.connectionTypes },
-  //   tagColor () { return this.currentConnectionType.color },
-  //   spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
-  //   spacePrivacyIsClosed () { return this.$store.state.currentSpace.privacy === 'closed' },
-  //   isInvitedButCannotEditSpace () { return this.$store.getters['currentUser/isInvitedButCannotEditSpace']() },
-  //   position () {
-  //     return {
-  //       left: `${position.x}px`,
-  //       top: `${position.y}px`
-  //     }
-  //   },
   //   currentConnection () {
   //     let connections = this.$store.state.currentSpace.connections
   //     return connections.find(connection => {
@@ -277,6 +281,14 @@ export default {
     background-color var(--secondary-background)
   .tag-name
     margin-left 6px
+  .results-section
+    border-top 1px solid var(--primary)
+    padding-top 2px
+  .loader
+    margin-left 6px
+
+  // .results-header
+  //   padding-bottom 4px
 //   .edit-message
 //     button
 //       margin-top 10px
