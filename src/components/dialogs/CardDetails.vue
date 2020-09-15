@@ -478,6 +478,7 @@ export default {
       this.$nextTick(() => {
         this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.card.id, shouldUpdateApi: true })
       })
+      this.updateTags()
     },
     insertLineBreak (event) {
       const position = this.$refs.name.selectionEnd
@@ -626,13 +627,32 @@ export default {
       }
       previousTags = utils.tagsFromStringWithoutBrackets(name) || []
     },
+    normalizeTags (tags) {
+      // ?? tags are the same color in a space, but not necessarily across all spaces
+      // const existingTags =
+      return tags.map(tag => {
+        return {
+          name: tag,
+          cardId: this.card.id,
+          spaceId: this.$store.state.currentSpace.id
+          // color added by currentSpace, based on preexisting tags or usercolor
+        }
+      })
+    },
     updateTags () {
       const name = this.card.name
       if (!name) { return }
       const newTags = utils.tagsFromStringWithoutBrackets(name) || []
-      const removedTags = previousTags.filter(previousTag => !newTags.includes(previousTag))
-      const addedTags = newTags.filter(newTag => !previousTags.includes(newTag))
-      console.log('🌴 removedTags:', removedTags, 'addedTags:', addedTags)
+      let removedTags = previousTags.filter(previousTag => !newTags.includes(previousTag))
+      removedTags = this.normalizeTags(removedTags)
+      let addedTags = newTags.filter(newTag => !previousTags.includes(newTag))
+      addedTags = this.normalizeTags(addedTags)
+
+      console.log('🌴', previousTags, 'removedTags:', removedTags, 'addedTags:', addedTags)
+      // this.$store.dispatch('currentSpace/removeTags', removedTags) // each tag has name, cardid, spaceid
+      // this.$store.dispatch('currentSpace/addTags', addedTags)
+
+      this.savePreviousTags()
     }
   },
   watch: {
@@ -643,7 +663,6 @@ export default {
           this.savePreviousTags()
         } else {
           this.removeTrackingQueryStrings()
-          this.updateTags()
         }
       })
       if (!visible && this.cardIsEmpty()) {
