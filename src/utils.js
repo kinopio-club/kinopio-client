@@ -108,6 +108,17 @@ export default {
     }
   },
 
+  arrayExists (array) {
+    this.typeCheck(array, 'array', true)
+    if (!array) {
+      return false
+    } else if (!array.length) {
+      return false
+    } else {
+      return true
+    }
+  },
+
   updateObject (object, value) {
     this.typeCheck(value, 'object')
     const keys = Object.keys(value)
