@@ -758,6 +758,7 @@ export default {
         x: window.scrollX + tagRect.x + 2,
         y: window.scrollY + tagRect.y + tagRect.height - 2
       })
+      tag.cardId = this.id
       this.$store.commit('currentSelectedTag', tag)
       this.$store.commit('tagDetailsIsVisible', true)
     },

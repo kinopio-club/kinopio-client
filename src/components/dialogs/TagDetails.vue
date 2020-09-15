@@ -1,5 +1,7 @@
 <template lang="pug">
 dialog.narrow.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="dialog" @click.left="closeDialogs")
+  section.edit-card
+    button(@click="showCardDetails") Edit Card
   section(:style="{backgroundColor: color}")
     .row
       .button-wrap
@@ -76,7 +78,7 @@ export default {
   },
   computed: {
     visible () { return this.$store.state.tagDetailsIsVisible },
-    tag () { return this.$store.state.currentSelectedTag },
+    tag () { return this.$store.state.currentSelectedTag }, // name, color, cardId
     position () { return this.$store.state.tagDetailsPosition },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     dialogPosition () {
@@ -149,6 +151,12 @@ export default {
   //   }
   },
   methods: {
+    showCardDetails () {
+      const cardId = this.tag.cardId
+      this.$store.dispatch('closeAllDialogs', 'TagDetails.showCardDetails')
+      this.$store.commit('cardDetailsIsVisibleForCardId', cardId)
+      this.$store.commit('parentCardId', cardId)
+    },
     toggleColorPicker () {
       this.colorPickerIsVisible = !this.colorPickerIsVisible
     },
@@ -264,6 +272,8 @@ export default {
 
 <style lang="stylus">
 .tag-details
+  section.edit-card
+    background-color var(--secondary-background)
   .tag-name
     margin-left 6px
 //   .edit-message

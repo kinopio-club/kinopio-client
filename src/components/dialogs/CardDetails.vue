@@ -624,7 +624,6 @@ export default {
       const newTags = utils.tagsFromStringWithoutBrackets(this.card.name) || []
       const removedTags = previousTags.filter(previousTag => !newTags.includes(previousTag))
       const addedTags = newTags.filter(newTag => !previousTags.includes(newTag))
-
       console.log('🌴 removedTags:', removedTags, 'addedTags:', addedTags)
     }
   },
