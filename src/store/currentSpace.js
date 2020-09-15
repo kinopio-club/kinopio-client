@@ -1043,8 +1043,8 @@ export default {
         return tagName && otherCard
       })
     },
-    tagsInCard: (state) => (cardId) => {
-      return state.tags.filter(tag => tag.cardId === cardId)
+    tagsInCard: (state) => (card) => {
+      return state.tags.filter(tag => tag.cardId === card.id)
     },
 
     // Connections

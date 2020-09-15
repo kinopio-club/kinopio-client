@@ -1,6 +1,6 @@
 <template lang="pug">
 dialog.narrow.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="dialog" @click.left="closeDialogs")
-  section.edit-card
+  section.edit-card(v-if="!cardDetailsIsVisible")
     button(@click="showCardDetails") Edit Card
   section(:style="{backgroundColor: color}")
     .row
@@ -88,6 +88,7 @@ export default {
       }
     },
     color () { return this.tag.color },
+    cardDetailsIsVisible () { return this.$store.state.cardDetailsIsVisibleForCardId },
     name: {
       get () {
         return this.tag.name

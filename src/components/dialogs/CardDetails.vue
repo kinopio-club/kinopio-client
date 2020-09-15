@@ -96,6 +96,16 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         img.icon.cancel(src="@/assets/add.svg")
         span Max Length
       p To fit small screens, cards can't be longer than 250 characters
+    //- Tags
+    template(v-for="tag in tagsInCard")
+      span.badge.button-badge(
+        :style="{backgroundColor: tag.color}"
+        :class="{ active: currentSelectedTag.name === tag.name }"
+        tabindex="0"
+        @click.left.stop="showTagDetailsIsVisible($event, tag)"
+        @touchend.stop="showTagDetailsIsVisible($event, tag)"
+        @keyup.stop.enter="showTagDetailsIsVisible($event, tag)"
+      ) {{tag.name}}
 
 </template>
 
@@ -185,6 +195,8 @@ export default {
         return false
       }
     },
+    tagsInCard () { return this.$store.getters['currentSpace/tagsInCard'](this.card) },
+    currentSelectedTag () { return this.$store.state.currentSelectedTag },
     name: {
       get () {
         return this.card.name
@@ -578,6 +590,7 @@ export default {
       this.framePickerIsVisible = false
       this.imagePickerIsVisible = false
       this.hideTagPicker()
+      this.hideTagDetailsIsVisible()
     },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
@@ -628,12 +641,10 @@ export default {
       previousTags = utils.tagsFromStringWithoutBrackets(name) || []
     },
     normalizeTags (tags) {
-      // ?? tags are the same color in a space, but not necessarily across all spaces
       return tags.map(tag => {
         return {
           name: tag,
           cardId: this.card.id
-          // color added by currentSpace, based on preexisting tags or usercolor
         }
       })
     },
@@ -650,6 +661,20 @@ export default {
       addedTags = this.normalizeTags(addedTags)
       addedTags.forEach(tag => this.$store.dispatch('currentSpace/addTag', tag))
       this.savePreviousTags()
+    },
+    hideTagDetailsIsVisible () {
+      this.$store.commit('currentSelectedTag', {})
+      this.$store.commit('tagDetailsIsVisible', false)
+    },
+    showTagDetailsIsVisible (event, tag) {
+      console.log(tag)
+      const tagRect = event.target.getBoundingClientRect()
+      this.$store.commit('tagDetailsPosition', {
+        x: window.scrollX + tagRect.x + 2,
+        y: window.scrollY + tagRect.y + tagRect.height - 2
+      })
+      this.$store.commit('currentSelectedTag', tag)
+      this.$store.commit('tagDetailsIsVisible', true)
     }
   },
   watch: {
