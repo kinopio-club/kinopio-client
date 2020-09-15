@@ -272,7 +272,6 @@ export default {
       cache.updateSpace('tags', state.tags, state.id)
       console.log('🐸🐸 after add tag', state.tags)
     },
-
     removeTag: (state, tag) => {
       state.tags = state.tags.filter(spaceTag => {
         const name = spaceTag.name === tag.name
@@ -280,7 +279,19 @@ export default {
         return !(name && cardId)
       })
       cache.updateSpace('tags', state.tags, state.id)
-      console.log('🍆🍆 after remove tag', state.tags)
+    },
+    removeTagsFromCard: (state, card) => {
+      state.tags = state.tags.filter(spaceTag => {
+        return spaceTag.cardId !== card.id
+      })
+      cache.updateSpace('tags', state.tags, state.id)
+    },
+    removeTagsFromAllRemovedCards: (state) => {
+      const cardIds = state.removedCards.map(card => card.id)
+      state.tags = state.tags.filter(spaceTag => {
+        return !cardIds.includes(spaceTag.cardId)
+      })
+      cache.updateSpace('tags', state.tags, state.id)
     }
   },
 
@@ -758,9 +769,11 @@ export default {
     },
     removeCardPermanent: (context, card) => {
       context.commit('removeCardPermanent', card)
+      context.commit('removeTagsFromCard', card)
       context.dispatch('api/addToQueue', { name: 'removeCardPermanent', body: card }, { root: true })
     },
     removeAllRemovedCardsPermanent: (context) => {
+      context.commit('removeTagsFromAllRemovedCards')
       context.commit('removeAllRemovedCardsPermanent')
       context.dispatch('api/addToQueue', { name: 'removeAllRemovedCardsPermanentFromSpace', body: {} }, { root: true })
     },
@@ -966,7 +979,7 @@ export default {
       })
     },
 
-    // background
+    // Background
 
     loadBackground: (context, background) => {
       const currentBackground = utils.urlFromString(document.body.style.backgroundImage)
@@ -978,7 +991,7 @@ export default {
       }
     },
 
-    // tags
+    // Tags
 
     addTag: (context, tag) => {
       tag.color = context.rootState.currentUser.color
@@ -1020,6 +1033,18 @@ export default {
     // Cards
     cardById: (state) => (id) => {
       return state.cards.find(card => card.id === id)
+    },
+
+    // Tags
+    tagByNameInOtherCard: (state) => ({ name, cardId }) => {
+      return state.tags.find(tag => {
+        const tagName = tag.name === name
+        const otherCard = tag.cardId !== cardId
+        return tagName && otherCard
+      })
+    },
+    tagsInCard: (state) => (cardId) => {
+      return state.tags.filter(tag => tag.cardId === cardId)
     },
 
     // Connections
