@@ -645,6 +645,7 @@ export default {
 
   tagsFromStringWithoutBrackets (string) {
     let tags = this.tagsFromString(string)
+    if (!tags) { return }
     tags = tags.map(tag => tag.substring(2, tag.length - 2))
     return tags
   },

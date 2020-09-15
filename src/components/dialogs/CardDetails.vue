@@ -161,6 +161,7 @@ export default {
     if (element) {
       this.scrollIntoViewAndFocus()
       this.$emit('broadcastShowCardDetails')
+      this.savePreviousTags()
     }
   },
   computed: {
@@ -618,10 +619,17 @@ export default {
       this.triggerUpdatePositionInVisualViewport()
     },
     savePreviousTags () {
-      previousTags = utils.tagsFromStringWithoutBrackets(this.card.name) || []
+      const name = this.card.name
+      if (!name) {
+        previousTags = []
+        return
+      }
+      previousTags = utils.tagsFromStringWithoutBrackets(name) || []
     },
     updateTags () {
-      const newTags = utils.tagsFromStringWithoutBrackets(this.card.name) || []
+      const name = this.card.name
+      if (!name) { return }
+      const newTags = utils.tagsFromStringWithoutBrackets(name) || []
       const removedTags = previousTags.filter(previousTag => !newTags.includes(previousTag))
       const addedTags = newTags.filter(newTag => !previousTags.includes(newTag))
       console.log('🌴 removedTags:', removedTags, 'addedTags:', addedTags)
