@@ -643,6 +643,12 @@ export default {
     return tags
   },
 
+  tagsFromStringWithoutBrackets (string) {
+    let tags = this.tagsFromString(string)
+    tags = tags.map(tag => tag.substring(2, tag.length - 2))
+    return tags
+  },
+
   urlWithoutProtocol (url) {
     let newUrl
     const http = 'http://'

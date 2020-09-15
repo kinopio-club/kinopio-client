@@ -109,6 +109,8 @@ import utils from '@/utils.js'
 
 import qs from '@aguezz/qs-parse'
 
+let previousTags = []
+
 export default {
   name: 'CardDetails',
   components: {
@@ -154,7 +156,7 @@ export default {
     })
   },
   mounted () {
-    // for new cards
+    // for new cards only
     const element = this.$refs.dialog
     if (element) {
       this.scrollIntoViewAndFocus()
@@ -265,7 +267,7 @@ export default {
       this.tagPickerIsVisible = false
     },
     tagStartText (cursorPosition) {
-      // ...[[start|
+      // ...[[abc
       const start = this.name.substring(0, cursorPosition)
       let startPosition = start.lastIndexOf('[[')
       if (startPosition === -1) { return }
@@ -273,7 +275,7 @@ export default {
       return start.substring(startPosition)
     },
     tagEndText (cursorPosition) {
-      // |end]]...
+      // xyz]]...
       const end = this.name.substring(cursorPosition)
       const endPosition = end.indexOf(']]')
       if (endPosition === -1) { return }
@@ -614,6 +616,16 @@ export default {
       }
       this.updateCardName(utils.trim(name))
       this.triggerUpdatePositionInVisualViewport()
+    },
+    savePreviousTags () {
+      previousTags = utils.tagsFromStringWithoutBrackets(this.card.name) || []
+    },
+    updateTags () {
+      const newTags = utils.tagsFromStringWithoutBrackets(this.card.name) || []
+      const removedTags = previousTags.filter(previousTag => !newTags.includes(previousTag))
+      const addedTags = newTags.filter(newTag => !previousTags.includes(newTag))
+
+      console.log('🌴 removedTags:', removedTags, 'addedTags:', addedTags)
     }
   },
   watch: {
@@ -621,8 +633,10 @@ export default {
       this.$nextTick(() => {
         if (visible) {
           this.scrollIntoViewAndFocus()
+          this.savePreviousTags()
         } else {
           this.removeTrackingQueryStrings()
+          this.updateTags()
         }
       })
       if (!visible && this.cardIsEmpty()) {
