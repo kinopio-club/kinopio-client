@@ -44,11 +44,11 @@ article(:style="position" :data-card-id="id" ref="card")
           p.name.name-segments(v-if="normalizedName" :style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox}")
             template(v-for="segment in nameSegments")
               span(v-if="segment.isText") {{segment.content}}
+              //- Tags
               span.badge.button-badge(
                 v-if="segment.isTag"
                 :style="{backgroundColor: segment.color}"
                 :class="{ active: currentSelectedTag.name === segment.name }"
-                :data-tag-id="segment.id"
                 tabindex="0"
                 @click.left="showTagDetailsIsVisible($event, segment)"
                 @touchend="showTagDetailsIsVisible($event, segment)"
@@ -325,6 +325,7 @@ export default {
       const tags = utils.tagsFromString(this.normalizedName)
       let segments = []
       let name = this.normalizedName
+      // const cardTags = currentSpace getter cardTags by name, for setting color
       if (tags) {
         tags.forEach(tag => {
           const tagStartPosition = name.indexOf(tag)
@@ -336,8 +337,7 @@ export default {
           segments.push({
             isTag: true,
             name: tag.substring(2, tag.length - 2),
-            color: 'pink', // TEMP, get from tags cache, (tags fetch happens on space load which updates †ags cache)
-            id: 1 // TEMP, get from cache, add :key=id to rendering
+            color: this.$store.state.currentUser.color // TEMP, get from tags cache, (tags fetch happens on space load which updates †ags cache)
           })
           name = name.substring(tagEndPosition, name.length)
         })
