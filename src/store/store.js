@@ -94,6 +94,7 @@ export default new Vuex.Store({
     spaceCollaboratorKeys: [],
     remotePendingUploads: [],
     hasRestoredFavorites: false,
+    loadSpaceShowDetailsForCardId: '',
 
     // notifications
     notifications: [],
@@ -506,6 +507,10 @@ export default new Vuex.Store({
     hasRestoredFavorites: (state, value) => {
       utils.typeCheck(value, 'boolean')
       state.hasRestoredFavorites = value
+    },
+    loadSpaceShowDetailsForCardId: (state, cardId) => {
+      utils.typeCheck(cardId, 'string')
+      state.loadSpaceShowDetailsForCardId = cardId
     },
 
     // Notifications

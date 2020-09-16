@@ -190,14 +190,14 @@ export default {
       })
     },
     showCardDetails (card) {
-      // TODO
-      console.log('🍄 diff show card logic if card.spaceId not current', this.currentSpaceId, card.spaceId)
-
-      const cardId = card.id || this.currentTag.cardId
-      this.$store.dispatch('closeAllDialogs', 'TagDetails.showCardDetails')
-      this.$store.dispatch('currentSpace/incrementCardZ', cardId)
-      this.$store.commit('cardDetailsIsVisibleForCardId', cardId)
-      this.$store.commit('parentCardId', cardId)
+      if (this.currentSpaceId !== card.spaceId) {
+        this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
+        const space = cache.space(card.spaceId) || { id: card.spaceId }
+        this.$store.dispatch('currentSpace/changeSpace', { space })
+      } else {
+        const cardId = card.id || this.currentTag.cardId
+        this.$store.dispatch('currentSpace/showCardDetails', cardId)
+      }
     },
     toggleColorPicker () {
       this.colorPickerIsVisible = !this.colorPickerIsVisible

@@ -552,6 +552,10 @@ export default {
       }, { root: true })
       context.commit('parentCardId', '', { root: true })
       context.dispatch('updateUserLastSpaceId')
+      const cardId = context.rootState.loadSpaceShowDetailsForCardId
+      if (cardId) {
+        context.dispatch('showCardDetails', cardId)
+      }
     },
     updateUserLastSpaceId: (context) => {
       const space = context.state
@@ -857,6 +861,13 @@ export default {
       } else {
         context.dispatch('incrementCardZ', currentDraggingCardId)
       }
+    },
+    showCardDetails: (context, cardId) => {
+      context.dispatch('closeAllDialogs', 'currentSpace.showCardDetails', { root: true })
+      context.dispatch('incrementCardZ', cardId)
+      context.commit('cardDetailsIsVisibleForCardId', cardId, { root: true })
+      context.commit('parentCardId', cardId, { root: true })
+      context.commit('loadSpaceShowDetailsForCardId', '', { root: true })
     },
 
     // Connections
