@@ -21,8 +21,13 @@ dialog.filters.narrow(v-if="visible" :open="visible")
           span Updated
 
   section.results-section.connection-types
+    //- TODO resultsfilter
     ul.results-list
-      template(v-for="(type in connectionTypes")
+      template(v-for="tag in tags")
+        li
+          input(type="checkbox" :checked="isSelected(tag)")
+          .badge(:style="{backgroundColor: tag.color}") {{tag.name}}
+      template(v-for="type in connectionTypes")
         li(:class="{ active: connectionTypeIsActive(type) }" @click.left="toggleFilteredConnectionType(type)" :key="type.id" tabindex="0" v-on:keyup.enter="toggleFilteredConnectionType(type)")
           input(type="checkbox" :checked="isSelected(type)")
           .badge(:style="{backgroundColor: type.color}")
@@ -38,10 +43,11 @@ dialog.filters.narrow(v-if="visible" :open="visible")
 </template>
 
 <script>
-import uniq from 'lodash-es/uniq'
-
 import frames from '@/frames.js'
 import utils from '@/utils.js'
+
+import uniq from 'lodash-es/uniq'
+import uniqBy from 'lodash-es/uniqBy'
 
 export default {
   name: 'Filters',
@@ -83,6 +89,11 @@ export default {
     },
     filterShowDateUpdated () {
       return this.$store.state.currentUser.filterShowDateUpdated
+    },
+    tags () {
+      let tags = this.$store.state.currentSpace.tags
+      tags = uniqBy(tags, 'name')
+      return tags
     }
   },
   methods: {
