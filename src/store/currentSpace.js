@@ -1036,6 +1036,11 @@ export default {
     },
 
     // Tags
+    tagByName: (state) => (name) => {
+      return state.tags.find(tag => {
+        return tag.name === name
+      })
+    },
     tagsByNameExcludingCardById: (state) => ({ name, cardId }) => {
       return state.tags.filter(tag => {
         const tagName = tag.name === name

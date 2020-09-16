@@ -9,15 +9,26 @@ dialog.narrow.tag-details(v-if="visible" :open="visible" :style="dialogPosition"
           .current-color(:style="{backgroundColor: color}")
         ColorPicker(:currentColor="color" :visible="colorPickerIsVisible" @selectedColor="updateTagColor")
       input.tag-name(:disabled="!canEditSpace" placeholder="Tag Name" v-model="name" ref="name")
-  //- section.results-header
-  //-   p {{currentSpaceName}}
-  section.results-section(v-if="tagCards.length")
+  section.results-section
     //- resultsfilter
     ul.results-list
       template(v-for="(card in tagCards")
-        li
-          .name {{card.name}}
+        li(:data-card-id="card.id" @click="showCardDetails(card)")
+          p.name.name-segments
+            template(v-for="segment in card.nameSegments")
+              span(v-if="segment.isText") {{segment.content}}
+              //- Tags
+              span.badge.tag-badge(
+                v-if="segment.isTag"
+                :style="{backgroundColor: segment.color}"
+                :class="{ active: currentTag.name === segment.name }"
+              ) {{segment.name}}
+
     Loader(:visible="true")
+  //- section
+  //-   button
+  //-     img.icon(src="@/assets/add.svg")
+  //-     span Space from Cards
 
   //- section.results-header
   //-   p Elsewhere
@@ -96,7 +107,7 @@ export default {
   },
   computed: {
     visible () { return this.$store.state.tagDetailsIsVisible },
-    tag () { return this.$store.state.currentSelectedTag }, // name, color, cardId
+    currentTag () { return this.$store.state.currentSelectedTag }, // name, color, cardId
     position () { return this.$store.state.tagDetailsPosition },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     dialogPosition () {
@@ -106,11 +117,11 @@ export default {
       }
     },
     // currentSpaceName () { return this.$store.state.currentSpace.name },
-    color () { return this.tag.color },
+    color () { return this.currentTag.color },
     cardDetailsIsVisible () { return this.$store.state.cardDetailsIsVisibleForCardId },
     name: {
       get () {
-        return this.tag.name
+        return this.currentTag.name
       },
       set (newName) {
         console.log('🌺', newName)
@@ -127,15 +138,18 @@ export default {
       // card has name, id, spaceid
 
       const cards = tags.map(tag => {
-        return this.$store.getters['currentSpace/cardById'](tag.cardId)
+        let card = this.$store.getters['currentSpace/cardById'](tag.cardId)
+        card = utils.clone(card)
+        card.nameSegments = this.cardNameSegments(card.name)
+        return card
       })
-      console.log('💳', tags, cards)
+      console.log('💳', cards)
       return cards
     },
     currentSpaceTags () {
-      const cardId = this.tag.cardId
+      const cardId = this.currentTag.cardId
       return this.$store.getters['currentSpace/tagsByNameExcludingCardById']({
-        name: this.tag.name,
+        name: this.currentTag.name,
         cardId
       })
     }
@@ -175,8 +189,18 @@ export default {
   //   }
   },
   methods: {
-    showCardDetails () {
-      const cardId = this.tag.cardId
+    cardNameSegments (name) {
+      let segments = utils.cardNameSegments(name)
+      return segments.map(segment => {
+        if (segment.isTag) {
+          const tag = this.$store.getters['currentSpace/tagByName'](segment.name)
+          segment.color = tag.color
+        }
+        return segment
+      })
+    },
+    showCardDetails (card) {
+      const cardId = card.id || this.currentTag.cardId
       this.$store.dispatch('closeAllDialogs', 'TagDetails.showCardDetails')
       this.$store.commit('cardDetailsIsVisibleForCardId', cardId)
       this.$store.commit('parentCardId', cardId)
@@ -305,6 +329,13 @@ export default {
     padding-top 2px
   .loader
     margin-left 6px
+  .name-segments
+    .badge
+      &:last-child
+        margin 0
+  .tag-badge
+    &.active
+      box-shadow var(--button-active-inset-shadow)
 
   // .results-header
   //   padding-bottom 4px

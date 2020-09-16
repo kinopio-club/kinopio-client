@@ -54,7 +54,6 @@ article(:style="position" :data-card-id="id" ref="card")
                 @touchend="showTagDetailsIsVisible($event, segment)"
                 @keyup.stop.enter="showTagDetailsIsVisible($event, segment)"
               ) {{segment.name}}
-              //- ^class TEMP switch to using tag.id?
 
       //- Right buttons
       span.card-buttons-wrap
@@ -322,38 +321,14 @@ export default {
       return utils.trim(name)
     },
     nameSegments () {
-      const tags = utils.tagsFromString(this.normalizedName)
-      let segments = []
-      let name = this.normalizedName
-      // const cardTags = currentSpace getter cardTags by name, for setting color
-      if (tags) {
-        tags.forEach(tag => {
-          const tagStartPosition = name.indexOf(tag)
-          const tagEndPosition = tagStartPosition + tag.length
-          segments.push({
-            isText: true,
-            content: name.substring(0, tagStartPosition)
-          })
-          segments.push({
-            isTag: true,
-            name: tag.substring(2, tag.length - 2),
-            color: this.$store.state.currentUser.color // TEMP, get from tags cache, (tags fetch happens on space load which updates †ags cache)
-          })
-          name = name.substring(tagEndPosition, name.length)
-        })
-        if (name.length) {
-          segments.push({
-            isText: true,
-            content: name
-          })
+      let segments = utils.cardNameSegments(this.normalizedName)
+      return segments.map(segment => {
+        if (segment.isTag) {
+          const tag = this.$store.getters['currentSpace/tagByName'](segment.name)
+          segment.color = tag.color
         }
-        return segments
-      } else {
-        return [{
-          isText: true,
-          content: name
-        }]
-      }
+        return segment
+      })
     },
     nameLineMinWidth () {
       const averageCharacterWidth = 6.5

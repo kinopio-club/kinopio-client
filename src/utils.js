@@ -644,23 +644,6 @@ export default {
     return urls
   },
 
-  tagsFromString (string) {
-    // https://regexr.com/5bv6b
-    // '[' twice
-    // then anything except line break and ']'
-    // ']' twice
-    const tagPattern = new RegExp(/([[]{2}[^\n(\]\])]+[\]]{2})/gm)
-    const tags = string.match(tagPattern)
-    return tags
-  },
-
-  tagsFromStringWithoutBrackets (string) {
-    let tags = this.tagsFromString(string)
-    if (!tags) { return }
-    tags = tags.map(tag => tag.substring(2, tag.length - 2))
-    return tags
-  },
-
   urlWithoutProtocol (url) {
     let newUrl
     const http = 'http://'
@@ -818,6 +801,59 @@ export default {
     const sizeLimit = 1024 * 1024 * 5 // 5mb
     if (file.size > sizeLimit && !userIsUpgraded) {
       return true
+    }
+  },
+
+  // Tags
+
+  tagsFromString (string) {
+    // https://regexr.com/5bv6b
+    // '[' twice
+    // then anything except line break and ']'
+    // ']' twice
+    const tagPattern = new RegExp(/([[]{2}[^\n(\]\])]+[\]]{2})/gm)
+    const tags = string.match(tagPattern)
+    return tags
+  },
+
+  tagsFromStringWithoutBrackets (string) {
+    let tags = this.tagsFromString(string)
+    if (!tags) { return }
+    tags = tags.map(tag => tag.substring(2, tag.length - 2))
+    return tags
+  },
+
+  cardNameSegments (name) {
+    const tags = this.tagsFromString(name)
+    let segments = []
+    // let name = name
+
+    if (tags) {
+      tags.forEach(tag => {
+        const tagStartPosition = name.indexOf(tag)
+        const tagEndPosition = tagStartPosition + tag.length
+        segments.push({
+          isText: true,
+          content: name.substring(0, tagStartPosition)
+        })
+        segments.push({
+          isTag: true,
+          name: tag.substring(2, tag.length - 2)
+        })
+        name = name.substring(tagEndPosition, name.length)
+      })
+      if (name.length) {
+        segments.push({
+          isText: true,
+          content: name
+        })
+      }
+      return segments
+    } else {
+      return [{
+        isText: true,
+        content: name
+      }]
     }
   }
 
