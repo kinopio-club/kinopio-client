@@ -68,7 +68,7 @@ export default new Vuex.Store({
     // tags
     tagDetailsIsVisible: false,
     tagDetailsPosition: {}, // x, y
-    currentSelectedTag: {}, // ?TEMP to currentSelectedTagId: '' ?
+    currentSelectedTag: {},
 
     // dragging
     currentDraggingCardId: '',

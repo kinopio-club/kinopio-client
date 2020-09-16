@@ -8,7 +8,7 @@ dialog.narrow.tag-picker(v-if="visible" :open="visible" @click.left.stop ref="di
     ul.results-list
       li(v-if="search")
         .badge.info.tag-badge(:style="{backgroundColor: currentUserColor}")
-          img.icon.add(v-if="!existingSpaceTag" src="@/assets/add.svg")
+          img.icon.add(v-if="!tags" src="@/assets/add.svg")
           span {{search}}
     Loader(:visible="loading")
 </template>
@@ -36,7 +36,7 @@ export default {
   },
   data () {
     return {
-      tags: [],
+      // tags: [],
       loading: true
     }
   },
@@ -44,11 +44,11 @@ export default {
     currentUserColor () {
       return this.$store.state.currentUser.color
     },
-    existingSpaceTag () {
-      const currentCardId = this.$store.state.cardDetailsIsVisibleForCardId
-      return this.$store.getters['currentSpace/tagByNameInOtherCard']({
+    tags () {
+      const cardId = this.$store.state.cardDetailsIsVisibleForCardId
+      return this.$store.getters['currentSpace/tagsByNameExcludingCardById']({
         name: this.search,
-        cardId: currentCardId
+        cardId
       })
     }
     // spaceTags () {

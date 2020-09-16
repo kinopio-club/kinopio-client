@@ -1036,8 +1036,8 @@ export default {
     },
 
     // Tags
-    tagByNameInOtherCard: (state) => ({ name, cardId }) => {
-      return state.tags.find(tag => {
+    tagsByNameExcludingCardById: (state) => ({ name, cardId }) => {
+      return state.tags.filter(tag => {
         const tagName = tag.name === name
         const otherCard = tag.cardId !== cardId
         return tagName && otherCard

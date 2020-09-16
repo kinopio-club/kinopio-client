@@ -11,11 +11,12 @@ dialog.narrow.tag-details(v-if="visible" :open="visible" :style="dialogPosition"
       input.tag-name(:disabled="!canEditSpace" placeholder="Tag Name" v-model="name" ref="name")
   //- section.results-header
   //-   p {{currentSpaceName}}
-  section.results-section
+  section.results-section(v-if="tagCards.length")
     //- resultsfilter
     ul.results-list
-      li
-        .name supsup
+      template(v-for="(card in tagCards")
+        li
+          .name {{card.name}}
     Loader(:visible="true")
 
   //- section.results-header
@@ -119,6 +120,24 @@ export default {
         // }
         // this.$store.dispatch('currentSpace/updateConnectionType', connectionType)
       }
+    },
+    tagCards () {
+      const tags = this.currentSpaceTags
+      // tag has cardid, color, name
+      // card has name, id, spaceid
+
+      const cards = tags.map(tag => {
+        return this.$store.getters['currentSpace/cardById'](tag.cardId)
+      })
+      console.log('💳', tags, cards)
+      return cards
+    },
+    currentSpaceTags () {
+      const cardId = this.tag.cardId
+      return this.$store.getters['currentSpace/tagsByNameExcludingCardById']({
+        name: this.tag.name,
+        cardId
+      })
     }
 
   //   currentConnection () {
