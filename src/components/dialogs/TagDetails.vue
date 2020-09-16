@@ -17,6 +17,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="d
           p.name.name-segments
             span.badge.space-badge(v-if="card.spaceName") {{card.spaceName}}
             template(v-for="segment in card.nameSegments")
+              img(v-if="segment.isImage" :src="segment.url")
               span(v-if="segment.isText") {{segment.content}}
               //- Tags
               span.badge.tag-badge(
@@ -118,7 +119,6 @@ export default {
         top: `${this.position.y}px`
       }
     },
-    // currentSpaceName () { return this.$store.state.currentSpace.name },
     color () { return this.currentTag.color },
     cardDetailsIsVisible () { return this.$store.state.cardDetailsIsVisibleForCardId },
     name: {
@@ -136,7 +136,6 @@ export default {
     },
     tagCards () {
       const cardsInCurrentSpace = this.tagCardsInCurrentSpace
-      // const cardsInCachedSpaces = this.tagCardsInCachedSpaces
       const cardsInCachedSpaces = cache.cardsByTagNameExcludingSpaceById(this.currentTag.name, this.currentSpaceId)
       // todo fetch remote, and merge
       console.log('🥂', cardsInCurrentSpace, cardsInCachedSpaces)
@@ -154,19 +153,32 @@ export default {
         name: this.currentTag.name,
         cardId
       })
-      return tags.map(tag => {
+      let cards = tags.map(tag => {
         let card = this.$store.getters['currentSpace/cardById'](tag.cardId)
         return card
       })
+      cards = cards.filter(card => card)
+      return cards
     }
   },
   methods: {
     cardNameSegments (name) {
+      let url = utils.urlFromString(name)
+      let imageUrl
+      if (utils.urlIsImage(url)) {
+        imageUrl = url
+        name = name.replace(url, '')
+      }
       let segments = utils.cardNameSegments(name)
+      if (imageUrl) {
+        segments.unshift({
+          isImage: true,
+          url: imageUrl
+        })
+      }
       return segments.map(segment => {
         if (segment.isTag) {
           const spaceTag = this.$store.getters['currentSpace/tagByName'](segment.name)
-          console.log(segment.name, spaceTag)
           if (spaceTag) {
             segment.color = spaceTag.color
           } else {
@@ -176,9 +188,6 @@ export default {
         }
         return segment
       })
-    },
-    tagByNameInCachedSpaces (name) {
-
     },
     showCardDetails (card) {
       // TODO
@@ -266,6 +275,12 @@ export default {
     .badge
       &:last-child
         margin 0
+    img
+      display inline
+      max-height 30px
+      border-radius 3px
+      margin-right 5px
+      vertical-align middle
   .space-badge
     // margin 0
     background-color var(--secondary-background)
