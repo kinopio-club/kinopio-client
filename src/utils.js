@@ -119,6 +119,16 @@ export default {
     }
   },
 
+  arrayHasItems (array) {
+    this.typeCheck(array, 'array')
+    if (array) {
+      if (array.length) {
+        return true
+      }
+    }
+    return false
+  },
+
   updateObject (object, value) {
     this.typeCheck(value, 'object')
     const keys = Object.keys(value)

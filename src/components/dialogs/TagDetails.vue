@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="dialog" @click.left="closeDialogs")
+dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="dialog" @click.left="closeDialogs")
   section.edit-card(v-if="!cardDetailsIsVisible")
     button(@click="showCardDetails") Edit Card
   section(:style="{backgroundColor: color}")
@@ -15,6 +15,7 @@ dialog.narrow.tag-details(v-if="visible" :open="visible" :style="dialogPosition"
       template(v-for="(card in tagCards")
         li(:data-card-id="card.id" @click="showCardDetails(card)")
           p.name.name-segments
+            span.badge.space-badge(v-if="card.spaceName") {{card.spaceName}}
             template(v-for="segment in card.nameSegments")
               span(v-if="segment.isText") {{segment.content}}
               //- Tags
@@ -86,10 +87,10 @@ dialog.narrow.tag-details(v-if="visible" :open="visible" :style="dialogPosition"
 <script>
 // import ResultsFilter from '@/components/ResultsFilter.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import utils from '@/utils.js'
-
 import Loader from '@/components/Loader.vue'
 import scrollIntoView from '@/scroll-into-view.js'
+import utils from '@/utils.js'
+import cache from '@/cache.js'
 
 export default {
   name: 'TagDetails',
@@ -110,6 +111,7 @@ export default {
     currentTag () { return this.$store.state.currentSelectedTag }, // name, color, cardId
     position () { return this.$store.state.tagDetailsPosition },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
+    currentSpaceId () { return this.$store.state.currentSpace.id },
     dialogPosition () {
       return {
         left: `${this.position.x}px`,
@@ -133,75 +135,58 @@ export default {
       }
     },
     tagCards () {
-      const tags = this.currentSpaceTags
-      // tag has cardid, color, name
-      // card has name, id, spaceid
-
-      const cards = tags.map(tag => {
-        let card = this.$store.getters['currentSpace/cardById'](tag.cardId)
+      const cardsInCurrentSpace = this.tagCardsInCurrentSpace
+      // const cardsInCachedSpaces = this.tagCardsInCachedSpaces
+      const cardsInCachedSpaces = cache.cardsByTagNameExcludingSpaceById(this.currentTag.name, this.currentSpaceId)
+      // todo fetch remote, and merge
+      console.log('🥂', cardsInCurrentSpace, cardsInCachedSpaces)
+      let cards = cardsInCurrentSpace.concat(cardsInCachedSpaces)
+      cards = cards.map(card => {
         card = utils.clone(card)
         card.nameSegments = this.cardNameSegments(card.name)
         return card
       })
-      console.log('💳', cards)
       return cards
     },
-    currentSpaceTags () {
+    tagCardsInCurrentSpace () {
       const cardId = this.currentTag.cardId
-      return this.$store.getters['currentSpace/tagsByNameExcludingCardById']({
+      const tags = this.$store.getters['currentSpace/tagsByNameExcludingCardById']({
         name: this.currentTag.name,
         cardId
       })
+      return tags.map(tag => {
+        let card = this.$store.getters['currentSpace/cardById'](tag.cardId)
+        return card
+      })
     }
-
-  //   currentConnection () {
-  //     let connections = this.$store.state.currentSpace.connections
-  //     return connections.find(connection => {
-  //       return connection.id === this.$store.state.connectionDetailsIsVisibleForConnectionId
-  //     })
-  //   },
-  //   canEditConnection () {
-  //     const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
-  //     const connectionIsCreatedByCurrentUser = this.$store.getters['currentUser/connectionIsCreatedByCurrentUser'](this.currentConnection)
-  //     const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
-  //     if (isSpaceMember) { return true }
-  //     if (canEditSpace && connectionIsCreatedByCurrentUser) { return true }
-  //     return false
-  //   },
-  //   typeName: {
-  //     get () {
-  //       return this.currentConnectionType.name
-  //     },
-  //     set (newName) {
-  //       const connectionType = {
-  //         id: this.currentConnectionType.id,
-  //         name: newName
-  //       }
-  //       this.$store.dispatch('currentSpace/updateConnectionType', connectionType)
-  //     }
-  //   },
-  //   connectionTypesFiltered () {
-  //     if (this.filter) {
-  //       return this.filteredConnectionTypes
-  //     } else {
-  //       return this.connectionTypes
-  //     }
-  //   }
   },
   methods: {
     cardNameSegments (name) {
       let segments = utils.cardNameSegments(name)
       return segments.map(segment => {
         if (segment.isTag) {
-          const tag = this.$store.getters['currentSpace/tagByName'](segment.name)
-          segment.color = tag.color
+          const spaceTag = this.$store.getters['currentSpace/tagByName'](segment.name)
+          console.log(segment.name, spaceTag)
+          if (spaceTag) {
+            segment.color = spaceTag.color
+          } else {
+            const cachedTag = cache.tagByName(segment.name)
+            segment.color = cachedTag.color
+          }
         }
         return segment
       })
     },
+    tagByNameInCachedSpaces (name) {
+
+    },
     showCardDetails (card) {
+      // TODO
+      console.log('🍄 diff show card logic if card.spaceId not current', this.currentSpaceId, card.spaceId)
+
       const cardId = card.id || this.currentTag.cardId
       this.$store.dispatch('closeAllDialogs', 'TagDetails.showCardDetails')
+      this.$store.dispatch('currentSpace/incrementCardZ', cardId)
       this.$store.commit('cardDetailsIsVisibleForCardId', cardId)
       this.$store.commit('parentCardId', cardId)
     },
@@ -219,52 +204,6 @@ export default {
       // }
       // this.$store.dispatch('currentSpace/updateConnectionType', connectionType)
     },
-
-    //   addConnectionType () {
-    //     this.$store.dispatch('currentSpace/addConnectionType')
-    //     const types = utils.clone(this.connectionTypes)
-    //     const newType = last(types)
-    //     this.changeConnectionType(newType)
-    //   },
-    //   connectionTypeIsActive (type) {
-    //     return Boolean(type.id === this.currentConnection.connectionTypeId)
-    //   },
-    //   connectionTypeIsDefault (type) {
-    //     const typePref = this.$store.state.currentUser.defaultConnectionTypeId
-    //     return typePref === type.id
-    //   },
-    //   removeConnection () {
-    //     this.$store.dispatch('currentSpace/removeConnection', this.currentConnection)
-    //     this.$store.dispatch('closeAllDialogs', 'ConnectionDetails.removeConnection')
-    //     this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
-    //   },
-    //   changeConnectionType (type) {
-    //     this.$store.dispatch('currentSpace/updateConnectionTypeForConnection', {
-    //       connectionId: this.currentConnection.id,
-    //       connectionTypeId: type.id
-    //     })
-    //     this.$store.commit('currentSpace/reorderConnectionTypeToLast', type)
-    //     this.updateDefaultConnectionType()
-    //   },
-    //   updateDefaultConnectionType () {
-    //     const typePref = this.$store.state.currentUser.defaultConnectionTypeId
-    //     this.isDefault = Boolean(typePref === this.currentConnectionType.id)
-    //   },
-    //   toggleDefault () {
-    //     this.isDefault = !this.isDefault
-    //     if (this.isDefault) {
-    //       this.$store.dispatch('currentUser/defaultConnectionTypeId', this.currentConnectionType.id)
-    //     } else {
-    //       this.$store.dispatch('currentUser/defaultConnectionTypeId', '')
-    //     }
-    //   },
-    //   toggleLabelIsVisible () {
-    //     const newValue = !this.labelIsVisible
-    //     this.$store.dispatch('currentSpace/updateLabelIsVisibleForConnection', {
-    //       connectionId: this.currentConnection.id,
-    //       labelIsVisible: newValue
-    //     })
-    //   },
     focusName () {
       this.$nextTick(() => {
         const element = this.$refs.name
@@ -292,12 +231,6 @@ export default {
   //   updateView () {
   //     this.updateDefaultConnectionType()
   //     this.colorPickerIsVisible = false
-  //   },
-  //   triggerSignUpOrInIsVisible () {
-  //     this.$store.commit('triggerSignUpOrInIsVisible')
-  //   },
-  //   updateFilteredConnectionTypes (types) {
-  //     this.filteredConnectionTypes = types
   //   },
   //   updateFilter (filter) {
   //     this.filter = filter
@@ -333,6 +266,9 @@ export default {
     .badge
       &:last-child
         margin 0
+  .space-badge
+    // margin 0
+    background-color var(--secondary-background)
   .tag-badge
     &.active
       box-shadow var(--button-active-inset-shadow)

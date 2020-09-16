@@ -149,6 +149,47 @@ export default {
     return sortedSpaces
   },
 
+  // Tags
+
+  cardsByTagNameExcludingSpaceById (name, spaceId) {
+    let spaces = this.getAllSpaces()
+    spaces = spaces.filter(space => {
+      const notExcludedSpace = space.id !== spaceId
+      const hasTags = utils.arrayHasItems(space.tags)
+      return notExcludedSpace && hasTags
+    })
+    let cards = [] // card name, id, spaceid
+    spaces.forEach(space => {
+      const tags = space.tags.filter(tag => tag.name === name)
+      if (!utils.arrayHasItems(tags)) { return }
+      const cardIds = tags.map(tag => tag.cardId)
+      space.cards.forEach(card => {
+        if (cardIds.includes(card.id)) {
+          card.spaceName = space.name
+          cards.push(card)
+        }
+      })
+    })
+    return cards
+  },
+  tagByName (name) {
+    let spaces = this.getAllSpaces()
+    let tags = []
+    spaces.forEach(space => {
+      if (!utils.arrayHasItems(space.tags)) { return }
+      tags = tags.concat(space.tags)
+      // space.tags
+    })
+    const tag = tags.find(tag => tag.name === name)
+    console.log(tags, tag)
+    return tag
+    // spaces.find(space => {
+    //   if (space.tags.find(tag => tag.name === name)) {
+    //     return true
+    //   }
+    // })
+  },
+
   // API Queue
 
   queue () {
@@ -202,13 +243,13 @@ export default {
     this.storeLocal('invitedSpaces', invitedSpaces)
   },
 
-  // billing
+  // Billing
 
   saveStripeIds (stripeIds) {
     this.storeLocal('stripeIds', stripeIds)
   }
   // stripeIds () {
   //   return this.getLocal('stripeIds')
-  // }
+  // },
 
 }
