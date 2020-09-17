@@ -1,21 +1,25 @@
 <template lang="pug">
 dialog.narrow.tag-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{top: position.top + 'px'}")
-  section(v-if="!search")
+  section.info-section(v-if="!search")
     p
       img.icon.search(src="@/assets/search.svg")
       span Type to add or search tags
   section.results-section
     ul.results-list
       li(v-if="search")
-        .badge.info.tag-badge(:style="{backgroundColor: currentUserColor}")
-          img.icon.add(v-if="!tags" src="@/assets/add.svg")
+        .badge.tag-badge(:style="{backgroundColor: currentUserColor}")
+          img.icon.add(v-if="!tagExists" src="@/assets/add.svg")
           span {{search}}
+      li(v-for="tag in tags")
+        .badge.tag-badge(:style="{backgroundColor: tag.color}")
+          span {{tag.name}}
+
     Loader(:visible="loading")
 </template>
 
 <script>
 // import scrollIntoView from '@/scroll-into-view.js'
-// import cache from '@/cache.js'
+import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
 
 export default {
@@ -27,16 +31,11 @@ export default {
     visible: Boolean,
     position: Object,
     search: String
-    // selectedSpace: Object,
-    // shouldExcludeCurrentSpace: Boolean,
-    // userSpaces: Array,
-    // user: Object,
     // loading: Boolean,
-    // showUserIfCurrentUserIsCollaborator: Boolean
   },
   data () {
     return {
-      // tags: [],
+      tags: [],
       loading: true
     }
   },
@@ -44,29 +43,44 @@ export default {
     currentUserColor () {
       return this.$store.state.currentUser.color
     },
-    tags () {
-      const cardId = this.$store.state.cardDetailsIsVisibleForCardId
-      return this.$store.getters['currentSpace/tagsByNameExcludingCardById']({
-        name: this.search,
-        cardId
+    tagExists () {
+      const currentCardId = this.$store.state.cardDetailsIsVisibleForCardId
+      console.log('🍄', this.tags)
+      const tags = this.tags.filter(tag => {
+        const isName = tag.name === this.search
+        const isOtherCard = tag.cardId !== currentCardId
+        return isName && isOtherCard
       })
+      if (tags.length) {
+        return true
+      } else {
+        return false
+      }
     }
-    // spaceTags () {
-    //   return this.$store.currentSpace.tags
-    // }
+  },
+  methods: {
+    updateTags () {
+      const spaceTags = this.$store.getters['currentSpace/spaceTags']()
+      this.tags = spaceTags
+
+      const cachedTags = cache.allTags()
+      console.log('🌲', spaceTags, cachedTags)
+      // merge
+      // this.tags = mergedTags
+
+      // x most recently added = first in each array
+    },
+    mergeTags (spaceTags, cachedTags) {
+      // move to util
+    }
+  },
+  watch: {
+    visible (visible) {
+      if (visible) {
+        this.updateTags()
+      }
+    }
   }
-  // methods: {
-  // },
-  // watch: {
-  //   visible (visible) {
-  //     this.$nextTick(() => {
-  //       if (visible) {
-  //         this.updateSpaces()
-  //         this.scrollIntoView()
-  //       }
-  //     })
-  //   },
-  // }
 }
 </script>
 
@@ -74,6 +88,9 @@ export default {
 .tag-picker
   .loader
     margin-left 6px
+  .info-section
+    padding-bottom 4px
   .results-section
-    margin-top 2px
+    &:first-child
+      padding-top 4px
 </style>

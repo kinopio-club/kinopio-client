@@ -189,6 +189,17 @@ export default {
     //   }
     // })
   },
+  allTags () {
+    const spaces = this.getAllSpaces()
+    let tags = []
+    spaces.forEach(space => {
+      if (utils.arrayHasItems(space.tags)) {
+        space.tags.forEach(tag => tags.push(tag))
+      }
+    })
+    tags.reverse()
+    return tags
+  },
 
   // API Queue
 
