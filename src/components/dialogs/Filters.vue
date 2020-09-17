@@ -47,7 +47,6 @@ import frames from '@/frames.js'
 import utils from '@/utils.js'
 
 import uniq from 'lodash-es/uniq'
-import uniqBy from 'lodash-es/uniqBy'
 
 export default {
   name: 'Filters',
@@ -90,11 +89,7 @@ export default {
     filterShowDateUpdated () {
       return this.$store.state.currentUser.filterShowDateUpdated
     },
-    tags () {
-      let tags = this.$store.state.currentSpace.tags
-      tags = uniqBy(tags, 'name')
-      return tags
-    }
+    tags () { return this.$store.getters['currentSpace/spaceTags']() }
   },
   methods: {
     toggleFilterShowUsers () {

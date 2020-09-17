@@ -3,6 +3,7 @@ import randomColor from 'randomcolor'
 import nanoid from 'nanoid'
 import random from 'lodash-es/random'
 import last from 'lodash-es/last'
+import uniqBy from 'lodash-es/uniqBy'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -1061,6 +1062,11 @@ export default {
     },
     tagsInCard: (state) => (card) => {
       return state.tags.filter(tag => tag.cardId === card.id)
+    },
+    spaceTags: (state) => (card) => {
+      let tags = state.tags
+      tags = uniqBy(tags, 'name')
+      return tags
     },
 
     // Connections
