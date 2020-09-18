@@ -8,7 +8,6 @@ dialog.narrow.tag-picker(v-if="visible" :open="visible" @click.left.stop ref="di
     ul.results-list
       li(v-if="search" @click="selectTag(null)" :class="{hover: focusOnTagName === search}")
         .badge.tag-badge(:style="{backgroundColor: currentUserColor}")
-          img.icon.add(v-if="!tagExists" src="@/assets/add.svg")
           span {{search}}
       li(v-for="tag in filteredTags" @click="selectTag(tag)" :class="{hover: focusOnTagName === tag.name}")
         .badge.tag-badge(:style="{backgroundColor: tag.color}")
@@ -75,19 +74,6 @@ export default {
   },
   computed: {
     currentUserColor () { return this.$store.state.currentUser.color },
-    tagExists () {
-      const currentCardId = this.$store.state.cardDetailsIsVisibleForCardId
-      const tags = this.tags.filter(tag => {
-        const isName = tag.name === this.search
-        const isOtherCard = tag.cardId !== currentCardId
-        return isName && isOtherCard
-      })
-      if (tags.length) {
-        return true
-      } else {
-        return false
-      }
-    },
     filteredTags () {
       let tags = this.tags.filter(tag => {
         return tag.name !== this.search
