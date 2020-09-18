@@ -380,6 +380,7 @@ ul.results-list
     user-select none
     cursor pointer
     &:hover,
+    &.hover,
     &:focus
       background-color var(--secondary-hover-background)
       box-shadow var(--hover-shadow)

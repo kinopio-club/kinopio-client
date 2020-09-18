@@ -209,6 +209,8 @@ export default new Vuex.Store({
     triggerUploadComplete: () => {},
     triggerPauseAllAudio: () => {},
     triggerScrollCardIntoView: (state, cardId) => {},
+    triggerPickerNavigationKey: (state, key) => {},
+    triggerPickerSelect: () => {},
 
     // Cards
 

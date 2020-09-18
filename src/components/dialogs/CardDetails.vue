@@ -25,19 +25,19 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @click.left="clickName"
         @blur="triggerUpdatePositionInVisualViewport"
         @paste="updatePastedName"
-        @keyup="updateTagPicker"
 
         @keyup.alt.enter.exact.stop
         @keyup.ctrl.enter.exact.stop
         @keydown.alt.enter.exact.stop="insertLineBreak"
         @keydown.ctrl.enter.exact.stop="insertLineBreak"
 
+        @keyup="updateTagPicker"
         @keydown.down="triggerTagPickerNavigation"
         @keydown.up="triggerTagPickerNavigation"
-        @keydown.enter="triggerTagPickerNavigation"
+        @keydown.enter="triggerTagPickerSelect"
       )
-      TagPicker(:visible="tagPickerIsVisible" :cursorPosition="cursorPosition" :position="tagPickerPosition" :search="tagPickerSearch" :navigationKey="tagPickerNavigationKey")
-        //- @selectLabel="insertLabel"
+      TagPicker(:visible="tagPickerIsVisible" :cursorPosition="cursorPosition" :position="tagPickerPosition" :search="tagPickerSearch" @closeDialog="hideTagPicker")
+        //- @selectTag="insertTag"
     .row(v-if="cardPendingUpload")
       .badge.info
         Loader(:visible="true")
@@ -144,7 +144,6 @@ export default {
       tagPickerIsVisible: false,
       tagPickerPosition: {},
       tagPickerSearch: '',
-      tagPickerNavigationKey: '',
       initialSearch: '',
       pastedName: '',
       wasPasted: false,
@@ -686,9 +685,18 @@ export default {
     triggerTagPickerNavigation (event) {
       const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
       const shouldTrigger = this.tagPickerIsVisible && !modifierKey
-      if (!shouldTrigger) { return }
-      event.preventDefault()
-      this.tagPickerNavigationKey = event.key
+      if (shouldTrigger) {
+        this.$store.commit('triggerPickerNavigationKey', event.key)
+        event.preventDefault()
+      }
+    },
+    triggerTagPickerSelect (event) {
+      const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
+      const shouldTrigger = this.tagPickerIsVisible && !modifierKey
+      if (shouldTrigger) {
+        this.$store.commit('triggerPickerSelect')
+        event.preventDefault()
+      }
     }
   },
   watch: {
