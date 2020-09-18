@@ -6,11 +6,11 @@ dialog.narrow.tag-picker(v-if="visible" :open="visible" @click.left.stop ref="di
       span Type to add or search tags
   section.results-section
     ul.results-list
-      li(v-if="search")
+      li(v-if="search" @click="selectSearchTag")
         .badge.tag-badge(:style="{backgroundColor: currentUserColor}")
           img.icon.add(v-if="!tagExists" src="@/assets/add.svg")
           span {{search}}
-      li(v-for="tag in filteredTags")
+      li(v-for="tag in filteredTags" @click="selectTag(tag)")
         .badge.tag-badge(:style="{backgroundColor: tag.color}")
           span {{tag.name}}
 
@@ -33,7 +33,8 @@ export default {
   props: {
     visible: Boolean,
     position: Object,
-    search: String
+    search: String,
+    cursorPosition: Number
   },
   data () {
     return {
@@ -90,6 +91,13 @@ export default {
       // await get remoteTags(user/tags) , assign to this.tags
       // mergedTags
       // this.loading false
+    },
+    selectSearchTag () {
+      console.log('🐸', this.search, this.cursorPosition)
+    },
+    selectTag (tag) {
+      console.log('🌴', tag, this.cursorPosition)
+      // emit?
     },
     scrollIntoView () {
       const element = this.$refs.dialog

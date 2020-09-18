@@ -31,7 +31,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.alt.enter.exact.stop="insertLineBreak"
         @keydown.ctrl.enter.exact.stop="insertLineBreak"
       )
-      TagPicker(:visible="tagPickerIsVisible" :position="tagPickerPosition" :search="tagPickerSearch")
+      TagPicker(:visible="tagPickerIsVisible" :cursorPosition="cursorPosition" :position="tagPickerPosition" :search="tagPickerSearch")
         //- @selectLabel="insertLabel"
     .row(v-if="cardPendingUpload")
       .badge.info
@@ -141,7 +141,8 @@ export default {
       tagPickerSearch: '',
       initialSearch: '',
       pastedName: '',
-      wasPasted: false
+      wasPasted: false,
+      cursorPosition: 0
     }
   },
   created () {
@@ -301,6 +302,7 @@ export default {
       this.tagPickerSearch = start + end
     },
     isCursorInsideBrackets (cursorPosition) {
+      this.cursorPosition = cursorPosition
       const start = this.tagStartText(cursorPosition)
       const end = this.tagEndText(cursorPosition)
       if (start === undefined || end === undefined) { return }
