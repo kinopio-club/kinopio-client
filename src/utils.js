@@ -1,5 +1,6 @@
 // functional methods that can see dom, but can't access components or store
 import nanoid from 'nanoid'
+import uniqBy from 'lodash-es/uniqBy'
 
 import cache from '@/cache.js'
 
@@ -836,8 +837,6 @@ export default {
   cardNameSegments (name) {
     const tags = this.tagsFromString(name)
     let segments = []
-    // let name = name
-
     if (tags) {
       tags.forEach(tag => {
         const tagStartPosition = name.indexOf(tag)
@@ -865,6 +864,12 @@ export default {
         content: name
       }]
     }
+  },
+
+  mergedTags (previousTags, newTags) {
+    let tags = previousTags.concat(newTags)
+    tags = uniqBy(tags, 'name')
+    return tags
   }
 
 }
