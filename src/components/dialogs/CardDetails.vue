@@ -273,105 +273,6 @@ export default {
     }
   },
   methods: {
-    showTagPicker (cursorPosition) {
-      this.closeDialogs()
-      const nameRect = this.$refs.name.getBoundingClientRect()
-      this.tagPickerPosition = {
-        top: nameRect.height - 2
-      }
-      this.updateTagPickerSearch(cursorPosition)
-      this.tagPickerIsVisible = true
-    },
-    hideTagPicker () {
-      this.tagPickerSearch = ''
-      this.tagPickerIsVisible = false
-    },
-    tagStartText (cursorPosition) {
-      // ...[[abc
-      const start = this.name.substring(0, cursorPosition)
-      let startPosition = start.lastIndexOf('[[')
-      if (startPosition === -1) { return }
-      startPosition = startPosition + 2
-      return start.substring(startPosition)
-    },
-    tagEndText (cursorPosition) {
-      // xyz]]...
-      const end = this.name.substring(cursorPosition)
-      const endPosition = end.indexOf(']]')
-      if (endPosition === -1) { return }
-      return end.substring(0, endPosition)
-    },
-    updateTagPickerSearch (cursorPosition) {
-      const start = this.tagStartText(cursorPosition) || ''
-      const end = this.tagEndText(cursorPosition) || ''
-      this.tagPickerSearch = start + end
-    },
-    isCursorInsideTagBrackets (cursorPosition) {
-      this.cursorPosition = cursorPosition
-      const start = this.tagStartText(cursorPosition)
-      const end = this.tagEndText(cursorPosition)
-      if (start === undefined || end === undefined) { return }
-      if (!start.includes(']]') && !end.includes('[[')) {
-        return true
-      }
-    },
-    checkIfShouldShowTagPicker () {
-      const cursorPosition = this.$refs.name.selectionStart
-      const tagPickerIsVisible = this.tagPickerIsVisible
-      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets(cursorPosition)
-      if (isCursorInsideTagBrackets && !tagPickerIsVisible) {
-        this.showTagPicker(cursorPosition)
-      } else if (!isCursorInsideTagBrackets && tagPickerIsVisible) {
-        this.hideTagPicker()
-      }
-    },
-    checkIfShouldHideTagPicker () {
-      const cursorPosition = this.$refs.name.selectionStart
-      const tagPickerIsVisible = this.tagPickerIsVisible
-      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets(cursorPosition)
-      if (!isCursorInsideTagBrackets && tagPickerIsVisible) {
-        this.hideTagPicker()
-      }
-    },
-    addClosingBrackets (cursorPosition) {
-      const name = this.name
-      const newName = `${name.substring(0, cursorPosition)}]]${name.substring(cursorPosition)}`
-      this.updateCardName(newName)
-      this.$nextTick(() => {
-        this.$refs.name.setSelectionRange(cursorPosition, cursorPosition)
-      })
-    },
-    updateTagPicker (event) {
-      const cursorPosition = this.$refs.name.selectionStart
-      const key = event.key
-      const keyIsLettterOrNumber = key.length === 1
-      const previousCharacter = this.name[cursorPosition - 2]
-      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets(cursorPosition)
-      if (this.tagPickerIsVisible) {
-        this.updateTagPickerSearch(cursorPosition)
-      }
-      if (cursorPosition === 0) { return }
-      if (key === '[' && previousCharacter === '[') {
-        this.showTagPicker(cursorPosition)
-        this.addClosingBrackets(cursorPosition)
-      } else if (keyIsLettterOrNumber && isCursorInsideTagBrackets) {
-        this.showTagPicker(cursorPosition)
-      }
-    },
-    moveCursorPastTagEnd () {
-      const cursorPosition = this.$refs.name.selectionStart
-      let end = this.name.substring(cursorPosition)
-      let newCursorPosition = end.indexOf(']]')
-      if (newCursorPosition === -1) {
-        this.addClosingBrackets(cursorPosition)
-        end = this.name.substring(cursorPosition)
-        newCursorPosition = end.indexOf(']]') + 2
-      } else {
-        newCursorPosition = newCursorPosition + 2
-      }
-      newCursorPosition = newCursorPosition + cursorPosition
-      this.$refs.name.setSelectionRange(newCursorPosition, newCursorPosition)
-    },
     seperatedLines (name) {
       let lines = name.split('\n')
       lines = lines.filter(line => Boolean(line.length))
@@ -637,6 +538,108 @@ export default {
       }
       this.updateCardName(utils.trim(name))
       this.triggerUpdatePositionInVisualViewport()
+    },
+
+    // Tags
+
+    showTagPicker (cursorPosition) {
+      this.closeDialogs()
+      const nameRect = this.$refs.name.getBoundingClientRect()
+      this.tagPickerPosition = {
+        top: nameRect.height - 2
+      }
+      this.updateTagPickerSearch(cursorPosition)
+      this.tagPickerIsVisible = true
+    },
+    hideTagPicker () {
+      this.tagPickerSearch = ''
+      this.tagPickerIsVisible = false
+    },
+    tagStartText (cursorPosition) {
+      // ...[[abc
+      const start = this.name.substring(0, cursorPosition)
+      let startPosition = start.lastIndexOf('[[')
+      if (startPosition === -1) { return }
+      startPosition = startPosition + 2
+      return start.substring(startPosition)
+    },
+    tagEndText (cursorPosition) {
+      // xyz]]...
+      const end = this.name.substring(cursorPosition)
+      const endPosition = end.indexOf(']]')
+      if (endPosition === -1) { return }
+      return end.substring(0, endPosition)
+    },
+    updateTagPickerSearch (cursorPosition) {
+      const start = this.tagStartText(cursorPosition) || ''
+      const end = this.tagEndText(cursorPosition) || ''
+      this.tagPickerSearch = start + end
+    },
+    isCursorInsideTagBrackets (cursorPosition) {
+      this.cursorPosition = cursorPosition
+      const start = this.tagStartText(cursorPosition)
+      const end = this.tagEndText(cursorPosition)
+      if (start === undefined || end === undefined) { return }
+      if (!start.includes(']]') && !end.includes('[[')) {
+        return true
+      }
+    },
+    checkIfShouldShowTagPicker () {
+      const cursorPosition = this.$refs.name.selectionStart
+      const tagPickerIsVisible = this.tagPickerIsVisible
+      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets(cursorPosition)
+      if (isCursorInsideTagBrackets && !tagPickerIsVisible) {
+        this.showTagPicker(cursorPosition)
+      } else if (!isCursorInsideTagBrackets && tagPickerIsVisible) {
+        this.hideTagPicker()
+      }
+    },
+    checkIfShouldHideTagPicker () {
+      const cursorPosition = this.$refs.name.selectionStart
+      const tagPickerIsVisible = this.tagPickerIsVisible
+      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets(cursorPosition)
+      if (!isCursorInsideTagBrackets && tagPickerIsVisible) {
+        this.hideTagPicker()
+      }
+    },
+    addClosingBrackets (cursorPosition) {
+      const name = this.name
+      const newName = `${name.substring(0, cursorPosition)}]]${name.substring(cursorPosition)}`
+      this.updateCardName(newName)
+      this.$nextTick(() => {
+        this.$refs.name.setSelectionRange(cursorPosition, cursorPosition)
+      })
+    },
+    updateTagPicker (event) {
+      const cursorPosition = this.$refs.name.selectionStart
+      const key = event.key
+      const keyIsLettterOrNumber = key.length === 1
+      const previousCharacter = this.name[cursorPosition - 2]
+      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets(cursorPosition)
+      if (this.tagPickerIsVisible) {
+        this.updateTagPickerSearch(cursorPosition)
+      }
+      if (cursorPosition === 0) { return }
+      if (key === '[' && previousCharacter === '[') {
+        this.showTagPicker(cursorPosition)
+        this.addClosingBrackets(cursorPosition)
+      } else if (keyIsLettterOrNumber && isCursorInsideTagBrackets) {
+        this.showTagPicker(cursorPosition)
+      }
+    },
+    moveCursorPastTagEnd () {
+      const cursorPosition = this.$refs.name.selectionStart
+      let end = this.name.substring(cursorPosition)
+      let newCursorPosition = end.indexOf(']]')
+      if (newCursorPosition === -1) {
+        this.addClosingBrackets(cursorPosition)
+        end = this.name.substring(cursorPosition)
+        newCursorPosition = end.indexOf(']]') + 2
+      } else {
+        newCursorPosition = newCursorPosition + 2
+      }
+      newCursorPosition = newCursorPosition + cursorPosition
+      this.$refs.name.setSelectionRange(newCursorPosition, newCursorPosition)
     },
     savePreviousTags () {
       const name = this.card.name
