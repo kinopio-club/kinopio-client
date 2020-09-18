@@ -30,8 +30,12 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keyup.ctrl.enter.exact.stop
         @keydown.alt.enter.exact.stop="insertLineBreak"
         @keydown.ctrl.enter.exact.stop="insertLineBreak"
+
+        @keydown.down="triggerTagPickerNavigation"
+        @keydown.up="triggerTagPickerNavigation"
+        @keydown.enter="triggerTagPickerNavigation"
       )
-      TagPicker(:visible="tagPickerIsVisible" :cursorPosition="cursorPosition" :position="tagPickerPosition" :search="tagPickerSearch")
+      TagPicker(:visible="tagPickerIsVisible" :cursorPosition="cursorPosition" :position="tagPickerPosition" :search="tagPickerSearch" :navigationKey="tagPickerNavigationKey")
         //- @selectLabel="insertLabel"
     .row(v-if="cardPendingUpload")
       .badge.info
@@ -139,6 +143,7 @@ export default {
       tagPickerIsVisible: false,
       tagPickerPosition: {},
       tagPickerSearch: '',
+      tagPickerNavigationKey: '',
       initialSearch: '',
       pastedName: '',
       wasPasted: false,
@@ -507,7 +512,6 @@ export default {
     closeCard (event) {
       if (this.tagPickerIsVisible) {
         this.hideTagPicker()
-        // TODO this.addSelectedTag()
         this.moveCursorPastTagEnd()
         event.stopPropagation()
         return
@@ -678,6 +682,13 @@ export default {
       })
       this.$store.commit('currentSelectedTag', tag)
       this.$store.commit('tagDetailsIsVisible', true)
+    },
+    triggerTagPickerNavigation (event) {
+      const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
+      const shouldTrigger = this.tagPickerIsVisible && !modifierKey
+      if (!shouldTrigger) { return }
+      event.preventDefault()
+      this.tagPickerNavigationKey = event.key
     }
   },
   watch: {

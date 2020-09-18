@@ -34,6 +34,7 @@ export default {
     visible: Boolean,
     position: Object,
     search: String,
+    navigationKey: String,
     cursorPosition: Number
   },
   data () {
@@ -114,6 +115,14 @@ export default {
           this.scrollIntoView()
         })
       }
+    },
+    search (value) {
+      console.log('💁‍♀️ search updated', value)
+      // focus on first li
+    },
+    navigationKey (key) {
+      console.log('🍇 navigationKey received', key)
+      // handle key = ArrowUp, ArrowDown, Enter
     }
   }
 }
