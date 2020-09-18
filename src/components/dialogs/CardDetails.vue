@@ -11,13 +11,14 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.prevent.enter.exact
 
         @keyup.enter.exact="closeCard"
-        @keyup.stop.esc="closeCardAndFocus"
+        @keyup.stop.esc
+        @keydown.esc="closeCardAndFocus"
 
         @keyup.stop.backspace="checkIfShouldShowTagPicker"
-        @keyup.stop.up="checkIfShouldShowTagPicker"
-        @keyup.stop.down="checkIfShouldShowTagPicker"
-        @keyup.stop.left="checkIfShouldShowTagPicker"
-        @keyup.stop.right="checkIfShouldShowTagPicker"
+        @keyup.stop.up="checkIfShouldHideTagPicker"
+        @keyup.stop.down="checkIfShouldHideTagPicker"
+        @keyup.stop.left="checkIfShouldHideTagPicker"
+        @keyup.stop.right="checkIfShouldHideTagPicker"
 
         data-type="name"
         maxlength="250"
@@ -306,7 +307,7 @@ export default {
       const end = this.tagEndText(cursorPosition) || ''
       this.tagPickerSearch = start + end
     },
-    isCursorInsideBrackets (cursorPosition) {
+    isCursorInsideTagBrackets (cursorPosition) {
       this.cursorPosition = cursorPosition
       const start = this.tagStartText(cursorPosition)
       const end = this.tagEndText(cursorPosition)
@@ -318,10 +319,18 @@ export default {
     checkIfShouldShowTagPicker () {
       const cursorPosition = this.$refs.name.selectionStart
       const tagPickerIsVisible = this.tagPickerIsVisible
-      const isCursorInsideBrackets = this.isCursorInsideBrackets(cursorPosition)
-      if (isCursorInsideBrackets && !tagPickerIsVisible) {
+      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets(cursorPosition)
+      if (isCursorInsideTagBrackets && !tagPickerIsVisible) {
         this.showTagPicker(cursorPosition)
-      } else if (!isCursorInsideBrackets && tagPickerIsVisible) {
+      } else if (!isCursorInsideTagBrackets && tagPickerIsVisible) {
+        this.hideTagPicker()
+      }
+    },
+    checkIfShouldHideTagPicker () {
+      const cursorPosition = this.$refs.name.selectionStart
+      const tagPickerIsVisible = this.tagPickerIsVisible
+      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets(cursorPosition)
+      if (!isCursorInsideTagBrackets && tagPickerIsVisible) {
         this.hideTagPicker()
       }
     },
@@ -336,7 +345,9 @@ export default {
     updateTagPicker (event) {
       const cursorPosition = this.$refs.name.selectionStart
       const key = event.key
+      const keyIsLettterOrNumber = key.length === 1
       const previousCharacter = this.name[cursorPosition - 2]
+      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets(cursorPosition)
       if (this.tagPickerIsVisible) {
         this.updateTagPickerSearch(cursorPosition)
       }
@@ -344,20 +355,10 @@ export default {
       if (key === '[' && previousCharacter === '[') {
         this.showTagPicker(cursorPosition)
         this.addClosingBrackets(cursorPosition)
+      } else if (keyIsLettterOrNumber && isCursorInsideTagBrackets) {
+        this.showTagPicker(cursorPosition)
       }
-
-      // hide label picker:
-      // X esc
-      // X enter while typing = new label
-      // X backspace when this.currentLabel is ''
-      // X if cursor isn't inside a [[ ]]
-      // X isCursorInsideBrackets(cursorPosition)
-
-      // each label has a id, name, color . 1label:many-cards (how tod?)
-      // get spaces should include labels
-      // clicking a label opens labelDetails: color, name, list currentspace cards and fetch other spaces that it's linked to (click to scroll/switch)
     },
-
     moveCursorPastTagEnd () {
       const cursorPosition = this.$refs.name.selectionStart
       let end = this.name.substring(cursorPosition)
@@ -372,7 +373,6 @@ export default {
       newCursorPosition = newCursorPosition + cursorPosition
       this.$refs.name.setSelectionRange(newCursorPosition, newCursorPosition)
     },
-
     seperatedLines (name) {
       let lines = name.split('\n')
       lines = lines.filter(line => Boolean(line.length))
@@ -584,7 +584,7 @@ export default {
     clickName (event) {
       this.triggerUpdateMagicPaintPositionOffset()
       const cursorPosition = this.$refs.name.selectionStart
-      if (this.isCursorInsideBrackets(cursorPosition)) {
+      if (this.isCursorInsideTagBrackets(cursorPosition)) {
         this.showTagPicker(cursorPosition)
         event.stopPropagation()
       }

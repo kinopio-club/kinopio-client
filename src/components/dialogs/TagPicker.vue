@@ -74,7 +74,7 @@ export default {
       }
       const filtered = fuzzy.filter(this.search, tags, options)
       tags = filtered.map(item => item.original)
-      return tags
+      return tags.slice(0, 5)
     }
   },
   methods: {
@@ -83,7 +83,7 @@ export default {
       this.tags = spaceTags || []
       const cachedTags = cache.allTags()
       const mergedTags = utils.mergedTags(spaceTags, cachedTags)
-      this.tags = mergedTags.slice(0, 5)
+      this.tags = mergedTags
       this.updateRemoteTags()
     },
     async updateRemoteTags () {
