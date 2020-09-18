@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="dialog" @click.left="closeDialogs")
   section.edit-card(v-if="!cardDetailsIsVisible")
-    button(@click="showCardDetails") Edit Card
+    button(@click="showCardDetails(null)") Edit Card
   section(:style="{backgroundColor: color}")
     .row
       .button-wrap
@@ -190,6 +190,7 @@ export default {
       })
     },
     showCardDetails (card) {
+      card = card || this.$store.getters['currentSpace/cardById'](this.currentTag.cardId)
       if (this.currentSpaceId !== card.spaceId) {
         this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
         const space = cache.space(card.spaceId) || { id: card.spaceId }

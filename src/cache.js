@@ -181,7 +181,6 @@ export default {
       // space.tags
     })
     const tag = tags.find(tag => tag.name === name)
-    console.log(tags, tag)
     return tag
     // spaces.find(space => {
     //   if (space.tags.find(tag => tag.name === name)) {
