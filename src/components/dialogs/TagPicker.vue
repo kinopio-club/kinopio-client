@@ -6,7 +6,7 @@ dialog.narrow.tag-picker(v-if="visible" :open="visible" @click.left.stop ref="di
       span Type to add or search tags
   section.results-section
     ul.results-list
-      li(v-if="search" @click="selectTag" :class="{hover: focusOnTagName === search}")
+      li(v-if="search" @click="selectTag(null)" :class="{hover: focusOnTagName === search}")
         .badge.tag-badge(:style="{backgroundColor: currentUserColor}")
           img.icon.add(v-if="!tagExists" src="@/assets/add.svg")
           span {{search}}
@@ -128,7 +128,8 @@ export default {
       }
       tag = tag || searchTag
       console.log('🌴 selecttag', tag, tag.name, 'into cursor position:', this.cursorPosition)
-      // this.$emit('selectTag', tag)
+      this.$emit('selectTag', tag)
+      this.closeDialog()
     },
     scrollIntoView () {
       const element = this.$refs.dialog

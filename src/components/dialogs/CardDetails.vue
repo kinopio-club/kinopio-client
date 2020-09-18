@@ -36,8 +36,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.up="triggerTagPickerNavigation"
         @keydown.enter="triggerTagPickerSelect"
       )
-      TagPicker(:visible="tagPickerIsVisible" :cursorPosition="cursorPosition" :position="tagPickerPosition" :search="tagPickerSearch" @closeDialog="hideTagPicker")
-        //- @selectTag="insertTag"
+      TagPicker(:visible="tagPickerIsVisible" :cursorPosition="cursorPosition" :position="tagPickerPosition" :search="tagPickerSearch" @closeDialog="hideTagPicker" @selectTag="updateTagBracketsWithTag")
     .row(v-if="cardPendingUpload")
       .badge.info
         Loader(:visible="true")
@@ -700,6 +699,9 @@ export default {
         this.$store.commit('triggerPickerSelect')
         event.preventDefault()
       }
+    },
+    updateTagBracketsWithTag (tag) {
+      console.log('🥭', tag)
     }
   },
   watch: {
