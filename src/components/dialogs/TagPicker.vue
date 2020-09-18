@@ -83,7 +83,7 @@ export default {
       this.tags = spaceTags || []
       const cachedTags = cache.allTags()
       const mergedTags = utils.mergedTags(spaceTags, cachedTags)
-      this.tags = mergedTags.slice(0, 10)
+      this.tags = mergedTags.slice(0, 5)
       this.updateRemoteTags()
     },
     async updateRemoteTags () {
