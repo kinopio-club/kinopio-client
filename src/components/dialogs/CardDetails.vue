@@ -101,15 +101,16 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         span Max Length
       p To fit small screens, cards can't be longer than 250 characters
     //- Tags
-    template(v-for="tag in tagsInCard")
-      span.badge.button-badge(
-        :style="{backgroundColor: tag.color}"
-        :class="{ active: currentSelectedTag.name === tag.name }"
-        tabindex="0"
-        @click.left.stop="showTagDetailsIsVisible($event, tag)"
-        @touchend.stop="showTagDetailsIsVisible($event, tag)"
-        @keyup.stop.enter="showTagDetailsIsVisible($event, tag)"
-      ) {{tag.name}}
+    .tags-row
+      template(v-for="tag in tagsInCard")
+        span.badge.button-badge(
+          :style="{backgroundColor: tag.color}"
+          :class="{ active: currentSelectedTag.name === tag.name }"
+          tabindex="0"
+          @click.left.stop="showTagDetailsIsVisible($event, tag)"
+          @touchend.stop="showTagDetailsIsVisible($event, tag)"
+          @keyup.stop.enter="showTagDetailsIsVisible($event, tag)"
+        ) {{tag.name}}
 
 </template>
 
@@ -411,7 +412,6 @@ export default {
     closeCard (event) {
       if (this.tagPickerIsVisible) {
         this.hideTagPicker()
-        this.moveCursorPastTagEnd()
         event.stopPropagation()
         return
       }
@@ -626,19 +626,14 @@ export default {
         this.showTagPicker(cursorPosition)
       }
     },
-    moveCursorPastTagEnd () {
-      const cursorPosition = this.$refs.name.selectionStart
-      let end = this.name.substring(cursorPosition)
-      let newCursorPosition = end.indexOf(']]')
-      if (newCursorPosition === -1) {
-        this.addClosingBrackets(cursorPosition)
-        end = this.name.substring(cursorPosition)
-        newCursorPosition = end.indexOf(']]') + 2
-      } else {
-        newCursorPosition = newCursorPosition + 2
-      }
-      newCursorPosition = newCursorPosition + cursorPosition
-      this.$refs.name.setSelectionRange(newCursorPosition, newCursorPosition)
+    moveCursorPastTagEnd (cursorPosition) {
+      cursorPosition = this.$refs.name.selectionStart || cursorPosition
+      let endText = this.name.substring(cursorPosition)
+      let newCursorPosition = endText.indexOf(']]')
+      newCursorPosition = cursorPosition + newCursorPosition + 2
+      this.$nextTick(() => {
+        this.$refs.name.setSelectionRange(newCursorPosition, newCursorPosition)
+      })
     },
     savePreviousTags () {
       const name = this.card.name
@@ -701,7 +696,20 @@ export default {
       }
     },
     updateTagBracketsWithTag (tag) {
-      console.log('🥭', tag)
+      const cursorPosition = this.cursorPosition
+      const tagStartText = this.tagStartText(cursorPosition)
+      const tagEndText = this.tagEndText(cursorPosition)
+      const text = tagStartText + tagEndText
+      let newName
+      if (text.length) {
+        newName = this.name.replace(`[[${text}]]`, `[[${tag.name}]]`)
+      } else {
+        const startText = this.name.substring(0, cursorPosition)
+        const endText = this.name.substring(cursorPosition)
+        newName = startText + tag.name + endText
+      }
+      this.updateCardName(newName)
+      this.moveCursorPastTagEnd(cursorPosition)
     }
   },
   watch: {
@@ -741,4 +749,7 @@ export default {
     input
       margin 0
       vertical-align -1px
+  .tags-row
+    display flex
+    flex-wrap wrap
 </style>

@@ -6,10 +6,10 @@ dialog.narrow.tag-picker(v-if="visible" :open="visible" @click.left.stop ref="di
       span Type to add or search tags
   section.results-section
     ul.results-list
-      li(v-if="search" @click="selectTag(null)" :class="{hover: focusOnTagName === search}")
+      li(v-if="search" @click="selectTag(null, true)" :class="{hover: focusOnTagName === search}")
         .badge.tag-badge(:style="{backgroundColor: currentUserColor}")
           span {{search}}
-      li(v-for="tag in filteredTags" @click="selectTag(tag)" :class="{hover: focusOnTagName === tag.name}")
+      li(v-for="tag in filteredTags" @click="selectTag(tag, true)" :class="{hover: focusOnTagName === tag.name}")
         .badge.tag-badge(:style="{backgroundColor: tag.color}")
           span {{tag.name}}
 
@@ -107,15 +107,16 @@ export default {
       // mergedTags
       // this.loading false
     },
-    selectTag (tag) {
+    selectTag (tag, shouldCloseDialog) {
       const searchTag = {
         name: this.search,
         color: this.currentUserColor
       }
       tag = tag || searchTag
-      console.log('🌴 selecttag', tag, tag.name, 'into cursor position:', this.cursorPosition)
       this.$emit('selectTag', tag)
-      this.closeDialog()
+      if (shouldCloseDialog) {
+        this.closeDialog()
+      }
     },
     scrollIntoView () {
       const element = this.$refs.dialog
