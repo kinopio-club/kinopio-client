@@ -113,7 +113,8 @@ export default new Vuex.Store({
 
     // filters
     filteredConnectionTypeIds: [],
-    filteredFrameIds: []
+    filteredFrameIds: [],
+    filteredTagNames: []
   },
   mutations: {
     updatePageSizes: (state) => {
@@ -586,6 +587,7 @@ export default new Vuex.Store({
     clearSpaceFilters: (state) => {
       state.filteredConnectionTypeIds = []
       state.filteredFrameIds = []
+      state.filteredTagNames = []
     },
     addToFilteredConnectionTypeId: (state, id) => {
       utils.typeCheck(id, 'string')
@@ -602,6 +604,14 @@ export default new Vuex.Store({
     removeFromFilteredFrameIds: (state, id) => {
       utils.typeCheck(id, 'number')
       state.filteredFrameIds = state.filteredFrameIds.filter(frameId => frameId !== id)
+    },
+    addToFilteredTagNames: (state, name) => {
+      utils.typeCheck(name, 'string')
+      state.filteredTagNames.push(name)
+    },
+    removeFromFilteredTagNames: (state, name) => {
+      utils.typeCheck(name, 'string')
+      state.filteredTagNames = state.filteredTagNames.filter(tagName => tagName !== name)
     }
   },
 

@@ -330,6 +330,13 @@ export default {
         return segment
       })
     },
+    tags () {
+      return this.nameSegments.filter(segment => {
+        if (segment.isTag) {
+          return true
+        }
+      })
+    },
     nameLineMinWidth () {
       const averageCharacterWidth = 6.5
       let maxWidth = 190
@@ -458,7 +465,17 @@ export default {
     filtersIsActive () {
       const types = this.$store.state.filteredConnectionTypeIds
       const frames = this.$store.state.filteredFrameIds
-      return Boolean(types.length + frames.length)
+      const tags = this.$store.state.filteredTagNames
+      return Boolean(types.length + frames.length + tags.length)
+    },
+    isCardFilteredByTags () {
+      const tagNames = this.$store.state.filteredTagNames
+      const isFiltered = this.tags.find(tag => {
+        if (tagNames.includes(tag.name)) {
+          return true
+        }
+      })
+      return isFiltered
     },
     isConnectionFilteredByType () {
       const typeIds = this.$store.state.filteredConnectionTypeIds
@@ -473,7 +490,7 @@ export default {
     },
     isFiltered () {
       if (this.filtersIsActive) {
-        const isInFilter = this.isCardFilteredByFrame || this.isConnectionFilteredByType
+        const isInFilter = this.isCardFilteredByTags || this.isConnectionFilteredByType || this.isCardFilteredByFrame
         if (isInFilter) {
           return false
         } else {

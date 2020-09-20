@@ -24,7 +24,7 @@ dialog.filters.narrow(v-if="visible" :open="visible")
     //- TODO resultsfilter
     ul.results-list
       template(v-for="tag in tags")
-        li
+        li(:class="{ active: tagIsActive(tag) }" @click.left="toggleFilteredTag(tag)" tabindex="0" v-on:keyup.enter="toggleFilteredTag(tag)")
           input(type="checkbox" :checked="isSelected(tag)")
           .badge(:style="{backgroundColor: tag.color}") {{tag.name}}
       template(v-for="type in connectionTypes")
@@ -69,8 +69,6 @@ export default {
     totalFilters () {
       const state = this.$store.state
       const currentUser = state.currentUser
-      const connections = state.filteredConnectionTypeIds.length
-      const frames = state.filteredFrameIds.length
       let userFilters = 0
       if (currentUser.filterShowUsers) {
         userFilters += 1
@@ -78,7 +76,11 @@ export default {
       if (currentUser.filterShowDateUpdated) {
         userFilters += 1
       }
-      return connections + frames + userFilters
+      const filteredTagNames = state.filteredTagNames.length
+      const connections = state.filteredConnectionTypeIds.length
+      const frames = state.filteredFrameIds.length
+
+      return userFilters + filteredTagNames + connections + frames
     },
     currentUser () {
       return this.$store.state.currentUser
@@ -92,6 +94,18 @@ export default {
     tags () { return this.$store.getters['currentSpace/spaceTags']() }
   },
   methods: {
+    isSelected (item) {
+      const types = this.$store.state.filteredConnectionTypeIds
+      const frames = this.$store.state.filteredFrameIds
+      const tags = this.$store.state.filteredTagNames
+      return types.includes(item.id) || frames.includes(item.id) || tags.includes(item.name)
+    },
+    clearAllFilters () {
+      this.$store.dispatch('clearAllFilters')
+    },
+
+    // Toggle filters
+
     toggleFilterShowUsers () {
       const value = !this.filterShowUsers
       this.$store.dispatch('currentUser/toggleFilterShowUsers', value)
@@ -100,14 +114,13 @@ export default {
       const value = !this.filterShowDateUpdated
       this.$store.dispatch('currentUser/toggleFilterShowDateUpdated', value)
     },
-    isSelected ({ id }) {
-      const types = this.$store.state.filteredConnectionTypeIds
-      const frames = this.$store.state.filteredFrameIds
-      return types.includes(id) || frames.includes(id)
-    },
-
-    clearAllFilters () {
-      this.$store.dispatch('clearAllFilters')
+    toggleFilteredTag (tag) {
+      const tags = this.$store.state.filteredTagNames
+      if (tags.includes(tag.name)) {
+        this.$store.commit('removeFromFilteredTagNames', tag.name)
+      } else {
+        this.$store.commit('addToFilteredTagNames', tag.name)
+      }
     },
     toggleFilteredConnectionType (type) {
       const filtered = this.$store.state.filteredConnectionTypeIds
@@ -126,6 +139,12 @@ export default {
       }
     },
 
+    // Item state
+
+    tagIsActive (tag) {
+      const tags = this.$store.state.filteredTagNames
+      return tags.includes(tag.name)
+    },
     connectionTypeIsActive (type) {
       const types = this.$store.state.filteredConnectionTypeIds
       return types.includes(type.id)
@@ -134,7 +153,6 @@ export default {
       const frames = this.$store.state.filteredFrameIds
       return frames.includes(frame.id)
     },
-
     frameBadge (frame) {
       return {
         path: require(`@/assets/frames/${frame.badge}`)
