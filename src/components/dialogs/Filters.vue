@@ -2,7 +2,7 @@
 dialog.filters.narrow(v-if="visible" :open="visible")
   section
     p
-      span.badge.info(v-if="totalFilters") {{totalFilters}}
+      span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
       span Filters
     button(@click.left="clearAllFilters")
       img.icon.cancel(src="@/assets/add.svg")
@@ -21,18 +21,21 @@ dialog.filters.narrow(v-if="visible" :open="visible")
           span Updated
 
   section.results-section.connection-types
-    //- TODO resultsfilter
+    ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="allItems" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredItems")
     ul.results-list
-      template(v-for="tag in tags")
+      //- Tags
+      template(v-for="tag in itemsFiltered.tags")
         li(:class="{ active: tagIsActive(tag) }" @click.left="toggleFilteredTag(tag)" tabindex="0" v-on:keyup.enter="toggleFilteredTag(tag)")
           input(type="checkbox" :checked="isSelected(tag)")
           .badge(:style="{backgroundColor: tag.color}") {{tag.name}}
-      template(v-for="type in connectionTypes")
+      //- Connection Types
+      template(v-for="type in itemsFiltered.connectionTypes")
         li(:class="{ active: connectionTypeIsActive(type) }" @click.left="toggleFilteredConnectionType(type)" :key="type.id" tabindex="0" v-on:keyup.enter="toggleFilteredConnectionType(type)")
           input(type="checkbox" :checked="isSelected(type)")
           .badge(:style="{backgroundColor: type.color}")
           .name {{type.name}}
-      template(v-for="(frame in frames")
+      //- Frames
+      template(v-for="(frame in itemsFiltered.frames")
         li.frames-list(:class="{active: frameIsActive(frame)}" @click.left="toggleFilteredCardFrame(frame)" :key="frame.id" tabindex="0" v-on:keyup.enter="toggleFilteredCardFrame(frame)")
           input(type="checkbox" :checked="isSelected(frame)")
           .badge
@@ -43,6 +46,7 @@ dialog.filters.narrow(v-if="visible" :open="visible")
 </template>
 
 <script>
+import ResultsFilter from '@/components/ResultsFilter.vue'
 import frames from '@/frames.js'
 import utils from '@/utils.js'
 
@@ -51,10 +55,17 @@ import uniq from 'lodash-es/uniq'
 export default {
   name: 'Filters',
   components: {
-    User: () => import('@/components/User.vue')
+    User: () => import('@/components/User.vue'),
+    ResultsFilter
   },
   props: {
     visible: Boolean
+  },
+  data () {
+    return {
+      filter: '',
+      filteredItems: []
+    }
   },
   computed: {
     connectionTypes () {
@@ -66,9 +77,8 @@ export default {
       framesInUse = uniq(framesInUse.filter(frame => frame))
       return framesInUse.map(frame => frames[frame])
     },
-    totalFilters () {
-      const state = this.$store.state
-      const currentUser = state.currentUser
+    totalFiltersActive () {
+      const currentUser = this.$store.state.currentUser
       let userFilters = 0
       if (currentUser.filterShowUsers) {
         userFilters += 1
@@ -76,11 +86,10 @@ export default {
       if (currentUser.filterShowDateUpdated) {
         userFilters += 1
       }
-      const filteredTagNames = state.filteredTagNames.length
-      const connections = state.filteredConnectionTypeIds.length
-      const frames = state.filteredFrameIds.length
-
-      return userFilters + filteredTagNames + connections + frames
+      const tagNames = this.$store.state.filteredTagNames
+      const connections = this.$store.state.filteredConnectionTypeIds
+      const frames = this.$store.state.filteredFrameIds
+      return userFilters + tagNames.length + connections.length + frames.length
     },
     currentUser () {
       return this.$store.state.currentUser
@@ -91,17 +100,79 @@ export default {
     filterShowDateUpdated () {
       return this.$store.state.currentUser.filterShowDateUpdated
     },
-    tags () { return this.$store.getters['currentSpace/spaceTags']() }
+    tags () { return this.$store.getters['currentSpace/spaceTags']() },
+    allItems () {
+      const tags = this.tags.map(tag => {
+        tag.isTag = true
+        return tag
+      })
+      const connectionTypes = this.connectionTypes.map(type => {
+        type.isConnectionType = true
+        return type
+      })
+      const frames = this.frames.map(frame => {
+        frame.isFrame = true
+        return frame
+      })
+      return tags.concat(connectionTypes, frames)
+    },
+    shouldHideResultsFilter () {
+      if (this.allItems.length < 5) {
+        return true
+      } else {
+        return false
+      }
+    },
+    itemsFiltered () {
+      if (this.filter) {
+        let items = {
+          tags: [],
+          connectionTypes: [],
+          frames: []
+        }
+        this.filteredItems.forEach(item => {
+          if (item.isTag) {
+            items.tags.push(item)
+          } else if (item.isConnectionType) {
+            items.connectionTypes.push(item)
+          } else if (item.isFrame) {
+            items.frames.push(item)
+          }
+        })
+        return items
+      } else {
+        return {
+          tags: this.tags,
+          connectionTypes: this.connectionTypes,
+          frames: this.frames
+        }
+      }
+    }
   },
   methods: {
+    updateFilteredItems (items) {
+      this.filteredItems = items
+    },
+    updateFilter (filter) {
+      this.filter = filter
+    },
     isSelected (item) {
       const types = this.$store.state.filteredConnectionTypeIds
       const frames = this.$store.state.filteredFrameIds
       const tags = this.$store.state.filteredTagNames
       return types.includes(item.id) || frames.includes(item.id) || tags.includes(item.name)
     },
+    clearResultsFilter () {
+      this.filter = ''
+      this.filteredItems = []
+      const searchElement = document.querySelector('dialog.filters .search-wrap input')
+      if (searchElement) {
+        searchElement.value = ''
+      }
+    },
     clearAllFilters () {
       this.$store.dispatch('clearAllFilters')
+      this.clearResultsFilter()
     },
 
     // Toggle filters

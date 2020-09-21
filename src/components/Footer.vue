@@ -26,7 +26,7 @@ footer(:style="visualViewportPosition")
 
     .button-wrap
       button(@click.left="toggleFiltersIsVisible" :class="{ active: filtersIsVisible}")
-        .span.badge.info(v-if="totalFilters") {{totalFilters}}
+        .span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
         img.icon.sunglasses(src="@/assets/filter.svg")
         span Filters
       Filters(:visible="filtersIsVisible")
@@ -147,11 +147,8 @@ export default {
     isOffline () {
       return !this.$store.state.isOnline
     },
-    totalFilters () {
-      const state = this.$store.state
-      const currentUser = state.currentUser
-      const connections = state.filteredConnectionTypeIds.length
-      const frames = state.filteredFrameIds.length
+    totalFiltersActive () {
+      const currentUser = this.$store.state.currentUser
       let userFilters = 0
       if (currentUser.filterShowUsers) {
         userFilters += 1
@@ -159,7 +156,10 @@ export default {
       if (currentUser.filterShowDateUpdated) {
         userFilters += 1
       }
-      return connections + frames + userFilters
+      const tagNames = this.$store.state.filteredTagNames
+      const connections = this.$store.state.filteredConnectionTypeIds
+      const frames = this.$store.state.filteredFrameIds
+      return userFilters + tagNames.length + connections.length + frames.length
     },
     isFavoriteSpace () {
       const currentSpace = this.$store.state.currentSpace
