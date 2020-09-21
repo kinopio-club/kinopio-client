@@ -10,10 +10,9 @@ dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="d
         ColorPicker(:currentColor="color" :visible="colorPickerIsVisible" @selectedColor="updateTagColor")
       .tag-name {{name}}
   section.results-section
-    //- TODO
-    //- ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="spaces" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredSpaces")
+    ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="tagCards" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredTagCards")
     ul.results-list
-      template(v-for="(card in tagCards")
+      template(v-for="(card in filteredItems")
         li(:data-card-id="card.id" @click="showCardDetails(card)")
           p.name.name-segments
             span.badge.space-badge(v-if="card.spaceName") {{card.spaceName}}
@@ -30,7 +29,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="d
 </template>
 
 <script>
-// import ResultsFilter from '@/components/ResultsFilter.vue'
+import ResultsFilter from '@/components/ResultsFilter.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import Loader from '@/components/Loader.vue'
 import scrollIntoView from '@/scroll-into-view.js'
@@ -41,14 +40,14 @@ export default {
   name: 'TagDetails',
   components: {
     ColorPicker,
-    Loader
-    // ResultsFilter
+    Loader,
+    ResultsFilter
   },
   data () {
     return {
-      colorPickerIsVisible: false
-      // filter: '',
-      // filteredTags: [],
+      colorPickerIsVisible: false,
+      filter: '',
+      filteredCardTags: []
     }
   },
   computed: {
@@ -72,7 +71,7 @@ export default {
     tagCards () {
       const cardsInCurrentSpace = this.tagCardsInCurrentSpace
       const cardsInCachedSpaces = cache.cardsByTagNameExcludingSpaceById(this.currentTag.name, this.currentSpaceId)
-      // todo fetch remote, and merge
+      // TODO fetch remote, and merge
       console.log('🥂', cardsInCurrentSpace, cardsInCachedSpaces)
       let cards = cardsInCurrentSpace.concat(cardsInCachedSpaces)
       cards = cards.map(card => {
@@ -81,6 +80,13 @@ export default {
         return card
       })
       return cards
+    },
+    filteredItems () {
+      if (this.filter) {
+        return this.filteredCardTags
+      } else {
+        return this.tagCards
+      }
     },
     tagCardsInCurrentSpace () {
       const cardId = this.currentTag.cardId
@@ -94,16 +100,22 @@ export default {
       })
       cards = cards.filter(card => card)
       return cards
+    },
+    shouldHideResultsFilter () {
+      if (this.tagCards.length < 5) {
+        return true
+      } else {
+        return false
+      }
     }
-    // shouldHideResultsFilter () {
-    //   if (this.tagCards.length < 5) {
-    //     return true
-    //   } else {
-    //     return false
-    //   }
-    // },
   },
   methods: {
+    updateFilter (filter) {
+      this.filter = filter
+    },
+    updateFilteredTagCards (cards) {
+      this.filteredCardTags = cards
+    },
     cardNameSegments (name) {
       let url = utils.urlFromString(name)
       let imageUrl
@@ -177,9 +189,6 @@ export default {
         }
       })
     }
-  //   updateFilter (filter) {
-  //     this.filter = filter
-  //   }
   },
   watch: {
     visible (visible) {
