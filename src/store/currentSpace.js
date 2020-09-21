@@ -287,12 +287,21 @@ export default {
       })
       cache.updateSpace('tags', state.tags, state.id)
     },
-    removeTagsFromAllRemovedCards: (state) => {
+    removeTagsFromAllRemovedCardsPermanent: (state) => {
       const cardIds = state.removedCards.map(card => card.id)
       state.tags = state.tags.filter(spaceTag => {
         return !cardIds.includes(spaceTag.cardId)
       })
       cache.updateSpace('tags', state.tags, state.id)
+    },
+    updateTagColor: (state, updatedTag) => {
+      state.tags = state.tags.map(tag => {
+        if (tag.name === updatedTag.name) {
+          tag.color = updatedTag.color
+        }
+        return tag
+      })
+      cache.updateTagInAllSpaces(updatedTag, 'color')
     }
   },
 
@@ -778,7 +787,7 @@ export default {
       context.dispatch('api/addToQueue', { name: 'removeCardPermanent', body: card }, { root: true })
     },
     removeAllRemovedCardsPermanent: (context) => {
-      context.commit('removeTagsFromAllRemovedCards')
+      context.commit('removeTagsFromAllRemovedCardsPermanent')
       context.commit('removeAllRemovedCardsPermanent')
       context.dispatch('api/addToQueue', { name: 'removeAllRemovedCardsPermanentFromSpace', body: {} }, { root: true })
     },
@@ -1016,14 +1025,23 @@ export default {
       // tag.spaceId = context.state.id
       //   context.commit('broadcast/update', { updates: tag, type: 'addTag' }, { root: true })
       //   context.dispatch('api/addToQueue', { name: 'addTag', body: tag }, { root: true })
-      //   context.commit('history/add', { name: 'addTag', body: tag }, { root: true })
+      context.commit('history/add', { name: 'addTag', body: tag }, { root: true })
     },
     removeTag: (context, tag) => {
       console.log('🍆 remove tag', tag)
       context.commit('removeTag', tag) // name, color, cardId
       // tag.spaceId = context.state.id
       // bradcast, api, history
+      // context.commit('history/add', { name: 'removeTag', body: tag }, { root: true })
+    },
+    updateTagColor: (context, tag) => {
+      context.commit('updateTagColor', tag)
+      const update = { name: 'updateTagColor', body: tag }
+      // context.dispatch('api/addToQueue', update, { root: true })
+      // context.commit('broadcast/update', { updates: tag, type: 'updateTag' }, { root: true })
+      context.commit('history/add', update, { root: true })
     }
+    // updateTagName
   },
 
   getters: {

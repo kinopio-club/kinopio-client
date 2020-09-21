@@ -199,6 +199,19 @@ export default {
     tags.reverse()
     return tags
   },
+  updateTagInAllSpaces (tag, key) {
+    const spaces = this.getAllSpaces()
+    spaces.forEach(space => {
+      if (!utils.arrayHasItems(space.tags)) { return }
+      const spaceTags = space.tags.map(spaceTag => {
+        if (spaceTag.name === tag.name) {
+          spaceTag[key] = tag[key]
+        }
+        return spaceTag
+      })
+      this.updateSpace('tags', spaceTags, space.id)
+    })
+  },
 
   // API Queue
 

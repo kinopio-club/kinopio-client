@@ -10,7 +10,8 @@ dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="d
         ColorPicker(:currentColor="color" :visible="colorPickerIsVisible" @selectedColor="updateTagColor")
       input.tag-name(:disabled="!canEditSpace" placeholder="Tag Name" v-model="name" ref="name")
   section.results-section
-    //- resultsfilter
+    //- TODO
+    //- ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="spaces" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredSpaces")
     ul.results-list
       template(v-for="(card in tagCards")
         li(:data-card-id="card.id" @click="showCardDetails(card)")
@@ -25,64 +26,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="d
                 :style="{backgroundColor: segment.color}"
                 :class="{ active: currentTag.name === segment.name }"
               ) {{segment.name}}
-
     Loader(:visible="true")
-  //- section
-  //-   button
-  //-     img.icon(src="@/assets/add.svg")
-  //-     span Space from Cards
-
-  //- section.results-header
-  //-   p Elsewhere
-  //- section.results-section
-  //-   //- resultsfilter
-  //-   ul.results-list
-  //-     li
-  //-       .name supsup
-
-  //-   .row
-  //-     button(:disabled="!canEditConnection" :class="{active: labelIsVisible}" @click.left="toggleLabelIsVisible")
-  //-       img.icon(v-if="labelIsVisible" src="@/assets/view.svg")
-  //-       img.icon(v-else src="@/assets/view-hidden.svg")
-
-  //-       span Label
-  //-     label(:class="{active: isDefault, disabled: !canEditSpace}" @click.left.prevent="toggleDefault" @keydown.stop.enter="toggleDefault")
-  //-       input(type="checkbox" v-model="isDefault")
-  //-       span Default
-
-  //-   button(:disabled="!canEditConnection" @click.left="removeConnection")
-  //-     img.icon(src="@/assets/remove.svg")
-  //-     span Remove
-
-  //-   p.edit-message(v-if="!canEditConnection")
-  //-     template(v-if="spacePrivacyIsOpen")
-  //-       span.badge.info
-  //-         img.icon.open(src="@/assets/open.svg")
-  //-         span In open spaces, you can only edit connections you've made
-  //-     template(v-else-if="isInvitedButCannotEditSpace")
-  //-       span.badge.info
-  //-         img.icon(src="@/assets/unlock.svg")
-  //-         span To edit spaces you've been invited to, you'll need to sign up or in
-  //-       .row
-  //-         .button-wrap
-  //-           button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
-  //-     template(v-else-if="spacePrivacyIsClosed")
-  //-       span.badge.info
-  //-         img.icon(src="@/assets/unlock.svg")
-  //-         span To edit closed spaces, you'll need to be invited
-
-  //- section.results-actions
-  //-   button(:disabled="!canEditConnection" @click.left="addConnectionType")
-  //-     img.icon(src="@/assets/add.svg")
-  //-     span Add
-
-  //- section.results-section
-  //-   ResultsFilter(:items="connectionTypes" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredConnectionTypes")
-  //-   ul.results-list
-  //-     template(v-for="(type in connectionTypesFiltered")
-  //-       li(:class="{ active: connectionTypeIsActive(type), disabled: !canEditConnection }" @click.left="changeConnectionType(type)" :key="type.id")
-  //-         .badge(:style="{backgroundColor: type.color}" :class="{checked: connectionTypeIsDefault(type)}")
-  //-         .name {{type.name}}
 </template>
 
 <script>
@@ -109,7 +53,10 @@ export default {
   },
   computed: {
     visible () { return this.$store.state.tagDetailsIsVisible },
-    currentTag () { return this.$store.state.currentSelectedTag }, // name, color, cardId
+    currentTag () { // name, color, cardId
+      const tag = this.$store.state.currentSelectedTag
+      return this.$store.getters['currentSpace/tagByName'](tag.name)
+    },
     position () { return this.$store.state.tagDetailsPosition },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     currentSpaceId () { return this.$store.state.currentSpace.id },
@@ -160,6 +107,13 @@ export default {
       cards = cards.filter(card => card)
       return cards
     }
+    // shouldHideResultsFilter () {
+    //   if (this.tagCards.length < 5) {
+    //     return true
+    //   } else {
+    //     return false
+    //   }
+    // },
   },
   methods: {
     cardNameSegments (name) {
@@ -207,12 +161,9 @@ export default {
       this.colorPickerIsVisible = false
     },
     updateTagColor (newColor) {
-      console.log('🎨', newColor)
-      // const connectionType = {
-      //   id: this.currentConnectionType.id,
-      //   color: newColor
-      // }
-      // this.$store.dispatch('currentSpace/updateConnectionType', connectionType)
+      let tag = utils.clone(this.currentTag)
+      tag.color = newColor
+      this.$store.dispatch('currentSpace/updateTagColor', tag)
     },
     focusName () {
       this.$nextTick(() => {
@@ -238,10 +189,6 @@ export default {
         }
       })
     }
-  //   updateView () {
-  //     this.updateDefaultConnectionType()
-  //     this.colorPickerIsVisible = false
-  //   },
   //   updateFilter (filter) {
   //     this.filter = filter
   //   }
@@ -250,7 +197,6 @@ export default {
     visible (visible) {
       this.$nextTick(() => {
         if (this.visible) {
-          // this.updateView()
           this.scrollIntoViewAndFocus()
         } else {
           this.closeDialogs()
