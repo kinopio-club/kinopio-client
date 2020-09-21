@@ -101,7 +101,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         span Max Length
       p To fit small screens, cards can't be longer than 250 characters
     //- Tags
-    .tags-row
+    .tags-row(v-if="tagsInCard.length")
       template(v-for="tag in tagsInCard")
         span.badge.button-badge(
           :style="{backgroundColor: tag.color}"
