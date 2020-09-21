@@ -7,7 +7,7 @@ dialog.narrow.tag-picker(v-if="visible" :open="visible" @click.left.stop ref="di
   section.results-section
     ul.results-list
       li(v-if="search" @click="selectTag(null, true)" :class="{hover: focusOnTagName === search}")
-        .badge.tag-badge(:style="{backgroundColor: currentUserColor}")
+        .badge.tag-badge(:style="{backgroundColor: searchTagColor}")
           span {{search}}
       li(v-for="tag in filteredTags" @click="selectTag(tag, true)" :class="{hover: focusOnTagName === tag.name}")
         .badge.tag-badge(:style="{backgroundColor: tag.color}")
@@ -51,7 +51,7 @@ export default {
       if (mutation.type === 'triggerPickerSelect') {
         const searchTag = [{
           name: this.search,
-          color: this.currentUserColor
+          color: this.searchTagColor
         }]
         const tags = searchTag.concat(this.filteredTags)
         const currentTag = tags.find(tag => tag.name === this.focusOnTagName)
@@ -89,6 +89,16 @@ export default {
       const filtered = fuzzy.filter(this.search, tags, options)
       tags = filtered.map(item => item.original)
       return tags.slice(0, 5)
+    },
+    searchTagColor () {
+      let tag = this.tags.find(tag => {
+        return tag.name === this.search
+      })
+      if (tag) {
+        return tag.color
+      } else {
+        return this.currentUserColor
+      }
     }
   },
   methods: {
@@ -110,7 +120,7 @@ export default {
     selectTag (tag, shouldCloseDialog) {
       const searchTag = {
         name: this.search,
-        color: this.currentUserColor
+        color: this.searchTagColor
       }
       tag = tag || searchTag
       this.$emit('selectTag', tag)

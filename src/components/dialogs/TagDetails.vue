@@ -8,7 +8,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="d
         button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{backgroundColor: color}")
         ColorPicker(:currentColor="color" :visible="colorPickerIsVisible" @selectedColor="updateTagColor")
-      input.tag-name(:disabled="!canEditSpace" placeholder="Tag Name" v-model="name" ref="name")
+      .tag-name {{name}}
   section.results-section
     //- TODO
     //- ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="spaces" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredSpaces")
@@ -68,19 +68,7 @@ export default {
     },
     color () { return this.currentTag.color },
     cardDetailsIsVisible () { return this.$store.state.cardDetailsIsVisibleForCardId },
-    name: {
-      get () {
-        return this.currentTag.name
-      },
-      set (newName) {
-        console.log('🌺', newName)
-        // const connectionType = {
-        //   id: this.currentConnectionType.id,
-        //   name: newName
-        // }
-        // this.$store.dispatch('currentSpace/updateConnectionType', connectionType)
-      }
-    },
+    name () { return this.currentTag.name },
     tagCards () {
       const cardsInCurrentSpace = this.tagCardsInCurrentSpace
       const cardsInCachedSpaces = cache.cardsByTagNameExcludingSpaceById(this.currentTag.name, this.currentSpaceId)
@@ -215,7 +203,7 @@ export default {
     margin-left 6px
   .results-section
     border-top 1px solid var(--primary)
-    padding-top 2px
+    padding-top 3px
   .loader
     margin-left 6px
   .name-segments
