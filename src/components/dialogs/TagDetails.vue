@@ -1,15 +1,26 @@
 <template lang="pug">
-dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="dialog" @click.left="closeDialogs")
+dialog.tag-details.narrow(v-if="visible" :open="visible" :style="dialogPosition" ref="dialog" @click.left="closeDialogs")
   section.edit-card(v-if="!cardDetailsIsVisible")
     button(@click="showCardDetails(null)") Edit Card
   section(:style="{backgroundColor: color}")
+    //- .top-info(v-if="tagCards.length")
+    //-   p Cards Tagged with
     .row
       .button-wrap
         button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{backgroundColor: color}")
         ColorPicker(:currentColor="color" :visible="colorPickerIsVisible" @selectedColor="updateTagColor")
       .tag-name {{name}}
-  section.results-section
+    //- .bottom-info(v-if="!tagCards.length")
+    p(v-if="!tagCards.length") Tag more cards with [[{{currentTag.name}}]] to see them here
+    //- .bottom-info(v-if="tagCards.length")
+    //-   p Tagged Cards
+
+    //- .info(v-if="tagCards.length")
+    //-   p Tagged Cards
+  //- section(v-if="tagCards.length")
+  //-   p Tagged Cards
+  section.results-section(v-if="tagCards.length")
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="tagCards" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredTagCards")
     ul.results-list
       template(v-for="(card in filteredItems")
@@ -89,7 +100,7 @@ export default {
       }
     },
     tagCardsInCurrentSpace () {
-      const cardId = this.currentTag.cardId
+      const cardId = this.$store.state.currentSelectedTag.cardId
       const tags = this.$store.getters['currentSpace/tagsByNameExcludingCardById']({
         name: this.currentTag.name,
         cardId
@@ -144,7 +155,8 @@ export default {
       })
     },
     showCardDetails (card) {
-      card = card || this.$store.getters['currentSpace/cardById'](this.currentTag.cardId)
+      const tag = this.$store.state.currentSelectedTag
+      card = card || this.$store.getters['currentSpace/cardById'](tag.cardId)
       if (this.currentSpaceId !== card.spaceId) {
         this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
         const space = cache.space(card.spaceId) || { id: card.spaceId }
