@@ -43,7 +43,7 @@ article(:style="position" :data-card-id="id" ref="card")
           //- Name
           p.name.name-segments(v-if="normalizedName" :style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox}")
             template(v-for="segment in nameSegments")
-              span(v-if="segment.isText") {{segment.content}}
+              span(v-if="segment.isText && segment.content") {{segment.content}}
               //- Tags
               span.badge.button-badge(
                 v-if="segment.isTag"
@@ -826,6 +826,10 @@ article
       .badge
         &:last-child
           margin 0
+      .button-badge
+        margin-right 3px
+      .button-badge + .button-badge
+        margin-left 3px
 
     .connector,
     .link

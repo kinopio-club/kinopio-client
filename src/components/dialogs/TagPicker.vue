@@ -114,7 +114,7 @@ export default {
       console.log('🌌')
       // this.loading = true
       // await get remoteTags(user/tags) , assign to this.tags
-      // mergedTags
+      // utils.mergedTags(previousTags, newTags)
       // this.loading false
     },
     selectTag (tag, shouldCloseDialog) {

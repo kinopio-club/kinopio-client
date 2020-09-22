@@ -173,15 +173,9 @@ export default {
     spaces.forEach(space => {
       if (!utils.arrayHasItems(space.tags)) { return }
       tags = tags.concat(space.tags)
-      // space.tags
     })
     const tag = tags.find(tag => tag.name === name)
     return tag
-    // spaces.find(space => {
-    //   if (space.tags.find(tag => tag.name === name)) {
-    //     return true
-    //   }
-    // })
   },
   allTags () {
     const spaces = this.getAllSpaces()
@@ -198,13 +192,13 @@ export default {
     const spaces = this.getAllSpaces()
     spaces.forEach(space => {
       if (!utils.arrayHasItems(space.tags)) { return }
-      const spaceTags = space.tags.map(spaceTag => {
+      const newSpaceTags = space.tags.map(spaceTag => {
         if (spaceTag.name === tag.name) {
           spaceTag[key] = tag[key]
         }
         return spaceTag
       })
-      this.updateSpace('tags', spaceTags, space.id)
+      this.updateSpace('tags', newSpaceTags, space.id)
     })
   },
 
