@@ -81,7 +81,7 @@ export default {
     name () { return this.currentTag.name },
     tagCards () {
       const cardsInCurrentSpace = this.tagCardsInCurrentSpace
-      const cardsInCachedSpaces = cache.cardsByTagNameExcludingSpaceById(this.currentTag.name, this.currentSpaceId)
+      const cardsInCachedSpaces = this.cardsByTagNameExcludingCurrentSpace(this.name)
       // TODO fetch remote, and merge
       console.log('🥂', cardsInCurrentSpace, cardsInCachedSpaces)
       let cards = cardsInCurrentSpace.concat(cardsInCachedSpaces)
@@ -121,6 +121,10 @@ export default {
     }
   },
   methods: {
+    cardsByTagNameExcludingCurrentSpace (name) {
+      const cards = cache.allCardsByTagName(name)
+      return cards.filter(card => card.spaceId !== this.currentSpaceId)
+    },
     updateFilter (filter) {
       this.filter = filter
     },

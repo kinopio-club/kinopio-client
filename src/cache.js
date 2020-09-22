@@ -151,13 +151,8 @@ export default {
 
   // Tags
 
-  cardsByTagNameExcludingSpaceById (name, spaceId) {
+  allCardsByTagName (name) {
     let spaces = this.getAllSpaces()
-    spaces = spaces.filter(space => {
-      const notExcludedSpace = space.id !== spaceId
-      const hasTags = utils.arrayHasItems(space.tags)
-      return notExcludedSpace && hasTags
-    })
     let cards = [] // card name, id, spaceid
     spaces.forEach(space => {
       const tags = space.tags.filter(tag => tag.name === name)
