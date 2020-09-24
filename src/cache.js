@@ -155,6 +155,7 @@ export default {
     let spaces = this.getAllSpaces()
     let cards = [] // card name, id, spaceid
     spaces.forEach(space => {
+      if (!space.tags) { return }
       const tags = space.tags.filter(tag => tag.name === name)
       if (!utils.arrayHasItems(tags)) { return }
       const cardIds = tags.map(tag => tag.cardId)
