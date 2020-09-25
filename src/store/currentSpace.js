@@ -1015,23 +1015,42 @@ export default {
     // Tags
 
     addTag: (context, tag) => {
+      // todo this should be supplied by the component!
       tag.color = context.rootState.currentUser.color
+
+      console.log('🐸 add tag', tag)
+      context.commit('addTag', tag) // name, color, cardId
+
+      if (!tag.id) {
+        tag.id = nanoid()
+      }
+
       const existingTag = context.state.tags.find(spaceTag => spaceTag.name === tag.name)
       if (existingTag) {
         tag.color = existingTag.color
       }
-      console.log('🐸 add tag', tag)
-      context.commit('addTag', tag) // name, color, cardId
-      // tag.spaceId = context.state.id
+
+      tag.spaceId = context.state.id
+      context.dispatch('api/addToQueue', {
+        name: 'createTag',
+        body: tag
+      }, { root: true })
       //   context.commit('broadcast/update', { updates: tag, type: 'addTag' }, { root: true })
-      //   context.dispatch('api/addToQueue', { name: 'addTag', body: tag }, { root: true })
+
       context.commit('history/add', { name: 'addTag', body: tag }, { root: true })
     },
     removeTag: (context, tag) => {
       console.log('🍆 remove tag', tag)
-      context.commit('removeTag', tag) // name, color, cardId
-      // tag.spaceId = context.state.id
-      // bradcast, api, history
+
+      context.commit('removeTag', tag) // name, color, cardId .. id
+
+      tag.spaceId = context.state.id
+      context.dispatch('api/addToQueue', {
+        name: 'removeTag',
+        body: tag
+      }, { root: true })
+      //   context.commit('broadcast/update', { updates: tag, type: 'addTag' }, { root: true })
+
       // context.commit('history/add', { name: 'removeTag', body: tag }, { root: true })
     },
     updateTagColor: (context, tag) => {
