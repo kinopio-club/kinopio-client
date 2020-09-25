@@ -9,7 +9,7 @@ dialog.tag-details.narrow(v-if="visible" :open="visible" :style="dialogPosition"
       .button-wrap
         button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{backgroundColor: color}")
-        ColorPicker(:currentColor="color" :visible="colorPickerIsVisible" @selectedColor="updateTagColor")
+        ColorPicker(:currentColor="color" :visible="colorPickerIsVisible" @selectedColor="updateTagNameColor")
       .tag-name {{name}}
     //- .bottom-info(v-if="!tagCards.length")
     p(v-if="!tagCards.length") Tag more cards with [[{{currentTag.name}}]] to see them here
@@ -176,10 +176,10 @@ export default {
     closeDialogs () {
       this.colorPickerIsVisible = false
     },
-    updateTagColor (newColor) {
+    updateTagNameColor (newColor) {
       let tag = utils.clone(this.currentTag)
       tag.color = newColor
-      this.$store.dispatch('currentSpace/updateTagColor', tag)
+      this.$store.dispatch('currentSpace/updateTagNameColor', tag)
     },
     focusName () {
       this.$nextTick(() => {

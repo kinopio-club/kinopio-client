@@ -189,13 +189,13 @@ export default {
     tags.reverse()
     return tags
   },
-  updateTagInAllSpaces (tag, key) {
+  updateTagColorInAllSpaces (tag) {
     const spaces = this.getAllSpaces()
     spaces.forEach(space => {
-      if (!utils.arrayHasItems(space.tags)) { return }
+      if (!space.tags) { return }
       const newSpaceTags = space.tags.map(spaceTag => {
         if (spaceTag.name === tag.name) {
-          spaceTag[key] = tag[key]
+          spaceTag.color = tag.color
         }
         return spaceTag
       })
