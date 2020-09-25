@@ -123,6 +123,7 @@ import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
 import qs from '@aguezz/qs-parse'
+import nanoid from 'nanoid'
 
 let previousTags = []
 
@@ -177,7 +178,7 @@ export default {
     if (element) {
       this.scrollIntoViewAndFocus()
       this.$emit('broadcastShowCardDetails')
-      this.savePreviousTags()
+      this.updatePreviousTags()
     }
   },
   computed: {
@@ -635,7 +636,7 @@ export default {
         this.$refs.name.setSelectionRange(newCursorPosition, newCursorPosition)
       })
     },
-    savePreviousTags () {
+    updatePreviousTags () {
       const name = this.card.name
       if (!name) {
         previousTags = []
@@ -647,27 +648,39 @@ export default {
         return tag
       })
     },
-    // normalizeTags (tags) {
-    //   return tags.map(tag => {
-    //     return {
-    //       name: tag,
-    //       cardId: this.card.id
-    //     }
-    //   })
-    // },
+    normalizedNewTag (name) {
+      let color
+      const existingSpaceTag = this.$store.state.currentSpace.tags.find(spaceTag => spaceTag.name === name)
+      if (existingSpaceTag) {
+        color = existingSpaceTag.color
+      }
+      return {
+        name: name,
+        id: nanoid(),
+        color: color || this.$store.state.currentUser.color,
+        cardId: this.card.id,
+        spaceId: this.$store.state.currentSpace.id
+      }
+    },
+    removeRemovedTags (newTagNames) {
+      const removeTags = previousTags.filter(previousTag => !newTagNames.includes(previousTag.name))
+      removeTags.forEach(tag => this.$store.dispatch('currentSpace/removeTag', tag))
+    },
+    addNewTags (newTagNames) {
+      const previousTagNames = previousTags.map(tag => tag.name)
+      const addTagsNames = newTagNames.filter(newTagName => !previousTagNames.includes(newTagName))
+      addTagsNames.forEach(tagName => {
+        const tag = this.normalizedNewTag(tagName)
+        this.$store.dispatch('currentSpace/addTag', tag)
+      })
+    },
     updateTags () {
       const name = this.card.name
       if (!name) { return }
-      const newTags = utils.tagsFromStringWithoutBrackets(name) || []
-      // removed
-      let removedTags = previousTags.filter(previousTag => !newTags.includes(previousTag))
-      removedTags = this.normalizeTags(removedTags)
-      removedTags.forEach(tag => this.$store.dispatch('currentSpace/removeTag', tag))
-      // added
-      let addedTags = newTags.filter(newTag => !previousTags.includes(newTag))
-      addedTags = this.normalizeTags(addedTags)
-      addedTags.forEach(tag => this.$store.dispatch('currentSpace/addTag', tag))
-      this.savePreviousTags()
+      const newTagNames = utils.tagsFromStringWithoutBrackets(name) || []
+      this.removeRemovedTags(newTagNames)
+      this.addNewTags(newTagNames)
+      this.updatePreviousTags()
     },
     hideTagDetailsIsVisible () {
       this.$store.commit('currentSelectedTag', {})
@@ -700,6 +713,7 @@ export default {
       }
     },
     updateTagBracketsWithTag (tag) {
+      this.updatePreviousTags()
       const cursorPosition = this.cursorPosition
       const tagStartText = this.tagStartText(cursorPosition)
       const tagEndText = this.tagEndText(cursorPosition)
@@ -721,7 +735,7 @@ export default {
       this.$nextTick(() => {
         if (visible) {
           this.scrollIntoViewAndFocus()
-          this.savePreviousTags()
+          this.updatePreviousTags()
         } else {
           this.removeTrackingQueryStrings()
         }
