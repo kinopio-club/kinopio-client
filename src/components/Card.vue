@@ -53,6 +53,7 @@ article(:style="position" :data-card-id="id" ref="card")
                 @click.left="showTagDetailsIsVisible($event, segment)"
                 @touchend="showTagDetailsIsVisible($event, segment)"
                 @keyup.stop.enter="showTagDetailsIsVisible($event, segment)"
+                :data-tag-id="segment.id"
               ) {{segment.name}}
 
       //- Right buttons
@@ -326,6 +327,7 @@ export default {
         if (segment.isTag) {
           const tag = this.$store.getters['currentSpace/tagByName'](segment.name)
           segment.color = tag.color
+          segment.id = tag.id
         }
         return segment
       })

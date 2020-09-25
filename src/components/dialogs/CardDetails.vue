@@ -642,15 +642,19 @@ export default {
         return
       }
       previousTags = utils.tagsFromStringWithoutBrackets(name) || []
-    },
-    normalizeTags (tags) {
-      return tags.map(tag => {
-        return {
-          name: tag,
-          cardId: this.card.id
-        }
+      previousTags = previousTags.map(tag => {
+        tag = this.$store.getters['currentSpace/tagByName'](tag)
+        return tag
       })
     },
+    // normalizeTags (tags) {
+    //   return tags.map(tag => {
+    //     return {
+    //       name: tag,
+    //       cardId: this.card.id
+    //     }
+    //   })
+    // },
     updateTags () {
       const name = this.card.name
       if (!name) { return }
