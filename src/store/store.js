@@ -69,6 +69,7 @@ export default new Vuex.Store({
     tagDetailsIsVisible: false,
     tagDetailsPosition: {}, // x, y
     currentSelectedTag: {},
+    remoteTagNameGroups: [], // {name: 'abc', cards: []}
 
     // dragging
     currentDraggingCardId: '',
@@ -360,6 +361,12 @@ export default new Vuex.Store({
     currentSelectedTag: (state, tag) => {
       utils.typeCheck(tag, 'object')
       state.currentSelectedTag = tag
+    },
+    addToRemoteTagNameGroups: (state, group) => {
+      utils.typeCheck(group, 'object')
+      let groups = state.remoteTagNameGroups
+      groups.push(group)
+      state.remoteTagNameGroups = groups
     },
 
     // Connection Details
@@ -695,6 +702,9 @@ export default new Vuex.Store({
       const isDrawingConnection = state.currentUserIsDrawingConnection
       const isDraggingCard = state.currentUserIsDraggingCard
       return isPainting || isDrawingConnection || isDraggingCard
+    },
+    remoteTagNameGroupByName: (state) => (name) => {
+      return state.remoteTagNameGroups.find(group => group.name === name)
     }
   },
 

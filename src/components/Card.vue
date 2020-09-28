@@ -146,6 +146,7 @@ import User from '@/components/User.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
 
 import fromNow from 'fromnow'
+import nanoid from 'nanoid'
 
 let isMultiTouch
 
@@ -325,7 +326,14 @@ export default {
       let segments = utils.cardNameSegments(this.normalizedName)
       return segments.map(segment => {
         if (segment.isTag) {
-          const tag = this.$store.getters['currentSpace/tagByName'](segment.name)
+          let tag = this.$store.getters['currentSpace/tagByName'](segment.name)
+          if (!tag) {
+            console.warn('🦚 tag data is missing', tag, this.card)
+            tag = {
+              color: this.$store.state.currentUser.color,
+              id: nanoid()
+            }
+          }
           segment.color = tag.color
           segment.id = tag.id
         }
@@ -824,14 +832,6 @@ article
         &.has-checkbox
           .audio
             width 132px
-    .name-segments
-      .badge
-        &:last-child
-          margin 0
-      .button-badge
-        margin-right 3px
-      .button-badge + .button-badge
-        margin-left 3px
 
     .connector,
     .link

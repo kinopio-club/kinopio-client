@@ -534,6 +534,15 @@ code
     cursor text
     flex-shrink 0
 
+.name-segments
+  .badge
+    &:last-child
+      margin 0
+  .badge
+    margin-right 3px
+  .badge + .badge
+    margin-left 3px
+
 #layout-viewport
   position fixed
   width 100%

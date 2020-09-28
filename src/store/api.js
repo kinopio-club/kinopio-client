@@ -403,6 +403,20 @@ const self = {
       }
     },
 
+    // Tag
+
+    getCardsWithTag: async (context, name) => {
+      if (!shouldRequest()) { return }
+      name = encodeURI(name)
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/card/by-tag-name/${name}`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
+
     // Billing
 
     createCustomer: async (context, body) => {

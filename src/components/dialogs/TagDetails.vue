@@ -3,25 +3,15 @@ dialog.tag-details.narrow(v-if="visible" :open="visible" :style="dialogPosition"
   section.edit-card(v-if="!cardDetailsIsVisible")
     button(@click="showCardDetails(null)") Edit Card
   section(:style="{backgroundColor: color}")
-    //- .top-info(v-if="tagCards.length")
-    //-   p Cards Tagged with
     .row
       .button-wrap
         button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{backgroundColor: color}")
         ColorPicker(:currentColor="color" :visible="colorPickerIsVisible" @selectedColor="updateTagNameColor")
       .tag-name {{name}}
-    //- .bottom-info(v-if="!tagCards.length")
-    p(v-if="!tagCards.length") Tag more cards with [[{{currentTag.name}}]] to see them here
-    //- .bottom-info(v-if="tagCards.length")
-    //-   p Tagged Cards
-
-    //- .info(v-if="tagCards.length")
-    //-   p Tagged Cards
-  //- section(v-if="tagCards.length")
-  //-   p Tagged Cards
-  section.results-section(v-if="tagCards.length")
-    ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="tagCards" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredTagCards")
+    p(v-if="!cardsWithTag.length") Tag more cards with [[{{currentTag.name}}]] to see them here
+  section.results-section(v-if="cardsWithTag.length")
+    ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="cardsWithTag" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredCardsWithTag")
     ul.results-list
       template(v-for="(card in filteredItems")
         li(:data-card-id="card.id" @click="showCardDetails(card)")
@@ -36,7 +26,7 @@ dialog.tag-details.narrow(v-if="visible" :open="visible" :style="dialogPosition"
                 :style="{backgroundColor: segment.color}"
                 :class="{ active: currentTag.name === segment.name }"
               ) {{segment.name}}
-    Loader(:visible="true")
+    Loader(:visible="loading")
 </template>
 
 <script>
@@ -46,6 +36,8 @@ import Loader from '@/components/Loader.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+
+import uniqBy from 'lodash-es/uniqBy'
 
 export default {
   name: 'TagDetails',
@@ -58,7 +50,9 @@ export default {
     return {
       colorPickerIsVisible: false,
       filter: '',
-      filteredCardTags: []
+      filteredCardsWithTag: [],
+      loading: false,
+      cardsWithTag: []
     }
   },
   computed: {
@@ -79,27 +73,14 @@ export default {
     color () { return this.currentTag.color },
     cardDetailsIsVisible () { return this.$store.state.cardDetailsIsVisibleForCardId },
     name () { return this.currentTag.name },
-    tagCards () {
-      const cardsInCurrentSpace = this.tagCardsInCurrentSpace
-      const cardsInCachedSpaces = this.cardsByTagNameExcludingCurrentSpace(this.name)
-      // TODO fetch remote, and merge
-      console.log('🥂', cardsInCurrentSpace, cardsInCachedSpaces)
-      let cards = cardsInCurrentSpace.concat(cardsInCachedSpaces)
-      cards = cards.map(card => {
-        card = utils.clone(card)
-        card.nameSegments = this.cardNameSegments(card.name)
-        return card
-      })
-      return cards
-    },
     filteredItems () {
       if (this.filter) {
-        return this.filteredCardTags
+        return this.filteredCardsWithTag
       } else {
-        return this.tagCards
+        return this.cardsWithTag
       }
     },
-    tagCardsInCurrentSpace () {
+    cardsWithTagNameInCurrentSpace () {
       const cardId = this.$store.state.currentSelectedTag.cardId
       const tags = this.$store.getters['currentSpace/tagsByNameExcludingCardById']({
         name: this.currentTag.name,
@@ -113,23 +94,61 @@ export default {
       return cards
     },
     shouldHideResultsFilter () {
-      if (this.tagCards.length < 5) {
+      if (this.cardsWithTag.length < 5) {
         return true
       } else {
         return false
       }
+    },
+    currentCard () {
+      return this.$store.getters['currentSpace/cardById'](this.$store.state.currentSelectedTag.cardId)
     }
   },
   methods: {
-    cardsByTagNameExcludingCurrentSpace (name) {
-      const cards = cache.allCardsByTagName(name)
-      return cards.filter(card => card.spaceId !== this.currentSpaceId)
+    setCardsWithTag (cards) {
+      cards = uniqBy(cards, 'id')
+      cards = this.excludeCurrentCard(cards)
+      cards = cards.map(card => {
+        card = utils.clone(card)
+        card.nameSegments = this.cardNameSegments(card.name)
+        return card
+      })
+      this.cardsWithTag = cards
+    },
+    async updateRemoteCardsWithTag () {
+      let remoteCardsWithTag
+      const remoteTagNameGroup = this.$store.getters['remoteTagNameGroupByName'](this.name)
+      if (remoteTagNameGroup) {
+        remoteCardsWithTag = remoteTagNameGroup.cards
+      } else {
+        this.loading = true
+        remoteCardsWithTag = await this.$store.dispatch('api/getCardsWithTag', this.name)
+        this.loading = false
+        const remoteTagGroup = {
+          name: this.name,
+          cards: remoteCardsWithTag
+        }
+        this.$store.commit('addToRemoteTagNameGroups', remoteTagGroup)
+      }
+      let cards = this.cardsWithTag.concat(this.remoteCardsWithTag)
+      this.setCardsWithTag(cards)
+    },
+    updateCardsWithTag () {
+      const cardsInCurrentSpace = this.cardsWithTagNameInCurrentSpace
+      const cardsInCachedSpaces = cache.allCardsByTagName(this.name)
+      let cards = cardsInCurrentSpace.concat(cardsInCachedSpaces)
+      this.setCardsWithTag(cards)
+      this.updateRemoteCardsWithTag()
+    },
+    excludeCurrentCard (cards) {
+      cards = cards.filter(Boolean)
+      return cards.filter(card => card.id !== this.currentCard.id)
     },
     updateFilter (filter) {
       this.filter = filter
     },
-    updateFilteredTagCards (cards) {
-      this.filteredCardTags = cards
+    updateFilteredCardsWithTag (cards) {
+      this.filteredCardsWithTag = cards
     },
     cardNameSegments (name) {
       let url = utils.urlFromString(name)
@@ -159,8 +178,7 @@ export default {
       })
     },
     showCardDetails (card) {
-      const tag = this.$store.state.currentSelectedTag
-      card = card || this.$store.getters['currentSpace/cardById'](tag.cardId)
+      card = card || this.currentCard
       if (this.currentSpaceId !== card.spaceId) {
         this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
         const space = cache.space(card.spaceId) || { id: card.spaceId }
@@ -208,6 +226,9 @@ export default {
   },
   watch: {
     visible (visible) {
+      if (this.visible) {
+        this.updateCardsWithTag()
+      }
       this.$nextTick(() => {
         if (this.visible) {
           this.scrollIntoViewAndFocus()
@@ -231,10 +252,6 @@ export default {
     padding-top 3px
   .loader
     margin-left 6px
-  .name-segments
-    .badge
-      &:last-child
-        margin 0
     img
       display inline
       max-height 30px
@@ -247,11 +264,4 @@ export default {
   .tag-badge
     &.active
       box-shadow var(--button-active-inset-shadow)
-
-  // .results-header
-  //   padding-bottom 4px
-//   .edit-message
-//     button
-//       margin-top 10px
-
 </style>
