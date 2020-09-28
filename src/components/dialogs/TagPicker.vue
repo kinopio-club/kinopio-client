@@ -68,7 +68,7 @@ export default {
   data () {
     return {
       tags: [],
-      loading: true,
+      loading: false,
       focusOnTagName: ''
     }
   },
@@ -111,11 +111,16 @@ export default {
       this.updateRemoteTags()
     },
     async updateRemoteTags () {
-      console.log('🌌')
-      // this.loading = true
-      // await get remoteTags(user/tags) , assign to this.tags
-      // utils.mergedTags(previousTags, newTags)
-      // this.loading false
+      let remoteTags = this.$store.state.remoteTags
+      if (!remoteTags.length) {
+        this.loading = true
+        remoteTags = await this.$store.dispatch('api/getUserTags')
+        this.loading = false
+        this.$store.commit('remoteTags', remoteTags)
+      }
+      // if (!remoteTags) { return }
+      const mergedTags = utils.mergedTags(this.tags, remoteTags)
+      this.tags = mergedTags
     },
     selectTag (tag, shouldCloseDialog) {
       const searchTag = {

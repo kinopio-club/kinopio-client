@@ -124,6 +124,7 @@ export default {
         this.loading = true
         remoteCardsWithTag = await this.$store.dispatch('api/getCardsWithTag', this.name)
         this.loading = false
+        // if (!remoteCardsWithTag) { return }
         const remoteTagGroup = {
           name: this.name,
           cards: remoteCardsWithTag

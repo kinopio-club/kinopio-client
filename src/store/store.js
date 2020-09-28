@@ -70,6 +70,7 @@ export default new Vuex.Store({
     tagDetailsPosition: {}, // x, y
     currentSelectedTag: {},
     remoteTagNameGroups: [], // {name: 'abc', cards: []}
+    remoteTags: [],
 
     // dragging
     currentDraggingCardId: '',
@@ -367,6 +368,10 @@ export default new Vuex.Store({
       let groups = state.remoteTagNameGroups
       groups.push(group)
       state.remoteTagNameGroups = groups
+    },
+    remoteTags: (state, tags) => {
+      utils.typeCheck(tags, 'array')
+      state.remoteTags = tags
     },
 
     // Connection Details
