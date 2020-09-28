@@ -49,7 +49,6 @@ article(:style="position" :data-card-id="id" ref="card")
                 v-if="segment.isTag"
                 :style="{backgroundColor: segment.color}"
                 :class="{ active: currentSelectedTag.name === segment.name }"
-                tabindex="0"
                 @click.left="showTagDetailsIsVisible($event, segment)"
                 @touchend="showTagDetailsIsVisible($event, segment)"
                 @keyup.stop.enter="showTagDetailsIsVisible($event, segment)"

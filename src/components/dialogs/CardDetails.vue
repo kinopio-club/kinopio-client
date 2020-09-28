@@ -124,6 +124,7 @@ import TagPicker from '@/components/dialogs/TagPicker.vue'
 import Loader from '@/components/Loader.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
+import cache from '@/cache.js'
 
 import qs from '@aguezz/qs-parse'
 import nanoid from 'nanoid'
@@ -653,9 +654,9 @@ export default {
     },
     normalizedNewTag (name) {
       let color
-      const existingSpaceTag = this.$store.state.currentSpace.tags.find(spaceTag => spaceTag.name === name)
-      if (existingSpaceTag) {
-        color = existingSpaceTag.color
+      const existingTag = cache.allTags().find(tag => tag.name === name)
+      if (existingTag) {
+        color = existingTag.color
       }
       return {
         name: name,
