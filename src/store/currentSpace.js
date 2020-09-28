@@ -1010,29 +1010,29 @@ export default {
     // Tags
 
     addTag: (context, tag) => {
-      console.log('🐸 add tag', tag)
       context.commit('addTag', tag)
       const update = { name: 'createTag', body: tag }
+      const broadcastUpdate = { updates: tag, type: 'addTag' }
       context.dispatch('api/addToQueue', update, { root: true })
-      //   context.commit('broadcast/update', { updates: tag, type: 'addTag' }, { root: true })
-      // context.commit('history/add', { name: 'addTag', body: tag }, { root: true })
+      context.commit('history/add', update, { root: true })
+      context.commit('broadcast/update', broadcastUpdate, { root: true })
     },
     removeTag: (context, tag) => {
-      console.log('🍆 remove tag', tag)
       context.commit('removeTag', tag)
       const update = { name: 'removeTag', body: tag }
+      const broadcastUpdate = { updates: tag, type: 'removeTag' }
       context.dispatch('api/addToQueue', update, { root: true })
-      //   context.commit('broadcast/update', { updates: tag, type: 'addTag' }, { root: true })
-      // context.commit('history/add', { name: 'removeTag', body: tag }, { root: true })
+      context.commit('history/add', update, { root: true })
+      context.commit('broadcast/update', broadcastUpdate, { root: true })
     },
     updateTagNameColor: (context, tag) => {
       context.commit('updateTagNameColor', tag)
       const update = { name: 'updateTagNameColor', body: tag }
+      const broadcastUpdate = { updates: tag, type: 'updateTagNameColor' }
       context.dispatch('api/addToQueue', update, { root: true })
-      // context.commit('broadcast/update', { updates: tag, type: 'updateTag' }, { root: true })
-      // context.commit('history/add', update, { root: true })
+      context.commit('history/add', update, { root: true })
+      context.commit('broadcast/update', broadcastUpdate, { root: true })
     }
-    // updateTagName
   },
 
   getters: {
