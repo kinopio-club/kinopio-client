@@ -259,7 +259,6 @@ export default {
       margin-right 5px
       vertical-align middle
   .space-badge
-    // margin 0
     background-color var(--secondary-background)
   .tag-badge
     &.active

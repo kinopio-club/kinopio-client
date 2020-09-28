@@ -35,6 +35,9 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.down="triggerTagPickerNavigation"
         @keydown.up="triggerTagPickerNavigation"
         @keydown.enter="triggerTagPickerSelect"
+        @keydown.tab="triggerTagPickerSelect"
+        @keydown.221="triggerTagPickerSelect"
+        @keydown.bracket-right="triggerTagPickerSelect"
       )
       TagPicker(:visible="tagPickerIsVisible" :cursorPosition="cursorPosition" :position="tagPickerPosition" :search="tagPickerSearch" @closeDialog="hideTagPicker" @selectTag="updateTagBracketsWithTag")
     .row(v-if="cardPendingUpload")
@@ -710,6 +713,9 @@ export default {
       if (shouldTrigger) {
         this.$store.commit('triggerPickerSelect')
         event.preventDefault()
+      }
+      if (event.key !== 'Enter') {
+        this.tagPickerIsVisible = false
       }
     },
     updateTagBracketsWithTag (tag) {
