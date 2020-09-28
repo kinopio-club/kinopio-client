@@ -71,6 +71,7 @@ export default new Vuex.Store({
     currentSelectedTag: {},
     remoteTagNameGroups: [], // {name: 'abc', cards: []}
     remoteTags: [],
+    remoteTagsIsFetched: false,
 
     // dragging
     currentDraggingCardId: '',
@@ -370,8 +371,13 @@ export default new Vuex.Store({
       state.remoteTagNameGroups = groups
     },
     remoteTags: (state, tags) => {
+      console.log('store remoteTags', tags)
       utils.typeCheck(tags, 'array')
       state.remoteTags = tags
+    },
+    remoteTagsIsFetched: (state, value) => {
+      utils.typeCheck(value, 'boolean')
+      state.remoteTagsIsFetched = value
     },
 
     // Connection Details

@@ -74,6 +74,7 @@ export default {
   },
   computed: {
     currentUserColor () { return this.$store.state.currentUser.color },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     filteredTags () {
       let tags = this.tags.filter(tag => {
         return tag.name !== this.search
@@ -111,14 +112,19 @@ export default {
       this.updateRemoteTags()
     },
     async updateRemoteTags () {
-      let remoteTags = this.$store.state.remoteTags
-      if (!remoteTags.length) {
+      if (!this.currentUserIsSignedIn) { return }
+      const remoteTagsIsFetched = this.$store.state.remoteTagsIsFetched
+      let remoteTags
+      if (remoteTagsIsFetched) {
+        remoteTags = this.$store.state.remoteTags
+      } else {
         this.loading = true
-        remoteTags = await this.$store.dispatch('api/getUserTags')
-        this.loading = false
+        remoteTags = await this.$store.dispatch('api/getUserTags') || []
+        console.log(remoteTags)
         this.$store.commit('remoteTags', remoteTags)
+        this.$store.commit('remoteTagsIsFetched', true)
+        this.loading = false
       }
-      // if (!remoteTags) { return }
       const mergedTags = utils.mergedTags(this.tags, remoteTags)
       this.tags = mergedTags
     },

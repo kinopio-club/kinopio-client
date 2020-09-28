@@ -102,7 +102,8 @@ export default {
     },
     currentCard () {
       return this.$store.getters['currentSpace/cardById'](this.$store.state.currentSelectedTag.cardId)
-    }
+    },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
     setCardsWithTag (cards) {
@@ -116,15 +117,15 @@ export default {
       this.cardsWithTag = cards
     },
     async updateRemoteCardsWithTag () {
+      if (!this.currentUserIsSignedIn) { return }
       let remoteCardsWithTag
       const remoteTagNameGroup = this.$store.getters['remoteTagNameGroupByName'](this.name)
       if (remoteTagNameGroup) {
         remoteCardsWithTag = remoteTagNameGroup.cards
       } else {
         this.loading = true
-        remoteCardsWithTag = await this.$store.dispatch('api/getCardsWithTag', this.name)
+        remoteCardsWithTag = await this.$store.dispatch('api/getCardsWithTag', this.name) || []
         this.loading = false
-        // if (!remoteCardsWithTag) { return }
         const remoteTagGroup = {
           name: this.name,
           cards: remoteCardsWithTag
