@@ -467,7 +467,7 @@ export default {
       })
     },
     loadSpace: async (context, space) => {
-      const emptySpace = { id: space.id, cards: [], connections: [], spectators: [], tags: [] }
+      const emptySpace = { id: space.id, cards: [], connections: [], spectators: [], tags: [], background: '' }
       const cachedSpace = cache.space(space.id)
       context.commit('clearAllNotifications', null, { root: true })
       context.commit('clearSpaceFilters', null, { root: true })
