@@ -101,12 +101,17 @@ export default {
     const items = {
       cards: space.cards,
       connectionTypes: space.connectionTypes,
-      connections: space.connections
+      connections: space.connections,
+      tags: space.tags
     }
     const uniqueItems = utils.uniqueSpaceItems(items, nullCardUsers)
     space.cards = uniqueItems.cards
     space.connectionTypes = uniqueItems.connectionTypes
     space.connections = uniqueItems.connections
+    space.tags = uniqueItems.tags.map(tag => {
+      tag.spaceId = space.id
+      return tag
+    })
     this.storeLocal(`space-${space.id}`, space)
     return space
   },
