@@ -9,7 +9,7 @@ const self = {
   },
   mutations: {
     add: (state, item) => {
-      utils.typeCheck(item, 'object')
+      utils.typeCheck({ value: item, type: 'object' })
       state.items.push(item)
     },
     clear: (state) => {

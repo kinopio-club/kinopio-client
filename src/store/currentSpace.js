@@ -35,14 +35,14 @@ export default {
     // Users
 
     addUserToSpace: (state, newUser) => {
-      utils.typeCheck(newUser, 'object')
+      utils.typeCheck({ value: newUser, type: 'object' })
       const userExists = state.users.find(user => user.id === newUser.id)
       if (userExists) { return }
       state.users.push(newUser)
       cache.updateSpace('users', state.users, state.id)
     },
     addCollaboratorToSpace: (state, newUser) => {
-      utils.typeCheck(newUser, 'object')
+      utils.typeCheck({ value: newUser, type: 'object' })
       const collaboratorExists = state.collaborators.find(collaborator => collaborator.id === newUser.id)
       if (collaboratorExists) { return }
       state.collaborators.push(newUser)
@@ -51,7 +51,7 @@ export default {
       cache.updateSpace('collaborators', space.collaborators, space.id)
     },
     addSpectatorToSpace: (state, update) => {
-      utils.typeCheck(update, 'object')
+      utils.typeCheck({ value: update, type: 'object' })
       const newUser = update.user || update
       const userExists = state.users.find(user => user.id === newUser.id)
       const collaboratorExists = state.collaborators.find(collaborator => collaborator.id === newUser.id)
@@ -63,28 +63,28 @@ export default {
       }
     },
     updateSpaceClients: (state, updates) => {
-      utils.typeCheck(updates, 'array')
+      utils.typeCheck({ value: updates, type: 'array' })
       state.clients = state.clients.concat(updates)
     },
     removeClientsFromSpace: (state) => {
       state.clients = []
     },
     removeSpectatorFromSpace: (state, oldUser) => {
-      utils.typeCheck(oldUser, 'object')
+      utils.typeCheck({ value: oldUser, type: 'object' })
       if (!state.spectators) { return }
       state.spectators = state.spectators.filter(user => {
         return user.id !== oldUser.id
       })
     },
     removeUserFromSpace: (state, oldUser) => {
-      utils.typeCheck(oldUser, 'object')
+      utils.typeCheck({ value: oldUser, type: 'object' })
       state.users = state.users.filter(user => {
         return user.id !== oldUser.id
       })
       cache.updateSpace('users', state.users, state.id)
     },
     removeCollaboratorFromSpace: (state, oldUser) => {
-      utils.typeCheck(oldUser, 'object')
+      utils.typeCheck({ value: oldUser, type: 'object' })
       state.collaborators = state.collaborators.filter(user => {
         return user.id !== oldUser.id
       })
@@ -638,7 +638,7 @@ export default {
     // Cards
 
     addCard: (context, { position, isParentCard, name, id }) => {
-      utils.typeCheck(position, 'object')
+      utils.typeCheck({ value: position, type: 'object' })
       if (context.rootGetters['currentUser/cardsCreatedIsOverLimit']) {
         context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
         context.commit('notifyCardsCreatedIsNearLimit', false, { root: true })
@@ -689,7 +689,7 @@ export default {
       context.commit('createCard', card)
     },
     pasteCard: (context, card) => {
-      utils.typeCheck(card, 'object')
+      utils.typeCheck({ value: card, type: 'object' })
       card = utils.clone(card)
       card.id = nanoid()
       card.spaceId = context.state.id
@@ -718,8 +718,8 @@ export default {
       context.commit('history/add', update, { root: true })
     },
     toggleCardChecked (context, { cardId, value }) {
-      utils.typeCheck(value, 'boolean')
-      utils.typeCheck(cardId, 'string')
+      utils.typeCheck({ value, type: 'boolean' })
+      utils.typeCheck({ value: cardId, type: 'string' })
       const currentUserId = context.rootState.currentUser.id
       const card = context.getters.cardById(cardId)
       let name = card.name

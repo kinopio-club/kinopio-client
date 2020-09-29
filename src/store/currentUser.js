@@ -131,12 +131,12 @@ export default {
       cache.updateUser('apiKey', apiKey)
     },
     favoriteUsers: (state, users) => {
-      utils.typeCheck(users, 'array')
+      utils.typeCheck({ value: users, type: 'array' })
       state.favoriteUsers = users
       cache.updateUser('favoriteUsers', users)
     },
     favoriteSpaces: (state, spaces) => {
-      utils.typeCheck(spaces, 'array')
+      utils.typeCheck({ value: spaces, type: 'array' })
       state.favoriteSpaces = spaces
       cache.updateUser('favoriteSpaces', spaces)
     },
@@ -170,27 +170,27 @@ export default {
       cache.updateUser('arenaAccessToken', token)
     },
     cardsCreatedCount: (state, count) => {
-      utils.typeCheck(count, 'number')
+      utils.typeCheck({ value: count, type: 'number' })
       state.cardsCreatedCount = count
       cache.updateUser('cardsCreatedCount', count)
     },
     isUpgraded: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.isUpgraded = value
       cache.updateUser('isUpgraded', value)
     },
     filterShowUsers: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.filterShowUsers = value
       cache.updateUser('filterShowUsers', value)
     },
     filterShowDateUpdated: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.filterShowDateUpdated = value
       cache.updateUser('filterShowDateUpdated', value)
     },
     filterShowAbsoluteDates: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.filterShowAbsoluteDates = value
       cache.updateUser('filterShowAbsoluteDates', value)
     }

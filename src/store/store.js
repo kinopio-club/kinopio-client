@@ -135,11 +135,11 @@ export default new Vuex.Store({
     },
 
     pageHeight: (state, height) => {
-      utils.typeCheck(height, 'number')
+      utils.typeCheck({ value: height, type: 'number' })
       state.pageHeight = height
     },
     pageWidth: (state, width) => {
-      utils.typeCheck(width, 'number')
+      utils.typeCheck({ value: width, type: 'number' })
       state.pageWidth = width
     },
     closeAllDialogs: (state) => {
@@ -150,47 +150,47 @@ export default new Vuex.Store({
       state.currentSelectedTag = {}
     },
     isOnline: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.isOnline = value
     },
     isBeta: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.isBeta = value
     },
     shouldHideConnectionOutline: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.shouldHideConnectionOutline = value
     },
     newStuffIsUpdated: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.newStuffIsUpdated = value
     },
     stripeIsLoaded: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.stripeIsLoaded = value
     },
     shouldHideFooter: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.shouldHideFooter = value
     },
     isTouchDevice: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.isTouchDevice = value
     },
     resetPasswordApiKey: (state, apiKey) => {
-      utils.typeCheck(apiKey, 'string')
+      utils.typeCheck({ value: apiKey, type: 'string' })
       state.resetPasswordApiKey = apiKey
     },
     passwordResetIsVisible: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.passwordResetIsVisible = value
     },
     importArenaChannelIsVisible: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.importArenaChannelIsVisible = value
     },
     isAuthenticatingWithArena: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.isAuthenticatingWithArena = value
     },
     triggerSpaceDetailsVisible: () => {},
@@ -219,27 +219,27 @@ export default new Vuex.Store({
     // Cards
 
     shouldAddCard: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.shouldAddCard = value
     },
     currentUserIsHoveringOverConnectionId: (state, connectionId) => {
-      utils.typeCheck(connectionId, 'string')
+      utils.typeCheck({ value: connectionId, type: 'string' })
       state.currentUserIsHoveringOverConnectionId = connectionId
     },
     cardDetailsIsVisibleForCardId: (state, cardId) => {
-      utils.typeCheck(cardId, 'string')
+      utils.typeCheck({ value: cardId, type: 'string' })
       state.cardDetailsIsVisibleForCardId = cardId
     },
     parentCardId: (state, cardId) => {
-      utils.typeCheck(cardId, 'string')
+      utils.typeCheck({ value: cardId, type: 'string' })
       state.parentCardId = cardId
     },
     childCardId: (state, cardId) => {
-      utils.typeCheck(cardId, 'string')
+      utils.typeCheck({ value: cardId, type: 'string' })
       state.childCardId = cardId
     },
     addToCopiedCards: (state, cards) => {
-      utils.typeCheck(cards, 'array')
+      utils.typeCheck({ value: cards, type: 'array' })
       cards = cards.map(card => {
         card = utils.clone(card)
         return card
@@ -247,7 +247,7 @@ export default new Vuex.Store({
       state.copiedCards = cards
     },
     updateRemoteCardDetailsVisible: (state, update) => {
-      utils.typeCheck(update, 'object')
+      utils.typeCheck({ value: update, type: 'object' })
       delete update.type
       let cardDetailsVisible = utils.clone(state.remoteCardDetailsVisible)
       cardDetailsVisible = cardDetailsVisible.filter(card => card.id !== update.cardId) || []
@@ -255,22 +255,22 @@ export default new Vuex.Store({
       state.remoteCardDetailsVisible = cardDetailsVisible
     },
     clearRemoteCardDetailsVisible: (state, update) => {
-      utils.typeCheck(update, 'object')
+      utils.typeCheck({ value: update, type: 'object' })
       state.remoteCardDetailsVisible = state.remoteCardDetailsVisible.filter(card => card.userId !== update.userId) || []
     },
 
     // Connecting
 
     currentUserIsDrawingConnection: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.currentUserIsDrawingConnection = value
     },
     currentConnectionSuccess: (state, object) => {
-      utils.typeCheck(object, 'object', true)
+      utils.typeCheck({ value: object, type: 'object', allowUndefined: true })
       state.currentConnectionSuccess = object
     },
     currentConnectionCursorStart: (state, object) => {
-      utils.typeCheck(object, 'object')
+      utils.typeCheck({ value: object, type: 'object' })
       state.currentConnectionCursorStart = object
     },
     currentConnection: (state, updates) => {
@@ -296,26 +296,26 @@ export default new Vuex.Store({
     // Painting
 
     currentUserIsPainting: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.currentUserIsPainting = value
     },
     currentUserIsPaintingLocked: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.currentUserIsPaintingLocked = value
     },
 
     // Dragging
 
     currentUserIsDraggingCard: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.currentUserIsDraggingCard = value
     },
     preventDraggedCardFromShowingDetails: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.preventDraggedCardFromShowingDetails = value
     },
     currentDraggingCardId: (state, cardId) => {
-      utils.typeCheck(cardId, 'string')
+      utils.typeCheck({ value: cardId, type: 'string' })
       state.currentDraggingCardId = cardId
       if (state.multipleCardsSelectedIds.length) { return }
       // ♨️ set up currentConnectionsDragging
@@ -326,7 +326,7 @@ export default new Vuex.Store({
       state.currentConnectionsDragging = connections
     },
     addToRemoteCardsDragging: (state, update) => {
-      utils.typeCheck(update, 'object')
+      utils.typeCheck({ value: update, type: 'object' })
       delete update.type
       let cards = utils.clone(state.remoteCardsDragging)
       cards = cards.filter(card => card.userId !== update.userId) || []
@@ -334,11 +334,11 @@ export default new Vuex.Store({
       state.remoteCardsDragging = cards
     },
     clearRemoteCardsDragging: (state, update) => {
-      utils.typeCheck(update, 'object')
+      utils.typeCheck({ value: update, type: 'object' })
       state.remoteCardsDragging = state.remoteCardsDragging.filter(card => card.userId !== update.userId)
     },
     addToRemoteUploadDraggedOverCards: (state, update) => {
-      utils.typeCheck(update, 'object')
+      utils.typeCheck({ value: update, type: 'object' })
       delete update.type
       let cards = utils.clone(state.remoteUploadDraggedOverCards)
       cards = cards.filter(card => card.userId !== update.userId) || []
@@ -346,59 +346,59 @@ export default new Vuex.Store({
       state.remoteUploadDraggedOverCards = cards
     },
     clearRemoteUploadDraggedOverCards: (state, update) => {
-      utils.typeCheck(update, 'object')
+      utils.typeCheck({ value: update, type: 'object' })
       state.remoteUploadDraggedOverCards = state.remoteUploadDraggedOverCards.filter(card => card.userId !== update.userId)
     },
 
     // Tag Details
 
     tagDetailsIsVisible: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.tagDetailsIsVisible = value
     },
     tagDetailsPosition: (state, position) => {
-      utils.typeCheck(position, 'object')
+      utils.typeCheck({ value: position, type: 'object' })
       state.tagDetailsPosition = position
     },
     currentSelectedTag: (state, tag) => {
-      utils.typeCheck(tag, 'object')
+      utils.typeCheck({ value: tag, type: 'object' })
       state.currentSelectedTag = tag
     },
     addToRemoteTagNameGroups: (state, group) => {
-      utils.typeCheck(group, 'object')
+      utils.typeCheck({ value: group, type: 'object' })
       let groups = state.remoteTagNameGroups
       groups.push(group)
       state.remoteTagNameGroups = groups
     },
     remoteTags: (state, tags) => {
       console.log('store remoteTags', tags)
-      utils.typeCheck(tags, 'array')
+      utils.typeCheck({ value: tags, type: 'array' })
       state.remoteTags = tags
     },
     remoteTagsIsFetched: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.remoteTagsIsFetched = value
     },
 
     // Connection Details
 
     connectionDetailsIsVisibleForConnectionId: (state, connectionId) => {
-      utils.typeCheck(connectionId, 'string')
+      utils.typeCheck({ value: connectionId, type: 'string' })
       state.connectionDetailsIsVisibleForConnectionId = connectionId
     },
     currentConnectionColor: (state, color) => {
-      utils.typeCheck(color, 'string')
+      utils.typeCheck({ value: color, type: 'string' })
       state.currentConnectionColor = color
     },
     connectionDetailsPosition: (state, position) => {
-      utils.typeCheck(position, 'object')
+      utils.typeCheck({ value: position, type: 'object' })
       state.connectionDetailsPosition = position
     },
     triggeredDrawConnectionFrame: (state, cursor) => {
       state.triggeredDrawConnectionFrame = cursor
     },
     addToRemoteConnectionDetailsVisible: (state, update) => {
-      utils.typeCheck(update, 'object')
+      utils.typeCheck({ value: update, type: 'object' })
       delete update.type
       let connections = utils.clone(state.remoteConnectionDetailsVisible)
       connections = connections.filter(connection => connection.userId !== update.userId) || []
@@ -406,18 +406,18 @@ export default new Vuex.Store({
       state.remoteConnectionDetailsVisible = connections
     },
     clearRemoteConnectionDetailsVisible: (state, update) => {
-      utils.typeCheck(update, 'object')
+      utils.typeCheck({ value: update, type: 'object' })
       state.remoteConnectionDetailsVisible = state.remoteConnectionDetailsVisible.filter(connection => connection.userId !== update.userId)
     },
 
     // Multiple Selection
 
     multipleSelectedActionsIsVisible: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.multipleSelectedActionsIsVisible = value
     },
     multipleSelectedActionsPosition: (state, position) => {
-      utils.typeCheck(position, 'object')
+      utils.typeCheck({ value: position, type: 'object' })
       state.multipleSelectedActionsPosition = position
     },
     addToMultipleCardsSelected: (state, cardId) => {
@@ -440,7 +440,7 @@ export default new Vuex.Store({
       state.multipleConnectionsSelectedIds.push(connectionId)
     },
     removeFromMultipleConnectionsSelected: (state, connectionId) => {
-      utils.typeCheck(connectionId, 'string')
+      utils.typeCheck({ value: connectionId, type: 'string' })
       state.multipleConnectionsSelectedIds = state.multipleConnectionsSelectedIds.filter(id => {
         return id !== connectionId
       })
@@ -450,15 +450,15 @@ export default new Vuex.Store({
       state.multipleConnectionsSelectedIds = []
     },
     multipleCardsSelectedIds: (state, cardIds) => {
-      utils.typeCheck(cardIds, 'array')
+      utils.typeCheck({ value: cardIds, type: 'array' })
       state.multipleCardsSelectedIds = cardIds
     },
     multipleConnectionsSelectedIds: (state, connectionIds) => {
-      utils.typeCheck(connectionIds, 'array')
+      utils.typeCheck({ value: connectionIds, type: 'array' })
       state.multipleConnectionsSelectedIds = connectionIds
     },
     addToRemoteCardsSelected: (state, update) => {
-      utils.typeCheck(update, 'object')
+      utils.typeCheck({ value: update, type: 'object' })
       delete update.type
       const isSelected = state.remoteCardsSelected.find(card => {
         const cardIsSelected = card.cardId === update.cardId
@@ -469,7 +469,7 @@ export default new Vuex.Store({
       state.remoteCardsSelected.push(update)
     },
     addToRemoteConnectionsSelected: (state, update) => {
-      utils.typeCheck(update, 'object')
+      utils.typeCheck({ value: update, type: 'object' })
       delete update.type
       const isSelected = state.remoteConnectionsSelected.find(connection => {
         const connectionIsSelected = connection.connectionId === update.connectionId
@@ -480,7 +480,7 @@ export default new Vuex.Store({
       state.remoteConnectionsSelected.push(update)
     },
     clearRemoteMultipleSelected: (state, update) => {
-      utils.typeCheck(update, 'object')
+      utils.typeCheck({ value: update, type: 'object' })
       const user = update.user || update.updates.user
       state.remoteCardsSelected = state.remoteCardsSelected.filter(card => card.userId !== user.id)
       state.remoteConnectionsSelected = state.remoteConnectionsSelected.filter(connection => connection.userId !== user.id)
@@ -489,23 +489,23 @@ export default new Vuex.Store({
     // Loading
 
     isLoadingSpace: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.isLoadingSpace = value
     },
     isJoiningSpace: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.isJoiningSpace = value
     },
     spaceUrlToLoad: (state, spaceUrl) => {
-      utils.typeCheck(spaceUrl, 'string')
+      utils.typeCheck({ value: spaceUrl, type: 'string' })
       state.spaceUrlToLoad = spaceUrl
     },
     addToSpaceCollaboratorKeys: (state, spaceCollaboratorKey) => {
-      utils.typeCheck(spaceCollaboratorKey, 'object')
+      utils.typeCheck({ value: spaceCollaboratorKey, type: 'object' })
       state.spaceCollaboratorKeys.push(spaceCollaboratorKey) // { spaceId, collaboratorKey }
     },
     updateRemotePendingUploads: (state, update) => {
-      utils.typeCheck(update, 'object')
+      utils.typeCheck({ value: update, type: 'object' })
       delete update.type
       const existingUpload = state.remotePendingUploads.find(item => {
         const card = item.cardId === update.cardId
@@ -526,11 +526,11 @@ export default new Vuex.Store({
       state.remotePendingUploads = state.remotePendingUploads.filter(item => item.percentComplete !== 100)
     },
     hasRestoredFavorites: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.hasRestoredFavorites = value
     },
     loadSpaceShowDetailsForCardId: (state, cardId) => {
-      utils.typeCheck(cardId, 'string')
+      utils.typeCheck({ value: cardId, type: 'string' })
       state.loadSpaceShowDetailsForCardId = cardId
     },
 
@@ -554,39 +554,39 @@ export default new Vuex.Store({
       state.notificationsWithPosition = []
     },
     notifySpaceNotFound: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.notifySpaceNotFound = value
     },
     notifyConnectionError: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.notifyConnectionError = value
     },
     notifyServerCouldNotSave: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.notifyServerCouldNotSave = value
     },
     notifySpaceIsRemoved: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.notifySpaceIsRemoved = value
     },
     notifyNewUser: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.notifyNewUser = value
     },
     notifySignUpToEditSpace: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.notifySignUpToEditSpace = value
     },
     notifySpaceIsOpenAndEditable: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.notifySpaceIsOpenAndEditable = value
     },
     notifyCardsCreatedIsNearLimit: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.notifyCardsCreatedIsNearLimit = value
     },
     notifyCardsCreatedIsOverLimit: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean' })
       state.notifyCardsCreatedIsOverLimit = value
     },
 
@@ -608,27 +608,27 @@ export default new Vuex.Store({
       state.filteredTagNames = []
     },
     addToFilteredConnectionTypeId: (state, id) => {
-      utils.typeCheck(id, 'string')
+      utils.typeCheck({ value: id, type: 'string' })
       state.filteredConnectionTypeIds.push(id)
     },
     removeFromFilteredConnectionTypeId: (state, id) => {
-      utils.typeCheck(id, 'string')
+      utils.typeCheck({ value: id, type: 'string' })
       state.filteredConnectionTypeIds = state.filteredConnectionTypeIds.filter(typeId => typeId !== id)
     },
     addToFilteredFrameIds: (state, id) => {
-      utils.typeCheck(id, 'number')
+      utils.typeCheck({ value: id, type: 'number' })
       state.filteredFrameIds.push(id)
     },
     removeFromFilteredFrameIds: (state, id) => {
-      utils.typeCheck(id, 'number')
+      utils.typeCheck({ value: id, type: 'number' })
       state.filteredFrameIds = state.filteredFrameIds.filter(frameId => frameId !== id)
     },
     addToFilteredTagNames: (state, name) => {
-      utils.typeCheck(name, 'string')
+      utils.typeCheck({ value: name, type: 'string' })
       state.filteredTagNames.push(name)
     },
     removeFromFilteredTagNames: (state, name) => {
-      utils.typeCheck(name, 'string')
+      utils.typeCheck({ value: name, type: 'string' })
       state.filteredTagNames = state.filteredTagNames.filter(tagName => tagName !== name)
     }
   },
@@ -667,7 +667,7 @@ export default new Vuex.Store({
       context.commit('updateSpacePageSize', { maxX, maxY })
     },
     addToMultipleCardsSelected: (context, cardId) => {
-      utils.typeCheck(cardId, 'string')
+      utils.typeCheck({ value: cardId, type: 'string' })
       if (context.state.multipleCardsSelectedIds.includes(cardId)) { return }
       context.commit('addToMultipleCardsSelected', cardId)
       const updates = {
@@ -683,7 +683,7 @@ export default new Vuex.Store({
       context.commit('broadcast/updateStore', { user: utils.userMeta(user, space), type: 'clearRemoteMultipleSelected' }, { root: true })
     },
     addToMultipleConnectionsSelected: (context, connectionId) => {
-      utils.typeCheck(connectionId, 'string')
+      utils.typeCheck({ value: connectionId, type: 'string' })
       if (context.state.multipleConnectionsSelectedIds.includes(connectionId)) { return }
       context.commit('addToMultipleConnectionsSelected', connectionId)
       const updates = {

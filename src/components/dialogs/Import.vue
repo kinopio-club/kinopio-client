@@ -31,6 +31,7 @@ import scrollIntoView from '@/scroll-into-view.js'
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
+import utils from '@/utils.js'
 
 export default {
   name: 'Import',
@@ -98,13 +99,6 @@ export default {
       this.closeDialogs()
       this.$emit('closeDialog')
     },
-    typeCheck (value, type) {
-      if (type === 'array') {
-        return Array.isArray(value)
-      } else {
-        return typeof value === type // eslint-disable-line valid-typeof
-      }
-    },
     isValidSpace (space) {
       this.errors = []
       const schema = {
@@ -113,10 +107,12 @@ export default {
         'cards': 'array',
         'connections': 'array',
         'connectionTypes': 'array',
-        'customFields': 'array'
+        'customFields': 'array',
+        'tags': 'array'
       }
       Object.keys(schema).forEach(field => {
-        if (!this.typeCheck(space[field], schema[field])) {
+        const isValidType = utils.typeCheck({ value: space[field], type: schema[field] })
+        if (!isValidType) {
           let error = `Expected ${field} but didn't get a ${schema[field]}`
           this.errors.push(error)
         }

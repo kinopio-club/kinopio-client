@@ -91,13 +91,13 @@ export default {
   },
 
   clone (object) {
-    this.typeCheck(object, 'object')
+    this.typeCheck({ value: object, type: 'object' })
     let cloned = JSON.stringify(object)
     cloned = JSON.parse(cloned)
     return cloned
   },
 
-  typeCheck (value, type, allowUndefined) {
+  typeCheck ({ value, type, allowUndefined, origin }) {
     if (allowUndefined && value === undefined) {
       return
     }
@@ -110,7 +110,7 @@ export default {
   },
 
   arrayExists (array) {
-    this.typeCheck(array, 'array', true)
+    this.typeCheck({ value: array, type: 'array', allowUndefined: true })
     if (!array) {
       return false
     } else if (!array.length) {
@@ -121,7 +121,7 @@ export default {
   },
 
   arrayHasItems (array) {
-    this.typeCheck(array, 'array')
+    this.typeCheck({ value: array, type: 'array' })
     if (array) {
       if (array.length) {
         return true
@@ -131,7 +131,7 @@ export default {
   },
 
   updateObject (object, value) {
-    this.typeCheck(value, 'object')
+    this.typeCheck({ value, type: 'object' })
     const keys = Object.keys(value)
     if (keys.length === 0) {
       object = {}
@@ -145,9 +145,9 @@ export default {
 
   updateUsersWithUser (users, updatedUser, keys) {
     keys = keys || ['name', 'color']
-    this.typeCheck(users, 'object')
-    this.typeCheck(updatedUser, 'object')
-    this.typeCheck(keys, 'array')
+    this.typeCheck({ value: users, type: 'object' })
+    this.typeCheck({ value: updatedUser, type: 'object' })
+    this.typeCheck({ value: keys, type: 'array' })
     return users.map(user => {
       if (user.id === updatedUser.userId) {
         keys.forEach(key => {
@@ -294,7 +294,7 @@ export default {
   },
 
   averageOfNumbers (numbers) {
-    this.typeCheck(numbers, 'array')
+    this.typeCheck({ value: numbers, type: 'array' })
     let total = 0
     numbers.forEach(number => {
       total += number
