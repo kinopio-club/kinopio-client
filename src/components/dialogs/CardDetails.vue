@@ -1,27 +1,45 @@
 <template lang="pug">
 dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="closeDialogs" @keyup.stop.backspace="removeCard")
   section
-    textarea.name(
-      :disabled="!canEditCard"
-      ref="name"
-      rows="1"
-      placeholder="Type text here, or paste a URL"
-      v-model="name"
-      @keydown.prevent.enter.exact
-      @keyup.enter.exact="closeCard"
-      @keyup.stop.esc="closeCardAndFocus"
-      @keyup.stop.backspace
-      data-type="name"
-      maxlength="250"
-      @click.left="triggerUpdateMagicPaintPositionOffset"
-      @blur="triggerUpdatePositionInVisualViewport"
-      @paste="updatePastedName"
+    .textarea-wrap
+      textarea.name(
+        :disabled="!canEditCard"
+        ref="name"
+        rows="1"
+        placeholder="Type text here, or paste a URL"
+        v-model="name"
+        @keydown.prevent.enter.exact
 
-      @keyup.alt.enter.exact.stop
-      @keyup.ctrl.enter.exact.stop
-      @keydown.alt.enter.exact.stop="insertLineBreak"
-      @keydown.ctrl.enter.exact.stop="insertLineBreak"
-    )
+        @keyup.enter.exact="closeCard"
+        @keyup.stop.esc
+        @keydown.esc="closeCardAndFocus"
+
+        @keyup.stop.backspace="checkIfShouldShowTagPicker"
+        @keyup.stop.up="checkIfShouldHideTagPicker"
+        @keyup.stop.down="checkIfShouldHideTagPicker"
+        @keyup.stop.left="checkIfShouldHideTagPicker"
+        @keyup.stop.right="checkIfShouldHideTagPicker"
+
+        data-type="name"
+        maxlength="250"
+        @click.left="clickName"
+        @blur="triggerUpdatePositionInVisualViewport"
+        @paste="updatePastedName"
+
+        @keyup.alt.enter.exact.stop
+        @keyup.ctrl.enter.exact.stop
+        @keydown.alt.enter.exact.stop="insertLineBreak"
+        @keydown.ctrl.enter.exact.stop="insertLineBreak"
+
+        @keyup="updateTagPicker"
+        @keydown.down="triggerTagPickerNavigation"
+        @keydown.up="triggerTagPickerNavigation"
+        @keydown.enter="triggerTagPickerSelect"
+        @keydown.tab="triggerTagPickerSelect"
+        @keydown.221="triggerTagPickerSelect"
+        @keydown.bracket-right="triggerTagPickerSelect"
+      )
+      TagPicker(:visible="tagPickerIsVisible" :cursorPosition="cursorPosition" :position="tagPickerPosition" :search="tagPickerSearch" @closeDialog="hideTagPicker" @selectTag="updateTagBracketsWithTag")
     .row(v-if="cardPendingUpload")
       .badge.info
         Loader(:visible="true")
@@ -85,23 +103,38 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         img.icon.cancel(src="@/assets/add.svg")
         span Max Length
       p To fit small screens, cards can't be longer than 250 characters
+    //- Tags
+    .tags-row(v-if="tagsInCard.length")
+      template(v-for="tag in tagsInCard")
+        span.badge.button-badge(
+          :style="{backgroundColor: tag.color}"
+          :class="{ active: currentSelectedTag.name === tag.name }"
+          tabindex="0"
+          @click.left.stop="showTagDetailsIsVisible($event, tag)"
+          @touchend.stop="showTagDetailsIsVisible($event, tag)"
+          @keyup.stop.enter="showTagDetailsIsVisible($event, tag)"
+        ) {{tag.name}}
 
 </template>
 
 <script>
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
+import TagPicker from '@/components/dialogs/TagPicker.vue'
 import Loader from '@/components/Loader.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
 import qs from '@aguezz/qs-parse'
 
+let previousTags = []
+
 export default {
   name: 'CardDetails',
   components: {
     FramePicker,
     ImagePicker,
+    TagPicker,
     Loader
   },
   props: {
@@ -111,9 +144,13 @@ export default {
     return {
       framePickerIsVisible: false,
       imagePickerIsVisible: false,
+      tagPickerIsVisible: false,
+      tagPickerPosition: {},
+      tagPickerSearch: '',
       initialSearch: '',
       pastedName: '',
-      wasPasted: false
+      wasPasted: false,
+      cursorPosition: 0
     }
   },
   created () {
@@ -121,6 +158,7 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.framePickerIsVisible = false
         this.imagePickerIsVisible = false
+        this.hideTagPicker()
       }
       if (mutation.type === 'triggerUploadComplete') {
         let { cardId, url } = mutation.payload
@@ -137,11 +175,12 @@ export default {
     })
   },
   mounted () {
-    // for new cards
+    // for new cards only
     const element = this.$refs.dialog
     if (element) {
       this.scrollIntoViewAndFocus()
       this.$emit('broadcastShowCardDetails')
+      this.updatePreviousTags()
     }
   },
   computed: {
@@ -165,6 +204,8 @@ export default {
         return false
       }
     },
+    tagsInCard () { return this.$store.getters['currentSpace/tagsInCard'](this.card) },
+    currentSelectedTag () { return this.$store.state.currentSelectedTag },
     name: {
       get () {
         return this.card.name
@@ -360,6 +401,7 @@ export default {
       this.$nextTick(() => {
         this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.card.id, shouldUpdateApi: true })
       })
+      this.updateTags()
     },
     insertLineBreak (event) {
       const position = this.$refs.name.selectionEnd
@@ -371,9 +413,18 @@ export default {
       this.updateCardName(newName)
     },
     closeCard (event) {
+      if (this.tagPickerIsVisible) {
+        this.hideTagPicker()
+        event.stopPropagation()
+        return
+      }
       this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCard')
     },
     closeCardAndFocus () {
+      if (this.tagPickerIsVisible) {
+        this.hideTagPicker()
+        return
+      }
       this.closeCard()
       document.querySelector(`.card[data-card-id="${this.card.id}"]`).focus()
     },
@@ -432,6 +483,14 @@ export default {
       this.triggerUpdateMagicPaintPositionOffset()
       this.triggerUpdatePositionInVisualViewport()
     },
+    clickName (event) {
+      this.triggerUpdateMagicPaintPositionOffset()
+      const cursorPosition = this.$refs.name.selectionStart
+      if (this.isCursorInsideTagBrackets(cursorPosition)) {
+        this.showTagPicker(cursorPosition)
+        event.stopPropagation()
+      }
+    },
     triggerUpdateMagicPaintPositionOffset () {
       this.$store.commit('triggerUpdateMagicPaintPositionOffset')
       this.triggerUpdatePositionInVisualViewport()
@@ -439,6 +498,8 @@ export default {
     closeDialogs () {
       this.framePickerIsVisible = false
       this.imagePickerIsVisible = false
+      this.hideTagPicker()
+      this.hideTagDetailsIsVisible()
     },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
@@ -479,6 +540,190 @@ export default {
       }
       this.updateCardName(utils.trim(name))
       this.triggerUpdatePositionInVisualViewport()
+    },
+
+    // Tags
+
+    showTagPicker (cursorPosition) {
+      this.closeDialogs()
+      const nameRect = this.$refs.name.getBoundingClientRect()
+      this.tagPickerPosition = {
+        top: nameRect.height - 2
+      }
+      this.updateTagPickerSearch(cursorPosition)
+      this.tagPickerIsVisible = true
+    },
+    hideTagPicker () {
+      this.tagPickerSearch = ''
+      this.tagPickerIsVisible = false
+    },
+    tagStartText (cursorPosition) {
+      // ...[[abc
+      const start = this.name.substring(0, cursorPosition)
+      let startPosition = start.lastIndexOf('[[')
+      if (startPosition === -1) { return }
+      startPosition = startPosition + 2
+      return start.substring(startPosition)
+    },
+    tagEndText (cursorPosition) {
+      // xyz]]...
+      const end = this.name.substring(cursorPosition)
+      const endPosition = end.indexOf(']]')
+      if (endPosition === -1) { return }
+      return end.substring(0, endPosition)
+    },
+    updateTagPickerSearch (cursorPosition) {
+      const start = this.tagStartText(cursorPosition) || ''
+      const end = this.tagEndText(cursorPosition) || ''
+      this.tagPickerSearch = start + end
+    },
+    isCursorInsideTagBrackets (cursorPosition) {
+      this.cursorPosition = cursorPosition
+      const start = this.tagStartText(cursorPosition)
+      const end = this.tagEndText(cursorPosition)
+      if (start === undefined || end === undefined) { return }
+      if (!start.includes(']]') && !end.includes('[[')) {
+        return true
+      }
+    },
+    checkIfShouldShowTagPicker () {
+      const cursorPosition = this.$refs.name.selectionStart
+      const tagPickerIsVisible = this.tagPickerIsVisible
+      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets(cursorPosition)
+      if (isCursorInsideTagBrackets && !tagPickerIsVisible) {
+        this.showTagPicker(cursorPosition)
+      } else if (!isCursorInsideTagBrackets && tagPickerIsVisible) {
+        this.hideTagPicker()
+      }
+    },
+    checkIfShouldHideTagPicker () {
+      const cursorPosition = this.$refs.name.selectionStart
+      const tagPickerIsVisible = this.tagPickerIsVisible
+      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets(cursorPosition)
+      if (!isCursorInsideTagBrackets && tagPickerIsVisible) {
+        this.hideTagPicker()
+      }
+    },
+    addClosingBrackets (cursorPosition) {
+      const name = this.name
+      const newName = `${name.substring(0, cursorPosition)}]]${name.substring(cursorPosition)}`
+      this.updateCardName(newName)
+      this.$nextTick(() => {
+        this.$refs.name.setSelectionRange(cursorPosition, cursorPosition)
+      })
+    },
+    updateTagPicker (event) {
+      const cursorPosition = this.$refs.name.selectionStart
+      const key = event.key
+      const keyIsLettterOrNumber = key.length === 1
+      const previousCharacter = this.name[cursorPosition - 2]
+      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets(cursorPosition)
+      if (this.tagPickerIsVisible) {
+        this.updateTagPickerSearch(cursorPosition)
+      }
+      if (cursorPosition === 0) { return }
+      if (key === '[' && previousCharacter === '[') {
+        this.showTagPicker(cursorPosition)
+        this.addClosingBrackets(cursorPosition)
+      } else if (keyIsLettterOrNumber && isCursorInsideTagBrackets) {
+        this.showTagPicker(cursorPosition)
+      }
+    },
+    moveCursorPastTagEnd (cursorPosition) {
+      cursorPosition = this.$refs.name.selectionStart || cursorPosition
+      let endText = this.name.substring(cursorPosition)
+      let newCursorPosition = endText.indexOf(']]')
+      newCursorPosition = cursorPosition + newCursorPosition + 2
+      this.$nextTick(() => {
+        this.$refs.name.setSelectionRange(newCursorPosition, newCursorPosition)
+      })
+    },
+    updatePreviousTags () {
+      const name = this.card.name
+      if (!name) {
+        previousTags = []
+        return
+      }
+      previousTags = utils.tagsFromStringWithoutBrackets(name) || []
+      previousTags = previousTags.map(tag => {
+        tag = this.$store.getters['currentSpace/tagByName'](tag)
+        return tag
+      })
+    },
+    removeRemovedTags (newTagNames) {
+      const removeTags = previousTags.filter(previousTag => !newTagNames.includes(previousTag.name))
+      removeTags.forEach(tag => this.$store.dispatch('currentSpace/removeTag', tag))
+    },
+    addNewTags (newTagNames) {
+      const previousTagNames = previousTags.map(tag => tag.name)
+      const addTagsNames = newTagNames.filter(newTagName => !previousTagNames.includes(newTagName))
+      addTagsNames.forEach(tagName => {
+        const tag = utils.newTag({
+          name: tagName,
+          userColor: this.$store.state.currentUser.color,
+          cardId: this.card.id,
+          spaceId: this.$store.state.currentSpace.id
+        })
+        this.$store.dispatch('currentSpace/addTag', tag)
+      })
+    },
+    updateTags () {
+      const name = this.card.name
+      if (!name) { return }
+      const newTagNames = utils.tagsFromStringWithoutBrackets(name) || []
+      this.removeRemovedTags(newTagNames)
+      this.addNewTags(newTagNames)
+      this.updatePreviousTags()
+    },
+    hideTagDetailsIsVisible () {
+      this.$store.commit('currentSelectedTag', {})
+      this.$store.commit('tagDetailsIsVisible', false)
+    },
+    showTagDetailsIsVisible (event, tag) {
+      this.closeDialogs()
+      const tagRect = event.target.getBoundingClientRect()
+      this.$store.commit('tagDetailsPosition', {
+        x: window.scrollX + tagRect.x + 2,
+        y: window.scrollY + tagRect.y + tagRect.height - 2
+      })
+      this.$store.commit('currentSelectedTag', tag)
+      this.$store.commit('tagDetailsIsVisible', true)
+    },
+    triggerTagPickerNavigation (event) {
+      const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
+      const shouldTrigger = this.tagPickerIsVisible && !modifierKey
+      if (shouldTrigger) {
+        this.$store.commit('triggerPickerNavigationKey', event.key)
+        event.preventDefault()
+      }
+    },
+    triggerTagPickerSelect (event) {
+      const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
+      const shouldTrigger = this.tagPickerIsVisible && !modifierKey
+      if (shouldTrigger) {
+        this.$store.commit('triggerPickerSelect')
+        event.preventDefault()
+      }
+      if (event.key !== 'Enter') {
+        this.tagPickerIsVisible = false
+      }
+    },
+    updateTagBracketsWithTag (tag) {
+      this.updatePreviousTags()
+      const cursorPosition = this.cursorPosition
+      const tagStartText = this.tagStartText(cursorPosition)
+      const tagEndText = this.tagEndText(cursorPosition)
+      const text = tagStartText + tagEndText
+      let newName
+      if (text.length) {
+        newName = this.name.replace(`[[${text}]]`, `[[${tag.name}]]`)
+      } else {
+        const startText = this.name.substring(0, cursorPosition)
+        const endText = this.name.substring(cursorPosition)
+        newName = startText + tag.name + endText
+      }
+      this.updateCardName(newName)
+      this.moveCursorPastTagEnd(cursorPosition)
     }
   },
   watch: {
@@ -486,6 +731,7 @@ export default {
       this.$nextTick(() => {
         if (visible) {
           this.scrollIntoViewAndFocus()
+          this.updatePreviousTags()
         } else {
           this.removeTrackingQueryStrings()
         }
@@ -503,6 +749,8 @@ export default {
 .card-details
   > section
     background-color var(--secondary-background)
+  .textarea-wrap
+    position relative
   textarea
     margin-bottom 5px
   .edit-message
@@ -515,4 +763,7 @@ export default {
     input
       margin 0
       vertical-align -1px
+  .tags-row
+    display flex
+    flex-wrap wrap
 </style>

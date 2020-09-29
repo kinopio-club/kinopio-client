@@ -101,12 +101,17 @@ export default {
     const items = {
       cards: space.cards,
       connectionTypes: space.connectionTypes,
-      connections: space.connections
+      connections: space.connections,
+      tags: space.tags
     }
     const uniqueItems = utils.uniqueSpaceItems(items, nullCardUsers)
     space.cards = uniqueItems.cards
     space.connectionTypes = uniqueItems.connectionTypes
     space.connections = uniqueItems.connections
+    space.tags = uniqueItems.tags.map(tag => {
+      tag.spaceId = space.id
+      return tag
+    })
     this.storeLocal(`space-${space.id}`, space)
     return space
   },
@@ -147,6 +152,60 @@ export default {
       return b.removeDate - a.removeDate
     })
     return sortedSpaces
+  },
+
+  // Tags
+
+  allCardsByTagName (name) {
+    let spaces = this.getAllSpaces()
+    let cards = [] // card name, id, spaceid
+    spaces.forEach(space => {
+      if (!space.tags) { return }
+      const tags = space.tags.filter(tag => tag.name === name)
+      if (!utils.arrayHasItems(tags)) { return }
+      const cardIds = tags.map(tag => tag.cardId)
+      space.cards.forEach(card => {
+        if (cardIds.includes(card.id)) {
+          card.spaceName = space.name
+          cards.push(card)
+        }
+      })
+    })
+    return cards
+  },
+  tagByName (name) {
+    let spaces = this.getAllSpaces()
+    let tags = []
+    spaces.forEach(space => {
+      if (!utils.arrayHasItems(space.tags)) { return }
+      tags = tags.concat(space.tags)
+    })
+    const tag = tags.find(tag => tag.name === name)
+    return tag
+  },
+  allTags () {
+    const spaces = this.getAllSpaces()
+    let tags = []
+    spaces.forEach(space => {
+      if (utils.arrayHasItems(space.tags)) {
+        space.tags.forEach(tag => tags.push(tag))
+      }
+    })
+    tags.reverse()
+    return tags
+  },
+  updateTagColorInAllSpaces (tag) {
+    const spaces = this.getAllSpaces()
+    spaces.forEach(space => {
+      if (!space.tags) { return }
+      const newSpaceTags = space.tags.map(spaceTag => {
+        if (spaceTag.name === tag.name) {
+          spaceTag.color = tag.color
+        }
+        return spaceTag
+      })
+      this.updateSpace('tags', newSpaceTags, space.id)
+    })
   },
 
   // API Queue
@@ -202,13 +261,13 @@ export default {
     this.storeLocal('invitedSpaces', invitedSpaces)
   },
 
-  // billing
+  // Billing
 
   saveStripeIds (stripeIds) {
     this.storeLocal('stripeIds', stripeIds)
   }
   // stripeIds () {
   //   return this.getLocal('stripeIds')
-  // }
+  // },
 
 }

@@ -380,6 +380,7 @@ ul.results-list
     user-select none
     cursor pointer
     &:hover,
+    &.hover,
     &:focus
       background-color var(--secondary-hover-background)
       box-shadow var(--hover-shadow)
@@ -426,7 +427,8 @@ code
     cursor pointer
     &:hover
       box-shadow var(--hover-shadow)
-    &:active
+    &:active,
+    &.active
       box-shadow var(--button-active-inset-shadow)
 
 .label-badge
@@ -531,6 +533,15 @@ code
     padding-right 5px
     cursor text
     flex-shrink 0
+
+.name-segments
+  .badge
+    &:last-child
+      margin 0
+  .badge
+    margin-right 3px
+  .badge + .badge
+    margin-left 3px
 
 #layout-viewport
   position fixed

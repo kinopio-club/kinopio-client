@@ -1,5 +1,6 @@
 // functional methods that can see dom, but can't access components or store
 import nanoid from 'nanoid'
+import uniqBy from 'lodash-es/uniqBy'
 
 import cache from '@/cache.js'
 
@@ -90,13 +91,13 @@ export default {
   },
 
   clone (object) {
-    this.typeCheck(object, 'object')
+    this.typeCheck({ value: object, type: 'object', origin: 'clone' })
     let cloned = JSON.stringify(object)
     cloned = JSON.parse(cloned)
     return cloned
   },
 
-  typeCheck (value, type, allowUndefined) {
+  typeCheck ({ value, type, allowUndefined, origin }) {
     if (allowUndefined && value === undefined) {
       return
     }
@@ -104,12 +105,33 @@ export default {
       return
     }
     if (typeof value !== type) { // eslint-disable-line valid-typeof
-      console.warn(`passed value is not ${type}`, value)
+      console.warn(`passed value is not ${type}`, value, origin)
     }
   },
 
+  arrayExists (array) {
+    this.typeCheck({ value: array, type: 'array', allowUndefined: true, origin: 'arrayExists' })
+    if (!array) {
+      return false
+    } else if (!array.length) {
+      return false
+    } else {
+      return true
+    }
+  },
+
+  arrayHasItems (array) {
+    this.typeCheck({ value: array, type: 'array', origin: 'arrayHasItems' })
+    if (array) {
+      if (array.length) {
+        return true
+      }
+    }
+    return false
+  },
+
   updateObject (object, value) {
-    this.typeCheck(value, 'object')
+    this.typeCheck({ value, type: 'object', origin: 'updateObject' })
     const keys = Object.keys(value)
     if (keys.length === 0) {
       object = {}
@@ -123,9 +145,9 @@ export default {
 
   updateUsersWithUser (users, updatedUser, keys) {
     keys = keys || ['name', 'color']
-    this.typeCheck(users, 'object')
-    this.typeCheck(updatedUser, 'object')
-    this.typeCheck(keys, 'array')
+    this.typeCheck({ value: users, type: 'object', origin: 'updateUsersWithUser' })
+    this.typeCheck({ value: updatedUser, type: 'object', origin: 'updateUsersWithUser' })
+    this.typeCheck({ value: keys, type: 'array', origin: 'updateUsersWithUser' })
     return users.map(user => {
       if (user.id === updatedUser.userId) {
         keys.forEach(key => {
@@ -272,7 +294,7 @@ export default {
   },
 
   averageOfNumbers (numbers) {
-    this.typeCheck(numbers, 'array')
+    this.typeCheck({ value: numbers, type: 'array', origin: 'averageOfNumbers' })
     let total = 0
     numbers.forEach(number => {
       total += number
@@ -447,6 +469,14 @@ export default {
       connection.userId = userId
       return connection
     })
+    if (this.arrayHasItems(items.tags)) {
+      items.tags = items.tags.map(tag => {
+        tag.id = nanoid()
+        tag.cardId = this.updateAllIds(tag, 'cardId', cardIdDeltas)
+        return tag
+      })
+    }
+
     return items
   },
   normalizeSpace (space) {
@@ -790,6 +820,78 @@ export default {
     const sizeLimit = 1024 * 1024 * 5 // 5mb
     if (file.size > sizeLimit && !userIsUpgraded) {
       return true
+    }
+  },
+
+  // Tags
+
+  tagsFromString (string) {
+    // https://regexr.com/5bv6b
+    // '[' twice
+    // then anything except line break and ']'
+    // ']' twice
+    const tagPattern = new RegExp(/([[]{2}[^\n(\]\])]+[\]]{2})/gm)
+    const tags = string.match(tagPattern)
+    return tags
+  },
+
+  tagsFromStringWithoutBrackets (string) {
+    let tags = this.tagsFromString(string)
+    if (!tags) { return }
+    tags = tags.map(tag => tag.substring(2, tag.length - 2))
+    return tags
+  },
+
+  cardNameSegments (name) {
+    const tags = this.tagsFromString(name)
+    let segments = []
+    if (tags) {
+      tags.forEach(tag => {
+        const tagStartPosition = name.indexOf(tag)
+        const tagEndPosition = tagStartPosition + tag.length
+        segments.push({
+          isText: true,
+          content: name.substring(0, tagStartPosition)
+        })
+        segments.push({
+          isTag: true,
+          name: tag.substring(2, tag.length - 2)
+        })
+        name = name.substring(tagEndPosition, name.length)
+      })
+      if (name.length) {
+        segments.push({
+          isText: true,
+          content: name
+        })
+      }
+      return segments
+    } else {
+      return [{
+        isText: true,
+        content: name
+      }]
+    }
+  },
+
+  mergedTags (previousTags, newTags) {
+    let tags = previousTags.concat(newTags)
+    tags = uniqBy(tags, 'name')
+    return tags
+  },
+
+  newTag ({ name, userColor, cardId, spaceId }) {
+    let color
+    const existingTag = cache.allTags().find(tag => tag.name === name)
+    if (existingTag) {
+      color = existingTag.color
+    }
+    return {
+      name,
+      id: nanoid(),
+      color: color || userColor,
+      cardId: cardId,
+      spaceId: spaceId
     }
   }
 

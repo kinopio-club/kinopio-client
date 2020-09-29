@@ -160,7 +160,9 @@ export default {
       } else {
         this.$store.dispatch('currentSpace/removeCurrentSpace')
       }
-      this.remoteSpaces = this.remoteSpaces.filter(space => space.id !== currentSpaceId)
+      if (utils.arrayExists(this.remoteSpaces)) {
+        this.remoteSpaces = this.remoteSpaces.filter(space => space.id !== currentSpaceId)
+      }
       this.updateSpaces()
       this.changeToLastSpace()
     },
@@ -182,7 +184,7 @@ export default {
       })
     },
     updateWithExistingRemoteSpaces (userSpaces) {
-      if (!this.remoteSpaces.length) { return userSpaces }
+      if (!utils.arrayExists(this.remoteSpaces)) { return userSpaces }
       let spaces = userSpaces
       this.remoteSpaces.forEach(space => {
         const spaceExists = userSpaces.find(userSpace => userSpace.id === space.id)

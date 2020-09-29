@@ -1,5 +1,5 @@
 <template lang="pug">
-.search-wrap(v-if="shouldShowFilter")
+.search-wrap(v-if="shouldShowFilter" @mouseup.stop @touchend.stop)
   img.icon.search(src="@/assets/search.svg" @click.left="focusFilterInput")
   input(placeholder="Search" v-model="filterItems" ref="filterInput")
   button.borderless.clear-input-wrap(@click.left="clearFilter")

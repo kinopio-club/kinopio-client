@@ -189,8 +189,7 @@ export default {
       const space = this.$store.state.currentSpace
       const remoteCards = await this.$store.dispatch('api/getSpaceRemovedCards', space)
       this.loading.cards = false
-      const remoteCardsIsArray = utils.typeCheck(remoteCards, 'array')
-      if (!remoteCards || !remoteCardsIsArray) { return }
+      if (!utils.arrayExists(this.remoteCards)) { return }
       this.removedCards = remoteCards
       this.$store.commit('currentSpace/removedCards', remoteCards)
     },

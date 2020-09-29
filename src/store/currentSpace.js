@@ -3,6 +3,7 @@ import randomColor from 'randomcolor'
 import nanoid from 'nanoid'
 import random from 'lodash-es/random'
 import last from 'lodash-es/last'
+import uniqBy from 'lodash-es/uniqBy'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -34,14 +35,14 @@ export default {
     // Users
 
     addUserToSpace: (state, newUser) => {
-      utils.typeCheck(newUser, 'object')
+      utils.typeCheck({ value: newUser, type: 'object', origin: 'addUserToSpace' })
       const userExists = state.users.find(user => user.id === newUser.id)
       if (userExists) { return }
       state.users.push(newUser)
       cache.updateSpace('users', state.users, state.id)
     },
     addCollaboratorToSpace: (state, newUser) => {
-      utils.typeCheck(newUser, 'object')
+      utils.typeCheck({ value: newUser, type: 'object', origin: 'addCollaboratorToSpace' })
       const collaboratorExists = state.collaborators.find(collaborator => collaborator.id === newUser.id)
       if (collaboratorExists) { return }
       state.collaborators.push(newUser)
@@ -50,7 +51,7 @@ export default {
       cache.updateSpace('collaborators', space.collaborators, space.id)
     },
     addSpectatorToSpace: (state, update) => {
-      utils.typeCheck(update, 'object')
+      utils.typeCheck({ value: update, type: 'object', origin: 'addSpectatorToSpace' })
       const newUser = update.user || update
       const userExists = state.users.find(user => user.id === newUser.id)
       const collaboratorExists = state.collaborators.find(collaborator => collaborator.id === newUser.id)
@@ -62,28 +63,28 @@ export default {
       }
     },
     updateSpaceClients: (state, updates) => {
-      utils.typeCheck(updates, 'array')
+      utils.typeCheck({ value: updates, type: 'array', origin: 'updateSpaceClients' })
       state.clients = state.clients.concat(updates)
     },
     removeClientsFromSpace: (state) => {
       state.clients = []
     },
     removeSpectatorFromSpace: (state, oldUser) => {
-      utils.typeCheck(oldUser, 'object')
+      utils.typeCheck({ value: oldUser, type: 'object', origin: 'removeSpectatorFromSpace' })
       if (!state.spectators) { return }
       state.spectators = state.spectators.filter(user => {
         return user.id !== oldUser.id
       })
     },
     removeUserFromSpace: (state, oldUser) => {
-      utils.typeCheck(oldUser, 'object')
+      utils.typeCheck({ value: oldUser, type: 'object', origin: 'removeUserFromSpace' })
       state.users = state.users.filter(user => {
         return user.id !== oldUser.id
       })
       cache.updateSpace('users', state.users, state.id)
     },
     removeCollaboratorFromSpace: (state, oldUser) => {
-      utils.typeCheck(oldUser, 'object')
+      utils.typeCheck({ value: oldUser, type: 'object', origin: 'removeCollaboratorFromSpace' })
       state.collaborators = state.collaborators.filter(user => {
         return user.id !== oldUser.id
       })
@@ -263,6 +264,39 @@ export default {
         return connectionType.id !== type.id
       })
       state.connectionTypes.push(connectionType)
+    },
+
+    // Tags
+
+    addTag: (state, tag) => {
+      state.tags.push(tag)
+      cache.updateSpace('tags', state.tags, state.id)
+    },
+    removeTag: (state, tag) => {
+      state.tags = state.tags.filter(spaceTag => spaceTag.id !== tag.id)
+      cache.updateSpace('tags', state.tags, state.id)
+    },
+    removeTagsFromCard: (state, card) => {
+      state.tags = state.tags.filter(spaceTag => {
+        return spaceTag.cardId !== card.id
+      })
+      cache.updateSpace('tags', state.tags, state.id)
+    },
+    removeTagsFromAllRemovedCardsPermanent: (state) => {
+      const cardIds = state.removedCards.map(card => card.id)
+      state.tags = state.tags.filter(spaceTag => {
+        return !cardIds.includes(spaceTag.cardId)
+      })
+      cache.updateSpace('tags', state.tags, state.id)
+    },
+    updateTagNameColor: (state, updatedTag) => {
+      state.tags = state.tags.map(tag => {
+        if (tag.name === updatedTag.name) {
+          tag.color = updatedTag.color
+        }
+        return tag
+      })
+      cache.updateTagColorInAllSpaces(updatedTag)
     }
   },
 
@@ -433,7 +467,7 @@ export default {
       })
     },
     loadSpace: async (context, space) => {
-      const emptySpace = { id: space.id, cards: [], connections: [], spectators: [] }
+      const emptySpace = { id: space.id, cards: [], connections: [], spectators: [], tags: [], background: '' }
       const cachedSpace = cache.space(space.id)
       context.commit('clearAllNotifications', null, { root: true })
       context.commit('clearSpaceFilters', null, { root: true })
@@ -523,6 +557,10 @@ export default {
       }, { root: true })
       context.commit('parentCardId', '', { root: true })
       context.dispatch('updateUserLastSpaceId')
+      const cardId = context.rootState.loadSpaceShowDetailsForCardId
+      if (cardId) {
+        context.dispatch('showCardDetails', cardId)
+      }
     },
     updateUserLastSpaceId: (context) => {
       const space = context.state
@@ -600,7 +638,7 @@ export default {
     // Cards
 
     addCard: (context, { position, isParentCard, name, id }) => {
-      utils.typeCheck(position, 'object')
+      utils.typeCheck({ value: position, type: 'object', origin: 'addCard' })
       if (context.rootGetters['currentUser/cardsCreatedIsOverLimit']) {
         context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
         context.commit('notifyCardsCreatedIsNearLimit', false, { root: true })
@@ -651,7 +689,7 @@ export default {
       context.commit('createCard', card)
     },
     pasteCard: (context, card) => {
-      utils.typeCheck(card, 'object')
+      utils.typeCheck({ value: card, type: 'object', origin: 'pasteCard' })
       card = utils.clone(card)
       card.id = nanoid()
       card.spaceId = context.state.id
@@ -680,8 +718,8 @@ export default {
       context.commit('history/add', update, { root: true })
     },
     toggleCardChecked (context, { cardId, value }) {
-      utils.typeCheck(value, 'boolean')
-      utils.typeCheck(cardId, 'string')
+      utils.typeCheck({ value, type: 'boolean', origin: 'toggleCardChecked' })
+      utils.typeCheck({ value: cardId, type: 'string', origin: 'toggleCardChecked' })
       const currentUserId = context.rootState.currentUser.id
       const card = context.getters.cardById(cardId)
       let name = card.name
@@ -740,9 +778,11 @@ export default {
     },
     removeCardPermanent: (context, card) => {
       context.commit('removeCardPermanent', card)
+      context.commit('removeTagsFromCard', card)
       context.dispatch('api/addToQueue', { name: 'removeCardPermanent', body: card }, { root: true })
     },
     removeAllRemovedCardsPermanent: (context) => {
+      context.commit('removeTagsFromAllRemovedCardsPermanent')
       context.commit('removeAllRemovedCardsPermanent')
       context.dispatch('api/addToQueue', { name: 'removeAllRemovedCardsPermanentFromSpace', body: {} }, { root: true })
     },
@@ -826,6 +866,13 @@ export default {
       } else {
         context.dispatch('incrementCardZ', currentDraggingCardId)
       }
+    },
+    showCardDetails: (context, cardId) => {
+      context.dispatch('closeAllDialogs', 'currentSpace.showCardDetails', { root: true })
+      context.dispatch('incrementCardZ', cardId)
+      context.commit('cardDetailsIsVisibleForCardId', cardId, { root: true })
+      context.commit('parentCardId', cardId, { root: true })
+      context.commit('loadSpaceShowDetailsForCardId', '', { root: true })
     },
 
     // Connections
@@ -948,7 +995,7 @@ export default {
       })
     },
 
-    // background
+    // Background
 
     loadBackground: (context, background) => {
       const currentBackground = utils.urlFromString(document.body.style.backgroundImage)
@@ -958,6 +1005,33 @@ export default {
       } else {
         document.body.style.backgroundImage = ''
       }
+    },
+
+    // Tags
+
+    addTag: (context, tag) => {
+      context.commit('addTag', tag)
+      const update = { name: 'addTag', body: tag }
+      const broadcastUpdate = { updates: tag, type: 'addTag' }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('history/add', update, { root: true })
+      context.commit('broadcast/update', broadcastUpdate, { root: true })
+    },
+    removeTag: (context, tag) => {
+      context.commit('removeTag', tag)
+      const update = { name: 'removeTag', body: tag }
+      const broadcastUpdate = { updates: tag, type: 'removeTag' }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('history/add', update, { root: true })
+      context.commit('broadcast/update', broadcastUpdate, { root: true })
+    },
+    updateTagNameColor: (context, tag) => {
+      context.commit('updateTagNameColor', tag)
+      const update = { name: 'updateTagNameColor', body: tag }
+      const broadcastUpdate = { updates: tag, type: 'updateTagNameColor' }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('history/add', update, { root: true })
+      context.commit('broadcast/update', broadcastUpdate, { root: true })
     }
   },
 
@@ -980,6 +1054,29 @@ export default {
     // Cards
     cardById: (state) => (id) => {
       return state.cards.find(card => card.id === id)
+    },
+
+    // Tags
+    tagByName: (state) => (name) => {
+      return state.tags.find(tag => {
+        return tag.name === name
+      })
+    },
+    tagsByNameExcludingCardById: (state) => ({ name, cardId }) => {
+      return state.tags.filter(tag => {
+        const tagName = tag.name === name
+        const otherCard = tag.cardId !== cardId
+        return tagName && otherCard
+      })
+    },
+    tagsInCard: (state) => (card) => {
+      return state.tags.filter(tag => tag.cardId === card.id)
+    },
+    spaceTags: (state) => (card) => {
+      let tags = state.tags
+      tags = uniqBy(tags, 'name')
+      tags.reverse()
+      return tags
     },
 
     // Connections

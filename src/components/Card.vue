@@ -39,9 +39,21 @@ article(:style="position" :data-card-id="id" ref="card")
           .checkbox-wrap(v-if="hasCheckbox" @click.left.prevent.stop="toggleCardChecked" @touchend.prevent.stop="toggleCardChecked")
             label(:class="{active: isChecked, disabled: !canEditSpace}")
               input(type="checkbox" v-model="checkboxState")
+
           //- Name
-          p.name(v-if="normalizedName" :style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox}")
-            span {{normalizedName}}
+          p.name.name-segments(v-if="normalizedName" :style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox}")
+            template(v-for="segment in nameSegments")
+              span(v-if="segment.isText && segment.content") {{segment.content}}
+              //- Tags
+              span.badge.button-badge(
+                v-if="segment.isTag"
+                :style="{backgroundColor: segment.color}"
+                :class="{ active: currentSelectedTag.name === segment.name }"
+                @click.left="showTagDetailsIsVisible($event, segment)"
+                @touchend="showTagDetailsIsVisible($event, segment)"
+                @keyup.stop.enter="showTagDetailsIsVisible($event, segment)"
+                :data-tag-id="segment.id"
+              ) {{segment.name}}
 
       //- Right buttons
       span.card-buttons-wrap
@@ -104,7 +116,14 @@ article(:style="position" :data-card-id="id" ref="card")
   .meta-container(v-if="filterShowUsers || filterShowDateUpdated")
     //- User
     .badge-wrap
-      .badge.user-badge.button-badge(v-if="filterShowUsers" :style="{background: updatedByUser.color}" @click.left.prevent.stop="toggleUserDetails" @touchend.prevent.stop="toggleUserDetails")
+      .badge.user-badge.button-badge(
+        v-if="filterShowUsers"
+        :style="{background: updatedByUser.color}"
+        @mouseup.left.stop
+        @touchend.stop
+        @click.left.prevent.stop="toggleUserDetailsIsVisible"
+        @touchend.prevent.stop="toggleUserDetailsIsVisible"
+      )
         User(:user="updatedByUser" :isClickable="false")
         .name {{updatedByUser.name}}
       UserDetails(:visible="userDetailsIsVisible" :user="updatedByUser" :dialogIsReadOnly="true")
@@ -166,6 +185,7 @@ export default {
       uploadIsDraggedOver: false,
       isPlayingAudio: false,
       userDetailsIsVisible: false,
+      preventDraggedTagFromShowingDetails: false,
       error: {
         sizeLimit: false,
         unknownUploadError: false,
@@ -181,6 +201,7 @@ export default {
     }
   },
   computed: {
+    currentSelectedTag () { return this.$store.state.currentSelectedTag },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     id () { return this.card.id },
     x () { return this.card.x },
@@ -298,6 +319,34 @@ export default {
         name = name.replace(checkbox, '')
       }
       return utils.trim(name)
+    },
+    nameSegments () {
+      let segments = utils.cardNameSegments(this.normalizedName)
+      return segments.map(segment => {
+        if (segment.isTag) {
+          let tag = this.$store.getters['currentSpace/tagByName'](segment.name)
+          if (!tag) {
+            tag = utils.newTag({
+              name: segment.name,
+              userColor: this.$store.state.currentUser.color,
+              cardId: this.id,
+              spaceId: this.$store.state.currentSpace.id
+            })
+            console.warn('🦚 create missing tag', segment.name, tag, this.card)
+            this.$store.dispatch('currentSpace/addTag', tag)
+          }
+          segment.color = tag.color
+          segment.id = tag.id
+        }
+        return segment
+      })
+    },
+    tags () {
+      return this.nameSegments.filter(segment => {
+        if (segment.isTag) {
+          return true
+        }
+      })
     },
     nameLineMinWidth () {
       const averageCharacterWidth = 6.5
@@ -427,7 +476,17 @@ export default {
     filtersIsActive () {
       const types = this.$store.state.filteredConnectionTypeIds
       const frames = this.$store.state.filteredFrameIds
-      return Boolean(types.length + frames.length)
+      const tags = this.$store.state.filteredTagNames
+      return Boolean(types.length + frames.length + tags.length)
+    },
+    isCardFilteredByTags () {
+      const tagNames = this.$store.state.filteredTagNames
+      const isFiltered = this.tags.find(tag => {
+        if (tagNames.includes(tag.name)) {
+          return true
+        }
+      })
+      return isFiltered
     },
     isConnectionFilteredByType () {
       const typeIds = this.$store.state.filteredConnectionTypeIds
@@ -442,7 +501,7 @@ export default {
     },
     isFiltered () {
       if (this.filtersIsActive) {
-        const isInFilter = this.isCardFilteredByFrame || this.isConnectionFilteredByType
+        const isInFilter = this.isCardFilteredByTags || this.isConnectionFilteredByType || this.isCardFilteredByFrame
         if (isInFilter) {
           return false
         } else {
@@ -563,9 +622,10 @@ export default {
       this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.id, value })
       this.$store.commit('currentUserIsDraggingCard', false)
     },
-    toggleUserDetails () {
+    toggleUserDetailsIsVisible () {
+      if (isMultiTouch) { return }
       const value = !this.userDetailsIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Card.toggleUserDetails')
+      this.$store.dispatch('closeAllDialogs', 'Card.toggleUserDetailsIsVisible')
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
       this.$store.commit('currentUserIsDraggingCard', false)
       this.userDetailsIsVisible = value
@@ -598,7 +658,11 @@ export default {
       }
     },
     longestNameLineLength () {
-      const nameLines = this.normalizedName.match(/[^\n]+/g)
+      let name = this.normalizedName
+      name = name.replaceAll('[[', '')
+      name = name.replaceAll(']]', '')
+      name = name || '.'
+      const nameLines = name.match(/[^\n]+/g)
       let longestLineLength = 0
       nameLines.forEach(line => {
         if (line.length > longestLineLength) {
@@ -649,7 +713,6 @@ export default {
     startDraggingCard (event) {
       isMultiTouch = false
       if (!this.canEditCard) { return }
-      if (this.userDetailsIsVisible) { return }
       if (utils.isMultiTouch(event)) {
         isMultiTouch = true
         return
@@ -669,17 +732,12 @@ export default {
       this.checkIfShouldDragMultipleCards()
       this.$store.dispatch('currentSpace/incrementSelectedCardsZ')
     },
-    shouldCancel (event) {
-      const element = document.querySelector('dialog.user-details')
-      if (!element) { return }
-      if (element.contains(event.target)) { return true }
-    },
     showCardDetails (event) {
       if (isMultiTouch) { return }
-      if (this.shouldCancel(event)) { return }
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
       const userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
+      this.preventDraggedTagFromShowingDetails = this.$store.state.preventDraggedCardFromShowingDetails
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       this.$store.dispatch('closeAllDialogs', 'Card.showCardDetails')
       this.$store.dispatch('clearMultipleSelected')
@@ -690,6 +748,22 @@ export default {
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
       this.$store.commit('currentUserIsDraggingCard', false)
       this.broadcastShowCardDetails()
+    },
+    showTagDetailsIsVisible (event, tag) {
+      if (isMultiTouch) { return }
+      if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
+      if (this.preventDraggedTagFromShowingDetails) { return }
+      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
+      this.$store.dispatch('closeAllDialogs', 'Card.showTagDetailsIsVisible')
+      this.$store.commit('currentUserIsDraggingCard', false)
+      const tagRect = event.target.getBoundingClientRect()
+      this.$store.commit('tagDetailsPosition', {
+        x: window.scrollX + tagRect.x + 2,
+        y: window.scrollY + tagRect.y + tagRect.height - 2
+      })
+      tag.cardId = this.id
+      this.$store.commit('currentSelectedTag', tag)
+      this.$store.commit('tagDetailsIsVisible', true)
     },
     openUrl (url) {
       window.location.href = url
@@ -759,6 +833,7 @@ article
         &.has-checkbox
           .audio
             width 132px
+
     .connector,
     .link
       padding 8px
