@@ -111,7 +111,7 @@ export default {
         'tags': 'array'
       }
       Object.keys(schema).forEach(field => {
-        const isValidType = utils.typeCheck({ value: space[field], type: schema[field] })
+        const isValidType = utils.typeCheck({ value: space[field], type: schema[field], origin: 'isValidSpace' })
         if (!isValidType) {
           let error = `Expected ${field} but didn't get a ${schema[field]}`
           this.errors.push(error)

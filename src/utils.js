@@ -91,7 +91,7 @@ export default {
   },
 
   clone (object) {
-    this.typeCheck({ value: object, type: 'object' })
+    this.typeCheck({ value: object, type: 'object', origin: 'clone' })
     let cloned = JSON.stringify(object)
     cloned = JSON.parse(cloned)
     return cloned
@@ -105,12 +105,12 @@ export default {
       return
     }
     if (typeof value !== type) { // eslint-disable-line valid-typeof
-      console.warn(`passed value is not ${type}`, value)
+      console.warn(`passed value is not ${type}`, value, origin)
     }
   },
 
   arrayExists (array) {
-    this.typeCheck({ value: array, type: 'array', allowUndefined: true })
+    this.typeCheck({ value: array, type: 'array', allowUndefined: true, origin: 'arrayExists' })
     if (!array) {
       return false
     } else if (!array.length) {
@@ -121,7 +121,7 @@ export default {
   },
 
   arrayHasItems (array) {
-    this.typeCheck({ value: array, type: 'array' })
+    this.typeCheck({ value: array, type: 'array', origin: 'arrayHasItems' })
     if (array) {
       if (array.length) {
         return true
@@ -131,7 +131,7 @@ export default {
   },
 
   updateObject (object, value) {
-    this.typeCheck({ value, type: 'object' })
+    this.typeCheck({ value, type: 'object', origin: 'updateObject' })
     const keys = Object.keys(value)
     if (keys.length === 0) {
       object = {}
@@ -145,9 +145,9 @@ export default {
 
   updateUsersWithUser (users, updatedUser, keys) {
     keys = keys || ['name', 'color']
-    this.typeCheck({ value: users, type: 'object' })
-    this.typeCheck({ value: updatedUser, type: 'object' })
-    this.typeCheck({ value: keys, type: 'array' })
+    this.typeCheck({ value: users, type: 'object', origin: 'updateUsersWithUser' })
+    this.typeCheck({ value: updatedUser, type: 'object', origin: 'updateUsersWithUser' })
+    this.typeCheck({ value: keys, type: 'array', origin: 'updateUsersWithUser' })
     return users.map(user => {
       if (user.id === updatedUser.userId) {
         keys.forEach(key => {
@@ -294,7 +294,7 @@ export default {
   },
 
   averageOfNumbers (numbers) {
-    this.typeCheck({ value: numbers, type: 'array' })
+    this.typeCheck({ value: numbers, type: 'array', origin: 'averageOfNumbers' })
     let total = 0
     numbers.forEach(number => {
       total += number

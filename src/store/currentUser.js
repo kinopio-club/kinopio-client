@@ -131,12 +131,12 @@ export default {
       cache.updateUser('apiKey', apiKey)
     },
     favoriteUsers: (state, users) => {
-      utils.typeCheck({ value: users, type: 'array' })
+      utils.typeCheck({ value: users, type: 'array', origin: 'favoriteUsers' })
       state.favoriteUsers = users
       cache.updateUser('favoriteUsers', users)
     },
     favoriteSpaces: (state, spaces) => {
-      utils.typeCheck({ value: spaces, type: 'array' })
+      utils.typeCheck({ value: spaces, type: 'array', origin: 'favoriteSpaces' })
       state.favoriteSpaces = spaces
       cache.updateUser('favoriteSpaces', spaces)
     },
@@ -170,27 +170,27 @@ export default {
       cache.updateUser('arenaAccessToken', token)
     },
     cardsCreatedCount: (state, count) => {
-      utils.typeCheck({ value: count, type: 'number' })
+      utils.typeCheck({ value: count, type: 'number', origin: 'cardsCreatedCount' })
       state.cardsCreatedCount = count
       cache.updateUser('cardsCreatedCount', count)
     },
     isUpgraded: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
+      utils.typeCheck({ value, type: 'boolean', origin: 'isUpgraded' })
       state.isUpgraded = value
       cache.updateUser('isUpgraded', value)
     },
     filterShowUsers: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
+      utils.typeCheck({ value, type: 'boolean', origin: 'filterShowUsers' })
       state.filterShowUsers = value
       cache.updateUser('filterShowUsers', value)
     },
     filterShowDateUpdated: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
+      utils.typeCheck({ value, type: 'boolean', origin: 'filterShowDateUpdated' })
       state.filterShowDateUpdated = value
       cache.updateUser('filterShowDateUpdated', value)
     },
     filterShowAbsoluteDates: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
+      utils.typeCheck({ value, type: 'boolean', origin: 'filterShowAbsoluteDates' })
       state.filterShowAbsoluteDates = value
       cache.updateUser('filterShowAbsoluteDates', value)
     }
