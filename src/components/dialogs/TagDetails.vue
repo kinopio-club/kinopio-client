@@ -196,10 +196,23 @@ export default {
     closeDialogs () {
       this.colorPickerIsVisible = false
     },
+    updateCardsWithTagColor (name, newColor) {
+      const cards = this.cardsWithTag.map(card => {
+        card.nameSegments = card.nameSegments.map(segment => {
+          if (segment.isTag && segment.name === name) {
+            segment.color = newColor
+          }
+          return segment
+        })
+        return card
+      })
+      this.cardsWithTag = cards
+    },
     updateTagNameColor (newColor) {
       let tag = utils.clone(this.currentTag)
       tag.color = newColor
       this.$store.dispatch('currentSpace/updateTagNameColor', tag)
+      this.updateCardsWithTagColor(tag.name, newColor)
     },
     focusName () {
       this.$nextTick(() => {
