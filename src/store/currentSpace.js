@@ -1011,7 +1011,7 @@ export default {
 
     addTag: (context, tag) => {
       context.commit('addTag', tag)
-      const update = { name: 'createTag', body: tag }
+      const update = { name: 'addTag', body: tag }
       const broadcastUpdate = { updates: tag, type: 'addTag' }
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('history/add', update, { root: true })

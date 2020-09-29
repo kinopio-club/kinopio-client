@@ -124,10 +124,8 @@ import TagPicker from '@/components/dialogs/TagPicker.vue'
 import Loader from '@/components/Loader.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
-import cache from '@/cache.js'
 
 import qs from '@aguezz/qs-parse'
-import nanoid from 'nanoid'
 
 let previousTags = []
 
@@ -652,20 +650,6 @@ export default {
         return tag
       })
     },
-    normalizedNewTag (name) {
-      let color
-      const existingTag = cache.allTags().find(tag => tag.name === name)
-      if (existingTag) {
-        color = existingTag.color
-      }
-      return {
-        name: name,
-        id: nanoid(),
-        color: color || this.$store.state.currentUser.color,
-        cardId: this.card.id,
-        spaceId: this.$store.state.currentSpace.id
-      }
-    },
     removeRemovedTags (newTagNames) {
       const removeTags = previousTags.filter(previousTag => !newTagNames.includes(previousTag.name))
       removeTags.forEach(tag => this.$store.dispatch('currentSpace/removeTag', tag))
@@ -674,7 +658,12 @@ export default {
       const previousTagNames = previousTags.map(tag => tag.name)
       const addTagsNames = newTagNames.filter(newTagName => !previousTagNames.includes(newTagName))
       addTagsNames.forEach(tagName => {
-        const tag = this.normalizedNewTag(tagName)
+        const tag = utils.newTag({
+          name: tagName,
+          userColor: this.$store.state.currentUser.color,
+          cardId: this.card.id,
+          spaceId: this.$store.state.currentSpace.id
+        })
         this.$store.dispatch('currentSpace/addTag', tag)
       })
     },

@@ -876,6 +876,21 @@ export default {
     let tags = previousTags.concat(newTags)
     tags = uniqBy(tags, 'name')
     return tags
+  },
+
+  newTag ({ name, userColor, cardId, spaceId }) {
+    let color
+    const existingTag = cache.allTags().find(tag => tag.name === name)
+    if (existingTag) {
+      color = existingTag.color
+    }
+    return {
+      name,
+      id: nanoid(),
+      color: color || userColor,
+      cardId: cardId,
+      spaceId: spaceId
+    }
   }
 
 }

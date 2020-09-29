@@ -145,7 +145,6 @@ import User from '@/components/User.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
 
 import fromNow from 'fromnow'
-import nanoid from 'nanoid'
 
 let isMultiTouch
 
@@ -327,13 +326,12 @@ export default {
         if (segment.isTag) {
           let tag = this.$store.getters['currentSpace/tagByName'](segment.name)
           if (!tag) {
-            tag = {
+            tag = utils.newTag({
               name: segment.name,
-              color: this.$store.state.currentUser.color,
-              id: nanoid(),
+              userColor: this.$store.state.currentUser.color,
               cardId: this.id,
               spaceId: this.$store.state.currentSpace.id
-            }
+            })
             console.warn('🦚 create missing tag', segment.name, tag, this.card)
             this.$store.dispatch('currentSpace/addTag', tag)
           }
