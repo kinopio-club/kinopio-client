@@ -120,7 +120,6 @@ export default {
       } else {
         this.loading = true
         remoteTags = await this.$store.dispatch('api/getUserTags') || []
-        console.log(remoteTags)
         this.$store.commit('remoteTags', remoteTags)
         this.$store.commit('remoteTagsIsFetched', true)
         this.loading = false
@@ -141,7 +140,6 @@ export default {
     },
     scrollIntoView () {
       const element = this.$refs.dialog
-      console.log(element)
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
     },

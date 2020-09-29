@@ -469,11 +469,13 @@ export default {
       connection.userId = userId
       return connection
     })
-    items.tags = items.tags.map(tag => {
-      tag.id = nanoid()
-      tag.cardId = this.updateAllIds(tag, 'cardId', cardIdDeltas)
-      return tag
-    })
+    if (this.arrayHasItems(items.tags)) {
+      items.tags = items.tags.map(tag => {
+        tag.id = nanoid()
+        tag.cardId = this.updateAllIds(tag, 'cardId', cardIdDeltas)
+        return tag
+      })
+    }
 
     return items
   },
