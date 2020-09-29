@@ -327,11 +327,15 @@ export default {
         if (segment.isTag) {
           let tag = this.$store.getters['currentSpace/tagByName'](segment.name)
           if (!tag) {
-            console.warn('🦚 tag data is missing', tag, this.card)
             tag = {
+              name: segment.name,
               color: this.$store.state.currentUser.color,
-              id: nanoid()
+              id: nanoid(),
+              cardId: this.id,
+              spaceId: this.$store.state.currentSpace.id
             }
+            console.warn('🦚 create missing tag', segment.name, tag, this.card)
+            this.$store.dispatch('currentSpace/addTag', tag)
           }
           segment.color = tag.color
           segment.id = tag.id
