@@ -371,6 +371,7 @@ export default {
       let space = utils.clone(context.state)
       space.originSpaceId = space.id
       space.id = nanoid()
+      space.name = space.name + ' copy'
       space.users = []
       space.collaborators = []
       space.showInExplore = false

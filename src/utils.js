@@ -476,7 +476,6 @@ export default {
         return tag
       })
     }
-
     return items
   },
   normalizeSpace (space) {

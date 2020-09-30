@@ -253,7 +253,7 @@ export default {
       window.location.reload()
     },
     duplicateSpace () {
-      const duplicatedSpaceName = this.$store.state.currentSpace.name
+      const duplicatedSpaceName = this.$store.state.currentSpace.name + ' copy'
       this.$store.dispatch('currentSpace/duplicateSpace')
       this.$store.commit('addNotification', { message: `${duplicatedSpaceName} is now yours to edit`, type: 'success' }, { root: true })
     }
