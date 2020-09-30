@@ -3,7 +3,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
   section
     template(v-if="isSpaceMember")
       .row
-        input(placeholder="name" v-model="spaceName")
+        input(ref="name" placeholder="name" v-model="spaceName")
       .row.privacy-row
         PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
         ShowInExploreButton(@updateSpaces="updateSpaces")
@@ -64,6 +64,20 @@ export default {
   },
   props: {
     visible: Boolean
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerFocusSpaceDetailsName') {
+        const isTouchDevice = this.$store.state.isTouchDevice
+        if (isTouchDevice) { return }
+        this.$nextTick(() => {
+          const element = this.$refs.name
+          if (!element) { return }
+          element.focus()
+          element.setSelectionRange(0, element.value.length)
+        })
+      }
+    })
   },
   data () {
     return {

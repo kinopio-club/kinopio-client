@@ -383,6 +383,7 @@ export default {
         context.dispatch('updateUserLastSpaceId')
         context.dispatch('saveNewSpace')
         context.commit('notifyNewUser', false, { root: true })
+        context.commit('triggerFocusSpaceDetailsName', null, { root: true })
       })
     },
     addSpace: (context) => {
@@ -395,6 +396,7 @@ export default {
         context.dispatch('updateUserLastSpaceId')
         context.commit('notifyNewUser', false, { root: true })
         context.commit('notifySignUpToEditSpace', false, { root: true })
+        context.commit('triggerFocusSpaceDetailsName', null, { root: true })
       })
     },
     getRemoteSpace: async (context, space) => {
