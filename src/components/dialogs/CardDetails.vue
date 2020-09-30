@@ -34,10 +34,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keyup="updateTagPicker"
         @keydown.down="triggerTagPickerNavigation"
         @keydown.up="triggerTagPickerNavigation"
-        @keydown.enter="triggerTagPickerSelect"
-        @keydown.tab="triggerTagPickerSelect"
-        @keydown.221="triggerTagPickerSelect"
-        @keydown.bracket-right="triggerTagPickerSelect"
+        @keydown.enter="triggerTagPickerSelectTag"
+        @keydown.tab="triggerTagPickerSelectTag"
+        @keydown.221="triggerTagPickerSelectTag"
+        @keydown.bracket-right="triggerTagPickerSelectTag"
       )
       TagPicker(:visible="tagPickerIsVisible" :cursorPosition="cursorPosition" :position="tagPickerPosition" :search="tagPickerSearch" @closeDialog="hideTagPicker" @selectTag="updateTagBracketsWithTag")
     .row(v-if="cardPendingUpload")
@@ -150,7 +150,8 @@ export default {
       initialSearch: '',
       pastedName: '',
       wasPasted: false,
-      cursorPosition: 0
+      cursorPosition: 0,
+      shouldCancelBracketRight: false
     }
   },
   created () {
@@ -697,13 +698,24 @@ export default {
         event.preventDefault()
       }
     },
-    triggerTagPickerSelect (event) {
+    triggerTagPickerSelectTag (event) {
       const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
       const shouldTrigger = this.tagPickerIsVisible && !modifierKey
       if (shouldTrigger) {
         this.$store.commit('triggerPickerSelect')
         event.preventDefault()
       }
+      // prevent trailing ]
+      if (event.key === ']' && this.tagPickerIsVisible) {
+        this.shouldCancelBracketRight = true
+        setTimeout(() => {
+          this.shouldCancelBracketRight = false
+        }, 250)
+      }
+      if (event.key === ']' && this.shouldCancelBracketRight) {
+        event.preventDefault()
+      }
+      // prevents Enter from creating new card
       if (event.key !== 'Enter') {
         this.tagPickerIsVisible = false
       }

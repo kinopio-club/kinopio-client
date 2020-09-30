@@ -121,7 +121,7 @@ export default {
   },
 
   arrayHasItems (array) {
-    this.typeCheck({ value: array, type: 'array', origin: 'arrayHasItems' })
+    this.typeCheck({ value: array, type: 'array', allowUndefined: true, origin: 'arrayHasItems' })
     if (array) {
       if (array.length) {
         return true
