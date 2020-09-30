@@ -211,10 +211,25 @@ export default {
     cardsCreatedCount: (context, { shouldIncrement }) => {
       let count
       if (shouldIncrement) {
-        count = Math.max(context.state.cardsCreatedCount + 1, 0)
+        count = context.state.cardsCreatedCount + 1
       } else {
-        count = Math.max(context.state.cardsCreatedCount - 1, 0)
+        count = context.state.cardsCreatedCount - 1
       }
+      count = Math.max(count, 0)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          cardsCreatedCount: count
+        } }, { root: true })
+      context.commit('cardsCreatedCount', count)
+    },
+    cardsCreatedCountUpdateBy: (context, { delta, shouldIncrement }) => {
+      let count
+      if (shouldIncrement) {
+        count = context.state.cardsCreatedCount + delta
+      } else {
+        count = context.state.cardsCreatedCount - delta
+      }
+      count = Math.max(count, 0)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           cardsCreatedCount: count

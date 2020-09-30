@@ -375,7 +375,8 @@ export default {
       space.collaborators = []
       space.showInExplore = false
       space.privacy = 'private'
-      const uniqueNewSpace = cache.updateIdsInSpace(space)
+      const nullCardUsers = true
+      const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
       context.commit('restoreSpace', uniqueNewSpace)
       Vue.nextTick(() => {
         context.dispatch('updateUserLastSpaceId')
@@ -568,8 +569,28 @@ export default {
       if (space.isRemoved || !canEdit) { return }
       context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
     },
+    incrementCardsCreatedCountFromSpace (context, space) {
+      const user = context.rootState.currentUser
+      const incrementCardsCreatedCountBy = space.cards.filter(card => {
+        return card.userId === user.id
+      }).length
+      context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+        delta: incrementCardsCreatedCountBy,
+        shouldIncrement: true
+      }, { root: true })
+    },
+    decrementCardsCreatedCountFromSpace (context, space) {
+      const user = context.rootState.currentUser
+      const decrementCardsCreatedCountBy = space.cards.filter(card => {
+        return card.userId === user.id
+      }).length
+      context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+        delta: decrementCardsCreatedCountBy
+      }, { root: true })
+    },
     removeCurrentSpace: (context) => {
       const space = utils.clone(context.state)
+      context.dispatch('decrementCardsCreatedCountFromSpace', space)
       cache.removeSpace(space)
       context.dispatch('api/addToQueue', {
         name: 'removeSpace',
@@ -793,6 +814,7 @@ export default {
     },
     restoreRemovedSpace: (context, space) => {
       cache.restoreRemovedSpace(space)
+      context.dispatch('incrementCardsCreatedCountFromSpace', space)
       context.dispatch('api/addToQueue', { name: 'restoreRemovedSpace',
         body: {
           id: space.id
