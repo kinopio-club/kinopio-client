@@ -366,6 +366,16 @@ const self = {
 
     // Card
 
+    findCard: async (context, cardId) => {
+      if (!shouldRequest()) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/card/${cardId}`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error(error)
+      }
+    },
     updateCards: async (context, body) => {
       if (!shouldRequest()) { return }
       try {

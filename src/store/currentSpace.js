@@ -475,15 +475,35 @@ export default {
       const cachedSpace = cache.space(space.id)
       context.commit('clearAllNotifications', null, { root: true })
       context.commit('clearSpaceFilters', null, { root: true })
-      // restore local
+      // restore local space
       context.commit('restoreSpace', emptySpace)
       context.commit('restoreSpace', utils.normalizeSpace(cachedSpace))
       context.dispatch('updateSpacePageSize')
       context.dispatch('loadBackground', context.state.background)
       context.commit('history/clear', null, { root: true })
-      // restore remote
+      // get remote space
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (remoteSpace) {
+        // add missing cached cards to remoteSpace if they exist on server
+        if (cachedSpace.cards) {
+          const cachedCardIds = cachedSpace.cards.map(card => card.id)
+          const remoteSpaceCardIds = remoteSpace.cards.map(card => card.id)
+          const cacheOnlyCards = cachedCardIds.filter(cardId => {
+            return !remoteSpaceCardIds.includes(cardId)
+          })
+          let cachedCardsToRestore = []
+          if (utils.arrayHasItems(cacheOnlyCards)) {
+            for (const cardId of cacheOnlyCards) {
+              let card = await context.dispatch('api/findCard', cardId, { root: true })
+              const cachedCard = cachedSpace.cards.find(cachedCard => cachedCard.id === cardId)
+              card.name = card.name || cachedCard.name
+              if (card) { cachedCardsToRestore.push(card) }
+            }
+          }
+          console.log('🗾 cached cards to restore', cachedCardsToRestore)
+          remoteSpace.cards = remoteSpace.cards.concat(cachedCardsToRestore)
+        }
+        // restore remote space
         context.commit('restoreSpace', utils.normalizeSpace(remoteSpace))
         context.dispatch('history/playback', null, { root: true })
         context.dispatch('checkIfShouldNotifySignUpToEditSpace', remoteSpace)
