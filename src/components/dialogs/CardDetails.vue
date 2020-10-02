@@ -355,11 +355,11 @@ export default {
       const cardNames = seperated(this.pastedName || this.name)
       let newCards = cardNames.map(name => {
         return {
+          id: nanoid(),
           name: name.substring(0, maxCardLength),
           x: this.card.x,
           y: this.card.y,
-          frameId: this.card.frameId,
-          id: nanoid()
+          frameId: this.card.frameId
         }
       })
       newCards.shift()
