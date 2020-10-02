@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.tag-details.narrow(v-if="visible" :open="visible" :style="dialogPosition" ref="dialog" @click.left="closeDialogs")
+dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="dialog" @click.left="closeDialogs")
   section.edit-card(v-if="!cardDetailsIsVisible")
     button(@click="showCardDetails(null)") Edit Card
   section(:style="{backgroundColor: color}")
