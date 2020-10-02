@@ -68,18 +68,23 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           span Frames
         FramePicker(:visible="framePickerIsVisible" :cards="[card]")
 
-    .row(v-if="nameHasLineBreaks || hasLinks")
+    .row(v-if="nameHasLineBreaks || hasLinks || nameHasSentences")
       //- Show Link
       .button-wrap(v-if="hasLinks")
         button(:disabled="!canEditCard" @click.left.stop="toggleLinksIsVisible" :class="{active: linksIsVisible}")
           img.icon(v-if="linksIsVisible" src="@/assets/view-hidden.svg")
           img.icon(v-else src="@/assets/view.svg")
           span Link
-      //- Split
+      //- Split by Line Breaks
       .button-wrap(v-if="nameHasLineBreaks")
         button(:disabled="!canEditCard" @click.left.stop="splitCards")
           img.icon(src="@/assets/split-vertically.svg")
           span Split into {{nameLines}} Cards
+      //- or, Split by Sentences
+      .button-wrap(v-if="nameHasSentences")
+        button(:disabled="!canEditCard" @click.left.stop="splitCards")
+          img.icon(src="@/assets/split-vertically.svg")
+          span Split into {{nameSentences}} Cards
 
     p.edit-message(v-if="!canEditCard")
       template(v-if="spacePrivacyIsOpen")
@@ -126,6 +131,7 @@ import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
 import qs from '@aguezz/qs-parse'
+import nanoid from 'nanoid'
 
 let previousTags = []
 
@@ -271,6 +277,18 @@ export default {
         return false
       }
     },
+    nameSentences () {
+      const name = this.pastedName || this.name
+      return this.seperatedSentences(name).length
+    },
+    nameHasSentences () {
+      if (this.nameHasLineBreaks) { return }
+      if (this.nameSentences > 1) {
+        return true
+      } else {
+        return false
+      }
+    },
     cardPendingUpload () {
       const pendingUploads = this.$store.state.upload.pendingUploads
       return pendingUploads.find(upload => upload.cardId === this.card.id)
@@ -281,6 +299,11 @@ export default {
       let lines = name.split('\n')
       lines = lines.filter(line => Boolean(line.length))
       return lines
+    },
+    seperatedSentences (name) {
+      let sentences = name.split('. ')
+      sentences = sentences.filter(sentence => Boolean(sentence.length))
+      return sentences
     },
     updateLink ({ url, newUrl }) {
       const newName = this.name.replace(url.trim(), newUrl)
@@ -323,27 +346,31 @@ export default {
     splitCards () {
       const spaceBetweenCards = 12
       const maxCardLength = 250
-      const cardNames = this.seperatedLines(this.pastedName || this.name)
+      let seperated
+      if (this.nameHasLineBreaks) {
+        seperated = this.seperatedLines
+      } else if (this.nameHasSentences) {
+        seperated = this.seperatedSentences
+      }
+      const cardNames = seperated(this.pastedName || this.name)
       let newCards = cardNames.map(name => {
         return {
           name: name.substring(0, maxCardLength),
           x: this.card.x,
           y: this.card.y,
-          frameId: this.card.frameId
+          frameId: this.card.frameId,
+          id: nanoid()
         }
       })
+      newCards.shift()
+      this.updateCardName(cardNames[0])
+      let prevCard = utils.clone(this.card)
       this.$store.dispatch('currentSpace/addMultipleCards', newCards)
-      this.removeCard()
-      newCards = utils.clone(this.$store.state.currentSpace.cards)
-      newCards = newCards.slice(-cardNames.length)
       this.$nextTick(() => {
-        let prevCard = {}
         newCards = newCards.map(card => {
-          if (utils.objectHasKeys(prevCard)) {
-            const element = document.querySelector(`article [data-card-id="${card.id}"]`)
-            const rect = element.getBoundingClientRect()
-            card.y = prevCard.y + rect.height + spaceBetweenCards
-          }
+          const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
+          const prevCardRect = element.getBoundingClientRect()
+          card.y = prevCard.y + prevCardRect.height + spaceBetweenCards
           prevCard = card
           return card
         })
@@ -353,6 +380,7 @@ export default {
             y: card.y
           })
         })
+        this.$store.dispatch('closeAllDialogs', 'CardDetails.splitCards')
       })
     },
     updatePastedName (event) {

@@ -693,7 +693,7 @@ export default {
     addMultipleCards: (context, newCards) => {
       newCards.forEach(card => {
         card = {
-          id: nanoid(),
+          id: card.id || nanoid(),
           x: card.x,
           y: card.y,
           z: context.state.cards.length + 1,
