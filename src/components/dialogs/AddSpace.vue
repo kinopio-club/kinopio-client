@@ -1,10 +1,14 @@
 <template lang="pug">
-dialog.narrow(v-if="visible" :open="visible" @click.left="closeDialogs")
+dialog.narrow(v-if="visible" :open="visible" @click.stop)
   section
-    button
-      span New Space
-    button
-      span 🌒 Daily Journal
+    .row
+      button
+        img.icon(src="@/assets/add.svg")
+        span New Space
+  section
+      button
+        img.icon(src="@/assets/add.svg")
+        span 🌒 Daily Journal
 </template>
 
 <script>
