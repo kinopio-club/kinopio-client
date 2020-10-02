@@ -73,26 +73,18 @@ export default {
         this.importSpace(space)
       }
     },
-    uniqueName (space) {
-      const spaces = cache.getAllSpaces()
-      const spaceNames = spaces.map(space => space.name)
-      if (spaceNames.includes(space.name)) {
-        return `${space.name}-${space.id}`
-      } else {
-        return space.name
-      }
-    },
     importSpace (space) {
       if (!this.isValidSpace(space)) { return }
       space.originSpaceId = space.id
       space.id = nanoid()
-      space.name = this.uniqueName(space)
+      space.name = space.name + ' import'
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       cache.saveSpace(uniqueNewSpace)
       this.$store.commit('currentSpace/restoreSpace', uniqueNewSpace)
       this.$store.dispatch('currentSpace/saveNewSpace')
       this.$store.dispatch('currentUser/lastSpaceId', space.id)
       this.updateSpaces()
+      this.$store.commit('triggerFocusSpaceDetailsName')
     },
     updateSpaces () {
       this.$emit('updateSpaces')
