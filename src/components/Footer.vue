@@ -14,7 +14,7 @@ footer(:style="visualViewportPosition")
           input(type="checkbox" v-model="isFavoriteSpace")
           img.icon(src="@/assets/heart.svg")
         button(@click.left="toggleFavoritesIsVisible" :class="{ active: favoritesIsVisible}")
-          img.down-arrow(src="@/assets/down-arrow.svg")
+          span Favorites
       Favorites(:visible="favoritesIsVisible")
 
   section.controls(v-if="isVisible")
