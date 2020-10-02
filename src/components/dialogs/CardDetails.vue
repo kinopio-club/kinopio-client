@@ -31,6 +31,8 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.alt.enter.exact.stop="insertLineBreak"
         @keydown.ctrl.enter.exact.stop="insertLineBreak"
 
+        @keyup="updateTagPickerSearch(null)"
+
         @keydown="updateTagPicker"
         @keydown.down="triggerTagPickerNavigation"
         @keydown.up="triggerTagPickerNavigation"
@@ -602,6 +604,8 @@ export default {
       return end.substring(0, endPosition)
     },
     updateTagPickerSearch (cursorPosition) {
+      if (!this.tagPickerIsVisible) { return }
+      cursorPosition = cursorPosition || this.$refs.name.selectionStart
       const start = this.tagStartText(cursorPosition) || ''
       const end = this.tagEndText(cursorPosition) || ''
       this.tagPickerSearch = start + end
@@ -647,9 +651,6 @@ export default {
       const key = event.key
       const keyIsLettterOrNumber = key.length === 1
       const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets(cursorPosition)
-      if (this.tagPickerIsVisible) {
-        this.updateTagPickerSearch(cursorPosition)
-      }
       if (cursorPosition === 0) { return }
       if (key === '[' && previousCharacter === '[') {
         this.showTagPicker(cursorPosition)
