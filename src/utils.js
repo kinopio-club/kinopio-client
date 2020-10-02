@@ -99,13 +99,16 @@ export default {
 
   typeCheck ({ value, type, allowUndefined, origin }) {
     if (allowUndefined && value === undefined) {
-      return
+      return true
     }
     if (type === 'array' && Array.isArray(value)) {
-      return
+      return true
     }
     if (typeof value !== type) { // eslint-disable-line valid-typeof
       console.warn(`passed value is not ${type}`, value, origin)
+      return false
+    } else {
+      return true
     }
   },
 
