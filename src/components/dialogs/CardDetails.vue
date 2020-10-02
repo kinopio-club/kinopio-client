@@ -270,16 +270,16 @@ export default {
       const name = this.pastedName || this.name
       return this.seperatedLines(name).length
     },
+    nameSentences () {
+      const name = this.pastedName || this.name
+      return this.seperatedSentences(name).length
+    },
     nameHasLineBreaks () {
       if (this.nameLines > 1) {
         return true
       } else {
         return false
       }
-    },
-    nameSentences () {
-      const name = this.pastedName || this.name
-      return this.seperatedSentences(name).length
     },
     nameHasSentences () {
       if (this.nameHasLineBreaks) { return }
