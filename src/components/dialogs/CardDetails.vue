@@ -31,7 +31,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.alt.enter.exact.stop="insertLineBreak"
         @keydown.ctrl.enter.exact.stop="insertLineBreak"
 
-        @keyup="updateTagPicker"
+        @keydown="updateTagPicker"
         @keydown.down="triggerTagPickerNavigation"
         @keydown.up="triggerTagPickerNavigation"
         @keydown.enter="triggerTagPickerSelectTag"
@@ -615,9 +615,9 @@ export default {
     },
     updateTagPicker (event) {
       const cursorPosition = this.$refs.name.selectionStart
+      const previousCharacter = this.name[cursorPosition - 1]
       const key = event.key
       const keyIsLettterOrNumber = key.length === 1
-      const previousCharacter = this.name[cursorPosition - 2]
       const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets(cursorPosition)
       if (this.tagPickerIsVisible) {
         this.updateTagPickerSearch(cursorPosition)
