@@ -466,7 +466,7 @@ export default {
       let cards = context.state.cards
       cards.forEach(card => {
         if (!card.name) {
-          context.dispatch('removeCardPermanent', card)
+          context.dispatch('removeCard', card)
         }
       })
     },

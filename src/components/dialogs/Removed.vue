@@ -87,11 +87,14 @@ export default {
     }
   },
   computed: {
+    removedCardsWithName () {
+      return this.removedCards.filter(card => card.name)
+    },
     items () {
       if (this.cardsVisible && !this.currentUserCanEditSpace) {
         return []
       } else if (this.cardsVisible) {
-        return this.removedCards
+        return this.removedCardsWithName
       } else {
         return this.removedSpaces
       }
