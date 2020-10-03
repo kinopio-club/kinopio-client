@@ -6,15 +6,16 @@ dialog.narrow.add-space(v-if="visible" :open="visible" @click.stop)
         img.icon(src="@/assets/add.svg")
         span New Space
     .row
-      button
-        img.icon(src="@/assets/add.svg")
-        span Daily Journal
-      button(@click.left.stop="toggleJournalEditIsVisible" :class="{ active: journalEditIsVisible }")
-        span Edit
+      .segmented-buttons
+        button
+          img.icon(src="@/assets/add.svg")
+          span Daily Journal
+        button(@click.left.stop="toggleEditQuestionsIsVisible" :class="{ active: editQuestionsIsVisible }")
+          span Edit
 
     //- todo display loader here if fetching user questions
 
-    .journal-questions(v-if="journalEditIsVisible")
+    .journal-questions(v-if="editQuestionsIsVisible")
       //- .row
       //-   p Questions
 
@@ -53,16 +54,20 @@ dialog.narrow.add-space(v-if="visible" :open="visible" @click.stop)
       //-     img.icon(src="@/assets/add.svg")
       //-     span Add Question
 
-  section(v-if="journalEditIsVisible")
+  section(v-if="editQuestionsIsVisible")
     .row
-      p Use the daily URL to start with a new daily journal
-          //-  load, default to
-    .row
-      input.textarea(ref="url" v-model="url")
-    button(@click.left="copyUrl")
-      span Copy Daily Url
-    .row
-      .badge.success.success-message(v-if="urlIsCopied") Url Copied
+      button(@click.left.stop="toggleDailyUrlIsVisible" :class="{ active: dailyUrlIsVisible }")
+        span Daily Url
+    template(v-if="dailyUrlIsVisible")
+      .row
+        p Automatically start with a new daily journal
+      .row
+        input.textarea(ref="url" v-model="url")
+      .row
+        button(@click.left="copyUrl")
+          span Copy Daily Url
+      .row(v-if="urlIsCopied")
+        .badge.success.success-message Url Copied
 
     //- p Use&nbsp;
     //-   a(href="#") kinopio.club/daily
@@ -86,7 +91,9 @@ export default {
     return {
       moonPhase: {},
       url: `${window.location.origin}/daily`,
-      journalEditIsVisible: false
+      editQuestionsIsVisible: false,
+      dailyUrlIsVisible: false,
+      urlIsCopied: false
     }
   },
   // computed: {
@@ -98,8 +105,23 @@ export default {
       this.$store.dispatch('currentSpace/addSpace')
       this.$emit('updateSpaces')
     },
-    toggleJournalEditIsVisible () {
-      this.journalEditIsVisible = !this.journalEditIsVisible
+    toggleEditQuestionsIsVisible () {
+      this.editQuestionsIsVisible = !this.editQuestionsIsVisible
+    },
+    toggleDailyUrlIsVisible () {
+      this.dailyUrlIsVisible = !this.dailyUrlIsVisible
+    },
+    closeAll () {
+      this.editQuestionsIsVisible = false
+      this.dailyUrlIsVisible = false
+      this.urlIsCopied = false
+    },
+    copyUrl () {
+      const element = this.$refs.url
+      element.select()
+      element.setSelectionRange(0, 99999) // for mobile
+      document.execCommand('copy')
+      this.urlIsCopied = true
     },
 
     // 🍆 methods for question component
@@ -115,7 +137,7 @@ export default {
   },
   watch: {
     visible (visible) {
-      this.journalEditIsVisible = false
+      this.closeAll()
     }
   }
 }
@@ -135,6 +157,7 @@ export default {
   .question + .question
     margin-top 10px
   .question
+    // margin-bottom 10px
     textarea
       margin-bottom 5px
 </style>
