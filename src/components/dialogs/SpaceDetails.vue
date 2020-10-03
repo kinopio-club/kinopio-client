@@ -55,7 +55,6 @@ import PrivacyButton from '@/components/PrivacyButton.vue'
 import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
 import templates from '@/spaces/templates.js'
 import utils from '@/utils.js'
-import moonphase from '@/moonphase.js'
 
 export default {
   name: 'SpaceDetails',
@@ -236,7 +235,6 @@ export default {
   },
   watch: {
     visible (visible) {
-      console.log(moonphase())
       if (visible) {
         this.updateSpaces()
         this.updateWithRemoteSpaces()
