@@ -10,9 +10,8 @@ dialog.narrow.add-space(v-if="visible" :open="visible" @click.stop)
         button
           img.icon(src="@/assets/add.svg")
           span Daily Journal
-        .button-wrap
-          button(@click.left.stop="toggleEditQuestionsIsVisible" :class="{ active: editQuestionsIsVisible }")
-            span Edit
+        button(@click.left.stop="toggleEditQuestionsIsVisible" :class="{ active: editQuestionsIsVisible }")
+          span Edit
 
     //- todo display loader here if fetching user questions
     .journal-questions(v-if="editQuestionsIsVisible")
