@@ -1,6 +1,6 @@
 <template lang="pug">
 .question
-  .row.prompt-category
+  .row.category
     //- category name and color
     .badge.info optional group
 
@@ -72,7 +72,6 @@ export default {
 .question
   textarea
     margin-bottom 5px
-  .prompt-category
+  .category
     margin-bottom 5px
-
 </style>

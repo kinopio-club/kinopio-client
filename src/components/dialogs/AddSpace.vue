@@ -24,8 +24,9 @@ dialog.narrow.add-space(v-if="visible" :open="visible" @click.left.stop="closeDi
               span NEW
             img.icon(src="@/assets/add.svg")
             span Prompts
-          JournalQuestionPromptPicker(:visible="promptPickerIsVisible" :position="promptPickerPosition")
-          //- TODO remove, currently unused, promptPickerPosition, or reuse for mobile?
+          JournalQuestionPromptPicker(:visible="promptPickerIsVisible" :position="promptPickerPosition" @closeDialog="closeDialogs" @select="togglePromptQuestion")
+          //- TODO promptPickerPosition remove, currently unused,?
+            //- remove closeDialog emit, currently unused
 
     //- Questions
     //- TODO display loader here if fetching user questions
@@ -131,8 +132,10 @@ export default {
     addQuestion () {
       console.log('🐸 addQuestion')
       // add a new question field , scroll to, focus
+    },
+    togglePromptQuestion (prompt) {
+      // add it if it doesn't already exist (prepend or append?)
     }
-
   },
   watch: {
     visible (visible) {
