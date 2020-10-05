@@ -96,9 +96,9 @@ export default {
       urlIsCopied: false
     }
   },
-  // computed: {
-  //   emoji () { if this.moonPhase.name === },
-  // },
+  computed: {
+    userJournalQuestions () { return this.$store.state.currentUser.journalQuestions }
+  },
   methods: {
     addSpace () {
       window.scrollTo(0, 0)

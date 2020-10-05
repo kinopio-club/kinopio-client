@@ -22,7 +22,19 @@ export default {
     isUpgraded: false,
     filterShowUsers: false,
     filterShowDateUpdated: false,
-    filterShowAbsoluteDates: false
+    filterShowAbsoluteDates: false,
+    journalQuestions: [
+      {
+        // id: '1',
+        // userId
+        name: "What's my mood?"
+      },
+      {
+        // id: '2',
+        // userid
+        name: 'Did I eat well?'
+      }
+    ]
   },
   getters: {
     isCurrentUser: (state) => (user) => {
