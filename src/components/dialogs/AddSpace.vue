@@ -2,7 +2,7 @@
 dialog.narrow.add-space(v-if="visible" :open="visible" @click.stop)
   section
     .row
-      button
+      button(@click="addSpace")
         img.icon(src="@/assets/add.svg")
         span New Space
     .row
@@ -10,57 +10,33 @@ dialog.narrow.add-space(v-if="visible" :open="visible" @click.stop)
         button
           img.icon(src="@/assets/add.svg")
           span Daily Journal
-        button(@click.left.stop="toggleEditQuestionsIsVisible" :class="{ active: editQuestionsIsVisible }")
-          span Edit
+        .button-wrap
+          button(@click.left.stop="toggleEditQuestionsIsVisible" :class="{ active: editQuestionsIsVisible }")
+            span Edit
 
     //- todo display loader here if fetching user questions
-
     .journal-questions(v-if="editQuestionsIsVisible")
-      //- .row
-      //-   p Questions
+      JournalQuestion(v-for="question in userJournalQuestions" :question="question" :key="question.id")
 
-      .question
-        //- to component Questions(questions=currentUser.questions, fetched from cache, etc. on load)
-        textarea(
-          ref="question"
-          rows="1"
-          v-model="question"
-          placeholder="Ask yourself this every day"
-          maxlength="250"
+    template(v-if="editQuestionsIsVisible")
+      .row
+        button(@click.left="addQuestion")
+          img.icon(src="@/assets/add.svg")
+          span Add
+        .button-wrap
+          button
+            .label-badge
+              span NEW
+            img.icon(src="@/assets/add.svg")
+            span Prompts
 
-          @keyup.alt.enter.exact.stop
-          @keyup.ctrl.enter.exact.stop
-          @keydown.alt.enter.exact.stop="insertLineBreak"
-          @keydown.ctrl.enter.exact.stop="insertLineBreak"
+      .row
+        button(@click.left.stop="toggleDailyUrlIsVisible" :class="{ active: dailyUrlIsVisible }")
+          span Daily Url
 
-          @paste="updateQuestion"
-          @keyup="updateQuestion"
-        )
-        //- carddetails.insertLineBreak 👀
-        //- paste = updatequestion, keyup=updatequestion
-        //- Remove
-        .row
-          .button-wrap
-            button(@click.left="removeQuestion")
-              img.icon(src="@/assets/remove.svg")
-              span Remove
-          .button-wrap
-            button
-              img.icon(src="@/assets/add.svg")
-              span Add
-
-      //- .button-wrap
-      //-   button
-      //-     img.icon(src="@/assets/add.svg")
-      //-     span Add Question
-
-  section(v-if="editQuestionsIsVisible")
-    .row
-      button(@click.left.stop="toggleDailyUrlIsVisible" :class="{ active: dailyUrlIsVisible }")
-        span Daily Url
     template(v-if="dailyUrlIsVisible")
       .row
-        p Automatically start with a new daily journal
+        p Start Kinopio with a new daily journal
       .row
         input.textarea(ref="url" v-model="url")
       .row
@@ -77,9 +53,13 @@ dialog.narrow.add-space(v-if="visible" :open="visible" @click.stop)
 
 <script>
 import moonphase from '@/moonphase.js'
+import JournalQuestion from '@/components/JournalQuestion.vue'
 
 export default {
   name: 'AddSpace',
+  components: {
+    JournalQuestion
+  },
   props: {
     visible: Boolean
   },
@@ -101,8 +81,15 @@ export default {
   },
   methods: {
     addSpace () {
+      this.$emit('closeDialog')
       window.scrollTo(0, 0)
       this.$store.dispatch('currentSpace/addSpace')
+      this.$emit('updateSpaces')
+    },
+    addDailyJournalSpace () {
+      this.$emit('closeDialog')
+      window.scrollTo(0, 0)
+      this.$store.dispatch('currentSpace/addDailyJournalSpace')
       this.$emit('updateSpaces')
     },
     toggleEditQuestionsIsVisible () {
@@ -123,17 +110,11 @@ export default {
       document.execCommand('copy')
       this.urlIsCopied = true
     },
-
-    // 🍆 methods for question component
-    insertLineBreak () {
-      console.log('🍆 insertLineBreak')
-    },
-    updateQuestion () {
-      console.log('🍆 updateQuestion')
-    },
-    removeQuestion () {
-      console.log('🍆 removeQuestion')
+    addQuestion () {
+      console.log('🐸 addQuestion')
+      // add a new question field , scroll to, focus
     }
+
   },
   watch: {
     visible (visible) {
@@ -152,12 +133,9 @@ export default {
     border 0
     border-radius 3px
     padding 4px
-
-  // todo move to JournalQuestions component
-  .question + .question
-    margin-top 10px
-  .question
-    // margin-bottom 10px
-    textarea
-      margin-bottom 5px
+  .journal-questions
+    margin-bottom 10px
+  .label-badge
+    left -4px
+    top -6px
 </style>

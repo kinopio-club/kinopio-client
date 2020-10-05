@@ -399,6 +399,10 @@ export default {
         context.commit('triggerFocusSpaceDetailsName', null, { root: true })
       })
     },
+    addDailyJournalSpace: (context) => {
+      console.log('TODO 🌒 addDailyJournalSpace')
+      // make space from user.journalQuestions
+    },
     getRemoteSpace: async (context, space) => {
       const collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
