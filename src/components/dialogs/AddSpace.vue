@@ -129,6 +129,7 @@ export default {
       document.execCommand('copy')
       this.urlIsCopied = true
     },
+    // updateCategoryFilter () {},
     addQuestion () {
       console.log('🐸 addQuestion')
       // add a new question field , scroll to, focus

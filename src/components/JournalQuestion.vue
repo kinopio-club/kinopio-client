@@ -43,7 +43,11 @@ export default {
         // this.$store.dispatch('currentSpace/updateSpace', { name: newName })
         // this.updateSpaces()
         // update height of textarea()
-        console.log('🍆 update')
+        console.log('🍆 update question', newName, this.question)
+        this.$store.dispatch('currentUser/updateJournalQuestion', {
+          questionId: this.question.id,
+          name: newName
+        })
       }
     }
 

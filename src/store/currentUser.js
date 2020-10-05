@@ -25,12 +25,12 @@ export default {
     filterShowAbsoluteDates: false,
     journalQuestions: [
       {
-        // id: '1',
+        id: '1a',
         // userId
         name: "What's my mood?"
       },
       {
-        // id: '2',
+        id: '2b',
         // userid
         name: 'Did I eat well?'
       }
@@ -205,6 +205,16 @@ export default {
       utils.typeCheck({ value, type: 'boolean', origin: 'filterShowAbsoluteDates' })
       state.filterShowAbsoluteDates = value
       cache.updateUser('filterShowAbsoluteDates', value)
+    },
+    updateJournalQuestion: (state, { questionId, name }) => {
+      const questions = state.journalQuestions.map(question => {
+        if (question.id === questionId) {
+          question.name = name
+        }
+        return question
+      })
+      state.journalQuestions = questions
+      cache.updateUser('journalQuestions', questions)
     }
   },
   actions: {
@@ -419,6 +429,12 @@ export default {
       context.dispatch('toggleFilterShowUsers', false)
       context.dispatch('toggleFilterShowDateUpdated', false)
       context.dispatch('toggleFilterShowAbsoluteDates', false)
+    },
+    updateJournalQuestion: (context, { questionId, name }) => {
+      utils.typeCheck({ value: name, type: 'string', origin: 'updateQuestion' })
+      utils.typeCheck({ value: questionId, type: 'string', origin: 'updateQuestion' })
+      // TODO update api
+      context.commit('updateJournalQuestion', { questionId, name })
     }
   }
 }

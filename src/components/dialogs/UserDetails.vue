@@ -293,7 +293,7 @@ export default {
   display: flex
   .row
     align-items center
-  p
-    margin 0
+  // p
+  //   margin 0
 
 </style>
