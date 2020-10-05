@@ -1,8 +1,7 @@
 <template lang="pug">
 .question
-  .row.category
-    //- category name and color
-    .badge.info optional group
+  .row.category(v-if="currentCategory")
+    .badge.info.button-badge(@click="triggerPromptCategory" :style="{'background-color': currentCategory.color}") {{currentCategory.name}}
 
   textarea(
     ref="question"
@@ -27,16 +26,28 @@
 </template>
 
 <script>
+import journalQuestionPrompts from '@/spaces/journalQuestionPrompts.js'
 
 export default {
   name: 'JournalQuestion',
   props: {
     question: Object
   },
+  data () {
+    return {
+      currentCategory: null
+    }
+  },
+  mounted () {
+    this.checkQuestionCategory(this.question.name)
+    // update height of textarea()
+  },
   computed: {
+    categories () {
+      return journalQuestionPrompts.categories()
+    },
     name: {
       get () {
-        // update height of textarea()
         return this.question.name
       },
       set (newName) {
@@ -44,6 +55,7 @@ export default {
         // this.updateSpaces()
         // update height of textarea()
         console.log('🍆 update question', newName, this.question)
+        this.checkQuestionCategory(newName)
         this.$store.dispatch('currentUser/updateJournalQuestion', {
           questionId: this.question.id,
           name: newName
@@ -56,6 +68,16 @@ export default {
     // }
   },
   methods: {
+    checkQuestionCategory (name) {
+      const currentCategory = this.categories.find(category => {
+        return category.prompts.includes(name)
+      })
+      if (currentCategory) {
+        this.currentCategory = currentCategory
+      } else {
+        this.currentCategory = null
+      }
+    },
     insertLineBreak () {
       console.log('🍆 insertLineBreak')
     },
