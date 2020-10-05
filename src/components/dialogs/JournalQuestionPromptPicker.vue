@@ -15,7 +15,8 @@ dialog.journal-question-prompt-picker(
         .badge.info All
       template(v-for="(unreadCategory in unreadCategories")
         //- todo click on one of these to set the cateogory
-        .badge.category-badge.button-badge(:style="{background: unreadCategory.color}") {{unreadCategory.name}}
+        .badge.category-badge.button-badge(:style="{background: unreadCategory.color}")
+          span {{unreadCategory.name}}
           img.icon(src="@/assets/new.gif")
   template(v-for="category in categories")
     section.results-section
