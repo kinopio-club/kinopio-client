@@ -40,7 +40,7 @@ export default {
   },
   mounted () {
     this.checkQuestionCategory(this.question.name)
-    // update height of textarea()
+    // TODO update height of textarea()
   },
   computed: {
     categories () {
@@ -51,9 +51,7 @@ export default {
         return this.question.name
       },
       set (newName) {
-        // this.$store.dispatch('currentSpace/updateSpace', { name: newName })
-        // this.updateSpaces()
-        // update height of textarea()
+        // TODO update height of textarea()
         console.log('🍆 update question', newName, this.question)
         this.checkQuestionCategory(newName)
         this.$store.dispatch('currentUser/updateJournalQuestion', {
@@ -62,10 +60,6 @@ export default {
         })
       }
     }
-
-    // showInExploreLabel () {
-    //   return 'Show Space in Explore'
-    // }
   },
   methods: {
     checkQuestionCategory (name) {
@@ -83,11 +77,10 @@ export default {
     },
     removeQuestion () {
       console.log('🍆 removeQuestion')
+    },
+    triggerPromptCategory () {
+      this.$store.commit('triggerJournalQuestionPromptIsVisibleWithCategory', this.currentCategory)
     }
-
-    // updateCurrentSpace () {
-    //   this.$emit('updateCurrentSpace')
-    // }
   }
 }
 </script>

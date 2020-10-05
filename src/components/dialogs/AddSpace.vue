@@ -68,6 +68,11 @@ export default {
   mounted () {
     this.moonPhase = moonphase()
     console.log('🌙 moonphase', this.moonPhase)
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerJournalQuestionPromptIsVisibleWithCategory') {
+        this.togglePromptPickerIsVisible()
+      }
+    })
   },
   data () {
     return {

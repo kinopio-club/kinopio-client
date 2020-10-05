@@ -216,6 +216,7 @@ export default new Vuex.Store({
     triggerScrollCardIntoView: (state, cardId) => {},
     triggerPickerNavigationKey: (state, key) => {},
     triggerPickerSelect: () => {},
+    triggerJournalQuestionPromptIsVisibleWithCategory: (state, category) => {},
 
     // Cards
 

@@ -36,6 +36,14 @@ export default {
     visible: Boolean,
     position: Object
   },
+  mounted () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerJournalQuestionPromptIsVisibleWithCategory') {
+        // TODO set category filter to payload
+        console.log('🍂 set category to id', mutation.payload.id, mutation.payload.name)
+      }
+    })
+  },
   data () {
     return {
       selectedCategoryId: null
@@ -44,6 +52,9 @@ export default {
   computed: {
     categories () {
       return journalQuestionPrompts.categories()
+    },
+    userJournalQuestions () {
+      return this.$store.state.currentUser.journalQuestions
     },
     unreadCategories () {
       const lastReadId = 0 // user.lastReadJournalQuestionPromptsId || 0
@@ -62,8 +73,9 @@ export default {
       // this.$emit('closeDialog')
     },
     isActive (prompt) {
-      return false
-      // return this.selectedCategoryId === category.id
+      return Boolean(this.userJournalQuestions.find(question => {
+        return question.name === prompt
+      }))
     }
   }
 }
