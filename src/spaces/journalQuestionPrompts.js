@@ -1,13 +1,13 @@
-// prompts from http://kawaiijournaling.com, https://www.instagram.com/kawaiijournaling
+// prompts from https://www.instagram.com/kawaiijournaling, http://kawaiijournaling.com
 
 export default {
 
-  groups () {
+  categories () {
     return [
       {
         id: 3,
         name: 'Autumn',
-        color: '#48daba',
+        color: '#f0e6c6',
         createdAt: 'Oct 5, 2020',
         prompts: [
           'My dream fall activities',
@@ -25,7 +25,7 @@ export default {
       {
         id: 2,
         name: 'Rainy',
-        color: '#48daba',
+        color: '#fde5fd',
         createdAt: 'Oct 5, 2020',
         prompts: [
           'Rainy season mood board',
@@ -43,7 +43,7 @@ export default {
       {
         id: 1,
         name: 'Everyday',
-        color: '#1b85b5',
+        color: '#bce8eb',
         createdAt: 'Oct 5, 2020',
         prompts: [
           '5 things to describe who I am',

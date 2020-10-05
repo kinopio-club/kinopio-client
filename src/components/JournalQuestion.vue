@@ -1,7 +1,7 @@
 <template lang="pug">
 .question
-  .row
-    //- name and color
+  .row.prompt-category
+    //- category name and color
     .badge.info optional group
 
   textarea(
@@ -24,7 +24,6 @@
       button(@click.left="removeQuestion")
         img.icon(src="@/assets/remove.svg")
         span Remove
-
 </template>
 
 <script>
@@ -72,6 +71,8 @@ export default {
   margin-top 10px
 .question
   textarea
+    margin-bottom 5px
+  .prompt-category
     margin-bottom 5px
 
 </style>

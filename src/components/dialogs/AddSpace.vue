@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.add-space(v-if="visible" :open="visible" @click.stop)
+dialog.narrow.add-space(v-if="visible" :open="visible" @click.left.stop="closeDialogs" :class="{'child-dialog-is-visible': promptPickerIsVisible}" ref="dialog")
   section
     .row
       button(@click="addSpace")
@@ -13,26 +13,30 @@ dialog.narrow.add-space(v-if="visible" :open="visible" @click.stop)
         button(@click.left.stop="toggleEditQuestionsIsVisible" :class="{ active: editQuestionsIsVisible }")
           span Edit
 
-    //- todo display loader here if fetching user questions
-    .journal-questions(v-if="editQuestionsIsVisible")
-      JournalQuestion(v-for="question in userJournalQuestions" :question="question" :key="question.id")
-
     template(v-if="editQuestionsIsVisible")
       .row
         button(@click.left="addQuestion")
           img.icon(src="@/assets/add.svg")
           span Add
         .button-wrap
-          button
+          button(@click.left.stop="togglePromptPickerIsVisible" :class="{ active: promptPickerIsVisible }" ref="promptButton")
             .label-badge
               span NEW
             img.icon(src="@/assets/add.svg")
             span Prompts
+          JournalQuestionPromptPicker(:visible="promptPickerIsVisible" :position="promptPickerPosition")
+          //- TODO remove, currently unused, promptPickerPosition, or reuse for mobile?
 
+    //- Questions
+    //- TODO display loader here if fetching user questions
+    .journal-questions(v-if="editQuestionsIsVisible")
+      JournalQuestion(v-for="question in userJournalQuestions" :question="question" :key="question.id")
+
+    //- Daily Url
+    template(v-if="editQuestionsIsVisible")
       .row
         button(@click.left.stop="toggleDailyUrlIsVisible" :class="{ active: dailyUrlIsVisible }")
           span Daily Url
-
     template(v-if="dailyUrlIsVisible")
       .row
         p Start Kinopio with a new daily journal
@@ -44,20 +48,18 @@ dialog.narrow.add-space(v-if="visible" :open="visible" @click.stop)
       .row(v-if="urlIsCopied")
         .badge.success.success-message Url Copied
 
-    //- p Use&nbsp;
-    //-   a(href="#") kinopio.club/daily
-
-    //-   span &nbsp;to automatically start with daily journals
 </template>
 
 <script>
 import moonphase from '@/moonphase.js'
 import JournalQuestion from '@/components/JournalQuestion.vue'
+import JournalQuestionPromptPicker from '@/components/dialogs/JournalQuestionPromptPicker.vue'
 
 export default {
   name: 'AddSpace',
   components: {
-    JournalQuestion
+    JournalQuestion,
+    JournalQuestionPromptPicker
   },
   props: {
     visible: Boolean
@@ -72,7 +74,9 @@ export default {
       url: `${window.location.origin}/daily`,
       editQuestionsIsVisible: false,
       dailyUrlIsVisible: false,
-      urlIsCopied: false
+      urlIsCopied: false,
+      promptPickerIsVisible: false,
+      promptPickerPosition: {}
     }
   },
   computed: {
@@ -97,10 +101,25 @@ export default {
     toggleDailyUrlIsVisible () {
       this.dailyUrlIsVisible = !this.dailyUrlIsVisible
     },
+    togglePromptPickerIsVisible () {
+      this.promptPickerIsVisible = !this.promptPickerIsVisible
+      this.updatePromptPickerPosition() // tODO remove method?
+    },
+    updatePromptPickerPosition () {
+      if (!this.promptPickerIsVisible) { return }
+      this.promptPickerPosition = {
+        left: 80,
+        top: 5
+      }
+    },
     closeAll () {
       this.editQuestionsIsVisible = false
       this.dailyUrlIsVisible = false
       this.urlIsCopied = false
+      this.promptPickerIsVisible = false
+    },
+    closeDialogs () {
+      this.promptPickerIsVisible = false
     },
     copyUrl () {
       const element = this.$refs.url
@@ -127,6 +146,8 @@ export default {
 .add-space
   overflow scroll
   max-height calc(100vh - 230px)
+  &.child-dialog-is-visible
+    overflow initial !important
   .textarea
     background-color var(--secondary-background)
     border 0
