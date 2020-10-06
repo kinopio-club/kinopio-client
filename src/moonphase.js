@@ -5,12 +5,21 @@ export default (date) => {
     date = new Date()
   }
   const Moon = {
-    phases: ['new-moon', 'waxing-crescent', 'waxing-quarter', 'waxing-gibbous', 'full-moon', 'waning-gibbous', 'waning-quarter', 'waning-crescent'],
+    phases: [
+      { name: 'new-moon', emoji: '🌚' },
+      { name: 'waxing-crescent', emoji: '🌒' },
+      { name: 'waxing-quarter', emoji: '🌓' },
+      { name: 'waxing-gibbous', emoji: '🌔' },
+      { name: 'full-moon', emoji: '🌝' },
+      { name: 'waning-gibbous', emoji: '🌖' },
+      { name: 'waning-quarter', emoji: '🌗' },
+      { name: 'waning-crescent', emoji: '🌘' }
+    ],
     phase: function (year, month, day) {
       let c = 0
       let e = 0
       let jd = 0
-      let b = 0
+      let phase = 0
 
       if (month < 3) {
         year--
@@ -21,12 +30,16 @@ export default (date) => {
       e = 30.6 * month
       jd = c + e + day - 694039.09 // jd is total days elapsed
       jd /= 29.5305882 // divide by the moon cycle
-      b = parseInt(jd) // int(jd) -> b, take integer part of jd
-      jd -= b // subtract integer part to leave fractional part of original jd
-      b = Math.round(jd * 8) // scale fraction from 0-8 and round
+      phase = parseInt(jd) // int(jd) -> phase, take integer part of jd
+      jd -= phase // subtract integer part to leave fractional part of original jd
+      phase = Math.round(jd * 8) // scale fraction from 0-8 and round
 
-      if (b >= 8) b = 0 // 0 and 8 are the same so turn 8 into 0
-      return { phase: b, name: Moon.phases[b] }
+      if (phase >= 8) phase = 0 // 0 and 8 are the same so turn 8 into 0
+      return {
+        phase,
+        name: Moon.phases[phase].name,
+        emoji: Moon.phases[phase].emoji
+      }
     }
   }
 

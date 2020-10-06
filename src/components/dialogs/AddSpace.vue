@@ -8,10 +8,9 @@ dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
         span New Space
     .row
       .segmented-buttons
-        button
+        button(@click="addJournalSpace")
           img.icon(src="@/assets/add.svg")
-          //- TODO real moonphase
-          span 🌒 Journal
+          span {{moonPhase.emoji}} Journal
         button(@click.left.stop="toggleEditQuestionsIsVisible" :class="{ active: editQuestionsIsVisible }")
           span Edit
 
@@ -69,7 +68,6 @@ export default {
   },
   mounted () {
     this.moonPhase = moonphase()
-    console.log('🌙 moonphase', this.moonPhase)
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerJournalQuestionPromptIsVisibleWithCategory') {
         this.togglePromptPickerIsVisible()
@@ -115,6 +113,7 @@ export default {
     //   this.$store.commit('triggerFocusSpaceDetailsName')
     // },
     addJournalSpace () {
+      console.log('moonphase', this.moonPhase.emoji, this.moonPhase)
       this.$emit('closeDialog')
       window.scrollTo(0, 0)
       // create the space here
