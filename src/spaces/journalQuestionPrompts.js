@@ -2,7 +2,7 @@
 
 export default {
 
-  categories () {
+  packs () {
     return [
       {
         id: 3,

@@ -1,10 +1,7 @@
 <template lang="pug">
 .question
-
   .row
-
-    .badge.info.button-badge.category(v-if="currentCategory" @click.stop="triggerPromptCategory" :style="{'background-color': currentCategory.color}") {{currentCategory.name}}
-
+    //- .badge.info.button-badge.category(v-if="currentCategory" @click.stop="triggerPromptCategory" :style="{'background-color': currentCategory.color}") {{currentCategory.name}}
     textarea(
       ref="name"
       rows="1"
@@ -17,9 +14,6 @@
       @keydown.alt.enter.exact.stop="insertLineBreak"
       @keydown.ctrl.enter.exact.stop="insertLineBreak"
     )
-
-    //- carddetails.insertLineBreak 👀
-
     .button-wrap
       button.remove(@click.left="removeQuestion")
         img.icon(src="@/assets/remove.svg")
@@ -27,7 +21,7 @@
 </template>
 
 <script>
-import journalQuestionPrompts from '@/spaces/journalQuestionPrompts.js'
+// import journalQuestionPrompts from '@/spaces/journalQuestionPrompts.js'
 
 export default {
   name: 'JournalQuestion',
@@ -40,19 +34,19 @@ export default {
     }
   },
   mounted () {
-    this.checkQuestionCategory(this.question.name)
+    // this.checkQuestionCategory(this.question.name)
     this.updateTextareaSize()
   },
   computed: {
-    categories () {
-      return journalQuestionPrompts.categories()
-    },
+    // categories () {
+    //   return journalQuestionPrompts.categories()
+    // },
     name: {
       get () {
         return this.question.name
       },
       set (newName) {
-        this.checkQuestionCategory(newName)
+        // this.checkQuestionCategory(newName)
         this.updateTextareaSize()
         this.$store.dispatch('currentUser/updateJournalQuestion', {
           questionId: this.question.id,
@@ -62,20 +56,17 @@ export default {
     }
   },
   methods: {
-    checkQuestionCategory (name) {
-      const currentCategory = this.categories.find(category => {
-        return category.prompts.includes(name)
-      })
-      if (currentCategory) {
-        this.currentCategory = currentCategory
-        this.updateTextareaSize()
-      } else {
-        this.currentCategory = null
-      }
-    },
-    insertLineBreak () {
-      console.log('🍆 insertLineBreak')
-    },
+    // checkQuestionCategory (name) {
+    //   const currentCategory = this.categories.find(category => {
+    //     return category.prompts.includes(name)
+    //   })
+    //   if (currentCategory) {
+    //     this.currentCategory = currentCategory
+    //     this.updateTextareaSize()
+    //   } else {
+    //     this.currentCategory = null
+    //   }
+    // },
     removeQuestion () {
       console.log('🍆 removeQuestion')
     },

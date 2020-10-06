@@ -1,20 +1,17 @@
 <template lang="pug">
-dialog.journal-question-prompt-picker(
-  v-if="visible"
-  :open="visible"
-  @click.left.stop
-)
+dialog.journal-question-prompt-picker.narrow(v-if="visible" :open="visible" @click.left.stop)
   //- :style="{ left: position.left + 'px', top: position.top + 'px'}"
 
-  //- section
-  //-   p Prompts
+  section
+    p Prompt packs add random prompts to your journals
     //- by&nbsp;
     //-   a(href="http://kawaiijournaling.com") Kawaii Journaling
-  section
-    .row
-      .button-wrap
-        button
-          .badge.info All Prompts
+
+  //- section
+  //-   .row
+  //-     .button-wrap
+  //-       button
+  //-         .badge.info All Prompts
 
     //- .row.category-row
     //-   template(v-for="(unreadCategory in unreadCategories")
@@ -25,17 +22,34 @@ dialog.journal-question-prompt-picker(
 
   //- ResultsFilter(:hideFilter="hideFilter" :items="spaces" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredSpaces")
 
-  template(v-for="category in categories")
-    section.results-section
-      ul.results-list
-        template(v-for="(prompt in category.prompts")
-          li(@click.left="select(prompt)" tabindex="0" v-on:keyup.enter="select(prompt)" :class="{ active: isActive(prompt) }")
-            .badge.category-badge(:style="{background: category.color}") {{category.name}}
-            span {{prompt}}
+  section.results-section
+    ul.results-list
+        li(v-for="pack in promptPacks" @click.left="select(pack)" tabindex="0" v-on:keyup.enter="select(pack)" :class="{ active: isActive(pack) }")
+          .name-wrap
+            .segmented-buttons
+              button
+                img.icon.button-add-icon(src="@/assets/add.svg")
+                .badge(:style="{background: pack.color}")
+                  span {{pack.name}}
+              button(@click.stop)
+                img.icon(src="@/assets/view.svg")
+
+          //- span 🔀
+          p
+            .label-badge
+              span ex
+            span {{randomPrompt(pack)}}
+
+        //- template(v-for="(prompt in pack.prompts")
+        //-   li(@click.left="select(prompt)" tabindex="0" v-on:keyup.enter="select(prompt)" :class="{ active: isActive(prompt) }")
+        //-     .badge.pack-badge(:style="{background: pack.color}") {{pack.name}}
+        //-     span {{prompt}}
 </template>
 
 <script>
+// change name w promptpack
 import journalQuestionPrompts from '@/spaces/journalQuestionPrompts.js'
+import random from 'lodash-es/random'
 
 export default {
   name: 'JournalQuestionPromptPicker',
@@ -57,28 +71,37 @@ export default {
     }
   },
   computed: {
-    categories () {
-      return journalQuestionPrompts.categories()
+    promptPacks () {
+      return journalQuestionPrompts.packs()
     },
     userJournalQuestions () {
       return this.$store.state.currentUser.journalQuestions
-    },
-    unreadCategories () {
-      const lastReadId = 0 // user.lastReadJournalQuestionPromptsId || 0
-      const unreadCategories = this.categories.filter(category => category.id > lastReadId)
-      return unreadCategories.slice(0, 5)
     }
+    // unreadCategories () {
+    //   const lastReadId = 0 // user.lastReadJournalQuestionPromptsId || 0
+    //   const unreadCategories = this.categories.filter(category => category.id > lastReadId)
+    //   return unreadCategories.slice(0, 5)
+    // }
   },
   methods: {
-    select (prompt) {
-      // cancel if prompt is existing active prompt
-      this.$emit('addPrompt', prompt)
+    select (pack) {
+      console.log('select ', pack)
+      // cancel if pack is existing active pack
+      this.$emit('addPromptPack', pack)
       // this.$emit('closeDialog')
     },
-    isActive (prompt) {
-      return Boolean(this.userJournalQuestions.find(question => {
-        return question.name === prompt
-      }))
+    isActive (pack) {
+      return false // temp
+    },
+    // isActive (prompt) {
+    //   return Boolean(this.userJournalQuestions.find(question => {
+    //     return question.name === prompt
+    //   }))
+    // },
+    randomPrompt (pack) {
+      let prompt = random(0, pack.prompts.length)
+      console.log(pack.prompts, prompt)
+      return pack.prompts[prompt]
     }
   }
 }
@@ -109,6 +132,30 @@ export default {
     flex none
   .results-section
     max-height initial
+  .results-section
+    border-top: 1px solid var(--primary);
+    padding-top: 4px;
+  ul.results-list
+    li
+      display block
+      .name-wrap
+        // display flex
+        // justify-content space-between
+        > .badge
+          height 19px
+          margin-top 2px
+      p
+        margin-top 2px
+      .label-badge
+        position static
+        display inline
+        margin-right 3px
+        background-color var(--secondary-background)
+        span
+          color var(--primary)
+          vertical-align 1px
+  .button-add-icon
+    margin-right 5px
 
 // .template-category-picker
 //   top calc(100% - 8px) !important

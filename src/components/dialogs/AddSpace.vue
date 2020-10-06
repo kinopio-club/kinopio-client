@@ -1,5 +1,6 @@
 <template lang="pug">
-dialog.add-space(v-if="visible" :open="visible" @click.left.stop="closeDialogs" :class="{'child-dialog-is-visible': promptPickerIsVisible, 'narrow': !editQuestionsIsVisible}" ref="dialog")
+dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" :class="{'child-dialog-is-visible': promptPickerIsVisible}" ref="dialog")
+  //- 'narrow': !editQuestionsIsVisible
   section
     .row
       button(@click="addSpace")
@@ -15,31 +16,36 @@ dialog.add-space(v-if="visible" :open="visible" @click.left.stop="closeDialogs" 
 
   section(v-if="editQuestionsIsVisible")
     .row
-      button(@click.left="addQuestion")
-        img.icon(src="@/assets/add.svg")
-        span Add
       .button-wrap
         button(@click.left.stop="togglePromptPickerIsVisible" :class="{ active: promptPickerIsVisible }" ref="promptButton")
           //- .label-badge
           //-   span NEW
+          img.icon(src="@/assets/add.svg")
           span Prompts
         JournalQuestionPromptPicker(:visible="promptPickerIsVisible" :position="promptPickerPosition" @closeDialog="closeDialogs" @select="togglePromptQuestion")
         //- TODO promptPickerPosition remove, currently unused,?
           //- remove closeDialog emit, currently unused
+      button(@click.left="addQuestion")
+        img.icon(src="@/assets/add.svg")
+        span Custom
 
     //- Questions
     //- TODO display loader here if fetching user questions
     .journal-questions(v-if="editQuestionsIsVisible")
       JournalQuestion(v-for="question in userJournalQuestions" :question="question" :key="question.id")
 
-    //- Journal Url
+    //- todo: Journal Url to help doc
+
     //- template(v-if="editQuestionsIsVisible")
     //-   .row
     //-     button(@click.left.stop="toggleDailyUrlIsVisible" :class="{ active: dailyUrlIsVisible }")
     //-       span Journal Url
     //- template(v-if="dailyUrlIsVisible")
     //-   .row
-    //-     p Start Kinopio with a new journal space
+    //-     //- p find todays journal, creates a journal for the day if none exists
+    //-     //- p this url will always take you to
+    //-     p any day you go to this link , it'll take you that day's daily journal space
+    //-     //- p Start Kinopio with a new journal space
     //-   .row
     //-     input.textarea(ref="url" v-model="url")
     //-   .row
