@@ -6,10 +6,10 @@ dialog.narrow.tag-picker(v-if="visible" :open="visible" @click.left.stop ref="di
       span Type to add or search tags
   section.results-section
     ul.results-list
-      li(v-if="search" @click="selectTag(null, true)" :class="{hover: focusOnTagName === search}")
+      li(v-if="search" @click="selectTag(null, true)" @touchend.stop :class="{hover: focusOnTagName === search}")
         .badge.tag-badge(:style="{backgroundColor: searchTagColor}")
           span {{search}}
-      li(v-for="tag in filteredTags" @click="selectTag(tag, true)" @touchend="selectTag(tag, true)" :class="{hover: focusOnTagName === tag.name}")
+      li(v-for="tag in filteredTags" @click="selectTag(tag, true)" @touchend.stop :class="{hover: focusOnTagName === tag.name}")
         .badge.tag-badge(:style="{backgroundColor: tag.color}")
           span {{tag.name}}
 
