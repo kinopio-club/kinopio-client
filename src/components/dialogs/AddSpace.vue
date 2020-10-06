@@ -1,5 +1,6 @@
 <template lang="pug">
-dialog.narrow.add-space(v-if="visible" :open="visible" @click.left.stop="closeDialogs" :class="{'child-dialog-is-visible': promptPickerIsVisible}" ref="dialog")
+dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" :class="{'child-dialog-is-visible': promptPickerIsVisible}" ref="dialog")
+  //- 'narrow': !editQuestionsIsVisible
   section
     .row
       button(@click="addSpace")
@@ -9,45 +10,46 @@ dialog.narrow.add-space(v-if="visible" :open="visible" @click.left.stop="closeDi
       .segmented-buttons
         button
           img.icon(src="@/assets/add.svg")
-          span Journal Space
+          //- TODO real moonphase
+          span 🌒 Journal
         button(@click.left.stop="toggleEditQuestionsIsVisible" :class="{ active: editQuestionsIsVisible }")
           span Edit
 
-    template(v-if="editQuestionsIsVisible")
-      .row
-        button(@click.left="addQuestion")
+  section(v-if="editQuestionsIsVisible")
+    .row
+      button(@click.left="addQuestion")
+        img.icon(src="@/assets/add.svg")
+        span Add
+      .button-wrap
+        button(@click.left.stop="togglePromptPickerIsVisible" :class="{ active: promptPickerIsVisible }" ref="promptButton")
+          //- .label-badge
+          //-   span NEW
           img.icon(src="@/assets/add.svg")
-          span Add
-        .button-wrap
-          button(@click.left.stop="togglePromptPickerIsVisible" :class="{ active: promptPickerIsVisible }" ref="promptButton")
-            .label-badge
-              span NEW
-            img.icon(src="@/assets/add.svg")
-            span Prompts
-          JournalQuestionPromptPicker(:visible="promptPickerIsVisible" :position="promptPickerPosition" @closeDialog="closeDialogs" @select="togglePromptQuestion")
-          //- TODO promptPickerPosition remove, currently unused,?
-            //- remove closeDialog emit, currently unused
+          span Prompts
+        JournalQuestionPromptPicker(:visible="promptPickerIsVisible" :position="promptPickerPosition" @closeDialog="closeDialogs" @select="togglePromptQuestion")
+        //- TODO promptPickerPosition remove, currently unused,?
+          //- remove closeDialog emit, currently unused
 
     //- Questions
     //- TODO display loader here if fetching user questions
     .journal-questions(v-if="editQuestionsIsVisible")
       JournalQuestion(v-for="question in userJournalQuestions" :question="question" :key="question.id")
 
-    //- Daily Url
-    template(v-if="editQuestionsIsVisible")
-      .row
-        button(@click.left.stop="toggleDailyUrlIsVisible" :class="{ active: dailyUrlIsVisible }")
-          span Daily Url
-    template(v-if="dailyUrlIsVisible")
-      .row
-        p Start Kinopio with a new daily journal
-      .row
-        input.textarea(ref="url" v-model="url")
-      .row
-        button(@click.left="copyUrl")
-          span Copy Daily Url
-      .row(v-if="urlIsCopied")
-        .badge.success.success-message Url Copied
+    //- Journal Url
+    //- template(v-if="editQuestionsIsVisible")
+    //-   .row
+    //-     button(@click.left.stop="toggleDailyUrlIsVisible" :class="{ active: dailyUrlIsVisible }")
+    //-       span Journal Url
+    //- template(v-if="dailyUrlIsVisible")
+    //-   .row
+    //-     p Start Kinopio with a new journal space
+    //-   .row
+    //-     input.textarea(ref="url" v-model="url")
+    //-   .row
+    //-     button(@click.left="copyUrl")
+    //-       span Copy Journal Url
+    //-   .row(v-if="urlIsCopied")
+    //-     .badge.success.success-message Url Copied
 
 </template>
 
@@ -98,10 +100,10 @@ export default {
       this.$store.dispatch('currentSpace/addSpace')
       this.$emit('updateSpaces')
     },
-    addDailyJournalSpace () {
+    addJournalSpace () {
       this.$emit('closeDialog')
       window.scrollTo(0, 0)
-      this.$store.dispatch('currentSpace/addDailyJournalSpace')
+      this.$store.dispatch('currentSpace/addJournalSpace')
       this.$emit('updateSpaces')
     },
     toggleEditQuestionsIsVisible () {
@@ -165,9 +167,9 @@ export default {
     border 0
     border-radius 3px
     padding 4px
-  .journal-questions
-    margin-bottom 10px
-  .label-badge
-    left -4px
-    top -6px
+  // .journal-questions
+  //   margin-bottom 10px
+  // .label-badge
+  //   left -4px
+  //   top -6px
 </style>

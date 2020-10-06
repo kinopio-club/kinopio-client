@@ -6,18 +6,25 @@ dialog.journal-question-prompt-picker(
 )
   //- :style="{ left: position.left + 'px', top: position.top + 'px'}"
 
+  //- section
+  //-   p Prompts
+    //- by&nbsp;
+    //-   a(href="http://kawaiijournaling.com") Kawaii Journaling
   section
-    p Prompts by&nbsp;
-      a(href="http://kawaiijournaling.com") Kawaii Journaling
-  section
-    .row.category-row
-      button.category-button
-        .badge.info All
-      template(v-for="(unreadCategory in unreadCategories")
-        //- todo click on one of these to set the cateogory
-        .badge.category-badge.button-badge(:style="{background: unreadCategory.color}")
-          span {{unreadCategory.name}}
-          img.icon(src="@/assets/new.gif")
+    .row
+      .button-wrap
+        button
+          .badge.info All Prompts
+
+    //- .row.category-row
+    //-   template(v-for="(unreadCategory in unreadCategories")
+    //-     //- todo click on one of these to set the cateogory
+    //-     .badge.category-badge.button-badge(:style="{background: unreadCategory.color}")
+    //-       span {{unreadCategory.name}}
+    //-       img.icon(src="@/assets/new.gif")
+
+  //- ResultsFilter(:hideFilter="hideFilter" :items="spaces" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredSpaces")
+
   template(v-for="category in categories")
     section.results-section
       ul.results-list
@@ -61,10 +68,6 @@ export default {
       const unreadCategories = this.categories.filter(category => category.id > lastReadId)
       return unreadCategories.slice(0, 5)
     }
-    // isActive (prompt) {
-    //   return false
-    // return this.selectedCategoryId === category.id
-    // }
   },
   methods: {
     select (prompt) {
@@ -95,13 +98,13 @@ export default {
     margin-bottom 10px
     padding-bottom 10px
     border-bottom 1px solid var(--primary)
-  .category-button
-    margin-right 6px
   .category
     margin-left 8px
     margin-bottom 5px
-  .category-row
-    flex-wrap wrap
+  // .category-row
+  //   flex-wrap wrap
+  //   .button-wrap
+  //     margin-right 6px
   .category-badge
     flex none
   .results-section

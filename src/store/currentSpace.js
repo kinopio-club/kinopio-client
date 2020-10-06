@@ -399,8 +399,8 @@ export default {
         context.commit('triggerFocusSpaceDetailsName', null, { root: true })
       })
     },
-    addDailyJournalSpace: (context) => {
-      console.log('TODO 🌒 addDailyJournalSpace')
+    addJournalSpace: (context) => {
+      console.log('TODO 🌒 addJournalSpace')
       // make space from user.journalQuestions
     },
     getRemoteSpace: async (context, space) => {

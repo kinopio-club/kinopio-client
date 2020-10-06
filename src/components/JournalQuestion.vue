@@ -1,9 +1,10 @@
 <template lang="pug">
 .question
-  .row.category(v-if="currentCategory")
-    .badge.info.button-badge(@click.stop="triggerPromptCategory" :style="{'background-color': currentCategory.color}") {{currentCategory.name}}
 
   .row
+
+    .badge.info.button-badge.category(v-if="currentCategory" @click.stop="triggerPromptCategory" :style="{'background-color': currentCategory.color}") {{currentCategory.name}}
+
     textarea(
       ref="question"
       rows="1"
@@ -93,5 +94,12 @@ export default {
     margin-bottom 5px
   .category
     margin-bottom 5px
-  // .remove
+    flex none
+  button.remove
+    margin-left 6px
+    width 26px
+    margin-top -5px
+    vertical-align 8px
+    flex none
+
 </style>
