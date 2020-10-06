@@ -1,5 +1,7 @@
 // prompts from https://www.instagram.com/kawaiijournaling, http://kawaiijournaling.com
 
+// - TODO remove female-oriented Qs (outfits) – journaling isn't just for girls
+
 export default {
 
   packs () {
@@ -13,8 +15,6 @@ export default {
           'My dream fall activities',
           'My ideal cozy autumn day routine',
           'Favorite fall fruits, food, and deserts',
-          'Fall season fashion inspiraiton',
-          'Favorite fall outfit',
           'Favorite drinks while autumn journaling',
           'Animals that remind me of autumn',
           'My cozy autumn playlist',

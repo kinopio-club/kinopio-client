@@ -54,6 +54,8 @@ dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
     //-   .row(v-if="urlIsCopied")
     //-     .badge.success.success-message Url Copied
 
+    //- todo help doc contains journal q sources, kawaiijournaling and Jour blog
+
 </template>
 
 <script>

@@ -26,15 +26,10 @@ dialog.journal-question-prompt-picker.narrow(v-if="visible" :open="visible" @cli
     ul.results-list
         li(v-for="pack in promptPacks" @click.left="select(pack)" tabindex="0" v-on:keyup.enter="select(pack)" :class="{ active: isActive(pack) }")
           .name-wrap
-            .segmented-buttons
-              button
-                img.icon.button-add-icon(src="@/assets/add.svg")
-                .badge(:style="{background: pack.color}")
-                  span {{pack.name}}
-              button(@click.stop)
-                img.icon(src="@/assets/view.svg")
-
-          //- span 🔀
+            .badge.button-badge(:style="{background: pack.color}")
+              img.icon(src="@/assets/add.svg")
+              span {{pack.name}}
+            button(@click.stop) View All
           p
             .label-badge
               span ex
@@ -139,8 +134,8 @@ export default {
     li
       display block
       .name-wrap
-        // display flex
-        // justify-content space-between
+        display flex
+        justify-content space-between
         > .badge
           height 19px
           margin-top 2px
@@ -154,8 +149,6 @@ export default {
         span
           color var(--primary)
           vertical-align 1px
-  .button-add-icon
-    margin-right 5px
 
 // .template-category-picker
 //   top calc(100% - 8px) !important
