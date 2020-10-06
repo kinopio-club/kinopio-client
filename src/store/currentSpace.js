@@ -485,10 +485,11 @@ export default {
       context.dispatch('updateSpacePageSize')
       context.dispatch('loadBackground', context.state.background)
       context.commit('history/clear', null, { root: true })
+
       // get remote space
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (remoteSpace) {
-        // add missing cached cards to remoteSpace if they exist on server
+        // sync resolution: add missing cached cards to remoteSpace if they exist on server
         if (cachedSpace.cards) {
           const cachedCardIds = cachedSpace.cards.map(card => card.id)
           const remoteSpaceCardIds = remoteSpace.cards.map(card => card.id)
@@ -498,15 +499,28 @@ export default {
           let cachedCardsToRestore = []
           if (utils.arrayHasItems(cacheOnlyCards)) {
             for (const cardId of cacheOnlyCards) {
-              let card = await context.dispatch('api/findCard', cardId, { root: true })
+              let card
               const cachedCard = cachedSpace.cards.find(cachedCard => cachedCard.id === cardId)
-              card.name = card.name || cachedCard.name
-              if (card) { cachedCardsToRestore.push(card) }
+              try {
+                card = await context.dispatch('api/findCard', cardId, { root: true })
+              } catch (error) {
+                console.warn('🌚 remote card not found', error, 'cachedCard', cachedCard)
+              }
+              console.log('🗾 remote card', card)
+              if (card) {
+                card.name = card.name || cachedCard.name
+                card.x = card.x || cachedCard.x
+                card.y = card.y || cachedCard.y
+              } else {
+                card = cachedCard
+              }
+              cachedCardsToRestore.push(card)
             }
           }
           console.log('🗾 cached cards to restore', cachedCardsToRestore)
           remoteSpace.cards = remoteSpace.cards.concat(cachedCardsToRestore)
         }
+
         // restore remote space
         context.commit('restoreSpace', utils.normalizeSpace(remoteSpace))
         context.dispatch('history/playback', null, { root: true })

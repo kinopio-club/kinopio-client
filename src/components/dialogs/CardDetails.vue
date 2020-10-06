@@ -516,9 +516,8 @@ export default {
     },
     clickName (event) {
       this.triggerUpdateMagicPaintPositionOffset()
-      const cursorPosition = this.$refs.name.selectionStart
-      if (this.isCursorInsideTagBrackets(cursorPosition)) {
-        this.showTagPicker(cursorPosition)
+      if (this.isCursorInsideTagBrackets()) {
+        this.showTagPicker()
         event.stopPropagation()
       }
     },
@@ -575,69 +574,69 @@ export default {
 
     // Tags
 
-    showTagPicker (cursorPosition) {
+    showTagPicker () {
       this.closeDialogs()
       const nameRect = this.$refs.name.getBoundingClientRect()
       this.tagPickerPosition = {
         top: nameRect.height - 2
       }
-      this.updateTagPickerSearch(cursorPosition)
+      this.updateTagPickerSearch()
       this.tagPickerIsVisible = true
     },
     hideTagPicker () {
       this.tagPickerSearch = ''
       this.tagPickerIsVisible = false
     },
-    tagStartText (cursorPosition) {
+    tagStartText () {
       // ...[[abc
+      const cursorPosition = this.$refs.name.selectionStart
       const start = this.name.substring(0, cursorPosition)
       let startPosition = start.lastIndexOf('[[')
       if (startPosition === -1) { return }
       startPosition = startPosition + 2
       return start.substring(startPosition)
     },
-    tagEndText (cursorPosition) {
+    tagEndText () {
       // xyz]]...
+      const cursorPosition = this.$refs.name.selectionStart
       const end = this.name.substring(cursorPosition)
       const endPosition = end.indexOf(']]')
       if (endPosition === -1) { return }
       return end.substring(0, endPosition)
     },
-    updateTagPickerSearch (cursorPosition) {
+    updateTagPickerSearch () {
       if (!this.tagPickerIsVisible) { return }
-      cursorPosition = cursorPosition || this.$refs.name.selectionStart
-      const start = this.tagStartText(cursorPosition) || ''
-      const end = this.tagEndText(cursorPosition) || ''
+      const start = this.tagStartText() || ''
+      const end = this.tagEndText() || ''
       this.tagPickerSearch = start + end
     },
-    isCursorInsideTagBrackets (cursorPosition) {
-      this.cursorPosition = cursorPosition
-      const start = this.tagStartText(cursorPosition)
-      const end = this.tagEndText(cursorPosition)
+    isCursorInsideTagBrackets () {
+      this.cursorPosition = this.$refs.name.selectionStart // for template
+      const start = this.tagStartText()
+      const end = this.tagEndText()
       if (start === undefined || end === undefined) { return }
       if (!start.includes(']]') && !end.includes('[[')) {
         return true
       }
     },
     checkIfShouldShowTagPicker () {
-      const cursorPosition = this.$refs.name.selectionStart
       const tagPickerIsVisible = this.tagPickerIsVisible
-      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets(cursorPosition)
+      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets()
       if (isCursorInsideTagBrackets && !tagPickerIsVisible) {
-        this.showTagPicker(cursorPosition)
+        this.showTagPicker()
       } else if (!isCursorInsideTagBrackets && tagPickerIsVisible) {
         this.hideTagPicker()
       }
     },
     checkIfShouldHideTagPicker () {
-      const cursorPosition = this.$refs.name.selectionStart
       const tagPickerIsVisible = this.tagPickerIsVisible
-      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets(cursorPosition)
+      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets()
       if (!isCursorInsideTagBrackets && tagPickerIsVisible) {
         this.hideTagPicker()
       }
     },
-    addClosingBrackets (cursorPosition) {
+    addClosingBrackets () {
+      const cursorPosition = this.$refs.name.selectionStart
       const name = this.name
       const newName = `${name.substring(0, cursorPosition)}]]${name.substring(cursorPosition)}`
       this.updateCardName(newName)
@@ -650,17 +649,17 @@ export default {
       const previousCharacter = this.name[cursorPosition - 1]
       const key = event.key
       const keyIsLettterOrNumber = key.length === 1
-      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets(cursorPosition)
+      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets()
       if (cursorPosition === 0) { return }
       if (key === '[' && previousCharacter === '[') {
-        this.showTagPicker(cursorPosition)
-        this.addClosingBrackets(cursorPosition)
+        this.showTagPicker()
+        this.addClosingBrackets()
       } else if (keyIsLettterOrNumber && isCursorInsideTagBrackets) {
-        this.showTagPicker(cursorPosition)
+        this.showTagPicker()
       }
     },
-    moveCursorPastTagEnd (cursorPosition) {
-      cursorPosition = this.$refs.name.selectionStart || cursorPosition
+    moveCursorPastTagEnd () {
+      const cursorPosition = this.$refs.name.selectionStart
       let endText = this.name.substring(cursorPosition)
       let newCursorPosition = endText.indexOf(']]')
       newCursorPosition = cursorPosition + newCursorPosition + 2
@@ -751,9 +750,9 @@ export default {
     },
     updateTagBracketsWithTag (tag) {
       this.updatePreviousTags()
-      const cursorPosition = this.cursorPosition
-      const tagStartText = this.tagStartText(cursorPosition)
-      const tagEndText = this.tagEndText(cursorPosition)
+      const cursorPosition = this.$refs.name.selectionStart
+      const tagStartText = this.tagStartText()
+      const tagEndText = this.tagEndText()
       const text = tagStartText + tagEndText
       let newName
       if (text.length) {
@@ -764,7 +763,7 @@ export default {
         newName = startText + tag.name + endText
       }
       this.updateCardName(newName)
-      this.moveCursorPastTagEnd(cursorPosition)
+      this.moveCursorPastTagEnd()
     }
   },
   watch: {
