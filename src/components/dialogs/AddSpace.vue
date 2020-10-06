@@ -100,12 +100,28 @@ export default {
       this.$store.dispatch('currentSpace/addSpace')
       this.$emit('updateSpaces')
     },
+
+    // importSpace (space) {
+    //   if (!this.isValidSpace(space)) { return }
+    //   space.originSpaceId = space.id
+    //   space.id = nanoid()
+    //   space.name = space.name + ' import'
+    //   const uniqueNewSpace = cache.updateIdsInSpace(space)
+    //   cache.saveSpace(uniqueNewSpace)
+    //   this.$store.commit('currentSpace/restoreSpace', uniqueNewSpace)
+    //   this.$store.dispatch('currentSpace/saveNewSpace')
+    //   this.$store.dispatch('currentUser/lastSpaceId', space.id)
+    //   this.updateSpaces()
+    //   this.$store.commit('triggerFocusSpaceDetailsName')
+    // },
     addJournalSpace () {
       this.$emit('closeDialog')
       window.scrollTo(0, 0)
-      this.$store.dispatch('currentSpace/addJournalSpace')
+      // create the space here
+      // TODO make the space creation part work like import example ^
       this.$emit('updateSpaces')
     },
+
     toggleEditQuestionsIsVisible () {
       this.editQuestionsIsVisible = !this.editQuestionsIsVisible
     },
