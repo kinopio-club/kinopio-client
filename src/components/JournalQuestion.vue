@@ -1,28 +1,28 @@
 <template lang="pug">
 .question
   .row.category(v-if="currentCategory")
-    .badge.info.button-badge(@click="triggerPromptCategory" :style="{'background-color': currentCategory.color}") {{currentCategory.name}}
-
-  textarea(
-    ref="question"
-    rows="1"
-    v-model="name"
-    placeholder="Ask yourself this every day"
-    maxlength="250"
-
-    @keyup.alt.enter.exact.stop
-    @keyup.ctrl.enter.exact.stop
-    @keydown.alt.enter.exact.stop="insertLineBreak"
-    @keydown.ctrl.enter.exact.stop="insertLineBreak"
-  )
-
-  //- carddetails.insertLineBreak 👀
+    .badge.info.button-badge(@click.stop="triggerPromptCategory" :style="{'background-color': currentCategory.color}") {{currentCategory.name}}
 
   .row
+    textarea(
+      ref="question"
+      rows="1"
+      v-model="name"
+      placeholder="Ask yourself this every day"
+      maxlength="250"
+
+      @keyup.alt.enter.exact.stop
+      @keyup.ctrl.enter.exact.stop
+      @keydown.alt.enter.exact.stop="insertLineBreak"
+      @keydown.ctrl.enter.exact.stop="insertLineBreak"
+    )
+
+    //- carddetails.insertLineBreak 👀
+
     .button-wrap
-      button(@click.left="removeQuestion")
+      button.remove(@click.left="removeQuestion")
         img.icon(src="@/assets/remove.svg")
-        span Remove
+        span
 </template>
 
 <script>
@@ -93,4 +93,5 @@ export default {
     margin-bottom 5px
   .category
     margin-bottom 5px
+  // .remove
 </style>

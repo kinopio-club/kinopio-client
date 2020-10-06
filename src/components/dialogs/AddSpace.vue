@@ -9,7 +9,7 @@ dialog.narrow.add-space(v-if="visible" :open="visible" @click.left.stop="closeDi
       .segmented-buttons
         button
           img.icon(src="@/assets/add.svg")
-          span Daily Journal
+          span Journal Space
         button(@click.left.stop="toggleEditQuestionsIsVisible" :class="{ active: editQuestionsIsVisible }")
           span Edit
 
@@ -82,7 +82,10 @@ export default {
       dailyUrlIsVisible: false,
       urlIsCopied: false,
       promptPickerIsVisible: false,
-      promptPickerPosition: {}
+      promptPickerPosition: {
+        left: 80,
+        top: 5
+      }
     }
   },
   computed: {
@@ -109,15 +112,15 @@ export default {
     },
     togglePromptPickerIsVisible () {
       this.promptPickerIsVisible = !this.promptPickerIsVisible
-      this.updatePromptPickerPosition() // tODO remove method?
+      // this.updatePromptPickerPosition() // tODO remove method?
     },
-    updatePromptPickerPosition () {
-      if (!this.promptPickerIsVisible) { return }
-      this.promptPickerPosition = {
-        left: 80,
-        top: 5
-      }
-    },
+    // updatePromptPickerPosition () {
+    //   if (!this.promptPickerIsVisible) { return }
+    //   this.promptPickerPosition = {
+    //     left: 80,
+    //     top: 5
+    //   }
+    // },
     closeAll () {
       this.editQuestionsIsVisible = false
       this.dailyUrlIsVisible = false
