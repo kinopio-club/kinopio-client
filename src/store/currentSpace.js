@@ -481,10 +481,11 @@ export default {
       context.dispatch('updateSpacePageSize')
       context.dispatch('loadBackground', context.state.background)
       context.commit('history/clear', null, { root: true })
+
       // get remote space
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (remoteSpace) {
-        // add missing cached cards to remoteSpace if they exist on server
+        // sync resolution: add missing cached cards to remoteSpace if they exist on server
         if (cachedSpace.cards) {
           const cachedCardIds = cachedSpace.cards.map(card => card.id)
           const remoteSpaceCardIds = remoteSpace.cards.map(card => card.id)
@@ -515,6 +516,7 @@ export default {
           console.log('🗾 cached cards to restore', cachedCardsToRestore)
           remoteSpace.cards = remoteSpace.cards.concat(cachedCardsToRestore)
         }
+
         // restore remote space
         context.commit('restoreSpace', utils.normalizeSpace(remoteSpace))
         context.dispatch('history/playback', null, { root: true })
