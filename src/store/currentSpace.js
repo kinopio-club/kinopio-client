@@ -494,10 +494,22 @@ export default {
           let cachedCardsToRestore = []
           if (utils.arrayHasItems(cacheOnlyCards)) {
             for (const cardId of cacheOnlyCards) {
-              let card = await context.dispatch('api/findCard', cardId, { root: true })
+              let card
               const cachedCard = cachedSpace.cards.find(cachedCard => cachedCard.id === cardId)
-              card.name = card.name || cachedCard.name
-              if (card) { cachedCardsToRestore.push(card) }
+              try {
+                card = await context.dispatch('api/findCard', cardId, { root: true })
+              } catch (error) {
+                console.warn('🌚 remote card not found', error, 'cachedCard', cachedCard)
+              }
+              console.log('🗾 remote card', card)
+              if (card) {
+                card.name = card.name || cachedCard.name
+                card.x = card.x || cachedCard.x
+                card.y = card.y || cachedCard.y
+              } else {
+                card = cachedCard
+              }
+              cachedCardsToRestore.push(card)
             }
           }
           console.log('🗾 cached cards to restore', cachedCardsToRestore)
