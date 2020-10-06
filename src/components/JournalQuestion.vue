@@ -6,10 +6,10 @@
     .badge.info.button-badge.category(v-if="currentCategory" @click.stop="triggerPromptCategory" :style="{'background-color': currentCategory.color}") {{currentCategory.name}}
 
     textarea(
-      ref="question"
+      ref="name"
       rows="1"
       v-model="name"
-      placeholder="Ask yourself this every day"
+      placeholder="Ask yourself this"
       maxlength="250"
 
       @keyup.alt.enter.exact.stop
@@ -41,7 +41,7 @@ export default {
   },
   mounted () {
     this.checkQuestionCategory(this.question.name)
-    // TODO update height of textarea()
+    this.updateTextareaSize()
   },
   computed: {
     categories () {
@@ -52,9 +52,8 @@ export default {
         return this.question.name
       },
       set (newName) {
-        // TODO update height of textarea()
-        console.log('🍆 update question', newName, this.question)
         this.checkQuestionCategory(newName)
+        this.updateTextareaSize()
         this.$store.dispatch('currentUser/updateJournalQuestion', {
           questionId: this.question.id,
           name: newName
@@ -69,6 +68,7 @@ export default {
       })
       if (currentCategory) {
         this.currentCategory = currentCategory
+        this.updateTextareaSize()
       } else {
         this.currentCategory = null
       }
@@ -81,6 +81,12 @@ export default {
     },
     triggerPromptCategory () {
       this.$store.commit('triggerJournalQuestionPromptIsVisibleWithCategory', this.currentCategory)
+    },
+    updateTextareaSize () {
+      this.$nextTick(() => {
+        const textarea = this.$refs.name
+        textarea.style.height = textarea.scrollHeight + 1 + 'px'
+      })
     }
   }
 }

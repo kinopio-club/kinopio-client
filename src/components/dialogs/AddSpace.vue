@@ -1,6 +1,5 @@
 <template lang="pug">
-dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" :class="{'child-dialog-is-visible': promptPickerIsVisible}" ref="dialog")
-  //- 'narrow': !editQuestionsIsVisible
+dialog.add-space(v-if="visible" :open="visible" @click.left.stop="closeDialogs" :class="{'child-dialog-is-visible': promptPickerIsVisible, 'narrow': !editQuestionsIsVisible}" ref="dialog")
   section
     .row
       button(@click="addSpace")
@@ -23,7 +22,6 @@ dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
         button(@click.left.stop="togglePromptPickerIsVisible" :class="{ active: promptPickerIsVisible }" ref="promptButton")
           //- .label-badge
           //-   span NEW
-          img.icon(src="@/assets/add.svg")
           span Prompts
         JournalQuestionPromptPicker(:visible="promptPickerIsVisible" :position="promptPickerPosition" @closeDialog="closeDialogs" @select="togglePromptQuestion")
         //- TODO promptPickerPosition remove, currently unused,?
