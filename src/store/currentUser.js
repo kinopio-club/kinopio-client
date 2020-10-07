@@ -23,15 +23,11 @@ export default {
     filterShowUsers: false,
     filterShowDateUpdated: false,
     filterShowAbsoluteDates: false,
-    journalQuestions: [
+    journalPrompts: [
       {
-        id: '1a',
-        // userId
         name: "What's my mood?"
       },
       {
-        id: '2b',
-        // userid
         name: 'Did I eat well?'
       }
     ]
@@ -206,15 +202,15 @@ export default {
       state.filterShowAbsoluteDates = value
       cache.updateUser('filterShowAbsoluteDates', value)
     },
-    updateJournalQuestion: (state, { questionId, name }) => {
-      const questions = state.journalQuestions.map(question => {
-        if (question.id === questionId) {
-          question.name = name
+    updateJournalPrompt: (state, { promptId, name }) => {
+      const prompts = state.journalPrompts.map(prompt => {
+        if (prompt.id === promptId) {
+          prompt.name = name
         }
-        return question
+        return prompt
       })
-      state.journalQuestions = questions
-      cache.updateUser('journalQuestions', questions)
+      state.journalPrompts = prompts
+      cache.updateUser('journalPrompts', prompts)
     }
   },
   actions: {
@@ -430,11 +426,11 @@ export default {
       context.dispatch('toggleFilterShowDateUpdated', false)
       context.dispatch('toggleFilterShowAbsoluteDates', false)
     },
-    updateJournalQuestion: (context, { questionId, name }) => {
-      utils.typeCheck({ value: name, type: 'string', origin: 'updateQuestion' })
-      utils.typeCheck({ value: questionId, type: 'string', origin: 'updateQuestion' })
+    updateJournalPrompt: (context, { promptId, name }) => {
+      utils.typeCheck({ value: name, type: 'string', origin: 'updateJournalPrompt' })
+      utils.typeCheck({ value: promptId, type: 'string', origin: 'updateJournalPrompt' })
       // TODO update api
-      context.commit('updateJournalQuestion', { questionId, name })
+      context.commit('updateJournalPrompt', { promptId, name })
     }
   }
 }

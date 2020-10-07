@@ -1,5 +1,5 @@
 <template lang="pug">
-.question
+.prompt
   .row
     //- .badge.info.button-badge.category(v-if="currentCategory" @click.stop="triggerPromptCategory" :style="{'background-color': currentCategory.color}") {{currentCategory.name}}
     textarea(
@@ -15,18 +15,18 @@
       @keydown.ctrl.enter.exact.stop="insertLineBreak"
     )
     .button-wrap
-      button.remove(@click.left="removeQuestion")
+      button.remove(@click.left="removePrompt")
         img.icon(src="@/assets/remove.svg")
         span
 </template>
 
 <script>
-// import journalQuestionPrompts from '@/spaces/journalQuestionPrompts.js'
+// import journalPromptPrompts from '@/spaces/journalPromptPrompts.js'
 
 export default {
-  name: 'JournalQuestion',
+  name: 'JournalPrompt',
   props: {
-    question: Object
+    prompt: Object
   },
   data () {
     return {
@@ -34,29 +34,29 @@ export default {
     }
   },
   mounted () {
-    // this.checkQuestionCategory(this.question.name)
+    // this.checkPromptCategory(this.prompt.name)
     this.updateTextareaSize()
   },
   computed: {
     // categories () {
-    //   return journalQuestionPrompts.categories()
+    //   return journalPromptPrompts.categories()
     // },
     name: {
       get () {
-        return this.question.name
+        return this.prompt.name
       },
       set (newName) {
-        // this.checkQuestionCategory(newName)
+        // this.checkPromptCategory(newName)
         this.updateTextareaSize()
-        this.$store.dispatch('currentUser/updateJournalQuestion', {
-          questionId: this.question.id,
+        this.$store.dispatch('currentUser/updateJournalPrompt', {
+          promptId: this.prompt.id,
           name: newName
         })
       }
     }
   },
   methods: {
-    // checkQuestionCategory (name) {
+    // checkPromptCategory (name) {
     //   const currentCategory = this.categories.find(category => {
     //     return category.prompts.includes(name)
     //   })
@@ -67,11 +67,12 @@ export default {
     //     this.currentCategory = null
     //   }
     // },
-    removeQuestion () {
-      console.log('🍆 removeQuestion')
+    removePrompt () {
+      console.log('🍆 removePrompt')
     },
     triggerPromptCategory () {
-      this.$store.commit('triggerJournalQuestionPromptIsVisibleWithCategory', this.currentCategory)
+      // temp
+      this.$store.commit('triggerJournalPromptPromptIsVisibleWithCategory', this.currentCategory)
     },
     updateTextareaSize () {
       this.$nextTick(() => {
@@ -84,9 +85,9 @@ export default {
 </script>
 
 <style lang="stylus">
-.question + .question
+.prompt + .prompt
   margin-top 10px
-.question
+.prompt
   textarea
     margin-bottom 5px
   .category

@@ -1,6 +1,6 @@
 <template lang="pug">
-dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" :class="{'child-dialog-is-visible': promptPickerIsVisible}" ref="dialog")
-  //- 'narrow': !editQuestionsIsVisible
+dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" :class="{'child-dialog-is-visible': promptPackPickerIsVisible}" ref="dialog")
+  //- 'narrow': !editPromptsIsVisible
   section
     .row
       button(@click="addSpace")
@@ -11,32 +11,32 @@ dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
         button(@click="addJournalSpace")
           img.icon(src="@/assets/add.svg")
           span {{moonPhase.emoji}} Journal
-        button(@click.left.stop="toggleEditQuestionsIsVisible" :class="{ active: editQuestionsIsVisible }")
+        button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
           span Edit
 
-  section(v-if="editQuestionsIsVisible")
+  section(v-if="editPromptsIsVisible")
     .row
       .button-wrap
-        button(@click.left.stop="togglePromptPickerIsVisible" :class="{ active: promptPickerIsVisible }" ref="promptButton")
+        button(@click.left.stop="togglePromptPackPickerIsVisible" :class="{ active: promptPackPickerIsVisible }" ref="promptButton")
           //- .label-badge
           //-   span NEW
           img.icon(src="@/assets/add.svg")
           span Prompts
-        JournalQuestionPromptPicker(:visible="promptPickerIsVisible" :position="promptPickerPosition" @closeDialog="closeDialogs" @select="togglePromptQuestion")
+        JournalPromptPackPicker(:visible="promptPackPickerIsVisible" :position="promptPickerPosition" @closeDialog="closeDialogs" @select="togglePromptPack")
         //- TODO promptPickerPosition remove, currently unused,?
           //- remove closeDialog emit, currently unused
-      button(@click.left="addQuestion")
+      button(@click.left="addCustomPrompt")
         img.icon(src="@/assets/add.svg")
         span Custom
 
     //- Questions
     //- TODO display loader here if fetching user questions
-    .journal-questions(v-if="editQuestionsIsVisible")
-      JournalQuestion(v-for="question in userJournalQuestions" :question="question" :key="question.id")
+    //- .journal-questions()
+    JournalPrompt(v-if="editPromptsIsVisible" v-for="prompt in userJournalPrompts" :prompt="prompt" :key="prompt.id")
 
     //- todo: Journal Url to help doc
 
-    //- template(v-if="editQuestionsIsVisible")
+    //- template(v-if="editPromptsIsVisible")
     //-   .row
     //-     button(@click.left.stop="toggleDailyUrlIsVisible" :class="{ active: dailyUrlIsVisible }")
     //-       span Journal Url
@@ -62,14 +62,14 @@ dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
 
 <script>
 import moonphase from '@/moonphase.js'
-import JournalQuestion from '@/components/JournalQuestion.vue'
-import JournalQuestionPromptPicker from '@/components/dialogs/JournalQuestionPromptPicker.vue'
+import JournalPrompt from '@/components/JournalPrompt.vue'
+import JournalPromptPackPicker from '@/components/dialogs/JournalPromptPackPicker.vue'
 
 export default {
   name: 'AddSpace',
   components: {
-    JournalQuestion,
-    JournalQuestionPromptPicker
+    JournalPrompt,
+    JournalPromptPackPicker
   },
   props: {
     visible: Boolean
@@ -77,8 +77,8 @@ export default {
   mounted () {
     this.moonPhase = moonphase()
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerJournalQuestionPromptIsVisibleWithCategory') {
-        this.togglePromptPickerIsVisible()
+      if (mutation.type === 'triggerJournalPromptPromptIsVisibleWithCategory') {
+        this.togglePromptPackPickerIsVisible()
       }
     })
   },
@@ -86,10 +86,10 @@ export default {
     return {
       moonPhase: {},
       url: `${window.location.origin}/daily`,
-      editQuestionsIsVisible: false,
+      editPromptsIsVisible: false,
       dailyUrlIsVisible: false,
       urlIsCopied: false,
-      promptPickerIsVisible: false,
+      promptPackPickerIsVisible: false,
       promptPickerPosition: {
         left: 80,
         top: 5
@@ -97,7 +97,7 @@ export default {
     }
   },
   computed: {
-    userJournalQuestions () { return this.$store.state.currentUser.journalQuestions }
+    userJournalPrompts () { return this.$store.state.currentUser.journalPrompts }
   },
   methods: {
     addSpace () {
@@ -129,31 +129,31 @@ export default {
       this.$emit('updateSpaces')
     },
 
-    toggleEditQuestionsIsVisible () {
-      this.editQuestionsIsVisible = !this.editQuestionsIsVisible
+    toggleEditPromptsIsVisible () {
+      this.editPromptsIsVisible = !this.editPromptsIsVisible
     },
     toggleDailyUrlIsVisible () {
       this.dailyUrlIsVisible = !this.dailyUrlIsVisible
     },
-    togglePromptPickerIsVisible () {
-      this.promptPickerIsVisible = !this.promptPickerIsVisible
+    togglePromptPackPickerIsVisible () {
+      this.promptPackPickerIsVisible = !this.promptPackPickerIsVisible
       // this.updatePromptPickerPosition() // tODO remove method?
     },
     // updatePromptPickerPosition () {
-    //   if (!this.promptPickerIsVisible) { return }
+    //   if (!this.promptPackPickerIsVisible) { return }
     //   this.promptPickerPosition = {
     //     left: 80,
     //     top: 5
     //   }
     // },
     closeAll () {
-      this.editQuestionsIsVisible = false
+      this.editPromptsIsVisible = false
       this.dailyUrlIsVisible = false
       this.urlIsCopied = false
-      this.promptPickerIsVisible = false
+      this.promptPackPickerIsVisible = false
     },
     closeDialogs () {
-      this.promptPickerIsVisible = false
+      this.promptPackPickerIsVisible = false
     },
     copyUrl () {
       const element = this.$refs.url
@@ -163,11 +163,11 @@ export default {
       this.urlIsCopied = true
     },
     // updateCategoryFilter () {},
-    addQuestion () {
-      console.log('🐸 addQuestion')
-      // add a new question field , scroll to, focus
+    addCustomPrompt () {
+      console.log('🐸 addCustomPrompt')
+      // add a new prompt field , scroll to, focus
     },
-    togglePromptQuestion (prompt) {
+    togglePromptPack (prompt) {
       // add it if it doesn't already exist (prepend or append?)
     }
   },

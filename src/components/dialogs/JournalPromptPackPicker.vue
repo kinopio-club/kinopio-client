@@ -43,7 +43,7 @@ dialog.journal-question-prompt-picker.narrow(v-if="visible" :open="visible" @cli
 
 <script>
 // change name w promptpack
-import journalQuestionPrompts from '@/spaces/journalQuestionPrompts.js'
+import journalPromptPacks from '@/spaces/journalPromptPacks.js'
 import random from 'lodash-es/random'
 
 export default {
@@ -67,7 +67,7 @@ export default {
   },
   computed: {
     promptPacks () {
-      return journalQuestionPrompts.packs()
+      return journalPromptPacks.packs()
     },
     userJournalQuestions () {
       return this.$store.state.currentUser.journalQuestions
