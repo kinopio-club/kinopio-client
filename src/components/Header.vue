@@ -70,11 +70,11 @@ import SignUpOrIn from '@/components/dialogs/SignUpOrIn.vue'
 import ResetPassword from '@/components/dialogs/ResetPassword.vue'
 import Share from '@/components/dialogs/Share.vue'
 import Loader from '@/components/Loader.vue'
-import templates from '@/spaces/templates.js'
+import templates from '@/data/templates.js'
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
-import privacy from '@/spaces/privacy.js'
+import privacy from '@/data/privacy.js'
 import utils from '@/utils.js'
 
 const maxIterations = 30

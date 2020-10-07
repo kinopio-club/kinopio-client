@@ -19,8 +19,8 @@ span
 </template>
 
 <script>
-import privacy from '@/spaces/privacy.js'
-import templates from '@/spaces/templates.js'
+import privacy from '@/data/privacy.js'
+import templates from '@/data/templates.js'
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import Loader from '@/components/Loader.vue'
 

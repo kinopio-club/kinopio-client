@@ -36,7 +36,7 @@ dialog.prompt-pack-picker.narrow(v-if="visible" :open="visible" @click.left.stop
 
 <script>
 // change name w promptpack
-import promptPacks from '@/spaces/promptPacks.json'
+import promptPacks from '@/data/promptPacks.json'
 import PromptPack from '@/components/PromptPack.vue'
 
 export default {

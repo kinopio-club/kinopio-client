@@ -53,7 +53,7 @@ import AddSpace from '@/components/dialogs/AddSpace.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
-import templates from '@/spaces/templates.js'
+import templates from '@/data/templates.js'
 import utils from '@/utils.js'
 
 export default {

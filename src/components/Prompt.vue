@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import promptPacks from '@/spaces/promptPacks.json'
+import promptPacks from '@/data/promptPacks.json'
 
 export default {
   name: 'JournalPrompt',

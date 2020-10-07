@@ -9,8 +9,8 @@ import utils from '@/utils.js'
 import cache from '@/cache.js'
 import words from '@/words.js'
 
-import helloSpace from '@/spaces/hello.json'
-import newSpace from '@/spaces/new.json'
+import helloSpace from '@/data/hello.json'
+import newSpace from '@/data/new.json'
 
 export default {
   namespaced: true,

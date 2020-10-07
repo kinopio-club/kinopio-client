@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import templates from '@/spaces/templates.js'
+import templates from '@/data/templates.js'
 import TemplateCategoryPicker from '@/components/dialogs/TemplateCategoryPicker.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import Contact from '@/components/dialogs/Contact.vue'

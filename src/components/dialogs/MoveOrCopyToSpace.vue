@@ -60,7 +60,7 @@ import utils from '@/utils.js'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
 import words from '@/words.js'
-import newSpace from '@/spaces/new.json'
+import newSpace from '@/data/new.json'
 import nanoid from 'nanoid'
 
 export default {
