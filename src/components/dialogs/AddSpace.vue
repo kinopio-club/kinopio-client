@@ -56,6 +56,8 @@ dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
 
     //- todo help doc contains journal q sources, kawaiijournaling and Jour blog
 
+    //- everyday is a default pack
+
 </template>
 
 <script>
