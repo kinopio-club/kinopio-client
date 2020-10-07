@@ -133,6 +133,11 @@ export default {
     }
   },
   methods: {
+    addSpace () {
+      window.scrollTo(0, 0)
+      this.$store.dispatch('currentSpace/addSpace')
+      this.updateSpaces()
+    },
     toggleExportIsVisible () {
       const isVisible = this.exportIsVisible
       this.closeDialogs()
