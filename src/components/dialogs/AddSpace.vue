@@ -22,7 +22,7 @@ dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
           //-   span NEW
           img.icon(src="@/assets/add.svg")
           span Prompts
-        JournalPromptPackPicker(:visible="promptPackPickerIsVisible" :position="promptPickerPosition" @closeDialog="closeDialogs" @select="togglePromptPack")
+        PromptPackPicker(:visible="promptPackPickerIsVisible" :position="promptPickerPosition" @closeDialog="closeDialogs" @select="togglePromptPack")
         //- TODO promptPickerPosition remove, currently unused,?
           //- remove closeDialog emit, currently unused
       button(@click.left="addCustomPrompt")
@@ -32,7 +32,7 @@ dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
     //- Questions
     //- TODO display loader here if fetching user questions
     //- .journal-questions()
-    JournalPrompt(v-if="editPromptsIsVisible" v-for="prompt in userJournalPrompts" :prompt="prompt" :key="prompt.id" @showPicker="togglePromptPackPickerIsVisible")
+    Prompt(v-if="editPromptsIsVisible" v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showPicker="togglePromptPackPickerIsVisible")
 
     //- todo: Journal Url to help doc
 
@@ -62,14 +62,14 @@ dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
 
 <script>
 import moonphase from '@/moonphase.js'
-import JournalPrompt from '@/components/JournalPrompt.vue'
-import JournalPromptPackPicker from '@/components/dialogs/JournalPromptPackPicker.vue'
+import Prompt from '@/components/Prompt.vue'
+import PromptPackPicker from '@/components/dialogs/PromptPackPicker.vue'
 
 export default {
   name: 'AddSpace',
   components: {
-    JournalPrompt,
-    JournalPromptPackPicker
+    Prompt,
+    PromptPackPicker
   },
   props: {
     visible: Boolean
@@ -92,7 +92,7 @@ export default {
     }
   },
   computed: {
-    userJournalPrompts () { return this.$store.state.currentUser.journalPrompts }
+    userPrompts () { return this.$store.state.currentUser.journalPrompts }
   },
   methods: {
     addSpace () {
@@ -159,7 +159,7 @@ export default {
       this.urlIsCopied = true
     },
     addCustomPrompt () {
-      // dispatch 'addJournalPrompt', prompt
+      // dispatch 'addPrompt', prompt
       // { id: nanoid() , name: '' }
       console.log('🐸 addCustomPrompt')
       // add a new prompt field , scroll to, focus
@@ -167,7 +167,7 @@ export default {
     togglePromptPack (pack) {
       console.log('🍄 togglePromptPack', pack)
       // if add:
-      // dispatch 'addJournalPrompt', prompt
+      // dispatch 'addPrompt', prompt
       // { id: nanoid(), isPack: true, name: 'Everyday' }
       // new packs should prepend to list
     }

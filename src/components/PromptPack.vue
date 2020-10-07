@@ -1,5 +1,5 @@
 <template lang="pug">
-li.journal-prompt-pack(@click.left="select(pack)" v-on:keyup.enter="select(pack)" :class="{ active: isInUserJournalPrompts }" tabindex="0")
+li.prompt-pack(@click.left="select(pack)" v-on:keyup.enter="select(pack)" :class="{ active: isInUserJournalPrompts }" tabindex="0")
   .name-wrap
     .badge.button-badge(:style="{background: pack.color}")
       img.icon(v-if="!isInUserJournalPrompts" src="@/assets/add.svg")
@@ -59,7 +59,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-.journal-prompt-pack
+.prompt-pack
   display block
   .name-wrap
     display flex

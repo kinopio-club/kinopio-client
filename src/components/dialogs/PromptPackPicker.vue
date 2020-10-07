@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.journal-question-prompt-picker.narrow(v-if="visible" :open="visible" @click.left.stop)
+dialog.prompt-pack-picker.narrow(v-if="visible" :open="visible" @click.left.stop)
   //- :style="{ left: position.left + 'px', top: position.top + 'px'}"
 
   section
@@ -24,8 +24,8 @@ dialog.journal-question-prompt-picker.narrow(v-if="visible" :open="visible" @cli
 
   section.results-section
     ul.results-list
-      template(v-for="pack in promptPacks")
-        JournalPromptPack(:pack="pack" @select="select")
+      template(v-for="pack in packs")
+        PromptPack(:pack="pack" @select="select")
           //- JournalPromptExample()
 
         //- template(v-for="(prompt in pack.prompts")
@@ -36,13 +36,13 @@ dialog.journal-question-prompt-picker.narrow(v-if="visible" :open="visible" @cli
 
 <script>
 // change name w promptpack
-import journalPromptPacks from '@/spaces/journalPromptPacks.js'
-import JournalPromptPack from '@/components/JournalPromptPack.vue'
+import promptPacks from '@/spaces/promptPacks.json'
+import PromptPack from '@/components/PromptPack.vue'
 
 export default {
-  name: 'JournalPromptPackPicker',
+  name: 'PromptPackPicker',
   components: {
-    JournalPromptPack
+    PromptPack
   },
   props: {
     visible: Boolean,
@@ -63,7 +63,7 @@ export default {
     }
   },
   computed: {
-    promptPacks () { return journalPromptPacks.packs() },
+    packs () { return promptPacks },
     userJournalQuestions () { return this.$store.state.currentUser.journalQuestions }
     // unreadCategories () {
     //   const lastReadId = 0 // user.lastReadJournalQuestionPromptsId || 0
@@ -109,7 +109,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.journal-question-prompt-picker
+.prompt-pack-picker
   overflow scroll
   max-height calc(100vh - 330px)
   button

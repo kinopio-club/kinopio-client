@@ -1,7 +1,6 @@
 <template lang="pug">
 .prompt
   .row
-    //- .badge.info.button-badge.category(v-if="currentCategory" @click.stop="triggerPromptCategory" :style="{'background-color': currentCategory.color}") {{currentCategory.name}}
     textarea(
       v-if="!isPack"
       ref="name"
@@ -27,7 +26,7 @@
 </template>
 
 <script>
-import journalPromptPacks from '@/spaces/journalPromptPacks.js'
+import promptPacks from '@/spaces/promptPacks.json'
 
 export default {
   name: 'JournalPrompt',
@@ -48,10 +47,9 @@ export default {
     //   return journalPromptPrompts.categories()
     // },
     isPack () { return this.prompt.isPack },
-    promptPacks () { return journalPromptPacks.packs() },
     pack () {
       if (!this.isPack) { return }
-      const pack = this.promptPacks.find(pack => pack.name === this.prompt.name)
+      const pack = promptPacks.find(pack => pack.name === this.prompt.name)
       return pack || {}
     },
     name: {
