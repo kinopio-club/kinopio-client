@@ -23,8 +23,6 @@ dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
           img.icon(src="@/assets/add.svg")
           span Prompts
         PromptPackPicker(:visible="promptPackPickerIsVisible" :position="promptPickerPosition" @closeDialog="closeDialogs" @select="togglePromptPack")
-        //- TODO promptPickerPosition remove, currently unused,?
-          //- remove closeDialog emit, currently unused
       button(@click.left="addCustomPrompt")
         img.icon(src="@/assets/add.svg")
         span Custom
@@ -118,10 +116,10 @@ export default {
     //   this.$store.commit('triggerFocusSpaceDetailsName')
     // },
     addJournalSpace () {
-      console.log('moonphase', this.moonPhase.emoji, this.moonPhase)
       this.$emit('closeDialog')
       window.scrollTo(0, 0)
-      // create the space here
+      console.log('moonphase', this.moonPhase.emoji, this.moonPhase)
+      // 🍄 create the space here
       // TODO make the space creation part work like import example ^
       this.$emit('updateSpaces')
     },
@@ -133,17 +131,8 @@ export default {
       this.dailyUrlIsVisible = !this.dailyUrlIsVisible
     },
     togglePromptPackPickerIsVisible () {
-      console.log('🍄')
       this.promptPackPickerIsVisible = !this.promptPackPickerIsVisible
-      // this.updatePromptPickerPosition() // tODO remove method?
     },
-    // updatePromptPickerPosition () {
-    //   if (!this.promptPackPickerIsVisible) { return }
-    //   this.promptPickerPosition = {
-    //     left: 80,
-    //     top: 5
-    //   }
-    // },
     closeAll () {
       this.editPromptsIsVisible = false
       this.dailyUrlIsVisible = false
@@ -161,21 +150,27 @@ export default {
       this.urlIsCopied = true
     },
     addCustomPrompt () {
-      const emptyPrompt = {
-        id: nanoid(),
-        name: ''
-      }
+      const emptyPrompt = { id: nanoid, name: '' }
       this.$store.dispatch('currentUser/addJournalPrompt', emptyPrompt)
       this.$nextTick(() => {
         document.querySelector('.add-space textarea').focus()
       })
     },
+    addPromptPack (pack) {
+      const promptPack = { id: nanoid(), isPack: true, name: pack.name }
+      this.$store.dispatch('currentUser/addJournalPrompt', promptPack)
+    },
     togglePromptPack (pack) {
-      console.log('🍄 togglePromptPack', pack)
-      // if add:
-      // dispatch 'addPrompt', prompt
-      // { id: nanoid(), isPack: true, name: 'Everyday' }
-      // new packs should prepend to list
+      const userPack = this.userPrompts.find(prompt => {
+        const isPack = prompt.isPack
+        const isPackName = prompt.name === pack.name
+        return isPack && isPackName
+      })
+      if (userPack) {
+        this.$store.dispatch('currentUser/removeJournalPrompt', userPack)
+      } else {
+        this.addPromptPack(pack)
+      }
     }
   },
   watch: {

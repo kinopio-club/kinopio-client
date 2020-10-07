@@ -39,7 +39,6 @@ export default {
     },
     randomPrompt () {
       let prompt = random(0, this.pack.prompts.length - 1)
-      console.log(this.pack.prompts, prompt)
       return this.pack.prompts[prompt]
     }
   },
@@ -50,7 +49,6 @@ export default {
       this.$refs.button.blur()
     },
     select () {
-      console.log('🍉select', this.pack)
       this.$emit('select', this.pack)
     }
 

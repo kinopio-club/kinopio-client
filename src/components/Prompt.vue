@@ -42,13 +42,9 @@ export default {
     }
   },
   mounted () {
-    // this.checkPromptCategory(this.prompt.name)
     this.updateTextareaSize()
   },
   computed: {
-    // categories () {
-    //   return journalPromptPrompts.categories()
-    // },
     isPack () { return this.prompt.isPack },
     pack () {
       if (!this.isPack) { return }
@@ -68,17 +64,6 @@ export default {
     }
   },
   methods: {
-    // checkPromptCategory (name) {
-    //   const currentCategory = this.categories.find(category => {
-    //     return category.prompts.includes(name)
-    //   })
-    //   if (currentCategory) {
-    //     this.currentCategory = currentCategory
-    //     this.updateTextareaSize()
-    //   } else {
-    //     this.currentCategory = null
-    //   }
-    // },
     removePrompt () {
       this.$store.dispatch('currentUser/removeJournalPrompt', this.prompt)
     },

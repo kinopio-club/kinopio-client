@@ -91,7 +91,6 @@ export default {
     //   }
     // },
     select (pack) {
-      console.log('select ', pack)
       // cancel if pack is existing active pack
       this.$emit('select', pack)
       // this.$emit('closeDialog')
