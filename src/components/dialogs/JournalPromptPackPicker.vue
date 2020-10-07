@@ -24,16 +24,9 @@ dialog.journal-question-prompt-picker.narrow(v-if="visible" :open="visible" @cli
 
   section.results-section
     ul.results-list
-        li(v-for="pack in promptPacks" @click.left="select(pack)" tabindex="0" v-on:keyup.enter="select(pack)" :class="{ active: isActive(pack) }")
-          .name-wrap
-            .badge.button-badge(:style="{background: pack.color}")
-              img.icon(src="@/assets/add.svg")
-              span {{pack.name}}
-            button(@click.stop) View All
-          p
-            .label-badge
-              span ex
-            span {{randomPrompt(pack)}}
+      template(v-for="pack in promptPacks")
+        JournalPromptPack(:pack="pack" @select="select")
+          //- JournalPromptExample()
 
         //- template(v-for="(prompt in pack.prompts")
         //-   li(@click.left="select(prompt)" tabindex="0" v-on:keyup.enter="select(prompt)" :class="{ active: isActive(prompt) }")
@@ -44,25 +37,29 @@ dialog.journal-question-prompt-picker.narrow(v-if="visible" :open="visible" @cli
 <script>
 // change name w promptpack
 import journalPromptPacks from '@/spaces/journalPromptPacks.js'
-import random from 'lodash-es/random'
+import JournalPromptPack from '@/components/JournalPromptPack.vue'
 
 export default {
-  name: 'JournalQuestionPromptPicker',
+  name: 'JournalPromptPackPicker',
+  components: {
+    JournalPromptPack
+  },
   props: {
     visible: Boolean,
     position: Object
   },
-  mounted () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerJournalQuestionPromptIsVisibleWithCategory') {
-        // TODO set category filter to payload
-        console.log('🍂 set category to id', mutation.payload.id, mutation.payload.name)
-      }
-    })
-  },
+  // mounted () {
+  // this.$store.subscribe((mutation, state) => {
+  // if (mutation.type === 'triggerJournalQuestionPromptIsVisibleWithCategory') {
+  // TODO set category filter to payload
+  //   console.log('🍂 set category to id', mutation.payload.id, mutation.payload.name)
+  // }
+  // })
+  // },
   data () {
     return {
       selectedCategoryId: null
+      // viewingPromptsInPack: []
     }
   },
   computed: {
@@ -79,25 +76,38 @@ export default {
     // }
   },
   methods: {
+    // isViewing(pack) {
+    //   if (this.viewingPromptsInPack.includes(pack.name)) {
+    //     return true
+    //   } else {
+    //     return false
+    //   }
+    // },
+
+    // toggleViewAllPrompts (pack) {
+    //   console.log('🍄', pack.prompts)
+    //   if (this.viewingPromptsInPack.includes(pack.name)) {
+    //     this.viewingPromptsInPack = this.viewingPromptsInPack.filter(packName => {
+    //       return packName !== pack.name
+    //     })
+    //   } else {
+    //     this.viewingPromptsInPack.push(pack.name)
+    //   }
+    // },
     select (pack) {
       console.log('select ', pack)
       // cancel if pack is existing active pack
-      this.$emit('addPromptPack', pack)
+      this.$emit('select', pack)
       // this.$emit('closeDialog')
-    },
-    isActive (pack) {
-      return false // temp
-    },
+    }
+    // isActive (pack) {
+    //   return false // temp
+    // },
     // isActive (prompt) {
     //   return Boolean(this.userJournalQuestions.find(question => {
     //     return question.name === prompt
     //   }))
     // },
-    randomPrompt (pack) {
-      let prompt = random(0, pack.prompts.length)
-      console.log(pack.prompts, prompt)
-      return pack.prompts[prompt]
-    }
   }
 }
 </script>
@@ -106,49 +116,21 @@ export default {
 .journal-question-prompt-picker
   overflow scroll
   max-height calc(100vh - 330px)
-  a
-    color var(--primary)
   button
     .badge
       margin 0
-  article
-    position static
-    margin-bottom 10px
-    padding-bottom 10px
-    border-bottom 1px solid var(--primary)
-  .category
-    margin-left 8px
-    margin-bottom 5px
+  // .category
+  //   margin-left 8px
+  //   margin-bottom 5px
   // .category-row
   //   flex-wrap wrap
   //   .button-wrap
   //     margin-right 6px
-  .category-badge
-    flex none
   .results-section
     max-height initial
   .results-section
     border-top: 1px solid var(--primary);
     padding-top: 4px;
-  ul.results-list
-    li
-      display block
-      .name-wrap
-        display flex
-        justify-content space-between
-        > .badge
-          height 19px
-          margin-top 2px
-      p
-        margin-top 2px
-      .label-badge
-        position static
-        display inline
-        margin-right 3px
-        background-color var(--secondary-background)
-        span
-          color var(--primary)
-          vertical-align 1px
 
 // .template-category-picker
 //   top calc(100% - 8px) !important

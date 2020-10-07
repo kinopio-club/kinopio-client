@@ -168,7 +168,8 @@ export default {
       console.log('🐸 addCustomPrompt')
       // add a new prompt field , scroll to, focus
     },
-    togglePromptPack (prompt) {
+    togglePromptPack (pack) {
+      console.log('🍄 togglePromptPack', pack)
       // if add:
       // dispatch 'addJournalPrompt', prompt
       // { id: nanoid(), isPack: true, name: 'Everyday' }

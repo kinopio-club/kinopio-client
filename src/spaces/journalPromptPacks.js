@@ -51,7 +51,5 @@ export default {
       }
     ]
   }
-  // rainy
-  // "What I'm thankful for",
 
 }
