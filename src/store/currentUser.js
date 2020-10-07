@@ -208,15 +208,17 @@ export default {
       })
       state.journalPrompts = prompts
       cache.updateUser('journalPrompts', prompts)
+    },
+    updateJournalPrompt: (state, updatedPrompt) => {
+      let prompts = state.journalPrompts.map(prompt => {
+        if (prompt.id === updatedPrompt.id) {
+          prompt = updatedPrompt
+        }
+        return prompt
+      })
+      state.journalPrompts = prompts
+      cache.updateUser('journalPrompts', prompts)
     }
-    // updateJournalPrompt: (state, prompt) => {
-    //   let prompts = state.journalPrompts.filter(journalPrompt => {
-    //     return journalPrompt.id !== prompt.id
-    //   }) || []
-    //   prompts.unshift(prompt)
-    //   state.journalPrompts = prompts
-    //   cache.updateUser('journalPrompts', prompts)
-    // }
   },
   actions: {
     init: (context) => {
@@ -455,9 +457,14 @@ export default {
       context.commit('addJournalPrompt', prompt)
     },
     removeJournalPrompt: (context, prompt) => {
-      utils.typeCheck({ value: prompt, type: 'object', origin: 'addJournalPrompt' })
+      utils.typeCheck({ value: prompt, type: 'object', origin: 'removeJournalPrompt' })
       // TODO update api
       context.commit('removeJournalPrompt', prompt)
+    },
+    updateJournalPrompt: (context, prompt) => {
+      utils.typeCheck({ value: prompt, type: 'object', origin: 'updateJournalPrompt' })
+      // TODO update api
+      context.commit('updateJournalPrompt', prompt)
     }
 
   }

@@ -29,6 +29,8 @@
 <script>
 import promptPacks from '@/data/promptPacks.json'
 
+import utils from '@/utils.js'
+
 export default {
   name: 'JournalPrompt',
   props: {
@@ -58,12 +60,10 @@ export default {
         return this.prompt.name
       },
       set (newName) {
-        // this.checkPromptCategory(newName)
         this.updateTextareaSize()
-        this.$store.dispatch('currentUser/updateJournalPrompt', {
-          promptId: this.prompt.id,
-          name: newName
-        })
+        let updatedPrompt = utils.clone(this.prompt)
+        updatedPrompt.name = newName
+        this.$store.dispatch('currentUser/updateJournalPrompt', updatedPrompt)
       }
     }
   },
@@ -80,7 +80,6 @@ export default {
     //   }
     // },
     removePrompt () {
-      console.log('🍆 removePrompt')
       this.$store.dispatch('currentUser/removeJournalPrompt', this.prompt)
     },
     updateTextareaSize () {
