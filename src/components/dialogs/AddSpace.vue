@@ -32,7 +32,7 @@ dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
     //- Questions
     //- TODO display loader here if fetching user questions
     //- .journal-questions()
-    JournalPrompt(v-if="editPromptsIsVisible" v-for="prompt in userJournalPrompts" :prompt="prompt" :key="prompt.id")
+    JournalPrompt(v-if="editPromptsIsVisible" v-for="prompt in userJournalPrompts" :prompt="prompt" :key="prompt.id" @showPicker="togglePromptPackPickerIsVisible")
 
     //- todo: Journal Url to help doc
 
@@ -76,11 +76,6 @@ export default {
   },
   mounted () {
     this.moonPhase = moonphase()
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerJournalPromptPromptIsVisibleWithCategory') {
-        this.togglePromptPackPickerIsVisible()
-      }
-    })
   },
   data () {
     return {
@@ -136,6 +131,7 @@ export default {
       this.dailyUrlIsVisible = !this.dailyUrlIsVisible
     },
     togglePromptPackPickerIsVisible () {
+      console.log('🍄')
       this.promptPackPickerIsVisible = !this.promptPackPickerIsVisible
       // this.updatePromptPickerPosition() // tODO remove method?
     },

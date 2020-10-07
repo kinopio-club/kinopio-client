@@ -63,12 +63,8 @@ export default {
     }
   },
   computed: {
-    promptPacks () {
-      return journalPromptPacks.packs()
-    },
-    userJournalQuestions () {
-      return this.$store.state.currentUser.journalQuestions
-    }
+    promptPacks () { return journalPromptPacks.packs() },
+    userJournalQuestions () { return this.$store.state.currentUser.journalQuestions }
     // unreadCategories () {
     //   const lastReadId = 0 // user.lastReadJournalQuestionPromptsId || 0
     //   const unreadCategories = this.categories.filter(category => category.id > lastReadId)

@@ -3,6 +3,7 @@
   .row
     //- .badge.info.button-badge.category(v-if="currentCategory" @click.stop="triggerPromptCategory" :style="{'background-color': currentCategory.color}") {{currentCategory.name}}
     textarea(
+      v-if="!isPack"
       ref="name"
       rows="1"
       v-model="name"
@@ -14,6 +15,11 @@
       @keydown.alt.enter.exact.stop="insertLineBreak"
       @keydown.ctrl.enter.exact.stop="insertLineBreak"
     )
+    div(v-if="isPack")
+      span.random Random
+      span.badge.button-badge(:style="{background: pack.color}" @click.stop="showPicker")
+        span {{name}}
+
     .button-wrap
       button.remove(@click.left="removePrompt")
         img.icon(src="@/assets/remove.svg")
@@ -21,7 +27,7 @@
 </template>
 
 <script>
-// import journalPromptPrompts from '@/spaces/journalPromptPrompts.js'
+import journalPromptPacks from '@/spaces/journalPromptPacks.js'
 
 export default {
   name: 'JournalPrompt',
@@ -41,6 +47,13 @@ export default {
     // categories () {
     //   return journalPromptPrompts.categories()
     // },
+    isPack () { return this.prompt.isPack },
+    promptPacks () { return journalPromptPacks.packs() },
+    pack () {
+      if (!this.isPack) { return }
+      const pack = this.promptPacks.find(pack => pack.name === this.prompt.name)
+      return pack || {}
+    },
     name: {
       get () {
         return this.prompt.name
@@ -70,15 +83,15 @@ export default {
     removePrompt () {
       console.log('🍆 removePrompt')
     },
-    triggerPromptCategory () {
-      // temp
-      this.$store.commit('triggerJournalPromptPromptIsVisibleWithCategory', this.currentCategory)
-    },
     updateTextareaSize () {
       this.$nextTick(() => {
         const textarea = this.$refs.name
+        if (!textarea) { return }
         textarea.style.height = textarea.scrollHeight + 1 + 'px'
       })
+    },
+    showPicker () {
+      this.$emit('showPicker')
     }
   }
 }
@@ -86,7 +99,7 @@ export default {
 
 <style lang="stylus">
 .prompt + .prompt
-  margin-top 10px
+  margin-top 4px
 .prompt
   textarea
     margin-bottom 5px
@@ -96,8 +109,11 @@ export default {
   button.remove
     margin-left 6px
     width 26px
-    margin-top -5px
     vertical-align 8px
     flex none
-
+  .row
+    justify-content space-between
+  .random
+    margin-right 3px
+    vertical-align -1px
 </style>
