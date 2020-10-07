@@ -81,6 +81,7 @@ export default {
     // },
     removePrompt () {
       console.log('🍆 removePrompt')
+      this.$store.dispatch('currentUser/removeJournalPrompt', this.prompt)
     },
     updateTextareaSize () {
       this.$nextTick(() => {

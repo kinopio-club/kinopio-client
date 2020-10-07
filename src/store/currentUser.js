@@ -195,9 +195,17 @@ export default {
       state.filterShowAbsoluteDates = value
       cache.updateUser('filterShowAbsoluteDates', value)
     },
-    addJournalPrompt: (state, prompt) => {
+    addJournalPrompt: (state, newPrompt) => {
       let prompts = utils.clone(state.journalPrompts) || []
-      prompts.unshift(prompt)
+      prompts.unshift(newPrompt)
+      state.journalPrompts = prompts
+      cache.updateUser('journalPrompts', prompts)
+    },
+    removeJournalPrompt: (state, removePrompt) => {
+      let prompts = utils.clone(state.journalPrompts) || []
+      prompts = prompts.filter(prompt => {
+        return prompt.id !== removePrompt.id
+      })
       state.journalPrompts = prompts
       cache.updateUser('journalPrompts', prompts)
     }
@@ -445,6 +453,12 @@ export default {
       utils.typeCheck({ value: prompt, type: 'object', origin: 'addJournalPrompt' })
       // TODO update api
       context.commit('addJournalPrompt', prompt)
+    },
+    removeJournalPrompt: (context, prompt) => {
+      utils.typeCheck({ value: prompt, type: 'object', origin: 'addJournalPrompt' })
+      // TODO update api
+      context.commit('removeJournalPrompt', prompt)
     }
+
   }
 }
