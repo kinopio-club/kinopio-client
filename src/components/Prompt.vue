@@ -36,11 +36,6 @@ export default {
   props: {
     prompt: Object
   },
-  data () {
-    return {
-      currentCategory: null
-    }
-  },
   mounted () {
     this.updateTextareaSize()
   },
@@ -87,9 +82,6 @@ export default {
 .prompt
   textarea
     margin-bottom 5px
-  .category
-    margin-bottom 5px
-    flex none
   button.remove
     margin-left 6px
     width 26px

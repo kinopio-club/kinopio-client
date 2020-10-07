@@ -1,6 +1,5 @@
 <template lang="pug">
 dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" :class="{'child-dialog-is-visible': promptPackPickerIsVisible}" ref="dialog")
-  //- 'narrow': !editPromptsIsVisible
   section
     .row
       button(@click="addSpace")
@@ -18,8 +17,6 @@ dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
     .row
       .button-wrap
         button(@click.left.stop="togglePromptPackPickerIsVisible" :class="{ active: promptPackPickerIsVisible }" ref="promptButton")
-          //- .label-badge
-          //-   span NEW
           img.icon(src="@/assets/add.svg")
           span Prompts
         PromptPackPicker(:visible="promptPackPickerIsVisible" :position="promptPickerPosition" @closeDialog="closeDialogs" @select="togglePromptPack")
@@ -27,35 +24,8 @@ dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
         img.icon(src="@/assets/add.svg")
         span Custom
 
-    //- Questions
     //- TODO display loader here if fetching user questions
-    //- .journal-questions()
     Prompt(v-if="editPromptsIsVisible" v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showPicker="togglePromptPackPickerIsVisible")
-
-    //- todo: Journal Url to help doc
-
-    //- template(v-if="editPromptsIsVisible")
-    //-   .row
-    //-     button(@click.left.stop="toggleDailyUrlIsVisible" :class="{ active: dailyUrlIsVisible }")
-    //-       span Journal Url
-    //- template(v-if="dailyUrlIsVisible")
-    //-   .row
-    //-     //- p find todays journal, creates a journal for the day if none exists
-    //-     //- p this url will always take you to
-    //-     p any day you go to this link , it'll take you that day's daily journal space
-    //-     //- p Start Kinopio with a new journal space
-    //-   .row
-    //-     input.textarea(ref="url" v-model="url")
-    //-   .row
-    //-     button(@click.left="copyUrl")
-    //-       span Copy Journal Url
-    //-   .row(v-if="urlIsCopied")
-    //-     .badge.success.success-message Url Copied
-
-    //- todo help doc contains journal q sources, kawaiijournaling and Jour blog
-
-    //- everyday is a default pack
-
 </template>
 
 <script>
@@ -150,7 +120,7 @@ export default {
       this.urlIsCopied = true
     },
     addCustomPrompt () {
-      const emptyPrompt = { id: nanoid, name: '' }
+      const emptyPrompt = { id: nanoid(), name: '' }
       this.$store.dispatch('currentUser/addJournalPrompt', emptyPrompt)
       this.$nextTick(() => {
         document.querySelector('.add-space textarea').focus()
@@ -192,9 +162,4 @@ export default {
     border 0
     border-radius 3px
     padding 4px
-  // .journal-questions
-  //   margin-bottom 10px
-  // .label-badge
-  //   left -4px
-  //   top -6px
 </style>

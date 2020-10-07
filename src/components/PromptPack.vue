@@ -14,7 +14,6 @@ li.prompt-pack(@click.left="select(pack)" v-on:keyup.enter="select(pack)" :class
     p
       span.label-badge ex
       span {{prompt}}
-
 </template>
 
 <script>
@@ -51,7 +50,6 @@ export default {
     select () {
       this.$emit('select', this.pack)
     }
-
   }
 }
 </script>
@@ -67,8 +65,6 @@ export default {
       margin-top 2px
   p
     margin-top 6px
-  // p + p
-  //   margin-bottom 4px
   .label-badge
     position static
     display inline
