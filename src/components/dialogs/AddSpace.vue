@@ -34,6 +34,7 @@ import Prompt from '@/components/Prompt.vue'
 import PromptPackPicker from '@/components/dialogs/PromptPackPicker.vue'
 
 import nanoid from 'nanoid'
+import last from 'lodash-es/last'
 
 export default {
   name: 'AddSpace',
@@ -123,7 +124,8 @@ export default {
       const emptyPrompt = { id: nanoid(), name: '' }
       this.$store.dispatch('currentUser/addJournalPrompt', emptyPrompt)
       this.$nextTick(() => {
-        document.querySelector('.add-space textarea').focus()
+        const textareas = document.querySelectorAll('.add-space textarea')
+        last(textareas).focus()
       })
     },
     addPromptPack (pack) {
