@@ -65,6 +65,8 @@ import moonphase from '@/moonphase.js'
 import Prompt from '@/components/Prompt.vue'
 import PromptPackPicker from '@/components/dialogs/PromptPackPicker.vue'
 
+import nanoid from 'nanoid'
+
 export default {
   name: 'AddSpace',
   components: {
@@ -159,10 +161,14 @@ export default {
       this.urlIsCopied = true
     },
     addCustomPrompt () {
-      // dispatch 'addPrompt', prompt
-      // { id: nanoid() , name: '' }
-      console.log('🐸 addCustomPrompt')
-      // add a new prompt field , scroll to, focus
+      const emptyPrompt = {
+        id: nanoid(),
+        name: ''
+      }
+      this.$store.dispatch('currentUser/addJournalPrompt', emptyPrompt)
+      this.$nextTick(() => {
+        document.querySelector('.add-space textarea').focus()
+      })
     },
     togglePromptPack (pack) {
       console.log('🍄 togglePromptPack', pack)

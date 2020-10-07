@@ -8,13 +8,14 @@
       v-model="name"
       placeholder="Ask yourself this"
       maxlength="250"
+      :data-id="prompt.id"
 
       @keyup.alt.enter.exact.stop
       @keyup.ctrl.enter.exact.stop
       @keydown.alt.enter.exact.stop="insertLineBreak"
       @keydown.ctrl.enter.exact.stop="insertLineBreak"
     )
-    div(v-if="isPack")
+    div(v-if="isPack" :data-id="prompt.id")
       span.random Random
       span.badge.button-badge(:style="{background: pack.color}" @click.stop="showPicker")
         span {{name}}
