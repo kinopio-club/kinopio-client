@@ -162,13 +162,17 @@ export default {
       document.execCommand('copy')
       this.urlIsCopied = true
     },
-    // updateCategoryFilter () {},
     addCustomPrompt () {
+      // dispatch 'addJournalPrompt', prompt
+      // { id: nanoid() , name: '' }
       console.log('🐸 addCustomPrompt')
       // add a new prompt field , scroll to, focus
     },
     togglePromptPack (prompt) {
-      // add it if it doesn't already exist (prepend or append?)
+      // if add:
+      // dispatch 'addJournalPrompt', prompt
+      // { id: nanoid(), isPack: true, name: 'Everyday' }
+      // new packs should prepend to list
     }
   },
   watch: {

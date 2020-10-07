@@ -23,14 +23,7 @@ export default {
     filterShowUsers: false,
     filterShowDateUpdated: false,
     filterShowAbsoluteDates: false,
-    journalPrompts: [
-      {
-        name: "What's my mood?"
-      },
-      {
-        name: 'Did I eat well?'
-      }
-    ]
+    journalPrompts: []
   },
   getters: {
     isCurrentUser: (state) => (user) => {
@@ -202,16 +195,20 @@ export default {
       state.filterShowAbsoluteDates = value
       cache.updateUser('filterShowAbsoluteDates', value)
     },
-    updateJournalPrompt: (state, { promptId, name }) => {
-      const prompts = state.journalPrompts.map(prompt => {
-        if (prompt.id === promptId) {
-          prompt.name = name
-        }
-        return prompt
-      })
+    addJournalPrompt: (state, prompt) => {
+      let prompts = utils.clone(state.journalPrompts) || []
+      prompts.unshift(prompt)
       state.journalPrompts = prompts
       cache.updateUser('journalPrompts', prompts)
     }
+    // updateJournalPrompt: (state, prompt) => {
+    //   let prompts = state.journalPrompts.filter(journalPrompt => {
+    //     return journalPrompt.id !== prompt.id
+    //   }) || []
+    //   prompts.unshift(prompt)
+    //   state.journalPrompts = prompts
+    //   cache.updateUser('journalPrompts', prompts)
+    // }
   },
   actions: {
     init: (context) => {
@@ -258,11 +255,28 @@ export default {
       context.commit('isUpgraded', value)
       context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
     },
+    createNewUserJournalPrompts: (context) => {
+      if (utils.arrayHasItems(context.state.journalPrompts)) { return }
+      let prompts = [
+        { name: "What's my mood?" },
+        { name: 'Did I eat well?' },
+        { isPack: true, name: 'Everyday' }
+      ]
+      prompts = prompts.map(prompt => {
+        prompt.id = nanoid()
+        return prompt
+      })
+      prompts.forEach(prompt => {
+        context.dispatch('addJournalPrompt', prompt)
+      })
+    },
     createNewUser: (context) => {
       cache.saveUser(context.state)
+      context.dispatch('createNewUserJournalPrompts')
     },
     broadcastUpdate: (context, updates) => {
       const space = context.rootState.currentSpace
+
       const spaceUserPermission = utils.capitalizeFirstLetter(context.getters.spaceUserPermission(space)) // User, Collaborator, Spectator
       const type = `update${spaceUserPermission}`
       const userId = context.state.id
@@ -318,6 +332,7 @@ export default {
       remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
       if (remoteUser.updatedAt > cachedUser.cacheDate) { console.log('🌸 Restore user from remote', remoteUser) }
       context.commit('updateUser', remoteUser)
+      context.dispatch('createNewUserJournalPrompts')
     },
     restoreUserFavorites: async (context) => {
       const hasRestoredFavorites = context.rootState.hasRestoredFavorites
@@ -426,11 +441,10 @@ export default {
       context.dispatch('toggleFilterShowDateUpdated', false)
       context.dispatch('toggleFilterShowAbsoluteDates', false)
     },
-    updateJournalPrompt: (context, { promptId, name }) => {
-      utils.typeCheck({ value: name, type: 'string', origin: 'updateJournalPrompt' })
-      utils.typeCheck({ value: promptId, type: 'string', origin: 'updateJournalPrompt' })
+    addJournalPrompt: (context, prompt) => {
+      utils.typeCheck({ value: prompt, type: 'object', origin: 'addJournalPrompt' })
       // TODO update api
-      context.commit('updateJournalPrompt', { promptId, name })
+      context.commit('addJournalPrompt', prompt)
     }
   }
 }
