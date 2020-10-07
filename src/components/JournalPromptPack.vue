@@ -2,7 +2,8 @@
 li.journal-prompt-pack(@click.left="select(pack)" v-on:keyup.enter="select(pack)" :class="{ active: isInUserJournalPrompts }" tabindex="0")
   .name-wrap
     .badge.button-badge(:style="{background: pack.color}")
-      img.icon(src="@/assets/add.svg")
+      img.icon(v-if="!isInUserJournalPrompts" src="@/assets/add.svg")
+      img.icon.minus(v-if="isInUserJournalPrompts" src="@/assets/minus.svg")
       span {{pack.name}}
     button(@click.stop="toggleViewAllIsActive" :class="{active: viewAllIsActive}" tabindex="0" ref="button") View All
   p(v-if="!viewAllIsActive")
