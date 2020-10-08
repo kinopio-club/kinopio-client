@@ -114,11 +114,12 @@ export default {
     addJournalSpace () {
       this.$emit('closeDialog')
       window.scrollTo(0, 0)
-      const date = `${this.moonPhase.emoji} ${dayjs(new Date()).format('MMMM D, YYYY')}` // 🌘 October 7, 2020
+      const date = `${dayjs(new Date()).format('MMMM D, YYYY')}` // October 7, 2020
       const day = `${this.moonPhase.emoji} ${dayjs(new Date()).format('dddd')}` // 🌘 Tuesday
       let space = utils.emptySpace(nanoid())
       space.name = date
       space.privacy = 'private'
+      // space.moonPhase = this.moonPhase.name
       space.cards.push({ id: nanoid(), name: day, x: 60, y: 90, frameId: 1 })
       this.userPrompts.forEach(prompt => {
         if (!prompt.name) { return }
