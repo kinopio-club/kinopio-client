@@ -402,6 +402,10 @@ export default {
 
   // Spaces 🌙
 
+  emptySpace (spaceId) {
+    return { id: spaceId, cards: [], connections: [], tags: [], users: [], collaborators: [], spectators: [] }
+  },
+
   // migration added oct 2019
   migrationEnsureRemovedCards (space) {
     if (!space.removedCards) {
@@ -882,7 +886,7 @@ export default {
     return tags
   },
 
-  newTag ({ name, userColor, cardId, spaceId }) {
+  newTag ({ name, defaultColor, cardId, spaceId }) {
     let color
     const existingTag = cache.allTags().find(tag => tag.name === name)
     if (existingTag) {
@@ -891,7 +895,7 @@ export default {
     return {
       name,
       id: nanoid(),
-      color: color || userColor,
+      color: color || defaultColor,
       cardId: cardId,
       spaceId: spaceId
     }

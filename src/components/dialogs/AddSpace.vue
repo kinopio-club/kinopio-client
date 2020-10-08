@@ -29,12 +29,16 @@ dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
 </template>
 
 <script>
-import moonphase from '@/moonphase.js'
+import promptPacks from '@/data/promptPacks.json'
 import Prompt from '@/components/Prompt.vue'
 import PromptPackPicker from '@/components/dialogs/PromptPackPicker.vue'
+import moonphase from '@/moonphase.js'
+import utils from '@/utils.js'
 
-import nanoid from 'nanoid'
 import last from 'lodash-es/last'
+import random from 'lodash-es/random'
+import nanoid from 'nanoid'
+import dayjs from 'dayjs'
 
 export default {
   name: 'AddSpace',
@@ -72,29 +76,72 @@ export default {
       this.$store.dispatch('currentSpace/addSpace')
       this.$emit('updateSpaces')
     },
-
-    // importSpace (space) {
-    //   if (!this.isValidSpace(space)) { return }
-    //   space.originSpaceId = space.id
-    //   space.id = nanoid()
-    //   space.name = space.name + ' import'
-    //   const uniqueNewSpace = cache.updateIdsInSpace(space)
-    //   cache.saveSpace(uniqueNewSpace)
-    //   this.$store.commit('currentSpace/restoreSpace', uniqueNewSpace)
-    //   this.$store.dispatch('currentSpace/saveNewSpace')
-    //   this.$store.dispatch('currentUser/lastSpaceId', space.id)
-    //   this.updateSpaces()
-    //   this.$store.commit('triggerFocusSpaceDetailsName')
-    // },
+    pack (prompt) {
+      return promptPacks.find(promptPack => {
+        return promptPack.name.includes(prompt.name)
+      })
+    },
+    randomPrompt (pack) {
+      let index = random(0, pack.prompts.length - 1)
+      return pack.prompts[index]
+    },
+    tag (pack, cardId, space) {
+      const spaceHasTag = space.tags.find(tag => tag.name === pack.name)
+      if (spaceHasTag) { return }
+      return utils.newTag({
+        name: pack.name,
+        defaultColor: pack.color,
+        cardId: cardId,
+        spaceId: space.id
+      })
+    },
+    cardY (cards) {
+      const lastCard = last(cards)
+      const lastCardY = lastCard.y
+      let lastCardName = lastCard.name.replaceAll('[', '')
+      lastCardName = lastCardName.replaceAll(']', '')
+      const averageCharactersPerLine = 25
+      const lines = Math.ceil(lastCardName.length / averageCharactersPerLine)
+      const lineHeight = 14
+      const padding = 16
+      const lastCardHeight = (lines * lineHeight) + padding + lines
+      let distanceBetween = 60
+      if (utils.checkboxFromString(lastCardName)) {
+        distanceBetween = 12
+      }
+      return lastCardY + lastCardHeight + distanceBetween
+    },
     addJournalSpace () {
       this.$emit('closeDialog')
       window.scrollTo(0, 0)
-      console.log('moonphase', this.moonPhase.emoji, this.moonPhase)
-      // 🍄 create the space here
-      // TODO make the space creation part work like import example ^
+      const date = `${this.moonPhase.emoji} ${dayjs(new Date()).format('MMMM D, YYYY')}` // 🌘 October 7, 2020
+      const day = `${this.moonPhase.emoji} ${dayjs(new Date()).format('dddd')}` // 🌘 Tuesday
+      let space = utils.emptySpace(nanoid())
+      space.name = date
+      space.privacy = 'private'
+      space.cards.push({ id: nanoid(), name: day, x: 60, y: 90, frameId: 1 })
+      this.userPrompts.forEach(prompt => {
+        if (!prompt.name) { return }
+        let card = { id: nanoid(), x: 100 }
+        if (prompt.isPack) {
+          const pack = this.pack(prompt)
+          const randomPrompt = this.randomPrompt(pack)
+          const tag = this.tag(pack, card.id, space)
+          if (tag) { space.tags.push(tag) }
+          card.name = `[[${prompt.name}]] ${randomPrompt}`
+        } else {
+          card.name = prompt.name
+        }
+        card.y = this.cardY(space.cards)
+        space.cards.push(card)
+      })
+      console.log('🌙 journal space', space)
+      this.$store.commit('currentSpace/restoreSpace', space)
+      this.$store.dispatch('currentSpace/saveNewSpace')
+      this.$store.dispatch('currentUser/lastSpaceId', space.id)
       this.$emit('updateSpaces')
+      this.$store.commit('triggerFocusSpaceDetailsName')
     },
-
     toggleEditPromptsIsVisible () {
       this.editPromptsIsVisible = !this.editPromptsIsVisible
     },

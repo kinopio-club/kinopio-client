@@ -197,7 +197,7 @@ export default {
     },
     addJournalPrompt: (state, newPrompt) => {
       let prompts = utils.clone(state.journalPrompts) || []
-      prompts.unshift(newPrompt)
+      prompts.push(newPrompt)
       state.journalPrompts = prompts
       cache.updateUser('journalPrompts', prompts)
     },

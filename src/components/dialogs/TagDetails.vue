@@ -59,6 +59,7 @@ export default {
     visible () { return this.$store.state.tagDetailsIsVisible },
     currentTag () { // name, color, cardId
       const tag = this.$store.state.currentSelectedTag
+      console.log('🐛 TAG DEBUG', tag, this.$store.getters['currentSpace/tagByName'](tag.name))
       return this.$store.getters['currentSpace/tagByName'](tag.name)
     },
     position () { return this.$store.state.tagDetailsPosition },

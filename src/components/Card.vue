@@ -328,7 +328,7 @@ export default {
           if (!tag) {
             tag = utils.newTag({
               name: segment.name,
-              userColor: this.$store.state.currentUser.color,
+              defaultColor: this.$store.state.currentUser.color,
               cardId: this.id,
               spaceId: this.$store.state.currentSpace.id
             })

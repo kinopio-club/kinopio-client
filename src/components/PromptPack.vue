@@ -37,8 +37,8 @@ export default {
       }))
     },
     randomPrompt () {
-      let prompt = random(0, this.pack.prompts.length - 1)
-      return this.pack.prompts[prompt]
+      let index = random(0, this.pack.prompts.length - 1)
+      return this.pack.prompts[index]
     }
   },
   methods: {
