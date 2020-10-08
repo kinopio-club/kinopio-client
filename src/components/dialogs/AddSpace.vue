@@ -9,7 +9,8 @@ dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
       .segmented-buttons
         button(@click="addJournalSpace")
           img.icon(src="@/assets/add.svg")
-          span {{moonPhase.emoji}} Journal
+          MoonPhase(:moonPhase="moonPhase.name")
+          span Journal
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
           span Edit
 
@@ -33,6 +34,7 @@ import promptPacks from '@/data/promptPacks.json'
 import Prompt from '@/components/Prompt.vue'
 import PromptPackPicker from '@/components/dialogs/PromptPackPicker.vue'
 import moonphase from '@/moonphase.js'
+import MoonPhase from '@/components/MoonPhase.vue'
 import utils from '@/utils.js'
 
 import last from 'lodash-es/last'
@@ -44,7 +46,8 @@ export default {
   name: 'AddSpace',
   components: {
     Prompt,
-    PromptPackPicker
+    PromptPackPicker,
+    MoonPhase
   },
   props: {
     visible: Boolean
@@ -119,7 +122,7 @@ export default {
       let space = utils.emptySpace(nanoid())
       space.name = date
       space.privacy = 'private'
-      // space.moonPhase = this.moonPhase.name
+      space.moonPhase = this.moonPhase.name
       space.cards.push({ id: nanoid(), name: day, x: 60, y: 90, frameId: 1 })
       this.userPrompts.forEach(prompt => {
         if (!prompt.name) { return }

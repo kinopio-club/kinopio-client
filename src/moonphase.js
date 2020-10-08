@@ -6,11 +6,11 @@ export default (date) => {
   }
   const Moon = {
     phases: [
-      { name: 'new-moon', emoji: '🌚' },
+      { name: 'new-moon', emoji: '🌑' },
       { name: 'waxing-crescent', emoji: '🌒' },
       { name: 'waxing-quarter', emoji: '🌓' },
       { name: 'waxing-gibbous', emoji: '🌔' },
-      { name: 'full-moon', emoji: '🌝' },
+      { name: 'full-moon', emoji: '🌕' },
       { name: 'waning-gibbous', emoji: '🌖' },
       { name: 'waning-quarter', emoji: '🌗' },
       { name: 'waning-crescent', emoji: '🌘' }
@@ -33,7 +33,6 @@ export default (date) => {
       phase = parseInt(jd) // int(jd) -> phase, take integer part of jd
       jd -= phase // subtract integer part to leave fractional part of original jd
       phase = Math.round(jd * 8) // scale fraction from 0-8 and round
-
       if (phase >= 8) phase = 0 // 0 and 8 are the same so turn 8 into 0
       return {
         phase,

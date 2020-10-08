@@ -7,6 +7,7 @@ span
         User(v-if="showUser" :user="user(space)" :isClickable="false" :key="user(space).id")
         template(v-else-if="showUserIfCurrentUserIsCollaborator && space.currentUserIsCollaborator")
           User(:user="user(space)" :isClickable="false" :key="user(space).id")
+        MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
         .badge.info.template-badge(v-if="showCategory") {{space.category}}
         .badge.info.template-badge(v-else-if="spaceIsTemplate(space)") Template
         .name
@@ -22,6 +23,7 @@ span
 import privacy from '@/data/privacy.js'
 import templates from '@/data/templates.js'
 import ResultsFilter from '@/components/ResultsFilter.vue'
+import MoonPhase from '@/components/MoonPhase.vue'
 import Loader from '@/components/Loader.vue'
 
 export default {
@@ -29,7 +31,8 @@ export default {
   components: {
     User: () => import('@/components/User.vue'),
     ResultsFilter,
-    Loader
+    Loader,
+    MoonPhase
   },
   props: {
     spaces: Array,
