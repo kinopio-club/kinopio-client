@@ -403,7 +403,7 @@ export default {
   // Spaces 🌙
 
   emptySpace (spaceId) {
-    return { id: spaceId, cards: [], connections: [], tags: [], users: [], collaborators: [], spectators: [] }
+    return { id: spaceId, moonPhase: '', cards: [], connections: [], tags: [], users: [], collaborators: [], spectators: [] }
   },
 
   // migration added oct 2019

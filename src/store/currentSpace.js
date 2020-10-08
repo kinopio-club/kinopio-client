@@ -453,7 +453,7 @@ export default {
       if (currentUserIsRemovedFromSpace) {
         context.commit('currentUser/resetLastSpaceId', null, { root: true })
         cache.removeSpacePermanent(space)
-        const emptySpace = { id: space.id, cards: [], connections: [], users: [], collaborators: [], spectators: [] }
+        const emptySpace = utils.emptySpace(space.id)
         context.commit('restoreSpace', emptySpace)
       }
     },

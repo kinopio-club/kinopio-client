@@ -98,7 +98,7 @@ export default {
         spaceId: space.id
       })
     },
-    cardY (cards) {
+    cardPosition (cards, newCardName) {
       const lastCard = last(cards)
       const lastCardY = lastCard.y
       let lastCardName = lastCard.name.replaceAll('[', '')
@@ -109,24 +109,27 @@ export default {
       const padding = 16
       const lastCardHeight = (lines * lineHeight) + padding + lines
       let distanceBetween = 60
-      if (utils.checkboxFromString(lastCardName)) {
+      let x = 100
+      if (utils.checkboxFromString(newCardName)) {
         distanceBetween = 12
+        x = 120
       }
-      return lastCardY + lastCardHeight + distanceBetween
+      const y = lastCardY + lastCardHeight + distanceBetween
+      return { x, y }
     },
     addJournalSpace () {
       this.$emit('closeDialog')
       window.scrollTo(0, 0)
-      const date = `${dayjs(new Date()).format('MMMM D, YYYY')}` // October 7, 2020
+      const date = `${dayjs(new Date()).format('dddd MMM D/YY')}` // Thursday Oct 8/20
       const day = `${this.moonPhase.emoji} ${dayjs(new Date()).format('dddd')}` // 🌘 Tuesday
       let space = utils.emptySpace(nanoid())
       space.name = date
       space.privacy = 'private'
       space.moonPhase = this.moonPhase.name
-      space.cards.push({ id: nanoid(), name: day, x: 60, y: 90, frameId: 1 })
+      space.cards.push({ id: nanoid(), name: day, x: 60, y: 90, frameId: 0 })
       this.userPrompts.forEach(prompt => {
         if (!prompt.name) { return }
-        let card = { id: nanoid(), x: 100 }
+        let card = { id: nanoid() }
         if (prompt.isPack) {
           const pack = this.pack(prompt)
           const randomPrompt = this.randomPrompt(pack)
@@ -136,7 +139,9 @@ export default {
         } else {
           card.name = prompt.name
         }
-        card.y = this.cardY(space.cards)
+        const position = this.cardPosition(space.cards, card.name)
+        card.x = position.x
+        card.y = position.y
         space.cards.push(card)
       })
       console.log('🌙 journal space', space)
