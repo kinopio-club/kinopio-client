@@ -486,36 +486,36 @@ export default {
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (remoteSpace) {
         // sync resolution: add missing cached cards to remoteSpace if they exist on server
-        if (cachedSpace.cards) {
-          const cachedCardIds = cachedSpace.cards.map(card => card.id)
-          const remoteSpaceCardIds = remoteSpace.cards.map(card => card.id)
-          const cacheOnlyCards = cachedCardIds.filter(cardId => {
-            return !remoteSpaceCardIds.includes(cardId)
-          })
-          let cachedCardsToRestore = []
-          if (utils.arrayHasItems(cacheOnlyCards)) {
-            for (const cardId of cacheOnlyCards) {
-              let card
-              const cachedCard = cachedSpace.cards.find(cachedCard => cachedCard.id === cardId)
-              try {
-                card = await context.dispatch('api/findCard', cardId, { root: true })
-              } catch (error) {
-                console.warn('🌚 remote card not found', error, 'cachedCard', cachedCard)
-              }
-              console.log('🗾 remote card', card)
-              if (card) {
-                card.name = card.name || cachedCard.name
-                card.x = card.x || cachedCard.x
-                card.y = card.y || cachedCard.y
-              } else {
-                card = cachedCard
-              }
-              cachedCardsToRestore.push(card)
-            }
-          }
-          console.log('🗾 cached cards to restore', cachedCardsToRestore)
-          remoteSpace.cards = remoteSpace.cards.concat(cachedCardsToRestore)
-        }
+        // if (cachedSpace.cards) {
+        //   const cachedCardIds = cachedSpace.cards.map(card => card.id)
+        //   const remoteSpaceCardIds = remoteSpace.cards.map(card => card.id)
+        //   const cacheOnlyCards = cachedCardIds.filter(cardId => {
+        //     return !remoteSpaceCardIds.includes(cardId)
+        //   })
+        //   let cachedCardsToRestore = []
+        //   if (utils.arrayHasItems(cacheOnlyCards)) {
+        //     for (const cardId of cacheOnlyCards) {
+        //       let card
+        //       const cachedCard = cachedSpace.cards.find(cachedCard => cachedCard.id === cardId)
+        //       try {
+        //         card = await context.dispatch('api/findCard', cardId, { root: true })
+        //       } catch (error) {
+        //         console.warn('🌚 remote card not found', error, 'cachedCard', cachedCard)
+        //       }
+        //       console.log('🗾 remote card', card)
+        //       if (card) {
+        //         card.name = card.name || cachedCard.name
+        //         card.x = card.x || cachedCard.x
+        //         card.y = card.y || cachedCard.y
+        //       } else {
+        //         card = cachedCard
+        //       }
+        //       cachedCardsToRestore.push(card)
+        //     }
+        //   }
+        //   console.log('🗾 cached cards to restore', cachedCardsToRestore)
+        //   remoteSpace.cards = remoteSpace.cards.concat(cachedCardsToRestore)
+        // }
 
         // restore remote space
         context.commit('restoreSpace', utils.normalizeSpace(remoteSpace))
@@ -545,7 +545,6 @@ export default {
       context.commit('spaceUrlToLoad', '', { root: true })
       context.dispatch('updateSpacePageSize')
       context.dispatch('loadBackground', context.state.background)
-      context.dispatch('removeEmptyCards')
     },
     loadLastSpace: (context) => {
       const user = context.rootState.currentUser
