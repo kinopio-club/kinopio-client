@@ -122,7 +122,8 @@ export default {
       window.scrollTo(0, 0)
       const date = `${dayjs(new Date()).format('dddd MMM D/YY')}` // Thursday Oct 8/20
       const day = `${this.moonPhase.emoji} ${dayjs(new Date()).format('dddd')}` // 🌘 Tuesday
-      let space = utils.emptySpace(nanoid())
+      const spaceId = nanoid()
+      let space = utils.emptySpace(spaceId)
       space.name = date
       space.privacy = 'private'
       space.moonPhase = this.moonPhase.name
@@ -142,6 +143,7 @@ export default {
         const position = this.cardPosition(space.cards, card.name)
         card.x = position.x
         card.y = position.y
+        card.spaceId = spaceId
         space.cards.push(card)
       })
       console.log('🌙 journal space', space)
