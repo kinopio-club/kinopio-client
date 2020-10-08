@@ -659,6 +659,7 @@ export default {
     },
     longestNameLineLength () {
       let name = this.normalizedName
+      if (!name) { return 0 }
       name = name.replaceAll('[[', '')
       name = name.replaceAll(']]', '')
       name = name || '.'
