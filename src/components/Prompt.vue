@@ -45,7 +45,11 @@ export default {
     },
     name: {
       get () {
-        return this.prompt.name
+        if (this.pack) {
+          return this.pack.name
+        } else {
+          return this.prompt.name
+        }
       },
       set (newName) {
         this.updateTextareaSize()
