@@ -75,15 +75,10 @@ export default {
     }
   },
   computed: {
-    userPrompts () { return this.$store.state.currentUser.journalPrompts }
+    userPrompts () { return this.$store.state.currentUser.journalPrompts },
+    currentUserId () { return this.$store.state.currentUser.id }
   },
   methods: {
-    addSpace () {
-      this.$emit('closeDialog')
-      window.scrollTo(0, 0)
-      this.$store.dispatch('currentSpace/addSpace')
-      this.$emit('updateSpaces')
-    },
     randomPrompt (pack) {
       let index = random(0, pack.prompts.length - 1)
       return pack.prompts[index]
@@ -154,6 +149,13 @@ export default {
       this.$store.dispatch('currentSpace/updateSpacePageSize')
       this.$store.commit('triggerFocusSpaceDetailsName')
     },
+    addSpace () {
+      this.$emit('closeDialog')
+      window.scrollTo(0, 0)
+
+      this.$store.dispatch('currentSpace/addSpace')
+      this.$emit('updateSpaces')
+    },
     toggleEditPromptsIsVisible () {
       this.editPromptsIsVisible = !this.editPromptsIsVisible
     },
@@ -180,7 +182,7 @@ export default {
       this.urlIsCopied = true
     },
     addCustomPrompt () {
-      const emptyPrompt = { id: nanoid(), name: '' }
+      const emptyPrompt = { id: nanoid(), name: '', userId: this.currentUserId }
       this.$store.dispatch('currentUser/addJournalPrompt', emptyPrompt)
       this.$nextTick(() => {
         const textareas = document.querySelectorAll('.add-space textarea')
@@ -188,7 +190,7 @@ export default {
       })
     },
     addPromptPack (pack) {
-      const promptPack = { id: nanoid(), name: pack.name, packId: pack.packId }
+      const promptPack = { id: nanoid(), name: pack.name, packId: pack.packId, userId: this.currentUserId }
       this.$store.dispatch('currentUser/addJournalPrompt', promptPack)
     },
     togglePromptPack (pack) {
