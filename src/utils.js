@@ -105,7 +105,7 @@ export default {
       return true
     }
     if (typeof value !== type) { // eslint-disable-line valid-typeof
-      console.warn(`passed value is not ${type}`, value, origin)
+      console.warn(`🚑 passed value is not ${type}`, value, origin)
       return false
     } else {
       return true
@@ -403,7 +403,7 @@ export default {
   // Spaces 🌙
 
   emptySpace (spaceId) {
-    return { id: spaceId, moonPhase: '', cards: [], connections: [], tags: [], users: [], collaborators: [], spectators: [] }
+    return { id: spaceId, moonPhase: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], collaborators: [], spectators: [], clients: [] }
   },
 
   // migration added oct 2019

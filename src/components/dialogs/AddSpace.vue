@@ -138,6 +138,7 @@ export default {
         const position = this.cardPosition(space.cards, card.name)
         card.x = position.x
         card.y = position.y
+        card.z = 0
         card.spaceId = spaceId
         space.cards.push(card)
       })
@@ -152,7 +153,6 @@ export default {
     addSpace () {
       this.$emit('closeDialog')
       window.scrollTo(0, 0)
-
       this.$store.dispatch('currentSpace/addSpace')
       this.$emit('updateSpaces')
     },
