@@ -279,6 +279,7 @@ export default {
       ]
       prompts = prompts.map(prompt => {
         prompt.id = nanoid()
+        prompt.userId = context.state.id
         return prompt
       })
       prompts.forEach(prompt => {
@@ -458,19 +459,18 @@ export default {
     },
     addJournalPrompt: (context, prompt) => {
       utils.typeCheck({ value: prompt, type: 'object', origin: 'addJournalPrompt' })
-      // TODO update api
+      context.dispatch('api/addToQueue', { name: 'addJournalPrompt', body: { prompt } }, { root: true })
       context.commit('addJournalPrompt', prompt)
     },
     removeJournalPrompt: (context, prompt) => {
       utils.typeCheck({ value: prompt, type: 'object', origin: 'removeJournalPrompt' })
-      // TODO update api
+      context.dispatch('api/addToQueue', { name: 'removeJournalPrompt', body: { prompt } }, { root: true })
       context.commit('removeJournalPrompt', prompt)
     },
     updateJournalPrompt: (context, prompt) => {
       utils.typeCheck({ value: prompt, type: 'object', origin: 'updateJournalPrompt' })
-      // TODO update api
+      context.dispatch('api/addToQueue', { name: 'updateJournalPrompt', body: { prompt } }, { root: true })
       context.commit('updateJournalPrompt', prompt)
     }
-
   }
 }
