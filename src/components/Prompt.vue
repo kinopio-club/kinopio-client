@@ -27,8 +27,6 @@
 </template>
 
 <script>
-import promptPacks from '@/data/promptPacks.json'
-
 import utils from '@/utils.js'
 
 export default {
@@ -40,11 +38,10 @@ export default {
     this.updateTextareaSize()
   },
   computed: {
-    isPack () { return this.prompt.isPack },
+    isPack () { return Boolean(this.prompt.packId) },
     pack () {
       if (!this.isPack) { return }
-      const pack = promptPacks.find(pack => pack.name === this.prompt.name)
-      return pack || {}
+      return this.$store.getters['currentUser/packById'](this.prompt.packId)
     },
     name: {
       get () {

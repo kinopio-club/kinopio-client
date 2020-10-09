@@ -27,10 +27,15 @@ dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
 
     //- TODO display loader here if fetching user questions
     Prompt(v-if="editPromptsIsVisible" v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showPicker="togglePromptPackPickerIsVisible")
+
+  //- section(v-if="editPromptsIsVisible")
+  //-   .row
+  //-     a(href="#")
+  //-       button Help →
+  //-  suggest prompts -> contact (👀 templates)
 </template>
 
 <script>
-import promptPacks from '@/data/promptPacks.json'
 import Prompt from '@/components/Prompt.vue'
 import PromptPackPicker from '@/components/dialogs/PromptPackPicker.vue'
 import moonphase from '@/moonphase.js'
@@ -79,11 +84,6 @@ export default {
       this.$store.dispatch('currentSpace/addSpace')
       this.$emit('updateSpaces')
     },
-    pack (prompt) {
-      return promptPacks.find(promptPack => {
-        return promptPack.name.includes(prompt.name)
-      })
-    },
     randomPrompt (pack) {
       let index = random(0, pack.prompts.length - 1)
       return pack.prompts[index]
@@ -131,8 +131,8 @@ export default {
       this.userPrompts.forEach(prompt => {
         if (!prompt.name) { return }
         let card = { id: nanoid() }
-        if (prompt.isPack) {
-          const pack = this.pack(prompt)
+        if (prompt.packId) {
+          const pack = this.$store.getters['currentUser/packById'](prompt.packId)
           const randomPrompt = this.randomPrompt(pack)
           const tag = this.tag(pack, card.id, space)
           if (tag) { space.tags.push(tag) }
@@ -151,6 +151,7 @@ export default {
       this.$store.dispatch('currentSpace/saveNewSpace')
       this.$store.dispatch('currentUser/lastSpaceId', space.id)
       this.$emit('updateSpaces')
+      this.$store.dispatch('currentSpace/updateSpacePageSize')
       this.$store.commit('triggerFocusSpaceDetailsName')
     },
     toggleEditPromptsIsVisible () {
@@ -187,14 +188,12 @@ export default {
       })
     },
     addPromptPack (pack) {
-      const promptPack = { id: nanoid(), isPack: true, name: pack.name }
+      const promptPack = { id: nanoid(), name: pack.name, packId: pack.packId }
       this.$store.dispatch('currentUser/addJournalPrompt', promptPack)
     },
     togglePromptPack (pack) {
-      const userPack = this.userPrompts.find(prompt => {
-        const isPack = prompt.isPack
-        const isPackName = prompt.name === pack.name
-        return isPack && isPackName
+      const userPack = this.userPrompts.find(userPrompt => {
+        return pack.packId === userPrompt.packId
       })
       if (userPack) {
         this.$store.dispatch('currentUser/removeJournalPrompt', userPack)

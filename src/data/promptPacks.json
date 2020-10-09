@@ -1,6 +1,6 @@
 [
   {
-    "name": "Confidence",
+    "name": "Boost Confidence",
     "packId": "6",
     "color": "#f6d4be",
     "prompts": [
@@ -16,7 +16,7 @@
     ]
   },
   {
-    "name": "Finding Calm",
+    "name": "Find Calm",
     "packId": "5",
     "color": "#c5f4f5",
     "prompts": [

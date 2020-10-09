@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.prompt-pack-picker.narrow(v-if="visible" :open="visible" @click.left.stop)
+dialog.prompt-pack-picker(v-if="visible" :open="visible" @click.left.stop)
   section
     p Prompt packs add random prompts to your journals
   section.results-section

@@ -1,8 +1,9 @@
-import randomColor from 'randomcolor'
-import nanoid from 'nanoid'
-
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import promptPacks from '@/data/promptPacks.json'
+
+import randomColor from 'randomcolor'
+import nanoid from 'nanoid'
 
 export default {
   namespaced: true,
@@ -94,6 +95,10 @@ export default {
       const currentUserIsSignedIn = getters.isSignedIn
       const isInvitedToSpace = Boolean(cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id))
       return !currentUserIsSignedIn && isInvitedToSpace
+    },
+    packById: (state, getters) => (packId) => {
+      const pack = promptPacks.find(pack => pack.packId === packId)
+      return pack
     }
   },
   mutations: {
@@ -270,7 +275,7 @@ export default {
       let prompts = [
         { name: "What's my mood?" },
         { name: 'Did I eat well?' },
-        { isPack: true, name: 'Everyday' }
+        { name: 'Everyday', packId: 1 }
       ]
       prompts = prompts.map(prompt => {
         prompt.id = nanoid()
