@@ -1,6 +1,49 @@
 [
   {
+    "name": "Confidence",
+    "packId": "6",
+    "color": "#f6d4be",
+    "prompts": [
+      "I felt good about myself when",
+      "One thing I can do to take better care of myself",
+      "What motivates me?",
+      "what makes me unique?",
+      "3 things I'm good at",
+      "Something I'm proud of myself for achieving",
+      "What's my secret talent?",
+      "What do I love most about myself?",
+      "What about my life makes me the most proud?"
+    ]
+  },
+  {
+    "name": "Finding Calm",
+    "packId": "5",
+    "color": "#c5f4f5",
+    "prompts": [
+      "Worry purge: I am worried about…",
+      "One thing that I can't control that's bothering me",
+      "What I'm grateful to have in my life",
+      "What I'm grateful for",
+      "Things that need attention, but I'll get to them later",
+      "A quote I will ponder today"
+    ]
+  },
+  {
+    "name": "Sleep Well",
+    "packId": "4",
+    "color": "#d9d7ee",
+    "prompts": [
+      "Tomorrow will be the day that I…",
+      "What went well for me today",
+      "A task I HAVE to complete tomorrow…",
+      "What am I looking forward to tomorrow?",
+      "How I'll make tomorrow better than today",
+      "Something I'm worried about"
+    ]
+  },
+  {
     "name": "Autumn",
+    "packId": "3",
     "color": "#f0e6c6",
     "prompts": [
       "My dream fall activities",
@@ -14,7 +57,8 @@
     ]
   },
   {
-    "name": "Rainy",
+    "name": "Rainy Day",
+    "packId": "2",
     "color": "#c8e0ff",
     "prompts": [
       "Rainy season mood board",
@@ -29,6 +73,7 @@
   },
   {
     "name": "Everyday",
+    "packId": "1",
     "color": "#e6ded7",
     "prompts": [
       "5 things that describe who I am",
@@ -41,7 +86,12 @@
       "My #1 goal this year",
       "My ultimate dream in life",
       "Home goods I want to buy",
-      "How I feel about Coffee and Tea"
+      "How I feel about Coffee and Tea",
+      "If I could talk to my younger self, I would tell them…",
+      "A moment in my life I'll never forget",
+      "The words I'd like to live by",
+      "If I had 3 wishes, what would I wish for?",
+      "What does success mean to me?"
     ]
   }
 ]
