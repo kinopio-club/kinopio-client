@@ -97,8 +97,8 @@ export default {
       return !currentUserIsSignedIn && isInvitedToSpace
     },
     packById: (state, getters) => (packId) => {
-      const pack = promptPacks.find(pack => pack.packId === packId)
-      return pack
+      packId = packId.toString()
+      return promptPacks.find(pack => pack.packId === packId)
     }
   },
   mutations: {
