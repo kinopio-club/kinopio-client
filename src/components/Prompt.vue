@@ -14,6 +14,7 @@
       @keyup.ctrl.enter.exact.stop
       @keydown.alt.enter.exact.stop="insertLineBreak"
       @keydown.ctrl.enter.exact.stop="insertLineBreak"
+      @focus="checkOnFocus"
     )
     div(v-if="isPack" :data-id="prompt.id")
       span.random Random
@@ -60,6 +61,14 @@ export default {
     }
   },
   methods: {
+    checkOnFocus () {
+      const height = utils.visualViewport().height
+      this.$nextTick(() => {
+        if (height < 500) {
+          this.$emit('showScreenIsShort', height)
+        }
+      })
+    },
     removePrompt () {
       this.$store.dispatch('currentUser/removeJournalPrompt', this.prompt)
     },

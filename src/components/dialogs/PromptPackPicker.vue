@@ -42,6 +42,8 @@ export default {
 .prompt-pack-picker
   overflow scroll
   max-height calc(100vh - 330px)
+  @media(max-height 600px)
+    top -68px !important
   button
     .badge
       margin 0

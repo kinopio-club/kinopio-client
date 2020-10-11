@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" :class="{'child-dialog-is-visible': promptPackPickerIsVisible}" ref="dialog")
+dialog.add-space.narrow(v-if="visible" :open="visible" @touchend.stop @click.left.stop="closeDialogs" :class="{'child-dialog-is-visible': promptPackPickerIsVisible, 'short': screenIsShort}" ref="dialog")
   section
     .row
       button(@click="addSpace")
@@ -14,7 +14,7 @@ dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
           span Edit
 
-  section(v-if="editPromptsIsVisible")
+  section.edit-section(v-if="editPromptsIsVisible")
     .row
       .button-wrap
         button(@click.left.stop="togglePromptPackPickerIsVisible" :class="{ active: promptPackPickerIsVisible }" ref="promptButton")
@@ -26,7 +26,7 @@ dialog.add-space.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
         span Custom
 
     //- TODO display loader here if fetching user questions
-    Prompt(v-if="editPromptsIsVisible" v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showPicker="togglePromptPackPickerIsVisible")
+    Prompt(v-if="editPromptsIsVisible" v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showPicker="togglePromptPackPickerIsVisible" @showScreenIsShort="showScreenIsShort")
 
   //- section(v-if="editPromptsIsVisible")
   //-   .row
@@ -71,7 +71,8 @@ export default {
       promptPickerPosition: {
         left: 80,
         top: 5
-      }
+      },
+      screenIsShort: false
     }
   },
   computed: {
@@ -79,6 +80,13 @@ export default {
     currentUserId () { return this.$store.state.currentUser.id }
   },
   methods: {
+    showScreenIsShort (value) {
+      this.screenIsShort = true
+      this.shouldHideFooter(true)
+    },
+    shouldHideFooter (value) {
+      this.$store.commit('shouldExplicitlyHideFooter', value)
+    },
     randomPrompt (pack) {
       let index = random(0, pack.prompts.length - 1)
       return pack.prompts[index]
@@ -164,6 +172,7 @@ export default {
     },
     togglePromptPackPickerIsVisible () {
       this.promptPackPickerIsVisible = !this.promptPackPickerIsVisible
+      this.screenIsShort = false
     },
     closeAll () {
       this.editPromptsIsVisible = false
@@ -207,6 +216,7 @@ export default {
   watch: {
     visible (visible) {
       this.closeAll()
+      this.shouldHideFooter(false)
     }
   }
 }
@@ -214,6 +224,12 @@ export default {
 
 <style lang="stylus">
 .add-space
+  &.short
+    top -68px !important
+    .edit-section
+      max-height 150px
+      overflow scroll
+
   overflow scroll
   max-height calc(100vh - 230px)
   &.child-dialog-is-visible

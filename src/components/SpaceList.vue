@@ -1,3 +1,4 @@
+
 <template lang="pug">
 span
   ResultsFilter(:hideFilter="hideFilter" :items="spaces" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredSpaces")
