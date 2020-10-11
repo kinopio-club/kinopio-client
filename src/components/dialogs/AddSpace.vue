@@ -224,10 +224,13 @@ export default {
 
 <style lang="stylus">
 .add-space
+  @media(max-height 600px)
+    max-height calc(100vh - 320px)
+
   &.short
     top -68px !important
     .edit-section
-      max-height 150px
+      max-height 125px
       overflow scroll
 
   overflow scroll
