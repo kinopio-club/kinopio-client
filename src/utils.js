@@ -1,8 +1,11 @@
 // functional methods that can see dom, but can't access components or store
+import cache from '@/cache.js'
+
 import nanoid from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
-
-import cache from '@/cache.js'
+import dayjs from 'dayjs'
+import random from 'lodash-es/random'
+import last from 'lodash-es/last'
 
 export default {
   host () {
@@ -105,7 +108,7 @@ export default {
       return true
     }
     if (typeof value !== type) { // eslint-disable-line valid-typeof
-      console.warn(`passed value is not ${type}`, value, origin)
+      console.warn(`🚑 passed value is not ${type}`, value, origin)
       return false
     } else {
       return true
@@ -402,6 +405,10 @@ export default {
 
   // Spaces 🌙
 
+  emptySpace (spaceId) {
+    return { id: spaceId, moonPhase: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], collaborators: [], spectators: [], clients: [] }
+  },
+
   // migration added oct 2019
   migrationEnsureRemovedCards (space) {
     if (!space.removedCards) {
@@ -533,6 +540,48 @@ export default {
     })
     space.cards = cards
     return space
+  },
+
+  // Journal Space 🌚
+
+  journalSpaceName () {
+    return `${dayjs(new Date()).format('dddd MMM D/YY')}` // Thursday Oct 8/20
+  },
+
+  randomPrompt (pack) {
+    let index = random(0, pack.prompts.length - 1)
+    return pack.prompts[index]
+  },
+
+  packTag (pack, cardId, space) {
+    const spaceHasTag = space.tags.find(tag => tag.name === pack.name)
+    if (spaceHasTag) { return }
+    return this.newTag({
+      name: pack.name,
+      defaultColor: pack.color,
+      cardId: cardId,
+      spaceId: space.id
+    })
+  },
+
+  promptCardPosition (cards, newCardName) {
+    const lastCard = last(cards)
+    const lastCardY = lastCard.y
+    let lastCardName = lastCard.name.replaceAll('[', '')
+    lastCardName = lastCardName.replaceAll(']', '')
+    const averageCharactersPerLine = 25
+    const lines = Math.ceil(lastCardName.length / averageCharactersPerLine)
+    const lineHeight = 14
+    const padding = 16
+    const lastCardHeight = (lines * lineHeight) + padding + lines
+    let distanceBetween = 60
+    let x = 100
+    if (this.checkboxFromString(newCardName)) {
+      distanceBetween = 12
+      x = 120
+    }
+    const y = lastCardY + lastCardHeight + distanceBetween
+    return { x, y }
   },
 
   // urls 🌍
@@ -882,7 +931,7 @@ export default {
     return tags
   },
 
-  newTag ({ name, userColor, cardId, spaceId }) {
+  newTag ({ name, defaultColor, cardId, spaceId }) {
     let color
     const existingTag = cache.allTags().find(tag => tag.name === name)
     if (existingTag) {
@@ -891,7 +940,7 @@ export default {
     return {
       name,
       id: nanoid(),
-      color: color || userColor,
+      color: color || defaultColor,
       cardId: cardId,
       spaceId: spaceId
     }

@@ -30,9 +30,11 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
 
   section.results-actions
     .row
-      button(@click.left="addSpace")
-        img.icon(src="@/assets/add.svg")
-        span Add
+      .button-wrap
+        button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
+          img.icon(src="@/assets/add.svg")
+          span Add
+        AddSpace(:visible="addSpaceIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
       .button-wrap
         button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
           span Import
@@ -47,10 +49,11 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
 import cache from '@/cache.js'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
+import AddSpace from '@/components/dialogs/AddSpace.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
-import templates from '@/spaces/templates.js'
+import templates from '@/data/templates.js'
 import utils from '@/utils.js'
 
 export default {
@@ -58,6 +61,7 @@ export default {
   components: {
     Export,
     Import,
+    AddSpace,
     SpaceList,
     PrivacyButton,
     ShowInExploreButton
@@ -86,6 +90,7 @@ export default {
       favoriteUsers: [],
       exportIsVisible: false,
       importIsVisible: false,
+      addSpaceIsVisible: false,
       privacyPickerIsVisible: false,
       isLoadingRemoteSpaces: false,
       remoteSpaces: []
@@ -128,6 +133,11 @@ export default {
     }
   },
   methods: {
+    addSpace () {
+      window.scrollTo(0, 0)
+      this.$store.dispatch('currentSpace/addSpace')
+      this.updateSpaces()
+    },
     toggleExportIsVisible () {
       const isVisible = this.exportIsVisible
       this.closeDialogs()
@@ -138,20 +148,21 @@ export default {
       this.closeDialogs()
       this.importIsVisible = !isVisible
     },
-    closeDialogs () {
-      this.exportIsVisible = false
-      this.importIsVisible = false
-      this.privacyPickerIsVisible = false
+    toggleAddSpaceIsVisible () {
+      const isVisible = this.addSpaceIsVisible
+      this.closeDialogs()
+      this.addSpaceIsVisible = !isVisible
     },
     togglePrivacyPickerIsVisible () {
       const isVisible = this.privacyPickerIsVisible
       this.closeDialogs()
       this.privacyPickerIsVisible = !isVisible
     },
-    addSpace () {
-      window.scrollTo(0, 0)
-      this.$store.dispatch('currentSpace/addSpace')
-      this.updateSpaces()
+    closeDialogs () {
+      this.exportIsVisible = false
+      this.importIsVisible = false
+      this.addSpaceIsVisible = false
+      this.privacyPickerIsVisible = false
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space })

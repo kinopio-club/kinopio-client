@@ -133,6 +133,10 @@ export default {
       })
     },
     isVisible () {
+      const shouldExplicitlyHideFooter = this.$store.state.shouldExplicitlyHideFooter
+      if (shouldExplicitlyHideFooter) {
+        return false
+      }
       let isVisible = true
       if (this.dialogsVisible) { isVisible = false }
       if (this.shouldHideFooter) { isVisible = false }

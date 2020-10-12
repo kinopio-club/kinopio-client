@@ -1,8 +1,9 @@
-import randomColor from 'randomcolor'
-import nanoid from 'nanoid'
-
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import promptPacks from '@/data/promptPacks.json'
+
+import randomColor from 'randomcolor'
+import nanoid from 'nanoid'
 
 export default {
   namespaced: true,
@@ -22,7 +23,8 @@ export default {
     isUpgraded: false,
     filterShowUsers: false,
     filterShowDateUpdated: false,
-    filterShowAbsoluteDates: false
+    filterShowAbsoluteDates: false,
+    journalPrompts: []
   },
   getters: {
     isCurrentUser: (state) => (user) => {
@@ -93,6 +95,10 @@ export default {
       const currentUserIsSignedIn = getters.isSignedIn
       const isInvitedToSpace = Boolean(cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id))
       return !currentUserIsSignedIn && isInvitedToSpace
+    },
+    packById: (state, getters) => (packId) => {
+      packId = packId.toString()
+      return promptPacks.find(pack => pack.packId === packId)
     }
   },
   mutations: {
@@ -193,6 +199,30 @@ export default {
       utils.typeCheck({ value, type: 'boolean', origin: 'filterShowAbsoluteDates' })
       state.filterShowAbsoluteDates = value
       cache.updateUser('filterShowAbsoluteDates', value)
+    },
+    addJournalPrompt: (state, newPrompt) => {
+      let prompts = utils.clone(state.journalPrompts) || []
+      prompts.push(newPrompt)
+      state.journalPrompts = prompts
+      cache.updateUser('journalPrompts', prompts)
+    },
+    removeJournalPrompt: (state, removePrompt) => {
+      let prompts = utils.clone(state.journalPrompts) || []
+      prompts = prompts.filter(prompt => {
+        return prompt.id !== removePrompt.id
+      })
+      state.journalPrompts = prompts
+      cache.updateUser('journalPrompts', prompts)
+    },
+    updateJournalPrompt: (state, updatedPrompt) => {
+      let prompts = state.journalPrompts.map(prompt => {
+        if (prompt.id === updatedPrompt.id) {
+          prompt = updatedPrompt
+        }
+        return prompt
+      })
+      state.journalPrompts = prompts
+      cache.updateUser('journalPrompts', prompts)
     }
   },
   actions: {
@@ -240,11 +270,29 @@ export default {
       context.commit('isUpgraded', value)
       context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
     },
+    createNewUserJournalPrompts: (context) => {
+      if (utils.arrayHasItems(context.state.journalPrompts)) { return }
+      let prompts = [
+        { name: 'How am I feeling?' },
+        { name: 'What do I have to do today?' },
+        { name: 'Everyday', packId: '1' }
+      ]
+      prompts = prompts.map(prompt => {
+        prompt.id = nanoid()
+        prompt.userId = context.state.id
+        return prompt
+      })
+      prompts.forEach(prompt => {
+        context.dispatch('addJournalPrompt', prompt)
+      })
+    },
     createNewUser: (context) => {
       cache.saveUser(context.state)
+      context.dispatch('createNewUserJournalPrompts')
     },
     broadcastUpdate: (context, updates) => {
       const space = context.rootState.currentSpace
+
       const spaceUserPermission = utils.capitalizeFirstLetter(context.getters.spaceUserPermission(space)) // User, Collaborator, Spectator
       const type = `update${spaceUserPermission}`
       const userId = context.state.id
@@ -300,6 +348,7 @@ export default {
       remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
       if (remoteUser.updatedAt > cachedUser.cacheDate) { console.log('🌸 Restore user from remote', remoteUser) }
       context.commit('updateUser', remoteUser)
+      context.dispatch('createNewUserJournalPrompts')
     },
     restoreUserFavorites: async (context) => {
       const hasRestoredFavorites = context.rootState.hasRestoredFavorites
@@ -407,6 +456,21 @@ export default {
       context.dispatch('toggleFilterShowUsers', false)
       context.dispatch('toggleFilterShowDateUpdated', false)
       context.dispatch('toggleFilterShowAbsoluteDates', false)
+    },
+    addJournalPrompt: (context, prompt) => {
+      utils.typeCheck({ value: prompt, type: 'object', origin: 'addJournalPrompt' })
+      context.dispatch('api/addToQueue', { name: 'addJournalPrompt', body: prompt }, { root: true })
+      context.commit('addJournalPrompt', prompt)
+    },
+    removeJournalPrompt: (context, prompt) => {
+      utils.typeCheck({ value: prompt, type: 'object', origin: 'removeJournalPrompt' })
+      context.dispatch('api/addToQueue', { name: 'removeJournalPrompt', body: prompt }, { root: true })
+      context.commit('removeJournalPrompt', prompt)
+    },
+    updateJournalPrompt: (context, prompt) => {
+      utils.typeCheck({ value: prompt, type: 'object', origin: 'updateJournalPrompt' })
+      context.dispatch('api/addToQueue', { name: 'updateJournalPrompt', body: prompt }, { root: true })
+      context.commit('updateJournalPrompt', prompt)
     }
   }
 }

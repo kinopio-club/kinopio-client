@@ -8,7 +8,7 @@ dialog.narrow.template-category-picker(v-if="visible" :open="visible" @click.lef
 </template>
 
 <script>
-import templates from '@/spaces/templates.js'
+import templates from '@/data/templates.js'
 
 export default {
   name: 'TemplateCategoryPicker',

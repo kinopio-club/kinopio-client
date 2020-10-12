@@ -21,7 +21,7 @@ header(:style="visualViewportPosition")
               span Read Only
             .badge.info.invisible-badge(ref="readOnly" :class="{'badge-jiggle': readOnlyJiggle, 'invisible': !readOnlyJiggle}")
               span Read Only
-
+          MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
           span {{currentSpaceName}}
           img.icon.privacy-icon(v-if="spaceIsNotClosed" :src="privacyIcon" :class="privacyName")
           .badge.status.explore(v-if="shouldShowInExplore")
@@ -65,16 +65,17 @@ header(:style="visualViewportPosition")
 <script>
 import About from '@/components/dialogs/About.vue'
 import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
+import MoonPhase from '@/components/MoonPhase.vue'
 import User from '@/components/User.vue'
 import SignUpOrIn from '@/components/dialogs/SignUpOrIn.vue'
 import ResetPassword from '@/components/dialogs/ResetPassword.vue'
 import Share from '@/components/dialogs/Share.vue'
 import Loader from '@/components/Loader.vue'
-import templates from '@/spaces/templates.js'
+import templates from '@/data/templates.js'
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
-import privacy from '@/spaces/privacy.js'
+import privacy from '@/data/privacy.js'
 import utils from '@/utils.js'
 
 const maxIterations = 30
@@ -92,7 +93,8 @@ export default {
     Loader,
     ImportArenaChannel,
     KeyboardShortcuts,
-    UpgradeUser
+    UpgradeUser,
+    MoonPhase
   },
   data () {
     return {

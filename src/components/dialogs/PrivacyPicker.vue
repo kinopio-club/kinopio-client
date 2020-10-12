@@ -11,7 +11,7 @@ dialog.narrow.privacy-picker(v-if="visible" :open="visible" @click.left.stop)
 </template>
 
 <script>
-import privacy from '@/spaces/privacy.js'
+import privacy from '@/data/privacy.js'
 import utils from '@/utils.js'
 
 export default {
