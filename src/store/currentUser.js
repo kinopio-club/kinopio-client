@@ -346,7 +346,8 @@ export default {
       const remoteUser = await context.dispatch('api/getUser', null, { root: true })
       if (!remoteUser) { return }
       remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
-      if (remoteUser.updatedAt > cachedUser.cacheDate) { console.log('🌸 Restore user from remote', remoteUser) }
+      // if (remoteUser.updatedAt > cachedUser.cacheDate) {
+      console.log('🌸 Restore user from remote', remoteUser)
       context.commit('updateUser', remoteUser)
       context.dispatch('createNewUserJournalPrompts')
     },
