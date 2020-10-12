@@ -406,7 +406,7 @@ export default {
   // Spaces 🌙
 
   emptySpace (spaceId) {
-    return { id: spaceId, moonPhase: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], collaborators: [], spectators: [], clients: [] }
+    return { id: spaceId, moonPhase: '', background: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], collaborators: [], spectators: [], clients: [] }
   },
 
   // migration added oct 2019
