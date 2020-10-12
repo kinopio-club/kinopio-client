@@ -660,7 +660,6 @@ export default {
     longestNameLineLength () {
       let name = this.normalizedName
       if (!name) { return 0 }
-      console.log('🍓 temp logging name', name)
       name = name.replaceAll('[[', '')
       name = name.replaceAll(']]', '')
       name = name || '.'
