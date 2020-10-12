@@ -1,16 +1,18 @@
+import helloSpace from '@/data/hello.json'
+import newSpace from '@/data/new.json'
+
+import words from '@/words.js'
+import moonphase from '@/moonphase.js'
+import utils from '@/utils.js'
+import cache from '@/cache.js'
+
 import Vue from 'vue'
 import randomColor from 'randomcolor'
 import nanoid from 'nanoid'
 import random from 'lodash-es/random'
 import last from 'lodash-es/last'
 import uniqBy from 'lodash-es/uniqBy'
-
-import utils from '@/utils.js'
-import cache from '@/cache.js'
-import words from '@/words.js'
-
-import helloSpace from '@/spaces/hello.json'
-import newSpace from '@/spaces/new.json'
+import dayjs from 'dayjs'
 
 export default {
   namespaced: true,
@@ -58,6 +60,7 @@ export default {
       const spectatorExists = state.spectators.find(spectator => spectator.id === newUser.id)
       if (userExists || collaboratorExists || spectatorExists) {
         state.clients.push(newUser)
+        state.clients = uniqBy(state.clients, 'id')
       } else {
         state.spectators.push(newUser)
       }
@@ -303,12 +306,17 @@ export default {
   actions: {
     init: (context) => {
       const spaceUrl = context.rootState.spaceUrlToLoad
+      const loadJournalSpace = context.rootState.loadJournalSpace
       const user = context.rootState.currentUser
       // restore from url
       if (spaceUrl) {
         console.log('🚃 Restore space from url', spaceUrl)
         const spaceId = utils.idFromUrl(spaceUrl)
         context.dispatch('loadSpace', { id: spaceId })
+      // restore or create journal space
+      } else if (loadJournalSpace) {
+        console.log('🚃 Restore journal space')
+        context.dispatch('loadJournalSpace')
       // restore last space
       } else if (user.lastSpaceId) {
         console.log('🚃 Restore last space', user.lastSpaceId)
@@ -399,6 +407,39 @@ export default {
         context.commit('triggerFocusSpaceDetailsName', null, { root: true })
       })
     },
+    addNewJournalSpace: (context) => {
+      const moonPhase = moonphase()
+      const day = `${moonPhase.emoji} ${dayjs(new Date()).format('dddd')}` // 🌘 Tuesday
+      const spaceId = nanoid()
+      let space = utils.emptySpace(spaceId)
+      space.name = utils.journalSpaceName()
+      space.privacy = 'private'
+      space.moonPhase = moonPhase.name
+      space.cards.push({ id: nanoid(), name: day, x: 60, y: 90, frameId: 0 })
+      const userPrompts = context.rootState.currentUser.journalPrompts
+      userPrompts.forEach(prompt => {
+        if (!prompt.name) { return }
+        let card = { id: nanoid() }
+        if (prompt.packId) {
+          const pack = context.rootGetters['currentUser/packById'](prompt.packId)
+          const randomPrompt = utils.randomPrompt(pack)
+          const tag = utils.packTag(pack, card.id, space)
+          if (tag) { space.tags.push(tag) }
+          card.name = `[[${prompt.name}]] ${randomPrompt}`
+        } else {
+          card.name = prompt.name
+        }
+        const position = utils.promptCardPosition(space.cards, card.name)
+        card.x = position.x
+        card.y = position.y
+        card.z = 0
+        card.spaceId = spaceId
+        space.cards.push(card)
+      })
+      context.commit('restoreSpace', space)
+      context.dispatch('saveNewSpace')
+      context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
+    },
     getRemoteSpace: async (context, space) => {
       const collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
@@ -453,7 +494,7 @@ export default {
       if (currentUserIsRemovedFromSpace) {
         context.commit('currentUser/resetLastSpaceId', null, { root: true })
         cache.removeSpacePermanent(space)
-        const emptySpace = { id: space.id, cards: [], connections: [], users: [], collaborators: [], spectators: [] }
+        const emptySpace = utils.emptySpace(space.id)
         context.commit('restoreSpace', emptySpace)
       }
     },
@@ -470,8 +511,20 @@ export default {
         }
       })
     },
+    loadJournalSpace: async (context) => {
+      const spaces = cache.getAllSpaces()
+      const journalName = utils.journalSpaceName()
+      const journalSpace = spaces.find(space => space.name === journalName)
+      context.commit('loadJournalSpace', false, { root: true })
+      if (journalSpace) {
+        context.dispatch('loadSpace', { id: journalSpace.id })
+      } else {
+        context.dispatch('addNewJournalSpace')
+      }
+    },
+
     loadSpace: async (context, space) => {
-      const emptySpace = { id: space.id, cards: [], connections: [], spectators: [], tags: [], background: '' }
+      const emptySpace = utils.emptySpace(space.id)
       const cachedSpace = cache.space(space.id)
       context.commit('clearAllNotifications', null, { root: true })
       context.commit('clearSpaceFilters', null, { root: true })
@@ -481,42 +534,8 @@ export default {
       context.dispatch('updateSpacePageSize')
       context.dispatch('loadBackground', context.state.background)
       context.commit('history/clear', null, { root: true })
-
-      // get remote space
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (remoteSpace) {
-        // sync resolution: add missing cached cards to remoteSpace if they exist on server
-        // if (cachedSpace.cards) {
-        //   const cachedCardIds = cachedSpace.cards.map(card => card.id)
-        //   const remoteSpaceCardIds = remoteSpace.cards.map(card => card.id)
-        //   const cacheOnlyCards = cachedCardIds.filter(cardId => {
-        //     return !remoteSpaceCardIds.includes(cardId)
-        //   })
-        //   let cachedCardsToRestore = []
-        //   if (utils.arrayHasItems(cacheOnlyCards)) {
-        //     for (const cardId of cacheOnlyCards) {
-        //       let card
-        //       const cachedCard = cachedSpace.cards.find(cachedCard => cachedCard.id === cardId)
-        //       try {
-        //         card = await context.dispatch('api/findCard', cardId, { root: true })
-        //       } catch (error) {
-        //         console.warn('🌚 remote card not found', error, 'cachedCard', cachedCard)
-        //       }
-        //       console.log('🗾 remote card', card)
-        //       if (card) {
-        //         card.name = card.name || cachedCard.name
-        //         card.x = card.x || cachedCard.x
-        //         card.y = card.y || cachedCard.y
-        //       } else {
-        //         card = cachedCard
-        //       }
-        //       cachedCardsToRestore.push(card)
-        //     }
-        //   }
-        //   console.log('🗾 cached cards to restore', cachedCardsToRestore)
-        //   remoteSpace.cards = remoteSpace.cards.concat(cachedCardsToRestore)
-        // }
-
         // restore remote space
         context.commit('restoreSpace', utils.normalizeSpace(remoteSpace))
         context.dispatch('history/playback', null, { root: true })

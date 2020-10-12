@@ -90,6 +90,13 @@ export default new Router({
         store.commit('addToSpaceCollaboratorKeys', { spaceId, collaboratorKey })
       }
     }, {
+      path: '/journal',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        store.commit('loadJournalSpace', true)
+        next()
+      }
+    }, {
       path: '/:space',
       component: Space,
       beforeEnter: (to, from, next) => {

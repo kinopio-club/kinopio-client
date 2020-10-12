@@ -14,7 +14,8 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop)
 
   section
     article(v-if="newStuff.length" v-for="post in newStuffWithUserHasRead" :key="post.id")
-      .title.badge.info {{post.title}}
+      .title.badge.info
+        span {{post.title}}
         img.icon(src="@/assets/new.gif" v-if="!post.userHasRead")
       span(v-html="media(post.description)")
       span(v-html="post.content_html")

@@ -689,7 +689,7 @@ export default {
       addTagsNames.forEach(tagName => {
         const tag = utils.newTag({
           name: tagName,
-          userColor: this.$store.state.currentUser.color,
+          defaultColor: this.$store.state.currentUser.color,
           cardId: this.card.id,
           spaceId: this.$store.state.currentSpace.id
         })

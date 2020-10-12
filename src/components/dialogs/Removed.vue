@@ -62,7 +62,7 @@ import merge from 'lodash-es/merge'
 import scrollIntoView from '@/scroll-into-view.js'
 import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
-import privacy from '@/spaces/privacy.js'
+import privacy from '@/data/privacy.js'
 import utils from '@/utils.js'
 
 export default {

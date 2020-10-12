@@ -320,6 +320,9 @@ dialog
   height 12px
   vertical-align -2px
 
+.minus
+  vertical-align middle
+
 .button-wrap
   display inline-block
   position relative

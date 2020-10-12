@@ -84,9 +84,9 @@ aside.notifications(@click.left="closeAllDialogs")
 
 <script>
 import cache from '@/cache.js'
-import privacy from '@/spaces/privacy.js'
+import privacy from '@/data/privacy.js'
 import utils from '@/utils.js'
-import templates from '@/spaces/templates.js'
+import templates from '@/data/templates.js'
 
 let wasOffline
 
