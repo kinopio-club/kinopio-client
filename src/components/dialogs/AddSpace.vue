@@ -25,7 +25,6 @@ dialog.add-space.narrow(v-if="visible" :open="visible" @touchend.stop @click.lef
         img.icon(src="@/assets/add.svg")
         span Custom
 
-    //- TODO display loader here if fetching user questions
     Prompt(v-if="editPromptsIsVisible" v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showPicker="togglePromptPackPickerIsVisible" @showScreenIsShort="showScreenIsShort")
 
   //- section(v-if="editPromptsIsVisible")

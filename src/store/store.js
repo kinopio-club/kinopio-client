@@ -99,6 +99,7 @@ export default new Vuex.Store({
     remotePendingUploads: [],
     hasRestoredFavorites: false,
     loadSpaceShowDetailsForCardId: '',
+    loadJournalSpace: false,
 
     // notifications
     notifications: [],
@@ -157,6 +158,10 @@ export default new Vuex.Store({
     isBeta: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isBeta' })
       state.isBeta = value
+    },
+    loadJournalSpace: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'loadJournalSpace' })
+      state.loadJournalSpace = value
     },
     shouldHideConnectionOutline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'shouldHideConnectionOutline' })
@@ -502,10 +507,6 @@ export default new Vuex.Store({
       utils.typeCheck({ value, type: 'boolean', origin: 'isJoiningSpace' })
       state.isJoiningSpace = value
     },
-    spaceUrlToLoad: (state, spaceUrl) => {
-      utils.typeCheck({ value: spaceUrl, type: 'string', origin: 'spaceUrlToLoad' })
-      state.spaceUrlToLoad = spaceUrl
-    },
     addToSpaceCollaboratorKeys: (state, spaceCollaboratorKey) => {
       utils.typeCheck({ value: spaceCollaboratorKey, type: 'object', origin: 'addToSpaceCollaboratorKeys' })
       state.spaceCollaboratorKeys.push(spaceCollaboratorKey) // { spaceId, collaboratorKey }
@@ -538,6 +539,10 @@ export default new Vuex.Store({
     loadSpaceShowDetailsForCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'loadSpaceShowDetailsForCardId' })
       state.loadSpaceShowDetailsForCardId = cardId
+    },
+    spaceUrlToLoad: (state, spaceUrl) => {
+      utils.typeCheck({ value: spaceUrl, type: 'string', origin: 'spaceUrlToLoad' })
+      state.spaceUrlToLoad = spaceUrl
     },
 
     // Notifications
