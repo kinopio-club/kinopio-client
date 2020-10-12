@@ -137,7 +137,9 @@ export default {
     },
     togglePromptPack (pack) {
       const userPack = this.userPrompts.find(userPrompt => {
-        return pack.packId === userPrompt.packId
+        console.log(pack.packId, userPrompt.packId)
+        if (!userPrompt.packId) { return }
+        return pack.packId === userPrompt.packId.toString()
       })
       if (userPack) {
         this.$store.dispatch('currentUser/removeJournalPrompt', userPack)

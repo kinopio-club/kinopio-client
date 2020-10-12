@@ -33,7 +33,8 @@ export default {
     userJournalPrompts () { return this.$store.state.currentUser.journalPrompts },
     isInUserJournalPrompts () {
       return Boolean(this.userJournalPrompts.find(userPrompt => {
-        return userPrompt.packId === this.pack.packId && userPrompt.packId
+        if (!userPrompt.packId) { return }
+        return userPrompt.packId.toString() === this.pack.packId
       }))
     },
     randomPrompt () {
