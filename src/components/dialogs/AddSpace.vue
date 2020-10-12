@@ -39,12 +39,9 @@ import Prompt from '@/components/Prompt.vue'
 import PromptPackPicker from '@/components/dialogs/PromptPackPicker.vue'
 import moonphase from '@/moonphase.js'
 import MoonPhase from '@/components/MoonPhase.vue'
-import utils from '@/utils.js'
 
 import last from 'lodash-es/last'
-import random from 'lodash-es/random'
 import nanoid from 'nanoid'
-import dayjs from 'dayjs'
 
 export default {
   name: 'AddSpace',
@@ -86,73 +83,10 @@ export default {
     shouldHideFooter (value) {
       this.$store.commit('shouldExplicitlyHideFooter', value)
     },
-    randomPrompt (pack) {
-      let index = random(0, pack.prompts.length - 1)
-      return pack.prompts[index]
-    },
-    tag (pack, cardId, space) {
-      const spaceHasTag = space.tags.find(tag => tag.name === pack.name)
-      if (spaceHasTag) { return }
-      return utils.newTag({
-        name: pack.name,
-        defaultColor: pack.color,
-        cardId: cardId,
-        spaceId: space.id
-      })
-    },
-    cardPosition (cards, newCardName) {
-      const lastCard = last(cards)
-      const lastCardY = lastCard.y
-      let lastCardName = lastCard.name.replaceAll('[', '')
-      lastCardName = lastCardName.replaceAll(']', '')
-      const averageCharactersPerLine = 25
-      const lines = Math.ceil(lastCardName.length / averageCharactersPerLine)
-      const lineHeight = 14
-      const padding = 16
-      const lastCardHeight = (lines * lineHeight) + padding + lines
-      let distanceBetween = 60
-      let x = 100
-      if (utils.checkboxFromString(newCardName)) {
-        distanceBetween = 12
-        x = 120
-      }
-      const y = lastCardY + lastCardHeight + distanceBetween
-      return { x, y }
-    },
     addJournalSpace () {
       this.$emit('closeDialog')
       window.scrollTo(0, 0)
-      const date = `${dayjs(new Date()).format('dddd MMM D/YY')}` // Thursday Oct 8/20
-      const day = `${this.moonPhase.emoji} ${dayjs(new Date()).format('dddd')}` // 🌘 Tuesday
-      const spaceId = nanoid()
-      let space = utils.emptySpace(spaceId)
-      space.name = date
-      space.privacy = 'private'
-      space.moonPhase = this.moonPhase.name
-      space.cards.push({ id: nanoid(), name: day, x: 60, y: 90, frameId: 0 })
-      this.userPrompts.forEach(prompt => {
-        if (!prompt.name) { return }
-        let card = { id: nanoid() }
-        if (prompt.packId) {
-          const pack = this.$store.getters['currentUser/packById'](prompt.packId)
-          const randomPrompt = this.randomPrompt(pack)
-          const tag = this.tag(pack, card.id, space)
-          if (tag) { space.tags.push(tag) }
-          card.name = `[[${prompt.name}]] ${randomPrompt}`
-        } else {
-          card.name = prompt.name
-        }
-        const position = this.cardPosition(space.cards, card.name)
-        card.x = position.x
-        card.y = position.y
-        card.z = 0
-        card.spaceId = spaceId
-        space.cards.push(card)
-      })
-      console.log('🚃 Restore journal space', space)
-      this.$store.commit('currentSpace/restoreSpace', space)
-      this.$store.dispatch('currentSpace/saveNewSpace')
-      this.$store.dispatch('currentUser/lastSpaceId', space.id)
+      this.$store.dispatch('currentSpace/addNewJournalSpace')
       this.$emit('updateSpaces')
       this.$store.dispatch('currentSpace/updateSpacePageSize')
       this.$store.commit('triggerFocusSpaceDetailsName')

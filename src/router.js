@@ -90,18 +90,18 @@ export default new Router({
         store.commit('addToSpaceCollaboratorKeys', { spaceId, collaboratorKey })
       }
     }, {
+      path: '/journal',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        store.commit('loadJournalSpace', true)
+        next()
+      }
+    }, {
       path: '/:space',
       component: Space,
       beforeEnter: (to, from, next) => {
         const spaceUrl = window.location.pathname.substring(1) // "/space-id" -> "space-id"
         store.commit('spaceUrlToLoad', spaceUrl)
-        next()
-      }
-    }, {
-      path: '/journal',
-      component: Space,
-      beforeEnter: (to, from, next) => {
-        store.commit('loadJournalSpace', true)
         next()
       }
     }
