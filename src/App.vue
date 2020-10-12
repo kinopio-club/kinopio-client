@@ -130,6 +130,7 @@ textarea,
   font-size 1em // required to disable ios input zooming
   resize none
   width 100%
+  min-width 0 // firefox hack
   background transparent
   border 0
   border-bottom 1px solid var(--primary)

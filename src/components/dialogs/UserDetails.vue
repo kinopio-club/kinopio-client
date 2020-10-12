@@ -35,7 +35,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.left.stop="clos
         .badge.info $4/month
       .row
         a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost")
-          button More Info →
+          button Help →
 
     section
       .button-wrap
