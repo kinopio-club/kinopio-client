@@ -346,10 +346,12 @@ export default {
       const remoteUser = await context.dispatch('api/getUser', null, { root: true })
       if (!remoteUser) { return }
       remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
-      // if (remoteUser.updatedAt > cachedUser.cacheDate) {
       console.log('🌸 Restore user from remote', remoteUser)
       context.commit('updateUser', remoteUser)
       context.dispatch('createNewUserJournalPrompts')
+      if (remoteUser.stripeSubscriptionId) {
+        context.commit('isUpgraded', true)
+      }
     },
     restoreUserFavorites: async (context) => {
       const hasRestoredFavorites = context.rootState.hasRestoredFavorites
