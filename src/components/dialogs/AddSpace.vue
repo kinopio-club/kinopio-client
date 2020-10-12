@@ -149,7 +149,7 @@ export default {
         card.spaceId = spaceId
         space.cards.push(card)
       })
-      console.log('🌙 journal space', space)
+      console.log('🚃 Restore journal space', space)
       this.$store.commit('currentSpace/restoreSpace', space)
       this.$store.dispatch('currentSpace/saveNewSpace')
       this.$store.dispatch('currentUser/lastSpaceId', space.id)
@@ -223,13 +223,10 @@ export default {
 
 <style lang="stylus">
 .add-space
-  @media(max-height 600px)
-    max-height calc(100vh - 320px)
-
   &.short
     top -68px !important
     .edit-section
-      max-height 125px
+      max-height 205px
       overflow scroll
 
   overflow scroll

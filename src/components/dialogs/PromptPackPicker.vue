@@ -21,11 +21,6 @@ export default {
     visible: Boolean,
     position: Object
   },
-  data () {
-    return {
-      selectedCategoryId: null
-    }
-  },
   computed: {
     packs () { return promptPacks },
     userJournalQuestions () { return this.$store.state.currentUser.journalQuestions }
@@ -50,6 +45,6 @@ export default {
   .results-section
     max-height initial
   .results-section
-    border-top: 1px solid var(--primary);
-    padding-top: 4px;
+    border-top 1px solid var(--primary)
+    padding-top 4px
 </style>

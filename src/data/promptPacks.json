@@ -57,21 +57,6 @@
     ]
   },
   {
-    "name": "Rainy Day",
-    "packId": "2",
-    "color": "#c8e0ff",
-    "prompts": [
-      "Rainy season mood board",
-      "Songs to listen to when it rains",
-      "What I think about when it rains",
-      "Things to do on a rainy day",
-      "Hot drinks for a rainy day",
-      "How I spend my usual rainy day",
-      "Puddles, rain showers, and thunderstorms",
-      "Getting cozy at home"
-    ]
-  },
-  {
     "name": "Everyday",
     "packId": "1",
     "color": "#e6ded7",
