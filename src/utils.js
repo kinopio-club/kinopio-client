@@ -387,7 +387,6 @@ export default {
   },
 
   cardMap () {
-    console.time('⏱🍇 utils.cardMap')
     const cards = document.querySelectorAll('.card')
     let cardMap = []
     cards.forEach(card => {
@@ -401,19 +400,16 @@ export default {
       }
       cardMap.push(mappedCard)
     })
-    console.timeEnd('⏱🍇 utils.cardMap')
     return cardMap
   },
 
   highestCardZ (cards) {
-    console.time('⏱🌷 utils.highestCardZ')
     let highestCardZ = 0
     cards.forEach(card => {
       if (card.z > highestCardZ) {
         highestCardZ = card.z
       }
     })
-    console.timeEnd('⏱🌷 utils.highestCardZ')
     return highestCardZ
   },
 

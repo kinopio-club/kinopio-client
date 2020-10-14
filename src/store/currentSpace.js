@@ -825,7 +825,6 @@ export default {
       })
     },
     incrementCardZ: (context, cardId) => {
-      console.time('⏱🦚 highestCardZ')
       const maxInt = Number.MAX_SAFE_INTEGER - 1000
       let cards = context.rootState.currentSpace.cards
       let highestCardZ = utils.highestCardZ(cards)
@@ -838,7 +837,6 @@ export default {
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
       context.commit('updateCard', body)
-      console.timeEnd('⏱🦚 highestCardZ')
     },
     removeCard: (context, card) => {
       const cardHasContent = Boolean(card.name)
