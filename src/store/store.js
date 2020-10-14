@@ -189,7 +189,6 @@ export default new Vuex.Store({
       state.isTouchDevice = value
     },
     updateCardMap: (state) => {
-      // todo optionally takes delta
       state.cardMap = utils.cardMap()
     },
     resetPasswordApiKey: (state, apiKey) => {
