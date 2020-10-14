@@ -215,6 +215,7 @@ export default {
     },
     stopPainting (event) {
       if (this.shouldCancel(event)) { return }
+      this.$store.commit('updateCardMap')
       startCursor = startCursor || {}
       const endCursor = utils.cursorPositionInViewport(event)
       const shouldAddCard = this.$store.state.shouldAddCard

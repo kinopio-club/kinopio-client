@@ -721,11 +721,12 @@ export default {
         return
       }
       let cards = context.state.cards
+      const highestCardZ = utils.highestCardZ(cards)
       let card = {
         id: id || nanoid(),
         x: position.x,
         y: position.y,
-        z: cards.length + 1,
+        z: highestCardZ + 1,
         name: name || '',
         frameId: 0,
         userId: context.rootState.currentUser.id
@@ -827,12 +828,7 @@ export default {
       console.time('⏱🦚 highestCardZ')
       const maxInt = Number.MAX_SAFE_INTEGER - 1000
       let cards = context.rootState.currentSpace.cards
-      let highestCardZ = 0
-      cards.forEach(card => {
-        if (card.z > highestCardZ) {
-          highestCardZ = card.z
-        }
-      })
+      let highestCardZ = utils.highestCardZ(cards)
       if (highestCardZ > maxInt) {
         context.dispatch('clearAllCardsZ')
         highestCardZ = 1
