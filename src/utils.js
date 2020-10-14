@@ -403,6 +403,16 @@ export default {
     return cardMap
   },
 
+  highestCardZ (cards) {
+    let highestCardZ = 0
+    cards.forEach(card => {
+      if (card.z > highestCardZ) {
+        highestCardZ = card.z
+      }
+    })
+    return highestCardZ
+  },
+
   // Spaces 🌙
 
   emptySpace (spaceId) {

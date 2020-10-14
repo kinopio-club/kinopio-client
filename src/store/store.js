@@ -32,6 +32,7 @@ export default new Vuex.Store({
     shouldHideFooter: false,
     shouldExplicitlyHideFooter: false,
     isTouchDevice: false,
+    cardMap: {},
 
     // reset password
     resetPasswordApiKey: '',
@@ -186,6 +187,9 @@ export default new Vuex.Store({
     isTouchDevice: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isTouchDevice' })
       state.isTouchDevice = value
+    },
+    updateCardMap: (state) => {
+      state.cardMap = utils.cardMap()
     },
     resetPasswordApiKey: (state, apiKey) => {
       utils.typeCheck({ value: apiKey, type: 'string', origin: 'resetPasswordApiKey' })
@@ -664,8 +668,8 @@ export default new Vuex.Store({
     updateSpacePageSize: (context) => {
       let maxX = 0
       let maxY = 0
-      const cardMap = utils.cardMap()
-      cardMap.forEach(card => {
+      context.commit('updateCardMap')
+      context.state.cardMap.forEach(card => {
         const cardX = card.x + card.width
         const cardY = card.y + card.height
         if (cardX > maxX) {

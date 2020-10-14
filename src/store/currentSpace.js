@@ -721,11 +721,12 @@ export default {
         return
       }
       let cards = context.state.cards
+      const highestCardZ = utils.highestCardZ(cards)
       let card = {
         id: id || nanoid(),
         x: position.x,
         y: position.y,
-        z: cards.length + 1,
+        z: highestCardZ + 1,
         name: name || '',
         frameId: 0,
         userId: context.rootState.currentUser.id
@@ -813,21 +814,29 @@ export default {
         nameUpdatedByUserId: currentUserId
       })
     },
-    incrementCardZ: (context, cardId) => {
+    clearAllCardsZ: (context) => {
       let cards = context.rootState.currentSpace.cards
-      cards = cards.map((card, index) => {
-        card = utils.clone(card)
-        card.z = Math.max(card.z - 1, 0)
-        let body = { id: card.id, z: card.z }
-        if (card.id === cardId) {
-          card.z = cards.length
-          body.z = card.z
-          const update = { name: 'updateCard', body }
-          context.dispatch('api/addToQueue', update, { root: true })
-          context.commit('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
-        }
+      cards.forEach(card => {
+        const body = { id: card.id, z: 0 }
+        const update = { name: 'updateCard', body }
+        context.dispatch('api/addToQueue', update, { root: true })
+        context.commit('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
         context.commit('updateCard', body)
       })
+    },
+    incrementCardZ: (context, cardId) => {
+      const maxInt = Number.MAX_SAFE_INTEGER - 1000
+      let cards = context.rootState.currentSpace.cards
+      let highestCardZ = utils.highestCardZ(cards)
+      if (highestCardZ > maxInt) {
+        context.dispatch('clearAllCardsZ')
+        highestCardZ = 1
+      }
+      const body = { id: cardId, z: highestCardZ + 1 }
+      const update = { name: 'updateCard', body }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
+      context.commit('updateCard', body)
     },
     removeCard: (context, card) => {
       const cardHasContent = Boolean(card.name)
