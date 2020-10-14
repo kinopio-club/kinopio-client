@@ -49,7 +49,6 @@ const rateOfIterationDecay = 0.03 // higher is faster tail decay
 let paintingCircles = []
 let paintingCanvas, paintingContext, startCursor, paintingCirclesTimer
 let prevScroll
-let cardMap
 
 // remote painting
 let remotePaintingCircles = []
@@ -131,7 +130,8 @@ export default {
     pageHeight () { return this.$store.state.pageHeight },
     pageWidth () { return this.$store.state.pageWidth },
     viewportHeight () { return this.$store.state.viewportHeight },
-    viewportWidth () { return this.$store.state.viewportWidth }
+    viewportWidth () { return this.$store.state.viewportWidth },
+    cardMap () { return this.$store.state.cardMap }
   },
   methods: {
     updatePositionOffsetByPinchZoom () {
@@ -259,7 +259,6 @@ export default {
       this.broadcastCircle(circle)
     },
     startPainting (event) {
-      cardMap = utils.cardMap()
       startCursor = utils.cursorPositionInViewport(event)
       this.currentCursor = utils.cursorPositionInViewport(event)
       const dialogIsVisible = Boolean(document.querySelector('dialog'))
@@ -300,7 +299,7 @@ export default {
 
     selectCards (point) {
       if (this.userCantEditSpace) { return }
-      cardMap.map(card => {
+      this.cardMap.map(card => {
         const x = {
           value: point.x + window.scrollX,
           min: card.x,

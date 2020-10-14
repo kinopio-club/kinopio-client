@@ -934,6 +934,7 @@ export default {
       })
     },
     incrementSelectedCardsZ: (context) => {
+      console.time('⏱ incrementSelectedCardsZ')
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       const currentDraggingCardId = context.rootState.currentDraggingCardId
       if (multipleCardsSelectedIds.length) {
@@ -941,6 +942,7 @@ export default {
       } else {
         context.dispatch('incrementCardZ', currentDraggingCardId)
       }
+      console.timeEnd('⏱ incrementSelectedCardsZ')
     },
     showCardDetails: (context, cardId) => {
       context.dispatch('closeAllDialogs', 'currentSpace.showCardDetails', { root: true })
