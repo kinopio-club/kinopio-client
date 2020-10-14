@@ -813,21 +813,36 @@ export default {
         nameUpdatedByUserId: currentUserId
       })
     },
-    incrementCardZ: (context, cardId) => {
+    clearAllCardsZ: (context) => {
       let cards = context.rootState.currentSpace.cards
-      cards = cards.map((card, index) => {
-        card = utils.clone(card)
-        card.z = Math.max(card.z - 1, 0)
-        let body = { id: card.id, z: card.z }
-        if (card.id === cardId) {
-          card.z = cards.length
-          body.z = card.z
-          const update = { name: 'updateCard', body }
-          context.dispatch('api/addToQueue', update, { root: true })
-          context.commit('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
-        }
+      cards.forEach(card => {
+        const body = { id: card.id, z: 0 }
+        const update = { name: 'updateCard', body }
+        context.dispatch('api/addToQueue', update, { root: true })
+        context.commit('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
         context.commit('updateCard', body)
       })
+    },
+    incrementCardZ: (context, cardId) => {
+      console.time('⏱🦚 highestCardZ')
+      const maxInt = Number.MAX_SAFE_INTEGER - 1000
+      let cards = context.rootState.currentSpace.cards
+      let highestCardZ = 0
+      cards.forEach(card => {
+        if (card.z > highestCardZ) {
+          highestCardZ = card.z
+        }
+      })
+      if (highestCardZ > maxInt) {
+        context.dispatch('clearAllCardsZ')
+        highestCardZ = 1
+      }
+      const body = { id: cardId, z: highestCardZ + 1 }
+      const update = { name: 'updateCard', body }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
+      context.commit('updateCard', body)
+      console.timeEnd('⏱🦚 highestCardZ')
     },
     removeCard: (context, card) => {
       const cardHasContent = Boolean(card.name)
@@ -934,7 +949,6 @@ export default {
       })
     },
     incrementSelectedCardsZ: (context) => {
-      console.time('⏱ incrementSelectedCardsZ')
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       const currentDraggingCardId = context.rootState.currentDraggingCardId
       if (multipleCardsSelectedIds.length) {
@@ -942,7 +956,6 @@ export default {
       } else {
         context.dispatch('incrementCardZ', currentDraggingCardId)
       }
-      console.timeEnd('⏱ incrementSelectedCardsZ')
     },
     showCardDetails: (context, cardId) => {
       context.dispatch('closeAllDialogs', 'currentSpace.showCardDetails', { root: true })
