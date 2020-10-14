@@ -73,11 +73,28 @@ export default {
         this.importSpace(space)
       }
     },
+    updateSpaceItemsUserId (space) {
+      const currentUserId = this.$store.state.currentUser.id
+      const cards = space.cards.map(card => {
+        card.userId = null
+        return card
+      })
+      const connections = space.connections.map(connection => {
+        connection.userId = currentUserId
+        return connection
+      })
+      space.cards = cards
+      space.connections = connections
+      return space
+    },
     importSpace (space) {
       if (!this.isValidSpace(space)) { return }
       space.originSpaceId = space.id
       space.id = nanoid()
       space.name = space.name + ' import'
+      space.removedCards = []
+      space.users = []
+      space = this.updateSpaceItemsUserId(space)
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       cache.saveSpace(uniqueNewSpace)
       this.$store.commit('currentSpace/restoreSpace', uniqueNewSpace)
