@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDialogs")
+dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     template(v-if="isSpaceMember")
       .row
@@ -40,7 +40,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
           span Import
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
 
-  section.results-section
+  section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(:spaces="spaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
 
 </template>
@@ -81,6 +81,9 @@ export default {
           element.setSelectionRange(0, element.value.length)
         })
       }
+      if (mutation.type === 'updatePageSizes') {
+        this.updateHeights()
+      }
     })
   },
   data () {
@@ -93,7 +96,9 @@ export default {
       addSpaceIsVisible: false,
       privacyPickerIsVisible: false,
       isLoadingRemoteSpaces: false,
-      remoteSpaces: []
+      remoteSpaces: [],
+      resultsSectionHeight: null,
+      dialogHeight: null
     }
   },
   computed: {
@@ -236,6 +241,23 @@ export default {
       this.$store.commit('addNotification', { message: `${duplicatedSpaceName} is now yours to edit`, type: 'success' })
       this.updateSpaces()
       this.updateWithRemoteSpaces()
+    },
+    updateHeights () {
+      if (!this.visible) { return }
+      this.updateDialogHeight()
+      this.updateResultsSectionHeight()
+    },
+    updateDialogHeight () {
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeight(element)
+      })
+    },
+    updateResultsSectionHeight () {
+      this.$nextTick(() => {
+        let element = this.$refs.results
+        this.resultsSectionHeight = utils.elementHeight(element)
+      })
     }
   },
   watch: {
@@ -245,6 +267,7 @@ export default {
         this.updateWithRemoteSpaces()
         this.closeDialogs()
         this.updateFavorites()
+        this.updateHeights()
       }
     }
   }

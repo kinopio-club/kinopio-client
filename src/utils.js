@@ -38,6 +38,14 @@ export default {
     }
   },
 
+  elementHeight (element) {
+    element = element.getBoundingClientRect()
+    let footer = document.querySelector('footer')
+    footer = footer.getBoundingClientRect()
+    const heightDelta = footer.y - element.y - 20
+    return heightDelta
+  },
+
   cursorPositionInViewport (event) {
     let x, y
     if (event.touches) {
