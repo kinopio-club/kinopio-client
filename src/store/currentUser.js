@@ -356,7 +356,10 @@ export default {
     restoreUserFavorites: async (context) => {
       const hasRestoredFavorites = context.rootState.hasRestoredFavorites
       if (hasRestoredFavorites) { return }
-      if (!context.getters.isSignedIn) { return }
+      if (!context.getters.isSignedIn) {
+        context.commit('hasRestoredFavorites', true, { root: true })
+        return
+      }
       let favorites = {
         favoriteUsers: [],
         favoriteSpaces: []

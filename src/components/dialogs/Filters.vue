@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.filters.narrow(v-if="visible" :open="visible")
+dialog.filters.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     p
       span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
@@ -20,7 +20,7 @@ dialog.filters.narrow(v-if="visible" :open="visible")
           img.icon.time(src="@/assets/time.svg")
           span Updated
 
-  section.results-section.connection-types
+  section.results-section.connection-types(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="allItems" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredItems")
     ul.results-list
       //- Tags
@@ -61,10 +61,20 @@ export default {
   props: {
     visible: Boolean
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'updatePageSizes') {
+        this.updateDialogHeight()
+        this.updateResultsSectionHeight()
+      }
+    })
+  },
   data () {
     return {
       filter: '',
-      filteredItems: []
+      filteredItems: [],
+      resultsSectionHeight: null,
+      dialogHeight: null
     }
   },
   computed: {
@@ -174,6 +184,20 @@ export default {
       this.$store.dispatch('clearAllFilters')
       this.clearResultsFilter()
     },
+    updateDialogHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeightFromHeader(element)
+      })
+    },
+    updateResultsSectionHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.results
+        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
+      })
+    },
 
     // Toggle filters
 
@@ -229,7 +253,14 @@ export default {
         path: require(`@/assets/frames/${frame.badge}`)
       }
     }
-
+  },
+  watch: {
+    visible (visible) {
+      if (visible) {
+        this.updateDialogHeight()
+        this.updateResultsSectionHeight()
+      }
+    }
   }
 }
 </script>

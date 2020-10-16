@@ -218,6 +218,10 @@ label
     opacity 0.5
     pointer-events none
 
+p,
+span
+  -webkit-text-size-adjust auto
+
 p
   margin 0
   margin-top 10px

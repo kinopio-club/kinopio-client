@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     p Export {{exportTitle}}
   section
@@ -38,11 +38,19 @@ export default {
     exportData: Object,
     exportScope: String // space, cards
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'updatePageSizes') {
+        this.updateDialogHeight()
+      }
+    })
+  },
   data () {
     return {
       textIsCopied: false,
       spaceIsDuplicated: false,
-      duplicatedSpaceName: ''
+      duplicatedSpaceName: '',
+      dialogHeight: null
     }
   },
   methods: {
@@ -94,6 +102,13 @@ export default {
       this.$store.dispatch('currentSpace/duplicateSpace')
       this.spaceIsDuplicated = true
       this.$emit('updateSpaces')
+    },
+    updateDialogHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeight(element)
+      })
     }
   },
   watch: {
@@ -103,6 +118,7 @@ export default {
           this.textIsCopied = false
           this.scrollIntoView()
           this.spaceIsDuplicated = false
+          this.updateDialogHeight()
         }
       })
     }

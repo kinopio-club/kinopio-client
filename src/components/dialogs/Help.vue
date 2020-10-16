@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.help-and-about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" :class="{'child-dialog-is-visible': contactIsVisible}")
+dialog.help-and-about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" :class="{'child-dialog-is-visible': contactIsVisible}" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     p Help
   section
@@ -38,6 +38,7 @@ dialog.help-and-about.narrow(v-if="visible" :open="visible" @click.left.stop="cl
 
 <script>
 import Contact from '@/components/dialogs/Contact.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'Help',
@@ -49,13 +50,17 @@ export default {
   },
   data () {
     return {
-      contactIsVisible: false
+      contactIsVisible: false,
+      dialogHeight: null
     }
   },
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
         this.contactIsVisible = false
+      }
+      if (mutation.type === 'updatePageSizes') {
+        this.updateDialogHeight()
       }
     })
   },
@@ -67,6 +72,20 @@ export default {
     },
     closeDialogs () {
       this.contactIsVisible = false
+    },
+    updateDialogHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeight(element)
+      })
+    }
+  },
+  watch: {
+    visible (visible) {
+      if (visible) {
+        this.updateDialogHeight()
+      }
     }
   }
 }

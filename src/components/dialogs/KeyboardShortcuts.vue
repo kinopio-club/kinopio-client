@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop)
+dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     .row
       .badge.title Keyboard Shortcuts
@@ -125,10 +125,18 @@ export default {
   components: {
     User
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'updatePageSizes') {
+        this.updateDialogHeight()
+      }
+    })
+  },
   data () {
     return {
       safariInfoIsVisible: false,
-      childCardInfoIsVisible: false
+      childCardInfoIsVisible: false,
+      dialogHeight: null
     }
   },
   computed: {
@@ -149,6 +157,20 @@ export default {
     },
     toggleChildCardInfoIsVisible () {
       this.childCardInfoIsVisible = !this.childCardInfoIsVisible
+    },
+    updateDialogHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeight(element)
+      })
+    }
+  },
+  watch: {
+    visible (visible) {
+      if (visible) {
+        this.updateDialogHeight()
+      }
     }
   }
 }

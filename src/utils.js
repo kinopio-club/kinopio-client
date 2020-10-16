@@ -38,6 +38,38 @@ export default {
     }
   },
 
+  elementHeightFromHeader (element, isChildElement) {
+    if (!element) { return }
+    const viewport = this.visualViewport()
+    const rect = element.getBoundingClientRect()
+    let header = document.querySelector('header')
+    header = header.getBoundingClientRect()
+    let height = viewport.height - header.bottom - (viewport.height - rect.bottom)
+    if (isChildElement) {
+      const dialog = element.closest('dialog')
+      const dialogRect = dialog.getBoundingClientRect()
+      height = height - (rect.y - dialogRect.y)
+    }
+    const zoomScale = viewport.scale
+    if (zoomScale > 1) {
+      height = height * zoomScale
+    }
+    return height
+  },
+
+  elementHeight (element) {
+    if (!element) { return }
+    const rect = element.getBoundingClientRect()
+    let footer = document.querySelector('footer')
+    footer = footer.getBoundingClientRect()
+    let height = footer.y - rect.y
+    const zoomScale = this.visualViewport().scale
+    if (zoomScale > 1) {
+      height = height * zoomScale
+    }
+    return height
+  },
+
   cursorPositionInViewport (event) {
     let x, y
     if (event.touches) {

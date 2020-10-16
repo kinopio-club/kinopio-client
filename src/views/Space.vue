@@ -147,7 +147,9 @@ export default {
       this.$store.dispatch('currentSpace/removeEmptyCards')
     },
     updatePageSizes () {
-      this.$store.commit('updatePageSizes')
+      this.$nextTick(() => {
+        this.$store.commit('updatePageSizes')
+      })
     },
     updateIsOnline () {
       const status = window.navigator.onLine
