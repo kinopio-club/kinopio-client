@@ -39,6 +39,7 @@ export default {
   },
 
   elementHeightFromHeader (element, isChildElement) {
+    if (!element) { return }
     const viewport = this.visualViewport()
     const rect = element.getBoundingClientRect()
     let header = document.querySelector('header')
@@ -56,7 +57,8 @@ export default {
     return height
   },
 
-  elementHeight (element, fromFooter) {
+  elementHeight (element) {
+    if (!element) { return }
     const rect = element.getBoundingClientRect()
     let footer = document.querySelector('footer')
     footer = footer.getBoundingClientRect()

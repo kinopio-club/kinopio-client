@@ -154,7 +154,6 @@ export default {
     },
     togglePromptPack (pack) {
       const userPack = this.userPrompts.find(userPrompt => {
-        console.log(pack.packId, userPrompt.packId)
         if (!userPrompt.packId) { return }
         return pack.packId === userPrompt.packId.toString()
       })
