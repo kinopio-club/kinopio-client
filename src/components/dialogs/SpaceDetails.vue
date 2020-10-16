@@ -256,7 +256,7 @@ export default {
     updateResultsSectionHeight () {
       this.$nextTick(() => {
         let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeight(element)
+        this.resultsSectionHeight = utils.elementHeight(element) - 2
       })
     }
   },

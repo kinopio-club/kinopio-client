@@ -1,5 +1,13 @@
 <template lang="pug">
-dialog.add-space.narrow(v-if="visible" :open="visible" @touchend.stop @click.left.stop="closeDialogs" :class="{'child-dialog-is-visible': promptPackPickerIsVisible, 'short': screenIsShort}" ref="dialog")
+dialog.add-space.narrow(
+  v-if="visible"
+  :open="visible"
+  @touchend.stop
+  @click.left.stop="closeDialogs"
+  :class="{'child-dialog-is-visible': promptPackPickerIsVisible, 'short': screenIsShort}"
+  ref="dialog"
+  :style="{'max-height': dialogHeight + 'px'}"
+)
   section
     .row
       button(@click="addSpace")
@@ -39,6 +47,7 @@ import Prompt from '@/components/Prompt.vue'
 import PromptPackPicker from '@/components/dialogs/PromptPackPicker.vue'
 import moonphase from '@/moonphase.js'
 import MoonPhase from '@/components/MoonPhase.vue'
+import utils from '@/utils.js'
 
 import last from 'lodash-es/last'
 import nanoid from 'nanoid'
@@ -52,6 +61,13 @@ export default {
   },
   props: {
     visible: Boolean
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'updatePageSizes') {
+        this.updateDialogHeight()
+      }
+    })
   },
   mounted () {
     this.moonPhase = moonphase()
@@ -68,7 +84,8 @@ export default {
         left: 80,
         top: 5
       },
-      screenIsShort: false
+      screenIsShort: false,
+      dialogHeight: null
     }
   },
   computed: {
@@ -146,12 +163,20 @@ export default {
       } else {
         this.addPromptPack(pack)
       }
+    },
+    updateDialogHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeight(element)
+      })
     }
   },
   watch: {
     visible (visible) {
       this.closeAll()
       this.shouldHideFooter(false)
+      this.updateDialogHeight()
     }
   }
 }

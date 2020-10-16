@@ -38,12 +38,34 @@ export default {
     }
   },
 
-  elementHeight (element) {
-    element = element.getBoundingClientRect()
+  elementHeightFromHeader (element, isChildElement) {
+    const viewport = this.visualViewport()
+    const rect = element.getBoundingClientRect()
+    let header = document.querySelector('header')
+    header = header.getBoundingClientRect()
+    let height = viewport.height - header.bottom - (viewport.height - rect.bottom)
+    if (isChildElement) {
+      const dialog = element.closest('dialog')
+      const dialogRect = dialog.getBoundingClientRect()
+      height = height - (rect.y - dialogRect.y)
+    }
+    const zoomScale = viewport.scale
+    if (zoomScale > 1) {
+      height = height * zoomScale
+    }
+    return height
+  },
+
+  elementHeight (element, fromFooter) {
+    const rect = element.getBoundingClientRect()
     let footer = document.querySelector('footer')
     footer = footer.getBoundingClientRect()
-    const heightDelta = footer.y - element.y - 20
-    return heightDelta
+    let height = footer.y - rect.y
+    const zoomScale = this.visualViewport().scale
+    if (zoomScale > 1) {
+      height = height * zoomScale
+    }
+    return height
   },
 
   cursorPositionInViewport (event) {

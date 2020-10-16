@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.explore(v-if="visible" :open="visible")
+dialog.explore(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     .segmented-buttons
       button(@click.left.stop="hideTemplates" :class="{ active: !templatesIsVisible }")
@@ -16,6 +16,7 @@ dialog.explore(v-if="visible" :open="visible")
 import Templates from '@/components/Templates.vue'
 import NewSpaces from '@/components/NewSpaces.vue'
 import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'Explore',
@@ -27,11 +28,19 @@ export default {
   props: {
     visible: Boolean
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'updatePageSizes') {
+        this.updateDialogHeight()
+      }
+    })
+  },
   data () {
     return {
       templatesIsVisible: false,
       loadingNewSpaces: false,
-      spaces: []
+      spaces: [],
+      dialogHeight: null
     }
   },
   methods: {
@@ -55,12 +64,20 @@ export default {
       } else {
         this.spaces.unshift(currentSpace)
       }
+    },
+    updateDialogHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeightFromHeader(element)
+      })
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
         this.getNewSpaces()
+        this.updateDialogHeight()
       }
     }
   }

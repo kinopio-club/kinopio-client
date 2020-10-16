@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keydown.stop :class="{'right-side': dialogOnRight}")
+dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keydown.stop :class="{'right-side': dialogOnRight}" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     p Upgrade your account for unlimited cards and uploads
     .summary
@@ -72,6 +72,13 @@ export default {
     visible: Boolean,
     dialogOnRight: Boolean
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'updatePageSizes') {
+        this.updateDialogHeight()
+      }
+    })
+  },
   data () {
     return {
       name: '',
@@ -86,7 +93,8 @@ export default {
         allFieldsAreRequired: false,
         stripeError: false,
         stripeErrorMessage: ''
-      }
+      },
+      dialogHeight: null
     }
   },
   computed: {
@@ -275,12 +283,20 @@ export default {
         }
       }
       this.loading.subscriptionIsBeingCreated = false
+    },
+    updateDialogHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeight(element)
+      })
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
         this.loadStripe()
+        this.updateDialogHeight()
       }
     }
   }

@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.contact(v-if="visible" :open="visible" @click.left.stop)
+dialog.contact(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     p Contact
   section
@@ -21,10 +21,40 @@ dialog.contact(v-if="visible" :open="visible" @click.left.stop)
 </template>
 
 <script>
+import utils from '@/utils.js'
+
 export default {
   name: 'Contact',
   props: {
     visible: Boolean
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'updatePageSizes') {
+        this.updateDialogHeight()
+      }
+    })
+  },
+  data () {
+    return {
+      dialogHeight: null
+    }
+  },
+  methods: {
+    updateDialogHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeight(element)
+      })
+    }
+  },
+  watch: {
+    visible (visible) {
+      if (visible) {
+        this.updateDialogHeight()
+      }
+    }
   }
 }
 </script>
