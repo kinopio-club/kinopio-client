@@ -159,7 +159,8 @@ export default {
       pastedName: '',
       wasPasted: false,
       cursorPosition: 0,
-      shouldCancelBracketRight: false
+      shouldCancelBracketRight: false,
+      insertedLineBreak: false
     }
   },
   created () {
@@ -434,6 +435,12 @@ export default {
       })
       this.updateTags()
     },
+    checkIfIsInsertLineBreak (event) {
+      const lineBreakInserted = event.ctrlKey || event.altKey
+      if (!lineBreakInserted) {
+        this.insertedLineBreak = false
+      }
+    },
     insertLineBreak (event) {
       const position = this.$refs.name.selectionEnd
       const name = this.card.name
@@ -441,11 +448,17 @@ export default {
       setTimeout(() => {
         this.$refs.name.setSelectionRange(position + 1, position + 1)
       })
+      this.insertedLineBreak = true
       this.updateCardName(newName)
     },
     closeCard (event) {
       if (this.tagPickerIsVisible) {
         this.hideTagPicker()
+        event.stopPropagation()
+        return
+      }
+      if (this.insertedLineBreak) {
+        this.insertedLineBreak = false
         event.stopPropagation()
         return
       }
@@ -657,6 +670,7 @@ export default {
       } else if (keyIsLettterOrNumber && isCursorInsideTagBrackets) {
         this.showTagPicker()
       }
+      this.checkIfIsInsertLineBreak(event)
     },
     moveCursorPastTagEnd () {
       const cursorPosition = this.$refs.name.selectionStart
