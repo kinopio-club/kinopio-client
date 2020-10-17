@@ -353,8 +353,8 @@ export default {
         }
       })
       connections = connections.filter(Boolean)
+      const connectionType = this.connectionType(event)
       connections.forEach(connection => {
-        const connectionType = this.connectionType(event)
         this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
         this.$store.dispatch('addToMultipleConnectionsSelected', connection.id)
       })
