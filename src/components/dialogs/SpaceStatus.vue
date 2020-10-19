@@ -1,22 +1,20 @@
 <template lang="pug">
-dialog.narrow.space-status(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.narrow.space-status(v-if="visible" :open="visible")
   section
     Loader(:visible="true")
-    p Space Status
-
+    template(v-if="isLoadingSpace")
+      p {{currentSpace.name}} is downloading…
+      p(v-if="spaceIsCached") You can edit it right now and your changes will sync up
+    template(v-else-if="isJoiningSpace")
+      p Joining {{currentSpace.name}} as a collaborator…
+    template(v-else-if="isReconnectingToBroadcast")
+      p Broadcast connection error, retrying…
 </template>
 
 <script>
 import Loader from '@/components/Loader.vue'
-// import cache from '@/cache.js'
-// import Export from '@/components/dialogs/Export.vue'
-// import Import from '@/components/dialogs/Import.vue'
-// import AddSpace from '@/components/dialogs/AddSpace.vue'
-// import SpaceList from '@/components/SpaceList.vue'
-// import PrivacyButton from '@/components/PrivacyButton.vue'
-// import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
-// import templates from '@/data/templates.js'
-// import utils from '@/utils.js'
+import cache from '@/cache.js'
+import utils from '@/utils.js'
 
 export default {
   name: 'SpaceStatus',
@@ -25,36 +23,26 @@ export default {
   },
   props: {
     visible: Boolean
+  },
+  data () {
+    return {
+      spaceIsCached: false
+    }
+  },
+  computed: {
+    currentSpace () { return this.$store.state.currentSpace },
+    isLoadingSpace () { return this.$store.state.isLoadingSpace },
+    isJoiningSpace () { return this.$store.state.isJoiningSpace },
+    isReconnectingToBroadcast () { return this.$store.state.isReconnectingToBroadcast }
+  },
+  watch: {
+    visible (visible) {
+      if (visible) {
+        const cachedSpace = cache.space(this.currentSpace.id)
+        this.spaceIsCached = utils.arrayHasItems(cachedSpace.cards)
+      }
+    }
   }
-  // created () {
-  //   this.$store.subscribe((mutation, state) => {
-  //     if (mutation.type === 'updatePageSizes') {
-  //       this.updateHeights()
-  //     }
-  //   })
-  // },
-  // data () {
-  //   return {
-  //     dialogHeight: null
-  //   }
-  // },
-  // computed: {
-  //   currentSpace () { return this.$store.state.currentSpace },
-  // },
-  // methods: {
-  //   addSpace () {
-  //     window.scrollTo(0, 0)
-  //     this.$store.dispatch('currentSpace/addSpace')
-  //     this.updateSpaces()
-  //   },
-  // },
-  // watch: {
-  //   visible (visible) {
-  //     if (visible) {
-  //       this.updateHeights()
-  //     }
-  //   }
-  // }
 }
 </script>
 

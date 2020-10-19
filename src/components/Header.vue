@@ -29,7 +29,7 @@ header(:style="visualViewportPosition")
           SpaceDetails(:visible="spaceDetailsIsVisible")
           ImportArenaChannel(:visible="importArenaChannelIsVisible")
         .button-wrap(v-if="spaceHasStatus")
-          button(@click.left.stop="toggleSpaceStatusIsVisible")
+          button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
             Loader(:visible="spaceHasStatus")
           SpaceStatus(:visible="spaceStatusIsVisible")
 
@@ -68,6 +68,7 @@ header(:style="visualViewportPosition")
 <script>
 import About from '@/components/dialogs/About.vue'
 import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
+import SpaceStatus from '@/components/dialogs/SpaceStatus.vue'
 import MoonPhase from '@/components/MoonPhase.vue'
 import User from '@/components/User.vue'
 import SignUpOrIn from '@/components/dialogs/SignUpOrIn.vue'
@@ -89,6 +90,7 @@ export default {
   components: {
     About,
     SpaceDetails,
+    SpaceStatus,
     User,
     SignUpOrIn,
     ResetPassword,
@@ -187,7 +189,8 @@ export default {
     spaceHasStatus () {
       const isLoadingSpace = this.$store.state.isLoadingSpace
       const isJoiningSpace = this.$store.state.isJoiningSpace
-      return isLoadingSpace || isJoiningSpace
+      const isReconnectingToBroadcast = this.$store.state.isReconnectingToBroadcast
+      return isLoadingSpace || isJoiningSpace || isReconnectingToBroadcast
     },
     isOnline () {
       return this.$store.state.isOnline
