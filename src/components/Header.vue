@@ -11,24 +11,27 @@ header(:style="visualViewportPosition")
         About(:visible="aboutIsVisible")
         KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
     .space-details-wrap
-      .button-wrap
-        button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
-          .badge.info(v-show="currentSpaceIsTemplate")
-            span Template
-
-          .badge-wrap(v-if="!userCanEditSpace && !currentSpaceIsTemplate")
-            .badge.info(:class="{'invisible': readOnlyJiggle}")
-              span Read Only
-            .badge.info.invisible-badge(ref="readOnly" :class="{'badge-jiggle': readOnlyJiggle, 'invisible': !readOnlyJiggle}")
-              span Read Only
-          MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
-          span {{currentSpaceName}}
-          img.icon.privacy-icon(v-if="spaceIsNotClosed" :src="privacyIcon" :class="privacyName")
-          .badge.status.explore(v-if="shouldShowInExplore")
-            img.icon(src="@/assets/checkmark.svg")
-          Loader(:visible="isLoadingOrJoiningSpace")
-        SpaceDetails(:visible="spaceDetailsIsVisible")
-        ImportArenaChannel(:visible="importArenaChannelIsVisible")
+      .segmented-buttons
+        .button-wrap
+          button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
+            .badge.info(v-show="currentSpaceIsTemplate")
+              span Template
+            .badge-wrap(v-if="!userCanEditSpace && !currentSpaceIsTemplate")
+              .badge.info(:class="{'invisible': readOnlyJiggle}")
+                span Read Only
+              .badge.info.invisible-badge(ref="readOnly" :class="{'badge-jiggle': readOnlyJiggle, 'invisible': !readOnlyJiggle}")
+                span Read Only
+            MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
+            span {{currentSpaceName}}
+            img.icon.privacy-icon(v-if="spaceIsNotClosed" :src="privacyIcon" :class="privacyName")
+            .badge.status.explore(v-if="shouldShowInExplore")
+              img.icon(src="@/assets/checkmark.svg")
+          SpaceDetails(:visible="spaceDetailsIsVisible")
+          ImportArenaChannel(:visible="importArenaChannelIsVisible")
+        .button-wrap(v-if="spaceHasStatus")
+          button(@click.left.stop="toggleSpaceStatusIsVisible")
+            Loader(:visible="spaceHasStatus")
+          SpaceStatus(:visible="spaceStatusIsVisible")
 
   aside
     .top
@@ -105,6 +108,7 @@ export default {
       loadingSignUpOrIn: false,
       keyboardShortcutsIsVisible: false,
       upgradeUserIsVisible: false,
+      spaceStatusIsVisible: false,
       pinchZoomOffsetLeft: 0,
       pinchZoomOffsetTop: 0,
       pinchZoomScale: 1,
@@ -180,7 +184,7 @@ export default {
     currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     },
-    isLoadingOrJoiningSpace () {
+    spaceHasStatus () {
       const isLoadingSpace = this.$store.state.isLoadingSpace
       const isJoiningSpace = this.$store.state.isJoiningSpace
       return isLoadingSpace || isJoiningSpace
@@ -251,6 +255,7 @@ export default {
       this.shareIsVisible = false
       this.keyboardShortcutsIsVisible = false
       this.upgradeUserIsVisible = false
+      this.spaceStatusIsVisible = false
     },
     updatePositionFrame () {
       currentIteration++
@@ -287,6 +292,11 @@ export default {
       const isVisible = this.shareIsVisible
       this.$store.dispatch('closeAllDialogs', 'Header.toggleShareIsVisible')
       this.shareIsVisible = !isVisible
+    },
+    toggleSpaceStatusIsVisible () {
+      const isVisible = this.spaceStatusIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleSpaceStatusIsVisible')
+      this.spaceStatusIsVisible = !isVisible
     },
     setLoadingSignUpOrIn (value) {
       this.loadingSignUpOrIn = value
@@ -364,6 +374,23 @@ header
       > button
         .privacy-icon
           margin-left 6px
+
+    // should not bubble down into dialogs
+    .segmented-buttons
+      > .button-wrap
+        > button
+          border-radius 0
+          .loader
+            margin 0
+        &:first-child
+          > button
+            border-top-left-radius 3px
+            border-bottom-left-radius 3px
+        &:last-child
+          > button
+            border-top-right-radius 3px
+            border-bottom-right-radius 3px
+            margin-left -1px
 
   aside
     display flex
