@@ -15,6 +15,7 @@ const joinSpaceRoom = (store, mutation) => {
   const currentSpaceHasUrl = utils.currentSpaceHasUrl(space)
   const user = utils.clone(store.state.currentUser)
   if (!currentSpaceHasUrl) { return }
+  if (!user) { return }
   if (currentSpaceRoom === space.id) { return }
   currentSpaceRoom = space.id
   websocket.send(JSON.stringify({
