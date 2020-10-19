@@ -34,7 +34,6 @@ header(:style="visualViewportPosition")
           button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
             Loader(:visible="spaceHasStatus")
             .badge.success.space-status-success(v-if="!spaceHasStatus")
-              img.icon.moon-phase(src="@/assets/moon-phases/full-moon.svg")
           SpaceStatus(:visible="spaceStatusIsVisible")
         //- offline
         .button-wrap(v-if="!isOnline")
@@ -391,7 +390,6 @@ header
       .down-arrow
         transform translateY(5px)
   .space-details-wrap
-    max-width 250px
     margin-top 8px
     @media(max-width 414px)
       max-width calc(100vw - 200px)
@@ -476,9 +474,9 @@ header
     vertical-align -2px
 
   .badge.space-status-success
-      margin 0
-    .moon-phase
-      margin 0
+    margin 0
+    padding 0 7px
+    border-radius 10px
 
 .badge-jiggle
   animation-name notificationJiggle
