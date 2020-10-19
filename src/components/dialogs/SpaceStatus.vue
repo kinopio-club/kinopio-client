@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.space-status(v-if="visible" :open="visible")
+dialog.narrow.space-status(v-if="visible" :open="visible" ref="dialog" :class="{'right-side': showOnRightSide}")
   section
     p Status
   section
@@ -28,9 +28,17 @@ export default {
   props: {
     visible: Boolean
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'updatePageSizes') {
+        this.checkIfShouldBeOnRightSide()
+      }
+    })
+  },
   data () {
     return {
-      spaceIsCached: false
+      spaceIsCached: false,
+      showOnRightSide: false
     }
   },
   computed: {
@@ -40,11 +48,27 @@ export default {
     isReconnectingToBroadcast () { return this.$store.state.isReconnectingToBroadcast },
     isConnected () { return !this.isLoadingSpace && !this.isJoiningSpace && !this.isReconnectingToBroadcast }
   },
+  methods: {
+    checkIfShouldBeOnRightSide () {
+      this.showOnRightSide = false
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        element = element.getBoundingClientRect()
+        const viewport = utils.visualViewport()
+        const offset = viewport.width - (element.x + element.width)
+        if (offset < 0) {
+          this.showOnRightSide = true
+        }
+      })
+    }
+  },
   watch: {
     visible (visible) {
       if (visible) {
         const cachedSpace = cache.space(this.currentSpace.id)
         this.spaceIsCached = utils.arrayHasItems(cachedSpace.cards)
+        this.checkIfShouldBeOnRightSide()
       }
     }
   }
@@ -53,6 +77,9 @@ export default {
 
 <style lang="stylus">
 .space-status
+  &.right-side
+    left initial
+    right 8px
   .badge
     display inline-block
 </style>

@@ -30,7 +30,7 @@ header(:style="visualViewportPosition")
           SpaceDetails(:visible="spaceDetailsIsVisible")
           ImportArenaChannel(:visible="importArenaChannelIsVisible")
         //- state
-        .button-wrap(v-if="spaceHasStatusAndStatusIsNotVisible")
+        .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
           button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
             Loader(:visible="spaceHasStatus")
             .badge.success.space-status-success(v-if="!spaceHasStatus")
@@ -204,7 +204,7 @@ export default {
       if (!this.isOnline) { return }
       return isLoadingSpace || isJoiningSpace || isReconnectingToBroadcast
     },
-    spaceHasStatusAndStatusIsNotVisible () {
+    spaceHasStatusAndStatusDialogIsNotVisible () {
       if (this.spaceHasStatus) {
         return true
       } else if (this.spaceStatusIsVisible) {
@@ -477,6 +477,7 @@ header
     margin 0
     padding 0 7px
     border-radius 10px
+    vertical-align 0
 
 .badge-jiggle
   animation-name notificationJiggle
