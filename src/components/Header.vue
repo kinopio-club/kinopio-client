@@ -29,13 +29,15 @@ header(:style="visualViewportPosition")
               img.icon(src="@/assets/checkmark.svg")
           SpaceDetails(:visible="spaceDetailsIsVisible")
           ImportArenaChannel(:visible="importArenaChannelIsVisible")
-          SpaceStatus(:visible="spaceStatusIsVisible")
         //- state
-        .button-wrap(v-if="spaceHasStatus")
+        .button-wrap(v-if="spaceHasStatusAndStatusIsNotVisible")
           button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
             Loader(:visible="spaceHasStatus")
+            .badge.success.space-status-success(v-if="!spaceHasStatus")
+              img.icon.moon-phase(src="@/assets/moon-phases/full-moon.svg")
+          SpaceStatus(:visible="spaceStatusIsVisible")
         //- offline
-        .button-wrap(v-if="isOffline")
+        .button-wrap(v-if="!isOnline")
           button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
             img.icon.offline(src="@/assets/offline.svg")
           Offline(:visible="offlineIsVisible")
@@ -200,8 +202,17 @@ export default {
       const isLoadingSpace = this.$store.state.isLoadingSpace
       const isJoiningSpace = this.$store.state.isJoiningSpace
       const isReconnectingToBroadcast = this.$store.state.isReconnectingToBroadcast
-      if (this.isOnline) { return }
+      if (!this.isOnline) { return }
       return isLoadingSpace || isJoiningSpace || isReconnectingToBroadcast
+    },
+    spaceHasStatusAndStatusIsNotVisible () {
+      if (this.spaceHasStatus) {
+        return true
+      } else if (this.spaceStatusIsVisible) {
+        return true
+      } else {
+        return false
+      }
     },
     isOnline () {
       return this.$store.state.isOnline
@@ -250,9 +261,6 @@ export default {
           'transform-origin': 'left top'
         }
       }
-    },
-    isOffline () {
-      return !this.$store.state.isOnline
     }
   },
   methods: {
@@ -466,6 +474,11 @@ header
   .icon.offline
     height 13px
     vertical-align -2px
+
+  .badge.space-status-success
+      margin 0
+    .moon-phase
+      margin 0
 
 .badge-jiggle
   animation-name notificationJiggle

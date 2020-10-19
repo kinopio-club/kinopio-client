@@ -6,13 +6,12 @@ dialog.narrow.space-status(v-if="visible" :open="visible")
     .badge.success(v-if="isConnected") Connected
 
     p(v-if="isLoadingSpace && spaceIsCached") You can edit right now, your changes will sync
-    //- p(v-else-if="isJoiningSpace") You'll be able to edit this space as a collaborator
-    p(v-else-if="isReconnectingToBroadcast") If you're not currently collaborating, you can edit right now
+    p(v-else-if="isJoiningSpace || isReconnectingToBroadcast") You can edit right now but cannot collaborate yet, your changes will sync
 
     p.badge.info(v-if="!isConnected")
       Loader(:visible="true")
       span(v-if="isLoadingSpace") Downloading
-      span(v-else-if="isJoiningSpace") Joining
+      span(v-else-if="isJoiningSpace") Broadcasting
       span(v-else-if="isReconnectingToBroadcast") Reconnecting
 </template>
 
@@ -54,7 +53,6 @@ export default {
 
 <style lang="stylus">
 .space-status
-  left calc(100% + 8px)
   .badge
     display inline-block
 </style>
