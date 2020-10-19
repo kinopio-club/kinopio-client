@@ -46,17 +46,12 @@ footer(:style="visualViewportPosition")
           span {{remotePendingUpload.percentComplete}}%
 
       Background(:visible="backgroundIsVisible")
-    .button-wrap(v-if="isOffline")
-      button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
-        span Offline
-      Offline(:visible="offlineIsVisible")
 
 </template>
 
 <script>
 import Explore from '@/components/dialogs/Explore.vue'
 import Removed from '@/components/dialogs/Removed.vue'
-import Offline from '@/components/dialogs/Offline.vue'
 import Filters from '@/components/dialogs/Filters.vue'
 import Favorites from '@/components/dialogs/Favorites.vue'
 import Background from '@/components/dialogs/Background.vue'
@@ -72,7 +67,6 @@ export default {
   components: {
     Explore,
     Removed,
-    Offline,
     Notifications,
     Filters,
     Favorites,
@@ -83,7 +77,6 @@ export default {
     return {
       removedIsVisible: false,
       favoritesIsVisible: false,
-      offlineIsVisible: false,
       filtersIsVisible: false,
       exploreIsVisible: false,
       backgroundIsVisible: false,
@@ -97,7 +90,6 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.removedIsVisible = false
         this.favoritesIsVisible = false
-        this.offlineIsVisible = false
         this.filtersIsVisible = false
         this.exploreIsVisible = false
         this.backgroundIsVisible = false
@@ -147,9 +139,6 @@ export default {
     },
     shouldHideFooter () {
       return this.$store.state.shouldHideFooter
-    },
-    isOffline () {
-      return !this.$store.state.isOnline
     },
     totalFiltersActive () {
       const currentUser = this.$store.state.currentUser
@@ -231,11 +220,6 @@ export default {
       const isVisible = this.favoritesIsVisible
       this.$store.dispatch('closeAllDialogs', 'Footer.toggleFavoritesIsVisible')
       this.favoritesIsVisible = !isVisible
-    },
-    toggleOfflineIsVisible () {
-      const isVisible = this.offlineIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Footer.toggleOfflineIsVisible')
-      this.offlineIsVisible = !isVisible
     },
     toggleFiltersIsVisible () {
       const isVisible = this.filtersIsVisible

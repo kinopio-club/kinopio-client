@@ -12,6 +12,7 @@ header(:style="visualViewportPosition")
         KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
     .space-details-wrap
       .segmented-buttons
+        //- space
         .button-wrap
           button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
             .badge.info(v-show="currentSpaceIsTemplate")
@@ -28,10 +29,16 @@ header(:style="visualViewportPosition")
               img.icon(src="@/assets/checkmark.svg")
           SpaceDetails(:visible="spaceDetailsIsVisible")
           ImportArenaChannel(:visible="importArenaChannelIsVisible")
+        //- state
         .button-wrap(v-if="spaceHasStatus")
           button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
             Loader(:visible="spaceHasStatus")
           SpaceStatus(:visible="spaceStatusIsVisible")
+        //- offline
+        .button-wrap(v-if="isOffline")
+          button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
+            span Offline
+          Offline(:visible="offlineIsVisible")
 
   aside
     .top
@@ -69,6 +76,7 @@ header(:style="visualViewportPosition")
 import About from '@/components/dialogs/About.vue'
 import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
 import SpaceStatus from '@/components/dialogs/SpaceStatus.vue'
+import Offline from '@/components/dialogs/Offline.vue'
 import MoonPhase from '@/components/MoonPhase.vue'
 import User from '@/components/User.vue'
 import SignUpOrIn from '@/components/dialogs/SignUpOrIn.vue'
@@ -91,6 +99,7 @@ export default {
     About,
     SpaceDetails,
     SpaceStatus,
+    Offline,
     User,
     SignUpOrIn,
     ResetPassword,
@@ -111,6 +120,7 @@ export default {
       keyboardShortcutsIsVisible: false,
       upgradeUserIsVisible: false,
       spaceStatusIsVisible: false,
+      offlineIsVisible: false,
       pinchZoomOffsetLeft: 0,
       pinchZoomOffsetTop: 0,
       pinchZoomScale: 1,
@@ -239,6 +249,9 @@ export default {
           'transform-origin': 'left top'
         }
       }
+    },
+    isOffline () {
+      return !this.$store.state.isOnline
     }
   },
   methods: {
@@ -259,6 +272,7 @@ export default {
       this.keyboardShortcutsIsVisible = false
       this.upgradeUserIsVisible = false
       this.spaceStatusIsVisible = false
+      this.offlineIsVisible = false
     },
     updatePositionFrame () {
       currentIteration++
@@ -301,6 +315,12 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'Header.toggleSpaceStatusIsVisible')
       this.spaceStatusIsVisible = !isVisible
     },
+    toggleOfflineIsVisible () {
+      const isVisible = this.offlineIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleOfflineIsVisible')
+      this.offlineIsVisible = !isVisible
+    },
+
     setLoadingSignUpOrIn (value) {
       this.loadingSignUpOrIn = value
     },

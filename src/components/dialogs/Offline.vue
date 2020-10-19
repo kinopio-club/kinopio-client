@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog(v-if="visible" :open="visible")
+dialog.narrow(v-if="visible" :open="visible")
   section
     p Offline
   section(v-if="currentUserIsSignedIn")
