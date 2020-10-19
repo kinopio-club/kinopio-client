@@ -37,7 +37,7 @@ header(:style="visualViewportPosition")
         //- offline
         .button-wrap(v-if="isOffline")
           button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
-            span Offline
+            img.icon.offline(src="@/assets/offline.svg")
           Offline(:visible="offlineIsVisible")
 
   aside
@@ -461,6 +461,10 @@ header
   .users
     > .upgrade-user
       max-height calc(100vh - 50px)
+
+  .icon.offline
+    height 13px
+    vertical-align -2px
 
 .badge-jiggle
   animation-name notificationJiggle

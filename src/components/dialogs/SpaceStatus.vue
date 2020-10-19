@@ -1,14 +1,15 @@
 <template lang="pug">
 dialog.narrow.space-status(v-if="visible" :open="visible")
   section
-    Loader(:visible="true")
-    template(v-if="isLoadingSpace")
-      p {{currentSpace.name}} is downloading…
-      p(v-if="spaceIsCached") You can edit it right now and your changes will sync up
-    template(v-else-if="isJoiningSpace")
-      p Joining {{currentSpace.name}} as a collaborator…
-    template(v-else-if="isReconnectingToBroadcast")
-      p Broadcast connection error, retrying…
+    .badge.info
+      Loader(:visible="true")
+      span(v-if="isLoadingSpace") Downloading
+      span(v-else-if="isJoiningSpace") Joining
+      span(v-else-if="isReconnectingToBroadcast") Reconnecting
+
+    p(v-if="isLoadingSpace && spaceIsCached") You can edit right now, your changes will sync up later
+    p(v-else-if="isJoiningSpace") You'll be able to edit this space as a collaborator
+    p(v-else-if="isReconnectingToBroadcast") Reconnecting to collaborators. If you're not currently collaborating, you can edit right now
 </template>
 
 <script>
@@ -47,4 +48,7 @@ export default {
 </script>
 
 <style lang="stylus">
+.space-status
+  .badge
+    display inline-block
 </style>
