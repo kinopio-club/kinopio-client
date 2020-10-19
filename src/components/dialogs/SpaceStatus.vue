@@ -1,15 +1,19 @@
 <template lang="pug">
 dialog.narrow.space-status(v-if="visible" :open="visible")
   section
-    .badge.info
+    p Status
+  section
+    .badge.success(v-if="isConnected") Connected
+
+    p(v-if="isLoadingSpace && spaceIsCached") You can edit right now, your changes will sync
+    //- p(v-else-if="isJoiningSpace") You'll be able to edit this space as a collaborator
+    p(v-else-if="isReconnectingToBroadcast") If you're not currently collaborating, you can edit right now
+
+    p.badge.info(v-if="!isConnected")
       Loader(:visible="true")
       span(v-if="isLoadingSpace") Downloading
       span(v-else-if="isJoiningSpace") Joining
       span(v-else-if="isReconnectingToBroadcast") Reconnecting
-
-    p(v-if="isLoadingSpace && spaceIsCached") You can edit right now, your changes will sync up later
-    p(v-else-if="isJoiningSpace") You'll be able to edit this space as a collaborator
-    p(v-else-if="isReconnectingToBroadcast") Reconnecting to collaborators. If you're not currently collaborating, you can edit right now
 </template>
 
 <script>
@@ -34,7 +38,8 @@ export default {
     currentSpace () { return this.$store.state.currentSpace },
     isLoadingSpace () { return this.$store.state.isLoadingSpace },
     isJoiningSpace () { return this.$store.state.isJoiningSpace },
-    isReconnectingToBroadcast () { return this.$store.state.isReconnectingToBroadcast }
+    isReconnectingToBroadcast () { return this.$store.state.isReconnectingToBroadcast },
+    isConnected () { return !this.isLoadingSpace && !this.isJoiningSpace && !this.isReconnectingToBroadcast }
   },
   watch: {
     visible (visible) {
@@ -49,6 +54,7 @@ export default {
 
 <style lang="stylus">
 .space-status
+  left calc(100% + 8px)
   .badge
     display inline-block
 </style>

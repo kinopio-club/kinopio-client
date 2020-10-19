@@ -29,11 +29,11 @@ header(:style="visualViewportPosition")
               img.icon(src="@/assets/checkmark.svg")
           SpaceDetails(:visible="spaceDetailsIsVisible")
           ImportArenaChannel(:visible="importArenaChannelIsVisible")
+          SpaceStatus(:visible="spaceStatusIsVisible")
         //- state
         .button-wrap(v-if="spaceHasStatus")
           button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
             Loader(:visible="spaceHasStatus")
-          SpaceStatus(:visible="spaceStatusIsVisible")
         //- offline
         .button-wrap(v-if="isOffline")
           button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
