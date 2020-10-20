@@ -198,10 +198,10 @@ export default {
       return this.$store.getters['currentUser/isSignedIn']
     },
     spaceHasStatus () {
+      if (!this.isOnline) { return }
       const isLoadingSpace = this.$store.state.isLoadingSpace
       const isJoiningSpace = this.$store.state.isJoiningSpace
       const isReconnectingToBroadcast = this.$store.state.isReconnectingToBroadcast
-      if (!this.isOnline) { return }
       return isLoadingSpace || isJoiningSpace || isReconnectingToBroadcast
     },
     spaceHasStatusAndStatusDialogIsNotVisible () {
