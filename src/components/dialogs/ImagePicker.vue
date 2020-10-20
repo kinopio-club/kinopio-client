@@ -1,6 +1,6 @@
 <template lang="pug">
-dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog" :class="{'is-arena-only' : isArenaOnly}")
-  section.status-container(v-if="!isArenaOnly")
+dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog" :class="{'background-image-picker' : isBackgroundImage}")
+  section(v-if="!isBackgroundImage")
     .row
       .segmented-buttons
         button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
@@ -91,7 +91,7 @@ export default {
     initialSearch: String,
     cardUrl: String,
     cardId: String,
-    isArenaOnly: Boolean,
+    isBackgroundImage: Boolean,
     imageIsFullSize: Boolean
   },
   data () {
@@ -302,7 +302,7 @@ export default {
       this.$emit('selectImage', image)
     },
     scrollIntoView () {
-      if (this.isArenaOnly) { return }
+      if (this.isBackgroundImage) { return }
       const element = this.$refs.dialog
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
@@ -405,7 +405,7 @@ export default {
   .arena
     width 18px
 
-  &.is-arena-only
+  &.background-image-picker
     padding-top 4px
 
 </style>
