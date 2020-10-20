@@ -1,6 +1,7 @@
 <template lang="pug">
 dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog" :class="{'background-image-picker' : isBackgroundImage}")
   section(v-if="!isBackgroundImage")
+    //- services for card image picking
     .row
       .segmented-buttons
         button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
@@ -10,14 +11,12 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="
       .button-wrap
         button(@click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile")
-
     //- upload progress
     .uploading-container(v-if="cardPendingUpload")
       img(v-if="cardPendingUpload" :src="cardPendingUpload.imageDataUrl")
       .badge.info(:class="{absolute : cardPendingUpload.imageDataUrl}")
         Loader(:visible="true")
         span {{cardPendingUpload.percentComplete}}%
-
     //- errors
     .error-container-top(v-if="error.signUpToUpload")
       p
@@ -35,11 +34,19 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="
       button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
     .error-container-top(v-if="error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-
     //- stickers toggle
     label(v-if="serviceIsGfycat" :class="{active: gfycatIsStickers}" @click.left.prevent="toggleGfycatIsStickers" @keydown.stop.enter="toggleGfycatIsStickers")
       input(type="checkbox" v-model="gfycatIsStickers")
       span Stickers
+
+  //- services for background image picking
+  section(v-if="isBackgroundImage")
+    .row
+      .segmented-buttons
+        button(@click.left.stop="toggleServiceIsBackgrounds" :class="{active : serviceIsBackgrounds}")
+          span Backgrounds
+        button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
+          span Are.na
 
   //- search results
   section.results-section
@@ -144,6 +151,13 @@ export default {
         return false
       }
     },
+    serviceIsBackgrounds () {
+      if (this.service === 'Backgrounds') {
+        return true
+      } else {
+        return false
+      }
+    },
     isNoSearchResults () {
       if (this.error.unknownServerError || this.error.userIsOffline) {
         return false
@@ -163,6 +177,10 @@ export default {
     triggerUpgradeUserIsVisible () {
       this.$store.dispatch('closeAllDialogs', 'ImagePicker.triggerUpgradeUserIsVisible')
       this.$store.commit('triggerUpgradeUserIsVisible')
+    },
+    toggleServiceIsBackgrounds () {
+      this.service = 'Backgrounds'
+      this.searchAgain()
     },
     toggleServiceIsArena () {
       this.service = 'Are.na'
@@ -340,6 +358,10 @@ export default {
     visible (visible) {
       this.$nextTick(() => {
         if (visible) {
+          if (this.isBackgroundImage) {
+            this.toggleServiceIsBackgrounds()
+            return
+          }
           this.scrollIntoView()
           this.focusSearchInput()
           this.search = this.initialSearch
