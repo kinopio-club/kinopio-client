@@ -50,7 +50,7 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="
 
   //- search results
   section.results-section
-    .search-wrap
+    .search-wrap(v-if="!serviceIsBackgrounds")
       img.icon.search(v-if="!loading" src="@/assets/search.svg" @click.left="focusSearchInput")
       Loader(:visible="loading")
       input(
@@ -82,11 +82,12 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="
 </template>
 
 <script>
-import debounce from 'lodash-es/debounce'
-
 import scrollIntoView from '@/scroll-into-view.js'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
+import backgroundImages from '@/data/backgroundImages.json'
+
+import debounce from 'lodash-es/debounce'
 
 export default {
   name: 'ImagePicker',
@@ -180,7 +181,7 @@ export default {
     },
     toggleServiceIsBackgrounds () {
       this.service = 'Backgrounds'
-      this.searchAgain()
+      this.searchAgainBackgrounds()
     },
     toggleServiceIsArena () {
       this.service = 'Are.na'
@@ -193,6 +194,9 @@ export default {
     toggleGfycatIsStickers () {
       this.gfycatIsStickers = !this.gfycatIsStickers
       this.searchAgain()
+    },
+    searchAgainBackgrounds () {
+      this.normalizeResults(backgroundImages, 'Backgrounds')
     },
     searchAgain () {
       this.images = []
@@ -294,6 +298,12 @@ export default {
               url: image.mobileUrl
             }
           }
+        })
+      } else if (service === 'Backgrounds' && this.serviceIsBackgrounds) {
+        this.images = data.map(image => {
+          image.sourceUserName = null
+          image.previewUrl = image.url
+          return image
         })
       }
       this.$nextTick(() => {
