@@ -7,7 +7,6 @@ import nanoid from 'nanoid'
 import utils from '@/utils.js'
 
 let websocket, currentSpaceRoom, currentUserIsConnected
-let hadError = false
 const clientId = nanoid()
 
 const joinSpaceRoom = (store, mutation) => {
@@ -17,6 +16,10 @@ const joinSpaceRoom = (store, mutation) => {
   const user = utils.clone(store.state.currentUser)
   if (!currentSpaceHasUrl) { return }
   if (currentSpaceRoom === space.id) { return }
+  if (websocket.readyState === 0) {
+    console.warn('🚑 joinSpaceRoom cancelled because websocket not ready', websocket.readyState)
+    return
+  }
   currentSpaceRoom = space.id
   websocket.send(JSON.stringify({
     message: 'joinSpaceRoom',
@@ -75,8 +78,8 @@ export default function createWebSocketPlugin () {
         websocket.onopen = (event) => {
           currentUserIsConnected = true
           store.commit('broadcast/joinSpaceRoom')
-          if (hadError) {
-            store.commit('addNotification', { message: 'Broadcast reconnected', type: 'success' })
+          if (store.state.isReconnectingToBroadcast) {
+            store.commit('isReconnectingToBroadcast', false)
           }
         }
         websocket.onclose = (event) => {
@@ -86,8 +89,7 @@ export default function createWebSocketPlugin () {
         }
         websocket.onerror = (event) => {
           console.warn('🌌', event)
-          hadError = true
-          store.commit('addNotification', { message: 'Broadcast connection error, retrying…', type: 'danger' })
+          store.commit('isReconnectingToBroadcast', true)
         }
         // receive
         websocket.onmessage = ({ data }) => {

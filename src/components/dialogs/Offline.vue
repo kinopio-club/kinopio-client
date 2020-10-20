@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog(v-if="visible" :open="visible")
+dialog.narrow.offline(v-if="visible" :open="visible" ref="dialog" :class="{'right-side': showOnRightSide}")
   section
     p Offline
   section(v-if="currentUserIsSignedIn")
@@ -22,9 +22,17 @@ export default {
   props: {
     visible: Boolean
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'updatePageSizes') {
+        this.checkIfShouldBeOnRightSide()
+      }
+    })
+  },
   data () {
     return {
-      queue: []
+      queue: [],
+      showOnRightSide: false
     }
   },
   computed: {
@@ -36,15 +44,35 @@ export default {
       return Boolean(this.$store.getters['currentUser/isSignedIn'])
     }
   },
+  methods: {
+    checkIfShouldBeOnRightSide () {
+      this.showOnRightSide = false
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        element = element.getBoundingClientRect()
+        const viewport = utils.visualViewport()
+        const offset = viewport.width - (element.x + element.width)
+        if (offset < 0) {
+          this.showOnRightSide = true
+        }
+      })
+    }
+  },
   watch: {
     visible (visible) {
       if (visible) {
         this.queue = cache.queue()
+        this.checkIfShouldBeOnRightSide()
       }
     }
   }
 }
 </script>
 
-<style lang="stylus">
+<style lang="stylus" scoped>
+.offline
+  &.right-side
+    left initial
+    right 8px
 </style>

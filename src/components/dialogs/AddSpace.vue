@@ -101,18 +101,15 @@ export default {
       this.$store.commit('shouldExplicitlyHideFooter', value)
     },
     addJournalSpace () {
-      this.$emit('closeDialog')
+      this.$store.dispatch('closeAllDialogs', 'addSpace.addJournalSpace')
       window.scrollTo(0, 0)
       this.$store.dispatch('currentSpace/addNewJournalSpace')
-      this.$emit('updateSpaces')
       this.$store.dispatch('currentSpace/updateSpacePageSize')
-      this.$store.commit('triggerFocusSpaceDetailsName')
     },
     addSpace () {
-      this.$emit('closeDialog')
+      this.$store.dispatch('closeAllDialogs', 'addSpace.addSpace')
       window.scrollTo(0, 0)
       this.$store.dispatch('currentSpace/addSpace')
-      this.$emit('updateSpaces')
     },
     toggleEditPromptsIsVisible () {
       this.editPromptsIsVisible = !this.editPromptsIsVisible

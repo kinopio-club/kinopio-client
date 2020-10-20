@@ -24,6 +24,7 @@ export default new Vuex.Store({
     viewportHeight: 0,
     viewportWidth: 0,
     isOnline: true,
+    isReconnectingToBroadcast: false,
     isBeta: false,
     shouldHideConnectionOutline: false,
     newStuffIsUpdated: false,
@@ -155,6 +156,10 @@ export default new Vuex.Store({
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isOnline' })
       state.isOnline = value
+    },
+    isReconnectingToBroadcast: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'isReconnectingToBroadcast' })
+      state.isReconnectingToBroadcast = value
     },
     isBeta: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isBeta' })

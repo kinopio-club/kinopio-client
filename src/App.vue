@@ -14,6 +14,8 @@
     .logo-hover
     .logo-active
   .badge.label-badge.development(v-if="isDevelopment") DEV
+  .icons.hidden
+    img.icon(src="@/assets/offline.svg")
 </template>
 
 <script>
@@ -475,6 +477,9 @@ code
 
 .cancel
   transform rotate(45deg)
+
+.hidden
+  display none
 
 .users
   display inline-block
