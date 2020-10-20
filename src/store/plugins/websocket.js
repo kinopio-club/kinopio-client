@@ -16,7 +16,10 @@ const joinSpaceRoom = (store, mutation) => {
   const user = utils.clone(store.state.currentUser)
   if (!currentSpaceHasUrl) { return }
   if (currentSpaceRoom === space.id) { return }
-  if (websocket.readyState === 0) { return }
+  if (websocket.readyState === 0) {
+    console.warn('🚑 joinSpaceRoom cancelled because websocket not ready', websocket.readyState)
+    return
+  }
   currentSpaceRoom = space.id
   websocket.send(JSON.stringify({
     message: 'joinSpaceRoom',
