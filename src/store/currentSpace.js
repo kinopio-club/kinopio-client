@@ -404,7 +404,6 @@ export default {
         context.dispatch('updateUserLastSpaceId')
         context.commit('notifyNewUser', false, { root: true })
         context.commit('notifySignUpToEditSpace', false, { root: true })
-        context.commit('triggerFocusSpaceDetailsName', null, { root: true })
       })
     },
     addNewJournalSpace: (context) => {

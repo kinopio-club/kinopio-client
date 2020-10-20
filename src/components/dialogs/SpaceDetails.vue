@@ -34,7 +34,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
         button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
           img.icon(src="@/assets/add.svg")
           span Add
-        AddSpace(:visible="addSpaceIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
+        AddSpace(:visible="addSpaceIsVisible")
       .button-wrap
         button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
           span Import
@@ -142,6 +142,7 @@ export default {
       window.scrollTo(0, 0)
       this.$store.dispatch('currentSpace/addSpace')
       this.updateSpaces()
+      this.$store.commit('triggerFocusSpaceDetailsName')
     },
     toggleExportIsVisible () {
       const isVisible = this.exportIsVisible
