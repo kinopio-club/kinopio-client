@@ -1,5 +1,12 @@
 <template lang="pug">
-dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog" :class="{'background-image-picker' : isBackgroundImage, 'right-side': showOnRightSide}")
+dialog.narrow.image-picker(
+  v-if="visible"
+  :open="visible"
+  @click.left.stop
+  ref="dialog"
+  :class="{'background-image-picker' : isBackgroundImage, 'right-side': showOnRightSide}"
+  :style="{'max-height': dialogHeight + 'px'}"
+)
   section(v-if="!isBackgroundImage")
     //- services for card image picking
     .row
@@ -69,7 +76,7 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
       .badge.danger(v-if="error.userIsOffline") Can't search {{service}} while offline, Please try again later
 
-  section.results-section
+  section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ul.results-list.image-list
       template(v-for="(image in images")
         li(@click.left="selectImage(image)" tabindex="0" :key="image.id" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
@@ -117,6 +124,8 @@ export default {
       gfycatIsStickers: false,
       loading: false,
       showOnRightSide: false,
+      dialogHeight: null,
+      resultsSectionHeight: null,
       error: {
         unknownServerError: false,
         userIsOffline: false,
@@ -338,7 +347,10 @@ export default {
       this.$emit('selectImage', image)
     },
     scrollIntoView () {
-      if (this.isBackgroundImage) { return }
+      if (this.isBackgroundImage) {
+        this.updateHeight()
+        return
+      }
       const element = this.$refs.dialog
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
@@ -383,6 +395,15 @@ export default {
           this.showOnRightSide = true
         }
       })
+    },
+    updateHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeightFromHeader(element)
+        element = this.$refs.results
+        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
+      })
     }
   },
   watch: {
@@ -392,6 +413,7 @@ export default {
           this.checkIfShouldBeOnRightSide()
           if (this.isBackgroundImage) {
             this.toggleServiceIsBackgrounds()
+            this.updateHeight()
             return
           }
           this.scrollIntoView()
