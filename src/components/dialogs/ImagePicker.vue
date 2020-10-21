@@ -335,11 +335,13 @@ export default {
       this.$emit('selectImage', image)
     },
     scrollIntoView () {
+      if (!this.visible) { return }
       if (this.isBackgroundImage) {
         this.updateHeight()
         return
       }
       const element = this.$refs.dialog
+      if (!element) { return }
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
       this.$store.commit('triggerUpdatePositionInVisualViewport')
@@ -389,6 +391,7 @@ export default {
       if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.dialog
+        if (!element) { return }
         this.dialogHeight = utils.elementHeightFromHeader(element)
         element = this.$refs.results
         this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
