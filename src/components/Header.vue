@@ -11,7 +11,6 @@ header(:style="visualViewportPosition")
         About(:visible="aboutIsVisible")
         KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
     .space-details-wrap(:class="{'segmented-buttons': spaceHasStatusOrOffline}")
-
       //- space
       .button-wrap
         button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")

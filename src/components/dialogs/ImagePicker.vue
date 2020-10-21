@@ -8,7 +8,7 @@ dialog.narrow.image-picker(
   :style="{'max-height': dialogHeight + 'px'}"
 )
   section(v-if="!isBackgroundImage")
-    //- services for card image picking
+    //- card images
     .row
       .segmented-buttons
         button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
@@ -46,7 +46,7 @@ dialog.narrow.image-picker(
       input(type="checkbox" v-model="gfycatIsStickers")
       span Stickers
 
-  //- services for background image picking
+  //- background images
   section(v-if="isBackgroundImage")
     .row
       .segmented-buttons
@@ -156,25 +156,13 @@ export default {
       return pendingUploads.find(upload => upload.cardId === this.cardId)
     },
     serviceIsArena () {
-      if (this.service === 'Are.na') {
-        return true
-      } else {
-        return false
-      }
+      return this.service === 'Are.na'
     },
     serviceIsGfycat () {
-      if (this.service === 'Gfycat') {
-        return true
-      } else {
-        return false
-      }
+      return this.service === 'Gfycat'
     },
     serviceIsBackgrounds () {
-      if (this.service === 'Backgrounds') {
-        return true
-      } else {
-        return false
-      }
+      return this.service === 'Backgrounds'
     },
     isNoSearchResults () {
       if (this.error.unknownServerError || this.error.userIsOffline) {
@@ -388,6 +376,7 @@ export default {
       if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.dialog
+        if (!element) { return }
         element = element.getBoundingClientRect()
         const viewport = utils.visualViewport()
         const offset = viewport.width - (element.x + element.width)
@@ -411,6 +400,7 @@ export default {
       this.$nextTick(() => {
         if (visible) {
           this.checkIfShouldBeOnRightSide()
+          this.search = this.initialSearch
           if (this.isBackgroundImage) {
             this.toggleServiceIsBackgrounds()
             this.updateHeight()
@@ -418,7 +408,6 @@ export default {
           }
           this.scrollIntoView()
           this.focusSearchInput()
-          this.search = this.initialSearch
           if (this.search) {
             this.loading = true
           }
