@@ -58,7 +58,7 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left="closeDialog
       .button-wrap
         button(:disabled="!canEditSpace" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
           span Image
-        ImagePicker(:visible="imagePickerIsVisible" :isArenaOnly="true" :imageIsFullSize="true" @selectImage="updateSpaceBackground")
+        ImagePicker(:visible="imagePickerIsVisible" :isBackgroundImage="true" :imageIsFullSize="true" @selectImage="updateSpaceBackground" :initialSearch="initialSearch")
       .button-wrap
         button(:disabled="!canEditSpace" @click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
@@ -82,14 +82,13 @@ export default {
   data () {
     return {
       imagePickerIsVisible: false,
+      initialSearch: '',
       error: {
         isNotImageUrl: false,
         signUpToUpload: false,
-
         userIsOffline: false,
         sizeLimit: false,
         unknownUploadError: false
-
       }
     }
   },
@@ -153,6 +152,8 @@ export default {
       const isVisible = this.imagePickerIsVisible
       this.closeDialogs()
       this.imagePickerIsVisible = !isVisible
+      this.initialSearch = this.currentSpace.name
+      console.log(this.currentSpace.name)
     },
     removeBackground () {
       this.updateSpaceBackground('')
@@ -238,8 +239,6 @@ export default {
 .background
   @media(max-width 435px)
     left -100px
-    dialog.image-picker
-      left -20px
   &.narrow
     width 215px
   textarea

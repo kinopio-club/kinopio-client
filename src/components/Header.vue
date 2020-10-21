@@ -10,36 +10,35 @@ header(:style="visualViewportPosition")
           img.down-arrow(src="@/assets/down-arrow.svg")
         About(:visible="aboutIsVisible")
         KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
-    .space-details-wrap
-      .segmented-buttons
-        //- space
-        .button-wrap
-          button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
-            .badge.info(v-show="currentSpaceIsTemplate")
-              span Template
-            .badge-wrap(v-if="!userCanEditSpace && !currentSpaceIsTemplate")
-              .badge.info(:class="{'invisible': readOnlyJiggle}")
-                span Read Only
-              .badge.info.invisible-badge(ref="readOnly" :class="{'badge-jiggle': readOnlyJiggle, 'invisible': !readOnlyJiggle}")
-                span Read Only
-            MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
-            span {{currentSpaceName}}
-            img.icon.privacy-icon(v-if="spaceIsNotClosed" :src="privacyIcon" :class="privacyName")
-            .badge.status.explore(v-if="shouldShowInExplore")
-              img.icon(src="@/assets/checkmark.svg")
-          SpaceDetails(:visible="spaceDetailsIsVisible")
-          ImportArenaChannel(:visible="importArenaChannelIsVisible")
-        //- state
-        .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
-          button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
-            Loader(:visible="spaceHasStatus")
-            .badge.success.space-status-success(v-if="!spaceHasStatus")
-          SpaceStatus(:visible="spaceStatusIsVisible")
-        //- offline
-        .button-wrap(v-if="!isOnline")
-          button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
-            img.icon.offline(src="@/assets/offline.svg")
-          Offline(:visible="offlineIsVisible")
+    .space-details-wrap(:class="{'segmented-buttons': spaceHasStatusOrOffline}")
+      //- space
+      .button-wrap
+        button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
+          .badge.info(v-show="currentSpaceIsTemplate")
+            span Template
+          .badge-wrap(v-if="!userCanEditSpace && !currentSpaceIsTemplate")
+            .badge.info(:class="{'invisible': readOnlyJiggle}")
+              span Read Only
+            .badge.info.invisible-badge(ref="readOnly" :class="{'badge-jiggle': readOnlyJiggle, 'invisible': !readOnlyJiggle}")
+              span Read Only
+          MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
+          span {{currentSpaceName}}
+          img.icon.privacy-icon(v-if="spaceIsNotClosed" :src="privacyIcon" :class="privacyName")
+          .badge.status.explore(v-if="shouldShowInExplore")
+            img.icon(src="@/assets/checkmark.svg")
+        SpaceDetails(:visible="spaceDetailsIsVisible")
+        ImportArenaChannel(:visible="importArenaChannelIsVisible")
+      //- state
+      .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
+        button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
+          Loader(:visible="spaceHasStatus")
+          .badge.success.space-status-success(v-if="!spaceHasStatus")
+        SpaceStatus(:visible="spaceStatusIsVisible")
+      //- offline
+      .button-wrap(v-if="!isOnline")
+        button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
+          img.icon.offline(src="@/assets/offline.svg")
+        Offline(:visible="offlineIsVisible")
 
   aside
     .top
@@ -203,6 +202,9 @@ export default {
       const isJoiningSpace = this.$store.state.isJoiningSpace
       const isReconnectingToBroadcast = this.$store.state.isReconnectingToBroadcast
       return isLoadingSpace || isJoiningSpace || isReconnectingToBroadcast
+    },
+    spaceHasStatusOrOffline () {
+      return this.spaceHasStatus || !this.isOnline || this.spaceStatusIsVisible
     },
     spaceHasStatusAndStatusDialogIsNotVisible () {
       if (this.spaceHasStatus) {
@@ -400,14 +402,16 @@ header
       max-width 100%
     dialog
       max-width initial
-    .button-wrap
+    > .button-wrap
+      max-width 100%
       > button
         .privacy-icon
           margin-left 6px
 
     // should not bubble down into dialogs
-    .segmented-buttons
+    &.segmented-buttons
       > .button-wrap
+        max-width calc(100% - 30px)
         > button
           border-radius 0
           .loader
