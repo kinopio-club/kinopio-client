@@ -403,7 +403,8 @@ header
       max-width 100%
     dialog
       max-width initial
-    .button-wrap
+    > .button-wrap
+      max-width 100%
       > button
         .privacy-icon
           margin-left 6px
@@ -411,6 +412,7 @@ header
     // should not bubble down into dialogs
     &.segmented-buttons
       > .button-wrap
+        max-width calc(100% - 30px)
         > button
           border-radius 0
           .loader
