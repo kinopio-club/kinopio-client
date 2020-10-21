@@ -201,7 +201,7 @@ export default {
       this.searchAgain()
     },
     searchAgainBackgrounds () {
-      this.normalizeResults(backgroundImages, 'Backgrounds')
+      this.normalizeResults(backgroundImages)
     },
     searchAgain () {
       this.images = []
@@ -219,7 +219,7 @@ export default {
       url.search = new URLSearchParams(params).toString()
       const response = await fetch(url)
       const data = await response.json()
-      this.normalizeResults(data, 'Are.na')
+      this.normalizeResults(data)
     },
     async searchGfycat () {
       let url
@@ -235,7 +235,7 @@ export default {
       url.search = new URLSearchParams(params).toString()
       const response = await fetch(url)
       const data = await response.json()
-      this.normalizeResults(data, 'Gfycat')
+      this.normalizeResults(data)
     },
     searchService: debounce(async function () {
       this.clearErrors()
@@ -270,8 +270,8 @@ export default {
       this.error.userIsOffline = false
       this.error.unknownUploadError = false
     },
-    normalizeResults (data, service) {
-      if (service === 'Are.na' && this.serviceIsArena) {
+    normalizeResults (data) {
+      if (this.serviceIsArena) {
         this.images = data.blocks.map(image => {
           let url
           if (this.imageIsFullSize) {
@@ -287,7 +287,7 @@ export default {
             url: url + '?img=.jpg'
           }
         })
-      } else if (service === 'Gfycat' && this.serviceIsGfycat) {
+      } else if (this.serviceIsGfycat) {
         this.images = data.gfycats.map(image => {
           if (this.gfycatIsStickers) {
             return {
@@ -304,7 +304,7 @@ export default {
             }
           }
         })
-      } else if (service === 'Backgrounds' && this.serviceIsBackgrounds) {
+      } else if (this.serviceIsBackgrounds) {
         this.images = data.map(image => {
           image.sourceUserName = null
           image.previewUrl = image.url
