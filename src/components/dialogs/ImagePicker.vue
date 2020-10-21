@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog" :class="{'background-image-picker' : isBackgroundImage}")
+dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog" :class="{'background-image-picker' : isBackgroundImage, 'right-side': showOnRightSide}")
   section(v-if="!isBackgroundImage")
     //- services for card image picking
     .row
@@ -102,6 +102,13 @@ export default {
     isBackgroundImage: Boolean,
     imageIsFullSize: Boolean
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'updatePageSizes') {
+        this.checkIfShouldBeOnRightSide()
+      }
+    })
+  },
   data () {
     return {
       images: [],
@@ -109,6 +116,7 @@ export default {
       service: 'Are.na',
       gfycatIsStickers: false,
       loading: false,
+      showOnRightSide: false,
       error: {
         unknownServerError: false,
         userIsOffline: false,
@@ -362,12 +370,26 @@ export default {
           this.error.unknownUploadError = true
         }
       }
+    },
+    checkIfShouldBeOnRightSide () {
+      this.showOnRightSide = false
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        element = element.getBoundingClientRect()
+        const viewport = utils.visualViewport()
+        const offset = viewport.width - (element.x + element.width)
+        if (offset < 0) {
+          this.showOnRightSide = true
+        }
+      })
     }
   },
   watch: {
     visible (visible) {
       this.$nextTick(() => {
         if (visible) {
+          this.checkIfShouldBeOnRightSide()
           if (this.isBackgroundImage) {
             this.toggleServiceIsBackgrounds()
             return
@@ -439,5 +461,9 @@ export default {
 
   &.background-image-picker
     padding-top 4px
+
+  &.right-side
+    left initial
+    right 8px
 
 </style>

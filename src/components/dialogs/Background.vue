@@ -238,8 +238,6 @@ export default {
 .background
   @media(max-width 435px)
     left -100px
-    dialog.image-picker
-      left -20px
   &.narrow
     width 215px
   textarea
