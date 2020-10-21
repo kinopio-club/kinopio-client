@@ -271,7 +271,10 @@ export default {
       this.error.unknownUploadError = false
     },
     normalizeResults (data, service) {
-      if (service === 'Are.na' && this.serviceIsArena) {
+      const arena = service === 'Are.na' && this.serviceIsArena
+      const gyfcat = service === 'Gfycat' && this.serviceIsGfycat
+      const backgrounds = service === 'Backgrounds' && this.serviceIsBackgrounds
+      if (arena) {
         this.images = data.blocks.map(image => {
           let url
           if (this.imageIsFullSize) {
@@ -287,7 +290,7 @@ export default {
             url: url + '?img=.jpg'
           }
         })
-      } else if (service === 'Gfycat' && this.serviceIsGfycat) {
+      } else if (gyfcat) {
         this.images = data.gfycats.map(image => {
           if (this.gfycatIsStickers) {
             return {
@@ -304,7 +307,7 @@ export default {
             }
           }
         })
-      } else if (service === 'Backgrounds' && this.serviceIsBackgrounds) {
+      } else if (backgrounds) {
         this.images = data.map(image => {
           image.sourceUserName = null
           image.previewUrl = image.url
