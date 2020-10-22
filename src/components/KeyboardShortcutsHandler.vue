@@ -63,6 +63,11 @@ export default {
         let value = this.$store.state.currentUser.filterShowDateUpdated
         value = !value
         this.$store.dispatch('currentUser/toggleFilterShowDateUpdated', value)
+      // 3
+      } else if (key === '3' && isSpaceScope) {
+        let value = this.$store.state.currentUser.filterUnchecked
+        value = !value
+        this.$store.dispatch('currentUser/toggleFilterUnchecked', value)
       }
     },
     handleMetaKeyShortcuts (event) {

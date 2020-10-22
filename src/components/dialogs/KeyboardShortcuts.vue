@@ -64,6 +64,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
     article
       .row
         .badge.title
+          img.icon.time(src="@/assets/unchecked.svg")
+          span Toggle Cards Unchecked Filter
+        .badge.info 3
+    article
+      .row
+        .badge.title
           img.icon(src="@/assets/brush.svg")
           span Select All Cards
         .badge.info {{meta}}-A
