@@ -502,6 +502,8 @@ export default {
       return frameIds.includes(this.frameId)
     },
     isCardFilteredByUnchecked () {
+      const filterUncheckedIsActive = this.$store.state.currentUser.filterUnchecked
+      if (!filterUncheckedIsActive) { return }
       return this.hasCheckbox && !this.isChecked
     },
     isFiltered () {
