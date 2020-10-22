@@ -16,6 +16,11 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left="closeDialog
       data-type="name"
       maxlength="250"
     )
+    .row(v-if="!canEditSpace")
+      span.badge.info
+        img.icon.cancel(src="@/assets/add.svg")
+        span Space is Read Only
+
     //- upload progress
     .uploading-container(v-if="pendingUpload")
       img(v-if="pendingUpload" :src="pendingUpload.imageDataUrl")
