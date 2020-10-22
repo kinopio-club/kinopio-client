@@ -923,6 +923,7 @@ export default {
     // '[' twice
     // then anything except line break and ']'
     // ']' twice
+    if (!string) { return }
     const tagPattern = new RegExp(/([[]{2}[^\n(\]\])]+[\]]{2})/gm)
     const tags = string.match(tagPattern)
     return tags
