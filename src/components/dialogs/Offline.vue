@@ -50,12 +50,7 @@ export default {
       if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.dialog
-        element = element.getBoundingClientRect()
-        const viewport = utils.visualViewport()
-        const offset = viewport.width - (element.x + element.width)
-        if (offset < 0) {
-          this.showOnRightSide = true
-        }
+        this.showOnRightSide = utils.elementShouldBeOnRightSide(element)
       })
     }
   },

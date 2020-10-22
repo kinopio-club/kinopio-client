@@ -38,6 +38,18 @@ export default {
     }
   },
 
+  elementShouldBeOnRightSide (element) {
+    if (!element) { return }
+    element = element.getBoundingClientRect()
+    const viewport = this.visualViewport()
+    const offset = viewport.width - (element.x + element.width)
+    if (offset < 0) {
+      return true
+    } else {
+      return false
+    }
+  },
+
   elementHeightFromHeader (element, isChildElement) {
     if (!element) { return }
     const viewport = this.visualViewport()
