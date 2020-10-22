@@ -403,7 +403,7 @@ header
     dialog
       max-width initial
     > .button-wrap
-      max-width 100%
+      max-width 100vw
       > button
         .privacy-icon
           margin-left 6px
