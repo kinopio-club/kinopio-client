@@ -24,6 +24,7 @@ export default {
     filterShowUsers: false,
     filterShowDateUpdated: false,
     filterShowAbsoluteDates: false,
+    filterUnchecked: false,
     journalPrompts: []
   },
   getters: {
@@ -199,6 +200,11 @@ export default {
       utils.typeCheck({ value, type: 'boolean', origin: 'filterShowAbsoluteDates' })
       state.filterShowAbsoluteDates = value
       cache.updateUser('filterShowAbsoluteDates', value)
+    },
+    filterUnchecked: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'filterUnchecked' })
+      state.filterUnchecked = value
+      cache.updateUser('filterUnchecked', value)
     },
     addJournalPrompt: (state, newPrompt) => {
       let prompts = utils.clone(state.journalPrompts) || []
@@ -456,6 +462,13 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           filterShowAbsoluteDates: value
+        } }, { root: true })
+    },
+    toggleFilterUnchecked: (context, value) => {
+      context.commit('filterUnchecked', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          filterUnchecked: value
         } }, { root: true })
     },
     clearUserFilters: (context) => {

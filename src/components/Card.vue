@@ -477,7 +477,9 @@ export default {
       const types = this.$store.state.filteredConnectionTypeIds
       const frames = this.$store.state.filteredFrameIds
       const tags = this.$store.state.filteredTagNames
-      return Boolean(types.length + frames.length + tags.length)
+      const itemFiltersIsActive = Boolean(types.length + frames.length + tags.length)
+      const filterUncheckedIsActive = this.$store.state.currentUser.filterUnchecked
+      return itemFiltersIsActive || filterUncheckedIsActive
     },
     isCardFilteredByTags () {
       const tagNames = this.$store.state.filteredTagNames
@@ -499,9 +501,12 @@ export default {
       const frameIds = this.$store.state.filteredFrameIds
       return frameIds.includes(this.frameId)
     },
+    isCardFilteredByUnchecked () {
+      return this.hasCheckbox && !this.isChecked
+    },
     isFiltered () {
       if (this.filtersIsActive) {
-        const isInFilter = this.isCardFilteredByTags || this.isConnectionFilteredByType || this.isCardFilteredByFrame
+        const isInFilter = this.isCardFilteredByTags || this.isConnectionFilteredByType || this.isCardFilteredByFrame || this.isCardFilteredByUnchecked
         if (isInFilter) {
           return false
         } else {

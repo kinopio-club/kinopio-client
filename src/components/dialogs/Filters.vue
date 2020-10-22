@@ -19,6 +19,11 @@ dialog.filters.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-
           input(type="checkbox" v-model="filterShowDateUpdated")
           img.icon.time(src="@/assets/time.svg")
           span Updated
+    .row
+      .button-wrap
+        label(:class="{active: filterUnchecked}" @click.left.prevent="toggleFilterUnchecked" @keydown.stop.enter="toggleFilterUnchecked")
+          input(type="checkbox" v-model="filterUnchecked")
+          span Unchecked
 
   section.results-section.connection-types(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="allItems" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredItems")
@@ -96,20 +101,18 @@ export default {
       if (currentUser.filterShowDateUpdated) {
         userFilters += 1
       }
+      if (currentUser.filterUnchecked) {
+        userFilters += 1
+      }
       const tagNames = this.$store.state.filteredTagNames
       const connections = this.$store.state.filteredConnectionTypeIds
       const frames = this.$store.state.filteredFrameIds
       return userFilters + tagNames.length + connections.length + frames.length
     },
-    currentUser () {
-      return this.$store.state.currentUser
-    },
-    filterShowUsers () {
-      return this.$store.state.currentUser.filterShowUsers
-    },
-    filterShowDateUpdated () {
-      return this.$store.state.currentUser.filterShowDateUpdated
-    },
+    currentUser () { return this.$store.state.currentUser },
+    filterShowUsers () { return this.$store.state.currentUser.filterShowUsers },
+    filterShowDateUpdated () { return this.$store.state.currentUser.filterShowDateUpdated },
+    filterUnchecked () { return this.$store.state.currentUser.filterUnchecked },
     tags () { return this.$store.getters['currentSpace/spaceTags']() },
     allItems () {
       const tags = this.tags.map(tag => {
@@ -208,6 +211,10 @@ export default {
     toggleFilterShowDateUpdated () {
       const value = !this.filterShowDateUpdated
       this.$store.dispatch('currentUser/toggleFilterShowDateUpdated', value)
+    },
+    toggleFilterUnchecked () {
+      const value = !this.filterUnchecked
+      this.$store.dispatch('currentUser/toggleFilterUnchecked', value)
     },
     toggleFilteredTag (tag) {
       const tags = this.$store.state.filteredTagNames

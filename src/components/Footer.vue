@@ -149,6 +149,9 @@ export default {
       if (currentUser.filterShowDateUpdated) {
         userFilters += 1
       }
+      if (currentUser.filterUnchecked) {
+        userFilters += 1
+      }
       const tagNames = this.$store.state.filteredTagNames
       const connections = this.$store.state.filteredConnectionTypeIds
       const frames = this.$store.state.filteredFrameIds
