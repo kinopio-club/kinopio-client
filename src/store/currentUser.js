@@ -475,6 +475,7 @@ export default {
       context.dispatch('toggleFilterShowUsers', false)
       context.dispatch('toggleFilterShowDateUpdated', false)
       context.dispatch('toggleFilterShowAbsoluteDates', false)
+      context.dispatch('toggleFilterUnchecked', false)
     },
     addJournalPrompt: (context, prompt) => {
       utils.typeCheck({ value: prompt, type: 'object', origin: 'addJournalPrompt' })
