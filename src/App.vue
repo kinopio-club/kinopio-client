@@ -119,6 +119,7 @@ body
     bottom 12px
     position fixed
     pointer-events none
+    z-index var(--max-z)
 
 img,
 video
