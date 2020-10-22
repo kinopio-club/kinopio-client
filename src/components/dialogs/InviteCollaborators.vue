@@ -30,6 +30,7 @@ dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.left.st
 
 <script>
 import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'InviteCollaborators',
@@ -78,8 +79,10 @@ export default {
     },
     updateInviteUrl () {
       const collaboratorKey = this.$store.state.currentSpace.collaboratorKey
-      const spaceId = this.$store.state.currentSpace.id
-      this.url = `${window.location.origin}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}`
+      const currentSpace = this.$store.state.currentSpace
+      const spaceId = currentSpace.id
+      const spaceName = utils.normalizeString(currentSpace.name)
+      this.url = `${window.location.origin}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}&name=${spaceName}`
     }
   },
   watch: {
