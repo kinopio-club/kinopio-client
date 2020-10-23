@@ -49,7 +49,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(v-if="spacesIsVisible" :spaces="spaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
-    //- TagsList(:tags="tags" :isLoading="isLoadingRemoteTags")
+    TagList(:tags="tags" :isLoading="isLoadingRemoteTags")
     //- blank slate inside TagsList: if !spacesIsVisible but you have no tags, :style is temp
     p(v-if="!spacesIsVisible" :style="{padding: '6px'}") Add
       span &nbsp;
@@ -64,6 +64,7 @@ import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
 import AddSpace from '@/components/dialogs/AddSpace.vue'
 import SpaceList from '@/components/SpaceList.vue'
+import TagList from '@/components/TagList.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
 import templates from '@/data/templates.js'
@@ -77,6 +78,7 @@ export default {
     Import,
     AddSpace,
     SpaceList,
+    TagList,
     PrivacyButton,
     ShowInExploreButton,
     Loader
