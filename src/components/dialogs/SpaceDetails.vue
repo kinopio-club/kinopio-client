@@ -33,8 +33,10 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
       .segmented-buttons
         button(:class="{active: spacesIsVisible}" @click.left.stop="toggleSpacesIsVisible(true)")
           span Spaces
+          Loader(:visible="isLoadingRemoteSpaces")
         button(:class="{active: !spacesIsVisible}" @click.left.stop="toggleSpacesIsVisible(false)")
           span Tags
+          Loader(:visible="isLoadingRemoteTags")
     .row(v-if="spacesIsVisible")
       .button-wrap
         button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
@@ -47,7 +49,12 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(v-if="spacesIsVisible" :spaces="spaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
-    //- TagsList(:tags="tags" ?:isLoading="isLoadingCurrentUser?")
+    //- TagsList(:tags="tags" :isLoading="isLoadingRemoteTags")
+    //- blank slate inside TagsList: if !spacesIsVisible but you have no tags, :style is temp
+    p(v-if="!spacesIsVisible" :style="{padding: '6px'}") Add
+      span &nbsp;
+      span.badge.info [[Tags]]
+      span to cards
 
 </template>
 
@@ -61,6 +68,7 @@ import PrivacyButton from '@/components/PrivacyButton.vue'
 import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
 import templates from '@/data/templates.js'
 import utils from '@/utils.js'
+import Loader from '@/components/Loader.vue'
 
 export default {
   name: 'SpaceDetails',
@@ -70,7 +78,8 @@ export default {
     AddSpace,
     SpaceList,
     PrivacyButton,
-    ShowInExploreButton
+    ShowInExploreButton,
+    Loader
   },
   props: {
     visible: Boolean
@@ -95,6 +104,7 @@ export default {
   data () {
     return {
       spaces: [],
+      tags: [],
       favoriteSpaces: [],
       favoriteUsers: [],
       exportIsVisible: false,
@@ -102,6 +112,7 @@ export default {
       addSpaceIsVisible: false,
       privacyPickerIsVisible: false,
       isLoadingRemoteSpaces: false,
+      isLoadingRemoteTags: false,
       remoteSpaces: [],
       resultsSectionHeight: null,
       dialogHeight: null,
@@ -145,8 +156,36 @@ export default {
     }
   },
   methods: {
+    updateTags () {
+      const spaceTags = this.$store.getters['currentSpace/spaceTags']()
+      this.tags = spaceTags || []
+      const cachedTags = cache.allTags()
+      const mergedTags = utils.mergedTags(spaceTags, cachedTags)
+      this.tags = mergedTags
+      this.updateRemoteTags()
+    },
+    async updateRemoteTags () {
+      if (!this.currentUserIsSignedIn) { return }
+      const remoteTagsIsFetched = this.$store.state.remoteTagsIsFetched
+      let remoteTags
+      if (remoteTagsIsFetched) {
+        remoteTags = this.$store.state.remoteTags
+      } else {
+        this.isLoadingRemoteTags = true
+        remoteTags = await this.$store.dispatch('api/getUserTags') || []
+        this.$store.commit('remoteTags', remoteTags)
+        this.$store.commit('remoteTagsIsFetched', true)
+        this.isLoadingRemoteTags = false
+      }
+      const mergedTags = utils.mergedTags(this.tags, remoteTags)
+      this.tags = mergedTags
+      console.log('🍇🍇', this.tags)
+    },
     toggleSpacesIsVisible (value) {
       this.closeDialogs()
+      if (!value) {
+        this.updateTags()
+      }
       this.spacesIsVisible = value
     },
     addSpace () {
