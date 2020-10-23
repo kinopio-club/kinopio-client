@@ -125,7 +125,12 @@ export default {
       })
     },
     isVisible () {
+      const isTouchDevice = this.$store.state.isTouchDevice
       const shouldExplicitlyHideFooter = this.$store.state.shouldExplicitlyHideFooter
+      // only hide footer on touch devices
+      if (!isTouchDevice) {
+        return true
+      }
       if (shouldExplicitlyHideFooter) {
         return false
       }
