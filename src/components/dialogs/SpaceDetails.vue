@@ -30,6 +30,11 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
 
   section.results-actions
     .row
+      .segmented-buttons
+        button.active Spaces
+        button Tags
+
+    .row
       .button-wrap
         button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
           img.icon(src="@/assets/add.svg")

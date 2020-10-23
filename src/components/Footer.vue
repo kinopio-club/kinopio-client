@@ -2,11 +2,11 @@
 footer(:style="visualViewportPosition")
   Notifications
   section(v-if="isVisible")
+    //- Explore
     .button-wrap
       button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
         span Explore
       Explore(:visible="exploreIsVisible")
-
     //- Favorites
     .button-wrap
       .segmented-buttons
@@ -18,12 +18,13 @@ footer(:style="visualViewportPosition")
       Favorites(:visible="favoritesIsVisible")
 
   section.controls(v-if="isVisible")
+    //- Removed
     .button-wrap
       button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
         img.refresh.icon(src="@/assets/remove.svg")
         span Removed
       Removed(:visible="removedIsVisible")
-
+    //- Filters
     .button-wrap
       button(@click.left="toggleFiltersIsVisible" :class="{ active: filtersIsVisible}")
         .span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
