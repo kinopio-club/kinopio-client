@@ -1,18 +1,19 @@
 <template lang="pug">
-span(@click.left="hideTagDetailsIsVisible")
-  ResultsFilter(:hideFilter="hideFilter" :items="tags" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredTags")
+span(@click.left="closeDialogs")
+  ResultsFilter(:items="tags" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredTags")
   ul.results-list.tag-list
     template(v-for="(tag in tagsFiltered")
       li(
         :key="tag.id"
         tabindex="0"
-        @click.left.stop="showTagDetailsIsVisible($event, tag)"
-        @touchend.stop="showTagDetailsIsVisible($event, tag)"
-        v-on:keyup.enter="showTagDetailsIsVisible($event, tag)"
+        @click.left.stop="toggleTagDetailsIsVisible(tag)"
+        @touchend.stop="toggleTagDetailsIsVisible(tag)"
+        v-on:keyup.enter="toggleTagDetailsIsVisible(tag)"
       )
         .badge(:style="{backgroundColor: tag.color}" :class="{ active: currentSelectedTag.name === tag.name }")
           span {{tag.name}}
-      //- TagPicker(:visible="tagDetailsIsVisible" :cursorPosition="cursorPosition" :position="tagPickerPosition" :search="tagPickerSearch" @closeDialog="hideTagPicker" @selectTag="updateTagBracketsWithTag")
+      //- TagDetails(:visible="tagDetailsIsVisible" :tag="tag")
+
     Loader(:visible="isLoading")
 
 </template>
@@ -20,12 +21,14 @@ span(@click.left="hideTagDetailsIsVisible")
 <script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import Loader from '@/components/Loader.vue'
+import TagDetails from '@/components/dialogs/TagDetails.vue'
 
 export default {
   name: 'TagList',
   components: {
     ResultsFilter,
-    Loader
+    Loader,
+    TagDetails
   },
   props: {
     tags: Array,
@@ -49,26 +52,35 @@ export default {
     }
   },
   methods: {
-    showTagDetailsIsVisible (event, tag) {
-      console.log('🌱', event, tag)
-      this.hideTagDetailsIsVisible()
-      const tagRect = event.target.getBoundingClientRect()
-      this.$store.commit('tagDetailsPosition', {
-        x: window.scrollX + tagRect.x + 2,
-        y: window.scrollY + tagRect.y + tagRect.height - 2
-      })
+    toggleTagDetailsIsVisible (tag) {
+      console.log('🌱', tag)
+      this.tagDetailsIsVisible = !this.tagDetailsIsVisible
+      // this.hideTagDetailsIsVisible()
+      // const tagRect = event.target.getBoundingClientRect()
+      // this.$store.commit('tagDetailsPosition', {
+      //   x: window.scrollX + tagRect.x + 2,
+      //   y: window.scrollY + tagRect.y + tagRect.height - 2
+      // })
       this.$store.commit('currentSelectedTag', tag)
-      this.$store.commit('tagDetailsIsVisible', true)
+      // this.$store.commit('tagDetailsIsVisible', true)
     },
-    hideTagDetailsIsVisible () {
+    closeDialogs () {
+      this.tagDetailsIsVisible = false
       this.$store.commit('currentSelectedTag', {})
-      this.$store.commit('tagDetailsIsVisible', false)
+      // this.$store.commit('tagDetailsIsVisible', false)
     },
     updateFilteredTags (tags) {
       this.filteredTags = tags
     },
     updateFilter (filter) {
       this.filter = filter
+    }
+  },
+  watch: {
+    visible (visible) {
+      if (visible) {
+        this.closeDialogs()
+      }
     }
   }
 }
