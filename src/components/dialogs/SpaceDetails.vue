@@ -50,12 +50,6 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(v-if="spacesIsVisible" :spaces="spaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
     TagList(:tags="tags" :isLoading="isLoadingRemoteTags")
-    //- blank slate inside TagsList: if !spacesIsVisible but you have no tags, :style is temp
-    p(v-if="!spacesIsVisible" :style="{padding: '6px'}") Add
-      span &nbsp;
-      span.badge.info [[Tags]]
-      span to cards
-
 </template>
 
 <script>
@@ -181,7 +175,6 @@ export default {
       }
       const mergedTags = utils.mergedTags(this.tags, remoteTags)
       this.tags = mergedTags
-      console.log('🍇🍇', this.tags)
     },
     toggleSpacesIsVisible (value) {
       this.closeDialogs()

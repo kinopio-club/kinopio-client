@@ -1,20 +1,25 @@
 <template lang="pug">
-span(@click.left="closeDialogs")
-  ResultsFilter(:items="tags" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredTags")
-  ul.results-list.tag-list
-    template(v-for="(tag in tagsFiltered")
-      li(
-        :key="tag.id"
-        tabindex="0"
-        @click.left.stop="toggleTagDetailsIsVisible(tag)"
-        @touchend.stop="toggleTagDetailsIsVisible(tag)"
-        v-on:keyup.enter="toggleTagDetailsIsVisible(tag)"
-      )
-        .badge(:style="{backgroundColor: tag.color}" :class="{ active: currentSelectedTag.name === tag.name }")
-          span {{tag.name}}
-      //- TagDetails(:visible="tagDetailsIsVisible" :tag="tag")
-
-    Loader(:visible="isLoading")
+span.tag-list(@click.left="closeDialogs")
+  template(v-if="tags")
+    ResultsFilter(:items="tags" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredTags")
+    ul.results-list
+      template(v-for="(tag in tagsFiltered")
+        li(
+          :key="tag.id"
+          tabindex="0"
+          @click.left.stop="toggleTagDetailsIsVisible($event, tag)"
+          @touchend.stop="toggleTagDetailsIsVisible($event, tag)"
+          v-on:keyup.enter="toggleTagDetailsIsVisible($event, tag)"
+          :class="{ active: currentSelectedTag.name === tag.name }"
+        )
+          .badge(:style="{backgroundColor: tag.color, 'pointerEvents': 'none'}")
+            span {{tag.name}}
+      Loader(:visible="isLoading")
+      TagDetails(:visibleFromProp="tagDetailsIsVisible")
+  p.info(v-if="!tags") Add
+    span &nbsp;
+    span.badge.info [[Tags]]
+    span to cards
 
 </template>
 
@@ -38,7 +43,8 @@ export default {
     return {
       filter: '',
       filteredTags: [],
-      tagDetailsIsVisible: false
+      tagDetailsIsVisible: false,
+      prevTagName: null
     }
   },
   computed: {
@@ -52,22 +58,38 @@ export default {
     }
   },
   methods: {
-    toggleTagDetailsIsVisible (tag) {
-      console.log('🌱', tag)
-      this.tagDetailsIsVisible = !this.tagDetailsIsVisible
-      // this.hideTagDetailsIsVisible()
+    updatePosition (event) {
+      console.log('🍆', event, event.target)
       // const tagRect = event.target.getBoundingClientRect()
-      // this.$store.commit('tagDetailsPosition', {
-      //   x: window.scrollX + tagRect.x + 2,
-      //   y: window.scrollY + tagRect.y + tagRect.height - 2
-      // })
+      this.$store.commit('tagDetailsPosition', {
+        // x: window.scrollX + tagRect.x + 2,
+        // y: window.scrollY + tagRect.y + tagRect.height - 2
+        x: 0,
+        y: 0
+      })
+    },
+    toggleTagDetailsIsVisible (event, tag) {
+      const value = !this.tagDetailsIsVisible
+      this.closeDialogs()
+      this.updatePosition(event)
+      if (this.prevTagName === tag.name) {
+        console.log('🦚tagDetailsIsVisible', this.tagDetailsIsVisible, value)
+
+        this.tagDetailsIsVisible = value
+      } else {
+        this.tagDetailsIsVisible = true
+      }
+
       this.$store.commit('currentSelectedTag', tag)
-      // this.$store.commit('tagDetailsIsVisible', true)
+
+      // if (!this.tagDetailsIsVisible) {
+      //   this.closeDialogs()
+      // }
+      this.prevTagName = tag.name
     },
     closeDialogs () {
       this.tagDetailsIsVisible = false
-      this.$store.commit('currentSelectedTag', {})
-      // this.$store.commit('tagDetailsIsVisible', false)
+      // this.$store.commit('currentSelectedTag', {})
     },
     updateFilteredTags (tags) {
       this.filteredTags = tags
@@ -87,26 +109,7 @@ export default {
 </script>
 
 <style lang="stylus">
-// .tag-list
-  // .badge
-  //   margin-left 0
-
-  // .badge.status
-  //   display inline-flex
-  //   margin 0
-  //   margin-left 6px
-  //   min-height auto
-  //   height 14px
-  //   img
-  //     margin 0
-
-  // .name
-  //   margin 0
-  //   white-tag wrap
-  //   overflow hidden
-  //   .icon
-  //     margin-left 6px
-
-  // .loader
-  //   margin-left 6px
+.tag-list
+  .info
+    margin 6px
 </style>

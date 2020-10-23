@@ -1,6 +1,6 @@
 <template lang="pug">
-dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="dialog" @click.left="closeDialogs")
-  section.edit-card(v-if="!cardDetailsIsVisible")
+dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="dialog" @click.left.stop="closeDialogs")
+  section.edit-card(v-if="showEditCard")
     button(@click="showCardDetails(null)") Edit Card
   section(:style="{backgroundColor: color}")
     .row
@@ -46,6 +46,21 @@ export default {
     Loader,
     ResultsFilter
   },
+  props: {
+    visibleFromProp: Boolean
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'currentSelectedTag') {
+        const currentSelectedTag = this.$store.state.currentSelectedTag
+        // if (this.prevSelectedTag.name === currentSelectedTag.name) { return }
+        console.log('🌷🌷🌷🌷🌷tag changed ', currentSelectedTag.name, this.name)
+        this.updateCardsWithTag()
+        // this.prevSelectedTag = currentSelectedTag
+      }
+    })
+  },
+
   data () {
     return {
       colorPickerIsVisible: false,
@@ -53,13 +68,20 @@ export default {
       filteredCardsWithTag: [],
       loading: false,
       cardsWithTag: []
+      // prevSelectedTag: {}
     }
   },
   computed: {
-    visible () { return this.$store.state.tagDetailsIsVisible },
+    visible () {
+      return this.$store.state.tagDetailsIsVisible || this.visibleFromProp
+    },
     currentTag () { // name, color, cardId
       const tag = this.$store.state.currentSelectedTag
-      return this.$store.getters['currentSpace/tagByName'](tag.name)
+      if (tag.spaceId) {
+        return tag
+      } else {
+        return this.$store.getters['currentSpace/tagByName'](tag.name)
+      }
     },
     position () { return this.$store.state.tagDetailsPosition },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
@@ -71,8 +93,14 @@ export default {
       }
     },
     color () { return this.currentTag.color },
-    cardDetailsIsVisible () { return this.$store.state.cardDetailsIsVisibleForCardId },
-    name () { return this.currentTag.name },
+    showEditCard () {
+      if (this.visibleFromProp) { return false }
+      return !this.$store.state.cardDetailsIsVisibleForCardId
+    },
+    name () {
+      console.log(this.currentTag)
+      return this.currentTag.name
+    },
     filteredItems () {
       if (this.filter) {
         return this.filteredCardsWithTag
@@ -81,11 +109,17 @@ export default {
       }
     },
     cardsWithTagNameInCurrentSpace () {
-      const cardId = this.$store.state.currentSelectedTag.cardId
-      const tags = this.$store.getters['currentSpace/tagsByNameExcludingCardById']({
-        name: this.currentTag.name,
-        cardId
-      })
+      let tags
+      if (this.visibleFromProp) {
+        console.log(this.name)
+        tags = this.$store.getters['currentSpace/tagsByName'](this.name)
+      } else {
+        const cardId = this.$store.state.currentSelectedTag.cardId
+        tags = this.$store.getters['currentSpace/tagsByNameExcludingCardById']({
+          name: this.name,
+          cardId
+        })
+      }
       let cards = tags.map(tag => {
         let card = this.$store.getters['currentSpace/cardById'](tag.cardId)
         return card
@@ -108,7 +142,10 @@ export default {
   methods: {
     setCardsWithTag (cards) {
       cards = uniqBy(cards, 'id')
-      cards = this.excludeCurrentCard(cards)
+      console.log('👀', this.visibleFromProp)
+      if (!this.visibleFromProp) {
+        cards = this.excludeCurrentCard(cards) || cards
+      }
       cards = cards.map(card => {
         card = utils.clone(card)
         card.nameSegments = this.cardNameSegments(card.name)
@@ -124,7 +161,14 @@ export default {
         remoteCardsWithTag = remoteTagNameGroup.cards
       } else {
         this.loading = true
-        remoteCardsWithTag = await this.$store.dispatch('api/getCardsWithTag', this.name) || []
+        console.log('🍆 getting cards w tag', this.name)
+        try {
+          remoteCardsWithTag = await this.$store.dispatch('api/getCardsWithTag', this.name) || []
+        } catch (error) {
+          console.warn('🚑 could not find cards with tag', this.name, error)
+          // TODO this happens if the tag was created but the card/space was removed. here's where i give the option to remove tag
+          this.loading = false
+        }
         this.loading = false
         const remoteTagGroup = {
           name: this.name,
@@ -133,9 +177,11 @@ export default {
         this.$store.commit('addToRemoteTagNameGroups', remoteTagGroup)
       }
       let cards = this.cardsWithTag.concat(this.remoteCardsWithTag)
+      cards = cards.filter(card => card) // remove undefined cards
       this.setCardsWithTag(cards)
     },
     updateCardsWithTag () {
+      console.log('🍓 updating', this.name)
       const cardsInCurrentSpace = this.cardsWithTagNameInCurrentSpace
       const cardsInCachedSpaces = cache.allCardsByTagName(this.name)
       let cards = cardsInCurrentSpace.concat(cardsInCachedSpaces)
@@ -143,8 +189,13 @@ export default {
       this.updateRemoteCardsWithTag()
     },
     excludeCurrentCard (cards) {
+      if (!this.currentCard) { return }
+      console.log('🍏excludeCurrentCard X', this.currentCard)
+
       cards = cards.filter(Boolean)
-      return cards.filter(card => card.id !== this.currentCard.id)
+      cards = cards.filter(card => card.id !== this.currentCard.id)
+      console.log('🧞‍♂️', cards)
+      return cards
     },
     updateFilter (filter) {
       this.filter = filter
@@ -222,21 +273,10 @@ export default {
       })
     },
     scrollIntoView () {
+      if (this.visibleFromProp) { return }
       const element = this.$refs.dialog
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
-    },
-    scrollIntoViewAndFocus () {
-      const element = this.$refs.name
-      const length = this.name.length
-      this.scrollIntoView()
-      if (utils.isMobile()) { return }
-      this.$nextTick(() => {
-        this.focusName()
-        if (length && element) {
-          element.setSelectionRange(length, length)
-        }
-      })
     }
   },
   watch: {
@@ -246,7 +286,7 @@ export default {
       }
       this.$nextTick(() => {
         if (this.visible) {
-          this.scrollIntoViewAndFocus()
+          this.scrollIntoView()
         } else {
           this.closeDialogs()
         }

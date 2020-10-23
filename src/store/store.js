@@ -391,7 +391,6 @@ export default new Vuex.Store({
       state.remoteTagNameGroups = groups
     },
     remoteTags: (state, tags) => {
-      console.log('store remoteTags', tags)
       utils.typeCheck({ value: tags, type: 'array', origin: 'remoteTags' })
       state.remoteTags = tags
     },
