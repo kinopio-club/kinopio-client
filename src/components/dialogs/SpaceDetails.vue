@@ -31,10 +31,11 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
   section.results-actions
     .row
       .segmented-buttons
-        button.active Spaces
-        button Tags
-
-    .row
+        button(:class="{active: spacesIsVisible}" @click.left.stop="toggleSpacesIsVisible(true)")
+          span Spaces
+        button(:class="{active: !spacesIsVisible}" @click.left.stop="toggleSpacesIsVisible(false)")
+          span Tags
+    .row(v-if="spacesIsVisible")
       .button-wrap
         button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
           img.icon(src="@/assets/add.svg")
@@ -44,9 +45,9 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
         button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
           span Import
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
-
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    SpaceList(:spaces="spaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
+    SpaceList(v-if="spacesIsVisible" :spaces="spaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
+    //- TagsList(:tags="tags" ?:isLoading="isLoadingCurrentUser?")
 
 </template>
 
@@ -103,7 +104,8 @@ export default {
       isLoadingRemoteSpaces: false,
       remoteSpaces: [],
       resultsSectionHeight: null,
-      dialogHeight: null
+      dialogHeight: null,
+      spacesIsVisible: true
     }
   },
   computed: {
@@ -143,6 +145,10 @@ export default {
     }
   },
   methods: {
+    toggleSpacesIsVisible (value) {
+      this.closeDialogs()
+      this.spacesIsVisible = value
+    },
     addSpace () {
       window.scrollTo(0, 0)
       this.$store.dispatch('currentSpace/addSpace')
