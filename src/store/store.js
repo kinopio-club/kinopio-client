@@ -387,6 +387,7 @@ export default new Vuex.Store({
     addToRemoteTagNameGroups: (state, group) => {
       utils.typeCheck({ value: group, type: 'object', origin: 'addToRemoteTagNameGroups' })
       let groups = state.remoteTagNameGroups
+      groups = groups.filter(storedGroup => storedGroup.name !== group.name)
       groups.push(group)
       state.remoteTagNameGroups = groups
     },
@@ -734,7 +735,8 @@ export default new Vuex.Store({
       return isPainting || isDrawingConnection || isDraggingCard
     },
     remoteTagNameGroupByName: (state) => (name) => {
-      return state.remoteTagNameGroups.find(group => group.name === name)
+      const tagGroup = state.remoteTagNameGroups.find(group => group.name === name)
+      return tagGroup
     }
   },
 
