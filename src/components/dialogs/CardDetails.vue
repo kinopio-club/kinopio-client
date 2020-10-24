@@ -110,6 +110,23 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         img.icon.cancel(src="@/assets/add.svg")
         span Max Length
       p To fit small screens, cards can't be longer than 250 characters
+    template(v-if="error.signUpToUpload")
+      p
+        span To upload files,
+        span.badge.info you need to Sign Up or In
+      button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
+    template(v-if="error.sizeLimit")
+      p
+        span.badge.danger
+          img.icon.cancel(src="@/assets/add.svg")
+          span Too Big
+      p
+        span To upload files over 5mb,
+        span.badge.info upgrade for unlimited
+      button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+    template(v-if="error.unknownUploadError")
+      .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+
     //- Tags
     .tags-row(v-if="tagsInCard.length")
       template(v-for="tag in tagsInCard")
@@ -160,7 +177,12 @@ export default {
       wasPasted: false,
       cursorPosition: 0,
       shouldCancelBracketRight: false,
-      insertedLineBreak: false
+      insertedLineBreak: false,
+      error: {
+        signUpToUpload: false,
+        sizeLimit: false,
+        unknownUploadError: false
+      }
     }
   },
   created () {
@@ -295,7 +317,8 @@ export default {
     cardPendingUpload () {
       const pendingUploads = this.$store.state.upload.pendingUploads
       return pendingUploads.find(upload => upload.cardId === this.card.id)
-    }
+    },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
     seperatedLines (name) {
@@ -386,7 +409,27 @@ export default {
         this.$store.dispatch('closeAllDialogs', 'CardDetails.splitCards')
       })
     },
+    async uploadFile (file) {
+      if (!this.currentUserIsSignedIn) {
+        this.error.signUpToUpload = true
+        return
+      }
+      try {
+        await this.$store.dispatch('upload/uploadFile', { file, cardId: this.card.id })
+      } catch (error) {
+        console.warn('🚒', error)
+        if (error.type === 'sizeLimit') {
+          this.error.sizeLimit = true
+        } else {
+          this.error.unknownUploadError = true
+        }
+      }
+    },
     updatePastedName (event) {
+      const files = event.clipboardData.files
+      if (files.length) {
+        this.uploadFile(files[0])
+      }
       const text = event.clipboardData.getData('text')
       this.pastedName = text
       this.wasPasted = true
@@ -547,6 +590,9 @@ export default {
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
+    triggerUpgradeUserIsVisible () {
+      this.$store.commit('triggerUpgradeUserIsVisible')
+    },
     urlType (url) {
       if (utils.urlIsImage(url)) {
         return 'image'
@@ -563,7 +609,7 @@ export default {
       const url = file.url
       const urlType = this.urlType(url)
       const checkbox = utils.checkboxFromString(name)
-      const previousUrls = utils.urlsFromString(name)
+      const previousUrls = utils.urlsFromString(name, true)
       let isReplaced
       previousUrls.forEach(previousUrl => {
         if (this.urlType(previousUrl) === urlType) {
@@ -583,6 +629,11 @@ export default {
       }
       this.updateCardName(utils.trim(name))
       this.triggerUpdatePositionInVisualViewport()
+    },
+    clearErrors () {
+      this.error.signUpToUpload = false
+      this.error.sizeLimit = false
+      this.error.unknownUploadError = false
     },
 
     // Tags
@@ -784,6 +835,7 @@ export default {
     visible (visible) {
       this.$nextTick(() => {
         if (visible) {
+          this.clearErrors()
           this.scrollIntoViewAndFocus()
           this.updatePreviousTags()
         } else {
