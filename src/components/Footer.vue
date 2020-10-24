@@ -251,7 +251,7 @@ export default {
 
 <style lang="stylus">
 footer
-  z-index var(--max-z)
+  z-index calc(var(--max-z) - 2)
   position fixed
   left 8px
   bottom 8px
