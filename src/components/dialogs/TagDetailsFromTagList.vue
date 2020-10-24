@@ -33,7 +33,6 @@ dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="d
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import Loader from '@/components/Loader.vue'
-import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -46,6 +45,12 @@ export default {
     Loader,
     ResultsFilter
   },
+  props: {
+    visible: Boolean,
+    position: Object,
+    tag: Object
+  },
+
   data () {
     return {
       colorPickerIsVisible: false,
@@ -53,14 +58,17 @@ export default {
       filteredCardsWithTag: [],
       loading: false,
       cardsWithTag: []
+      // prevSelectedTag: {}
     }
   },
   computed: {
-    visible () {
-      return this.$store.state.tagDetailsIsVisible
-    },
+    // visible () {
+    //   console.log('🍄details visible🍄',this.$store.state.tagDetailsIsVisible)
+    //   return this.$store.state.tagDetailsIsVisible
+    // },
     currentTag () { // name, color, cardId
-      const tag = this.$store.state.currentSelectedTag
+      const tag = this.tag
+      console.log(tag)
 
       if (tag.spaceId) {
         return tag
@@ -68,7 +76,6 @@ export default {
         return this.$store.getters['currentSpace/tagByName'](tag.name)
       }
     },
-    position () { return this.$store.state.tagDetailsPosition },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     currentSpaceId () { return this.$store.state.currentSpace.id },
     dialogPosition () {
@@ -89,16 +96,13 @@ export default {
       if (this.filter) {
         return this.filteredCardsWithTag
       } else {
+        console.log('filteredItems', this.cardsWithTag)
         return this.cardsWithTag
       }
     },
     cardsWithTagNameInCurrentSpace () {
       let tags
-      const cardId = this.$store.state.currentSelectedTag.cardId
-      tags = this.$store.getters['currentSpace/tagsByNameExcludingCardById']({
-        name: this.name,
-        cardId
-      })
+      tags = this.$store.getters['currentSpace/tagsByName'](this.name)
       let cards = tags.map(tag => {
         let card = this.$store.getters['currentSpace/cardById'](tag.cardId)
         return card
@@ -113,11 +117,9 @@ export default {
         return false
       }
     },
-    currentCard () {
-      return this.$store.getters['currentSpace/cardById'](this.$store.state.currentSelectedTag.cardId)
-    },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
+
   methods: {
     async remoteCards () {
       if (!this.currentUserIsSignedIn) { return }
@@ -128,10 +130,13 @@ export default {
       } else {
         this.loading = true
         try {
+          console.log('get remote cards w tag', this.name)
           remoteCards = await this.$store.dispatch('api/getCardsWithTag', this.name) || []
           remoteCards = utils.clone(remoteCards)
+          console.log(remoteCards)
         } catch (error) {
           console.warn('🚑 could not find cards with tag', this.name, error)
+          // TODO this happens if the tag was created but the card/space was removed. here's where i give the option to remove tag
           this.loading = false
         }
         this.loading = false
@@ -143,25 +148,23 @@ export default {
       }
       return remoteCards
     },
+
     async updateCards () {
+      console.log('🍓 updating', this.name)
       const cardsInCurrentSpace = this.cardsWithTagNameInCurrentSpace
       const cardsInCachedSpaces = cache.allCardsByTagName(this.name)
       const cacheCards = cardsInCurrentSpace.concat(cardsInCachedSpaces)
       const remoteCards = await this.remoteCards()
       let cards = cacheCards.concat(remoteCards)
       cards = uniqBy(cards, 'id')
-      cards = this.excludeCurrentCard(cards)
       cards = cards.map(card => {
         card.nameSegments = this.cardNameSegments(card.name)
         return card
       })
       this.cardsWithTag = cards
+      console.log('🌷', this.cardsWithTag)
     },
-    excludeCurrentCard (cards) {
-      if (this.currentTag.parentIsTagList) { return cards }
-      cards = cards.filter(card => card.id !== this.currentCard.id)
-      return cards
-    },
+
     updateFilter (filter) {
       this.filter = filter
     },
@@ -196,7 +199,6 @@ export default {
       })
     },
     showCardDetails (card) {
-      card = card || this.currentCard
       if (this.currentSpaceId !== card.spaceId) {
         this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
         const space = cache.space(card.spaceId) || { id: card.spaceId }
@@ -223,6 +225,7 @@ export default {
         return card
       })
       this.cardsWithTag = cards
+      console.log('🎨', this.cardsWithTag)
     },
     updateTagNameColor (newColor) {
       let tag = utils.clone(this.currentTag)
@@ -236,25 +239,22 @@ export default {
         if (!element) { return }
         element.focus()
       })
-    },
-    scrollIntoView () {
-      if (this.visibleFromProp) { return }
-      const element = this.$refs.dialog
-      const isTouchDevice = this.$store.state.isTouchDevice
-      scrollIntoView.scroll(element, isTouchDevice)
     }
   },
   watch: {
+    cardsWithTag (value) {
+      console.log('WATCH cardsWithTag', value, this.currentTag.name)
+    },
     visible (visible) {
       if (this.visible) {
         this.updateCards()
-        this.closeDialogs()
       }
-      this.$nextTick(() => {
-        if (this.visible) {
-          this.scrollIntoView()
-        }
-      })
+      // this.$nextTick(() => {
+      //   if (this.visible) {
+      //   } else {
+      //     this.closeDialogs()
+      //   }
+      // })
     }
   }
 }
