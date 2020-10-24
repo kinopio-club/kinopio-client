@@ -9,7 +9,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="d
           .current-color(:style="{backgroundColor: color}")
         ColorPicker(:currentColor="color" :visible="colorPickerIsVisible" @selectedColor="updateTagNameColor")
       .tag-name {{name}}
-    p(v-if="!cardsWithTag.length") Tag more cards with [[{{currentTag.name}}]] to see them here
+    p(v-if="!cardsWithTag.length") Tag more cards with [[{{tag.name}}]] to see them here
   section.results-section(v-if="cardsWithTag.length")
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="cardsWithTag" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredCardsWithTag")
     ul.results-list
@@ -24,7 +24,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="d
               span.badge.tag-badge(
                 v-if="segment.isTag"
                 :style="{backgroundColor: segment.color}"
-                :class="{ active: currentTag.name === segment.name }"
+                :class="{ active: tag.name === segment.name }"
               ) {{segment.name}}
     Loader(:visible="loading")
 </template>
@@ -58,24 +58,9 @@ export default {
       filteredCardsWithTag: [],
       loading: false,
       cardsWithTag: []
-      // prevSelectedTag: {}
     }
   },
   computed: {
-    // visible () {
-    //   console.log('🍄details visible🍄',this.$store.state.tagDetailsIsVisible)
-    //   return this.$store.state.tagDetailsIsVisible
-    // },
-    currentTag () { // name, color, cardId
-      const tag = this.tag
-      console.log(tag)
-
-      if (tag.spaceId) {
-        return tag
-      } else {
-        return this.$store.getters['currentSpace/tagByName'](tag.name)
-      }
-    },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     currentSpaceId () { return this.$store.state.currentSpace.id },
     dialogPosition () {
@@ -84,13 +69,13 @@ export default {
         top: `${this.position.y}px`
       }
     },
-    color () { return this.currentTag.color },
+    color () { return this.tag.color },
     showEditCard () {
       return !this.$store.state.cardDetailsIsVisibleForCardId
     },
     name () {
-      if (!this.currentTag) { return }
-      return this.currentTag.name
+      if (!this.tag) { return }
+      return this.tag.name
     },
     filteredItems () {
       if (this.filter) {
@@ -204,7 +189,7 @@ export default {
         const space = cache.space(card.spaceId) || { id: card.spaceId }
         this.$store.dispatch('currentSpace/changeSpace', { space })
       } else {
-        const cardId = card.id || this.currentTag.cardId
+        const cardId = card.id || this.tag.cardId
         this.$store.dispatch('currentSpace/showCardDetails', cardId)
       }
     },
@@ -225,10 +210,9 @@ export default {
         return card
       })
       this.cardsWithTag = cards
-      console.log('🎨', this.cardsWithTag)
     },
     updateTagNameColor (newColor) {
-      let tag = utils.clone(this.currentTag)
+      let tag = utils.clone(this.tag)
       tag.color = newColor
       this.$store.dispatch('currentSpace/updateTagNameColor', tag)
       this.updateCardsWithTagColor(tag.name, newColor)
@@ -243,18 +227,14 @@ export default {
   },
   watch: {
     cardsWithTag (value) {
-      console.log('WATCH cardsWithTag', value, this.currentTag.name)
+      console.log('WATCH cardsWithTag', value, this.tag.name)
+      // todo update position on nexttick, so that dialog bottom isn't below viewport bottom
     },
     visible (visible) {
       if (this.visible) {
+        this.closeDialogs()
         this.updateCards()
       }
-      // this.$nextTick(() => {
-      //   if (this.visible) {
-      //   } else {
-      //     this.closeDialogs()
-      //   }
-      // })
     }
   }
 }

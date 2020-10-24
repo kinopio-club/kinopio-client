@@ -158,7 +158,6 @@ export default {
       this.cardsWithTag = cards
     },
     excludeCurrentCard (cards) {
-      if (this.currentTag.parentIsTagList) { return cards }
       cards = cards.filter(card => card.id !== this.currentCard.id)
       return cards
     },

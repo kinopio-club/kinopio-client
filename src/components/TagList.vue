@@ -10,12 +10,12 @@ span.tag-list(@click.left="closeDialogs")
           @click.left.stop="toggleTagDetailsIsVisible($event, tag)"
           @touchend.stop="toggleTagDetailsIsVisible($event, tag)"
           v-on:keyup.enter="toggleTagDetailsIsVisible($event, tag)"
-          :class="{ active: currentSelectedTag.name === tag.name }"
+          :class="{ active: tagDetailsTag.name === tag.name }"
         )
           .badge(:style="{backgroundColor: tag.color, 'pointerEvents': 'none'}")
             span {{tag.name}}
+      TagDetailsFromTagList(:visible="tagDetailsIsVisible" :position="tagDetailsPosition" :tag="tagDetailsTag")
       Loader(:visible="isLoading")
-      TagDetails(:visibleFromProp="tagDetailsIsVisible")
   p.info(v-if="!tags") Add
     span &nbsp;
     span.badge.info [[Tags]]
@@ -26,14 +26,14 @@ span.tag-list(@click.left="closeDialogs")
 <script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import Loader from '@/components/Loader.vue'
-import TagDetails from '@/components/dialogs/TagDetails.vue'
+import TagDetailsFromTagList from '@/components/dialogs/TagDetailsFromTagList.vue'
 
 export default {
   name: 'TagList',
   components: {
     ResultsFilter,
     Loader,
-    TagDetails
+    TagDetailsFromTagList
   },
   props: {
     tags: Array,
@@ -44,7 +44,9 @@ export default {
       filter: '',
       filteredTags: [],
       tagDetailsIsVisible: false,
-      prevTagName: null
+      prevTagName: null,
+      tagDetailsPosition: {},
+      tagDetailsTag: {}
     }
   },
   computed: {
@@ -59,37 +61,28 @@ export default {
   },
   methods: {
     updatePosition (event) {
-      console.log('🍆', event, event.target)
-      // const tagRect = event.target.getBoundingClientRect()
-      this.$store.commit('tagDetailsPosition', {
-        // x: window.scrollX + tagRect.x + 2,
-        // y: window.scrollY + tagRect.y + tagRect.height - 2
-        x: 0,
-        y: 0
-      })
+      const rect = event.target.getBoundingClientRect()
+      console.log('🟣', event.target, rect)
+      this.tagDetailsPosition = {
+        x: rect.x + 8,
+        y: rect.y - 8
+      }
     },
     toggleTagDetailsIsVisible (event, tag) {
       const value = !this.tagDetailsIsVisible
       this.closeDialogs()
       this.updatePosition(event)
       if (this.prevTagName === tag.name) {
-        console.log('🦚tagDetailsIsVisible', this.tagDetailsIsVisible, value)
-
         this.tagDetailsIsVisible = value
       } else {
         this.tagDetailsIsVisible = true
       }
-
-      this.$store.commit('currentSelectedTag', tag)
-
-      // if (!this.tagDetailsIsVisible) {
-      //   this.closeDialogs()
-      // }
+      this.tagDetailsTag = tag
       this.prevTagName = tag.name
     },
     closeDialogs () {
       this.tagDetailsIsVisible = false
-      // this.$store.commit('currentSelectedTag', {})
+      this.$emit('closeDialogs')
     },
     updateFilteredTags (tags) {
       this.filteredTags = tags
