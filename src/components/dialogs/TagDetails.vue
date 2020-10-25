@@ -167,6 +167,17 @@ export default {
     updateFilteredCards (cards) {
       this.filteredCards = cards
     },
+    segmentTagColor (segment) {
+      const spaceTag = this.$store.getters['currentSpace/tagByName'](segment.name)
+      const cachedTag = cache.tagByName(segment.name)
+      if (spaceTag) {
+        return spaceTag.color
+      } else if (cachedTag) {
+        return cachedTag.color
+      } else {
+        return this.$store.state.currentUser.color
+      }
+    },
     cardNameSegments (name) {
       let url = utils.urlFromString(name)
       let imageUrl
@@ -182,15 +193,8 @@ export default {
         })
       }
       return segments.map(segment => {
-        if (segment.isTag) {
-          const spaceTag = this.$store.getters['currentSpace/tagByName'](segment.name)
-          if (spaceTag) {
-            segment.color = spaceTag.color
-          } else {
-            const cachedTag = cache.tagByName(segment.name)
-            segment.color = cachedTag.color
-          }
-        }
+        if (!segment.isTag) { return segment }
+        segment.color = this.segmentTagColor(segment)
         return segment
       })
     },
