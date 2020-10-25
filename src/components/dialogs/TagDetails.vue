@@ -9,9 +9,9 @@ dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="d
           .current-color(:style="{backgroundColor: color}")
         ColorPicker(:currentColor="color" :visible="colorPickerIsVisible" @selectedColor="updateTagNameColor")
       .tag-name {{name}}
-    p(v-if="!cardsWithTag.length") Tag more cards with [[{{currentTag.name}}]] to see them here
-  section.results-section(v-if="cardsWithTag.length")
-    ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="cardsWithTag" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredCardsWithTag")
+    p(v-if="!cards.length") Tag more cards with [[{{currentTag.name}}]] to see them here
+  section.results-section(v-if="cards.length")
+    ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="cards" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredCards")
     ul.results-list
       template(v-for="(card in filteredItems")
         li(:data-card-id="card.id" @click="showCardDetails(card)")
@@ -50,9 +50,9 @@ export default {
     return {
       colorPickerIsVisible: false,
       filter: '',
-      filteredCardsWithTag: [],
+      filteredCards: [],
       loading: false,
-      cardsWithTag: []
+      cards: []
     }
   },
   computed: {
@@ -87,12 +87,12 @@ export default {
     },
     filteredItems () {
       if (this.filter) {
-        return this.filteredCardsWithTag
+        return this.filteredCards
       } else {
-        return this.cardsWithTag
+        return this.cards
       }
     },
-    cardsWithTagNameInCurrentSpace () {
+    cardsNameInCurrentSpace () {
       let tags
       const cardId = this.$store.state.currentSelectedTag.cardId
       tags = this.$store.getters['currentSpace/tagsByNameExcludingCardById']({
@@ -107,7 +107,7 @@ export default {
       return cards
     },
     shouldHideResultsFilter () {
-      if (this.cardsWithTag.length < 5) {
+      if (this.cards.length < 5) {
         return true
       } else {
         return false
@@ -144,7 +144,7 @@ export default {
       return remoteCards
     },
     async updateCards () {
-      const cardsInCurrentSpace = this.cardsWithTagNameInCurrentSpace
+      const cardsInCurrentSpace = this.cardsNameInCurrentSpace
       const cardsInCachedSpaces = cache.allCardsByTagName(this.name)
       const cacheCards = cardsInCurrentSpace.concat(cardsInCachedSpaces)
       const remoteCards = await this.remoteCards()
@@ -155,7 +155,7 @@ export default {
         card.nameSegments = this.cardNameSegments(card.name)
         return card
       })
-      this.cardsWithTag = cards
+      this.cards = cards
     },
     excludeCurrentCard (cards) {
       cards = cards.filter(card => card.id !== this.currentCard.id)
@@ -164,8 +164,8 @@ export default {
     updateFilter (filter) {
       this.filter = filter
     },
-    updateFilteredCardsWithTag (cards) {
-      this.filteredCardsWithTag = cards
+    updateFilteredCards (cards) {
+      this.filteredCards = cards
     },
     cardNameSegments (name) {
       let url = utils.urlFromString(name)
@@ -212,7 +212,7 @@ export default {
       this.colorPickerIsVisible = false
     },
     updateCardsWithTagColor (name, newColor) {
-      const cards = this.cardsWithTag.map(card => {
+      const cards = this.cards.map(card => {
         card.nameSegments = card.nameSegments.map(segment => {
           if (segment.isTag && segment.name === name) {
             segment.color = newColor
@@ -221,7 +221,7 @@ export default {
         })
         return card
       })
-      this.cardsWithTag = cards
+      this.cards = cards
     },
     updateTagNameColor (newColor) {
       let tag = utils.clone(this.currentTag)

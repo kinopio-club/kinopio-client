@@ -71,14 +71,17 @@ export default {
     toggleTagDetailsIsVisible (event, tag) {
       const value = !this.tagDetailsIsVisible
       this.closeDialogs()
-      this.updatePosition(event)
-      if (this.prevTagName === tag.name) {
-        this.tagDetailsIsVisible = value
-      } else {
-        this.tagDetailsIsVisible = true
-      }
-      this.tagDetailsTag = tag
-      this.prevTagName = tag.name
+      this.$nextTick(() => {
+        this.updatePosition(event)
+        this.tagDetailsTag = tag
+        console.log('🍄tag', this.tagDetailsTag.name)
+        if (this.prevTagName === tag.name) {
+          this.tagDetailsIsVisible = value
+        } else {
+          this.tagDetailsIsVisible = true
+        }
+        this.prevTagName = tag.name
+      })
     },
     closeDialogs () {
       this.tagDetailsIsVisible = false
