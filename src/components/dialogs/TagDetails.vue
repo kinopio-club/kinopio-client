@@ -122,38 +122,33 @@ export default {
     async remoteCards () {
       if (!this.currentUserIsSignedIn) { return }
       let remoteCards
-      const remoteTagNameGroup = this.$store.getters['remoteTagNameGroupByName'](this.name)
-      if (remoteTagNameGroup) {
-        remoteCards = remoteTagNameGroup.cards
-      } else {
-        this.loading = true
-        try {
-          remoteCards = await this.$store.dispatch('api/getCardsWithTag', this.name) || []
-          remoteCards = utils.clone(remoteCards)
-        } catch (error) {
-          console.warn('🚑 could not find cards with tag', this.name, error)
-          this.loading = false
-        }
+      this.loading = true
+      try {
+        remoteCards = await this.$store.dispatch('api/getCardsWithTag', this.name) || []
+        remoteCards = utils.clone(remoteCards)
+      } catch (error) {
+        console.warn('🚑 could not find cards with tag', this.name, error)
         this.loading = false
-        const remoteTagGroup = {
-          name: this.name,
-          cards: remoteCards
-        }
-        this.$store.commit('addToRemoteTagNameGroups', remoteTagGroup)
       }
+      this.loading = false
       return remoteCards
     },
     async updateCards () {
       const cardsInCurrentSpace = this.cardsNameInCurrentSpace
       const cardsInCachedSpaces = cache.allCardsByTagName(this.name)
-      const cacheCards = cardsInCurrentSpace.concat(cardsInCachedSpaces)
-      const remoteCards = await this.remoteCards()
-      let cards = cacheCards.concat(remoteCards)
-      cards = uniqBy(cards, 'id')
-      cards = this.excludeCurrentCard(cards)
-      cards = cards.map(card => {
+      let cacheCards = cardsInCurrentSpace.concat(cardsInCachedSpaces)
+      cacheCards = cacheCards.map(card => {
         card.nameSegments = this.cardNameSegments(card.name)
         return card
+      })
+      this.cards = cacheCards
+      const remoteCards = await this.remoteCards()
+      const remoteCardIds = remoteCards.map(card => card.id)
+      cacheCards = cacheCards.filter(card => remoteCardIds.includes(card.id))
+      let cards = cacheCards.concat(remoteCards)
+      cards = uniqBy(cards, 'id')
+      cards = cards.filter(card => {
+        return card.isRemoved !== true
       })
       this.cards = cards
     },
