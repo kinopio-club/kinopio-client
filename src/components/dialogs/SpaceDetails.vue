@@ -95,6 +95,10 @@ export default {
       if (mutation.type === 'updatePageSizes') {
         this.updateHeights()
       }
+      if (mutation.type === 'currentSpace/updateTagNameColor') {
+        const updated = utils.clone(mutation.payload)
+        this.updateTagColor(updated)
+      }
     })
   },
   data () {
@@ -152,6 +156,16 @@ export default {
     }
   },
   methods: {
+    updateTagColor (updated) {
+      let tags = utils.clone(this.tags)
+      tags = tags.map(tag => {
+        if (tag.name === updated.name) {
+          tag.color = updated.color
+        }
+        return tag
+      })
+      this.tags = tags
+    },
     updateTags () {
       const spaceTags = this.$store.getters['currentSpace/spaceTags']()
       this.tags = spaceTags || []
@@ -176,12 +190,12 @@ export default {
       const mergedTags = utils.mergedTags(this.tags, remoteTags)
       this.tags = mergedTags
     },
-    toggleSpacesIsVisible (value) {
+    toggleSpacesIsVisible (visible) {
       this.closeDialogs()
-      if (!value) {
+      if (!visible) {
         this.updateTags()
       }
-      this.spacesIsVisible = value
+      this.spacesIsVisible = visible
     },
     addSpace () {
       window.scrollTo(0, 0)

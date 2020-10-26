@@ -436,6 +436,16 @@ const self = {
         console.error(error)
       }
     },
+    // updateUserTagsColor: async (context, tag) => {
+    //   if (!shouldRequest()) { return }
+    //   try {
+    //     const options = await context.dispatch('requestOptions', { method: 'PATCH', space: context.rootState.currentSpace, tag })
+    //     const response = await fetch(`${host}/tags/color`, options)
+    //     return normalizeResponse(response)
+    //   } catch (error) {
+    //     console.error(error)
+    //   }
+    // },
 
     // Billing
 

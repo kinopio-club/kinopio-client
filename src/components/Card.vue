@@ -332,7 +332,7 @@ export default {
               cardId: this.id,
               spaceId: this.$store.state.currentSpace.id
             })
-            console.warn('🦚 create missing tag', segment.name, tag, this.card)
+            console.warn('🦋 create missing tag', segment.name, tag, this.card)
             this.$store.dispatch('currentSpace/addTag', tag)
           }
           segment.color = tag.color

@@ -62,7 +62,6 @@ export default {
   methods: {
     updatePosition (event) {
       const rect = event.target.getBoundingClientRect()
-      console.log('🟣', event.target, rect)
       this.tagDetailsPosition = {
         x: rect.x + 8,
         y: rect.y - 8
@@ -74,7 +73,6 @@ export default {
       this.$nextTick(() => {
         this.updatePosition(event)
         this.tagDetailsTag = tag
-        console.log('🍄tag', this.tagDetailsTag.name)
         if (this.prevTagName === tag.name) {
           this.tagDetailsIsVisible = value
         } else {
