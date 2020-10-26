@@ -215,6 +215,8 @@ export default new Vuex.Store({
     triggerSpaceDetailsVisible: () => {},
     triggerFocusSpaceDetailsFilter: () => {},
     triggerFocusSpaceDetailsName: () => {},
+    triggerSpaceDetailsCloseTagDetails: () => {},
+    triggerSpaceDetailsCloseDialogs: () => {},
     triggerSignUpOrInIsVisible: () => {},
     triggerArenaAuthenticationError: () => {},
     triggerKeyboardShortcutsIsVisible: () => {},

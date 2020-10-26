@@ -39,6 +39,13 @@ export default {
     tags: Array,
     isLoading: Boolean
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerSpaceDetailsCloseTagDetails') {
+        this.closeDialogs()
+      }
+    })
+  },
   data () {
     return {
       filter: '',
@@ -83,7 +90,7 @@ export default {
     },
     closeDialogs () {
       this.tagDetailsIsVisible = false
-      this.$emit('closeDialogs')
+      this.$store.commit('triggerSpaceDetailsCloseDialogs')
     },
     updateFilteredTags (tags) {
       this.filteredTags = tags

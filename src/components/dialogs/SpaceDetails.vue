@@ -99,6 +99,9 @@ export default {
         const updated = utils.clone(mutation.payload)
         this.updateTagColor(updated)
       }
+      if (mutation.type === 'triggerSpaceDetailsCloseDialogs') {
+        this.closeDialogsFromTrigger()
+      }
     })
   },
   data () {
@@ -224,6 +227,16 @@ export default {
       this.privacyPickerIsVisible = !isVisible
     },
     closeDialogs () {
+      this.exportIsVisible = false
+      this.importIsVisible = false
+      this.addSpaceIsVisible = false
+      this.privacyPickerIsVisible = false
+      console.log(this.spacesIsVisible)
+      if (!this.spacesIsVisible) {
+        this.$store.commit('triggerSpaceDetailsCloseTagDetails')
+      }
+    },
+    closeDialogsFromTrigger () {
       this.exportIsVisible = false
       this.importIsVisible = false
       this.addSpaceIsVisible = false
