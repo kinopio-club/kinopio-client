@@ -141,7 +141,7 @@ export default {
         card.nameSegments = this.cardNameSegments(card.name)
         return card
       })
-      this.cards = cacheCards
+      this.cards = this.excludeCurrentCard(cacheCards)
       let remoteCards = await this.remoteCards()
       remoteCards = remoteCards.map(card => {
         card.nameSegments = this.cardNameSegments(card.name)
@@ -154,7 +154,7 @@ export default {
       cards = cards.filter(card => {
         return card.isRemoved !== true
       })
-      this.cards = cards
+      this.cards = this.excludeCurrentCard(cards)
     },
     excludeCurrentCard (cards) {
       cards = cards.filter(card => card.id !== this.currentCard.id)
@@ -229,7 +229,7 @@ export default {
         })
         return card
       })
-      this.cards = cards
+      this.cards = this.excludeCurrentCard(cards)
     },
     updateTagNameColor (newColor) {
       let tag = utils.clone(this.currentTag)
