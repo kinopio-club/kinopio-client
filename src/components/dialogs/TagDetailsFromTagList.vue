@@ -233,10 +233,13 @@ export default {
     }
   },
   watch: {
-    // cards (value) {
-    //   console.log('WATCH cards', value, this.tag.name, this.tag.color)
-    //   // todo update position on nexttick, so that dialog bottom isn't below viewport bottom
-    // },
+    cards (value) {
+      this.$nextTick(() => { // double nextTick to avoid timing conflicts with TagList updatePosition()
+        this.$nextTick(() => {
+          this.$emit('updatePositionY')
+        })
+      })
+    },
     visible (visible) {
       if (this.visible) {
         this.closeDialogs()

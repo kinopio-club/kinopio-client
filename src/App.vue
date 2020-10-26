@@ -390,6 +390,7 @@ ul.results-list
     border-radius 3px
     user-select none
     cursor pointer
+    word-break break-word
     &:hover,
     &.hover,
     &:focus

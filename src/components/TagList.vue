@@ -14,7 +14,7 @@ span.tag-list(@click.left="closeDialogs")
         )
           .badge(:style="{backgroundColor: tag.color, 'pointerEvents': 'none'}")
             span {{tag.name}}
-      TagDetailsFromTagList(:visible="tagDetailsIsVisible" :position="tagDetailsPosition" :tag="tagDetailsTag" @removeTag="removeTag")
+      TagDetailsFromTagList(:visible="tagDetailsIsVisible" :position="tagDetailsPosition" :tag="tagDetailsTag" @removeTag="removeTag" @updatePositionY="updatePositionY")
       Loader(:visible="isLoading")
   p.info(v-if="!tags") Add
     span &nbsp;
@@ -27,6 +27,8 @@ span.tag-list(@click.left="closeDialogs")
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import Loader from '@/components/Loader.vue'
 import TagDetailsFromTagList from '@/components/dialogs/TagDetailsFromTagList.vue'
+
+const threshold = 40
 
 export default {
   name: 'TagList',
@@ -67,12 +69,29 @@ export default {
     }
   },
   methods: {
+    updatePositionY () {
+      const viewportHeight = this.$store.state.viewportHeight
+      let dialog = document.querySelector('dialog.tag-details')
+      if (!dialog) { return }
+      dialog = dialog.getBoundingClientRect()
+      const distanceFromBottom = viewportHeight - dialog.y - dialog.height
+      if (distanceFromBottom < threshold) {
+        const y = viewportHeight - dialog.height - threshold // todo: too high on mobile?
+        this.tagDetailsPosition = {
+          x: this.tagDetailsPosition.x,
+          y
+        }
+      }
+    },
     updatePosition (event) {
       const rect = event.target.getBoundingClientRect()
       this.tagDetailsPosition = {
         x: rect.x + 8,
         y: rect.y - 8
       }
+      this.$nextTick(() => {
+        this.updatePositionY()
+      })
     },
     toggleTagDetailsIsVisible (event, tag) {
       const value = !this.tagDetailsIsVisible
