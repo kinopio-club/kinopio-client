@@ -1,7 +1,5 @@
 <template lang="pug">
 dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="dialog" @click.left.stop="closeDialogs")
-  section.edit-card(v-if="showEditCard")
-    button(@click="showCardDetails(null)") Edit Card
   section(:style="{backgroundColor: color}")
     .row
       .button-wrap
@@ -72,9 +70,6 @@ export default {
       }
     },
     color () { return this.tag.color },
-    showEditCard () {
-      return !this.$store.state.cardDetailsIsVisibleForCardId
-    },
     name () {
       return this.tag.name
     },
@@ -155,6 +150,9 @@ export default {
       this.filteredCards = cards
     },
     segmentTagColor (segment) {
+      if (this.tag.name === segment.name) {
+        return this.tag.color
+      }
       const spaceTag = this.$store.getters['currentSpace/tagByName'](segment.name)
       const cachedTag = cache.tagByName(segment.name)
       if (spaceTag) {
