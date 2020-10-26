@@ -14,7 +14,7 @@ span.tag-list(@click.left="closeDialogs")
         )
           .badge(:style="{backgroundColor: tag.color, 'pointerEvents': 'none'}")
             span {{tag.name}}
-      TagDetailsFromTagList(:visible="tagDetailsIsVisible" :position="tagDetailsPosition" :tag="tagDetailsTag")
+      TagDetailsFromTagList(:visible="tagDetailsIsVisible" :position="tagDetailsPosition" :tag="tagDetailsTag" @removeTag="removeTag")
       Loader(:visible="isLoading")
   p.info(v-if="!tags") Add
     span &nbsp;
@@ -97,6 +97,10 @@ export default {
     },
     updateFilter (filter) {
       this.filter = filter
+    },
+    removeTag (tag) {
+      this.closeDialogs()
+      this.$emit('removeTag', tag)
     }
   },
   watch: {

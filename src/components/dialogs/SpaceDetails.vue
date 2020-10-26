@@ -49,7 +49,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(v-if="spacesIsVisible" :spaces="spaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
-    TagList(:tags="tags" :isLoading="isLoadingRemoteTags" @closeDialogs="closeDialogs")
+    TagList(:tags="tags" :isLoading="isLoadingRemoteTags" @closeDialogs="closeDialogs" @removeTag="removeTag")
 </template>
 
 <script>
@@ -166,6 +166,13 @@ export default {
           tag.color = updated.color
         }
         return tag
+      })
+      this.tags = tags
+    },
+    removeTag (removed) {
+      let tags = utils.clone(this.tags)
+      tags = tags.filter(tag => {
+        return tag.name !== removed.name
       })
       this.tags = tags
     },
@@ -341,6 +348,9 @@ export default {
         this.closeDialogs()
         this.updateFavorites()
         this.updateHeights()
+      }
+      if (visible && !this.spacesIsVisible) {
+        this.updateTags()
       }
     }
   }

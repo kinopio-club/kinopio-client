@@ -7,7 +7,11 @@ dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="d
           .current-color(:style="{backgroundColor: color}")
         ColorPicker(:currentColor="color" :visible="colorPickerIsVisible" @selectedColor="updateTagNameColor")
       .tag-name {{name}}
-    p(v-if="!cards.length") Tag more cards with [[{{tag.name}}]] to see them here
+    template(v-if="!cards.length && !loading")
+      p Tag more cards with [[{{tag.name}}]] to see them here
+      button(@click.left.stop="removeTag")
+        img.icon(src="@/assets/remove.svg")
+        span Remove Tag
   section.results-section(v-if="cards.length")
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="cards" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredCards")
     ul.results-list
@@ -137,6 +141,9 @@ export default {
         card.nameSegments = this.cardNameSegments(card.name)
         return card
       })
+      cards = cards.filter(card => {
+        return card.isRemoved !== true
+      })
       this.cards = cards
     },
 
@@ -220,6 +227,10 @@ export default {
         if (!element) { return }
         element.focus()
       })
+    },
+    removeTag () {
+      this.$store.dispatch('currentSpace/removeTag', this.tag)
+      this.$emit('removeTag', this.tag)
     }
   },
   watch: {
