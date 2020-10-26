@@ -100,6 +100,12 @@ export default {
     }
   },
   watch: {
+    tags (tags) {
+      const updatedTag = tags.find(tag => tag.name === this.tagDetailsTag.name)
+      if (updatedTag) {
+        this.tagDetailsTag = updatedTag
+      }
+    },
     visible (visible) {
       if (visible) {
         this.closeDialogs()

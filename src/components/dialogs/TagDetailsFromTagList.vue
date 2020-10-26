@@ -77,7 +77,6 @@ export default {
       if (this.filter) {
         return this.filteredCards
       } else {
-        console.log('filteredItems', this.cards)
         return this.cards
       }
     },
@@ -110,10 +109,8 @@ export default {
       } else {
         this.loading = true
         try {
-          console.log('get remote cards w tag', this.name)
           remoteCards = await this.$store.dispatch('api/getCardsWithTag', this.name) || []
           remoteCards = utils.clone(remoteCards)
-          console.log(remoteCards)
         } catch (error) {
           console.warn('🚑 could not find cards with tag', this.name, error)
           // TODO this happens if the tag was created but the card/space was removed. here's where i give the option to remove tag
@@ -226,10 +223,10 @@ export default {
     }
   },
   watch: {
-    cards (value) {
-      console.log('WATCH cards', value, this.tag.name)
-      // todo update position on nexttick, so that dialog bottom isn't below viewport bottom
-    },
+    // cards (value) {
+    //   console.log('WATCH cards', value, this.tag.name, this.tag.color)
+    //   // todo update position on nexttick, so that dialog bottom isn't below viewport bottom
+    // },
     visible (visible) {
       if (this.visible) {
         this.closeDialogs()
