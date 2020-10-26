@@ -201,10 +201,15 @@ export default {
       card = card || this.currentCard
       if (this.currentSpaceId !== card.spaceId) {
         this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
-        const space = cache.space(card.spaceId) || { id: card.spaceId }
+        let space
+        if (card.spaceId) {
+          space = { id: card.spaceId }
+        } else {
+          space = cache.space(card.spaceId)
+        }
         this.$store.dispatch('currentSpace/changeSpace', { space })
       } else {
-        const cardId = card.id || this.currentTag.cardId
+        const cardId = card.id || this.tag.cardId
         this.$store.dispatch('currentSpace/showCardDetails', cardId)
       }
     },
