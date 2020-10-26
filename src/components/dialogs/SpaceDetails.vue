@@ -49,7 +49,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(v-if="spacesIsVisible" :spaces="spaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
-    TagList(:tags="tags" :isLoading="isLoadingRemoteTags" @closeDialogs="closeDialogs" @removeTag="removeTag")
+    TagList(v-if="!spacesIsVisible" :tags="tags" :isLoading="isLoadingRemoteTags" @closeDialogs="closeDialogs" @removeTag="removeTag")
 </template>
 
 <script>
