@@ -127,7 +127,11 @@ export default {
         return card
       })
       this.cards = cacheCards
-      const remoteCards = await this.remoteCards()
+      let remoteCards = await this.remoteCards()
+      remoteCards = remoteCards.map(card => {
+        card.nameSegments = this.cardNameSegments(card.name)
+        return card
+      })
       const remoteCardIds = remoteCards.map(card => card.id)
       cacheCards = cacheCards.filter(card => remoteCardIds.includes(card.id))
       let cards = cacheCards.concat(remoteCards)
