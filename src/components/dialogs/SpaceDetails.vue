@@ -238,7 +238,6 @@ export default {
       this.importIsVisible = false
       this.addSpaceIsVisible = false
       this.privacyPickerIsVisible = false
-      console.log(this.spacesIsVisible)
       if (!this.spacesIsVisible) {
         this.$store.commit('triggerSpaceDetailsCloseTagDetails')
       }
