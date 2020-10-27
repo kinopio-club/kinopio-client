@@ -130,6 +130,10 @@ export default {
     margin-bottom 10px
     padding-bottom 10px
     border-bottom 1px solid var(--primary)
+    span
+      img,
+      video
+        margin-bottom 10px
     &:last-child
       margin-bottom 0
       padding-bottom 0
@@ -159,17 +163,4 @@ export default {
   code
     background-color var(--secondary-background)
     margin 0
-.coming-up
-  ul
-    margin 0
-    margin-top 2px
-    padding-left 15px
-    list-style-type square
-    li
-      padding-top 10px
-      margin-left 5px
-      user-select text
-      &:first-child
-        padding-top 0
-
 </style>
