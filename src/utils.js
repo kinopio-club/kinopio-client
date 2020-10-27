@@ -69,12 +69,30 @@ export default {
     return height
   },
 
-  elementHeight (element) {
+  resultsItemDialogY (dialog) {
+    if (!dialog) { return }
+    const threshold = 40
+    const viewportHeight = this.visualViewport().height
+    dialog = dialog.getBoundingClientRect()
+    const distanceFromBottom = viewportHeight - dialog.y - dialog.height
+    if (distanceFromBottom < threshold) {
+      const y = viewportHeight - dialog.height - threshold
+      return y
+    }
+  },
+
+  elementHeight (element, ignoreFooter) {
     if (!element) { return }
     const rect = element.getBoundingClientRect()
-    let footer = document.querySelector('footer')
-    footer = footer.getBoundingClientRect()
-    let height = footer.y - rect.y
+    let height
+    if (ignoreFooter) {
+      const viewportHeight = this.visualViewport().height
+      height = viewportHeight - rect.y
+    } else {
+      let footer = document.querySelector('footer')
+      footer = footer.getBoundingClientRect()
+      height = footer.y - rect.y
+    }
     const zoomScale = this.visualViewport().scale
     if (zoomScale > 1) {
       height = height * zoomScale

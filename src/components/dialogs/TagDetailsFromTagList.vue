@@ -61,7 +61,8 @@ export default {
       filter: '',
       filteredCards: [],
       loading: false,
-      cards: []
+      cards: [],
+      dialogHeight: null
     }
   },
   computed: {
@@ -70,7 +71,8 @@ export default {
     dialogPosition () {
       return {
         left: `${this.position.x}px`,
-        top: `${this.position.y}px`
+        top: `${this.position.y}px`,
+        maxHeight: `${this.dialogHeight}px`
       }
     },
     color () { return this.tag.color },
@@ -126,7 +128,7 @@ export default {
         card.nameSegments = this.cardNameSegments(card.name)
         return card
       })
-      this.cards = cacheCards
+      this.updateCardsList(cacheCards)
       let remoteCards = await this.remoteCards()
       remoteCards = remoteCards.map(card => {
         card.nameSegments = this.cardNameSegments(card.name)
@@ -139,7 +141,7 @@ export default {
       cards = cards.filter(card => {
         return card.isRemoved !== true
       })
-      this.cards = cards
+      this.updateCardsList(cards)
     },
     updateFilter (filter) {
       this.filter = filter
@@ -212,7 +214,7 @@ export default {
         })
         return card
       })
-      this.cards = cards
+      this.updateCardsList(cards)
     },
     updateTagNameColor (newColor) {
       let tag = utils.clone(this.tag)
@@ -230,20 +232,29 @@ export default {
     removeTag () {
       this.$store.dispatch('currentSpace/removeTag', this.tag)
       this.$emit('removeTag', this.tag)
-    }
-  },
-  watch: {
-    cards (value) {
+    },
+    updateCardsList (cards) {
+      this.cards = cards
       this.$nextTick(() => { // double nextTick to avoid timing conflicts with TagList updatePosition()
         this.$nextTick(() => {
           this.$emit('updatePositionY')
+          this.updateDialogHeight()
         })
       })
     },
+    updateDialogHeight () {
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeight(element, true)
+      })
+    }
+  },
+  watch: {
     visible (visible) {
       if (this.visible) {
         this.closeDialogs()
         this.updateCards()
+        this.updateDialogHeight()
       }
     }
   }

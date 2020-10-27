@@ -14,7 +14,6 @@ span.tag-list(@click.left="closeDialogs")
         )
           .badge(:style="{backgroundColor: tag.color, 'pointerEvents': 'none'}")
             span {{tag.name}}
-      TagDetailsFromTagList(:visible="tagDetailsIsVisible" :position="tagDetailsPosition" :tag="tagDetailsTag" @removeTag="removeTag" @updatePositionY="updatePositionY")
       Loader(:visible="isLoading")
   p.info(v-if="!tags") Add
     span &nbsp;
@@ -26,16 +25,13 @@ span.tag-list(@click.left="closeDialogs")
 <script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import Loader from '@/components/Loader.vue'
-import TagDetailsFromTagList from '@/components/dialogs/TagDetailsFromTagList.vue'
-
-const threshold = 40
+import utils from '@/utils.js'
 
 export default {
   name: 'TagList',
   components: {
     ResultsFilter,
-    Loader,
-    TagDetailsFromTagList
+    Loader
   },
   props: {
     tags: Array,
@@ -52,8 +48,8 @@ export default {
     return {
       filter: '',
       filteredTags: [],
-      tagDetailsIsVisible: false,
       prevTagName: null,
+      tagDetailsIsVisible: false,
       tagDetailsPosition: {},
       tagDetailsTag: {}
     }
@@ -70,45 +66,55 @@ export default {
   },
   methods: {
     updatePositionY () {
-      const viewportHeight = this.$store.state.viewportHeight
       let dialog = document.querySelector('dialog.tag-details')
-      if (!dialog) { return }
-      dialog = dialog.getBoundingClientRect()
-      const distanceFromBottom = viewportHeight - dialog.y - dialog.height
-      if (distanceFromBottom < threshold) {
-        const y = viewportHeight - dialog.height - threshold // todo: too high on mobile?
-        this.tagDetailsPosition = {
+      const resultsItemDialogY = utils.resultsItemDialogY(dialog)
+      if (resultsItemDialogY) {
+        const position = {
           x: this.tagDetailsPosition.x,
-          y
+          y: resultsItemDialogY
         }
+        this.updateTagDetailsPosition(position)
       }
     },
     updatePosition (event) {
       const rect = event.target.getBoundingClientRect()
-      this.tagDetailsPosition = {
+      const position = {
         x: rect.x + 8,
         y: rect.y - 8
       }
+      this.updateTagDetailsPosition(position)
       this.$nextTick(() => {
         this.updatePositionY()
       })
+    },
+    updateTagDetailsPosition (position) {
+      this.tagDetailsPosition = position
+      this.$emit('updateTagDetailsPosition', position)
+    },
+    updateTagDetailsTag (tag) {
+      this.tagDetailsTag = tag
+      this.$emit('updateTagDetailsTag', tag)
+    },
+    updateTagDetailsIsVisible (value) {
+      this.tagDetailsIsVisible = value
+      this.$emit('updateTagDetailsIsVisible', value)
     },
     toggleTagDetailsIsVisible (event, tag) {
       const value = !this.tagDetailsIsVisible
       this.closeDialogs()
       this.$nextTick(() => {
         this.updatePosition(event)
-        this.tagDetailsTag = tag
+        this.updateTagDetailsTag(tag)
         if (this.prevTagName === tag.name) {
-          this.tagDetailsIsVisible = value
+          this.updateTagDetailsIsVisible(value)
         } else {
-          this.tagDetailsIsVisible = true
+          this.updateTagDetailsIsVisible(true)
         }
         this.prevTagName = tag.name
       })
     },
     closeDialogs () {
-      this.tagDetailsIsVisible = false
+      this.updateTagDetailsIsVisible(false)
       this.$store.commit('triggerSpaceDetailsCloseDialogs')
     },
     updateFilteredTags (tags) {
@@ -116,17 +122,13 @@ export default {
     },
     updateFilter (filter) {
       this.filter = filter
-    },
-    removeTag (tag) {
-      this.closeDialogs()
-      this.$emit('removeTag', tag)
     }
   },
   watch: {
     tags (tags) {
       const updatedTag = tags.find(tag => tag.name === this.tagDetailsTag.name)
       if (updatedTag) {
-        this.tagDetailsTag = updatedTag
+        this.updateTagDetailsTag(updatedTag)
       }
     },
     visible (visible) {

@@ -47,9 +47,19 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
         button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
           span Import
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
+  TagDetailsFromTagList(:visible="tagDetailsIsVisible" :position="tagDetailsPosition" :tag="tagDetailsTag" @removeTag="removeTag" @updatePositionY="updatePositionY")
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(v-if="spacesIsVisible" :spaces="spaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
-    TagList(v-if="!spacesIsVisible" :tags="tags" :isLoading="isLoadingRemoteTags" @closeDialogs="closeDialogs" @removeTag="removeTag")
+    TagList(
+      v-if="!spacesIsVisible"
+      :tags="tags"
+      :isLoading="isLoadingRemoteTags"
+      @closeDialogs="closeDialogs"
+      @removeTag="removeTag"
+      @updateTagDetailsPosition="updateTagDetailsPosition"
+      @updateTagDetailsTag="updateTagDetailsTag"
+      @updateTagDetailsIsVisible="updateTagDetailsIsVisible"
+    )
 </template>
 
 <script>
@@ -64,6 +74,7 @@ import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
 import templates from '@/data/templates.js'
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
+import TagDetailsFromTagList from '@/components/dialogs/TagDetailsFromTagList.vue'
 
 export default {
   name: 'SpaceDetails',
@@ -75,7 +86,8 @@ export default {
     TagList,
     PrivacyButton,
     ShowInExploreButton,
-    Loader
+    Loader,
+    TagDetailsFromTagList
   },
   props: {
     visible: Boolean
@@ -119,7 +131,10 @@ export default {
       remoteSpaces: [],
       resultsSectionHeight: null,
       dialogHeight: null,
-      spacesIsVisible: true
+      spacesIsVisible: true,
+      tagDetailsIsVisible: false,
+      tagDetailsPosition: {},
+      tagDetailsTag: {}
     }
   },
   computed: {
@@ -159,6 +174,26 @@ export default {
     }
   },
   methods: {
+    updateTagDetailsPosition (position) {
+      this.tagDetailsPosition = position
+    },
+    updateTagDetailsTag (tag) {
+      this.tagDetailsTag = tag
+    },
+    updateTagDetailsIsVisible (value) {
+      this.tagDetailsIsVisible = value
+    },
+    updatePositionY () {
+      let dialog = document.querySelector('dialog.tag-details')
+      const resultsItemDialogY = utils.resultsItemDialogY(dialog)
+      if (resultsItemDialogY) {
+        const position = {
+          x: this.tagDetailsPosition.x,
+          y: resultsItemDialogY
+        }
+        this.updateTagDetailsPosition(position)
+      }
+    },
     updateTagColor (updated) {
       let tags = utils.clone(this.tags)
       tags = tags.map(tag => {
@@ -169,10 +204,11 @@ export default {
       })
       this.tags = tags
     },
-    removeTag (removed) {
+    removeTag (tagToRemove) {
+      this.closeDialogs()
       let tags = utils.clone(this.tags)
       tags = tags.filter(tag => {
-        return tag.name !== removed.name
+        return tag.name !== tagToRemove.name
       })
       this.tags = tags
     },
