@@ -47,7 +47,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
         button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
           span Import
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
-  TagDetailsFromTagList(:visible="tagDetailsIsVisible" :position="tagDetailsPosition" :tag="tagDetailsTag" @removeTag="removeTag" @updatePositionY="updatePositionY")
+  TagDetailsFromTagList(:visible="tagDetailsIsVisible" :position="tagDetailsPosition" :tag="tagDetailsTag" @updatePositionY="updatePositionY")
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(v-if="spacesIsVisible" :spaces="spaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
     TagList(
@@ -55,7 +55,6 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
       :tags="tags"
       :isLoading="isLoadingRemoteTags"
       @closeDialogs="closeDialogs"
-      @removeTag="removeTag"
       @updateTagDetailsPosition="updateTagDetailsPosition"
       @updateTagDetailsTag="updateTagDetailsTag"
       @updateTagDetailsIsVisible="updateTagDetailsIsVisible"
@@ -110,9 +109,6 @@ export default {
       if (mutation.type === 'currentSpace/updateTagNameColor') {
         const updated = utils.clone(mutation.payload)
         this.updateTagColor(updated)
-      }
-      if (mutation.type === 'triggerSpaceDetailsCloseDialogs') {
-        this.closeDialogsFromTrigger()
       }
     })
   },
@@ -204,14 +200,6 @@ export default {
       })
       this.tags = tags
     },
-    removeTag (tagToRemove) {
-      this.closeDialogs()
-      let tags = utils.clone(this.tags)
-      tags = tags.filter(tag => {
-        return tag.name !== tagToRemove.name
-      })
-      this.tags = tags
-    },
     updateTags () {
       const spaceTags = this.$store.getters['currentSpace/spaceTags']()
       this.tags = spaceTags || []
@@ -274,15 +262,7 @@ export default {
       this.importIsVisible = false
       this.addSpaceIsVisible = false
       this.privacyPickerIsVisible = false
-      if (!this.spacesIsVisible) {
-        this.$store.commit('triggerSpaceDetailsCloseTagDetails')
-      }
-    },
-    closeDialogsFromTrigger () {
-      this.exportIsVisible = false
-      this.importIsVisible = false
-      this.addSpaceIsVisible = false
-      this.privacyPickerIsVisible = false
+      this.tagDetailsIsVisible = false
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space })
