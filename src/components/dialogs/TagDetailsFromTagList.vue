@@ -37,8 +37,6 @@ import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
-import uniqBy from 'lodash-es/uniqBy'
-
 export default {
   name: 'TagDetails',
   components: {
@@ -131,10 +129,7 @@ export default {
         card.nameSegments = this.cardNameSegments(card.name)
         return card
       })
-      const remoteCardIds = remoteCards.map(card => card.id)
-      cacheCards = cacheCards.filter(card => remoteCardIds.includes(card.id))
-      let cards = cacheCards.concat(remoteCards)
-      cards = uniqBy(cards, 'id')
+      let cards = utils.mergeArrays({ previous: cacheCards, updated: remoteCards, key: 'id' })
       cards = cards.filter(card => {
         return card.isRemoved !== true
       })

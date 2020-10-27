@@ -226,17 +226,13 @@ export default {
     })
   },
 
-  // mergeArrayOfObjectsById (baseArray, newArray) {
-  //   baseArray = this.clone(baseArray)
-  //   newArray.forEach(item => {
-  //     const existingItemIndex = baseArray.findIndex(baseItem => baseItem.id === item.id)
-  //     if (existingItemIndex > -1) {
-  //       baseArray.splice(existingItemIndex, 1)
-  //     }
-  //     baseArray.push(item)
-  //   })
-  //   return baseArray
-  // },
+  mergeArrays ({ previous, updated, key }) {
+    const updatedKeys = updated.map(item => item[key])
+    const base = previous.filter(item => !updatedKeys.includes(item[key]))
+    let merged = base.concat(updated)
+    merged = uniqBy(merged, key)
+    return merged
+  },
 
   findInArrayOfObjects (array, key, value) {
     return array.find(item => item[key] === value)
@@ -996,12 +992,6 @@ export default {
         content: name
       }]
     }
-  },
-
-  mergedTags (previousTags, newTags) {
-    let tags = previousTags.concat(newTags)
-    tags = uniqBy(tags, 'name')
-    return tags
   },
 
   newTag ({ name, defaultColor, cardId, spaceId }) {
