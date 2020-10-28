@@ -9,6 +9,9 @@ dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="d
       .tag-name {{name}}
     template(v-if="!cards.length && !loading")
       p Tag more cards with [[{{tag.name}}]] to see them here
+      button(@click.left.stop="removeTag")
+        img.icon(src="@/assets/remove.svg")
+        span Remove Tag
   section.results-section(v-if="cards.length")
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="cards" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredCards")
     ul.results-list
@@ -235,6 +238,10 @@ export default {
         let element = this.$refs.dialog
         this.dialogHeight = utils.elementHeight(element, true)
       })
+    },
+    removeTag () {
+      this.$store.dispatch('currentSpace/removeTags', this.tag)
+      this.$emit('removeTag', this.tag)
     }
   },
   watch: {

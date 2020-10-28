@@ -279,6 +279,10 @@ export default {
       state.tags = state.tags.filter(spaceTag => spaceTag.id !== tag.id)
       cache.updateSpace('tags', state.tags, state.id)
     },
+    removeTags: (state, tag) => {
+      state.tags = state.tags.filter(spaceTag => spaceTag.name !== tag.name)
+      cache.updateSpace('tags', state.tags, state.id)
+    },
     removeTagsFromCard: (state, card) => {
       state.tags = state.tags.filter(spaceTag => {
         return spaceTag.cardId !== card.id
@@ -1107,6 +1111,12 @@ export default {
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('history/add', update, { root: true })
       context.commit('broadcast/update', broadcastUpdate, { root: true })
+    },
+    removeTags: (context, tag) => {
+      context.commit('removeTags', tag)
+      const update = { name: 'removeTags', body: tag }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('history/add', update, { root: true })
     },
     updateTagNameColor: (context, tag) => {
       context.commit('updateTagNameColor', tag)

@@ -47,7 +47,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
         button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
           span Import
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
-  TagDetailsFromTagList(:visible="tagDetailsIsVisible" :position="tagDetailsPosition" :tag="tagDetailsTag" @updatePositionY="updatePositionY")
+  TagDetailsFromTagList(:visible="tagDetailsIsVisible" :position="tagDetailsPosition" :tag="tagDetailsTag" @updatePositionY="updatePositionY" @removeTag="removeTag")
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(v-if="spacesIsVisible" :spaces="spaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
     TagList(
@@ -170,6 +170,14 @@ export default {
     }
   },
   methods: {
+    removeTag (tagToRemove) {
+      this.closeDialogs()
+      let tags = utils.clone(this.tags)
+      tags = tags.filter(tag => {
+        return tag.name !== tagToRemove.name
+      })
+      this.tags = tags
+    },
     updateTagDetailsPosition (position) {
       this.tagDetailsPosition = position
     },
