@@ -11,7 +11,7 @@ dialog.narrow.space-status(v-if="visible" :open="visible" ref="dialog" :class="{
     p.badge.info(v-if="!isConnected")
       Loader(:visible="true")
       span(v-if="isLoadingSpace") Downloading
-      span(v-else-if="isJoiningSpace") Broadcasting
+      span(v-else-if="isJoiningSpace") Connecting to Broadcast
       span(v-else-if="isReconnectingToBroadcast") Reconnecting
 </template>
 
