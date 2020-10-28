@@ -281,7 +281,7 @@ export default {
     },
     removeTags: (state, tag) => {
       state.tags = state.tags.filter(spaceTag => spaceTag.name !== tag.name)
-      cache.updateSpace('tags', state.tags, state.id)
+      cache.removeTagsByNameInAllSpaces(tag)
     },
     removeTagsFromCard: (state, card) => {
       state.tags = state.tags.filter(spaceTag => {
