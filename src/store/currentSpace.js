@@ -776,6 +776,7 @@ export default {
       const existingCards = context.rootState.currentSpace.cards
       utils.uniqueCardPosition(card, existingCards)
       const tags = utils.tagsFromStringWithoutBrackets(card.name)
+      console.log('pastecard debug', card, tags)
       tags.forEach(tag => {
         tag = utils.newTag({
           name: tag,
