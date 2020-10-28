@@ -107,7 +107,7 @@ export default {
       const spaceTags = this.$store.getters['currentSpace/spaceTags']()
       this.tags = spaceTags || []
       const cachedTags = cache.allTags()
-      const mergedTags = utils.mergedTags(spaceTags, cachedTags)
+      const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })
       this.tags = mergedTags
       this.updateRemoteTags()
     },
@@ -124,7 +124,7 @@ export default {
         this.$store.commit('remoteTagsIsFetched', true)
         this.loading = false
       }
-      const mergedTags = utils.mergedTags(this.tags, remoteTags)
+      const mergedTags = utils.mergeArrays({ previous: this.tags, updated: remoteTags, key: 'name' })
       this.tags = mergedTags
     },
     selectTag (tag, shouldCloseDialog) {

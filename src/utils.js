@@ -69,12 +69,18 @@ export default {
     return height
   },
 
-  elementHeight (element) {
+  elementHeight (element, ignoreFooter) {
     if (!element) { return }
     const rect = element.getBoundingClientRect()
-    let footer = document.querySelector('footer')
-    footer = footer.getBoundingClientRect()
-    let height = footer.y - rect.y
+    let height
+    if (ignoreFooter) {
+      const viewportHeight = this.visualViewport().height
+      height = viewportHeight - rect.y
+    } else {
+      let footer = document.querySelector('footer')
+      footer = footer.getBoundingClientRect()
+      height = footer.y - rect.y
+    }
     const zoomScale = this.visualViewport().scale
     if (zoomScale > 1) {
       height = height * zoomScale
@@ -208,17 +214,13 @@ export default {
     })
   },
 
-  // mergeArrayOfObjectsById (baseArray, newArray) {
-  //   baseArray = this.clone(baseArray)
-  //   newArray.forEach(item => {
-  //     const existingItemIndex = baseArray.findIndex(baseItem => baseItem.id === item.id)
-  //     if (existingItemIndex > -1) {
-  //       baseArray.splice(existingItemIndex, 1)
-  //     }
-  //     baseArray.push(item)
-  //   })
-  //   return baseArray
-  // },
+  mergeArrays ({ previous, updated, key }) {
+    const updatedKeys = updated.map(item => item[key])
+    const base = previous.filter(item => !updatedKeys.includes(item[key]))
+    let merged = base.concat(updated)
+    merged = uniqBy(merged, key)
+    return merged
+  },
 
   findInArrayOfObjects (array, key, value) {
     return array.find(item => item[key] === value)
@@ -978,12 +980,6 @@ export default {
         content: name
       }]
     }
-  },
-
-  mergedTags (previousTags, newTags) {
-    let tags = previousTags.concat(newTags)
-    tags = uniqBy(tags, 'name')
-    return tags
   },
 
   newTag ({ name, defaultColor, cardId, spaceId }) {

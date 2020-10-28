@@ -207,6 +207,14 @@ export default {
       this.updateSpace('tags', newSpaceTags, space.id)
     })
   },
+  removeTagsByNameInAllSpaces (tag) {
+    const spaces = this.getAllSpaces()
+    spaces.forEach(space => {
+      if (!space.tags) { return }
+      const newSpaceTags = space.tags.filter(spaceTag => spaceTag.name !== tag.name)
+      this.updateSpace('tags', newSpaceTags, space.id)
+    })
+  },
 
   // API Queue
 

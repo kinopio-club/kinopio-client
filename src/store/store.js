@@ -72,7 +72,6 @@ export default new Vuex.Store({
     tagDetailsIsVisible: false,
     tagDetailsPosition: {}, // x, y
     currentSelectedTag: {},
-    remoteTagNameGroups: [], // {name: 'abc', cards: []}
     remoteTags: [],
     remoteTagsIsFetched: false,
 
@@ -384,14 +383,7 @@ export default new Vuex.Store({
       utils.typeCheck({ value: tag, type: 'object', origin: 'currentSelectedTag' })
       state.currentSelectedTag = tag
     },
-    addToRemoteTagNameGroups: (state, group) => {
-      utils.typeCheck({ value: group, type: 'object', origin: 'addToRemoteTagNameGroups' })
-      let groups = state.remoteTagNameGroups
-      groups.push(group)
-      state.remoteTagNameGroups = groups
-    },
     remoteTags: (state, tags) => {
-      console.log('store remoteTags', tags)
       utils.typeCheck({ value: tags, type: 'array', origin: 'remoteTags' })
       state.remoteTags = tags
     },
@@ -733,9 +725,6 @@ export default new Vuex.Store({
       const isDrawingConnection = state.currentUserIsDrawingConnection
       const isDraggingCard = state.currentUserIsDraggingCard
       return isPainting || isDrawingConnection || isDraggingCard
-    },
-    remoteTagNameGroupByName: (state) => (name) => {
-      return state.remoteTagNameGroups.find(group => group.name === name)
     }
   },
 

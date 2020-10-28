@@ -279,6 +279,10 @@ export default {
       state.tags = state.tags.filter(spaceTag => spaceTag.id !== tag.id)
       cache.updateSpace('tags', state.tags, state.id)
     },
+    removeTags: (state, tag) => {
+      state.tags = state.tags.filter(spaceTag => spaceTag.name !== tag.name)
+      cache.removeTagsByNameInAllSpaces(tag)
+    },
     removeTagsFromCard: (state, card) => {
       state.tags = state.tags.filter(spaceTag => {
         return spaceTag.cardId !== card.id
@@ -457,7 +461,7 @@ export default {
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
         }
       } catch (error) {
-        console.error(error)
+        console.error('🚒', error)
         if (error.status === 404) {
           context.commit('notifySpaceNotFound', true, { root: true })
         }
@@ -1118,6 +1122,12 @@ export default {
       context.commit('history/add', update, { root: true })
       context.commit('broadcast/update', broadcastUpdate, { root: true })
     },
+    removeTags: (context, tag) => {
+      context.commit('removeTags', tag)
+      const update = { name: 'removeTags', body: tag }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('history/add', update, { root: true })
+    },
     updateTagNameColor: (context, tag) => {
       context.commit('updateTagNameColor', tag)
       const update = { name: 'updateTagNameColor', body: tag }
@@ -1152,6 +1162,11 @@ export default {
     // Tags
     tagByName: (state) => (name) => {
       return state.tags.find(tag => {
+        return tag.name === name
+      })
+    },
+    tagsByName: (state) => (name) => {
+      return state.tags.filter(tag => {
         return tag.name === name
       })
     },
