@@ -776,16 +776,17 @@ export default {
       const existingCards = context.rootState.currentSpace.cards
       utils.uniqueCardPosition(card, existingCards)
       const tags = utils.tagsFromStringWithoutBrackets(card.name)
-      console.log('pastecard debug', card, tags)
-      tags.forEach(tag => {
-        tag = utils.newTag({
-          name: tag,
-          defaultColor: context.rootState.currentUser.color,
-          cardId: card.id,
-          spaceId: context.state.id
+      if (tags) {
+        tags.forEach(tag => {
+          tag = utils.newTag({
+            name: tag,
+            defaultColor: context.rootState.currentUser.color,
+            cardId: card.id,
+            spaceId: context.state.id
+          })
+          context.dispatch('addTag', tag)
         })
-        context.dispatch('addTag', tag)
-      })
+      }
       context.commit('createCard', card)
       const update = { name: 'createCard', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
