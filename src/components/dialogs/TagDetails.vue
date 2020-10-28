@@ -37,8 +37,6 @@ import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
-import uniqBy from 'lodash-es/uniqBy'
-
 export default {
   name: 'TagDetails',
   components: {
@@ -136,25 +134,21 @@ export default {
     async updateCards () {
       const cardsInCurrentSpace = this.cardsNameInCurrentSpace
       const cardsInCachedSpaces = cache.allCardsByTagName(this.name)
+      // cache cards
       let cacheCards = cardsInCurrentSpace.concat(cardsInCachedSpaces)
       cacheCards = cacheCards.map(card => {
         card.nameSegments = this.cardNameSegments(card.name)
         return card
       })
       this.cards = this.excludeCurrentCard(cacheCards)
+      // remote cards
       let remoteCards = await this.remoteCards()
       remoteCards = remoteCards.map(card => {
         card.nameSegments = this.cardNameSegments(card.name)
         return card
       })
-      const remoteCardIds = remoteCards.map(card => card.id)
-      cacheCards = cacheCards.filter(card => remoteCardIds.includes(card.id))
-      let cards = cacheCards.concat(remoteCards)
-      cards = uniqBy(cards, 'id')
-      cards = cards.filter(card => {
-        return card.isRemoved !== true
-      })
-      this.cards = this.excludeCurrentCard(cards)
+      remoteCards = remoteCards.filter(card => card.isRemoved !== true)
+      this.cards = this.excludeCurrentCard(remoteCards)
     },
     excludeCurrentCard (cards) {
       cards = cards.filter(card => card.id !== this.currentCard.id)

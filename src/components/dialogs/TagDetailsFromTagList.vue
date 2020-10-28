@@ -121,22 +121,21 @@ export default {
     async updateCards () {
       const cardsInCurrentSpace = this.cardsNameInCurrentSpace
       const cardsInCachedSpaces = cache.allCardsByTagName(this.name)
+      // cache cards
       let cacheCards = cardsInCurrentSpace.concat(cardsInCachedSpaces)
       cacheCards = cacheCards.map(card => {
         card.nameSegments = this.cardNameSegments(card.name)
         return card
       })
       this.updateCardsList(cacheCards)
+      // remote cards
       let remoteCards = await this.remoteCards()
       remoteCards = remoteCards.map(card => {
         card.nameSegments = this.cardNameSegments(card.name)
         return card
       })
-      let cards = utils.mergeArrays({ previous: cacheCards, updated: remoteCards, key: 'id' })
-      cards = cards.filter(card => {
-        return card.isRemoved !== true
-      })
-      this.updateCardsList(cards)
+      remoteCards = remoteCards.filter(card => card.isRemoved !== true)
+      this.updateCardsList(remoteCards)
     },
     updateFilter (filter) {
       this.filter = filter

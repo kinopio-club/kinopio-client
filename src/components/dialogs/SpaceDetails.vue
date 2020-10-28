@@ -75,6 +75,8 @@ import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import TagDetailsFromTagList from '@/components/dialogs/TagDetailsFromTagList.vue'
 
+import uniqBy from 'lodash-es/uniqBy'
+
 export default {
   name: 'SpaceDetails',
   components: {
@@ -229,8 +231,8 @@ export default {
         this.$store.commit('remoteTagsIsFetched', true)
         this.isLoadingRemoteTags = false
       }
-      const mergedTags = utils.mergeArrays({ previous: this.tags, updated: remoteTags, key: 'name' })
-      this.tags = mergedTags
+      remoteTags = uniqBy(remoteTags, 'name')
+      this.tags = remoteTags
     },
     toggleSpacesIsVisible (visible) {
       this.closeDialogs()
