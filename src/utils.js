@@ -433,7 +433,6 @@ export default {
   },
 
   cardMap () {
-    console.time('⏱ cardMap')
     const cards = document.querySelectorAll('.card')
     let cardMap = []
     cards.forEach(card => {
@@ -447,7 +446,6 @@ export default {
       }
       cardMap.push(mappedCard)
     })
-    console.timeEnd('⏱ cardMap')
     return cardMap
   },
 

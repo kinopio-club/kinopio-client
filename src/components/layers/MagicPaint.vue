@@ -48,7 +48,7 @@ const maxIterations = 200 // higher is longer paint fade time
 const rateOfIterationDecay = 0.03 // higher is faster tail decay
 let paintingCircles = []
 let paintingCanvas, paintingContext, startCursor, paintingCirclesTimer
-let prevScroll
+let prevScroll, viewportCardMap
 
 // remote painting
 let remotePaintingCircles = []
@@ -139,11 +139,23 @@ export default {
       this.pinchZoomOffsetTop = window.visualViewport.offsetTop
       this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
     },
+    updateViewportCardMap () {
+      const cardMap = utils.clone(this.cardMap)
+      if (!utils.objectHasKeys(cardMap)) { return }
+      const viewport = utils.visualViewport()
+      viewportCardMap = utils.clone(this.cardMap)
+      viewportCardMap = viewportCardMap.filter(card => {
+        const isInViewportX = card.x > viewport.pageLeft && card.x < viewport.pageLeft + viewport.width
+        const isInViewportY = card.y > viewport.pageTop && card.y < viewport.pageTop + viewport.height
+        return isInViewportX && isInViewportY
+      })
+    },
     updatePrevScrollPosition () {
       prevScroll = {
         x: window.scrollX,
         y: window.scrollY
       }
+      this.updateViewportCardMap()
     },
     updateCirclePositions (circles, scrollDelta) {
       return circles.map(circle => {
@@ -260,6 +272,7 @@ export default {
     },
     startPainting (event) {
       this.$store.commit('updateCardMap')
+      this.updateViewportCardMap()
       startCursor = utils.cursorPositionInViewport(event)
       this.currentCursor = utils.cursorPositionInViewport(event)
       const dialogIsVisible = Boolean(document.querySelector('dialog'))
@@ -366,7 +379,8 @@ export default {
     },
     selectCards (point) {
       if (this.userCantEditSpace) { return }
-      this.cardMap.map(card => {
+      const cardMap = viewportCardMap || this.cardMap
+      cardMap.forEach(card => {
         const x = {
           value: point.x + window.scrollX,
           min: card.x,
