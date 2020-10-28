@@ -215,7 +215,6 @@ export default {
     },
     stopPainting (event) {
       if (this.shouldCancel(event)) { return }
-      this.$store.commit('updateCardMap')
       startCursor = startCursor || {}
       const endCursor = utils.cursorPositionInViewport(event)
       const shouldAddCard = this.$store.state.shouldAddCard
@@ -260,6 +259,7 @@ export default {
       this.broadcastCircle(circle)
     },
     startPainting (event) {
+      this.$store.commit('updateCardMap')
       startCursor = utils.cursorPositionInViewport(event)
       this.currentCursor = utils.cursorPositionInViewport(event)
       const dialogIsVisible = Boolean(document.querySelector('dialog'))
