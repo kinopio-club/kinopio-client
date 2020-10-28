@@ -58,27 +58,18 @@ export default {
     }
   },
   methods: {
-    updatePositionY () {
-      let dialog = document.querySelector('dialog.tag-details')
-      const resultsItemDialogY = utils.resultsItemDialogY(dialog)
-      if (resultsItemDialogY) {
-        const position = {
-          x: this.tagDetailsPosition.x,
-          y: resultsItemDialogY
-        }
-        this.updateTagDetailsPosition(position)
-      }
-    },
     updatePosition (event) {
+      const viewport = utils.visualViewport()
+      const minY = (viewport.height * viewport.scale) / 2
       const rect = event.target.getBoundingClientRect()
-      const position = {
+      let position = {
         x: rect.x + 8,
         y: rect.y - 8
       }
+      if (position.y > minY) {
+        position.y = minY
+      }
       this.updateTagDetailsPosition(position)
-      this.$nextTick(() => {
-        this.updatePositionY()
-      })
     },
     updateTagDetailsPosition (position) {
       this.tagDetailsPosition = position

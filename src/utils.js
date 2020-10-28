@@ -69,19 +69,6 @@ export default {
     return height
   },
 
-  resultsItemDialogY (dialog) {
-    if (!dialog) { return }
-    const threshold = 40
-    const zoomScale = this.visualViewport().scale
-    const viewportHeight = this.visualViewport().height * zoomScale
-    dialog = dialog.getBoundingClientRect()
-    const distanceFromBottom = viewportHeight - dialog.y - (dialog.height * zoomScale)
-    if (distanceFromBottom < threshold) {
-      const y = viewportHeight - dialog.height - threshold
-      return y
-    }
-  },
-
   elementHeight (element, ignoreFooter) {
     if (!element) { return }
     const rect = element.getBoundingClientRect()

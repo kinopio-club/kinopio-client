@@ -47,7 +47,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
         button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
           span Import
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
-  TagDetailsFromTagList(:visible="tagDetailsIsVisible" :position="tagDetailsPosition" :tag="tagDetailsTag" @updatePositionY="updatePositionY" @removeTag="removeTag")
+  TagDetailsFromTagList(:visible="tagDetailsIsVisible" :position="tagDetailsPosition" :tag="tagDetailsTag" @removeTag="removeTag")
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(v-if="spacesIsVisible" :spaces="spaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
     TagList(
@@ -188,17 +188,6 @@ export default {
     },
     updateTagDetailsIsVisible (value) {
       this.tagDetailsIsVisible = value
-    },
-    updatePositionY () {
-      let dialog = document.querySelector('dialog.tag-details')
-      const resultsItemDialogY = utils.resultsItemDialogY(dialog)
-      if (resultsItemDialogY) {
-        const position = {
-          x: this.tagDetailsPosition.x,
-          y: resultsItemDialogY
-        }
-        this.updateTagDetailsPosition(position)
-      }
     },
     updateTagColor (updated) {
       let tags = utils.clone(this.tags)

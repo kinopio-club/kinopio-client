@@ -12,7 +12,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="d
       button(@click.left.stop="removeTag")
         img.icon(src="@/assets/remove.svg")
         span Remove Tag
-  section.results-section(v-if="cards.length")
+  section.results-section(v-if="cards.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="cards" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredCards")
     ul.results-list
       template(v-for="(card in filteredItems")
@@ -60,7 +60,8 @@ export default {
       filteredCards: [],
       loading: false,
       cards: [],
-      dialogHeight: null
+      dialogHeight: null,
+      resultsSectionHeight: null
     }
   },
   computed: {
@@ -223,24 +224,31 @@ export default {
         element.focus()
       })
     },
-    updateCardsList (cards) {
-      this.cards = cards
-      this.$nextTick(() => { // double nextTick to avoid timing conflicts with TagList updatePosition()
-        this.$nextTick(() => {
-          this.$emit('updatePositionY')
-          this.updateDialogHeight()
-        })
+    updateResultsSectionHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.results
+        this.resultsSectionHeight = utils.elementHeight(element, true) - 2
       })
     },
     updateDialogHeight () {
       this.$nextTick(() => {
         let element = this.$refs.dialog
         this.dialogHeight = utils.elementHeight(element, true)
+        this.updateResultsSectionHeight()
       })
     },
     removeTag () {
       this.$store.dispatch('currentSpace/removeTags', this.tag)
       this.$emit('removeTag', this.tag)
+    },
+    updateCardsList (cards) {
+      this.cards = cards
+      this.$nextTick(() => { // double nextTick to avoid timing conflicts with TagList updatePosition()
+        this.$nextTick(() => {
+          this.updateDialogHeight()
+        })
+      })
     }
   },
   watch: {
@@ -248,7 +256,6 @@ export default {
       if (this.visible) {
         this.closeDialogs()
         this.updateCards()
-        this.updateDialogHeight()
       }
     }
   }
