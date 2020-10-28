@@ -298,26 +298,6 @@ export default {
 
     // Selecting
 
-    selectCards (point) {
-      if (this.userCantEditSpace) { return }
-      this.cardMap.map(card => {
-        const x = {
-          value: point.x + window.scrollX,
-          min: card.x,
-          max: card.x + card.width
-        }
-        const y = {
-          value: point.y + window.scrollY,
-          min: card.y,
-          max: card.y + card.height
-        }
-        const isBetweenX = utils.isBetween(x)
-        const isBetweenY = utils.isBetween(y)
-        if (isBetweenX && isBetweenY) {
-          this.$store.dispatch('addToMultipleCardsSelected', card.cardId)
-        }
-      })
-    },
     movementDirection (prevCircle, delta) {
       let movementDirection = {}
       if (delta.xAbsolute > delta.yAbsolute) {
@@ -383,6 +363,26 @@ export default {
           this.selectCards({ x, y })
         }
       }
+    },
+    selectCards (point) {
+      if (this.userCantEditSpace) { return }
+      this.cardMap.map(card => {
+        const x = {
+          value: point.x + window.scrollX,
+          min: card.x,
+          max: card.x + card.width
+        }
+        const y = {
+          value: point.y + window.scrollY,
+          min: card.y,
+          max: card.y + card.height
+        }
+        const isBetweenX = utils.isBetween(x)
+        const isBetweenY = utils.isBetween(y)
+        if (isBetweenX && isBetweenY) {
+          this.$store.dispatch('addToMultipleCardsSelected', card.cardId)
+        }
+      })
     },
     selectConnectionPaths (point) {
       const paths = document.querySelectorAll('svg .connection-path')
