@@ -246,6 +246,7 @@ export default {
         remoteSpace = await this.$store.dispatch('api/getSpaceAnonymously', space)
       }
       if (space.updatedAt !== remoteSpace.updatedAt) {
+        console.log('☎️ spaceUpdatedAt local remote', space.updatedAt, remoteSpace.updatedAt)
         this.notifySpaceOutOfSync = true
       }
     },
