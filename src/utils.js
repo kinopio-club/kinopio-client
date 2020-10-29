@@ -128,7 +128,9 @@ export default {
         height: document.documentElement.clientHeight,
         scale: document.documentElement.clientWidth / window.innerWidth,
         offsetLeft: 0,
-        offsetRight: 0
+        offsetRight: 0,
+        pageLeft: window.scrollX,
+        pageTop: window.scrollY
       }
     }
   },
