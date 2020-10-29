@@ -229,6 +229,10 @@ export default {
       context.fill()
     },
     shouldCancel (event) {
+      let shouldCancelOutsideOfBrowser = !(event.target instanceof Element)
+      if (shouldCancelOutsideOfBrowser) {
+        return false
+      }
       const fromDialog = event.target.closest('dialog')
       const fromHeader = event.target.closest('header')
       const fromFooter = event.target.closest('footer')
