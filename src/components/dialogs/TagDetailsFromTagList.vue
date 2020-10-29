@@ -15,19 +15,21 @@ dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="d
   section.results-section(v-if="cards.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="cards" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredCards")
     ul.results-list
-      template(v-for="(card in filteredItems")
-        li(:data-card-id="card.id" @click="showCardDetails(card)")
-          p.name.name-segments
-            span.badge.space-badge(v-if="card.spaceName") {{card.spaceName}}
-            template(v-for="segment in card.nameSegments")
-              img(v-if="segment.isImage" :src="segment.url")
-              span(v-if="segment.isText") {{segment.content}}
-              //- Tags
-              span.badge.tag-badge(
-                v-if="segment.isTag"
-                :style="{backgroundColor: segment.color}"
-                :class="{ active: tag.name === segment.name }"
-              ) {{segment.name}}
+      template(v-for="group in groupedItems")
+        li.space-name(:data-space-id="group.spaceId" @click="changeSpace(group.spaceId)")
+          span.badge.space-badge {{group.spaceName}}
+        template(v-for="card in group.cards")
+          li(:data-card-id="card.id" @click="showCardDetails(card)")
+            p.name.name-segments
+              template(v-for="segment in card.nameSegments")
+                img(v-if="segment.isImage" :src="segment.url")
+                span(v-if="segment.isText") {{segment.content}}
+                //- Tags
+                span.badge.tag-badge(
+                  v-if="segment.isTag"
+                  :style="{backgroundColor: segment.color}"
+                  :class="{ active: tag.name === segment.name }"
+                ) {{segment.name}}
     Loader(:visible="loading")
 </template>
 
@@ -77,6 +79,22 @@ export default {
     color () { return this.tag.color },
     name () {
       return this.tag.name
+    },
+    groupedItems () {
+      let groups = []
+      this.filteredItems.forEach(item => {
+        const groupIndex = groups.findIndex(group => group.spaceName === item.spaceName)
+        if (groupIndex !== -1) {
+          groups[groupIndex].cards.push(item)
+        } else {
+          groups.push({
+            spaceName: item.spaceName,
+            spaceId: item.spaceId,
+            cards: [item]
+          })
+        }
+      })
+      return groups
     },
     filteredItems () {
       if (this.filter) {
@@ -177,6 +195,10 @@ export default {
         segment.color = this.segmentTagColor(segment)
         return segment
       })
+    },
+    changeSpace (spaceId) {
+      const space = { id: spaceId }
+      this.$store.dispatch('currentSpace/changeSpace', { space })
     },
     showCardDetails (card) {
       if (this.currentSpaceId !== card.spaceId) {
