@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="dialog" @click.left.stop="closeDialogs")
+dialog.tag-details(v-if="isVisible" :open="isVisible" :style="dialogPosition" ref="dialog" @click.left.stop="closeDialogs")
   section.edit-card(v-if="showEditCard")
     button(@click="showCardDetails(null)") Edit Card
   section(:style="{backgroundColor: color}")
@@ -9,15 +9,19 @@ dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="d
           .current-color(:style="{backgroundColor: color}")
         ColorPicker(:currentColor="color" :visible="colorPickerIsVisible" @selectedColor="updateTagNameColor")
       .tag-name {{name}}
-    p(v-if="!cards.length") Tag more cards with [[{{currentTag.name}}]] to see them here
-  section.results-section(v-if="cards.length")
+    template(v-if="!cards.length && !loading")
+      p Tag more cards with [[{{currentTag.name}}]] to see them here
+      button(v-if="hasProps" @click.left.stop="removeTag")
+        img.icon(src="@/assets/remove.svg")
+        span Remove Tag
+  section.results-section(v-if="cards.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="cards" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredCards")
     ul.results-list
       template(v-for="group in groupedItems")
         li.space-name(:data-space-id="group.spaceId" @click="changeSpace(group.spaceId)" :class="{ active: spaceIsCurrentSpace(group.spaceId) }")
           span.badge.space-badge {{group.spaceName}}
         template(v-for="(card in group.cards")
-          li(:data-card-id="card.id" @click="showCardDetails(card)")
+          li(:data-card-id="card.id" @click="showCardDetails(card)"  :class="{ active: cardIsCurrentCard(card.id) }")
             p.name.name-segments
               template(v-for="segment in card.nameSegments")
                 img(v-if="segment.isImage" :src="segment.url")
@@ -46,41 +50,51 @@ export default {
     Loader,
     ResultsFilter
   },
+  props: {
+    visible: Boolean,
+    position: Object,
+    tag: Object,
+    hasProps: Boolean // + pass in true from TL
+  },
+
   data () {
     return {
       colorPickerIsVisible: false,
       filter: '',
       filteredCards: [],
       loading: false,
-      cards: []
+      cards: [],
+      dialogHeight: null,
+      resultsSectionHeight: null
     }
   },
   computed: {
-    visible () {
-      return this.$store.state.tagDetailsIsVisible
+    isVisible () {
+      return this.visible || this.$store.state.tagDetailsIsVisible
     },
     currentTag () { // name, color, cardId
-      const tag = this.$store.state.currentSelectedTag
-
+      const tag = this.tag || this.$store.state.currentSelectedTag
       if (tag.spaceId) {
         return tag
       } else {
         return this.$store.getters['currentSpace/tagByName'](tag.name)
       }
     },
-    position () { return this.$store.state.tagDetailsPosition },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     currentSpaceId () { return this.$store.state.currentSpace.id },
     dialogPosition () {
+      const position = this.position || this.$store.state.tagDetailsPosition
       return {
-        left: `${this.position.x}px`,
-        top: `${this.position.y}px`
+        left: `${position.x}px`,
+        top: `${position.y}px`
       }
     },
-    color () { return this.currentTag.color },
-    showEditCard () {
-      return !this.$store.state.cardDetailsIsVisibleForCardId
+    color () {
+      if (!this.currentTag) { return }
+      return this.currentTag.color
     },
+    cardDetailsIsVisibleForCardId () { return this.$store.state.cardDetailsIsVisibleForCardId },
+    showEditCard () { return !this.cardDetailsIsVisibleForCardId && !this.hasProps },
     name () {
       if (!this.currentTag) { return }
       return this.currentTag.name
@@ -131,11 +145,18 @@ export default {
       }
     },
     currentCard () {
-      return this.$store.getters['currentSpace/cardById'](this.$store.state.currentSelectedTag.cardId)
+      let currentCardId = this.cardDetailsIsVisibleForCardId
+      const currentCard = this.$store.getters['currentSpace/cardById'](currentCardId)
+      const tagCard = this.$store.getters['currentSpace/cardById'](this.$store.state.currentSelectedTag.cardId)
+      return currentCard || tagCard
     },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
+    cardIsCurrentCard (cardId) {
+      if (!this.currentCard) { return }
+      return cardId === this.currentCard.id
+    },
     sortCurrentSpaceIsFirst (groups) {
       const currentSpaceGroup = groups.find(group => group.spaceId === this.currentSpaceId)
       if (!currentSpaceGroup) { return groups }
@@ -169,7 +190,7 @@ export default {
         card.nameSegments = this.cardNameSegments(card.name)
         return card
       })
-      this.cards = this.excludeCurrentCard(cacheCards)
+      this.updateCardsList(cacheCards)
       // remote cards
       let remoteCards = await this.remoteCards()
       remoteCards = remoteCards.map(card => {
@@ -177,11 +198,7 @@ export default {
         return card
       })
       remoteCards = remoteCards.filter(card => card.isRemoved !== true)
-      this.cards = this.excludeCurrentCard(remoteCards)
-    },
-    excludeCurrentCard (cards) {
-      cards = cards.filter(card => card.id !== this.currentCard.id)
-      return cards
+      this.updateCardsList(remoteCards)
     },
     updateFilter (filter) {
       this.filter = filter
@@ -190,6 +207,9 @@ export default {
       this.filteredCards = cards
     },
     segmentTagColor (segment) {
+      if (this.name === segment.name) {
+        return this.color
+      }
       const spaceTag = this.$store.getters['currentSpace/tagByName'](segment.name)
       const cachedTag = cache.tagByName(segment.name)
       if (spaceTag) {
@@ -237,7 +257,7 @@ export default {
         }
         this.$store.dispatch('currentSpace/changeSpace', { space })
       } else {
-        const cardId = card.id || this.tag.cardId
+        const cardId = card.id || this.currentTag.cardId
         this.$store.dispatch('currentSpace/showCardDetails', cardId)
       }
     },
@@ -257,7 +277,7 @@ export default {
         })
         return card
       })
-      this.cards = this.excludeCurrentCard(cards)
+      this.updateCardsList(cards)
     },
     updateTagNameColor (newColor) {
       let tag = utils.clone(this.currentTag)
@@ -273,20 +293,54 @@ export default {
       })
     },
     scrollIntoView () {
-      if (this.visibleFromProp) { return }
+      if (this.hasProps) { return }
       const element = this.$refs.dialog
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
+    },
+    updateResultsSectionHeight () {
+      if (!this.isVisible) { return }
+      if (!this.hasProps) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.results
+        this.resultsSectionHeight = utils.elementHeight(element, true) - 2
+      })
+    },
+    updateDialogHeight () {
+      if (!this.hasProps) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeight(element, true)
+        this.updateResultsSectionHeight()
+      })
+    },
+    removeTag () {
+      this.$store.dispatch('currentSpace/removeTags', this.currentTag)
+      this.$emit('removeTag', this.currentTag)
+    },
+
+    updateCardsList (cards) {
+      cards = cards.filter(card => {
+        const cardTags = utils.tagsFromStringWithoutBrackets(card.name)
+        return cardTags.includes(this.name)
+      })
+      this.cards = cards
+      this.$nextTick(() => { // double nextTick to avoid timing conflicts with TagList updatePosition()
+        this.$nextTick(() => {
+          this.updateDialogHeight()
+        })
+      })
     }
+
   },
   watch: {
-    visible (visible) {
-      if (this.visible) {
+    isVisible (visible) {
+      if (visible) {
         this.updateCards()
         this.closeDialogs()
       }
       this.$nextTick(() => {
-        if (this.visible) {
+        if (visible) {
           this.scrollIntoView()
         }
       })

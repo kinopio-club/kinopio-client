@@ -47,7 +47,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
         button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
           span Import
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
-  TagDetailsFromTagList(:visible="tagDetailsIsVisible" :position="tagDetailsPosition" :tag="tagDetailsTag" @removeTag="removeTag")
+  TagDetails(:visible="tagDetailsIsVisible" :position="tagDetailsPosition" :tag="tagDetailsTag" @removeTag="removeTag" hasProps=true)
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(v-if="spacesIsVisible" :spaces="spaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" @selectSpace="changeSpace")
     TagList(
@@ -73,7 +73,7 @@ import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
 import templates from '@/data/templates.js'
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
-import TagDetailsFromTagList from '@/components/dialogs/TagDetailsFromTagList.vue'
+import TagDetails from '@/components/dialogs/TagDetails.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
@@ -88,7 +88,7 @@ export default {
     PrivacyButton,
     ShowInExploreButton,
     Loader,
-    TagDetailsFromTagList
+    TagDetails
   },
   props: {
     visible: Boolean
