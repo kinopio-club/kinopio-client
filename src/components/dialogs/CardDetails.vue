@@ -236,7 +236,16 @@ export default {
         return false
       }
     },
-    tagsInCard () { return this.$store.getters['currentSpace/tagsInCard'](this.card) },
+    tagsInCard () {
+      const tagNames = utils.tagsFromStringWithoutBrackets(this.name)
+      if (!tagNames) { return [] }
+      let tags = []
+      tagNames.forEach(name => {
+        const tag = this.$store.getters['currentSpace/tagByName'](name)
+        tags.push(tag)
+      })
+      return tags
+    },
     currentSelectedTag () { return this.$store.state.currentSelectedTag },
     name: {
       get () {

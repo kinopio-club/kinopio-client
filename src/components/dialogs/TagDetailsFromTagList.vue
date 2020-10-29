@@ -243,6 +243,10 @@ export default {
       this.$emit('removeTag', this.tag)
     },
     updateCardsList (cards) {
+      cards = cards.filter(card => {
+        const cardTags = utils.tagsFromStringWithoutBrackets(card.name)
+        return cardTags.includes(this.tag.name)
+      })
       this.cards = cards
       this.$nextTick(() => { // double nextTick to avoid timing conflicts with TagList updatePosition()
         this.$nextTick(() => {
