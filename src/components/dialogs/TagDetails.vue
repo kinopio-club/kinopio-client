@@ -14,7 +14,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="dialogPosition" ref="d
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="cards" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredCards")
     ul.results-list
       template(v-for="group in groupedItems")
-        li.space-name(:data-space-id="group.spaceId" @click="changeSpace(group.spaceId)")
+        li.space-name(:data-space-id="group.spaceId" @click="changeSpace(group.spaceId)" :class="{ active: spaceIsCurrentSpace(group.spaceId) }")
           span.badge.space-badge {{group.spaceName}}
         template(v-for="(card in group.cards")
           li(:data-card-id="card.id" @click="showCardDetails(card)")
@@ -99,6 +99,7 @@ export default {
           })
         }
       })
+      groups = this.sortCurrentSpaceIsFirst(groups)
       return groups
     },
     filteredItems () {
@@ -135,6 +136,16 @@ export default {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
+    sortCurrentSpaceIsFirst (groups) {
+      const currentSpaceGroup = groups.find(group => group.spaceId === this.currentSpaceId)
+      if (!currentSpaceGroup) { return groups }
+      groups = groups.filter(group => group.spaceId !== this.currentSpaceId)
+      groups.unshift(currentSpaceGroup)
+      return groups
+    },
+    spaceIsCurrentSpace (spaceId) {
+      return spaceId === this.currentSpaceId
+    },
     async remoteCards () {
       if (!this.currentUserIsSignedIn) { return }
       let remoteCards
@@ -210,6 +221,7 @@ export default {
       })
     },
     changeSpace (spaceId) {
+      if (this.spaceIsCurrentSpace(spaceId)) { return }
       const space = { id: spaceId }
       this.$store.dispatch('currentSpace/changeSpace', { space })
     },
