@@ -251,7 +251,8 @@ export default {
 
 <style lang="stylus">
 footer
-  z-index calc(var(--max-z) - 2)
+  --footer-max-z 2147483644 // var(--max-z) - 2, hardcoded because firefox vars in calc is buggy
+  z-index var(--footer-max-z)
   position fixed
   left 8px
   bottom 8px
