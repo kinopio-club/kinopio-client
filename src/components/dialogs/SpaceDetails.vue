@@ -112,6 +112,9 @@ export default {
         const updated = utils.clone(mutation.payload)
         this.updateTagColor(updated)
       }
+      if (mutation.type === 'triggerSpaceDetailsVisible') {
+        this.spacesIsVisible = true
+      }
     })
   },
   data () {
