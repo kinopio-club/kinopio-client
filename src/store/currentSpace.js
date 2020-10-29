@@ -1172,13 +1172,6 @@ export default {
         return tag.name === name
       })
     },
-    tagsByNameExcludingCardById: (state) => ({ name, cardId }) => {
-      return state.tags.filter(tag => {
-        const tagName = tag.name === name
-        const otherCard = tag.cardId !== cardId
-        return tagName && otherCard
-      })
-    },
     tagsInCard: (state) => (card) => {
       return state.tags.filter(tag => tag.cardId === card.id)
     },

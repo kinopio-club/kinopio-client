@@ -128,7 +128,7 @@ export default {
     cardsNameInCurrentSpace () {
       let tags
       const cardId = this.$store.state.currentSelectedTag.cardId
-      tags = this.$store.getters['currentSpace/tagsByNameExcludingCardById']({
+      tags = this.$store.getters['currentSpace/tagsByName']({
         name: this.name,
         cardId
       })
@@ -326,7 +326,7 @@ export default {
         const cardTags = utils.tagsFromStringWithoutBrackets(card.name)
         return cardTags.includes(this.name)
       })
-      cards = uniqBy(cards, 'cardId')
+      cards = uniqBy(cards, 'id')
       this.cards = cards
       this.$nextTick(() => { // double nextTick to avoid timing conflicts with TagList updatePosition()
         this.$nextTick(() => {
