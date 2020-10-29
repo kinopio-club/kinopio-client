@@ -43,6 +43,8 @@ import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
+import uniqBy from 'lodash-es/uniqBy'
+
 export default {
   name: 'TagDetails',
   components: {
@@ -324,6 +326,7 @@ export default {
         const cardTags = utils.tagsFromStringWithoutBrackets(card.name)
         return cardTags.includes(this.name)
       })
+      cards = uniqBy(cards, 'cardId')
       this.cards = cards
       this.$nextTick(() => { // double nextTick to avoid timing conflicts with TagList updatePosition()
         this.$nextTick(() => {
