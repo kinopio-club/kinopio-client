@@ -107,9 +107,8 @@ export default {
       this.$store.dispatch('currentSpace/updateSpacePageSize')
     },
     addSpace () {
-      this.$store.dispatch('closeAllDialogs', 'addSpace.addSpace')
-      window.scrollTo(0, 0)
-      this.$store.dispatch('currentSpace/addSpace')
+      this.$emit('closeDialogs')
+      this.$emit('addSpace')
     },
     toggleEditPromptsIsVisible () {
       this.editPromptsIsVisible = !this.editPromptsIsVisible

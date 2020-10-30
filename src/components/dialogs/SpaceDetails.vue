@@ -42,7 +42,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
         button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
           img.icon(src="@/assets/add.svg")
           span Add
-        AddSpace(:visible="addSpaceIsVisible")
+        AddSpace(:visible="addSpaceIsVisible" @closeDialogs="closeDialogs" @addSpace="addSpace")
       .button-wrap
         button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
           span Import
@@ -99,10 +99,12 @@ export default {
         const isTouchDevice = this.$store.state.isTouchDevice
         if (isTouchDevice) { return }
         this.$nextTick(() => {
-          const element = this.$refs.name
-          if (!element) { return }
-          element.focus()
-          element.setSelectionRange(0, element.value.length)
+          this.$nextTick(() => {
+            const element = this.$refs.name
+            if (!element) { return }
+            element.focus()
+            element.setSelectionRange(0, element.value.length)
+          })
         })
       }
       if (mutation.type === 'updatePageSizes') {
@@ -268,6 +270,7 @@ export default {
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space })
+      this.$store.dispatch('closeAllDialogs', 'spaceDetails.changeSpace')
     },
     changeToLastSpace () {
       const currentSpace = this.$store.state.currentSpace
