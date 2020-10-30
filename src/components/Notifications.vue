@@ -120,9 +120,11 @@ export default {
       if (mutation.type === 'isOnline') {
         const isOnline = Boolean(mutation.payload)
         if (!isOnline) {
+          console.log('☎️ is offline', !isOnline)
           wasOffline = true
         } else if (isOnline && wasOffline) {
           this.checkIfShouldNotifySpaceOutOfSync()
+          wasOffline = false
         }
       }
       if (mutation.type === 'currentSpace/restoreSpace') {
@@ -245,8 +247,8 @@ export default {
       } else {
         remoteSpace = await this.$store.dispatch('api/getSpaceAnonymously', space)
       }
+      console.log('☎️ spaceUpdatedAt local remote', space.updatedAt === remoteSpace.updatedAt, space.updatedAt, remoteSpace.updatedAt)
       if (space.updatedAt !== remoteSpace.updatedAt) {
-        console.log('☎️ spaceUpdatedAt local remote', space.updatedAt, remoteSpace.updatedAt)
         this.notifySpaceOutOfSync = true
       }
     },
