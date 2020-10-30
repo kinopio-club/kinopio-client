@@ -550,11 +550,7 @@ export default {
           shouldUpdateUrl: true
         })
         context.commit('broadcast/joinSpaceRoom', null, { root: true })
-        if (!space.isRemoved && remoteSpace.isRemoved) {
-          context.commit('notifySpaceIsRemoved', false, { root: true })
-        } else {
-          context.dispatch('checkIfShouldNotifySpaceIsRemoved', remoteSpace)
-        }
+        context.dispatch('checkIfShouldNotifySpaceIsRemoved', remoteSpace)
         if (cache.getAllSpaces().length) {
           context.commit('notifyNewUser', false, { root: true })
         } else {
