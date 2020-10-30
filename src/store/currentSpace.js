@@ -316,7 +316,8 @@ export default {
       if (spaceUrl) {
         console.log('🚃 Restore space from url', spaceUrl)
         const spaceId = utils.idFromUrl(spaceUrl)
-        context.dispatch('loadSpace', { id: spaceId })
+        const space = { id: spaceId }
+        context.dispatch('loadSpace', { space })
       // restore or create journal space
       } else if (loadJournalSpace) {
         console.log('🚃 Restore journal space')
@@ -520,13 +521,14 @@ export default {
       const journalSpace = spaces.find(space => space.name === journalName)
       context.commit('loadJournalSpace', false, { root: true })
       if (journalSpace) {
-        context.dispatch('loadSpace', { id: journalSpace.id })
+        const space = { id: journalSpace.id }
+        context.dispatch('loadSpace', { space })
       } else {
         context.dispatch('addNewJournalSpace')
       }
     },
 
-    loadSpace: async (context, space) => {
+    loadSpace: async (context, { space }) => {
       const emptySpace = utils.emptySpace(space.id)
       const cachedSpace = cache.space(space.id)
       context.commit('clearAllNotifications', null, { root: true })
@@ -574,7 +576,7 @@ export default {
       if (!spaceToRestore.id) {
         spaceToRestore = { id: user.lastSpaceId }
       }
-      context.dispatch('loadSpace', spaceToRestore)
+      context.dispatch('loadSpace', { space: spaceToRestore })
       context.dispatch('updateUserLastSpaceId')
     },
     updateSpace: async (context, updates) => {
@@ -607,7 +609,7 @@ export default {
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
-      await context.dispatch('loadSpace', space)
+      await context.dispatch('loadSpace', { space })
       const canEdit = context.rootGetters['currentUser/canEditSpace']()
       if (!canEdit) { return }
       context.dispatch('api/addToQueue', {
