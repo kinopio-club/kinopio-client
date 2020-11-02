@@ -110,7 +110,7 @@ export default {
         } else {
           groups.push({
             spaceName: item.spaceName,
-            spaceId: item.spaceId,
+            spaceId: item.spaceId || this.currentSpaceId,
             cards: [item]
           })
         }
