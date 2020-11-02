@@ -360,9 +360,16 @@ export default {
       let space = utils.clone(newSpace)
       space.name = words.randomUniqueName()
       space.id = nanoid()
-      space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
-      space.cards[1].x = random(180, 200)
-      space.cards[1].y = random(160, 180)
+      const newSpacesAreBlank = context.rootState.currentUser.newSpacesAreBlank
+      if (newSpacesAreBlank) {
+        space.connectionTypes = []
+        space.connections = []
+        space.cards = []
+      } else {
+        space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
+        space.cards[1].x = random(180, 200)
+        space.cards[1].y = random(160, 180)
+      }
       space.userId = context.rootState.currentUser.id
       const nullCardUsers = true
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
@@ -403,8 +410,11 @@ export default {
       const user = context.rootState.currentUser
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       context.dispatch('createNewSpace')
+      const cards = context.state.cards
       Vue.nextTick(() => {
-        context.dispatch('updateCardConnectionPaths', { cardId: context.state.cards[1].id, connections: context.state.connections })
+        if (cards.length) {
+          context.dispatch('updateCardConnectionPaths', { cardId: cards[1].id, connections: context.state.connections })
+        }
         context.dispatch('saveNewSpace')
         context.dispatch('updateUserLastSpaceId')
         context.commit('notifyNewUser', false, { root: true })
