@@ -59,7 +59,7 @@ import cache from '@/cache.js'
 import utils from '@/utils.js'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
-import words from '@/words.js'
+import words from '@/data/words.js'
 import newSpace from '@/data/new.json'
 import nanoid from 'nanoid'
 

@@ -52,7 +52,7 @@ dialog.filters.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-
 
 <script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
-import frames from '@/frames.js'
+import frames from '@/data/frames.js'
 import utils from '@/utils.js'
 
 import uniq from 'lodash-es/uniq'

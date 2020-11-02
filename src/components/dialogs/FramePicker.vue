@@ -12,7 +12,7 @@ dialog.narrow.frame-details(v-if="visible" :open="visible" ref="dialog" @click.l
 
 <script>
 import scrollIntoView from '@/scroll-into-view.js'
-import frames from '@/frames.js'
+import frames from '@/data/frames.js'
 
 export default {
   props: {

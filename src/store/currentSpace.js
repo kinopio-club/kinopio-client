@@ -1,7 +1,7 @@
 import helloSpace from '@/data/hello.json'
 import newSpace from '@/data/new.json'
 
-import words from '@/words.js'
+import words from '@/data/words.js'
 import moonphase from '@/moonphase.js'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
