@@ -462,7 +462,7 @@ export default {
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
         }
       } catch (error) {
-        console.error('🚒', error)
+        console.warn('🚑', error.status, error)
         if (error.status === 404) {
           context.commit('notifySpaceNotFound', true, { root: true })
         }
@@ -475,6 +475,7 @@ export default {
         if (error.status === 500) {
           context.commit('notifyConnectionError', true, { root: true })
         }
+        context.dispatch('checkIfShouldNotifyNewUser')
       }
       context.commit('isLoadingSpace', false, { root: true })
       if (!remoteSpace) { return }
@@ -665,6 +666,11 @@ export default {
       const removedSpaces = cache.getAllRemovedSpaces()
       removedSpaces.forEach(space => cache.removeSpacePermanent(space))
       context.dispatch('api/addToQueue', { name: 'removeAllRemovedSpacesPermanentFromUser', body: { userId } }, { root: true })
+    },
+    checkIfShouldNotifyNewUser: (context) => {
+      if (!cache.getAllSpaces().length) {
+        context.commit('notifyNewUser', true, { root: true })
+      }
     },
     checkIfShouldNotifySpaceIsRemoved: (context, space) => {
       const canEdit = context.rootGetters['currentUser/canEditSpace']()

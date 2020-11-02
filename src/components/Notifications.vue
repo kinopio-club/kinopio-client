@@ -37,7 +37,7 @@ aside.notifications(@click.left="closeAllDialogs")
       button(v-if="!currentUserIsSignedIn" @click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
 
   .persistent-item(v-if="notifySpaceIsRemoved")
-    p This space has been removed
+    p This space is removed
     .row
       button(@click.left="restoreSpace")
         img.icon(src="@/assets/undo.svg")

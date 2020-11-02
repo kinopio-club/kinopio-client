@@ -1,8 +1,4 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
 import utils from '@/utils.js'
-import nanoid from 'nanoid'
-
 // store modules
 import api from '@/store/api.js'
 import broadcast from '@/store/broadcast.js'
@@ -10,9 +6,12 @@ import history from '@/store/history.js'
 import currentUser from '@/store/currentUser.js'
 import currentSpace from '@/store/currentSpace.js'
 import upload from '@/store/upload.js'
-
 // store plugins
 import websocket from '@/store/plugins/websocket.js'
+
+import Vue from 'vue'
+import Vuex from 'vuex'
+import nanoid from 'nanoid'
 
 Vue.use(Vuex)
 
@@ -556,7 +555,6 @@ export default new Vuex.Store({
       state.notifications.shift()
     },
     clearAllNotifications: (state) => {
-      state.notifySpaceNotFound = false
       state.notifyConnectionError = false
       state.notifyServerCouldNotSave = false
       state.notifySignUpToEditSpace = false
