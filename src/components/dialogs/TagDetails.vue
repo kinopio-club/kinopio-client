@@ -125,7 +125,7 @@ export default {
         return this.cards
       }
     },
-    cardsNameInCurrentSpace () {
+    cardsByTagName () {
       let tags
       const cardId = this.$store.state.currentSelectedTag.cardId
       tags = this.$store.getters['currentSpace/tagsByName']({
@@ -184,7 +184,7 @@ export default {
       return remoteCards
     },
     async updateCards () {
-      const cardsInCurrentSpace = this.cardsNameInCurrentSpace
+      const cardsInCurrentSpace = this.cardsByTagName
       const cardsInCachedSpaces = cache.allCardsByTagName(this.name)
       // cache cards
       let cacheCards = cardsInCurrentSpace.concat(cardsInCachedSpaces)
@@ -195,6 +195,7 @@ export default {
       this.updateCardsList(cacheCards)
       // remote cards
       let remoteCards = await this.remoteCards()
+      if (!remoteCards) { return }
       remoteCards = remoteCards.map(card => {
         card.nameSegments = this.cardNameSegments(card.name)
         return card
