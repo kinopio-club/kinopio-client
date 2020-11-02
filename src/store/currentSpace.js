@@ -316,7 +316,8 @@ export default {
       if (spaceUrl) {
         console.log('🚃 Restore space from url', spaceUrl)
         const spaceId = utils.idFromUrl(spaceUrl)
-        context.dispatch('loadSpace', { id: spaceId })
+        const space = { id: spaceId }
+        context.dispatch('loadSpace', { space })
       // restore or create journal space
       } else if (loadJournalSpace) {
         console.log('🚃 Restore journal space')
@@ -359,9 +360,16 @@ export default {
       let space = utils.clone(newSpace)
       space.name = words.randomUniqueName()
       space.id = nanoid()
-      space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
-      space.cards[1].x = random(180, 200)
-      space.cards[1].y = random(160, 180)
+      const newSpacesAreBlank = context.rootState.currentUser.newSpacesAreBlank
+      if (newSpacesAreBlank) {
+        space.connectionTypes = []
+        space.connections = []
+        space.cards = []
+      } else {
+        space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
+        space.cards[1].x = random(180, 200)
+        space.cards[1].y = random(160, 180)
+      }
       space.userId = context.rootState.currentUser.id
       const nullCardUsers = true
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
@@ -402,8 +410,11 @@ export default {
       const user = context.rootState.currentUser
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       context.dispatch('createNewSpace')
+      const cards = context.state.cards
       Vue.nextTick(() => {
-        context.dispatch('updateCardConnectionPaths', { cardId: context.state.cards[1].id, connections: context.state.connections })
+        if (cards.length) {
+          context.dispatch('updateCardConnectionPaths', { cardId: cards[1].id, connections: context.state.connections })
+        }
         context.dispatch('saveNewSpace')
         context.dispatch('updateUserLastSpaceId')
         context.commit('notifyNewUser', false, { root: true })
@@ -461,7 +472,7 @@ export default {
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
         }
       } catch (error) {
-        console.error('🚒', error)
+        console.warn('🚑', error.status, error)
         if (error.status === 404) {
           context.commit('notifySpaceNotFound', true, { root: true })
         }
@@ -474,6 +485,7 @@ export default {
         if (error.status === 500) {
           context.commit('notifyConnectionError', true, { root: true })
         }
+        context.dispatch('checkIfShouldNotifyNewUser')
       }
       context.commit('isLoadingSpace', false, { root: true })
       if (!remoteSpace) { return }
@@ -520,13 +532,14 @@ export default {
       const journalSpace = spaces.find(space => space.name === journalName)
       context.commit('loadJournalSpace', false, { root: true })
       if (journalSpace) {
-        context.dispatch('loadSpace', { id: journalSpace.id })
+        const space = { id: journalSpace.id }
+        context.dispatch('loadSpace', { space })
       } else {
         context.dispatch('addNewJournalSpace')
       }
     },
 
-    loadSpace: async (context, space) => {
+    loadSpace: async (context, { space }) => {
       const emptySpace = utils.emptySpace(space.id)
       const cachedSpace = cache.space(space.id)
       context.commit('clearAllNotifications', null, { root: true })
@@ -548,11 +561,7 @@ export default {
           shouldUpdateUrl: true
         })
         context.commit('broadcast/joinSpaceRoom', null, { root: true })
-        if (!space.isRemoved && remoteSpace.isRemoved) {
-          context.commit('notifySpaceIsRemoved', false, { root: true })
-        } else {
-          context.dispatch('checkIfShouldNotifySpaceIsRemoved', remoteSpace)
-        }
+        context.dispatch('checkIfShouldNotifySpaceIsRemoved', remoteSpace)
         if (cache.getAllSpaces().length) {
           context.commit('notifyNewUser', false, { root: true })
         } else {
@@ -574,7 +583,7 @@ export default {
       if (!spaceToRestore.id) {
         spaceToRestore = { id: user.lastSpaceId }
       }
-      context.dispatch('loadSpace', spaceToRestore)
+      context.dispatch('loadSpace', { space: spaceToRestore })
       context.dispatch('updateUserLastSpaceId')
     },
     updateSpace: async (context, updates) => {
@@ -607,7 +616,7 @@ export default {
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
-      await context.dispatch('loadSpace', space)
+      await context.dispatch('loadSpace', { space })
       const canEdit = context.rootGetters['currentUser/canEditSpace']()
       if (!canEdit) { return }
       context.dispatch('api/addToQueue', {
@@ -667,6 +676,12 @@ export default {
       const removedSpaces = cache.getAllRemovedSpaces()
       removedSpaces.forEach(space => cache.removeSpacePermanent(space))
       context.dispatch('api/addToQueue', { name: 'removeAllRemovedSpacesPermanentFromUser', body: { userId } }, { root: true })
+    },
+    checkIfShouldNotifyNewUser: (context) => {
+      const noUserSpaces = !cache.getAllSpaces().length
+      if (noUserSpaces) {
+        context.commit('notifyNewUser', true, { root: true })
+      }
     },
     checkIfShouldNotifySpaceIsRemoved: (context, space) => {
       const canEdit = context.rootGetters['currentUser/canEditSpace']()

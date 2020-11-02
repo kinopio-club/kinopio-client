@@ -10,9 +10,13 @@ dialog.add-space.narrow(
 )
   section
     .row
-      button(@click="addSpace")
-        img.icon(src="@/assets/add.svg")
-        span New Space
+      .segmented-buttons
+        button(@click="addSpace")
+          img.icon(src="@/assets/add.svg")
+          span New Space
+        button(@click.left.stop="toggleEditNewSpaceIsVisible" :class="{ active: editNewSpaceIsVisible }")
+          span Edit
+
     .row
       .segmented-buttons
         button(@click="addJournalSpace")
@@ -21,6 +25,12 @@ dialog.add-space.narrow(
           span Journal
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
           span Edit
+
+  section.edit-section(v-if="editNewSpaceIsVisible")
+    .row
+      label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
+        input(type="checkbox" v-model="newSpacesAreBlank")
+        span New Spaces Are Blank
 
   section.edit-section(v-if="editPromptsIsVisible")
     .row
@@ -48,6 +58,7 @@ import PromptPackPicker from '@/components/dialogs/PromptPackPicker.vue'
 import moonphase from '@/moonphase.js'
 import MoonPhase from '@/components/MoonPhase.vue'
 import utils from '@/utils.js'
+import cache from '@/cache.js'
 
 import last from 'lodash-es/last'
 import nanoid from 'nanoid'
@@ -77,7 +88,7 @@ export default {
       moonPhase: {},
       url: `${window.location.origin}/daily`,
       editPromptsIsVisible: false,
-      dailyUrlIsVisible: false,
+      editNewSpaceIsVisible: false,
       urlIsCopied: false,
       promptPackPickerIsVisible: false,
       promptPickerPosition: {
@@ -90,7 +101,8 @@ export default {
   },
   computed: {
     userPrompts () { return this.$store.state.currentUser.journalPrompts },
-    currentUserId () { return this.$store.state.currentUser.id }
+    currentUserId () { return this.$store.state.currentUser.id },
+    newSpacesAreBlank () { return this.$store.state.currentUser.newSpacesAreBlank }
   },
   methods: {
     showScreenIsShort (value) {
@@ -107,22 +119,35 @@ export default {
       this.$store.dispatch('currentSpace/updateSpacePageSize')
     },
     addSpace () {
-      this.$emit('closeDialogs')
-      this.$emit('addSpace')
+      const noUserSpaces = !cache.getAllSpaces().length
+      if (noUserSpaces) {
+        window.location.href = '/'
+      } else {
+        this.$emit('closeDialogs')
+        this.$emit('addSpace')
+      }
+    },
+    toggleNewSpacesAreBlank () {
+      const value = !this.newSpacesAreBlank
+      this.$store.dispatch('currentUser/newSpacesAreBlank', value)
+    },
+    toggleEditNewSpaceIsVisible () {
+      const value = !this.editNewSpaceIsVisible
+      this.closeAll()
+      this.editNewSpaceIsVisible = value
     },
     toggleEditPromptsIsVisible () {
-      this.editPromptsIsVisible = !this.editPromptsIsVisible
-    },
-    toggleDailyUrlIsVisible () {
-      this.dailyUrlIsVisible = !this.dailyUrlIsVisible
+      const value = !this.editPromptsIsVisible
+      this.closeAll()
+      this.editPromptsIsVisible = value
     },
     togglePromptPackPickerIsVisible () {
       this.promptPackPickerIsVisible = !this.promptPackPickerIsVisible
       this.screenIsShort = false
     },
     closeAll () {
+      this.editNewSpaceIsVisible = false
       this.editPromptsIsVisible = false
-      this.dailyUrlIsVisible = false
       this.urlIsCopied = false
       this.promptPackPickerIsVisible = false
     },

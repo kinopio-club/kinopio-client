@@ -25,7 +25,8 @@ export default {
     filterShowDateUpdated: false,
     filterShowAbsoluteDates: false,
     filterUnchecked: false,
-    journalPrompts: []
+    journalPrompts: [],
+    newSpacesAreBlank: false
   },
   getters: {
     isCurrentUser: (state) => (user) => {
@@ -229,6 +230,10 @@ export default {
       })
       state.journalPrompts = prompts
       cache.updateUser('journalPrompts', prompts)
+    },
+    newSpacesAreBlank: (state, value) => {
+      state.newSpacesAreBlank = value
+      cache.updateUser('newSpacesAreBlank', value)
     }
   },
   actions: {
@@ -491,6 +496,14 @@ export default {
       utils.typeCheck({ value: prompt, type: 'object', origin: 'updateJournalPrompt' })
       context.dispatch('api/addToQueue', { name: 'updateJournalPrompt', body: prompt }, { root: true })
       context.commit('updateJournalPrompt', prompt)
+    },
+    newSpacesAreBlank: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'newSpacesAreBlank' })
+      context.commit('newSpacesAreBlank', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          newSpacesAreBlank: value
+        } }, { root: true })
     }
   }
 }

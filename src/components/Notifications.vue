@@ -37,7 +37,7 @@ aside.notifications(@click.left="closeAllDialogs")
       button(v-if="!currentUserIsSignedIn" @click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
 
   .persistent-item(v-if="notifySpaceIsRemoved")
-    p This space has been removed
+    p This space is removed
     .row
       button(@click.left="restoreSpace")
         img.icon(src="@/assets/undo.svg")
@@ -222,7 +222,7 @@ export default {
       this.$store.dispatch('currentSpace/removeSpacePermanent', space)
       this.$store.commit('notifySpaceIsRemoved', false)
       const firstSpace = cache.getAllSpaces()[0]
-      this.$store.dispatch('currentSpace/loadSpace', firstSpace)
+      this.$store.dispatch('currentSpace/loadSpace', { space: firstSpace })
     },
     createNewHelloSpace () {
       this.$store.commit('notifyNewUser', false)
