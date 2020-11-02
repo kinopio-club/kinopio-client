@@ -105,7 +105,10 @@ export default {
       tags: space.tags
     }
     const uniqueItems = utils.uniqueSpaceItems(items, nullCardUsers)
-    space.cards = uniqueItems.cards
+    space.cards = uniqueItems.cards.map(card => {
+      card.spaceId = space.id
+      return card
+    })
     space.connectionTypes = uniqueItems.connectionTypes
     space.connections = uniqueItems.connections
     space.tags = uniqueItems.tags.map(tag => {
