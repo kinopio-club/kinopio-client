@@ -668,7 +668,8 @@ export default {
       context.dispatch('api/addToQueue', { name: 'removeAllRemovedSpacesPermanentFromUser', body: { userId } }, { root: true })
     },
     checkIfShouldNotifyNewUser: (context) => {
-      if (!cache.getAllSpaces().length) {
+      const noUserSpaces = !cache.getAllSpaces().length
+      if (noUserSpaces) {
         context.commit('notifyNewUser', true, { root: true })
       }
     },

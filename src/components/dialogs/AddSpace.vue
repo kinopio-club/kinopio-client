@@ -48,6 +48,7 @@ import PromptPackPicker from '@/components/dialogs/PromptPackPicker.vue'
 import moonphase from '@/moonphase.js'
 import MoonPhase from '@/components/MoonPhase.vue'
 import utils from '@/utils.js'
+import cache from '@/cache.js'
 
 import last from 'lodash-es/last'
 import nanoid from 'nanoid'
@@ -107,8 +108,13 @@ export default {
       this.$store.dispatch('currentSpace/updateSpacePageSize')
     },
     addSpace () {
-      this.$emit('closeDialogs')
-      this.$emit('addSpace')
+      const noUserSpaces = !cache.getAllSpaces().length
+      if (noUserSpaces) {
+        window.location.href = '/'
+      } else {
+        this.$emit('closeDialogs')
+        this.$emit('addSpace')
+      }
     },
     toggleEditPromptsIsVisible () {
       this.editPromptsIsVisible = !this.editPromptsIsVisible
