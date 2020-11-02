@@ -10,9 +10,13 @@ dialog.add-space.narrow(
 )
   section
     .row
-      button(@click="addSpace")
-        img.icon(src="@/assets/add.svg")
-        span New Space
+      .segmented-buttons
+        button(@click="addSpace")
+          img.icon(src="@/assets/add.svg")
+          span New Space
+        button(@click.left.stop="toggleEditNewSpaceIsVisible" :class="{ active: editNewSpaceIsVisible }")
+          span Edit
+
     .row
       .segmented-buttons
         button(@click="addJournalSpace")
@@ -21,6 +25,12 @@ dialog.add-space.narrow(
           span Journal
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
           span Edit
+
+  section.edit-section(v-if="editNewSpaceIsVisible")
+    .row
+      label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
+        input(type="checkbox" v-model="newSpacesAreBlank")
+        span New Spaces Are Blank
 
   section.edit-section(v-if="editPromptsIsVisible")
     .row
@@ -78,7 +88,7 @@ export default {
       moonPhase: {},
       url: `${window.location.origin}/daily`,
       editPromptsIsVisible: false,
-      dailyUrlIsVisible: false,
+      editNewSpaceIsVisible: false,
       urlIsCopied: false,
       promptPackPickerIsVisible: false,
       promptPickerPosition: {
@@ -91,7 +101,8 @@ export default {
   },
   computed: {
     userPrompts () { return this.$store.state.currentUser.journalPrompts },
-    currentUserId () { return this.$store.state.currentUser.id }
+    currentUserId () { return this.$store.state.currentUser.id },
+    newSpacesAreBlank () { return this.$store.state.currentUser.newSpacesAreBlank }
   },
   methods: {
     showScreenIsShort (value) {
@@ -116,19 +127,27 @@ export default {
         this.$emit('addSpace')
       }
     },
-    toggleEditPromptsIsVisible () {
-      this.editPromptsIsVisible = !this.editPromptsIsVisible
+    toggleNewSpacesAreBlank () {
+      const value = !this.newSpacesAreBlank
+      this.$store.dispatch('currentUser/newSpacesAreBlank', value)
     },
-    toggleDailyUrlIsVisible () {
-      this.dailyUrlIsVisible = !this.dailyUrlIsVisible
+    toggleEditNewSpaceIsVisible () {
+      const value = !this.editNewSpaceIsVisible
+      this.closeAll()
+      this.editNewSpaceIsVisible = value
+    },
+    toggleEditPromptsIsVisible () {
+      const value = !this.editPromptsIsVisible
+      this.closeAll()
+      this.editPromptsIsVisible = value
     },
     togglePromptPackPickerIsVisible () {
       this.promptPackPickerIsVisible = !this.promptPackPickerIsVisible
       this.screenIsShort = false
     },
     closeAll () {
+      this.editNewSpaceIsVisible = false
       this.editPromptsIsVisible = false
-      this.dailyUrlIsVisible = false
       this.urlIsCopied = false
       this.promptPackPickerIsVisible = false
     },
