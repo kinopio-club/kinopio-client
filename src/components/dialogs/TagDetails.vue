@@ -305,14 +305,14 @@ export default {
       if (!this.hasProps) { return }
       this.$nextTick(() => {
         let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeight(element, true) - 2
+        this.resultsSectionHeight = utils.elementHeight(element) - 2
       })
     },
     updateDialogHeight () {
       if (!this.hasProps) { return }
       this.$nextTick(() => {
         let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeight(element, true)
+        this.dialogHeight = utils.elementHeight(element)
         this.updateResultsSectionHeight()
       })
     },

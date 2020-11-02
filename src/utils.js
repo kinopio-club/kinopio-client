@@ -69,18 +69,13 @@ export default {
     return height
   },
 
-  elementHeight (element, ignoreFooter) {
+  elementHeight (element) {
     if (!element) { return }
+    const threshold = 20
     const rect = element.getBoundingClientRect()
     let height
-    if (ignoreFooter) {
-      const viewportHeight = this.visualViewport().height
-      height = viewportHeight - rect.y
-    } else {
-      let footer = document.querySelector('footer')
-      footer = footer.getBoundingClientRect()
-      height = footer.y - rect.y
-    }
+    const viewportHeight = this.visualViewport().height
+    height = viewportHeight - rect.y - threshold
     const zoomScale = this.visualViewport().scale
     if (zoomScale > 1) {
       height = height * zoomScale
