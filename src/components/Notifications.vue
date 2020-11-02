@@ -222,7 +222,7 @@ export default {
       this.$store.dispatch('currentSpace/removeSpacePermanent', space)
       this.$store.commit('notifySpaceIsRemoved', false)
       const firstSpace = cache.getAllSpaces()[0]
-      this.$store.dispatch('currentSpace/loadSpace', firstSpace)
+      this.$store.dispatch('currentSpace/loadSpace', { space: firstSpace })
     },
     createNewHelloSpace () {
       this.$store.commit('notifyNewUser', false)
