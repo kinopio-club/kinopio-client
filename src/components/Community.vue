@@ -1,8 +1,17 @@
 <template lang="pug">
-.new-spaces(v-if="visible" :open="visible" @click.left.stop)
+.community(v-if="visible" :open="visible" @click.left.stop)
   section.header
-    p Recently updated spaces made by cool people like you
-    ShowInExploreButton(@updateSpaces="updateCurrentSpace" :label="showInExploreLabel")
+    .segmented-buttons
+      button(@click.left.stop="toggleAllSpacesIsVisible(true)" :class="{ active: allSpacesIsVisible }")
+        span All
+      button(@click.left.stop="toggleAllSpacesIsVisible(false)" :class="{ active: !allSpacesIsVisible }")
+        img.icon(src="@/assets/heart.svg")
+        span Best Of
+    template(v-if="allSpacesIsVisible")
+      p Recently updated spaces made by cool people like you
+      ShowInExploreButton(@updateSpaces="updateCurrentSpace" :label="showInExploreLabel")
+    template(v-if="!allSpacesIsVisible")
+      p Selections by the creator of Kinopio
     p(v-if="loading")
       Loader(:visible="loading")
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
@@ -16,7 +25,7 @@ import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
 import utils from '@/utils.js'
 
 export default {
-  name: 'NewSpaces',
+  name: 'Community',
   components: {
     Loader,
     SpaceList,
@@ -25,7 +34,8 @@ export default {
   props: {
     visible: Boolean,
     loading: Boolean,
-    spaces: Array
+    spaces: Array,
+    allSpacesIsVisible: Boolean
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -45,6 +55,9 @@ export default {
     }
   },
   methods: {
+    toggleAllSpacesIsVisible (value) {
+      this.$emit('toggleAllSpacesIsVisible', value)
+    },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
     },
@@ -73,7 +86,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.new-spaces
+.community
   .header
     border-top 1px solid var(--primary)
     border-top-left-radius 0
