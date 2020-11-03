@@ -226,7 +226,7 @@ export default {
       }
     },
     dateUpdatedAt () {
-      const date = this.card.nameUpdatedAt
+      const date = this.card.nameUpdatedAt || this.card.createdAt
       const showAbsoluteDate = this.$store.state.currentUser.filterShowAbsoluteDates
       if (date) {
         if (showAbsoluteDate) {
