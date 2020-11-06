@@ -120,6 +120,7 @@ export default {
     },
     isConnectionFilteredByType () {
       const typeIds = this.$store.state.filteredConnectionTypeIds
+      if (!this.connectionType) { return }
       return typeIds.includes(this.connectionType.id)
     },
     isFiltered () {
