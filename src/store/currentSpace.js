@@ -429,6 +429,7 @@ export default {
       space.name = utils.journalSpaceName()
       space.privacy = 'private'
       space.moonPhase = moonPhase.name
+      space.removedCards = []
       space.cards.push({ id: nanoid(), name: day, x: 60, y: 90, frameId: 0 })
       const userPrompts = context.rootState.currentUser.journalPrompts
       userPrompts.forEach(prompt => {
