@@ -8,21 +8,19 @@ dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.left.st
     p Invite Collaborators
 
   section
-    .row
-      Loader(:visible="loading" v-if="loading")
-      input.textarea(ref="url" v-model="url" v-if="!loading")
+    Loader(:visible="loading")
 
-    button(v-if="!canNativeShare" @click.left="copyUrl" :disabled="loading")
-      span Copy Invite Url
-      Loader(:visible="loading")
-
-    .segmented-buttons(v-if="canNativeShare")
-      button(@click.left="copyUrl" :disabled="loading")
+    template(v-if="!loading")
+      .row
+        input.textarea(ref="url" v-model="url")
+      button(v-if="!canNativeShare" @click.left="copyUrl")
         span Copy Invite Url
-        Loader(:visible="loading")
+      .segmented-buttons(v-if="canNativeShare")
+        button(@click.left="copyUrl" :disabled="loading")
+          span Copy Invite Url
+        button(@click.left="shareUrl" :disabled="loading")
+          img.icon(src="@/assets/share.svg")
 
-      button(@click.left="shareUrl" :disabled="loading")
-        img.icon(src="@/assets/share.svg")
     .row
       .badge.success.success-message(v-if="urlIsCopied") Url Copied
 
