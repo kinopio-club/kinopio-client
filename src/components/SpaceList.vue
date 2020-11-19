@@ -9,7 +9,7 @@ span
         template(v-else-if="showUserIfCurrentUserIsCollaborator && space.currentUserIsCollaborator")
           User(:user="user(space)" :isClickable="false" :key="user(space).id")
         MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
-        .badge.info.template-badge(v-if="showCategory") {{space.category}}
+        .badge.info.template-badge(v-if="showCategory" :class="categoryClassName(space)") {{space.category}}
         .badge.info.template-badge(v-else-if="spaceIsTemplate(space)") Template
         .name
           span {{space.name}}
@@ -61,6 +61,9 @@ export default {
     }
   },
   methods: {
+    categoryClassName (space) {
+      return space.category.toLowerCase()
+    },
     updateFilteredSpaces (spaces) {
       this.filteredSpaces = spaces
     },

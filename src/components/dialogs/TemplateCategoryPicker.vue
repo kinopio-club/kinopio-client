@@ -4,7 +4,7 @@ dialog.narrow.template-category-picker(v-if="visible" :open="visible" @click.lef
     ul.results-list
       template(v-for="(category in categories")
         li(@click.left="select(category)" :key="category.id" tabindex="0" v-on:keyup.enter="select(category)" :class="{ active: isActive(category) }")
-          .badge.info {{category.name}}
+          .badge.info.template-badge(:class="categoryClassName(category)") {{category.name}}
 </template>
 
 <script>
@@ -22,6 +22,9 @@ export default {
     }
   },
   methods: {
+    categoryClassName (category) {
+      return category.name.toLowerCase()
+    },
     select (category) {
       this.$store.commit('triggerSelectTemplateCategory')
       this.$emit('selectCategory', category)

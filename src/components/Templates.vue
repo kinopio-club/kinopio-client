@@ -4,7 +4,7 @@
   section.categories
     .button-wrap.category-wrap
       button(@click.left.stop="toggleTemplateCategoryPickerIsVisible" :class="{active: templateCategoryPickerIsVisible}")
-        .badge.info {{filterCategory.name}}
+        .badge.info.template-badge(:class="categoryClassName(filterCategory)") {{filterCategory.name}}
       TemplateCategoryPicker(:visible="templateCategoryPickerIsVisible" :selectedCategoryId="filteredCategoryId" @closeDialog="closeDialogs" @selectCategory="updateFilteredCategory")
     .button-wrap(v-if="!hideSuggestTemplates")
       button(@click.left.stop="toggleContactIsVisible" :class="{active: contactIsVisible}")
@@ -80,6 +80,9 @@ export default {
     }
   },
   methods: {
+    categoryClassName (filterCategory) {
+      return filterCategory.name.toLowerCase()
+    },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
     },
@@ -136,4 +139,14 @@ export default {
   .contact
     top calc(100% - 8px)
     bottom initial
+  // template category colors
+  .template-badge
+    &.learning
+      background-color #f0e68c
+    &.life
+      background-color #b9a8ff
+    &.planning
+      background-color #ffc0cb
+    &.product
+      background-color #ee83ee
 </style>
