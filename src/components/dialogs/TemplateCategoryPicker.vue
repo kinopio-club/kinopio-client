@@ -40,4 +40,8 @@ export default {
   bottom initial !important
   .results-section
     padding-top 4px
+.add-space
+  .template-category-picker
+    &.narrow
+      width 160px
 </style>

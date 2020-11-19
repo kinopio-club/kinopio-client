@@ -6,7 +6,7 @@
       button(@click.left.stop="toggleTemplateCategoryPickerIsVisible" :class="{active: templateCategoryPickerIsVisible}")
         .badge.info {{filterCategory.name}}
       TemplateCategoryPicker(:visible="templateCategoryPickerIsVisible" :selectedCategoryId="filteredCategoryId" @closeDialog="closeDialogs" @selectCategory="updateFilteredCategory")
-    .button-wrap
+    .button-wrap(v-if="!hideSuggestTemplates")
       button(@click.left.stop="toggleContactIsVisible" :class="{active: contactIsVisible}")
         span Suggest Templates
       Contact(:visible="contactIsVisible")
@@ -29,7 +29,8 @@ export default {
     Contact
   },
   props: {
-    visible: Boolean
+    visible: Boolean,
+    hideSuggestTemplates: Boolean
   },
   created () {
     this.$store.subscribe((mutation, state) => {

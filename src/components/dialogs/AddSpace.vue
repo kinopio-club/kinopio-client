@@ -11,12 +11,19 @@ dialog.add-space.narrow(
   section
     .row
       .segmented-buttons
+        button(@click.left.stop="hideTemplatesIsVisible" :class="{ active: !templatesIsVisible }")
+          span New
+        button(@click.left.stop="showTemplatesIsVisible" :class="{ active: templatesIsVisible }")
+          span Templates
+
+  section(v-if="!templatesIsVisible")
+    .row
+      .segmented-buttons
         button(@click="addSpace")
           img.icon(src="@/assets/add.svg")
-          span New Space
+          span Space
         button(@click.left.stop="toggleEditNewSpaceIsVisible" :class="{ active: editNewSpaceIsVisible }")
           span Edit
-
     .row
       .segmented-buttons
         button(@click="addJournalSpace")
@@ -25,6 +32,7 @@ dialog.add-space.narrow(
           span Journal
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
           span Edit
+  Templates(:visible="templatesIsVisible" :hideSuggestTemplates="true")
 
   section.edit-section(v-if="editNewSpaceIsVisible")
     .row
@@ -59,6 +67,7 @@ import moonphase from '@/moonphase.js'
 import MoonPhase from '@/components/MoonPhase.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import Templates from '@/components/Templates.vue'
 
 import last from 'lodash-es/last'
 import nanoid from 'nanoid'
@@ -68,7 +77,8 @@ export default {
   components: {
     Prompt,
     PromptPackPicker,
-    MoonPhase
+    MoonPhase,
+    Templates
   },
   props: {
     visible: Boolean
@@ -89,6 +99,7 @@ export default {
       url: `${window.location.origin}/daily`,
       editPromptsIsVisible: false,
       editNewSpaceIsVisible: false,
+      templatesIsVisible: false,
       urlIsCopied: false,
       promptPackPickerIsVisible: false,
       promptPickerPosition: {
@@ -144,6 +155,13 @@ export default {
     togglePromptPackPickerIsVisible () {
       this.promptPackPickerIsVisible = !this.promptPackPickerIsVisible
       this.screenIsShort = false
+    },
+    showTemplatesIsVisible () {
+      this.templatesIsVisible = true
+    },
+    hideTemplatesIsVisible () {
+      this.closeAll()
+      this.templatesIsVisible = false
     },
     closeAll () {
       this.editNewSpaceIsVisible = false
