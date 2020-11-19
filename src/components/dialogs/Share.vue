@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog")
+dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     p Share
   section(v-if="spaceHasUrl")
@@ -47,6 +47,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import InviteCollaborators from '@/components/dialogs/InviteCollaborators.vue'
 import UserList from '@/components/UserList.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'Share',
@@ -59,6 +60,13 @@ export default {
   props: {
     visible: Boolean
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'updatePageSizes') {
+        this.updateDialogHeight()
+      }
+    })
+  },
   data () {
     return {
       urlIsCopied: false,
@@ -69,7 +77,8 @@ export default {
       userDetailsPosition: {},
       userDetailsIsVisible: false,
       spaceCollaborators: [],
-      url: ''
+      url: '',
+      dialogHeight: null
     }
   },
   computed: {
@@ -104,7 +113,7 @@ export default {
       this.urlIsCopied = true
     },
     triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Share.triggerSignUpOrInIsVisible')
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     shareUrl () {
@@ -146,7 +155,7 @@ export default {
     removedCollaborator (user) {
       const isCurrentUser = this.$store.state.currentUser.id === user.id
       if (isCurrentUser) {
-        this.$store.dispatch('closeAllDialogs')
+        this.$store.dispatch('closeAllDialogs', 'Share.removedCollaborator')
       }
       this.updateSpaceCollaborators()
     },
@@ -157,6 +166,13 @@ export default {
     updateSpaceCollaborators () {
       this.userDetailsIsNotVisible()
       this.spaceCollaborators = this.$store.state.currentSpace.collaborators
+    },
+    updateDialogHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeight(element)
+      })
     }
   },
   watch: {
@@ -167,6 +183,7 @@ export default {
       if (visible) {
         this.updateSpaceCollaborators()
         this.url = window.location.href
+        this.updateDialogHeight()
       }
     }
   }

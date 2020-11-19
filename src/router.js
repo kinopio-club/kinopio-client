@@ -76,7 +76,7 @@ export default new Router({
               store.commit('addNotification', { message: 'You can now edit this space', type: 'success' })
               next()
             }).catch(error => {
-              console.error(error)
+              console.error('🚒', error)
               if (error.status === 401) {
                 store.commit('addNotification', { message: 'Space could not be found, or your invite was invalid', type: 'danger' })
               } else {
@@ -88,6 +88,13 @@ export default new Router({
           next()
         }
         store.commit('addToSpaceCollaboratorKeys', { spaceId, collaboratorKey })
+      }
+    }, {
+      path: '/journal',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        store.commit('loadJournalSpace', true)
+        next()
       }
     }, {
       path: '/:space',

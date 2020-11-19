@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs")
+dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     .row
       p Kinopio is the visual thinking tool for new ideas and hard problems.
@@ -12,7 +12,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs")
     .row
       .button-wrap
         button(@click.left.stop="toggleHelpIsVisible" :class="{active: helpIsVisible}")
-          span Help and About
+          span Help
         Help(:visible="helpIsVisible")
       .button-wrap
         a(href="https://help.kinopio.club/api")
@@ -54,6 +54,17 @@ export default {
   props: {
     visible: Boolean
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'closeAllDialogs') {
+        this.whatsNewIsVisible = false
+        this.addToHomescreenIsVisible = false
+      }
+      if (mutation.type === 'updatePageSizes') {
+        this.updateDialogHeight()
+      }
+    })
+  },
   data () {
     return {
       helpIsVisible: false,
@@ -63,16 +74,9 @@ export default {
       newStuff: [],
       isIPhone: false,
       isAndroid: false,
-      isMobile: false
+      isMobile: false,
+      dialogHeight: null
     }
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'closeAllDialogs') {
-        this.whatsNewIsVisible = false
-        this.addToHomescreenIsVisible = false
-      }
-    })
   },
   async mounted () {
     const isOffline = !this.$store.state.isOnline
@@ -125,6 +129,13 @@ export default {
       this.whatsNewIsVisible = false
       this.addToHomescreenIsVisible = false
       this.keyboardShortcutsIsVisible = false
+    },
+    updateDialogHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeight(element)
+      })
     }
   },
   watch: {
@@ -134,6 +145,7 @@ export default {
       }
       if (visible) {
         this.closeDialogs()
+        this.updateDialogHeight()
       }
     }
   }

@@ -10,25 +10,35 @@ header(:style="visualViewportPosition")
           img.down-arrow(src="@/assets/down-arrow.svg")
         About(:visible="aboutIsVisible")
         KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
-    .space-details-wrap
+    .space-details-wrap(:class="{'segmented-buttons': spaceHasStatusOrOffline}")
+      //- space
       .button-wrap
         button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
           .badge.info(v-show="currentSpaceIsTemplate")
             span Template
-
           .badge-wrap(v-if="!userCanEditSpace && !currentSpaceIsTemplate")
             .badge.info(:class="{'invisible': readOnlyJiggle}")
               span Read Only
             .badge.info.invisible-badge(ref="readOnly" :class="{'badge-jiggle': readOnlyJiggle, 'invisible': !readOnlyJiggle}")
               span Read Only
-
+          MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
           span {{currentSpaceName}}
           img.icon.privacy-icon(v-if="spaceIsNotClosed" :src="privacyIcon" :class="privacyName")
           .badge.status.explore(v-if="shouldShowInExplore")
             img.icon(src="@/assets/checkmark.svg")
-          Loader(:visible="isLoadingSpace")
         SpaceDetails(:visible="spaceDetailsIsVisible")
         ImportArenaChannel(:visible="importArenaChannelIsVisible")
+      //- state
+      .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
+        button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
+          Loader(:visible="spaceHasStatus")
+          .badge.success.space-status-success(v-if="!spaceHasStatus")
+        SpaceStatus(:visible="spaceStatusIsVisible")
+      //- offline
+      .button-wrap(v-if="!isOnline")
+        button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
+          img.icon.offline(src="@/assets/offline.svg")
+        Offline(:visible="offlineIsVisible")
 
     .button-wrap
       button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
@@ -70,17 +80,19 @@ header(:style="visualViewportPosition")
 <script>
 import About from '@/components/dialogs/About.vue'
 import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
+import SpaceStatus from '@/components/dialogs/SpaceStatus.vue'
+import Offline from '@/components/dialogs/Offline.vue'
+import MoonPhase from '@/components/MoonPhase.vue'
 import User from '@/components/User.vue'
 import SignUpOrIn from '@/components/dialogs/SignUpOrIn.vue'
 import ResetPassword from '@/components/dialogs/ResetPassword.vue'
 import Share from '@/components/dialogs/Share.vue'
 import Loader from '@/components/Loader.vue'
-import templates from '@/spaces/templates.js'
 import Search from '@/components/dialogs/Search.vue'
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
-import privacy from '@/spaces/privacy.js'
+import privacy from '@/data/privacy.js'
 import utils from '@/utils.js'
 
 const maxIterations = 30
@@ -91,6 +103,8 @@ export default {
   components: {
     About,
     SpaceDetails,
+    SpaceStatus,
+    Offline,
     User,
     SignUpOrIn,
     ResetPassword,
@@ -99,7 +113,8 @@ export default {
     Search,
     ImportArenaChannel,
     KeyboardShortcuts,
-    UpgradeUser
+    UpgradeUser,
+    MoonPhase
   },
   data () {
     return {
@@ -110,6 +125,8 @@ export default {
       loadingSignUpOrIn: false,
       keyboardShortcutsIsVisible: false,
       upgradeUserIsVisible: false,
+      spaceStatusIsVisible: false,
+      offlineIsVisible: false,
       pinchZoomOffsetLeft: 0,
       pinchZoomOffsetTop: 0,
       pinchZoomScale: 1,
@@ -185,8 +202,24 @@ export default {
     currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     },
-    isLoadingSpace () {
-      return this.$store.state.isLoadingSpace
+    spaceHasStatus () {
+      if (!this.isOnline) { return }
+      const isLoadingSpace = this.$store.state.isLoadingSpace
+      const isJoiningSpace = this.$store.state.isJoiningSpace
+      const isReconnectingToBroadcast = this.$store.state.isReconnectingToBroadcast
+      return isLoadingSpace || isJoiningSpace || isReconnectingToBroadcast
+    },
+    spaceHasStatusOrOffline () {
+      return this.spaceHasStatus || !this.isOnline || this.spaceStatusIsVisible
+    },
+    spaceHasStatusAndStatusDialogIsNotVisible () {
+      if (this.spaceHasStatus) {
+        return true
+      } else if (this.spaceStatusIsVisible) {
+        return true
+      } else {
+        return false
+      }
     },
     isOnline () {
       return this.$store.state.isOnline
@@ -257,6 +290,8 @@ export default {
       this.shareIsVisible = false
       this.keyboardShortcutsIsVisible = false
       this.upgradeUserIsVisible = false
+      this.spaceStatusIsVisible = false
+      this.offlineIsVisible = false
     },
     updatePositionFrame () {
       currentIteration++
@@ -276,24 +311,35 @@ export default {
     },
     toggleAboutIsVisible () {
       const isVisible = this.aboutIsVisible
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleAboutIsVisible')
       this.aboutIsVisible = !isVisible
     },
     toggleSpaceDetailsIsVisible () {
       const isVisible = this.spaceDetailsIsVisible
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleSpaceDetailsIsVisible')
       this.spaceDetailsIsVisible = !isVisible
     },
     toggleSignUpOrInIsVisible () {
       const isVisible = this.signUpOrInIsVisible
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleSignUpOrInIsVisible')
       this.signUpOrInIsVisible = !isVisible
     },
     toggleShareIsVisible () {
       const isVisible = this.shareIsVisible
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleShareIsVisible')
       this.shareIsVisible = !isVisible
     },
+    toggleSpaceStatusIsVisible () {
+      const isVisible = this.spaceStatusIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleSpaceStatusIsVisible')
+      this.spaceStatusIsVisible = !isVisible
+    },
+    toggleOfflineIsVisible () {
+      const isVisible = this.offlineIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleOfflineIsVisible')
+      this.offlineIsVisible = !isVisible
+    },
+
     setLoadingSignUpOrIn (value) {
       this.loadingSignUpOrIn = value
     },
@@ -304,7 +350,7 @@ export default {
     },
     triggerUpgradeUserIsVisible () {
       const isVisible = this.upgradeUserIsVisible
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Header.triggerUpgradeUserIsVisible')
       this.upgradeUserIsVisible = !isVisible
     }
   }
@@ -360,7 +406,6 @@ header
       .down-arrow
         transform translateY(5px)
   .space-details-wrap
-    max-width 250px
     margin-top 8px
     @media(max-width 414px)
       max-width calc(100vw - 200px)
@@ -371,10 +416,29 @@ header
       max-width 100%
     dialog
       max-width initial
-    .button-wrap
+    > .button-wrap
+      max-width 100vw
       > button
         .privacy-icon
           margin-left 6px
+
+    // should not bubble down into dialogs
+    &.segmented-buttons
+      > .button-wrap
+        max-width calc(100% - 30px)
+        > button
+          border-radius 0
+          .loader
+            margin 0
+        &:first-child
+          > button
+            border-top-left-radius 3px
+            border-bottom-left-radius 3px
+        &:last-child
+          > button
+            border-top-right-radius 3px
+            border-bottom-right-radius 3px
+            margin-left -1px
 
   aside
     display flex
@@ -425,6 +489,16 @@ header
   .users
     > .upgrade-user
       max-height calc(100vh - 50px)
+
+  .icon.offline
+    height 13px
+    vertical-align -2px
+
+  .badge.space-status-success
+    margin 0
+    padding 0 7px
+    border-radius 10px
+    vertical-align 0
 
 .badge-jiggle
   animation-name notificationJiggle

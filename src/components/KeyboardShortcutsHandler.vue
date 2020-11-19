@@ -8,7 +8,7 @@ import last from 'lodash-es/last'
 import utils from '@/utils.js'
 
 const incrementPosition = 20
-let cardMap, useSiblingConnectionType
+let useSiblingConnectionType
 
 export default {
   mounted () {
@@ -40,7 +40,7 @@ export default {
         this.remove()
       // Escape
       } else if (key === 'Escape') {
-        this.$store.dispatch('closeAllDialogs')
+        this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.escape')
       // → Left
       } else if (key === 'ArrowLeft' && (isSpaceScope || isFromCard)) {
         this.focusNearestCardLeft()
@@ -53,6 +53,21 @@ export default {
       // ↑ Up
       } else if (key === 'ArrowUp' && (isSpaceScope || isFromCard)) {
         this.focusNearestCardUp()
+      // 1
+      } else if (key === '1' && isSpaceScope) {
+        let value = this.$store.state.currentUser.filterShowUsers
+        value = !value
+        this.$store.dispatch('currentUser/toggleFilterShowUsers', value)
+      // 2
+      } else if (key === '2' && isSpaceScope) {
+        let value = this.$store.state.currentUser.filterShowDateUpdated
+        value = !value
+        this.$store.dispatch('currentUser/toggleFilterShowDateUpdated', value)
+      // 3
+      } else if (key === '3' && isSpaceScope) {
+        let value = this.$store.state.currentUser.filterUnchecked
+        value = !value
+        this.$store.dispatch('currentUser/toggleFilterUnchecked', value)
       }
     },
     handleMetaKeyShortcuts (event) {
@@ -86,6 +101,10 @@ export default {
       } else if (isMeta && key === 'a' && isSpaceScope) {
         event.preventDefault()
         this.selectAllCards()
+      // Jump to Space
+      } else if (isMeta && key === 'k' && isSpaceScope) {
+        event.preventDefault()
+        this.focusOnSpaceDetailsFilter()
       }
     },
 
@@ -125,7 +144,7 @@ export default {
         initialPosition.x = window.pageXOffset + 40
         initialPosition.y = window.pageYOffset + 80
       }
-      cardMap = utils.cardMap()
+      this.$store.commit('updateCardMap')
       const position = this.nonOverlappingCardPosition(initialPosition)
       this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
       if (childCard) {
@@ -157,7 +176,7 @@ export default {
         x: window.pageXOffset + rect.x + rect.width + incrementPosition,
         y: window.pageYOffset + rect.y + rect.height + incrementPosition
       }
-      cardMap = utils.cardMap()
+      this.$store.commit('updateCardMap')
       const position = this.nonOverlappingCardPosition(initialPosition)
       this.$store.dispatch('currentSpace/addCard', { position })
       this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)
@@ -168,6 +187,7 @@ export default {
 
     // recursive
     nonOverlappingCardPosition (position) {
+      const cardMap = this.$store.state.cardMap
       const overlappingCard = cardMap.find(card => {
         const isBetweenX = utils.isBetween({
           value: position.x,
@@ -276,6 +296,7 @@ export default {
       }
       let closestDistanceFromCenter = Math.max(viewportWidth, viewportHeight)
       let closestCard
+      const cardMap = this.$store.state.cardMap
       cardMap.forEach(card => {
         const toPosition = utils.rectCenter(card)
         const distance = utils.distanceBetweenTwoPoints(viewportCenter, toPosition)
@@ -289,6 +310,7 @@ export default {
     },
 
     currentFocusedCard () {
+      const cardMap = this.$store.state.cardMap
       let lastCardId = this.$store.state.parentCardId || this.$store.state.childCardId
       let lastCard = cardMap.filter(card => card.cardId === lastCardId)
       if (lastCard.length) {
@@ -299,7 +321,8 @@ export default {
     },
 
     focusCard (direction) {
-      cardMap = utils.cardMap()
+      this.$store.commit('updateCardMap')
+      const cardMap = this.$store.state.cardMap
       const originCard = this.currentFocusedCard()
       let focusableCards
       if (direction === 'left') {
@@ -381,7 +404,7 @@ export default {
       })
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
       this.clearAllSelectedCards()
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.remove')
     },
 
     // Undo
@@ -444,7 +467,21 @@ export default {
       this.$store.commit('multipleSelectedActionsPosition', viewportCenter)
       this.$store.commit('multipleSelectedActionsIsVisible', true)
       this.$store.commit('multipleCardsSelectedIds', cards)
+    },
+
+    // Jump to Space (temporary?)
+
+    focusOnSpaceDetailsFilter () {
+      this.$store.commit('triggerSpaceDetailsVisible')
+      this.$nextTick(() => {
+        this.$nextTick(() => {
+          this.$nextTick(() => {
+            this.$store.commit('triggerFocusSpaceDetailsFilter')
+          })
+        })
+      })
     }
+
   }
 }
 </script>

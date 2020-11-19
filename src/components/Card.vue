@@ -39,9 +39,21 @@ article(:style="position" :data-card-id="id" ref="card")
           .checkbox-wrap(v-if="hasCheckbox" @click.left.prevent.stop="toggleCardChecked" @touchend.prevent.stop="toggleCardChecked")
             label(:class="{active: isChecked, disabled: !canEditSpace}")
               input(type="checkbox" v-model="checkboxState")
+
           //- Name
-          p.name(v-if="normalizedName" :style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox}")
-            span {{normalizedName}}
+          p.name.name-segments(v-if="normalizedName" :style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox}")
+            template(v-for="segment in nameSegments")
+              span(v-if="segment.isText && segment.content") {{segment.content}}
+              //- Tags
+              span.badge.button-badge(
+                v-if="segment.isTag"
+                :style="{backgroundColor: segment.color}"
+                :class="{ active: currentSelectedTag.name === segment.name }"
+                @click.left="showTagDetailsIsVisible($event, segment)"
+                @touchend="showTagDetailsIsVisible($event, segment)"
+                @keyup.stop.enter="showTagDetailsIsVisible($event, segment)"
+                :data-tag-id="segment.id"
+              ) {{segment.name}}
 
       //- Right buttons
       span.card-buttons-wrap
@@ -99,6 +111,27 @@ article(:style="position" :data-card-id="id" ref="card")
         span Space is Read Only
 
   CardDetails(:card="card" @broadcastShowCardDetails="broadcastShowCardDetails")
+
+  //- Meta Info
+  .meta-container(v-if="filterShowUsers || filterShowDateUpdated")
+    //- User
+    .badge-wrap
+      .badge.user-badge.button-badge(
+        v-if="filterShowUsers"
+        :style="{background: updatedByUser.color}"
+        @mouseup.left.stop
+        @touchend.stop
+        @click.left.prevent.stop="toggleUserDetailsIsVisible"
+        @touchend.prevent.stop="toggleUserDetailsIsVisible"
+      )
+        User(:user="updatedByUser" :isClickable="false")
+        .name {{updatedByUser.name}}
+      UserDetails(:visible="userDetailsIsVisible" :user="updatedByUser" :dialogIsReadOnly="true")
+    //- Date
+    .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
+      img.icon.time(src="@/assets/time.svg")
+      .name {{dateUpdatedAt}}
+
 </template>
 
 <script>
@@ -108,6 +141,10 @@ import Frames from '@/components/Frames.vue'
 import Loader from '@/components/Loader.vue'
 import Audio from '@/components/Audio.vue'
 import scrollIntoView from '@/scroll-into-view.js'
+import User from '@/components/User.vue'
+import UserDetails from '@/components/dialogs/UserDetails.vue'
+
+import fromNow from 'fromnow'
 
 let isMultiTouch
 
@@ -116,7 +153,9 @@ export default {
     CardDetails,
     Frames,
     Loader,
-    Audio
+    Audio,
+    User,
+    UserDetails
   },
   props: {
     card: Object
@@ -134,6 +173,9 @@ export default {
           scrollIntoView.scroll(element, isTouchDevice)
         }
       }
+      if (mutation.type === 'closeAllDialogs') {
+        this.userDetailsIsVisible = false
+      }
     })
   },
   data () {
@@ -142,6 +184,8 @@ export default {
       remoteConnectionColor: '',
       uploadIsDraggedOver: false,
       isPlayingAudio: false,
+      userDetailsIsVisible: false,
+      preventDraggedTagFromShowingDetails: false,
       error: {
         sizeLimit: false,
         unknownUploadError: false,
@@ -157,6 +201,7 @@ export default {
     }
   },
   computed: {
+    currentSelectedTag () { return this.$store.state.currentSelectedTag },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     id () { return this.card.id },
     x () { return this.card.x },
@@ -166,6 +211,33 @@ export default {
     newConnectionColor () { return this.$store.state.currentConnectionColor },
     name () { return this.card.name },
     frameId () { return this.card.frameId },
+    filterShowUsers () { return this.$store.state.currentUser.filterShowUsers },
+    filterShowDateUpdated () { return this.$store.state.currentUser.filterShowDateUpdated },
+    updatedByUser () {
+      const userId = this.card.nameUpdatedByUserId || this.card.userId
+      const user = this.$store.getters['currentSpace/memberById'](userId)
+      if (user) {
+        return user
+      } else {
+        return {
+          name: '',
+          color: '#cdcdcd' // secondary-active-background
+        }
+      }
+    },
+    dateUpdatedAt () {
+      const date = this.card.nameUpdatedAt || this.card.createdAt
+      const showAbsoluteDate = this.$store.state.currentUser.filterShowAbsoluteDates
+      if (date) {
+        if (showAbsoluteDate) {
+          return new Date(date).toLocaleString()
+        } else {
+          return fromNow(date, { max: 1, suffix: true })
+        }
+      } else {
+        return 'Just now'
+      }
+    },
     cardPendingUpload () {
       const pendingUploads = this.$store.state.upload.pendingUploads
       return pendingUploads.find(upload => upload.cardId === this.card.id)
@@ -236,14 +308,45 @@ export default {
         name = name.replace(this.formats.audio, '')
       }
       // for music use cases
-      if (this.formats.link.includes('kinopio=hide')) {
+      const isLegacyHidden = this.formats.link.includes('kinopio=hide')
+      const isHidden = this.formats.link.includes('hidden=true')
+      if (isHidden || isLegacyHidden) {
         name = name.replace(this.formats.link, '')
+        name = name.replace(utils.urlWithoutProtocol(this.formats.link), '')
       }
       const checkbox = utils.checkboxFromString(name)
       if (checkbox) {
         name = name.replace(checkbox, '')
       }
       return utils.trim(name)
+    },
+    nameSegments () {
+      let segments = utils.cardNameSegments(this.normalizedName)
+      return segments.map(segment => {
+        if (segment.isTag) {
+          let tag = this.$store.getters['currentSpace/tagByName'](segment.name)
+          if (!tag) {
+            tag = utils.newTag({
+              name: segment.name,
+              defaultColor: this.$store.state.currentUser.color,
+              cardId: this.id,
+              spaceId: this.$store.state.currentSpace.id
+            })
+            console.warn('🦋 create missing tag', segment.name, tag, this.card)
+            this.$store.dispatch('currentSpace/addTag', tag)
+          }
+          segment.color = tag.color
+          segment.id = tag.id
+        }
+        return segment
+      })
+    },
+    tags () {
+      return this.nameSegments.filter(segment => {
+        if (segment.isTag) {
+          return true
+        }
+      })
     },
     nameLineMinWidth () {
       const averageCharacterWidth = 6.5
@@ -373,7 +476,19 @@ export default {
     filtersIsActive () {
       const types = this.$store.state.filteredConnectionTypeIds
       const frames = this.$store.state.filteredFrameIds
-      return Boolean(types.length + frames.length)
+      const tags = this.$store.state.filteredTagNames
+      const itemFiltersIsActive = Boolean(types.length + frames.length + tags.length)
+      const filterUncheckedIsActive = this.$store.state.currentUser.filterUnchecked
+      return itemFiltersIsActive || filterUncheckedIsActive
+    },
+    isCardFilteredByTags () {
+      const tagNames = this.$store.state.filteredTagNames
+      const isFiltered = this.tags.find(tag => {
+        if (tagNames.includes(tag.name)) {
+          return true
+        }
+      })
+      return isFiltered
     },
     isConnectionFilteredByType () {
       const typeIds = this.$store.state.filteredConnectionTypeIds
@@ -386,9 +501,14 @@ export default {
       const frameIds = this.$store.state.filteredFrameIds
       return frameIds.includes(this.frameId)
     },
+    isCardFilteredByUnchecked () {
+      const filterUncheckedIsActive = this.$store.state.currentUser.filterUnchecked
+      if (!filterUncheckedIsActive) { return }
+      return this.hasCheckbox && !this.isChecked
+    },
     isFiltered () {
       if (this.filtersIsActive) {
-        const isInFilter = this.isCardFilteredByFrame || this.isConnectionFilteredByType
+        const isInFilter = this.isCardFilteredByTags || this.isConnectionFilteredByType || this.isCardFilteredByFrame || this.isCardFilteredByUnchecked
         if (isInFilter) {
           return false
         } else {
@@ -402,7 +522,7 @@ export default {
       const isMeta = event.metaKey || event.ctrlKey
       if (!isMeta) { return }
       if (!this.canEditSpace) { return }
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Card.selectAllConnectedCards')
       const connections = this.$store.state.currentSpace.connections
       let selectedCards = [this.card.id]
       let shouldSearch = true
@@ -505,9 +625,30 @@ export default {
     toggleCardChecked () {
       if (!this.canEditSpace) { return }
       const value = !this.isChecked
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Card.toggleCardChecked')
       this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.id, value })
       this.$store.commit('currentUserIsDraggingCard', false)
+    },
+    toggleUserDetailsIsVisible () {
+      if (isMultiTouch) { return }
+      const value = !this.userDetailsIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Card.toggleUserDetailsIsVisible')
+      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
+      this.$store.commit('currentUserIsDraggingCard', false)
+      this.userDetailsIsVisible = value
+      this.$nextTick(() => {
+        if (this.userDetailsIsVisible) {
+          const element = document.querySelector('dialog.user-details')
+          const isTouchDevice = this.$store.state.isTouchDevice
+          scrollIntoView.scroll(element, isTouchDevice)
+        }
+      })
+    },
+    toggleFilterShowAbsoluteDates () {
+      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
+      this.$store.dispatch('closeAllDialogs', 'Card.toggleFilterShowAbsoluteDates')
+      const value = !this.$store.state.currentUser.filterShowAbsoluteDates
+      this.$store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
     },
     updateRemoteConnections () {
       const remoteCurrentConnections = this.$store.state.remoteCurrentConnections
@@ -524,7 +665,12 @@ export default {
       }
     },
     longestNameLineLength () {
-      const nameLines = this.normalizedName.match(/[^\n]+/g)
+      let name = this.normalizedName
+      if (!name) { return 0 }
+      name = name.replaceAll('[[', '')
+      name = name.replaceAll(']]', '')
+      name = name || '.'
+      const nameLines = name.match(/[^\n]+/g)
       let longestLineLength = 0
       nameLines.forEach(line => {
         if (line.length > longestLineLength) {
@@ -539,7 +685,7 @@ export default {
       }
     },
     closeAllDialogs () {
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Card.closeAllDialogs')
     },
     createCurrentConnection (event) {
       const cursor = utils.cursorPositionInViewport(event)
@@ -557,7 +703,7 @@ export default {
     startConnecting (event) {
       if (!this.canEditSpace) { return }
       if (utils.isMultiTouch(event)) { return }
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Card.startConnecting')
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.dispatch('clearMultipleSelected')
       if (!this.$store.state.currentUserIsDrawingConnection) {
@@ -581,7 +727,7 @@ export default {
       }
       event.preventDefault()
       if (this.$store.state.currentUserIsDrawingConnection) { return }
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Card.startDraggingCard')
       this.$store.commit('currentUserIsDraggingCard', true)
       this.$store.commit('currentDraggingCardId', this.id)
       const updates = {
@@ -599,8 +745,9 @@ export default {
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
       const userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
+      this.preventDraggedTagFromShowingDetails = this.$store.state.preventDraggedCardFromShowingDetails
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Card.showCardDetails')
       this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
       if (event.target.nodeName === 'LABEL') { return }
@@ -609,6 +756,22 @@ export default {
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
       this.$store.commit('currentUserIsDraggingCard', false)
       this.broadcastShowCardDetails()
+    },
+    showTagDetailsIsVisible (event, tag) {
+      if (isMultiTouch) { return }
+      if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
+      if (this.preventDraggedTagFromShowingDetails) { return }
+      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
+      this.$store.dispatch('closeAllDialogs', 'Card.showTagDetailsIsVisible')
+      this.$store.commit('currentUserIsDraggingCard', false)
+      const tagRect = event.target.getBoundingClientRect()
+      this.$store.commit('tagDetailsPosition', {
+        x: window.scrollX + tagRect.x + 2,
+        y: window.scrollY + tagRect.y + tagRect.height - 2
+      })
+      tag.cardId = this.id
+      this.$store.commit('currentSelectedTag', tag)
+      this.$store.commit('tagDetailsIsVisible', true)
     },
     openUrl (url) {
       window.location.href = url
@@ -628,181 +791,206 @@ export default {
 article
   pointer-events all
   position absolute
-.card
-  border-radius 3px
-  user-select none
-  background-color var(--secondary-background)
   max-width 235px
-  cursor pointer
-  touch-action manipulation
-  &:hover,
-  &.hover
-    box-shadow var(--hover-shadow)
-  &:active,
-  &.active
-    box-shadow var(--active-shadow)
-  .card-content-wrap
-    display flex
-    align-items flex-start
-  .card-content
-    min-width 40px
-  .card-buttons-wrap
-    display flex
-  .name-wrap
-    display flex
-    align-items flex-start
-    .checkbox-wrap
-      padding-top 8px
-      padding-left 8px
-      label
-        width 20px
-        height 16px
-        display flex
-        align-items center
-        padding-left 4px
-        padding-right 4px
-        input
-          margin 0
-          width 10px
-          height 10px
-          background-size contain
-    .name
-      margin 8px
-      margin-right 0
-      align-self stretch
-      word-break break-word
-      white-space pre-line
-      &.is-checked
-        text-decoration line-through
-      &.has-checkbox
-        .audio
-          width 132px
-  .connector,
-  .link
-    padding 8px
-    align-self right
-    cursor cell
-    button
-      background-color transparent
-      cursor cell
-      position relative
-      width 20px
-      height 16px
-      vertical-align top
-      background-color var(--secondary-background)
-    &:hover
-      button
-        box-shadow 3px 3px 0 var(--heavy-shadow)
-        background var(--secondary-hover-background)
-    &:active
-      button
-        box-shadow none
-        color var(--primary)
-        background var(--secondary-active-background)
-  .checkbox-wrap
-    &:hover
-      label
-        box-shadow 3px 3px 0 var(--heavy-shadow)
-        background-color var(--secondary-hover-background)
-        input
-          background-color var(--secondary-hover-background)
-      label.active
-        box-shadow var(--active-inset-shadow)
-        background-color var(--secondary-active-background)
-        input
-          background-color var(--secondary-active-background)
-    &:active
-      label
-        box-shadow none
-        color var(--primary)
-        background-color var(--secondary-active-background)
-      input
-        background-color var(--secondary-active-background)
-  .connected-colors
-    position absolute
-    left 0
-    top 0
-    display flex
-    height 100%
-    width 100%
-    border-radius 2px
-    overflow hidden
-    .color
-      width 100%
-  .connector-icon
-    position absolute
-    left 4px
-    top 2px
-  .arrow-icon
-    position absolute
-    left 5px
-    top 3.5px
-  .link
+  .card
+    border-radius 3px
+    user-select none
+    background-color var(--secondary-background)
+    max-width 235px
     cursor pointer
-    padding-right 0
-    button
-      cursor pointer
-      span
-        top -3px
-        position relative
-
-  .link-wrap
-    max-height 28px
-
-  .uploading-container
-    position absolute
-    top 6px
-    left 6px
-
-  &.media-card
-    width 235px
-    background-color transparent
+    touch-action manipulation
     &:hover,
     &.hover
-      background-color var(--secondary-background)
+      box-shadow var(--hover-shadow)
     &:active,
     &.active
-      background-color var(--secondary-background)
-    .image,
-    video
-      border-radius 3px
-      display block
-      &.selected
-        mix-blend-mode color-burn
+      box-shadow var(--active-shadow)
     .card-content-wrap
-      position absolute
-      top 0
-      width 100%
-      align-items initial
-      justify-content space-between
+      display flex
+      align-items flex-start
+    .card-content
+      min-width 40px
+    .card-buttons-wrap
+      display flex
+    .name-wrap
+      display flex
+      align-items flex-start
+      .checkbox-wrap
+        padding-top 8px
+        padding-left 8px
+        label
+          width 20px
+          height 16px
+          display flex
+          align-items center
+          padding-left 4px
+          padding-right 4px
+          input
+            margin 0
+            width 10px
+            height 10px
+            background-size contain
       .name
+        margin 8px
+        margin-right 0
+        align-self stretch
+        word-break break-word
+        white-space pre-line
+        &.is-checked
+          text-decoration line-through
+        &.has-checkbox
+          .audio
+            width 132px
+
+    .connector,
+    .link
+      padding 8px
+      align-self right
+      cursor cell
+      button
+        background-color transparent
+        cursor cell
+        position relative
+        width 20px
+        height 16px
+        vertical-align top
         background-color var(--secondary-background)
-
-  &.audio-card
-    width 235px
-    .card-content-wrap
+      &:hover
+        button
+          box-shadow 3px 3px 0 var(--heavy-shadow)
+          background var(--secondary-hover-background)
+      &:active
+        button
+          box-shadow none
+          color var(--primary)
+          background var(--secondary-active-background)
+    .checkbox-wrap
+      &:hover
+        label
+          box-shadow 3px 3px 0 var(--heavy-shadow)
+          background-color var(--secondary-hover-background)
+          input
+            background-color var(--secondary-hover-background)
+        label.active
+          box-shadow var(--active-inset-shadow)
+          background-color var(--secondary-active-background)
+          input
+            background-color var(--secondary-active-background)
+      &:active
+        label
+          box-shadow none
+          color var(--primary)
+          background-color var(--secondary-active-background)
+        input
+          background-color var(--secondary-active-background)
+    .connected-colors
+      position absolute
+      left 0
+      top 0
+      display flex
+      height 100%
       width 100%
-      align-items initial
-      justify-content space-between
+      border-radius 2px
+      overflow hidden
+      .color
+        width 100%
+    .connector-icon
+      position absolute
+      left 4px
+      top 2px
+    .arrow-icon
+      position absolute
+      left 5px
+      top 3.5px
+    .link
+      cursor pointer
+      padding-right 0
+      button
+        cursor pointer
+        span
+          top -3px
+          position relative
 
-  .error-container
-    position absolute
-    top 6px
-    left 6px
-    animation-name hideme
-    animation-delay 5s
-    animation-duration 0.1s
-    animation-iteration-count 1
-    animation-direction forward
-    animation-fill-mode forwards
-    animation-timing-function ease-out
+    .link-wrap
+      max-height 28px
 
-  &.is-playing-audio
-    animation bounce 1.2s infinite ease-in-out forwards
+    .uploading-container
+      position absolute
+      top 6px
+      left 6px
 
-  .audio-wrap
-    margin-top 8px
-    margin-left 8px
+    &.media-card
+      width 235px
+      background-color transparent
+      &:hover,
+      &.hover
+        background-color var(--secondary-background)
+      &:active,
+      &.active
+        background-color var(--secondary-background)
+      .image,
+      video
+        border-radius 3px
+        display block
+        &.selected
+          mix-blend-mode color-burn
+      .card-content-wrap
+        position absolute
+        top 0
+        width 100%
+        align-items initial
+        justify-content space-between
+        .name
+          background-color var(--secondary-background)
+
+    &.audio-card
+      width 235px
+      .card-content-wrap
+        width 100%
+        align-items initial
+        justify-content space-between
+
+    .error-container
+      position absolute
+      top 6px
+      left 6px
+      animation-name hideme
+      animation-delay 5s
+      animation-duration 0.1s
+      animation-iteration-count 1
+      animation-direction forward
+      animation-fill-mode forwards
+      animation-timing-function ease-out
+
+    &.is-playing-audio
+      animation bounce 1.2s infinite ease-in-out forwards
+
+    .audio-wrap
+      margin-top 8px
+      margin-left 8px
+
+  .meta-container
+    margin-top -6px
+    display flex
+    padding 8px
+    padding-top 0
+    .user-badge
+      display flex
+      margin 0
+      .label-badge
+        padding 0 10px
+        left -2px
+        bottom initial
+        top 12px
+    .badge
+      &.secondary
+        display flex
+        .icon
+          margin-right 5px
+          margin-top 1px
+    .badge + .badge,
+    .badge-wrap + .badge
+      margin-left 6px
 
 @keyframes bounce
   0%

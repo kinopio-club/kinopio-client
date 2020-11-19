@@ -10,7 +10,9 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position
 
     .row
       button(:disabled="!canEditConnection" :class="{active: labelIsVisible}" @click.left="toggleLabelIsVisible")
-        img.icon(src="@/assets/view.svg")
+        img.icon(v-if="labelIsVisible" src="@/assets/view.svg")
+        img.icon(v-else src="@/assets/view-hidden.svg")
+
         span Label
       label(:class="{active: isDefault, disabled: !canEditSpace}" @click.left.prevent="toggleDefault" @keydown.stop.enter="toggleDefault")
         input(type="checkbox" v-model="isDefault")
@@ -140,7 +142,7 @@ export default {
     },
     removeConnection () {
       this.$store.dispatch('currentSpace/removeConnection', this.currentConnection)
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'ConnectionDetails.removeConnection')
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
     },
     changeConnectionType (type) {

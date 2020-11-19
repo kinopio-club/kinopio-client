@@ -14,6 +14,8 @@
     .logo-hover
     .logo-active
   .badge.label-badge.development(v-if="isDevelopment") DEV
+  .icons.hidden
+    img.icon(src="@/assets/offline.svg")
 </template>
 
 <script>
@@ -117,6 +119,7 @@ body
     bottom 12px
     position fixed
     pointer-events none
+    z-index var(--max-z)
 
 img,
 video
@@ -130,6 +133,7 @@ textarea,
   font-size 1em // required to disable ios input zooming
   resize none
   width 100%
+  min-width 0 // firefox hack
   background transparent
   border 0
   border-bottom 1px solid var(--primary)
@@ -217,6 +221,10 @@ label
     opacity 0.5
     pointer-events none
 
+p,
+span
+  -webkit-text-size-adjust auto
+
 p
   margin 0
   margin-top 10px
@@ -296,7 +304,8 @@ dialog
       border-radius 3px
 
 .segmented-buttons
-  button
+  button,
+  label
     margin 0
     border-radius 0
     &:first-child
@@ -305,16 +314,22 @@ dialog
     &:last-child
       border-top-right-radius 3px
       border-bottom-right-radius 3px
-  button + button
+  button + button,
+  label + button
     margin-left -1px
 
 .icon
   vertical-align -1px
-  // &.more
-  //   vertical-align 3px
 
 .icon + span
   margin-left 5px
+
+.time
+  height 12px
+  vertical-align -2px
+
+.minus
+  vertical-align middle
 
 .button-wrap
   display inline-block
@@ -375,7 +390,9 @@ ul.results-list
     border-radius 3px
     user-select none
     cursor pointer
+    word-break break-word
     &:hover,
+    &.hover,
     &:focus
       background-color var(--secondary-hover-background)
       box-shadow var(--hover-shadow)
@@ -402,6 +419,8 @@ code
     background var(--success-background)
   &.status
     background var(--secondary-background)
+  &.secondary
+    background var(--secondary-active-background)
   input
     margin 0
   .user
@@ -415,6 +434,14 @@ code
     height 14px
     vertical-align -3px
     margin-right 6px
+  &.button-badge
+    box-shadow var(--button-hover-shadow)
+    cursor pointer
+    &:hover
+      box-shadow var(--hover-shadow)
+    &:active,
+    &.active
+      box-shadow var(--button-active-inset-shadow)
 
 .label-badge
   position absolute
@@ -452,6 +479,9 @@ code
 
 .cancel
   transform rotate(45deg)
+
+.hidden
+  display none
 
 .users
   display inline-block
@@ -518,6 +548,15 @@ code
     padding-right 5px
     cursor text
     flex-shrink 0
+
+.name-segments
+  .badge
+    &:last-child
+      margin 0
+  .badge
+    margin-right 3px
+  .badge + .badge
+    margin-left 3px
 
 #layout-viewport
   position fixed

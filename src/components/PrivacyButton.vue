@@ -14,7 +14,7 @@
 <script>
 import PrivacyPicker from '@/components/dialogs/PrivacyPicker.vue'
 import utils from '@/utils.js'
-import privacy from '@/spaces/privacy.js'
+import privacy from '@/data/privacy.js'
 
 export default {
   name: 'PrivacyButton',

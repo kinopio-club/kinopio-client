@@ -31,6 +31,7 @@ import scrollIntoView from '@/scroll-into-view.js'
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
+import utils from '@/utils.js'
 
 export default {
   name: 'Import',
@@ -72,37 +73,40 @@ export default {
         this.importSpace(space)
       }
     },
-    uniqueName (space) {
-      const spaces = cache.getAllSpaces()
-      const spaceNames = spaces.map(space => space.name)
-      if (spaceNames.includes(space.name)) {
-        return `${space.name}-${space.id}`
-      } else {
-        return space.name
-      }
+    updateSpaceItemsUserId (space) {
+      const currentUserId = this.$store.state.currentUser.id
+      const cards = space.cards.map(card => {
+        card.userId = null
+        return card
+      })
+      const connections = space.connections.map(connection => {
+        connection.userId = currentUserId
+        return connection
+      })
+      space.cards = cards
+      space.connections = connections
+      return space
     },
     importSpace (space) {
       if (!this.isValidSpace(space)) { return }
+      space.originSpaceId = space.id
       space.id = nanoid()
-      space.name = this.uniqueName(space)
+      space.name = space.name + ' import'
+      space.removedCards = []
+      space.users = []
+      space = this.updateSpaceItemsUserId(space)
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       cache.saveSpace(uniqueNewSpace)
       this.$store.commit('currentSpace/restoreSpace', uniqueNewSpace)
       this.$store.dispatch('currentSpace/saveNewSpace')
       this.$store.dispatch('currentUser/lastSpaceId', space.id)
       this.updateSpaces()
+      this.$store.commit('triggerFocusSpaceDetailsName')
     },
     updateSpaces () {
       this.$emit('updateSpaces')
       this.closeDialogs()
       this.$emit('closeDialog')
-    },
-    typeCheck (value, type) {
-      if (type === 'array') {
-        return Array.isArray(value)
-      } else {
-        return typeof value === type // eslint-disable-line valid-typeof
-      }
     },
     isValidSpace (space) {
       this.errors = []
@@ -112,10 +116,12 @@ export default {
         'cards': 'array',
         'connections': 'array',
         'connectionTypes': 'array',
-        'customFields': 'array'
+        'customFields': 'array',
+        'tags': 'array'
       }
       Object.keys(schema).forEach(field => {
-        if (!this.typeCheck(space[field], schema[field])) {
+        const isValidType = utils.typeCheck({ value: space[field], type: schema[field], origin: 'isValidSpace' })
+        if (!isValidType) {
           let error = `Expected ${field} but didn't get a ${schema[field]}`
           this.errors.push(error)
         }

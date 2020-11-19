@@ -9,7 +9,7 @@ export default {
   },
   mutations: {
     s3Policy: (state, value) => {
-      utils.typeCheck(value, 'object')
+      utils.typeCheck({ value, type: 'object', origin: 's3Policy' })
       state.s3Policy = value
     },
     addPendingUpload: (state, upload) => { // key, fileName, cardId, spaceId

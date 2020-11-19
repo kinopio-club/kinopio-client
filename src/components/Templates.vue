@@ -1,5 +1,5 @@
 <template lang="pug">
-.templates(v-if="visible" :open="visible" @click.left.stop ref="dialog" @click.left="closeDialogs")
+.templates(v-if="visible" :open="visible" @click.left.stop @click.left="closeDialogs")
   //- p Make these your own
   section.categories
     .button-wrap.category-wrap
@@ -10,15 +10,16 @@
       button(@click.left.stop="toggleContactIsVisible" :class="{active: contactIsVisible}")
         span Suggest Templates
       Contact(:visible="contactIsVisible")
-  section.results-section
+  section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(:spaces="spacesFiltered" :showCategory="true" @selectSpace="changeSpace")
 </template>
 
 <script>
-import templates from '@/spaces/templates.js'
+import templates from '@/data/templates.js'
 import TemplateCategoryPicker from '@/components/dialogs/TemplateCategoryPicker.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import Contact from '@/components/dialogs/Contact.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'Templates',
@@ -30,12 +31,20 @@ export default {
   props: {
     visible: Boolean
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'updatePageSizes') {
+        this.updateResultsSectionHeight()
+      }
+    })
+  },
   data () {
     return {
       filteredCategoryId: 0,
       filteredSpaces: [],
       templateCategoryPickerIsVisible: false,
-      contactIsVisible: false
+      contactIsVisible: false,
+      resultsSectionHeight: null
     }
   },
   computed: {
@@ -89,12 +98,25 @@ export default {
       const isVisible = this.contactIsVisible
       this.closeDialogs()
       this.contactIsVisible = !isVisible
+    },
+    updateResultsSectionHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.results
+        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
+      })
     }
   },
   watch: {
     visible (visible) {
       this.templateCategoryPickerIsVisible = false
       this.contactIsVisible = false
+      if (visible) {
+        this.updateResultsSectionHeight()
+      }
+    },
+    loading (loading) {
+      this.updateResultsSectionHeight()
     }
   }
 }

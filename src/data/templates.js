@@ -58,6 +58,11 @@ export default {
         name: 'Mental Health'
       },
       {
+        id: 'HKksDw5m1Mi4xDdscyK2L',
+        categoryId: 2,
+        name: 'Garage Sale'
+      },
+      {
         id: '85dWJ4_zDipSREM-nllXH',
         categoryId: 3,
         name: 'Brainstorming'
@@ -66,6 +71,11 @@ export default {
         id: 'b87U9WETGvl17BrKNsqDH',
         categoryId: 3,
         name: 'Meeting Agenda'
+      },
+      {
+        id: 'QCtseqHqA1Ib0OwYETk7m',
+        categoryId: 3,
+        name: 'Weekly Planner'
       },
       {
         id: 'DWCwVJNU8yu1cPs87BEQR',

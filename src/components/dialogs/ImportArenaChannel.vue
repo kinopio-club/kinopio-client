@@ -148,7 +148,7 @@ export default {
         }
         return response.json()
       } catch (error) {
-        console.error(error)
+        console.error('🚒', error)
         if (error.status === 404) {
           this.error.channelNotFoundName = channel
           this.error.channelNotFound = true

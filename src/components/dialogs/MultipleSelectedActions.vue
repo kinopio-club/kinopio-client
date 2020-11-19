@@ -33,7 +33,8 @@ dialog.narrow.multiple-selected-actions(
         MultipleConnectionsPicker(:visible="multipleConnectionsPickerVisible" :selectedConnections="editableConnections" :selectedConnectionTypes="editableConnectionTypes")
       //- Labels
       button(:disabled="!canEditSome.connections" :class="{active: allLabelsAreVisible}" @click.left="toggleAllLabelsAreVisible")
-        img.icon(src="@/assets/view.svg")
+        img.icon(v-if="allLabelsAreVisible" src="@/assets/view.svg")
+        img.icon(v-else src="@/assets/view-hidden.svg")
         span {{ pluralLabels }}
   section
     .row
@@ -352,8 +353,8 @@ export default {
         }
       })
       connections = connections.filter(Boolean)
+      const connectionType = this.connectionType(event)
       connections.forEach(connection => {
-        const connectionType = this.connectionType(event)
         this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
         this.$store.dispatch('addToMultipleConnectionsSelected', connection.id)
       })
@@ -368,7 +369,7 @@ export default {
     remove () {
       this.editableConnections.forEach(connection => this.$store.dispatch('currentSpace/removeConnection', connection))
       this.editableCards.forEach(card => this.$store.dispatch('currentSpace/removeCard', card))
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'MultipleSelectedActions.remove')
       this.$store.dispatch('clearMultipleSelected')
     },
     scrollIntoView () {

@@ -1,0 +1,275 @@
+{
+  "id": "1",
+  "name": "Hello Kinopio",
+  "privacy": "private",
+  "showInExplore": false,
+  "collaboratorKey": "",
+  "users": [],
+  "collaborators": [],
+  "spectators": [],
+  "clients": [],
+  "background": "",
+  "moonPhase": "",
+  "cards": [
+    {
+      "id": "P5sO3RuZDh1-ldOio9ExN",
+      "x": 34,
+      "y": 88,
+      "z": 27,
+      "name": "Kinopio helps you think through your hardest problems [[To Do]]",
+      "frameId": 1,
+      "frameName": "Garden Leaves",
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2"
+    },
+    {
+      "id": "gc6nYsgfvrNY_yQ_xBk4j",
+      "x": 92.04387568555751,
+      "y": 501,
+      "name": "↙ Explore community spaces and templates [[To Do]]",
+      "z": 23,
+      "frameName": "None",
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2"
+    },
+    {
+      "id": "ZsvjtsrkYRL1Y_qRoj47U",
+      "x": 437.3820840950632,
+      "y": 656,
+      "name": "Feelings",
+      "z": 2,
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2"
+    },
+    {
+      "id": "X65kfBfcfuHq7WPUCdJNV",
+      "x": 189.04387568555762,
+      "y": 627,
+      "name": "Brainstorming",
+      "z": 3,
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2"
+    },
+    {
+      "id": "Wx8fxfngY9uUFZGHfb_9u",
+      "x": 399.6033304284697,
+      "y": 563,
+      "name": "Mindmaps",
+      "z": 4,
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2"
+    },
+    {
+      "id": "Pe-v0YGavBgDwbTX8nX9U",
+      "x": 158,
+      "y": 298.58952879581,
+      "name": "https://us-east-1.linodeobjects.com/kinopio-uploads/c70QiLI9RTDbtOViV2R5Y/tutorial-connection.mp4\n",
+      "z": 15,
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2"
+    },
+    {
+      "id": "JHAgQHS0WAzYBZUOQpOkf",
+      "x": 289.0438756855576,
+      "y": 698,
+      "name": "Note Taking",
+      "z": 6,
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2"
+    },
+    {
+      "id": "KX8OPcC8VTCGHvn0T9gjJ",
+      "x": 112,
+      "y": 211,
+      "name": "Create new cards  by tapping empty areas [[To Do]]",
+      "z": 19,
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2",
+      "nameUpdatedAt": "2020-11-02T19:33:27.299Z",
+      "nameUpdatedByUserId": "KaLgTOuIDXJQpVccImbsx"
+    },
+    {
+      "id": "2fSI_Y4Fl_P_cueWnONwH",
+      "x": 471.005484460695,
+      "y": 87,
+      "name": " ↖ Get started by adding a new space [[To Do]]\n\nhttps://kinopio-updates.us-east-1.linodeobjects.com/delica-van-small.jpg",
+      "z": 26,
+      "frameId": 2,
+      "frameName": "Magical Helper",
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2",
+      "nameUpdatedAt": "2020-11-02T19:33:30.015Z",
+      "nameUpdatedByUserId": "KaLgTOuIDXJQpVccImbsx"
+    },
+    {
+      "id": "gXfyIsDo8v6Kw8r9b_f03",
+      "x": 785.9149908592326,
+      "y": 88,
+      "z": 9,
+      "name": "Kinopio is free for 150 cards, afterwards it's 4$/month\n\nhttps://us-east-1.linodeobjects.com/kinopio-uploads/ULVF2EpZiImBb_pG4-Jgk/Wii-Shop-Bling.mp3\n",
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2"
+    },
+    {
+      "id": "VEJHefwju1rJYpRvaAr7e",
+      "x": 706,
+      "y": 382,
+      "z": 10,
+      "name": "Share → Invite to collaborate with your friends or team",
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2"
+    },
+    {
+      "id": "Mm790fmLYrE4bdxQaFHKO",
+      "x": 756,
+      "y": 462,
+      "z": 11,
+      "name": "More tips at help.kinopio.club",
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2"
+    },
+    {
+      "id": "re0QR3y_ZHEwiQunDThSH",
+      "x": 388.0438756855576,
+      "y": 755,
+      "z": 12,
+      "name": "Planning and Specs",
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2"
+    },
+    {
+      "id": "RJmgPpKryUOjPocxRNJ1h",
+      "x": 704,
+      "y": 325,
+      "z": 13,
+      "name": "[] Use checkbox cards for tasks",
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2"
+    }
+  ],
+  "connections": [
+    {
+      "startCardId": "gc6nYsgfvrNY_yQ_xBk4j",
+      "endCardId": "ZsvjtsrkYRL1Y_qRoj47U",
+      "path": "m309,517 q90,40 210,155",
+      "id": "qtkPLKXhkSpAOIfqe83gx",
+      "connectionTypeId": "osu5_zgWSIgr3nzyW_YmN",
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2"
+    },
+    {
+      "startCardId": "gc6nYsgfvrNY_yQ_xBk4j",
+      "endCardId": "X65kfBfcfuHq7WPUCdJNV",
+      "path": "m309,517 q90,40 -3,126",
+      "id": "guPv0DF1uEQ3kKNcKUT1L",
+      "connectionTypeId": "osu5_zgWSIgr3nzyW_YmN",
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2"
+    },
+    {
+      "startCardId": "gc6nYsgfvrNY_yQ_xBk4j",
+      "endCardId": "Wx8fxfngY9uUFZGHfb_9u",
+      "path": "m309,517 q90,40 173,62",
+      "id": "k6iIXCpe8H5UhotPcxTYl",
+      "connectionTypeId": "osu5_zgWSIgr3nzyW_YmN",
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2"
+    },
+    {
+      "startCardId": "gc6nYsgfvrNY_yQ_xBk4j",
+      "endCardId": "JHAgQHS0WAzYBZUOQpOkf",
+      "path": "m309,517 q90,40 80,197",
+      "id": "om2KO_fhClGlCxJ_jRllV",
+      "connectionTypeId": "osu5_zgWSIgr3nzyW_YmN",
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2"
+    },
+    {
+      "startCardId": "KX8OPcC8VTCGHvn0T9gjJ",
+      "endCardId": "Pe-v0YGavBgDwbTX8nX9U",
+      "path": "m329,227 q90,40 46,88",
+      "id": "_OBnu0-zG4eWeNSTClVqS",
+      "connectionTypeId": "GdD5qfGbMkijPlA9rUM-4",
+      "labelIsVisible": false,
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2"
+    },
+    {
+      "startCardId": "VEJHefwju1rJYpRvaAr7e",
+      "endCardId": "Mm790fmLYrE4bdxQaFHKO",
+      "path": "m923,393 q90,40 50,80",
+      "id": "yEKLOv8wr0GvgYsU4MIuQ",
+      "spaceId": "m-8hcs0iyI7XiCQEdTQbj",
+      "connectionTypeId": "TCLMsUuCMxwYwDSgrSQoU"
+    },
+    {
+      "startCardId": "gc6nYsgfvrNY_yQ_xBk4j",
+      "endCardId": "re0QR3y_ZHEwiQunDThSH",
+      "path": "m309,517 q90,40 224,254",
+      "id": "43qHf7hfK46kiwxIBkCyF",
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2",
+      "connectionTypeId": "osu5_zgWSIgr3nzyW_YmN"
+    },
+    {
+      "startCardId": "Pe-v0YGavBgDwbTX8nX9U",
+      "endCardId": "2fSI_Y4Fl_P_cueWnONwH",
+      "path": "m375,315 q90,40 313,-212",
+      "id": "TJhHCkRRVagMmXAOsxEd8",
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2",
+      "connectionTypeId": "GdD5qfGbMkijPlA9rUM-4"
+    },
+    {
+      "startCardId": "RJmgPpKryUOjPocxRNJ1h",
+      "endCardId": "VEJHefwju1rJYpRvaAr7e",
+      "path": "m921,341 q90,40 2,52",
+      "id": "p09dFbAMC2AdGZtMzy0NY",
+      "spaceId": "m-8hcs0iyI7XiCQEdTQbj",
+      "connectionTypeId": "TCLMsUuCMxwYwDSgrSQoU"
+    },
+    {
+      "startCardId": "P5sO3RuZDh1-ldOio9ExN",
+      "endCardId": "KX8OPcC8VTCGHvn0T9gjJ",
+      "path": "m251,104 q90,40 78,123",
+      "id": "HlnOUa6b94xp-ZkMbtaqp",
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2",
+      "connectionTypeId": "GdD5qfGbMkijPlA9rUM-4",
+      "labelIsVisible": true
+    }
+  ],
+  "connectionTypes": [
+    {
+      "id": "osu5_zgWSIgr3nzyW_YmN",
+      "name": "Some Uses",
+      "color": "#c18fef",
+      "userId": null
+    },
+    {
+      "id": "TCLMsUuCMxwYwDSgrSQoU",
+      "name": "Tips",
+      "color": "#9ff9f5",
+      "spaceId": "m-8hcs0iyI7XiCQEdTQbj",
+      "userId": null
+    },
+    {
+      "id": "GdD5qfGbMkijPlA9rUM-4",
+      "name": "How to Use",
+      "color": "#f9bbe4",
+      "userId": null
+    }
+  ],
+  "customFields": [],
+  "cacheDate": 1597156721422,
+  "removedCards": [],
+  "originSpaceId": "",
+  "tags": [
+    {
+      "name": "To Do",
+      "id": "LTb4Ae1c6KSGztAYZYOQC",
+      "color": "#90ffff",
+      "cardId": "P5sO3RuZDh1-ldOio9ExN",
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2"
+    },
+    {
+      "name": "To Do",
+      "id": "8oq-HL2s6-uA6MCnJFjdT",
+      "color": "#90ffff",
+      "cardId": "KX8OPcC8VTCGHvn0T9gjJ",
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2"
+    },
+    {
+      "name": "To Do",
+      "id": "fcfJ-naERAkiq8bzWDeCv",
+      "color": "#90ffff",
+      "cardId": "2fSI_Y4Fl_P_cueWnONwH",
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2"
+    },
+    {
+      "name": "To Do",
+      "id": "tOYw5grrwzgdBma8917OM",
+      "color": "#90ffff",
+      "cardId": "gc6nYsgfvrNY_yQ_xBk4j",
+      "spaceId": "Bi66qUdjwECZ7DDVIUxX2"
+    }
+  ]
+}

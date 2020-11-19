@@ -1,5 +1,5 @@
 <template lang="pug">
-.search-wrap(v-if="shouldShowFilter")
+.search-wrap(v-if="shouldShowFilter" @mouseup.stop @touchend.stop)
   img.icon.search(src="@/assets/search.svg" @click.left="focusFilterInput")
   input(placeholder="Search" v-model="filterItems" ref="filterInput")
   button.borderless.clear-input-wrap(@click.left="clearFilter")
@@ -29,6 +29,9 @@ export default {
       }
       if (mutation.type === 'triggerSelectTemplateCategory') {
         this.clearFilter()
+      }
+      if (mutation.type === 'triggerFocusSpaceDetailsFilter') {
+        this.focusFilterInput()
       }
     })
   },
@@ -65,6 +68,7 @@ export default {
   methods: {
     focusFilterInput () {
       const element = this.$refs.filterInput
+      if (!element) { return }
       element.focus()
       element.setSelectionRange(0, 0)
     },

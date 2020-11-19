@@ -2,26 +2,32 @@
 footer(:style="visualViewportPosition")
   Notifications
   section(v-if="isVisible")
+    //- Explore
     .button-wrap
       button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
         span Explore
       Explore(:visible="exploreIsVisible")
-
+    //- Favorites
     .button-wrap
-      label(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
-        input(type="checkbox" v-model="isFavoriteSpace")
-        span Favorite
+      .segmented-buttons
+        label(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+          input(type="checkbox" v-model="isFavoriteSpace")
+          img.icon(src="@/assets/heart.svg")
+        button(@click.left="toggleFavoritesIsVisible" :class="{ active: favoritesIsVisible}")
+          span Favorites
+      Favorites(:visible="favoritesIsVisible")
 
   section.controls(v-if="isVisible")
+    //- Removed
     .button-wrap
       button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
         img.refresh.icon(src="@/assets/remove.svg")
         span Removed
       Removed(:visible="removedIsVisible")
-
+    //- Filters
     .button-wrap
       button(@click.left="toggleFiltersIsVisible" :class="{ active: filtersIsVisible}")
-        .span.badge.info(v-if="totalFilters") {{totalFilters}}
+        .span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
         img.icon.sunglasses(src="@/assets/filter.svg")
         span Filters
       Filters(:visible="filtersIsVisible")
@@ -41,18 +47,14 @@ footer(:style="visualViewportPosition")
           span {{remotePendingUpload.percentComplete}}%
 
       Background(:visible="backgroundIsVisible")
-    .button-wrap(v-if="isOffline")
-      button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
-        span Offline
-      Offline(:visible="offlineIsVisible")
 
 </template>
 
 <script>
 import Explore from '@/components/dialogs/Explore.vue'
 import Removed from '@/components/dialogs/Removed.vue'
-import Offline from '@/components/dialogs/Offline.vue'
 import Filters from '@/components/dialogs/Filters.vue'
+import Favorites from '@/components/dialogs/Favorites.vue'
 import Background from '@/components/dialogs/Background.vue'
 import Notifications from '@/components/Notifications.vue'
 import Loader from '@/components/Loader.vue'
@@ -66,16 +68,16 @@ export default {
   components: {
     Explore,
     Removed,
-    Offline,
     Notifications,
     Filters,
+    Favorites,
     Background,
     Loader
   },
   data () {
     return {
       removedIsVisible: false,
-      offlineIsVisible: false,
+      favoritesIsVisible: false,
       filtersIsVisible: false,
       exploreIsVisible: false,
       backgroundIsVisible: false,
@@ -88,7 +90,7 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
         this.removedIsVisible = false
-        this.offlineIsVisible = false
+        this.favoritesIsVisible = false
         this.filtersIsVisible = false
         this.exploreIsVisible = false
         this.backgroundIsVisible = false
@@ -100,6 +102,7 @@ export default {
       }
     })
     window.addEventListener('scroll', this.updatePositionInVisualViewport)
+    this.$store.dispatch('currentUser/restoreUserFavorites')
   },
   computed: {
     // buildHash () {
@@ -123,6 +126,15 @@ export default {
       })
     },
     isVisible () {
+      const isTouchDevice = this.$store.state.isTouchDevice
+      const shouldExplicitlyHideFooter = this.$store.state.shouldExplicitlyHideFooter
+      // only hide footer on touch devices
+      if (!isTouchDevice) {
+        return true
+      }
+      if (shouldExplicitlyHideFooter) {
+        return false
+      }
       let isVisible = true
       if (this.dialogsVisible) { isVisible = false }
       if (this.shouldHideFooter) { isVisible = false }
@@ -134,13 +146,22 @@ export default {
     shouldHideFooter () {
       return this.$store.state.shouldHideFooter
     },
-    isOffline () {
-      return !this.$store.state.isOnline
-    },
-    totalFilters () {
-      const types = this.$store.state.filteredConnectionTypeIds
+    totalFiltersActive () {
+      const currentUser = this.$store.state.currentUser
+      let userFilters = 0
+      if (currentUser.filterShowUsers) {
+        userFilters += 1
+      }
+      if (currentUser.filterShowDateUpdated) {
+        userFilters += 1
+      }
+      if (currentUser.filterUnchecked) {
+        userFilters += 1
+      }
+      const tagNames = this.$store.state.filteredTagNames
+      const connections = this.$store.state.filteredConnectionTypeIds
       const frames = this.$store.state.filteredFrameIds
-      return types.length + frames.length
+      return userFilters + tagNames.length + connections.length + frames.length
     },
     isFavoriteSpace () {
       const currentSpace = this.$store.state.currentSpace
@@ -201,27 +222,27 @@ export default {
     },
     toggleRemovedIsVisible () {
       const isVisible = this.removedIsVisible
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Footer.toggleRemovedIsVisible')
       this.removedIsVisible = !isVisible
     },
-    toggleOfflineIsVisible () {
-      const isVisible = this.offlineIsVisible
-      this.$store.dispatch('closeAllDialogs')
-      this.offlineIsVisible = !isVisible
+    toggleFavoritesIsVisible () {
+      const isVisible = this.favoritesIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Footer.toggleFavoritesIsVisible')
+      this.favoritesIsVisible = !isVisible
     },
     toggleFiltersIsVisible () {
       const isVisible = this.filtersIsVisible
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Footer.toggleFiltersIsVisible')
       this.filtersIsVisible = !isVisible
     },
     toggleBackgroundIsVisible () {
       const isVisible = this.backgroundIsVisible
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Footer.toggleBackgroundIsVisible')
       this.backgroundIsVisible = !isVisible
     },
     toggleExploreIsVisible () {
       const isVisible = this.exploreIsVisible
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Footer.toggleExploreIsVisible')
       this.exploreIsVisible = !isVisible
     }
   }
@@ -230,7 +251,8 @@ export default {
 
 <style lang="stylus">
 footer
-  z-index var(--max-z)
+  --footer-max-z 2147483644 // var(--max-z) - 2, hardcoded because firefox vars in calc is buggy
+  z-index var(--footer-max-z)
   position fixed
   left 8px
   bottom 8px
@@ -255,10 +277,6 @@ footer
   .macro
     vertical-align -3px
     height 13px
-  .user-details
-    .space-picker
-      bottom initial
-      top calc(100% - 8px)
 
   .uploading-container-footer
     position absolute
@@ -272,5 +290,9 @@ footer
         position absolute
         top 6px
         left 6px
+
+  .segmented-buttons
+    .down-arrow
+      padding 0
 
 </style>

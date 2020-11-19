@@ -1,37 +1,47 @@
 <template lang="pug">
-dialog.explore(v-if="visible" :open="visible")
+dialog.explore(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     .segmented-buttons
       button(@click.left.stop="hideTemplates" :class="{ active: !templatesIsVisible }")
-        span New Spaces
-        Loader(:visible="loadingNewSpaces")
+        span Community
+        Loader(:visible="loading")
       button(@click.left.stop="showTemplates" :class="{ active: templatesIsVisible }")
         span Templates
 
-  NewSpaces(:visible="!templatesIsVisible" :loading="loadingNewSpaces" :spaces="spaces" @updateCurrentSpace="updateCurrentSpace")
+  Community(:visible="!templatesIsVisible" :allSpacesIsVisible="allSpacesIsVisible" :loading="loading" :spaces="spaces" @updateCurrentSpace="updateCurrentSpace" @toggleAllSpacesIsVisible="toggleAllSpacesIsVisible")
   Templates(:visible="templatesIsVisible")
 </template>
 
 <script>
 import Templates from '@/components/Templates.vue'
-import NewSpaces from '@/components/NewSpaces.vue'
+import Community from '@/components/Community.vue'
 import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'Explore',
   components: {
     Templates,
     Loader,
-    NewSpaces
+    Community
   },
   props: {
     visible: Boolean
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'updatePageSizes') {
+        this.updateDialogHeight()
+      }
+    })
+  },
   data () {
     return {
       templatesIsVisible: false,
-      loadingNewSpaces: false,
-      spaces: []
+      allSpacesIsVisible: true,
+      loading: false,
+      spaces: [],
+      dialogHeight: null
     }
   },
   methods: {
@@ -41,11 +51,24 @@ export default {
     hideTemplates () {
       this.templatesIsVisible = false
     },
-    async getNewSpaces () {
-      if (this.loadingNewSpaces) { return }
-      this.loadingNewSpaces = true
-      this.spaces = await this.$store.dispatch('api/getNewSpaces')
-      this.loadingNewSpaces = false
+    toggleAllSpacesIsVisible (value) {
+      const prevValue = utils.clone(this.allSpacesIsVisible)
+      this.allSpacesIsVisible = value
+      if (prevValue === value) { return }
+      this.spaces = []
+      this.loading = false
+      this.updateSpaces()
+    },
+    async updateSpaces () {
+      if (this.loading) { return }
+      if (this.templatesIsVisible) { return }
+      this.loading = true
+      if (this.allSpacesIsVisible) {
+        this.spaces = await this.$store.dispatch('api/getNewSpaces')
+      } else {
+        this.spaces = await this.$store.dispatch('api/getBestOfSpaces')
+      }
+      this.loading = false
     },
     updateCurrentSpace () {
       const currentSpace = this.$store.state.currentSpace
@@ -55,12 +78,20 @@ export default {
       } else {
         this.spaces.unshift(currentSpace)
       }
+    },
+    updateDialogHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeightFromHeader(element)
+      })
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
-        this.getNewSpaces()
+        this.updateSpaces()
+        this.updateDialogHeight()
       }
     }
   }

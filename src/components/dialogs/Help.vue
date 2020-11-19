@@ -1,24 +1,27 @@
 <template lang="pug">
-dialog.help-and-about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" :class="{'child-dialog-is-visible': contactIsVisible}")
+dialog.help-and-about.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" :class="{'child-dialog-is-visible': contactIsVisible}" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
-    p Help and About
+    p Help
   section
-    .row
-      p How to use Kinopio, and other help topics
-    .row
-      .button-wrap
-        a(href="https://help.kinopio.club")
-          button Help Topics →
-    .row
-      .button-wrap
-        a(href="https://join.slack.com/t/kinopio-club/shared_invite/zt-garivnp1-qMbj9Nk2bo5wI78hgxkD_A")
-          button
-            span Community Slack →
     .row
       .button-wrap
         button(@click.left.stop="toggleContactIsVisible" :class="{active: contactIsVisible}")
           span Contact
         Contact(:visible="contactIsVisible")
+    .row
+      p Guides, topics, and policies
+    .row
+      .button-wrap
+        a(href="https://help.kinopio.club")
+          button Help Site →
+    .row
+      .button-wrap
+        //- a(href="https://join.slack.com/t/kinopio-club/shared_invite/zt-gmbihdhs-NF4zYijQvdk37zerbEy0VA")
+        //-   button
+        //-     span Community Slack →
+        a(href="https://club.kinopio.club")
+          button
+            span Community Forum →
 
   section
     .row
@@ -27,14 +30,15 @@ dialog.help-and-about.narrow(v-if="visible" :open="visible" @click.left.stop="cl
       .button-wrap
         a(href="https://help.kinopio.club/posts/who-makes-kinopio")
           button Who Makes Kinopio? →
-    //- .row
-    //-   .button-wrap
-    //-     a(href="https://pketh.org")
-    //-       button Blog →
+    .row
+      .button-wrap
+        a(href="https://pketh.org")
+          button Blog →
 </template>
 
 <script>
 import Contact from '@/components/dialogs/Contact.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'Help',
@@ -46,13 +50,17 @@ export default {
   },
   data () {
     return {
-      contactIsVisible: false
+      contactIsVisible: false,
+      dialogHeight: null
     }
   },
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
         this.contactIsVisible = false
+      }
+      if (mutation.type === 'updatePageSizes') {
+        this.updateDialogHeight()
       }
     })
   },
@@ -64,6 +72,20 @@ export default {
     },
     closeDialogs () {
       this.contactIsVisible = false
+    },
+    updateDialogHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeight(element)
+      })
+    }
+  },
+  watch: {
+    visible (visible) {
+      if (visible) {
+        this.updateDialogHeight()
+      }
     }
   }
 }

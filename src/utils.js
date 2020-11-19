@@ -1,7 +1,11 @@
 // functional methods that can see dom, but can't access components or store
-import nanoid from 'nanoid'
-
 import cache from '@/cache.js'
+
+import nanoid from 'nanoid'
+import uniqBy from 'lodash-es/uniqBy'
+import dayjs from 'dayjs'
+import random from 'lodash-es/random'
+import last from 'lodash-es/last'
 
 export default {
   host () {
@@ -32,6 +36,51 @@ export default {
       x: touch[`${type}X`],
       y: touch[`${type}Y`]
     }
+  },
+
+  elementShouldBeOnRightSide (element) {
+    if (!element) { return }
+    element = element.getBoundingClientRect()
+    const viewport = this.visualViewport()
+    const offset = viewport.width - (element.x + element.width)
+    if (offset < 0) {
+      return true
+    } else {
+      return false
+    }
+  },
+
+  elementHeightFromHeader (element, isChildElement) {
+    if (!element) { return }
+    const viewport = this.visualViewport()
+    const rect = element.getBoundingClientRect()
+    let header = document.querySelector('header')
+    header = header.getBoundingClientRect()
+    let height = viewport.height - header.bottom - (viewport.height - rect.bottom)
+    if (isChildElement) {
+      const dialog = element.closest('dialog')
+      const dialogRect = dialog.getBoundingClientRect()
+      height = height - (rect.y - dialogRect.y)
+    }
+    const zoomScale = viewport.scale
+    if (zoomScale > 1) {
+      height = height * zoomScale
+    }
+    return height
+  },
+
+  elementHeight (element) {
+    if (!element) { return }
+    const threshold = 20
+    const rect = element.getBoundingClientRect()
+    let height
+    const viewportHeight = this.visualViewport().height
+    height = viewportHeight - rect.y - threshold
+    const zoomScale = this.visualViewport().scale
+    if (zoomScale > 1) {
+      height = height * zoomScale
+    }
+    return height
   },
 
   cursorPositionInViewport (event) {
@@ -74,7 +123,9 @@ export default {
         height: document.documentElement.clientHeight,
         scale: document.documentElement.clientWidth / window.innerWidth,
         offsetLeft: 0,
-        offsetRight: 0
+        offsetRight: 0,
+        pageLeft: window.scrollX,
+        pageTop: window.scrollY
       }
     }
   },
@@ -90,26 +141,50 @@ export default {
   },
 
   clone (object) {
-    this.typeCheck(object, 'object')
+    this.typeCheck({ value: object, type: 'object', origin: 'clone' })
     let cloned = JSON.stringify(object)
     cloned = JSON.parse(cloned)
     return cloned
   },
 
-  typeCheck (value, type, allowUndefined) {
+  typeCheck ({ value, type, allowUndefined, origin }) {
     if (allowUndefined && value === undefined) {
-      return
+      return true
     }
     if (type === 'array' && Array.isArray(value)) {
-      return
+      return true
     }
     if (typeof value !== type) { // eslint-disable-line valid-typeof
-      console.warn(`passed value is not ${type}`, value)
+      console.warn(`🚑 passed value is not ${type}`, value, origin)
+      return false
+    } else {
+      return true
     }
   },
 
+  arrayExists (array) {
+    this.typeCheck({ value: array, type: 'array', allowUndefined: true, origin: 'arrayExists' })
+    if (!array) {
+      return false
+    } else if (!array.length) {
+      return false
+    } else {
+      return true
+    }
+  },
+
+  arrayHasItems (array) {
+    this.typeCheck({ value: array, type: 'array', allowUndefined: true, origin: 'arrayHasItems' })
+    if (array) {
+      if (array.length) {
+        return true
+      }
+    }
+    return false
+  },
+
   updateObject (object, value) {
-    this.typeCheck(value, 'object')
+    this.typeCheck({ value, type: 'object', origin: 'updateObject' })
     const keys = Object.keys(value)
     if (keys.length === 0) {
       object = {}
@@ -123,9 +198,9 @@ export default {
 
   updateUsersWithUser (users, updatedUser, keys) {
     keys = keys || ['name', 'color']
-    this.typeCheck(users, 'object')
-    this.typeCheck(updatedUser, 'object')
-    this.typeCheck(keys, 'array')
+    this.typeCheck({ value: users, type: 'object', origin: 'updateUsersWithUser' })
+    this.typeCheck({ value: updatedUser, type: 'object', origin: 'updateUsersWithUser' })
+    this.typeCheck({ value: keys, type: 'array', origin: 'updateUsersWithUser' })
     return users.map(user => {
       if (user.id === updatedUser.userId) {
         keys.forEach(key => {
@@ -136,17 +211,13 @@ export default {
     })
   },
 
-  // mergeArrayOfObjectsById (baseArray, newArray) {
-  //   baseArray = this.clone(baseArray)
-  //   newArray.forEach(item => {
-  //     const existingItemIndex = baseArray.findIndex(baseItem => baseItem.id === item.id)
-  //     if (existingItemIndex > -1) {
-  //       baseArray.splice(existingItemIndex, 1)
-  //     }
-  //     baseArray.push(item)
-  //   })
-  //   return baseArray
-  // },
+  mergeArrays ({ previous, updated, key }) {
+    const updatedKeys = updated.map(item => item[key])
+    const base = previous.filter(item => !updatedKeys.includes(item[key]))
+    let merged = base.concat(updated)
+    merged = uniqBy(merged, key)
+    return merged
+  },
 
   findInArrayOfObjects (array, key, value) {
     return array.find(item => item[key] === value)
@@ -272,7 +343,7 @@ export default {
   },
 
   averageOfNumbers (numbers) {
-    this.typeCheck(numbers, 'array')
+    this.typeCheck({ value: numbers, type: 'array', origin: 'averageOfNumbers' })
     let total = 0
     numbers.forEach(number => {
       total += number
@@ -375,7 +446,21 @@ export default {
     return cardMap
   },
 
+  highestCardZ (cards) {
+    let highestCardZ = 0
+    cards.forEach(card => {
+      if (card.z > highestCardZ) {
+        highestCardZ = card.z
+      }
+    })
+    return highestCardZ
+  },
+
   // Spaces 🌙
+
+  emptySpace (spaceId) {
+    return { id: spaceId, moonPhase: '', background: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], collaborators: [], spectators: [], clients: [] }
+  },
 
   // migration added oct 2019
   migrationEnsureRemovedCards (space) {
@@ -402,41 +487,60 @@ export default {
     return space
   },
 
-  uniqueSpaceItems (items) {
+  itemUserId (user, item, nullCardUsers) {
+    let userId
+    if (nullCardUsers) {
+      userId = null
+    } else {
+      userId = item.userId || user.id
+    }
+    return userId
+  },
+
+  uniqueSpaceItems (items, nullCardUsers) {
     const cardIdDeltas = []
     const connectionTypeIdDeltas = []
     const user = cache.user()
     items.cards = items.cards.map(card => {
+      const userId = this.itemUserId(user, card, nullCardUsers)
       const newId = nanoid()
       cardIdDeltas.push({
         prevId: card.id,
         newId
       })
       card.id = newId
-      card.userId = user.id
+      card.userId = userId
       return card
     })
     items.connectionTypes = items.connectionTypes.map(type => {
+      const userId = this.itemUserId(user, type, nullCardUsers)
       const newId = nanoid()
       connectionTypeIdDeltas.push({
         prevId: type.id,
         newId
       })
       type.id = newId
-      type.userId = user.id
+      type.userId = userId
       return type
     })
     items.connections = items.connections.map(connection => {
+      const userId = this.itemUserId(user, connection, nullCardUsers)
       connection.id = nanoid()
       connection.connectionTypeId = this.updateAllIds(connection, 'connectionTypeId', connectionTypeIdDeltas)
       connection.startCardId = this.updateAllIds(connection, 'startCardId', cardIdDeltas)
       connection.endCardId = this.updateAllIds(connection, 'endCardId', cardIdDeltas)
-      connection.userId = user.id
+      connection.userId = userId
       return connection
     })
+    if (this.arrayHasItems(items.tags)) {
+      items.tags = items.tags.map(tag => {
+        tag.id = nanoid()
+        tag.cardId = this.updateAllIds(tag, 'cardId', cardIdDeltas)
+        return tag
+      })
+    }
     return items
   },
-
   normalizeSpace (space) {
     if (!this.objectHasKeys(space)) { return space }
     if (!space.connections) { return space }
@@ -489,6 +593,48 @@ export default {
     })
     space.cards = cards
     return space
+  },
+
+  // Journal Space 🌚
+
+  journalSpaceName () {
+    return `${dayjs(new Date()).format('dddd MMM D/YY')}` // Thursday Oct 8/20
+  },
+
+  randomPrompt (pack) {
+    let index = random(0, pack.prompts.length - 1)
+    return pack.prompts[index]
+  },
+
+  packTag (pack, cardId, space) {
+    const spaceHasTag = space.tags.find(tag => tag.name === pack.name)
+    if (spaceHasTag) { return }
+    return this.newTag({
+      name: pack.name,
+      defaultColor: pack.color,
+      cardId: cardId,
+      spaceId: space.id
+    })
+  },
+
+  promptCardPosition (cards, newCardName) {
+    const lastCard = last(cards)
+    const lastCardY = lastCard.y
+    let lastCardName = lastCard.name.replaceAll('[', '')
+    lastCardName = lastCardName.replaceAll(']', '')
+    const averageCharactersPerLine = 25
+    const lines = Math.ceil(lastCardName.length / averageCharactersPerLine)
+    const lineHeight = 14
+    const padding = 16
+    const lastCardHeight = (lines * lineHeight) + padding + lines
+    let distanceBetween = 60
+    let x = 100
+    if (this.checkboxFromString(newCardName)) {
+      distanceBetween = 12
+      x = 120
+    }
+    const y = lastCardY + lastCardHeight + distanceBetween
+    return { x, y }
   },
 
   // urls 🌍
@@ -564,6 +710,15 @@ export default {
     }
   },
 
+  urlIsCurrencyFloat (url) {
+    // https://regexr.com/5bfgm
+    // matches currencySymbol numbers '.' numbers
+    const currencyFloatPattern = new RegExp(/^[$€£₾₺₴₦₪R¥元₹¥₱₩฿₫₿ɱŁΞ]{1}[0-9]+\.[0-9]+/g)
+    if (url.match(currencyFloatPattern)) {
+      return true
+    }
+  },
+
   urlFromString (string) {
     if (!string) { return }
     // https://regexr.com/52r0i
@@ -571,32 +726,35 @@ export default {
     // followed by alphanumerics
     // then '.''
     // followed by alphanumerics
-    const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<>]*\.[^\s.[">,<]+[\n ]*/igm)
+    const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+[\n ]*/igm)
     const urls = string.match(urlPattern)
     if (!urls) { return }
     const url = urls[0]
     const hasProtocol = url.startsWith('http://') || url.startsWith('https://')
+    const isInvalidUrl = this.urlIsFloatOrIp(url) || this.urlIsCurrencyFloat(url)
+    if (isInvalidUrl) { return }
     if (hasProtocol) {
       return url
-    } else if (!this.urlIsFloatOrIp(url)) {
+    } else {
       return `http://${url}`
     }
   },
 
-  urlsFromString (string) {
+  urlsFromString (string, skipProtocolCheck) {
     if (!string) { return [] }
     // https://regexr.com/59m5t
     // same as urlFromString but matches multiple urls and returns [urls]
-    const urlPattern = new RegExp(/((http[s]?:\/\/)?[^\s(["<>]*\.[^\s.[">,<]+[ ]*)*/igm)
+    const urlPattern = new RegExp(/((http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+[ ]*)*/igm)
     let urls = string.match(urlPattern)
     // filter out empty or non-urls
     urls = urls.filter(url => {
       const urlHasContent = Boolean(this.trim(url).length)
-      const urlIsFloatOrIp = this.urlIsFloatOrIp(url.trim())
-      if (urlHasContent && !urlIsFloatOrIp) {
+      const isInvalidUrl = this.urlIsFloatOrIp(url.trim()) || this.urlIsCurrencyFloat(url.trim())
+      if (urlHasContent && !isInvalidUrl) {
         return true
       }
     })
+    if (skipProtocolCheck) { return urls }
     // ensure url has protocol
     urls = urls.map(url => {
       const hasProtocol = url.startsWith('http://') || url.startsWith('https://')
@@ -607,6 +765,20 @@ export default {
       }
     })
     return urls
+  },
+
+  urlWithoutProtocol (url) {
+    let newUrl
+    const http = 'http://'
+    const https = 'https://'
+    if (url.match(http)) {
+      newUrl = url.replace(http, '')
+    } else if (url.match(https)) {
+      newUrl = url.replace(https, '')
+    } else {
+      newUrl = url
+    }
+    return newUrl
   },
 
   urlIsImage (url) {
@@ -636,6 +808,21 @@ export default {
     const isAudio = url.match(audioUrlPattern)
     return Boolean(isAudio)
   },
+
+  urlWithoutQueryString (url) {
+    return url.split('?')[0]
+  },
+
+  queryString (url) {
+    const split = url.split('?')
+    if (split.length <= 1) {
+      return undefined
+    } else {
+      return split[1]
+    }
+  },
+
+  // Checkbox ✅
 
   nameIsUnchecked (name) {
     if (!name) { return }
@@ -737,6 +924,73 @@ export default {
     const sizeLimit = 1024 * 1024 * 5 // 5mb
     if (file.size > sizeLimit && !userIsUpgraded) {
       return true
+    }
+  },
+
+  // Tags
+
+  tagsFromString (string) {
+    // https://regexr.com/5bv6b
+    // '[' twice
+    // then anything except line break and ']'
+    // ']' twice
+    if (!string) { return }
+    const tagPattern = new RegExp(/([[]{2}[^\n(\]\])]+[\]]{2})/gm)
+    const tags = string.match(tagPattern)
+    return tags
+  },
+
+  tagsFromStringWithoutBrackets (string) {
+    let tags = this.tagsFromString(string)
+    if (!tags) { return }
+    tags = tags.map(tag => tag.substring(2, tag.length - 2))
+    return tags
+  },
+
+  cardNameSegments (name) {
+    const tags = this.tagsFromString(name)
+    let segments = []
+    if (tags) {
+      tags.forEach(tag => {
+        const tagStartPosition = name.indexOf(tag)
+        const tagEndPosition = tagStartPosition + tag.length
+        segments.push({
+          isText: true,
+          content: name.substring(0, tagStartPosition)
+        })
+        segments.push({
+          isTag: true,
+          name: tag.substring(2, tag.length - 2)
+        })
+        name = name.substring(tagEndPosition, name.length)
+      })
+      if (name.length) {
+        segments.push({
+          isText: true,
+          content: name
+        })
+      }
+      return segments
+    } else {
+      return [{
+        isText: true,
+        content: name
+      }]
+    }
+  },
+
+  newTag ({ name, defaultColor, cardId, spaceId }) {
+    let color
+    const existingTag = cache.allTags().find(tag => tag.name === name)
+    if (existingTag) {
+      color = existingTag.color
+    }
+    return {
+      name,
+      id: nanoid(),
+      color: color || defaultColor,
+      cardId: cardId,
+      spaceId: spaceId
     }
   }
 

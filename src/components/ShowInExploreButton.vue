@@ -28,6 +28,13 @@ export default {
   props: {
     label: String
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'currentSpace/restoreSpace') {
+        this.clearErrors()
+      }
+    })
+  },
   data () {
     return {
       error: {
@@ -46,7 +53,8 @@ export default {
     spaceCardsCount () { return this.$store.state.currentSpace.cards.length }
   },
   methods: {
-    toggleShowInExplore () {
+    checkIfShouldShowInExplore () {
+      if (this.showInExplore) { return true }
       if (!this.currentUserIsSignedIn) {
         this.error.userNeedsToSignUpOrIn = true
         return
@@ -59,6 +67,11 @@ export default {
         this.error.spaceCardsMinimum = true
         return
       }
+      return true
+    },
+    toggleShowInExplore () {
+      const shouldShowInExplore = this.checkIfShouldShowInExplore()
+      if (!shouldShowInExplore) { return }
       const currentPrivacy = this.$store.state.currentSpace.privacy
       if (currentPrivacy === 'private') {
         this.$store.dispatch('currentSpace/updateSpace', { privacy: 'closed' })
@@ -68,16 +81,18 @@ export default {
       this.$emit('updateSpaces')
     },
     triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'ShowInExploreButton.triggerSignUpOrInIsVisible')
       this.$store.commit('triggerSignUpOrInIsVisible')
-    }
-
-  },
-  watch: {
-    visible (visible) {
+    },
+    clearErrors () {
       this.error.userNeedsToSignUpOrIn = false
       this.error.spaceMustBeEdited = false
       this.error.spaceCardsMinimum = false
+    }
+  },
+  watch: {
+    visible (visible) {
+      this.clearErrors()
     }
   }
 }

@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.removed(v-if="visible" :open="visible" @click.left.stop)
+dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     .segmented-buttons
       button(@click.left="showCards" :class="{active: cardsVisible}")
@@ -23,7 +23,7 @@ dialog.removed(v-if="visible" :open="visible" @click.left.stop)
     template(v-if="!cardsVisible")
       p Removed spaces can be restored here
 
-  section.results-section(v-if="items.length")
+  section.results-section(v-if="items.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     .button-wrap
       button(v-if="!removeAllConfirmationIsVisible" @click.left.stop="showRemoveAllConfirmation")
         img.icon(src="@/assets/remove.svg")
@@ -62,7 +62,7 @@ import merge from 'lodash-es/merge'
 import scrollIntoView from '@/scroll-into-view.js'
 import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
-import privacy from '@/spaces/privacy.js'
+import privacy from '@/data/privacy.js'
 import utils from '@/utils.js'
 
 export default {
@@ -72,6 +72,14 @@ export default {
   },
   props: {
     visible: Boolean
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'updatePageSizes') {
+        this.updateDialogHeight()
+        this.updateResultsSectionHeight()
+      }
+    })
   },
   data () {
     return {
@@ -83,13 +91,20 @@ export default {
       loading: {
         cards: false,
         spaces: false
-      }
+      },
+      resultsSectionHeight: null,
+      dialogHeight: null
     }
   },
   computed: {
+    removedCardsWithName () {
+      return this.removedCards.filter(card => card.name)
+    },
     items () {
-      if (this.cardsVisible) {
-        return this.removedCards
+      if (this.cardsVisible && !this.currentUserCanEditSpace) {
+        return []
+      } else if (this.cardsVisible) {
+        return this.removedCardsWithName
       } else {
         return this.removedSpaces
       }
@@ -167,6 +182,20 @@ export default {
         this.removeSpacePermanent(item)
       }
     },
+    updateDialogHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeightFromHeader(element)
+      })
+    },
+    updateResultsSectionHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.results
+        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
+      })
+    },
 
     // Cards
 
@@ -187,8 +216,7 @@ export default {
       const space = this.$store.state.currentSpace
       const remoteCards = await this.$store.dispatch('api/getSpaceRemovedCards', space)
       this.loading.cards = false
-      const remoteCardsIsArray = utils.typeCheck(remoteCards, 'array')
-      if (!remoteCards || !remoteCardsIsArray) { return }
+      if (!utils.arrayExists(this.remoteCards)) { return }
       this.removedCards = remoteCards
       this.$store.commit('currentSpace/removedCards', remoteCards)
     },
@@ -256,6 +284,8 @@ export default {
         this.updateRemovedCards()
         this.updateRemovedSpaces()
         this.removeAllConfirmationIsVisible = false
+        this.updateDialogHeight()
+        this.updateResultsSectionHeight()
       }
     }
   }

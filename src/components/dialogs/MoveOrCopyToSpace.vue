@@ -59,8 +59,8 @@ import cache from '@/cache.js'
 import utils from '@/utils.js'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
-import words from '@/words.js'
-import newSpace from '@/spaces/new.json'
+import words from '@/data/words.js'
+import newSpace from '@/data/new.json'
 import nanoid from 'nanoid'
 
 export default {
@@ -188,7 +188,8 @@ export default {
 
     async copyToSelectedSpace (items) {
       this.loading = true
-      const newItems = utils.uniqueSpaceItems(utils.clone(items))
+      const nullCardUsers = true
+      const newItems = utils.uniqueSpaceItems(utils.clone(items), nullCardUsers)
       let { cards, connectionTypes, connections } = newItems
       cards = this.mapRemoteItems(cards)
       connectionTypes = this.mapRemoteItems(connectionTypes)
@@ -218,7 +219,7 @@ export default {
       }
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
       this.$store.dispatch('clearMultipleSelected')
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'MoveOrCopyToSpace.moveOrCopyToSpace')
       if (this.shouldSwitchToSpace) {
         this.$store.dispatch('currentSpace/changeSpace', { space: selectedSpace })
         if (this.toNewSpace) {

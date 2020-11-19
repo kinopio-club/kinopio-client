@@ -8,20 +8,19 @@ dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.left.st
     p Invite Collaborators
 
   section
-    .row
-      input.textarea(ref="url" v-model="url")
+    Loader(:visible="loading")
 
-    button(v-if="!canNativeShare" @click.left="copyUrl")
-      span Copy Invite Url
-      Loader(:visible="loading")
-
-    .segmented-buttons(v-if="canNativeShare")
-      button(@click.left="copyUrl")
+    template(v-if="!loading")
+      .row
+        input.textarea(ref="url" v-model="url")
+      button(v-if="!canNativeShare" @click.left="copyUrl")
         span Copy Invite Url
-        Loader(:visible="loading")
+      .segmented-buttons(v-if="canNativeShare")
+        button(@click.left="copyUrl" :disabled="loading")
+          span Copy Invite Url
+        button(@click.left="shareUrl" :disabled="loading")
+          img.icon(src="@/assets/share.svg")
 
-      button(@click.left="shareUrl")
-        img.icon(src="@/assets/share.svg")
     .row
       .badge.success.success-message(v-if="urlIsCopied") Url Copied
 
@@ -29,6 +28,7 @@ dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.left.st
 
 <script>
 import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'InviteCollaborators',
@@ -77,8 +77,10 @@ export default {
     },
     updateInviteUrl () {
       const collaboratorKey = this.$store.state.currentSpace.collaboratorKey
-      const spaceId = this.$store.state.currentSpace.id
-      this.url = `${window.location.origin}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}`
+      const currentSpace = this.$store.state.currentSpace
+      const spaceId = currentSpace.id
+      const spaceName = utils.normalizeString(currentSpace.name)
+      this.url = `${window.location.origin}/invite?spaceId=${spaceId}&collaboratorKey=${collaboratorKey}&name=${spaceName}`
     }
   },
   watch: {

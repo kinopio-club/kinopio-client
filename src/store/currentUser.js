@@ -1,8 +1,9 @@
-import randomColor from 'randomcolor'
-import nanoid from 'nanoid'
-
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import promptPacks from '@/data/promptPacks.json'
+
+import randomColor from 'randomcolor'
+import nanoid from 'nanoid'
 
 export default {
   namespaced: true,
@@ -19,7 +20,13 @@ export default {
     favoriteUsers: [],
     favoriteSpaces: [],
     cardsCreatedCount: 0,
-    isUpgraded: false
+    isUpgraded: false,
+    filterShowUsers: false,
+    filterShowDateUpdated: false,
+    filterShowAbsoluteDates: false,
+    filterUnchecked: false,
+    journalPrompts: [],
+    newSpacesAreBlank: false
   },
   getters: {
     isCurrentUser: (state) => (user) => {
@@ -90,6 +97,10 @@ export default {
       const currentUserIsSignedIn = getters.isSignedIn
       const isInvitedToSpace = Boolean(cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id))
       return !currentUserIsSignedIn && isInvitedToSpace
+    },
+    packById: (state, getters) => (packId) => {
+      packId = packId.toString()
+      return promptPacks.find(pack => pack.packId === packId)
     }
   },
   mutations: {
@@ -128,12 +139,12 @@ export default {
       cache.updateUser('apiKey', apiKey)
     },
     favoriteUsers: (state, users) => {
-      utils.typeCheck(users, 'array')
+      utils.typeCheck({ value: users, type: 'array', origin: 'favoriteUsers' })
       state.favoriteUsers = users
       cache.updateUser('favoriteUsers', users)
     },
     favoriteSpaces: (state, spaces) => {
-      utils.typeCheck(spaces, 'array')
+      utils.typeCheck({ value: spaces, type: 'array', origin: 'favoriteSpaces' })
       state.favoriteSpaces = spaces
       cache.updateUser('favoriteSpaces', spaces)
     },
@@ -167,14 +178,62 @@ export default {
       cache.updateUser('arenaAccessToken', token)
     },
     cardsCreatedCount: (state, count) => {
-      utils.typeCheck(count, 'number')
+      utils.typeCheck({ value: count, type: 'number', origin: 'cardsCreatedCount' })
       state.cardsCreatedCount = count
       cache.updateUser('cardsCreatedCount', count)
     },
     isUpgraded: (state, value) => {
-      utils.typeCheck(value, 'boolean')
+      utils.typeCheck({ value, type: 'boolean', origin: 'isUpgraded' })
       state.isUpgraded = value
       cache.updateUser('isUpgraded', value)
+    },
+    filterShowUsers: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'filterShowUsers' })
+      state.filterShowUsers = value
+      cache.updateUser('filterShowUsers', value)
+    },
+    filterShowDateUpdated: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'filterShowDateUpdated' })
+      state.filterShowDateUpdated = value
+      cache.updateUser('filterShowDateUpdated', value)
+    },
+    filterShowAbsoluteDates: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'filterShowAbsoluteDates' })
+      state.filterShowAbsoluteDates = value
+      cache.updateUser('filterShowAbsoluteDates', value)
+    },
+    filterUnchecked: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'filterUnchecked' })
+      state.filterUnchecked = value
+      cache.updateUser('filterUnchecked', value)
+    },
+    addJournalPrompt: (state, newPrompt) => {
+      let prompts = utils.clone(state.journalPrompts) || []
+      prompts.push(newPrompt)
+      state.journalPrompts = prompts
+      cache.updateUser('journalPrompts', prompts)
+    },
+    removeJournalPrompt: (state, removePrompt) => {
+      let prompts = utils.clone(state.journalPrompts) || []
+      prompts = prompts.filter(prompt => {
+        return prompt.id !== removePrompt.id
+      })
+      state.journalPrompts = prompts
+      cache.updateUser('journalPrompts', prompts)
+    },
+    updateJournalPrompt: (state, updatedPrompt) => {
+      let prompts = state.journalPrompts.map(prompt => {
+        if (prompt.id === updatedPrompt.id) {
+          prompt = updatedPrompt
+        }
+        return prompt
+      })
+      state.journalPrompts = prompts
+      cache.updateUser('journalPrompts', prompts)
+    },
+    newSpacesAreBlank: (state, value) => {
+      state.newSpacesAreBlank = value
+      cache.updateUser('newSpacesAreBlank', value)
     }
   },
   actions: {
@@ -193,10 +252,25 @@ export default {
     cardsCreatedCount: (context, { shouldIncrement }) => {
       let count
       if (shouldIncrement) {
-        count = Math.max(context.state.cardsCreatedCount + 1, 0)
+        count = context.state.cardsCreatedCount + 1
       } else {
-        count = Math.max(context.state.cardsCreatedCount - 1, 0)
+        count = context.state.cardsCreatedCount - 1
       }
+      count = Math.max(count, 0)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          cardsCreatedCount: count
+        } }, { root: true })
+      context.commit('cardsCreatedCount', count)
+    },
+    cardsCreatedCountUpdateBy: (context, { delta, shouldIncrement }) => {
+      let count
+      if (shouldIncrement) {
+        count = context.state.cardsCreatedCount + delta
+      } else {
+        count = context.state.cardsCreatedCount - delta
+      }
+      count = Math.max(count, 0)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           cardsCreatedCount: count
@@ -207,15 +281,37 @@ export default {
       context.commit('isUpgraded', value)
       context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
     },
+    createNewUserJournalPrompts: (context) => {
+      if (utils.arrayHasItems(context.state.journalPrompts)) { return }
+      let prompts = [
+        { name: 'How am I feeling?' },
+        { name: 'What do I have to do today?' },
+        { name: 'Everyday', packId: '1' }
+      ]
+      prompts = prompts.map(prompt => {
+        prompt.id = nanoid()
+        prompt.userId = context.state.id
+        return prompt
+      })
+      prompts.forEach(prompt => {
+        context.dispatch('addJournalPrompt', prompt)
+      })
+    },
     createNewUser: (context) => {
       cache.saveUser(context.state)
+      context.dispatch('createNewUserJournalPrompts')
     },
     broadcastUpdate: (context, updates) => {
       const space = context.rootState.currentSpace
+
       const spaceUserPermission = utils.capitalizeFirstLetter(context.getters.spaceUserPermission(space)) // User, Collaborator, Spectator
       const type = `update${spaceUserPermission}`
       const userId = context.state.id
       context.commit('broadcast/updateUser', { id: space.id, updates, type, userId }, { root: true })
+      let user = utils.clone(context.state)
+      user.userId = user.id
+      context.commit('currentSpace/updateUser', user, { root: true })
+      context.commit('currentSpace/updateCollaborator', user, { root: true })
     },
     name: (context, newName) => {
       context.commit('name', newName)
@@ -261,11 +357,20 @@ export default {
       const remoteUser = await context.dispatch('api/getUser', null, { root: true })
       if (!remoteUser) { return }
       remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
-      if (remoteUser.updatedAt > cachedUser.cacheDate) { console.log('🌸 Restore user from remote', remoteUser) }
+      console.log('🌸 Restore user from remote', remoteUser)
       context.commit('updateUser', remoteUser)
+      context.dispatch('createNewUserJournalPrompts')
+      if (remoteUser.stripeSubscriptionId) {
+        context.commit('isUpgraded', true)
+      }
     },
     restoreUserFavorites: async (context) => {
-      if (!context.getters.isSignedIn) { return }
+      const hasRestoredFavorites = context.rootState.hasRestoredFavorites
+      if (hasRestoredFavorites) { return }
+      if (!context.getters.isSignedIn) {
+        context.commit('hasRestoredFavorites', true, { root: true })
+        return
+      }
       let favorites = {
         favoriteUsers: [],
         favoriteSpaces: []
@@ -273,9 +378,9 @@ export default {
       favorites = await context.dispatch('api/getUserFavorites', null, { root: true }) || favorites
       context.commit('favoriteUsers', favorites.favoriteUsers)
       context.commit('favoriteSpaces', favorites.favoriteSpaces)
+      context.commit('hasRestoredFavorites', true, { root: true })
     },
     addFavorite: (context, { type, item }) => {
-      context.commit('notifyAccessFavorites', true, { root: true })
       if (type === 'user') {
         let favorites = utils.clone(context.state.favoriteUsers)
         let favorite = {
@@ -302,7 +407,6 @@ export default {
       }, { root: true })
     },
     removeFavorite: (context, { type, item }) => {
-      context.commit('notifyAccessFavorites', false, { root: true })
       if (type === 'user') {
         let favorites = utils.clone(context.state.favoriteUsers)
         favorites = favorites.filter(favorite => {
@@ -343,6 +447,63 @@ export default {
       context.commit('arenaAccessToken', response.arenaAccessToken)
       context.commit('importArenaChannelIsVisible', true, { root: true })
       context.commit('isAuthenticatingWithArena', false, { root: true })
+    },
+    toggleFilterShowUsers: (context, value) => {
+      context.commit('filterShowUsers', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          filterShowUsers: value
+        } }, { root: true })
+    },
+    toggleFilterShowDateUpdated: (context, value) => {
+      context.commit('filterShowDateUpdated', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          filterShowDateUpdated: value
+        } }, { root: true })
+    },
+    toggleFilterShowAbsoluteDates: (context, value) => {
+      context.commit('filterShowAbsoluteDates', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          filterShowAbsoluteDates: value
+        } }, { root: true })
+    },
+    toggleFilterUnchecked: (context, value) => {
+      context.commit('filterUnchecked', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          filterUnchecked: value
+        } }, { root: true })
+    },
+    clearUserFilters: (context) => {
+      context.dispatch('toggleFilterShowUsers', false)
+      context.dispatch('toggleFilterShowDateUpdated', false)
+      context.dispatch('toggleFilterShowAbsoluteDates', false)
+      context.dispatch('toggleFilterUnchecked', false)
+    },
+    addJournalPrompt: (context, prompt) => {
+      utils.typeCheck({ value: prompt, type: 'object', origin: 'addJournalPrompt' })
+      context.dispatch('api/addToQueue', { name: 'addJournalPrompt', body: prompt }, { root: true })
+      context.commit('addJournalPrompt', prompt)
+    },
+    removeJournalPrompt: (context, prompt) => {
+      utils.typeCheck({ value: prompt, type: 'object', origin: 'removeJournalPrompt' })
+      context.dispatch('api/addToQueue', { name: 'removeJournalPrompt', body: prompt }, { root: true })
+      context.commit('removeJournalPrompt', prompt)
+    },
+    updateJournalPrompt: (context, prompt) => {
+      utils.typeCheck({ value: prompt, type: 'object', origin: 'updateJournalPrompt' })
+      context.dispatch('api/addToQueue', { name: 'updateJournalPrompt', body: prompt }, { root: true })
+      context.commit('updateJournalPrompt', prompt)
+    },
+    newSpacesAreBlank: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'newSpacesAreBlank' })
+      context.commit('newSpacesAreBlank', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          newSpacesAreBlank: value
+        } }, { root: true })
     }
   }
 }

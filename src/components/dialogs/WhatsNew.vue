@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.whats-new(v-if="visible" :open="visible" @click.left.stop)
+dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     p What's New
     .button-wrap
@@ -14,7 +14,8 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop)
 
   section
     article(v-if="newStuff.length" v-for="post in newStuffWithUserHasRead" :key="post.id")
-      .title.badge.info {{post.title}}
+      .title.badge.info
+        span {{post.title}}
         img.icon(src="@/assets/new.gif" v-if="!post.userHasRead")
       span(v-html="media(post.description)")
       span(v-html="post.content_html")
@@ -36,6 +37,7 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop)
 
 <script>
 import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'WhatsNew',
@@ -46,17 +48,20 @@ export default {
     visible: Boolean,
     newStuff: Array
   },
-  data () {
-    return {
-      // newStuffIsUpdated: false
-    }
-  },
   created () {
     this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'updatePageSizes') {
+        this.updateDialogHeight()
+      }
       if (mutation.type === 'closeAllDialogs' && this.visible) {
         this.updateUserLastRead()
       }
     })
+  },
+  data () {
+    return {
+      dialogHeight: null
+    }
   },
   computed: {
     newStuffWithUserHasRead () {
@@ -93,12 +98,20 @@ export default {
       } else {
         return `<video autoplay loop muted playsinline><source src="${description}"></video>`
       }
+    },
+    updateDialogHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeight(element)
+      })
     }
   },
   watch: {
     visible (visible) {
       if (visible) {
         // this.checkNewStuffIsUpdated()
+        this.updateDialogHeight()
       }
       if (!visible) {
         this.updateUserLastRead()
@@ -117,6 +130,10 @@ export default {
     margin-bottom 10px
     padding-bottom 10px
     border-bottom 1px solid var(--primary)
+    span
+      img,
+      video
+        margin-bottom 10px
     &:last-child
       margin-bottom 0
       padding-bottom 0
@@ -146,17 +163,4 @@ export default {
   code
     background-color var(--secondary-background)
     margin 0
-.coming-up
-  ul
-    margin 0
-    margin-top 2px
-    padding-left 15px
-    list-style-type square
-    li
-      padding-top 10px
-      margin-left 5px
-      user-select text
-      &:first-child
-        padding-top 0
-
 </style>

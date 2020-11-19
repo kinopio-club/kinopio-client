@@ -27,6 +27,7 @@ main.space(
     template(v-for="card in cards")
       Card(:card="card")
   ConnectionDetails
+  TagDetails
   MultipleSelectedActions
   OffscreenMarkers
   ScrollAtEdgesHandler
@@ -39,6 +40,7 @@ import Connection from '@/components/Connection.vue'
 import ConnectionLabel from '@/components/ConnectionLabel.vue'
 import UserLabel from '@/components/UserLabel.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
+import TagDetails from '@/components/dialogs/TagDetails.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import ScrollAtEdgesHandler from '@/components/ScrollAtEdgesHandler.vue'
@@ -48,7 +50,7 @@ import utils from '@/utils.js'
 import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 
-let startCursor, prevCursor, endCursor, cardMap, shouldCancel
+let startCursor, prevCursor, endCursor, shouldCancel
 
 export default {
   name: 'Space',
@@ -58,6 +60,7 @@ export default {
     ConnectionLabel,
     UserLabel,
     ConnectionDetails,
+    TagDetails,
     MultipleSelectedActions,
     OffscreenMarkers,
     ScrollAtEdgesHandler,
@@ -79,7 +82,7 @@ export default {
       }
       if (mutation.type === 'currentUserIsDrawingConnection') {
         if (mutation.payload === true) {
-          cardMap = utils.cardMap()
+          this.$store.commit('updateCardMap')
         }
       }
     })
@@ -141,9 +144,12 @@ export default {
   methods: {
     unloadPage () {
       this.$store.commit('broadcast/close')
+      this.$store.dispatch('currentSpace/removeEmptyCards')
     },
     updatePageSizes () {
-      this.$store.commit('updatePageSizes')
+      this.$nextTick(() => {
+        this.$store.commit('updatePageSizes')
+      })
     },
     updateIsOnline () {
       const status = window.navigator.onLine
@@ -228,6 +234,7 @@ export default {
     },
     checkCurrentConnectionSuccess () {
       const cursor = this.cursor()
+      const cardMap = this.$store.state.cardMap
       const connection = cardMap.find(card => {
         const xValues = {
           value: cursor.x,
@@ -295,7 +302,10 @@ export default {
     },
     addCard (position) {
       const isParentCard = true
-      if (this.spaceIsReadOnly) { return }
+      if (this.spaceIsReadOnly) {
+        this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info' })
+        return
+      }
       const withinX = position.x > 0 && position.x < this.$store.state.pageWidth
       const withinY = position.y > 0 && position.y < this.$store.state.pageHeight
       if (withinX && withinY) {
@@ -375,7 +385,7 @@ export default {
         const position = utils.cursorPositionInPage(event)
         this.addCard(position)
       } else if (this.$store.state.cardDetailsIsVisibleForCardId) {
-        this.$store.dispatch('closeAllDialogs')
+        this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
       }
       if (this.$store.state.multipleCardsSelectedIds.length || this.$store.state.multipleConnectionsSelectedIds.length) {
         const position = utils.cursorPositionInPage(event)

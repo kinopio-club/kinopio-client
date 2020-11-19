@@ -10,11 +10,6 @@ aside.notifications(@click.left="closeAllDialogs")
       img.icon.open(src="@/assets/open.svg")
       span This space is open, which means you can add to it too
 
-  .item.success(v-if="notifyAccessFavorites" @animationend="resetNotifyAccessFavorites")
-    p Access favorites from your spaces
-    .row
-      button(@click.left.stop="triggerSpaceDetailsFavoritesVisible") Your Spaces
-
   .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
     p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade for $4/month
     .row
@@ -42,7 +37,7 @@ aside.notifications(@click.left="closeAllDialogs")
       button(v-if="!currentUserIsSignedIn" @click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
 
   .persistent-item(v-if="notifySpaceIsRemoved")
-    p This space has been removed
+    p This space is removed
     .row
       button(@click.left="restoreSpace")
         img.icon(src="@/assets/undo.svg")
@@ -89,9 +84,9 @@ aside.notifications(@click.left="closeAllDialogs")
 
 <script>
 import cache from '@/cache.js'
-import privacy from '@/spaces/privacy.js'
+import privacy from '@/data/privacy.js'
 import utils from '@/utils.js'
-import templates from '@/spaces/templates.js'
+import templates from '@/data/templates.js'
 
 let wasOffline
 
@@ -125,9 +120,11 @@ export default {
       if (mutation.type === 'isOnline') {
         const isOnline = Boolean(mutation.payload)
         if (!isOnline) {
+          console.log('☎️ is offline', !isOnline)
           wasOffline = true
         } else if (isOnline && wasOffline) {
           this.checkIfShouldNotifySpaceOutOfSync()
+          wasOffline = false
         }
       }
       if (mutation.type === 'currentSpace/restoreSpace') {
@@ -151,7 +148,6 @@ export default {
     notifyNewUser () { return this.$store.state.notifyNewUser },
     notifySignUpToEditSpace () { return this.$store.state.notifySignUpToEditSpace },
     notifySpaceIsOpenAndEditable () { return this.$store.state.notifySpaceIsOpenAndEditable },
-    notifyAccessFavorites () { return this.$store.state.notifyAccessFavorites },
     notifyCardsCreatedIsNearLimit () { return this.$store.state.notifyCardsCreatedIsNearLimit },
     notifyCardsCreatedIsOverLimit () { return this.$store.state.notifyCardsCreatedIsOverLimit },
     currentUserIsSignedIn () {
@@ -183,7 +179,7 @@ export default {
       }
     },
     closeAllDialogs () {
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'Notifications.closeAllDialogs')
     },
     update () {
       const notifications = this.$store.state.notifications
@@ -213,10 +209,6 @@ export default {
     triggerSpaceDetailsVisible () {
       this.$store.commit('triggerSpaceDetailsVisible')
     },
-    triggerSpaceDetailsFavoritesVisible () {
-      this.$store.commit('triggerFavoritesIsVisible')
-      this.triggerSpaceDetailsVisible()
-    },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
@@ -230,14 +222,11 @@ export default {
       this.$store.dispatch('currentSpace/removeSpacePermanent', space)
       this.$store.commit('notifySpaceIsRemoved', false)
       const firstSpace = cache.getAllSpaces()[0]
-      this.$store.dispatch('currentSpace/loadSpace', firstSpace)
+      this.$store.dispatch('currentSpace/loadSpace', { space: firstSpace })
     },
     createNewHelloSpace () {
       this.$store.commit('notifyNewUser', false)
       window.location.href = '/'
-    },
-    resetNotifyAccessFavorites () {
-      this.$store.commit('notifyAccessFavorites', false)
     },
     resetNotifyCardsCreatedIsNearLimit () {
       this.$store.commit('notifyCardsCreatedIsNearLimit', false)
@@ -258,6 +247,7 @@ export default {
       } else {
         remoteSpace = await this.$store.dispatch('api/getSpaceAnonymously', space)
       }
+      console.log('☎️ spaceUpdatedAt local remote', space.updatedAt === remoteSpace.updatedAt, space.updatedAt, remoteSpace.updatedAt)
       if (space.updatedAt !== remoteSpace.updatedAt) {
         this.notifySpaceOutOfSync = true
       }
@@ -266,7 +256,7 @@ export default {
       window.location.reload()
     },
     duplicateSpace () {
-      const duplicatedSpaceName = this.$store.state.currentSpace.name
+      const duplicatedSpaceName = this.$store.state.currentSpace.name + ' copy'
       this.$store.dispatch('currentSpace/duplicateSpace')
       this.$store.commit('addNotification', { message: `${duplicatedSpaceName} is now yours to edit`, type: 'success' }, { root: true })
     }

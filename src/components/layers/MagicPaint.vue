@@ -48,8 +48,7 @@ const maxIterations = 200 // higher is longer paint fade time
 const rateOfIterationDecay = 0.03 // higher is faster tail decay
 let paintingCircles = []
 let paintingCanvas, paintingContext, startCursor, paintingCirclesTimer
-let prevScroll
-let cardMap
+let prevScroll, viewportCardMap
 
 // remote painting
 let remotePaintingCircles = []
@@ -131,7 +130,8 @@ export default {
     pageHeight () { return this.$store.state.pageHeight },
     pageWidth () { return this.$store.state.pageWidth },
     viewportHeight () { return this.$store.state.viewportHeight },
-    viewportWidth () { return this.$store.state.viewportWidth }
+    viewportWidth () { return this.$store.state.viewportWidth },
+    cardMap () { return this.$store.state.cardMap }
   },
   methods: {
     updatePositionOffsetByPinchZoom () {
@@ -139,11 +139,32 @@ export default {
       this.pinchZoomOffsetTop = window.visualViewport.offsetTop
       this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
     },
+    isCardInViewport (card) {
+      const viewport = utils.visualViewport()
+      // x
+      const isStartInViewportX = card.x > viewport.pageLeft || card.x + card.width > viewport.pageLeft
+      const isEndInViewportX = card.x < viewport.pageLeft + viewport.width
+      const isInViewportX = isStartInViewportX && isEndInViewportX
+      // y
+      const isStartInViewportY = card.y > viewport.pageTop || card.y + card.height > viewport.pageTop
+      const isEndInViewportY = card.y < viewport.pageTop + viewport.height
+      const isInViewportY = isStartInViewportY && isEndInViewportY
+      return isInViewportX && isInViewportY
+    },
+    updateViewportCardMap () {
+      const cardMap = utils.clone(this.cardMap)
+      if (!utils.objectHasKeys(cardMap)) { return }
+      viewportCardMap = utils.clone(this.cardMap)
+      viewportCardMap = viewportCardMap.filter(card => {
+        return this.isCardInViewport(card)
+      })
+    },
     updatePrevScrollPosition () {
       prevScroll = {
         x: window.scrollX,
         y: window.scrollY
       }
+      this.updateViewportCardMap()
     },
     updateCirclePositions (circles, scrollDelta) {
       return circles.map(circle => {
@@ -208,6 +229,10 @@ export default {
       context.fill()
     },
     shouldCancel (event) {
+      let shouldCancelOutsideOfBrowser = !(event.target instanceof Element)
+      if (shouldCancelOutsideOfBrowser) {
+        return false
+      }
       const fromDialog = event.target.closest('dialog')
       const fromHeader = event.target.closest('header')
       const fromFooter = event.target.closest('footer')
@@ -259,7 +284,8 @@ export default {
       this.broadcastCircle(circle)
     },
     startPainting (event) {
-      cardMap = utils.cardMap()
+      this.$store.commit('updateCardMap')
+      this.updateViewportCardMap()
       startCursor = utils.cursorPositionInViewport(event)
       this.currentCursor = utils.cursorPositionInViewport(event)
       const dialogIsVisible = Boolean(document.querySelector('dialog'))
@@ -276,7 +302,7 @@ export default {
         this.$store.commit('shouldAddCard', true)
       }
       this.$store.dispatch('clearMultipleSelected')
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'MagicPaint.startPainting')
     },
     paintCirclesAnimationFrame () {
       paintingCircles = utils.filterCircles(paintingCircles, maxIterations)
@@ -298,26 +324,6 @@ export default {
 
     // Selecting
 
-    selectCards (point) {
-      if (this.userCantEditSpace) { return }
-      cardMap.map(card => {
-        const x = {
-          value: point.x + window.scrollX,
-          min: card.x,
-          max: card.x + card.width
-        }
-        const y = {
-          value: point.y + window.scrollY,
-          min: card.y,
-          max: card.y + card.height
-        }
-        const isBetweenX = utils.isBetween(x)
-        const isBetweenY = utils.isBetween(y)
-        if (isBetweenX && isBetweenY) {
-          this.$store.dispatch('addToMultipleCardsSelected', card.cardId)
-        }
-      })
-    },
     movementDirection (prevCircle, delta) {
       let movementDirection = {}
       if (delta.xAbsolute > delta.yAbsolute) {
@@ -383,6 +389,27 @@ export default {
           this.selectCards({ x, y })
         }
       }
+    },
+    selectCards (point) {
+      if (this.userCantEditSpace) { return }
+      const cardMap = viewportCardMap || this.cardMap
+      cardMap.forEach(card => {
+        const x = {
+          value: point.x + window.scrollX,
+          min: card.x,
+          max: card.x + card.width
+        }
+        const y = {
+          value: point.y + window.scrollY,
+          min: card.y,
+          max: card.y + card.height
+        }
+        const isBetweenX = utils.isBetween(x)
+        const isBetweenY = utils.isBetween(y)
+        if (isBetweenX && isBetweenY) {
+          this.$store.dispatch('addToMultipleCardsSelected', card.cardId)
+        }
+      })
     },
     selectConnectionPaths (point) {
       const paths = document.querySelectorAll('svg .connection-path')

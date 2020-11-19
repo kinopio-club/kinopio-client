@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop)
+dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     p Billing
 
@@ -53,10 +53,18 @@ export default {
   props: {
     visible: Boolean
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'updatePageSizes') {
+        this.updateDialogHeight()
+      }
+    })
+  },
   data () {
     return {
       cancelSubscriptionVisible: false,
       isCancelled: false,
+      dialogHeight: null,
       info: {
         price: 0,
         period: 'month',
@@ -82,7 +90,7 @@ export default {
       this.cancelSubscriptionVisible = !this.cancelSubscriptionVisible
     },
     triggerUpgradeUserIsVisible () {
-      this.$store.commit('closeAllDialogs')
+      this.$store.commit('closeAllDialogs', 'UserBilling.triggerUpgradeUserIsVisible')
       this.$store.commit('triggerUpgradeUserIsVisible')
     },
     async cancelSubscription () {
@@ -130,13 +138,22 @@ export default {
         this.$store.commit('addNotification', { message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
       }
       this.loading.gettingBillingInfo = false
+    },
+    updateDialogHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeight(element)
+      })
     }
+
   },
   watch: {
     visible (visible) {
       if (visible) {
         this.getBillingInfo()
         this.isCancelled = false
+        this.updateDialogHeight()
       }
     }
   }
@@ -145,7 +162,7 @@ export default {
 
 <style lang="stylus">
 .user-billing
-  max-height calc(100vh - 300px)
+  max-height calc(100vh - 190px)
   overflow auto
   .summary
     display flex

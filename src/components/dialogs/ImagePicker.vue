@@ -1,6 +1,14 @@
 <template lang="pug">
-dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog" :class="{'is-arena-only' : isArenaOnly}")
-  section.status-container(v-if="!isArenaOnly")
+dialog.narrow.image-picker(
+  v-if="visible"
+  :open="visible"
+  @click.left.stop
+  ref="dialog"
+  :class="{'background-image-picker' : isBackgroundImage, 'right-side': showOnRightSide}"
+  :style="{'max-height': dialogHeight + 'px'}"
+)
+  section(v-if="!isBackgroundImage")
+    //- card images
     .row
       .segmented-buttons
         button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
@@ -10,14 +18,12 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="
       .button-wrap
         button(@click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile")
-
     //- upload progress
     .uploading-container(v-if="cardPendingUpload")
       img(v-if="cardPendingUpload" :src="cardPendingUpload.imageDataUrl")
       .badge.info(:class="{absolute : cardPendingUpload.imageDataUrl}")
         Loader(:visible="true")
         span {{cardPendingUpload.percentComplete}}%
-
     //- errors
     .error-container-top(v-if="error.signUpToUpload")
       p
@@ -35,15 +41,23 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="
       button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
     .error-container-top(v-if="error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-
     //- stickers toggle
     label(v-if="serviceIsGfycat" :class="{active: gfycatIsStickers}" @click.left.prevent="toggleGfycatIsStickers" @keydown.stop.enter="toggleGfycatIsStickers")
       input(type="checkbox" v-model="gfycatIsStickers")
       span Stickers
 
+  //- background images
+  section(v-if="isBackgroundImage")
+    .row
+      .segmented-buttons
+        button(@click.left.stop="toggleServiceIsBackgrounds" :class="{active : serviceIsBackgrounds}")
+          span Backgrounds
+        button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
+          span Are.na
+
   //- search results
   section.results-section
-    .search-wrap
+    .search-wrap(v-if="!serviceIsBackgrounds")
       img.icon.search(v-if="!loading" src="@/assets/search.svg" @click.left="focusSearchInput")
       Loader(:visible="loading")
       input(
@@ -62,7 +76,7 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
       .badge.danger(v-if="error.userIsOffline") Can't search {{service}} while offline, Please try again later
 
-  section.results-section
+  section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ul.results-list.image-list
       template(v-for="(image in images")
         li(@click.left="selectImage(image)" tabindex="0" :key="image.id" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
@@ -75,11 +89,12 @@ dialog.narrow.image-picker(v-if="visible" :open="visible" @click.left.stop ref="
 </template>
 
 <script>
-import debounce from 'lodash-es/debounce'
-
 import scrollIntoView from '@/scroll-into-view.js'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
+import backgroundImages from '@/data/backgroundImages.json'
+
+import debounce from 'lodash-es/debounce'
 
 export default {
   name: 'ImagePicker',
@@ -91,8 +106,15 @@ export default {
     initialSearch: String,
     cardUrl: String,
     cardId: String,
-    isArenaOnly: Boolean,
+    isBackgroundImage: Boolean,
     imageIsFullSize: Boolean
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'updatePageSizes') {
+        this.checkIfShouldBeOnRightSide()
+      }
+    })
   },
   data () {
     return {
@@ -101,6 +123,9 @@ export default {
       service: 'Are.na',
       gfycatIsStickers: false,
       loading: false,
+      showOnRightSide: false,
+      dialogHeight: null,
+      resultsSectionHeight: null,
       error: {
         unknownServerError: false,
         userIsOffline: false,
@@ -131,18 +156,13 @@ export default {
       return pendingUploads.find(upload => upload.cardId === this.cardId)
     },
     serviceIsArena () {
-      if (this.service === 'Are.na') {
-        return true
-      } else {
-        return false
-      }
+      return this.service === 'Are.na'
     },
     serviceIsGfycat () {
-      if (this.service === 'Gfycat') {
-        return true
-      } else {
-        return false
-      }
+      return this.service === 'Gfycat'
+    },
+    serviceIsBackgrounds () {
+      return this.service === 'Backgrounds'
     },
     isNoSearchResults () {
       if (this.error.unknownServerError || this.error.userIsOffline) {
@@ -157,12 +177,16 @@ export default {
   },
   methods: {
     triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'ImagePicker.triggerSignUpOrInIsVisible')
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     triggerUpgradeUserIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
+      this.$store.dispatch('closeAllDialogs', 'ImagePicker.triggerUpgradeUserIsVisible')
       this.$store.commit('triggerUpgradeUserIsVisible')
+    },
+    toggleServiceIsBackgrounds () {
+      this.service = 'Backgrounds'
+      this.searchAgainBackgrounds()
     },
     toggleServiceIsArena () {
       this.service = 'Are.na'
@@ -175,6 +199,9 @@ export default {
     toggleGfycatIsStickers () {
       this.gfycatIsStickers = !this.gfycatIsStickers
       this.searchAgain()
+    },
+    searchAgainBackgrounds () {
+      this.normalizeResults(backgroundImages, 'Backgrounds')
     },
     searchAgain () {
       this.images = []
@@ -244,7 +271,10 @@ export default {
       this.error.unknownUploadError = false
     },
     normalizeResults (data, service) {
-      if (service === 'Are.na' && this.serviceIsArena) {
+      const arena = service === 'Are.na' && this.serviceIsArena
+      const gyfcat = service === 'Gfycat' && this.serviceIsGfycat
+      const backgrounds = service === 'Backgrounds' && this.serviceIsBackgrounds
+      if (arena) {
         this.images = data.blocks.map(image => {
           let url
           if (this.imageIsFullSize) {
@@ -260,7 +290,7 @@ export default {
             url: url + '?img=.jpg'
           }
         })
-      } else if (service === 'Gfycat' && this.serviceIsGfycat) {
+      } else if (gyfcat) {
         this.images = data.gfycats.map(image => {
           if (this.gfycatIsStickers) {
             return {
@@ -276,6 +306,12 @@ export default {
               url: image.mobileUrl
             }
           }
+        })
+      } else if (backgrounds) {
+        this.images = data.map(image => {
+          image.sourceUserName = null
+          image.previewUrl = image.url
+          return image
         })
       }
       this.$nextTick(() => {
@@ -302,8 +338,13 @@ export default {
       this.$emit('selectImage', image)
     },
     scrollIntoView () {
-      if (this.isArenaOnly) { return }
+      if (!this.visible) { return }
+      if (this.isBackgroundImage) {
+        this.updateHeight()
+        return
+      }
       const element = this.$refs.dialog
+      if (!element) { return }
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
       this.$store.commit('triggerUpdatePositionInVisualViewport')
@@ -334,15 +375,39 @@ export default {
           this.error.unknownUploadError = true
         }
       }
+    },
+    checkIfShouldBeOnRightSide () {
+      this.showOnRightSide = false
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.showOnRightSide = utils.elementShouldBeOnRightSide(element)
+      })
+    },
+    updateHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        if (!element) { return }
+        this.dialogHeight = utils.elementHeightFromHeader(element)
+        element = this.$refs.results
+        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
+      })
     }
   },
   watch: {
     visible (visible) {
       this.$nextTick(() => {
         if (visible) {
+          this.checkIfShouldBeOnRightSide()
+          this.search = this.initialSearch
+          if (this.isBackgroundImage) {
+            this.toggleServiceIsBackgrounds()
+            this.updateHeight()
+            return
+          }
           this.scrollIntoView()
           this.focusSearchInput()
-          this.search = this.initialSearch
           if (this.search) {
             this.loading = true
           }
@@ -405,7 +470,11 @@ export default {
   .arena
     width 18px
 
-  &.is-arena-only
+  &.background-image-picker
     padding-top 4px
+
+  &.right-side
+    left initial
+    right 8px
 
 </style>
