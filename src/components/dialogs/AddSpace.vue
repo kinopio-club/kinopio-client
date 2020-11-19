@@ -237,4 +237,7 @@ export default {
     border 0
     border-radius 3px
     padding 4px
+  .templates
+    border-top 1px solid var(--primary)
+    padding-top 4px
 </style>
