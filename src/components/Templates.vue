@@ -1,12 +1,11 @@
 <template lang="pug">
 .templates(v-if="visible" :open="visible" @click.left.stop @click.left="closeDialogs")
-  //- p Make these your own
-  section.categories
+  section.categories(v-if="!hideOptions")
     .button-wrap.category-wrap
       button(@click.left.stop="toggleTemplateCategoryPickerIsVisible" :class="{active: templateCategoryPickerIsVisible}")
         .badge.info.template-badge(:class="categoryClassName(filterCategory)") {{filterCategory.name}}
       TemplateCategoryPicker(:visible="templateCategoryPickerIsVisible" :selectedCategoryId="filteredCategoryId" @closeDialog="closeDialogs" @selectCategory="updateFilteredCategory")
-    .button-wrap(v-if="!hideSuggestTemplates")
+    .button-wrap
       button(@click.left.stop="toggleContactIsVisible" :class="{active: contactIsVisible}")
         span Suggest Templates
       Contact(:visible="contactIsVisible")
@@ -30,7 +29,7 @@ export default {
   },
   props: {
     visible: Boolean,
-    hideSuggestTemplates: Boolean
+    hideOptions: Boolean
   },
   created () {
     this.$store.subscribe((mutation, state) => {

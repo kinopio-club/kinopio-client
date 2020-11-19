@@ -32,7 +32,7 @@ dialog.add-space.narrow(
           span Journal
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
           span Edit
-  Templates(:visible="templatesIsVisible" :hideSuggestTemplates="true")
+  Templates(:visible="templatesIsVisible" :hideOptions="true")
 
   section.edit-section(v-if="editNewSpaceIsVisible")
     .row
