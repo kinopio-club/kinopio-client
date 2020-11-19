@@ -162,7 +162,7 @@ export default {
     privacyName () { return this.privacyState.name },
     spacePrivacyIsOpen () { return this.privacyName === 'open' },
     cardsCreatedCountFromLimit () {
-      const cardsCreatedLimit = 150
+      const cardsCreatedLimit = this.$store.state.cardsCreatedLimit
       const cardsCreatedCount = this.$store.state.currentUser.cardsCreatedCount
       return Math.max(cardsCreatedLimit - cardsCreatedCount, 0)
     },

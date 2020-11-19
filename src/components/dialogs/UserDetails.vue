@@ -110,7 +110,6 @@ export default {
       loadingUserspaces: false,
       spacePickerIsVisible: false,
       userSpaces: [],
-      cardsCreatedLimit: 150,
       error: {
         unknownServerError: false
       }
@@ -125,6 +124,7 @@ export default {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
     hasRestoredFavorites () { return this.$store.state.hasRestoredFavorites },
+    cardsCreatedLimit () { return this.$store.state.cardsCreatedLimit },
     userIsSignedIn () {
       if (this.user.isSignedIn === false) {
         return false

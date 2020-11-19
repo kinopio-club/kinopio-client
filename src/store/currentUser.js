@@ -35,8 +35,8 @@ export default {
     isSignedIn: (state) => {
       return Boolean(state.apiKey)
     },
-    cardsCreatedIsOverLimit: (state) => {
-      const cardsCreatedLimit = 150
+    cardsCreatedIsOverLimit: (state, getters, rootState) => {
+      const cardsCreatedLimit = rootState.cardsCreatedLimit
       if (state.isUpgraded) { return }
       if (state.cardsCreatedCount >= cardsCreatedLimit) { return true }
     },

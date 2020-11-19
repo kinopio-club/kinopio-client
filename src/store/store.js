@@ -33,6 +33,7 @@ export default new Vuex.Store({
     shouldExplicitlyHideFooter: false,
     isTouchDevice: false,
     cardMap: {},
+    cardsCreatedLimit: 100,
 
     // reset password
     resetPasswordApiKey: '',
