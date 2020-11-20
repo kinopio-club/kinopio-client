@@ -854,7 +854,7 @@ export default {
       if (!visible && this.cardIsEmpty()) {
         this.$store.dispatch('currentSpace/removeCard', this.card)
       }
-      this.$store.commit('updatePageSizes')
+      this.$store.dispatch('updatePageSizes')
     }
   }
 }

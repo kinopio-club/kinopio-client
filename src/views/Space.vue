@@ -96,7 +96,6 @@ export default {
     // keep space element updated to viewport size so connections show up
     this.updatePageSizes()
     window.addEventListener('resize', this.updatePageSizes)
-    window.addEventListener('scroll', this.updatePageSizes)
 
     this.updateIsOnline()
     window.addEventListener('online', this.updateIsOnline)
@@ -148,7 +147,7 @@ export default {
     },
     updatePageSizes () {
       this.$nextTick(() => {
-        this.$store.commit('updatePageSizes')
+        this.$store.dispatch('updatePageSizes')
       })
     },
     updateIsOnline () {
@@ -329,6 +328,7 @@ export default {
         return true
       }
       if (this.eventIsFromTextarea(event)) { return true }
+      if (event.target.nodeType === 9) { return true } // type 9 is Document
       const fromDialog = event.target.closest('dialog')
       const fromHeader = event.target.closest('header')
       const fromFooter = event.target.closest('footer')
