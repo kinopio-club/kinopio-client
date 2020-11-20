@@ -193,7 +193,7 @@ export default {
       return Math.min(base * (multiplier + (multiplier * 0.5)), maxSpeed)
     },
     updatePageSizes () {
-      this.$store.commit('updatePageSizes')
+      this.$store.dispatch('updatePageSizes')
     },
     stopInteractions () {
       window.cancelAnimationFrame(scrollTimer)

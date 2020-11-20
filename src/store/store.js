@@ -20,6 +20,8 @@ export default new Vuex.Store({
   state: {
     pageHeight: 0,
     pageWidth: 0,
+    maxPageSizeHeight: 0,
+    maxPageSizeWidth: 0,
     viewportHeight: 0,
     viewportWidth: 0,
     isOnline: true,
@@ -126,10 +128,14 @@ export default new Vuex.Store({
     updatePageSizes: (state) => {
       const body = document.body
       const html = document.documentElement
-      state.pageWidth = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
-      state.pageHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
+      state.pageWidth = Math.max(state.maxPageSizeWidth, body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth)
+      state.pageHeight = Math.max(state.maxPageSizeHeight, body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight)
       state.viewportWidth = utils.visualViewport().width
       state.viewportHeight = utils.visualViewport().height
+    },
+    updateMaxPageSizes: (state, { width, height }) => {
+      state.maxPageSizeWidth = width
+      state.maxPageSizeHeight = height
     },
     updateSpacePageSize: (state, { maxX, maxY }) => {
       const extraScrollArea = 160
@@ -645,6 +651,22 @@ export default new Vuex.Store({
   },
 
   actions: {
+    updatePageSizes: (context) => {
+      const paddingX = Math.min(400, (utils.visualViewport().width / 4) * 3) + 100
+      const paddingY = Math.min(400, (utils.visualViewport().height / 4) * 3)
+      const cards = utils.clone(context.rootState.currentSpace.cards)
+      if (cards.length) {
+        const xPositions = Array.from(cards, card => card.x)
+        const yPositions = Array.from(cards, card => card.y)
+        const x = Math.max(...xPositions)
+        const y = Math.max(...yPositions)
+        context.commit('updateMaxPageSizes', {
+          width: x + paddingX,
+          height: y + paddingY
+        })
+      }
+      context.commit('updatePageSizes')
+    },
     clearAllFilters: (context) => {
       context.commit('clearSpaceFilters')
       context.dispatch('currentUser/clearUserFilters')
