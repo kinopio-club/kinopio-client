@@ -76,6 +76,7 @@ import Loader from '@/components/Loader.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
+import debounce from 'lodash-es/debounce'
 
 export default {
   name: 'SpaceDetails',
@@ -296,7 +297,10 @@ export default {
       this.updateSpaces()
       this.changeToLastSpace()
     },
-    async updateSpaces () {
+    updateSpaces () {
+      this.debouncedUpdatespaces()
+    },
+    debouncedUpdatespaces: debounce(async function () {
       this.$nextTick(() => {
         const currentUser = this.$store.state.currentUser
         let userSpaces = cache.getAllSpaces().filter(space => {
@@ -305,7 +309,7 @@ export default {
         userSpaces = this.updateWithExistingRemoteSpaces(userSpaces)
         this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(userSpaces, currentUser)
       })
-    },
+    }, 350, { leading: true }),
     pruneCachedSpaces (remoteSpaces) {
       const remoteSpaceIds = remoteSpaces.map(space => space.id)
       const spacesToRemove = this.spaces.filter(space => !remoteSpaceIds.includes(space.id))
