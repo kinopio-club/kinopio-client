@@ -8,9 +8,13 @@ span
         User(v-if="showUser" :user="user(space)" :isClickable="false" :key="user(space).id")
         template(v-else-if="showUserIfCurrentUserIsCollaborator && space.currentUserIsCollaborator")
           User(:user="user(space)" :isClickable="false" :key="user(space).id")
+        //- space meta
+        span(v-if="space.isFavorite")
+          img.icon.favorite-icon(src="@/assets/heart.svg")
         MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
         .badge.info.template-badge(v-if="showCategory" :class="categoryClassName(space)") {{space.category}}
         .badge.info.template-badge(v-else-if="spaceIsTemplate(space)") Template
+        //- space details
         .name
           span {{space.name}}
           img.icon.privacy-icon(v-if="spaceIsNotClosed(space)" :src="privacyIcon(space)")
@@ -139,6 +143,10 @@ export default {
   .privacy-icon
     height 12px
     vertical-align -2px
+
+  .favorite-icon
+    margin-right 4px
+    width 12px
 
   .user
     margin-right 6px
