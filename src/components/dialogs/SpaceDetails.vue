@@ -297,6 +297,29 @@ export default {
       this.updateSpaces()
       this.changeToLastSpace()
     },
+    orderByFavoriteSpaces (spaces) {
+      let favoriteSpaces = []
+      spaces = spaces.filter(space => {
+        if (space.isFavorite) {
+          favoriteSpaces.push(space)
+        } else {
+          return space
+        }
+      })
+      return favoriteSpaces.concat(spaces)
+    },
+    updateFavoriteSpaces (spaces) {
+      const userFavoriteSpaces = this.$store.state.currentUser.favoriteSpaces
+      const favoriteSpaceIds = userFavoriteSpaces.map(space => space.id)
+      spaces = spaces.map(space => {
+        if (favoriteSpaceIds.includes(space.id)) {
+          space.isFavorite = true
+        }
+        return space
+      })
+      spaces = this.orderByFavoriteSpaces(spaces)
+      return spaces
+    },
     updateSpaces () {
       this.debouncedUpdatespaces()
     },
@@ -307,6 +330,7 @@ export default {
           return this.$store.getters['currentUser/canEditSpace'](space)
         })
         userSpaces = this.updateWithExistingRemoteSpaces(userSpaces)
+        userSpaces = this.updateFavoriteSpaces(userSpaces)
         this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(userSpaces, currentUser)
       })
     }, 350, { leading: true }),
@@ -334,7 +358,8 @@ export default {
       this.isLoadingRemoteSpaces = false
       if (!this.remoteSpaces) { return }
       this.pruneCachedSpaces(this.remoteSpaces)
-      this.spaces = this.remoteSpaces
+      const spaces = this.updateFavoriteSpaces(this.remoteSpaces)
+      this.spaces = spaces
     },
     async updateFavorites () {
       await this.$store.dispatch('currentUser/restoreUserFavorites')
