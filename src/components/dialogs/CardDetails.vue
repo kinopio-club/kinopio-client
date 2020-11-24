@@ -21,7 +21,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keyup.stop.right="checkIfShouldHideTagPicker"
 
         data-type="name"
-        maxlength="250"
+        maxlength="300"
         @click.left="clickName"
         @blur="triggerUpdatePositionInVisualViewport"
         @paste="updatePastedName"
@@ -109,7 +109,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       span.badge.danger
         img.icon.cancel(src="@/assets/add.svg")
         span Max Length
-      p To fit small screens, cards can't be longer than 250 characters
+      p To fit small screens, cards can't be longer than 300 characters
     template(v-if="error.signUpToUpload")
       p
         span To upload files,
@@ -229,7 +229,7 @@ export default {
     },
     isInvitedButCannotEditSpace () { return this.$store.getters['currentUser/isInvitedButCannotEditSpace']() },
     errorMaxCardLength () {
-      const maxCardLength = 250
+      const maxCardLength = 300
       if (this.card.name.length >= maxCardLength) {
         return true
       } else {
@@ -380,7 +380,7 @@ export default {
     },
     splitCards () {
       const spaceBetweenCards = 12
-      const maxCardLength = 250
+      const maxCardLength = 300
       let seperated
       if (this.nameHasLineBreaks) {
         seperated = this.seperatedLines
