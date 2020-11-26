@@ -215,7 +215,7 @@ export default {
     filterShowDateUpdated () { return this.$store.state.currentUser.filterShowDateUpdated },
     updatedByUser () {
       const userId = this.card.nameUpdatedByUserId || this.card.userId
-      const user = this.$store.getters['currentSpace/memberById'](userId)
+      let user = this.$store.getters['currentSpace/userById'](userId)
       if (user) {
         return user
       } else {
@@ -431,7 +431,7 @@ export default {
       const remoteCardDetailsVisible = this.$store.state.remoteCardDetailsVisible
       const visibleCard = remoteCardDetailsVisible.find(card => card.cardId === this.id)
       if (visibleCard) {
-        const user = this.$store.getters['currentSpace/memberById'](visibleCard.userId)
+        const user = this.$store.getters['currentSpace/userById'](visibleCard.userId)
         return user.color
       } else {
         return undefined
@@ -441,7 +441,7 @@ export default {
       const remoteCardsSelected = this.$store.state.remoteCardsSelected
       const selectedCard = remoteCardsSelected.find(card => card.cardId === this.id)
       if (selectedCard) {
-        const user = this.$store.getters['currentSpace/memberById'](selectedCard.userId)
+        const user = this.$store.getters['currentSpace/userById'](selectedCard.userId)
         return user.color
       } else {
         return undefined
@@ -451,7 +451,7 @@ export default {
       const remoteCardsDragging = this.$store.state.remoteCardsDragging
       const draggingCard = remoteCardsDragging.find(card => card.cardId === this.id)
       if (draggingCard) {
-        const user = this.$store.getters['currentSpace/memberById'](draggingCard.userId)
+        const user = this.$store.getters['currentSpace/userById'](draggingCard.userId)
         return user.color
       } else {
         return undefined
@@ -461,7 +461,7 @@ export default {
       const remoteUploadDraggedOverCards = this.$store.state.remoteUploadDraggedOverCards
       const draggedOverCard = remoteUploadDraggedOverCards.find(card => card.cardId === this.id)
       if (draggedOverCard) {
-        const user = this.$store.getters['currentSpace/memberById'](draggedOverCard.userId)
+        const user = this.$store.getters['currentSpace/userById'](draggedOverCard.userId)
         return user.color
       } else {
         return undefined

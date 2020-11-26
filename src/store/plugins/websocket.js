@@ -38,7 +38,7 @@ const sendEvent = (store, mutation, type) => {
   const message = mutation.payload.type
   let updates = mutation.payload
   updates = utils.normalizeBroadcastUpdates(updates)
-  const hidden = ['updateRemoteUserCursor', 'addRemotePaintingCircle', 'addSpectatorToSpace', 'clearRemoteCardDetailsVisible', 'clearRemoteConnectionDetailsVisible']
+  const hidden = ['updateRemoteUserCursor', 'addRemotePaintingCircle', 'clearRemoteCardDetailsVisible', 'clearRemoteConnectionDetailsVisible']
   if (!hidden.includes(updates.type)) {
     console.log('🌜', updates)
   }
@@ -103,6 +103,9 @@ export default function createWebSocketPlugin () {
           // presence
           } else if (message === 'userJoinedRoom') {
             store.dispatch('currentSpace/addUserToJoinedSpace', user)
+          } else if (message === 'addSpectatorToSpace') {
+            store.commit('currentSpace/addSpectatorToSpace', updates)
+            store.commit('updateOtherUsers', updates.user, { root: true })
           } else if (message === 'userLeftRoom') {
             store.commit('currentSpace/removeSpectatorFromSpace', user || updates.user)
             store.commit('clearRemoteMultipleSelected', data)

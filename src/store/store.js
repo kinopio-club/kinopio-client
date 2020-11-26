@@ -122,7 +122,10 @@ export default new Vuex.Store({
     // filters
     filteredConnectionTypeIds: [],
     filteredFrameIds: [],
-    filteredTagNames: []
+    filteredTagNames: [],
+
+    // session data
+    otherUsers: [] // { id, name color }
   },
   mutations: {
     updatePageSizes: (state) => {
@@ -647,6 +650,20 @@ export default new Vuex.Store({
     removeFromFilteredTagNames: (state, name) => {
       utils.typeCheck({ value: name, type: 'string', origin: 'removeFromFilteredTagNames' })
       state.filteredTagNames = state.filteredTagNames.filter(tagName => tagName !== name)
+    },
+
+    // Session Data
+
+    updateOtherUsers: (state, updatedUser) => {
+      utils.typeCheck({ value: updatedUser, type: 'object', origin: 'updateOtherUsers' })
+      let users = utils.clone(state.otherUsers)
+      users = users.filter(user => {
+        if (user.id !== updatedUser.id) {
+          return user
+        }
+      })
+      users.push(updatedUser)
+      state.otherUsers = users
     }
   },
 
@@ -746,6 +763,10 @@ export default new Vuex.Store({
       const isDrawingConnection = state.currentUserIsDrawingConnection
       const isDraggingCard = state.currentUserIsDraggingCard
       return isPainting || isDrawingConnection || isDraggingCard
+    },
+    otherUserById: (state, getters) => (userId) => {
+      const user = state.otherUsers.find(otherUser => otherUser.id === userId)
+      return user
     }
   },
 

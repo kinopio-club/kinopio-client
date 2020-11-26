@@ -12,6 +12,7 @@ import nanoid from 'nanoid'
 import random from 'lodash-es/random'
 import last from 'lodash-es/last'
 import uniqBy from 'lodash-es/uniqBy'
+import uniq from 'lodash-es/uniq'
 import dayjs from 'dayjs'
 
 export default {
@@ -344,6 +345,27 @@ export default {
         context.commit('addSpectatorToSpace', newUser)
       }
     },
+    updateOtherUsers: async (context) => {
+      const cards = utils.clone(context.state.cards)
+      let userIds = []
+      const spaceMemberIds = utils.clone(context.state.users).map(user => user.id)
+      const spaceCollaboratorIds = utils.clone(context.state.collaborators).map(user => user.id)
+      userIds = userIds.concat(spaceMemberIds)
+      userIds = userIds.concat(spaceCollaboratorIds)
+      let otherUserIds = []
+      cards.forEach(card => {
+        if (!card.nameUpdatedByUserId) { return }
+        if (!userIds.includes(card.nameUpdatedByUserId)) {
+          otherUserIds.push(card.nameUpdatedByUserId)
+        }
+      })
+      otherUserIds = uniq(otherUserIds)
+      if (!otherUserIds.length) { return }
+      for (const userId of otherUserIds) {
+        const user = await context.dispatch('api/getPublicUser', { id: userId }, { root: true })
+        context.commit('updateOtherUsers', user, { root: true })
+      }
+    },
 
     // Space
 
@@ -577,6 +599,7 @@ export default {
       context.commit('spaceUrlToLoad', '', { root: true })
       context.dispatch('updateSpacePageSize')
       context.dispatch('loadBackground', context.state.background)
+      context.dispatch('updateOtherUsers')
     },
     loadLastSpace: (context) => {
       const user = context.rootState.currentUser
@@ -1262,6 +1285,13 @@ export default {
     memberById: (state, getters, rootState) => (id) => {
       const members = getters.members()
       return members.find(member => member.id === id)
+    },
+    userById: (state, getters, rootState, rootGetters) => (id) => {
+      let user = getters.memberById(id) || rootGetters.otherUserById(id)
+      if (rootState.currentUser.id === id) {
+        user = rootState.currentUser
+      }
+      return user
     }
   }
 }
