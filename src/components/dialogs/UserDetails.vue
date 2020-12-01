@@ -31,11 +31,19 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.left.stop="clos
         button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: upgradeUserIsVisible}")
           span Upgrade for Unlimited
         UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeDialogs")
-      p
-        .badge.info $4/month
       .row
+        p
+          .badge.info $4/month
         a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost")
           button Help →
+      .row(v-if="spaceUserIsUpgraded")
+        .badge.status
+          p
+            .badge-wrap
+              .badge.inline-user-badge(:style="{background: spaceUser.color}")
+                User(:user="spaceUser" :detailsOnRight="true" :isClickable="false")
+                span {{spaceUser.name}}
+            span is upgraded, so cards you create in this space won't change your card count
 
     section
       .button-wrap
@@ -125,6 +133,8 @@ export default {
     currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
     hasRestoredFavorites () { return this.$store.state.hasRestoredFavorites },
     cardsCreatedLimit () { return this.$store.state.cardsCreatedLimit },
+    spaceUserIsUpgraded () { return this.$store.getters['currentSpace/spaceUserIsUpgraded'] },
+    spaceUser () { return this.$store.state.currentSpace.users[0] },
     userIsSignedIn () {
       if (this.user.isSignedIn === false) {
         return false
@@ -288,6 +298,9 @@ export default {
 
   .upgrade-user
     max-height calc(100vh - 175px)
+
+  .inline-user-badge
+    display inline-flex !important
 
 .user-info
   display: flex

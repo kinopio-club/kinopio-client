@@ -250,6 +250,8 @@ export default {
       }
     },
     cardsCreatedCount: (context, { shouldIncrement }) => {
+      const spaceUserIsUpgraded = context.rootGetters['currentSpace/spaceUserIsUpgraded']
+      if (spaceUserIsUpgraded) { return }
       let count
       if (shouldIncrement) {
         count = context.state.cardsCreatedCount + 1

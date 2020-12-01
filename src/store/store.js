@@ -608,6 +608,9 @@ export default new Vuex.Store({
     notifyCardsCreatedIsOverLimit: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'notifyCardsCreatedIsOverLimit' })
       state.notifyCardsCreatedIsOverLimit = value
+      if (value === true) {
+        state.notifyCardsCreatedIsNearLimit = false
+      }
     },
 
     // Notifications with Position

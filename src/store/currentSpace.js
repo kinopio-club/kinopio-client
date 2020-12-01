@@ -660,25 +660,6 @@ export default {
       if (space.isRemoved || !canEdit) { return }
       context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
     },
-    incrementCardsCreatedCountFromSpace (context, space) {
-      const user = context.rootState.currentUser
-      const incrementCardsCreatedCountBy = space.cards.filter(card => {
-        return card.userId === user.id
-      }).length
-      context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        delta: incrementCardsCreatedCountBy,
-        shouldIncrement: true
-      }, { root: true })
-    },
-    decrementCardsCreatedCountFromSpace (context, space) {
-      const user = context.rootState.currentUser
-      const decrementCardsCreatedCountBy = space.cards.filter(card => {
-        return card.userId === user.id
-      }).length
-      context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        delta: decrementCardsCreatedCountBy
-      }, { root: true })
-    },
     removeCurrentSpace: (context) => {
       const space = utils.clone(context.state)
       context.dispatch('decrementCardsCreatedCountFromSpace', space)
@@ -727,15 +708,6 @@ export default {
         context.commit('notifySignUpToEditSpace', false, { root: true })
       }
     },
-    checkIfShouldnotifyCardsCreatedIsNearLimit: (context) => {
-      const currentUser = context.rootState.currentUser
-      if (currentUser.isUpgraded) { return }
-      const cardsCreatedLimit = context.rootState.cardsCreatedLimit
-      const value = cardsCreatedLimit - currentUser.cardsCreatedCount
-      if (utils.isBetween({ value, min: 0, max: 10 })) {
-        context.commit('notifyCardsCreatedIsNearLimit', true, { root: true })
-      }
-    },
     removeCollaboratorFromSpace: (context, user) => {
       const space = utils.clone(context.state)
       const userName = user.name || 'User'
@@ -753,13 +725,45 @@ export default {
       }
     },
 
+    // Card Count
+
+    checkIfShouldNotifyCardsCreatedIsNearLimit: (context) => {
+      const spaceUserIsUpgraded = context.getters.spaceUserIsUpgraded
+      if (spaceUserIsUpgraded) { return }
+      const currentUser = context.rootState.currentUser
+      if (currentUser.isUpgraded) { return }
+      const cardsCreatedLimit = context.rootState.cardsCreatedLimit
+      const value = cardsCreatedLimit - currentUser.cardsCreatedCount
+      if (utils.isBetween({ value, min: 0, max: 10 })) {
+        context.commit('notifyCardsCreatedIsNearLimit', true, { root: true })
+      }
+    },
+    incrementCardsCreatedCountFromSpace (context, space) {
+      const user = context.rootState.currentUser
+      const incrementCardsCreatedCountBy = space.cards.filter(card => {
+        return card.userId === user.id
+      }).length
+      context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+        delta: incrementCardsCreatedCountBy,
+        shouldIncrement: true
+      }, { root: true })
+    },
+    decrementCardsCreatedCountFromSpace (context, space) {
+      const user = context.rootState.currentUser
+      const decrementCardsCreatedCountBy = space.cards.filter(card => {
+        return card.userId === user.id
+      }).length
+      context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+        delta: decrementCardsCreatedCountBy
+      }, { root: true })
+    },
+
     // Cards
 
     addCard: (context, { position, isParentCard, name, id }) => {
       utils.typeCheck({ value: position, type: 'object', origin: 'addCard' })
-      if (context.rootGetters['currentUser/cardsCreatedIsOverLimit']) {
+      if (context.getters.shouldPreventAddCard) {
         context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
-        context.commit('notifyCardsCreatedIsNearLimit', false, { root: true })
         return
       }
       let cards = context.state.cards
@@ -783,7 +787,7 @@ export default {
       context.commit('history/add', update, { root: true })
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
       context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: true }, { root: true })
-      context.dispatch('checkIfShouldnotifyCardsCreatedIsNearLimit')
+      context.dispatch('checkIfShouldNotifyCardsCreatedIsNearLimit')
     },
     addMultipleCards: (context, newCards) => {
       newCards.forEach(card => {
@@ -1292,6 +1296,22 @@ export default {
         user = rootState.currentUser
       }
       return user
+    },
+    spaceUserIsUpgraded: (state, getters, rootState) => {
+      const currentUser = rootState.currentUser
+      const users = state.users
+      const userIds = users.map(user => user.id)
+      if (userIds.includes(currentUser.id)) { return }
+      let userIsUpgraded
+      users.forEach(user => {
+        if (user.isUpgraded) { userIsUpgraded = true }
+      })
+      return userIsUpgraded
+    },
+    shouldPreventAddCard: (state, getters, rootState, rootGetters) => {
+      const cardsCreatedIsOverLimit = rootGetters['currentUser/cardsCreatedIsOverLimit']
+      const spaceUserIsUpgraded = getters.spaceUserIsUpgraded
+      return cardsCreatedIsOverLimit && !spaceUserIsUpgraded
     }
   }
 }
