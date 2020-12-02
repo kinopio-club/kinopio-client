@@ -10,7 +10,7 @@ dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.left.st
   section
     Loader(:visible="loading")
 
-    template(v-if="!loading")
+    template(v-if="!loading && collaboratorKey")
       .row
         input.textarea(ref="url" v-model="url")
       button(v-if="!canNativeShare" @click.left="copyUrl")
@@ -20,6 +20,11 @@ dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.left.st
           span Copy Invite Url
         button(@click.left="shareUrl" :disabled="loading")
           img.icon(src="@/assets/share.svg")
+
+    template(v-if="!loading && !collaboratorKey")
+      .row
+        .badge.danger シ_ _)シ Something went wrong
+      button(@click="updateCollaboratorKey") Try Again
 
     .row
       .badge.success.success-message(v-if="urlIsCopied") Url Copied
@@ -42,7 +47,8 @@ export default {
     return {
       urlIsCopied: false,
       url: '',
-      loading: false
+      loading: false,
+      collaboratorKey: ''
     }
   },
   computed: {
@@ -69,14 +75,16 @@ export default {
       navigator.share(data)
     },
     async updateCollaboratorKey () {
+      this.collaboratorKey = ''
       const space = this.$store.state.currentSpace
       this.loading = true
       const collaboratorKey = await this.$store.dispatch('api/getSpaceCollaboratorKey', space)
+      this.collaboratorKey = collaboratorKey
       this.loading = false
       this.$store.commit('currentSpace/updateSpace', { collaboratorKey })
+      this.updateInviteUrl(collaboratorKey)
     },
-    updateInviteUrl () {
-      const collaboratorKey = this.$store.state.currentSpace.collaboratorKey
+    updateInviteUrl (collaboratorKey) {
       const currentSpace = this.$store.state.currentSpace
       const spaceId = currentSpace.id
       const spaceName = utils.normalizeString(currentSpace.name)
@@ -88,7 +96,6 @@ export default {
       if (visible) {
         this.urlIsCopied = false
         this.updateCollaboratorKey()
-        this.updateInviteUrl()
       }
     }
   }
