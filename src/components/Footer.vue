@@ -31,7 +31,12 @@ footer(:style="visualViewportPosition")
         img.icon.sunglasses(src="@/assets/filter.svg")
         span Filters
       Filters(:visible="filtersIsVisible")
-
+    //- Links
+    .button-wrap
+      button(@click.left="toggleLinksIsVisible" :class="{ active: linksIsVisible}")
+        span Links
+      Links(:visible="linksIsVisible")
+    //- Background
     .button-wrap
       button(@click.left="toggleBackgroundIsVisible" :class="{ active: backgroundIsVisible}")
         img.icon.macro(src="@/assets/macro.svg")
@@ -45,7 +50,6 @@ footer(:style="visualViewportPosition")
         .badge.info
           Loader(:visible="true")
           span {{remotePendingUpload.percentComplete}}%
-
       Background(:visible="backgroundIsVisible")
 
 </template>
@@ -54,6 +58,7 @@ footer(:style="visualViewportPosition")
 import Explore from '@/components/dialogs/Explore.vue'
 import Removed from '@/components/dialogs/Removed.vue'
 import Filters from '@/components/dialogs/Filters.vue'
+import Links from '@/components/dialogs/Links.vue'
 import Favorites from '@/components/dialogs/Favorites.vue'
 import Background from '@/components/dialogs/Background.vue'
 import Notifications from '@/components/Notifications.vue'
@@ -70,6 +75,7 @@ export default {
     Removed,
     Notifications,
     Filters,
+    Links,
     Favorites,
     Background,
     Loader
@@ -79,6 +85,7 @@ export default {
       removedIsVisible: false,
       favoritesIsVisible: false,
       filtersIsVisible: false,
+      linksIsVisible: false,
       exploreIsVisible: false,
       backgroundIsVisible: false,
       pinchZoomOffsetLeft: 0,
@@ -92,6 +99,7 @@ export default {
         this.removedIsVisible = false
         this.favoritesIsVisible = false
         this.filtersIsVisible = false
+        this.linksIsVisible = false
         this.exploreIsVisible = false
         this.backgroundIsVisible = false
       }
@@ -234,6 +242,11 @@ export default {
       const isVisible = this.filtersIsVisible
       this.$store.dispatch('closeAllDialogs', 'Footer.toggleFiltersIsVisible')
       this.filtersIsVisible = !isVisible
+    },
+    toggleLinksIsVisible () {
+      const isVisible = this.linksIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Footer.toggleLinksIsVisible')
+      this.linksIsVisible = !isVisible
     },
     toggleBackgroundIsVisible () {
       const isVisible = this.backgroundIsVisible
