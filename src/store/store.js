@@ -125,7 +125,8 @@ export default new Vuex.Store({
     filteredTagNames: [],
 
     // session data
-    otherUsers: [] // { id, name color }
+    otherUsers: [], // { id, name color }
+    otherSpaces: [] // { {user}, name, id }
   },
   mutations: {
     updatePageSizes: (state) => {
@@ -667,6 +668,17 @@ export default new Vuex.Store({
       })
       users.push(updatedUser)
       state.otherUsers = users
+    },
+    updateOtherSpaces: (state, updatedSpace) => {
+      utils.typeCheck({ value: updatedSpace, type: 'object', origin: 'updateOtherSpaces' })
+      let spaces = utils.clone(state.otherSpaces)
+      spaces = spaces.filter(space => {
+        if (space.id !== updatedSpace.id) {
+          return space
+        }
+      })
+      spaces.push(updatedSpace)
+      state.otherSpaces = spaces
     }
   },
 
@@ -770,6 +782,10 @@ export default new Vuex.Store({
     otherUserById: (state, getters) => (userId) => {
       const user = state.otherUsers.find(otherUser => otherUser.id === userId)
       return user
+    },
+    otherSpaceById: (state, getters) => (spaceId) => {
+      const space = state.otherSpaces.find(otherSpace => otherSpace.id === spaceId)
+      return space
     }
   },
 

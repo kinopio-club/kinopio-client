@@ -335,7 +335,7 @@ export default {
       }
     },
 
-    // Users
+    // Users and otherSpaces
 
     addUserToJoinedSpace: (context, newUser) => {
       if (newUser.isCollaborator) {
@@ -364,6 +364,31 @@ export default {
       for (const userId of otherUserIds) {
         const user = await context.dispatch('api/getPublicUser', { id: userId }, { root: true })
         context.commit('updateOtherUsers', user, { root: true })
+      }
+    },
+    updateOtherSpaces: async (context, links) => {
+      utils.typeCheck({ value: links, type: 'array', allowUndefined: true, origin: 'updateOtherSpaces' })
+      links = links || context.getters.links()
+      if (!links.length) { return }
+      for (const link of links) {
+        if (link.toSpaceId) {
+          const cachedSpace = cache.space(link.toSpaceId)
+          if (utils.objectHasKeys(cachedSpace)) {
+            const space = utils.normalizeSpaceMetaOnly(cachedSpace)
+            context.commit('updateOtherSpaces', space, { root: true })
+          } else {
+            await context.dispatch('saveOtherSpace', link.toSpaceId)
+          }
+        }
+      }
+    },
+    saveOtherSpace: async (context, spaceId) => {
+      try {
+        let space = await context.dispatch('api/getSpace', { id: spaceId }, { root: true })
+        space = utils.normalizeSpaceMetaOnly(space)
+        context.commit('updateOtherSpaces', space, { root: true })
+      } catch (error) {
+        console.warn('🚑 otherSpace not found', error)
       }
     },
 
@@ -600,6 +625,7 @@ export default {
       context.dispatch('updateSpacePageSize')
       context.dispatch('loadBackground', context.state.background)
       context.dispatch('updateOtherUsers')
+      context.dispatch('updateOtherSpaces')
     },
     loadLastSpace: (context) => {
       const user = context.rootState.currentUser
@@ -1312,6 +1338,35 @@ export default {
       const cardsCreatedIsOverLimit = rootGetters['currentUser/cardsCreatedIsOverLimit']
       const spaceUserIsUpgraded = getters.spaceUserIsUpgraded
       return cardsCreatedIsOverLimit && !spaceUserIsUpgraded
+    },
+
+    // Links
+
+    links: (state, getters) => (cardWithLinks) => {
+      let cards = state.cards
+      if (cardWithLinks) { cards = [cardWithLinks] }
+      let links = cards.filter(card => {
+        const urls = utils.urlsFromString(card.name)
+        let link
+        urls.forEach(url => {
+          if (utils.urlType(url) === 'link') {
+            link = url
+          }
+        })
+        return link
+      })
+      links = links.map(card => {
+        let link = {}
+        link.url = utils.urlFromString(card.name)
+        link.originCardId = card.id
+        link.originSpaceId = card.spaceId
+        link.originIsCurrentSpace = card.spaceId === state.id
+        if (utils.urlIsKinopioSpace(link.url)) {
+          link.toSpaceId = utils.spaceIdFromUrl(link.url)
+        }
+        return link
+      })
+      return links
     }
   }
 }

@@ -516,6 +516,15 @@ export default {
     remoteSpace.removedCards = removedCards
     return remoteSpace
   },
+  normalizeSpaceMetaOnly (space) {
+    let spaceMeta = {}
+    spaceMeta.id = space.id
+    spaceMeta.name = space.name
+    spaceMeta.users = space.users
+    spaceMeta.background = space.background
+    spaceMeta.moonPhase = space.moonPhase
+    return spaceMeta
+  },
   AddCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
     return spaces.map(space => {
       let userId
@@ -738,8 +747,14 @@ export default {
   },
   urlIsKinopioSpace (url) {
     if (!url) { return }
-    // https://regexr.com/5hjc2
-    const kinopioUrlPattern = new RegExp(/(?:kinopio)(.local|.club)(\/|:.*\/)(.*)\b/gi)
+    let kinopioUrlPattern
+    if (process.env.NODE_ENV === 'development') {
+      // https://regexr.com/5hjc2
+      kinopioUrlPattern = new RegExp(/(?:kinopio.local:.*\/)(.*)\b/gi)
+    } else {
+      // https://regexr.com/5hk37
+      kinopioUrlPattern = new RegExp(/(?:kinopio.club\/)(.*)\b/gi)
+    }
     const isKinopioUrl = url.match(kinopioUrlPattern)
     return Boolean(isKinopioUrl)
   },
