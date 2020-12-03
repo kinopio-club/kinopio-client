@@ -264,7 +264,7 @@ export default {
     urls () { return utils.urlsFromString(this.name, true) },
     linkUrls () {
       return this.urls.filter(url => {
-        return this.urlType(url) === 'link'
+        return utils.urlType(url) === 'link'
       })
     },
     hasLinks () {
@@ -349,7 +349,7 @@ export default {
       let newUrls = []
       this.urls.forEach(url => {
         url = url.trim()
-        const isLink = this.urlType(url) === 'link'
+        const isLink = utils.urlType(url) === 'link'
         if (!isLink) { return }
         const queryString = utils.queryString(url)
         const domain = utils.urlWithoutQueryString(url)
@@ -602,26 +602,15 @@ export default {
     triggerUpgradeUserIsVisible () {
       this.$store.commit('triggerUpgradeUserIsVisible')
     },
-    urlType (url) {
-      if (utils.urlIsImage(url)) {
-        return 'image'
-      } else if (utils.urlIsVideo(url)) {
-        return 'video'
-      } else if (utils.urlIsAudio(url)) {
-        return 'audio'
-      } else {
-        return 'link'
-      }
-    },
     addFile (file) {
       let name = this.card.name
       const url = file.url
-      const urlType = this.urlType(url)
+      const urlType = utils.urlType(url)
       const checkbox = utils.checkboxFromString(name)
       const previousUrls = utils.urlsFromString(name, true)
       let isReplaced
       previousUrls.forEach(previousUrl => {
-        if (this.urlType(previousUrl) === urlType) {
+        if (utils.urlType(previousUrl) === urlType) {
           name = name.replace(previousUrl.trim(), url)
           isReplaced = true
         }

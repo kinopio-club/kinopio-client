@@ -10,7 +10,7 @@ export default {
       console.warn('storeLocal could not save to localStorage')
       if (this.user().apiKey) {
         console.log('🐇 pruning localStorage spaces')
-        const currentSpaceId = utils.idFromUrl()
+        const currentSpaceId = utils.spaceIdFromUrl()
         const keys = Object.keys(window.localStorage)
         let spaceKeys = keys.filter(key => key.startsWith('space-') || key.startsWith('removed-space-'))
         spaceKeys = spaceKeys.filter(key => key !== `space-${currentSpaceId}`)

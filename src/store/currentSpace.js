@@ -316,7 +316,7 @@ export default {
       // restore from url
       if (spaceUrl) {
         console.log('🚃 Restore space from url', spaceUrl)
-        const spaceId = utils.idFromUrl(spaceUrl)
+        const spaceId = utils.spaceIdFromUrl(spaceUrl)
         const space = { id: spaceId }
         context.dispatch('loadSpace', { space })
       // restore or create journal space
