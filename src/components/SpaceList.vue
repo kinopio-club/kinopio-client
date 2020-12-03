@@ -1,25 +1,25 @@
-
 <template lang="pug">
 span
   ResultsFilter(:hideFilter="hideFilter" :items="spaces" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredSpaces")
   ul.results-list.space-list
     template(v-for="(space in spacesFiltered")
-      li(@click.left="selectSpace(space)" :class="{ active: spaceIsActive(space) }" :key="space.id" tabindex="0" v-on:keyup.enter="selectSpace(space)")
-        User(v-if="showUser" :user="user(space)" :isClickable="false" :key="user(space).id")
-        template(v-else-if="showUserIfCurrentUserIsCollaborator && space.currentUserIsCollaborator")
-          User(:user="user(space)" :isClickable="false" :key="user(space).id")
-        //- space meta
-        span(v-if="space.isFavorite")
-          img.icon.favorite-icon(src="@/assets/heart.svg")
-        MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
-        .badge.info.template-badge(v-if="showCategory" :class="categoryClassName(space)") {{space.category}}
-        .badge.info.template-badge(v-else-if="spaceIsTemplate(space)") Template
-        //- space details
-        .name
-          span {{space.name}}
-          img.icon.privacy-icon(v-if="spaceIsNotClosed(space)" :src="privacyIcon(space)")
-          .badge.status(v-if="showInExplore(space)")
-            img.icon(src="@/assets/checkmark.svg")
+      a(:href="space.url")
+        li(@click.left.prevent.stop="selectSpace(space)" :class="{ active: spaceIsActive(space) }" :key="space.id" tabindex="0" v-on:keyup.enter="selectSpace(space)")
+          User(v-if="showUser" :user="user(space)" :isClickable="false" :key="user(space).id")
+          template(v-else-if="showUserIfCurrentUserIsCollaborator && space.currentUserIsCollaborator")
+            User(:user="user(space)" :isClickable="false" :key="user(space).id")
+          //- space meta
+          span(v-if="space.isFavorite")
+            img.icon.favorite-icon(src="@/assets/heart.svg")
+          MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
+          .badge.info.template-badge(v-if="showCategory" :class="categoryClassName(space)") {{space.category}}
+          .badge.info.template-badge(v-else-if="spaceIsTemplate(space)") Template
+          //- space details
+          .name
+            span {{space.name}}
+            img.icon.privacy-icon(v-if="spaceIsNotClosed(space)" :src="privacyIcon(space)")
+            .badge.status(v-if="showInExplore(space)")
+              img.icon(src="@/assets/checkmark.svg")
     Loader(:visible="isLoading")
 
 </template>
@@ -154,4 +154,8 @@ export default {
 
   .loader
     margin-left 6px
+
+  a
+    color var(--primary)
+    text-decoration none
 </style>
