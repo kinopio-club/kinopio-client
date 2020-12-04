@@ -697,10 +697,11 @@ export default {
     const urlPattern = new RegExp(/((http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+[ ]*)*/igm)
     let urls = string.match(urlPattern)
     // filter out empty or non-urls
+    urls = urls.map(url => this.trim(url))
     urls = urls.filter(url => {
-      const urlHasContent = Boolean(this.trim(url).length)
-      const isInvalidUrl = this.urlIsFloatOrIp(url.trim()) || this.urlIsCurrencyFloat(url.trim())
-      if (urlHasContent && !isInvalidUrl) {
+      if (!url) { return }
+      const isInvalidUrl = this.urlIsFloatOrIp(url) || this.urlIsCurrencyFloat(url)
+      if (!isInvalidUrl) {
         return true
       }
     })
@@ -911,35 +912,45 @@ export default {
     return tags
   },
   cardNameSegments (name) {
-    const tags = this.tagsFromString(name)
+    const tags = this.tagsFromString(name) || []
+    const urls = this.urlsFromString(name) || []
+    const links = urls.filter(url => this.urlIsKinopioSpace(url))
     let segments = []
-    if (tags) {
-      tags.forEach(tag => {
-        const tagStartPosition = name.indexOf(tag)
-        const tagEndPosition = tagStartPosition + tag.length
-        segments.push({
-          isText: true,
-          content: name.substring(0, tagStartPosition)
-        })
-        segments.push({
-          isTag: true,
-          name: tag.substring(2, tag.length - 2)
-        })
-        name = name.substring(tagEndPosition, name.length)
+    // tags
+    tags.forEach(tag => {
+      const tagStartPosition = name.indexOf(tag)
+      const tagEndPosition = tagStartPosition + tag.length
+      segments.push({
+        isText: true,
+        content: name.substring(0, tagStartPosition)
       })
-      if (name.length) {
-        segments.push({
-          isText: true,
-          content: name
-        })
-      }
-      return segments
-    } else {
-      return [{
+      segments.push({
+        isTag: true,
+        name: tag.substring(2, tag.length - 2)
+      })
+      name = name.substring(tagEndPosition, name.length)
+    })
+    // links
+    links.forEach(link => {
+      const linkStartPosition = name.indexOf(link)
+      const linkEndPosition = linkStartPosition + link.length
+      segments.push({
+        isText: true,
+        content: name.substring(0, linkStartPosition)
+      })
+      segments.push({
+        isLink: true,
+        name: link
+      })
+      name = name.substring(linkEndPosition, name.length)
+    })
+    if (name.length) {
+      segments.push({
         isText: true,
         content: name
-      }]
+      })
     }
+    return segments
   },
   newTag ({ name, defaultColor, cardId, spaceId }) {
     let color
