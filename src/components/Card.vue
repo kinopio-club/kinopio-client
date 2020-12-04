@@ -54,12 +54,21 @@ article(:style="position" :data-card-id="id" ref="card")
                 @keyup.stop.enter="showTagDetailsIsVisible($event, segment)"
                 :data-tag-id="segment.id"
               ) {{segment.name}}
+              //- Link
+              a(v-if="segment.isLink" :href="segment.name")
+                span.badge.button-badge.link-badge(
+                  :class="{ active: currentSelectedLink.name === segment.name }"
+                  @click.left.prevent="showLinkDetailsIsVisible($event, segment)"
+                  @touchend.prevent="showLinkDetailsIsVisible($event, segment)"
+                  @keyup.stop.enter="showLinkDetailsIsVisible($event, segment)"
+                )
+                  span {{segment.space.name || segment.content }}
 
       //- Right buttons
       span.card-buttons-wrap
-        //- Link
-        a.link-wrap(:href="linkOrUrl" @click.left.stop="closeAllDialogs" @touchend="openUrl(linkOrUrl)" v-if="linkOrUrl")
-          .link
+        //- Url →
+        a.url-wrap(:href="linkOrUrl" @click.left.stop="closeAllDialogs" @touchend="openUrl(linkOrUrl)" v-if="linkOrUrl")
+          .url
             button(:style="{background: selectedColor}" tabindex="-1")
               img.icon.visit.arrow-icon(src="@/assets/visit.svg")
         //- Connector
@@ -185,7 +194,7 @@ export default {
       uploadIsDraggedOver: false,
       isPlayingAudio: false,
       userDetailsIsVisible: false,
-      preventDraggedTagFromShowingDetails: false,
+      preventDraggedButtonBadgeFromShowingDetails: false,
       error: {
         sizeLimit: false,
         unknownUploadError: false,
@@ -202,6 +211,7 @@ export default {
   },
   computed: {
     currentSelectedTag () { return this.$store.state.currentSelectedTag },
+    currentSelectedLink () { return this.$store.state.currentSelectedLink },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     id () { return this.card.id },
     x () { return this.card.x },
@@ -322,7 +332,8 @@ export default {
     },
     nameSegments () {
       let segments = utils.cardNameSegments(this.normalizedName)
-      return segments.map(segment => {
+      segments = segments.map(segment => {
+        // tags
         if (segment.isTag) {
           let tag = this.$store.getters['currentSpace/tagByName'](segment.name)
           if (!tag) {
@@ -337,9 +348,14 @@ export default {
           }
           segment.color = tag.color
           segment.id = tag.id
+        // links
+        } else if (segment.isLink) {
+          const spaceId = utils.spaceIdFromUrl(segment.name)
+          segment.space = this.spaceFromLinkSpaceId(spaceId, segment.name)
         }
         return segment
       })
+      return segments
     },
     tags () {
       return this.nameSegments.filter(segment => {
@@ -745,7 +761,7 @@ export default {
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
       const userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
-      this.preventDraggedTagFromShowingDetails = this.$store.state.preventDraggedCardFromShowingDetails
+      this.preventDraggedButtonBadgeFromShowingDetails = this.$store.state.preventDraggedCardFromShowingDetails
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       this.$store.dispatch('closeAllDialogs', 'Card.showCardDetails')
       this.$store.dispatch('clearMultipleSelected')
@@ -760,7 +776,7 @@ export default {
     showTagDetailsIsVisible (event, tag) {
       if (isMultiTouch) { return }
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
-      if (this.preventDraggedTagFromShowingDetails) { return }
+      if (this.preventDraggedButtonBadgeFromShowingDetails) { return }
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
       this.$store.dispatch('closeAllDialogs', 'Card.showTagDetailsIsVisible')
       this.$store.commit('currentUserIsDraggingCard', false)
@@ -772,6 +788,32 @@ export default {
       tag.cardId = this.id
       this.$store.commit('currentSelectedTag', tag)
       this.$store.commit('tagDetailsIsVisible', true)
+    },
+    showLinkDetailsIsVisible (event, link) {
+      if (isMultiTouch) { return }
+      if (this.preventDraggedButtonBadgeFromShowingDetails) { return }
+      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
+      this.$store.dispatch('closeAllDialogs', 'Card.showTagDetailsIsVisible')
+      this.$store.commit('currentUserIsDraggingCard', false)
+      const linkRect = event.target.getBoundingClientRect()
+      this.$store.commit('linkDetailsPosition', {
+        x: window.scrollX + linkRect.x + 2,
+        y: window.scrollY + linkRect.y + linkRect.height - 2
+      })
+      link.cardId = this.id
+      this.$store.commit('currentSelectedLink', link)
+      this.$store.commit('linkDetailsIsVisible', true)
+    },
+    spaceFromLinkSpaceId (spaceId, url) {
+      let space = this.$store.getters.otherSpaceById(spaceId)
+      if (!space) {
+        space = {
+          isLoadingOrInvalid: true,
+          name: url,
+          url: spaceId
+        }
+      }
+      return space
     },
     openUrl (url) {
       window.location.href = url
@@ -841,9 +883,12 @@ article
         &.has-checkbox
           .audio
             width 132px
+        a
+          color var(--primary)
+          text-decoration none
 
     .connector,
-    .link
+    .url
       padding 8px
       align-self right
       cursor cell
@@ -902,7 +947,7 @@ article
       position absolute
       left 5px
       top 3.5px
-    .link
+    .url
       cursor pointer
       padding-right 0
       button
@@ -911,7 +956,7 @@ article
           top -3px
           position relative
 
-    .link-wrap
+    .url-wrap
       max-height 28px
 
     .uploading-container
@@ -991,6 +1036,9 @@ article
     .badge + .badge,
     .badge-wrap + .badge
       margin-left 6px
+
+  .link-badge
+    background-color var(--secondary-active-background)
 
 @keyframes bounce
   0%
