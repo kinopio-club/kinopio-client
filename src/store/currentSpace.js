@@ -13,6 +13,7 @@ import random from 'lodash-es/random'
 import last from 'lodash-es/last'
 import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
+import debounce from 'lodash-es/debounce'
 import dayjs from 'dayjs'
 
 export default {
@@ -366,12 +367,12 @@ export default {
         context.commit('updateOtherUsers', user, { root: true })
       }
     },
-    updateOtherSpaces: (context) => {
+    updateOtherSpaces: async (context) => {
       const links = context.getters.links()
       if (!links.length) { return }
       for (const link of links) {
         if (link.toSpaceId) {
-          context.dispatch('saveOtherSpace', link.toSpaceId)
+          await context.dispatch('saveOtherSpace', link.toSpaceId)
         }
       }
     },
@@ -382,14 +383,17 @@ export default {
         context.commit('updateOtherSpaces', space, { root: true })
       } else {
         try {
-          let space = await context.dispatch('api/getSpace', { id: spaceId }, { root: true })
-          space = utils.normalizeSpaceMetaOnly(space)
-          context.commit('updateOtherSpaces', space, { root: true })
+          context.dispatch('debouncedGetSpace', spaceId)
         } catch (error) {
           console.warn('🚑 otherSpace not found', error)
         }
       }
     },
+    debouncedGetSpace: debounce(async function (context, spaceId) {
+      let space = await context.dispatch('api/getSpace', { id: spaceId }, { root: true })
+      space = utils.normalizeSpaceMetaOnly(space)
+      context.commit('updateOtherSpaces', space, { root: true })
+    }, 100, { leading: true }),
 
     // Space
 
