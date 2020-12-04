@@ -486,6 +486,20 @@ export default {
         this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.card.id, shouldUpdateApi: true })
       })
       this.updateTags()
+      this.updateSpaceLink()
+    },
+    updateSpaceLink () {
+      let link = this.linkUrls.filter(url => utils.urlIsKinopioSpace(url))
+      link = link[0]
+      const linkToSpaceId = utils.spaceIdFromUrl(link) || null
+      const linkExists = linkToSpaceId === this.card.linkToSpaceId
+      if (linkExists) { return }
+      const update = {
+        id: this.card.id,
+        linkToSpaceId
+      }
+      this.$store.dispatch('currentSpace/updateCard', update)
+      this.$store.dispatch('currentSpace/saveOtherSpace', linkToSpaceId)
     },
     checkIfIsInsertLineBreak (event) {
       const lineBreakInserted = event.ctrlKey || event.altKey

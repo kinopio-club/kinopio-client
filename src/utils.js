@@ -632,7 +632,11 @@ export default {
   },
   spaceIdFromUrl (url) {
     url = url || window.location.href
-    return url.substring(url.length - 21, url.length)
+    const id = url.substring(url.length - 21, url.length)
+    if (id.includes('/')) {
+      return undefined
+    }
+    return id
   },
   currentSpaceHasUrl (space) {
     const id = this.spaceIdFromUrl()

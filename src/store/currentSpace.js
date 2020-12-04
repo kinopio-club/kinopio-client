@@ -366,29 +366,28 @@ export default {
         context.commit('updateOtherUsers', user, { root: true })
       }
     },
-    updateOtherSpaces: async (context, links) => {
-      utils.typeCheck({ value: links, type: 'array', allowUndefined: true, origin: 'updateOtherSpaces' })
-      links = links || context.getters.links()
+    updateOtherSpaces: (context) => {
+      const links = context.getters.links()
       if (!links.length) { return }
       for (const link of links) {
         if (link.toSpaceId) {
-          const cachedSpace = cache.space(link.toSpaceId)
-          if (utils.objectHasKeys(cachedSpace)) {
-            const space = utils.normalizeSpaceMetaOnly(cachedSpace)
-            context.commit('updateOtherSpaces', space, { root: true })
-          } else {
-            await context.dispatch('saveOtherSpace', link.toSpaceId)
-          }
+          context.dispatch('saveOtherSpace', link.toSpaceId)
         }
       }
     },
     saveOtherSpace: async (context, spaceId) => {
-      try {
-        let space = await context.dispatch('api/getSpace', { id: spaceId }, { root: true })
-        space = utils.normalizeSpaceMetaOnly(space)
+      const cachedSpace = cache.space(spaceId)
+      if (utils.objectHasKeys(cachedSpace)) {
+        const space = utils.normalizeSpaceMetaOnly(cachedSpace)
         context.commit('updateOtherSpaces', space, { root: true })
-      } catch (error) {
-        console.warn('🚑 otherSpace not found', error)
+      } else {
+        try {
+          let space = await context.dispatch('api/getSpace', { id: spaceId }, { root: true })
+          space = utils.normalizeSpaceMetaOnly(space)
+          context.commit('updateOtherSpaces', space, { root: true })
+        } catch (error) {
+          console.warn('🚑 otherSpace not found', error)
+        }
       }
     },
 
