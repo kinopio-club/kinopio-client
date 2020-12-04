@@ -523,6 +523,7 @@ export default {
     spaceMeta.users = space.users
     spaceMeta.background = space.background
     spaceMeta.moonPhase = space.moonPhase
+    spaceMeta.url = space.url
     return spaceMeta
   },
   AddCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
@@ -633,10 +634,14 @@ export default {
   spaceIdFromUrl (url) {
     url = url || window.location.href
     const id = url.substring(url.length - 21, url.length)
+    if (this.idIsValid(id)) { return id }
+  },
+  idIsValid (id) {
+    if (!id) { return }
     if (id.includes('/')) {
       return undefined
     }
-    return id
+    return true
   },
   currentSpaceHasUrl (space) {
     const id = this.spaceIdFromUrl()

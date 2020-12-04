@@ -499,7 +499,7 @@ export default {
         linkToSpaceId
       }
       this.$store.dispatch('currentSpace/updateCard', update)
-      this.$store.dispatch('currentSpace/saveOtherSpace', linkToSpaceId)
+      this.$store.dispatch('currentSpace/saveOtherSpace', { spaceId: linkToSpaceId })
     },
     checkIfIsInsertLineBreak (event) {
       const lineBreakInserted = event.ctrlKey || event.altKey

@@ -13,8 +13,9 @@ import random from 'lodash-es/random'
 import last from 'lodash-es/last'
 import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
-import debounce from 'lodash-es/debounce'
 import dayjs from 'dayjs'
+
+let otherSpacesQueue = [] // id
 
 export default {
   namespaced: true,
@@ -368,32 +369,42 @@ export default {
       }
     },
     updateOtherSpaces: async (context) => {
-      const links = context.getters.links()
+      const links = context.getters.cardsWithSpaceLinks
       if (!links.length) { return }
-      for (const link of links) {
-        if (link.toSpaceId) {
-          await context.dispatch('saveOtherSpace', link.toSpaceId)
-        }
-      }
+      links.forEach(link => {
+        const spaceId = link.linkToSpaceId
+        context.dispatch('saveOtherSpace', { spaceId, shouldAddToQueue: true })
+      })
+      otherSpacesQueue = uniq(otherSpacesQueue)
+      let spaces = await context.dispatch('api/getSpaces', otherSpacesQueue, { root: true })
+      spaces = spaces.filter(space => space.id)
+      spaces.forEach(space => {
+        space = utils.normalizeSpaceMetaOnly(space)
+        context.commit('updateOtherSpaces', space, { root: true })
+      })
+      console.log('👼', context.rootState.otherSpaces) // temp
+      otherSpacesQueue = []
     },
-    saveOtherSpace: async (context, spaceId) => {
+
+    saveOtherSpace: async (context, { spaceId, shouldAddToQueue }) => {
       const cachedSpace = cache.space(spaceId)
-      if (utils.objectHasKeys(cachedSpace)) {
+      const spaceIsCached = utils.objectHasKeys(cachedSpace)
+      if (spaceIsCached) {
         const space = utils.normalizeSpaceMetaOnly(cachedSpace)
         context.commit('updateOtherSpaces', space, { root: true })
+      } else if (shouldAddToQueue) {
+        otherSpacesQueue.push(spaceId)
       } else {
         try {
-          context.dispatch('debouncedGetSpace', spaceId)
+          let space = await context.dispatch('api/getSpace', { id: spaceId }, { root: true })
+          console.log('👿 saved OtherSpace', space) // temp
+          space = utils.normalizeSpaceMetaOnly(space)
+          context.commit('updateOtherSpaces', space, { root: true })
         } catch (error) {
           console.warn('🚑 otherSpace not found', error)
         }
       }
     },
-    debouncedGetSpace: debounce(async function (context, spaceId) {
-      let space = await context.dispatch('api/getSpace', { id: spaceId }, { root: true })
-      space = utils.normalizeSpaceMetaOnly(space)
-      context.commit('updateOtherSpaces', space, { root: true })
-    }, 100, { leading: true }),
 
     // Space
 
@@ -1232,6 +1243,11 @@ export default {
     cardById: (state) => (id) => {
       return state.cards.find(card => card.id === id)
     },
+    cardsWithSpaceLinks: (state) => {
+      let cards = state.cards
+      let links = cards.filter(card => utils.idIsValid(card.linkToSpaceId))
+      return links
+    },
 
     // Tags
     tagByName: (state) => (name) => {
@@ -1341,35 +1357,7 @@ export default {
       const cardsCreatedIsOverLimit = rootGetters['currentUser/cardsCreatedIsOverLimit']
       const spaceUserIsUpgraded = getters.spaceUserIsUpgraded
       return cardsCreatedIsOverLimit && !spaceUserIsUpgraded
-    },
-
-    // Links
-
-    links: (state, getters) => (cardWithLinks) => {
-      let cards = state.cards
-      if (cardWithLinks) { cards = [cardWithLinks] }
-      let links = cards.filter(card => {
-        const urls = utils.urlsFromString(card.name)
-        let link
-        urls.forEach(url => {
-          if (utils.urlType(url) === 'link') {
-            link = url
-          }
-        })
-        return link
-      })
-      links = links.map(card => {
-        let link = {}
-        link.url = utils.urlFromString(card.name)
-        link.originCardId = card.id
-        link.originSpaceId = card.spaceId
-        link.originIsCurrentSpace = card.spaceId === state.id
-        if (utils.urlIsKinopioSpace(link.url)) {
-          link.toSpaceId = utils.spaceIdFromUrl(link.url)
-        }
-        return link
-      })
-      return links
     }
+
   }
 }

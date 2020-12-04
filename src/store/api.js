@@ -280,6 +280,20 @@ const self = {
         console.error('🚒', error)
       }
     },
+    getSpaces: async (context, spaceIds) => {
+      const max = 60
+      try {
+        if (!shouldRequest()) { return }
+        spaceIds = spaceIds.slice(0, max)
+        console.log('🛬🛬 getting remote spaces', spaceIds)
+        spaceIds = spaceIds.join(',')
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await utils.timeout(40000, fetch(`${host}/space/spaces?spaceIds=${spaceIds}`, options))
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒', error)
+      }
+    },
     getSpaceAnonymously: async (context, space) => {
       const isOffline = !window.navigator.onLine
       if (isOffline) { return }
