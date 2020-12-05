@@ -963,6 +963,13 @@ export default {
         currentPosition = nextBadge.startPosition
       }
     })
+    const trailingText = name.substring(currentPosition, name.length)
+    if (trailingText) {
+      segments.push({
+        isText: true,
+        content: trailingText
+      })
+    }
     return segments
   },
   newTag ({ name, defaultColor, cardId, spaceId }) {
