@@ -5,7 +5,7 @@ dialog.links.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-he
 </template>
 
 <script>
-// import ResultsFilter from '@/components/ResultsFilter.vue'
+import ResultsFilter from '@/components/ResultsFilter.vue'
 import utils from '@/utils.js'
 
 // import uniq from 'lodash-es/uniq'
@@ -13,8 +13,8 @@ import utils from '@/utils.js'
 export default {
   name: 'Links',
   components: {
-    // User: () => import('@/components/User.vue'),
-    // ResultsFilter
+    User: () => import('@/components/User.vue'),
+    ResultsFilter
   },
   props: {
     visible: Boolean
@@ -32,7 +32,9 @@ export default {
       // filter: '',
       // filteredItems: [],
       // resultsSectionHeight: null,
-      dialogHeight: null
+      dialogHeight: null,
+      links: [],
+      loading: false
     }
   },
   computed: {
@@ -45,7 +47,47 @@ export default {
         let element = this.$refs.dialog
         this.dialogHeight = utils.elementHeightFromHeader(element)
       })
+    },
+
+    //     urlMetadata (link) {
+    //       if (link.isSpace) {
+    //         link.spaceId = utils.spaceIdFromUrl(link.url)
+
+    //         // console.log('👯‍♀️',link)
+
+    // // link.space = get from ls, else get from store
+
+    //         // ? link.isUnknownUrl bool
+    //       }
+    //       return link
+    //     },
+    // otherSpaceLinks async? () {},
+    updateLinks () {
+      this.loading = true
+      // let currentSpaceLinks = this.$store.getters['currentSpace/ cardsWithSpaceLinks'] reformat
+
+      //       links = links.map(card => {
+      //   let link = {}
+      //   link.url = utils.urlFromString(card.name)
+      //   link.originCardId = card.id
+      //   link.originSpaceId = card.spaceId
+      //   link.originIsCurrentSpace = card.spaceId === state.id
+      //   if (utils.urlIsKinopioSpace(link.url)) {
+      //     link.toSpaceId = utils.spaceIdFromUrl(link.url)
+      //   }
+      //   return link
+      // })
+
+      // await?
+      // currentSpaceLinks = currentSpaceLinks.map(link => this.urlMetadata(link))
+
+      // map
+      // check utils.isSpace => isKinopioSpace: true
+      // return also originCardId, url
+
+      this.loading = false
     }
+
     // updateResultsSectionHeight () {
     //   if (!this.visible) { return }
     //   this.$nextTick(() => {
@@ -58,6 +100,7 @@ export default {
     visible (visible) {
       if (visible) {
         this.updateDialogHeight()
+        this.updateLinks()
         // this.updateResultsSectionHeight()
       }
     }
