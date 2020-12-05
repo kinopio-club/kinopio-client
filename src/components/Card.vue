@@ -572,6 +572,7 @@ export default {
       this.formats.video = ''
       this.formats.audio = ''
       this.formats.link = ''
+      if (!urls) { return }
       if (!urls.length) { return }
       urls.forEach(url => {
         if (utils.urlIsImage(url)) {

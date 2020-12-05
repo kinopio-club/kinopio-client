@@ -6,6 +6,7 @@ import uniqBy from 'lodash-es/uniqBy'
 import dayjs from 'dayjs'
 import random from 'lodash-es/random'
 import last from 'lodash-es/last'
+import sortBy from 'lodash-es/sortBy'
 
 export default {
   host () {
@@ -916,41 +917,52 @@ export default {
     const tags = this.tagsFromString(name) || []
     const urls = this.urlsFromString(name) || []
     const links = urls.filter(url => this.urlIsKinopioSpace(url))
+    let badges = []
     let segments = []
-    // tags
     tags.forEach(tag => {
-      const tagStartPosition = name.indexOf(tag)
-      const tagEndPosition = tagStartPosition + tag.length
-      segments.push({
-        isText: true,
-        content: name.substring(0, tagStartPosition)
-      })
-      segments.push({
-        isTag: true,
-        name: tag.substring(2, tag.length - 2)
-      })
-      name = name.substring(tagEndPosition, name.length)
+      const startPosition = name.indexOf(tag)
+      const endPosition = name.indexOf(tag) + tag.length
+      badges.push({ tag, startPosition, endPosition, isTag: true })
     })
-    // links
     links.forEach(link => {
-      const linkStartPosition = name.indexOf(link)
-      const linkEndPosition = linkStartPosition + link.length
-      segments.push({
-        isText: true,
-        content: name.substring(0, linkStartPosition)
-      })
-      segments.push({
-        isLink: true,
-        name: link
-      })
-      name = name.substring(linkEndPosition, name.length)
+      const startPosition = name.indexOf(link)
+      const endPosition = name.indexOf(link) + link.length
+      badges.push({ link, startPosition, endPosition, isLink: true })
     })
-    if (name.length) {
-      segments.push({
-        isText: true,
-        content: name
-      })
+    badges = sortBy(badges, ['startPosition'])
+    if (!badges.length) {
+      return [{ isText: true, content: name }]
     }
+    // first segment
+    let startPosition = badges[0].startPosition
+    const leadingText = name.substring(0, startPosition)
+    segments.push({ isText: true, content: leadingText })
+    let currentPosition = startPosition
+    // other segments
+    badges.forEach((segment, index) => {
+      if (segment.isTag) {
+        const tag = segment.tag
+        segments.push({
+          isTag: true,
+          name: tag.substring(2, tag.length - 2)
+        })
+      } else if (segment.isLink) {
+        const link = segment.link
+        segments.push({
+          isLink: true,
+          name: link
+        })
+      }
+      currentPosition = segment.endPosition
+      const nextBadge = badges[index + 1]
+      if (nextBadge) {
+        segments.push({
+          isText: true,
+          content: name.substring(currentPosition, nextBadge.startPosition)
+        })
+        currentPosition = nextBadge.startPosition
+      }
+    })
     return segments
   },
   newTag ({ name, defaultColor, cardId, spaceId }) {
