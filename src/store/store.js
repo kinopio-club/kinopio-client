@@ -77,6 +77,11 @@ export default new Vuex.Store({
     remoteTags: [],
     remoteTagsIsFetched: false,
 
+    // links
+    linkDetailsIsVisible: false,
+    linkDetailsPosition: {}, // x, y
+    currentSelectedLink: {},
+
     // dragging
     currentDraggingCardId: '',
     remoteCardsDragging: [],
@@ -161,6 +166,8 @@ export default new Vuex.Store({
       state.connectionDetailsIsVisibleForConnectionId = ''
       state.tagDetailsIsVisible = false
       state.currentSelectedTag = {}
+      state.linkDetailsIsVisible = false
+      state.currentSelectedLink = {}
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isOnline' })
@@ -400,6 +407,21 @@ export default new Vuex.Store({
     remoteTagsIsFetched: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'remoteTagsIsFetched' })
       state.remoteTagsIsFetched = value
+    },
+
+    // Link Details
+
+    linkDetailsIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'linkDetailsIsVisible' })
+      state.linkDetailsIsVisible = value
+    },
+    linkDetailsPosition: (state, position) => {
+      utils.typeCheck({ value: position, type: 'object', origin: 'linkDetailsPosition' })
+      state.linkDetailsPosition = position
+    },
+    currentSelectedLink: (state, link) => {
+      utils.typeCheck({ value: link, type: 'object', origin: 'currentSelectedLink' })
+      state.currentSelectedLink = link
     },
 
     // Connection Details
