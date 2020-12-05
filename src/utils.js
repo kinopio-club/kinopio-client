@@ -677,7 +677,7 @@ export default {
     // followed by alphanumerics
     // then '.''
     // followed by alphanumerics
-    const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+[\n ]*/igm)
+    const urlPattern = new RegExp(/(?=http)(http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+[\n ]*/igm)
     const urls = string.match(urlPattern)
     if (!urls) { return }
     const url = urls[0]
@@ -694,8 +694,9 @@ export default {
     if (!string) { return [] }
     // https://regexr.com/59m5t
     // same as urlFromString but matches multiple urls and returns [urls]
-    const urlPattern = new RegExp(/((http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+[ ]*)*/igm)
+    const urlPattern = new RegExp(/(?=http)((http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+[\n ]*)*/igm)
     let urls = string.match(urlPattern)
+    if (!urls) { return }
     // filter out empty or non-urls
     urls = urls.map(url => this.trim(url))
     urls = urls.filter(url => {
