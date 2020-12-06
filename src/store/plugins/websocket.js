@@ -8,6 +8,7 @@ import utils from '@/utils.js'
 
 let websocket, currentSpaceRoom, currentUserIsConnected
 const clientId = nanoid()
+const showDebugMessages = true
 
 const joinSpaceRoom = (store, mutation) => {
   if (!websocket) { return }
@@ -39,7 +40,7 @@ const sendEvent = (store, mutation, type) => {
   let updates = mutation.payload
   updates = utils.normalizeBroadcastUpdates(updates)
   const hidden = ['updateRemoteUserCursor', 'addRemotePaintingCircle', 'clearRemoteCardDetailsVisible', 'clearRemoteConnectionDetailsVisible']
-  if (!hidden.includes(updates.type)) {
+  if (showDebugMessages && !hidden.includes(updates.type)) {
     console.log('🌜', updates)
   }
   const space = utils.clone(store.state.currentSpace)
