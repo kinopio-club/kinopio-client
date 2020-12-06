@@ -634,6 +634,7 @@ export default {
   },
   spaceIdFromUrl (url) {
     url = url || window.location.href
+    url = url.replaceAll('?hidden=true', '')
     const id = url.substring(url.length - 21, url.length)
     if (this.idIsValid(id)) { return id }
   },

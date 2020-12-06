@@ -206,7 +206,8 @@ export default {
         video: '',
         audio: '',
         link: ''
-      }
+      },
+      prevNameLineMinWidth: 0
     }
   },
   computed: {
@@ -318,11 +319,11 @@ export default {
         name = name.replace(this.formats.audio, '')
       }
       // for music use cases
-      const isLegacyHidden = this.formats.link.includes('kinopio=hide')
-      const isHidden = this.formats.link.includes('hidden=true')
-      if (isHidden || isLegacyHidden) {
-        name = name.replace(this.formats.link, '')
-        name = name.replace(utils.urlWithoutProtocol(this.formats.link), '')
+      let link = this.formats.link
+      const isHidden = link.includes('hidden=true') || link.includes('kinopio=hide')
+      if (isHidden) {
+        name = name.replace(link, '')
+        name = name.replace(utils.urlWithoutProtocol(link), '')
       }
       const checkbox = utils.checkboxFromString(name)
       if (checkbox) {
@@ -376,6 +377,7 @@ export default {
       if (!this.normalizedName) { return 0 }
       const width = this.longestNameLineLength() * averageCharacterWidth
       if (width <= maxWidth) {
+        this.checkIfShouldUpdateCardConnectionPaths(width)
         return width
       } else {
         return Math.min(width, maxWidth)
@@ -534,6 +536,16 @@ export default {
     }
   },
   methods: {
+    checkIfShouldUpdateCardConnectionPaths (width) {
+      this.$nextTick(() => {
+        this.$nextTick(() => {
+          if (this.prevNameLineMinWidth !== width) {
+            this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.card.id, shouldUpdateApi: true })
+          }
+          this.prevNameLineMinWidth = width
+        })
+      })
+    },
     selectAllConnectedCards (event) {
       const isMeta = event.metaKey || event.ctrlKey
       if (!isMeta) { return }
@@ -683,6 +695,13 @@ export default {
     },
     longestNameLineLength () {
       let name = this.normalizedName
+      // replace links
+      let links = this.nameSegments.filter(segment => segment.isLink)
+      links.forEach(segment => {
+        const link = segment.space.name || segment.name
+        name = name.replaceAll(segment.name, link)
+      })
+      // replace tags
       if (!name) { return 0 }
       name = name.replaceAll('[[', '')
       name = name.replaceAll(']]', '')
