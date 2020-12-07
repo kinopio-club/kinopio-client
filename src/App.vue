@@ -559,9 +559,11 @@ code
   .badge
     &:last-child
       margin 0
-  .badge
+  .badge,
+  a
     margin-right 3px
-  .badge + .badge
+  .badge + .badge,
+  a + a
     margin-left 3px
 
 #layout-viewport

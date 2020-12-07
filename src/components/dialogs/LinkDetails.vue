@@ -3,27 +3,36 @@ dialog.link-details.narrow(v-if="isVisible" :open="isVisible" :style="dialogPosi
   section.edit-card(v-if="showEditCard")
     button(@click="showCardDetails(null)") Edit Card
   section
-    img.background(v-if="space.background" src="space.background")
-    a(:href="space.url")
-      button(@click.prevent.stop)
-        MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
-        span {{space.name}} →
+    .container-wrap
+      .background-wrap(v-if="space.background")
+        img.background(:src="space.background" @click="changeSpace" v-on:keyup.enter="changeSpace")
+      .meta-wrap
+        a(v-if="space.url" :href="space.url")
+          button(@click.prevent="changeSpace" v-on:keyup.enter.prevent="changeSpace")
+            MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
+            span {{space.name}} →
 
-    .row.badge-wrap(v-if="space.isLoadingOrInvalid")
-      .badge.danger Space is loading or invalid
-    .row.badge-wrap(v-if="!space.isLoadingOrInvalid")
-      UserList(:users="space.users" :isClickable="false")
+        template(v-if="isSpace")
+          .row.badge-wrap(v-if="space.isLoadingOrInvalid")
+            .badge.danger Space is loading or invalid
+          .row.badge-wrap(v-if="!space.isLoadingOrInvalid")
+            UserList(:users="space.users" :isClickable="false")
+        template(v-if="!isSpace")
+          .badge.danger Space is loading or invalid
 
   section
     .row
       input.url-textarea(ref="url" v-model="url")
-    button(@click.left="copyUrl" v-if="!canNativeShare")
-      span Copy Url
-    .segmented-buttons(v-if="canNativeShare")
-      button(@click.left="copyUrl")
+    .row
+      button(@click.left="copyUrl" v-if="!canNativeShare")
         span Copy Url
-      button(@click.left="shareUrl")
-        img.icon(src="@/assets/share.svg")
+      .segmented-buttons(v-if="canNativeShare")
+        button(@click.left="copyUrl")
+          span Copy Url
+        button(@click.left="shareUrl")
+          img.icon(src="@/assets/share.svg")
+    .row(v-if="urlIsCopied")
+      .badge.success.success-message Url Copied
 
 </template>
 
@@ -60,6 +69,7 @@ export default {
     },
     spaceUser () { return this.currentLink.space.users[0] },
     space () { return this.currentLink.space },
+    isSpace () { return utils.objectHasKeys(this.currentLink.space) },
     dialogPosition () {
       const position = this.position || this.$store.state.linkDetailsPosition
       return {
@@ -67,7 +77,15 @@ export default {
         top: `${position.y}px`
       }
     },
-    url () { return `${utils.kinopioDomain()}/${this.space.url}` },
+    url () {
+      const url = this.space.url
+      if (url) {
+        return `${utils.kinopioDomain()}/${url}`
+      } else {
+        console.log(this.link)
+        return this.currentLink.name
+      }
+    },
     cardDetailsIsVisibleForCardId () { return this.$store.state.cardDetailsIsVisibleForCardId },
     showEditCard () { return !this.cardDetailsIsVisibleForCardId },
     canNativeShare () { return Boolean(navigator.share) },
@@ -111,6 +129,10 @@ export default {
         this.$store.dispatch('currentSpace/showCardDetails', cardId)
       }
     },
+    changeSpace () {
+      this.$store.dispatch('currentSpace/changeSpace', { space: this.space })
+      this.$store.dispatch('closeAllDialogs', 'linkDetails.changeSpace')
+    },
     scrollIntoView () {
       if (this.hasProps) { return }
       const element = this.$refs.dialog
@@ -122,6 +144,7 @@ export default {
     isVisible (visible) {
       if (visible) {
         this.urlIsCopied = false
+        console.log(this.currentLink, this.currentLink.space, this.space.background)
       }
       this.$nextTick(() => {
         if (visible) {
@@ -143,4 +166,20 @@ export default {
       word-break break-word
   .badge-wrap
     margin-top 6px
+
+  .container-wrap
+    display flex
+  .background-wrap
+    width 30%
+    margin-right 6px
+  .background
+    width 100%
+    border-radius 3px
+    cursor pointer
+    &:hover
+      box-shadow var(--button-hover-shadow)
+      background var(--secondary-hover-background)
+    &:active
+      box-shadow var(--button-active-inset-shadow)
+      background var(--secondary-active-background)
 </style>

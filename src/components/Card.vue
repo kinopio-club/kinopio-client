@@ -63,7 +63,7 @@ article(:style="position" :data-card-id="id" ref="card")
                   @keyup.stop.enter="showLinkDetailsIsVisible($event, segment)"
                 )
                   User(v-if="segment.space.users" :user="segment.space.users[0]" :isClickable="false")
-                  span {{segment.space.name || segment.content }}
+                  span {{segment.space.name || segment.content || segment.name }}
 
       //- Right buttons
       span.card-buttons-wrap
