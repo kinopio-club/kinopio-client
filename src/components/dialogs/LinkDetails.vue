@@ -1,6 +1,6 @@
 <template lang="pug">
 dialog.link-details.narrow(v-if="isVisible" :open="isVisible" :style="dialogPosition" ref="dialog")
-  section.edit-card(v-if="cardDetailsIsVisibleForCardId")
+  section.edit-card(v-if="showEditCard")
     button(@click="showCardDetails(null)") Edit Card
   section
     img.background(v-if="space.background" src="space.background")
@@ -69,7 +69,15 @@ export default {
     },
     url () { return `${utils.kinopioDomain()}/${this.space.url}` },
     cardDetailsIsVisibleForCardId () { return this.$store.state.cardDetailsIsVisibleForCardId },
-    canNativeShare () { return Boolean(navigator.share) }
+    showEditCard () { return !this.cardDetailsIsVisibleForCardId },
+    canNativeShare () { return Boolean(navigator.share) },
+    currentCard () {
+      let currentCardId = this.cardDetailsIsVisibleForCardId
+      const currentCard = this.$store.getters['currentSpace/cardById'](currentCardId)
+      const linkCard = this.$store.getters['currentSpace/cardById'](this.$store.state.currentSelectedLink.cardId)
+      return currentCard || linkCard
+    },
+    currentSpaceId () { return this.$store.state.currentSpace.id }
   },
   methods: {
     copyUrl () {

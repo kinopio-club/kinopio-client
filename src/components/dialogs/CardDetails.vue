@@ -263,6 +263,8 @@ export default {
     url () { return utils.urlFromString(this.name) },
     urls () { return utils.urlsFromString(this.name, true) },
     linkUrls () {
+      if (!this.urls) { return [] }
+      console.log(this.urls)
       return this.urls.filter(url => {
         return utils.urlType(url) === 'link'
       })
