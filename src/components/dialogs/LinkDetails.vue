@@ -20,7 +20,8 @@ dialog.link-details.narrow(v-if="isVisible" :open="isVisible" :style="dialogPosi
         template(v-if="!isSpace")
           .badge.danger Space is loading or invalid
 
-    .row
+    .badges-wrap(v-if="isSpace")
+      .badge.info.template-badge(v-if="spaceIsTemplate") Template
       .badge.secondary.button-badge(@click="toggleFilterShowAbsoluteDate")
         img.icon.time(src="@/assets/time.svg")
         span.name {{dateUpdatedAt}}
@@ -47,6 +48,7 @@ import UserList from '@/components/UserList.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import templates from '@/data/templates.js'
 
 import fromNow from 'fromnow'
 
@@ -111,6 +113,10 @@ export default {
       } else {
         return fromNow(date, { max: 1, suffix: true })
       }
+    },
+    spaceIsTemplate () {
+      const templateSpaceIds = templates.spaces().map(template => template.id)
+      return templateSpaceIds.includes(this.space.id)
     }
   },
   methods: {
@@ -202,4 +208,9 @@ export default {
     &:active
       box-shadow var(--button-active-inset-shadow)
       background var(--secondary-active-background)
+  .secondary
+    background-color var(--secondary-background)
+  .badges-wrap
+    margin-top 6px
+    display flex
 </style>
