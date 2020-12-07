@@ -5,7 +5,8 @@ dialog.link-details.narrow(v-if="isVisible" :open="isVisible" :style="dialogPosi
   section
     .container-wrap
       .background-wrap(v-if="space.background")
-        img.background(:src="space.background" @click="changeSpace" v-on:keyup.enter="changeSpace")
+        a(:href="space.url")
+          img.background(:src="space.background" @click.prevent="changeSpace" v-on:keyup.enter.prevent="changeSpace")
       .meta-wrap
         a(v-if="space.url" :href="space.url")
           button(@click.prevent="changeSpace" v-on:keyup.enter.prevent="changeSpace" :class="{active: linkIsCurrentSpace}")
@@ -20,7 +21,7 @@ dialog.link-details.narrow(v-if="isVisible" :open="isVisible" :style="dialogPosi
         template(v-if="!isSpace")
           .badge.danger Space is loading or invalid
 
-    .badges-wrap(v-if="isSpace")
+    .badges-wrap(v-if="isSpace && !space.isLoadingOrInvalid")
       .badge.info.template-badge(v-if="spaceIsTemplate") Template
       .badge.secondary.button-badge(@click="toggleFilterShowAbsoluteDate")
         img.icon.time(src="@/assets/time.svg")
