@@ -8,7 +8,7 @@ dialog.link-details.narrow(v-if="isVisible" :open="isVisible" :style="dialogPosi
         img.background(:src="space.background" @click="changeSpace" v-on:keyup.enter="changeSpace")
       .meta-wrap
         a(v-if="space.url" :href="space.url")
-          button(@click.prevent="changeSpace" v-on:keyup.enter.prevent="changeSpace")
+          button(@click.prevent="changeSpace" v-on:keyup.enter.prevent="changeSpace" :class="{active: linkIsCurrentSpace}")
             MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
             span {{space.name}} →
 
@@ -103,6 +103,7 @@ export default {
       return currentCard || linkCard
     },
     currentSpaceId () { return this.$store.state.currentSpace.id },
+    linkIsCurrentSpace () { return this.space.id === this.currentSpaceId },
     dateUpdatedAt () {
       const date = this.space.updatedAt
       if (this.showAbsoluteDate) {
