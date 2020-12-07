@@ -377,12 +377,10 @@ export default {
       }
       if (!this.normalizedName) { return 0 }
       const width = this.longestNameLineLength() * averageCharacterWidth
-      if (width <= maxWidth) {
+      if (this.card.linkToSpaceId && width <= maxWidth) {
         this.checkIfShouldUpdateCardConnectionPaths(width)
-        return width
-      } else {
-        return Math.min(width, maxWidth)
       }
+      return Math.min(width, maxWidth)
     },
     isConnectingTo () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess

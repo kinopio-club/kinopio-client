@@ -194,6 +194,7 @@ export default {
     // Connections
 
     updateConnection: (state, updatedConnection) => {
+      // ⤵ same as updateConnectionReadOnly, but with cache.updateSpace
       state.connections.map(connection => {
         if (connection.id === updatedConnection.id) {
           const updates = Object.keys(updatedConnection)
@@ -208,6 +209,22 @@ export default {
         }
       })
       cache.updateSpace('connections', state.connections, state.id)
+    },
+    updateConnectionReadOnly: (state, updatedConnection) => {
+      // ⤴ same as updateConnection, without cache.updateSpace
+      state.connections.map(connection => {
+        if (connection.id === updatedConnection.id) {
+          const updates = Object.keys(updatedConnection)
+          updates.forEach(key => {
+            // update properties differently depending on whether it's existing or new
+            if (connection[key]) {
+              connection[key] = updatedConnection[key]
+            } else {
+              Vue.set(connection, key, updatedConnection[key])
+            }
+          })
+        }
+      })
     },
     addConnection: (state, connection) => {
       state.connections.push(connection)
@@ -1085,7 +1102,12 @@ export default {
           context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
         }
         context.commit('broadcast/update', { updates: connection, type: 'updateConnection' }, { root: true })
-        context.commit('updateConnection', connection)
+        const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
+        if (userCanEdit) {
+          context.commit('updateConnection', connection)
+        } else {
+          context.commit('updateConnectionReadOnly', connection)
+        }
       })
     },
     removeConnectionsFromCard: (context, card) => {
