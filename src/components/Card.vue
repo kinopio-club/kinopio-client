@@ -62,6 +62,7 @@ article(:style="position" :data-card-id="id" ref="card")
                   @touchend.prevent="showLinkDetailsIsVisible($event, segment)"
                   @keyup.stop.enter="showLinkDetailsIsVisible($event, segment)"
                 )
+                  User(v-if="segment.space.users" :user="segment.space.users[0]" :isClickable="false")
                   span {{segment.space.name || segment.content }}
 
       //- Right buttons
@@ -1059,6 +1060,12 @@ article
 
   .link-badge
     background-color var(--secondary-active-background)
+    .user
+      .label-badge
+        width 21px
+        height 10px
+        span
+          font-size 10px
 
 @keyframes bounce
   0%

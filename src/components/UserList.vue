@@ -91,4 +91,10 @@ export default {
         box-shadow none
         background-color transparent
         outline none
+    .user
+      .label-badge
+        width 21px
+        height 10px
+        span
+          font-size 10px
 </style>
