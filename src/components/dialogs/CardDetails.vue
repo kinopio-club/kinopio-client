@@ -152,6 +152,7 @@ import utils from '@/utils.js'
 
 import qs from '@aguezz/qs-parse'
 import nanoid from 'nanoid'
+import debounce from 'lodash-es/debounce'
 
 let previousTags = []
 
@@ -491,8 +492,17 @@ export default {
       this.updateSpaceLink()
     },
     updateSpaceLink () {
-      let link = this.validUrls.filter(url => utils.urlIsKinopioSpace(url))
-      link = link[0]
+      let link = this.validUrls.filter(url => utils.urlIsKinopioSpace(url))[0]
+      const shouldRemoveLink = this.card.linkToSpaceId && !link
+      if (shouldRemoveLink) {
+        const update = {
+          id: this.card.id,
+          linkToSpaceId: null
+        }
+        this.$store.dispatch('currentSpace/updateCard', update)
+        return
+      }
+      if (!link) { return }
       const linkToSpaceId = utils.spaceIdFromUrl(link) || null
       const linkExists = linkToSpaceId === this.card.linkToSpaceId
       if (linkExists) { return }
@@ -501,8 +511,11 @@ export default {
         linkToSpaceId
       }
       this.$store.dispatch('currentSpace/updateCard', update)
-      this.$store.dispatch('currentSpace/saveOtherSpace', { spaceId: linkToSpaceId })
+      this.debouncedSaveOtherSpace(linkToSpaceId)
     },
+    debouncedSaveOtherSpace: debounce(async function (linkToSpaceId) {
+      this.$store.dispatch('currentSpace/saveOtherSpace', { spaceId: linkToSpaceId })
+    }, 250),
     checkIfIsInsertLineBreak (event) {
       const lineBreakInserted = event.ctrlKey || event.altKey
       if (!lineBreakInserted) {
