@@ -20,6 +20,11 @@ dialog.link-details.narrow(v-if="isVisible" :open="isVisible" :style="dialogPosi
         template(v-if="!isSpace")
           .badge.danger Space is loading or invalid
 
+    .row
+      .badge.secondary.button-badge(@click="toggleFilterShowAbsoluteDate")
+        img.icon.time(src="@/assets/time.svg")
+        span.name {{dateUpdatedAt}}
+
   section
     .row
       input.url-textarea(ref="url" v-model="url")
@@ -43,6 +48,8 @@ import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
+import fromNow from 'fromnow'
+
 export default {
   name: 'LinkDetails',
   components: {
@@ -54,10 +61,10 @@ export default {
     position: Object,
     link: Object
   },
-
   data () {
     return {
-      urlIsCopied: false
+      urlIsCopied: false,
+      showAbsoluteDate: false
     }
   },
   computed: {
@@ -95,7 +102,15 @@ export default {
       const linkCard = this.$store.getters['currentSpace/cardById'](this.$store.state.currentSelectedLink.cardId)
       return currentCard || linkCard
     },
-    currentSpaceId () { return this.$store.state.currentSpace.id }
+    currentSpaceId () { return this.$store.state.currentSpace.id },
+    dateUpdatedAt () {
+      const date = this.space.updatedAt
+      if (this.showAbsoluteDate) {
+        return new Date(date).toLocaleString()
+      } else {
+        return fromNow(date, { max: 1, suffix: true })
+      }
+    }
   },
   methods: {
     copyUrl () {
@@ -138,7 +153,11 @@ export default {
       const element = this.$refs.dialog
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
+    },
+    toggleFilterShowAbsoluteDate () {
+      this.showAbsoluteDate = !this.showAbsoluteDate
     }
+
   },
   watch: {
     isVisible (visible) {

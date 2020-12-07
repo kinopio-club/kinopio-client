@@ -525,13 +525,17 @@ export default {
     return remoteSpace
   },
   normalizeSpaceMetaOnly (space) {
-    let spaceMeta = {}
-    spaceMeta.id = space.id
-    spaceMeta.name = space.name
-    spaceMeta.users = space.users
-    spaceMeta.background = space.background
-    spaceMeta.moonPhase = space.moonPhase
-    spaceMeta.url = space.url
+    let spaceMeta = {
+      id: space.id,
+      name: space.name,
+      users: space.users,
+      background: space.background,
+      moonPhase: space.moonPhase,
+      url: space.url,
+      privacy: space.url,
+      updatedAt: space.updatedAt,
+      showInExplore: space.showInExplore
+    }
     return spaceMeta
   },
   AddCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
