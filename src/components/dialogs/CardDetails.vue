@@ -70,11 +70,11 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           span Frames
         FramePicker(:visible="framePickerIsVisible" :cards="[card]")
 
-    .row(v-if="nameHasLineBreaks || hasLinks || nameHasSentences")
-      //- Show Link
-      .button-wrap(v-if="hasLinks")
-        button(:disabled="!canEditCard" @click.left.stop="toggleLinksIsVisible" :class="{active: linksIsVisible}")
-          img.icon(v-if="linksIsVisible" src="@/assets/view-hidden.svg")
+    .row(v-if="nameHasLineBreaks || hasUrls || nameHasSentences")
+      //- Show Url
+      .button-wrap(v-if="hasUrls")
+        button(:disabled="!canEditCard" @click.left.stop="toggleUrlsIsVisible" :class="{active: urlsIsVisible}")
+          img.icon(v-if="urlsIsVisible" src="@/assets/view-hidden.svg")
           img.icon(v-else src="@/assets/view.svg")
           span Link
       //- Split by Line Breaks
@@ -138,7 +138,8 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           @touchend.stop="showTagDetailsIsVisible($event, tag)"
           @keyup.stop.enter="showTagDetailsIsVisible($event, tag)"
         ) {{tag.name}}
-
+    //- Links
+    p(v-if="card.linkToSpaceId") {{card.linkToSpaceId}}
 </template>
 
 <script>
@@ -262,18 +263,17 @@ export default {
     },
     url () { return utils.urlFromString(this.name) },
     urls () { return utils.urlsFromString(this.name, true) },
-    linkUrls () {
+    validUrls () {
       if (!this.urls) { return [] }
-      console.log(this.urls)
       return this.urls.filter(url => {
         return utils.urlType(url) === 'link'
       })
     },
-    hasLinks () {
-      return Boolean(this.linkUrls.length)
+    hasUrls () {
+      return Boolean(this.validUrls.length)
     },
-    linksIsVisible () {
-      const linksVisible = this.linkUrls.filter(url => {
+    urlsIsVisible () {
+      const urlsVisible = this.validUrls.filter(url => {
         const queryString = utils.queryString(url)
         if (queryString) {
           const queryObject = qs.decode(queryString)
@@ -282,7 +282,7 @@ export default {
           return false
         }
       })
-      return linksVisible.length === this.linkUrls.length
+      return urlsVisible.length === this.validUrls.length
     },
     urlIsAudio () { return utils.urlIsAudio(this.url) },
     normalizedName () {
@@ -346,13 +346,13 @@ export default {
       const newName = this.name.replace(url.trim(), newUrl)
       this.updateCardName(newName)
     },
-    toggleLinksIsVisible () {
-      const isVisible = !this.linksIsVisible
+    toggleUrlsIsVisible () {
+      const isVisible = !this.urlsIsVisible
       let newUrls = []
       this.urls.forEach(url => {
         url = url.trim()
-        const isLink = utils.urlType(url) === 'link'
-        if (!isLink) { return }
+        const isUrl = utils.urlType(url) === 'link'
+        if (!isUrl) { return }
         const queryString = utils.queryString(url)
         const domain = utils.urlWithoutQueryString(url)
         let queryObject
@@ -446,7 +446,7 @@ export default {
       this.wasPasted = true
     },
     removeTrackingQueryStrings () {
-      this.linkUrls.forEach(url => {
+      this.validUrls.forEach(url => {
         url = url.trim()
         const queryString = utils.queryString(url)
         const domain = utils.urlWithoutQueryString(url)
@@ -491,7 +491,7 @@ export default {
       this.updateSpaceLink()
     },
     updateSpaceLink () {
-      let link = this.linkUrls.filter(url => utils.urlIsKinopioSpace(url))
+      let link = this.validUrls.filter(url => utils.urlIsKinopioSpace(url))
       link = link[0]
       const linkToSpaceId = utils.spaceIdFromUrl(link) || null
       const linkExists = linkToSpaceId === this.card.linkToSpaceId
