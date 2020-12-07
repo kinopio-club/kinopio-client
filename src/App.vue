@@ -512,6 +512,12 @@ code
     transform rotate(45deg)
     vertical-align 2px
 
+.url-textarea
+  background-color var(--secondary-background)
+  border 0
+  border-radius 3px
+  padding 4px
+
 .logo-image
   background-image url('assets/logo-base.png')
 .logo

@@ -12,7 +12,7 @@ dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.left.st
 
     template(v-if="!loading && collaboratorKey")
       .row
-        input.textarea(ref="url" v-model="url")
+        input.url-textarea(ref="url" v-model="url")
       button(v-if="!canNativeShare" @click.left="copyUrl")
         span Copy Invite Url
       .segmented-buttons(v-if="canNativeShare")

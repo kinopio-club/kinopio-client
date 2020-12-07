@@ -4,8 +4,8 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
     p Share
   section(v-if="spaceHasUrl")
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
-    template(v-if="!spaceIsPrivate")
-      input.textarea(ref="url" v-model="url")
+    .url-wrap(v-if="!spaceIsPrivate")
+      input.url-textarea(ref="url" v-model="url")
       button(@click.left="copyUrl" v-if="!canNativeShare")
         span Copy Url
       .segmented-buttons(v-if="canNativeShare")
@@ -31,7 +31,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
         span Invite Collaborators
       InviteCollaborators(:visible="inviteCollaboratorsIsVisible")
   section.results-section.collaborators(v-if="spaceHasUrl && isSpaceMember && spaceHasCollaborators")
-    UserList(:users="spaceCollaborators" :selectedUser="selectedUser" :showRemoveUser="true" @selectSpace="showUserDetails" @removeUser="removeCollaborator")
+    UserList(:users="spaceCollaborators" :selectedUser="selectedUser" :showRemoveUser="true" @selectSpace="showUserDetails" @removeUser="removeCollaborator" :isClickable="true")
     UserDetails(:visible="userDetailsIsVisible" :user="selectedUser" :userDetailsPosition="userDetailsPosition" :userDetailsIsFromList="true" @removedCollaborator="removedCollaborator")
 
   section(v-if="!spaceHasUrl")
@@ -202,11 +202,6 @@ export default {
       background-color var(--danger-background)
   .success-message
     margin-top 10px
-  .textarea
-    background-color var(--secondary-background)
-    border 0
-    border-radius 3px
-    padding 4px
   .privacy-button + .textarea
     margin-top 10px
   .description
@@ -222,4 +217,6 @@ export default {
   .share-private
     .badge
       margin-left 6px
+  .url-wrap
+    margin-top 10px
 </style>

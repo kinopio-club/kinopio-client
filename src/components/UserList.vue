@@ -3,7 +3,7 @@ span
   ResultsFilter(:items="users" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredUsers")
   ul.results-list.user-list
     template(v-for="(user in usersFiltered")
-      li(:key="user.id" @click.left.stop="selectSpace($event, user)" tabindex="0" v-on:keyup.stop.enter="selectSpace($event, user)" :class="{ active: userIsSelected(user) }")
+      li(:key="user.id" @click.left.stop="selectSpace($event, user)" :tabindex="tabIndex" v-on:keyup.stop.enter="selectSpace($event, user)" :class="{ active: userIsSelected(user), 'is-not-clickable': !isClickable }")
         .badge(:style="{background: user.color}" :class="{'narrow-badge': showRemoveUser}")
           User(:user="user" :isClickable="false")
           .name {{user.name}}
@@ -21,6 +21,7 @@ export default {
     ResultsFilter
   },
   props: {
+    isClickable: Boolean,
     users: Array,
     selectedUser: Object,
     showRemoveUser: Boolean
@@ -38,6 +39,13 @@ export default {
       } else {
         return this.users
       }
+    },
+    tabIndex () {
+      if (this.isClickable) {
+        return '0'
+      } else {
+        return '-1'
+      }
     }
   },
   methods: {
@@ -48,12 +56,15 @@ export default {
       this.filter = filter
     },
     selectSpace (event, user) {
+      if (!this.isClickable) { return }
       this.$emit('selectSpace', event, user)
     },
     userIsSelected (user) {
+      if (!this.isClickable) { return }
       return this.selectedUser.id === user.id
     },
     removeUser (user) {
+      if (!this.isClickable) { return }
       this.$emit('removeUser', user)
     }
   }
@@ -70,4 +81,14 @@ export default {
       display inline-block
     .narrow-badge
       max-width calc(100% - 32px)
+    &.is-not-clickable
+      cursor auto
+      padding-left 0
+      padding-right 0
+      &:hover,
+      &:active,
+      &:focus
+        box-shadow none
+        background-color transparent
+        outline none
 </style>

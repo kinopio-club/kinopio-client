@@ -28,6 +28,7 @@ main.space(
       Card(:card="card")
   ConnectionDetails
   TagDetails
+  LinkDetails
   MultipleSelectedActions
   OffscreenMarkers
   ScrollAtEdgesHandler
@@ -41,6 +42,7 @@ import ConnectionLabel from '@/components/ConnectionLabel.vue'
 import UserLabel from '@/components/UserLabel.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
+import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import ScrollAtEdgesHandler from '@/components/ScrollAtEdgesHandler.vue'
@@ -61,6 +63,7 @@ export default {
     UserLabel,
     ConnectionDetails,
     TagDetails,
+    LinkDetails,
     MultipleSelectedActions,
     OffscreenMarkers,
     ScrollAtEdgesHandler,

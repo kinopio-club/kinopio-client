@@ -9,6 +9,13 @@ import last from 'lodash-es/last'
 import sortBy from 'lodash-es/sortBy'
 
 export default {
+  kinopioDomain () {
+    let domain = 'https://kinopio.club'
+    if (process.env.NODE_ENV === 'development') {
+      domain = 'http://kinopio.local:8080'
+    }
+    return domain
+  },
   host () {
     let host = 'https://kinopio-server.herokuapp.com'
     if (process.env.NODE_ENV === 'development') {
