@@ -41,7 +41,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.221="triggerTagPickerSelectTag"
         @keydown.bracket-right="triggerTagPickerSelectTag"
       )
-      TagPicker(:visible="tagPickerIsVisible" :cursorPosition="cursorPosition" :position="tagPickerPosition" :search="tagPickerSearch" @closeDialog="hidePickers" @selectTag="updateTagBracketsWithTag")
+      TagPicker(:visible="tag.pickerIsVisible" :cursorPosition="cursorPosition" :position="tag.pickerPosition" :search="tag.pickerSearch" @closeDialog="hidePickers" @selectTag="updateTagBracketsWithTag")
     .row(v-if="cardPendingUpload")
       .badge.info
         Loader(:visible="true")
@@ -181,9 +181,6 @@ export default {
     return {
       framePickerIsVisible: false,
       imagePickerIsVisible: false,
-      tagPickerIsVisible: false,
-      tagPickerPosition: {},
-      tagPickerSearch: '',
       initialSearch: '',
       pastedName: '',
       wasPasted: false,
@@ -194,6 +191,16 @@ export default {
         signUpToUpload: false,
         sizeLimit: false,
         unknownUploadError: false
+      },
+      tag: {
+        pickerIsVisible: false,
+        pickerPosition: {},
+        pickerSearch: ''
+      },
+      space: {
+        pickerIsVisible: false,
+        pickerPosition: {},
+        pickerSearch: ''
       }
     }
   },
@@ -561,7 +568,7 @@ export default {
       this.updateCardName(newName)
     },
     closeCard (event) {
-      if (this.tagPickerIsVisible) {
+      if (this.tag.pickerIsVisible) {
         this.hidePickers()
         event.stopPropagation()
         return
@@ -574,7 +581,7 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCard')
     },
     closeCardAndFocus () {
-      if (this.tagPickerIsVisible) {
+      if (this.tag.pickerIsVisible) {
         this.hidePickers()
         return
       }
@@ -693,6 +700,7 @@ export default {
     },
     checkIfShouldShowPicker () {
       this.checkIfShouldShowTagPicker()
+      this.checkIfShouldShowSpacePicker()
     },
     checkIfShouldHidePicker () {
       this.checkIfShouldHideTagPicker()
@@ -703,15 +711,15 @@ export default {
     showTagPicker () {
       this.closeDialogs()
       const nameRect = this.$refs.name.getBoundingClientRect()
-      this.tagPickerPosition = {
+      this.tag.pickerPosition = {
         top: nameRect.height - 2
       }
       this.updateTagPickerSearch()
-      this.tagPickerIsVisible = true
+      this.tag.pickerIsVisible = true
     },
     hidePickers () {
-      this.tagPickerSearch = ''
-      this.tagPickerIsVisible = false
+      this.tag.pickerSearch = ''
+      this.tag.pickerIsVisible = false
     },
     tagStartText () {
       // ...[[abc
@@ -731,10 +739,10 @@ export default {
       return end.substring(0, endPosition)
     },
     updateTagPickerSearch () {
-      if (!this.tagPickerIsVisible) { return }
+      if (!this.tag.pickerIsVisible) { return }
       const start = this.tagStartText() || ''
       const end = this.tagEndText() || ''
-      this.tagPickerSearch = start + end
+      this.tag.pickerSearch = start + end
     },
     isCursorInsideTagBrackets () {
       this.cursorPosition = this.$refs.name.selectionStart // for template
@@ -746,7 +754,7 @@ export default {
       }
     },
     checkIfShouldShowTagPicker () {
-      const tagPickerIsVisible = this.tagPickerIsVisible
+      const tagPickerIsVisible = this.tag.pickerIsVisible
       const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets()
       if (isCursorInsideTagBrackets && !tagPickerIsVisible) {
         this.showTagPicker()
@@ -755,7 +763,7 @@ export default {
       }
     },
     checkIfShouldHideTagPicker () {
-      const tagPickerIsVisible = this.tagPickerIsVisible
+      const tagPickerIsVisible = this.tag.pickerIsVisible
       const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets()
       if (!isCursorInsideTagBrackets && tagPickerIsVisible) {
         this.hidePickers()
@@ -865,7 +873,7 @@ export default {
     },
     triggerTagPickerNavigation (event) {
       const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
-      const shouldTrigger = this.tagPickerIsVisible && !modifierKey
+      const shouldTrigger = this.tag.pickerIsVisible && !modifierKey
       if (shouldTrigger) {
         this.$store.commit('triggerPickerNavigationKey', event.key)
         event.preventDefault()
@@ -873,13 +881,13 @@ export default {
     },
     triggerTagPickerSelectTag (event) {
       const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
-      const shouldTrigger = this.tagPickerIsVisible && !modifierKey
+      const shouldTrigger = this.tag.pickerIsVisible && !modifierKey
       if (shouldTrigger) {
         this.$store.commit('triggerPickerSelect')
         event.preventDefault()
       }
       // prevent trailing ]
-      if (event.key === ']' && this.tagPickerIsVisible) {
+      if (event.key === ']' && this.tag.pickerIsVisible) {
         this.shouldCancelBracketRight = true
         setTimeout(() => {
           this.shouldCancelBracketRight = false
@@ -890,7 +898,7 @@ export default {
       }
       // prevents Enter from creating new card
       if (event.key !== 'Enter') {
-        this.tagPickerIsVisible = false
+        this.tag.pickerIsVisible = false
       }
     },
     updateTagBracketsWithTag (tag) {
