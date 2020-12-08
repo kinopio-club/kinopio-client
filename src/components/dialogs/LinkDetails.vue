@@ -3,23 +3,21 @@ dialog.link-details.narrow(v-if="isVisible" :open="isVisible" :style="dialogPosi
   section.edit-card(v-if="showEditCard")
     button(@click="showCardDetails(null)") Edit Card
   section
-    .container-wrap
+    .container-wrap(v-if="space.url")
       .background-wrap(v-if="space.background")
         a(:href="space.url")
           img.background(:src="space.background" @click.prevent="changeSpace" v-on:keyup.enter.prevent="changeSpace")
       .meta-wrap
-        a(v-if="space.url" :href="space.url")
+        a(:href="space.url")
           button(@click.prevent="changeSpace" v-on:keyup.enter.prevent="changeSpace" :class="{active: linkIsCurrentSpace}")
             MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
             span {{space.name}} →
 
-        template(v-if="isSpace")
-          .row.badge-wrap(v-if="space.isLoadingOrInvalid")
-            .badge.danger Space is loading or invalid
-          .row.badge-wrap(v-if="!space.isLoadingOrInvalid")
-            UserList(:users="space.users" :isClickable="false")
-        template(v-if="!isSpace")
-          .badge.danger Space is loading or invalid
+    template(v-if="isSpace")
+      .row.badge-wrap(v-if="space.isLoadingOrInvalid")
+        .badge.danger Space is loading or invalid
+      .row.badge-wrap(v-else-if="!space.isLoadingOrInvalid")
+        UserList(:users="users" :isClickable="false")
 
     .badges-wrap(v-if="isSpace && !space.isLoadingOrInvalid")
       .badge.info.template-badge(v-if="spaceIsTemplate") Template
@@ -27,37 +25,30 @@ dialog.link-details.narrow(v-if="isVisible" :open="isVisible" :style="dialogPosi
         img.icon.time(src="@/assets/time.svg")
         span.name {{dateUpdatedAt}}
 
-  section
-    .row
-      input.url-textarea(ref="url" v-model="url")
-    .row
-      button(@click.left="copyUrl" v-if="!canNativeShare")
-        span Copy Url
-      .segmented-buttons(v-if="canNativeShare")
-        button(@click.left="copyUrl")
-          span Copy Url
-        button(@click.left="shareUrl")
-          img.icon(src="@/assets/share.svg")
-    .row(v-if="urlIsCopied")
-      .badge.success.success-message Url Copied
-
+    template(v-if="isSpace && !space.isLoadingOrInvalid")
+      p
+        Loader(:visible="loading")
+        textarea(v-if="cardsText") {{cardsText}}
 </template>
 
 <script>
 import User from '@/components/User.vue'
 import UserList from '@/components/UserList.vue'
 import scrollIntoView from '@/scroll-into-view.js'
+import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 import templates from '@/data/templates.js'
 
 import fromNow from 'fromnow'
+import join from 'lodash-es/join'
 
 export default {
   name: 'LinkDetails',
   components: {
     User,
-    UserList
+    UserList,
+    Loader
   },
   props: {
     visible: Boolean,
@@ -66,8 +57,11 @@ export default {
   },
   data () {
     return {
-      urlIsCopied: false,
-      showAbsoluteDate: false
+      showAbsoluteDate: false,
+      loading: true,
+      remoteSpaceId: '',
+      cardsText: '',
+      users: []
     }
   },
   computed: {
@@ -77,7 +71,6 @@ export default {
     currentLink () { // cardId, isLink, name, space: { background, id , moonPhase, name, url, users[0] }
       return this.link || this.$store.state.currentSelectedLink
     },
-    spaceUser () { return this.currentLink.space.users[0] },
     space () { return this.currentLink.space },
     isSpace () { return utils.objectHasKeys(this.currentLink.space) },
     dialogPosition () {
@@ -92,7 +85,6 @@ export default {
       if (url) {
         return `${utils.kinopioDomain()}/${url}`
       } else {
-        console.log(this.link)
         return this.currentLink.name
       }
     },
@@ -121,20 +113,19 @@ export default {
     }
   },
   methods: {
-    copyUrl () {
-      const element = this.$refs.url
-      element.select()
-      element.setSelectionRange(0, 99999) // for mobile
-      document.execCommand('copy')
-      this.urlIsCopied = true
+    async getRemoteSpace () {
+      this.loading = true
+      const remoteSpace = await this.$store.dispatch('api/getSpace', this.space)
+      this.loading = false
+      return remoteSpace
     },
-    shareUrl () {
-      const data = {
-        title: 'Kinopio Space',
-        text: this.space.name,
-        url: this.url
-      }
-      navigator.share(data)
+    async getCardsTextAndCollaboratorsFromRemoteSpace () {
+      if (!this.isSpace) { return }
+      const remoteSpace = await this.getRemoteSpace()
+      remoteSpace.collaborators.forEach(user => this.users.push(user))
+      let text = remoteSpace.cards.map(card => { return card.name })
+      text = join(text, '\n')
+      this.cardsText = text
     },
     showCardDetails (card) {
       card = card || this.currentCard
@@ -164,14 +155,18 @@ export default {
     },
     toggleFilterShowAbsoluteDate () {
       this.showAbsoluteDate = !this.showAbsoluteDate
+    },
+    updateSpaceUser () {
+      if (!this.isSpace) { return }
+      this.users = []
+      this.users.push(this.space.users[0])
     }
-
   },
   watch: {
     isVisible (visible) {
       if (visible) {
-        this.urlIsCopied = false
-        console.log(this.currentLink, this.currentLink.space, this.space.background)
+        this.updateSpaceUser()
+        this.getCardsTextAndCollaboratorsFromRemoteSpace()
       }
       this.$nextTick(() => {
         if (visible) {
@@ -191,9 +186,8 @@ export default {
   button
     span
       word-break break-word
-  .badge-wrap
+  .container-wrap + .badge-wrap
     margin-top 6px
-
   .container-wrap
     display flex
   .background-wrap
@@ -214,4 +208,11 @@ export default {
   .badges-wrap
     margin-top 6px
     display flex
+  textarea
+    background-color var(--secondary-background)
+    border 0
+    border-radius 3px
+    padding 4px
+    margin-bottom 0
+    height 100px
 </style>
