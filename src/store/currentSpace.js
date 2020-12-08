@@ -414,10 +414,11 @@ export default {
         otherSpacesQueue.push(spaceId)
       } else {
         try {
-          let space = await context.dispatch('api/getSpace', { id: spaceId }, { root: true })
-          console.log('👿 saved OtherSpace', space) // temp
-          space = utils.normalizeSpaceMetaOnly(space)
-          context.commit('updateOtherSpaces', space, { root: true })
+          const space = { id: spaceId }
+          let remoteSpace = await context.dispatch('api/getSpace', { space }, { root: true })
+          console.log('👿 saved OtherSpace', remoteSpace) // temp
+          remoteSpace = utils.normalizeSpaceMetaOnly(remoteSpace)
+          context.commit('updateOtherSpaces', remoteSpace, { root: true })
         } catch (error) {
           console.warn('🚑 otherSpace not found', error)
         }
@@ -542,7 +543,7 @@ export default {
       try {
         context.commit('isLoadingSpace', true, { root: true })
         if (currentUserIsSignedIn) {
-          remoteSpace = await context.dispatch('api/getSpace', space, { root: true })
+          remoteSpace = await context.dispatch('api/getSpace', { space }, { root: true })
         } else if (collaboratorKey) {
           space.collaboratorKey = collaboratorKey
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })

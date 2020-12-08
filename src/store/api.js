@@ -272,9 +272,9 @@ const self = {
         console.error('🚒', error)
       }
     },
-    getSpace: async (context, space) => {
+    getSpace: async (context, { space, shouldRequestRemoteSpace }) => {
       try {
-        if (!shouldRequest()) { return }
+        if (!shouldRequest(shouldRequestRemoteSpace)) { return }
         console.log('🛬 getting remote space', space.id)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(40000, fetch(`${host}/space/${space.id}`, options))

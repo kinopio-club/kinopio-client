@@ -115,7 +115,8 @@ export default {
   methods: {
     async getRemoteSpace () {
       this.loading = true
-      const remoteSpace = await this.$store.dispatch('api/getSpace', this.space)
+      const shouldRequestRemoteSpace = !this.$store.getters['currentSpace/spaceUserIsCurrentUser']
+      const remoteSpace = await this.$store.dispatch('api/getSpace', { space: this.space, shouldRequestRemoteSpace })
       this.loading = false
       return remoteSpace
     },
