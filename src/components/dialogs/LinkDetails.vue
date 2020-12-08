@@ -59,9 +59,9 @@ export default {
     return {
       showAbsoluteDate: false,
       loading: true,
-      remoteSpaceId: '',
       cardsText: '',
-      users: []
+      users: [],
+      remoteSpaceId: ''
     }
   },
   computed: {
@@ -117,6 +117,7 @@ export default {
       this.loading = true
       const shouldRequestRemoteSpace = !this.$store.getters['currentSpace/spaceUserIsCurrentUser']
       const remoteSpace = await this.$store.dispatch('api/getSpace', { space: this.space, shouldRequestRemoteSpace })
+      this.remoteSpaceId = remoteSpace.id
       this.loading = false
       return remoteSpace
     },
@@ -159,13 +160,20 @@ export default {
     },
     updateSpaceUser () {
       if (!this.isSpace) { return }
-      this.users = []
       this.users.push(this.space.users[0])
+    },
+    checkIfShouldRequestSpace () {
+      if (!this.isSpace || this.space.isLoadingOrInvalid) { return }
+      return this.remoteSpaceId !== this.space.id
     }
   },
   watch: {
     isVisible (visible) {
       if (visible) {
+        const shouldRequestSpace = this.checkIfShouldRequestSpace()
+        if (!shouldRequestSpace) { return }
+        this.users = []
+        this.cardsText = ''
         this.updateSpaceUser()
         this.getCardsTextAndCollaboratorsFromRemoteSpace()
       }
