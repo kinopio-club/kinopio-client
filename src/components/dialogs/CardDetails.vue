@@ -127,8 +127,8 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
     template(v-if="error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
-    //- Tags
-    .tags-row(v-if="tagsInCard.length")
+    .badges-row(v-if="tagsInCard.length || card.linkToSpaceId")
+      //- Tags
       template(v-for="tag in tagsInCard")
         span.badge.button-badge(
           :style="{backgroundColor: tag.color}"
@@ -138,14 +138,17 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           @touchend.stop="showTagDetailsIsVisible($event, tag)"
           @keyup.stop.enter="showTagDetailsIsVisible($event, tag)"
         ) {{tag.name}}
-    //- Links
-    p(v-if="card.linkToSpaceId") {{card.linkToSpaceId}}
+      //- Links
+      .badge.button-badge.link-badge(v-if="card.linkToSpaceId")
+        User(v-if="linkToSpace" :user="linkToSpace.users[0]" :isClickable="false")
+        span {{linkName}}
 </template>
 
 <script>
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
+import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
@@ -162,7 +165,8 @@ export default {
     FramePicker,
     ImagePicker,
     TagPicker,
-    Loader
+    Loader,
+    User
   },
   props: {
     card: Object // name, x, y, z
@@ -228,6 +232,19 @@ export default {
       if (this.isSpaceMember) { return true }
       if (this.canEditSpace && this.cardIsCreatedByCurrentUser) { return true }
       return false
+    },
+    linkToSpace () {
+      const spaceId = this.card.linkToSpaceId
+      const space = this.$store.getters.otherSpaceById(spaceId)
+      return space
+    },
+    linkName () {
+      const space = this.linkToSpace
+      if (space) {
+        return space.name
+      } else {
+        return 'Space is loading or invalid'
+      }
     },
     isInvitedButCannotEditSpace () { return this.$store.getters['currentUser/isInvitedButCannotEditSpace']() },
     errorMaxCardLength () {
@@ -896,7 +913,7 @@ export default {
     input
       margin 0
       vertical-align -1px
-  .tags-row
+  .badges-row
     display flex
     flex-wrap wrap
 </style>
