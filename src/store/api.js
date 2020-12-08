@@ -28,9 +28,12 @@ const squashQueue = (queue) => {
   return squashed
 }
 
-const shouldRequest = () => {
+const shouldRequest = (shouldRequestRemoteSpace) => {
   const isOnline = window.navigator.onLine
   const currentUserIsSignedIn = cache.user().apiKey
+  if (isOnline && shouldRequestRemoteSpace) {
+    return true
+  }
   if (isOnline && currentUserIsSignedIn) {
     return true
   }
@@ -283,7 +286,8 @@ const self = {
     getSpaces: async (context, spaceIds) => {
       const max = 60
       try {
-        if (!shouldRequest()) { return }
+        const shouldRequestRemoteSpace = !context.rootGetters['currentSpace/spaceUserIsCurrentUser']
+        if (!shouldRequest(shouldRequestRemoteSpace)) { return }
         spaceIds = spaceIds.slice(0, max)
         console.log('🛬🛬 getting remote spaces', spaceIds)
         spaceIds = spaceIds.join(',')

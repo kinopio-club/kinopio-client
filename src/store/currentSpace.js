@@ -394,6 +394,7 @@ export default {
       })
       otherSpacesQueue = uniq(otherSpacesQueue)
       let spaces = await context.dispatch('api/getSpaces', otherSpacesQueue, { root: true })
+      if (!spaces) { return }
       spaces = spaces.filter(space => space.id)
       spaces.forEach(space => {
         space = utils.normalizeSpaceMetaOnly(space)
@@ -1375,11 +1376,16 @@ export default {
       })
       return userIsUpgraded
     },
+    spaceUserIsCurrentUser: (state, getters, rootState) => {
+      const currentUser = rootState.currentUser
+      const users = state.users
+      const userIds = users.map(user => user.id)
+      return userIds.includes(currentUser.id)
+    },
     shouldPreventAddCard: (state, getters, rootState, rootGetters) => {
       const cardsCreatedIsOverLimit = rootGetters['currentUser/cardsCreatedIsOverLimit']
       const spaceUserIsUpgraded = getters.spaceUserIsUpgraded
       return cardsCreatedIsOverLimit && !spaceUserIsUpgraded
     }
-
   }
 }
