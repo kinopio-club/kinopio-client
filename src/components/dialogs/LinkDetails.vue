@@ -128,9 +128,7 @@ export default {
       let text = remoteSpace.cards.map(card => { return card.name })
       text = join(text, '\n')
       this.cardsText = text
-      this.$nextTick(() => {
-        this.scrollIntoView()
-      })
+      this.scrollIntoView()
     },
     showCardDetails (card) {
       card = card || this.currentCard
@@ -153,9 +151,11 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'linkDetails.changeSpace')
     },
     scrollIntoView () {
-      const element = this.$refs.dialog
-      const isTouchDevice = this.$store.state.isTouchDevice
-      scrollIntoView.scroll(element, isTouchDevice)
+      this.$nextTick(() => {
+        const element = this.$refs.dialog
+        const isTouchDevice = this.$store.state.isTouchDevice
+        scrollIntoView.scroll(element, isTouchDevice)
+      })
     },
     toggleFilterShowAbsoluteDate () {
       this.showAbsoluteDate = !this.showAbsoluteDate
@@ -173,17 +173,15 @@ export default {
     isVisible (visible) {
       if (visible) {
         const shouldRequestSpace = this.checkIfShouldRequestSpace()
-        if (!shouldRequestSpace) { return }
+        if (!shouldRequestSpace) {
+          this.scrollIntoView()
+          return
+        }
         this.users = []
         this.cardsText = ''
         this.updateSpaceUser()
         this.getCardsTextAndCollaboratorsFromRemoteSpace()
       }
-      this.$nextTick(() => {
-        if (visible) {
-          this.scrollIntoView()
-        }
-      })
     }
   }
 }
