@@ -14,9 +14,9 @@ dialog.link-details.narrow(v-if="isVisible" :open="isVisible" :style="dialogPosi
             span {{space.name}} →
 
     template(v-if="isSpace")
-      .row.badge-wrap(v-if="space.isLoadingOrInvalid")
+      .row.badges-wrap(v-if="space.isLoadingOrInvalid")
         .badge.danger Space is loading or invalid
-      .row.badge-wrap(v-else-if="!space.isLoadingOrInvalid")
+      .row.badges-wrap(v-else-if="!space.isLoadingOrInvalid")
         UserList(:users="users" :isClickable="false")
 
     .badges-wrap(v-if="isSpace && !space.isLoadingOrInvalid")
@@ -195,7 +195,7 @@ export default {
   button
     span
       word-break break-word
-  .container-wrap + .badge-wrap
+  .container-wrap + .badges-wrap
     margin-top 6px
   .container-wrap
     display flex
@@ -215,8 +215,9 @@ export default {
   .secondary
     background-color var(--secondary-background)
   .badges-wrap
-    margin-top 6px
     display flex
+    .user-list
+      display flex
   textarea
     background-color var(--secondary-background)
     border 0
