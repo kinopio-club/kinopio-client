@@ -39,8 +39,20 @@ export default {
     id () { return this.connection.id },
     connectionTypeId () { return this.connection.connectionTypeId },
     connectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.connectionTypeId) },
-    typeColor () { return this.connectionType.color },
-    typeName () { return this.connectionType.name },
+    typeColor () {
+      if (this.connectionType) {
+        return this.connectionType.color
+      } else {
+        return 'transparent'
+      }
+    },
+    typeName () {
+      if (this.connectionType) {
+        return this.connectionType.name
+      } else {
+        return ''
+      }
+    },
     path () { return this.connection.path },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
 
