@@ -14,11 +14,11 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keyup.stop.esc
         @keydown.esc="closeCardAndFocus"
 
-        @keyup.stop.backspace="checkIfShouldShowTagPicker"
-        @keyup.stop.up="checkIfShouldHideTagPicker"
-        @keyup.stop.down="checkIfShouldHideTagPicker"
-        @keyup.stop.left="checkIfShouldHideTagPicker"
-        @keyup.stop.right="checkIfShouldHideTagPicker"
+        @keyup.stop.backspace="checkIfShouldShowPicker"
+        @keyup.stop.up="checkIfShouldHidePicker"
+        @keyup.stop.down="checkIfShouldHidePicker"
+        @keyup.stop.left="checkIfShouldHidePicker"
+        @keyup.stop.right="checkIfShouldHidePicker"
 
         data-type="name"
         maxlength="300"
@@ -41,7 +41,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.221="triggerTagPickerSelectTag"
         @keydown.bracket-right="triggerTagPickerSelectTag"
       )
-      TagPicker(:visible="tagPickerIsVisible" :cursorPosition="cursorPosition" :position="tagPickerPosition" :search="tagPickerSearch" @closeDialog="hideTagPicker" @selectTag="updateTagBracketsWithTag")
+      TagPicker(:visible="tagPickerIsVisible" :cursorPosition="cursorPosition" :position="tagPickerPosition" :search="tagPickerSearch" @closeDialog="hidePickers" @selectTag="updateTagBracketsWithTag")
     .row(v-if="cardPendingUpload")
       .badge.info
         Loader(:visible="true")
@@ -202,7 +202,7 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.framePickerIsVisible = false
         this.imagePickerIsVisible = false
-        this.hideTagPicker()
+        this.hidePickers()
       }
       if (mutation.type === 'triggerUploadComplete') {
         let { cardId, url } = mutation.payload
@@ -562,7 +562,7 @@ export default {
     },
     closeCard (event) {
       if (this.tagPickerIsVisible) {
-        this.hideTagPicker()
+        this.hidePickers()
         event.stopPropagation()
         return
       }
@@ -575,7 +575,7 @@ export default {
     },
     closeCardAndFocus () {
       if (this.tagPickerIsVisible) {
-        this.hideTagPicker()
+        this.hidePickers()
         return
       }
       this.closeCard()
@@ -650,7 +650,7 @@ export default {
     closeDialogs () {
       this.framePickerIsVisible = false
       this.imagePickerIsVisible = false
-      this.hideTagPicker()
+      this.hidePickers()
       this.hideTagDetailsIsVisible()
       this.hideLinkDetailsIsVisible()
     },
@@ -691,6 +691,12 @@ export default {
       this.error.sizeLimit = false
       this.error.unknownUploadError = false
     },
+    checkIfShouldShowPicker () {
+      this.checkIfShouldShowTagPicker()
+    },
+    checkIfShouldHidePicker () {
+      this.checkIfShouldHideTagPicker()
+    },
 
     // Tags
 
@@ -703,7 +709,7 @@ export default {
       this.updateTagPickerSearch()
       this.tagPickerIsVisible = true
     },
-    hideTagPicker () {
+    hidePickers () {
       this.tagPickerSearch = ''
       this.tagPickerIsVisible = false
     },
@@ -745,14 +751,14 @@ export default {
       if (isCursorInsideTagBrackets && !tagPickerIsVisible) {
         this.showTagPicker()
       } else if (!isCursorInsideTagBrackets && tagPickerIsVisible) {
-        this.hideTagPicker()
+        this.hidePickers()
       }
     },
     checkIfShouldHideTagPicker () {
       const tagPickerIsVisible = this.tagPickerIsVisible
       const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets()
       if (!isCursorInsideTagBrackets && tagPickerIsVisible) {
-        this.hideTagPicker()
+        this.hidePickers()
       }
     },
     addClosingBrackets () {
