@@ -128,6 +128,9 @@ export default {
       let text = remoteSpace.cards.map(card => { return card.name })
       text = join(text, '\n')
       this.cardsText = text
+      this.$nextTick(() => {
+        this.scrollIntoView()
+      })
     },
     showCardDetails (card) {
       card = card || this.currentCard
@@ -150,7 +153,6 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'linkDetails.changeSpace')
     },
     scrollIntoView () {
-      if (this.hasProps) { return }
       const element = this.$refs.dialog
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)

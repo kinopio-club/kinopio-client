@@ -812,7 +812,7 @@ export default {
       if (isMultiTouch) { return }
       if (this.preventDraggedButtonBadgeFromShowingDetails) { return }
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
-      this.$store.dispatch('closeAllDialogs', 'Card.showTagDetailsIsVisible')
+      this.$store.dispatch('closeAllDialogs', 'Card.showLinkDetailsIsVisible')
       this.$store.commit('currentUserIsDraggingCard', false)
       const linkRect = event.target.getBoundingClientRect()
       this.$store.commit('linkDetailsPosition', {

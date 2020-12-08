@@ -139,7 +139,13 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           @keyup.stop.enter="showTagDetailsIsVisible($event, tag)"
         ) {{tag.name}}
       //- Links
-      .badge.button-badge.link-badge(v-if="card.linkToSpaceId")
+      .badge.button-badge.link-badge(
+        v-if="card.linkToSpaceId"
+        :class="{ active: currentSelectedLinkisActive }"
+        @click.left.stop="showLinkDetailsIsVisible($event)"
+        @touchend.stop="showLinkDetailsIsVisible($event)"
+        @keyup.stop.enter="showLinkDetailsIsVisible($event)"
+      )
         User(v-if="linkToSpace" :user="linkToSpace.users[0]" :isClickable="false")
         span {{linkName}}
 </template>
@@ -266,6 +272,11 @@ export default {
       return tags
     },
     currentSelectedTag () { return this.$store.state.currentSelectedTag },
+    currentSelectedLink () { return this.$store.state.currentSelectedLink },
+    currentSelectedLinkisActive () {
+      if (!this.currentSelectedLink.space) { return }
+      return this.currentSelectedLink.space.id === this.card.linkToSpaceId
+    },
     name: {
       get () {
         return this.card.name
@@ -641,6 +652,7 @@ export default {
       this.imagePickerIsVisible = false
       this.hideTagPicker()
       this.hideTagDetailsIsVisible()
+      this.hideLinkDetailsIsVisible()
     },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
@@ -817,6 +829,10 @@ export default {
       this.$store.commit('currentSelectedTag', {})
       this.$store.commit('tagDetailsIsVisible', false)
     },
+    hideLinkDetailsIsVisible () {
+      this.$store.commit('currentSelectedLink', {})
+      this.$store.commit('linkDetailsIsVisible', false)
+    },
     showTagDetailsIsVisible (event, tag) {
       this.closeDialogs()
       const tagRect = event.target.getBoundingClientRect()
@@ -826,6 +842,20 @@ export default {
       })
       this.$store.commit('currentSelectedTag', tag)
       this.$store.commit('tagDetailsIsVisible', true)
+    },
+    showLinkDetailsIsVisible (event) {
+      this.closeDialogs()
+      const linkRect = event.target.getBoundingClientRect()
+      this.$store.commit('linkDetailsPosition', {
+        x: window.scrollX + linkRect.x + 2,
+        y: window.scrollY + linkRect.y + linkRect.height - 2
+      })
+      const link = {
+        cardId: this.card.id,
+        space: this.linkToSpace
+      }
+      this.$store.commit('currentSelectedLink', link)
+      this.$store.commit('linkDetailsIsVisible', true)
     },
     triggerTagPickerNavigation (event) {
       const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
