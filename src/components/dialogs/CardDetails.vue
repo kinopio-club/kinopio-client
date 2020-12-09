@@ -585,8 +585,8 @@ export default {
       }
       this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCard')
     },
-    closeCardAndFocus () {
-      if (this.tag.pickerIsVisible) {
+    closeCardAndFocus (event) {
+      if (this.tag.pickerIsVisible || this.space.pickerIsVisible) {
         this.hidePickers()
         return
       }
