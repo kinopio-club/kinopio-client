@@ -1,9 +1,9 @@
 <template lang="pug">
 dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{top: dialogPositionTop}")
-  section.info-section
+  section.info-section(v-if="!search")
     p
       img.icon.search(src="@/assets/search.svg")
-      span Type to search spaces
+      span Type to search spaces {{search}}
   section.results-section
     Loader(:visible="loading")
     SpaceList(v-if="spaces.length" :hideFilter="hideFilter" :spaces="spaces" :showUserIfCurrentUserIsCollaborator="showUserIfCurrentUserIsCollaborator" :selectedSpace="selectedSpace" @selectSpace="selectSpace")
@@ -94,11 +94,16 @@ export default {
       }
       this.excludeCurrentSpace()
       this.checkIfShouldTruncateSpaces()
+      this.checkIfShouldFilterSpacesBySearch()
     },
     checkIfShouldTruncateSpaces () {
       if (this.parentIsCardDetails) {
         this.spaces = this.spaces.slice(0, 5)
       }
+    },
+    checkIfShouldFilterSpacesBySearch () {
+      if (!this.parentIsCardDetails) { return }
+      console.log(this.search)
     },
     async updateWithRemoteSpaces () {
       if (!this.spaces.length) {

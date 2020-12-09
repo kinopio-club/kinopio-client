@@ -387,6 +387,12 @@ export default {
       return true
     }
   },
+  splitByBlankCharacters (string) {
+    // https://regexr.com/5i5a3
+    // matches space, enter, tab, whitespace characters
+    const blankPattern = new RegExp(/( |\s|\t)+/gm)
+    return string.split(blankPattern)
+  },
 
   // Painting 🖌
 

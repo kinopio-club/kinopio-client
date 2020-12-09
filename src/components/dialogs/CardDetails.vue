@@ -797,10 +797,17 @@ export default {
       this.space.pickerPosition = {
         top: nameRect.height - 2
       }
-      this.updateSpacePickerSearch()
       this.space.pickerIsVisible = true
+      this.updateSpacePickerSearch()
     },
     slashText () {
+      const cursorPosition = this.$refs.name.selectionStart
+      const start = this.slashTextToCursor() // /txt|
+      let end = this.name.substring(cursorPosition, this.name.length) // |abc xyz
+      end = utils.splitByBlankCharacters(end)[0]
+      return start + end
+    },
+    slashTextToCursor () {
       const cursorPosition = this.$refs.name.selectionStart
       const textPosition = this.slashTextPosition()
       const text = this.name.substring(textPosition, cursorPosition)
@@ -821,9 +828,7 @@ export default {
     },
     checkIfShouldHideSpacePicker () {
       if (!this.space.pickerIsVisible) { return }
-      const cursorPosition = this.$refs.name.selectionStart
-      const lastCharacter = this.name.charAt(cursorPosition - 1)
-      if (utils.hasBlankCharacters(lastCharacter)) {
+      if (!this.isCursorInsideSlashCommand()) {
         this.hideSpacePicker()
       }
     },
@@ -835,7 +840,7 @@ export default {
       }
     },
     isCursorInsideSlashCommand () {
-      const text = this.slashText()
+      const text = this.slashTextToCursor()
       if (!text) { return }
       const characterBeforeSlash = this.name.charAt(this.slashTextPosition() - 1)
       if (!characterBeforeSlash) { return true }
@@ -866,8 +871,8 @@ export default {
       this.tag.pickerPosition = {
         top: nameRect.height - 2
       }
-      this.updateTagPickerSearch()
       this.tag.pickerIsVisible = true
+      this.updateTagPickerSearch()
     },
     tagStartText () {
       // ...[[abc
