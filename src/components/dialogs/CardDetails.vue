@@ -31,17 +31,20 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.alt.enter.exact.stop="insertLineBreak"
         @keydown.ctrl.enter.exact.stop="insertLineBreak"
 
-        @keyup="updateTagPickerSearch(null)"
+        @keyup="updatePickerSearch(null)"
 
-        @keydown="updateTagPicker"
-        @keydown.down="triggerTagPickerNavigation"
-        @keydown.up="triggerTagPickerNavigation"
-        @keydown.enter="triggerTagPickerSelectTag"
-        @keydown.tab="triggerTagPickerSelectTag"
-        @keydown.221="triggerTagPickerSelectTag"
-        @keydown.bracket-right="triggerTagPickerSelectTag"
+        @keydown="updatePicker"
+        @keydown.down="triggerPickerNavigation"
+        @keydown.up="triggerPickerNavigation"
+        @keydown.enter="triggerPickerSelectItem"
+        @keydown.tab="triggerPickerSelectItem"
+        @keydown.221="triggerPickerSelectItem"
+        @keydown.bracket-right="triggerPickerSelectItem"
       )
       TagPicker(:visible="tag.pickerIsVisible" :cursorPosition="cursorPosition" :position="tag.pickerPosition" :search="tag.pickerSearch" @closeDialog="hidePickers" @selectTag="updateTagBracketsWithTag")
+      SpacePicker(:visible="space.pickerIsVisible" :parentIsCardDetails="true" :cursorPosition="cursorPosition" :position="space.pickerPosition" :search="space.pickerSearch" @closeDialog="hidePickers")
+        //- :selectedSpace="selectedSpace" @selectSpace="updateSelectedSpace"
+
     .row(v-if="cardPendingUpload")
       .badge.info
         Loader(:visible="true")
@@ -154,6 +157,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
+import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 import scrollIntoView from '@/scroll-into-view.js'
@@ -171,6 +175,7 @@ export default {
     FramePicker,
     ImagePicker,
     TagPicker,
+    SpacePicker,
     Loader,
     User
   },
@@ -568,7 +573,7 @@ export default {
       this.updateCardName(newName)
     },
     closeCard (event) {
-      if (this.tag.pickerIsVisible) {
+      if (this.tag.pickerIsVisible || this.space.pickerIsVisible) {
         this.hidePickers()
         event.stopPropagation()
         return
@@ -661,6 +666,18 @@ export default {
       this.hideTagDetailsIsVisible()
       this.hideLinkDetailsIsVisible()
     },
+    hidePickers () {
+      this.hideTagPicker()
+      this.hideSpacePicker()
+    },
+    hideTagPicker () {
+      this.tag.pickerSearch = ''
+      this.tag.pickerIsVisible = false
+    },
+    hideSpacePicker () {
+      this.space.pickerSearch = ''
+      this.space.pickerIsVisible = false
+    },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
@@ -704,9 +721,131 @@ export default {
     },
     checkIfShouldHidePicker () {
       this.checkIfShouldHideTagPicker()
+      this.checkIfShouldHideSpacePicker()
     },
 
-    // Tags
+    // Pickers
+
+    updatePicker (event) {
+      const cursorPosition = this.$refs.name.selectionStart
+      const previousCharacter = this.name[cursorPosition - 1]
+      const previousCharacterIsBlank = utils.hasBlankCharacters(previousCharacter)
+      const key = event.key
+      const keyIsLettterOrNumber = key.length === 1
+      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets()
+      const isCursorInsideSlashCommand = this.isCursorInsideSlashCommand()
+      if (key === '/' && previousCharacterIsBlank) {
+        this.showSpacePicker()
+      } else if (cursorPosition === 0) {
+        return
+      } else if (keyIsLettterOrNumber && isCursorInsideSlashCommand) {
+        this.showSpacePicker()
+      } else if (key === '[' && previousCharacter === '[') {
+        this.showTagPicker()
+        this.addClosingBrackets()
+      } else if (keyIsLettterOrNumber && isCursorInsideTagBrackets) {
+        this.showTagPicker()
+      }
+      this.checkIfIsInsertLineBreak(event)
+    },
+    triggerPickerNavigation (event) {
+      const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
+      const shouldTriggerTag = this.tag.pickerIsVisible && !modifierKey
+      if (shouldTriggerTag) {
+        this.$store.commit('triggerPickerNavigationKey', event.key)
+        event.preventDefault()
+      }
+    },
+    triggerPickerSelectItem (event) {
+      const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
+      const shouldTriggerTag = this.tag.pickerIsVisible && !modifierKey
+      if (shouldTriggerTag) {
+        this.$store.commit('triggerPickerSelect')
+        event.preventDefault()
+      }
+      // prevent trailing ]
+      if (event.key === ']' && this.tag.pickerIsVisible) {
+        this.shouldCancelBracketRight = true
+        setTimeout(() => {
+          this.shouldCancelBracketRight = false
+        }, 250)
+      }
+      if (event.key === ']' && this.shouldCancelBracketRight) {
+        event.preventDefault()
+      }
+      // prevents Enter from creating new card
+      if (event.key !== 'Enter') {
+        this.hidePickers()
+      }
+    },
+    updatePickerSearch () {
+      if (this.tag.pickerIsVisible) {
+        this.updateTagPickerSearch()
+      } else if (this.space.pickerIsVisible) {
+        this.updateSpacePickerSearch()
+      }
+    },
+
+    // /Space-Links
+
+    showSpacePicker () {
+      this.closeDialogs()
+      const nameRect = this.$refs.name.getBoundingClientRect()
+      this.space.pickerPosition = {
+        top: nameRect.height - 2
+      }
+      this.updateSpacePickerSearch()
+      this.space.pickerIsVisible = true
+    },
+    spaceTextStart () {
+      const cursorPosition = this.$refs.name.selectionStart
+      let start = this.name.substring(0, cursorPosition)
+      let startPosition = start.lastIndexOf('/')
+      if (startPosition === -1) { return }
+      start = this.name.substring(startPosition, cursorPosition)
+      return start
+    },
+    updateSpacePickerSearch () {
+      if (!this.space.pickerIsVisible) { return }
+      const start = this.spaceTextStart()
+      this.space.pickerSearch = start.substring(1, start.length)
+      this.checkIfShouldHideSpacePicker()
+    },
+    checkIfShouldHideSpacePicker () {
+      if (!this.space.pickerIsVisible) { return }
+      const cursorPosition = this.$refs.name.selectionStart
+      const lastCharacter = this.name.charAt(cursorPosition - 1)
+      if (utils.hasBlankCharacters(lastCharacter)) {
+        this.hideSpacePicker()
+      }
+    },
+    checkIfShouldShowSpacePicker () {
+      if (this.isCursorInsideSlashCommand()) {
+        this.showSpacePicker()
+      } else {
+        this.hideSpacePicker()
+      }
+    },
+    isCursorInsideSlashCommand () {
+      const start = this.spaceTextStart()
+      return !utils.hasBlankCharacters(start)
+    },
+    showLinkDetailsIsVisible (event) {
+      this.closeDialogs()
+      const linkRect = event.target.getBoundingClientRect()
+      this.$store.commit('linkDetailsPosition', {
+        x: window.scrollX + linkRect.x + 2,
+        y: window.scrollY + linkRect.y + linkRect.height - 2
+      })
+      const link = {
+        cardId: this.card.id,
+        space: this.linkToSpace
+      }
+      this.$store.commit('currentSelectedLink', link)
+      this.$store.commit('linkDetailsIsVisible', true)
+    },
+
+    // [[Tags]]
 
     showTagPicker () {
       this.closeDialogs()
@@ -716,10 +855,6 @@ export default {
       }
       this.updateTagPickerSearch()
       this.tag.pickerIsVisible = true
-    },
-    hidePickers () {
-      this.tag.pickerSearch = ''
-      this.tag.pickerIsVisible = false
     },
     tagStartText () {
       // ...[[abc
@@ -759,14 +894,14 @@ export default {
       if (isCursorInsideTagBrackets && !tagPickerIsVisible) {
         this.showTagPicker()
       } else if (!isCursorInsideTagBrackets && tagPickerIsVisible) {
-        this.hidePickers()
+        this.hideTagPicker()
       }
     },
     checkIfShouldHideTagPicker () {
       const tagPickerIsVisible = this.tag.pickerIsVisible
       const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets()
       if (!isCursorInsideTagBrackets && tagPickerIsVisible) {
-        this.hidePickers()
+        this.hideTagPicker()
       }
     },
     addClosingBrackets () {
@@ -777,21 +912,6 @@ export default {
       this.$nextTick(() => {
         this.$refs.name.setSelectionRange(cursorPosition, cursorPosition)
       })
-    },
-    updateTagPicker (event) {
-      const cursorPosition = this.$refs.name.selectionStart
-      const previousCharacter = this.name[cursorPosition - 1]
-      const key = event.key
-      const keyIsLettterOrNumber = key.length === 1
-      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets()
-      if (cursorPosition === 0) { return }
-      if (key === '[' && previousCharacter === '[') {
-        this.showTagPicker()
-        this.addClosingBrackets()
-      } else if (keyIsLettterOrNumber && isCursorInsideTagBrackets) {
-        this.showTagPicker()
-      }
-      this.checkIfIsInsertLineBreak(event)
     },
     moveCursorPastTagEnd () {
       const cursorPosition = this.$refs.name.selectionStart
@@ -856,50 +976,6 @@ export default {
       })
       this.$store.commit('currentSelectedTag', tag)
       this.$store.commit('tagDetailsIsVisible', true)
-    },
-    showLinkDetailsIsVisible (event) {
-      this.closeDialogs()
-      const linkRect = event.target.getBoundingClientRect()
-      this.$store.commit('linkDetailsPosition', {
-        x: window.scrollX + linkRect.x + 2,
-        y: window.scrollY + linkRect.y + linkRect.height - 2
-      })
-      const link = {
-        cardId: this.card.id,
-        space: this.linkToSpace
-      }
-      this.$store.commit('currentSelectedLink', link)
-      this.$store.commit('linkDetailsIsVisible', true)
-    },
-    triggerTagPickerNavigation (event) {
-      const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
-      const shouldTrigger = this.tag.pickerIsVisible && !modifierKey
-      if (shouldTrigger) {
-        this.$store.commit('triggerPickerNavigationKey', event.key)
-        event.preventDefault()
-      }
-    },
-    triggerTagPickerSelectTag (event) {
-      const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
-      const shouldTrigger = this.tag.pickerIsVisible && !modifierKey
-      if (shouldTrigger) {
-        this.$store.commit('triggerPickerSelect')
-        event.preventDefault()
-      }
-      // prevent trailing ]
-      if (event.key === ']' && this.tag.pickerIsVisible) {
-        this.shouldCancelBracketRight = true
-        setTimeout(() => {
-          this.shouldCancelBracketRight = false
-        }, 250)
-      }
-      if (event.key === ']' && this.shouldCancelBracketRight) {
-        event.preventDefault()
-      }
-      // prevents Enter from creating new card
-      if (event.key !== 'Enter') {
-        this.tag.pickerIsVisible = false
-      }
     },
     updateTagBracketsWithTag (tag) {
       this.updatePreviousTags()

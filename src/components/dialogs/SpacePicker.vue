@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{top: position.top + 'px'}")
   section.results-section
     Loader(:visible="loading")
     SpaceList(v-if="spaces.length" :spaces="spaces" :showUserIfCurrentUserIsCollaborator="showUserIfCurrentUserIsCollaborator" :selectedSpace="selectedSpace" @selectSpace="selectSpace")

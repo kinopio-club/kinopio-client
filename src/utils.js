@@ -378,6 +378,15 @@ export default {
     // unlike string.trim(), this removes line breaks too
     return string.replace(/^(\n|\\n|\s)+|(\n|\\n|\s)+$/g, '')
   },
+  hasBlankCharacters (string) {
+    if (!string) { return true }
+    // https://regexr.com/5i5a3
+    // matches space, enter, tab, whitespace characters
+    const blankPattern = new RegExp(/( |\s|\t)+/gm)
+    if (string.match(blankPattern)) {
+      return true
+    }
+  },
 
   // Painting 🖌
 
