@@ -6,10 +6,11 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
       span Type to search spaces {{search}}
   section.results-section
     Loader(:visible="loading")
-    SpaceList(v-if="spaces.length" :hideFilter="hideFilter" :spaces="spaces" :showUserIfCurrentUserIsCollaborator="showUserIfCurrentUserIsCollaborator" :selectedSpace="selectedSpace" @selectSpace="selectSpace")
-    .error-container(v-if="!spaces.length && !loading")
+    SpaceList(v-if="filteredSpaces.length" :hideFilter="hideFilter" :spaces="filteredSpaces" :showUserIfCurrentUserIsCollaborator="showUserIfCurrentUserIsCollaborator" :selectedSpace="selectedSpace" @selectSpace="selectSpace")
+    .error-container(v-if="!filteredSpaces.length && !loading")
       User(:user="activeUser" :isClickable="false" :key="activeUser.id")
-      span(v-if="activeUserIsCurrentUser") have no spaces
+      span(v-if="activeUserIsCurrentUser && search") has no spaces matching {{search}}
+      span(v-else-if="activeUserIsCurrentUser") has no spaces
       span(v-else) has no public spaces
 </template>
 
@@ -17,6 +18,8 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
 import scrollIntoView from '@/scroll-into-view.js'
 import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
+
+import fuzzy from 'fuzzy'
 
 export default {
   name: 'SpacePicker',
@@ -77,6 +80,24 @@ export default {
       } else {
         return undefined
       }
+    },
+    filteredSpaces () {
+      console.log(this.search)
+      if (!this.parentIsCardDetails) { return this.spaces }
+      let spaces = this.spaces.filter(tag => {
+        return tag.name !== this.search
+      })
+      const options = {
+        pre: '',
+        post: '',
+        extract: (item) => {
+          let name = item.name || ''
+          return name
+        }
+      }
+      const filtered = fuzzy.filter(this.search, spaces, options)
+      spaces = filtered.map(item => item.original)
+      return spaces.slice(0, 5)
     }
   },
   methods: {
@@ -102,8 +123,7 @@ export default {
       }
     },
     checkIfShouldFilterSpacesBySearch () {
-      if (!this.parentIsCardDetails) { return }
-      console.log(this.search)
+      if (!this.parentIsCardDetails) { }
     },
     async updateWithRemoteSpaces () {
       if (!this.spaces.length) {

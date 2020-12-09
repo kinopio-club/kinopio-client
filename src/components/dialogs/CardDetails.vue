@@ -666,6 +666,7 @@ export default {
         event.stopPropagation()
       } else if (this.isCursorInsideSlashCommand()) {
         this.showSpacePicker()
+        this.updateSpacePickerSearch()
         event.stopPropagation()
       }
     },
@@ -737,7 +738,9 @@ export default {
       const keyIsLettterOrNumber = key.length === 1
       const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets()
       const isCursorInsideSlashCommand = this.isCursorInsideSlashCommand()
-      if (key === '/' && previousCharacterIsBlank) {
+      if (utils.hasBlankCharacters(key)) {
+        this.hideSpacePicker()
+      } else if (key === '/' && previousCharacterIsBlank) {
         this.showSpacePicker()
       } else if (cursorPosition === 0) {
         return
@@ -798,7 +801,6 @@ export default {
         top: nameRect.height - 2
       }
       this.space.pickerIsVisible = true
-      this.updateSpacePickerSearch()
     },
     slashText () {
       const cursorPosition = this.$refs.name.selectionStart
@@ -824,7 +826,6 @@ export default {
       if (!this.space.pickerIsVisible) { return }
       const text = this.slashText()
       this.space.pickerSearch = text.substring(1, text.length)
-      this.checkIfShouldHideSpacePicker()
     },
     checkIfShouldHideSpacePicker () {
       if (!this.space.pickerIsVisible) { return }
@@ -841,9 +842,9 @@ export default {
     },
     isCursorInsideSlashCommand () {
       const text = this.slashTextToCursor()
-      if (!text) { return }
+      if (utils.hasBlankCharacters(text)) { return }
       const characterBeforeSlash = this.name.charAt(this.slashTextPosition() - 1)
-      if (!characterBeforeSlash) { return true }
+      if (text && !characterBeforeSlash) { return true }
       const characterBeforeSlashIsBlank = utils.hasBlankCharacters(characterBeforeSlash)
       const textIsValid = !utils.hasBlankCharacters(text)
       return textIsValid && characterBeforeSlashIsBlank
