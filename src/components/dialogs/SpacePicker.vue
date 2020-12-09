@@ -1,11 +1,16 @@
 <template lang="pug">
-dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{top: position.top + 'px'}")
+dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{top: dialogPositionTop}")
+  section.info-section
+    p
+      img.icon.search(src="@/assets/search.svg")
+      span Type to search spaces
   section.results-section
     Loader(:visible="loading")
-    SpaceList(v-if="spaces.length" :spaces="spaces" :showUserIfCurrentUserIsCollaborator="showUserIfCurrentUserIsCollaborator" :selectedSpace="selectedSpace" @selectSpace="selectSpace")
+    SpaceList(v-if="spaces.length" :hideFilter="hideFilter" :spaces="spaces" :showUserIfCurrentUserIsCollaborator="showUserIfCurrentUserIsCollaborator" :selectedSpace="selectedSpace" @selectSpace="selectSpace")
     .error-container(v-if="!spaces.length && !loading")
       User(:user="activeUser" :isClickable="false" :key="activeUser.id")
-      span has no public spaces
+      span(v-if="activeUserIsCurrentUser") have no spaces
+      span(v-else) has no public spaces
 </template>
 
 <script>
@@ -27,7 +32,12 @@ export default {
     userSpaces: Array,
     user: Object,
     loading: Boolean,
-    showUserIfCurrentUserIsCollaborator: Boolean
+    showUserIfCurrentUserIsCollaborator: Boolean,
+
+    parentIsCardDetails: Boolean,
+    position: Object,
+    search: String,
+    cursorPosition: Number
   },
   data () {
     return {
@@ -49,6 +59,24 @@ export default {
     activeUser () {
       const currentUser = this.$store.state.currentUser
       return this.user || currentUser
+    },
+    hideFilter () {
+      if (this.parentIsCardDetails) {
+        return true
+      } else {
+        return false
+      }
+    },
+    activeUserIsCurrentUser () {
+      const currentUser = this.$store.state.currentUser
+      return this.activeUser.id === currentUser.id
+    },
+    dialogPositionTop () {
+      if (this.position) {
+        return this.position.top + 'px'
+      } else {
+        return undefined
+      }
     }
   },
   methods: {
@@ -65,12 +93,23 @@ export default {
         this.updateWithRemoteSpaces()
       }
       this.excludeCurrentSpace()
+      this.checkIfShouldTruncateSpaces()
+    },
+    checkIfShouldTruncateSpaces () {
+      if (this.parentIsCardDetails) {
+        this.spaces = this.spaces.slice(0, 5)
+      }
     },
     async updateWithRemoteSpaces () {
+      if (!this.spaces.length) {
+        this.loading = true
+      }
       const spaces = await this.$store.dispatch('api/getUserSpaces')
+      this.loading = false
       if (!spaces) { return }
       this.spaces = spaces
       this.excludeCurrentSpace()
+      this.checkIfShouldTruncateSpaces()
     },
     selectSpace (space) {
       this.$emit('selectSpace', space)
@@ -109,4 +148,6 @@ export default {
     align-items center
     .user
       margin-right 6px
+  .info-section
+    padding-bottom 4px
 </style>

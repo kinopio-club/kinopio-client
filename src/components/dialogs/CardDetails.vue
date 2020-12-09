@@ -648,13 +648,6 @@ export default {
       this.triggerUpdateMagicPaintPositionOffset()
       this.triggerUpdatePositionInVisualViewport()
     },
-    clickName (event) {
-      this.triggerUpdateMagicPaintPositionOffset()
-      if (this.isCursorInsideTagBrackets()) {
-        this.showTagPicker()
-        event.stopPropagation()
-      }
-    },
     triggerUpdateMagicPaintPositionOffset () {
       this.$store.commit('triggerUpdateMagicPaintPositionOffset')
       this.triggerUpdatePositionInVisualViewport()
@@ -665,6 +658,16 @@ export default {
       this.hidePickers()
       this.hideTagDetailsIsVisible()
       this.hideLinkDetailsIsVisible()
+    },
+    clickName (event) {
+      this.triggerUpdateMagicPaintPositionOffset()
+      if (this.isCursorInsideTagBrackets()) {
+        this.showTagPicker()
+        event.stopPropagation()
+      } else if (this.isCursorInsideSlashCommand()) {
+        this.showSpacePicker()
+        event.stopPropagation()
+      }
     },
     hidePickers () {
       this.hideTagPicker()
@@ -786,7 +789,7 @@ export default {
       }
     },
 
-    // /Space-Links
+    // /Space-Links, slash command text
 
     showSpacePicker () {
       this.closeDialogs()
@@ -797,18 +800,23 @@ export default {
       this.updateSpacePickerSearch()
       this.space.pickerIsVisible = true
     },
-    spaceTextStart () {
+    slashText () {
       const cursorPosition = this.$refs.name.selectionStart
-      let start = this.name.substring(0, cursorPosition)
-      let startPosition = start.lastIndexOf('/')
-      if (startPosition === -1) { return }
-      start = this.name.substring(startPosition, cursorPosition)
-      return start
+      const textPosition = this.slashTextPosition()
+      const text = this.name.substring(textPosition, cursorPosition)
+      return text
+    },
+    slashTextPosition () {
+      const cursorPosition = this.$refs.name.selectionStart
+      let text = this.name.substring(0, cursorPosition)
+      const textPosition = text.lastIndexOf('/')
+      if (textPosition === -1) { return }
+      return textPosition
     },
     updateSpacePickerSearch () {
       if (!this.space.pickerIsVisible) { return }
-      const start = this.spaceTextStart()
-      this.space.pickerSearch = start.substring(1, start.length)
+      const text = this.slashText()
+      this.space.pickerSearch = text.substring(1, text.length)
       this.checkIfShouldHideSpacePicker()
     },
     checkIfShouldHideSpacePicker () {
@@ -827,8 +835,13 @@ export default {
       }
     },
     isCursorInsideSlashCommand () {
-      const start = this.spaceTextStart()
-      return !utils.hasBlankCharacters(start)
+      const text = this.slashText()
+      if (!text) { return }
+      const characterBeforeSlash = this.name.charAt(this.slashTextPosition() - 1)
+      if (!characterBeforeSlash) { return true }
+      const characterBeforeSlashIsBlank = utils.hasBlankCharacters(characterBeforeSlash)
+      const textIsValid = !utils.hasBlankCharacters(text)
+      return textIsValid && characterBeforeSlashIsBlank
     },
     showLinkDetailsIsVisible (event) {
       this.closeDialogs()
