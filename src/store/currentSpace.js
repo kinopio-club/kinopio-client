@@ -400,7 +400,6 @@ export default {
         space = utils.normalizeSpaceMetaOnly(space)
         context.commit('updateOtherSpaces', space, { root: true })
       })
-      console.log('👼', context.rootState.otherSpaces) // temp
       otherSpacesQueue = []
     },
 
