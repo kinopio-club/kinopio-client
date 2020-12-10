@@ -6,10 +6,10 @@ dialog.narrow.tag-picker(v-if="visible" :open="visible" @click.left.stop ref="di
       span Type to add or search tags
   section.results-section
     ul.results-list
-      li(v-if="search" @click="selectTag(null, true)" @touchend.stop :class="{hover: focusOnTagName === search}")
+      li(v-if="search" @click="selectTag(null, true)" @touchend.stop :class="{hover: focusOnName === search}")
         .badge.tag-badge(:style="{backgroundColor: searchTagColor}")
           span {{search}}
-      li(v-for="tag in filteredTags" @click="selectTag(tag, true)" @touchend.stop :class="{hover: focusOnTagName === tag.name}")
+      li(v-for="tag in filteredTags" @click="selectTag(tag, true)" @touchend.stop :class="{hover: focusOnName === tag.name}")
         .badge.tag-badge(:style="{backgroundColor: tag.color}")
           span {{tag.name}}
 
@@ -39,13 +39,13 @@ export default {
           color: this.currentUserColor
         }]
         const tags = searchTag.concat(this.filteredTags)
-        const currentTagIndex = tags.findIndex(tag => tag.name === this.focusOnTagName)
+        const currentIndex = tags.findIndex(tag => tag.name === this.focusOnName)
         if (!utils.arrayHasItems(this.filteredTags)) {
           this.closeDialog()
         } else if (key === 'ArrowUp') {
-          this.focusPreviousItem(tags, currentTagIndex)
+          this.focusPreviousItem(tags, currentIndex)
         } else if (key === 'ArrowDown') {
-          this.focusNextItem(tags, currentTagIndex)
+          this.focusNextItem(tags, currentIndex)
         }
       }
       if (mutation.type === 'triggerPickerSelect') {
@@ -54,7 +54,7 @@ export default {
           color: this.searchTagColor
         }]
         const tags = searchTag.concat(this.filteredTags)
-        const currentTag = tags.find(tag => tag.name === this.focusOnTagName)
+        const currentTag = tags.find(tag => tag.name === this.focusOnName)
         this.selectTag(currentTag)
       }
     })
@@ -69,7 +69,7 @@ export default {
     return {
       tags: [],
       loading: false,
-      focusOnTagName: ''
+      focusOnName: ''
     }
   },
   computed: {
@@ -144,28 +144,28 @@ export default {
       scrollIntoView.scroll(element, isTouchDevice)
     },
 
-    focusPreviousItem (tags, currentTagIndex) {
-      const firstItemIsFocused = this.search === this.focusOnTagName
+    focusPreviousItem (tags, currentIndex) {
+      const firstItemIsFocused = this.search === this.focusOnName
       const firstItem = tags[0]
-      const previousItem = tags[currentTagIndex - 1]
+      const previousItem = tags[currentIndex - 1]
       if (firstItemIsFocused) {
         this.closeDialog()
       } else if (previousItem) {
-        this.focusOnTagName = previousItem.name
+        this.focusOnName = previousItem.name
       } else {
-        this.focusOnTagName = firstItem.name
+        this.focusOnName = firstItem.name
       }
     },
-    focusNextItem (tags, currentTagIndex) {
+    focusNextItem (tags, currentIndex) {
       const lastItem = last(tags)
-      const lastItemIsFocused = lastItem.name === this.focusOnTagName
-      const nextItem = tags[currentTagIndex + 1]
+      const lastItemIsFocused = lastItem.name === this.focusOnName
+      const nextItem = tags[currentIndex + 1]
       if (lastItemIsFocused) {
         this.closeDialog()
       } else if (nextItem) {
-        this.focusOnTagName = nextItem.name
+        this.focusOnName = nextItem.name
       } else {
-        this.focusOnTagName = lastItem.name
+        this.focusOnName = lastItem.name
       }
     },
     closeDialog () {
@@ -182,7 +182,7 @@ export default {
       }
     },
     search (newSearch) {
-      this.focusOnTagName = newSearch
+      this.focusOnName = newSearch
     }
   }
 }

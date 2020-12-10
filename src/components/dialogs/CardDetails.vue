@@ -41,9 +41,23 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.221="triggerPickerSelectItem"
         @keydown.bracket-right="triggerPickerSelectItem"
       )
-      TagPicker(:visible="tag.pickerIsVisible" :cursorPosition="cursorPosition" :position="tag.pickerPosition" :search="tag.pickerSearch" @closeDialog="hidePickers" @selectTag="updateTagBracketsWithTag")
-      SpacePicker(:visible="space.pickerIsVisible" :parentIsCardDetails="true" :cursorPosition="cursorPosition" :position="space.pickerPosition" :search="space.pickerSearch" @closeDialog="hidePickers")
-        //- :selectedSpace="selectedSpace" @selectSpace="updateSelectedSpace"
+      TagPicker(
+        :visible="tag.pickerIsVisible"
+        :cursorPosition="cursorPosition"
+        :position="tag.pickerPosition"
+        :search="tag.pickerSearch"
+        @closeDialog="hideTagPicker"
+        @selectTag="updateTagBracketsWithTag"
+      )
+      SpacePicker(
+        :visible="space.pickerIsVisible"
+        :parentIsCardDetails="true"
+        :cursorPosition="cursorPosition"
+        :position="space.pickerPosition"
+        :search="space.pickerSearch"
+        @closeDialog="hideSpacePicker"
+        @selectSpace="replaceSlashCommandWithSpaceUrl"
+      )
 
     .row(v-if="cardPendingUpload")
       .badge.info
@@ -756,16 +770,18 @@ export default {
     },
     triggerPickerNavigation (event) {
       const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
-      const shouldTriggerTag = this.tag.pickerIsVisible && !modifierKey
-      if (shouldTriggerTag) {
+      const pickerIsVisible = this.tag.pickerIsVisible || this.space.pickerIsVisible
+      const shouldTrigger = pickerIsVisible && !modifierKey
+      if (shouldTrigger) {
         this.$store.commit('triggerPickerNavigationKey', event.key)
         event.preventDefault()
       }
     },
     triggerPickerSelectItem (event) {
       const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
-      const shouldTriggerTag = this.tag.pickerIsVisible && !modifierKey
-      if (shouldTriggerTag) {
+      const pickerIsVisible = this.tag.pickerIsVisible || this.space.pickerIsVisible
+      const shouldTrigger = pickerIsVisible && !modifierKey
+      if (shouldTrigger) {
         this.$store.commit('triggerPickerSelect')
         event.preventDefault()
       }
@@ -862,6 +878,15 @@ export default {
       }
       this.$store.commit('currentSelectedLink', link)
       this.$store.commit('linkDetailsIsVisible', true)
+    },
+    replaceSlashCommandWithSpaceUrl (space) {
+      let name = this.card.name
+      const position = this.slashTextPosition()
+      const spaceUrl = utils.kinopioDomain() + '/' + space.url
+      const start = name.substring(0, position)
+      const end = name.substring(position + this.slashText().length, name.length)
+      const newName = start + spaceUrl + end
+      this.updateCardName(newName)
     },
 
     // [[Tags]]

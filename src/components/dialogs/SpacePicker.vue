@@ -6,7 +6,15 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
       span Type to search spaces {{search}}
   section.results-section
     Loader(:visible="loading")
-    SpaceList(v-if="filteredSpaces.length" :hideFilter="hideFilter" :spaces="filteredSpaces" :showUserIfCurrentUserIsCollaborator="showUserIfCurrentUserIsCollaborator" :selectedSpace="selectedSpace" @selectSpace="selectSpace")
+    SpaceList(
+      v-if="filteredSpaces.length"
+      :hideFilter="hideFilter"
+      :spaces="filteredSpaces"
+      :showUserIfCurrentUserIsCollaborator="showUserIfCurrentUserIsCollaborator"
+      :selectedSpace="selectedSpace"
+      @selectSpace="selectSpace"
+      :search="search"
+    )
     .error-container(v-if="!filteredSpaces.length && !loading")
       User(:user="activeUser" :isClickable="false" :key="activeUser.id")
       span(v-if="activeUserIsCurrentUser && search") has no spaces matching {{search}}
@@ -82,7 +90,6 @@ export default {
       }
     },
     filteredSpaces () {
-      console.log(this.search)
       if (!this.parentIsCardDetails) { return this.spaces }
       let spaces = this.spaces.filter(tag => {
         return tag.name !== this.search
@@ -119,6 +126,8 @@ export default {
     },
     checkIfShouldTruncateSpaces () {
       if (this.parentIsCardDetails) {
+        const currentSpace = this.$store.state.currentSpace
+        this.spaces = this.spaces.filter(space => space.id !== currentSpace.id)
         this.spaces = this.spaces.slice(0, 5)
       }
     },

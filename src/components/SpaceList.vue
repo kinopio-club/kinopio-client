@@ -4,7 +4,13 @@ span
   ul.results-list.space-list
     template(v-for="(space in spacesFiltered")
       a(:href="space.url")
-        li(@click.left.prevent.stop="selectSpace(space)" :class="{ active: spaceIsActive(space) }" :key="space.id" tabindex="0" v-on:keyup.enter="selectSpace(space)")
+        li(
+          @click.left.prevent.stop="selectSpace(space)"
+          :class="{ active: spaceIsActive(space), hover: focusOnName === space.name }"
+          :key="space.id"
+          tabindex="0"
+          v-on:keyup.enter="selectSpace(space)"
+        )
           User(v-if="showUser" :user="user(space)" :isClickable="false" :key="user(space).id")
           template(v-else-if="showUserIfCurrentUserIsCollaborator && space.currentUserIsCollaborator")
             User(:user="user(space)" :isClickable="false" :key="user(space).id")
@@ -30,6 +36,9 @@ import templates from '@/data/templates.js'
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import MoonPhase from '@/components/MoonPhase.vue'
 import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
+
+import last from 'lodash-es/last'
 
 export default {
   name: 'SpaceList',
@@ -38,6 +47,27 @@ export default {
     ResultsFilter,
     Loader,
     MoonPhase
+  },
+  mounted () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerPickerNavigationKey') {
+        const key = mutation.payload
+        const spaces = this.spaces
+        let currentIndex = spaces.findIndex(space => space.name === this.focusOnName)
+        if (!utils.arrayHasItems(spaces)) {
+          this.closeDialog()
+        } else if (key === 'ArrowUp') {
+          this.focusPreviousItem(currentIndex)
+        } else if (key === 'ArrowDown') {
+          this.focusNextItem(currentIndex)
+        }
+      }
+      if (mutation.type === 'triggerPickerSelect') {
+        const spaces = this.spaces
+        const currentSpace = spaces.find(space => space.name === this.focusOnName)
+        this.selectSpace(currentSpace)
+      }
+    })
   },
   props: {
     spaces: Array,
@@ -52,7 +82,8 @@ export default {
   data () {
     return {
       filter: '',
-      filteredSpaces: []
+      filteredSpaces: [],
+      focusOnName: ''
     }
   },
   computed: {
@@ -110,6 +141,43 @@ export default {
     },
     user (space) {
       return space.user || space.users[0]
+    },
+    focusPreviousItem (currentIndex) {
+      const spaces = this.spaces
+      const firstItemIsFocused = this.search === this.focusOnName
+      const firstItem = spaces[0]
+      const previousItem = spaces[currentIndex - 1]
+      if (firstItemIsFocused) {
+        this.closeDialog()
+      } else if (previousItem) {
+        this.focusOnName = previousItem.name
+      } else {
+        this.focusOnName = firstItem.name
+      }
+    },
+    focusNextItem (currentIndex) {
+      const spaces = this.spaces
+      const lastItem = last(spaces)
+      const lastItemIsFocused = lastItem.name === this.focusOnName
+      const nextItem = spaces[currentIndex + 1]
+      if (lastItemIsFocused) {
+        this.closeDialog()
+      } else if (nextItem) {
+        this.focusOnName = nextItem.name
+      } else {
+        this.focusOnName = lastItem.name
+      }
+    },
+    closeDialog () {
+      this.$emit('closeDialog')
+    }
+  },
+  watch: {
+    spaces (spaces) {
+      const cardDetailsIsVisible = this.$store.state.cardDetailsIsVisibleForCardId
+      if (spaces && cardDetailsIsVisible) {
+        this.focusOnName = spaces[0].name
+      }
     }
   }
 }
