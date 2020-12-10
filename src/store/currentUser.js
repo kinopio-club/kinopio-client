@@ -28,81 +28,6 @@ export default {
     journalPrompts: [],
     newSpacesAreBlank: false
   },
-  getters: {
-    isCurrentUser: (state) => (user) => {
-      return Boolean(state.id === user.id)
-    },
-    isSignedIn: (state) => {
-      return Boolean(state.apiKey)
-    },
-    cardsCreatedIsOverLimit: (state, getters, rootState) => {
-      const cardsCreatedLimit = rootState.cardsCreatedLimit
-      if (state.isUpgraded) { return }
-      if (state.cardsCreatedCount >= cardsCreatedLimit) { return true }
-    },
-    canEditSpace: (state, getters, rootState) => (space) => {
-      space = space || rootState.currentSpace
-      const spaceIsOpen = space.privacy === 'open'
-      const currentUserIsSignedIn = getters.isSignedIn
-      const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
-      const isSpaceMember = getters.isSpaceMember(space)
-      return canEditOpenSpace || isSpaceMember
-    },
-    cardIsCreatedByCurrentUser: (state, getters, rootState) => (card) => {
-      return state.id === card.userId
-    },
-    connectionIsCreatedByCurrentUser: (state, getters, rootState) => (connection) => {
-      return state.id === connection.userId
-    },
-    isSpaceMember: (state, getters, rootState) => (space) => {
-      space = space || rootState.currentSpace
-      const isSpaceUser = getters.isSpaceUser(space)
-      const isSpaceCollaborator = getters.isSpaceCollaborator(space)
-      return isSpaceUser || isSpaceCollaborator
-    },
-    isSpaceUser: (state, getters, rootState) => (space) => {
-      let userIsInSpace
-      if (space.users) {
-        userIsInSpace = Boolean(space.users.find(user => {
-          return user.id === state.id
-        }))
-      } else {
-        userIsInSpace = space.userId === state.id
-      }
-      return userIsInSpace
-    },
-    isSpaceCollaborator: (state, getters, rootState) => (space) => {
-      space = space || rootState.currentSpace
-      if (space.collaborators) {
-        return Boolean(space.collaborators.find(collaborator => {
-          return collaborator.id === state.id
-        }))
-      }
-    },
-    spaceUserPermission: (state, getters, rootState) => (space) => {
-      space = space || rootState.currentSpace
-      const isSpaceUser = getters.isSpaceUser(space)
-      const isSpaceCollaborator = getters.isSpaceCollaborator(space)
-      const spaceHasNoUsers = !space.users.length
-      if (isSpaceUser || spaceHasNoUsers) {
-        return 'user'
-      } else if (isSpaceCollaborator) {
-        return 'collaborator'
-      } else {
-        return 'spectator'
-      }
-    },
-    isInvitedButCannotEditSpace: (state, getters, rootState) => (space) => {
-      space = space || rootState.currentSpace
-      const currentUserIsSignedIn = getters.isSignedIn
-      const isInvitedToSpace = Boolean(cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id))
-      return !currentUserIsSignedIn && isInvitedToSpace
-    },
-    packById: (state, getters) => (packId) => {
-      packId = packId.toString()
-      return promptPacks.find(pack => pack.packId === packId)
-    }
-  },
   mutations: {
     color: (state, newColor) => {
       state.color = newColor
@@ -506,6 +431,81 @@ export default {
         body: {
           newSpacesAreBlank: value
         } }, { root: true })
+    }
+  },
+  getters: {
+    isCurrentUser: (state) => (user) => {
+      return Boolean(state.id === user.id)
+    },
+    isSignedIn: (state) => {
+      return Boolean(state.apiKey)
+    },
+    cardsCreatedIsOverLimit: (state, getters, rootState) => {
+      const cardsCreatedLimit = rootState.cardsCreatedLimit
+      if (state.isUpgraded) { return }
+      if (state.cardsCreatedCount >= cardsCreatedLimit) { return true }
+    },
+    canEditSpace: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
+      const spaceIsOpen = space.privacy === 'open'
+      const currentUserIsSignedIn = getters.isSignedIn
+      const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
+      const isSpaceMember = getters.isSpaceMember(space)
+      return canEditOpenSpace || isSpaceMember
+    },
+    cardIsCreatedByCurrentUser: (state, getters, rootState) => (card) => {
+      return state.id === card.userId
+    },
+    connectionIsCreatedByCurrentUser: (state, getters, rootState) => (connection) => {
+      return state.id === connection.userId
+    },
+    isSpaceMember: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
+      const isSpaceUser = getters.isSpaceUser(space)
+      const isSpaceCollaborator = getters.isSpaceCollaborator(space)
+      return isSpaceUser || isSpaceCollaborator
+    },
+    isSpaceUser: (state, getters, rootState) => (space) => {
+      let userIsInSpace
+      if (space.users) {
+        userIsInSpace = Boolean(space.users.find(user => {
+          return user.id === state.id
+        }))
+      } else {
+        userIsInSpace = space.userId === state.id
+      }
+      return userIsInSpace
+    },
+    isSpaceCollaborator: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
+      if (space.collaborators) {
+        return Boolean(space.collaborators.find(collaborator => {
+          return collaborator.id === state.id
+        }))
+      }
+    },
+    spaceUserPermission: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
+      const isSpaceUser = getters.isSpaceUser(space)
+      const isSpaceCollaborator = getters.isSpaceCollaborator(space)
+      const spaceHasNoUsers = !space.users.length
+      if (isSpaceUser || spaceHasNoUsers) {
+        return 'user'
+      } else if (isSpaceCollaborator) {
+        return 'collaborator'
+      } else {
+        return 'spectator'
+      }
+    },
+    isInvitedButCannotEditSpace: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
+      const currentUserIsSignedIn = getters.isSignedIn
+      const isInvitedToSpace = Boolean(cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id))
+      return !currentUserIsSignedIn && isInvitedToSpace
+    },
+    packById: (state, getters) => (packId) => {
+      packId = packId.toString()
+      return promptPacks.find(pack => pack.packId === packId)
     }
   }
 }
