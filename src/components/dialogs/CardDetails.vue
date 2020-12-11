@@ -633,11 +633,14 @@ export default {
       this.imagePickerIsVisible = !isVisible
       this.initialSearch = this.normalizedName
     },
-    focusName () {
+    focusName (position) {
       const element = this.$refs.name
       const length = this.name.length
       if (!element) { return }
       element.focus()
+      if (position && element) {
+        element.setSelectionRange(position, position)
+      }
       if (length && element) {
         element.setSelectionRange(length, length)
       }
@@ -881,12 +884,16 @@ export default {
     },
     replaceSlashCommandWithSpaceUrl (space) {
       let name = this.card.name
-      const position = this.slashTextPosition()
-      const spaceUrl = utils.kinopioDomain() + '/' + space.url
+      let position = this.slashTextPosition()
+      const spaceUrl = utils.kinopioDomain() + '/' + space.url + ' '
       const start = name.substring(0, position)
       const end = name.substring(position + this.slashText().length, name.length)
       const newName = start + spaceUrl + end
       this.updateCardName(newName)
+      position = position + spaceUrl.length + 1
+      this.$nextTick(() => {
+        this.focusName(position)
+      })
     },
 
     // [[Tags]]

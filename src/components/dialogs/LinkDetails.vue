@@ -34,6 +34,7 @@ dialog.link-details.narrow(v-if="isVisible" :open="isVisible" :style="dialogPosi
 <script>
 import User from '@/components/User.vue'
 import UserList from '@/components/UserList.vue'
+import MoonPhase from '@/components/MoonPhase.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -48,7 +49,8 @@ export default {
   components: {
     User,
     UserList,
-    Loader
+    Loader,
+    MoonPhase
   },
   props: {
     visible: Boolean,
