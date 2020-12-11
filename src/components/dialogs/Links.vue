@@ -2,7 +2,7 @@
 dialog.links.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     p Links to This Space
-  section.results-section(v-if="!loading && spaces.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
+  section.results-section(v-if="shouldShowSpaces" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(:spaces="spaces" :showUser="true" @selectSpace="changeSpace")
   section(v-else-if="loading")
     Loader(:visible="loading")
@@ -47,7 +47,11 @@ export default {
     }
   },
   computed: {
-    currentUser () { return this.$store.state.currentUser }
+    currentUser () { return this.$store.state.currentUser },
+    shouldShowSpaces () {
+      const spaces = this.spaces || []
+      return !this.loading && spaces.length
+    }
   },
   methods: {
     changeSpace (space) {
@@ -67,7 +71,9 @@ export default {
       this.spaces = []
       this.loading = true
       const links = await this.$store.dispatch('api/getCardsWithLinkToSpaceId', spaceId) || []
-      this.spaces = links.spaces
+      if (links) {
+        this.spaces = links.spaces
+      }
       this.loading = false
       this.prevSpaceId = spaceId
     },
