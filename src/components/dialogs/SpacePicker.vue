@@ -1,25 +1,35 @@
 <template lang="pug">
 dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{top: dialogPositionTop}")
-  section.info-section(v-if="!search")
-    p
-      img.icon.search(src="@/assets/search.svg")
-      span Type to search spaces {{search}}
-  section.results-section
-    Loader(:visible="loading")
-    SpaceList(
-      v-if="filteredSpaces.length"
-      :hideFilter="hideFilter"
-      :spaces="filteredSpaces"
-      :showUserIfCurrentUserIsCollaborator="showUserIfCurrentUserIsCollaborator"
-      :selectedSpace="selectedSpace"
-      @selectSpace="selectSpace"
-      :search="search"
-    )
-    .error-container(v-if="!filteredSpaces.length && !loading")
-      User(:user="activeUser" :isClickable="false" :key="activeUser.id")
-      span(v-if="activeUserIsCurrentUser && search") has no spaces matching {{search}}
-      span(v-else-if="activeUserIsCurrentUser") has no spaces
-      span(v-else) has no public spaces
+  template(v-if="parentIsCardDetails && !currentUserIsSignedIn")
+    //- p sign in or up
+    //- button sign in or up
+    section
+      p
+        span To link to a space,
+        span.badge.info you need to Sign Up or In
+      button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
+
+  template(v-else)
+    section.info-section(v-if="!search")
+      p
+        img.icon.search(src="@/assets/search.svg")
+        span Type to search spaces {{search}}
+    section.results-section
+      Loader(:visible="loading")
+      SpaceList(
+        v-if="filteredSpaces.length"
+        :hideFilter="hideFilter"
+        :spaces="filteredSpaces"
+        :showUserIfCurrentUserIsCollaborator="showUserIfCurrentUserIsCollaborator"
+        :selectedSpace="selectedSpace"
+        @selectSpace="selectSpace"
+        :search="search"
+      )
+      .error-container(v-if="!filteredSpaces.length && !loading")
+        User(:user="activeUser" :isClickable="false" :key="activeUser.id")
+        span(v-if="activeUserIsCurrentUser && search") has no spaces matching {{search}}
+        span(v-else-if="activeUserIsCurrentUser") has no spaces
+        span(v-else) has no public spaces
 </template>
 
 <script>
@@ -105,7 +115,8 @@ export default {
       const filtered = fuzzy.filter(this.search, spaces, options)
       spaces = filtered.map(item => item.original)
       return spaces.slice(0, 5)
-    }
+    },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
     excludeCurrentSpace () {
@@ -152,6 +163,10 @@ export default {
       const element = this.$refs.dialog
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
+    },
+    triggerSignUpOrInIsVisible () {
+      this.$store.dispatch('closeAllDialogs', 'SpacePicker.triggerSignUpOrInIsVisible')
+      this.$store.commit('triggerSignUpOrInIsVisible')
     }
   },
   watch: {
