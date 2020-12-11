@@ -7,9 +7,11 @@ dialog.links.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-he
   section(v-else-if="loading")
     Loader(:visible="loading")
   section(v-else)
-    p instructionssss
-    //- TODO section handle no links: (if u canEdit:) add url or '/' in card,
-    //- if not signed in, then prompt to sign up [sign up or in]
+    p Spaces with cards that link to this space can be found here.
+    p Type
+      span {{' '}}
+      span.badge.secondary /
+      span when editing a card to create links
 </template>
 
 <script>
@@ -65,7 +67,6 @@ export default {
       this.spaces = []
       this.loading = true
       const links = await this.$store.dispatch('api/getCardsWithLinkToSpaceId', spaceId) || []
-      console.log('🎢', links, links.spaces)
       this.spaces = links.spaces
       this.loading = false
       this.prevSpaceId = spaceId
