@@ -1,13 +1,13 @@
 <template lang="pug">
 dialog.links.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
-    p Links to This Space
+    p Spaces that Link Here
   section.results-section(v-if="shouldShowSpaces" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(:spaces="spaces" :showUser="true" @selectSpace="changeSpace")
   section(v-else-if="loading")
     Loader(:visible="loading")
   section(v-else)
-    p Other spaces that contain cards which link to this space can be found here.
+    p Spaces with cards that link to this space can be found here.
     p Type
       span {{' '}}
       span.badge.secondary /
@@ -56,6 +56,7 @@ export default {
   methods: {
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      this.$store.dispatch('closeAllDialogs', 'Links.closeAllDialogs')
     },
     updateDialogHeight () {
       if (!this.visible) { return }
