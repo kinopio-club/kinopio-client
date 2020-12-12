@@ -292,7 +292,7 @@ const self = {
         console.log('🛬🛬 getting remote spaces', spaceIds)
         spaceIds = spaceIds.join(',')
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await utils.timeout(40000, fetch(`${host}/space/spaces?spaceIds=${spaceIds}`, options))
+        const response = await utils.timeout(40000, fetch(`${host}/space/multiple?spaceIds=${spaceIds}`, options))
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒', error)

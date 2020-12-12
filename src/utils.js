@@ -659,6 +659,8 @@ export default {
     return window.location.href !== (window.location.origin + '/')
   },
   spaceIdFromUrl (url) {
+    if (!url) { return }
+    url = this.trim(url)
     url = url || window.location.href
     url = url.replaceAll('?hidden=true', '')
     const id = url.substring(url.length - 21, url.length)
