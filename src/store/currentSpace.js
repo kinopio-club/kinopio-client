@@ -385,8 +385,14 @@ export default {
         context.commit('updateOtherUsers', user, { root: true })
       }
     },
-    updateOtherSpaces: async (context) => {
-      const links = context.getters.cardsWithSpaceLinks
+    updateOtherSpaces: async (context, spaceId) => {
+      let links
+      if (spaceId) {
+        links = [{ linkToSpaceId: spaceId }]
+      } else {
+        links = context.getters.cardsWithSpaceLinks
+      }
+      console.log(links)
       if (!links.length) { return }
       links.forEach(link => {
         const spaceId = link.linkToSpaceId

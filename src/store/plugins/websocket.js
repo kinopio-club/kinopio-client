@@ -63,6 +63,12 @@ const checkIfShouldUpdateWindowUrlAndTitle = (store, data) => {
   }
 }
 
+const checkIfShouldUpdateLinkToSpaceId = (store, { message, updates }) => {
+  if (message === 'updateCard' && updates.linkToSpaceId) {
+    store.dispatch('currentSpace/updateOtherSpaces', updates.linkToSpaceId)
+  }
+}
+
 const closeWebsocket = (store) => {
   if (!websocket) { return }
   store.commit('isJoiningSpace', true)
@@ -128,6 +134,7 @@ export default function createWebSocketPlugin () {
           } else {
             store.commit(`currentSpace/${message}`, updates)
             checkIfShouldUpdateWindowUrlAndTitle(store, data)
+            checkIfShouldUpdateLinkToSpaceId(store, data)
           }
         }
       }
