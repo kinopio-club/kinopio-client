@@ -19,7 +19,7 @@ dialog.favorites.narrow(v-if="visible" :open="visible" @click.left.stop="userDet
     template(v-if="spacesIsVisible")
       SpaceList(:spaces="favoriteSpaces" :showUser="true" @selectSpace="changeSpace")
     template(v-if="!spacesIsVisible")
-      UserList(:users="favoriteUsers" :selectedUser="selectedUser" @selectSpace="showUserDetails")
+      UserList(:users="favoriteUsers" :selectedUser="selectedUser" @selectSpace="showUserDetails" :isClickable="true")
       UserDetails(:visible="userDetailsIsVisible" :user="selectedUser" :userDetailsPosition="userDetailsPosition")
 
 </template>

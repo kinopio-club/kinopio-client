@@ -6,8 +6,16 @@ import uniqBy from 'lodash-es/uniqBy'
 import dayjs from 'dayjs'
 import random from 'lodash-es/random'
 import last from 'lodash-es/last'
+import sortBy from 'lodash-es/sortBy'
 
 export default {
+  kinopioDomain () {
+    let domain = 'https://kinopio.club'
+    if (process.env.NODE_ENV === 'development') {
+      domain = 'http://kinopio.local:8080'
+    }
+    return domain
+  },
   host () {
     let host = 'https://kinopio-server.herokuapp.com'
     if (process.env.NODE_ENV === 'development') {
@@ -15,7 +23,6 @@ export default {
     }
     return host
   },
-
   websocketHost () {
     let host = 'wss://kinopio-server.herokuapp.com'
     if (process.env.NODE_ENV === 'development') {
@@ -23,7 +30,6 @@ export default {
     }
     return host
   },
-
   mobileTouchPosition (event, type) {
     let touch
     if (event.touches[0]) {
@@ -37,7 +43,6 @@ export default {
       y: touch[`${type}Y`]
     }
   },
-
   elementShouldBeOnRightSide (element) {
     if (!element) { return }
     element = element.getBoundingClientRect()
@@ -49,7 +54,6 @@ export default {
       return false
     }
   },
-
   elementHeightFromHeader (element, isChildElement) {
     if (!element) { return }
     const viewport = this.visualViewport()
@@ -68,7 +72,6 @@ export default {
     }
     return height
   },
-
   elementHeight (element) {
     if (!element) { return }
     const threshold = 20
@@ -82,7 +85,6 @@ export default {
     }
     return height
   },
-
   cursorPositionInViewport (event) {
     let x, y
     if (event.touches) {
@@ -95,7 +97,6 @@ export default {
     }
     return { x, y }
   },
-
   cursorPositionInPage (event) {
     let x, y
     if (event.touches) {
@@ -112,7 +113,6 @@ export default {
     }
     return { x, y }
   },
-
   visualViewport () {
     if (window.visualViewport) {
       return window.visualViewport
@@ -129,24 +129,20 @@ export default {
       }
     }
   },
-
   rectCenter (rect) {
     const x = Math.round(rect.x + (rect.width / 2))
     const y = Math.round(rect.y + (rect.height / 2))
     return { x, y }
   },
-
   isBetween ({ value, min, max }) {
     if (min <= value && value <= max) { return true }
   },
-
   clone (object) {
     this.typeCheck({ value: object, type: 'object', origin: 'clone' })
     let cloned = JSON.stringify(object)
     cloned = JSON.parse(cloned)
     return cloned
   },
-
   typeCheck ({ value, type, allowUndefined, origin }) {
     if (allowUndefined && value === undefined) {
       return true
@@ -161,7 +157,6 @@ export default {
       return true
     }
   },
-
   arrayExists (array) {
     this.typeCheck({ value: array, type: 'array', allowUndefined: true, origin: 'arrayExists' })
     if (!array) {
@@ -172,7 +167,6 @@ export default {
       return true
     }
   },
-
   arrayHasItems (array) {
     this.typeCheck({ value: array, type: 'array', allowUndefined: true, origin: 'arrayHasItems' })
     if (array) {
@@ -182,7 +176,6 @@ export default {
     }
     return false
   },
-
   updateObject (object, value) {
     this.typeCheck({ value, type: 'object', origin: 'updateObject' })
     const keys = Object.keys(value)
@@ -195,7 +188,6 @@ export default {
     }
     return object
   },
-
   updateUsersWithUser (users, updatedUser, keys) {
     keys = keys || ['name', 'color']
     this.typeCheck({ value: users, type: 'object', origin: 'updateUsersWithUser' })
@@ -210,7 +202,6 @@ export default {
       return user
     })
   },
-
   mergeArrays ({ previous, updated, key }) {
     const updatedKeys = updated.map(item => item[key])
     const base = previous.filter(item => !updatedKeys.includes(item[key]))
@@ -218,11 +209,9 @@ export default {
     merged = uniqBy(merged, key)
     return merged
   },
-
   findInArrayOfObjects (array, key, value) {
     return array.find(item => item[key] === value)
   },
-
   cursorsAreClose (startCursor, endCursor) {
     const threshold = 5
     const xRange = {
@@ -237,7 +226,6 @@ export default {
     }
     return this.isBetween(xRange) && this.isBetween(yRange)
   },
-
   objectHasKeys (object) {
     if (!object) { return }
     if (Object.keys(object).length) {
@@ -246,40 +234,32 @@ export default {
       return false
     }
   },
-
   isIPhone () {
     // iPads identify as MacIntosh
     return navigator.platform && /iPhone|iPod/.test(navigator.platform)
   },
-
   isAndroid () {
     return navigator.platform && /Android/.test(navigator.platform)
   },
-
   isMobile () {
     return Boolean(this.isIPhone() || this.isAndroid())
   },
-
   isMultiTouch (event) {
     if (event.touches) {
       return event.touches.length > 1
     }
   },
-
   isMacOrIpad () {
     return window.navigator.platform === 'MacIntel'
   },
-
   capitalizeFirstLetter (string) {
     // 'dreams' -> 'Dreams'
     return string.charAt(0).toUpperCase() + string.slice(1)
   },
-
   removeTrailingPeriod (string) {
     // https://regexr.com/5784j
     return string.replace(/\.$/g, '')
   },
-
   pastTense (string) {
     const lastLetter = string.charAt(string.length - 1)
     // add test cases ad hoc from https://github.com/boo1ean/tensify
@@ -291,12 +271,10 @@ export default {
       return string + 'ed'
     }
   },
-
   lowercaseFirstLetter (string) {
     // 'Dreams' -> 'dreams'
     return string.charAt(0).toLowerCase() + string.slice(1)
   },
-
   updateAllIds (object, key, idDeltas) {
     const index = idDeltas.findIndex(id => object[key] === id.prevId)
     if (index >= 0) {
@@ -305,7 +283,6 @@ export default {
       return object[key]
     }
   },
-
   timeout (ms, promise) {
     // https://github.com/github/fetch/issues/175#issuecomment-216791333
     return new Promise((resolve, reject) => {
@@ -324,24 +301,20 @@ export default {
       )
     })
   },
-
   pluralize (word, condition) {
     if (condition) {
       word = word + 's'
     }
     return word
   },
-
   normalizeToUnixTime (date) {
     return new Date(date).getTime()
   },
-
   isEvenNumber (number) {
     if (number % 2 === 0) {
       return true
     }
   },
-
   averageOfNumbers (numbers) {
     this.typeCheck({ value: numbers, type: 'array', origin: 'averageOfNumbers' })
     let total = 0
@@ -350,7 +323,6 @@ export default {
     })
     return total / numbers.length
   },
-
   distanceBetweenTwoPoints (point1, point2) {
     // https://www.mathwarehouse.com/algebra/distance_formula/index.php
     const xDelta = Math.abs(point1.x - point2.x)
@@ -358,7 +330,6 @@ export default {
     const distance = Math.sqrt((xDelta ** 2) + (yDelta ** 2))
     return Math.round(distance)
   },
-
   angleBetweenTwoPoints (point1, point2) {
     // https://www.mathisfunforum.com/viewtopic.php?id=16175
     const xDelta = Math.abs(point1.x - point2.x)
@@ -376,25 +347,21 @@ export default {
     const rect = element.getBoundingClientRect()
     return this.rectCenter(rect)
   },
-
   coordsWithCurrentScrollOffset ({ x, y }) {
     x = x + window.scrollX
     y = y + window.scrollY
     return { x, y }
   },
-
   connectionBetweenCards (startId, endId) {
     let start = this.connectorCoords(startId)
     let end = this.connectorCoords(endId)
     return this.connectionPathBetweenCoords(start, end)
   },
-
   curveControlPoint (start, end) {
     // TODO: as you're drawing, manipulate the curvecontrolpoint to be more pleasing
     // q defines a quadratic curve control point
     return 'q90,40'
   },
-
   connectionPathBetweenCoords (start, end) {
     if (!start || !end) { return }
     const offsetStart = this.coordsWithCurrentScrollOffset(start)
@@ -406,11 +373,25 @@ export default {
     let curve = this.curveControlPoint(offsetStart, delta)
     return `m${offsetStart.x},${offsetStart.y} ${curve} ${delta.x},${delta.y}`
   },
-
   trim (string) {
     // https://regexr.com/59m7a
     // unlike string.trim(), this removes line breaks too
     return string.replace(/^(\n|\\n|\s)+|(\n|\\n|\s)+$/g, '')
+  },
+  hasBlankCharacters (string) {
+    if (!string) { return true }
+    // https://regexr.com/5i5a3
+    // matches space, enter, tab, whitespace characters
+    const blankPattern = new RegExp(/( |\s|\t)+/gm)
+    if (string.match(blankPattern)) {
+      return true
+    }
+  },
+  splitByBlankCharacters (string) {
+    // https://regexr.com/5i5a3
+    // matches space, enter, tab, whitespace characters
+    const blankPattern = new RegExp(/( |\s|\t)+/gm)
+    return string.split(blankPattern)
   },
 
   // Painting 🖌
@@ -418,17 +399,14 @@ export default {
   exponentialDecay (iteration, rateOfIterationDecay) {
     return Math.exp(-(rateOfIterationDecay * iteration))
   },
-
   filterCircles (circles, maxIterationsToPaint) {
     return circles.filter(circle => circle.iteration < maxIterationsToPaint)
   },
-
   easeOut (percentComplete, elaspedTime, duration) {
     const startValue = 0
     const endValue = 1
     return -endValue * (elaspedTime /= duration) * (elaspedTime - 2) + startValue
   },
-
   cardMap () {
     const cards = document.querySelectorAll('.card')
     let cardMap = []
@@ -445,7 +423,6 @@ export default {
     })
     return cardMap
   },
-
   highestCardZ (cards) {
     let highestCardZ = 0
     cards.forEach(card => {
@@ -461,7 +438,6 @@ export default {
   emptySpace (spaceId) {
     return { id: spaceId, moonPhase: '', background: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], collaborators: [], spectators: [], clients: [] }
   },
-
   // migration added oct 2019
   migrationEnsureRemovedCards (space) {
     if (!space.removedCards) {
@@ -469,7 +445,6 @@ export default {
     }
     return space
   },
-
   updateSpaceUserId (space, userId) {
     space.cards = space.cards.map(card => {
       card.userId = userId
@@ -486,7 +461,6 @@ export default {
     console.log(space)
     return space
   },
-
   itemUserId (user, item, nullCardUsers) {
     let userId
     if (nullCardUsers) {
@@ -496,7 +470,6 @@ export default {
     }
     return userId
   },
-
   uniqueSpaceItems (items, nullCardUsers) {
     const cardIdDeltas = []
     const connectionTypeIdDeltas = []
@@ -552,7 +525,6 @@ export default {
     space.connections = connections
     return space
   },
-
   normalizeRemoteSpace (remoteSpace) {
     const removedCards = []
     const cards = []
@@ -567,7 +539,20 @@ export default {
     remoteSpace.removedCards = removedCards
     return remoteSpace
   },
-
+  normalizeSpaceMetaOnly (space) {
+    let spaceMeta = {
+      id: space.id,
+      name: space.name,
+      users: space.users,
+      background: space.background,
+      moonPhase: space.moonPhase,
+      url: space.url,
+      privacy: space.url,
+      updatedAt: space.updatedAt,
+      showInExplore: space.showInExplore
+    }
+    return spaceMeta
+  },
   AddCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
     return spaces.map(space => {
       let userId
@@ -582,7 +567,6 @@ export default {
       return space
     })
   },
-
   removeRemovedCardsFromSpace (space) {
     if (!space.cards) { return }
     let cards = []
@@ -600,12 +584,10 @@ export default {
   journalSpaceName () {
     return `${dayjs(new Date()).format('dddd MMM D/YY')}` // Thursday Oct 8/20
   },
-
   randomPrompt (pack) {
     let index = random(0, pack.prompts.length - 1)
     return pack.prompts[index]
   },
-
   packTag (pack, cardId, space) {
     const spaceHasTag = space.tags.find(tag => tag.name === pack.name)
     if (spaceHasTag) { return }
@@ -616,7 +598,6 @@ export default {
       spaceId: space.id
     })
   },
-
   promptCardPosition (cards, newCardName) {
     const lastCard = last(cards)
     const lastCardY = lastCard.y
@@ -644,12 +625,10 @@ export default {
     // replaces non alphanumeric (spaces, emojis, $%&, etc.) characters with '-'s
     return string.replace(/([^a-z0-9-]+)/ig, '-').toLowerCase()
   },
-
   normalizeFileUrl (string) {
     // same as normalizeString^, but keeps '.' and case
     return string.replace(/([^a-z0-9-.]+)/ig, '-')
   },
-
   // same as server util
   url ({ name, id }) {
     if (name) {
@@ -659,7 +638,6 @@ export default {
       return id
     }
   },
-
   title ({ name }) {
     if (name) {
       return `${name} – Kinopio`
@@ -667,7 +645,6 @@ export default {
       return 'Kinopio'
     }
   },
-
   updateWindowUrlAndTitle ({ space, shouldUpdateUrl, currentUserIsSignedIn }) {
     const title = this.title(space)
     let url = ''
@@ -678,21 +655,26 @@ export default {
     window.history.replaceState({}, title, url)
     document.title = title
   },
-
   spaceHasUrl () {
     return window.location.href !== (window.location.origin + '/')
   },
-
-  idFromUrl (url) {
+  spaceIdFromUrl (url) {
     url = url || window.location.href
-    return url.substring(url.length - 21, url.length)
+    url = url.replaceAll('?hidden=true', '')
+    const id = url.substring(url.length - 21, url.length)
+    if (this.idIsValid(id)) { return id }
   },
-
+  idIsValid (id) {
+    if (!id) { return }
+    if (id.includes('/')) {
+      return undefined
+    }
+    return true
+  },
   currentSpaceHasUrl (space) {
-    const id = this.idFromUrl()
+    const id = this.spaceIdFromUrl()
     return Boolean(id === space.id)
   },
-
   normalizeUrl (url) {
     const lastCharacterPosition = url.length - 1
     if (url[lastCharacterPosition] === '/') {
@@ -700,7 +682,6 @@ export default {
     }
     return url
   },
-
   urlIsFloatOrIp (url) {
     // https://regexr.com/58ii6
     // matches numbers '.'' numbers ...
@@ -709,7 +690,6 @@ export default {
       return true
     }
   },
-
   urlIsCurrencyFloat (url) {
     // https://regexr.com/5bfgm
     // matches currencySymbol numbers '.' numbers
@@ -718,7 +698,6 @@ export default {
       return true
     }
   },
-
   urlFromString (string) {
     if (!string) { return }
     // https://regexr.com/52r0i
@@ -726,7 +705,7 @@ export default {
     // followed by alphanumerics
     // then '.''
     // followed by alphanumerics
-    const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+[\n ]*/igm)
+    const urlPattern = new RegExp(/(?=http)(http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+[\n ]*/igm)
     const urls = string.match(urlPattern)
     if (!urls) { return }
     const url = urls[0]
@@ -739,18 +718,19 @@ export default {
       return `http://${url}`
     }
   },
-
   urlsFromString (string, skipProtocolCheck) {
     if (!string) { return [] }
     // https://regexr.com/59m5t
     // same as urlFromString but matches multiple urls and returns [urls]
-    const urlPattern = new RegExp(/((http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+[ ]*)*/igm)
+    const urlPattern = new RegExp(/(?=http)((http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+[\n ]*)*/igm)
     let urls = string.match(urlPattern)
+    if (!urls) { return }
     // filter out empty or non-urls
+    urls = urls.map(url => this.trim(url))
     urls = urls.filter(url => {
-      const urlHasContent = Boolean(this.trim(url).length)
-      const isInvalidUrl = this.urlIsFloatOrIp(url.trim()) || this.urlIsCurrencyFloat(url.trim())
-      if (urlHasContent && !isInvalidUrl) {
+      if (!url) { return }
+      const isInvalidUrl = this.urlIsFloatOrIp(url) || this.urlIsCurrencyFloat(url)
+      if (!isInvalidUrl) {
         return true
       }
     })
@@ -766,7 +746,6 @@ export default {
     })
     return urls
   },
-
   urlWithoutProtocol (url) {
     let newUrl
     const http = 'http://'
@@ -780,7 +759,6 @@ export default {
     }
     return newUrl
   },
-
   urlIsImage (url) {
     if (!url) { return }
     // append space to match as an end character
@@ -792,7 +770,6 @@ export default {
     const isImage = url.match(imageUrlPattern)
     return Boolean(isImage)
   },
-
   urlIsVideo (url) {
     if (!url) { return }
     url = url + ' '
@@ -800,7 +777,6 @@ export default {
     const isVideo = url.match(videoUrlPattern)
     return Boolean(isVideo)
   },
-
   urlIsAudio (url) {
     if (!url) { return }
     url = url + ' '
@@ -808,17 +784,40 @@ export default {
     const isAudio = url.match(audioUrlPattern)
     return Boolean(isAudio)
   },
-
+  urlIsKinopioSpace (url) {
+    if (!url) { return }
+    let kinopioUrlPattern
+    if (process.env.NODE_ENV === 'development') {
+      // https://regexr.com/5hjc2
+      kinopioUrlPattern = new RegExp(/(?:kinopio.local:.*\/)(.*)\b/gi)
+    } else {
+      // https://regexr.com/5hk37
+      kinopioUrlPattern = new RegExp(/(?:kinopio.club\/)(.*)\b/gi)
+    }
+    const isKinopioUrl = url.match(kinopioUrlPattern)
+    return Boolean(isKinopioUrl)
+  },
   urlWithoutQueryString (url) {
     return url.split('?')[0]
   },
-
   queryString (url) {
     const split = url.split('?')
     if (split.length <= 1) {
       return undefined
     } else {
       return split[1]
+    }
+  },
+  urlType (url) {
+    if (!url) { return }
+    if (this.urlIsImage(url)) {
+      return 'image'
+    } else if (this.urlIsVideo(url)) {
+      return 'video'
+    } else if (this.urlIsAudio(url)) {
+      return 'audio'
+    } else {
+      return 'link'
     }
   },
 
@@ -832,7 +831,6 @@ export default {
     const isTask = name.match(taskPattern)
     return Boolean(isTask)
   },
-
   nameIsChecked (name) {
     if (!name) { return }
     // https://regexr.com/55afk
@@ -841,7 +839,6 @@ export default {
     const isTask = name.match(taskPattern)
     return Boolean(isTask)
   },
-
   checkboxFromString (name) {
     if (!name) { return }
     let match
@@ -892,14 +889,12 @@ export default {
       isUpgraded: user.isUpgraded
     }
   },
-
   spaceMeta (space) {
     return {
       id: space.id,
       name: space.name
     }
   },
-
   normalizeBroadcastUpdates (updates) {
     if (updates.body) {
       const keys = Object.keys(updates.body)
@@ -939,46 +934,71 @@ export default {
     const tags = string.match(tagPattern)
     return tags
   },
-
   tagsFromStringWithoutBrackets (string) {
     let tags = this.tagsFromString(string)
     if (!tags) { return }
     tags = tags.map(tag => tag.substring(2, tag.length - 2))
     return tags
   },
-
   cardNameSegments (name) {
-    const tags = this.tagsFromString(name)
+    const tags = this.tagsFromString(name) || []
+    const urls = this.urlsFromString(name) || []
+    const links = urls.filter(url => this.urlIsKinopioSpace(url))
+    let badges = []
     let segments = []
-    if (tags) {
-      tags.forEach(tag => {
-        const tagStartPosition = name.indexOf(tag)
-        const tagEndPosition = tagStartPosition + tag.length
-        segments.push({
-          isText: true,
-          content: name.substring(0, tagStartPosition)
-        })
+    tags.forEach(tag => {
+      const startPosition = name.indexOf(tag)
+      const endPosition = name.indexOf(tag) + tag.length
+      badges.push({ tag, startPosition, endPosition, isTag: true })
+    })
+    links.forEach(link => {
+      const startPosition = name.indexOf(link)
+      const endPosition = name.indexOf(link) + link.length
+      badges.push({ link, startPosition, endPosition, isLink: true })
+    })
+    badges = sortBy(badges, ['startPosition'])
+    if (!badges.length) {
+      return [{ isText: true, content: name }]
+    }
+    // first segment
+    let startPosition = badges[0].startPosition
+    const leadingText = name.substring(0, startPosition)
+    segments.push({ isText: true, content: leadingText })
+    let currentPosition = startPosition
+    // other segments
+    badges.forEach((segment, index) => {
+      if (segment.isTag) {
+        const tag = segment.tag
         segments.push({
           isTag: true,
           name: tag.substring(2, tag.length - 2)
         })
-        name = name.substring(tagEndPosition, name.length)
-      })
-      if (name.length) {
+      } else if (segment.isLink) {
+        const link = segment.link
         segments.push({
-          isText: true,
-          content: name
+          isLink: true,
+          name: link
         })
       }
-      return segments
-    } else {
-      return [{
+      currentPosition = segment.endPosition
+      const nextBadge = badges[index + 1]
+      if (nextBadge) {
+        segments.push({
+          isText: true,
+          content: name.substring(currentPosition, nextBadge.startPosition)
+        })
+        currentPosition = nextBadge.startPosition
+      }
+    })
+    const trailingText = name.substring(currentPosition, name.length)
+    if (trailingText) {
+      segments.push({
         isText: true,
-        content: name
-      }]
+        content: trailingText
+      })
     }
+    return segments
   },
-
   newTag ({ name, defaultColor, cardId, spaceId }) {
     let color
     const existingTag = cache.allTags().find(tag => tag.name === name)
@@ -993,5 +1013,4 @@ export default {
       spaceId: spaceId
     }
   }
-
 }

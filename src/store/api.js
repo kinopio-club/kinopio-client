@@ -28,9 +28,12 @@ const squashQueue = (queue) => {
   return squashed
 }
 
-const shouldRequest = () => {
+const shouldRequest = (shouldRequestRemoteSpace) => {
   const isOnline = window.navigator.onLine
   const currentUserIsSignedIn = cache.user().apiKey
+  if (isOnline && shouldRequestRemoteSpace) {
+    return true
+  }
   if (isOnline && currentUserIsSignedIn) {
     return true
   }
@@ -269,12 +272,26 @@ const self = {
         console.error('🚒', error)
       }
     },
-    getSpace: async (context, space) => {
+    getSpace: async (context, { space, shouldRequestRemoteSpace }) => {
       try {
-        if (!shouldRequest()) { return }
+        if (!shouldRequest(shouldRequestRemoteSpace)) { return }
         console.log('🛬 getting remote space', space.id)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(40000, fetch(`${host}/space/${space.id}`, options))
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒', error)
+      }
+    },
+    getSpaces: async (context, { spaceIds, shouldRequestRemoteSpace }) => {
+      const max = 60
+      try {
+        if (!shouldRequest(shouldRequestRemoteSpace)) { return }
+        spaceIds = spaceIds.slice(0, max)
+        console.log('🛬🛬 getting remote spaces', spaceIds)
+        spaceIds = spaceIds.join(',')
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await utils.timeout(40000, fetch(`${host}/space/multiple?spaceIds=${spaceIds}`, options))
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒', error)
@@ -375,11 +392,11 @@ const self = {
 
     // Card
 
-    findCard: async (context, cardId) => {
+    getCardsWithLinkToSpaceId: async (context, spaceId) => {
       if (!shouldRequest()) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/card/${cardId}`, options)
+        const response = await fetch(`${host}/card/by-link-to-space/${spaceId}`, options)
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒', error)

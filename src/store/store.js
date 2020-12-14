@@ -77,6 +77,11 @@ export default new Vuex.Store({
     remoteTags: [],
     remoteTagsIsFetched: false,
 
+    // links
+    linkDetailsIsVisible: false,
+    linkDetailsPosition: {}, // x, y
+    currentSelectedLink: {},
+
     // dragging
     currentDraggingCardId: '',
     remoteCardsDragging: [],
@@ -125,7 +130,8 @@ export default new Vuex.Store({
     filteredTagNames: [],
 
     // session data
-    otherUsers: [] // { id, name color }
+    otherUsers: [], // { id, name color }
+    otherSpaces: [] // { {user}, name, id }
   },
   mutations: {
     updatePageSizes: (state) => {
@@ -160,6 +166,8 @@ export default new Vuex.Store({
       state.connectionDetailsIsVisibleForConnectionId = ''
       state.tagDetailsIsVisible = false
       state.currentSelectedTag = {}
+      state.linkDetailsIsVisible = false
+      state.currentSelectedLink = {}
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isOnline' })
@@ -399,6 +407,21 @@ export default new Vuex.Store({
     remoteTagsIsFetched: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'remoteTagsIsFetched' })
       state.remoteTagsIsFetched = value
+    },
+
+    // Link Details
+
+    linkDetailsIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'linkDetailsIsVisible' })
+      state.linkDetailsIsVisible = value
+    },
+    linkDetailsPosition: (state, position) => {
+      utils.typeCheck({ value: position, type: 'object', origin: 'linkDetailsPosition' })
+      state.linkDetailsPosition = position
+    },
+    currentSelectedLink: (state, link) => {
+      utils.typeCheck({ value: link, type: 'object', origin: 'currentSelectedLink' })
+      state.currentSelectedLink = link
     },
 
     // Connection Details
@@ -667,6 +690,17 @@ export default new Vuex.Store({
       })
       users.push(updatedUser)
       state.otherUsers = users
+    },
+    updateOtherSpaces: (state, updatedSpace) => {
+      utils.typeCheck({ value: updatedSpace, type: 'object', origin: 'updateOtherSpaces' })
+      let spaces = utils.clone(state.otherSpaces)
+      spaces = spaces.filter(space => {
+        if (space.id !== updatedSpace.id) {
+          return space
+        }
+      })
+      spaces.push(updatedSpace)
+      state.otherSpaces = spaces
     }
   },
 
@@ -770,6 +804,10 @@ export default new Vuex.Store({
     otherUserById: (state, getters) => (userId) => {
       const user = state.otherUsers.find(otherUser => otherUser.id === userId)
       return user
+    },
+    otherSpaceById: (state, getters) => (spaceId) => {
+      const space = state.otherSpaces.find(otherSpace => otherSpace.id === spaceId)
+      return space
     }
   },
 

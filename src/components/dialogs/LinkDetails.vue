@@ -1,0 +1,229 @@
+<template lang="pug">
+dialog.link-details.narrow(v-if="isVisible" :open="isVisible" :style="dialogPosition" ref="dialog")
+  section.edit-card(v-if="showEditCard")
+    button(@click="showCardDetails(null)") Edit Card
+  section
+    .container-wrap(v-if="space.url")
+      .background-wrap(v-if="space.background")
+        a(:href="space.url")
+          img.background(:src="space.background" @click.prevent="changeSpace" v-on:keyup.enter.prevent="changeSpace")
+      .meta-wrap
+        a(:href="space.url")
+          button(@click.prevent="changeSpace" v-on:keyup.enter.prevent="changeSpace" :class="{active: linkIsCurrentSpace}")
+            MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
+            span {{space.name}} →
+
+    template(v-if="isSpace")
+      .row.badges-wrap(v-if="space.isLoadingOrInvalid")
+        .badge.danger Space is loading or invalid
+      .row.badges-wrap(v-else-if="!space.isLoadingOrInvalid")
+        UserList(:users="users" :isClickable="false")
+
+    .badges-wrap(v-if="isSpace && !space.isLoadingOrInvalid")
+      .badge.info.template-badge(v-if="spaceIsTemplate") Template
+      .badge.secondary.button-badge(@click="toggleFilterShowAbsoluteDate")
+        img.icon.time(src="@/assets/time.svg")
+        span.name {{dateUpdatedAt}}
+
+    template(v-if="isSpace && !space.isLoadingOrInvalid")
+      p
+        Loader(:visible="loading")
+        textarea(v-if="cardsText") {{cardsText}}
+</template>
+
+<script>
+import User from '@/components/User.vue'
+import UserList from '@/components/UserList.vue'
+import MoonPhase from '@/components/MoonPhase.vue'
+import scrollIntoView from '@/scroll-into-view.js'
+import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
+import cache from '@/cache.js'
+import templates from '@/data/templates.js'
+
+import fromNow from 'fromnow'
+import join from 'lodash-es/join'
+
+export default {
+  name: 'LinkDetails',
+  components: {
+    User,
+    UserList,
+    Loader,
+    MoonPhase
+  },
+  props: {
+    visible: Boolean,
+    position: Object,
+    link: Object
+  },
+  data () {
+    return {
+      showAbsoluteDate: false,
+      loading: true,
+      cardsText: '',
+      users: [],
+      remoteSpaceId: ''
+    }
+  },
+  computed: {
+    isVisible () {
+      return this.visible || this.$store.state.linkDetailsIsVisible
+    },
+    currentLink () { // cardId, isLink, name, space: { background, id , moonPhase, name, url, users[0] }
+      return this.link || this.$store.state.currentSelectedLink
+    },
+    space () { return this.currentLink.space },
+    isSpace () { return utils.objectHasKeys(this.currentLink.space) },
+    dialogPosition () {
+      const position = this.position || this.$store.state.linkDetailsPosition
+      return {
+        left: `${position.x}px`,
+        top: `${position.y}px`
+      }
+    },
+    url () {
+      const url = this.space.url
+      if (url) {
+        return `${utils.kinopioDomain()}/${url}`
+      } else {
+        return this.currentLink.name
+      }
+    },
+    cardDetailsIsVisibleForCardId () { return this.$store.state.cardDetailsIsVisibleForCardId },
+    showEditCard () { return !this.cardDetailsIsVisibleForCardId },
+    canNativeShare () { return Boolean(navigator.share) },
+    currentCard () {
+      let currentCardId = this.cardDetailsIsVisibleForCardId
+      const currentCard = this.$store.getters['currentSpace/cardById'](currentCardId)
+      const linkCard = this.$store.getters['currentSpace/cardById'](this.$store.state.currentSelectedLink.cardId)
+      return currentCard || linkCard
+    },
+    currentSpaceId () { return this.$store.state.currentSpace.id },
+    linkIsCurrentSpace () { return this.space.id === this.currentSpaceId },
+    dateUpdatedAt () {
+      const date = this.space.updatedAt
+      if (this.showAbsoluteDate) {
+        return new Date(date).toLocaleString()
+      } else {
+        return fromNow(date, { max: 1, suffix: true })
+      }
+    },
+    spaceIsTemplate () {
+      const templateSpaceIds = templates.spaces().map(template => template.id)
+      return templateSpaceIds.includes(this.space.id)
+    }
+  },
+  methods: {
+    async getRemoteSpace () {
+      this.loading = true
+      const remoteSpace = await this.$store.dispatch('api/getSpace', { space: this.space, shouldRequestRemoteSpace: true })
+      this.remoteSpaceId = remoteSpace.id
+      this.loading = false
+      return remoteSpace
+    },
+    async getCardsTextAndCollaboratorsFromRemoteSpace () {
+      if (!this.isSpace) { return }
+      const remoteSpace = await this.getRemoteSpace()
+      remoteSpace.collaborators.forEach(user => this.users.push(user))
+      let text = remoteSpace.cards.map(card => { return card.name })
+      text = join(text, '\n')
+      this.cardsText = text
+      this.scrollIntoView()
+    },
+    showCardDetails (card) {
+      card = card || this.currentCard
+      if (this.currentSpaceId !== card.spaceId) {
+        this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
+        let space
+        if (card.spaceId) {
+          space = { id: card.spaceId }
+        } else {
+          space = cache.space(card.spaceId)
+        }
+        this.$store.dispatch('currentSpace/changeSpace', { space })
+      } else {
+        const cardId = card.id || this.currentTag.cardId
+        this.$store.dispatch('currentSpace/showCardDetails', cardId)
+      }
+    },
+    changeSpace () {
+      this.$store.dispatch('currentSpace/changeSpace', { space: this.space, isRemote: true })
+      this.$store.dispatch('closeAllDialogs', 'linkDetails.changeSpace')
+    },
+    scrollIntoView () {
+      this.$nextTick(() => {
+        const element = this.$refs.dialog
+        const isTouchDevice = this.$store.state.isTouchDevice
+        scrollIntoView.scroll(element, isTouchDevice)
+      })
+    },
+    toggleFilterShowAbsoluteDate () {
+      this.showAbsoluteDate = !this.showAbsoluteDate
+    },
+    updateSpaceUser () {
+      if (!this.isSpace) { return }
+      this.users.push(this.space.users[0])
+    },
+    checkIfShouldRequestSpace () {
+      if (!this.isSpace || this.space.isLoadingOrInvalid) { return }
+      return this.remoteSpaceId !== this.space.id
+    }
+  },
+  watch: {
+    isVisible (visible) {
+      if (visible) {
+        const shouldRequestSpace = this.checkIfShouldRequestSpace()
+        if (!shouldRequestSpace) {
+          this.scrollIntoView()
+          return
+        }
+        this.users = []
+        this.cardsText = ''
+        this.updateSpaceUser()
+        this.getCardsTextAndCollaboratorsFromRemoteSpace()
+      }
+    }
+  }
+}
+</script>
+
+<style lang="stylus">
+.link-details
+  cursor auto
+  section.edit-card
+    background-color var(--secondary-background)
+  button
+    span
+      word-break break-word
+  .container-wrap + .badges-wrap
+    margin-top 6px
+  .container-wrap
+    display flex
+  .background-wrap
+    width 30%
+    margin-right 6px
+  .background
+    width 100%
+    border-radius 3px
+    cursor pointer
+    &:hover
+      box-shadow var(--button-hover-shadow)
+      background var(--secondary-hover-background)
+    &:active
+      box-shadow var(--button-active-inset-shadow)
+      background var(--secondary-active-background)
+  .secondary
+    background-color var(--secondary-background)
+  .badges-wrap
+    display flex
+    .user-list
+      display flex
+  textarea
+    background-color var(--secondary-background)
+    border 0
+    border-radius 3px
+    padding 4px
+    margin-bottom 0
+    height 100px
+</style>

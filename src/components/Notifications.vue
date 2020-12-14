@@ -243,7 +243,7 @@ export default {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace'](space)
       let remoteSpace
       if (canEditSpace) {
-        remoteSpace = await this.$store.dispatch('api/getSpace', space)
+        remoteSpace = await this.$store.dispatch('api/getSpace', { space })
       } else {
         remoteSpace = await this.$store.dispatch('api/getSpaceAnonymously', space)
       }

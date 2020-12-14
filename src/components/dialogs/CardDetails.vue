@@ -14,11 +14,11 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keyup.stop.esc
         @keydown.esc="closeCardAndFocus"
 
-        @keyup.stop.backspace="checkIfShouldShowTagPicker"
-        @keyup.stop.up="checkIfShouldHideTagPicker"
-        @keyup.stop.down="checkIfShouldHideTagPicker"
-        @keyup.stop.left="checkIfShouldHideTagPicker"
-        @keyup.stop.right="checkIfShouldHideTagPicker"
+        @keyup.stop.backspace="checkIfShouldShowPicker"
+        @keyup.stop.up="checkIfShouldHidePicker"
+        @keyup.stop.down="checkIfShouldHidePicker"
+        @keyup.stop.left="checkIfShouldHidePicker"
+        @keyup.stop.right="checkIfShouldHidePicker"
 
         data-type="name"
         maxlength="300"
@@ -31,17 +31,34 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.alt.enter.exact.stop="insertLineBreak"
         @keydown.ctrl.enter.exact.stop="insertLineBreak"
 
-        @keyup="updateTagPickerSearch(null)"
+        @keyup="updatePickerSearch(null)"
 
-        @keydown="updateTagPicker"
-        @keydown.down="triggerTagPickerNavigation"
-        @keydown.up="triggerTagPickerNavigation"
-        @keydown.enter="triggerTagPickerSelectTag"
-        @keydown.tab="triggerTagPickerSelectTag"
-        @keydown.221="triggerTagPickerSelectTag"
-        @keydown.bracket-right="triggerTagPickerSelectTag"
+        @keydown="updatePicker"
+        @keydown.down="triggerPickerNavigation"
+        @keydown.up="triggerPickerNavigation"
+        @keydown.enter="triggerPickerSelectItem"
+        @keydown.tab="triggerPickerSelectItem"
+        @keydown.221="triggerPickerSelectItem"
+        @keydown.bracket-right="triggerPickerSelectItem"
       )
-      TagPicker(:visible="tagPickerIsVisible" :cursorPosition="cursorPosition" :position="tagPickerPosition" :search="tagPickerSearch" @closeDialog="hideTagPicker" @selectTag="updateTagBracketsWithTag")
+      TagPicker(
+        :visible="tag.pickerIsVisible"
+        :cursorPosition="cursorPosition"
+        :position="tag.pickerPosition"
+        :search="tag.pickerSearch"
+        @closeDialog="hideTagPicker"
+        @selectTag="updateTagBracketsWithTag"
+      )
+      SpacePicker(
+        :visible="space.pickerIsVisible"
+        :parentIsCardDetails="true"
+        :cursorPosition="cursorPosition"
+        :position="space.pickerPosition"
+        :search="space.pickerSearch"
+        @closeDialog="hideSpacePicker"
+        @selectSpace="replaceSlashCommandWithSpaceUrl"
+      )
+
     .row(v-if="cardPendingUpload")
       .badge.info
         Loader(:visible="true")
@@ -70,11 +87,11 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           span Frames
         FramePicker(:visible="framePickerIsVisible" :cards="[card]")
 
-    .row(v-if="nameHasLineBreaks || hasLinks || nameHasSentences")
-      //- Show Link
-      .button-wrap(v-if="hasLinks")
-        button(:disabled="!canEditCard" @click.left.stop="toggleLinksIsVisible" :class="{active: linksIsVisible}")
-          img.icon(v-if="linksIsVisible" src="@/assets/view-hidden.svg")
+    .row(v-if="nameHasLineBreaks || hasUrls || nameHasSentences")
+      //- Show Url
+      .button-wrap(v-if="hasUrls")
+        button(:disabled="!canEditCard" @click.left.stop="toggleUrlsIsVisible" :class="{active: urlsIsVisible}")
+          img.icon(v-if="urlsIsVisible" src="@/assets/view-hidden.svg")
           img.icon(v-else src="@/assets/view.svg")
           span Link
       //- Split by Line Breaks
@@ -127,8 +144,8 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
     template(v-if="error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
-    //- Tags
-    .tags-row(v-if="tagsInCard.length")
+    .badges-row(v-if="tagsInCard.length || card.linkToSpaceId")
+      //- Tags
       template(v-for="tag in tagsInCard")
         span.badge.button-badge(
           :style="{backgroundColor: tag.color}"
@@ -138,19 +155,31 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           @touchend.stop="showTagDetailsIsVisible($event, tag)"
           @keyup.stop.enter="showTagDetailsIsVisible($event, tag)"
         ) {{tag.name}}
-
+      //- Links
+      .badge.button-badge.link-badge(
+        v-if="card.linkToSpaceId"
+        :class="{ active: currentSelectedLinkisActive }"
+        @click.left.stop="showLinkDetailsIsVisible($event)"
+        @touchend.stop="showLinkDetailsIsVisible($event)"
+        @keyup.stop.enter="showLinkDetailsIsVisible($event)"
+      )
+        User(v-if="linkToSpace" :user="linkToSpace.users[0]" :isClickable="false")
+        span {{linkName}}
 </template>
 
 <script>
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
+import SpacePicker from '@/components/dialogs/SpacePicker.vue'
+import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
 import qs from '@aguezz/qs-parse'
 import nanoid from 'nanoid'
+import debounce from 'lodash-es/debounce'
 
 let previousTags = []
 
@@ -160,7 +189,9 @@ export default {
     FramePicker,
     ImagePicker,
     TagPicker,
-    Loader
+    SpacePicker,
+    Loader,
+    User
   },
   props: {
     card: Object // name, x, y, z
@@ -169,9 +200,6 @@ export default {
     return {
       framePickerIsVisible: false,
       imagePickerIsVisible: false,
-      tagPickerIsVisible: false,
-      tagPickerPosition: {},
-      tagPickerSearch: '',
       initialSearch: '',
       pastedName: '',
       wasPasted: false,
@@ -182,6 +210,16 @@ export default {
         signUpToUpload: false,
         sizeLimit: false,
         unknownUploadError: false
+      },
+      tag: {
+        pickerIsVisible: false,
+        pickerPosition: {},
+        pickerSearch: ''
+      },
+      space: {
+        pickerIsVisible: false,
+        pickerPosition: {},
+        pickerSearch: ''
       }
     }
   },
@@ -190,7 +228,7 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.framePickerIsVisible = false
         this.imagePickerIsVisible = false
-        this.hideTagPicker()
+        this.hidePickers()
       }
       if (mutation.type === 'triggerUploadComplete') {
         let { cardId, url } = mutation.payload
@@ -227,6 +265,19 @@ export default {
       if (this.canEditSpace && this.cardIsCreatedByCurrentUser) { return true }
       return false
     },
+    linkToSpace () {
+      const spaceId = this.card.linkToSpaceId
+      const space = this.$store.getters.otherSpaceById(spaceId)
+      return space
+    },
+    linkName () {
+      const space = this.linkToSpace
+      if (space) {
+        return space.name
+      } else {
+        return 'Space is loading or invalid'
+      }
+    },
     isInvitedButCannotEditSpace () { return this.$store.getters['currentUser/isInvitedButCannotEditSpace']() },
     errorMaxCardLength () {
       const maxCardLength = 300
@@ -247,6 +298,11 @@ export default {
       return tags
     },
     currentSelectedTag () { return this.$store.state.currentSelectedTag },
+    currentSelectedLink () { return this.$store.state.currentSelectedLink },
+    currentSelectedLinkisActive () {
+      if (!this.currentSelectedLink.space) { return }
+      return this.currentSelectedLink.space.id === this.card.linkToSpaceId
+    },
     name: {
       get () {
         return this.card.name
@@ -262,16 +318,17 @@ export default {
     },
     url () { return utils.urlFromString(this.name) },
     urls () { return utils.urlsFromString(this.name, true) },
-    linkUrls () {
+    validUrls () {
+      if (!this.urls) { return [] }
       return this.urls.filter(url => {
-        return this.urlType(url) === 'link'
+        return utils.urlType(url) === 'link'
       })
     },
-    hasLinks () {
-      return Boolean(this.linkUrls.length)
+    hasUrls () {
+      return Boolean(this.validUrls.length)
     },
-    linksIsVisible () {
-      const linksVisible = this.linkUrls.filter(url => {
+    urlsIsVisible () {
+      const urlsVisible = this.validUrls.filter(url => {
         const queryString = utils.queryString(url)
         if (queryString) {
           const queryObject = qs.decode(queryString)
@@ -280,7 +337,7 @@ export default {
           return false
         }
       })
-      return linksVisible.length === this.linkUrls.length
+      return urlsVisible.length === this.validUrls.length
     },
     urlIsAudio () { return utils.urlIsAudio(this.url) },
     normalizedName () {
@@ -344,13 +401,13 @@ export default {
       const newName = this.name.replace(url.trim(), newUrl)
       this.updateCardName(newName)
     },
-    toggleLinksIsVisible () {
-      const isVisible = !this.linksIsVisible
+    toggleUrlsIsVisible () {
+      const isVisible = !this.urlsIsVisible
       let newUrls = []
       this.urls.forEach(url => {
         url = url.trim()
-        const isLink = this.urlType(url) === 'link'
-        if (!isLink) { return }
+        const isUrl = utils.urlType(url) === 'link'
+        if (!isUrl) { return }
         const queryString = utils.queryString(url)
         const domain = utils.urlWithoutQueryString(url)
         let queryObject
@@ -444,7 +501,7 @@ export default {
       this.wasPasted = true
     },
     removeTrackingQueryStrings () {
-      this.linkUrls.forEach(url => {
+      this.validUrls.forEach(url => {
         url = url.trim()
         const queryString = utils.queryString(url)
         const domain = utils.urlWithoutQueryString(url)
@@ -486,7 +543,33 @@ export default {
         this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.card.id, shouldUpdateApi: true })
       })
       this.updateTags()
+      this.updateSpaceLink()
     },
+    updateSpaceLink () {
+      let link = this.validUrls.filter(url => utils.urlIsKinopioSpace(url))[0]
+      const shouldRemoveLink = this.card.linkToSpaceId && !link
+      if (shouldRemoveLink) {
+        const update = {
+          id: this.card.id,
+          linkToSpaceId: null
+        }
+        this.$store.dispatch('currentSpace/updateCard', update)
+        return
+      }
+      if (!link) { return }
+      const linkToSpaceId = utils.spaceIdFromUrl(link) || null
+      const linkExists = linkToSpaceId === this.card.linkToSpaceId
+      if (linkExists) { return }
+      const update = {
+        id: this.card.id,
+        linkToSpaceId
+      }
+      this.$store.dispatch('currentSpace/updateCard', update)
+      this.debouncedSaveOtherSpace(linkToSpaceId)
+    },
+    debouncedSaveOtherSpace: debounce(async function (linkToSpaceId) {
+      this.$store.dispatch('currentSpace/saveOtherSpace', { spaceId: linkToSpaceId })
+    }, 250),
     checkIfIsInsertLineBreak (event) {
       const lineBreakInserted = event.ctrlKey || event.altKey
       if (!lineBreakInserted) {
@@ -504,8 +587,8 @@ export default {
       this.updateCardName(newName)
     },
     closeCard (event) {
-      if (this.tagPickerIsVisible) {
-        this.hideTagPicker()
+      if (this.tag.pickerIsVisible || this.space.pickerIsVisible) {
+        this.hidePickers()
         event.stopPropagation()
         return
       }
@@ -516,9 +599,9 @@ export default {
       }
       this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCard')
     },
-    closeCardAndFocus () {
-      if (this.tagPickerIsVisible) {
-        this.hideTagPicker()
+    closeCardAndFocus (event) {
+      if (this.tag.pickerIsVisible || this.space.pickerIsVisible) {
+        this.hidePickers()
         return
       }
       this.closeCard()
@@ -550,11 +633,14 @@ export default {
       this.imagePickerIsVisible = !isVisible
       this.initialSearch = this.normalizedName
     },
-    focusName () {
+    focusName (position) {
       const element = this.$refs.name
       const length = this.name.length
       if (!element) { return }
       element.focus()
+      if (position && element) {
+        element.setSelectionRange(position, position)
+      }
       if (length && element) {
         element.setSelectionRange(length, length)
       }
@@ -579,13 +665,6 @@ export default {
       this.triggerUpdateMagicPaintPositionOffset()
       this.triggerUpdatePositionInVisualViewport()
     },
-    clickName (event) {
-      this.triggerUpdateMagicPaintPositionOffset()
-      if (this.isCursorInsideTagBrackets()) {
-        this.showTagPicker()
-        event.stopPropagation()
-      }
-    },
     triggerUpdateMagicPaintPositionOffset () {
       this.$store.commit('triggerUpdateMagicPaintPositionOffset')
       this.triggerUpdatePositionInVisualViewport()
@@ -593,8 +672,32 @@ export default {
     closeDialogs () {
       this.framePickerIsVisible = false
       this.imagePickerIsVisible = false
-      this.hideTagPicker()
+      this.hidePickers()
       this.hideTagDetailsIsVisible()
+      this.hideLinkDetailsIsVisible()
+    },
+    clickName (event) {
+      this.triggerUpdateMagicPaintPositionOffset()
+      if (this.isCursorInsideTagBrackets()) {
+        this.showTagPicker()
+        event.stopPropagation()
+      } else if (this.isCursorInsideSlashCommand()) {
+        this.showSpacePicker()
+        this.updateSpacePickerSearch()
+        event.stopPropagation()
+      }
+    },
+    hidePickers () {
+      this.hideTagPicker()
+      this.hideSpacePicker()
+    },
+    hideTagPicker () {
+      this.tag.pickerSearch = ''
+      this.tag.pickerIsVisible = false
+    },
+    hideSpacePicker () {
+      this.space.pickerSearch = ''
+      this.space.pickerIsVisible = false
     },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
@@ -602,26 +705,15 @@ export default {
     triggerUpgradeUserIsVisible () {
       this.$store.commit('triggerUpgradeUserIsVisible')
     },
-    urlType (url) {
-      if (utils.urlIsImage(url)) {
-        return 'image'
-      } else if (utils.urlIsVideo(url)) {
-        return 'video'
-      } else if (utils.urlIsAudio(url)) {
-        return 'audio'
-      } else {
-        return 'link'
-      }
-    },
     addFile (file) {
       let name = this.card.name
       const url = file.url
-      const urlType = this.urlType(url)
+      const urlType = utils.urlType(url)
       const checkbox = utils.checkboxFromString(name)
       const previousUrls = utils.urlsFromString(name, true)
       let isReplaced
       previousUrls.forEach(previousUrl => {
-        if (this.urlType(previousUrl) === urlType) {
+        if (utils.urlType(previousUrl) === urlType) {
           name = name.replace(previousUrl.trim(), url)
           isReplaced = true
         }
@@ -644,21 +736,176 @@ export default {
       this.error.sizeLimit = false
       this.error.unknownUploadError = false
     },
+    checkIfShouldShowPicker () {
+      this.checkIfShouldShowTagPicker()
+      this.checkIfShouldShowSpacePicker()
+    },
+    checkIfShouldHidePicker () {
+      this.checkIfShouldHideTagPicker()
+      this.checkIfShouldHideSpacePicker()
+    },
 
-    // Tags
+    // Pickers
+
+    updatePicker (event) {
+      const cursorPosition = this.$refs.name.selectionStart
+      const previousCharacter = this.name[cursorPosition - 1]
+      const previousCharacterIsBlank = utils.hasBlankCharacters(previousCharacter)
+      const key = event.key
+      const keyIsLettterOrNumber = key.length === 1
+      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets()
+      const isCursorInsideSlashCommand = this.isCursorInsideSlashCommand()
+      if (utils.hasBlankCharacters(key)) {
+        this.hideSpacePicker()
+      } else if (key === '/' && previousCharacterIsBlank) {
+        this.showSpacePicker()
+      } else if (cursorPosition === 0) {
+        return
+      } else if (keyIsLettterOrNumber && isCursorInsideSlashCommand) {
+        this.showSpacePicker()
+      } else if (key === '[' && previousCharacter === '[') {
+        this.showTagPicker()
+        this.addClosingBrackets()
+      } else if (keyIsLettterOrNumber && isCursorInsideTagBrackets) {
+        this.showTagPicker()
+      }
+      this.checkIfIsInsertLineBreak(event)
+    },
+    triggerPickerNavigation (event) {
+      const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
+      const pickerIsVisible = this.tag.pickerIsVisible || this.space.pickerIsVisible
+      const shouldTrigger = pickerIsVisible && !modifierKey && this.currentUserIsSignedIn
+      if (shouldTrigger) {
+        this.$store.commit('triggerPickerNavigationKey', event.key)
+        event.preventDefault()
+      }
+    },
+    triggerPickerSelectItem (event) {
+      const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
+      const pickerIsVisible = this.tag.pickerIsVisible || this.space.pickerIsVisible
+      const shouldTrigger = pickerIsVisible && !modifierKey && this.currentUserIsSignedIn
+      if (shouldTrigger) {
+        this.$store.commit('triggerPickerSelect')
+        event.preventDefault()
+      }
+      // prevent trailing ]
+      if (event.key === ']' && this.tag.pickerIsVisible) {
+        this.shouldCancelBracketRight = true
+        setTimeout(() => {
+          this.shouldCancelBracketRight = false
+        }, 250)
+      }
+      if (event.key === ']' && this.shouldCancelBracketRight) {
+        event.preventDefault()
+      }
+      // prevents Enter from creating new card
+      if (event.key !== 'Enter') {
+        this.hidePickers()
+      }
+    },
+    updatePickerSearch () {
+      if (this.tag.pickerIsVisible) {
+        this.updateTagPickerSearch()
+      } else if (this.space.pickerIsVisible) {
+        this.updateSpacePickerSearch()
+      }
+    },
+
+    // /Space-Links, slash command text
+
+    showSpacePicker () {
+      this.closeDialogs()
+      const nameRect = this.$refs.name.getBoundingClientRect()
+      this.space.pickerPosition = {
+        top: nameRect.height - 2
+      }
+      this.space.pickerIsVisible = true
+    },
+    slashText () {
+      const cursorPosition = this.$refs.name.selectionStart
+      const start = this.slashTextToCursor() // /txt|
+      let end = this.name.substring(cursorPosition, this.name.length) // |abc xyz
+      end = utils.splitByBlankCharacters(end)[0]
+      return start + end
+    },
+    slashTextToCursor () {
+      const cursorPosition = this.$refs.name.selectionStart
+      const textPosition = this.slashTextPosition()
+      const text = this.name.substring(textPosition, cursorPosition)
+      return text
+    },
+    slashTextPosition () {
+      const cursorPosition = this.$refs.name.selectionStart
+      let text = this.name.substring(0, cursorPosition)
+      const textPosition = text.lastIndexOf('/')
+      if (textPosition === -1) { return }
+      return textPosition
+    },
+    updateSpacePickerSearch () {
+      if (!this.space.pickerIsVisible) { return }
+      const text = this.slashText()
+      this.space.pickerSearch = text.substring(1, text.length)
+    },
+    checkIfShouldHideSpacePicker () {
+      if (!this.space.pickerIsVisible) { return }
+      if (!this.isCursorInsideSlashCommand()) {
+        this.hideSpacePicker()
+      }
+    },
+    checkIfShouldShowSpacePicker () {
+      if (this.isCursorInsideSlashCommand()) {
+        this.showSpacePicker()
+      } else {
+        this.hideSpacePicker()
+      }
+    },
+    isCursorInsideSlashCommand () {
+      const text = this.slashTextToCursor()
+      if (utils.hasBlankCharacters(text)) { return }
+      const characterBeforeSlash = this.name.charAt(this.slashTextPosition() - 1)
+      if (text && !characterBeforeSlash) { return true }
+      const characterBeforeSlashIsBlank = utils.hasBlankCharacters(characterBeforeSlash)
+      const textIsValid = !utils.hasBlankCharacters(text)
+      return textIsValid && characterBeforeSlashIsBlank
+    },
+    showLinkDetailsIsVisible (event) {
+      this.closeDialogs()
+      const linkRect = event.target.getBoundingClientRect()
+      this.$store.commit('linkDetailsPosition', {
+        x: window.scrollX + linkRect.x + 2,
+        y: window.scrollY + linkRect.y + linkRect.height - 2
+      })
+      const link = {
+        cardId: this.card.id,
+        space: this.linkToSpace
+      }
+      this.$store.commit('currentSelectedLink', link)
+      this.$store.commit('linkDetailsIsVisible', true)
+    },
+    replaceSlashCommandWithSpaceUrl (space) {
+      let name = this.card.name
+      let position = this.slashTextPosition()
+      const spaceUrl = utils.kinopioDomain() + '/' + space.url + ' '
+      const start = name.substring(0, position)
+      const end = name.substring(position + this.slashText().length, name.length)
+      const newName = start + spaceUrl + end
+      this.updateCardName(newName)
+      position = position + spaceUrl.length + 1
+      this.$nextTick(() => {
+        this.focusName(position)
+      })
+    },
+
+    // [[Tags]]
 
     showTagPicker () {
       this.closeDialogs()
       const nameRect = this.$refs.name.getBoundingClientRect()
-      this.tagPickerPosition = {
+      this.tag.pickerPosition = {
         top: nameRect.height - 2
       }
+      this.tag.pickerIsVisible = true
       this.updateTagPickerSearch()
-      this.tagPickerIsVisible = true
-    },
-    hideTagPicker () {
-      this.tagPickerSearch = ''
-      this.tagPickerIsVisible = false
     },
     tagStartText () {
       // ...[[abc
@@ -678,10 +925,10 @@ export default {
       return end.substring(0, endPosition)
     },
     updateTagPickerSearch () {
-      if (!this.tagPickerIsVisible) { return }
+      if (!this.tag.pickerIsVisible) { return }
       const start = this.tagStartText() || ''
       const end = this.tagEndText() || ''
-      this.tagPickerSearch = start + end
+      this.tag.pickerSearch = start + end
     },
     isCursorInsideTagBrackets () {
       this.cursorPosition = this.$refs.name.selectionStart // for template
@@ -693,7 +940,7 @@ export default {
       }
     },
     checkIfShouldShowTagPicker () {
-      const tagPickerIsVisible = this.tagPickerIsVisible
+      const tagPickerIsVisible = this.tag.pickerIsVisible
       const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets()
       if (isCursorInsideTagBrackets && !tagPickerIsVisible) {
         this.showTagPicker()
@@ -702,7 +949,7 @@ export default {
       }
     },
     checkIfShouldHideTagPicker () {
-      const tagPickerIsVisible = this.tagPickerIsVisible
+      const tagPickerIsVisible = this.tag.pickerIsVisible
       const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets()
       if (!isCursorInsideTagBrackets && tagPickerIsVisible) {
         this.hideTagPicker()
@@ -716,21 +963,6 @@ export default {
       this.$nextTick(() => {
         this.$refs.name.setSelectionRange(cursorPosition, cursorPosition)
       })
-    },
-    updateTagPicker (event) {
-      const cursorPosition = this.$refs.name.selectionStart
-      const previousCharacter = this.name[cursorPosition - 1]
-      const key = event.key
-      const keyIsLettterOrNumber = key.length === 1
-      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets()
-      if (cursorPosition === 0) { return }
-      if (key === '[' && previousCharacter === '[') {
-        this.showTagPicker()
-        this.addClosingBrackets()
-      } else if (keyIsLettterOrNumber && isCursorInsideTagBrackets) {
-        this.showTagPicker()
-      }
-      this.checkIfIsInsertLineBreak(event)
     },
     moveCursorPastTagEnd () {
       const cursorPosition = this.$refs.name.selectionStart
@@ -782,6 +1014,10 @@ export default {
       this.$store.commit('currentSelectedTag', {})
       this.$store.commit('tagDetailsIsVisible', false)
     },
+    hideLinkDetailsIsVisible () {
+      this.$store.commit('currentSelectedLink', {})
+      this.$store.commit('linkDetailsIsVisible', false)
+    },
     showTagDetailsIsVisible (event, tag) {
       this.closeDialogs()
       const tagRect = event.target.getBoundingClientRect()
@@ -791,36 +1027,6 @@ export default {
       })
       this.$store.commit('currentSelectedTag', tag)
       this.$store.commit('tagDetailsIsVisible', true)
-    },
-    triggerTagPickerNavigation (event) {
-      const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
-      const shouldTrigger = this.tagPickerIsVisible && !modifierKey
-      if (shouldTrigger) {
-        this.$store.commit('triggerPickerNavigationKey', event.key)
-        event.preventDefault()
-      }
-    },
-    triggerTagPickerSelectTag (event) {
-      const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
-      const shouldTrigger = this.tagPickerIsVisible && !modifierKey
-      if (shouldTrigger) {
-        this.$store.commit('triggerPickerSelect')
-        event.preventDefault()
-      }
-      // prevent trailing ]
-      if (event.key === ']' && this.tagPickerIsVisible) {
-        this.shouldCancelBracketRight = true
-        setTimeout(() => {
-          this.shouldCancelBracketRight = false
-        }, 250)
-      }
-      if (event.key === ']' && this.shouldCancelBracketRight) {
-        event.preventDefault()
-      }
-      // prevents Enter from creating new card
-      if (event.key !== 'Enter') {
-        this.tagPickerIsVisible = false
-      }
     },
     updateTagBracketsWithTag (tag) {
       this.updatePreviousTags()
@@ -878,7 +1084,7 @@ export default {
     input
       margin 0
       vertical-align -1px
-  .tags-row
+  .badges-row
     display flex
     flex-wrap wrap
 </style>

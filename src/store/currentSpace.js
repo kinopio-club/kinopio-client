@@ -15,6 +15,8 @@ import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
 import dayjs from 'dayjs'
 
+let otherSpacesQueue = [] // id
+
 export default {
   namespaced: true,
   state: helloSpace,
@@ -192,6 +194,7 @@ export default {
     // Connections
 
     updateConnection: (state, updatedConnection) => {
+      // ⤵ same as updateConnectionReadOnly, but with cache.updateSpace
       state.connections.map(connection => {
         if (connection.id === updatedConnection.id) {
           const updates = Object.keys(updatedConnection)
@@ -206,6 +209,22 @@ export default {
         }
       })
       cache.updateSpace('connections', state.connections, state.id)
+    },
+    updateConnectionReadOnly: (state, updatedConnection) => {
+      // ⤴ same as updateConnection, without cache.updateSpace
+      state.connections.map(connection => {
+        if (connection.id === updatedConnection.id) {
+          const updates = Object.keys(updatedConnection)
+          updates.forEach(key => {
+            // update properties differently depending on whether it's existing or new
+            if (connection[key]) {
+              connection[key] = updatedConnection[key]
+            } else {
+              Vue.set(connection, key, updatedConnection[key])
+            }
+          })
+        }
+      })
     },
     addConnection: (state, connection) => {
       state.connections.push(connection)
@@ -316,7 +335,7 @@ export default {
       // restore from url
       if (spaceUrl) {
         console.log('🚃 Restore space from url', spaceUrl)
-        const spaceId = utils.idFromUrl(spaceUrl)
+        const spaceId = utils.spaceIdFromUrl(spaceUrl)
         const space = { id: spaceId }
         context.dispatch('loadSpace', { space })
       // restore or create journal space
@@ -335,7 +354,7 @@ export default {
       }
     },
 
-    // Users
+    // Users and otherSpaces
 
     addUserToJoinedSpace: (context, newUser) => {
       if (newUser.isCollaborator) {
@@ -364,6 +383,49 @@ export default {
       for (const userId of otherUserIds) {
         const user = await context.dispatch('api/getPublicUser', { id: userId }, { root: true })
         context.commit('updateOtherUsers', user, { root: true })
+      }
+    },
+    updateOtherSpaces: async (context, spaceId) => {
+      let links
+      if (spaceId) {
+        links = [{ linkToSpaceId: spaceId }]
+      } else {
+        links = context.getters.cardsWithSpaceLinks
+      }
+      console.log(links)
+      if (!links.length) { return }
+      links.forEach(link => {
+        const spaceId = link.linkToSpaceId
+        context.dispatch('saveOtherSpace', { spaceId, shouldAddToQueue: true })
+      })
+      otherSpacesQueue = uniq(otherSpacesQueue)
+      let spaces = await context.dispatch('api/getSpaces', { spaceIds: otherSpacesQueue, shouldRequestRemoteSpace: true }, { root: true })
+      if (!spaces) { return }
+      spaces = spaces.filter(space => space.id)
+      spaces.forEach(space => {
+        space = utils.normalizeSpaceMetaOnly(space)
+        context.commit('updateOtherSpaces', space, { root: true })
+      })
+      otherSpacesQueue = []
+    },
+
+    saveOtherSpace: async (context, { spaceId, shouldAddToQueue }) => {
+      const cachedSpace = cache.space(spaceId)
+      const spaceIsCached = utils.objectHasKeys(cachedSpace)
+      if (spaceIsCached) {
+        const space = utils.normalizeSpaceMetaOnly(cachedSpace)
+        context.commit('updateOtherSpaces', space, { root: true })
+      } else if (shouldAddToQueue) {
+        otherSpacesQueue.push(spaceId)
+      } else {
+        try {
+          const space = { id: spaceId }
+          let remoteSpace = await context.dispatch('api/getSpace', { space, shouldRequestRemoteSpace: true }, { root: true })
+          remoteSpace = utils.normalizeSpaceMetaOnly(remoteSpace)
+          context.commit('updateOtherSpaces', remoteSpace, { root: true })
+        } catch (error) {
+          console.warn('🚑 otherSpace not found', error, spaceId)
+        }
       }
     },
 
@@ -485,7 +547,7 @@ export default {
       try {
         context.commit('isLoadingSpace', true, { root: true })
         if (currentUserIsSignedIn) {
-          remoteSpace = await context.dispatch('api/getSpace', space, { root: true })
+          remoteSpace = await context.dispatch('api/getSpace', { space }, { root: true })
         } else if (collaboratorKey) {
           space.collaboratorKey = collaboratorKey
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
@@ -600,6 +662,7 @@ export default {
       context.dispatch('updateSpacePageSize')
       context.dispatch('loadBackground', context.state.background)
       context.dispatch('updateOtherUsers')
+      context.dispatch('updateOtherSpaces')
     },
     loadLastSpace: (context) => {
       const user = context.rootState.currentUser
@@ -1045,7 +1108,12 @@ export default {
           context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
         }
         context.commit('broadcast/update', { updates: connection, type: 'updateConnection' }, { root: true })
-        context.commit('updateConnection', connection)
+        const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
+        if (userCanEdit) {
+          context.commit('updateConnection', connection)
+        } else {
+          context.commit('updateConnectionReadOnly', connection)
+        }
       })
     },
     removeConnectionsFromCard: (context, card) => {
@@ -1203,6 +1271,11 @@ export default {
     cardById: (state) => (id) => {
       return state.cards.find(card => card.id === id)
     },
+    cardsWithSpaceLinks: (state) => {
+      let cards = state.cards
+      let links = cards.filter(card => utils.idIsValid(card.linkToSpaceId))
+      return links
+    },
 
     // Tags
     tagByName: (state) => (name) => {
@@ -1307,6 +1380,12 @@ export default {
         if (user.isUpgraded) { userIsUpgraded = true }
       })
       return userIsUpgraded
+    },
+    spaceUserIsCurrentUser: (state, getters, rootState) => {
+      const currentUser = rootState.currentUser
+      const users = state.users
+      const userIds = users.map(user => user.id)
+      return userIds.includes(currentUser.id)
     },
     shouldPreventAddCard: (state, getters, rootState, rootGetters) => {
       const cardsCreatedIsOverLimit = rootGetters['currentUser/cardsCreatedIsOverLimit']
