@@ -722,7 +722,7 @@ export default {
     if (!string) { return [] }
     // https://regexr.com/59m5t
     // same as urlFromString but matches multiple urls and returns [urls]
-    const urlPattern = new RegExp(/(?=http)((http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+[\n ]*)*/igm)
+    const urlPattern = new RegExp(/(?=http)((http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+[^\n ]*)*/igm)
     let urls = string.match(urlPattern)
     if (!urls) { return }
     // filter out empty or non-urls
