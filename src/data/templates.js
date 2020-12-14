@@ -91,7 +91,13 @@ export default {
         id: 'J4vbhO646y4296cLRQEU3',
         categoryId: 4,
         name: 'Roadmap'
+      },
+      {
+        id: 'GgDOqKvEEzTA93EYmAZrn',
+        categoryId: 3,
+        name: 'Mood Board'
       }
+
       // {
       //   id: '123',
       //   categoryId: 4,
