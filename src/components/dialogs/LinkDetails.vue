@@ -148,7 +148,7 @@ export default {
       }
     },
     changeSpace () {
-      this.$store.dispatch('currentSpace/changeSpace', { space: this.space })
+      this.$store.dispatch('currentSpace/changeSpace', { space: this.space, isRemote: true })
       this.$store.dispatch('closeAllDialogs', 'linkDetails.changeSpace')
     },
     scrollIntoView () {
