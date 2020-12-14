@@ -792,6 +792,11 @@ export default {
       kinopioUrlPattern = new RegExp(/(?:kinopio.local:.*\/)(.*)\b/gi)
     } else {
       // https://regexr.com/5hk37
+      // no '.' before 'kinopio' (no subdomains, matches optional protocol)
+      // 'kinopio.club'
+      // no 'invite?' after 'club' (no invite links)
+      // any characters after
+      // until whitespace
       kinopioUrlPattern = new RegExp(/[^.](?:kinopio.club\/)(?:(?!invite\?).)(.*)\b/gi)
     }
     const isKinopioUrl = url.match(kinopioUrlPattern)
