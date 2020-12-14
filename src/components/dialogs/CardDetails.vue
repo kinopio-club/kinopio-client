@@ -710,7 +710,7 @@ export default {
       const url = file.url
       const urlType = utils.urlType(url)
       const checkbox = utils.checkboxFromString(name)
-      const previousUrls = utils.urlsFromString(name, true)
+      const previousUrls = utils.urlsFromString(name, true) || []
       let isReplaced
       previousUrls.forEach(previousUrl => {
         if (utils.urlType(previousUrl) === urlType) {

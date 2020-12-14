@@ -6,7 +6,7 @@ dialog.link-details.narrow(v-if="isVisible" :open="isVisible" :style="dialogPosi
     .container-wrap(v-if="space.url")
       .background-wrap(v-if="space.background")
         a(:href="space.url")
-          img.background(:src="space.background" @click.prevent="changeSpace" v-on:keyup.enter.prevent="changeSpace")
+          img.background(:src="space.background" @click.left.prevent="changeSpace" v-on:keyup.enter.prevent="changeSpace")
       .meta-wrap
         a(:href="space.url")
           button(@click.prevent="changeSpace" v-on:keyup.enter.prevent="changeSpace" :class="{active: linkIsCurrentSpace}")
