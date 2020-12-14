@@ -73,6 +73,11 @@ export default {
         name: 'Meeting Agenda'
       },
       {
+        id: 'GgDOqKvEEzTA93EYmAZrn',
+        categoryId: 3,
+        name: 'Mood Board'
+      },
+      {
         id: 'QCtseqHqA1Ib0OwYETk7m',
         categoryId: 3,
         name: 'Weekly Planner'
@@ -91,11 +96,6 @@ export default {
         id: 'J4vbhO646y4296cLRQEU3',
         categoryId: 4,
         name: 'Roadmap'
-      },
-      {
-        id: 'GgDOqKvEEzTA93EYmAZrn',
-        categoryId: 3,
-        name: 'Mood Board'
       }
 
       // {
