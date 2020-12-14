@@ -393,7 +393,7 @@ export default {
         context.dispatch('saveOtherSpace', { spaceId, shouldAddToQueue: true })
       })
       otherSpacesQueue = uniq(otherSpacesQueue)
-      let spaces = await context.dispatch('api/getSpaces', otherSpacesQueue, { root: true })
+      let spaces = await context.dispatch('api/getSpaces', { spaceIds: otherSpacesQueue, shouldRequestRemoteSpace: true }, { root: true })
       if (!spaces) { return }
       spaces = spaces.filter(space => space.id)
       spaces.forEach(space => {
@@ -414,11 +414,11 @@ export default {
       } else {
         try {
           const space = { id: spaceId }
-          let remoteSpace = await context.dispatch('api/getSpace', { space }, { root: true })
+          let remoteSpace = await context.dispatch('api/getSpace', { space, shouldRequestRemoteSpace: true }, { root: true })
           remoteSpace = utils.normalizeSpaceMetaOnly(remoteSpace)
           context.commit('updateOtherSpaces', remoteSpace, { root: true })
         } catch (error) {
-          console.warn('🚑 otherSpace not found', error)
+          console.warn('🚑 otherSpace not found', error, spaceId)
         }
       }
     },

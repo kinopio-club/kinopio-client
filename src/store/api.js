@@ -283,10 +283,9 @@ const self = {
         console.error('🚒', error)
       }
     },
-    getSpaces: async (context, spaceIds) => {
+    getSpaces: async (context, { spaceIds, shouldRequestRemoteSpace }) => {
       const max = 60
       try {
-        const shouldRequestRemoteSpace = !context.rootGetters['currentSpace/spaceUserIsCurrentUser']
         if (!shouldRequest(shouldRequestRemoteSpace)) { return }
         spaceIds = spaceIds.slice(0, max)
         console.log('🛬🛬 getting remote spaces', spaceIds)
