@@ -792,7 +792,7 @@ export default {
       kinopioUrlPattern = new RegExp(/(?:kinopio.local:.*\/)(.*)\b/gi)
     } else {
       // https://regexr.com/5hk37
-      kinopioUrlPattern = new RegExp(/(?:kinopio.club\/)(.*)\b/gi)
+      kinopioUrlPattern = new RegExp(/[^.](?:kinopio.club\/)(?:(?!invite\?).)(.*)\b/gi)
     }
     const isKinopioUrl = url.match(kinopioUrlPattern)
     return Boolean(isKinopioUrl)
