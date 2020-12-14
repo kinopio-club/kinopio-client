@@ -393,16 +393,6 @@ const self = {
 
     // Card
 
-    // getCard: async (context, cardId) => {
-    //   if (!shouldRequest()) { return }
-    //   try {
-    //     const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-    //     const response = await fetch(`${host}/card/${cardId}`, options)
-    //     return normalizeResponse(response)
-    //   } catch (error) {
-    //     console.error('🚒', error)
-    //   }
-    // },
     getCardsWithLinkToSpaceId: async (context, spaceId) => {
       if (!shouldRequest()) { return }
       try {

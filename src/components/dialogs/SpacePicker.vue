@@ -1,8 +1,6 @@
 <template lang="pug">
 dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{top: dialogPositionTop}")
   template(v-if="parentIsCardDetails && !currentUserIsSignedIn")
-    //- p sign in or up
-    //- button sign in or up
     section
       p
         span To link to a space,

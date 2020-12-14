@@ -415,7 +415,6 @@ export default {
         try {
           const space = { id: spaceId }
           let remoteSpace = await context.dispatch('api/getSpace', { space }, { root: true })
-          console.log('👿 saved OtherSpace', remoteSpace) // temp
           remoteSpace = utils.normalizeSpaceMetaOnly(remoteSpace)
           context.commit('updateOtherSpaces', remoteSpace, { root: true })
         } catch (error) {

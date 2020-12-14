@@ -774,7 +774,7 @@ export default {
     triggerPickerNavigation (event) {
       const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
       const pickerIsVisible = this.tag.pickerIsVisible || this.space.pickerIsVisible
-      const shouldTrigger = pickerIsVisible && !modifierKey
+      const shouldTrigger = pickerIsVisible && !modifierKey && this.currentUserIsSignedIn
       if (shouldTrigger) {
         this.$store.commit('triggerPickerNavigationKey', event.key)
         event.preventDefault()
@@ -783,7 +783,7 @@ export default {
     triggerPickerSelectItem (event) {
       const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
       const pickerIsVisible = this.tag.pickerIsVisible || this.space.pickerIsVisible
-      const shouldTrigger = pickerIsVisible && !modifierKey
+      const shouldTrigger = pickerIsVisible && !modifierKey && this.currentUserIsSignedIn
       if (shouldTrigger) {
         this.$store.commit('triggerPickerSelect')
         event.preventDefault()
