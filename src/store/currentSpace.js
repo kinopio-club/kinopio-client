@@ -392,7 +392,6 @@ export default {
       } else {
         links = context.getters.cardsWithSpaceLinks
       }
-      console.log(links)
       if (!links.length) { return }
       links.forEach(link => {
         const spaceId = link.linkToSpaceId
