@@ -662,13 +662,16 @@ export default {
     url = url || window.location.href
     url = url.replaceAll('?hidden=true', '')
     const id = url.substring(url.length - 21, url.length)
+    console.log('spaceIdFromUrl', url, id)
     if (this.idIsValid(id)) { return id }
   },
   idIsValid (id) {
+    console.log('idIsValid', id)
     if (!id) { return }
     if (id.includes('/')) {
       return undefined
     }
+    console.log('id is valid', id)
     return true
   },
   currentSpaceHasUrl (space) {
@@ -800,6 +803,7 @@ export default {
       kinopioUrlPattern = new RegExp(/[^.](?:kinopio.club\/)(?:(?!invite\?).)(.*)\b/gi)
     }
     const isKinopioUrl = url.match(kinopioUrlPattern)
+    console.log('urlIsKinopioSpace', url, isKinopioUrl)
     return Boolean(isKinopioUrl)
   },
   urlWithoutQueryString (url) {
