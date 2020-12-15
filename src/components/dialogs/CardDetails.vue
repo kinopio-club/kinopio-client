@@ -547,7 +547,6 @@ export default {
     },
     updateSpaceLink () {
       let link = this.validUrls.filter(url => utils.urlIsKinopioSpace(url))[0]
-      console.log('updateSpaceLink', link)
       const shouldRemoveLink = this.card.linkToSpaceId && !link
       if (shouldRemoveLink) {
         const update = {
@@ -560,7 +559,6 @@ export default {
       if (!link) { return }
       const linkToSpaceId = utils.spaceIdFromUrl(link) || null
       const linkExists = linkToSpaceId === this.card.linkToSpaceId
-      console.log('linkExists', linkExists)
       if (linkExists) { return }
       const update = {
         id: this.card.id,
@@ -570,7 +568,6 @@ export default {
       this.debouncedSaveOtherSpace(linkToSpaceId)
     },
     debouncedSaveOtherSpace: debounce(async function (linkToSpaceId) {
-      console.log('linkToSpaceId', linkToSpaceId)
       this.$store.dispatch('currentSpace/saveOtherSpace', { spaceId: linkToSpaceId })
     }, 250),
     checkIfIsInsertLineBreak (event) {

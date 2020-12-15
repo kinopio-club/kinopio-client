@@ -386,7 +386,6 @@ export default {
       }
     },
     updateOtherSpaces: async (context, spaceId) => {
-      console.log('updateOtherSpaces', spaceId)
       let links
       if (spaceId) {
         links = [{ linkToSpaceId: spaceId }]
@@ -411,19 +410,12 @@ export default {
     },
 
     saveOtherSpace: async (context, { spaceId, shouldAddToQueue }) => {
-      console.log('saveOtherSpace', spaceId, shouldAddToQueue)
-
       const cachedSpace = cache.space(spaceId)
       const spaceIsCached = Boolean(cachedSpace.id)
-
-      // space is incorrectlycached, has no id
-      console.log('spaceIsCached', spaceIsCached)
-
       if (spaceIsCached) {
         const space = utils.normalizeSpaceMetaOnly(cachedSpace)
         context.commit('updateOtherSpaces', space, { root: true })
       } else if (shouldAddToQueue) {
-        console.log('shouldAddToQueue', shouldAddToQueue, otherSpacesQueue)
         otherSpacesQueue.push(spaceId)
       } else {
         try {
