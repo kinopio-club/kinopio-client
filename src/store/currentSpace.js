@@ -501,6 +501,7 @@ export default {
         }
         context.dispatch('saveNewSpace')
         context.dispatch('updateUserLastSpaceId')
+        context.dispatch('updateBrowserHistory')
         context.commit('notifyNewUser', false, { root: true })
         context.commit('notifySignUpToEditSpace', false, { root: true })
       })
@@ -596,6 +597,13 @@ export default {
         cache.removeSpacePermanent(space)
         const emptySpace = utils.emptySpace(space.id)
         context.commit('restoreSpace', emptySpace)
+      }
+    },
+    updateBrowserHistory: (context, space) => {
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      if (currentUserIsSignedIn) {
+        space = space || context.state
+        window.history.pushState({ spaceId: space.id }, '', space.url)
       }
     },
     updateSpacePageSize: (context) => {
@@ -699,6 +707,7 @@ export default {
           shouldUpdateUrl: true
         })
       }
+      context.dispatch('updateBrowserHistory', space)
       const user = context.rootState.currentUser
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       space = utils.clone(space)

@@ -108,6 +108,7 @@ export default {
     this.startProcessQueueTimer()
 
     window.addEventListener('unload', this.unloadPage)
+    window.addEventListener('popstate', this.loadSpaceOnBackOrForward)
   },
   data () {
     return {
@@ -144,6 +145,13 @@ export default {
     }
   },
   methods: {
+    loadSpaceOnBackOrForward (event) {
+      const url = window.location.href
+      if (!utils.urlIsKinopioSpace(url)) { return }
+      const spaceId = utils.spaceIdFromUrl(url)
+      const space = { id: spaceId }
+      this.$store.dispatch('currentSpace/loadSpace', { space })
+    },
     unloadPage () {
       this.$store.commit('broadcast/close')
       this.$store.dispatch('currentSpace/removeEmptyCards')
