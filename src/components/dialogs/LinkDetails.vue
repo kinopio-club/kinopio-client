@@ -148,8 +148,13 @@ export default {
       }
     },
     changeSpace () {
-      this.$store.dispatch('currentSpace/changeSpace', { space: this.space, isRemote: true })
-      this.$store.dispatch('closeAllDialogs', 'linkDetails.changeSpace')
+      console.log('changeSpace', this.space, this.space.id)
+      if (this.space.id) {
+        this.$store.dispatch('currentSpace/changeSpace', { space: this.space, isRemote: true })
+        this.$store.dispatch('closeAllDialogs', 'linkDetails.changeSpace')
+      } else {
+        window.location.href = this.space.url
+      }
     },
     scrollIntoView () {
       this.$nextTick(() => {
