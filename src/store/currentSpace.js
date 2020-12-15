@@ -414,7 +414,11 @@ export default {
       console.log('saveOtherSpace', spaceId, shouldAddToQueue)
 
       const cachedSpace = cache.space(spaceId)
-      const spaceIsCached = utils.objectHasKeys(cachedSpace)
+      const spaceIsCached = Boolean(cachedSpace.id)
+
+      // space is incorrectlycached, has no id
+      console.log('spaceIsCached', spaceIsCached)
+
       if (spaceIsCached) {
         const space = utils.normalizeSpaceMetaOnly(cachedSpace)
         context.commit('updateOtherSpaces', space, { root: true })

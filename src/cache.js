@@ -75,6 +75,10 @@ export default {
   },
   updateSpace (key, value, spaceId) {
     let space = this.space(spaceId)
+    if (!utils.objectHasKeys(space)) {
+      console.warn('🚑 could not updateSpace cache because cachedSpace does not exist')
+      return
+    }
     space[key] = value
     space.cacheDate = Date.now()
     this.storeLocal(`space-${spaceId}`, space)
