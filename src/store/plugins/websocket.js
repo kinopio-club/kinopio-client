@@ -118,6 +118,9 @@ export default function createWebSocketPlugin () {
             store.commit('clearRemoteMultipleSelected', data)
           } else if (message === 'userLeftSpace') {
             store.commit('currentSpace/removeCollaboratorFromSpace', updates.user)
+            if (updates.user.id === store.state.currentUser.id) {
+              store.dispatch('currentSpace/removeCurrentUserFromSpace', updates.user)
+            }
           // circles and position
           } else if (message === 'addRemotePaintingCircle') {
             store.commit('triggerAddRemotePaintingCircle', updates)

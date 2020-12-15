@@ -598,6 +598,14 @@ export default {
         context.commit('restoreSpace', emptySpace)
       }
     },
+    removeCurrentUserFromSpace: (context) => {
+      const spaceIdToRemove = context.state.id
+      const name = context.state.name
+      const space = { id: spaceIdToRemove }
+      context.dispatch('loadLastSpace')
+      cache.removeSpace(space)
+      context.commit('addNotification', { message: `You were removed as a collaborator from ${name}`, type: 'info' }, { root: true })
+    },
     updateBrowserHistory: (context, space) => {
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       if (currentUserIsSignedIn) {
