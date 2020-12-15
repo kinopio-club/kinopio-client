@@ -21,6 +21,8 @@ const joinSpaceRoom = (store, mutation) => {
     console.warn('🚑 joinSpaceRoom cancelled because websocket not ready', websocket.readyState)
     return
   }
+  const spaceIsLoadedOrCached = Boolean(store.state.currentSpace.cards.length) // proxy for checking if user can view space
+  if (!spaceIsLoadedOrCached) { return }
   currentSpaceRoom = space.id
   websocket.send(JSON.stringify({
     message: 'joinSpaceRoom',
