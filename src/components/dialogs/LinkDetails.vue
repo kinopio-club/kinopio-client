@@ -230,4 +230,5 @@ export default {
     padding 4px
     margin-bottom 0
     height 100px
+    overflow scroll
 </style>
