@@ -319,9 +319,9 @@ export default {
       return spaces
     },
     updateSpaces () {
-      this.debouncedUpdatespaces()
+      this.debouncedUpdateSpaces()
     },
-    debouncedUpdatespaces: debounce(async function () {
+    debouncedUpdateSpaces: debounce(async function () {
       this.$nextTick(() => {
         const currentUser = this.$store.state.currentUser
         let userSpaces = cache.getAllSpaces().filter(space => {

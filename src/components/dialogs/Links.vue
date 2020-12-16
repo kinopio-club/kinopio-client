@@ -26,6 +26,8 @@ import SpaceList from '@/components/SpaceList.vue'
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
 
+import debounce from 'lodash-es/debounce'
+
 export default {
   name: 'Links',
   components: {
@@ -89,13 +91,17 @@ export default {
       if (this.prevSpaceId === spaceId) { return }
       this.spaces = []
       this.loading = true
+      this.debouncedUpdateLinks()
+    },
+    debouncedUpdateLinks: debounce(async function () {
+      const spaceId = this.$store.state.currentSpace.id
       const links = await this.$store.dispatch('api/getCardsWithLinkToSpaceId', spaceId) || []
       if (links) {
         this.spaces = links.spaces
       }
       this.loading = false
       this.prevSpaceId = spaceId
-    },
+    }, 350, { leading: true }),
     updateResultsSectionHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
