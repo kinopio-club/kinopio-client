@@ -3,7 +3,13 @@ dialog.links.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-he
   section
     p Spaces that Link Here
   section.results-section(v-if="shouldShowSpaces" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    SpaceList(:spaces="spaces" :showUser="true" @selectSpace="changeSpace")
+    .button-wrap.user-button-wrap(@click="toggleCurrentUserSpacesIsVisibleOnly")
+      button(:class="{ active: currentUserSpacesIsVisibleOnly }")
+        User(:user="currentUser" :isClickable="false" :hideYouLabel="true")
+        span Only
+
+    SpaceList(:spaces="filteredSpaces" :showUser="true" @selectSpace="changeSpace")
+
   section(v-else-if="loading")
     Loader(:visible="loading")
   section(v-else)
@@ -17,13 +23,15 @@ dialog.links.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-he
 <script>
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
+import User from '@/components/User.vue'
 import utils from '@/utils.js'
 
 export default {
   name: 'Links',
   components: {
     Loader,
-    SpaceList
+    SpaceList,
+    User
   },
   props: {
     visible: Boolean
@@ -43,7 +51,8 @@ export default {
       links: [],
       loading: false,
       spaces: [],
-      prevSpaceId: ''
+      prevSpaceId: '',
+      currentUserSpacesIsVisibleOnly: false
     }
   },
   computed: {
@@ -51,9 +60,19 @@ export default {
     shouldShowSpaces () {
       const spaces = this.spaces || []
       return !this.loading && spaces.length
+    },
+    filteredSpaces () {
+      if (this.currentUserSpacesIsVisibleOnly) {
+        return this.spaces.filter(space => space.userId === this.currentUser.id)
+      } else {
+        return this.spaces
+      }
     }
   },
   methods: {
+    toggleCurrentUserSpacesIsVisibleOnly () {
+      this.currentUserSpacesIsVisibleOnly = !this.currentUserSpacesIsVisibleOnly
+    },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
       this.$store.dispatch('closeAllDialogs', 'Links.closeAllDialogs')
@@ -67,7 +86,6 @@ export default {
     },
     async updateLinks () {
       const spaceId = this.$store.state.currentSpace.id
-      console.log(this.prevSpaceId)
       if (this.prevSpaceId === spaceId) { return }
       this.spaces = []
       this.loading = true
@@ -108,4 +126,6 @@ export default {
   .results-section
     border-top 1px solid var(--primary)
     padding-top 4px
+  .user-button-wrap
+    padding 4px
 </style>
