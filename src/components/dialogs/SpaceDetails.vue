@@ -97,9 +97,6 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerFocusSpaceDetailsName') {
-        const isTouchDevice = this.$store.state.isTouchDevice
-        const isBeta = this.$store.state.isBeta
-        if (isTouchDevice && !isBeta) { return }
         this.$nextTick(() => {
           this.$nextTick(() => {
             const element = this.$refs.name
