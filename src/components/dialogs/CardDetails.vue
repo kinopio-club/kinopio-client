@@ -182,6 +182,7 @@ import nanoid from 'nanoid'
 import debounce from 'lodash-es/debounce'
 
 let previousTags = []
+let tagsToRemove = []
 
 export default {
   name: 'CardDetails',
@@ -985,9 +986,13 @@ export default {
         return tag
       })
     },
-    removeRemovedTags (newTagNames) {
+    updateTagsToRemove (newTagNames) {
       const removeTags = previousTags.filter(previousTag => !newTagNames.includes(previousTag.name))
-      removeTags.forEach(tag => this.$store.dispatch('currentSpace/removeTag', tag))
+      tagsToRemove = tagsToRemove.concat(removeTags)
+    },
+    removeRemovedTags (newTagNames) {
+      tagsToRemove.forEach(tag => this.$store.dispatch('currentSpace/removeTag', tag))
+      tagsToRemove = []
     },
     addNewTags (newTagNames) {
       const previousTagNames = previousTags.map(tag => tag.name)
@@ -1006,8 +1011,8 @@ export default {
       const name = this.card.name
       if (!name) { return }
       const newTagNames = utils.tagsFromStringWithoutBrackets(name) || []
-      this.removeRemovedTags(newTagNames)
       this.addNewTags(newTagNames)
+      this.updateTagsToRemove(newTagNames)
       this.updatePreviousTags()
     },
     hideTagDetailsIsVisible () {
@@ -1057,6 +1062,9 @@ export default {
           this.removeTrackingQueryStrings()
         }
       })
+      if (!visible) {
+        this.removeRemovedTags()
+      }
       if (!visible && this.cardIsEmpty()) {
         this.$store.dispatch('currentSpace/removeCard', this.card)
       }
