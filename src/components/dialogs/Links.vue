@@ -3,7 +3,7 @@ dialog.links.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-he
   section
     p Spaces that Link Here
   section.results-section(v-if="shouldShowSpaces" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    .button-wrap.user-button-wrap(@click="toggleCurrentUserSpacesIsVisibleOnly")
+    .button-wrap.user-button-wrap(v-if="userSpacesToggleShouldBeVisible" @click="toggleCurrentUserSpacesIsVisibleOnly")
       button(:class="{ active: currentUserSpacesIsVisibleOnly }")
         User(:user="currentUser" :isClickable="false" :hideYouLabel="true")
         span Only
@@ -68,6 +68,16 @@ export default {
         return this.spaces.filter(space => space.userId === this.currentUser.id)
       } else {
         return this.spaces
+      }
+    },
+    userSpacesToggleShouldBeVisible () {
+      const otherUserSpaces = this.spaces.filter(space => space.userId !== this.currentUser.id) || []
+      let isOtherUserSpaces = Boolean(otherUserSpaces.length)
+      const shouldForceToggleVisible = !isOtherUserSpaces && this.spaces.length
+      if (isOtherUserSpaces || shouldForceToggleVisible) {
+        return true
+      } else {
+        return false
       }
     }
   },
