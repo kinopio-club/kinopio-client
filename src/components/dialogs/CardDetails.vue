@@ -105,7 +105,30 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           img.icon(src="@/assets/split-vertically.svg")
           span Split into {{nameSentences}} Cards
 
-    p.edit-message(v-if="!canEditCard")
+    .row.badges-row(v-if="tagsInCard.length || card.linkToSpaceId")
+      //- Tags
+      template(v-for="tag in tagsInCard")
+        span.badge.button-badge(
+          :style="{backgroundColor: tag.color}"
+          :class="{ active: currentSelectedTag.name === tag.name }"
+          tabindex="0"
+          @click.left.stop="showTagDetailsIsVisible($event, tag)"
+          @touchend.stop="showTagDetailsIsVisible($event, tag)"
+          @keyup.stop.enter="showTagDetailsIsVisible($event, tag)"
+        ) {{tag.name}}
+      //- Links
+      .badge.button-badge.link-badge(
+        v-if="card.linkToSpaceId"
+        :class="{ active: currentSelectedLinkisActive }"
+        @click.left.stop="showLinkDetailsIsVisible($event)"
+        @touchend.stop="showLinkDetailsIsVisible($event)"
+        @keyup.stop.enter="showLinkDetailsIsVisible($event)"
+      )
+        User(v-if="linkToSpace" :user="linkToSpace.users[0]" :isClickable="false")
+        span {{linkName}}
+
+    //- Read Only
+    p.row.edit-message(v-if="!canEditCard")
       template(v-if="spacePrivacyIsOpen")
         span.badge.info
           img.icon.open(src="@/assets/open.svg")
@@ -143,28 +166,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
     template(v-if="error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-
-    .badges-row(v-if="tagsInCard.length || card.linkToSpaceId")
-      //- Tags
-      template(v-for="tag in tagsInCard")
-        span.badge.button-badge(
-          :style="{backgroundColor: tag.color}"
-          :class="{ active: currentSelectedTag.name === tag.name }"
-          tabindex="0"
-          @click.left.stop="showTagDetailsIsVisible($event, tag)"
-          @touchend.stop="showTagDetailsIsVisible($event, tag)"
-          @keyup.stop.enter="showTagDetailsIsVisible($event, tag)"
-        ) {{tag.name}}
-      //- Links
-      .badge.button-badge.link-badge(
-        v-if="card.linkToSpaceId"
-        :class="{ active: currentSelectedLinkisActive }"
-        @click.left.stop="showLinkDetailsIsVisible($event)"
-        @touchend.stop="showLinkDetailsIsVisible($event)"
-        @keyup.stop.enter="showLinkDetailsIsVisible($event)"
-      )
-        User(v-if="linkToSpace" :user="linkToSpace.users[0]" :isClickable="false")
-        span {{linkName}}
 </template>
 
 <script>

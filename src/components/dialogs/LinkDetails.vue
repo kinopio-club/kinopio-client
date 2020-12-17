@@ -229,6 +229,6 @@ export default {
     border-radius 3px
     padding 4px
     margin-bottom 0
-    height 100px
+    height 100px !important
     overflow scroll
 </style>
