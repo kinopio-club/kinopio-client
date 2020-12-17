@@ -18,6 +18,15 @@ footer(:style="visualViewportPosition")
           //- span Favs
           img.icon(src="@/assets/hearts.svg")
       Favorites(:visible="favoritesIsVisible")
+    //- Links
+    .button-wrap
+      .segmented-buttons
+        button(@click.left="toggleTagsIsVisible" :class="{ active: tagsIsVisible}")
+          span Tags
+        button(@click.left="toggleLinksIsVisible" :class="{ active: linksIsVisible}")
+          span Links
+      Links(:visible="linksIsVisible")
+      Tags(:visible="tagsIsVisible")
 
   section.controls(v-if="isVisible")
     //- Removed
@@ -33,11 +42,6 @@ footer(:style="visualViewportPosition")
         img.icon.sunglasses(src="@/assets/filter.svg")
         span Filters
       Filters(:visible="filtersIsVisible")
-    //- Links
-    .button-wrap
-      button(@click.left="toggleLinksIsVisible" :class="{ active: linksIsVisible}")
-        span Links
-      Links(:visible="linksIsVisible")
     //- Background
     .button-wrap
       button(@click.left="toggleBackgroundIsVisible" :class="{ active: backgroundIsVisible}")
@@ -61,6 +65,7 @@ import Explore from '@/components/dialogs/Explore.vue'
 import Removed from '@/components/dialogs/Removed.vue'
 import Filters from '@/components/dialogs/Filters.vue'
 import Links from '@/components/dialogs/Links.vue'
+import Tags from '@/components/dialogs/Tags.vue'
 import Favorites from '@/components/dialogs/Favorites.vue'
 import Background from '@/components/dialogs/Background.vue'
 import Notifications from '@/components/Notifications.vue'
@@ -78,6 +83,7 @@ export default {
     Notifications,
     Filters,
     Links,
+    Tags,
     Favorites,
     Background,
     Loader
@@ -88,6 +94,7 @@ export default {
       favoritesIsVisible: false,
       filtersIsVisible: false,
       linksIsVisible: false,
+      tagsIsVisible: false,
       exploreIsVisible: false,
       backgroundIsVisible: false,
       pinchZoomOffsetLeft: 0,
@@ -102,6 +109,7 @@ export default {
         this.favoritesIsVisible = false
         this.filtersIsVisible = false
         this.linksIsVisible = false
+        this.tagsIsVisible = false
         this.exploreIsVisible = false
         this.backgroundIsVisible = false
       }
@@ -249,6 +257,11 @@ export default {
       const isVisible = this.linksIsVisible
       this.$store.dispatch('closeAllDialogs', 'Footer.toggleLinksIsVisible')
       this.linksIsVisible = !isVisible
+    },
+    toggleTagsIsVisible () {
+      const isVisible = this.tagsIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Footer.toggleTagsIsVisible')
+      this.tagsIsVisible = !isVisible
     },
     toggleBackgroundIsVisible () {
       const isVisible = this.backgroundIsVisible
