@@ -12,9 +12,11 @@ footer(:style="visualViewportPosition")
       .segmented-buttons
         label(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
           input(type="checkbox" v-model="isFavoriteSpace")
-          img.icon(src="@/assets/heart.svg")
+          img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+          img.icon(v-else src="@/assets/heart-empty.svg")
         button(@click.left="toggleFavoritesIsVisible" :class="{ active: favoritesIsVisible}")
-          span Favorites
+          //- span Favs
+          img.icon(src="@/assets/hearts.svg")
       Favorites(:visible="favoritesIsVisible")
 
   section.controls(v-if="isVisible")
