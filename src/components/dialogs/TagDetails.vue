@@ -311,7 +311,6 @@ export default {
     removeTag () {
       this.$store.dispatch('currentSpace/removeTags', this.currentTag)
     },
-
     updateCardsList (cards) {
       cards = cards.filter(card => {
         const cardTags = utils.tagsFromStringWithoutBrackets(card.name)
@@ -325,11 +324,10 @@ export default {
         })
       })
     }
-
   },
   watch: {
-    visible (visible) {
-      if (visible) {
+    currentTag (tag) {
+      if (tag && this.visible) {
         this.updateCards()
         this.closeDialogs()
         this.$nextTick(() => {

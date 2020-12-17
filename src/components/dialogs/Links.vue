@@ -7,8 +7,6 @@ dialog.links.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-he
       label(:class="{ active: currentUserSpacesIsVisibleOnly }")
         input(type="checkbox" v-model="currentUserSpacesIsVisibleOnly")
         User(:user="currentUser" :isClickable="false" :hideYouLabel="true")
-        span Only
-
     SpaceList(:spaces="filteredSpaces" :showUser="true" @selectSpace="changeSpace")
 
   section(v-else-if="loading")

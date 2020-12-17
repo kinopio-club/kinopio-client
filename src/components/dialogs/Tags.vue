@@ -6,7 +6,7 @@ dialog.tags.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-hei
     .button-wrap(@click.left.prevent="toggleCurrentSpaceTagsIsVisibleOnly" @keydown.stop.enter="toggleCurrentSpaceTagsIsVisibleOnly")
       label(:class="{ active: currentSpaceTagsIsVisibleOnly }")
         input(type="checkbox" v-model="currentSpaceTagsIsVisibleOnly")
-        span Current Space Only
+        span In Current Space
     TagList(:tags="tags" :isLoading="isLoadingRemoteTags")
 </template>
 
