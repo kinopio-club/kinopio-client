@@ -15,11 +15,11 @@ span.tag-list(@click.left="closeDialogs")
           .badge(:style="{backgroundColor: tag.color, 'pointerEvents': 'none'}")
             span {{tag.name}}
       Loader(:visible="isLoading")
-  p.info(v-if="!tags") Add
-    span &nbsp;
-    span.badge.info [[Tags]]
-    span to cards
-
+  p.info(v-if="!tags")
+    span Type
+    span {{' '}}
+    span.badge.secondary [[
+      span when editing a card to create tags
 </template>
 
 <script>
@@ -42,8 +42,6 @@ export default {
       filter: '',
       filteredTags: [],
       prevTagName: null,
-      tagDetailsIsVisible: false,
-      tagDetailsPosition: {},
       tagDetailsTag: {}
     }
   },
@@ -60,36 +58,30 @@ export default {
   methods: {
     updatePosition (event) {
       const viewport = utils.visualViewport()
-      const minY = (viewport.height * viewport.scale) / 2
       const rect = event.target.getBoundingClientRect()
       let position = {
-        x: rect.x + 8,
-        y: rect.y - 8
+        x: rect.x + (rect.width / 2) + window.scrollX,
+        y: rect.y + 8 + window.scrollY
       }
-      if (position.y > minY) {
-        position.y = minY
-      }
-      this.updateTagDetailsPosition(position)
-    },
-    updateTagDetailsPosition (position) {
-      this.tagDetailsPosition = position
-      this.$emit('updateTagDetailsPosition', position)
+      const minY = ((viewport.height * viewport.scale) / 2) + window.scrollY
+      position.y = Math.min(position.y, minY)
+      this.$store.commit('tagDetailsPosition', position)
     },
     updateTagDetailsTag (tag) {
       this.tagDetailsTag = tag
-      this.$emit('updateTagDetailsTag', tag)
+      this.$store.commit('currentSelectedTag', tag)
     },
     updateTagDetailsIsVisible (value) {
-      this.tagDetailsIsVisible = value
-      this.$emit('updateTagDetailsIsVisible', value)
+      this.$store.commit('tagDetailsIsVisible', value)
+      this.$store.commit('tagDetailsIsVisibleFromTagList', value)
     },
     toggleTagDetailsIsVisible (event, tag) {
-      const value = !this.tagDetailsIsVisible
       this.closeDialogs()
       this.$nextTick(() => {
         this.updatePosition(event)
         this.updateTagDetailsTag(tag)
         if (this.prevTagName === tag.name) {
+          const value = !this.$store.state.tagDetailsIsVisible
           this.updateTagDetailsIsVisible(value)
         } else {
           this.updateTagDetailsIsVisible(true)
@@ -98,7 +90,6 @@ export default {
       })
     },
     closeDialogs () {
-      this.updateTagDetailsIsVisible(false)
       this.$emit('closeDialogs')
     },
     updateFilteredTags (tags) {

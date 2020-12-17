@@ -72,6 +72,7 @@ export default new Vuex.Store({
 
     // tags
     tagDetailsIsVisible: false,
+    tagDetailsIsVisibleFromTagList: false,
     tagDetailsPosition: {}, // x, y
     currentSelectedTag: {},
     remoteTags: [],
@@ -165,6 +166,7 @@ export default new Vuex.Store({
       state.cardDetailsIsVisibleForCardId = ''
       state.connectionDetailsIsVisibleForConnectionId = ''
       state.tagDetailsIsVisible = false
+      state.tagDetailsIsVisibleFromTagList = false
       state.currentSelectedTag = {}
       state.linkDetailsIsVisible = false
       state.currentSelectedLink = {}
@@ -391,6 +393,10 @@ export default new Vuex.Store({
     tagDetailsIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'tagDetailsIsVisible' })
       state.tagDetailsIsVisible = value
+    },
+    tagDetailsIsVisibleFromTagList: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'tagDetailsIsVisibleFromTagList' })
+      state.tagDetailsIsVisibleFromTagList = value
     },
     tagDetailsPosition: (state, position) => {
       utils.typeCheck({ value: position, type: 'object', origin: 'tagDetailsPosition' })
