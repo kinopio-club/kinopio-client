@@ -67,7 +67,8 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.left.stop="clos
     .button-wrap
       label(:class="{active: isFavoriteUser}" @click.left.prevent="toggleIsFavoriteUser" @keydown.stop.enter="toggleIsFavoriteUser")
         input(type="checkbox" v-model="isFavoriteUser")
-        img.icon(src="@/assets/heart.svg")
+        img.icon(v-if="isFavoriteUser" src="@/assets/heart.svg")
+        img.icon(v-else src="@/assets/heart-empty.svg")
         Loader(:visible="!hasRestoredFavorites")
     .badge.danger.error-message(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
 

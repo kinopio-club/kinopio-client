@@ -204,19 +204,6 @@ export default {
     margin-top 6px
   .container-wrap
     display flex
-  .background-wrap
-    width 30%
-    margin-right 6px
-  .background
-    width 100%
-    border-radius 3px
-    cursor pointer
-    &:hover
-      box-shadow var(--button-hover-shadow)
-      background var(--secondary-hover-background)
-    &:active
-      box-shadow var(--button-active-inset-shadow)
-      background var(--secondary-active-background)
   .secondary
     background-color var(--secondary-background)
   .badges-wrap
@@ -229,6 +216,6 @@ export default {
     border-radius 3px
     padding 4px
     margin-bottom 0
-    height 100px
+    height 100px !important
     overflow scroll
 </style>

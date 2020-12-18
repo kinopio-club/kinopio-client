@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.tag-details(v-if="isVisible" :open="isVisible" :style="dialogPosition" ref="dialog" @click.left.stop="closeDialogs")
+dialog.tag-details(v-if="visible" :open="visible" :style="position" ref="dialog" @click.left.stop="closeDialogs")
   section.edit-card(v-if="showEditCard")
     button(@click="showCardDetails(null)") Edit Card
   section(:style="{backgroundColor: color}")
@@ -11,7 +11,7 @@ dialog.tag-details(v-if="isVisible" :open="isVisible" :style="dialogPosition" re
       .tag-name {{name}}
     template(v-if="!cards.length && !loading")
       p Tag more cards with [[{{currentTag.name}}]] to see them here
-      button(v-if="hasProps" @click.left.stop="removeTag")
+      button(v-if="visibleFromTagList" @click.left.stop="removeTag")
         img.icon(src="@/assets/remove.svg")
         span Remove Tag
   section.results-section(v-if="cards.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
@@ -19,9 +19,11 @@ dialog.tag-details(v-if="isVisible" :open="isVisible" :style="dialogPosition" re
     ul.results-list
       template(v-for="group in groupedItems")
         li.space-name(:data-space-id="group.spaceId" @click="changeSpace(group.spaceId)" :class="{ active: spaceIsCurrentSpace(group.spaceId) }")
+          .background-wrap(v-if="group.space.background")
+            img.background(:src="group.space.background")
           span.badge.space-badge {{group.spaceName}}
         template(v-for="(card in group.cards")
-          li(:data-card-id="card.id" @click="showCardDetails(card)"  :class="{ active: cardIsCurrentCard(card.id) }")
+          li(:data-card-id="card.id" @click="showCardDetails(card)" :class="{ active: cardIsCurrentCard(card.id) }")
             p.name.name-segments
               template(v-for="segment in card.nameSegments")
                 img(v-if="segment.isImage" :src="segment.url")
@@ -52,13 +54,6 @@ export default {
     Loader,
     ResultsFilter
   },
-  props: {
-    visible: Boolean,
-    position: Object,
-    tag: Object,
-    hasProps: Boolean // + pass in true from TL
-  },
-
   data () {
     return {
       colorPickerIsVisible: false,
@@ -71,11 +66,11 @@ export default {
     }
   },
   computed: {
-    isVisible () {
-      return this.visible || this.$store.state.tagDetailsIsVisible
-    },
-    currentTag () { // name, color, cardId
-      const tag = this.tag || this.$store.state.currentSelectedTag
+    visible () { return this.$store.state.tagDetailsIsVisible },
+    visibleFromTagList () { return this.$store.state.tagDetailsIsVisibleFromTagList },
+    currentTag () {
+      // name, color, cardId
+      const tag = this.$store.state.currentSelectedTag
       if (tag.spaceId) {
         return tag
       } else {
@@ -84,8 +79,8 @@ export default {
     },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     currentSpaceId () { return this.$store.state.currentSpace.id },
-    dialogPosition () {
-      const position = this.position || this.$store.state.tagDetailsPosition
+    position () {
+      const position = this.$store.state.tagDetailsPosition
       return {
         left: `${position.x}px`,
         top: `${position.y}px`
@@ -96,7 +91,7 @@ export default {
       return this.currentTag.color
     },
     cardDetailsIsVisibleForCardId () { return this.$store.state.cardDetailsIsVisibleForCardId },
-    showEditCard () { return !this.cardDetailsIsVisibleForCardId && !this.hasProps },
+    showEditCard () { return !this.cardDetailsIsVisibleForCardId && !this.visibleFromTagList },
     name () {
       if (!this.currentTag) { return }
       return this.currentTag.name
@@ -108,10 +103,12 @@ export default {
         if (groupIndex !== -1) {
           groups[groupIndex].cards.push(item)
         } else {
+          const spaceId = item.spaceId || this.currentSpaceId
           groups.push({
             spaceName: item.spaceName,
-            spaceId: item.spaceId || this.currentSpaceId,
-            cards: [item]
+            spaceId: spaceId,
+            cards: [item],
+            space: this.$store.getters.cachedOrOtherSpaceById(spaceId)
           })
         }
       })
@@ -156,6 +153,7 @@ export default {
   },
   methods: {
     cardIsCurrentCard (cardId) {
+      if (this.visibleFromTagList) { return }
       if (!this.currentCard) { return }
       return cardId === this.currentCard.id
     },
@@ -296,21 +294,18 @@ export default {
       })
     },
     scrollIntoView () {
-      if (this.hasProps) { return }
       const element = this.$refs.dialog
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
     },
     updateResultsSectionHeight () {
-      if (!this.isVisible) { return }
-      if (!this.hasProps) { return }
+      if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.results
         this.resultsSectionHeight = utils.elementHeight(element) - 2
       })
     },
     updateDialogHeight () {
-      if (!this.hasProps) { return }
       this.$nextTick(() => {
         let element = this.$refs.dialog
         this.dialogHeight = utils.elementHeight(element)
@@ -319,9 +314,7 @@ export default {
     },
     removeTag () {
       this.$store.dispatch('currentSpace/removeTags', this.currentTag)
-      this.$emit('removeTag', this.currentTag)
     },
-
     updateCardsList (cards) {
       cards = cards.filter(card => {
         const cardTags = utils.tagsFromStringWithoutBrackets(card.name)
@@ -335,19 +328,16 @@ export default {
         })
       })
     }
-
   },
   watch: {
-    isVisible (visible) {
-      if (visible) {
+    currentTag (tag) {
+      if (tag && this.visible) {
         this.updateCards()
         this.closeDialogs()
-      }
-      this.$nextTick(() => {
-        if (visible) {
+        this.$nextTick(() => {
           this.scrollIntoView()
-        }
-      })
+        })
+      }
     }
   }
 }

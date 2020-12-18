@@ -3,11 +3,10 @@ dialog.links.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-he
   section
     p Spaces that Link Here
   section.results-section(v-if="shouldShowSpaces" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    .button-wrap.user-button-wrap(@click="toggleCurrentUserSpacesIsVisibleOnly")
-      button(:class="{ active: currentUserSpacesIsVisibleOnly }")
+    .button-wrap(v-if="userSpacesToggleShouldBeVisible" @click.left.prevent="toggleCurrentUserSpacesIsVisibleOnly" @keydown.stop.enter="toggleCurrentUserSpacesIsVisibleOnly")
+      label(:class="{ active: currentUserSpacesIsVisibleOnly }")
+        input(type="checkbox" v-model="currentUserSpacesIsVisibleOnly")
         User(:user="currentUser" :isClickable="false" :hideYouLabel="true")
-        span Only
-
     SpaceList(:spaces="filteredSpaces" :showUser="true" @selectSpace="changeSpace")
 
   section(v-else-if="loading")
@@ -68,6 +67,16 @@ export default {
         return this.spaces.filter(space => space.userId === this.currentUser.id)
       } else {
         return this.spaces
+      }
+    },
+    userSpacesToggleShouldBeVisible () {
+      const otherUserSpaces = this.spaces.filter(space => space.userId !== this.currentUser.id) || []
+      let isOtherUserSpaces = Boolean(otherUserSpaces.length)
+      const shouldForceToggleVisible = !isOtherUserSpaces && this.spaces.length
+      if (isOtherUserSpaces || shouldForceToggleVisible) {
+        return true
+      } else {
+        return false
       }
     }
   },
@@ -132,6 +141,14 @@ export default {
   .results-section
     border-top 1px solid var(--primary)
     padding-top 4px
-  .user-button-wrap
+  .button-wrap
     padding 4px
+  label
+    .user
+      vertical-align -5px
+      transform translateY(-1px)
+      margin-right 5px
+      .user-avatar
+        width 17px
+        height 16px
 </style>
