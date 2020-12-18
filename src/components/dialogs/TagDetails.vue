@@ -19,6 +19,8 @@ dialog.tag-details(v-if="visible" :open="visible" :style="position" ref="dialog"
     ul.results-list
       template(v-for="group in groupedItems")
         li.space-name(:data-space-id="group.spaceId" @click="changeSpace(group.spaceId)" :class="{ active: spaceIsCurrentSpace(group.spaceId) }")
+          .background-wrap(v-if="group.space.background")
+            img.background(:src="group.space.background")
           span.badge.space-badge {{group.spaceName}}
         template(v-for="(card in group.cards")
           li(:data-card-id="card.id" @click="showCardDetails(card)" :class="{ active: cardIsCurrentCard(card.id) }")
@@ -101,10 +103,12 @@ export default {
         if (groupIndex !== -1) {
           groups[groupIndex].cards.push(item)
         } else {
+          const spaceId = item.spaceId || this.currentSpaceId
           groups.push({
             spaceName: item.spaceName,
-            spaceId: item.spaceId || this.currentSpaceId,
-            cards: [item]
+            spaceId: spaceId,
+            cards: [item],
+            space: this.$store.getters.cachedOrOtherSpaceById(spaceId)
           })
         }
       })

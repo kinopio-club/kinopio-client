@@ -1,4 +1,5 @@
 import utils from '@/utils.js'
+import cache from '@/cache.js'
 // store modules
 import api from '@/store/api.js'
 import broadcast from '@/store/broadcast.js'
@@ -814,6 +815,14 @@ export default new Vuex.Store({
     otherSpaceById: (state, getters) => (spaceId) => {
       const space = state.otherSpaces.find(otherSpace => otherSpace.id === spaceId)
       return space
+    },
+    cachedOrOtherSpaceById: (state, getters) => (spaceId) => {
+      const cachedSpace = cache.space(spaceId)
+      if (cachedSpace) {
+        return cachedSpace
+      } else {
+        return getters.otherSpaceById(spaceId)
+      }
     }
   },
 
