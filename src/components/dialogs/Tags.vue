@@ -2,12 +2,19 @@
 dialog.tags.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     p Tags
-  section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
+  section.results-section(v-if="tags.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     .button-wrap(@click.left.prevent="toggleCurrentSpaceTagsIsVisibleOnly" @keydown.stop.enter="toggleCurrentSpaceTagsIsVisibleOnly")
       label(:class="{ active: currentSpaceTagsIsVisibleOnly }")
         input(type="checkbox" v-model="currentSpaceTagsIsVisibleOnly")
         span In Current Space
     TagList(:tags="filteredTags" :isLoading="isLoadingRemoteTags")
+  section(v-else)
+    p Use tags to help cards stand out, and to connect ideas across spaces.
+    p Type
+      span {{' '}}
+      span.badge.secondary [[
+      span when editing a card to create tags
+
 </template>
 
 <script>
