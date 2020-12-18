@@ -1242,7 +1242,7 @@ export default {
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('history/add', update, { root: true })
       context.commit('broadcast/update', broadcastUpdate, { root: true })
-      context.dispatch('remoteTagsIsFetched', false, { root: true })
+      context.commit('remoteTagsIsFetched', false, { root: true })
     },
     removeTag: (context, tag) => {
       context.commit('removeTag', tag)
@@ -1251,14 +1251,14 @@ export default {
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('history/add', update, { root: true })
       context.commit('broadcast/update', broadcastUpdate, { root: true })
-      context.dispatch('remoteTagsIsFetched', false, { root: true })
+      context.commit('remoteTagsIsFetched', false, { root: true })
     },
     removeTags: (context, tag) => {
       context.commit('removeTags', tag)
       const update = { name: 'removeTags', body: tag }
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('history/add', update, { root: true })
-      context.dispatch('remoteTagsIsFetched', false, { root: true })
+      context.commit('remoteTagsIsFetched', false, { root: true })
     },
     updateTagNameColor: (context, tag) => {
       context.commit('updateTagNameColor', tag)
@@ -1267,7 +1267,7 @@ export default {
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('history/add', update, { root: true })
       context.commit('broadcast/update', broadcastUpdate, { root: true })
-      context.dispatch('remoteTagsIsFetched', false, { root: true })
+      context.commit('remoteTagsIsFetched', false, { root: true })
     }
   },
 

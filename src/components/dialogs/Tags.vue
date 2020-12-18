@@ -7,7 +7,7 @@ dialog.tags.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-hei
       label(:class="{ active: currentSpaceTagsIsVisibleOnly }")
         input(type="checkbox" v-model="currentSpaceTagsIsVisibleOnly")
         span In Current Space
-    TagList(:tags="tags" :isLoading="isLoadingRemoteTags")
+    TagList(:tags="filteredTags" :isLoading="isLoadingRemoteTags")
 </template>
 
 <script>
@@ -50,27 +50,14 @@ export default {
     }
   },
   computed: {
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
-
-  //   currentUser () { return this.$store.state.currentUser },
-  //   filteredSpaces () {
-  //     if (this.currentUserSpacesIsVisibleOnly) {
-  //       return this.spaces.filter(space => space.userId === this.currentUser.id)
-  //     } else {
-  //       return this.spaces
-  //     }
-  //   },
-    // userSpacesToggleShouldBeVisible () {
-    // click = tagDetailsIsVisible false
-  //     const otherUserSpaces = this.spaces.filter(space => space.userId !== this.currentUser.id) || []
-  //     let isOtherUserSpaces = Boolean(otherUserSpaces.length)
-  //     const shouldForceToggleVisible = !isOtherUserSpaces && this.spaces.length
-  //     if (isOtherUserSpaces || shouldForceToggleVisible) {
-  //       return true
-  //     } else {
-  //       return false
-  //     }
-  //   }
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    filteredTags () {
+      if (this.currentSpaceTagsIsVisibleOnly) {
+        return this.$store.getters['currentSpace/spaceTags']()
+      } else {
+        return this.tags
+      }
+    }
   },
   methods: {
     toggleCurrentSpaceTagsIsVisibleOnly () {
