@@ -14,7 +14,6 @@ dialog.tags.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-hei
       span {{' '}}
       span.badge.secondary [[
       span when editing a card to create tags
-
 </template>
 
 <script>

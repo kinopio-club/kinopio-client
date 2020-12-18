@@ -15,10 +15,9 @@ footer(:style="visualViewportPosition")
           img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
           img.icon(v-else src="@/assets/heart-empty.svg")
         button(@click.left="toggleFavoritesIsVisible" :class="{ active: favoritesIsVisible}")
-          //- span Favs
           img.icon(src="@/assets/hearts.svg")
       Favorites(:visible="favoritesIsVisible")
-    //- Links
+    //- Tags and Links
     .button-wrap
       .segmented-buttons
         button(@click.left="toggleTagsIsVisible" :class="{ active: tagsIsVisible}")
