@@ -140,7 +140,7 @@ export default {
 <style lang="stylus">
 .tags
   @media(max-width 435px)
-    left -100px
+    left -150px
   > .results-section
     border-top 1px solid var(--primary)
     padding-top 4px
