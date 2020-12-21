@@ -24,6 +24,16 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
         button(@click.left.stop="toggleKeyboardShortcutsIsVisible" :class="{active: keyboardShortcutsIsVisible}")
           span Keyboard Shortcuts
         KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
+    .row
+      .button-wrap(@click.left.stop="toggleAppsIsVisible" :class="{active: appsIsVisible}")
+        button
+          //- img.icon(src="@/assets/homescreen.svg")
+          //- window
+          //- linux
+          //- img.icon(src="@/assets/apple.svg")
+          span Apps
+        Apps(:visible="appsIsVisible")
+
     .button-wrap(v-if="isMobile")
       button(@click.left.stop="toggleAddToHomescreenIsVisible" :class="{active: addToHomescreenIsVisible}")
         span(v-if="isIPhone")
@@ -41,6 +51,7 @@ import WhatsNew from '@/components/dialogs/WhatsNew.vue'
 import AddToHomescreen from '@/components/dialogs/AddToHomescreen.vue'
 import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import Help from '@/components/dialogs/Help.vue'
+import Apps from '@/components/dialogs/Apps.vue'
 import utils from '@/utils.js'
 
 export default {
@@ -49,7 +60,8 @@ export default {
     WhatsNew,
     AddToHomescreen,
     KeyboardShortcuts,
-    Help
+    Help,
+    Apps
   },
   props: {
     visible: Boolean
@@ -71,6 +83,7 @@ export default {
       whatsNewIsVisible: false,
       addToHomescreenIsVisible: false,
       keyboardShortcutsIsVisible: false,
+      appsIsVisible: false,
       newStuff: [],
       isIPhone: false,
       isAndroid: false,
@@ -114,6 +127,11 @@ export default {
       this.closeDialogs()
       this.keyboardShortcutsIsVisible = !isVisible
     },
+    toggleAppsIsVisible () {
+      const isVisible = this.appsIsVisible
+      this.closeDialogs()
+      this.appsIsVisible = !isVisible
+    },
     async getNewStuff () {
       const response = await fetch('https://api.are.na/v2/channels/kinopio-what-s-new/contents?direction=desc')
       const data = await response.json()
@@ -129,6 +147,7 @@ export default {
       this.whatsNewIsVisible = false
       this.addToHomescreenIsVisible = false
       this.keyboardShortcutsIsVisible = false
+      this.appsIsVisible = false
     },
     updateDialogHeight () {
       if (!this.visible) { return }
