@@ -16,9 +16,6 @@ dialog.help-and-about.narrow(v-if="visible" :open="visible" @click.left.stop="cl
           button Help Site →
     .row
       .button-wrap
-        //- a(href="https://join.slack.com/t/kinopio-club/shared_invite/zt-gmbihdhs-NF4zYijQvdk37zerbEy0VA")
-        //-   button
-        //-     span Community Slack →
         a(href="https://club.kinopio.club")
           button
             span Community Forum →
