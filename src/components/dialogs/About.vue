@@ -25,30 +25,14 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
           span Keyboard Shortcuts
         KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
     .row
-      .button-wrap(@click.left.stop="toggleAppsIsVisible" :class="{active: appsIsVisible}")
-        button
-          //- img.icon(src="@/assets/homescreen.svg")
-          //- window
-          //- linux
-          //- img.icon(src="@/assets/apple.svg")
+      .button-wrap
+        button(@click.left.stop="toggleAppsIsVisible" :class="{active: appsIsVisible}")
           span Apps
         Apps(:visible="appsIsVisible")
-
-    .button-wrap(v-if="isMobile")
-      button(@click.left.stop="toggleAddToHomescreenIsVisible" :class="{active: addToHomescreenIsVisible}")
-        span(v-if="isIPhone")
-          img.icon(src="@/assets/apple.svg")
-          span Kinopio for IOS
-        span(v-if="isAndroid")
-          img.icon(src="@/assets/homescreen.svg")
-          span Kinopio for Android
-      AddToHomescreen(:visible="addToHomescreenIsVisible")
-
 </template>
 
 <script>
 import WhatsNew from '@/components/dialogs/WhatsNew.vue'
-import AddToHomescreen from '@/components/dialogs/AddToHomescreen.vue'
 import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import Help from '@/components/dialogs/Help.vue'
 import Apps from '@/components/dialogs/Apps.vue'
@@ -58,7 +42,6 @@ export default {
   name: 'About',
   components: {
     WhatsNew,
-    AddToHomescreen,
     KeyboardShortcuts,
     Help,
     Apps
@@ -70,7 +53,6 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
         this.whatsNewIsVisible = false
-        this.addToHomescreenIsVisible = false
       }
       if (mutation.type === 'updatePageSizes') {
         this.updateDialogHeight()
@@ -81,7 +63,6 @@ export default {
     return {
       helpIsVisible: false,
       whatsNewIsVisible: false,
-      addToHomescreenIsVisible: false,
       keyboardShortcutsIsVisible: false,
       appsIsVisible: false,
       newStuff: [],
@@ -117,11 +98,6 @@ export default {
       this.whatsNewIsVisible = !isVisible
       this.$store.commit('newStuffIsUpdated', false)
     },
-    toggleAddToHomescreenIsVisible () {
-      const isVisible = this.addToHomescreenIsVisible
-      this.closeDialogs()
-      this.addToHomescreenIsVisible = !isVisible
-    },
     toggleKeyboardShortcutsIsVisible () {
       const isVisible = this.keyboardShortcutsIsVisible
       this.closeDialogs()
@@ -145,7 +121,6 @@ export default {
     closeDialogs () {
       this.helpIsVisible = false
       this.whatsNewIsVisible = false
-      this.addToHomescreenIsVisible = false
       this.keyboardShortcutsIsVisible = false
       this.appsIsVisible = false
     },
