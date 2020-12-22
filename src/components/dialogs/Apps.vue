@@ -1,7 +1,32 @@
 <template lang="pug">
-dialog.apps.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.apps.narrow(v-if="visible" @click.stop :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
-    p Apps
+    .segmented-buttons
+      button(:class="{active: isDesktop}" @click="toggleIsDesktop(true)")
+        span Desktop
+      button(:class="{active: !isDesktop}" @click="toggleIsDesktop(false)")
+        span Mobile
+
+  section(v-if="isDesktop")
+    .logo-wrap
+      .app-frame
+        .logo-image
+      span.arrow →
+      img.icon(src="@/assets/computer.svg")
+
+    p Download Kinopio
+    .row
+      p for
+        .badge.info Mac, Windows, Linux
+    ol
+      li
+        span Download and install
+        a(href="https://webcatalog.app")
+          button WebCatalog →
+      li
+        a(href="https://webcatalog.app/catalog/kinopio")
+          button Install Kinopio →
+    img.icon.screenshot(src="@/assets/screenshot-app-macos.png")
 </template>
 
 <script>
@@ -14,9 +39,6 @@ export default {
   },
   created () {
     this.$store.subscribe((mutation, state) => {
-      // if (mutation.type === 'closeAllDialogs') {
-      //   this.addToHomescreenIsVisible = false
-      // }
       if (mutation.type === 'updatePageSizes') {
         this.updateDialogHeight()
       }
@@ -24,54 +46,15 @@ export default {
   },
   data () {
     return {
-      dialogHeight: null
+      dialogHeight: null,
+      isDesktop: true
+      // isIPhone: false,
+      // isAndroid: false
     }
   },
-  computed: {
-    // newStuffIsUpdated () { return this.$store.state.newStuffIsUpdated }
-  },
   methods: {
-    // toggleHelpIsVisible () {
-    //   const isVisible = this.helpIsVisible
-    //   this.closeDialogs()
-    //   this.helpIsVisible = !isVisible
-    // },
-    // toggleWhatsNewIsVisible () {
-    //   const isVisible = this.whatsNewIsVisible
-    //   this.closeDialogs()
-    //   this.whatsNewIsVisible = !isVisible
-    //   this.$store.commit('newStuffIsUpdated', false)
-    // },
-    // toggleAddToHomescreenIsVisible () {
-    //   const isVisible = this.addToHomescreenIsVisible
-    //   this.closeDialogs()
-    //   this.addToHomescreenIsVisible = !isVisible
-    // },
-    // toggleKeyboardShortcutsIsVisible () {
-    //   const isVisible = this.keyboardShortcutsIsVisible
-    //   this.closeDialogs()
-    //   this.keyboardShortcutsIsVisible = !isVisible
-    // },
-    // toggleAppsIsVisible () {
-    //   const isVisible = this.appsIsVisible
-    //   this.closeDialogs()
-    //   this.appsIsVisible = !isVisible
-    // },
-    // async getNewStuff () {
-    //   const response = await fetch('https://api.are.na/v2/channels/kinopio-what-s-new/contents?direction=desc')
-    //   const data = await response.json()
-    //   return data
-    // },
-    // checkNewStuffIsUpdated (latestUpdateId) {
-    //   const userlastReadId = parseInt(this.$store.state.currentUser.lastReadNewStuffId)
-    //   const newStuffIsUpdated = Boolean(userlastReadId !== latestUpdateId)
-    //   this.$store.commit('newStuffIsUpdated', newStuffIsUpdated)
-    // },
-    closeDialogs () {
-      // this.helpIsVisible = false
-      // this.whatsNewIsVisible = false
-      // this.addToHomescreenIsVisible = false
-      // this.keyboardShortcutsIsVisible = false
+    toggleIsDesktop (value) {
+      this.isDesktop = value
     },
     updateDialogHeight () {
       if (!this.visible) { return }
@@ -80,22 +63,61 @@ export default {
         this.dialogHeight = utils.elementHeight(element)
       })
     }
+  },
+  watch: {
+    visible (visible) {
+      if (visible) {
+        this.updateDialogHeight()
+      }
+    }
   }
-  // watch: {
-  //   visible (visible) {
-  //     if (visible && this.newStuff.length) {
-  //       this.checkNewStuffIsUpdated(this.newStuff[0].id)
-  //     }
-  //     if (visible) {
-  //       this.closeDialogs()
-  //       this.updateDialogHeight()
-  //     }
-  //   }
-  // }
 }
 </script>
 
 <style lang="stylus">
 .apps
   top calc(100% - 6px) !important
+  overflow auto
+
+  .logo-wrap
+    display flex
+    align-items center
+    margin-bottom 10px
+    .arrow
+      margin-left 5px
+      margin-right 5px
+  .logo-image
+    width 35px
+    height 30px
+    background-repeat no-repeat
+    background-size cover
+    background-position center
+  .app-frame
+    border 1px solid var(--secondary-background)
+    background-color var(--secondary-background)
+    border-radius 10px
+    padding 6px
+    display inline-block
+
+  .badge
+    display inline
+    margin-left 6px
+  .add
+    padding-left 5px
+
+  .row
+    margin-bottom 0
+  .screenshot
+    margin-top 10px
+
+  // copied from WhatsNew.vue
+  ol
+    margin 0
+    margin-top 2px
+    padding-left 15px
+    li
+      padding-top 10px
+      margin-left 5px
+      user-select text
+
 </style>
