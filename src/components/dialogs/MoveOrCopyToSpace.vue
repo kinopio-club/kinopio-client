@@ -120,9 +120,11 @@ export default {
   },
   methods: {
     hideToNewSpace () {
+      this.closeDialogs()
       this.toNewSpace = false
     },
     showToNewSpace () {
+      this.closeDialogs()
       this.toNewSpace = true
     },
     showMove () {
