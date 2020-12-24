@@ -50,7 +50,7 @@ dialog.apps.narrow(v-if="visible" @click.stop :open="visible" ref="dialog" :styl
                 span Add to Home screen
     template(v-else)
       p Kinopio is a web-app which you can add to your
-        span.badge.info iPhone
+        span.badge.info iPhone or iPad
         ol
           li
             span Tap the Share button
