@@ -8,7 +8,7 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
       button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
 
   template(v-else)
-    section.info-section(v-if="!search")
+    section.info-section(v-if="parentIsCardDetails && !search")
       p
         img.icon.search(src="@/assets/search.svg")
         span Type to search spaces {{search}}
