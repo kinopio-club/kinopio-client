@@ -1,18 +1,23 @@
 <template lang="pug">
 dialog.narrow.space-status(v-if="visible" :open="visible" ref="dialog" :class="{'right-side': showOnRightSide}")
   section
-    p Status
-  section
-    .badge.success(v-if="isConnected") Connected
-
-    p(v-if="isLoadingSpace && spaceIsCached") You can edit right now, your changes will sync
-    p(v-else-if="isJoiningSpace || isReconnectingToBroadcast") You can edit right now but cannot collaborate yet, your changes will sync
-
-    p.badge.info(v-if="!isConnected")
+    p(v-if="!isConnected")
       Loader(:visible="true")
       span(v-if="isLoadingSpace") Downloading
       span(v-else-if="isJoiningSpace") Connecting to Broadcast
       span(v-else-if="isReconnectingToBroadcast") Reconnecting
+    p.badge.success(v-if="isConnected") Connected
+
+  template(v-if="!isConnected")
+    section(v-if="isLoadingSpace && spaceIsCached")
+      p
+        span.badge.info You can edit right now
+        span and your changes will sync once connected
+    section(v-else-if="isJoiningSpace || isReconnectingToBroadcast")
+      p
+        span.badge.info You can edit right now
+        span {{' '}}
+        span but cannot collaborate yet, your changes will sync once connected
 </template>
 
 <script>
@@ -77,4 +82,11 @@ export default {
     right 8px
   .badge
     display inline-block
+
+  .loader
+    width 14px
+    height 14px
+    vertical-align -3px
+    margin-right 6px
+
 </style>
