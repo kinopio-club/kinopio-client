@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.apps(v-if="visible" @click.stop :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.apps.narrow(v-if="visible" @click.stop :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     .segmented-buttons
       button(:class="{active: isDesktop}" @click="toggleIsDesktop(true)")
@@ -19,8 +19,8 @@ dialog.apps(v-if="visible" @click.stop :open="visible" ref="dialog" :style="{'ma
       p for
         .badge.info Mac, Windows, Linux
     .row
-      a(href="https://webcatalog.app/catalog/kinopio")
-        button Get it on WebCatalog →
+      a(href="https://dl.todesktop.com/201223j48l03cxi" download)
+        button Download App
 
   section(v-if="!isDesktop")
     .logo-wrap
@@ -28,9 +28,16 @@ dialog.apps(v-if="visible" @click.stop :open="visible" ref="dialog" :style="{'ma
         .logo-image
       span.arrow →
       img.icon(src="@/assets/phone.svg")
+
+    .segmented-buttons
+      button(@click="toggleIsAndroid(false)" :class="{ active: !isAndroid }")
+        span iOS
+      button(@click="toggleIsAndroid(true)" :class="{ active: isAndroid }")
+        span Android
+
     template(v-if="isAndroid")
-      p Kinopio is a web-app which you can add to your
-        .badge.info Android Phone
+      p Kinopio is a web-app which you can add to
+        span.badge.info Android
         ol
           li
             span Tap the Menu button
@@ -77,7 +84,6 @@ export default {
     })
   },
   mounted () {
-    this.isIPhone = utils.isIPhone()
     this.isAndroid = utils.isAndroid()
     shouldRestoreUrlPath = true
     this.$store.subscribe((mutation, state) => {
@@ -94,11 +100,13 @@ export default {
     return {
       dialogHeight: null,
       isDesktop: true,
-      isIPhone: false,
       isAndroid: false
     }
   },
   methods: {
+    toggleIsAndroid (value) {
+      this.isAndroid = value
+    },
     toggleIsDesktop (value) {
       this.isDesktop = value
       if (value) {
@@ -123,7 +131,7 @@ export default {
       window.history.replaceState({}, title, pathname)
     },
     updateCurrentDeviceView () {
-      if (this.isIPhone || this.isAndroid) {
+      if (utils.isMobile()) {
         this.isDesktop = false
       } else {
         this.isDesktop = true
