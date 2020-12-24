@@ -254,6 +254,8 @@ export default {
         this.$store.commit('notifyNewUser', false)
         this.addCollaboratorToInvitedSpaces()
         this.$store.commit('triggerSpaceDetailsVisible')
+        this.$store.commit('hasRestoredFavorites', false)
+        this.$store.dispatch('currentUser/restoreUserFavorites')
       } else {
         await this.handleErrors(result)
       }
