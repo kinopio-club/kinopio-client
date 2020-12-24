@@ -810,11 +810,13 @@ export default new Vuex.Store({
       return isPainting || isDrawingConnection || isDraggingCard
     },
     otherUserById: (state, getters) => (userId) => {
-      const user = state.otherUsers.find(otherUser => otherUser.id === userId)
+      const otherUsers = state.otherUsers.filter(Boolean)
+      const user = otherUsers.find(otherUser => otherUser.id === userId)
       return user
     },
     otherSpaceById: (state, getters) => (spaceId) => {
-      const space = state.otherSpaces.find(otherSpace => otherSpace.id === spaceId)
+      const otherSpaces = state.otherSpaces.filter(Boolean)
+      const space = otherSpaces.find(otherSpace => otherSpace.id === spaceId)
       return space
     },
     cachedOrOtherSpaceById: (state, getters) => (spaceId) => {

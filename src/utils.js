@@ -447,6 +447,7 @@ export default {
   },
   updateSpaceUserId (space, userId) {
     space.cards = space.cards.map(card => {
+      if (card.userId === null) { return card }
       card.userId = userId
       return card
     })
