@@ -26,7 +26,8 @@ export default {
     filterShowAbsoluteDates: false,
     filterUnchecked: false,
     journalPrompts: [],
-    newSpacesAreBlank: false
+    newSpacesAreBlank: false,
+    shouldHideCardTips: false
   },
   mutations: {
     color: (state, newColor) => {
@@ -159,6 +160,10 @@ export default {
     newSpacesAreBlank: (state, value) => {
       state.newSpacesAreBlank = value
       cache.updateUser('newSpacesAreBlank', value)
+    },
+    shouldHideCardTips: (state, value) => {
+      state.shouldHideCardTips = value
+      cache.updateUser('shouldHideCardTips', value)
     }
   },
   actions: {
@@ -430,6 +435,14 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           newSpacesAreBlank: value
+        } }, { root: true })
+    },
+    shouldHideCardTips: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldHideCardTips' })
+      context.commit('shouldHideCardTips', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldHideCardTips: value
         } }, { root: true })
     }
   },
