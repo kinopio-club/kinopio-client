@@ -58,6 +58,9 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @closeDialog="hideSpacePicker"
         @selectSpace="replaceSlashCommandWithSpaceUrl"
       )
+      .inline-button-wrap(v-if="!name")
+        button.inline-button(tabindex="-1") ?
+      //- dialog here
 
     .row(v-if="cardPendingUpload")
       .badge.info
@@ -1081,8 +1084,8 @@ export default {
     background-color var(--secondary-background)
   .textarea-wrap
     position relative
-  textarea
-    margin-bottom 5px
+    display flex
+    align-items flex-start
   .edit-message
     button
       margin-top 10px
@@ -1096,4 +1099,11 @@ export default {
   .badges-row
     display flex
     flex-wrap wrap
+  .inline-button-wrap
+    cursor pointer
+    margin-right -8px
+    margin-top -8px
+    .inline-button
+      cursor pointer
+      padding 0px 6px
 </style>

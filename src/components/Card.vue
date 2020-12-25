@@ -69,16 +69,16 @@ article(:style="position" :data-card-id="id" ref="card")
       span.card-buttons-wrap
         //- Url →
         a.url-wrap(:href="linkOrUrl" @click.left.stop="closeAllDialogs" @touchend="openUrl(linkOrUrl)" v-if="linkOrUrl")
-          .url
-            button(:style="{background: selectedColor}" tabindex="-1")
+          .url.inline-button-wrap
+            button.inline-button(:style="{background: selectedColor}" tabindex="-1")
               img.icon.visit.arrow-icon(src="@/assets/visit.svg")
         //- Connector
-        .connector(
+        .connector.inline-button-wrap(
           :data-card-id="id"
           @mousedown.left="startConnecting"
           @touchstart="startConnecting"
         )
-          button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: selectedColor}" tabindex="-1")
+          button.inline-button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: selectedColor}" tabindex="-1")
             .connected-colors
               template(v-if="isConnectingTo || isConnectingFrom")
                 .color(:style="{ background: newConnectionColor}")
@@ -911,23 +911,6 @@ article
       padding 8px
       align-self right
       cursor cell
-      button
-        background-color transparent
-        cursor cell
-        position relative
-        width 20px
-        height 16px
-        vertical-align top
-        background-color var(--secondary-background)
-      &:hover
-        button
-          box-shadow 3px 3px 0 var(--heavy-shadow)
-          background var(--secondary-hover-background)
-      &:active
-        button
-          box-shadow none
-          color var(--primary)
-          background var(--secondary-active-background)
     .checkbox-wrap
       &:hover
         label
