@@ -207,6 +207,27 @@ label // used for checkbox buttons
     //     box-shadow var(--button-active-inset-shadow)
     //     background var(--secondary-active-background)
 
+.inline-button
+  background-color transparent
+  cursor cell
+  position relative
+  width 20px
+  height 16px
+  vertical-align top
+  background-color var(--secondary-background)
+  font-size 12px
+.inline-button-wrap
+  padding 8px
+  &:hover
+    .inline-button
+      box-shadow 3px 3px 0 var(--heavy-shadow)
+      background var(--secondary-hover-background)
+  &:active,
+  &.active
+    .inline-button
+      box-shadow none
+      color var(--primary)
+      background var(--secondary-active-background)
 label
   padding-bottom 4px
   display inline-block

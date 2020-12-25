@@ -58,9 +58,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @closeDialog="hideSpacePicker"
         @selectSpace="replaceSlashCommandWithSpaceUrl"
       )
-      .inline-button-wrap(v-if="!name")
-        button.inline-button(tabindex="-1") ?
-      //- dialog here
+      .inline-button-wrap(v-if="!name" @click.left.stop="toggleTipsIsVisible" :class="{ active: tipsIsVisible }")
+        button.inline-button(tabindex="-1" :class="{ active: tipsIsVisible }")
+          span ?
+      Tips(:visible="tipsIsVisible")
 
     .row(v-if="cardPendingUpload")
       .badge.info
@@ -174,6 +175,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
 <script>
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
+import Tips from '@/components/dialogs/Tips.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import User from '@/components/User.vue'
@@ -193,6 +195,7 @@ export default {
   components: {
     FramePicker,
     ImagePicker,
+    Tips,
     TagPicker,
     SpacePicker,
     Loader,
@@ -205,6 +208,7 @@ export default {
     return {
       framePickerIsVisible: false,
       imagePickerIsVisible: false,
+      tipsIsVisible: false,
       initialSearch: '',
       pastedName: '',
       wasPasted: false,
@@ -233,6 +237,7 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.framePickerIsVisible = false
         this.imagePickerIsVisible = false
+        this.tipsIsVisible = false
         this.hidePickers()
       }
       if (mutation.type === 'triggerUploadComplete') {
@@ -632,6 +637,11 @@ export default {
       this.closeDialogs()
       this.framePickerIsVisible = !isVisible
     },
+    toggleTipsIsVisible () {
+      const isVisible = this.tipsIsVisible
+      this.closeDialogs()
+      this.tipsIsVisible = !isVisible
+    },
     toggleImagePickerIsVisible () {
       const isVisible = this.imagePickerIsVisible
       this.closeDialogs()
@@ -677,6 +687,7 @@ export default {
     closeDialogs () {
       this.framePickerIsVisible = false
       this.imagePickerIsVisible = false
+      this.tipsIsVisible = false
       this.hidePickers()
       this.hideTagDetailsIsVisible()
       this.hideLinkDetailsIsVisible()
