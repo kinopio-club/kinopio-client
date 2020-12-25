@@ -216,6 +216,8 @@ label // used for checkbox buttons
   vertical-align top
   background-color var(--secondary-background)
   font-size 12px
+  span
+    font-size 12px
 .inline-button-wrap
   padding 8px
   &:hover

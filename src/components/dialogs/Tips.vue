@@ -1,11 +1,13 @@
 <template lang="pug">
 dialog.tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
-  section
-    p Tips
-    .button-wrap
+  section.section-with-button
+    .row
+      p Tips
       label(:class="{active: shouldHideCardTips}" @click.left.prevent="toggleShouldHideCardTips" @keydown.stop.enter="toggleShouldHideCardTips")
         input(type="checkbox" v-model="shouldHideCardTips")
-        span Hide Tips(?)
+        span Hide
+        span.badge.secondary ?
+
   section
     article
       p
@@ -62,7 +64,7 @@ export default {
 .tips
   left initial
   right 8px
-  top 12px
+  top 22px
   article
     position static
     margin-bottom 10px
@@ -73,4 +75,16 @@ export default {
       padding-bottom 0
       border-bottom 0
 
+  label
+    margin-left 6px
+  .row
+    justify-content space-between
+
+  .section-with-button
+    padding 4px 8px
+
+  .badge.secondary
+    margin 0
+    margin-left 6px
+    font-size 12px
 </style>

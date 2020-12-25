@@ -1116,5 +1116,6 @@ export default {
     margin-top -8px
     .inline-button
       cursor pointer
-      padding 0px 6px
+      padding 2px 6px
+      padding-top 1px
 </style>
