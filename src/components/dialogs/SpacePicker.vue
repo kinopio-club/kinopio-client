@@ -99,8 +99,8 @@ export default {
     },
     filteredSpaces () {
       if (!this.parentIsCardDetails) { return this.spaces }
-      let spaces = this.spaces.filter(tag => {
-        return tag.name !== this.search
+      let spaces = this.spaces.filter(space => {
+        return space.name !== this.search
       })
       const options = {
         pre: '',
@@ -112,7 +112,7 @@ export default {
       }
       const filtered = fuzzy.filter(this.search, spaces, options)
       spaces = filtered.map(item => item.original)
-      return spaces.slice(0, 5)
+      return spaces
     },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
@@ -130,15 +130,7 @@ export default {
         this.updateWithRemoteSpaces()
       }
       this.excludeCurrentSpace()
-      this.checkIfShouldTruncateSpaces()
       this.checkIfShouldFilterSpacesBySearch()
-    },
-    checkIfShouldTruncateSpaces () {
-      if (this.parentIsCardDetails) {
-        const currentSpace = this.$store.state.currentSpace
-        this.spaces = this.spaces.filter(space => space.id !== currentSpace.id)
-        this.spaces = this.spaces.slice(0, 5)
-      }
     },
     checkIfShouldFilterSpacesBySearch () {
       if (!this.parentIsCardDetails) { }
@@ -152,7 +144,6 @@ export default {
       if (!spaces) { return }
       this.spaces = spaces
       this.excludeCurrentSpace()
-      this.checkIfShouldTruncateSpaces()
     },
     selectSpace (space) {
       this.$emit('selectSpace', space)

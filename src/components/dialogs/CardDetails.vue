@@ -55,6 +55,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         :cursorPosition="cursorPosition"
         :position="space.pickerPosition"
         :search="space.pickerSearch"
+        :shouldExcludeCurrentSpace="true"
         @closeDialog="hideSpacePicker"
         @selectSpace="replaceSlashCommandWithSpaceUrl"
       )
