@@ -1268,6 +1268,14 @@ export default {
       context.commit('history/add', update, { root: true })
       context.commit('broadcast/update', broadcastUpdate, { root: true })
       context.commit('remoteTagsIsFetched', false, { root: true })
+    },
+    removeUnusedTagsFromCard: (context, cardId) => {
+      const card = context.getters.cardById(cardId)
+      const cardTagNames = utils.tagsFromStringWithoutBrackets(card.name)
+      if (!cardTagNames) { return }
+      const tagsInCard = context.getters.tagsInCard({ id: cardId })
+      const tagsToRemove = tagsInCard.filter(tag => !cardTagNames.includes(tag.name))
+      tagsToRemove.forEach(tag => context.dispatch('removeTag', tag))
     }
   },
 

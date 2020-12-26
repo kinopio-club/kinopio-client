@@ -8,7 +8,10 @@ import utils from '@/utils.js'
 
 let websocket, currentSpaceRoom, currentUserIsConnected
 const clientId = nanoid()
-const showDebugMessages = true
+let showDebugMessages = true
+if (process.env.NODE_ENV === 'development') {
+  showDebugMessages = false
+}
 
 const joinSpaceRoom = (store, mutation) => {
   if (!websocket) { return }
