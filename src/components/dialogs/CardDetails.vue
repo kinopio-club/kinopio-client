@@ -58,7 +58,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @closeDialog="hideSpacePicker"
         @selectSpace="replaceSlashCommandWithSpaceUrl"
       )
-      .inline-button-wrap(v-if="!name" @click.left.stop="toggleTipsIsVisible" :class="{ active: tipsIsVisible }")
+      .inline-button-wrap(v-if="showCardTips" @click.left.stop="toggleTipsIsVisible" :class="{ active: tipsIsVisible }")
         button.inline-button(tabindex="-1" :class="{ active: tipsIsVisible }")
           span ?
       Tips(:visible="tipsIsVisible")
@@ -269,6 +269,12 @@ export default {
     cardIsCreatedByCurrentUser () { return this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](this.card) },
     spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
     spacePrivacyIsClosed () { return this.$store.state.currentSpace.privacy === 'closed' },
+    shouldHideCardTips () { return this.$store.state.currentUser.shouldHideCardTips },
+    showCardTips () {
+      if (this.name) { return }
+      if (this.shouldHideCardTips) { return }
+      return true
+    },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     canEditCard () {
       if (this.isSpaceMember) { return true }

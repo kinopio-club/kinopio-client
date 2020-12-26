@@ -12,7 +12,7 @@ dialog.tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
     article
       p
         span.badge.info Ctrl-Enter
-        span to make a line break
+        span line break
     article
       p
         span.badge.info [[
