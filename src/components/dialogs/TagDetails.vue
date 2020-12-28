@@ -101,15 +101,11 @@ export default {
     },
     cardDetailsIsVisibleForCardId () { return this.$store.state.cardDetailsIsVisibleForCardId },
     cardUser () {
-      if (!this.currentCard) {
-        return this.currentUser
-      }
       const user = this.userById(this.currentCard.nameUpdatedByUserId)
       return user
     },
     currentCard () {
       let currentCardId = this.cardDetailsIsVisibleForCardId
-      if (!currentCardId) { return }
       const currentCard = this.$store.getters['currentSpace/cardById'](currentCardId)
       const tagCard = this.$store.getters['currentSpace/cardById'](this.$store.state.currentSelectedTag.cardId)
       return currentCard || tagCard
@@ -223,10 +219,11 @@ export default {
       this.updateCardsList(cacheCards)
       // remote cards
       let remoteCards = await this.remoteCards()
-      if (!remoteCards) { return }
-      remoteCards = this.addCardNameSegments(remoteCards)
-      remoteCards = remoteCards.filter(card => card.isRemoved !== true)
-      this.updateCardsList(remoteCards)
+      if (remoteCards) {
+        remoteCards = this.addCardNameSegments(remoteCards)
+        remoteCards = remoteCards.filter(card => card.isRemoved !== true)
+        this.updateCardsList(remoteCards)
+      }
       // remote other user cards
       const currentUserIsCardUser = !this.cardUser.id || this.cardUser.id === this.currentUser.id
       if (currentUserIsCardUser) { return }
