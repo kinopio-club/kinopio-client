@@ -398,7 +398,7 @@ export default {
         context.dispatch('saveOtherSpace', { spaceId, shouldAddToQueue: true })
       })
       otherSpacesQueue = uniq(otherSpacesQueue)
-      let spaces = await context.dispatch('api/getSpaces', { spaceIds: otherSpacesQueue, shouldRequestRemoteSpace: true }, { root: true })
+      let spaces = await context.dispatch('api/getSpaces', { spaceIds: otherSpacesQueue, shouldRequestRemote: true }, { root: true })
       if (!spaces) { return }
       spaces = spaces.filter(space => space.id)
       spaces.forEach(space => {
@@ -419,7 +419,7 @@ export default {
       } else {
         try {
           const space = { id: spaceId }
-          let remoteSpace = await context.dispatch('api/getSpace', { space, shouldRequestRemoteSpace: true }, { root: true })
+          let remoteSpace = await context.dispatch('api/getSpace', { space, shouldRequestRemote: true }, { root: true })
           remoteSpace = utils.normalizeSpaceMetaOnly(remoteSpace)
           context.commit('updateOtherSpaces', remoteSpace, { root: true })
         } catch (error) {
@@ -969,6 +969,8 @@ export default {
         context.dispatch('clearAllCardsZ')
         highestCardZ = 1
       }
+      const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
+      if (!userCanEdit) { return }
       const body = { id: cardId, z: highestCardZ + 1 }
       const update = { name: 'updateCard', body }
       context.dispatch('api/addToQueue', update, { root: true })

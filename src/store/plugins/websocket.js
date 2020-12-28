@@ -107,7 +107,7 @@ export default function createWebSocketPlugin () {
         websocket.onmessage = ({ data }) => {
           data = JSON.parse(data)
           if (data.clientId === clientId) { return }
-          if (data.message !== 'updateRemoteUserCursor') {
+          if (data.message !== 'updateRemoteUserCursor' && showDebugMessages) {
             console.log('🌛', data)
           }
           let { message, user, updates } = data
