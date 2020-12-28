@@ -28,10 +28,10 @@ const squashQueue = (queue) => {
   return squashed
 }
 
-const shouldRequest = (shouldRequestRemoteSpace) => {
+const shouldRequest = (shouldRequestRemote) => {
   const isOnline = window.navigator.onLine
   const currentUserIsSignedIn = cache.user().apiKey
-  if (isOnline && shouldRequestRemoteSpace) {
+  if (isOnline && shouldRequestRemote) {
     return true
   }
   if (isOnline && currentUserIsSignedIn) {
@@ -272,9 +272,9 @@ const self = {
         console.error('🚒', error)
       }
     },
-    getSpace: async (context, { space, shouldRequestRemoteSpace }) => {
+    getSpace: async (context, { space, shouldRequestRemote }) => {
       try {
-        if (!shouldRequest(shouldRequestRemoteSpace)) { return }
+        if (!shouldRequest(shouldRequestRemote)) { return }
         console.log('🛬 getting remote space', space.id)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(40000, fetch(`${host}/space/${space.id}`, options))
@@ -283,10 +283,10 @@ const self = {
         console.error('🚒', error)
       }
     },
-    getSpaces: async (context, { spaceIds, shouldRequestRemoteSpace }) => {
+    getSpaces: async (context, { spaceIds, shouldRequestRemote }) => {
       const max = 60
       try {
-        if (!shouldRequest(shouldRequestRemoteSpace)) { return }
+        if (!shouldRequest(shouldRequestRemote)) { return }
         spaceIds = spaceIds.slice(0, max)
         console.log('🛬🛬 getting remote spaces', spaceIds)
         spaceIds = spaceIds.join(',')
@@ -447,6 +447,17 @@ const self = {
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/card/by-tag-name/${name}`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒', error)
+      }
+    },
+    getCardsWithTagAndUser: async (context, { userId, tagName }) => {
+      const shouldRequestRemote = true
+      if (!shouldRequest(shouldRequestRemote)) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/card/by-tag-name-and-user/${tagName}/${userId}`, options)
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒', error)
