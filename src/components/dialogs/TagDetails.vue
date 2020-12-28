@@ -208,7 +208,6 @@ export default {
           } else {
             cards = await this.$store.dispatch('api/getCardsWithTagAndUser', { userId: user.id, tagName: this.name }) || []
           }
-          console.log(cards)
           cards = utils.clone(cards)
           remoteCards = remoteCards.concat(cards)
         } catch (error) {
@@ -284,7 +283,7 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'TagDetails.changeSpace')
       if (this.spaceIsCurrentSpace(spaceId)) { return }
       const space = { id: spaceId }
-      this.$store.dispatch('currentSpace/changeSpace', { space })
+      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
     },
     showCardDetails (card) {
       this.$store.dispatch('closeAllDialogs', 'TagDetails.showCardDetails')
@@ -297,7 +296,7 @@ export default {
         } else {
           space = cache.space(card.spaceId)
         }
-        this.$store.dispatch('currentSpace/changeSpace', { space })
+        this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
       } else {
         const cardId = card.id || this.currentTag.cardId
         this.$store.dispatch('currentSpace/showCardDetails', cardId)
