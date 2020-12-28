@@ -240,7 +240,6 @@ export default {
         return card
       })
       otherUserCards = this.addCardNameSegments(otherUserCards)
-      // todo: display user icon next to card/space
       this.appendToCardsList(otherUserCards)
     },
     updateFilter (filter) {
