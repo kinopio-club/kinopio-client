@@ -214,23 +214,17 @@ export default {
       this.loading = false
       return remoteCards
     },
-    addNameSegments (cards) {
-      return cards.map(card => {
-        card.nameSegments = this.cardNameSegments(card.name)
-        return card
-      })
-    },
     async updateCards () {
       const cardsInCurrentSpace = this.cardsByTagName
       const cardsInCachedSpaces = cache.allCardsByTagName(this.name)
       // cache cards
       let cacheCards = cardsInCurrentSpace.concat(cardsInCachedSpaces)
-      cacheCards = this.addNameSegments(cacheCards)
+      cacheCards = this.addCardNameSegments(cacheCards)
       this.updateCardsList(cacheCards)
       // remote cards
       let remoteCards = await this.remoteCards()
       if (!remoteCards) { return }
-      remoteCards = this.addNameSegments(remoteCards)
+      remoteCards = this.addCardNameSegments(remoteCards)
       remoteCards = remoteCards.filter(card => card.isRemoved !== true)
       this.updateCardsList(remoteCards)
       // remote other user cards
@@ -245,7 +239,7 @@ export default {
         }
         return card
       })
-      otherUserCards = this.addNameSegments(otherUserCards)
+      otherUserCards = this.addCardNameSegments(otherUserCards)
       // todo: display user icon next to card/space
       this.appendToCardsList(otherUserCards)
     },
@@ -268,6 +262,12 @@ export default {
       } else {
         return this.currentUser.color
       }
+    },
+    addCardNameSegments (cards) {
+      return cards.map(card => {
+        card.nameSegments = this.cardNameSegments(card.name)
+        return card
+      })
     },
     cardNameSegments (name) {
       let url = utils.urlFromString(name)
