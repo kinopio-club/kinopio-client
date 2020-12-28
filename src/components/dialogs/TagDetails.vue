@@ -190,21 +190,30 @@ export default {
     spaceIsCurrentSpace (spaceId) {
       return spaceId === this.currentSpaceId
     },
-    async remoteCards (shouldGetOtherUserCards) {
+    async remoteCards () {
       let remoteCards
       this.loading = true
       try {
-        if (shouldGetOtherUserCards) {
-          remoteCards = await this.$store.dispatch('api/getCardsWithTagAndUser', {
-            userId: this.cardUser.id,
-            tagName: this.name
-          }) || []
-        } else {
-          remoteCards = await this.$store.dispatch('api/getCardsWithTag', this.name) || []
-        }
+        remoteCards = await this.$store.dispatch('api/getCardsWithTag', this.name) || []
         remoteCards = utils.clone(remoteCards)
       } catch (error) {
         console.warn('🚑 could not find cards with tag', this.name, error)
+        this.loading = false
+      }
+      this.loading = false
+      return remoteCards
+    },
+    async otherUsersCards () {
+      let remoteCards
+      this.loading = true
+      try {
+        remoteCards = await this.$store.dispatch('api/getCardsWithTagAndUser', {
+          userId: this.cardUser.id,
+          tagName: this.name
+        }) || []
+        remoteCards = utils.clone(remoteCards)
+      } catch (error) {
+        console.warn('🚑 could not find other cards with tag', this.name, error)
         this.loading = false
       }
       this.loading = false
@@ -227,8 +236,7 @@ export default {
       // remote other user cards
       const currentUserIsCardUser = !this.cardUser.id || this.cardUser.id === this.currentUser.id
       if (currentUserIsCardUser) { return }
-      const shouldGetOtherUserCards = true
-      let otherUserCards = await this.remoteCards(shouldGetOtherUserCards)
+      let otherUserCards = await this.otherUsersCards()
       if (!otherUserCards) { return }
       otherUserCards = otherUserCards.map(card => {
         if (card.userId !== this.currentUser.id) {
