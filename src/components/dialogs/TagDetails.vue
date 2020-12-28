@@ -18,13 +18,19 @@ dialog.tag-details(v-if="visible" :open="visible" :style="position" ref="dialog"
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="cards" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredCards")
     ul.results-list
       template(v-for="group in groupedItems")
-        li.space-name(:data-space-id="group.spaceId" @click="changeSpace(group.spaceId)" :class="{ active: spaceIsCurrentSpace(group.spaceId) }")
-          .background-wrap(v-if="group.space.background")
-            img.background(:src="group.space.background")
-          span.badge.space-badge {{group.spaceName}}
+
+        //- space
+        li.space-name(v-if="group.spaceId" :data-space-id="group.spaceId" @click="changeSpace(group.spaceId)" :class="{ active: spaceIsCurrentSpace(group.spaceId) }")
+          .background(v-if="group.background" :style="{ backgroundImage: `url(${group.background})` }")
+          span.badge.space-badge
+            span {{group.spaceName}}
+
+        //- cards
         template(v-for="(card in group.cards")
           li(:data-card-id="card.id" @click="showCardDetails(card)" :class="{ active: cardIsCurrentCard(card.id) }")
             p.name.name-segments
+              User(v-if="card.otherUser" :user="card.otherUser" :isClickable="false")
+              User(v-else-if="card.userId !== currentUser.id && userById(card.userId)" :user="userById(card.userId)" :isClickable="false")
               template(v-for="segment in card.nameSegments")
                 img(v-if="segment.isImage" :src="segment.url")
                 span(v-if="segment.isText") {{segment.content}}
@@ -33,13 +39,15 @@ dialog.tag-details(v-if="visible" :open="visible" :style="position" ref="dialog"
                   v-if="segment.isTag"
                   :style="{backgroundColor: segment.color}"
                   :class="{ active: currentTag.name === segment.name }"
-                ) {{segment.name}}
+                )
+                  span {{segment.name}}
     Loader(:visible="loading")
 </template>
 
 <script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
+import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
@@ -51,6 +59,7 @@ export default {
   name: 'TagDetails',
   components: {
     ColorPicker,
+    User,
     Loader,
     ResultsFilter
   },
@@ -91,6 +100,20 @@ export default {
       return this.currentTag.color
     },
     cardDetailsIsVisibleForCardId () { return this.$store.state.cardDetailsIsVisibleForCardId },
+    cardUser () {
+      if (!this.currentCard) {
+        return this.currentUser
+      }
+      const user = this.userById(this.currentCard.nameUpdatedByUserId)
+      return user
+    },
+    currentCard () {
+      let currentCardId = this.cardDetailsIsVisibleForCardId
+      if (!currentCardId) { return }
+      const currentCard = this.$store.getters['currentSpace/cardById'](currentCardId)
+      const tagCard = this.$store.getters['currentSpace/cardById'](this.$store.state.currentSelectedTag.cardId)
+      return currentCard || tagCard
+    },
     showEditCard () { return !this.cardDetailsIsVisibleForCardId && !this.visibleFromTagList },
     name () {
       if (!this.currentTag) { return }
@@ -103,12 +126,18 @@ export default {
         if (groupIndex !== -1) {
           groups[groupIndex].cards.push(item)
         } else {
+          let background
           const spaceId = item.spaceId || this.currentSpaceId
+          const space = this.$store.getters.cachedOrOtherSpaceById(spaceId)
+          if (space) {
+            background = space.background
+          }
           groups.push({
             spaceName: item.spaceName,
             spaceId: spaceId,
             cards: [item],
-            space: this.$store.getters.cachedOrOtherSpaceById(spaceId)
+            space,
+            background
           })
         }
       })
@@ -143,15 +172,13 @@ export default {
         return false
       }
     },
-    currentCard () {
-      let currentCardId = this.cardDetailsIsVisibleForCardId
-      const currentCard = this.$store.getters['currentSpace/cardById'](currentCardId)
-      const tagCard = this.$store.getters['currentSpace/cardById'](this.$store.state.currentSelectedTag.cardId)
-      return currentCard || tagCard
-    },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    currentUser () { return this.$store.state.currentUser }
   },
   methods: {
+    userById (userId) {
+      return this.$store.getters['currentSpace/userById'](userId)
+    },
     cardIsCurrentCard (cardId) {
       if (this.visibleFromTagList) { return }
       if (!this.currentCard) { return }
@@ -167,12 +194,18 @@ export default {
     spaceIsCurrentSpace (spaceId) {
       return spaceId === this.currentSpaceId
     },
-    async remoteCards () {
-      if (!this.currentUserIsSignedIn) { return }
+    async remoteCards (shouldGetOtherUserCards) {
       let remoteCards
       this.loading = true
       try {
-        remoteCards = await this.$store.dispatch('api/getCardsWithTag', this.name) || []
+        if (shouldGetOtherUserCards) {
+          remoteCards = await this.$store.dispatch('api/getCardsWithTagAndUser', {
+            userId: this.cardUser.id,
+            tagName: this.name
+          }) || []
+        } else {
+          remoteCards = await this.$store.dispatch('api/getCardsWithTag', this.name) || []
+        }
         remoteCards = utils.clone(remoteCards)
       } catch (error) {
         console.warn('🚑 could not find cards with tag', this.name, error)
@@ -181,25 +214,40 @@ export default {
       this.loading = false
       return remoteCards
     },
+    addNameSegments (cards) {
+      return cards.map(card => {
+        card.nameSegments = this.cardNameSegments(card.name)
+        return card
+      })
+    },
     async updateCards () {
       const cardsInCurrentSpace = this.cardsByTagName
       const cardsInCachedSpaces = cache.allCardsByTagName(this.name)
       // cache cards
       let cacheCards = cardsInCurrentSpace.concat(cardsInCachedSpaces)
-      cacheCards = cacheCards.map(card => {
-        card.nameSegments = this.cardNameSegments(card.name)
-        return card
-      })
+      cacheCards = this.addNameSegments(cacheCards)
       this.updateCardsList(cacheCards)
       // remote cards
       let remoteCards = await this.remoteCards()
       if (!remoteCards) { return }
-      remoteCards = remoteCards.map(card => {
-        card.nameSegments = this.cardNameSegments(card.name)
-        return card
-      })
+      remoteCards = this.addNameSegments(remoteCards)
       remoteCards = remoteCards.filter(card => card.isRemoved !== true)
       this.updateCardsList(remoteCards)
+      // remote other user cards
+      const currentUserIsCardUser = !this.cardUser.id || this.cardUser.id === this.currentUser.id
+      if (currentUserIsCardUser) { return }
+      const shouldGetOtherUserCards = true
+      let otherUserCards = await this.remoteCards(shouldGetOtherUserCards)
+      if (!otherUserCards) { return }
+      otherUserCards = otherUserCards.map(card => {
+        if (card.userId !== this.currentUser.id) {
+          card.otherUser = this.userById(card.userId)
+        }
+        return card
+      })
+      otherUserCards = this.addNameSegments(otherUserCards)
+      // todo: display user icon next to card/space
+      this.appendToCardsList(otherUserCards)
     },
     updateFilter (filter) {
       this.filter = filter
@@ -218,7 +266,7 @@ export default {
       } else if (cachedTag) {
         return cachedTag.color
       } else {
-        return this.$store.state.currentUser.color
+        return this.currentUser.color
       }
     },
     cardNameSegments (name) {
@@ -242,11 +290,13 @@ export default {
       })
     },
     changeSpace (spaceId) {
+      this.$store.dispatch('closeAllDialogs', 'TagDetails.changeSpace')
       if (this.spaceIsCurrentSpace(spaceId)) { return }
       const space = { id: spaceId }
       this.$store.dispatch('currentSpace/changeSpace', { space })
     },
     showCardDetails (card) {
+      this.$store.dispatch('closeAllDialogs', 'TagDetails.showCardDetails')
       card = card || this.currentCard
       if (this.currentSpaceId !== card.spaceId) {
         this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
@@ -327,6 +377,12 @@ export default {
           this.updateDialogHeight()
         })
       })
+    },
+    appendToCardsList (cards) {
+      const newCardIds = cards.map(card => card.id)
+      this.cards = this.cards.filter(card => !newCardIds.includes(card.id))
+      this.cards = this.cards.concat(cards)
+      this.updateDialogHeight()
     }
   },
   watch: {
@@ -366,4 +422,16 @@ export default {
   .tag-badge
     &.active
       box-shadow var(--button-active-inset-shadow)
+  .user
+    vertical-align middle
+    margin-right 3px
+  .background
+    border-radius 3px
+    display inline-grid
+    height 24px
+    width 24px
+    vertical-align middle
+    margin-right 3px
+    background-repeat no-repeat
+    background-size cover
 </style>

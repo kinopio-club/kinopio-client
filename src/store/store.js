@@ -821,7 +821,7 @@ export default new Vuex.Store({
     },
     cachedOrOtherSpaceById: (state, getters) => (spaceId) => {
       const cachedSpace = cache.space(spaceId)
-      if (cachedSpace) {
+      if (utils.objectHasKeys(cachedSpace)) {
         return cachedSpace
       } else {
         return getters.otherSpaceById(spaceId)

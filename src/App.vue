@@ -589,23 +589,6 @@ code
   a + a
     margin-left 3px
 
-.background-wrap
-  width 24%
-  margin-right 6px
-  .background
-    width 100%
-    border-radius 3px
-    cursor pointer
-    &:hover
-      box-shadow var(--button-hover-shadow)
-      background var(--secondary-hover-background)
-    &:active
-      box-shadow var(--button-active-inset-shadow)
-      background var(--secondary-active-background)
-.narrow
-  .background-wrap
-    width 30%
-
 #layout-viewport
   position fixed
   width 100%
