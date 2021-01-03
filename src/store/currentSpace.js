@@ -471,6 +471,8 @@ export default {
       context.commit('addUserToSpace', user)
     },
     duplicateSpace: (context) => {
+      const user = context.rootState.currentUser
+      context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       let space = utils.clone(context.state)
       space.originSpaceId = space.id
       space.id = nanoid()
@@ -506,6 +508,8 @@ export default {
       })
     },
     addNewJournalSpace: (context) => {
+      const user = context.rootState.currentUser
+      context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       const moonPhase = moonphase()
       const day = `${moonPhase.emoji} ${dayjs(new Date()).format('dddd')}` // 🌘 Tuesday
       const spaceId = nanoid()
@@ -642,6 +646,8 @@ export default {
     loadSpace: async (context, { space }) => {
       const emptySpace = utils.emptySpace(space.id)
       const cachedSpace = cache.space(space.id)
+      const user = context.rootState.currentUser
+      context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       context.commit('clearAllNotifications', null, { root: true })
       context.commit('clearSpaceFilters', null, { root: true })
       // restore local space
@@ -715,8 +721,6 @@ export default {
         })
       }
       context.dispatch('updateBrowserHistory', space)
-      const user = context.rootState.currentUser
-      context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
       await context.dispatch('loadSpace', { space })
