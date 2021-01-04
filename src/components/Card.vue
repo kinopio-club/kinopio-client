@@ -41,7 +41,7 @@ article(:style="position" :data-card-id="id" ref="card")
               input(type="checkbox" v-model="checkboxState")
 
           //- Name
-          p.name.name-segments(v-if="normalizedName" :style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox}")
+          p.name.name-segments(v-if="normalizedName" :style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image)}")
             template(v-for="segment in nameSegments")
               span(v-if="segment.isText && segment.content") {{segment.content}}
               //- Tags
