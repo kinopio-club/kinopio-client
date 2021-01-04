@@ -16,6 +16,7 @@ import uniq from 'lodash-es/uniq'
 import dayjs from 'dayjs'
 
 let otherSpacesQueue = [] // id
+let spectatorIdleTimers = []
 
 export default {
   namespaced: true,
@@ -55,22 +56,14 @@ export default {
       cache.saveSpace(space)
       cache.updateSpace('collaborators', space.collaborators, space.id)
     },
-    addSpectatorToSpace: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'addSpectatorToSpace' })
-      const newUser = update.user || update
-      const userExists = state.users.find(user => user.id === newUser.id)
-      const collaboratorExists = state.collaborators.find(collaborator => collaborator.id === newUser.id)
-      const spectatorExists = state.spectators.find(spectator => spectator.id === newUser.id)
-      if (userExists || collaboratorExists || spectatorExists) {
-        state.clients.push(newUser)
-        state.clients = uniqBy(state.clients, 'id')
-      } else {
-        state.spectators.push(newUser)
-      }
+    addSpectatorToSpace: (state, newUser) => {
+      state.spectators.push(newUser)
+      state.spectators = uniqBy(state.spectators, 'id')
     },
     updateSpaceClients: (state, updates) => {
       utils.typeCheck({ value: updates, type: 'array', origin: 'updateSpaceClients' })
       state.clients = state.clients.concat(updates)
+      state.clients = uniqBy(state.clients, 'id')
     },
     removeClientsFromSpace: (state) => {
       state.clients = []
@@ -356,12 +349,30 @@ export default {
 
     // Users and otherSpaces
 
+    addSpectatorToSpace: (context, update) => {
+      utils.typeCheck({ value: update, type: 'object', origin: 'addSpectatorToSpace' })
+      const newUser = update.user || update
+      const userExists = context.state.users.find(user => user.id === newUser.id)
+      const collaboratorExists = context.state.collaborators.find(collaborator => collaborator.id === newUser.id)
+      if (userExists || collaboratorExists) {
+        context.commit('updateSpaceClients', [newUser])
+      } else {
+        context.commit('addSpectatorToSpace', newUser)
+        clearTimeout(spectatorIdleTimers[newUser.id])
+        const removeIdleSpectator = (newUser) => {
+          context.commit('removeSpectatorFromSpace', newUser)
+        }
+        spectatorIdleTimers[newUser.id] = setTimeout(() => {
+          removeIdleSpectator(newUser)
+        }, 10 * 1000)
+      }
+    },
     addUserToJoinedSpace: (context, newUser) => {
       if (newUser.isCollaborator) {
         context.commit('addCollaboratorToSpace', newUser)
         context.commit('removeSpectatorFromSpace', newUser)
       } else {
-        context.commit('addSpectatorToSpace', newUser)
+        context.dispatch('addSpectatorToSpace', newUser)
       }
     },
     updateOtherUsers: async (context) => {
@@ -407,7 +418,6 @@ export default {
       })
       otherSpacesQueue = []
     },
-
     saveOtherSpace: async (context, { spaceId, shouldAddToQueue }) => {
       const cachedSpace = cache.space(spaceId)
       const spaceIsCached = Boolean(cachedSpace.id)
@@ -471,6 +481,8 @@ export default {
       context.commit('addUserToSpace', user)
     },
     duplicateSpace: (context) => {
+      const user = context.rootState.currentUser
+      context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       let space = utils.clone(context.state)
       space.originSpaceId = space.id
       space.id = nanoid()
@@ -506,6 +518,8 @@ export default {
       })
     },
     addNewJournalSpace: (context) => {
+      const user = context.rootState.currentUser
+      context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       const moonPhase = moonphase()
       const day = `${moonPhase.emoji} ${dayjs(new Date()).format('dddd')}` // 🌘 Tuesday
       const spaceId = nanoid()
@@ -642,6 +656,8 @@ export default {
     loadSpace: async (context, { space }) => {
       const emptySpace = utils.emptySpace(space.id)
       const cachedSpace = cache.space(space.id)
+      const user = context.rootState.currentUser
+      context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       context.commit('clearAllNotifications', null, { root: true })
       context.commit('clearSpaceFilters', null, { root: true })
       // restore local space
@@ -715,8 +731,6 @@ export default {
         })
       }
       context.dispatch('updateBrowserHistory', space)
-      const user = context.rootState.currentUser
-      context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
       await context.dispatch('loadSpace', { space })

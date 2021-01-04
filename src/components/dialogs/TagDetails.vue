@@ -32,7 +32,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="position" ref="dialog"
               User(v-if="card.otherUser" :user="card.otherUser" :isClickable="false")
               User(v-else-if="card.userId !== currentUser.id && userById(card.userId)" :user="userById(card.userId)" :isClickable="false")
               template(v-for="segment in card.nameSegments")
-                img(v-if="segment.isImage" :src="segment.url")
+                img.card-image(v-if="segment.isImage" :src="segment.url")
                 span(v-if="segment.isText") {{segment.content}}
                 //- Tags
                 span.badge.tag-badge(
@@ -145,6 +145,7 @@ export default {
         }
       })
       groups = this.sortCurrentSpaceIsFirst(groups)
+      groups = this.sortCurrentCardIsFirst(groups)
       return groups
     },
     filteredItems () {
@@ -192,6 +193,14 @@ export default {
       if (!currentSpaceGroup) { return groups }
       groups = groups.filter(group => group.spaceId !== this.currentSpaceId)
       groups.unshift(currentSpaceGroup)
+      return groups
+    },
+    sortCurrentCardIsFirst (groups) {
+      const currentCard = groups[0].cards.find(card => card.id === this.currentCard.id)
+      if (!currentCard) { return groups }
+      let cards = groups[0].cards.filter(card => card.id !== currentCard.id)
+      cards.unshift(currentCard)
+      groups[0].cards = cards
       return groups
     },
     spaceIsCurrentSpace (spaceId) {
@@ -424,4 +433,8 @@ export default {
     margin-right 3px
     background-repeat no-repeat
     background-size cover
+  .card-image
+    width 48px
+    vertical-align middle
+    border-radius 3px
 </style>
