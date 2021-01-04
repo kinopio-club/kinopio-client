@@ -15,7 +15,9 @@ dialog.link-details.narrow(v-if="isVisible" :open="isVisible" :style="dialogPosi
 
     template(v-if="isSpace")
       .row.badges-wrap(v-if="space.isLoadingOrInvalid")
-        .badge.danger Space is loading or invalid
+        .badge.danger Space is loading, invalid, or private
+          img.icon.private(src="@/assets/lock.svg")
+
       .row.badges-wrap(v-else-if="!space.isLoadingOrInvalid")
         UserList(:users="users" :isClickable="false")
 
@@ -231,4 +233,6 @@ export default {
       &:active
         box-shadow var(--button-active-inset-shadow)
         background var(--secondary-active-background)
+  .icon.private
+    margin-left 5px
 </style>
