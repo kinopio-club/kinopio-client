@@ -212,6 +212,7 @@ export default {
     display flex
     .user-list
       display flex
+      flex-wrap wrap
   textarea
     background-color var(--secondary-background)
     border 0
