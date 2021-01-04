@@ -131,6 +131,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       )
         User(v-if="linkToSpace" :user="linkToSpace.users[0]" :isClickable="false")
         span {{linkName}}
+        img.icon.private(v-if="spaceIsPrivate" src="@/assets/lock.svg")
 
     //- Read Only
     p.row.edit-message(v-if="!canEditCard")
@@ -270,6 +271,10 @@ export default {
     spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
     spacePrivacyIsClosed () { return this.$store.state.currentSpace.privacy === 'closed' },
     shouldHideCardTips () { return this.$store.state.currentUser.shouldHideCardTips },
+    spaceIsPrivate () {
+      const space = this.linkToSpace
+      return space.privacy === 'private'
+    },
     showCardTips () {
       if (this.name) { return }
       if (this.shouldHideCardTips) { return }

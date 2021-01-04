@@ -548,7 +548,7 @@ export default {
       background: space.background,
       moonPhase: space.moonPhase,
       url: space.url,
-      privacy: space.url,
+      privacy: space.privacy,
       updatedAt: space.updatedAt,
       showInExplore: space.showInExplore
     }

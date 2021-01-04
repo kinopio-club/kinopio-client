@@ -64,6 +64,7 @@ article(:style="position" :data-card-id="id" ref="card")
                 )
                   User(v-if="segment.space.users" :user="segment.space.users[0]" :isClickable="false")
                   span {{segment.space.name || segment.content || segment.name }}
+                  img.icon.private(v-if="spaceIsPrivate(segment.space)" src="@/assets/lock.svg")
 
       //- Right buttons
       span.card-buttons-wrap
@@ -535,6 +536,9 @@ export default {
     }
   },
   methods: {
+    spaceIsPrivate (space) {
+      return space.privacy === 'private'
+    },
     checkIfShouldUpdateCardConnectionPaths (width) {
       this.$nextTick(() => {
         this.$nextTick(() => {
@@ -1047,6 +1051,8 @@ article
         height 10px
         span
           font-size 10px
+    .icon.private
+      margin-left 6px
 
 @keyframes bounce
   0%

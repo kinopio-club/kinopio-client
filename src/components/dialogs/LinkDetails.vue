@@ -234,5 +234,5 @@ export default {
         box-shadow var(--button-active-inset-shadow)
         background var(--secondary-active-background)
   .icon.private
-    margin-left 5px
+    margin-left 6px
 </style>
