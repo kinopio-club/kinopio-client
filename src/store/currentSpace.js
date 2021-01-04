@@ -512,7 +512,6 @@ export default {
         }
         context.dispatch('saveNewSpace')
         context.dispatch('updateUserLastSpaceId')
-        context.dispatch('updateBrowserHistory')
         context.commit('notifyNewUser', false, { root: true })
         context.commit('notifySignUpToEditSpace', false, { root: true })
       })
