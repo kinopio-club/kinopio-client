@@ -364,7 +364,7 @@ export default {
         }
         spectatorIdleTimers[newUser.id] = setTimeout(() => {
           removeIdleSpectator(newUser)
-        }, 10 * 1000)
+        }, 60 * 1000)
       }
     },
     addUserToJoinedSpace: (context, newUser) => {
