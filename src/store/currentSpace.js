@@ -480,6 +480,15 @@ export default {
       utils.updateWindowUrlAndTitle({ space, currentUserIsSignedIn })
       context.commit('addUserToSpace', user)
     },
+    saveImportedSpace: async (context) => {
+      const space = utils.clone(context.state)
+      const user = context.rootState.currentUser
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      cache.saveSpace(space)
+      await context.dispatch('api/createSpace', space, { root: true })
+      utils.updateWindowUrlAndTitle({ space, currentUserIsSignedIn })
+      context.commit('addUserToSpace', user)
+    },
     duplicateSpace: (context) => {
       const user = context.rootState.currentUser
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
