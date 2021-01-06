@@ -1064,7 +1064,7 @@ export default {
       })
       items = sortBy(items, ['startPosition'])
       const match = items[0]
-      if (!match.startPosition) {
+      if (match.startPosition === undefined) {
         segment.content = text
         currentPosition = name.length // ends loop
       } else {
