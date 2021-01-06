@@ -928,7 +928,7 @@ export default {
     }
   },
 
-  // Tags
+  // Tags 🦋
 
   tagsFromString (string) {
     // https://regexr.com/5bv6b
@@ -946,6 +946,23 @@ export default {
     tags = tags.map(tag => tag.substring(2, tag.length - 2))
     return tags
   },
+  newTag ({ name, defaultColor, cardId, spaceId }) {
+    let color
+    const existingTag = cache.allTags().find(tag => tag.name === name)
+    if (existingTag) {
+      color = existingTag.color
+    }
+    return {
+      name,
+      id: nanoid(),
+      color: color || defaultColor,
+      cardId: cardId,
+      spaceId: spaceId
+    }
+  },
+
+  // Name Segments 🎫
+
   cardNameSegments (name) {
     const tags = this.tagsFromString(name) || []
     const urls = this.urlsFromString(name) || []
@@ -1005,18 +1022,66 @@ export default {
     }
     return segments
   },
-  newTag ({ name, defaultColor, cardId, spaceId }) {
-    let color
-    const existingTag = cache.allTags().find(tag => tag.name === name)
-    if (existingTag) {
-      color = existingTag.color
+  markdownSegments (name) {
+    this.typeCheck({ value: name, type: 'string', origin: 'markdownSegments' })
+    let segments = []
+    let currentPosition = 0
+    while (currentPosition < name.length) {
+      // https://regexr.com/5jmf1
+      // matches [x](url)
+      const linkPattern = /\[([^[]+)\]\(([^)]+)\)/gmi
+      // https://regexr.com/5jmeu
+      // matches **x**
+      const boldPattern = /(\*\*)(.*?)\1/gmi
+      // https://regexr.com/5jmf4
+      // matches _x_ or *x*
+      const emphasisPattern = /(_|\*)(.*?)\1/gmi
+      // https://regexr.com/5jmf7
+      // matches ~x~ or ~~x~~
+      const strikethroughPattern = /(~){1,2}(.*?)~/gmi
+      let text = name.substring(currentPosition, name.length)
+      let segment = { content: '', type: 'text' }
+      let items = [
+        {
+          type: 'link',
+          result: linkPattern.exec(text)
+        }, {
+          type: 'bold',
+          result: boldPattern.exec(text)
+        }, {
+          type: 'emphasis',
+          result: emphasisPattern.exec(text)
+        }, {
+          type: 'strikethrough',
+          result: strikethroughPattern.exec(text)
+        }
+      ]
+      items = items.map(item => {
+        if (item.result) {
+          item.startPosition = text.indexOf(item.result[0])
+        }
+        return item
+      })
+      items = sortBy(items, ['startPosition'])
+      const match = items[0]
+      if (!match.startPosition) {
+        segment.content = text
+        currentPosition = name.length // ends loop
+      } else {
+        // before text
+        const beforeSegment = {
+          content: text.substring(0, match.startPosition),
+          type: 'text'
+        }
+        segments.push(beforeSegment)
+        // segment
+        segment.content = match.result[2]
+        segment.result = match.result
+        segment.type = match.type
+        currentPosition = currentPosition + match.startPosition + match.result[0].length
+      }
+      segments.push(segment)
     }
-    return {
-      name,
-      id: nanoid(),
-      color: color || defaultColor,
-      cardId: cardId,
-      spaceId: spaceId
-    }
+    return segments
   }
 }

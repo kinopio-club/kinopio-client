@@ -63,6 +63,7 @@ export default {
   // theme vars
   --primary black
   --primary-background white
+  --text-link #143997
 
   // --secondary #818181
   --secondary-background #e3e3e3
