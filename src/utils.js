@@ -1028,16 +1028,16 @@ export default {
     let currentPosition = 0
     while (currentPosition < name.length) {
       // https://regexr.com/5jmf1
-      // matches [x](url)
+      // matches [text](url)
       const linkPattern = /\[([^[]+)\]\(([^)]+)\)/gmi
       // https://regexr.com/5jmeu
-      // matches **x**
+      // matches **text**
       const boldPattern = /(\*\*)(.*?)\1/gmi
       // https://regexr.com/5jmf4
-      // matches _x_ or *x*
+      // matches _text_ or *text*
       const emphasisPattern = /(_|\*)(.*?)\1/gmi
       // https://regexr.com/5jmf7
-      // matches ~~x~~
+      // matches ~~text~~
       const strikethroughPattern = /(~){2}(.*?)(~){2}/gmi
       let text = name.substring(currentPosition, name.length)
       let segment = { content: '', type: 'text' }

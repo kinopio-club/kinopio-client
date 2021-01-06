@@ -11,17 +11,29 @@ dialog.tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
   section
     article
       p
-        span.badge.info Ctrl-Enter
-        span line break
-    article
-      p
         span.badge.info [[
         span create tags to label and group ideas
     article
       p
         span.badge.info /
         span link to other spaces
-
+    article
+      p
+        span.badge.info Ctrl-Enter
+        span line break
+    article
+      .row
+        button(@click.left.stop="toggleMarkdownInfoIsVisible" :class="{ active: markdownInfoIsVisible }")
+          span Markdown
+      div(v-if="markdownInfoIsVisible")
+        p
+          span.badge.info _italic_ or *italic*
+        p
+          span.badge.info **bold**
+        p
+          span.badge.info ~~strikethrough~~
+        p
+          span.badge.info [link text](url)
 </template>
 
 <script>
@@ -32,6 +44,11 @@ export default {
   name: 'Tips',
   props: {
     visible: Boolean
+  },
+  data () {
+    return {
+      markdownInfoIsVisible: false
+    }
   },
   computed: {
     shouldHideCardTips () { return this.$store.state.currentUser.shouldHideCardTips }
@@ -48,6 +65,12 @@ export default {
         const isTouchDevice = this.$store.state.isTouchDevice
         scrollIntoView.scroll(element, isTouchDevice)
       })
+    },
+    toggleMarkdownInfoIsVisible () {
+      this.markdownInfoIsVisible = !this.markdownInfoIsVisible
+      if (this.markdownInfoIsVisible) {
+        this.scrollIntoView()
+      }
     }
   },
   watch: {
