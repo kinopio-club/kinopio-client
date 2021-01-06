@@ -931,6 +931,8 @@ article
           text-decoration underline
           &:hover
             text-decoration none
+        b
+          font-family monospace
 
     .connector,
     .url
