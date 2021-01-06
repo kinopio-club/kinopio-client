@@ -87,7 +87,7 @@ export default {
       space.connections = connections
       return space
     },
-    importSpace (space) {
+    async importSpace (space) {
       if (!this.isValidSpace(space)) { return }
       space.originSpaceId = space.id
       space.id = nanoid()
@@ -98,7 +98,7 @@ export default {
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       cache.saveSpace(uniqueNewSpace)
       this.$store.commit('currentSpace/restoreSpace', uniqueNewSpace)
-      this.$store.dispatch('currentSpace/saveNewSpace')
+      await this.$store.dispatch('currentSpace/saveImportedSpace')
       this.$store.dispatch('currentUser/lastSpaceId', space.id)
       this.updateSpaces()
       this.$store.commit('triggerFocusSpaceDetailsName')

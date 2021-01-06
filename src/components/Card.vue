@@ -43,7 +43,21 @@ article(:style="position" :data-card-id="id" ref="card")
           //- Name
           p.name.name-segments(v-if="normalizedName" :style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image)}")
             template(v-for="segment in nameSegments")
-              span(v-if="segment.isText && segment.content") {{segment.content}}
+              //- Markdown
+              template(v-if="segment.isText && segment.content")
+                span.markdown(v-if="segment.markdown")
+                  template(v-for="markdown in segment.markdown")
+                    template(v-if="markdown.type === 'text'")
+                      span {{markdown.content}}
+                    template(v-else-if="markdown.type === 'link'")
+                      a(:href="markdown.result[2]") {{markdown.result[1]}}
+                    template(v-else-if="markdown.type === 'bold'")
+                      b {{markdown.content}}
+                    template(v-else-if="markdown.type === 'emphasis'")
+                      em {{markdown.content}}
+                    template(v-else-if="markdown.type === 'strikethrough'")
+                      del {{markdown.content}}
+                span(v-else) {{segment.content}}
               //- Tags
               span.badge.button-badge(
                 v-if="segment.isTag"
@@ -355,6 +369,8 @@ export default {
         } else if (segment.isLink) {
           const spaceId = utils.spaceIdFromUrl(segment.name)
           segment.space = this.spaceFromLinkSpaceId(spaceId, segment.name)
+        } else if (segment.isText) {
+          segment.markdown = utils.markdownSegments(segment.content)
         }
         return segment
       })
@@ -909,6 +925,12 @@ article
         a
           color var(--primary)
           text-decoration none
+      .markdown
+        a
+          color var(--text-link)
+          text-decoration underline
+          &:hover
+            text-decoration none
 
     .connector,
     .url
