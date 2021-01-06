@@ -1037,8 +1037,8 @@ export default {
       // matches _x_ or *x*
       const emphasisPattern = /(_|\*)(.*?)\1/gmi
       // https://regexr.com/5jmf7
-      // matches ~x~ or ~~x~~
-      const strikethroughPattern = /(~){1,2}(.*?)~/gmi
+      // matches ~~x~~
+      const strikethroughPattern = /(~){2}(.*?)(~){2}/gmi
       let text = name.substring(currentPosition, name.length)
       let segment = { content: '', type: 'text' }
       let items = [
