@@ -1034,8 +1034,11 @@ export default {
       // matches **text**
       const boldPattern = /(\*\*)(.*?)\1/gmi
       // https://regexr.com/5jmf4
-      // matches _text_ or *text*
-      const emphasisPattern = /(_|\*)(.*?)\1/gmi
+      // matches *text*
+      const emphasisPattern1 = /(\*)(.*?)\1/gmi
+      // https://regexr.com/5jop0
+      // matches _text_
+      const emphasisPattern2 = /\b(_)(.*?)\1\b/gmi
       // https://regexr.com/5jmf7
       // matches ~~text~~
       const strikethroughPattern = /(~){2}(.*?)(~){2}/gmi
@@ -1050,7 +1053,10 @@ export default {
           result: boldPattern.exec(text)
         }, {
           type: 'emphasis',
-          result: emphasisPattern.exec(text)
+          result: emphasisPattern1.exec(text)
+        }, {
+          type: 'emphasis',
+          result: emphasisPattern2.exec(text)
         }, {
           type: 'strikethrough',
           result: strikethroughPattern.exec(text)
