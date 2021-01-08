@@ -105,11 +105,17 @@ export default {
       let spaceUsers
       const user = currentSpace.users
       const collaborators = currentSpace.collaborators
-      const cardUser = this.userById(this.currentCard.nameUpdatedByUserId)
       const currentUser = utils.clone(this.$store.state.currentUser)
-      spaceUsers = user.concat(collaborators).concat(cardUser).concat(currentUser)
-      spaceUsers = uniqBy(spaceUsers, 'id')
-      return spaceUsers
+      spaceUsers = user.concat(collaborators).concat(currentUser)
+      if (this.currentCard) {
+        const cardUser = this.userById(this.currentCard.nameUpdatedByUserId)
+        spaceUsers = spaceUsers.concat(cardUser)
+        spaceUsers = uniqBy(spaceUsers, 'id')
+        return spaceUsers
+      } else {
+        spaceUsers = uniqBy(spaceUsers, 'id')
+        return spaceUsers
+      }
     },
     currentCard () {
       let currentCardId = this.cardDetailsIsVisibleForCardId
@@ -196,6 +202,7 @@ export default {
       return groups
     },
     sortCurrentCardIsFirst (groups) {
+      if (!this.currentCard) { return groups }
       const currentCard = groups[0].cards.find(card => card.id === this.currentCard.id)
       if (!currentCard) { return groups }
       let cards = groups[0].cards.filter(card => card.id !== currentCard.id)
@@ -366,7 +373,7 @@ export default {
     },
     updateCardsList (cards) {
       cards = cards.filter(card => {
-        const cardTags = utils.tagsFromStringWithoutBrackets(card.name)
+        const cardTags = utils.tagsFromStringWithoutBrackets(card.name) || []
         return cardTags.includes(this.name)
       })
       cards = uniqBy(cards, 'id')
