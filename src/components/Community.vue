@@ -15,7 +15,7 @@
     p(v-if="loading")
       Loader(:visible="loading")
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    SpaceList(:hideFilter="true" :spaces="spaces" :showUser="true" :hideExploreBadge="true" @selectSpace="changeSpace")
+    SpaceList(:spaces="spaces" :showUser="true" :hideExploreBadge="true" @selectSpace="changeSpace")
 </template>
 
 <script>
