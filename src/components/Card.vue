@@ -257,6 +257,9 @@ export default {
         }
       }
     },
+    currentCardDetailsIsVisible () {
+      return this.id === this.$store.state.cardDetailsIsVisibleForCardId
+    },
     dateUpdatedAt () {
       const date = this.card.nameUpdatedAt || this.card.createdAt
       const showAbsoluteDate = this.$store.state.currentUser.filterShowAbsoluteDates
@@ -317,10 +320,14 @@ export default {
       }
     },
     position () {
+      let z = this.z
+      if (this.currentCardDetailsIsVisible) {
+        z = 2147483646 // max z
+      }
       return {
         left: `${this.x}px`,
         top: `${this.y}px`,
-        zIndex: this.z
+        zIndex: z
       }
     },
     canEditCard () {
