@@ -1044,7 +1044,7 @@ export default {
       const strikethroughPattern = /(~){2}(.*?)(~){2}/gmi
       // https://regexr.com/5jr6k
       // matches ```⮐text⮐```
-      const codeBlockPattern = /(`){3} *\n(.*?)\n(`){3}/gmis
+      const codeBlockPattern = /(`){3}[\n ]*(.*?)[\n ]*(`){3}/gmis
       // https://regexr.com/5jr6h
       // matches _text_
       const codePattern = /(`)(.*?)\1/gmi

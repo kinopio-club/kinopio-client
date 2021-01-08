@@ -34,6 +34,10 @@ dialog.tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
           span.badge.info ~~strikethrough~~
         p
           span.badge.info [link text](url)
+        p
+          span.badge.info `code`
+        p
+          span.badge.info ``` code block ```
 </template>
 
 <script>

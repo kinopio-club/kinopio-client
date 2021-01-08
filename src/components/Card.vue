@@ -945,6 +945,7 @@ article
           background-color var(--secondary-active-background)
           border-radius 3px
           margin 0
+          white-space normal
         code
           font-weight normal
           background-color var(--secondary-active-background)
