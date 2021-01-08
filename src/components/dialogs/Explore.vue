@@ -41,6 +41,8 @@ export default {
       allSpacesIsVisible: true,
       loading: false,
       spaces: [],
+      newSpaces: [],
+      bestOfSpaces: [],
       dialogHeight: null
     }
   },
@@ -55,7 +57,12 @@ export default {
       const prevValue = utils.clone(this.allSpacesIsVisible)
       this.allSpacesIsVisible = value
       if (prevValue === value) { return }
-      this.spaces = []
+
+      if (this.allSpacesIsVisible) {
+        this.spaces = this.newSpaces
+      } else {
+        this.spaces = this.bestOfSpaces
+      }
       this.loading = false
       this.updateSpaces()
     },
@@ -65,8 +72,10 @@ export default {
       this.loading = true
       if (this.allSpacesIsVisible) {
         this.spaces = await this.$store.dispatch('api/getNewSpaces')
+        this.newSpaces = this.spaces
       } else {
         this.spaces = await this.$store.dispatch('api/getBestOfSpaces')
+        this.bestOfSpaces = this.spaces
       }
       this.loading = false
     },
