@@ -52,7 +52,7 @@ article(:style="position" :data-card-id="id" ref="card")
                     template(v-else-if="markdown.type === 'link'")
                       a(:href="markdown.result[2]") {{markdown.result[1]}}
                     template(v-else-if="markdown.type === 'bold'")
-                      b {{markdown.content}}
+                      strong {{markdown.content}}
                     template(v-else-if="markdown.type === 'emphasis'")
                       em {{markdown.content}}
                     template(v-else-if="markdown.type === 'strikethrough'")
@@ -931,6 +931,10 @@ article
           text-decoration underline
           &:hover
             text-decoration none
+        strong
+          font-weight normal
+          background-color var(--info-background)
+          border-radius 3px
 
     .connector,
     .url
