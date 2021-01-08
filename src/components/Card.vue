@@ -57,6 +57,11 @@ article(:style="position" :data-card-id="id" ref="card")
                       em {{markdown.content}}
                     template(v-else-if="markdown.type === 'strikethrough'")
                       del {{markdown.content}}
+                    template(v-else-if="markdown.type === 'codeBlock'")
+                      pre {{markdown.content}}
+                    template(v-else-if="markdown.type === 'code'")
+                      code {{markdown.content}}
+
                 span(v-else) {{segment.content}}
               //- Tags
               span.badge.button-badge(
@@ -934,6 +939,15 @@ article
         strong
           font-weight normal
           background-color var(--info-background)
+          border-radius 3px
+        pre
+          font-weight normal
+          background-color var(--secondary-active-background)
+          border-radius 3px
+          margin 0
+        code
+          font-weight normal
+          background-color var(--secondary-active-background)
           border-radius 3px
 
     .connector,

@@ -1042,6 +1042,12 @@ export default {
       // https://regexr.com/5jmf7
       // matches ~~text~~
       const strikethroughPattern = /(~){2}(.*?)(~){2}/gmi
+      // https://regexr.com/5jr6k
+      // matches ```⮐text⮐```
+      const codeBlockPattern = /(`){3} *\n(.*?)\n(`){3}/gmis
+      // https://regexr.com/5jr6h
+      // matches _text_
+      const codePattern = /(`)(.*?)\1/gmi
       let text = name.substring(currentPosition, name.length)
       let segment = { content: '', type: 'text' }
       let items = [
@@ -1060,6 +1066,12 @@ export default {
         }, {
           type: 'strikethrough',
           result: strikethroughPattern.exec(text)
+        }, {
+          type: 'codeBlock',
+          result: codeBlockPattern.exec(text)
+        }, {
+          type: 'code',
+          result: codePattern.exec(text)
         }
       ]
       items = items.map(item => {
