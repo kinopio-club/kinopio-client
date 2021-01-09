@@ -1101,5 +1101,11 @@ export default {
       segments.push(segment)
     }
     return segments
+  },
+  isNameComment (name) {
+    // https://regexr.com/5ju19
+    // matches from start |((text))| to end
+    const commentPattern = /^(\(\().+?(\)\))$/gims
+    return Boolean(name.match(commentPattern))
   }
 }

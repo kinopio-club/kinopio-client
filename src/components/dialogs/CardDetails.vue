@@ -110,7 +110,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           img.icon(src="@/assets/split-vertically.svg")
           span Split into {{nameSentences}} Cards
 
-    .row.badges-row(v-if="tagsInCard.length || card.linkToSpaceId")
+    .row.badges-row(v-if="tagsInCard.length || card.linkToSpaceId || nameIsComment")
       //- Tags
       template(v-for="tag in tagsInCard")
         span.badge.button-badge(
@@ -132,6 +132,9 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         User(v-if="linkToSpace" :user="linkToSpace.users[0]" :isClickable="false")
         span {{linkName}}
         img.icon.private(v-if="spaceIsPrivate" src="@/assets/lock.svg")
+      //- Comment
+      .badge.info(v-if="nameIsComment")
+        span ((comment))
 
     //- Read Only
     p.row.edit-message(v-if="!canEditCard")
@@ -280,6 +283,7 @@ export default {
       if (this.shouldHideCardTips) { return }
       return true
     },
+    nameIsComment () { return utils.isNameComment(this.name) },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     canEditCard () {
       if (this.isSpaceMember) { return true }
