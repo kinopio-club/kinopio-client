@@ -133,7 +133,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         span {{linkName}}
         img.icon.private(v-if="spaceIsPrivate" src="@/assets/lock.svg")
       //- Comment
-      .badge.info(v-if="nameIsComment")
+      .badge.info(v-if="nameIsComment" :style="{backgroundColor: updatedByUser.color}")
         span ((comment))
 
     //- Read Only
@@ -409,7 +409,19 @@ export default {
       const pendingUploads = this.$store.state.upload.pendingUploads
       return pendingUploads.find(upload => upload.cardId === this.card.id)
     },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    updatedByUser () {
+      const userId = this.card.nameUpdatedByUserId || this.card.userId
+      let user = this.$store.getters['currentSpace/userById'](userId)
+      if (user) {
+        return user
+      } else {
+        return {
+          name: '',
+          color: '#cdcdcd' // secondary-active-background
+        }
+      }
+    }
   },
   methods: {
     seperatedLines (name) {
