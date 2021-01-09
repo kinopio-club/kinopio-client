@@ -1105,7 +1105,7 @@ export default {
   isNameComment (name) {
     // https://regexr.com/5ju19
     // matches ((text))
-    const commentPattern = /(\(\().+?(\)\))/gims
+    const commentPattern = /(\(\().*?(\)\))/gims
     return Boolean(name.match(commentPattern))
   }
 }

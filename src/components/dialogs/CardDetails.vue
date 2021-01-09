@@ -40,6 +40,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.tab="triggerPickerSelectItem"
         @keydown.221="triggerPickerSelectItem"
         @keydown.bracket-right="triggerPickerSelectItem"
+        @keydown.57="triggerCommentAddClosingBrackets"
       )
       TagPicker(
         :visible="tag.pickerIsVisible"
@@ -786,6 +787,21 @@ export default {
     checkIfShouldHidePicker () {
       this.checkIfShouldHideTagPicker()
       this.checkIfShouldHideSpacePicker()
+    },
+
+    // Comment
+
+    triggerCommentAddClosingBrackets (event) {
+      const cursorPosition = this.$refs.name.selectionStart
+      const previousCharacter = this.name[cursorPosition - 1]
+      if (previousCharacter === '(') {
+        const name = this.name
+        const newName = `${name.substring(0, cursorPosition)}))${name.substring(cursorPosition)}`
+        this.updateCardName(newName)
+        this.$nextTick(() => {
+          this.$refs.name.setSelectionRange(cursorPosition, cursorPosition)
+        })
+      }
     },
 
     // Pickers
