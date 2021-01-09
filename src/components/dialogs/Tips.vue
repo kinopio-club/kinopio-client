@@ -19,6 +19,10 @@ dialog.tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
         span link to other spaces
     article
       p
+        span.badge.info ((
+        span turn card into comment
+    article
+      p
         span.badge.info Ctrl-Enter
         span line break
     article
