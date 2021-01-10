@@ -9,13 +9,19 @@ dialog.tag-details(v-if="visible" :open="visible" :style="position" ref="dialog"
           .current-color(:style="{backgroundColor: color}")
         ColorPicker(:currentColor="color" :visible="colorPickerIsVisible" @selectedColor="updateTagNameColor")
       .tag-name {{name}}
+
+    //- no cards found
     template(v-if="!cards.length && !loading")
       p Tag more cards with [[{{currentTag.name}}]] to see them here
       button(v-if="visibleFromTagList" @click.left.stop="removeTag")
         img.icon(src="@/assets/remove.svg")
         span Remove Tag
+
+  //- loading without cached cards
   section(v-if="!cards.length && loading")
     Loader(:visible="loading")
+
+  //- cards found, or loading with cached cards
   section.results-section(v-if="cards.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="cards" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredCards")
     ul.results-list
