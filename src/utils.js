@@ -1118,6 +1118,6 @@ export default {
     if (!comment) { return }
     if (code) { isCode = code[0].includes(comment[0]) }
     if (isCode) { return }
-    return Boolean(name.match(commentPattern))
+    return Boolean(comment)
   }
 }
