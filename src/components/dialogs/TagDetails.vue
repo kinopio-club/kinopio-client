@@ -14,6 +14,8 @@ dialog.tag-details(v-if="visible" :open="visible" :style="position" ref="dialog"
       button(v-if="visibleFromTagList" @click.left.stop="removeTag")
         img.icon(src="@/assets/remove.svg")
         span Remove Tag
+  section(v-if="!cards && loading")
+    Loader(:visible="loading")
   section.results-section(v-if="cards.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="cards" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredCards")
     ul.results-list
