@@ -40,6 +40,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.tab="triggerPickerSelectItem"
         @keydown.221="triggerPickerSelectItem"
         @keydown.bracket-right="triggerPickerSelectItem"
+        @keydown.57="triggerCommentAddClosingBrackets"
       )
       TagPicker(
         :visible="tag.pickerIsVisible"
@@ -110,7 +111,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           img.icon(src="@/assets/split-vertically.svg")
           span Split into {{nameSentences}} Cards
 
-    .row.badges-row(v-if="tagsInCard.length || card.linkToSpaceId")
+    .row.badges-row(v-if="tagsInCard.length || card.linkToSpaceId || nameIsComment")
       //- Tags
       template(v-for="tag in tagsInCard")
         span.badge.button-badge(
@@ -132,6 +133,9 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         User(v-if="linkToSpace" :user="linkToSpace.users[0]" :isClickable="false")
         span {{linkName}}
         img.icon.private(v-if="spaceIsPrivate" src="@/assets/lock.svg")
+      //- Comment
+      .badge.info(v-if="nameIsComment" :style="{backgroundColor: updatedByUser.color}")
+        span ((comment))
 
     //- Read Only
     p.row.edit-message(v-if="!canEditCard")
@@ -280,6 +284,7 @@ export default {
       if (this.shouldHideCardTips) { return }
       return true
     },
+    nameIsComment () { return utils.isNameComment(this.name) },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     canEditCard () {
       if (this.isSpaceMember) { return true }
@@ -405,7 +410,19 @@ export default {
       const pendingUploads = this.$store.state.upload.pendingUploads
       return pendingUploads.find(upload => upload.cardId === this.card.id)
     },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    updatedByUser () {
+      const userId = this.card.nameUpdatedByUserId || this.card.userId
+      let user = this.$store.getters['currentSpace/userById'](userId)
+      if (user) {
+        return user
+      } else {
+        return {
+          name: '',
+          color: '#cdcdcd' // secondary-active-background
+        }
+      }
+    }
   },
   methods: {
     seperatedLines (name) {
@@ -770,6 +787,21 @@ export default {
     checkIfShouldHidePicker () {
       this.checkIfShouldHideTagPicker()
       this.checkIfShouldHideSpacePicker()
+    },
+
+    // Comment
+
+    triggerCommentAddClosingBrackets (event) {
+      const cursorPosition = this.$refs.name.selectionStart
+      const previousCharacter = this.name[cursorPosition - 1]
+      if (previousCharacter === '(') {
+        const name = this.name
+        const newName = `${name.substring(0, cursorPosition)}))${name.substring(cursorPosition)}`
+        this.updateCardName(newName)
+        this.$nextTick(() => {
+          this.$refs.name.setSelectionRange(cursorPosition, cursorPosition)
+        })
+      }
     },
 
     // Pickers
