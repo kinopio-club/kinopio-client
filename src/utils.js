@@ -1022,56 +1022,61 @@ export default {
     }
     return segments
   },
+  markdown () {
+    return {
+      // https://regexr.com/5jmf1
+      // matches [text](url)
+      linkPattern: /\[([^[]+)\]\(([^)]+)\)/gmi,
+      // https://regexr.com/5jmeu
+      // matches **text**
+      boldPattern: /(\*\*)(.*?)\1/gmi,
+      // https://regexr.com/5jmf4
+      // matches *text*
+      emphasisPattern1: /(\*)(.*?)\1/gmi,
+      // https://regexr.com/5jop0
+      // matches _text_
+      emphasisPattern2: /\b(_)(.*?)\1\b/gmi,
+      // https://regexr.com/5jmf7
+      // matches ~~text~~
+      strikethroughPattern: /(~){2}(.*?)(~){2}/gmi,
+      // https://regexr.com/5jr6k
+      // matches ```⮐text⮐```
+      codeBlockPattern: /(`){3}[\n ]*(.*?)[\n ]*(`){3}/gmis,
+      // https://regexr.com/5jr6h
+      // matches `text`
+      codePattern: /(`)(.*?)\1/gmi
+    }
+  },
   markdownSegments (name) {
     this.typeCheck({ value: name, type: 'string', origin: 'markdownSegments' })
     let segments = []
     let currentPosition = 0
     while (currentPosition < name.length) {
-      // https://regexr.com/5jmf1
-      // matches [text](url)
-      const linkPattern = /\[([^[]+)\]\(([^)]+)\)/gmi
-      // https://regexr.com/5jmeu
-      // matches **text**
-      const boldPattern = /(\*\*)(.*?)\1/gmi
-      // https://regexr.com/5jmf4
-      // matches *text*
-      const emphasisPattern1 = /(\*)(.*?)\1/gmi
-      // https://regexr.com/5jop0
-      // matches _text_
-      const emphasisPattern2 = /\b(_)(.*?)\1\b/gmi
-      // https://regexr.com/5jmf7
-      // matches ~~text~~
-      const strikethroughPattern = /(~){2}(.*?)(~){2}/gmi
-      // https://regexr.com/5jr6k
-      // matches ```⮐text⮐```
-      const codeBlockPattern = /(`){3}[\n ]*(.*?)[\n ]*(`){3}/gmis
-      // https://regexr.com/5jr6h
-      // matches _text_
-      const codePattern = /(`)(.*?)\1/gmi
+      const markdown = this.markdown()
       let text = name.substring(currentPosition, name.length)
       let segment = { content: '', type: 'text' }
       let items = [
         {
           type: 'link',
-          result: linkPattern.exec(text)
+          result: markdown.linkPattern.exec(text)
         }, {
           type: 'bold',
-          result: boldPattern.exec(text)
+          result: markdown.boldPattern.exec(text)
         }, {
           type: 'emphasis',
-          result: emphasisPattern1.exec(text)
+          result: markdown.emphasisPattern1.exec(text)
         }, {
           type: 'emphasis',
-          result: emphasisPattern2.exec(text)
+          result: markdown.emphasisPattern2.exec(text)
         }, {
           type: 'strikethrough',
-          result: strikethroughPattern.exec(text)
+          result: markdown.strikethroughPattern.exec(text)
         }, {
           type: 'codeBlock',
-          result: codeBlockPattern.exec(text)
+          result: markdown.codeBlockPattern.exec(text)
         }, {
           type: 'code',
-          result: codePattern.exec(text)
+          result: markdown.codePattern.exec(text)
         }
       ]
       items = items.map(item => {
@@ -1106,6 +1111,13 @@ export default {
     // https://regexr.com/5ju19
     // matches ((text))
     const commentPattern = /(\(\().*?(\)\))/gims
+    const comment = name.match(commentPattern)
+    const markdown = this.markdown()
+    const code = name.match(markdown.codeBlockPattern) || name.match(markdown.codePattern)
+    let isCode
+    if (!comment) { return }
+    if (code) { isCode = code[0].includes(comment[0]) }
+    if (isCode) { return }
     return Boolean(name.match(commentPattern))
   }
 }
