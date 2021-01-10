@@ -7,7 +7,7 @@ article(:style="position" :data-card-id="id" ref="card")
     @touchend="showCardDetails"
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
-    :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || isRemoteCardDragging, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': Boolean(formats.audio), 'is-playing-audio': isPlayingAudio}",
+    :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || isRemoteCardDragging, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': isAudioCard, 'is-playing-audio': isPlayingAudio}",
     :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor || selectedColorUpload || remoteCardDraggingColor || remoteUploadDraggedOverCardColor }"
     :data-card-id="id"
     :data-card-x="x"
@@ -23,15 +23,26 @@ article(:style="position" :data-card-id="id" ref="card")
   )
     Frames(:card="card")
 
-    //- Video
-    video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
-      source(:src="formats.video")
-    //- Image
-    img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
-    img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
+    template(v-if="!nameIsComment")
+      //- Video
+      video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
+        source(:src="formats.video")
+      //- Image
+      img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
+      img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
 
     span.card-content-wrap
-      .card-content
+      //- Comment
+      .card-comment(v-if="nameIsComment")
+        //- [·]
+        .checkbox-wrap(v-if="hasCheckbox" @click.left.prevent.stop="toggleCardChecked" @touchend.prevent.stop="toggleCardChecked")
+          label(:class="{active: isChecked, disabled: !canEditSpace}")
+            input(type="checkbox" v-model="checkboxState")
+        .badge.secondary
+          User(:user="updatedByUser" :isClickable="false")
+          span …
+      .card-content(v-else)
+        //- Audio
         .audio-wrap(v-if="Boolean(formats.audio)")
           Audio(:visible="Boolean(formats.audio)" :url="formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
         .name-wrap
@@ -88,7 +99,7 @@ article(:style="position" :data-card-id="id" ref="card")
       //- Right buttons
       span.card-buttons-wrap
         //- Url →
-        a.url-wrap(:href="linkOrUrl" @click.left.stop="closeAllDialogs" @touchend="openUrl(linkOrUrl)" v-if="linkOrUrl")
+        a.url-wrap(:href="linkOrUrl" @click.left.stop="closeAllDialogs" @touchend="openUrl(linkOrUrl)" v-if="linkOrUrl && !nameIsComment")
           .url.inline-button-wrap
             button.inline-button(:style="{background: selectedColor}" tabindex="-1")
               img.icon.visit.arrow-icon(src="@/assets/visit.svg")
@@ -286,7 +297,7 @@ export default {
       })
     },
     pendingUploadDataUrl () {
-      if (!this.cardPendingUpload) { return }
+      if (!this.cardPendingUpload || this.nameIsComment) { return }
       return this.cardPendingUpload.imageDataUrl
     },
     linkOrUrl () {
@@ -302,7 +313,15 @@ export default {
       this.updateMediaUrls(urls)
       return urls || []
     },
-    isVisualCard () { return this.formats.image || this.formats.video },
+    nameIsComment () { return utils.isNameComment(this.name) },
+    isVisualCard () {
+      if (this.nameIsComment) { return }
+      return this.formats.image || this.formats.video
+    },
+    isAudioCard () {
+      if (this.nameIsComment) { return }
+      return this.formats.audio
+    },
     cardHasMedia () { return this.formats.image || this.formats.video || this.formats.audio },
     cardHasUrls () {
       if (!this.urls.length) {
@@ -898,6 +917,11 @@ article
     &:active,
     &.active
       box-shadow var(--active-shadow)
+    .card-comment
+      .badge
+        margin 0
+        margin-top 6px
+        margin-left 6px
     .card-content-wrap
       display flex
       align-items flex-start
@@ -905,7 +929,8 @@ article
       min-width 40px
     .card-buttons-wrap
       display flex
-    .name-wrap
+    .name-wrap,
+    .card-comment
       display flex
       align-items flex-start
       .checkbox-wrap
