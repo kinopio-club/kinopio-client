@@ -4,7 +4,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
     p Share
   section(v-if="spaceHasUrl")
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
-    .url-wrap(v-if="!spaceIsPrivate")
+    template(v-if="!spaceIsPrivate")
       input.url-textarea(ref="url" v-model="url")
       button(@click.left="copyUrl" v-if="!canNativeShare")
         span Copy Url
@@ -217,6 +217,6 @@ export default {
   .share-private
     .badge
       margin-left 6px
-  .url-wrap
+  .privacy-button + input
     margin-top 10px
 </style>
