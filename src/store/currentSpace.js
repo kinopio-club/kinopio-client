@@ -1054,6 +1054,16 @@ export default {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
       }
+      // prevent cards bunching up at 0
+      let cards
+      if (multipleCardsSelectedIds.length) {
+        cards = multipleCardsSelectedIds.map(cardId => context.getters.cardById(cardId))
+        cards.forEach(card => {
+          if (card.x === 0) { options.delta.x = Math.max(0, options.delta.x) }
+          if (card.y === 0) { options.delta.y = Math.max(0, options.delta.y) }
+        })
+      }
+      // move cards
       if (multipleCardsSelectedIds.length) {
         context.dispatch('dragMultipleCards', options)
       } else {

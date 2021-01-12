@@ -71,6 +71,7 @@ export default {
       const cursorIsBottomSide = cursor.y >= viewportHeight - scrollAreaHeight
       const cursorIsLeftSide = cursor.x <= scrollAreaWidth
       const cursorIsRightSide = cursor.x >= viewportWidth - scrollAreaWidth
+      // Y movement
       if (movementDirection.y === 'up' && cursorIsTopSide && window.scrollY) {
         speed = this.speed(cursor, 'up')
         delta = {
@@ -87,6 +88,7 @@ export default {
         this.increasePageHeight(delta)
         this.scrollBy(delta)
       }
+      // X movement
       if (movementDirection.x === 'left' && cursorIsLeftSide && window.scrollX) {
         speed = this.speed(cursor, 'left')
         delta = {
