@@ -277,6 +277,7 @@ export default {
     shouldHideCardTips () { return this.$store.state.currentUser.shouldHideCardTips },
     spaceIsPrivate () {
       const space = this.linkToSpace
+      if (!space) { return }
       return space.privacy === 'private'
     },
     showCardTips () {

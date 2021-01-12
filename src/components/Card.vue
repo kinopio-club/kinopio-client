@@ -46,7 +46,7 @@ article(:style="position" :data-card-id="id" ref="card")
               img.icon.view(v-else src="@/assets/view.svg")
           User(:user="updatedByUser" :isClickable="false")
           template(v-if="commentIsVisible" v-for="segment in nameSegments")
-            MarkdownSegment(:segment="segment")
+            NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
           span(v-if="!commentIsVisible") …
 
       .card-content(v-else)
@@ -61,30 +61,7 @@ article(:style="position" :data-card-id="id" ref="card")
           //- Name
           p.name.name-segments(v-if="normalizedName" :style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image)}")
             template(v-for="segment in nameSegments")
-              template(v-if="segment.isText && segment.content")
-                MarkdownSegment(:segment="segment")
-                span(v-if="!segment.markdown") {{segment.content}}
-              //- Tags
-              span.badge.button-badge(
-                v-if="segment.isTag"
-                :style="{backgroundColor: segment.color}"
-                :class="{ active: currentSelectedTag.name === segment.name }"
-                @click.left="showTagDetailsIsVisible($event, segment)"
-                @touchend="showTagDetailsIsVisible($event, segment)"
-                @keyup.stop.enter="showTagDetailsIsVisible($event, segment)"
-                :data-tag-id="segment.id"
-              ) {{segment.name}}
-              //- Link
-              a(v-if="segment.isLink" :href="segment.name")
-                span.badge.button-badge.link-badge(
-                  :class="{ active: currentSelectedLink.name === segment.name }"
-                  @click.left.prevent="showLinkDetailsIsVisible($event, segment)"
-                  @touchend.prevent="showLinkDetailsIsVisible($event, segment)"
-                  @keyup.stop.enter="showLinkDetailsIsVisible($event, segment)"
-                )
-                  User(v-if="segment.space.users" :user="segment.space.users[0]" :isClickable="false")
-                  span {{segment.space.name || segment.content || segment.name }}
-                  img.icon.private(v-if="spaceIsPrivate(segment.space)" src="@/assets/lock.svg")
+              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
 
       //- Right buttons
       span.card-buttons-wrap
@@ -174,7 +151,7 @@ import Audio from '@/components/Audio.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import User from '@/components/User.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
-import MarkdownSegment from '@/components/MarkdownSegment.vue'
+import NameSegment from '@/components/NameSegment.vue'
 
 import fromNow from 'fromnow'
 
@@ -188,7 +165,7 @@ export default {
     Audio,
     User,
     UserDetails,
-    MarkdownSegment
+    NameSegment
   },
   props: {
     card: Object
@@ -585,9 +562,6 @@ export default {
     }
   },
   methods: {
-    spaceIsPrivate (space) {
-      return space.privacy === 'private'
-    },
     checkIfShouldUpdateCardConnectionPaths (width) {
       this.$nextTick(() => {
         this.$nextTick(() => {
@@ -853,7 +827,7 @@ export default {
       this.$store.commit('currentUserIsDraggingCard', false)
       this.broadcastShowCardDetails()
     },
-    showTagDetailsIsVisible (event, tag) {
+    showTagDetailsIsVisible ({ event, tag }) {
       if (isMultiTouch) { return }
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
       if (this.preventDraggedButtonBadgeFromShowingDetails) { return }
@@ -869,7 +843,7 @@ export default {
       this.$store.commit('currentSelectedTag', tag)
       this.$store.commit('tagDetailsIsVisible', true)
     },
-    showLinkDetailsIsVisible (event, link) {
+    showLinkDetailsIsVisible ({ event, link }) {
       if (isMultiTouch) { return }
       if (this.preventDraggedButtonBadgeFromShowingDetails) { return }
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
