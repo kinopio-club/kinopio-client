@@ -377,6 +377,7 @@ export default {
       if (checkbox) {
         name = name.replace(checkbox, '')
       }
+      name = this.removeCommentBrackets(name)
       return utils.trim(name)
     },
     nameSegments () {
@@ -903,7 +904,20 @@ export default {
         userId: this.$store.state.currentUser.id
       }
       this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
+    },
+    removeCommentBrackets (name) {
+      if (!this.nameIsComment) {
+        return name
+      }
+      const commentPattern = utils.commentPattern()
+      const comments = name.match(commentPattern)
+      comments.forEach(comment => {
+        const content = comment.substring(2, comment.length - 2)
+        name = name.replace(comment, content)
+      })
+      return name
     }
+
   }
 }
 </script>

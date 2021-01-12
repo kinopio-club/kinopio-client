@@ -1107,10 +1107,14 @@ export default {
     }
     return segments
   },
-  isNameComment (name) {
+  commentPattern () {
     // https://regexr.com/5ju19
     // matches ((text))
     const commentPattern = /(\(\().*?(\)\))/gims
+    return commentPattern
+  },
+  isNameComment (name) {
+    const commentPattern = this.commentPattern()
     const comment = name.match(commentPattern)
     const markdown = this.markdown()
     const code = name.match(markdown.codeBlockPattern) || name.match(markdown.codePattern)
