@@ -41,9 +41,9 @@ article(:style="position" :data-card-id="id" ref="card")
         .badge.secondary
           User(:user="updatedByUser" :isClickable="false")
           span …
-          .toggle-comment-wrap(@mousedown.left="toggleComment" @touchstart="toggleComment")
-            button.inline-button(:class="{active: commentNameIsVisible}" tabindex="-1")
-              img.icon.view(v-if="commentNameIsVisible" src="@/assets/view-hidden.svg")
+          .toggle-comment-wrap(@mousedown.left="toggleCommentIsVisible" @touchstart="toggleCommentIsVisible")
+            button.inline-button(:class="{active: commentIsVisible}" tabindex="-1")
+              img.icon.view(v-if="commentIsVisible" src="@/assets/view-hidden.svg")
               img.icon.view(v-else src="@/assets/view.svg")
 
       .card-content(v-else)
@@ -255,6 +255,7 @@ export default {
     x () { return this.card.x },
     y () { return this.card.y },
     z () { return this.card.z },
+    commentIsVisible () { return this.card.commentIsVisible },
     connectionTypes () { return this.$store.getters['currentSpace/cardConnectionTypes'](this.id) },
     newConnectionColor () { return this.$store.state.currentConnectionColor },
     name () { return this.card.name },
@@ -810,6 +811,14 @@ export default {
         this.createCurrentConnection(event)
       }
       this.$store.commit('currentUserIsDrawingConnection', true)
+    },
+    toggleCommentIsVisible (event) {
+      if (utils.isMultiTouch(event)) { return }
+      this.$store.dispatch('closeAllDialogs', 'Card.toggleComment')
+      this.$store.commit('preventDraggedCardFromShowingDetails', true)
+      this.$store.dispatch('clearMultipleSelected')
+      const cardId = this.id
+      this.$store.dispatch('currentSpace/toggleCommentIsVisible', cardId)
     },
     checkIfShouldDragMultipleCards () {
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
