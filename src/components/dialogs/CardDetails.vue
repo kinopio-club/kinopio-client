@@ -483,6 +483,7 @@ export default {
         seperated = this.seperatedSentences
       }
       const cardNames = seperated(this.pastedName || this.name)
+      this.pastedName = ''
       let newCards = cardNames.map(name => {
         return {
           id: nanoid(),
