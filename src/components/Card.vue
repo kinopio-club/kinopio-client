@@ -365,13 +365,21 @@ export default {
         name = name.replace(this.formats.video, '')
         name = name.replace(this.formats.audio, '')
       }
-      // for music use cases
+      // link hiding
       let link = this.formats.link
-      const isHidden = link.includes('hidden=true') || link.includes('kinopio=hide')
+      let isHidden
+      let markdownLinks = name.match(utils.markdown().linkPattern)
+      if (markdownLinks) {
+        const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(link))
+        isHidden = !linkIsMarkdown
+      } else if (link.includes('hidden=true')) {
+        isHidden = true
+      }
       if (isHidden) {
         name = name.replace(link, '')
         name = name.replace(utils.urlWithoutProtocol(link), '')
       }
+      // checkboxes
       const checkbox = utils.checkboxFromString(name)
       if (checkbox) {
         name = name.replace(checkbox, '')
