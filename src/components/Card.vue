@@ -39,12 +39,12 @@ article(:style="position" :data-card-id="id" ref="card")
           label(:class="{active: isChecked, disabled: !canEditSpace}")
             input(type="checkbox" v-model="checkboxState")
         .badge.secondary
-          User(:user="updatedByUser" :isClickable="false")
-          span …
           .toggle-comment-wrap(@mousedown.left="toggleCommentIsVisible" @touchstart="toggleCommentIsVisible")
             button.inline-button(:class="{active: commentIsVisible}" tabindex="-1")
               img.icon.view(v-if="commentIsVisible" src="@/assets/view-hidden.svg")
               img.icon.view(v-else src="@/assets/view.svg")
+          User(:user="updatedByUser" :isClickable="false")
+          span(v-if="!commentIsVisible") …
 
       .card-content(v-else)
         //- Audio
@@ -940,10 +940,11 @@ article
     &.active
       box-shadow var(--active-shadow)
     .card-comment
-      .badge
+      > .badge
         margin 0
         margin-top 6px
         margin-left 6px
+        margin-bottom 6px
         .user-avatar
           width 17px
           height 16px
@@ -1155,7 +1156,7 @@ article
   .toggle-comment-wrap
     display initial
     cursor pointer
-    padding-left 4px
+    padding-right 6px
     button
       cursor pointer
       background-color transparent
