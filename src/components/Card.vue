@@ -38,12 +38,15 @@ article(:style="position" :data-card-id="id" ref="card")
         .checkbox-wrap(v-if="hasCheckbox" @click.left.prevent.stop="toggleCardChecked" @touchend.prevent.stop="toggleCardChecked")
           label(:class="{active: isChecked, disabled: !canEditSpace}")
             input(type="checkbox" v-model="checkboxState")
+        //- Name
         .badge.secondary
           .toggle-comment-wrap(@mousedown.left="toggleCommentIsVisible" @touchstart="toggleCommentIsVisible")
             button.inline-button(:class="{active: commentIsVisible}" tabindex="-1")
               img.icon.view(v-if="commentIsVisible" src="@/assets/view-hidden.svg")
               img.icon.view(v-else src="@/assets/view.svg")
           User(:user="updatedByUser" :isClickable="false")
+          template(v-if="commentIsVisible" v-for="segment in nameSegments")
+            MarkdownSegment(:segment="segment")
           span(v-if="!commentIsVisible") …
 
       .card-content(v-else)
@@ -55,30 +58,12 @@ article(:style="position" :data-card-id="id" ref="card")
           .checkbox-wrap(v-if="hasCheckbox" @click.left.prevent.stop="toggleCardChecked" @touchend.prevent.stop="toggleCardChecked")
             label(:class="{active: isChecked, disabled: !canEditSpace}")
               input(type="checkbox" v-model="checkboxState")
-
           //- Name
           p.name.name-segments(v-if="normalizedName" :style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image)}")
             template(v-for="segment in nameSegments")
-              //- Markdown
               template(v-if="segment.isText && segment.content")
-                span.markdown(v-if="segment.markdown")
-                  template(v-for="markdown in segment.markdown")
-                    template(v-if="markdown.type === 'text'")
-                      span {{markdown.content}}
-                    template(v-else-if="markdown.type === 'link'")
-                      a(:href="markdown.result[2]") {{markdown.result[1]}}
-                    template(v-else-if="markdown.type === 'bold'")
-                      strong {{markdown.content}}
-                    template(v-else-if="markdown.type === 'emphasis'")
-                      em {{markdown.content}}
-                    template(v-else-if="markdown.type === 'strikethrough'")
-                      del {{markdown.content}}
-                    template(v-else-if="markdown.type === 'codeBlock'")
-                      pre {{markdown.content}}
-                    template(v-else-if="markdown.type === 'code'")
-                      code {{markdown.content}}
-
-                span(v-else) {{segment.content}}
+                MarkdownSegment(:segment="segment")
+                span(v-if="!segment.markdown") {{segment.content}}
               //- Tags
               span.badge.button-badge(
                 v-if="segment.isTag"
@@ -189,6 +174,7 @@ import Audio from '@/components/Audio.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import User from '@/components/User.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
+import MarkdownSegment from '@/components/MarkdownSegment.vue'
 
 import fromNow from 'fromnow'
 
@@ -201,7 +187,8 @@ export default {
     Loader,
     Audio,
     User,
-    UserDetails
+    UserDetails,
+    MarkdownSegment
   },
   props: {
     card: Object
