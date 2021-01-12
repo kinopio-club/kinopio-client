@@ -41,6 +41,11 @@ article(:style="position" :data-card-id="id" ref="card")
         .badge.secondary
           User(:user="updatedByUser" :isClickable="false")
           span …
+          .toggle-comment-wrap(@mousedown.left="toggleComment" @touchstart="toggleComment")
+            button.inline-button(:class="{active: commentNameIsVisible}" tabindex="-1")
+              img.icon.view(v-if="commentNameIsVisible" src="@/assets/view-hidden.svg")
+              img.icon.view(v-else src="@/assets/view.svg")
+
       .card-content(v-else)
         //- Audio
         .audio-wrap(v-if="Boolean(formats.audio)")
@@ -930,6 +935,9 @@ article
         margin 0
         margin-top 6px
         margin-left 6px
+        .user-avatar
+          width 17px
+          height 16px
     .card-content-wrap
       display flex
       align-items flex-start
@@ -1134,6 +1142,19 @@ article
           font-size 10px
     .icon.private
       margin-left 6px
+
+  .toggle-comment-wrap
+    display initial
+    cursor pointer
+    padding-left 4px
+    button
+      cursor pointer
+      background-color transparent
+    .icon
+      width 12px
+      position absolute
+      left 3px
+      top 2px
 
 @keyframes bounce
   0%
