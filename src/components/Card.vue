@@ -41,7 +41,7 @@ article(:style="position" :data-card-id="id" ref="card")
         //- Name
         .badge.secondary
           .toggle-comment-wrap(@mousedown.left="toggleCommentIsVisible" @touchstart="toggleCommentIsVisible")
-            button.inline-button(:class="{active: commentIsVisible}" tabindex="-1")
+            button.inline-button(:class="{active: commentIsVisible}" tabindex="-1" :disabled="!canEditSpace")
               img.icon.view(v-if="commentIsVisible" src="@/assets/view-hidden.svg")
               img.icon.view(v-else src="@/assets/view.svg")
           User(:user="updatedByUser" :isClickable="false")
@@ -776,6 +776,7 @@ export default {
       this.$store.commit('currentUserIsDrawingConnection', true)
     },
     toggleCommentIsVisible (event) {
+      if (!this.canEditSpace) { return }
       if (utils.isMultiTouch(event)) { return }
       this.$store.dispatch('closeAllDialogs', 'Card.toggleComment')
       this.$store.commit('preventDraggedCardFromShowingDetails', true)

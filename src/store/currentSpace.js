@@ -1135,12 +1135,7 @@ export default {
     toggleCommentIsVisible: (context, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'toggleCommentIsVisible' })
       const card = context.getters.cardById(cardId)
-      const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
       const value = !card.commentIsVisible
-      if (!userCanEdit) {
-        context.commit('updateCard', card)
-        return
-      }
       context.dispatch('updateCard', {
         id: cardId,
         commentIsVisible: value
