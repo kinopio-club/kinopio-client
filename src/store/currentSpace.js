@@ -1130,6 +1130,18 @@ export default {
       context.commit('loadSpaceShowDetailsForCardId', '', { root: true })
     },
 
+    // Comments
+
+    toggleCommentIsVisible: (context, cardId) => {
+      utils.typeCheck({ value: cardId, type: 'string', origin: 'toggleCommentIsVisible' })
+      const card = context.getters.cardById(cardId)
+      const value = !card.commentIsVisible
+      context.dispatch('updateCard', {
+        id: cardId,
+        commentIsVisible: value
+      })
+    },
+
     // Connections
 
     addConnection: (context, { connection, connectionType }) => {

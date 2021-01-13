@@ -38,10 +38,19 @@ article(:style="position" :data-card-id="id" ref="card")
         .checkbox-wrap(v-if="hasCheckbox" @click.left.prevent.stop="toggleCardChecked" @touchend.prevent.stop="toggleCardChecked")
           label(:class="{active: isChecked, disabled: !canEditSpace}")
             input(type="checkbox" v-model="checkboxState")
+        //- Name
         .badge.secondary
+          .toggle-comment-wrap(@mousedown.left="toggleCommentIsVisible" @touchstart="toggleCommentIsVisible")
+            button.inline-button(:class="{active: commentIsVisible}" tabindex="-1" :disabled="!canEditSpace")
+              img.icon.view(v-if="commentIsVisible" src="@/assets/view-hidden.svg")
+              img.icon.view(v-else src="@/assets/view.svg")
           User(:user="updatedByUser" :isClickable="false")
-          span …
-      .card-content(v-else)
+          p.comment.name-segments(v-if="commentIsVisible" :class="{'is-checked': isChecked}")
+            template(v-for="segment in nameSegments")
+              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
+          span(v-if="!commentIsVisible") …
+
+      .card-content(v-if="!nameIsComment")
         //- Audio
         .audio-wrap(v-if="Boolean(formats.audio)")
           Audio(:visible="Boolean(formats.audio)" :url="formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
@@ -50,51 +59,10 @@ article(:style="position" :data-card-id="id" ref="card")
           .checkbox-wrap(v-if="hasCheckbox" @click.left.prevent.stop="toggleCardChecked" @touchend.prevent.stop="toggleCardChecked")
             label(:class="{active: isChecked, disabled: !canEditSpace}")
               input(type="checkbox" v-model="checkboxState")
-
           //- Name
           p.name.name-segments(v-if="normalizedName" :style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image)}")
             template(v-for="segment in nameSegments")
-              //- Markdown
-              template(v-if="segment.isText && segment.content")
-                span.markdown(v-if="segment.markdown")
-                  template(v-for="markdown in segment.markdown")
-                    template(v-if="markdown.type === 'text'")
-                      span {{markdown.content}}
-                    template(v-else-if="markdown.type === 'link'")
-                      a(:href="markdown.result[2]") {{markdown.result[1]}}
-                    template(v-else-if="markdown.type === 'bold'")
-                      strong {{markdown.content}}
-                    template(v-else-if="markdown.type === 'emphasis'")
-                      em {{markdown.content}}
-                    template(v-else-if="markdown.type === 'strikethrough'")
-                      del {{markdown.content}}
-                    template(v-else-if="markdown.type === 'codeBlock'")
-                      pre {{markdown.content}}
-                    template(v-else-if="markdown.type === 'code'")
-                      code {{markdown.content}}
-
-                span(v-else) {{segment.content}}
-              //- Tags
-              span.badge.button-badge(
-                v-if="segment.isTag"
-                :style="{backgroundColor: segment.color}"
-                :class="{ active: currentSelectedTag.name === segment.name }"
-                @click.left="showTagDetailsIsVisible($event, segment)"
-                @touchend="showTagDetailsIsVisible($event, segment)"
-                @keyup.stop.enter="showTagDetailsIsVisible($event, segment)"
-                :data-tag-id="segment.id"
-              ) {{segment.name}}
-              //- Link
-              a(v-if="segment.isLink" :href="segment.name")
-                span.badge.button-badge.link-badge(
-                  :class="{ active: currentSelectedLink.name === segment.name }"
-                  @click.left.prevent="showLinkDetailsIsVisible($event, segment)"
-                  @touchend.prevent="showLinkDetailsIsVisible($event, segment)"
-                  @keyup.stop.enter="showLinkDetailsIsVisible($event, segment)"
-                )
-                  User(v-if="segment.space.users" :user="segment.space.users[0]" :isClickable="false")
-                  span {{segment.space.name || segment.content || segment.name }}
-                  img.icon.private(v-if="spaceIsPrivate(segment.space)" src="@/assets/lock.svg")
+              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
 
       //- Right buttons
       span.card-buttons-wrap
@@ -184,6 +152,7 @@ import Audio from '@/components/Audio.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import User from '@/components/User.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
+import NameSegment from '@/components/NameSegment.vue'
 
 import fromNow from 'fromnow'
 
@@ -196,7 +165,8 @@ export default {
     Loader,
     Audio,
     User,
-    UserDetails
+    UserDetails,
+    NameSegment
   },
   props: {
     card: Object
@@ -250,6 +220,7 @@ export default {
     x () { return this.card.x },
     y () { return this.card.y },
     z () { return this.card.z },
+    commentIsVisible () { return this.card.commentIsVisible },
     connectionTypes () { return this.$store.getters['currentSpace/cardConnectionTypes'](this.id) },
     newConnectionColor () { return this.$store.state.currentConnectionColor },
     name () { return this.card.name },
@@ -384,6 +355,7 @@ export default {
       if (checkbox) {
         name = name.replace(checkbox, '')
       }
+      name = this.removeCommentBrackets(name)
       return utils.trim(name)
     },
     nameSegments () {
@@ -591,9 +563,6 @@ export default {
     }
   },
   methods: {
-    spaceIsPrivate (space) {
-      return space.privacy === 'private'
-    },
     checkIfShouldUpdateCardConnectionPaths (width) {
       this.$nextTick(() => {
         this.$nextTick(() => {
@@ -806,6 +775,27 @@ export default {
       }
       this.$store.commit('currentUserIsDrawingConnection', true)
     },
+    toggleCommentIsVisible (event) {
+      if (!this.canEditSpace) { return }
+      if (utils.isMultiTouch(event)) { return }
+      this.$store.dispatch('closeAllDialogs', 'Card.toggleComment')
+      this.$store.commit('preventDraggedCardFromShowingDetails', true)
+      this.$store.dispatch('clearMultipleSelected')
+      const cardId = this.id
+      this.$store.dispatch('currentSpace/toggleCommentIsVisible', cardId)
+      this.updateCardConnectionPathsIfOpenSpace()
+    },
+    updateCardConnectionPathsIfOpenSpace () {
+      const spaceIsOpen = this.$store.state.currentSpace.privacy === 'open'
+      const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
+      if (spaceIsOpen && !isSpaceMember) {
+        this.$nextTick(() => {
+          this.$nextTick(() => {
+            this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.id, shouldUpdateApi: true })
+          })
+        })
+      }
+    },
     checkIfShouldDragMultipleCards () {
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
       if (!multipleCardsSelectedIds.includes(this.id)) {
@@ -851,7 +841,7 @@ export default {
       this.$store.commit('currentUserIsDraggingCard', false)
       this.broadcastShowCardDetails()
     },
-    showTagDetailsIsVisible (event, tag) {
+    showTagDetailsIsVisible ({ event, tag }) {
       if (isMultiTouch) { return }
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
       if (this.preventDraggedButtonBadgeFromShowingDetails) { return }
@@ -867,7 +857,7 @@ export default {
       this.$store.commit('currentSelectedTag', tag)
       this.$store.commit('tagDetailsIsVisible', true)
     },
-    showLinkDetailsIsVisible (event, link) {
+    showLinkDetailsIsVisible ({ event, link }) {
       if (isMultiTouch) { return }
       if (this.preventDraggedButtonBadgeFromShowingDetails) { return }
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
@@ -902,7 +892,20 @@ export default {
         userId: this.$store.state.currentUser.id
       }
       this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
+    },
+    removeCommentBrackets (name) {
+      if (!this.nameIsComment) {
+        return name
+      }
+      const commentPattern = utils.commentPattern()
+      const comments = name.match(commentPattern)
+      comments.forEach(comment => {
+        const content = comment.substring(2, comment.length - 2)
+        name = name.replace(comment, content)
+      })
+      return name
     }
+
   }
 }
 </script>
@@ -926,10 +929,17 @@ article
     &.active
       box-shadow var(--active-shadow)
     .card-comment
-      .badge
+      > .badge
         margin 0
         margin-top 6px
         margin-left 6px
+        margin-bottom 6px
+        .user-avatar
+          width 17px
+          height 16px
+      .comment
+        &.is-checked
+          text-decoration line-through
     .card-content-wrap
       display flex
       align-items flex-start
@@ -970,26 +980,6 @@ article
         a
           color var(--primary)
           text-decoration none
-      .markdown
-        a
-          color var(--text-link)
-          text-decoration underline
-          &:hover
-            text-decoration none
-        strong
-          font-weight normal
-          background-color var(--info-background)
-          border-radius 3px
-        pre
-          font-weight normal
-          background-color var(--secondary-active-background)
-          border-radius 3px
-          margin 0
-          white-space pre-wrap
-        code
-          font-weight normal
-          background-color var(--secondary-active-background)
-          border-radius 3px
 
     .connector,
     .url
@@ -1134,6 +1124,19 @@ article
           font-size 10px
     .icon.private
       margin-left 6px
+
+  .toggle-comment-wrap
+    display initial
+    cursor pointer
+    padding-right 6px
+    button
+      cursor pointer
+      background-color transparent
+    .icon
+      width 12px
+      position absolute
+      left 3px
+      top 2px
 
 @keyframes bounce
   0%
