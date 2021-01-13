@@ -963,26 +963,6 @@ article
         a
           color var(--primary)
           text-decoration none
-      .markdown
-        a
-          color var(--text-link)
-          text-decoration underline
-          &:hover
-            text-decoration none
-        strong
-          font-weight normal
-          background-color var(--info-background)
-          border-radius 3px
-        pre
-          font-weight normal
-          background-color var(--secondary-active-background)
-          border-radius 3px
-          margin 0
-          white-space pre-wrap
-        code
-          font-weight normal
-          background-color var(--secondary-active-background)
-          border-radius 3px
 
     .connector,
     .url

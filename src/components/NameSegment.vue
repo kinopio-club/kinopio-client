@@ -76,6 +76,7 @@ export default {
 .name-segment
   .markdown
     word-break break-word
+    white-space pre-wrap
     a
       color var(--text-link)
       text-decoration underline
