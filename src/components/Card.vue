@@ -45,11 +45,12 @@ article(:style="position" :data-card-id="id" ref="card")
               img.icon.view(v-if="commentIsVisible" src="@/assets/view-hidden.svg")
               img.icon.view(v-else src="@/assets/view.svg")
           User(:user="updatedByUser" :isClickable="false")
-          template(v-if="commentIsVisible" v-for="segment in nameSegments")
-            NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
+          p.comment.name-segments(v-if="commentIsVisible" :class="{'is-checked': isChecked}")
+            template(v-for="segment in nameSegments")
+              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
           span(v-if="!commentIsVisible") …
 
-      .card-content(v-else)
+      .card-content(v-if="!nameIsComment")
         //- Audio
         .audio-wrap(v-if="Boolean(formats.audio)")
           Audio(:visible="Boolean(formats.audio)" :url="formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
@@ -923,6 +924,9 @@ article
         .user-avatar
           width 17px
           height 16px
+      .comment
+        &.is-checked
+          text-decoration line-through
     .card-content-wrap
       display flex
       align-items flex-start
