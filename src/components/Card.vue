@@ -783,6 +783,18 @@ export default {
       this.$store.dispatch('clearMultipleSelected')
       const cardId = this.id
       this.$store.dispatch('currentSpace/toggleCommentIsVisible', cardId)
+      this.updateCardConnectionPathsIfOpenSpace()
+    },
+    updateCardConnectionPathsIfOpenSpace () {
+      const spaceIsOpen = this.$store.state.currentSpace.privacy === 'open'
+      const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
+      if (spaceIsOpen && !isSpaceMember) {
+        this.$nextTick(() => {
+          this.$nextTick(() => {
+            this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.id, shouldUpdateApi: true })
+          })
+        })
+      }
     },
     checkIfShouldDragMultipleCards () {
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
