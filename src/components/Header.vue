@@ -42,11 +42,15 @@ header(:style="visualViewportPosition")
 
   aside
     .top
-      // Share
-      .button-wrap
-        button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
-          span Share
-        Share(:visible="shareIsVisible")
+      .top-buttons-wrap
+        // Share
+        .button-wrap
+          button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
+            span Share
+          Share(:visible="shareIsVisible")
+        // Notifications
+        .button-wrap
+          button 0
 
       .users
         User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
@@ -439,6 +443,11 @@ header
       flex-wrap wrap
       justify-content flex-end
       align-content flex-start
+
+  .top-buttons-wrap
+    display inline-table
+    .button-wrap + .button-wrap
+      margin-left 6px
 
   .bottom
     margin-top 5px
