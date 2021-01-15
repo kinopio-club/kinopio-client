@@ -29,7 +29,7 @@ span.name-segment
     :data-tag-id="segment.id"
   ) {{segment.name}}
   //- Link
-  a(v-if="segment.isLink" :href="segment.name")
+  a.link-badge-url(v-if="segment.isLink" :href="segment.name")
     span.badge.button-badge.link-badge(
       :class="{ active: currentSelectedLink.name === segment.name }"
       @click.left.prevent="showLinkDetailsIsVisible($event, segment)"
@@ -96,4 +96,20 @@ export default {
       font-weight normal
       background-color var(--secondary-active-background)
       border-radius 3px
+
+  .link-badge-url
+    color var(--primary)
+    text-decoration none
+
+  .link-badge
+    background-color var(--secondary-active-background)
+    .user
+      .label-badge
+        width 21px
+        height 10px
+        span
+          font-size 10px
+    .icon.private
+      margin-left 6px
+
 </style>
