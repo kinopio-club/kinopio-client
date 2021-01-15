@@ -50,7 +50,9 @@ header(:style="visualViewportPosition")
           Share(:visible="shareIsVisible")
         // Notifications
         .button-wrap
-          button 0
+          button(@click.left.stop="toggleNotificationsIsVisible" :class="{active : notificationsIsVisible}")
+            span 0
+          Notifications(:visible="notificationsIsVisible")
 
       .users
         User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
@@ -86,6 +88,7 @@ import User from '@/components/User.vue'
 import SignUpOrIn from '@/components/dialogs/SignUpOrIn.vue'
 import ResetPassword from '@/components/dialogs/ResetPassword.vue'
 import Share from '@/components/dialogs/Share.vue'
+import Notifications from '@/components/dialogs/Notifications.vue'
 import Loader from '@/components/Loader.vue'
 import templates from '@/data/templates.js'
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
@@ -108,6 +111,7 @@ export default {
     SignUpOrIn,
     ResetPassword,
     Share,
+    Notifications,
     Loader,
     ImportArenaChannel,
     KeyboardShortcuts,
@@ -120,6 +124,7 @@ export default {
       spaceDetailsIsVisible: false,
       signUpOrInIsVisible: false,
       shareIsVisible: false,
+      notificationsIsVisible: false,
       loadingSignUpOrIn: false,
       keyboardShortcutsIsVisible: false,
       upgradeUserIsVisible: false,
@@ -287,6 +292,7 @@ export default {
       this.upgradeUserIsVisible = false
       this.spaceStatusIsVisible = false
       this.offlineIsVisible = false
+      this.notificationsIsVisible = false
     },
     updatePositionFrame () {
       currentIteration++
@@ -323,6 +329,11 @@ export default {
       const isVisible = this.shareIsVisible
       this.$store.dispatch('closeAllDialogs', 'Header.toggleShareIsVisible')
       this.shareIsVisible = !isVisible
+    },
+    toggleNotificationsIsVisible () {
+      const isVisible = this.notificationsIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleNotificationsIsVisible')
+      this.notificationsIsVisible = !isVisible
     },
     toggleSpaceStatusIsVisible () {
       const isVisible = this.spaceStatusIsVisible
