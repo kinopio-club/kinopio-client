@@ -966,7 +966,12 @@ export default {
   cardNameSegments (name) {
     const tags = this.tagsFromString(name) || []
     const urls = this.urlsFromString(name) || []
-    const links = urls.filter(url => this.urlIsKinopioSpace(url))
+    const markdownLinks = name.match(this.markdown().linkPattern) || []
+    const links = urls.filter(url => {
+      const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(url))
+      if (linkIsMarkdown) { return }
+      return this.urlIsKinopioSpace(url)
+    })
     let badges = []
     let segments = []
     tags.forEach(tag => {
