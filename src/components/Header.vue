@@ -51,7 +51,7 @@ header(:style="visualViewportPosition")
         // Notifications
         .button-wrap
           button(@click.left.stop="toggleNotificationsIsVisible" :class="{active : notificationsIsVisible}")
-            span 0
+            span 2
           Notifications(:visible="notificationsIsVisible")
 
       .users
