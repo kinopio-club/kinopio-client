@@ -44,7 +44,13 @@ article(:style="position" :data-card-id="id" ref="card")
             button.inline-button(:class="{active: commentIsVisible}" tabindex="-1" :disabled="!canEditSpace")
               img.icon.view(v-if="commentIsVisible" src="@/assets/view-hidden.svg")
               img.icon.view(v-else src="@/assets/view.svg")
-          User(:user="updatedByUser" :isClickable="false")
+          //- User
+          template(v-if="commentIsVisible")
+            .badge.user-badge.user-badge.comment-user-badge(:style="{background: updatedByUser.color}")
+              User(:user="updatedByUser" :isClickable="false")
+              span {{updatedByUser.name}}
+          template(v-if="!commentIsVisible")
+            User(:user="updatedByUser" :isClickable="false")
           p.comment.name-segments(v-if="commentIsVisible" :class="{'is-checked': isChecked}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
@@ -1136,6 +1142,11 @@ article
       position absolute
       left 3px
       top 2px
+
+  .comment-user-badge
+    display inline
+    .user
+      vertical-align bottom
 
 @keyframes bounce
   0%
