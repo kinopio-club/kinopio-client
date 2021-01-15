@@ -983,9 +983,6 @@ article
         &.has-checkbox
           .audio
             width 132px
-        a
-          color var(--primary)
-          text-decoration none
 
     .connector,
     .url
@@ -1118,17 +1115,6 @@ article
           margin-top 1px
     .badge + .badge,
     .badge-wrap + .badge
-      margin-left 6px
-
-  .link-badge
-    background-color var(--secondary-active-background)
-    .user
-      .label-badge
-        width 21px
-        height 10px
-        span
-          font-size 10px
-    .icon.private
       margin-left 6px
 
   .toggle-comment-wrap
