@@ -1131,7 +1131,6 @@ article
     padding-right 6px
     button
       cursor pointer
-      background-color transparent
     .icon
       width 12px
       position absolute
