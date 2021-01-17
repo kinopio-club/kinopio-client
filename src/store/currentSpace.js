@@ -889,6 +889,7 @@ export default {
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
       context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: true }, { root: true })
       context.dispatch('checkIfShouldNotifyCardsCreatedIsNearLimit')
+      console.log('🌷', context.getters.membersToNotify)
     },
     addMultipleCards: (context, newCards) => {
       newCards.forEach(card => {
@@ -1465,6 +1466,16 @@ export default {
       const cardsCreatedIsOverLimit = rootGetters['currentUser/cardsCreatedIsOverLimit']
       const spaceUserIsUpgraded = getters.spaceUserIsUpgraded
       return cardsCreatedIsOverLimit && !spaceUserIsUpgraded
+    },
+    membersToNotify: (state, getters) => {
+      let members = getters.members(true)
+
+      // members.forEach(member => {
+      //   remove not online member
+      // })
+
+      return members
+      // remove the ones that are online
     }
   }
 }
