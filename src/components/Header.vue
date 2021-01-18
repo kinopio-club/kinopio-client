@@ -51,9 +51,9 @@ header(:style="visualViewportPosition")
         // Notifications
         .button-wrap
           button(@click.left.stop="toggleNotificationsIsVisible" :class="{active : notificationsIsVisible}")
-            span 2
-          Notifications(:visible="notificationsIsVisible")
-
+            span(v-if="notificationsIsLoading") …
+            span(v-else) {{notificationsUnreadCount}}
+          Notifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount")
       .users
         User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
         User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
@@ -133,7 +133,9 @@ export default {
       pinchZoomOffsetLeft: 0,
       pinchZoomOffsetTop: 0,
       pinchZoomScale: 1,
-      readOnlyJiggle: false
+      readOnlyJiggle: false,
+      notifications: [],
+      notificationsIsLoading: true
     }
   },
   created () {
@@ -170,6 +172,7 @@ export default {
   },
   mounted () {
     window.addEventListener('scroll', this.updatePositionInVisualViewport)
+    this.updateNotifications()
   },
   computed: {
     shouldShowNewStuffIsUpdated () {
@@ -271,6 +274,10 @@ export default {
           'transform-origin': 'left top'
         }
       }
+    },
+    notificationsUnreadCount () {
+      const unread = this.notifications.filter(notification => !notification.isRead)
+      return unread.length
     }
   },
   methods: {
@@ -353,6 +360,11 @@ export default {
       const isVisible = this.upgradeUserIsVisible
       this.$store.dispatch('closeAllDialogs', 'Header.triggerUpgradeUserIsVisible')
       this.upgradeUserIsVisible = !isVisible
+    },
+    async updateNotifications () {
+      this.notificationsIsLoading = true
+      this.notifications = await this.$store.dispatch('api/getNotifications')
+      this.notificationsIsLoading = false
     }
   }
 }

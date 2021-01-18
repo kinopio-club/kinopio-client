@@ -1140,7 +1140,7 @@ export default {
         recipientUserIds,
         spaceId: context.state.id
       }
-      context.dispatch('api/addToQueue', { name: 'createNotification', body: notification }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'createNotifications', body: notification }, { root: true })
       notifiedCardAdded.push(cardId)
     },
 
