@@ -276,8 +276,9 @@ export default {
       }
     },
     notificationsUnreadCount () {
+      if (!this.notifications) { return 0 }
       const unread = this.notifications.filter(notification => !notification.isRead)
-      return unread.length
+      return unread.length || 0
     }
   },
   methods: {

@@ -889,6 +889,7 @@ export default {
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
       context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: true }, { root: true })
       context.dispatch('checkIfShouldNotifyCardsCreatedIsNearLimit')
+      context.dispatch('notifyMembersCardAdded', id)
     },
     addMultipleCards: (context, newCards) => {
       newCards.forEach(card => {
