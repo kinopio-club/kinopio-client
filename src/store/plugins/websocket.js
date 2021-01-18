@@ -115,8 +115,8 @@ export default function createWebSocketPlugin () {
           // presence
           } else if (message === 'userJoinedRoom') {
             store.dispatch('currentSpace/addUserToJoinedSpace', user)
-          } else if (message === 'addSpectatorToSpace') {
-            store.dispatch('currentSpace/addSpectatorToSpace', updates)
+          } else if (message === 'updateUserPresence') {
+            store.dispatch('currentSpace/updateUserPresence', updates)
             store.commit('updateOtherUsers', updates.user, { root: true })
           } else if (message === 'userLeftRoom') {
             store.commit('currentSpace/removeSpectatorFromSpace', user || updates.user)

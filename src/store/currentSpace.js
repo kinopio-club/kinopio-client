@@ -349,12 +349,11 @@ export default {
 
     // Users and otherSpaces
 
-    addSpectatorToSpace: (context, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'addSpectatorToSpace' })
+    updateUserPresence: (context, update) => {
+      utils.typeCheck({ value: update, type: 'object', origin: 'updateUserPresence' })
       const newUser = update.user || update
-      const userExists = context.state.users.find(user => user.id === newUser.id)
-      const collaboratorExists = context.state.collaborators.find(collaborator => collaborator.id === newUser.id)
-      if (userExists || collaboratorExists) {
+      const member = context.getters.memberById(newUser.id)
+      if (member) {
         context.commit('updateSpaceClients', [newUser])
       } else {
         context.commit('addSpectatorToSpace', newUser)
@@ -364,7 +363,7 @@ export default {
         }
         spectatorIdleTimers[newUser.id] = setTimeout(() => {
           removeIdleSpectator(newUser)
-        }, 10 * 60 * 1000)
+        }, 60 * 1000) // 60 seconds
       }
     },
     addUserToJoinedSpace: (context, newUser) => {
@@ -372,7 +371,7 @@ export default {
         context.commit('addCollaboratorToSpace', newUser)
         context.commit('removeSpectatorFromSpace', newUser)
       } else {
-        context.dispatch('addSpectatorToSpace', newUser)
+        context.dispatch('updateUserPresence', newUser)
       }
     },
     updateOtherUsers: async (context) => {
@@ -889,7 +888,6 @@ export default {
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
       context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: true }, { root: true })
       context.dispatch('checkIfShouldNotifyCardsCreatedIsNearLimit')
-      console.log('🌷', context.getters.membersToNotify)
     },
     addMultipleCards: (context, newCards) => {
       newCards.forEach(card => {
@@ -1467,15 +1465,11 @@ export default {
       const spaceUserIsUpgraded = getters.spaceUserIsUpgraded
       return cardsCreatedIsOverLimit && !spaceUserIsUpgraded
     },
-    membersToNotify: (state, getters) => {
+    membersToNotify: (state, getters, rootState, rootGetters) => {
+      let clients = state.clients.map(client => client.id)
       let members = getters.members(true)
-
-      // members.forEach(member => {
-      //   remove not online member
-      // })
-
+      members = members.filter(member => !clients.includes(member.id))
       return members
-      // remove the ones that are online
     }
   }
 }
