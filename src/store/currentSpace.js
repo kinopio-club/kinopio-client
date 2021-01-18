@@ -17,6 +17,7 @@ import dayjs from 'dayjs'
 
 let otherSpacesQueue = [] // id
 let spectatorIdleTimers = []
+let notifiedCardAdded = []
 
 export default {
   namespaced: true,
@@ -1129,6 +1130,7 @@ export default {
       context.commit('loadSpaceShowDetailsForCardId', '', { root: true })
     },
     notifyMembersCardAdded: (context, cardId) => {
+      if (notifiedCardAdded.includes(cardId)) { return }
       const membersToNotify = context.getters.membersToNotify
       const recipientUserIds = membersToNotify.map(member => member.id)
       const notification = {
@@ -1139,6 +1141,7 @@ export default {
         spaceId: context.state.id
       }
       context.dispatch('api/addToQueue', { name: 'createNotification', body: notification }, { root: true })
+      notifiedCardAdded.push(cardId)
     },
 
     // Comments
