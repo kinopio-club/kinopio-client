@@ -53,7 +53,7 @@ header(:style="visualViewportPosition")
           button(@click.left.stop="toggleNotificationsIsVisible" :class="{active : notificationsIsVisible}")
             span(v-if="notificationsIsLoading") …
             span(v-else) {{notificationsUnreadCount}}
-          Notifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount")
+          Notifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead")
       .users
         User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
         User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")

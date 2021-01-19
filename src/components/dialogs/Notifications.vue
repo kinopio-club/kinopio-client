@@ -19,7 +19,7 @@ dialog.narrow.notifications(v-if="visible" :open="visible" ref="dialog" :style="
             span {{group.spaceName}}
         //- notification
         template(v-for="(notification in group.notifications")
-          li
+          li(@click="showCardDetails(notification)" :class="{ active: cardDetailsIsVisible(notification.card.id) }")
             p
               span.badge.info(v-if="!notification.isRead") New
               span.badge.user-badge.user-badge(:style="{background: notification.user.color}")
@@ -36,8 +36,9 @@ dialog.narrow.notifications(v-if="visible" :open="visible" ref="dialog" :style="
 <script>
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
-import utils from '@/utils.js'
 import NameSegment from '@/components/NameSegment.vue'
+import utils from '@/utils.js'
+import cache from '@/cache.js'
 
 export default {
   name: 'Notifications',
@@ -87,6 +88,9 @@ export default {
     }
   },
   methods: {
+    cardDetailsIsVisible (cardId) {
+      return this.$store.state.cardDetailsIsVisibleForCardId === cardId
+    },
     spaceIsCurrentSpace (spaceId) {
       return spaceId === this.currentSpaceId
     },
@@ -116,8 +120,22 @@ export default {
       })
     },
     markAllAsRead () {
-      console.log('☮️☮️☮️☮️')
-      // local and api op: mark as real all this.notifications which are isRead: false
+      this.$emit('markAllAsRead')
+    },
+    showCardDetails (notification) {
+      let space = notification.space
+      const card = notification.card
+      if (this.currentSpaceId !== space.id) {
+        this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
+        const cachedSpace = cache.space(space.id)
+        if (cachedSpace) {
+          space = cachedSpace
+        }
+        this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      } else {
+        this.$store.dispatch('currentSpace/showCardDetails', card.id)
+      }
+      this.$emit('markAsRead', notification.id)
     },
     updateDialogHeight () {
       if (!this.visible) { return }
