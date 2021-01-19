@@ -367,7 +367,7 @@ export default {
 
     async updateNotifications () {
       this.notificationsIsLoading = true
-      this.notifications = await this.$store.dispatch('api/getNotifications')
+      this.notifications = await this.$store.dispatch('api/getNotifications') || []
       this.notificationsIsLoading = false
     },
     markAllAsRead () {

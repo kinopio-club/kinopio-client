@@ -2,7 +2,8 @@
 dialog.narrow.notifications(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     p
-      span.badge.info {{unreadCount}}
+      span.badge.info(v-if="unreadCount") {{unreadCount}}
+      span(v-else) {{unreadCount}}{{' '}}
       span Notifications
 
   section(v-if="loading")
