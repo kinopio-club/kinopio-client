@@ -1124,7 +1124,6 @@ export default {
       }
     },
     showCardDetails: (context, cardId) => {
-      context.dispatch('closeAllDialogs', 'currentSpace.showCardDetails', { root: true })
       context.dispatch('incrementCardZ', cardId)
       context.commit('cardDetailsIsVisibleForCardId', cardId, { root: true })
       context.commit('parentCardId', cardId, { root: true })
