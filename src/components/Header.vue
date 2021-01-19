@@ -362,10 +362,33 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'Header.triggerUpgradeUserIsVisible')
       this.upgradeUserIsVisible = !isVisible
     },
+
+    // notifications
+
     async updateNotifications () {
       this.notificationsIsLoading = true
       this.notifications = await this.$store.dispatch('api/getNotifications')
       this.notificationsIsLoading = false
+    },
+    markAllAsRead () {
+      const notifications = this.notifications.filter(notification => !notification.isRead)
+      const notificationIds = notifications.map(notification => notification.id)
+      this.updateNotificationsIsRead(notificationIds)
+    },
+    markAsRead (notificationId) {
+      this.updateNotificationsIsRead([notificationId])
+    },
+    updateNotificationsIsRead (notificationIds) {
+      this.notifications = this.notifications.map(notification => {
+        if (notificationIds.includes(notification.id)) {
+          notification.isRead = true
+        }
+        return notification
+      })
+      this.$store.dispatch('api/addToQueue', {
+        name: 'updateNotificationsIsRead',
+        body: notificationIds
+      })
     }
   }
 }
