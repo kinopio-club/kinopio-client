@@ -254,6 +254,7 @@ export default new Vuex.Store({
     triggerScrollCardIntoView: (state, cardId) => {},
     triggerPickerNavigationKey: (state, key) => {},
     triggerPickerSelect: () => {},
+    triggerUpdateNotifications: () => {},
 
     // Cards
 

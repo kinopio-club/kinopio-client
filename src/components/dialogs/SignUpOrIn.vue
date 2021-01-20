@@ -256,6 +256,7 @@ export default {
         this.$store.commit('triggerSpaceDetailsVisible')
         this.$store.commit('hasRestoredFavorites', false)
         this.$store.dispatch('currentUser/restoreUserFavorites')
+        this.$store.commit('triggerUpdateNotifications')
       } else {
         await this.handleErrors(result)
       }

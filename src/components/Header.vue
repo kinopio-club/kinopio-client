@@ -168,6 +168,9 @@ export default {
       if (mutation.type === 'triggerReadOnlyJiggle') {
         this.addReadOnlyJiggle()
       }
+      if (mutation.type === 'triggerUpdateNotifications') {
+        this.updateNotifications()
+      }
     })
   },
   mounted () {
