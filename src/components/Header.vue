@@ -342,6 +342,9 @@ export default {
       const isVisible = this.notificationsIsVisible
       this.$store.dispatch('closeAllDialogs', 'Header.toggleNotificationsIsVisible')
       this.notificationsIsVisible = !isVisible
+      if (this.notificationsIsVisible) {
+        this.updateNotifications()
+      }
     },
     toggleSpaceStatusIsVisible () {
       const isVisible = this.spaceStatusIsVisible

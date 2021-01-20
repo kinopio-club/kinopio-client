@@ -68,6 +68,7 @@ export default {
   },
   computed: {
     currentSpaceId () { return this.$store.state.currentSpace.id },
+    currentUser () { return this.$store.state.currentUser },
     groupedItems () {
       let groups = []
       this.notifications.forEach(item => {
@@ -99,6 +100,20 @@ export default {
       if (this.spaceIsCurrentSpace(spaceId)) { return }
       const space = { id: spaceId }
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+    },
+    segmentTagColor (segment) {
+      if (this.name === segment.name) {
+        return this.color
+      }
+      const spaceTag = this.$store.getters['currentSpace/tagByName'](segment.name)
+      const cachedTag = cache.tagByName(segment.name)
+      if (spaceTag) {
+        return spaceTag.color
+      } else if (cachedTag) {
+        return cachedTag.color
+      } else {
+        return this.currentUser.color
+      }
     },
     cardNameSegments (name) {
       let url = utils.urlFromString(name)
