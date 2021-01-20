@@ -189,6 +189,11 @@ export default {
       display block
   .notification-info
     margin-top 4px
+    .button-badge
+      box-shadow none
+      &:hover,
+      &:active
+        box-shadow none
   .space-badge
     background-color var(--secondary-background)
   .background
