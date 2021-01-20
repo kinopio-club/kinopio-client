@@ -3,6 +3,19 @@ dialog.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
   section
     p User Settings
   section
+    template(v-if="!currentUserIsSignedIn")
+      p After you sign up you'll be able to manage your notification settings here
+      button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
+    template(v-if="currentUserIsSignedIn")
+      .row
+        label(:class="{active: shouldEmailNotifications}" @click.left.prevent="toggleShouldEmailNotifications" @keydown.stop.enter="toggleShouldEmailNotifications")
+          input(type="checkbox" v-model="shouldEmailNotifications")
+          span Email Notifications
+      .row
+        label(:class="{active: shouldEmailNewsletter}" @click.left.prevent="toggleShouldEmailNewsletter" @keydown.stop.enter="toggleShouldEmailNewsletter")
+          input(type="checkbox" v-model="shouldEmailNewsletter")
+          span Email Newsletter
+  section
     .row
       .button-wrap
         button(@click.left.stop="toggleUserBillingIsVisible" :class="{active: userBillingIsVisible}")
@@ -54,12 +67,11 @@ export default {
     }
   },
   computed: {
-    isSignedIn () {
-      return this.$store.getters['currentUser/isSignedIn']
-    },
-    isUpgraded () {
-      return this.$store.state.currentUser.isUpgraded
-    }
+    isSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    isUpgraded () { return this.$store.state.currentUser.isUpgraded },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    shouldEmailNotifications () { return this.$store.state.currentUser.shouldEmailNotifications },
+    shouldEmailNewsletter () { return this.$store.state.currentUser.shouldEmailNewsletter }
   },
   methods: {
     closeDialogs () {
@@ -67,6 +79,14 @@ export default {
     },
     toggleRemoveAllConfirmationVisible () {
       this.removeAllConfirmationVisible = !this.removeAllConfirmationVisible
+    },
+    toggleShouldEmailNotifications () {
+      const value = !this.shouldEmailNotifications
+      this.$store.dispatch('currentUser/shouldEmailNotifications', value)
+    },
+    toggleShouldEmailNewsletter () {
+      const value = !this.shouldEmailNewsletter
+      this.$store.dispatch('currentUser/shouldEmailNewsletter', value)
     },
     async removeUserPermanent () {
       this.loading.removeUserPermanent = true
@@ -83,6 +103,10 @@ export default {
       const isVisible = this.userBillingIsVisible
       this.closeDialogs()
       this.userBillingIsVisible = !isVisible
+    },
+    triggerSignUpOrInIsVisible () {
+      this.$store.dispatch('closeAllDialogs', 'UserSettings.triggerSignUpOrInIsVisible')
+      this.$store.commit('triggerSignUpOrInIsVisible')
     }
   },
   watch: {
