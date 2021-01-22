@@ -74,7 +74,8 @@ export default {
     segmentSpace (segment) {
       if (segment.space) { return segment.space }
       const spaceId = utils.spaceIdFromUrl(segment.name)
-      return this.$store.getters.cachedOrOtherSpaceById(spaceId)
+      const space = this.$store.getters.cachedOrOtherSpaceById(spaceId)
+      return space
     }
   }
 }

@@ -659,6 +659,18 @@ export default {
   spaceHasUrl () {
     return window.location.href !== (window.location.origin + '/')
   },
+  spaceAndCardIdFromUrl (path) {
+    // https://regexr.com/5kr4g
+    // matches (text after /) twice
+    const urlPattern = new RegExp(/\/([^?\s/]+)\/{0,1}([^?\s/]+){0,1}/i)
+    let matches = path.match(urlPattern)
+    matches = {
+      spaceUrl: matches[1],
+      cardId: matches[2]
+    }
+    console.log('🛶', matches)
+    return matches
+  },
   spaceIdFromUrl (url) {
     url = url || window.location.href
     url = url.replaceAll('?hidden=true', '')

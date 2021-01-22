@@ -702,6 +702,10 @@ export default {
       context.dispatch('loadBackground', context.state.background)
       context.dispatch('updateOtherUsers')
       context.dispatch('updateOtherSpaces')
+      const cardId = context.rootState.loadSpaceShowDetailsForCardId
+      if (cardId) {
+        context.dispatch('showCardDetails', cardId)
+      }
     },
     loadLastSpace: (context) => {
       const user = context.rootState.currentUser
