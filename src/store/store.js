@@ -56,6 +56,7 @@ export default new Vuex.Store({
     // cards
     shouldAddCard: false,
     cardDetailsIsVisibleForCardId: '',
+    previousCardDetailsIsVisibleForCardId: '',
     parentCardId: '',
     childCardId: '',
     remoteCardDetailsVisible: [],
@@ -164,6 +165,7 @@ export default new Vuex.Store({
     },
     closeAllDialogs: (state) => {
       state.multipleSelectedActionsIsVisible = false
+      state.previousCardDetailsIsVisibleForCardId = state.cardDetailsIsVisibleForCardId
       state.cardDetailsIsVisibleForCardId = ''
       state.connectionDetailsIsVisibleForConnectionId = ''
       state.tagDetailsIsVisible = false

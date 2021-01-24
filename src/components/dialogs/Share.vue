@@ -5,7 +5,11 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
   section(v-if="spaceHasUrl")
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
     template(v-if="!spaceIsPrivate")
-      input.url-textarea(ref="url" v-model="url")
+      .segmented-buttons(v-if="previousCard")
+        button(@click="toggleSpaceUrlIsVisible(true)" :class="{active: spaceUrlIsVisible}") Space
+        button(@click="toggleSpaceUrlIsVisible(false)" :class="{active: !spaceUrlIsVisible}") Card
+      p(v-if="!spaceUrlIsVisible && previousCard") {{previousCard.name}}
+      input.url-textarea(ref="url" v-model="spaceOrCardUrl")
       button(@click.left="copyUrl" v-if="!canNativeShare")
         span Copy Url
       .segmented-buttons(v-if="canNativeShare")
@@ -34,7 +38,9 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
     UserList(:users="spaceCollaborators" :selectedUser="selectedUser" :showRemoveUser="true" @selectSpace="showUserDetails" @removeUser="removeCollaborator" :isClickable="true")
     UserDetails(:visible="userDetailsIsVisible" :user="selectedUser" :userDetailsPosition="userDetailsPosition" :userDetailsIsFromList="true" @removedCollaborator="removedCollaborator")
 
-  section(v-if="!spaceHasUrl")
+  section(v-if="isOffline")
+    p To share or invite collaborators, you'll need to be online
+  section(v-else-if="!spaceHasUrl")
     p
       span To share or invite collaborators,
       span.badge.info you need to Sign Up or In
@@ -77,8 +83,9 @@ export default {
       userDetailsPosition: {},
       userDetailsIsVisible: false,
       spaceCollaborators: [],
-      url: '',
-      dialogHeight: null
+      spaceUrl: '',
+      dialogHeight: null,
+      spaceUrlIsVisible: true
     }
   },
   computed: {
@@ -102,9 +109,29 @@ export default {
     },
     spaceHasCollaborators () {
       return Boolean(this.spaceCollaborators.length)
+    },
+    isOffline () {
+      return !this.$store.state.isOnline
+    },
+    previousCard () {
+      const cardId = this.$store.state.previousCardDetailsIsVisibleForCardId
+      const card = this.$store.getters['currentSpace/cardById'](cardId)
+      if (!card) { return }
+      if (card.isRemoved) { return }
+      return card
     }
   },
   methods: {
+    spaceOrCardUrl () {
+      if (this.spaceUrlIsVisible) {
+        return this.spaceUrl
+      } else {
+        return this.spaceUrl + '/' + this.previousCard.id
+      }
+    },
+    toggleSpaceUrlIsVisible (value) {
+      this.spaceUrlIsVisible = value
+    },
     copyUrl () {
       const element = this.$refs.url
       element.select()
@@ -120,7 +147,7 @@ export default {
       const data = {
         title: 'Kinopio',
         text: this.spaceName,
-        url: this.url
+        url: this.spaceOrCardUrl
       }
       navigator.share(data)
     },
