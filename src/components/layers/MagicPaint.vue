@@ -41,7 +41,7 @@ import utils from '@/utils.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
 
 const circleRadius = 20
-const circleSelectionRadius = circleRadius - 3
+const circleSelectionRadius = circleRadius - 10 // magnitude of sensitivity
 
 // painting
 // a sequence of circles that's broadcasted to others and is used for multi-card selection

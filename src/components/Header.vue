@@ -468,7 +468,6 @@ header
     // should not bubble down into dialogs
     &.segmented-buttons
       > .button-wrap
-        max-width calc(100% - 30px)
         > button
           border-radius 0
           .loader
