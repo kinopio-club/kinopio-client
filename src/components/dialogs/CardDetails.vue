@@ -93,7 +93,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           span Frames
         FramePicker(:visible="framePickerIsVisible" :cards="[card]")
 
-    .row(v-if="nameHasLineBreaks || hasUrls || nameHasSentences")
+    .row(v-if="nameHasLineBreaks || hasUrls || nameHasSentences || shouldShowCardSize")
       //- Show Url
       .button-wrap(v-if="hasUrls")
         button(:disabled="!canEditCard" @click.left.stop="toggleUrlsIsVisible" :class="{active: urlsIsVisible}")
@@ -110,7 +110,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         button(:disabled="!canEditCard" @click.left.stop="splitCards")
           img.icon(src="@/assets/split-vertically.svg")
           span Split into {{nameSentences}} Cards
-
+      //- Card Size
+      .segmented-buttons(v-if="shouldShowCardSize")
+        button.active S
+        button XL
     .row.badges-row(v-if="tagsInCard.length || card.linkToSpaceId || nameIsComment")
       //- Tags
       template(v-for="tag in tagsInCard")
@@ -423,6 +426,12 @@ export default {
           color: '#cdcdcd' // secondary-active-background
         }
       }
+    },
+    shouldShowCardSize () {
+      // name must have image?
+      // add val: card.currentSize (default 's')
+      // this.card.name.length > 30 , or currentsize is 'xl'
+      return true
     }
   },
   methods: {
