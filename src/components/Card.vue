@@ -734,7 +734,11 @@ export default {
         }
         if (segment.markdown) {
           segment.markdown.forEach(markdown => {
-            name += markdown.content
+            if (markdown.type === 'link') {
+              name += markdown.result[1]
+            } else {
+              name += markdown.content
+            }
           })
         }
       })
