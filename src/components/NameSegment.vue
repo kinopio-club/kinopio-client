@@ -36,14 +36,17 @@ span.name-segment
       @touchend.prevent="showLinkDetailsIsVisible($event, segment)"
       @keyup.stop.enter="showLinkDetailsIsVisible($event, segment)"
     )
-      User(v-if="segment.space.users" :user="segment.space.users[0]" :isClickable="false")
-      span {{segment.space.name || segment.content || segment.name }}
-      img.icon.private(v-if="spaceIsPrivate(segment.space)" src="@/assets/lock.svg")
-
+      template(v-if="segmentSpace(segment)")
+        User(v-if="segmentSpace(segment).users" :user="segmentSpace(segment).users[0]" :isClickable="false")
+        span {{segmentSpace(segment).name || segment.content || segment.name }}
+        img.icon.private(v-if="spaceIsPrivate(segmentSpace(segment))" src="@/assets/lock.svg")
+      template(v-else)
+        span {{segment.name}}
 </template>
 
 <script>
 import User from '@/components/User.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'NameSegment',
@@ -67,6 +70,12 @@ export default {
     spaceIsPrivate (space) {
       if (!space.privacy) { return }
       return space.privacy === 'private'
+    },
+    segmentSpace (segment) {
+      if (segment.space) { return segment.space }
+      const spaceId = utils.spaceIdFromUrl(segment.name)
+      const space = this.$store.getters.cachedOrOtherSpaceById(spaceId)
+      return space
     }
   }
 }
@@ -100,16 +109,4 @@ export default {
   .link-badge-url
     color var(--primary)
     text-decoration none
-
-  .link-badge
-    background-color var(--secondary-active-background)
-    .user
-      .label-badge
-        width 21px
-        height 10px
-        span
-          font-size 10px
-    .icon.private
-      margin-left 6px
-
 </style>

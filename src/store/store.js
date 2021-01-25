@@ -254,6 +254,7 @@ export default new Vuex.Store({
     triggerScrollCardIntoView: (state, cardId) => {},
     triggerPickerNavigationKey: (state, key) => {},
     triggerPickerSelect: () => {},
+    triggerUpdateNotifications: () => {},
 
     // Cards
 
@@ -713,6 +714,14 @@ export default new Vuex.Store({
   },
 
   actions: {
+    updateSpaceAndCardUrlToLoad: (context, path) => {
+      const matches = utils.spaceAndCardIdFromUrl(path)
+      if (matches.cardId) {
+        context.commit('loadSpaceShowDetailsForCardId', matches.cardId)
+      }
+      context.commit('spaceUrlToLoad', matches.spaceUrl)
+    },
+
     updatePageSizes: (context) => {
       const paddingX = Math.min(400, (utils.visualViewport().width / 4) * 3) + 100
       const paddingY = Math.min(400, (utils.visualViewport().height / 4) * 3)
@@ -741,7 +750,7 @@ export default new Vuex.Store({
       context.commit('closeAllDialogs', logging)
       const space = utils.clone(context.rootState.currentSpace)
       const user = utils.clone(context.rootState.currentUser)
-      context.commit('broadcast/updateUser', { user: utils.userMeta(user, space), type: 'addSpectatorToSpace' }, { root: true })
+      context.commit('broadcast/updateUser', { user: utils.userMeta(user, space), type: 'updateUserPresence' }, { root: true })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteCardDetailsVisible' })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteConnectionDetailsVisible' })
     },

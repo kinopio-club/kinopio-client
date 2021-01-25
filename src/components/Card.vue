@@ -727,17 +727,17 @@ export default {
       }
     },
     longestNameLineLength () {
-      let name = this.normalizedName
-      // replace links
-      let links = this.nameSegments.filter(segment => segment.isLink)
-      links.forEach(segment => {
-        const link = segment.space.name || segment.name
-        name = name.replaceAll(segment.name, link)
+      let name = ''
+      this.nameSegments.forEach(segment => {
+        if (segment.isTag) {
+          name += segment.name
+        }
+        if (segment.markdown) {
+          segment.markdown.forEach(markdown => {
+            name += markdown.content
+          })
+        }
       })
-      // replace tags
-      if (!name) { return 0 }
-      name = name.replaceAll('[[', '')
-      name = name.replaceAll(']]', '')
       name = name || '.'
       const nameLines = name.match(/[^\n]+/g)
       let longestLineLength = 0

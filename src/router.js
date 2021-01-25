@@ -97,11 +97,19 @@ export default new Router({
         next()
       }
     }, {
+      path: '/:space/:card',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        const path = window.location.pathname
+        store.dispatch('updateSpaceAndCardUrlToLoad', path)
+        next()
+      }
+    }, {
       path: '/:space',
       component: Space,
       beforeEnter: (to, from, next) => {
-        const spaceUrl = window.location.pathname.substring(1) // "/space-id" -> "space-id"
-        store.commit('spaceUrlToLoad', spaceUrl)
+        const path = window.location.pathname
+        store.dispatch('updateSpaceAndCardUrlToLoad', path)
         next()
       }
     }

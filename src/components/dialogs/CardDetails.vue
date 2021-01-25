@@ -1119,6 +1119,9 @@ export default {
       if (!visible && this.cardIsEmpty()) {
         this.$store.dispatch('currentSpace/removeCard', this.card)
       }
+      if (!visible && !this.cardIsEmpty()) {
+        this.$store.dispatch('currentSpace/notifyMembersCardAdded', this.card.id)
+      }
       this.$store.dispatch('updatePageSizes')
     }
   }

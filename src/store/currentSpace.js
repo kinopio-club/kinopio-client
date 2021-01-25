@@ -17,6 +17,7 @@ import dayjs from 'dayjs'
 
 let otherSpacesQueue = [] // id
 let spectatorIdleTimers = []
+let notifiedCardAdded = []
 
 export default {
   namespaced: true,
@@ -349,12 +350,11 @@ export default {
 
     // Users and otherSpaces
 
-    addSpectatorToSpace: (context, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'addSpectatorToSpace' })
+    updateUserPresence: (context, update) => {
+      utils.typeCheck({ value: update, type: 'object', origin: 'updateUserPresence' })
       const newUser = update.user || update
-      const userExists = context.state.users.find(user => user.id === newUser.id)
-      const collaboratorExists = context.state.collaborators.find(collaborator => collaborator.id === newUser.id)
-      if (userExists || collaboratorExists) {
+      const member = context.getters.memberById(newUser.id)
+      if (member) {
         context.commit('updateSpaceClients', [newUser])
       } else {
         context.commit('addSpectatorToSpace', newUser)
@@ -364,7 +364,7 @@ export default {
         }
         spectatorIdleTimers[newUser.id] = setTimeout(() => {
           removeIdleSpectator(newUser)
-        }, 60 * 1000)
+        }, 60 * 1000) // 60 seconds
       }
     },
     addUserToJoinedSpace: (context, newUser) => {
@@ -372,7 +372,7 @@ export default {
         context.commit('addCollaboratorToSpace', newUser)
         context.commit('removeSpectatorFromSpace', newUser)
       } else {
-        context.dispatch('addSpectatorToSpace', newUser)
+        context.dispatch('updateUserPresence', newUser)
       }
     },
     updateOtherUsers: async (context) => {
@@ -702,6 +702,10 @@ export default {
       context.dispatch('loadBackground', context.state.background)
       context.dispatch('updateOtherUsers')
       context.dispatch('updateOtherSpaces')
+      const cardId = context.rootState.loadSpaceShowDetailsForCardId
+      if (cardId) {
+        context.dispatch('showCardDetails', cardId)
+      }
     },
     loadLastSpace: (context) => {
       const user = context.rootState.currentUser
@@ -889,6 +893,7 @@ export default {
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
       context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: true }, { root: true })
       context.dispatch('checkIfShouldNotifyCardsCreatedIsNearLimit')
+      context.dispatch('notifyMembersCardAdded', id)
     },
     addMultipleCards: (context, newCards) => {
       newCards.forEach(card => {
@@ -1123,11 +1128,24 @@ export default {
       }
     },
     showCardDetails: (context, cardId) => {
-      context.dispatch('closeAllDialogs', 'currentSpace.showCardDetails', { root: true })
       context.dispatch('incrementCardZ', cardId)
       context.commit('cardDetailsIsVisibleForCardId', cardId, { root: true })
       context.commit('parentCardId', cardId, { root: true })
       context.commit('loadSpaceShowDetailsForCardId', '', { root: true })
+    },
+    notifyMembersCardAdded: (context, cardId) => {
+      if (notifiedCardAdded.includes(cardId)) { return }
+      const membersToNotify = context.getters.membersToNotify
+      const recipientUserIds = membersToNotify.map(member => member.id)
+      const notification = {
+        type: 'addCard',
+        cardId,
+        userId: context.rootState.currentUser.id,
+        recipientUserIds,
+        spaceId: context.state.id
+      }
+      context.dispatch('api/addToQueue', { name: 'createNotifications', body: notification }, { root: true })
+      notifiedCardAdded.push(cardId)
     },
 
     // Comments
@@ -1465,6 +1483,12 @@ export default {
       const cardsCreatedIsOverLimit = rootGetters['currentUser/cardsCreatedIsOverLimit']
       const spaceUserIsUpgraded = getters.spaceUserIsUpgraded
       return cardsCreatedIsOverLimit && !spaceUserIsUpgraded
+    },
+    membersToNotify: (state, getters, rootState, rootGetters) => {
+      let clients = state.clients.map(client => client.id)
+      let members = getters.members(true)
+      members = members.filter(member => !clients.includes(member.id))
+      return members
     }
   }
 }

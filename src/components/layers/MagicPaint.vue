@@ -41,6 +41,7 @@ import utils from '@/utils.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
 
 const circleRadius = 20
+const circleSelectionRadius = circleRadius - 10 // magnitude of sensitivity
 
 // painting
 // a sequence of circles that's broadcasted to others and is used for multi-card selection
@@ -396,13 +397,13 @@ export default {
       cardMap.forEach(card => {
         const x = {
           value: point.x + window.scrollX,
-          min: card.x,
-          max: card.x + card.width
+          min: card.x - circleSelectionRadius,
+          max: card.x + card.width + circleSelectionRadius
         }
         const y = {
           value: point.y + window.scrollY,
-          min: card.y,
-          max: card.y + card.height
+          min: card.y - circleSelectionRadius,
+          max: card.y + card.height + circleSelectionRadius
         }
         const isBetweenX = utils.isBetween(x)
         const isBetweenY = utils.isBetween(y)
@@ -410,6 +411,18 @@ export default {
           this.$store.dispatch('addToMultipleCardsSelected', card.cardId)
         }
       })
+    },
+    isPointInPath (point, path) {
+      const below = path.isPointInFill({
+        x: point.x - circleSelectionRadius,
+        y: point.y - circleSelectionRadius
+      })
+      const exact = path.isPointInFill(point)
+      const above = path.isPointInFill({
+        x: point.x + circleSelectionRadius,
+        y: point.y + circleSelectionRadius
+      })
+      return below || exact || above
     },
     selectConnectionPaths (point) {
       const paths = document.querySelectorAll('svg .connection-path')
@@ -422,7 +435,8 @@ export default {
         svgPoint.y = point.y + window.scrollY
         const isAlreadySelected = ids.includes(pathId)
         if (isAlreadySelected) { return }
-        if (path.isPointInFill(svgPoint)) {
+        const isSelected = this.isPointInPath(svgPoint, path)
+        if (isSelected) {
           this.$store.dispatch('addToMultipleConnectionsSelected', pathId)
         }
       })

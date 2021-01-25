@@ -481,6 +481,17 @@ code
     font-size 12px
     color var(--primary-background)
 
+.link-badge
+  background-color var(--secondary-active-background)
+  > .user
+    .label-badge
+      width 21px
+      height 10px
+      span
+        font-size 10px
+  > .icon.private
+    margin-left 3px
+
 .danger
   background-color var(--danger-background)
 

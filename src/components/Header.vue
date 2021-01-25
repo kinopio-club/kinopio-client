@@ -42,12 +42,18 @@ header(:style="visualViewportPosition")
 
   aside
     .top
-      // Share
-      .button-wrap
-        button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
-          span Share
-        Share(:visible="shareIsVisible")
-
+      .top-buttons-wrap
+        // Share
+        .button-wrap
+          button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
+            span Share
+          Share(:visible="shareIsVisible")
+        // Notifications
+        .button-wrap
+          button(@click.left.stop="toggleNotificationsIsVisible" :class="{active : notificationsIsVisible}")
+            span(v-if="notificationsIsLoading") …
+            span(v-else) {{notificationsUnreadCount}}
+          Notifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead")
       .users
         User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
         User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
@@ -82,6 +88,7 @@ import User from '@/components/User.vue'
 import SignUpOrIn from '@/components/dialogs/SignUpOrIn.vue'
 import ResetPassword from '@/components/dialogs/ResetPassword.vue'
 import Share from '@/components/dialogs/Share.vue'
+import Notifications from '@/components/dialogs/Notifications.vue'
 import Loader from '@/components/Loader.vue'
 import templates from '@/data/templates.js'
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
@@ -104,6 +111,7 @@ export default {
     SignUpOrIn,
     ResetPassword,
     Share,
+    Notifications,
     Loader,
     ImportArenaChannel,
     KeyboardShortcuts,
@@ -116,6 +124,7 @@ export default {
       spaceDetailsIsVisible: false,
       signUpOrInIsVisible: false,
       shareIsVisible: false,
+      notificationsIsVisible: false,
       loadingSignUpOrIn: false,
       keyboardShortcutsIsVisible: false,
       upgradeUserIsVisible: false,
@@ -124,7 +133,9 @@ export default {
       pinchZoomOffsetLeft: 0,
       pinchZoomOffsetTop: 0,
       pinchZoomScale: 1,
-      readOnlyJiggle: false
+      readOnlyJiggle: false,
+      notifications: [],
+      notificationsIsLoading: true
     }
   },
   created () {
@@ -157,10 +168,14 @@ export default {
       if (mutation.type === 'triggerReadOnlyJiggle') {
         this.addReadOnlyJiggle()
       }
+      if (mutation.type === 'triggerUpdateNotifications') {
+        this.updateNotifications()
+      }
     })
   },
   mounted () {
     window.addEventListener('scroll', this.updatePositionInVisualViewport)
+    this.updateNotifications()
   },
   computed: {
     shouldShowNewStuffIsUpdated () {
@@ -262,6 +277,11 @@ export default {
           'transform-origin': 'left top'
         }
       }
+    },
+    notificationsUnreadCount () {
+      if (!this.notifications) { return 0 }
+      const unread = this.notifications.filter(notification => !notification.isRead)
+      return unread.length || 0
     }
   },
   methods: {
@@ -283,6 +303,7 @@ export default {
       this.upgradeUserIsVisible = false
       this.spaceStatusIsVisible = false
       this.offlineIsVisible = false
+      this.notificationsIsVisible = false
     },
     updatePositionFrame () {
       currentIteration++
@@ -320,6 +341,14 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'Header.toggleShareIsVisible')
       this.shareIsVisible = !isVisible
     },
+    toggleNotificationsIsVisible () {
+      const isVisible = this.notificationsIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleNotificationsIsVisible')
+      this.notificationsIsVisible = !isVisible
+      if (this.notificationsIsVisible) {
+        this.updateNotifications()
+      }
+    },
     toggleSpaceStatusIsVisible () {
       const isVisible = this.spaceStatusIsVisible
       this.$store.dispatch('closeAllDialogs', 'Header.toggleSpaceStatusIsVisible')
@@ -338,6 +367,34 @@ export default {
       const isVisible = this.upgradeUserIsVisible
       this.$store.dispatch('closeAllDialogs', 'Header.triggerUpgradeUserIsVisible')
       this.upgradeUserIsVisible = !isVisible
+    },
+
+    // notifications
+
+    async updateNotifications () {
+      this.notificationsIsLoading = true
+      this.notifications = await this.$store.dispatch('api/getNotifications') || []
+      this.notificationsIsLoading = false
+    },
+    markAllAsRead () {
+      const notifications = this.notifications.filter(notification => !notification.isRead)
+      const notificationIds = notifications.map(notification => notification.id)
+      this.updateNotificationsIsRead(notificationIds)
+    },
+    markAsRead (notificationId) {
+      this.updateNotificationsIsRead([notificationId])
+    },
+    updateNotificationsIsRead (notificationIds) {
+      this.notifications = this.notifications.map(notification => {
+        if (notificationIds.includes(notification.id)) {
+          notification.isRead = true
+        }
+        return notification
+      })
+      this.$store.dispatch('api/addToQueue', {
+        name: 'updateNotificationsIsRead',
+        body: notificationIds
+      })
     }
   }
 }
@@ -411,7 +468,6 @@ header
     // should not bubble down into dialogs
     &.segmented-buttons
       > .button-wrap
-        max-width calc(100% - 30px)
         > button
           border-radius 0
           .loader
@@ -439,6 +495,11 @@ header
       flex-wrap wrap
       justify-content flex-end
       align-content flex-start
+
+  .top-buttons-wrap
+    display inline-table
+    .button-wrap + .button-wrap
+      margin-left 6px
 
   .bottom
     margin-top 5px

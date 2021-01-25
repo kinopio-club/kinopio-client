@@ -27,7 +27,9 @@ export default {
     filterUnchecked: false,
     journalPrompts: [],
     newSpacesAreBlank: false,
-    shouldHideCardTips: false
+    shouldHideCardTips: false,
+    shouldEmailNotifications: true,
+    shouldEmailNewsletter: true
   },
   mutations: {
     color: (state, newColor) => {
@@ -164,7 +166,16 @@ export default {
     shouldHideCardTips: (state, value) => {
       state.shouldHideCardTips = value
       cache.updateUser('shouldHideCardTips', value)
+    },
+    shouldEmailNotifications: (state, value) => {
+      state.shouldEmailNotifications = value
+      cache.updateUser('shouldEmailNotifications', value)
+    },
+    shouldEmailNewsletter: (state, value) => {
+      state.shouldEmailNewsletter = value
+      cache.updateUser('shouldEmailNewsletter', value)
     }
+
   },
   actions: {
     init: (context) => {
@@ -443,6 +454,22 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldHideCardTips: value
+        } }, { root: true })
+    },
+    shouldEmailNotifications: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldEmailNotifications' })
+      context.commit('shouldEmailNotifications', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldEmailNotifications: value
+        } }, { root: true })
+    },
+    shouldEmailNewsletter: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldEmailNewsletter' })
+      context.commit('shouldEmailNewsletter', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldEmailNewsletter: value
         } }, { root: true })
     }
   },

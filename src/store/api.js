@@ -554,6 +554,19 @@ const self = {
       }
     },
 
+    // Notifications
+
+    getNotifications: async (context) => {
+      if (!shouldRequest()) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/notification`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒', error)
+      }
+    },
+
     // Services
 
     updateArenaAccessToken: async (context, arenaReturnedCode) => {

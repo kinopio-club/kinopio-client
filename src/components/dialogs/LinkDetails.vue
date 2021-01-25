@@ -146,6 +146,7 @@ export default {
         this.$store.dispatch('currentSpace/changeSpace', { space })
       } else {
         const cardId = card.id || this.currentTag.cardId
+        this.$store.dispatch('closeAllDialogs', 'showCardDetails')
         this.$store.dispatch('currentSpace/showCardDetails', cardId)
       }
     },
