@@ -5,13 +5,12 @@ dialog.narrow.notifications(v-if="visible" :open="visible" ref="dialog" :style="
       span.badge.info(v-if="unreadCount") {{unreadCount}}
       span(v-else) {{unreadCount}}{{' '}}
       span Notifications
+      Loader(:visible="loading")
 
-  section(v-if="loading")
-    Loader(:visible="loading")
-  section(v-else-if="!loading && !notifications.length")
-    p Cards added to your spaces by collaborators can be found here
-  section.results-section(v-else)
-    ul.results-list
+  section.results-section(v-if="notifications.length")
+    p(v-if="!loading && !notifications.length")
+      span Cards added to your spaces by collaborators can be found here
+    ul.results-list(v-if="notifications.length")
       template(v-for="group in groupedItems")
         //- space
         li.space-name(v-if="group.spaceId" :data-space-id="group.spaceId" @click="changeSpace(group.spaceId)" :class="{ active: spaceIsCurrentSpace(group.spaceId) }")
@@ -165,6 +164,7 @@ export default {
     visible (visible) {
       if (visible) {
         this.updateDialogHeight()
+        this.$emit('updateNotifications')
       }
       if (!visible) {
         this.markAllAsRead()
@@ -212,4 +212,10 @@ export default {
   .icon + .card-image
   .card-image + span
     margin-left 5px
+  .loader
+    width 14px
+    height 14px
+    vertical-align -3px
+    margin-left 6px
+
 </style>
