@@ -175,6 +175,9 @@ export default {
   mounted () {
     window.addEventListener('scroll', this.updatePositionInVisualViewport)
     this.updateNotifications()
+    setInterval(() => {
+      this.updateNotifications()
+    }, 1000 * 60 * 10) // 10 minutes
   },
   computed: {
     shouldShowNewStuffIsUpdated () {
