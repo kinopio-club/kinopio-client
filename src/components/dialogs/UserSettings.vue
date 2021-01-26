@@ -2,6 +2,8 @@
 dialog.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
   section
     p User Settings
+
+  //- User Preferences
   section
     template(v-if="!currentUserIsSignedIn")
       p After you sign up you'll be able to manage your notification settings here
@@ -15,7 +17,14 @@ dialog.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
         label(:class="{active: shouldEmailNewsletter}" @click.left.prevent="toggleShouldEmailNewsletter" @keydown.stop.enter="toggleShouldEmailNewsletter")
           input(type="checkbox" v-model="shouldEmailNewsletter")
           span Email Newsletter
+
+  //- Account Settings
   section
+    .row
+      .button-wrap
+        button(@click.left.stop="toggleUpdateEmailIsVisible" :class="{active: updateEmailIsVisible}")
+          span Update Email
+        UpdateEmail(:visible="updateEmailIsVisible")
     .row
       .button-wrap
         button(@click.left.stop="toggleUserBillingIsVisible" :class="{active: userBillingIsVisible}")
@@ -46,13 +55,15 @@ dialog.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
 
 <script>
 import UserBilling from '@/components/dialogs/UserBilling.vue'
+import UpdateEmail from '@/components/dialogs/UpdateEmail.vue'
 import Loader from '@/components/Loader.vue'
 
 export default {
   name: 'UserSettings',
   components: {
     Loader,
-    UserBilling
+    UserBilling,
+    UpdateEmail
   },
   props: {
     visible: Boolean
@@ -60,6 +71,7 @@ export default {
   data () {
     return {
       userBillingIsVisible: false,
+      updateEmailIsVisible: false,
       removeAllConfirmationVisible: false,
       loading: {
         removeUserPermanent: false
@@ -76,6 +88,7 @@ export default {
   methods: {
     closeDialogs () {
       this.userBillingIsVisible = false
+      this.updateEmailIsVisible = false
     },
     toggleRemoveAllConfirmationVisible () {
       this.removeAllConfirmationVisible = !this.removeAllConfirmationVisible
@@ -103,6 +116,11 @@ export default {
       const isVisible = this.userBillingIsVisible
       this.closeDialogs()
       this.userBillingIsVisible = !isVisible
+    },
+    toggleUpdateEmailIsVisible () {
+      const isVisible = this.updateEmailIsVisible
+      this.closeDialogs()
+      this.updateEmailIsVisible = !isVisible
     },
     triggerSignUpOrInIsVisible () {
       this.$store.dispatch('closeAllDialogs', 'UserSettings.triggerSignUpOrInIsVisible')
