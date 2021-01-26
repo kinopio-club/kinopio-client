@@ -175,6 +175,11 @@ const self = {
       const options = await context.dispatch('requestOptions', { body, method: 'PATCH', apiKey, space: context.rootState.currentSpace })
       return fetch(`${host}/user/update-password`, options)
     },
+    updateEmail: async (context, email) => {
+      const body = { email }
+      const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
+      return fetch(`${host}/user/update-email`, options)
+    },
 
     // User
 
