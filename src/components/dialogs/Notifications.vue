@@ -19,7 +19,7 @@ dialog.narrow.notifications(v-if="visible" :open="visible" ref="dialog" :style="
             span {{group.spaceName}}
         //- notification
         template(v-for="(notification in group.notifications")
-          li(@click="showCardDetails(notification)" :class="{ active: cardDetailsIsVisible(notification.card.id) }")
+          li(@click="showCardDetails(notification)" :class="{ active: cardDetailsIsVisible(notification.card.id) }" :data-notification-id="notification.id")
             p
               span.badge.info(v-if="!notification.isRead") New
               span.badge.user-badge.user-badge(:style="{background: notification.user.color}")
