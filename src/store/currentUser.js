@@ -40,6 +40,10 @@ export default {
       state.name = newName
       cache.updateUser('name', newName)
     },
+    email: (state, newEmail) => {
+      state.email = newEmail
+      cache.updateUser('email', newEmail)
+    },
     lastSpaceId: (state, spaceId) => {
       state.lastSpaceId = spaceId
       cache.updateUser('lastSpaceId', spaceId)

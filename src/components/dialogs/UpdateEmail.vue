@@ -9,14 +9,16 @@ dialog.narrow.update-email(v-if="visible" :open="visible" @click.left.stop ref="
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
     template(v-else)
       form(@submit.prevent="updateEmail")
-      input(type="text" placeholder="Email" required autocomplete="email" v-model="email")
-      button(type="submit" :class="{active : loading}")
-        span Update
-        Loader(:visible="loading")
+        input(type="text" placeholder="Email" required autocomplete="email" v-model="email")
+        button(type="submit" :class="{active : loading}")
+          span Update
+          Loader(:visible="loading")
     //- status
     .row(v-if="success")
       span.badge.success Email Changed
-    .row(v-if="error")
+    .row(v-if="success")
+      span.badge.success A confirmation email has been sent to both your previous and new addresses
+    .row(v-if="error.unknownServerError")
       span.badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 </template>
 
@@ -45,7 +47,10 @@ export default {
       email: '',
       loading: false,
       success: false,
-      error: false
+      error: {
+        unknownServerError: false,
+        accountAlreadyExists: false
+      }
     }
   },
   computed: {
@@ -66,25 +71,32 @@ export default {
     async updateEmail () {
       if (this.loading) { return }
       if (!this.email) { return }
-      this.loading = true
-      // const response = await this.$store.dispatch('api/signIn', { email, password })
-      // const result = await response.json()
-      // this.loading = false
-
-      // if (this.isSuccess(response)) {
-      //      this.clearStatus()
-      //   // show success
-      // } else {
-      //      this.clearStatus()
-      //   this.error = true
-      // }
+      this.clearStatus()
+      let result
+      try {
+        this.loading = true
+        const response = await this.$store.dispatch('api/updateEmail', this.email)
+        result = await response.json()
+        this.success = true
+        this.$store.commit('currentUser/email', this.email)
+      } catch (error) {
+        console.warn('updateEmail', error)
+        await this.handleErrors(result)
+      }
+      this.loading = false
     },
-    isSuccess (response) {
-      const success = [200, 201, 202, 204]
-      return Boolean(success.includes(response.status))
+    async handleErrors (response) {
+      if (!response) {
+        this.error.unknownServerError = true
+        return
+      }
+      if (response.type === 'unique violation') {
+        this.error.accountAlreadyExists = true
+      }
     },
     clearStatus () {
-      this.error = false
+      this.error.unknownServerError = false
+      this.error.accountAlreadyExists = false
       this.success = false
     }
   },
