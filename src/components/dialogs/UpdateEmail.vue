@@ -5,7 +5,7 @@ dialog.narrow.update-email(v-if="visible" :open="visible" @click.left.stop ref="
     p Update Email
   section
     template(v-if="!currentUserIsSignedIn")
-      p After you sign up you'll be able to update your email here
+      p After you sign up you'll be able to update your email address here
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
     template(v-else)
       form(@submit.prevent="updateEmail")
