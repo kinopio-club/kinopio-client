@@ -7,10 +7,12 @@ dialog.narrow(v-if="visible" :open="visible" @click.left.stop)
       p After you sign up you'll be able to manage your notification settings here
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
     template(v-else)
+      .row Receive emails when a collaborator adds a card to your spaces
       .row
         label(:class="{active: shouldEmailNotifications}" @click.left.prevent="toggleShouldEmailNotifications" @keydown.stop.enter="toggleShouldEmailNotifications")
           input(type="checkbox" v-model="shouldEmailNotifications")
           span Email Notifications
+      .row A biweekly newsletter about upcoming features and cool spaces
       .row
         label(:class="{active: shouldEmailBulletin}" @click.left.prevent="toggleShouldEmailBulletin" @keydown.stop.enter="toggleShouldEmailBulletin")
           input(type="checkbox" v-model="shouldEmailBulletin")
