@@ -413,6 +413,7 @@ export default {
       })
     },
     isPointInPath (point, path) {
+      if (!path) { return }
       const below = path.isPointInFill({
         x: point.x - circleSelectionRadius,
         y: point.y - circleSelectionRadius
