@@ -437,7 +437,8 @@ export default {
       return sentences
     },
     updateLink ({ url, newUrl }) {
-      const newName = this.name.replace(url.trim(), newUrl)
+      url = url.trim()
+      const newName = this.name.replace(url, newUrl)
       this.updateCardName(newName)
     },
     toggleUrlsIsVisible () {

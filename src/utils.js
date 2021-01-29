@@ -735,7 +735,7 @@ export default {
     if (!string) { return [] }
     // https://regexr.com/59m5t
     // same as urlFromString but matches multiple urls and returns [urls]
-    const urlPattern = new RegExp(/((http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+\w)*/igm)
+    const urlPattern = new RegExp(/((http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+\w|\/)*/igm)
     let urls = string.match(urlPattern)
     if (!urls) { return }
     // filter out empty or non-urls
@@ -816,7 +816,15 @@ export default {
     return Boolean(isKinopioUrl)
   },
   urlWithoutQueryString (url) {
+    url = this.urlWithoutTrailingSlash(url)
     return url.split('?')[0]
+  },
+  urlWithoutTrailingSlash (url) {
+    const lastCharacter = url.substring(url.length - 1, url.length)
+    if (lastCharacter === '/') {
+      url = url.substring(0, url.length - 1)
+    }
+    return url
   },
   queryString (url) {
     const split = url.split('?')
