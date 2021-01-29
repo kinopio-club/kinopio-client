@@ -412,20 +412,6 @@ export default {
         }
       })
     },
-    isPointInPath (point, path) {
-      // if (!path) { return }
-      console.log('🌹', point)
-      const below = path.isPointInStroke({
-        x: point.x - circleSelectionRadius,
-        y: point.y - circleSelectionRadius
-      })
-      const exact = path.isPointInStroke(point)
-      const above = path.isPointInStroke({
-        x: point.x + circleSelectionRadius,
-        y: point.y + circleSelectionRadius
-      })
-      return below || exact || above
-    },
     selectConnectionPaths (point) {
       const paths = document.querySelectorAll('svg .connection-path')
       paths.forEach(path => {
@@ -437,7 +423,7 @@ export default {
         svgPoint.y = point.y + window.scrollY
         const isAlreadySelected = ids.includes(pathId)
         if (isAlreadySelected) { return }
-        const isSelected = this.isPointInPath(svgPoint, path)
+        const isSelected = path.isPointInStroke(svgPoint)
         if (isSelected) {
           this.$store.dispatch('addToMultipleConnectionsSelected', pathId)
         }
