@@ -414,7 +414,7 @@ export default {
     },
     isPointInPath (point, path) {
       if (!path) { return }
-      console.log('🌹', path, typeof path)
+      console.log('🌹', path, typeof path, point, typeof point)
       const below = path.isPointInFill({
         x: point.x - circleSelectionRadius,
         y: point.y - circleSelectionRadius
@@ -437,7 +437,7 @@ export default {
         svgPoint.y = point.y + window.scrollY
         const isAlreadySelected = ids.includes(pathId)
         if (isAlreadySelected) { return }
-        console.log('🌷', path, typeof path)
+        console.log('🌷', path, typeof path, point, typeof point)
         const isSelected = this.isPointInPath(svgPoint, path)
         if (isSelected) {
           this.$store.dispatch('addToMultipleConnectionsSelected', pathId)
