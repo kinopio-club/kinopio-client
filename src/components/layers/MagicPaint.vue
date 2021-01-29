@@ -415,12 +415,12 @@ export default {
     isPointInPath (point, path) {
       // if (!path) { return }
       console.log('🌹', point)
-      const below = path.isPointInFill({
+      const below = path.isPointInStroke({
         x: point.x - circleSelectionRadius,
         y: point.y - circleSelectionRadius
       })
-      const exact = path.isPointInFill(point)
-      const above = path.isPointInFill({
+      const exact = path.isPointInStroke(point)
+      const above = path.isPointInStroke({
         x: point.x + circleSelectionRadius,
         y: point.y + circleSelectionRadius
       })
@@ -433,13 +433,8 @@ export default {
         const pathId = path.dataset.id
         const svg = document.querySelector('svg.connections')
         let svgPoint = svg.createSVGPoint()
-
-        console.log('💦', svgPoint)
         svgPoint.x = point.x + window.scrollX
         svgPoint.y = point.y + window.scrollY
-        console.log('🌷', point)
-        // convert svgPoint to type svgPoint
-
         const isAlreadySelected = ids.includes(pathId)
         if (isAlreadySelected) { return }
         const isSelected = this.isPointInPath(svgPoint, path)
