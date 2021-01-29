@@ -414,6 +414,7 @@ export default {
     },
     isPointInPath (point, path) {
       if (!path) { return }
+      console.log('🌹', path)
       const below = path.isPointInFill({
         x: point.x - circleSelectionRadius,
         y: point.y - circleSelectionRadius
