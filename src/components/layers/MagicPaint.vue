@@ -413,8 +413,8 @@ export default {
       })
     },
     isPointInPath (point, path) {
-      if (!path) { return }
-      console.log('🌹', path, typeof path, point, typeof point)
+      // if (!path) { return }
+      console.log('🌹', point)
       const below = path.isPointInFill({
         x: point.x - circleSelectionRadius,
         y: point.y - circleSelectionRadius
@@ -433,11 +433,15 @@ export default {
         const pathId = path.dataset.id
         const svg = document.querySelector('svg.connections')
         let svgPoint = svg.createSVGPoint()
+
+        console.log('💦', svgPoint)
         svgPoint.x = point.x + window.scrollX
         svgPoint.y = point.y + window.scrollY
+        console.log('🌷', point)
+        // convert svgPoint to type svgPoint
+
         const isAlreadySelected = ids.includes(pathId)
         if (isAlreadySelected) { return }
-        console.log('🌷', path, typeof path, point, typeof point)
         const isSelected = this.isPointInPath(svgPoint, path)
         if (isSelected) {
           this.$store.dispatch('addToMultipleConnectionsSelected', pathId)
