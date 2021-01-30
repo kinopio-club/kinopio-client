@@ -1135,8 +1135,11 @@ export default {
     },
     notifyMembersCardAdded: (context, cardId) => {
       if (notifiedCardAdded.includes(cardId)) { return }
+      const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
+      if (!userCanEdit) { return }
       const membersToNotify = context.getters.membersToNotify
       const recipientUserIds = membersToNotify.map(member => member.id)
+      if (!recipientUserIds.length) { return }
       const notification = {
         type: 'addCard',
         cardId,
