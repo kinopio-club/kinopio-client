@@ -234,7 +234,8 @@ export default {
         pickerIsVisible: false,
         pickerPosition: {},
         pickerSearch: ''
-      }
+      },
+      notifiedMembers: false
     }
   },
   created () {
@@ -585,6 +586,9 @@ export default {
       })
       this.updateTags()
       this.updateSpaceLink()
+      if (this.notifiedMembers) { return }
+      this.$store.dispatch('currentSpace/notifyMembersCardAdded', this.card.id)
+      this.notifiedMembers = true
     },
     updateSpaceLink () {
       let link = this.validUrls.filter(url => utils.urlIsKinopioSpace(url))[0]
@@ -1119,9 +1123,6 @@ export default {
       }
       if (!visible && this.cardIsEmpty()) {
         this.$store.dispatch('currentSpace/removeCard', this.card)
-      }
-      if (!visible && !this.cardIsEmpty()) {
-        this.$store.dispatch('currentSpace/notifyMembersCardAdded', this.card.id)
       }
       this.$store.dispatch('updatePageSizes')
     }
