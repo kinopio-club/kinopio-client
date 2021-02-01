@@ -636,7 +636,8 @@ export default {
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       if (currentUserIsSignedIn || isRemote) {
         space = space || context.state
-        window.history.pushState({ spaceId: space.id }, `${space.name} – Kinopio`, space.url)
+        const spaceUrl = space.url || utils.url({ name: space.name, id: space.id })
+        window.history.pushState({ spaceId: space.id }, `${space.name} – Kinopio`, spaceUrl)
       } else {
         window.history.replaceState({}, space.name, '/')
       }
