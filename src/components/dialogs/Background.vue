@@ -230,6 +230,10 @@ export default {
       if (visible) {
         this.closeDialogs()
         this.clearErrors()
+      } else {
+        if (this.error.isNotImageUrl) {
+          this.removeBackground()
+        }
       }
     },
     // update background on broadcast
