@@ -498,7 +498,10 @@ export default {
       return canEditOpenSpace || isSpaceMember
     },
     cardIsCreatedByCurrentUser: (state, getters, rootState) => (card) => {
-      return state.id === card.userId
+      const isCreatedByUser = state.id === card.userId
+      const isUpdatedByUser = state.id === card.nameUpdatedByUserId
+      const isNoUser = !card.userId && !card.nameUpdatedByUserId
+      return isCreatedByUser || isUpdatedByUser || isNoUser
     },
     connectionIsCreatedByCurrentUser: (state, getters, rootState) => (connection) => {
       return state.id === connection.userId
