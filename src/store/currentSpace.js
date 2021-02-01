@@ -510,6 +510,8 @@ export default {
         context.commit('notifyNewUser', false, { root: true })
         context.commit('triggerFocusSpaceDetailsName', null, { root: true })
       })
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      context.dispatch('updateWindowHistory', { space, isRemote: currentUserIsSignedIn })
     },
     addSpace: (context) => {
       const user = context.rootState.currentUser
