@@ -436,7 +436,7 @@ export default {
   // Spaces 🌙
 
   emptySpace (spaceId) {
-    return { id: spaceId, moonPhase: '', background: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], collaborators: [], spectators: [], clients: [] }
+    return { id: spaceId, moonPhase: '', background: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [] }
   },
   // migration added oct 2019
   migrationEnsureRemovedCards (space) {
@@ -678,9 +678,14 @@ export default {
     }
     return true
   },
-  currentSpaceHasUrl (space) {
-    const id = this.spaceIdFromUrl()
-    return Boolean(id === space.id)
+  currentSpaceIsRemote (space, currentUser) {
+    if (!space.users) { return true }
+    const currentUserCreatedSpace = currentUser.id === space.users[0].id
+    if (currentUserCreatedSpace) {
+      return Boolean(currentUser.apiKey)
+    } else {
+      return true
+    }
   },
   normalizeUrl (url) {
     const lastCharacterPosition = url.length - 1

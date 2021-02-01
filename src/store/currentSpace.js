@@ -562,6 +562,8 @@ export default {
     getRemoteSpace: async (context, space) => {
       const collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      const user = context.rootState.currentUser
+      const currentSpaceIsRemote = utils.currentSpaceIsRemote(space, user)
       let remoteSpace
       try {
         context.commit('isLoadingSpace', true, { root: true })
@@ -572,7 +574,7 @@ export default {
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
           cache.saveInvitedSpace(remoteSpace)
           context.commit('collaboratorKey', '', { root: true })
-        } else {
+        } else if (currentSpaceIsRemote) {
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
         }
       } catch (error) {
@@ -625,11 +627,13 @@ export default {
       cache.removeSpace(space)
       context.commit('addNotification', { message: `You were removed as a collaborator from ${name}`, type: 'info' }, { root: true })
     },
-    updateBrowserHistory: (context, { space, isRemote }) => {
+    updateWindowHistory: (context, { space, isRemote }) => {
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       if (currentUserIsSignedIn || isRemote) {
         space = space || context.state
         window.history.pushState({ spaceId: space.id }, `${space.name} – Kinopio`, space.url)
+      } else {
+        window.history.replaceState({}, space.name, '/')
       }
     },
     updateSpacePageSize: (context) => {
@@ -729,7 +733,7 @@ export default {
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
       await context.dispatch('loadSpace', { space })
-      context.dispatch('updateBrowserHistory', { space, isRemote })
+      context.dispatch('updateWindowHistory', { space, isRemote })
       const canEdit = context.rootGetters['currentUser/canEditSpace']()
       if (!canEdit) { return }
       context.dispatch('api/addToQueue', {

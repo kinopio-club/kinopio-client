@@ -16,9 +16,9 @@ if (process.env.NODE_ENV === 'development') {
 const joinSpaceRoom = (store, mutation) => {
   if (!websocket) { return }
   const space = utils.clone(store.state.currentSpace)
-  const currentSpaceHasUrl = utils.currentSpaceHasUrl(space)
   const user = utils.clone(store.state.currentUser)
-  if (!currentSpaceHasUrl) { return }
+  const currentSpaceIsRemote = utils.currentSpaceIsRemote(space, user)
+  if (!currentSpaceIsRemote) { return }
   if (currentSpaceRoom === space.id) { return }
   if (websocket.readyState === 0) {
     console.warn('🚑 joinSpaceRoom cancelled because websocket not ready', websocket.readyState)
