@@ -689,6 +689,7 @@ export default new Vuex.Store({
     // Session Data
 
     updateOtherUsers: (state, updatedUser) => {
+      if (!updatedUser) { return }
       utils.typeCheck({ value: updatedUser, type: 'object', origin: 'updateOtherUsers' })
       let users = utils.clone(state.otherUsers)
       users = users.filter(Boolean)

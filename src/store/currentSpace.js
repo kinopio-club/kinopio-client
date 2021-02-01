@@ -471,22 +471,20 @@ export default {
     saveNewSpace: (context) => {
       const space = utils.clone(context.state)
       const user = context.rootState.currentUser
-      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       cache.saveSpace(space)
       context.dispatch('api/addToQueue', {
         name: 'createSpace',
         body: space
       }, { root: true })
-      utils.updateWindowUrlAndTitle({ space, currentUserIsSignedIn })
+      utils.updateWindowTitle(space)
       context.commit('addUserToSpace', user)
     },
     saveImportedSpace: async (context) => {
       const space = utils.clone(context.state)
       const user = context.rootState.currentUser
-      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       cache.saveSpace(space)
       await context.dispatch('api/createSpace', space, { root: true })
-      utils.updateWindowUrlAndTitle({ space, currentUserIsSignedIn })
+      utils.updateWindowTitle(space)
       context.commit('addUserToSpace', user)
     },
     duplicateSpace: (context) => {
@@ -564,7 +562,6 @@ export default {
     getRemoteSpace: async (context, space) => {
       const collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
-      const currentSpaceHasUrl = utils.currentSpaceHasUrl(space)
       let remoteSpace
       try {
         context.commit('isLoadingSpace', true, { root: true })
@@ -575,7 +572,7 @@ export default {
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
           cache.saveInvitedSpace(remoteSpace)
           context.commit('collaboratorKey', '', { root: true })
-        } else if (currentSpaceHasUrl) {
+        } else {
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
         }
       } catch (error) {
@@ -628,11 +625,11 @@ export default {
       cache.removeSpace(space)
       context.commit('addNotification', { message: `You were removed as a collaborator from ${name}`, type: 'info' }, { root: true })
     },
-    updateBrowserHistory: (context, space) => {
+    updateBrowserHistory: (context, { space, isRemote }) => {
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
-      if (currentUserIsSignedIn) {
+      if (currentUserIsSignedIn || isRemote) {
         space = space || context.state
-        window.history.pushState({ spaceId: space.id }, '', space.url)
+        window.history.pushState({ spaceId: space.id }, `${space.name} – Kinopio`, space.url)
       }
     },
     updateSpacePageSize: (context) => {
@@ -680,10 +677,7 @@ export default {
         context.commit('restoreSpace', utils.normalizeSpace(remoteSpace))
         context.dispatch('history/playback', null, { root: true })
         context.dispatch('checkIfShouldNotifySignUpToEditSpace', remoteSpace)
-        utils.updateWindowUrlAndTitle({
-          space: remoteSpace,
-          shouldUpdateUrl: true
-        })
+        utils.updateWindowTitle(remoteSpace)
         context.commit('broadcast/joinSpaceRoom', null, { root: true })
         context.dispatch('checkIfShouldNotifySpaceIsRemoved', remoteSpace)
         if (cache.getAllSpaces().length) {
@@ -692,10 +686,7 @@ export default {
           context.commit('notifyNewUser', true, { root: true })
         }
       } else {
-        utils.updateWindowUrlAndTitle({
-          space,
-          shouldUpdateUrl: false
-        })
+        utils.updateWindowTitle(space)
       }
       context.commit('spaceUrlToLoad', '', { root: true })
       context.dispatch('updateSpacePageSize')
@@ -718,15 +709,11 @@ export default {
     },
     updateSpace: async (context, updates) => {
       const space = utils.clone(context.state)
-      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       updates.id = space.id
       if (updates.name) {
         const updatedSpace = utils.clone(space)
         updatedSpace.name = updates.name
-        utils.updateWindowUrlAndTitle({
-          space: updatedSpace,
-          currentUserIsSignedIn
-        })
+        utils.updateWindowTitle(updatedSpace)
       }
       context.commit('updateSpace', updates)
       context.commit('broadcast/update', { updates, type: 'updateSpace' }, { root: true })
@@ -737,15 +724,12 @@ export default {
     },
     changeSpace: async (context, { space, isRemote }) => {
       if (isRemote) {
-        utils.updateWindowUrlAndTitle({
-          space: space,
-          shouldUpdateUrl: true
-        })
+        utils.updateWindowTitle(space)
       }
-      context.dispatch('updateBrowserHistory', space)
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
       await context.dispatch('loadSpace', { space })
+      context.dispatch('updateBrowserHistory', { space, isRemote })
       const canEdit = context.rootGetters['currentUser/canEditSpace']()
       if (!canEdit) { return }
       context.dispatch('api/addToQueue', {

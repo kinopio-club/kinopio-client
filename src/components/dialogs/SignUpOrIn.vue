@@ -195,11 +195,7 @@ export default {
         await this.createSpaces(result.apiKey)
         this.addCollaboratorToInvitedSpaces()
         const currentSpace = this.$store.state.currentSpace
-        const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
-        utils.updateWindowUrlAndTitle({
-          space: currentSpace,
-          currentUserIsSignedIn
-        })
+        utils.updateWindowTitle(currentSpace)
       } else {
         await this.handleErrors(result)
       }
@@ -240,11 +236,7 @@ export default {
         // update currentSpace
         const currentSpace = this.$store.state.currentSpace
         const currentUser = this.$store.state.currentUser
-        const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
-        utils.updateWindowUrlAndTitle({
-          space: currentSpace,
-          currentUserIsSignedIn
-        })
+        utils.updateWindowTitle(currentSpace)
         this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
         const userIsSpaceUser = this.$store.getters['currentUser/spaceUserPermission'](currentSpace) === 'user'
         if (userIsSpaceUser) {

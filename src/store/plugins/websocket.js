@@ -58,13 +58,11 @@ const sendEvent = (store, mutation, type) => {
   }))
 }
 
-const checkIfShouldUpdateWindowUrlAndTitle = (store, data) => {
+const checkIfShouldupdateWindowTitle = (store, data) => {
   const newName = data.updates.name
   if (data.message === 'updateSpace' && newName) {
-    utils.updateWindowUrlAndTitle({
-      space: utils.clone(store.state.currentSpace),
-      shouldUpdateUrl: true
-    })
+    const space = utils.clone(store.state.currentSpace)
+    utils.updateWindowTitle(space)
   }
 }
 
@@ -141,7 +139,7 @@ export default function createWebSocketPlugin () {
             store.commit(`${message}`, updates)
           } else {
             store.commit(`currentSpace/${message}`, updates)
-            checkIfShouldUpdateWindowUrlAndTitle(store, data)
+            checkIfShouldupdateWindowTitle(store, data)
             checkIfShouldUpdateLinkToSpaceId(store, data)
           }
         }

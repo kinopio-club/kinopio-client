@@ -646,14 +646,8 @@ export default {
       return 'Kinopio'
     }
   },
-  updateWindowUrlAndTitle ({ space, shouldUpdateUrl, currentUserIsSignedIn }) {
+  updateWindowTitle (space) {
     const title = this.title(space)
-    let url = ''
-    if (shouldUpdateUrl || currentUserIsSignedIn) {
-      url = this.url(space)
-    }
-    url = '/' + url
-    window.history.replaceState({}, title, url)
     document.title = title
   },
   spaceHasUrl () {
