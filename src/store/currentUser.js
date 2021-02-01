@@ -326,6 +326,21 @@ export default {
       context.commit('favoriteUsers', favorites.favoriteUsers)
       context.commit('favoriteSpaces', favorites.favoriteSpaces)
       context.commit('hasRestoredFavorites', true, { root: true })
+      let spaceIdsUpdated = await context.dispatch('api/getSpacesUpdated', favorites.favoriteSpaces, { root: true }) || []
+      // spaceIdsUpdated = spaceIdsUpdated.m
+      console.log('🔮', spaceIdsUpdated)
+
+      // new store state, spaceIdsUpdated
+
+      // [Log] 🔮 – [{id: "dNB5aH7ToS7qCZdFVufuG", updatedAt: "2021-01-31T21:05:01.073Z", timeDeltaInMinutes: 219}, {id: "q8NdPeppS_2L760ka8lhw", updatedAt: "2021-01-31T16:49:09.744Z", timeDeltaInMinutes: 185}, {id: "eTmSUVy1msiU9PTeR2AMT", updatedAt: "2021-01-25T17:29:43.460Z", timeDeltaInMinutes: 8784}] (3)
+
+      // map existing favorites.favoriteSpaces w ids to have isUnreadUpdates: true
+      // const favoriteSpaces = favorites.favoriteSpaces.map(space => {
+
+      // if
+      // space.isUpdated = true
+      // return space
+      // })
     },
     addFavorite: (context, { type, item }) => {
       if (type === 'user') {

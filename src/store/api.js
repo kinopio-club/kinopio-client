@@ -288,6 +288,20 @@ const self = {
         console.error('🚒', error)
       }
     },
+    getSpaceAnonymously: async (context, space) => {
+      const isOffline = !window.navigator.onLine
+      if (isOffline) { return }
+      const invite = cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id) || {}
+      space.collaboratorKey = space.collaboratorKey || invite.collaboratorKey
+      try {
+        console.log('🛬 getting remote space anonymously', space.id, space.collaboratorKey)
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: space })
+        const response = await utils.timeout(40000, fetch(`${host}/space/${space.id}`, options))
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒', error)
+      }
+    },
     getSpaces: async (context, { spaceIds, shouldRequestRemote }) => {
       const max = 60
       try {
@@ -302,15 +316,16 @@ const self = {
         console.error('🚒', error)
       }
     },
-    getSpaceAnonymously: async (context, space) => {
-      const isOffline = !window.navigator.onLine
-      if (isOffline) { return }
-      const invite = cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id) || {}
-      space.collaboratorKey = space.collaboratorKey || invite.collaboratorKey
+    getSpacesUpdated: async (context, spaces) => {
+      const max = 60
       try {
-        console.log('🛬 getting remote space anonymously', space.id, space.collaboratorKey)
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: space })
-        const response = await utils.timeout(40000, fetch(`${host}/space/${space.id}`, options))
+        if (!shouldRequest()) { return }
+        if (!spaces.length) { return }
+        spaces = spaces.slice(0, max)
+        const body = spaces.map(space => space.id)
+        console.log('🛬🛬 getting user spaces updated', body)
+        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
+        const response = await utils.timeout(40000, fetch(`${host}/space/updated`, options))
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒', error)
