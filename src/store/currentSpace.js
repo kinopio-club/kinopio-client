@@ -482,8 +482,11 @@ export default {
     saveImportedSpace: async (context) => {
       const space = utils.clone(context.state)
       const user = context.rootState.currentUser
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       cache.saveSpace(space)
-      await context.dispatch('api/createSpace', space, { root: true })
+      if (currentUserIsSignedIn) {
+        await context.dispatch('api/createSpace', space, { root: true })
+      }
       utils.updateWindowTitle(space)
       context.commit('addUserToSpace', user)
     },
