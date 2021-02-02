@@ -527,6 +527,7 @@ export default {
         context.dispatch('updateUserLastSpaceId')
         context.commit('notifyNewUser', false, { root: true })
         context.commit('notifySignUpToEditSpace', false, { root: true })
+        context.dispatch('updateWindowHistory', {})
       })
     },
     addNewJournalSpace: (context) => {
@@ -564,6 +565,7 @@ export default {
       context.commit('restoreSpace', space)
       context.dispatch('saveNewSpace')
       context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
+      context.dispatch('updateWindowHistory', {})
     },
     getRemoteSpace: async (context, space) => {
       const collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
@@ -634,11 +636,10 @@ export default {
       context.commit('addNotification', { message: `You were removed as a collaborator from ${name}`, type: 'info' }, { root: true })
     },
     updateWindowHistory: (context, { space, isRemote }) => {
-      if (!space) { return }
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       if (currentUserIsSignedIn || isRemote) {
         space = space || context.state
-        const spaceUrl = space.url || utils.url(space)
+        const spaceUrl = utils.url(space)
         window.history.pushState({ spaceId: space.id }, `${space.name} – Kinopio`, spaceUrl)
       } else {
         window.history.replaceState({}, space.name, '/')
