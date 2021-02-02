@@ -332,7 +332,6 @@ export default {
         const spaceId = utils.spaceIdFromUrl(spaceUrl)
         const space = { id: spaceId }
         context.dispatch('loadSpace', { space })
-        context.dispatch('updateWindowHistory', { space, isRemote: true })
       // restore or create journal space
       } else if (loadJournalSpace) {
         console.log('🚃 Restore journal space')
@@ -347,6 +346,7 @@ export default {
         context.dispatch('createNewHelloSpace')
         context.dispatch('updateUserLastSpaceId')
       }
+      context.dispatch('updateWindowHistory', {})
     },
 
     // Users and otherSpaces
@@ -716,7 +716,6 @@ export default {
         spaceToRestore = { id: user.lastSpaceId }
       }
       context.dispatch('loadSpace', { space: spaceToRestore })
-      context.dispatch('updateWindowHistory', { space: spaceToRestore })
       context.dispatch('updateUserLastSpaceId')
     },
     updateSpace: async (context, updates) => {
