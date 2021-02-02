@@ -715,6 +715,7 @@ export default {
         spaceToRestore = { id: user.lastSpaceId }
       }
       context.dispatch('loadSpace', { space: spaceToRestore })
+      context.dispatch('updateWindowHistory', { space: spaceToRestore })
       context.dispatch('updateUserLastSpaceId')
     },
     updateSpace: async (context, updates) => {
