@@ -1335,8 +1335,7 @@ export default {
     },
     removeUnusedTagsFromCard: (context, cardId) => {
       const card = context.getters.cardById(cardId)
-      const cardTagNames = utils.tagsFromStringWithoutBrackets(card.name)
-      if (!cardTagNames) { return }
+      const cardTagNames = utils.tagsFromStringWithoutBrackets(card.name) || []
       const tagsInCard = context.getters.tagsInCard({ id: cardId })
       const tagsToRemove = tagsInCard.filter(tag => !cardTagNames.includes(tag.name))
       tagsToRemove.forEach(tag => context.dispatch('removeTag', tag))
@@ -1370,20 +1369,27 @@ export default {
     },
 
     // Tags
-    tagByName: (state) => (name) => {
-      return state.tags.find(tag => {
+    tags: (state, getters, rootState) => {
+      const mergedTags = utils.mergeArrays({ previous: rootState.otherTags, updated: state.tags, key: 'name' })
+      return mergedTags
+    },
+    tagByName: (state, getters) => (name) => {
+      const tags = getters.tags
+      return tags.find(tag => {
         return tag.name === name
       })
     },
-    tagsByName: (state) => (name) => {
-      return state.tags.filter(tag => {
+    tagsByName: (state, getters) => (name) => {
+      const tags = getters.tags
+      return tags.filter(tag => {
         return tag.name === name
       })
     },
-    tagsInCard: (state) => (card) => {
-      return state.tags.filter(tag => tag.cardId === card.id)
+    tagsInCard: (state, getters) => (card) => {
+      const tags = getters.tags
+      return tags.filter(tag => tag.cardId === card.id)
     },
-    spaceTags: (state) => (card) => {
+    spaceTags: (state, getters) => (card) => {
       let tags = state.tags
       tags = uniqBy(tags, 'name')
       tags.reverse()

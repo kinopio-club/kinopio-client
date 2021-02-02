@@ -13,6 +13,7 @@ import websocket from '@/store/plugins/websocket.js'
 import Vue from 'vue'
 import Vuex from 'vuex'
 import nanoid from 'nanoid'
+import uniqBy from 'lodash-es/uniqBy'
 
 Vue.use(Vuex)
 
@@ -133,7 +134,8 @@ export default new Vuex.Store({
 
     // session data
     otherUsers: [], // { id, name color }
-    otherSpaces: [] // { {user}, name, id }
+    otherSpaces: [], // { {user}, name, id }
+    otherTags: []
   },
   mutations: {
     updatePageSizes: (state) => {
@@ -711,6 +713,10 @@ export default new Vuex.Store({
       })
       spaces.push(updatedSpace)
       state.otherSpaces = spaces
+    },
+    otherTags: (state, remoteTags) => {
+      remoteTags = uniqBy(remoteTags, 'name')
+      state.otherTags = remoteTags
     }
   },
 

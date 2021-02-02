@@ -310,6 +310,8 @@ export default {
       if (remoteUser.stripeSubscriptionId) {
         context.commit('isUpgraded', true)
       }
+      const remoteTags = await context.dispatch('api/getUserTags', null, { root: true }) || []
+      context.commit('otherTags', remoteTags, { root: true })
     },
     restoreUserFavorites: async (context) => {
       const hasRestoredFavorites = context.rootState.hasRestoredFavorites
