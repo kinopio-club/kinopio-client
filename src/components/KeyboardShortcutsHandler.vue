@@ -7,7 +7,7 @@ import last from 'lodash-es/last'
 
 import utils from '@/utils.js'
 
-const incrementPosition = 20
+const incrementPosition = 12
 let useSiblingConnectionType
 
 export default {
