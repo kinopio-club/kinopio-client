@@ -642,7 +642,7 @@ export default {
         const spaceUrl = utils.url(space)
         window.history.pushState({ spaceId: space.id }, `${space.name} – Kinopio`, spaceUrl)
       } else {
-        window.history.replaceState({}, space.name, '/')
+        window.history.replaceState({}, '', '/')
       }
     },
     updateSpacePageSize: (context) => {
