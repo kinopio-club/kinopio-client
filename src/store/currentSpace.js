@@ -332,6 +332,7 @@ export default {
         const spaceId = utils.spaceIdFromUrl(spaceUrl)
         const space = { id: spaceId }
         context.dispatch('loadSpace', { space })
+        context.dispatch('updateWindowHistory', { space, isRemote: true })
       // restore or create journal space
       } else if (loadJournalSpace) {
         console.log('🚃 Restore journal space')
