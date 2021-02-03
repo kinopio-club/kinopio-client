@@ -712,28 +712,21 @@ export default {
   },
   urlFromString (string) {
     if (!string) { return }
-    // https://regexr.com/52r0i
-    // optionally starts with http/s protocol
-    // followed by alphanumerics
-    // then '.''
-    // followed by alphanumerics
-    const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+\w*/igm)
-    const urls = string.match(urlPattern)
-    if (!urls) { return }
-    const url = urls[0]
-    const hasProtocol = url.startsWith('http://') || url.startsWith('https://')
-    const isInvalidUrl = this.urlIsFloatOrIp(url) || this.urlIsCurrencyFloat(url)
-    if (isInvalidUrl) { return }
-    if (hasProtocol) {
-      return url
+    const urls = this.urlsFromString(string)
+    if (urls) {
+      return urls[0]
     } else {
-      return `http://${url}`
+      return null
     }
   },
   urlsFromString (string, skipProtocolCheck) {
     if (!string) { return [] }
     // https://regexr.com/59m5t
-    // same as urlFromString but matches multiple urls and returns [urls]
+    // optionally starts with http/s protocol
+    // followed by alphanumerics
+    // then '.''
+    // followed by alphanumerics
+    // matches multiple urls and returns [urls]
     const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+\w\/?/igm)
     let urls = string.match(urlPattern)
     if (!urls) { return }
@@ -741,7 +734,8 @@ export default {
     urls = urls.map(url => this.trim(url))
     urls = urls.filter(url => {
       if (!url) { return }
-      const isInvalidUrl = this.urlIsFloatOrIp(url) || this.urlIsCurrencyFloat(url)
+      const urlIsMarkdownEmphasis = Boolean(this.markdown().emphasisPattern2.exec(url))
+      const isInvalidUrl = urlIsMarkdownEmphasis || this.urlIsFloatOrIp(url) || this.urlIsCurrencyFloat(url)
       if (!isInvalidUrl) {
         return true
       }
