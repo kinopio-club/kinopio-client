@@ -71,6 +71,7 @@ export default new Vuex.Store({
     triggeredDrawConnectionFrame: {},
     remoteConnectionDetailsVisible: [],
     remoteCurrentConnections: [],
+    currentCardConnections: [],
 
     // tags
     tagDetailsIsVisible: false,
@@ -333,6 +334,11 @@ export default new Vuex.Store({
     removeRemoteCurrentConnection: (state, updates) => {
       const id = updates.id
       state.remoteCurrentConnections = state.remoteCurrentConnections.filter(remoteConnection => remoteConnection.id !== id)
+    },
+    updateCurrentCardConnections: (state, connections) => {
+      connections = connections || []
+      connections = connections.map(connection => connection.id)
+      state.currentCardConnections = connections
     },
 
     // Painting

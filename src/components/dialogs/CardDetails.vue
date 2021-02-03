@@ -1118,8 +1118,13 @@ export default {
           this.removeTrackingQueryStrings()
         }
       })
+      if (visible) {
+        const connections = this.$store.getters['currentSpace/cardConnections'](this.card.id)
+        this.$store.commit('updateCurrentCardConnections', connections)
+      }
       if (!visible) {
         this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', this.card.id)
+        this.$store.commit('updateCurrentCardConnections')
       }
       if (!visible && this.cardIsEmpty()) {
         this.$store.dispatch('currentSpace/removeCard', this.card)
