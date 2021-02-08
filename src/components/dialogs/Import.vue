@@ -10,6 +10,9 @@ dialog.import.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialo
     Loader(:visible="loading")
     input.hidden(type="file" ref="input" accept=".json" @change="readFile")
 
+    .errors(v-if="unknownError")
+      .badge.danger (シ_ _)シ Something went wrong parsing your json, Please try again or contact support
+
     .errors(v-if="errors.length")
       span.badge.danger File Errors
       ul
@@ -46,6 +49,7 @@ export default {
     return {
       loading: false,
       errors: [],
+      unknownError: false,
       importArenaChannelIsVisible: false
     }
   },
@@ -60,6 +64,7 @@ export default {
       if (this.loading) { return }
       const input = this.$refs.input
       input.click()
+      this.unknownError = false
     },
     readFile () {
       this.loading = true
@@ -69,7 +74,13 @@ export default {
       reader.readAsText(file)
       reader.onload = event => {
         this.loading = false
-        const space = JSON.parse(event.target.result)
+        let space
+        try {
+          space = JSON.parse(event.target.result)
+        } catch (error) {
+          console.error('🚒', error)
+          this.unknownError = true
+        }
         this.importSpace(space)
       }
     },
