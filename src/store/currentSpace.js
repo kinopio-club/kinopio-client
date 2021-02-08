@@ -322,7 +322,7 @@ export default {
   },
 
   actions: {
-    init: (context) => {
+    init: async (context) => {
       const spaceUrl = context.rootState.spaceUrlToLoad
       const loadJournalSpace = context.rootState.loadJournalSpace
       const user = context.rootState.currentUser
@@ -331,19 +331,19 @@ export default {
         console.log('🚃 Restore space from url', spaceUrl)
         const spaceId = utils.spaceIdFromUrl(spaceUrl)
         const space = { id: spaceId }
-        context.dispatch('loadSpace', { space })
+        await context.dispatch('loadSpace', { space })
       // restore or create journal space
       } else if (loadJournalSpace) {
         console.log('🚃 Restore journal space')
-        context.dispatch('loadJournalSpace')
+        await context.dispatch('loadJournalSpace')
       // restore last space
       } else if (user.lastSpaceId) {
         console.log('🚃 Restore last space', user.lastSpaceId)
-        context.dispatch('loadLastSpace')
+        await context.dispatch('loadLastSpace')
       // hello kinopio
       } else {
         console.log('🚃 Create new Hello Kinopio space')
-        context.dispatch('createNewHelloSpace')
+        await context.dispatch('createNewHelloSpace')
         context.dispatch('updateUserLastSpaceId')
       }
       context.dispatch('updateWindowHistory', {})
