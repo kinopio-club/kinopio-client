@@ -1131,7 +1131,9 @@ export default {
         connections = connections.concat(context.getters.cardConnections(card.id))
         connections = uniqBy(connections, 'id')
       })
-      context.dispatch('api/addToQueue', { name: 'updateConnections', body: connections }, { root: true })
+      connections.forEach(connection => {
+        context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
+      })
     },
     incrementSelectedCardsZ: (context) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
