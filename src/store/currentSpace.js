@@ -1078,7 +1078,6 @@ export default {
         cards = [currentDraggingCardId]
       }
       cards = cards.map(cardId => context.getters.cardById(cardId))
-      console.log(cards)
       // prevent cards bunching up at 0
       cards.forEach(card => {
         if (card.x === 0) { delta.x = Math.max(0, delta.x) }
