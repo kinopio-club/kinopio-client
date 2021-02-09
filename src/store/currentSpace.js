@@ -1063,49 +1063,33 @@ export default {
       context.dispatch('changeSpace', { space })
     },
     dragCards: (context, options) => {
+      const currentDraggingCardId = context.rootState.currentDraggingCardId
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
-      const { delta, endCursor, prevCursor } = options
-      options.delta = delta || {
+      const { endCursor, prevCursor } = options
+      const delta = options.delta || {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
       }
       let cards
       let connections = []
       if (multipleCardsSelectedIds.length) {
-        cards = multipleCardsSelectedIds.map(cardId => context.getters.cardById(cardId))
-        // prevent cards bunching up at 0
-        cards.forEach(card => {
-          if (card.x === 0) { options.delta.x = Math.max(0, options.delta.x) }
-          if (card.y === 0) { options.delta.y = Math.max(0, options.delta.y) }
-          connections = connections.concat(context.getters.cardConnections(card.id))
-        })
-        options.cards = cards
+        cards = multipleCardsSelectedIds
       } else {
-        const cardId = context.rootState.currentDraggingCardId
-        connections = context.getters.cardConnections(cardId)
-        options.card = context.getters.cardById(cardId)
+        cards = [currentDraggingCardId]
       }
-      options.connections = uniqBy(connections, 'id')
-      // move cards
-      if (multipleCardsSelectedIds.length) {
-        context.dispatch('dragMultipleCards', options)
-      } else {
-        context.dispatch('dragSingleCard', options)
-      }
-    },
-    dragSingleCard: (context, { card, connections, endCursor, delta, shouldUpdateApi }) => {
-      context.commit('moveCard', { card, delta })
-      context.commit('updateConnectionPaths', connections)
-      const update = { cardId: card.id, delta }
-      context.commit('broadcast/update', { updates: update, type: 'moveCard' }, { root: true })
-      context.commit('broadcast/update', { updates: connections, type: 'updateConnectionPaths' }, { root: true })
-      context.dispatch('api/addToQueue', { name: 'updateConnections', body: connections }, { root: true })
-    },
-    dragMultipleCards: (context, { cards, connections, endCursor, prevCursor, delta }) => {
+      cards = cards.map(cardId => context.getters.cardById(cardId))
+      console.log(cards)
+      // prevent cards bunching up at 0
+      cards.forEach(card => {
+        if (card.x === 0) { delta.x = Math.max(0, delta.x) }
+        if (card.y === 0) { delta.y = Math.max(0, delta.y) }
+        connections = connections.concat(context.getters.cardConnections(card.id))
+      })
+      connections = uniqBy(connections, 'id')
       context.commit('moveCards', { cards, delta })
       context.commit('updateConnectionPaths', connections)
       context.commit('broadcast/update', { updates: { cards, delta }, type: 'moveCards' }, { root: true })
-      context.dispatch('api/addToQueue', { name: 'updateConnections', body: connections }, { root: true })
+      context.commit('broadcast/update', { updates: connections, type: 'updateConnectionPaths' }, { root: true })
     },
     updateAfterDragWithPositions: (context) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
