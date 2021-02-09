@@ -91,8 +91,6 @@ export default new Vuex.Store({
     remoteCardsDragging: [],
     remoteUploadDraggedOverCards: [],
     preventDraggedCardFromShowingDetails: false,
-    currentCardsDragging: [],
-    currentConnectionsDragging: [],
 
     // multiple selection
     multipleSelectedActionsIsVisible: false,
@@ -365,13 +363,6 @@ export default new Vuex.Store({
     currentDraggingCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'currentDraggingCardId' })
       state.currentDraggingCardId = cardId
-      if (state.multipleCardsSelectedIds.length) { return }
-      // ♨️ set up currentConnectionsDragging
-      let connections = utils.clone(state.currentSpace.connections)
-      connections = connections.filter(connection => {
-        return (connection.startCardId === cardId || connection.endCardId === cardId)
-      })
-      state.currentConnectionsDragging = connections
     },
     addToRemoteCardsDragging: (state, update) => {
       utils.typeCheck({ value: update, type: 'object', origin: 'addToRemoteCardsDragging' })
@@ -481,20 +472,8 @@ export default new Vuex.Store({
       state.multipleSelectedActionsPosition = position
     },
     addToMultipleCardsSelected: (state, cardId) => {
+      utils.typeCheck({ value: cardId, type: 'string', origin: 'addToMultipleCardsSelected' })
       state.multipleCardsSelectedIds.push(cardId)
-      // ♨️ set up currentConnectionsDragging
-      let connections = utils.clone(state.currentSpace.connections)
-      connections = connections.filter(connection => {
-        const isStartCard = connection.startCardId === cardId
-        const isEndCard = connection.endCardId === cardId
-        return isStartCard || isEndCard
-      })
-      connections.forEach(connection => {
-        state.currentConnectionsDragging.push(connection)
-      })
-      // ♨️ set up currentCardsDragging
-      let currentCard = state.currentSpace.cards.filter(card => card.id === cardId)
-      state.currentCardsDragging.push(currentCard)
     },
     addToMultipleConnectionsSelected: (state, connectionId) => {
       state.multipleConnectionsSelectedIds.push(connectionId)

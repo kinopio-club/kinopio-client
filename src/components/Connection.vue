@@ -64,6 +64,7 @@ export default {
     connectionTypeId () { return this.connection.connectionTypeId },
     startCardId () { return this.connection.startCardId },
     endCardId () { return this.connection.endCardId },
+    connectionPath () { return this.connection.path },
     path () {
       if (this.controlCurve) {
         const { controlPoint, x, y } = this.controlCurve
@@ -241,6 +242,9 @@ export default {
       if (shouldAnimate) {
         animationTimer = window.requestAnimationFrame(this.animationFrame)
       }
+    },
+    connectionPath (path) {
+      this.curvedPath = path
     }
   }
 

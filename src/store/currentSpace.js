@@ -1185,7 +1185,7 @@ export default {
     },
     updateCardConnectionPaths: (context, { cardId, shouldUpdateApi, connections }) => {
       const spaceId = context.state.id
-      connections = utils.clone(connections || context.getters.cardConnections(cardId) || context.rootState.currentConnectionsDragging)
+      connections = utils.clone(connections || context.getters.cardConnections(cardId))
       connections.map(connection => {
         connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
         connection.spaceId = spaceId
