@@ -680,7 +680,7 @@ export default {
   },
   currentSpaceIsRemote (space, currentUser) {
     if (!space.users) { return true }
-    const currentUserCreatedSpace = currentUser.id === space.users[0].id
+    const currentUserCreatedSpace = currentUser.id === space.userId
     if (currentUserCreatedSpace) {
       return Boolean(currentUser.apiKey)
     } else {

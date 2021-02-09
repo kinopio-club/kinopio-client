@@ -132,15 +132,21 @@ export default {
       })
       cache.updateSpace('cards', state.cards, state.id)
     },
-    moveCard: (state, { cardId, delta }) => {
+    moveCard: (state, { card, delta }) => {
       const maxOffset = 0
-      state.cards.map(card => {
-        if (card.id === cardId) {
-          card.x += delta.x || 0
-          card.y += delta.y || 0
-          card.x = Math.max(card.x, maxOffset)
-          card.y = Math.max(card.y, maxOffset)
-        }
+      card.x += delta.x || 0
+      card.y += delta.y || 0
+      card.x = Math.max(card.x, maxOffset)
+      card.y = Math.max(card.y, maxOffset)
+      cache.updateSpace('cards', state.cards, state.id)
+    },
+    moveCards: (state, { cards, delta }) => {
+      const maxOffset = 0
+      cards.forEach(card => {
+        card.x += delta.x || 0
+        card.y += delta.y || 0
+        card.x = Math.max(card.x, maxOffset)
+        card.y = Math.max(card.y, maxOffset)
       })
       cache.updateSpace('cards', state.cards, state.id)
     },
@@ -219,6 +225,13 @@ export default {
           })
         }
       })
+    },
+    updateConnectionPaths: (state, connections) => {
+      connections.forEach(connection => {
+        connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
+        connection.spaceId = state.id
+      })
+      cache.updateSpace('connections', state.connections, state.id)
     },
     addConnection: (state, connection) => {
       state.connections.push(connection)
@@ -919,7 +932,7 @@ export default {
       card = utils.clone(card)
       card.id = nanoid()
       card.spaceId = context.state.id
-      const existingCards = context.rootState.currentSpace.cards
+      const existingCards = context.state.cards
       utils.uniqueCardPosition(card, existingCards)
       const tags = utils.tagsFromStringWithoutBrackets(card.name)
       if (tags) {
@@ -976,7 +989,7 @@ export default {
       })
     },
     clearAllCardsZ: (context) => {
-      let cards = context.rootState.currentSpace.cards
+      let cards = context.state.cards
       cards.forEach(card => {
         const body = { id: card.id, z: 0 }
         const update = { name: 'updateCard', body }
@@ -987,7 +1000,7 @@ export default {
     },
     incrementCardZ: (context, cardId) => {
       const maxInt = Number.MAX_SAFE_INTEGER - 1000
-      let cards = context.rootState.currentSpace.cards
+      let cards = context.state.cards
       let highestCardZ = utils.highestCardZ(cards)
       if (highestCardZ > maxInt) {
         context.dispatch('clearAllCardsZ')
@@ -1056,15 +1069,23 @@ export default {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
       }
-      // prevent cards bunching up at 0
       let cards
+      let connections = []
       if (multipleCardsSelectedIds.length) {
         cards = multipleCardsSelectedIds.map(cardId => context.getters.cardById(cardId))
+        // prevent cards bunching up at 0
         cards.forEach(card => {
           if (card.x === 0) { options.delta.x = Math.max(0, options.delta.x) }
           if (card.y === 0) { options.delta.y = Math.max(0, options.delta.y) }
+          connections = connections.concat(context.getters.cardConnections(card.id))
         })
+        options.cards = cards
+      } else {
+        const cardId = context.rootState.currentDraggingCardId
+        connections = context.getters.cardConnections(cardId)
+        options.card = context.getters.cardById(cardId)
       }
+      options.connections = uniqBy(connections, 'id')
       // move cards
       if (multipleCardsSelectedIds.length) {
         context.dispatch('dragMultipleCards', options)
@@ -1072,31 +1093,29 @@ export default {
         context.dispatch('dragSingleCard', options)
       }
     },
-    dragMultipleCards: (context, { endCursor, prevCursor, delta }) => {
-      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
-      const cards = context.rootState.currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
-      cards.forEach(card => {
-        const update = { cardId: card.id, delta }
-        context.commit('moveCard', update)
-        context.commit('broadcast/update', { updates: update, type: 'moveCard' }, { root: true })
-        context.dispatch('updateCardConnectionPaths', { cardId: card.id })
-      })
-    },
-    dragSingleCard: (context, { endCursor, delta, shouldUpdateApi }) => {
-      const currentDraggingCardId = context.rootState.currentDraggingCardId
-      const update = { cardId: currentDraggingCardId, delta }
-      context.commit('moveCard', update)
+    dragSingleCard: (context, { card, connections, endCursor, delta, shouldUpdateApi }) => {
+      context.commit('moveCard', { card, delta })
+      context.commit('updateConnectionPaths', connections)
+      const update = { cardId: card.id, delta }
       context.commit('broadcast/update', { updates: update, type: 'moveCard' }, { root: true })
-      context.dispatch('updateCardConnectionPaths', { cardId: currentDraggingCardId })
+      context.commit('broadcast/update', { updates: connections, type: 'updateConnectionPaths' }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'updateConnections', body: connections }, { root: true })
+    },
+    dragMultipleCards: (context, { cards, connections, endCursor, prevCursor, delta }) => {
+      context.commit('moveCards', { cards, delta })
+      context.commit('updateConnectionPaths', connections)
+      context.commit('broadcast/update', { updates: { cards, delta }, type: 'moveCards' }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'updateConnections', body: connections }, { root: true })
     },
     updateAfterDragWithPositions: (context) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       const currentDraggingCardId = context.rootState.currentDraggingCardId
       let cards = []
+      let connections = []
       if (multipleCardsSelectedIds.length) {
-        cards = context.rootState.currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
+        cards = context.state.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
       } else {
-        const card = context.rootState.currentSpace.cards.find(card => currentDraggingCardId === card.id)
+        const card = context.state.cards.find(card => currentDraggingCardId === card.id)
         if (!card) { return }
         cards.push(card)
       }
@@ -1112,8 +1131,10 @@ export default {
         }
         context.dispatch('api/addToQueue', update, { root: true })
         context.commit('history/add', update, { root: true })
-        context.dispatch('updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
+        connections = connections.concat(context.getters.cardConnections(card.id))
+        connections = uniqBy(connections, 'id')
       })
+      context.dispatch('api/addToQueue', { name: 'updateConnections', body: connections }, { root: true })
     },
     incrementSelectedCardsZ: (context) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
