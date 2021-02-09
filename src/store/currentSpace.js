@@ -150,6 +150,14 @@ export default {
       })
       cache.updateSpace('cards', state.cards, state.id)
     },
+    moveCardsBroadcast: (state, { cards, delta }) => {
+      cards.forEach(updated => {
+        const card = state.cards.find(card => card.id === updated.id)
+        card.x = updated.x
+        card.y = updated.y
+      })
+      cache.updateSpace('cards', state.cards, state.id)
+    },
     createCard: (state, card) => {
       state.cards.push(card)
       cache.updateSpace('cards', state.cards, state.id)
@@ -230,6 +238,12 @@ export default {
       connections.forEach(connection => {
         connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
         connection.spaceId = state.id
+      })
+      cache.updateSpace('connections', state.connections, state.id)
+    },
+    updateConnectionPathsBroadcast: (state, { connections }) => {
+      connections.forEach(updated => {
+        state.connections.find(connection => connection.id === updated.id).path = updated.path
       })
       cache.updateSpace('connections', state.connections, state.id)
     },
@@ -1088,7 +1102,7 @@ export default {
       context.commit('moveCards', { cards, delta })
       context.commit('updateConnectionPaths', connections)
       context.commit('broadcast/update', { updates: { cards, delta }, type: 'moveCards' }, { root: true })
-      context.commit('broadcast/update', { updates: connections, type: 'updateConnectionPaths' }, { root: true })
+      context.commit('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths' }, { root: true })
     },
     updateAfterDragWithPositions: (context) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds

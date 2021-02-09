@@ -134,6 +134,11 @@ export default function createWebSocketPlugin () {
             store.commit('triggerUpdateRemoteDropGuideLine', updates)
           } else if (message === 'updateStopRemoteUserDropGuideLine') {
             store.commit('triggerUpdateStopRemoteUserDropGuideLine', updates)
+          // cards and connections
+          } else if (message === 'updateConnectionPaths') {
+            store.commit('currentSpace/updateConnectionPathsBroadcast', updates)
+          } else if (message === 'moveCards') {
+            store.commit('currentSpace/moveCardsBroadcast', updates)
           // other
           } else if (data.type === 'store') {
             store.commit(`${message}`, updates)
