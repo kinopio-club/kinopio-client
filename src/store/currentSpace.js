@@ -132,14 +132,6 @@ export default {
       })
       cache.updateSpace('cards', state.cards, state.id)
     },
-    moveCard: (state, { card, delta }) => {
-      const maxOffset = 0
-      card.x += delta.x || 0
-      card.y += delta.y || 0
-      card.x = Math.max(card.x, maxOffset)
-      card.y = Math.max(card.y, maxOffset)
-      cache.updateSpace('cards', state.cards, state.id)
-    },
     moveCards: (state, { cards, delta }) => {
       const maxOffset = 0
       cards.forEach(card => {
@@ -148,7 +140,7 @@ export default {
         card.x = Math.max(card.x, maxOffset)
         card.y = Math.max(card.y, maxOffset)
       })
-      cache.updateSpace('cards', state.cards, state.id)
+      cache.updateSpaceCardsDebounced(state.cards, state.id)
     },
     moveCardsBroadcast: (state, { cards, delta }) => {
       cards.forEach(updated => {
@@ -239,7 +231,7 @@ export default {
         connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
         connection.spaceId = state.id
       })
-      cache.updateSpace('connections', state.connections, state.id)
+      cache.updateSpaceConnectionsDebounced(state.connections, state.id)
     },
     updateConnectionPathsBroadcast: (state, { connections }) => {
       connections.forEach(updated => {
@@ -697,7 +689,6 @@ export default {
         context.dispatch('addNewJournalSpace')
       }
     },
-
     loadSpace: async (context, { space }) => {
       const emptySpace = utils.emptySpace(space.id)
       const cachedSpace = cache.space(space.id)
