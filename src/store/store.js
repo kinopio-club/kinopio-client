@@ -13,6 +13,7 @@ import websocket from '@/store/plugins/websocket.js'
 import Vue from 'vue'
 import Vuex from 'vuex'
 import nanoid from 'nanoid'
+import uniqBy from 'lodash-es/uniqBy'
 
 Vue.use(Vuex)
 
@@ -70,6 +71,7 @@ export default new Vuex.Store({
     triggeredDrawConnectionFrame: {},
     remoteConnectionDetailsVisible: [],
     remoteCurrentConnections: [],
+    currentCardConnections: [],
 
     // tags
     tagDetailsIsVisible: false,
@@ -89,8 +91,6 @@ export default new Vuex.Store({
     remoteCardsDragging: [],
     remoteUploadDraggedOverCards: [],
     preventDraggedCardFromShowingDetails: false,
-    currentCardsDragging: [],
-    currentConnectionsDragging: [],
 
     // multiple selection
     multipleSelectedActionsIsVisible: false,
@@ -122,6 +122,7 @@ export default new Vuex.Store({
     notifySpaceIsOpenAndEditable: false,
     notifyCardsCreatedIsNearLimit: false,
     notifyCardsCreatedIsOverLimit: false,
+    notifyKinopioUpdatesAreAvailable: false,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -133,7 +134,8 @@ export default new Vuex.Store({
 
     // session data
     otherUsers: [], // { id, name color }
-    otherSpaces: [] // { {user}, name, id }
+    otherSpaces: [], // { {user}, name, id }
+    otherTags: []
   },
   mutations: {
     updatePageSizes: (state) => {
@@ -332,6 +334,11 @@ export default new Vuex.Store({
       const id = updates.id
       state.remoteCurrentConnections = state.remoteCurrentConnections.filter(remoteConnection => remoteConnection.id !== id)
     },
+    updateCurrentCardConnections: (state, connections) => {
+      connections = connections || []
+      connections = connections.map(connection => connection.id)
+      state.currentCardConnections = connections
+    },
 
     // Painting
 
@@ -357,13 +364,6 @@ export default new Vuex.Store({
     currentDraggingCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'currentDraggingCardId' })
       state.currentDraggingCardId = cardId
-      if (state.multipleCardsSelectedIds.length) { return }
-      // ♨️ set up currentConnectionsDragging
-      let connections = utils.clone(state.currentSpace.connections)
-      connections = connections.filter(connection => {
-        return (connection.startCardId === cardId || connection.endCardId === cardId)
-      })
-      state.currentConnectionsDragging = connections
     },
     addToRemoteCardsDragging: (state, update) => {
       utils.typeCheck({ value: update, type: 'object', origin: 'addToRemoteCardsDragging' })
@@ -473,20 +473,8 @@ export default new Vuex.Store({
       state.multipleSelectedActionsPosition = position
     },
     addToMultipleCardsSelected: (state, cardId) => {
+      utils.typeCheck({ value: cardId, type: 'string', origin: 'addToMultipleCardsSelected' })
       state.multipleCardsSelectedIds.push(cardId)
-      // ♨️ set up currentConnectionsDragging
-      let connections = utils.clone(state.currentSpace.connections)
-      connections = connections.filter(connection => {
-        const isStartCard = connection.startCardId === cardId
-        const isEndCard = connection.endCardId === cardId
-        return isStartCard || isEndCard
-      })
-      connections.forEach(connection => {
-        state.currentConnectionsDragging.push(connection)
-      })
-      // ♨️ set up currentCardsDragging
-      let currentCard = state.currentSpace.cards.filter(card => card.id === cardId)
-      state.currentCardsDragging.push(currentCard)
     },
     addToMultipleConnectionsSelected: (state, connectionId) => {
       state.multipleConnectionsSelectedIds.push(connectionId)
@@ -643,6 +631,10 @@ export default new Vuex.Store({
         state.notifyCardsCreatedIsNearLimit = false
       }
     },
+    notifyKinopioUpdatesAreAvailable: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'notifyKinopioUpdatesAreAvailable' })
+      state.notifyKinopioUpdatesAreAvailable = value
+    },
 
     // Notifications with Position
 
@@ -689,6 +681,7 @@ export default new Vuex.Store({
     // Session Data
 
     updateOtherUsers: (state, updatedUser) => {
+      if (!updatedUser) { return }
       utils.typeCheck({ value: updatedUser, type: 'object', origin: 'updateOtherUsers' })
       let users = utils.clone(state.otherUsers)
       users = users.filter(Boolean)
@@ -710,6 +703,10 @@ export default new Vuex.Store({
       })
       spaces.push(updatedSpace)
       state.otherSpaces = spaces
+    },
+    otherTags: (state, remoteTags) => {
+      remoteTags = uniqBy(remoteTags, 'name')
+      state.otherTags = remoteTags
     }
   },
 

@@ -24,7 +24,7 @@ span.name-segment
     :style="{backgroundColor: segment.color}"
     :class="{ active: currentSelectedTag.name === segment.name }"
     @click.left="showTagDetailsIsVisible($event, segment)"
-    @touchend="showTagDetailsIsVisible($event, segment)"
+    @touchend.stop="showTagDetailsIsVisible($event, segment)"
     @keyup.stop.enter="showTagDetailsIsVisible($event, segment)"
     :data-tag-id="segment.id"
   ) {{segment.name}}
@@ -33,7 +33,7 @@ span.name-segment
     span.badge.button-badge.link-badge(
       :class="{ active: currentSelectedLink.name === segment.name }"
       @click.left.prevent="showLinkDetailsIsVisible($event, segment)"
-      @touchend.prevent="showLinkDetailsIsVisible($event, segment)"
+      @touchend.stop.prevent="showLinkDetailsIsVisible($event, segment)"
       @keyup.stop.enter="showLinkDetailsIsVisible($event, segment)"
     )
       template(v-if="segmentSpace(segment)")

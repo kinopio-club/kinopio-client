@@ -310,8 +310,8 @@ export default {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
     },
     showCardDetails (card) {
-      this.$store.dispatch('closeAllDialogs', 'TagDetails.showCardDetails')
       card = card || this.currentCard
+      this.$store.dispatch('closeAllDialogs', 'TagDetails.showCardDetails')
       if (this.currentSpaceId !== card.spaceId) {
         this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
         let space

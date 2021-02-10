@@ -361,7 +361,6 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'Header.toggleOfflineIsVisible')
       this.offlineIsVisible = !isVisible
     },
-
     setLoadingSignUpOrIn (value) {
       this.loadingSignUpOrIn = value
     },

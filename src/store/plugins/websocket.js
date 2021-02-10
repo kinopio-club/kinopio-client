@@ -16,9 +16,9 @@ if (process.env.NODE_ENV === 'development') {
 const joinSpaceRoom = (store, mutation) => {
   if (!websocket) { return }
   const space = utils.clone(store.state.currentSpace)
-  const currentSpaceHasUrl = utils.currentSpaceHasUrl(space)
   const user = utils.clone(store.state.currentUser)
-  if (!currentSpaceHasUrl) { return }
+  const currentSpaceIsRemote = utils.currentSpaceIsRemote(space, user)
+  if (!currentSpaceIsRemote) { return }
   if (currentSpaceRoom === space.id) { return }
   if (websocket.readyState === 0) {
     console.warn('🚑 joinSpaceRoom cancelled because websocket not ready', websocket.readyState)
@@ -58,13 +58,11 @@ const sendEvent = (store, mutation, type) => {
   }))
 }
 
-const checkIfShouldUpdateWindowUrlAndTitle = (store, data) => {
+const checkIfShouldupdateWindowTitle = (store, data) => {
   const newName = data.updates.name
   if (data.message === 'updateSpace' && newName) {
-    utils.updateWindowUrlAndTitle({
-      space: utils.clone(store.state.currentSpace),
-      shouldUpdateUrl: true
-    })
+    const space = utils.clone(store.state.currentSpace)
+    utils.updateWindowTitle(space)
   }
 }
 
@@ -136,12 +134,17 @@ export default function createWebSocketPlugin () {
             store.commit('triggerUpdateRemoteDropGuideLine', updates)
           } else if (message === 'updateStopRemoteUserDropGuideLine') {
             store.commit('triggerUpdateStopRemoteUserDropGuideLine', updates)
+          // cards and connections
+          } else if (message === 'updateConnectionPaths') {
+            store.commit('currentSpace/updateConnectionPathsBroadcast', updates)
+          } else if (message === 'moveCards') {
+            store.commit('currentSpace/moveCardsBroadcast', updates)
           // other
           } else if (data.type === 'store') {
             store.commit(`${message}`, updates)
           } else {
             store.commit(`currentSpace/${message}`, updates)
-            checkIfShouldUpdateWindowUrlAndTitle(store, data)
+            checkIfShouldupdateWindowTitle(store, data)
             checkIfShouldUpdateLinkToSpaceId(store, data)
           }
         }

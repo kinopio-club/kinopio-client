@@ -73,7 +73,7 @@ article(:style="position" :data-card-id="id" ref="card")
       //- Right buttons
       span.card-buttons-wrap
         //- Url →
-        a.url-wrap(:href="linkOrUrl" @click.left.stop="closeAllDialogs" @touchend="openUrl(linkOrUrl)" v-if="linkOrUrl && !nameIsComment")
+        a.url-wrap(:href="linkOrUrl" @click.left.prevent.stop="openUrl(linkOrUrl)" @touchend.prevent="openUrl(linkOrUrl)" v-if="linkOrUrl && !nameIsComment")
           .url.inline-button-wrap
             button.inline-button(:style="{background: selectedColor}" tabindex="-1")
               img.icon.visit.arrow-icon(src="@/assets/visit.svg")
@@ -894,7 +894,16 @@ export default {
       return space
     },
     openUrl (url) {
-      window.location.href = url
+      if (utils.urlIsKinopioSpace(url)) {
+        const spaceId = utils.spaceIdFromUrl(url)
+        this.changeSpace({ id: spaceId })
+      } else {
+        window.location.href = url
+      }
+    },
+    changeSpace (space) {
+      this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
+      this.$store.dispatch('closeAllDialogs', 'spaceDetails.changeSpace')
     },
     broadcastShowCardDetails () {
       const updates = {

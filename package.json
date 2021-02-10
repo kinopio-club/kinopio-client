@@ -50,7 +50,8 @@
       "@vue/standard"
     ],
     "rules": {
-      "no-throw-literal": "off"
+      "no-throw-literal": "off",
+      "no-irregular-whitespace": "off"
     },
     "parserOptions": {
       "parser": "babel-eslint"

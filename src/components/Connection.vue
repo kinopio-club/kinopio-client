@@ -14,7 +14,7 @@ path.connection-path(
   @touchend.stop="showConnectionDetails"
   @keyup.stop.backspace="removeConnection"
   @keyup.stop.enter="showConnectionDetailsOnKeyup"
-  :class="{active: isSelected || detailsIsVisible || remoteDetailsIsVisible || isRemoteSelected, filtered: isFiltered, hover: isHovered, 'hide-connection-outline': shouldHideConnectionOutline }"
+  :class="{active: isSelected || detailsIsVisible || remoteDetailsIsVisible || isRemoteSelected || isCurrentCardConnection, filtered: isFiltered, hover: isHovered, 'hide-connection-outline': shouldHideConnectionOutline }"
   ref="connection"
   tabindex="0"
   @dragover.prevent
@@ -64,6 +64,7 @@ export default {
     connectionTypeId () { return this.connection.connectionTypeId },
     startCardId () { return this.connection.startCardId },
     endCardId () { return this.connection.endCardId },
+    connectionPath () { return this.connection.path },
     path () {
       if (this.controlCurve) {
         const { controlPoint, x, y } = this.controlCurve
@@ -87,6 +88,10 @@ export default {
       const remoteConnections = this.$store.state.remoteConnectionsSelected
       const isSelected = remoteConnections.find(connection => connection.connectionId === this.id)
       return isSelected
+    },
+    isCurrentCardConnection () {
+      const currentCardConnections = this.$store.state.currentCardConnections
+      return currentCardConnections.includes(this.id)
     },
     detailsIsVisible () {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
@@ -237,6 +242,9 @@ export default {
       if (shouldAnimate) {
         animationTimer = window.requestAnimationFrame(this.animationFrame)
       }
+    },
+    connectionPath (path) {
+      this.curvedPath = path
     }
   }
 

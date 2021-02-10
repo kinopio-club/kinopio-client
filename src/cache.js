@@ -1,5 +1,7 @@
 // local storage cache interface for currentUser and spaces
 
+import debounce from 'lodash-es/debounce'
+
 import utils from '@/utils.js'
 
 export default {
@@ -83,6 +85,26 @@ export default {
     space.cacheDate = Date.now()
     this.storeLocal(`space-${spaceId}`, space)
   },
+  updateSpaceCardsDebounced: debounce(function (cards, spaceId) {
+    let space = this.space(spaceId)
+    if (!utils.objectHasKeys(space)) {
+      console.warn('🚑 could not updateSpace cache because cachedSpace does not exist')
+      return
+    }
+    space.cards = cards
+    space.cacheDate = Date.now()
+    this.storeLocal(`space-${spaceId}`, space)
+  }, 200),
+  updateSpaceConnectionsDebounced: debounce(function (connections, spaceId) {
+    let space = this.space(spaceId)
+    if (!utils.objectHasKeys(space)) {
+      console.warn('🚑 could not updateSpace cache because cachedSpace does not exist')
+      return
+    }
+    space.connections = connections
+    space.cacheDate = Date.now()
+    this.storeLocal(`space-${spaceId}`, space)
+  }, 200),
   addToSpace ({ cards, connections, connectionTypes }, spaceId) {
     let space = this.space(spaceId)
     cards.forEach(card => space.cards.push(card))

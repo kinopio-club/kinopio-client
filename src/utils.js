@@ -436,7 +436,7 @@ export default {
   // Spaces 🌙
 
   emptySpace (spaceId) {
-    return { id: spaceId, moonPhase: '', background: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], collaborators: [], spectators: [], clients: [] }
+    return { id: spaceId, moonPhase: '', background: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [] }
   },
   // migration added oct 2019
   migrationEnsureRemovedCards (space) {
@@ -646,14 +646,8 @@ export default {
       return 'Kinopio'
     }
   },
-  updateWindowUrlAndTitle ({ space, shouldUpdateUrl, currentUserIsSignedIn }) {
+  updateWindowTitle (space) {
     const title = this.title(space)
-    let url = ''
-    if (shouldUpdateUrl || currentUserIsSignedIn) {
-      url = this.url(space)
-    }
-    url = '/' + url
-    window.history.replaceState({}, title, url)
     document.title = title
   },
   spaceHasUrl () {
@@ -684,9 +678,14 @@ export default {
     }
     return true
   },
-  currentSpaceHasUrl (space) {
-    const id = this.spaceIdFromUrl()
-    return Boolean(id === space.id)
+  currentSpaceIsRemote (space, currentUser) {
+    if (!this.arrayExists(space.users)) { return true }
+    const currentUserCreatedSpace = currentUser.id === space.users[0].id
+    if (currentUserCreatedSpace) {
+      return Boolean(currentUser.apiKey)
+    } else {
+      return true
+    }
   },
   normalizeUrl (url) {
     const lastCharacterPosition = url.length - 1
@@ -713,36 +712,30 @@ export default {
   },
   urlFromString (string) {
     if (!string) { return }
-    // https://regexr.com/52r0i
-    // optionally starts with http/s protocol
-    // followed by alphanumerics
-    // then '.''
-    // followed by alphanumerics
-    const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+\w*/igm)
-    const urls = string.match(urlPattern)
-    if (!urls) { return }
-    const url = urls[0]
-    const hasProtocol = url.startsWith('http://') || url.startsWith('https://')
-    const isInvalidUrl = this.urlIsFloatOrIp(url) || this.urlIsCurrencyFloat(url)
-    if (isInvalidUrl) { return }
-    if (hasProtocol) {
-      return url
+    const urls = this.urlsFromString(string)
+    if (urls) {
+      return urls[0]
     } else {
-      return `http://${url}`
+      return null
     }
   },
   urlsFromString (string, skipProtocolCheck) {
     if (!string) { return [] }
     // https://regexr.com/59m5t
-    // same as urlFromString but matches multiple urls and returns [urls]
-    const urlPattern = new RegExp(/((http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+\w|\/)*/igm)
+    // optionally starts with http/s protocol
+    // followed by alphanumerics
+    // then '.''
+    // followed by alphanumerics
+    // matches multiple urls and returns [urls]
+    const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+\w\/?/igm)
     let urls = string.match(urlPattern)
     if (!urls) { return }
     // filter out empty or non-urls
     urls = urls.map(url => this.trim(url))
     urls = urls.filter(url => {
       if (!url) { return }
-      const isInvalidUrl = this.urlIsFloatOrIp(url) || this.urlIsCurrencyFloat(url)
+      const urlIsMarkdownEmphasis = Boolean(this.markdown().emphasisPattern2.exec(url))
+      const isInvalidUrl = urlIsMarkdownEmphasis || this.urlIsFloatOrIp(url) || this.urlIsCurrencyFloat(url)
       if (!isInvalidUrl) {
         return true
       }

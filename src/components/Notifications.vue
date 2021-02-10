@@ -54,6 +54,14 @@ aside.notifications(@click.left="closeAllDialogs")
           button Email Support
         button(@click.left="refreshBrowser") Refresh
 
+  .persistent-item(v-if="notifyKinopioUpdatesAreAvailable")
+    p
+      span.label-badge NEW
+      span Kinopio updates are available
+    .row
+      .button-wrap
+        button(@click.left="refreshBrowser") Update
+
   .persistent-item.danger(v-if="notifyServerCouldNotSave")
     p Error saving changes to server, retrying…
 
@@ -150,6 +158,7 @@ export default {
     notifySpaceIsOpenAndEditable () { return this.$store.state.notifySpaceIsOpenAndEditable },
     notifyCardsCreatedIsNearLimit () { return this.$store.state.notifyCardsCreatedIsNearLimit },
     notifyCardsCreatedIsOverLimit () { return this.$store.state.notifyCardsCreatedIsOverLimit },
+    notifyKinopioUpdatesAreAvailable () { return this.$store.state.notifyKinopioUpdatesAreAvailable },
     currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     },
@@ -322,6 +331,12 @@ export default {
     animation-direction forward
     animation-fill-mode forwards
     animation-timing-function ease-out
+
+  .label-badge
+    position initial
+    display inline-block
+    color var(--primary-background)
+    margin-right 6px
 
 @keyframes notificationJiggle
   0%

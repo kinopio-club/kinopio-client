@@ -38,7 +38,7 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keyd
 
   section(v-if="currentUserIsSignedIn")
     img.icon(src="@/assets/lock.svg")
-    span Payments by Stripe
+    span Payments securely processed by Stripe. Card info is not sent to Kinopio.
 
 </template>
 

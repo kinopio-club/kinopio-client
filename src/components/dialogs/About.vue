@@ -38,6 +38,10 @@ import Help from '@/components/dialogs/Help.vue'
 import Apps from '@/components/dialogs/Apps.vue'
 import utils from '@/utils.js'
 
+import dayjs from 'dayjs'
+
+const initTime = dayjs(new Date())
+
 export default {
   name: 'About',
   components: {
@@ -75,13 +79,16 @@ export default {
   async mounted () {
     const isOffline = !this.$store.state.isOnline
     if (isOffline) { return }
+    this.isMobile = utils.isMobile()
+    this.isIPhone = utils.isIPhone()
+    this.isAndroid = utils.isAndroid()
     const data = await this.getNewStuff()
     const newStuff = data.contents
     this.newStuff = newStuff.slice(0, 5)
     this.checkNewStuffIsUpdated(newStuff[0].id)
-    this.isMobile = utils.isMobile()
-    this.isIPhone = utils.isIPhone()
-    this.isAndroid = utils.isAndroid()
+    setInterval(() => {
+      this.checkIfKinopioUpdatesAreAvailable()
+    }, 1000 * 60 * 60 * 24) // 24 hours
   },
   computed: {
     newStuffIsUpdated () { return this.$store.state.newStuffIsUpdated }
@@ -117,6 +124,15 @@ export default {
       const userlastReadId = parseInt(this.$store.state.currentUser.lastReadNewStuffId)
       const newStuffIsUpdated = Boolean(userlastReadId !== latestUpdateId)
       this.$store.commit('newStuffIsUpdated', newStuffIsUpdated)
+    },
+    async checkIfKinopioUpdatesAreAvailable () {
+      const data = await this.getNewStuff()
+      let newest = data.contents[0]
+      newest = dayjs(newest.updated_at)
+      const timeSinceNewest = initTime.diff(newest, 'minute')
+      if (timeSinceNewest < 0) {
+        this.$store.commit('notifyKinopioUpdatesAreAvailable', true)
+      }
     },
     closeDialogs () {
       this.helpIsVisible = false
