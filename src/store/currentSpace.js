@@ -1096,19 +1096,17 @@ export default {
       context.commit('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths' }, { root: true })
     },
     updateAfterDragWithPositions: (context) => {
-      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       const currentDraggingCardId = context.rootState.currentDraggingCardId
-      let cards = []
+      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
+      let cards
       let connections = []
       if (multipleCardsSelectedIds.length) {
-        cards = context.state.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
+        cards = multipleCardsSelectedIds
       } else {
-        const card = context.state.cards.find(card => currentDraggingCardId === card.id)
-        if (!card) { return }
-        cards.push(card)
+        cards = [currentDraggingCardId]
       }
+      cards = cards.map(cardId => context.getters.cardById(cardId))
       cards.forEach(card => {
-        card = utils.clone(card)
         const update = { name: 'updateCard',
           body: {
             id: card.id,
@@ -1120,8 +1118,9 @@ export default {
         context.dispatch('api/addToQueue', update, { root: true })
         context.commit('history/add', update, { root: true })
         connections = connections.concat(context.getters.cardConnections(card.id))
-        connections = uniqBy(connections, 'id')
       })
+      connections = uniqBy(connections, 'id')
+      context.commit('updateConnectionPaths', connections)
       connections.forEach(connection => {
         context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
       })
