@@ -1094,6 +1094,9 @@ export default {
       context.commit('updateConnectionPaths', connections)
       context.commit('broadcast/update', { updates: { cards, delta }, type: 'moveCards' }, { root: true })
       context.commit('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths' }, { root: true })
+      connections.forEach(connection => {
+        context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
+      })
     },
     updateAfterDragWithPositions: (context) => {
       const currentDraggingCardId = context.rootState.currentDraggingCardId
