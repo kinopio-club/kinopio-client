@@ -122,6 +122,7 @@ export default new Vuex.Store({
     notifySpaceIsOpenAndEditable: false,
     notifyCardsCreatedIsNearLimit: false,
     notifyCardsCreatedIsOverLimit: false,
+    notifyKinopioUpdatesAreAvailable: false,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -629,6 +630,10 @@ export default new Vuex.Store({
       if (value === true) {
         state.notifyCardsCreatedIsNearLimit = false
       }
+    },
+    notifyKinopioUpdatesAreAvailable: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'notifyKinopioUpdatesAreAvailable' })
+      state.notifyKinopioUpdatesAreAvailable = value
     },
 
     // Notifications with Position
