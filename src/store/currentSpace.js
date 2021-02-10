@@ -132,15 +132,21 @@ export default {
       })
       cache.updateSpace('cards', state.cards, state.id)
     },
-    moveCard: (state, { cardId, delta }) => {
+    moveCards: (state, { cards, delta }) => {
       const maxOffset = 0
-      state.cards.map(card => {
-        if (card.id === cardId) {
-          card.x += delta.x || 0
-          card.y += delta.y || 0
-          card.x = Math.max(card.x, maxOffset)
-          card.y = Math.max(card.y, maxOffset)
-        }
+      cards.forEach(card => {
+        card.x += delta.x || 0
+        card.y += delta.y || 0
+        card.x = Math.max(card.x, maxOffset)
+        card.y = Math.max(card.y, maxOffset)
+      })
+      cache.updateSpaceCardsDebounced(state.cards, state.id)
+    },
+    moveCardsBroadcast: (state, { cards, delta }) => {
+      cards.forEach(updated => {
+        const card = state.cards.find(card => card.id === updated.id)
+        card.x = updated.x
+        card.y = updated.y
       })
       cache.updateSpace('cards', state.cards, state.id)
     },
@@ -219,6 +225,19 @@ export default {
           })
         }
       })
+    },
+    updateConnectionPaths: (state, connections) => {
+      connections.forEach(connection => {
+        connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
+        connection.spaceId = state.id
+      })
+      cache.updateSpaceConnectionsDebounced(state.connections, state.id)
+    },
+    updateConnectionPathsBroadcast: (state, { connections }) => {
+      connections.forEach(updated => {
+        state.connections.find(connection => connection.id === updated.id).path = updated.path
+      })
+      cache.updateSpace('connections', state.connections, state.id)
     },
     addConnection: (state, connection) => {
       state.connections.push(connection)
@@ -322,7 +341,7 @@ export default {
   },
 
   actions: {
-    init: (context) => {
+    init: async (context) => {
       const spaceUrl = context.rootState.spaceUrlToLoad
       const loadJournalSpace = context.rootState.loadJournalSpace
       const user = context.rootState.currentUser
@@ -331,19 +350,19 @@ export default {
         console.log('🚃 Restore space from url', spaceUrl)
         const spaceId = utils.spaceIdFromUrl(spaceUrl)
         const space = { id: spaceId }
-        context.dispatch('loadSpace', { space })
+        await context.dispatch('loadSpace', { space })
       // restore or create journal space
       } else if (loadJournalSpace) {
         console.log('🚃 Restore journal space')
-        context.dispatch('loadJournalSpace')
+        await context.dispatch('loadJournalSpace')
       // restore last space
       } else if (user.lastSpaceId) {
         console.log('🚃 Restore last space', user.lastSpaceId)
-        context.dispatch('loadLastSpace')
+        await context.dispatch('loadLastSpace')
       // hello kinopio
       } else {
         console.log('🚃 Create new Hello Kinopio space')
-        context.dispatch('createNewHelloSpace')
+        await context.dispatch('createNewHelloSpace')
         context.dispatch('updateUserLastSpaceId')
       }
       context.dispatch('updateWindowHistory', {})
@@ -670,7 +689,6 @@ export default {
         context.dispatch('addNewJournalSpace')
       }
     },
-
     loadSpace: async (context, { space }) => {
       const emptySpace = utils.emptySpace(space.id)
       const cachedSpace = cache.space(space.id)
@@ -919,7 +937,7 @@ export default {
       card = utils.clone(card)
       card.id = nanoid()
       card.spaceId = context.state.id
-      const existingCards = context.rootState.currentSpace.cards
+      const existingCards = context.state.cards
       utils.uniqueCardPosition(card, existingCards)
       const tags = utils.tagsFromStringWithoutBrackets(card.name)
       if (tags) {
@@ -976,7 +994,7 @@ export default {
       })
     },
     clearAllCardsZ: (context) => {
-      let cards = context.rootState.currentSpace.cards
+      let cards = context.state.cards
       cards.forEach(card => {
         const body = { id: card.id, z: 0 }
         const update = { name: 'updateCard', body }
@@ -987,7 +1005,7 @@ export default {
     },
     incrementCardZ: (context, cardId) => {
       const maxInt = Number.MAX_SAFE_INTEGER - 1000
-      let cards = context.rootState.currentSpace.cards
+      let cards = context.state.cards
       let highestCardZ = utils.highestCardZ(cards)
       if (highestCardZ > maxInt) {
         context.dispatch('clearAllCardsZ')
@@ -1050,58 +1068,45 @@ export default {
       context.dispatch('changeSpace', { space })
     },
     dragCards: (context, options) => {
+      const currentDraggingCardId = context.rootState.currentDraggingCardId
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
-      const { delta, endCursor, prevCursor } = options
-      options.delta = delta || {
+      const { endCursor, prevCursor } = options
+      const delta = options.delta || {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
       }
-      // prevent cards bunching up at 0
       let cards
+      let connections = []
       if (multipleCardsSelectedIds.length) {
-        cards = multipleCardsSelectedIds.map(cardId => context.getters.cardById(cardId))
-        cards.forEach(card => {
-          if (card.x === 0) { options.delta.x = Math.max(0, options.delta.x) }
-          if (card.y === 0) { options.delta.y = Math.max(0, options.delta.y) }
-        })
-      }
-      // move cards
-      if (multipleCardsSelectedIds.length) {
-        context.dispatch('dragMultipleCards', options)
+        cards = multipleCardsSelectedIds
       } else {
-        context.dispatch('dragSingleCard', options)
+        cards = [currentDraggingCardId]
       }
-    },
-    dragMultipleCards: (context, { endCursor, prevCursor, delta }) => {
-      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
-      const cards = context.rootState.currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
+      cards = cards.map(cardId => context.getters.cardById(cardId))
+      // prevent cards bunching up at 0
       cards.forEach(card => {
-        const update = { cardId: card.id, delta }
-        context.commit('moveCard', update)
-        context.commit('broadcast/update', { updates: update, type: 'moveCard' }, { root: true })
-        context.dispatch('updateCardConnectionPaths', { cardId: card.id })
+        if (card.x === 0) { delta.x = Math.max(0, delta.x) }
+        if (card.y === 0) { delta.y = Math.max(0, delta.y) }
+        connections = connections.concat(context.getters.cardConnections(card.id))
       })
-    },
-    dragSingleCard: (context, { endCursor, delta, shouldUpdateApi }) => {
-      const currentDraggingCardId = context.rootState.currentDraggingCardId
-      const update = { cardId: currentDraggingCardId, delta }
-      context.commit('moveCard', update)
-      context.commit('broadcast/update', { updates: update, type: 'moveCard' }, { root: true })
-      context.dispatch('updateCardConnectionPaths', { cardId: currentDraggingCardId })
+      connections = uniqBy(connections, 'id')
+      context.commit('moveCards', { cards, delta })
+      context.commit('updateConnectionPaths', connections)
+      context.commit('broadcast/update', { updates: { cards, delta }, type: 'moveCards' }, { root: true })
+      context.commit('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths' }, { root: true })
     },
     updateAfterDragWithPositions: (context) => {
-      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       const currentDraggingCardId = context.rootState.currentDraggingCardId
-      let cards = []
+      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
+      let cards
+      let connections = []
       if (multipleCardsSelectedIds.length) {
-        cards = context.rootState.currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
+        cards = multipleCardsSelectedIds
       } else {
-        const card = context.rootState.currentSpace.cards.find(card => currentDraggingCardId === card.id)
-        if (!card) { return }
-        cards.push(card)
+        cards = [currentDraggingCardId]
       }
+      cards = cards.map(cardId => context.getters.cardById(cardId))
       cards.forEach(card => {
-        card = utils.clone(card)
         const update = { name: 'updateCard',
           body: {
             id: card.id,
@@ -1112,8 +1117,11 @@ export default {
         }
         context.dispatch('api/addToQueue', update, { root: true })
         context.commit('history/add', update, { root: true })
-        context.dispatch('updateCardConnectionPaths', { cardId: card.id, shouldUpdateApi: true })
+        connections = connections.concat(context.getters.cardConnections(card.id))
       })
+      connections = uniqBy(connections, 'id')
+      context.commit('updateConnectionPaths', connections)
+      context.commit('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths' }, { root: true })
     },
     incrementSelectedCardsZ: (context) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
@@ -1180,7 +1188,7 @@ export default {
     },
     updateCardConnectionPaths: (context, { cardId, shouldUpdateApi, connections }) => {
       const spaceId = context.state.id
-      connections = utils.clone(connections || context.getters.cardConnections(cardId) || context.rootState.currentConnectionsDragging)
+      connections = utils.clone(connections || context.getters.cardConnections(cardId))
       connections.map(connection => {
         connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
         connection.spaceId = spaceId
