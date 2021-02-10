@@ -1121,9 +1121,7 @@ export default {
       })
       connections = uniqBy(connections, 'id')
       context.commit('updateConnectionPaths', connections)
-      connections.forEach(connection => {
-        context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
-      })
+      context.commit('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths' }, { root: true })
     },
     incrementSelectedCardsZ: (context) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
