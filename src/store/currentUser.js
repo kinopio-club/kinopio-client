@@ -82,12 +82,14 @@ export default {
     },
     updateFavoriteSpaceIsEdited: (state, spaceId) => {
       utils.typeCheck({ value: spaceId, type: 'string', origin: 'updateFavoriteSpaceIsEdited' })
-      state.favoriteSpaces = state.favoriteSpaces.map(space => {
+      const spaces = state.favoriteSpaces.map(space => {
         if (space.id === spaceId) {
           space.isEdited = false
         }
         return space
       })
+      state.favoriteSpaces = spaces
+      cache.updateUser('favoriteSpaces', spaces)
     },
     restoreUser: (state, user) => {
       Object.keys(user).forEach(item => {
