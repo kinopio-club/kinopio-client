@@ -4,7 +4,7 @@ dialog.narrow.template-category-picker(v-if="visible" :open="visible" @click.lef
     ul.results-list
       template(v-for="(category in categories")
         li(@click.left="select(category)" :key="category.id" tabindex="0" v-on:keyup.enter="select(category)" :class="{ active: isActive(category) }")
-          .badge.info.template-badge(:class="categoryClassName(category)") {{category.name}}
+          .badge.info.inline-badge(:class="categoryClassName(category)") {{category.name}}
 </template>
 
 <script>

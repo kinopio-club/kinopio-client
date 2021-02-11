@@ -3,7 +3,7 @@
   section.categories(v-if="!hideOptions")
     .button-wrap.category-wrap
       button(@click.left.stop="toggleTemplateCategoryPickerIsVisible" :class="{active: templateCategoryPickerIsVisible}")
-        .badge.info.template-badge(:class="categoryClassName(filterCategory)") {{filterCategory.name}}
+        .badge.info.inline-badge(:class="categoryClassName(filterCategory)") {{filterCategory.name}}
       TemplateCategoryPicker(:visible="templateCategoryPickerIsVisible" :selectedCategoryId="filteredCategoryId" @closeDialog="closeDialogs" @selectCategory="updateFilteredCategory")
     .button-wrap
       button(@click.left.stop="toggleContactIsVisible" :class="{active: contactIsVisible}")
@@ -139,7 +139,7 @@ export default {
     top calc(100% - 8px)
     bottom initial
   // template category colors
-  .template-badge
+  .inline-badge
     &.learning
       background-color #f0e68c
     &.life

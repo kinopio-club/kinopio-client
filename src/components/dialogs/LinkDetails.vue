@@ -22,7 +22,7 @@ dialog.link-details.narrow(v-if="isVisible" :open="isVisible" :style="dialogPosi
         UserList(:users="users" :isClickable="false")
 
     .badges-wrap(v-if="isSpace && !space.isLoadingOrInvalid")
-      .badge.info.template-badge(v-if="spaceIsTemplate") Template
+      .badge.info.inline-badge(v-if="spaceIsTemplate") Template
       .badge.secondary.button-badge(@click="toggleFilterShowAbsoluteDate")
         img.icon.time(src="@/assets/time.svg")
         span.name {{dateUpdatedAt}}

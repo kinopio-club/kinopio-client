@@ -14,12 +14,15 @@ span
           User(v-if="showUser" :user="user(space)" :isClickable="false" :key="user(space).id")
           template(v-else-if="showUserIfCurrentUserIsCollaborator && space.currentUserIsCollaborator")
             User(:user="user(space)" :isClickable="false" :key="user(space).id")
+          //- NEW
+          span(v-if="space.isEdited")
+            .badge.info.inline-badge.new-badge NEW
           //- space meta
           span(v-if="space.isFavorite")
             img.icon.favorite-icon(src="@/assets/heart.svg")
           MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
-          .badge.info.template-badge(v-if="showCategory" :class="categoryClassName(space)") {{space.category}}
-          .badge.info.template-badge(v-else-if="spaceIsTemplate(space)") Template
+          .badge.info.inline-badge(v-if="showCategory" :class="categoryClassName(space)") {{space.category}}
+          .badge.info.inline-badge(v-else-if="spaceIsTemplate(space)") Template
           //- space details
           .name
             span {{space.name}}
@@ -185,9 +188,12 @@ export default {
 
 <style lang="stylus">
 .space-list
-  .template-badge
+  .inline-badge
     margin-left 0
     flex none
+
+  .new-badge
+    word-break keep-all
 
   .badge
     margin-left 0

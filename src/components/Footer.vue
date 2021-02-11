@@ -16,6 +16,7 @@ footer(:style="visualViewportPosition")
           img.icon(v-else src="@/assets/heart-empty.svg")
         button(@click.left="toggleFavoritesIsVisible" :class="{ active: favoritesIsVisible}")
           img.icon(src="@/assets/hearts.svg")
+          span(v-if="favoriteSpacesEditedCount") {{favoriteSpacesEditedCount}}
       Favorites(:visible="favoritesIsVisible")
     //- Tags and Links
     .button-wrap
@@ -133,6 +134,10 @@ export default {
     //   let hash = path.src.match(regex)[0] // app.768db305407f4c847d44
     //   return hash.replace('app.', '') // 768db305407f4c847d44
     // },
+    favoriteSpacesEditedCount () {
+      const favoriteSpaces = this.$store.state.currentUser.favoriteSpaces
+      return favoriteSpaces.filter(space => space.isEdited).length
+    },
     pendingUpload () {
       const currentSpace = this.$store.state.currentSpace
       const pendingUploads = this.$store.state.upload.pendingUploads
