@@ -728,6 +728,7 @@ export default {
       if (cardId) {
         context.dispatch('showCardDetails', cardId)
       }
+      context.commit('currentUser/updateFavoriteSpaceIsEdited', space.id, { root: true })
     },
     loadLastSpace: (context) => {
       const user = context.rootState.currentUser

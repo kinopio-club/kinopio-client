@@ -16,7 +16,7 @@ span
             User(:user="user(space)" :isClickable="false" :key="user(space).id")
           //- NEW
           span(v-if="space.isEdited")
-            .badge.info.inline-badge.new-badge NEW
+            .badge.info.inline-badge.new-badge New
           //- space meta
           span(v-if="space.isFavorite")
             img.icon.favorite-icon(src="@/assets/heart.svg")
