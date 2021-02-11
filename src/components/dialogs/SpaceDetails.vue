@@ -58,6 +58,8 @@ import Loader from '@/components/Loader.vue'
 
 import debounce from 'lodash-es/debounce'
 
+let shouldUpdateFavorites = true
+
 export default {
   name: 'SpaceDetails',
   components: {
@@ -266,6 +268,8 @@ export default {
       this.spaces = spaces
     },
     async updateFavorites () {
+      if (!shouldUpdateFavorites) { return }
+      shouldUpdateFavorites = false
       await this.$store.dispatch('currentUser/restoreUserFavorites')
     },
     duplicateSpace () {

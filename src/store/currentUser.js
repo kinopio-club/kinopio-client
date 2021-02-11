@@ -325,8 +325,6 @@ export default {
       context.commit('otherTags', remoteTags, { root: true })
     },
     restoreUserFavorites: async (context) => {
-      const hasRestoredFavorites = context.rootState.hasRestoredFavorites
-      if (hasRestoredFavorites) { return }
       if (!context.getters.isSignedIn) {
         context.commit('hasRestoredFavorites', true, { root: true })
         return

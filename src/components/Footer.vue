@@ -120,7 +120,10 @@ export default {
       }
     })
     window.addEventListener('scroll', this.updatePositionInVisualViewport)
-    this.$store.dispatch('currentUser/restoreUserFavorites')
+    this.updateFavorites()
+    setInterval(() => {
+      this.updateFavorites()
+    }, 1000 * 60 * 10) // 10 minutes
   },
   computed: {
     // buildHash () {
@@ -276,6 +279,9 @@ export default {
       const isVisible = this.exploreIsVisible
       this.$store.dispatch('closeAllDialogs', 'Footer.toggleExploreIsVisible')
       this.exploreIsVisible = !isVisible
+    },
+    async updateFavorites () {
+      await this.$store.dispatch('currentUser/restoreUserFavorites')
     }
   }
 }

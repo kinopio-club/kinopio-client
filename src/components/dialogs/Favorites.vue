@@ -99,6 +99,7 @@ export default {
     },
     updateFavoriteSpaceIsEdited () {
       const spaces = this.favoriteSpaces.filter(space => space.isEdited)
+      if (!spaces.length) { return }
       spaces.forEach(space => {
         this.$store.commit('currentUser/updateFavoriteSpaceIsEdited', space.id)
       })
