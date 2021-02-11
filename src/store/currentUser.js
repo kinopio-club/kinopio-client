@@ -80,6 +80,17 @@ export default {
       state.favoriteSpaces = spaces
       cache.updateUser('favoriteSpaces', spaces)
     },
+    updateFavoriteSpaceIsEdited: (state, spaceId) => {
+      utils.typeCheck({ value: spaceId, type: 'string', origin: 'updateFavoriteSpaceIsEdited' })
+      const spaces = state.favoriteSpaces.map(space => {
+        if (space.id === spaceId) {
+          space.isEdited = false
+        }
+        return space
+      })
+      state.favoriteSpaces = spaces
+      cache.updateUser('favoriteSpaces', spaces)
+    },
     restoreUser: (state, user) => {
       Object.keys(user).forEach(item => {
         state[item] = user[item]
@@ -314,8 +325,6 @@ export default {
       context.commit('otherTags', remoteTags, { root: true })
     },
     restoreUserFavorites: async (context) => {
-      const hasRestoredFavorites = context.rootState.hasRestoredFavorites
-      if (hasRestoredFavorites) { return }
       if (!context.getters.isSignedIn) {
         context.commit('hasRestoredFavorites', true, { root: true })
         return

@@ -96,12 +96,27 @@ export default {
     },
     async updateFavorites () {
       await this.$store.dispatch('currentUser/restoreUserFavorites')
+    },
+    updateFavoriteSpaceIsEdited () {
+      const spaces = this.favoriteSpaces.filter(space => space.isEdited)
+      if (!spaces.length) { return }
+      spaces.forEach(space => {
+        this.$store.commit('currentUser/updateFavoriteSpaceIsEdited', space.id)
+      })
+      this.$store.dispatch('api/addToQueue', {
+        name: 'updateUserVisitSpaces',
+        body: spaces
+      })
     }
   },
   watch: {
     visible (visible) {
-      this.userDetailsIsNotVisible()
-      this.updateFavorites()
+      if (visible) {
+        this.userDetailsIsNotVisible()
+        this.updateFavorites()
+      } else {
+        this.updateFavoriteSpaceIsEdited()
+      }
     }
   }
 }
