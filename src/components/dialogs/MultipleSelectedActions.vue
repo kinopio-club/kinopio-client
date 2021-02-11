@@ -48,7 +48,7 @@ dialog.narrow.multiple-selected-actions(
           span Export
         Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
     .row(v-if="multipleCardsSelectedIds.length")
-      AlignAndDistribute(:visible="multipleCardsIsSelected")
+      AlignAndDistribute(:visible="multipleCardsIsSelected" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser")
       //- Move or Copy
       .button-wrap
         button(:disabled="!canEditAll.cards" @click.left.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
@@ -56,7 +56,7 @@ dialog.narrow.multiple-selected-actions(
           span Move or Copy
         MoveOrCopyToSpace(:visible="moveOrCopyToSpaceIsVisible")
 
-    p(v-if="canEditAsNonMember")
+    p(v-if="canEditAsNonMember && !selectedItemsIsCreatedByCurrentUser")
       span.badge.info
         img.icon.open(src="@/assets/open.svg")
         span In open spaces, you can only edit cards and connections you've made
@@ -182,6 +182,15 @@ export default {
       const spaceIsOpen = this.$store.state.currentSpace.privacy === 'open'
       const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
       return spaceIsOpen && !isSpaceMember
+    },
+    selectedItemsIsCreatedByCurrentUser () {
+      const cardsByCurrentUser = this.numberOfSelectedItemsCreatedByCurrentUser.cards === this.cards.length
+      const connectionsByCurrentUser = this.numberOfSelectedItemsCreatedByCurrentUser.connections === this.connections.length
+      if (cardsByCurrentUser && connectionsByCurrentUser) {
+        return true
+      } else {
+        return false
+      }
     },
     numberOfSelectedItemsCreatedByCurrentUser () {
       const connections = this.connections.filter(Boolean)

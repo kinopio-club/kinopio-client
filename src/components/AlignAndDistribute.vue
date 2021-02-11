@@ -15,7 +15,8 @@ const spaceBetweenCards = 12
 export default {
   name: 'AlignAndDistribute',
   props: {
-    visible: Boolean
+    visible: Boolean,
+    numberOfSelectedItemsCreatedByCurrentUser: Object
   },
   computed: {
     multipleCardsSelectedIds () { return this.$store.state.multipleCardsSelectedIds },
