@@ -9,9 +9,13 @@ dialog.favorites.narrow(v-if="visible" :open="visible" @click.left.stop="userDet
         span People
         Loader(:visible="loading")
     template(v-if="isEmpty")
-      p Spaces and people you
-      img.icon(src="@/assets/heart.svg")
-      span can be found here
+      p Spaces and people you {{' '}}
+        img.icon(src="@/assets/heart.svg")
+        span can be found here.
+      p
+        img.icon(src="@/assets/heart.svg")
+        span Spaces to know when they've been updated
+
       p(v-if="loading")
         Loader(:visible="loading")
 
