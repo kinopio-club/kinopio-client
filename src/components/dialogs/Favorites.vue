@@ -17,7 +17,7 @@ dialog.favorites.narrow(v-if="visible" :open="visible" @click.left.stop="userDet
 
   section.results-section(v-if="!isEmpty")
     template(v-if="spacesIsVisible")
-      SpaceList(:spaces="favoriteSpaces" :showUser="true" @selectSpace="changeSpace")
+      SpaceList(:spaces="favoriteSpacesOrderedByEdited" :showUser="true" @selectSpace="changeSpace")
     template(v-if="!spacesIsVisible")
       UserList(:users="favoriteUsers" :selectedUser="selectedUser" @selectSpace="showUserDetails" :isClickable="true")
       UserDetails(:visible="userDetailsIsVisible" :user="selectedUser" :userDetailsPosition="userDetailsPosition")
@@ -58,7 +58,13 @@ export default {
       const noPeople = !this.spacesIsVisible && !this.favoriteUsers.length
       if (noSpaces || noPeople) { return true }
       return false
+    },
+    favoriteSpacesOrderedByEdited () {
+      let editedSpaces = this.favoriteSpaces.filter(space => space.isEdited)
+      let spaces = this.favoriteSpaces.filter(space => !space.isEdited)
+      return editedSpaces.concat(spaces)
     }
+
   },
   methods: {
     showSpaces () {
