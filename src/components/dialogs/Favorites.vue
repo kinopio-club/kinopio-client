@@ -64,7 +64,6 @@ export default {
       let spaces = this.favoriteSpaces.filter(space => !space.isEdited)
       return editedSpaces.concat(spaces)
     }
-
   },
   methods: {
     showSpaces () {
