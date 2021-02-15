@@ -1132,6 +1132,7 @@ export default {
     return commentPattern
   },
   isNameComment (name) {
+    if (!name) { return }
     const commentPattern = this.commentPattern()
     const comment = name.match(commentPattern)
     const markdown = this.markdown()
