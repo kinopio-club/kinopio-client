@@ -88,6 +88,11 @@ aside.notifications(@click.left="closeAllDialogs")
     .row
       button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
 
+  .item.success(v-if="notifyMoveOrCopyToSpace" @animationend="resetNotifyMoveOrCopyToSpace")
+    p {{notifyMoveOrCopyToSpaceDetails.message}}
+    .row(@click.left="changeSpace(notifyMoveOrCopyToSpaceDetails.id)")
+      button {{notifyMoveOrCopyToSpaceDetails.name}} →
+
 </template>
 
 <script>
@@ -159,6 +164,8 @@ export default {
     notifyCardsCreatedIsNearLimit () { return this.$store.state.notifyCardsCreatedIsNearLimit },
     notifyCardsCreatedIsOverLimit () { return this.$store.state.notifyCardsCreatedIsOverLimit },
     notifyKinopioUpdatesAreAvailable () { return this.$store.state.notifyKinopioUpdatesAreAvailable },
+    notifyMoveOrCopyToSpace () { return this.$store.state.notifyMoveOrCopyToSpace },
+    notifyMoveOrCopyToSpaceDetails () { return this.$store.state.notifyMoveOrCopyToSpaceDetails },
     currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     },
@@ -240,6 +247,9 @@ export default {
     resetNotifyCardsCreatedIsNearLimit () {
       this.$store.commit('notifyCardsCreatedIsNearLimit', false)
     },
+    resetNotifyMoveOrCopyToSpace () {
+      this.$store.commit('notifyMoveOrCopyToSpace', false)
+    },
     resetNotifyCardsCreatedIsOverLimitJiggle () {
       this.notifyCardsCreatedIsOverLimitJiggle = false
     },
@@ -268,6 +278,11 @@ export default {
       const duplicatedSpaceName = this.$store.state.currentSpace.name + ' copy'
       this.$store.dispatch('currentSpace/duplicateSpace')
       this.$store.commit('addNotification', { message: `${duplicatedSpaceName} is now yours to edit`, type: 'success' }, { root: true })
+    },
+    changeSpace (spaceId) {
+      const space = { id: spaceId }
+      this.$store.dispatch('currentSpace/changeSpace', { space })
+      this.$store.dispatch('closeAllDialogs', 'notifications.changeSpace')
     }
   }
 }

@@ -22,10 +22,6 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.left.stop="clos
     template(v-if="toNewSpace")
       .row
         input(placeholder="name" v-model="newSpaceName")
-      .row
-        label(:class="{active: shouldSwitchToSpace}" @click.left.prevent="toggleShouldSwitchToSpace" @keydown.stop.enter="toggleShouldSwitchToSpace")
-          input(type="checkbox" v-model="shouldSwitchToSpace")
-          span Switch to Space
       button(@click.left="moveOrCopyToSpace" :class="{active: loading}")
         img.icon.visit(src="@/assets/visit.svg")
         span {{actionLabel | capitalize}} to New Space
@@ -42,10 +38,6 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.left.stop="clos
               span {{selectedSpace.name}}
               img.down-arrow(src="@/assets/down-arrow.svg")
             SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" @selectSpace="updateSelectedSpace")
-        .row(v-if="spaces.length")
-          label(:class="{active: shouldSwitchToSpace}" @click.left.prevent="toggleShouldSwitchToSpace" @keydown.stop.enter="toggleShouldSwitchToSpace")
-            input(type="checkbox" v-model="shouldSwitchToSpace")
-            span Switch to Space
         button(@click.left="moveOrCopyToSpace" :class="{active: loading}")
           img.icon.visit(src="@/assets/visit.svg")
           span {{actionLabel | capitalize}} to {{selectedSpace.name}}
@@ -74,7 +66,6 @@ export default {
   },
   data () {
     return {
-      shouldSwitchToSpace: true,
       spaces: [],
       selectedSpace: {},
       spacePickerIsVisible: false,
@@ -136,9 +127,6 @@ export default {
     toggleSpacePickerIsVisible () {
       this.spacePickerIsVisible = !this.spacePickerIsVisible
     },
-    toggleShouldSwitchToSpace () {
-      this.shouldSwitchToSpace = !this.shouldSwitchToSpace
-    },
     removeCards (cards) {
       cards.forEach(card => {
         this.$store.dispatch('currentSpace/removeCard', card)
@@ -148,12 +136,14 @@ export default {
     notifySuccess () {
       const actionLabel = this.$options.filters.pastTense(this.actionLabel)
       const message = `${this.cardsCount} ${this.pluralCard} ${actionLabel} to ${this.selectedSpace.name}` // 3 cards copied to SpacePalace
-      this.$store.commit('addNotification', { message, type: 'success' })
+      this.$store.commit('notifyMoveOrCopyToSpaceDetails', { id: this.selectedSpace.id, name: this.selectedSpace.name, message })
+      this.$store.commit('notifyMoveOrCopyToSpace', true)
     },
-    notifyNewSpaceSuccess (newSpaceName) {
+    notifyNewSpaceSuccess (newSpace) {
       const actionLabel = this.$options.filters.pastTense(this.actionLabel)
-      const message = `${newSpaceName} added with ${this.cardsCount} ${this.pluralCard} ${actionLabel} ` // SpacePalace added with 3 cards copied
-      this.$store.commit('addNotification', { message, type: 'success' })
+      const message = `${newSpace.name} added with ${this.cardsCount} ${this.pluralCard} ${actionLabel} ` // SpacePalace added with 3 cards copied
+      this.$store.commit('notifyMoveOrCopyToSpaceDetails', { id: newSpace.id, name: newSpace.name, message })
+      this.$store.commit('notifyMoveOrCopyToSpace', true)
     },
     selectedItems () {
       const currentSpace = utils.clone(this.$store.state.currentSpace)
@@ -217,7 +207,7 @@ export default {
       let selectedSpace = this.selectedSpace
       if (this.toNewSpace) {
         selectedSpace = await this.createNewSpace(items, newSpaceName)
-        this.notifyNewSpaceSuccess(newSpaceName)
+        this.notifyNewSpaceSuccess(selectedSpace)
       } else {
         await this.copyToSelectedSpace(items)
         this.notifySuccess()
@@ -228,14 +218,6 @@ export default {
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
       this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('closeAllDialogs', 'MoveOrCopyToSpace.moveOrCopyToSpace')
-      if (this.shouldSwitchToSpace) {
-        this.$store.dispatch('currentSpace/changeSpace', { space: selectedSpace })
-        if (this.toNewSpace) {
-          this.$nextTick(() => {
-            this.$store.commit('triggerScrollCardIntoView', selectedSpace.cards[0].id)
-          })
-        }
-      }
     },
     mapRemoteItems (items) {
       const spaceId = this.selectedSpace.id

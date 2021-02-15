@@ -123,6 +123,8 @@ export default new Vuex.Store({
     notifyCardsCreatedIsNearLimit: false,
     notifyCardsCreatedIsOverLimit: false,
     notifyKinopioUpdatesAreAvailable: false,
+    notifyMoveOrCopyToSpace: false,
+    notifyMoveOrCopyToSpaceDetails: {},
 
     // notifications with position
     notificationsWithPosition: [],
@@ -590,6 +592,7 @@ export default new Vuex.Store({
       state.notifySpaceIsOpenAndEditable = false
       state.notifyCardsCreatedIsNearLimit = false
       state.notifyCardsCreatedIsOverLimit = false
+      state.notifyMoveOrCopyToSpace = false
       state.notificationsWithPosition = []
     },
     notifySpaceNotFound: (state, value) => {
@@ -634,6 +637,14 @@ export default new Vuex.Store({
     notifyKinopioUpdatesAreAvailable: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'notifyKinopioUpdatesAreAvailable' })
       state.notifyKinopioUpdatesAreAvailable = value
+    },
+    notifyMoveOrCopyToSpace: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'notifyMoveOrCopyToSpace' })
+      state.notifyMoveOrCopyToSpace = value
+    },
+    notifyMoveOrCopyToSpaceDetails: (state, value) => {
+      utils.typeCheck({ value, type: 'object', origin: 'notifyMoveOrCopyToSpaceDetails' })
+      state.notifyMoveOrCopyToSpaceDetails = value
     },
 
     // Notifications with Position
