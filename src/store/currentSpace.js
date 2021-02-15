@@ -1110,6 +1110,7 @@ export default {
         cards = [currentDraggingCardId]
       }
       cards = cards.map(cardId => context.getters.cardById(cardId))
+      cards = cards.filter(card => card)
       cards.forEach(card => {
         const update = { name: 'updateCard',
           body: {
