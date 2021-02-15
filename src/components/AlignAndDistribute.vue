@@ -23,9 +23,10 @@ export default {
     multipleConnectionsSelectedIds () { return this.$store.state.multipleConnectionsSelectedIds },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     cards () {
-      return this.multipleCardsSelectedIds.map(cardId => {
+      const cards = this.multipleCardsSelectedIds.map(cardId => {
         return this.$store.getters['currentSpace/cardById'](cardId)
-      })
+      }) || []
+      return cards
     },
     editableCards () {
       if (this.isSpaceMember) {
