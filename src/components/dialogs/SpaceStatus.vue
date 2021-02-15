@@ -18,6 +18,9 @@ dialog.narrow.space-status(v-if="visible" :open="visible" ref="dialog" :class="{
         span.badge.info You can edit right now
         span {{' '}}
         span but cannot collaborate yet, your changes will sync once connected
+      .button-wrap
+        button(@click.left="refreshBrowser") Refresh
+
 </template>
 
 <script>
@@ -61,6 +64,9 @@ export default {
         let element = this.$refs.dialog
         this.showOnRightSide = utils.elementShouldBeOnRightSide(element)
       })
+    },
+    refreshBrowser () {
+      window.location.reload()
     }
   },
   watch: {
