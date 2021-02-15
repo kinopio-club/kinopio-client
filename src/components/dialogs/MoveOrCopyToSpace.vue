@@ -200,6 +200,12 @@ export default {
       await this.$store.dispatch('api/updateCards', cards)
       await this.$store.dispatch('api/updateConnectionTypes', connectionTypes)
       await this.$store.dispatch('api/updateConnections', connections)
+      const spaceIsCached = Boolean(cache.space(this.selectedSpace.id).cards)
+      if (!spaceIsCached) {
+        const space = { id: this.selectedSpace.id }
+        let remoteSpace = await this.$store.dispatch('api/getSpace', { space, shouldRequestRemote: true })
+        cache.saveSpace(remoteSpace)
+      }
       cache.addToSpace(newItems, this.selectedSpace.id)
       this.loading = false
     },

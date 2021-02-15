@@ -25,8 +25,8 @@ export default {
     cards () {
       const cards = this.multipleCardsSelectedIds.map(cardId => {
         return this.$store.getters['currentSpace/cardById'](cardId)
-      }) || []
-      return cards
+      })
+      return cards || []
     },
     editableCards () {
       if (this.isSpaceMember) {
