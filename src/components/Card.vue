@@ -580,8 +580,10 @@ export default {
         this.nameIsOnlyMarkdownLink = false
         return
       }
-      const contentIsName = segments[0].markdown[1].result[0] === this.name
-      if (contentIsName) {
+      const content = segments[0].markdown[1].result[0]
+      const contentIsName = content === this.name
+      const contentisLink = content.match(utils.markdown().linkPattern)
+      if (contentIsName && contentisLink) {
         this.nameIsOnlyMarkdownLink = true
       } else {
         this.nameIsOnlyMarkdownLink = false
