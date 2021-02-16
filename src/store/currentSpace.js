@@ -508,6 +508,7 @@ export default {
         await context.dispatch('api/createSpace', space, { root: true })
       }
       utils.updateWindowTitle(space)
+      context.dispatch('updateWindowHistory', { space, isRemote: currentUserIsSignedIn })
       context.commit('addUserToSpace', user)
     },
     duplicateSpace: (context) => {
