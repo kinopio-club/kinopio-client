@@ -71,7 +71,7 @@ article(:style="position" :data-card-id="id" ref="card")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
 
       //- Right buttons
-      span.card-buttons-wrap
+      span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}")
         //- Url →
         a.url-wrap(:href="linkOrUrl" @click.left.prevent.stop="openUrl(linkOrUrl)" @touchend.prevent="openUrl(linkOrUrl)" v-if="linkOrUrl && !nameIsComment")
           .url.inline-button-wrap
@@ -215,7 +215,8 @@ export default {
         audio: '',
         link: ''
       },
-      prevNameLineMinWidth: 0
+      prevNameLineMinWidth: 0,
+      nameIsOnlyMarkdownLink: false
     }
   },
   computed: {
@@ -391,6 +392,7 @@ export default {
         }
         return segment
       })
+      this.checkIfNameIsOnlyMarkdownLink(segments)
       return segments
     },
     tags () {
@@ -569,6 +571,22 @@ export default {
     }
   },
   methods: {
+    checkIfNameIsOnlyMarkdownLink (segments) {
+      if (!segments.length) {
+        this.nameIsOnlyMarkdownLink = false
+        return
+      }
+      if (segments[0].markdown.length <= 1) {
+        this.nameIsOnlyMarkdownLink = false
+        return
+      }
+      const contentIsName = segments[0].markdown[1].result[0] === this.name
+      if (contentIsName) {
+        this.nameIsOnlyMarkdownLink = true
+      } else {
+        this.nameIsOnlyMarkdownLink = false
+      }
+    },
     checkIfShouldUpdateCardConnectionPaths (width) {
       this.$nextTick(() => {
         this.$nextTick(() => {
@@ -1146,6 +1164,9 @@ article
     display inline
     .user
       vertical-align bottom
+
+  .tappable-area
+    margin-left 20px
 
 @keyframes bounce
   0%
