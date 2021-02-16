@@ -721,6 +721,13 @@ export default {
   },
   urlsFromString (string, skipProtocolCheck) {
     if (!string) { return [] }
+    // remove markdown links
+    const markdownLinks = string.match(this.markdown().linkPattern)
+    if (markdownLinks) {
+      markdownLinks.forEach(link => {
+        string = string.replace(link, '')
+      })
+    }
     // https://regexr.com/59m5t
     // optionally starts with http/s protocol
     // followed by alphanumerics
