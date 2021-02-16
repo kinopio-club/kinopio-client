@@ -951,11 +951,18 @@ export default {
   // Tags 🦋
 
   tagsFromString (string) {
+    if (!string) { return }
+    // remove `code blocks`
+    const codeBlocks = string.match(this.markdown().codeBlockPattern) || string.match(this.markdown().codePattern)
+    if (codeBlocks) {
+      codeBlocks.forEach(code => {
+        string = string.replace(code, '')
+      })
+    }
     // https://regexr.com/5bv6b
     // '[' twice
     // then anything except line break and ']'
     // ']' twice
-    if (!string) { return }
     const tagPattern = new RegExp(/([[]{2}[^\n(\]\])]+[\]]{2})/gm)
     const tags = string.match(tagPattern)
     return tags
