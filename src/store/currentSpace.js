@@ -1314,6 +1314,9 @@ export default {
     // Tags
 
     addTag: (context, tag) => {
+      let tagsInCard = context.getters.tagsInCard({ id: tag.cardId })
+      tagsInCard = tagsInCard.map(card => card.name)
+      if (tagsInCard.includes(tag.name)) { return }
       context.commit('addTag', tag)
       const update = { name: 'addTag', body: tag }
       const broadcastUpdate = { updates: tag, type: 'addTag' }
