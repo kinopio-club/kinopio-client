@@ -1,11 +1,12 @@
 <template lang="pug">
 dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keydown.stop :class="{'right-side': dialogOnRight}" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
-    p Upgrade your account for unlimited cards and uploads
-    .summary
-      User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
-      .badge.info $4/month
-
+    .row
+      p Upgrade your account for unlimited cards and uploads
+    .row
+      .segmented-buttons
+        button(:class="{active: priceIsMonthly}") $5/month
+        button(:class="{active: !priceIsMonthly}") $55/year
     .should-sign-up(v-if="!currentUserIsSignedIn")
       p To upgrade your account, you'll need to sign up first
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
@@ -29,6 +30,10 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keyd
       .badge.danger(v-if="error.allFieldsAreRequired") All fields are required
       .badge.danger(v-if="error.stripeError") {{error.stripeErrorMessage}}
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
+
+      .summary
+        User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
+        .badge.info $5/month
 
       button(@click.left="subscribe" :class="{active : loading.subscriptionIsBeingCreated}")
         span Upgrade Account
@@ -94,7 +99,8 @@ export default {
         stripeError: false,
         stripeErrorMessage: ''
       },
-      dialogHeight: null
+      dialogHeight: null,
+      priceIsMonthly: true
     }
   },
   computed: {
