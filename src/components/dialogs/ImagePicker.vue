@@ -5,7 +5,7 @@ dialog.narrow.image-picker(
   @click.left.stop
   ref="dialog"
   :class="{'background-image-picker' : isBackgroundImage, 'right-side': showOnRightSide}"
-  :style="{'max-height': dialogHeight + 'px'}"
+  :style="{'max-height': dialogHeight + 'px', 'min-height': minDialogHeight + 'px'}"
 )
   section(v-if="!isBackgroundImage")
     //- card images
@@ -54,9 +54,15 @@ dialog.narrow.image-picker(
           span Backgrounds
         button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
           span Are.na
+    template(v-if="serviceIsBackgrounds")
+      .row
+        .segmented-buttons
+          button(:class="{active: backgroundsIsStatic}" @click.left.stop="toggleBackgroundsIsStatic(true)") Static
+          button(:class="{active: !backgroundsIsStatic}" @click.left.stop="toggleBackgroundsIsStatic(false)") Animated
+      //- p(v-if="!backgroundsIsStatic") Animation can be distracting, but really sets a vibe
 
-  //- search results
-  section.results-section
+  //- search box
+  section.results-section.search-input-wrap
     .search-wrap(v-if="!serviceIsBackgrounds")
       img.icon.search(v-if="!loading" src="@/assets/search.svg" @click.left="focusSearchInput")
       Loader(:visible="loading")
@@ -76,6 +82,7 @@ dialog.narrow.image-picker(
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
       .badge.danger(v-if="error.userIsOffline") Can't search {{service}} while offline, Please try again later
 
+  //- search results
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ul.results-list.image-list
       template(v-for="(image in images")
@@ -93,6 +100,7 @@ import scrollIntoView from '@/scroll-into-view.js'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import backgroundImages from '@/data/backgroundImages.json'
+import backgroundImagesAnimated from '@/data/backgroundImagesAnimated.json'
 
 import debounce from 'lodash-es/debounce'
 
@@ -112,7 +120,12 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'updatePageSizes') {
-        this.checkIfShouldBeOnRightSide()
+        this.clearHeights()
+        if (this.isBackgroundImage) {
+          this.updateHeightFromFooter()
+        } else {
+          this.updateHeightFromDialog()
+        }
       }
     })
   },
@@ -124,6 +137,7 @@ export default {
       gfycatIsStickers: false,
       loading: false,
       showOnRightSide: false,
+      minDialogHeight: null,
       dialogHeight: null,
       resultsSectionHeight: null,
       error: {
@@ -132,7 +146,8 @@ export default {
         signUpToUpload: false,
         sizeLimit: false,
         unknownUploadError: false
-      }
+      },
+      backgroundsIsStatic: true
     }
   },
   computed: {
@@ -188,6 +203,10 @@ export default {
       this.service = 'Backgrounds'
       this.searchAgainBackgrounds()
     },
+    toggleBackgroundsIsStatic (value) {
+      this.backgroundsIsStatic = value
+      this.searchAgainBackgrounds()
+    },
     toggleServiceIsArena () {
       this.service = 'Are.na'
       this.searchAgain()
@@ -201,7 +220,13 @@ export default {
       this.searchAgain()
     },
     searchAgainBackgrounds () {
-      this.normalizeResults(backgroundImages, 'Backgrounds')
+      let images
+      if (this.backgroundsIsStatic) {
+        images = backgroundImages
+      } else {
+        images = backgroundImagesAnimated
+      }
+      this.normalizeResults(images, 'Backgrounds')
     },
     searchAgain () {
       this.images = []
@@ -262,6 +287,9 @@ export default {
         this.error.unknownServerError = true
       }
       this.loading = false
+      if (!this.isBackgroundImage) {
+        this.updateHeightFromDialog()
+      }
     }, 350),
     clearErrors () {
       this.error.signUpToUpload = false
@@ -269,6 +297,11 @@ export default {
       this.error.unknownServerError = false
       this.error.userIsOffline = false
       this.error.unknownUploadError = false
+    },
+    clearHeights () {
+      this.minDialogHeight = null
+      this.dialogHeight = null
+      this.resultsSectionHeight = null
     },
     normalizeResults (data, service) {
       const arena = service === 'Are.na' && this.serviceIsArena
@@ -340,7 +373,7 @@ export default {
     scrollIntoView () {
       if (!this.visible) { return }
       if (this.isBackgroundImage) {
-        this.updateHeight()
+        this.updateHeightFromFooter()
         return
       }
       const element = this.$refs.dialog
@@ -384,7 +417,17 @@ export default {
         this.showOnRightSide = utils.elementShouldBeOnRightSide(element)
       })
     },
-    updateHeight () {
+    updateHeightFromDialog () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        const element = this.$refs.dialog
+        const dialogHeight = utils.elementHeight(element)
+        this.resultsSectionHeight = utils.elementHeight(element, true)
+        this.resultsSectionHeight = Math.max(this.resultsSectionHeight, 300)
+        this.minDialogHeight = Math.max(this.minDialogHeight, dialogHeight)
+      })
+    },
+    updateHeightFromFooter () {
       if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.dialog
@@ -392,6 +435,7 @@ export default {
         this.dialogHeight = utils.elementHeightFromHeader(element)
         element = this.$refs.results
         this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
+        this.minDialogHeight = Math.max(this.minDialogHeight, this.dialogHeight)
       })
     }
   },
@@ -403,15 +447,15 @@ export default {
           this.search = this.initialSearch
           if (this.isBackgroundImage) {
             this.toggleServiceIsBackgrounds()
-            this.updateHeight()
+            this.updateHeightFromFooter()
             return
           }
-          this.scrollIntoView()
-          this.focusSearchInput()
           if (this.search) {
             this.loading = true
           }
           this.searchService()
+          this.scrollIntoView()
+          this.focusSearchInput()
         }
       })
     }
@@ -432,6 +476,9 @@ export default {
   .results-section
     padding-top 0
     padding-bottom 0
+
+  .search-input-wrap
+    max-height initial
 
   .image-list
     li

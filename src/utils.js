@@ -72,13 +72,19 @@ export default {
     }
     return height
   },
-  elementHeight (element) {
+  elementHeight (element, isChildElement) {
     if (!element) { return }
     const threshold = 20
     const rect = element.getBoundingClientRect()
     let height
     const viewportHeight = this.visualViewport().height
     height = viewportHeight - rect.y - threshold
+    if (isChildElement) {
+      const dialog = element.closest('dialog')
+      const dialogRect = dialog.getBoundingClientRect()
+      height = height - (rect.y - dialogRect.y)
+    }
+
     const zoomScale = this.visualViewport().scale
     if (zoomScale > 1) {
       height = height * zoomScale
