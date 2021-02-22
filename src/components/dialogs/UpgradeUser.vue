@@ -41,7 +41,7 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keyd
         span Upgrade Account
         Loader(:visible="loading.subscriptionIsBeingCreated")
 
-      p You'll be billed immediately and then each {{monthOrYear}}. You can cancel at anytime.
+      p You'll be billed immediately and then each {{monthOrYear}}. You can cancel anytime.
 
   section(v-if="currentUserIsSignedIn")
     img.icon(src="@/assets/lock.svg")
