@@ -120,7 +120,7 @@ export default {
         yearly = 'price_1ILuOPL1W0hlm1mqUV79ZnJm'
       } else {
         monthly = 'price_1IIjZ6L1W0hlm1mqawebhdDz'
-        yearly = 'price_1IIjdSL1W0hlm1mqh50JFKXj'
+        yearly = 'price_1INn9gL1W0hlm1mqF8AC4Dd5'
       }
       if (this.priceIsMonthly) {
         return monthly
