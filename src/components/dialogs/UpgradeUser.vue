@@ -1,11 +1,12 @@
 <template lang="pug">
 dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keydown.stop :class="{'right-side': dialogOnRight}" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
-    p Upgrade your account for unlimited cards and uploads
-    .summary
-      User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
-      .badge.info $4/month
-
+    .row
+      p Upgrade your account for unlimited cards and uploads
+    .row
+      .segmented-buttons
+        button(:class="{active: priceIsMonthly}" @click.left="togglePriceIsMonthly(true)") $5/month
+        button(:class="{active: !priceIsMonthly}" @click.left="togglePriceIsMonthly(false)") $55/year
     .should-sign-up(v-if="!currentUserIsSignedIn")
       p To upgrade your account, you'll need to sign up first
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
@@ -30,11 +31,17 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keyd
       .badge.danger(v-if="error.stripeError") {{error.stripeErrorMessage}}
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
 
+      .summary
+        User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
+        .badge.info
+          span(v-if="priceIsMonthly") $5/month
+          span(v-else) $55/year
+
       button(@click.left="subscribe" :class="{active : loading.subscriptionIsBeingCreated}")
         span Upgrade Account
         Loader(:visible="loading.subscriptionIsBeingCreated")
 
-      p You'll be billed immediately and then each month. You can cancel at anytime.
+      p You'll be billed immediately and then each {{monthOrYear}}. You can cancel anytime.
 
   section(v-if="currentUserIsSignedIn")
     img.icon(src="@/assets/lock.svg")
@@ -50,16 +57,14 @@ import cache from '@/cache.js'
 import { loadStripe } from '@stripe/stripe-js/pure'
 
 // https://stripe.com/docs/billing/subscriptions/fixed-price
-
-let stripePublishableKey, priceId, stripe, elements, cardNumber, cardExpiry, cardCvc
+let stripePublishableKey, stripe, elements, cardNumber, cardExpiry, cardCvc
 let customer, paymentMethod, subscription
 let invoice, paymentIntent
+
 if (process.env.NODE_ENV === 'development') {
   stripePublishableKey = 'pk_test_51Gv55TL1W0hlm1mqF9VvEevFCGr53d0eDUx0VD1tPA8ESuGdTceeoK0hAWaELCmTqkbt3wZqffT0mN41X0Jmlxpe00en3VmODJ'
-  priceId = 'price_1Gy3QWL1W0hlm1mqKLnVVNAd'
 } else {
   stripePublishableKey = 'pk_live_51Gv55TL1W0hlm1mq80jsOLNIJEgtPei8OuuW1v9lFV6KbVo7yme2nERsysqYiIpt1BrRvAi860IATF103QNI6FDn00wjUlhOvQ'
-  priceId = 'price_1Gv5OfL1W0hlm1mqpTfR61iZ'
 }
 
 export default {
@@ -94,12 +99,35 @@ export default {
         stripeError: false,
         stripeErrorMessage: ''
       },
-      dialogHeight: null
+      dialogHeight: null,
+      priceIsMonthly: true
     }
   },
   computed: {
     user () { return this.$store.state.currentUser },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    monthOrYear () {
+      if (this.priceIsMonthly) {
+        return 'month'
+      } else {
+        return 'year'
+      }
+    },
+    priceId () {
+      let monthly, yearly
+      if (process.env.NODE_ENV === 'development') {
+        monthly = 'price_1ILuNtL1W0hlm1mqqkIVY39P'
+        yearly = 'price_1ILuOPL1W0hlm1mqUV79ZnJm'
+      } else {
+        monthly = 'price_1IIjZ6L1W0hlm1mqawebhdDz'
+        yearly = 'price_1IIjdSL1W0hlm1mqh50JFKXj'
+      }
+      if (this.priceIsMonthly) {
+        return monthly
+      } else {
+        return yearly
+      }
+    }
   },
   methods: {
     shouldHideFooter (event) {
@@ -201,7 +229,7 @@ export default {
       const result = await this.$store.dispatch('api/createSubscription', {
         customerId: customer.id,
         paymentMethodId: paymentMethod.id,
-        priceId
+        priceId: this.priceId
       })
       console.log('🎡 stripe subscription', result)
       if (result.error) {
@@ -290,6 +318,9 @@ export default {
         let element = this.$refs.dialog
         this.dialogHeight = utils.elementHeight(element)
       })
+    },
+    togglePriceIsMonthly (value) {
+      this.priceIsMonthly = value
     }
   },
   watch: {

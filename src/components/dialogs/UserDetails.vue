@@ -33,7 +33,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.left.stop="clos
         UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeDialogs")
       .row
         p
-          .badge.info $4/month
+          .badge.info $5/month
         a(href="https://help.kinopio.club/posts/how-much-does-kinopio-cost")
           button Help →
       .row(v-if="spaceUserIsUpgraded")

@@ -11,12 +11,12 @@ aside.notifications(@click.left="closeAllDialogs")
       span This space is open, which means you can add to it too
 
   .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
-    p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade for $4/month
+    p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade for $5/month
     .row
       button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
   .persistent-item.danger(v-if="notifyCardsCreatedIsOverLimit" ref="cardsOverLimit" :class="{'notification-jiggle': notifyCardsCreatedIsOverLimitJiggle}" @animationend="resetNotifyCardsCreatedIsOverLimitJiggle")
-    p To add more cards, you'll need to upgrade for $4/month
+    p To add more cards, you'll need to upgrade for $5/month
     .row
       button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
