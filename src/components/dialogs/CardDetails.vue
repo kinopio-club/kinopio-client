@@ -642,6 +642,11 @@ export default {
         event.stopPropagation()
         return
       }
+      const nameContainsJapanese = utils.nameContainsJapanese(this.name)
+      if (nameContainsJapanese) {
+        event.stopPropagation()
+        return
+      }
       this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCard')
     },
     closeCardAndFocus (event) {

@@ -14,6 +14,8 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
         .divider.badge or
         .badge.title Click Focused Item
         .badge.info Enter
+      button(@click.left.stop="toggleCardInfoIsVisible" :class="{ active: cardInfoIsVisible }") More Info
+      p(v-if="cardInfoIsVisible") Disabled if card contains Japanese characters
     article
       .row
         .badge.title
@@ -141,6 +143,7 @@ export default {
   data () {
     return {
       safariInfoIsVisible: false,
+      cardInfoIsVisible: false,
       childCardInfoIsVisible: false,
       dialogHeight: null
     }
@@ -163,6 +166,9 @@ export default {
     },
     toggleChildCardInfoIsVisible () {
       this.childCardInfoIsVisible = !this.childCardInfoIsVisible
+    },
+    toggleCardInfoIsVisible () {
+      this.cardInfoIsVisible = !this.cardInfoIsVisible
     },
     updateDialogHeight () {
       if (!this.visible) { return }
