@@ -997,6 +997,7 @@ export default {
   // Name Segments 🎫
 
   cardNameSegments (name) {
+    if (!name) { return [] }
     const tags = this.tagsFromString(name) || []
     const urls = this.urlsFromString(name) || []
     const markdownLinks = name.match(this.markdown().linkPattern) || []
