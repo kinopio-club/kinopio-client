@@ -345,11 +345,13 @@ export default {
       const spaceUrl = context.rootState.spaceUrlToLoad
       const loadJournalSpace = context.rootState.loadJournalSpace
       const user = context.rootState.currentUser
+      let space, isRemote
       // restore from url
       if (spaceUrl) {
         console.log('🚃 Restore space from url', spaceUrl)
         const spaceId = utils.spaceIdFromUrl(spaceUrl)
-        const space = { id: spaceId }
+        space = { id: spaceId }
+        isRemote = true
         await context.dispatch('loadSpace', { space })
       // restore or create journal space
       } else if (loadJournalSpace) {
@@ -365,7 +367,7 @@ export default {
         await context.dispatch('createNewHelloSpace')
         context.dispatch('updateUserLastSpaceId')
       }
-      context.dispatch('updateWindowHistory', {})
+      context.dispatch('updateWindowHistory', { space, isRemote })
     },
 
     // Users and otherSpaces
