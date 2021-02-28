@@ -193,9 +193,22 @@ export default {
       startCursor = utils.cursorPositionInViewport(event)
     },
 
+    constrainCursorToAxis (event) {
+      if (!event.shiftKey) { return }
+      const delta = {
+        x: Math.abs(endCursor.x - startCursor.x),
+        y: Math.abs(endCursor.y - startCursor.y)
+      }
+      if (delta.x > delta.y) {
+        endCursor.y = prevCursor.y
+      } else {
+        endCursor.x = prevCursor.x
+      }
+    },
     interact (event) {
       endCursor = utils.cursorPositionInViewport(event)
       if (this.isDraggingCard) {
+        this.constrainCursorToAxis(event)
         this.dragCard()
       }
       if (this.isDrawingConnection) {
