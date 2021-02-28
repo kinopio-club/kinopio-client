@@ -105,6 +105,7 @@ export default {
       font-weight normal
       background-color var(--secondary-active-background)
       border-radius 3px
+      margin-right 0
 
   .link-badge-url
     color var(--primary)
