@@ -1,5 +1,5 @@
 <template lang="pug">
-span
+span.space-list-wrap
   ResultsFilter(:hideFilter="hideFilter" :items="spaces" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredSpaces")
   ul.results-list.space-list
     template(v-for="(space in spacesFiltered")
@@ -187,6 +187,9 @@ export default {
 </script>
 
 <style lang="stylus">
+.space-list-wrap
+  position relative
+
 .space-list
   .inline-badge
     margin-left 0
@@ -227,7 +230,11 @@ export default {
     vertical-align middle
 
   .loader
-    margin-left 6px
+    position absolute
+    top 4px
+    left 4px
+    height 14px
+    width 14px
 
   a
     color var(--primary)
