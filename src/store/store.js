@@ -38,6 +38,7 @@ export default new Vuex.Store({
     isTouchDevice: false,
     cardMap: {},
     cardsCreatedLimit: 100,
+    prevCursorPosition: { x: 0, y: 0 },
 
     // reset password
     resetPasswordApiKey: '',
@@ -218,6 +219,9 @@ export default new Vuex.Store({
     },
     updateCardMap: (state) => {
       state.cardMap = utils.cardMap()
+    },
+    prevCursorPosition: (state, cursor) => {
+      state.prevCursorPosition = cursor
     },
     resetPasswordApiKey: (state, apiKey) => {
       utils.typeCheck({ value: apiKey, type: 'string', origin: 'resetPasswordApiKey' })

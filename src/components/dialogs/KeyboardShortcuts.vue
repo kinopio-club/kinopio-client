@@ -78,6 +78,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
     article
       .row
         .badge.title
+          img.icon(src="@/assets/brush-y.svg")
+          span Select All Cards Below Cursor
+        .badge.info {{meta}}-Shift-A
+    article
+      .row
+        .badge.title
           img.icon(src="@/assets/brush.svg")
           span Select All Connected Cards
         .badge.info {{meta}}-Click Card

@@ -97,6 +97,10 @@ export default {
       } else if (isMeta && key === 'v' && isSpaceScope) {
         event.preventDefault()
         this.pasteCards()
+      // Select All Cards Below Cursor
+      } else if (isMeta && event.shiftKey && key === 'a' && isSpaceScope) {
+        event.preventDefault()
+        this.selectAllCardsBelowCursor(event)
       // Select All Cards
       } else if (isMeta && key === 'a' && isSpaceScope) {
         event.preventDefault()
@@ -449,9 +453,23 @@ export default {
       })
     },
 
+    // Select All Cards Below Cursor
+
+    selectAllCardsBelowCursor (event) {
+      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
+      if (!canEditSpace) { return }
+      const cursor = this.$store.state.prevCursorPosition
+      let cards = utils.clone(this.$store.state.currentSpace.cards)
+      cards = cards.filter(card => card.y > cursor.y)
+      cards = cards.map(card => card.id)
+      this.$store.commit('multipleSelectedActionsPosition', cursor)
+      this.$store.commit('multipleSelectedActionsIsVisible', true)
+      this.$store.commit('multipleCardsSelectedIds', cards)
+    },
+
     // Select All Cards
 
-    selectAllCards (event) {
+    selectAllCards () {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
       let cards = utils.clone(this.$store.state.currentSpace.cards)
