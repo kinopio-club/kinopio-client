@@ -215,7 +215,7 @@ export default {
         this.drawConnection()
       }
       prevCursor = utils.cursorPositionInViewport(event)
-      this.$store.commit('prevCursorPosition', prevCursor)
+      this.$store.commit('prevCursorPosition', utils.cursorPositionInPage(event))
     },
     checkShouldShowDetails () {
       if (!utils.cursorsAreClose(startCursor, endCursor)) {
