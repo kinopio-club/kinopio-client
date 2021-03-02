@@ -101,6 +101,7 @@ export default new Vuex.Store({
     remoteConnectionsSelected: [],
     multipleConnectionsSelectedIds: [],
     triggeredPaintFramePosition: {},
+    alignAndDistributeMoreOptionsIsVisible: false,
 
     // loading
     isLoadingSpace: false,
@@ -530,6 +531,10 @@ export default new Vuex.Store({
       const user = update.user || update.updates.user
       state.remoteCardsSelected = state.remoteCardsSelected.filter(card => card.userId !== user.id)
       state.remoteConnectionsSelected = state.remoteConnectionsSelected.filter(connection => connection.userId !== user.id)
+    },
+    alignAndDistributeMoreOptionsIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'alignAndDistributeMoreOptionsIsVisible' })
+      state.alignAndDistributeMoreOptionsIsVisible = value
     },
 
     // Loading

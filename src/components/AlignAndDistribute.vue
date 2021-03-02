@@ -1,10 +1,12 @@
 <template lang="pug">
-.button-wrap(v-if="visible")
+.align-and-distribute.button-wrap(v-if="visible")
   .segmented-buttons
     button(:disabled="!canEditSome.cards" @click.left="alignAndDistributeCardsVertically" :class="{active: isVerticallyAligned}")
       img.icon(src="@/assets/align-vertically.svg")
     button(:disabled="!canEditSome.cards" @click.left="alignAndDistributeCardsHorizontally" :class="{active: isHorizontallyAligned}")
       img.icon(src="@/assets/align-horizontally.svg")
+    button(:disabled="!canEditSome.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
+      img.down-arrow(src="@/assets/down-arrow.svg")
 </template>
 
 <script>
@@ -19,6 +21,7 @@ export default {
     numberOfSelectedItemsCreatedByCurrentUser: Object
   },
   computed: {
+    moreOptionsIsVisible () { return this.$store.state.alignAndDistributeMoreOptionsIsVisible },
     multipleCardsSelectedIds () { return this.$store.state.multipleCardsSelectedIds },
     multipleConnectionsSelectedIds () { return this.$store.state.multipleConnectionsSelectedIds },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
@@ -59,6 +62,10 @@ export default {
     }
   },
   methods: {
+    toggleMoreOptionsIsVisible () {
+      const value = !this.moreOptionsIsVisible
+      this.$store.commit('alignAndDistributeMoreOptionsIsVisible', value)
+    },
     cardsSortedByX () {
       return this.editableCards.sort((a, b) => {
         return a.x - b.x
@@ -151,4 +158,7 @@ export default {
 </script>
 
 <style lang="stylus">
+.align-and-distribute
+  .down-arrow
+    padding 0
 </style>

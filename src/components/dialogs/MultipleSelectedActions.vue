@@ -53,7 +53,7 @@ dialog.narrow.multiple-selected-actions(
       .button-wrap
         button(:disabled="!canEditAll.cards" @click.left.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
           img.icon.visit(src="@/assets/visit.svg")
-          span Move or Copy
+          span Move/Copy
         MoveOrCopyToSpace(:visible="moveOrCopyToSpaceIsVisible")
 
     p(v-if="canEditAsNonMember && !selectedItemsIsCreatedByCurrentUser")
