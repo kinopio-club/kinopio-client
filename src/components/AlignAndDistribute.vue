@@ -1,12 +1,46 @@
 <template lang="pug">
 .align-and-distribute.button-wrap(v-if="visible")
-  .segmented-buttons
-    button(:disabled="!canEditSome.cards" @click.left="alignAndDistributeCardsVertically" :class="{active: isVerticallyAligned}")
-      img.icon(src="@/assets/align-vertically.svg")
-    button(:disabled="!canEditSome.cards" @click.left="alignAndDistributeCardsHorizontally" :class="{active: isHorizontallyAligned}")
-      img.icon(src="@/assets/align-horizontally.svg")
-    button(:disabled="!canEditSome.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
-      img.down-arrow(src="@/assets/down-arrow.svg")
+  //- More Options
+  template(v-if="moreOptionsIsVisible")
+    .segmented-buttons.first-row
+      button(title="Align Left" :disabled="!canEditSome.cards" @click.left="alignCardsLeft" :class="{active: isLeftAligned}")
+        img.icon(src="@/assets/align-left.svg")
+      //- TODO center-horizontally
+      button(title="Center Horizontally" :disabled="!canEditSome.cards" @click.left="alignCardsLeft" :class="{active: isLeftAligned}")
+        img.icon(src="@/assets/center-horizontally.svg")
+      //- TODO align-right
+      button(title="Align Right" :disabled="!canEditSome.cards" @click.left="alignCardsLeft" :class="{active: isLeftAligned}")
+        img.icon.align-right(src="@/assets/align-left.svg")
+      //- TODO distribute-horizontally
+      button(title="Distribute Horizontally" :disabled="!canDistributeCards" @click.left="alignCardsLeft" :class="{active: isLeftAligned}")
+        img.icon(src="@/assets/distribute-horizontally.svg")
+
+    .segmented-buttons.last-row
+      button(title="Align Top" :disabled="!canEditSome.cards" @click.left="alignCardsTop" :class="{active: isTopAligned}")
+        img.icon(src="@/assets/align-top.svg")
+      //- TODO center-verticaly
+      button.center-vertically-button(title="Center Verticaly" :disabled="!canEditSome.cards" @click.left="alignCardsTop" :class="{active: isTopAligned}")
+        img.icon(src="@/assets/center-vertically.svg")
+      //- TODO align-bottom
+      button(title="Align Bottom" :disabled="!canEditSome.cards" @click.left="alignCardsTop" :class="{active: isTopAligned}")
+        img.icon.align-bottom(src="@/assets/align-top.svg")
+      //- TODO distribute-vertically
+      button(title="Distribute Vertically" :disabled="!canDistributeCards" @click.left="alignCardsTop" :class="{active: isTopAligned}")
+        img.icon.distribute-vertically(src="@/assets/distribute-horizontally.svg")
+
+      button(title="Less Options" :disabled="!canEditSome.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
+        img.down-arrow.left-arrow(src="@/assets/down-arrow.svg")
+
+  //- Less Options
+  template(v-else)
+    .segmented-buttons
+      button(title="Align Left" :disabled="!canEditSome.cards" @click.left="alignCardsLeft" :class="{active: isLeftAligned}")
+        img.icon(src="@/assets/align-left.svg")
+      button(title="Align Top" :disabled="!canEditSome.cards" @click.left="alignCardsTop" :class="{active: isTopAligned}")
+        img.icon(src="@/assets/align-top.svg")
+      button(title="More Options" :disabled="!canEditSome.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
+        img.down-arrow.right-arrow(src="@/assets/down-arrow.svg")
+
 </template>
 
 <script>
@@ -45,11 +79,11 @@ export default {
         return this.$store.getters['currentSpace/connectionById'](id)
       })
     },
-    isVerticallyAligned () {
+    isLeftAligned () {
       const xValues = this.cards.map(card => card.x)
       return xValues.every(x => x === xValues[0])
     },
-    isHorizontallyAligned () {
+    isTopAligned () {
       const yValues = this.cards.map(card => card.y)
       return yValues.every(y => y === yValues[0])
     },
@@ -59,6 +93,16 @@ export default {
       const connections = this.numberOfSelectedItemsCreatedByCurrentUser.connections > 0
       const any = cards || connections
       return { cards, connections, any }
+    },
+    canDistributeCards () {
+      const minimumRequiredToDistribute = 3
+      let cards
+      if (this.isSpaceMember) {
+        cards = this.multipleCardsSelectedIds.length >= minimumRequiredToDistribute
+      } else {
+        cards = this.numberOfSelectedItemsCreatedByCurrentUser.cards >= minimumRequiredToDistribute
+      }
+      return Boolean(cards)
     }
   },
   methods: {
@@ -76,7 +120,7 @@ export default {
         return a.y - b.y
       })
     },
-    alignAndDistributeCardsVertically () {
+    alignCardsLeft () {
       const cards = this.cardsSortedByY()
       const origin = cards[0]
       cards.forEach((card, index) => {
@@ -94,7 +138,7 @@ export default {
       this.updateConnectionPaths()
     },
 
-    alignAndDistributeCardsHorizontally () {
+    alignCardsTop () {
       const cards = this.cardsSortedByX()
       const origin = cards[0]
       cards.forEach((card, index) => {
@@ -161,4 +205,30 @@ export default {
 .align-and-distribute
   .down-arrow
     padding 0
+  .right-arrow
+    transform rotate(-90deg)
+  .left-arrow
+    transform rotate(90deg)
+  .segmented-buttons
+    &.first-row
+      button
+        margin-bottom -1px
+      button:first-child
+        border-bottom-left-radius 0
+      button:last-child
+        border-bottom-right-radius 0
+    &.last-row
+      margin-bottom 10px
+      button:first-child
+        border-top-left-radius 0
+
+  .align-right,
+  .align-bottom
+    transform rotate(180deg)
+  .distribute-vertically
+    transform rotate(90deg) translateX(1px)
+
+  .center-vertically-button
+    padding-left 6px
+    padding-right 6px
 </style>

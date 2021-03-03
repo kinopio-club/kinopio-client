@@ -47,10 +47,12 @@ dialog.narrow.multiple-selected-actions(
         button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
           span Export
         Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
-    .row(v-if="multipleCardsSelectedIds.length")
+
+    div(v-if="multipleCardsSelectedIds.length" :class="{ row: !moreOptionsIsVisible }")
+      //- Align And Distribute
       AlignAndDistribute(:visible="multipleCardsIsSelected" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser")
       //- Move or Copy
-      .button-wrap
+      .button-wrap(:class="{ 'block-row': moreOptionsIsVisible }")
         button(:disabled="!canEditAll.cards" @click.left.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
           img.icon.visit(src="@/assets/visit.svg")
           span Move/Copy
@@ -97,6 +99,7 @@ export default {
   },
   computed: {
     visible () { return this.$store.state.multipleSelectedActionsIsVisible },
+    moreOptionsIsVisible () { return this.$store.state.alignAndDistributeMoreOptionsIsVisible },
     position () {
       const cursor = this.$store.state.multipleSelectedActionsPosition
       return {
@@ -426,4 +429,6 @@ export default {
       margin 0
   .connector-icon
     width 11px
+  .block-row
+    margin-left 0 !important
 </style>
