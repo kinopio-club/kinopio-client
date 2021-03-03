@@ -17,13 +17,13 @@
 
     .segmented-buttons.last-row
       button(title="Align Top" :disabled="!canEditSome.cards" @click.left="alignCardsTop" :class="{active: isTopAligned}")
-        img.icon(src="@/assets/align-top.svg")
+        img.icon.align-top(src="@/assets/align-left.svg")
       //- TODO center-verticaly
-      button.center-vertically-button(title="Center Verticaly" :disabled="!canEditSome.cards" @click.left="alignCardsTop" :class="{active: isTopAligned}")
-        img.icon(src="@/assets/center-vertically.svg")
+      button(title="Center Verticaly" :disabled="!canEditSome.cards" @click.left="alignCardsTop" :class="{active: isTopAligned}")
+        img.icon.center-vertically(src="@/assets/center-horizontally.svg")
       //- TODO align-bottom
       button(title="Align Bottom" :disabled="!canEditSome.cards" @click.left="alignCardsTop" :class="{active: isTopAligned}")
-        img.icon.align-bottom(src="@/assets/align-top.svg")
+        img.icon.align-bottom(src="@/assets/align-left.svg")
       //- TODO distribute-vertically
       button(title="Distribute Vertically" :disabled="!canDistributeCards" @click.left="alignCardsTop" :class="{active: isTopAligned}")
         img.icon.distribute-vertically(src="@/assets/distribute-horizontally.svg")
@@ -37,10 +37,9 @@
       button(title="Align Left" :disabled="!canEditSome.cards" @click.left="alignCardsLeft" :class="{active: isLeftAligned}")
         img.icon(src="@/assets/align-left.svg")
       button(title="Align Top" :disabled="!canEditSome.cards" @click.left="alignCardsTop" :class="{active: isTopAligned}")
-        img.icon(src="@/assets/align-top.svg")
+        img.icon.align-top(src="@/assets/align-left.svg")
       button(title="More Options" :disabled="!canEditSome.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
         img.down-arrow.right-arrow(src="@/assets/down-arrow.svg")
-
 </template>
 
 <script>
@@ -221,14 +220,14 @@ export default {
       margin-bottom 10px
       button:first-child
         border-top-left-radius 0
-
-  .align-right,
+  .align-top
+    transform rotate(90deg)
   .align-bottom
+    transform rotate(-90deg)
+  .align-right
     transform rotate(180deg)
+  .center-vertically
+    transform rotate(-90deg)
   .distribute-vertically
     transform rotate(90deg) translateX(1px)
-
-  .center-vertically-button
-    padding-left 6px
-    padding-right 6px
 </style>
