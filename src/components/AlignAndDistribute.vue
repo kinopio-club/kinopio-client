@@ -29,7 +29,7 @@
         img.icon.distribute-vertically(src="@/assets/distribute-horizontally.svg")
 
       button(title="Less Options" :disabled="!canEditSome.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
-        img.down-arrow.left-arrow(src="@/assets/down-arrow.svg")
+        img.down-arrow.up-arrow(src="@/assets/down-arrow.svg")
 
   //- Less Options
   template(v-else)
@@ -39,7 +39,7 @@
       button(title="Align Top" :disabled="!canEditSome.cards" @click.left="alignCardsTop" :class="{active: isTopAligned}")
         img.icon.align-top(src="@/assets/align-left.svg")
       button(title="More Options" :disabled="!canEditSome.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
-        img.down-arrow.right-arrow(src="@/assets/down-arrow.svg")
+        img.down-arrow(src="@/assets/down-arrow.svg")
 </template>
 
 <script>
@@ -204,10 +204,8 @@ export default {
 .align-and-distribute
   .down-arrow
     padding 0
-  .right-arrow
-    transform rotate(-90deg)
-  .left-arrow
-    transform rotate(90deg)
+  .up-arrow
+    transform rotate(180deg)
   .segmented-buttons
     &.first-row
       button
