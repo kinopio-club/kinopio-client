@@ -129,23 +129,6 @@ export default {
         return (b.x + b.width) - (a.x + a.width)
       })
     },
-    alignLeft () {
-      const cards = this.cardsSortedByY()
-      const origin = cards[0]
-      cards.forEach((card, index) => {
-        if (index > 0) {
-          const previousCard = cards[index - 1]
-          const previousElement = document.querySelector(`article [data-card-id="${previousCard.id}"]`)
-          const previousRect = previousElement.getBoundingClientRect()
-          const previousRectBottomSide = previousCard.y + previousRect.height
-          card = utils.clone(card)
-          card.x = origin.x
-          card.y = previousRectBottomSide + spaceBetweenCards
-          this.$store.dispatch('currentSpace/updateCard', card)
-        }
-      })
-      this.updateConnectionPaths()
-    },
     alignTop () {
       const cards = this.cardsSortedByX()
       const origin = cards[0]
@@ -197,9 +180,42 @@ export default {
       })
       this.updateConnectionPaths()
     },
+
     distributeHorizontally () {},
 
-    centerVertically () {},
+    alignLeft () {
+      const cards = this.cardsSortedByY()
+      const origin = cards[0]
+      cards.forEach((card, index) => {
+        if (index > 0) {
+          const previousCard = cards[index - 1]
+          const previousElement = document.querySelector(`article [data-card-id="${previousCard.id}"]`)
+          const previousRect = previousElement.getBoundingClientRect()
+          const previousRectBottomSide = previousCard.y + previousRect.height
+          card = utils.clone(card)
+          card.x = origin.x
+          card.y = previousRectBottomSide + spaceBetweenCards
+          this.$store.dispatch('currentSpace/updateCard', card)
+        }
+      })
+      this.updateConnectionPaths()
+    },
+    centerVertically () {
+      const cards = this.cardsSortedByY()
+      const origin = cards[0]
+      cards.forEach((card, index) => {
+        if (index > 0) {
+          const previousCard = cards[index - 1]
+          const previousRightSide = previousCard.x + previousCard.width
+          card = utils.clone(card)
+          card.x = previousRightSide + spaceBetweenCards
+          card.y = origin.y + (origin.height / 2) - (card.height / 2)
+          this.$store.dispatch('currentSpace/updateCard', card)
+        }
+      })
+      this.updateConnectionPaths()
+    },
+
     alignBottom () {},
     distributeVertically () {},
 
