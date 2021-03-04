@@ -147,6 +147,7 @@ export default {
         return (b.y + b.height) - (a.y + a.height)
       })
     },
+    // ⎺o
     alignTop () {
       const cards = this.cardsSortedByX()
       const origin = cards[0]
@@ -164,6 +165,7 @@ export default {
       })
       this.updateConnectionPaths()
     },
+    // o|o
     centerHorizontally () {
       const cards = this.cardsSortedByX()
       const origin = cards[0]
@@ -181,6 +183,7 @@ export default {
       })
       this.updateConnectionPaths()
     },
+    // o|
     alignRight () {
       const cards = this.cardsSortedByXWidth()
       const origin = cards[0]
@@ -198,12 +201,22 @@ export default {
       })
       this.updateConnectionPaths()
     },
-
+    // | o |
     distributeHorizontally () {
-      // Y|skdlfj| 20/spaceBetweenCards |blahb|X
-
+      const cards = this.cardsSortedByX()
+      const xDistancesBetweenCards = this.xDistancesBetweenCards(cards)
+      const averageDistance = utils.averageOfNumbers(xDistancesBetweenCards)
+      cards.forEach((card, index) => {
+        if (index > 0) {
+          const previousCard = cards[index - 1]
+          card = utils.clone(card)
+          card.x = previousCard.x + previousCard.width + averageDistance
+          this.$store.dispatch('currentSpace/updateCard', card)
+        }
+      })
+      this.updateConnectionPaths()
     },
-
+    // |o
     alignLeft () {
       const cards = this.cardsSortedByY()
       const origin = cards[0]
@@ -221,6 +234,7 @@ export default {
       })
       this.updateConnectionPaths()
     },
+    // o-o
     centerVertically () {
       const cards = this.cardsSortedByX()
       const origin = cards[0]
@@ -236,6 +250,7 @@ export default {
       })
       this.updateConnectionPaths()
     },
+    // _o
     alignBottom () {
       const cards = this.cardsSortedByYHeight()
       const origin = cards[0]
@@ -251,6 +266,7 @@ export default {
       })
       this.updateConnectionPaths()
     },
+    // ⎺ o _
     distributeVertically () {
 
     },
