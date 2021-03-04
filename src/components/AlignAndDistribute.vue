@@ -14,7 +14,7 @@
           button(title="Align Right" :disabled="!canEditSome.cards" @click.left="alignRight" :class="{active: isLeftAligned}")
             img.icon.align-right(src="@/assets/align-left.svg")
           //- TODO distribute-horizontally
-          button(v-if="!shouldAutoDistribute" title="Distribute Horizontally" :disabled="!canDistributeCards" @click.left="distributeHorizontally" :class="{active: isLeftAligned}")
+          button(title="Distribute Horizontally" v-if="!shouldAutoDistribute" :disabled="!canDistributeCards" @click.left="distributeHorizontally" :class="{active: isLeftAligned}")
             img.icon(src="@/assets/distribute-horizontally.svg")
 
         .segmented-buttons.last-row
@@ -27,12 +27,10 @@
           button(title="Align Bottom" :disabled="!canEditSome.cards" @click.left="alignBottom" :class="{active: isTopAligned}")
             img.icon.align-bottom(src="@/assets/align-left.svg")
           //- TODO distribute-vertically
-          button(v-if="!shouldAutoDistribute" title="Distribute Vertically" :disabled="!canDistributeCards" @click.left="distributeVertically" :class="{active: isTopAligned}")
+          button(title="Distribute Vertically" v-if="!shouldAutoDistribute" :disabled="!canDistributeCards" @click.left="distributeVertically" :class="{active: isTopAligned}")
             img.icon.distribute-vertically(src="@/assets/distribute-horizontally.svg")
-
           button(title="Less Options" :disabled="!canEditSome.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
             img.down-arrow.up-arrow(src="@/assets/down-arrow.svg")
-
       //- Auto Distribute
       .checkbox-wrap
         label(title="Auto Distribute" :class="{active: shouldAutoDistribute}" @click.left.prevent="toggleShouldAutoDistribute" @keydown.stop.enter="toggleShouldAutoDistribute")
