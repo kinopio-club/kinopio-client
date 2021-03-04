@@ -154,12 +154,12 @@ export default {
       cards.forEach((card, index) => {
         if (index > 0) {
           const previousCard = cards[index - 1]
-          const previousElement = document.querySelector(`article [data-card-id="${previousCard.id}"]`)
-          const previousRect = previousElement.getBoundingClientRect()
-          const previousRectRightSide = previousCard.x + previousRect.width
+          const previousRightSide = previousCard.x + previousCard.width
           card = utils.clone(card)
           card.y = origin.y
-          card.x = previousRectRightSide + spaceBetweenCards
+          if (this.shouldAutoDistribute) {
+            card.x = previousRightSide + spaceBetweenCards
+          }
           this.$store.dispatch('currentSpace/updateCard', card)
         }
       })
@@ -172,12 +172,12 @@ export default {
       cards.forEach((card, index) => {
         if (index > 0) {
           const previousCard = cards[index - 1]
-          const previousElement = document.querySelector(`article [data-card-id="${previousCard.id}"]`)
-          const previousRect = previousElement.getBoundingClientRect()
-          const previousRectBottomSide = previousCard.y + previousRect.height
+          const previousBottomSide = previousCard.y + previousCard.height
           card = utils.clone(card)
           card.x = origin.x + (origin.width / 2) - (card.width / 2)
-          card.y = previousRectBottomSide + spaceBetweenCards
+          if (this.shouldAutoDistribute) {
+            card.y = previousBottomSide + spaceBetweenCards
+          }
           this.$store.dispatch('currentSpace/updateCard', card)
         }
       })
@@ -190,12 +190,12 @@ export default {
       cards.forEach((card, index) => {
         if (index > 0) {
           const previousCard = cards[index - 1]
-          const previousElement = document.querySelector(`article [data-card-id="${previousCard.id}"]`)
-          const previousRect = previousElement.getBoundingClientRect()
-          const previousRectBottomSide = previousCard.y + previousRect.height
+          const previousBottomSide = previousCard.y + previousCard.height
           card = utils.clone(card)
           card.x = origin.x + origin.width - card.width
-          card.y = previousRectBottomSide + spaceBetweenCards
+          if (this.shouldAutoDistribute) {
+            card.y = previousBottomSide + spaceBetweenCards
+          }
           this.$store.dispatch('currentSpace/updateCard', card)
         }
       })
@@ -223,12 +223,12 @@ export default {
       cards.forEach((card, index) => {
         if (index > 0) {
           const previousCard = cards[index - 1]
-          const previousElement = document.querySelector(`article [data-card-id="${previousCard.id}"]`)
-          const previousRect = previousElement.getBoundingClientRect()
-          const previousRectBottomSide = previousCard.y + previousRect.height
+          const previousBottomSide = previousCard.y + previousCard.height
           card = utils.clone(card)
           card.x = origin.x
-          card.y = previousRectBottomSide + spaceBetweenCards
+          if (this.shouldAutoDistribute) {
+            card.y = previousBottomSide + spaceBetweenCards
+          }
           this.$store.dispatch('currentSpace/updateCard', card)
         }
       })
@@ -243,7 +243,9 @@ export default {
           const previousCard = cards[index - 1]
           const previousRightSide = previousCard.x + previousCard.width
           card = utils.clone(card)
-          card.x = previousRightSide + spaceBetweenCards
+          if (this.shouldAutoDistribute) {
+            card.x = previousRightSide + spaceBetweenCards
+          }
           card.y = origin.y + (origin.height / 2) - (card.height / 2)
           this.$store.dispatch('currentSpace/updateCard', card)
         }
@@ -260,7 +262,9 @@ export default {
           const previousRightSide = previousCard.x + previousCard.width
           card = utils.clone(card)
           card.y = origin.y + origin.height - card.height
-          card.x = previousRightSide + spaceBetweenCards
+          if (this.shouldAutoDistribute) {
+            card.x = previousRightSide + spaceBetweenCards
+          }
           this.$store.dispatch('currentSpace/updateCard', card)
         }
       })
