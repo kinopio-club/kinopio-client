@@ -268,7 +268,18 @@ export default {
     },
     // ⎺ o _
     distributeVertically () {
-
+      const cards = this.cardsSortedByY()
+      const yDistancesBetweenCards = this.yDistancesBetweenCards(cards)
+      const averageDistance = utils.averageOfNumbers(yDistancesBetweenCards)
+      cards.forEach((card, index) => {
+        if (index > 0) {
+          const previousCard = cards[index - 1]
+          card = utils.clone(card)
+          card.y = previousCard.y + previousCard.height + averageDistance
+          this.$store.dispatch('currentSpace/updateCard', card)
+        }
+      })
+      this.updateConnectionPaths()
     },
 
     xDistancesBetweenCards (cards) {
