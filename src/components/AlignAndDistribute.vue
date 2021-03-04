@@ -1,53 +1,52 @@
 <template lang="pug">
-.align-and-distribute.button-wrap(v-if="visible")
+.align-and-distribute(v-if="visible")
+  .segmented-buttons(v-if="shouldHideMoreOptions")
+    button(title="Align Left" :disabled="!canEditSome.cards" @click.left="alignLeft" :class="{active: isLeftAligned}")
+      img.icon(src="@/assets/align-left.svg")
+    button(title="Align Top" :disabled="!canEditSome.cards" @click.left="alignTop" :class="{active: isTopAligned}")
+      img.icon.align-top(src="@/assets/align-left.svg")
+    button(title="More Options" :disabled="!canEditSome.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
+      img.down-arrow(src="@/assets/down-arrow.svg")
+
   //- More Options
-  template(v-if="moreOptionsIsVisible")
-    .row.multi-height-row
-      div
-        .segmented-buttons.first-row
-          button(title="Align Left" :disabled="!canEditSome.cards" @click.left="alignLeft" :class="{active: isLeftAligned}")
-            img.icon(src="@/assets/align-left.svg")
-          //- TODO center-horizontally
-          button(title="Center Horizontally" :disabled="!canEditSome.cards" @click.left="centerHorizontally" :class="{active: isLeftAligned}")
-            img.icon(src="@/assets/center-horizontally.svg")
-          //- TODO align-right
-          button(title="Align Right" :disabled="!canEditSome.cards" @click.left="alignRight" :class="{active: isLeftAligned}")
-            img.icon.align-right(src="@/assets/align-left.svg")
-          //- TODO distribute-horizontally
-          button(title="Distribute Horizontally" v-if="!shouldAutoDistribute" :disabled="!canDistributeCards" @click.left="distributeHorizontally" :class="{active: isLeftAligned}")
-            img.icon(src="@/assets/distribute-horizontally.svg")
-
-        .segmented-buttons.last-row
-          button(title="Align Top" :disabled="!canEditSome.cards" @click.left="alignTop" :class="{active: isTopAligned}")
-            img.icon.align-top(src="@/assets/align-left.svg")
-          //- TODO center-verticaly
-          button(title="Center Verticaly" :disabled="!canEditSome.cards" @click.left="centerVertically" :class="{active: isTopAligned}")
-            img.icon.center-vertically(src="@/assets/center-horizontally.svg")
-          //- TODO align-bottom
-          button(title="Align Bottom" :disabled="!canEditSome.cards" @click.left="alignBottom" :class="{active: isTopAligned}")
-            img.icon.align-bottom(src="@/assets/align-left.svg")
-          //- TODO distribute-vertically
-          button(title="Distribute Vertically" v-if="!shouldAutoDistribute" :disabled="!canDistributeCards" @click.left="distributeVertically" :class="{active: isTopAligned}")
-            img.icon.distribute-vertically(src="@/assets/distribute-horizontally.svg")
-          button(title="Less Options" :disabled="!canEditSome.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
-            img.down-arrow.up-arrow(src="@/assets/down-arrow.svg")
-      //- Auto Distribute
-      .checkbox-wrap
-        label(title="Auto Distribute" :class="{active: shouldAutoDistribute}" @click.left.prevent="toggleShouldAutoDistribute" @keydown.stop.enter="toggleShouldAutoDistribute")
-          input(type="checkbox" v-model="shouldAutoDistribute")
-          img.icon(src="@/assets/auto-distribute.svg")
-          .badge.label-badge.auto(v-if="shouldAutoDistribute") AUTO
-          .badge.label-badge.manual(v-if="!shouldAutoDistribute") MANUAL
-
-  //- Less Options
-  template(v-else)
-    .segmented-buttons
+  .more-options(v-if="moreOptionsIsVisible && !shouldHideMoreOptions")
+    .segmented-buttons.first-row
       button(title="Align Left" :disabled="!canEditSome.cards" @click.left="alignLeft" :class="{active: isLeftAligned}")
         img.icon(src="@/assets/align-left.svg")
+      //- TODO center-horizontally
+      button(title="Center Horizontally" :disabled="!canEditSome.cards" @click.left="centerHorizontally" :class="{active: isCenteredHorizontally}")
+        img.icon(src="@/assets/center-horizontally.svg")
+      //- TODO align-right
+      button(title="Align Right" :disabled="!canEditSome.cards" @click.left="alignRight" :class="{active: isRightAligned}")
+        img.icon.align-right(src="@/assets/align-left.svg")
+      //- TODO distribute-horizontally
+      button(title="Distribute Horizontally" v-if="!shouldAutoDistribute" :disabled="!canDistributeCards" @click.left="distributeHorizontally" :class="{active: isDistributedHorizontally}")
+        img.icon(src="@/assets/distribute-horizontally.svg")
+
+    .segmented-buttons.last-row
       button(title="Align Top" :disabled="!canEditSome.cards" @click.left="alignTop" :class="{active: isTopAligned}")
         img.icon.align-top(src="@/assets/align-left.svg")
-      button(title="More Options" :disabled="!canEditSome.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
-        img.down-arrow(src="@/assets/down-arrow.svg")
+      //- TODO center-verticaly
+      button(title="Center Verticaly" :disabled="!canEditSome.cards" @click.left="centerVertically" :class="{active: isCenteredVertically}")
+        img.icon.center-vertically(src="@/assets/center-horizontally.svg")
+      //- TODO align-bottom
+      button(title="Align Bottom" :disabled="!canEditSome.cards" @click.left="alignBottom" :class="{active: isBottomAligned}")
+        img.icon.align-bottom(src="@/assets/align-left.svg")
+      //- TODO distribute-vertically
+      button(title="Distribute Vertically" v-if="!shouldAutoDistribute" :disabled="!canDistributeCards" @click.left="distributeVertically" :class="{active: isDistributedVertically}")
+        img.icon.distribute-vertically(src="@/assets/distribute-horizontally.svg")
+
+          //- button(title="Less Options" :disabled="!canEditSome.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
+          //-   img.down-arrow.up-arrow(src="@/assets/down-arrow.svg")
+
+      //- Auto Distribute
+      //- .checkbox-wrap
+      //-   label(title="Auto Distribute" :class="{active: shouldAutoDistribute}" @click.left.prevent="toggleShouldAutoDistribute" @keydown.stop.enter="toggleShouldAutoDistribute")
+      //-     input(type="checkbox" v-model="shouldAutoDistribute")
+      //-     img.icon(src="@/assets/auto-distribute.svg")
+      //-     .badge.label-badge.auto(v-if="shouldAutoDistribute") AUTO
+      //-     .badge.label-badge.manual(v-if="!shouldAutoDistribute") MANUAL
+
 </template>
 
 <script>
@@ -59,7 +58,8 @@ export default {
   name: 'AlignAndDistribute',
   props: {
     visible: Boolean,
-    numberOfSelectedItemsCreatedByCurrentUser: Object
+    numberOfSelectedItemsCreatedByCurrentUser: Object,
+    shouldHideMoreOptions: Boolean
   },
   computed: {
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
@@ -92,14 +92,24 @@ export default {
         return this.$store.getters['currentSpace/connectionById'](id)
       })
     },
+
+    // todo update to be autoDist aware (12 or avg)
+
     isLeftAligned () {
       const xValues = this.cards.map(card => card.x)
       return xValues.every(x => x === xValues[0])
     },
+    isCenteredHorizontally () { return false },
+    isRightAligned () { return false },
+    isDistributedHorizontally () { return false },
     isTopAligned () {
       const yValues = this.cards.map(card => card.y)
       return yValues.every(y => y === yValues[0])
     },
+    isCenteredVertically () { return false },
+    isBottomAligned () { return false },
+    isDistributedVertically () { return false },
+
     canEditSome () {
       if (this.isSpaceMember) { return { cards: true, connections: true, any: true } }
       const cards = this.numberOfSelectedItemsCreatedByCurrentUser.cards > 0
@@ -359,22 +369,8 @@ export default {
     transform rotate(-90deg)
   .distribute-vertically
     transform rotate(90deg)
-  .multi-height-row
-    align-items flex-end
-    margin-bottom 10px !important
-    .checkbox-wrap
-      margin-left 6px
-      position relative
-    .label-badge
-      color var(--primary-background)
-      min-height initial
-      position absolute
-      pointer-events none
-      &.auto
-        left 6px
-        top -8px
-      &.manual
-        left -1px
-        top -8px
-
+  .more-options
+    margin 0
+    margin-top 10px
+    margin-bottom 10px
 </style>

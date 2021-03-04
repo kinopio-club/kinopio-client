@@ -48,15 +48,18 @@ dialog.narrow.multiple-selected-actions(
           span Export
         Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
 
-    div(v-if="multipleCardsSelectedIds.length" :class="{ row: !moreOptionsIsVisible }")
-      //- Align And Distribute
+    template(v-if="multipleCardsSelectedIds.length")
+      .row
+        //- Align And Distribute
+        AlignAndDistribute(:visible="multipleCardsIsSelected" :shouldHideMoreOptions="true" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser")
+        //- Move/Copy
+        .button-wrap.move-or-copy-wrap
+          button(:disabled="!canEditAll.cards" @click.left.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
+            img.icon.visit(src="@/assets/visit.svg")
+            span Move/Copy
+          MoveOrCopyToSpace(:visible="moveOrCopyToSpaceIsVisible")
+      //- More Options
       AlignAndDistribute(:visible="multipleCardsIsSelected" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser")
-      //- Move or Copy
-      .button-wrap(:class="{ 'block-row': moreOptionsIsVisible }")
-        button(:disabled="!canEditAll.cards" @click.left.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
-          img.icon.visit(src="@/assets/visit.svg")
-          span Move/Copy
-        MoveOrCopyToSpace(:visible="moveOrCopyToSpaceIsVisible")
 
     p(v-if="canEditAsNonMember && !selectedItemsIsCreatedByCurrentUser")
       span.badge.info
@@ -415,7 +418,6 @@ export default {
     .current-color
       display inline-block
       vertical-align bottom
-      // margin-right 3px
       border-radius 0
       &:first-child
         border-top-left-radius 3px
@@ -429,6 +431,6 @@ export default {
       margin 0
   .connector-icon
     width 11px
-  .block-row
-    margin-left 0 !important
+  .move-or-copy-wrap
+    margin-left 6px
 </style>
