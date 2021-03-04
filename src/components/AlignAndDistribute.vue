@@ -36,6 +36,8 @@
         label(title="Auto Distribute" :class="{active: shouldAutoDistribute}" @click.left.prevent="toggleShouldAutoDistribute" @keydown.stop.enter="toggleShouldAutoDistribute")
           input(type="checkbox" v-model="shouldAutoDistribute")
           img.icon(src="@/assets/auto-distribute.svg")
+          .badge.label-badge.auto(v-if="shouldAutoDistribute") AUTO
+          .badge.label-badge.manual(v-if="!shouldAutoDistribute") MANUAL
 
   //- Less Options
   template(v-else)
@@ -362,4 +364,17 @@ export default {
     margin-bottom 10px !important
     .checkbox-wrap
       margin-left 6px
+      position relative
+    .label-badge
+      color var(--primary-background)
+      min-height initial
+      position absolute
+      pointer-events none
+      &.auto
+        left 6px
+        top -8px
+      &.manual
+        left -1px
+        top -8px
+
 </style>
