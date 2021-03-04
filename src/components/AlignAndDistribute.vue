@@ -3,29 +3,29 @@
   //- More Options
   template(v-if="moreOptionsIsVisible")
     .segmented-buttons.first-row
-      button(title="Align Left" :disabled="!canEditSome.cards" @click.left="alignCardsLeft" :class="{active: isLeftAligned}")
+      button(title="Align Left" :disabled="!canEditSome.cards" @click.left="alignLeft" :class="{active: isLeftAligned}")
         img.icon(src="@/assets/align-left.svg")
       //- TODO center-horizontally
-      button(title="Center Horizontally" :disabled="!canEditSome.cards" @click.left="alignCardsLeft" :class="{active: isLeftAligned}")
+      button(title="Center Horizontally" :disabled="!canEditSome.cards" @click.left="centerHorizontally" :class="{active: isLeftAligned}")
         img.icon(src="@/assets/center-horizontally.svg")
       //- TODO align-right
-      button(title="Align Right" :disabled="!canEditSome.cards" @click.left="alignCardsLeft" :class="{active: isLeftAligned}")
+      button(title="Align Right" :disabled="!canEditSome.cards" @click.left="alignRight" :class="{active: isLeftAligned}")
         img.icon.align-right(src="@/assets/align-left.svg")
       //- TODO distribute-horizontally
-      button(title="Distribute Horizontally" :disabled="!canDistributeCards" @click.left="alignCardsLeft" :class="{active: isLeftAligned}")
+      button(title="Distribute Horizontally" :disabled="!canDistributeCards" @click.left="distributeHorizontally" :class="{active: isLeftAligned}")
         img.icon(src="@/assets/distribute-horizontally.svg")
 
     .segmented-buttons.last-row
-      button(title="Align Top" :disabled="!canEditSome.cards" @click.left="alignCardsTop" :class="{active: isTopAligned}")
+      button(title="Align Top" :disabled="!canEditSome.cards" @click.left="alignTop" :class="{active: isTopAligned}")
         img.icon.align-top(src="@/assets/align-left.svg")
       //- TODO center-verticaly
-      button(title="Center Verticaly" :disabled="!canEditSome.cards" @click.left="alignCardsTop" :class="{active: isTopAligned}")
+      button(title="Center Verticaly" :disabled="!canEditSome.cards" @click.left="centerVertically" :class="{active: isTopAligned}")
         img.icon.center-vertically(src="@/assets/center-horizontally.svg")
       //- TODO align-bottom
-      button(title="Align Bottom" :disabled="!canEditSome.cards" @click.left="alignCardsTop" :class="{active: isTopAligned}")
+      button(title="Align Bottom" :disabled="!canEditSome.cards" @click.left="alignBottom" :class="{active: isTopAligned}")
         img.icon.align-bottom(src="@/assets/align-left.svg")
       //- TODO distribute-vertically
-      button(title="Distribute Vertically" :disabled="!canDistributeCards" @click.left="alignCardsTop" :class="{active: isTopAligned}")
+      button(title="Distribute Vertically" :disabled="!canDistributeCards" @click.left="distributeVertically" :class="{active: isTopAligned}")
         img.icon.distribute-vertically(src="@/assets/distribute-horizontally.svg")
 
       button(title="Less Options" :disabled="!canEditSome.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
@@ -34,9 +34,9 @@
   //- Less Options
   template(v-else)
     .segmented-buttons
-      button(title="Align Left" :disabled="!canEditSome.cards" @click.left="alignCardsLeft" :class="{active: isLeftAligned}")
+      button(title="Align Left" :disabled="!canEditSome.cards" @click.left="alignLeft" :class="{active: isLeftAligned}")
         img.icon(src="@/assets/align-left.svg")
-      button(title="Align Top" :disabled="!canEditSome.cards" @click.left="alignCardsTop" :class="{active: isTopAligned}")
+      button(title="Align Top" :disabled="!canEditSome.cards" @click.left="alignTop" :class="{active: isTopAligned}")
         img.icon.align-top(src="@/assets/align-left.svg")
       button(title="More Options" :disabled="!canEditSome.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
         img.down-arrow(src="@/assets/down-arrow.svg")
@@ -60,7 +60,12 @@ export default {
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     cards () {
       const cards = this.multipleCardsSelectedIds.map(cardId => {
-        return this.$store.getters['currentSpace/cardById'](cardId)
+        let card = this.$store.getters['currentSpace/cardById'](cardId)
+        const element = document.querySelector(`article [data-card-id="${cardId}"]`)
+        const rect = element.getBoundingClientRect()
+        card.width = rect.width
+        card.height = rect.height
+        return card
       })
       return cards || []
     },
@@ -119,7 +124,12 @@ export default {
         return a.y - b.y
       })
     },
-    alignCardsLeft () {
+    cardsSortedByXWidth () {
+      return this.editableCards.sort((a, b) => {
+        return (b.x + b.width) - (a.x + a.width)
+      })
+    },
+    alignLeft () {
       const cards = this.cardsSortedByY()
       const origin = cards[0]
       cards.forEach((card, index) => {
@@ -136,8 +146,7 @@ export default {
       })
       this.updateConnectionPaths()
     },
-
-    alignCardsTop () {
+    alignTop () {
       const cards = this.cardsSortedByX()
       const origin = cards[0]
       cards.forEach((card, index) => {
@@ -154,6 +163,46 @@ export default {
       })
       this.updateConnectionPaths()
     },
+    centerHorizontally () {
+      const cards = this.cardsSortedByX()
+      const origin = cards[0]
+      cards.forEach((card, index) => {
+        if (index > 0) {
+          const previousCard = cards[index - 1]
+          const previousElement = document.querySelector(`article [data-card-id="${previousCard.id}"]`)
+          const previousRect = previousElement.getBoundingClientRect()
+          const previousRectBottomSide = previousCard.y + previousRect.height
+          card = utils.clone(card)
+          card.x = origin.x + (origin.width / 2) - (card.width / 2)
+          card.y = previousRectBottomSide + spaceBetweenCards
+          this.$store.dispatch('currentSpace/updateCard', card)
+        }
+      })
+      this.updateConnectionPaths()
+    },
+    alignRight () {
+      const cards = this.cardsSortedByXWidth()
+      const origin = cards[0]
+      cards.forEach((card, index) => {
+        if (index > 0) {
+          const previousCard = cards[index - 1]
+          const previousElement = document.querySelector(`article [data-card-id="${previousCard.id}"]`)
+          const previousRect = previousElement.getBoundingClientRect()
+          const previousRectBottomSide = previousCard.y + previousRect.height
+          card = utils.clone(card)
+          card.x = origin.x + origin.width - card.width
+          card.y = previousRectBottomSide + spaceBetweenCards
+          this.$store.dispatch('currentSpace/updateCard', card)
+        }
+      })
+      this.updateConnectionPaths()
+    },
+    distributeHorizontally () {},
+
+    centerVertically () {},
+    alignBottom () {},
+    distributeVertically () {},
+
     xDistancesBetweenCards (cards) {
       let xDistances = []
       cards.forEach((card, index) => {
