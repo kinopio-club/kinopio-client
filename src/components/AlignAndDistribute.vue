@@ -2,34 +2,42 @@
 .align-and-distribute.button-wrap(v-if="visible")
   //- More Options
   template(v-if="moreOptionsIsVisible")
-    .segmented-buttons.first-row
-      button(title="Align Left" :disabled="!canEditSome.cards" @click.left="alignLeft" :class="{active: isLeftAligned}")
-        img.icon(src="@/assets/align-left.svg")
-      //- TODO center-horizontally
-      button(title="Center Horizontally" :disabled="!canEditSome.cards" @click.left="centerHorizontally" :class="{active: isLeftAligned}")
-        img.icon(src="@/assets/center-horizontally.svg")
-      //- TODO align-right
-      button(title="Align Right" :disabled="!canEditSome.cards" @click.left="alignRight" :class="{active: isLeftAligned}")
-        img.icon.align-right(src="@/assets/align-left.svg")
-      //- TODO distribute-horizontally
-      button(title="Distribute Horizontally" :disabled="!canDistributeCards" @click.left="distributeHorizontally" :class="{active: isLeftAligned}")
-        img.icon(src="@/assets/distribute-horizontally.svg")
+    .row.multi-height-row
+      div
+        .segmented-buttons.first-row
+          button(title="Align Left" :disabled="!canEditSome.cards" @click.left="alignLeft" :class="{active: isLeftAligned}")
+            img.icon(src="@/assets/align-left.svg")
+          //- TODO center-horizontally
+          button(title="Center Horizontally" :disabled="!canEditSome.cards" @click.left="centerHorizontally" :class="{active: isLeftAligned}")
+            img.icon(src="@/assets/center-horizontally.svg")
+          //- TODO align-right
+          button(title="Align Right" :disabled="!canEditSome.cards" @click.left="alignRight" :class="{active: isLeftAligned}")
+            img.icon.align-right(src="@/assets/align-left.svg")
+          //- TODO distribute-horizontally
+          button(v-if="!shouldAutoDistribute" title="Distribute Horizontally" :disabled="!canDistributeCards" @click.left="distributeHorizontally" :class="{active: isLeftAligned}")
+            img.icon(src="@/assets/distribute-horizontally.svg")
 
-    .segmented-buttons.last-row
-      button(title="Align Top" :disabled="!canEditSome.cards" @click.left="alignTop" :class="{active: isTopAligned}")
-        img.icon.align-top(src="@/assets/align-left.svg")
-      //- TODO center-verticaly
-      button(title="Center Verticaly" :disabled="!canEditSome.cards" @click.left="centerVertically" :class="{active: isTopAligned}")
-        img.icon.center-vertically(src="@/assets/center-horizontally.svg")
-      //- TODO align-bottom
-      button(title="Align Bottom" :disabled="!canEditSome.cards" @click.left="alignBottom" :class="{active: isTopAligned}")
-        img.icon.align-bottom(src="@/assets/align-left.svg")
-      //- TODO distribute-vertically
-      button(title="Distribute Vertically" :disabled="!canDistributeCards" @click.left="distributeVertically" :class="{active: isTopAligned}")
-        img.icon.distribute-vertically(src="@/assets/distribute-horizontally.svg")
+        .segmented-buttons.last-row
+          button(title="Align Top" :disabled="!canEditSome.cards" @click.left="alignTop" :class="{active: isTopAligned}")
+            img.icon.align-top(src="@/assets/align-left.svg")
+          //- TODO center-verticaly
+          button(title="Center Verticaly" :disabled="!canEditSome.cards" @click.left="centerVertically" :class="{active: isTopAligned}")
+            img.icon.center-vertically(src="@/assets/center-horizontally.svg")
+          //- TODO align-bottom
+          button(title="Align Bottom" :disabled="!canEditSome.cards" @click.left="alignBottom" :class="{active: isTopAligned}")
+            img.icon.align-bottom(src="@/assets/align-left.svg")
+          //- TODO distribute-vertically
+          button(v-if="!shouldAutoDistribute" title="Distribute Vertically" :disabled="!canDistributeCards" @click.left="distributeVertically" :class="{active: isTopAligned}")
+            img.icon.distribute-vertically(src="@/assets/distribute-horizontally.svg")
 
-      button(title="Less Options" :disabled="!canEditSome.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
-        img.down-arrow.up-arrow(src="@/assets/down-arrow.svg")
+          button(title="Less Options" :disabled="!canEditSome.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
+            img.down-arrow.up-arrow(src="@/assets/down-arrow.svg")
+
+      //- Auto Distribute
+      .checkbox-wrap
+        label(title="Auto Distribute" :class="{active: shouldAutoDistribute}" @click.left.prevent="toggleShouldAutoDistribute" @keydown.stop.enter="toggleShouldAutoDistribute")
+          input(type="checkbox" v-model="shouldAutoDistribute")
+          img.icon(src="@/assets/auto-distribute.svg")
 
   //- Less Options
   template(v-else)
@@ -53,8 +61,17 @@ export default {
     visible: Boolean,
     numberOfSelectedItemsCreatedByCurrentUser: Object
   },
+  data () {
+    return {
+      // - TODO change this to be a persistent user pref, more from store to user
+      shouldAutoDistribute: true
+    }
+  },
   computed: {
-    moreOptionsIsVisible () { return this.$store.state.alignAndDistributeMoreOptionsIsVisible },
+    moreOptionsIsVisible () {
+      // - TODO change this to be a persistent user pref, more from store to user
+      return this.$store.state.alignAndDistributeMoreOptionsIsVisible
+    },
     multipleCardsSelectedIds () { return this.$store.state.multipleCardsSelectedIds },
     multipleConnectionsSelectedIds () { return this.$store.state.multipleConnectionsSelectedIds },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
@@ -110,6 +127,12 @@ export default {
     }
   },
   methods: {
+    toggleShouldAutoDistribute () {
+      const value = !this.shouldAutoDistribute
+      this.shouldAutoDistribute = value
+      // - TODO change this to be a persistent user pref
+      // this.$store.commit('currentUser/shouldAutoDistribute', value)
+    },
     toggleMoreOptionsIsVisible () {
       const value = !this.moreOptionsIsVisible
       this.$store.commit('alignAndDistributeMoreOptionsIsVisible', value)
@@ -127,6 +150,11 @@ export default {
     cardsSortedByXWidth () {
       return this.editableCards.sort((a, b) => {
         return (b.x + b.width) - (a.x + a.width)
+      })
+    },
+    cardsSortedByYHeight () {
+      return this.editableCards.sort((a, b) => {
+        return (b.y + b.height) - (a.y + a.height)
       })
     },
     alignTop () {
@@ -181,7 +209,10 @@ export default {
       this.updateConnectionPaths()
     },
 
-    distributeHorizontally () {},
+    distributeHorizontally () {
+      // Y|skdlfj| 20/spaceBetweenCards |blahb|X
+
+    },
 
     alignLeft () {
       const cards = this.cardsSortedByY()
@@ -201,7 +232,7 @@ export default {
       this.updateConnectionPaths()
     },
     centerVertically () {
-      const cards = this.cardsSortedByY()
+      const cards = this.cardsSortedByX()
       const origin = cards[0]
       cards.forEach((card, index) => {
         if (index > 0) {
@@ -215,9 +246,24 @@ export default {
       })
       this.updateConnectionPaths()
     },
+    alignBottom () {
+      const cards = this.cardsSortedByYHeight()
+      const origin = cards[0]
+      cards.forEach((card, index) => {
+        if (index > 0) {
+          const previousCard = cards[index - 1]
+          const previousRightSide = previousCard.x + previousCard.width
+          card = utils.clone(card)
+          card.y = origin.y + origin.height - card.height
+          card.x = previousRightSide + spaceBetweenCards
+          this.$store.dispatch('currentSpace/updateCard', card)
+        }
+      })
+      this.updateConnectionPaths()
+    },
+    distributeVertically () {
 
-    alignBottom () {},
-    distributeVertically () {},
+    },
 
     xDistancesBetweenCards (cards) {
       let xDistances = []
@@ -280,7 +326,6 @@ export default {
       button:last-child
         border-bottom-right-radius 0
     &.last-row
-      margin-bottom 10px
       button:first-child
         border-top-left-radius 0
   .align-top
@@ -292,5 +337,10 @@ export default {
   .center-vertically
     transform rotate(-90deg)
   .distribute-vertically
-    transform rotate(90deg) translateX(1px)
+    transform rotate(90deg)
+  .multi-height-row
+    align-items flex-end
+    margin-bottom 10px !important
+    .checkbox-wrap
+      margin-left 6px
 </style>
