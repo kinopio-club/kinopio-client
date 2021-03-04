@@ -29,7 +29,9 @@ export default {
     newSpacesAreBlank: false,
     shouldHideCardTips: false,
     shouldEmailNotifications: true,
-    shouldEmailBulletin: true
+    shouldEmailBulletin: true,
+    shouldShowMoreAlignOptions: false,
+    shouldAutoDistribute: true
   },
   mutations: {
     color: (state, newColor) => {
@@ -189,8 +191,15 @@ export default {
     shouldEmailBulletin: (state, value) => {
       state.shouldEmailBulletin = value
       cache.updateUser('shouldEmailBulletin', value)
+    },
+    shouldShowMoreAlignOptions: (state, value) => {
+      state.shouldShowMoreAlignOptions = value
+      cache.updateUser('shouldShowMoreAlignOptions', value)
+    },
+    shouldAutoDistribute: (state, value) => {
+      state.shouldAutoDistribute = value
+      cache.updateUser('shouldAutoDistribute', value)
     }
-
   },
   actions: {
     init: (context) => {
@@ -485,6 +494,22 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldEmailBulletin: value
+        } }, { root: true })
+    },
+    shouldShowMoreAlignOptions: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldShowMoreAlignOptions' })
+      context.commit('shouldShowMoreAlignOptions', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldShowMoreAlignOptions: value
+        } }, { root: true })
+    },
+    shouldAutoDistribute: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldAutoDistribute' })
+      context.commit('shouldAutoDistribute', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldAutoDistribute: value
         } }, { root: true })
     }
   },

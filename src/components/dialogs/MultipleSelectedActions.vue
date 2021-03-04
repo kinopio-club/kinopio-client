@@ -99,10 +99,7 @@ export default {
   },
   computed: {
     visible () { return this.$store.state.multipleSelectedActionsIsVisible },
-    moreOptionsIsVisible () {
-      // - TODO change this to be a persistent user pref, more from store to user
-      return this.$store.state.alignAndDistributeMoreOptionsIsVisible
-    },
+    moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
     position () {
       const cursor = this.$store.state.multipleSelectedActionsPosition
       return {

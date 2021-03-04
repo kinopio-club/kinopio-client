@@ -61,17 +61,9 @@ export default {
     visible: Boolean,
     numberOfSelectedItemsCreatedByCurrentUser: Object
   },
-  data () {
-    return {
-      // - TODO change this to be a persistent user pref, more from store to user
-      shouldAutoDistribute: true
-    }
-  },
   computed: {
-    moreOptionsIsVisible () {
-      // - TODO change this to be a persistent user pref, more from store to user
-      return this.$store.state.alignAndDistributeMoreOptionsIsVisible
-    },
+    moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
+    shouldAutoDistribute () { return this.$store.state.currentUser.shouldAutoDistribute },
     multipleCardsSelectedIds () { return this.$store.state.multipleCardsSelectedIds },
     multipleConnectionsSelectedIds () { return this.$store.state.multipleConnectionsSelectedIds },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
@@ -129,13 +121,11 @@ export default {
   methods: {
     toggleShouldAutoDistribute () {
       const value = !this.shouldAutoDistribute
-      this.shouldAutoDistribute = value
-      // - TODO change this to be a persistent user pref
-      // this.$store.commit('currentUser/shouldAutoDistribute', value)
+      this.$store.dispatch('currentUser/shouldAutoDistribute', value)
     },
     toggleMoreOptionsIsVisible () {
       const value = !this.moreOptionsIsVisible
-      this.$store.commit('alignAndDistributeMoreOptionsIsVisible', value)
+      this.$store.dispatch('currentUser/shouldShowMoreAlignOptions', value)
     },
     cardsSortedByX () {
       return this.editableCards.sort((a, b) => {
