@@ -30,8 +30,7 @@ export default {
     shouldHideCardTips: false,
     shouldEmailNotifications: true,
     shouldEmailBulletin: true,
-    shouldShowMoreAlignOptions: false,
-    shouldAutoDistribute: true
+    shouldShowMoreAlignOptions: false
   },
   mutations: {
     color: (state, newColor) => {
@@ -195,10 +194,6 @@ export default {
     shouldShowMoreAlignOptions: (state, value) => {
       state.shouldShowMoreAlignOptions = value
       cache.updateUser('shouldShowMoreAlignOptions', value)
-    },
-    shouldAutoDistribute: (state, value) => {
-      state.shouldAutoDistribute = value
-      cache.updateUser('shouldAutoDistribute', value)
     }
   },
   actions: {
@@ -502,14 +497,6 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldShowMoreAlignOptions: value
-        } }, { root: true })
-    },
-    shouldAutoDistribute: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldAutoDistribute' })
-      context.commit('shouldAutoDistribute', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
-        body: {
-          shouldAutoDistribute: value
         } }, { root: true })
     }
   },

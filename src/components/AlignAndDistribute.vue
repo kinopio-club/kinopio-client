@@ -2,14 +2,14 @@
 .align-and-distribute(v-if="visible")
   .segmented-buttons(v-if="shouldHideMoreOptions")
     button(title="Align Left" :disabled="!canEditSome.cards" @click.left="alignLeft" :class="{active: isLeftAligned}")
-      img.icon(src="@/assets/align-left.svg")
+      img.icon(src="@/assets/align-left-distributed.svg")
     button(title="Align Top" :disabled="!canEditSome.cards" @click.left="alignTop" :class="{active: isTopAligned}")
-      img.icon.align-top(src="@/assets/align-left.svg")
+      img.icon.align-top(src="@/assets/align-left-distributed.svg")
     button(title="More Options" :disabled="!canEditSome.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
       img.down-arrow(src="@/assets/down-arrow.svg")
 
   //- More Options
-  .more-options(v-if="moreOptionsIsVisible && !shouldHideMoreOptions")
+  .more-options(v-if="visible && !shouldHideMoreOptions")
     .segmented-buttons.first-row
       button(title="Align Left" :disabled="!canEditSome.cards" @click.left="alignLeft" :class="{active: isLeftAligned}")
         img.icon(src="@/assets/align-left.svg")
@@ -20,9 +20,8 @@
       button(title="Align Right" :disabled="!canEditSome.cards" @click.left="alignRight" :class="{active: isRightAligned}")
         img.icon.align-right(src="@/assets/align-left.svg")
       //- TODO distribute-horizontally
-      button(title="Distribute Horizontally" v-if="!shouldAutoDistribute" :disabled="!canDistributeCards" @click.left="distributeHorizontally" :class="{active: isDistributedHorizontally}")
+      button(title="Distribute Horizontally" :disabled="!canDistributeCards" @click.left="distributeHorizontally" :class="{active: isDistributedHorizontally}")
         img.icon(src="@/assets/distribute-horizontally.svg")
-
     .segmented-buttons.last-row
       button(title="Align Top" :disabled="!canEditSome.cards" @click.left="alignTop" :class="{active: isTopAligned}")
         img.icon.align-top(src="@/assets/align-left.svg")
@@ -33,20 +32,8 @@
       button(title="Align Bottom" :disabled="!canEditSome.cards" @click.left="alignBottom" :class="{active: isBottomAligned}")
         img.icon.align-bottom(src="@/assets/align-left.svg")
       //- TODO distribute-vertically
-      button(title="Distribute Vertically" v-if="!shouldAutoDistribute" :disabled="!canDistributeCards" @click.left="distributeVertically" :class="{active: isDistributedVertically}")
+      button(title="Distribute Vertically" :disabled="!canDistributeCards" @click.left="distributeVertically" :class="{active: isDistributedVertically}")
         img.icon.distribute-vertically(src="@/assets/distribute-horizontally.svg")
-
-          //- button(title="Less Options" :disabled="!canEditSome.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
-          //-   img.down-arrow.up-arrow(src="@/assets/down-arrow.svg")
-
-      //- Auto Distribute
-      //- .checkbox-wrap
-      //-   label(title="Auto Distribute" :class="{active: shouldAutoDistribute}" @click.left.prevent="toggleShouldAutoDistribute" @keydown.stop.enter="toggleShouldAutoDistribute")
-      //-     input(type="checkbox" v-model="shouldAutoDistribute")
-      //-     img.icon(src="@/assets/auto-distribute.svg")
-      //-     .badge.label-badge.auto(v-if="shouldAutoDistribute") AUTO
-      //-     .badge.label-badge.manual(v-if="!shouldAutoDistribute") MANUAL
-
 </template>
 
 <script>
@@ -59,11 +46,11 @@ export default {
   props: {
     visible: Boolean,
     numberOfSelectedItemsCreatedByCurrentUser: Object,
-    shouldHideMoreOptions: Boolean
+    shouldHideMoreOptions: Boolean,
+    shouldAutoDistribute: Boolean
   },
   computed: {
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
-    shouldAutoDistribute () { return this.$store.state.currentUser.shouldAutoDistribute },
     multipleCardsSelectedIds () { return this.$store.state.multipleCardsSelectedIds },
     multipleConnectionsSelectedIds () { return this.$store.state.multipleConnectionsSelectedIds },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
@@ -93,18 +80,54 @@ export default {
       })
     },
 
-    // todo update to be autoDist aware (12 or avg)
+    yIsDistributed () {
+      const cards = this.cards
+      let yIsDistributed = true
+      if (this.shouldAutoDistribute) {
+        cards.forEach((card, index) => {
+          if (index > 0) {
+            const previousCard = cards[index - 1]
+            const previousBottomSide = previousCard.y + previousCard.height
+            if (card.y - previousBottomSide !== spaceBetweenCards) {
+              yIsDistributed = false
+            }
+          }
+        })
+      }
+      return yIsDistributed
+    },
+    xIsDistributed () {
+      const cards = this.cards
+      let xIsDistributed = true
+      if (this.shouldAutoDistribute) {
+        cards.forEach((card, index) => {
+          if (index > 0) {
+            const previousCard = cards[index - 1]
+            const previousRightSide = previousCard.x + previousCard.width
+            if (card.x - previousRightSide !== spaceBetweenCards) {
+              xIsDistributed = false
+            }
+          }
+        })
+      }
+      return xIsDistributed
+    },
 
     isLeftAligned () {
       const xValues = this.cards.map(card => card.x)
-      return xValues.every(x => x === xValues[0])
+      const xIsAligned = xValues.every(x => x === xValues[0])
+      const yIsDistributed = this.yIsDistributed
+      return xIsAligned && yIsDistributed
     },
+
     isCenteredHorizontally () { return false },
     isRightAligned () { return false },
     isDistributedHorizontally () { return false },
     isTopAligned () {
       const yValues = this.cards.map(card => card.y)
-      return yValues.every(y => y === yValues[0])
+      const yIsAligned = yValues.every(y => y === yValues[0])
+      const xIsDistributed = this.xIsDistributed
+      return yIsAligned && xIsDistributed
     },
     isCenteredVertically () { return false },
     isBottomAligned () { return false },
@@ -129,10 +152,6 @@ export default {
     }
   },
   methods: {
-    toggleShouldAutoDistribute () {
-      const value = !this.shouldAutoDistribute
-      this.$store.dispatch('currentUser/shouldAutoDistribute', value)
-    },
     toggleMoreOptionsIsVisible () {
       const value = !this.moreOptionsIsVisible
       this.$store.dispatch('currentUser/shouldShowMoreAlignOptions', value)
@@ -372,5 +391,4 @@ export default {
   .more-options
     margin 0
     margin-top 10px
-    margin-bottom 10px
 </style>

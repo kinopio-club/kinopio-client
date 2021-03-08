@@ -51,7 +51,7 @@ dialog.narrow.multiple-selected-actions(
     template(v-if="multipleCardsSelectedIds.length")
       .row
         //- Align And Distribute
-        AlignAndDistribute(:visible="multipleCardsIsSelected" :shouldHideMoreOptions="true" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser")
+        AlignAndDistribute(:visible="multipleCardsIsSelected" :shouldHideMoreOptions="true" :shouldAutoDistribute="true" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser")
         //- Move/Copy
         .button-wrap.move-or-copy-wrap
           button(:disabled="!canEditAll.cards" @click.left.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
@@ -59,7 +59,7 @@ dialog.narrow.multiple-selected-actions(
             span Move/Copy
           MoveOrCopyToSpace(:visible="moveOrCopyToSpaceIsVisible")
       //- More Options
-      AlignAndDistribute(:visible="multipleCardsIsSelected" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser")
+      AlignAndDistribute(:visible="multipleCardsIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser")
 
     p(v-if="canEditAsNonMember && !selectedItemsIsCreatedByCurrentUser")
       span.badge.info
