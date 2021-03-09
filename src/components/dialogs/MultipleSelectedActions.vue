@@ -431,6 +431,6 @@ export default {
       margin 0
   .connector-icon
     width 11px
-  .move-or-copy-wrap
+  .align-and-distribute + .move-or-copy-wrap
     margin-left 6px
 </style>
