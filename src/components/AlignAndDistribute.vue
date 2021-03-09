@@ -2,38 +2,38 @@
 .align-and-distribute(v-if="visible")
   .segmented-buttons(v-if="shouldHideMoreOptions")
     //- |o
-    button(title="Align Left" :disabled="!canEditSome.cards" @click.left="alignLeft" :class="{active: isLeftAligned}")
+    button(title="Align Left" :disabled="!canEditAll.cards" @click.left="alignLeft" :class="{active: isLeftAligned}")
       img.icon(src="@/assets/align-left-distributed.svg")
     //- ⎺o
-    button(title="Align Top" :disabled="!canEditSome.cards" @click.left="alignTop" :class="{active: isTopAligned}")
+    button(title="Align Top" :disabled="!canEditAll.cards" @click.left="alignTop" :class="{active: isTopAligned}")
       img.icon.align-top(src="@/assets/align-left-distributed.svg")
-    button(title="More Options" :disabled="!canEditSome.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
+    button(title="More Options" :disabled="!canEditAll.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
       img.down-arrow(src="@/assets/down-arrow.svg")
 
   //- More Options
   .more-options(v-if="visible && !shouldHideMoreOptions")
     .segmented-buttons.first-row
       //- |o
-      button(title="Align Left" :disabled="!canEditSome.cards" @click.left="alignLeft" :class="{active: isLeftAligned}")
+      button(title="Align Left" :disabled="!canEditAll.cards" @click.left="alignLeft" :class="{active: isLeftAligned}")
         img.icon(src="@/assets/align-left.svg")
       //- o|o
-      button(title="Center Horizontally" :disabled="!canEditSome.cards" @click.left="centerHorizontally" :class="{active: isCenteredHorizontally}")
+      button(title="Center Horizontally" :disabled="!canEditAll.cards" @click.left="centerHorizontally" :class="{active: isCenteredHorizontally}")
         img.icon(src="@/assets/center-horizontally.svg")
       //- o|
-      button(title="Align Right" :disabled="!canEditSome.cards" @click.left="alignRight" :class="{active: isRightAligned}")
+      button(title="Align Right" :disabled="!canEditAll.cards" @click.left="alignRight" :class="{active: isRightAligned}")
         img.icon.align-right(src="@/assets/align-left.svg")
       //- | o |
       button(title="Distribute Horizontally" :disabled="!canDistributeCards" @click.left="distributeHorizontally" :class="{active: isDistributedHorizontally}")
         img.icon(src="@/assets/distribute-horizontally.svg")
     .segmented-buttons.last-row
       //- ⎺o
-      button(title="Align Top" :disabled="!canEditSome.cards" @click.left="alignTop" :class="{active: isTopAligned}")
+      button(title="Align Top" :disabled="!canEditAll.cards" @click.left="alignTop" :class="{active: isTopAligned}")
         img.icon.align-top(src="@/assets/align-left.svg")
       //- o-o
-      button(title="Center Verticaly" :disabled="!canEditSome.cards" @click.left="centerVertically" :class="{active: isCenteredVertically}")
+      button(title="Center Verticaly" :disabled="!canEditAll.cards" @click.left="centerVertically" :class="{active: isCenteredVertically}")
         img.icon.center-vertically(src="@/assets/center-horizontally.svg")
       //- _o
-      button(title="Align Bottom" :disabled="!canEditSome.cards" @click.left="alignBottom" :class="{active: isBottomAligned}")
+      button(title="Align Bottom" :disabled="!canEditAll.cards" @click.left="alignBottom" :class="{active: isBottomAligned}")
         img.icon.align-bottom(src="@/assets/align-left.svg")
       //- ⎺ o _
       button(title="Distribute Vertically" :disabled="!canDistributeCards" @click.left="distributeVertically" :class="{active: isDistributedVertically}")
@@ -83,14 +83,15 @@ export default {
         return this.$store.getters['currentSpace/connectionById'](id)
       })
     },
-    canEditSome () {
-      if (this.isSpaceMember) { return { cards: true, connections: true, any: true } }
-      const cards = this.numberOfSelectedItemsCreatedByCurrentUser.cards > 0
-      const connections = this.numberOfSelectedItemsCreatedByCurrentUser.connections > 0
-      const any = cards || connections
-      return { cards, connections, any }
+    canEditAll () {
+      if (this.isSpaceMember) { return { cards: true, connections: true, all: true } }
+      const cards = this.multipleCardsSelectedIds.length === this.numberOfSelectedItemsCreatedByCurrentUser.cards
+      const connections = this.multipleConnectionsSelectedIds.length === this.numberOfSelectedItemsCreatedByCurrentUser.connections
+      const all = cards && connections
+      return { cards, connections, all }
     },
     canDistributeCards () {
+      if (!this.canEditAll.cards) { return }
       const minimumRequiredToDistribute = 3
       let cards
       if (this.isSpaceMember) {
@@ -143,6 +144,7 @@ export default {
     },
     isCenteredHorizontally () {
       const cards = this.cardsSortedByX()
+      if (!cards.length) { return }
       const origin = cards[0]
       const cardsCenterX = origin.x + (origin.width / 2)
       let centerIsEqual = true
@@ -191,6 +193,7 @@ export default {
     },
     isCenteredVertically () {
       const cards = this.cardsSortedByY()
+      if (!cards.length) { return }
       const origin = cards[0]
       const cardsCenterY = origin.y + (origin.height / 2)
       let centerIsEqual = true
