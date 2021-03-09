@@ -122,7 +122,25 @@ export default {
 
     isCenteredHorizontally () { return false },
     isRightAligned () { return false },
-    isDistributedHorizontally () { return false },
+    isDistributedHorizontally () {
+      if (this.cards.length < 3) { return }
+      const cards = this.cardsSortedByX()
+      const xDistancesBetweenCards = this.xDistancesBetweenCards(cards)
+      const distanceBetweenCards = Math.abs(xDistancesBetweenCards[0])
+      let distanceIsEqual = true
+      xDistancesBetweenCards.forEach((distance, index) => {
+        distance = Math.abs(distance)
+        const roundedDistanceIsEqual = utils.isBetween({
+          value: distance,
+          min: distanceBetweenCards - 1,
+          max: distanceBetweenCards + 1
+        })
+        if (!roundedDistanceIsEqual) {
+          distanceIsEqual = false
+        }
+      })
+      return distanceIsEqual
+    },
     isTopAligned () {
       const yValues = this.cards.map(card => card.y)
       const yIsAligned = yValues.every(y => y === yValues[0])
@@ -131,7 +149,25 @@ export default {
     },
     isCenteredVertically () { return false },
     isBottomAligned () { return false },
-    isDistributedVertically () { return false },
+    isDistributedVertically () {
+      if (this.cards.length < 3) { return }
+      const cards = this.cardsSortedByY()
+      const yDistancesBetweenCards = this.yDistancesBetweenCards(cards)
+      const distanceBetweenCards = yDistancesBetweenCards[0]
+      let distanceIsEqual = true
+      yDistancesBetweenCards.forEach((distance, index) => {
+        distance = Math.abs(distance)
+        const roundedDistanceIsEqual = utils.isBetween({
+          value: distance,
+          min: distanceBetweenCards - 1,
+          max: distanceBetweenCards + 1
+        })
+        if (!roundedDistanceIsEqual) {
+          distanceIsEqual = false
+        }
+      })
+      return distanceIsEqual
+    },
 
     canEditSome () {
       if (this.isSpaceMember) { return { cards: true, connections: true, any: true } }
