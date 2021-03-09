@@ -168,10 +168,10 @@ export default {
       if (this.cards.length < 3) { return }
       const cards = this.cardsSortedByX()
       const xDistancesBetweenCards = this.xDistancesBetweenCards(cards)
-      const distanceBetweenCards = xDistancesBetweenCards[0]
-      if (distanceBetweenCards < spaceBetweenCards) { return }
+      const distanceBetweenCards = Math.abs(xDistancesBetweenCards[0])
       let distanceIsEqual = true
       xDistancesBetweenCards.forEach((distance, index) => {
+        distance = Math.abs(distance)
         const roundedDistanceIsEqual = utils.isBetween({
           value: distance,
           min: distanceBetweenCards - 1,
@@ -217,9 +217,9 @@ export default {
       const cards = this.cardsSortedByY()
       const yDistancesBetweenCards = this.yDistancesBetweenCards(cards)
       const distanceBetweenCards = yDistancesBetweenCards[0]
-      if (distanceBetweenCards < spaceBetweenCards) { return }
       let distanceIsEqual = true
       yDistancesBetweenCards.forEach((distance, index) => {
+        distance = Math.abs(distance)
         const roundedDistanceIsEqual = utils.isBetween({
           value: distance,
           min: distanceBetweenCards - 1,
@@ -316,12 +316,11 @@ export default {
       const cards = this.cardsSortedByX()
       const xDistancesBetweenCards = this.xDistancesBetweenCards(cards)
       const averageDistance = utils.averageOfNumbers(xDistancesBetweenCards)
-      let distance = Math.max(averageDistance, spaceBetweenCards)
       cards.forEach((card, index) => {
         if (index > 0) {
           const previousCard = cards[index - 1]
           card = utils.clone(card)
-          card.x = previousCard.x + previousCard.width + distance
+          card.x = previousCard.x + previousCard.width + averageDistance
           this.$store.dispatch('currentSpace/updateCard', card)
         }
       })
@@ -386,12 +385,11 @@ export default {
       const cards = this.cardsSortedByY()
       const yDistancesBetweenCards = this.yDistancesBetweenCards(cards)
       const averageDistance = utils.averageOfNumbers(yDistancesBetweenCards)
-      let distance = Math.max(averageDistance, spaceBetweenCards)
       cards.forEach((card, index) => {
         if (index > 0) {
           const previousCard = cards[index - 1]
           card = utils.clone(card)
-          card.y = previousCard.y + previousCard.height + distance
+          card.y = previousCard.y + previousCard.height + averageDistance
           this.$store.dispatch('currentSpace/updateCard', card)
         }
       })
