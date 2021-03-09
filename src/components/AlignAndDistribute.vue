@@ -1,8 +1,10 @@
 <template lang="pug">
 .align-and-distribute(v-if="visible")
   .segmented-buttons(v-if="shouldHideMoreOptions")
+    //- |o
     button(title="Align Left" :disabled="!canEditSome.cards" @click.left="alignLeft" :class="{active: isLeftAligned}")
       img.icon(src="@/assets/align-left-distributed.svg")
+    //- ⎺o
     button(title="Align Top" :disabled="!canEditSome.cards" @click.left="alignTop" :class="{active: isTopAligned}")
       img.icon.align-top(src="@/assets/align-left-distributed.svg")
     button(title="More Options" :disabled="!canEditSome.cards" @click.left="toggleMoreOptionsIsVisible" :class="{active: moreOptionsIsVisible}")
@@ -11,27 +13,29 @@
   //- More Options
   .more-options(v-if="visible && !shouldHideMoreOptions")
     .segmented-buttons.first-row
+      //- |o
       button(title="Align Left" :disabled="!canEditSome.cards" @click.left="alignLeft" :class="{active: isLeftAligned}")
         img.icon(src="@/assets/align-left.svg")
-      //- TODO center-horizontally
+      //- o|o
       button(title="Center Horizontally" :disabled="!canEditSome.cards" @click.left="centerHorizontally" :class="{active: isCenteredHorizontally}")
         img.icon(src="@/assets/center-horizontally.svg")
-      //- TODO align-right
+      //- o|
       button(title="Align Right" :disabled="!canEditSome.cards" @click.left="alignRight" :class="{active: isRightAligned}")
         img.icon.align-right(src="@/assets/align-left.svg")
-      //- TODO distribute-horizontally
+      //- | o |
       button(title="Distribute Horizontally" :disabled="!canDistributeCards" @click.left="distributeHorizontally" :class="{active: isDistributedHorizontally}")
         img.icon(src="@/assets/distribute-horizontally.svg")
     .segmented-buttons.last-row
+      //- ⎺o
       button(title="Align Top" :disabled="!canEditSome.cards" @click.left="alignTop" :class="{active: isTopAligned}")
         img.icon.align-top(src="@/assets/align-left.svg")
-      //- TODO center-verticaly
+      //- o-o
       button(title="Center Verticaly" :disabled="!canEditSome.cards" @click.left="centerVertically" :class="{active: isCenteredVertically}")
         img.icon.center-vertically(src="@/assets/center-horizontally.svg")
-      //- TODO align-bottom
+      //- _o
       button(title="Align Bottom" :disabled="!canEditSome.cards" @click.left="alignBottom" :class="{active: isBottomAligned}")
         img.icon.align-bottom(src="@/assets/align-left.svg")
-      //- TODO distribute-vertically
+      //- ⎺ o _
       button(title="Distribute Vertically" :disabled="!canDistributeCards" @click.left="distributeVertically" :class="{active: isDistributedVertically}")
         img.icon.distribute-vertically(src="@/assets/distribute-horizontally.svg")
 </template>
