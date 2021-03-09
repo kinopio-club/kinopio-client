@@ -29,7 +29,8 @@ export default {
     newSpacesAreBlank: false,
     shouldHideCardTips: false,
     shouldEmailNotifications: true,
-    shouldEmailBulletin: true
+    shouldEmailBulletin: true,
+    shouldShowMoreAlignOptions: false
   },
   mutations: {
     color: (state, newColor) => {
@@ -189,8 +190,11 @@ export default {
     shouldEmailBulletin: (state, value) => {
       state.shouldEmailBulletin = value
       cache.updateUser('shouldEmailBulletin', value)
+    },
+    shouldShowMoreAlignOptions: (state, value) => {
+      state.shouldShowMoreAlignOptions = value
+      cache.updateUser('shouldShowMoreAlignOptions', value)
     }
-
   },
   actions: {
     init: (context) => {
@@ -485,6 +489,14 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldEmailBulletin: value
+        } }, { root: true })
+    },
+    shouldShowMoreAlignOptions: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldShowMoreAlignOptions' })
+      context.commit('shouldShowMoreAlignOptions', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldShowMoreAlignOptions: value
         } }, { root: true })
     }
   },

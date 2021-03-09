@@ -14,8 +14,11 @@
     .logo-hover
     .logo-active
   .badge.label-badge.development(v-if="isDevelopment") DEV
+  //- pre-cached icons
   .icons.hidden
     img.icon(src="@/assets/offline.svg")
+    img.icon(src="@/assets/center-horizontally.svg")
+    img.icon(src="@/assets/distribute-horizontally.svg")
 </template>
 
 <script>

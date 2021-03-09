@@ -45,16 +45,21 @@ dialog.narrow.multiple-selected-actions(
       //- Export
       .button-wrap
         button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+          img.icon.visit(src="@/assets/export.svg")
           span Export
         Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
-    .row(v-if="multipleCardsSelectedIds.length")
-      AlignAndDistribute(:visible="multipleCardsIsSelected" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser")
-      //- Move or Copy
-      .button-wrap
-        button(:disabled="!canEditAll.cards" @click.left.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
-          img.icon.visit(src="@/assets/visit.svg")
-          span Move or Copy
-        MoveOrCopyToSpace(:visible="moveOrCopyToSpaceIsVisible")
+
+    template(v-if="multipleCardsSelectedIds.length")
+      .row
+        //- Align And Distribute
+        AlignAndDistribute(:visible="multipleCardsIsSelected" :shouldHideMoreOptions="true" :shouldAutoDistribute="true" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser")
+        //- Move/Copy
+        .button-wrap.move-or-copy-wrap
+          button(:disabled="!canEditAll.cards" @click.left.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
+            span Move or Copy
+          MoveOrCopyToSpace(:visible="moveOrCopyToSpaceIsVisible")
+      //- More Options
+      AlignAndDistribute(:visible="multipleCardsIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser")
 
     p(v-if="canEditAsNonMember && !selectedItemsIsCreatedByCurrentUser")
       span.badge.info
@@ -97,6 +102,7 @@ export default {
   },
   computed: {
     visible () { return this.$store.state.multipleSelectedActionsIsVisible },
+    moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
     position () {
       const cursor = this.$store.state.multipleSelectedActionsPosition
       return {
@@ -412,7 +418,6 @@ export default {
     .current-color
       display inline-block
       vertical-align bottom
-      // margin-right 3px
       border-radius 0
       &:first-child
         border-top-left-radius 3px
@@ -426,4 +431,6 @@ export default {
       margin 0
   .connector-icon
     width 11px
+  .align-and-distribute + .move-or-copy-wrap
+    margin-left 6px
 </style>
