@@ -25,6 +25,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
         span Duplicate
     .button-wrap
       button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+        img.icon.visit(src="@/assets/export.svg")
         span Export
       Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="currentSpace" :exportScope="exportScope" @updateSpaces="updateSpaces")
 

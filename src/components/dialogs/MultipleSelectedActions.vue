@@ -45,6 +45,7 @@ dialog.narrow.multiple-selected-actions(
       //- Export
       .button-wrap
         button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+          img.icon.visit(src="@/assets/export.svg")
           span Export
         Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
 
@@ -55,8 +56,7 @@ dialog.narrow.multiple-selected-actions(
         //- Move/Copy
         .button-wrap.move-or-copy-wrap
           button(:disabled="!canEditAll.cards" @click.left.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
-            img.icon.visit(src="@/assets/visit.svg")
-            span Move/Copy
+            span Move or Copy
           MoveOrCopyToSpace(:visible="moveOrCopyToSpaceIsVisible")
       //- More Options
       AlignAndDistribute(:visible="multipleCardsIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser")
