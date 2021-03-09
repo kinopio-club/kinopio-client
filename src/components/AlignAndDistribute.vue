@@ -79,6 +79,25 @@ export default {
         return this.$store.getters['currentSpace/connectionById'](id)
       })
     },
+    canEditSome () {
+      if (this.isSpaceMember) { return { cards: true, connections: true, any: true } }
+      const cards = this.numberOfSelectedItemsCreatedByCurrentUser.cards > 0
+      const connections = this.numberOfSelectedItemsCreatedByCurrentUser.connections > 0
+      const any = cards || connections
+      return { cards, connections, any }
+    },
+    canDistributeCards () {
+      const minimumRequiredToDistribute = 3
+      let cards
+      if (this.isSpaceMember) {
+        cards = this.multipleCardsSelectedIds.length >= minimumRequiredToDistribute
+      } else {
+        cards = this.numberOfSelectedItemsCreatedByCurrentUser.cards >= minimumRequiredToDistribute
+      }
+      return Boolean(cards)
+    },
+
+    // verify positioning
 
     yIsDistributed () {
       const cards = this.cards
@@ -112,16 +131,35 @@ export default {
       }
       return xIsDistributed
     },
-
     isLeftAligned () {
       const xValues = this.cards.map(card => card.x)
       const xIsAligned = xValues.every(x => x === xValues[0])
       const yIsDistributed = this.yIsDistributed
       return xIsAligned && yIsDistributed
     },
-
-    isCenteredHorizontally () { return false },
-    isRightAligned () { return false },
+    isCenteredHorizontally () {
+      const cards = this.cardsSortedByX()
+      const origin = cards[0]
+      const cardsCenterX = origin.x + (origin.width / 2)
+      let centerIsEqual = true
+      cards.forEach(card => {
+        const roundedCenterIsEqual = utils.isBetween({
+          value: card.x + (card.width / 2),
+          min: cardsCenterX - 1,
+          max: cardsCenterX + 1
+        })
+        if (!roundedCenterIsEqual) {
+          centerIsEqual = false
+        }
+      })
+      return centerIsEqual
+    },
+    isRightAligned () {
+      const origin = this.cards[0]
+      const cardRight = origin.x + origin.width
+      const xIsAligned = this.cards.every(card => card.x + card.width === cardRight)
+      return xIsAligned
+    },
     isDistributedHorizontally () {
       if (this.cards.length < 3) { return }
       const cards = this.cardsSortedByX()
@@ -147,8 +185,29 @@ export default {
       const xIsDistributed = this.xIsDistributed
       return yIsAligned && xIsDistributed
     },
-    isCenteredVertically () { return false },
-    isBottomAligned () { return false },
+    isCenteredVertically () {
+      const cards = this.cardsSortedByY()
+      const origin = cards[0]
+      const cardsCenterY = origin.y + (origin.height / 2)
+      let centerIsEqual = true
+      cards.forEach(card => {
+        const roundedCenterIsEqual = utils.isBetween({
+          value: card.y + (card.height / 2),
+          min: cardsCenterY - 1,
+          max: cardsCenterY + 1
+        })
+        if (!roundedCenterIsEqual) {
+          centerIsEqual = false
+        }
+      })
+      return centerIsEqual
+    },
+    isBottomAligned () {
+      const origin = this.cards[0]
+      const cardBottom = origin.y + origin.height
+      const yIsAligned = this.cards.every(card => card.y + card.height === cardBottom)
+      return yIsAligned
+    },
     isDistributedVertically () {
       if (this.cards.length < 3) { return }
       const cards = this.cardsSortedByY()
@@ -167,24 +226,6 @@ export default {
         }
       })
       return distanceIsEqual
-    },
-
-    canEditSome () {
-      if (this.isSpaceMember) { return { cards: true, connections: true, any: true } }
-      const cards = this.numberOfSelectedItemsCreatedByCurrentUser.cards > 0
-      const connections = this.numberOfSelectedItemsCreatedByCurrentUser.connections > 0
-      const any = cards || connections
-      return { cards, connections, any }
-    },
-    canDistributeCards () {
-      const minimumRequiredToDistribute = 3
-      let cards
-      if (this.isSpaceMember) {
-        cards = this.multipleCardsSelectedIds.length >= minimumRequiredToDistribute
-      } else {
-        cards = this.numberOfSelectedItemsCreatedByCurrentUser.cards >= minimumRequiredToDistribute
-      }
-      return Boolean(cards)
     }
   },
   methods: {
@@ -414,6 +455,9 @@ export default {
     &.last-row
       button:first-child
         border-top-left-radius 0
+      button:last-child
+        border-top-right-radius 0
+
   .align-top
     transform rotate(90deg)
   .align-bottom
