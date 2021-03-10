@@ -139,18 +139,19 @@ export default {
     groupedItems () {
       let groups = []
       this.filteredItems.forEach(item => {
-        const groupIndex = groups.findIndex(group => group.spaceName === item.spaceName)
+        const groupIndex = groups.findIndex(group => group.spaceId === item.spaceId)
         if (groupIndex !== -1) {
           groups[groupIndex].cards.push(item)
         } else {
-          let background
+          let background, spaceName
           const spaceId = item.spaceId || this.currentSpaceId
           const space = this.$store.getters.cachedOrOtherSpaceById(spaceId)
           if (space) {
             background = space.background
+            spaceName = space.name
           }
           groups.push({
-            spaceName: item.spaceName,
+            spaceName: spaceName || item.spaceName,
             spaceId: spaceId,
             cards: [item],
             space,
@@ -171,15 +172,13 @@ export default {
     },
     cardsByTagName () {
       let tags
-      const cardId = this.$store.state.currentSelectedTag.cardId
-      tags = this.$store.getters['currentSpace/tagsByName']({
-        name: this.name,
-        cardId
-      })
+      tags = this.$store.getters['currentSpace/tagsByName'](this.name)
+      tags = utils.clone(tags)
       let cards = tags.map(tag => {
         let card = this.$store.getters['currentSpace/cardById'](tag.cardId)
         return card
       })
+      cards = utils.clone(cards)
       cards = cards.filter(card => card)
       return cards
     },
@@ -251,7 +250,7 @@ export default {
       this.updateCardsList(cacheCards)
       // remote cards
       let remoteCards = await this.remoteCards() // consolidate otherusres
-      if (remoteCards) {
+      if (remoteCards.length) {
         remoteCards = this.addCardNameSegments(remoteCards)
         remoteCards = remoteCards.filter(card => card.isRemoved !== true)
         this.updateCardsList(remoteCards)
