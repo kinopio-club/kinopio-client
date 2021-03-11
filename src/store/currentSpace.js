@@ -732,6 +732,7 @@ export default {
         context.dispatch('showCardDetails', cardId)
       }
       context.commit('currentUser/updateFavoriteSpaceIsEdited', space.id, { root: true })
+      context.dispatch('updateIncorrectCardConnectionPaths', { shouldUpdateApi: Boolean(remoteSpace) })
     },
     loadLastSpace: (context) => {
       const user = context.rootState.currentUser
@@ -1211,6 +1212,16 @@ export default {
           context.commit('updateConnectionReadOnly', connection)
         }
       })
+    },
+    updateIncorrectCardConnectionPaths: (context, { shouldUpdateApi }) => {
+      let connections = []
+      context.state.connections.forEach(connection => {
+        const updatedPath = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
+        if (!updatedPath) { return }
+        if (updatedPath === connection.path) { return }
+        connections.push(connection)
+      })
+      context.dispatch('updateCardConnectionPaths', { connections, shouldUpdateApi })
     },
     removeConnectionsFromCard: (context, card) => {
       context.state.connections.forEach(connection => {
