@@ -4,7 +4,7 @@ dialog.add-space.narrow(
   :open="visible"
   @touchend.stop
   @click.left.stop
-  :class="{'child-dialog-is-visible': promptPackPickerIsVisible, 'short': screenIsShort}"
+  :class="{'short': screenIsShort}"
   ref="dialog"
   :style="{'max-height': dialogHeight + 'px'}"
 )
@@ -114,6 +114,7 @@ export default {
     showScreenIsShort (value) {
       this.screenIsShort = true
       this.shouldHideFooter(true)
+      this.updateDialogHeight()
     },
     shouldHideFooter (value) {
       this.$store.commit('shouldExplicitlyHideFooter', value)
@@ -220,9 +221,6 @@ export default {
   max-height calc(100vh - 230px)
   .journal-edit-row
     margin-top 10px
-  // &.child-dialog-is-visible
-    // overflow initial !important
-    // width 400px
   .textarea
     background-color var(--secondary-background)
     border 0
