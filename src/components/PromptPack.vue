@@ -5,7 +5,10 @@ li.prompt-pack(@click.left="select(pack)" v-on:keyup.enter="select(pack)" :class
       img.icon(v-if="!isInUserJournalPrompts" src="@/assets/add.svg")
       img.icon.minus(v-if="isInUserJournalPrompts" src="@/assets/minus.svg")
       span {{pack.name}}
-    button(@click.stop="toggleViewAllIsActive" :class="{active: viewAllIsActive}" tabindex="0" ref="button") View All
+    button(@click.stop="toggleViewAllIsActive" :class="{active: viewAllIsActive}" tabindex="0" ref="button")
+      img.icon(v-if="viewAllIsActive" src="@/assets/view-hidden.svg")
+      img.icon(v-else src="@/assets/view.svg")
+
   p(v-if="!viewAllIsActive")
     span.label-badge ex
     span {{randomPrompt}}

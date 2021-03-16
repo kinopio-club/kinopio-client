@@ -1,8 +1,7 @@
 <template lang="pug">
-dialog.prompt-pack-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
-  section
-    p Prompt packs add random prompts to your journals
-  section.results-section
+.prompt-pack-picker(v-if="visible" @click.left.stop ref="dialog")
+  p Add random prompts to your journals
+  .results-section
     ul.results-list
       template(v-for="pack in packs")
         PromptPack(:pack="pack" @select="select")
@@ -62,16 +61,13 @@ export default {
 
 <style lang="stylus">
 .prompt-pack-picker
-  overflow scroll
-  max-height calc(100vh - 330px)
-  @media(max-height 600px)
-    top -68px !important
   button
     .badge
       margin 0
   .results-section
     max-height initial
   .results-section
-    border-top 1px solid var(--primary)
+    padding 0
     padding-top 4px
+
 </style>

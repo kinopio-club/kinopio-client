@@ -3,7 +3,7 @@ dialog.add-space.narrow(
   v-if="visible"
   :open="visible"
   @touchend.stop
-  @click.left.stop="closeDialogs"
+  @click.left.stop
   :class="{'child-dialog-is-visible': promptPackPickerIsVisible, 'short': screenIsShort}"
   ref="dialog"
   :style="{'max-height': dialogHeight + 'px'}"
@@ -38,18 +38,18 @@ dialog.add-space.narrow(
           span Daily Journal
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
           span Edit
+    Prompt(v-if="editPromptsIsVisible" v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showPicker="togglePromptPackPickerIsVisible" @showScreenIsShort="showScreenIsShort")
     //- Edit Journal
-    .row(v-if="editPromptsIsVisible")
+    .row.journal-edit-row(v-if="editPromptsIsVisible")
       .button-wrap
         button(@click.left.stop="togglePromptPackPickerIsVisible" :class="{ active: promptPackPickerIsVisible }" ref="promptButton")
           img.icon(src="@/assets/add.svg")
           span Prompts
-        PromptPackPicker(:visible="promptPackPickerIsVisible" :position="promptPickerPosition" @closeDialog="closeDialogs" @select="togglePromptPack")
       .button-wrap
         button(@click.left="addCustomPrompt")
           img.icon(src="@/assets/add.svg")
           span Custom
-    Prompt(v-if="editPromptsIsVisible" v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showPicker="togglePromptPackPickerIsVisible" @showScreenIsShort="showScreenIsShort")
+    PromptPackPicker(:visible="promptPackPickerIsVisible" :position="promptPickerPosition" @select="togglePromptPack")
 
   Templates(:visible="templatesIsVisible" :hideOptions="true")
 
@@ -139,10 +139,12 @@ export default {
     },
     toggleEditNewSpaceIsVisible () {
       const value = !this.editNewSpaceIsVisible
+      this.closeAll()
       this.editNewSpaceIsVisible = value
     },
     toggleEditPromptsIsVisible () {
       const value = !this.editPromptsIsVisible
+      this.closeAll()
       this.editPromptsIsVisible = value
     },
     togglePromptPackPickerIsVisible () {
@@ -160,9 +162,6 @@ export default {
       this.editNewSpaceIsVisible = false
       this.editPromptsIsVisible = false
       this.urlIsCopied = false
-      this.promptPackPickerIsVisible = false
-    },
-    closeDialogs () {
       this.promptPackPickerIsVisible = false
     },
     copyUrl () {
@@ -219,8 +218,11 @@ export default {
     top -68px !important
   overflow scroll
   max-height calc(100vh - 230px)
-  &.child-dialog-is-visible
-    overflow initial !important
+  .journal-edit-row
+    margin-top 10px
+  // &.child-dialog-is-visible
+    // overflow initial !important
+    // width 400px
   .textarea
     background-color var(--secondary-background)
     border 0
