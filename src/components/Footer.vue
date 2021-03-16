@@ -1,62 +1,67 @@
 <template lang="pug">
-footer(:style="visualViewportPosition")
-  Notifications
-  section(v-if="isVisible")
-    //- Explore
-    .button-wrap
-      button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
-        span Explore
-      Explore(:visible="exploreIsVisible")
-    //- Favorites
-    .button-wrap
-      .segmented-buttons
-        label(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
-          input(type="checkbox" v-model="isFavoriteSpace")
-          img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-          img.icon(v-else src="@/assets/heart-empty.svg")
-        button(@click.left="toggleFavoritesIsVisible" :class="{ active: favoritesIsVisible}")
-          img.icon(src="@/assets/hearts.svg")
-          span(v-if="favoriteSpacesEditedCount") {{favoriteSpacesEditedCount}}
-      Favorites(:visible="favoritesIsVisible")
-    //- Tags and Links
-    .button-wrap
-      .segmented-buttons
-        button(@click.left="toggleTagsIsVisible" :class="{ active: tagsIsVisible}")
-          span Tags
-        button(@click.left="toggleLinksIsVisible" :class="{ active: linksIsVisible}")
-          span Links
-      Links(:visible="linksIsVisible")
-      Tags(:visible="tagsIsVisible")
+.footer-wrap
+  .left
+    footer(:style="visualViewportPosition")
+      Notifications
+      section(v-if="isVisible")
+        //- Explore
+        .button-wrap
+          button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
+            span Explore
+          Explore(:visible="exploreIsVisible")
+        //- Favorites
+        .button-wrap
+          .segmented-buttons
+            label(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
+              input(type="checkbox" v-model="isFavoriteSpace")
+              img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+              img.icon(v-else src="@/assets/heart-empty.svg")
+            button(@click.left="toggleFavoritesIsVisible" :class="{ active: favoritesIsVisible}")
+              img.icon(src="@/assets/hearts.svg")
+              span(v-if="favoriteSpacesEditedCount") {{favoriteSpacesEditedCount}}
+          Favorites(:visible="favoritesIsVisible")
+        //- Tags and Links
+        .button-wrap
+          .segmented-buttons
+            button(@click.left="toggleTagsIsVisible" :class="{ active: tagsIsVisible}")
+              span Tags
+            button(@click.left="toggleLinksIsVisible" :class="{ active: linksIsVisible}")
+              span Links
+          Links(:visible="linksIsVisible")
+          Tags(:visible="tagsIsVisible")
 
-  section.controls(v-if="isVisible")
-    //- Removed
-    .button-wrap
-      button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
-        img.refresh.icon(src="@/assets/remove.svg")
-        span Removed
-      Removed(:visible="removedIsVisible")
-    //- Filters
-    .button-wrap
-      button(@click.left="toggleFiltersIsVisible" :class="{ active: filtersIsVisible}")
-        .span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
-        img.icon.sunglasses(src="@/assets/filter.svg")
-        span Filters
-      Filters(:visible="filtersIsVisible")
-    //- Background
-    .button-wrap
-      button(@click.left="toggleBackgroundIsVisible" :class="{ active: backgroundIsVisible}")
-        img.icon.macro(src="@/assets/macro.svg")
-      //- Upload Progress
-      .uploading-container-footer(v-if="pendingUpload")
-        .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
-          Loader(:visible="true")
-          span {{pendingUpload.percentComplete}}%
-      //- Remote Upload Progress
-      .uploading-container-footer(v-if="remotePendingUpload")
-        .badge.info
-          Loader(:visible="true")
-          span {{remotePendingUpload.percentComplete}}%
-      Background(:visible="backgroundIsVisible")
+      section.controls(v-if="isVisible")
+        //- Removed
+        .button-wrap
+          button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
+            img.refresh.icon(src="@/assets/remove.svg")
+            span Removed
+          Removed(:visible="removedIsVisible")
+        //- Filters
+        .button-wrap
+          button(@click.left="toggleFiltersIsVisible" :class="{ active: filtersIsVisible}")
+            .span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
+            img.icon.sunglasses(src="@/assets/filter.svg")
+            span Filters
+          Filters(:visible="filtersIsVisible")
+        //- Background
+        .button-wrap
+          button(@click.left="toggleBackgroundIsVisible" :class="{ active: backgroundIsVisible}")
+            img.icon.macro(src="@/assets/macro.svg")
+          //- Upload Progress
+          .uploading-container-footer(v-if="pendingUpload")
+            .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
+              Loader(:visible="true")
+              span {{pendingUpload.percentComplete}}%
+          //- Remote Upload Progress
+          .uploading-container-footer(v-if="remotePendingUpload")
+            .badge.info
+              Loader(:visible="true")
+              span {{remotePendingUpload.percentComplete}}%
+          Background(:visible="backgroundIsVisible")
+
+  .right(v-if="!isMobileOrTouch")
+    .badge.info yolo right
 
 </template>
 
@@ -126,17 +131,6 @@ export default {
     }, 1000 * 60 * 10) // 10 minutes
   },
   computed: {
-    // buildHash () {
-    //   const regex = /(app\.)([a-z0-9])\w+/
-    //   const scripts = Array.from(document.querySelectorAll('script'))
-    //   const path = scripts.find(script => {
-    //     const src = script.src
-    //     return src.includes('app')
-    //   })
-    //   if (!path) { return }
-    //   let hash = path.src.match(regex)[0] // app.768db305407f4c847d44
-    //   return hash.replace('app.', '') // 768db305407f4c847d44
-    // },
     favoriteSpacesEditedCount () {
       const favoriteSpaces = this.$store.state.currentUser.favoriteSpaces
       return favoriteSpaces.filter(space => space.isEdited).length
@@ -149,6 +143,11 @@ export default {
         const isInProgress = upload.percentComplete < 100
         return isCurrentSpace && isInProgress
       })
+    },
+    isMobileOrTouch () {
+      const isTouchDevice = this.$store.state.isTouchDevice
+      const isMobile = utils.isMobile()
+      return isTouchDevice || isMobile
     },
     isVisible () {
       const isTouchDevice = this.$store.state.isTouchDevice
@@ -288,14 +287,25 @@ export default {
 </script>
 
 <style lang="stylus">
-footer
+.footer-wrap
+  display flex
+  justify-content space-between
+  align-items flex-end
   --footer-max-z 2147483644 // var(--max-z) - 2, hardcoded because firefox vars in calc is buggy
   z-index var(--footer-max-z)
   position fixed
   left 8px
   bottom 8px
+  right 8px
+  max-width 100%
   pointer-events none
-  max-width calc(100% - 17px)
+  .right
+    // TODO move pointer events to progress bar only
+    pointer-events all
+    @media(max-width 460px)
+     display none
+
+footer
   .undo
     margin 0
     height 11px
