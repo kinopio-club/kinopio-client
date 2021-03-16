@@ -1,6 +1,6 @@
 <template lang="pug">
 dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs")
-  section
+  section(v-if="!copyOnly")
     .segmented-buttons
       button(@click.left.stop="showMove" :class="{ active: actionIsMove }")
         span Move
@@ -62,7 +62,8 @@ export default {
     Loader
   },
   props: {
-    visible: Boolean
+    visible: Boolean,
+    copyOnly: Boolean
   },
   data () {
     return {
@@ -102,6 +103,9 @@ export default {
       return utils.pluralize('card', condition)
     },
     actionLabel () {
+      if (this.copyOnly) {
+        return 'copy'
+      }
       if (this.actionIsMove) {
         return 'move'
       } else {
@@ -212,7 +216,7 @@ export default {
         await this.copyToSelectedSpace(items)
         this.notifySuccess()
       }
-      if (this.actionIsMove) {
+      if (this.actionIsMove && !this.copyOnly) {
         this.removeCards(items.cards)
       }
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')

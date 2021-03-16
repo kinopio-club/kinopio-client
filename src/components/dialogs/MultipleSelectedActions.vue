@@ -55,9 +55,10 @@ dialog.narrow.multiple-selected-actions(
         AlignAndDistribute(:visible="multipleCardsIsSelected" :shouldHideMoreOptions="true" :shouldAutoDistribute="true" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser")
         //- Move/Copy
         .button-wrap.move-or-copy-wrap
-          button(:disabled="!canEditAll.cards" @click.left.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
-            span Move or Copy
-          MoveOrCopyToSpace(:visible="moveOrCopyToSpaceIsVisible")
+          button(@click.left.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
+            span(v-if="!canEditAll.cards") Copy
+            span(v-else) Move or Copy
+          MoveOrCopyToSpace(:visible="moveOrCopyToSpaceIsVisible" :copyOnly="!canEditAll.cards")
       //- More Options
       AlignAndDistribute(:visible="multipleCardsIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser")
 
@@ -97,7 +98,8 @@ export default {
       framePickerIsVisible: false,
       cardsIsConnected: false,
       cardsHaveCheckboxes: false,
-      cardsCheckboxIsChecked: false
+      cardsCheckboxIsChecked: false,
+      copyOnly: false
     }
   },
   computed: {
