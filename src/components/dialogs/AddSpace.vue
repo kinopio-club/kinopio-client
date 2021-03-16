@@ -24,40 +24,35 @@ dialog.add-space.narrow(
           span Space
         button(@click.left.stop="toggleEditNewSpaceIsVisible" :class="{ active: editNewSpaceIsVisible }")
           span Edit
+    //- Edit Space
+    .row(v-if="editNewSpaceIsVisible")
+      label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
+        input(type="checkbox" v-model="newSpacesAreBlank")
+        span New Spaces Are Blank
+
     .row
       .segmented-buttons
         button(@click="addJournalSpace")
           img.icon(src="@/assets/add.svg")
           MoonPhase(:moonPhase="moonPhase.name")
-          span Journal
+          span Daily Journal
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
           span Edit
-  Templates(:visible="templatesIsVisible" :hideOptions="true")
-
-  section.edit-section(v-if="editNewSpaceIsVisible")
-    .row
-      label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
-        input(type="checkbox" v-model="newSpacesAreBlank")
-        span New Spaces Are Blank
-
-  section.edit-section(v-if="editPromptsIsVisible")
-    .row
+    //- Edit Journal
+    .row(v-if="editPromptsIsVisible")
       .button-wrap
         button(@click.left.stop="togglePromptPackPickerIsVisible" :class="{ active: promptPackPickerIsVisible }" ref="promptButton")
           img.icon(src="@/assets/add.svg")
           span Prompts
         PromptPackPicker(:visible="promptPackPickerIsVisible" :position="promptPickerPosition" @closeDialog="closeDialogs" @select="togglePromptPack")
-      button(@click.left="addCustomPrompt")
-        img.icon(src="@/assets/add.svg")
-        span Custom
-
+      .button-wrap
+        button(@click.left="addCustomPrompt")
+          img.icon(src="@/assets/add.svg")
+          span Custom
     Prompt(v-if="editPromptsIsVisible" v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showPicker="togglePromptPackPickerIsVisible" @showScreenIsShort="showScreenIsShort")
 
-  //- section(v-if="editPromptsIsVisible")
-  //-   .row
-  //-     a(href="#")
-  //-       button Help →
-  //-  suggest prompts -> contact (👀 templates)
+  Templates(:visible="templatesIsVisible" :hideOptions="true")
+
 </template>
 
 <script>
@@ -144,12 +139,10 @@ export default {
     },
     toggleEditNewSpaceIsVisible () {
       const value = !this.editNewSpaceIsVisible
-      this.closeAll()
       this.editNewSpaceIsVisible = value
     },
     toggleEditPromptsIsVisible () {
       const value = !this.editPromptsIsVisible
-      this.closeAll()
       this.editPromptsIsVisible = value
     },
     togglePromptPackPickerIsVisible () {
@@ -224,10 +217,6 @@ export default {
 .add-space
   &.short
     top -68px !important
-    .edit-section
-      max-height 205px
-      overflow scroll
-
   overflow scroll
   max-height calc(100vh - 230px)
   &.child-dialog-is-visible
