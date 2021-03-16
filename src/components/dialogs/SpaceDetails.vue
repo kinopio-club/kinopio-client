@@ -241,7 +241,7 @@ export default {
         this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(userSpaces, currentUser)
       })
     }, 350, { leading: true }),
-    pruneCachedSpaces (remoteSpaces) {
+    removeRemovedCachedSpaces (remoteSpaces) {
       const remoteSpaceIds = remoteSpaces.map(space => space.id)
       const spacesToRemove = this.spaces.filter(space => !remoteSpaceIds.includes(space.id))
       spacesToRemove.forEach(spaceToRemove => {
@@ -264,9 +264,20 @@ export default {
       this.remoteSpaces = await this.$store.dispatch('api/getUserSpaces')
       this.isLoadingRemoteSpaces = false
       if (!this.remoteSpaces) { return }
-      this.pruneCachedSpaces(this.remoteSpaces)
+      this.removeRemovedCachedSpaces(this.remoteSpaces)
       const spaces = this.updateFavoriteSpaces(this.remoteSpaces)
       this.spaces = spaces
+      this.updateCachedSpacesUpdatedAt()
+    },
+    updateCachedSpacesUpdatedAt () {
+      this.spaces.forEach(space => {
+        const cachedSpace = cache.space(space.id)
+        const isCachedSpace = utils.objectHasKeys(cachedSpace)
+        const shouldUpdateDate = space.updatedAt !== cachedSpace.updatedAt
+        if (isCachedSpace && shouldUpdateDate) {
+          cache.updateSpace('updatedAt', space.updatedAt, space.id)
+        }
+      })
     },
     async updateFavorites () {
       if (!shouldUpdateFavorites) { return }
