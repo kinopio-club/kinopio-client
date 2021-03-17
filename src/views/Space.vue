@@ -343,6 +343,7 @@ export default {
       const node = event.target.nodeName
       const isTextarea = node === 'TEXTAREA'
       const isInput = node === 'INPUT'
+      if (event.srcElement.type === 'range') { return false }
       if (isTextarea || isInput) {
         return true
       }
