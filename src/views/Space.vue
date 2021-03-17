@@ -5,7 +5,7 @@ main.space(
   @touchstart="initInteractions"
   @mouseup.left="stopInteractions"
   @touchstop="stopInteractions"
-  :style="size"
+  :style="styles"
 )
   svg.connections
     path.current-connection(
@@ -117,10 +117,11 @@ export default {
     }
   },
   computed: {
-    size () {
+    styles () {
       return {
         width: `${this.pageWidth}px`,
-        height: `${this.pageHeight}px`
+        height: `${this.pageHeight}px`,
+        zoom: this.spaceZoomDecimal
       }
     },
     cards () { return this.$store.state.currentSpace.cards },
@@ -142,7 +143,8 @@ export default {
     spaceMembers () {
       const excludeCurrentUser = true
       return this.$store.getters['currentSpace/members'](excludeCurrentUser)
-    }
+    },
+    spaceZoomDecimal () { return (this.$store.state.spaceZoomPercent / 100) }
   },
   methods: {
     loadSpaceOnBackOrForward (event) {

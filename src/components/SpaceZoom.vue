@@ -12,7 +12,11 @@
     @touchend="endMovePlayhead"
     :class="{'is-dragging': playheadIsBeingDragged}"
   )
-    span.badge.info.zoom-percent-badge(v-if="zoomPercentBadgeIsVisible")
+    span.badge.info.zoom-percent-badge(
+      ref="badge"
+      v-if="zoomPercentBadgeIsVisible"
+      :style="{left: zoomPercentBadgePosition + 'px'}"
+    )
       span {{ spaceZoomPercent }}%
       button.inline-button(@mousedown.left.stop @click.left.stop="resetPlayhead")
         img.icon.close(src="@/assets/add.svg")
@@ -20,7 +24,7 @@
     progress(
       :value="sliderPercent"
       max="100"
-      min="20"
+      min="40"
       ref="progress"
     )
     img.vertical-line.first-child(src="@/assets/vertical-line.svg")
@@ -61,6 +65,13 @@ export default {
       } else {
         return false
       }
+    },
+    zoomPercentBadgePosition () {
+      const max = 40
+      const badgeWidth = 45
+      let position = this.buttonPosition - (badgeWidth / 2)
+      position = Math.min(position, max)
+      return position
     }
   },
   methods: {
@@ -85,7 +96,7 @@ export default {
       this.updateButtonPosition()
     },
     updateSpaceZoomPercent () {
-      const min = 20
+      const min = 40
       const max = 100
       let spaceZoomPercent = this.sliderPercent
       spaceZoomPercent = spaceZoomPercent / 100
@@ -166,7 +177,6 @@ export default {
   .zoom-percent-badge
     position absolute
     top -10px
-    right -2px
     .inline-button
       cursor pointer
       vertical-align baseline
