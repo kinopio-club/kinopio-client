@@ -12,6 +12,11 @@
     @touchend="endMovePlayhead"
     :class="{'is-dragging': playheadIsBeingDragged}"
   )
+    span.badge.info.zoom-percent-badge(v-if="zoomPercentBadgeIsVisible")
+      span {{ spaceZoomPercent }}%
+      button.inline-button(@mousedown.left.stop @click.left.stop="resetPlayhead")
+        img.icon.close(src="@/assets/add.svg")
+
     progress(
       :value="sliderPercent"
       max="100"
@@ -26,12 +31,6 @@
       :style="{left: buttonPosition + 'px'}"
       :class="{'is-dragging': playheadIsBeingDragged, active: playheadIsBeingDragged}"
     )
-
-  //- .row
-    //- span.badge(:class="{info: isPlaying, status: !isPlaying}" :style="{background: selectedColor}")
-    //-   img.icon(v-if="!isPlaying" src="@/assets/autoplay.svg")
-    //-   Loader(:visible="isPlaying")
-    //-   span {{currentTime}}/{{totalTime}}
 </template>
 
 <script>
@@ -54,7 +53,24 @@ export default {
     window.addEventListener('mouseup', this.endMovePlayhead)
     this.updateButtonPosition()
   },
+  computed: {
+    spaceZoomPercent () { return this.$store.state.spaceZoomPercent },
+    zoomPercentBadgeIsVisible () {
+      if (this.sliderPercent !== 100) {
+        return true
+      } else {
+        return false
+      }
+    }
+  },
   methods: {
+    resetPlayhead () {
+      this.sliderPercent = 100
+      this.playheadIsBeingDragged = false
+      this.buttonPosition = 100
+      this.updateSpaceZoomPercent()
+      this.updateButtonPosition()
+    },
     movePlayhead (event) {
       const progress = this.$refs.progress
       const rect = progress.getBoundingClientRect()
@@ -147,7 +163,18 @@ export default {
     top 12px
   .is-dragging
     cursor grabbing
-  .badge
-    &.status
-      background var(--secondary-active-background)
+  .zoom-percent-badge
+    position absolute
+    top -10px
+    right -2px
+    .inline-button
+      cursor pointer
+      vertical-align baseline
+      margin-left 5px
+      padding-top 1px
+      padding-left 4px
+      padding-right 4px
+      .icon
+        transform rotate(45deg)
+
 </style>
