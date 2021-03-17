@@ -61,8 +61,7 @@
           Background(:visible="backgroundIsVisible")
 
   .right(v-if="!isMobileOrTouch")
-    .badge.info yolo right
-
+    SpaceZoom
 </template>
 
 <script>
@@ -75,6 +74,7 @@ import Favorites from '@/components/dialogs/Favorites.vue'
 import Background from '@/components/dialogs/Background.vue'
 import Notifications from '@/components/Notifications.vue'
 import Loader from '@/components/Loader.vue'
+import SpaceZoom from '@/components/SpaceZoom.vue'
 import utils from '@/utils.js'
 
 const maxIterations = 30
@@ -91,7 +91,8 @@ export default {
     Tags,
     Favorites,
     Background,
-    Loader
+    Loader,
+    SpaceZoom
   },
   data () {
     return {
