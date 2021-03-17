@@ -39,6 +39,7 @@ export default new Vuex.Store({
     cardMap: {},
     cardsCreatedLimit: 100,
     prevCursorPosition: { x: 0, y: 0 },
+    spaceZoomPercent: 100,
 
     // reset password
     resetPasswordApiKey: '',
@@ -222,6 +223,10 @@ export default new Vuex.Store({
     },
     prevCursorPosition: (state, cursor) => {
       state.prevCursorPosition = cursor
+    },
+    spaceZoomPercent: (state, value) => {
+      utils.typeCheck({ value, type: 'number', origin: 'spaceZoomPercent' })
+      state.spaceZoomPercent = value
     },
     resetPasswordApiKey: (state, apiKey) => {
       utils.typeCheck({ value: apiKey, type: 'string', origin: 'resetPasswordApiKey' })

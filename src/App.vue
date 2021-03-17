@@ -119,11 +119,12 @@ body
     color var(--primary-background)
     min-height initial
     left initial
-    right 12px
-    bottom 42px
+    right 10px
+    bottom 60px
     position fixed
     pointer-events none
-    z-index var(--max-z)
+    z-index 100
+    font-size 12px
 
 img,
 video
