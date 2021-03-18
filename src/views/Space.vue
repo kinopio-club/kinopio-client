@@ -327,7 +327,12 @@ export default {
       })
     },
     addCard (position) {
+      const zoom = this.$store.getters.spaceCounterZoomDecimal
       const isParentCard = true
+      position = {
+        x: position.x * zoom,
+        y: position.y * zoom
+      }
       if (this.spaceIsReadOnly) {
         this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info' })
         return

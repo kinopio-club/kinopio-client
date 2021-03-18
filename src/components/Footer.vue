@@ -301,7 +301,6 @@ export default {
   max-width 100%
   pointer-events none
   .right
-    // TODO move pointer events to progress bar only
     pointer-events all
     @media(max-width 460px)
      display none
