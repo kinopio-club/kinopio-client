@@ -1075,7 +1075,12 @@ export default {
     dragCards: (context, options) => {
       const currentDraggingCardId = context.rootState.currentDraggingCardId
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
-      const { endCursor, prevCursor } = options
+      const zoom = context.rootGetters.spaceCounterZoomDecimal
+      let { endCursor, prevCursor } = options
+      endCursor = {
+        x: endCursor.x * zoom,
+        y: endCursor.y * zoom
+      }
       const delta = options.delta || {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
