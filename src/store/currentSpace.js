@@ -1322,6 +1322,22 @@ export default {
       } else {
         document.body.style.backgroundImage = ''
       }
+      context.dispatch('updateBackgroundZoom')
+    },
+    updateBackgroundZoom: (context) => {
+      const defaultImage = {
+        width: 310,
+        height: 200
+      }
+      const spaceZoomDecimal = context.rootGetters.spaceZoomDecimal
+      const computedStyle = window.getComputedStyle(document.body)
+      let image = new Image()
+      image.src = utils.urlFromString(computedStyle.backgroundImage)
+      let width = image.width || defaultImage.width
+      let height = image.height || defaultImage.height
+      width = width * spaceZoomDecimal
+      height = height * spaceZoomDecimal
+      document.body.style.backgroundSize = `${width}px ${height}px`
     },
 
     // Tags

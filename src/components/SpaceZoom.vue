@@ -74,6 +74,9 @@ export default {
     }
   },
   methods: {
+    updateBackgroundZoom () {
+      this.$store.dispatch('currentSpace/updateBackgroundZoom')
+    },
     resetPlayhead () {
       this.sliderPercent = 100
       this.playheadIsBeingDragged = false
@@ -81,6 +84,7 @@ export default {
       this.updateSpaceZoomPercent()
       this.updateButtonPosition()
       this.updateConnectionPaths()
+      this.updateBackgroundZoom()
     },
     movePlayhead (event) {
       const progress = this.$refs.progress
@@ -94,6 +98,7 @@ export default {
       this.sliderPercent = Math.max(this.sliderPercent, 0)
       this.updateSpaceZoomPercent()
       this.updateButtonPosition()
+      this.updateBackgroundZoom()
     },
     updateSpaceZoomPercent () {
       const min = 40
