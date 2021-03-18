@@ -132,7 +132,8 @@ export default {
     pageWidth () { return this.$store.state.pageWidth },
     viewportHeight () { return this.$store.state.viewportHeight },
     viewportWidth () { return this.$store.state.viewportWidth },
-    cardMap () { return this.$store.state.cardMap }
+    cardMap () { return this.$store.state.cardMap },
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal }
   },
   methods: {
     updatePositionOffsetByPinchZoom () {
@@ -413,14 +414,15 @@ export default {
       })
     },
     selectConnectionPaths (point) {
+      const zoom = this.spaceCounterZoomDecimal
       const paths = document.querySelectorAll('svg .connection-path')
       paths.forEach(path => {
         const ids = this.$store.state.multipleConnectionsSelectedIds
         const pathId = path.dataset.id
         const svg = document.querySelector('svg.connections')
         let svgPoint = svg.createSVGPoint()
-        svgPoint.x = point.x + window.scrollX
-        svgPoint.y = point.y + window.scrollY
+        svgPoint.x = (point.x + window.scrollX) * zoom
+        svgPoint.y = (point.y + window.scrollY) * zoom
         const isAlreadySelected = ids.includes(pathId)
         if (isAlreadySelected) { return }
         const isSelected = path.isPointInStroke(svgPoint)
