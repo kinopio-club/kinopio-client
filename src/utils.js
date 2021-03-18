@@ -373,8 +373,8 @@ export default {
     const offsetStart = this.coordsWithCurrentScrollOffset(start)
     const offsetEnd = this.coordsWithCurrentScrollOffset(end)
     const delta = {
-      x: (offsetEnd.x - offsetStart.x),
-      y: (offsetEnd.y - offsetStart.y)
+      x: parseInt(offsetEnd.x - offsetStart.x),
+      y: parseInt(offsetEnd.y - offsetStart.y)
     }
     let curve = this.curveControlPoint(offsetStart, delta)
     return `m${offsetStart.x},${offsetStart.y} ${curve} ${delta.x},${delta.y}`

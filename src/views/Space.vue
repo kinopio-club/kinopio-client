@@ -225,11 +225,18 @@ export default {
       }
     },
     cursor () {
+      const zoom = this.$store.getters.spaceCounterZoomDecimal
+      let cursor
       if (utils.objectHasKeys(prevCursor)) {
-        return prevCursor
+        cursor = prevCursor
       } else {
-        return startCursor
+        cursor = startCursor
       }
+      cursor = {
+        x: cursor.x * zoom,
+        y: cursor.y * zoom
+      }
+      return cursor
     },
     dragCard () {
       const prevCursor = this.cursor()
@@ -240,7 +247,14 @@ export default {
       this.checkShouldShowDetails()
     },
     drawConnection () {
-      const end = this.cursor()
+      const zoom = this.$store.getters.spaceZoomDecimal
+      let end = this.cursor()
+      if (zoom !== 1) {
+        end = {
+          x: end.x + window.scrollX,
+          y: end.y + window.scrollY
+        }
+      }
       const startCardId = this.$store.state.currentConnection.startCardId
       const start = utils.connectorCoords(startCardId)
       const path = utils.connectionPathBetweenCoords(start, end)
@@ -260,17 +274,18 @@ export default {
     },
     checkCurrentConnectionSuccess () {
       const cursor = this.cursor()
+      const zoom = this.$store.getters.spaceCounterZoomDecimal
       const cardMap = this.$store.state.cardMap
       const connection = cardMap.find(card => {
         const xValues = {
           value: cursor.x,
-          min: (card.x - window.scrollX),
-          max: (card.x - window.scrollX + card.width)
+          min: (card.x - window.scrollX) * zoom,
+          max: (card.x - window.scrollX + card.width) * zoom
         }
         const yValues = {
           value: cursor.y,
-          min: (card.y - window.scrollY),
-          max: (card.y - window.scrollY + card.height)
+          min: (card.y - window.scrollY) * zoom,
+          max: (card.y - window.scrollY + card.height) * zoom
         }
         const inXRange = utils.isBetween(xValues)
         const inYRange = utils.isBetween(yValues)
