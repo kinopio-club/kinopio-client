@@ -61,7 +61,8 @@
           Background(:visible="backgroundIsVisible")
 
   .right(v-if="!isMobileOrTouch")
-    SpaceZoom
+    .space-zoom
+      Slider(@updatePlayhead="updateSpaceZoom" @endMovePlayhead="updateConnectionPaths" :minValue=40 :value="spaceZoomPercent" :maxValue=100)
 </template>
 
 <script>
@@ -74,7 +75,7 @@ import Favorites from '@/components/dialogs/Favorites.vue'
 import Background from '@/components/dialogs/Background.vue'
 import Notifications from '@/components/Notifications.vue'
 import Loader from '@/components/Loader.vue'
-import SpaceZoom from '@/components/SpaceZoom.vue'
+import Slider from '@/components/Slider.vue'
 import utils from '@/utils.js'
 
 const maxIterations = 30
@@ -92,7 +93,7 @@ export default {
     Favorites,
     Background,
     Loader,
-    SpaceZoom
+    Slider
   },
   data () {
     return {
@@ -217,7 +218,8 @@ export default {
         const isSpace = upload.spaceId === currentSpace.id
         return inProgress && isSpace
       })
-    }
+    },
+    spaceZoomPercent () { return this.$store.state.spaceZoomPercent }
   },
   methods: {
     updatePositionFrame () {
@@ -282,7 +284,28 @@ export default {
     },
     async updateFavorites () {
       await this.$store.dispatch('currentUser/restoreUserFavorites')
+    },
+    updateSpaceZoom (percent) {
+      this.updateSpaceZoomPercent(percent)
+      this.updateConnectionPaths(percent)
+      this.updateBackgroundZoom(percent)
+    },
+    updateSpaceZoomPercent (percent) {
+      const min = 40
+      const max = 100
+      let spaceZoomPercent = percent
+      spaceZoomPercent = spaceZoomPercent / 100
+      spaceZoomPercent = Math.round(min + (max - min) * spaceZoomPercent)
+      this.$store.commit('spaceZoomPercent', spaceZoomPercent)
+    },
+    updateConnectionPaths () {
+      const shouldUpdateApi = this.$store.getters['currentSpace/shouldUpdateApi']
+      this.$store.dispatch('currentSpace/updateIncorrectCardConnectionPaths', { shouldUpdateApi })
+    },
+    updateBackgroundZoom () {
+      this.$store.dispatch('currentSpace/updateBackgroundZoom')
     }
+
   }
 }
 </script>
@@ -304,6 +327,9 @@ export default {
     pointer-events all
     @media(max-width 460px)
      display none
+  .space-zoom
+      display block
+      width 100px
 
 footer
   .undo
@@ -343,4 +369,4 @@ footer
     .down-arrow
       padding 0
 
-</style>
+  </style>
