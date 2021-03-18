@@ -144,7 +144,7 @@ export default {
       const excludeCurrentUser = true
       return this.$store.getters['currentSpace/members'](excludeCurrentUser)
     },
-    spaceZoomDecimal () { return (this.$store.state.spaceZoomPercent / 100) }
+    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
     loadSpaceOnBackOrForward (event) {

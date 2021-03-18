@@ -853,8 +853,11 @@ export default new Vuex.Store({
         return getters.otherSpaceById(spaceId)
       }
     },
-    spaceCounterZoomDecimal: (state) => {
-      return 1 / (state.spaceZoomPercent / 100)
+    spaceZoomDecimal: (state) => {
+      return state.spaceZoomPercent / 100
+    },
+    spaceCounterZoomDecimal: (state, getters) => {
+      return 1 / getters.spaceZoomDecimal
     }
   },
 

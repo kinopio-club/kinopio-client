@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position" @click.left="closeColorPicker" ref="dialog")
+dialog.narrow.connection-details(v-if="visible" :open="visible" :style="styles" @click.left="closeColorPicker" ref="dialog")
   section(:style="{backgroundColor: typeColor}")
     .row
       .button-wrap
@@ -85,11 +85,13 @@ export default {
     spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
     spacePrivacyIsClosed () { return this.$store.state.currentSpace.privacy === 'closed' },
     isInvitedButCannotEditSpace () { return this.$store.getters['currentUser/isInvitedButCannotEditSpace']() },
-    position () {
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    styles () {
       const position = this.$store.state.connectionDetailsPosition
       return {
         left: `${position.x}px`,
-        top: `${position.y}px`
+        top: `${position.y}px`,
+        zoom: this.spaceCounterZoomDecimal
       }
     },
     currentConnection () {

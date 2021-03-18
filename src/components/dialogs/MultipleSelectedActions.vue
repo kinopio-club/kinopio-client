@@ -4,7 +4,7 @@ dialog.narrow.multiple-selected-actions(
   :open="visible"
   ref="dialog"
   @click.left="closeDialogs"
-  :style="{backgroundColor: userColor, left: position.left, top: position.top}"
+  :style="{backgroundColor: userColor, left: position.left, top: position.top, zoom: spaceCounterZoomDecimal}"
 )
   section(v-if="cardsIsSelected || connectionsIsSelected")
     .row(v-if="cardsIsSelected")
@@ -114,6 +114,7 @@ export default {
     },
     userColor () { return this.$store.state.currentUser.color },
     pluralLabels () { return utils.pluralize('Label', this.multipleConnectionsSelectedIds.length > 1) },
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
 
     // cards
 
