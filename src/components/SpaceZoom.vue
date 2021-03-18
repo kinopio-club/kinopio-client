@@ -1,6 +1,5 @@
 <template lang="pug">
 .space-zoom
-  //-TODO?? doubleclick to Reset to 100
   .progress-wrap(
     @mousedown.left.stop.prevent="startMovePlayhead"
     @touchstart.stop.prevent="startMovePlayhead"
@@ -81,6 +80,7 @@ export default {
       this.buttonPosition = 100
       this.updateSpaceZoomPercent()
       this.updateButtonPosition()
+      this.updateConnectionPaths()
     },
     movePlayhead (event) {
       const progress = this.$refs.progress
@@ -102,7 +102,6 @@ export default {
       spaceZoomPercent = spaceZoomPercent / 100
       spaceZoomPercent = Math.round(min + (max - min) * spaceZoomPercent)
       this.$store.commit('spaceZoomPercent', spaceZoomPercent)
-      console.log('🐌', this.$store.state.spaceZoomPercent)
     },
     updateButtonPosition () {
       if (!this.$refs.progress) { return }
@@ -120,9 +119,6 @@ export default {
       if (!this.playheadIsBeingDragged) { return }
       this.movePlayhead(event)
     },
-    // startMovePlayheadOrReset (event) {
-    //   this.startMovePlayhead(event)
-    // },
     startMovePlayhead (event) {
       this.playheadIsBeingDragged = true
       this.movePlayhead(event)
@@ -131,6 +127,13 @@ export default {
       if (!this.playheadIsBeingDragged) { return }
       this.playheadIsBeingDragged = false
       this.movePlayhead(event)
+      if (this.sliderPercent === 100) {
+        this.updateConnectionPaths()
+      }
+    },
+    updateConnectionPaths () {
+      const shouldUpdateApi = this.$store.getters['currentSpace/shouldUpdateApi']
+      this.$store.dispatch('currentSpace/updateIncorrectCardConnectionPaths', { shouldUpdateApi })
     },
     stopMovingPlayhead () {
       this.playheadIsBeingDragged = false

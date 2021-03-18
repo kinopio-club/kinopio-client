@@ -1387,6 +1387,11 @@ export default {
       console.log('🌺 shouldBroadcast', shouldBroadcast, 'clientCount', total)
       return shouldBroadcast
     },
+    shouldUpdateApi: (state, getters, rootState, rootGetters) => {
+      const isSpaceMember = rootGetters['currentUser/isSpaceMember']
+      const isSignedIn = rootGetters['currentUser/isSignedIn']
+      return isSpaceMember && isSignedIn
+    },
 
     // Cards
     cardById: (state) => (id) => {
