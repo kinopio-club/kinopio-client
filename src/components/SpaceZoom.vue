@@ -132,6 +132,7 @@ export default {
       if (!this.playheadIsBeingDragged) { return }
       this.playheadIsBeingDragged = false
       this.movePlayhead(event)
+      this.$store.commit('updateCardMap')
       if (this.sliderPercent === 100) {
         this.updateConnectionPaths()
       }
