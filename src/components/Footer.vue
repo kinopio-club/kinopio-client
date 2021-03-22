@@ -62,7 +62,7 @@
 
   .right(v-if="!isMobileOrTouch")
     .space-zoom
-      Slider(@updatePlayhead="updateSpaceZoom" @endMovePlayhead="updateConnectionPaths" :minValue=40 :value="spaceZoomPercent" :maxValue=100)
+      Slider(@updatePlayhead="updateSpaceZoom" :minValue=40 :value="spaceZoomPercent" :maxValue=100)
 </template>
 
 <script>
@@ -287,7 +287,6 @@ export default {
     },
     updateSpaceZoom (percent) {
       this.updateSpaceZoomPercent(percent)
-      this.updateConnectionPaths(percent)
       this.updateBackgroundZoom(percent)
     },
     updateSpaceZoomPercent (percent) {
@@ -297,10 +296,6 @@ export default {
       spaceZoomPercent = spaceZoomPercent / 100
       spaceZoomPercent = Math.round(min + (max - min) * spaceZoomPercent)
       this.$store.commit('spaceZoomPercent', spaceZoomPercent)
-    },
-    updateConnectionPaths () {
-      const shouldUpdateApi = this.$store.getters['currentSpace/shouldUpdateApi']
-      this.$store.dispatch('currentSpace/updateIncorrectCardConnectionPaths', { shouldUpdateApi })
     },
     updateBackgroundZoom () {
       this.$store.dispatch('currentSpace/updateBackgroundZoom')

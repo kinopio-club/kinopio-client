@@ -219,8 +219,7 @@ export default new Vuex.Store({
       state.isTouchDevice = value
     },
     updateCardMap: (state) => {
-      const spaceZoomDecimal = state.spaceZoomPercent / 100
-      state.cardMap = utils.cardMap(spaceZoomDecimal)
+      state.cardMap = utils.cardMap()
     },
     prevCursorPosition: (state, cursor) => {
       state.prevCursorPosition = cursor

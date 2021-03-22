@@ -121,7 +121,7 @@ export default {
       return {
         width: `${this.pageWidth}px`,
         height: `${this.pageHeight}px`,
-        zoom: this.spaceZoomDecimal
+        transform: `scale(${this.spaceZoomDecimal})`
       }
     },
     cards () { return this.$store.state.currentSpace.cards },
@@ -469,6 +469,7 @@ export default {
   height 100vh
   pointer-events none // so that painting can receive events
   position relative // used by svg connections
+  transform-origin top left
 .is-interacting
   pointer-events all
 .is-painting

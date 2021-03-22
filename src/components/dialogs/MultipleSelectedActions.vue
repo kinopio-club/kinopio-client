@@ -4,7 +4,7 @@ dialog.narrow.multiple-selected-actions(
   :open="visible"
   ref="dialog"
   @click.left="closeDialogs"
-  :style="{backgroundColor: userColor, left: position.left, top: position.top, zoom: spaceCounterZoomDecimal}"
+  :style="styles"
 )
   section(v-if="cardsIsSelected || connectionsIsSelected")
     .row(v-if="cardsIsSelected")
@@ -257,6 +257,14 @@ export default {
       } else {
         return 'Remove'
       }
+    },
+    styles () {
+      return {
+        backgroundColor: this.userColor,
+        left: this.position.left,
+        top: this.position.top,
+        transform: `scale(${this.spaceCounterZoomDecimal})`
+      }
     }
   },
   methods: {
@@ -415,6 +423,7 @@ export default {
 
 <style lang="stylus">
 .multiple-selected-actions
+  transform-origin top left
   .segmented-colors
     display: inline-block
     vertical-align: middle

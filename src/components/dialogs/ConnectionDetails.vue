@@ -91,7 +91,7 @@ export default {
       return {
         left: `${position.x}px`,
         top: `${position.y}px`,
-        zoom: this.spaceCounterZoomDecimal
+        transform: `scale(${this.spaceCounterZoomDecimal})`
       }
     },
     currentConnection () {
@@ -244,6 +244,7 @@ export default {
 
 <style lang="stylus">
 .connection-details
+  transform-origin top left
   .type-name
     margin-left 6px
   .edit-message

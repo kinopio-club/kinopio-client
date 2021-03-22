@@ -413,18 +413,17 @@ export default {
     const endValue = 1
     return -endValue * (elaspedTime /= duration) * (elaspedTime - 2) + startValue
   },
-  cardMap (zoom) {
-    zoom = zoom || 1
+  cardMap () {
     const cards = document.querySelectorAll('.card')
     let cardMap = []
     cards.forEach(card => {
       const rect = card.getBoundingClientRect()
       const mappedCard = {
         cardId: card.dataset.cardId,
-        x: (window.scrollX * zoom) + (rect.x * zoom),
-        y: (window.scrollY * zoom) + (rect.y * zoom),
-        width: rect.width * zoom,
-        height: rect.height * zoom
+        x: (window.scrollX) + (rect.x),
+        y: (window.scrollY) + (rect.y),
+        width: rect.width,
+        height: rect.height
       }
       cardMap.push(mappedCard)
     })
