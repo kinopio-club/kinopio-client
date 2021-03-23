@@ -15,6 +15,7 @@ export default {
     window.addEventListener('keyup', this.handleShortcuts)
     // event.metaKey only works on keydown
     window.addEventListener('keydown', this.handleMetaKeyShortcuts)
+    window.addEventListener('wheel', this.handleMouseWheelEvents)
   },
   computed: {
   },
@@ -109,6 +110,18 @@ export default {
       } else if (isMeta && key === 'k' && isSpaceScope) {
         event.preventDefault()
         this.focusOnSpaceDetailsFilter()
+      }
+    },
+    handleMouseWheelEvents (event) {
+      const isMeta = event.metaKey || event.ctrlKey
+      if (!isMeta) { return }
+      event.preventDefault()
+      const deltaY = event.deltaY
+      console.log(event)
+      if (deltaY < 0) {
+        console.log('🐘 scroll upwards, zoom out')
+      } else if (deltaY > 0) {
+        console.log('🛶 scroll downwards, zoom in')
       }
     },
 
