@@ -251,8 +251,8 @@ export default {
       let end = this.cursor()
       if (zoom !== 1) {
         end = {
-          x: end.x + window.scrollX,
-          y: end.y + window.scrollY
+          x: end.x * zoom,
+          y: end.y * zoom
         }
       }
       const startCardId = this.$store.state.currentConnection.startCardId

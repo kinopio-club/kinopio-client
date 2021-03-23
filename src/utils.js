@@ -347,6 +347,17 @@ export default {
 
   // Connection Path Utils 🐙
 
+  spaceZoomDecimal () {
+    const floatPattern = /[+-]?\d+(\.\d+)?/g
+    const element = document.querySelector('.space')
+    let scale = element.style.transform
+    scale = scale.match(floatPattern)[0]
+    return scale
+  },
+  spaceCounterZoomDecimal () {
+    return 1 / this.spaceZoomDecimal()
+  },
+
   connectorCoords (cardId) {
     const element = document.querySelector(`.connector[data-card-id="${cardId}"] button`)
     if (!element) { return }
@@ -354,8 +365,9 @@ export default {
     return this.rectCenter(rect)
   },
   coordsWithCurrentScrollOffset ({ x, y }) {
-    x = x + window.scrollX
-    y = y + window.scrollY
+    const zoom = this.spaceCounterZoomDecimal() || 1
+    x = (x + window.scrollX) * zoom
+    y = (y + window.scrollY) * zoom
     return { x, y }
   },
   connectionBetweenCards (startId, endId) {
