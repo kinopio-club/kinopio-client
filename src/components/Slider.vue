@@ -20,7 +20,7 @@
       img.icon.close(src="@/assets/add.svg")
 
   progress(
-    :value="sliderPercent"
+    :value="sliderValue"
     :max="maxValue"
     :min="minValue"
     ref="progress"
@@ -47,21 +47,28 @@ export default {
   },
   data () {
     return {
-      sliderPercent: 100,
       playheadIsBeingDragged: false,
       buttonPosition: 100
     }
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'spaceZoomPercent') {
+        this.$nextTick(() => {
+          this.updateButtonPosition()
+        })
+      }
+    })
   },
   mounted () {
     // bind events to window to receive events when mouse is outside window
     window.addEventListener('mousemove', this.dragPlayhead)
     window.addEventListener('mouseup', this.endMovePlayhead)
     this.updateButtonPosition()
-    this.sliderPercent = this.value
   },
   computed: {
     zoomPercentBadgeIsVisible () {
-      if (this.sliderPercent !== this.maxValue) {
+      if (this.value !== this.maxValue) {
         return true
       } else {
         return false
@@ -73,15 +80,22 @@ export default {
       let position = this.buttonPosition - (badgeWidth / 2)
       position = Math.min(position, max)
       return position
+    },
+    sliderValue () {
+      const value = utils.percentageBetween({
+        value: this.value,
+        min: this.minValue,
+        max: this.maxValue
+      })
+      return value
     }
   },
   methods: {
     resetPlayhead () {
-      this.sliderPercent = this.maxValue
       this.playheadIsBeingDragged = false
       this.buttonPosition = this.maxValue
       this.updateButtonPosition()
-      this.$emit('updatePlayhead', this.sliderPercent)
+      this.$emit('updatePlayhead', this.maxValue)
     },
     movePlayhead (event) {
       const progress = this.$refs.progress
@@ -90,20 +104,17 @@ export default {
       const progressWidth = rect.width - 2
       const clickX = utils.cursorPositionInViewport(event).x + window.scrollX
       const progressX = clickX - progressStartX
-      this.sliderPercent = (progressX / progressWidth) * 100
-      this.sliderPercent = Math.min(this.sliderPercent, 100)
-      this.sliderPercent = Math.max(this.sliderPercent, 0)
+      let percent = (progressX / progressWidth) * 100
+      percent = Math.min(percent, 100)
+      percent = Math.max(percent, 0)
       this.updateButtonPosition()
-      this.$emit('updatePlayhead', this.sliderPercent)
+      this.$emit('updatePlayhead', percent)
     },
     updateButtonPosition () {
       if (!this.$refs.progress) { return }
-      const sliderElement = this.$refs.progress
       const buttonElement = this.$refs.button
-      const sliderWidth = sliderElement.getBoundingClientRect().width
       const buttonWidth = buttonElement.getBoundingClientRect().width + 2
-      const percent = this.sliderPercent / 100
-      let position = (sliderWidth * percent) - (buttonWidth / 2)
+      let position = this.sliderValue - (buttonWidth / 2)
       position = Math.min(position, 86)
       position = Math.max(position, -1)
       this.buttonPosition = position
@@ -120,10 +131,8 @@ export default {
       if (!this.playheadIsBeingDragged) { return }
       this.playheadIsBeingDragged = false
       this.movePlayhead(event)
-      this.$store.commit('updateCardMap')
-      if (this.sliderPercent === this.maxValue) {
-        this.$emit('endMovePlayhead', this.sliderPercent)
-      }
+      // this.$store.commit('updateCardMap')
+      // this.$emit('endMovePlayhead', this.value)
     },
     stopMovingPlayhead () {
       this.playheadIsBeingDragged = false

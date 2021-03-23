@@ -1,31 +1,59 @@
 <template lang="pug">
 .space-zoom
-  Slider(@updatePlayhead="updateSpaceZoom" :minValue=40 :value="spaceZoomPercent" :maxValue=100)
+  Slider(@updatePlayhead="updateSpaceZoom" :minValue="min" :value="spaceZoomPercent" :maxValue="max")
 </template>
 
 <script>
 import Slider from '@/components/Slider.vue'
+
+const increment = 10
 
 export default {
   name: 'SpaceZoom',
   components: {
     Slider
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerSpaceZoomReset') {
+        this.updateSpaceZoomFromTrigger(this.max)
+      }
+      if (mutation.type === 'triggerSpaceZoomOut') {
+        let percent = this.spaceZoomPercent
+        percent -= increment
+        this.updateSpaceZoomFromTrigger(percent)
+      }
+      if (mutation.type === 'triggerSpaceZoomIn') {
+        let percent = this.spaceZoomPercent
+        percent += increment
+        this.updateSpaceZoomFromTrigger(percent)
+      }
+    })
+  },
+  data () {
+    return {
+      min: 40,
+      max: 100
+    }
+  },
   computed: {
     spaceZoomPercent () { return this.$store.state.spaceZoomPercent }
   },
   methods: {
+    updateSpaceZoomFromTrigger (percent) {
+      percent = Math.max(percent, this.min)
+      percent = Math.min(percent, this.max)
+      this.$store.commit('spaceZoomPercent', percent)
+      this.updateBackgroundZoom()
+    },
     updateSpaceZoom (percent) {
       this.updateSpaceZoomPercent(percent)
-      this.updateBackgroundZoom(percent)
+      this.updateBackgroundZoom()
     },
     updateSpaceZoomPercent (percent) {
-      const min = 40
-      const max = 100
-      let spaceZoomPercent = percent
-      spaceZoomPercent = spaceZoomPercent / 100
-      spaceZoomPercent = Math.round(min + (max - min) * spaceZoomPercent)
-      this.$store.commit('spaceZoomPercent', spaceZoomPercent)
+      percent = percent / 100
+      percent = Math.round(this.min + (this.max - this.min) * percent)
+      this.$store.commit('spaceZoomPercent', percent)
     },
     updateBackgroundZoom () {
       this.$store.dispatch('currentSpace/updateBackgroundZoom')

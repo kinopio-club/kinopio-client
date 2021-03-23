@@ -143,6 +143,9 @@ export default {
   isBetween ({ value, min, max }) {
     if (min <= value && value <= max) { return true }
   },
+  percentageBetween ({ value, min, max }) {
+    return ((value - min) * 100) / (max - min)
+  },
   clone (object) {
     this.typeCheck({ value: object, type: 'object', origin: 'clone' })
     let cloned = JSON.stringify(object)

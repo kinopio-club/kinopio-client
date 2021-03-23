@@ -268,6 +268,9 @@ export default new Vuex.Store({
     triggerPickerNavigationKey: (state, key) => {},
     triggerPickerSelect: () => {},
     triggerUpdateNotifications: () => {},
+    triggerSpaceZoomReset: () => {},
+    triggerSpaceZoomOut: () => {},
+    triggerSpaceZoomIn: () => {},
 
     // Cards
 

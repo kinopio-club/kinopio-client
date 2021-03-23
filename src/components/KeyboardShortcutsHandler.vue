@@ -110,6 +110,17 @@ export default {
       } else if (isMeta && key === 'k' && isSpaceScope) {
         event.preventDefault()
         this.focusOnSpaceDetailsFilter()
+      // Zoom Reset
+      } else if (isMeta && key === '0') {
+        this.$store.commit('triggerSpaceZoomReset')
+      // Zoom Out
+      } else if (isMeta && key === '-') {
+        event.preventDefault()
+        this.$store.commit('triggerSpaceZoomOut')
+      // Zoom In
+      } else if (isMeta && key === '=') {
+        event.preventDefault()
+        this.$store.commit('triggerSpaceZoomIn')
       }
     },
     handleMouseWheelEvents (event) {
