@@ -352,13 +352,9 @@ export default {
         this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info' })
         return
       }
-      const withinX = position.x > 0 && position.x < this.$store.state.pageWidth
-      const withinY = position.y > 0 && position.y < this.$store.state.pageHeight
-      if (withinX && withinY) {
-        this.normalizeSpaceCardsZ()
-        this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
-        this.$store.commit('childCardId', '')
-      }
+      this.normalizeSpaceCardsZ()
+      this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
+      this.$store.commit('childCardId', '')
     },
     eventIsFromTextarea (event) {
       if (event.target.nodeType !== 1) { return } // firefox check
