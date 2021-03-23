@@ -128,13 +128,19 @@ export default {
       if (!isMeta) { return }
       event.preventDefault()
       const deltaY = event.deltaY
-      if (deltaY < 0) {
+      let shouldZoomIn = deltaY < 0
+      let shouldZoomOut = deltaY > 0
+      const invertZoom = this.$store.state.currentUser.shouldInvertZoomDirection
+      if (invertZoom) {
+        shouldZoomIn = deltaY > 0
+        shouldZoomOut = deltaY < 0
+      }
+      if (shouldZoomIn) {
         this.$store.commit('triggerSpaceZoomIn', 5)
-      } else if (deltaY > 0) {
+      } else if (shouldZoomOut) {
         this.$store.commit('triggerSpaceZoomOut', 5)
       }
     },
-
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
       const isTouchDevice = this.$store.state.isTouchDevice

@@ -5,6 +5,10 @@ dialog.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
 
   //- User Preferences
   section
+    .row(v-if="!isMobile")
+      label(:class="{active: shouldInvertZoomDirection}" @click.left.prevent="toggleShouldInvertZoomDirection" @keydown.stop.enter="toggleShouldInvertZoomDirection")
+        input(type="checkbox" v-model="shouldInvertZoomDirection")
+        span Invert Zoom Direction
     .row
       .button-wrap
         button(@click.left.stop="toggleNotificationSettingsIsVisible" :class="{active: notificationSettingsIsVisible}")
@@ -51,6 +55,7 @@ import UserBilling from '@/components/dialogs/UserBilling.vue'
 import UpdateEmail from '@/components/dialogs/UpdateEmail.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
 import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'UserSettings',
@@ -76,7 +81,9 @@ export default {
   },
   computed: {
     isSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    isUpgraded () { return this.$store.state.currentUser.isUpgraded }
+    isUpgraded () { return this.$store.state.currentUser.isUpgraded },
+    shouldInvertZoomDirection () { return this.$store.state.currentUser.shouldInvertZoomDirection },
+    isMobile () { return utils.isMobile() }
   },
   methods: {
     closeDialogs () {
@@ -112,6 +119,10 @@ export default {
       const isVisible = this.notificationSettingsIsVisible
       this.closeDialogs()
       this.notificationSettingsIsVisible = !isVisible
+    },
+    toggleShouldInvertZoomDirection () {
+      const value = !this.shouldInvertZoomDirection
+      this.$store.commit('currentUser/shouldInvertZoomDirection', value)
     }
   },
   watch: {
