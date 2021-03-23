@@ -222,6 +222,7 @@ export default {
     return array.find(item => item[key] === value)
   },
   cursorsAreClose (startCursor, endCursor) {
+    if (!startCursor) { return }
     const threshold = 5
     const xRange = {
       value: endCursor.x,
