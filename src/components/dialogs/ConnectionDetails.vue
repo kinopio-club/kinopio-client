@@ -88,9 +88,10 @@ export default {
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     styles () {
       const position = this.$store.state.connectionDetailsPosition
+      const zoom = this.spaceCounterZoomDecimal
       return {
-        left: `${position.x}px`,
-        top: `${position.y}px`,
+        left: `${position.x * zoom}px`,
+        top: `${position.y * zoom}px`,
         transform: `scale(${this.spaceCounterZoomDecimal})`
       }
     },
