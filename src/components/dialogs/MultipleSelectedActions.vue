@@ -107,14 +107,16 @@ export default {
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
     position () {
       const cursor = this.$store.state.multipleSelectedActionsPosition
+      const zoom = this.spaceCounterZoomDecimal
       return {
-        left: `${cursor.x}px`,
-        top: `${cursor.y}px`
+        left: `${cursor.x * zoom}px`,
+        top: `${cursor.y * zoom}px`
       }
     },
     userColor () { return this.$store.state.currentUser.color },
     pluralLabels () { return utils.pluralize('Label', this.multipleConnectionsSelectedIds.length > 1) },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
 
     // cards
 
