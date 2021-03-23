@@ -37,17 +37,20 @@ export default {
     pageWidth () { return this.$store.state.pageWidth },
     currentUserIsPainting () { return this.$store.state.currentUserIsPainting },
     isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
-    isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection }
+    isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal }
+    // spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
     initInteractions (event) {
       const position = utils.cursorPositionInViewport(event)
+      const zoom = this.spaceCounterZoomDecimal
       startCursor = position
       endCursor = position
-      scrollAreaHeight = Math.max(50, this.viewportHeight / 8)
-      scrollAreaWidth = Math.max(50, this.viewportWidth / 8)
-      maxHeight = Math.max(6500, this.$store.state.viewportHeight)
-      maxWidth = Math.max(6500, this.$store.state.viewportWidth)
+      scrollAreaHeight = Math.max(50, this.viewportHeight / 8) * zoom
+      scrollAreaWidth = Math.max(50, this.viewportWidth / 8) * zoom
+      maxHeight = Math.max(6500, this.$store.state.viewportHeight) * zoom
+      maxWidth = Math.max(6500, this.$store.state.viewportWidth) * zoom
       if (this.$store.getters.shouldScrollAtEdges(event)) {
         this.updateMovementDirection()
       }
@@ -55,7 +58,7 @@ export default {
         scrollTimer = window.requestAnimationFrame(this.scrollFrame)
       }
     },
-    interact () {
+    interact (event) {
       if (this.$store.getters.shouldScrollAtEdges(event)) {
         this.updateMovementDirection()
       }
@@ -160,11 +163,14 @@ export default {
       return !scrolledTooFarDown
     },
     scrollBy (delta) {
+      const zoom = this.spaceCounterZoomDecimal
       delta.left = delta.x * 1.1
       delta.top = delta.y
+      delta.x = delta.x * zoom
+      delta.y = delta.y * zoom
       const cursor = this.cursor()
       if (this.isDraggingCard) {
-        this.$store.dispatch('currentSpace/dragCards', { delta })
+        this.$store.dispatch('currentSpace/dragCards', { delta, endCursor })
       }
       if (this.isDrawingConnection) {
         this.$store.commit('triggeredDrawConnectionFrame', cursor)
