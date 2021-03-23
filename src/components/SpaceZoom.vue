@@ -20,12 +20,12 @@ export default {
       }
       if (mutation.type === 'triggerSpaceZoomOut') {
         let percent = this.spaceZoomPercent
-        percent -= increment
+        percent -= mutation.payload || increment
         this.updateSpaceZoomFromTrigger(percent)
       }
       if (mutation.type === 'triggerSpaceZoomIn') {
         let percent = this.spaceZoomPercent
-        percent += increment
+        percent += mutation.payload || increment
         this.updateSpaceZoomFromTrigger(percent)
       }
     })

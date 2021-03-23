@@ -128,11 +128,10 @@ export default {
       if (!isMeta) { return }
       event.preventDefault()
       const deltaY = event.deltaY
-      console.log(event)
       if (deltaY < 0) {
-        console.log('🐘 scroll upwards, zoom out')
+        this.$store.commit('triggerSpaceZoomIn', 5)
       } else if (deltaY > 0) {
-        console.log('🛶 scroll downwards, zoom in')
+        this.$store.commit('triggerSpaceZoomOut', 5)
       }
     },
 
