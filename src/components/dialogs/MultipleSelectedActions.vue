@@ -4,7 +4,7 @@ dialog.narrow.multiple-selected-actions(
   :open="visible"
   ref="dialog"
   @click.left="closeDialogs"
-  :style="{backgroundColor: userColor, left: position.left, top: position.top}"
+  :style="styles"
 )
   section(v-if="cardsIsSelected || connectionsIsSelected")
     .row(v-if="cardsIsSelected")
@@ -107,13 +107,16 @@ export default {
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
     position () {
       const cursor = this.$store.state.multipleSelectedActionsPosition
+      const zoom = this.spaceCounterZoomDecimal
       return {
-        left: `${cursor.x}px`,
-        top: `${cursor.y}px`
+        left: `${cursor.x * zoom}px`,
+        top: `${cursor.y * zoom}px`
       }
     },
     userColor () { return this.$store.state.currentUser.color },
     pluralLabels () { return utils.pluralize('Label', this.multipleConnectionsSelectedIds.length > 1) },
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
 
     // cards
 
@@ -255,6 +258,14 @@ export default {
         return 'Remove All'
       } else {
         return 'Remove'
+      }
+    },
+    styles () {
+      return {
+        backgroundColor: this.userColor,
+        left: this.position.left,
+        top: this.position.top,
+        transform: `scale(${this.spaceCounterZoomDecimal})`
       }
     }
   },
@@ -414,6 +425,7 @@ export default {
 
 <style lang="stylus">
 .multiple-selected-actions
+  transform-origin top left
   .segmented-colors
     display: inline-block
     vertical-align: middle

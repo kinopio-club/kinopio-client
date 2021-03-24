@@ -143,6 +143,9 @@ export default {
   isBetween ({ value, min, max }) {
     if (min <= value && value <= max) { return true }
   },
+  percentageBetween ({ value, min, max }) {
+    return ((value - min) * 100) / (max - min)
+  },
   clone (object) {
     this.typeCheck({ value: object, type: 'object', origin: 'clone' })
     let cloned = JSON.stringify(object)
@@ -219,6 +222,7 @@ export default {
     return array.find(item => item[key] === value)
   },
   cursorsAreClose (startCursor, endCursor) {
+    if (!startCursor) { return }
     const threshold = 5
     const xRange = {
       value: endCursor.x,
@@ -257,6 +261,11 @@ export default {
   },
   isMacOrIpad () {
     return window.navigator.platform === 'MacIntel'
+  },
+  backgroundIsDefault (path) {
+    // https://regexr.com/5pa1n
+    const backgroundPathPattern = /\/background\..+\.svg$/g
+    return Boolean(path.match(backgroundPathPattern))
   },
   capitalizeFirstLetter (string) {
     // 'dreams' -> 'Dreams'
@@ -347,6 +356,17 @@ export default {
 
   // Connection Path Utils 🐙
 
+  spaceZoomDecimal () {
+    const floatPattern = /[+-]?\d+(\.\d+)?/g
+    const element = document.querySelector('.space')
+    let scale = element.style.transform
+    scale = scale.match(floatPattern)[0]
+    return scale
+  },
+  spaceCounterZoomDecimal () {
+    return 1 / this.spaceZoomDecimal()
+  },
+
   connectorCoords (cardId) {
     const element = document.querySelector(`.connector[data-card-id="${cardId}"] button`)
     if (!element) { return }
@@ -354,8 +374,9 @@ export default {
     return this.rectCenter(rect)
   },
   coordsWithCurrentScrollOffset ({ x, y }) {
-    x = x + window.scrollX
-    y = y + window.scrollY
+    const zoom = this.spaceCounterZoomDecimal() || 1
+    x = (x + window.scrollX) * zoom
+    y = (y + window.scrollY) * zoom
     return { x, y }
   },
   connectionBetweenCards (startId, endId) {
@@ -373,8 +394,8 @@ export default {
     const offsetStart = this.coordsWithCurrentScrollOffset(start)
     const offsetEnd = this.coordsWithCurrentScrollOffset(end)
     const delta = {
-      x: (offsetEnd.x - offsetStart.x),
-      y: (offsetEnd.y - offsetStart.y)
+      x: parseInt(offsetEnd.x - offsetStart.x),
+      y: parseInt(offsetEnd.y - offsetStart.y)
     }
     let curve = this.curveControlPoint(offsetStart, delta)
     return `m${offsetStart.x},${offsetStart.y} ${curve} ${delta.x},${delta.y}`
@@ -420,8 +441,8 @@ export default {
       const rect = card.getBoundingClientRect()
       const mappedCard = {
         cardId: card.dataset.cardId,
-        x: window.scrollX + rect.x,
-        y: window.scrollY + rect.y,
+        x: (window.scrollX) + (rect.x),
+        y: (window.scrollY) + (rect.y),
         width: rect.width,
         height: rect.height
       }

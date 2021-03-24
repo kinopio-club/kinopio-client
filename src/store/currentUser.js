@@ -30,7 +30,8 @@ export default {
     shouldHideCardTips: false,
     shouldEmailNotifications: true,
     shouldEmailBulletin: true,
-    shouldShowMoreAlignOptions: false
+    shouldShowMoreAlignOptions: false,
+    shouldInvertZoomDirection: false
   },
   mutations: {
     color: (state, newColor) => {
@@ -194,6 +195,10 @@ export default {
     shouldShowMoreAlignOptions: (state, value) => {
       state.shouldShowMoreAlignOptions = value
       cache.updateUser('shouldShowMoreAlignOptions', value)
+    },
+    shouldInvertZoomDirection: (state, value) => {
+      state.shouldInvertZoomDirection = value
+      cache.updateUser('shouldInvertZoomDirection', value)
     }
   },
   actions: {

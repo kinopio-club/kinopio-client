@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.connection-details(v-if="visible" :open="visible" :style="position" @click.left="closeColorPicker" ref="dialog")
+dialog.narrow.connection-details(v-if="visible" :open="visible" :style="styles" @click.left="closeColorPicker" ref="dialog")
   section(:style="{backgroundColor: typeColor}")
     .row
       .button-wrap
@@ -85,11 +85,14 @@ export default {
     spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
     spacePrivacyIsClosed () { return this.$store.state.currentSpace.privacy === 'closed' },
     isInvitedButCannotEditSpace () { return this.$store.getters['currentUser/isInvitedButCannotEditSpace']() },
-    position () {
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    styles () {
       const position = this.$store.state.connectionDetailsPosition
+      const zoom = this.spaceCounterZoomDecimal
       return {
-        left: `${position.x}px`,
-        top: `${position.y}px`
+        left: `${position.x * zoom}px`,
+        top: `${position.y * zoom}px`,
+        transform: `scale(${this.spaceCounterZoomDecimal})`
       }
     },
     currentConnection () {
@@ -242,6 +245,7 @@ export default {
 
 <style lang="stylus">
 .connection-details
+  transform-origin top left
   .type-name
     margin-left 6px
   .edit-message

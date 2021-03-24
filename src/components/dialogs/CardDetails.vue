@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="closeDialogs" @keyup.stop.backspace="removeCard")
+dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="closeDialogs" @keyup.stop.backspace="removeCard" :style="styles")
   section
     .textarea-wrap
       textarea.name(
@@ -423,6 +423,12 @@ export default {
           name: '',
           color: '#cdcdcd' // secondary-active-background
         }
+      }
+    },
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    styles () {
+      return {
+        transform: `scale(${this.spaceCounterZoomDecimal})`
       }
     }
   },
@@ -1142,6 +1148,7 @@ export default {
 
 <style lang="stylus">
 .card-details
+  transform-origin top left
   > section
     background-color var(--secondary-background)
   .textarea-wrap

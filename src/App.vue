@@ -51,6 +51,7 @@ export default {
       if (!canEditSpace) { return }
       let updates = utils.cursorPositionInPage(event)
       updates.userId = this.$store.state.currentUser.id
+      updates.zoom = this.$store.getters.spaceZoomDecimal
       this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor' })
     },
     isTouchDevice () {
@@ -119,11 +120,12 @@ body
     color var(--primary-background)
     min-height initial
     left initial
-    right 12px
-    bottom 12px
+    right 10px
+    bottom 60px
     position fixed
     pointer-events none
-    z-index var(--max-z)
+    z-index 100
+    font-size 12px
 
 img,
 video

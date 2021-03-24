@@ -1075,7 +1075,12 @@ export default {
     dragCards: (context, options) => {
       const currentDraggingCardId = context.rootState.currentDraggingCardId
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
-      const { endCursor, prevCursor } = options
+      const zoom = context.rootGetters.spaceCounterZoomDecimal
+      let { endCursor, prevCursor } = options
+      endCursor = {
+        x: endCursor.x * zoom,
+        y: endCursor.y * zoom
+      }
       const delta = options.delta || {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
@@ -1322,6 +1327,29 @@ export default {
       } else {
         document.body.style.backgroundImage = ''
       }
+      context.dispatch('updateBackgroundZoom')
+    },
+    updateBackgroundZoom: async (context) => {
+      const defaultBackground = {
+        width: 310,
+        height: 200
+      }
+      const spaceZoomDecimal = context.rootGetters.spaceZoomDecimal
+      const computedStyle = window.getComputedStyle(document.body)
+      let image = new Image()
+      image.src = utils.urlFromString(computedStyle.backgroundImage)
+      let width = image.width
+      let height = image.height
+      if (utils.backgroundIsDefault(image.src)) {
+        width = defaultBackground.width
+        height = defaultBackground.height
+      } else if (!width) {
+        document.body.style.backgroundSize = 'initial'
+        return
+      }
+      width = width * spaceZoomDecimal
+      height = height * spaceZoomDecimal
+      document.body.style.backgroundSize = `${width}px ${height}px`
     },
 
     // Tags
@@ -1386,6 +1414,11 @@ export default {
       const shouldBroadcast = Boolean(total > 2) // currentUser and currentClient
       console.log('🌺 shouldBroadcast', shouldBroadcast, 'clientCount', total)
       return shouldBroadcast
+    },
+    shouldUpdateApi: (state, getters, rootState, rootGetters) => {
+      const isSpaceMember = rootGetters['currentUser/isSpaceMember']
+      const isSignedIn = rootGetters['currentUser/isSignedIn']
+      return isSpaceMember && isSignedIn
     },
 
     // Cards

@@ -5,7 +5,7 @@ main.space(
   @touchstart="initInteractions"
   @mouseup.left="stopInteractions"
   @touchstop="stopInteractions"
-  :style="size"
+  :style="styles"
 )
   svg.connections
     path.current-connection(
@@ -117,10 +117,11 @@ export default {
     }
   },
   computed: {
-    size () {
+    styles () {
       return {
         width: `${this.pageWidth}px`,
-        height: `${this.pageHeight}px`
+        height: `${this.pageHeight}px`,
+        transform: `scale(${this.spaceZoomDecimal})`
       }
     },
     cards () { return this.$store.state.currentSpace.cards },
@@ -142,7 +143,8 @@ export default {
     spaceMembers () {
       const excludeCurrentUser = true
       return this.$store.getters['currentSpace/members'](excludeCurrentUser)
-    }
+    },
+    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
     loadSpaceOnBackOrForward (event) {
@@ -223,11 +225,18 @@ export default {
       }
     },
     cursor () {
+      const zoom = this.$store.getters.spaceCounterZoomDecimal
+      let cursor
       if (utils.objectHasKeys(prevCursor)) {
-        return prevCursor
+        cursor = prevCursor
       } else {
-        return startCursor
+        cursor = startCursor
       }
+      cursor = {
+        x: cursor.x * zoom,
+        y: cursor.y * zoom
+      }
+      return cursor
     },
     dragCard () {
       const prevCursor = this.cursor()
@@ -238,7 +247,14 @@ export default {
       this.checkShouldShowDetails()
     },
     drawConnection () {
-      const end = this.cursor()
+      const zoom = this.$store.getters.spaceZoomDecimal
+      let end = this.cursor()
+      if (zoom !== 1) {
+        end = {
+          x: end.x * zoom,
+          y: end.y * zoom
+        }
+      }
       const startCardId = this.$store.state.currentConnection.startCardId
       const start = utils.connectorCoords(startCardId)
       const path = utils.connectionPathBetweenCoords(start, end)
@@ -258,17 +274,18 @@ export default {
     },
     checkCurrentConnectionSuccess () {
       const cursor = this.cursor()
+      const zoom = this.$store.getters.spaceCounterZoomDecimal
       const cardMap = this.$store.state.cardMap
       const connection = cardMap.find(card => {
         const xValues = {
           value: cursor.x,
-          min: (card.x - window.scrollX),
-          max: (card.x - window.scrollX + card.width)
+          min: (card.x - window.scrollX) * zoom,
+          max: (card.x - window.scrollX + card.width) * zoom
         }
         const yValues = {
           value: cursor.y,
-          min: (card.y - window.scrollY),
-          max: (card.y - window.scrollY + card.height)
+          min: (card.y - window.scrollY) * zoom,
+          max: (card.y - window.scrollY + card.height) * zoom
         }
         const inXRange = utils.isBetween(xValues)
         const inYRange = utils.isBetween(yValues)
@@ -325,24 +342,26 @@ export default {
       })
     },
     addCard (position) {
+      const zoom = this.$store.getters.spaceCounterZoomDecimal
       const isParentCard = true
+      position = {
+        x: position.x * zoom,
+        y: position.y * zoom
+      }
       if (this.spaceIsReadOnly) {
         this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info' })
         return
       }
-      const withinX = position.x > 0 && position.x < this.$store.state.pageWidth
-      const withinY = position.y > 0 && position.y < this.$store.state.pageHeight
-      if (withinX && withinY) {
-        this.normalizeSpaceCardsZ()
-        this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
-        this.$store.commit('childCardId', '')
-      }
+      this.normalizeSpaceCardsZ()
+      this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
+      this.$store.commit('childCardId', '')
     },
     eventIsFromTextarea (event) {
       if (event.target.nodeType !== 1) { return } // firefox check
       const node = event.target.nodeName
       const isTextarea = node === 'TEXTAREA'
       const isInput = node === 'INPUT'
+      if (event.srcElement.type === 'range') { return false }
       if (isTextarea || isInput) {
         return true
       }
@@ -446,6 +465,7 @@ export default {
   height 100vh
   pointer-events none // so that painting can receive events
   position relative // used by svg connections
+  transform-origin top left
 .is-interacting
   pointer-events all
 .is-painting

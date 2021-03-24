@@ -15,6 +15,7 @@ export default {
     window.addEventListener('keyup', this.handleShortcuts)
     // event.metaKey only works on keydown
     window.addEventListener('keydown', this.handleMetaKeyShortcuts)
+    window.addEventListener('wheel', this.handleMouseWheelEvents, { passive: false })
   },
   computed: {
   },
@@ -109,9 +110,37 @@ export default {
       } else if (isMeta && key === 'k' && isSpaceScope) {
         event.preventDefault()
         this.focusOnSpaceDetailsFilter()
+      // Zoom Reset
+      } else if (isMeta && key === '0') {
+        this.$store.commit('triggerSpaceZoomReset')
+      // Zoom Out
+      } else if (isMeta && key === '-') {
+        event.preventDefault()
+        this.$store.commit('triggerSpaceZoomOut')
+      // Zoom In
+      } else if (isMeta && key === '=') {
+        event.preventDefault()
+        this.$store.commit('triggerSpaceZoomIn')
       }
     },
-
+    handleMouseWheelEvents (event) {
+      const isMeta = event.metaKey || event.ctrlKey
+      if (!isMeta) { return }
+      event.preventDefault()
+      const deltaY = event.deltaY
+      let shouldZoomIn = deltaY < 0
+      let shouldZoomOut = deltaY > 0
+      const invertZoom = this.$store.state.currentUser.shouldInvertZoomDirection
+      if (invertZoom) {
+        shouldZoomIn = deltaY > 0
+        shouldZoomOut = deltaY < 0
+      }
+      if (shouldZoomIn) {
+        this.$store.commit('triggerSpaceZoomIn', 5)
+      } else if (shouldZoomOut) {
+        this.$store.commit('triggerSpaceZoomOut', 5)
+      }
+    },
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
       const isTouchDevice = this.$store.state.isTouchDevice
@@ -125,6 +154,13 @@ export default {
     },
 
     // Add Parent and Child Cards
+
+    updateWithZoom (object) {
+      const zoom = this.$store.getters.spaceCounterZoomDecimal
+      object.x = object.x * zoom
+      object.y = object.y * zoom
+      return object
+    },
 
     addCard () {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
@@ -148,6 +184,7 @@ export default {
         initialPosition.x = window.pageXOffset + 40
         initialPosition.y = window.pageYOffset + 80
       }
+      initialPosition = this.updateWithZoom(initialPosition)
       this.$store.commit('updateCardMap')
       const position = this.nonOverlappingCardPosition(initialPosition)
       this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
@@ -176,10 +213,11 @@ export default {
         return
       }
       const rect = baseCard.getBoundingClientRect()
-      const initialPosition = {
+      let initialPosition = {
         x: window.pageXOffset + rect.x + rect.width + incrementPosition,
         y: window.pageYOffset + rect.y + rect.height + incrementPosition
       }
+      initialPosition = this.updateWithZoom(initialPosition)
       this.$store.commit('updateCardMap')
       const position = this.nonOverlappingCardPosition(initialPosition)
       this.$store.dispatch('currentSpace/addCard', { position })

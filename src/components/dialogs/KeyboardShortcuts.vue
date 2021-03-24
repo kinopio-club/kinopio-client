@@ -49,6 +49,16 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
         p Preferences → Advanced → Press Tab to highlight each item on a webpage
     article
       .row
+        .badge.title
+          img.icon.magnifying-glass(src="@/assets/magnifying-glass.svg")
+          span Zoom In or Out
+        .badge.info {{meta}}-+/-, {{meta}}-Scroll
+      .row(v-if="!isMobile")
+        label(:class="{active: shouldInvertZoomDirection}" @click.left.prevent="toggleShouldInvertZoomDirection" @keydown.stop.enter="toggleShouldInvertZoomDirection")
+          input(type="checkbox" v-model="shouldInvertZoomDirection")
+          span Invert Zoom Direction
+    article
+      .row
         .badge.title Focus Nearest Card
         .badge.info Arrow(→↑←↓)
     article
@@ -168,9 +178,9 @@ export default {
         return 'Ctrl'
       }
     },
-    currentUser () {
-      return this.$store.state.currentUser
-    }
+    currentUser () { return this.$store.state.currentUser },
+    isMobile () { return utils.isMobile() },
+    shouldInvertZoomDirection () { return this.$store.state.currentUser.shouldInvertZoomDirection }
   },
   methods: {
     toggleSafariInfoIsVisible () {
@@ -181,6 +191,10 @@ export default {
     },
     toggleCardInfoIsVisible () {
       this.cardInfoIsVisible = !this.cardInfoIsVisible
+    },
+    toggleShouldInvertZoomDirection () {
+      const value = !this.shouldInvertZoomDirection
+      this.$store.commit('currentUser/shouldInvertZoomDirection', value)
     },
     updateDialogHeight () {
       if (!this.visible) { return }
@@ -238,4 +252,7 @@ export default {
     margin-top 10px
   .user
     margin-right 5px !important
+
+  .magnifying-glass
+    vertical-align -2px
 </style>

@@ -24,6 +24,7 @@ export default {
         this.top = cursor.y - 10
         this.color = this.user.color
         currentIteration = 0
+        this.updatePositionWithZoom(cursor)
         this.userLabelVisibleTimer()
         this.checkIsOnscreen()
         this.offscreenLabelPosition()
@@ -47,6 +48,11 @@ export default {
     }
   },
   methods: {
+    updatePositionWithZoom (cursor) {
+      const counterZoom = 1 / cursor.zoom
+      this.left = this.left * counterZoom
+      this.top = this.top * counterZoom
+    },
     checkIsOnscreen () {
       const isBetweenX = utils.isBetween({
         value: this.left,
