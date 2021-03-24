@@ -155,6 +155,13 @@ export default {
 
     // Add Parent and Child Cards
 
+    updateWithZoom (object) {
+      const zoom = this.$store.getters.spaceCounterZoomDecimal
+      object.x = object.x * zoom
+      object.y = object.y * zoom
+      return object
+    },
+
     addCard () {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
@@ -177,6 +184,7 @@ export default {
         initialPosition.x = window.pageXOffset + 40
         initialPosition.y = window.pageYOffset + 80
       }
+      initialPosition = this.updateWithZoom(initialPosition)
       this.$store.commit('updateCardMap')
       const position = this.nonOverlappingCardPosition(initialPosition)
       this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
@@ -205,10 +213,11 @@ export default {
         return
       }
       const rect = baseCard.getBoundingClientRect()
-      const initialPosition = {
+      let initialPosition = {
         x: window.pageXOffset + rect.x + rect.width + incrementPosition,
         y: window.pageYOffset + rect.y + rect.height + incrementPosition
       }
+      initialPosition = this.updateWithZoom(initialPosition)
       this.$store.commit('updateCardMap')
       const position = this.nonOverlappingCardPosition(initialPosition)
       this.$store.dispatch('currentSpace/addCard', { position })
