@@ -180,6 +180,7 @@ export default {
   .is-dragging
     cursor grabbing
   .zoom-percent-badge
+    display flex
     position absolute
     top -10px
     .inline-button
