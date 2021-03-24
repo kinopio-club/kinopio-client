@@ -1329,8 +1329,8 @@ export default {
       }
       context.dispatch('updateBackgroundZoom')
     },
-    updateBackgroundZoom: (context) => {
-      const defaultImage = {
+    updateBackgroundZoom: async (context) => {
+      const defaultBackground = {
         width: 310,
         height: 200
       }
@@ -1338,8 +1338,15 @@ export default {
       const computedStyle = window.getComputedStyle(document.body)
       let image = new Image()
       image.src = utils.urlFromString(computedStyle.backgroundImage)
-      let width = image.width || defaultImage.width
-      let height = image.height || defaultImage.height
+      let width = image.width
+      let height = image.height
+      if (utils.backgroundIsDefault(image.src)) {
+        width = defaultBackground.width
+        height = defaultBackground.height
+      } else if (!width) {
+        document.body.style.backgroundSize = 'initial'
+        return
+      }
       width = width * spaceZoomDecimal
       height = height * spaceZoomDecimal
       document.body.style.backgroundSize = `${width}px ${height}px`

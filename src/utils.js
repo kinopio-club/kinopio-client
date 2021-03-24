@@ -262,6 +262,11 @@ export default {
   isMacOrIpad () {
     return window.navigator.platform === 'MacIntel'
   },
+  backgroundIsDefault (path) {
+    // https://regexr.com/5pa1n
+    const backgroundPathPattern = /\/background\..+\.svg$/g
+    return Boolean(path.match(backgroundPathPattern))
+  },
   capitalizeFirstLetter (string) {
     // 'dreams' -> 'Dreams'
     return string.charAt(0).toUpperCase() + string.slice(1)
