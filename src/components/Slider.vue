@@ -8,7 +8,8 @@
 
   @mouseup.left="endMovePlayhead"
   @touchend="endMovePlayhead"
-  :class="{'is-dragging': playheadIsBeingDragged}"
+  :class="{'is-dragging': playheadIsBeingDragged, 'jiggle-right': animateJiggleRight, 'jiggle-left': animateJiggleLeft}"
+  @animationend="removeAnimations"
 )
   span.badge.info.zoom-percent-badge(
     ref="badge"
@@ -43,7 +44,9 @@ export default {
   props: {
     minValue: Number,
     maxValue: Number,
-    value: Number
+    value: Number,
+    animateJiggleRight: Boolean,
+    animateJiggleLeft: Boolean
   },
   data () {
     return {
@@ -136,6 +139,9 @@ export default {
     },
     stopMovingPlayhead () {
       this.playheadIsBeingDragged = false
+    },
+    removeAnimations () {
+      this.$emit('removeAnimations')
     }
   }
 }
@@ -185,5 +191,33 @@ export default {
       padding-right 4px
       .icon
         transform rotate(45deg)
+
+.jiggle-right
+  animation jiggle-right 0.3s ease-out forwards
+@keyframes jiggle-right
+  0%
+    transform translateX(0)
+  25%
+    transform translateX(3px)
+  50%
+    transform translateX(-3px)
+  75%
+    transform translateX(2px)
+  100%
+    transform translateX(0)
+
+.jiggle-left
+  animation jiggle-left 0.3s ease-out forwards
+@keyframes jiggle-left
+  0%
+    transform translateX(0)
+  25%
+    transform translateX(-3px)
+  50%
+    transform translateX(3px)
+  75%
+    transform translateX(-2px)
+  100%
+    transform translateX(0)
 
 </style>

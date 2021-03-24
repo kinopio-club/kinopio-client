@@ -1,6 +1,14 @@
 <template lang="pug">
 .space-zoom
-  Slider(@updatePlayhead="updateSpaceZoom" :minValue="min" :value="spaceZoomPercent" :maxValue="max")
+  Slider(
+    @updatePlayhead="updateSpaceZoom"
+    :minValue="min"
+    :value="spaceZoomPercent"
+    :maxValue="max"
+    :animateJiggleRight="animateJiggleRight"
+    :animateJiggleLeft="animateJiggleLeft"
+    @removeAnimations="removeAnimations"
+  )
 </template>
 
 <script>
@@ -33,7 +41,9 @@ export default {
   data () {
     return {
       min: 40,
-      max: 100
+      max: 100,
+      animateJiggleRight: false,
+      animateJiggleLeft: false
     }
   },
   computed: {
@@ -41,6 +51,11 @@ export default {
   },
   methods: {
     updateSpaceZoomFromTrigger (percent) {
+      if (percent > this.max) {
+        this.animateJiggleRight = true
+      } else if (percent < this.min) {
+        this.animateJiggleLeft = true
+      }
       percent = Math.max(percent, this.min)
       percent = Math.min(percent, this.max)
       this.$store.commit('spaceZoomPercent', percent)
@@ -57,6 +72,10 @@ export default {
     },
     updateBackgroundZoom () {
       this.$store.dispatch('currentSpace/updateBackgroundZoom')
+    },
+    removeAnimations () {
+      this.animateJiggleRight = false
+      this.animateJiggleLeft = false
     }
   }
 }
