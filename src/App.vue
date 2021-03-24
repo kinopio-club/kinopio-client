@@ -51,6 +51,7 @@ export default {
       if (!canEditSpace) { return }
       let updates = utils.cursorPositionInPage(event)
       updates.userId = this.$store.state.currentUser.id
+      updates.zoom = this.$store.getters.spaceZoomDecimal
       this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor' })
     },
     isTouchDevice () {

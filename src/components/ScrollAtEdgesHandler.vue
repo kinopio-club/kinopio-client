@@ -39,7 +39,6 @@ export default {
     isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
     isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal }
-    // spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
     initInteractions (event) {

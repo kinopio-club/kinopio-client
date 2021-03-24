@@ -133,7 +133,8 @@ export default {
     viewportHeight () { return this.$store.state.viewportHeight },
     viewportWidth () { return this.$store.state.viewportWidth },
     cardMap () { return this.$store.state.cardMap },
-    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal }
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
     updatePositionOffsetByPinchZoom () {
@@ -443,12 +444,21 @@ export default {
           x: circle.x + window.scrollX,
           y: circle.y + window.scrollY,
           color: circle.color,
-          iteration: circle.iteration
+          iteration: circle.iteration,
+          zoom: this.spaceZoomDecimal
         },
         type: 'addRemotePaintingCircle'
       })
     },
     createRemotePaintingCircle (circle) {
+      const remoteZoom = 1 / circle.zoom
+      const localZoom = this.spaceCounterZoomDecimal
+      // remote zoom
+      circle.x = circle.x * remoteZoom
+      circle.y = circle.y * remoteZoom
+      // local zoom
+      circle.x = circle.x / localZoom
+      circle.y = circle.y / localZoom
       remotePaintingCircles.push(circle)
     },
     remotePainting () {
