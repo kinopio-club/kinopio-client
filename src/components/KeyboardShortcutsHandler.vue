@@ -135,10 +135,11 @@ export default {
         shouldZoomIn = deltaY > 0
         shouldZoomOut = deltaY < 0
       }
+      let speed = Math.min(Math.abs(deltaY), 5)
       if (shouldZoomIn) {
-        this.$store.commit('triggerSpaceZoomIn', 5)
+        this.$store.commit('triggerSpaceZoomIn', speed)
       } else if (shouldZoomOut) {
-        this.$store.commit('triggerSpaceZoomOut', 5)
+        this.$store.commit('triggerSpaceZoomOut', speed)
       }
     },
     scrollIntoView (card) {
