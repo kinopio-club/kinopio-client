@@ -16,7 +16,7 @@
     v-if="zoomPercentBadgeIsVisible"
     :style="{left: zoomPercentBadgePosition + 'px'}"
   )
-    span {{ value }}%
+    span {{ integerValue }}%
     button.inline-button(@mousedown.left.stop @click.left.stop="resetPlayhead")
       img.icon.close(src="@/assets/add.svg")
 
@@ -70,6 +70,9 @@ export default {
     this.updateButtonPosition()
   },
   computed: {
+    integerValue () {
+      return Math.round(this.value)
+    },
     zoomPercentBadgeIsVisible () {
       if (this.value !== this.maxValue) {
         return true
