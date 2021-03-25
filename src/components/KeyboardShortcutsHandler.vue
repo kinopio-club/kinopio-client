@@ -119,6 +119,8 @@ export default {
         this.$store.commit('triggerSpaceZoomOut')
       // Zoom In
       } else if (isMeta && key === '=') {
+        const zoom = this.$store.state.spaceZoomPercent
+        if (zoom === 100) { return }
         event.preventDefault()
         this.$store.commit('triggerSpaceZoomIn')
       }
