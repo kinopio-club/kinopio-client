@@ -2,7 +2,7 @@
 dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     .row
-      p Kinopio is the visual thinking tool for new ideas and hard problems.
+      p Kinopio is your spatial thinking tool for new ideas and hard problems.
     .row
       .button-wrap
         button(@click.left.stop="toggleWhatsNewIsVisible" :class="{active: whatsNewIsVisible}")
