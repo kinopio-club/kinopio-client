@@ -9,6 +9,7 @@ import utils from '@/utils.js'
 
 const incrementPosition = 12
 let useSiblingConnectionType
+let browserZoomLevel = 0
 
 export default {
   mounted () {
@@ -112,15 +113,22 @@ export default {
         this.focusOnSpaceDetailsFilter()
       // Zoom Reset
       } else if (isMeta && key === '0') {
+        browserZoomLevel = 0
         this.$store.commit('triggerSpaceZoomReset')
       // Zoom Out
       } else if (isMeta && key === '-') {
+        const shouldNativeZoom = browserZoomLevel > 0
+        browserZoomLevel = Math.max(0, browserZoomLevel - 1)
+        if (shouldNativeZoom) { return }
         event.preventDefault()
         this.$store.commit('triggerSpaceZoomOut')
       // Zoom In
       } else if (isMeta && key === '=') {
         const zoom = this.$store.state.spaceZoomPercent
-        if (zoom === 100) { return }
+        if (zoom === 100) {
+          browserZoomLevel += 1
+          return
+        }
         event.preventDefault()
         this.$store.commit('triggerSpaceZoomIn')
       }
