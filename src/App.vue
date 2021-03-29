@@ -6,9 +6,11 @@
 )
   #layout-viewport
   MagicPaint
+  //- router-view is Space
   router-view
   Header
   Footer
+  TagDetails
   KeyboardShortcutsHandler
   .preload
     .logo-hover
@@ -26,6 +28,7 @@ import Header from '@/components/Header.vue'
 import MagicPaint from '@/components/layers/MagicPaint.vue'
 import Footer from '@/components/Footer.vue'
 import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
+import TagDetails from '@/components/dialogs/TagDetails.vue'
 
 import utils from '@/utils.js'
 
@@ -34,7 +37,8 @@ export default {
     Header,
     MagicPaint,
     Footer,
-    KeyboardShortcutsHandler
+    KeyboardShortcutsHandler,
+    TagDetails
   },
   computed: {
     isDevelopment () {

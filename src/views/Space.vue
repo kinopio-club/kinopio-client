@@ -27,7 +27,6 @@ main.space(
     template(v-for="card in cards")
       Card(:card="card")
   ConnectionDetails
-  TagDetails
   LinkDetails
   MultipleSelectedActions
   OffscreenMarkers
@@ -41,7 +40,6 @@ import Connection from '@/components/Connection.vue'
 import ConnectionLabel from '@/components/ConnectionLabel.vue'
 import UserLabel from '@/components/UserLabel.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
-import TagDetails from '@/components/dialogs/TagDetails.vue'
 import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
@@ -62,7 +60,6 @@ export default {
     ConnectionLabel,
     UserLabel,
     ConnectionDetails,
-    TagDetails,
     LinkDetails,
     MultipleSelectedActions,
     OffscreenMarkers,

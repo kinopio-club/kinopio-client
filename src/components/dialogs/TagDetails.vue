@@ -96,14 +96,11 @@ export default {
     },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     currentSpaceId () { return this.$store.state.currentSpace.id },
-    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     styles () {
-      const zoom = this.spaceCounterZoomDecimal
       const position = this.$store.state.tagDetailsPosition
       return {
-        left: `${position.x * zoom}px`,
-        top: `${position.y * zoom}px`,
-        transform: `scale(${this.spaceCounterZoomDecimal})`
+        left: `${position.x}px`,
+        top: `${position.y}px`
       }
     },
     color () {
