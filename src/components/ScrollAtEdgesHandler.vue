@@ -38,7 +38,8 @@ export default {
     currentUserIsPainting () { return this.$store.state.currentUserIsPainting },
     isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
     isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
-    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal }
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
     initInteractions (event) {
@@ -66,13 +67,14 @@ export default {
     },
     scrollFrame () {
       let delta, speed
+      const zoom = this.spaceZoomDecimal
       const viewportHeight = this.viewportHeight
       const viewportWidth = this.viewportWidth
       const cursor = this.cursor()
-      const cursorIsTopSide = cursor.y <= scrollAreaHeight
-      const cursorIsBottomSide = cursor.y >= viewportHeight - scrollAreaHeight
-      const cursorIsLeftSide = cursor.x <= scrollAreaWidth
-      const cursorIsRightSide = cursor.x >= viewportWidth - scrollAreaWidth
+      const cursorIsTopSide = cursor.y <= scrollAreaHeight * zoom
+      const cursorIsBottomSide = cursor.y >= (viewportHeight - scrollAreaHeight) * zoom
+      const cursorIsLeftSide = cursor.x <= scrollAreaWidth * zoom
+      const cursorIsRightSide = cursor.x >= (viewportWidth - scrollAreaWidth) * zoom
       // Y movement
       if (movementDirection.y === 'up' && cursorIsTopSide && window.scrollY) {
         speed = this.speed(cursor, 'up')
