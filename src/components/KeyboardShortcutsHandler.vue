@@ -507,9 +507,10 @@ export default {
     selectAllCardsBelowCursor (event) {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
+      const zoom = this.$store.getters.spaceZoomDecimal
       const cursor = this.$store.state.prevCursorPosition
       let cards = utils.clone(this.$store.state.currentSpace.cards)
-      cards = cards.filter(card => card.y > cursor.y)
+      cards = cards.filter(card => (card.y * zoom) > cursor.y)
       cards = cards.map(card => card.id)
       this.$store.commit('multipleSelectedActionsPosition', cursor)
       this.$store.commit('multipleSelectedActionsIsVisible', true)
