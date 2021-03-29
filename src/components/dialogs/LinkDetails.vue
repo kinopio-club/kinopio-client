@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.link-details.narrow(v-if="isVisible" :open="isVisible" :style="dialogPosition" ref="dialog")
+dialog.link-details.narrow(v-if="isVisible" :open="isVisible" :style="styles" ref="dialog")
   section.edit-card(v-if="showEditCard")
     button(@click="showCardDetails(null)") Edit Card
   section
@@ -77,11 +77,14 @@ export default {
     },
     space () { return this.currentLink.space },
     isSpace () { return utils.objectHasKeys(this.currentLink.space) },
-    dialogPosition () {
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    styles () {
+      const zoom = this.spaceCounterZoomDecimal
       const position = this.position || this.$store.state.linkDetailsPosition
       return {
-        left: `${position.x}px`,
-        top: `${position.y}px`
+        left: `${position.x * zoom}px`,
+        top: `${position.y * zoom}px`,
+        transform: `scale(${this.spaceCounterZoomDecimal})`
       }
     },
     url () {

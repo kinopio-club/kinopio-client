@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.tag-details(v-if="visible" :open="visible" :style="position" ref="dialog" @click.left.stop="closeDialogs")
+dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @click.left.stop="closeDialogs")
   section.edit-card(v-if="showEditCard")
     button(@click="showCardDetails(null)") Edit Card
   section(:style="{backgroundColor: color}")
@@ -96,11 +96,14 @@ export default {
     },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     currentSpaceId () { return this.$store.state.currentSpace.id },
-    position () {
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    styles () {
+      const zoom = this.spaceCounterZoomDecimal
       const position = this.$store.state.tagDetailsPosition
       return {
-        left: `${position.x}px`,
-        top: `${position.y}px`
+        left: `${position.x * zoom}px`,
+        top: `${position.y * zoom}px`,
+        transform: `scale(${this.spaceCounterZoomDecimal})`
       }
     },
     color () {
