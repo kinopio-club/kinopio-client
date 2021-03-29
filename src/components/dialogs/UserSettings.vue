@@ -122,7 +122,7 @@ export default {
     },
     toggleShouldInvertZoomDirection () {
       const value = !this.shouldInvertZoomDirection
-      this.$store.commit('currentUser/shouldInvertZoomDirection', value)
+      this.$store.dispatch('currentUser/shouldInvertZoomDirection', value)
     }
   },
   watch: {

@@ -503,6 +503,14 @@ export default {
         body: {
           shouldShowMoreAlignOptions: value
         } }, { root: true })
+    },
+    shouldInvertZoomDirection: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldInvertZoomDirection' })
+      context.commit('shouldInvertZoomDirection', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldInvertZoomDirection: value
+        } }, { root: true })
     }
   },
   getters: {
