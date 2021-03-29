@@ -122,6 +122,12 @@ export default {
     // Cards
 
     updateCard: (state, updatedCard) => {
+      if (updatedCard.x) {
+        updatedCard.x = Math.round(updatedCard.x)
+      }
+      if (updatedCard.y) {
+        updatedCard.y = Math.round(updatedCard.y)
+      }
       state.cards.map(card => {
         if (card.id === updatedCard.id) {
           const updates = Object.keys(updatedCard)

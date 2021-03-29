@@ -105,14 +105,22 @@ export default {
     // verify positioning
 
     yIsDistributed () {
-      const cards = this.cards
+      const cards = this.cardsSortedByY()
+      const zoom = this.spaceCounterZoomDecimal
       let yIsDistributed = true
       if (this.shouldAutoDistribute) {
         cards.forEach((card, index) => {
           if (index > 0) {
             const previousCard = cards[index - 1]
-            const previousBottomSide = previousCard.y + previousCard.height
-            if (card.y - previousBottomSide !== spaceBetweenCards) {
+            const previousCardHeight = Math.round(previousCard.height * zoom)
+            const previousBottomSide = previousCard.y + previousCardHeight
+            const cardYDelta = card.y - previousBottomSide
+            const isNotEquallyDistributed = !utils.isBetween({
+              value: Math.abs(cardYDelta),
+              min: spaceBetweenCards - 1,
+              max: spaceBetweenCards + 1
+            })
+            if (isNotEquallyDistributed) {
               yIsDistributed = false
             }
           }
@@ -121,14 +129,22 @@ export default {
       return yIsDistributed
     },
     xIsDistributed () {
-      const cards = this.cards
+      const cards = this.cardsSortedByX()
+      const zoom = this.spaceCounterZoomDecimal
       let xIsDistributed = true
       if (this.shouldAutoDistribute) {
         cards.forEach((card, index) => {
           if (index > 0) {
             const previousCard = cards[index - 1]
-            const previousRightSide = previousCard.x + previousCard.width
-            if (card.x - previousRightSide !== spaceBetweenCards) {
+            const previousCardWidth = Math.round(previousCard.width * zoom)
+            const previousRightSide = previousCard.x + previousCardWidth
+            const cardXDelta = card.x - previousRightSide
+            const isNotEquallyDistributed = !utils.isBetween({
+              value: Math.abs(cardXDelta),
+              min: spaceBetweenCards - 1,
+              max: spaceBetweenCards + 1
+            })
+            if (isNotEquallyDistributed) {
               xIsDistributed = false
             }
           }
@@ -161,9 +177,16 @@ export default {
       return centerIsEqual
     },
     isRightAligned () {
+      const zoom = this.spaceCounterZoomDecimal
       const origin = this.cards[0]
-      const cardRight = origin.x + origin.width
-      const xIsAligned = this.cards.every(card => card.x + card.width === cardRight)
+      const cardRight = origin.x + (origin.width * zoom)
+      const xIsAligned = this.cards.every(card => {
+        return utils.isBetween({
+          value: card.x + (card.width * zoom),
+          min: cardRight - 1,
+          max: cardRight + 1
+        })
+      })
       return xIsAligned
     },
     isDistributedHorizontally () {
@@ -233,7 +256,9 @@ export default {
         }
       })
       return distanceIsEqual
-    }
+    },
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
     toggleMoreOptionsIsVisible () {
@@ -264,10 +289,11 @@ export default {
     alignTop () {
       const cards = this.cardsSortedByX()
       const origin = cards[0]
+      const zoom = this.spaceCounterZoomDecimal
       cards.forEach((card, index) => {
         if (index > 0) {
           const previousCard = cards[index - 1]
-          const previousRightSide = previousCard.x + previousCard.width
+          const previousRightSide = previousCard.x + (previousCard.width * zoom)
           card = utils.clone(card)
           card.y = origin.y
           if (this.shouldAutoDistribute) {
@@ -300,12 +326,13 @@ export default {
     alignRight () {
       const cards = this.cardsSortedByXWidth()
       const origin = cards[0]
+      const zoom = this.spaceCounterZoomDecimal
       cards.forEach((card, index) => {
         if (index > 0) {
           const previousCard = cards[index - 1]
-          const previousBottomSide = previousCard.y + previousCard.height
+          const previousBottomSide = previousCard.y + (previousCard.height * zoom)
           card = utils.clone(card)
-          card.x = origin.x + origin.width - card.width
+          card.x = origin.x + (origin.width * zoom) - (card.width * zoom)
           if (this.shouldAutoDistribute) {
             card.y = previousBottomSide + spaceBetweenCards
           }
@@ -333,10 +360,11 @@ export default {
     alignLeft () {
       const cards = this.cardsSortedByY()
       const origin = cards[0]
+      const zoom = this.spaceCounterZoomDecimal
       cards.forEach((card, index) => {
         if (index > 0) {
           const previousCard = cards[index - 1]
-          const previousBottomSide = previousCard.y + previousCard.height
+          const previousBottomSide = previousCard.y + (previousCard.height * zoom)
           card = utils.clone(card)
           card.x = origin.x
           if (this.shouldAutoDistribute) {
