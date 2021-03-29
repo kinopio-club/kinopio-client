@@ -63,7 +63,7 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left="closeDialog
       .button-wrap
         button(:disabled="!canEditSpace" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
           span Image
-        ImagePicker(:visible="imagePickerIsVisible" :isBackgroundImage="true" :imageIsFullSize="true" @selectImage="updateSpaceBackground" :initialSearch="initialSearch")
+        ImagePicker(:visible="imagePickerIsVisible" :isBackgroundImage="true" @selectImage="updateSpaceBackground" :initialSearch="initialSearch")
       .button-wrap
         button(:disabled="!canEditSpace" @click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")

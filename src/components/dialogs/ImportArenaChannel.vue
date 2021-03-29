@@ -143,6 +143,7 @@ export default {
           headers
         }
         const response = await fetch(`https://api.are.na/v2/channels/${channel}?per=${maxBlocks}&sort=position&direction=desc`, options)
+        console.log('🙅‍♀️channel contents', response.body)
         if (response.status !== 200) {
           throw { response, status: response.status }
         }
@@ -205,7 +206,7 @@ export default {
       } else if (type === 'Text') {
         card.name = `${title} – ${block.content}`
       } else if (type === 'Media') {
-        card.name = `${title} – ${block.image.display.url}`
+        card.name = `${title} – ${block.image.original.url}`
       } else if (type === 'Attachment') {
         card.name = block.attachment.url
       } else if (type === 'Channel') {

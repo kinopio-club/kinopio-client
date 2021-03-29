@@ -114,8 +114,7 @@ export default {
     initialSearch: String,
     cardUrl: String,
     cardId: String,
-    isBackgroundImage: Boolean,
-    imageIsFullSize: Boolean
+    isBackgroundImage: Boolean
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -298,7 +297,7 @@ export default {
       this.error.userIsOffline = false
       this.error.unknownUploadError = false
     },
-    clearHeights () {
+    clearHeights () {
       this.minDialogHeight = null
       this.dialogHeight = null
       this.resultsSectionHeight = null
@@ -309,12 +308,7 @@ export default {
       const backgrounds = service === 'Backgrounds' && this.serviceIsBackgrounds
       if (arena) {
         this.images = data.blocks.map(image => {
-          let url
-          if (this.imageIsFullSize) {
-            url = image.image.original.url
-          } else {
-            url = image.image.display.url
-          }
+          const url = image.image.original.url
           return {
             id: image.id,
             sourcePageUrl: `https://www.are.na/block/${image.id}`,
@@ -417,7 +411,7 @@ export default {
         this.showOnRightSide = utils.elementShouldBeOnRightSide(element)
       })
     },
-    updateHeightFromDialog () {
+    updateHeightFromDialog () {
       if (!this.visible) { return }
       this.$nextTick(() => {
         const element = this.$refs.dialog
