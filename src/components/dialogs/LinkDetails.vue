@@ -77,14 +77,11 @@ export default {
     },
     space () { return this.currentLink.space },
     isSpace () { return utils.objectHasKeys(this.currentLink.space) },
-    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     styles () {
-      const zoom = this.spaceCounterZoomDecimal
       const position = this.position || this.$store.state.linkDetailsPosition
       return {
-        left: `${position.x * zoom}px`,
-        top: `${position.y * zoom}px`,
-        transform: `scale(${this.spaceCounterZoomDecimal})`
+        left: `${position.x}px`,
+        top: `${position.y}px`
       }
     },
     url () {
