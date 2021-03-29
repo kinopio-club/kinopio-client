@@ -143,7 +143,6 @@ export default {
           headers
         }
         const response = await fetch(`https://api.are.na/v2/channels/${channel}?per=${maxBlocks}&sort=position&direction=desc`, options)
-        console.log('🙅‍♀️channel contents', response.body)
         if (response.status !== 200) {
           throw { response, status: response.status }
         }
@@ -160,16 +159,8 @@ export default {
       }
     },
     createSpace (channel) {
-      let space = {
-        id: nanoid(),
-        name: channel.title,
-        cards: [],
-        connections: [],
-        connectionTypes: [],
-        cacheDate: new Date().getTime(),
-        removedCards: [],
-        showInExplore: true
-      }
+      let space = utils.emptySpace(nanoid())
+      space.cacheDate = new Date().getTime()
       const meta = {
         id: nanoid(),
         x: 40,
@@ -200,7 +191,7 @@ export default {
       let card = { id: nanoid() }
       const type = block.class
       const title = block.title
-      console.log('**', block)
+      console.log('**', block, type)
       if (type === 'Link') {
         card.name = `${block.image.display.url} ${block.source.url}`
       } else if (type === 'Text') {
@@ -212,7 +203,7 @@ export default {
       } else if (type === 'Channel') {
         card.name = `${title} – https://are.na/${block.owner_slug}/${block.slug}`
       } else if (type === 'Image') {
-        card.name = block.image.display.url
+        card.name = block.image.original.url
       } else {
         card.name = `${title} ${type}`
       }
