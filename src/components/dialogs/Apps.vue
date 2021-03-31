@@ -63,6 +63,10 @@ dialog.apps.narrow(v-if="visible" @click.stop :open="visible" ref="dialog" :styl
                 span Add to Home Screen
                 img.icon.add(src="@/assets/add.svg")
               span (you'll need to scroll down)
+  section(v-if="!isDesktop")
+    label(:class="{active: isJournalPath}" @click.left.prevent="toggleIsJournalPath" @keydown.stop.enter="toggleIsJournalPath")
+      input(type="checkbox" v-model="isJournalPath")
+      span Use /journal Url
 
 </template>
 
@@ -100,7 +104,8 @@ export default {
     return {
       dialogHeight: null,
       isDesktop: true,
-      isAndroid: false
+      isAndroid: false,
+      isJournalPath: false
     }
   },
   methods: {
@@ -125,7 +130,11 @@ export default {
     stripUrlPath () {
       title = document.title
       pathname = window.location.pathname
-      window.history.replaceState({}, title, '/')
+      if (this.isJournalPath) {
+        window.history.replaceState({}, title, '/journal')
+      } else {
+        window.history.replaceState({}, title, '/')
+      }
     },
     restoreUrlPath () {
       window.history.replaceState({}, title, pathname)
@@ -136,6 +145,10 @@ export default {
       } else {
         this.isDesktop = true
       }
+    },
+    toggleIsJournalPath () {
+      this.isJournalPath = !this.isJournalPath
+      this.stripUrlPath()
     }
   },
   watch: {
