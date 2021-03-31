@@ -1,5 +1,5 @@
 <template lang="pug">
-.footer-wrap
+.footer-wrap(:class="{ 'is-mobile-standalone': isMobileStandalone }")
   .left
     footer(:style="visualViewportPosition")
       Notifications
@@ -217,6 +217,9 @@ export default {
         const isSpace = upload.spaceId === currentSpace.id
         return inProgress && isSpace
       })
+    },
+    isMobileStandalone () {
+      return utils.isMobile() && navigator.standalone
     }
   },
   methods: {
@@ -304,6 +307,8 @@ export default {
     pointer-events all
     @media(max-width 460px)
      display none
+  &.is-mobile-standalone
+    margin-bottom 20px
 
 footer
   .undo
