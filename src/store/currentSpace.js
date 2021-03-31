@@ -664,12 +664,17 @@ export default {
       context.commit('addNotification', { message: `You were removed as a collaborator from ${name}`, type: 'info' }, { root: true })
     },
     updateWindowHistory: (context, { space, isRemote }) => {
+      space = space || context.state
+      const spaceUrl = utils.url(space)
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
-      if (currentUserIsSignedIn || isRemote) {
-        space = space || context.state
-        const spaceUrl = utils.url(space)
+      const spaceHasUrl = currentUserIsSignedIn || isRemote
+      if (spaceHasUrl) {
+        context.commit('currentSpacePath', spaceUrl, { root: true })
+        if (navigator.standalone) { return }
         window.history.pushState({ spaceId: space.id }, `${space.name} – Kinopio`, spaceUrl)
       } else {
+        context.commit('currentSpacePath', '/', { root: true })
+        if (navigator.standalone) { return }
         window.history.replaceState({}, '', '/')
       }
     },

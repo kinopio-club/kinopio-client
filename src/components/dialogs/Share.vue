@@ -173,16 +173,24 @@ export default {
         let element = this.$refs.dialog
         this.dialogHeight = utils.elementHeight(element)
       })
+    },
+    updateSpaceHasUrl () {
+      const hasCurrentSpacePath = this.$store.state.currentSpacePath !== '/'
+      const hasWindowUrl = window.location.href !== (window.location.origin + '/')
+      this.spaceHasUrl = hasCurrentSpacePath || hasWindowUrl
+    },
+    updateUrl () {
+      this.url = `${window.location.origin}/${this.$store.state.currentSpacePath}`
     }
   },
   watch: {
     visible (visible) {
       this.urlIsCopied = false
-      this.spaceHasUrl = window.location.href !== (window.location.origin + '/')
+      this.updateSpaceHasUrl()
       this.closeDialogs()
       if (visible) {
         this.updateSpaceCollaborators()
-        this.url = window.location.href
+        this.updateUrl()
         this.updateDialogHeight()
       }
     }
