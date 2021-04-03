@@ -27,7 +27,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
     .row
       .button-wrap
         button(@click.left.stop="toggleAppsIsVisible" :class="{active: appsIsVisible}")
-          span Apps
+          span Desktop and Mobile Apps
         Apps(:visible="appsIsVisible")
 </template>
 
