@@ -63,10 +63,10 @@ dialog.apps.narrow(v-if="visible" @click.stop :open="visible" ref="dialog" :styl
                 span Add to Home Screen
                 img.icon.add(src="@/assets/add.svg")
               span (you'll need to scroll down)
-  section(v-if="!isDesktop")
-    label(:class="{active: isJournalPath}" @click.left.prevent="toggleIsJournalPath" @keydown.stop.enter="toggleIsJournalPath")
-      input(type="checkbox" v-model="isJournalPath")
-      span Use /journal Url
+  //- section(v-if="!isDesktop")
+  //-   label(:class="{active: isJournalPath}" @click.left.prevent="toggleIsJournalPath" @keydown.stop.enter="toggleIsJournalPath")
+  //-     input(type="checkbox" v-model="isJournalPath")
+  //-     span Use /journal Url
 
 </template>
 
