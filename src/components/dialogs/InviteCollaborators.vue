@@ -21,6 +21,10 @@ dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.left.st
         button(@click.left="shareUrl" :disabled="loading")
           img.icon(src="@/assets/share.svg")
 
+    p(v-if="spaceIsPrivate")
+      img.icon(src="@/assets/view.svg")
+      span Invited users can view private spaces without a Kinopio account
+
     template(v-if="!loading && !collaboratorKey")
       .row
         .badge.danger シ_ _)シ Something went wrong
@@ -56,6 +60,9 @@ export default {
     // https://caniuse.com/#feat=web-share
     canNativeShare () {
       return Boolean(navigator.share)
+    },
+    spaceIsPrivate () {
+      return this.$store.state.currentSpace.privacy === 'private'
     }
   },
   methods: {
