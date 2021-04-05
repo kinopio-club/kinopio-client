@@ -88,6 +88,9 @@ export default {
       const currentUserId = this.$store.state.currentUser.id
       const cards = space.cards.map(card => {
         card.userId = null
+        card.z = card.z || 1
+        card.x = card.x || 100
+        card.y = card.y || 100
         return card
       })
       const connections = space.connections.map(connection => {
@@ -109,7 +112,13 @@ export default {
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       cache.saveSpace(uniqueNewSpace)
       this.$store.commit('currentSpace/restoreSpace', uniqueNewSpace)
-      await this.$store.dispatch('currentSpace/saveImportedSpace')
+      try {
+        await this.$store.dispatch('currentSpace/saveImportedSpace')
+      } catch (error) {
+        console.error('🚒', error)
+        this.unknownError = true
+        return
+      }
       this.$store.dispatch('currentUser/lastSpaceId', space.id)
       this.updateSpaces()
       this.$store.commit('triggerFocusSpaceDetailsName')
