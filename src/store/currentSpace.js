@@ -743,7 +743,9 @@ export default {
         context.dispatch('showCardDetails', cardId)
       }
       context.commit('currentUser/updateFavoriteSpaceIsEdited', space.id, { root: true })
-      context.dispatch('updateIncorrectCardConnectionPaths', { shouldUpdateApi: Boolean(remoteSpace) })
+      Vue.nextTick(() => {
+        context.dispatch('updateIncorrectCardConnectionPaths', { shouldUpdateApi: Boolean(remoteSpace) })
+      })
     },
     loadLastSpace: (context) => {
       const user = context.rootState.currentUser
