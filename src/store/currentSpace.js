@@ -1230,6 +1230,7 @@ export default {
       })
     },
     updateIncorrectCardConnectionPaths: (context, { shouldUpdateApi }) => {
+      if (!context.rootState.webfontIsLoaded) { return }
       let connections = []
       context.state.connections.forEach(connection => {
         const updatedPath = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)

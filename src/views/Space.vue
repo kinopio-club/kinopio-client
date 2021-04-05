@@ -103,6 +103,11 @@ export default {
 
     window.addEventListener('unload', this.unloadPage)
     window.addEventListener('popstate', this.loadSpaceOnBackOrForward)
+
+    document.fonts.ready.then(event => {
+      this.$store.commit('webfontIsLoaded', true)
+      this.updateIncorrectCardConnectionPaths()
+    })
   },
   data () {
     return {
@@ -141,6 +146,12 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
+    updateIncorrectCardConnectionPaths () {
+      const space = utils.clone(this.$store.state.currentSpace)
+      const user = utils.clone(this.$store.state.currentUser)
+      const currentSpaceIsRemote = utils.currentSpaceIsRemote(space, user)
+      this.$store.dispatch('currentSpace/updateIncorrectCardConnectionPaths', { shouldUpdateApi: currentSpaceIsRemote })
+    },
     loadSpaceOnBackOrForward (event) {
       const url = window.location.href
       if (!utils.urlIsKinopioSpace(url)) { return }

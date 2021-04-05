@@ -41,6 +41,7 @@ export default new Vuex.Store({
     prevCursorPosition: { x: 0, y: 0 },
     spaceZoomPercent: 100,
     currentSpacePath: '/',
+    webfontIsLoaded: false,
 
     // reset password
     resetPasswordApiKey: '',
@@ -232,6 +233,10 @@ export default new Vuex.Store({
     currentSpacePath: (state, value) => {
       utils.typeCheck({ value, type: 'string', origin: 'currentSpacePath' })
       state.currentSpacePath = value
+    },
+    webfontIsLoaded: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'webfontIsLoaded' })
+      state.webfontIsLoaded = value
     },
     resetPasswordApiKey: (state, apiKey) => {
       utils.typeCheck({ value: apiKey, type: 'string', origin: 'resetPasswordApiKey' })
