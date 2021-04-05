@@ -11,8 +11,9 @@ span.space-list-wrap
           tabindex="0"
           v-on:keyup.enter="selectSpace(space)"
         )
-          User(v-if="showUser" :user="user(space)" :isClickable="false" :key="user(space).id")
-          template(v-else-if="showUserIfCurrentUserIsCollaborator && space.currentUserIsCollaborator")
+          template(v-if="showUser")
+            User(:user="user(space)" :isClickable="false" :key="user(space).id")
+          template(v-else-if="showCollaborator(space)")
             User(:user="user(space)" :isClickable="false" :key="user(space).id")
           //- NEW
           span(v-if="space.isEdited")
@@ -99,6 +100,10 @@ export default {
     }
   },
   methods: {
+    showCollaborator (space) {
+      const isUser = Boolean(this.user(space))
+      return this.showUserIfCurrentUserIsCollaborator && space.currentUserIsCollaborator && isUser
+    },
     categoryClassName (space) {
       return space.category.toLowerCase()
     },
