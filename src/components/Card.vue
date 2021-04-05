@@ -287,7 +287,8 @@ export default {
       }
     },
     urls () {
-      const urls = utils.urlsFromString(this.name)
+      const name = utils.removeMarkdownCodeblocksFromString(this.name)
+      const urls = utils.urlsFromString(name)
       this.updateMediaUrls(urls)
       return urls || []
     },

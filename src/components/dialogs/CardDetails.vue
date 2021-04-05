@@ -345,7 +345,10 @@ export default {
       }
     },
     url () { return utils.urlFromString(this.name) },
-    urls () { return utils.urlsFromString(this.name, true) },
+    urls () {
+      const name = utils.removeMarkdownCodeblocksFromString(this.name)
+      return utils.urlsFromString(name, true)
+    },
     validUrls () {
       if (!this.urls) { return [] }
       return this.urls.filter(url => {

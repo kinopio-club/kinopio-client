@@ -1192,5 +1192,14 @@ export default {
     const japanesePattern = new RegExp(/[\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf]/gmi)
     const japanese = name.match(japanesePattern)
     return Boolean(japanese)
+  },
+  removeMarkdownCodeblocksFromString (string) {
+    const segments = this.markdownSegments(string)
+    segments.forEach(segment => {
+      if (segment.type === 'codeBlock' || segment.type === 'code') {
+        string = string.replace(segment.content, '')
+      }
+    })
+    return string
   }
 }
