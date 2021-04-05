@@ -9,18 +9,16 @@ dialog.narrow.space-status(v-if="visible" :open="visible" ref="dialog" :class="{
     p.badge.success(v-if="isConnected") Connected
 
   template(v-if="!isConnected")
-    section(v-if="isLoadingSpace && spaceIsCached")
-      p
+    section
+      p(v-if="isLoadingSpace && spaceIsCached")
         span.badge.info You can edit right now
         span and your changes will sync once connected
-    section(v-else-if="isJoiningSpace || isReconnectingToBroadcast")
-      p
+      p(v-else-if="isJoiningSpace || isReconnectingToBroadcast")
         span.badge.info You can edit right now
         span {{' '}}
         span but cannot collaborate yet, your changes will sync once connected
       .button-wrap
         button(@click.left="refreshBrowser") Refresh
-
 </template>
 
 <script>
