@@ -124,7 +124,6 @@ export default new Vuex.Store({
     notifySpaceIsRemoved: false,
     notifyNewUser: false,
     notifySignUpToEditSpace: false,
-    notifySpaceIsOpenAndEditable: false,
     notifyCardsCreatedIsNearLimit: false,
     notifyCardsCreatedIsOverLimit: false,
     notifyKinopioUpdatesAreAvailable: false,
@@ -616,7 +615,6 @@ export default new Vuex.Store({
       state.notifyConnectionError = false
       state.notifyServerCouldNotSave = false
       state.notifySignUpToEditSpace = false
-      state.notifySpaceIsOpenAndEditable = false
       state.notifyCardsCreatedIsNearLimit = false
       state.notifyCardsCreatedIsOverLimit = false
       state.notifyMoveOrCopyToSpace = false
@@ -645,10 +643,6 @@ export default new Vuex.Store({
     notifySignUpToEditSpace: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'notifySignUpToEditSpace' })
       state.notifySignUpToEditSpace = value
-    },
-    notifySpaceIsOpenAndEditable: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'notifySpaceIsOpenAndEditable' })
-      state.notifySpaceIsOpenAndEditable = value
     },
     notifyCardsCreatedIsNearLimit: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'notifyCardsCreatedIsNearLimit' })

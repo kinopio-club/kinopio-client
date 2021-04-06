@@ -188,12 +188,7 @@ export default {
       const frames = this.$store.state.filteredFrameIds
       return userFilters + tagNames.length + connections.length + frames.length
     },
-    isFavoriteSpace () {
-      const currentSpace = this.$store.state.currentSpace
-      const favoriteSpaces = this.$store.state.currentUser.favoriteSpaces
-      const isFavoriteSpace = favoriteSpaces.filter(space => space.id === currentSpace.id)
-      return Boolean(isFavoriteSpace.length)
-    },
+    isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] },
     visualViewportPosition () {
       if (this.pinchZoomScale === 1) { return }
       if (this.pinchZoomScale > 1) {

@@ -194,6 +194,7 @@ import nanoid from 'nanoid'
 import debounce from 'lodash-es/debounce'
 
 let previousTags = []
+let notifiedFavoriteSpaceToFollow = false
 
 export default {
   name: 'CardDetails',
@@ -331,6 +332,8 @@ export default {
       if (!this.currentSelectedLink.space) { return }
       return this.currentSelectedLink.space.id === this.card.linkToSpaceId
     },
+    currentUserIsSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
+    isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] },
     name: {
       get () {
         return this.card.name
@@ -1119,6 +1122,17 @@ export default {
       }
       this.updateCardName(newName)
       this.moveCursorPastTagEnd()
+    },
+    notifyFavoriteSpaceToFollow (context) {
+      const spaceIsOpen = this.spacePrivacyIsOpen
+      const userIsNotMember = !this.currentUserIsSpaceMember
+      const spaceIsNotFavorite = !this.isFavoriteSpace
+      const userUpdatedCard = this.cardIsCreatedByCurrentUser
+      const notNotified = !notifiedFavoriteSpaceToFollow
+      if (spaceIsOpen && userIsNotMember && spaceIsNotFavorite && userUpdatedCard && notNotified) {
+        this.$store.commit('addNotification', { message: 'Favorite to follow', icon: 'heart-empty', type: 'info' })
+        notifiedFavoriteSpaceToFollow = true
+      }
     }
   },
   watch: {
@@ -1142,6 +1156,9 @@ export default {
       }
       if (!visible && this.cardIsEmpty()) {
         this.$store.dispatch('currentSpace/removeCard', this.card)
+      }
+      if (!visible && !this.cardIsEmpty()) {
+        this.notifyFavoriteSpaceToFollow()
       }
       this.$store.dispatch('updatePageSizes')
     }

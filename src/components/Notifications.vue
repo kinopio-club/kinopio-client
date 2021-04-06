@@ -5,11 +5,6 @@ aside.notifications(@click.left="closeAllDialogs")
       img.icon(v-if="item.icon" :src="icon(item.icon).path" :class="item.icon")
       span {{item.message}}
 
-  .item.success(v-if="notifySpaceIsOpenAndEditable")
-    p
-      img.icon.open(src="@/assets/open.svg")
-      span This space is open, which means you can add to it too
-
   .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
     p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade for $5/month
     .row
@@ -160,7 +155,6 @@ export default {
     notifySpaceIsRemoved () { return this.$store.state.notifySpaceIsRemoved },
     notifyNewUser () { return this.$store.state.notifyNewUser },
     notifySignUpToEditSpace () { return this.$store.state.notifySignUpToEditSpace },
-    notifySpaceIsOpenAndEditable () { return this.$store.state.notifySpaceIsOpenAndEditable },
     notifyCardsCreatedIsNearLimit () { return this.$store.state.notifyCardsCreatedIsNearLimit },
     notifyCardsCreatedIsOverLimit () { return this.$store.state.notifyCardsCreatedIsOverLimit },
     notifyKinopioUpdatesAreAvailable () { return this.$store.state.notifyKinopioUpdatesAreAvailable },

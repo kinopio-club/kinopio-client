@@ -641,7 +641,7 @@ export default {
         console.log('🌌', remoteSpace)
         cache.saveSpace(remoteSpace)
       } else if (!isSpaceMember && canEditSpace) {
-        context.commit('notifySpaceIsOpenAndEditable', true, { root: true })
+        context.commit('addNotification', { message: 'This space is open, which means you can add to it too', icon: 'open', type: 'success' }, { root: true })
       }
       return utils.normalizeRemoteSpace(remoteSpace)
     },
@@ -1461,6 +1461,11 @@ export default {
       const isSpaceMember = rootGetters['currentUser/isSpaceMember']
       const isSignedIn = rootGetters['currentUser/isSignedIn']
       return isSpaceMember && isSignedIn
+    },
+    isFavorite: (state, getters, rootState) => {
+      const favoriteSpaces = rootState.currentUser.favoriteSpaces
+      const isFavoriteSpace = favoriteSpaces.filter(space => space.id === state.id)
+      return Boolean(isFavoriteSpace.length)
     },
 
     // Cards
