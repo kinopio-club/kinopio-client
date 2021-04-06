@@ -42,6 +42,7 @@ export default new Vuex.Store({
     spaceZoomPercent: 100,
     currentSpacePath: '/',
     webfontIsLoaded: false,
+    userHasScrolled: false,
 
     // reset password
     resetPasswordApiKey: '',
@@ -237,6 +238,10 @@ export default new Vuex.Store({
     webfontIsLoaded: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'webfontIsLoaded' })
       state.webfontIsLoaded = value
+    },
+    userHasScrolled: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'userHasScrolled' })
+      state.userHasScrolled = value
     },
     resetPasswordApiKey: (state, apiKey) => {
       utils.typeCheck({ value: apiKey, type: 'string', origin: 'resetPasswordApiKey' })

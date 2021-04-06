@@ -43,6 +43,13 @@ export default {
     TagDetails,
     LinkDetails
   },
+  mounted () {
+    // use timer to prevent being fired from page reload scroll
+    // https://stackoverflow.com/questions/34095038/on-scroll-fires-automatically-on-page-refresh
+    setTimeout(() => {
+      window.addEventListener('scroll', this.updateUserHasScrolled)
+    }, 100)
+  },
   computed: {
     isDevelopment () {
       if (process.env.NODE_ENV === 'development') {
@@ -63,8 +70,11 @@ export default {
     },
     isTouchDevice () {
       this.$store.commit('isTouchDevice', true)
+    },
+    updateUserHasScrolled () {
+      if (this.$store.state.userHasScrolled) { return }
+      this.$store.commit('userHasScrolled', true)
     }
-
   }
 }
 </script>

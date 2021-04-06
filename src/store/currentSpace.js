@@ -13,6 +13,7 @@ import random from 'lodash-es/random'
 import last from 'lodash-es/last'
 import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
+import sortBy from 'lodash-es/sortBy'
 import dayjs from 'dayjs'
 
 let otherSpacesQueue = [] // id
@@ -707,6 +708,7 @@ export default {
       const emptySpace = utils.emptySpace(space.id)
       const cachedSpace = cache.space(space.id)
       const user = context.rootState.currentUser
+      context.commit('userHasScrolled', false, { root: true })
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       context.commit('clearAllNotifications', null, { root: true })
       context.commit('clearSpaceFilters', null, { root: true })
@@ -745,6 +747,7 @@ export default {
       context.commit('currentUser/updateFavoriteSpaceIsEdited', space.id, { root: true })
       Vue.nextTick(() => {
         context.dispatch('updateIncorrectCardConnectionPaths', { shouldUpdateApi: Boolean(remoteSpace) })
+        context.dispatch('scrollCardsIntoView')
       })
     },
     loadLastSpace: (context) => {
@@ -861,6 +864,31 @@ export default {
       } else {
         context.commit('addNotification', { message: `${userName} removed from space`, type: 'success' }, { root: true })
       }
+    },
+    scrollCardsIntoView: (context) => {
+      if (context.rootState.userHasScrolled) { return }
+      const origin = { x: 0, y: 0 }
+      let cards = utils.clone(context.state.cards)
+      cards = cards.map(card => {
+        card = {
+          x: card.x,
+          y: card.y,
+          distanceFromOrigin: utils.distanceBetweenTwoPoints(card, origin)
+        }
+        return card
+      })
+      cards = sortBy(cards, ['distanceFromOrigin'])
+      const card = cards[0]
+      const xIsVisible = context.rootState.viewportWidth + window.scrollX > card.x
+      const yIsVisible = context.rootState.viewportHeight + window.scrollY > card.y
+      if (xIsVisible && yIsVisible) { return }
+      const position = {
+        x: Math.max(card.x - 100, 0),
+        y: Math.max(card.y - 100, 0)
+      }
+      Vue.nextTick(() => {
+        window.scrollTo(position.x, position.y)
+      })
     },
 
     // Card Count
