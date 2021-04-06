@@ -98,9 +98,16 @@ export default {
     currentSpaceId () { return this.$store.state.currentSpace.id },
     styles () {
       const position = this.$store.state.tagDetailsPosition
+      const isChildDialog = this.cardDetailsIsVisibleForCardId || this.visibleFromTagList
+      let zoom = this.$store.getters.spaceZoomDecimal
+      if (isChildDialog) {
+        zoom = 1
+      }
+      const x = zoom * position.x
+      const y = zoom * position.y
       return {
-        left: `${position.x}px`,
-        top: `${position.y}px`
+        left: `${x}px`,
+        top: `${y}px`
       }
     },
     color () {

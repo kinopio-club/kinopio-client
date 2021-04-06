@@ -79,9 +79,16 @@ export default {
     isSpace () { return utils.objectHasKeys(this.currentLink.space) },
     styles () {
       const position = this.position || this.$store.state.linkDetailsPosition
+      const isChildDialog = this.cardDetailsIsVisibleForCardId
+      let zoom = this.$store.getters.spaceZoomDecimal
+      if (isChildDialog) {
+        zoom = 1
+      }
+      const x = zoom * position.x
+      const y = zoom * position.y
       return {
-        left: `${position.x}px`,
-        top: `${position.y}px`
+        left: `${x}px`,
+        top: `${y}px`
       }
     },
     url () {
