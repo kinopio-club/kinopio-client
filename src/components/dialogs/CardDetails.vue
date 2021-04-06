@@ -1124,12 +1124,12 @@ export default {
       this.moveCursorPastTagEnd()
     },
     notifyFavoriteSpaceToFollow (context) {
-      const spaceIsOpen = this.spacePrivacyIsOpen
+      const userCanEdit = this.$store.getters['currentUser/canEditSpace']
       const userIsNotMember = !this.currentUserIsSpaceMember
       const spaceIsNotFavorite = !this.isFavoriteSpace
       const userUpdatedCard = this.cardIsCreatedByCurrentUser
       const notNotified = !notifiedFavoriteSpaceToFollow
-      if (spaceIsOpen && userIsNotMember && spaceIsNotFavorite && userUpdatedCard && notNotified) {
+      if (userCanEdit && userIsNotMember && spaceIsNotFavorite && userUpdatedCard && notNotified) {
         this.$store.commit('addNotification', { message: 'Favorite to follow', icon: 'heart-empty', type: 'info' })
         notifiedFavoriteSpaceToFollow = true
       }
