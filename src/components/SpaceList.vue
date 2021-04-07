@@ -148,7 +148,11 @@ export default {
       return space.showInExplore
     },
     user (space) {
-      return space.user || space.users[0]
+      let users = []
+      if (space.users.length) {
+        users = space.users
+      }
+      return space.user || users[0]
     },
     focusPreviousItem (currentIndex) {
       const spaces = this.spaces
