@@ -28,8 +28,6 @@ dialog.import.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialo
 </template>
 
 <script>
-import nanoid from 'nanoid'
-
 import scrollIntoView from '@/scroll-into-view.js'
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 import Loader from '@/components/Loader.vue'
@@ -103,11 +101,7 @@ export default {
     },
     async importSpace (space) {
       if (!this.isValidSpace(space)) { return }
-      space.originSpaceId = space.id
-      space.id = nanoid()
-      space.name = space.name + ' import'
-      space.removedCards = []
-      space.users = []
+      space = utils.clearSpaceMeta(space, 'import')
       space = this.updateSpaceItemsUserId(space)
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       cache.saveSpace(uniqueNewSpace)

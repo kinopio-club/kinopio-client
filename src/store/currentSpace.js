@@ -524,13 +524,7 @@ export default {
       const user = context.rootState.currentUser
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       let space = utils.clone(context.state)
-      space.originSpaceId = space.id
-      space.id = nanoid()
-      space.name = space.name + ' copy'
-      space.users = []
-      space.collaborators = []
-      space.showInExplore = false
-      space.privacy = 'private'
+      space = utils.clearSpaceMeta(space, 'copy')
       const nullCardUsers = true
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
       context.commit('restoreSpace', uniqueNewSpace)

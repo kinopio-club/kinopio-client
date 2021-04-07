@@ -465,6 +465,19 @@ export default {
   emptySpace (spaceId) {
     return { id: spaceId, moonPhase: '', background: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [] }
   },
+  clearSpaceMeta (space, type) {
+    space.originSpaceId = space.id
+    space.id = nanoid()
+    space.name = `${space.name} ${type}`
+    space.removedCards = []
+    space.users = []
+    space.collaborators = []
+    space.showInExplore = false
+    space.bestOfExplore = false
+    space.proposedShowInExplore = false
+    space.privacy = 'private'
+    return space
+  },
   // migration added oct 2019
   migrationEnsureRemovedCards (space) {
     if (!space.removedCards) {
