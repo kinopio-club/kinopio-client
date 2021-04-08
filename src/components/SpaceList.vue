@@ -149,7 +149,8 @@ export default {
     },
     user (space) {
       let users = []
-      if (space.users.length) {
+
+      if (utils.arrayExists(space.users)) {
         users = space.users
       }
       return space.user || users[0]
