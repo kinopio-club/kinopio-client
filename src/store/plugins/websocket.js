@@ -2,6 +2,9 @@
 
 // handles websockets, and delegates events to broadcast
 
+// 🌛 Send
+// 🌜 Receive
+
 import nanoid from 'nanoid'
 
 import utils from '@/utils.js'
@@ -112,6 +115,7 @@ export default function createWebSocketPlugin () {
           if (message === 'connected') {
           // presence
           } else if (message === 'userJoinedRoom') {
+            if (data.space.id !== store.state.currentSpace.id) { return }
             store.dispatch('currentSpace/addUserToJoinedSpace', user)
           } else if (message === 'updateUserPresence') {
             store.dispatch('currentSpace/updateUserPresence', updates)
