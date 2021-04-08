@@ -865,7 +865,12 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'Card.showCardDetails')
       this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
-      if (event.target.nodeName === 'LABEL') { return }
+      const nodeName = event.target.nodeName
+      if (nodeName === 'LABEL') { return }
+      if (nodeName === 'A' && event.touches) {
+        window.location = event.target.href
+        return
+      }
       this.$store.commit('cardDetailsIsVisibleForCardId', this.id)
       this.$store.commit('parentCardId', this.id)
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
