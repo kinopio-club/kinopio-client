@@ -1124,6 +1124,7 @@ export default {
     this.typeCheck({ value: name, type: 'string', origin: 'markdownSegments' })
     let segments = []
     let currentPosition = 0
+    if (!name) { return segments }
     while (currentPosition < name.length) {
       const markdown = this.markdown()
       let text = name.substring(currentPosition, name.length)
