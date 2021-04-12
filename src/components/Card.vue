@@ -25,11 +25,11 @@ article(:style="position" :data-card-id="id" ref="card")
 
     template(v-if="!nameIsComment")
       //- Video
-      video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
+      video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor || connectionColorToCardBeingDragged || connectedToCardDetailsVisibleColor}")
         source(:src="formats.video")
       //- Image
-      img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
-      img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
+      img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor || connectionColorToCardBeingDragged || connectedToCardDetailsVisibleColor}")
+      img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor || connectionColorToCardBeingDragged || connectedToCardDetailsVisibleColor}")
 
     span.card-content-wrap
       //- Comment
