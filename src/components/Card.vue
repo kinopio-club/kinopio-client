@@ -8,7 +8,7 @@ article(:style="position" :data-card-id="id" ref="card")
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
     :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || isRemoteCardDragging, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': isAudioCard, 'is-playing-audio': isPlayingAudio}",
-    :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor || selectedColorUpload || remoteCardDraggingColor || remoteUploadDraggedOverCardColor || connectionColorToCardBeingDragged || connectedToCardDetailsVisibleColor }"
+    :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor || selectedColorUpload || remoteCardDraggingColor || remoteUploadDraggedOverCardColor }"
     :data-card-id="id"
     :data-card-x="x"
     :data-card-y="y"
@@ -25,11 +25,11 @@ article(:style="position" :data-card-id="id" ref="card")
 
     template(v-if="!nameIsComment")
       //- Video
-      video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor || connectionColorToCardBeingDragged || connectedToCardDetailsVisibleColor}")
+      video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
         source(:src="formats.video")
       //- Image
-      img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor || connectionColorToCardBeingDragged || connectedToCardDetailsVisibleColor}")
-      img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor || connectionColorToCardBeingDragged || connectedToCardDetailsVisibleColor}")
+      img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
+      img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
 
     span.card-content-wrap
       //- Comment
@@ -83,6 +83,7 @@ article(:style="position" :data-card-id="id" ref="card")
           @mousedown.left="startConnecting"
           @touchstart="startConnecting"
         )
+          .connector-glow(:style="connectorGlowStyle")
           button.inline-button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: selectedColor}" tabindex="-1")
             .connected-colors
               template(v-if="isConnectingTo || isConnectingFrom")
@@ -249,7 +250,12 @@ export default {
     currentCardDetailsIsVisible () {
       return this.id === this.$store.state.cardDetailsIsVisibleForCardId
     },
-    connectionColorToCardBeingDragged () {
+    connectorGlowStyle () {
+      const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor
+      if (!color) { return }
+      return { background: color }
+    },
+    connectedToCardBeingDraggedColor () {
       const isDraggingCard = this.$store.state.currentUserIsDraggingCard
       if (!isDraggingCard) { return }
       if (this.isBeingDragged) { return }
@@ -1056,6 +1062,16 @@ article
         &.has-checkbox
           .audio
             width 132px
+
+    .connector
+      position relative
+      .connector-glow
+        position absolute
+        width 40px
+        height 40px
+        border-radius 100px
+        top -4px
+        left -1px
 
     .connector,
     .url
