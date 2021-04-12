@@ -8,7 +8,7 @@ article(:style="position" :data-card-id="id" ref="card")
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
     :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || isRemoteCardDragging, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': isAudioCard, 'is-playing-audio': isPlayingAudio}",
-    :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor || selectedColorUpload || remoteCardDraggingColor || remoteUploadDraggedOverCardColor || connectedToCardDetailsVisibleColor }"
+    :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor || selectedColorUpload || remoteCardDraggingColor || remoteUploadDraggedOverCardColor || connectionColorToCardBeingDragged || connectedToCardDetailsVisibleColor }"
     :data-card-id="id"
     :data-card-x="x"
     :data-card-y="y"
@@ -249,28 +249,27 @@ export default {
     currentCardDetailsIsVisible () {
       return this.id === this.$store.state.cardDetailsIsVisibleForCardId
     },
-    connectedToCardDetailsVisibleColor () {
-      const connection = this.connectionToCardAndVisibleCard
+    connectionColorToCardBeingDragged () {
+      const isDraggingCard = this.$store.state.currentUserIsDraggingCard
+      if (!isDraggingCard) { return }
+      if (this.isBeingDragged) { return }
+      let connections = this.$store.state.currentSpace.connections
+      connections = connections.filter(connection => this.connectionIsBeingDragged(connection))
+      const connection = connections.find(connection => connection.startCardId === this.id || connection.endCardId === this.id)
       if (!connection) { return }
       const connectionType = this.$store.getters['currentSpace/connectionTypeById'](connection.connectionTypeId)
       return connectionType.color
     },
-    connectionToCardAndVisibleCard () {
+    connectedToCardDetailsVisibleColor () {
       if (this.currentCardDetailsIsVisible) { return }
       const visibleCardId = this.$store.state.cardDetailsIsVisibleForCardId
       let connections = this.$store.state.currentSpace.connections
-      connections = connections.filter(connection => {
-        let isConnectedToCard
-        let isConnectedToVisibleCard
-        if (connection.startCardId === visibleCardId || connection.endCardId === visibleCardId) {
-          isConnectedToVisibleCard = true
-        }
-        if (connection.startCardId === this.id || connection.endCardId === this.id) {
-          isConnectedToCard = true
-        }
-        return isConnectedToVisibleCard && isConnectedToCard
-      })
-      return connections[0]
+      connections = connections.filter(connection => connection.startCardId === visibleCardId || connection.endCardId === visibleCardId)
+      connections = connections.filter(connection => connection.startCardId === this.id || connection.endCardId === this.id)
+      const connection = connections[0]
+      if (!connection) { return }
+      const connectionType = this.$store.getters['currentSpace/connectionTypeById'](connection.connectionTypeId)
+      return connectionType.color
     },
     dateUpdatedAt () {
       const date = this.card.nameUpdatedAt || this.card.createdAt
@@ -595,6 +594,12 @@ export default {
     }
   },
   methods: {
+    connectionIsBeingDragged (connection) {
+      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
+      const currentDraggingCardId = this.$store.state.currentDraggingCardId
+      const cardIdsBeingDragged = multipleCardsSelectedIds.concat(currentDraggingCardId)
+      return cardIdsBeingDragged.find(cardId => connection.startCardId === cardId || connection.endCardId === cardId)
+    },
     checkIfNameIsOnlyMarkdownLink (segments) {
       if (!segments.length) {
         this.nameIsOnlyMarkdownLink = false
