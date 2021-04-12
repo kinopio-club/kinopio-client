@@ -107,9 +107,10 @@ export default {
     moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
     position () {
       const cursor = this.$store.state.multipleSelectedActionsPosition
+      const zoom = this.$store.getters.spaceCounterZoomDecimal
       return {
-        left: `${cursor.x}px`,
-        top: `${cursor.y}px`
+        left: `${cursor.x * zoom}px`,
+        top: `${cursor.y * zoom}px`
       }
     },
     userColor () { return this.$store.state.currentUser.color },
