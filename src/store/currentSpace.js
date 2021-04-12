@@ -776,8 +776,8 @@ export default {
       space = utils.migrationEnsureRemovedCards(space)
       await context.dispatch('loadSpace', { space })
       context.dispatch('updateWindowHistory', { space, isRemote })
-      const canEdit = context.rootGetters['currentUser/canEditSpace']()
-      if (!canEdit) { return }
+      const userIsMember = context.rootGetters['currentUser/isSpaceMember']
+      if (!userIsMember) { return }
       context.dispatch('api/addToQueue', {
         name: 'updateSpace',
         body: { id: space.id, updatedAt: new Date() }
