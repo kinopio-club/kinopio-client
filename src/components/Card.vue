@@ -8,7 +8,7 @@ article(:style="position" :data-card-id="id" ref="card")
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
     :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || isRemoteCardDragging, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': isAudioCard, 'is-playing-audio': isPlayingAudio}",
-    :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor || selectedColorUpload || remoteCardDraggingColor || remoteUploadDraggedOverCardColor }"
+    :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor || selectedColorUpload || remoteCardDraggingColor || remoteUploadDraggedOverCardColor || connectedToCardDetailsVisibleColor }"
     :data-card-id="id"
     :data-card-x="x"
     :data-card-y="y"
@@ -248,6 +248,29 @@ export default {
     },
     currentCardDetailsIsVisible () {
       return this.id === this.$store.state.cardDetailsIsVisibleForCardId
+    },
+    connectedToCardDetailsVisibleColor () {
+      const connection = this.connectionToCardAndVisibleCard
+      if (!connection) { return }
+      const connectionType = this.$store.getters['currentSpace/connectionTypeById'](connection.connectionTypeId)
+      return connectionType.color
+    },
+    connectionToCardAndVisibleCard () {
+      if (this.currentCardDetailsIsVisible) { return }
+      const visibleCardId = this.$store.state.cardDetailsIsVisibleForCardId
+      let connections = this.$store.state.currentSpace.connections
+      connections = connections.filter(connection => {
+        let isConnectedToCard
+        let isConnectedToVisibleCard
+        if (connection.startCardId === visibleCardId || connection.endCardId === visibleCardId) {
+          isConnectedToVisibleCard = true
+        }
+        if (connection.startCardId === this.id || connection.endCardId === this.id) {
+          isConnectedToCard = true
+        }
+        return isConnectedToVisibleCard && isConnectedToCard
+      })
+      return connections[0]
     },
     dateUpdatedAt () {
       const date = this.card.nameUpdatedAt || this.card.createdAt
