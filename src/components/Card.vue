@@ -1067,11 +1067,11 @@ article
       position relative
       .connector-glow
         position absolute
-        width 40px
-        height 40px
+        width 36px
+        height 36px
         border-radius 100px
-        top -4px
-        left -2px
+        top -2px
+        left 0px
 
     .connector,
     .url
