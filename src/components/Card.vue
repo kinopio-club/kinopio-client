@@ -83,7 +83,7 @@ article(:style="position" :data-card-id="id" ref="card")
           @mousedown.left="startConnecting"
           @touchstart="startConnecting"
         )
-          .connector-glow(:style="connectorGlowStyle")
+          .connector-glow(:style="connectorGlowStyle" tabindex="-1")
           button.inline-button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: selectedColor}" tabindex="-1")
             .connected-colors
               template(v-if="isConnectingTo || isConnectingFrom")
@@ -1072,6 +1072,7 @@ article
         border-radius 100px
         top -2px
         left 0px
+        pointer-events none
 
     .connector,
     .url
