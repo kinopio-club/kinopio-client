@@ -1071,7 +1071,7 @@ article
         height 40px
         border-radius 100px
         top -4px
-        left -1px
+        left -2px
 
     .connector,
     .url
