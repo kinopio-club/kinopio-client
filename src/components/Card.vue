@@ -251,9 +251,18 @@ export default {
       return this.id === this.$store.state.cardDetailsIsVisibleForCardId
     },
     connectorGlowStyle () {
-      const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor
+      const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor || this.connectedToConnectionDetailsIsVisibleColor
       if (!color) { return }
       return { background: color }
+    },
+    connectedToConnectionDetailsIsVisibleColor () {
+      const connectionId = this.$store.state.connectionDetailsIsVisibleForConnectionId
+      const connection = this.$store.getters['currentSpace/connectionById'](connectionId)
+      if (!connection) { return }
+      const isConnected = connection.startCardId === this.id || connection.endCardId === this.id
+      if (!isConnected) { return }
+      const connectionType = this.$store.getters['currentSpace/connectionTypeById'](connection.connectionTypeId)
+      return connectionType.color
     },
     connectedToCardBeingDraggedColor () {
       const isDraggingCard = this.$store.state.currentUserIsDraggingCard
