@@ -17,7 +17,7 @@
               img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
               img.icon(v-else src="@/assets/heart-empty.svg")
             button(@click.left="toggleFavoritesIsVisible" :class="{ active: favoritesIsVisible}")
-              img.icon(src="@/assets/hearts.svg")
+              img.icon.down-arrow(src="@/assets/down-arrow.svg")
               span(v-if="favoriteSpacesEditedCount") {{favoriteSpacesEditedCount}}
           Favorites(:visible="favoritesIsVisible")
         //- Tags and Links
