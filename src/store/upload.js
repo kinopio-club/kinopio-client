@@ -117,6 +117,11 @@ export default {
       })
     },
     addCardsAndUploadFiles: async (context, { files, currentCursor }) => {
+      const zoom = context.rootGetters.spaceCounterZoomDecimal
+      currentCursor = {
+        x: currentCursor.x * zoom,
+        y: currentCursor.y * zoom
+      }
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!canEditSpace) {
         context.commit('addNotificationWithPosition', { message: 'Space is Read Only', position: currentCursor, type: 'info' }, { root: true })
