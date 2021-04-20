@@ -837,6 +837,13 @@ export default {
     const isAudio = url.match(audioUrlPattern)
     return Boolean(isAudio)
   },
+  urlIsFile (url) {
+    if (!url) { return }
+    url = url + ' '
+    const fileUrlPattern = new RegExp(/(?:\.txt|\.pdf|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml)(?:\n| |\?|&)/igm)
+    const isFile = url.match(fileUrlPattern)
+    return Boolean(isFile)
+  },
   urlIsKinopioSpace (url) {
     if (!url) { return }
     let kinopioUrlPattern
@@ -854,6 +861,23 @@ export default {
     }
     const isKinopioUrl = url.match(kinopioUrlPattern)
     return Boolean(isKinopioUrl)
+  },
+  fileNameAndExtension (url) {
+    if (!url) { return }
+    if (!this.urlIsFile(url)) { return }
+    // https://regexr.com/4rjtu
+    // /filename.pdf from end of string
+    const filePattern = new RegExp(/\/[A-z0-9-]+\.[A-z0-9-]+$/gim)
+    let file = url.match(filePattern)[0]
+    if (!file) { return }
+    // remove leading '/''
+    file = file.substring(1, file.length)
+    // https://regexr.com/5r728
+    // .pdf from filename.pdf
+    const extensionPattern = new RegExp(/.[A-z0-9-]+$/gim)
+    let extension = file.match(extensionPattern)[0]
+    extension = extension.substring(1, extension.length)
+    return { name: file, extension }
   },
   urlWithoutQueryString (url) {
     url = this.urlWithoutTrailingSlash(url)
@@ -1040,6 +1064,7 @@ export default {
       if (linkIsMarkdown) { return }
       return this.urlIsKinopioSpace(url)
     })
+    const files = urls.filter(url => this.urlIsFile(url))
     let badges = []
     let segments = []
     tags.forEach(tag => {
@@ -1051,6 +1076,11 @@ export default {
       const startPosition = name.indexOf(link)
       const endPosition = name.indexOf(link) + link.length
       badges.push({ link, startPosition, endPosition, isLink: true })
+    })
+    files.forEach(file => {
+      const startPosition = name.indexOf(file)
+      const endPosition = name.indexOf(file) + file.length
+      badges.push({ file, startPosition, endPosition, isFile: true })
     })
     badges = sortBy(badges, ['startPosition'])
     if (!badges.length) {
@@ -1074,6 +1104,11 @@ export default {
         segments.push({
           isLink: true,
           name: link
+        })
+      } else if (segment.isFile) {
+        segments.push({
+          isFile: true,
+          name: this.fileNameAndExtension(segment.file).name
         })
       }
       currentPosition = segment.endPosition

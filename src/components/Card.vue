@@ -214,7 +214,8 @@ export default {
         image: '',
         video: '',
         audio: '',
-        link: ''
+        link: '',
+        file: ''
       },
       prevNameLineMinWidth: 0,
       nameIsOnlyMarkdownLink: false
@@ -690,6 +691,8 @@ export default {
           this.formats.video = url
         } else if (utils.urlIsAudio(url)) {
           this.formats.audio = url
+        } else if (utils.urlIsFile(url)) {
+          this.formats.file = url
         } else {
           this.formats.link = url
         }

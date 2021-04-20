@@ -42,6 +42,9 @@ span.name-segment
         img.icon.private(v-if="spaceIsPrivate(segmentSpace(segment))" src="@/assets/lock.svg")
       template(v-else)
         span {{segment.name}}
+  //- File
+  span.badge.secondary(v-if="segment.isFile")
+    span {{segment.name}}
 </template>
 
 <script>
