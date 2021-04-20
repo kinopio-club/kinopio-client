@@ -65,7 +65,6 @@ export default {
     updateSpaceClients: (state, updates) => {
       utils.typeCheck({ value: updates, type: 'array', origin: 'updateSpaceClients' })
       state.clients = state.clients.concat(updates)
-      state.clients = uniqBy(state.clients, 'id')
     },
     removeClientsFromSpace: (state) => {
       state.clients = []
