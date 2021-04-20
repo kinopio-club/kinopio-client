@@ -840,7 +840,7 @@ export default {
   urlIsFile (url) {
     if (!url) { return }
     url = url + ' '
-    const fileUrlPattern = new RegExp(/(?:\.txt|\.pdf|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml)(?:\n| |\?|&)/igm)
+    const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml)(?:\n| |\?|&)/igm)
     const isFile = url.match(fileUrlPattern)
     return Boolean(isFile)
   },
