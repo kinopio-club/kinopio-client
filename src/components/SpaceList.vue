@@ -28,7 +28,7 @@ span.space-list-wrap
           .name
             span {{space.name}}
             img.icon.privacy-icon(v-if="spaceIsNotClosed(space)" :src="privacyIcon(space)")
-            .badge.status(v-if="showInExplore(space)")
+            .badge.status(v-if="showInExplore(space)" title="Shown in Explore")
               img.icon(src="@/assets/checkmark.svg")
     Loader(:visible="isLoading")
 

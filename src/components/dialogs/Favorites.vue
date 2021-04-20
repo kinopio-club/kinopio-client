@@ -33,6 +33,7 @@ import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import UserList from '@/components/UserList.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'Favorites',
@@ -64,9 +65,14 @@ export default {
       return false
     },
     favoriteSpacesOrderedByEdited () {
-      let editedSpaces = this.favoriteSpaces.filter(space => space.isEdited)
-      let spaces = this.favoriteSpaces.filter(space => !space.isEdited)
-      return editedSpaces.concat(spaces)
+      let spaces = utils.clone(this.favoriteSpaces)
+      spaces = spaces.map(space => {
+        space.editedAt = space.editedAt || space.updatedAt || space.createdAt
+        space.editedAt = new Date(space.editedAt)
+        return space
+      })
+      spaces = spaces.sort((a, b) => b.editedAt - a.editedAt)
+      return spaces
     }
   },
   methods: {
