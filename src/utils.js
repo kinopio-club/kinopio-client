@@ -702,7 +702,6 @@ export default {
       spaceUrl: matches[1],
       cardId: matches[2]
     }
-    console.log('🛶', matches)
     return matches
   },
   spaceIdFromUrl (url) {
@@ -790,7 +789,7 @@ export default {
     if (skipProtocolCheck) { return urls }
     // ensure url has protocol
     urls = urls.map(url => {
-      const hasProtocol = url.startsWith('http://') || url.startsWith('https://')
+      const hasProtocol = this.urlHasProtocol(url)
       if (hasProtocol) {
         return url
       } else {
@@ -798,6 +797,10 @@ export default {
       }
     })
     return urls
+  },
+  urlHasProtocol (url) {
+    if (!url) { return }
+    return url.startsWith('http://') || url.startsWith('https://')
   },
   urlWithoutProtocol (url) {
     let newUrl
@@ -839,6 +842,8 @@ export default {
   },
   urlIsFile (url) {
     if (!url) { return }
+    const hasProtocol = this.urlHasProtocol(url)
+    if (!hasProtocol) { return }
     url = url + ' '
     const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml)(?:\n| |\?|&)/igm)
     const isFile = url.match(fileUrlPattern)
@@ -862,22 +867,19 @@ export default {
     const isKinopioUrl = url.match(kinopioUrlPattern)
     return Boolean(isKinopioUrl)
   },
-  fileNameAndExtension (url) {
+  fileNameFromUrl (url) {
     if (!url) { return }
     if (!this.urlIsFile(url)) { return }
     // https://regexr.com/4rjtu
     // /filename.pdf from end of string
     const filePattern = new RegExp(/\/[A-z0-9-]+\.[A-z0-9-]+$/gim)
-    let file = url.match(filePattern)[0]
+    let file = url.match(filePattern)
+
     if (!file) { return }
+    file = file[0]
     // remove leading '/''
-    file = file.substring(1, file.length)
-    // https://regexr.com/5r728
-    // .pdf from filename.pdf
-    const extensionPattern = new RegExp(/.[A-z0-9-]+$/gim)
-    let extension = file.match(extensionPattern)[0]
-    extension = extension.substring(1, extension.length)
-    return { name: file, extension }
+    const name = file.substring(1, file.length)
+    return name
   },
   urlWithoutQueryString (url) {
     url = this.urlWithoutTrailingSlash(url)
@@ -1057,7 +1059,7 @@ export default {
   cardNameSegments (name) {
     if (!name) { return [] }
     const tags = this.tagsFromString(name) || []
-    const urls = this.urlsFromString(name) || []
+    const urls = this.urlsFromString(name, true) || []
     const markdownLinks = name.match(this.markdown().linkPattern) || []
     const links = urls.filter(url => {
       const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(url))
@@ -1065,6 +1067,7 @@ export default {
       return this.urlIsKinopioSpace(url)
     })
     const files = urls.filter(url => this.urlIsFile(url))
+
     let badges = []
     let segments = []
     tags.forEach(tag => {
@@ -1108,7 +1111,7 @@ export default {
       } else if (segment.isFile) {
         segments.push({
           isFile: true,
-          name: this.fileNameAndExtension(segment.file).name
+          name: this.fileNameFromUrl(segment.file)
         })
       }
       currentPosition = segment.endPosition
