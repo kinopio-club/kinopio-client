@@ -44,6 +44,7 @@ span.name-segment
         span {{segment.name}}
   //- File
   span.badge.secondary(v-if="segment.isFile")
+    img.icon(src="@/assets/file.svg")
     span {{segment.name}}
 </template>
 
