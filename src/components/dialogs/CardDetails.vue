@@ -668,6 +668,7 @@ export default {
       this.updateCardName(newName)
     },
     closeCard (event, shouldIgnoreLanguages) {
+      console.log('🚗 enter key hit', event)
       if (this.tag.pickerIsVisible || this.space.pickerIsVisible) {
         this.hidePickers()
         event.stopPropagation()
