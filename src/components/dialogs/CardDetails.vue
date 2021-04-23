@@ -10,6 +10,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         v-model="name"
         @keydown.prevent.enter.exact
 
+        @compositionend="updateCompositionEventEndTime"
         @keyup.enter.exact="closeCard"
         @keyup.stop.esc
         @keydown.esc="closeCardAndFocus"
@@ -195,6 +196,7 @@ import debounce from 'lodash-es/debounce'
 
 let previousTags = []
 let notifiedFavoriteSpaceToFollow = false
+let compositionEventEndTime = 0
 
 export default {
   name: 'CardDetails',
@@ -643,6 +645,11 @@ export default {
       this.insertedLineBreak = true
       this.updateCardName(newName)
     },
+    updateCompositionEventEndTime (event) {
+      // for non-latin input
+      // https://stackoverflow.com/questions/51226598/what-is-javascripts-compositionevent-please-give-examples
+      compositionEventEndTime = event.timeStamp
+    },
     closeCard (event) {
       if (this.tag.pickerIsVisible || this.space.pickerIsVisible) {
         this.hidePickers()
@@ -654,8 +661,8 @@ export default {
         event.stopPropagation()
         return
       }
-      const nameContainsJapanese = utils.nameContainsJapanese(this.name)
-      if (nameContainsJapanese) {
+      const isCompositionEvent = Math.abs(event.timeStamp - compositionEventEndTime) < 200
+      if (isCompositionEvent) {
         event.stopPropagation()
         return
       }

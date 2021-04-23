@@ -1237,14 +1237,6 @@ export default {
     if (isCode) { return }
     return Boolean(comment)
   },
-  nameContainsJapanese (name) {
-    if (!name) { return }
-    // https://regexr.com/5n78p
-    // matches unicode ranges for hiragana, katana, kanji
-    const japanesePattern = new RegExp(/[\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf]/gmi)
-    const japanese = name.match(japanesePattern)
-    return Boolean(japanese)
-  },
   removeMarkdownCodeblocksFromString (string) {
     const segments = this.markdownSegments(string)
     segments.forEach(segment => {
