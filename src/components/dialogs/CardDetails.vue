@@ -111,17 +111,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           img.icon(src="@/assets/split-vertically.svg")
           span Split into {{nameSentences}} Cards
 
-    //- Information: Japanese characters
-    .row(v-if="nameContainsJapanese")
-      .button-wrap(@click.left.stop="toggleJapaneseInputInformationIsVisible")
-        button
-          span ● JPN
-        Information(
-          :visible="japaneseInputInformationIsVisible"
-          :narrow="true"
-          :title="japaneseInputInformation.title"
-          :message="japaneseInputInformation.message"
-        )
     .row.badges-row(v-if="tagsInCard.length || card.linkToSpaceId || nameIsComment")
       //- Tags
       template(v-for="tag in tagsInCard")
@@ -195,7 +184,6 @@ import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import Tips from '@/components/dialogs/Tips.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
-import Information from '@/components/dialogs/Information.vue'
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 import scrollIntoView from '@/scroll-into-view.js'
@@ -216,7 +204,6 @@ export default {
     Tips,
     TagPicker,
     SpacePicker,
-    Information,
     Loader,
     User
   },
@@ -249,8 +236,7 @@ export default {
         pickerPosition: {},
         pickerSearch: ''
       },
-      notifiedMembers: false,
-      japaneseInputInformationIsVisible: false
+      notifiedMembers: false
     }
   },
   created () {
@@ -259,7 +245,6 @@ export default {
         this.framePickerIsVisible = false
         this.imagePickerIsVisible = false
         this.tipsIsVisible = false
-        this.japaneseInformationIsVisible = false
         this.hidePickers()
       }
       if (mutation.type === 'triggerUploadComplete') {
@@ -450,15 +435,6 @@ export default {
     styles () {
       return {
         transform: `scale(${this.spaceCounterZoomDecimal})`
-      }
-    },
-    nameContainsJapanese () {
-      return utils.nameContainsJapanese(this.name)
-    },
-    japaneseInputInformation () {
-      return {
-        title: 'Japanese Input Detected',
-        message: '<code>Enter</code> key to close card is disabled, to allow switching between Hiragana and Katakana'
       }
     }
   },
@@ -667,7 +643,7 @@ export default {
       this.insertedLineBreak = true
       this.updateCardName(newName)
     },
-    closeCard (event, shouldIgnoreLanguages) {
+    closeCard (event) {
       if (this.tag.pickerIsVisible || this.space.pickerIsVisible) {
         this.hidePickers()
         event.stopPropagation()
@@ -678,7 +654,8 @@ export default {
         event.stopPropagation()
         return
       }
-      if (this.nameContainsJapanese && !shouldIgnoreLanguages) {
+      const nameContainsJapanese = utils.nameContainsJapanese(this.name)
+      if (nameContainsJapanese) {
         event.stopPropagation()
         return
       }
@@ -689,8 +666,7 @@ export default {
         this.hidePickers()
         return
       }
-      const shouldIgnoreLanguages = true
-      this.closeCard(event, shouldIgnoreLanguages)
+      this.closeCard()
       document.querySelector(`.card[data-card-id="${this.card.id}"]`).focus()
     },
     removeCard () {
@@ -723,11 +699,6 @@ export default {
       this.closeDialogs()
       this.imagePickerIsVisible = !isVisible
       this.initialSearch = this.normalizedName
-    },
-    toggleJapaneseInputInformationIsVisible () {
-      const isVisible = this.japaneseInputInformationIsVisible
-      this.closeDialogs()
-      this.japaneseInputInformationIsVisible = !isVisible
     },
     focusName (position) {
       const element = this.$refs.name
@@ -769,7 +740,6 @@ export default {
       this.framePickerIsVisible = false
       this.imagePickerIsVisible = false
       this.tipsIsVisible = false
-      this.japaneseInputInformationIsVisible = false
       this.hidePickers()
       this.hideTagDetailsIsVisible()
       this.hideLinkDetailsIsVisible()
