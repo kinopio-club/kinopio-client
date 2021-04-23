@@ -62,9 +62,9 @@ let customer, paymentMethod, subscription
 let invoice, paymentIntent
 
 if (process.env.NODE_ENV === 'development') {
-  stripePublishableKey = 'pk_test_51Gv55TL1W0hlm1mqF9VvEevFCGr53d0eDUx0VD1tPA8ESuGdTceeoK0hAWaELCmTqkbt3wZqffT0mN41X0Jmlxpe00en3VmODJ'
+  stripePublishableKey = 'pk_test_51IiftNDFIr5ywhwoBAVavNoA1ig4RdmmC73ZEuuuOAPxN5DHJyXsNpNtYhuUN885xoEHmq97HNaqfhJHFQh87IrH00F8eStuuX'
 } else {
-  stripePublishableKey = 'pk_live_51Gv55TL1W0hlm1mq80jsOLNIJEgtPei8OuuW1v9lFV6KbVo7yme2nERsysqYiIpt1BrRvAi860IATF103QNI6FDn00wjUlhOvQ'
+  stripePublishableKey = 'pk_live_51IiftNDFIr5ywhwo9dUo1W2kZ2dwjWRUVh1QcUJ3YWc9ZAobDziUKWldKbthPtZbiq33kfRHQYrnBhvMlsomfOsB00f6Qvgm3B'
 }
 
 export default {
@@ -116,11 +116,11 @@ export default {
     priceId () {
       let monthly, yearly
       if (process.env.NODE_ENV === 'development') {
-        monthly = 'price_1ILuNtL1W0hlm1mqqkIVY39P'
-        yearly = 'price_1ILuOPL1W0hlm1mqUV79ZnJm'
+        monthly = 'price_1IjPHfDFIr5ywhwoFUltkq7s'
+        yearly = 'price_1IjPHQDFIr5ywhwoFMHQ3tPq'
       } else {
-        monthly = 'price_1IIjZ6L1W0hlm1mqawebhdDz'
-        yearly = 'price_1INn9gL1W0hlm1mqF8AC4Dd5'
+        monthly = 'price_1IjOp1DFIr5ywhwou6V7nRkE'
+        yearly = 'price_1IjOgJDFIr5ywhwoQtQIacSa'
       }
       if (this.priceIsMonthly) {
         return monthly
