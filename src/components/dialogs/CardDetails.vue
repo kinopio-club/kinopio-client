@@ -673,7 +673,7 @@ export default {
         this.hidePickers()
         return
       }
-      this.closeCard()
+      this.closeCard(event)
       document.querySelector(`.card[data-card-id="${this.card.id}"]`).focus()
     },
     removeCard () {
