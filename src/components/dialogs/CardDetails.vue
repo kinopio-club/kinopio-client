@@ -1173,6 +1173,8 @@ export default {
           urlPreviewTitle: utils.truncated(data.title),
           urlPreviewDescription: utils.truncated(data.description)
         }
+        const maxImageLength = 350
+        if (data.image.length >= maxImageLength) { return }
         this.$store.dispatch('currentSpace/updateCard', update)
       } catch (error) {
         console.warn('🚑', error)
