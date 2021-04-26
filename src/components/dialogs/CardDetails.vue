@@ -1190,6 +1190,14 @@ export default {
         urlPreviewTitle: ''
       }
       this.$store.dispatch('currentSpace/updateCard', update)
+    },
+    toggleUrlPreviewIsVisible () {
+      const value = !this.card.urlPreviewIsVisible
+      const update = {
+        id: this.card.id,
+        urlPreviewIsVisible: value
+      }
+      this.$store.dispatch('currentSpace/updateCard', update)
     }
   },
   watch: {
@@ -1222,7 +1230,8 @@ export default {
     validWebUrls (urls) {
       let url = urls[0]
       if (!url) { return }
-      url = utils.urlWithoutQueryString(url)
+      url = url.replace('?hidden=true', '')
+      url = url.replace('&hidden=true', '')
       const previewIsVisible = this.card.urlPreviewIsVisible
       const isNotPreviewUrl = url !== this.card.urlPreviewUrl
       if (previewIsVisible && isNotPreviewUrl) {

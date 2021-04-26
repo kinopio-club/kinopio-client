@@ -2,8 +2,9 @@
 .row.url-preview(v-if="visible")
   Loader(:visible="loading")
   template(v-if="!loading")
-    img(v-if="card.urlPreviewImage" :src="card.urlPreviewImage")
-    p(v-if="card.urlPreviewTitle") {{card.urlPreviewTitle}}
+    a(:href="card.urlPreviewUrl")
+      img.url-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage")
+      span(v-if="card.urlPreviewTitle") {{card.urlPreviewTitle}}
 </template>
 
 <script>
@@ -24,9 +25,22 @@ export default {
 
 <style lang="stylus">
 .url-preview
-  align-items start !important
-  img
-    max-width 80px
+  a
+    display flex
+    align-items start !important
+    color var(--primary)
+    text-decoration none
+    border-radius 3px
+    padding 4px
+    background var(--secondary-hover-background)
+    &:hover
+      background var(--secondary-active-background)
+      box-shadow var(--hover-shadow)
+    &:active
+      box-shadow var(--active-inset-shadow)
+
+  .url-image
+    max-width 40%
     max-height 80px
     border-radius 3px
     margin-right 6px
