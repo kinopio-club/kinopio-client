@@ -25,19 +25,20 @@ export default {
 
 <style lang="stylus">
 .url-preview
+  border-radius 3px
+  padding 4px
+  background var(--secondary-hover-background)
+  &:hover
+    background var(--secondary-active-background)
+    box-shadow var(--hover-shadow)
+  &:active
+    box-shadow var(--active-inset-shadow)
+
   a
     display flex
     align-items start !important
     color var(--primary)
     text-decoration none
-    border-radius 3px
-    padding 4px
-    background var(--secondary-hover-background)
-    &:hover
-      background var(--secondary-active-background)
-      box-shadow var(--hover-shadow)
-    &:active
-      box-shadow var(--active-inset-shadow)
 
   .url-image
     max-width 40%
