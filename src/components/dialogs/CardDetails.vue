@@ -102,15 +102,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           img.icon(v-else src="@/assets/view.svg")
           span Link
       //- Split by Line Breaks
-      .button-wrap(v-if="nameHasLineBreaks")
+      .button-wrap(v-if="nameHasLineBreaks || nameHasSentences")
         button(:disabled="!canEditCard" @click.left.stop="splitCards")
           img.icon(src="@/assets/split-vertically.svg")
-          span Split into {{nameLines}} Cards
-      //- or, Split by Sentences
-      .button-wrap(v-if="nameHasSentences")
-        button(:disabled="!canEditCard" @click.left.stop="splitCards")
-          img.icon(src="@/assets/split-vertically.svg")
-          span Split into {{nameSentences}} Cards
+          span Split into {{nameLines || nameSentences}} Cards
 
     .row.badges-row(v-if="tagsInCard.length || card.linkToSpaceId || nameIsComment")
       //- Tags
