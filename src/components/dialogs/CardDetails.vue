@@ -138,6 +138,8 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       .badge.info(v-if="nameIsComment" :style="{backgroundColor: updatedByUser.color}")
         span ((comment))
 
+    UrlPreview(:visible="cardUrlPreviewIsVisible" :loading="isLoadingUrlPreview" :card="card")
+
     //- Read Only
     p.row.edit-message(v-if="!canEditCard")
       template(v-if="spacePrivacyIsOpen")
@@ -187,6 +189,7 @@ import TagPicker from '@/components/dialogs/TagPicker.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
+import UrlPreview from '@/components/UrlPreview.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
@@ -207,6 +210,7 @@ export default {
     TagPicker,
     SpacePicker,
     Loader,
+    UrlPreview,
     User
   },
   props: {
@@ -223,6 +227,7 @@ export default {
       cursorPosition: 0,
       shouldCancelBracketRight: false,
       insertedLineBreak: false,
+      isLoadingUrlPreview: false,
       error: {
         signUpToUpload: false,
         sizeLimit: false,
@@ -360,6 +365,14 @@ export default {
         return utils.urlType(url) === 'link'
       })
     },
+    validWebUrls () {
+      return this.validUrls.filter(url => {
+        const urlHasProtocol = utils.urlHasProtocol(url)
+        const isLinode = url.includes('us-east-1.linodeobjects.com')
+        const isSpace = utils.urlIsKinopioSpace(url)
+        return urlHasProtocol && !isLinode && !isSpace
+      })
+    },
     hasUrls () {
       return Boolean(this.validUrls.length)
     },
@@ -438,6 +451,10 @@ export default {
       return {
         transform: `scale(${this.spaceCounterZoomDecimal})`
       }
+    },
+    cardUrlPreviewIsVisible () {
+      const isUrlOrLoading = this.card.urlPreviewUrl || this.isLoadingUrlPreview
+      return Boolean(this.card.urlPreviewIsVisible && isUrlOrLoading)
     }
   },
   methods: {
@@ -1140,6 +1157,38 @@ export default {
         this.$store.commit('addNotification', { message: 'Favorite to follow', icon: 'heart-empty', type: 'info' })
         notifiedFavoriteSpaceToFollow = true
       }
+    },
+    async updateUrlPreview (url) {
+      try {
+        this.isLoadingUrlPreview = true
+        const linkPreviewApiKey = 'a9f249ef6b59cc8ccdd19de6b167bafa'
+        const response = await fetch(`https://api.linkpreview.net/?key=${linkPreviewApiKey}&q=${encodeURIComponent(url)}`)
+        const data = await response.json()
+        const cardUrl = this.validWebUrls[0]
+        this.isLoadingUrlPreview = false
+        if (data.error || url !== cardUrl) {
+          this.clearUrlPreview()
+          return
+        }
+        const update = {
+          id: this.card.id,
+          urlPreviewUrl: data.url,
+          urlPreviewImage: data.image,
+          urlPreviewTitle: data.title
+        }
+        this.$store.dispatch('currentSpace/updateCard', update)
+      } catch (error) {
+        console.warn('🚑', error)
+      }
+    },
+    clearUrlPreview () {
+      const update = {
+        id: this.card.id,
+        urlPreviewUrl: '',
+        urlPreviewImage: '',
+        urlPreviewTitle: ''
+      }
+      this.$store.dispatch('currentSpace/updateCard', update)
     }
   },
   watch: {
@@ -1168,6 +1217,14 @@ export default {
         this.notifyFavoriteSpaceToFollow()
       }
       this.$store.dispatch('updatePageSizes')
+    },
+    validWebUrls (urls) {
+      const url = urls[0]
+      const previewIsVisible = this.card.urlPreviewIsVisible
+      const isNotPreviewUrl = url !== this.card.urlPreviewUrl
+      if (url && previewIsVisible && isNotPreviewUrl) {
+        this.updateUrlPreview(url)
+      }
     }
   }
 }

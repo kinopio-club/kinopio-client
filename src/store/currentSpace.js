@@ -934,7 +934,8 @@ export default {
         z: highestCardZ + 1,
         name: name || '',
         frameId: 0,
-        userId: context.rootState.currentUser.id
+        userId: context.rootState.currentUser.id,
+        urlPreviewIsVisible: true
       }
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       context.commit('createCard', card)
