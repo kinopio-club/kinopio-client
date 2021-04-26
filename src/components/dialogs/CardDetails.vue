@@ -1158,7 +1158,7 @@ export default {
         notifiedFavoriteSpaceToFollow = true
       }
     },
-    async updateUrlPreview (url) {
+    debouncedUpdateUrlPreview: debounce(async function (url) {
       try {
         this.isLoadingUrlPreview = true
         const linkPreviewApiKey = 'a9f249ef6b59cc8ccdd19de6b167bafa'
@@ -1170,9 +1170,10 @@ export default {
           this.clearUrlPreview()
           return
         }
+        console.log('🚗 link preview', data)
         const update = {
           id: this.card.id,
-          urlPreviewUrl: data.url,
+          urlPreviewUrl: url,
           urlPreviewImage: data.image,
           urlPreviewTitle: data.title
         }
@@ -1180,7 +1181,7 @@ export default {
       } catch (error) {
         console.warn('🚑', error)
       }
-    },
+    }, 350),
     clearUrlPreview () {
       const update = {
         id: this.card.id,
@@ -1219,11 +1220,14 @@ export default {
       this.$store.dispatch('updatePageSizes')
     },
     validWebUrls (urls) {
-      const url = urls[0]
+      let url = urls[0]
+      if (!url) { return }
+      url = utils.urlWithoutQueryString(url)
       const previewIsVisible = this.card.urlPreviewIsVisible
       const isNotPreviewUrl = url !== this.card.urlPreviewUrl
-      if (url && previewIsVisible && isNotPreviewUrl) {
-        this.updateUrlPreview(url)
+      if (previewIsVisible && isNotPreviewUrl) {
+        this.isLoadingUrlPreview = true
+        this.debouncedUpdateUrlPreview(url)
       }
     }
   }

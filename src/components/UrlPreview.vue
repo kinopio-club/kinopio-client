@@ -23,5 +23,13 @@ export default {
 </script>
 
 <style lang="stylus">
-
+.url-preview
+  align-items start !important
+  img
+    max-width 80px
+    max-height 80px
+    border-radius 3px
+    margin-right 6px
+  p
+    margin-top 0
 </style>
