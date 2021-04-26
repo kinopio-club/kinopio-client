@@ -322,6 +322,12 @@ export default {
     }
     return word
   },
+  truncated (string, limit) {
+    limit = limit || 60
+    if (string.length < limit) { return string }
+    string = string.substring(0, limit) + '…'
+    return string
+  },
   normalizeToUnixTime (date) {
     return new Date(date).getTime()
   },

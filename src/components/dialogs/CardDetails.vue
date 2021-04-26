@@ -1170,7 +1170,8 @@ export default {
           id: this.card.id,
           urlPreviewUrl: url,
           urlPreviewImage: data.image,
-          urlPreviewTitle: data.title
+          urlPreviewTitle: utils.truncated(data.title),
+          urlPreviewDescription: utils.truncated(data.description)
         }
         this.$store.dispatch('currentSpace/updateCard', update)
       } catch (error) {
@@ -1182,7 +1183,8 @@ export default {
         id: this.card.id,
         urlPreviewUrl: '',
         urlPreviewImage: '',
-        urlPreviewTitle: ''
+        urlPreviewTitle: '',
+        urlPreviewDescription: ''
       }
       this.$store.dispatch('currentSpace/updateCard', update)
     },
