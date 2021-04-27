@@ -98,6 +98,9 @@ article(:style="position" :data-card-id="id" ref="card")
             template(v-else)
               img.connector-icon(src="@/assets/connector-open.svg")
 
+    .url-preview-wrap(v-if="cardUrlPreviewIsVisible")
+      UrlPreview(:visible="cardUrlPreviewIsVisible" :card="card")
+
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
       .badge.info
@@ -160,6 +163,7 @@ import scrollIntoView from '@/scroll-into-view.js'
 import User from '@/components/User.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
 import NameSegment from '@/components/NameSegment.vue'
+import UrlPreview from '@/components/UrlPreview.vue'
 
 import fromNow from 'fromnow'
 
@@ -173,7 +177,8 @@ export default {
     Audio,
     User,
     UserDetails,
-    NameSegment
+    NameSegment,
+    UrlPreview
   },
   props: {
     card: Object
@@ -433,6 +438,9 @@ export default {
       })
       this.checkIfNameIsOnlyMarkdownLink(segments)
       return segments
+    },
+    cardUrlPreviewIsVisible () {
+      return Boolean(this.card.urlPreviewIsVisible && this.card.urlPreviewUrl)
     },
     tags () {
       return this.nameSegments.filter(segment => {
@@ -1040,6 +1048,7 @@ article
     .card-content-wrap
       display flex
       align-items flex-start
+      justify-content space-between
     .card-content
       min-width 40px
     .card-buttons-wrap
@@ -1238,6 +1247,10 @@ article
 
   .tappable-area
     margin-left 20px
+
+  .url-preview-wrap
+    padding 8px
+    padding-top 0
 
 @keyframes bounce
   0%
