@@ -4,9 +4,14 @@
 
   template(v-if="!loading")
     .preview-content
-      .button-wrap.hide-preview-wrap(v-if="parentIsCardDetails" :class="{'has-padding': card.urlPreviewImage}")
-        button(@click="hidePreview")
-          img.icon.cancel(src="@/assets/add.svg")
+      .card-details-buttons(v-if="parentIsCardDetails" :class="{'has-padding': card.urlPreviewImage}")
+        .button-wrap
+          button(@click="hidePreview")
+            img.icon.cancel(src="@/assets/add.svg")
+        .button-wrap
+          a(:href="card.urlPreviewUrl")
+            button.visit-button
+              img.icon.visit(src="@/assets/visit.svg")
 
       //- Preview with Image
       template(v-if="card.urlPreviewImage")
@@ -109,11 +114,17 @@ export default {
   .description
     margin-top 10px
 
-  .hide-preview-wrap
+  .card-details-buttons
     z-index 1
     position absolute
     right 0
     top 0
+    display flex
+    flex-direction row-reverse
     &.has-padding
       padding 4px
+    .visit-button
+      margin-right 5px
+    .visit
+      vertical-align middle
 </style>
