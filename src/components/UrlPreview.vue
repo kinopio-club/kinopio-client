@@ -56,7 +56,9 @@ export default {
       const isFutureland = url.includes('futureland.tv')
       const isSpotify = url.includes('spotify.com')
       const isTwitter = url.includes('twitter.com')
-      return noPreviewImage || isSpotify || isTwitter || isFutureland
+      const isWikipedia = url.includes('wikipedia.org')
+      const isTumblr = url.includes('tumblr.com')
+      return noPreviewImage || isSpotify || isTwitter || isFutureland || isWikipedia || isTumblr
     }
   },
   methods: {

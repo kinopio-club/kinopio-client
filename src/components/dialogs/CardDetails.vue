@@ -361,12 +361,16 @@ export default {
       })
     },
     validWebUrls () {
-      return this.validUrls.filter(url => {
+      const urls = this.validUrls.filter(url => {
         const urlHasProtocol = utils.urlHasProtocol(url)
         const isLinode = url.includes('us-east-1.linodeobjects.com')
         const isSpace = utils.urlIsKinopioSpace(url)
         return urlHasProtocol && !isLinode && !isSpace
       })
+      if (!urls.length && this.card.urlPreviewUrl) {
+        this.clearUrlPreview()
+      }
+      return urls
     },
     hasUrls () {
       return Boolean(this.validUrls.length)
