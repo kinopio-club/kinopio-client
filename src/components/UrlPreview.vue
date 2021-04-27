@@ -3,7 +3,7 @@
   Loader(:visible="loading")
 
   template(v-if="!loading")
-    .preview-content
+    .preview-content(:style="{background: selectedColor}")
       .card-details-buttons(v-if="parentIsCardDetails" :class="{'has-padding': card.urlPreviewImage}")
         .button-wrap
           button(@click="hidePreview")
@@ -13,22 +13,12 @@
             button.visit-button
               img.icon.visit(src="@/assets/visit.svg")
 
-      //- Preview with Image
-      template(v-if="card.urlPreviewImage")
-        img.url-image(:src="card.urlPreviewImage" :class="{selected: isSelected}")
-        .badge.url-text(:style="{background: selectedColor}")
-          img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
-          img.icon.favicon.open(v-else src="@/assets/open.svg")
-          .title {{card.urlPreviewTitle}}
-          .description(v-if="shouldShowDescription") {{card.urlPreviewDescription}}
-
-      //- Preview without Image
-      template(v-else)
-        div
-          img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
-          img.icon.favicon.open(v-else src="@/assets/open.svg")
-          .title {{card.urlPreviewTitle}}
-          .description(v-if="shouldShowDescription") {{card.urlPreviewDescription}}
+      img.url-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected}")
+      div
+        img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
+        img.icon.favicon.open(v-else src="@/assets/open.svg")
+        .title {{card.urlPreviewTitle}}
+        .description(v-if="shouldShowDescription") {{card.urlPreviewDescription}}
 
 </template>
 
@@ -86,21 +76,18 @@ export default {
     color var(--primary)
     text-decoration none
     word-break break-word
+    background var(--secondary-hover-background)
+    border-radius 3px
+    padding 4px
 
   .url-image
+    max-width 30%
+    max-height 70px
+    margin-right 6px
     border-radius 3px
     background var(--primary-background)
     &.selected
       mix-blend-mode color-burn
-
-  .url-text
-    position absolute
-    margin 8px
-    max-width calc(100% - 16px)
-    color var(--primary)
-    text-decoration none
-    background var(--secondary-background)
-    border-radius 3px
 
   .favicon
     border-radius 3px
