@@ -98,7 +98,7 @@ article(:style="position" :data-card-id="id" ref="card")
             template(v-else)
               img.connector-icon(src="@/assets/connector-open.svg")
 
-    .url-preview-wrap(v-if="cardUrlPreviewIsVisible && commentIsVisible")
+    .url-preview-wrap(v-if="cardUrlPreviewIsVisible && !isHiddenInComment")
       UrlPreview(
         :visible="cardUrlPreviewIsVisible"
         :card="card"
@@ -257,6 +257,13 @@ export default {
           name: '',
           color: '#cdcdcd' // secondary-active-background
         }
+      }
+    },
+    isHiddenInComment () {
+      if (this.nameIsComment && !this.commentIsVisible) {
+        return true
+      } else {
+        return false
       }
     },
     currentCardDetailsIsVisible () {
