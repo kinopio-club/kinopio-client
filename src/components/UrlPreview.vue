@@ -11,7 +11,7 @@
       //- Preview with Image
       template(v-if="card.urlPreviewImage")
         img.url-image(:src="card.urlPreviewImage" :class="{selected: isSelected}")
-        a.badge.button-badge.url-text(:href="card.urlPreviewUrl")
+        .badge.url-text(:style="{background: selectedColor}")
           img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
           img.icon.favicon.open(v-else src="@/assets/open.svg")
           .title {{card.urlPreviewTitle}}
@@ -39,15 +39,21 @@ export default {
     loading: Boolean,
     card: Object,
     parentIsCardDetails: Boolean,
-    isSelected: Boolean
+    isSelected: Boolean,
+    updatedByUser: Object
   },
   computed: {
+    selectedColor () {
+      if (!this.isSelected) { return }
+      return this.updatedByUser.color
+    },
     shouldShowDescription () {
       if (!this.card.urlPreviewDescription) { return }
       const noPreviewImage = !this.card.urlPreviewImage
       const url = this.card.urlPreviewUrl
       const isSpotify = url.includes('spotify.com')
-      return noPreviewImage || isSpotify
+      const isTwitter = url.includes('twitter.com')
+      return noPreviewImage || isSpotify || isTwitter
     }
   },
   methods: {
@@ -84,15 +90,10 @@ export default {
     position absolute
     margin 8px
     max-width calc(100% - 16px)
-    // color var(--text-link)
     color var(--primary)
     text-decoration none
     background var(--secondary-background)
     border-radius 3px
-    &:hover
-      background var(--secondary-hover-background)
-    &:active
-      background var(--secondary-active-background)
 
   .favicon
     border-radius 3px
