@@ -8,13 +8,22 @@
         button(@click="hidePreview")
           img.icon.cancel(src="@/assets/add.svg")
 
-      img.url-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage")
-      div
+      //- Preview with Image
+      template(v-if="card.urlPreviewImage")
+        img.url-image(:src="card.urlPreviewImage" :class="{selected: isSelected}")
+        a.badge.button-badge.url-text(:href="card.urlPreviewUrl")
+          img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
+          img.icon.favicon.open(v-else src="@/assets/open.svg")
+          .title {{card.urlPreviewTitle}}
+          .description(v-if="shouldShowDescription") {{card.urlPreviewDescription}}
+
+      //- Preview without Image
+      template(v-if="!card.urlPreviewImage")
         img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
         img.icon.favicon.open(v-else src="@/assets/open.svg")
-
         .title {{card.urlPreviewTitle}}
-        .description(v-if="card.urlPreviewDescription && shouldShowDescription") {{card.urlPreviewDescription}}
+        .description(v-if="shouldShowDescription") {{card.urlPreviewDescription}}
+
 </template>
 
 <script>
@@ -29,13 +38,16 @@ export default {
     visible: Boolean,
     loading: Boolean,
     card: Object,
-    parentIsCardDetails: Boolean
+    parentIsCardDetails: Boolean,
+    isSelected: Boolean
   },
   computed: {
     shouldShowDescription () {
+      if (!this.card.urlPreviewDescription) { return }
+      const noPreviewImage = !this.card.urlPreviewImage
       const url = this.card.urlPreviewUrl
       const isSpotify = url.includes('spotify.com')
-      return isSpotify
+      return noPreviewImage || isSpotify
     }
   },
   methods: {
@@ -52,6 +64,8 @@ export default {
 
 <style lang="stylus">
 .url-preview
+  &.row
+    display flex
   .preview-content
     position relative
     display flex
@@ -59,15 +73,26 @@ export default {
     color var(--primary)
     text-decoration none
     word-break break-word
-    background var(--secondary-hover-background)
-    border-radius 3px
-    padding 4px
 
   .url-image
-    max-width 45%
-    max-height 70px
     border-radius 3px
-    margin-right 6px
+    background var(--primary-background)
+    &.selected
+      mix-blend-mode color-burn
+
+  .url-text
+    position absolute
+    margin 8px
+    max-width calc(100% - 16px)
+    // color var(--text-link)
+    color var(--primary)
+    text-decoration none
+    background var(--secondary-background)
+    border-radius 3px
+    &:hover
+      background var(--secondary-hover-background)
+    &:active
+      background var(--secondary-active-background)
 
   .favicon
     border-radius 3px
@@ -84,6 +109,7 @@ export default {
     margin-top 10px
 
   .hide-preview-wrap
+    z-index 1
     position absolute
     right 0
     top 0
