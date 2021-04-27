@@ -1,28 +1,20 @@
 <template lang="pug">
 .row.url-preview(v-if="visible")
   Loader(:visible="loading")
+  .button-wrap.hide-preview-wrap(v-if="parentIsCardDetails" :class="{'has-padding': card.urlPreviewImage}")
+    button(@click="hidePreview")
+      img.icon.cancel(src="@/assets/add.svg")
+
   template(v-if="!loading")
     a(:href="card.urlPreviewUrl")
       img.url-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage")
-      //- if no image, then use generic globe url icon , or
       div
-        //- special case favicons: twitter, youtube/video
-        //- img.favicon(src="https://are.na/favicon.ico")
-
-        //- img.favicon(v-if="favicon" :src="favicon")
-        //- template(v-if="favicon")
-        //-   {{favicon}}
-        img.icon.favicon(v-if="domainType === 'arena'" src="@/assets/arena.svg" :class="domainType")
-        img.icon.favicon(v-else src="@/assets/open.svg")
-
-        //- template(v-if="faviconExists")
-        //- p {{domain}}
-
+        img.icon.url-type(v-if="urlType === 'arena'" src="@/assets/arena.svg" :class="urlType")
+        //- TODO video icon
+        //- TODO audio icon , spotify, soundcloud, bandcamp
+        img.icon.url-type(v-else src="@/assets/open.svg")
         .title {{card.urlPreviewTitle}}
-        //- template(v-if="showDescription")
-        //-   br
-        .description(v-if="card.urlPreviewDescription && !hideDescription") {{card.urlPreviewDescription}}
-        //- template(v-else)
+        .description(v-if="card.urlPreviewDescription && !shouldHideDescription") {{card.urlPreviewDescription}}
 </template>
 
 <script>
@@ -36,31 +28,23 @@ export default {
   props: {
     visible: Boolean,
     loading: Boolean,
-    card: Object
+    card: Object,
+    parentIsCardDetails: Boolean
   },
-  // data () {
-  //   return {
-  //     type: ''
-  //     // domain: ''
-  //     // favicon: ''
-  //   }
-  // },
-  // mounted () {
-  //   console.log('🚙')
-  //   this.getFavicon()
-  // },
   computed: {
-    hideDescription () {
-      const isYoutube = this.card.urlPreviewUrl.includes('youtube.com')
-      const isArena = this.card.urlPreviewUrl.includes('are.na')
+    shouldHideDescription () {
+      const url = this.card.urlPreviewUrl
+      const isYoutube = url.includes('youtube.com')
+      const isArena = url.includes('are.na')
       return isYoutube || isArena
     },
-    domainType () {
+    urlType () {
+      const url = this.card.urlPreviewUrl
       // video
-      const isYoutube = this.card.urlPreviewUrl.includes('youtube.com')
-      const isVimeo = this.card.urlPreviewUrl.includes('vimeo.com')
+      const isYoutube = url.includes('youtube.com')
+      const isVimeo = url.includes('vimeo.com')
       // arena
-      const isArena = this.card.urlPreviewUrl.includes('are.na')
+      const isArena = url.includes('are.na')
       if (isYoutube || isVimeo) {
         return 'video'
       } else if (isArena) {
@@ -69,62 +53,35 @@ export default {
         return ''
       }
     }
-    // async isFavicon () {
-    //   return this.favicon()
-    // }
-
   },
   methods: {
-    // async getFavicon () {
-    //   const url = this.card.urlPreviewUrl
-    //   if (!url) { return }
-    //   console.log(url, typeof url)
-    //   let domain = new URL(url)
-    //   domain = domain.origin
-    //   let image = new Image()
-    //   image.src = domain + '/favicon.ico'
-    //   console.log('🍅',domain, image)
-    //   await image.decode()
-    //   console.log('🍅🍅🍅',domain, image)
-    //   // return image.src
-    //   this.favicon = image.src
-    // }
-
-    //   truncated (string) {
-    //     return utils.truncated(string, 60)
-    //   }
-
+    hidePreview () {
+      const update = {
+        id: this.card.id,
+        urlPreviewIsVisible: false
+      }
+      this.$store.dispatch('currentSpace/updateCard', update)
+    }
   }
-  // watch: {
-  //   visible (visible) {
-  //       console.log('🚙🚙🚙')
-
-  //     if (visible) {
-  //       this.getFavicon()
-  //     }
-  //   }
-  // }
-
 }
 </script>
 
 <style lang="stylus">
 .url-preview
-  border-radius 3px
-  padding 4px
-  background var(--secondary-hover-background)
-  &:hover
-    background var(--secondary-active-background)
-    box-shadow var(--hover-shadow)
-  &:active
-    box-shadow var(--active-inset-shadow)
-
   a
     display flex
     align-items start !important
     color var(--primary)
     text-decoration none
     word-break break-word
+    background var(--secondary-hover-background)
+    border-radius 3px
+    padding 4px
+    &:hover
+      background var(--secondary-active-background)
+      box-shadow var(--hover-shadow)
+    &:active
+      box-shadow var(--active-inset-shadow)
 
   .url-image
     max-width 30%
@@ -132,7 +89,7 @@ export default {
     border-radius 3px
     margin-right 6px
 
-  .favicon
+  .url-type
     width 12px
     max-height 14px
     display inline
@@ -145,4 +102,11 @@ export default {
     display inline
   .description
     margin-top 10px
+
+  .hide-preview-wrap
+    position absolute
+    right 0
+    top 0
+    &.has-padding
+      padding 4px
 </style>
