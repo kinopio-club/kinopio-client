@@ -1,6 +1,11 @@
 <template lang="pug">
 .row.url-preview(v-if="visible")
   Loader(:visible="loading")
+  template(v-if="loading")
+    .card-details-buttons(v-if="parentIsCardDetails")
+      .button-wrap
+        button(@click="hidePreview")
+          img.icon.cancel(src="@/assets/add.svg")
 
   template(v-if="!loading")
     .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard}")
@@ -48,9 +53,10 @@ export default {
       if (!this.card.urlPreviewDescription) { return }
       const noPreviewImage = !this.card.urlPreviewImage
       const url = this.card.urlPreviewUrl
+      const isFutureland = url.includes('futureland.tv')
       const isSpotify = url.includes('spotify.com')
       const isTwitter = url.includes('twitter.com')
-      return noPreviewImage || isSpotify || isTwitter
+      return noPreviewImage || isSpotify || isTwitter || isFutureland
     }
   },
   methods: {

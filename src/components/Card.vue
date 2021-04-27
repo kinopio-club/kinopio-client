@@ -98,7 +98,7 @@ article(:style="position" :data-card-id="id" ref="card")
             template(v-else)
               img.connector-icon(src="@/assets/connector-open.svg")
 
-    .url-preview-wrap(v-if="cardUrlPreviewIsVisible")
+    .url-preview-wrap(v-if="cardUrlPreviewIsVisible && commentIsVisible")
       UrlPreview(
         :visible="cardUrlPreviewIsVisible"
         :card="card"
