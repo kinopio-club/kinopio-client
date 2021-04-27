@@ -6,7 +6,7 @@
       img.icon.cancel(src="@/assets/add.svg")
 
   template(v-if="!loading")
-    a(:href="card.urlPreviewUrl")
+    .preview-content
       img.url-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage")
       div
         img.icon.url-type(v-if="urlType === 'arena'" src="@/assets/arena.svg" :class="urlType")
@@ -68,7 +68,7 @@ export default {
 
 <style lang="stylus">
 .url-preview
-  a
+  .preview-content
     display flex
     align-items start !important
     color var(--primary)
@@ -77,15 +77,10 @@ export default {
     background var(--secondary-hover-background)
     border-radius 3px
     padding 4px
-    &:hover
-      background var(--secondary-active-background)
-      box-shadow var(--hover-shadow)
-    &:active
-      box-shadow var(--active-inset-shadow)
 
   .url-image
     max-width 30%
-    max-height 80px
+    max-height 60px
     border-radius 3px
     margin-right 6px
 
