@@ -1153,6 +1153,21 @@ export default {
         notifiedFavoriteSpaceToFollow = true
       }
     },
+    async getFavicon () {
+      const url = this.card.urlPreviewUrl
+      if (!url) { return }
+      let domain = new URL(url)
+      domain = domain.origin
+      let image = new Image()
+      image.src = domain + '/favicon.ico'
+      await image.decode()
+      if (!image) { return }
+      const update = {
+        id: this.card.id,
+        urlPreviewFavicon: image.src
+      }
+      this.$store.dispatch('currentSpace/updateCard', update)
+    },
     debouncedUpdateUrlPreview: debounce(async function (url) {
       try {
         this.isLoadingUrlPreview = true
@@ -1176,6 +1191,7 @@ export default {
         const maxImageLength = 350
         if (data.image.length >= maxImageLength) { return }
         this.$store.dispatch('currentSpace/updateCard', update)
+        this.getFavicon()
       } catch (error) {
         console.warn('🚑', error)
       }

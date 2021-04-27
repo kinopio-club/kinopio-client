@@ -10,11 +10,9 @@
 
       img.url-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage")
       div
-        img.icon.url-type(v-if="urlType === 'arena'" src="@/assets/arena.svg" :class="urlType")
-        img.icon.url-type(v-if="urlType === 'music'" src="@/assets/autoplay.svg" :class="urlType")
-        //- TODO video icon
-        //- TODO audio icon , spotify, soundcloud, bandcamp
-        img.icon.url-type(v-else src="@/assets/open.svg")
+        img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
+        img.icon.favicon.open(v-else src="@/assets/open.svg")
+
         .title {{card.urlPreviewTitle}}
         .description(v-if="card.urlPreviewDescription && shouldShowDescription") {{card.urlPreviewDescription}}
 </template>
@@ -36,29 +34,8 @@ export default {
   computed: {
     shouldShowDescription () {
       const url = this.card.urlPreviewUrl
-      // const isYoutube = url.includes('youtube.com')
-      // const isArena = url.includes('are.na')
       const isSpotify = url.includes('spotify.com')
       return isSpotify
-    },
-    urlType () {
-      const url = this.card.urlPreviewUrl
-      // video
-      const isYoutube = url.includes('youtube.com')
-      const isVimeo = url.includes('vimeo.com')
-      // music
-      const isSpotify = url.includes('spotify.com')
-      // arena
-      const isArena = url.includes('are.na')
-      if (isYoutube || isVimeo) {
-        return 'video'
-      } else if (isSpotify) {
-        return 'music'
-      } else if (isArena) {
-        return 'arena'
-      } else {
-        return ''
-      }
     }
   },
   methods: {
@@ -87,20 +64,20 @@ export default {
     padding 4px
 
   .url-image
-    max-width 30%
-    max-height 60px
+    max-width 45%
+    max-height 70px
     border-radius 3px
     margin-right 6px
 
-  .url-type
-    width 12px
-    max-height 14px
+  .favicon
+    border-radius 3px
+    width 14px
+    vertical-align -3px
     display inline
     margin-right 5px
-    vertical-align -2px
-    &.arena
-      width 14px
-      vertical-align 0
+    &.open
+      width 12px
+      vertical-align -2px
   .title
     display inline
   .description
