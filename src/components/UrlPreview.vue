@@ -3,7 +3,7 @@
   Loader(:visible="loading")
 
   template(v-if="!loading")
-    .preview-content(:style="{background: selectedColor}")
+    .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard}")
       .card-details-buttons(v-if="parentIsCardDetails" :class="{'has-padding': card.urlPreviewImage}")
         .button-wrap
           button(@click="hidePreview")
@@ -36,7 +36,8 @@ export default {
     card: Object,
     parentIsCardDetails: Boolean,
     isSelected: Boolean,
-    updatedByUser: Object
+    updatedByUser: Object,
+    isImageCard: Boolean
   },
   computed: {
     selectedColor () {
@@ -79,6 +80,10 @@ export default {
     background var(--secondary-hover-background)
     border-radius 3px
     padding 4px
+
+  .image-card
+    border-top-left-radius 0
+    border-top-right-radius 0
 
   .url-image
     max-width 40%

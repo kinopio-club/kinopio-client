@@ -99,7 +99,13 @@ article(:style="position" :data-card-id="id" ref="card")
               img.connector-icon(src="@/assets/connector-open.svg")
 
     .url-preview-wrap(v-if="cardUrlPreviewIsVisible")
-      UrlPreview(:visible="cardUrlPreviewIsVisible" :card="card" :updatedByUser="updatedByUser" :isSelected="isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor")
+      UrlPreview(
+        :visible="cardUrlPreviewIsVisible"
+        :card="card"
+        :updatedByUser="updatedByUser"
+        :isImageCard="Boolean(formats.image)"
+        :isSelected="isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor"
+      )
 
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
