@@ -1168,6 +1168,15 @@ export default {
       }
       this.$store.dispatch('currentSpace/updateCard', update)
     },
+    async imageIsTooSmall (url) {
+      const minSize = 120
+      let image = new Image()
+      image.src = url
+      await image.decode()
+      if (image.width < minSize && image.height < minSize) {
+        return true
+      }
+    },
     debouncedUpdateUrlPreview: debounce(async function (url) {
       try {
         this.isLoadingUrlPreview = true
@@ -1180,11 +1189,16 @@ export default {
           this.clearUrlPreview()
           return
         }
+        let image = data.image
+        const imageIsTooSmall = await this.imageIsTooSmall(image)
+        if (imageIsTooSmall) {
+          image = ''
+        }
         console.log('🚗 link preview', data)
         const update = {
           id: this.card.id,
           urlPreviewUrl: url,
-          urlPreviewImage: data.image,
+          urlPreviewImage: image,
           urlPreviewTitle: utils.truncated(data.title),
           urlPreviewDescription: utils.truncated(data.description)
         }

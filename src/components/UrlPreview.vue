@@ -23,11 +23,12 @@
           .description(v-if="shouldShowDescription") {{card.urlPreviewDescription}}
 
       //- Preview without Image
-      template(v-if="!card.urlPreviewImage")
-        img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
-        img.icon.favicon.open(v-else src="@/assets/open.svg")
-        .title {{card.urlPreviewTitle}}
-        .description(v-if="shouldShowDescription") {{card.urlPreviewDescription}}
+      template(v-else)
+        div
+          img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
+          img.icon.favicon.open(v-else src="@/assets/open.svg")
+          .title {{card.urlPreviewTitle}}
+          .description(v-if="shouldShowDescription") {{card.urlPreviewDescription}}
 
 </template>
 
@@ -78,6 +79,7 @@ export default {
   &.row
     display flex
   .preview-content
+    width 100%
     position relative
     display flex
     align-items start !important
