@@ -81,8 +81,8 @@ export default {
     padding 4px
 
   .url-image
-    max-width 30%
-    max-height 70px
+    max-width 40%
+    max-height 110px
     margin-right 6px
     border-radius 3px
     background var(--primary-background)
