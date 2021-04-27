@@ -1,20 +1,22 @@
 <template lang="pug">
 .row.url-preview(v-if="visible")
   Loader(:visible="loading")
-  .button-wrap.hide-preview-wrap(v-if="parentIsCardDetails" :class="{'has-padding': card.urlPreviewImage}")
-    button(@click="hidePreview")
-      img.icon.cancel(src="@/assets/add.svg")
 
   template(v-if="!loading")
     .preview-content
+      .button-wrap.hide-preview-wrap(v-if="parentIsCardDetails" :class="{'has-padding': card.urlPreviewImage}")
+        button(@click="hidePreview")
+          img.icon.cancel(src="@/assets/add.svg")
+
       img.url-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage")
       div
         img.icon.url-type(v-if="urlType === 'arena'" src="@/assets/arena.svg" :class="urlType")
+        img.icon.url-type(v-if="urlType === 'music'" src="@/assets/autoplay.svg" :class="urlType")
         //- TODO video icon
         //- TODO audio icon , spotify, soundcloud, bandcamp
         img.icon.url-type(v-else src="@/assets/open.svg")
         .title {{card.urlPreviewTitle}}
-        .description(v-if="card.urlPreviewDescription && !shouldHideDescription") {{card.urlPreviewDescription}}
+        .description(v-if="card.urlPreviewDescription && shouldShowDescription") {{card.urlPreviewDescription}}
 </template>
 
 <script>
@@ -32,21 +34,26 @@ export default {
     parentIsCardDetails: Boolean
   },
   computed: {
-    shouldHideDescription () {
+    shouldShowDescription () {
       const url = this.card.urlPreviewUrl
-      const isYoutube = url.includes('youtube.com')
-      const isArena = url.includes('are.na')
-      return isYoutube || isArena
+      // const isYoutube = url.includes('youtube.com')
+      // const isArena = url.includes('are.na')
+      const isSpotify = url.includes('spotify.com')
+      return isSpotify
     },
     urlType () {
       const url = this.card.urlPreviewUrl
       // video
       const isYoutube = url.includes('youtube.com')
       const isVimeo = url.includes('vimeo.com')
+      // music
+      const isSpotify = url.includes('spotify.com')
       // arena
       const isArena = url.includes('are.na')
       if (isYoutube || isVimeo) {
         return 'video'
+      } else if (isSpotify) {
+        return 'music'
       } else if (isArena) {
         return 'arena'
       } else {
@@ -69,6 +76,7 @@ export default {
 <style lang="stylus">
 .url-preview
   .preview-content
+    position relative
     display flex
     align-items start !important
     color var(--primary)
