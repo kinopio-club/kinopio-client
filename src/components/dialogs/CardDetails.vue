@@ -1157,26 +1157,16 @@ export default {
         notifiedFavoriteSpaceToFollow = true
       }
     },
-    async getFavicon () {
-      const url = this.card.urlPreviewUrl
-      if (!url) { return }
-      let domain = new URL(url)
-      domain = domain.origin
-      let image = new Image()
-      image.src = domain + '/favicon.ico'
-      await image.decode()
-      if (!image) { return }
-      const update = {
-        id: this.card.id,
-        urlPreviewFavicon: image.src
-      }
-      this.$store.dispatch('currentSpace/updateCard', update)
+    previewImage (image, width) {
+      const minWidth = 200
+      if (width < minWidth) { return '' }
+      return image
     },
     debouncedUpdateUrlPreview: debounce(async function (url) {
       try {
         this.isLoadingUrlPreview = true
         const linkPreviewApiKey = 'a9f249ef6b59cc8ccdd19de6b167bafa'
-        const response = await fetch(`https://api.linkpreview.net/?key=${linkPreviewApiKey}&q=${encodeURIComponent(url)}`)
+        const response = await fetch(`https://api.linkpreview.net/?key=${linkPreviewApiKey}&q=${encodeURIComponent(url)}&fields=icon,image_x`)
         const data = await response.json()
         let cardUrl = this.validWebUrls[0]
         cardUrl = this.removeHiddenQueryString(cardUrl)
@@ -1186,17 +1176,18 @@ export default {
           return
         }
         console.log('🚗 link preview', data)
+        const image = this.previewImage(data.image, data.image_x)
         const update = {
           id: this.card.id,
           urlPreviewUrl: url,
-          urlPreviewImage: data.image,
+          urlPreviewImage: image,
           urlPreviewTitle: utils.truncated(data.title),
-          urlPreviewDescription: utils.truncated(data.description)
+          urlPreviewDescription: utils.truncated(data.description),
+          urlPreviewFavicon: data.icon
         }
         const maxImageLength = 350
         if (data.image.length >= maxImageLength) { return }
         this.$store.dispatch('currentSpace/updateCard', update)
-        this.getFavicon()
       } catch (error) {
         console.warn('🚑', error)
       }
