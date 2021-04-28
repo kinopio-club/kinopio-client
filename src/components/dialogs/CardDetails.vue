@@ -222,7 +222,6 @@ export default {
       cursorPosition: 0,
       shouldCancelBracketRight: false,
       insertedLineBreak: false,
-      isLoadingUrlPreview: false,
       error: {
         signUpToUpload: false,
         sizeLimit: false,
@@ -454,6 +453,11 @@ export default {
     cardUrlPreviewIsVisible () {
       const isUrlOrLoading = this.card.urlPreviewUrl || this.isLoadingUrlPreview
       return Boolean(this.card.urlPreviewIsVisible && isUrlOrLoading)
+    },
+    isLoadingUrlPreview () {
+      const cardIds = this.$store.state.urlPreviewLoadingForCardIds
+      const isLoading = cardIds.find(cardId => cardId === this.card.id)
+      return Boolean(isLoading)
     }
   },
   methods: {
@@ -1166,13 +1170,13 @@ export default {
     },
     debouncedUpdateUrlPreview: debounce(async function (url) {
       try {
-        this.isLoadingUrlPreview = true
+        this.$store.commit('addUrlPreviewLoadingForCardIds', this.card.id)
         const linkPreviewApiKey = 'a9f249ef6b59cc8ccdd19de6b167bafa'
         const response = await fetch(`https://api.linkpreview.net/?key=${linkPreviewApiKey}&q=${encodeURIComponent(url)}&fields=icon,image_x`)
         const data = await response.json()
         let cardUrl = this.validWebUrls[0]
         cardUrl = this.removeHiddenQueryString(cardUrl)
-        this.isLoadingUrlPreview = false
+        this.$store.commit('removeUrlPreviewLoadingForCardIds', this.card.id)
         if (data.error || url !== cardUrl) {
           this.clearUrlPreview()
           return
@@ -1252,7 +1256,7 @@ export default {
       const previewIsVisible = this.card.urlPreviewIsVisible
       const isNotPreviewUrl = url !== this.card.urlPreviewUrl
       if (previewIsVisible && isNotPreviewUrl) {
-        this.isLoadingUrlPreview = true
+        this.$store.commit('addUrlPreviewLoadingForCardIds', this.card.id)
         this.debouncedUpdateUrlPreview(url)
       }
     }

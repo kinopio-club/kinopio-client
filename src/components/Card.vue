@@ -69,6 +69,7 @@ article(:style="position" :data-card-id="id" ref="card")
           p.name.name-segments(v-if="normalizedName" :style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image)}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
+            Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
       span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}")
@@ -631,6 +632,11 @@ export default {
           return true
         }
       } else { return false }
+    },
+    isLoadingUrlPreview () {
+      const cardIds = this.$store.state.urlPreviewLoadingForCardIds
+      const isLoading = cardIds.find(cardId => cardId === this.card.id)
+      return Boolean(isLoading)
     }
   },
   methods: {
@@ -1099,6 +1105,11 @@ article
         &.has-checkbox
           .audio
             width 132px
+        .loader
+          margin-left 5px
+          width 14px
+          height 14px
+          vertical-align -3px
 
     .connector
       position relative

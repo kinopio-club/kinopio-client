@@ -115,6 +115,7 @@ export default new Vuex.Store({
     hasRestoredFavorites: false,
     loadSpaceShowDetailsForCardId: '',
     loadJournalSpace: false,
+    urlPreviewLoadingForCardIds: [],
 
     // notifications
     notifications: [],
@@ -195,6 +196,16 @@ export default new Vuex.Store({
     loadJournalSpace: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'loadJournalSpace' })
       state.loadJournalSpace = value
+    },
+    addUrlPreviewLoadingForCardIds: (state, cardId) => {
+      utils.typeCheck({ value: cardId, type: 'string', origin: 'addUrlPreviewLoadingForCardIds' })
+      state.urlPreviewLoadingForCardIds.push(cardId)
+    },
+    removeUrlPreviewLoadingForCardIds: (state, cardId) => {
+      utils.typeCheck({ value: cardId, type: 'string', origin: 'removeUrlPreviewLoadingForCardIds' })
+      let cardIds = utils.clone(state.urlPreviewLoadingForCardIds)
+      cardIds = cardIds.filter(id => cardId !== id) || []
+      state.urlPreviewLoadingForCardIds = cardIds
     },
     shouldHideConnectionOutline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'shouldHideConnectionOutline' })
