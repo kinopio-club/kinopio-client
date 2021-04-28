@@ -8,7 +8,7 @@
           img.icon.cancel(src="@/assets/add.svg")
 
   template(v-if="!loading")
-    .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard}")
+    .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard, 'is-card-details': parentIsCardDetails}")
       .card-details-buttons(v-if="parentIsCardDetails" :class="{'has-padding': card.urlPreviewImage}")
         .button-wrap
           button(@click="hidePreview")
@@ -18,8 +18,8 @@
             button.visit-button
               img.icon.visit(src="@/assets/visit.svg")
 
-      img.url-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected}")
-      div
+      img.preview-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected, 'side-image': isImageCard || parentIsCardDetails}")
+      div(:class="{'side-text badge': !isImageCard && !parentIsCardDetails && card.urlPreviewImage}")
         img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
         img.icon.favicon.open(v-else src="@/assets/open.svg")
         .title {{card.urlPreviewTitle}}
@@ -84,20 +84,28 @@ export default {
     word-break break-word
     background var(--secondary-hover-background)
     border-radius 3px
-    padding 4px
+    &.image-card
+      padding 4px
+      border-top-left-radius 0
+      border-top-right-radius 0
+    &.is-card-details
+      padding 4px
 
-  .image-card
-    border-top-left-radius 0
-    border-top-right-radius 0
-
-  .url-image
-    max-width 40%
-    max-height 110px
-    margin-right 6px
+  .preview-image
+    width 100%
     border-radius 3px
     background var(--primary-background)
     &.selected
       mix-blend-mode color-burn
+    &.side-image
+      max-width 40%
+      margin-right 6px
+
+  .side-text
+    position absolute
+    margin 8px
+    max-width calc(100% - 24px)
+    background var(--secondary-hover-background)
 
   .favicon
     border-radius 3px
