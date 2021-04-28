@@ -1160,6 +1160,8 @@ export default {
     previewImage (image, width) {
       const minWidth = 200
       if (width < minWidth) { return '' }
+      const isTwitterIcon = image.includes('abs.twimg.com/responsive-web/client-web/icon-ios')
+      if (isTwitterIcon) { return '' }
       return image
     },
     debouncedUpdateUrlPreview: debounce(async function (url) {

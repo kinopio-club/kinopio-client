@@ -19,10 +19,10 @@
               img.icon.visit(src="@/assets/visit.svg")
 
       img.preview-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected, 'side-image': isImageCard || parentIsCardDetails}")
-      div(:class="{'side-text badge': !isImageCard && !parentIsCardDetails && card.urlPreviewImage}" :style="{background: selectedColor}")
+      .text(v-if="isNotGithubRepo" :class="{'side-text badge': !isImageCard && !parentIsCardDetails && card.urlPreviewImage}" :style="{background: selectedColor}")
         img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
         img.icon.favicon.open(v-else src="@/assets/open.svg")
-        .title {{card.urlPreviewTitle}}
+        .title {{filteredTitle}}
         .description(v-if="shouldShowDescription") {{card.urlPreviewDescription}}
 
 </template>
@@ -56,6 +56,16 @@ export default {
       const domainPattern = new RegExp(/(?:(futureland.tv)|(spotify.com)|(twitter.com)|(wikipedia.org)|(tumblr.com)|(medium.com))/igm)
       const isDomain = this.card.urlPreviewUrl.match(domainPattern)
       return noPreviewImage || isDomain
+    },
+    filteredTitle () {
+      let title = this.card.urlPreviewTitle
+      title = title.replace('on Twitter', '')
+      return title
+    },
+    isNotGithubRepo () {
+      const image = this.card.urlPreviewImage
+      if (image.includes('opengraph.githubassets.com')) { return false }
+      return true
     }
   },
   methods: {
