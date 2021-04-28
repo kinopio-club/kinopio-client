@@ -344,7 +344,10 @@ export default {
     },
     urls () {
       const name = utils.removeMarkdownCodeblocksFromString(this.name)
-      const urls = utils.urlsFromString(name)
+      let urls = utils.urlsFromString(name)
+      if (urls) {
+        urls.reverse()
+      }
       this.updateMediaUrls(urls)
       return urls || []
     },
