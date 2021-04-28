@@ -53,7 +53,7 @@ export default {
       if (!this.card.urlPreviewDescription) { return }
       const noPreviewImage = !this.card.urlPreviewImage
       // https://regexr.com/5ror4
-      const domainPattern = new RegExp(/(?:(futureland.tv)|(spotify.com)|(twitter.com)|(wikipedia.org)|(tumblr.com))/igm)
+      const domainPattern = new RegExp(/(?:(futureland.tv)|(spotify.com)|(twitter.com)|(wikipedia.org)|(tumblr.com)|(medium.com))/igm)
       const isDomain = this.card.urlPreviewUrl.match(domainPattern)
       return noPreviewImage || isDomain
     }
