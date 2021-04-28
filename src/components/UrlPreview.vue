@@ -19,7 +19,7 @@
               img.icon.visit(src="@/assets/visit.svg")
 
       img.preview-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected, 'side-image': isImageCard || parentIsCardDetails}")
-      div(:class="{'side-text badge': !isImageCard && !parentIsCardDetails && card.urlPreviewImage}")
+      div(:class="{'side-text badge': !isImageCard && !parentIsCardDetails && card.urlPreviewImage}" :style="{background: selectedColor}")
         img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
         img.icon.favicon.open(v-else src="@/assets/open.svg")
         .title {{card.urlPreviewTitle}}
