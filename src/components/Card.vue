@@ -98,6 +98,15 @@ article(:style="position" :data-card-id="id" ref="card")
             template(v-else)
               img.connector-icon(src="@/assets/connector-open.svg")
 
+    .url-preview-wrap(v-if="cardUrlPreviewIsVisible && !isHiddenInComment")
+      UrlPreview(
+        :visible="cardUrlPreviewIsVisible"
+        :card="card"
+        :updatedByUser="updatedByUser"
+        :isImageCard="Boolean(formats.image)"
+        :isSelected="isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor"
+      )
+
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
       .badge.info
@@ -160,6 +169,7 @@ import scrollIntoView from '@/scroll-into-view.js'
 import User from '@/components/User.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
 import NameSegment from '@/components/NameSegment.vue'
+import UrlPreview from '@/components/UrlPreview.vue'
 
 import fromNow from 'fromnow'
 
@@ -173,7 +183,8 @@ export default {
     Audio,
     User,
     UserDetails,
-    NameSegment
+    NameSegment,
+    UrlPreview
   },
   props: {
     card: Object
@@ -246,6 +257,13 @@ export default {
           name: '',
           color: '#cdcdcd' // secondary-active-background
         }
+      }
+    },
+    isHiddenInComment () {
+      if (this.nameIsComment && !this.commentIsVisible) {
+        return true
+      } else {
+        return false
       }
     },
     currentCardDetailsIsVisible () {
@@ -326,7 +344,10 @@ export default {
     },
     urls () {
       const name = utils.removeMarkdownCodeblocksFromString(this.name)
-      const urls = utils.urlsFromString(name)
+      let urls = utils.urlsFromString(name)
+      if (urls) {
+        urls.reverse()
+      }
       this.updateMediaUrls(urls)
       return urls || []
     },
@@ -433,6 +454,9 @@ export default {
       })
       this.checkIfNameIsOnlyMarkdownLink(segments)
       return segments
+    },
+    cardUrlPreviewIsVisible () {
+      return Boolean(this.card.urlPreviewIsVisible && this.card.urlPreviewUrl)
     },
     tags () {
       return this.nameSegments.filter(segment => {
@@ -1040,6 +1064,7 @@ article
     .card-content-wrap
       display flex
       align-items flex-start
+      justify-content space-between
     .card-content
       min-width 40px
     .card-buttons-wrap
@@ -1238,6 +1263,10 @@ article
 
   .tappable-area
     margin-left 20px
+
+  .url-preview-wrap
+    padding 8px
+    padding-top 0
 
 @keyframes bounce
   0%

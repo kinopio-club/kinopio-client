@@ -102,15 +102,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           img.icon(v-else src="@/assets/view.svg")
           span Link
       //- Split by Line Breaks
-      .button-wrap(v-if="nameHasLineBreaks")
+      .button-wrap(v-if="nameHasLineBreaks || nameHasSentences")
         button(:disabled="!canEditCard" @click.left.stop="splitCards")
           img.icon(src="@/assets/split-vertically.svg")
-          span Split into {{nameLines}} Cards
-      //- or, Split by Sentences
-      .button-wrap(v-if="nameHasSentences")
-        button(:disabled="!canEditCard" @click.left.stop="splitCards")
-          img.icon(src="@/assets/split-vertically.svg")
-          span Split into {{nameSentences}} Cards
+          span Split into {{nameLines || nameSentences}} Cards
 
     .row.badges-row(v-if="tagsInCard.length || card.linkToSpaceId || nameIsComment")
       //- Tags
@@ -137,6 +132,8 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       //- Comment
       .badge.info(v-if="nameIsComment" :style="{backgroundColor: updatedByUser.color}")
         span ((comment))
+
+    UrlPreview(:visible="cardUrlPreviewIsVisible" :loading="isLoadingUrlPreview" :card="card" :parentIsCardDetails="true")
 
     //- Read Only
     p.row.edit-message(v-if="!canEditCard")
@@ -187,6 +184,7 @@ import TagPicker from '@/components/dialogs/TagPicker.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
+import UrlPreview from '@/components/UrlPreview.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
@@ -207,6 +205,7 @@ export default {
     TagPicker,
     SpacePicker,
     Loader,
+    UrlPreview,
     User
   },
   props: {
@@ -223,6 +222,7 @@ export default {
       cursorPosition: 0,
       shouldCancelBracketRight: false,
       insertedLineBreak: false,
+      isLoadingUrlPreview: false,
       error: {
         signUpToUpload: false,
         sizeLimit: false,
@@ -360,6 +360,18 @@ export default {
         return utils.urlType(url) === 'link'
       })
     },
+    validWebUrls () {
+      const urls = this.validUrls.filter(url => {
+        const urlHasProtocol = utils.urlHasProtocol(url)
+        const isLinode = url.includes('us-east-1.linodeobjects.com')
+        const isSpace = utils.urlIsKinopioSpace(url)
+        return urlHasProtocol && !isLinode && !isSpace
+      })
+      if (!urls.length && this.card.urlPreviewUrl) {
+        this.clearUrlPreview()
+      }
+      return urls
+    },
     hasUrls () {
       return Boolean(this.validUrls.length)
     },
@@ -438,6 +450,10 @@ export default {
       return {
         transform: `scale(${this.spaceCounterZoomDecimal})`
       }
+    },
+    cardUrlPreviewIsVisible () {
+      const isUrlOrLoading = this.card.urlPreviewUrl || this.isLoadingUrlPreview
+      return Boolean(this.card.urlPreviewIsVisible && isUrlOrLoading)
     }
   },
   methods: {
@@ -1140,6 +1156,64 @@ export default {
         this.$store.commit('addNotification', { message: 'Favorite to follow', icon: 'heart-empty', type: 'info' })
         notifiedFavoriteSpaceToFollow = true
       }
+    },
+    previewImage (image, width) {
+      const minWidth = 200
+      if (width < minWidth) { return '' }
+      return image
+    },
+    debouncedUpdateUrlPreview: debounce(async function (url) {
+      try {
+        this.isLoadingUrlPreview = true
+        const linkPreviewApiKey = 'a9f249ef6b59cc8ccdd19de6b167bafa'
+        const response = await fetch(`https://api.linkpreview.net/?key=${linkPreviewApiKey}&q=${encodeURIComponent(url)}&fields=icon,image_x`)
+        const data = await response.json()
+        let cardUrl = this.validWebUrls[0]
+        cardUrl = this.removeHiddenQueryString(cardUrl)
+        this.isLoadingUrlPreview = false
+        if (data.error || url !== cardUrl) {
+          this.clearUrlPreview()
+          return
+        }
+        console.log('🚗 link preview', data)
+        const image = this.previewImage(data.image, data.image_x)
+        const update = {
+          id: this.card.id,
+          urlPreviewUrl: url,
+          urlPreviewImage: image,
+          urlPreviewTitle: utils.truncated(data.title),
+          urlPreviewDescription: utils.truncated(data.description),
+          urlPreviewFavicon: data.icon
+        }
+        const maxImageLength = 350
+        if (data.image.length >= maxImageLength) { return }
+        this.$store.dispatch('currentSpace/updateCard', update)
+      } catch (error) {
+        console.warn('🚑', error)
+      }
+    }, 350),
+    clearUrlPreview () {
+      const update = {
+        id: this.card.id,
+        urlPreviewUrl: '',
+        urlPreviewImage: '',
+        urlPreviewTitle: '',
+        urlPreviewDescription: ''
+      }
+      this.$store.dispatch('currentSpace/updateCard', update)
+    },
+    toggleUrlPreviewIsVisible () {
+      const value = !this.card.urlPreviewIsVisible
+      const update = {
+        id: this.card.id,
+        urlPreviewIsVisible: value
+      }
+      this.$store.dispatch('currentSpace/updateCard', update)
+    },
+    removeHiddenQueryString (url) {
+      url = url.replace('?hidden=true', '')
+      url = url.replace('&hidden=true', '')
+      return url
     }
   },
   watch: {
@@ -1168,6 +1242,17 @@ export default {
         this.notifyFavoriteSpaceToFollow()
       }
       this.$store.dispatch('updatePageSizes')
+    },
+    validWebUrls (urls) {
+      let url = urls[0]
+      if (!url) { return }
+      url = this.removeHiddenQueryString(url)
+      const previewIsVisible = this.card.urlPreviewIsVisible
+      const isNotPreviewUrl = url !== this.card.urlPreviewUrl
+      if (previewIsVisible && isNotPreviewUrl) {
+        this.isLoadingUrlPreview = true
+        this.debouncedUpdateUrlPreview(url)
+      }
     }
   }
 }

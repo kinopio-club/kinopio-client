@@ -350,6 +350,19 @@ dialog
       border-radius 3px
 
 .segmented-buttons
+  &.first-row
+    button
+      margin-bottom -1px
+    button:first-child
+      border-bottom-left-radius 0
+    button:last-child
+      border-bottom-right-radius 0
+  &.last-row
+    button:first-child
+      border-top-left-radius 0
+    button:last-child
+      border-top-right-radius 0
+
   button,
   label
     margin 0

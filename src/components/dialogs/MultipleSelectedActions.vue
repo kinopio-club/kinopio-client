@@ -427,8 +427,8 @@ export default {
 .multiple-selected-actions
   transform-origin top left
   .segmented-colors
-    display: inline-block
-    vertical-align: middle
+    display inline-block
+    vertical-align middle
     .current-color
       display inline-block
       vertical-align bottom
