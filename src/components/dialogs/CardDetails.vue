@@ -1178,7 +1178,8 @@ export default {
         const linkPreviewApiKey = 'a9f249ef6b59cc8ccdd19de6b167bafa'
         const response = await fetch(`https://api.linkpreview.net/?key=${linkPreviewApiKey}&q=${encodeURIComponent(url)}`)
         const data = await response.json()
-        const cardUrl = this.validWebUrls[0]
+        let cardUrl = this.validWebUrls[0]
+        cardUrl = this.removeHiddenQueryString(cardUrl)
         this.isLoadingUrlPreview = false
         if (data.error || url !== cardUrl) {
           this.clearUrlPreview()
@@ -1217,6 +1218,11 @@ export default {
         urlPreviewIsVisible: value
       }
       this.$store.dispatch('currentSpace/updateCard', update)
+    },
+    removeHiddenQueryString (url) {
+      url = url.replace('?hidden=true', '')
+      url = url.replace('&hidden=true', '')
+      return url
     }
   },
   watch: {
@@ -1249,8 +1255,7 @@ export default {
     validWebUrls (urls) {
       let url = urls[0]
       if (!url) { return }
-      url = url.replace('?hidden=true', '')
-      url = url.replace('&hidden=true', '')
+      url = this.removeHiddenQueryString(url)
       const previewIsVisible = this.card.urlPreviewIsVisible
       const isNotPreviewUrl = url !== this.card.urlPreviewUrl
       if (previewIsVisible && isNotPreviewUrl) {
