@@ -872,6 +872,7 @@ export default {
       })
       cards = sortBy(cards, ['distanceFromOrigin'])
       const card = cards[0]
+      if (!card) { return }
       const xIsVisible = context.rootState.viewportWidth + window.scrollX > card.x
       const yIsVisible = context.rootState.viewportHeight + window.scrollY > card.y
       if (xIsVisible && yIsVisible) { return }
