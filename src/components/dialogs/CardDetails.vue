@@ -1157,7 +1157,7 @@ export default {
       const userUpdatedCard = this.cardIsCreatedByCurrentUser
       const notNotified = !notifiedFavoriteSpaceToFollow
       if (userCanEdit && userIsNotMember && spaceIsNotFavorite && userUpdatedCard && notNotified) {
-        this.$store.commit('addNotification', { message: 'Favorite to follow', icon: 'heart-empty', type: 'info' })
+        this.$store.commit('addNotification', { message: 'to be notified of updates', icon: 'heart-empty', type: 'info' })
         notifiedFavoriteSpaceToFollow = true
       }
     },
