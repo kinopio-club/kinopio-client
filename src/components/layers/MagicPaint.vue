@@ -541,7 +541,7 @@ export default {
         this.$store.commit('currentUserIsPainting', true)
         this.$store.commit('currentUserIsPaintingLocked', true)
         this.$store.commit('triggeredPaintFramePosition', { x: startCursor.x, y: startCursor.y })
-        console.log('🔒lockingAnimationFrame locked')
+        console.log('🔒 lockingAnimationFrame locked')
         lockingStartTime = undefined
       }
     },

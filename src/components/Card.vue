@@ -3,7 +3,8 @@ article(:style="position" :data-card-id="id" ref="card")
   .card(
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
-    @touchstart="updateTouchPosition"
+    @touchstart="startLocking"
+    @touchmove="updateCurrentTouchPosition"
     @touchend="showCardDetailsTouch"
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
@@ -21,6 +22,7 @@ article(:style="position" :data-card-id="id" ref="card")
     @drop.prevent.stop="uploadFile"
     @click="selectAllConnectedCards"
   )
+    .locking-frame(v-if="isLocking" :style="lockingFrameStyle")
     Frames(:card="card")
 
     template(v-if="!nameIsComment")
@@ -175,7 +177,15 @@ import UrlPreview from '@/components/UrlPreview.vue'
 import fromNow from 'fromnow'
 
 let isMultiTouch
+let initialTouchEvent = {}
 let touchPosition = {}
+let currentTouchPosition = {}
+
+// locking
+// long press to touch drag card
+const lockingPreDuration = 100 // ms
+const lockingDuration = 150 // ms
+let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
 
 export default {
   components: {
@@ -231,7 +241,10 @@ export default {
         file: ''
       },
       prevNameLineMinWidth: 0,
-      nameIsOnlyMarkdownLink: false
+      nameIsOnlyMarkdownLink: false,
+      isLocking: true,
+      lockingPercent: 0,
+      lockingAlpha: 0
     }
   },
   computed: {
@@ -638,6 +651,24 @@ export default {
       const cardIds = this.$store.state.urlPreviewLoadingForCardIds
       const isLoading = cardIds.find(cardId => cardId === this.card.id)
       return Boolean(isLoading)
+    },
+    lockingFrameStyle () {
+      const initialLockPadding = 65 // matches initialLockCircleRadius in magicPaint
+      const initialBorderRadius = 50
+      const padding = initialLockPadding * this.lockingPercent
+      const userColor = this.$store.state.currentUser.color
+      const borderRadius = Math.max((this.lockingPercent * initialBorderRadius), 5) + 'px'
+      const size = `calc(100% + ${padding}px)`
+      const position = -(padding / 2) + 'px'
+      return {
+        width: size,
+        height: size,
+        left: position,
+        top: position,
+        background: userColor,
+        opacity: this.lockingAlpha,
+        borderRadius: borderRadius
+      }
     }
   },
   methods: {
@@ -910,44 +941,6 @@ export default {
         this.$store.dispatch('clearMultipleSelected')
       }
     },
-    updateTouchPosition (event) {
-      isMultiTouch = false
-      if (!this.canEditCard) { return }
-      if (utils.isMultiTouch(event)) {
-        isMultiTouch = true
-        return
-      }
-      touchPosition = {
-        x: event.pageX,
-        y: event.pageY
-      }
-      event.preventDefault()
-    },
-    touchIsNearTouchPosition (event) {
-      const currentPosition = {
-        x: event.pageX,
-        y: event.pageY
-      }
-      const touchBlur = 12
-      const isTouchX = utils.isBetween({
-        value: currentPosition.x,
-        min: touchPosition.x - touchBlur,
-        max: touchPosition.x + touchBlur
-      })
-      const isTouchY = utils.isBetween({
-        value: currentPosition.y,
-        min: touchPosition.y - touchBlur,
-        max: touchPosition.y + touchBlur
-      })
-      if (isTouchX && isTouchY) {
-        return true
-      }
-    },
-    showCardDetailsTouch (event) {
-      if (this.touchIsNearTouchPosition(event)) {
-        this.showCardDetails(event)
-      }
-    },
     startDraggingCard (event) {
       isMultiTouch = false
       if (!this.canEditCard) { return }
@@ -1070,8 +1063,118 @@ export default {
         name = name.replace(comment, content)
       })
       return name
-    }
+    },
 
+    // Touch
+
+    notifyPressAndHoldToDrag () {
+      const isDrawingConnection = this.$store.state.currentUserIsDrawingConnection
+      if (isDrawingConnection) { return }
+      const hasNotified = this.$store.state.hasNotifiedPressAndHoldToDrag
+      if (!hasNotified) {
+        this.$store.commit('addNotification', { message: 'Press and hold to drag cards', icon: 'press-and-hold' })
+      }
+      this.$store.commit('hasNotifiedPressAndHoldToDrag', true)
+    },
+    cancelLocking () {
+      shouldCancelLocking = true
+    },
+    cancelLockingAnimationFrame () {
+      this.isLocking = false
+      this.lockingPercent = 0
+      this.lockingAlpha = 0
+      shouldCancelLocking = false
+    },
+    startLocking (event) {
+      this.updateTouchPosition(event)
+      this.updateCurrentTouchPosition(event)
+      this.isLocking = true
+      shouldCancelLocking = false
+      setTimeout(() => {
+        if (!lockingAnimationTimer) {
+          lockingAnimationTimer = window.requestAnimationFrame(this.lockingAnimationFrame)
+        }
+      }, lockingPreDuration)
+    },
+    lockingAnimationFrame (timestamp) {
+      if (!lockingStartTime) {
+        lockingStartTime = timestamp
+      }
+      const elaspedTime = timestamp - lockingStartTime
+      const percentComplete = (elaspedTime / lockingDuration) // between 0 and 1
+      if (!utils.cursorsAreClose(touchPosition, currentTouchPosition)) {
+        this.notifyPressAndHoldToDrag()
+        this.cancelLockingAnimationFrame()
+      }
+      if (shouldCancelLocking) {
+        this.cancelLockingAnimationFrame()
+      }
+      if (this.isLocking && percentComplete <= 1) {
+        // const minSize = circleRadius
+        const percentRemaining = Math.abs(percentComplete - 1)
+        this.lockingPercent = percentRemaining
+        const alpha = utils.easeOut(percentComplete, elaspedTime, lockingDuration)
+        this.lockingAlpha = alpha
+        window.requestAnimationFrame(this.lockingAnimationFrame)
+      } else if (this.isLocking && percentComplete > 1) {
+        console.log('🔒🐢 card lockingAnimationFrame locked')
+        lockingAnimationTimer = undefined
+        lockingStartTime = undefined
+        this.isLocking = false
+        this.startDraggingCard(initialTouchEvent)
+      } else {
+        window.cancelAnimationFrame(lockingAnimationTimer)
+        lockingAnimationTimer = undefined
+        lockingStartTime = undefined
+        this.cancelLockingAnimationFrame()
+      }
+    },
+    updateCurrentTouchPosition (event) {
+      currentTouchPosition = utils.cursorPositionInViewport(event)
+      if (this.isBeingDragged) {
+        event.preventDefault() // allows dragging cards without scrolling
+      }
+    },
+    updateTouchPosition (event) {
+      initialTouchEvent = event
+      isMultiTouch = false
+      if (!this.canEditCard) { return }
+      if (utils.isMultiTouch(event)) {
+        isMultiTouch = true
+        return
+      }
+      touchPosition = utils.cursorPositionInViewport(event)
+      const isDrawingConnection = this.$store.state.currentUserIsDrawingConnection
+      if (isDrawingConnection) {
+        event.preventDefault() // allows swipe to scroll, before card locked
+      }
+    },
+    touchIsNearTouchPosition (event) {
+      const currentPosition = {
+        x: event.pageX,
+        y: event.pageY
+      }
+      const touchBlur = 12
+      const isTouchX = utils.isBetween({
+        value: currentPosition.x,
+        min: touchPosition.x - touchBlur,
+        max: touchPosition.x + touchBlur
+      })
+      const isTouchY = utils.isBetween({
+        value: currentPosition.y,
+        min: touchPosition.y - touchBlur,
+        max: touchPosition.y + touchBlur
+      })
+      if (isTouchX && isTouchY) {
+        return true
+      }
+    },
+    showCardDetailsTouch (event) {
+      this.cancelLocking()
+      if (this.touchIsNearTouchPosition(event)) {
+        this.showCardDetails(event)
+      }
+    }
   }
 }
 </script>
@@ -1234,6 +1337,7 @@ article
       video
         border-radius 3px
         display block
+        -webkit-touch-callout none // prevents safari mobile press-and-hold from interrupting
         &.selected
           mix-blend-mode color-burn
       .card-content-wrap
@@ -1317,6 +1421,11 @@ article
   .url-preview-wrap
     padding 8px
     padding-top 0
+
+  .locking-frame
+    position absolute
+    z-index -1
+    pointer-events none
 
 @keyframes bounce
   0%

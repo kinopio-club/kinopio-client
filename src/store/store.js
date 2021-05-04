@@ -130,6 +130,7 @@ export default new Vuex.Store({
     notifyKinopioUpdatesAreAvailable: false,
     notifyMoveOrCopyToSpace: false,
     notifyMoveOrCopyToSpaceDetails: {},
+    hasNotifiedPressAndHoldToDrag: false,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -677,6 +678,10 @@ export default new Vuex.Store({
     notifyMoveOrCopyToSpaceDetails: (state, value) => {
       utils.typeCheck({ value, type: 'object', origin: 'notifyMoveOrCopyToSpaceDetails' })
       state.notifyMoveOrCopyToSpaceDetails = value
+    },
+    hasNotifiedPressAndHoldToDrag: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'hasNotifiedPressAndHoldToDrag' })
+      state.hasNotifiedPressAndHoldToDrag = value
     },
 
     // Notifications with Position
