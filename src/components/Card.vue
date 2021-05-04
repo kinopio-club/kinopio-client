@@ -921,6 +921,7 @@ export default {
         x: event.pageX,
         y: event.pageY
       }
+      event.preventDefault()
     },
     touchIsNearTouchPosition (event) {
       const currentPosition = {
