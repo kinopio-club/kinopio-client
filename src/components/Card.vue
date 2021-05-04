@@ -943,11 +943,6 @@ export default {
         return true
       }
     },
-    checkIfTouchShouldCancel (event) {
-      if (this.touchIsNearTouchPosition(event)) {
-        event.stopPropagation()
-      }
-    },
     showCardDetailsTouch (event) {
       if (this.touchIsNearTouchPosition(event)) {
         this.showCardDetails(event)
@@ -986,7 +981,7 @@ export default {
       this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
       const nodeName = event.target.nodeName
-      if (nodeName === 'LABEL') { return }
+      if (nodeName === 'LABEL') { return } // checkbox
       if (nodeName === 'A' && event.touches) {
         window.location = event.target.href
         return
