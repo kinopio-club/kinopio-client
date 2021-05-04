@@ -2,8 +2,8 @@
 article(:style="position" :data-card-id="id" ref="card")
   .card(
     @mousedown.left.prevent="startDraggingCard"
-    @touchstart="updateTouchPosition"
     @mouseup.left="showCardDetails"
+    @touchstart="updateTouchPosition"
     @touchend="showCardDetailsTouch"
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
