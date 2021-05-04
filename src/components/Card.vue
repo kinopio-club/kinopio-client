@@ -2,9 +2,9 @@
 article(:style="position" :data-card-id="id" ref="card")
   .card(
     @mousedown.left.prevent="startDraggingCard"
-    @touchstart="startDraggingCard"
+    @touchstart="updateTouchPosition"
     @mouseup.left="showCardDetails"
-    @touchend="showCardDetails"
+    @touchend="showCardDetailsTouch"
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
     :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || isRemoteCardDragging, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': isAudioCard, 'is-playing-audio': isPlayingAudio}",
@@ -175,6 +175,7 @@ import UrlPreview from '@/components/UrlPreview.vue'
 import fromNow from 'fromnow'
 
 let isMultiTouch
+let touchPosition = {}
 
 export default {
   components: {
@@ -907,6 +908,48 @@ export default {
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
       if (!multipleCardsSelectedIds.includes(this.id)) {
         this.$store.dispatch('clearMultipleSelected')
+      }
+    },
+    updateTouchPosition (event) {
+      isMultiTouch = false
+      if (!this.canEditCard) { return }
+      if (utils.isMultiTouch(event)) {
+        isMultiTouch = true
+        return
+      }
+      touchPosition = {
+        x: event.pageX,
+        y: event.pageY
+      }
+    },
+    touchIsNearTouchPosition (event) {
+      const currentPosition = {
+        x: event.pageX,
+        y: event.pageY
+      }
+      const touchBlur = 12
+      const isTouchX = utils.isBetween({
+        value: currentPosition.x,
+        min: touchPosition.x - touchBlur,
+        max: touchPosition.x + touchBlur
+      })
+      const isTouchY = utils.isBetween({
+        value: currentPosition.y,
+        min: touchPosition.y - touchBlur,
+        max: touchPosition.y + touchBlur
+      })
+      if (isTouchX && isTouchY) {
+        return true
+      }
+    },
+    checkIfTouchShouldCancel (event) {
+      if (this.touchIsNearTouchPosition(event)) {
+        event.stopPropagation()
+      }
+    },
+    showCardDetailsTouch (event) {
+      if (this.touchIsNearTouchPosition(event)) {
+        this.showCardDetails(event)
       }
     },
     startDraggingCard (event) {
