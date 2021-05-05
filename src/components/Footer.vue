@@ -1,7 +1,7 @@
 <template lang="pug">
-.footer-wrap(:class="{ 'is-mobile': isMobile, 'is-mobile-standalone': isMobileStandalone }")
+.footer-wrap(:style="visualViewportPosition")
   .left
-    footer(:style="visualViewportPosition")
+    footer
       Notifications
       section(v-if="isVisible")
         //- Explore
@@ -103,9 +103,7 @@ export default {
       tagsIsVisible: false,
       exploreIsVisible: false,
       backgroundIsVisible: false,
-      pinchZoomOffsetLeft: 0,
-      pinchZoomOffsetTop: 0,
-      pinchZoomScale: 1
+      visualViewportPosition: {}
     }
   },
   mounted () {
@@ -125,6 +123,7 @@ export default {
         updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
       }
     })
+    this.updatePositionInVisualViewport()
     window.addEventListener('scroll', this.updatePositionInVisualViewport)
     this.updateFavorites()
     setInterval(() => {
@@ -189,21 +188,6 @@ export default {
       return userFilters + tagNames.length + connections.length + frames.length
     },
     isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] },
-    visualViewportPosition () {
-      if (this.pinchZoomScale === 1) { return }
-      if (this.pinchZoomScale > 1) {
-        return {
-          transform: `translate(${this.pinchZoomOffsetLeft}px, ${this.pinchZoomOffsetTop}px) scale(${1 / this.pinchZoomScale})`,
-          'transform-origin': 'left bottom'
-        }
-      } else {
-        return {
-          transform: `translate(${this.pinchZoomOffsetLeft}px, ${this.pinchZoomOffsetTop}px)`,
-          zoom: 1 / this.pinchZoomScale,
-          'transform-origin': 'left bottom'
-        }
-      }
-    },
     remotePendingUpload () {
       const currentSpace = this.$store.state.currentSpace
       let remotePendingUploads = this.$store.state.remotePendingUploads
@@ -231,12 +215,43 @@ export default {
         updatePositionTimer = undefined
       }
     },
+    offsetMarginBottom () {
+      const isMobile = utils.isMobile()
+      let margin
+      if (isMobile && navigator.standalone) {
+        margin = 20
+      } else if (isMobile) {
+        margin = 10
+      } else {
+        margin = 0
+      }
+      return margin
+    },
     updatePositionInVisualViewport () {
       const viewport = utils.visualViewport()
       const layoutViewport = document.getElementById('layout-viewport')
-      this.pinchZoomScale = viewport.scale
-      this.pinchZoomOffsetLeft = viewport.offsetLeft
-      this.pinchZoomOffsetTop = viewport.height - layoutViewport.getBoundingClientRect().height + viewport.offsetTop
+      const pinchZoomScale = viewport.scale
+      const marginBottom = this.offsetMarginBottom()
+      const pinchZoomOffsetLeft = viewport.offsetLeft
+      const pinchZoomOffsetTop = viewport.height + viewport.offsetTop + marginBottom - layoutViewport.getBoundingClientRect().height - 20
+      let style
+      if (pinchZoomScale === 1) {
+        style = {
+          'margin-bottom': marginBottom
+        }
+      } else if (pinchZoomScale > 1) {
+        style = {
+          transform: `translate(${pinchZoomOffsetLeft}px, ${pinchZoomOffsetTop}px) scale(${1 / pinchZoomScale})`,
+          'transform-origin': 'left bottom'
+        }
+      } else {
+        style = {
+          transform: `translate(${pinchZoomOffsetLeft}px, 0px)`,
+          zoom: 1 / pinchZoomScale,
+          'transform-origin': 'left bottom'
+        }
+      }
+      this.visualViewportPosition = style
     },
     toggleIsFavoriteSpace () {
       const currentSpace = this.$store.state.currentSpace
@@ -327,6 +342,9 @@ footer
       dialog
         top initial
         bottom calc(100% - 8px)
+      &:first-child
+        margin-left 0
+
   .sunglasses
     vertical-align middle
   .macro

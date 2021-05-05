@@ -120,8 +120,18 @@ export default {
     return { x, y }
   },
   visualViewport () {
-    if (window.visualViewport) {
-      return window.visualViewport
+    const visualViewport = window.visualViewport
+    if (visualViewport) {
+      return {
+        width: visualViewport.width,
+        height: visualViewport.height,
+        scale: visualViewport.scale,
+        offsetLeft: Math.max(visualViewport.offsetLeft, 0),
+        offsetRight: Math.max(visualViewport.offsetRight, 0),
+        offsetTop: Math.max(visualViewport.offsetTop, 0),
+        pageLeft: visualViewport.pageLeft,
+        pageTop: visualViewport.pageTop
+      }
     } else {
       // firefox fallback, doesn't support pinch zooming
       return {
@@ -130,6 +140,7 @@ export default {
         scale: document.documentElement.clientWidth / window.innerWidth,
         offsetLeft: 0,
         offsetRight: 0,
+        offsetTop: 0,
         pageLeft: window.scrollX,
         pageTop: window.scrollY
       }
