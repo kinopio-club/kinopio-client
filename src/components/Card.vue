@@ -1182,6 +1182,8 @@ export default {
       if (this.touchIsNearTouchPosition(event)) {
         this.showCardDetails(event)
       }
+      const userId = this.$store.state.currentUser.id
+      this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
     }
   }
 }
