@@ -765,6 +765,8 @@ export default {
     },
     updateIsPlayingAudio (value) {
       this.isPlayingAudio = value
+      this.cancelLocking()
+      this.$store.commit('currentUserIsDraggingCard', false)
     },
     clearErrors () {
       this.error.signUpToUpload = false
@@ -1004,6 +1006,8 @@ export default {
       tag.cardId = this.id
       this.$store.commit('currentSelectedTag', tag)
       this.$store.commit('tagDetailsIsVisible', true)
+      this.cancelLocking()
+      this.$store.commit('currentUserIsDraggingCard', false)
     },
     showLinkDetailsIsVisible ({ event, link }) {
       if (isMultiTouch) { return }
@@ -1019,6 +1023,8 @@ export default {
       link.cardId = this.id
       this.$store.commit('currentSelectedLink', link)
       this.$store.commit('linkDetailsIsVisible', true)
+      this.cancelLocking()
+      this.$store.commit('currentUserIsDraggingCard', false)
     },
     spaceFromLinkSpaceId (spaceId, url) {
       let space = this.$store.getters.otherSpaceById(spaceId)
