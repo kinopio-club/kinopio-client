@@ -1,5 +1,5 @@
 <template lang="pug">
-.footer-wrap(:class="{ 'is-mobile-standalone': isMobileStandalone }")
+.footer-wrap(:class="{ 'is-mobile': isMobile, 'is-mobile-standalone': isMobileStandalone }")
   .left
     footer(:style="visualViewportPosition")
       Notifications
@@ -17,7 +17,7 @@
               img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
               img.icon(v-else src="@/assets/heart-empty.svg")
             button(@click.left="toggleFavoritesIsVisible" :class="{ active: favoritesIsVisible}")
-              img.icon.down-arrow(src="@/assets/down-arrow.svg")
+              img.icon.down-arrow(src="@/assets/down-arrow.svg" :class="{ 'is-mobile-icon': isMobile }")
               span(v-if="favoriteSpacesEditedCount") {{favoriteSpacesEditedCount}}
           Favorites(:visible="favoritesIsVisible")
         //- Tags and Links
@@ -213,8 +213,11 @@ export default {
         return inProgress && isSpace
       })
     },
+    isMobile () {
+      return utils.isMobile()
+    },
     isMobileStandalone () {
-      return utils.isMobile() && navigator.standalone
+      return utils.isMobile() && navigator.standalone // is homescreen app
     }
   },
   methods: {
@@ -302,10 +305,14 @@ export default {
     pointer-events all
     @media(max-width 460px)
      display none
+  &.is-mobile
+    margin-bottom 10px
   &.is-mobile-standalone
     margin-bottom 20px
 
 footer
+  .is-mobile-icon
+    vertical-align 2px !important
   .undo
     margin 0
     height 11px
