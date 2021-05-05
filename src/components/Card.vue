@@ -3,11 +3,14 @@ article(:style="position" :data-card-id="id" ref="card")
   .card(
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
+
     @touchstart="startLocking"
     @touchmove="updateCurrentTouchPosition"
     @touchend="showCardDetailsTouch"
+
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
+
     :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || isRemoteCardDragging, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': isAudioCard, 'is-playing-audio': isPlayingAudio}",
     :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor || selectedColorUpload || remoteCardDraggingColor || remoteUploadDraggedOverCardColor }"
     :data-card-id="id"
@@ -818,6 +821,7 @@ export default {
       const value = !this.isChecked
       this.$store.dispatch('closeAllDialogs', 'Card.toggleCardChecked')
       this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.id, value })
+      this.cancelLocking()
       this.$store.commit('currentUserIsDraggingCard', false)
     },
     toggleUserDetailsIsVisible () {
@@ -1150,10 +1154,7 @@ export default {
       }
     },
     touchIsNearTouchPosition (event) {
-      const currentPosition = {
-        x: event.pageX,
-        y: event.pageY
-      }
+      const currentPosition = utils.cursorPositionInViewport(event)
       const touchBlur = 12
       const isTouchX = utils.isBetween({
         value: currentPosition.x,
