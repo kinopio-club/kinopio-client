@@ -187,7 +187,7 @@ let currentTouchPosition = {}
 // locking
 // long press to touch drag card
 const lockingPreDuration = 100 // ms
-const lockingDuration = 150 // ms
+const lockingDuration = 100 // ms
 let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
 
 export default {
