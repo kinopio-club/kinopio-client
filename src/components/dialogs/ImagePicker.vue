@@ -96,7 +96,7 @@ dialog.narrow.image-picker(
 </template>
 
 <script>
-// import scrollIntoView from '@/scroll-into-view.js'
+import scrollIntoView from '@/scroll-into-view.js'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import backgroundImages from '@/data/backgroundImages.json'
@@ -288,6 +288,7 @@ export default {
       this.loading = false
       if (!this.isBackgroundImage) {
         this.updateHeightFromDialog()
+        this.scrollIntoView()
       }
     }, 350),
     clearErrors () {
@@ -365,17 +366,16 @@ export default {
       this.$emit('selectImage', image)
     },
     scrollIntoView () {
-      console.log('🍅🍅 experiment: temp disable ImagePicker scrollIntoView()')
-      // if (!this.visible) { return }
-      // if (this.isBackgroundImage) {
-      //   this.updateHeightFromFooter()
-      //   return
-      // }
-      // const element = this.$refs.dialog
-      // if (!element) { return }
-      // const isTouchDevice = this.$store.state.isTouchDevice
-      // scrollIntoView.scroll(element, isTouchDevice)
-      // this.$store.commit('triggerUpdatePositionInVisualViewport')
+      if (!this.visible) { return }
+      if (this.isBackgroundImage) {
+        this.updateHeightFromFooter()
+        return
+      }
+      const element = this.$refs.dialog
+      if (!element) { return }
+      const isTouchDevice = this.$store.state.isTouchDevice
+      scrollIntoView.scroll(element, isTouchDevice)
+      this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
     isCardUrl (image) {
       return this.cardUrl === image.url
@@ -417,6 +417,7 @@ export default {
       this.$nextTick(() => {
         const element = this.$refs.dialog
         const dialogHeight = utils.elementHeight(element)
+        console.log('dialogHeight', dialogHeight)
         this.resultsSectionHeight = utils.elementHeight(element, true)
         this.resultsSectionHeight = Math.max(this.resultsSectionHeight, 300)
         this.minDialogHeight = Math.max(this.minDialogHeight, dialogHeight)
@@ -449,7 +450,6 @@ export default {
             this.loading = true
           }
           this.searchService()
-          this.scrollIntoView()
           this.focusSearchInput()
         }
       })
