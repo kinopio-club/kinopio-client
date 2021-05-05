@@ -96,6 +96,7 @@ export default new Vuex.Store({
     remoteCardsDragging: [],
     remoteUploadDraggedOverCards: [],
     preventDraggedCardFromShowingDetails: false,
+    triggeredTouchCardDragPosition: {},
 
     // multiple selection
     multipleSelectedActionsIsVisible: false,
@@ -400,6 +401,9 @@ export default new Vuex.Store({
     preventDraggedCardFromShowingDetails: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'preventDraggedCardFromShowingDetails' })
       state.preventDraggedCardFromShowingDetails = value
+    },
+    triggeredTouchCardDragPosition: (state, cursor) => {
+      state.triggeredTouchCardDragPosition = cursor
     },
     currentDraggingCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'currentDraggingCardId' })

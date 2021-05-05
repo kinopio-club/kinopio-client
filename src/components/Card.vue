@@ -1126,6 +1126,7 @@ export default {
         lockingStartTime = undefined
         this.isLocking = false
         this.startDraggingCard(initialTouchEvent)
+        this.$store.commit('triggeredTouchCardDragPosition', touchPosition)
       } else {
         window.cancelAnimationFrame(lockingAnimationTimer)
         lockingAnimationTimer = undefined

@@ -19,6 +19,14 @@ export default {
         }
         this.initInteractions(event)
       }
+      if (mutation.type === 'triggeredTouchCardDragPosition') {
+        const position = this.$store.state.triggeredTouchCardDragPosition
+        const event = {
+          clientX: position.x,
+          clientY: position.y
+        }
+        this.initInteractions(event)
+      }
     })
   },
   mounted () {
