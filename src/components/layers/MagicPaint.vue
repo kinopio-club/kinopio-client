@@ -492,7 +492,16 @@ export default {
     cancelLocking () {
       shouldCancelLocking = true
     },
+    shouldPreventLocking () {
+      const maxDelta = 50
+      const delta = this.viewportHeight - startCursor.y
+      const isBottomOfViewport = delta < maxDelta
+      if (isBottomOfViewport && utils.isMobile() && navigator.standalone) {
+        return true
+      }
+    },
     startLocking () {
+      if (this.shouldPreventLocking()) { return }
       currentUserIsLocking = true
       shouldCancelLocking = false
       setTimeout(() => {

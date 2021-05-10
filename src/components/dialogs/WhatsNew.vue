@@ -8,6 +8,8 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialog" :s
     .button-wrap
       a(href="https://www.are.na/kinopio/diary-q6l8pa4a4ye")
         button Diary →
+    .button-wrap
+      button(@click.left="refreshBrowser") Refresh
 
   section(v-if="!newStuff.length")
     Loader(:visible="true")
@@ -105,6 +107,9 @@ export default {
         let element = this.$refs.dialog
         this.dialogHeight = utils.elementHeight(element)
       })
+    },
+    refreshBrowser () {
+      window.location.reload()
     }
   },
   watch: {
