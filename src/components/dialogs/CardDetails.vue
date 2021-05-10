@@ -1207,6 +1207,7 @@ export default {
         urlPreviewTitle: '',
         urlPreviewDescription: ''
       }
+      this.$store.commit('removeUrlPreviewLoadingForCardIds', this.card.id)
       this.$store.dispatch('currentSpace/updateCard', update)
     },
     toggleUrlPreviewIsVisible () {
