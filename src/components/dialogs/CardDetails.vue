@@ -1196,6 +1196,7 @@ export default {
         this.$store.dispatch('currentSpace/updateCard', update)
       } catch (error) {
         console.warn('🚑', error)
+        this.clearUrlPreview()
       }
     }, 350),
     clearUrlPreview () {
