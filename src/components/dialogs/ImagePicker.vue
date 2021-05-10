@@ -74,6 +74,7 @@ dialog.narrow.image-picker(
         @keyup.stop.enter
         @mouseup.stop
         @touchend.stop
+        @focus="triggerResetPinchCounterZoomDecimal"
       )
       button.borderless.clear-input-wrap(@click.left="clearSearch")
         img.icon(src="@/assets/add.svg")
@@ -367,6 +368,7 @@ export default {
     },
     scrollIntoView () {
       if (!this.visible) { return }
+      if (utils.isMobile()) { return }
       if (this.isBackgroundImage) {
         this.updateHeightFromFooter()
         return
@@ -417,7 +419,6 @@ export default {
       this.$nextTick(() => {
         const element = this.$refs.dialog
         const dialogHeight = utils.elementHeight(element)
-        console.log('dialogHeight', dialogHeight)
         this.resultsSectionHeight = utils.elementHeight(element, true)
         this.resultsSectionHeight = Math.max(this.resultsSectionHeight, 300)
         this.minDialogHeight = Math.max(this.minDialogHeight, dialogHeight)
@@ -433,6 +434,9 @@ export default {
         this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
         this.minDialogHeight = Math.max(this.minDialogHeight, this.dialogHeight)
       })
+    },
+    triggerResetPinchCounterZoomDecimal () {
+      this.$store.commit('triggerResetPinchCounterZoomDecimal')
     }
   },
   watch: {

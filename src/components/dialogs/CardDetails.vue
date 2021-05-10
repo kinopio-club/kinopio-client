@@ -42,6 +42,8 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.221="triggerPickerSelectItem"
         @keydown.bracket-right="triggerPickerSelectItem"
         @keydown.57="triggerCommentAddClosingBrackets"
+
+        @focus="resetPinchCounterZoomDecimal"
       )
       TagPicker(
         :visible="tag.pickerIsVisible"
@@ -254,6 +256,10 @@ export default {
         if (cardId !== this.card.id) { return }
         this.addFile({ url })
       }
+      if (mutation.type === 'triggerResetPinchCounterZoomDecimal') {
+        if (this.pinchCounterZoomDecimal === 1) { return }
+        this.resetPinchCounterZoomDecimal()
+      }
     })
   },
   updated () {
@@ -448,7 +454,7 @@ export default {
     },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     styles () {
-      if (this.pinchCounterZoomDecimal > 1) {
+      if (this.isSignificantlyPinchZoomed()) {
         return { transform: `scale(${this.pinchCounterZoomDecimal})` }
       } else {
         return { transform: `scale(${this.spaceCounterZoomDecimal})` }
@@ -750,14 +756,16 @@ export default {
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
     },
-    scrollIntoViewAndFocus () {
+    isSignificantlyPinchZoomed () {
       const pinchZoomScale = utils.visualViewport().scale
-      const pinchZoomScaleShouldFocus = utils.isBetween({
+      return !utils.isBetween({
         value: pinchZoomScale,
         min: 0.8,
         max: 1.3
       })
-      if (!pinchZoomScaleShouldFocus) { return }
+    },
+    scrollIntoViewAndFocus () {
+      if (this.isSignificantlyPinchZoomed()) { return }
       this.scrollIntoView()
       this.focusName()
       this.triggerUpdateMagicPaintPositionOffset()
