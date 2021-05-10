@@ -237,7 +237,8 @@ export default {
         pickerPosition: {},
         pickerSearch: ''
       },
-      notifiedMembers: false
+      notifiedMembers: false,
+      pinchCounterZoomDecimal: 1
     }
   },
   created () {
@@ -269,6 +270,7 @@ export default {
       this.scrollIntoViewAndFocus()
       this.$emit('broadcastShowCardDetails')
       this.updatePreviousTags()
+      this.updatePinchCounterZoomDecimal()
     }
   },
   computed: {
@@ -446,8 +448,10 @@ export default {
     },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     styles () {
-      return {
-        transform: `scale(${this.spaceCounterZoomDecimal})`
+      if (this.pinchCounterZoomDecimal > 1) {
+        return { transform: `scale(${this.pinchCounterZoomDecimal})` }
+      } else {
+        return { transform: `scale(${this.spaceCounterZoomDecimal})` }
       }
     },
     cardUrlPreviewIsVisible () {
@@ -1222,6 +1226,12 @@ export default {
       url = url.replace('?hidden=true', '')
       url = url.replace('&hidden=true', '')
       return url
+    },
+    resetPinchCounterZoomDecimal () {
+      this.pinchCounterZoomDecimal = 1
+    },
+    updatePinchCounterZoomDecimal () {
+      this.pinchCounterZoomDecimal = utils.pinchCounterZoomDecimal()
     }
   },
   watch: {
@@ -1238,10 +1248,12 @@ export default {
       if (visible) {
         const connections = this.$store.getters['currentSpace/cardConnections'](this.card.id)
         this.$store.commit('updateCurrentCardConnections', connections)
+        this.updatePinchCounterZoomDecimal()
       }
       if (!visible) {
         this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', this.card.id)
         this.$store.commit('updateCurrentCardConnections')
+        this.resetPinchCounterZoomDecimal()
       }
       if (!visible && this.cardIsEmpty()) {
         this.$store.dispatch('currentSpace/removeCard', this.card)

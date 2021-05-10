@@ -298,6 +298,7 @@ export default new Vuex.Store({
     triggerSpaceZoomReset: () => {},
     triggerSpaceZoomOut: () => {},
     triggerSpaceZoomIn: () => {},
+    triggerResetPinchCounterZoomDecimal: () => {},
 
     // Cards
 
