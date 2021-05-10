@@ -106,6 +106,7 @@ export default {
     },
     setPosition () {
       this.$nextTick(() => {
+        const zoom = this.$store.getters.spaceCounterZoomDecimal
         let connection = document.querySelector(`.connection-path[data-id="${this.id}"]`)
         connection = connection.getBoundingClientRect()
         let label = this.$refs.label
@@ -120,8 +121,8 @@ export default {
           labelOffset = { left: 0, top: 0 }
         }
         const basePosition = {
-          left: connection.x + window.scrollX,
-          top: connection.y + window.scrollY
+          left: connection.x + window.scrollX * zoom,
+          top: connection.y + window.scrollY * zoom
         }
         const connectionOffset = {
           left: connection.width / 2,
