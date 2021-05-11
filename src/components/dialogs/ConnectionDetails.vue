@@ -6,7 +6,7 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="styles" 
         button.change-color(:disabled="!canEditConnection" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{backgroundColor: typeColor}")
         ColorPicker(:currentColor="typeColor" :visible="colorPickerIsVisible" @selectedColor="updateTypeColor")
-      input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeName")
+      input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeName" @focus="resetPinchCounterZoomDecimal")
 
     .row
       button(:disabled="!canEditConnection" :class="{active: labelIsVisible}" @click.left="toggleLabelIsVisible")
@@ -67,6 +67,9 @@ export default {
     ResultsFilter
   },
   name: 'ConnectionDetails',
+  mounted () {
+    this.updatePinchCounterZoomDecimal()
+  },
   data () {
     return {
       isDefault: false,
@@ -86,13 +89,19 @@ export default {
     spacePrivacyIsClosed () { return this.$store.state.currentSpace.privacy === 'closed' },
     isInvitedButCannotEditSpace () { return this.$store.getters['currentUser/isInvitedButCannotEditSpace']() },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
     styles () {
       const position = this.$store.state.connectionDetailsPosition
-      const zoom = this.spaceCounterZoomDecimal
+      let zoom
+      if (utils.isSignificantlyPinchZoomed()) {
+        zoom = this.pinchCounterZoomDecimal
+      } else {
+        zoom = this.spaceCounterZoomDecimal
+      }
       return {
-        left: `${position.x * zoom}px`,
-        top: `${position.y * zoom}px`,
-        transform: `scale(${this.spaceCounterZoomDecimal})`
+        left: `${position.x * this.spaceCounterZoomDecimal}px`,
+        top: `${position.y * this.spaceCounterZoomDecimal}px`,
+        transform: `scale(${zoom})`
       }
     },
     currentConnection () {
@@ -224,6 +233,12 @@ export default {
     },
     updateFilter (filter) {
       this.filter = filter
+    },
+    resetPinchCounterZoomDecimal () {
+      this.$store.commit('pinchCounterZoomDecimal', 1)
+    },
+    updatePinchCounterZoomDecimal () {
+      this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
     }
   },
   watch: {
@@ -238,6 +253,11 @@ export default {
           this.$store.commit('shouldHideConnectionOutline', false)
         }
       })
+    },
+    visible (visible) {
+      if (visible) {
+        this.updatePinchCounterZoomDecimal()
+      }
     }
   }
 }
