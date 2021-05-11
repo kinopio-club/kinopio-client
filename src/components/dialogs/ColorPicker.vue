@@ -2,7 +2,7 @@
 dialog.narrow.color-picker(v-if="visible" :open="visible" @click.left.stop)
   section
     .badge(:style="{backgroundColor: currentColor}")
-      input(v-model="hexColor" @focus="resetPinchCounterZoomDecimal")
+      input(v-model="hexColor" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport")
   section
     .colors
       template(v-for="color in colors")
@@ -95,6 +95,9 @@ export default {
     },
     resetPinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', 1)
+    },
+    triggerUpdatePositionInVisualViewport () {
+      this.$store.commit('triggerUpdatePositionInVisualViewport')
     }
   },
   watch: {
