@@ -1,6 +1,6 @@
 <template lang="pug">
 dialog.narrow.connection-details(v-if="visible" :open="visible" :style="styles" @click.left="closeColorPicker" ref="dialog")
-  section(:style="{backgroundColor: typeColor}")
+  section(:style="{backgroundColor: typeColor}" ref="infoSection")
     .row
       .button-wrap
         button.change-color(:disabled="!canEditConnection" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
@@ -39,12 +39,12 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="styles" 
           img.icon(src="@/assets/unlock.svg")
           span To edit closed spaces, you'll need to be invited
 
-  section.results-actions
+  section.results-actions(ref="resultsActions")
     button(:disabled="!canEditConnection" @click.left="addConnectionType")
       img.icon(src="@/assets/add.svg")
       span Add
 
-  section.results-section
+  section.results-section(ref="resultsSection" :style="{'max-height': resultsSectionMaxHeight + 'px'}")
     ResultsFilter(:items="connectionTypes" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredConnectionTypes")
     ul.results-list
       template(v-for="(type in connectionTypesFiltered")
@@ -75,7 +75,8 @@ export default {
       isDefault: false,
       colorPickerIsVisible: false,
       filter: '',
-      filteredConnectionTypes: []
+      filteredConnectionTypes: [],
+      resultsSectionMaxHeight: undefined // number
     }
   },
   computed: {
@@ -204,16 +205,30 @@ export default {
         element.focus()
       })
     },
+    updateResultsSectionMaxHeight () {
+      const position = this.$store.state.connectionDetailsPosition
+      const infoSection = this.$refs.infoSection.getBoundingClientRect()
+      const resultsActions = this.$refs.resultsActions.getBoundingClientRect()
+      const minHeight = 300
+      const otherHeight = infoSection.height + resultsActions.height
+      const maxHeight = this.$store.state.viewportHeight - otherHeight - position.y
+      this.resultsSectionMaxHeight = Math.max(minHeight, maxHeight)
+    },
     scrollIntoView () {
-      const element = this.$refs.dialog
-      const isTouchDevice = this.$store.state.isTouchDevice
-      scrollIntoView.scroll(element, isTouchDevice)
+      this.$nextTick(() => {
+        const element = this.$refs.dialog
+        this.updateResultsSectionMaxHeight()
+        const isTouchDevice = this.$store.state.isTouchDevice
+        this.$nextTick(() => {
+          scrollIntoView.scroll(element, isTouchDevice)
+        })
+      })
     },
     scrollIntoViewAndFocus () {
-      const element = this.$refs.typeName
-      const length = this.typeName.length
       this.scrollIntoView()
       if (utils.isMobile()) { return }
+      const element = this.$refs.typeName
+      const length = this.typeName.length
       this.$nextTick(() => {
         this.focusName()
         if (length && element) {
@@ -257,6 +272,8 @@ export default {
     visible (visible) {
       if (visible) {
         this.updatePinchCounterZoomDecimal()
+      } else {
+        this.resultsSectionMaxHeight = undefined
       }
     }
   }

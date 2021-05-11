@@ -2,7 +2,7 @@
 dialog.narrow.color-picker(v-if="visible" :open="visible" @click.left.stop)
   section
     .badge(:style="{backgroundColor: currentColor}")
-      input(v-model="hexColor")
+      input(v-model="hexColor" @focus="resetPinchCounterZoomDecimal")
   section
     .colors
       template(v-for="color in colors")
@@ -92,6 +92,9 @@ export default {
       hues.forEach(hue => {
         this.buttonHues[hue] = randomColor({ luminosity: 'light', count: 2, hue })
       })
+    },
+    resetPinchCounterZoomDecimal () {
+      this.$store.commit('pinchCounterZoomDecimal', 1)
     }
   },
   watch: {
