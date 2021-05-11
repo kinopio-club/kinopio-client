@@ -121,16 +121,20 @@ export default {
           labelOffset = { left: 0, top: 0 }
         }
         const basePosition = {
-          left: connection.x + window.scrollX * zoom,
-          top: connection.y + window.scrollY * zoom
+          left: connection.x + window.scrollX,
+          top: connection.y + window.scrollY
         }
         const connectionOffset = {
           left: connection.width / 2,
           top: connection.height / 2
         }
-        this.position = {
+        let position = {
           left: basePosition.left + connectionOffset.left - labelOffset.left,
           top: basePosition.top + connectionOffset.top - labelOffset.top
+        }
+        this.position = {
+          left: position.left * zoom,
+          top: position.top * zoom
         }
       })
     }
