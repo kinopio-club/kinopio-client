@@ -149,6 +149,14 @@ export default {
   pinchCounterZoomDecimal () {
     return 1 / this.visualViewport().scale
   },
+  isSignificantlyPinchZoomed () {
+    const pinchZoomScale = this.visualViewport().scale
+    return !this.isBetween({
+      value: pinchZoomScale,
+      min: 0.8,
+      max: 1.3
+    })
+  },
   rectCenter (rect) {
     const x = Math.round(rect.x + (rect.width / 2))
     const y = Math.round(rect.y + (rect.height / 2))

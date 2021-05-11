@@ -454,7 +454,7 @@ export default {
     },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     styles () {
-      if (this.isSignificantlyPinchZoomed()) {
+      if (utils.isSignificantlyPinchZoomed()) {
         return { transform: `scale(${this.pinchCounterZoomDecimal})` }
       } else {
         return { transform: `scale(${this.spaceCounterZoomDecimal})` }
@@ -756,16 +756,8 @@ export default {
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
     },
-    isSignificantlyPinchZoomed () {
-      const pinchZoomScale = utils.visualViewport().scale
-      return !utils.isBetween({
-        value: pinchZoomScale,
-        min: 0.8,
-        max: 1.3
-      })
-    },
     scrollIntoViewAndFocus () {
-      if (this.isSignificantlyPinchZoomed()) { return }
+      if (utils.isSignificantlyPinchZoomed()) { return }
       this.scrollIntoView()
       this.focusName()
       this.triggerUpdateMagicPaintPositionOffset()
