@@ -40,6 +40,7 @@ export default new Vuex.Store({
     cardsCreatedLimit: 100,
     prevCursorPosition: { x: 0, y: 0 },
     spaceZoomPercent: 100,
+    pinchCounterZoomDecimal: 1,
     currentSpacePath: '/',
     webfontIsLoaded: false,
     userHasScrolled: false,
@@ -243,6 +244,10 @@ export default new Vuex.Store({
       utils.typeCheck({ value, type: 'number', origin: 'spaceZoomPercent' })
       state.spaceZoomPercent = value
     },
+    pinchCounterZoomDecimal: (state, value) => {
+      utils.typeCheck({ value, type: 'number', origin: 'pinchCounterZoomDecimal' })
+      state.pinchCounterZoomDecimal = value
+    },
     currentSpacePath: (state, value) => {
       utils.typeCheck({ value, type: 'string', origin: 'currentSpacePath' })
       state.currentSpacePath = value
@@ -298,7 +303,6 @@ export default new Vuex.Store({
     triggerSpaceZoomReset: () => {},
     triggerSpaceZoomOut: () => {},
     triggerSpaceZoomIn: () => {},
-    triggerResetPinchCounterZoomDecimal: () => {},
 
     // Cards
 

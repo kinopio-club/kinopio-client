@@ -74,7 +74,7 @@ dialog.narrow.image-picker(
         @keyup.stop.enter
         @mouseup.stop
         @touchend.stop
-        @focus="triggerResetPinchCounterZoomDecimal"
+        @focus="resetPinchCounterZoomDecimal"
       )
       button.borderless.clear-input-wrap(@click.left="clearSearch")
         img.icon(src="@/assets/add.svg")
@@ -435,8 +435,8 @@ export default {
         this.minDialogHeight = Math.max(this.minDialogHeight, this.dialogHeight)
       })
     },
-    triggerResetPinchCounterZoomDecimal () {
-      this.$store.commit('triggerResetPinchCounterZoomDecimal')
+    resetPinchCounterZoomDecimal () {
+      this.$store.commit('pinchCounterZoomDecimal', 1)
     }
   },
   watch: {

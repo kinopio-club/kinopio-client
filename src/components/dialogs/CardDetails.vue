@@ -239,8 +239,7 @@ export default {
         pickerPosition: {},
         pickerSearch: ''
       },
-      notifiedMembers: false,
-      pinchCounterZoomDecimal: 1
+      notifiedMembers: false
     }
   },
   created () {
@@ -255,10 +254,6 @@ export default {
         let { cardId, url } = mutation.payload
         if (cardId !== this.card.id) { return }
         this.addFile({ url })
-      }
-      if (mutation.type === 'triggerResetPinchCounterZoomDecimal') {
-        if (this.pinchCounterZoomDecimal === 1) { return }
-        this.resetPinchCounterZoomDecimal()
       }
     })
   },
@@ -453,12 +448,15 @@ export default {
       }
     },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
     styles () {
+      let zoom
       if (utils.isSignificantlyPinchZoomed()) {
-        return { transform: `scale(${this.pinchCounterZoomDecimal})` }
+        zoom = this.pinchCounterZoomDecimal
       } else {
-        return { transform: `scale(${this.spaceCounterZoomDecimal})` }
+        zoom = this.spaceCounterZoomDecimal
       }
+      return { transform: `scale(${zoom})` }
     },
     cardUrlPreviewIsVisible () {
       const isUrlOrLoading = this.card.urlPreviewUrl || this.isLoadingUrlPreview
@@ -1238,10 +1236,10 @@ export default {
       return url
     },
     resetPinchCounterZoomDecimal () {
-      this.pinchCounterZoomDecimal = 1
+      this.$store.commit('pinchCounterZoomDecimal', 1)
     },
     updatePinchCounterZoomDecimal () {
-      this.pinchCounterZoomDecimal = utils.pinchCounterZoomDecimal()
+      this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
     }
   },
   watch: {
