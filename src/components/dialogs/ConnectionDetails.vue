@@ -44,7 +44,7 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="styles" 
       img.icon(src="@/assets/add.svg")
       span Add
 
-  section.results-section(ref="resultsSection" :style="{'max-height': resultsSectionMaxHeight + 'px'}")
+  section.results-section(ref="resultsSection" :style="{'max-height': resultsSectionMaxHeight}")
     ResultsFilter(:items="connectionTypes" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredConnectionTypes")
     ul.results-list
       template(v-for="(type in connectionTypesFiltered")
@@ -206,13 +206,16 @@ export default {
       })
     },
     updateResultsSectionMaxHeight () {
+      const pinchZoom = utils.visualViewport().scale
       const position = this.$store.state.connectionDetailsPosition
       const infoSection = this.$refs.infoSection.getBoundingClientRect()
       const resultsActions = this.$refs.resultsActions.getBoundingClientRect()
+      const dialogInfoHeight = infoSection.height + resultsActions.height
+      const maxHeight = (this.$store.state.viewportHeight - position.y - dialogInfoHeight) * pinchZoom
       const minHeight = 300
-      const otherHeight = infoSection.height + resultsActions.height
-      const maxHeight = this.$store.state.viewportHeight - otherHeight - position.y
-      this.resultsSectionMaxHeight = Math.max(minHeight, maxHeight)
+      let height = Math.max(minHeight, maxHeight)
+      height = Math.round(height)
+      this.resultsSectionMaxHeight = `calc(90vh - ${height}px)`
     },
     scrollIntoView () {
       this.$nextTick(() => {
