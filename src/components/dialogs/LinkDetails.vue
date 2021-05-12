@@ -77,6 +77,8 @@ export default {
     },
     space () { return this.currentLink.space },
     isSpace () { return utils.objectHasKeys(this.currentLink.space) },
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
     styles () {
       const position = this.position || this.$store.state.linkDetailsPosition
       const isChildDialog = this.cardDetailsIsVisibleForCardId
@@ -86,9 +88,13 @@ export default {
       }
       const x = zoom * position.x
       const y = zoom * position.y
+      if (utils.isSignificantlyPinchZoomed()) {
+        zoom = this.pinchCounterZoomDecimal
+      }
       return {
         left: `${x}px`,
-        top: `${y}px`
+        top: `${y}px`,
+        transform: `scale(${zoom})`
       }
     },
     url () {
@@ -182,11 +188,15 @@ export default {
     checkIfShouldRequestSpace () {
       if (!this.isSpace || this.space.isLoadingOrInvalid) { return }
       return this.remoteSpaceId !== this.space.id
+    },
+    updatePinchCounterZoomDecimal () {
+      this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
     }
   },
   watch: {
     isVisible (visible) {
       if (visible) {
+        this.updatePinchCounterZoomDecimal()
         const shouldRequestSpace = this.checkIfShouldRequestSpace()
         if (!shouldRequestSpace) {
           this.scrollIntoView()
@@ -205,6 +215,7 @@ export default {
 <style lang="stylus">
 .link-details
   cursor auto
+  transform-origin top left
   section.edit-card
     background-color var(--secondary-background)
   button
