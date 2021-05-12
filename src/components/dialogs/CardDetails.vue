@@ -750,14 +750,13 @@ export default {
       this.triggerUpdatePositionInVisualViewport()
     },
     scrollIntoView () {
-      if (utils.isMobile()) { return }
       const element = this.$refs.dialog
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
     },
     scrollIntoViewAndFocus () {
-      if (utils.isSignificantlyPinchZoomed()) { return }
       this.scrollIntoView()
+      if (utils.isSignificantlyPinchZoomed()) { return }
       this.focusName()
       this.triggerUpdateMagicPaintPositionOffset()
       this.triggerUpdatePositionInVisualViewport()
