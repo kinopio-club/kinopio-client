@@ -116,6 +116,7 @@ export default {
     userColor () { return this.$store.state.currentUser.color },
     pluralLabels () { return utils.pluralize('Label', this.multipleConnectionsSelectedIds.length > 1) },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
 
     // cards
@@ -261,11 +262,17 @@ export default {
       }
     },
     styles () {
+      let zoom
+      if (utils.isSignificantlyPinchZoomed()) {
+        zoom = this.pinchCounterZoomDecimal
+      } else {
+        zoom = this.spaceCounterZoomDecimal
+      }
       return {
         backgroundColor: this.userColor,
         left: this.position.left,
         top: this.position.top,
-        transform: `scale(${this.spaceCounterZoomDecimal})`
+        transform: `scale(${zoom})`
       }
     }
   },
@@ -404,12 +411,16 @@ export default {
       const element = this.$refs.dialog
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
+    },
+    updatePinchCounterZoomDecimal () {
+      this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
     }
   },
   watch: {
     visible (visible) {
       this.$nextTick(() => {
         if (visible) {
+          this.updatePinchCounterZoomDecimal()
           this.checkIsCardsConnected()
           this.checkCardsHaveCheckboxes()
           this.checkCardsCheckboxIsChecked()
