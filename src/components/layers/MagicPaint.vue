@@ -497,7 +497,7 @@ export default {
       const maxDelta = 50
       const delta = this.viewportHeight - startCursor.y
       const isBottomOfViewport = delta < maxDelta
-      if (isBottomOfViewport && utils.isMobile() && navigator.standalone) {
+      if (isBottomOfViewport && utils.isMobile()) {
         return true
       }
     },
