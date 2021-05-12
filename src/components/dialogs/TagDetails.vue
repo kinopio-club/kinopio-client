@@ -107,13 +107,14 @@ export default {
       }
       const x = zoom * position.x
       const y = zoom * position.y
+      let scale
       if (utils.isSignificantlyPinchZoomed()) {
-        zoom = this.pinchCounterZoomDecimal
+        scale = this.pinchCounterZoomDecimal
       }
       return {
         left: `${x}px`,
         top: `${y}px`,
-        transform: `scale(${zoom})`
+        transform: `scale(${scale})`
       }
     },
     color () {
