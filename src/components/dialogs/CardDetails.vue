@@ -1244,6 +1244,7 @@ export default {
   },
   watch: {
     visible (visible) {
+      this.updatePinchCounterZoomDecimal()
       this.$nextTick(() => {
         if (visible) {
           this.clearErrors()
@@ -1256,7 +1257,6 @@ export default {
       if (visible) {
         const connections = this.$store.getters['currentSpace/cardConnections'](this.card.id)
         this.$store.commit('updateCurrentCardConnections', connections)
-        this.updatePinchCounterZoomDecimal()
       }
       if (!visible) {
         this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', this.card.id)
