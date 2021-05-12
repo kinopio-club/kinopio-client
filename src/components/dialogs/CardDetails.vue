@@ -1172,6 +1172,7 @@ export default {
       return image
     },
     updateUrlPreviewErrorUrl (url) {
+      this.$store.commit('removeUrlPreviewLoadingForCardIds', this.card.id)
       const update = {
         id: this.card.id,
         urlPreviewErrorUrl: url
@@ -1207,7 +1208,7 @@ export default {
         if (data.image.length >= maxImageLength) { return }
         this.$store.dispatch('currentSpace/updateCard', update)
       } catch (error) {
-        console.warn('🚑', error)
+        console.warn('🚑', error, url)
         this.updateUrlPreviewErrorUrl(url)
       }
     }, 350),
