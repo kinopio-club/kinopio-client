@@ -260,6 +260,7 @@ export default {
       }
       // prevent mouse events from firing after touch events on touch device
       event.preventDefault()
+      this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
 
     // Painting

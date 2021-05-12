@@ -750,6 +750,7 @@ export default {
       this.triggerUpdatePositionInVisualViewport()
     },
     scrollIntoView () {
+      if (!utils.isSignificantlyPinchZoomed() && utils.isMobile()) { return }
       const element = this.$refs.dialog
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
