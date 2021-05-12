@@ -1261,7 +1261,6 @@ export default {
       if (!visible) {
         this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', this.card.id)
         this.$store.commit('updateCurrentCardConnections')
-        this.resetPinchCounterZoomDecimal()
       }
       if (!visible && this.cardIsEmpty()) {
         this.$store.dispatch('currentSpace/removeCard', this.card)
