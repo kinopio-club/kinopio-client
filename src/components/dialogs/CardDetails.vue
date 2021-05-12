@@ -1261,6 +1261,7 @@ export default {
       if (!visible) {
         this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', this.card.id)
         this.$store.commit('updateCurrentCardConnections')
+        this.$store.commit('triggerUpdatePositionInVisualViewport')
       }
       if (!visible && this.cardIsEmpty()) {
         this.$store.dispatch('currentSpace/removeCard', this.card)
