@@ -88,6 +88,7 @@ export default {
     })
   },
   mounted () {
+    this.updateCurrentDeviceView()
     this.isAndroid = utils.isAndroid()
     shouldRestoreUrlPath = true
     this.$store.subscribe((mutation, state) => {
@@ -166,7 +167,7 @@ export default {
 
 <style lang="stylus">
 .apps
-  top calc(100% - 6px) !important
+  // top calc(100% - 6px) !important
   overflow auto
 
   .logo-wrap

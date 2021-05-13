@@ -60,7 +60,7 @@
               span {{remotePendingUpload.percentComplete}}%
           Background(:visible="backgroundIsVisible")
         //- mobile tips
-        .button-wrap
+        .button-wrap(v-if="isMobileOrTouch")
           button(@click.left="toggleMobileTipsIsVisible" :class="{ active: mobileTipsIsVisible}")
             img.icon(src="@/assets/press-and-hold.svg")
             span Mobile Tips
