@@ -59,6 +59,11 @@
               Loader(:visible="true")
               span {{remotePendingUpload.percentComplete}}%
           Background(:visible="backgroundIsVisible")
+        //- mobile tips
+        .button-wrap
+          button(@click.left="toggleMobileTipsIsVisible" :class="{ active: mobileTipsIsVisible}")
+            img.icon(src="@/assets/press-and-hold.svg")
+            span Mobile Tips
 
   .right(v-if="!isMobileOrTouch")
     SpaceZoom
@@ -103,6 +108,7 @@ export default {
       tagsIsVisible: false,
       exploreIsVisible: false,
       backgroundIsVisible: false,
+      mobileTipsIsVisible: false,
       visualViewportPosition: {}
     }
   },
@@ -116,6 +122,7 @@ export default {
         this.tagsIsVisible = false
         this.exploreIsVisible = false
         this.backgroundIsVisible = false
+        this.mobileTipsIsVisible = false
       }
       if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
         currentIteration = 0
@@ -215,40 +222,40 @@ export default {
         updatePositionTimer = undefined
       }
     },
-    offsetMarginBottom () {
+    footerMarginBottom () {
       const isMobile = utils.isMobile()
-      let margin
-      if (isMobile && navigator.standalone) {
-        margin = 20
-      } else if (isMobile) {
-        margin = 10
+      const isTouchDevice = this.$store.state.isTouchDevice
+      if (isMobile || isTouchDevice) {
+        return 20
       } else {
-        margin = 0
+        return 0
       }
-      return margin
     },
     updatePositionInVisualViewport () {
       const viewport = utils.visualViewport()
       const layoutViewport = document.getElementById('layout-viewport')
       const pinchZoomScale = viewport.scale
-      const marginBottom = this.offsetMarginBottom()
+      const marginBottom = this.footerMarginBottom()
       const pinchZoomOffsetLeft = viewport.offsetLeft
-      const pinchZoomOffsetTop = viewport.height + viewport.offsetTop + marginBottom - layoutViewport.getBoundingClientRect().height - 20
+      const pinchZoomOffsetTop = viewport.height + viewport.offsetTop - layoutViewport.getBoundingClientRect().height
       let style
       if (pinchZoomScale === 1) {
         style = {
-          'margin-bottom': marginBottom
+          'margin-bottom': marginBottom + 'px'
         }
       } else if (pinchZoomScale > 1) {
         style = {
           transform: `translate(${pinchZoomOffsetLeft}px, ${pinchZoomOffsetTop}px) scale(${1 / pinchZoomScale})`,
-          'transform-origin': 'left bottom'
+          'transform-origin': 'left bottom',
+          'margin-bottom': marginBottom / pinchZoomScale + 'px'
         }
       } else {
         style = {
           transform: `translate(${pinchZoomOffsetLeft}px, 0px)`,
           zoom: 1 / pinchZoomScale,
-          'transform-origin': 'left bottom'
+          'transform-origin': 'left bottom',
+          'margin-bottom': marginBottom + 'px',
+          'margin-left': `-${pinchZoomOffsetLeft}px`
         }
       }
       this.visualViewportPosition = style
@@ -295,6 +302,11 @@ export default {
       const isVisible = this.exploreIsVisible
       this.$store.dispatch('closeAllDialogs', 'Footer.toggleExploreIsVisible')
       this.exploreIsVisible = !isVisible
+    },
+    toggleMobileTipsIsVisible () {
+      const isVisible = this.mobileTipsIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Footer.toggleMobileTipsIsVisible')
+      this.mobileTipsIsVisible = !isVisible
     },
     async updateFavorites () {
       await this.$store.dispatch('currentUser/restoreUserFavorites')
