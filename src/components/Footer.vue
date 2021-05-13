@@ -64,6 +64,7 @@
           button(@click.left="toggleMobileTipsIsVisible" :class="{ active: mobileTipsIsVisible}")
             img.icon(src="@/assets/press-and-hold.svg")
             span Mobile Tips
+          MobileTips(:visible="mobileTipsIsVisible")
 
   .right(v-if="!isMobileOrTouch")
     SpaceZoom
@@ -77,6 +78,7 @@ import Links from '@/components/dialogs/Links.vue'
 import Tags from '@/components/dialogs/Tags.vue'
 import Favorites from '@/components/dialogs/Favorites.vue'
 import Background from '@/components/dialogs/Background.vue'
+import MobileTips from '@/components/dialogs/MobileTips.vue'
 import Notifications from '@/components/Notifications.vue'
 import SpaceZoom from '@/components/SpaceZoom.vue'
 import Loader from '@/components/Loader.vue'
@@ -96,6 +98,7 @@ export default {
     Tags,
     Favorites,
     Background,
+    MobileTips,
     Loader,
     SpaceZoom
   },
@@ -223,9 +226,7 @@ export default {
       }
     },
     footerMarginBottom () {
-      const isMobile = utils.isMobile()
-      const isTouchDevice = this.$store.state.isTouchDevice
-      if (isMobile || isTouchDevice) {
+      if (this.isMobileOrTouch) {
         return 20
       } else {
         return 0
