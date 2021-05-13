@@ -91,5 +91,9 @@ export default {
   .apps
     top initial
     bottom 8px
+  video
+    margin-left -1px
+    margin-top -1px
+    border-radius 3px
 
 </style>
