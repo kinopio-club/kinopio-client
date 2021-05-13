@@ -1,7 +1,7 @@
 <template lang="pug">
-.footer-wrap(:class="{ 'is-mobile-standalone': isMobileStandalone }")
+.footer-wrap(:style="visualViewportPosition")
   .left
-    footer(:style="visualViewportPosition")
+    footer
       Notifications
       section(v-if="isVisible")
         //- Explore
@@ -17,7 +17,7 @@
               img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
               img.icon(v-else src="@/assets/heart-empty.svg")
             button(@click.left="toggleFavoritesIsVisible" :class="{ active: favoritesIsVisible}")
-              img.icon.down-arrow(src="@/assets/down-arrow.svg")
+              img.icon.down-arrow(src="@/assets/down-arrow.svg" :class="{ 'is-mobile-icon': isMobile }")
               span(v-if="favoriteSpacesEditedCount") {{favoriteSpacesEditedCount}}
           Favorites(:visible="favoritesIsVisible")
         //- Tags and Links
@@ -59,6 +59,12 @@
               Loader(:visible="true")
               span {{remotePendingUpload.percentComplete}}%
           Background(:visible="backgroundIsVisible")
+        //- mobile tips
+        .button-wrap(v-if="isMobileOrTouch")
+          button(@click.left="toggleMobileTipsIsVisible" :class="{ active: mobileTipsIsVisible}")
+            img.icon(src="@/assets/press-and-hold.svg")
+            span Mobile Tips
+          MobileTips(:visible="mobileTipsIsVisible")
 
   .right(v-if="!isMobileOrTouch")
     SpaceZoom
@@ -72,6 +78,7 @@ import Links from '@/components/dialogs/Links.vue'
 import Tags from '@/components/dialogs/Tags.vue'
 import Favorites from '@/components/dialogs/Favorites.vue'
 import Background from '@/components/dialogs/Background.vue'
+import MobileTips from '@/components/dialogs/MobileTips.vue'
 import Notifications from '@/components/Notifications.vue'
 import SpaceZoom from '@/components/SpaceZoom.vue'
 import Loader from '@/components/Loader.vue'
@@ -91,6 +98,7 @@ export default {
     Tags,
     Favorites,
     Background,
+    MobileTips,
     Loader,
     SpaceZoom
   },
@@ -103,9 +111,8 @@ export default {
       tagsIsVisible: false,
       exploreIsVisible: false,
       backgroundIsVisible: false,
-      pinchZoomOffsetLeft: 0,
-      pinchZoomOffsetTop: 0,
-      pinchZoomScale: 1
+      mobileTipsIsVisible: false,
+      visualViewportPosition: {}
     }
   },
   mounted () {
@@ -118,6 +125,7 @@ export default {
         this.tagsIsVisible = false
         this.exploreIsVisible = false
         this.backgroundIsVisible = false
+        this.mobileTipsIsVisible = false
       }
       if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
         currentIteration = 0
@@ -125,6 +133,7 @@ export default {
         updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
       }
     })
+    this.updatePositionInVisualViewport()
     window.addEventListener('scroll', this.updatePositionInVisualViewport)
     this.updateFavorites()
     setInterval(() => {
@@ -189,21 +198,6 @@ export default {
       return userFilters + tagNames.length + connections.length + frames.length
     },
     isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] },
-    visualViewportPosition () {
-      if (this.pinchZoomScale === 1) { return }
-      if (this.pinchZoomScale > 1) {
-        return {
-          transform: `translate(${this.pinchZoomOffsetLeft}px, ${this.pinchZoomOffsetTop}px) scale(${1 / this.pinchZoomScale})`,
-          'transform-origin': 'left bottom'
-        }
-      } else {
-        return {
-          transform: `translate(${this.pinchZoomOffsetLeft}px, ${this.pinchZoomOffsetTop}px)`,
-          zoom: 1 / this.pinchZoomScale,
-          'transform-origin': 'left bottom'
-        }
-      }
-    },
     remotePendingUpload () {
       const currentSpace = this.$store.state.currentSpace
       let remotePendingUploads = this.$store.state.remotePendingUploads
@@ -213,8 +207,11 @@ export default {
         return inProgress && isSpace
       })
     },
+    isMobile () {
+      return utils.isMobile()
+    },
     isMobileStandalone () {
-      return utils.isMobile() && navigator.standalone
+      return utils.isMobile() && navigator.standalone // is homescreen app
     }
   },
   methods: {
@@ -228,12 +225,41 @@ export default {
         updatePositionTimer = undefined
       }
     },
+    footerMarginBottom () {
+      if (this.isMobileOrTouch) {
+        return 20
+      } else {
+        return 0
+      }
+    },
     updatePositionInVisualViewport () {
       const viewport = utils.visualViewport()
       const layoutViewport = document.getElementById('layout-viewport')
-      this.pinchZoomScale = viewport.scale
-      this.pinchZoomOffsetLeft = viewport.offsetLeft
-      this.pinchZoomOffsetTop = viewport.height - layoutViewport.getBoundingClientRect().height + viewport.offsetTop
+      const pinchZoomScale = viewport.scale
+      const marginBottom = this.footerMarginBottom()
+      const pinchZoomOffsetLeft = viewport.offsetLeft
+      const pinchZoomOffsetTop = viewport.height + viewport.offsetTop - layoutViewport.getBoundingClientRect().height
+      let style
+      if (pinchZoomScale === 1) {
+        style = {
+          'margin-bottom': marginBottom + 'px'
+        }
+      } else if (pinchZoomScale > 1) {
+        style = {
+          transform: `translate(${pinchZoomOffsetLeft}px, ${pinchZoomOffsetTop}px) scale(${1 / pinchZoomScale})`,
+          'transform-origin': 'left bottom',
+          'margin-bottom': marginBottom / pinchZoomScale + 'px'
+        }
+      } else {
+        style = {
+          transform: `translate(${pinchZoomOffsetLeft}px, 0px)`,
+          zoom: 1 / pinchZoomScale,
+          'transform-origin': 'left bottom',
+          'margin-bottom': marginBottom + 'px',
+          'margin-left': `-${pinchZoomOffsetLeft}px`
+        }
+      }
+      this.visualViewportPosition = style
     },
     toggleIsFavoriteSpace () {
       const currentSpace = this.$store.state.currentSpace
@@ -278,6 +304,11 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'Footer.toggleExploreIsVisible')
       this.exploreIsVisible = !isVisible
     },
+    toggleMobileTipsIsVisible () {
+      const isVisible = this.mobileTipsIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Footer.toggleMobileTipsIsVisible')
+      this.mobileTipsIsVisible = !isVisible
+    },
     async updateFavorites () {
       await this.$store.dispatch('currentUser/restoreUserFavorites')
     }
@@ -302,10 +333,14 @@ export default {
     pointer-events all
     @media(max-width 460px)
      display none
+  &.is-mobile
+    margin-bottom 10px
   &.is-mobile-standalone
     margin-bottom 20px
 
 footer
+  .is-mobile-icon
+    vertical-align 2px !important
   .undo
     margin 0
     height 11px
@@ -320,6 +355,9 @@ footer
       dialog
         top initial
         bottom calc(100% - 8px)
+      &:first-child
+        margin-left 0
+
   .sunglasses
     vertical-align middle
   .macro

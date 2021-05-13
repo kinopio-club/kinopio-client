@@ -120,8 +120,18 @@ export default {
     return { x, y }
   },
   visualViewport () {
-    if (window.visualViewport) {
-      return window.visualViewport
+    const visualViewport = window.visualViewport
+    if (visualViewport) {
+      return {
+        width: visualViewport.width,
+        height: visualViewport.height,
+        scale: visualViewport.scale,
+        offsetLeft: Math.max(visualViewport.offsetLeft, 0),
+        offsetRight: Math.max(visualViewport.offsetRight, 0),
+        offsetTop: Math.max(visualViewport.offsetTop, 0),
+        pageLeft: visualViewport.pageLeft,
+        pageTop: visualViewport.pageTop
+      }
     } else {
       // firefox fallback, doesn't support pinch zooming
       return {
@@ -130,10 +140,22 @@ export default {
         scale: document.documentElement.clientWidth / window.innerWidth,
         offsetLeft: 0,
         offsetRight: 0,
+        offsetTop: 0,
         pageLeft: window.scrollX,
         pageTop: window.scrollY
       }
     }
+  },
+  pinchCounterZoomDecimal () {
+    return 1 / this.visualViewport().scale
+  },
+  isSignificantlyPinchZoomed () {
+    const pinchZoomScale = this.visualViewport().scale
+    return !this.isBetween({
+      value: pinchZoomScale,
+      min: 0.8,
+      max: 1.3
+    })
   },
   rectCenter (rect) {
     const x = Math.round(rect.x + (rect.width / 2))
@@ -779,7 +801,7 @@ export default {
     // then '.''
     // followed by alphanumerics
     // matches multiple urls and returns [urls]
-    const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<>]+\.[^\s.[">,<]+\w\/?/igm)
+    const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<>]{2,}\.[^\s.[">,<]+\w\/?/igm)
     let urls = string.match(urlPattern)
     if (!urls) { return }
     // filter out empty or non-urls
@@ -835,7 +857,7 @@ export default {
   urlIsVideo (url) {
     if (!url) { return }
     url = url + ' '
-    const videoUrlPattern = new RegExp(/(?:\.mp4)(?:\n| |\?|&)/igm)
+    const videoUrlPattern = new RegExp(/(?:\.mp4|\.webm)(?:\n| |\?|&)/igm)
     const isVideo = url.match(videoUrlPattern)
     return Boolean(isVideo)
   },
@@ -851,8 +873,8 @@ export default {
     const hasProtocol = this.urlHasProtocol(url)
     if (!hasProtocol) { return }
     url = url + ' '
-    const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml|\.psd|\.ai|\.ind|\.sketch)(?:\n| |\?|&)/igm)
-    const isFile = url.match(fileUrlPattern)
+    const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml|\.psd|\.ai|\.ind|\.sketch|\.mov)(?:\n| |\?|&)/igm)
+    const isFile = url.toLowerCase().match(fileUrlPattern)
     return Boolean(isFile)
   },
   urlIsKinopioSpace (url) {
@@ -878,7 +900,7 @@ export default {
     if (!this.urlIsFile(url)) { return }
     // https://regexr.com/4rjtu
     // /filename.pdf from end of string
-    const filePattern = new RegExp(/\/[A-z0-9-]+\.[A-z0-9-]+$/gim)
+    const filePattern = new RegExp(/\/[A-z0-9-]+\.[A-z.0-9-]+$/gim)
     let file = url.match(filePattern)
 
     if (!file) { return }

@@ -5,6 +5,8 @@ main.space(
   @touchstart="initInteractions"
   @mouseup.left="stopInteractions"
   @touchstop="stopInteractions"
+  @gesturestart="updateVisualViewport"
+  @gesturechange="updateVisualViewport"
   :style="styles"
 )
   svg.connections
@@ -146,6 +148,9 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
+    updateVisualViewport () {
+      this.$store.commit('triggerUpdatePositionInVisualViewport')
+    },
     updateIncorrectCardConnectionPaths () {
       const space = utils.clone(this.$store.state.currentSpace)
       const user = utils.clone(this.$store.state.currentUser)

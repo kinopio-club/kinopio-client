@@ -42,6 +42,8 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.221="triggerPickerSelectItem"
         @keydown.bracket-right="triggerPickerSelectItem"
         @keydown.57="triggerCommentAddClosingBrackets"
+
+        @focus="resetPinchCounterZoomDecimal"
       )
       TagPicker(
         :visible="tag.pickerIsVisible"
@@ -269,6 +271,7 @@ export default {
       this.scrollIntoViewAndFocus()
       this.$emit('broadcastShowCardDetails')
       this.updatePreviousTags()
+      this.updatePinchCounterZoomDecimal()
     }
   },
   computed: {
@@ -445,10 +448,15 @@ export default {
       }
     },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
     styles () {
-      return {
-        transform: `scale(${this.spaceCounterZoomDecimal})`
+      let zoom
+      if (utils.isSignificantlyPinchZoomed()) {
+        zoom = this.pinchCounterZoomDecimal
+      } else {
+        zoom = this.spaceCounterZoomDecimal
       }
+      return { transform: `scale(${zoom})` }
     },
     cardUrlPreviewIsVisible () {
       const isUrlOrLoading = this.card.urlPreviewUrl || this.isLoadingUrlPreview
@@ -742,20 +750,14 @@ export default {
       this.triggerUpdatePositionInVisualViewport()
     },
     scrollIntoView () {
-      if (utils.isMobile()) { return }
+      if (!utils.isSignificantlyPinchZoomed() && utils.isMobile()) { return }
       const element = this.$refs.dialog
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
     },
     scrollIntoViewAndFocus () {
-      const pinchZoomScale = utils.visualViewport().scale
-      const pinchZoomScaleShouldFocus = utils.isBetween({
-        value: pinchZoomScale,
-        min: 0.8,
-        max: 1.3
-      })
-      if (!pinchZoomScaleShouldFocus) { return }
       this.scrollIntoView()
+      if (utils.isSignificantlyPinchZoomed()) { return }
       this.focusName()
       this.triggerUpdateMagicPaintPositionOffset()
       this.triggerUpdatePositionInVisualViewport()
@@ -1170,6 +1172,7 @@ export default {
       return image
     },
     updateUrlPreviewErrorUrl (url) {
+      this.$store.commit('removeUrlPreviewLoadingForCardIds', this.card.id)
       const update = {
         id: this.card.id,
         urlPreviewErrorUrl: url
@@ -1205,7 +1208,7 @@ export default {
         if (data.image.length >= maxImageLength) { return }
         this.$store.dispatch('currentSpace/updateCard', update)
       } catch (error) {
-        console.warn('🚑', error)
+        console.warn('🚑', error, url)
         this.updateUrlPreviewErrorUrl(url)
       }
     }, 350),
@@ -1217,6 +1220,7 @@ export default {
         urlPreviewTitle: '',
         urlPreviewDescription: ''
       }
+      this.$store.commit('removeUrlPreviewLoadingForCardIds', this.card.id)
       this.$store.dispatch('currentSpace/updateCard', update)
     },
     toggleUrlPreviewIsVisible () {
@@ -1231,10 +1235,17 @@ export default {
       url = url.replace('?hidden=true', '')
       url = url.replace('&hidden=true', '')
       return url
+    },
+    resetPinchCounterZoomDecimal () {
+      this.$store.commit('pinchCounterZoomDecimal', 1)
+    },
+    updatePinchCounterZoomDecimal () {
+      this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
     }
   },
   watch: {
     visible (visible) {
+      this.updatePinchCounterZoomDecimal()
       this.$nextTick(() => {
         if (visible) {
           this.clearErrors()
@@ -1251,6 +1262,7 @@ export default {
       if (!visible) {
         this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', this.card.id)
         this.$store.commit('updateCurrentCardConnections')
+        this.$store.commit('triggerUpdatePositionInVisualViewport')
       }
       if (!visible && this.cardIsEmpty()) {
         this.$store.dispatch('currentSpace/removeCard', this.card)

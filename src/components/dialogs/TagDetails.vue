@@ -96,6 +96,8 @@ export default {
     },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     currentSpaceId () { return this.$store.state.currentSpace.id },
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
     styles () {
       const position = this.$store.state.tagDetailsPosition
       const isChildDialog = this.cardDetailsIsVisibleForCardId || this.visibleFromTagList
@@ -105,9 +107,14 @@ export default {
       }
       const x = zoom * position.x
       const y = zoom * position.y
+      let scale
+      if (utils.isSignificantlyPinchZoomed()) {
+        scale = this.pinchCounterZoomDecimal
+      }
       return {
         left: `${x}px`,
-        top: `${y}px`
+        top: `${y}px`,
+        transform: `scale(${scale})`
       }
     },
     color () {
@@ -403,12 +410,16 @@ export default {
       this.cards = this.cards.filter(card => !newCardIds.includes(card.id))
       this.cards = this.cards.concat(cards)
       this.updateDialogHeight()
+    },
+    updatePinchCounterZoomDecimal () {
+      this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
     }
   },
   watch: {
     currentTag (tag) {
       if (tag && this.visible) {
         this.updateCards()
+        this.updatePinchCounterZoomDecimal()
         this.closeDialogs()
         this.$nextTick(() => {
           this.scrollIntoView()
@@ -422,6 +433,7 @@ export default {
 <style lang="stylus">
 .tag-details
   cursor auto
+  transform-origin top left
   section.edit-card
     background-color var(--secondary-background)
   .tag-name

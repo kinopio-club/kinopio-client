@@ -106,6 +106,8 @@ export default {
     width 100%
     border-radius 3px
     background var(--primary-background)
+    pointer-events none
+    -webkit-touch-callout none // prevents safari mobile press-and-hold from interrupting
     &.selected
       mix-blend-mode color-burn
     &.side-image

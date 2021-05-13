@@ -1,12 +1,12 @@
 <template lang="pug">
 dialog.narrow.connection-details(v-if="visible" :open="visible" :style="styles" @click.left="closeColorPicker" ref="dialog")
-  section(:style="{backgroundColor: typeColor}")
+  section(:style="{backgroundColor: typeColor}" ref="infoSection")
     .row
       .button-wrap
         button.change-color(:disabled="!canEditConnection" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{backgroundColor: typeColor}")
         ColorPicker(:currentColor="typeColor" :visible="colorPickerIsVisible" @selectedColor="updateTypeColor")
-      input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeName")
+      input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeName" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport")
 
     .row
       button(:disabled="!canEditConnection" :class="{active: labelIsVisible}" @click.left="toggleLabelIsVisible")
@@ -39,12 +39,12 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="styles" 
           img.icon(src="@/assets/unlock.svg")
           span To edit closed spaces, you'll need to be invited
 
-  section.results-actions
+  section.results-actions(ref="resultsActions")
     button(:disabled="!canEditConnection" @click.left="addConnectionType")
       img.icon(src="@/assets/add.svg")
       span Add
 
-  section.results-section
+  section.results-section(ref="resultsSection" :style="{'max-height': resultsSectionMaxHeight}")
     ResultsFilter(:items="connectionTypes" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredConnectionTypes")
     ul.results-list
       template(v-for="(type in connectionTypesFiltered")
@@ -67,12 +67,16 @@ export default {
     ResultsFilter
   },
   name: 'ConnectionDetails',
+  mounted () {
+    this.updatePinchCounterZoomDecimal()
+  },
   data () {
     return {
       isDefault: false,
       colorPickerIsVisible: false,
       filter: '',
-      filteredConnectionTypes: []
+      filteredConnectionTypes: [],
+      resultsSectionMaxHeight: undefined // number
     }
   },
   computed: {
@@ -86,13 +90,19 @@ export default {
     spacePrivacyIsClosed () { return this.$store.state.currentSpace.privacy === 'closed' },
     isInvitedButCannotEditSpace () { return this.$store.getters['currentUser/isInvitedButCannotEditSpace']() },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
     styles () {
       const position = this.$store.state.connectionDetailsPosition
-      const zoom = this.spaceCounterZoomDecimal
+      let zoom
+      if (utils.isSignificantlyPinchZoomed()) {
+        zoom = this.pinchCounterZoomDecimal
+      } else {
+        zoom = this.spaceCounterZoomDecimal
+      }
       return {
-        left: `${position.x * zoom}px`,
-        top: `${position.y * zoom}px`,
-        transform: `scale(${this.spaceCounterZoomDecimal})`
+        left: `${position.x * this.spaceCounterZoomDecimal}px`,
+        top: `${position.y * this.spaceCounterZoomDecimal}px`,
+        transform: `scale(${zoom})`
       }
     },
     currentConnection () {
@@ -195,16 +205,33 @@ export default {
         element.focus()
       })
     },
+    updateResultsSectionMaxHeight () {
+      const pinchZoom = utils.visualViewport().scale
+      const position = this.$store.state.connectionDetailsPosition
+      const infoSection = this.$refs.infoSection.getBoundingClientRect()
+      const resultsActions = this.$refs.resultsActions.getBoundingClientRect()
+      const dialogInfoHeight = infoSection.height + resultsActions.height
+      const maxHeight = (this.$store.state.viewportHeight - position.y - dialogInfoHeight) * pinchZoom
+      const minHeight = 300
+      let height = Math.max(minHeight, maxHeight)
+      height = Math.round(height)
+      this.resultsSectionMaxHeight = `calc(90vh - ${height}px)`
+    },
     scrollIntoView () {
-      const element = this.$refs.dialog
-      const isTouchDevice = this.$store.state.isTouchDevice
-      scrollIntoView.scroll(element, isTouchDevice)
+      this.$nextTick(() => {
+        const element = this.$refs.dialog
+        this.updateResultsSectionMaxHeight()
+        const isTouchDevice = this.$store.state.isTouchDevice
+        this.$nextTick(() => {
+          scrollIntoView.scroll(element, isTouchDevice)
+        })
+      })
     },
     scrollIntoViewAndFocus () {
-      const element = this.$refs.typeName
-      const length = this.typeName.length
       this.scrollIntoView()
       if (utils.isMobile()) { return }
+      const element = this.$refs.typeName
+      const length = this.typeName.length
       this.$nextTick(() => {
         this.focusName()
         if (length && element) {
@@ -224,6 +251,15 @@ export default {
     },
     updateFilter (filter) {
       this.filter = filter
+    },
+    resetPinchCounterZoomDecimal () {
+      this.$store.commit('pinchCounterZoomDecimal', 1)
+    },
+    updatePinchCounterZoomDecimal () {
+      this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
+    },
+    triggerUpdatePositionInVisualViewport () {
+      this.$store.commit('triggerUpdatePositionInVisualViewport')
     }
   },
   watch: {
@@ -238,6 +274,13 @@ export default {
           this.$store.commit('shouldHideConnectionOutline', false)
         }
       })
+    },
+    visible (visible) {
+      if (visible) {
+        this.updatePinchCounterZoomDecimal()
+      } else {
+        this.resultsSectionMaxHeight = undefined
+      }
     }
   }
 }

@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.notifications(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.narrow.notifications(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight -50 + 'px'}")
   section
     p
       span.badge.info(v-if="unreadCount") {{unreadCount}}
@@ -7,7 +7,7 @@ dialog.narrow.notifications(v-if="visible" :open="visible" ref="dialog" :style="
       span Notifications
       Loader(:visible="loading")
 
-  section.results-section(v-if="notifications.length")
+  section.results-section(v-if="notifications.length" :style="{'max-height': dialogHeight + 'px'}")
     p(v-if="!loading && !notifications.length")
       span Cards added to your spaces by collaborators can be found here
     ul.results-list(v-if="notifications.length")
@@ -169,6 +169,9 @@ export default {
       if (!visible) {
         this.markAllAsRead()
       }
+    },
+    loading (loading) {
+      this.updateDialogHeight()
     }
   }
 }

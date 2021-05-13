@@ -40,6 +40,7 @@ export default new Vuex.Store({
     cardsCreatedLimit: 100,
     prevCursorPosition: { x: 0, y: 0 },
     spaceZoomPercent: 100,
+    pinchCounterZoomDecimal: 1,
     currentSpacePath: '/',
     webfontIsLoaded: false,
     userHasScrolled: false,
@@ -96,6 +97,7 @@ export default new Vuex.Store({
     remoteCardsDragging: [],
     remoteUploadDraggedOverCards: [],
     preventDraggedCardFromShowingDetails: false,
+    triggeredTouchCardDragPosition: {},
 
     // multiple selection
     multipleSelectedActionsIsVisible: false,
@@ -130,6 +132,7 @@ export default new Vuex.Store({
     notifyKinopioUpdatesAreAvailable: false,
     notifyMoveOrCopyToSpace: false,
     notifyMoveOrCopyToSpaceDetails: {},
+    hasNotifiedPressAndHoldToDrag: false,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -240,6 +243,10 @@ export default new Vuex.Store({
     spaceZoomPercent: (state, value) => {
       utils.typeCheck({ value, type: 'number', origin: 'spaceZoomPercent' })
       state.spaceZoomPercent = value
+    },
+    pinchCounterZoomDecimal: (state, value) => {
+      utils.typeCheck({ value, type: 'number', origin: 'pinchCounterZoomDecimal' })
+      state.pinchCounterZoomDecimal = value
     },
     currentSpacePath: (state, value) => {
       utils.typeCheck({ value, type: 'string', origin: 'currentSpacePath' })
@@ -399,6 +406,9 @@ export default new Vuex.Store({
     preventDraggedCardFromShowingDetails: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'preventDraggedCardFromShowingDetails' })
       state.preventDraggedCardFromShowingDetails = value
+    },
+    triggeredTouchCardDragPosition: (state, cursor) => {
+      state.triggeredTouchCardDragPosition = cursor
     },
     currentDraggingCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'currentDraggingCardId' })
@@ -677,6 +687,10 @@ export default new Vuex.Store({
     notifyMoveOrCopyToSpaceDetails: (state, value) => {
       utils.typeCheck({ value, type: 'object', origin: 'notifyMoveOrCopyToSpaceDetails' })
       state.notifyMoveOrCopyToSpaceDetails = value
+    },
+    hasNotifiedPressAndHoldToDrag: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'hasNotifiedPressAndHoldToDrag' })
+      state.hasNotifiedPressAndHoldToDrag = value
     },
 
     // Notifications with Position

@@ -260,6 +260,7 @@ export default {
       }
       // prevent mouse events from firing after touch events on touch device
       event.preventDefault()
+      this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
 
     // Painting
@@ -492,7 +493,16 @@ export default {
     cancelLocking () {
       shouldCancelLocking = true
     },
+    shouldPreventLocking () {
+      const maxDelta = 50
+      const delta = this.viewportHeight - startCursor.y
+      const isBottomOfViewport = delta < maxDelta
+      if (isBottomOfViewport && utils.isMobile()) {
+        return true
+      }
+    },
     startLocking () {
+      if (this.shouldPreventLocking()) { return }
       currentUserIsLocking = true
       shouldCancelLocking = false
       setTimeout(() => {
@@ -541,7 +551,7 @@ export default {
         this.$store.commit('currentUserIsPainting', true)
         this.$store.commit('currentUserIsPaintingLocked', true)
         this.$store.commit('triggeredPaintFramePosition', { x: startCursor.x, y: startCursor.y })
-        console.log('🔒lockingAnimationFrame locked')
+        console.log('🔒 lockingAnimationFrame locked')
         lockingStartTime = undefined
       }
     },

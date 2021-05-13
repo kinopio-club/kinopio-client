@@ -129,9 +129,7 @@ export default {
       upgradeUserIsVisible: false,
       spaceStatusIsVisible: false,
       offlineIsVisible: false,
-      pinchZoomOffsetLeft: 0,
-      pinchZoomOffsetTop: 0,
-      pinchZoomScale: 1,
+      visualViewportPosition: {},
       readOnlyJiggle: false,
       notifications: [],
       notificationsIsLoading: true
@@ -265,21 +263,6 @@ export default {
       if (privacy === 'private') { return false }
       return this.$store.state.currentSpace.showInExplore
     },
-    visualViewportPosition () {
-      if (this.pinchZoomScale === 1) { return }
-      if (this.pinchZoomScale > 1) {
-        return {
-          transform: `translate(${this.pinchZoomOffsetLeft}px, ${this.pinchZoomOffsetTop}px) scale(${1 / this.pinchZoomScale})`,
-          'transform-origin': 'left top'
-        }
-      } else {
-        return {
-          transform: `translate(${this.pinchZoomOffsetLeft}px, ${this.pinchZoomOffsetTop}px)`,
-          zoom: 1 / this.pinchZoomScale,
-          'transform-origin': 'left top'
-        }
-      }
-    },
     notificationsUnreadCount () {
       if (!this.notifications) { return 0 }
       const unread = this.notifications.filter(notification => !notification.isRead)
@@ -319,9 +302,25 @@ export default {
     },
     updatePositionInVisualViewport () {
       if (!window.visualViewport) { return }
-      this.pinchZoomScale = window.visualViewport.scale
-      this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
-      this.pinchZoomOffsetTop = window.visualViewport.offsetTop
+      const viewport = utils.visualViewport()
+      const pinchZoomScale = viewport.scale
+      const pinchZoomOffsetLeft = viewport.offsetLeft
+      const pinchZoomOffsetTop = viewport.offsetTop
+      if (pinchZoomScale === 1) { return }
+      let style
+      if (pinchZoomScale > 1) {
+        style = {
+          transform: `translate(${pinchZoomOffsetLeft}px, ${pinchZoomOffsetTop}px) scale(${1 / pinchZoomScale})`,
+          'transform-origin': 'left top'
+        }
+      } else {
+        style = {
+          transform: `translate(${pinchZoomOffsetLeft}px, 0px)`,
+          zoom: 1 / pinchZoomScale,
+          'transform-origin': 'left top'
+        }
+      }
+      this.visualViewportPosition = style
     },
     toggleAboutIsVisible () {
       const isVisible = this.aboutIsVisible
