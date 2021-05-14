@@ -50,9 +50,10 @@ dialog.narrow.image-picker(
     //-   span From Giphy
 
     //- stickers toggle
-    .segmented-buttons(v-if="serviceIsGfycat")
-      button(:class="{active : gfycatIsStickers}" @click.left.stop="toggleGfycatIsStickers") Stickers
-      button(:class="{active : !gfycatIsStickers}" @click.left.stop="toggleGfycatIsNotStickers") Gifs
+    .row
+      .segmented-buttons(v-if="serviceIsGfycat")
+        button(:class="{active : gfycatIsStickers}" @click.left.stop="toggleGfycatIsStickers") Stickers
+        button(:class="{active : !gfycatIsStickers}" @click.left.stop="toggleGfycatIsNotStickers") Gifs
 
     //- label(v-if="serviceIsGfycat" :class="{active: gfycatIsStickers}" @click.left.prevent="toggleGfycatIsStickers" @keydown.stop.enter="toggleGfycatIsStickers")
     //-   input(type="checkbox" v-model="gfycatIsStickers")
@@ -90,6 +91,15 @@ dialog.narrow.image-picker(
       )
       button.borderless.clear-input-wrap(@click.left="clearSearch")
         img.icon(src="@/assets/add.svg")
+    //- .row.search-options-row
+    //-   //- p
+    //-   //-   span Blobs
+    //-   //-   span Arrows
+    //-   .segmented-buttons
+    //-     button Blobs
+    //-     button Arrows
+    //-     button something
+
     .error-container(v-if="isNoSearchResults || error.unknownServerError || error.userIsOffline")
       p(v-if="isNoSearchResults") Nothing found on {{service}} for {{search}}
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
@@ -264,11 +274,8 @@ export default {
       this.normalizeResults(data, 'Are.na')
     },
     async searchGfycat () {
-      // let url
-      // search stickers
-
       let resource = 'gifs'
-      let endpoint = 'trending' // or random?
+      let endpoint = 'trending'
       if (this.gfycatIsStickers) {
         resource = 'stickers'
       }
@@ -287,9 +294,7 @@ export default {
       url.search = new URLSearchParams(params).toString()
       const response = await fetch(url)
       const data = await response.json()
-      console.log(url, response, data)
-
-      this.normalizeResults(data, 'Gfycat')
+      this.normalizeResults(data.data, 'Gfycat')
     },
     searchService: debounce(async function () {
       this.clearErrors()
@@ -349,19 +354,21 @@ export default {
           }
         })
       } else if (gyfcat) {
-        this.images = data.gfycats.map(image => {
+        console.log('💼', data)
+        this.images = data.map(image => {
           if (this.gfycatIsStickers) {
             return {
-              id: image.gfyId,
-              previewUrl: image.gifUrl,
-              url: image.gifUrl
+              isVideo: true,
+              id: image.id,
+              previewUrl: image.images.fixed_height_small.mp4,
+              url: image.images.original.webp
             }
           } else {
             return {
               isVideo: true,
-              id: image.gfyId,
-              previewUrl: image.max1mbGif,
-              url: image.mobileUrl
+              id: image.id,
+              previewUrl: image.images.fixed_height.mp4,
+              url: image.images.original.webp
             }
           }
         })
@@ -552,4 +559,11 @@ export default {
     left initial
     right 8px
 
+  // .search-options-row
+  //   padding 4px
+  //   overflow scroll
+  //   display flex
+  //   flex-wrap none
+  //   span
+  //     text-decoration underline
 </style>
