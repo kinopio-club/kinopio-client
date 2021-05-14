@@ -11,10 +11,10 @@ dialog.narrow.image-picker(
     //- card images
     .row
       .segmented-buttons
+        button(@click.left.stop="toggleServiceIsGfycat" :class="{active : serviceIsGfycat}")
+          span Giphy
         button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
           span Are.na
-        button(@click.left.stop="toggleServiceIsGfycat" :class="{active : serviceIsGfycat}")
-          span Gfycat
       .button-wrap
         button(@click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile")
@@ -41,10 +41,22 @@ dialog.narrow.image-picker(
       button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
     .error-container-top(v-if="error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+
+    //- attribution
+    //- p(v-if="serviceIsArena")
+    //-   img.icon.arena(src="@/assets/arena.svg")
+    //-   span From Are.na
+    //- p(v-else-if="serviceIsGfycat")
+    //-   span From Giphy
+
     //- stickers toggle
-    label(v-if="serviceIsGfycat" :class="{active: gfycatIsStickers}" @click.left.prevent="toggleGfycatIsStickers" @keydown.stop.enter="toggleGfycatIsStickers")
-      input(type="checkbox" v-model="gfycatIsStickers")
-      span Stickers
+    .segmented-buttons(v-if="serviceIsGfycat")
+      button(:class="{active : gfycatIsStickers}" @click.left.stop="toggleGfycatIsStickers") Stickers
+      button(:class="{active : !gfycatIsStickers}" @click.left.stop="toggleGfycatIsNotStickers") Gifs
+
+    //- label(v-if="serviceIsGfycat" :class="{active: gfycatIsStickers}" @click.left.prevent="toggleGfycatIsStickers" @keydown.stop.enter="toggleGfycatIsStickers")
+    //-   input(type="checkbox" v-model="gfycatIsStickers")
+    //-   span Stickers
 
   //- background images
   section(v-if="isBackgroundImage")
@@ -133,8 +145,8 @@ export default {
     return {
       images: [],
       search: '',
-      service: 'Are.na',
-      gfycatIsStickers: false,
+      service: 'Gfycat',
+      gfycatIsStickers: true,
       loading: false,
       showOnRightSide: false,
       minDialogHeight: null,
@@ -215,8 +227,12 @@ export default {
       this.service = 'Gfycat'
       this.searchAgain()
     },
+    toggleGfycatIsNotStickers () {
+      this.gfycatIsStickers = false
+      this.searchAgain()
+    },
     toggleGfycatIsStickers () {
-      this.gfycatIsStickers = !this.gfycatIsStickers
+      this.gfycatIsStickers = true
       this.searchAgain()
     },
     searchAgainBackgrounds () {
@@ -230,10 +246,11 @@ export default {
     },
     searchAgain () {
       this.images = []
-      if (this.search) {
-        this.loading = true
-        this.searchService()
-      }
+      // if (this.search) {
+      // default arena trending?
+      this.loading = true
+      this.searchService()
+      // }
     },
     async searchArena () {
       const url = new URL('https://api.are.na/v2/search/blocks')
@@ -247,28 +264,40 @@ export default {
       this.normalizeResults(data, 'Are.na')
     },
     async searchGfycat () {
-      let url
+      // let url
+      // search stickers
+
+      let resource = 'gifs'
+      let endpoint = 'trending' // or random?
       if (this.gfycatIsStickers) {
-        url = new URL('https://api.gfycat.com/v1/stickers/search')
-      } else {
-        url = new URL('https://api.gfycat.com/v1/gfycats/search')
+        resource = 'stickers'
       }
-      const params = {
-        search_text: this.search,
-        count: 20
+      if (this.search) {
+        endpoint = 'search'
+      }
+      let url = new URL(`https://api.giphy.com/v1/${resource}/${endpoint}`)
+      let params = {
+        api_key: 'pK3Etx5Jj8IAzUx9Z7H7dUcjD4PazKq7',
+        limit: 20,
+        rating: 'g'
+      }
+      if (this.search) {
+        params.q = this.search
       }
       url.search = new URLSearchParams(params).toString()
       const response = await fetch(url)
       const data = await response.json()
+      console.log(url, response, data)
+
       this.normalizeResults(data, 'Gfycat')
     },
     searchService: debounce(async function () {
       this.clearErrors()
       this.loading = true
-      if (!this.search) {
-        this.loading = false
-        return
-      }
+      // if (!this.search) {
+      //   this.loading = false
+      //   return
+      // }
       const isOffline = !this.$store.state.isOnline
       if (isOffline) {
         this.loading = false
