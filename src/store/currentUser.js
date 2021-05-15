@@ -27,7 +27,6 @@ export default {
     filterUnchecked: false,
     journalPrompts: [],
     newSpacesAreBlank: false,
-    shouldHideCardTips: false,
     shouldEmailNotifications: true,
     shouldEmailBulletin: true,
     shouldShowMoreAlignOptions: false,
@@ -179,10 +178,6 @@ export default {
     newSpacesAreBlank: (state, value) => {
       state.newSpacesAreBlank = value
       cache.updateUser('newSpacesAreBlank', value)
-    },
-    shouldHideCardTips: (state, value) => {
-      state.shouldHideCardTips = value
-      cache.updateUser('shouldHideCardTips', value)
     },
     shouldEmailNotifications: (state, value) => {
       state.shouldEmailNotifications = value
@@ -470,14 +465,6 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           newSpacesAreBlank: value
-        } }, { root: true })
-    },
-    shouldHideCardTips: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldHideCardTips' })
-      context.commit('shouldHideCardTips', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
-        body: {
-          shouldHideCardTips: value
         } }, { root: true })
     },
     shouldEmailNotifications: (context, value) => {

@@ -63,10 +63,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @closeDialog="hideSpacePicker"
         @selectSpace="replaceSlashCommandWithSpaceUrl"
       )
-      .inline-button-wrap(v-if="showCardTips" @click.left.stop="toggleTipsIsVisible" :class="{ active: tipsIsVisible }")
-        button.inline-button(tabindex="-1" :class="{ active: tipsIsVisible }")
+      .inline-button-wrap(v-if="showCardTips" @click.left.stop="toggleCardTipsIsVisible" :class="{ active: cardTipsIsVisible }")
+        button.inline-button(tabindex="-1" :class="{ active: cardTipsIsVisible }")
           span ?
-      Tips(:visible="tipsIsVisible")
+      CardTips(:visible="cardTipsIsVisible")
 
     .row(v-if="cardPendingUpload")
       .badge.info
@@ -181,7 +181,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
 <script>
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
-import Tips from '@/components/dialogs/Tips.vue'
+import CardTips from '@/components/dialogs/CardTips.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import User from '@/components/User.vue'
@@ -203,7 +203,7 @@ export default {
   components: {
     FramePicker,
     ImagePicker,
-    Tips,
+    CardTips,
     TagPicker,
     SpacePicker,
     Loader,
@@ -217,7 +217,7 @@ export default {
     return {
       framePickerIsVisible: false,
       imagePickerIsVisible: false,
-      tipsIsVisible: false,
+      cardTipsIsVisible: false,
       initialSearch: '',
       pastedName: '',
       wasPasted: false,
@@ -247,7 +247,7 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.framePickerIsVisible = false
         this.imagePickerIsVisible = false
-        this.tipsIsVisible = false
+        this.cardTipsIsVisible = false
         this.hidePickers()
       }
       if (mutation.type === 'triggerUploadComplete') {
@@ -280,7 +280,6 @@ export default {
     cardIsCreatedByCurrentUser () { return this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](this.card) },
     spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
     spacePrivacyIsClosed () { return this.$store.state.currentSpace.privacy === 'closed' },
-    shouldHideCardTips () { return this.$store.state.currentUser.shouldHideCardTips },
     spaceIsPrivate () {
       const space = this.linkToSpace
       if (!space) { return }
@@ -288,7 +287,6 @@ export default {
     },
     showCardTips () {
       if (this.name) { return }
-      if (this.shouldHideCardTips) { return }
       return true
     },
     nameIsComment () { return utils.isNameComment(this.name) },
@@ -725,10 +723,10 @@ export default {
       this.closeDialogs()
       this.framePickerIsVisible = !isVisible
     },
-    toggleTipsIsVisible () {
-      const isVisible = this.tipsIsVisible
+    toggleCardTipsIsVisible () {
+      const isVisible = this.cardTipsIsVisible
       this.closeDialogs()
-      this.tipsIsVisible = !isVisible
+      this.cardTipsIsVisible = !isVisible
     },
     toggleImagePickerIsVisible () {
       const isVisible = this.imagePickerIsVisible
@@ -769,7 +767,7 @@ export default {
     closeDialogs () {
       this.framePickerIsVisible = false
       this.imagePickerIsVisible = false
-      this.tipsIsVisible = false
+      this.cardTipsIsVisible = false
       this.hidePickers()
       this.hideTagDetailsIsVisible()
       this.hideLinkDetailsIsVisible()
