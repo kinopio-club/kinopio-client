@@ -22,7 +22,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keyup.stop.right="checkIfShouldHidePicker"
 
         data-type="name"
-        maxlength="300"
+        :maxlength="maxCardLength"
         @click.left="clickName"
         @blur="triggerUpdatePositionInVisualViewport"
         @paste="updatePastedName"
@@ -66,7 +66,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       .inline-button-wrap(v-if="showCardTips" @click.left.stop="toggleCardTipsIsVisible" :class="{ active: cardTipsIsVisible }")
         button.inline-button(tabindex="-1" :class="{ active: cardTipsIsVisible }")
           span ?
-      CardTips(:visible="cardTipsIsVisible")
+      CardTips(:visible="cardTipsIsVisible" :maxCardLength="maxCardLength")
 
     .row(v-if="cardPendingUpload")
       .badge.info
@@ -159,7 +159,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       span.badge.danger
         img.icon.cancel(src="@/assets/add.svg")
         span Max Length
-      p To fit small screens, cards can't be longer than 300 characters
+      p To fit small screens, cards can't be longer than {{maxCardLength}} characters
     template(v-if="error.signUpToUpload")
       p
         span To upload files,
@@ -310,9 +310,9 @@ export default {
       }
     },
     isInvitedButCannotEditSpace () { return this.$store.getters['currentUser/isInvitedButCannotEditSpace']() },
+    maxCardLength () { return 300 },
     errorMaxCardLength () {
-      const maxCardLength = 300
-      if (this.card.name.length >= maxCardLength) {
+      if (this.card.name.length >= this.maxCardLength) {
         return true
       } else {
         return false
@@ -519,7 +519,6 @@ export default {
     },
     splitCards () {
       const spaceBetweenCards = 12
-      const maxCardLength = 300
       let seperated
       if (this.nameHasLineBreaks) {
         seperated = this.seperatedLines
@@ -531,7 +530,7 @@ export default {
       let newCards = cardNames.map(name => {
         return {
           id: nanoid(),
-          name: name.substring(0, maxCardLength),
+          name: name.substring(0, this.maxCardLength),
           x: this.card.x,
           y: this.card.y,
           frameId: this.card.frameId

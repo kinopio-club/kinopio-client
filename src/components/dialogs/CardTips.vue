@@ -20,6 +20,8 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
         span.badge.info Ctrl-Enter
         span line break
     article
+      p Card character limit is {{maxCardLength}}
+    article
       .row
         button(@click.left.stop="toggleMarkdownInfoIsVisible" :class="{ active: markdownInfoIsVisible }")
           span Markdown
@@ -45,7 +47,8 @@ import utils from '@/utils.js'
 export default {
   name: 'CardTips',
   props: {
-    visible: Boolean
+    visible: Boolean,
+    maxCardLength: Number
   },
   data () {
     return {
