@@ -127,6 +127,7 @@ import backgroundImages from '@/data/backgroundImages.json'
 import backgroundImagesAnimated from '@/data/backgroundImagesAnimated.json'
 
 import debounce from 'lodash-es/debounce'
+import sampleSize from 'lodash-es/sampleSize'
 
 export default {
   name: 'ImagePicker',
@@ -268,19 +269,38 @@ export default {
       this.searchService()
     },
     async searchArena () {
-      let url, params
+      let url, params, data
       if (this.search) {
         url = new URL('https://api.are.na/v2/search/blocks')
         params = {
           q: this.search,
           'filter[type]': 'image'
         }
+        url.search = new URLSearchParams(params).toString()
+        const response = await fetch(url)
+        data = await response.json()
       } else {
-        // TODO: default feed/explore search
+        // get random blocks from a channel
+        const channel = 'only-the-best-mxtcaqj5_wq'
+        url = new URL(`https://api.are.na/v2/channels/${channel}/contents`)
+        params = {
+          per: 100
+        }
+        const response = await fetch(url)
+        data = await response.json()
+        data.blocks = data.contents
+        data.blocks = data.blocks.filter(block => block.image)
+        data.blocks = data.blocks.map(block => {
+          let image = {}
+          image.image = block.image
+          image.id = block.id
+          image.user = {
+            username: ''
+          }
+          return image
+        })
+        data.blocks = sampleSize(data.blocks, 20)
       }
-      url.search = new URLSearchParams(params).toString()
-      const response = await fetch(url)
-      const data = await response.json()
       this.normalizeResults(data, 'arena')
     },
     async searchGiphy (isStickers) {
@@ -309,10 +329,6 @@ export default {
     searchService: debounce(async function () {
       this.clearErrors()
       this.loading = true
-      // if (!this.search) {
-      //   this.loading = false
-      //   return
-      // }
       const isOffline = !this.$store.state.isOnline
       if (isOffline) {
         this.loading = false
