@@ -550,6 +550,10 @@ code
 .cancel
   transform rotate(45deg)
 
+.flower
+  vertical-align -3px
+  height 13px
+
 .hidden
   display none
 

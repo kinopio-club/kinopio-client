@@ -11,10 +11,13 @@ dialog.narrow.image-picker(
     //- card images
     .row
       .segmented-buttons
-        button(@click.left.stop="toggleServiceIsGfycat" :class="{active : serviceIsGfycat}")
-          span Giphy
-        button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
-          span Are.na
+        button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}" title="are.na")
+          img.icon.arena(src="@/assets/arena.svg")
+        button(@click.left.stop="toggleServiceIsStickers" :class="{active : serviceIsStickers}" title="stickers")
+          img.icon.sticker(src="@/assets/sticker.svg")
+        button(@click.left.stop="toggleServiceIsGifs" :class="{active : serviceIsGifs}" title="gifs")
+          span GIF
+
       .button-wrap
         button(@click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile")
@@ -50,10 +53,10 @@ dialog.narrow.image-picker(
     //-   span From Giphy
 
     //- stickers toggle
-    .row
-      .segmented-buttons(v-if="serviceIsGfycat")
-        button(:class="{active : gfycatIsStickers}" @click.left.stop="toggleGfycatIsStickers") Stickers
-        button(:class="{active : !gfycatIsStickers}" @click.left.stop="toggleGfycatIsNotStickers") Gifs
+    //- .row
+    //-   .segmented-buttons(v-if="serviceIsGfycat")
+    //-     button(:class="{active : gfycatIsStickers}" @click.left.stop="toggleGfycatIsStickers") Stickers
+    //-     button(:class="{active : !gfycatIsStickers}" @click.left.stop="toggleGfycatIsNotStickers") Gifs
 
     //- label(v-if="serviceIsGfycat" :class="{active: gfycatIsStickers}" @click.left.prevent="toggleGfycatIsStickers" @keydown.stop.enter="toggleGfycatIsStickers")
     //-   input(type="checkbox" v-model="gfycatIsStickers")
@@ -66,7 +69,7 @@ dialog.narrow.image-picker(
         button(@click.left.stop="toggleServiceIsBackgrounds" :class="{active : serviceIsBackgrounds}")
           span Backgrounds
         button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
-          span Are.na
+          img.icon.arena(src="@/assets/arena.svg")
     template(v-if="serviceIsBackgrounds")
       .row
         .segmented-buttons
@@ -110,8 +113,6 @@ dialog.narrow.image-picker(
     ul.results-list.image-list
       template(v-for="(image in images")
         li(@click.left="selectImage(image)" tabindex="0" :key="image.id" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
-          //- video(v-if="image.isVideo" autoplay loop muted playsinline)
-          //-   source(:src="image.url")
           img(:src="image.previewUrl")
           a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
             button {{image.sourceUserName}} →
@@ -155,8 +156,7 @@ export default {
     return {
       images: [],
       search: '',
-      service: 'Gfycat',
-      gfycatIsStickers: true,
+      service: 'arena', // 'stickers', 'gifs', 'arena', 'backgrounds'
       loading: false,
       showOnRightSide: false,
       minDialogHeight: null,
@@ -187,19 +187,31 @@ export default {
         }
       }
     },
-    placeholder () { return `Search ${this.service}` },
+    provider () {
+      if (this.service === 'stickers' || this.service === 'gifs') {
+        return 'giphy'
+      } else {
+        return 'are.na'
+      }
+    },
+    placeholder () {
+      return `Search ${utils.capitalizeFirstLetter(this.provider)}`
+    },
     cardPendingUpload () {
       const pendingUploads = this.$store.state.upload.pendingUploads
       return pendingUploads.find(upload => upload.cardId === this.cardId)
     },
     serviceIsArena () {
-      return this.service === 'Are.na'
+      return this.service === 'arena'
     },
-    serviceIsGfycat () {
-      return this.service === 'Gfycat'
+    serviceIsStickers () {
+      return this.service === 'stickers'
+    },
+    serviceIsGifs () {
+      return this.service === 'gifs'
     },
     serviceIsBackgrounds () {
-      return this.service === 'Backgrounds'
+      return this.service === 'backgrounds'
     },
     isNoSearchResults () {
       if (this.error.unknownServerError || this.error.userIsOffline) {
@@ -222,7 +234,7 @@ export default {
       this.$store.commit('triggerUpgradeUserIsVisible')
     },
     toggleServiceIsBackgrounds () {
-      this.service = 'Backgrounds'
+      this.service = 'backgrounds'
       this.searchAgainBackgrounds()
     },
     toggleBackgroundsIsStatic (value) {
@@ -230,19 +242,15 @@ export default {
       this.searchAgainBackgrounds()
     },
     toggleServiceIsArena () {
-      this.service = 'Are.na'
+      this.service = 'arena'
       this.searchAgain()
     },
-    toggleServiceIsGfycat () {
-      this.service = 'Gfycat'
+    toggleServiceIsStickers () {
+      this.service = 'stickers'
       this.searchAgain()
     },
-    toggleGfycatIsNotStickers () {
-      this.gfycatIsStickers = false
-      this.searchAgain()
-    },
-    toggleGfycatIsStickers () {
-      this.gfycatIsStickers = true
+    toggleServiceIsGifs () {
+      this.service = 'gifs'
       this.searchAgain()
     },
     searchAgainBackgrounds () {
@@ -252,31 +260,33 @@ export default {
       } else {
         images = backgroundImagesAnimated
       }
-      this.normalizeResults(images, 'Backgrounds')
+      this.normalizeResults(images, 'backgrounds')
     },
     searchAgain () {
       this.images = []
-      // if (this.search) {
-      // default arena trending?
       this.loading = true
       this.searchService()
-      // }
     },
     async searchArena () {
-      const url = new URL('https://api.are.na/v2/search/blocks')
-      const params = {
-        q: this.search,
-        'filter[type]': 'image'
+      let url, params
+      if (this.search) {
+        url = new URL('https://api.are.na/v2/search/blocks')
+        params = {
+          q: this.search,
+          'filter[type]': 'image'
+        }
+      } else {
+        // TODO: default feed/explore search
       }
       url.search = new URLSearchParams(params).toString()
       const response = await fetch(url)
       const data = await response.json()
-      this.normalizeResults(data, 'Are.na')
+      this.normalizeResults(data, 'arena')
     },
-    async searchGfycat () {
+    async searchGiphy (isStickers) {
       let resource = 'gifs'
       let endpoint = 'trending'
-      if (this.gfycatIsStickers) {
+      if (isStickers) {
         resource = 'stickers'
       }
       if (this.search) {
@@ -294,7 +304,7 @@ export default {
       url.search = new URLSearchParams(params).toString()
       const response = await fetch(url)
       const data = await response.json()
-      this.normalizeResults(data.data, 'Gfycat')
+      this.normalizeResults(data.data, 'giphy')
     },
     searchService: debounce(async function () {
       this.clearErrors()
@@ -312,8 +322,11 @@ export default {
       try {
         if (this.serviceIsArena) {
           await this.searchArena()
-        } else if (this.serviceIsGfycat) {
-          await this.searchGfycat()
+        } else if (this.serviceIsStickers) {
+          const isStickers = true
+          await this.searchGiphy(isStickers)
+        } else if (this.serviceIsGifs) {
+          await this.searchGiphy()
         }
       } catch (error) {
         console.error('🚒', error)
@@ -339,9 +352,10 @@ export default {
       this.resultsSectionHeight = null
     },
     normalizeResults (data, service) {
-      const arena = service === 'Are.na' && this.serviceIsArena
-      const gyfcat = service === 'Gfycat' && this.serviceIsGfycat
-      const backgrounds = service === 'Backgrounds' && this.serviceIsBackgrounds
+      console.log('🎑', service, data)
+      const arena = service === 'arena' && this.serviceIsArena
+      const giphy = service === 'giphy' && (this.serviceIsStickers || this.serviceIsGifs)
+      const backgrounds = service === 'backgrounds' && this.serviceIsBackgrounds
       if (arena) {
         this.images = data.blocks.map(image => {
           const url = image.image.original.url
@@ -353,22 +367,21 @@ export default {
             url: url + '?img=.jpg'
           }
         })
-      } else if (gyfcat) {
-        console.log('💼', data)
+      } else if (giphy) {
         this.images = data.map(image => {
-          if (this.gfycatIsStickers) {
+          if (this.serviceIsStickers) {
             return {
               isVideo: true,
               id: image.id,
-              previewUrl: image.images.fixed_height_small.mp4,
-              url: image.images.original.webp
+              previewUrl: image.images.fixed_height_small.url,
+              url: utils.urlWithoutQueryString(image.images.original.url)
             }
           } else {
             return {
               isVideo: true,
               id: image.id,
               previewUrl: image.images.fixed_height.mp4,
-              url: image.images.original.webp
+              url: utils.urlWithoutQueryString(image.images.original.mp4)
             }
           }
         })
@@ -558,6 +571,9 @@ export default {
   &.right-side
     left initial
     right 8px
+
+  .sticker
+    vertical-align -2px
 
   // .search-options-row
   //   padding 4px
