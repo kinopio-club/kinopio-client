@@ -654,8 +654,8 @@ export default {
       const cardIds = this.$store.state.urlPreviewLoadingForCardIds
       let isLoading = cardIds.find(cardId => cardId === this.card.id)
       isLoading = Boolean(isLoading)
-      const isNotErrorUrl = this.card.urlPreviewUrl !== this.card.urlPreviewErrorUrl
-      return isLoading && isNotErrorUrl && this.card.urlPreviewIsVisible
+      const isErrorUrl = this.card.urlPreviewErrorUrl && this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl
+      return isLoading && this.card.urlPreviewIsVisible && !isErrorUrl
     },
     lockingFrameStyle () {
       const initialLockPadding = 65 // matches initialLockCircleRadius in magicPaint

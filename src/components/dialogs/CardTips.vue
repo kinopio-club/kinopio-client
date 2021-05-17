@@ -1,13 +1,7 @@
 <template lang="pug">
-dialog.tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
-  section.section-with-button
-    .row
-      p Tips
-      label(:class="{active: shouldHideCardTips}" @click.left.prevent="toggleShouldHideCardTips" @keydown.stop.enter="toggleShouldHideCardTips")
-        input(type="checkbox" v-model="shouldHideCardTips")
-        span Hide
-        span.badge.secondary ?
-
+dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
+  section
+    p Tips
   section
     article
       p
@@ -25,6 +19,8 @@ dialog.tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
       p
         span.badge.info Ctrl-Enter
         span line break
+    article
+      p Card character limit is {{maxCardLength}}
     article
       .row
         button(@click.left.stop="toggleMarkdownInfoIsVisible" :class="{ active: markdownInfoIsVisible }")
@@ -49,23 +45,19 @@ import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
 export default {
-  name: 'Tips',
+  name: 'CardTips',
   props: {
-    visible: Boolean
+    visible: Boolean,
+    maxCardLength: Number
   },
   data () {
     return {
       markdownInfoIsVisible: false
     }
   },
-  computed: {
-    shouldHideCardTips () { return this.$store.state.currentUser.shouldHideCardTips }
-  },
+  // computed: {
+  // },
   methods: {
-    toggleShouldHideCardTips () {
-      const value = !this.shouldHideCardTips
-      this.$store.dispatch('currentUser/shouldHideCardTips', value)
-    },
     scrollIntoView () {
       if (utils.isMobile()) { return }
       this.$nextTick(() => {
@@ -92,7 +84,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.tips
+.card-tips
   left initial
   right 8px
   top 22px
@@ -111,11 +103,4 @@ export default {
   .row
     justify-content space-between
 
-  .section-with-button
-    padding 4px 8px
-
-  .badge.secondary
-    margin 0
-    margin-left 6px
-    font-size 12px
 </style>

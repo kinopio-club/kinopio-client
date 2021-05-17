@@ -47,7 +47,7 @@
         //- Background
         .button-wrap
           button(@click.left="toggleBackgroundIsVisible" :class="{ active: backgroundIsVisible}")
-            img.icon.macro(src="@/assets/macro.svg")
+            img.icon.flower(src="@/assets/flower.svg")
           //- Upload Progress
           .uploading-container-footer(v-if="pendingUpload")
             .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
@@ -360,9 +360,6 @@ footer
 
   .sunglasses
     vertical-align middle
-  .macro
-    vertical-align -3px
-    height 13px
 
   .uploading-container-footer
     position absolute

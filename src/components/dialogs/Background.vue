@@ -62,7 +62,7 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left="closeDialog
           span Remove
       .button-wrap
         button(:disabled="!canEditSpace" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
-          span Image
+          img.icon.flower(src="@/assets/flower.svg")
         ImagePicker(:visible="imagePickerIsVisible" :isBackgroundImage="true" @selectImage="updateSpaceBackground" :initialSearch="initialSearch")
       .button-wrap
         button(:disabled="!canEditSpace" @click.left.stop="selectFile") Upload

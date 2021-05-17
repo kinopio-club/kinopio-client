@@ -22,7 +22,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keyup.stop.right="checkIfShouldHidePicker"
 
         data-type="name"
-        maxlength="300"
+        :maxlength="maxCardLength"
         @click.left="clickName"
         @blur="triggerUpdatePositionInVisualViewport"
         @paste="updatePastedName"
@@ -63,10 +63,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @closeDialog="hideSpacePicker"
         @selectSpace="replaceSlashCommandWithSpaceUrl"
       )
-      .inline-button-wrap(v-if="showCardTips" @click.left.stop="toggleTipsIsVisible" :class="{ active: tipsIsVisible }")
-        button.inline-button(tabindex="-1" :class="{ active: tipsIsVisible }")
+      .inline-button-wrap(v-if="showCardTips" @click.left.stop="toggleCardTipsIsVisible" :class="{ active: cardTipsIsVisible }")
+        button.inline-button(tabindex="-1" :class="{ active: cardTipsIsVisible }")
           span ?
-      Tips(:visible="tipsIsVisible")
+      CardTips(:visible="cardTipsIsVisible" :maxCardLength="maxCardLength")
 
     .row(v-if="cardPendingUpload")
       .badge.info
@@ -88,7 +88,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       //- Image
       .button-wrap
         button(:disabled="!canEditCard" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
-          span Image
+          img.icon.flower(src="@/assets/flower.svg")
         ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addFile")
       //- Frames
       .button-wrap
@@ -159,7 +159,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       span.badge.danger
         img.icon.cancel(src="@/assets/add.svg")
         span Max Length
-      p To fit small screens, cards can't be longer than 300 characters
+      p To fit small screens, cards can't be longer than {{maxCardLength}} characters
     template(v-if="error.signUpToUpload")
       p
         span To upload files,
@@ -181,7 +181,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
 <script>
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
-import Tips from '@/components/dialogs/Tips.vue'
+import CardTips from '@/components/dialogs/CardTips.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import User from '@/components/User.vue'
@@ -203,7 +203,7 @@ export default {
   components: {
     FramePicker,
     ImagePicker,
-    Tips,
+    CardTips,
     TagPicker,
     SpacePicker,
     Loader,
@@ -217,7 +217,7 @@ export default {
     return {
       framePickerIsVisible: false,
       imagePickerIsVisible: false,
-      tipsIsVisible: false,
+      cardTipsIsVisible: false,
       initialSearch: '',
       pastedName: '',
       wasPasted: false,
@@ -247,7 +247,7 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.framePickerIsVisible = false
         this.imagePickerIsVisible = false
-        this.tipsIsVisible = false
+        this.cardTipsIsVisible = false
         this.hidePickers()
       }
       if (mutation.type === 'triggerUploadComplete') {
@@ -280,7 +280,6 @@ export default {
     cardIsCreatedByCurrentUser () { return this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](this.card) },
     spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
     spacePrivacyIsClosed () { return this.$store.state.currentSpace.privacy === 'closed' },
-    shouldHideCardTips () { return this.$store.state.currentUser.shouldHideCardTips },
     spaceIsPrivate () {
       const space = this.linkToSpace
       if (!space) { return }
@@ -288,7 +287,6 @@ export default {
     },
     showCardTips () {
       if (this.name) { return }
-      if (this.shouldHideCardTips) { return }
       return true
     },
     nameIsComment () { return utils.isNameComment(this.name) },
@@ -312,9 +310,9 @@ export default {
       }
     },
     isInvitedButCannotEditSpace () { return this.$store.getters['currentUser/isInvitedButCannotEditSpace']() },
+    maxCardLength () { return 300 },
     errorMaxCardLength () {
-      const maxCardLength = 300
-      if (this.card.name.length >= maxCardLength) {
+      if (this.card.name.length >= this.maxCardLength) {
         return true
       } else {
         return false
@@ -459,9 +457,8 @@ export default {
       return { transform: `scale(${zoom})` }
     },
     cardUrlPreviewIsVisible () {
-      const isUrlOrLoading = this.card.urlPreviewUrl || this.isLoadingUrlPreview
-      const isNotErrorUrl = this.card.urlPreviewUrl !== this.card.urlPreviewErrorUrl
-      return Boolean(this.card.urlPreviewIsVisible && isUrlOrLoading && isNotErrorUrl)
+      const isErrorUrl = this.card.urlPreviewErrorUrl && this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl
+      return this.card.urlPreviewIsVisible && this.isLoadingUrlPreview && !isErrorUrl
     },
     isLoadingUrlPreview () {
       const cardIds = this.$store.state.urlPreviewLoadingForCardIds
@@ -521,7 +518,6 @@ export default {
     },
     splitCards () {
       const spaceBetweenCards = 12
-      const maxCardLength = 300
       let seperated
       if (this.nameHasLineBreaks) {
         seperated = this.seperatedLines
@@ -533,7 +529,7 @@ export default {
       let newCards = cardNames.map(name => {
         return {
           id: nanoid(),
-          name: name.substring(0, maxCardLength),
+          name: name.substring(0, this.maxCardLength),
           x: this.card.x,
           y: this.card.y,
           frameId: this.card.frameId
@@ -725,10 +721,10 @@ export default {
       this.closeDialogs()
       this.framePickerIsVisible = !isVisible
     },
-    toggleTipsIsVisible () {
-      const isVisible = this.tipsIsVisible
+    toggleCardTipsIsVisible () {
+      const isVisible = this.cardTipsIsVisible
       this.closeDialogs()
-      this.tipsIsVisible = !isVisible
+      this.cardTipsIsVisible = !isVisible
     },
     toggleImagePickerIsVisible () {
       const isVisible = this.imagePickerIsVisible
@@ -769,7 +765,7 @@ export default {
     closeDialogs () {
       this.framePickerIsVisible = false
       this.imagePickerIsVisible = false
-      this.tipsIsVisible = false
+      this.cardTipsIsVisible = false
       this.hidePickers()
       this.hideTagDetailsIsVisible()
       this.hideLinkDetailsIsVisible()
@@ -1181,7 +1177,6 @@ export default {
     },
     debouncedUpdateUrlPreview: debounce(async function (url) {
       try {
-        this.$store.commit('addUrlPreviewLoadingForCardIds', this.card.id)
         const linkPreviewApiKey = 'a9f249ef6b59cc8ccdd19de6b167bafa'
         const response = await fetch(`https://api.linkpreview.net/?key=${linkPreviewApiKey}&q=${encodeURIComponent(url)}&fields=icon,image_x`)
         const data = await response.json()

@@ -11,10 +11,13 @@ dialog.narrow.image-picker(
     //- card images
     .row
       .segmented-buttons
-        button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
-          span Are.na
-        button(@click.left.stop="toggleServiceIsGfycat" :class="{active : serviceIsGfycat}")
-          span Gfycat
+        button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}" title="are.na")
+          img.icon.arena(src="@/assets/arena.svg")
+        button(@click.left.stop="toggleServiceIsStickers" :class="{active : serviceIsStickers}" title="stickers")
+          img.icon.sticker(src="@/assets/sticker.svg")
+        button(@click.left.stop="toggleServiceIsGifs" :class="{active : serviceIsGifs}" title="gifs")
+          span GIF
+
       .button-wrap
         button(@click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile")
@@ -41,10 +44,23 @@ dialog.narrow.image-picker(
       button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
     .error-container-top(v-if="error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+
+    //- attribution
+    //- p(v-if="serviceIsArena")
+    //-   img.icon.arena(src="@/assets/arena.svg")
+    //-   span From Are.na
+    //- p(v-else-if="serviceIsGfycat")
+    //-   span From Giphy
+
     //- stickers toggle
-    label(v-if="serviceIsGfycat" :class="{active: gfycatIsStickers}" @click.left.prevent="toggleGfycatIsStickers" @keydown.stop.enter="toggleGfycatIsStickers")
-      input(type="checkbox" v-model="gfycatIsStickers")
-      span Stickers
+    //- .row
+    //-   .segmented-buttons(v-if="serviceIsGfycat")
+    //-     button(:class="{active : gfycatIsStickers}" @click.left.stop="toggleGfycatIsStickers") Stickers
+    //-     button(:class="{active : !gfycatIsStickers}" @click.left.stop="toggleGfycatIsNotStickers") Gifs
+
+    //- label(v-if="serviceIsGfycat" :class="{active: gfycatIsStickers}" @click.left.prevent="toggleGfycatIsStickers" @keydown.stop.enter="toggleGfycatIsStickers")
+    //-   input(type="checkbox" v-model="gfycatIsStickers")
+    //-   span Stickers
 
   //- background images
   section(v-if="isBackgroundImage")
@@ -53,7 +69,7 @@ dialog.narrow.image-picker(
         button(@click.left.stop="toggleServiceIsBackgrounds" :class="{active : serviceIsBackgrounds}")
           span Backgrounds
         button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
-          span Are.na
+          img.icon.arena(src="@/assets/arena.svg")
     template(v-if="serviceIsBackgrounds")
       .row
         .segmented-buttons
@@ -78,6 +94,15 @@ dialog.narrow.image-picker(
       )
       button.borderless.clear-input-wrap(@click.left="clearSearch")
         img.icon(src="@/assets/add.svg")
+    //- .row.search-options-row
+    //-   //- p
+    //-   //-   span Blobs
+    //-   //-   span Arrows
+    //-   .segmented-buttons
+    //-     button Blobs
+    //-     button Arrows
+    //-     button something
+
     .error-container(v-if="isNoSearchResults || error.unknownServerError || error.userIsOffline")
       p(v-if="isNoSearchResults") Nothing found on {{service}} for {{search}}
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
@@ -88,8 +113,6 @@ dialog.narrow.image-picker(
     ul.results-list.image-list
       template(v-for="(image in images")
         li(@click.left="selectImage(image)" tabindex="0" :key="image.id" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
-          //- video(v-if="image.isVideo" autoplay loop muted playsinline)
-          //-   source(:src="image.url")
           img(:src="image.previewUrl")
           a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
             button {{image.sourceUserName}} →
@@ -104,6 +127,11 @@ import backgroundImages from '@/data/backgroundImages.json'
 import backgroundImagesAnimated from '@/data/backgroundImagesAnimated.json'
 
 import debounce from 'lodash-es/debounce'
+import sampleSize from 'lodash-es/sampleSize'
+
+let randomArenaBlocksData
+const numberOfImages = 25
+const arenaChannelRandomBlocksFrom = 'kinopio-moods'
 
 export default {
   name: 'ImagePicker',
@@ -133,8 +161,7 @@ export default {
     return {
       images: [],
       search: '',
-      service: 'Are.na',
-      gfycatIsStickers: false,
+      service: 'arena', // 'stickers', 'gifs', 'arena', 'backgrounds'
       loading: false,
       showOnRightSide: false,
       minDialogHeight: null,
@@ -160,24 +187,34 @@ export default {
         if (newValue) {
           this.loading = true
           this.searchService()
-        } else {
-          this.clearSearch()
         }
       }
     },
-    placeholder () { return `Search ${this.service}` },
+    provider () {
+      if (this.service === 'stickers' || this.service === 'gifs') {
+        return 'giphy'
+      } else {
+        return 'are.na'
+      }
+    },
+    placeholder () {
+      return `Search ${utils.capitalizeFirstLetter(this.provider)}`
+    },
     cardPendingUpload () {
       const pendingUploads = this.$store.state.upload.pendingUploads
       return pendingUploads.find(upload => upload.cardId === this.cardId)
     },
     serviceIsArena () {
-      return this.service === 'Are.na'
+      return this.service === 'arena'
     },
-    serviceIsGfycat () {
-      return this.service === 'Gfycat'
+    serviceIsStickers () {
+      return this.service === 'stickers'
+    },
+    serviceIsGifs () {
+      return this.service === 'gifs'
     },
     serviceIsBackgrounds () {
-      return this.service === 'Backgrounds'
+      return this.service === 'backgrounds'
     },
     isNoSearchResults () {
       if (this.error.unknownServerError || this.error.userIsOffline) {
@@ -200,7 +237,7 @@ export default {
       this.$store.commit('triggerUpgradeUserIsVisible')
     },
     toggleServiceIsBackgrounds () {
-      this.service = 'Backgrounds'
+      this.service = 'backgrounds'
       this.searchAgainBackgrounds()
     },
     toggleBackgroundsIsStatic (value) {
@@ -208,15 +245,15 @@ export default {
       this.searchAgainBackgrounds()
     },
     toggleServiceIsArena () {
-      this.service = 'Are.na'
+      this.service = 'arena'
       this.searchAgain()
     },
-    toggleServiceIsGfycat () {
-      this.service = 'Gfycat'
+    toggleServiceIsStickers () {
+      this.service = 'stickers'
       this.searchAgain()
     },
-    toggleGfycatIsStickers () {
-      this.gfycatIsStickers = !this.gfycatIsStickers
+    toggleServiceIsGifs () {
+      this.service = 'gifs'
       this.searchAgain()
     },
     searchAgainBackgrounds () {
@@ -226,49 +263,83 @@ export default {
       } else {
         images = backgroundImagesAnimated
       }
-      this.normalizeResults(images, 'Backgrounds')
+      this.normalizeResults(images, 'backgrounds')
     },
     searchAgain () {
       this.images = []
-      if (this.search) {
-        this.loading = true
-        this.searchService()
+      this.loading = true
+      this.searchService()
+    },
+    async randomArenaBlocks () {
+      let url, params, data
+      if (randomArenaBlocksData) {
+        data = randomArenaBlocksData
+      } else {
+        url = new URL(`https://api.are.na/v2/channels/${arenaChannelRandomBlocksFrom}/contents`)
+        params = {
+          per: 100
+        }
+        url.search = new URLSearchParams(params).toString()
+        const response = await fetch(url)
+        data = await response.json()
+        data.blocks = data.contents
+        data.blocks = data.blocks.filter(block => block.image)
+        data.blocks = data.blocks.map(block => {
+          let image = {}
+          image.image = block.image
+          image.id = block.id
+          image.user = {
+            username: ''
+          }
+          return image
+        })
+        randomArenaBlocksData = data
       }
+      data.blocks = sampleSize(data.blocks, numberOfImages)
+      return data
     },
     async searchArena () {
-      const url = new URL('https://api.are.na/v2/search/blocks')
-      const params = {
-        q: this.search,
-        'filter[type]': 'image'
-      }
-      url.search = new URLSearchParams(params).toString()
-      const response = await fetch(url)
-      const data = await response.json()
-      this.normalizeResults(data, 'Are.na')
-    },
-    async searchGfycat () {
-      let url
-      if (this.gfycatIsStickers) {
-        url = new URL('https://api.gfycat.com/v1/stickers/search')
+      let url, params, data
+      if (this.search) {
+        url = new URL('https://api.are.na/v2/search/blocks')
+        params = {
+          q: this.search,
+          'filter[type]': 'image'
+        }
+        url.search = new URLSearchParams(params).toString()
+        const response = await fetch(url)
+        data = await response.json()
       } else {
-        url = new URL('https://api.gfycat.com/v1/gfycats/search')
+        data = await this.randomArenaBlocks()
       }
-      const params = {
-        search_text: this.search,
-        count: 20
+      this.normalizeResults(data, 'arena')
+    },
+    async searchGiphy (isStickers) {
+      let resource = 'gifs'
+      let endpoint = 'trending'
+      if (isStickers) {
+        resource = 'stickers'
+      }
+      if (this.search) {
+        endpoint = 'search'
+      }
+      let url = new URL(`https://api.giphy.com/v1/${resource}/${endpoint}`)
+      let params = {
+        api_key: 'pK3Etx5Jj8IAzUx9Z7H7dUcjD4PazKq7',
+        limit: numberOfImages,
+        rating: 'g'
+      }
+      if (this.search) {
+        params.q = this.search
       }
       url.search = new URLSearchParams(params).toString()
       const response = await fetch(url)
       const data = await response.json()
-      this.normalizeResults(data, 'Gfycat')
+      this.normalizeResults(data.data, 'giphy')
     },
     searchService: debounce(async function () {
       this.clearErrors()
       this.loading = true
-      if (!this.search) {
-        this.loading = false
-        return
-      }
       const isOffline = !this.$store.state.isOnline
       if (isOffline) {
         this.loading = false
@@ -278,8 +349,11 @@ export default {
       try {
         if (this.serviceIsArena) {
           await this.searchArena()
-        } else if (this.serviceIsGfycat) {
-          await this.searchGfycat()
+        } else if (this.serviceIsStickers) {
+          const isStickers = true
+          await this.searchGiphy(isStickers)
+        } else if (this.serviceIsGifs) {
+          await this.searchGiphy()
         }
       } catch (error) {
         console.error('🚒', error)
@@ -287,10 +361,6 @@ export default {
         this.error.unknownServerError = true
       }
       this.loading = false
-      if (!this.isBackgroundImage) {
-        this.updateHeightFromDialog()
-        this.scrollIntoView()
-      }
     }, 350),
     clearErrors () {
       this.error.signUpToUpload = false
@@ -305,9 +375,10 @@ export default {
       this.resultsSectionHeight = null
     },
     normalizeResults (data, service) {
-      const arena = service === 'Are.na' && this.serviceIsArena
-      const gyfcat = service === 'Gfycat' && this.serviceIsGfycat
-      const backgrounds = service === 'Backgrounds' && this.serviceIsBackgrounds
+      console.log('🎑', service, data)
+      const arena = service === 'arena' && this.serviceIsArena
+      const giphy = service === 'giphy' && (this.serviceIsStickers || this.serviceIsGifs)
+      const backgrounds = service === 'backgrounds' && this.serviceIsBackgrounds
       if (arena) {
         this.images = data.blocks.map(image => {
           const url = image.image.original.url
@@ -319,20 +390,21 @@ export default {
             url: url + '?img=.jpg'
           }
         })
-      } else if (gyfcat) {
-        this.images = data.gfycats.map(image => {
-          if (this.gfycatIsStickers) {
+      } else if (giphy) {
+        this.images = data.map(image => {
+          if (this.serviceIsStickers) {
             return {
-              id: image.gfyId,
-              previewUrl: image.gifUrl,
-              url: image.gifUrl
+              isVideo: true,
+              id: image.id,
+              previewUrl: image.images.fixed_height_small.url,
+              url: utils.urlWithoutQueryString(image.images.original.url)
             }
           } else {
             return {
               isVideo: true,
-              id: image.gfyId,
-              previewUrl: image.max1mbGif,
-              url: image.mobileUrl
+              id: image.id,
+              previewUrl: image.images.fixed_height.mp4,
+              url: utils.urlWithoutQueryString(image.images.original.mp4)
             }
           }
         })
@@ -343,9 +415,10 @@ export default {
           return image
         })
       }
-      this.$nextTick(() => {
+      if (!this.isBackgroundImage) {
+        this.updateHeightFromDialog()
         this.scrollIntoView()
-      })
+      }
     },
     focusSearchInput () {
       if (utils.isMobile()) { return }
@@ -359,9 +432,7 @@ export default {
       this.search = ''
       this.loading = false
       this.images = []
-      this.$nextTick(() => {
-        this.scrollIntoView()
-      })
+      this.searchService()
     },
     selectImage (image) {
       this.$emit('selectImage', image)
@@ -414,13 +485,23 @@ export default {
         this.showOnRightSide = utils.elementShouldBeOnRightSide(element)
       })
     },
+    heightIsSignificantlyDifferent (height) {
+      const thresholdDelta = 100
+      if (!this.resultsSectionHeight) { return true }
+      if (Math.abs(this.resultsSectionHeight - height) > thresholdDelta) {
+        return true
+      }
+    },
     updateHeightFromDialog () {
       if (!this.visible) { return }
       this.$nextTick(() => {
         const element = this.$refs.dialog
         const dialogHeight = utils.elementHeight(element)
-        this.resultsSectionHeight = utils.elementHeight(element, true)
-        this.resultsSectionHeight = Math.max(this.resultsSectionHeight, 300)
+        let height = utils.elementHeight(element, true)
+        height = Math.max(height, 300)
+        if (this.heightIsSignificantlyDifferent(height)) {
+          this.resultsSectionHeight = height
+        }
         this.minDialogHeight = Math.max(this.minDialogHeight, dialogHeight)
       })
     },
@@ -449,9 +530,6 @@ export default {
             this.toggleServiceIsBackgrounds()
             this.updateHeightFromFooter()
             return
-          }
-          if (this.search) {
-            this.loading = true
           }
           this.searchService()
           this.focusSearchInput()
@@ -523,4 +601,14 @@ export default {
     left initial
     right 8px
 
+  .sticker
+    vertical-align -2px
+
+  // .search-options-row
+  //   padding 4px
+  //   overflow scroll
+  //   display flex
+  //   flex-wrap none
+  //   span
+  //     text-decoration underline
 </style>
