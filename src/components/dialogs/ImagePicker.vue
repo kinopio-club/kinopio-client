@@ -129,6 +129,10 @@ import backgroundImagesAnimated from '@/data/backgroundImagesAnimated.json'
 import debounce from 'lodash-es/debounce'
 import sampleSize from 'lodash-es/sampleSize'
 
+let randomArenaBlocksData
+const numberOfImages = 25
+const arenaChannelRandomBlocksFrom = 'kinopio-moods'
+
 export default {
   name: 'ImagePicker',
   components: {
@@ -183,8 +187,6 @@ export default {
         if (newValue) {
           this.loading = true
           this.searchService()
-        } else {
-          this.clearSearch()
         }
       }
     },
@@ -268,24 +270,16 @@ export default {
       this.loading = true
       this.searchService()
     },
-    async searchArena () {
+    async randomArenaBlocks () {
       let url, params, data
-      if (this.search) {
-        url = new URL('https://api.are.na/v2/search/blocks')
-        params = {
-          q: this.search,
-          'filter[type]': 'image'
-        }
-        url.search = new URLSearchParams(params).toString()
-        const response = await fetch(url)
-        data = await response.json()
+      if (randomArenaBlocksData) {
+        data = randomArenaBlocksData
       } else {
-        // get random blocks from a channel
-        const channel = 'only-the-best-mxtcaqj5_wq'
-        url = new URL(`https://api.are.na/v2/channels/${channel}/contents`)
+        url = new URL(`https://api.are.na/v2/channels/${arenaChannelRandomBlocksFrom}/contents`)
         params = {
           per: 100
         }
+        url.search = new URLSearchParams(params).toString()
         const response = await fetch(url)
         data = await response.json()
         data.blocks = data.contents
@@ -299,7 +293,24 @@ export default {
           }
           return image
         })
-        data.blocks = sampleSize(data.blocks, 20)
+        randomArenaBlocksData = data
+      }
+      data.blocks = sampleSize(data.blocks, numberOfImages)
+      return data
+    },
+    async searchArena () {
+      let url, params, data
+      if (this.search) {
+        url = new URL('https://api.are.na/v2/search/blocks')
+        params = {
+          q: this.search,
+          'filter[type]': 'image'
+        }
+        url.search = new URLSearchParams(params).toString()
+        const response = await fetch(url)
+        data = await response.json()
+      } else {
+        data = await this.randomArenaBlocks()
       }
       this.normalizeResults(data, 'arena')
     },
@@ -315,7 +326,7 @@ export default {
       let url = new URL(`https://api.giphy.com/v1/${resource}/${endpoint}`)
       let params = {
         api_key: 'pK3Etx5Jj8IAzUx9Z7H7dUcjD4PazKq7',
-        limit: 20,
+        limit: numberOfImages,
         rating: 'g'
       }
       if (this.search) {
@@ -424,9 +435,10 @@ export default {
       this.search = ''
       this.loading = false
       this.images = []
-      this.$nextTick(() => {
-        this.scrollIntoView()
-      })
+      // this.$nextTick(() => {
+      //   this.scrollIntoView()
+      // })
+      this.searchService()
     },
     selectImage (image) {
       this.$emit('selectImage', image)
@@ -514,9 +526,6 @@ export default {
             this.toggleServiceIsBackgrounds()
             this.updateHeightFromFooter()
             return
-          }
-          if (this.search) {
-            this.loading = true
           }
           this.searchService()
           this.focusSearchInput()
