@@ -457,9 +457,8 @@ export default {
       return { transform: `scale(${zoom})` }
     },
     cardUrlPreviewIsVisible () {
-      const isUrlOrLoading = this.card.urlPreviewUrl || this.isLoadingUrlPreview
-      const isNotErrorUrl = this.card.urlPreviewUrl !== this.card.urlPreviewErrorUrl
-      return Boolean(this.card.urlPreviewIsVisible && isUrlOrLoading && isNotErrorUrl)
+      const isErrorUrl = this.card.urlPreviewErrorUrl && this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl
+      return this.card.urlPreviewIsVisible && this.isLoadingUrlPreview && !isErrorUrl
     },
     isLoadingUrlPreview () {
       const cardIds = this.$store.state.urlPreviewLoadingForCardIds
@@ -1178,7 +1177,6 @@ export default {
     },
     debouncedUpdateUrlPreview: debounce(async function (url) {
       try {
-        this.$store.commit('addUrlPreviewLoadingForCardIds', this.card.id)
         const linkPreviewApiKey = 'a9f249ef6b59cc8ccdd19de6b167bafa'
         const response = await fetch(`https://api.linkpreview.net/?key=${linkPreviewApiKey}&q=${encodeURIComponent(url)}&fields=icon,image_x`)
         const data = await response.json()
