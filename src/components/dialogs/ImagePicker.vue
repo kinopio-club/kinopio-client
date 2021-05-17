@@ -361,10 +361,6 @@ export default {
         this.error.unknownServerError = true
       }
       this.loading = false
-      if (!this.isBackgroundImage) {
-        this.updateHeightFromDialog()
-        this.scrollIntoView()
-      }
     }, 350),
     clearErrors () {
       this.error.signUpToUpload = false
@@ -419,9 +415,10 @@ export default {
           return image
         })
       }
-      this.$nextTick(() => {
+      if (!this.isBackgroundImage) {
+        this.updateHeightFromDialog()
         this.scrollIntoView()
-      })
+      }
     },
     focusSearchInput () {
       if (utils.isMobile()) { return }
@@ -435,9 +432,6 @@ export default {
       this.search = ''
       this.loading = false
       this.images = []
-      // this.$nextTick(() => {
-      //   this.scrollIntoView()
-      // })
       this.searchService()
     },
     selectImage (image) {
@@ -491,13 +485,23 @@ export default {
         this.showOnRightSide = utils.elementShouldBeOnRightSide(element)
       })
     },
+    heightIsSignificantlyDifferent (height) {
+      const thresholdDelta = 100
+      if (!this.resultsSectionHeight) { return true }
+      if (Math.abs(this.resultsSectionHeight - height) > thresholdDelta) {
+        return true
+      }
+    },
     updateHeightFromDialog () {
       if (!this.visible) { return }
       this.$nextTick(() => {
         const element = this.$refs.dialog
         const dialogHeight = utils.elementHeight(element)
-        this.resultsSectionHeight = utils.elementHeight(element, true)
-        this.resultsSectionHeight = Math.max(this.resultsSectionHeight, 300)
+        let height = utils.elementHeight(element, true)
+        height = Math.max(height, 300)
+        if (this.heightIsSignificantlyDifferent(height)) {
+          this.resultsSectionHeight = height
+        }
         this.minDialogHeight = Math.max(this.minDialogHeight, dialogHeight)
       })
     },
