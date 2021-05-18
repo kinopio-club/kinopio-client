@@ -1,30 +1,27 @@
 <template lang="pug">
 aside.offscreen-markers
-  .marker.top(v-if="hasDirectionTop")
-  .marker.topleft(v-if="hasDirectionTopLeft")
-  .marker.topright(v-if="hasDirectionTopRight")
-  .marker.left(v-if="hasDirectionLeft")
-  .marker.right(v-if="hasDirectionRight")
-  .marker.bottom(v-if="hasDirectionBottom")
-  .marker.bottomleft(v-if="hasDirectionBottomLeft")
-  .marker.bottomright(v-if="hasDirectionBottomRight")
+  .marker.top(v-if="offscreenCardsTop.length" :style="{ left: topMarkerOffset }")
+    //- (v-if="hasDirectionTop")
+  //- .marker.topleft(v-if="hasDirectionTopLeft")
+  //- .marker.topright(v-if="hasDirectionTopRight")
+  .marker.left
+    //- (v-if="hasDirectionLeft")
+  .marker.right
+    //- (v-if="hasDirectionRight")
+  .marker.bottom
+    //- (v-if="hasDirectionBottom")
+  //- .marker.bottomleft(v-if="hasDirectionBottomLeft")
+  //- .marker.bottomright(v-if="hasDirectionBottomRight")
 </template>
 
 <script>
-let observer
+import utils from '@/utils.js'
 
 export default {
   name: 'OffscreenMarkers',
   mounted () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'currentSpace/restoreSpace') {
-        if (observer) {
-          this.offscreenCards = []
-          observer.disconnect()
-        }
-        this.updateCardsObserver()
-      }
-    })
+    window.addEventListener('scroll', this.updateOffscreenCards)
+    this.updateOffscreenCards()
   },
   data () {
     return {
@@ -32,69 +29,66 @@ export default {
     }
   },
   computed: {
-    hasDirectionTop () { return this.hasDirection('top') },
-    hasDirectionTopLeft () { return this.hasDirection('topleft') },
-    hasDirectionTopRight () { return this.hasDirection('topright') },
-    hasDirectionLeft () { return this.hasDirection('left') },
-    hasDirectionRight () { return this.hasDirection('right') },
-    hasDirectionBottom () { return this.hasDirection('bottom') },
-    hasDirectionBottomLeft () { return this.hasDirection('bottomleft') },
-    hasDirectionBottomRight () { return this.hasDirection('bottomright') }
+    // hasDirectionTop () { return this.hasDirection('top') },
+    // hasDirectionTopLeft () { return this.hasDirection('topleft') },
+    // hasDirectionTopRight () { return this.hasDirection('topright') },
+    // hasDirectionLeft () { return this.hasDirection('left') },
+    // hasDirectionRight () { return this.hasDirection('right') },
+    // hasDirectionBottom () { return this.hasDirection('bottom') },
+    // hasDirectionBottomLeft () { return this.hasDirection('bottomleft') },
+    // hasDirectionBottomRight () { return this.hasDirection('bottomright') }
+
+    // top marker
+    offscreenCardsTop () { return this.offscreenCards.filter(card => card.direction === 'top') },
+    topMarkerOffset () {
+      let cards = this.offscreenCardsTop
+      if (!cards.length) { return }
+      cards = cards.map(card => card.x)
+      const average = utils.averageOfNumbers(cards)
+      return average + 'px'
+    }
   },
   methods: {
-    hasDirection (direction) {
-      return this.offscreenCards.find(card => {
-        return card.direction === direction
-      })
-    },
-    updateDirections () {
-      this.offscreenCards.map(card => {
-        let x = ''
-        let y = ''
-        const scrollX = window.scrollX
-        const scrollY = window.scrollY
-        const viewportWidth = this.$store.state.viewportWidth
-        const viewportHeight = this.$store.state.viewportHeight
-        if (card.y > (viewportHeight + scrollY)) {
-          y = 'bottom'
-        } else if (card.y < scrollY) {
-          y = 'top'
-        }
-        if (card.x > (viewportWidth + scrollX)) {
-          x = 'right'
-        } else if (card.x < scrollX) {
-          x = 'left'
-        }
-        card.direction = y + x
+    updateOffscreenCards () {
+      let cards = utils.clone(this.$store.state.currentSpace.cards)
+      cards = cards.filter(card => !utils.isCardInViewport(card))
+      cards = cards.map(card => {
+        const element = document.querySelector(`article [data-card-id="${card.id}"]`)
+        const rect = element.getBoundingClientRect()
+        card.x = rect.x + (rect.width / 2)
+        card.direction = this.direction(card)
         return card
       })
+      this.offscreenCards = cards || []
     },
-    updateCardsObserver () {
-      const cards = document.querySelectorAll('.card')
-      observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          const cardId = entry.target.dataset.cardId
-          const cardX = entry.target.dataset.cardX
-          const cardY = entry.target.dataset.cardY
-          if (entry.intersectionRatio > 0) {
-            this.offscreenCards = this.offscreenCards.filter(card => {
-              return card.id !== cardId
-            })
-          } else {
-            const card = {
-              id: cardId,
-              x: cardX,
-              y: cardY
-            }
-            this.offscreenCards.push(card)
-          }
-        })
-
-        this.updateDirections()
-      })
-      cards.forEach(card => {
-        observer.observe(card)
-      })
+    // hasDirection (direction) {
+    //   return this.offscreenCards.find(card => {
+    //     return card.direction === direction
+    //   })
+    // },
+    direction (card) {
+      const scrollX = window.scrollX
+      const scrollY = window.scrollY
+      const viewportWidth = this.$store.state.viewportWidth
+      const viewportHeight = this.$store.state.viewportHeight
+      let x = ''
+      let y = ''
+      if (card.y > (viewportHeight + scrollY)) {
+        y = 'bottom'
+      } else if (card.y < scrollY) {
+        y = 'top'
+      }
+      if (card.x > (viewportWidth + scrollX)) {
+        x = 'right'
+      } else if (card.x < scrollX) {
+        x = 'left'
+      }
+      return y + x
+    },
+    updateMarkers () {
+      let cards = utils.clone(this.$store.state.currentSpace.cards)
+      this.offscreenCards = cards.filter(card => !utils.isCardInViewport(card))
+      this.updateDirections()
     }
   }
 }
@@ -109,7 +103,7 @@ edge = 4px
   position fixed
   width 100%
   height 100%
-  // background-color rgba(255, 193, 93, 0.45)
+  background-color rgba(255, 193, 93, 0.45)
   .marker
     width width
     height height
