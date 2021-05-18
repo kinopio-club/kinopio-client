@@ -102,7 +102,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         button(:disabled="!canEditCard" @click.left.stop="toggleUrlsIsVisible" :class="{active: urlsIsVisible}")
           img.icon(v-if="urlsIsVisible" src="@/assets/view-hidden.svg")
           img.icon(v-else src="@/assets/view.svg")
-          span Link
+          span URL
       //- Split by Line Breaks
       .button-wrap(v-if="nameHasLineBreaks || nameHasSentences")
         button(:disabled="!canEditCard" @click.left.stop="splitCards")
