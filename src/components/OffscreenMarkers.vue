@@ -15,11 +15,6 @@ let observer
 
 export default {
   name: 'OffscreenMarkers',
-  data () {
-    return {
-      offscreenCards: []
-    }
-  },
   mounted () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'currentSpace/restoreSpace') {
@@ -30,6 +25,11 @@ export default {
         this.updateCardsObserver()
       }
     })
+  },
+  data () {
+    return {
+      offscreenCards: []
+    }
   },
   computed: {
     hasDirectionTop () { return this.hasDirection('top') },
@@ -106,14 +106,16 @@ width = 12px
 edge = 4px
 
 .offscreen-markers
-  pointer-events none
+  position fixed
+  width 100%
+  height 100%
+  // background-color rgba(255, 193, 93, 0.45)
   .marker
     width width
     height height
     background-repeat no-repeat
     background-size contain
-    position fixed
-    z-index calc(var(--max-z) - 1)
+    position absolute
     opacity 0.3
   .top
     top edge

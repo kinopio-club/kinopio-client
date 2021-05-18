@@ -5,6 +5,7 @@
   @touchstart="isTouchDevice"
 )
   #layout-viewport
+    OffscreenMarkers
   MagicPaint
   //- router-view is Space
   router-view
@@ -31,6 +32,7 @@ import Footer from '@/components/Footer.vue'
 import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
 import LinkDetails from '@/components/dialogs/LinkDetails.vue'
+import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 
 import utils from '@/utils.js'
 
@@ -41,7 +43,8 @@ export default {
     Footer,
     KeyboardShortcutsHandler,
     TagDetails,
-    LinkDetails
+    LinkDetails,
+    OffscreenMarkers
   },
   mounted () {
     // use timer to prevent being fired from page reload scroll
@@ -379,6 +382,7 @@ dialog
 
 .icon
   vertical-align -1px
+  user-drag none
 
 .icon + span
   margin-left 5px
@@ -644,7 +648,6 @@ code
   position fixed
   width 100%
   height 100%
-  visibility hidden
   pointer-events none
 
 progress
