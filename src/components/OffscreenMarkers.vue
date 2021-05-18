@@ -25,7 +25,8 @@ export default {
   },
   data () {
     return {
-      offscreenCards: []
+      offscreenCards: [],
+      viewport: {}
     }
   },
   computed: {
@@ -36,7 +37,7 @@ export default {
       if (!cards.length) { return }
       cards = cards.map(card => card.x)
       const average = utils.averageOfNumbers(cards)
-      return average + 'px'
+      return average - this.viewport.pageLeft + 'px'
     },
     // top left
 
@@ -47,10 +48,8 @@ export default {
       if (!cards.length) { return }
       cards = cards.map(card => card.y)
       const average = utils.averageOfNumbers(cards)
-      return average + 'px'
+      return average - this.viewport.pageTop + 'px'
     },
-
-    // at bottom or right side
 
     // right
     offscreenCardsRight () { return this.offscreenCards.filter(card => card.direction === 'right') },
@@ -59,7 +58,7 @@ export default {
       if (!cards.length) { return }
       cards = cards.map(card => card.y)
       const average = utils.averageOfNumbers(cards)
-      return average + 'px'
+      return average - this.viewport.pageTop + 'px'
     },
     // bottom
     offscreenCardsBottom () { return this.offscreenCards.filter(card => card.direction === 'bottom') },
@@ -68,7 +67,7 @@ export default {
       if (!cards.length) { return }
       cards = cards.map(card => card.x)
       const average = utils.averageOfNumbers(cards)
-      return average + 'px'
+      return average - this.viewport.pageLeft + 'px'
     }
   },
   methods: {
@@ -85,18 +84,17 @@ export default {
       this.offscreenCards = cards || []
     },
     direction (card) {
-      const scrollX = window.scrollX
-      const scrollY = window.scrollY
-      const viewportWidth = this.$store.state.viewportWidth
-      const viewportHeight = this.$store.state.viewportHeight
+      this.viewport = utils.visualViewport()
+      const scrollX = this.viewport.pageLeft
+      const scrollY = this.viewport.pageTop
       let x = ''
       let y = ''
-      if (card.y > (viewportHeight + scrollY)) {
+      if (card.y > (this.viewport.height + scrollY)) {
         y = 'bottom'
       } else if (card.y < scrollY) {
         y = 'top'
       }
-      if (card.x > (viewportWidth + scrollX)) {
+      if (card.x > (this.viewport.width + scrollX)) {
         x = 'right'
       } else if (card.x < scrollX) {
         x = 'left'
