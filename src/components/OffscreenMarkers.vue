@@ -74,21 +74,16 @@ export default {
   methods: {
     updateOffscreenCards () {
       let cards = utils.clone(this.$store.state.currentSpace.cards)
-      cards = cards.filter(card => !utils.isCardInViewport(card))
       cards = cards.map(card => {
         const element = document.querySelector(`article [data-card-id="${card.id}"]`)
         const rect = element.getBoundingClientRect()
-        card.x = rect.x + (rect.width / 2)
+        card.x = card.x + (rect.width / 2)
+        card.y = card.y + (rect.height / 2)
         card.direction = this.direction(card)
         return card
       })
       this.offscreenCards = cards || []
     },
-    // hasDirection (direction) {
-    //   return this.offscreenCards.find(card => {
-    //     return card.direction === direction
-    //   })
-    // },
     direction (card) {
       const scrollX = window.scrollX
       const scrollY = window.scrollY
@@ -107,11 +102,6 @@ export default {
         x = 'left'
       }
       return y + x
-    },
-    updateMarkers () {
-      let cards = utils.clone(this.$store.state.currentSpace.cards)
-      this.offscreenCards = cards.filter(card => !utils.isCardInViewport(card))
-      this.updateDirections()
     }
   }
 }
