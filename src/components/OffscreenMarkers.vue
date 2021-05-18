@@ -4,11 +4,11 @@ aside.offscreen-markers
     //- (v-if="hasDirectionTop")
   //- .marker.topleft(v-if="hasDirectionTopLeft")
   //- .marker.topright(v-if="hasDirectionTopRight")
-  .marker.left
+  .marker.left(v-if="offscreenCardsLeft.length" :style="{ top: leftMarkerOffset }")
     //- (v-if="hasDirectionLeft")
-  .marker.right
+  .marker.right(v-if="offscreenCardsRight.length" :style="{ top: rightMarkerOffset }")
     //- (v-if="hasDirectionRight")
-  .marker.bottom
+  .marker.bottom(v-if="offscreenCardsBottom.length" :style="{ left: bottomMarkerOffset }")
     //- (v-if="hasDirectionBottom")
   //- .marker.bottomleft(v-if="hasDirectionBottomLeft")
   //- .marker.bottomright(v-if="hasDirectionBottomRight")
@@ -29,19 +29,42 @@ export default {
     }
   },
   computed: {
-    // hasDirectionTop () { return this.hasDirection('top') },
-    // hasDirectionTopLeft () { return this.hasDirection('topleft') },
-    // hasDirectionTopRight () { return this.hasDirection('topright') },
-    // hasDirectionLeft () { return this.hasDirection('left') },
-    // hasDirectionRight () { return this.hasDirection('right') },
-    // hasDirectionBottom () { return this.hasDirection('bottom') },
-    // hasDirectionBottomLeft () { return this.hasDirection('bottomleft') },
-    // hasDirectionBottomRight () { return this.hasDirection('bottomright') }
-
-    // top marker
+    // top
     offscreenCardsTop () { return this.offscreenCards.filter(card => card.direction === 'top') },
     topMarkerOffset () {
       let cards = this.offscreenCardsTop
+      if (!cards.length) { return }
+      cards = cards.map(card => card.x)
+      const average = utils.averageOfNumbers(cards)
+      return average + 'px'
+    },
+    // top left
+
+    // left
+    offscreenCardsLeft () { return this.offscreenCards.filter(card => card.direction === 'left') },
+    leftMarkerOffset () {
+      let cards = this.offscreenCardsLeft
+      if (!cards.length) { return }
+      cards = cards.map(card => card.y)
+      const average = utils.averageOfNumbers(cards)
+      return average + 'px'
+    },
+
+    // at bottom or right side
+
+    // right
+    offscreenCardsRight () { return this.offscreenCards.filter(card => card.direction === 'right') },
+    rightMarkerOffset () {
+      let cards = this.offscreenCardsRight
+      if (!cards.length) { return }
+      cards = cards.map(card => card.y)
+      const average = utils.averageOfNumbers(cards)
+      return average + 'px'
+    },
+    // bottom
+    offscreenCardsBottom () { return this.offscreenCards.filter(card => card.direction === 'bottom') },
+    bottomMarkerOffset () {
+      let cards = this.offscreenCardsBottom
       if (!cards.length) { return }
       cards = cards.map(card => card.x)
       const average = utils.averageOfNumbers(cards)
