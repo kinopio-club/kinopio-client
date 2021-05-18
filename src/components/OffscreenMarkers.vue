@@ -1,17 +1,10 @@
 <template lang="pug">
 aside.offscreen-markers
   .marker.top(v-if="offscreenCardsTop.length" :style="{ left: topMarkerOffset }")
-    //- (v-if="hasDirectionTop")
-  //- .marker.topleft(v-if="hasDirectionTopLeft")
-  //- .marker.topright(v-if="hasDirectionTopRight")
+  .marker.topleft(v-if="hasDirectionTopLeft")
   .marker.left(v-if="offscreenCardsLeft.length" :style="{ top: leftMarkerOffset }")
-    //- (v-if="hasDirectionLeft")
   .marker.right(v-if="offscreenCardsRight.length" :style="{ top: rightMarkerOffset }")
-    //- (v-if="hasDirectionRight")
   .marker.bottom(v-if="offscreenCardsBottom.length" :style="{ left: bottomMarkerOffset }")
-    //- (v-if="hasDirectionBottom")
-  //- .marker.bottomleft(v-if="hasDirectionBottomLeft")
-  //- .marker.bottomright(v-if="hasDirectionBottomRight")
 </template>
 
 <script>
@@ -30,6 +23,11 @@ export default {
     }
   },
   computed: {
+    hasDirectionTopLeft () { return this.hasDirection('topleft') },
+    hasDirectionTopRight () { return this.hasDirection('topright') },
+    hasDirectionBottomLeft () { return this.hasDirection('bottomleft') },
+    hasDirectionBottomRight () { return this.hasDirection('bottomright') },
+
     // top
     offscreenCardsTop () { return this.offscreenCards.filter(card => card.direction === 'top') },
     topMarkerOffset () {
@@ -39,8 +37,6 @@ export default {
       const average = utils.averageOfNumbers(cards)
       return average - this.viewport.pageLeft + 'px'
     },
-    // top left
-
     // left
     offscreenCardsLeft () { return this.offscreenCards.filter(card => card.direction === 'left') },
     leftMarkerOffset () {
@@ -50,7 +46,6 @@ export default {
       const average = utils.averageOfNumbers(cards)
       return average - this.viewport.pageTop + 'px'
     },
-
     // right
     offscreenCardsRight () { return this.offscreenCards.filter(card => card.direction === 'right') },
     rightMarkerOffset () {
@@ -71,6 +66,11 @@ export default {
     }
   },
   methods: {
+    hasDirection (direction) {
+      return this.offscreenCards.find(card => {
+        return card.direction === direction
+      })
+    },
     updateOffscreenCards () {
       let cards = utils.clone(this.$store.state.currentSpace.cards)
       cards = cards.map(card => {
@@ -89,6 +89,20 @@ export default {
       const scrollY = this.viewport.pageTop
       let x = ''
       let y = ''
+      //           │        │
+      //                       top-right
+      //           │  top   │
+      //
+      // ─ ─ ─ ─ ─ ┼────────┼ ─ ─ ─ ─ ─
+      //           │        │
+      //    left   │Viewport│  right
+      //           │        │
+      // ─ ─ ─ ─ ─ ┼────────┼ ─ ─ ─ ─ ─
+      //
+      //           │ bottom │
+      //
+      //           │        │
+
       if (card.y > (this.viewport.height + scrollY)) {
         y = 'bottom'
       } else if (card.y < scrollY) {
