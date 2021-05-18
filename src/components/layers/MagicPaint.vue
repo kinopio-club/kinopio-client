@@ -142,24 +142,12 @@ export default {
       this.pinchZoomOffsetTop = window.visualViewport.offsetTop
       this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
     },
-    isCardInViewport (card) {
-      const viewport = utils.visualViewport()
-      // x
-      const isStartInViewportX = card.x > viewport.pageLeft || card.x + card.width > viewport.pageLeft
-      const isEndInViewportX = card.x < viewport.pageLeft + viewport.width
-      const isInViewportX = isStartInViewportX && isEndInViewportX
-      // y
-      const isStartInViewportY = card.y > viewport.pageTop || card.y + card.height > viewport.pageTop
-      const isEndInViewportY = card.y < viewport.pageTop + viewport.height
-      const isInViewportY = isStartInViewportY && isEndInViewportY
-      return isInViewportX && isInViewportY
-    },
     updateViewportCardMap () {
       const cardMap = utils.clone(this.cardMap)
       if (!utils.objectHasKeys(cardMap)) { return }
       viewportCardMap = utils.clone(this.cardMap)
       viewportCardMap = viewportCardMap.filter(card => {
-        return this.isCardInViewport(card)
+        return utils.isCardInViewport(card)
       })
     },
     updatePrevScrollPosition () {
