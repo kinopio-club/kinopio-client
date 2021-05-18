@@ -128,14 +128,14 @@ edge = 4px
   position fixed
   width 100%
   height 100%
-  background-color rgba(255, 193, 93, 0.45)
+  // background-color rgba(255, 193, 93, 0.45)
   .marker
     width width
     height height
     background-repeat no-repeat
     background-size contain
     position absolute
-    opacity 0.3
+    opacity 0.5
   .top
     top edge
     left "calc(50% -  %s)" % (width / 2)
