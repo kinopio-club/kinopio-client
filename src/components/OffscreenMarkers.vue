@@ -1,7 +1,11 @@
 <template lang="pug">
 aside.offscreen-markers
-  .marker.top(v-if="offscreenCardsTop.length" :style="{ left: topMarkerOffset }")
   .marker.topleft(v-if="hasDirectionTopLeft")
+  .marker.topright(v-if="hasDirectionTopRight")
+  .marker.bottomleft(v-if="hasDirectionBottomLeft")
+  .marker.bottomright(v-if="hasDirectionBottomRight")
+
+  .marker.top(v-if="offscreenCardsTop.length" :style="{ left: topMarkerOffset }")
   .marker.left(v-if="offscreenCardsLeft.length" :style="{ top: leftMarkerOffset }")
   .marker.right(v-if="offscreenCardsRight.length" :style="{ top: rightMarkerOffset }")
   .marker.bottom(v-if="offscreenCardsBottom.length" :style="{ left: bottomMarkerOffset }")
