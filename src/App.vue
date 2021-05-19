@@ -383,6 +383,7 @@ dialog
 .icon
   vertical-align -1px
   user-drag none
+  -webkit-user-drag none
 
 .icon + span
   margin-left 5px
