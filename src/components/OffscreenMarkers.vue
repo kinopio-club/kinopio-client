@@ -23,11 +23,11 @@ export default {
     }
   },
   computed: {
+    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     hasDirectionTopLeft () { return this.hasDirection('topleft') },
     hasDirectionTopRight () { return this.hasDirection('topright') },
     hasDirectionBottomLeft () { return this.hasDirection('bottomleft') },
     hasDirectionBottomRight () { return this.hasDirection('bottomright') },
-
     // top
     offscreenCardsTop () { return this.offscreenCards.filter(card => card.direction === 'top') },
     topMarkerOffset () {
@@ -72,12 +72,17 @@ export default {
       })
     },
     updateOffscreenCards () {
+      const markerHeight = 16
+      const markerWidth = 12
+      const zoom = this.spaceZoomDecimal
       let cards = utils.clone(this.$store.state.currentSpace.cards)
       cards = cards.map(card => {
         const element = document.querySelector(`article [data-card-id="${card.id}"]`)
         const rect = element.getBoundingClientRect()
-        card.x = card.x + (rect.width / 2)
-        card.y = card.y + (rect.height / 2)
+        card.x = card.x + (rect.width / 2) - (markerWidth / 2)
+        card.x = card.x * zoom
+        card.y = card.y + (rect.height / 2) - (markerHeight / 2)
+        card.y = card.y * zoom
         card.direction = this.direction(card)
         return card
       })
@@ -114,6 +119,11 @@ export default {
         x = 'left'
       }
       return y + x
+    }
+  },
+  watch: {
+    spaceZoomDecimal (value) {
+      this.updateOffscreenCards()
     }
   }
 }
