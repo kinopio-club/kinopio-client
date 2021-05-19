@@ -1,45 +1,85 @@
 <template lang="pug">
-aside.offscreen-markers
-  .marker.top(v-if="hasDirectionTop")
+aside.offscreen-markers(:style="styles")
   .marker.topleft(v-if="hasDirectionTopLeft")
   .marker.topright(v-if="hasDirectionTopRight")
-  .marker.left(v-if="hasDirectionLeft")
-  .marker.right(v-if="hasDirectionRight")
-  .marker.bottom(v-if="hasDirectionBottom")
   .marker.bottomleft(v-if="hasDirectionBottomLeft")
   .marker.bottomright(v-if="hasDirectionBottomRight")
+
+  .marker.top(v-if="offscreenCardsTop.length" :style="{ left: topMarkerOffset }")
+  .marker.left(v-if="offscreenCardsLeft.length" :style="{ top: leftMarkerOffset }")
+  .marker.right(v-if="offscreenCardsRight.length" :style="{ top: rightMarkerOffset }")
+  .marker.bottom(v-if="offscreenCardsBottom.length" :style="{ left: bottomMarkerOffset }")
 </template>
 
 <script>
-let observer
+import utils from '@/utils.js'
 
 export default {
   name: 'OffscreenMarkers',
+  mounted () {
+    window.addEventListener('scroll', this.updateOffscreenCards)
+    this.updateOffscreenCards()
+  },
   data () {
     return {
-      offscreenCards: []
+      offscreenCards: [],
+      viewport: {}
     }
   },
-  mounted () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'currentSpace/restoreSpace') {
-        if (observer) {
-          this.offscreenCards = []
-          observer.disconnect()
-        }
-        this.updateCardsObserver()
-      }
-    })
-  },
   computed: {
-    hasDirectionTop () { return this.hasDirection('top') },
+    styles () {
+      const viewport = this.viewport
+      const pinchZoomScale = viewport.scale
+      const pinchZoomOffsetLeft = viewport.offsetLeft
+      const pinchZoomOffsetTop = viewport.offsetTop
+      if (pinchZoomScale > 1) {
+        return {
+          transform: `translate(${pinchZoomOffsetLeft}px, ${pinchZoomOffsetTop}px) scale(${1 / pinchZoomScale})`,
+          'transform-origin': 'left top'
+        }
+      } else { return {} }
+    },
+    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     hasDirectionTopLeft () { return this.hasDirection('topleft') },
     hasDirectionTopRight () { return this.hasDirection('topright') },
-    hasDirectionLeft () { return this.hasDirection('left') },
-    hasDirectionRight () { return this.hasDirection('right') },
-    hasDirectionBottom () { return this.hasDirection('bottom') },
     hasDirectionBottomLeft () { return this.hasDirection('bottomleft') },
-    hasDirectionBottomRight () { return this.hasDirection('bottomright') }
+    hasDirectionBottomRight () { return this.hasDirection('bottomright') },
+    // top
+    offscreenCardsTop () { return this.offscreenCards.filter(card => card.direction === 'top') },
+    topMarkerOffset () {
+      let cards = this.offscreenCardsTop
+      if (!cards.length) { return }
+      cards = cards.map(card => card.x)
+      const average = utils.averageOfNumbers(cards)
+      return average - this.viewport.pageLeft + 'px'
+    },
+    // left
+    offscreenCardsLeft () { return this.offscreenCards.filter(card => card.direction === 'left') },
+    leftMarkerOffset () {
+      let cards = this.offscreenCardsLeft
+      if (!cards.length) { return }
+      cards = cards.map(card => card.y)
+      const average = utils.averageOfNumbers(cards)
+      return average - this.viewport.pageTop + 'px'
+    },
+    // right
+    offscreenCardsRight () { return this.offscreenCards.filter(card => card.direction === 'right') },
+    rightMarkerOffset () {
+      let cards = this.offscreenCardsRight
+      if (!cards.length) { return }
+      cards = cards.map(card => card.y)
+      const average = utils.averageOfNumbers(cards)
+      return average - this.viewport.pageTop + 'px'
+    },
+    // bottom
+    offscreenCardsBottom () { return this.offscreenCards.filter(card => card.direction === 'bottom') },
+    bottomMarkerOffset () {
+      let cards = this.offscreenCardsBottom
+      if (!cards.length) { return }
+      cards = cards.map(card => card.x)
+      const average = utils.averageOfNumbers(cards)
+      return average - this.viewport.pageLeft + 'px'
+    }
   },
   methods: {
     hasDirection (direction) {
@@ -47,54 +87,59 @@ export default {
         return card.direction === direction
       })
     },
-    updateDirections () {
-      this.offscreenCards.map(card => {
-        let x = ''
-        let y = ''
-        const scrollX = window.scrollX
-        const scrollY = window.scrollY
-        const viewportWidth = this.$store.state.viewportWidth
-        const viewportHeight = this.$store.state.viewportHeight
-        if (card.y > (viewportHeight + scrollY)) {
-          y = 'bottom'
-        } else if (card.y < scrollY) {
-          y = 'top'
-        }
-        if (card.x > (viewportWidth + scrollX)) {
-          x = 'right'
-        } else if (card.x < scrollX) {
-          x = 'left'
-        }
-        card.direction = y + x
+    updateOffscreenCards () {
+      const markerHeight = 16
+      const markerWidth = 12
+      const zoom = this.spaceZoomDecimal
+      let cards = utils.clone(this.$store.state.currentSpace.cards)
+      cards = cards.map(card => {
+        const element = document.querySelector(`article [data-card-id="${card.id}"]`)
+        const rect = element.getBoundingClientRect()
+        card.x = card.x + (rect.width / 2) - (markerWidth / 2)
+        card.x = card.x * zoom
+        card.y = card.y + (rect.height / 2) - (markerHeight / 2)
+        card.y = card.y * zoom
+        card.direction = this.direction(card)
         return card
       })
+      this.offscreenCards = cards || []
     },
-    updateCardsObserver () {
-      const cards = document.querySelectorAll('.card')
-      observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          const cardId = entry.target.dataset.cardId
-          const cardX = entry.target.dataset.cardX
-          const cardY = entry.target.dataset.cardY
-          if (entry.intersectionRatio > 0) {
-            this.offscreenCards = this.offscreenCards.filter(card => {
-              return card.id !== cardId
-            })
-          } else {
-            const card = {
-              id: cardId,
-              x: cardX,
-              y: cardY
-            }
-            this.offscreenCards.push(card)
-          }
-        })
+    direction (card) {
+      this.viewport = utils.visualViewport()
+      const scrollX = this.viewport.pageLeft
+      const scrollY = this.viewport.pageTop
+      let x = ''
+      let y = ''
+      //           │        │
+      //                       top-right
+      //           │  top   │
+      //
+      // ─ ─ ─ ─ ─ ┼────────┼ ─ ─ ─ ─ ─
+      //           │        │
+      //    left   │Viewport│  right
+      //           │        │
+      // ─ ─ ─ ─ ─ ┼────────┼ ─ ─ ─ ─ ─
+      //
+      //           │ bottom │
+      //
+      //           │        │
 
-        this.updateDirections()
-      })
-      cards.forEach(card => {
-        observer.observe(card)
-      })
+      if (card.y > (this.viewport.height + scrollY)) {
+        y = 'bottom'
+      } else if (card.y < scrollY) {
+        y = 'top'
+      }
+      if (card.x > (this.viewport.width + scrollX)) {
+        x = 'right'
+      } else if (card.x < scrollX) {
+        x = 'left'
+      }
+      return y + x
+    }
+  },
+  watch: {
+    spaceZoomDecimal (value) {
+      this.updateOffscreenCards()
     }
   }
 }
@@ -106,15 +151,16 @@ width = 12px
 edge = 4px
 
 .offscreen-markers
-  pointer-events none
+  position fixed
+  width 100%
+  height 100%
   .marker
     width width
     height height
     background-repeat no-repeat
     background-size contain
-    position fixed
-    z-index calc(var(--max-z) - 1)
-    opacity 0.3
+    position absolute
+    opacity 0.5
   .top
     top edge
     left "calc(50% -  %s)" % (width / 2)

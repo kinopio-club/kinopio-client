@@ -13,7 +13,7 @@ dialog.narrow.mobile-tips(v-if="visible" :open="visible" @click.stop="closeDialo
 
     p
       img.icon(src="@/assets/press-and-hold.svg")
-      span Press and hold to paint cards
+      span Press and hold to paint select cards
     video(autoplay loop muted playsinline src="https://kinopio-updates.us-east-1.linodeobjects.com/mobile-press-hold-paint.mp4" height="83")
 
   section(

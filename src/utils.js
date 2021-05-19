@@ -382,6 +382,21 @@ export default {
     return Math.round(angleDegrees)
   },
 
+  // Cards
+
+  isCardInViewport (card) {
+    const viewport = this.visualViewport()
+    // x
+    const isStartInViewportX = card.x > viewport.pageLeft || card.x + card.width > viewport.pageLeft
+    const isEndInViewportX = card.x < viewport.pageLeft + viewport.width
+    const isInViewportX = isStartInViewportX && isEndInViewportX
+    // y
+    const isStartInViewportY = card.y > viewport.pageTop || card.y + card.height > viewport.pageTop
+    const isEndInViewportY = card.y < viewport.pageTop + viewport.height
+    const isInViewportY = isStartInViewportY && isEndInViewportY
+    return isInViewportX && isInViewportY
+  },
+
   // Connection Path Utils 🐙
 
   spaceZoomDecimal () {

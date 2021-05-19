@@ -30,7 +30,6 @@ main.space(
       Card(:card="card")
   ConnectionDetails
   MultipleSelectedActions
-  OffscreenMarkers
   ScrollAtEdgesHandler
   NotificationsWithPosition
 </template>
@@ -42,7 +41,6 @@ import ConnectionLabel from '@/components/ConnectionLabel.vue'
 import UserLabel from '@/components/UserLabel.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
-import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import ScrollAtEdgesHandler from '@/components/ScrollAtEdgesHandler.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import utils from '@/utils.js'
@@ -61,7 +59,6 @@ export default {
     UserLabel,
     ConnectionDetails,
     MultipleSelectedActions,
-    OffscreenMarkers,
     ScrollAtEdgesHandler,
     NotificationsWithPosition
   },

@@ -1100,6 +1100,11 @@ export default {
     startLocking (event) {
       this.updateTouchPosition(event)
       this.updateCurrentTouchPosition(event)
+      if (this.isSelected) {
+        this.isLocking = false
+        this.startDraggingCard(event)
+        return
+      }
       this.isLocking = true
       shouldCancelLocking = false
       setTimeout(() => {

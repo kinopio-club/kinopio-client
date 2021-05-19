@@ -11,10 +11,10 @@ dialog.narrow.image-picker(
     //- card images
     .row
       .segmented-buttons
-        button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}" title="are.na")
-          img.icon.arena(src="@/assets/arena.svg")
         button(@click.left.stop="toggleServiceIsStickers" :class="{active : serviceIsStickers}" title="stickers")
           img.icon.sticker(src="@/assets/sticker.svg")
+        button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}" title="are.na")
+          img.icon.arena(src="@/assets/arena.svg")
         button(@click.left.stop="toggleServiceIsGifs" :class="{active : serviceIsGifs}" title="gifs")
           span GIF
 
@@ -161,7 +161,7 @@ export default {
     return {
       images: [],
       search: '',
-      service: 'arena', // 'stickers', 'gifs', 'arena', 'backgrounds'
+      service: 'stickers', // 'stickers', 'gifs', 'arena', 'backgrounds'
       loading: false,
       showOnRightSide: false,
       minDialogHeight: null,
