@@ -1,5 +1,5 @@
 <template lang="pug">
-aside.offscreen-markers
+aside.offscreen-markers(:style="styles")
   .marker.topleft(v-if="hasDirectionTopLeft")
   .marker.topright(v-if="hasDirectionTopRight")
   .marker.bottomleft(v-if="hasDirectionBottomLeft")
@@ -27,6 +27,18 @@ export default {
     }
   },
   computed: {
+    styles () {
+      const viewport = this.viewport
+      const pinchZoomScale = viewport.scale
+      const pinchZoomOffsetLeft = viewport.offsetLeft
+      const pinchZoomOffsetTop = viewport.offsetTop
+      if (pinchZoomScale > 1) {
+        return {
+          transform: `translate(${pinchZoomOffsetLeft}px, ${pinchZoomOffsetTop}px) scale(${1 / pinchZoomScale})`,
+          'transform-origin': 'left top'
+        }
+      } else { return {} }
+    },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     hasDirectionTopLeft () { return this.hasDirection('topleft') },
     hasDirectionTopRight () { return this.hasDirection('topright') },
@@ -142,7 +154,6 @@ edge = 4px
   position fixed
   width 100%
   height 100%
-  // background-color rgba(255, 193, 93, 0.45)
   .marker
     width width
     height height
