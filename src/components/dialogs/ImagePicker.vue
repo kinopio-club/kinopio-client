@@ -403,7 +403,7 @@ export default {
             return {
               isVideo: true,
               id: image.id,
-              previewUrl: image.images.fixed_height.mp4,
+              previewUrl: image.images.fixed_height.url,
               url: utils.urlWithoutQueryString(image.images.original.mp4)
             }
           }
