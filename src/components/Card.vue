@@ -474,7 +474,8 @@ export default {
       return segments
     },
     cardUrlPreviewIsVisible () {
-      return Boolean(this.card.urlPreviewIsVisible && this.card.urlPreviewUrl)
+      const isErrorUrl = this.card.urlPreviewErrorUrl && this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl
+      return Boolean(this.card.urlPreviewIsVisible && this.card.urlPreviewUrl && !isErrorUrl)
     },
     tags () {
       return this.nameSegments.filter(segment => {

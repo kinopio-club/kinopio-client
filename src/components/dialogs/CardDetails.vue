@@ -458,7 +458,8 @@ export default {
     },
     cardUrlPreviewIsVisible () {
       const isErrorUrl = this.card.urlPreviewErrorUrl && this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl
-      return this.card.urlPreviewIsVisible && this.isLoadingUrlPreview && !isErrorUrl
+      const hasPreview = this.url && (this.isLoadingUrlPreview || this.card.urlPreviewUrl)
+      return this.card.urlPreviewIsVisible && hasPreview && !isErrorUrl
     },
     isLoadingUrlPreview () {
       const cardIds = this.$store.state.urlPreviewLoadingForCardIds
@@ -1171,7 +1172,8 @@ export default {
       this.$store.commit('removeUrlPreviewLoadingForCardIds', this.card.id)
       const update = {
         id: this.card.id,
-        urlPreviewErrorUrl: url
+        urlPreviewErrorUrl: url,
+        urlPreviewUrl: url
       }
       this.$store.dispatch('currentSpace/updateCard', update)
     },
