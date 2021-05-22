@@ -1430,6 +1430,7 @@ export default {
     },
     removeUnusedTagsFromCard: (context, cardId) => {
       const card = context.getters.cardById(cardId)
+      if (!card) { return }
       const cardTagNames = utils.tagsFromStringWithoutBrackets(card.name) || []
       const tagsInCard = context.getters.tagsInCard({ id: cardId })
       const tagsToRemove = tagsInCard.filter(tag => !cardTagNames.includes(tag.name))
