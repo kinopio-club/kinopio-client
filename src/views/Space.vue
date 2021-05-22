@@ -164,6 +164,7 @@ export default {
     unloadPage () {
       this.$store.commit('broadcast/close')
       this.$store.dispatch('currentSpace/removeEmptyCards')
+      this.$store.commit('triggerUnloadPage')
     },
     updatePageSizes () {
       this.$nextTick(() => {

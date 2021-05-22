@@ -255,6 +255,9 @@ export default {
         if (cardId !== this.card.id) { return }
         this.addFile({ url })
       }
+      if (mutation.type === 'triggerUnloadPage' && this.visible) {
+        this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', this.card.id)
+      }
     })
   },
   updated () {
@@ -789,6 +792,7 @@ export default {
     hideTagPicker () {
       this.tag.pickerSearch = ''
       this.tag.pickerIsVisible = false
+      this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', this.card.id)
     },
     hideSpacePicker () {
       this.space.pickerSearch = ''

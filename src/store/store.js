@@ -303,6 +303,7 @@ export default new Vuex.Store({
     triggerSpaceZoomReset: () => {},
     triggerSpaceZoomOut: () => {},
     triggerSpaceZoomIn: () => {},
+    triggerUnloadPage: () => {},
 
     // Cards
 
