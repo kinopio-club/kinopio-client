@@ -14,9 +14,19 @@ aside.offscreen-markers(:style="styles")
 <script>
 import utils from '@/utils.js'
 
+const maxIterations = 30
+let currentIteration, updatePositionTimer
+
 export default {
   name: 'OffscreenMarkers',
   mounted () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
+        currentIteration = 0
+        if (updatePositionTimer) { return }
+        updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
+      }
+    })
     window.addEventListener('scroll', this.updateOffscreenCards)
     this.updateOffscreenCards()
   },
@@ -82,6 +92,16 @@ export default {
     }
   },
   methods: {
+    updatePositionFrame () {
+      currentIteration++
+      this.updateOffscreenCards()
+      if (currentIteration < maxIterations) {
+        window.requestAnimationFrame(this.updatePositionFrame)
+      } else {
+        window.cancelAnimationFrame(updatePositionTimer)
+        updatePositionTimer = undefined
+      }
+    },
     hasDirection (direction) {
       return this.offscreenCards.find(card => {
         return card.direction === direction
