@@ -45,6 +45,9 @@ export default new Vuex.Store({
     webfontIsLoaded: false,
     userHasScrolled: false,
 
+    // search
+    searchIsVisible: false,
+
     // reset password
     resetPasswordApiKey: '',
     passwordResetIsVisible: false,
@@ -259,6 +262,10 @@ export default new Vuex.Store({
     userHasScrolled: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'userHasScrolled' })
       state.userHasScrolled = value
+    },
+    searchIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'searchIsVisible' })
+      state.searchIsVisible = value
     },
     resetPasswordApiKey: (state, apiKey) => {
       utils.typeCheck({ value: apiKey, type: 'string', origin: 'resetPasswordApiKey' })

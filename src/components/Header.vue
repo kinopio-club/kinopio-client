@@ -10,36 +10,43 @@ header(:style="visualViewportPosition")
           img.down-arrow(src="@/assets/down-arrow.svg")
         About(:visible="aboutIsVisible")
         KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
-    .space-details-wrap(:class="{'segmented-buttons': spaceHasStatusOrOffline}")
-      //- space
-      .button-wrap
-        button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
-          .badge.info(v-show="currentSpaceIsTemplate")
-            span Template
-          .badge-wrap(v-if="!userCanEditSpace && !currentSpaceIsTemplate")
-            .badge.info(:class="{'invisible': readOnlyJiggle}")
-              span Read Only
-            .badge.info.invisible-badge(ref="readOnly" :class="{'badge-jiggle': readOnlyJiggle, 'invisible': !readOnlyJiggle}")
-              span Read Only
-          MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
-          span {{currentSpaceName}}
-          img.icon.privacy-icon(v-if="spaceIsNotClosed" :src="privacyIcon" :class="privacyName")
-          .badge.status.explore(v-if="shouldShowInExplore")
-            img.icon(src="@/assets/checkmark.svg")
-        SpaceDetails(:visible="spaceDetailsIsVisible")
-        ImportArenaChannel(:visible="importArenaChannelIsVisible")
-      //- state
-      .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
-        button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
-          Loader(:visible="spaceHasStatus")
-          .badge.success.space-status-success(v-if="!spaceHasStatus")
-        SpaceStatus(:visible="spaceStatusIsVisible")
-      //- offline
-      .button-wrap(v-if="!isOnline")
-        button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
-          img.icon.offline(src="@/assets/offline.svg")
-        Offline(:visible="offlineIsVisible")
+    .space-meta-rows
+      .space-details-row(:class="{'segmented-buttons': spaceHasStatusOrOffline}")
+        //- space
+        .button-wrap
+          button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
+            .badge.info(v-show="currentSpaceIsTemplate")
+              span Template
+            .badge-wrap(v-if="!userCanEditSpace && !currentSpaceIsTemplate")
+              .badge.info(:class="{'invisible': readOnlyJiggle}")
+                span Read Only
+              .badge.info.invisible-badge(ref="readOnly" :class="{'badge-jiggle': readOnlyJiggle, 'invisible': !readOnlyJiggle}")
+                span Read Only
+            MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
+            span {{currentSpaceName}}
+            img.icon.privacy-icon(v-if="spaceIsNotClosed" :src="privacyIcon" :class="privacyName")
+            .badge.status.explore(v-if="shouldShowInExplore")
+              img.icon(src="@/assets/checkmark.svg")
+          SpaceDetails(:visible="spaceDetailsIsVisible")
+          ImportArenaChannel(:visible="importArenaChannelIsVisible")
+        //- state
+        .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
+          button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
+            Loader(:visible="spaceHasStatus")
+            .badge.success.space-status-success(v-if="!spaceHasStatus")
+          SpaceStatus(:visible="spaceStatusIsVisible")
+        //- offline
+        .button-wrap(v-if="!isOnline")
+          button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
+            img.icon.offline(src="@/assets/offline.svg")
+          Offline(:visible="offlineIsVisible")
 
+      .search-row
+        //- search
+        .button-wrap
+           button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
+              img.icon.search(src="@/assets/search.svg")
+           //- Search
   aside
     .top
       .top-buttons-wrap
@@ -267,7 +274,8 @@ export default {
       if (!this.notifications) { return 0 }
       const unread = this.notifications.filter(notification => !notification.isRead)
       return unread.length || 0
-    }
+    },
+    searchIsVisible () { return this.$store.state.searchIsVisible }
   },
   methods: {
     addReadOnlyJiggle () {
@@ -360,6 +368,11 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'Header.toggleOfflineIsVisible')
       this.offlineIsVisible = !isVisible
     },
+    toggleSearchIsVisible () {
+      const isVisible = this.searchIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleSearchIsVisible')
+      this.$store.commit('searchIsVisible', !isVisible)
+    },
     setLoadingSignUpOrIn (value) {
       this.loadingSignUpOrIn = value
     },
@@ -448,7 +461,7 @@ header
     &.active
       .down-arrow
         transform translateY(5px)
-  .space-details-wrap
+  .space-details-row
     margin-top 8px
     @media(max-width 414px)
       max-width calc(100vw - 200px)
@@ -481,7 +494,8 @@ header
             border-top-right-radius 3px
             border-bottom-right-radius 3px
             margin-left -1px
-
+  .search-row
+    margin-top 5px
   aside
     display flex
     flex-direction column
