@@ -47,7 +47,7 @@ export default {
     if (!element) { return }
     element = element.getBoundingClientRect()
     const viewport = this.visualViewport()
-    const offset = viewport.width - (element.x + element.width)
+    const offset = (viewport.width * viewport.scale) - (element.x + element.width)
     if (offset < 0) {
       return true
     } else {
