@@ -1233,6 +1233,7 @@ export default {
       this.$store.dispatch('currentSpace/updateCard', update)
     },
     removeHiddenQueryString (url) {
+      if (!url) { return }
       url = url.replace('?hidden=true', '')
       url = url.replace('&hidden=true', '')
       return url
