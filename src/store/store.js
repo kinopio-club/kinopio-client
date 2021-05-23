@@ -47,6 +47,9 @@ export default new Vuex.Store({
 
     // search
     searchIsVisible: false,
+    search: '',
+    searchResultsCards: [],
+    previousResultCardId: '',
 
     // reset password
     resetPasswordApiKey: '',
@@ -266,6 +269,28 @@ export default new Vuex.Store({
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'searchIsVisible' })
       state.searchIsVisible = value
+    },
+    search: (state, value) => {
+      utils.typeCheck({ value, type: 'string', origin: 'search' })
+      state.search = value
+    },
+    searchResultsCards: (state, results) => {
+      utils.typeCheck({ value: results, type: 'array', origin: 'searchResultsCards' })
+      results = results.map(card => {
+        card = utils.clone(card)
+        return card
+      })
+      state.searchResultsCards = results
+    },
+    previousResultCardId: (state, value) => {
+      utils.typeCheck({ value, type: 'string', origin: 'previousResultCardId' })
+      state.previousResultCardId = value
+    },
+    clearSearch: (state) => {
+      state.searchIsVisible = false
+      state.search = ''
+      state.searchResultsCards = []
+      state.previousResultCardId = ''
     },
     resetPasswordApiKey: (state, apiKey) => {
       utils.typeCheck({ value: apiKey, type: 'string', origin: 'resetPasswordApiKey' })

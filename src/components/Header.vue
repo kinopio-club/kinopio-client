@@ -43,10 +43,15 @@ header(:style="visualViewportPosition")
 
       .search-row
         //- search
-        .button-wrap
-           button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
-              img.icon.search(src="@/assets/search.svg")
-           //- Search
+        .segmented-buttons
+          button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
+            img.icon.search(src="@/assets/search.svg")
+            .badge.info 2
+          button
+            img.icon.left-arrow(src="@/assets/down-arrow.svg")
+          button
+            img.icon.right-arrow(src="@/assets/down-arrow.svg")
+
   aside
     .top
       .top-buttons-wrap
@@ -461,6 +466,18 @@ header
     &.active
       .down-arrow
         transform translateY(5px)
+
+  .left-arrow
+    transform rotate(90deg)
+    vertical-align 1px
+  .right-arrow
+    transform rotate(-90deg)
+    vertical-align 1px
+  .search-button
+    .badge
+      margin-right 0
+      margin-left 6px
+
   .space-details-row
     margin-top 8px
     @media(max-width 414px)
