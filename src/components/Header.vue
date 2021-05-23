@@ -51,16 +51,19 @@ header(:style="visualViewportPosition")
             img.icon.left-arrow(src="@/assets/down-arrow.svg")
           button
             img.icon.right-arrow(src="@/assets/down-arrow.svg")
+          button
+            img.icon.cancel(src="@/assets/add.svg")
+        Search(:visible="searchIsVisible")
 
   aside
     .top
       .top-buttons-wrap
-        // Share
+        //- Share
         .button-wrap
           button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
             span Share
           Share(:visible="shareIsVisible")
-        // Notifications
+        //- Notifications
         .button-wrap
           button(@click.left.stop="toggleNotificationsIsVisible" :class="{active : notificationsIsVisible}")
             span {{notificationsUnreadCount}}
@@ -77,7 +80,7 @@ header(:style="visualViewportPosition")
 
     .bottom
       ResetPassword
-      // Sign Up or In
+      //- Sign Up or In
       .button-wrap(v-if="!currentUserIsSignedIn && isOnline")
         button(@click.left.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}")
           span Sign Up or In
@@ -105,6 +108,7 @@ import templates from '@/data/templates.js'
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
+import Search from '@/components/dialogs/Search.vue'
 import privacy from '@/data/privacy.js'
 import utils from '@/utils.js'
 
@@ -127,6 +131,7 @@ export default {
     ImportArenaChannel,
     KeyboardShortcuts,
     UpgradeUser,
+    Search,
     MoonPhase
   },
   data () {
@@ -513,6 +518,7 @@ header
             margin-left -1px
   .search-row
     margin-top 5px
+    position relative
   aside
     display flex
     flex-direction column
