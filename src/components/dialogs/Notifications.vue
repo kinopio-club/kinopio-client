@@ -101,9 +101,6 @@ export default {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
     },
     segmentTagColor (segment) {
-      if (this.name === segment.name) {
-        return this.color
-      }
       const spaceTag = this.$store.getters['currentSpace/tagByName'](segment.name)
       const cachedTag = cache.tagByName(segment.name)
       if (spaceTag) {
