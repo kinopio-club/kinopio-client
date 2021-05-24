@@ -544,6 +544,7 @@ export default {
     // Search/Jump-to
 
     focusOnSpaceDetailsFilter () {
+      this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.focusOnSpaceDetailsFilter')
       this.$store.commit('triggerSpaceDetailsVisible')
       this.$nextTick(() => {
         this.$nextTick(() => {
@@ -554,6 +555,7 @@ export default {
       })
     },
     focusOnSearchCardFilter () {
+      this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.focusOnSearchCardFilter')
       this.$store.commit('searchIsVisible', true)
       this.$nextTick(() => {
         this.$nextTick(() => {

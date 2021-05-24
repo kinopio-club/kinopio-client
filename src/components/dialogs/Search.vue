@@ -208,6 +208,12 @@ export default {
   watch: {
     visible (visible) {
       this.$store.commit('previousResultCardId', '')
+      if (visible) {
+        if (utils.isMobile()) { return }
+        this.$nextTick(() => {
+          this.$store.commit('triggerFocusResultsFilter')
+        })
+      }
     }
   }
 }

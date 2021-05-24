@@ -91,7 +91,7 @@ export default {
       const element = this.$refs.filterInput
       if (!element) { return }
       element.focus()
-      element.setSelectionRange(0, 0)
+      element.setSelectionRange(0, 99999)
     },
     clearFilter () {
       this.filter = ''
