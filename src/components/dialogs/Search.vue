@@ -72,7 +72,8 @@ export default {
     recentlyUpdatedCards () {
       let cards = utils.clone(this.$store.state.currentSpace.cards)
       cards = cards.map(card => {
-        card.updatedAt = dayjs(card.updatedAt)
+        const date = card.nameUpdatedAt || card.createdAt
+        card.updatedAt = dayjs(date)
         return card
       })
       cards = cards.sort((a, b) => {
