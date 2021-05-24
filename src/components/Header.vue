@@ -48,11 +48,11 @@ header(:style="visualViewportPosition")
             img.icon.search(src="@/assets/search.svg")
             .badge.info(v-if="searchResultsCount") {{searchResultsCount}}
           template(v-if="searchResultsCount")
-            button
+            button(@click="showPreviousSearchCard")
               img.icon.left-arrow(src="@/assets/down-arrow.svg")
-            button
+            button(@click="showNextSearchCard")
               img.icon.right-arrow(src="@/assets/down-arrow.svg")
-            button
+            button(@click="clearSearch")
               img.icon.cancel(src="@/assets/add.svg")
         Search(:visible="searchIsVisible")
 
@@ -290,6 +290,42 @@ export default {
     searchResultsCount () { return this.$store.state.searchResultsCards.length }
   },
   methods: {
+    showCardDetails (card) {
+      this.$store.dispatch('currentSpace/showCardDetails', card.id)
+      this.$store.commit('previousResultCardId', card.id)
+    },
+    showNextSearchCard () {
+      const cards = this.$store.state.searchResultsCards
+      const previousResultCardId = this.$store.state.previousResultCardId
+      if (!previousResultCardId) {
+        this.showCardDetails(cards[0])
+        return
+      }
+      const currentIndex = cards.findIndex(card => card.id === previousResultCardId)
+      let index = currentIndex + 1
+      if (cards.length === index) {
+        index = 0
+      }
+      this.showCardDetails(cards[index])
+    },
+    showPreviousSearchCard () {
+      const cards = this.$store.state.searchResultsCards
+      const previousResultCardId = this.$store.state.previousResultCardId
+      if (!previousResultCardId) {
+        this.showCardDetails(cards[0])
+        return
+      }
+      const currentIndex = cards.findIndex(card => card.id === previousResultCardId)
+      let index = currentIndex - 1
+      if (index < 0) {
+        index = cards.length - 1
+      }
+      this.showCardDetails(cards[index])
+    },
+    clearSearch () {
+      this.$store.dispatch('closeAllDialogs', 'Header.clearSearch')
+      this.$store.commit('clearSearch')
+    },
     addReadOnlyJiggle () {
       const element = this.$refs.readOnly
       if (!element) { return }

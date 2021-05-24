@@ -170,7 +170,7 @@ export default {
         this.focusItem(cards[0])
         return
       }
-      let currentIndex = cards.findIndex(card => card.id === this.previousResultCardId)
+      const currentIndex = cards.findIndex(card => card.id === this.previousResultCardId)
       let index = currentIndex + 1
       if (cards.length === index) {
         index = 0
@@ -183,7 +183,7 @@ export default {
         this.focusItem(cards[0])
         return
       }
-      let currentIndex = cards.findIndex(card => card.id === this.previousResultCardId)
+      const currentIndex = cards.findIndex(card => card.id === this.previousResultCardId)
       let index = currentIndex - 1
       if (index < 0) {
         index = cards.length - 1
