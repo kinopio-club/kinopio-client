@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.search(v-if="visible" :open="visible" ref="dialog")
   section.results-section
-    ResultsFilter(:showFilter="true" :items="recentlyUpdatedCards" :placeholder="placeholder" @updateFilter="updateSearch" @updateFilteredItems="updateSearchResultsCards")
+    ResultsFilter(:showFilter="true" :items="recentlyUpdatedCards" :placeholder="placeholder" @updateFilter="updateSearch" @updateFilteredItems="updateSearchResultsCards" @clearFilter="clearSearch")
     .badge.secondary.inline-badge(v-if="!search")
       img.icon.time(src="@/assets/time.svg")
       span Recent
@@ -120,16 +120,19 @@ export default {
     updateSearch (search) {
       this.$store.commit('search', search)
       if (!search) {
-        this.$nextTick(() => {
-          this.$store.commit('clearSearch')
-        })
+        this.clearSearch()
       }
     },
     updateSearchResultsCards (cards) {
       this.$store.commit('searchResultsCards', cards)
+    },
+    clearSearch () {
+      this.$nextTick(() => {
+        this.$store.commit('clearSearch')
+      })
     }
     // selectCard
-    // previousResultCardId
+    // add to previousResultCardId
   }
 }
 </script>
@@ -154,5 +157,7 @@ export default {
       &:active
         box-shadow none
     img
-      max-height 100px
+      max-width 48px
+      border-radius 3px
+      vertical-align middle
 </style>

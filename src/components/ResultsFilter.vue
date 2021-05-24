@@ -83,6 +83,7 @@ export default {
       this.filter = ''
       this.$emit('updateFilter', this.filter)
       this.$emit('updateFilteredItems', [])
+      this.$emit('clearFilter')
     },
     resetPinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', 1)
