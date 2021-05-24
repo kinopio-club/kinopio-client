@@ -474,6 +474,7 @@ export default {
       let space = utils.clone(helloSpace)
       space.id = nanoid()
       space = cache.updateIdsInSpace(space, nullCardUsers)
+      context.commit('clearSearch', null, { root: true })
       context.commit('restoreSpace', space)
       context.commit('addUserToSpace', user)
     },
@@ -494,6 +495,7 @@ export default {
       space.userId = context.rootState.currentUser.id
       const nullCardUsers = true
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
+      context.commit('clearSearch', null, { root: true })
       context.commit('restoreSpace', uniqueNewSpace)
     },
     saveNewSpace: (context) => {
@@ -526,6 +528,7 @@ export default {
       space = utils.clearSpaceMeta(space, 'copy')
       const nullCardUsers = true
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
+      context.commit('clearSearch', null, { root: true })
       context.commit('restoreSpace', uniqueNewSpace)
       Vue.nextTick(() => {
         context.dispatch('updateUserLastSpaceId')
@@ -584,6 +587,7 @@ export default {
         card.spaceId = spaceId
         space.cards.push(card)
       })
+      context.commit('clearSearch', null, { root: true })
       context.commit('restoreSpace', space)
       context.dispatch('saveNewSpace')
       context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
@@ -706,6 +710,7 @@ export default {
       context.commit('clearAllNotifications', null, { root: true })
       context.commit('clearSpaceFilters', null, { root: true })
       // restore local space
+      context.commit('clearSearch', null, { root: true })
       context.commit('restoreSpace', emptySpace)
       context.commit('restoreSpace', utils.normalizeSpace(cachedSpace))
       context.dispatch('updateSpacePageSize')
