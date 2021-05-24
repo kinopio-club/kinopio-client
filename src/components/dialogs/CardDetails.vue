@@ -781,6 +781,7 @@ export default {
     },
     clickName (event) {
       this.triggerUpdateMagicPaintPositionOffset()
+      this.$store.commit('searchIsVisible', false)
       if (this.isCursorInsideTagBrackets()) {
         this.showTagPicker()
         event.stopPropagation()
