@@ -278,7 +278,6 @@ export default new Vuex.Store({
     searchResultsCards: (state, results) => {
       utils.typeCheck({ value: results, type: 'array', origin: 'searchResultsCards' })
       results = results.map(card => {
-        card = utils.clone(card)
         return card
       })
       state.searchResultsCards = results

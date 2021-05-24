@@ -1196,6 +1196,7 @@ export default {
           throw new Error(response.message)
         }
         console.log('🚗 link preview', data)
+        if (!data.title) { return }
         const image = this.previewImage(data.image, data.image_x)
         const update = {
           id: this.card.id,

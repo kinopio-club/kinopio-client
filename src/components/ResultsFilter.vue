@@ -1,7 +1,7 @@
 <template lang="pug">
 .search-wrap(v-if="shouldShowFilter" @mouseup.stop @touchend.stop)
   img.icon.search(src="@/assets/search.svg" @click.left="focusFilterInput")
-  input(placeholder="Search" v-model="filterItems" ref="filterInput" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport")
+  input(:placeholder="inputPlaceholder" v-model="filterItems" ref="filterInput" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport")
   button.borderless.clear-input-wrap(@click.left="clearFilter")
     img.icon(src="@/assets/add.svg")
 
@@ -14,7 +14,9 @@ export default {
   name: 'ResultsFilter',
   props: {
     hideFilter: Boolean,
-    items: Array
+    showFilter: Boolean,
+    items: Array,
+    placeholder: String
   },
   data () {
     return {
@@ -36,8 +38,13 @@ export default {
     })
   },
   computed: {
+    inputPlaceholder () {
+      return this.placeholder || 'Search'
+    },
     shouldShowFilter () {
-      if (this.hideFilter || !this.isManyItems) {
+      if (this.showFilter) {
+        return true
+      } else if (this.hideFilter || !this.isManyItems) {
         return false
       } else {
         return true
