@@ -48,9 +48,9 @@ header(:style="visualViewportPosition")
             img.icon.search(src="@/assets/search.svg")
             .badge.info(v-if="searchResultsCount") {{searchResultsCount}}
           template(v-if="searchResultsCount")
-            button(v-if="searchResultsCount > 1")
+            button
               img.icon.left-arrow(src="@/assets/down-arrow.svg")
-            button(v-if="searchResultsCount > 1")
+            button
               img.icon.right-arrow(src="@/assets/down-arrow.svg")
             button
               img.icon.cancel(src="@/assets/add.svg")

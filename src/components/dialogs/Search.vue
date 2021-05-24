@@ -8,7 +8,7 @@ dialog.search(v-if="visible" :open="visible" ref="dialog")
     ul.results-list
       template(v-for="card in cards")
         //- card list item
-        li
+        li(@click="selectCard(card)" :data-card-id="card.id")
           template(v-if="card.user.id")
             span.badge.user-badge.user-badge(v-if="userIsNotCurrentUser(card.user.id)" :style="{background: card.user.color}")
               User(:user="card.user" :isClickable="false" :hideYouLabel="true")
@@ -131,9 +131,11 @@ export default {
       this.$nextTick(() => {
         this.$store.commit('clearSearch')
       })
+    },
+    selectCard (card) {
+      this.$store.dispatch('currentSpace/showCardDetails', card.id)
+      this.$store.commit('previousResultCardId', card.id)
     }
-    // selectCard
-    // add to previousResultCardId
   }
 }
 </script>
