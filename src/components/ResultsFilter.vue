@@ -24,6 +24,7 @@ export default {
   props: {
     hideFilter: Boolean,
     showFilter: Boolean,
+    filterIsPersistent: Boolean,
     items: Array,
     placeholder: String
   },
@@ -36,6 +37,7 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
+        if (this.filterIsPersistent) { return }
         this.clearFilter()
       }
       if (mutation.type === 'triggerSelectTemplateCategory') {

@@ -1,7 +1,15 @@
 <template lang="pug">
 dialog.search(v-if="visible" :open="visible" ref="dialog")
   section.results-section
-    ResultsFilter(:showFilter="true" :items="recentlyUpdatedCards" :placeholder="placeholder" @updateFilter="updateSearch" @updateFilteredItems="updateSearchResultsCards" @clearFilter="clearSearch")
+    ResultsFilter(
+      :showFilter="true"
+      :filterIsPersistent="true"
+      :items="recentlyUpdatedCards"
+      :placeholder="placeholder"
+      @updateFilter="updateSearch"
+      @updateFilteredItems="updateSearchResultsCards"
+      @clearFilter="clearSearch"
+    )
     .badge.secondary.inline-badge(v-if="!search")
       img.icon.time(src="@/assets/time.svg")
       span Recent
