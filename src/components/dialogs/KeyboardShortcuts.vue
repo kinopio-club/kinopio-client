@@ -7,6 +7,19 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
 
   section
     article
+      .row
+        .badge.title
+          img.icon(src="@/assets/search.svg")
+          span Search/Jump-to Spaces
+        .badge.info {{meta}}–K
+    article
+      .row
+        .badge.title
+          img.icon(src="@/assets/search.svg")
+          span Search/Jump-to Cards
+        .badge.info {{meta}}–F
+
+    article
       .row.multiple-items
         .badge.title
           img.icon(src="@/assets/add.svg")
@@ -14,8 +27,6 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
         .divider.badge or
         .badge.title Click Focused Item
         .badge.info Enter
-      button(@click.left.stop="toggleCardInfoIsVisible" :class="{ active: cardInfoIsVisible }") More Info
-      p(v-if="cardInfoIsVisible") Disabled if card contains Japanese characters
     article
       .row
         .badge.title
@@ -165,19 +176,12 @@ export default {
   data () {
     return {
       safariInfoIsVisible: false,
-      cardInfoIsVisible: false,
       childCardInfoIsVisible: false,
       dialogHeight: null
     }
   },
   computed: {
-    meta () {
-      if (utils.isMacOrIpad() || utils.isIPhone()) {
-        return '⌘'
-      } else {
-        return 'Ctrl'
-      }
-    },
+    meta () { return utils.metaKey() },
     currentUser () { return this.$store.state.currentUser },
     isMobile () { return utils.isMobile() },
     shouldInvertZoomDirection () { return this.$store.state.currentUser.shouldInvertZoomDirection }
@@ -188,9 +192,6 @@ export default {
     },
     toggleChildCardInfoIsVisible () {
       this.childCardInfoIsVisible = !this.childCardInfoIsVisible
-    },
-    toggleCardInfoIsVisible () {
-      this.cardInfoIsVisible = !this.cardInfoIsVisible
     },
     toggleShouldInvertZoomDirection () {
       const value = !this.shouldInvertZoomDirection

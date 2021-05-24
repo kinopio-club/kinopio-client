@@ -680,6 +680,11 @@ export default {
       compositionEventEndTime = event.timeStamp
     },
     closeCard (event) {
+      if (this.$store.state.shouldPreventNextEnterKey) {
+        event.stopPropagation()
+        this.$store.commit('shouldPreventNextEnterKey', false)
+        return
+      }
       if (this.tag.pickerIsVisible || this.space.pickerIsVisible) {
         this.hidePickers()
         event.stopPropagation()
@@ -776,6 +781,7 @@ export default {
     },
     clickName (event) {
       this.triggerUpdateMagicPaintPositionOffset()
+      this.$store.commit('searchIsVisible', false)
       if (this.isCursorInsideTagBrackets()) {
         this.showTagPicker()
         event.stopPropagation()
@@ -1196,6 +1202,7 @@ export default {
           throw new Error(response.message)
         }
         console.log('🚗 link preview', data)
+        if (!data.title) { return }
         const image = this.previewImage(data.image, data.image_x)
         const update = {
           id: this.card.id,

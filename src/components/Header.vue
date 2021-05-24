@@ -10,45 +10,61 @@ header(:style="visualViewportPosition")
           img.down-arrow(src="@/assets/down-arrow.svg")
         About(:visible="aboutIsVisible")
         KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
-    .space-details-wrap(:class="{'segmented-buttons': spaceHasStatusOrOffline}")
-      //- space
-      .button-wrap
-        button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
-          .badge.info(v-show="currentSpaceIsTemplate")
-            span Template
-          .badge-wrap(v-if="!userCanEditSpace && !currentSpaceIsTemplate")
-            .badge.info(:class="{'invisible': readOnlyJiggle}")
-              span Read Only
-            .badge.info.invisible-badge(ref="readOnly" :class="{'badge-jiggle': readOnlyJiggle, 'invisible': !readOnlyJiggle}")
-              span Read Only
-          MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
-          span {{currentSpaceName}}
-          img.icon.privacy-icon(v-if="spaceIsNotClosed" :src="privacyIcon" :class="privacyName")
-          .badge.status.explore(v-if="shouldShowInExplore")
-            img.icon(src="@/assets/checkmark.svg")
-        SpaceDetails(:visible="spaceDetailsIsVisible")
-        ImportArenaChannel(:visible="importArenaChannelIsVisible")
-      //- state
-      .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
-        button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
-          Loader(:visible="spaceHasStatus")
-          .badge.success.space-status-success(v-if="!spaceHasStatus")
-        SpaceStatus(:visible="spaceStatusIsVisible")
-      //- offline
-      .button-wrap(v-if="!isOnline")
-        button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
-          img.icon.offline(src="@/assets/offline.svg")
-        Offline(:visible="offlineIsVisible")
+    .space-meta-rows
+      .space-details-row(:class="{'segmented-buttons': spaceHasStatusOrOffline}")
+        //- space
+        .button-wrap
+          button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
+            .badge.info(v-show="currentSpaceIsTemplate")
+              span Template
+            .badge-wrap(v-if="!userCanEditSpace && !currentSpaceIsTemplate")
+              .badge.info(:class="{'invisible': readOnlyJiggle}")
+                span Read Only
+              .badge.info.invisible-badge(ref="readOnly" :class="{'badge-jiggle': readOnlyJiggle, 'invisible': !readOnlyJiggle}")
+                span Read Only
+            MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
+            span {{currentSpaceName}}
+            img.icon.privacy-icon(v-if="spaceIsNotClosed" :src="privacyIcon" :class="privacyName")
+            .badge.status.explore(v-if="shouldShowInExplore")
+              img.icon(src="@/assets/checkmark.svg")
+          SpaceDetails(:visible="spaceDetailsIsVisible")
+          ImportArenaChannel(:visible="importArenaChannelIsVisible")
+        //- state
+        .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
+          button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
+            Loader(:visible="spaceHasStatus")
+            .badge.success.space-status-success(v-if="!spaceHasStatus")
+          SpaceStatus(:visible="spaceStatusIsVisible")
+        //- offline
+        .button-wrap(v-if="!isOnline")
+          button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
+            img.icon.offline(src="@/assets/offline.svg")
+          Offline(:visible="offlineIsVisible")
+
+      .search-row
+        //- search
+        .segmented-buttons
+          button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
+            img.icon.search(src="@/assets/search.svg")
+            .badge.info(v-if="searchResultsCount") {{searchResultsCount}}
+          template(v-if="searchResultsCount")
+            button(@click="showPreviousSearchCard")
+              img.icon.left-arrow(src="@/assets/down-arrow.svg")
+            button(@click="showNextSearchCard")
+              img.icon.right-arrow(src="@/assets/down-arrow.svg")
+            button(@click="clearSearch")
+              img.icon.cancel(src="@/assets/add.svg")
+        Search(:visible="searchIsVisible")
 
   aside
     .top
       .top-buttons-wrap
-        // Share
+        //- Share
         .button-wrap
           button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
             span Share
           Share(:visible="shareIsVisible")
-        // Notifications
+        //- Notifications
         .button-wrap
           button(@click.left.stop="toggleNotificationsIsVisible" :class="{active : notificationsIsVisible}")
             span {{notificationsUnreadCount}}
@@ -65,7 +81,7 @@ header(:style="visualViewportPosition")
 
     .bottom
       ResetPassword
-      // Sign Up or In
+      //- Sign Up or In
       .button-wrap(v-if="!currentUserIsSignedIn && isOnline")
         button(@click.left.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}")
           span Sign Up or In
@@ -93,6 +109,7 @@ import templates from '@/data/templates.js'
 import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
+import Search from '@/components/dialogs/Search.vue'
 import privacy from '@/data/privacy.js'
 import utils from '@/utils.js'
 
@@ -115,6 +132,7 @@ export default {
     ImportArenaChannel,
     KeyboardShortcuts,
     UpgradeUser,
+    Search,
     MoonPhase
   },
   data () {
@@ -267,9 +285,47 @@ export default {
       if (!this.notifications) { return 0 }
       const unread = this.notifications.filter(notification => !notification.isRead)
       return unread.length || 0
-    }
+    },
+    searchIsVisible () { return this.$store.state.searchIsVisible },
+    searchResultsCount () { return this.$store.state.searchResultsCards.length }
   },
   methods: {
+    showCardDetails (card) {
+      this.$store.dispatch('currentSpace/showCardDetails', card.id)
+      this.$store.commit('previousResultCardId', card.id)
+    },
+    showNextSearchCard () {
+      const cards = this.$store.state.searchResultsCards
+      const previousResultCardId = this.$store.state.previousResultCardId
+      if (!previousResultCardId) {
+        this.showCardDetails(cards[0])
+        return
+      }
+      const currentIndex = cards.findIndex(card => card.id === previousResultCardId)
+      let index = currentIndex + 1
+      if (cards.length === index) {
+        index = 0
+      }
+      this.showCardDetails(cards[index])
+    },
+    showPreviousSearchCard () {
+      const cards = this.$store.state.searchResultsCards
+      const previousResultCardId = this.$store.state.previousResultCardId
+      if (!previousResultCardId) {
+        this.showCardDetails(cards[0])
+        return
+      }
+      const currentIndex = cards.findIndex(card => card.id === previousResultCardId)
+      let index = currentIndex - 1
+      if (index < 0) {
+        index = cards.length - 1
+      }
+      this.showCardDetails(cards[index])
+    },
+    clearSearch () {
+      this.$store.dispatch('closeAllDialogs', 'Header.clearSearch')
+      this.$store.commit('clearSearch')
+    },
     addReadOnlyJiggle () {
       const element = this.$refs.readOnly
       if (!element) { return }
@@ -360,6 +416,11 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'Header.toggleOfflineIsVisible')
       this.offlineIsVisible = !isVisible
     },
+    toggleSearchIsVisible () {
+      const isVisible = this.searchIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleSearchIsVisible')
+      this.$store.commit('searchIsVisible', !isVisible)
+    },
     setLoadingSignUpOrIn (value) {
       this.loadingSignUpOrIn = value
     },
@@ -448,7 +509,19 @@ header
     &.active
       .down-arrow
         transform translateY(5px)
-  .space-details-wrap
+
+  .left-arrow
+    transform rotate(90deg)
+    vertical-align 1px
+  .right-arrow
+    transform rotate(-90deg)
+    vertical-align 1px
+  .search-button
+    .badge
+      margin-right 0
+      margin-left 6px
+
+  .space-details-row
     margin-top 8px
     @media(max-width 414px)
       max-width calc(100vw - 200px)
@@ -481,7 +554,9 @@ header
             border-top-right-radius 3px
             border-bottom-right-radius 3px
             margin-left -1px
-
+  .search-row
+    margin-top 5px
+    position relative
   aside
     display flex
     flex-direction column

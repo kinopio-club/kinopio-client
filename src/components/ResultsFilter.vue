@@ -1,10 +1,18 @@
 <template lang="pug">
 .search-wrap(v-if="shouldShowFilter" @mouseup.stop @touchend.stop)
   img.icon.search(src="@/assets/search.svg" @click.left="focusFilterInput")
-  input(placeholder="Search" v-model="filterItems" ref="filterInput" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport")
+  input(
+    :placeholder="inputPlaceholder"
+    v-model="filterItems"
+    ref="filterInput"
+    @focus="resetPinchCounterZoomDecimal"
+    @blur="triggerUpdatePositionInVisualViewport"
+    @keydown.down.exact="focusNextItem"
+    @keydown.up.exact="focusPreviousItem"
+    @keydown.enter.stop.prevent.exact="selectItem"
+  )
   button.borderless.clear-input-wrap(@click.left="clearFilter")
     img.icon(src="@/assets/add.svg")
-
 </template>
 
 <script>
@@ -14,7 +22,11 @@ export default {
   name: 'ResultsFilter',
   props: {
     hideFilter: Boolean,
-    items: Array
+    showFilter: Boolean,
+    filterIsPersistent: Boolean,
+    items: Array,
+    placeholder: String,
+    initialValue: String
   },
   data () {
     return {
@@ -23,21 +35,30 @@ export default {
     }
   },
   created () {
+    if (this.initialValue) {
+      this.filter = this.initialValue
+    }
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
+        if (this.filterIsPersistent) { return }
         this.clearFilter()
       }
       if (mutation.type === 'triggerSelectTemplateCategory') {
         this.clearFilter()
       }
-      if (mutation.type === 'triggerFocusSpaceDetailsFilter') {
+      if (mutation.type === 'triggerFocusResultsFilter') {
         this.focusFilterInput()
       }
     })
   },
   computed: {
+    inputPlaceholder () {
+      return this.placeholder || 'Search'
+    },
     shouldShowFilter () {
-      if (this.hideFilter || !this.isManyItems) {
+      if (this.showFilter) {
+        return true
+      } else if (this.hideFilter || !this.isManyItems) {
         return false
       } else {
         return true
@@ -70,18 +91,28 @@ export default {
       const element = this.$refs.filterInput
       if (!element) { return }
       element.focus()
-      element.setSelectionRange(0, 0)
+      element.setSelectionRange(0, 99999)
     },
     clearFilter () {
       this.filter = ''
       this.$emit('updateFilter', this.filter)
       this.$emit('updateFilteredItems', [])
+      this.$emit('clearFilter')
     },
     resetPinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', 1)
     },
     triggerUpdatePositionInVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
+    },
+    focusNextItem (event) {
+      this.$emit('focusNextItem')
+    },
+    focusPreviousItem (event) {
+      this.$emit('focusPreviousItem')
+    },
+    selectItem (event) {
+      this.$emit('selectItem')
     }
   }
 }

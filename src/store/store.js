@@ -44,6 +44,13 @@ export default new Vuex.Store({
     currentSpacePath: '/',
     webfontIsLoaded: false,
     userHasScrolled: false,
+    shouldPreventNextEnterKey: false,
+
+    // search
+    searchIsVisible: false,
+    search: '',
+    searchResultsCards: [],
+    previousResultCardId: '',
 
     // reset password
     resetPasswordApiKey: '',
@@ -183,6 +190,7 @@ export default new Vuex.Store({
       state.currentSelectedTag = {}
       state.linkDetailsIsVisible = false
       state.currentSelectedLink = {}
+      state.searchIsVisible = false
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isOnline' })
@@ -260,6 +268,31 @@ export default new Vuex.Store({
       utils.typeCheck({ value, type: 'boolean', origin: 'userHasScrolled' })
       state.userHasScrolled = value
     },
+    shouldPreventNextEnterKey: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldPreventNextEnterKey' })
+      state.shouldPreventNextEnterKey = value
+    },
+    searchIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'searchIsVisible' })
+      state.searchIsVisible = value
+    },
+    search: (state, value) => {
+      utils.typeCheck({ value, type: 'string', origin: 'search' })
+      state.search = value
+    },
+    searchResultsCards: (state, results) => {
+      utils.typeCheck({ value: results, type: 'array', origin: 'searchResultsCards' })
+      state.searchResultsCards = results
+    },
+    previousResultCardId: (state, value) => {
+      utils.typeCheck({ value, type: 'string', origin: 'previousResultCardId' })
+      state.previousResultCardId = value
+    },
+    clearSearch: (state) => {
+      state.search = ''
+      state.searchResultsCards = []
+      state.previousResultCardId = ''
+    },
     resetPasswordApiKey: (state, apiKey) => {
       utils.typeCheck({ value: apiKey, type: 'string', origin: 'resetPasswordApiKey' })
       state.resetPasswordApiKey = apiKey
@@ -277,7 +310,7 @@ export default new Vuex.Store({
       state.isAuthenticatingWithArena = value
     },
     triggerSpaceDetailsVisible: () => {},
-    triggerFocusSpaceDetailsFilter: () => {},
+    triggerFocusResultsFilter: () => {},
     triggerFocusSpaceDetailsName: () => {},
     triggerSignUpOrInIsVisible: () => {},
     triggerArenaAuthenticationError: () => {},
