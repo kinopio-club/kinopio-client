@@ -9,6 +9,9 @@ dialog.search(v-if="visible" :open="visible" ref="dialog")
       @updateFilter="updateSearch"
       @updateFilteredItems="updateSearchResultsCards"
       @clearFilter="clearSearch"
+      @focusNextItem="focusNextItem"
+      @focusPreviousItem="focusPreviousItem"
+      @selectItem="selectItem"
     )
     .badge.secondary.inline-badge(v-if="!search")
       img.icon.time(src="@/assets/time.svg")
@@ -16,7 +19,7 @@ dialog.search(v-if="visible" :open="visible" ref="dialog")
     ul.results-list
       template(v-for="card in cards")
         //- card list item
-        li(@click="selectCard(card)" :data-card-id="card.id" :class="{active: cardDetailsIsVisibleForCardId(card)}")
+        li(@click="selectCard(card)" :data-card-id="card.id" :class="{active: cardDetailsIsVisibleForCardId(card), hover: cardIsFocused(card)}")
           template(v-if="card.user.id")
             span.badge.user-badge.user-badge(v-if="userIsNotCurrentUser(card.user.id)" :style="{background: card.user.color}")
               User(:user="card.user" :isClickable="false" :hideYouLabel="true")
@@ -57,6 +60,7 @@ export default {
     },
     search () { return this.$store.state.search },
     searchResultsCards () { return this.$store.state.searchResultsCards },
+    previousResultCardId () { return this.$store.state.previousResultCardId },
     cards () {
       let cards
       if (this.search) {
@@ -81,6 +85,7 @@ export default {
     },
     recentlyUpdatedCards () {
       let cards = utils.clone(this.$store.state.currentSpace.cards)
+      cards = cards.filter(card => card.name)
       cards = cards.map(card => {
         const date = card.nameUpdatedAt || card.createdAt
         card.updatedAt = dayjs(date)
@@ -136,6 +141,11 @@ export default {
       if (!search) {
         this.clearSearch()
       }
+      this.$nextTick(() => {
+        if (this.cards.length && this.search) {
+          this.focusItem(this.cards[0])
+        }
+      })
     },
     updateSearchResultsCards (cards) {
       this.$store.commit('previousResultCardId', '')
@@ -148,7 +158,52 @@ export default {
     },
     selectCard (card) {
       this.$store.dispatch('currentSpace/showCardDetails', card.id)
+      this.focusItem(card)
+    },
+    focusNextItem () {
+      const cards = this.cards
+      if (!this.previousResultCardId) {
+        this.focusItem(cards[0])
+        return
+      }
+      let currentIndex = cards.findIndex(card => card.id === this.previousResultCardId)
+      let index = currentIndex + 1
+      if (cards.length === index) {
+        index = 0
+      }
+      this.focusItem(cards[index])
+    },
+    focusPreviousItem () {
+      const cards = this.cards
+      if (!this.previousResultCardId) {
+        this.focusItem(cards[0])
+        return
+      }
+      let currentIndex = cards.findIndex(card => card.id === this.previousResultCardId)
+      let index = currentIndex - 1
+      if (index < 0) {
+        index = cards.length - 1
+      }
+      this.focusItem(cards[index])
+    },
+    focusItem (card) {
       this.$store.commit('previousResultCardId', card.id)
+    },
+    cardIsFocused (card) {
+      if (this.previousResultCardId === card.id) {
+        return true
+      }
+    },
+    selectItem () {
+      const card = this.$store.getters['currentSpace/cardById'](this.previousResultCardId)
+      this.$store.commit('shouldPreventNextEnterKey', true)
+      this.$store.dispatch('closeAllDialogs', 'Search.selectItem')
+      this.selectCard(card)
+    }
+  },
+  watch: {
+    visible (visible) {
+      this.$store.commit('previousResultCardId', '')
     }
   }
 }

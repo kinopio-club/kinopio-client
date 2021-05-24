@@ -44,6 +44,7 @@ export default new Vuex.Store({
     currentSpacePath: '/',
     webfontIsLoaded: false,
     userHasScrolled: false,
+    shouldPreventNextEnterKey: false,
 
     // search
     searchIsVisible: false,
@@ -266,6 +267,10 @@ export default new Vuex.Store({
     userHasScrolled: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'userHasScrolled' })
       state.userHasScrolled = value
+    },
+    shouldPreventNextEnterKey: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldPreventNextEnterKey' })
+      state.shouldPreventNextEnterKey = value
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'searchIsVisible' })

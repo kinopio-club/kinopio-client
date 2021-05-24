@@ -9,7 +9,7 @@
     @blur="triggerUpdatePositionInVisualViewport"
     @keydown.down="focusNextItem"
     @keydown.up="focusPreviousItem"
-    @keydown.enter="selectItem"
+    @keydown.enter.stop.prevent="selectItem"
   )
   button.borderless.clear-input-wrap(@click.left="clearFilter")
     img.icon(src="@/assets/add.svg")

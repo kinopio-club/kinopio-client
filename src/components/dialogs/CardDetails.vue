@@ -680,6 +680,11 @@ export default {
       compositionEventEndTime = event.timeStamp
     },
     closeCard (event) {
+      if (this.$store.state.shouldPreventNextEnterKey) {
+        event.stopPropagation()
+        this.$store.commit('shouldPreventNextEnterKey', false)
+        return
+      }
       if (this.tag.pickerIsVisible || this.space.pickerIsVisible) {
         this.hidePickers()
         event.stopPropagation()
