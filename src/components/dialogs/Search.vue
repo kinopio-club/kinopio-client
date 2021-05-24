@@ -6,6 +6,7 @@ dialog.search(v-if="visible" :open="visible" ref="dialog")
       :filterIsPersistent="true"
       :items="recentlyUpdatedCards"
       :placeholder="placeholder"
+      :initialValue="search"
       @updateFilter="updateSearch"
       @updateFilteredItems="updateSearchResultsCards"
       @clearFilter="clearSearch"

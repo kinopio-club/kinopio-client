@@ -13,7 +13,6 @@
   )
   button.borderless.clear-input-wrap(@click.left="clearFilter")
     img.icon(src="@/assets/add.svg")
-
 </template>
 
 <script>
@@ -26,7 +25,8 @@ export default {
     showFilter: Boolean,
     filterIsPersistent: Boolean,
     items: Array,
-    placeholder: String
+    placeholder: String,
+    initialValue: String
   },
   data () {
     return {
@@ -35,6 +35,9 @@ export default {
     }
   },
   created () {
+    if (this.initialValue) {
+      this.filter = this.initialValue
+    }
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
         if (this.filterIsPersistent) { return }
