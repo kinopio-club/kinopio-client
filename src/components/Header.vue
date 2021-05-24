@@ -46,13 +46,14 @@ header(:style="visualViewportPosition")
         .segmented-buttons
           button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
             img.icon.search(src="@/assets/search.svg")
-            .badge.info 2
-          button
-            img.icon.left-arrow(src="@/assets/down-arrow.svg")
-          button
-            img.icon.right-arrow(src="@/assets/down-arrow.svg")
-          button
-            img.icon.cancel(src="@/assets/add.svg")
+            .badge.info(v-if="searchResultsCount") {{searchResultsCount}}
+          template(v-if="searchResultsCount")
+            button(v-if="searchResultsCount > 1")
+              img.icon.left-arrow(src="@/assets/down-arrow.svg")
+            button(v-if="searchResultsCount > 1")
+              img.icon.right-arrow(src="@/assets/down-arrow.svg")
+            button
+              img.icon.cancel(src="@/assets/add.svg")
         Search(:visible="searchIsVisible")
 
   aside
@@ -285,7 +286,8 @@ export default {
       const unread = this.notifications.filter(notification => !notification.isRead)
       return unread.length || 0
     },
-    searchIsVisible () { return this.$store.state.searchIsVisible }
+    searchIsVisible () { return this.$store.state.searchIsVisible },
+    searchResultsCount () { return this.$store.state.searchResultsCards.length }
   },
   methods: {
     addReadOnlyJiggle () {

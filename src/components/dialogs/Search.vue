@@ -54,6 +54,7 @@ export default {
       } else {
         cards = this.recentlyUpdatedCards
       }
+      cards = utils.clone(cards)
       cards.map(card => {
         card.nameSegments = this.cardNameSegments(card.name)
         card.user = this.$store.getters['currentSpace/userById'](card.userId)
@@ -118,6 +119,11 @@ export default {
     },
     updateSearch (search) {
       this.$store.commit('search', search)
+      if (!search) {
+        this.$nextTick(() => {
+          this.$store.commit('clearSearch')
+        })
+      }
     },
     updateSearchResultsCards (cards) {
       this.$store.commit('searchResultsCards', cards)

@@ -277,9 +277,6 @@ export default new Vuex.Store({
     },
     searchResultsCards: (state, results) => {
       utils.typeCheck({ value: results, type: 'array', origin: 'searchResultsCards' })
-      results = results.map(card => {
-        return card
-      })
       state.searchResultsCards = results
     },
     previousResultCardId: (state, value) => {
@@ -287,7 +284,6 @@ export default new Vuex.Store({
       state.previousResultCardId = value
     },
     clearSearch: (state) => {
-      state.searchIsVisible = false
       state.search = ''
       state.searchResultsCards = []
       state.previousResultCardId = ''
