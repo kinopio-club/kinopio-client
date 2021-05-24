@@ -8,7 +8,7 @@ dialog.search(v-if="visible" :open="visible" ref="dialog")
     ul.results-list
       template(v-for="card in cards")
         //- card list item
-        li(@click="selectCard(card)" :data-card-id="card.id")
+        li(@click="selectCard(card)" :data-card-id="card.id" :class="{active: cardDetailsIsVisibleForCardId(card)}")
           template(v-if="card.user.id")
             span.badge.user-badge.user-badge(v-if="userIsNotCurrentUser(card.user.id)" :style="{background: card.user.color}")
               User(:user="card.user" :isClickable="false" :hideYouLabel="true")
@@ -84,6 +84,9 @@ export default {
     currentUser () { return this.$store.state.currentUser }
   },
   methods: {
+    cardDetailsIsVisibleForCardId (card) {
+      return this.$store.state.cardDetailsIsVisibleForCardId === card.id
+    },
     userIsNotCurrentUser (userId) {
       return this.currentUser.id !== userId
     },
@@ -125,6 +128,7 @@ export default {
       }
     },
     updateSearchResultsCards (cards) {
+      this.$store.commit('previousResultCardId', '')
       this.$store.commit('searchResultsCards', cards)
     },
     clearSearch () {
