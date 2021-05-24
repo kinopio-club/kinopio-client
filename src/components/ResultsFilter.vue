@@ -43,7 +43,7 @@ export default {
       if (mutation.type === 'triggerSelectTemplateCategory') {
         this.clearFilter()
       }
-      if (mutation.type === 'triggerFocusSpaceDetailsFilter') {
+      if (mutation.type === 'triggerFocusResultsFilter') {
         this.focusFilterInput()
       }
     })

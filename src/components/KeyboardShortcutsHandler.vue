@@ -107,10 +107,14 @@ export default {
       } else if (isMeta && key === 'a' && isSpaceScope) {
         event.preventDefault()
         this.selectAllCards()
-      // Jump to Space
-      } else if (isMeta && key === 'k' && isSpaceScope) {
+      // Search/Jump-to Space
+      } else if (isMeta && key === 'k') {
         event.preventDefault()
         this.focusOnSpaceDetailsFilter()
+      // Search/Jump-to Card
+      } else if (isMeta && key === 'f') {
+        event.preventDefault()
+        this.focusOnSearchCardFilter()
       // Zoom Reset
       } else if (isMeta && key === '0') {
         browserZoomLevel = 0
@@ -537,14 +541,24 @@ export default {
       this.$store.commit('multipleCardsSelectedIds', cards)
     },
 
-    // Jump to Space (temporary?)
+    // Search/Jump-to
 
     focusOnSpaceDetailsFilter () {
       this.$store.commit('triggerSpaceDetailsVisible')
       this.$nextTick(() => {
         this.$nextTick(() => {
           this.$nextTick(() => {
-            this.$store.commit('triggerFocusSpaceDetailsFilter')
+            this.$store.commit('triggerFocusResultsFilter')
+          })
+        })
+      })
+    },
+    focusOnSearchCardFilter () {
+      this.$store.commit('searchIsVisible', true)
+      this.$nextTick(() => {
+        this.$nextTick(() => {
+          this.$nextTick(() => {
+            this.$store.commit('triggerFocusResultsFilter')
           })
         })
       })
