@@ -47,12 +47,14 @@ export default {
   props: {
     visible: Boolean
   },
-  data () {
-    return {
-      placeholder: undefined
-    }
-  },
   computed: {
+    placeholder () {
+      let placeholder = 'Search Cards'
+      if (!utils.isMobile()) {
+        placeholder = placeholder + ` (${utils.metaKey()}-F)`
+      }
+      return placeholder
+    },
     search () { return this.$store.state.search },
     searchResultsCards () { return this.$store.state.searchResultsCards },
     cards () {
@@ -89,8 +91,7 @@ export default {
       })
       return cards
     },
-    currentUser () { return this.$store.state.currentUser },
-    meta () { return utils.metaKey() }
+    currentUser () { return this.$store.state.currentUser }
   },
   methods: {
     cardDetailsIsVisibleForCardId (card) {
@@ -148,16 +149,6 @@ export default {
     selectCard (card) {
       this.$store.dispatch('currentSpace/showCardDetails', card.id)
       this.$store.commit('previousResultCardId', card.id)
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.placeholder = `Search Cards (${this.meta}-F)`
-        if (utils.isMobile()) {
-          this.placeholder = 'Search Cards'
-        }
-      }
     }
   }
 }

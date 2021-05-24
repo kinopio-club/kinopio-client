@@ -1,6 +1,6 @@
 <template lang="pug">
 span.space-list-wrap
-  ResultsFilter(:hideFilter="hideFilter" :items="spaces" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredSpaces")
+  ResultsFilter(:hideFilter="hideFilter" :items="spaces" :placeholder="placeholder" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredSpaces")
   ul.results-list.space-list
     template(v-for="(space in spacesFiltered")
       a(:href="space.url")
@@ -52,6 +52,17 @@ export default {
     Loader,
     MoonPhase
   },
+  props: {
+    spaces: Array,
+    selectedSpace: Object,
+    showCategory: Boolean,
+    showUser: Boolean,
+    showUserIfCurrentUserIsCollaborator: Boolean,
+    hideExploreBadge: Boolean,
+    hideFilter: Boolean,
+    isLoading: Boolean,
+    parentIsSpaceDetails: Boolean
+  },
   mounted () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerPickerNavigationKey') {
@@ -73,16 +84,6 @@ export default {
       }
     })
   },
-  props: {
-    spaces: Array,
-    selectedSpace: Object,
-    showCategory: Boolean,
-    showUser: Boolean,
-    showUserIfCurrentUserIsCollaborator: Boolean,
-    hideExploreBadge: Boolean,
-    hideFilter: Boolean,
-    isLoading: Boolean
-  },
   data () {
     return {
       filter: '',
@@ -91,6 +92,14 @@ export default {
     }
   },
   computed: {
+    placeholder () {
+      if (!this.parentIsSpaceDetails) { return }
+      let placeholder = 'Search Spaces'
+      if (!utils.isMobile()) {
+        placeholder = placeholder + ` (${utils.metaKey()}-K)`
+      }
+      return placeholder
+    },
     spacesFiltered () {
       if (this.filter) {
         return this.filteredSpaces
