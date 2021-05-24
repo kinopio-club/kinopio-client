@@ -1,7 +1,16 @@
 <template lang="pug">
 .search-wrap(v-if="shouldShowFilter" @mouseup.stop @touchend.stop)
   img.icon.search(src="@/assets/search.svg" @click.left="focusFilterInput")
-  input(:placeholder="inputPlaceholder" v-model="filterItems" ref="filterInput" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport")
+  input(
+    :placeholder="inputPlaceholder"
+    v-model="filterItems"
+    ref="filterInput"
+    @focus="resetPinchCounterZoomDecimal"
+    @blur="triggerUpdatePositionInVisualViewport"
+    @keydown.down="focusNextItem"
+    @keydown.up="focusPreviousItem"
+    @keydown.enter="selectItem"
+  )
   button.borderless.clear-input-wrap(@click.left="clearFilter")
     img.icon(src="@/assets/add.svg")
 
@@ -90,6 +99,22 @@ export default {
     },
     triggerUpdatePositionInVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
+    },
+    shouldPreventEmit (event) {
+      const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
+      if (modifierKey) { return true }
+    },
+    focusNextItem (event) {
+      if (this.shouldPreventEmit(event)) { return }
+      this.$emit('focusNextItem')
+    },
+    focusPreviousItem (event) {
+      if (this.shouldPreventEmit(event)) { return }
+      this.$emit('focusPreviousItem')
+    },
+    selectItem (event) {
+      if (this.shouldPreventEmit(event)) { return }
+      this.$emit('selectItem')
     }
   }
 }

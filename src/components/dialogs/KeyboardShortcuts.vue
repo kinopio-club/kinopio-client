@@ -171,13 +171,7 @@ export default {
     }
   },
   computed: {
-    meta () {
-      if (utils.isMacOrIpad() || utils.isIPhone()) {
-        return '⌘'
-      } else {
-        return 'Ctrl'
-      }
-    },
+    meta () { return utils.metaKey() },
     currentUser () { return this.$store.state.currentUser },
     isMobile () { return utils.isMobile() },
     shouldInvertZoomDirection () { return this.$store.state.currentUser.shouldInvertZoomDirection }

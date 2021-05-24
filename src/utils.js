@@ -284,6 +284,13 @@ export default {
   isMacOrIpad () {
     return window.navigator.platform === 'MacIntel'
   },
+  metaKey () {
+    if (this.isMacOrIpad() || this.isIPhone()) {
+      return '⌘'
+    } else {
+      return 'Ctrl'
+    }
+  },
   backgroundIsDefault (path) {
     // https://regexr.com/5pa1n
     const backgroundPathPattern = /\/background\..+\.svg$/g

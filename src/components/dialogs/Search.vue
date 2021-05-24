@@ -41,7 +41,7 @@ export default {
   },
   data () {
     return {
-      placeholder: 'Search Space Cards'
+      placeholder: undefined
     }
   },
   computed: {
@@ -81,7 +81,8 @@ export default {
       })
       return cards
     },
-    currentUser () { return this.$store.state.currentUser }
+    currentUser () { return this.$store.state.currentUser },
+    meta () { return utils.metaKey() }
   },
   methods: {
     cardDetailsIsVisibleForCardId (card) {
@@ -139,6 +140,16 @@ export default {
     selectCard (card) {
       this.$store.dispatch('currentSpace/showCardDetails', card.id)
       this.$store.commit('previousResultCardId', card.id)
+    }
+  },
+  watch: {
+    visible (visible) {
+      if (visible) {
+        this.placeholder = `Search Cards (${this.meta}-F)`
+        if (utils.isMobile()) {
+          this.placeholder = 'Search Cards'
+        }
+      }
     }
   }
 }
