@@ -148,7 +148,6 @@ article(:style="position" :data-card-id="id" ref="card")
     //- Search result
     span.badge.search(v-if="isInSearchResultsCards")
       img.icon.search(src="@/assets/search.svg")
-
     //- User
     .badge-wrap
       .badge.user-badge.button-badge(
