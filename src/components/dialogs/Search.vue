@@ -176,9 +176,7 @@ export default {
       })
     },
     selectCard (card) {
-      if (utils.isMobile()) {
-        this.$store.dispatch('closeAllDialogs', 'Search.selectCard')
-      }
+      this.$store.dispatch('closeAllDialogs', 'Search.selectCard')
       this.$store.dispatch('currentSpace/showCardDetails', card.id)
       this.focusItem(card)
     },
