@@ -144,7 +144,10 @@ article(:style="position" :data-card-id="id" ref="card")
   CardDetails(:card="card" @broadcastShowCardDetails="broadcastShowCardDetails")
 
   //- Meta Info
-  .meta-container(v-if="filterShowUsers || filterShowDateUpdated")
+  .meta-container(v-if="filterShowUsers || filterShowDateUpdated || isInSearchResultsCards")
+    //- Search result
+    span.badge.search(v-if="isInSearchResultsCards")
+      img.icon.search(src="@/assets/search.svg")
     //- User
     .badge-wrap
       .badge.user-badge.button-badge(
@@ -176,8 +179,6 @@ import User from '@/components/User.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
-
-import fromNow from 'fromnow'
 
 let isMultiTouch
 let initialTouchEvent = {}
@@ -251,6 +252,11 @@ export default {
     }
   },
   computed: {
+    isInSearchResultsCards () {
+      const results = this.$store.state.searchResultsCards
+      if (!results.length) { return }
+      return Boolean(results.find(card => this.card.id === card.id))
+    },
     currentSelectedTag () { return this.$store.state.currentSelectedTag },
     currentSelectedLink () { return this.$store.state.currentSelectedLink },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
@@ -330,7 +336,7 @@ export default {
         if (showAbsoluteDate) {
           return new Date(date).toLocaleString()
         } else {
-          return fromNow(date, { max: 1, suffix: true })
+          return utils.shortRelativeTime(date)
         }
       } else {
         return 'Just now'
@@ -993,6 +999,16 @@ export default {
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
       this.$store.commit('currentUserIsDraggingCard', false)
       this.broadcastShowCardDetails()
+      this.updatePreviousResultCardId()
+    },
+    updatePreviousResultCardId () {
+      const search = this.$store.state.search
+      const searchResultsCards = this.$store.state.searchResultsCards
+      if (!search) { return }
+      if (!searchResultsCards.length) { return }
+      if (searchResultsCards.find(card => card.id === this.card.id)) {
+        this.$store.commit('previousResultCardId', this.card.id)
+      }
     },
     showTagDetailsIsVisible ({ event, tag }) {
       if (isMultiTouch) { return }

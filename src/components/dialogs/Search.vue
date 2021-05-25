@@ -1,6 +1,6 @@
 <template lang="pug">
-dialog.search(v-if="visible" :open="visible" ref="dialog")
-  section.results-section
+dialog.search(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+  section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ResultsFilter(
       :showFilter="true"
       :filterIsPersistent="true"
@@ -14,18 +14,19 @@ dialog.search(v-if="visible" :open="visible" ref="dialog")
       @focusPreviousItem="focusPreviousItem"
       @selectItem="selectItem"
     )
-    .badge.secondary.inline-badge(v-if="!search")
-      img.icon.time(src="@/assets/time.svg")
-      span Recent
     ul.results-list
       template(v-for="card in cards")
         //- card list item
         li(@click="selectCard(card)" :data-card-id="card.id" :class="{active: cardDetailsIsVisibleForCardId(card), hover: cardIsFocused(card)}")
+          span.badge.status.inline-badge
+            img.icon.time(src="@/assets/time.svg")
+            span {{ relativeDate(card) }}
+
           template(v-if="card.user.id")
             span.badge.user-badge.user-badge(v-if="userIsNotCurrentUser(card.user.id)" :style="{background: card.user.color}")
               User(:user="card.user" :isClickable="false" :hideYouLabel="true")
               span {{card.user.name}}
-          .card-info
+          span.card-info
             template(v-for="segment in card.nameSegments")
               img.card-image(v-if="segment.isImage" :src="segment.url")
               NameSegment(:segment="segment")
@@ -41,6 +42,9 @@ import cache from '@/cache.js'
 
 import dayjs from 'dayjs'
 
+const maxIterations = 30
+let currentIteration, updatePositionTimer
+
 export default {
   name: 'Search',
   components: {
@@ -50,6 +54,19 @@ export default {
   },
   props: {
     visible: Boolean
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'updatePageSizes') {
+        this.updateHeights()
+      }
+    })
+  },
+  data () {
+    return {
+      dialogHeight: null,
+      resultsSectionHeight: null
+    }
   },
   computed: {
     placeholder () {
@@ -70,6 +87,7 @@ export default {
         cards = this.recentlyUpdatedCards
       }
       cards = utils.clone(cards)
+      cards = cards.slice(0, 20)
       cards.map(card => {
         card.nameSegments = this.cardNameSegments(card.name)
         card.user = this.$store.getters['currentSpace/userById'](card.userId)
@@ -158,10 +176,10 @@ export default {
       })
     },
     selectCard (card) {
-      this.$store.dispatch('currentSpace/showCardDetails', card.id)
       if (utils.isMobile()) {
         this.$store.dispatch('closeAllDialogs', 'Search.selectCard')
       }
+      this.$store.dispatch('currentSpace/showCardDetails', card.id)
       this.focusItem(card)
     },
     focusNextItem () {
@@ -203,11 +221,48 @@ export default {
       this.$store.commit('shouldPreventNextEnterKey', true)
       this.$store.dispatch('closeAllDialogs', 'Search.selectItem')
       this.selectCard(card)
+    },
+    relativeDate (card) {
+      return utils.shortRelativeTime(card.updatedAt)
+    },
+    updateHeights () {
+      if (!this.visible) {
+        window.cancelAnimationFrame(updatePositionTimer)
+        updatePositionTimer = undefined
+        return
+      }
+      currentIteration = 0
+      if (updatePositionTimer) { return }
+      updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
+    },
+    updatePositionFrame () {
+      currentIteration++
+      this.updateDialogHeight()
+      this.updateResultsSectionHeight()
+      if (currentIteration < maxIterations) {
+        window.requestAnimationFrame(this.updatePositionFrame)
+      } else {
+        window.cancelAnimationFrame(updatePositionTimer)
+        updatePositionTimer = undefined
+      }
+    },
+    updateDialogHeight () {
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeight(element) - 100
+      })
+    },
+    updateResultsSectionHeight () {
+      this.$nextTick(() => {
+        let element = this.$refs.results
+        this.resultsSectionHeight = utils.elementHeight(element) - 2 - 100
+      })
     }
   },
   watch: {
     visible (visible) {
       this.$store.commit('previousResultCardId', '')
+      this.updateHeights()
       if (visible) {
         if (utils.isMobile()) { return }
         this.$nextTick(() => {
@@ -220,17 +275,13 @@ export default {
 </script>
 
 <style lang="stylus">
-.search
+dialog.search
   top 16px
   max-height calc(100vh - 140px)
   @media(max-width 360px)
     left -40px
   .search-wrap
     padding-top 8px
-  .inline-badge
-    display inline-block
-    margin-left 6px
-    margin-bottom 4px
   li
     display block !important
     .button-badge

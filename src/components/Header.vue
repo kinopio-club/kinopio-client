@@ -45,8 +45,10 @@ header(:style="visualViewportPosition")
         //- search
         .segmented-buttons
           button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
-            img.icon.search(src="@/assets/search.svg")
-            .badge.info(v-if="searchResultsCount") {{searchResultsCount}}
+            img.icon.search(v-if="!searchResultsCount" src="@/assets/search.svg")
+            .badge.search.search-count-badge(v-if="searchResultsCount")
+              img.icon.search(src="@/assets/search.svg")
+              span {{searchResultsCount}}
           template(v-if="searchResultsCount")
             button(@click="showPreviousSearchCard")
               img.icon.left-arrow(src="@/assets/down-arrow.svg")
@@ -186,6 +188,12 @@ export default {
       if (mutation.type === 'triggerUpdateNotifications') {
         this.updateNotifications()
       }
+      if (mutation.type === 'triggerShowNextSearchCard') {
+        this.showNextSearchCard()
+      }
+      if (mutation.type === 'triggerShowPreviousSearchCard') {
+        this.showPreviousSearchCard()
+      }
     })
   },
   mounted () {
@@ -295,6 +303,8 @@ export default {
       this.$store.commit('previousResultCardId', card.id)
     },
     showNextSearchCard () {
+      const search = this.$store.state.search
+      if (!search) { return }
       const cards = this.$store.state.searchResultsCards
       const previousResultCardId = this.$store.state.previousResultCardId
       if (!previousResultCardId) {
@@ -309,6 +319,8 @@ export default {
       this.showCardDetails(cards[index])
     },
     showPreviousSearchCard () {
+      const search = this.$store.state.search
+      if (!search) { return }
       const cards = this.$store.state.searchResultsCards
       const previousResultCardId = this.$store.state.previousResultCardId
       if (!previousResultCardId) {
@@ -557,6 +569,9 @@ header
   .search-row
     margin-top 5px
     position relative
+    .search-count-badge
+      margin 0
+
   aside
     display flex
     flex-direction column

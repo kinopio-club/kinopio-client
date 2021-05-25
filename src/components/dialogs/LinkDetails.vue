@@ -43,8 +43,10 @@ import utils from '@/utils.js'
 import cache from '@/cache.js'
 import templates from '@/data/templates.js'
 
-import fromNow from 'fromnow'
 import join from 'lodash-es/join'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+dayjs.extend(relativeTime)
 
 export default {
   name: 'LinkDetails',
@@ -122,7 +124,7 @@ export default {
       if (this.showAbsoluteDate) {
         return new Date(date).toLocaleString()
       } else {
-        return fromNow(date, { max: 1, suffix: true })
+        return dayjs(date).fromNow()
       }
     },
     spaceIsTemplate () {

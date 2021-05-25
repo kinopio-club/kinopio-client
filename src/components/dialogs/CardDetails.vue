@@ -109,7 +109,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           img.icon(src="@/assets/split-vertically.svg")
           span Split into {{nameLines || nameSentences}} Cards
 
-    .row.badges-row(v-if="tagsInCard.length || card.linkToSpaceId || nameIsComment")
+    .row.badges-row(v-if="tagsInCard.length || card.linkToSpaceId || nameIsComment || isInSearchResultsCards")
+      //- Search result
+      span.badge.search(v-if="isInSearchResultsCards")
+        img.icon.search(src="@/assets/search.svg")
       //- Tags
       template(v-for="tag in tagsInCard")
         span.badge.button-badge(
@@ -283,6 +286,11 @@ export default {
     cardIsCreatedByCurrentUser () { return this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](this.card) },
     spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
     spacePrivacyIsClosed () { return this.$store.state.currentSpace.privacy === 'closed' },
+    isInSearchResultsCards () {
+      const results = this.$store.state.searchResultsCards
+      if (!results.length) { return }
+      return Boolean(results.find(card => this.card.id === card.id))
+    },
     spaceIsPrivate () {
       const space = this.linkToSpace
       if (!space) { return }
@@ -1288,7 +1296,8 @@ export default {
       const previewIsVisible = this.card.urlPreviewIsVisible
       const isNotPreviewUrl = url !== this.card.urlPreviewUrl
       const isNotErrorUrl = url !== this.card.urlPreviewErrorUrl
-      if (previewIsVisible && isNotPreviewUrl && isNotErrorUrl) {
+      const isNotKinopioUrl = !url.startsWith('https://kinopio.club')
+      if (previewIsVisible && isNotPreviewUrl && isNotErrorUrl && isNotKinopioUrl) {
         this.$store.commit('addUrlPreviewLoadingForCardIds', this.card.id)
         this.debouncedUpdateUrlPreview(url)
       }

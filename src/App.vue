@@ -103,6 +103,7 @@ export default {
 
   --info-background #90ffff
   --success-background #98f49f
+  --search-background yellow
 
   // non-theme vars
   --max-z 2147483646
@@ -485,6 +486,8 @@ code
     background var(--secondary-background)
   &.secondary
     background var(--secondary-active-background)
+  &.search
+    background var(--search-background)
   input
     margin 0
   .user

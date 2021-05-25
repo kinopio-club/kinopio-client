@@ -115,6 +115,14 @@ export default {
       } else if (isMeta && key === 'f') {
         event.preventDefault()
         this.focusOnSearchCardFilter()
+      // Show previous search card
+      } else if (isMeta && event.shiftKey && key === 'g') {
+        event.preventDefault()
+        this.$store.commit('triggerShowPreviousSearchCard')
+      // Show next search card
+      } else if (isMeta && key === 'g') {
+        event.preventDefault()
+        this.$store.commit('triggerShowNextSearchCard')
       // Zoom Reset
       } else if (isMeta && key === '0') {
         browserZoomLevel = 0

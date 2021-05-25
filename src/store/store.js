@@ -337,6 +337,8 @@ export default new Vuex.Store({
     triggerSpaceZoomOut: () => {},
     triggerSpaceZoomIn: () => {},
     triggerUnloadPage: () => {},
+    triggerShowNextSearchCard: () => {},
+    triggerShowPreviousSearchCard: () => {},
 
     // Cards
 
