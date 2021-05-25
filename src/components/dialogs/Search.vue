@@ -176,10 +176,10 @@ export default {
       })
     },
     selectCard (card) {
-      this.$store.dispatch('currentSpace/showCardDetails', card.id)
       if (utils.isMobile()) {
         this.$store.dispatch('closeAllDialogs', 'Search.selectCard')
       }
+      this.$store.dispatch('currentSpace/showCardDetails', card.id)
       this.focusItem(card)
     },
     focusNextItem () {
