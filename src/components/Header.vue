@@ -46,7 +46,7 @@ header(:style="visualViewportPosition")
         .segmented-buttons
           button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
             img.icon.search(v-if="!searchResultsCount" src="@/assets/search.svg")
-            .badge.info.search-count-badge(v-if="searchResultsCount")
+            .badge.search.search-count-badge(v-if="searchResultsCount")
               img.icon.search(src="@/assets/search.svg")
               span {{searchResultsCount}}
           template(v-if="searchResultsCount")

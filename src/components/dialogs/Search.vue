@@ -240,7 +240,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.search
+dialog.search
   top 16px
   max-height calc(100vh - 140px)
   @media(max-width 360px)

@@ -146,7 +146,7 @@ article(:style="position" :data-card-id="id" ref="card")
   //- Meta Info
   .meta-container(v-if="filterShowUsers || filterShowDateUpdated || isInSearchResultsCards")
     //- Search result
-    span.badge.info.search-result-badge(v-if="isInSearchResultsCards")
+    span.badge.search(v-if="isInSearchResultsCards")
       img.icon.search(src="@/assets/search.svg")
 
     //- User
