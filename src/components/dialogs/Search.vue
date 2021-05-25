@@ -243,6 +243,4 @@ dialog.search
       max-width 48px
       border-radius 3px
       vertical-align middle
-  .name-segment
-    word-break break-all
 </style>
