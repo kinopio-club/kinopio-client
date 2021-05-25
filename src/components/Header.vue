@@ -188,6 +188,12 @@ export default {
       if (mutation.type === 'triggerUpdateNotifications') {
         this.updateNotifications()
       }
+      if (mutation.type === 'triggerShowNextSearchCard') {
+        this.showNextSearchCard()
+      }
+      if (mutation.type === 'triggerShowPreviousSearchCard') {
+        this.showPreviousSearchCard()
+      }
     })
   },
   mounted () {
@@ -297,6 +303,8 @@ export default {
       this.$store.commit('previousResultCardId', card.id)
     },
     showNextSearchCard () {
+      const search = this.$store.state.search
+      if (!search) { return }
       const cards = this.$store.state.searchResultsCards
       const previousResultCardId = this.$store.state.previousResultCardId
       if (!previousResultCardId) {
@@ -311,6 +319,8 @@ export default {
       this.showCardDetails(cards[index])
     },
     showPreviousSearchCard () {
+      const search = this.$store.state.search
+      if (!search) { return }
       const cards = this.$store.state.searchResultsCards
       const previousResultCardId = this.$store.state.previousResultCardId
       if (!previousResultCardId) {
