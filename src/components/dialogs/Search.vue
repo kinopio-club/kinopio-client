@@ -14,18 +14,19 @@ dialog.search(v-if="visible" :open="visible" ref="dialog")
       @focusPreviousItem="focusPreviousItem"
       @selectItem="selectItem"
     )
-    .badge.secondary.inline-badge(v-if="!search")
-      img.icon.time(src="@/assets/time.svg")
-      span Recent
     ul.results-list
       template(v-for="card in cards")
         //- card list item
         li(@click="selectCard(card)" :data-card-id="card.id" :class="{active: cardDetailsIsVisibleForCardId(card), hover: cardIsFocused(card)}")
+          span.badge.secondary.inline-badge
+            img.icon.time(src="@/assets/time.svg")
+            span {{ relativeDate(card) }}
+
           template(v-if="card.user.id")
             span.badge.user-badge.user-badge(v-if="userIsNotCurrentUser(card.user.id)" :style="{background: card.user.color}")
               User(:user="card.user" :isClickable="false" :hideYouLabel="true")
               span {{card.user.name}}
-          .card-info
+          span.card-info
             template(v-for="segment in card.nameSegments")
               img.card-image(v-if="segment.isImage" :src="segment.url")
               NameSegment(:segment="segment")
@@ -40,6 +41,8 @@ import utils from '@/utils.js'
 import cache from '@/cache.js'
 
 import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+dayjs.extend(relativeTime)
 
 export default {
   name: 'Search',
@@ -68,6 +71,7 @@ export default {
         cards = this.searchResultsCards
       } else {
         cards = this.recentlyUpdatedCards
+        cards = cards.slice(0, 20)
       }
       cards = utils.clone(cards)
       cards.map(card => {
@@ -203,6 +207,22 @@ export default {
       this.$store.commit('shouldPreventNextEnterKey', true)
       this.$store.dispatch('closeAllDialogs', 'Search.selectItem')
       this.selectCard(card)
+    },
+    relativeDate (card) {
+      let relativeTime = dayjs(card.updatedAt).fromNow(true)
+      // https://day.js.org/docs/en/customization/relative-time
+      relativeTime = relativeTime.replace('a few seconds', 'now')
+      relativeTime = relativeTime.replace('a minute', '1m')
+      relativeTime = relativeTime.replace(' minutes', 'm')
+      relativeTime = relativeTime.replace('an hour', '1h')
+      relativeTime = relativeTime.replace(' hours', 'h')
+      relativeTime = relativeTime.replace('a day', '1d')
+      relativeTime = relativeTime.replace(' days', 'd')
+      relativeTime = relativeTime.replace('a month', '1mo')
+      relativeTime = relativeTime.replace(' months', 'mo')
+      relativeTime = relativeTime.replace('a year', '1yr')
+      relativeTime = relativeTime.replace(' years', 'y')
+      return relativeTime
     }
   },
   watch: {
@@ -227,10 +247,6 @@ export default {
     left -40px
   .search-wrap
     padding-top 8px
-  .inline-badge
-    display inline-block
-    margin-left 6px
-    margin-bottom 4px
   li
     display block !important
     .button-badge
@@ -242,4 +258,6 @@ export default {
       max-width 48px
       border-radius 3px
       vertical-align middle
+  .name-segment
+    word-break break-all
 </style>
