@@ -69,9 +69,9 @@ export default {
         cards = this.searchResultsCards
       } else {
         cards = this.recentlyUpdatedCards
-        cards = cards.slice(0, 20)
       }
       cards = utils.clone(cards)
+      cards = cards.slice(0, 20)
       cards.map(card => {
         card.nameSegments = this.cardNameSegments(card.name)
         card.user = this.$store.getters['currentSpace/userById'](card.userId)
