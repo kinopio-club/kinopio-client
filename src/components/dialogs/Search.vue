@@ -18,7 +18,7 @@ dialog.search(v-if="visible" :open="visible" ref="dialog" :style="{'max-height':
       template(v-for="card in cards")
         //- card list item
         li(@click="selectCard(card)" :data-card-id="card.id" :class="{active: cardDetailsIsVisibleForCardId(card), hover: cardIsFocused(card)}")
-          span.badge.secondary.inline-badge
+          span.badge.status.inline-badge
             img.icon.time(src="@/assets/time.svg")
             span {{ relativeDate(card) }}
 
