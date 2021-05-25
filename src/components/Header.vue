@@ -46,7 +46,6 @@ header(:style="visualViewportPosition")
         .segmented-buttons
           button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
             img.icon.search(src="@/assets/search.svg")
-            img.icon.time(v-if="!searchResultsCount" src="@/assets/time.svg")
             .badge.info(v-if="searchResultsCount") {{searchResultsCount}}
           template(v-if="searchResultsCount")
             button(@click="showPreviousSearchCard")
@@ -521,10 +520,6 @@ header
     .badge
       margin-right 0
       margin-left 6px
-    > .time
-      margin-left 6px
-      height 11px
-      vertical-align -1px
 
   .space-details-row
     margin-top 8px
