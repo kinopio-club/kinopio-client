@@ -1,6 +1,6 @@
 <template lang="pug">
-dialog.search(v-if="visible" :open="visible" ref="dialog")
-  section.results-section
+dialog.search(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+  section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ResultsFilter(
       :showFilter="true"
       :filterIsPersistent="true"
@@ -42,6 +42,9 @@ import cache from '@/cache.js'
 
 import dayjs from 'dayjs'
 
+const maxIterations = 30
+let currentIteration, updatePositionTimer
+
 export default {
   name: 'Search',
   components: {
@@ -51,6 +54,19 @@ export default {
   },
   props: {
     visible: Boolean
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'updatePageSizes') {
+        this.updateHeights()
+      }
+    })
+  },
+  data () {
+    return {
+      dialogHeight: null,
+      resultsSectionHeight: null
+    }
   },
   computed: {
     placeholder () {
@@ -208,11 +224,45 @@ export default {
     },
     relativeDate (card) {
       return utils.shortRelativeTime(card.updatedAt)
+    },
+    updateHeights () {
+      if (!this.visible) {
+        window.cancelAnimationFrame(updatePositionTimer)
+        updatePositionTimer = undefined
+        return
+      }
+      currentIteration = 0
+      if (updatePositionTimer) { return }
+      updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
+    },
+    updatePositionFrame () {
+      currentIteration++
+      this.updateDialogHeight()
+      this.updateResultsSectionHeight()
+      if (currentIteration < maxIterations) {
+        window.requestAnimationFrame(this.updatePositionFrame)
+      } else {
+        window.cancelAnimationFrame(updatePositionTimer)
+        updatePositionTimer = undefined
+      }
+    },
+    updateDialogHeight () {
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeight(element) - 100
+      })
+    },
+    updateResultsSectionHeight () {
+      this.$nextTick(() => {
+        let element = this.$refs.results
+        this.resultsSectionHeight = utils.elementHeight(element) - 2 - 100
+      })
     }
   },
   watch: {
     visible (visible) {
       this.$store.commit('previousResultCardId', '')
+      this.updateHeights()
       if (visible) {
         if (utils.isMobile()) { return }
         this.$nextTick(() => {

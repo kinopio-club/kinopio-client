@@ -60,6 +60,8 @@ import Loader from '@/components/Loader.vue'
 import debounce from 'lodash-es/debounce'
 
 let shouldUpdateFavorites = true
+const maxIterations = 30
+let currentIteration, updatePositionTimer
 
 export default {
   name: 'SpaceDetails',
@@ -292,9 +294,25 @@ export default {
       this.updateWithRemoteSpaces()
     },
     updateHeights () {
-      if (!this.visible) { return }
+      if (!this.visible) {
+        window.cancelAnimationFrame(updatePositionTimer)
+        updatePositionTimer = undefined
+        return
+      }
+      currentIteration = 0
+      if (updatePositionTimer) { return }
+      updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
+    },
+    updatePositionFrame () {
+      currentIteration++
       this.updateDialogHeight()
       this.updateResultsSectionHeight()
+      if (currentIteration < maxIterations) {
+        window.requestAnimationFrame(this.updatePositionFrame)
+      } else {
+        window.cancelAnimationFrame(updatePositionTimer)
+        updatePositionTimer = undefined
+      }
     },
     updateDialogHeight () {
       this.$nextTick(() => {
