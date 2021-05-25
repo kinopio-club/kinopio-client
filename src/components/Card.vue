@@ -181,10 +181,6 @@ import UserDetails from '@/components/dialogs/UserDetails.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
-dayjs.extend(relativeTime)
-
 let isMultiTouch
 let initialTouchEvent = {}
 let touchPosition = {}
@@ -341,7 +337,7 @@ export default {
         if (showAbsoluteDate) {
           return new Date(date).toLocaleString()
         } else {
-          return dayjs(date).fromNow()
+          return utils.shortRelativeTime(date)
         }
       } else {
         return 'Just now'

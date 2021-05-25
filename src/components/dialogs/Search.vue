@@ -41,8 +41,6 @@ import utils from '@/utils.js'
 import cache from '@/cache.js'
 
 import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
-dayjs.extend(relativeTime)
 
 export default {
   name: 'Search',
@@ -209,20 +207,7 @@ export default {
       this.selectCard(card)
     },
     relativeDate (card) {
-      let relativeTime = dayjs(card.updatedAt).fromNow(true)
-      // https://day.js.org/docs/en/customization/relative-time
-      relativeTime = relativeTime.replace('a few seconds', 'now')
-      relativeTime = relativeTime.replace('a minute', '1m')
-      relativeTime = relativeTime.replace(' minutes', 'm')
-      relativeTime = relativeTime.replace('an hour', '1h')
-      relativeTime = relativeTime.replace(' hours', 'h')
-      relativeTime = relativeTime.replace('a day', '1d')
-      relativeTime = relativeTime.replace(' days', 'd')
-      relativeTime = relativeTime.replace('a month', '1mo')
-      relativeTime = relativeTime.replace(' months', 'mo')
-      relativeTime = relativeTime.replace('a year', '1yr')
-      relativeTime = relativeTime.replace(' years', 'y')
-      return relativeTime
+      return utils.shortRelativeTime(card.updatedAt)
     }
   },
   watch: {

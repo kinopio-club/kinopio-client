@@ -3,10 +3,13 @@ import cache from '@/cache.js'
 
 import nanoid from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
-import dayjs from 'dayjs'
 import random from 'lodash-es/random'
 import last from 'lodash-es/last'
 import sortBy from 'lodash-es/sortBy'
+
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+dayjs.extend(relativeTime)
 
 export default {
   kinopioDomain () {
@@ -359,6 +362,23 @@ export default {
   },
   normalizeToUnixTime (date) {
     return new Date(date).getTime()
+  },
+  shortRelativeTime (date) {
+    this.typeCheck({ value: date, type: 'string', origin: 'shortRelativeTime' })
+    let time = dayjs(date).fromNow(true)
+    // https://day.js.org/docs/en/customization/relative-time
+    time = time.replace('a few seconds', 'now')
+    time = time.replace('a minute', '1m')
+    time = time.replace(' minutes', 'm')
+    time = time.replace('an hour', '1h')
+    time = time.replace(' hours', 'h')
+    time = time.replace('a day', '1d')
+    time = time.replace(' days', 'd')
+    time = time.replace('a month', '1mo')
+    time = time.replace(' months', 'mo')
+    time = time.replace('a year', '1yr')
+    time = time.replace(' years', 'y')
+    return time
   },
   isEvenNumber (number) {
     if (number % 2 === 0) {
