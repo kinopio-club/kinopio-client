@@ -1288,7 +1288,8 @@ export default {
       const previewIsVisible = this.card.urlPreviewIsVisible
       const isNotPreviewUrl = url !== this.card.urlPreviewUrl
       const isNotErrorUrl = url !== this.card.urlPreviewErrorUrl
-      if (previewIsVisible && isNotPreviewUrl && isNotErrorUrl) {
+      const isNotKinopioUrl = !url.startsWith('https://kinopio.club')
+      if (previewIsVisible && isNotPreviewUrl && isNotErrorUrl && isNotKinopioUrl) {
         this.$store.commit('addUrlPreviewLoadingForCardIds', this.card.id)
         this.debouncedUpdateUrlPreview(url)
       }

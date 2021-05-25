@@ -45,8 +45,10 @@ header(:style="visualViewportPosition")
         //- search
         .segmented-buttons
           button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
-            img.icon.search(src="@/assets/search.svg")
-            .badge.info(v-if="searchResultsCount") {{searchResultsCount}}
+            img.icon.search(v-if="!searchResultsCount" src="@/assets/search.svg")
+            .badge.info.search-count-badge(v-if="searchResultsCount")
+              img.icon.search(src="@/assets/search.svg")
+              span {{searchResultsCount}}
           template(v-if="searchResultsCount")
             button(@click="showPreviousSearchCard")
               img.icon.left-arrow(src="@/assets/down-arrow.svg")
@@ -557,6 +559,9 @@ header
   .search-row
     margin-top 5px
     position relative
+    .search-count-badge
+      margin 0
+
   aside
     display flex
     flex-direction column
