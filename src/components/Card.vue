@@ -59,6 +59,13 @@ article(:style="position" :data-card-id="id" ref="card")
           p.comment.name-segments(v-if="commentIsVisible" :class="{'is-checked': isChecked}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
+            //- Image
+            img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
+            img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
+            //- Video
+            video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
+              source(:src="formats.video")
+
           span(v-if="!commentIsVisible") …
 
       .card-content(v-if="!nameIsComment")
@@ -1243,6 +1250,10 @@ article
       .comment
         &.is-checked
           text-decoration line-through
+        .image
+          margin-top 10px
+          border-radius 3px
+
     .card-content-wrap
       display flex
       align-items flex-start
