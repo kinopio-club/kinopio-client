@@ -138,8 +138,8 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       .badge.info(v-if="nameIsComment" :style="{backgroundColor: updatedByUser.color}")
         span ((comment))
 
-    UrlPreview(:visible="cardUrlPreviewIsVisible" :loading="isLoadingUrlPreview" :card="card" :parentIsCardDetails="true")
     MediaPreview(:visible="cardHasMedia" :card="card" :formats="formats" @removeUrl="removeUrlFromName")
+    UrlPreview(:visible="cardUrlPreviewIsVisible" :loading="isLoadingUrlPreview" :card="card" :parentIsCardDetails="true")
 
     //- Read Only
     p.row.edit-message(v-if="!canEditCard")
@@ -1376,4 +1376,6 @@ export default {
       cursor pointer
       padding 2px 6px
       padding-top 1px
+  .media-preview + .url-preview
+    margin-top 10px
 </style>
