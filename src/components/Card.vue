@@ -951,6 +951,7 @@ export default {
       this.$store.dispatch('clearMultipleSelected')
       const cardId = this.id
       this.$store.dispatch('currentSpace/toggleCommentIsVisible', cardId)
+      this.$store.dispatch('currentSpace/incrementCardZ', cardId)
       this.updateCardConnectionPathsIfOpenSpace()
     },
     updateCardConnectionPathsIfOpenSpace () {

@@ -1058,12 +1058,12 @@ export default {
         highestCardZ = 1
       }
       const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
-      if (!userCanEdit) { return }
       const body = { id: cardId, z: highestCardZ + 1 }
       const update = { name: 'updateCard', body }
+      context.commit('updateCard', body)
+      if (!userCanEdit) { return }
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
-      context.commit('updateCard', body)
     },
     removeCard: (context, card) => {
       const cardHasContent = Boolean(card.name)
