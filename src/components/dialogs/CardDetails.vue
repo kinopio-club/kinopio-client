@@ -139,6 +139,8 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         span ((comment))
 
     UrlPreview(:visible="cardUrlPreviewIsVisible" :loading="isLoadingUrlPreview" :card="card" :parentIsCardDetails="true")
+    MediaPreview(:visible="cardHasMedia" :card="card" :formats="formats")
+      //- @removeUrl(url)=removeUrlFromName(url)
 
     //- Read Only
     p.row.edit-message(v-if="!canEditCard")
@@ -190,6 +192,7 @@ import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
+import MediaPreview from '@/components/MediaPreview.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
@@ -211,6 +214,7 @@ export default {
     SpacePicker,
     Loader,
     UrlPreview,
+    MediaPreview,
     User
   },
   props: {
@@ -359,6 +363,7 @@ export default {
         return this.card.name
       },
       set (newName) {
+        this.updateMediaUrls()
         this.updateCardName(newName)
         if (this.wasPasted) {
           this.wasPasted = false
@@ -371,7 +376,6 @@ export default {
     urls () {
       const name = utils.removeMarkdownCodeblocksFromString(this.name)
       const urls = utils.urlsFromString(name, true)
-      this.updateMediaUrls(urls)
       return urls
     },
     validUrls () {
@@ -486,10 +490,11 @@ export default {
       const isLoading = cardIds.find(cardId => cardId === this.card.id)
       return Boolean(isLoading)
     },
-    cardHasMedia () { return this.formats.image || this.formats.video || this.formats.audio }
+    cardHasMedia () { return Boolean(this.formats.image || this.formats.video || this.formats.audio) }
   },
   methods: {
-    updateMediaUrls (urls) {
+    updateMediaUrls () {
+      const urls = utils.urlsFromString(this.card.name, true)
       this.formats.image = ''
       this.formats.video = ''
       this.formats.audio = ''
@@ -1304,6 +1309,7 @@ export default {
         }
       })
       if (visible) {
+        this.updateMediaUrls()
         const connections = this.$store.getters['currentSpace/cardConnections'](this.card.id)
         this.$store.commit('updateCurrentCardConnections', connections)
       }
