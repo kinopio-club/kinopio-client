@@ -242,7 +242,14 @@ export default {
         pickerPosition: {},
         pickerSearch: ''
       },
-      notifiedMembers: false
+      notifiedMembers: false,
+      formats: {
+        image: '',
+        video: '',
+        audio: '',
+        link: '',
+        file: ''
+      }
     }
   },
   created () {
@@ -363,7 +370,9 @@ export default {
     url () { return utils.urlFromString(this.name) },
     urls () {
       const name = utils.removeMarkdownCodeblocksFromString(this.name)
-      return utils.urlsFromString(name, true)
+      const urls = utils.urlsFromString(name, true)
+      this.updateMediaUrls(urls)
+      return urls
     },
     validUrls () {
       if (!this.urls) { return [] }
@@ -476,9 +485,31 @@ export default {
       const cardIds = this.$store.state.urlPreviewLoadingForCardIds
       const isLoading = cardIds.find(cardId => cardId === this.card.id)
       return Boolean(isLoading)
-    }
+    },
+    cardHasMedia () { return this.formats.image || this.formats.video || this.formats.audio }
   },
   methods: {
+    updateMediaUrls (urls) {
+      this.formats.image = ''
+      this.formats.video = ''
+      this.formats.audio = ''
+      this.formats.link = ''
+      if (!urls) { return }
+      if (!urls.length) { return }
+      urls.forEach(url => {
+        if (utils.urlIsImage(url)) {
+          this.formats.image = url
+        } else if (utils.urlIsVideo(url)) {
+          this.formats.video = url
+        } else if (utils.urlIsAudio(url)) {
+          this.formats.audio = url
+        } else if (utils.urlIsFile(url)) {
+          this.formats.file = url
+        } else {
+          this.formats.link = url
+        }
+      })
+    },
     seperatedLines (name) {
       let lines = name.split('\n')
       lines = lines.filter(line => Boolean(line.length))
