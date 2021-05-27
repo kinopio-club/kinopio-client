@@ -56,7 +56,7 @@ article(:style="position" :data-card-id="id" ref="card")
               span {{updatedByUser.name}}
           template(v-if="!commentIsVisible")
             User(:user="updatedByUser" :isClickable="false")
-          p.comment.name-segments(v-if="commentIsVisible" :class="{'is-checked': isChecked}")
+          p.comment.name-segments(v-if="commentIsVisible" :class="{'is-checked': isChecked}" :style="{minWidth: nameLineMinWidth + 'px'}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
             //- Image
@@ -68,6 +68,7 @@ article(:style="position" :data-card-id="id" ref="card")
 
           span(v-if="!commentIsVisible") …
 
+      //- Not Comment
       .card-content(v-if="!nameIsComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- Audio
         .audio-wrap(v-if="Boolean(formats.audio)")
