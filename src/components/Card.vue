@@ -38,7 +38,7 @@ article(:style="position" :data-card-id="id" ref="card")
 
     span.card-content-wrap
       //- Comment
-      .card-comment(v-if="nameIsComment")
+      .card-comment(v-if="nameIsComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- [·]
         .checkbox-wrap(v-if="hasCheckbox" @click.left.prevent.stop="toggleCardChecked" @touchend.prevent.stop="toggleCardChecked")
           label(:class="{active: isChecked, disabled: !canEditSpace}")
@@ -68,7 +68,7 @@ article(:style="position" :data-card-id="id" ref="card")
 
           span(v-if="!commentIsVisible") …
 
-      .card-content(v-if="!nameIsComment")
+      .card-content(v-if="!nameIsComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- Audio
         .audio-wrap(v-if="Boolean(formats.audio)")
           Audio(:visible="Boolean(formats.audio)" :url="formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
@@ -78,7 +78,7 @@ article(:style="position" :data-card-id="id" ref="card")
             label(:class="{active: isChecked, disabled: !canEditSpace}")
               input(type="checkbox" v-model="checkboxState")
           //- Name
-          p.name.name-segments.badge.badge-status(v-if="normalizedName" :style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image)}")
+          p.name.name-segments(v-if="normalizedName" :style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image || formats.video)}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
             Loader(:visible="isLoadingUrlPreview")
@@ -86,12 +86,13 @@ article(:style="position" :data-card-id="id" ref="card")
       //- Right buttons
       span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}")
         //- Url →
-        a.url-wrap(:href="formats.link" @click.left.stop="openUrl($event, formats.link)" @touchend.prevent="openUrl($event, formats.link)" v-if="formats.link && !nameIsComment")
+        a.url-wrap(:href="formats.link" @click.left.stop="openUrl($event, formats.link)" @touchend.prevent="openUrl($event, formats.link)" v-if="formats.link && !nameIsComment" :class="{'connector-is-visible': connectorIsVisible}")
           .url.inline-button-wrap
             button.inline-button(:style="{background: selectedColor}" tabindex="-1")
               img.icon.visit.arrow-icon(src="@/assets/visit.svg")
         //- Connector
         .connector.inline-button-wrap(
+          v-if="connectorIsVisible"
           :data-card-id="id"
           @mousedown.left="startConnecting"
           @touchstart="startConnecting"
@@ -116,7 +117,7 @@ article(:style="position" :data-card-id="id" ref="card")
         :visible="cardUrlPreviewIsVisible"
         :card="card"
         :updatedByUser="updatedByUser"
-        :isImageCard="Boolean(formats.image)"
+        :isImageCard="Boolean(formats.image || formats.video)"
         :isSelected="isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor"
       )
 
@@ -288,6 +289,20 @@ export default {
           name: '',
           color: '#cdcdcd' // secondary-active-background
         }
+      }
+    },
+    connectorIsVisible () {
+      if (this.canEditCard || this.connectionTypes.length) {
+        return true
+      } else {
+        return false
+      }
+    },
+    cardButtonsIsVisible () {
+      if (this.connectorIsVisible || Boolean(this.formats.link)) {
+        return true
+      } else {
+        return false
       }
     },
     isHiddenInComment () {
@@ -1252,6 +1267,8 @@ article
     .card-content
       min-width 40px
       width 100%
+    .extra-name-padding
+      margin-right 8px
     .card-buttons-wrap
       display flex
     .name-wrap,
@@ -1355,6 +1372,9 @@ article
 
     .url-wrap
       max-height 28px
+      padding-right 8px
+      &.connector-is-visible
+        padding-right 0
 
     .uploading-container
       position absolute

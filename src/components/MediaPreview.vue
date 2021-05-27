@@ -6,7 +6,7 @@
     .card-details-buttons
       .button-wrap
         a(:href="formats.image")
-          button.visit-button(:disabled="!canEditCard")
+          button.visit-button
             img.icon.visit(src="@/assets/visit.svg")
       .button-wrap
         button(@click="removeUrl(formats.image)" :disabled="!canEditCard")
@@ -18,7 +18,7 @@
     .card-details-buttons
       .button-wrap
         a(:href="formats.video")
-          button.visit-button(:disabled="!canEditCard")
+          button.visit-button
             img.icon.visit(src="@/assets/visit.svg")
       .button-wrap
         button(@click="removeUrl(formats.video)" :disabled="!canEditCard")
@@ -29,7 +29,7 @@
     .card-details-buttons
       .button-wrap
         a(:href="formats.audio")
-          button.visit-button(:disabled="!canEditCard")
+          button.visit-button
             img.icon.visit(src="@/assets/visit.svg")
       .button-wrap
         button(@click="removeUrl(formats.audio)" :disabled="!canEditCard")
