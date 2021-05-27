@@ -139,7 +139,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         span ((comment))
 
     UrlPreview(:visible="cardUrlPreviewIsVisible" :loading="isLoadingUrlPreview" :card="card" :parentIsCardDetails="true")
-    MediaPreview(:visible="cardHasMedia" :card="card" :formats="formats" @updateIsPlayingAudio="updateIsPlayingAudio" @removeUrl="removeUrlFromName")
+    MediaPreview(:visible="cardHasMedia" :card="card" :formats="formats" @removeUrl="removeUrlFromName")
 
     //- Read Only
     p.row.edit-message(v-if="!canEditCard")
@@ -491,9 +491,6 @@ export default {
     cardHasMedia () { return Boolean(this.formats.image || this.formats.video || this.formats.audio) }
   },
   methods: {
-    updateIsPlayingAudio (value) {
-      this.$emit('updateIsPlayingAudio', value)
-    },
     updateMediaUrls () {
       const urls = utils.urlsFromString(this.card.name, true)
       this.formats.image = ''

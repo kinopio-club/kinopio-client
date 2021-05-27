@@ -25,7 +25,7 @@
           img.icon.cancel(src="@/assets/add.svg")
   //- Audio
   .row(v-if="formats.audio")
-    Audio(:visible="Boolean(formats.audio)" :url="formats.audio" @isPlaying="updateIsPlayingAudio" :normalizedName="this.card.name" :parentIsCardDetails="true")
+    Audio(:visible="Boolean(formats.audio)" :url="formats.audio" :normalizedName="this.card.name" :parentIsCardDetails="true")
     .card-details-buttons
       .button-wrap
         a(:href="formats.audio")
@@ -59,10 +59,6 @@ export default {
     }
   },
   methods: {
-    updateIsPlayingAudio (value) {
-      // emits up through CardDetails → Card
-      this.$emit('updateIsPlayingAudio', value)
-    },
     removeUrl (url) {
       this.$emit('removeUrl', url)
     }
