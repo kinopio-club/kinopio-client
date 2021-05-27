@@ -139,6 +139,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         span ((comment))
 
     UrlPreview(:visible="cardUrlPreviewIsVisible" :loading="isLoadingUrlPreview" :card="card" :parentIsCardDetails="true")
+    MediaPreview(:visible="cardHasMedia" :card="card" :formats="formats" @removeUrl="removeUrlFromName")
 
     //- Read Only
     p.row.edit-message(v-if="!canEditCard")
@@ -190,6 +191,7 @@ import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
+import MediaPreview from '@/components/MediaPreview.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
@@ -211,6 +213,7 @@ export default {
     SpacePicker,
     Loader,
     UrlPreview,
+    MediaPreview,
     User
   },
   props: {
@@ -242,7 +245,14 @@ export default {
         pickerPosition: {},
         pickerSearch: ''
       },
-      notifiedMembers: false
+      notifiedMembers: false,
+      formats: {
+        image: '',
+        video: '',
+        audio: '',
+        link: '',
+        file: ''
+      }
     }
   },
   created () {
@@ -363,7 +373,8 @@ export default {
     url () { return utils.urlFromString(this.name) },
     urls () {
       const name = utils.removeMarkdownCodeblocksFromString(this.name)
-      return utils.urlsFromString(name, true)
+      const urls = utils.urlsFromString(name, true)
+      return urls
     },
     validUrls () {
       if (!this.urls) { return [] }
@@ -470,15 +481,38 @@ export default {
     cardUrlPreviewIsVisible () {
       const isErrorUrl = this.card.urlPreviewErrorUrl && this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl
       const hasPreview = this.url && (this.isLoadingUrlPreview || this.card.urlPreviewUrl)
-      return this.card.urlPreviewIsVisible && hasPreview && !isErrorUrl
+      return Boolean(this.card.urlPreviewIsVisible && hasPreview && !isErrorUrl)
     },
     isLoadingUrlPreview () {
       const cardIds = this.$store.state.urlPreviewLoadingForCardIds
       const isLoading = cardIds.find(cardId => cardId === this.card.id)
       return Boolean(isLoading)
-    }
+    },
+    cardHasMedia () { return Boolean(this.formats.image || this.formats.video || this.formats.audio) }
   },
   methods: {
+    updateMediaUrls () {
+      const urls = utils.urlsFromString(this.card.name, true)
+      this.formats.image = ''
+      this.formats.video = ''
+      this.formats.audio = ''
+      this.formats.link = ''
+      if (!urls) { return }
+      if (!urls.length) { return }
+      urls.forEach(url => {
+        if (utils.urlIsImage(url)) {
+          this.formats.image = url
+        } else if (utils.urlIsVideo(url)) {
+          this.formats.video = url
+        } else if (utils.urlIsAudio(url)) {
+          this.formats.audio = url
+        } else if (utils.urlIsFile(url)) {
+          this.formats.file = url
+        } else {
+          this.formats.link = url
+        }
+      })
+    },
     seperatedLines (name) {
       let lines = name.split('\n')
       lines = lines.filter(line => Boolean(line.length))
@@ -492,6 +526,10 @@ export default {
     updateLink ({ url, newUrl }) {
       url = url.trim()
       const newName = this.name.replace(url, newUrl)
+      this.updateCardName(newName)
+    },
+    removeUrlFromName (url) {
+      const newName = this.name.replace(url, '')
       this.updateCardName(newName)
     },
     toggleUrlsIsVisible () {
@@ -635,6 +673,7 @@ export default {
       this.$nextTick(() => {
         this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.card.id, shouldUpdateApi: true })
       })
+      this.updateMediaUrls()
       this.updateTags()
       this.updateSpaceLink()
       if (this.notifiedMembers) { return }
@@ -1273,6 +1312,7 @@ export default {
         }
       })
       if (visible) {
+        this.updateMediaUrls()
         const connections = this.$store.getters['currentSpace/cardConnections'](this.card.id)
         this.$store.commit('updateCurrentCardConnections', connections)
       }

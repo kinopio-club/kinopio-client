@@ -53,7 +53,8 @@ export default {
     visible: Boolean,
     url: String,
     selectedColor: String,
-    normalizedName: String
+    normalizedName: String,
+    parentIsCardDetails: Boolean
   },
   data () {
     return {
@@ -83,6 +84,7 @@ export default {
   methods: {
     cancelClick () {
       this.$store.commit('currentUserIsDraggingCard', false)
+      if (this.parentIsCardDetails) { return }
       this.$store.dispatch('closeAllDialogs', 'Audio.cancelClick')
     },
     handleErrors (event) {
@@ -232,6 +234,8 @@ export default {
     progressPercent (value) {
       if (value >= 100) {
         this.pauseAudio()
+      } else if (this.isPlaying) {
+        this.$emit('isPlaying', true)
       }
     }
   }
@@ -241,7 +245,7 @@ export default {
 <style lang="stylus">
 .audio
   display block
-  width 160px
+  width 100%
   &.selected
     mix-blend-mode color-burn
   &.card-has-no-name
