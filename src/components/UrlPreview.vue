@@ -144,7 +144,5 @@ export default {
     &.has-padding
       padding 4px
     .visit-button
-      margin-right 5px
-    .visit
-      vertical-align middle
+      margin-right 6px
 </style>

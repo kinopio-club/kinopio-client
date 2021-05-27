@@ -139,8 +139,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         span ((comment))
 
     UrlPreview(:visible="cardUrlPreviewIsVisible" :loading="isLoadingUrlPreview" :card="card" :parentIsCardDetails="true")
-    MediaPreview(:visible="cardHasMedia" :card="card" :formats="formats")
-      //- @removeUrl(url)=removeUrlFromName(url)
+    MediaPreview(:visible="cardHasMedia" :card="card" :formats="formats" @updateIsPlayingAudio="updateIsPlayingAudio" @removeUrl="removeUrlFromName")
 
     //- Read Only
     p.row.edit-message(v-if="!canEditCard")
@@ -363,7 +362,6 @@ export default {
         return this.card.name
       },
       set (newName) {
-        this.updateMediaUrls()
         this.updateCardName(newName)
         if (this.wasPasted) {
           this.wasPasted = false
@@ -483,7 +481,7 @@ export default {
     cardUrlPreviewIsVisible () {
       const isErrorUrl = this.card.urlPreviewErrorUrl && this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl
       const hasPreview = this.url && (this.isLoadingUrlPreview || this.card.urlPreviewUrl)
-      return this.card.urlPreviewIsVisible && hasPreview && !isErrorUrl
+      return Boolean(this.card.urlPreviewIsVisible && hasPreview && !isErrorUrl)
     },
     isLoadingUrlPreview () {
       const cardIds = this.$store.state.urlPreviewLoadingForCardIds
@@ -493,6 +491,9 @@ export default {
     cardHasMedia () { return Boolean(this.formats.image || this.formats.video || this.formats.audio) }
   },
   methods: {
+    updateIsPlayingAudio (value) {
+      this.$emit('updateIsPlayingAudio', value)
+    },
     updateMediaUrls () {
       const urls = utils.urlsFromString(this.card.name, true)
       this.formats.image = ''
@@ -528,6 +529,10 @@ export default {
     updateLink ({ url, newUrl }) {
       url = url.trim()
       const newName = this.name.replace(url, newUrl)
+      this.updateCardName(newName)
+    },
+    removeUrlFromName (url) {
+      const newName = this.name.replace(url, '')
       this.updateCardName(newName)
     },
     toggleUrlsIsVisible () {
@@ -671,6 +676,7 @@ export default {
       this.$nextTick(() => {
         this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.card.id, shouldUpdateApi: true })
       })
+      this.updateMediaUrls()
       this.updateTags()
       this.updateSpaceLink()
       if (this.notifiedMembers) { return }

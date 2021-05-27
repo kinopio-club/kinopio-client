@@ -148,7 +148,7 @@ article(:style="position" :data-card-id="id" ref="card")
         img.icon.cancel(src="@/assets/add.svg")
         span Space is Read Only
 
-  CardDetails(:card="card" @broadcastShowCardDetails="broadcastShowCardDetails")
+  CardDetails(:card="card" @broadcastShowCardDetails="broadcastShowCardDetails" @updateIsPlayingAudio="updateIsPlayingAudio")
 
   //- Meta Info
   .meta-container(v-if="filterShowUsers || filterShowDateUpdated || isInSearchResultsCards")

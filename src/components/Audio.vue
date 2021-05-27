@@ -53,7 +53,8 @@ export default {
     visible: Boolean,
     url: String,
     selectedColor: String,
-    normalizedName: String
+    normalizedName: String,
+    parentIsCardDetails: Boolean
   },
   data () {
     return {
@@ -83,6 +84,7 @@ export default {
   methods: {
     cancelClick () {
       this.$store.commit('currentUserIsDraggingCard', false)
+      if (this.parentIsCardDetails) { return }
       this.$store.dispatch('closeAllDialogs', 'Audio.cancelClick')
     },
     handleErrors (event) {
