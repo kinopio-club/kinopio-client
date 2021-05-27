@@ -234,6 +234,8 @@ export default {
     progressPercent (value) {
       if (value >= 100) {
         this.pauseAudio()
+      } else if (this.isPlaying) {
+        this.$emit('isPlaying', true)
       }
     }
   }
