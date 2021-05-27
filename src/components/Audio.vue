@@ -245,7 +245,7 @@ export default {
 <style lang="stylus">
 .audio
   display block
-  width 160px
+  width 100%
   &.selected
     mix-blend-mode color-burn
   &.card-has-no-name

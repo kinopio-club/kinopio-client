@@ -78,7 +78,7 @@ article(:style="position" :data-card-id="id" ref="card")
             label(:class="{active: isChecked, disabled: !canEditSpace}")
               input(type="checkbox" v-model="checkboxState")
           //- Name
-          p.name.name-segments(v-if="normalizedName" :style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image)}")
+          p.name.name-segments.badge.badge-status(v-if="normalizedName" :style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image)}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
             Loader(:visible="isLoadingUrlPreview")
@@ -86,7 +86,7 @@ article(:style="position" :data-card-id="id" ref="card")
       //- Right buttons
       span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}")
         //- Url →
-        a.url-wrap(:href="linkOrUrl" @click.left.stop="openUrl($event, linkOrUrl)" @touchend.prevent="openUrl($event, linkOrUrl)" v-if="linkOrUrl && !nameIsComment")
+        a.url-wrap(:href="formats.link" @click.left.stop="openUrl($event, formats.link)" @touchend.prevent="openUrl($event, formats.link)" v-if="formats.link && !nameIsComment")
           .url.inline-button-wrap
             button.inline-button(:style="{background: selectedColor}" tabindex="-1")
               img.icon.visit.arrow-icon(src="@/assets/visit.svg")
@@ -364,14 +364,6 @@ export default {
     pendingUploadDataUrl () {
       if (!this.cardPendingUpload || this.nameIsComment) { return }
       return this.cardPendingUpload.imageDataUrl
-    },
-    linkOrUrl () {
-      if (!this.urls.length) { return }
-      if (this.formats.link) {
-        return this.formats.link
-      } else {
-        return this.urls[0]
-      }
     },
     urls () {
       const name = utils.removeMarkdownCodeblocksFromString(this.name)
@@ -1259,6 +1251,7 @@ article
       justify-content space-between
     .card-content
       min-width 40px
+      width 100%
     .card-buttons-wrap
       display flex
     .name-wrap,
