@@ -276,7 +276,10 @@ export default {
     commentIsVisible () { return this.card.commentIsVisible },
     connectionTypes () { return this.$store.getters['currentSpace/cardConnectionTypes'](this.id) },
     newConnectionColor () { return this.$store.state.currentConnectionColor },
-    name () { return this.card.name },
+    name () {
+      this.updateMediaUrls()
+      return this.card.name
+    },
     frameId () { return this.card.frameId },
     filterShowUsers () { return this.$store.state.currentUser.filterShowUsers },
     filterShowDateUpdated () { return this.$store.state.currentUser.filterShowDateUpdated },
@@ -769,6 +772,7 @@ export default {
       this.$store.commit('multipleCardsSelectedIds', selectedCards)
     },
     updateMediaUrls (urls) {
+      urls = urls || utils.urlsFromString(this.card.name)
       this.formats.image = ''
       this.formats.video = ''
       this.formats.audio = ''
