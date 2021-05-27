@@ -293,7 +293,9 @@ export default {
       }
     },
     connectorIsVisible () {
-      if (this.canEditCard || this.connectionTypes.length) {
+      if (this.isRemoteConnecting) {
+        return true
+      } else if (this.canEditCard || this.connectionTypes.length) {
         return true
       } else {
         return false
