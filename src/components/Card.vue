@@ -87,7 +87,7 @@ article(:style="position" :data-card-id="id" ref="card")
       //- Right buttons
       span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}")
         //- Url →
-        a.url-wrap(:href="formats.link" @click.left.stop="openUrl($event, formats.link)" @touchend.prevent="openUrl($event, formats.link)" v-if="formats.link && !nameIsComment" :class="{'connector-is-visible': connectorIsVisible}")
+        a.url-wrap(:href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" v-if="cardButtonUrl && !nameIsComment" :class="{'connector-is-visible': connectorIsVisible}")
           .url.inline-button-wrap
             button.inline-button(:style="{background: selectedColor}" tabindex="-1")
               img.icon.visit.arrow-icon(src="@/assets/visit.svg")
@@ -305,11 +305,14 @@ export default {
       }
     },
     cardButtonsIsVisible () {
-      if (this.connectorIsVisible || Boolean(this.formats.link)) {
+      if (this.connectorIsVisible || Boolean(this.formats.link || this.formats.file)) {
         return true
       } else {
         return false
       }
+    },
+    cardButtonUrl () {
+      return this.formats.link || this.formats.file
     },
     isHiddenInComment () {
       if (this.nameIsComment && !this.commentIsVisible) {
