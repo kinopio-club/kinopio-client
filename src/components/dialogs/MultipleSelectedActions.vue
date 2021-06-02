@@ -315,10 +315,14 @@ export default {
     connectionType (event) {
       const typePref = this.$store.state.currentUser.defaultConnectionTypeId
       const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
-      if (!defaultType && !event.shiftKey) {
+      let connectionType = last(this.$store.state.currentSpace.connectionTypes)
+      const shouldUseLastConnectionType = this.$store.state.currentUser.shouldUseLastConnectionType
+      const shiftKey = event.shiftKey
+      const shouldAddType = !connectionType || (shouldUseLastConnectionType && shiftKey) || (!shouldUseLastConnectionType && !shiftKey)
+      if (!defaultType && shouldAddType) {
         this.$store.dispatch('currentSpace/addConnectionType')
       }
-      const connectionType = last(this.$store.state.currentSpace.connectionTypes)
+      connectionType = last(this.$store.state.currentSpace.connectionTypes)
       return defaultType || connectionType
     },
     connectionAlreadyExists (startCardId, endCardId) {
