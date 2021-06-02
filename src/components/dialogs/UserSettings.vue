@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
+dialog.user-settings(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs")
   section
     p User Settings
 
@@ -9,6 +9,10 @@ dialog.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
       label(:class="{active: shouldInvertZoomDirection}" @click.left.prevent="toggleShouldInvertZoomDirection" @keydown.stop.enter="toggleShouldInvertZoomDirection")
         input(type="checkbox" v-model="shouldInvertZoomDirection")
         span Invert Zoom Direction
+    .row
+      label(:class="{active: shouldUseLastConnectionType}" @click.left.prevent="toggleShouldUseLastConnectionType" @keydown.stop.enter="toggleShouldUseLastConnectionType")
+        input(type="checkbox" v-model="shouldUseLastConnectionType")
+        span Use Last Connection Type
     .row
       .button-wrap
         button(@click.left.stop="toggleNotificationSettingsIsVisible" :class="{active: notificationSettingsIsVisible}")
@@ -83,6 +87,7 @@ export default {
     isSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     isUpgraded () { return this.$store.state.currentUser.isUpgraded },
     shouldInvertZoomDirection () { return this.$store.state.currentUser.shouldInvertZoomDirection },
+    shouldUseLastConnectionType () { return this.$store.state.currentUser.shouldUseLastConnectionType },
     isMobile () { return utils.isMobile() }
   },
   methods: {
@@ -123,6 +128,10 @@ export default {
     toggleShouldInvertZoomDirection () {
       const value = !this.shouldInvertZoomDirection
       this.$store.dispatch('currentUser/shouldInvertZoomDirection', value)
+    },
+    toggleShouldUseLastConnectionType () {
+      const value = !this.shouldUseLastConnectionType
+      this.$store.dispatch('currentUser/shouldUseLastConnectionType', value)
     }
   },
   watch: {
@@ -137,4 +146,7 @@ export default {
 </script>
 
 <style lang="stylus">
+  @media(max-height 500px)
+    .user-settings
+      top -100px !important
 </style>
