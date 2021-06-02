@@ -40,7 +40,6 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
 </template>
 
 <script>
-// import cache from '@/cache.js'
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 
@@ -146,7 +145,6 @@ export default {
         this.dialogHeight = utils.elementHeight(element)
       })
     }
-
   },
   watch: {
     visible (visible) {
