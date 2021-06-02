@@ -30,7 +30,8 @@ export default {
     shouldEmailNotifications: true,
     shouldEmailBulletin: true,
     shouldShowMoreAlignOptions: false,
-    shouldInvertZoomDirection: false
+    shouldInvertZoomDirection: false,
+    shouldUseLastConnectionType: false
   },
   mutations: {
     color: (state, newColor) => {
@@ -194,6 +195,10 @@ export default {
     shouldInvertZoomDirection: (state, value) => {
       state.shouldInvertZoomDirection = value
       cache.updateUser('shouldInvertZoomDirection', value)
+    },
+    shouldUseLastConnectionType: (state, value) => {
+      state.shouldUseLastConnectionType = value
+      cache.updateUser('shouldUseLastConnectionType', value)
     }
   },
   actions: {
@@ -497,6 +502,14 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldInvertZoomDirection: value
+        } }, { root: true })
+    },
+    shouldUseLastConnectionType: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldUseLastConnectionType' })
+      context.commit('shouldUseLastConnectionType', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldUseLastConnectionType: value
         } }, { root: true })
     }
   },

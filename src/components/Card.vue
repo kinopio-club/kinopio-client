@@ -938,7 +938,19 @@ export default {
     addConnectionType (event) {
       const typePref = this.$store.state.currentUser.defaultConnectionTypeId
       const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
-      if (defaultType || event.shiftKey) { return }
+      const shouldUseLastConnectionType = this.$store.state.currentUser.shouldUseLastConnectionType
+      const shiftKey = event.shiftKey
+      const connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
+      if (!connectionType) {
+        this.$store.dispatch('currentSpace/addConnectionType')
+      }
+      if (shouldUseLastConnectionType && shiftKey) {
+        this.$store.dispatch('currentSpace/addConnectionType')
+        return
+      }
+      if (defaultType || shiftKey || shouldUseLastConnectionType) {
+        return
+      }
       this.$store.dispatch('currentSpace/addConnectionType')
     },
     startConnecting (event) {
