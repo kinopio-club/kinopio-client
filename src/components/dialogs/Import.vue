@@ -130,7 +130,6 @@ export default {
         'cards': 'array',
         'connections': 'array',
         'connectionTypes': 'array',
-        'customFields': 'array',
         'tags': 'array'
       }
       Object.keys(schema).forEach(field => {
