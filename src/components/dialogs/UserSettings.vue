@@ -1,18 +1,15 @@
 <template lang="pug">
-dialog.user-settings(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs")
+dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs")
   section
     p User Settings
 
   //- User Preferences
   section
-    .row(v-if="!isMobile")
-      label(:class="{active: shouldInvertZoomDirection}" @click.left.prevent="toggleShouldInvertZoomDirection" @keydown.stop.enter="toggleShouldInvertZoomDirection")
-        input(type="checkbox" v-model="shouldInvertZoomDirection")
-        span Invert Zoom Direction
     .row
-      label(:class="{active: shouldUseLastConnectionType}" @click.left.prevent="toggleShouldUseLastConnectionType" @keydown.stop.enter="toggleShouldUseLastConnectionType")
-        input(type="checkbox" v-model="shouldUseLastConnectionType")
-        span Use Last Connection Type
+      .button-wrap
+        button(@click.left.stop="toggleControlsSettingsIsVisible" :class="{active: controlsSettingsIsVisible}")
+          span Controls
+        ControlsSettings(:visible="controlsSettingsIsVisible")
     .row
       .button-wrap
         button(@click.left.stop="toggleNotificationSettingsIsVisible" :class="{active: notificationSettingsIsVisible}")
@@ -58,8 +55,8 @@ dialog.user-settings(v-if="visible" :open="visible" ref="dialog" @click.left.sto
 import UserBilling from '@/components/dialogs/UserBilling.vue'
 import UpdateEmail from '@/components/dialogs/UpdateEmail.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
+import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
 import Loader from '@/components/Loader.vue'
-import utils from '@/utils.js'
 
 export default {
   name: 'UserSettings',
@@ -67,7 +64,8 @@ export default {
     Loader,
     UserBilling,
     UpdateEmail,
-    NotificationSettings
+    NotificationSettings,
+    ControlsSettings
   },
   props: {
     visible: Boolean
@@ -80,21 +78,20 @@ export default {
       loading: {
         removeUserPermanent: false
       },
-      notificationSettingsIsVisible: false
+      notificationSettingsIsVisible: false,
+      controlsSettingsIsVisible: false
     }
   },
   computed: {
     isSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    isUpgraded () { return this.$store.state.currentUser.isUpgraded },
-    shouldInvertZoomDirection () { return this.$store.state.currentUser.shouldInvertZoomDirection },
-    shouldUseLastConnectionType () { return this.$store.state.currentUser.shouldUseLastConnectionType },
-    isMobile () { return utils.isMobile() }
+    isUpgraded () { return this.$store.state.currentUser.isUpgraded }
   },
   methods: {
     closeDialogs () {
       this.userBillingIsVisible = false
       this.updateEmailIsVisible = false
       this.notificationSettingsIsVisible = false
+      this.controlsSettingsIsVisible = false
     },
     toggleRemoveAllConfirmationVisible () {
       this.removeAllConfirmationVisible = !this.removeAllConfirmationVisible
@@ -110,6 +107,11 @@ export default {
       this.loading.removeUserPermanent = false
       this.$emit('removeUser')
     },
+    toggleControlsSettingsIsVisible () {
+      const isVisible = this.controlsSettingsIsVisible
+      this.closeDialogs()
+      this.controlsSettingsIsVisible = !isVisible
+    },
     toggleUserBillingIsVisible () {
       const isVisible = this.userBillingIsVisible
       this.closeDialogs()
@@ -124,14 +126,6 @@ export default {
       const isVisible = this.notificationSettingsIsVisible
       this.closeDialogs()
       this.notificationSettingsIsVisible = !isVisible
-    },
-    toggleShouldInvertZoomDirection () {
-      const value = !this.shouldInvertZoomDirection
-      this.$store.dispatch('currentUser/shouldInvertZoomDirection', value)
-    },
-    toggleShouldUseLastConnectionType () {
-      const value = !this.shouldUseLastConnectionType
-      this.$store.dispatch('currentUser/shouldUseLastConnectionType', value)
     }
   },
   watch: {
