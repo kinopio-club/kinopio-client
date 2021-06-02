@@ -119,14 +119,14 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       .row
         .badge.title
           img.icon.connector-icon(src="@/assets/connector-open.svg")
-          span Use Last Connection Type
+          span Use {{lastOrNewConnectionTypeControlSetting}} Connection Type
         .badge.info Shift-Click on
           img.icon.connector-icon(src="@/assets/connector-open.svg")
       p
         span.badge.info Shift-Drag
         span card connector or
         span.badge.info Shift-Click
-        span 'Connect' button to use last connection type
+        span 'Connect' button to use {{lastOrNewConnectionTypeControlSetting}} connection type
     article
       .row
         .badge.title
@@ -184,7 +184,15 @@ export default {
     meta () { return utils.metaKey() },
     currentUser () { return this.$store.state.currentUser },
     isMobile () { return utils.isMobile() },
-    shouldInvertZoomDirection () { return this.$store.state.currentUser.shouldInvertZoomDirection }
+    shouldInvertZoomDirection () { return this.$store.state.currentUser.shouldInvertZoomDirection },
+    shouldUseLastConnectionType () { return this.$store.state.currentUser.shouldUseLastConnectionType },
+    lastOrNewConnectionTypeControlSetting () {
+      if (this.shouldUseLastConnectionType) {
+        return 'New'
+      } else {
+        return 'Last'
+      }
+    }
   },
   methods: {
     toggleSafariInfoIsVisible () {
