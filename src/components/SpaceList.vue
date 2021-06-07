@@ -4,6 +4,7 @@ span.space-list-wrap
     :hideFilter="hideFilter"
     :items="spaces"
     :placeholder="placeholder"
+    :isLoading="isLoading"
     @updateFilter="updateFilter"
     @updateFilteredItems="updateFilteredSpaces"
 
@@ -40,7 +41,6 @@ span.space-list-wrap
             img.icon.privacy-icon(v-if="spaceIsNotClosed(space)" :src="privacyIcon(space)")
             .badge.status(v-if="showInExplore(space)" title="Shown in Explore")
               img.icon(src="@/assets/checkmark.svg")
-    Loader(:visible="isLoading")
 
 </template>
 
@@ -49,7 +49,6 @@ import privacy from '@/data/privacy.js'
 import templates from '@/data/templates.js'
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import MoonPhase from '@/components/MoonPhase.vue'
-import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
 import last from 'lodash-es/last'
@@ -59,7 +58,6 @@ export default {
   components: {
     User: () => import('@/components/User.vue'),
     ResultsFilter,
-    Loader,
     MoonPhase
   },
   props: {
@@ -130,8 +128,10 @@ export default {
       this.filteredSpaces = spaces
     },
     updateFilter (filter) {
+      const spaces = this.spacesFiltered || this.spaces
       this.filter = filter
-      this.focusOnId = ''
+      if (!spaces.length) { return }
+      this.focusOnId = spaces[0].id
     },
     spaceIsActive (space) {
       if (this.selectedSpace) {
@@ -209,19 +209,16 @@ export default {
     focusNextItemFromFilter () {
       const spaces = this.spacesFiltered
       const currentIndex = spaces.findIndex(space => space.id === this.focusOnId)
-      console.log('next', currentIndex, this.focusOnId, spaces)
       this.focusNextItem(currentIndex)
     },
     focusPreviousItemFromFilter () {
       const spaces = this.spacesFiltered
       const currentIndex = spaces.findIndex(space => space.id === this.focusOnId)
-      console.log('prev', currentIndex, this.focusOnId)
       this.focusPreviousItem(currentIndex)
     },
     selectItemFromFilter () {
       const spaces = this.spacesFiltered
       const space = spaces.find(space => space.id === this.focusOnId)
-      console.log('select', space, this.focusOnId)
       this.$store.commit('shouldPreventNextEnterKey', true)
       this.selectSpace(space)
     }
@@ -279,13 +276,6 @@ export default {
   .user
     margin-right 6px
     vertical-align middle
-
-  .loader
-    position absolute
-    top 6px
-    left 4px
-    height 14px
-    width 14px
 
   a
     color var(--primary)

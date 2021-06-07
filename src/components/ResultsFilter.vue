@@ -1,6 +1,10 @@
 <template lang="pug">
-.search-wrap(v-if="shouldShowFilter" @mouseup.stop @touchend.stop)
-  img.icon.search(src="@/assets/search.svg" @click.left="focusFilterInput")
+.search-wrap.results-filter(v-if="shouldShowFilter" @mouseup.stop @touchend.stop)
+  template(v-if="isLoading")
+    Loader(:visible="true")
+  template(v-else)
+    img.icon.search(src="@/assets/search.svg" @click.left="focusFilterInput")
+
   input(
     :placeholder="inputPlaceholder"
     v-model="filterItems"
@@ -16,17 +20,23 @@
 </template>
 
 <script>
+import Loader from '@/components/Loader.vue'
+
 import fuzzy from 'fuzzy'
 
 export default {
   name: 'ResultsFilter',
+  components: {
+    Loader
+  },
   props: {
     hideFilter: Boolean,
     showFilter: Boolean,
     filterIsPersistent: Boolean,
     items: Array,
     placeholder: String,
-    initialValue: String
+    initialValue: String,
+    isLoading: Boolean
   },
   data () {
     return {
@@ -119,4 +129,11 @@ export default {
 </script>
 
 <style lang="stylus">
+.results-filter
+  .loader
+    width 13px
+    height 14px
+    margin-right 3px
+    flex-shrink 0
+    margin-top 2px
 </style>
