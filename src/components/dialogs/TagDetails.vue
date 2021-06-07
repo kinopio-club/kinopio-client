@@ -37,6 +37,9 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
         template(v-for="(card in group.cards")
           li(:data-card-id="card.id" @click="showCardDetails(card)" :class="{ active: cardIsCurrentCard(card.id) }")
             p.name.name-segments
+              span.badge.status.inline-badge
+                img.icon.time(src="@/assets/time.svg")
+                span {{ relativeDate(card) }}
               User(v-if="card.otherUser" :user="card.otherUser" :isClickable="false")
               User(v-else-if="card.userId !== currentUser.id && userById(card.userId)" :user="userById(card.userId)" :isClickable="false")
               template(v-for="segment in card.nameSegments")
@@ -413,6 +416,9 @@ export default {
     },
     updatePinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
+    },
+    relativeDate (card) {
+      return utils.shortRelativeTime(card.updatedAt)
     }
   },
   watch: {
