@@ -105,13 +105,13 @@ export default {
     triggerUpdatePositionInVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
-    focusNextItem (event) {
+    focusNextItem () {
       this.$emit('focusNextItem')
     },
-    focusPreviousItem (event) {
+    focusPreviousItem () {
       this.$emit('focusPreviousItem')
     },
-    selectItem (event) {
+    selectItem () {
       this.$emit('selectItem')
     }
   }

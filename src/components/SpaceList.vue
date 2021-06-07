@@ -1,6 +1,16 @@
 <template lang="pug">
 span.space-list-wrap
-  ResultsFilter(:hideFilter="hideFilter" :items="spaces" :placeholder="placeholder" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredSpaces")
+  ResultsFilter(
+    :hideFilter="hideFilter"
+    :items="spaces"
+    :placeholder="placeholder"
+    @updateFilter="updateFilter"
+    @updateFilteredItems="updateFilteredSpaces"
+
+    @focusNextItem="focusNextItemFromFilter"
+    @focusPreviousItem="focusPreviousItemFromFilter"
+    @selectItem="selectItemFromFilter"
+  )
   ul.results-list.space-list
     template(v-for="(space in spacesFiltered")
       a(:href="space.url")
@@ -137,9 +147,6 @@ export default {
       const templateSpaceIds = templates.spaces().map(template => template.id)
       return templateSpaceIds.includes(space.id)
     },
-    selectSpace (space) {
-      this.$emit('selectSpace', space)
-    },
     spaceIsNotClosed (space) {
       return space.privacy !== 'closed'
     },
@@ -190,8 +197,21 @@ export default {
         this.focusOnName = lastItem.name
       }
     },
+    selectSpace (space) {
+      this.$emit('selectSpace', space)
+    },
     closeDialog () {
       this.$emit('closeDialog')
+    },
+
+    focusNextItemFromFilter () {
+      console.log('next')
+    },
+    focusPreviousItemFromFilter () {
+      console.log('prev')
+    },
+    selectItemFromFilter () {
+      console.log('select')
     }
   },
   watch: {
