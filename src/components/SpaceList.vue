@@ -131,6 +131,7 @@ export default {
     },
     updateFilter (filter) {
       this.filter = filter
+      this.focusOnName = ''
     },
     spaceIsActive (space) {
       if (this.selectedSpace) {
@@ -172,7 +173,7 @@ export default {
       return space.user || users[0]
     },
     focusPreviousItem (currentIndex) {
-      const spaces = this.spaces
+      const spaces = this.spacesFiltered
       const firstItemIsFocused = this.search === this.focusOnName
       const firstItem = spaces[0]
       const previousItem = spaces[currentIndex - 1]
@@ -185,7 +186,7 @@ export default {
       }
     },
     focusNextItem (currentIndex) {
-      const spaces = this.spaces
+      const spaces = this.spacesFiltered
       const lastItem = last(spaces)
       const lastItemIsFocused = lastItem.name === this.focusOnName
       const nextItem = spaces[currentIndex + 1]
@@ -205,21 +206,21 @@ export default {
     },
 
     focusNextItemFromFilter () {
-      const spaces = this.spaces
+      const spaces = this.spacesFiltered
       const currentIndex = spaces.findIndex(space => space.name === this.focusOnName)
-      console.log('next', currentIndex)
+      console.log('next', currentIndex, this.focusOnName, spaces)
       this.focusNextItem(currentIndex)
     },
     focusPreviousItemFromFilter () {
-      const spaces = this.spaces
+      const spaces = this.spacesFiltered
       const currentIndex = spaces.findIndex(space => space.name === this.focusOnName)
-      console.log('prev', currentIndex)
+      console.log('prev', currentIndex, this.focusOnName)
       this.focusPreviousItem(currentIndex)
     },
     selectItemFromFilter () {
-      const spaces = this.spaces
+      const spaces = this.spacesFiltered
       const space = spaces.find(space => space.name === this.focusOnName)
-      console.log('select', space)
+      console.log('select', space, this.focusOnName)
       this.$store.commit('shouldPreventNextEnterKey', true)
       this.selectSpace(space)
     }
