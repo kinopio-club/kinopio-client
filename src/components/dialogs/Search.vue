@@ -189,7 +189,7 @@ export default {
       const currentIndex = cards.findIndex(card => card.id === this.previousResultCardId)
       let index = currentIndex + 1
       if (cards.length === index) {
-        index = 0
+        return
       }
       this.focusItem(cards[index])
     },
@@ -202,7 +202,7 @@ export default {
       const currentIndex = cards.findIndex(card => card.id === this.previousResultCardId)
       let index = currentIndex - 1
       if (index < 0) {
-        index = cards.length - 1
+        index = 0
       }
       this.focusItem(cards[index])
     },

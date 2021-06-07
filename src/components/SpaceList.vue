@@ -128,8 +128,8 @@ export default {
       this.filteredSpaces = spaces
     },
     updateFilter (filter) {
-      const spaces = this.spacesFiltered || this.spaces
       this.filter = filter
+      const spaces = this.spacesFiltered || this.spaces
       if (!spaces.length) { return }
       this.focusOnId = spaces[0].id
     },

@@ -1,16 +1,25 @@
 <template lang="pug">
 span.tag-list(@click.left="closeDialogs")
   template(v-if="tags")
-    ResultsFilter(:items="tags" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredTags")
+    ResultsFilter(
+      :items="tags"
+      @updateFilter="updateFilter"
+      @updateFilteredItems="updateFilteredTags"
+
+      @focusNextItem="focusNextItem"
+      @focusPreviousItem="focusPreviousItem"
+      @selectItem="selectItem"
+    )
     ul.results-list
       template(v-for="(tag in tagsFiltered")
         li(
           :key="tag.id"
+          :data-tag-id="tag.id"
           tabindex="0"
           @click.left.stop="toggleTagDetailsIsVisible($event, tag)"
           @touchend.stop="toggleTagDetailsIsVisible($event, tag)"
           v-on:keyup.enter="toggleTagDetailsIsVisible($event, tag)"
-          :class="{ active: tagDetailsTag.name === tag.name }"
+          :class="{ active: tagDetailsTag.name === tag.name, hover: tagIsFocused(tag) }"
         )
           .badge(:style="{backgroundColor: tag.color, 'pointerEvents': 'none'}")
             span {{tag.name}}
@@ -42,7 +51,8 @@ export default {
       filter: '',
       filteredTags: [],
       prevTagName: null,
-      tagDetailsTag: {}
+      tagDetailsTag: {},
+      focusOnId: ''
     }
   },
   computed: {
@@ -56,9 +66,19 @@ export default {
     }
   },
   methods: {
-    updatePosition (event) {
+    tagIsFocused (tag) {
+      return this.focusOnId === tag.id
+    },
+    updatePosition (event, tag) {
+      let rect
       const viewport = utils.visualViewport()
-      const rect = event.target.getBoundingClientRect()
+      if (event) {
+        rect = event.target.getBoundingClientRect()
+      } else {
+        console.log(tag.id, tag)
+        const element = document.querySelector(`li[data-tag-id="${tag.id}"]`)
+        rect = element.getBoundingClientRect()
+      }
       let position = {
         x: rect.x + (rect.width / 2) + window.scrollX,
         y: rect.y + 8 + window.scrollY
@@ -78,7 +98,7 @@ export default {
     toggleTagDetailsIsVisible (event, tag) {
       this.closeDialogs()
       this.$nextTick(() => {
-        this.updatePosition(event)
+        this.updatePosition(event, tag)
         this.updateTagDetailsTag(tag)
         if (this.prevTagName === tag.name) {
           const value = !this.$store.state.tagDetailsIsVisible
@@ -97,6 +117,37 @@ export default {
     },
     updateFilter (filter) {
       this.filter = filter
+      this.$nextTick(() => {
+        const tags = this.tagsFiltered || this.tags
+        if (!tags.length) { return }
+        this.focusOnId = tags[0].id
+      })
+    },
+    focusNextItem () {
+      const tags = this.tagsFiltered
+      let currentIndex = tags.findIndex(tags => tags.id === this.focusOnId)
+      let index = currentIndex + 1
+      if (tags.length === index) {
+        index = 0
+      }
+      this.focusItem(tags[index])
+    },
+    focusPreviousItem () {
+      const tags = this.tagsFiltered
+      let currentIndex = tags.findIndex(tags => tags.id === this.focusOnId)
+      let index = currentIndex - 1
+      if (index < 0) {
+        index = 0
+      }
+      this.focusItem(tags[index])
+    },
+    selectItem () {
+      const tags = this.tagsFiltered
+      const index = tags.findIndex(tags => tags.id === this.focusOnId)
+      this.toggleTagDetailsIsVisible(null, tags[index])
+    },
+    focusItem (tag) {
+      this.focusOnId = tag.id
     }
   },
   watch: {
