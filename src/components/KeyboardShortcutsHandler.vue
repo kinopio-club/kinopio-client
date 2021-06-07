@@ -186,6 +186,10 @@ export default {
     },
 
     addCard () {
+      if (this.$store.state.shouldPreventNextEnterKey) {
+        this.$store.commit('shouldPreventNextEnterKey', false)
+        return
+      }
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
       const parentCardId = this.$store.state.parentCardId

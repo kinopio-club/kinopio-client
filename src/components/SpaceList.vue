@@ -205,13 +205,23 @@ export default {
     },
 
     focusNextItemFromFilter () {
-      console.log('next')
+      const spaces = this.spaces
+      const currentIndex = spaces.findIndex(space => space.name === this.focusOnName)
+      console.log('next', currentIndex)
+      this.focusNextItem(currentIndex)
     },
     focusPreviousItemFromFilter () {
-      console.log('prev')
+      const spaces = this.spaces
+      const currentIndex = spaces.findIndex(space => space.name === this.focusOnName)
+      console.log('prev', currentIndex)
+      this.focusPreviousItem(currentIndex)
     },
     selectItemFromFilter () {
-      console.log('select')
+      const spaces = this.spaces
+      const space = spaces.find(space => space.name === this.focusOnName)
+      console.log('select', space)
+      this.$store.commit('shouldPreventNextEnterKey', true)
+      this.selectSpace(space)
     }
   },
   watch: {
