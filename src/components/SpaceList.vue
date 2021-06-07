@@ -250,7 +250,7 @@ export default {
 
   .loader
     position absolute
-    top 4px
+    top 6px
     left 4px
     height 14px
     width 14px
