@@ -16,7 +16,7 @@ span.space-list-wrap
       a(:href="space.url")
         li(
           @click.left.prevent.stop="selectSpace(space)"
-          :class="{ active: spaceIsActive(space), hover: focusOnName === space.name }"
+          :class="{ active: spaceIsActive(space), hover: focusOnId === space.id }"
           :key="space.id"
           tabindex="0"
           v-on:keyup.enter="selectSpace(space)"
@@ -78,7 +78,7 @@ export default {
       if (mutation.type === 'triggerPickerNavigationKey') {
         const key = mutation.payload
         const spaces = this.spaces
-        let currentIndex = spaces.findIndex(space => space.name === this.focusOnName)
+        let currentIndex = spaces.findIndex(space => space.id === this.focusOnId)
         if (!utils.arrayHasItems(spaces)) {
           this.closeDialog()
         } else if (key === 'ArrowUp') {
@@ -89,7 +89,7 @@ export default {
       }
       if (mutation.type === 'triggerPickerSelect') {
         const spaces = this.spaces
-        const currentSpace = spaces.find(space => space.name === this.focusOnName)
+        const currentSpace = spaces.find(space => space.id === this.focusOnId)
         this.selectSpace(currentSpace)
       }
     })
@@ -98,7 +98,7 @@ export default {
     return {
       filter: '',
       filteredSpaces: [],
-      focusOnName: ''
+      focusOnId: ''
     }
   },
   computed: {
@@ -131,7 +131,7 @@ export default {
     },
     updateFilter (filter) {
       this.filter = filter
-      this.focusOnName = ''
+      this.focusOnId = ''
     },
     spaceIsActive (space) {
       if (this.selectedSpace) {
@@ -174,28 +174,29 @@ export default {
     },
     focusPreviousItem (currentIndex) {
       const spaces = this.spacesFiltered
-      const firstItemIsFocused = this.search === this.focusOnName
+      const focusedSpaceName = this.spaces.find(space => space.id === this.focusOnId)
+      const firstItemIsFocused = this.search === focusedSpaceName
       const firstItem = spaces[0]
       const previousItem = spaces[currentIndex - 1]
       if (firstItemIsFocused) {
         this.closeDialog()
       } else if (previousItem) {
-        this.focusOnName = previousItem.name
+        this.focusOnId = previousItem.id
       } else {
-        this.focusOnName = firstItem.name
+        this.focusOnId = firstItem.id
       }
     },
     focusNextItem (currentIndex) {
       const spaces = this.spacesFiltered
       const lastItem = last(spaces)
-      const lastItemIsFocused = lastItem.name === this.focusOnName
+      const lastItemIsFocused = lastItem.name === this.focusOnId
       const nextItem = spaces[currentIndex + 1]
       if (lastItemIsFocused) {
         this.closeDialog()
       } else if (nextItem) {
-        this.focusOnName = nextItem.name
+        this.focusOnId = nextItem.id
       } else {
-        this.focusOnName = lastItem.name
+        this.focusOnId = lastItem.id
       }
     },
     selectSpace (space) {
@@ -207,20 +208,20 @@ export default {
 
     focusNextItemFromFilter () {
       const spaces = this.spacesFiltered
-      const currentIndex = spaces.findIndex(space => space.name === this.focusOnName)
-      console.log('next', currentIndex, this.focusOnName, spaces)
+      const currentIndex = spaces.findIndex(space => space.id === this.focusOnId)
+      console.log('next', currentIndex, this.focusOnId, spaces)
       this.focusNextItem(currentIndex)
     },
     focusPreviousItemFromFilter () {
       const spaces = this.spacesFiltered
-      const currentIndex = spaces.findIndex(space => space.name === this.focusOnName)
-      console.log('prev', currentIndex, this.focusOnName)
+      const currentIndex = spaces.findIndex(space => space.id === this.focusOnId)
+      console.log('prev', currentIndex, this.focusOnId)
       this.focusPreviousItem(currentIndex)
     },
     selectItemFromFilter () {
       const spaces = this.spacesFiltered
-      const space = spaces.find(space => space.name === this.focusOnName)
-      console.log('select', space, this.focusOnName)
+      const space = spaces.find(space => space.id === this.focusOnId)
+      console.log('select', space, this.focusOnId)
       this.$store.commit('shouldPreventNextEnterKey', true)
       this.selectSpace(space)
     }
@@ -229,7 +230,7 @@ export default {
     spaces (spaces) {
       const cardDetailsIsVisible = this.$store.state.cardDetailsIsVisibleForCardId
       if (spaces && cardDetailsIsVisible) {
-        this.focusOnName = spaces[0].name
+        this.focusOnId = spaces[0].id
       }
     }
   }
