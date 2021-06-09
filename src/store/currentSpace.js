@@ -1118,6 +1118,7 @@ export default {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       const zoom = context.rootGetters.spaceCounterZoomDecimal
       let { endCursor, prevCursor } = options
+      if (!endCursor || !prevCursor) { return }
       endCursor = {
         x: endCursor.x * zoom,
         y: endCursor.y * zoom
