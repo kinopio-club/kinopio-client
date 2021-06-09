@@ -9,7 +9,13 @@ import sortBy from 'lodash-es/sortBy'
 
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+
+// https://data.iana.org/TLD/tlds-alpha-by-domain.txt
+// Updated Jun 9 2021 UTC
+import tldsList from '@/data/tlds.json'
 dayjs.extend(relativeTime)
+let tlds = tldsList.join(String.raw`)|(\.`)
+tlds = String.raw`(\.` + tlds + ')'
 
 export default {
   kinopioDomain () {
@@ -819,6 +825,15 @@ export default {
       return true
     }
   },
+  urlIsValidTld (url) {
+    // https://regexr.com/5v6s9
+    const regex = `${tlds}([?| ]|$|` + String.raw`\s)`
+    const tldPattern = new RegExp(regex)
+    url = url.toLowerCase()
+    if (url.match(tldPattern)) {
+      return true
+    }
+  },
   urlFromString (string) {
     if (!string) { return }
     const urls = this.urlsFromString(string)
@@ -852,7 +867,7 @@ export default {
     urls = urls.filter(url => {
       if (!url) { return }
       const urlIsMarkdownEmphasis = Boolean(this.markdown().emphasisPattern2.exec(url))
-      const isInvalidUrl = urlIsMarkdownEmphasis || this.urlIsFloatOrIp(url) || this.urlIsCurrencyFloat(url)
+      const isInvalidUrl = urlIsMarkdownEmphasis || this.urlIsFloatOrIp(url) || this.urlIsCurrencyFloat(url) || !this.urlIsValidTld(url)
       if (!isInvalidUrl) {
         return true
       }
