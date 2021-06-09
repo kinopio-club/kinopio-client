@@ -852,6 +852,7 @@ export default {
         string = string.replace(link, '')
       })
     }
+    string = this.removeMarkdownCodeblocksFromString(string)
     // https://regexr.com/59m5t
     // start, newline, or space
     // optionally starts with http/s protocol
