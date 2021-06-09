@@ -2,10 +2,11 @@
 </template>
 
 <script>
+import utils from '@/utils.js'
+
 import scrollIntoView from '@/scroll-into-view.js'
 import last from 'lodash-es/last'
-
-import utils from '@/utils.js'
+import nanoid from 'nanoid'
 
 const incrementPosition = 12
 let useSiblingConnectionType
@@ -509,8 +510,12 @@ export default {
     pasteCards () {
       const cards = this.$store.state.copiedCards
       if (!cards.length) { return }
+      this.$store.commit('clearMultipleSelected')
+      this.$store.commit('multipleSelectedActionsIsVisible', false)
       cards.forEach(card => {
-        this.$store.dispatch('currentSpace/pasteCard', card)
+        const cardId = nanoid()
+        this.$store.dispatch('currentSpace/pasteCard', { card, cardId })
+        this.$store.commit('addToMultipleCardsSelected', cardId)
       })
       this.$nextTick(() => {
         const newCard = last(this.$store.state.currentSpace.cards)

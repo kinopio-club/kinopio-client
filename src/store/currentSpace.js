@@ -978,10 +978,10 @@ export default {
     createCard: (context, card) => {
       context.commit('createCard', card)
     },
-    pasteCard: (context, card) => {
+    pasteCard: (context, { card, cardId }) => {
       utils.typeCheck({ value: card, type: 'object', origin: 'pasteCard' })
       card = utils.clone(card)
-      card.id = nanoid()
+      card.id = cardId || nanoid()
       card.spaceId = context.state.id
       const existingCards = context.state.cards
       utils.uniqueCardPosition(card, existingCards)
