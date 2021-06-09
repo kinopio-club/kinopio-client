@@ -904,6 +904,9 @@ export default {
           segment.markdown.forEach(markdown => {
             if (markdown.type === 'link') {
               name += markdown.result[1]
+            } else if (markdown.type === 'code') {
+              // truncate code characters to compensate for badge padding
+              name += markdown.content.substring(4, markdown.content.length)
             } else {
               name += markdown.content
             }
