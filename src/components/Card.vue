@@ -313,7 +313,7 @@ export default {
     },
     cardButtonUrl () {
       const link = this.formats.link
-      if (utils.urlIsValidTld(link)) {
+      if (utils.urlIsValidTld(link) || utils.urlIsKinopioSpace(link)) {
         return link
       }
       return this.formats.file
