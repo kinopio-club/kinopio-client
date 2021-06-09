@@ -827,7 +827,7 @@ export default {
   },
   urlIsValidTld (url) {
     // https://regexr.com/5v6s9
-    const regex = '(' + tlds + ')' + String.raw`(\?| |$|\s)`
+    const regex = '(' + tlds + ')' + String.raw`(\?|\/| |$|\s)`
     const tldPattern = new RegExp(regex)
     url = url.toLowerCase()
     if (url.match(tldPattern)) {

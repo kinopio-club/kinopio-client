@@ -312,7 +312,11 @@ export default {
       }
     },
     cardButtonUrl () {
-      return this.formats.link || this.formats.file
+      const link = this.formats.link
+      if (utils.urlIsValidTld(link)) {
+        return link
+      }
+      return this.formats.file
     },
     isHiddenInComment () {
       if (this.nameIsComment && !this.commentIsVisible) {
