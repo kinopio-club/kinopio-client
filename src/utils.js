@@ -868,7 +868,7 @@ export default {
     urls = urls.filter(url => {
       if (!url) { return }
       const urlIsMarkdownEmphasis = Boolean(this.markdown().emphasisPattern2.exec(url))
-      const isInvalidUrl = urlIsMarkdownEmphasis || this.urlIsFloatOrIp(url) || this.urlIsCurrencyFloat(url) || !this.urlIsValidTld(url)
+      const isInvalidUrl = urlIsMarkdownEmphasis || this.urlIsFloatOrIp(url) || this.urlIsCurrencyFloat(url)
       if (!isInvalidUrl) {
         return true
       }
