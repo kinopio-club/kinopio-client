@@ -163,7 +163,10 @@ export default {
     },
     spaceBackground () {
       const defaultBackground = 'https://kinopio-backgrounds.us-east-1.linodeobjects.com/background-thumbnail.svg'
-      const background = this.$store.state.currentSpace.background || defaultBackground
+      let background = this.$store.state.currentSpace.background || defaultBackground
+      if (!utils.urlIsImage(background)) {
+        background = defaultBackground
+      }
       return { backgroundImage: `url(${background})` }
     },
     pendingUpload () {
