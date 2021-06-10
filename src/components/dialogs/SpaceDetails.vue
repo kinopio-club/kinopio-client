@@ -5,6 +5,18 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
       .row.space-meta-row
         .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
           button(:style="spaceBackground" :class="{ active: backgroundIsVisible }")
+          //- Background Upload Progress
+          .uploading-container-footer(v-if="pendingUpload")
+            .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
+              Loader(:visible="true")
+              span {{pendingUpload.percentComplete}}%
+          //- Background Remote Upload Progress
+          .uploading-container-footer(v-if="remotePendingUpload")
+            .badge.info
+              Loader(:visible="true")
+              span {{remotePendingUpload.percentComplete}}%
+
+          Background(:visible="backgroundIsVisible")
         input(ref="name" placeholder="name" v-model="spaceName")
       .row.privacy-row
         PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
@@ -52,6 +64,7 @@ import cache from '@/cache.js'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
 import AddSpace from '@/components/dialogs/AddSpace.vue'
+import Background from '@/components/dialogs/Background.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
@@ -71,6 +84,7 @@ export default {
     Export,
     Import,
     AddSpace,
+    Background,
     SpaceList,
     PrivacyButton,
     ShowInExploreButton,
@@ -151,6 +165,24 @@ export default {
       const defaultBackground = 'https://kinopio-backgrounds.us-east-1.linodeobjects.com/background-thumbnail.svg'
       const background = this.$store.state.currentSpace.background || defaultBackground
       return { backgroundImage: `url(${background})` }
+    },
+    pendingUpload () {
+      const currentSpace = this.$store.state.currentSpace
+      const pendingUploads = this.$store.state.upload.pendingUploads
+      return pendingUploads.find(upload => {
+        const isCurrentSpace = upload.spaceId === currentSpace.id
+        const isInProgress = upload.percentComplete < 100
+        return isCurrentSpace && isInProgress
+      })
+    },
+    remotePendingUpload () {
+      const currentSpace = this.$store.state.currentSpace
+      let remotePendingUploads = this.$store.state.remotePendingUploads
+      return remotePendingUploads.find(upload => {
+        const inProgress = upload.percentComplete < 100
+        const isSpace = upload.spaceId === currentSpace.id
+        return inProgress && isSpace
+      })
     }
   },
   methods: {
@@ -380,4 +412,18 @@ export default {
         height 20px
         background-size cover
         background-position center
+  .uploading-container-footer
+    position absolute
+    top 15px
+    left 8px
+    width 100px
+    pointer-events none
+    z-index 1
+    .badge
+      display inline-block
+      &.absolute
+        position absolute
+        top 6px
+        left 6px
+
 </style>

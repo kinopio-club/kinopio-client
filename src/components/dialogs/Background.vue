@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.background(v-if="visible" :open="visible" @click.left="closeDialogs")
+dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
   section
     p Background
 
