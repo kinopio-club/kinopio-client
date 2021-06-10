@@ -411,8 +411,8 @@ export default {
     >.button-wrap
       padding-right 6px
       > button
-        width 25px
-        height 20px
+        width 24px
+        height 24px
         background-size cover
         background-position center
   .uploading-container-footer
