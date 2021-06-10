@@ -2,7 +2,9 @@
 dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     template(v-if="isSpaceMember")
-      .row
+      .row.space-meta-row
+        .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
+          button(:style="spaceBackground" :class="{ active: backgroundIsVisible }")
         input(ref="name" placeholder="name" v-model="spaceName")
       .row.privacy-row
         PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
@@ -103,6 +105,7 @@ export default {
       importIsVisible: false,
       addSpaceIsVisible: false,
       privacyPickerIsVisible: false,
+      backgroundIsVisible: false,
       isLoadingRemoteSpaces: false,
       remoteSpaces: [],
       resultsSectionHeight: null,
@@ -143,6 +146,11 @@ export default {
       const id = this.$store.state.currentSpace.id
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(id)
+    },
+    spaceBackground () {
+      const defaultBackground = 'https://kinopio-backgrounds.us-east-1.linodeobjects.com/background-thumbnail.svg'
+      const background = this.$store.state.currentSpace.background || defaultBackground
+      return { backgroundImage: `url(${background})` }
     }
   },
   methods: {
@@ -172,11 +180,17 @@ export default {
       this.closeDialogs()
       this.privacyPickerIsVisible = !isVisible
     },
+    toggleBackgroundIsVisible () {
+      const isVisible = this.backgroundIsVisible
+      this.closeDialogs()
+      this.backgroundIsVisible = !isVisible
+    },
     closeDialogs () {
       this.exportIsVisible = false
       this.importIsVisible = false
       this.addSpaceIsVisible = false
       this.privacyPickerIsVisible = false
+      this.backgroundIsVisible = false
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space })
@@ -356,4 +370,14 @@ export default {
   button.disabled
     opacity 0.5
     pointer-events none
+  .space-meta-row
+    >.button-wrap + input
+      margin 0
+    >.button-wrap
+      padding-right 6px
+      > button
+        width 25px
+        height 20px
+        background-size cover
+        background-position center
 </style>
