@@ -941,7 +941,8 @@ export default {
         name: name || '',
         frameId: 0,
         userId: context.rootState.currentUser.id,
-        urlPreviewIsVisible: true
+        urlPreviewIsVisible: true,
+        commentIsVisible: true
       }
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       context.commit('createCard', card)
