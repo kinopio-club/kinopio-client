@@ -267,4 +267,8 @@ export default {
   .hidden
     display none
 
+  @media(max-height 700px)
+    .image-picker
+      top -50px
+
 </style>

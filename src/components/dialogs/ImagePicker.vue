@@ -7,7 +7,7 @@ dialog.narrow.image-picker(
   :class="{'background-image-picker' : isBackgroundImage, 'right-side': showOnRightSide}"
   :style="{'max-height': dialogHeight + 'px', 'min-height': minDialogHeight + 'px'}"
 )
-  section(v-if="!isBackgroundImage")
+  section(v-if="!isBackgroundImage" ref="cardImageServiceSection")
     //- card images
     .row
       .segmented-buttons
@@ -63,7 +63,7 @@ dialog.narrow.image-picker(
     //-   span Stickers
 
   //- background images
-  section(v-if="isBackgroundImage")
+  section(v-if="isBackgroundImage" ref="serviceSection")
     .row
       .segmented-buttons
         button(@click.left.stop="toggleServiceIsBackgrounds" :class="{active : serviceIsBackgrounds}")
@@ -78,7 +78,7 @@ dialog.narrow.image-picker(
       //- p(v-if="!backgroundsIsStatic") Animation can be distracting, but really sets a vibe
 
   //- search box
-  section.results-section.search-input-wrap
+  section.results-section.search-input-wrap(ref="searchSection")
     .search-wrap(v-if="!serviceIsBackgrounds")
       img.icon.search(v-if="!loading" src="@/assets/search.svg" @click.left="focusSearchInput")
       Loader(:visible="loading")
@@ -497,23 +497,35 @@ export default {
       this.$nextTick(() => {
         const element = this.$refs.dialog
         const dialogHeight = utils.elementHeight(element)
-        let height = utils.elementHeight(element, true)
-        height = Math.max(height, 300)
-        if (this.heightIsSignificantlyDifferent(height)) {
-          this.resultsSectionHeight = height
-        }
         this.minDialogHeight = Math.max(this.minDialogHeight, dialogHeight)
+        this.updateResultsSectionHeight()
       })
     },
     updateHeightFromFooter () {
       if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.dialog
-        if (!element) { return }
-        this.dialogHeight = utils.elementHeightFromHeader(element)
-        element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
+        this.dialogHeight = utils.elementHeight(element)
         this.minDialogHeight = Math.max(this.minDialogHeight, this.dialogHeight)
+        this.updateResultsSectionHeight()
+      })
+    },
+    updateResultsSectionHeight () {
+      this.$nextTick(() => {
+        if (!this.visible) { return }
+        let resultsSection = this.$refs.results
+        let serviceSection
+        if (this.isBackgroundImage) {
+          serviceSection = this.$refs.serviceSection
+        } else {
+          serviceSection = this.$refs.cardImageServiceSection
+        }
+        let searchSection = this.$refs.searchSection
+        if (!serviceSection) { return }
+        serviceSection = serviceSection.getBoundingClientRect().height
+        resultsSection = utils.elementHeight(resultsSection, true)
+        searchSection = searchSection.getBoundingClientRect().height
+        this.resultsSectionHeight = resultsSection + serviceSection + searchSection + 4
       })
     },
     resetPinchCounterZoomDecimal () {
