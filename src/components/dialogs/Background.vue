@@ -3,10 +3,7 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
   section
     p Background
 
-  section(
-    @mouseup.stop
-    @touchend.stop
-  )
+  section(@mouseup.stop @touchend.stop)
     textarea(
       :disabled="!canEditSpace"
       ref="background"
@@ -68,10 +65,26 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
         button(:disabled="!canEditSpace" @click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
 
+  section(@mouseup.stop @touchend.stop)
+    .row
+      p Tint
+    .row
+      .button-wrap
+        button(:disabled="!canEditSpace" @click.left="removeBackground")
+          img.icon(src="@/assets/remove.svg")
+          span Remove
+
+      .button-wrap
+        button.change-color(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
+          .current-color(v-if="spaceBackgroundColor" :style="{ background: spaceBackgroundColor }")
+          span(v-if="!spaceBackgroundColor") Select Color
+        ColorPicker(:currentColor="spaceBackgroundColor" :visible="colorPickerIsVisible" @selectedColor="updateSpaceBackgroundColor")
+
 </template>
 
 <script>
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
+import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
@@ -79,6 +92,7 @@ export default {
   name: 'Background',
   components: {
     ImagePicker,
+    ColorPicker,
     Loader
   },
   props: {
@@ -87,6 +101,7 @@ export default {
   data () {
     return {
       imagePickerIsVisible: false,
+      colorPickerIsVisible: false,
       initialSearch: '',
       error: {
         isNotImageUrl: false,
@@ -143,15 +158,32 @@ export default {
         const isSpace = upload.spaceId === currentSpace.id
         return isInProgress && isSpace
       })
+    },
+    spaceBackgroundColor () {
+      // new server attr
+      return '' // def white #fff
     }
+    // spaceBackgroundColorWithDefault () {
+    //   if !this.spaceBackgroundColor
+    //     // #fff
+    // }
   },
   methods: {
+    toggleColorPicker () {
+      const isVisible = this.colorPickerIsVisible
+      this.closeDialogs()
+      this.colorPickerIsVisible = !isVisible
+    },
+    updateSpaceBackgroundColor () {
+      console.log('❤️❤️', this.$store.state.currentSpace.backgroundColor)
+    },
     triggerSignUpOrInIsVisible () {
       this.$store.dispatch('closeAllDialogs', 'Background.triggerSignUpOrInIsVisible')
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     closeDialogs () {
       this.imagePickerIsVisible = false
+      this.colorPickerIsVisible = false
     },
     toggleImagePickerIsVisible () {
       const isVisible = this.imagePickerIsVisible
@@ -270,5 +302,6 @@ export default {
   @media(max-height 700px)
     .image-picker
       top -50px
-
+    .color-picker
+      top -50px
 </style>
