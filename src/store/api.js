@@ -1,8 +1,9 @@
-import debounce from 'lodash-es/debounce'
-import merge from 'lodash-es/merge'
-
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+
+import debounce from 'lodash-es/debounce'
+import merge from 'lodash-es/merge'
+import nanoid from 'nanoid'
 
 let host = 'https://kinopio-server.herokuapp.com'
 if (process.env.NODE_ENV === 'development') {
@@ -127,7 +128,10 @@ const self = {
         cache.saveQueueBuffer(body)
         cache.clearQueue()
       }
-
+      body = body.map(item => {
+        item.operationId = nanoid()
+        return item
+      })
       try {
         console.log(`🛫 sending operations`, body)
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
