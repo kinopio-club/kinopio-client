@@ -2,6 +2,7 @@
 dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
   section
     p Background
+    ImagePicker(:visible="imagePickerIsVisible" :isBackgroundImage="true" @selectImage="updateSpaceBackground" :initialSearch="initialSearch")
 
   section(@mouseup.stop @touchend.stop)
     textarea(
@@ -57,12 +58,10 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
     .row
       .button-wrap
         button(:disabled="!canEditSpace" @click.left="removeBackground")
-          img.icon(src="@/assets/remove.svg")
-          span Remove
+          img.icon.cancel(src="@/assets/add.svg")
       .button-wrap
         button(:disabled="!canEditSpace" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
           img.icon.flower(src="@/assets/flower.svg")
-        ImagePicker(:visible="imagePickerIsVisible" :isBackgroundImage="true" @selectImage="updateSpaceBackground" :initialSearch="initialSearch")
       .button-wrap
         button(:disabled="!canEditSpace" @click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
@@ -73,8 +72,7 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
     .row
       .button-wrap
         button(:disabled="!canEditSpace" @click.left="removeBackground")
-          img.icon(src="@/assets/remove.svg")
-          span Remove
+          img.icon.cancel(src="@/assets/add.svg")
 
       .button-wrap
         button.change-color(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
@@ -283,6 +281,8 @@ export default {
 .background
   &.narrow
     width 215px
+  section
+    position relative
   textarea
     margin-bottom 6px
   .error-container
@@ -304,8 +304,6 @@ export default {
     word-break break-all
 
   @media(max-height 700px)
-    .image-picker
-      top -50px
     .color-picker
       top -50px
 
