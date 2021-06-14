@@ -178,15 +178,6 @@ export default {
       return userFilters + tagNames.length + connections.length + frames.length
     },
     isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] },
-    // remotePendingUpload () {
-    //   const currentSpace = this.$store.state.currentSpace
-    //   let remotePendingUploads = this.$store.state.remotePendingUploads
-    //   return remotePendingUploads.find(upload => {
-    //     const inProgress = upload.percentComplete < 100
-    //     const isSpace = upload.spaceId === currentSpace.id
-    //     return inProgress && isSpace
-    //   })
-    // },
     isMobile () {
       return utils.isMobile()
     },
