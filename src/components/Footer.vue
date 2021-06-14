@@ -12,8 +12,7 @@
         //- Favorites
         .button-wrap
           .segmented-buttons
-            label(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
-              input(type="checkbox" v-model="isFavoriteSpace")
+            button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
               img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
               img.icon(v-else src="@/assets/heart-empty.svg")
             button(@click.left="toggleFavoritesIsVisible" :class="{ active: favoritesIsVisible}")
