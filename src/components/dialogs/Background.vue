@@ -5,7 +5,7 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
 
   section(@mouseup.stop @touchend.stop)
     textarea(
-      :disabled="!canEditSpace"
+      v-if="canEditSpace"
       ref="background"
       rows="1"
       placeholder="Paste an image URL or upload"
@@ -13,6 +13,8 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
       data-type="name"
       maxlength="250"
     )
+    p.read-only-url(v-if="!canEditSpace")
+      span {{background}}
     .row(v-if="!canEditSpace")
       span.badge.info
         img.icon.cancel(src="@/assets/add.svg")
@@ -65,7 +67,7 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
         button(:disabled="!canEditSpace" @click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
 
-  section(@mouseup.stop @touchend.stop)
+  section.hidden(@mouseup.stop @touchend.stop)
     .row
       p Tint
     .row
@@ -218,6 +220,7 @@ export default {
       }
     },
     textareaSize () {
+      if (!this.canEditSpace) { return }
       const textarea = this.$refs.background
       textarea.style.height = textarea.scrollHeight + 1 + 'px'
     },
@@ -278,8 +281,6 @@ export default {
 
 <style lang="stylus">
 .background
-  @media(max-width 435px)
-    left -100px
   &.narrow
     width 215px
   textarea
@@ -298,10 +299,17 @@ export default {
         left 6px
   .hidden
     display none
+  .read-only-url
+    margin-bottom 10px
+    word-break break-all
 
   @media(max-height 700px)
     .image-picker
       top -50px
     .color-picker
       top -50px
+
+  @media(max-width 500px)
+    .image-picker
+      left -20px
 </style>

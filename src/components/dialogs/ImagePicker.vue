@@ -45,23 +45,6 @@ dialog.narrow.image-picker(
     .error-container-top(v-if="error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
-    //- attribution
-    //- p(v-if="serviceIsArena")
-    //-   img.icon.arena(src="@/assets/arena.svg")
-    //-   span From Are.na
-    //- p(v-else-if="serviceIsGfycat")
-    //-   span From Giphy
-
-    //- stickers toggle
-    //- .row
-    //-   .segmented-buttons(v-if="serviceIsGfycat")
-    //-     button(:class="{active : gfycatIsStickers}" @click.left.stop="toggleGfycatIsStickers") Stickers
-    //-     button(:class="{active : !gfycatIsStickers}" @click.left.stop="toggleGfycatIsNotStickers") Gifs
-
-    //- label(v-if="serviceIsGfycat" :class="{active: gfycatIsStickers}" @click.left.prevent="toggleGfycatIsStickers" @keydown.stop.enter="toggleGfycatIsStickers")
-    //-   input(type="checkbox" v-model="gfycatIsStickers")
-    //-   span Stickers
-
   //- background images
   section(v-if="isBackgroundImage" ref="serviceSection")
     .row
@@ -70,12 +53,6 @@ dialog.narrow.image-picker(
           span Backgrounds
         button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
           img.icon.arena(src="@/assets/arena.svg")
-    template(v-if="serviceIsBackgrounds")
-      .row
-        .segmented-buttons
-          button(:class="{active: backgroundsIsStatic}" @click.left.stop="toggleBackgroundsIsStatic(true)") Static
-          button(:class="{active: !backgroundsIsStatic}" @click.left.stop="toggleBackgroundsIsStatic(false)") Animated
-      //- p(v-if="!backgroundsIsStatic") Animation can be distracting, but really sets a vibe
 
   //- search box
   section.results-section.search-input-wrap(ref="searchSection")
@@ -116,6 +93,19 @@ dialog.narrow.image-picker(
           img(:src="image.previewUrl")
           a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
             button {{image.sourceUserName}} →
+
+    template(v-if="serviceIsBackgrounds")
+      .button-wrap.animated-button-wrap
+        button(:class="{active: animatedBackgroundsVisible}" @click.left.prevent="toggleAnimatedBackgroundsVisible" @keydown.stop.enter="toggleAnimatedBackgroundsVisible")
+          img.icon(v-if="animatedBackgroundsVisible" src="@/assets/view.svg")
+          img.icon(v-else src="@/assets/view-hidden.svg")
+          span Animated
+      ul.results-list.image-list(v-if="animatedBackgroundsVisible")
+        template(v-for="(image in animatedBackgroundImages")
+          li(@click.left="selectImage(image)" tabindex="0" :key="image.id" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
+            img(:src="image.previewUrl")
+            a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
+              button {{image.sourceUserName}} →
 
 </template>
 
@@ -174,7 +164,9 @@ export default {
         sizeLimit: false,
         unknownUploadError: false
       },
-      backgroundsIsStatic: true
+      backgroundsIsStatic: true,
+      animatedBackgroundsVisible: false,
+      animatedBackgroundImages: []
     }
   },
   computed: {
@@ -240,9 +232,16 @@ export default {
       this.service = 'backgrounds'
       this.searchAgainBackgrounds()
     },
-    toggleBackgroundsIsStatic (value) {
-      this.backgroundsIsStatic = value
+    toggleAnimatedBackgroundsVisible () {
+      this.animatedBackgroundsVisible = !this.animatedBackgroundsVisible
       this.searchAgainBackgrounds()
+      if (this.animatedBackgroundsVisible) {
+        const results = this.$refs.results
+        const currentY = results.scrollHeight
+        this.$nextTick(() => {
+          results.scrollTop = currentY
+        })
+      }
     },
     toggleServiceIsArena () {
       this.service = 'arena'
@@ -258,10 +257,9 @@ export default {
     },
     searchAgainBackgrounds () {
       let images
-      if (this.backgroundsIsStatic) {
-        images = backgroundImages
-      } else {
-        images = backgroundImagesAnimated
+      images = backgroundImages
+      if (this.animatedBackgroundsVisible) {
+        this.normalizeBackgroundImages(backgroundImagesAnimated)
       }
       this.normalizeResults(images, 'backgrounds')
     },
@@ -420,6 +418,13 @@ export default {
         this.scrollIntoView()
       }
     },
+    normalizeBackgroundImages (images) {
+      this.animatedBackgroundImages = images.map(image => {
+        image.sourceUserName = null
+        image.previewUrl = image.url
+        return image
+      })
+    },
     focusSearchInput () {
       if (utils.isMobile()) { return }
       const element = this.$refs.searchInput
@@ -512,20 +517,22 @@ export default {
     },
     updateResultsSectionHeight () {
       this.$nextTick(() => {
-        if (!this.visible) { return }
-        let resultsSection = this.$refs.results
-        let serviceSection
-        if (this.isBackgroundImage) {
-          serviceSection = this.$refs.serviceSection
-        } else {
-          serviceSection = this.$refs.cardImageServiceSection
-        }
-        let searchSection = this.$refs.searchSection
-        if (!serviceSection) { return }
-        serviceSection = serviceSection.getBoundingClientRect().height
-        resultsSection = utils.elementHeight(resultsSection, true)
-        searchSection = searchSection.getBoundingClientRect().height
-        this.resultsSectionHeight = resultsSection + serviceSection + searchSection + 4
+        this.$nextTick(() => {
+          if (!this.visible) { return }
+          let resultsSection = this.$refs.results
+          let serviceSection
+          if (this.isBackgroundImage) {
+            serviceSection = this.$refs.serviceSection
+          } else {
+            serviceSection = this.$refs.cardImageServiceSection
+          }
+          let searchSection = this.$refs.searchSection
+          if (!serviceSection) { return }
+          serviceSection = serviceSection.getBoundingClientRect().height
+          resultsSection = utils.elementHeight(resultsSection, true)
+          searchSection = searchSection.getBoundingClientRect().height
+          this.resultsSectionHeight = resultsSection + serviceSection + searchSection + 4
+        })
       })
     },
     resetPinchCounterZoomDecimal () {
@@ -536,13 +543,13 @@ export default {
     visible (visible) {
       this.$nextTick(() => {
         if (visible) {
-          this.checkIfShouldBeOnRightSide()
           this.search = this.initialSearch
           if (this.isBackgroundImage) {
             this.toggleServiceIsBackgrounds()
             this.updateHeightFromFooter()
             return
           }
+          this.checkIfShouldBeOnRightSide()
           this.searchService()
           this.focusSearchInput()
         }
@@ -616,11 +623,7 @@ export default {
   .sticker
     vertical-align -2px
 
-  // .search-options-row
-  //   padding 4px
-  //   overflow scroll
-  //   display flex
-  //   flex-wrap none
-  //   span
-  //     text-decoration underline
+  .animated-button-wrap
+    margin 8px
+
 </style>

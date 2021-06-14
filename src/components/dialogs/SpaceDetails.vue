@@ -23,7 +23,11 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
         ShowInExploreButton(@updateSpaces="updateSpaces")
 
     template(v-if="!isSpaceMember")
-      p {{spaceName}}
+      .row.space-meta-row.not-space-member
+        .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
+          button(:style="spaceBackground" :class="{ active: backgroundIsVisible }")
+          Background(:visible="backgroundIsVisible")
+        p {{spaceName}}
       .row(v-if="shouldShowInExplore")
         .badge.status.explore-message
           img.icon(src="@/assets/checkmark.svg")
@@ -406,15 +410,19 @@ export default {
     opacity 0.5
     pointer-events none
   .space-meta-row
-    >.button-wrap + input
+    > .button-wrap + input
       margin 0
-    >.button-wrap
+    > .button-wrap
       padding-right 6px
       > button
         width 24px
         height 24px
         background-size cover
         background-position center
+    > .button-wrap + p
+      margin 0
+    &.not-space-member
+      margin 0
   .uploading-container-footer
     position absolute
     top 15px
