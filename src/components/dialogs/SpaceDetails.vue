@@ -447,7 +447,7 @@ export default {
         background-size cover
         background-position center
     > .button-wrap + p
-      margin 0
+      margin-top 0
     &.not-space-member
       margin 0
   .uploading-container-footer
