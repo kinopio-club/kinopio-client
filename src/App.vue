@@ -4,7 +4,7 @@
   @touchmove="broadcastCursor"
   @touchstart="isTouchDevice"
 )
-  #layout-viewport
+  #layout-viewport(:style="{ background: backgroundTint, mixBlendMode: backgroundBlendMode }")
     OffscreenMarkers
   MagicPaint
   //- router-view is Space
@@ -46,12 +46,29 @@ export default {
     LinkDetails,
     OffscreenMarkers
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerUpdateBackgroundTint') {
+        this.updateBackgroundTint()
+      }
+      if (mutation.type === 'currentSpace/restoreSpace') {
+        this.updateBackgroundTint()
+      }
+    })
+  },
   mounted () {
     // use timer to prevent being fired from page reload scroll
     // https://stackoverflow.com/questions/34095038/on-scroll-fires-automatically-on-page-refresh
     setTimeout(() => {
       window.addEventListener('scroll', this.updateUserHasScrolled)
     }, 100)
+    this.updateBackgroundTint()
+  },
+  data () {
+    return {
+      backgroundTint: '',
+      backgroundBlendMode: ''
+    }
   },
   computed: {
     isDevelopment () {
@@ -77,6 +94,15 @@ export default {
     updateUserHasScrolled () {
       if (this.$store.state.userHasScrolled) { return }
       this.$store.commit('userHasScrolled', true)
+    },
+    updateBackgroundTint () {
+      let color = this.$store.state.currentSpace.backgroundTint
+      this.backgroundTint = color
+      if (this.$store.state.currentSpace.background) {
+        this.backgroundBlendMode = 'color-burn'
+      } else {
+        this.backgroundBlendMode = 'multiply'
+      }
     }
   }
 }
@@ -653,7 +679,7 @@ code
   width 100%
   height 100%
   pointer-events none
-  z-index 1
+  z-index -1
 
 progress
   appearance none
