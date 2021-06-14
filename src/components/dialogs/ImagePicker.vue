@@ -7,7 +7,7 @@ dialog.narrow.image-picker(
   :class="{'background-image-picker' : isBackgroundImage, 'right-side': showOnRightSide}"
   :style="{'max-height': dialogHeight + 'px', 'min-height': minDialogHeight + 'px'}"
 )
-  section(v-if="!isBackgroundImage")
+  section(v-if="!isBackgroundImage" ref="cardImageServiceSection")
     //- card images
     .row
       .segmented-buttons
@@ -45,40 +45,17 @@ dialog.narrow.image-picker(
     .error-container-top(v-if="error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
-    //- attribution
-    //- p(v-if="serviceIsArena")
-    //-   img.icon.arena(src="@/assets/arena.svg")
-    //-   span From Are.na
-    //- p(v-else-if="serviceIsGfycat")
-    //-   span From Giphy
-
-    //- stickers toggle
-    //- .row
-    //-   .segmented-buttons(v-if="serviceIsGfycat")
-    //-     button(:class="{active : gfycatIsStickers}" @click.left.stop="toggleGfycatIsStickers") Stickers
-    //-     button(:class="{active : !gfycatIsStickers}" @click.left.stop="toggleGfycatIsNotStickers") Gifs
-
-    //- label(v-if="serviceIsGfycat" :class="{active: gfycatIsStickers}" @click.left.prevent="toggleGfycatIsStickers" @keydown.stop.enter="toggleGfycatIsStickers")
-    //-   input(type="checkbox" v-model="gfycatIsStickers")
-    //-   span Stickers
-
   //- background images
-  section(v-if="isBackgroundImage")
+  section(v-if="isBackgroundImage" ref="serviceSection")
     .row
       .segmented-buttons
         button(@click.left.stop="toggleServiceIsBackgrounds" :class="{active : serviceIsBackgrounds}")
           span Backgrounds
         button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
           img.icon.arena(src="@/assets/arena.svg")
-    template(v-if="serviceIsBackgrounds")
-      .row
-        .segmented-buttons
-          button(:class="{active: backgroundsIsStatic}" @click.left.stop="toggleBackgroundsIsStatic(true)") Static
-          button(:class="{active: !backgroundsIsStatic}" @click.left.stop="toggleBackgroundsIsStatic(false)") Animated
-      //- p(v-if="!backgroundsIsStatic") Animation can be distracting, but really sets a vibe
 
   //- search box
-  section.results-section.search-input-wrap
+  section.results-section.search-input-wrap(ref="searchSection")
     .search-wrap(v-if="!serviceIsBackgrounds")
       img.icon.search(v-if="!loading" src="@/assets/search.svg" @click.left="focusSearchInput")
       Loader(:visible="loading")
@@ -116,6 +93,19 @@ dialog.narrow.image-picker(
           img(:src="image.previewUrl")
           a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
             button {{image.sourceUserName}} →
+
+    template(v-if="serviceIsBackgrounds")
+      .button-wrap.animated-button-wrap
+        button(:class="{active: animatedBackgroundsVisible}" @click.left.prevent="toggleAnimatedBackgroundsVisible" @keydown.stop.enter="toggleAnimatedBackgroundsVisible")
+          img.icon(v-if="animatedBackgroundsVisible" src="@/assets/view.svg")
+          img.icon(v-else src="@/assets/view-hidden.svg")
+          span Animated
+      ul.results-list.image-list(v-if="animatedBackgroundsVisible")
+        template(v-for="(image in animatedBackgroundImages")
+          li(@click.left="selectImage(image)" tabindex="0" :key="image.id" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
+            img(:src="image.previewUrl")
+            a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
+              button {{image.sourceUserName}} →
 
 </template>
 
@@ -174,7 +164,9 @@ export default {
         sizeLimit: false,
         unknownUploadError: false
       },
-      backgroundsIsStatic: true
+      backgroundsIsStatic: true,
+      animatedBackgroundsVisible: false,
+      animatedBackgroundImages: []
     }
   },
   computed: {
@@ -240,9 +232,16 @@ export default {
       this.service = 'backgrounds'
       this.searchAgainBackgrounds()
     },
-    toggleBackgroundsIsStatic (value) {
-      this.backgroundsIsStatic = value
+    toggleAnimatedBackgroundsVisible () {
+      this.animatedBackgroundsVisible = !this.animatedBackgroundsVisible
       this.searchAgainBackgrounds()
+      if (this.animatedBackgroundsVisible) {
+        const results = this.$refs.results
+        const currentY = results.scrollHeight
+        this.$nextTick(() => {
+          results.scrollTop = currentY
+        })
+      }
     },
     toggleServiceIsArena () {
       this.service = 'arena'
@@ -258,10 +257,9 @@ export default {
     },
     searchAgainBackgrounds () {
       let images
-      if (this.backgroundsIsStatic) {
-        images = backgroundImages
-      } else {
-        images = backgroundImagesAnimated
+      images = backgroundImages
+      if (this.animatedBackgroundsVisible) {
+        this.normalizeBackgroundImages(backgroundImagesAnimated)
       }
       this.normalizeResults(images, 'backgrounds')
     },
@@ -420,6 +418,13 @@ export default {
         this.scrollIntoView()
       }
     },
+    normalizeBackgroundImages (images) {
+      this.animatedBackgroundImages = images.map(image => {
+        image.sourceUserName = null
+        image.previewUrl = image.url
+        return image
+      })
+    },
     focusSearchInput () {
       if (utils.isMobile()) { return }
       const element = this.$refs.searchInput
@@ -497,23 +502,37 @@ export default {
       this.$nextTick(() => {
         const element = this.$refs.dialog
         const dialogHeight = utils.elementHeight(element)
-        let height = utils.elementHeight(element, true)
-        height = Math.max(height, 300)
-        if (this.heightIsSignificantlyDifferent(height)) {
-          this.resultsSectionHeight = height
-        }
         this.minDialogHeight = Math.max(this.minDialogHeight, dialogHeight)
+        this.updateResultsSectionHeight()
       })
     },
     updateHeightFromFooter () {
       if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.dialog
-        if (!element) { return }
-        this.dialogHeight = utils.elementHeightFromHeader(element)
-        element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
+        this.dialogHeight = utils.elementHeight(element)
         this.minDialogHeight = Math.max(this.minDialogHeight, this.dialogHeight)
+        this.updateResultsSectionHeight()
+      })
+    },
+    updateResultsSectionHeight () {
+      this.$nextTick(() => {
+        this.$nextTick(() => {
+          if (!this.visible) { return }
+          let resultsSection = this.$refs.results
+          let serviceSection
+          if (this.isBackgroundImage) {
+            serviceSection = this.$refs.serviceSection
+          } else {
+            serviceSection = this.$refs.cardImageServiceSection
+          }
+          let searchSection = this.$refs.searchSection
+          if (!serviceSection) { return }
+          serviceSection = serviceSection.getBoundingClientRect().height
+          resultsSection = utils.elementHeight(resultsSection, true)
+          searchSection = searchSection.getBoundingClientRect().height
+          this.resultsSectionHeight = resultsSection + serviceSection + searchSection + 4
+        })
       })
     },
     resetPinchCounterZoomDecimal () {
@@ -522,15 +541,16 @@ export default {
   },
   watch: {
     visible (visible) {
+      this.animatedBackgroundsVisible = false
       this.$nextTick(() => {
         if (visible) {
-          this.checkIfShouldBeOnRightSide()
           this.search = this.initialSearch
           if (this.isBackgroundImage) {
             this.toggleServiceIsBackgrounds()
             this.updateHeightFromFooter()
             return
           }
+          this.checkIfShouldBeOnRightSide()
           this.searchService()
           this.focusSearchInput()
         }
@@ -604,11 +624,7 @@ export default {
   .sticker
     vertical-align -2px
 
-  // .search-options-row
-  //   padding 4px
-  //   overflow scroll
-  //   display flex
-  //   flex-wrap none
-  //   span
-  //     text-decoration underline
+  .animated-button-wrap
+    margin 8px
+
 </style>

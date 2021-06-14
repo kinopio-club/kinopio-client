@@ -12,8 +12,7 @@
         //- Favorites
         .button-wrap
           .segmented-buttons
-            label(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
-              input(type="checkbox" v-model="isFavoriteSpace")
+            button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace")
               img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
               img.icon(v-else src="@/assets/heart-empty.svg")
             button(@click.left="toggleFavoritesIsVisible" :class="{ active: favoritesIsVisible}")
@@ -44,21 +43,6 @@
             img.icon.sunglasses(src="@/assets/filter.svg")
             span Filters
           Filters(:visible="filtersIsVisible")
-        //- Background
-        .button-wrap
-          button(@click.left="toggleBackgroundIsVisible" :class="{ active: backgroundIsVisible}")
-            img.icon.flower(src="@/assets/flower.svg")
-          //- Upload Progress
-          .uploading-container-footer(v-if="pendingUpload")
-            .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
-              Loader(:visible="true")
-              span {{pendingUpload.percentComplete}}%
-          //- Remote Upload Progress
-          .uploading-container-footer(v-if="remotePendingUpload")
-            .badge.info
-              Loader(:visible="true")
-              span {{remotePendingUpload.percentComplete}}%
-          Background(:visible="backgroundIsVisible")
         //- mobile tips
         .button-wrap(v-if="isMobileOrTouch")
           button(@click.left="toggleMobileTipsIsVisible" :class="{ active: mobileTipsIsVisible}")
@@ -77,7 +61,6 @@ import Filters from '@/components/dialogs/Filters.vue'
 import Links from '@/components/dialogs/Links.vue'
 import Tags from '@/components/dialogs/Tags.vue'
 import Favorites from '@/components/dialogs/Favorites.vue'
-import Background from '@/components/dialogs/Background.vue'
 import MobileTips from '@/components/dialogs/MobileTips.vue'
 import Notifications from '@/components/Notifications.vue'
 import SpaceZoom from '@/components/SpaceZoom.vue'
@@ -97,7 +80,6 @@ export default {
     Links,
     Tags,
     Favorites,
-    Background,
     MobileTips,
     Loader,
     SpaceZoom
@@ -110,7 +92,6 @@ export default {
       linksIsVisible: false,
       tagsIsVisible: false,
       exploreIsVisible: false,
-      backgroundIsVisible: false,
       mobileTipsIsVisible: false,
       visualViewportPosition: {}
     }
@@ -124,7 +105,6 @@ export default {
         this.linksIsVisible = false
         this.tagsIsVisible = false
         this.exploreIsVisible = false
-        this.backgroundIsVisible = false
         this.mobileTipsIsVisible = false
       }
       if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
@@ -144,15 +124,6 @@ export default {
     favoriteSpacesEditedCount () {
       const favoriteSpaces = this.$store.state.currentUser.favoriteSpaces
       return favoriteSpaces.filter(space => space.isEdited).length
-    },
-    pendingUpload () {
-      const currentSpace = this.$store.state.currentSpace
-      const pendingUploads = this.$store.state.upload.pendingUploads
-      return pendingUploads.find(upload => {
-        const isCurrentSpace = upload.spaceId === currentSpace.id
-        const isInProgress = upload.percentComplete < 100
-        return isCurrentSpace && isInProgress
-      })
     },
     isMobileOrTouch () {
       const isTouchDevice = this.$store.state.isTouchDevice
@@ -198,15 +169,6 @@ export default {
       return userFilters + tagNames.length + connections.length + frames.length
     },
     isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] },
-    remotePendingUpload () {
-      const currentSpace = this.$store.state.currentSpace
-      let remotePendingUploads = this.$store.state.remotePendingUploads
-      return remotePendingUploads.find(upload => {
-        const inProgress = upload.percentComplete < 100
-        const isSpace = upload.spaceId === currentSpace.id
-        return inProgress && isSpace
-      })
-    },
     isMobile () {
       return utils.isMobile()
     },
@@ -294,11 +256,6 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'Footer.toggleTagsIsVisible')
       this.tagsIsVisible = !isVisible
     },
-    toggleBackgroundIsVisible () {
-      const isVisible = this.backgroundIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Footer.toggleBackgroundIsVisible')
-      this.backgroundIsVisible = !isVisible
-    },
     toggleExploreIsVisible () {
       const isVisible = this.exploreIsVisible
       this.$store.dispatch('closeAllDialogs', 'Footer.toggleExploreIsVisible')
@@ -361,21 +318,7 @@ footer
   .sunglasses
     vertical-align middle
 
-  .uploading-container-footer
-    position absolute
-    top -11px
-    left 8px
-    width 100px
-    pointer-events none
-    .badge
-      display inline-block
-      &.absolute
-        position absolute
-        top 6px
-        left 6px
-
   .segmented-buttons
     .down-arrow
       padding 0
-
   </style>

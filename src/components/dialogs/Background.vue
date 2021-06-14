@@ -1,14 +1,11 @@
 <template lang="pug">
-dialog.narrow.background(v-if="visible" :open="visible" @click.left="closeDialogs")
+dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
   section
     p Background
 
-  section(
-    @mouseup.stop
-    @touchend.stop
-  )
+  section(@mouseup.stop @touchend.stop)
     textarea(
-      :disabled="!canEditSpace"
+      v-if="canEditSpace"
       ref="background"
       rows="1"
       placeholder="Paste an image URL or upload"
@@ -16,6 +13,8 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left="closeDialog
       data-type="name"
       maxlength="250"
     )
+    p.read-only-url(v-if="!canEditSpace")
+      span {{background}}
     .row(v-if="!canEditSpace")
       span.badge.info
         img.icon.cancel(src="@/assets/add.svg")
@@ -68,10 +67,26 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left="closeDialog
         button(:disabled="!canEditSpace" @click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
 
+  section.hidden(@mouseup.stop @touchend.stop)
+    .row
+      p Tint
+    .row
+      .button-wrap
+        button(:disabled="!canEditSpace" @click.left="removeBackground")
+          img.icon(src="@/assets/remove.svg")
+          span Remove
+
+      .button-wrap
+        button.change-color(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
+          .current-color(v-if="spaceBackgroundColor" :style="{ background: spaceBackgroundColor }")
+          span(v-if="!spaceBackgroundColor") Select Color
+        ColorPicker(:currentColor="spaceBackgroundColor" :visible="colorPickerIsVisible" @selectedColor="updateSpaceBackgroundColor")
+
 </template>
 
 <script>
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
+import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
@@ -79,6 +94,7 @@ export default {
   name: 'Background',
   components: {
     ImagePicker,
+    ColorPicker,
     Loader
   },
   props: {
@@ -87,6 +103,7 @@ export default {
   data () {
     return {
       imagePickerIsVisible: false,
+      colorPickerIsVisible: false,
       initialSearch: '',
       error: {
         isNotImageUrl: false,
@@ -143,15 +160,32 @@ export default {
         const isSpace = upload.spaceId === currentSpace.id
         return isInProgress && isSpace
       })
+    },
+    spaceBackgroundColor () {
+      // new server attr
+      return '' // def white #fff
     }
+    // spaceBackgroundColorWithDefault () {
+    //   if !this.spaceBackgroundColor
+    //     // #fff
+    // }
   },
   methods: {
+    toggleColorPicker () {
+      const isVisible = this.colorPickerIsVisible
+      this.closeDialogs()
+      this.colorPickerIsVisible = !isVisible
+    },
+    updateSpaceBackgroundColor () {
+      console.log('❤️❤️', this.$store.state.currentSpace.backgroundColor)
+    },
     triggerSignUpOrInIsVisible () {
       this.$store.dispatch('closeAllDialogs', 'Background.triggerSignUpOrInIsVisible')
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
     closeDialogs () {
       this.imagePickerIsVisible = false
+      this.colorPickerIsVisible = false
     },
     toggleImagePickerIsVisible () {
       const isVisible = this.imagePickerIsVisible
@@ -186,6 +220,7 @@ export default {
       }
     },
     textareaSize () {
+      if (!this.canEditSpace) { return }
       const textarea = this.$refs.background
       textarea.style.height = textarea.scrollHeight + 1 + 'px'
     },
@@ -246,8 +281,6 @@ export default {
 
 <style lang="stylus">
 .background
-  @media(max-width 435px)
-    left -100px
   &.narrow
     width 215px
   textarea
@@ -266,5 +299,17 @@ export default {
         left 6px
   .hidden
     display none
+  .read-only-url
+    margin-bottom 10px
+    word-break break-all
 
+  @media(max-height 700px)
+    .image-picker
+      top -50px
+    .color-picker
+      top -50px
+
+  @media(max-width 500px)
+    .image-picker
+      left -20px
 </style>

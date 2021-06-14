@@ -2,14 +2,32 @@
 dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     template(v-if="isSpaceMember")
-      .row
+      .row.space-meta-row
+        .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
+          button(:style="spaceBackground" :class="{ active: backgroundIsVisible }")
+          //- Background Upload Progress
+          .uploading-container-footer(v-if="pendingUpload")
+            .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
+              Loader(:visible="true")
+              span {{pendingUpload.percentComplete}}%
+          //- Background Remote Upload Progress
+          .uploading-container-footer(v-if="remotePendingUpload")
+            .badge.info
+              Loader(:visible="true")
+              span {{remotePendingUpload.percentComplete}}%
+
+          Background(:visible="backgroundIsVisible")
         input(ref="name" placeholder="name" v-model="spaceName")
       .row.privacy-row
         PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
         ShowInExploreButton(@updateSpaces="updateSpaces")
 
     template(v-if="!isSpaceMember")
-      p {{spaceName}}
+      .row.space-meta-row.not-space-member
+        .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
+          button(:style="spaceBackground" :class="{ active: backgroundIsVisible }")
+          Background(:visible="backgroundIsVisible")
+        p {{spaceName}}
       .row(v-if="shouldShowInExplore")
         .badge.status.explore-message
           img.icon(src="@/assets/checkmark.svg")
@@ -50,6 +68,7 @@ import cache from '@/cache.js'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
 import AddSpace from '@/components/dialogs/AddSpace.vue'
+import Background from '@/components/dialogs/Background.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
@@ -69,6 +88,7 @@ export default {
     Export,
     Import,
     AddSpace,
+    Background,
     SpaceList,
     PrivacyButton,
     ShowInExploreButton,
@@ -103,6 +123,7 @@ export default {
       importIsVisible: false,
       addSpaceIsVisible: false,
       privacyPickerIsVisible: false,
+      backgroundIsVisible: false,
       isLoadingRemoteSpaces: false,
       remoteSpaces: [],
       resultsSectionHeight: null,
@@ -143,6 +164,32 @@ export default {
       const id = this.$store.state.currentSpace.id
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(id)
+    },
+    spaceBackground () {
+      const defaultBackground = 'https://kinopio-backgrounds.us-east-1.linodeobjects.com/background-thumbnail.svg'
+      let background = this.$store.state.currentSpace.background || defaultBackground
+      if (!utils.urlIsImage(background)) {
+        background = defaultBackground
+      }
+      return { backgroundImage: `url(${background})` }
+    },
+    pendingUpload () {
+      const currentSpace = this.$store.state.currentSpace
+      const pendingUploads = this.$store.state.upload.pendingUploads
+      return pendingUploads.find(upload => {
+        const isCurrentSpace = upload.spaceId === currentSpace.id
+        const isInProgress = upload.percentComplete < 100
+        return isCurrentSpace && isInProgress
+      })
+    },
+    remotePendingUpload () {
+      const currentSpace = this.$store.state.currentSpace
+      let remotePendingUploads = this.$store.state.remotePendingUploads
+      return remotePendingUploads.find(upload => {
+        const inProgress = upload.percentComplete < 100
+        const isSpace = upload.spaceId === currentSpace.id
+        return inProgress && isSpace
+      })
     }
   },
   methods: {
@@ -172,11 +219,17 @@ export default {
       this.closeDialogs()
       this.privacyPickerIsVisible = !isVisible
     },
+    toggleBackgroundIsVisible () {
+      const isVisible = this.backgroundIsVisible
+      this.closeDialogs()
+      this.backgroundIsVisible = !isVisible
+    },
     closeDialogs () {
       this.exportIsVisible = false
       this.importIsVisible = false
       this.addSpaceIsVisible = false
       this.privacyPickerIsVisible = false
+      this.backgroundIsVisible = false
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space })
@@ -356,4 +409,32 @@ export default {
   button.disabled
     opacity 0.5
     pointer-events none
+  .space-meta-row
+    > .button-wrap + input
+      margin 0
+    > .button-wrap
+      padding-right 6px
+      > button
+        width 24px
+        height 24px
+        background-size cover
+        background-position center
+    > .button-wrap + p
+      margin 0
+    &.not-space-member
+      margin 0
+  .uploading-container-footer
+    position absolute
+    top 15px
+    left 8px
+    width 100px
+    pointer-events none
+    z-index 1
+    .badge
+      display inline-block
+      &.absolute
+        position absolute
+        top 6px
+        left 6px
+
 </style>

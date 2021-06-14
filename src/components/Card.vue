@@ -1216,7 +1216,6 @@ export default {
     updateTouchPosition (event) {
       initialTouchEvent = event
       isMultiTouch = false
-      if (!this.canEditCard) { return }
       if (utils.isMultiTouch(event)) {
         isMultiTouch = true
         return
