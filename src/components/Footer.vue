@@ -125,15 +125,6 @@ export default {
       const favoriteSpaces = this.$store.state.currentUser.favoriteSpaces
       return favoriteSpaces.filter(space => space.isEdited).length
     },
-    // pendingUpload () {
-    //   const currentSpace = this.$store.state.currentSpace
-    //   const pendingUploads = this.$store.state.upload.pendingUploads
-    //   return pendingUploads.find(upload => {
-    //     const isCurrentSpace = upload.spaceId === currentSpace.id
-    //     const isInProgress = upload.percentComplete < 100
-    //     return isCurrentSpace && isInProgress
-    //   })
-    // },
     isMobileOrTouch () {
       const isTouchDevice = this.$store.state.isTouchDevice
       const isMobile = utils.isMobile()
