@@ -578,9 +578,12 @@ export default {
     max-height initial
 
   .image-list
+    display flex
+    flex-wrap wrap
+    align-items flex-start
     li
       position relative
-      width 100%
+      width 50%
       img
         border-radius 3px
         min-height 100px
