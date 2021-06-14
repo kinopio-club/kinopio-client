@@ -541,6 +541,7 @@ export default {
   },
   watch: {
     visible (visible) {
+      this.animatedBackgroundsVisible = false
       this.$nextTick(() => {
         if (visible) {
           this.search = this.initialSearch
