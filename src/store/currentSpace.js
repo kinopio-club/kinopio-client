@@ -1377,17 +1377,17 @@ export default {
         height: 200
       }
       const spaceZoomDecimal = context.rootGetters.spaceZoomDecimal
-      const computedStyle = window.getComputedStyle(document.body)
+      let backgroundImage = document.body.style.backgroundImage
+      backgroundImage = utils.urlFromCSSBackgroundImage(backgroundImage)
       let image = new Image()
-      image.src = utils.urlFromString(computedStyle.backgroundImage)
-      let width = image.width
-      let height = image.height
-      if (utils.backgroundIsDefault(image.src)) {
+      let width, height
+      if (backgroundImage) {
+        image.src = backgroundImage
+        width = image.width
+        height = image.height
+      } else {
         width = defaultBackground.width
         height = defaultBackground.height
-      } else if (!width) {
-        document.body.style.backgroundSize = 'initial'
-        return
       }
       width = width * spaceZoomDecimal
       height = height * spaceZoomDecimal
