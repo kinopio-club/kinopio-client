@@ -4,8 +4,8 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
     template(v-if="isSpaceMember")
       .row.space-meta-row
         .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
-          .background-tint(:style="{ background: backgroundTint }")
-          button.background-button(:style="spaceBackground" :class="{ active: backgroundIsVisible }")
+          .background-tint(:style="backgroundTintStyles")
+          button.background-button(:style="backgroundStyles" :class="{ active: backgroundIsVisible }")
           //- Background Upload Progress
           .uploading-container-footer(v-if="pendingUpload")
             .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
@@ -25,8 +25,8 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
     template(v-if="!isSpaceMember")
       .row.space-meta-row.not-space-member
         .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
-          .background-tint(:style="{ background: backgroundTint }")
-          button.background-button(:style="spaceBackground" :class="{ active: backgroundIsVisible }")
+          .background-tint(:style="backgroundTintStyles")
+          button.background-button(:style="backgroundStyles" :class="{ active: backgroundIsVisible }")
           Background(:visible="backgroundIsVisible")
         p {{spaceName}}
       .row(v-if="shouldShowInExplore")
@@ -170,20 +170,29 @@ export default {
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(id)
     },
-    spaceBackground () {
+    backgroundStyles () {
       const defaultBackground = 'https://kinopio-backgrounds.us-east-1.linodeobjects.com/background-thumbnail.svg'
       let background = this.$store.state.currentSpace.background || defaultBackground
-      let mixBlendMode = 'initial'
       if (!utils.urlIsImage(background)) {
         background = defaultBackground
       }
-      if (this.backgroundTint) {
-        console.log(this.backgroundTint)
-        mixBlendMode = 'color-burn'
-      }
       return {
-        backgroundImage: `url(${background})`,
-        mixBlendMode
+        backgroundImage: `url(${background})`
+      }
+    },
+    backgroundTintStyles () {
+      let mixBlendMode
+      let background
+      if (this.$store.state.currentSpace.background) {
+        mixBlendMode = 'color-burn'
+      } else {
+        mixBlendMode = 'multiply'
+      }
+      if (this.backgroundTint) {
+        background = this.backgroundTint
+        return { background, mixBlendMode }
+      } else {
+        return {}
       }
     },
     pendingUpload () {
@@ -461,7 +470,4 @@ export default {
     left 1px
     position absolute
     pointer-events none
-    z-index -1
-  .background-button
-    mix-blend-mode color-burn
 </style>

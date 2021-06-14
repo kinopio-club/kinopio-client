@@ -1362,22 +1362,26 @@ export default {
     // Background
 
     loadBackground: (context, background) => {
-      const currentBackground = utils.urlFromString(document.body.style.backgroundImage)
+      const element = document.getElementById('app')
+      if (!element) { return }
+      const currentBackground = utils.urlFromString(element.style.backgroundImage)
       if (background === currentBackground) { return }
       if (utils.urlIsImage(background)) {
-        document.body.style.backgroundImage = `url(${background})`
+        element.style.backgroundImage = `url(${background})`
       } else {
-        document.body.style.backgroundImage = ''
+        element.style.backgroundImage = ''
       }
       context.dispatch('updateBackgroundZoom')
     },
     updateBackgroundZoom: async (context) => {
+      const element = document.getElementById('app')
+      if (!element) { return }
       const defaultBackground = {
         width: 310,
         height: 200
       }
       const spaceZoomDecimal = context.rootGetters.spaceZoomDecimal
-      let backgroundImage = document.body.style.backgroundImage
+      let backgroundImage = element.style.backgroundImage
       backgroundImage = utils.urlFromCSSBackgroundImage(backgroundImage)
       let image = new Image()
       let width, height
@@ -1392,6 +1396,7 @@ export default {
       width = width * spaceZoomDecimal
       height = height * spaceZoomDecimal
       document.body.style.backgroundSize = `${width}px ${height}px`
+      element.style.backgroundSize = `${width}px ${height}px`
     },
 
     // Tags

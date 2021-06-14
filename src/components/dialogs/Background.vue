@@ -166,16 +166,6 @@ export default {
       this.closeDialogs()
       this.colorPickerIsVisible = !isVisible
     },
-    updateBackgroundTint (value) {
-      this.backgroundTint = value
-      this.$store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
-      this.$store.commit('triggerUpdateBackgroundTint')
-    },
-    removeBackgroundTint () {
-      this.backgroundTint = ''
-      this.$store.dispatch('currentSpace/updateSpace', { backgroundTint: '' })
-      this.$store.commit('triggerUpdateBackgroundTint')
-    },
     triggerSignUpOrInIsVisible () {
       this.$store.dispatch('closeAllDialogs', 'Background.triggerSignUpOrInIsVisible')
       this.$store.commit('triggerSignUpOrInIsVisible')
@@ -191,13 +181,33 @@ export default {
       this.initialSearch = this.currentSpace.name
       console.log(this.currentSpace.name)
     },
+    clearBackground () {
+      this.removeBackground()
+      this.removeBackgroundTint()
+    },
     removeBackground () {
       this.updateSpaceBackground('')
+      this.$store.commit('triggerUpdateBackgroundTint')
     },
     updateSpaceBackground (url) {
       url = url.url || url
       this.$store.dispatch('currentSpace/updateSpace', { background: url })
       this.$store.dispatch('currentSpace/loadBackground', url)
+      this.updatePageSizes()
+    },
+    removeBackgroundTint () {
+      this.updateBackgroundTint('')
+    },
+    updateBackgroundTint (value) {
+      this.backgroundTint = value
+      this.$store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
+      this.$store.commit('triggerUpdateBackgroundTint')
+      this.updatePageSizes()
+    },
+    updatePageSizes () {
+      this.$nextTick(() => {
+        this.$store.dispatch('updatePageSizes')
+      })
     },
     clearErrors () {
       this.error.isNotImageUrl = false

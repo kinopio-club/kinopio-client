@@ -3,6 +3,7 @@
   @mousemove="broadcastCursor"
   @touchmove="broadcastCursor"
   @touchstart="isTouchDevice"
+  :style="{ width: pageWidth, height: pageHeight }"
 )
   #layout-viewport(:style="{ background: backgroundTint, mixBlendMode: backgroundBlendMode }")
     OffscreenMarkers
@@ -63,6 +64,7 @@ export default {
       window.addEventListener('scroll', this.updateUserHasScrolled)
     }, 100)
     this.updateBackgroundTint()
+    this.$store.dispatch('currentSpace/updateBackgroundZoom')
   },
   data () {
     return {
@@ -77,7 +79,9 @@ export default {
       } else {
         return false
       }
-    }
+    },
+    pageWidth () { return this.$store.state.pageWidth + 'px' },
+    pageHeight () { return this.$store.state.pageHeight + 'px' }
   },
   methods: {
     broadcastCursor (event) {
@@ -679,7 +683,7 @@ code
   width 100%
   height 100%
   pointer-events none
-  z-index -1
+  z-index 0
 
 progress
   appearance none
