@@ -534,7 +534,7 @@ export default {
   // Spaces 🌙
 
   emptySpace (spaceId) {
-    return { id: spaceId, moonPhase: '', background: '', backgroundColor: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [] }
+    return { id: spaceId, moonPhase: '', background: '', backgroundTint: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [] }
   },
   clearSpaceMeta (space, type) {
     space.originSpaceId = space.id
@@ -547,6 +547,7 @@ export default {
     space.bestOfExplore = false
     space.proposedShowInExplore = false
     space.privacy = 'private'
+    space.backgroundTint = ''
     return space
   },
   // migration added oct 2019
@@ -657,6 +658,7 @@ export default {
       name: space.name,
       users: space.users,
       background: space.background,
+      backgroundTint: space.backgroundTint,
       moonPhase: space.moonPhase,
       url: space.url,
       privacy: space.privacy,

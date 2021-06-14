@@ -4,7 +4,8 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
     template(v-if="isSpaceMember")
       .row.space-meta-row
         .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
-          button(:style="spaceBackground" :class="{ active: backgroundIsVisible }")
+          .background-tint(:style="{ background: backgroundTint }")
+          button.background-button(:style="spaceBackground" :class="{ active: backgroundIsVisible }")
           //- Background Upload Progress
           .uploading-container-footer(v-if="pendingUpload")
             .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
@@ -15,7 +16,6 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
             .badge.info
               Loader(:visible="true")
               span {{remotePendingUpload.percentComplete}}%
-
           Background(:visible="backgroundIsVisible")
         input(ref="name" placeholder="name" v-model="spaceName")
       .row.privacy-row
@@ -25,7 +25,8 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
     template(v-if="!isSpaceMember")
       .row.space-meta-row.not-space-member
         .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
-          button(:style="spaceBackground" :class="{ active: backgroundIsVisible }")
+          .background-tint(:style="{ background: backgroundTint }")
+          button.background-button(:style="spaceBackground" :class="{ active: backgroundIsVisible }")
           Background(:visible="backgroundIsVisible")
         p {{spaceName}}
       .row(v-if="shouldShowInExplore")
@@ -112,6 +113,9 @@ export default {
       if (mutation.type === 'updatePageSizes') {
         this.updateHeights()
       }
+      if (mutation.type === 'triggerUpdateBackgroundTint') {
+        this.updateBackgroundTint()
+      }
     })
   },
   data () {
@@ -127,7 +131,8 @@ export default {
       isLoadingRemoteSpaces: false,
       remoteSpaces: [],
       resultsSectionHeight: null,
-      dialogHeight: null
+      dialogHeight: null,
+      backgroundTint: ''
     }
   },
   computed: {
@@ -168,10 +173,18 @@ export default {
     spaceBackground () {
       const defaultBackground = 'https://kinopio-backgrounds.us-east-1.linodeobjects.com/background-thumbnail.svg'
       let background = this.$store.state.currentSpace.background || defaultBackground
+      let mixBlendMode = 'initial'
       if (!utils.urlIsImage(background)) {
         background = defaultBackground
       }
-      return { backgroundImage: `url(${background})` }
+      if (this.backgroundTint) {
+        console.log(this.backgroundTint)
+        mixBlendMode = 'color-burn'
+      }
+      return {
+        backgroundImage: `url(${background})`,
+        mixBlendMode
+      }
     },
     pendingUpload () {
       const currentSpace = this.$store.state.currentSpace
@@ -378,6 +391,10 @@ export default {
         let element = this.$refs.results
         this.resultsSectionHeight = utils.elementHeight(element) - 2
       })
+    },
+    updateBackgroundTint () {
+      let color = this.currentSpace.backgroundTint
+      this.backgroundTint = color
     }
   },
   watch: {
@@ -388,6 +405,7 @@ export default {
         this.closeDialogs()
         this.updateFavorites()
         this.updateHeights()
+        this.updateBackgroundTint()
       }
     }
   }
@@ -436,5 +454,14 @@ export default {
         position absolute
         top 6px
         left 6px
-
+  .background-tint
+    width 22px
+    height 22px
+    top 1px
+    left 1px
+    position absolute
+    pointer-events none
+    z-index -1
+  .background-button
+    mix-blend-mode color-burn
 </style>

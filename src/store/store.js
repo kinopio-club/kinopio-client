@@ -339,6 +339,7 @@ export default new Vuex.Store({
     triggerUnloadPage: () => {},
     triggerShowNextSearchCard: () => {},
     triggerShowPreviousSearchCard: () => {},
+    triggerUpdateBackgroundTint: () => {},
 
     // Cards
 
