@@ -120,10 +120,10 @@ export default function createWebSocketPlugin () {
             console.log('🌛', data)
           }
           let { message, user, updates } = data
+          if (data.space.id !== store.state.currentSpace.id) { return }
           if (message === 'connected') {
           // presence
           } else if (message === 'userJoinedRoom') {
-            if (data.space.id !== store.state.currentSpace.id) { return }
             store.dispatch('currentSpace/addUserToJoinedSpace', user)
           } else if (message === 'updateUserPresence') {
             store.dispatch('currentSpace/updateUserPresence', updates)
