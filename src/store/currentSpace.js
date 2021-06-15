@@ -1373,6 +1373,7 @@ export default {
         element.style.backgroundImage = ''
       }
       context.dispatch('updateBackgroundZoom')
+      context.commit('triggerUpdateBackgroundTint', null, { root: true })
     },
     updateBackgroundZoom: async (context) => {
       const element = document.getElementById('app')
