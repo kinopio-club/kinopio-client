@@ -30,6 +30,8 @@ span.space-list-wrap
           span(v-if="space.isEdited")
             .badge.info.inline-badge.new-badge New
           //- space meta
+          span(v-if="space.backgroundTint")
+            .badge.inline-badge(:style="{ background: space.backgroundTint }")
           span(v-if="space.isFavorite")
             img.icon.favorite-icon(src="@/assets/heart.svg")
           MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")

@@ -190,12 +190,14 @@ export default {
     removeBackgroundTint () {
       this.updateBackgroundTint('')
       this.closeDialogs()
+      this.$emit('updateSpaces')
     },
     updateBackgroundTint (value) {
       this.backgroundTint = value
       this.$store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
       this.$store.commit('triggerUpdateBackgroundTint')
       this.updatePageSizes()
+      this.$emit('updateSpaces')
     },
     updatePageSizes () {
       this.$nextTick(() => {

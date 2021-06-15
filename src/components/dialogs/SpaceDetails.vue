@@ -16,7 +16,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
             .badge.info
               Loader(:visible="true")
               span {{remotePendingUpload.percentComplete}}%
-          Background(:visible="backgroundIsVisible")
+          Background(:visible="backgroundIsVisible" @updateSpaces="updateSpaces")
         input(ref="name" placeholder="name" v-model="spaceName")
       .row.privacy-row
         PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
