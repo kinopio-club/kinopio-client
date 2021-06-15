@@ -80,8 +80,14 @@ export default {
         return false
       }
     },
-    pageWidth () { return this.$store.state.pageWidth + 'px' },
-    pageHeight () { return this.$store.state.pageHeight + 'px' }
+    pageWidth () {
+      const size = Math.max(this.$store.state.pageWidth, this.$store.state.viewportWidth)
+      return size + 'px'
+    },
+    pageHeight () {
+      const size = Math.max(this.$store.state.pageHeight, this.$store.state.viewportHeight)
+      return size + 'px'
+    }
   },
   methods: {
     broadcastCursor (event) {
