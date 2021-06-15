@@ -1364,8 +1364,6 @@ export default {
     loadBackground: (context, background) => {
       const element = document.getElementById('app')
       if (!element) { return }
-      const currentBackground = utils.urlFromString(element.style.backgroundImage)
-      if (background === currentBackground) { return }
       if (utils.urlIsImage(background)) {
         element.style.backgroundImage = `url(${background})`
       } else {
@@ -1395,6 +1393,10 @@ export default {
       }
       width = width * spaceZoomDecimal
       height = height * spaceZoomDecimal
+      if (width === 0 || height === 0) {
+        element.style.backgroundSize = 'initial'
+        return
+      }
       element.style.backgroundSize = `${width}px ${height}px`
     },
 
