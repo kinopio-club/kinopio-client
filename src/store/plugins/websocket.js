@@ -75,6 +75,14 @@ const checkIfShouldUpdateLinkToSpaceId = (store, { message, updates }) => {
   }
 }
 
+const checkIfShouldUpdateBackground = (store, { message, updates }) => {
+  const updateBackground = updates.background || updates.backgroundTint
+  if (message === 'updateSpace' && updateBackground) {
+    store.dispatch('currentSpace/loadBackground')
+    store.commit('triggerUpdateBackgroundTint')
+  }
+}
+
 const closeWebsocket = (store) => {
   if (!websocket) { return }
   store.commit('isJoiningSpace', true)
@@ -111,11 +119,13 @@ export default function createWebSocketPlugin () {
           if (data.message !== 'updateRemoteUserCursor' && showDebugMessages) {
             console.log('🌛', data)
           }
+          if (data.space) {
+            if (data.space.id !== store.state.currentSpace.id) { return }
+          }
           let { message, user, updates } = data
           if (message === 'connected') {
           // presence
           } else if (message === 'userJoinedRoom') {
-            if (data.space.id !== store.state.currentSpace.id) { return }
             store.dispatch('currentSpace/addUserToJoinedSpace', user)
           } else if (message === 'updateUserPresence') {
             store.dispatch('currentSpace/updateUserPresence', updates)
@@ -150,6 +160,7 @@ export default function createWebSocketPlugin () {
             store.commit(`currentSpace/${message}`, updates)
             checkIfShouldupdateWindowTitle(store, data)
             checkIfShouldUpdateLinkToSpaceId(store, data)
+            checkIfShouldUpdateBackground(store, data)
           }
         }
       }

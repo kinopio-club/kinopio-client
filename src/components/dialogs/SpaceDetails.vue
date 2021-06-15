@@ -4,7 +4,8 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
     template(v-if="isSpaceMember")
       .row.space-meta-row
         .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
-          button(:style="spaceBackground" :class="{ active: backgroundIsVisible }")
+          .background-tint(:style="backgroundTintStyles")
+          button.background-button(:style="backgroundStyles" :class="{ active: backgroundIsVisible }")
           //- Background Upload Progress
           .uploading-container-footer(v-if="pendingUpload")
             .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
@@ -15,8 +16,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
             .badge.info
               Loader(:visible="true")
               span {{remotePendingUpload.percentComplete}}%
-
-          Background(:visible="backgroundIsVisible")
+          Background(:visible="backgroundIsVisible" @updateSpaces="updateSpaces")
         input(ref="name" placeholder="name" v-model="spaceName")
       .row.privacy-row
         PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
@@ -25,7 +25,8 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
     template(v-if="!isSpaceMember")
       .row.space-meta-row.not-space-member
         .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
-          button(:style="spaceBackground" :class="{ active: backgroundIsVisible }")
+          .background-tint(:style="backgroundTintStyles")
+          button.background-button(:style="backgroundStyles" :class="{ active: backgroundIsVisible }")
           Background(:visible="backgroundIsVisible")
         p {{spaceName}}
       .row(v-if="shouldShowInExplore")
@@ -112,6 +113,9 @@ export default {
       if (mutation.type === 'updatePageSizes') {
         this.updateHeights()
       }
+      if (mutation.type === 'triggerUpdateBackgroundTint') {
+        this.updateBackgroundTint()
+      }
     })
   },
   data () {
@@ -127,7 +131,8 @@ export default {
       isLoadingRemoteSpaces: false,
       remoteSpaces: [],
       resultsSectionHeight: null,
-      dialogHeight: null
+      dialogHeight: null,
+      backgroundTint: ''
     }
   },
   computed: {
@@ -165,13 +170,30 @@ export default {
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(id)
     },
-    spaceBackground () {
+    backgroundStyles () {
       const defaultBackground = 'https://kinopio-backgrounds.us-east-1.linodeobjects.com/background-thumbnail.svg'
       let background = this.$store.state.currentSpace.background || defaultBackground
       if (!utils.urlIsImage(background)) {
         background = defaultBackground
       }
-      return { backgroundImage: `url(${background})` }
+      return {
+        backgroundImage: `url(${background})`
+      }
+    },
+    backgroundTintStyles () {
+      let mixBlendMode
+      let background
+      if (this.$store.state.currentSpace.background) {
+        mixBlendMode = 'soft-light'
+      } else {
+        mixBlendMode = 'multiply'
+      }
+      if (this.backgroundTint) {
+        background = this.backgroundTint
+        return { background, mixBlendMode }
+      } else {
+        return {}
+      }
     },
     pendingUpload () {
       const currentSpace = this.$store.state.currentSpace
@@ -378,6 +400,10 @@ export default {
         let element = this.$refs.results
         this.resultsSectionHeight = utils.elementHeight(element) - 2
       })
+    },
+    updateBackgroundTint () {
+      let color = this.currentSpace.backgroundTint
+      this.backgroundTint = color
     }
   },
   watch: {
@@ -388,6 +414,7 @@ export default {
         this.closeDialogs()
         this.updateFavorites()
         this.updateHeights()
+        this.updateBackgroundTint()
       }
     }
   }
@@ -405,7 +432,6 @@ export default {
       min-width 24px
   .explore-message
     display flex
-    margin-top 6px
   button.disabled
     opacity 0.5
     pointer-events none
@@ -420,9 +446,10 @@ export default {
         background-size cover
         background-position center
     > .button-wrap + p
-      margin 0
+      margin-top 0
     &.not-space-member
       margin 0
+      margin-bottom 10px
   .uploading-container-footer
     position absolute
     top 15px
@@ -436,5 +463,16 @@ export default {
         position absolute
         top 6px
         left 6px
-
+  .background-tint
+    width 22px
+    height 22px
+    top 1px
+    left 1px
+    position absolute
+    pointer-events none
+  .background-button
+    &:hover,
+    &:active,
+    &.active
+      background-color var(--primary-background)
 </style>

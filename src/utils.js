@@ -300,11 +300,6 @@ export default {
       return 'Ctrl'
     }
   },
-  backgroundIsDefault (path) {
-    // https://regexr.com/5pa1n
-    const backgroundPathPattern = /\/background\..+\.svg$/g
-    return Boolean(path.match(backgroundPathPattern))
-  },
   capitalizeFirstLetter (string) {
     // 'dreams' -> 'Dreams'
     return string.charAt(0).toUpperCase() + string.slice(1)
@@ -539,7 +534,7 @@ export default {
   // Spaces 🌙
 
   emptySpace (spaceId) {
-    return { id: spaceId, moonPhase: '', background: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [] }
+    return { id: spaceId, moonPhase: '', background: '', backgroundTint: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [] }
   },
   clearSpaceMeta (space, type) {
     space.originSpaceId = space.id
@@ -552,6 +547,7 @@ export default {
     space.bestOfExplore = false
     space.proposedShowInExplore = false
     space.privacy = 'private'
+    space.backgroundTint = ''
     return space
   },
   // migration added oct 2019
@@ -662,6 +658,7 @@ export default {
       name: space.name,
       users: space.users,
       background: space.background,
+      backgroundTint: space.backgroundTint,
       moonPhase: space.moonPhase,
       url: space.url,
       privacy: space.privacy,
@@ -842,6 +839,14 @@ export default {
     } else {
       return null
     }
+  },
+  urlFromCSSBackgroundImage (string) {
+    if (!string) { return }
+    // https://regexr.com/5vvc4
+    // image from `url("image")`
+    const urlPattern = new RegExp(/(http[s]?:\/\/)[^\s(["<>]{2,}\.[^\s.[">,<]+\w\/?/igm)
+    let urls = string.match(urlPattern)
+    return urls[0]
   },
   urlsFromString (string, skipProtocolCheck) {
     if (!string) { return [] }

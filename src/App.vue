@@ -3,8 +3,9 @@
   @mousemove="broadcastCursor"
   @touchmove="broadcastCursor"
   @touchstart="isTouchDevice"
+  :style="{ width: pageWidth, height: pageHeight }"
 )
-  #layout-viewport
+  #layout-viewport(:style="{ background: backgroundTint, mixBlendMode: backgroundBlendMode }")
     OffscreenMarkers
   MagicPaint
   //- router-view is Space
@@ -46,12 +47,30 @@ export default {
     LinkDetails,
     OffscreenMarkers
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerUpdateBackgroundTint') {
+        this.updateBackgroundTint()
+      }
+      if (mutation.type === 'currentSpace/restoreSpace') {
+        this.updateBackgroundTint()
+      }
+    })
+  },
   mounted () {
     // use timer to prevent being fired from page reload scroll
     // https://stackoverflow.com/questions/34095038/on-scroll-fires-automatically-on-page-refresh
     setTimeout(() => {
       window.addEventListener('scroll', this.updateUserHasScrolled)
     }, 100)
+    this.updateBackgroundTint()
+    this.$store.dispatch('currentSpace/updateBackgroundZoom')
+  },
+  data () {
+    return {
+      backgroundTint: '',
+      backgroundBlendMode: ''
+    }
   },
   computed: {
     isDevelopment () {
@@ -60,6 +79,14 @@ export default {
       } else {
         return false
       }
+    },
+    pageWidth () {
+      const size = Math.max(this.$store.state.pageWidth, this.$store.state.viewportWidth)
+      return size + 'px'
+    },
+    pageHeight () {
+      const size = Math.max(this.$store.state.pageHeight, this.$store.state.viewportHeight)
+      return size + 'px'
     }
   },
   methods: {
@@ -77,6 +104,15 @@ export default {
     updateUserHasScrolled () {
       if (this.$store.state.userHasScrolled) { return }
       this.$store.commit('userHasScrolled', true)
+    },
+    updateBackgroundTint () {
+      let color = this.$store.state.currentSpace.backgroundTint
+      this.backgroundTint = color
+      if (this.$store.state.currentSpace.background) {
+        this.backgroundBlendMode = 'soft-light'
+      } else {
+        this.backgroundBlendMode = 'multiply'
+      }
     }
   }
 }
@@ -130,12 +166,11 @@ export default {
 body
   margin 0
   color var(--primary)
-  background-color var(--primary-background)
-  background-image url('assets/background.svg')
   -webkit-user-select none
   overflow auto // enables window.scrollBy support
 
 .app
+  background-image url('assets/background.svg')
   position relative
   > .label-badge
     color var(--primary-background)
@@ -653,7 +688,7 @@ code
   width 100%
   height 100%
   pointer-events none
-  z-index 1
+  z-index 0
 
 progress
   appearance none

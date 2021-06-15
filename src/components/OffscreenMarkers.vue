@@ -42,12 +42,17 @@ export default {
       const pinchZoomScale = viewport.scale
       const pinchZoomOffsetLeft = viewport.offsetLeft
       const pinchZoomOffsetTop = viewport.offsetTop
+      let styles = {}
+      if (this.$store.state.currentSpace.background) {
+        styles.opacity = 1
+      } else {
+        styles.opacity = 0.5
+      }
       if (pinchZoomScale > 1) {
-        return {
-          transform: `translate(${pinchZoomOffsetLeft}px, ${pinchZoomOffsetTop}px) scale(${1 / pinchZoomScale})`,
-          'transform-origin': 'left top'
-        }
-      } else { return {} }
+        styles.transform = `translate(${pinchZoomOffsetLeft}px, ${pinchZoomOffsetTop}px) scale(${1 / pinchZoomScale})`
+        styles['transform-origin'] = 'left top'
+      }
+      return styles
     },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     hasDirectionTopLeft () { return this.hasDirection('topleft') },
@@ -174,13 +179,13 @@ edge = 4px
   position fixed
   width 100%
   height 100%
+  mix-blend-mode color-burn
   .marker
     width width
     height height
     background-repeat no-repeat
     background-size contain
     position absolute
-    opacity 0.5
   .top
     top edge
     left "calc(50% -  %s)" % (width / 2)

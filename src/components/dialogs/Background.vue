@@ -2,7 +2,6 @@
 dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
   section
     p Background
-    ImagePicker(:visible="imagePickerIsVisible" :isBackgroundImage="true" @selectImage="updateSpaceBackground" :initialSearch="initialSearch")
 
   section(@mouseup.stop @touchend.stop)
     textarea(
@@ -14,7 +13,7 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
       data-type="name"
       maxlength="250"
     )
-    p.read-only-url(v-if="!canEditSpace")
+    p.read-only-url(v-if="!canEditSpace && background")
       span {{background}}
     .row(v-if="!canEditSpace")
       span.badge.info
@@ -57,28 +56,20 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
     //- buttons
     .row
       .button-wrap
-        button(:disabled="!canEditSpace" @click.left="removeBackground")
-          img.icon.cancel(src="@/assets/add.svg")
+        button(:disabled="!canEditSpace" @click.left="removeBackgroundAll")
+          img.icon(src="@/assets/remove.svg")
+      .button-wrap
+        button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
+          .current-color(v-if="backgroundTint" :style="{ background: backgroundTint }")
+          span(v-if="!backgroundTint") Tint
+        ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint")
       .button-wrap
         button(:disabled="!canEditSpace" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
           img.icon.flower(src="@/assets/flower.svg")
+        ImagePicker(:visible="imagePickerIsVisible" :isBackgroundImage="true" @selectImage="updateSpaceBackground" :initialSearch="initialSearch" :removeIsVisible="true" @removeImage="removeBackground")
       .button-wrap
         button(:disabled="!canEditSpace" @click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
-
-  section.hidden(@mouseup.stop @touchend.stop)
-    .row
-      p Tint
-    .row
-      .button-wrap
-        button(:disabled="!canEditSpace" @click.left="removeBackground")
-          img.icon.cancel(src="@/assets/add.svg")
-
-      .button-wrap
-        button.change-color(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-          .current-color(v-if="spaceBackgroundColor" :style="{ background: spaceBackgroundColor }")
-          span(v-if="!spaceBackgroundColor") Select Color
-        ColorPicker(:currentColor="spaceBackgroundColor" :visible="colorPickerIsVisible" @selectedColor="updateSpaceBackgroundColor")
 
 </template>
 
@@ -109,7 +100,8 @@ export default {
         userIsOffline: false,
         sizeLimit: false,
         unknownUploadError: false
-      }
+      },
+      backgroundTint: ''
     }
   },
   created () {
@@ -158,24 +150,13 @@ export default {
         const isSpace = upload.spaceId === currentSpace.id
         return isInProgress && isSpace
       })
-    },
-    spaceBackgroundColor () {
-      // new server attr
-      return '' // def white #fff
     }
-    // spaceBackgroundColorWithDefault () {
-    //   if !this.spaceBackgroundColor
-    //     // #fff
-    // }
   },
   methods: {
     toggleColorPicker () {
       const isVisible = this.colorPickerIsVisible
       this.closeDialogs()
       this.colorPickerIsVisible = !isVisible
-    },
-    updateSpaceBackgroundColor () {
-      console.log('❤️❤️', this.$store.state.currentSpace.backgroundColor)
     },
     triggerSignUpOrInIsVisible () {
       this.$store.dispatch('closeAllDialogs', 'Background.triggerSignUpOrInIsVisible')
@@ -190,15 +171,38 @@ export default {
       this.closeDialogs()
       this.imagePickerIsVisible = !isVisible
       this.initialSearch = this.currentSpace.name
-      console.log(this.currentSpace.name)
+    },
+    removeBackgroundAll () {
+      this.removeBackground()
+      this.removeBackgroundTint()
     },
     removeBackground () {
       this.updateSpaceBackground('')
+      this.$store.commit('triggerUpdateBackgroundTint')
+      this.closeDialogs()
     },
     updateSpaceBackground (url) {
       url = url.url || url
       this.$store.dispatch('currentSpace/updateSpace', { background: url })
-      this.$store.dispatch('currentSpace/loadBackground', url)
+      this.$store.dispatch('currentSpace/loadBackground')
+      this.updatePageSizes()
+    },
+    removeBackgroundTint () {
+      this.updateBackgroundTint('')
+      this.closeDialogs()
+      this.$emit('updateSpaces')
+    },
+    updateBackgroundTint (value) {
+      this.backgroundTint = value
+      this.$store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
+      this.$store.commit('triggerUpdateBackgroundTint')
+      this.updatePageSizes()
+      this.$emit('updateSpaces')
+    },
+    updatePageSizes () {
+      this.$nextTick(() => {
+        this.$store.dispatch('updatePageSizes')
+      })
     },
     clearErrors () {
       this.error.isNotImageUrl = false
@@ -256,11 +260,11 @@ export default {
         }
       }
     }
-
   },
   watch: {
     visible (visible) {
       if (visible) {
+        this.backgroundTint = this.currentSpace.backgroundTint
         this.closeDialogs()
         this.clearErrors()
       } else {
@@ -268,10 +272,6 @@ export default {
           this.removeBackground()
         }
       }
-    },
-    // update background on broadcast
-    background (value) {
-      this.$store.dispatch('currentSpace/loadBackground', value)
     }
   }
 }
@@ -304,7 +304,7 @@ export default {
     word-break break-all
 
   @media(max-height 700px)
-    .color-picker
+    .image-picker
       top -50px
 
   @media(max-width 500px)

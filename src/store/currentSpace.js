@@ -497,6 +497,7 @@ export default {
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
       context.commit('clearSearch', null, { root: true })
       context.commit('restoreSpace', uniqueNewSpace)
+      context.dispatch('loadBackground')
     },
     saveNewSpace: (context) => {
       const space = utils.clone(context.state)
@@ -592,6 +593,7 @@ export default {
       context.dispatch('saveNewSpace')
       context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
       context.dispatch('updateWindowHistory', {})
+      context.dispatch('loadBackground')
     },
     getRemoteSpace: async (context, space) => {
       const collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
@@ -714,7 +716,7 @@ export default {
       context.commit('restoreSpace', emptySpace)
       context.commit('restoreSpace', utils.normalizeSpace(cachedSpace))
       context.dispatch('updateSpacePageSize')
-      context.dispatch('loadBackground', context.state.background)
+      context.dispatch('loadBackground')
       context.commit('history/clear', null, { root: true })
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (remoteSpace) {
@@ -735,7 +737,7 @@ export default {
       }
       context.commit('spaceUrlToLoad', '', { root: true })
       context.dispatch('updateSpacePageSize')
-      context.dispatch('loadBackground', context.state.background)
+      context.dispatch('loadBackground')
       context.dispatch('updateOtherUsers')
       context.dispatch('updateOtherSpaces')
       const cardId = context.rootState.loadSpaceShowDetailsForCardId
@@ -1361,37 +1363,45 @@ export default {
 
     // Background
 
-    loadBackground: (context, background) => {
-      const currentBackground = utils.urlFromString(document.body.style.backgroundImage)
-      if (background === currentBackground) { return }
+    loadBackground: (context) => {
+      const element = document.getElementById('app')
+      if (!element) { return }
+      const background = context.state.background
       if (utils.urlIsImage(background)) {
-        document.body.style.backgroundImage = `url(${background})`
+        element.style.backgroundImage = `url(${background})`
       } else {
-        document.body.style.backgroundImage = ''
+        element.style.backgroundImage = ''
       }
       context.dispatch('updateBackgroundZoom')
+      context.commit('triggerUpdateBackgroundTint', null, { root: true })
     },
     updateBackgroundZoom: async (context) => {
+      const element = document.getElementById('app')
+      if (!element) { return }
       const defaultBackground = {
         width: 310,
         height: 200
       }
       const spaceZoomDecimal = context.rootGetters.spaceZoomDecimal
-      const computedStyle = window.getComputedStyle(document.body)
+      let backgroundImage = element.style.backgroundImage
+      backgroundImage = utils.urlFromCSSBackgroundImage(backgroundImage)
       let image = new Image()
-      image.src = utils.urlFromString(computedStyle.backgroundImage)
-      let width = image.width
-      let height = image.height
-      if (utils.backgroundIsDefault(image.src)) {
+      let width, height
+      if (backgroundImage) {
+        image.src = backgroundImage
+        width = image.width
+        height = image.height
+      } else {
         width = defaultBackground.width
         height = defaultBackground.height
-      } else if (!width) {
-        document.body.style.backgroundSize = 'initial'
-        return
       }
       width = width * spaceZoomDecimal
       height = height * spaceZoomDecimal
-      document.body.style.backgroundSize = `${width}px ${height}px`
+      if (width === 0 || height === 0) {
+        element.style.backgroundSize = 'initial'
+        return
+      }
+      element.style.backgroundSize = `${width}px ${height}px`
     },
 
     // Tags
