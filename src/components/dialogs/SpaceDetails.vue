@@ -470,4 +470,9 @@ export default {
     left 1px
     position absolute
     pointer-events none
+  .background-button
+    &:hover,
+    &:active,
+    &.active
+      background-color var(--primary-background)
 </style>
