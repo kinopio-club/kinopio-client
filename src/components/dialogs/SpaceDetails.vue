@@ -432,7 +432,6 @@ export default {
       min-width 24px
   .explore-message
     display flex
-    margin-top 6px
   button.disabled
     opacity 0.5
     pointer-events none
@@ -450,6 +449,7 @@ export default {
       margin-top 0
     &.not-space-member
       margin 0
+      margin-bottom 10px
   .uploading-container-footer
     position absolute
     top 15px
