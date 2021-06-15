@@ -166,12 +166,11 @@ export default {
 body
   margin 0
   color var(--primary)
-  background-color var(--primary-background)
-  background-image url('assets/background.svg')
   -webkit-user-select none
   overflow auto // enables window.scrollBy support
 
 .app
+  background-image url('assets/background.svg')
   position relative
   > .label-badge
     color var(--primary-background)
