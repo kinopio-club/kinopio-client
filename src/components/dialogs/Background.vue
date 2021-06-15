@@ -272,10 +272,6 @@ export default {
           this.removeBackground()
         }
       }
-    },
-    // update background on broadcast
-    background (value) {
-      this.$store.dispatch('currentSpace/loadBackground')
     }
   }
 }

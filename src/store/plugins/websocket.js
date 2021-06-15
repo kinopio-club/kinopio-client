@@ -75,6 +75,14 @@ const checkIfShouldUpdateLinkToSpaceId = (store, { message, updates }) => {
   }
 }
 
+const checkIfShouldUpdateBackground = (store, { message, updates }) => {
+  const updateBackground = updates.background || updates.backgroundTint
+  if (message === 'updateSpace' && updateBackground) {
+    store.dispatch('currentSpace/loadBackground')
+    store.commit('triggerUpdateBackgroundTint')
+  }
+}
+
 const closeWebsocket = (store) => {
   if (!websocket) { return }
   store.commit('isJoiningSpace', true)
@@ -150,6 +158,7 @@ export default function createWebSocketPlugin () {
             store.commit(`currentSpace/${message}`, updates)
             checkIfShouldupdateWindowTitle(store, data)
             checkIfShouldUpdateLinkToSpaceId(store, data)
+            checkIfShouldUpdateBackground(store, data)
           }
         }
       }
