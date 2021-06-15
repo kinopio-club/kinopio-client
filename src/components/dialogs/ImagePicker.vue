@@ -594,6 +594,7 @@ export default {
       padding 0px
       padding-left 6px
       padding-right 5px
+      max-width 80%
 
   .error-container
     p,
