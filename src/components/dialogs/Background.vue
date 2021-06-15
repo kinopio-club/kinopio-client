@@ -56,8 +56,15 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
     //- buttons
     .row
       .button-wrap
-        button(:disabled="!canEditSpace" @click.left="removeBackground")
-          img.icon.cancel(src="@/assets/add.svg")
+        button(v-if="background && backgroundTint" :disabled="!canEditSpace" @click.left="toggleRemoveBackgrounds" :class="{active: removeBackgroundsIsVisible}")
+          img.icon(src="@/assets/remove.svg")
+        button(v-else :disabled="!canEditSpace" @click.left="removeBackgroundAll")
+          img.icon(src="@/assets/remove.svg")
+      .button-wrap
+        button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
+          .current-color(v-if="backgroundTint" :style="{ background: backgroundTint }")
+          span(v-if="!backgroundTint") Tint
+        ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint")
       .button-wrap
         button(:disabled="!canEditSpace" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
           img.icon.flower(src="@/assets/flower.svg")
@@ -66,18 +73,14 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
         button(:disabled="!canEditSpace" @click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
 
-  section(@mouseup.stop @touchend.stop)
-    .row
-      p Tint
-    .row
-      .button-wrap
-        button(:disabled="!canEditSpace" @click.left="removeBackgroundTint")
-          img.icon.cancel(src="@/assets/add.svg")
-      .button-wrap
-        button.change-color(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-          .current-color(v-if="backgroundTint" :style="{ background: backgroundTint }")
-          span(v-if="!backgroundTint") Select Color
-        ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint")
+    //- remove backgrounds
+    template(v-if="removeBackgroundsIsVisible")
+      button(@click="removeBackgroundTint")
+        img.icon(src="@/assets/remove.svg")
+        span Tint
+      button(@click="removeBackground")
+        img.icon(src="@/assets/remove.svg")
+        span Image
 
 </template>
 
@@ -109,7 +112,8 @@ export default {
         sizeLimit: false,
         unknownUploadError: false
       },
-      backgroundTint: ''
+      backgroundTint: '',
+      removeBackgroundsIsVisible: false
     }
   },
   created () {
@@ -161,6 +165,11 @@ export default {
     }
   },
   methods: {
+    toggleRemoveBackgrounds () {
+      const isVisible = this.removeBackgroundsIsVisible
+      this.closeDialogs()
+      this.removeBackgroundsIsVisible = !isVisible
+    },
     toggleColorPicker () {
       const isVisible = this.colorPickerIsVisible
       this.closeDialogs()
@@ -179,9 +188,8 @@ export default {
       this.closeDialogs()
       this.imagePickerIsVisible = !isVisible
       this.initialSearch = this.currentSpace.name
-      console.log(this.currentSpace.name)
     },
-    clearBackground () {
+    removeBackgroundAll () {
       this.removeBackground()
       this.removeBackgroundTint()
     },
