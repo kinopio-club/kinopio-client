@@ -119,8 +119,10 @@ export default function createWebSocketPlugin () {
           if (data.message !== 'updateRemoteUserCursor' && showDebugMessages) {
             console.log('🌛', data)
           }
+          if (data.space) {
+            if (data.space.id !== store.state.currentSpace.id) { return }
+          }
           let { message, user, updates } = data
-          if (data.space.id !== store.state.currentSpace.id) { return }
           if (message === 'connected') {
           // presence
           } else if (message === 'userJoinedRoom') {
