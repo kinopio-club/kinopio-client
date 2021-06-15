@@ -30,11 +30,14 @@ span.space-list-wrap
           span(v-if="space.isEdited")
             .badge.info.inline-badge.new-badge New
           //- space meta
-          span(v-if="space.backgroundTint")
-            .badge.inline-badge(:style="{ background: space.backgroundTint }")
           span(v-if="space.isFavorite")
             img.icon.favorite-icon(src="@/assets/heart.svg")
+
+          span(v-if="space.backgroundTint")
+            .badge.inline-badge.color-only-badge(:style="{ background: space.backgroundTint }")
+
           MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
+
           .badge.info.inline-badge(v-if="showCategory" :class="categoryClassName(space)") {{space.category}}
           .badge.info.inline-badge(v-else-if="spaceIsTemplate(space)") Template
           //- space details
@@ -282,4 +285,11 @@ export default {
   a
     color var(--primary)
     text-decoration none
+
+  .color-only-badge
+    width 16px
+    height 16px
+    padding 0
+    min-width initial
+    min-height initial
 </style>
