@@ -184,7 +184,7 @@ export default {
       let mixBlendMode
       let background
       if (this.$store.state.currentSpace.background) {
-        mixBlendMode = 'color-burn'
+        mixBlendMode = 'soft-light'
       } else {
         mixBlendMode = 'multiply'
       }
