@@ -497,6 +497,7 @@ export default {
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
       context.commit('clearSearch', null, { root: true })
       context.commit('restoreSpace', uniqueNewSpace)
+      context.dispatch('loadBackground')
     },
     saveNewSpace: (context) => {
       const space = utils.clone(context.state)
@@ -592,6 +593,7 @@ export default {
       context.dispatch('saveNewSpace')
       context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
       context.dispatch('updateWindowHistory', {})
+      context.dispatch('loadBackground')
     },
     getRemoteSpace: async (context, space) => {
       const collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
@@ -714,7 +716,7 @@ export default {
       context.commit('restoreSpace', emptySpace)
       context.commit('restoreSpace', utils.normalizeSpace(cachedSpace))
       context.dispatch('updateSpacePageSize')
-      context.dispatch('loadBackground', context.state.background)
+      context.dispatch('loadBackground')
       context.commit('history/clear', null, { root: true })
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (remoteSpace) {
@@ -735,7 +737,7 @@ export default {
       }
       context.commit('spaceUrlToLoad', '', { root: true })
       context.dispatch('updateSpacePageSize')
-      context.dispatch('loadBackground', context.state.background)
+      context.dispatch('loadBackground')
       context.dispatch('updateOtherUsers')
       context.dispatch('updateOtherSpaces')
       const cardId = context.rootState.loadSpaceShowDetailsForCardId
@@ -1361,9 +1363,10 @@ export default {
 
     // Background
 
-    loadBackground: (context, background) => {
+    loadBackground: (context) => {
       const element = document.getElementById('app')
       if (!element) { return }
+      const background = context.state.background
       if (utils.urlIsImage(background)) {
         element.style.backgroundImage = `url(${background})`
       } else {

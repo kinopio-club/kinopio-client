@@ -184,7 +184,7 @@ export default {
     updateSpaceBackground (url) {
       url = url.url || url
       this.$store.dispatch('currentSpace/updateSpace', { background: url })
-      this.$store.dispatch('currentSpace/loadBackground', url)
+      this.$store.dispatch('currentSpace/loadBackground')
       this.updatePageSizes()
     },
     removeBackgroundTint () {
@@ -275,7 +275,7 @@ export default {
     },
     // update background on broadcast
     background (value) {
-      this.$store.dispatch('currentSpace/loadBackground', value)
+      this.$store.dispatch('currentSpace/loadBackground')
     }
   }
 }
