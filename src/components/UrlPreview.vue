@@ -5,14 +5,14 @@
     .card-details-buttons(v-if="parentIsCardDetails")
       .button-wrap
         button(@click="hidePreview")
-          img.icon.cancel(src="@/assets/add.svg")
+          img.icon(src="@/assets/remove.svg")
 
   template(v-if="!loading")
     .preview-content(:style="{background: selectedColor}" :class="{'image-card': isImageCard, 'is-card-details': parentIsCardDetails}")
       .card-details-buttons(v-if="parentIsCardDetails" :class="{'has-padding': card.urlPreviewImage}")
         .button-wrap
           button(@click="hidePreview")
-            img.icon.cancel(src="@/assets/add.svg")
+            img.icon(src="@/assets/remove.svg")
         .button-wrap
           a(:href="card.urlPreviewUrl")
             button.visit-button

@@ -13,7 +13,7 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
       data-type="name"
       maxlength="250"
     )
-    p.read-only-url(v-if="!canEditSpace")
+    p.read-only-url(v-if="!canEditSpace && background")
       span {{background}}
     .row(v-if="!canEditSpace")
       span.badge.info

@@ -10,7 +10,7 @@
             img.icon.visit(src="@/assets/visit.svg")
       .button-wrap
         button(@click="removeUrl(formats.image)" :disabled="!canEditCard")
-          img.icon.cancel(src="@/assets/add.svg")
+          img.icon(src="@/assets/remove.svg")
   //- Video
   .row(v-if="formats.video")
     video.video(autoplay loop muted playsinline)
@@ -22,7 +22,7 @@
             img.icon.visit(src="@/assets/visit.svg")
       .button-wrap
         button(@click="removeUrl(formats.video)" :disabled="!canEditCard")
-          img.icon.cancel(src="@/assets/add.svg")
+          img.icon(src="@/assets/remove.svg")
   //- Audio
   .row(v-if="formats.audio")
     Audio(:visible="Boolean(formats.audio)" :url="formats.audio" :normalizedName="this.card.name" :parentIsCardDetails="true")
@@ -33,7 +33,7 @@
             img.icon.visit(src="@/assets/visit.svg")
       .button-wrap
         button(@click="removeUrl(formats.audio)" :disabled="!canEditCard")
-          img.icon.cancel(src="@/assets/add.svg")
+          img.icon(src="@/assets/remove.svg")
 </template>
 
 <script>
