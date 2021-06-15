@@ -1395,7 +1395,6 @@ export default {
       }
       width = width * spaceZoomDecimal
       height = height * spaceZoomDecimal
-      document.body.style.backgroundSize = `${width}px ${height}px`
       element.style.backgroundSize = `${width}px ${height}px`
     },
 

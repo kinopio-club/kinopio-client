@@ -56,10 +56,10 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
     //- buttons
     .row
       .button-wrap
-        button(v-if="background && backgroundTint" :disabled="!canEditSpace" @click.left="toggleRemoveBackgrounds" :class="{active: removeBackgroundsIsVisible}")
+        button(:disabled="!canEditSpace" @click.left="toggleRemoveBackgrounds" :class="{active: removeBackgroundsIsVisible}")
           img.icon(src="@/assets/remove.svg")
-        button(v-else :disabled="!canEditSpace" @click.left="removeBackgroundAll")
-          img.icon(src="@/assets/remove.svg")
+        //- button(v-else :disabled="!canEditSpace" @click.left="removeBackgroundAll")
+        //-   img.icon(src="@/assets/remove.svg")
       .button-wrap
         button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(v-if="backgroundTint" :style="{ background: backgroundTint }")
@@ -192,6 +192,7 @@ export default {
     removeBackgroundAll () {
       this.removeBackground()
       this.removeBackgroundTint()
+      this.toggleRemoveBackgrounds = false
     },
     removeBackground () {
       this.updateSpaceBackground('')
@@ -273,7 +274,6 @@ export default {
         }
       }
     }
-
   },
   watch: {
     visible (visible) {
