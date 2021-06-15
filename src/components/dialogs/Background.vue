@@ -62,7 +62,7 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
         button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(v-if="backgroundTint" :style="{ background: backgroundTint }")
           span(v-if="!backgroundTint") Tint
-        ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint")
+        ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :lightenColors="true")
       .button-wrap
         button(:disabled="!canEditSpace" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
           img.icon.flower(src="@/assets/flower.svg")

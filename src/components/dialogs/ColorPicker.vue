@@ -31,13 +31,15 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" @click.left.stop)
 <script>
 import randomColor from 'randomcolor'
 import validHexColor from 'valid-hex-color'
+import shader from 'shader'
 
 export default {
   name: 'ColorPicker',
   props: {
     currentColor: String,
     visible: Boolean,
-    removeIsVisible: Boolean
+    removeIsVisible: Boolean,
+    lightenColors: Boolean
   },
   data () {
     return {
@@ -74,6 +76,9 @@ export default {
     },
     shuffleColors () {
       this.colors = randomColor({ luminosity: 'light', count: 14, hue: this.currentHue })
+      if (this.lightenColors) {
+        this.colors = this.colors.map(color => shader(color, 0.6))
+      }
       this.colors.unshift(this.currentColor)
     },
     select (color) {
