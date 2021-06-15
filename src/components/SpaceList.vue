@@ -32,12 +32,9 @@ span.space-list-wrap
           //- space meta
           span(v-if="space.isFavorite")
             img.icon.favorite-icon(src="@/assets/heart.svg")
-
-          span(v-if="space.backgroundTint")
-            .badge.inline-badge.color-only-badge(:style="{ background: space.backgroundTint }")
-
+          //- span(v-if="space.backgroundTint")
+          //-   .badge.inline-badge.color-only-badge(:style="{ background: space.backgroundTint }")
           MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
-
           .badge.info.inline-badge(v-if="showCategory" :class="categoryClassName(space)") {{space.category}}
           .badge.info.inline-badge(v-else-if="spaceIsTemplate(space)") Template
           //- space details
