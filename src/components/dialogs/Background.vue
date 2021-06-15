@@ -56,31 +56,20 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
     //- buttons
     .row
       .button-wrap
-        button(:disabled="!canEditSpace" @click.left="toggleRemoveBackgrounds" :class="{active: removeBackgroundsIsVisible}")
+        button(:disabled="!canEditSpace" @click.left="removeBackgroundAll")
           img.icon(src="@/assets/remove.svg")
-        //- button(v-else :disabled="!canEditSpace" @click.left="removeBackgroundAll")
-        //-   img.icon(src="@/assets/remove.svg")
       .button-wrap
         button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(v-if="backgroundTint" :style="{ background: backgroundTint }")
           span(v-if="!backgroundTint") Tint
-        ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint")
+        ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint")
       .button-wrap
         button(:disabled="!canEditSpace" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
           img.icon.flower(src="@/assets/flower.svg")
-        ImagePicker(:visible="imagePickerIsVisible" :isBackgroundImage="true" @selectImage="updateSpaceBackground" :initialSearch="initialSearch")
+        ImagePicker(:visible="imagePickerIsVisible" :isBackgroundImage="true" @selectImage="updateSpaceBackground" :initialSearch="initialSearch" :removeIsVisible="true" @removeImage="removeBackground")
       .button-wrap
         button(:disabled="!canEditSpace" @click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
-
-    //- remove backgrounds
-    template(v-if="removeBackgroundsIsVisible")
-      button(@click="removeBackgroundTint")
-        img.icon(src="@/assets/remove.svg")
-        span Tint
-      button(@click="removeBackground")
-        img.icon(src="@/assets/remove.svg")
-        span Image
 
 </template>
 
@@ -112,8 +101,7 @@ export default {
         sizeLimit: false,
         unknownUploadError: false
       },
-      backgroundTint: '',
-      removeBackgroundsIsVisible: false
+      backgroundTint: ''
     }
   },
   created () {
@@ -165,11 +153,6 @@ export default {
     }
   },
   methods: {
-    toggleRemoveBackgrounds () {
-      const isVisible = this.removeBackgroundsIsVisible
-      this.closeDialogs()
-      this.removeBackgroundsIsVisible = !isVisible
-    },
     toggleColorPicker () {
       const isVisible = this.colorPickerIsVisible
       this.closeDialogs()
@@ -192,11 +175,11 @@ export default {
     removeBackgroundAll () {
       this.removeBackground()
       this.removeBackgroundTint()
-      this.toggleRemoveBackgrounds = false
     },
     removeBackground () {
       this.updateSpaceBackground('')
       this.$store.commit('triggerUpdateBackgroundTint')
+      this.closeDialogs()
     },
     updateSpaceBackground (url) {
       url = url.url || url
@@ -206,6 +189,7 @@ export default {
     },
     removeBackgroundTint () {
       this.updateBackgroundTint('')
+      this.closeDialogs()
     },
     updateBackgroundTint (value) {
       this.backgroundTint = value

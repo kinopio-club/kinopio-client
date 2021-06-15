@@ -1,8 +1,15 @@
 <template lang="pug">
 dialog.narrow.color-picker(v-if="visible" :open="visible" @click.left.stop)
-  section
+  section(v-if="removeIsVisible")
+    .row
+      .badge.inline-color-badge(:style="{backgroundColor: currentColor}")
+        input(v-model="hexColor" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport")
+      button(@click="removeColor")
+        img.icon(src="@/assets/remove.svg")
+  section(v-if="!removeIsVisible")
     .badge(:style="{backgroundColor: currentColor}")
       input(v-model="hexColor" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport")
+
   section
     .colors
       template(v-for="color in colors")
@@ -29,7 +36,8 @@ export default {
   name: 'ColorPicker',
   props: {
     currentColor: String,
-    visible: Boolean
+    visible: Boolean,
+    removeIsVisible: Boolean
   },
   data () {
     return {
@@ -61,6 +69,9 @@ export default {
     hueIsBlue () { return this.currentHue === 'blue' }
   },
   methods: {
+    removeColor () {
+      this.$emit('removeColor')
+    },
     shuffleColors () {
       this.colors = randomColor({ luminosity: 'light', count: 14, hue: this.currentHue })
       this.colors.unshift(this.currentColor)
@@ -129,4 +140,6 @@ export default {
   .segmented-buttons
     margin 0
     margin-left 6px
+  .inline-color-badge
+    width 83%
 </style>

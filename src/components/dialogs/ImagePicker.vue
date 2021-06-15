@@ -21,6 +21,7 @@ dialog.narrow.image-picker(
       .button-wrap
         button(@click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile")
+
     //- upload progress
     .uploading-container(v-if="cardPendingUpload")
       img(v-if="cardPendingUpload" :src="cardPendingUpload.imageDataUrl")
@@ -53,6 +54,10 @@ dialog.narrow.image-picker(
           span Backgrounds
         button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
           img.icon.arena(src="@/assets/arena.svg")
+
+      .button-wrap(v-if="removeIsVisible")
+        button(@click="removeImage")
+          img.icon(src="@/assets/remove.svg")
 
   //- search box
   section.results-section.search-input-wrap(ref="searchSection")
@@ -133,7 +138,8 @@ export default {
     initialSearch: String,
     cardUrl: String,
     cardId: String,
-    isBackgroundImage: Boolean
+    isBackgroundImage: Boolean,
+    removeIsVisible: Boolean
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -220,6 +226,9 @@ export default {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
+    removeImage () {
+      this.$emit('removeImage')
+    },
     triggerSignUpOrInIsVisible () {
       this.$store.dispatch('closeAllDialogs', 'ImagePicker.triggerSignUpOrInIsVisible')
       this.$store.commit('triggerSignUpOrInIsVisible')
