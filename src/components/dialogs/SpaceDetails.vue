@@ -181,13 +181,8 @@ export default {
       }
     },
     backgroundTintStyles () {
-      let mixBlendMode
       let background
-      if (this.$store.state.currentSpace.background) {
-        mixBlendMode = 'soft-light'
-      } else {
-        mixBlendMode = 'multiply'
-      }
+      const mixBlendMode = 'multiply'
       if (this.backgroundTint) {
         background = this.backgroundTint
         return { background, mixBlendMode }

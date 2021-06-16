@@ -547,7 +547,6 @@ export default {
     space.bestOfExplore = false
     space.proposedShowInExplore = false
     space.privacy = 'private'
-    space.backgroundTint = ''
     return space
   },
   // migration added oct 2019
