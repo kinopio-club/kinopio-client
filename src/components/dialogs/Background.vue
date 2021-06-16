@@ -60,8 +60,7 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
           img.icon(src="@/assets/remove.svg")
       .button-wrap
         button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-          .current-color(v-if="backgroundTint" :style="{ background: backgroundTint }")
-          span(v-if="!backgroundTint") Tint
+          .current-color(:style="{ background: backgroundTintBadgeColor }")
         ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :lightenColors="lightenColors")
       .button-wrap
         button(:disabled="!canEditSpace" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
@@ -157,6 +156,12 @@ export default {
         const isSpace = upload.spaceId === currentSpace.id
         return isInProgress && isSpace
       })
+    },
+    backgroundTintBadgeColor () {
+      if (!this.backgroundTint || this.backgroundTint === '#fff') {
+        return '#e3e3e3' // --secondary-background
+      }
+      return this.backgroundTint
     }
   },
   methods: {
