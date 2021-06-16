@@ -76,11 +76,14 @@ const checkIfShouldUpdateLinkToSpaceId = (store, { message, updates }) => {
 }
 
 const checkIfShouldUpdateBackground = (store, { message, updates }) => {
-  const updateBackground = updates.background || updates.backgroundTint
-  if (message === 'updateSpace' && updateBackground) {
-    store.dispatch('currentSpace/loadBackground')
-    store.commit('triggerUpdateBackgroundTint')
-  }
+  const updateKeys = Object.keys(updates)
+  updateKeys.forEach(key => {
+    const shouldUpdateBackground = key === 'background' || key === 'backgroundTint'
+    if (message === 'updateSpace' && shouldUpdateBackground) {
+      store.dispatch('currentSpace/loadBackground')
+      store.commit('triggerUpdateBackgroundTint')
+    }
+  })
 }
 
 const closeWebsocket = (store) => {
