@@ -521,6 +521,7 @@ export default {
       utils.updateWindowTitle(space)
       context.dispatch('updateWindowHistory', { space, isRemote: currentUserIsSignedIn })
       context.commit('addUserToSpace', user)
+      context.dispatch('loadBackground')
     },
     duplicateSpace: (context) => {
       const user = context.rootState.currentUser
