@@ -108,11 +108,7 @@ export default {
     updateBackgroundTint () {
       let color = this.$store.state.currentSpace.backgroundTint
       this.backgroundTint = color
-      if (this.$store.state.currentSpace.background) {
-        this.backgroundBlendMode = 'soft-light'
-      } else {
-        this.backgroundBlendMode = 'multiply'
-      }
+      this.backgroundBlendMode = 'multiply'
     }
   }
 }
