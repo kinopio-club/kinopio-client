@@ -135,9 +135,9 @@ export default {
     },
     lightenColors () {
       if (this.background) {
-        return false
-      } else {
         return true
+      } else {
+        return false
       }
     },
     pendingUpload () {
