@@ -39,7 +39,7 @@ export default {
     currentColor: String,
     visible: Boolean,
     removeIsVisible: Boolean,
-    lightenColors: Boolean
+    shouldLightenColors: Boolean
   },
   data () {
     return {
@@ -76,7 +76,7 @@ export default {
     },
     shuffleColors () {
       this.colors = randomColor({ luminosity: 'light', count: 14, hue: this.currentHue })
-      if (this.lightenColors) {
+      if (this.shouldLightenColors) {
         this.colors = this.colors.map(color => shader(color, 0.4))
       }
       this.colors.unshift(this.currentColor)

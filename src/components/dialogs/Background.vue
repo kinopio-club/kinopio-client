@@ -61,7 +61,7 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
       .button-wrap
         button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{ background: backgroundTintBadgeColor }")
-        ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :lightenColors="lightenColors")
+        ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="shouldLightenColors")
       .button-wrap
         button(:disabled="!canEditSpace" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
           img.icon.flower(src="@/assets/flower.svg")
@@ -70,6 +70,10 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
         button(:disabled="!canEditSpace" @click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
 
+    .row(v-if="shouldTintBackground")
+      .arrow-up
+      .badge.status You should tint this background
+
 </template>
 
 <script>
@@ -77,6 +81,7 @@ import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
+import backgroundImages from '@/data/backgroundImages.json'
 
 export default {
   name: 'Background',
@@ -133,7 +138,7 @@ export default {
         this.updateSpaceBackground(url)
       }
     },
-    lightenColors () {
+    shouldLightenColors () {
       if (this.background) {
         return true
       } else {
@@ -162,6 +167,13 @@ export default {
         return '#e3e3e3' // --secondary-background
       }
       return this.backgroundTint
+    },
+    shouldTintBackground () {
+      if (this.backgroundTint) { return }
+      return backgroundImages.find(image => {
+        const isBackground = this.background === image.url
+        return isBackground && image.shouldTint
+      })
     }
   },
   methods: {
@@ -247,7 +259,7 @@ export default {
       input.click()
     },
     isFileTooBig (file) {
-      const sizeLimit = 1024 * 1024 * 0.600 // 600kb
+      const sizeLimit = 1024 * 1024 * 0.650 // 600kb~
       if (file.size > sizeLimit) {
         return true
       }
@@ -314,6 +326,16 @@ export default {
   .read-only-url
     margin-bottom 10px
     word-break break-all
+
+  .arrow-up
+    position absolute
+    width 0
+    height 0
+    border-left 5px solid transparent
+    border-right 5px solid transparent
+    border-bottom 6px solid var(--secondary-background)
+    top -6px
+    left 42px
 
   @media(max-height 700px)
     .image-picker
