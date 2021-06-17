@@ -1,7 +1,36 @@
 [
   {
-    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/poolside-fm-palermo-weekends.png",
-    "sourcePageUrl": "https://poolside.fm"
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/pixel-checkerboard.svg",
+    "shouldTint": true
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/concentric-grid.jpeg",
+    "shouldTint": true
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid.svg",
+    "shouldTint": true
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-inverse.svg",
+    "shouldTint": true
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/gem-grid.svg",
+    "shouldTint": true
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/confetti-boxes.svg",
+    "shouldTint": true
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/chalkboard.svg",
+    "shouldTint": true
+
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/wall-arts.svg",
+    "shouldTint": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/texture-tomato.jpg",
@@ -23,15 +52,23 @@
     "sourcePageUrl": "https://www.are.na/block/2154679"
   },
   {
-    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/bouquet-vase.jpg"
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/poolside-fm-palermo-weekends.png",
+    "sourcePageUrl": "https://poolside.fm"
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/poolside-fm-martini-picnic.png",
+    "sourcePageUrl": "https://poolside.fm"
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/rust.jpg",
+    "sourcePageUrl": "https://www.are.na/block/10763959"
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/forest-door.jpg",
     "sourcePageUrl": "https://www.are.na/block/931018"
   },
   {
-    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/starry-sky.jpg",
-    "sourcePageUrl": "https://www.are.na/block/5495231"
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/scratchy-black.jpg"
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/kusama-1.jpg",
@@ -41,8 +78,8 @@
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/kusama-2.jpg"
   },
   {
-    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/blue-globe.jpg",
-    "sourcePageUrl": "https://www.are.na/block/8662259"
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/gradient-geometric.png",
+    "sourcePageUrl": "https://www.are.na/block/395449"
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/jellyfish.jpg",
@@ -53,11 +90,16 @@
     "sourcePageUrl": "https://www.are.na/block/479306"
   },
   {
-    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/bouquet-pink.jpg"
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/vases.jpg",
+    "sourcePageUrl": "https://www.are.na/block/5813311"
   },
   {
-    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/smoothie-vibe.jpg",
-    "sourcePageUrl": "https://www.are.na/block/4889980"
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/seedling.jpg",
+    "sourcePageUrl": "https://www.are.na/block/8489006"
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/abstract-grid.jpg",
+    "sourcePageUrl": "https://www.are.na/block/4218398"
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/ghibli-forest-canopy.jpeg",
@@ -68,8 +110,7 @@
     "sourcePageUrl": "https://www.are.na/block/10213505"
   },
   {
-    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/synthwave.jpg",
-    "sourcePageUrl": "https://www.are.na/block/216587"
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/ghibli-tv.jpg"
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/gradient-4.jpg",
@@ -83,6 +124,9 @@
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/peach.jpeg"
   },
   {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/roses.jpg"
+  },
+  {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/classic-macos-5.png"
   },
   {
@@ -93,5 +137,22 @@
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/classic-macos-8.png"
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/classic-macos-9.png"
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/classic-macos-10.png"
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/classic-macos-11.png"
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/classic-macos-12.png"
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/topography.png",
+    "sourcePageUrl": "https://www.are.na/block/2519680",
+    "shouldTint": true
   }
 ]
