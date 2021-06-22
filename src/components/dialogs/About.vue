@@ -20,6 +20,17 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
 
   section
     .row
+      p Kinopio is self-funded and entirely supported by people like you
+    .row
+      .button-wrap
+        a(href="https://help.kinopio.club/posts/who-makes-kinopio")
+          button About Me →
+      .button-wrap
+        a(href="https://pketh.org")
+          button Blog →
+
+  section
+    .row
       .button-wrap
         button(@click.left.stop="toggleKeyboardShortcutsIsVisible" :class="{active: keyboardShortcutsIsVisible}")
           span Keyboard Shortcuts
@@ -29,6 +40,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
         button(@click.left.stop="toggleAppsIsVisible" :class="{active: appsIsVisible}")
           span Desktop and Mobile Apps
         Apps(:visible="appsIsVisible")
+
 </template>
 
 <script>

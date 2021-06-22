@@ -20,17 +20,6 @@ dialog.help-and-about.narrow(v-if="visible" :open="visible" @click.left.stop="cl
           button
             span Community Forum →
 
-  section
-    .row
-      p Kinopio is self-funded and entirely supported by people like you
-    .row
-      .button-wrap
-        a(href="https://help.kinopio.club/posts/who-makes-kinopio")
-          button Who Makes Kinopio? →
-    .row
-      .button-wrap
-        a(href="https://pketh.org")
-          button Blog →
 </template>
 
 <script>
