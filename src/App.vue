@@ -109,6 +109,8 @@ export default {
       let color = this.$store.state.currentSpace.backgroundTint
       this.backgroundTint = color
       this.backgroundBlendMode = 'multiply'
+      const metaThemeColor = document.querySelector('meta[name=theme-color]')
+      metaThemeColor.setAttribute('content', color)
     }
   }
 }

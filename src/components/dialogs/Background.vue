@@ -61,7 +61,7 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
       .button-wrap
         button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
           .current-color(:style="{ background: backgroundTintBadgeColor }")
-        ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="shouldLightenColors")
+        ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="true")
       .button-wrap
         button(:disabled="!canEditSpace" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
           img.icon.flower(src="@/assets/flower.svg")
@@ -136,13 +136,6 @@ export default {
       },
       set (url) {
         this.updateSpaceBackground(url)
-      }
-    },
-    shouldLightenColors () {
-      if (this.background) {
-        return true
-      } else {
-        return false
       }
     },
     pendingUpload () {
