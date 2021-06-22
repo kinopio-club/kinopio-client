@@ -958,7 +958,7 @@ export default {
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
       context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: true }, { root: true })
       context.dispatch('checkIfShouldNotifyCardsCreatedIsNearLimit')
-      context.dispatch('notifyMembersCardAdded', id)
+      context.dispatch('notifyCollaboratorsCardUpdated', { cardId: id, type: 'createCard' })
     },
     addMultipleCards: (context, newCards) => {
       newCards.forEach(card => {
@@ -1196,21 +1196,20 @@ export default {
       context.commit('parentCardId', cardId, { root: true })
       context.commit('loadSpaceShowDetailsForCardId', '', { root: true })
     },
-    notifyMembersCardAdded: (context, cardId) => {
+    notifyCollaboratorsCardUpdated: (context, { cardId, type }) => {
       if (notifiedCardAdded.includes(cardId)) { return }
       const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
       if (!userCanEdit) { return }
-      const membersToNotify = context.getters.membersToNotify
-      const recipientUserIds = membersToNotify.map(member => member.id)
+      const recipientUserIds = context.getters.userIdsToNotify
       if (!recipientUserIds.length) { return }
       const notification = {
-        type: 'addCard',
+        type, // 'createCard' or 'updateCard'
         cardId,
         userId: context.rootState.currentUser.id,
         recipientUserIds,
         spaceId: context.state.id
       }
-      context.dispatch('api/addToQueue', { name: 'createNotifications', body: notification }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'createCardNotifications', body: notification }, { root: true })
       notifiedCardAdded.push(cardId)
     },
 
@@ -1612,11 +1611,17 @@ export default {
       const spaceUserIsUpgraded = getters.spaceUserIsUpgraded
       return cardsCreatedIsOverLimit && !spaceUserIsUpgraded
     },
-    membersToNotify: (state, getters, rootState, rootGetters) => {
+    userIdsToNotify: (state, getters, rootState, rootGetters) => {
       let clients = state.clients.map(client => client.id)
       let members = getters.members(true)
-      members = members.filter(member => !clients.includes(member.id))
-      return members
+      let contributors = [] // for open spaces
+      members = members.map(member => member.id)
+      contributors = state.cards.map(card => card.userId)
+      let userIds = members.concat(contributors)
+      userIds = uniq(userIds)
+      // exclude currently connected userIds
+      userIds = userIds.filter(userId => !clients.includes(userId))
+      return userIds
     }
   }
 }

@@ -200,7 +200,6 @@ import nanoid from 'nanoid'
 import debounce from 'lodash-es/debounce'
 
 let previousTags = []
-let notifiedFavoriteSpaceToFollow = false
 let compositionEventEndTime = 0
 
 export default {
@@ -677,7 +676,7 @@ export default {
       this.updateTags()
       this.updateSpaceLink()
       if (this.notifiedMembers) { return }
-      this.$store.dispatch('currentSpace/notifyMembersCardAdded', this.card.id)
+      this.$store.dispatch('currentSpace/notifyCollaboratorsCardUpdated', { cardId: this.card.id, type: 'updateCard' })
       this.notifiedMembers = true
     },
     updateSpaceLink () {
@@ -1207,17 +1206,6 @@ export default {
       this.updateCardName(newName)
       this.moveCursorPastTagEnd()
     },
-    notifyFavoriteSpaceToFollow (context) {
-      const userCanEdit = this.$store.getters['currentUser/canEditSpace']
-      const userIsNotMember = !this.currentUserIsSpaceMember
-      const spaceIsNotFavorite = !this.isFavoriteSpace
-      const userUpdatedCard = this.cardIsCreatedByCurrentUser
-      const notNotified = !notifiedFavoriteSpaceToFollow
-      if (userCanEdit && userIsNotMember && spaceIsNotFavorite && userUpdatedCard && notNotified) {
-        this.$store.commit('addNotification', { message: 'to be notified of updates', icon: 'heart-empty', type: 'info' })
-        notifiedFavoriteSpaceToFollow = true
-      }
-    },
     previewImage (image, width) {
       const minWidth = 200
       if (width < minWidth) { return '' }
@@ -1323,9 +1311,6 @@ export default {
       }
       if (!visible && this.cardIsEmpty()) {
         this.$store.dispatch('currentSpace/removeCard', this.card)
-      }
-      if (!visible && !this.cardIsEmpty()) {
-        this.notifyFavoriteSpaceToFollow()
       }
       this.$store.dispatch('updatePageSizes')
     },
