@@ -180,4 +180,9 @@ export default {
   .updated
     margin 0
     margin-left 3px
+  @media(max-height 600px)
+    dialog.apps
+      top -100px
+    dialog.keyboard-shortcuts
+      top -150px
 </style>
