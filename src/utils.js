@@ -940,23 +940,22 @@ export default {
     const isFile = url.toLowerCase().match(fileUrlPattern)
     return Boolean(isFile)
   },
-  urlIsKinopioSpace (url) {
+  urlIsSpace (url) {
     if (!url) { return }
-    let kinopioUrlPattern
+    let spaceUrlPattern
     if (process.env.NODE_ENV === 'development') {
       // https://regexr.com/5hjc2
-      kinopioUrlPattern = new RegExp(/(?:kinopio\.local:.*\/)(.*)\b/gi)
+      spaceUrlPattern = new RegExp(/(?:kinopio\.local:.*\/)(.*)\b/gi)
     } else {
-      // https://regexr.com/5hk37
-      // no '.' before 'kinopio' (no subdomains, matches optional protocol)
-      // 'kinopio.club'
+      // https://regexr.com/60jvc
+      // 'https://kinopio.club/' (protocol required)
       // no 'invite?' after 'club' (no invite links)
-      // any characters after
-      // until whitespace
-      kinopioUrlPattern = new RegExp(/[^.](?:kinopio\.club\/)(?:(?!invite\?).)(.*)\b/gi)
+      // alphanumber and '-' characters after
+      // until whitespace or end of string
+      spaceUrlPattern = new RegExp(/(https:\/\/kinopio\.club\/)(?:(?!invite\?).)([A-z0-9-]*)/gi)
     }
-    const isKinopioUrl = url.match(kinopioUrlPattern)
-    return Boolean(isKinopioUrl)
+    const isSpaceUrl = url.match(spaceUrlPattern)
+    return Boolean(isSpaceUrl)
   },
   fileNameFromUrl (url) {
     if (!url) { return }
@@ -1155,7 +1154,7 @@ export default {
     const links = urls.filter(url => {
       const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(url))
       if (linkIsMarkdown) { return }
-      return this.urlIsKinopioSpace(url)
+      return this.urlIsSpace(url)
     })
     const files = urls.filter(url => this.urlIsFile(url))
 

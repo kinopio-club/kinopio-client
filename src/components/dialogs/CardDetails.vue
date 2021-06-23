@@ -385,7 +385,7 @@ export default {
       const urls = this.validUrls.filter(url => {
         const urlHasProtocol = utils.urlHasProtocol(url)
         const isLinode = url.includes('us-east-1.linodeobjects.com')
-        const isSpace = utils.urlIsKinopioSpace(url)
+        const isSpace = utils.urlIsSpace(url)
         return urlHasProtocol && !isLinode && !isSpace
       })
       if (!urls.length && this.card.urlPreviewUrl) {
@@ -680,7 +680,7 @@ export default {
       this.notifiedMembers = true
     },
     updateSpaceLink () {
-      let link = this.validUrls.filter(url => utils.urlIsKinopioSpace(url))[0]
+      let link = this.validUrls.filter(url => utils.urlIsSpace(url))[0]
       const shouldRemoveLink = this.card.linkToSpaceId && !link
       if (shouldRemoveLink) {
         const update = {

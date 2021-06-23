@@ -313,7 +313,7 @@ export default {
     },
     cardButtonUrl () {
       const link = this.formats.link
-      if (utils.urlIsValidTld(link) || utils.urlIsKinopioSpace(link)) {
+      if (utils.urlIsValidTld(link) || utils.urlIsSpace(link)) {
         return link
       }
       return this.formats.file
@@ -1106,7 +1106,7 @@ export default {
       } else {
         event.preventDefault()
       }
-      if (utils.urlIsKinopioSpace(url)) {
+      if (utils.urlIsSpace(url)) {
         const spaceId = utils.spaceIdFromUrl(url)
         this.changeSpace({ id: spaceId })
       } else {
