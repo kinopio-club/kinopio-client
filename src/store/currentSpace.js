@@ -1018,6 +1018,16 @@ export default {
     },
     updateCard: (context, card) => {
       context.commit('updateCard', card)
+      // prevent null position
+      const cardKeys = Object.keys(card)
+      if (cardKeys.includes('x') || cardKeys.includes('y')) {
+        if (!card.x) {
+          delete card.x
+        }
+        if (!card.y) {
+          delete card.y
+        }
+      }
       const update = { name: 'updateCard', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('broadcast/update', { updates: card, type: 'updateCard' }, { root: true })
