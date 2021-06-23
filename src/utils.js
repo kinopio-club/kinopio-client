@@ -863,8 +863,9 @@ export default {
     // followed by alphanumerics
     // then '.''
     // followed by alphanumerics
+    // then trailing '/' or '-'
     // matches multiple urls and returns [urls]
-    const urlPattern = new RegExp(/(^|\n| )(http[s]?:\/\/)?[^\s(["<>]{2,}\.[^\s.[">,<]+\w\/?/igm)
+    const urlPattern = new RegExp(/(^|\n| )(http[s]?:\/\/)?[^\s(["<>]{2,}\.[^\s.[">,<]+\w\/?-?/igm)
     let urls = string.match(urlPattern)
     if (!urls) { return }
     // filter out empty or non-urls
