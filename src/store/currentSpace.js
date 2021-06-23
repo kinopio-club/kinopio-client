@@ -1265,14 +1265,28 @@ export default {
     },
     updateIncorrectCardConnectionPaths: (context, { shouldUpdateApi }) => {
       if (!context.rootState.webfontIsLoaded) { return }
+      const cardIds = context.state.cards.map(card => card.id)
       let connections = []
       context.state.connections.forEach(connection => {
+        const startCardExists = cardIds.includes(connection.startCardId)
+        const endCardExists = cardIds.includes(connection.endCardId)
+        if (!startCardExists || !endCardExists) {
+          context.dispatch('removeOrphanConnections', { connection, shouldUpdateApi })
+          return
+        }
         const updatedPath = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
         if (!updatedPath) { return }
         if (updatedPath === connection.path) { return }
         connections.push(connection)
       })
       context.dispatch('updateCardConnectionPaths', { connections, shouldUpdateApi })
+    },
+    removeOrphanConnections: (context, { connection, shouldUpdateApi }) => {
+      if (shouldUpdateApi) {
+        context.dispatch('removeConnection', connection)
+      } else {
+        context.commit('removeConnection', connection)
+      }
     },
     removeConnectionsFromCard: (context, card) => {
       context.state.connections.forEach(connection => {
