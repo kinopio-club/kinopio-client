@@ -1,6 +1,28 @@
 [
   {
-    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/pixel-checkerboard.svg",
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid.svg",
+    "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-thumbnail.svg",
+    "shouldTint": true
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-inverse.svg",
+    "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-inverse-thumbnail.svg",
+    "shouldTint": true
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/concentric-boxes.svg",
+    "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/concentric-boxes-thumbnail.svg",
+    "shouldTint": true
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/picture-frame-inverse.svg",
+    "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/picture-frame-inverse-thumbnail.svg",
+    "shouldTint": true
+
+  },
+  {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/pixel-grid-2.svg",
+    "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/pixel-grid-2-thumbnail.svg",
     "shouldTint": true
   },
   {
@@ -8,30 +30,15 @@
     "shouldTint": true
   },
   {
-    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid.svg",
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/gem-grid-2.svg",
     "shouldTint": true
   },
   {
-    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-inverse.svg",
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/wall-arts-2.svg",
+    "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/wall-arts-2-thumbnail.svg",
     "shouldTint": true
   },
-  {
-    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/gem-grid.svg",
-    "shouldTint": true
-  },
-  {
-    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/confetti-boxes.svg",
-    "shouldTint": true
-  },
-  {
-    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/chalkboard.svg",
-    "shouldTint": true
 
-  },
-  {
-    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/wall-arts.svg",
-    "shouldTint": true
-  },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/texture-tomato.jpg",
     "sourcePageUrl": "https://www.are.na/block/2155084"

@@ -418,7 +418,7 @@ export default {
       } else if (backgrounds) {
         this.images = data.map(image => {
           image.sourceUserName = null
-          image.previewUrl = image.url
+          image.previewUrl = image.previewUrl || image.url
           return image
         })
       }
