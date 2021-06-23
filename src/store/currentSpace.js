@@ -1200,12 +1200,14 @@ export default {
       if (notifiedCardAdded.includes(cardId)) { return }
       const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
       if (!userCanEdit) { return }
-      const recipientUserIds = context.getters.userIdsToNotify
+      const userId = context.rootState.currentUser.id
+      let recipientUserIds = context.getters.userIdsToNotify
+      recipientUserIds = recipientUserIds.filter(recipientUserId => recipientUserId !== userId)
       if (!recipientUserIds.length) { return }
       const notification = {
         type, // 'createCard' or 'updateCard'
         cardId,
-        userId: context.rootState.currentUser.id,
+        userId,
         recipientUserIds,
         spaceId: context.state.id
       }
