@@ -144,6 +144,8 @@ export default {
         if (cachedSpace) {
           space = cachedSpace
         }
+        console.log('🍆🍅', space)
+
         this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
       } else {
         this.$store.dispatch('currentSpace/showCardDetails', card.id)
