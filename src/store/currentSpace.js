@@ -705,6 +705,7 @@ export default {
       }
     },
     loadSpace: async (context, { space }) => {
+      console.log('🍆 loadSpace', space)
       const emptySpace = utils.emptySpace(space.id)
       const cachedSpace = cache.space(space.id)
       const user = context.rootState.currentUser
