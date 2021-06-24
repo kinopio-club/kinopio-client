@@ -135,6 +135,7 @@ export default {
       this.$emit('markAllAsRead')
     },
     showCardDetails (notification) {
+      console.log('🍆', notification)
       let space = notification.space
       const card = notification.card
       if (this.currentSpaceId !== space.id) {
