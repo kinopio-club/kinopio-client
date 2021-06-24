@@ -1213,6 +1213,7 @@ export default {
       const userId = context.rootState.currentUser.id
       let recipientUserIds = context.getters.userIdsToNotify
       recipientUserIds = recipientUserIds.filter(recipientUserId => recipientUserId !== userId)
+      recipientUserIds = recipientUserIds.filter(id => Boolean(id))
       if (!recipientUserIds.length) { return }
       const notification = {
         type, // 'createCard' or 'updateCard'
