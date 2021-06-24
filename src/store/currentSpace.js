@@ -705,7 +705,6 @@ export default {
       }
     },
     loadSpace: async (context, { space }) => {
-      console.log('🍆 loadSpace', space)
       const emptySpace = utils.emptySpace(space.id)
       const cachedSpace = cache.space(space.id)
       const user = context.rootState.currentUser
@@ -777,13 +776,11 @@ export default {
       }, { root: true })
     },
     changeSpace: async (context, { space, isRemote }) => {
-      console.log('🍆🍆', space)
       if (isRemote) {
         utils.updateWindowTitle(space)
       }
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
-      console.log('🍆🍆🍆', space)
       await context.dispatch('loadSpace', { space })
       context.dispatch('updateWindowHistory', { space, isRemote })
       const userIsMember = context.rootGetters['currentUser/isSpaceMember']

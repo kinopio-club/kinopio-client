@@ -135,13 +135,10 @@ export default {
       this.$emit('markAllAsRead')
     },
     showCardDetails (notification) {
-      console.log('🍆', notification)
       let space = utils.clone(notification.space)
       const card = utils.clone(notification.card)
       if (this.currentSpaceId !== space.id) {
         this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
-        console.log('🍆🍅', space)
-
         this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
       } else {
         this.$store.dispatch('currentSpace/showCardDetails', card.id)
