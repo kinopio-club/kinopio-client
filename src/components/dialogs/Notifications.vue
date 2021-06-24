@@ -136,14 +136,10 @@ export default {
     },
     showCardDetails (notification) {
       console.log('🍆', notification)
-      let space = notification.space
-      const card = notification.card
+      let space = utils.clone(notification.space)
+      const card = utils.clone(notification.card)
       if (this.currentSpaceId !== space.id) {
         this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
-        const cachedSpace = cache.space(space.id)
-        if (cachedSpace) {
-          space = cachedSpace
-        }
         console.log('🍆🍅', space)
 
         this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
