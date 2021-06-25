@@ -17,7 +17,7 @@
           input(type="checkbox" v-model="filterUnchecked")
           span Todo
       .button-wrap
-        button(:class="{active: moreFiltersVisible, 'has-badge': totalFiltersActive}" @click.left.prevent="toggleMoreFiltersVisible")
+        button(:class="{active: moreFiltersVisible, 'has-badge': totalFiltersActive}" @click.left.prevent.stop="toggleMoreFiltersVisible")
           span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
           span …
         MoreFilters(:visible="moreFiltersVisible")
@@ -35,6 +35,13 @@ export default {
   components: {
     User: () => import('@/components/User.vue'),
     MoreFilters
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerMoreFiltersIsNotVisible') {
+        this.moreFiltersVisible = false
+      }
+    })
   },
   data () {
     return {

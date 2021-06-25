@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.more-filters.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.more-filters.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" @click.stop)
   section
     button(@click.left="clearAllFilters")
       img.icon.cancel(src="@/assets/add.svg")

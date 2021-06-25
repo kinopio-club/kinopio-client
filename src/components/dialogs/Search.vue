@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.search(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.search(@click="closeDialogs" v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   Filters
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ResultsFilter(
@@ -182,6 +182,9 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'Search.selectCard')
       this.$store.dispatch('currentSpace/showCardDetails', card.id)
       this.focusItem(card)
+    },
+    closeDialogs () {
+      this.$store.commit('triggerMoreFiltersIsNotVisible')
     },
     focusNextItem () {
       const cards = this.cards
