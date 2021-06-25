@@ -1,29 +1,9 @@
 <template lang="pug">
-dialog.filters.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.more-filters.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
-    p
-      span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
-      span Filters
     button(@click.left="clearAllFilters")
       img.icon.cancel(src="@/assets/add.svg")
       span Clear all
-
-  section
-    .row
-      .button-wrap
-        label.show-users(:class="{active: filterShowUsers}" @click.left.prevent="toggleFilterShowUsers" @keydown.stop.enter="toggleFilterShowUsers")
-          input(type="checkbox" v-model="filterShowUsers")
-          User(:user="currentUser" :key="currentUser.id" :hideYouLabel="true")
-      .button-wrap
-        label(:class="{active: filterShowDateUpdated}" @click.left.prevent="toggleFilterShowDateUpdated" @keydown.stop.enter="toggleFilterShowDateUpdated")
-          input(type="checkbox" v-model="filterShowDateUpdated")
-          img.icon.time(src="@/assets/time.svg")
-          span Updated
-    .row
-      .button-wrap
-        label(:class="{active: filterUnchecked}" @click.left.prevent="toggleFilterUnchecked" @keydown.stop.enter="toggleFilterUnchecked")
-          input(type="checkbox" v-model="filterUnchecked")
-          span Unchecked
 
   section.results-section.connection-types(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="allItems" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredItems")
@@ -58,7 +38,7 @@ import utils from '@/utils.js'
 import uniq from 'lodash-es/uniq'
 
 export default {
-  name: 'Filters',
+  name: 'MoreFilters',
   components: {
     User: () => import('@/components/User.vue'),
     ResultsFilter
@@ -92,27 +72,6 @@ export default {
       framesInUse = uniq(framesInUse.filter(frame => frame))
       return framesInUse.map(frame => frames[frame])
     },
-    totalFiltersActive () {
-      const currentUser = this.$store.state.currentUser
-      let userFilters = 0
-      if (currentUser.filterShowUsers) {
-        userFilters += 1
-      }
-      if (currentUser.filterShowDateUpdated) {
-        userFilters += 1
-      }
-      if (currentUser.filterUnchecked) {
-        userFilters += 1
-      }
-      const tagNames = this.$store.state.filteredTagNames
-      const connections = this.$store.state.filteredConnectionTypeIds
-      const frames = this.$store.state.filteredFrameIds
-      return userFilters + tagNames.length + connections.length + frames.length
-    },
-    currentUser () { return this.$store.state.currentUser },
-    filterShowUsers () { return this.$store.state.currentUser.filterShowUsers },
-    filterShowDateUpdated () { return this.$store.state.currentUser.filterShowDateUpdated },
-    filterUnchecked () { return this.$store.state.currentUser.filterUnchecked },
     tags () { return this.$store.getters['currentSpace/spaceTags']() },
     allItems () {
       const tags = this.tags.map(tag => {
@@ -191,31 +150,19 @@ export default {
       if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeightFromHeader(element)
+        this.dialogHeight = utils.elementHeight(element)
       })
     },
     updateResultsSectionHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
         let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
+        this.resultsSectionHeight = utils.elementHeight(element, true)
       })
     },
 
     // Toggle filters
 
-    toggleFilterShowUsers () {
-      const value = !this.filterShowUsers
-      this.$store.dispatch('currentUser/toggleFilterShowUsers', value)
-    },
-    toggleFilterShowDateUpdated () {
-      const value = !this.filterShowDateUpdated
-      this.$store.dispatch('currentUser/toggleFilterShowDateUpdated', value)
-    },
-    toggleFilterUnchecked () {
-      const value = !this.filterUnchecked
-      this.$store.dispatch('currentUser/toggleFilterUnchecked', value)
-    },
     toggleFilteredTag (tag) {
       const tags = this.$store.state.filteredTagNames
       if (tags.includes(tag.name)) {
@@ -273,13 +220,18 @@ export default {
 </script>
 
 <style lang="stylus">
-dialog.filters
+dialog.more-filters
+  .badge
+    display inline-block
+    vertical-align middle
+  .name
+    display inline-block
   .frames-list
     .badge
       width 17px
       height 19px
-      display block
       padding 0
+      display inline-block
       img
         width 100%
   .connection-types
@@ -288,12 +240,4 @@ dialog.filters
     overflow scroll
   input[type="checkbox"]
     margin-top 1px
-  .show-users
-    width 50px
-  .user
-    position absolute
-    top 4px
-    .user-avatar
-      width 17px
-      height 16px
 </style>
