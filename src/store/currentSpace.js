@@ -1639,12 +1639,15 @@ export default {
       return cardsCreatedIsOverLimit && !spaceUserIsUpgraded
     },
     userIdsToNotify: (state, getters, rootState, rootGetters) => {
+      let clients = state.clients.map(client => client.id)
       let members = getters.members(true)
       let contributors = [] // for open spaces
       members = members.map(member => member.id)
       contributors = state.cards.map(card => card.userId)
       let userIds = members.concat(contributors)
       userIds = uniq(userIds)
+      // exclude currently connected userIds
+      userIds = userIds.filter(userId => !clients.includes(userId))
       return userIds
     }
   }
