@@ -264,15 +264,9 @@ export default {
   .magnifying-glass
     vertical-align -2px
   .keyboard-shortcut-badge
-    background-color var(--primary-background)
-    color var(--secondary)
-    padding 0
-    min-height initial
-    min-width initial
     margin 0
     .icon
       margin-left 3px
-      opacity 0.3
   .keyboard-shortcut-badge + span
     margin-left 6px
 </style>

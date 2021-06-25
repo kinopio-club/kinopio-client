@@ -120,7 +120,6 @@ export default {
 :root
   // theme vars
   --primary black
-  --secondary #a9a9a9
   --primary-background white
   --text-link #143997
 
@@ -557,6 +556,11 @@ code
   span
     font-size 12px
     color var(--primary-background)
+
+.keyboard-shortcut-badge
+  min-height initial
+  min-width initial
+  background-color var(--secondary-background)
 
 .link-badge
   background-color var(--secondary-active-background)

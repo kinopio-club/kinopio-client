@@ -2,17 +2,17 @@
   section.filters
     .row
       .button-wrap
-        .badge.keyboard-shortcut-badge(v-if="isNotMobile") 1
+        .badge.keyboard-shortcut-badge(title="keyboard shortcut" v-if="isNotMobile") 1
         label.show-users(:class="{active: filterShowUsers}" @click.left.prevent="toggleFilterShowUsers" @keydown.stop.enter="toggleFilterShowUsers")
           input(type="checkbox" v-model="filterShowUsers")
           User(:user="currentUser" :key="currentUser.id" :hideYouLabel="true" :isSmall="true")
       .button-wrap
-        .badge.keyboard-shortcut-badge(v-if="isNotMobile") 2
+        .badge.keyboard-shortcut-badge(title="keyboard shortcut" v-if="isNotMobile") 2
         label(:class="{active: filterShowDateUpdated}" @click.left.prevent="toggleFilterShowDateUpdated" @keydown.stop.enter="toggleFilterShowDateUpdated")
           input(type="checkbox" v-model="filterShowDateUpdated")
           img.icon.time(src="@/assets/time.svg")
       .button-wrap
-        .badge.keyboard-shortcut-badge(v-if="isNotMobile") 3
+        .badge.keyboard-shortcut-badge(title="keyboard shortcut" v-if="isNotMobile") 3
         label(:class="{active: filterUnchecked}" @click.left.prevent="toggleFilterUnchecked" @keydown.stop.enter="toggleFilterUnchecked")
           input(type="checkbox" v-model="filterUnchecked")
           span Todo
@@ -119,11 +119,7 @@ export default {
     position absolute
     padding 0px 4px
     padding-top 1px
-    min-height initial
-    min-width initial
     bottom -10px
     right -6px
     z-index 1
-    background-color var(--primary-background)
-    color var(--secondary)
 </style>
