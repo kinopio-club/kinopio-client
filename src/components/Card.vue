@@ -296,9 +296,10 @@ export default {
       }
     },
     connectorIsVisible () {
+      const spaceIsOpen = this.$store.state.currentSpace.privacy === 'open' && this.currentUserIsSignedIn
       if (this.isRemoteConnecting) {
         return true
-      } else if (this.canEditCard || this.connectionTypes.length) {
+      } else if (spaceIsOpen || this.canEditCard || this.connectionTypes.length) {
         return true
       } else {
         return false
