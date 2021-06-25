@@ -7,6 +7,7 @@
         //- Explore
         .button-wrap
           button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
+            //- img.icon.sunglasses(src="@/assets/filter.svg")
             span Explore
           Explore(:visible="exploreIsVisible")
         //- Favorites
@@ -19,6 +20,14 @@
               img.icon.down-arrow(src="@/assets/down-arrow.svg" :class="{ 'is-mobile-icon': isMobile }")
               span(v-if="favoriteSpacesEditedCount") {{favoriteSpacesEditedCount}}
           Favorites(:visible="favoritesIsVisible")
+
+      section.controls(v-if="isVisible")
+        //- Removed
+        .button-wrap
+          button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
+            img.refresh.icon(src="@/assets/remove.svg")
+            span Removed
+          Removed(:visible="removedIsVisible")
         //- Tags and Links
         .button-wrap
           .segmented-buttons
@@ -29,21 +38,7 @@
           Links(:visible="linksIsVisible")
           Tags(:visible="tagsIsVisible")
 
-      section.controls(v-if="isVisible")
-        //- Removed
-        .button-wrap
-          button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
-            img.refresh.icon(src="@/assets/remove.svg")
-            span Removed
-          Removed(:visible="removedIsVisible")
-        //- Filters
-        .button-wrap
-          button(@click.left="toggleFiltersIsVisible" :class="{ active: filtersIsVisible}")
-            .span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
-            img.icon.sunglasses(src="@/assets/filter.svg")
-            span Filters
-          Filters(:visible="filtersIsVisible")
-        //- mobile tips
+        //- Mobile Tips
         .button-wrap(v-if="isMobileOrTouch")
           button(@click.left="toggleMobileTipsIsVisible" :class="{ active: mobileTipsIsVisible}")
             img.icon(src="@/assets/press-and-hold.svg")
@@ -57,7 +52,6 @@
 <script>
 import Explore from '@/components/dialogs/Explore.vue'
 import Removed from '@/components/dialogs/Removed.vue'
-import Filters from '@/components/dialogs/Filters.vue'
 import Links from '@/components/dialogs/Links.vue'
 import Tags from '@/components/dialogs/Tags.vue'
 import Favorites from '@/components/dialogs/Favorites.vue'
@@ -76,7 +70,6 @@ export default {
     Explore,
     Removed,
     Notifications,
-    Filters,
     Links,
     Tags,
     Favorites,
@@ -88,7 +81,6 @@ export default {
     return {
       removedIsVisible: false,
       favoritesIsVisible: false,
-      filtersIsVisible: false,
       linksIsVisible: false,
       tagsIsVisible: false,
       exploreIsVisible: false,
@@ -101,7 +93,6 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.removedIsVisible = false
         this.favoritesIsVisible = false
-        this.filtersIsVisible = false
         this.linksIsVisible = false
         this.tagsIsVisible = false
         this.exploreIsVisible = false
@@ -150,23 +141,6 @@ export default {
     },
     shouldHideFooter () {
       return this.$store.state.shouldHideFooter
-    },
-    totalFiltersActive () {
-      const currentUser = this.$store.state.currentUser
-      let userFilters = 0
-      if (currentUser.filterShowUsers) {
-        userFilters += 1
-      }
-      if (currentUser.filterShowDateUpdated) {
-        userFilters += 1
-      }
-      if (currentUser.filterUnchecked) {
-        userFilters += 1
-      }
-      const tagNames = this.$store.state.filteredTagNames
-      const connections = this.$store.state.filteredConnectionTypeIds
-      const frames = this.$store.state.filteredFrameIds
-      return userFilters + tagNames.length + connections.length + frames.length
     },
     isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] },
     isMobile () {
@@ -240,11 +214,6 @@ export default {
       const isVisible = this.favoritesIsVisible
       this.$store.dispatch('closeAllDialogs', 'Footer.toggleFavoritesIsVisible')
       this.favoritesIsVisible = !isVisible
-    },
-    toggleFiltersIsVisible () {
-      const isVisible = this.filtersIsVisible
-      this.$store.dispatch('closeAllDialogs', 'Footer.toggleFiltersIsVisible')
-      this.filtersIsVisible = !isVisible
     },
     toggleLinksIsVisible () {
       const isVisible = this.linksIsVisible
