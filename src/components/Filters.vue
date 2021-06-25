@@ -71,7 +71,6 @@ export default {
       const connections = this.$store.state.filteredConnectionTypeIds
       const frames = this.$store.state.filteredFrameIds
       return userFilters + tagNames.length + connections.length + frames.length
-      // TODO update store and use on search button
     },
     currentUser () { return this.$store.state.currentUser },
     filterShowUsers () { return this.currentUser.filterShowUsers },
