@@ -112,9 +112,11 @@ export default {
     }, 1000 * 60 * 10) // 10 minutes
   },
   computed: {
+    currentUser () { return this.$store.state.currentUser },
     favoriteSpacesEditedCount () {
-      const favoriteSpaces = this.$store.state.currentUser.favoriteSpaces
-      return favoriteSpaces.filter(space => space.isEdited).length
+      let favoriteSpaces = utils.clone(this.currentUser.favoriteSpaces)
+      favoriteSpaces = favoriteSpaces.filter(space => space.isEdited && space.userId !== this.currentUser.id)
+      return favoriteSpaces.length
     },
     isMobileOrTouch () {
       const isTouchDevice = this.$store.state.isTouchDevice
