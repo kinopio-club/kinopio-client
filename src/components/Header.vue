@@ -11,8 +11,8 @@ header(:style="visualViewportPosition")
         About(:visible="aboutIsVisible")
         KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
     .space-meta-rows
-      .space-details-row(:class="{'segmented-buttons': spaceHasStatusOrOffline}")
-        //- space
+      .space-details-row.segmented-buttons
+        //- Space
         .button-wrap
           button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
             .badge.info(v-show="currentSpaceIsTemplate")
@@ -29,20 +29,24 @@ header(:style="visualViewportPosition")
               img.icon(src="@/assets/checkmark.svg")
           SpaceDetails(:visible="spaceDetailsIsVisible")
           ImportArenaChannel(:visible="importArenaChannelIsVisible")
-        //- state
+        //- Add Space
+        .button-wrap
+          button
+            img.icon(src="@/assets/add.svg")
+        //- State
         .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
           button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
             Loader(:visible="spaceHasStatus")
             .badge.success.space-status-success(v-if="!spaceHasStatus")
           SpaceStatus(:visible="spaceStatusIsVisible")
-        //- offline
+        //- Offline
         .button-wrap(v-if="!isOnline")
           button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
             img.icon.offline(src="@/assets/offline.svg")
           Offline(:visible="offlineIsVisible")
 
       .search-row
-        //- search
+        //- Search
         .segmented-buttons
           button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
             img.icon.search(v-if="!searchResultsCount" src="@/assets/search.svg")
@@ -244,9 +248,6 @@ export default {
       const isJoiningSpace = this.$store.state.isJoiningSpace
       const isReconnectingToBroadcast = this.$store.state.isReconnectingToBroadcast
       return isLoadingSpace || isJoiningSpace || isReconnectingToBroadcast
-    },
-    spaceHasStatusOrOffline () {
-      return this.spaceHasStatus || !this.isOnline || this.spaceStatusIsVisible
     },
     spaceHasStatusAndStatusDialogIsNotVisible () {
       if (this.spaceHasStatus) {
