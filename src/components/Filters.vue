@@ -121,4 +121,8 @@ export default {
     bottom -10px
     right -6px
     z-index 1
+  @media(max-width 500px)
+    dialog.more-filters
+      left initial
+      right 8px
 </style>
