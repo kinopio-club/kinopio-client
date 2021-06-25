@@ -38,6 +38,8 @@ dialog.add-space.narrow(
           span Daily Journal
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
           span …
+    .row(v-if="editPromptsIsVisible")
+      p Journals spaces will be created with these cards:
     Prompt(v-if="editPromptsIsVisible" v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showPicker="togglePromptPackPickerIsVisible" @showScreenIsShort="showScreenIsShort")
     //- Edit Journal
     .row.journal-edit-row(v-if="editPromptsIsVisible")

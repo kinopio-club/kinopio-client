@@ -400,8 +400,9 @@ dialog
     button:last-child
       border-top-right-radius 0
 
-  button,
-  label
+  > .button-wrap > button,
+  > button,
+  > label
     margin 0
     border-radius 0
     &:first-child
