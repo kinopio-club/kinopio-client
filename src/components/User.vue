@@ -4,7 +4,7 @@
     @mouseup.left.stop="toggleUserDetails"
     @touchend.stop="toggleUserDetails"
     ref="user"
-    :class="{ clickable: isClickable, active: userDetailsIsVisible }"
+    :class="{ clickable: isClickable, active: userDetailsIsVisible, 'is-small': isSmall }"
     :style="{backgroundColor: user.color}"
   )
     .label-badge(v-if="isCurrentUser && !hideYouLabel")
@@ -26,7 +26,8 @@ export default {
     user: Object,
     detailsOnRight: Boolean,
     shouldCloseAllDialogs: Boolean,
-    hideYouLabel: Boolean
+    hideYouLabel: Boolean,
+    isSmall: Boolean
   },
   data () {
     return {
@@ -92,6 +93,9 @@ export default {
     &.clickable
       cursor pointer
       pointer-events all
+    &.is-small
+      width 17px
+      height 16px
   .label-badge
     bottom -7px
     width 100%

@@ -181,11 +181,11 @@ export default {
       }
     },
     backgroundTintStyles () {
-      let background
-      const mixBlendMode = 'multiply'
       if (this.backgroundTint) {
-        background = this.backgroundTint
-        return { background, mixBlendMode }
+        return {
+          background: this.backgroundTint,
+          mixBlendMode: 'multiply'
+        }
       } else {
         return {}
       }

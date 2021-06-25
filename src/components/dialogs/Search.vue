@@ -1,5 +1,6 @@
 <template lang="pug">
-dialog.search(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.search(@click="closeDialogs" v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+  Filters
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ResultsFilter(
       :showFilter="true"
@@ -37,6 +38,7 @@ dialog.search(v-if="visible" :open="visible" ref="dialog" :style="{'max-height':
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import User from '@/components/User.vue'
 import NameSegment from '@/components/NameSegment.vue'
+import Filters from '@/components/Filters.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -50,7 +52,8 @@ export default {
   components: {
     ResultsFilter,
     User,
-    NameSegment
+    NameSegment,
+    Filters
   },
   props: {
     visible: Boolean
@@ -179,6 +182,9 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'Search.selectCard')
       this.$store.dispatch('currentSpace/showCardDetails', card.id)
       this.focusItem(card)
+    },
+    closeDialogs () {
+      this.$store.commit('triggerMoreFiltersIsNotVisible')
     },
     focusNextItem () {
       const cards = this.cards

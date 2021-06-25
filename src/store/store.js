@@ -340,6 +340,7 @@ export default new Vuex.Store({
     triggerShowNextSearchCard: () => {},
     triggerShowPreviousSearchCard: () => {},
     triggerUpdateBackgroundTint: () => {},
+    triggerMoreFiltersIsNotVisible: () => {},
 
     // Cards
 

@@ -49,6 +49,7 @@ header(:style="visualViewportPosition")
             .badge.search.search-count-badge(v-if="searchResultsCount")
               img.icon.search(src="@/assets/search.svg")
               span {{searchResultsCount}}
+            span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
           template(v-if="searchResultsCount")
             button(@click="showPreviousSearchCard")
               img.icon.left-arrow(src="@/assets/down-arrow.svg")
@@ -295,7 +296,24 @@ export default {
       return unread.length || 0
     },
     searchIsVisible () { return this.$store.state.searchIsVisible },
-    searchResultsCount () { return this.$store.state.searchResultsCards.length }
+    searchResultsCount () { return this.$store.state.searchResultsCards.length },
+    totalFiltersActive () {
+      const currentUser = this.$store.state.currentUser
+      let userFilters = 0
+      if (currentUser.filterShowUsers) {
+        userFilters += 1
+      }
+      if (currentUser.filterShowDateUpdated) {
+        userFilters += 1
+      }
+      if (currentUser.filterUnchecked) {
+        userFilters += 1
+      }
+      const tagNames = this.$store.state.filteredTagNames
+      const connections = this.$store.state.filteredConnectionTypeIds
+      const frames = this.$store.state.filteredFrameIds
+      return userFilters + tagNames.length + connections.length + frames.length
+    }
   },
   methods: {
     showCardDetails (card) {

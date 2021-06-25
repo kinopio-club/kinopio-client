@@ -3,7 +3,7 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
   section
     .row
       .badge.title Keyboard Shortcuts
-      .badge.info ?
+      .badge.keyboard-shortcut-badge ?
 
   section
     article
@@ -11,13 +11,13 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
         .badge.title
           img.icon(src="@/assets/search.svg")
           span Search/Jump-to Spaces
-        .badge.info {{meta}}–K
+        .badge.keyboard-shortcut-badge {{meta}}–K
     article
       .row
         .badge.title
           img.icon(src="@/assets/search.svg")
           span Search/Jump-to Cards
-        .badge.info {{meta}}–F
+        .badge.keyboard-shortcut-badge {{meta}}–F
 
     article
       .row.multiple-items
@@ -26,15 +26,15 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           span Add Card
         .divider.badge or
         .badge.title Click Focused Item
-        .badge.info Enter
+        .badge.keyboard-shortcut-badge Enter
     article
       .row
         .badge.title
           img.icon(src="@/assets/add.svg")
           span Add Child Card
-        .badge.info Shift-Enter
+        .badge.keyboard-shortcut-badge Shift-Enter
       p Subsequent&nbsp;
-        span.badge.info Enters
+        span.badge.keyboard-shortcut-badge Enters
         span add siblings
       button(@click.left.stop="toggleChildCardInfoIsVisible" :class="{ active: childCardInfoIsVisible }") More Info
       div(v-if="childCardInfoIsVisible")
@@ -45,17 +45,17 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
         .badge.title
           img.icon(src="@/assets/line-break.svg")
           span Line break in card
-        .badge.info Ctrl-Enter
+        .badge.keyboard-shortcut-badge Ctrl-Enter
     article
       .row
         .badge.title Focus Next/Previous
-        .badge.info Tab/Shift-Tab
+        .badge.keyboard-shortcut-badge Tab/Shift-Tab
       .row
         button(@click.left.stop="toggleSafariInfoIsVisible" :class="{ active: safariInfoIsVisible }")
           span Safari Info
       div(v-if="safariInfoIsVisible")
         p Instead of Tab, Safari uses
-        p.badge.info Option-Tab/Option-Shift-Tab
+        p.badge.keyboard-shortcut-badge Option-Tab/Option-Shift-Tab
         p Unless you update your Safari preferences:
         p Preferences → Advanced → Press Tab to highlight each item on a webpage
     article
@@ -63,7 +63,7 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
         .badge.title
           img.icon.magnifying-glass(src="@/assets/magnifying-glass.svg")
           span Zoom In or Out
-        .badge.info {{meta}}-+/-, {{meta}}-Scroll
+        .badge.keyboard-shortcut-badge {{meta}}-+/-, {{meta}}-Scroll
       .row(v-if="!isMobile")
         label(:class="{active: shouldInvertZoomDirection}" @click.left.prevent="toggleShouldInvertZoomDirection" @keydown.stop.enter="toggleShouldInvertZoomDirection")
           input(type="checkbox" v-model="shouldInvertZoomDirection")
@@ -71,86 +71,86 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
     article
       .row
         .badge.title Focus Nearest Card
-        .badge.info Arrow(→↑←↓)
+        .badge.keyboard-shortcut-badge Arrow(→↑←↓)
     article
       .row
         .badge.title
           User(:user="currentUser" :key="currentUser.id" :hideYouLabel="true")
           span Toggle Card User Filter
-        .badge.info 1
+        .badge.keyboard-shortcut-badge 1
     article
       .row
         .badge.title
           img.icon.time(src="@/assets/time.svg")
           span Toggle Card Date Filter
-        .badge.info 2
+        .badge.keyboard-shortcut-badge 2
     article
       .row
         .badge.title
           img.icon.time(src="@/assets/unchecked.svg")
           span Toggle Cards Unchecked Filter
-        .badge.info 3
+        .badge.keyboard-shortcut-badge 3
     article
       .row
         .badge.title
           img.icon(src="@/assets/brush.svg")
           span Select All Cards
-        .badge.info {{meta}}-A
+        .badge.keyboard-shortcut-badge {{meta}}-A
     article
       .row
         .badge.title
           img.icon(src="@/assets/brush-y.svg")
           span Select All Cards Below Cursor
-        .badge.info {{meta}}-Shift-A
+        .badge.keyboard-shortcut-badge {{meta}}-Shift-A
     article
       .row
         .badge.title
           img.icon(src="@/assets/brush.svg")
           span Select All Connected Cards
-        .badge.info {{meta}}-Click Card
+        .badge.keyboard-shortcut-badge {{meta}}-Click Card
     article
       .row
         .badge.title
           img.icon.cut(src="@/assets/cut.svg")
           span Copy/Cut/Paste Selected Cards
-        .badge.info {{meta}}-C/{{meta}}-X/{{meta}}-V
+        .badge.keyboard-shortcut-badge {{meta}}-C/{{meta}}-X/{{meta}}-V
       p You can copy and paste cards between spaces
     article
       .row
         .badge.title
           img.icon.connector-icon(src="@/assets/connector-open.svg")
           span Use {{lastOrNewConnectionTypeControlSetting}} Connection Type
-        .badge.info Shift-Click on
+        .badge.keyboard-shortcut-badge Shift-Click on
           img.icon.connector-icon(src="@/assets/connector-open.svg")
       p
-        span.badge.info Shift-Drag
+        span.badge.keyboard-shortcut-badge Shift-Drag
         span card connector or
-        span.badge.info Shift-Click
+        span.badge.keyboard-shortcut-badge Shift-Click
         span 'Connect' button to use {{lastOrNewConnectionTypeControlSetting}} connection type
     article
       .row
         .badge.title
           img.icon(src="@/assets/constrain-axis.svg")
           span Constrain Card Move to Axis
-        .badge.info Shift-Drag Card
+        .badge.keyboard-shortcut-badge Shift-Drag Card
     article
       .row
         .badge.title
           img.icon(src="@/assets/remove.svg")
           span Remove Selected
-        .badge.info Delete
+        .badge.keyboard-shortcut-badge Delete
     article
       .row
         .badge.title
           img.icon(src="@/assets/undo.svg")
           span Restore Last Removed Card
-        .badge.info {{meta}}-Z
+        .badge.keyboard-shortcut-badge {{meta}}-Z
     article
       .row
         .badge.title
           img.icon.cancel(src="@/assets/add.svg")
           span Close Dialogs
-        .badge.info Escape
+        .badge.keyboard-shortcut-badge Escape
 
 </template>
 
@@ -261,7 +261,12 @@ export default {
     margin-top 10px
   .user
     margin-right 5px !important
-
   .magnifying-glass
     vertical-align -2px
+  .keyboard-shortcut-badge
+    margin 0
+    .icon
+      margin-left 3px
+  .keyboard-shortcut-badge + span
+    margin-left 6px
 </style>
