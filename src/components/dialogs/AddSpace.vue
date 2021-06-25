@@ -23,7 +23,7 @@ dialog.add-space.narrow(
           img.icon(src="@/assets/add.svg")
           span Space
         button(@click.left.stop="toggleEditNewSpaceIsVisible" :class="{ active: editNewSpaceIsVisible }")
-          span Edit
+          span …
     //- Edit Space
     .row(v-if="editNewSpaceIsVisible")
       label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
@@ -37,7 +37,7 @@ dialog.add-space.narrow(
           MoonPhase(:moonPhase="moonPhase.name")
           span Daily Journal
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
-          span Edit
+          span …
     Prompt(v-if="editPromptsIsVisible" v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showPicker="togglePromptPackPickerIsVisible" @showScreenIsShort="showScreenIsShort")
     //- Edit Journal
     .row.journal-edit-row(v-if="editPromptsIsVisible")
@@ -76,7 +76,8 @@ export default {
     Templates
   },
   props: {
-    visible: Boolean
+    visible: Boolean,
+    shouldAddSpaceDirectly: Boolean
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -132,6 +133,12 @@ export default {
       } else {
         this.$emit('closeDialogs')
         this.$emit('addSpace')
+      }
+      if (this.shouldAddSpaceDirectly) {
+        this.$store.dispatch('closeAllDialogs', 'addSpace.addSpace')
+        window.scrollTo(0, 0)
+        this.$store.dispatch('currentSpace/addSpace')
+        this.$store.dispatch('currentSpace/updateSpacePageSize')
       }
     },
     toggleNewSpacesAreBlank () {

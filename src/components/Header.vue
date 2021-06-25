@@ -31,8 +31,9 @@ header(:style="visualViewportPosition")
           ImportArenaChannel(:visible="importArenaChannelIsVisible")
         //- Add Space
         .button-wrap
-          button
+          button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
             img.icon(src="@/assets/add.svg")
+          AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
         //- State
         .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
           button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
@@ -117,6 +118,7 @@ import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
 import Search from '@/components/dialogs/Search.vue'
+import AddSpace from '@/components/dialogs/AddSpace.vue'
 import privacy from '@/data/privacy.js'
 import utils from '@/utils.js'
 
@@ -140,7 +142,8 @@ export default {
     KeyboardShortcuts,
     UpgradeUser,
     Search,
-    MoonPhase
+    MoonPhase,
+    AddSpace
   },
   data () {
     return {
@@ -157,7 +160,8 @@ export default {
       visualViewportPosition: {},
       readOnlyJiggle: false,
       notifications: [],
-      notificationsIsLoading: true
+      notificationsIsLoading: true,
+      addSpaceIsVisible: false
     }
   },
   created () {
@@ -376,6 +380,7 @@ export default {
       this.spaceStatusIsVisible = false
       this.offlineIsVisible = false
       this.notificationsIsVisible = false
+      this.addSpaceIsVisible = false
     },
     updatePositionFrame () {
       currentIteration++
@@ -436,6 +441,11 @@ export default {
       if (this.notificationsIsVisible) {
         this.updateNotifications()
       }
+    },
+    toggleAddSpaceIsVisible () {
+      const isVisible = this.addSpaceIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleAddSpaceIsVisible')
+      this.addSpaceIsVisible = !isVisible
     },
     toggleSpaceStatusIsVisible () {
       const isVisible = this.spaceStatusIsVisible
