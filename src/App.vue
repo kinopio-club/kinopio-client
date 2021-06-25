@@ -120,6 +120,7 @@ export default {
 :root
   // theme vars
   --primary black
+  --secondary #a9a9a9
   --primary-background white
   --text-link #143997
 
