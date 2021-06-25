@@ -14,7 +14,9 @@ dialog.narrow.notifications(v-if="visible" :open="visible" ref="dialog" :style="
       template(v-for="group in groupedItems")
         //- space
         li.space-name(v-if="group.spaceId" :data-space-id="group.spaceId" @click="changeSpace(group.spaceId)" :class="{ active: spaceIsCurrentSpace(group.spaceId) }")
-          .background(v-if="group.background" :style="{ backgroundImage: `url(${group.background})` }")
+          .background-wrap
+            .background-tint(:style="backgroundTintStyles(group.backgroundTint)")
+            .background(v-if="group.background" :style="{ backgroundImage: `url(${group.background})` }")
           span.badge.space-badge
             span {{group.spaceName}}
         //- notification
@@ -81,7 +83,8 @@ export default {
             spaceId: item.spaceId,
             space: item.space,
             notifications: [item],
-            background: item.space.background
+            background: item.space.background,
+            backgroundTint: item.space.backgroundTint
           })
         }
       })
@@ -89,6 +92,17 @@ export default {
     }
   },
   methods: {
+    backgroundTintStyles (tint) {
+      console.log(tint)
+      if (tint) {
+        return {
+          background: tint,
+          mixBlendMode: 'multiply'
+        }
+      } else {
+        return {}
+      }
+    },
     cardDetailsIsVisible (cardId) {
       return this.$store.state.cardDetailsIsVisibleForCardId === cardId
     },
@@ -192,6 +206,11 @@ export default {
         box-shadow none
   .space-badge
     background-color var(--secondary-background)
+
+  .background-wrap
+    position relative
+    display inline
+
   .background
     border-radius 3px
     display inline-grid
@@ -201,6 +220,14 @@ export default {
     margin-right 3px
     background-repeat no-repeat
     background-size cover
+
+  .background-tint
+    width 24px
+    height 24px
+    border-radius 3px
+    position absolute
+    pointer-events none
+
   .card-image
     width 48px
     vertical-align middle
