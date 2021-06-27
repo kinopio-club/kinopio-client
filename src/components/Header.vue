@@ -56,14 +56,12 @@ header(:style="visualViewportPosition")
               span {{searchResultsCount}}
             span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
           Search(:visible="searchIsVisible")
-        template(v-if="searchResultsCount")
-          //- .button-wrap
-          button(@click="showPreviousSearchCard")
-            img.icon.left-arrow(src="@/assets/down-arrow.svg")
-          button(@click="showNextSearchCard")
-            img.icon.right-arrow(src="@/assets/down-arrow.svg")
-          button(@click="clearSearchAndFilters")
-            img.icon.cancel(src="@/assets/add.svg")
+        button(@click="showPreviousSearchCard" v-if="searchResultsCount")
+          img.icon.left-arrow(src="@/assets/down-arrow.svg")
+        button(@click="showNextSearchCard" v-if="searchResultsCount")
+          img.icon.right-arrow(src="@/assets/down-arrow.svg")
+        button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters")
+          img.icon.cancel(src="@/assets/add.svg")
 
   aside
     .top
@@ -319,6 +317,13 @@ export default {
       const connections = this.$store.state.filteredConnectionTypeIds
       const frames = this.$store.state.filteredFrameIds
       return userFilters + tagNames.length + connections.length + frames.length
+    },
+    searchResultsOrFilters () {
+      if (this.searchResultsCount || this.totalFiltersActive) {
+        return true
+      } else {
+        return false
+      }
     }
   },
   methods: {

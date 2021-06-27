@@ -5,9 +5,6 @@
       button(@click.left.stop="toggleTemplateCategoryPickerIsVisible" :class="{active: templateCategoryPickerIsVisible}")
         .badge.info.inline-badge(:class="categoryClassName(filterCategory)") {{filterCategory.name}}
       TemplateCategoryPicker(:visible="templateCategoryPickerIsVisible" :selectedCategoryId="filteredCategoryId" @closeDialog="closeDialogs" @selectCategory="updateFilteredCategory")
-    .button-wrap
-      button(@click.left.stop="toggleContactIsVisible" :class="{active: contactIsVisible}")
-        span Suggest Templates
       Contact(:visible="contactIsVisible")
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(:spaces="spacesFiltered" :showCategory="true" @selectSpace="changeSpace")
@@ -17,15 +14,13 @@
 import templates from '@/data/templates.js'
 import TemplateCategoryPicker from '@/components/dialogs/TemplateCategoryPicker.vue'
 import SpaceList from '@/components/SpaceList.vue'
-import Contact from '@/components/dialogs/Contact.vue'
 import utils from '@/utils.js'
 
 export default {
   name: 'Templates',
   components: {
     TemplateCategoryPicker,
-    SpaceList,
-    Contact
+    SpaceList
   },
   props: {
     visible: Boolean,
@@ -43,7 +38,6 @@ export default {
       filteredCategoryId: 0,
       filteredSpaces: [],
       templateCategoryPickerIsVisible: false,
-      contactIsVisible: false,
       resultsSectionHeight: null
     }
   },
@@ -87,7 +81,6 @@ export default {
     },
     closeDialogs () {
       this.templateCategoryPickerIsVisible = false
-      this.contactIsVisible = false
     },
     updateFilteredCategory (category) {
       this.filteredCategoryId = category.id
@@ -96,11 +89,6 @@ export default {
       const isVisible = this.templateCategoryPickerIsVisible
       this.closeDialogs()
       this.templateCategoryPickerIsVisible = !isVisible
-    },
-    toggleContactIsVisible () {
-      const isVisible = this.contactIsVisible
-      this.closeDialogs()
-      this.contactIsVisible = !isVisible
     },
     updateResultsSectionHeight () {
       if (!this.visible) { return }
@@ -113,7 +101,6 @@ export default {
   watch: {
     visible (visible) {
       this.templateCategoryPickerIsVisible = false
-      this.contactIsVisible = false
       if (visible) {
         this.updateResultsSectionHeight()
       }

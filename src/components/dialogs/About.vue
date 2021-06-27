@@ -5,30 +5,14 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
       p Kinopio is your spatial thinking tool for new ideas and hard problems.
     .row
       .button-wrap
-        button(@click.left.stop="toggleWhatsNewIsVisible" :class="{active: whatsNewIsVisible}")
-          span What's New
-          img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
-        WhatsNew(:visible="whatsNewIsVisible" :newStuff="newStuff")
-    .row
-      .button-wrap
         button(@click.left.stop="toggleHelpIsVisible" :class="{active: helpIsVisible}")
           span Help
         Help(:visible="helpIsVisible")
       .button-wrap
-        a(href="https://help.kinopio.club/api")
-          button API →
-
-  section
-    .row
-      p Kinopio is self-funded and entirely supported by people like you
-    .row
-      .button-wrap
-        a(href="https://help.kinopio.club/posts/who-makes-kinopio")
-          button About Me →
-      .button-wrap
-        a(href="https://pketh.org")
-          button Blog →
-
+        button(@click.left.stop="toggleWhatsNewIsVisible" :class="{active: whatsNewIsVisible}")
+          span What's New
+          img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
+        WhatsNew(:visible="whatsNewIsVisible" :newStuff="newStuff")
   section
     .row
       .button-wrap
@@ -40,6 +24,21 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
         button(@click.left.stop="toggleAppsIsVisible" :class="{active: appsIsVisible}")
           span Desktop and Mobile Apps
         Apps(:visible="appsIsVisible")
+  section
+    .row
+      p Kinopio is supported by people like you
+    .row
+      .button-wrap
+        a(href="https://discord.gg/h2sR45Nby8")
+          button Discord →
+      .button-wrap
+        a(href="https://club.kinopio.club")
+          button
+            span Forum →
+    .row
+      .button-wrap
+        a(href="https://pketh.org")
+          button Blog →
 
 </template>
 
@@ -180,9 +179,9 @@ export default {
   .updated
     margin 0
     margin-left 3px
-  @media(max-height 600px)
-    dialog.apps
-      top -100px
-    dialog.keyboard-shortcuts
-      top -150px
+  // @media(max-height 600px)
+  //   dialog.apps
+  //     top -100px
+  //   dialog.keyboard-shortcuts
+  //     top -150px
 </style>
