@@ -29,11 +29,6 @@ header(:style="visualViewportPosition")
               img.icon(src="@/assets/checkmark.svg")
           SpaceDetails(:visible="spaceDetailsIsVisible")
           ImportArenaChannel(:visible="importArenaChannelIsVisible")
-        //- Add Space
-        .button-wrap
-          button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
-            img.icon(src="@/assets/add.svg")
-          AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
         //- State
         .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
           button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
@@ -46,23 +41,29 @@ header(:style="visualViewportPosition")
             img.icon.offline(src="@/assets/offline.svg")
           Offline(:visible="offlineIsVisible")
 
-      .search-row
-        //- Search
+      .bottom-row
         .segmented-buttons
-          button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
-            img.icon.search(v-if="!searchResultsCount" src="@/assets/search.svg")
-            .badge.search.search-count-badge(v-if="searchResultsCount")
-              img.icon.search(src="@/assets/search.svg")
-              span {{searchResultsCount}}
-            span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
-          template(v-if="searchResultsCount")
-            button(@click="showPreviousSearchCard")
-              img.icon.left-arrow(src="@/assets/down-arrow.svg")
-            button(@click="showNextSearchCard")
-              img.icon.right-arrow(src="@/assets/down-arrow.svg")
-            button(@click="clearSearch")
-              img.icon.cancel(src="@/assets/add.svg")
-        Search(:visible="searchIsVisible")
+          //- Add Space
+          .button-wrap
+            button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
+              img.icon(src="@/assets/add.svg")
+            AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
+          //- Search
+          .button-wrap
+            button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
+              img.icon.search(v-if="!searchResultsCount" src="@/assets/search.svg")
+              .badge.search.search-count-badge(v-if="searchResultsCount")
+                img.icon.search(src="@/assets/search.svg")
+                span {{searchResultsCount}}
+              span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
+            template(v-if="searchResultsCount")
+              button(@click="showPreviousSearchCard")
+                img.icon.left-arrow(src="@/assets/down-arrow.svg")
+              button(@click="showNextSearchCard")
+                img.icon.right-arrow(src="@/assets/down-arrow.svg")
+              button(@click="clearSearch")
+                img.icon.cancel(src="@/assets/add.svg")
+          Search(:visible="searchIsVisible")
 
   aside
     .top
@@ -598,7 +599,7 @@ header
             border-bottom-right-radius 3px
             border-left 0
 
-  .search-row
+  .bottom-row
     margin-top 5px
     position relative
     .search-count-badge
