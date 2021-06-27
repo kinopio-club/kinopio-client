@@ -41,29 +41,29 @@ header(:style="visualViewportPosition")
             img.icon.offline(src="@/assets/offline.svg")
           Offline(:visible="offlineIsVisible")
 
-      .bottom-row
-        .segmented-buttons
-          //- Add Space
-          .button-wrap
-            button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
-              img.icon(src="@/assets/add.svg")
-            AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
-          //- Search
-          .button-wrap
-            button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
-              img.icon.search(v-if="!searchResultsCount" src="@/assets/search.svg")
-              .badge.search.search-count-badge(v-if="searchResultsCount")
-                img.icon.search(src="@/assets/search.svg")
-                span {{searchResultsCount}}
-              span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
-            template(v-if="searchResultsCount")
-              button(@click="showPreviousSearchCard")
-                img.icon.left-arrow(src="@/assets/down-arrow.svg")
-              button(@click="showNextSearchCard")
-                img.icon.right-arrow(src="@/assets/down-arrow.svg")
-              button(@click="clearSearch")
-                img.icon.cancel(src="@/assets/add.svg")
+      .space-functions-row.segmented-buttons
+        //- Add Space
+        .button-wrap
+          button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
+            img.icon(src="@/assets/add.svg")
+          AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
+        //- Search
+        .button-wrap
+          button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
+            img.icon.search(v-if="!searchResultsCount" src="@/assets/search.svg")
+            .badge.search.search-count-badge(v-if="searchResultsCount")
+              img.icon.search(src="@/assets/search.svg")
+              span {{searchResultsCount}}
+            span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
           Search(:visible="searchIsVisible")
+        template(v-if="searchResultsCount")
+          //- .button-wrap
+          button(@click="showPreviousSearchCard")
+            img.icon.left-arrow(src="@/assets/down-arrow.svg")
+          button(@click="showNextSearchCard")
+            img.icon.right-arrow(src="@/assets/down-arrow.svg")
+          button(@click="clearSearchAndFilters")
+            img.icon.cancel(src="@/assets/add.svg")
 
   aside
     .top
@@ -358,9 +358,10 @@ export default {
       }
       this.showCardDetails(cards[index])
     },
-    clearSearch () {
+    clearSearchAndFilters () {
       this.$store.dispatch('closeAllDialogs', 'Header.clearSearch')
       this.$store.commit('clearSearch')
+      this.$store.dispatch('clearAllFilters')
     },
     addReadOnlyJiggle () {
       const element = this.$refs.readOnly
@@ -580,26 +581,28 @@ header
         .privacy-icon
           margin-left 6px
 
-    // should not bubble down into dialogs
+  // should not bubble down into dialogs
+  .space-details-row,
+  .space-functions-row
     &.segmented-buttons
       > .button-wrap
         > button
           border-radius 0
-          border-left 0
+          border-right 0
           .loader
             margin 0
         &:first-child
           > button
             border-top-left-radius 3px
             border-bottom-left-radius 3px
-            border-left 1px solid var(--primary)
+            border-right 0
         &:last-child
           > button
             border-top-right-radius 3px
             border-bottom-right-radius 3px
-            border-left 0
+            border-right 1px solid var(--primary)
 
-  .bottom-row
+  .space-functions-row
     margin-top 5px
     position relative
     .search-count-badge
