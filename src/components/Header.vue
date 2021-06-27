@@ -584,17 +584,20 @@ header
       > .button-wrap
         > button
           border-radius 0
+          border-left 0
           .loader
             margin 0
         &:first-child
           > button
             border-top-left-radius 3px
             border-bottom-left-radius 3px
+            border-left 1px solid var(--primary)
         &:last-child
           > button
             border-top-right-radius 3px
             border-bottom-right-radius 3px
-            margin-left -1px
+            border-left 0
+
   .search-row
     margin-top 5px
     position relative
