@@ -1,6 +1,8 @@
 <template lang="pug">
 .prompt-pack-picker(v-if="visible" @click.left.stop ref="dialog")
-  p Add random prompts to your journals
+  p
+    img.icon(src="@/assets/add.svg")
+    span Add random daily prompts
   .results-section
     ul.results-list
       template(v-for="pack in packs")
@@ -61,6 +63,7 @@ export default {
 
 <style lang="stylus">
 .prompt-pack-picker
+  // margin-top 10px
   button
     .badge
       margin 0

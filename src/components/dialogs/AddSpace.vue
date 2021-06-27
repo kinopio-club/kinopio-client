@@ -38,20 +38,15 @@ dialog.add-space.narrow(
           span Daily Journal
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
           span …
-    .row(v-if="editPromptsIsVisible")
-      p Journals spaces will be created with these cards:
-    Prompt(v-if="editPromptsIsVisible" v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showPicker="togglePromptPackPickerIsVisible" @showScreenIsShort="showScreenIsShort")
     //- Edit Journal
-    .row.journal-edit-row(v-if="editPromptsIsVisible")
-      .button-wrap
-        button(@click.left.stop="togglePromptPackPickerIsVisible" :class="{ active: promptPackPickerIsVisible }" ref="promptButton")
-          img.icon(src="@/assets/add.svg")
-          span Prompts
+    .row(v-if="editPromptsIsVisible")
       .button-wrap
         button(@click.left="addCustomPrompt")
           img.icon(src="@/assets/add.svg")
-          span Custom
-    PromptPackPicker(:visible="promptPackPickerIsVisible" :position="promptPickerPosition" @select="togglePromptPack")
+          span Add Daily Prompt
+    Prompt(v-if="editPromptsIsVisible" v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
+  section(v-if="editPromptsIsVisible")
+    PromptPackPicker(:visible="editPromptsIsVisible" :position="promptPickerPosition" @select="togglePromptPack")
 
   Templates(:visible="templatesIsVisible" :hideOptions="true")
 
@@ -99,7 +94,6 @@ export default {
       editNewSpaceIsVisible: false,
       templatesIsVisible: false,
       urlIsCopied: false,
-      promptPackPickerIsVisible: false,
       promptPickerPosition: {
         left: 80,
         top: 5
@@ -157,10 +151,6 @@ export default {
       this.closeAll()
       this.editPromptsIsVisible = value
     },
-    togglePromptPackPickerIsVisible () {
-      this.promptPackPickerIsVisible = !this.promptPackPickerIsVisible
-      this.screenIsShort = false
-    },
     showTemplatesIsVisible () {
       this.templatesIsVisible = true
     },
@@ -172,7 +162,6 @@ export default {
       this.editNewSpaceIsVisible = false
       this.editPromptsIsVisible = false
       this.urlIsCopied = false
-      this.promptPackPickerIsVisible = false
     },
     copyUrl () {
       const element = this.$refs.url
@@ -228,8 +217,6 @@ export default {
     top -68px !important
   overflow scroll
   max-height calc(100vh - 230px)
-  .journal-edit-row
-    margin-top 10px
   .textarea
     background-color var(--secondary-background)
     border 0
