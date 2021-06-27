@@ -2,17 +2,14 @@
   section.filters
     .row
       .button-wrap
-        .badge.keyboard-shortcut-badge(title="keyboard shortcut" v-if="isNotMobile") 1
         label.show-users(:class="{active: filterShowUsers}" @click.left.prevent="toggleFilterShowUsers" @keydown.stop.enter="toggleFilterShowUsers")
           input(type="checkbox" v-model="filterShowUsers")
           User(:user="currentUser" :key="currentUser.id" :hideYouLabel="true" :isSmall="true")
       .button-wrap
-        .badge.keyboard-shortcut-badge(title="keyboard shortcut" v-if="isNotMobile") 2
         label(:class="{active: filterShowDateUpdated}" @click.left.prevent="toggleFilterShowDateUpdated" @keydown.stop.enter="toggleFilterShowDateUpdated")
           input(type="checkbox" v-model="filterShowDateUpdated")
           img.icon.time(src="@/assets/time.svg")
       .button-wrap
-        .badge.keyboard-shortcut-badge(title="keyboard shortcut" v-if="isNotMobile") 3
         label(:class="{active: filterUnchecked}" @click.left.prevent="toggleFilterUnchecked" @keydown.stop.enter="toggleFilterUnchecked")
           input(type="checkbox" v-model="filterUnchecked")
           span Todo
@@ -75,8 +72,7 @@ export default {
     currentUser () { return this.$store.state.currentUser },
     filterShowUsers () { return this.currentUser.filterShowUsers },
     filterShowDateUpdated () { return this.currentUser.filterShowDateUpdated },
-    filterUnchecked () { return this.currentUser.filterUnchecked },
-    isNotMobile () { return !utils.isMobile() }
+    filterUnchecked () { return this.currentUser.filterUnchecked }
   },
   methods: {
     toggleMoreFiltersVisible () {
@@ -114,13 +110,6 @@ export default {
   .has-badge
     padding-top 2px
     padding-bottom 1px
-  .keyboard-shortcut-badge
-    position absolute
-    padding 0px 4px
-    padding-top 1px
-    bottom -10px
-    right -6px
-    z-index 1
   @media(max-width 500px)
     dialog.more-filters
       left initial

@@ -522,6 +522,11 @@ code
     background var(--secondary-active-background)
   &.search
     background var(--search-background)
+  &.keyboard-shortcut
+    min-height initial
+    min-width initial
+    background-color var(--secondary-background)
+
   input
     margin 0
   .user
@@ -557,11 +562,6 @@ code
   span
     font-size 12px
     color var(--primary-background)
-
-.keyboard-shortcut-badge
-  min-height initial
-  min-width initial
-  background-color var(--secondary-background)
 
 .link-badge
   background-color var(--secondary-active-background)
