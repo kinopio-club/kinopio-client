@@ -164,10 +164,15 @@ export default {
         currentCursor = utils.cursorPositionInViewport(event)
         if (!utils.cursorsAreClose(startCursor, currentCursor)) { return }
       }
-      const detailsPosition = utils.cursorPositionInPage(event)
       this.$store.dispatch('closeAllDialogs', 'Connection.showConnectionDetails')
+      if (event.shiftKey) {
+        this.$store.dispatch('toggleMultipleConnectionsSelected', this.id)
+        this.$store.commit('previousMultipleConnectionsSelectedIds', utils.clone(this.$store.state.multipleConnectionsSelectedIds))
+        return
+      }
+      const dialogPosition = utils.cursorPositionInPage(event)
       this.$store.dispatch('connectionDetailsIsVisibleForConnectionId', this.id)
-      this.$store.commit('connectionDetailsPosition', detailsPosition)
+      this.$store.commit('connectionDetailsPosition', dialogPosition)
       this.$store.dispatch('clearMultipleSelected')
     },
     startDraggingConnection (event) {
