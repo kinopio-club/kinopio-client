@@ -47,6 +47,12 @@ export default {
       if (mutation.type === 'currentSpace/removeConnection') {
         this.controlCurve = undefined
       }
+      if (mutation.type === 'triggerShowConnectionDetails') {
+        if (mutation.payload.connectionId === this.id) {
+          const fromStore = true
+          this.showConnectionDetails(mutation.payload.event, fromStore)
+        }
+      }
     })
   },
   data () {
@@ -151,12 +157,13 @@ export default {
         isMultiTouch = true
       }
     },
-    // same as ConnectionLabel method
-    showConnectionDetails (event) {
+    showConnectionDetails (event, fromStore) {
       if (isMultiTouch) { return }
       if (!this.canEditSpace) { this.$store.commit('triggerReadOnlyJiggle') }
-      currentCursor = utils.cursorPositionInViewport(event)
-      if (!utils.cursorsAreClose(startCursor, currentCursor)) { return }
+      if (!fromStore) {
+        currentCursor = utils.cursorPositionInViewport(event)
+        if (!utils.cursorsAreClose(startCursor, currentCursor)) { return }
+      }
       const detailsPosition = utils.cursorPositionInPage(event)
       this.$store.dispatch('closeAllDialogs', 'Connection.showConnectionDetails')
       this.$store.dispatch('connectionDetailsIsVisibleForConnectionId', this.id)

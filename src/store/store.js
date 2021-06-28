@@ -345,6 +345,7 @@ export default new Vuex.Store({
     triggerShowPreviousSearchCard: () => {},
     triggerUpdateBackgroundTint: () => {},
     triggerMoreFiltersIsNotVisible: () => {},
+    triggerShowConnectionDetails: (state, options) => {},
 
     // Cards
 

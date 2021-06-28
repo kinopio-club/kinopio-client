@@ -95,14 +95,12 @@ export default {
         isMultiTouch = true
       }
     },
-    // same as Connection method
     showConnectionDetails (event) {
       if (isMultiTouch) { return }
-      const detailsPosition = utils.cursorPositionInPage(event)
-      this.$store.dispatch('closeAllDialogs', 'ConnectionLabel.showConnectionDetails')
-      this.$store.dispatch('connectionDetailsIsVisibleForConnectionId', this.id)
-      this.$store.commit('connectionDetailsPosition', detailsPosition)
-      this.$store.dispatch('clearMultipleSelected')
+      this.$store.commit('triggerShowConnectionDetails', {
+        connectionId: this.id,
+        event
+      })
     },
     setPosition () {
       this.$nextTick(() => {
