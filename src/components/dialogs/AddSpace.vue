@@ -225,7 +225,4 @@ export default {
   .templates
     border-top 1px solid var(--primary)
     padding-top 4px
-  .new-shortcut
-    right initial
-    left 10px
 </style>
