@@ -14,9 +14,6 @@ dialog.help-and-about.narrow(v-if="visible" :open="visible" @click.left.stop="cl
       .button-wrap
         a(href="https://twitter.com/kinopioclub")
           button Twitter →
-
-        //- a(href="mailto:hi@kinopio.club")
-        //-   button Email
   section
     .row
       p Guides, topics, and policies
