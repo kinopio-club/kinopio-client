@@ -23,7 +23,7 @@ dialog.add-space.narrow(
           img.icon(src="@/assets/add.svg")
           span Space
         button(@click.left.stop="toggleEditNewSpaceIsVisible" :class="{ active: editNewSpaceIsVisible }")
-          span …
+          span Edit
     //- Edit Space
     .row(v-if="editNewSpaceIsVisible")
       label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
@@ -37,7 +37,7 @@ dialog.add-space.narrow(
           MoonPhase(:moonPhase="moonPhase.name")
           span Daily Journal
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
-          span …
+          span Edit
     //- Edit Journal
     .row(v-if="editPromptsIsVisible")
       .button-wrap
