@@ -105,6 +105,7 @@ export default new Vuex.Store({
     remoteUploadDraggedOverCards: [],
     preventDraggedCardFromShowingDetails: false,
     triggeredTouchCardDragPosition: {},
+    cardsWereDragged: false,
 
     // multiple selection
     multipleSelectedActionsIsVisible: false,
@@ -191,6 +192,7 @@ export default new Vuex.Store({
       state.linkDetailsIsVisible = false
       state.currentSelectedLink = {}
       state.searchIsVisible = false
+      state.cardsWereDragged = false
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isOnline' })
@@ -448,6 +450,10 @@ export default new Vuex.Store({
     triggeredTouchCardDragPosition: (state, cursor) => {
       state.triggeredTouchCardDragPosition = cursor
     },
+    cardsWereDragged: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'cardsWereDragged' })
+      state.cardsWereDragged = value
+    },
     currentDraggingCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'currentDraggingCardId' })
       state.currentDraggingCardId = cardId
@@ -562,6 +568,12 @@ export default new Vuex.Store({
     addToMultipleCardsSelected: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'addToMultipleCardsSelected' })
       state.multipleCardsSelectedIds.push(cardId)
+    },
+    removeFromMultipleCardsSelected: (state, cardId) => {
+      utils.typeCheck({ value: cardId, type: 'string', origin: 'removeFromMultipleCardsSelected' })
+      state.multipleCardsSelectedIds = state.multipleCardsSelectedIds.filter(id => {
+        return id !== cardId
+      })
     },
     addToMultipleConnectionsSelected: (state, connectionId) => {
       state.multipleConnectionsSelectedIds.push(connectionId)

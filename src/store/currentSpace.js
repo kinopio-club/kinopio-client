@@ -1155,6 +1155,7 @@ export default {
       })
       connections = uniqBy(connections, 'id')
       context.commit('moveCards', { cards, delta })
+      context.commit('cardsWereDragged', true, { root: true })
       context.commit('updateConnectionPaths', connections)
       context.commit('broadcast/update', { updates: { cards, delta }, type: 'moveCards' }, { root: true })
       context.commit('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths' }, { root: true })

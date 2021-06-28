@@ -994,7 +994,9 @@ export default {
         })
       }
     },
-    checkIfShouldDragMultipleCards () {
+    checkIfShouldDragMultipleCards (event) {
+      if (event.shiftKey) { return }
+      // if the current dragging card is not already selected then clear selection
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
       if (!multipleCardsSelectedIds.includes(this.id)) {
         this.$store.dispatch('clearMultipleSelected')
@@ -1019,13 +1021,28 @@ export default {
       this.$store.commit('broadcast/updateStore', { updates, type: 'addToRemoteCardsDragging' })
       this.$store.commit('parentCardId', this.id)
       this.$store.commit('childCardId', '')
-      this.checkIfShouldDragMultipleCards()
+      this.checkIfShouldDragMultipleCards(event)
       this.$store.dispatch('currentSpace/incrementSelectedCardsZ')
+    },
+    toggleCardSelected () {
+      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
+      if (multipleCardsSelectedIds.includes(this.id)) {
+        this.$store.commit('removeFromMultipleCardsSelected', this.id)
+      } else {
+        this.$store.commit('addToMultipleCardsSelected', this.id)
+      }
     },
     showCardDetails (event) {
       if (isMultiTouch) { return }
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
       const userId = this.$store.state.currentUser.id
+      const cardsWereDragged = this.$store.state.cardsWereDragged
+      if (event.shiftKey && !cardsWereDragged) {
+        this.toggleCardSelected()
+        event.stopPropagation()
+        this.$store.commit('currentUserIsDraggingCard', false)
+        return
+      }
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
       this.preventDraggedButtonBadgeFromShowingDetails = this.$store.state.preventDraggedCardFromShowingDetails
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
