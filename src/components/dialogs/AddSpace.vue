@@ -23,7 +23,7 @@ dialog.add-space.narrow(
           img.icon(src="@/assets/add.svg")
           span Space
         button(@click.left.stop="toggleEditNewSpaceIsVisible" :class="{ active: editNewSpaceIsVisible }")
-          span Edit
+          span …
     //- Edit Space
     .row(v-if="editNewSpaceIsVisible")
       label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
@@ -37,19 +37,16 @@ dialog.add-space.narrow(
           MoonPhase(:moonPhase="moonPhase.name")
           span Daily Journal
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
-          span Edit
-    Prompt(v-if="editPromptsIsVisible" v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showPicker="togglePromptPackPickerIsVisible" @showScreenIsShort="showScreenIsShort")
+          span …
     //- Edit Journal
-    .row.journal-edit-row(v-if="editPromptsIsVisible")
-      .button-wrap
-        button(@click.left.stop="togglePromptPackPickerIsVisible" :class="{ active: promptPackPickerIsVisible }" ref="promptButton")
-          img.icon(src="@/assets/add.svg")
-          span Prompts
+    .row(v-if="editPromptsIsVisible")
       .button-wrap
         button(@click.left="addCustomPrompt")
           img.icon(src="@/assets/add.svg")
-          span Custom
-    PromptPackPicker(:visible="promptPackPickerIsVisible" :position="promptPickerPosition" @select="togglePromptPack")
+          span Add Daily Prompt
+    Prompt(v-if="editPromptsIsVisible" v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
+  section(v-if="editPromptsIsVisible")
+    PromptPackPicker(:visible="editPromptsIsVisible" :position="promptPickerPosition" @select="togglePromptPack")
 
   Templates(:visible="templatesIsVisible" :hideOptions="true")
 
@@ -76,7 +73,8 @@ export default {
     Templates
   },
   props: {
-    visible: Boolean
+    visible: Boolean,
+    shouldAddSpaceDirectly: Boolean
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -96,7 +94,6 @@ export default {
       editNewSpaceIsVisible: false,
       templatesIsVisible: false,
       urlIsCopied: false,
-      promptPackPickerIsVisible: false,
       promptPickerPosition: {
         left: 80,
         top: 5
@@ -133,6 +130,12 @@ export default {
         this.$emit('closeDialogs')
         this.$emit('addSpace')
       }
+      if (this.shouldAddSpaceDirectly) {
+        this.$store.dispatch('closeAllDialogs', 'addSpace.addSpace')
+        window.scrollTo(0, 0)
+        this.$store.dispatch('currentSpace/addSpace')
+        this.$store.dispatch('currentSpace/updateSpacePageSize')
+      }
     },
     toggleNewSpacesAreBlank () {
       const value = !this.newSpacesAreBlank
@@ -148,10 +151,6 @@ export default {
       this.closeAll()
       this.editPromptsIsVisible = value
     },
-    togglePromptPackPickerIsVisible () {
-      this.promptPackPickerIsVisible = !this.promptPackPickerIsVisible
-      this.screenIsShort = false
-    },
     showTemplatesIsVisible () {
       this.templatesIsVisible = true
     },
@@ -163,7 +162,6 @@ export default {
       this.editNewSpaceIsVisible = false
       this.editPromptsIsVisible = false
       this.urlIsCopied = false
-      this.promptPackPickerIsVisible = false
     },
     copyUrl () {
       const element = this.$refs.url
@@ -219,8 +217,6 @@ export default {
     top -68px !important
   overflow scroll
   max-height calc(100vh - 230px)
-  .journal-edit-row
-    margin-top 10px
   .textarea
     background-color var(--secondary-background)
     border 0

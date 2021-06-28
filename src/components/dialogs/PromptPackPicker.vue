@@ -1,6 +1,8 @@
 <template lang="pug">
 .prompt-pack-picker(v-if="visible" @click.left.stop ref="dialog")
-  p Add random prompts to your journals
+  p
+    img.icon(src="@/assets/add.svg")
+    span Add random prompts
   .results-section
     ul.results-list
       template(v-for="pack in packs")

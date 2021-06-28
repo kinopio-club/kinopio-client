@@ -95,6 +95,7 @@ export default {
   button.remove
     margin-left 6px
     width 26px
+    height 24px
     vertical-align 8px
     flex none
   .row

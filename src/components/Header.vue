@@ -11,8 +11,8 @@ header(:style="visualViewportPosition")
         About(:visible="aboutIsVisible")
         KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
     .space-meta-rows
-      .space-details-row(:class="{'segmented-buttons': spaceHasStatusOrOffline}")
-        //- space
+      .space-details-row.segmented-buttons
+        //- Space
         .button-wrap
           button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
             .badge.info(v-show="currentSpaceIsTemplate")
@@ -29,35 +29,39 @@ header(:style="visualViewportPosition")
               img.icon(src="@/assets/checkmark.svg")
           SpaceDetails(:visible="spaceDetailsIsVisible")
           ImportArenaChannel(:visible="importArenaChannelIsVisible")
-        //- state
+        //- State
         .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
           button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
             Loader(:visible="spaceHasStatus")
             .badge.success.space-status-success(v-if="!spaceHasStatus")
           SpaceStatus(:visible="spaceStatusIsVisible")
-        //- offline
+        //- Offline
         .button-wrap(v-if="!isOnline")
           button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
             img.icon.offline(src="@/assets/offline.svg")
           Offline(:visible="offlineIsVisible")
 
-      .search-row
-        //- search
-        .segmented-buttons
+      .space-functions-row.segmented-buttons
+        //- Add Space
+        .button-wrap
+          button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
+            img.icon(src="@/assets/add.svg")
+          AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
+        //- Search
+        .button-wrap
           button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
             img.icon.search(v-if="!searchResultsCount" src="@/assets/search.svg")
             .badge.search.search-count-badge(v-if="searchResultsCount")
               img.icon.search(src="@/assets/search.svg")
               span {{searchResultsCount}}
             span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
-          template(v-if="searchResultsCount")
-            button(@click="showPreviousSearchCard")
-              img.icon.left-arrow(src="@/assets/down-arrow.svg")
-            button(@click="showNextSearchCard")
-              img.icon.right-arrow(src="@/assets/down-arrow.svg")
-            button(@click="clearSearch")
-              img.icon.cancel(src="@/assets/add.svg")
-        Search(:visible="searchIsVisible")
+          Search(:visible="searchIsVisible")
+        button(@click="showPreviousSearchCard" v-if="searchResultsCount")
+          img.icon.left-arrow(src="@/assets/down-arrow.svg")
+        button(@click="showNextSearchCard" v-if="searchResultsCount")
+          img.icon.right-arrow(src="@/assets/down-arrow.svg")
+        button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters")
+          img.icon.cancel(src="@/assets/add.svg")
 
   aside
     .top
@@ -113,6 +117,7 @@ import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
 import Search from '@/components/dialogs/Search.vue'
+import AddSpace from '@/components/dialogs/AddSpace.vue'
 import privacy from '@/data/privacy.js'
 import utils from '@/utils.js'
 
@@ -136,7 +141,8 @@ export default {
     KeyboardShortcuts,
     UpgradeUser,
     Search,
-    MoonPhase
+    MoonPhase,
+    AddSpace
   },
   data () {
     return {
@@ -153,7 +159,8 @@ export default {
       visualViewportPosition: {},
       readOnlyJiggle: false,
       notifications: [],
-      notificationsIsLoading: true
+      notificationsIsLoading: true,
+      addSpaceIsVisible: false
     }
   },
   created () {
@@ -245,9 +252,6 @@ export default {
       const isReconnectingToBroadcast = this.$store.state.isReconnectingToBroadcast
       return isLoadingSpace || isJoiningSpace || isReconnectingToBroadcast
     },
-    spaceHasStatusOrOffline () {
-      return this.spaceHasStatus || !this.isOnline || this.spaceStatusIsVisible
-    },
     spaceHasStatusAndStatusDialogIsNotVisible () {
       if (this.spaceHasStatus) {
         return true
@@ -313,6 +317,13 @@ export default {
       const connections = this.$store.state.filteredConnectionTypeIds
       const frames = this.$store.state.filteredFrameIds
       return userFilters + tagNames.length + connections.length + frames.length
+    },
+    searchResultsOrFilters () {
+      if (this.searchResultsCount || this.totalFiltersActive) {
+        return true
+      } else {
+        return false
+      }
     }
   },
   methods: {
@@ -352,9 +363,10 @@ export default {
       }
       this.showCardDetails(cards[index])
     },
-    clearSearch () {
+    clearSearchAndFilters () {
       this.$store.dispatch('closeAllDialogs', 'Header.clearSearch')
       this.$store.commit('clearSearch')
+      this.$store.dispatch('clearAllFilters')
     },
     addReadOnlyJiggle () {
       const element = this.$refs.readOnly
@@ -375,6 +387,7 @@ export default {
       this.spaceStatusIsVisible = false
       this.offlineIsVisible = false
       this.notificationsIsVisible = false
+      this.addSpaceIsVisible = false
     },
     updatePositionFrame () {
       currentIteration++
@@ -435,6 +448,11 @@ export default {
       if (this.notificationsIsVisible) {
         this.updateNotifications()
       }
+    },
+    toggleAddSpaceIsVisible () {
+      const isVisible = this.addSpaceIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleAddSpaceIsVisible')
+      this.addSpaceIsVisible = !isVisible
     },
     toggleSpaceStatusIsVisible () {
       const isVisible = this.spaceStatusIsVisible
@@ -568,23 +586,28 @@ header
         .privacy-icon
           margin-left 6px
 
-    // should not bubble down into dialogs
+  // should not bubble down into dialogs
+  .space-details-row,
+  .space-functions-row
     &.segmented-buttons
       > .button-wrap
         > button
           border-radius 0
+          border-right 0
           .loader
             margin 0
         &:first-child
           > button
             border-top-left-radius 3px
             border-bottom-left-radius 3px
+            border-right 0
         &:last-child
           > button
             border-top-right-radius 3px
             border-bottom-right-radius 3px
-            margin-left -1px
-  .search-row
+            border-right 1px solid var(--primary)
+
+  .space-functions-row
     margin-top 5px
     position relative
     .search-count-badge

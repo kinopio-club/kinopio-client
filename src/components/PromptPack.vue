@@ -2,10 +2,9 @@
 li.prompt-pack(@click.left="select(pack)" v-on:keyup.enter="select(pack)" :class="{ active: isInUserJournalPrompts }" tabindex="0")
   .name-wrap
     .badge.button-badge(:style="{background: pack.color}")
-      img.icon(v-if="!isInUserJournalPrompts" src="@/assets/add.svg")
       img.icon.minus(v-if="isInUserJournalPrompts" src="@/assets/minus.svg")
       span {{pack.name}}
-    button(@click.stop="toggleViewAllIsActive" :class="{active: viewAllIsActive}" tabindex="0" ref="button")
+    button.small-button(@click.stop="toggleViewAllIsActive" :class="{active: viewAllIsActive}" tabindex="0" ref="button")
       img.icon(v-if="viewAllIsActive" src="@/assets/view-hidden.svg")
       img.icon(v-else src="@/assets/view.svg")
 
@@ -77,4 +76,10 @@ export default {
     span
       color var(--primary)
       vertical-align 1px
+  .small-button
+    padding-top 4px
+    padding-bottom 3px
+    padding-left 5px
+    padding-right 5px
+    border-radius 3px
 </style>
