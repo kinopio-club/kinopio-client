@@ -269,9 +269,13 @@ export default {
       let color = this.$store.state.currentUser.color
       this.currentCursor = utils.cursorPositionInViewport(event)
       let circle = { x: this.currentCursor.x, y: this.currentCursor.y, color, iteration: 0 }
-      this.selectCards(circle)
-      this.selectConnections(circle)
-      this.selectCardsAndConnectionsBetweenCircles(circle)
+      let shouldToggle
+      if (event.shiftKey) {
+        shouldToggle = true
+      }
+      this.selectCards(circle, shouldToggle)
+      this.selectConnections(circle, shouldToggle)
+      this.selectCardsAndConnectionsBetweenCircles(circle, shouldToggle)
       paintingCircles.push(circle)
       this.broadcastCircle(circle)
     },
@@ -293,7 +297,10 @@ export default {
       if (!multipleCardsIsSelected && !dialogIsVisible) {
         this.$store.commit('shouldAddCard', true)
       }
-      this.$store.dispatch('clearMultipleSelected')
+      if (!event.shiftKey) {
+        this.$store.dispatch('clearMultipleSelected')
+      }
+      this.$store.commit('previousMultipleCardsSelectedIds', utils.clone(this.$store.state.multipleCardsSelectedIds))
       this.$store.dispatch('closeAllDialogs', 'MagicPaint.startPainting')
     },
     paintCirclesAnimationFrame () {
@@ -333,11 +340,11 @@ export default {
       }
       return movementDirection
     },
-    selectConnections (circle) {
+    selectConnections (circle, shouldToggle) {
       if (this.userCantEditSpace) { return }
-      this.selectConnectionPaths(circle)
+      this.selectConnectionPaths(circle, shouldToggle)
     },
-    selectCardsAndConnectionsBetweenCircles (circle) {
+    selectCardsAndConnectionsBetweenCircles (circle, shouldToggle) {
       if (this.userCantEditSpace) { return }
       const prevCircle = paintingCircles[paintingCircles.length - 1] || circle
       const delta = {
@@ -356,33 +363,33 @@ export default {
         x = prevCircle.x + increment
         while (x < circle.x) {
           x += increment
-          this.selectConnectionPaths({ x, y })
-          this.selectCards({ x, y })
+          this.selectConnectionPaths({ x, y, shouldToggle })
+          this.selectCards({ x, y, shouldToggle })
         }
       } else if (movementDirection.x === 'left') {
         x = prevCircle.x - increment
         while (x > circle.x) {
           x += -increment
-          this.selectConnectionPaths({ x, y })
-          this.selectCards({ x, y })
+          this.selectConnectionPaths({ x, y, shouldToggle })
+          this.selectCards({ x, y, shouldToggle })
         }
       } else if (movementDirection.y === 'down') {
         y = prevCircle.y + increment
         while (y < circle.y) {
           y += increment
-          this.selectConnectionPaths({ x, y })
-          this.selectCards({ x, y })
+          this.selectConnectionPaths({ x, y, shouldToggle })
+          this.selectCards({ x, y, shouldToggle })
         }
       } else if (movementDirection.y === 'up') {
         y = prevCircle.y - increment
         while (y > circle.y) {
           y += -increment
-          this.selectConnectionPaths({ x, y })
-          this.selectCards({ x, y })
+          this.selectConnectionPaths({ x, y, shouldToggle })
+          this.selectCards({ x, y, shouldToggle })
         }
       }
     },
-    selectCards (point) {
+    selectCards (point, shouldToggle) {
       if (this.userCantEditSpace) { return }
       const cardMap = viewportCardMap || this.cardMap
       cardMap.forEach(card => {
@@ -399,11 +406,15 @@ export default {
         const isBetweenX = utils.isBetween(x)
         const isBetweenY = utils.isBetween(y)
         if (isBetweenX && isBetweenY) {
-          this.$store.dispatch('addToMultipleCardsSelected', card.cardId)
+          if (shouldToggle) {
+            this.$store.dispatch('toggleCardSelected', card.cardId)
+          } else {
+            this.$store.dispatch('addToMultipleCardsSelected', card.cardId)
+          }
         }
       })
     },
-    selectConnectionPaths (point) {
+    selectConnectionPaths (point, shouldToggle) {
       const zoom = this.spaceCounterZoomDecimal
       const paths = document.querySelectorAll('svg .connection-path')
       paths.forEach(path => {

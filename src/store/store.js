@@ -111,6 +111,7 @@ export default new Vuex.Store({
     multipleSelectedActionsIsVisible: false,
     multipleSelectedActionsPosition: {},
     multipleCardsSelectedIds: [],
+    previousMultipleCardsSelectedIds: [],
     remoteCardsSelected: [],
     remoteConnectionsSelected: [],
     multipleConnectionsSelectedIds: [],
@@ -565,6 +566,10 @@ export default new Vuex.Store({
       utils.typeCheck({ value: position, type: 'object', origin: 'multipleSelectedActionsPosition' })
       state.multipleSelectedActionsPosition = position
     },
+    previousMultipleCardsSelectedIds: (state, cardIds) => {
+      utils.typeCheck({ value: cardIds, type: 'array', origin: 'previousMultipleCardsSelectedIds' })
+      state.previousMultipleCardsSelectedIds = cardIds
+    },
     addToMultipleCardsSelected: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'addToMultipleCardsSelected' })
       state.multipleCardsSelectedIds.push(cardId)
@@ -606,6 +611,16 @@ export default new Vuex.Store({
       })
       if (isSelected) { return }
       state.remoteCardsSelected.push(update)
+    },
+    removeFromRemoteCardsSelected: (state, update) => {
+      utils.typeCheck({ value: update, type: 'object', origin: 'addToRemoteCardsSelected' })
+      delete update.type
+      state.remoteCardsSelected = state.remoteCardsSelected.filter(card => {
+        const cardIsSelected = card.cardId === update.cardId
+        const selectedByUser = card.userId === update.userId
+        const cardIsUpdate = cardIsSelected && selectedByUser
+        return !cardIsUpdate
+      })
     },
     addToRemoteConnectionsSelected: (state, update) => {
       utils.typeCheck({ value: update, type: 'object', origin: 'addToRemoteConnectionsSelected' })
@@ -874,6 +889,15 @@ export default new Vuex.Store({
       })
       context.commit('updateSpacePageSize', { maxX, maxY })
     },
+    toggleCardSelected: (context, cardId) => {
+      const previousMultipleCardsSelectedIds = context.state.previousMultipleCardsSelectedIds
+      const cardIsSelected = previousMultipleCardsSelectedIds.includes(cardId)
+      if (cardIsSelected) {
+        context.dispatch('removeFromMultipleCardsSelected', cardId)
+      } else {
+        context.dispatch('addToMultipleCardsSelected', cardId)
+      }
+    },
     addToMultipleCardsSelected: (context, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'addToMultipleCardsSelected' })
       if (context.state.multipleCardsSelectedIds.includes(cardId)) { return }
@@ -883,6 +907,16 @@ export default new Vuex.Store({
         cardId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteCardsSelected' }, { root: true })
+    },
+    removeFromMultipleCardsSelected: (context, cardId) => {
+      utils.typeCheck({ value: cardId, type: 'string', origin: 'removeFromMultipleCardsSelected' })
+      if (!context.state.multipleCardsSelectedIds.includes(cardId)) { return }
+      context.commit('removeFromMultipleCardsSelected', cardId)
+      const updates = {
+        userId: context.rootState.currentUser.id,
+        cardId
+      }
+      context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteCardsSelected' }, { root: true })
     },
     clearMultipleSelected: (context) => {
       context.commit('clearMultipleSelected')
