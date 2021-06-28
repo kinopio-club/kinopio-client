@@ -2,7 +2,7 @@
 .prompt-pack-picker(v-if="visible" @click.left.stop ref="dialog")
   p
     img.icon(src="@/assets/add.svg")
-    span Add random daily prompts
+    span Add random prompts
   .results-section
     ul.results-list
       template(v-for="pack in packs")
@@ -63,7 +63,6 @@ export default {
 
 <style lang="stylus">
 .prompt-pack-picker
-  // margin-top 10px
   button
     .badge
       margin 0

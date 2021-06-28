@@ -26,7 +26,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
         Apps(:visible="appsIsVisible")
   section
     .row
-      p Kinopio is supported by people like you
+      p Kinopio is made possible by people like you
     .row
       .button-wrap
         a(href="https://discord.gg/h2sR45Nby8")
@@ -39,6 +39,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
       .button-wrap
         a(href="https://pketh.org")
           button Blog →
+    //- img(src="https://us-east-1.linodeobjects.com/kinopio-uploads/I6_0lhntYrv5i1-Rky61H/image.gif")
 
 </template>
 
@@ -179,9 +180,4 @@ export default {
   .updated
     margin 0
     margin-left 3px
-  // @media(max-height 600px)
-  //   dialog.apps
-  //     top -100px
-  //   dialog.keyboard-shortcuts
-  //     top -150px
 </style>
