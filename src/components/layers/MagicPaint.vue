@@ -301,6 +301,7 @@ export default {
         this.$store.dispatch('clearMultipleSelected')
       }
       this.$store.commit('previousMultipleCardsSelectedIds', utils.clone(this.$store.state.multipleCardsSelectedIds))
+      this.$store.commit('previousMultipleConnectionsSelectedIds', utils.clone(this.$store.state.multipleConnectionsSelectedIds))
       this.$store.dispatch('closeAllDialogs', 'MagicPaint.startPainting')
     },
     paintCirclesAnimationFrame () {
@@ -418,17 +419,18 @@ export default {
       const zoom = this.spaceCounterZoomDecimal
       const paths = document.querySelectorAll('svg .connection-path')
       paths.forEach(path => {
-        const ids = this.$store.state.multipleConnectionsSelectedIds
         const pathId = path.dataset.id
         const svg = document.querySelector('svg.connections')
         let svgPoint = svg.createSVGPoint()
         svgPoint.x = (point.x + window.scrollX) * zoom
         svgPoint.y = (point.y + window.scrollY) * zoom
-        const isAlreadySelected = ids.includes(pathId)
-        if (isAlreadySelected) { return }
         const isSelected = path.isPointInStroke(svgPoint)
         if (isSelected) {
-          this.$store.dispatch('addToMultipleConnectionsSelected', pathId)
+          if (shouldToggle) {
+            this.$store.dispatch('toggleMultipleConnectionsSelected', pathId)
+          } else {
+            this.$store.dispatch('addToMultipleConnectionsSelected', pathId)
+          }
         }
       })
     },

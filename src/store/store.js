@@ -112,6 +112,7 @@ export default new Vuex.Store({
     multipleSelectedActionsPosition: {},
     multipleCardsSelectedIds: [],
     previousMultipleCardsSelectedIds: [],
+    previousMultipleConnectionsSelectedIds: [],
     remoteCardsSelected: [],
     remoteConnectionsSelected: [],
     multipleConnectionsSelectedIds: [],
@@ -570,6 +571,10 @@ export default new Vuex.Store({
       utils.typeCheck({ value: cardIds, type: 'array', origin: 'previousMultipleCardsSelectedIds' })
       state.previousMultipleCardsSelectedIds = cardIds
     },
+    previousMultipleConnectionsSelectedIds: (state, connectionIds) => {
+      utils.typeCheck({ value: connectionIds, type: 'array', origin: 'previousMultipleConnectionsSelectedIds' })
+      state.previousMultipleConnectionsSelectedIds = connectionIds
+    },
     addToMultipleCardsSelected: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'addToMultipleCardsSelected' })
       state.multipleCardsSelectedIds.push(cardId)
@@ -632,6 +637,16 @@ export default new Vuex.Store({
       })
       if (isSelected) { return }
       state.remoteConnectionsSelected.push(update)
+    },
+    removeFromRemoteConnectionsSelected: (state, update) => {
+      utils.typeCheck({ value: update, type: 'object', origin: 'removeFromRemoteConnectionsSelected' })
+      delete update.type
+      state.remoteConnectionsSelected = state.remoteConnectionsSelected.filter(connection => {
+        const connectionIsSelected = connection.connectionId === update.connectionId
+        const selectedByUser = connection.userId === update.userId
+        const connectionIsUpdate = connectionIsSelected && selectedByUser
+        return !connectionIsUpdate
+      })
     },
     clearRemoteMultipleSelected: (state, update) => {
       utils.typeCheck({ value: update, type: 'object', origin: 'clearRemoteMultipleSelected' })
@@ -924,6 +939,16 @@ export default new Vuex.Store({
       const user = utils.clone(context.rootState.currentUser)
       context.commit('broadcast/updateStore', { user: utils.userMeta(user, space), type: 'clearRemoteMultipleSelected' }, { root: true })
     },
+    toggleMultipleConnectionsSelected: (context, connectionId) => {
+      utils.typeCheck({ value: connectionId, type: 'string', origin: 'toggleMultipleConnectionsSelected' })
+      const previousMultipleConnectionsSelectedIds = context.state.previousMultipleConnectionsSelectedIds
+      const connectionIsSelected = previousMultipleConnectionsSelectedIds.includes(connectionId)
+      if (connectionIsSelected) {
+        context.dispatch('removeFromMultipleConnectionsSelected', connectionId)
+      } else {
+        context.dispatch('addToMultipleConnectionsSelected', connectionId)
+      }
+    },
     addToMultipleConnectionsSelected: (context, connectionId) => {
       utils.typeCheck({ value: connectionId, type: 'string', origin: 'addToMultipleConnectionsSelected' })
       if (context.state.multipleConnectionsSelectedIds.includes(connectionId)) { return }
@@ -933,6 +958,16 @@ export default new Vuex.Store({
         connectionId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteConnectionsSelected' }, { root: true })
+    },
+    removeFromMultipleConnectionsSelected: (context, connectionId) => {
+      utils.typeCheck({ value: connectionId, type: 'string', origin: 'removeFromMultipleConnectionsSelected' })
+      if (!context.state.multipleConnectionsSelectedIds.includes(connectionId)) { return }
+      context.commit('removeFromMultipleConnectionsSelected', connectionId)
+      const updates = {
+        userId: context.rootState.currentUser.id,
+        connectionId
+      }
+      context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteConnectionsSelected' }, { root: true })
     },
     connectionDetailsIsVisibleForConnectionId: (context, connectionId) => {
       context.commit('connectionDetailsIsVisibleForConnectionId', connectionId)
