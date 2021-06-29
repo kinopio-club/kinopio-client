@@ -7,7 +7,7 @@
         //- Explore
         .button-wrap
           button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
-            //- img.icon.sunglasses(src="@/assets/filter.svg")
+            img.icon.sunglasses(src="@/assets/sunglasses.svg")
             span Explore
           Explore(:visible="exploreIsVisible")
         //- Favorites
