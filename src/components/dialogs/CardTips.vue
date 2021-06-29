@@ -24,6 +24,8 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
     article
       .row
         button(@click.left.stop="toggleMarkdownInfoIsVisible" :class="{ active: markdownInfoIsVisible }")
+          img.icon.view(v-if="markdownInfoIsVisible" src="@/assets/view-hidden.svg")
+          img.icon.view(v-else src="@/assets/view.svg")
           span Markdown
       div(v-if="markdownInfoIsVisible")
         p
