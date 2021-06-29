@@ -180,7 +180,7 @@ export default {
       delta.y = delta.y * zoom
       const cursor = this.cursor()
       if (this.isDraggingCard) {
-        this.$store.dispatch('currentSpace/dragCards', { delta, endCursor })
+        this.$store.dispatch('currentSpace/dragCards', { endCursor, prevCursor, delta })
       }
       if (this.isDrawingConnection) {
         this.$store.commit('triggeredDrawConnectionFrame', cursor)
