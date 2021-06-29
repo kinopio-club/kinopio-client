@@ -1,15 +1,8 @@
 <template lang="pug">
-dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs")
-  section(v-if="!copyOnly")
-    .segmented-buttons
-      button(@click.left.stop="showMove" :class="{ active: actionIsMove }")
-        span Move
-      button(@click.left.stop="hideMove" :class="{ active: !actionIsMove }")
-        span Copy
-
+dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs")
   section
     .row
-      p {{actionLabel | capitalize}} {{cardsCount}} {{pluralCard}} to
+      p {{capitalize(actionLabel)}} {{cardsCount}} {{pluralCard}} to
     .row
       .segmented-buttons
         button(@click.left.stop="hideToNewSpace" :class="{active: !toNewSpace}")
@@ -24,7 +17,7 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.left.stop="clos
         input(placeholder="name" v-model="newSpaceName")
       button(@click.left="moveOrCopyToSpace" :class="{active: loading}")
         img.icon.visit(src="@/assets/visit.svg")
-        span {{actionLabel | capitalize}} to New Space
+        span {{buttonLabel('New Space')}}
         Loader(:visible="loading")
 
     //- To Existing Space
@@ -40,8 +33,16 @@ dialog.narrow(v-if="visible" :open="visible" ref="dialog" @click.left.stop="clos
             SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" @selectSpace="updateSelectedSpace")
         button(@click.left="moveOrCopyToSpace" :class="{active: loading}")
           img.icon.visit(src="@/assets/visit.svg")
-          span {{actionLabel | capitalize}} to {{selectedSpace.name}}
+          span {{buttonLabel(selectedSpace.name)}}
           Loader(:visible="loading")
+
+  //- Copy Card Names
+  section(v-if="!actionIsMove")
+    textarea(ref="text") {{text()}}
+    button(@click.left="copyText")
+      span Copy Card Names
+    .row
+      .badge.success(v-if="textIsCopied") Card Names Copied
 
 </template>
 
@@ -54,16 +55,19 @@ import Loader from '@/components/Loader.vue'
 import words from '@/data/words.js'
 import newSpace from '@/data/new.json'
 import nanoid from 'nanoid'
+import join from 'lodash-es/join'
 
 export default {
-  name: 'MoveToSpace',
+  name: 'MoveOrCopyCards',
   components: {
     SpacePicker,
     Loader
   },
   props: {
     visible: Boolean,
-    copyOnly: Boolean
+    actionIsMove: Boolean,
+
+    exportData: Object
   },
   data () {
     return {
@@ -71,17 +75,9 @@ export default {
       selectedSpace: {},
       spacePickerIsVisible: false,
       loading: false,
-      actionIsMove: true,
       toNewSpace: false,
-      newSpaceName: ''
-    }
-  },
-  filters: {
-    capitalize (value) {
-      return utils.capitalizeFirstLetter(value)
-    },
-    pastTense (value) {
-      return utils.pastTense(value)
+      newSpaceName: '',
+      textIsCopied: false
     }
   },
   computed: {
@@ -103,9 +99,6 @@ export default {
       return utils.pluralize('card', condition)
     },
     actionLabel () {
-      if (this.copyOnly) {
-        return 'copy'
-      }
       if (this.actionIsMove) {
         return 'move'
       } else {
@@ -114,6 +107,27 @@ export default {
     }
   },
   methods: {
+    buttonLabel (spaceName) {
+      const actionLabel = this.capitalize(this.actionLabel) // copy, move
+      return `${actionLabel} to ${spaceName}`
+    },
+    capitalize (value) {
+      return utils.capitalizeFirstLetter(value)
+    },
+    pastTense (value) {
+      return utils.pastTense(value)
+    },
+    text () {
+      const data = this.exportData.cards.map(card => { return card.name })
+      return join(data, '\n')
+    },
+    copyText () {
+      const element = this.$refs.text
+      element.select()
+      element.setSelectionRange(0, 99999) // for mobile
+      document.execCommand('copy')
+      this.textIsCopied = true
+    },
     hideToNewSpace () {
       this.closeDialogs()
       this.toNewSpace = false
@@ -121,12 +135,6 @@ export default {
     showToNewSpace () {
       this.closeDialogs()
       this.toNewSpace = true
-    },
-    showMove () {
-      this.actionIsMove = true
-    },
-    hideMove () {
-      this.actionIsMove = false
     },
     toggleSpacePickerIsVisible () {
       this.spacePickerIsVisible = !this.spacePickerIsVisible
@@ -138,13 +146,13 @@ export default {
       })
     },
     notifySuccess () {
-      const actionLabel = this.$options.filters.pastTense(this.actionLabel)
+      const actionLabel = this.pastTense(this.actionLabel)
       const message = `${this.cardsCount} ${this.pluralCard} ${actionLabel} to ${this.selectedSpace.name}` // 3 cards copied to SpacePalace
       this.$store.commit('notifyMoveOrCopyToSpaceDetails', { id: this.selectedSpace.id, name: this.selectedSpace.name, message })
       this.$store.commit('notifyMoveOrCopyToSpace', true)
     },
     notifyNewSpaceSuccess (newSpace) {
-      const actionLabel = this.$options.filters.pastTense(this.actionLabel)
+      const actionLabel = this.pastTense(this.actionLabel)
       const message = `${newSpace.name} added with ${this.cardsCount} ${this.pluralCard} ${actionLabel} ` // SpacePalace added with 3 cards copied
       this.$store.commit('notifyMoveOrCopyToSpaceDetails', { id: newSpace.id, name: newSpace.name, message })
       this.$store.commit('notifyMoveOrCopyToSpace', true)
@@ -216,7 +224,7 @@ export default {
         await this.copyToSelectedSpace(items)
         this.notifySuccess()
       }
-      if (this.actionIsMove && !this.copyOnly) {
+      if (this.actionIsMove) {
         this.removeCards(items.cards)
       }
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
@@ -263,6 +271,7 @@ export default {
           this.scrollIntoView()
           this.updateSpaces()
           this.newSpaceName = words.randomUniqueName()
+          this.textIsCopied = false
         }
       })
     }
@@ -271,4 +280,16 @@ export default {
 </script>
 
 <style lang="stylus">
+.more-or-copy-cards
+  cursor initial
+  textarea
+    background-color var(--secondary-background)
+    border 0
+    border-radius 3px
+    padding 4px
+    margin-bottom 4px
+    height 60px
+  .badge.success
+    margin-top 10px
+
 </style>

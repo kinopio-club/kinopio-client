@@ -42,23 +42,19 @@ dialog.narrow.multiple-selected-actions(
       button(:disabled="!canEditSome.any" @click.left="remove")
         img.icon(src="@/assets/remove.svg")
         span {{ removeLabel }}
-      //- Export
-      .button-wrap
-        button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
-          img.icon.visit(src="@/assets/export.svg")
-          span Export
-        Export(:visible="exportIsVisible" :exportTitle="exportTitle" :exportData="exportData" :exportScope="exportScope")
 
     template(v-if="multipleCardsSelectedIds.length")
       .row
         //- Align And Distribute
         AlignAndDistribute(:visible="multipleCardsIsSelected" :shouldHideMoreOptions="true" :shouldAutoDistribute="true" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser")
         //- Move/Copy
-        .button-wrap.move-or-copy-wrap
-          button(@click.left.stop="toggleMoveOrCopyToSpaceIsVisible" :class="{ active: moveOrCopyToSpaceIsVisible }")
-            span(v-if="!canEditAll.cards") Copy
-            span(v-else) Move or Copy
-          MoveOrCopyToSpace(:visible="moveOrCopyToSpaceIsVisible" :copyOnly="!canEditAll.cards")
+        .segmented-buttons.move-or-copy-wrap
+          button(@click.left.stop="toggleCopyCardsIsVisible" :class="{ active: copyCardsIsVisible }")
+            span Copy
+            MoveOrCopyCards(:visible="copyCardsIsVisible" :actionIsMove="false" :exportData="exportData")
+          button(@click.left.stop="toggleMoveCardsIsVisible" :class="{ active: moveCardsIsVisible }" :disabled="!canEditAll.cards")
+            span Move
+            MoveOrCopyCards(:visible="moveCardsIsVisible" :actionIsMove="true" :exportData="exportData")
       //- More Options
       AlignAndDistribute(:visible="multipleCardsIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser")
 
@@ -75,8 +71,7 @@ import uniq from 'lodash-es/uniq'
 
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
-import Export from '@/components/dialogs/Export.vue'
-import MoveOrCopyToSpace from '@/components/dialogs/MoveOrCopyToSpace.vue'
+import MoveOrCopyCards from '@/components/dialogs/MoveOrCopyCards.vue'
 import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
@@ -84,16 +79,15 @@ import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
 export default {
   name: 'MultipleSelectedActions',
   components: {
-    Export,
-    MoveOrCopyToSpace,
+    MoveOrCopyCards,
     MultipleConnectionsPicker,
     FramePicker,
     AlignAndDistribute
   },
   data () {
     return {
-      exportIsVisible: false,
-      moveOrCopyToSpaceIsVisible: false,
+      copyCardsIsVisible: false,
+      moveCardsIsVisible: false,
       multipleConnectionsPickerVisible: false,
       framePickerIsVisible: false,
       cardsIsConnected: false,
@@ -237,13 +231,6 @@ export default {
       const total = this.multipleConnectionsSelectedIds.length + this.multipleCardsSelectedIds.length
       return Boolean(total > 1)
     },
-    exportScope () { return 'cards' },
-    exportTitle () {
-      const numberOfCards = this.numberOfCardsSelected
-      let title = 'Card'
-      if (numberOfCards > 1) { title = `${numberOfCards} Cards` }
-      return title
-    },
     exportData () {
       const cards = this.multipleCardsSelectedIds.map(cardId => {
         return this.$store.getters['currentSpace/cardById'](cardId)
@@ -286,15 +273,15 @@ export default {
         })
       })
     },
-    toggleExportIsVisible () {
-      const isVisible = this.exportIsVisible
+    toggleCopyCardsIsVisible () {
+      const isVisible = this.copyCardsIsVisible
       this.closeDialogs()
-      this.exportIsVisible = !isVisible
+      this.copyCardsIsVisible = !isVisible
     },
-    toggleMoveOrCopyToSpaceIsVisible () {
-      const isVisible = this.moveOrCopyToSpaceIsVisible
+    toggleMoveCardsIsVisible () {
+      const isVisible = this.moveCardsIsVisible
       this.closeDialogs()
-      this.moveOrCopyToSpaceIsVisible = !isVisible
+      this.moveCardsIsVisible = !isVisible
     },
     toggleMultipleConnectionsPickerVisible () {
       const isVisible = this.multipleConnectionsPickerVisible
@@ -307,8 +294,8 @@ export default {
       this.framePickerIsVisible = !isVisible
     },
     closeDialogs () {
-      this.exportIsVisible = false
-      this.moveOrCopyToSpaceIsVisible = false
+      this.copyCardsIsVisible = false
+      this.moveCardsIsVisible = false
       this.multipleConnectionsPickerVisible = false
       this.framePickerIsVisible = false
     },

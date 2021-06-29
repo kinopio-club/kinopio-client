@@ -46,7 +46,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
       button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
         img.icon.visit(src="@/assets/export.svg")
         span Export
-      Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="currentSpace" :exportScope="exportScope" @updateSpaces="updateSpaces")
+      Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="currentSpace" @updateSpaces="updateSpaces")
 
   section.results-actions
     .row
@@ -137,7 +137,6 @@ export default {
   },
   computed: {
     currentSpace () { return this.$store.state.currentSpace },
-    exportScope () { return 'space' },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     shouldShowInExplore () {
       const privacy = this.$store.state.currentSpace.privacy

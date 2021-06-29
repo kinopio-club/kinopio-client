@@ -35,8 +35,7 @@ export default {
   props: {
     visible: Boolean,
     exportTitle: String, // space-name, 3 Cards
-    exportData: Object,
-    exportScope: String // space, cards
+    exportData: Object
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -58,10 +57,6 @@ export default {
       const spaceName = this.$store.state.currentSpace.name
       const spaceId = this.$store.state.currentSpace.id
       let fileName = spaceName || `kinopio-space-${spaceId}`
-      if (this.exportScope === 'cards') {
-        const cardsCount = utils.normalizeString(this.exportTitle) // '3 Cards' to '3-cards'
-        fileName = `${fileName}-${cardsCount}`
-      }
       return fileName
     },
     text () {
