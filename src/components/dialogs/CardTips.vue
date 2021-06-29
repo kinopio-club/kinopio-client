@@ -5,19 +5,19 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
   section
     article
       p
-        span.badge.info [[
+        span.badge.keyboard-shortcut [[
         span create tags to label and group ideas
     article
       p
-        span.badge.info /
+        span.badge.keyboard-shortcut /
         span link to other spaces
     article
       p
-        span.badge.info ((
+        span.badge.keyboard-shortcut ((
         span turn card into comment
     article
       p
-        span.badge.info Ctrl-Enter
+        span.badge.keyboard-shortcut Ctrl-Enter
         span line break
     article
       p Card character limit is {{maxCardLength}}
@@ -27,17 +27,17 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
           span Markdown
       div(v-if="markdownInfoIsVisible")
         p
-          span.badge.info _italic_ or *italic*
+          span.badge.keyboard-shortcut _italic_ or *italic*
         p
-          span.badge.info **bold**
+          span.badge.keyboard-shortcut **bold**
         p
-          span.badge.info ~~strikethrough~~
+          span.badge.keyboard-shortcut ~~strikethrough~~
         p
-          span.badge.info [link text](url)
+          span.badge.keyboard-shortcut [link text](url)
         p
-          span.badge.info `code`
+          span.badge.keyboard-shortcut `code`
         p
-          span.badge.info ``` code block ```
+          span.badge.keyboard-shortcut ``` code block ```
 </template>
 
 <script>
