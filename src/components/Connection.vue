@@ -49,8 +49,8 @@ export default {
       }
       if (mutation.type === 'triggerShowConnectionDetails') {
         if (mutation.payload.connectionId === this.id) {
-          const fromStore = true
-          this.showConnectionDetails(mutation.payload.event, fromStore)
+          const isFromStore = true
+          this.showConnectionDetails(mutation.payload.event, isFromStore)
         }
       }
     })
@@ -157,10 +157,10 @@ export default {
         isMultiTouch = true
       }
     },
-    showConnectionDetails (event, fromStore) {
+    showConnectionDetails (event, isFromStore) {
       if (isMultiTouch) { return }
       if (!this.canEditSpace) { this.$store.commit('triggerReadOnlyJiggle') }
-      if (!fromStore) {
+      if (!isFromStore) {
         currentCursor = utils.cursorPositionInViewport(event)
         if (!utils.cursorsAreClose(startCursor, currentCursor)) { return }
       }
