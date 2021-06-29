@@ -1125,17 +1125,16 @@ export default {
       space.isRemoved = false
       context.dispatch('changeSpace', { space })
     },
-    dragCards: (context, options) => {
+    dragCards: (context, { endCursor, prevCursor, delta }) => {
       const currentDraggingCardId = context.rootState.currentDraggingCardId
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       const zoom = context.rootGetters.spaceCounterZoomDecimal
-      let { endCursor, prevCursor } = options
       if (!endCursor || !prevCursor) { return }
       endCursor = {
         x: endCursor.x * zoom,
         y: endCursor.y * zoom
       }
-      const delta = options.delta || {
+      delta = delta || {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
       }

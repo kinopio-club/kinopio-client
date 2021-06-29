@@ -1024,21 +1024,13 @@ export default {
       this.checkIfShouldDragMultipleCards(event)
       this.$store.dispatch('currentSpace/incrementSelectedCardsZ')
     },
-    toggleCardSelected () {
-      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
-      if (multipleCardsSelectedIds.includes(this.id)) {
-        this.$store.commit('removeFromMultipleCardsSelected', this.id)
-      } else {
-        this.$store.commit('addToMultipleCardsSelected', this.id)
-      }
-    },
     showCardDetails (event) {
       if (isMultiTouch) { return }
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
       const userId = this.$store.state.currentUser.id
       const cardsWereDragged = this.$store.state.cardsWereDragged
       if (event.shiftKey && !cardsWereDragged) {
-        this.toggleCardSelected()
+        this.$store.dispatch('toggleCardSelected', this.id)
         event.stopPropagation()
         this.$store.commit('currentUserIsDraggingCard', false)
         return
