@@ -519,6 +519,12 @@ export default {
     },
     seperatedSentences (name) {
       let sentences = name.split('. ')
+      sentences = sentences.map((sentence, index) => {
+        if (index < sentences.length - 1) {
+          sentence = sentence + '.'
+        }
+        return sentence
+      })
       sentences = sentences.filter(sentence => Boolean(sentence.length))
       return sentences
     },
@@ -567,15 +573,16 @@ export default {
     },
     splitCards () {
       const spaceBetweenCards = 12
-      let seperated
+      let name = this.pastedName || this.name
+      name = name.trim()
+      let names = []
       if (this.nameHasLineBreaks) {
-        seperated = this.seperatedLines
+        names = this.seperatedLines(name)
       } else if (this.nameHasSentences) {
-        seperated = this.seperatedSentences
+        names = this.seperatedSentences(name)
       }
-      const cardNames = seperated(this.pastedName || this.name)
       this.pastedName = ''
-      let newCards = cardNames.map(name => {
+      let newCards = names.map(name => {
         return {
           id: nanoid(),
           name: name.substring(0, this.maxCardLength),
@@ -585,7 +592,7 @@ export default {
         }
       })
       newCards.shift()
-      this.updateCardName(cardNames[0])
+      this.updateCardName(names[0])
       let prevCard = utils.clone(this.card)
       this.$store.dispatch('currentSpace/addMultipleCards', newCards)
       this.$nextTick(() => {
