@@ -96,7 +96,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           span Frames
         FramePicker(:visible="framePickerIsVisible" :cards="[card]")
 
-    .row(v-if="nameHasLineBreaks || hasUrls || nameHasSentences")
+    .row(v-if="nameHasParagraphs || hasUrls || nameHasSentences")
       //- Show Url
       .button-wrap(v-if="hasUrls")
         button(:disabled="!canEditCard" @click.left.stop="toggleUrlsIsVisible" :class="{active: urlsIsVisible}")
@@ -104,10 +104,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           img.icon(v-else src="@/assets/view.svg")
           span URL
       //- Split by Line Breaks
-      .button-wrap(v-if="nameHasLineBreaks || nameHasSentences")
+      .button-wrap(v-if="nameHasParagraphs || nameHasSentences")
         button(:disabled="!canEditCard" @click.left.stop="splitCards")
           img.icon(src="@/assets/split-vertically.svg")
-          span Split into {{nameLines || nameSentences}} Cards
+          span Split into {{nameParagraphs || nameSentences}} Cards
 
     .row.badges-row(v-if="tagsInCard.length || card.linkToSpaceId || nameIsComment || isInSearchResultsCards")
       //- Search result
@@ -426,29 +426,34 @@ export default {
         this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.card.id, value })
       }
     },
-    nameLines () {
+
+    // refactor to: numberOfCardsToSplitInto
+    nameParagraphs () {
       const name = this.pastedName || this.name
-      return this.seperatedLines(name).length
+      return this.seperatedParagraphs(name).length
     },
     nameSentences () {
       const name = this.pastedName || this.name
       return this.seperatedSentences(name).length
     },
-    nameHasLineBreaks () {
-      if (this.nameLines > 1) {
+    // remove
+    nameHasParagraphs () {
+      if (this.nameParagraphs > 1) {
         return true
       } else {
         return false
       }
     },
+    // remove
     nameHasSentences () {
-      if (this.nameHasLineBreaks) { return }
+      if (this.nameHasParagraphs) { return }
       if (this.nameSentences > 1) {
         return true
       } else {
         return false
       }
     },
+
     cardPendingUpload () {
       const pendingUploads = this.$store.state.upload.pendingUploads
       return pendingUploads.find(upload => upload.cardId === this.card.id)
@@ -512,7 +517,7 @@ export default {
         }
       })
     },
-    seperatedLines (name) {
+    seperatedParagraphs (name) {
       let lines = name.split('\n')
       lines = lines.filter(line => Boolean(line.length))
       return lines
@@ -571,28 +576,78 @@ export default {
       })
       newUrls.forEach(urls => this.updateLink(urls))
     },
-    splitCards () {
-      const spaceBetweenCards = 12
-      let name = this.pastedName || this.name
-      name = name.trim()
-      let names = []
-      if (this.nameHasLineBreaks) {
-        names = this.seperatedLines(name)
-      } else if (this.nameHasSentences) {
-        names = this.seperatedSentences(name)
+
+    splitByNextParagraph (string) {
+      let paragraph = string.split('\n', 1)[0]
+      const index = string.indexOf(paragraph) + paragraph.length
+      let paragraphs = [
+        paragraph,
+        string.substring(index, string.length)
+      ]
+      paragraphs = paragraphs.filter(paragraph => Boolean(paragraph.length))
+      return paragraphs
+    },
+    splitByNextSentence (string) {
+      let sentence = string.split('. ', 1)[0]
+      let index = string.indexOf(sentence) + sentence.length + 2
+      let sentences = [
+        sentence,
+        string.substring(index, string.length)
+      ]
+      sentences = sentences.filter(sentence => Boolean(sentence.length))
+      sentences = sentences.map((sentence, index) => {
+        if (index < sentences.length - 1) {
+          sentence = sentence + '.'
+        }
+        return sentence
+      })
+      return sentences
+    },
+    splitCardName (name) {
+      // if the name is > maxCardLength, split the next card by paragraph
+      // else if the paragraph is > maxCardLength, then split the next card by sentence instead,
+      // else if the sentence is > maxCardLength, then split by maxCardLength
+      if (name.length < this.maxCardLength) { return [name] }
+      const paragraphs = this.splitByNextParagraph(name)
+      const sentences = this.splitByNextSentence(name)
+      if (paragraphs[0].length < this.maxCardLength) {
+        return paragraphs
+      } else if (sentences[0].length < this.maxCardLength) {
+        return sentences
+      } else {
+        return [
+          name.substring(0, this.maxCardLength),
+          name.substring(this.maxCardLength, name.length)
+        ]
       }
+    },
+    splitCards () {
+      let cardNames = [this.pastedName || this.name]
+      let shouldSplitLastCard
+      // recursive
+      do {
+        const name = cardNames.pop()
+        const result = this.splitCardName(name)
+        cardNames = cardNames.concat(result)
+        shouldSplitLastCard = utils.longestStringInArray(cardNames).length > this.maxCardLength
+      }
+      while (shouldSplitLastCard)
       this.pastedName = ''
-      let newCards = names.map(name => {
+      let newCards = cardNames.map(cardName => {
         return {
           id: nanoid(),
-          name: name.substring(0, this.maxCardLength),
+          name: cardName,
           x: this.card.x,
           y: this.card.y,
           frameId: this.card.frameId
         }
       })
       newCards.shift()
-      this.updateCardName(names[0])
+      this.updateCardName(cardNames[0])
+      this.addSplitCards(newCards)
+    },
+    addSplitCards (newCards) {
+      const spaceBetweenCards = 12
       let prevCard = utils.clone(this.card)
       this.$store.dispatch('currentSpace/addMultipleCards', newCards)
       this.$nextTick(() => {
