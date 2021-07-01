@@ -151,6 +151,7 @@ export default {
     moveCardsBroadcast: (state, { cards, delta }) => {
       cards.forEach(updated => {
         const card = state.cards.find(card => card.id === updated.id)
+        if (!card) { return }
         card.x = updated.x
         card.y = updated.y
       })
