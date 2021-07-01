@@ -1029,7 +1029,8 @@ export default {
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
       const userId = this.$store.state.currentUser.id
       const cardsWereDragged = this.$store.state.cardsWereDragged
-      if (event.shiftKey && !cardsWereDragged) {
+      const shouldToggleSelected = event.shiftKey && !cardsWereDragged && !this.isConnectingTo
+      if (shouldToggleSelected) {
         this.$store.dispatch('toggleCardSelected', this.id)
         event.stopPropagation()
         this.$store.commit('currentUserIsDraggingCard', false)
