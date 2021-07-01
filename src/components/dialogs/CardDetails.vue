@@ -104,13 +104,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           img.icon(v-else src="@/assets/view.svg")
           span URL
       //- Split by Line Breaks
-
       .button-wrap(v-if="nameSplitIntoCardsCount")
         button(:disabled="!canEditCard" @click.left.stop="splitCards")
           img.icon(src="@/assets/split-vertically.svg")
-
           span Split into {{nameSplitIntoCardsCount}} Cards
-
     .row.badges-row(v-if="tagsInCard.length || card.linkToSpaceId || nameIsComment || isInSearchResultsCards")
       //- Search result
       span.badge.search(v-if="isInSearchResultsCards")
@@ -549,12 +546,14 @@ export default {
     },
     splitByNextSentence (string) {
       let sentence = string.split('. ', 1)[0]
-      let index = string.indexOf(sentence) + sentence.length + 2
+      const charactersRemovedBySplit = 2
+      let index = string.indexOf(sentence) + sentence.length + charactersRemovedBySplit
       let sentences = [
         sentence,
         string.substring(index, string.length)
       ]
       sentences = sentences.filter(sentence => Boolean(sentence.length))
+      // re-add sentence periods removed by split
       sentences = sentences.map((sentence, index) => {
         if (index < sentences.length - 1) {
           sentence = sentence + '.'
@@ -567,7 +566,7 @@ export default {
       if (!name) { return [] }
       const sentences = this.splitByNextSentence(name)
       const paragraphs = this.splitByNextParagraph(name)
-      // split by either next sentence or paragraph, whichever comes first
+      // split by either next sentence or paragraph, whichever type comes first
       let firstType, secondType
       if (sentences[0] < paragraphs[0]) {
         firstType = sentences

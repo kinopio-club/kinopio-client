@@ -217,9 +217,9 @@ export default {
     return false
   },
   longestStringInArray (array) {
+    this.typeCheck({ value: array, type: 'array', origin: 'longestStringInArray' })
     let longest = ''
     array.forEach(string => {
-      // if (!string) { return }
       if (string.length > longest.length) {
         longest = string
       }
