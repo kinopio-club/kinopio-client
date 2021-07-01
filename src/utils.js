@@ -216,6 +216,16 @@ export default {
     }
     return false
   },
+  longestStringInArray (array) {
+    this.typeCheck({ value: array, type: 'array', origin: 'longestStringInArray' })
+    let longest = ''
+    array.forEach(string => {
+      if (string.length > longest.length) {
+        longest = string
+      }
+    })
+    return longest
+  },
   updateObject (object, value) {
     this.typeCheck({ value, type: 'object', origin: 'updateObject' })
     const keys = Object.keys(value)

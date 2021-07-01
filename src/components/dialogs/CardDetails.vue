@@ -96,7 +96,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           span Frames
         FramePicker(:visible="framePickerIsVisible" :cards="[card]")
 
-    .row(v-if="nameHasLineBreaks || hasUrls || nameHasSentences")
+    .row(v-if="nameSplitIntoCardsCount || hasUrls")
       //- Show Url
       .button-wrap(v-if="hasUrls")
         button(:disabled="!canEditCard" @click.left.stop="toggleUrlsIsVisible" :class="{active: urlsIsVisible}")
@@ -104,11 +104,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           img.icon(v-else src="@/assets/view.svg")
           span URL
       //- Split by Line Breaks
-      .button-wrap(v-if="nameHasLineBreaks || nameHasSentences")
+      .button-wrap(v-if="nameSplitIntoCardsCount")
         button(:disabled="!canEditCard" @click.left.stop="splitCards")
           img.icon(src="@/assets/split-vertically.svg")
-          span Split into {{nameLines || nameSentences}} Cards
-
+          span Split into {{nameSplitIntoCardsCount}} Cards
     .row.badges-row(v-if="tagsInCard.length || card.linkToSpaceId || nameIsComment || isInSearchResultsCards")
       //- Search result
       span.badge.search(v-if="isInSearchResultsCards")
@@ -198,6 +197,7 @@ import utils from '@/utils.js'
 import qs from '@aguezz/qs-parse'
 import nanoid from 'nanoid'
 import debounce from 'lodash-es/debounce'
+import last from 'lodash-es/last'
 
 let previousTags = []
 let compositionEventEndTime = 0
@@ -251,7 +251,8 @@ export default {
         audio: '',
         link: '',
         file: ''
-      }
+      },
+      nameSplitIntoCardsCount: 0
     }
   },
   created () {
@@ -367,6 +368,7 @@ export default {
         } else {
           this.pastedName = ''
         }
+        this.updateNameSplitIntoCardsCount()
       }
     },
     url () { return utils.urlFromString(this.name) },
@@ -424,29 +426,6 @@ export default {
       },
       set (value) {
         this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.card.id, value })
-      }
-    },
-    nameLines () {
-      const name = this.pastedName || this.name
-      return this.seperatedLines(name).length
-    },
-    nameSentences () {
-      const name = this.pastedName || this.name
-      return this.seperatedSentences(name).length
-    },
-    nameHasLineBreaks () {
-      if (this.nameLines > 1) {
-        return true
-      } else {
-        return false
-      }
-    },
-    nameHasSentences () {
-      if (this.nameHasLineBreaks) { return }
-      if (this.nameSentences > 1) {
-        return true
-      } else {
-        return false
       }
     },
     cardPendingUpload () {
@@ -512,16 +491,6 @@ export default {
         }
       })
     },
-    seperatedLines (name) {
-      let lines = name.split('\n')
-      lines = lines.filter(line => Boolean(line.length))
-      return lines
-    },
-    seperatedSentences (name) {
-      let sentences = name.split('. ')
-      sentences = sentences.filter(sentence => Boolean(sentence.length))
-      return sentences
-    },
     updateLink ({ url, newUrl }) {
       url = url.trim()
       const newName = this.name.replace(url, newUrl)
@@ -565,27 +534,106 @@ export default {
       })
       newUrls.forEach(urls => this.updateLink(urls))
     },
-    splitCards () {
-      const spaceBetweenCards = 12
-      let seperated
-      if (this.nameHasLineBreaks) {
-        seperated = this.seperatedLines
-      } else if (this.nameHasSentences) {
-        seperated = this.seperatedSentences
+    splitByNextParagraph (string) {
+      let paragraph = string.split('\n', 1)[0]
+      const index = string.indexOf(paragraph) + paragraph.length
+      let paragraphs = [
+        paragraph,
+        string.substring(index, string.length)
+      ]
+      paragraphs = paragraphs.filter(paragraph => Boolean(paragraph.length))
+      return paragraphs
+    },
+    splitByNextSentence (string) {
+      let sentence = string.split('. ', 1)[0]
+      const charactersRemovedBySplit = 2
+      let index = string.indexOf(sentence) + sentence.length + charactersRemovedBySplit
+      let sentences = [
+        sentence,
+        string.substring(index, string.length)
+      ]
+      sentences = sentences.filter(sentence => Boolean(sentence.length))
+      // re-add sentence periods removed by split
+      sentences = sentences.map((sentence, index) => {
+        if (index < sentences.length - 1) {
+          sentence = sentence + '.'
+        }
+        return sentence
+      })
+      return sentences
+    },
+    splitCardName (name) {
+      if (!name) { return [] }
+      const sentences = this.splitByNextSentence(name)
+      const paragraphs = this.splitByNextParagraph(name)
+      // split by either next sentence or paragraph, whichever type comes first
+      let firstType, secondType
+      if (sentences[0] < paragraphs[0]) {
+        firstType = sentences
+        secondType = paragraphs
+      } else {
+        firstType = paragraphs
+        secondType = sentences
       }
-      const cardNames = seperated(this.pastedName || this.name)
-      this.pastedName = ''
-      let newCards = cardNames.map(name => {
+      const firstTypeIsCardLength = firstType[0].length < this.maxCardLength
+      const secondTypeIsCardLength = secondType[0].length < this.maxCardLength
+      if (firstTypeIsCardLength) {
+        return firstType
+      } else if (secondTypeIsCardLength) {
+        return secondType
+      } else {
+        return [
+          name.substring(0, this.maxCardLength),
+          name.substring(this.maxCardLength, name.length)
+        ]
+      }
+    },
+    updateNameSplitIntoCardsCount () {
+      const isPreview = true
+      const newCards = this.splitCards(null, isPreview)
+      const count = newCards.length
+      if (count > 1) {
+        this.nameSplitIntoCardsCount = count
+      } else {
+        this.nameSplitIntoCardsCount = 0
+      }
+    },
+    shouldSplitLastCard (cardNames) {
+      const lastCardName = last(cardNames)
+      const isRemainingSentences = this.splitByNextSentence(lastCardName).length > 1
+      const isRemainingParagraphs = this.splitByNextParagraph(lastCardName).length > 1
+      return isRemainingSentences || isRemainingParagraphs
+    },
+    splitCards (event, isPreview) {
+      const originalName = (this.pastedName || this.name).trim()
+      let cardNames = [originalName]
+      let shouldSplitLastCard
+      // recursive
+      do {
+        const name = cardNames.pop()
+        const result = this.splitCardName(name)
+        cardNames = cardNames.concat(result)
+        shouldSplitLastCard = this.shouldSplitLastCard(cardNames)
+      }
+      while (shouldSplitLastCard)
+
+      let newCards = cardNames.map(cardName => {
         return {
           id: nanoid(),
-          name: name.substring(0, this.maxCardLength),
+          name: cardName,
           x: this.card.x,
           y: this.card.y,
           frameId: this.card.frameId
         }
       })
+      if (isPreview) { return newCards }
+      this.pastedName = ''
+      this.updateCardName(newCards[0].name)
       newCards.shift()
-      this.updateCardName(cardNames[0])
+      this.addSplitCards(newCards)
+    },
+    addSplitCards (newCards) {
+      const spaceBetweenCards = 12
       let prevCard = utils.clone(this.card)
       this.$store.dispatch('currentSpace/addMultipleCards', newCards)
       this.$nextTick(() => {
@@ -602,7 +650,7 @@ export default {
             y: card.y
           })
         })
-        this.$store.dispatch('closeAllDialogs', 'CardDetails.splitCards')
+        this.$store.dispatch('closeAllDialogs', 'CardDetails.addSplitCards')
       })
     },
     async uploadFile (file) {
@@ -1295,6 +1343,7 @@ export default {
           this.clearErrors()
           this.scrollIntoViewAndFocus()
           this.updatePreviousTags()
+          this.updateNameSplitIntoCardsCount()
         } else {
           this.removeTrackingQueryStrings()
         }
