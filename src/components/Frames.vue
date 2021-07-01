@@ -78,8 +78,8 @@ export default {
       top -19px
       left 7px
     .ichigotchi
-      width 23px
-      right -4px
-      top -19px
-      transform rotate(-10deg)
+      width 22px
+      right -12px
+      bottom -8px
+      transform rotate(12deg)
 </style>
