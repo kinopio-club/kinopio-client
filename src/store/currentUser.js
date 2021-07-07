@@ -326,7 +326,6 @@ export default {
       remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
       console.log('🌸 Restore user from remote', remoteUser)
       context.commit('updateUser', remoteUser)
-      context.dispatch('createNewUserJournalPrompts')
       if (remoteUser.stripeSubscriptionId) {
         context.commit('isUpgraded', true)
       }
