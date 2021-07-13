@@ -54,6 +54,7 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
       .badge.success(v-if="resetSuccess") Password Reset Email Sent
       .badge.danger(v-if="error.resetUserEmailNotFound") A user with that that email address wasn't found. Try another?
       .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
+      p.success-message(v-if="resetSuccess") If you don't see the email, please check your spam folder, or contact support
 </template>
 
 <script>
@@ -329,6 +330,8 @@ export default {
   p,
   .badge
     margin-bottom 10px
+  .success-message
+    margin-bottom 0
   .forgot-password
     .badge
       margin 0
