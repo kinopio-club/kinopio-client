@@ -38,14 +38,9 @@ export default {
         name: 'Book Club'
       },
       {
-        id: 'e5z76fEWMq3DQDXYqyjE_',
+        id: 'ZHoXccPyfmTu7FMueXUEP',
         categoryId: 1,
-        name: 'Class Assignment'
-      },
-      {
-        id: 'a9DYG9qD1QJYngFkuGiEo',
-        categoryId: 2,
-        name: 'To Dos'
+        name: 'Research'
       },
       {
         id: 'YD_eqjNH7DQpgDKjEDSzu',
@@ -75,7 +70,7 @@ export default {
       {
         id: 'b87U9WETGvl17BrKNsqDH',
         categoryId: 3,
-        name: 'Meeting Agenda'
+        name: 'Meeting'
       },
       {
         id: 'GgDOqKvEEzTA93EYmAZrn',
