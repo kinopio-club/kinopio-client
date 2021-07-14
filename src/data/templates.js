@@ -63,6 +63,11 @@ export default {
         name: 'Garage Sale'
       },
       {
+        id: 'u2Zc1bR0q7bRb16-K5o6X',
+        categoryId: 2,
+        name: 'Mind Map'
+      },
+      {
         id: '85dWJ4_zDipSREM-nllXH',
         categoryId: 3,
         name: 'Brainstorming'
