@@ -1,8 +1,10 @@
 <template lang="pug">
 .community(v-if="visible" :open="visible" @click.left.stop)
-  section.header
+  section
     template
-      p Recently updated spaces made by cool people like you
+      p
+        img.icon.sunglasses(src="@/assets/sunglasses.svg")
+        span Explore cool community spaces
       ShowInExploreButton(@updateSpaces="updateCurrentSpace" :label="showInExploreLabel")
     p(v-if="loading")
       Loader(:visible="loading")
@@ -75,10 +77,6 @@ export default {
 
 <style lang="stylus">
 .community
-  .header
-    border-top 1px solid var(--primary)
-    border-top-left-radius 0
-    border-top-right-radius 0
   .badge
     display flex
   button + a

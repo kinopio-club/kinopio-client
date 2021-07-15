@@ -48,7 +48,7 @@ dialog.add-space.narrow(
   section(v-if="editPromptsIsVisible")
     PromptPackPicker(:visible="editPromptsIsVisible" :position="promptPickerPosition" @select="togglePromptPack")
 
-  Templates(:visible="templatesIsVisible" :hideOptions="true")
+  Templates(:visible="templatesIsVisible")
 
 </template>
 
@@ -224,5 +224,4 @@ export default {
     padding 4px
   .templates
     border-top 1px solid var(--primary)
-    padding-top 4px
 </style>

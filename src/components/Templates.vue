@@ -114,6 +114,7 @@ export default {
 
 <style lang="stylus">
 .templates
+  padding-top 4px
   .categories
     border-top 1px solid var(--primary)
     border-top-left-radius 0
