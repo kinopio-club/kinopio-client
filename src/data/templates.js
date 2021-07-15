@@ -43,6 +43,11 @@ export default {
         name: 'Research'
       },
       {
+        id: 'aKbPUalz4zHLqGwpDncDI',
+        categoryId: 2,
+        name: 'Journal'
+      },
+      {
         id: 'YD_eqjNH7DQpgDKjEDSzu',
         categoryId: 2,
         name: 'Making Hard Decisions'
