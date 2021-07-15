@@ -30,7 +30,7 @@ export default {
       {
         id: 'BXblLMDGVn-mmRG9IUMeb',
         categoryId: 1,
-        name: 'Class Notes'
+        name: 'Note Taking'
       },
       {
         id: 'oVBOOfoO4qg7AzzUwweyf',
