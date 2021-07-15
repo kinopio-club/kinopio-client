@@ -8,7 +8,7 @@ dialog.explore(v-if="visible" :open="visible" ref="dialog" :style="{'max-height'
       button(@click.left.stop="showTemplates" :class="{ active: templatesIsVisible }")
         span Templates
 
-  Community(:visible="!templatesIsVisible" :allSpacesIsVisible="allSpacesIsVisible" :loading="loading" :spaces="spaces" @updateCurrentSpace="updateCurrentSpace" @toggleAllSpacesIsVisible="toggleAllSpacesIsVisible")
+  Community(:visible="!templatesIsVisible" :loading="loading" :spaces="spaces" @updateCurrentSpace="updateCurrentSpace")
   Templates(:visible="templatesIsVisible")
 </template>
 
@@ -38,11 +38,9 @@ export default {
   data () {
     return {
       templatesIsVisible: false,
-      allSpacesIsVisible: true,
       loading: false,
       spaces: [],
       newSpaces: [],
-      bestOfSpaces: [],
       dialogHeight: null
     }
   },
@@ -53,30 +51,12 @@ export default {
     hideTemplates () {
       this.templatesIsVisible = false
     },
-    toggleAllSpacesIsVisible (value) {
-      const prevValue = utils.clone(this.allSpacesIsVisible)
-      this.allSpacesIsVisible = value
-      if (prevValue === value) { return }
-
-      if (this.allSpacesIsVisible) {
-        this.spaces = this.newSpaces
-      } else {
-        this.spaces = this.bestOfSpaces
-      }
-      this.loading = false
-      this.updateSpaces()
-    },
     async updateSpaces () {
       if (this.loading) { return }
       if (this.templatesIsVisible) { return }
       this.loading = true
-      if (this.allSpacesIsVisible) {
-        this.spaces = await this.$store.dispatch('api/getNewSpaces')
-        this.newSpaces = this.spaces
-      } else {
-        this.spaces = await this.$store.dispatch('api/getBestOfSpaces')
-        this.bestOfSpaces = this.spaces
-      }
+      this.spaces = await this.$store.dispatch('api/getNewSpaces')
+      this.newSpaces = this.spaces
       this.loading = false
     },
     updateCurrentSpace () {

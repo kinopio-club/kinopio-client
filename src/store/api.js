@@ -271,16 +271,6 @@ const self = {
         console.error('🚒', error)
       }
     },
-    getBestOfSpaces: async (context) => {
-      try {
-        console.log('🛬 getting best of spaces')
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await utils.timeout(40000, fetch(`${host}/space/best-of`, options))
-        return normalizeResponse(response)
-      } catch (error) {
-        console.error('🚒', error)
-      }
-    },
     getSpace: async (context, { space, shouldRequestRemote }) => {
       try {
         if (!shouldRequest(shouldRequestRemote)) { return }
