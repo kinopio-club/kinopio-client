@@ -68,11 +68,6 @@ export default {
         name: 'Mind Map'
       },
       {
-        id: '85dWJ4_zDipSREM-nllXH',
-        categoryId: 3,
-        name: 'Brainstorming'
-      },
-      {
         id: 'b87U9WETGvl17BrKNsqDH',
         categoryId: 3,
         name: 'Meeting'
