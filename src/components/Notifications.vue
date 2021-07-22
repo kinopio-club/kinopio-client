@@ -69,7 +69,7 @@ aside.notifications(@click.left="closeAllDialogs")
   .persistent-item.success.notify-new-user(ref="newUser" v-if="notifyNewUser")
     p Welcome to Kinopio, a space for thinking
     video.welcome(autoplay loop muted playsinline)
-      source(src="https://us-east-1.linodeobjects.com/kinopio-uploads/KsnhFh3L5CAAuW20OJeWc/rainy.mp4")
+      source(src="https://us-east-1.linodeobjects.com/kinopio-uploads/a5FrULtBOxP9slhtAN2CV/stirring-soup.mp4")
     .row
       button(@click.left="createNewHelloSpace" v-if="!userHasSpaces")
         img.icon(src="@/assets/add.svg")
@@ -336,6 +336,8 @@ export default {
     .welcome
       border-radius 3px
       margin-top 5px
+      @media(max-height 800px)
+        display none
 
   .hidden
     display: none
