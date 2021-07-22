@@ -31,7 +31,8 @@ export default {
     shouldEmailBulletin: true,
     shouldShowMoreAlignOptions: false,
     shouldInvertZoomDirection: false,
-    shouldUseLastConnectionType: false
+    shouldUseLastConnectionType: false,
+    shouldShowNewUserNotification: true
   },
   mutations: {
     color: (state, newColor) => {
@@ -199,6 +200,10 @@ export default {
     shouldUseLastConnectionType: (state, value) => {
       state.shouldUseLastConnectionType = value
       cache.updateUser('shouldUseLastConnectionType', value)
+    },
+    shouldShowNewUserNotification: (state, value) => {
+      state.shouldShowNewUserNotification = value
+      cache.updateUser('shouldShowNewUserNotification', value)
     }
   },
   actions: {

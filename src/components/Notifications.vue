@@ -66,7 +66,7 @@ aside.notifications(@click.left="closeAllDialogs")
       .button-wrap
         button(@click.left="refreshBrowser") Refresh
 
-  .item.success.notify-new-user(ref="newUser" v-if="notifyNewUser")
+  .persistent-item.success.notify-new-user(ref="newUser" v-if="notifyNewUser")
     p Welcome to Kinopio
     .row
       button(@click.left="createNewHelloSpace" v-if="!userHasSpaces")
@@ -74,6 +74,8 @@ aside.notifications(@click.left="closeAllDialogs")
         span Space
       button
         span About Kinopio →
+      button(@click.left="removeNotifyNewUser")
+        img.icon.cancel(src="@/assets/add.svg")
 
   .persistent-item.info(v-if="currentSpaceIsTemplate" ref="template" :class="{'notification-jiggle': readOnlyJiggle}")
     button(@click.left="duplicateSpace")
@@ -138,13 +140,6 @@ export default {
       }
       if (mutation.type === 'currentSpace/restoreSpace') {
         this.notifySpaceOutOfSync = false
-      }
-      if (mutation.type === 'notifyNewUser') {
-        this.$nextTick(() => {
-          const element = this.$refs.newUser
-          if (!element) { return }
-          element.addEventListener('animationend', this.removeNotifyNewUser, false)
-        })
       }
     })
   },
@@ -219,6 +214,7 @@ export default {
     },
     removeNotifyNewUser () {
       this.$store.commit('notifyNewUser', false)
+      this.$store.commit('currentUser/shouldShowNewUserNotification', false)
     },
     triggerSpaceDetailsVisible () {
       this.$store.commit('triggerSpaceDetailsVisible')
@@ -318,8 +314,6 @@ export default {
     p
       margin 0
       user-select text
-    .notify-new-user
-      animation-delay 10s
   .persistent-item
     animation none
   .row

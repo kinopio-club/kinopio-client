@@ -376,7 +376,8 @@ export default {
       }
       context.dispatch('updateWindowHistory', { isRemote })
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
-      if (!currentUserIsSignedIn) {
+      const shouldShow = context.rootState.currentUser.shouldShowNewUserNotification
+      if (!currentUserIsSignedIn && shouldShow) {
         context.commit('notifyNewUser', true, { root: true })
       }
     },
