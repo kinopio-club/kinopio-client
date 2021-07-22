@@ -375,6 +375,10 @@ export default {
         context.dispatch('updateUserLastSpaceId')
       }
       context.dispatch('updateWindowHistory', { isRemote })
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      if (!currentUserIsSignedIn) {
+        context.commit('notifyNewUser', true, { root: true })
+      }
     },
 
     // Users and otherSpaces
@@ -629,7 +633,6 @@ export default {
         if (error.status === 500) {
           context.commit('notifyConnectionError', true, { root: true })
         }
-        context.dispatch('checkIfShouldNotifyNewUser')
       }
       context.commit('isLoadingSpace', false, { root: true })
       if (!remoteSpace) { return }
@@ -824,12 +827,6 @@ export default {
       const removedSpaces = cache.getAllRemovedSpaces()
       removedSpaces.forEach(space => cache.removeSpacePermanent(space))
       context.dispatch('api/addToQueue', { name: 'removeAllRemovedSpacesPermanentFromUser', body: { userId } }, { root: true })
-    },
-    checkIfShouldNotifyNewUser: (context) => {
-      const noUserSpaces = !cache.getAllSpaces().length
-      if (noUserSpaces) {
-        context.commit('notifyNewUser', true, { root: true })
-      }
     },
     checkIfShouldNotifySpaceIsRemoved: (context, space) => {
       const canEdit = context.rootGetters['currentUser/canEditSpace']()

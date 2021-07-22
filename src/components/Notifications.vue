@@ -66,12 +66,14 @@ aside.notifications(@click.left="closeAllDialogs")
       .button-wrap
         button(@click.left="refreshBrowser") Refresh
 
-  .item.success(ref="newUser" v-if="notifyNewUser && !hasNotifiedNewUser")
+  .item.success.notify-new-user(ref="newUser" v-if="notifyNewUser")
     p Welcome to Kinopio
     .row
-      button(@click.left="createNewHelloSpace")
+      button(@click.left="createNewHelloSpace" v-if="!userHasSpaces")
         img.icon(src="@/assets/add.svg")
-        span How does this work?
+        span Space
+      button
+        span About Kinopio →
 
   .persistent-item.info(v-if="currentSpaceIsTemplate" ref="template" :class="{'notification-jiggle': readOnlyJiggle}")
     button(@click.left="duplicateSpace")
@@ -104,8 +106,7 @@ export default {
     return {
       readOnlyJiggle: false,
       notifyCardsCreatedIsOverLimitJiggle: false,
-      notifySpaceOutOfSync: false,
-      hasNotifiedNewUser: false
+      notifySpaceOutOfSync: false
     }
   },
   created () {
@@ -180,6 +181,10 @@ export default {
       const id = this.$store.state.currentSpace.id
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(id)
+    },
+    userHasSpaces () {
+      let userSpaces = cache.getAllSpaces()
+      return Boolean(userSpaces.length)
     }
   },
   methods: {
@@ -214,7 +219,6 @@ export default {
     },
     removeNotifyNewUser () {
       this.$store.commit('notifyNewUser', false)
-      this.hasNotifiedNewUser = true
     },
     triggerSpaceDetailsVisible () {
       this.$store.commit('triggerSpaceDetailsVisible')
@@ -314,6 +318,8 @@ export default {
     p
       margin 0
       user-select text
+    .notify-new-user
+      animation-delay 10s
   .persistent-item
     animation none
   .row
