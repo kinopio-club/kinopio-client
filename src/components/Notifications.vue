@@ -67,7 +67,9 @@ aside.notifications(@click.left="closeAllDialogs")
         button(@click.left="refreshBrowser") Refresh
 
   .persistent-item.success.notify-new-user(ref="newUser" v-if="notifyNewUser")
-    p Welcome to Kinopio
+    p Welcome to Kinopio, a space for thinking
+    video.welcome(autoplay loop muted playsinline)
+      source(src="https://us-east-1.linodeobjects.com/kinopio-uploads/KsnhFh3L5CAAuW20OJeWc/rainy.mp4")
     .row
       button(@click.left="createNewHelloSpace" v-if="!userHasSpaces")
         img.icon(src="@/assets/add.svg")
@@ -329,6 +331,11 @@ export default {
   button + button,
   button + label
     margin-left 6px
+
+  .notify-new-user
+    .welcome
+      border-radius 3px
+      margin-top 5px
 
   .hidden
     display: none
