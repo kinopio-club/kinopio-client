@@ -333,7 +333,8 @@ export default {
     margin-left 6px
 
   button + button,
-  button + label
+  button + label,
+  .button-wrap + .button-wrap
     margin-left 6px
 
   .notify-new-user
