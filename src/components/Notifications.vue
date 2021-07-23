@@ -71,13 +71,17 @@ aside.notifications(@click.left="closeAllDialogs")
     video.welcome(autoplay loop muted playsinline)
       source(src="https://us-east-1.linodeobjects.com/kinopio-uploads/a5FrULtBOxP9slhtAN2CV/stirring-soup.mp4")
     .row
-      button(@click.left="createNewHelloSpace" v-if="!userHasSpaces")
-        img.icon(src="@/assets/add.svg")
-        span Space
-      button
-        span About Kinopio →
-      button(@click.left="removeNotifyNewUser")
-        img.icon.cancel(src="@/assets/add.svg")
+      .button-wrap
+        button(@click.left="createNewHelloSpace" v-if="!userHasSpaces")
+          img.icon(src="@/assets/add.svg")
+          span Space
+      .button-wrap
+        a(href="https://help.kinopio.club/about")
+          button
+            span About Kinopio →
+      .button-wrap
+        button(@click.left="removeNotifyNewUser")
+          img.icon.cancel(src="@/assets/add.svg")
 
   .persistent-item.info(v-if="currentSpaceIsTemplate" ref="template" :class="{'notification-jiggle': readOnlyJiggle}")
     button(@click.left="duplicateSpace")
