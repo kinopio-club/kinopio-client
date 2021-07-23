@@ -71,8 +71,8 @@ aside.notifications(@click.left="closeAllDialogs")
     video.welcome(autoplay loop muted playsinline)
       source(src="https://us-east-1.linodeobjects.com/kinopio-uploads/a5FrULtBOxP9slhtAN2CV/stirring-soup.mp4")
     .row
-      .button-wrap
-        button(@click.left="createNewHelloSpace" v-if="!userHasSpaces")
+      .button-wrap(v-if="!userHasSpaces")
+        button(@click.left="createNewHelloSpace")
           img.icon(src="@/assets/add.svg")
           span Space
       .button-wrap
