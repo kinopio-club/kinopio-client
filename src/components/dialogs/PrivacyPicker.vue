@@ -6,8 +6,8 @@ dialog.narrow.privacy-picker(v-if="visible" :open="visible" @click.left.stop)
         li(:class="{ active: privacyStateIsActive(privacyState) }" @click.left="select(privacyState)")
           .badge(:class="privacyState.color")
             img.icon(:src="privacyIcon(privacyState).path" :class="privacyState.name")
-            span {{privacyState.name | capitalize}}
-          p.description {{privacyState.description | capitalize}}
+            span {{ privacyStateName(privacyState) }}
+          p.description {{ privacyStateDescription(privacyState) }}
 </template>
 
 <script>
@@ -18,11 +18,6 @@ export default {
   name: 'PrivacyPicker',
   props: {
     visible: Boolean
-  },
-  filters: {
-    capitalize (value) {
-      return utils.capitalizeFirstLetter(value)
-    }
   },
   computed: {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
@@ -37,6 +32,14 @@ export default {
     }
   },
   methods: {
+    privacyStateName (privacyState) {
+      const name = privacyState.friendlyName || privacyState.name
+      return utils.capitalizeFirstLetter(name)
+    },
+    privacyStateDescription (privacyState) {
+      const description = privacyState.description
+      return utils.capitalizeFirstLetter(description)
+    },
     spaceIsPrivate (privacyState) {
       return privacyState.name === 'private'
     },

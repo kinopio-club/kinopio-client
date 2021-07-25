@@ -10,6 +10,7 @@ export default {
       },
       {
         name: 'closed',
+        friendlyName: 'Public Read Only',
         description: 'everyone can view, only you and collaborators can edit',
         color: 'info',
         icon: 'unlock'
