@@ -6,9 +6,11 @@
       section(v-if="isVisible")
         //- Explore
         .button-wrap
-          button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
-            img.icon.sunglasses(src="@/assets/sunglasses.svg")
-            span Explore
+          .segmented-buttons
+            button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
+              img.icon.sunglasses(src="@/assets/sunglasses.svg")
+              span Explore
+            button L 33
           Explore(:visible="exploreIsVisible")
         //- Favorites
         .button-wrap
