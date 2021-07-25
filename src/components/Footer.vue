@@ -87,7 +87,8 @@ export default {
       tagsIsVisible: false,
       exploreIsVisible: false,
       mobileTipsIsVisible: false,
-      visualViewportPosition: {}
+      visualViewportPosition: {},
+      liveSpaces: []
     }
   },
   mounted () {
@@ -109,8 +110,10 @@ export default {
     this.updatePositionInVisualViewport()
     window.addEventListener('scroll', this.updatePositionInVisualViewport)
     this.updateFavorites()
+    this.updateLiveSpaces()
     setInterval(() => {
       this.updateFavorites()
+      this.updateLiveSpaces()
     }, 1000 * 60 * 10) // 10 minutes
   },
   computed: {
@@ -241,7 +244,14 @@ export default {
     },
     async updateFavorites () {
       await this.$store.dispatch('currentUser/restoreUserFavorites')
+    },
+    async updateLiveSpaces () {
+      let spaces = await this.$store.dispatch('api/getLiveSpaces')
+      spaces = spaces.filter(space => space.user.id !== this.currentUser.id)
+      this.liveSpaces = spaces
+      console.log('🍊', this.liveSpaces)
     }
+
   }
 }
 </script>
