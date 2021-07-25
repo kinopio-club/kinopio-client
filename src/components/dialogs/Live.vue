@@ -2,13 +2,13 @@
 dialog.live(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
       p
-        //- img.icon.sunglasses(src="@/assets/sunglasses.svg")
-        span ablkjsadlkjfsadf
-  section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
+        img.icon.camera(src="@/assets/camera.svg")
+        span Live Public Spaces
+  section.results-section(v-if="spaces.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(:spaces="spaces" :showUser="true" :hideExploreBadge="true" @selectSpace="changeSpace")
-
-  //- Community(:visible="!templatesIsVisible" :loading="loading" :spaces="spaces" @updateCurrentSpace="updateCurrentSpace")
-  //- Templates(:visible="templatesIsVisible")
+  section.empty(v-if="!spaces.length")
+    p No public spaces are currently being edited, check back soon
+    img.placeholder(src="@/assets/cat-book.jpg")
 </template>
 
 <script>
@@ -71,8 +71,13 @@ export default {
 <style lang="stylus">
 .live
   max-height calc(100vh - 100px)
-// .header
-//   border-bottom 1px solid var(--primary)
-//   border-bottom-left-radius 0
-//   border-bottom-right-radius 0
+  .camera
+    vertical-align baseline
+  section.empty
+    border-top 0
+    padding-top 4px
+  .placeholder
+    border-radius 3px
+    margin-top 10px
+    // margin-bottom -4px
 </style>

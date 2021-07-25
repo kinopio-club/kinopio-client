@@ -4,7 +4,7 @@ export default {
     return [
       {
         name: 'open',
-        description: 'Everyone can view and edit (add only)',
+        description: 'Everyone can view and add cards',
         color: 'success',
         icon: 'open'
       },
