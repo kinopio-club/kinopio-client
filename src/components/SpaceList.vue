@@ -41,8 +41,7 @@ span.space-list-wrap
           .name
             span {{space.name}}
             img.icon.privacy-icon(v-if="spaceIsNotClosed(space)" :src="privacyIcon(space)")
-            .badge.status(v-if="showInExplore(space)" title="Shown in Explore")
-              img.icon(src="@/assets/checkmark.svg")
+            img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
 
 </template>
 
@@ -251,14 +250,8 @@ export default {
   .badge
     margin-left 0
 
-  .badge.status
-    display inline-flex
-    margin 0
-    margin-left 6px
-    min-height auto
-    height 14px
-    img
-      margin 0
+  .sunglasses
+    width 16px
 
   .name
     margin 0
