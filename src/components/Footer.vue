@@ -10,8 +10,11 @@
             button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
               img.icon.sunglasses(src="@/assets/sunglasses.svg")
               span Explore
-            button L 33
+            button(@click.left="toggleLiveIsVisible" :class="{ active: liveIsVisible}")
+              span L&nbsp;
+              span(v-if="liveSpaces.length") {{ liveSpaces.length }}
           Explore(:visible="exploreIsVisible")
+          Live(:visible="liveIsVisible" :spaces="liveSpaces")
         //- Favorites
         .button-wrap
           .segmented-buttons
@@ -53,6 +56,7 @@
 
 <script>
 import Explore from '@/components/dialogs/Explore.vue'
+import Live from '@/components/dialogs/Live.vue'
 import Removed from '@/components/dialogs/Removed.vue'
 import Links from '@/components/dialogs/Links.vue'
 import Tags from '@/components/dialogs/Tags.vue'
@@ -70,6 +74,7 @@ export default {
   name: 'Footer',
   components: {
     Explore,
+    Live,
     Removed,
     Notifications,
     Links,
@@ -86,6 +91,7 @@ export default {
       linksIsVisible: false,
       tagsIsVisible: false,
       exploreIsVisible: false,
+      liveIsVisible: false,
       mobileTipsIsVisible: false,
       visualViewportPosition: {},
       liveSpaces: []
@@ -99,6 +105,7 @@ export default {
         this.linksIsVisible = false
         this.tagsIsVisible = false
         this.exploreIsVisible = false
+        this.liveIsVisible = false
         this.mobileTipsIsVisible = false
       }
       if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
@@ -236,6 +243,11 @@ export default {
       const isVisible = this.exploreIsVisible
       this.$store.dispatch('closeAllDialogs', 'Footer.toggleExploreIsVisible')
       this.exploreIsVisible = !isVisible
+    },
+    toggleLiveIsVisible () {
+      const isVisible = this.liveIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Footer.toggleLiveIsVisible')
+      this.liveIsVisible = !isVisible
     },
     toggleMobileTipsIsVisible () {
       const isVisible = this.mobileTipsIsVisible
