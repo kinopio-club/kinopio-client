@@ -1085,7 +1085,8 @@ export default {
   spaceMeta (space) {
     return {
       id: space.id,
-      name: space.name
+      name: space.name,
+      privacy: space.privacy
     }
   },
   normalizeBroadcastUpdates (updates) {
