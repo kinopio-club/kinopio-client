@@ -4,8 +4,7 @@
     template
       p
         img.icon.sunglasses(src="@/assets/sunglasses.svg")
-        span Explore cool community spaces
-      ShowInExploreButton(@updateSpaces="updateCurrentSpace" :label="showInExploreLabel")
+        span Cool Community Spaces
     p(v-if="loading")
       Loader(:visible="loading")
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
@@ -15,15 +14,13 @@
 <script>
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
-import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
 import utils from '@/utils.js'
 
 export default {
   name: 'Community',
   components: {
     Loader,
-    SpaceList,
-    ShowInExploreButton
+    SpaceList
   },
   props: {
     visible: Boolean,

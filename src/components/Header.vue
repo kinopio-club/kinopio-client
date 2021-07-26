@@ -24,9 +24,10 @@ header(:style="visualViewportPosition")
                 span Read Only
             MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
             span {{currentSpaceName}}
+            //- privacy
             img.icon.privacy-icon(v-if="spaceIsNotClosed" :src="privacyIcon" :class="privacyName")
-            .badge.status.explore(v-if="shouldShowInExplore")
-              img.icon(src="@/assets/checkmark.svg")
+            //- explore
+            img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
           SpaceDetails(:visible="spaceDetailsIsVisible")
           ImportArenaChannel(:visible="importArenaChannelIsVisible")
         //- State
@@ -644,9 +645,8 @@ header
       display inline-flex
       margin 0
       margin-left 6px
-      min-height auto
-      height 14px
-      vertical-align -1px
+      width 16px
+      vertical-align baseline
 
   .badge-wrap
     position relative

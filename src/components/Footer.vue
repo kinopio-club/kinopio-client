@@ -6,10 +6,15 @@
       section(v-if="isVisible")
         //- Explore
         .button-wrap
-          button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
-            img.icon.sunglasses(src="@/assets/sunglasses.svg")
-            span Explore
+          .segmented-buttons
+            button(@click.left="toggleExploreIsVisible" :class="{ active: exploreIsVisible}")
+              img.icon.sunglasses(src="@/assets/sunglasses.svg")
+              span Explore
+            button(@click.left="toggleLiveIsVisible" :class="{ active: liveIsVisible}")
+              img.icon.camera(src="@/assets/camera.svg")
+              span(v-if="liveSpaces.length") {{ liveSpaces.length }}
           Explore(:visible="exploreIsVisible")
+          Live(:visible="liveIsVisible" :spaces="liveSpaces" :loading="isLoadingLiveSpaces")
         //- Favorites
         .button-wrap
           .segmented-buttons
@@ -51,6 +56,7 @@
 
 <script>
 import Explore from '@/components/dialogs/Explore.vue'
+import Live from '@/components/dialogs/Live.vue'
 import Removed from '@/components/dialogs/Removed.vue'
 import Links from '@/components/dialogs/Links.vue'
 import Tags from '@/components/dialogs/Tags.vue'
@@ -68,6 +74,7 @@ export default {
   name: 'Footer',
   components: {
     Explore,
+    Live,
     Removed,
     Notifications,
     Links,
@@ -84,8 +91,10 @@ export default {
       linksIsVisible: false,
       tagsIsVisible: false,
       exploreIsVisible: false,
+      liveIsVisible: false,
       mobileTipsIsVisible: false,
-      visualViewportPosition: {}
+      visualViewportPosition: {},
+      liveSpaces: []
     }
   },
   mounted () {
@@ -96,6 +105,7 @@ export default {
         this.linksIsVisible = false
         this.tagsIsVisible = false
         this.exploreIsVisible = false
+        this.liveIsVisible = false
         this.mobileTipsIsVisible = false
       }
       if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
@@ -106,10 +116,15 @@ export default {
     })
     this.updatePositionInVisualViewport()
     window.addEventListener('scroll', this.updatePositionInVisualViewport)
+    window.addEventListener('online', this.updateLiveSpaces)
     this.updateFavorites()
+    this.updateLiveSpaces()
     setInterval(() => {
       this.updateFavorites()
     }, 1000 * 60 * 10) // 10 minutes
+    setInterval(() => {
+      this.updateLiveSpaces()
+    }, 1000 * 60 * 5) // 5 minutes
   },
   computed: {
     currentUser () { return this.$store.state.currentUser },
@@ -232,6 +247,14 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'Footer.toggleExploreIsVisible')
       this.exploreIsVisible = !isVisible
     },
+    toggleLiveIsVisible () {
+      const isVisible = this.liveIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Footer.toggleLiveIsVisible')
+      this.liveIsVisible = !isVisible
+      if (this.liveIsVisible) {
+        this.updateLiveSpaces()
+      }
+    },
     toggleMobileTipsIsVisible () {
       const isVisible = this.mobileTipsIsVisible
       this.$store.dispatch('closeAllDialogs', 'Footer.toggleMobileTipsIsVisible')
@@ -239,7 +262,16 @@ export default {
     },
     async updateFavorites () {
       await this.$store.dispatch('currentUser/restoreUserFavorites')
+    },
+    async updateLiveSpaces () {
+      this.isLoadingLiveSpaces = true
+      let spaces = await this.$store.dispatch('api/getLiveSpaces')
+      spaces = spaces.filter(space => space.user.id !== this.currentUser.id)
+      this.liveSpaces = spaces
+      this.isLoadingLiveSpaces = false
+      console.log('🍊 updated live spaces', this.liveSpaces)
     }
+
   }
 }
 </script>

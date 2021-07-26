@@ -271,6 +271,16 @@ const self = {
         console.error('🚒', error)
       }
     },
+    getLiveSpaces: async (context) => {
+      try {
+        console.log('🛬 getting live spaces')
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await utils.timeout(40000, fetch(`${host}/space/live-spaces`, options))
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒', error)
+      }
+    },
     getSpace: async (context, { space, shouldRequestRemote }) => {
       try {
         if (!shouldRequest(shouldRequestRemote)) { return }

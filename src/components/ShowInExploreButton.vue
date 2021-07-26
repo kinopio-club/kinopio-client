@@ -1,7 +1,7 @@
 <template lang="pug">
 .button-wrap(v-if="isSpaceMember")
-  label(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
-    input(type="checkbox" v-model="showInExplore")
+  button(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
+    img.icon.sunglasses(src="@/assets/sunglasses.svg")
     span {{showInExploreLabel}}
 
   template(v-if="error.userNeedsToSignUpOrIn")
