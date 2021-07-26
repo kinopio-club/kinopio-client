@@ -4,6 +4,7 @@ dialog.live(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': d
       p
         img.icon.camera(src="@/assets/camera.svg")
         span Live Public Spaces
+        Loader(:visible="loading")
   section.results-section(v-if="spaces.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(:spaces="spaces" :showUser="true" :hideExploreBadge="true" @selectSpace="changeSpace")
   section.empty(v-if="!spaces.length")
@@ -12,17 +13,20 @@ dialog.live(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': d
 </template>
 
 <script>
-import utils from '@/utils.js'
 import SpaceList from '@/components/SpaceList.vue'
+import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'Live',
   components: {
-    SpaceList
+    SpaceList,
+    Loader
   },
   props: {
     visible: Boolean,
-    spaces: Array
+    spaces: Array,
+    loading: Boolean
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -79,5 +83,9 @@ export default {
   .placeholder
     border-radius 3px
     margin-top 10px
-    // margin-bottom -4px
+  .loader
+    height 14px
+    width 14px
+    vertical-align -3px
+    margin-left 3px
 </style>

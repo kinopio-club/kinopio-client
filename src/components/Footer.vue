@@ -14,7 +14,7 @@
               img.icon.camera(src="@/assets/camera.svg")
               span(v-if="liveSpaces.length") {{ liveSpaces.length }}
           Explore(:visible="exploreIsVisible")
-          Live(:visible="liveIsVisible" :spaces="liveSpaces")
+          Live(:visible="liveIsVisible" :spaces="liveSpaces" :loading="isLoadingLiveSpaces")
         //- Favorites
         .button-wrap
           .segmented-buttons
@@ -116,12 +116,15 @@ export default {
     })
     this.updatePositionInVisualViewport()
     window.addEventListener('scroll', this.updatePositionInVisualViewport)
+    window.addEventListener('online', this.updateLiveSpaces)
     this.updateFavorites()
     this.updateLiveSpaces()
     setInterval(() => {
       this.updateFavorites()
-      this.updateLiveSpaces()
     }, 1000 * 60 * 10) // 10 minutes
+    setInterval(() => {
+      this.updateLiveSpaces()
+    }, 1000 * 60 * 5) // 5 minutes
   },
   computed: {
     currentUser () { return this.$store.state.currentUser },
@@ -248,6 +251,9 @@ export default {
       const isVisible = this.liveIsVisible
       this.$store.dispatch('closeAllDialogs', 'Footer.toggleLiveIsVisible')
       this.liveIsVisible = !isVisible
+      if (this.liveIsVisible) {
+        this.updateLiveSpaces()
+      }
     },
     toggleMobileTipsIsVisible () {
       const isVisible = this.mobileTipsIsVisible
@@ -258,10 +264,12 @@ export default {
       await this.$store.dispatch('currentUser/restoreUserFavorites')
     },
     async updateLiveSpaces () {
+      this.isLoadingLiveSpaces = true
       let spaces = await this.$store.dispatch('api/getLiveSpaces')
       spaces = spaces.filter(space => space.user.id !== this.currentUser.id)
       this.liveSpaces = spaces
-      console.log('🍊', this.liveSpaces)
+      this.isLoadingLiveSpaces = false
+      console.log('🍊 updated live spaces', this.liveSpaces)
     }
 
   }
