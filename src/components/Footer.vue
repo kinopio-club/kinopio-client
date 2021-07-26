@@ -269,7 +269,7 @@ export default {
       spaces = spaces.filter(space => space.user.id !== this.currentUser.id)
       this.liveSpaces = spaces
       this.isLoadingLiveSpaces = false
-      console.log('🍊 updated live spaces', this.liveSpaces)
+      console.log('📽', this.liveSpaces)
     }
 
   }
