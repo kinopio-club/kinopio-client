@@ -6,8 +6,8 @@
     template(v-else)
       .badge(:class="privacyState.color")
         img.icon(:src="privacyIcon(privacyState).path" :class="privacyState.name")
-        span {{privacyState.name | capitalize}}
-    p.description(v-if="showDescription") {{privacyState.description | capitalize}}
+        span {{name}}
+    p.description(v-if="showDescription") {{description}}
   PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
 </template>
 
@@ -39,6 +39,13 @@ export default {
       return privacy.states().find(state => {
         return state.name === this.spacePrivacy
       })
+    },
+    description () {
+      return utils.capitalizeFirstLetter(this.privacyState.description)
+    },
+    name () {
+      const name = this.privacyState.friendlyName || this.privacyState.name
+      return utils.capitalizeFirstLetter(name)
     }
   },
   methods: {

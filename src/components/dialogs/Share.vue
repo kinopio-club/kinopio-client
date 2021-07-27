@@ -19,11 +19,11 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
       span To share this space publically, set the privacy to
       span.badge.info
         img.icon.closed(src="@/assets/unlock.svg")
-        span Closed
+        span {{privacyName(1)}}
       span or
       span.badge.success
         img.icon.open(src="@/assets/open.svg")
-        span Open
+        span {{privacyName(0)}}
 
   section(v-if="spaceHasUrl && isSpaceMember")
     .button-wrap
@@ -48,6 +48,7 @@ import PrivacyButton from '@/components/PrivacyButton.vue'
 import InviteCollaborators from '@/components/dialogs/InviteCollaborators.vue'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
+import privacy from '@/data/privacy.js'
 
 export default {
   name: 'Share',
@@ -105,6 +106,11 @@ export default {
     }
   },
   methods: {
+    privacyName (number) {
+      const state = privacy.states()[number]
+      const name = state.friendlyName || state.name
+      return utils.capitalizeFirstLetter(name)
+    },
     copyUrl () {
       const element = this.$refs.url
       element.select()

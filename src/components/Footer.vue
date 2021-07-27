@@ -94,7 +94,8 @@ export default {
       liveIsVisible: false,
       mobileTipsIsVisible: false,
       visualViewportPosition: {},
-      liveSpaces: []
+      liveSpaces: [],
+      isLoadingLiveSpaces: true
     }
   },
   mounted () {
