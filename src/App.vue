@@ -58,7 +58,6 @@ export default {
           name: 'og:author',
           content: this.spaceAuthorName
         }
-        // TODO og:image as background, first card img, or space screenshot?
       ]
     }
   },

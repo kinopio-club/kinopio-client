@@ -66,7 +66,7 @@ aside.notifications(@click.left="closeAllDialogs")
       .button-wrap
         button(@click.left="refreshBrowser") Refresh
 
-  .persistent-item.success.notify-new-user(ref="newUser" v-if="notifyNewUser")
+  .persistent-item.success(ref="newUser" v-if="notifyNewUser")
     p Welcome to Kinopio, a space for thinking
     .row
       .button-wrap(v-if="!userHasSpaces")
