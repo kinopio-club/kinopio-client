@@ -37,16 +37,20 @@ import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import utils from '@/utils.js'
 
 export default {
-  metaInfo: {
-    title: 'Kinopio',
-    // titleTemplate: '%s – Kinopio',
-    meta: [
-      { name: 'description', content: 'testinggg description' }
-    ]
-    // link: [
-    //   { rel: 'canonical', href: 'https://kinopio.club' }
-    // ]
-    // add social tags, og, twitter (see blog)
+  metaInfo () {
+    return {
+      title: this.pageName,
+      meta: [
+        {
+          name: 'description',
+          content: 'Kinopio is your spatial thinking tool for new ideas and hard problems.'
+        },
+        {
+          name: 'theme-color',
+          content: this.backgroundTint
+        }
+      ]
+    }
   },
   components: {
     Header,
@@ -83,6 +87,16 @@ export default {
     }
   },
   computed: {
+    pageName () {
+      const spaceName = this.$store.state.currentSpace.name
+      if (spaceName === 'Hello Kinopio') {
+        return 'Kinopio'
+      } else if (spaceName) {
+        return `${spaceName} – Kinopio`
+      } else {
+        return 'Kinopio'
+      }
+    },
     isDevelopment () {
       if (process.env.NODE_ENV === 'development') {
         return true
@@ -119,8 +133,6 @@ export default {
       let color = this.$store.state.currentSpace.backgroundTint
       this.backgroundTint = color
       this.backgroundBlendMode = 'multiply'
-      const metaThemeColor = document.querySelector('meta[name=theme-color]')
-      metaThemeColor.setAttribute('content', color)
     }
   }
 }

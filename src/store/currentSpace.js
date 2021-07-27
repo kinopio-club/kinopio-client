@@ -513,7 +513,6 @@ export default {
         name: 'createSpace',
         body: space
       }, { root: true })
-      utils.updateWindowTitle(space)
       context.commit('addUserToSpace', user)
     },
     saveImportedSpace: async (context) => {
@@ -524,7 +523,6 @@ export default {
       if (currentUserIsSignedIn) {
         await context.dispatch('api/createSpace', space, { root: true })
       }
-      utils.updateWindowTitle(space)
       context.dispatch('updateWindowHistory', { space, isRemote: currentUserIsSignedIn })
       context.commit('addUserToSpace', user)
       context.dispatch('loadBackground')
@@ -730,7 +728,6 @@ export default {
         context.commit('restoreSpace', utils.normalizeSpace(remoteSpace))
         context.dispatch('history/playback', null, { root: true })
         context.dispatch('checkIfShouldNotifySignUpToEditSpace', remoteSpace)
-        utils.updateWindowTitle(remoteSpace)
         context.commit('broadcast/joinSpaceRoom', null, { root: true })
         context.dispatch('checkIfShouldNotifySpaceIsRemoved', remoteSpace)
         if (cache.getAllSpaces().length) {
@@ -738,8 +735,6 @@ export default {
         } else {
           context.commit('notifyNewUser', true, { root: true })
         }
-      } else {
-        utils.updateWindowTitle(space)
       }
       context.commit('spaceUrlToLoad', '', { root: true })
       context.dispatch('updateSpacePageSize')
@@ -771,7 +766,6 @@ export default {
       if (updates.name) {
         const updatedSpace = utils.clone(space)
         updatedSpace.name = updates.name
-        utils.updateWindowTitle(updatedSpace)
       }
       context.commit('updateSpace', updates)
       context.commit('broadcast/update', { updates, type: 'updateSpace' }, { root: true })
@@ -781,9 +775,6 @@ export default {
       }, { root: true })
     },
     changeSpace: async (context, { space, isRemote }) => {
-      if (isRemote) {
-        utils.updateWindowTitle(space)
-      }
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
       await context.dispatch('loadSpace', { space })
