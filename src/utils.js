@@ -761,17 +761,6 @@ export default {
       return id
     }
   },
-  title ({ name }) {
-    if (name) {
-      return `${name} – Kinopio`
-    } else {
-      return 'Kinopio'
-    }
-  },
-  updateWindowTitle (space) {
-    const title = this.title(space)
-    document.title = title
-  },
   spaceHasUrl () {
     return window.location.href !== (window.location.origin + '/')
   },

@@ -34,10 +34,33 @@ import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
 import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
-
 import utils from '@/utils.js'
 
 export default {
+  metaInfo () {
+    return {
+      title: this.pageName,
+      meta: [
+        {
+          name: 'description',
+          content: 'Kinopio is your spatial thinking tool for new ideas and hard problems.'
+        },
+        {
+          name: 'theme-color',
+          content: this.backgroundTint
+        },
+        // open graph
+        {
+          name: 'og:title',
+          content: this.spaceName
+        },
+        {
+          name: 'og:author',
+          content: this.spaceAuthorName
+        }
+      ]
+    }
+  },
   components: {
     Header,
     MagicPaint,
@@ -73,6 +96,26 @@ export default {
     }
   },
   computed: {
+    spaceName () { return this.$store.state.currentSpace.name },
+    pageName () {
+      const spaceName = this.spaceName
+      if (spaceName === 'Hello Kinopio') {
+        return 'Kinopio'
+      } else if (spaceName) {
+        return `${spaceName} – Kinopio`
+      } else {
+        return 'Kinopio'
+      }
+    },
+    spaceAuthorName () {
+      if (!this.$store.state.currentSpace.users.length) { return undefined }
+      const authorName = this.$store.state.currentSpace.users[0].name
+      if (authorName) {
+        return authorName
+      } else {
+        return undefined
+      }
+    },
     isDevelopment () {
       if (process.env.NODE_ENV === 'development') {
         return true
@@ -109,8 +152,6 @@ export default {
       let color = this.$store.state.currentSpace.backgroundTint
       this.backgroundTint = color
       this.backgroundBlendMode = 'multiply'
-      const metaThemeColor = document.querySelector('meta[name=theme-color]')
-      metaThemeColor.setAttribute('content', color)
     }
   }
 }
