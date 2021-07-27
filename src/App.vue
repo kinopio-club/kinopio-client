@@ -48,7 +48,13 @@ export default {
         {
           name: 'theme-color',
           content: this.backgroundTint
+        },
+        // open graph
+        {
+          name: 'og:title',
+          content: this.spaceName
         }
+        // TODO og:image as background, first card img, or space screenshot?
       ]
     }
   },
@@ -87,8 +93,9 @@ export default {
     }
   },
   computed: {
+    spaceName () { return this.$store.state.currentSpace.name },
     pageName () {
-      const spaceName = this.$store.state.currentSpace.name
+      const spaceName = this.spaceName
       if (spaceName === 'Hello Kinopio') {
         return 'Kinopio'
       } else if (spaceName) {
