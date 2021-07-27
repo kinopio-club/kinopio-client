@@ -34,10 +34,20 @@ import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
 import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
-
 import utils from '@/utils.js'
 
 export default {
+  metaInfo: {
+    title: 'Kinopio',
+    // titleTemplate: '%s – Kinopio',
+    meta: [
+      { name: 'description', content: 'testinggg description' }
+    ]
+    // link: [
+    //   { rel: 'canonical', href: 'https://kinopio.club' }
+    // ]
+    // add social tags, og, twitter (see blog)
+  },
   components: {
     Header,
     MagicPaint,
