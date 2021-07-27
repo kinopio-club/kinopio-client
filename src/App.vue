@@ -53,6 +53,10 @@ export default {
         {
           name: 'og:title',
           content: this.spaceName
+        },
+        {
+          name: 'og:author',
+          content: this.spaceAuthorName
         }
         // TODO og:image as background, first card img, or space screenshot?
       ]
@@ -102,6 +106,15 @@ export default {
         return `${spaceName} – Kinopio`
       } else {
         return 'Kinopio'
+      }
+    },
+    spaceAuthorName () {
+      if (!this.$store.state.currentSpace.users.length) { return undefined }
+      const authorName = this.$store.state.currentSpace.users[0].name
+      if (authorName) {
+        return authorName
+      } else {
+        return undefined
       }
     },
     isDevelopment () {
