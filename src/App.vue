@@ -37,30 +37,6 @@ import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import utils from '@/utils.js'
 
 export default {
-  metaInfo () {
-    return {
-      title: this.pageName,
-      meta: [
-        {
-          name: 'description',
-          content: 'Kinopio is your spatial thinking tool for new ideas and hard problems.'
-        },
-        {
-          name: 'theme-color',
-          content: this.backgroundTint
-        },
-        // open graph
-        {
-          name: 'og:title',
-          content: this.spaceName
-        },
-        {
-          name: 'og:author',
-          content: this.spaceAuthorName
-        }
-      ]
-    }
-  },
   components: {
     Header,
     MagicPaint,
@@ -107,15 +83,6 @@ export default {
         return 'Kinopio'
       }
     },
-    spaceAuthorName () {
-      if (!this.$store.state.currentSpace.users.length) { return undefined }
-      const authorName = this.$store.state.currentSpace.users[0].name
-      if (authorName) {
-        return authorName
-      } else {
-        return undefined
-      }
-    },
     isDevelopment () {
       if (process.env.NODE_ENV === 'development') {
         return true
@@ -152,6 +119,15 @@ export default {
       let color = this.$store.state.currentSpace.backgroundTint
       this.backgroundTint = color
       this.backgroundBlendMode = 'multiply'
+    }
+  },
+  watch: {
+    pageName (pageName) {
+      document.title = pageName
+    },
+    backgroundTint (color) {
+      const metaThemeColor = document.querySelector('meta[name=theme-color]')
+      metaThemeColor.setAttribute('content', color)
     }
   }
 }

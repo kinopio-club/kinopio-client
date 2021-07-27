@@ -1,10 +1,8 @@
 import Vue from 'vue'
 import App from './App.vue'
-import Meta from 'vue-meta'
 
 import router from './router'
 import store from './store/store'
-Vue.use(Meta)
 
 // import devtools from '@vue/devtools'
 
