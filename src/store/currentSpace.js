@@ -514,6 +514,9 @@ export default {
         body: space
       }, { root: true })
       context.commit('addUserToSpace', user)
+      Vue.nextTick(() => {
+        context.dispatch('updateCardsDimensions')
+      })
     },
     saveImportedSpace: async (context) => {
       const space = utils.clone(context.state)
@@ -526,6 +529,9 @@ export default {
       context.dispatch('updateWindowHistory', { space, isRemote: currentUserIsSignedIn })
       context.commit('addUserToSpace', user)
       context.dispatch('loadBackground')
+      Vue.nextTick(() => {
+        context.dispatch('updateCardsDimensions')
+      })
     },
     duplicateSpace: (context) => {
       const user = context.rootState.currentUser
@@ -935,7 +941,9 @@ export default {
         frameId: 0,
         userId: context.rootState.currentUser.id,
         urlPreviewIsVisible: true,
-        commentIsVisible: true
+        commentIsVisible: true,
+        width: utils.emptyCard().width,
+        height: utils.emptyCard().height
       }
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       context.commit('createCard', card)
@@ -1018,10 +1026,33 @@ export default {
           delete card.y
         }
       }
+      card = utils.updateCardDimentions(card)
       const update = { name: 'updateCard', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('broadcast/update', { updates: card, type: 'updateCard' }, { root: true })
       context.commit('history/add', update, { root: true })
+    },
+    updateCardsDimensions: (context) => {
+      let cards = utils.clone(context.state.cards)
+      cards.forEach(card => {
+        const prevDimensions = {
+          width: card.width,
+          height: card.height
+        }
+        card = utils.updateCardDimentions(card)
+        const dimensionsChanged = card.width !== prevDimensions.width || card.height !== prevDimensions.height
+        if (dimensionsChanged) {
+          const body = {
+            id: card.id,
+            width: card.width,
+            height: card.height
+          }
+          const update = { name: 'updateCard', body }
+          context.dispatch('api/addToQueue', update, { root: true })
+          context.commit('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
+          context.commit('updateCard', body)
+        }
+      })
     },
     toggleCardChecked (context, { cardId, value }) {
       utils.typeCheck({ value, type: 'boolean', origin: 'toggleCardChecked' })

@@ -645,6 +645,7 @@ export default {
           return card
         })
         newCards.forEach(card => {
+          card = utils.updateCardDimentions(card)
           this.$store.dispatch('currentSpace/updateCard', {
             id: card.id,
             y: card.y
