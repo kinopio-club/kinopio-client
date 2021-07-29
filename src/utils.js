@@ -894,7 +894,7 @@ export default {
       if (hasProtocol) {
         return url
       } else {
-        return `http://${url}`
+        return `https://${url}`
       }
     })
     return urls

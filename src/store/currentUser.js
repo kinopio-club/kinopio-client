@@ -12,6 +12,8 @@ export default {
     lastSpaceId: '',
     color: randomColor({ luminosity: 'light' }),
     name: undefined,
+    description: undefined,
+    website: undefined,
     defaultConnectionTypeId: '',
     lastReadNewStuffId: undefined,
     prefersDarkTheme: false,
@@ -35,17 +37,25 @@ export default {
     shouldShowNewUserNotification: true
   },
   mutations: {
-    color: (state, newColor) => {
-      state.color = newColor
-      cache.updateUser('color', newColor)
+    color: (state, value) => {
+      state.color = value
+      cache.updateUser('color', value)
     },
-    name: (state, newName) => {
-      state.name = newName
-      cache.updateUser('name', newName)
+    name: (state, value) => {
+      state.name = value
+      cache.updateUser('name', value)
     },
-    email: (state, newEmail) => {
-      state.email = newEmail
-      cache.updateUser('email', newEmail)
+    description: (state, value) => {
+      state.description = value
+      cache.updateUser('description', value)
+    },
+    website: (state, value) => {
+      state.website = value
+      cache.updateUser('website', value)
+    },
+    email: (state, value) => {
+      state.email = value
+      cache.updateUser('email', value)
     },
     lastSpaceId: (state, spaceId) => {
       state.lastSpaceId = spaceId
@@ -285,22 +295,15 @@ export default {
       context.commit('currentSpace/updateUser', user, { root: true })
       context.commit('currentSpace/updateCollaborator', user, { root: true })
     },
-    name: (context, newName) => {
-      context.commit('name', newName)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
-        body: {
-          name: newName
-        } }, { root: true })
-      context.dispatch('broadcastUpdate', { name: newName })
+    update: (context, updates) => {
+      const keys = Object.keys(updates)
+      keys.forEach(key => {
+        context.commit(key, updates[key])
+        context.dispatch('broadcastUpdate', { [key]: updates[key] })
+      })
+      context.dispatch('api/addToQueue', { name: 'updateUser', body: updates }, { root: true })
     },
-    color: (context, newColor) => {
-      context.commit('color', newColor)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
-        body: {
-          color: newColor
-        } }, { root: true })
-      context.dispatch('broadcastUpdate', { color: newColor })
-    },
+
     lastSpaceId: (context, spaceId) => {
       context.commit('notifySpaceNotFound', false, { root: true })
       context.commit('lastSpaceId', spaceId)
