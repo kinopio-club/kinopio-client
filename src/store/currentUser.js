@@ -229,6 +229,14 @@ export default {
         context.dispatch('createNewUser')
       }
     },
+    update: (context, updates) => {
+      const keys = Object.keys(updates)
+      keys.forEach(key => {
+        context.commit(key, updates[key])
+        context.dispatch('broadcastUpdate', { [key]: updates[key] })
+      })
+      context.dispatch('api/addToQueue', { name: 'updateUser', body: updates }, { root: true })
+    },
     cardsCreatedCount: (context, { shouldIncrement }) => {
       const spaceUserIsUpgraded = context.rootGetters['currentSpace/spaceUserIsUpgraded']
       if (spaceUserIsUpgraded) { return }
@@ -294,15 +302,6 @@ export default {
       context.commit('currentSpace/updateUser', user, { root: true })
       context.commit('currentSpace/updateCollaborator', user, { root: true })
     },
-    update: (context, updates) => {
-      const keys = Object.keys(updates)
-      keys.forEach(key => {
-        context.commit(key, updates[key])
-        context.dispatch('broadcastUpdate', { [key]: updates[key] })
-      })
-      context.dispatch('api/addToQueue', { name: 'updateUser', body: updates }, { root: true })
-    },
-
     lastSpaceId: (context, spaceId) => {
       context.commit('notifySpaceNotFound', false, { root: true })
       context.commit('lastSpaceId', spaceId)

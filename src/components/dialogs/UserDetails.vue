@@ -34,7 +34,6 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.left.stop="clos
         a(:href="websiteUrl" v-if="websiteUrl")
           button.inline-button
             img.icon.visit.arrow-icon(src="@/assets/visit.svg")
-      //- badges
       .row.badges(v-if="user.isSpectator || user.isUpgraded")
         .badge.status(v-if="user.isSpectator") Spectator
         .badge.success(v-if="user.isUpgraded") Upgraded
