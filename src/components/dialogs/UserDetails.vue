@@ -8,12 +8,14 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.left.stop="clos
         User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
         p.name {{user.name}}
       .row(v-if="user.description")
-        p {{user.description}}
+        textarea(ref="description" :value="user.description" disabled)
       .row.website(v-if="user.website")
-        p {{user.website}}
+        p(v-if="!websiteUrl") {{user.website}}
         a(:href="websiteUrl" v-if="websiteUrl")
+          span {{user.website}}
           button.inline-button
             img.icon.visit.arrow-icon(src="@/assets/visit.svg")
+
     .row.badges(v-if="user.isSpectator || user.isUpgraded")
       .badge.status(v-if="user.isSpectator") Spectator
       .badge.success(v-if="user.isUpgraded") Upgraded
@@ -379,6 +381,9 @@ export default {
     word-break break-all
     align-items flex-start
     .inline-button
-      margin-top -2px
-
+      margin-top -1px
+  textarea:disabled
+    color var(--primary)
+    -webkit-text-fill-color var(--primary)
+    -webkit-opacity 1
 </style>
