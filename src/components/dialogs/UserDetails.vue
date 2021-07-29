@@ -7,6 +7,13 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.left.stop="clos
       .row
         User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
         p.name {{user.name}}
+      .row(v-if="user.description")
+        p {{user.description}}
+      .row.website(v-if="user.website")
+        p {{user.website}}
+        a(:href="websiteUrl" v-if="websiteUrl")
+          button.inline-button
+            img.icon.visit.arrow-icon(src="@/assets/visit.svg")
     .row.badges(v-if="user.isSpectator || user.isUpgraded")
       .badge.status(v-if="user.isSpectator") Spectator
       .badge.success(v-if="user.isUpgraded") Upgraded
@@ -19,7 +26,14 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.left.stop="clos
           button.change-color(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
             .current-color(:style="{ background: userColor }")
           ColorPicker(:currentColor="userColor" :visible="colorPickerIsVisible" @selectedColor="updateUserColor")
-        input.name(placeholder="What's your name?" v-model="userName" name="Name")
+        input.name(placeholder="What's your name?" v-model="userName" name="Name" maxlength=100)
+      .row
+        textarea(ref="description" placeholder="Tell us about yourself" v-model="userDescription" name="Description" maxlength=220 rows="1")
+      .row
+        input(ref="website" placeholder="Website" v-model="userWebsite" name="Website" maxlength=200 rows="1")
+        a(:href="websiteUrl" v-if="websiteUrl")
+          button.inline-button
+            img.icon.visit.arrow-icon(src="@/assets/visit.svg")
       .row.badges(v-if="user.isSpectator || user.isUpgraded")
         .badge.status(v-if="user.isSpectator") Spectator
         .badge.success(v-if="user.isUpgraded") Upgraded
@@ -146,9 +160,32 @@ export default {
       get () {
         return this.user.name
       },
-      set (newName) {
-        this.$store.dispatch('currentUser/name', newName)
+      set (newValue) {
+        this.updateUser({ name: newValue })
       }
+    },
+    userDescription: {
+      get () {
+        return this.user.description
+      },
+      set (newValue) {
+        this.updateUser({ description: newValue })
+        this.updateTextareaSize()
+      }
+    },
+    userWebsite: {
+      get () {
+        return this.user.website
+      },
+      set (newValue) {
+        this.updateUser({ website: newValue })
+      }
+    },
+    websiteUrl () {
+      if (!this.userWebsite) { return }
+      const urls = utils.urlsFromString(this.userWebsite)
+      if (!urls) { return }
+      return urls[0]
     },
     isFavoriteUser () {
       const favoriteUsers = this.$store.state.currentUser.favoriteUsers
@@ -209,8 +246,18 @@ export default {
       this.spacePickerIsVisible = false
       this.upgradeUserIsVisible = false
     },
-    updateUserColor (newColor) {
-      this.$store.dispatch('currentUser/color', newColor)
+    updateUserColor (newValue) {
+      this.updateUser({ color: newValue })
+    },
+    updateUser (update) {
+      this.$store.dispatch('currentUser/update', update)
+    },
+    updateTextareaSize () {
+      this.$nextTick(() => {
+        let textarea = this.$refs.description
+        if (!textarea) { return }
+        textarea.style.height = textarea.scrollHeight + 1 + 'px'
+      })
     },
     signOut () {
       cache.removeAll()
@@ -263,6 +310,9 @@ export default {
       this.closeDialogs()
       this.clearUserSpaces()
       this.updateFavorites()
+      if (visible) {
+        this.updateTextareaSize()
+      }
     },
     userDetailsPosition (position) {
       this.closeDialogs()
@@ -303,11 +353,30 @@ export default {
   .inline-user-badge
     display inline-flex !important
 
+  textarea
+    margin-bottom 0
+
+  .inline-button
+    margin-left 6px
+    background-color var(--primary-background)
+    cursor pointer
+    &:hover
+      background var(--secondary-hover-background)
+    &:active
+      background var(--secondary-active-background)
+
+  .arrow-icon
+    position absolute
+    left 5px
+    top 3.5px
+
 .user-info
-  display: flex
   .row
     align-items center
   p
     margin 0
+  .website
+    word-break break-all
+    align-items flex-start
 
 </style>
