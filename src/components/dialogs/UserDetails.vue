@@ -21,7 +21,7 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.left.stop="clos
           ColorPicker(:currentColor="userColor" :visible="colorPickerIsVisible" @selectedColor="updateUserColor")
         input.name(placeholder="What's your name?" v-model="userName" name="Name" maxlength=100)
       .row
-        textarea(ref="description" placeholder="Tell us about yourself" v-model="userDescription" name="Description" maxlength=220 rows="1" @mousedown="textWasSelected" @touchstart="textWasSelected")
+        textarea(ref="description" placeholder="Tell us about yourself" v-model="userDescription" name="Description" maxlength=220 rows="1")
       .row
         input(ref="website" placeholder="Website" v-model="userWebsite" name="Website" maxlength=200 rows="1")
         a(:href="websiteUrl" v-if="websiteUrl")
@@ -248,7 +248,6 @@ export default {
     },
     updateTextareaSize () {
       this.$nextTick(() => {
-        console.log('💔')
         let textarea = this.$refs.description
         textarea.style.height = textarea.scrollHeight + 1 + 'px'
       })
