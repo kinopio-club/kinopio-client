@@ -239,7 +239,7 @@ export default {
     return object
   },
   updateUsersWithUser (users, updatedUser, keys) {
-    keys = keys || ['name', 'color']
+    keys = keys || ['name', 'color', 'description', 'website']
     this.typeCheck({ value: users, type: 'object', origin: 'updateUsersWithUser' })
     this.typeCheck({ value: updatedUser, type: 'object', origin: 'updateUsersWithUser' })
     this.typeCheck({ value: keys, type: 'array', origin: 'updateUsersWithUser' })
@@ -1075,6 +1075,8 @@ export default {
       id: user.id,
       name: user.name,
       color: user.color,
+      description: user.description,
+      website: user.website,
       isSignedIn,
       isSpectator,
       isCollaborator,

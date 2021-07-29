@@ -285,7 +285,6 @@ export default {
     },
     broadcastUpdate: (context, updates) => {
       const space = context.rootState.currentSpace
-
       const spaceUserPermission = utils.capitalizeFirstLetter(context.getters.spaceUserPermission(space)) // User, Collaborator, Spectator
       const type = `update${spaceUserPermission}`
       const userId = context.state.id

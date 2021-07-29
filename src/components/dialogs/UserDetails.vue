@@ -7,6 +7,13 @@ dialog.narrow.user-details(v-if="visible" :open="visible" @click.left.stop="clos
       .row
         User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
         p.name {{user.name}}
+      .row(v-if="user.description")
+        p {{user.description}}
+      .row.website(v-if="user.website")
+        p {{user.website}}
+        a(:href="websiteUrl" v-if="websiteUrl")
+          button.inline-button
+            img.icon.visit.arrow-icon(src="@/assets/visit.svg")
     .row.badges(v-if="user.isSpectator || user.isUpgraded")
       .badge.status(v-if="user.isSpectator") Spectator
       .badge.success(v-if="user.isUpgraded") Upgraded
@@ -249,6 +256,7 @@ export default {
     updateTextareaSize () {
       this.$nextTick(() => {
         let textarea = this.$refs.description
+        if (!textarea) { return }
         textarea.style.height = textarea.scrollHeight + 1 + 'px'
       })
     },
@@ -364,10 +372,12 @@ export default {
     top 3.5px
 
 .user-info
-  display: flex
   .row
     align-items center
   p
     margin 0
+  .website
+    word-break break-all
+    align-items flex-start
 
 </style>
