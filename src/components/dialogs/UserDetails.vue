@@ -378,5 +378,7 @@ export default {
   .website
     word-break break-all
     align-items flex-start
+    .inline-button
+      margin-top -2px
 
 </style>
