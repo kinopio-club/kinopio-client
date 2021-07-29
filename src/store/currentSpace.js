@@ -1015,6 +1015,7 @@ export default {
       })
     },
     updateCard: (context, card) => {
+      card = utils.clone(card)
       context.commit('updateCard', card)
       // prevent null position
       const cardKeys = Object.keys(card)
