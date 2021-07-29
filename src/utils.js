@@ -422,6 +422,9 @@ export default {
 
   // Cards
 
+  emptyCard () {
+    return { width: 76, height: 32 }
+  },
   isCardInViewport (card) {
     const viewport = this.visualViewport()
     // x
@@ -433,6 +436,13 @@ export default {
     const isEndInViewportY = card.y < viewport.pageTop + viewport.height
     const isInViewportY = isStartInViewportY && isEndInViewportY
     return isInViewportX && isInViewportY
+  },
+  updateCardDimentions (card) {
+    const element = document.querySelector(`article [data-card-id="${card.id}"]`)
+    const rect = element.getBoundingClientRect()
+    card.width = Math.ceil(rect.width)
+    card.height = Math.ceil(rect.height)
+    return card
   },
 
   // Connection Path Utils 🐙

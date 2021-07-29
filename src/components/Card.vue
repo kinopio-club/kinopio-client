@@ -232,6 +232,12 @@ export default {
       }
     })
   },
+  mounted () {
+    if (this.shouldUpdateDimensions) {
+      let card = { id: this.card.id }
+      this.$store.dispatch('currentSpace/updateCard', card)
+    }
+  },
   data () {
     return {
       isRemoteConnecting: false,
@@ -261,6 +267,9 @@ export default {
     }
   },
   computed: {
+    shouldUpdateDimensions () {
+      return Boolean(!this.card.width || !this.card.height)
+    },
     isInSearchResultsCards () {
       const results = this.$store.state.searchResultsCards
       if (!results.length) { return }
