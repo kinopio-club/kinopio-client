@@ -136,8 +136,6 @@ export default {
 
 <style lang="stylus">
 .links
-  @media(max-width 435px)
-    left -100px
   .results-section
     border-top 1px solid var(--primary)
     padding-top 4px
