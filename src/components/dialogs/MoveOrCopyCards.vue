@@ -2,8 +2,6 @@
 dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs")
   section
     .row
-      p {{capitalize(actionLabel)}} {{cardsCount}} {{pluralCard}} to
-    .row
       .segmented-buttons
         button(@click.left.stop="hideToNewSpace" :class="{active: !toNewSpace}")
           span Space
@@ -14,10 +12,10 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @cl
     //- To New Space
     template(v-if="toNewSpace")
       .row
-        input(placeholder="name" v-model="newSpaceName")
+        input(placeholder="name" v-model="newSpaceName" @keyup.space.prevent)
       button(@click.left="moveOrCopyToSpace" :class="{active: loading}")
         img.icon.visit(src="@/assets/visit.svg")
-        span {{buttonLabel('New Space')}}
+        span {{buttonLabel}}
         Loader(:visible="loading")
 
     //- To Existing Space
@@ -33,7 +31,7 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @cl
             SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" @selectSpace="updateSelectedSpace")
         button(@click.left="moveOrCopyToSpace" :class="{active: loading}")
           img.icon.visit(src="@/assets/visit.svg")
-          span {{buttonLabel(selectedSpace.name)}}
+          span {{buttonLabel}}
           Loader(:visible="loading")
 
   //- Copy Card Names
@@ -82,7 +80,7 @@ export default {
   },
   computed: {
     multipleCardsSelectedIds () {
-      return this.$store.state.multipleCardsSelectedIds
+      return utils.clone(this.$store.state.multipleCardsSelectedIds)
     },
     multipleCardsIsSelected () {
       const numberOfCards = this.multipleCardsSelectedIds.length
@@ -104,13 +102,14 @@ export default {
       } else {
         return 'copy'
       }
+    },
+    buttonLabel () {
+      const actionLabel = this.capitalize(this.actionLabel) // copy, move
+      const pluralCard = this.capitalize(this.pluralCard) // card, cards
+      return `${actionLabel} ${pluralCard}`
     }
   },
   methods: {
-    buttonLabel (spaceName) {
-      const actionLabel = this.capitalize(this.actionLabel) // copy, move
-      return `${actionLabel} to ${spaceName}`
-    },
     capitalize (value) {
       return utils.capitalizeFirstLetter(value)
     },
@@ -281,6 +280,7 @@ export default {
 
 <style lang="stylus">
 .more-or-copy-cards
+  top calc(100% - 8px)
   cursor initial
   textarea
     background-color var(--secondary-background)

@@ -61,6 +61,7 @@ export default {
     cards () {
       const cards = this.multipleCardsSelectedIds.map(cardId => {
         let card = this.$store.getters['currentSpace/cardById'](cardId)
+        card = utils.clone(card)
         const element = document.querySelector(`article [data-card-id="${cardId}"]`)
         const rect = element.getBoundingClientRect()
         card.width = rect.width

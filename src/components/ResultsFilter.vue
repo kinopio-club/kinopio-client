@@ -14,6 +14,7 @@
     @keydown.down.exact="focusNextItem"
     @keydown.up.exact="focusPreviousItem"
     @keydown.enter.stop.prevent.exact="selectItem"
+    @keyup.space.prevent
   )
   button.borderless.clear-input-wrap(@click.left="clearFilter")
     img.icon(src="@/assets/add.svg")
