@@ -65,6 +65,8 @@ import utils from '@/utils.js'
 import cache from '@/cache.js'
 
 import uniqBy from 'lodash-es/uniqBy'
+import sortBy from 'lodash-es/sortBy'
+import dayjs from 'dayjs'
 
 export default {
   name: 'TagDetails',
@@ -249,6 +251,8 @@ export default {
             cards = await this.$store.dispatch('api/getCardsWithTagAndUser', { userId: user.id, tagName: this.name }) || []
           }
           cards = utils.clone(cards)
+          cards = sortBy(cards, card => dayjs(card.updatedAt).valueOf())
+          cards = cards.reverse()
           remoteCards = remoteCards.concat(cards)
         } catch (error) {
           console.warn('🚑 could not find cards with tag', this.name, error)
