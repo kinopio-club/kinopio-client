@@ -22,11 +22,17 @@ span.space-list-wrap
           tabindex="0"
           v-on:keyup.enter="selectSpace(space)"
         )
-          template(v-if="showUser")
+          //- User(s)
+          template(v-if="showOtherUsers")
+            .users
+              User(:user="user(space)" :isClickable="false" :key="user(space).id")
+              template(v-for="otherUser in space.otherUsers")
+                User(:user="otherUser" :isClickable="false" :key="otherUser.id")
+          template(v-else-if="showUser")
             User(:user="user(space)" :isClickable="false" :key="user(space).id")
           template(v-else-if="showCollaborator(space)")
             User(:user="user(space)" :isClickable="false" :key="user(space).id")
-          //- NEW
+          //- NEW badge
           span(v-if="space.isEdited")
             .badge.info.inline-badge.new-badge New
           //- space meta
@@ -66,6 +72,7 @@ export default {
     selectedSpace: Object,
     showCategory: Boolean,
     showUser: Boolean,
+    showOtherUsers: Boolean,
     showUserIfCurrentUserIsCollaborator: Boolean,
     hideExploreBadge: Boolean,
     hideFilter: Boolean,
@@ -271,6 +278,15 @@ export default {
   .user
     margin-right 6px
     vertical-align middle
+
+  .users
+    margin-right 6px
+    display flex
+    flex-wrap wrap
+    justify-content flex-end
+    align-content flex-start
+    .user
+      margin-right 0
 
   a
     color var(--primary)

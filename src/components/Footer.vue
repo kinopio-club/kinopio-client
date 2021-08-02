@@ -268,11 +268,33 @@ export default {
       this.isLoadingLiveSpaces = true
       let spaces = await this.$store.dispatch('api/getLiveSpaces')
       spaces = spaces.filter(space => space.user.id !== this.currentUser.id)
+      spaces = this.normalizeLiveSpaces(spaces)
       this.liveSpaces = spaces
       this.isLoadingLiveSpaces = false
       console.log('📽', this.liveSpaces)
+    },
+    normalizeLiveSpaces (spaces) {
+      let normalizedSpaces = []
+      spaces = spaces.map(space => {
+        space.otherUsers = []
+        return space
+      })
+      spaces.forEach(space => {
+        const spaceExists = normalizedSpaces.find(normalizedSpace => normalizedSpace.id === space.id)
+        if (spaceExists) {
+          // update otherUsers
+          normalizedSpaces = normalizedSpaces.map(normalizedSpace => {
+            if (normalizedSpace.id === space.id) {
+              normalizedSpace.otherUsers.push(space.user)
+            }
+            return normalizedSpace
+          })
+        } else {
+          normalizedSpaces.push(space)
+        }
+      })
+      return normalizedSpaces
     }
-
   }
 }
 </script>
