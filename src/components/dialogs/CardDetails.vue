@@ -814,8 +814,12 @@ export default {
     },
     textareaSizes () {
       let textareas = document.querySelectorAll('dialog textarea')
+      let modifier = 0
+      if (this.canEditCard) {
+        modifier = 1
+      }
       textareas.forEach(textarea => {
-        textarea.style.height = textarea.scrollHeight + 1 + 'px'
+        textarea.style.height = textarea.scrollHeight + modifier + 'px'
       })
     },
     cardIsEmpty () {
