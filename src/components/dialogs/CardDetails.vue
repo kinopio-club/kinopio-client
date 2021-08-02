@@ -1,5 +1,7 @@
 <template lang="pug">
 dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="closeDialogs" @keyup.stop.backspace="removeCard" :style="styles")
+  .opening-frame
+  //- (v-if="isOpening" :style="lockingFrameStyle")
   section
     .textarea-wrap
       textarea.name(
@@ -1418,4 +1420,19 @@ export default {
       padding-top 1px
   .media-preview + .url-preview
     margin-top 10px
+  .opening-frame
+    position absolute
+    z-index -1
+    pointer-events none
+    // background-color blue
+
+    // dynamic
+    left: -10px;
+    top: -10px;
+    width: calc(100% + 20px);
+    height: calc(100% + 20px);
+    border-radius: 3px;
+    background-color #97e5dd
+    opacity 0.5
+
 </style>
