@@ -517,7 +517,7 @@ header
   top 0
   user-select none
   z-index var(--max-z)
-  width 100vw
+  width 100%
   padding 8px
   display flex
   justify-content space-between
