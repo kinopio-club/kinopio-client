@@ -107,6 +107,9 @@ export default {
       this.$store.commit('webfontIsLoaded', true)
       this.updateIncorrectCardConnectionPaths()
     })
+    if (utils.isAndroid()) {
+      this.$store.commit('addNotification', { message: 'Android is currenly only partially supported. You may experience scrolling issues', type: 'danger' })
+    }
   },
   data () {
     return {
