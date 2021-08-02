@@ -542,6 +542,7 @@ export default {
         string.substring(index, string.length)
       ]
       paragraphs = paragraphs.filter(paragraph => Boolean(paragraph.length))
+      paragraphs = paragraphs.map(paragraph => paragraph.trim())
       return paragraphs
     },
     splitByNextSentence (string) {
