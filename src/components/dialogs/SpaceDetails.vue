@@ -31,8 +31,8 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
         p {{spaceName}}
       .row(v-if="shouldShowInExplore")
         .badge.status.explore-message
-          img.icon(src="@/assets/checkmark.svg")
-          span Shown in Explore
+          img.icon.sunglasses(src="@/assets/sunglasses.svg")
+          span In Explore
 
     .button-wrap(v-if="isSpaceMember")
       button(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
