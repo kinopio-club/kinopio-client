@@ -1,5 +1,6 @@
 <template lang="pug">
 dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="closeDialogs" @keyup.stop.backspace="removeCard" :style="styles")
+  .opening-frame(v-if="isOpening" :style="openingFrameStyle")
   section
     .textarea-wrap
       textarea.name(
@@ -202,6 +203,10 @@ import last from 'lodash-es/last'
 let previousTags = []
 let compositionEventEndTime = 0
 
+const openingPreDuration = 220 // ms
+const openingDuration = 200 // ms
+let openingAnimationTimer, openingStartTime, shouldCancelOpening
+
 export default {
   name: 'CardDetails',
   components: {
@@ -252,7 +257,10 @@ export default {
         link: '',
         file: ''
       },
-      nameSplitIntoCardsCount: 0
+      nameSplitIntoCardsCount: 0,
+      isOpening: false,
+      openingPercent: 0,
+      openingAlpha: 0
     }
   },
   created () {
@@ -466,9 +474,77 @@ export default {
       const isLoading = cardIds.find(cardId => cardId === this.card.id)
       return Boolean(isLoading)
     },
-    cardHasMedia () { return Boolean(this.formats.image || this.formats.video || this.formats.audio) }
+    cardHasMedia () { return Boolean(this.formats.image || this.formats.video || this.formats.audio) },
+    openingFrameStyle () {
+      const initialPadding = 200
+      const initialBorderRadius = 100
+      const padding = initialPadding * this.openingPercent
+      const userColor = this.$store.state.currentUser.color
+      const borderRadius = Math.max((this.openingPercent * initialBorderRadius), 5) + 'px'
+      const size = `calc(100% + ${padding}px)`
+      const position = -(padding / 2) + 'px'
+      return {
+        width: size,
+        height: size,
+        left: position,
+        top: position,
+        background: userColor,
+        opacity: this.openingAlpha,
+        borderRadius: borderRadius
+      }
+    }
   },
   methods: {
+    cancelOpening () {
+      shouldCancelOpening = true
+    },
+    cancelOpeningAnimationFrame () {
+      this.isOpening = false
+      this.openingPercent = 0
+      this.openingAlpha = 0
+      shouldCancelOpening = false
+    },
+    startOpening () {
+      if (this.$store.state.preventCardDetailsOpeningAnimation) {
+        this.$store.commit('preventCardDetailsOpeningAnimation', false)
+        return
+      }
+      shouldCancelOpening = false
+      setTimeout(() => {
+        if (!openingAnimationTimer) {
+          this.isOpening = true
+          openingAnimationTimer = window.requestAnimationFrame(this.openingAnimationFrame)
+        }
+      }, openingPreDuration)
+    },
+    openingAnimationFrame (timestamp) {
+      if (!openingStartTime) {
+        openingStartTime = timestamp
+      }
+      const elaspedTime = timestamp - openingStartTime
+      const percentComplete = (elaspedTime / openingDuration) // between 0 and 1
+      if (shouldCancelOpening) {
+        this.cancelOpeningAnimationFrame()
+      }
+      if (this.isOpening && percentComplete <= 1) {
+        const percentRemaining = Math.abs(percentComplete - 1)
+        this.openingPercent = percentRemaining
+        const alpha = utils.easeOut(percentComplete, elaspedTime, openingDuration)
+        this.openingAlpha = alpha
+        window.requestAnimationFrame(this.openingAnimationFrame)
+      } else if (this.isOpening && percentComplete > 1) {
+        console.log('🎴🐢 cardDetails openingAnimationFrame complete')
+        openingAnimationTimer = undefined
+        openingStartTime = undefined
+        this.isOpening = false
+      } else {
+        window.cancelAnimationFrame(openingAnimationTimer)
+        openingAnimationTimer = undefined
+        openingStartTime = undefined
+        this.cancelOpeningAnimationFrame()
+      }
+    },
+
     updateMediaUrls () {
       const urls = utils.urlsFromString(this.card.name, true)
       this.formats.image = ''
@@ -1350,8 +1426,12 @@ export default {
           this.scrollIntoViewAndFocus()
           this.updatePreviousTags()
           this.updateNameSplitIntoCardsCount()
+          this.$nextTick(() => {
+            this.startOpening()
+          })
         } else {
           this.removeTrackingQueryStrings()
+          this.cancelOpening()
         }
       })
       if (visible) {
@@ -1418,4 +1498,8 @@ export default {
       padding-top 1px
   .media-preview + .url-preview
     margin-top 10px
+  .opening-frame
+    position absolute
+    z-index -1
+    pointer-events none
 </style>

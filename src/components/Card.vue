@@ -702,9 +702,9 @@ export default {
       return isLoading && this.card.urlPreviewIsVisible && !isErrorUrl
     },
     lockingFrameStyle () {
-      const initialLockPadding = 65 // matches initialLockCircleRadius in magicPaint
+      const initialPadding = 65 // matches initialLockCircleRadius in magicPaint
       const initialBorderRadius = 50
-      const padding = initialLockPadding * this.lockingPercent
+      const padding = initialPadding * this.lockingPercent
       const userColor = this.$store.state.currentUser.color
       const borderRadius = Math.max((this.lockingPercent * initialBorderRadius), 5) + 'px'
       const size = `calc(100% + ${padding}px)`
@@ -1058,6 +1058,7 @@ export default {
         return
       }
       this.$store.commit('cardDetailsIsVisibleForCardId', this.id)
+      this.$store.commit('preventCardDetailsOpeningAnimation', true)
       this.$store.commit('parentCardId', this.id)
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
       this.$store.commit('currentUserIsDraggingCard', false)
