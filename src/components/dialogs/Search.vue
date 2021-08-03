@@ -265,7 +265,6 @@ export default {
   },
   watch: {
     visible (visible) {
-      this.$store.commit('previousResultCardId', '')
       this.updateHeights()
       if (visible) {
         if (utils.isMobile()) { return }
