@@ -73,6 +73,7 @@ export default new Vuex.Store({
     parentCardId: '',
     childCardId: '',
     remoteCardDetailsVisible: [],
+    preventCardDetailsOpeningAnimation: true,
 
     // connecting
     currentConnection: {}, // startCardId, startConnectorRect
@@ -388,6 +389,10 @@ export default new Vuex.Store({
     clearRemoteCardDetailsVisible: (state, update) => {
       utils.typeCheck({ value: update, type: 'object', origin: 'clearRemoteCardDetailsVisible' })
       state.remoteCardDetailsVisible = state.remoteCardDetailsVisible.filter(card => card.userId !== update.userId) || []
+    },
+    preventCardDetailsOpeningAnimation: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'preventCardDetailsOpeningAnimation' })
+      state.preventCardDetailsOpeningAnimation = value
     },
 
     // Connecting

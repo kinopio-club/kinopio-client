@@ -1058,6 +1058,7 @@ export default {
         return
       }
       this.$store.commit('cardDetailsIsVisibleForCardId', this.id)
+      this.$store.commit('preventCardDetailsOpeningAnimation', true)
       this.$store.commit('parentCardId', this.id)
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
       this.$store.commit('currentUserIsDraggingCard', false)

@@ -505,7 +505,10 @@ export default {
       shouldCancelOpening = false
     },
     startOpening () {
-      // TODO return/cancel if opened by direct card click, from store value
+      if (this.$store.state.preventCardDetailsOpeningAnimation) {
+        this.$store.commit('preventCardDetailsOpeningAnimation', false)
+        return
+      }
       shouldCancelOpening = false
       setTimeout(() => {
         if (!openingAnimationTimer) {
