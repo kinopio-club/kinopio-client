@@ -203,8 +203,8 @@ import last from 'lodash-es/last'
 let previousTags = []
 let compositionEventEndTime = 0
 
-const openingPreDuration = 220 // ms
-const openingDuration = 200 // ms
+const openingPreDuration = 250 // ms
+const openingDuration = 250 // ms
 let openingAnimationTimer, openingStartTime, shouldCancelOpening
 
 export default {
@@ -477,7 +477,7 @@ export default {
     cardHasMedia () { return Boolean(this.formats.image || this.formats.video || this.formats.audio) },
     openingFrameStyle () {
       const initialPadding = 200
-      const initialBorderRadius = 100
+      const initialBorderRadius = 60
       const padding = initialPadding * this.openingPercent
       const userColor = this.$store.state.currentUser.color
       const borderRadius = Math.max((this.openingPercent * initialBorderRadius), 5) + 'px'
