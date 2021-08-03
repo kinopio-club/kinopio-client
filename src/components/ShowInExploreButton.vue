@@ -1,8 +1,9 @@
 <template lang="pug">
-.button-wrap(v-if="isSpaceMember")
-  button(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
+.button-wrap.show-in-explore(v-if="isSpaceMember")
+  label(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
+    input(type="checkbox" v-model="showInExplore")
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
-    span {{showInExploreLabel}}
+    span In Explore
 
   template(v-if="error.userNeedsToSignUpOrIn")
     p
@@ -25,9 +26,6 @@
 <script>
 export default {
   name: 'ShowInExploreButton',
-  props: {
-    label: String
-  },
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'currentSpace/restoreSpace') {
@@ -49,7 +47,6 @@ export default {
     showInExplore () { return this.$store.state.currentSpace.showInExplore },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     spaceIsHelloKinopio () { return this.$store.getters['currentSpace/isHelloKinopio'] },
-    showInExploreLabel () { return this.label || 'Show in Explore' },
     spaceCardsCount () { return this.$store.state.currentSpace.cards.length }
   },
   methods: {
@@ -99,4 +96,7 @@ export default {
 </script>
 
 <style lang="stylus">
+.show-in-explore
+  input
+    vertical-align -1px !important
 </style>
