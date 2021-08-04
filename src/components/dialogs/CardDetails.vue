@@ -1557,4 +1557,6 @@ export default {
   .collaboration-options
     .users
       margin-left 6px
+      display flex
+      flex-wrap wrap
 </style>
