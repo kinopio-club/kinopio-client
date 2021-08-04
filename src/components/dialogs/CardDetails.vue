@@ -96,10 +96,23 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         button(:disabled="!canEditCard" @click.left.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
           span Frame
         FramePicker(:visible="framePickerIsVisible" :cards="[card]")
-      //- More Collaboration Options
+      //- Toggle Collaboration Options
       .button-wrap
         button.toggle-collaboration-options(@click.left.stop="toggleCollaborationOptionsIsVisible" :class="{active : collaborationOptionsIsVisible}")
           img.down-arrow(src="@/assets/down-arrow.svg")
+
+    //- Collaboration
+    .row.collaboration-options(v-if="collaborationOptionsIsVisible")
+      .button-wrap
+        button.toggle-comment(:disabled="!canEditCard" :class="{active: nameIsComment}")
+          span Comment
+          //- TODO toggleCommentInName, append (())
+      .users
+        //- template(v-for="(user, index) in cardUsers")
+        .badge(:style="{background: createdByUser.color}")
+          User(:user="createdByUser" :isClickable="false" :detailsOnRight="true" :isSmall="true")
+          span.name {{createdByUser.name}}
+
     .row(v-if="nameSplitIntoCardsCount || hasUrls")
       //- Show Url
       .button-wrap(v-if="hasUrls")
@@ -112,6 +125,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         button(:disabled="!canEditCard" @click.left.stop="splitCards")
           img.icon(src="@/assets/split-vertically.svg")
           span Split into {{nameSplitIntoCardsCount}} Cards
+
     .row.badges-row(v-if="tagsInCard.length || card.linkToSpaceId || nameIsComment || isInSearchResultsCards")
       //- Search result
       span.badge.search(v-if="isInSearchResultsCards")
@@ -445,6 +459,18 @@ export default {
       return pendingUploads.find(upload => upload.cardId === this.card.id)
     },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    createdByUser () {
+      const userId = this.card.userId
+      let user = this.$store.getters['currentSpace/userById'](userId)
+      if (user) {
+        return user
+      } else {
+        return {
+          name: '',
+          color: '#cdcdcd' // secondary-active-background
+        }
+      }
+    },
     updatedByUser () {
       const userId = this.card.nameUpdatedByUserId || this.card.userId
       let user = this.$store.getters['currentSpace/userById'](userId)
@@ -1515,4 +1541,7 @@ export default {
   .toggle-collaboration-options
     .down-arrow
       padding 0
+  .collaboration-options
+    .users
+      margin-left 6px
 </style>
