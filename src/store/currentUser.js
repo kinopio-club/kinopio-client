@@ -32,6 +32,7 @@ export default {
     shouldEmailNotifications: true,
     shouldEmailBulletin: true,
     shouldShowMoreAlignOptions: false,
+    shouldShowCardCollaborationOptions: false,
     shouldInvertZoomDirection: false,
     shouldUseLastConnectionType: false,
     shouldShowNewUserNotification: true
@@ -202,6 +203,10 @@ export default {
     shouldShowMoreAlignOptions: (state, value) => {
       state.shouldShowMoreAlignOptions = value
       cache.updateUser('shouldShowMoreAlignOptions', value)
+    },
+    shouldShowCardCollaborationOptions: (state, value) => {
+      state.shouldShowCardCollaborationOptions = value
+      cache.updateUser('shouldShowCardCollaborationOptions', value)
     },
     shouldInvertZoomDirection: (state, value) => {
       state.shouldInvertZoomDirection = value
@@ -499,6 +504,14 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldShowMoreAlignOptions: value
+        } }, { root: true })
+    },
+    shouldShowCardCollaborationOptions: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldShowCardCollaborationOptions' })
+      context.commit('shouldShowCardCollaborationOptions', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldShowCardCollaborationOptions: value
         } }, { root: true })
     },
     shouldInvertZoomDirection: (context, value) => {

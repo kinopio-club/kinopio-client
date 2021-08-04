@@ -94,9 +94,12 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       //- Frames
       .button-wrap
         button(:disabled="!canEditCard" @click.left.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
-          span Frames
+          span Frame
         FramePicker(:visible="framePickerIsVisible" :cards="[card]")
-
+      //- More Collaboration Options
+      .button-wrap
+        button.toggle-collaboration-options(@click.left.stop="toggleCollaborationOptionsIsVisible" :class="{active : collaborationOptionsIsVisible}")
+          img.down-arrow(src="@/assets/down-arrow.svg")
     .row(v-if="nameSplitIntoCardsCount || hasUrls")
       //- Show Url
       .button-wrap(v-if="hasUrls")
@@ -228,6 +231,7 @@ export default {
       framePickerIsVisible: false,
       imagePickerIsVisible: false,
       cardTipsIsVisible: false,
+      collaborationOptionsIsVisible: false,
       initialSearch: '',
       pastedName: '',
       wasPasted: false,
@@ -917,6 +921,12 @@ export default {
       this.imagePickerIsVisible = !isVisible
       this.initialSearch = this.normalizedName
     },
+    toggleCollaborationOptionsIsVisible () {
+      this.closeDialogs()
+      const isVisible = !this.collaborationOptionsIsVisible
+      this.collaborationOptionsIsVisible = isVisible
+      this.$store.commit('currentUser/shouldShowCardCollaborationOptions', isVisible)
+    },
     focusName (position) {
       const element = this.$refs.name
       const length = this.name.length
@@ -1502,4 +1512,7 @@ export default {
     position absolute
     z-index -1
     pointer-events none
+  .toggle-collaboration-options
+    .down-arrow
+      padding 0
 </style>
