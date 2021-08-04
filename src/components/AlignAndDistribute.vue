@@ -289,11 +289,12 @@ export default {
     // ⎺o
     alignTop () {
       const cards = this.cardsSortedByX()
+      let newCards = []
       const origin = cards[0]
       const zoom = this.spaceCounterZoomDecimal
       cards.forEach((card, index) => {
         if (index > 0) {
-          const previousCard = cards[index - 1]
+          const previousCard = newCards[index - 1]
           const previousRightSide = previousCard.x + (previousCard.width * zoom)
           card = utils.clone(card)
           card.y = origin.y
@@ -302,6 +303,7 @@ export default {
           }
           this.$store.dispatch('currentSpace/updateCard', card)
         }
+        newCards.push(card)
       })
       this.updateConnectionPaths()
     },
@@ -360,11 +362,12 @@ export default {
     // |o
     alignLeft () {
       const cards = this.cardsSortedByY()
+      let newCards = []
       const origin = cards[0]
       const zoom = this.spaceCounterZoomDecimal
       cards.forEach((card, index) => {
         if (index > 0) {
-          const previousCard = cards[index - 1]
+          const previousCard = newCards[index - 1]
           const previousBottomSide = previousCard.y + (previousCard.height * zoom)
           card = utils.clone(card)
           card.x = origin.x
@@ -373,6 +376,7 @@ export default {
           }
           this.$store.dispatch('currentSpace/updateCard', card)
         }
+        newCards.push(card)
       })
       this.updateConnectionPaths()
     },
