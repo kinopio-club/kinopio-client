@@ -247,7 +247,6 @@ export default {
       framePickerIsVisible: false,
       imagePickerIsVisible: false,
       cardTipsIsVisible: false,
-      collaborationOptionsIsVisible: false,
       initialSearch: '',
       pastedName: '',
       wasPasted: false,
@@ -525,7 +524,8 @@ export default {
         opacity: this.openingAlpha,
         borderRadius: borderRadius
       }
-    }
+    },
+    collaborationOptionsIsVisible () { return this.$store.state.currentUser.shouldShowCardCollaborationOptions }
   },
   methods: {
     toggleCommentInName () {
@@ -963,9 +963,8 @@ export default {
     },
     toggleCollaborationOptionsIsVisible () {
       this.closeDialogs()
-      const isVisible = !this.collaborationOptionsIsVisible
-      this.collaborationOptionsIsVisible = isVisible
-      this.$store.commit('currentUser/shouldShowCardCollaborationOptions', isVisible)
+      const isVisible = !this.$store.state.currentUser.shouldShowCardCollaborationOptions
+      this.$store.dispatch('currentUser/shouldShowCardCollaborationOptions', isVisible)
     },
     focusName (position) {
       const element = this.$refs.name
