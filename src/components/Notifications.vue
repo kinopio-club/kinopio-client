@@ -93,8 +93,9 @@ aside.notifications(@click.left="closeAllDialogs")
 
   .item.success(v-if="notifyMoveOrCopyToSpace" @animationend="resetNotifyMoveOrCopyToSpace")
     p {{notifyMoveOrCopyToSpaceDetails.message}}
-    .row(@click.left="changeSpace(notifyMoveOrCopyToSpaceDetails.id)")
-      button {{notifyMoveOrCopyToSpaceDetails.name}} →
+    .row
+      a(:href="notifyMoveOrCopyToSpaceDetails.id")
+        button(@click.left.prevent.stop="changeSpace(notifyMoveOrCopyToSpaceDetails.id)") {{notifyMoveOrCopyToSpaceDetails.name}} →
 
 </template>
 
