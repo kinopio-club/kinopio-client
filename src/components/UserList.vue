@@ -2,8 +2,8 @@
 span
   ResultsFilter(:items="users" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredUsers")
   ul.results-list.user-list
-    template(v-for="(user in usersFiltered")
-      li(:key="user.id" @click.left.stop="selectSpace($event, user)" :tabindex="tabIndex" v-on:keyup.stop.enter="selectSpace($event, user)" :class="{ active: userIsSelected(user), 'is-not-clickable': !isClickable }")
+    template(v-for="user in usersFiltered")
+      li(:key="user.id" @click.left.stop="selectUser($event, user)" :tabindex="tabIndex" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user), 'is-not-clickable': !isClickable }")
         .badge(:style="{background: user.color}" :class="{'narrow-badge': showRemoveUser}")
           User(:user="user" :isClickable="false")
           .name {{user.name}}
@@ -55,9 +55,9 @@ export default {
     updateFilter (filter) {
       this.filter = filter
     },
-    selectSpace (event, user) {
+    selectUser (event, user) {
       if (!this.isClickable) { return }
-      this.$emit('selectSpace', event, user)
+      this.$emit('selectUser', event, user)
     },
     userIsSelected (user) {
       if (!this.isClickable) { return }

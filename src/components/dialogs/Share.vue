@@ -31,7 +31,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
         span Invite Collaborators
       InviteCollaborators(:visible="inviteCollaboratorsIsVisible")
   section.results-section.collaborators(v-if="spaceHasUrl && isSpaceMember && spaceHasCollaborators")
-    UserList(:users="spaceCollaborators" :selectedUser="selectedUser" :showRemoveUser="true" @selectSpace="showUserDetails" @removeUser="removeCollaborator" :isClickable="true")
+    UserList(:users="spaceCollaborators" :selectedUser="selectedUser" :showRemoveUser="true" @selectUser="showUserDetails" @removeUser="removeCollaborator" :isClickable="true")
     UserDetails(:visible="userDetailsIsVisible" :user="selectedUser" :userDetailsPosition="userDetailsPosition" :userDetailsIsFromList="true" @removedCollaborator="removedCollaborator")
 
   section(v-if="!spaceHasUrl")
