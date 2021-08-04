@@ -104,9 +104,8 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
     //- Collaboration
     .row.collaboration-options(v-if="collaborationOptionsIsVisible")
       .button-wrap
-        button.toggle-comment(:disabled="!canEditCard" :class="{active: nameIsComment}")
+        button.toggle-comment(@click.left.stop="toggleCommentInName" :disabled="!canEditCard" :class="{active: nameIsComment}")
           span Comment
-          //- TODO toggleCommentInName, append (())
       .users
         .badge(:style="{background: createdByUser.color}" title="Created by")
           User(:user="createdByUser" :isClickable="false" :detailsOnRight="true" :isSmall="true")
@@ -529,6 +528,17 @@ export default {
     }
   },
   methods: {
+    toggleCommentInName () {
+      let name = this.card.name
+      if (this.nameIsComment) {
+        name = name.replace('((', '')
+        name = name.replace('))', '')
+      } else {
+        name = name.trim()
+        name = name + ' (())'
+      }
+      this.updateCardName(name)
+    },
     cancelOpening () {
       shouldCancelOpening = true
     },
