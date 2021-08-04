@@ -108,10 +108,13 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           span Comment
           //- TODO toggleCommentInName, append (())
       .users
-        //- template(v-for="(user, index) in cardUsers")
-        .badge(:style="{background: createdByUser.color}")
+        .badge(:style="{background: createdByUser.color}" title="Created by")
           User(:user="createdByUser" :isClickable="false" :detailsOnRight="true" :isSmall="true")
           span.name {{createdByUser.name}}
+        template(v-if="isUpdatedByDifferentUser")
+          .badge(:style="{background: updatedByUser.color}" title="Last edited by")
+            User(:user="updatedByUser" :isClickable="false" :detailsOnRight="true" :isSmall="true")
+            span.name {{updatedByUser.name}}
 
     .row(v-if="nameSplitIntoCardsCount || hasUrls")
       //- Show Url
@@ -483,6 +486,7 @@ export default {
         }
       }
     },
+    isUpdatedByDifferentUser () { return this.createdByUser.id !== this.updatedByUser.id },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
     styles () {
