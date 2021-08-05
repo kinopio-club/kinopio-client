@@ -101,7 +101,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         button.toggle-collaboration-info(@click.left.stop="toggleCollaborationInfoIsVisible" :class="{active : collaborationInfoIsVisible}")
           img.down-arrow(src="@/assets/down-arrow.svg")
 
-    CardCollaborationInfo(:visible="collaborationInfoIsVisible" @closeDialogs="closeDialogs" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card")
+    CardCollaborationInfo(:visible="collaborationInfoIsVisible" @closeDialogs="closeCardDialogs" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :triggerCloseComponent="shouldTriggerCloseChildComponents")
 
     .row(v-if="nameSplitIntoCardsCount || hasUrls")
       //- Show Url
@@ -269,7 +269,8 @@ export default {
       nameSplitIntoCardsCount: 0,
       isOpening: false,
       openingPercent: 0,
-      openingAlpha: 0
+      openingAlpha: 0,
+      shouldTriggerCloseChildComponents: ''
     }
   },
   created () {
@@ -975,6 +976,10 @@ export default {
       this.triggerUpdatePositionInVisualViewport()
     },
     closeDialogs () {
+      this.shouldTriggerCloseChildComponents = nanoid()
+      this.closeCardDialogs()
+    },
+    closeCardDialogs () {
       this.framePickerIsVisible = false
       this.imagePickerIsVisible = false
       this.cardTipsIsVisible = false

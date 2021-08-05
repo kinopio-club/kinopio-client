@@ -1,5 +1,5 @@
 <template lang="pug">
-.row.collaboration-info(v-if="visible")
+.row.collaboration-info(v-if="visible" @click.left.stop="closeDialogs")
   .badge.secondary.button-badge(@click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
     img.icon.time(src="@/assets/time.svg")
     span.name {{dateUpdatedAt}}
@@ -32,7 +32,8 @@ export default {
     visible: Boolean,
     createdByUser: Object,
     updatedByUser: Object,
-    card: Object
+    card: Object,
+    triggerCloseComponent: String
   },
   data () {
     return {
@@ -59,10 +60,13 @@ export default {
   },
   methods: {
     closeDialogs () {
+      this.closeComponentDialogs()
+      this.$emit('closeDialogs')
+    },
+    closeComponentDialogs () {
       this.userDetailsIsVisibleForCreatedByUser = false
       this.userDetailsIsVisibleForUpdatedByUser = false
       this.selectedUser = {}
-      this.$emit('closeDialogs')
     },
     toggleFilterShowAbsoluteDates () {
       this.closeDialogs()
@@ -95,6 +99,13 @@ export default {
       console.log(element)
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
+    }
+  },
+  watch: {
+    triggerCloseComponent (value) {
+      if (this.visible) {
+        this.closeComponentDialogs()
+      }
     }
   }
 }
