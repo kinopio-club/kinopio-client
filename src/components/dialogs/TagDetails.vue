@@ -422,7 +422,12 @@ export default {
       this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
     },
     relativeDate (card) {
-      return utils.shortRelativeTime(card.updatedAt)
+      let date = card.updatedAt || card.nameUpdatedAt
+      if (!date) {
+        card = this.$store.getters['currentSpace/cardById'](card.id)
+        date = card.updatedAt || card.nameUpdatedAt
+      }
+      return utils.shortRelativeTime(date)
     }
   },
   watch: {
