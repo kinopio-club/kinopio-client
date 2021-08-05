@@ -103,15 +103,16 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
 
     //- Collaboration
     .row.collaboration-options(v-if="collaborationOptionsIsVisible")
-      .button-wrap
-        button.toggle-comment(@click.left.stop="toggleCommentInName" :disabled="!canEditCard" :class="{active: nameIsComment}")
-          span Comment
+      .badge.secondary.button-badge(@click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
+        img.icon.time(src="@/assets/time.svg")
+        span.name {{dateUpdatedAt}}
       .users
         .badge(:style="{background: createdByUser.color}" title="Created by")
           User(:user="createdByUser" :isClickable="false" :detailsOnRight="true" :isSmall="true")
           span.name {{createdByUser.name}}
         template(v-if="isUpdatedByDifferentUser")
           .badge(:style="{background: updatedByUser.color}" title="Last edited by")
+            img.icon(src="@/assets/brush.svg")
             User(:user="updatedByUser" :isClickable="false" :detailsOnRight="true" :isSmall="true")
             span.name {{updatedByUser.name}}
 
@@ -525,19 +526,26 @@ export default {
         borderRadius: borderRadius
       }
     },
-    collaborationOptionsIsVisible () { return this.$store.state.currentUser.shouldShowCardCollaborationOptions }
+    collaborationOptionsIsVisible () { return this.$store.state.currentUser.shouldShowCardCollaborationOptions },
+    dateUpdatedAt () {
+      const date = this.card.nameUpdatedAt || this.card.createdAt
+      const showAbsoluteDate = this.$store.state.currentUser.filterShowAbsoluteDates
+      if (date) {
+        if (showAbsoluteDate) {
+          return new Date(date).toLocaleString()
+        } else {
+          return utils.shortRelativeTime(date)
+        }
+      } else {
+        return 'Just now'
+      }
+    }
   },
   methods: {
-    toggleCommentInName () {
-      let name = this.card.name
-      if (this.nameIsComment) {
-        name = name.replace('((', '')
-        name = name.replace('))', '')
-      } else {
-        name = name.trim()
-        name = name + ' (())'
-      }
-      this.updateCardName(name)
+    toggleFilterShowAbsoluteDates () {
+      this.closeDialogs()
+      const value = !this.$store.state.currentUser.filterShowAbsoluteDates
+      this.$store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
     },
     cancelOpening () {
       shouldCancelOpening = true
@@ -1556,7 +1564,6 @@ export default {
       padding 0
   .collaboration-options
     .users
-      margin-left 6px
       display flex
       flex-wrap wrap
 </style>
