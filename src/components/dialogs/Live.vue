@@ -88,4 +88,7 @@ export default {
     width 14px
     vertical-align -3px
     margin-left 3px
+  .space-list
+    .users
+      flex-wrap nowrap
 </style>

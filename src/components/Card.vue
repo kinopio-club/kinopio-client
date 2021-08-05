@@ -51,11 +51,11 @@ article(:style="position" :data-card-id="id" ref="card")
               img.icon.view(v-else src="@/assets/view.svg")
           //- User
           template(v-if="commentIsVisible")
-            .badge.user-badge.user-badge.comment-user-badge(:style="{background: updatedByUser.color}")
-              User(:user="updatedByUser" :isClickable="false")
-              span {{updatedByUser.name}}
+            .badge.user-badge.user-badge.comment-user-badge(:style="{background: createdByUser.color}")
+              User(:user="createdByUser" :isClickable="false")
+              span {{createdByUser.name}}
           template(v-if="!commentIsVisible")
-            User(:user="updatedByUser" :isClickable="false")
+            User(:user="createdByUser" :isClickable="false")
           p.comment.name-segments(v-if="commentIsVisible" :class="{'is-checked': isChecked}" :style="{minWidth: nameLineMinWidth - 10 + 'px'}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
@@ -117,7 +117,7 @@ article(:style="position" :data-card-id="id" ref="card")
       UrlPreview(
         :visible="cardUrlPreviewIsVisible"
         :card="card"
-        :updatedByUser="updatedByUser"
+        :user="createdByUser"
         :isImageCard="Boolean(formats.image || formats.video)"
         :isSelected="isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor"
       )
@@ -161,15 +161,15 @@ article(:style="position" :data-card-id="id" ref="card")
     .badge-wrap
       .badge.user-badge.button-badge(
         v-if="filterShowUsers"
-        :style="{background: updatedByUser.color}"
+        :style="{background: createdByUser.color}"
         @mouseup.left.stop
         @touchend.stop
         @click.left.prevent.stop="toggleUserDetailsIsVisible"
         @touchend.prevent.stop="toggleUserDetailsIsVisible"
       )
-        User(:user="updatedByUser" :isClickable="false")
-        .name {{updatedByUser.name}}
-      UserDetails(:visible="userDetailsIsVisible" :user="updatedByUser" :dialogIsReadOnly="true")
+        User(:user="createdByUser" :isClickable="false")
+        .name {{createdByUser.name}}
+      UserDetails(:visible="userDetailsIsVisible" :user="createdByUser" :dialogIsReadOnly="true")
     //- Date
     .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
       img.icon.time(src="@/assets/time.svg")
@@ -292,8 +292,8 @@ export default {
     frameId () { return this.card.frameId },
     filterShowUsers () { return this.$store.state.currentUser.filterShowUsers },
     filterShowDateUpdated () { return this.$store.state.currentUser.filterShowDateUpdated },
-    updatedByUser () {
-      const userId = this.card.nameUpdatedByUserId || this.card.userId
+    createdByUser () {
+      const userId = this.card.userId
       let user = this.$store.getters['currentSpace/userById'](userId)
       if (user) {
         return user

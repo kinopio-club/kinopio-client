@@ -94,8 +94,14 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       //- Frames
       .button-wrap
         button(:disabled="!canEditCard" @click.left.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
-          span Frames
+          span Frame
         FramePicker(:visible="framePickerIsVisible" :cards="[card]")
+      //- Toggle Collaboration Info
+      .button-wrap
+        button.toggle-collaboration-info(@click.left.stop="toggleCollaborationInfoIsVisible" :class="{active : collaborationInfoIsVisible}")
+          img.down-arrow(src="@/assets/down-arrow.svg")
+
+    CardCollaborationInfo(:visible="collaborationInfoIsVisible" @closeDialogs="closeCardDialogs" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :triggerCloseComponent="shouldTriggerCloseChildComponents")
 
     .row(v-if="nameSplitIntoCardsCount || hasUrls")
       //- Show Url
@@ -109,6 +115,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         button(:disabled="!canEditCard" @click.left.stop="splitCards")
           img.icon(src="@/assets/split-vertically.svg")
           span Split into {{nameSplitIntoCardsCount}} Cards
+
     .row.badges-row(v-if="tagsInCard.length || card.linkToSpaceId || nameIsComment || isInSearchResultsCards")
       //- Search result
       span.badge.search(v-if="isInSearchResultsCards")
@@ -192,6 +199,7 @@ import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 import MediaPreview from '@/components/MediaPreview.vue'
+import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
@@ -218,7 +226,8 @@ export default {
     Loader,
     UrlPreview,
     MediaPreview,
-    User
+    User,
+    CardCollaborationInfo
   },
   props: {
     card: Object // name, x, y, z
@@ -260,7 +269,8 @@ export default {
       nameSplitIntoCardsCount: 0,
       isOpening: false,
       openingPercent: 0,
-      openingAlpha: 0
+      openingAlpha: 0,
+      shouldTriggerCloseChildComponents: ''
     }
   },
   created () {
@@ -441,6 +451,18 @@ export default {
       return pendingUploads.find(upload => upload.cardId === this.card.id)
     },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    createdByUser () {
+      const userId = this.card.userId
+      let user = this.$store.getters['currentSpace/userById'](userId)
+      if (user) {
+        return user
+      } else {
+        return {
+          name: '',
+          color: '#cdcdcd' // secondary-active-background
+        }
+      }
+    },
     updatedByUser () {
       const userId = this.card.nameUpdatedByUserId || this.card.userId
       let user = this.$store.getters['currentSpace/userById'](userId)
@@ -492,7 +514,8 @@ export default {
         opacity: this.openingAlpha,
         borderRadius: borderRadius
       }
-    }
+    },
+    collaborationInfoIsVisible () { return this.$store.state.currentUser.shouldShowCardCollaborationInfo }
   },
   methods: {
     cancelOpening () {
@@ -802,6 +825,7 @@ export default {
       this.updateTags()
       this.updateSpaceLink()
       if (this.notifiedMembers) { return }
+      if (this.createdByUser.id !== this.$store.state.currentUser.id) { return }
       this.$store.dispatch('currentSpace/notifyCollaboratorsCardUpdated', { cardId: this.card.id, type: 'updateCard' })
       this.notifiedMembers = true
     },
@@ -917,6 +941,11 @@ export default {
       this.imagePickerIsVisible = !isVisible
       this.initialSearch = this.normalizedName
     },
+    toggleCollaborationInfoIsVisible () {
+      this.closeDialogs()
+      const isVisible = !this.$store.state.currentUser.shouldShowCardCollaborationInfo
+      this.$store.dispatch('currentUser/shouldShowCardCollaborationInfo', isVisible)
+    },
     focusName (position) {
       const element = this.$refs.name
       const length = this.name.length
@@ -948,6 +977,10 @@ export default {
       this.triggerUpdatePositionInVisualViewport()
     },
     closeDialogs () {
+      this.shouldTriggerCloseChildComponents = nanoid()
+      this.closeCardDialogs()
+    },
+    closeCardDialogs () {
       this.framePickerIsVisible = false
       this.imagePickerIsVisible = false
       this.cardTipsIsVisible = false
@@ -1502,4 +1535,7 @@ export default {
     position absolute
     z-index -1
     pointer-events none
+  .toggle-collaboration-info
+    .down-arrow
+      padding 0
 </style>

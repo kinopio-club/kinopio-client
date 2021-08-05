@@ -23,7 +23,7 @@ dialog.favorites.narrow(v-if="visible" :open="visible" @click.left.stop="userDet
     template(v-if="spacesIsVisible")
       SpaceList(:spaces="favoriteSpacesOrderedByEdited" :showUser="true" @selectSpace="changeSpace")
     template(v-if="!spacesIsVisible")
-      UserList(:users="favoriteUsers" :selectedUser="selectedUser" @selectSpace="showUserDetails" :isClickable="true")
+      UserList(:users="favoriteUsers" :selectedUser="selectedUser" @selectUser="showUserDetails" :isClickable="true")
       UserDetails(:visible="userDetailsIsVisible" :user="selectedUser" :userDetailsPosition="userDetailsPosition")
 
 </template>
@@ -95,15 +95,23 @@ export default {
       }
     },
     showUserDetails (event, user) {
-      const dialogRect = this.$refs.dialog.getBoundingClientRect()
-      const targetRect = event.target.getBoundingClientRect()
       this.userDetailsIsNotVisible()
-      this.userDetailsPosition = {
-        top: targetRect.y - dialogRect.y + 'px',
-        bottom: 'initial'
-      }
       this.selectedUser = user
       this.userDetailsIsVisible = true
+      this.$nextTick(() => {
+        const dialogRect = this.$refs.dialog.getBoundingClientRect()
+        const targetRect = event.target.getBoundingClientRect()
+        const userDetailsRect = document.querySelector('dialog.user-details').getBoundingClientRect()
+        const viewportHeight = this.$store.state.viewportHeight
+        let dialogPositionTop = targetRect.y - dialogRect.y
+        if (userDetailsRect.y + userDetailsRect.height > viewportHeight) {
+          dialogPositionTop = dialogPositionTop - userDetailsRect.height
+        }
+        this.userDetailsPosition = {
+          top: dialogPositionTop + 'px',
+          bottom: 'initial'
+        }
+      })
     },
     userDetailsIsNotVisible () {
       this.userDetailsIsVisible = false
