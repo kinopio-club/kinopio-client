@@ -41,13 +41,13 @@ export default {
     card: Object,
     parentIsCardDetails: Boolean,
     isSelected: Boolean,
-    updatedByUser: Object,
+    user: Object,
     isImageCard: Boolean
   },
   computed: {
     selectedColor () {
       if (!this.isSelected) { return }
-      return this.updatedByUser.color
+      return this.user.color
     },
     shouldShowDescription () {
       if (!this.card.urlPreviewDescription) { return }
