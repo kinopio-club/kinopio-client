@@ -20,6 +20,7 @@
 import UserDetails from '@/components/dialogs/UserDetails.vue'
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
+import scrollIntoView from '@/scroll-into-view.js'
 
 export default {
   name: 'CardCollaborationInfo',
@@ -85,8 +86,16 @@ export default {
       } else {
         this.userDetailsIsVisibleForUpdatedByUser = true
       }
+      this.$nextTick(() => {
+        this.scrollIntoView()
+      })
+    },
+    scrollIntoView () {
+      const element = document.querySelector('dialog.user-details')
+      console.log(element)
+      const isTouchDevice = this.$store.state.isTouchDevice
+      scrollIntoView.scroll(element, isTouchDevice)
     }
-
   }
 }
 </script>
