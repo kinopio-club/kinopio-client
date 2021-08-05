@@ -825,6 +825,7 @@ export default {
       this.updateTags()
       this.updateSpaceLink()
       if (this.notifiedMembers) { return }
+      if (this.createdByUser.id !== this.$store.state.currentUser.id) { return }
       this.$store.dispatch('currentSpace/notifyCollaboratorsCardUpdated', { cardId: this.card.id, type: 'updateCard' })
       this.notifiedMembers = true
     },
