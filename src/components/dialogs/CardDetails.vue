@@ -96,13 +96,13 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         button(:disabled="!canEditCard" @click.left.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
           span Frame
         FramePicker(:visible="framePickerIsVisible" :cards="[card]")
-      //- Toggle Collaboration Options
+      //- Toggle Collaboration Info
       .button-wrap
-        button.toggle-collaboration-options(@click.left.stop="toggleCollaborationOptionsIsVisible" :class="{active : collaborationOptionsIsVisible}")
+        button.toggle-collaboration-info(@click.left.stop="toggleCollaborationInfoIsVisible" :class="{active : collaborationInfoIsVisible}")
           img.down-arrow(src="@/assets/down-arrow.svg")
 
     //- Collaboration
-    .row.collaboration-options(v-if="collaborationOptionsIsVisible")
+    .row.collaboration-info(v-if="collaborationInfoIsVisible")
       .badge.secondary.button-badge(@click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
         img.icon.time(src="@/assets/time.svg")
         span.name {{dateUpdatedAt}}
@@ -533,7 +533,7 @@ export default {
         borderRadius: borderRadius
       }
     },
-    collaborationOptionsIsVisible () { return this.$store.state.currentUser.shouldShowCardCollaborationOptions },
+    collaborationInfoIsVisible () { return this.$store.state.currentUser.shouldShowCardCollaborationInfo },
     dateUpdatedAt () {
       const date = this.card.nameUpdatedAt || this.card.createdAt
       const showAbsoluteDate = this.$store.state.currentUser.filterShowAbsoluteDates
@@ -558,7 +558,7 @@ export default {
       if (createdByUserDetailsIsVisible || updatedByUserDetailsIsVislble) {
         shouldHideDialog = true
       }
-      this.closeDialogs()
+      this.closeDialogs() // emit close
       if (shouldHideDialog) { return }
       this.selectedUser = user
       if (userIsCreatedByUser) {
@@ -568,10 +568,11 @@ export default {
       }
     },
     toggleFilterShowAbsoluteDates () {
-      this.closeDialogs()
+      this.closeDialogs() // emit close
       const value = !this.$store.state.currentUser.filterShowAbsoluteDates
       this.$store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
     },
+
     cancelOpening () {
       shouldCancelOpening = true
     },
@@ -994,10 +995,10 @@ export default {
       this.imagePickerIsVisible = !isVisible
       this.initialSearch = this.normalizedName
     },
-    toggleCollaborationOptionsIsVisible () {
+    toggleCollaborationInfoIsVisible () {
       this.closeDialogs()
-      const isVisible = !this.$store.state.currentUser.shouldShowCardCollaborationOptions
-      this.$store.dispatch('currentUser/shouldShowCardCollaborationOptions', isVisible)
+      const isVisible = !this.$store.state.currentUser.shouldShowCardCollaborationInfo
+      this.$store.dispatch('currentUser/shouldShowCardCollaborationInfo', isVisible)
     },
     focusName (position) {
       const element = this.$refs.name
@@ -1036,6 +1037,7 @@ export default {
       this.hidePickers()
       this.hideTagDetailsIsVisible()
       this.hideLinkDetailsIsVisible()
+
       this.userDetailsIsVisibleForCreatedByUser = false
       this.userDetailsIsVisibleForUpdatedByUser = false
       this.selectedUser = {}
@@ -1587,10 +1589,10 @@ export default {
     position absolute
     z-index -1
     pointer-events none
-  .toggle-collaboration-options
+  .toggle-collaboration-info
     .down-arrow
       padding 0
-  .collaboration-options
+  .collaboration-info
     .users
       display flex
       flex-wrap wrap

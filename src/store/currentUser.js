@@ -32,7 +32,7 @@ export default {
     shouldEmailNotifications: true,
     shouldEmailBulletin: true,
     shouldShowMoreAlignOptions: false,
-    shouldShowCardCollaborationOptions: false,
+    shouldShowCardCollaborationInfo: false,
     shouldInvertZoomDirection: false,
     shouldUseLastConnectionType: false,
     shouldShowNewUserNotification: true
@@ -204,9 +204,9 @@ export default {
       state.shouldShowMoreAlignOptions = value
       cache.updateUser('shouldShowMoreAlignOptions', value)
     },
-    shouldShowCardCollaborationOptions: (state, value) => {
-      state.shouldShowCardCollaborationOptions = value
-      cache.updateUser('shouldShowCardCollaborationOptions', value)
+    shouldShowCardCollaborationInfo: (state, value) => {
+      state.shouldShowCardCollaborationInfo = value
+      cache.updateUser('shouldShowCardCollaborationInfo', value)
     },
     shouldInvertZoomDirection: (state, value) => {
       state.shouldInvertZoomDirection = value
@@ -506,12 +506,12 @@ export default {
           shouldShowMoreAlignOptions: value
         } }, { root: true })
     },
-    shouldShowCardCollaborationOptions: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'shouldShowCardCollaborationOptions' })
-      context.commit('shouldShowCardCollaborationOptions', value)
+    shouldShowCardCollaborationInfo: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldShowCardCollaborationInfo' })
+      context.commit('shouldShowCardCollaborationInfo', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
-          shouldShowCardCollaborationOptions: value
+          shouldShowCardCollaborationInfo: value
         } }, { root: true })
     },
     shouldInvertZoomDirection: (context, value) => {
