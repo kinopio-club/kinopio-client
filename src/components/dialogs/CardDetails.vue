@@ -107,14 +107,16 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         img.icon.time(src="@/assets/time.svg")
         span.name {{dateUpdatedAt}}
       .users
-        .badge(:style="{background: createdByUser.color}" title="Created by")
+        .badge.button-badge(:style="{background: createdByUser.color}" title="Created by" @click.left.stop="toggleUserDetails(createdByUser)")
           User(:user="createdByUser" :isClickable="false" :detailsOnRight="true" :isSmall="true")
           span.name {{createdByUser.name}}
+          UserDetails(:visible="userDetailsIsVisibleForCreatedByUser" :user="createdByUser")
         template(v-if="isUpdatedByDifferentUser")
-          .badge(:style="{background: updatedByUser.color}" title="Last edited by")
+          .badge.button-badge(:style="{background: updatedByUser.color}" title="Last edited by" @click.left.stop="toggleUserDetails(updatedByUser)")
             img.icon(src="@/assets/brush.svg")
             User(:user="updatedByUser" :isClickable="false" :detailsOnRight="true" :isSmall="true")
             span.name {{updatedByUser.name}}
+            UserDetails(:visible="userDetailsIsVisibleForUpdatedByUser" :user="updatedByUser")
 
     .row(v-if="nameSplitIntoCardsCount || hasUrls")
       //- Show Url
@@ -208,6 +210,7 @@ import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import CardTips from '@/components/dialogs/CardTips.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
+import UserDetails from '@/components/dialogs/UserDetails.vue'
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
@@ -235,6 +238,7 @@ export default {
     CardTips,
     TagPicker,
     SpacePicker,
+    UserDetails,
     Loader,
     UrlPreview,
     MediaPreview,
@@ -280,7 +284,10 @@ export default {
       nameSplitIntoCardsCount: 0,
       isOpening: false,
       openingPercent: 0,
-      openingAlpha: 0
+      openingAlpha: 0,
+      selectedUser: {},
+      userDetailsIsVisibleForCreatedByUser: false,
+      userDetailsIsVisibleForUpdatedByUser: false
     }
   },
   created () {
@@ -542,6 +549,24 @@ export default {
     }
   },
   methods: {
+    toggleUserDetails (user) {
+      let shouldHideDialog
+      const userIsCreatedByUser = user.id === this.createdByUser.id
+      const userIsUpdatedByUser = user.id === this.updatedByUser.id
+      const createdByUserDetailsIsVisible = userIsCreatedByUser && this.userDetailsIsVisibleForCreatedByUser
+      const updatedByUserDetailsIsVislble = userIsUpdatedByUser && this.userDetailsIsVisibleForUpdatedByUser
+      if (createdByUserDetailsIsVisible || updatedByUserDetailsIsVislble) {
+        shouldHideDialog = true
+      }
+      this.closeDialogs()
+      if (shouldHideDialog) { return }
+      this.selectedUser = user
+      if (userIsCreatedByUser) {
+        this.userDetailsIsVisibleForCreatedByUser = true
+      } else {
+        this.userDetailsIsVisibleForUpdatedByUser = true
+      }
+    },
     toggleFilterShowAbsoluteDates () {
       this.closeDialogs()
       const value = !this.$store.state.currentUser.filterShowAbsoluteDates
@@ -1011,6 +1036,9 @@ export default {
       this.hidePickers()
       this.hideTagDetailsIsVisible()
       this.hideLinkDetailsIsVisible()
+      this.userDetailsIsVisibleForCreatedByUser = false
+      this.userDetailsIsVisibleForUpdatedByUser = false
+      this.selectedUser = {}
     },
     clickName (event) {
       this.triggerUpdateMagicPaintPositionOffset()
