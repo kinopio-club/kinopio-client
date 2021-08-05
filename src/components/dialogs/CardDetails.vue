@@ -101,22 +101,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         button.toggle-collaboration-info(@click.left.stop="toggleCollaborationInfoIsVisible" :class="{active : collaborationInfoIsVisible}")
           img.down-arrow(src="@/assets/down-arrow.svg")
 
-    //- Collaboration
-    .row.collaboration-info(v-if="collaborationInfoIsVisible")
-      .badge.secondary.button-badge(@click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
-        img.icon.time(src="@/assets/time.svg")
-        span.name {{dateUpdatedAt}}
-      .users
-        .badge.button-badge(:style="{background: createdByUser.color}" title="Created by" @click.left.stop="toggleUserDetails(createdByUser)")
-          User(:user="createdByUser" :isClickable="false" :detailsOnRight="true" :isSmall="true")
-          span.name {{createdByUser.name}}
-          UserDetails(:visible="userDetailsIsVisibleForCreatedByUser" :user="createdByUser")
-        template(v-if="isUpdatedByDifferentUser")
-          .badge.button-badge(:style="{background: updatedByUser.color}" title="Last edited by" @click.left.stop="toggleUserDetails(updatedByUser)")
-            img.icon(src="@/assets/brush.svg")
-            User(:user="updatedByUser" :isClickable="false" :detailsOnRight="true" :isSmall="true")
-            span.name {{updatedByUser.name}}
-            UserDetails(:visible="userDetailsIsVisibleForUpdatedByUser" :user="updatedByUser")
+    CardCollaborationInfo(:visible="collaborationInfoIsVisible" @closeDialogs="closeDialogs" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card")
 
     .row(v-if="nameSplitIntoCardsCount || hasUrls")
       //- Show Url
@@ -210,11 +195,11 @@ import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import CardTips from '@/components/dialogs/CardTips.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
-import UserDetails from '@/components/dialogs/UserDetails.vue'
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 import MediaPreview from '@/components/MediaPreview.vue'
+import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
@@ -238,11 +223,11 @@ export default {
     CardTips,
     TagPicker,
     SpacePicker,
-    UserDetails,
     Loader,
     UrlPreview,
     MediaPreview,
-    User
+    User,
+    CardCollaborationInfo
   },
   props: {
     card: Object // name, x, y, z
@@ -284,10 +269,7 @@ export default {
       nameSplitIntoCardsCount: 0,
       isOpening: false,
       openingPercent: 0,
-      openingAlpha: 0,
-      selectedUser: {},
-      userDetailsIsVisibleForCreatedByUser: false,
-      userDetailsIsVisibleForUpdatedByUser: false
+      openingAlpha: 0
     }
   },
   created () {
@@ -492,7 +474,6 @@ export default {
         }
       }
     },
-    isUpdatedByDifferentUser () { return this.createdByUser.id !== this.updatedByUser.id },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
     styles () {
@@ -533,46 +514,9 @@ export default {
         borderRadius: borderRadius
       }
     },
-    collaborationInfoIsVisible () { return this.$store.state.currentUser.shouldShowCardCollaborationInfo },
-    dateUpdatedAt () {
-      const date = this.card.nameUpdatedAt || this.card.createdAt
-      const showAbsoluteDate = this.$store.state.currentUser.filterShowAbsoluteDates
-      if (date) {
-        if (showAbsoluteDate) {
-          return new Date(date).toLocaleString()
-        } else {
-          return utils.shortRelativeTime(date)
-        }
-      } else {
-        return 'Just now'
-      }
-    }
+    collaborationInfoIsVisible () { return this.$store.state.currentUser.shouldShowCardCollaborationInfo }
   },
   methods: {
-    toggleUserDetails (user) {
-      let shouldHideDialog
-      const userIsCreatedByUser = user.id === this.createdByUser.id
-      const userIsUpdatedByUser = user.id === this.updatedByUser.id
-      const createdByUserDetailsIsVisible = userIsCreatedByUser && this.userDetailsIsVisibleForCreatedByUser
-      const updatedByUserDetailsIsVislble = userIsUpdatedByUser && this.userDetailsIsVisibleForUpdatedByUser
-      if (createdByUserDetailsIsVisible || updatedByUserDetailsIsVislble) {
-        shouldHideDialog = true
-      }
-      this.closeDialogs() // emit close
-      if (shouldHideDialog) { return }
-      this.selectedUser = user
-      if (userIsCreatedByUser) {
-        this.userDetailsIsVisibleForCreatedByUser = true
-      } else {
-        this.userDetailsIsVisibleForUpdatedByUser = true
-      }
-    },
-    toggleFilterShowAbsoluteDates () {
-      this.closeDialogs() // emit close
-      const value = !this.$store.state.currentUser.filterShowAbsoluteDates
-      this.$store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
-    },
-
     cancelOpening () {
       shouldCancelOpening = true
     },
@@ -1037,10 +981,6 @@ export default {
       this.hidePickers()
       this.hideTagDetailsIsVisible()
       this.hideLinkDetailsIsVisible()
-
-      this.userDetailsIsVisibleForCreatedByUser = false
-      this.userDetailsIsVisibleForUpdatedByUser = false
-      this.selectedUser = {}
     },
     clickName (event) {
       this.triggerUpdateMagicPaintPositionOffset()
@@ -1592,8 +1532,4 @@ export default {
   .toggle-collaboration-info
     .down-arrow
       padding 0
-  .collaboration-info
-    .users
-      display flex
-      flex-wrap wrap
 </style>
