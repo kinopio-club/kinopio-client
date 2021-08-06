@@ -53,7 +53,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
       .button-wrap
         button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
           img.icon(src="@/assets/add.svg")
-          span Add
+          span Space
         AddSpace(:visible="addSpaceIsVisible" @closeDialogs="closeDialogs" @addSpace="addSpace")
       .button-wrap
         button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
