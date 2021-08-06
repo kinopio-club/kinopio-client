@@ -7,10 +7,6 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
       label(:class="{active: shouldInvertZoomDirection}" @click.left.prevent="toggleShouldInvertZoomDirection" @keydown.stop.enter="toggleShouldInvertZoomDirection")
         input(type="checkbox" v-model="shouldInvertZoomDirection")
         span Invert Zoom Direction
-    .row
-      label(:class="{active: shouldUseLastConnectionType}" @click.left.prevent="toggleShouldUseLastConnectionType" @keydown.stop.enter="toggleShouldUseLastConnectionType")
-        input(type="checkbox" v-model="shouldUseLastConnectionType")
-        span Use Last Connection Type
 </template>
 
 <script>
@@ -35,17 +31,12 @@ export default {
   },
   computed: {
     isMobile () { return utils.isMobile() },
-    shouldInvertZoomDirection () { return this.$store.state.currentUser.shouldInvertZoomDirection },
-    shouldUseLastConnectionType () { return this.$store.state.currentUser.shouldUseLastConnectionType }
+    shouldInvertZoomDirection () { return this.$store.state.currentUser.shouldInvertZoomDirection }
   },
   methods: {
     toggleShouldInvertZoomDirection () {
       const value = !this.shouldInvertZoomDirection
       this.$store.dispatch('currentUser/shouldInvertZoomDirection', value)
-    },
-    toggleShouldUseLastConnectionType () {
-      const value = !this.shouldUseLastConnectionType
-      this.$store.dispatch('currentUser/shouldUseLastConnectionType', value)
     },
     updateDialogHeight () {
       if (!this.visible) { return }
