@@ -9,18 +9,13 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="styles" 
       input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeName" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport")
 
     .row
+      button(:disabled="!canEditConnection" @click.left="removeConnection")
+        img.icon(src="@/assets/remove.svg")
+        span Remove
       button(:disabled="!canEditConnection" :class="{active: labelIsVisible}" @click.left="toggleLabelIsVisible")
         img.icon(v-if="labelIsVisible" src="@/assets/view.svg")
         img.icon(v-else src="@/assets/view-hidden.svg")
-
         span Label
-      label(:class="{active: isDefault, disabled: !canEditSpace}" @click.left.prevent="toggleDefault" @keydown.stop.enter="toggleDefault")
-        input(type="checkbox" v-model="isDefault")
-        span Default
-
-    button(:disabled="!canEditConnection" @click.left="removeConnection")
-      img.icon(src="@/assets/remove.svg")
-      span Remove
 
     p.edit-message(v-if="!canEditConnection")
       template(v-if="spacePrivacyIsOpen")
@@ -40,16 +35,22 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="styles" 
           span To edit closed spaces, you'll need to be invited
 
   section.results-actions(ref="resultsActions")
+    .row
+      label(:class="{active: shouldUseLastConnectionType}" @click.left.prevent="toggleShouldUseLastConnectionType" @keydown.stop.enter="toggleShouldUseLastConnectionType")
+        input(type="checkbox" v-model="shouldUseLastConnectionType")
+        .badge.badge-in-button(:style="{backgroundColor: typeColor}")
+        span Use Last Type
     button(:disabled="!canEditConnection" @click.left="addConnectionType")
       img.icon(src="@/assets/add.svg")
-      span Add
+      .badge.badge-in-button(:style="{backgroundColor: nextConnectionTypeColor}")
+      span Type
 
   section.results-section(ref="resultsSection" :style="{'max-height': resultsSectionMaxHeight}")
     ResultsFilter(:items="connectionTypes" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredConnectionTypes")
     ul.results-list
       template(v-for="(type in connectionTypesFiltered")
         li(:class="{ active: connectionTypeIsActive(type), disabled: !canEditConnection }" @click.left="changeConnectionType(type)" :key="type.id")
-          .badge(:style="{backgroundColor: type.color}" :class="{checked: connectionTypeIsDefault(type)}")
+          .badge(:style="{backgroundColor: type.color}")
           .name {{type.name}}
 </template>
 
@@ -60,6 +61,7 @@ import utils from '@/utils.js'
 
 import last from 'lodash-es/last'
 import scrollIntoView from '@/scroll-into-view.js'
+import randomColor from 'randomcolor'
 
 export default {
   components: {
@@ -72,11 +74,11 @@ export default {
   },
   data () {
     return {
-      isDefault: false,
       colorPickerIsVisible: false,
       filter: '',
       filteredConnectionTypes: [],
-      resultsSectionMaxHeight: undefined // number
+      resultsSectionMaxHeight: undefined, // number
+      nextConnectionTypeColor: ''
     }
   },
   computed: {
@@ -137,21 +139,23 @@ export default {
       } else {
         return this.connectionTypes
       }
-    }
+    },
+    shouldUseLastConnectionType () { return this.$store.state.currentUser.shouldUseLastConnectionType }
   },
   methods: {
+    toggleShouldUseLastConnectionType () {
+      const value = !this.shouldUseLastConnectionType
+      this.$store.dispatch('currentUser/shouldUseLastConnectionType', value)
+    },
     addConnectionType () {
-      this.$store.dispatch('currentSpace/addConnectionType')
+      this.$store.dispatch('currentSpace/addConnectionType', { color: this.nextConnectionTypeColor })
       const types = utils.clone(this.connectionTypes)
       const newType = last(types)
       this.changeConnectionType(newType)
+      this.updateNextConnectionColor()
     },
     connectionTypeIsActive (type) {
       return Boolean(type.id === this.currentConnection.connectionTypeId)
-    },
-    connectionTypeIsDefault (type) {
-      const typePref = this.$store.state.currentUser.defaultConnectionTypeId
-      return typePref === type.id
     },
     removeConnection () {
       this.$store.dispatch('currentSpace/removeConnection', this.currentConnection)
@@ -164,19 +168,6 @@ export default {
         connectionTypeId: type.id
       })
       this.$store.commit('currentSpace/reorderConnectionTypeToLast', type)
-      this.updateDefaultConnectionType()
-    },
-    updateDefaultConnectionType () {
-      const typePref = this.$store.state.currentUser.defaultConnectionTypeId
-      this.isDefault = Boolean(typePref === this.currentConnectionType.id)
-    },
-    toggleDefault () {
-      this.isDefault = !this.isDefault
-      if (this.isDefault) {
-        this.$store.dispatch('currentUser/defaultConnectionTypeId', this.currentConnectionType.id)
-      } else {
-        this.$store.dispatch('currentUser/defaultConnectionTypeId', '')
-      }
     },
     toggleLabelIsVisible () {
       const newValue = !this.labelIsVisible
@@ -239,10 +230,6 @@ export default {
         }
       })
     },
-    updateView () {
-      this.updateDefaultConnectionType()
-      this.colorPickerIsVisible = false
-    },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
@@ -260,6 +247,9 @@ export default {
     },
     triggerUpdatePositionInVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
+    },
+    updateNextConnectionColor () {
+      this.nextConnectionTypeColor = randomColor({ luminosity: 'light' })
     }
   },
   watch: {
@@ -267,7 +257,7 @@ export default {
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
       this.$nextTick(() => {
         if (this.visible) {
-          this.updateView()
+          this.colorPickerIsVisible = false
           this.scrollIntoViewAndFocus()
           this.$store.commit('currentSpace/reorderConnectionTypeToLast', this.currentConnectionType)
         } else {
@@ -278,6 +268,7 @@ export default {
     visible (visible) {
       if (visible) {
         this.updatePinchCounterZoomDecimal()
+        this.updateNextConnectionColor()
       } else {
         this.resultsSectionMaxHeight = undefined
       }
@@ -294,5 +285,10 @@ export default {
   .edit-message
     button
       margin-top 10px
-
+  .results-actions
+    .badge-in-button
+      margin-left 5px
+    label
+      .badge-in-button
+        margin-left 0
 </style>

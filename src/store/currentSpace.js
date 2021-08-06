@@ -1376,13 +1376,19 @@ export default {
 
     // Connection Types
 
-    addConnectionType: (context) => {
+    addConnectionType: (context, options) => {
       const types = context.state.connectionTypes
-      const connectionType = {
+      let connectionType = {
         id: nanoid(),
-        name: `Connection ${types.length + 1}`,
+        name: `Connection Type ${types.length + 1}`,
         color: randomColor({ luminosity: 'light' }),
         spaceId: context.state.id
+      }
+      if (options) {
+        const keys = Object.keys(options)
+        keys.forEach(key => {
+          connectionType[key] = options[key]
+        })
       }
       context.commit('addConnectionType', connectionType)
       context.commit('broadcast/update', { updates: connectionType, type: 'addConnectionType' }, { root: true })
@@ -1601,14 +1607,8 @@ export default {
       })
     },
     connectionTypeForNewConnections: (state, getters, rootState) => {
-      const typePref = rootState.currentUser.defaultConnectionTypeId
-      const defaultType = getters.connectionTypeById(typePref)
-      if (defaultType) {
-        return defaultType
-      } else {
-        const lastConnectionType = getters.lastConnectionType
-        return lastConnectionType
-      }
+      const lastConnectionType = getters.lastConnectionType
+      return lastConnectionType
     },
 
     // Users

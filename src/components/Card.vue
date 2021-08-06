@@ -953,8 +953,6 @@ export default {
       this.$store.commit('currentConnectionCursorStart', cursor)
     },
     addConnectionType (event) {
-      const typePref = this.$store.state.currentUser.defaultConnectionTypeId
-      const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
       const shouldUseLastConnectionType = this.$store.state.currentUser.shouldUseLastConnectionType
       const shiftKey = event.shiftKey
       const connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
@@ -965,7 +963,7 @@ export default {
         this.$store.dispatch('currentSpace/addConnectionType')
         return
       }
-      if (defaultType || shiftKey || shouldUseLastConnectionType) {
+      if (shiftKey || shouldUseLastConnectionType) {
         return
       }
       this.$store.dispatch('currentSpace/addConnectionType')

@@ -23,7 +23,7 @@ dialog.narrow.multiple-selected-actions(
       .button-wrap(:class="{active: framePickerIsVisible}" @click.left.stop="toggleFramePickerIsVisible")
         button Frames
         FramePicker(:visible="framePickerIsVisible" :cards="cards")
-    .row(v-if="connectionsIsSelected")
+    .row.edit-connection-types(v-if="connectionsIsSelected")
       //- Type Color
       .button-wrap
         button.change-color(:disabled="!canEditSome.connections" @click.left.stop="toggleMultipleConnectionsPickerVisible")
@@ -31,6 +31,7 @@ dialog.narrow.multiple-selected-actions(
             template(v-for="type in connectionTypes")
               .current-color(:style="{ background: type.color }")
         MultipleConnectionsPicker(:visible="multipleConnectionsPickerVisible" :selectedConnections="editableConnections" :selectedConnectionTypes="editableConnectionTypes")
+
       //- Labels
       button(:disabled="!canEditSome.connections" :class="{active: allLabelsAreVisible}" @click.left="toggleAllLabelsAreVisible")
         img.icon(v-if="allLabelsAreVisible" src="@/assets/view.svg")
@@ -300,17 +301,15 @@ export default {
       this.framePickerIsVisible = false
     },
     connectionType (event) {
-      const typePref = this.$store.state.currentUser.defaultConnectionTypeId
-      const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
       let connectionType = last(this.$store.state.currentSpace.connectionTypes)
       const shouldUseLastConnectionType = this.$store.state.currentUser.shouldUseLastConnectionType
       const shiftKey = event.shiftKey
       const shouldAddType = !connectionType || (shouldUseLastConnectionType && shiftKey) || (!shouldUseLastConnectionType && !shiftKey)
-      if (!defaultType && shouldAddType) {
+      if (shouldAddType) {
         this.$store.dispatch('currentSpace/addConnectionType')
       }
       connectionType = last(this.$store.state.currentSpace.connectionTypes)
-      return defaultType || connectionType
+      return connectionType
     },
     connectionAlreadyExists (startCardId, endCardId) {
       const connections = this.$store.state.currentSpace.connections
@@ -449,4 +448,8 @@ export default {
     width 11px
   .align-and-distribute + .move-or-copy-wrap
     margin-left 6px
+  .edit-connection-types
+    margin-right 6px
+    .change-color
+      height 24px
 </style>

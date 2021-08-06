@@ -280,9 +280,8 @@ export default {
     },
 
     addConnectionType () {
-      const typePref = this.$store.state.currentUser.defaultConnectionTypeId
-      const defaultType = this.$store.getters['currentSpace/connectionTypeById'](typePref)
-      if (defaultType || useSiblingConnectionType) { return }
+      const shouldUseLastConnectionType = this.$store.state.currentUser.shouldUseLastConnectionType
+      if (shouldUseLastConnectionType || useSiblingConnectionType) { return }
       this.$store.dispatch('currentSpace/addConnectionType')
       useSiblingConnectionType = true
     },

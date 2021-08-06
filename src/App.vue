@@ -565,6 +565,10 @@ code
     &:active,
     &.active
       box-shadow var(--button-active-inset-shadow)
+  &.badge-in-button
+    padding 0px 7px
+    vertical-align 0
+    margin-right 5px
 
 .label-badge
   position absolute

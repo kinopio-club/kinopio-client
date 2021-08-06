@@ -3,21 +3,23 @@ dialog.narrow.multiple-connections-picker(v-if="visible" :open="visible" ref="di
   section.results-actions
     button(@click.left="addConnectionType")
       img.icon(src="@/assets/add.svg")
-      span Add
+      .badge.badge-in-button(:style="{backgroundColor: nextConnectionTypeColor}")
+      span Type
 
   section.results-section
     ul.results-list
       template(v-for="(type in connectionTypes")
         li(:class="{ active: connectionTypeIsActive(type) }" @click.left="changeConnectionTypes(type)" :key="type.id" tabindex="0" v-on:keyup.enter="changeConnectionTypes(type)")
-          .badge(:style="{backgroundColor: type.color}" :class="{checked: connectionTypeIsDefault(type)}")
+          .badge(:style="{backgroundColor: type.color}")
           .name {{type.name}}
 </template>
 
 <script>
-import last from 'lodash-es/last'
-
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
+
+import last from 'lodash-es/last'
+import randomColor from 'randomcolor'
 
 export default {
   name: 'MultipleConnectionsPicker',
@@ -25,6 +27,11 @@ export default {
     visible: Boolean,
     selectedConnections: Array,
     selectedConnectionTypes: Array
+  },
+  data () {
+    return {
+      nextConnectionTypeColor: ''
+    }
   },
   computed: {
     connectionTypes () {
@@ -40,25 +47,25 @@ export default {
         })
       })
     },
-    connectionTypeIsDefault (type) {
-      const typePref = this.$store.state.currentUser.defaultConnectionTypeId
-      return typePref === type.id
-    },
     connectionTypeIsActive (type) {
       return this.selectedConnections.find(connection => {
         return connection.connectionTypeId === type.id
       })
     },
     addConnectionType () {
-      this.$store.dispatch('currentSpace/addConnectionType')
+      this.$store.dispatch('currentSpace/addConnectionType', { color: this.nextConnectionTypeColor })
       const types = utils.clone(this.connectionTypes)
       const newType = last(types)
       this.changeConnectionTypes(newType)
+      this.updateNextConnectionColor()
     },
     scrollIntoView () {
       const element = this.$refs.dialog
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
+    },
+    updateNextConnectionColor () {
+      this.nextConnectionTypeColor = randomColor({ luminosity: 'light' })
     }
   },
   watch: {
@@ -66,6 +73,7 @@ export default {
       this.$nextTick(() => {
         if (visible) {
           this.scrollIntoView()
+          this.updateNextConnectionColor()
         }
       })
     }
@@ -74,7 +82,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.connection-details
-  .type-name
-    margin-left 6px
+.multiple-connections-picker
+  .badge-in-button
+    margin-left 5px
 </style>

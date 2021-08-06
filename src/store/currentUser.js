@@ -14,7 +14,6 @@ export default {
     name: undefined,
     description: undefined,
     website: undefined,
-    defaultConnectionTypeId: '',
     lastReadNewStuffId: undefined,
     prefersDarkTheme: false,
     apiKey: '',
@@ -75,10 +74,6 @@ export default {
     lastReadNewStuffId: (state, newStuffId) => {
       state.lastReadNewStuffId = newStuffId
       cache.updateUser('lastReadNewStuffId', newStuffId)
-    },
-    defaultConnectionTypeId: (state, typeId) => {
-      state.defaultConnectionTypeId = typeId
-      cache.updateUser('defaultConnectionTypeId', typeId)
     },
     apiKey: (state, apiKey) => {
       state.apiKey = apiKey
@@ -321,13 +316,6 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           lastReadNewStuffId: newStuffId
-        } }, { root: true })
-    },
-    defaultConnectionTypeId: (context, typeId) => {
-      context.commit('defaultConnectionTypeId', typeId)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
-        body: {
-          defaultConnectionTypeId: typeId
         } }, { root: true })
     },
     restoreRemoteUser: async (context, cachedUser) => {
