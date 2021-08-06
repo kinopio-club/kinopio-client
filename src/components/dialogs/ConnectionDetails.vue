@@ -36,7 +36,7 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="styles" 
 
   section.results-actions(ref="resultsActions")
     .row
-      label(:class="{active: shouldUseLastConnectionType}" @click.left.prevent="toggleShouldUseLastConnectionType" @keydown.stop.enter="toggleShouldUseLastConnectionType")
+      label(:class="{active: shouldUseLastConnectionType, disabled: !canEditConnection}" @click.left.prevent="toggleShouldUseLastConnectionType" @keydown.stop.enter="toggleShouldUseLastConnectionType")
         input(type="checkbox" v-model="shouldUseLastConnectionType")
         .badge.badge-in-button(:style="{backgroundColor: typeColor}")
         span Use Last Type

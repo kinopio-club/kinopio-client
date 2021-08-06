@@ -269,7 +269,8 @@ label // used for checkbox buttons
     width 14px
     vertical-align -3px
     margin-left 3px
-  &:disabled
+  &:disabled,
+  .disabled
     cursor default
     color var(--primary)
     opacity 0.5
