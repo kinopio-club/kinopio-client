@@ -152,6 +152,7 @@ export default {
       const types = utils.clone(this.connectionTypes)
       const newType = last(types)
       this.changeConnectionType(newType)
+      this.updateNextConnectionColor()
     },
     connectionTypeIsActive (type) {
       return Boolean(type.id === this.currentConnection.connectionTypeId)
@@ -229,9 +230,6 @@ export default {
         }
       })
     },
-    // updateView () {
-    //   this.updateDefaultConnectionType()
-    // },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
     },
