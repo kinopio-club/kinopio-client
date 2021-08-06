@@ -9,18 +9,18 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="styles" 
       input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeName" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport")
 
     .row
+      button(:disabled="!canEditConnection" @click.left="removeConnection")
+        img.icon(src="@/assets/remove.svg")
+        span Remove
+
       button(:disabled="!canEditConnection" :class="{active: labelIsVisible}" @click.left="toggleLabelIsVisible")
         img.icon(v-if="labelIsVisible" src="@/assets/view.svg")
         img.icon(v-else src="@/assets/view-hidden.svg")
-
         span Label
-      label(:class="{active: isDefault, disabled: !canEditSpace}" @click.left.prevent="toggleDefault" @keydown.stop.enter="toggleDefault")
-        input(type="checkbox" v-model="isDefault")
-        span Default
-
-    button(:disabled="!canEditConnection" @click.left="removeConnection")
-      img.icon(src="@/assets/remove.svg")
-      span Remove
+    //- .row
+    //-   label(:class="{active: isDefault, disabled: !canEditSpace}" @click.left.prevent="toggleDefault" @keydown.stop.enter="toggleDefault")
+    //-     input(type="checkbox" v-model="isDefault")
+    //-     span Default
 
     p.edit-message(v-if="!canEditConnection")
       template(v-if="spacePrivacyIsOpen")
@@ -40,6 +40,11 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="styles" 
           span To edit closed spaces, you'll need to be invited
 
   section.results-actions(ref="resultsActions")
+    .row
+      label(:class="{active: shouldUseLastConnectionType}" @click.left.prevent="toggleShouldUseLastConnectionType" @keydown.stop.enter="toggleShouldUseLastConnectionType")
+        input(type="checkbox" v-model="shouldUseLastConnectionType")
+        .badge.badge-in-button(:style="{backgroundColor: typeColor}")
+        span Use Last Type
     button(:disabled="!canEditConnection" @click.left="addConnectionType")
       img.icon(src="@/assets/add.svg")
       span Add
@@ -137,9 +142,14 @@ export default {
       } else {
         return this.connectionTypes
       }
-    }
+    },
+    shouldUseLastConnectionType () { return this.$store.state.currentUser.shouldUseLastConnectionType }
   },
   methods: {
+    toggleShouldUseLastConnectionType () {
+      const value = !this.shouldUseLastConnectionType
+      this.$store.dispatch('currentUser/shouldUseLastConnectionType', value)
+    },
     addConnectionType () {
       this.$store.dispatch('currentSpace/addConnectionType')
       const types = utils.clone(this.connectionTypes)
@@ -294,5 +304,7 @@ export default {
   .edit-message
     button
       margin-top 10px
-
+  .badge-in-button
+    padding 0px 7px
+    vertical-align 0
 </style>
