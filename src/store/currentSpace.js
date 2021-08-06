@@ -1378,11 +1378,17 @@ export default {
 
     addConnectionType: (context, options) => {
       const types = context.state.connectionTypes
-      const connectionType = {
+      let connectionType = {
         id: nanoid(),
         name: `Connection Type ${types.length + 1}`,
-        color: options.color || randomColor({ luminosity: 'light' }),
+        color: randomColor({ luminosity: 'light' }),
         spaceId: context.state.id
+      }
+      if (options) {
+        const keys = Object.keys(options)
+        keys.forEach(key => {
+          connectionType[key] = options[key]
+        })
       }
       context.commit('addConnectionType', connectionType)
       context.commit('broadcast/update', { updates: connectionType, type: 'addConnectionType' }, { root: true })
