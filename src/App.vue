@@ -697,6 +697,7 @@ code
   .badge
     &:last-child
       margin 0
+      margin-right 2px
   .badge,
   a
     margin-right 3px
