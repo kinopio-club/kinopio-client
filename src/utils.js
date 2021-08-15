@@ -564,7 +564,6 @@ export default {
     space.users = []
     space.collaborators = []
     space.showInExplore = false
-    space.bestOfExplore = false
     space.proposedShowInExplore = false
     space.privacy = 'private'
     space.cards = space.cards.map(card => {
