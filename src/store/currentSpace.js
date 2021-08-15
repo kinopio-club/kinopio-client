@@ -481,10 +481,9 @@ export default {
 
     createNewHelloSpace: (context) => {
       const user = context.rootState.currentUser
-      const nullCardUsers = true
       let space = utils.clone(helloSpace)
       space.id = nanoid()
-      space = cache.updateIdsInSpace(space, nullCardUsers)
+      space = cache.updateIdsInSpace(space)
       context.commit('clearSearch', null, { root: true })
       context.commit('restoreSpace', space)
       context.commit('addUserToSpace', user)
