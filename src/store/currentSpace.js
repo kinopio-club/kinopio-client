@@ -488,6 +488,8 @@ export default {
       context.commit('clearSearch', null, { root: true })
       context.commit('restoreSpace', space)
       context.commit('addUserToSpace', user)
+      context.dispatch('updateOtherUsers')
+      context.dispatch('updateOtherSpaces')
     },
     createNewSpace: (context) => {
       let space = utils.clone(newSpace)
