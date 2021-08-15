@@ -437,38 +437,7 @@
     }
   ],
   "cacheDate": 1629052193966,
-  "removedCards": [
-    {
-      "id": "OF6Qd6_IorPR3jsHQbHCw",
-      "x": 300,
-      "y": 1337,
-      "z": 1006,
-      "name": "[] ?? adjust for macbook air full screen size",
-      "frameId": 3,
-      "isRemoved": false,
-      "linkToSpaceId": null,
-      "commentIsVisible": true,
-      "width": 235,
-      "height": 46,
-      "spaceId": "1",
-      "userId": "euGhpBrR9eBcjKnK16C_g"
-    },
-    {
-      "id": "PJQq-u4ys7vYbo5Y2EXeh",
-      "x": 333,
-      "y": 1432,
-      "z": 1004,
-      "name": "[] imageoptim images, serve from transit",
-      "frameId": 3,
-      "isRemoved": false,
-      "linkToSpaceId": null,
-      "commentIsVisible": true,
-      "width": 235,
-      "height": 46,
-      "spaceId": "1",
-      "userId": "euGhpBrR9eBcjKnK16C_g"
-    }
-  ],
+  "removedCards": [],
   "originSpaceId": "OyZvnvMO419R00oT4nOrK",
   "tags": [
     {
