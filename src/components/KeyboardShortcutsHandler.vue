@@ -38,8 +38,8 @@ export default {
       // ?
       } else if (key === '?' && isSpaceScope) {
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
-      // Backspace
-      } else if (key === 'Backspace' && isSpaceScope) {
+      // Backspace, Clear, Delete
+      } else if ((key === 'Backspace' || key === 'Clear' || key === 'Delete') && isSpaceScope) {
         this.remove()
       // Escape
       } else if (key === 'Escape') {
