@@ -431,6 +431,7 @@ export default {
       })
     },
     updateOtherSpaces: async (context, spaceId) => {
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       let links
       if (spaceId) {
         links = [{ linkToSpaceId: spaceId }]
@@ -449,6 +450,10 @@ export default {
       spaces.forEach(space => {
         space = utils.normalizeSpaceMetaOnly(space)
         context.commit('updateOtherSpaces', space, { root: true })
+        const linkedCard = links.find(link => link.linkToSpaceId === space.id)
+        Vue.nextTick(() => {
+          context.dispatch('updateCardConnectionPaths', { cardId: linkedCard.id, shouldUpdateApi: canEditSpace })
+        })
       })
       otherSpacesQueue = []
     },
