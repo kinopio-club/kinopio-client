@@ -248,6 +248,19 @@ const self = {
         console.error('🚒', error)
       }
     },
+    getPublicUsers: async (context, userIds) => {
+      const max = 60
+      try {
+        userIds = userIds.slice(0, max)
+        userIds = userIds.join(',')
+        console.log('🛬🛬 getting remote public users', userIds)
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await utils.timeout(40000, fetch(`${host}/user/public/multiple?userIds=${userIds}`, options))
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒', error)
+      }
+    },
     updateUserFavorites: async (context, body) => {
       if (!shouldRequest()) { return }
       try {

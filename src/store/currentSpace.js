@@ -425,10 +425,10 @@ export default {
       })
       otherUserIds = uniq(otherUserIds)
       if (!otherUserIds.length) { return }
-      for (const userId of otherUserIds) {
-        const user = await context.dispatch('api/getPublicUser', { id: userId }, { root: true })
+      const users = await context.dispatch('api/getPublicUsers', otherUserIds, { root: true })
+      users.forEach(user => {
         context.commit('updateOtherUsers', user, { root: true })
-      }
+      })
     },
     updateOtherSpaces: async (context, spaceId) => {
       let links
