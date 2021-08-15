@@ -1045,8 +1045,8 @@ export default {
         if (dimensionsChanged) {
           const body = {
             id: card.id,
-            width: card.width,
-            height: card.height
+            width: Math.ceil(card.width),
+            height: Math.ceil(card.height)
           }
           const update = { name: 'updateCard', body }
           context.dispatch('api/addToQueue', update, { root: true })

@@ -567,6 +567,15 @@ export default {
     space.bestOfExplore = false
     space.proposedShowInExplore = false
     space.privacy = 'private'
+    space.cards = space.cards.map(card => {
+      if (card.nameUpdatedByUserId) {
+        card.nameUpdatedByUserId = null
+        card.nameUpdatedAt = null
+      }
+      card.width = Math.ceil(card.width)
+      card.height = Math.ceil(card.height)
+      return card
+    })
     return space
   },
   // migration added oct 2019
@@ -579,6 +588,9 @@ export default {
   updateSpaceUserId (space, userId) {
     space.cards = space.cards.map(card => {
       if (card.userId === null) { return card }
+      if (card.nameUpdatedByUserId) {
+        card.nameUpdatedByUserId = userId
+      }
       card.userId = userId
       return card
     })
