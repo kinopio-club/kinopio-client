@@ -89,7 +89,6 @@ export default {
   data () {
     return {
       moonPhase: {},
-      url: `${window.location.origin}/daily`,
       editPromptsIsVisible: false,
       editNewSpaceIsVisible: false,
       templatesIsVisible: false,
