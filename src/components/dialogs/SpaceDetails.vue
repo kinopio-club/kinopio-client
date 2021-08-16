@@ -59,9 +59,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
         button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
           span Import
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
-
-      //- TODO v-if user has a journal space
-      .button-wrap.toggle-journals
+      .button-wrap.toggle-journals(v-if="spacesHasJournalSpace")
         button(title="Toggle show journal spaces only" @click.left.stop="toggleShouldShowJournalsOnly" :class="{ active: shouldShowJournalsOnly }")
           img.icon(v-if="!shouldShowJournalsOnly" src="@/assets/view-hidden.svg")
           img.icon(v-else src="@/assets/view.svg")
@@ -221,6 +219,10 @@ export default {
         const isSpace = upload.spaceId === currentSpace.id
         return inProgress && isSpace
       })
+    },
+    spacesHasJournalSpace () {
+      const journal = this.spaces.find(space => space.moonPhase)
+      return Boolean(journal)
     }
   },
   methods: {
