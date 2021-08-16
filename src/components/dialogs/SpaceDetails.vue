@@ -66,7 +66,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
           MoonPhase(:moonPhase="moonPhase.name")
 
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    SpaceList(:spaces="spaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" :parentIsSpaceDetails="true" @selectSpace="changeSpace")
+    SpaceList(:spaces="filteredSpaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" :parentIsSpaceDetails="true" @selectSpace="changeSpace")
 </template>
 
 <script>
@@ -145,10 +145,19 @@ export default {
       dialogHeight: null,
       backgroundTint: '',
       moonPhase: {},
-      shouldShowJournalsOnly: false
+      shouldShowJournalsOnly: false,
+      journalSpaces: []
     }
   },
   computed: {
+    filteredSpaces () {
+      if (this.shouldShowJournalsOnly) {
+        this.updateJournalSpaces()
+        return this.journalSpaces
+      } else {
+        return this.spaces
+      }
+    },
     currentSpace () { return this.$store.state.currentSpace },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     shouldShowInExplore () {
@@ -361,6 +370,10 @@ export default {
       const spaces = this.updateFavoriteSpaces(this.remoteSpaces)
       this.spaces = spaces
       this.updateCachedSpacesUpdatedAt()
+    },
+    updateJournalSpaces () {
+      const journalSpaces = this.spaces.filter(space => space.moonPhase)
+      this.journalSpaces = journalSpaces
     },
     updateCachedSpacesUpdatedAt () {
       this.spaces.forEach(space => {
