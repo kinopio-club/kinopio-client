@@ -60,6 +60,13 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
           span Import
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
 
+      //- TODO v-if user has a journal space
+      .button-wrap.toggle-journals
+        button(title="Toggle show journal spaces only" @click.left.stop="toggleShouldShowJournalsOnly" :class="{ active: shouldShowJournalsOnly }")
+          img.icon(v-if="!shouldShowJournalsOnly" src="@/assets/view-hidden.svg")
+          img.icon(v-else src="@/assets/view.svg")
+          MoonPhase(:moonPhase="moonPhase.name")
+
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(:spaces="spaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" :parentIsSpaceDetails="true" @selectSpace="changeSpace")
 </template>
@@ -76,6 +83,8 @@ import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
 import templates from '@/data/templates.js'
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
+import MoonPhase from '@/components/MoonPhase.vue'
+import moonphase from '@/moonphase.js'
 
 import debounce from 'lodash-es/debounce'
 
@@ -93,7 +102,8 @@ export default {
     SpaceList,
     PrivacyButton,
     ShowInExploreButton,
-    Loader
+    Loader,
+    MoonPhase
   },
   props: {
     visible: Boolean
@@ -118,6 +128,9 @@ export default {
       }
     })
   },
+  mounted () {
+    this.moonPhase = moonphase()
+  },
   data () {
     return {
       spaces: [],
@@ -132,7 +145,9 @@ export default {
       remoteSpaces: [],
       resultsSectionHeight: null,
       dialogHeight: null,
-      backgroundTint: ''
+      backgroundTint: '',
+      moonPhase: {},
+      shouldShowJournalsOnly: false
     }
   },
   computed: {
@@ -209,6 +224,11 @@ export default {
     }
   },
   methods: {
+    toggleShouldShowJournalsOnly () {
+      const isVisible = this.shouldShowJournalsOnly
+      this.closeDialogs()
+      this.shouldShowJournalsOnly = !isVisible
+    },
     addSpace () {
       window.scrollTo(0, 0)
       this.$store.dispatch('currentSpace/addSpace')
@@ -469,4 +489,7 @@ export default {
     &:active,
     &.active
       background-color var(--primary-background)
+  .toggle-journals
+    .moon-phase
+      margin 0
 </style>
