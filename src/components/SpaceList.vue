@@ -274,6 +274,7 @@ export default {
   .favorite-icon
     margin-right 4px
     width 12px
+    min-width 12px
 
   .user
     margin-right 6px
