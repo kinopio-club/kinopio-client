@@ -6,7 +6,7 @@ span.name-segment
         template(v-if="markdown.type === 'text'")
           span {{markdown.content}}
         template(v-else-if="markdown.type === 'link'")
-          a(:href="markdown.result[2]") {{markdown.result[1]}}
+          a(:href="escapedUrl(markdown.result[2])") {{markdown.result[1]}}
         template(v-else-if="markdown.type === 'bold'")
           strong {{markdown.content}}
         template(v-else-if="markdown.type === 'emphasis'")
@@ -80,6 +80,12 @@ export default {
       const spaceId = utils.spaceIdFromUrl(segment.name)
       const space = this.$store.getters.cachedOrOtherSpaceById(spaceId)
       return space
+    },
+    escapedUrl (url) {
+      if (url.includes('javascript:')) {
+        return null
+      }
+      return url
     }
   }
 }
