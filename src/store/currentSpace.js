@@ -1549,6 +1549,15 @@ export default {
       let links = cards.filter(card => utils.idIsValid(card.linkToSpaceId))
       return links
     },
+    cardsWithTagName: (state, getters) => (tagName) => {
+      let cards = state.cards
+      return cards.filter(card => {
+        const tags = utils.tagsFromStringWithoutBrackets(card.name)
+        if (tags) {
+          return tags.includes(tagName)
+        }
+      })
+    },
 
     // Tags
     tags: (state, getters, rootState) => {
@@ -1558,12 +1567,6 @@ export default {
     tagByName: (state, getters) => (name) => {
       const tags = getters.tags
       return tags.find(tag => {
-        return tag.name === name
-      })
-    },
-    tagsByName: (state, getters) => (name) => {
-      const tags = getters.tags
-      return tags.filter(tag => {
         return tag.name === name
       })
     },

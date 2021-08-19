@@ -127,23 +127,6 @@ export default {
       return this.currentTag.color
     },
     cardDetailsIsVisibleForCardId () { return this.$store.state.cardDetailsIsVisibleForCardId },
-    spaceUsers () {
-      const currentSpace = utils.clone(this.$store.state.currentSpace)
-      let spaceUsers
-      const user = currentSpace.users
-      const collaborators = currentSpace.collaborators
-      const currentUser = utils.clone(this.$store.state.currentUser)
-      spaceUsers = user.concat(collaborators).concat(currentUser)
-      if (this.currentCard) {
-        const cardUser = this.userById(this.currentCard.nameUpdatedByUserId)
-        spaceUsers = spaceUsers.concat(cardUser)
-        spaceUsers = uniqBy(spaceUsers, 'id')
-        return spaceUsers
-      } else {
-        spaceUsers = uniqBy(spaceUsers, 'id')
-        return spaceUsers
-      }
-    },
     currentCard () {
       let currentCardId = this.cardDetailsIsVisibleForCardId
       const currentCard = this.$store.getters['currentSpace/cardById'](currentCardId)
@@ -189,18 +172,6 @@ export default {
         return this.cards
       }
     },
-    cardsByTagName () {
-      let tags
-      tags = this.$store.getters['currentSpace/tagsByName'](this.name)
-      tags = utils.clone(tags)
-      let cards = tags.map(tag => {
-        let card = this.$store.getters['currentSpace/cardById'](tag.cardId)
-        return card
-      })
-      cards = utils.clone(cards)
-      cards = cards.filter(card => card)
-      return cards
-    },
     shouldHideResultsFilter () {
       if (this.cards.length < 5) {
         return true
@@ -242,35 +213,29 @@ export default {
     async remoteCards () {
       let remoteCards = []
       this.loading = true
-      for (const user of this.spaceUsers) {
-        try {
-          let cards
-          if (user.id === this.currentUser.id) {
-            cards = await this.$store.dispatch('api/getCardsWithTag', this.name) || []
-          } else {
-            cards = await this.$store.dispatch('api/getCardsWithTagAndUser', { userId: user.id, tagName: this.name }) || []
-          }
-          cards = utils.clone(cards)
-          cards = sortBy(cards, card => dayjs(card.updatedAt).valueOf())
-          cards = cards.reverse()
-          remoteCards = remoteCards.concat(cards)
-        } catch (error) {
-          console.warn('🚑 could not find cards with tag', this.name, error)
-          this.loading = false
-        }
+      try {
+        let cards
+        cards = await this.$store.dispatch('api/getCardsWithTag', this.name) || []
+        cards = utils.clone(cards)
+        cards = sortBy(cards, card => dayjs(card.updatedAt).valueOf())
+        cards = cards.reverse()
+        remoteCards = remoteCards.concat(cards)
+      } catch (error) {
+        console.warn('🚑 could not find cards with tag', this.name, error)
+        this.loading = false
       }
       this.loading = false
       return remoteCards
     },
     async updateCards () {
-      const cardsInCurrentSpace = this.cardsByTagName
+      const cardsInCurrentSpace = this.$store.getters['currentSpace/cardsWithTagName'](this.name)
       const cardsInCachedSpaces = cache.allCardsByTagName(this.name)
       // cache cards
       let cacheCards = cardsInCurrentSpace.concat(cardsInCachedSpaces)
       cacheCards = this.addCardNameSegments(cacheCards)
       this.updateCardsList(cacheCards)
       // remote cards
-      let remoteCards = await this.remoteCards() // consolidate otherusres
+      let remoteCards = await this.remoteCards()
       if (remoteCards.length) {
         remoteCards = this.addCardNameSegments(remoteCards)
         remoteCards = remoteCards.filter(card => card.isRemoved !== true)
@@ -404,6 +369,7 @@ export default {
         const cardTags = utils.tagsFromStringWithoutBrackets(card.name) || []
         return cardTags.includes(this.name)
       })
+      cards = this.cards.concat(cards)
       cards = uniqBy(cards, 'id')
       this.cards = cards
       this.$nextTick(() => { // double nextTick to avoid timing conflicts with TagList updatePosition()

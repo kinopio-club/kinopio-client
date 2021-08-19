@@ -474,17 +474,6 @@ const self = {
         console.error('🚒', error)
       }
     },
-    getCardsWithTagAndUser: async (context, { userId, tagName }) => {
-      const shouldRequestRemote = true
-      if (!shouldRequest(shouldRequestRemote)) { return }
-      try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/card/by-tag-name-and-user/${tagName}/${userId}`, options)
-        return normalizeResponse(response)
-      } catch (error) {
-        console.error('🚒', error)
-      }
-    },
     getUserTags: async (context) => {
       if (!shouldRequest()) { return }
       try {
