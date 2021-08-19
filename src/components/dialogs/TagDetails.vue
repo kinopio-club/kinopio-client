@@ -228,6 +228,7 @@ export default {
       return remoteCards
     },
     async updateCards () {
+      this.cards = []
       const cardsInCurrentSpace = this.$store.getters['currentSpace/cardsWithTagName'](this.name)
       const cardsInCachedSpaces = cache.allCardsByTagName(this.name)
       // cache cards
