@@ -569,6 +569,7 @@ header
     .badge
       margin-right 0
       margin-left 6px
+      vertical-align 0
 
   .space-details-row
     margin-top 8px
