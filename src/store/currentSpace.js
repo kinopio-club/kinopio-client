@@ -1235,6 +1235,7 @@ export default {
       context.commit('loadSpaceShowDetailsForCardId', '', { root: true })
     },
     notifyCollaboratorsCardUpdated: (context, { cardId, type }) => {
+      if (context.state.name === 'Hello Kinopio') { return }
       if (notifiedCardAdded.includes(cardId)) { return }
       const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
       if (!userCanEdit) { return }
