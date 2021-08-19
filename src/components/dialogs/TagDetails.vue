@@ -391,6 +391,7 @@ export default {
       let date = card.nameUpdatedAt || card.updatedAt
       if (!date) {
         card = this.$store.getters['currentSpace/cardById'](card.id)
+        if (!card) { return }
         date = card.nameUpdatedAt || card.updatedAt
       }
       return utils.shortRelativeTime(date)
