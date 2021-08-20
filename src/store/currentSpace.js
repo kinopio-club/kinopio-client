@@ -351,6 +351,7 @@ export default {
     init: async (context) => {
       const spaceUrl = context.rootState.spaceUrlToLoad
       const loadJournalSpace = context.rootState.loadJournalSpace
+      const loadNewSpace = context.rootState.loadNewSpace
       const user = context.rootState.currentUser
       let isRemote
       // restore from url
@@ -364,6 +365,11 @@ export default {
       } else if (loadJournalSpace) {
         console.log('🚃 Restore journal space')
         await context.dispatch('loadJournalSpace')
+      // create new space
+      } else if (loadNewSpace) {
+        console.log('🚃 Create new space')
+        await context.dispatch('addSpace')
+        context.commit('loadNewSpace', false, { root: true })
       // restore last space
       } else if (user.lastSpaceId) {
         console.log('🚃 Restore last space', user.lastSpaceId)
@@ -502,7 +508,7 @@ export default {
       } else {
         space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
         space.cards[1].x = random(180, 200)
-        space.cards[1].y = random(160, 180)
+        space.cards[1].y = random(180, 200)
       }
       space.userId = context.rootState.currentUser.id
       const nullCardUsers = true
@@ -580,7 +586,7 @@ export default {
       const day = `${moonPhase.emoji} ${dayjs(new Date()).format('dddd')}` // 🌘 Tuesday
       const spaceId = nanoid()
       let space = utils.emptySpace(spaceId)
-      space.name = utils.journalSpaceName()
+      space.name = utils.journalSpaceName(context.rootState.loadJournalSpaceTomorrow)
       space.privacy = 'private'
       space.moonPhase = moonPhase.name
       space.removedCards = []
@@ -709,15 +715,17 @@ export default {
     },
     loadJournalSpace: async (context) => {
       const spaces = cache.getAllSpaces()
-      const journalName = utils.journalSpaceName()
+      const journalName = utils.journalSpaceName(context.rootState.loadJournalSpaceTomorrow)
       const journalSpace = spaces.find(space => space.name === journalName)
-      context.commit('loadJournalSpace', false, { root: true })
       if (journalSpace) {
         const space = { id: journalSpace.id }
-        context.dispatch('loadSpace', { space })
+        context.dispatch('changeSpace', { space })
       } else {
         context.dispatch('addNewJournalSpace')
       }
+      // todo reset state
+      context.commit('loadJournalSpace', false, { root: true })
+      context.commit('loadJournalSpaceTomorrow', false, { root: true })
     },
     loadSpace: async (context, { space }) => {
       const emptySpace = utils.emptySpace(space.id)

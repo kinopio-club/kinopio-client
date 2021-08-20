@@ -128,6 +128,8 @@ export default new Vuex.Store({
     hasRestoredFavorites: false,
     loadSpaceShowDetailsForCardId: '',
     loadJournalSpace: false,
+    loadJournalSpaceTomorrow: false,
+    loadNewSpace: false,
     urlPreviewLoadingForCardIds: [],
 
     // notifications
@@ -212,6 +214,14 @@ export default new Vuex.Store({
     loadJournalSpace: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'loadJournalSpace' })
       state.loadJournalSpace = value
+    },
+    loadJournalSpaceTomorrow: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'loadJournalSpaceTomorrow' })
+      state.loadJournalSpaceTomorrow = value
+    },
+    loadNewSpace: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'loadNewSpace' })
+      state.loadNewSpace = value
     },
     addUrlPreviewLoadingForCardIds: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'addUrlPreviewLoadingForCardIds' })

@@ -726,8 +726,12 @@ export default {
 
   // Journal Space 🌚
 
-  journalSpaceName () {
-    return `${dayjs(new Date()).format('dddd MMM D/YY')}` // Thursday Oct 8/20
+  journalSpaceName (isTomorrow) {
+    let date = dayjs(new Date())
+    if (isTomorrow) {
+      date = date.add(1, 'day')
+    }
+    return `${date.format('dddd MMM D/YY')}` // Thursday Oct 8/20
   },
   randomPrompt (pack) {
     let index = random(0, pack.prompts.length - 1)

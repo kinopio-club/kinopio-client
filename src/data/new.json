@@ -14,8 +14,8 @@
   "cards": [
     {
       "id": "1",
-      "x": 20,
-      "y": 80,
+      "x": 40,
+      "y": 100,
       "z": 0,
       "name": "Get your thoughts, ideas and feelings out"
     },
