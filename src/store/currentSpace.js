@@ -582,15 +582,22 @@ export default {
     addNewJournalSpace: (context) => {
       const user = context.rootState.currentUser
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
-      const moonPhase = moonphase()
-      const day = `${moonPhase.emoji} ${dayjs(new Date()).format('dddd')}` // 🌘 Tuesday
+      // journal date
+      let date = dayjs(new Date())
+      if (context.rootState.loadJournalSpaceTomorrow) {
+        date = date.add(1, 'day')
+      }
+      const moonPhase = moonphase(date)
+      const day = `${moonPhase.emoji} ${date.format('dddd')}` // 🌘 Tuesday
+      // space meta
       const spaceId = nanoid()
       let space = utils.emptySpace(spaceId)
       space.name = utils.journalSpaceName(context.rootState.loadJournalSpaceTomorrow)
       space.privacy = 'private'
       space.moonPhase = moonPhase.name
       space.removedCards = []
-      space.cards.push({ id: nanoid(), name: day, x: 60, y: 90, frameId: 0 })
+      // cards
+      space.cards.push({ id: nanoid(), name: day, x: 60, y: 100, frameId: 0 })
       const userPrompts = context.rootState.currentUser.journalPrompts
       userPrompts.forEach(prompt => {
         if (!prompt.name) { return }

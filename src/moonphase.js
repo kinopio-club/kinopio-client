@@ -1,8 +1,10 @@
+import dayjs from 'dayjs'
+
 // adapted from https://github.com/t1mwillis/simple-moonphase-js/blob/master/index.js
 
 export default (date) => {
   if (!date) {
-    date = new Date()
+    date = dayjs(new Date())
   }
   const Moon = {
     phases: [
@@ -42,9 +44,9 @@ export default (date) => {
     }
   }
 
-  let dd = date.getDate()
-  let mm = date.getMonth() + 1 // January is 0!
-  let yyyy = date.getFullYear()
+  let dd = date.get('date')
+  let mm = date.get('month') + 1 // January is 0!
+  let yyyy = dayjs().get('year')
 
   let phase = Moon.phase(yyyy, mm, dd)
   return phase
