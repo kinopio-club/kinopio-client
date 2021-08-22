@@ -63,7 +63,6 @@ import MoonPhase from '@/components/MoonPhase.vue'
 import utils from '@/utils.js'
 
 import last from 'lodash-es/last'
-import dayjs from 'dayjs'
 
 export default {
   name: 'SpaceList',
@@ -132,9 +131,9 @@ export default {
   methods: {
     isTodayJournal (space) {
       if (space.moonPhase) {
-        const createdAt = dayjs(space.createdAt)
-        const isToday = dayjs().isSame(createdAt, 'day')
-        return isToday
+        const createdAt = utils.journalSpaceDateFromName(space.name)
+        const today = utils.journalSpaceName()
+        return createdAt === today
       } else {
         return false
       }

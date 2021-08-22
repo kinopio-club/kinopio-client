@@ -733,6 +733,12 @@ export default {
     }
     return `${date.format('dddd MMM D/YY')}` // Thursday Oct 8/20
   },
+  journalSpaceDateFromName (name) {
+    // https://regexr.com/6471p
+    const datePattern = new RegExp(/^[A-z]+ [A-z]+ [0-9]+\/[0-9]{2}/g)
+    let matches = name.match(datePattern)
+    return matches[0]
+  },
   randomPrompt (pack) {
     let index = random(0, pack.prompts.length - 1)
     return pack.prompts[index]
