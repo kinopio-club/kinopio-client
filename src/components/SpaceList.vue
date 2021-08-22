@@ -35,9 +35,13 @@ span.space-list-wrap
           //- NEW badge
           span(v-if="space.isEdited")
             .badge.info.inline-badge.new-badge New
+          //- today journal badge
+          span.badge.info.inline-badge(v-if="isTodayJournal(space)" title="Today's journal")
+            img.icon.today-icon(src="@/assets/today.svg")
           //- space meta
           span(v-if="space.isFavorite")
             img.icon.favorite-icon(src="@/assets/heart.svg")
+
           //- span(v-if="space.backgroundTint")
           //-   .badge.inline-badge.color-only-badge(:style="{ background: space.backgroundTint }")
           MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
@@ -59,6 +63,7 @@ import MoonPhase from '@/components/MoonPhase.vue'
 import utils from '@/utils.js'
 
 import last from 'lodash-es/last'
+import dayjs from 'dayjs'
 
 export default {
   name: 'SpaceList',
@@ -125,6 +130,15 @@ export default {
     }
   },
   methods: {
+    isTodayJournal (space) {
+      if (space.moonPhase) {
+        const createdAt = dayjs(space.createdAt)
+        const isToday = dayjs().isSame(createdAt, 'day')
+        return isToday
+      } else {
+        return false
+      }
+    },
     showCollaborator (space) {
       const isUser = Boolean(this.user(space))
       return this.showUserIfCurrentUserIsCollaborator && space.currentUserIsCollaborator && isUser
@@ -259,6 +273,11 @@ export default {
 
   .sunglasses
     width 16px
+
+  .today-icon
+    width 12px
+    height 12px
+    vertical-align -2px
 
   .name
     margin 0
