@@ -132,6 +132,7 @@ export default {
     isTodayJournal (space) {
       if (space.moonPhase) {
         const createdAt = utils.journalSpaceDateFromName(space.name)
+        if (!createdAt) { return }
         const today = utils.journalSpaceName()
         return createdAt === today
       } else {
