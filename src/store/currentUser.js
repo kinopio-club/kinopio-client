@@ -237,22 +237,6 @@ export default {
       })
       context.dispatch('api/addToQueue', { name: 'updateUser', body: updates }, { root: true })
     },
-    cardsCreatedCount: (context, { shouldIncrement }) => {
-      const spaceUserIsUpgraded = context.rootGetters['currentSpace/spaceUserIsUpgraded']
-      if (spaceUserIsUpgraded) { return }
-      let count
-      if (shouldIncrement) {
-        count = context.state.cardsCreatedCount + 1
-      } else {
-        count = context.state.cardsCreatedCount - 1
-      }
-      count = Math.max(count, 0)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
-        body: {
-          cardsCreatedCount: count
-        } }, { root: true })
-      context.commit('cardsCreatedCount', count)
-    },
     cardsCreatedCountUpdateBy: (context, { delta, shouldIncrement }) => {
       let count
       if (shouldIncrement) {

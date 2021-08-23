@@ -975,7 +975,10 @@ export default {
       context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
       context.commit('history/add', update, { root: true })
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
-      context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: true }, { root: true })
+      context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+        delta: 1,
+        shouldIncrement: true
+      }, { root: true })
       context.dispatch('checkIfShouldNotifyCardsCreatedIsNearLimit')
       context.dispatch('notifyCollaboratorsCardUpdated', { cardId: id, type: 'createCard' })
     },
@@ -1025,7 +1028,10 @@ export default {
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
       context.commit('history/add', update, { root: true })
-      context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: true }, { root: true })
+      context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+        delta: 1,
+        shouldIncrement: true
+      }, { root: true })
     },
     repaceInCardName: (context, { cardId, match, replace }) => {
       const card = context.getters.cardById(cardId)
@@ -1135,7 +1141,10 @@ export default {
       context.commit('triggerUpdatePositionInVisualViewport', null, { root: true })
       const cardIsUpdatedByCurrentUser = card.userId === context.rootState.currentUser.id
       if (cardIsUpdatedByCurrentUser) {
-        context.dispatch('currentUser/cardsCreatedCount', { shouldIncrement: false }, { root: true })
+        context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+          delta: 1,
+          shouldIncrement: false
+        }, { root: true })
       }
       if (!context.rootGetters['currentUser/cardsCreatedIsOverLimit']) {
         context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
