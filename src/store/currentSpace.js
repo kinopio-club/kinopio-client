@@ -929,8 +929,7 @@ export default {
         return card.userId === user.id
       }).length
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        delta: incrementCardsCreatedCountBy,
-        shouldIncrement: true
+        delta: incrementCardsCreatedCountBy
       }, { root: true })
     },
     decrementCardsCreatedCountFromSpace (context, space) {
@@ -939,7 +938,7 @@ export default {
         return card.userId === user.id
       }).length
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        delta: decrementCardsCreatedCountBy
+        delta: -decrementCardsCreatedCountBy
       }, { root: true })
     },
 
@@ -976,8 +975,7 @@ export default {
       context.commit('history/add', update, { root: true })
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        delta: 1,
-        shouldIncrement: true
+        delta: 1
       }, { root: true })
       context.dispatch('checkIfShouldNotifyCardsCreatedIsNearLimit')
       context.dispatch('notifyCollaboratorsCardUpdated', { cardId: id, type: 'createCard' })
@@ -1029,8 +1027,7 @@ export default {
       context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
       context.commit('history/add', update, { root: true })
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        delta: 1,
-        shouldIncrement: true
+        delta: 1
       }, { root: true })
     },
     repaceInCardName: (context, { cardId, match, replace }) => {
@@ -1142,8 +1139,7 @@ export default {
       const cardIsUpdatedByCurrentUser = card.userId === context.rootState.currentUser.id
       if (cardIsUpdatedByCurrentUser) {
         context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-          delta: 1,
-          shouldIncrement: false
+          delta: -1
         }, { root: true })
       }
       if (!context.rootGetters['currentUser/cardsCreatedIsOverLimit']) {

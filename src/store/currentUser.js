@@ -238,13 +238,7 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser', body: updates }, { root: true })
     },
     cardsCreatedCountUpdateBy: (context, { delta, shouldIncrement }) => {
-      let count
-      if (shouldIncrement) {
-        count = context.state.cardsCreatedCount + delta
-      } else {
-        count = context.state.cardsCreatedCount - delta
-      }
-      count = Math.max(count, 0)
+      const count = context.state.cardsCreatedCount + delta
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           cardsCreatedCount: count
