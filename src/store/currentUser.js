@@ -239,10 +239,7 @@ export default {
     },
     cardsCreatedCountUpdateBy: (context, { delta, shouldIncrement }) => {
       const count = context.state.cardsCreatedCount + delta
-      context.dispatch('api/addToQueue', { name: 'updateUser',
-        body: {
-          cardsCreatedCount: count
-        } }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCount', body: { delta } }, { root: true })
       context.commit('cardsCreatedCount', count)
     },
     isUpgraded: (context, value) => {
