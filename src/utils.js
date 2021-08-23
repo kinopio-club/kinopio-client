@@ -445,7 +445,7 @@ export default {
     return card
   },
   topLeftCard (cards) {
-    this.clone(cards)
+    cards = this.clone(cards)
     let shortestDistanceCard = {}
     cards.forEach(card => {
       card.distance = Math.sqrt(Math.pow(card.x, 2) + Math.pow(card.y, 2))
