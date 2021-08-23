@@ -53,6 +53,7 @@ export default {
       }
       if (mutation.type === 'currentSpace/restoreSpace') {
         this.updateBackgroundTint()
+        this.updateMetaDescription()
       }
     })
   },
@@ -63,6 +64,7 @@ export default {
       window.addEventListener('scroll', this.updateUserHasScrolled)
     }, 100)
     this.updateBackgroundTint()
+    this.updateMetaDescription()
     this.$store.dispatch('currentSpace/updateBackgroundZoom')
   },
   data () {
@@ -119,6 +121,20 @@ export default {
       let color = this.$store.state.currentSpace.backgroundTint
       this.backgroundTint = color
       this.backgroundBlendMode = 'multiply'
+    },
+    updateMetaDescription () {
+      let description = 'Kinopio is your spatial thinking tool for new ideas and hard problems.'
+      const minCharacterLength = 40
+      const metaDescription = document.querySelector('meta[name=description]')
+      const cards = this.$store.state.currentSpace.cards
+      const topLeftCard = utils.topLeftCard(cards)
+      if (!topLeftCard.name) {
+        metaDescription.setAttribute('content', description)
+      } else if (topLeftCard.name.length < minCharacterLength) {
+        metaDescription.setAttribute('content', description)
+      } else {
+        metaDescription.setAttribute('content', topLeftCard.name)
+      }
     }
   },
   watch: {

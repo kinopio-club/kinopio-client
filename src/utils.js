@@ -444,6 +444,19 @@ export default {
     card.height = Math.ceil(rect.height)
     return card
   },
+  topLeftCard (cards) {
+    this.clone(cards)
+    let shortestDistanceCard = {}
+    cards.forEach(card => {
+      card.distance = Math.sqrt(Math.pow(card.x, 2) + Math.pow(card.y, 2))
+      if (!shortestDistanceCard.distance) {
+        shortestDistanceCard = card
+      } else if (card.distance < shortestDistanceCard.distance) {
+        shortestDistanceCard = card
+      }
+    })
+    return shortestDistanceCard
+  },
 
   // Connection Path Utils 🐙
 
