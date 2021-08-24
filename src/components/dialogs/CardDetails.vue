@@ -740,7 +740,7 @@ export default {
         newCards = newCards.map(card => {
           const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
           const prevCardRect = element.getBoundingClientRect()
-          card.y = prevCard.y + prevCardRect.height + spaceBetweenCards
+          card.y = prevCard.y + (prevCardRect.height * this.spaceCounterZoomDecimal) + spaceBetweenCards
           prevCard = card
           return card
         })
