@@ -38,6 +38,9 @@ export default {
       // ?
       } else if (key === '?' && isSpaceScope) {
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
+      } else if (key === 'n' && isSpaceScope) {
+        this.$store.dispatch('currentSpace/addSpace')
+        this.$store.commit('addNotification', { message: 'New space created', icon: 'add', type: 'success', label: 'N' })
       // Backspace, Clear, Delete
       } else if ((key === 'Backspace' || key === 'Clear' || key === 'Delete') && isSpaceScope) {
         this.remove()

@@ -146,6 +146,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
     article
       .row
         .badge.title
+          img.icon(src="@/assets/add.svg")
+          span New Space
+        .badge.keyboard-shortcut N
+    article
+      .row
+        .badge.title
           img.icon.magnifying-glass(src="@/assets/magnifying-glass.svg")
           span Zoom In or Out
         .badge.keyboard-shortcut {{meta}}-+/-, {{meta}}-Scroll
