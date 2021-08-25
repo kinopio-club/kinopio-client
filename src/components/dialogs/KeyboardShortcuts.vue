@@ -6,6 +6,9 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       .badge.keyboard-shortcut ?
 
   section
+    //- Search and Jump
+    .section-title
+      .badge.info Search and Jump
     article
       .row
         .badge.title
@@ -19,13 +22,14 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           span Search/Jump-to Cards
         .badge.keyboard-shortcut {{meta}}–F
 
+    //- Edit
+    .section-title
+      .badge.info Edit
     article
       .row.multiple-items
         .badge.title
           img.icon(src="@/assets/add.svg")
           span Add Card
-        .divider.badge or
-        .badge.title Click Focused Item
         .badge.keyboard-shortcut Enter
     article
       .row
@@ -34,8 +38,8 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           span Add Child Card
         .badge.keyboard-shortcut Shift-Enter
       p Subsequent&nbsp;
-        span.badge.keyboard-shortcut Enters
-        span add siblings
+        span.badge.keyboard-shortcut Enter
+        span adds siblings
       button(@click.left.stop="toggleChildCardInfoIsVisible" :class="{ active: childCardInfoIsVisible }") More Info
       div(v-if="childCardInfoIsVisible")
         video(autoplay loop muted playsinline)
@@ -48,26 +52,10 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
         .badge.keyboard-shortcut Ctrl-Enter
     article
       .row
-        .badge.title Focus Next/Previous
-        .badge.keyboard-shortcut Tab/Shift-Tab
-      .row
-        button(@click.left.stop="toggleSafariInfoIsVisible" :class="{ active: safariInfoIsVisible }")
-          span Safari Info
-      div(v-if="safariInfoIsVisible")
-        p Instead of Tab, Safari uses
-        p.badge.keyboard-shortcut Option-Tab/Option-Shift-Tab
-        p Unless you update your Safari preferences:
-        p Preferences → Advanced → Press Tab to highlight each item on a webpage
-    article
-      .row
         .badge.title
-          img.icon.magnifying-glass(src="@/assets/magnifying-glass.svg")
-          span Zoom In or Out
-        .badge.keyboard-shortcut {{meta}}-+/-, {{meta}}-Scroll
-      .row(v-if="!isMobile")
-        label(:class="{active: shouldInvertZoomDirection}" @click.left.prevent="toggleShouldInvertZoomDirection" @keydown.stop.enter="toggleShouldInvertZoomDirection")
-          input(type="checkbox" v-model="shouldInvertZoomDirection")
-          span Invert Zoom Direction
+          img.icon(src="@/assets/constrain-axis.svg")
+          span Constrain Card Move to Axis
+        .badge.keyboard-shortcut Shift-Drag Card
     article
       .row
         .badge.title Focus Nearest Card
@@ -75,21 +63,13 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
     article
       .row
         .badge.title
-          User(:user="currentUser" :key="currentUser.id" :hideYouLabel="true")
-          span Toggle Card User Filter
-        .badge.keyboard-shortcut 1
-    article
-      .row
-        .badge.title
-          img.icon.time(src="@/assets/time.svg")
-          span Toggle Card Date Filter
-        .badge.keyboard-shortcut 2
-    article
-      .row
-        .badge.title
-          img.icon.time(src="@/assets/unchecked.svg")
-          span Toggle Cards Unchecked Filter
-        .badge.keyboard-shortcut 3
+          img.icon(src="@/assets/undo.svg")
+          span Restore Last Removed Card
+        .badge.keyboard-shortcut {{meta}}-Z
+
+    //- Select
+    .section-title
+      .badge.info Select
     article
       .row
         .badge.title
@@ -118,6 +98,38 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
     article
       .row
         .badge.title
+          img.icon(src="@/assets/remove.svg")
+          span Remove Selected
+        .badge.keyboard-shortcut Delete
+
+    //- Filter
+    .section-title
+      .badge.info Filter
+    article
+      .row
+        .badge.title
+          User(:user="currentUser" :key="currentUser.id" :hideYouLabel="true")
+          span Toggle Card User Filter
+        .badge.keyboard-shortcut 1
+    article
+      .row
+        .badge.title
+          img.icon.time(src="@/assets/time.svg")
+          span Toggle Card Date Filter
+        .badge.keyboard-shortcut 2
+    article
+      .row
+        .badge.title
+          img.icon.time(src="@/assets/unchecked.svg")
+          span Toggle Cards Unchecked Filter
+        .badge.keyboard-shortcut 3
+
+    //- Connect
+    .section-title
+      .badge.info Connect
+    article
+      .row
+        .badge.title
           img.icon.connector-icon(src="@/assets/connector-open.svg")
           span Use {{lastOrNewConnectionTypeControlSetting}} Connection Type
         .badge.keyboard-shortcut Shift-Click on
@@ -127,24 +139,20 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
         span card connector or
         span.badge.keyboard-shortcut Shift-Click
         span 'Connect' button to use {{lastOrNewConnectionTypeControlSetting}} connection type
+
+    //- General
+    .section-title
+      .badge.info General
     article
       .row
         .badge.title
-          img.icon(src="@/assets/constrain-axis.svg")
-          span Constrain Card Move to Axis
-        .badge.keyboard-shortcut Shift-Drag Card
-    article
-      .row
-        .badge.title
-          img.icon(src="@/assets/remove.svg")
-          span Remove Selected
-        .badge.keyboard-shortcut Delete
-    article
-      .row
-        .badge.title
-          img.icon(src="@/assets/undo.svg")
-          span Restore Last Removed Card
-        .badge.keyboard-shortcut {{meta}}-Z
+          img.icon.magnifying-glass(src="@/assets/magnifying-glass.svg")
+          span Zoom In or Out
+        .badge.keyboard-shortcut {{meta}}-+/-, {{meta}}-Scroll
+      .row(v-if="!isMobile")
+        label(:class="{active: shouldInvertZoomDirection}" @click.left.prevent="toggleShouldInvertZoomDirection" @keydown.stop.enter="toggleShouldInvertZoomDirection")
+          input(type="checkbox" v-model="shouldInvertZoomDirection")
+          span Invert Zoom Direction
     article
       .row
         .badge.title
@@ -269,4 +277,6 @@ export default {
       margin-left 3px
   .keyboard-shortcut + span
     margin-left 6px
+  .section-title
+    margin-bottom 10px
 </style>
