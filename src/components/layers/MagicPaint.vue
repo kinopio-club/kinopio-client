@@ -137,6 +137,23 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
+    dialogIsVisible () {
+      let dialogs = document.querySelectorAll('dialog')
+      const dialogIsVisible = Boolean(dialogs.length)
+      if (!dialogIsVisible) { return }
+      // ignore pinned dialogs
+      let pinnedDialogs = []
+      dialogs.forEach(dialog => {
+        if (dialog.dataset['is-pinned']) {
+          pinnedDialogs.push(dialog)
+        }
+      })
+      if (pinnedDialogs.length !== dialogs.length) {
+        return true
+      } else {
+
+      }
+    },
     updatePositionOffsetByPinchZoom () {
       if (!window.visualViewport) { return }
       this.pinchZoomOffsetTop = window.visualViewport.offsetTop
@@ -284,7 +301,6 @@ export default {
       this.updateViewportCardMap()
       startCursor = utils.cursorPositionInViewport(event)
       this.currentCursor = utils.cursorPositionInViewport(event)
-      const dialogIsVisible = Boolean(document.querySelector('dialog'))
       const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)
       if (utils.isMultiTouch(event)) { return }
       this.startLocking()
@@ -294,7 +310,7 @@ export default {
         this.$store.commit('currentUserIsPainting', true)
         this.createInitialCircle()
       }
-      if (!multipleCardsIsSelected && !dialogIsVisible) {
+      if (!multipleCardsIsSelected && !this.dialogIsVisible()) {
         this.$store.commit('shouldAddCard', true)
       }
       if (!event.shiftKey) {

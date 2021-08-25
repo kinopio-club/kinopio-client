@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.tags.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.tags.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="isPinnedDialog")
   section
     .title-row
       p Tags
