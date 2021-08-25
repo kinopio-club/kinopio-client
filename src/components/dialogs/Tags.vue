@@ -3,7 +3,7 @@ dialog.tags.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-hei
   section
     .title-row
       p Tags
-      .button-wrap(@click.left="toggleIsPinnedDialog"  :class="{active: isPinnedDialog}")
+      .button-wrap(@click.left="toggleIsPinnedDialog"  :class="{active: isPinnedDialog}" title="Pin dialog")
         button P
   section.results-section(v-if="tags.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     .button-wrap(@click.left.prevent="toggleCurrentSpaceTagsIsVisibleOnly" @keydown.stop.enter="toggleCurrentSpaceTagsIsVisibleOnly")

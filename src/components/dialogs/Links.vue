@@ -3,7 +3,7 @@ dialog.links.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-he
   section
     .title-row
       p Spaces that Link Here
-      .button-wrap(@click.left="toggleIsPinnedDialog"  :class="{active: isPinnedDialog}")
+      .button-wrap(@click.left="toggleIsPinnedDialog"  :class="{active: isPinnedDialog}" title="Pin dialog")
         button P
 
   section.results-section(v-if="shouldShowSpaces" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
