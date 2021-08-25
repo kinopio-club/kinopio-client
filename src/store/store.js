@@ -100,6 +100,10 @@ export default new Vuex.Store({
     linkDetailsPosition: {}, // x, y
     currentSelectedLink: {},
 
+    // pinned dialogs
+    linksIsPinnedDialog: false,
+    tagsIsPinnedDialog: false,
+
     // dragging
     currentDraggingCardId: '',
     remoteCardsDragging: [],
@@ -541,6 +545,17 @@ export default new Vuex.Store({
     currentSelectedLink: (state, link) => {
       utils.typeCheck({ value: link, type: 'object', origin: 'currentSelectedLink' })
       state.currentSelectedLink = link
+    },
+
+    // Pinned Dialogs
+
+    linksIsPinnedDialog: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'linksIsPinnedDialog' })
+      state.linksIsPinnedDialog = value
+    },
+    tagsIsPinnedDialog: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'tagsIsPinnedDialog' })
+      state.tagsIsPinnedDialog = value
     },
 
     // Connection Details

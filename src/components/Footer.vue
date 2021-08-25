@@ -100,14 +100,20 @@ export default {
   },
   mounted () {
     this.$store.subscribe((mutation, state) => {
+      const linksIsPinnedDialog = this.$store.state.linksIsPinnedDialog
+      const tagsIsPinnedDialog = this.$store.state.tagsIsPinnedDialog
       if (mutation.type === 'closeAllDialogs') {
         this.removedIsVisible = false
         this.favoritesIsVisible = false
-        this.linksIsVisible = false
-        this.tagsIsVisible = false
         this.exploreIsVisible = false
         this.liveIsVisible = false
         this.mobileTipsIsVisible = false
+        if (!linksIsPinnedDialog) {
+          this.linksIsVisible = false
+        }
+        if (!tagsIsPinnedDialog) {
+          this.tagsIsVisible = false
+        }
       }
       if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
         currentIteration = 0
