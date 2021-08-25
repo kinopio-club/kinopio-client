@@ -1,7 +1,11 @@
 <template lang="pug">
-dialog.links.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.links.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="isPinnedDialog")
   section
-    p Spaces that Link Here
+    .title-row
+      p Spaces that Link Here
+      .button-wrap(@click.left="toggleIsPinnedDialog"  :class="{active: isPinnedDialog}")
+        button P
+
   section.results-section(v-if="shouldShowSpaces" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     .button-wrap(v-if="userSpacesToggleShouldBeVisible" @click.left.prevent="toggleCurrentUserSpacesIsVisibleOnly" @keydown.stop.enter="toggleCurrentUserSpacesIsVisibleOnly")
       label(:class="{ active: currentUserSpacesIsVisibleOnly }")
@@ -78,9 +82,14 @@ export default {
       } else {
         return false
       }
-    }
+    },
+    isPinnedDialog () { return this.$store.state.linksIsPinnedDialog }
   },
   methods: {
+    toggleIsPinnedDialog () {
+      const isPinned = !this.isPinnedDialog
+      this.$store.commit('linksIsPinnedDialog', isPinned)
+    },
     toggleCurrentUserSpacesIsVisibleOnly () {
       this.currentUserSpacesIsVisibleOnly = !this.currentUserSpacesIsVisibleOnly
     },
