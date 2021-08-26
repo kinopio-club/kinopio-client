@@ -37,7 +37,8 @@ export default {
     items: Array,
     placeholder: String,
     initialValue: String,
-    isLoading: Boolean
+    isLoading: Boolean,
+    parentIsPinned: Boolean
   },
   data () {
     return {
@@ -52,6 +53,7 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
         if (this.filterIsPersistent) { return }
+        if (this.parentIsPinned) { return }
         this.clearFilter()
       }
       if (mutation.type === 'triggerSelectTemplateCategory') {

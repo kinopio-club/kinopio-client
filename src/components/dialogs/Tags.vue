@@ -11,7 +11,7 @@ dialog.tags.narrow(@click.stop v-if="visible" :open="visible" ref="dialog" :styl
       label(:class="{ active: currentSpaceTagsIsVisibleOnly }")
         input(type="checkbox" v-model="currentSpaceTagsIsVisibleOnly")
         span In Current Space
-    TagList(:tags="filteredTags" :isLoading="isLoadingRemoteTags")
+    TagList(:tags="filteredTags" :isLoading="isLoadingRemoteTags" :parentIsPinned="isPinnedDialog")
   section(v-else)
     p Use tags to help cards stand out, and to connect ideas across spaces.
     p Type

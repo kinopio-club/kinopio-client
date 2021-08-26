@@ -12,7 +12,7 @@ dialog.links.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-he
       label(:class="{ active: currentUserSpacesIsVisibleOnly }")
         input(type="checkbox" v-model="currentUserSpacesIsVisibleOnly")
         User(:user="currentUser" :isClickable="false" :hideYouLabel="true")
-    SpaceList(:spaces="filteredSpaces" :showUser="true" @selectSpace="changeSpace")
+    SpaceList(:spaces="filteredSpaces" :showUser="true" @selectSpace="changeSpace" :parentIsPinned="isPinnedDialog")
 
   section(v-else-if="loading")
     Loader(:visible="loading")

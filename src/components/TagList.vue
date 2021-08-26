@@ -3,9 +3,9 @@ span.tag-list(@click.left="closeDialogs")
   template(v-if="tags")
     ResultsFilter(
       :items="tags"
+      :parentIsPinned="parentIsPinned"
       @updateFilter="updateFilter"
       @updateFilteredItems="updateFilteredTags"
-
       @focusNextItem="focusNextItem"
       @focusPreviousItem="focusPreviousItem"
       @selectItem="selectItem"
@@ -44,7 +44,8 @@ export default {
   },
   props: {
     tags: Array,
-    isLoading: Boolean
+    isLoading: Boolean,
+    parentIsPinned: Boolean
   },
   data () {
     return {
