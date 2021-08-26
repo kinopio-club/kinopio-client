@@ -48,6 +48,9 @@ export default {
         this.updateDialogHeight()
         this.updateResultsSectionHeight()
       }
+      if (mutation.type === 'currentSpace/restoreSpace' && this.visible) {
+        this.updateLinks()
+      }
     })
   },
   data () {
@@ -160,5 +163,6 @@ export default {
         width 17px
         height 16px
   &.is-pinned
+    z-index 0
     left -86px
 </style>

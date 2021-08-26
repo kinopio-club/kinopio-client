@@ -396,6 +396,8 @@ dialog
           box-shadow none
           color var(--primary)
           background var(--secondary-active-background)
+    .button-wrap + .button-wrap
+      margin-left 0px
     button
       padding-top 2px
       padding-bottom 0px

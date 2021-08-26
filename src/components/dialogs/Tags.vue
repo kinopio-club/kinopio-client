@@ -38,6 +38,14 @@ export default {
   },
   created () {
     this.$store.subscribe((mutation, state) => {
+      const tagMutations = [
+        'currentSpace/addTag',
+        'currentSpace/removeTag',
+        'currentSpace/removeTags',
+        'currentSpace/removeTagsFromCard',
+        'currentSpace/removeTagsFromAllRemovedCardsPermanent'
+      ]
+
       if (mutation.type === 'updatePageSizes') {
         this.updateDialogHeight()
         this.updateResultsSectionHeight()
@@ -47,6 +55,9 @@ export default {
       }
       if (mutation.type === 'currentSpace/updateTagNameColor') {
         this.updateTagColor(mutation.payload)
+      }
+      if (tagMutations.includes(mutation.type) && this.visible) {
+        this.updateTags()
       }
     })
   },
@@ -160,5 +171,6 @@ export default {
     > .button-wrap
       padding 4px
   &.is-pinned
+    z-index 0
     left -86px
 </style>
