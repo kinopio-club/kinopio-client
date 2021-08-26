@@ -245,6 +245,7 @@ export default {
         this.addCard()
         return
       }
+      this.$store.commit('shouldPreventNextEnterKey', true)
       const rect = baseCard.getBoundingClientRect()
       let initialPosition = {
         x: window.pageXOffset + rect.x + rect.width + incrementPosition,
