@@ -10,7 +10,7 @@ if (process.env.NODE_ENV === 'development') {
   host = 'http://kinopio.local:3000'
 }
 
-const mergeCardsCreatedCount = (queue, request) => {
+const squashCardsCreatedCount = (queue, request) => {
   let isSquashed
   queue = queue.map(queueItem => {
     if (queueItem.name === 'updateUserCardsCreatedCount') {
@@ -123,7 +123,7 @@ const self = {
         body
       }
       if (name === 'updateUserCardsCreatedCount') {
-        queue = mergeCardsCreatedCount(queue, request)
+        queue = squashCardsCreatedCount(queue, request)
       } else {
         queue.push(request)
       }
