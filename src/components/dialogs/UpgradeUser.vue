@@ -131,6 +131,8 @@ export default {
   },
   methods: {
     shouldHideFooter (event) {
+      const isTouchDevice = this.$store.state.isTouchDevice
+      if (!isTouchDevice) { return }
       this.$store.commit('shouldHideFooter', true)
     },
     clearErrors () {
