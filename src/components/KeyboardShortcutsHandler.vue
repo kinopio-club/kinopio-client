@@ -29,11 +29,8 @@ export default {
       const isFromCard = event.target.classList[0] === 'card'
       const isSpaceScope = event.target.tagName === 'BODY'
       const isCardScope = isFromCard || isFromCardName
-      // Shift-Enter
-      if (event.shiftKey && key === 'Enter' && (isSpaceScope || isCardScope)) {
-        this.addChildCard()
       // Enter
-      } else if (key === 'Enter' && (isSpaceScope || isCardScope)) {
+      if (key === 'Enter' && (isSpaceScope || isCardScope)) {
         this.addCard()
       // ?
       } else if (key === '?' && isSpaceScope) {
@@ -79,10 +76,15 @@ export default {
     handleMetaKeyShortcuts (event) {
       const key = event.key
       const isMeta = event.metaKey || event.ctrlKey
-      const isSpaceScope = event.target.tagName === 'BODY'
+      const isFromCardName = event.target.closest('dialog.card-details')
       const isFromCard = event.target.classList[0] === 'card'
+      const isCardScope = isFromCard || isFromCardName
+      const isSpaceScope = event.target.tagName === 'BODY'
+      // Shift-Enter
+      if (event.shiftKey && key === 'Enter' && (isSpaceScope || isCardScope)) {
+        this.addChildCard()
       // Undo
-      if (isMeta && key === 'z' && isSpaceScope) {
+      } else if (isMeta && key === 'z' && isSpaceScope) {
         event.preventDefault()
         this.restoreLastRemovedCard()
       // Copy
