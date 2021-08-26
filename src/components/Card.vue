@@ -813,7 +813,6 @@ export default {
     updateIsPlayingAudio (value) {
       this.isPlayingAudio = value
       this.cancelLocking()
-      this.$store.commit('currentUserIsDraggingCard', false)
     },
     clearErrors () {
       this.error.signUpToUpload = false
