@@ -329,7 +329,6 @@ const self = {
       try {
         if (!shouldRequest(shouldRequestRemote)) { return }
         spaceIds = spaceIds.slice(0, max)
-        if (!spaceIds.length) { return }
         console.log('🛬🛬 getting remote spaces', spaceIds)
         spaceIds = spaceIds.join(',')
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })

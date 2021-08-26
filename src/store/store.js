@@ -195,16 +195,13 @@ export default new Vuex.Store({
       state.multipleSelectedActionsIsVisible = false
       state.cardDetailsIsVisibleForCardId = ''
       state.connectionDetailsIsVisibleForConnectionId = ''
+      state.tagDetailsIsVisible = false
+      state.tagDetailsIsVisibleFromTagList = false
+      state.currentSelectedTag = {}
       state.linkDetailsIsVisible = false
       state.currentSelectedLink = {}
       state.searchIsVisible = false
       state.cardsWereDragged = false
-      const tagDetailsIsVisibleFromPinnedDialog = state.tagDetailsIsVisible && state.tagDetailsIsVisibleFromTagList && state.tagsIsPinnedDialog
-      if (!tagDetailsIsVisibleFromPinnedDialog) {
-        state.currentSelectedTag = {}
-        state.tagDetailsIsVisibleFromTagList = false
-        state.tagDetailsIsVisible = false
-      }
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isOnline' })
