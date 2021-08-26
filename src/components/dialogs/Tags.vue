@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.tags.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="isPinnedDialog" :class="{'is-pinned': isPinnedDialog}")
+dialog.tags.narrow(@click.stop v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="isPinnedDialog" :class="{'is-pinned': isPinnedDialog}")
   section
     .title-row
       p Tags
@@ -57,6 +57,9 @@ export default {
         this.updateTagColor(mutation.payload)
       }
       if (tagMutations.includes(mutation.type) && this.visible) {
+        this.updateTags()
+      }
+      if (mutation.type === 'shouldHideFooter' && this.visible) {
         this.updateTags()
       }
     })

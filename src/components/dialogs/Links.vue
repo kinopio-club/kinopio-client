@@ -51,6 +51,9 @@ export default {
       if (mutation.type === 'currentSpace/restoreSpace' && this.visible) {
         this.updateLinks()
       }
+      if (mutation.type === 'shouldHideFooter' && this.visible) {
+        this.updateLinks()
+      }
     })
   },
   data () {

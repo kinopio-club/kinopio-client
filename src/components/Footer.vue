@@ -44,7 +44,7 @@
           Tags(:visible="tagsIsVisible")
 
         //- Mobile Tips
-        .button-wrap(v-if="isMobileOrTouch")
+        .button-wrap(v-if="isMobileOrTouch" :style="{zIndex: mobileTipsZIndex}")
           button(@click.left="toggleMobileTipsIsVisible" :class="{ active: mobileTipsIsVisible}")
             img.icon(src="@/assets/press-and-hold.svg")
             span Mobile Tips
@@ -172,6 +172,19 @@ export default {
     },
     isMobileStandalone () {
       return utils.isMobile() && navigator.standalone // is homescreen app
+    },
+    dialogsArePinned () {
+      const linksIsPinnedDialog = this.$store.state.linksIsPinnedDialog
+      const tagsIsPinnedDialog = this.$store.state.tagsIsPinnedDialog
+      return linksIsPinnedDialog || tagsIsPinnedDialog
+    },
+    mobileTipsZIndex () {
+      if (this.mobileTipsIsVisible) {
+        return 0
+      } else if (this.dialogsArePinned) {
+        return -1
+      }
+      return 0
     }
   },
   methods: {
