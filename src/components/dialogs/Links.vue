@@ -96,6 +96,9 @@ export default {
     toggleIsPinnedDialog () {
       const isPinned = !this.isPinnedDialog
       this.$store.commit('linksIsPinnedDialog', isPinned)
+      if (!isPinned) {
+        this.$store.dispatch('closeAllDialogs', 'Tags.toggleIsPinnedDialog')
+      }
     },
     toggleCurrentUserSpacesIsVisibleOnly () {
       this.currentUserSpacesIsVisibleOnly = !this.currentUserSpacesIsVisibleOnly
