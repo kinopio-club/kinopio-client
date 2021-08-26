@@ -1,13 +1,18 @@
 <template lang="pug">
-dialog.links.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.links.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="isPinnedDialog" :class="{'is-pinned': isPinnedDialog}")
   section
-    p Spaces that Link Here
+    .title-row
+      p Spaces that Link Here
+      .button-wrap(@click.left="toggleIsPinnedDialog"  :class="{active: isPinnedDialog}" title="Pin dialog")
+        button
+          img.icon(src="@/assets/pin.svg")
+
   section.results-section(v-if="shouldShowSpaces" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     .button-wrap(v-if="userSpacesToggleShouldBeVisible" @click.left.prevent="toggleCurrentUserSpacesIsVisibleOnly" @keydown.stop.enter="toggleCurrentUserSpacesIsVisibleOnly")
       label(:class="{ active: currentUserSpacesIsVisibleOnly }")
         input(type="checkbox" v-model="currentUserSpacesIsVisibleOnly")
         User(:user="currentUser" :isClickable="false" :hideYouLabel="true")
-    SpaceList(:spaces="filteredSpaces" :showUser="true" @selectSpace="changeSpace")
+    SpaceList(:spaces="filteredSpaces" :showUser="true" @selectSpace="changeSpace" :parentIsPinned="isPinnedDialog")
 
   section(v-else-if="loading")
     Loader(:visible="loading")
@@ -42,6 +47,12 @@ export default {
       if (mutation.type === 'updatePageSizes') {
         this.updateDialogHeight()
         this.updateResultsSectionHeight()
+      }
+      if (mutation.type === 'currentSpace/restoreSpace' && this.visible) {
+        this.updateLinks()
+      }
+      if (mutation.type === 'shouldHideFooter' && this.visible) {
+        this.updateLinks()
       }
     })
   },
@@ -78,9 +89,14 @@ export default {
       } else {
         return false
       }
-    }
+    },
+    isPinnedDialog () { return this.$store.state.linksIsPinnedDialog }
   },
   methods: {
+    toggleIsPinnedDialog () {
+      const isPinned = !this.isPinnedDialog
+      this.$store.commit('linksIsPinnedDialog', isPinned)
+    },
     toggleCurrentUserSpacesIsVisibleOnly () {
       this.currentUserSpacesIsVisibleOnly = !this.currentUserSpacesIsVisibleOnly
     },
@@ -149,4 +165,7 @@ export default {
       .user-avatar
         width 17px
         height 16px
+  &.is-pinned
+    z-index 0
+    left -86px
 </style>

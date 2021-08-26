@@ -29,15 +29,15 @@ export default {
       const isFromCard = event.target.classList[0] === 'card'
       const isSpaceScope = event.target.tagName === 'BODY'
       const isCardScope = isFromCard || isFromCardName
-      // Shift-Enter
-      if (event.shiftKey && key === 'Enter' && (isSpaceScope || isCardScope)) {
-        this.addChildCard()
       // Enter
-      } else if (key === 'Enter' && (isSpaceScope || isCardScope)) {
+      if (key === 'Enter' && (isSpaceScope || isCardScope)) {
         this.addCard()
       // ?
       } else if (key === '?' && isSpaceScope) {
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
+      } else if (key === 'n' && isSpaceScope) {
+        this.$store.dispatch('currentSpace/addSpace')
+        this.$store.commit('addNotification', { message: 'New space created', icon: 'add', type: 'success', label: 'N' })
       // Backspace, Clear, Delete
       } else if ((key === 'Backspace' || key === 'Clear' || key === 'Delete') && isSpaceScope) {
         this.remove()
@@ -76,10 +76,15 @@ export default {
     handleMetaKeyShortcuts (event) {
       const key = event.key
       const isMeta = event.metaKey || event.ctrlKey
-      const isSpaceScope = event.target.tagName === 'BODY'
+      const isFromCardName = event.target.closest('dialog.card-details')
       const isFromCard = event.target.classList[0] === 'card'
+      const isCardScope = isFromCard || isFromCardName
+      const isSpaceScope = event.target.tagName === 'BODY'
+      // Shift-Enter
+      if (event.shiftKey && key === 'Enter' && (isSpaceScope || isCardScope)) {
+        this.addChildCard()
       // Undo
-      if (isMeta && key === 'z' && isSpaceScope) {
+      } else if (isMeta && key === 'z' && isSpaceScope) {
         event.preventDefault()
         this.restoreLastRemovedCard()
       // Copy
@@ -240,6 +245,7 @@ export default {
         this.addCard()
         return
       }
+      this.$store.commit('shouldPreventNextEnterKey', true)
       const rect = baseCard.getBoundingClientRect()
       let initialPosition = {
         x: window.pageXOffset + rect.x + rect.width + incrementPosition,

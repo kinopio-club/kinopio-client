@@ -391,6 +391,8 @@ export default {
     },
     checkIfShouldHideFooter (event) {
       if (event.target.nodeType !== 1) { return } // firefox check
+      const isTouchDevice = this.$store.state.isTouchDevice
+      if (!isTouchDevice) { return }
       const node = event.target.nodeName
       const isTextarea = node === 'TEXTAREA'
       const isInput = node === 'INPUT'

@@ -5,9 +5,9 @@ span.space-list-wrap
     :items="spaces"
     :placeholder="placeholder"
     :isLoading="isLoading"
+    :parentIsPinned="parentIsPinned"
     @updateFilter="updateFilter"
     @updateFilteredItems="updateFilteredSpaces"
-
     @focusNextItem="focusNextItemFromFilter"
     @focusPreviousItem="focusPreviousItemFromFilter"
     @selectItem="selectItemFromFilter"
@@ -81,7 +81,8 @@ export default {
     hideExploreBadge: Boolean,
     hideFilter: Boolean,
     isLoading: Boolean,
-    parentIsSpaceDetails: Boolean
+    parentIsSpaceDetails: Boolean,
+    parentIsPinned: Boolean
   },
   mounted () {
     this.$store.subscribe((mutation, state) => {

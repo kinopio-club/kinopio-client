@@ -206,7 +206,6 @@ import utils from '@/utils.js'
 import qs from '@aguezz/qs-parse'
 import nanoid from 'nanoid'
 import debounce from 'lodash-es/debounce'
-import last from 'lodash-es/last'
 
 let previousTags = []
 let compositionEventEndTime = 0
@@ -567,7 +566,6 @@ export default {
         this.cancelOpeningAnimationFrame()
       }
     },
-
     updateMediaUrls () {
       const urls = utils.urlsFromString(this.card.name, true)
       this.formats.image = ''
@@ -633,61 +631,6 @@ export default {
       })
       newUrls.forEach(urls => this.updateLink(urls))
     },
-    splitByNextParagraph (string) {
-      let paragraph = string.split('\n', 1)[0]
-      const index = string.indexOf(paragraph) + paragraph.length
-      let paragraphs = [
-        paragraph,
-        string.substring(index, string.length)
-      ]
-      paragraphs = paragraphs.filter(paragraph => Boolean(paragraph.length))
-      paragraphs = paragraphs.map(paragraph => paragraph.trim())
-      return paragraphs
-    },
-    splitByNextSentence (string) {
-      let sentence = string.split('. ', 1)[0]
-      const charactersRemovedBySplit = 2
-      let index = string.indexOf(sentence) + sentence.length + charactersRemovedBySplit
-      let sentences = [
-        sentence,
-        string.substring(index, string.length)
-      ]
-      sentences = sentences.filter(sentence => Boolean(sentence.length))
-      // re-add sentence periods removed by split
-      sentences = sentences.map((sentence, index) => {
-        if (index < sentences.length - 1) {
-          sentence = sentence + '.'
-        }
-        return sentence
-      })
-      return sentences
-    },
-    splitCardName (name) {
-      if (!name) { return [] }
-      const sentences = this.splitByNextSentence(name)
-      const paragraphs = this.splitByNextParagraph(name)
-      // split by either next sentence or paragraph, whichever type comes first
-      let firstType, secondType
-      if (sentences[0] < paragraphs[0]) {
-        firstType = sentences
-        secondType = paragraphs
-      } else {
-        firstType = paragraphs
-        secondType = sentences
-      }
-      const firstTypeIsCardLength = firstType[0].length < this.maxCardLength
-      const secondTypeIsCardLength = secondType[0].length < this.maxCardLength
-      if (firstTypeIsCardLength) {
-        return firstType
-      } else if (secondTypeIsCardLength) {
-        return secondType
-      } else {
-        return [
-          name.substring(0, this.maxCardLength),
-          name.substring(this.maxCardLength, name.length)
-        ]
-      }
-    },
     updateNameSplitIntoCardsCount () {
       const isPreview = true
       const newCards = this.splitCards(null, isPreview)
@@ -698,25 +641,59 @@ export default {
         this.nameSplitIntoCardsCount = 0
       }
     },
-    shouldSplitLastCard (cardNames) {
-      const lastCardName = last(cardNames)
-      const isRemainingSentences = this.splitByNextSentence(lastCardName).length > 1
-      const isRemainingParagraphs = this.splitByNextParagraph(lastCardName).length > 1
-      return isRemainingSentences || isRemainingParagraphs
+    splitBySentences (string) {
+      let sentences = string.split('. ')
+      sentences = sentences.filter(sentence => Boolean(sentence.length))
+      // re-add sentence periods removed by split
+      sentences = sentences.map((sentence, index) => {
+        if (index < sentences.length - 1) {
+          sentence = sentence + '.'
+        }
+        return sentence
+      })
+      return sentences
+    },
+    splitByParagraphs (string) {
+      let paragraphs = string.split('\n')
+      paragraphs = paragraphs.filter(paragraph => Boolean(paragraph.length))
+      paragraphs = paragraphs.map(paragraph => paragraph.trim())
+      return paragraphs
     },
     splitCards (event, isPreview) {
       const originalName = (this.pastedName || this.name).trim()
-      let cardNames = [originalName]
-      let shouldSplitLastCard
-      // recursive
-      do {
-        const name = cardNames.pop()
-        const result = this.splitCardName(name)
-        cardNames = cardNames.concat(result)
-        shouldSplitLastCard = this.shouldSplitLastCard(cardNames)
-      }
-      while (shouldSplitLastCard)
+      // split names by paragraph and sentence
+      const paragraphs = this.splitByParagraphs(originalName)
+      let cardNames = paragraphs.map(paragraph => {
+        let sentences
+        if (paragraph.length > this.maxCardLength) {
+          sentences = this.splitBySentences(paragraph)
+        }
+        return sentences || paragraph
+      })
+      cardNames = cardNames.flat()
+      // split names longer than max card length
+      cardNames = cardNames.map(name => {
+        // recursive
+        let results = []
+        let shouldSplit, nameToSplit
+        do {
+          shouldSplit = false
+          nameToSplit = nameToSplit || name
+          results.push(nameToSplit.substring(0, this.maxCardLength))
+          const otherSplit = nameToSplit.substring(this.maxCardLength)
+          if (otherSplit <= this.maxCardLength) {
+            results.push(otherSplit)
+          } else {
+            nameToSplit = otherSplit
+            shouldSplit = true
+          }
+        } while (shouldSplit)
 
+        if (results.length) { return results }
+        return name
+      })
+      cardNames = cardNames.flat()
+      cardNames = cardNames.filter(name => Boolean(name.length))
       let newCards = cardNames.map(cardName => {
         return {
           id: nanoid(),
@@ -740,7 +717,7 @@ export default {
         newCards = newCards.map(card => {
           const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
           const prevCardRect = element.getBoundingClientRect()
-          card.y = prevCard.y + prevCardRect.height + spaceBetweenCards
+          card.y = prevCard.y + (prevCardRect.height * this.spaceCounterZoomDecimal) + spaceBetweenCards
           prevCard = card
           return card
         })
@@ -751,6 +728,10 @@ export default {
             y: card.y
           })
         })
+        this.$store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+          delta: newCards.length,
+          shouldIncrement: true
+        }, { root: true })
         this.$store.dispatch('closeAllDialogs', 'CardDetails.addSplitCards')
       })
     },

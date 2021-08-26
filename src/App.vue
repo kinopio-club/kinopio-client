@@ -47,12 +47,14 @@ export default {
     OffscreenMarkers
   },
   created () {
+    console.log('🐢 kinopio-client build', this.buildHash)
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerUpdateBackgroundTint') {
         this.updateBackgroundTint()
       }
       if (mutation.type === 'currentSpace/restoreSpace') {
         this.updateBackgroundTint()
+        this.updateMetaDescription()
       }
     })
   },
@@ -63,6 +65,7 @@ export default {
       window.addEventListener('scroll', this.updateUserHasScrolled)
     }, 100)
     this.updateBackgroundTint()
+    this.updateMetaDescription()
     this.$store.dispatch('currentSpace/updateBackgroundZoom')
   },
   data () {
@@ -97,6 +100,17 @@ export default {
     pageHeight () {
       const size = Math.max(this.$store.state.pageHeight, this.$store.state.viewportHeight)
       return size + 'px'
+    },
+    buildHash () {
+      const regex = /(app\.)([a-z0-9])\w+/
+      const scripts = Array.from(document.querySelectorAll('script'))
+      const path = scripts.find(script => {
+        const src = script.src
+        return src.includes('app')
+      })
+      if (!path) { return }
+      let hash = path.src.match(regex)[0] // app.768db305407f4c847d44
+      return hash.replace('app.', '') // 768db305407f4c847d44
     }
   },
   methods: {
@@ -119,6 +133,17 @@ export default {
       let color = this.$store.state.currentSpace.backgroundTint
       this.backgroundTint = color
       this.backgroundBlendMode = 'multiply'
+    },
+    updateMetaDescription () {
+      let description = 'Kinopio is your spatial thinking tool for new ideas and hard problems.'
+      const metaDescription = document.querySelector('meta[name=description]')
+      const cards = this.$store.state.currentSpace.cards
+      const topLeftCard = utils.topLeftCard(cards)
+      if (!topLeftCard.name) {
+        metaDescription.setAttribute('content', description)
+      } else {
+        metaDescription.setAttribute('content', topLeftCard.name)
+      }
     }
   },
   watch: {
@@ -365,6 +390,33 @@ dialog
   .button-wrap + label,
   .segmented-buttons + .button-wrap
     margin-left 6px
+  .title-row
+    display flex
+    justify-content space-between
+    align-items center
+    .button-wrap
+      padding 8px
+      margin -8px
+      cursor pointer
+      &:hover
+        button
+          box-shadow 3px 3px 0 var(--heavy-shadow)
+          background var(--secondary-hover-background)
+      &:active,
+      &.active
+        button
+          box-shadow none
+          color var(--primary)
+          background var(--secondary-active-background)
+    .button-wrap + .button-wrap
+      margin-left 0px
+    button
+      padding-top 2px
+      padding-bottom 0px
+      padding-left 5px
+      padding-right 5px
+      border-radius 3px
+      margin 0
 
   p + button,
   button + p,

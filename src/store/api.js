@@ -10,17 +10,32 @@ if (process.env.NODE_ENV === 'development') {
   host = 'http://kinopio.local:3000'
 }
 
+const squashCardsCreatedCount = (queue, request) => {
+  let isSquashed
+  queue = queue.map(queueItem => {
+    if (queueItem.name === 'updateUserCardsCreatedCount') {
+      queueItem.body.delta += request.body.delta
+      isSquashed = true
+    }
+    return queueItem
+  })
+  if (!isSquashed) {
+    queue.push(request)
+  }
+  return queue
+}
+
 const squashQueue = (queue) => {
   let squashed = []
   queue.forEach(request => {
     // check if request has already been squashed
-    const isSquashed = squashed.find(item => {
-      return item.name === request.name && item.body.id === request.body.id
+    const isSquashed = squashed.find(queueItem => {
+      return queueItem.name === request.name && queueItem.body.id === request.body.id
     })
     if (isSquashed) { return }
     // merge queue items with the same operation name and matching entity id
-    const matches = queue.filter(item => {
-      return item.name === request.name && item.body.id === request.body.id
+    const matches = queue.filter(queueItem => {
+      return queueItem.name === request.name && queueItem.body.id === request.body.id
     })
     const reduced = matches.reduce((accumulator, currentValue) => merge(accumulator, currentValue))
     reduced.name = request.name
@@ -107,7 +122,11 @@ const self = {
         name,
         body
       }
-      queue.push(request)
+      if (name === 'updateUserCardsCreatedCount') {
+        queue = squashCardsCreatedCount(queue, request)
+      } else {
+        queue.push(request)
+      }
       cache.saveQueue(queue)
       context.dispatch('debouncedProcessQueueOperations')
     },

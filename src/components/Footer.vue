@@ -44,7 +44,7 @@
           Tags(:visible="tagsIsVisible")
 
         //- Mobile Tips
-        .button-wrap(v-if="isMobileOrTouch")
+        .button-wrap(v-if="isMobileOrTouch" :style="{zIndex: mobileTipsZIndex}")
           button(@click.left="toggleMobileTipsIsVisible" :class="{ active: mobileTipsIsVisible}")
             img.icon(src="@/assets/press-and-hold.svg")
             span Mobile Tips
@@ -100,14 +100,20 @@ export default {
   },
   mounted () {
     this.$store.subscribe((mutation, state) => {
+      const linksIsPinnedDialog = this.$store.state.linksIsPinnedDialog
+      const tagsIsPinnedDialog = this.$store.state.tagsIsPinnedDialog
       if (mutation.type === 'closeAllDialogs') {
         this.removedIsVisible = false
         this.favoritesIsVisible = false
-        this.linksIsVisible = false
-        this.tagsIsVisible = false
         this.exploreIsVisible = false
         this.liveIsVisible = false
         this.mobileTipsIsVisible = false
+        if (!linksIsPinnedDialog) {
+          this.linksIsVisible = false
+        }
+        if (!tagsIsPinnedDialog) {
+          this.tagsIsVisible = false
+        }
       }
       if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
         currentIteration = 0
@@ -166,6 +172,19 @@ export default {
     },
     isMobileStandalone () {
       return utils.isMobile() && navigator.standalone // is homescreen app
+    },
+    dialogsArePinned () {
+      const linksIsPinnedDialog = this.$store.state.linksIsPinnedDialog
+      const tagsIsPinnedDialog = this.$store.state.tagsIsPinnedDialog
+      return linksIsPinnedDialog || tagsIsPinnedDialog
+    },
+    mobileTipsZIndex () {
+      if (this.mobileTipsIsVisible) {
+        return 0
+      } else if (this.dialogsArePinned) {
+        return -1
+      }
+      return 0
     }
   },
   methods: {

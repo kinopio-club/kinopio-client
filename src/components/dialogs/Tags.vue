@@ -1,13 +1,17 @@
 <template lang="pug">
-dialog.tags.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.tags.narrow(@click.stop v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="isPinnedDialog" :class="{'is-pinned': isPinnedDialog}")
   section
-    p Tags
+    .title-row
+      p Tags
+      .button-wrap(@click.left="toggleIsPinnedDialog"  :class="{active: isPinnedDialog}" title="Pin dialog")
+        button
+          img.icon(src="@/assets/pin.svg")
   section.results-section(v-if="tags.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     .button-wrap(@click.left.prevent="toggleCurrentSpaceTagsIsVisibleOnly" @keydown.stop.enter="toggleCurrentSpaceTagsIsVisibleOnly")
       label(:class="{ active: currentSpaceTagsIsVisibleOnly }")
         input(type="checkbox" v-model="currentSpaceTagsIsVisibleOnly")
         span In Current Space
-    TagList(:tags="filteredTags" :isLoading="isLoadingRemoteTags")
+    TagList(:tags="filteredTags" :isLoading="isLoadingRemoteTags" :parentIsPinned="isPinnedDialog")
   section(v-else)
     p Use tags to help cards stand out, and to connect ideas across spaces.
     p Type
@@ -34,6 +38,14 @@ export default {
   },
   created () {
     this.$store.subscribe((mutation, state) => {
+      const tagMutations = [
+        'currentSpace/addTag',
+        'currentSpace/removeTag',
+        'currentSpace/removeTags',
+        'currentSpace/removeTagsFromCard',
+        'currentSpace/removeTagsFromAllRemovedCardsPermanent'
+      ]
+
       if (mutation.type === 'updatePageSizes') {
         this.updateDialogHeight()
         this.updateResultsSectionHeight()
@@ -43,6 +55,12 @@ export default {
       }
       if (mutation.type === 'currentSpace/updateTagNameColor') {
         this.updateTagColor(mutation.payload)
+      }
+      if (tagMutations.includes(mutation.type) && this.visible) {
+        this.updateTags()
+      }
+      if (mutation.type === 'shouldHideFooter' && this.visible) {
+        this.updateTags()
       }
     })
   },
@@ -63,9 +81,14 @@ export default {
       } else {
         return this.tags
       }
-    }
+    },
+    isPinnedDialog () { return this.$store.state.tagsIsPinnedDialog }
   },
   methods: {
+    toggleIsPinnedDialog () {
+      const isPinned = !this.isPinnedDialog
+      this.$store.commit('tagsIsPinnedDialog', isPinned)
+    },
     toggleCurrentSpaceTagsIsVisibleOnly () {
       this.currentSpaceTagsIsVisibleOnly = !this.currentSpaceTagsIsVisibleOnly
     },
@@ -150,4 +173,7 @@ export default {
     padding-top 4px
     > .button-wrap
       padding 4px
+  &.is-pinned
+    z-index 0
+    left -86px
 </style>

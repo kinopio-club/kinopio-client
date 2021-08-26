@@ -2,6 +2,7 @@
 aside.notifications(@click.left="closeAllDialogs")
   .item(v-for="item in items" v-bind:key="item.id" :data-notification-id="item.id" :class="item.type")
     p
+      span.label-badge(v-if="item.label") {{item.label}}
       img.icon(v-if="item.icon" :src="icon(item.icon).path" :class="item.icon")
       span {{item.message}}
 
