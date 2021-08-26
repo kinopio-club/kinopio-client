@@ -12,7 +12,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
 
     //- no cards found
     template(v-if="!cards.length && !loading")
-      p Tag more cards with [[{{currentTag.name}}]] to see them here
+      p Tag more cards with [[{{name}}]] to see them here
       button(v-if="visibleFromTagList" @click.left.stop="removeTag")
         img.icon(src="@/assets/remove.svg")
         span Remove Tag
@@ -49,7 +49,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
                 span.badge.tag-badge(
                   v-if="segment.isTag"
                   :style="{backgroundColor: segment.color}"
-                  :class="{ active: currentTag.name === segment.name }"
+                  :class="{ active: tagIsActive(currentTag, segment) }"
                 )
                   span {{segment.name}}
     Loader(:visible="loading")
@@ -183,6 +183,10 @@ export default {
     currentUser () { return this.$store.state.currentUser }
   },
   methods: {
+    tagIsActive (currentTag, segment) {
+      if (!currentTag) { return }
+      return currentTag.name === segment.name
+    },
     userById (userId) {
       return this.$store.getters['currentSpace/userById'](userId)
     },
