@@ -455,7 +455,6 @@ export default {
       this.$store.commit('currentUserIsDrawingConnection', false)
       this.$store.commit('currentUserIsPainting', false)
       this.$store.commit('currentUserIsPaintingLocked', false)
-      this.$store.commit('currentUserIsPanning', false)
       if (this.isDraggingCard) {
         this.$store.dispatch('currentSpace/updateAfterDragWithPositions')
       }
