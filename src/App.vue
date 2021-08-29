@@ -3,7 +3,7 @@
   @mousemove="broadcastCursor"
   @touchmove="broadcastCursor"
   @touchstart="isTouchDevice"
-  :style="{ width: pageWidth, height: pageHeight }"
+  :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
 )
   #layout-viewport(:style="{ background: backgroundTint, mixBlendMode: backgroundBlendMode }")
     OffscreenMarkers
@@ -111,6 +111,14 @@ export default {
       if (!path) { return }
       let hash = path.src.match(regex)[0] // app.768db305407f4c847d44
       return hash.replace('app.', '') // 768db305407f4c847d44
+    },
+    pageCursor () {
+      if (this.$store.state.currentUserIsPanning) {
+        return 'grabbing'
+      } else if (this.$store.state.currentUserIsPanningReady) {
+        return 'grab'
+      }
+      return undefined
     }
   },
   methods: {
