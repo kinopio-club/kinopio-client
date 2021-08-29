@@ -152,6 +152,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
     article
       .row
         .badge.title
+          img.icon.hand(src="@/assets/hand.svg")
+          span Drag to Pan
+        .badge.keyboard-shortcut Space
+    article
+      .row
+        .badge.title
           img.icon.magnifying-glass(src="@/assets/magnifying-glass.svg")
           span Zoom In or Out
         .badge.keyboard-shortcut {{meta}}-+/-, {{meta}}-Scroll
@@ -285,4 +291,6 @@ export default {
     margin-left 6px
   .section-title
     margin-bottom 10px
+  .hand
+    verical-align middle
 </style>
