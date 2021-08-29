@@ -196,7 +196,7 @@ export default {
     },
     // on mouse move
     handleMouseMoveEvents (event) {
-      const speed = 1.4
+      const speed = 2
       if (this.$store.state.currentUserIsPanning) {
         event.preventDefault()
         if (!prevCursorPosition) {
@@ -204,8 +204,8 @@ export default {
         }
         const position = utils.cursorPositionInPage(event)
         const delta = {
-          x: Math.round((prevCursorPosition.x - position.x) * speed),
-          y: Math.round((prevCursorPosition.y - position.y) * speed)
+          x: Math.ceil((prevCursorPosition.x - position.x) * speed),
+          y: Math.ceil((prevCursorPosition.y - position.y) * speed)
         }
         window.scrollBy(delta.x, delta.y)
       }
@@ -213,6 +213,7 @@ export default {
     // on mouse up
     handleMouseUpEvents (event) {
       prevCursorPosition = undefined
+      this.$store.commit('currentUserIsPanning', false)
     },
     // on scroll
     handleScrollEvents (event) {
