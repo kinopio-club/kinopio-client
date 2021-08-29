@@ -642,6 +642,7 @@ export default {
       }
     },
     splitBySentences (string) {
+      if (!string) { return }
       let sentences = string.split('. ')
       sentences = sentences.filter(sentence => Boolean(sentence.length))
       // re-add sentence periods removed by split
@@ -654,6 +655,7 @@ export default {
       return sentences
     },
     splitByParagraphs (string) {
+      if (!string) { return }
       let paragraphs = string.split('\n')
       paragraphs = paragraphs.filter(paragraph => Boolean(paragraph.length))
       paragraphs = paragraphs.map(paragraph => paragraph.trim())
@@ -662,7 +664,7 @@ export default {
     splitCards (event, isPreview) {
       const originalName = (this.pastedName || this.name).trim()
       // split names by paragraph and sentence
-      const paragraphs = this.splitByParagraphs(originalName)
+      const paragraphs = this.splitByParagraphs(originalName) || []
       let cardNames = paragraphs.map(paragraph => {
         let sentences
         if (paragraph.length > this.maxCardLength) {

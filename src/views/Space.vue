@@ -1,6 +1,6 @@
 <template lang="pug">
 main.space(
-  :class="{'is-interacting': isInteracting, 'is-painting': isPainting}"
+  :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady}"
   @mousedown.left="initInteractions"
   @touchstart="initInteractions"
   @mouseup.left="stopInteractions"
@@ -127,6 +127,7 @@ export default {
     },
     cards () { return this.$store.state.currentSpace.cards },
     isPainting () { return this.$store.state.currentUserIsPainting },
+    isPanningReady () { return this.$store.state.currentUserIsPanningReady },
     spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
     isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
     isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
@@ -479,11 +480,12 @@ export default {
   pointer-events none // so that painting can receive events
   position relative // used by svg connections
   transform-origin top left
+
 .is-interacting
   pointer-events all
-.is-painting
+.is-not-interacting
   *
-    pointer-events: none !important
+    pointer-events none !important
 
 svg.connections,
 .connection-labels

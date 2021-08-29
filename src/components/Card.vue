@@ -1010,6 +1010,7 @@ export default {
     },
     startDraggingCard (event) {
       isMultiTouch = false
+      if (this.$store.state.currentUserIsPanningReady) { return }
       if (!this.canEditCard) { return }
       if (utils.isMultiTouch(event)) {
         isMultiTouch = true
@@ -1032,6 +1033,7 @@ export default {
     },
     showCardDetails (event) {
       if (isMultiTouch) { return }
+      if (this.$store.state.currentUserIsPanningReady) { return }
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
       const userId = this.$store.state.currentUser.id
       const cardsWereDragged = this.$store.state.cardsWereDragged

@@ -66,6 +66,8 @@ export default new Vuex.Store({
     currentUserIsPaintingLocked: false,
     currentUserIsDraggingCard: false,
     currentUserIsHoveringOverConnectionId: '',
+    currentUserIsPanningReady: false,
+    currentUserIsPanning: false,
 
     // cards
     shouldAddCard: false,
@@ -461,6 +463,14 @@ export default new Vuex.Store({
 
     // Dragging
 
+    currentUserIsPanningReady: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsPanningReady' })
+      state.currentUserIsPanningReady = value
+    },
+    currentUserIsPanning: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsPanning' })
+      state.currentUserIsPanning = value
+    },
     currentUserIsDraggingCard: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsDraggingCard' })
       state.currentUserIsDraggingCard = value

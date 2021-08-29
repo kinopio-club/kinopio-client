@@ -12,16 +12,24 @@ const incrementPosition = 12
 let useSiblingConnectionType
 let browserZoomLevel = 0
 
+let prevCursorPosition
+
 export default {
   mounted () {
     window.addEventListener('keyup', this.handleShortcuts)
     // event.metaKey only works on keydown
     window.addEventListener('keydown', this.handleMetaKeyShortcuts)
+
     window.addEventListener('wheel', this.handleMouseWheelEvents, { passive: false })
+    window.addEventListener('mousedown', this.handleMouseDownEvents)
+    window.addEventListener('mousemove', this.handleMouseMoveEvents)
+    window.addEventListener('mouseup', this.handleMouseUpEvents)
+    window.addEventListener('scroll', this.handleScrollEvents)
   },
   computed: {
   },
   methods: {
+    // on key up
     handleShortcuts (event) {
       const key = event.key
       // console.warn('🎹', key)
@@ -71,8 +79,11 @@ export default {
         let value = this.$store.state.currentUser.filterUnchecked
         value = !value
         this.$store.dispatch('currentUser/toggleFilterUnchecked', value)
+      } else if (key === ' ' && isSpaceScope) {
+        this.$store.commit('currentUserIsPanningReady', false)
       }
     },
+    // on key down
     handleMetaKeyShortcuts (event) {
       const key = event.key
       const isMeta = event.metaKey || event.ctrlKey
@@ -149,8 +160,14 @@ export default {
         }
         event.preventDefault()
         this.$store.commit('triggerSpaceZoomIn')
+      } else if (key === ' ' && isSpaceScope) {
+        event.preventDefault()
+        if (!this.$store.state.currentUserIsPanningReady) {
+          this.$store.commit('currentUserIsPanningReady', true)
+        }
       }
     },
+    // on mouse wheel
     handleMouseWheelEvents (event) {
       const isMeta = event.metaKey || event.ctrlKey
       if (!isMeta) { return }
@@ -170,6 +187,39 @@ export default {
         this.$store.commit('triggerSpaceZoomOut', speed)
       }
     },
+    // on mouse down
+    handleMouseDownEvents (event) {
+      if (this.$store.state.currentUserIsPanningReady) {
+        event.preventDefault()
+        this.$store.commit('currentUserIsPanning', true)
+      }
+    },
+    // on mouse move
+    handleMouseMoveEvents (event) {
+      const speed = 2
+      if (this.$store.state.currentUserIsPanning) {
+        event.preventDefault()
+        if (!prevCursorPosition) {
+          prevCursorPosition = utils.cursorPositionInPage(event)
+        }
+        const position = utils.cursorPositionInPage(event)
+        const delta = {
+          x: Math.ceil((prevCursorPosition.x - position.x) * speed),
+          y: Math.ceil((prevCursorPosition.y - position.y) * speed)
+        }
+        window.scrollBy(delta.x, delta.y)
+      }
+    },
+    // on mouse up
+    handleMouseUpEvents (event) {
+      prevCursorPosition = undefined
+      this.$store.commit('currentUserIsPanning', false)
+    },
+    // on scroll
+    handleScrollEvents (event) {
+      prevCursorPosition = undefined
+    },
+
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
       const isTouchDevice = this.$store.state.isTouchDevice

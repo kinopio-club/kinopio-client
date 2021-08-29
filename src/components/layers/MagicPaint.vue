@@ -134,7 +134,8 @@ export default {
     viewportWidth () { return this.$store.state.viewportWidth },
     cardMap () { return this.$store.state.cardMap },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
-    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
+    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
+    isPanning () { return this.$store.state.currentUserIsPanningReady }
   },
   methods: {
     dialogIsVisible () {
@@ -271,6 +272,7 @@ export default {
     // Painting
 
     painting (event) {
+      if (this.isPanning) { return }
       if (!this.$store.state.currentUserIsPainting) { return }
       if (this.$store.getters.shouldScrollAtEdges(event)) {
         event.preventDefault() // prevents touch swipe viewport scrolling
@@ -297,6 +299,7 @@ export default {
       this.broadcastCircle(circle)
     },
     startPainting (event) {
+      if (this.isPanning) { return }
       this.$store.commit('updateCardMap')
       this.updateViewportCardMap()
       startCursor = utils.cursorPositionInViewport(event)
