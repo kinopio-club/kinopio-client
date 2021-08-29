@@ -12,6 +12,8 @@ const incrementPosition = 12
 let useSiblingConnectionType
 let browserZoomLevel = 0
 
+let prevCursorPosition
+
 export default {
   mounted () {
     window.addEventListener('keyup', this.handleShortcuts)
@@ -21,6 +23,8 @@ export default {
     window.addEventListener('wheel', this.handleMouseWheelEvents, { passive: false })
     window.addEventListener('mousedown', this.handleMouseDownEvents)
     window.addEventListener('mousemove', this.handleMouseMoveEvents)
+    window.addEventListener('mouseup', this.handleMouseUpEvents)
+    window.addEventListener('scroll', this.handleScrollEvents)
   },
   computed: {
   },
@@ -77,7 +81,6 @@ export default {
         this.$store.dispatch('currentUser/toggleFilterUnchecked', value)
       } else if (key === ' ' && isSpaceScope) {
         this.$store.commit('currentUserIsPanningReady', false)
-        console.log('🌑 dragmode false')
       }
     },
     // on key down
@@ -161,7 +164,6 @@ export default {
         event.preventDefault()
         if (!this.$store.state.currentUserIsPanningReady) {
           this.$store.commit('currentUserIsPanningReady', true)
-          console.log('☀️ dragmode true')
         }
       }
     },
@@ -189,17 +191,32 @@ export default {
     handleMouseDownEvents (event) {
       if (this.$store.state.currentUserIsPanningReady) {
         event.preventDefault()
-        console.log('🍅', event)
         this.$store.commit('currentUserIsPanning', true)
       }
     },
     // on mouse move
     handleMouseMoveEvents (event) {
+      const speed = 1.4
       if (this.$store.state.currentUserIsPanning) {
         event.preventDefault()
-        console.log('🐢 is panning now')
-        // listener mousemove w mouse down and dragmode active : scroll page by delta/direction
+        if (!prevCursorPosition) {
+          prevCursorPosition = utils.cursorPositionInPage(event)
+        }
+        const position = utils.cursorPositionInPage(event)
+        const delta = {
+          x: Math.round((prevCursorPosition.x - position.x) * speed),
+          y: Math.round((prevCursorPosition.y - position.y) * speed)
+        }
+        window.scrollBy(delta.x, delta.y)
       }
+    },
+    // on mouse up
+    handleMouseUpEvents (event) {
+      prevCursorPosition = undefined
+    },
+    // on scroll
+    handleScrollEvents (event) {
+      prevCursorPosition = undefined
     },
 
     scrollIntoView (card) {
