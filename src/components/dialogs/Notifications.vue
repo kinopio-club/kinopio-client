@@ -93,7 +93,6 @@ export default {
   },
   methods: {
     backgroundTintStyles (tint) {
-      console.log(tint)
       if (tint) {
         return {
           background: tint,

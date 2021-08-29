@@ -17,11 +17,15 @@ export default {
     window.addEventListener('keyup', this.handleShortcuts)
     // event.metaKey only works on keydown
     window.addEventListener('keydown', this.handleMetaKeyShortcuts)
+
     window.addEventListener('wheel', this.handleMouseWheelEvents, { passive: false })
+    window.addEventListener('mousedown', this.handleMouseDownEvents)
+    window.addEventListener('mousemove', this.handleMouseMoveEvents)
   },
   computed: {
   },
   methods: {
+    // on key up
     handleShortcuts (event) {
       const key = event.key
       // console.warn('🎹', key)
@@ -71,8 +75,12 @@ export default {
         let value = this.$store.state.currentUser.filterUnchecked
         value = !value
         this.$store.dispatch('currentUser/toggleFilterUnchecked', value)
+      } else if (key === ' ' && isSpaceScope) {
+        this.$store.commit('currentUserIsPanningReady', false)
+        console.log('🌑 dragmode false')
       }
     },
+    // on key down
     handleMetaKeyShortcuts (event) {
       const key = event.key
       const isMeta = event.metaKey || event.ctrlKey
@@ -149,8 +157,15 @@ export default {
         }
         event.preventDefault()
         this.$store.commit('triggerSpaceZoomIn')
+      } else if (key === ' ' && isSpaceScope) {
+        event.preventDefault()
+        if (!this.$store.state.currentUserIsPanningReady) {
+          this.$store.commit('currentUserIsPanningReady', true)
+          console.log('☀️ dragmode true')
+        }
       }
     },
+    // on mouse wheel
     handleMouseWheelEvents (event) {
       const isMeta = event.metaKey || event.ctrlKey
       if (!isMeta) { return }
@@ -170,6 +185,23 @@ export default {
         this.$store.commit('triggerSpaceZoomOut', speed)
       }
     },
+    // on mouse down
+    handleMouseDownEvents (event) {
+      if (this.$store.state.currentUserIsPanningReady) {
+        event.preventDefault()
+        console.log('🍅', event)
+        this.$store.commit('currentUserIsPanning', true)
+      }
+    },
+    // on mouse move
+    handleMouseMoveEvents (event) {
+      if (this.$store.state.currentUserIsPanning) {
+        event.preventDefault()
+        console.log('🐢 is panning now')
+        // listener mousemove w mouse down and dragmode active : scroll page by delta/direction
+      }
+    },
+
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
       const isTouchDevice = this.$store.state.isTouchDevice
