@@ -1033,9 +1033,9 @@ export default {
     },
     showCardDetails (event) {
       if (isMultiTouch) { return }
-      if (this.$store.state.currentUserIsPanningReady) { return }
       // temp debugging for https://club.kinopio.club/t/building-drag-to-pan/505/13
       console.log('🦀 showCardDetails', this.$store.state.currentUserIsPanningReady, this.$store.state.currentUserIsPanning)
+      if (this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning) { return }
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
       const userId = this.$store.state.currentUser.id
       const cardsWereDragged = this.$store.state.cardsWereDragged
