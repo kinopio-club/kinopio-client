@@ -269,7 +269,8 @@ export default {
       isOpening: false,
       openingPercent: 0,
       openingAlpha: 0,
-      shouldTriggerCloseChildComponents: ''
+      shouldTriggerCloseChildComponents: '',
+      previousSelectedTag: {}
     }
   },
   created () {
@@ -1292,8 +1293,13 @@ export default {
         return
       }
       previousTags = utils.tagsFromStringWithoutBrackets(name) || []
-      previousTags = previousTags.map(tag => {
-        tag = this.$store.getters['currentSpace/tagByName'](tag)
+      previousTags = previousTags.map(tagName => {
+        let tag
+        if (this.previousSelectedTag.name === tagName) {
+          tag = this.previousSelectedTag
+        } else {
+          tag = this.$store.getters['currentSpace/tagByName'](tagName)
+        }
         return tag
       })
     },
@@ -1301,12 +1307,16 @@ export default {
       const previousTagNames = previousTags.map(tag => tag.name)
       const addTagsNames = newTagNames.filter(newTagName => !previousTagNames.includes(newTagName))
       addTagsNames.forEach(tagName => {
-        const tag = utils.newTag({
+        let tag
+        tag = utils.newTag({
           name: tagName,
           defaultColor: this.$store.state.currentUser.color,
           cardId: this.card.id,
           spaceId: this.$store.state.currentSpace.id
         })
+        if (this.previousSelectedTag.name === tagName) {
+          tag.color = this.previousSelectedTag.color
+        }
         this.$store.dispatch('currentSpace/addTag', tag)
       })
     },
@@ -1336,6 +1346,7 @@ export default {
       this.$store.commit('tagDetailsIsVisible', true)
     },
     updateTagBracketsWithTag (tag) {
+      this.previousSelectedTag = tag
       this.updatePreviousTags()
       const cursorPosition = this.$refs.name.selectionStart
       const tagStartText = this.tagStartText()
@@ -1451,6 +1462,7 @@ export default {
         }
       })
       if (visible) {
+        this.previousSelectedTag = {}
         this.updateMediaUrls()
         const connections = this.$store.getters['currentSpace/cardConnections'](this.card.id)
         this.$store.commit('updateCurrentCardConnections', connections)
