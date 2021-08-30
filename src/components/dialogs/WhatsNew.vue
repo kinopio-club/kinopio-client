@@ -16,8 +16,8 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialog" :s
       .title.badge.info
         span {{post.title}}
         img.icon(src="@/assets/new.gif" v-if="!post.userHasRead")
-      span(v-html="media(post.description)")
       span(v-html="post.content_html")
+      .media(v-html="media(post.description)")
 
   section
     .button-wrap
@@ -132,10 +132,8 @@ export default {
     margin-bottom 10px
     padding-bottom 10px
     border-bottom 1px solid var(--primary)
-    span
-      img,
-      video
-        margin-bottom 10px
+    .media
+      margin-top 10px
     &:last-child
       margin-bottom 0
       padding-bottom 0
