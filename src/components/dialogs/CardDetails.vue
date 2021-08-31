@@ -1204,6 +1204,7 @@ export default {
       const newName = start + spaceUrl + end
       this.updateCardName(newName)
       position = position + spaceUrl.length + 1
+      this.hideSpacePicker()
       this.$nextTick(() => {
         this.focusName(position)
       })
