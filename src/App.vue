@@ -463,6 +463,11 @@ dialog
       width 14px
       margin-bottom 1px
       border-radius 3px
+  a
+    text-decoration-thickness 1px
+    color var(--text-link)
+    &:hover
+      text-decoration none
 
 .segmented-buttons
   &.first-row

@@ -99,6 +99,7 @@ export default {
     a
       color var(--text-link)
       text-decoration underline
+      text-decoration-thickness 1px // for firefox
       &:hover
         text-decoration none
     strong
