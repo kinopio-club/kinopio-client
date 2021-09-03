@@ -169,7 +169,7 @@ article(:style="position" :data-card-id="id" ref="card")
       )
         User(:user="createdByUser" :isClickable="false")
         .name {{createdByUser.name}}
-      UserDetails(:visible="userDetailsIsVisible" :user="createdByUser" :dialogIsReadOnly="true")
+      UserDetails(:visible="userDetailsIsVisible" :user="createdByUser")
     //- Date
     .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
       img.icon.time(src="@/assets/time.svg")

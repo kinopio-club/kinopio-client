@@ -1,8 +1,8 @@
 <template lang="pug">
 dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.left.stop="closeDialogs" @keydown.stop :class="{'right-side': detailsOnRight}" :style="userDetailsPosition")
 
-  //- Other User or Read Only
-  section(v-if="!isCurrentUser || dialogIsReadOnly")
+  //- Not Current User
+  section(v-if="!isCurrentUser")
     .user-info
       .row
         User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
@@ -21,7 +21,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
       .badge.success(v-if="user.isUpgraded") Upgraded
 
   //- Current User
-  template(v-if="isCurrentUser && !dialogIsReadOnly")
+  template(v-if="isCurrentUser ")
     section
       .row
         .button-wrap
@@ -89,7 +89,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
     .badge.danger.error-message(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
 
   //- Collaborator
-  section(v-if="isCollaborator && currentUserIsSpaceMember && !dialogIsReadOnly")
+  section(v-if="isCollaborator && currentUserIsSpaceMember")
     template(v-if="isCurrentUser && isCollaborator")
       button(@click.left.stop="removeCollaborator")
         img.icon(src="@/assets/remove.svg")
@@ -124,8 +124,7 @@ export default {
     detailsOnRight: Boolean,
     visible: Boolean,
     userDetailsPosition: Object,
-    userDetailsIsFromList: Boolean,
-    dialogIsReadOnly: Boolean
+    userDetailsIsFromList: Boolean
   },
   data () {
     return {
