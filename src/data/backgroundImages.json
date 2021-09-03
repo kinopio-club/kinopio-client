@@ -4,29 +4,35 @@
     "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/dot-grid-thumbnail.svg",
     "shouldTint": true
   },
+  {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid.svg",
-    "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-thumbnail.svg",
+    "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-preview.svg",
+    "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-thumbnail-2.svg",
     "shouldTint": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-inverse.svg",
-    "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-inverse-thumbnail.svg",
+    "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-inverse-preview.svg",
+    "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-inverse-thumbnail-2.svg",
     "shouldTint": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/concentric-boxes.svg",
-    "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/concentric-boxes-thumbnail.svg",
+    "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/concentric-boxes-preview.svg",
+    "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/concentric-boxes-thumbnail-2.svg",
     "shouldTint": true
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/picture-frame-inverse.svg",
-    "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/picture-frame-inverse-thumbnail.svg",
+    "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/picture-frame-inverse-preview.svg",
+    "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/picture-frame-inverse-thumbnail-2.svg",
     "shouldTint": true
 
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/pixel-grid-2.svg",
-    "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/pixel-grid-2-thumbnail.svg",
+    "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/pixel-grid-2-preview.svg",
+    "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/pixel-grid-2-thumbnail-2.svg",
     "shouldTint": true
   },
   {
@@ -35,6 +41,7 @@
   },
   {
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/gem-grid-2.svg",
+    "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/gem-grid-2-thumbnail.svg",
     "shouldTint": true
   },
 
