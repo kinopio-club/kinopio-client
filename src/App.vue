@@ -382,7 +382,7 @@ dialog
   box-shadow var(--hover-shadow)
   border-radius 3px
   &.narrow
-    width 200px
+    width 202px
   button,
   label
     background-color var(--primary-background)
