@@ -387,6 +387,7 @@ export default {
       const giphy = service === 'giphy' && (this.serviceIsStickers || this.serviceIsGifs)
       const backgrounds = service === 'backgrounds' && this.serviceIsBackgrounds
       if (arena) {
+        data.blocks = data.blocks.filter(image => Boolean(image.image))
         this.images = data.blocks.map(image => {
           const url = image.image.original.url
           return {
