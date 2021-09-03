@@ -83,6 +83,7 @@ import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import MoonPhase from '@/components/MoonPhase.vue'
 import moonphase from '@/moonphase.js'
+import backgroundImages from '@/data/backgroundImages.json'
 
 import debounce from 'lodash-es/debounce'
 
@@ -192,10 +193,18 @@ export default {
       return templateSpaceIds.includes(id)
     },
     backgroundStyles () {
-      const defaultBackground = 'https://kinopio-backgrounds.us-east-1.linodeobjects.com/background-thumbnail.svg'
-      let background = this.$store.state.currentSpace.background || defaultBackground
+      const defaultBackgroundThumbnail = 'https://kinopio-backgrounds.us-east-1.linodeobjects.com/background-thumbnail.svg'
+      let background = this.$store.state.currentSpace.background
+      const backgroundImage = backgroundImages.find(image => {
+        const isImage = image.url === background
+        const hasThumbnailUrl = image.thumbnailUrl
+        return isImage && hasThumbnailUrl
+      })
+      if (backgroundImage) {
+        background = backgroundImage.thumbnailUrl || background
+      }
       if (!utils.urlIsImage(background)) {
-        background = defaultBackground
+        background = defaultBackgroundThumbnail
       }
       return {
         backgroundImage: `url(${background})`

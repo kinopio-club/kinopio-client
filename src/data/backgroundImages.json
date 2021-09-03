@@ -1,5 +1,9 @@
 [
   {
+    "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/dot-grid.svg",
+    "thumbnailUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/dot-grid-thumbnail.svg",
+    "shouldTint": true
+  },
     "url": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid.svg",
     "previewUrl": "https://kinopio-backgrounds.us-east-1.linodeobjects.com/grid-thumbnail.svg",
     "shouldTint": true
