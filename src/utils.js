@@ -729,6 +729,9 @@ export default {
     if (!space.cards) { return }
     let cards = []
     space.cards.forEach(card => {
+      if (!card) {
+        return
+      }
       if (!card.isRemoved) {
         cards.push(card)
       }
