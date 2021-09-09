@@ -10,7 +10,7 @@ dialog.favorites.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
           span People
           Loader(:visible="loading")
       //- Filter
-      .button-wrap.hidden
+      .button-wrap
         button(v-if="spacesIsVisible" @click.left.stop="toggleFavoritesFiltersIsVisible" :class="{ active: favoritesFiltersIsVisible || favoritesFilter }")
           img.icon(src="@/assets/filter.svg")
         FavoritesFilters(:visible="favoritesFiltersIsVisible" :favoritesFilter="favoritesFilter" @updateFavoritesFilter="updateFavoritesFilter")
@@ -61,15 +61,21 @@ export default {
       userDetailsIsVisible: false,
       selectedUser: {},
       userDetailsPosition: {},
-      favoritesFilter: null,
+      favoritesFilter: null, // null, 'currentUser', 'otherUsers'
       favoritesFiltersIsVisible: false
     }
   },
   computed: {
+    currentUser () { return this.$store.state.currentUser },
     favoriteUsers () { return this.$store.state.currentUser.favoriteUsers },
     favoriteSpaces () {
-      // TODO filter based on this.favoritesFilter
-      return this.$store.state.currentUser.favoriteSpaces
+      let spaces = this.$store.state.currentUser.favoriteSpaces
+      if (this.favoritesFilter === 'currentUser') {
+        spaces = spaces.filter(space => space.userId === this.currentUser.id)
+      } else if (this.favoritesFilter === 'otherUsers') {
+        spaces = spaces.filter(space => space.userId !== this.currentUser.id)
+      }
+      return spaces
     },
     loading () { return !this.$store.state.hasRestoredFavorites },
     isEmpty () {
@@ -108,7 +114,7 @@ export default {
     },
     changeSpace (space) {
       const spaceUser = space.user || space.users[0]
-      const isSpaceUser = spaceUser.id === this.$store.state.currentUser.id
+      const isSpaceUser = spaceUser.id === this.currentUser.id
       const isNotSignedIn = !this.$store.getters['currentUser/isSignedIn']
       if (isSpaceUser && isNotSignedIn) {
         this.$store.dispatch('currentSpace/changeSpace', { space })
