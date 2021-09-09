@@ -10,7 +10,9 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
             .current-color(:style="{backgroundColor: color}")
           ColorPicker(:currentColor="color" :visible="colorPickerIsVisible" @selectedColor="updateTagNameColor")
         .tag-name {{name}}
-      button(@click="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
+      //- Filter
+      label(@@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
+        input(type="checkbox" v-model="isFilteredInSpace")
         img.icon(src="@/assets/filter.svg")
 
     //- no cards found
@@ -184,9 +186,14 @@ export default {
     },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     currentUser () { return this.$store.state.currentUser },
-    isFilteredInSpace () {
-      const tags = this.$store.state.filteredTagNames
-      return tags.includes(this.currentTag.name)
+    isFilteredInSpace: {
+      get () {
+        const tags = this.$store.state.filteredTagNames
+        return tags.includes(this.currentTag.name)
+      },
+      set () {
+        this.toggleFilteredInSpace()
+      }
     }
   },
   methods: {

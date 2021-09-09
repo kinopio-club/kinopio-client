@@ -1,13 +1,20 @@
 <template lang="pug">
-dialog.favorites.narrow(v-if="visible" :open="visible" @click.left.stop="userDetailsIsNotVisible" ref="dialog")
+dialog.favorites.narrow(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog")
   section
-    .segmented-buttons
-      button(@click.left.stop="showSpaces" :class="{ active: spacesIsVisible }")
-        span Spaces
-        Loader(:visible="loading")
-      button(@click.left.stop="hideSpaces" :class="{ active: !spacesIsVisible }")
-        span People
-        Loader(:visible="loading")
+    .row
+      .segmented-buttons
+        button(@click.left.stop="showSpaces" :class="{ active: spacesIsVisible }")
+          span Spaces
+          Loader(:visible="loading")
+        button(@click.left.stop="hideSpaces" :class="{ active: !spacesIsVisible }")
+          span People
+          Loader(:visible="loading")
+      //- Filter
+      .button-wrap.hidden
+        button(v-if="spacesIsVisible" @click.left.stop="toggleFavoritesFiltersIsVisible" :class="{ active: favoritesFiltersIsVisible || favoritesFilter }")
+          img.icon(src="@/assets/filter.svg")
+        FavoritesFilters(:visible="favoritesFiltersIsVisible" :favoritesFilter="favoritesFilter" @updateFavoritesFilter="updateFavoritesFilter")
+
     template(v-if="isEmpty")
       p Spaces and people you {{' '}}
         img.icon(src="@/assets/heart.svg")
@@ -33,6 +40,7 @@ import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import UserList from '@/components/UserList.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
+import FavoritesFilters from '@/components/dialogs/FavoritesFilters.vue'
 import utils from '@/utils.js'
 
 export default {
@@ -41,7 +49,8 @@ export default {
     Loader,
     UserDetails,
     SpaceList,
-    UserList
+    UserList,
+    FavoritesFilters
   },
   props: {
     visible: Boolean
@@ -51,12 +60,17 @@ export default {
       spacesIsVisible: true,
       userDetailsIsVisible: false,
       selectedUser: {},
-      userDetailsPosition: {}
+      userDetailsPosition: {},
+      favoritesFilter: null,
+      favoritesFiltersIsVisible: false
     }
   },
   computed: {
     favoriteUsers () { return this.$store.state.currentUser.favoriteUsers },
-    favoriteSpaces () { return this.$store.state.currentUser.favoriteSpaces },
+    favoriteSpaces () {
+      // TODO filter based on this.favoritesFilter
+      return this.$store.state.currentUser.favoriteSpaces
+    },
     loading () { return !this.$store.state.hasRestoredFavorites },
     isEmpty () {
       const noSpaces = this.spacesIsVisible && !this.favoriteSpaces.length
@@ -76,13 +90,21 @@ export default {
     }
   },
   methods: {
+    updateFavoritesFilter (value) {
+      this.favoritesFilter = value
+    },
+    toggleFavoritesFiltersIsVisible () {
+      const isVisible = this.favoritesFiltersIsVisible
+      this.closeDialogs()
+      this.favoritesFiltersIsVisible = !isVisible
+    },
     showSpaces () {
       this.spacesIsVisible = true
-      this.userDetailsIsNotVisible()
+      this.closeDialogs()
     },
     hideSpaces () {
       this.spacesIsVisible = false
-      this.userDetailsIsNotVisible()
+      this.closeDialogs()
     },
     changeSpace (space) {
       const spaceUser = space.user || space.users[0]
@@ -95,7 +117,7 @@ export default {
       }
     },
     showUserDetails (event, user) {
-      this.userDetailsIsNotVisible()
+      this.closeDialogs()
       this.selectedUser = user
       this.userDetailsIsVisible = true
       this.$nextTick(() => {
@@ -113,9 +135,10 @@ export default {
         }
       })
     },
-    userDetailsIsNotVisible () {
+    closeDialogs () {
       this.userDetailsIsVisible = false
       this.selectedUser = {}
+      this.favoritesFiltersIsVisible = false
     },
     async updateFavorites () {
       await this.$store.dispatch('currentUser/restoreUserFavorites')
@@ -135,7 +158,7 @@ export default {
   watch: {
     visible (visible) {
       if (visible) {
-        this.userDetailsIsNotVisible()
+        this.closeDialogs()
         this.updateFavorites()
       } else {
         this.updateFavoriteSpaceIsEdited()
@@ -149,5 +172,8 @@ export default {
 .favorites
   .user-details
     left 50%
+  dialog.favorites-filters
+    top calc(100% - 8px)
+    bottom initial
 
 </style>
