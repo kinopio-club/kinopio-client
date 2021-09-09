@@ -34,14 +34,17 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
           img.icon.sunglasses(src="@/assets/sunglasses.svg")
           span In Explore
 
+    //- Remove
     .button-wrap(v-if="isSpaceMember")
       button(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
         img.icon(src="@/assets/remove.svg")
         span {{removeLabel}}
+    //-  Duplicate
     .button-wrap(v-if="!isSpaceMember")
       button(@click.left="duplicateSpace")
         img.icon(src="@/assets/add.svg")
         span Duplicate
+    //- Export
     .button-wrap
       button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
         img.icon.visit(src="@/assets/export.svg")
@@ -50,20 +53,22 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
 
   section.results-actions
     .row
+      //- Add Space
       .button-wrap
         button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
           img.icon(src="@/assets/add.svg")
           span Space
         AddSpace(:visible="addSpaceIsVisible" @closeDialogs="closeDialogs" @addSpace="addSpace")
+      //- Import
       .button-wrap
         button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
           span Import
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
-      .button-wrap.toggle-journals(v-if="spacesHasJournalSpace")
-        button(title="Toggle show journal spaces only" @click.left.stop="toggleShouldShowJournalsOnly" :class="{ active: shouldShowJournalsOnly }")
-          img.icon(v-if="!shouldShowJournalsOnly" src="@/assets/view-hidden.svg")
-          img.icon(v-else src="@/assets/view.svg")
-          MoonPhase(:moonPhase="moonPhase.name")
+      //- Filters
+      .button-wrap.toggle-filters(v-if="spacesHasJournalSpace")
+        button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible || spaceFiltersActive }")
+          img.icon(src="@/assets/filter.svg")
+        SpaceFilters(:visible="spaceFiltersIsVisible" :currentSpaceFilter="currentSpaceFilter" @updateSpaceFilter="updateSpaceFilter")
 
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(:spaces="filteredSpaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" :parentIsSpaceDetails="true" @selectSpace="changeSpace")
@@ -75,14 +80,13 @@ import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
 import AddSpace from '@/components/dialogs/AddSpace.vue'
 import Background from '@/components/dialogs/Background.vue'
+import SpaceFilters from '@/components/dialogs/SpaceFilters.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
 import templates from '@/data/templates.js'
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
-import MoonPhase from '@/components/MoonPhase.vue'
-import moonphase from '@/moonphase.js'
 import backgroundImages from '@/data/backgroundImages.json'
 
 import debounce from 'lodash-es/debounce'
@@ -98,11 +102,11 @@ export default {
     Import,
     AddSpace,
     Background,
+    SpaceFilters,
     SpaceList,
     PrivacyButton,
     ShowInExploreButton,
-    Loader,
-    MoonPhase
+    Loader
   },
   props: {
     visible: Boolean
@@ -127,9 +131,6 @@ export default {
       }
     })
   },
-  mounted () {
-    this.moonPhase = moonphase()
-  },
   data () {
     return {
       spaces: [],
@@ -145,18 +146,29 @@ export default {
       resultsSectionHeight: null,
       dialogHeight: null,
       backgroundTint: '',
-      moonPhase: {},
-      shouldShowJournalsOnly: false,
-      journalSpaces: []
+      currentSpaceFilter: null,
+      journalSpaces: [],
+      nonJournalSpaces: [],
+      spaceFiltersIsVisible: false
     }
   },
   computed: {
     filteredSpaces () {
-      if (this.shouldShowJournalsOnly) {
+      if (this.currentSpaceFilter === 'journals') {
         this.updateJournalSpaces()
         return this.journalSpaces
+      } else if (this.currentSpaceFilter === 'spaces') {
+        this.updateNonJournalSpaces()
+        return this.nonJournalSpaces
       } else {
         return this.spaces
+      }
+    },
+    spaceFiltersActive () {
+      if (this.currentSpaceFilter) {
+        return '1'
+      } else {
+        return null
       }
     },
     currentSpace () { return this.$store.state.currentSpace },
@@ -244,10 +256,13 @@ export default {
     }
   },
   methods: {
-    toggleShouldShowJournalsOnly () {
-      const isVisible = this.shouldShowJournalsOnly
+    toggleSpaceFiltersIsVisible () {
+      const isVisible = this.spaceFiltersIsVisible
       this.closeDialogs()
-      this.shouldShowJournalsOnly = !isVisible
+      this.spaceFiltersIsVisible = !isVisible
+    },
+    updateSpaceFilter (value) {
+      this.currentSpaceFilter = value
     },
     addSpace () {
       window.scrollTo(0, 0)
@@ -286,6 +301,7 @@ export default {
       this.addSpaceIsVisible = false
       this.privacyPickerIsVisible = false
       this.backgroundIsVisible = false
+      this.spaceFiltersIsVisible = false
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space })
@@ -383,6 +399,10 @@ export default {
     updateJournalSpaces () {
       const journalSpaces = this.spaces.filter(space => space.moonPhase)
       this.journalSpaces = journalSpaces
+    },
+    updateNonJournalSpaces () {
+      const nonJournalSpaces = this.spaces.filter(space => !space.moonPhase)
+      this.nonJournalSpaces = nonJournalSpaces
     },
     updateCachedSpacesUpdatedAt () {
       this.spaces.forEach(space => {
@@ -513,7 +533,7 @@ export default {
     &:active,
     &.active
       background-color var(--primary-background)
-  .toggle-journals
-    .moon-phase
-      margin 0
+  .toggle-filters
+    .badge
+      margin-right 0
 </style>

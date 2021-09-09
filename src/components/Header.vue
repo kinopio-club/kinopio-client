@@ -55,7 +55,9 @@ header(:style="visualViewportPosition")
             .badge.search.search-count-badge(v-if="searchResultsCount")
               img.icon.search(src="@/assets/search.svg")
               span {{searchResultsCount}}
-            span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
+            span.badge.info(v-if="totalFiltersActive")
+              img.icon(src="@/assets/filter.svg")
+              span {{totalFiltersActive}}
           Search(:visible="searchIsVisible")
         button(@click="showPreviousSearchCard" v-if="searchResultsCount")
           img.icon.left-arrow(src="@/assets/down-arrow.svg")
