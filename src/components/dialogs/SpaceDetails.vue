@@ -533,7 +533,4 @@ export default {
     &:active,
     &.active
       background-color var(--primary-background)
-  .toggle-filters
-    .badge
-      margin-right 0
 </style>
