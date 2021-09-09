@@ -137,7 +137,11 @@ export default {
     currentUser () { return this.$store.state.currentUser },
     favoriteSpacesEditedCount () {
       let favoriteSpaces = utils.clone(this.currentUser.favoriteSpaces)
-      favoriteSpaces = favoriteSpaces.filter(space => space.isEdited && space.userId !== this.currentUser.id)
+      favoriteSpaces = favoriteSpaces.filter(space => {
+        const isEditedByOtherUser = space.editedByUserId !== this.currentUser.id
+        const isEditedAndNotVisited = space.isEdited && space.userId !== this.currentUser.id
+        return isEditedByOtherUser && isEditedAndNotVisited
+      })
       return favoriteSpaces.length
     },
     isMobileOrTouch () {

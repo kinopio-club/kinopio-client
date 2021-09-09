@@ -6,10 +6,10 @@ dialog.narrow.favorites-filters(v-if="visible" :open="visible" @click.left.stop 
       span Spaces Filter
   section
     .segmented-buttons
-      button(@click="showAllSpaces" :class="{active: all}") All
-      button(@click="showJournalsOnly" :class="{active: journals}")
-        span Journals
-      button(@click="showSpacesOnly" :class="{active: spaces}") Spaces
+      button(@click="showAll" :class="{active: all}") All
+      button(@click="showCurrentUserSpacesOnly" :class="{active: current}")
+        User(:user="currentUser" :key="currentUser.id" :hideYouLabel="true" :isSmall="true")
+      button(@click="showOtherUserSpacesOnly" :class="{active: others}") Others
 
 </template>
 
@@ -17,34 +17,33 @@ dialog.narrow.favorites-filters(v-if="visible" :open="visible" @click.left.stop 
 
 export default {
   name: 'FavoritesFilters',
+  components: {
+    User: () => import('@/components/User.vue')
+  },
   props: {
     visible: Boolean,
     favoritesFilter: String
   },
-  data () {
-    return {
-      // moonPhase: {}
-    }
-  },
   computed: {
+    currentUser () { return this.$store.state.currentUser },
     all () {
       return Boolean(!this.favoritesFilter)
     },
-    journals () {
-      return this.favoritesFilter === 'journals'
+    current () {
+      return this.favoritesFilter === 'currentUser'
     },
-    spaces () {
-      return this.favoritesFilter === 'spaces'
+    others () {
+      return this.favoritesFilter === 'otherUsers'
     }
   },
   methods: {
-    showJournalsOnly () {
-      this.$emit('updateFavoritesFilter', 'journals')
+    showCurrentUserSpacesOnly () {
+      this.$emit('updateFavoritesFilter', 'currentUser')
     },
-    showSpacesOnly () {
-      this.$emit('updateFavoritesFilter', 'spaces')
+    showOtherUserSpacesOnly () {
+      this.$emit('updateFavoritesFilter', 'otherUsers')
     },
-    showAllSpaces () {
+    showAll () {
       this.$emit('updateFavoritesFilter', null)
     }
   }
@@ -52,4 +51,9 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+.favorites-filters
+  .user
+    margin 0
+    margin-top -2px
+    margin-bottom -1px
 </style>
