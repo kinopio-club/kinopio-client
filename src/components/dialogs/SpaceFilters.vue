@@ -1,0 +1,126 @@
+<template lang="pug">
+dialog.narrow.space-filters(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+  //- :style="{'max-height': dialogHeight + 'px'}"
+  section
+    p blah blah
+    p move moonphase into here
+    MoonPhase(:moonPhase="moonPhase.name")
+    //- .space-filters
+    //- .row
+    //-   .button-wrap
+    //-     label.show-users(:class="{active: filterShowUsers}" @click.left.prevent="toggleFilterShowUsers" @keydown.stop.enter="toggleFilterShowUsers")
+    //-       input(type="checkbox" v-model="filterShowUsers")
+    //-       User(:user="currentUser" :key="currentUser.id" :hideYouLabel="true" :isSmall="true")
+    //-   .button-wrap
+    //-     label(:class="{active: filterShowDateUpdated}" @click.left.prevent="toggleFilterShowDateUpdated" @keydown.stop.enter="toggleFilterShowDateUpdated")
+    //-       input(type="checkbox" v-model="filterShowDateUpdated")
+    //-       img.icon.time(src="@/assets/time.svg")
+    //-   .button-wrap
+    //-     label(:class="{active: filterUnchecked}" @click.left.prevent="toggleFilterUnchecked" @keydown.stop.enter="toggleFilterUnchecked")
+    //-       input(type="checkbox" v-model="filterUnchecked")
+    //-       span Todo
+    //-   .button-wrap
+    //-     button(:class="{active: moreFiltersVisible, 'has-badge': totalFiltersActive}" @click.left.prevent.stop="toggleMoreFiltersVisible")
+    //-       img.icon(src="@/assets/filter.svg")
+    //-       span.badge.info(v-if="totalFiltersActive")
+    //-         span {{totalFiltersActive}}
+    //-     MoreFilters(:visible="moreFiltersVisible")
+</template>
+
+<script>
+// import MoreFilters from '@/components/dialogs/MoreFilters.vue'
+// import frames from '@/data/frames.js'
+// import utils from '@/utils.js'
+import MoonPhase from '@/components/MoonPhase.vue'
+import moonphase from '@/moonphase.js'
+
+// import uniq from 'lodash-es/uniq'
+
+export default {
+  name: 'SpaceFilters',
+  components: {
+    MoonPhase
+  },
+  props: {
+    visible: Boolean
+  },
+  mounted () {
+    this.moonPhase = moonphase()
+  },
+
+  // created () {
+  //   this.$store.subscribe((mutation, state) => {
+  //     if (mutation.type === 'triggerMoreFiltersIsNotVisible') {
+  //       this.moreFiltersVisible = false
+  //     }
+  //   })
+  // },
+  data () {
+    return {
+      moonPhase: {}
+    }
+  },
+  computed: {
+    // frames () {
+    //   const cards = utils.clone(this.$store.state.currentSpace.cards)
+    //   let framesInUse = cards.map(card => card.frameId)
+    //   framesInUse = uniq(framesInUse.filter(frame => frame))
+    //   return framesInUse.map(frame => frames[frame])
+    // },
+    // totalFiltersActive () {
+    //   const currentUser = this.currentUser
+    //   let userFilters = 0
+    //   if (currentUser.filterShowUsers) {
+    //     userFilters += 1
+    //   }
+    //   if (currentUser.filterShowDateUpdated) {
+    //     userFilters += 1
+    //   }
+    //   if (currentUser.filterUnchecked) {
+    //     userFilters += 1
+    //   }
+    //   const tagNames = this.$store.state.filteredTagNames
+    //   const connections = this.$store.state.filteredConnectionTypeIds
+    //   const frames = this.$store.state.filteredFrameIds
+    //   return userFilters + tagNames.length + connections.length + frames.length
+    // },
+    // currentUser () { return this.$store.state.currentUser },
+    // filterShowUsers () { return this.currentUser.filterShowUsers },
+    // filterShowDateUpdated () { return this.currentUser.filterShowDateUpdated },
+    // filterUnchecked () { return this.currentUser.filterUnchecked }
+  },
+  methods: {
+    // toggleMoreFiltersVisible () {
+    //   this.moreFiltersVisible = !this.moreFiltersVisible
+    // },
+    // // Toggle filters
+    // toggleFilterShowUsers () {
+    //   const value = !this.filterShowUsers
+    //   this.$store.dispatch('currentUser/toggleFilterShowUsers', value)
+    // },
+    // toggleFilterShowDateUpdated () {
+    //   const value = !this.filterShowDateUpdated
+    //   this.$store.dispatch('currentUser/toggleFilterShowDateUpdated', value)
+    // },
+    // toggleFilterUnchecked () {
+    //   const value = !this.filterUnchecked
+    //   this.$store.dispatch('currentUser/toggleFilterUnchecked', value)
+    // }
+  }
+}
+</script>
+
+<style lang="stylus" scoped>
+// .space-filters
+//   .badge
+//     display inline-block
+//     vertical-align middle
+//     margin-right 0
+//   .has-badge
+//     padding-top 2px
+//     padding-bottom 1px
+//   @media(max-width 500px)
+//     dialog.more-filters
+//       left initial
+//       right 8px
+</style>
