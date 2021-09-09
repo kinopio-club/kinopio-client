@@ -118,7 +118,8 @@ export default {
     filtersIsActive () {
       const types = this.$store.state.filteredConnectionTypeIds
       const frames = this.$store.state.filteredFrameIds
-      return Boolean(types.length + frames.length)
+      const tags = this.$store.state.filteredTagNames
+      return Boolean(types.length + frames.length + tags.length)
     },
     isCardsFilteredByFrame () {
       const frameIds = this.$store.state.filteredFrameIds
