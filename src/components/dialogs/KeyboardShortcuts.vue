@@ -40,10 +40,6 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       p Subsequent&nbsp;
         span.badge.keyboard-shortcut Enter
         span adds siblings
-      button(@click.left.stop="toggleChildCardInfoIsVisible" :class="{ active: childCardInfoIsVisible }") More Info
-      div(v-if="childCardInfoIsVisible")
-        video(autoplay loop muted playsinline)
-          source(src="https://kinopio-updates.us-east-1.linodeobjects.com/keyboard-shortcuts2.mp4")
     article
       .row
         .badge.title
@@ -196,7 +192,6 @@ export default {
   data () {
     return {
       safariInfoIsVisible: false,
-      childCardInfoIsVisible: false,
       dialogHeight: null
     }
   },
@@ -217,9 +212,6 @@ export default {
   methods: {
     toggleSafariInfoIsVisible () {
       this.safariInfoIsVisible = !this.safariInfoIsVisible
-    },
-    toggleChildCardInfoIsVisible () {
-      this.childCardInfoIsVisible = !this.childCardInfoIsVisible
     },
     toggleShouldInvertZoomDirection () {
       const value = !this.shouldInvertZoomDirection
