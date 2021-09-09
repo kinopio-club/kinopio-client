@@ -33,7 +33,7 @@ span.space-list-wrap
           template(v-else-if="showCollaborator(space)")
             User(:user="user(space)" :isClickable="false" :key="user(space).id")
           //- NEW badge
-          span(v-if="space.isEdited")
+          span(v-if="isNew(space)")
             .badge.info.inline-badge.new-badge New
           //- today journal badge
           span.badge.info.inline-badge(v-if="isTodayJournal(space)" title="Today's journal")
@@ -113,6 +113,7 @@ export default {
     }
   },
   computed: {
+    currentUser () { return this.$store.state.currentUser },
     placeholder () {
       if (!this.parentIsSpaceDetails) { return }
       let placeholder = 'Search Spaces'
@@ -130,6 +131,14 @@ export default {
     }
   },
   methods: {
+    isNew (space) {
+      const isEditedByOtherUser = space.editedByUserId !== this.currentUser.id
+      if (isEditedByOtherUser) {
+        return space.isEdited
+      } else {
+        return false
+      }
+    },
     isTodayJournal (space) {
       if (space.moonPhase) {
         const createdAt = utils.journalSpaceDateFromName(space.name)
