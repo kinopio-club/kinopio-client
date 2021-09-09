@@ -10,7 +10,7 @@ dialog.favorites.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
           span People
           Loader(:visible="loading")
       //- Filter
-      .button-wrap
+      .button-wrap.hidden
         button(v-if="spacesIsVisible" @click.left.stop="toggleFavoritesFiltersIsVisible" :class="{ active: favoritesFiltersIsVisible || favoritesFilter }")
           img.icon(src="@/assets/filter.svg")
         FavoritesFilters(:visible="favoritesFiltersIsVisible" :favoritesFilter="favoritesFilter" @updateFavoritesFilter="updateFavoritesFilter")

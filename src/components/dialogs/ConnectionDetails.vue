@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.connection-details(v-if="visible" :open="visible" :style="styles" @click.left="closeColorPicker" ref="dialog")
+dialog.connection-details(v-if="visible" :open="visible" :style="styles" @click.left="closeColorPicker" ref="dialog")
   section(:style="{backgroundColor: typeColor}" ref="infoSection")
     .row
       .button-wrap
@@ -19,7 +19,8 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="styles" 
         img.icon(v-else src="@/assets/view-hidden.svg")
         span Label
       //- Filter
-      button(@click="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
+      label(@@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
+        input(type="checkbox" v-model="isFilteredInSpace")
         img.icon(src="@/assets/filter.svg")
 
     p.edit-message(v-if="!canEditConnection")
@@ -146,9 +147,14 @@ export default {
       }
     },
     shouldUseLastConnectionType () { return this.$store.state.currentUser.shouldUseLastConnectionType },
-    isFilteredInSpace () {
-      const types = this.$store.state.filteredConnectionTypeIds
-      return types.includes(this.currentConnectionType.id)
+    isFilteredInSpace: {
+      get () {
+        const types = this.$store.state.filteredConnectionTypeIds
+        return types.includes(this.currentConnectionType.id)
+      },
+      set () {
+        this.toggleFilteredInSpace()
+      }
     }
   },
   methods: {
