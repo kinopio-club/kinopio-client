@@ -286,7 +286,7 @@ label // used for checkbox buttons
     background var(--secondary-active-background)
   .badge
     display inline
-    vertical-align middle
+    vertical-align 0
   &.danger
     &:hover,
     &.hover,
