@@ -42,14 +42,15 @@ dialog.connection-details(v-if="visible" :open="visible" :style="styles" @click.
 
   section.results-actions(ref="resultsActions")
     .row
+      button(:disabled="!canEditConnection" @click.left="addConnectionType")
+        img.icon(src="@/assets/add.svg")
+        .badge.badge-in-button(:style="{backgroundColor: nextConnectionTypeColor}")
+        span Type
+
       label(:class="{active: shouldUseLastConnectionType, disabled: !canEditConnection}" @click.left.prevent="toggleShouldUseLastConnectionType" @keydown.stop.enter="toggleShouldUseLastConnectionType")
         input(type="checkbox" v-model="shouldUseLastConnectionType")
         .badge.badge-in-button(:style="{backgroundColor: typeColor}")
         span Use Last Type
-    button(:disabled="!canEditConnection" @click.left="addConnectionType")
-      img.icon(src="@/assets/add.svg")
-      .badge.badge-in-button(:style="{backgroundColor: nextConnectionTypeColor}")
-      span Type
 
   section.results-section(ref="resultsSection" :style="{'max-height': resultsSectionMaxHeight}")
     ResultsFilter(:items="connectionTypes" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredConnectionTypes")
