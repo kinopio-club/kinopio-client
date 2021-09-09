@@ -72,7 +72,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
               img.icon(src="@/assets/filter.svg")
           template(v-else)
             img.icon(src="@/assets/filter.svg")
-        SpaceFilters(:visible="spaceFiltersIsVisible")
+        SpaceFilters(:visible="spaceFiltersIsVisible" :currentSpaceFilter="currentSpaceFilter" @updateSpaceFilter="updateSpaceFilter")
 
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(:spaces="filteredSpaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" :parentIsSpaceDetails="true" @selectSpace="changeSpace")
@@ -150,8 +150,7 @@ export default {
       resultsSectionHeight: null,
       dialogHeight: null,
       backgroundTint: '',
-      filterShowJournalSpacesOnly: false,
-      filterShowSpacesOnly: false,
+      currentSpaceFilter: null,
       journalSpaces: [],
       nonJournalSpaces: [],
       spaceFiltersIsVisible: false
@@ -159,10 +158,10 @@ export default {
   },
   computed: {
     filteredSpaces () {
-      if (this.filterShowJournalSpacesOnly) {
+      if (this.currentSpaceFilter === 'journals') {
         this.updateJournalSpaces()
         return this.journalSpaces
-      } else if (this.filterShowSpacesOnly) {
+      } else if (this.currentSpaceFilter === 'spaces') {
         this.updateNonJournalSpaces()
         return this.nonJournalSpaces
       } else {
@@ -170,7 +169,7 @@ export default {
       }
     },
     spaceFiltersActive () {
-      if (this.filterShowJournalSpacesOnly || this.filterShowSpacesOnly) {
+      if (this.currentSpaceFilter) {
         return '1'
       } else {
         return null
@@ -266,22 +265,8 @@ export default {
       this.closeDialogs()
       this.spaceFiltersIsVisible = !isVisible
     },
-    toggleFilterShowJournalSpacesOnly () {
-      const isVisible = this.filterShowJournalSpacesOnly
-      this.closeDialogs()
-      this.filterShowSpacesOnly = false
-      this.filterShowJournalSpacesOnly = !isVisible
-    },
-    toggleFilterShowSpacesOnly () {
-      const isVisible = this.filterShowSpacesOnly
-      this.closeDialogs()
-      this.filterShowJournalSpacesOnly = false
-      this.filterShowSpacesOnly = !isVisible
-    },
-    toggleShouldShowAllSpaces () {
-      this.closeDialogs()
-      this.filterShowJournalSpacesOnly = false
-      this.filterShowSpacesOnly = false
+    updateSpaceFilter (value) {
+      this.currentSpaceFilter = value
     },
     addSpace () {
       window.scrollTo(0, 0)
