@@ -15,8 +15,8 @@
           span Todo
       .button-wrap
         button(:class="{active: moreFiltersVisible, 'has-badge': totalFiltersActive}" @click.left.prevent.stop="toggleMoreFiltersVisible")
+          img.icon(src="@/assets/filter.svg")
           span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
-          span …
         MoreFilters(:visible="moreFiltersVisible")
 </template>
 
@@ -102,6 +102,7 @@ export default {
   .badge
     display inline-block
     vertical-align middle
+    margin-right 0
   .show-users
     width 50px
   .user
