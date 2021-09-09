@@ -9,13 +9,18 @@ dialog.narrow.connection-details(v-if="visible" :open="visible" :style="styles" 
       input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeName" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport")
 
     .row
+      //- Remove
       button(:disabled="!canEditConnection" @click.left="removeConnection")
         img.icon(src="@/assets/remove.svg")
         span Remove
+      //- Label
       button(:disabled="!canEditConnection" :class="{active: labelIsVisible}" @click.left="toggleLabelIsVisible")
         img.icon(v-if="labelIsVisible" src="@/assets/view.svg")
         img.icon(v-else src="@/assets/view-hidden.svg")
         span Label
+      //- Filter
+      button(@click="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
+        img.icon(src="@/assets/filter.svg")
 
     p.edit-message(v-if="!canEditConnection")
       template(v-if="spacePrivacyIsOpen")
@@ -140,9 +145,22 @@ export default {
         return this.connectionTypes
       }
     },
-    shouldUseLastConnectionType () { return this.$store.state.currentUser.shouldUseLastConnectionType }
+    shouldUseLastConnectionType () { return this.$store.state.currentUser.shouldUseLastConnectionType },
+    isFilteredInSpace () {
+      const types = this.$store.state.filteredConnectionTypeIds
+      return types.includes(this.currentConnectionType.id)
+    }
   },
   methods: {
+    toggleFilteredInSpace () {
+      const filtered = this.$store.state.filteredConnectionTypeIds
+      const typeId = this.currentConnectionType.id
+      if (filtered.includes(typeId)) {
+        this.$store.commit('removeFromFilteredConnectionTypeId', typeId)
+      } else {
+        this.$store.commit('addToFilteredConnectionTypeId', typeId)
+      }
+    },
     toggleShouldUseLastConnectionType () {
       const value = !this.shouldUseLastConnectionType
       this.$store.dispatch('currentUser/shouldUseLastConnectionType', value)

@@ -3,12 +3,15 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
   section.edit-card(v-if="showEditCard")
     button(@click="showCardDetails(null)") Edit Card
   section(:style="{backgroundColor: color}")
-    .row
-      .button-wrap
-        button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-          .current-color(:style="{backgroundColor: color}")
-        ColorPicker(:currentColor="color" :visible="colorPickerIsVisible" @selectedColor="updateTagNameColor")
-      .tag-name {{name}}
+    .row.tag-title-row
+      .row
+        .button-wrap
+          button.change-color(:disabled="!canEditSpace" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
+            .current-color(:style="{backgroundColor: color}")
+          ColorPicker(:currentColor="color" :visible="colorPickerIsVisible" @selectedColor="updateTagNameColor")
+        .tag-name {{name}}
+      button(@click="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
+        img.icon(src="@/assets/filter.svg")
 
     //- no cards found
     template(v-if="!cards.length && !loading")
@@ -180,9 +183,22 @@ export default {
       }
     },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    currentUser () { return this.$store.state.currentUser }
+    currentUser () { return this.$store.state.currentUser },
+    isFilteredInSpace () {
+      const tags = this.$store.state.filteredTagNames
+      return tags.includes(this.currentTag.name)
+    }
   },
   methods: {
+    toggleFilteredInSpace () {
+      const filtered = this.$store.state.filteredTagNames
+      const tagName = this.currentTag.name
+      if (filtered.includes(tagName)) {
+        this.$store.commit('removeFromFilteredTagNames', tagName)
+      } else {
+        this.$store.commit('addToFilteredTagNames', tagName)
+      }
+    },
     userById (userId) {
       return this.$store.getters['currentSpace/userById'](userId)
     },
@@ -453,4 +469,9 @@ export default {
     width 48px
     vertical-align middle
     border-radius 3px
+  .tag-title-row
+    justify-content space-between
+    align-items flex-start
+    .row
+      margin 0
 </style>

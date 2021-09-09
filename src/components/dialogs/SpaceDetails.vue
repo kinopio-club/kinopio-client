@@ -66,12 +66,8 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
       //- Filters
       .button-wrap.toggle-filters(v-if="spacesHasJournalSpace")
-        button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible }")
-          template(v-if="spaceFiltersActive")
-            span.badge.info
-              img.icon(src="@/assets/filter.svg")
-          template(v-else)
-            img.icon(src="@/assets/filter.svg")
+        button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible || spaceFiltersActive }")
+          img.icon(src="@/assets/filter.svg")
         SpaceFilters(:visible="spaceFiltersIsVisible" :currentSpaceFilter="currentSpaceFilter" @updateSpaceFilter="updateSpaceFilter")
 
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
