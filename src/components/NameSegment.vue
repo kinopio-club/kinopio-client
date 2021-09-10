@@ -104,7 +104,7 @@ export default {
         text-decoration none
     strong
       font-weight normal
-      background-color var(--info-background)
+      background-color var(--primary-background)
       border-radius 3px
     pre
       font-weight normal
