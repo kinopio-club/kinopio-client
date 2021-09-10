@@ -66,7 +66,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
       //- Filters
       .button-wrap.toggle-filters(v-if="spacesHasJournalSpace")
-        button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible || spaceFiltersActive }")
+        button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible || dialogSpaceFilters }")
           img.icon(src="@/assets/filter.svg")
         SpaceFilters(:visible="spaceFiltersIsVisible")
 
@@ -162,13 +162,6 @@ export default {
         return this.nonJournalSpaces
       } else {
         return this.spaces
-      }
-    },
-    spaceFiltersActive () {
-      if (this.dialogSpaceFilters) {
-        return '1'
-      } else {
-        return null
       }
     },
     currentSpace () { return this.$store.state.currentSpace },
