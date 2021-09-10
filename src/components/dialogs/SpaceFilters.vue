@@ -46,18 +46,17 @@ export default {
   },
   methods: {
     showJournalsOnly () {
-      this.updateSpaceFilter('journals')
+      this.updateFilter('journals')
     },
     showSpacesOnly () {
-      this.updateSpaceFilter('spaces')
+      this.updateFilter('spaces')
     },
     showAllSpaces () {
-      this.updateSpaceFilter(null)
+      this.updateFilter(null)
     },
-    updateSpaceFilter (value) {
+    updateFilter (value) {
       this.$store.dispatch('currentUser/update', { dialogSpaceFilters: value })
     }
-
   }
 }
 </script>

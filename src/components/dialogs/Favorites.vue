@@ -11,9 +11,9 @@ dialog.favorites.narrow(v-if="visible" :open="visible" @click.left.stop="closeDi
           Loader(:visible="loading")
       //- Filter
       .button-wrap
-        button(v-if="spacesIsVisible" @click.left.stop="toggleFavoritesFiltersIsVisible" :class="{ active: favoritesFiltersIsVisible || favoritesFilter }")
+        button(v-if="spacesIsVisible" @click.left.stop="toggleFavoritesFiltersIsVisible" :class="{ active: favoritesFiltersIsVisible || dialogFavoritesFilters }")
           img.icon(src="@/assets/filter.svg")
-        FavoritesFilters(:visible="favoritesFiltersIsVisible" :favoritesFilter="favoritesFilter" @updateFavoritesFilter="updateFavoritesFilter")
+        FavoritesFilters(:visible="favoritesFiltersIsVisible")
 
     template(v-if="isEmpty")
       p Spaces and people you {{' '}}
@@ -61,18 +61,18 @@ export default {
       userDetailsIsVisible: false,
       selectedUser: {},
       userDetailsPosition: {},
-      favoritesFilter: null, // null, 'currentUser', 'otherUsers'
       favoritesFiltersIsVisible: false
     }
   },
   computed: {
+    dialogFavoritesFilters () { return this.$store.state.currentUser.dialogFavoritesFilters },
     currentUser () { return this.$store.state.currentUser },
     favoriteUsers () { return this.$store.state.currentUser.favoriteUsers },
     favoriteSpaces () {
       let spaces = this.$store.state.currentUser.favoriteSpaces
-      if (this.favoritesFilter === 'currentUser') {
+      if (this.dialogFavoritesFilters === 'currentUser') {
         spaces = spaces.filter(space => space.userId === this.currentUser.id)
-      } else if (this.favoritesFilter === 'otherUsers') {
+      } else if (this.dialogFavoritesFilters === 'otherUsers') {
         spaces = spaces.filter(space => space.userId !== this.currentUser.id)
       }
       return spaces
@@ -96,9 +96,6 @@ export default {
     }
   },
   methods: {
-    updateFavoritesFilter (value) {
-      this.favoritesFilter = value
-    },
     toggleFavoritesFiltersIsVisible () {
       const isVisible = this.favoritesFiltersIsVisible
       this.closeDialogs()

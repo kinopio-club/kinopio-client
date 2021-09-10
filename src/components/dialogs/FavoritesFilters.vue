@@ -2,6 +2,7 @@
 dialog.narrow.favorites-filters(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
     p
+      //- Favorite Spaces Filter
       img.icon.heart(src="@/assets/heart.svg")
       span Spaces Filter
   section
@@ -21,30 +22,33 @@ export default {
     User: () => import('@/components/User.vue')
   },
   props: {
-    visible: Boolean,
-    favoritesFilter: String
+    visible: Boolean
   },
   computed: {
+    dialogFavoritesFilters () { return this.$store.state.currentUser.dialogFavoritesFilters },
     currentUser () { return this.$store.state.currentUser },
     all () {
-      return Boolean(!this.favoritesFilter)
+      return Boolean(!this.dialogFavoritesFilters)
     },
     current () {
-      return this.favoritesFilter === 'currentUser'
+      return this.dialogFavoritesFilters === 'currentUser'
     },
     others () {
-      return this.favoritesFilter === 'otherUsers'
+      return this.dialogFavoritesFilters === 'otherUsers'
     }
   },
   methods: {
     showCurrentUserSpacesOnly () {
-      this.$emit('updateFavoritesFilter', 'currentUser')
+      this.updateFilter('currentUser')
     },
     showOtherUserSpacesOnly () {
-      this.$emit('updateFavoritesFilter', 'otherUsers')
+      this.updateFilter('otherUsers')
     },
     showAll () {
-      this.$emit('updateFavoritesFilter', null)
+      this.updateFilter(null)
+    },
+    updateFilter (value) {
+      this.$store.dispatch('currentUser/update', { dialogFavoritesFilters: value })
     }
   }
 }
