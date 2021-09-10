@@ -176,10 +176,8 @@ export default {
 
 <style lang="stylus">
 .favorites
+  @media(max-width 370px)
+    left -40px
   .user-details
     left 50%
-  dialog.favorites-filters
-    top calc(100% - 8px)
-    bottom initial
-
 </style>

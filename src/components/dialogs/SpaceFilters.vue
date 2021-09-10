@@ -58,5 +58,12 @@ export default {
 }
 </script>
 
-<style lang="stylus" scoped>
+<style lang="stylus">
+.space-filters
+  @media(max-width 490px)
+    left -40px
+  @media(max-width 430px)
+    left -70px
+  @media(max-width 370px)
+    left -110px
 </style>

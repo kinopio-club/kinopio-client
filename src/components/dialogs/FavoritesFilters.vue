@@ -52,6 +52,12 @@ export default {
 
 <style lang="stylus" scoped>
 .favorites-filters
+  top calc(100% - 8px)
+  bottom initial
+  @media(max-width 490px)
+    left -60px
+  @media(max-width 430px)
+    left -110px
   .user
     margin 0
     margin-top -2px
