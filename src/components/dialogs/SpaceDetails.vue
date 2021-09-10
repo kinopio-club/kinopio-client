@@ -68,7 +68,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
       .button-wrap.toggle-filters(v-if="spacesHasJournalSpace")
         button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible || spaceFiltersActive }")
           img.icon(src="@/assets/filter.svg")
-        SpaceFilters(:visible="spaceFiltersIsVisible" :currentSpaceFilter="currentSpaceFilter" @updateSpaceFilter="updateSpaceFilter")
+        SpaceFilters(:visible="spaceFiltersIsVisible")
 
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(:spaces="filteredSpaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" :parentIsSpaceDetails="true" @selectSpace="changeSpace")
@@ -146,18 +146,18 @@ export default {
       resultsSectionHeight: null,
       dialogHeight: null,
       backgroundTint: '',
-      currentSpaceFilter: null,
       journalSpaces: [],
       nonJournalSpaces: [],
       spaceFiltersIsVisible: false
     }
   },
   computed: {
+    dialogSpaceFilters () { return this.$store.state.currentUser.dialogSpaceFilters },
     filteredSpaces () {
-      if (this.currentSpaceFilter === 'journals') {
+      if (this.dialogSpaceFilters === 'journals') {
         this.updateJournalSpaces()
         return this.journalSpaces
-      } else if (this.currentSpaceFilter === 'spaces') {
+      } else if (this.dialogSpaceFilters === 'spaces') {
         this.updateNonJournalSpaces()
         return this.nonJournalSpaces
       } else {
@@ -165,7 +165,7 @@ export default {
       }
     },
     spaceFiltersActive () {
-      if (this.currentSpaceFilter) {
+      if (this.dialogSpaceFilters) {
         return '1'
       } else {
         return null
@@ -260,9 +260,6 @@ export default {
       const isVisible = this.spaceFiltersIsVisible
       this.closeDialogs()
       this.spaceFiltersIsVisible = !isVisible
-    },
-    updateSpaceFilter (value) {
-      this.currentSpaceFilter = value
     },
     addSpace () {
       window.scrollTo(0, 0)

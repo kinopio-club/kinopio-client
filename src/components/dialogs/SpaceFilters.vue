@@ -22,8 +22,7 @@ export default {
     MoonPhase
   },
   props: {
-    visible: Boolean,
-    currentSpaceFilter: String
+    visible: Boolean
   },
   mounted () {
     this.moonPhase = moonphase()
@@ -34,26 +33,31 @@ export default {
     }
   },
   computed: {
+    dialogSpaceFilters () { return this.$store.state.currentUser.dialogSpaceFilters },
     all () {
-      return Boolean(!this.currentSpaceFilter)
+      return Boolean(!this.dialogSpaceFilters)
     },
     journals () {
-      return this.currentSpaceFilter === 'journals'
+      return this.dialogSpaceFilters === 'journals'
     },
     spaces () {
-      return this.currentSpaceFilter === 'spaces'
+      return this.dialogSpaceFilters === 'spaces'
     }
   },
   methods: {
     showJournalsOnly () {
-      this.$emit('updateSpaceFilter', 'journals')
+      this.updateSpaceFilter('journals')
     },
     showSpacesOnly () {
-      this.$emit('updateSpaceFilter', 'spaces')
+      this.updateSpaceFilter('spaces')
     },
     showAllSpaces () {
-      this.$emit('updateSpaceFilter', null)
+      this.updateSpaceFilter(null)
+    },
+    updateSpaceFilter (value) {
+      this.$store.dispatch('currentUser/update', { dialogSpaceFilters: value })
     }
+
   }
 }
 </script>
