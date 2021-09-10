@@ -1299,6 +1299,9 @@ export default {
       // https://regexr.com/5jr6h
       // matches `text`
       codePattern: /(`)(.*?)\1/gmi
+
+      // headerPattern
+      // subheaderPattern
     }
   },
   markdownSegments (name) {
