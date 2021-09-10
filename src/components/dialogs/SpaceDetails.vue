@@ -66,9 +66,9 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
       //- Filters
       .button-wrap.toggle-filters(v-if="spacesHasJournalSpace")
-        button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible || spaceFiltersActive }")
+        button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible || dialogSpaceFilters }")
           img.icon(src="@/assets/filter.svg")
-        SpaceFilters(:visible="spaceFiltersIsVisible" :currentSpaceFilter="currentSpaceFilter" @updateSpaceFilter="updateSpaceFilter")
+        SpaceFilters(:visible="spaceFiltersIsVisible")
 
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(:spaces="filteredSpaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" :parentIsSpaceDetails="true" @selectSpace="changeSpace")
@@ -146,29 +146,22 @@ export default {
       resultsSectionHeight: null,
       dialogHeight: null,
       backgroundTint: '',
-      currentSpaceFilter: null,
       journalSpaces: [],
       nonJournalSpaces: [],
       spaceFiltersIsVisible: false
     }
   },
   computed: {
+    dialogSpaceFilters () { return this.$store.state.currentUser.dialogSpaceFilters },
     filteredSpaces () {
-      if (this.currentSpaceFilter === 'journals') {
+      if (this.dialogSpaceFilters === 'journals') {
         this.updateJournalSpaces()
         return this.journalSpaces
-      } else if (this.currentSpaceFilter === 'spaces') {
+      } else if (this.dialogSpaceFilters === 'spaces') {
         this.updateNonJournalSpaces()
         return this.nonJournalSpaces
       } else {
         return this.spaces
-      }
-    },
-    spaceFiltersActive () {
-      if (this.currentSpaceFilter) {
-        return '1'
-      } else {
-        return null
       }
     },
     currentSpace () { return this.$store.state.currentSpace },
@@ -260,9 +253,6 @@ export default {
       const isVisible = this.spaceFiltersIsVisible
       this.closeDialogs()
       this.spaceFiltersIsVisible = !isVisible
-    },
-    updateSpaceFilter (value) {
-      this.currentSpaceFilter = value
     },
     addSpace () {
       window.scrollTo(0, 0)

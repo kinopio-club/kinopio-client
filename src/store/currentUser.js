@@ -34,7 +34,9 @@ export default {
     shouldShowCardCollaborationInfo: false,
     shouldInvertZoomDirection: false,
     shouldUseLastConnectionType: false,
-    shouldShowNewUserNotification: true
+    shouldShowNewUserNotification: true,
+    dialogFavoritesFilters: null, // null, 'currentUser', 'otherUsers'
+    dialogSpaceFilters: null // null, journals, spaces
   },
   mutations: {
     color: (state, value) => {
@@ -214,6 +216,14 @@ export default {
     shouldShowNewUserNotification: (state, value) => {
       state.shouldShowNewUserNotification = value
       cache.updateUser('shouldShowNewUserNotification', value)
+    },
+    dialogFavoritesFilters: (state, value) => {
+      state.dialogFavoritesFilters = value
+      cache.updateUser('dialogFavoritesFilters', value)
+    },
+    dialogSpaceFilters: (state, value) => {
+      state.dialogSpaceFilters = value
+      cache.updateUser('dialogSpaceFilters', value)
     }
   },
   actions: {
