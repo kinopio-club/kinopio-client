@@ -199,8 +199,20 @@ export default {
 
 @font-face
   font-family 'OsakaMono-Kinopio'
-  src url("assets/OsakaMono-Kinopio.woff2") format("woff2")
+  src url("assets/fonts/OsakaMono-Kinopio.woff2") format("woff2")
   font-weight normal
+  font-style normal
+
+@font-face
+  font-family 'Recoleta'
+  src url("assets/fonts/Recoleta-Regular.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+
+@font-face
+  font-family 'Recoleta'
+  src url("assets/fonts/Recoleta-Bold.woff2") format("woff2")
+  font-weight bold
   font-style normal
 
 *

@@ -9,6 +9,12 @@ span.name-segment
           a(:href="escapedUrl(markdown.result[2])") {{markdown.result[1]}}
         template(v-else-if="markdown.type === 'bold'")
           strong {{markdown.content}}
+        template(v-else-if="markdown.type === 'h1'")
+          h1 {{markdown.content}}
+        template(v-else-if="markdown.type === 'h2'")
+          h2 {{markdown.content}}
+        template(v-else-if="markdown.type === 'h3'")
+          h3 {{markdown.content}}
         template(v-else-if="markdown.type === 'emphasis'")
           em {{markdown.content}}
         template(v-else-if="markdown.type === 'strikethrough'")
@@ -118,6 +124,24 @@ export default {
       background-color var(--secondary-active-background)
       border-radius 3px
       margin-right 0
+    h1
+      font-family recoleta
+      font-size 22px
+      font-weight bold
+      margin 0
+      display inline-block
+    h2
+      font-family recoleta
+      font-weight normal
+      font-size 20px
+      margin 0
+      display inline-block
+    h3
+      font-family recoleta
+      font-weight normal
+      font-size 16px
+      margin 0
+      display inline-block
 
   .link-badge-url
     color var(--primary)

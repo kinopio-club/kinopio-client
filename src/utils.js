@@ -1284,6 +1284,11 @@ export default {
       // https://regexr.com/5jmeu
       // matches **text**
       boldPattern: /(\*\*)(.*?)\1/gmi,
+      // https://regexr.com/65i1l
+      // matches # text
+      h1Pattern: /^# ()(.+$)/gmi,
+      h2Pattern: /^## ()(.+$)/gmi,
+      h3Pattern: /^### ()(.+$)/gmi,
       // https://regexr.com/5jmf4
       // matches *text*
       emphasisPattern1: /(\*)(.*?)\1/gmi,
@@ -1317,6 +1322,15 @@ export default {
         }, {
           type: 'bold',
           result: markdown.boldPattern.exec(text)
+        }, {
+          type: 'h1',
+          result: markdown.h1Pattern.exec(text)
+        }, {
+          type: 'h2',
+          result: markdown.h2Pattern.exec(text)
+        }, {
+          type: 'h3',
+          result: markdown.h3Pattern.exec(text)
         }, {
           type: 'emphasis',
           result: markdown.emphasisPattern1.exec(text)
