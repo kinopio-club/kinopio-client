@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @click.left.stop="closeDialogs")
+dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @click.left.stop="closeDialogs" :class="{narrow: !visibleFromTagList}")
   section.edit-card(v-if="showEditCard")
     button(@click="showCardDetails(null)") Edit Card
   section(:style="{backgroundColor: color}")
@@ -11,7 +11,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
           ColorPicker(:currentColor="color" :visible="colorPickerIsVisible" @selectedColor="updateTagNameColor")
         .tag-name {{name}}
       //- Filter
-      label(@@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
+      label.toggle-filter(@@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
         input(type="checkbox" v-model="isFilteredInSpace")
         img.icon(src="@/assets/filter.svg")
 
@@ -481,4 +481,6 @@ export default {
     align-items flex-start
     .row
       margin 0
+  .toggle-filter
+    min-width 45px
 </style>
