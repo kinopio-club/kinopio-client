@@ -29,6 +29,10 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
           span Markdown
       div(v-if="markdownInfoIsVisible")
         p
+          span.badge.keyboard-shortcut # heading 1
+        p
+          span.badge.keyboard-shortcut ## heading 2
+        p
           span.badge.keyboard-shortcut _italic_ or *italic*
         p
           span.badge.keyboard-shortcut **bold**
