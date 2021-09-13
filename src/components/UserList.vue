@@ -61,6 +61,7 @@ export default {
     },
     userIsSelected (user) {
       if (!this.isClickable) { return }
+      if (!this.selectedUser) { return }
       return this.selectedUser.id === user.id
     },
     removeUser (user) {

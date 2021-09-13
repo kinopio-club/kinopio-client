@@ -36,7 +36,8 @@ export default {
     shouldUseLastConnectionType: false,
     shouldShowNewUserNotification: true,
     dialogFavoritesFilters: null, // null, 'currentUser', 'otherUsers'
-    dialogSpaceFilters: null // null, journals, spaces
+    dialogSpaceFilters: null, // null, journals, spaces
+    dialogSpaceFilterByUser: {}
   },
   mutations: {
     color: (state, value) => {
@@ -224,6 +225,10 @@ export default {
     dialogSpaceFilters: (state, value) => {
       state.dialogSpaceFilters = value
       cache.updateUser('dialogSpaceFilters', value)
+    },
+    dialogSpaceFilterByUser: (state, value) => {
+      state.dialogSpaceFilterByUser = value
+      cache.updateUser('dialogSpaceFilterByUser', value)
     }
   },
   actions: {

@@ -66,9 +66,9 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
         Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
       //- Filters
       .button-wrap.toggle-filters(v-if="spacesHasJournalSpace")
-        button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible || dialogSpaceFilters }")
+        button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible || spaceFiltersIsActive }")
           img.icon(src="@/assets/filter.svg")
-        SpaceFilters(:visible="spaceFiltersIsVisible")
+        SpaceFilters(:visible="spaceFiltersIsVisible" :spaces="spaces")
 
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(:spaces="filteredSpaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" :parentIsSpaceDetails="true" @selectSpace="changeSpace")
@@ -153,16 +153,27 @@ export default {
   },
   computed: {
     dialogSpaceFilters () { return this.$store.state.currentUser.dialogSpaceFilters },
+    dialogSpaceFilterByUser () { return this.$store.state.currentUser.dialogSpaceFilterByUser },
+    spaceFiltersIsActive () {
+      return Boolean(this.dialogSpaceFilters || utils.objectHasKeys(this.dialogSpaceFilterByUser))
+    },
     filteredSpaces () {
+      let spaces
+      // filter by space type
       if (this.dialogSpaceFilters === 'journals') {
         this.updateJournalSpaces()
-        return this.journalSpaces
+        spaces = this.journalSpaces
       } else if (this.dialogSpaceFilters === 'spaces') {
         this.updateNonJournalSpaces()
-        return this.nonJournalSpaces
+        spaces = this.nonJournalSpaces
       } else {
-        return this.spaces
+        spaces = this.spaces
       }
+      // filter by user
+      if (utils.objectHasKeys(this.dialogSpaceFilterByUser)) {
+        spaces = spaces.filter(space => space.userId === this.dialogSpaceFilterByUser.id)
+      }
+      return spaces
     },
     currentSpace () { return this.$store.state.currentSpace },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
