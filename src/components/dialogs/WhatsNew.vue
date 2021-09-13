@@ -90,8 +90,7 @@ export default {
     // },
     media (description) {
       if (!description) { return }
-      const imageTypes = ['jpg', 'png', 'gif']
-      const isImage = imageTypes.includes(description.slice(-3))
+      const isImage = utils.urlIsImage(description)
       if (isImage) {
         return `<img src="${description}"/>`
       } else {
