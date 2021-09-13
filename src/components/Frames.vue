@@ -51,8 +51,10 @@ export default {
       width 32px
     .flower
       width 20px
-      top -10px
+      height 21px
+      top -17px
       right 22px
+      z-index -1
 
   .magical-helper
     .cat
