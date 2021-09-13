@@ -17,6 +17,11 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
           span What's New
           img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
         WhatsNew(:visible="whatsNewIsVisible" :newStuff="newStuff")
+    .row
+      a(href="https://kinopio.club/pop-up-shop-u9XxpuIzz2_LvQUAayl65")
+        button
+          img.icon(src="@/assets/sticker.svg")
+          span Pop Up Shop →
   section
     .row
       .button-wrap
