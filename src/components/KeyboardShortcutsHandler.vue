@@ -565,6 +565,11 @@ export default {
 
     pasteCards () {
       const cards = this.$store.state.copiedCards
+      const isCardsCreatedIsOverLimit = this.$store.getters['currentUser/cardsCreatedWillBeOverLimit'](cards.length)
+      if (isCardsCreatedIsOverLimit) {
+        this.$store.commit('notifyCardsCreatedIsOverLimit', true)
+        return
+      }
       if (!cards.length) { return }
       this.$store.commit('clearMultipleSelected')
       this.$store.commit('multipleSelectedActionsIsVisible', false)
