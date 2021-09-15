@@ -484,4 +484,20 @@ export default {
         position absolute
         top 6px
         left 6px
+  .background-tint
+    width 22px
+    height 22px
+    top 1px
+    left 1px
+    position absolute
+    pointer-events none
+  .background-button
+    height 24px
+    width 24px
+    background-size cover
+    &:hover,
+    &:active,
+    &.active
+      background-color var(--primary-background)
+      background-size cover
 </style>

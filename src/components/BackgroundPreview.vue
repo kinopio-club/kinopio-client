@@ -1,8 +1,14 @@
 <template lang="pug">
-span.background-preview
-  template(v-if="isButton")
-    .tint(:style="backgroundTintStyles")
-    button(:style="backgroundStyles" :class="{ active: buttonIsActive }")
+.background-preview
+  //- button
+  .preview-button(v-if="isButton")
+    .background-tint(:style="backgroundTintStyles")
+    button.background-button(:style="backgroundStyles" :class="{ active: buttonIsActive }")
+
+  //- thumbnail
+  .preview-wrap(v-else)
+    .background-tint(:style="backgroundTintStyles")
+    .background-image(:style="backgroundStyles")
 </template>
 
 <script>
@@ -75,21 +81,22 @@ export default {
 
 <style lang="stylus">
 .background-preview
-  .tint
-    width 22px
-    height 22px
-    top 1px
-    left 1px
-    position absolute
-    pointer-events none
-  button
+  display inline-block
+  .preview-wrap
     height 24px
     width 24px
-    background-size cover
-    &:hover,
-    &:active,
-    &.active
-      background-color var(--primary-background)
+    position relative
+    border-radius 3px
+    overflow hidden
+    display inline-block
+    .background-tint
+      height 100%
+      width 100%
+      top 0
+      left 0
+    .background-image
+      height 100%
+      width 100%
       background-size cover
 
 </style>
