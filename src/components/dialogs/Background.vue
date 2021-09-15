@@ -198,7 +198,6 @@ export default {
     },
     removeBackground () {
       this.updateSpaceBackground('')
-      this.$store.commit('triggerUpdateBackgroundTint')
       this.closeDialogs()
     },
     updateSpaceBackground (url) {
@@ -215,7 +214,6 @@ export default {
     updateBackgroundTint (value) {
       this.backgroundTint = value
       this.$store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
-      this.$store.commit('triggerUpdateBackgroundTint')
       this.updatePageSizes()
       this.$emit('updateSpaces')
     },

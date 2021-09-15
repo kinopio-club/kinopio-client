@@ -4,7 +4,6 @@
   .preview-button(v-if="isButton")
     .background-tint(:style="backgroundTintStyles")
     button.background-button(:style="backgroundStyles" :class="{ active: buttonIsActive }")
-
   //- thumbnail
   .preview-wrap(v-else)
     .background-tint(:style="backgroundTintStyles")
@@ -22,26 +21,12 @@ export default {
     buttonIsActive: Boolean,
     space: Object
   },
-  // data () {
-  //   return {
-  //     backgroundTint: ''
-  //   }
-  // },
-  // created () {
-  //   this.$store.subscribe((mutation, state) => {
-  //     if (mutation.type === 'triggerUpdateBackgroundTint') {
-  //       this.updateBackgroundTint()
-  //     }
-  //   })
-  // },
-
   computed: {
     backgroundTint () { return this.space.backgroundTint },
     backgroundTintStyles () {
       if (this.backgroundTint) {
         return {
-          background: this.backgroundTint,
-          mixBlendMode: 'multiply'
+          background: this.backgroundTint
         }
       } else {
         return {}
@@ -65,16 +50,6 @@ export default {
         backgroundImage: `url(${background})`
       }
     }
-
-  },
-  methods: {
-    // toggleBackground () {
-    //   this.$emit('toggleBackground')
-    // }
-    // updateBackgroundTint () {
-    //   let color = this.currentSpace.backgroundTint
-    //   this.backgroundTint = color
-    // }
   }
 }
 </script>
@@ -82,6 +57,8 @@ export default {
 <style lang="stylus">
 .background-preview
   display inline-block
+  .background-tint
+    mix-blend-mode multiply
   .preview-wrap
     height 24px
     width 24px
@@ -96,6 +73,7 @@ export default {
       position absolute
       top 0
       left 0
+      mix-blend-mode multiply
     .background-image
       height 100%
       width 100%
@@ -103,4 +81,5 @@ export default {
       position absolute
       top 0
       left 0
+      mix-blend-mode multiply
 </style>

@@ -360,7 +360,6 @@ export default new Vuex.Store({
     triggerUnloadPage: () => {},
     triggerShowNextSearchCard: () => {},
     triggerShowPreviousSearchCard: () => {},
-    triggerUpdateBackgroundTint: () => {},
     triggerMoreFiltersIsNotVisible: () => {},
     triggerShowConnectionDetails: (state, options) => {},
 
