@@ -320,6 +320,7 @@ export default {
   .hidden
     display none
   .read-only-url
+    margin-top 0
     margin-bottom 10px
     word-break break-all
 
