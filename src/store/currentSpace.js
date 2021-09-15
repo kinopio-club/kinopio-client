@@ -385,6 +385,8 @@ export default {
       const shouldShow = context.rootState.currentUser.shouldShowNewUserNotification
       if (!currentUserIsSignedIn && shouldShow) {
         context.commit('notifyNewUser', true, { root: true })
+      } else {
+        context.commit('notifyNewUser', false, { root: true })
       }
     },
 
@@ -1455,7 +1457,6 @@ export default {
         element.style.backgroundImage = ''
       }
       context.dispatch('updateBackgroundZoom')
-      context.commit('triggerUpdateBackgroundTint', null, { root: true })
     },
     updateBackgroundZoom: async (context) => {
       const element = document.getElementById('app')

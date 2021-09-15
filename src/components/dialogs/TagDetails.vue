@@ -34,7 +34,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
 
         //- space
         li.space-name(v-if="group.spaceId" :data-space-id="group.spaceId" @click="changeSpace(group.spaceId)" :class="{ active: spaceIsCurrentSpace(group.spaceId) }")
-          .background(v-if="group.background" :style="{ backgroundImage: `url(${group.background})` }")
+          BackgroundPreview(:space="group.space")
           span.badge.space-badge
             span {{group.spaceName}}
 
@@ -64,6 +64,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import User from '@/components/User.vue'
+import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import Loader from '@/components/Loader.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
@@ -78,6 +79,7 @@ export default {
   components: {
     ColorPicker,
     User,
+    BackgroundPreview,
     Loader,
     ResultsFilter
   },
@@ -463,15 +465,8 @@ export default {
   .user
     vertical-align middle
     margin-right 3px
-  .background
-    border-radius 3px
-    display inline-grid
-    height 24px
-    width 24px
-    vertical-align middle
+  .background-preview
     margin-right 3px
-    background-repeat no-repeat
-    background-size cover
   .card-image
     width 48px
     vertical-align middle

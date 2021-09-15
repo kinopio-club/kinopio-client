@@ -4,8 +4,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
     template(v-if="isSpaceMember")
       .row.space-meta-row
         .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
-          .background-tint(:style="backgroundTintStyles")
-          button.background-button(:style="backgroundStyles" :class="{ active: backgroundIsVisible }")
+          BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
           //- Background Upload Progress
           .uploading-container-footer(v-if="pendingUpload")
             .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
@@ -25,8 +24,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
     template(v-if="!isSpaceMember")
       .row.space-meta-row.not-space-member
         .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
-          .background-tint(:style="backgroundTintStyles")
-          button.background-button(:style="backgroundStyles" :class="{ active: backgroundIsVisible }")
+          BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
           Background(:visible="backgroundIsVisible")
         p {{spaceName}}
       .row(v-if="shouldShowInExplore")
@@ -68,7 +66,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
       .button-wrap.toggle-filters(v-if="spacesHasJournalSpace")
         button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible || spaceFiltersIsActive }")
           img.icon(src="@/assets/filter.svg")
-        SpaceFilters(:visible="spaceFiltersIsVisible" :spaces="spaces")
+        SpaceFilters(:visible="spaceFiltersIsVisible" :spaces="filteredSpaces")
 
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(:spaces="filteredSpaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" :parentIsSpaceDetails="true" @selectSpace="changeSpace")
@@ -80,6 +78,7 @@ import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
 import AddSpace from '@/components/dialogs/AddSpace.vue'
 import Background from '@/components/dialogs/Background.vue'
+import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import SpaceFilters from '@/components/dialogs/SpaceFilters.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
@@ -87,7 +86,6 @@ import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
 import templates from '@/data/templates.js'
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
-import backgroundImages from '@/data/backgroundImages.json'
 
 import debounce from 'lodash-es/debounce'
 
@@ -106,7 +104,8 @@ export default {
     SpaceList,
     PrivacyButton,
     ShowInExploreButton,
-    Loader
+    Loader,
+    BackgroundPreview
   },
   props: {
     visible: Boolean
@@ -126,9 +125,6 @@ export default {
       if (mutation.type === 'updatePageSizes') {
         this.updateHeights()
       }
-      if (mutation.type === 'triggerUpdateBackgroundTint') {
-        this.updateBackgroundTint()
-      }
     })
   },
   data () {
@@ -145,7 +141,6 @@ export default {
       remoteSpaces: [],
       resultsSectionHeight: null,
       dialogHeight: null,
-      backgroundTint: '',
       journalSpaces: [],
       nonJournalSpaces: [],
       spaceFiltersIsVisible: false
@@ -207,34 +202,6 @@ export default {
       const id = this.$store.state.currentSpace.id
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(id)
-    },
-    backgroundStyles () {
-      const defaultBackgroundThumbnail = 'https://kinopio-backgrounds.us-east-1.linodeobjects.com/background-thumbnail.svg'
-      let background = this.$store.state.currentSpace.background
-      const backgroundImage = backgroundImages.find(image => {
-        const isImage = image.url === background
-        const hasThumbnailUrl = image.thumbnailUrl
-        return isImage && hasThumbnailUrl
-      })
-      if (backgroundImage) {
-        background = backgroundImage.thumbnailUrl || background
-      }
-      if (!utils.urlIsImage(background)) {
-        background = defaultBackgroundThumbnail
-      }
-      return {
-        backgroundImage: `url(${background})`
-      }
-    },
-    backgroundTintStyles () {
-      if (this.backgroundTint) {
-        return {
-          background: this.backgroundTint,
-          mixBlendMode: 'multiply'
-        }
-      } else {
-        return {}
-      }
     },
     pendingUpload () {
       const currentSpace = this.$store.state.currentSpace
@@ -459,10 +426,6 @@ export default {
         let element = this.$refs.results
         this.resultsSectionHeight = utils.elementHeight(element) - 2
       })
-    },
-    updateBackgroundTint () {
-      let color = this.currentSpace.backgroundTint
-      this.backgroundTint = color
     }
   },
   watch: {
@@ -473,7 +436,6 @@ export default {
         this.closeDialogs()
         this.updateFavorites()
         this.updateHeights()
-        this.updateBackgroundTint()
       }
     }
   }
@@ -530,8 +492,12 @@ export default {
     position absolute
     pointer-events none
   .background-button
+    height 24px
+    width 24px
+    background-size cover
     &:hover,
     &:active,
     &.active
       background-color var(--primary-background)
+      background-size cover
 </style>

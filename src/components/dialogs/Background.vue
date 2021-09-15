@@ -4,6 +4,7 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
     p Background
 
   section(@mouseup.stop @touchend.stop)
+    BackgroundPreview(:space="currentSpace")
     textarea(
       v-if="canEditSpace"
       ref="background"
@@ -82,13 +83,15 @@ import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import backgroundImages from '@/data/backgroundImages.json'
+import BackgroundPreview from '@/components/BackgroundPreview.vue'
 
 export default {
   name: 'Background',
   components: {
     ImagePicker,
     ColorPicker,
-    Loader
+    Loader,
+    BackgroundPreview
   },
   props: {
     visible: Boolean
@@ -195,7 +198,6 @@ export default {
     },
     removeBackground () {
       this.updateSpaceBackground('')
-      this.$store.commit('triggerUpdateBackgroundTint')
       this.closeDialogs()
     },
     updateSpaceBackground (url) {
@@ -212,7 +214,6 @@ export default {
     updateBackgroundTint (value) {
       this.backgroundTint = value
       this.$store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
-      this.$store.commit('triggerUpdateBackgroundTint')
       this.updatePageSizes()
       this.$emit('updateSpaces')
     },
@@ -298,6 +299,8 @@ export default {
 .background
   &.narrow
     width 215px
+  .background-preview
+    margin-bottom 5px
   section
     position relative
   textarea
@@ -317,6 +320,7 @@ export default {
   .hidden
     display none
   .read-only-url
+    margin-top 0
     margin-bottom 10px
     word-break break-all
 
