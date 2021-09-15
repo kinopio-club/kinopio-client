@@ -14,7 +14,7 @@ dialog.narrow.image-picker(
         button(@click.left.stop="toggleServiceIsStickers" :class="{active : serviceIsStickers}" title="stickers")
           img.icon.sticker(src="@/assets/sticker.svg")
         button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}" title="are.na")
-          img.icon.arena(src="@/assets/arena.svg")
+          img.icon(src="@/assets/search.svg")
         button(@click.left.stop="toggleServiceIsGifs" :class="{active : serviceIsGifs}" title="gifs")
           span GIF
 
@@ -53,7 +53,7 @@ dialog.narrow.image-picker(
         button(@click.left.stop="toggleServiceIsBackgrounds" :class="{active : serviceIsBackgrounds}")
           span Backgrounds
         button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
-          img.icon.arena(src="@/assets/arena.svg")
+          img.icon(src="@/assets/search.svg")
 
       .button-wrap(v-if="removeIsVisible")
         button(@click="removeImage")
@@ -123,10 +123,10 @@ import backgroundImagesAnimated from '@/data/backgroundImagesAnimated.json'
 
 import debounce from 'lodash-es/debounce'
 import sampleSize from 'lodash-es/sampleSize'
+import sample from 'lodash-es/sample'
 
-let randomArenaBlocksData
+let defaultArenaBlocksData
 const numberOfImages = 25
-const arenaChannelRandomBlocksFrom = 'kinopio-moods'
 
 export default {
   name: 'ImagePicker',
@@ -277,14 +277,16 @@ export default {
       this.loading = true
       this.searchService()
     },
-    async randomArenaBlocks () {
+    async defaultArenaBlocks () {
       let url, params, data
-      if (randomArenaBlocksData) {
-        data = randomArenaBlocksData
+      if (defaultArenaBlocksData) {
+        data = defaultArenaBlocksData
       } else {
-        url = new URL(`https://api.are.na/v2/channels/${arenaChannelRandomBlocksFrom}/contents`)
+        const defaultChannels = ['mood-imagined', 'good-w8twljfeosy', 'natur-i0sr6kdr1xq', 'colon-caret-bracket-vdm6ix4mr_8', 'ggggraphic']
+        const channel = sample(defaultChannels)
+        url = new URL(`https://api.are.na/v2/channels/${channel}/contents`)
         params = {
-          per: 100
+          per: 30
         }
         url.search = new URLSearchParams(params).toString()
         const response = await fetch(url)
@@ -300,7 +302,7 @@ export default {
           }
           return image
         })
-        randomArenaBlocksData = data
+        defaultArenaBlocksData = data
       }
       data.blocks = sampleSize(data.blocks, numberOfImages)
       return data
@@ -317,7 +319,7 @@ export default {
         const response = await fetch(url)
         data = await response.json()
       } else {
-        data = await this.randomArenaBlocks()
+        data = await this.defaultArenaBlocks()
       }
       this.normalizeResults(data, 'arena')
     },
