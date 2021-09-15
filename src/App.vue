@@ -5,7 +5,7 @@
   @touchstart="isTouchDevice"
   :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
 )
-  #layout-viewport(:style="{ background: backgroundTint, mixBlendMode: backgroundBlendMode }")
+  #layout-viewport(:style="{ background: backgroundTint }")
     OffscreenMarkers
   MagicPaint
   //- router-view is Space
@@ -49,11 +49,7 @@ export default {
   created () {
     console.log('🐢 kinopio-client build', this.buildHash)
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerUpdateBackgroundTint') {
-        this.updateBackgroundTint()
-      }
       if (mutation.type === 'currentSpace/restoreSpace') {
-        this.updateBackgroundTint()
         this.updateMetaDescription()
       }
     })
@@ -64,17 +60,16 @@ export default {
     setTimeout(() => {
       window.addEventListener('scroll', this.updateUserHasScrolled)
     }, 100)
-    this.updateBackgroundTint()
     this.updateMetaDescription()
     this.$store.dispatch('currentSpace/updateBackgroundZoom')
   },
-  data () {
-    return {
-      backgroundTint: '',
-      backgroundBlendMode: ''
-    }
-  },
   computed: {
+    backgroundTint () {
+      const color = this.$store.state.currentSpace.backgroundTint
+      const metaThemeColor = document.querySelector('meta[name=theme-color]')
+      metaThemeColor.setAttribute('content', color)
+      return color
+    },
     spaceName () { return this.$store.state.currentSpace.name },
     pageName () {
       const spaceName = this.spaceName
@@ -137,11 +132,6 @@ export default {
       if (this.$store.state.userHasScrolled) { return }
       this.$store.commit('userHasScrolled', true)
     },
-    updateBackgroundTint () {
-      let color = this.$store.state.currentSpace.backgroundTint
-      this.backgroundTint = color
-      this.backgroundBlendMode = 'multiply'
-    },
     updateMetaDescription () {
       let description = 'Kinopio is your spatial thinking tool for new ideas and hard problems.'
       const metaDescription = document.querySelector('meta[name=description]')
@@ -157,10 +147,6 @@ export default {
   watch: {
     pageName (pageName) {
       document.title = pageName
-    },
-    backgroundTint (color) {
-      const metaThemeColor = document.querySelector('meta[name=theme-color]')
-      metaThemeColor.setAttribute('content', color)
     }
   }
 }
@@ -793,6 +779,7 @@ code
   height 100%
   pointer-events none
   z-index 0
+  mix-blend-mode multiply
 
 progress
   appearance none
