@@ -223,14 +223,8 @@ export default {
 
     isCardsCreatedIsOverLimit () {
       if (this.actionIsMove) { return }
-      const currentUser = this.$store.state.currentUser
-      const count = currentUser.cardsCreatedCount
-      const limit = this.$store.state.cardsCreatedLimit
       const items = this.selectedItems().cards.length
-      if (currentUser.isUpgraded) { return }
-      if (count + items >= limit) {
-        return true
-      }
+      return this.$store.getters['currentUser/cardsCreatedWillBeOverLimit'](items)
     },
 
     async moveOrCopyToSpace () {

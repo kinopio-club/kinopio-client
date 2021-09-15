@@ -521,6 +521,11 @@ export default {
       if (state.isUpgraded) { return }
       if (state.cardsCreatedCount >= cardsCreatedLimit) { return true }
     },
+    cardsCreatedWillBeOverLimit: (state, getters, rootState) => (count) => {
+      const cardsCreatedLimit = rootState.cardsCreatedLimit
+      if (state.isUpgraded) { return }
+      if (state.cardsCreatedCount + count >= cardsCreatedLimit) { return true }
+    },
     canEditSpace: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
       const spaceIsOpen = space.privacy === 'open'
