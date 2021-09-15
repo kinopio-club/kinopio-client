@@ -392,10 +392,14 @@ export default {
         data.blocks = data.blocks.filter(image => Boolean(image.image))
         this.images = data.blocks.map(image => {
           const url = image.image.original.url
+          let username
+          if (image.user) {
+            username = image.user.username
+          }
           return {
             id: image.id,
             sourcePageUrl: `https://www.are.na/block/${image.id}`,
-            sourceUserName: image.user.username,
+            sourceUserName: username,
             previewUrl: image.image.display.url,
             url: url + '?img=.jpg'
           }
