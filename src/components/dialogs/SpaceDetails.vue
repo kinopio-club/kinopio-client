@@ -68,7 +68,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
       .button-wrap.toggle-filters(v-if="spacesHasJournalSpace")
         button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible || spaceFiltersIsActive }")
           img.icon(src="@/assets/filter.svg")
-        SpaceFilters(:visible="spaceFiltersIsVisible" :spaces="spaces")
+        SpaceFilters(:visible="spaceFiltersIsVisible" :spaces="filteredSpaces")
 
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(:spaces="filteredSpaces" :isLoading="isLoadingRemoteSpaces" :showUserIfCurrentUserIsCollaborator="true" :parentIsSpaceDetails="true" @selectSpace="changeSpace")
