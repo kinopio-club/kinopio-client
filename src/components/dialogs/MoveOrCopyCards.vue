@@ -34,6 +34,11 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @cl
           span {{buttonLabel}}
           Loader(:visible="loading")
 
+    .error-card-limit(v-if="cardsCreatedIsOverLimit")
+      .badge.danger Out of Cards
+      p To add more cards you'll need to upgrade for $5/month
+      button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+
   //- Copy Card Names
   section(v-if="!actionIsMove")
     textarea(ref="text") {{text()}}
@@ -75,7 +80,8 @@ export default {
       loading: false,
       toNewSpace: false,
       newSpaceName: '',
-      textIsCopied: false
+      textIsCopied: false,
+      cardsCreatedIsOverLimit: false
     }
   },
   computed: {
@@ -110,6 +116,10 @@ export default {
     }
   },
   methods: {
+    triggerUpgradeUserIsVisible () {
+      this.$store.dispatch('closeAllDialogs', 'MoveOrCopyToSpace')
+      this.$store.commit('triggerUpgradeUserIsVisible')
+    },
     capitalize (value) {
       return utils.capitalizeFirstLetter(value)
     },
@@ -211,11 +221,28 @@ export default {
       this.loading = false
     },
 
+    isCardsCreatedIsOverLimit () {
+      if (this.actionIsMove) { return }
+      const currentUser = this.$store.state.currentUser
+      const count = currentUser.cardsCreatedCount
+      const limit = this.$store.state.cardsCreatedLimit
+      const items = this.selectedItems().cards.length
+      if (currentUser.isUpgraded) { return }
+      if (count + items >= limit) {
+        return true
+      }
+    },
+
     async moveOrCopyToSpace () {
       if (this.loading) { return }
       const newSpaceName = this.newSpaceName || words.randomUniqueName()
       const items = this.selectedItems()
       let selectedSpace = this.selectedSpace
+      if (this.isCardsCreatedIsOverLimit()) {
+        this.cardsCreatedIsOverLimit = true
+        return
+      }
+      // action
       if (this.toNewSpace) {
         selectedSpace = await this.createNewSpace(items, newSpaceName)
         this.notifyNewSpaceSuccess(selectedSpace)
@@ -223,8 +250,14 @@ export default {
         await this.copyToSelectedSpace(items)
         this.notifySuccess()
       }
+      // cleanup
       if (this.actionIsMove) {
         this.removeCards(items.cards)
+      } else {
+        this.$store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+          delta: items.cards.length,
+          shouldIncrement: true
+        })
       }
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
       this.$store.dispatch('clearMultipleSelected')
@@ -291,5 +324,6 @@ export default {
     height 60px
   .badge.success
     margin-top 10px
-
+  .error-card-limit
+    margin-top 10px
 </style>
