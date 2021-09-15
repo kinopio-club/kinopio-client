@@ -302,7 +302,7 @@ export default {
   &.narrow
     width 215px
   .background-preview
-    margin-bottom 2px
+    margin-bottom 5px
   section
     position relative
   textarea

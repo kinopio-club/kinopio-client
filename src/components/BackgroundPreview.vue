@@ -89,14 +89,18 @@ export default {
     border-radius 3px
     overflow hidden
     display inline-block
+    vertical-align middle
     .background-tint
       height 100%
       width 100%
+      position absolute
       top 0
       left 0
     .background-image
       height 100%
       width 100%
       background-size cover
-
+      position absolute
+      top 0
+      left 0
 </style>
