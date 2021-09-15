@@ -385,6 +385,8 @@ export default {
       const shouldShow = context.rootState.currentUser.shouldShowNewUserNotification
       if (!currentUserIsSignedIn && shouldShow) {
         context.commit('notifyNewUser', true, { root: true })
+      } else {
+        context.commit('notifyNewUser', false, { root: true })
       }
     },
 
