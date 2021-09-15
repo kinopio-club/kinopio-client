@@ -1,0 +1,95 @@
+<template lang="pug">
+span.background-preview
+  template(v-if="isButton")
+    .tint(:style="backgroundTintStyles")
+    button(:style="backgroundStyles" :class="{ active: buttonIsActive }")
+</template>
+
+<script>
+import backgroundImages from '@/data/backgroundImages.json'
+import utils from '@/utils.js'
+
+export default {
+  name: 'BackgroundPreview',
+  props: {
+    isButton: Boolean,
+    buttonIsActive: Boolean,
+    space: Object
+  },
+  // data () {
+  //   return {
+  //     backgroundTint: ''
+  //   }
+  // },
+  // created () {
+  //   this.$store.subscribe((mutation, state) => {
+  //     if (mutation.type === 'triggerUpdateBackgroundTint') {
+  //       this.updateBackgroundTint()
+  //     }
+  //   })
+  // },
+
+  computed: {
+    backgroundTint () { return this.space.backgroundTint },
+    backgroundTintStyles () {
+      if (this.backgroundTint) {
+        return {
+          background: this.backgroundTint,
+          mixBlendMode: 'multiply'
+        }
+      } else {
+        return {}
+      }
+    },
+    backgroundStyles () {
+      const defaultBackgroundThumbnail = 'https://kinopio-backgrounds.us-east-1.linodeobjects.com/background-thumbnail.svg'
+      let background = this.space.background
+      const backgroundImage = backgroundImages.find(image => {
+        const isImage = image.url === background
+        const hasThumbnailUrl = image.thumbnailUrl
+        return isImage && hasThumbnailUrl
+      })
+      if (backgroundImage) {
+        background = backgroundImage.thumbnailUrl || background
+      }
+      if (!utils.urlIsImage(background)) {
+        background = defaultBackgroundThumbnail
+      }
+      return {
+        backgroundImage: `url(${background})`
+      }
+    }
+
+  },
+  methods: {
+    // toggleBackground () {
+    //   this.$emit('toggleBackground')
+    // }
+    // updateBackgroundTint () {
+    //   let color = this.currentSpace.backgroundTint
+    //   this.backgroundTint = color
+    // }
+  }
+}
+</script>
+
+<style lang="stylus">
+.background-preview
+  .tint
+    width 22px
+    height 22px
+    top 1px
+    left 1px
+    position absolute
+    pointer-events none
+  button
+    height 24px
+    width 24px
+    background-size cover
+    &:hover,
+    &:active,
+    &.active
+      background-color var(--primary-background)
+      background-size cover
+
+</style>
