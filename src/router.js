@@ -7,6 +7,10 @@ import store from '@/store/store.js'
 
 Vue.use(Router)
 
+// const space = (props, context) => {
+//   return Space
+// }
+
 export default new Router({
 // const router = createRouter({
 

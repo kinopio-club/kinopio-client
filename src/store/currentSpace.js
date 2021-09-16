@@ -29,16 +29,6 @@ export default {
       space = utils.removeRemovedCardsFromSpace(space)
       Object.assign(state, space)
     },
-    // Added aug 2019, can safely remove this in aug 2020
-    updateBetaSpace: (state) => {
-      if (state.id === '1') {
-        const newId = nanoid()
-        state.id = newId
-        state.name = 'Hello Kinopio'
-        cache.updateBetaSpaceId(newId)
-        cache.updateSpace('name', state.name, state.id)
-      }
-    },
 
     // Users
 
@@ -88,13 +78,7 @@ export default {
       state.collaborators = state.collaborators.filter(user => {
         return user.id !== oldUser.id
       })
-      const updatedSpace = utils.clone(state)
-      // same as updateSpace() to force reactivity
-      const updates = Object.keys(updatedSpace)
-      updates.forEach(key => {
-        Vue.set(state, key, updatedSpace[key])
-        cache.updateSpace(key, state[key], state.id)
-      })
+      cache.updateSpace('collaborators', state.collaborators, state.id)
     },
     // websocket receive
     updateUser: (state, updatedUser) => {
@@ -114,7 +98,7 @@ export default {
     updateSpace: (state, updatedSpace) => {
       const updates = Object.keys(updatedSpace)
       updates.forEach(key => {
-        Vue.set(state, key, updatedSpace[key])
+        state[key] = updatedSpace[key]
         cache.updateSpace(key, state[key], state.id)
       })
     },
@@ -128,13 +112,14 @@ export default {
       if (updatedCard.y) {
         updatedCard.y = Math.round(updatedCard.y)
       }
-      state.cards.map(card => {
+      state.cards = state.cards.map(card => {
         if (card.id === updatedCard.id) {
           const updates = Object.keys(updatedCard)
           updates.forEach(key => {
-            Vue.set(card, key, updatedCard[key])
+            card[key] = updatedCard[key]
           })
         }
+        return card
       })
       cache.updateSpace('cards', state.cards, state.id)
     },
@@ -162,10 +147,6 @@ export default {
       cache.updateSpace('cards', state.cards, state.id)
     },
     removeCard: (state, cardToRemove) => {
-      if (!state.removedCards) {
-        // migration oct 2019
-        Vue.set(state, 'removedCards', [])
-      }
       const card = state.cards.find(card => card.id === cardToRemove.id)
       state.cards = state.cards.filter(card => card.id !== cardToRemove.id)
       state.removedCards.unshift(card)
@@ -206,12 +187,7 @@ export default {
         if (connection.id === updatedConnection.id) {
           const updates = Object.keys(updatedConnection)
           updates.forEach(key => {
-            // update properties differently depending on whether it's existing or new
-            if (connection[key]) {
-              connection[key] = updatedConnection[key]
-            } else {
-              Vue.set(connection, key, updatedConnection[key])
-            }
+            connection[key] = updatedConnection[key]
           })
         }
       })
@@ -223,12 +199,7 @@ export default {
         if (connection.id === updatedConnection.id) {
           const updates = Object.keys(updatedConnection)
           updates.forEach(key => {
-            // update properties differently depending on whether it's existing or new
-            if (connection[key]) {
-              connection[key] = updatedConnection[key]
-            } else {
-              Vue.set(connection, key, updatedConnection[key])
-            }
+            connection[key] = updatedConnection[key]
           })
         }
       })
@@ -268,12 +239,7 @@ export default {
     updateLabelIsVisibleForConnection: (state, { connectionId, labelIsVisible }) => {
       state.connections.map(connection => {
         if (connection.id === connectionId) {
-          // update properties differently depending on whether it's existing or new
-          if (connection.labelIsVisible) {
-            connection.labelIsVisible = labelIsVisible
-          } else {
-            Vue.set(connection, 'labelIsVisible', labelIsVisible)
-          }
+          connection.labelIsVisible = labelIsVisible
         }
       })
       cache.updateSpace('connections', state.connections, state.id)
