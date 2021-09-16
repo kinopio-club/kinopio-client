@@ -1,8 +1,8 @@
 <template lang="pug">
 dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
-    .row
-      p Spatial thinking for new ideas and hard problems
+    p About
+  section
     .row
       .button-wrap
         a(href="https://help.kinopio.club/about/")
