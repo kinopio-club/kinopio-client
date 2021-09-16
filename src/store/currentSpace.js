@@ -703,10 +703,14 @@ export default {
         context.commit('currentSpacePath', spaceUrl, { root: true })
         if (navigator.standalone) { return }
         window.history.pushState({ spaceId: space.id }, `${space.name} – Kinopio`, spaceUrl)
+        // https://next.router.vuejs.org/guide/migration/#usage-of-history-state
+        // await router.push(url)
+        // history.replaceState({ ...history.state, ...myState }, '')
       } else {
         context.commit('currentSpacePath', '/', { root: true })
         if (navigator.standalone) { return }
         window.history.replaceState({}, '', '/')
+        // history.replaceState(history.state, '', url)
       }
     },
     updateSpacePageSize: (context) => {

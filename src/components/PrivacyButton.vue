@@ -26,11 +26,6 @@ export default {
     showDescription: Boolean,
     showIconOnly: Boolean
   },
-  filters: {
-    capitalize (value) {
-      return utils.capitalizeFirstLetter(value)
-    }
-  },
   computed: {
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     isInvitedButCannotEditSpace () { return this.$store.getters['currentUser/isInvitedButCannotEditSpace']() },

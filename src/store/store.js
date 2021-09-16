@@ -12,12 +12,14 @@ import websocket from '@/store/plugins/websocket.js'
 
 import Vue from 'vue'
 import Vuex from 'vuex'
+// import { createStore } from 'vuex'
 import nanoid from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
+// export const store = createStore({
   strict: process.env.NODE_ENV !== 'production',
   state: {
     pageHeight: 0,

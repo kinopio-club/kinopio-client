@@ -133,8 +133,10 @@ export default {
       pathname = window.location.pathname
       if (this.isJournalPath) {
         window.history.replaceState({}, title, '/journal')
+        // history.replaceState(history.state, '', url)
       } else {
         window.history.replaceState({}, title, '/')
+        // history.replaceState(history.state, '', url)
       }
     },
     restoreUrlPath () {

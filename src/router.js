@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+// import { createRouter, createWebHistory } from 'vue-router'
 
 import Space from '@/views/Space.vue'
 import store from '@/store/store.js'
@@ -7,8 +8,12 @@ import store from '@/store/store.js'
 Vue.use(Router)
 
 export default new Router({
+// const router = createRouter({
+
   mode: 'history',
+  // history: createWebHistory(process.env.BASE_URL) // or createMemoryHistory or createWebHashHistory , not sure the diffs
   base: process.env.BASE_URL,
+  // base option is now passed as the first argument to createWebHistory
   routes: [
     {
       path: '/',
@@ -45,6 +50,7 @@ export default new Router({
         }
         next()
         window.history.replaceState({}, document.title, window.location.origin)
+        // history.replaceState(history.state, '', url)
       }
     }, {
       path: '/update-arena-access-token',
@@ -55,6 +61,7 @@ export default new Router({
         const arenaReturnedCode = urlParams.get('code')
         next()
         window.history.replaceState({}, document.title, window.location.origin)
+        // history.replaceState(history.state, '', url)
         store.dispatch('currentUser/updateArenaAccessToken', arenaReturnedCode)
       }
     }, {
