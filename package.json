@@ -7,7 +7,7 @@
     "serve": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint --ext .js,.vue"
+    "lint": "eslint . --ext .js,.vue"
   },
   "dependencies": {
     "@aguezz/qs-parse": "^2.0.0",
@@ -31,9 +31,9 @@
     "@vue/eslint-config-standard": "^4.0.0",
     "@vue/test-utils": "1.0.0-beta.29",
     "babel-eslint": "^10.0.1",
-    "eslint": "^5.16.0",
+    "eslint": "^7.32.0",
     "eslint-plugin-vue": "^5.0.0",
-    "lint-staged": "^8.1.5",
+    "lint-staged": "^11.1.2",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2",
     "@vue/compiler-sfc": "^3.2.6",
@@ -41,7 +41,8 @@
     "@vitejs/plugin-vue": "^1.6.2",
     "postcss": "^8.3.6",
     "autoprefixer": "^10.3.4",
-    "pug": "^3.0.2"
+    "pug": "^3.0.2",
+    "yorkie": "^2.0.0"
   },
   "eslintConfig": {
     "root": true,
@@ -67,5 +68,14 @@
   "browserslist": [
     "> 1%",
     "last 2 versions"
-  ]
+  ],
+  "gitHooks": {
+    "pre-commit": "lint-staged"
+  },
+  "lint-staged": {
+    "src/*.{js,vue}": [
+      "eslint --fix",
+      "git add"
+    ]
+  }
 }
