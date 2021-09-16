@@ -17,7 +17,7 @@ const centerLineY = lineMaxHeight / 2
 let isReverse = false
 
 export default {
-  name: 'DropGuides',
+  name: 'DropGuideLine',
   props: {
     currentCursor: Object,
     uploadIsDraggedOver: Boolean
