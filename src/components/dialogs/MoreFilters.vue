@@ -24,8 +24,7 @@ dialog.more-filters.narrow(v-if="visible" :open="visible" ref="dialog" :style="{
         li.frames-list(:class="{active: frameIsActive(frame)}" @click.left="toggleFilteredCardFrame(frame)" tabindex="0" v-on:keyup.enter="toggleFilteredCardFrame(frame)")
           input(type="checkbox" :checked="isSelected(frame)")
           .badge
-            template
-              img(:src="frameBadge(frame).path")
+            img(:src="frameBadge(frame).path")
           .name {{frame.name}}
 
 </template>

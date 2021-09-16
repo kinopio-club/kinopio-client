@@ -44,7 +44,8 @@ dialog.add-space.narrow(
         button(@click.left="addCustomPrompt")
           img.icon(src="@/assets/add.svg")
           span Add Daily Prompt
-    Prompt(v-if="editPromptsIsVisible" v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
+    template(v-if="editPromptsIsVisible" )
+      Prompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
   section(v-if="editPromptsIsVisible")
     PromptPackPicker(:visible="editPromptsIsVisible" :position="promptPickerPosition" @select="togglePromptPack")
 

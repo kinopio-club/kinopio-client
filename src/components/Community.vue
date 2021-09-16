@@ -1,10 +1,9 @@
 <template lang="pug">
 .community(v-if="visible" :open="visible" @click.left.stop)
   section
-    template
-      p
-        img.icon.sunglasses(src="@/assets/sunglasses.svg")
-        span Cool Community Spaces
+    p
+      img.icon.sunglasses(src="@/assets/sunglasses.svg")
+      span Cool Community Spaces
     p(v-if="loading")
       Loader(:visible="loading")
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")

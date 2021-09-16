@@ -12,26 +12,18 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialog" :s
     Loader(:visible="true")
 
   section
-    article(v-if="newStuff.length" v-for="post in newStuffWithUserHasRead" :key="post.id")
-      .title.badge.info
-        span {{post.title}}
-        img.icon(src="@/assets/new.gif" v-if="!post.userHasRead")
-      span(v-html="post.content_html")
-      .media(v-html="media(post.description)")
+    template(v-for="post in newStuffWithUserHasRead" :key="post.id")
+      article(v-if="newStuff.length")
+        .title.badge.info
+          span {{post.title}}
+          img.icon(src="@/assets/new.gif" v-if="!post.userHasRead")
+        span(v-html="post.content_html")
+        .media(v-html="media(post.description)")
 
   section
     .button-wrap
       a(href="https://www.are.na/kinopio/kinopio-what-s-new")
         button Read All →
-
-  //- section
-  //-   p Follow for Updates
-  //-   .button-wrap
-  //-     a(href="https://www.are.na/kinopio")
-  //-       button Are.na →
-  //-   .button-wrap
-  //-     a(href="https://twitter.com/KinopioClub")
-  //-       button Twitter →
 </template>
 
 <script>
