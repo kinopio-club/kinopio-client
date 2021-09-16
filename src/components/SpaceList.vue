@@ -255,11 +255,14 @@ export default {
     }
   },
   watch: {
-    spaces (spaces) {
-      const cardDetailsIsVisible = this.$store.state.cardDetailsIsVisibleForCardId
-      if (spaces && cardDetailsIsVisible) {
-        this.focusOnId = spaces[0].id
-      }
+    spaces: {
+      handler (spaces) {
+        const cardDetailsIsVisible = this.$store.state.cardDetailsIsVisibleForCardId
+        if (spaces && cardDetailsIsVisible) {
+          this.focusOnId = spaces[0].id
+        }
+      },
+      deep: true
     }
   }
 }

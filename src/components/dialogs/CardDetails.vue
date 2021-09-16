@@ -1490,18 +1490,23 @@ export default {
       }
       this.$store.dispatch('updatePageSizes')
     },
-    validWebUrls (urls) {
-      let url = urls[0]
-      if (!url) { return }
-      url = this.removeHiddenQueryString(url)
-      const previewIsVisible = this.card.urlPreviewIsVisible
-      const isNotPreviewUrl = url !== this.card.urlPreviewUrl
-      const isNotErrorUrl = url !== this.card.urlPreviewErrorUrl
-      const isNotKinopioUrl = !url.startsWith('https://kinopio.club')
-      if (previewIsVisible && isNotPreviewUrl && isNotErrorUrl && isNotKinopioUrl) {
-        this.$store.commit('addUrlPreviewLoadingForCardIds', this.card.id)
-        this.debouncedUpdateUrlPreview(url)
-      }
+    // https://v3.vuejs.org/guide/migration/watch.html
+    // watching arrays doesn't work for changes anymore (only whole replacement, unless 'deep', option is specified)
+    validWebUrls: {
+      handler (urls) {
+        let url = urls[0]
+        if (!url) { return }
+        url = this.removeHiddenQueryString(url)
+        const previewIsVisible = this.card.urlPreviewIsVisible
+        const isNotPreviewUrl = url !== this.card.urlPreviewUrl
+        const isNotErrorUrl = url !== this.card.urlPreviewErrorUrl
+        const isNotKinopioUrl = !url.startsWith('https://kinopio.club')
+        if (previewIsVisible && isNotPreviewUrl && isNotErrorUrl && isNotKinopioUrl) {
+          this.$store.commit('addUrlPreviewLoadingForCardIds', this.card.id)
+          this.debouncedUpdateUrlPreview(url)
+        }
+      },
+      deep: true
     }
   }
 }
