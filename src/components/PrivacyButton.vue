@@ -55,7 +55,7 @@ export default {
     },
     privacyIcon (privacyState) {
       return {
-        path: require(`@/assets/${privacyState.icon}.svg`)
+        path: utils.assetUrl(privacyState.icon, 'svg')
       }
     }
   }

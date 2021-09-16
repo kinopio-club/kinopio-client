@@ -170,7 +170,7 @@ export default {
         return state.name === this.$store.state.currentSpace.privacy
       })
     },
-    privacyIcon () { return require(`@/assets/${this.privacyState.icon}.svg`) },
+    privacyIcon () { return utils.assetUrl(this.privacyState.icon, 'svg') },
     privacyName () { return this.privacyState.name },
     spacePrivacyIsOpen () { return this.privacyName === 'open' },
     cardsCreatedCountFromLimit () {
@@ -191,7 +191,7 @@ export default {
   methods: {
     icon (icon) {
       return {
-        path: require(`@/assets/${icon}.svg`)
+        path: utils.assetUrl(icon, 'svg')
       }
     },
     closeAllDialogs () {

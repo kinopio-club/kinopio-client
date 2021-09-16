@@ -8,17 +8,17 @@ const frames = [
   {
     id: 1,
     name: 'Garden Leaves',
-    badge: 'garden-leaves/flower.png'
+    badge: 'frames/garden-leaves/flower.png'
   },
   {
     id: 2,
     name: 'Magical Helper',
-    badge: 'magical-helper/hat.png'
+    badge: 'frames/magical-helper/hat.png'
   },
   {
     id: 3,
     name: 'Tea Time',
-    badge: 'tea-time/pot.png'
+    badge: 'frames/tea-time/pot.png'
   }
 ]
 

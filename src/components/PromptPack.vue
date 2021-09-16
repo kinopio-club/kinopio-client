@@ -12,10 +12,11 @@ li.prompt-pack(@click.left="select(pack)" v-on:keyup.enter="select(pack)" :class
     span.label-badge ex
     span {{randomPrompt}}
 
-  template(v-if="viewAllIsActive" v-for="prompt in pack.prompts")
-    p
-      span.label-badge ex
-      span {{prompt}}
+  template(v-if="viewAllIsActive")
+    template(v-for="prompt in pack.prompts" :key="prompt.packId")
+      p
+        span.label-badge ex
+        span {{prompt}}
 </template>
 
 <script>

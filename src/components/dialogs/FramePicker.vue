@@ -13,6 +13,7 @@ dialog.narrow.frame-details(v-if="visible" :open="visible" ref="dialog" @click.l
 <script>
 import scrollIntoView from '@/scroll-into-view.js'
 import frames from '@/data/frames.js'
+import utils from '@/utils.js'
 
 export default {
   props: {
@@ -44,7 +45,7 @@ export default {
     },
     frameBadge (frame) {
       return {
-        path: require(`@/assets/frames/${frame.badge}`)
+        path: utils.assetUrl(frame.badge)
       }
     },
     scrollIntoView () {

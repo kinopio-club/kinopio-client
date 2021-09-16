@@ -204,7 +204,7 @@ export default {
     },
     frameBadge (frame) {
       return {
-        path: require(`@/assets/frames/${frame.badge}`)
+        path: utils.assetUrl(frame.badge)
       }
     }
   },

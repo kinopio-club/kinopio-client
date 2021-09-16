@@ -18,6 +18,13 @@ let tlds = tldsList.join(String.raw`)|(\.`)
 tlds = String.raw`(\.` + tlds + ')'
 
 export default {
+  assetUrl (path, type) {
+    if (type) {
+      return `/src/assets/${path}.${type}`
+    } else {
+      return `/src/assets/${path}`
+    }
+  },
   kinopioDomain () {
     let domain = 'https://kinopio.club'
     if (import.meta.env.NODE_ENV === 'development') {

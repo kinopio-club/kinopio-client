@@ -282,7 +282,7 @@ export default {
         return state.name === space.privacy
       })
       if (!privacyState) { return }
-      return require(`@/assets/${privacyState.icon}.svg`)
+      return utils.assetUrl(privacyState.icon, 'svg')
     },
     privacyName () {
       const space = this.$store.state.currentSpace
