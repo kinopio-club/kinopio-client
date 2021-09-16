@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
-    p About
+    p About test
   section
     .row
       .button-wrap
