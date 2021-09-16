@@ -93,8 +93,8 @@ dialog.narrow.image-picker(
   //- search results
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     ul.results-list.image-list
-      template(v-for="(image in images")
-        li(@click.left="selectImage(image)" tabindex="0" :key="image.id" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
+      template(v-for="image in images" :key="image.id")
+        li(@click.left="selectImage(image)" tabindex="0" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
           img(:src="image.previewUrl")
           a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
             button.small-button {{image.sourceUserName}} →
@@ -106,8 +106,8 @@ dialog.narrow.image-picker(
           img.icon(v-else src="@/assets/view-hidden.svg")
           span Animated
       ul.results-list.image-list(v-if="animatedBackgroundsVisible")
-        template(v-for="(image in animatedBackgroundImages")
-          li(@click.left="selectImage(image)" tabindex="0" :key="image.id" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
+        template(v-for="image in animatedBackgroundImages" :key="image.id")
+          li(@click.left="selectImage(image)" tabindex="0" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
             img(:src="image.previewUrl")
             a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
               button.small-button {{image.sourceUserName}} →

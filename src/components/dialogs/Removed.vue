@@ -38,8 +38,8 @@ dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :sty
             span Remove All
 
     ul.results-list
-      template(v-for="(item in items")
-        li(:key="item.id" @click.left="restore(item)" tabindex="0" v-on:keyup.enter="restore(item)")
+      template(v-for="item in items" :key="item.id")
+        li(@click.left="restore(item)" tabindex="0" v-on:keyup.enter="restore(item)")
           .badge
             img.undo.icon(src="@/assets/undo.svg")
           .name {{item.name}}

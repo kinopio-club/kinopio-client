@@ -6,16 +6,20 @@ import store from './store/store'
 
 // import devtools from '@vue/devtools'
 
-// if (process.env.NODE_ENV === 'development') {
+// if (import.meta.env.NODE_ENV === 'development') {
 //   devtools.connect()
 // }
 
 // import { h } from 'vue'
-// render() {
+
+// const app = Vue.createApp({
+//   router,
+//   store,
+//   render(h) {
 //     return h(App)
 //   }
+// })
 
-// const app = Vue.createApp({...})
 // somehow app elevated to global?
 new Vue({
   router,

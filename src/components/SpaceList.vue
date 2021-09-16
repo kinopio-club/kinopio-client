@@ -13,12 +13,11 @@ span.space-list-wrap
     @selectItem="selectItemFromFilter"
   )
   ul.results-list.space-list
-    template(v-for="(space in spacesFiltered")
+    template(v-for="space in spacesFiltered" :key="space.id")
       a(:href="space.url")
         li(
           @click.left.prevent.stop="selectSpace(space)"
           :class="{ active: spaceIsActive(space), hover: focusOnId === space.id }"
-          :key="space.id"
           tabindex="0"
           v-on:keyup.enter="selectSpace(space)"
         )
@@ -26,8 +25,8 @@ span.space-list-wrap
           template(v-if="showOtherUsers")
             .users
               User(:user="user(space)" :isClickable="false" :key="user(space).id")
-              template(v-for="otherUser in space.otherUsers")
-                User(:user="otherUser" :isClickable="false" :key="otherUser.id")
+              template(v-for="otherUser in space.otherUsers" :key="otherUser.id")
+                User(:user="otherUser" :isClickable="false")
           template(v-else-if="showUser")
             User(:user="user(space)" :isClickable="false" :key="user(space).id")
           template(v-else-if="showCollaborator(space)")

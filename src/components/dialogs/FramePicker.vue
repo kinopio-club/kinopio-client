@@ -2,8 +2,8 @@
 dialog.narrow.frame-details(v-if="visible" :open="visible" ref="dialog" @click.left.stop)
   section.results-section
     ul.results-list
-      template(v-for="(frame in frames")
-        li(:class="{active: frameIsSelected(frame)}" @click.left="changeCardFrame(frame)" :key="frame.id" tabindex="0" v-on:keyup.enter="changeCardFrame(frame)")
+      template(v-for="frame in frames" :key="frame.id")
+        li(:class="{active: frameIsSelected(frame)}" @click.left="changeCardFrame(frame)" tabindex="0" v-on:keyup.enter="changeCardFrame(frame)")
           .badge
             template(v-if="frameHasBadge(frame)")
               img(:src="frameBadge(frame).path")

@@ -12,7 +12,7 @@ import utils from '@/utils.js'
 let websocket, currentSpaceRoom, currentUserIsConnected
 const clientId = nanoid()
 let showDebugMessages = true
-if (process.env.NODE_ENV === 'development') {
+if (import.meta.env.NODE_ENV === 'development') {
   showDebugMessages = false
 }
 

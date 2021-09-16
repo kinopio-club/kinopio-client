@@ -1,23 +1,23 @@
 <template lang="pug">
-  section.filters
-    .row
-      .button-wrap
-        label.show-users(:class="{active: filterShowUsers}" @click.left.prevent="toggleFilterShowUsers" @keydown.stop.enter="toggleFilterShowUsers")
-          input(type="checkbox" v-model="filterShowUsers")
-          User(:user="currentUser" :key="currentUser.id" :hideYouLabel="true" :isSmall="true")
-      .button-wrap
-        label(:class="{active: filterShowDateUpdated}" @click.left.prevent="toggleFilterShowDateUpdated" @keydown.stop.enter="toggleFilterShowDateUpdated")
-          input(type="checkbox" v-model="filterShowDateUpdated")
-          img.icon.time(src="@/assets/time.svg")
-      .button-wrap
-        label(:class="{active: filterUnchecked}" @click.left.prevent="toggleFilterUnchecked" @keydown.stop.enter="toggleFilterUnchecked")
-          input(type="checkbox" v-model="filterUnchecked")
-          span Todo
-      .button-wrap
-        button(:class="{active: moreFiltersVisible, 'has-badge': totalFiltersActive}" @click.left.prevent.stop="toggleMoreFiltersVisible")
-          img.icon(src="@/assets/filter.svg")
-          span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
-        MoreFilters(:visible="moreFiltersVisible")
+section.filters
+  .row
+    .button-wrap
+      label.show-users(:class="{active: filterShowUsers}" @click.left.prevent="toggleFilterShowUsers" @keydown.stop.enter="toggleFilterShowUsers")
+        input(type="checkbox" v-model="filterShowUsers")
+        User(:user="currentUser" :key="currentUser.id" :hideYouLabel="true" :isSmall="true")
+    .button-wrap
+      label(:class="{active: filterShowDateUpdated}" @click.left.prevent="toggleFilterShowDateUpdated" @keydown.stop.enter="toggleFilterShowDateUpdated")
+        input(type="checkbox" v-model="filterShowDateUpdated")
+        img.icon.time(src="@/assets/time.svg")
+    .button-wrap
+      label(:class="{active: filterUnchecked}" @click.left.prevent="toggleFilterUnchecked" @keydown.stop.enter="toggleFilterUnchecked")
+        input(type="checkbox" v-model="filterUnchecked")
+        span Todo
+    .button-wrap
+      button(:class="{active: moreFiltersVisible, 'has-badge': totalFiltersActive}" @click.left.prevent.stop="toggleMoreFiltersVisible")
+        img.icon(src="@/assets/filter.svg")
+        span.badge.info(v-if="totalFiltersActive") {{totalFiltersActive}}
+      MoreFilters(:visible="moreFiltersVisible")
 </template>
 
 <script>

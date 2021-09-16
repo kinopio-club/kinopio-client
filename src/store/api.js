@@ -6,7 +6,7 @@ import merge from 'lodash-es/merge'
 import nanoid from 'nanoid'
 
 let host = 'https://kinopio-server.herokuapp.com'
-if (process.env.NODE_ENV === 'development') {
+if (import.meta.env.NODE_ENV === 'development') {
   host = 'http://kinopio.local:3000'
 }
 

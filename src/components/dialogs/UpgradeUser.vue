@@ -61,7 +61,7 @@ let stripePublishableKey, stripe, elements, cardNumber, cardExpiry, cardCvc
 let customer, paymentMethod, subscription
 let invoice, paymentIntent
 
-if (process.env.NODE_ENV === 'development') {
+if (import.meta.env.NODE_ENV === 'development') {
   stripePublishableKey = 'pk_test_51IiftNDFIr5ywhwoBAVavNoA1ig4RdmmC73ZEuuuOAPxN5DHJyXsNpNtYhuUN885xoEHmq97HNaqfhJHFQh87IrH00F8eStuuX'
 } else {
   stripePublishableKey = 'pk_live_51IiftNDFIr5ywhwo9dUo1W2kZ2dwjWRUVh1QcUJ3YWc9ZAobDziUKWldKbthPtZbiq33kfRHQYrnBhvMlsomfOsB00f6Qvgm3B'
@@ -115,7 +115,7 @@ export default {
     },
     priceId () {
       let monthly, yearly
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.NODE_ENV === 'development') {
         monthly = 'price_1IjPHfDFIr5ywhwoFUltkq7s'
         yearly = 'price_1IjPHQDFIr5ywhwoFMHQ3tPq'
       } else {

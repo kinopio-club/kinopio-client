@@ -82,7 +82,7 @@ export default {
       }
     },
     isDevelopment () {
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.NODE_ENV === 'development') {
         return true
       } else {
         return false

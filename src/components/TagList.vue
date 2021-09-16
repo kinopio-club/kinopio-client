@@ -11,9 +11,8 @@ span.tag-list(@click.left="closeDialogs")
       @selectItem="selectItem"
     )
     ul.results-list
-      template(v-for="(tag in tagsFiltered")
+      template(v-for="tag in tagsFiltered" :key="tag.id")
         li(
-          :key="tag.id"
           :data-tag-id="tag.id"
           tabindex="0"
           @click.left.stop="toggleTagDetailsIsVisible($event, tag)"

@@ -20,21 +20,21 @@ tlds = String.raw`(\.` + tlds + ')'
 export default {
   kinopioDomain () {
     let domain = 'https://kinopio.club'
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.NODE_ENV === 'development') {
       domain = 'http://kinopio.local:8080'
     }
     return domain
   },
   host () {
     let host = 'https://kinopio-server.herokuapp.com'
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.NODE_ENV === 'development') {
       host = 'http://kinopio.local:3000'
     }
     return host
   },
   websocketHost () {
     let host = 'wss://kinopio-server.herokuapp.com'
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.NODE_ENV === 'development') {
       host = 'ws://kinopio.local:3000'
     }
     return host
@@ -993,7 +993,7 @@ export default {
   urlIsSpace (url) {
     if (!url) { return }
     let spaceUrlPattern
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.NODE_ENV === 'development') {
       // https://regexr.com/5hjc2
       spaceUrlPattern = new RegExp(/(?:kinopio\.local:.*\/)(.*)\b/gi)
     } else {

@@ -20,7 +20,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
 // export const store = createStore({
-  strict: process.env.NODE_ENV !== 'production',
+  strict: import.meta.env.NODE_ENV !== 'production',
   state: {
     pageHeight: 0,
     pageWidth: 0,

@@ -11,8 +11,8 @@ export default new Router({
 // const router = createRouter({
 
   mode: 'history',
-  // history: createWebHistory(process.env.BASE_URL) // or createMemoryHistory or createWebHashHistory , not sure the diffs
-  base: process.env.BASE_URL,
+  // history: createWebHistory(import.meta.env.BASE_URL) // or createMemoryHistory or createWebHashHistory , not sure the diffs
+  base: import.meta.env.BASE_URL,
   // base option is now passed as the first argument to createWebHistory
   routes: [
     {
