@@ -1347,6 +1347,10 @@ article
         white-space pre-line
         &.is-checked
           text-decoration line-through
+          h1,
+          h2,
+          h3
+            text-decoration line-through
         &.has-checkbox
           .audio
             width 132px
