@@ -947,10 +947,10 @@ export default {
       const length = this.name.length
       if (!element) { return }
       element.focus()
-      if (position && element) {
+      if (position) {
         element.setSelectionRange(position, position)
       }
-      if (length && element) {
+      if (length) {
         element.setSelectionRange(length, length)
       }
       this.triggerUpdatePositionInVisualViewport()

@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.3",
-    "@vue/devtools": "^5.1.1",
+    "@vue/devtools": "^5.3.4",
     "@vue/eslint-config-standard": "^4.0.0",
     "babel-eslint": "^10.0.1",
     "eslint": "^7.32.0",
