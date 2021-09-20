@@ -40,8 +40,7 @@ export default createRouter({
           store.commit('passwordResetIsVisible', true)
         }
         next()
-        window.history.replaceState({}, document.title, window.location.origin)
-        // history.replaceState(history.state, '', url)
+        history.replaceState({}, document.title, window.location.origin)
       }
     }, {
       path: '/update-arena-access-token',
@@ -51,8 +50,7 @@ export default createRouter({
         const urlParams = new URLSearchParams(window.location.search)
         const arenaReturnedCode = urlParams.get('code')
         next()
-        window.history.replaceState({}, document.title, window.location.origin)
-        // history.replaceState(history.state, '', url)
+        history.replaceState({}, document.title, window.location.origin)
         store.dispatch('currentUser/updateArenaAccessToken', arenaReturnedCode)
       }
     }, {

@@ -267,7 +267,6 @@ export default {
     signOut () {
       cache.removeAll()
       window.history.replaceState({}, 'Kinopio', '/')
-      // history.replaceState(history.state, '', url)
       location.reload()
     },
     triggerSignUpOrInIsVisible () {
