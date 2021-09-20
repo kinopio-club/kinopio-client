@@ -1,5 +1,5 @@
 <template lang='pug'>
-#app.app(
+.app(
   @mousemove="broadcastCursor"
   @touchmove="broadcastCursor"
   @touchstart="isTouchDevice"

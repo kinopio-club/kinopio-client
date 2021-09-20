@@ -1418,7 +1418,7 @@ export default {
     // Background
 
     loadBackground: (context) => {
-      const element = document.getElementById('app')
+      const element = document.querySelector('.app')
       if (!element) { return }
       const background = context.state.background
       if (utils.urlIsImage(background)) {
@@ -1429,7 +1429,7 @@ export default {
       context.dispatch('updateBackgroundZoom')
     },
     updateBackgroundZoom: async (context) => {
-      const element = document.getElementById('app')
+      const element = document.querySelector('.app')
       if (!element) { return }
       const defaultBackground = {
         width: 310,
