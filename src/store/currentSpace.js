@@ -1518,7 +1518,6 @@ export default {
       const clients = state.clients.length
       const total = users + collaborators + spectators + clients
       const shouldBroadcast = Boolean(total > 2) // currentUser and currentClient
-      console.log('🌺 shouldBroadcast', shouldBroadcast, 'clientCount', total)
       return shouldBroadcast
     },
     shouldUpdateApi: (state, getters, rootState, rootGetters) => {

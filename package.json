@@ -23,16 +23,15 @@
     "valid-hex-color": "^1.1.1",
     "vue": "^3.2.6",
     "vue-router": "^3.0.3",
-    "vuex": "^3.0.1"
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.3",
     "@vue/devtools": "^5.1.1",
     "@vue/eslint-config-standard": "^4.0.0",
-    "@vue/test-utils": "1.0.0-beta.29",
     "babel-eslint": "^10.0.1",
     "eslint": "^7.32.0",
-    "eslint-plugin-vue": "^5.0.0",
+    "eslint-plugin-vue": "^7.18.0",
     "lint-staged": "^11.1.2",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2",

@@ -5,11 +5,12 @@ import router from './router'
 import store from './store/store'
 
 // Create global app instance
-
-createApp({
+const app = createApp({
   router,
-  store,
   render () {
     return h(App)
   }
-}).mount('#app')
+})
+
+app.use(store)
+app.mount('#app')

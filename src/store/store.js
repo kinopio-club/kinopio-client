@@ -10,16 +10,11 @@ import upload from '@/store/upload.js'
 // store plugins
 import websocket from '@/store/plugins/websocket.js'
 
-import Vue from 'vue'
-import Vuex from 'vuex'
-// import { createStore } from 'vuex'
+import { createStore } from 'vuex'
 import nanoid from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
 
-Vue.use(Vuex)
-
-export default new Vuex.Store({
-// export const store = createStore({
+export default createStore({
   strict: import.meta.env.MODE !== 'production',
   state: {
     pageHeight: 0,
