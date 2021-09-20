@@ -60,13 +60,17 @@ import templates from '@/data/templates.js'
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import MoonPhase from '@/components/MoonPhase.vue'
 import utils from '@/utils.js'
+import { defineAsyncComponent } from 'vue'
 
 import last from 'lodash-es/last'
+const User = defineAsyncComponent({
+  loader: () => import('@/components/User.vue')
+})
 
 export default {
   name: 'SpaceList',
   components: {
-    User: () => import('@/components/User.vue'),
+    User,
     ResultsFilter,
     MoonPhase
   },

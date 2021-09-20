@@ -53,8 +53,12 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keyd
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import { defineAsyncComponent } from 'vue'
 
 import { loadStripe } from '@stripe/stripe-js/pure'
+const User = defineAsyncComponent({
+  loader: () => import('@/components/User.vue')
+})
 
 // https://stripe.com/docs/billing/subscriptions/fixed-price
 let stripePublishableKey, stripe, elements, cardNumber, cardExpiry, cardCvc
@@ -70,7 +74,7 @@ if (import.meta.env.MODE === 'development') {
 export default {
   name: 'UpgradeUser',
   components: {
-    User: () => import('@/components/User.vue'),
+    User,
     Loader
   },
   props: {

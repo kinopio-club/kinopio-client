@@ -39,7 +39,6 @@ import uniq from 'lodash-es/uniq'
 export default {
   name: 'MoreFilters',
   components: {
-    User: () => import('@/components/User.vue'),
     ResultsFilter
   },
   props: {
@@ -208,8 +207,8 @@ export default {
     }
   },
   watch: {
-    visible (visible) {
-      if (visible) {
+    visible (value) {
+      if (value) {
         this.updateDialogHeight()
         this.updateResultsSectionHeight()
       }

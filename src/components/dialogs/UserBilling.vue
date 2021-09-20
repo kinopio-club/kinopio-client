@@ -42,11 +42,15 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
 <script>
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
+import { defineAsyncComponent } from 'vue'
+const User = defineAsyncComponent({
+  loader: () => import('@/components/User.vue')
+})
 
 export default {
   name: 'UserBilling',
   components: {
-    User: () => import('@/components/User.vue'),
+    User,
     Loader
   },
   props: {

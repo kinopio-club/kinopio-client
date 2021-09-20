@@ -22,7 +22,7 @@
     "smooth-scroll-into-view-if-needed": "^1.1.23",
     "valid-hex-color": "^1.1.1",
     "vue": "^3.2.6",
-    "vue-router": "^3.0.3",
+    "vue-router": "^4.0.11",
     "vuex": "^4.0.2"
   },
   "devDependencies": {

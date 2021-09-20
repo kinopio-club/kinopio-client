@@ -49,6 +49,10 @@ import InviteCollaborators from '@/components/dialogs/InviteCollaborators.vue'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import privacy from '@/data/privacy.js'
+import { defineAsyncComponent } from 'vue'
+const UserDetails = defineAsyncComponent({
+  loader: () => import('@/components/dialogs/UserDetails.vue')
+})
 
 export default {
   name: 'Share',
@@ -56,7 +60,7 @@ export default {
     PrivacyButton,
     InviteCollaborators,
     UserList,
-    UserDetails: () => import('@/components/dialogs/UserDetails.vue')
+    UserDetails
   },
   props: {
     visible: Boolean

@@ -131,16 +131,14 @@ export default {
     stripUrlPath () {
       title = document.title
       pathname = window.location.pathname
+      let url = '/'
       if (this.isJournalPath) {
-        window.history.replaceState({}, title, '/journal')
-        // history.replaceState(history.state, '', url)
-      } else {
-        window.history.replaceState({}, title, '/')
-        // history.replaceState(history.state, '', url)
+        url = '/journal'
       }
+      history.replaceState(history.state, '', url)
     },
     restoreUrlPath () {
-      window.history.replaceState({}, title, pathname)
+      history.replaceState({}, title, pathname)
     },
     updateCurrentDeviceView () {
       if (utils.isMobile()) {

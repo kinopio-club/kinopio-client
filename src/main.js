@@ -6,11 +6,11 @@ import store from './store/store'
 
 // Create global app instance
 const app = createApp({
-  router,
   render () {
     return h(App)
   }
 })
 
+app.use(router)
 app.use(store)
 app.mount('#app')

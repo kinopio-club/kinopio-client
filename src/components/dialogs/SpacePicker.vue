@@ -34,15 +34,22 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
 import scrollIntoView from '@/scroll-into-view.js'
 import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
+import { defineAsyncComponent } from 'vue'
 
 import fuzzy from 'fuzzy'
+const User = defineAsyncComponent({
+  loader: () => import('@/components/User.vue')
+})
+const SpaceList = defineAsyncComponent({
+  loader: () => import('@/components/SpaceList.vue')
+})
 
 export default {
   name: 'SpacePicker',
   components: {
     Loader,
-    SpaceList: () => import('@/components/SpaceList.vue'),
-    User: () => import('@/components/User.vue')
+    SpaceList,
+    User
   },
   props: {
     visible: Boolean,
@@ -168,8 +175,11 @@ export default {
         }
       })
     },
-    userSpaces (userSpaces) {
-      this.updateSpaces()
+    userSpaces: {
+      handler (userSpaces) {
+        this.updateSpaces()
+      },
+      deep: true
     }
   }
 }

@@ -78,7 +78,7 @@ export default {
     if (!audio) { return }
     audio.addEventListener('loadedmetadata', this.getTotalTime)
   },
-  beforeDestroy () {
+  beforeUnmount () {
     this.pauseAudio()
   },
   methods: {

@@ -13,11 +13,15 @@ span
 
 <script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
+import { defineAsyncComponent } from 'vue'
+const User = defineAsyncComponent({
+  loader: () => import('@/components/User.vue')
+})
 
 export default {
   name: 'UserList',
   components: {
-    User: () => import('@/components/User.vue'),
+    User,
     ResultsFilter
   },
   props: {

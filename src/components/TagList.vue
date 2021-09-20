@@ -151,11 +151,14 @@ export default {
     }
   },
   watch: {
-    tags (tags) {
-      const updatedTag = tags.find(tag => tag.name === this.tagDetailsTag.name)
-      if (updatedTag) {
-        this.updateTagDetailsTag(updatedTag)
-      }
+    tags: {
+      handler (tags) {
+        const updatedTag = tags.find(tag => tag.name === this.tagDetailsTag.name)
+        if (updatedTag) {
+          this.updateTagDetailsTag(updatedTag)
+        }
+      },
+      deep: true
     },
     visible (visible) {
       if (visible) {

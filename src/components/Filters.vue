@@ -24,13 +24,17 @@ section.filters
 import MoreFilters from '@/components/dialogs/MoreFilters.vue'
 import frames from '@/data/frames.js'
 import utils from '@/utils.js'
+import { defineAsyncComponent } from 'vue'
 
 import uniq from 'lodash-es/uniq'
+const User = defineAsyncComponent({
+  loader: () => import('@/components/User.vue')
+})
 
 export default {
   name: 'Filters',
   components: {
-    User: () => import('@/components/User.vue'),
+    User,
     MoreFilters
   },
   created () {

@@ -1,23 +1,10 @@
-import Vue from 'vue'
-import Router from 'vue-router'
-// import { createRouter, createWebHistory } from 'vue-router'
-
 import Space from '@/views/Space.vue'
 import store from '@/store/store.js'
 
-Vue.use(Router)
+import { createRouter, createWebHistory } from 'vue-router'
 
-// const space = (props, context) => {
-//   return Space
-// }
-
-export default new Router({
-// const router = createRouter({
-
-  mode: 'history',
-  // history: createWebHistory(import.meta.env.BASE_URL) // or createMemoryHistory or createWebHashHistory , not sure the diffs
-  base: import.meta.env.BASE_URL,
-  // base option is now passed as the first argument to createWebHistory
+export default createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',

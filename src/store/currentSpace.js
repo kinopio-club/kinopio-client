@@ -425,6 +425,7 @@ export default {
         space = utils.normalizeSpaceMetaOnly(space)
         context.commit('updateOtherSpaces', space, { root: true })
         const linkedCard = links.find(link => link.linkToSpaceId === space.id)
+        if (!linkedCard) { return }
         Vue.nextTick(() => {
           context.dispatch('updateCardConnectionPaths', { cardId: linkedCard.id, shouldUpdateApi: canEditSpace })
         })
@@ -668,15 +669,11 @@ export default {
       if (spaceHasUrl) {
         context.commit('currentSpacePath', spaceUrl, { root: true })
         if (navigator.standalone) { return }
-        window.history.pushState({ spaceId: space.id }, `${space.name} – Kinopio`, spaceUrl)
-        // https://next.router.vuejs.org/guide/migration/#usage-of-history-state
-        // await router.push(url)
-        // history.replaceState({ ...history.state, ...myState }, '')
+        history.pushState({ spaceId: space.id }, `${space.name} – Kinopio`, spaceUrl)
       } else {
         context.commit('currentSpacePath', '/', { root: true })
         if (navigator.standalone) { return }
-        window.history.replaceState({}, '', '/')
-        // history.replaceState(history.state, '', url)
+        history.replaceState({}, '', '/')
       }
     },
     updateSpacePageSize: (context) => {

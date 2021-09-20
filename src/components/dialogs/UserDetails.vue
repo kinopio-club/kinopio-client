@@ -108,13 +108,17 @@ import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+import { defineAsyncComponent } from 'vue'
+const User = defineAsyncComponent({
+  loader: () => import('@/components/User.vue')
+})
 
 export default {
   name: 'UserDetails',
   components: {
     ColorPicker,
     UserSettings,
-    User: () => import('@/components/User.vue'),
+    User,
     Loader,
     SpacePicker,
     UpgradeUser
