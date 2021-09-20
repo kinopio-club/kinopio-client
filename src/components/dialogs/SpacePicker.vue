@@ -52,7 +52,6 @@ export default {
     user: Object,
     loading: Boolean,
     showUserIfCurrentUserIsCollaborator: Boolean,
-
     parentIsCardDetails: Boolean,
     position: Object,
     search: String,
@@ -60,6 +59,7 @@ export default {
   },
   data () {
     return {
+      isLoading: false,
       spaces: []
     }
   },
@@ -137,10 +137,10 @@ export default {
     },
     async updateWithRemoteSpaces () {
       if (!this.spaces.length) {
-        this.loading = true
+        this.isLoading = true
       }
       const spaces = await this.$store.dispatch('api/getUserSpaces')
-      this.loading = false
+      this.isLoading = false
       if (!spaces) { return }
       this.spaces = spaces
       this.excludeCurrentSpace()
@@ -164,6 +164,7 @@ export default {
         if (visible) {
           this.updateSpaces()
           this.scrollIntoView()
+          this.isLoading = this.loading
         }
       })
     },
