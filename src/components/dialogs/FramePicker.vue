@@ -4,18 +4,20 @@ dialog.narrow.frame-details(v-if="visible" :open="visible" ref="dialog" @click.l
     ul.results-list
       template(v-for="frame in frames" :key="frame.id")
         li(:class="{active: frameIsSelected(frame)}" @click.left="changeCardFrame(frame)" tabindex="0" v-on:keyup.enter="changeCardFrame(frame)")
-          .badge
-            template(v-if="frameHasBadge(frame)")
-              img(:src="frameBadge(frame).path")
+          FrameBadge(:frame="frame")
           .name {{frame.name}}
 </template>
 
 <script>
 import scrollIntoView from '@/scroll-into-view.js'
 import frames from '@/data/frames.js'
-import utils from '@/utils.js'
+import FrameBadge from '@/components/FrameBadge.vue'
 
 export default {
+  name: 'FramePicker',
+  components: {
+    FrameBadge
+  },
   props: {
     visible: Boolean,
     cards: Array
@@ -39,14 +41,6 @@ export default {
     frameIsSelected (frame) {
       const cardFrameIds = this.cards.map(card => card.frameId)
       return cardFrameIds.includes(frame.id)
-    },
-    frameHasBadge (frame) {
-      return Boolean(frame.badge)
-    },
-    frameBadge (frame) {
-      return {
-        path: utils.assetUrl(frame.badge)
-      }
     },
     scrollIntoView () {
       const element = this.$refs.dialog

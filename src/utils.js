@@ -20,9 +20,9 @@ tlds = String.raw`(\.` + tlds + ')'
 export default {
   assetUrl (path, type) {
     if (type) {
-      return `/src/assets/${path}.${type}`
+      return `@/assets/${path}.${type}`
     } else {
-      return `/src/assets/${path}`
+      return `@/assets/${path}`
     }
   },
   kinopioDomain () {

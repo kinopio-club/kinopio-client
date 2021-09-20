@@ -24,7 +24,7 @@ dialog.more-filters.narrow(v-if="visible" :open="visible" ref="dialog" :style="{
         li.frames-list(:class="{active: frameIsActive(frame)}" @click.left="toggleFilteredCardFrame(frame)" tabindex="0" v-on:keyup.enter="toggleFilteredCardFrame(frame)")
           input(type="checkbox" :checked="isSelected(frame)")
           .badge
-            img(:src="frameBadge(frame).path")
+            FrameBadge(:frame="frame")
           .name {{frame.name}}
 
 </template>
@@ -33,13 +33,15 @@ dialog.more-filters.narrow(v-if="visible" :open="visible" ref="dialog" :style="{
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import frames from '@/data/frames.js'
 import utils from '@/utils.js'
+import FrameBadge from '@/components/FrameBadge.vue'
 
 import uniq from 'lodash-es/uniq'
 
 export default {
   name: 'MoreFilters',
   components: {
-    ResultsFilter
+    ResultsFilter,
+    FrameBadge
   },
   props: {
     visible: Boolean
@@ -199,11 +201,6 @@ export default {
     frameIsActive (frame) {
       const frames = this.$store.state.filteredFrameIds
       return frames.includes(frame.id)
-    },
-    frameBadge (frame) {
-      return {
-        path: utils.assetUrl(frame.badge)
-      }
     }
   },
   watch: {

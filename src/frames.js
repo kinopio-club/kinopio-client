@@ -7,18 +7,15 @@ const frames = [
   },
   {
     id: 1,
-    name: 'Garden Leaves',
-    badge: 'garden-leaves/flower.png'
+    name: 'Garden Leaves'
   },
   {
     id: 2,
-    name: 'Magical Helper',
-    badge: 'magical-helper/hat.png'
+    name: 'Magical Helper'
   },
   {
     id: 3,
-    name: 'Tea Time',
-    badge: 'tea-time/pot.png'
+    name: 'Tea Time'
   }
 ]
 
