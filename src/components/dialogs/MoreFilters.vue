@@ -62,7 +62,7 @@ export default {
   },
   computed: {
     connectionTypes () {
-      return this.$store.state.currentSpace.connectionTypes
+      return utils.clone(this.$store.state.currentSpace.connectionTypes)
     },
     frames () {
       const cards = utils.clone(this.$store.state.currentSpace.cards)
@@ -70,7 +70,7 @@ export default {
       framesInUse = uniq(framesInUse.filter(frame => frame))
       return framesInUse.map(frame => frames[frame])
     },
-    tags () { return this.$store.getters['currentSpace/spaceTags']() },
+    tags () { return utils.clone(this.$store.getters['currentSpace/spaceTags']()) },
     allItems () {
       const tags = this.tags.map(tag => {
         tag.isTag = true
