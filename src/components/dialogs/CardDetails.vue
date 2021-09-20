@@ -40,9 +40,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.up="triggerPickerNavigation"
         @keydown.enter="triggerPickerSelectItem"
         @keydown.tab="triggerPickerSelectItem"
-        @keydown.221="triggerPickerSelectItem"
-        @keydown.bracket-right="triggerPickerSelectItem"
-        @keydown.57="triggerCommentAddClosingBrackets"
 
         @focus="resetPinchCounterZoomDecimal"
       )
@@ -239,6 +236,7 @@ export default {
   },
   data () {
     return {
+      lastSelectionStartPosition: 0,
       framePickerIsVisible: false,
       imagePickerIsVisible: false,
       cardTipsIsVisible: false,
@@ -530,6 +528,20 @@ export default {
     collaborationInfoIsVisible () { return this.$store.state.currentUser.shouldShowCardCollaborationInfo }
   },
   methods: {
+    selectionStartPosition () {
+      let startPosition = this.lastSelectionStartPosition
+      if (this.$refs.name) {
+        const position = this.$refs.name.selectionStart
+        this.lastSelectionStartPosition = position
+        startPosition = position
+      }
+      return startPosition
+    },
+    setSelectionRange (start, end) {
+      if (this.$refs.name) {
+        this.$refs.name.setSelectionRange(start, end)
+      }
+    },
     cancelOpening () {
       shouldCancelOpening = true
     },
@@ -861,7 +873,7 @@ export default {
       const name = this.card.name
       const newName = name.substring(0, position) + '\n' + name.substring(position)
       setTimeout(() => {
-        this.$refs.name.setSelectionRange(position + 1, position + 1)
+        this.setSelectionRange(position + 1, position + 1)
       })
       this.insertedLineBreak = true
       this.updateCardName(newName)
@@ -1057,15 +1069,15 @@ export default {
 
     // Comment
 
-    triggerCommentAddClosingBrackets (event) {
-      const cursorPosition = this.$refs.name.selectionStart
+    triggerCommentAddClosingBrackets () {
+      const cursorPosition = this.selectionStartPosition()
       const previousCharacter = this.name[cursorPosition - 1]
       if (previousCharacter === '(') {
         const name = this.name
         const newName = `${name.substring(0, cursorPosition)}))${name.substring(cursorPosition)}`
         this.updateCardName(newName)
         this.$nextTick(() => {
-          this.$refs.name.setSelectionRange(cursorPosition, cursorPosition)
+          this.setSelectionRange(cursorPosition, cursorPosition)
         })
       }
     },
@@ -1073,13 +1085,16 @@ export default {
     // Pickers
 
     updatePicker (event) {
-      const cursorPosition = this.$refs.name.selectionStart
+      const cursorPosition = this.selectionStartPosition()
       const previousCharacter = this.name[cursorPosition - 1]
       const previousCharacterIsBlank = utils.hasBlankCharacters(previousCharacter)
       const key = event.key
       const keyIsLettterOrNumber = key.length === 1
       const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets()
       const isCursorInsideSlashCommand = this.isCursorInsideSlashCommand()
+      if (key === '(') {
+        this.triggerCommentAddClosingBrackets()
+      }
       if (utils.hasBlankCharacters(key)) {
         this.hideSpacePicker()
       } else if (key === '/' && previousCharacterIsBlank) {
@@ -1112,6 +1127,7 @@ export default {
       if (shouldTrigger) {
         this.$store.commit('triggerPickerSelect')
         event.preventDefault()
+        return
       }
       // prevent trailing ]
       if (event.key === ']' && this.tag.pickerIsVisible) {
@@ -1147,20 +1163,20 @@ export default {
       this.space.pickerIsVisible = true
     },
     slashText () {
-      const cursorPosition = this.$refs.name.selectionStart
+      const cursorPosition = this.selectionStartPosition()
       const start = this.slashTextToCursor() // /txt|
       let end = this.name.substring(cursorPosition, this.name.length) // |abc xyz
       end = utils.splitByBlankCharacters(end)[0]
       return start + end
     },
     slashTextToCursor () {
-      const cursorPosition = this.$refs.name.selectionStart
+      const cursorPosition = this.selectionStartPosition()
       const textPosition = this.slashTextPosition()
       const text = this.name.substring(textPosition, cursorPosition)
       return text
     },
     slashTextPosition () {
-      const cursorPosition = this.$refs.name.selectionStart
+      const cursorPosition = this.selectionStartPosition()
       let text = this.name.substring(0, cursorPosition)
       const textPosition = text.lastIndexOf('/')
       if (textPosition === -1) { return }
@@ -1235,7 +1251,7 @@ export default {
     },
     tagStartText () {
       // ...[[abc
-      const cursorPosition = this.$refs.name.selectionStart
+      const cursorPosition = this.selectionStartPosition()
       const start = this.name.substring(0, cursorPosition)
       let startPosition = start.lastIndexOf('[[')
       if (startPosition === -1) { return }
@@ -1244,7 +1260,7 @@ export default {
     },
     tagEndText () {
       // xyz]]...
-      const cursorPosition = this.$refs.name.selectionStart
+      const cursorPosition = this.selectionStartPosition()
       const end = this.name.substring(cursorPosition)
       const endPosition = end.indexOf(']]')
       if (endPosition === -1) { return }
@@ -1257,7 +1273,7 @@ export default {
       this.tag.pickerSearch = start + end
     },
     isCursorInsideTagBrackets () {
-      this.cursorPosition = this.$refs.name.selectionStart // for template
+      this.cursorPosition = this.selectionStartPosition() // for template
       const start = this.tagStartText()
       const end = this.tagEndText()
       if (start === undefined || end === undefined) { return }
@@ -1282,21 +1298,21 @@ export default {
       }
     },
     addClosingBrackets () {
-      const cursorPosition = this.$refs.name.selectionStart
+      const cursorPosition = this.selectionStartPosition()
       const name = this.name
       const newName = `${name.substring(0, cursorPosition)}]]${name.substring(cursorPosition)}`
       this.updateCardName(newName)
       this.$nextTick(() => {
-        this.$refs.name.setSelectionRange(cursorPosition, cursorPosition)
+        this.setSelectionRange(cursorPosition, cursorPosition)
       })
     },
     moveCursorPastTagEnd () {
-      const cursorPosition = this.$refs.name.selectionStart
+      const cursorPosition = this.selectionStartPosition()
       let endText = this.name.substring(cursorPosition)
       let newCursorPosition = endText.indexOf(']]')
       newCursorPosition = cursorPosition + newCursorPosition + 2
       this.$nextTick(() => {
-        this.$refs.name.setSelectionRange(newCursorPosition, newCursorPosition)
+        this.setSelectionRange(newCursorPosition, newCursorPosition)
       })
     },
     updatePreviousTags () {
@@ -1361,7 +1377,7 @@ export default {
     updateTagBracketsWithTag (tag) {
       this.previousSelectedTag = tag
       this.updatePreviousTags()
-      const cursorPosition = this.$refs.name.selectionStart
+      const cursorPosition = this.selectionStartPosition()
       const tagStartText = this.tagStartText()
       const tagEndText = this.tagEndText()
       const text = tagStartText + tagEndText

@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import createVuePlugin from '@vitejs/plugin-vue'
 import path from 'path'
 
 export default defineConfig({
@@ -9,17 +9,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src')
     }
   },
-  plugins: [
-    vue({
-      template: {
-        compilerOptions: {
-          compatConfig: {
-            MODE: 2
-          }
-        }
-      }
-    })
-  ],
+  plugins: [createVuePlugin()],
   server: {
     port: 8080
   }
