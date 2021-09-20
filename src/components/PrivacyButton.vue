@@ -2,10 +2,10 @@
 .button-wrap.privacy-button(v-if="isSpaceMember || isInvitedButCannotEditSpace")
   button(@click.left.stop="togglePrivacyPickerIsVisible" :disabled="isInvitedButCannotEditSpace" :class="{ active: privacyPickerIsVisible }")
     template(v-if="showIconOnly")
-      img.icon(:src="privacyIcon(privacyState).path" :class="privacyState.name")
+      PrivacyIcon(:privacy="privacyState.name")
     template(v-else)
       .badge(:class="privacyState.color")
-        img.icon(:src="privacyIcon(privacyState).path" :class="privacyState.name")
+        PrivacyIcon(:privacy="privacyState.name")
         span {{name}}
     p.description(v-if="showDescription") {{description}}
   PrivacyPicker(:visible="privacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
@@ -13,13 +13,15 @@
 
 <script>
 import PrivacyPicker from '@/components/dialogs/PrivacyPicker.vue'
+import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import utils from '@/utils.js'
 import privacy from '@/data/privacy.js'
 
 export default {
   name: 'PrivacyButton',
   components: {
-    PrivacyPicker
+    PrivacyPicker,
+    PrivacyIcon
   },
   props: {
     privacyPickerIsVisible: Boolean,
@@ -52,11 +54,6 @@ export default {
     },
     updateSpaces () {
       this.$emit('updateSpaces')
-    },
-    privacyIcon (privacyState) {
-      return {
-        path: utils.assetUrl(privacyState.icon, 'svg')
-      }
     }
   }
 }

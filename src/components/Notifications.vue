@@ -18,7 +18,7 @@ aside.notifications(@click.left="closeAllDialogs")
 
   .persistent-item.success(v-if="notifySignUpToEditSpace" ref="readOnly" :class="{'notification-jiggle': readOnlyJiggle}")
     p
-      img.icon(:src="privacyIcon" :class="privacyName")
+      PrivacyIcon(:privacy="privacyState.name")
       template(v-if="spacePrivacyIsOpen")
         span This space is open to edits, but you'll need to sign up or in first
       template(v-else)
@@ -105,11 +105,15 @@ import cache from '@/cache.js'
 import privacy from '@/data/privacy.js'
 import utils from '@/utils.js'
 import templates from '@/data/templates.js'
+import PrivacyIcon from '@/components/PrivacyIcon.vue'
 
 let wasOffline
 
 export default {
   name: 'Notifications',
+  components: {
+    PrivacyIcon
+  },
   data () {
     return {
       readOnlyJiggle: false,
@@ -170,8 +174,6 @@ export default {
         return state.name === this.$store.state.currentSpace.privacy
       })
     },
-    privacyIcon () { return utils.assetUrl(this.privacyState.icon, 'svg') },
-    privacyName () { return this.privacyState.name },
     spacePrivacyIsOpen () { return this.privacyName === 'open' },
     cardsCreatedCountFromLimit () {
       const cardsCreatedLimit = this.$store.state.cardsCreatedLimit
@@ -191,7 +193,7 @@ export default {
   methods: {
     icon (icon) {
       return {
-        path: utils.assetUrl(icon, 'svg')
+        path: require(`@/assets/${icon}.svg`)
       }
     },
     closeAllDialogs () {

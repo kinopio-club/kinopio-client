@@ -49,18 +49,18 @@ span.space-list-wrap
           //- space details
           .name
             span {{space.name}}
-            img.icon.privacy-icon(v-if="spaceIsNotClosed(space)" :src="privacyIcon(space)")
+            PrivacyIcon(:privacy="space.privacy" :closedIsNotVisible="true")
             img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
 
 </template>
 
 <script>
-import privacy from '@/data/privacy.js'
 import templates from '@/data/templates.js'
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import MoonPhase from '@/components/MoonPhase.vue'
 import utils from '@/utils.js'
 import { defineAsyncComponent } from 'vue'
+import PrivacyIcon from '@/components/PrivacyIcon.vue'
 
 import last from 'lodash-es/last'
 const User = defineAsyncComponent({
@@ -72,7 +72,8 @@ export default {
   components: {
     User,
     ResultsFilter,
-    MoonPhase
+    MoonPhase,
+    PrivacyIcon
   },
   props: {
     spaces: Array,
@@ -182,17 +183,6 @@ export default {
     spaceIsTemplate (space) {
       const templateSpaceIds = templates.spaces().map(template => template.id)
       return templateSpaceIds.includes(space.id)
-    },
-    spaceIsNotClosed (space) {
-      return space.privacy !== 'closed'
-    },
-    privacyIcon (space) {
-      const privacyState = privacy.states().find(state => {
-        return state.name === space.privacy
-      })
-      if (privacyState) {
-        return utils.assetUrl(privacyState.icon, 'svg')
-      }
     },
     showInExplore (space) {
       if (this.hideExploreBadge) { return }

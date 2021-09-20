@@ -5,17 +5,21 @@ dialog.narrow.privacy-picker(v-if="visible" :open="visible" @click.left.stop)
       template(v-for="(privacyState in privacyStates")
         li(:class="{ active: privacyStateIsActive(privacyState) }" @click.left="select(privacyState)")
           .badge(:class="privacyState.color")
-            img.icon(:src="privacyIcon(privacyState).path" :class="privacyState.name")
+            PrivacyIcon(:privacy="privacyState.name")
             span {{ privacyStateName(privacyState) }}
           p.description {{ privacyStateDescription(privacyState) }}
 </template>
 
 <script>
+import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import privacy from '@/data/privacy.js'
 import utils from '@/utils.js'
 
 export default {
   name: 'PrivacyPicker',
+  components: {
+    PrivacyIcon
+  },
   props: {
     visible: Boolean
   },
@@ -51,11 +55,6 @@ export default {
       this.$store.dispatch('currentSpace/updateSpace', { privacy: privacyState.name })
       this.updateSpaces()
       this.$emit('closeDialogs')
-    },
-    privacyIcon (privacyState) {
-      return {
-        path: utils.assetUrl(privacyState.icon, 'svg')
-      }
     },
     updateSpaces () {
       this.$emit('updateSpaces')

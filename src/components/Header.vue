@@ -24,8 +24,7 @@ header(:style="visualViewportPosition")
                 span Read Only
             MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
             span {{currentSpaceName}}
-            //- privacy
-            img.icon.privacy-icon(v-if="spaceIsNotClosed" :src="privacyIcon" :class="privacyName")
+            PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
             //- explore
             img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
           SpaceDetails(:visible="spaceDetailsIsVisible")
@@ -121,7 +120,7 @@ import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
 import Search from '@/components/dialogs/Search.vue'
 import AddSpace from '@/components/dialogs/AddSpace.vue'
-import privacy from '@/data/privacy.js'
+import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import utils from '@/utils.js'
 
 const maxIterations = 30
@@ -145,7 +144,8 @@ export default {
     UpgradeUser,
     Search,
     MoonPhase,
-    AddSpace
+    AddSpace,
+    PrivacyIcon
   },
   data () {
     return {
@@ -271,26 +271,6 @@ export default {
       const id = this.$store.state.currentSpace.id
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(id)
-    },
-    spaceIsNotClosed () {
-      const space = this.$store.state.currentSpace
-      return space.privacy !== 'closed'
-    },
-    privacyIcon () {
-      const space = this.$store.state.currentSpace
-      const privacyState = privacy.states().find(state => {
-        return state.name === space.privacy
-      })
-      if (!privacyState) { return }
-      return utils.assetUrl(privacyState.icon, 'svg')
-    },
-    privacyName () {
-      const space = this.$store.state.currentSpace
-      const privacyState = privacy.states().find(state => {
-        return state.name === space.privacy
-      })
-      if (!privacyState) { return }
-      return privacyState.name
     },
     shouldShowInExplore () {
       const privacy = this.$store.state.currentSpace.privacy
