@@ -2,14 +2,7 @@ import App from './App.vue'
 import router from './router'
 import store from './store/store'
 
-import { createApp, h, configureCompat } from 'vue'
-
-// silence false positives
-// https://v3.vuejs.org/guide/migration/migration-build.html#installation
-configureCompat({
-  RENDER_FUNCTION: false,
-  WATCH_ARRAY: false
-})
+import { createApp, h } from 'vue'
 
 // Create global app instance
 const app = createApp({

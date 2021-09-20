@@ -14,7 +14,7 @@ import { createStore } from 'vuex'
 import nanoid from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
 
-export default createStore({
+const store = createStore({
   strict: import.meta.env.MODE !== 'production',
   state: {
     pageHeight: 0,
@@ -1067,3 +1067,5 @@ export default createStore({
   },
   plugins: [websocket()]
 })
+
+export default store

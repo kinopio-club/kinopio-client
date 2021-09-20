@@ -6,7 +6,7 @@ import moonphase from '@/moonphase.js'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
-import Vue from 'vue'
+import { nextTick } from 'vue'
 import randomColor from 'randomcolor'
 import nanoid from 'nanoid'
 import random from 'lodash-es/random'
@@ -426,7 +426,7 @@ export default {
         context.commit('updateOtherSpaces', space, { root: true })
         const linkedCard = links.find(link => link.linkToSpaceId === space.id)
         if (!linkedCard) { return }
-        Vue.nextTick(() => {
+        nextTick(() => {
           context.dispatch('updateCardConnectionPaths', { cardId: linkedCard.id, shouldUpdateApi: canEditSpace })
         })
       })
@@ -495,7 +495,7 @@ export default {
         body: space
       }, { root: true })
       context.commit('addUserToSpace', user)
-      Vue.nextTick(() => {
+      nextTick(() => {
         context.dispatch('updateCardsDimensions')
       })
     },
@@ -510,7 +510,7 @@ export default {
       context.dispatch('updateWindowHistory', { space, isRemote: currentUserIsSignedIn })
       context.commit('addUserToSpace', user)
       context.dispatch('loadBackground')
-      Vue.nextTick(() => {
+      nextTick(() => {
         context.dispatch('updateCardsDimensions')
       })
     },
@@ -523,7 +523,7 @@ export default {
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
       context.commit('clearSearch', null, { root: true })
       context.commit('restoreSpace', uniqueNewSpace)
-      Vue.nextTick(() => {
+      nextTick(() => {
         context.dispatch('updateUserLastSpaceId')
         context.dispatch('saveNewSpace')
         context.commit('notifyNewUser', false, { root: true })
@@ -537,7 +537,7 @@ export default {
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       context.dispatch('createNewSpace')
       const cards = context.state.cards
-      Vue.nextTick(() => {
+      nextTick(() => {
         if (cards.length) {
           context.dispatch('updateCardConnectionPaths', { cardId: cards[1].id, connections: context.state.connections })
         }
@@ -677,7 +677,7 @@ export default {
       }
     },
     updateSpacePageSize: (context) => {
-      Vue.nextTick(() => {
+      nextTick(() => {
         context.dispatch('updateSpacePageSize', null, { root: true })
       })
     },
@@ -704,6 +704,7 @@ export default {
       context.commit('loadJournalSpaceTomorrow', false, { root: true })
     },
     loadSpace: async (context, { space }) => {
+      const timeStart = utils.normalizeToUnixTime(new Date())
       const emptySpace = utils.emptySpace(space.id)
       const cachedSpace = cache.space(space.id)
       const user = context.rootState.currentUser
@@ -742,10 +743,12 @@ export default {
         context.dispatch('showCardDetails', cardId)
       }
       context.commit('currentUser/updateFavoriteSpaceIsEdited', space.id, { root: true })
-      Vue.nextTick(() => {
+      nextTick(() => {
         context.dispatch('updateIncorrectCardConnectionPaths', { shouldUpdateApi: Boolean(remoteSpace) })
         context.dispatch('scrollCardsIntoView')
       })
+      const timeEnd = utils.normalizeToUnixTime(new Date())
+      console.log(`🐇 space loaded in ${timeEnd - timeStart}ms, cards ${context.state.cards.length}, connections ${context.state.connections.length}`)
     },
     loadLastSpace: (context) => {
       const user = context.rootState.currentUser
@@ -874,7 +877,7 @@ export default {
         x: Math.max(card.x - 100, 0),
         y: Math.max(card.y - 100, 0)
       }
-      Vue.nextTick(() => {
+      nextTick(() => {
         window.scrollTo(position.x, position.y)
       })
     },

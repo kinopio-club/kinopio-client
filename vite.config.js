@@ -5,11 +5,10 @@ import path from 'path'
 export default defineConfig({
   resolve: {
     alias: {
-      vue: '@vue/compat',
       '@': path.resolve(__dirname, './src')
     }
   },
-  plugins: [createVuePlugin()],
+  plugins: [createVuePlugin()], // .vue support
   server: {
     port: 8080
   }
