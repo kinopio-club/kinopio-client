@@ -662,7 +662,6 @@ export default {
       context.commit('addNotification', { message: `You were removed as a collaborator from ${name}`, type: 'info' }, { root: true })
     },
     updateWindowHistory: (context, { space, isRemote }) => {
-      console.log('🍑 updateWindowHistory', space, isRemote) // TEMP LOG
       space = space || context.state
       const spaceUrl = utils.url(space)
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
@@ -677,6 +676,7 @@ export default {
         if (navigator.standalone) { return }
         history.replaceState({}, '', '/')
       }
+      console.log('🍑 updateWindowHistory', space, isRemote, history.state) // TEMP LOG
     },
     updateWindowTitle: (context) => {
       const spaceName = context.state.name
@@ -688,8 +688,8 @@ export default {
       } else {
         title = 'Kinopio'
       }
-      console.log('🍆 updateWindowTitle', title) // TEMP LOG
       document.title = title
+      console.log('🍆 updateWindowTitle', title) // TEMP LOG
     },
     updateSpacePageSize: (context) => {
       nextTick(() => {
