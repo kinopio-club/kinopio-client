@@ -671,12 +671,12 @@ export default {
         context.commit('currentSpacePath', spaceUrl, { root: true })
         if (navigator.standalone) { return }
         history.pushState({ spaceId: space.id }, `${space.name} – Kinopio`, spaceUrl)
+        console.log('🍑 updateWindowHistory', space, isRemote, history.state) // TEMP LOG
       } else {
         context.commit('currentSpacePath', '/', { root: true })
         if (navigator.standalone) { return }
         history.replaceState({}, '', '/')
       }
-      console.log('🍑 updateWindowHistory', space, isRemote, history.state) // TEMP LOG
     },
     updateWindowTitle: (context) => {
       const spaceName = context.state.name

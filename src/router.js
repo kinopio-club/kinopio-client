@@ -3,8 +3,6 @@ import store from '@/store/store.js'
 
 import { createRouter, createWebHistory } from 'vue-router'
 
-console.log('👼 base url, should be /', import.meta.env.BASE_URL) // TEMP LOG
-
 export default createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
