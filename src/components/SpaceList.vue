@@ -106,6 +106,7 @@ export default {
         const spaces = this.spaces
         const currentSpace = spaces.find(space => space.id === this.focusOnId)
         this.selectSpace(currentSpace)
+        this.$store.commit('shouldPreventNextEnterKey', true)
       }
     })
   },
