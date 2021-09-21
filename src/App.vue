@@ -265,6 +265,7 @@ label // used for checkbox buttons
   border-radius 3px
   cursor pointer
   user-select none
+  color var(--primary)
   .down-arrow
     padding-left 4px
     vertical-align middle
