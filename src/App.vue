@@ -71,16 +71,6 @@ export default {
       return color
     },
     spaceName () { return this.$store.state.currentSpace.name },
-    pageName () {
-      const spaceName = this.spaceName
-      if (spaceName === 'Hello Kinopio') {
-        return 'Kinopio'
-      } else if (spaceName) {
-        return `${spaceName} – Kinopio`
-      } else {
-        return 'Kinopio'
-      }
-    },
     isDevelopment () {
       if (import.meta.env.MODE === 'development') {
         return true
@@ -142,11 +132,6 @@ export default {
       } else {
         metaDescription.setAttribute('content', topLeftCard.name)
       }
-    }
-  },
-  watch: {
-    pageName (pageName) {
-      document.title = pageName
     }
   }
 }
