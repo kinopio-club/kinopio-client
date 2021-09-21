@@ -67,19 +67,41 @@ export default {
     overflow hidden
     display inline-block
     vertical-align middle
-    .background-tint
-      height 100%
-      width 100%
-      position absolute
-      top 0
-      left 0
-      mix-blend-mode multiply
-    .background-image
-      height 100%
-      width 100%
+  .background-tint
+    height 100%
+    width 100%
+    position absolute
+    top 0
+    left 0
+    mix-blend-mode multiply
+  .background-image
+    height 100%
+    width 100%
+    background-size cover
+    position absolute
+    top 0
+    left 0
+    mix-blend-mode multiply
+  .preview-button
+    position relative
+    cursor pointer
+    &:hover,
+    &:active,
+    &.active
+      background-color var(--primary-background)
       background-size cover
-      position absolute
-      top 0
-      left 0
-      mix-blend-mode multiply
+      background-position center
+    &:hover
+      box-shadow var(--button-hover-shadow)
+      background var(--secondary-hover-background)
+    &:active
+      box-shadow var(--button-active-inset-shadow)
+      background var(--secondary-active-background)
+
+  button
+    width 24px
+    height 24px
+    background-size cover
+    background-position center
+
 </style>
