@@ -486,6 +486,7 @@ export default {
 .is-not-interacting
   *
     pointer-events none !important
+    cursor default
 
 svg.connections,
 .connection-labels
