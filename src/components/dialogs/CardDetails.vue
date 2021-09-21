@@ -818,6 +818,10 @@ export default {
       this.$store.dispatch('currentSpace/updateCard', update)
     },
     updateCardName (newName) {
+      const cardId = this.$store.state.cardDetailsIsVisibleForCardId
+      if (this.card.id !== cardId) {
+        return
+      }
       const userId = this.$store.state.currentUser.id
       const card = {
         name: newName,
