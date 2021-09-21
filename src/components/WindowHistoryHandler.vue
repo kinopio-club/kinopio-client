@@ -24,7 +24,7 @@ export default {
     currentSpaceName () { return this.currentSpace.name }
   },
   methods: {
-    updateWindowHistory ({ space, isRemote }) {
+    async updateWindowHistory ({ space, isRemote }) {
       console.log('🚛', space, isRemote) // TEMP LOG
       space = space || this.currentSpace
       const spaceUrl = utils.url(space)
@@ -33,7 +33,9 @@ export default {
       if (spaceHasUrl) {
         this.$store.commit('currentSpacePath', spaceUrl, { root: true })
         if (navigator.standalone) { return }
-        this.$router.push(spaceUrl)
+        await this.$router.push(spaceUrl)
+        const state = utils.clone(this.$store.state)
+        history.replaceState({ ...history.state, ...state }, '')
         console.log('🍑 updateWindowHistory', space, isRemote, history.state) // TEMP LOG
       } else {
         this.$store.commit('currentSpacePath', '/', { root: true })
