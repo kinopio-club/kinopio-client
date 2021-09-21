@@ -14,6 +14,7 @@
   Footer
   TagDetails
   LinkDetails
+  WindowHistoryHandler
   KeyboardShortcutsHandler
   .preload
     .logo-hover
@@ -30,6 +31,7 @@
 import Header from '@/components/Header.vue'
 import MagicPaint from '@/components/layers/MagicPaint.vue'
 import Footer from '@/components/Footer.vue'
+import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
 import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
 import LinkDetails from '@/components/dialogs/LinkDetails.vue'
@@ -42,6 +44,7 @@ export default {
     MagicPaint,
     Footer,
     KeyboardShortcutsHandler,
+    WindowHistoryHandler,
     TagDetails,
     LinkDetails,
     OffscreenMarkers

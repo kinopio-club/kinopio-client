@@ -359,6 +359,7 @@ const store = createStore({
     triggerShowPreviousSearchCard: () => {},
     triggerMoreFiltersIsNotVisible: () => {},
     triggerShowConnectionDetails: (state, options) => {},
+    triggerUpdateWindowHistory: (state, options) => {},
 
     // Cards
 

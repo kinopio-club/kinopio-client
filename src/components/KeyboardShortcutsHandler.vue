@@ -15,6 +15,7 @@ let browserZoomLevel = 0
 let prevCursorPosition
 
 export default {
+  name: 'KeyboardShortcutsHandler',
   mounted () {
     window.addEventListener('keyup', this.handleShortcuts)
     // event.metaKey only works on keydown
