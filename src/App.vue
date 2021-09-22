@@ -90,15 +90,17 @@ export default {
       return size + 'px'
     },
     buildHash () {
-      const regex = /(app\.)([a-z0-9])\w+/
+      const regex = /(index\.)([a-z0-9])\w+/
       const scripts = Array.from(document.querySelectorAll('script'))
       const path = scripts.find(script => {
         const src = script.src
-        return src.includes('app')
+        return src.includes('index')
       })
+      console.log('🍱', scripts, path) // TEMP LOG
       if (!path) { return }
-      let hash = path.src.match(regex)[0] // app.768db305407f4c847d44
-      return hash.replace('app.', '') // 768db305407f4c847d44
+      let hash = path.src.match(regex)[0] // index.xyzabc123.js
+      console.log(hash) // TEMP LOG
+      return hash.replace('index.', '') // xyzabc123
     },
     pageCursor () {
       if (this.$store.state.currentUserIsPanning) {
