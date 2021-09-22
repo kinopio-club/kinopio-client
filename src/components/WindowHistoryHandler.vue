@@ -30,7 +30,6 @@ export default {
         await this.$router.push(spaceUrl)
         const state = utils.clone(this.$store.state)
         history.replaceState({ ...history.state, ...state }, '')
-        console.log('🍑 updateWindowHistory', space, isRemote, history.state) // TEMP LOG
       } else {
         this.$store.commit('currentSpacePath', '/', { root: true })
         if (navigator.standalone) { return }
@@ -48,7 +47,6 @@ export default {
         title = 'Kinopio'
       }
       document.title = title
-      console.log('🍆 updateWindowTitle', title) // TEMP LOG
     }
   },
   watch: {
