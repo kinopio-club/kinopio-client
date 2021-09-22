@@ -3,7 +3,11 @@ aside.notifications(@click.left="closeAllDialogs")
   .item(v-for="item in items" v-bind:key="item.id" :data-notification-id="item.id" :class="item.type")
     p
       span.label-badge(v-if="item.label") {{item.label}}
-      img.icon(v-if="item.icon" :src="icon(item.icon).path" :class="item.icon")
+      template(v-if="item.icon")
+        img.icon(v-if="item.icon === 'open'" src="@/assets/open.svg" class="open")
+        img.icon(v-else-if="item.icon === 'press-and-hold'" src="@/assets/press-and-hold.svg" class="press-and-hold")
+        img.icon(v-else-if="item.icon === 'add'" src="@/assets/add.svg" class="add")
+        img.icon(v-else-if="item.icon === 'cut'" src="@/assets/cut.svg" class="cut")
       span {{item.message}}
 
   .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
@@ -191,11 +195,6 @@ export default {
     }
   },
   methods: {
-    icon (icon) {
-      return {
-        path: require(`@/assets/${icon}.svg`)
-      }
-    },
     closeAllDialogs () {
       this.$store.dispatch('closeAllDialogs', 'Notifications.closeAllDialogs')
     },
