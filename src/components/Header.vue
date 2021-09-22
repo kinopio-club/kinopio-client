@@ -122,6 +122,7 @@ import Search from '@/components/dialogs/Search.vue'
 import AddSpace from '@/components/dialogs/AddSpace.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import utils from '@/utils.js'
+import uniqBy from 'lodash-es/uniqBy'
 
 const maxIterations = 30
 let currentIteration, updatePositionTimer
@@ -239,7 +240,12 @@ export default {
       let collaborators = this.currentSpace.collaborators
       return collaborators.filter(user => user.id !== this.currentUser.id)
     },
-    spectators () { return this.currentSpace.spectators },
+    spectators () {
+      let spectators = this.currentSpace.spectators
+      spectators = spectators.filter(user => user.id !== this.currentUser.id)
+      spectators = uniqBy(spectators, 'id')
+      return spectators
+    },
     userIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
     currentSpaceName () {
       const id = this.$store.state.currentSpace.id
