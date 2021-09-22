@@ -96,10 +96,8 @@ export default {
         const src = script.src
         return src.includes('index')
       })
-      console.log('🍱', scripts, path) // TEMP LOG
       if (!path) { return }
       let hash = path.src.match(regex)[0] // index.xyzabc123.js
-      console.log(hash) // TEMP LOG
       return hash.replace('index.', '') // xyzabc123
     },
     pageCursor () {
