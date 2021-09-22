@@ -15,11 +15,15 @@ dialog.narrow.favorites-filters(v-if="visible" :open="visible" @click.left.stop 
 </template>
 
 <script>
+import { defineAsyncComponent } from 'vue'
+const User = defineAsyncComponent({
+  loader: () => import('@/components/User.vue')
+})
 
 export default {
   name: 'FavoritesFilters',
   components: {
-    User: () => import('@/components/User.vue')
+    User
   },
   props: {
     visible: Boolean

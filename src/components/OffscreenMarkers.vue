@@ -30,6 +30,9 @@ export default {
     window.addEventListener('scroll', this.updateOffscreenCards)
     this.updateOffscreenCards()
   },
+  beforeUnmount () {
+    window.removeEventListener('scroll', this.updateOffscreenCards)
+  },
   data () {
     return {
       offscreenCards: [],
@@ -119,6 +122,7 @@ export default {
       let cards = utils.clone(this.$store.state.currentSpace.cards)
       cards = cards.map(card => {
         const element = document.querySelector(`article [data-card-id="${card.id}"]`)
+        if (!element) { return card }
         const rect = element.getBoundingClientRect()
         card.x = card.x + (rect.width / 2) - (markerWidth / 2)
         card.x = card.x * zoom

@@ -18,7 +18,7 @@ dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :sty
         span can be restored here
       p(v-if="!currentUserCanEditSpace")
         span.badge.info
-          img.icon(:src="privacyIcon" :class="privacyName")
+          PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
           span You need to be a collaborator
     template(v-if="!cardsVisible")
       p Removed spaces can be restored here
@@ -38,8 +38,8 @@ dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :sty
             span Remove All
 
     ul.results-list
-      template(v-for="(item in items")
-        li(:key="item.id" @click.left="restore(item)" tabindex="0" v-on:keyup.enter="restore(item)")
+      template(v-for="item in items" :key="item.id")
+        li(@click.left="restore(item)" tabindex="0" v-on:keyup.enter="restore(item)")
           .badge
             img.undo.icon(src="@/assets/undo.svg")
           .name {{item.name}}
@@ -62,13 +62,14 @@ import merge from 'lodash-es/merge'
 import scrollIntoView from '@/scroll-into-view.js'
 import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
-import privacy from '@/data/privacy.js'
+import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import utils from '@/utils.js'
 
 export default {
   name: 'Restore',
   components: {
-    Loader
+    Loader,
+    PrivacyIcon
   },
   props: {
     visible: Boolean
@@ -109,9 +110,8 @@ export default {
         return this.removedSpaces
       }
     },
-    currentSpaceName () {
-      return this.$store.state.currentSpace.name
-    },
+    currentSpace () { return this.$store.state.currentSpace },
+    currentSpaceName () { return this.currentSpace.name },
     removeAllTypeLabel () {
       if (this.cardsVisible) {
         return 'cards'
@@ -121,22 +121,6 @@ export default {
     },
     currentUserCanEditSpace () {
       return this.$store.getters['currentUser/canEditSpace']()
-    },
-    privacyIcon () {
-      const space = this.$store.state.currentSpace
-      const privacyState = privacy.states().find(state => {
-        return state.name === space.privacy
-      })
-      if (!privacyState) { return }
-      return require(`@/assets/${privacyState.icon}.svg`)
-    },
-    privacyName () {
-      const space = this.$store.state.currentSpace
-      const privacyState = privacy.states().find(state => {
-        return state.name === space.privacy
-      })
-      if (!privacyState) { return }
-      return privacyState.name
     }
   },
   methods: {

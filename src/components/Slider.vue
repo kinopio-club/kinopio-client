@@ -69,6 +69,10 @@ export default {
     window.addEventListener('mouseup', this.endMovePlayhead)
     this.updateButtonPosition()
   },
+  beforeUnmount () {
+    window.removeEventListener('mousemove', this.dragPlayhead)
+    window.removeEventListener('mouseup', this.endMovePlayhead)
+  },
   computed: {
     integerValue () {
       return Math.round(this.value)

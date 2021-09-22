@@ -34,15 +34,22 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
 import scrollIntoView from '@/scroll-into-view.js'
 import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
+import { defineAsyncComponent } from 'vue'
 
 import fuzzy from 'fuzzy'
+const User = defineAsyncComponent({
+  loader: () => import('@/components/User.vue')
+})
+const SpaceList = defineAsyncComponent({
+  loader: () => import('@/components/SpaceList.vue')
+})
 
 export default {
   name: 'SpacePicker',
   components: {
     Loader,
-    SpaceList: () => import('@/components/SpaceList.vue'),
-    User: () => import('@/components/User.vue')
+    SpaceList,
+    User
   },
   props: {
     visible: Boolean,
@@ -52,7 +59,6 @@ export default {
     user: Object,
     loading: Boolean,
     showUserIfCurrentUserIsCollaborator: Boolean,
-
     parentIsCardDetails: Boolean,
     position: Object,
     search: String,
@@ -60,6 +66,7 @@ export default {
   },
   data () {
     return {
+      isLoading: false,
       spaces: []
     }
   },
@@ -130,17 +137,13 @@ export default {
         this.updateWithRemoteSpaces()
       }
       this.excludeCurrentSpace()
-      this.checkIfShouldFilterSpacesBySearch()
-    },
-    checkIfShouldFilterSpacesBySearch () {
-      if (!this.parentIsCardDetails) { }
     },
     async updateWithRemoteSpaces () {
       if (!this.spaces.length) {
-        this.loading = true
+        this.isLoading = true
       }
       const spaces = await this.$store.dispatch('api/getUserSpaces')
-      this.loading = false
+      this.isLoading = false
       if (!spaces) { return }
       this.spaces = spaces
       this.excludeCurrentSpace()
@@ -164,11 +167,15 @@ export default {
         if (visible) {
           this.updateSpaces()
           this.scrollIntoView()
+          this.isLoading = this.loading
         }
       })
     },
-    userSpaces (userSpaces) {
-      this.updateSpaces()
+    userSpaces: {
+      handler (userSpaces) {
+        this.updateSpaces()
+      },
+      deep: true
     }
   }
 }

@@ -112,13 +112,6 @@ export default {
     connectionTypes.forEach(connectionType => space.connectionTypes.push(connectionType))
     this.storeLocal(`space-${spaceId}`, space)
   },
-  // Added aug 2019, can safely remove this in aug 2020
-  updateBetaSpaceId (newId) {
-    const updatedSpace = this.space('1')
-    updatedSpace.id = newId
-    this.storeLocal(`space-${newId}`, updatedSpace)
-    this.removeLocal('space-1')
-  },
   saveSpace (space) {
     space.cacheDate = Date.now()
     this.storeLocal(`space-${space.id}`, space)

@@ -1,14 +1,10 @@
-import Vue from 'vue'
-import Router from 'vue-router'
-
 import Space from '@/views/Space.vue'
 import store from '@/store/store.js'
 
-Vue.use(Router)
+import { createRouter, createWebHistory } from 'vue-router'
 
-export default new Router({
-  mode: 'history',
-  base: process.env.BASE_URL,
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
@@ -44,7 +40,7 @@ export default new Router({
           store.commit('passwordResetIsVisible', true)
         }
         next()
-        window.history.replaceState({}, document.title, window.location.origin)
+        history.replaceState({}, document.title, window.location.origin)
       }
     }, {
       path: '/update-arena-access-token',
@@ -54,7 +50,7 @@ export default new Router({
         const urlParams = new URLSearchParams(window.location.search)
         const arenaReturnedCode = urlParams.get('code')
         next()
-        window.history.replaceState({}, document.title, window.location.origin)
+        history.replaceState({}, document.title, window.location.origin)
         store.dispatch('currentUser/updateArenaAccessToken', arenaReturnedCode)
       }
     }, {
@@ -145,3 +141,5 @@ export default new Router({
     // }
   ]
 })
+
+export default router

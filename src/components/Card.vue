@@ -1032,6 +1032,7 @@ export default {
       this.$store.dispatch('currentSpace/incrementSelectedCardsZ')
     },
     showCardDetails (event) {
+      if (this.$store.state.currentUserIsPainting) { return }
       if (isMultiTouch) { return }
       if (this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning) { return }
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
@@ -1347,6 +1348,10 @@ article
         white-space pre-line
         &.is-checked
           text-decoration line-through
+          h1,
+          h2,
+          h3
+            text-decoration line-through
         &.has-checkbox
           .audio
             width 132px

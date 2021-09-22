@@ -11,9 +11,8 @@ span.tag-list(@click.left="closeDialogs")
       @selectItem="selectItem"
     )
     ul.results-list
-      template(v-for="(tag in tagsFiltered")
+      template(v-for="tag in tagsFiltered" :key="tag.id")
         li(
-          :key="tag.id"
           :data-tag-id="tag.id"
           tabindex="0"
           @click.left.stop="toggleTagDetailsIsVisible($event, tag)"
@@ -152,11 +151,14 @@ export default {
     }
   },
   watch: {
-    tags (tags) {
-      const updatedTag = tags.find(tag => tag.name === this.tagDetailsTag.name)
-      if (updatedTag) {
-        this.updateTagDetailsTag(updatedTag)
-      }
+    tags: {
+      handler (tags) {
+        const updatedTag = tags.find(tag => tag.name === this.tagDetailsTag.name)
+        if (updatedTag) {
+          this.updateTagDetailsTag(updatedTag)
+        }
+      },
+      deep: true
     },
     visible (visible) {
       if (visible) {

@@ -55,8 +55,8 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
   section.results-section(ref="resultsSection" :style="{'max-height': resultsSectionMaxHeight}")
     ResultsFilter(:items="connectionTypes" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredConnectionTypes")
     ul.results-list
-      template(v-for="(type in connectionTypesFiltered")
-        li(:class="{ active: connectionTypeIsActive(type), disabled: !canEditConnection }" @click.left="changeConnectionType(type)" :key="type.id")
+      template(v-for="type in connectionTypesFiltered" :key="type.id")
+        li(:class="{ active: connectionTypeIsActive(type), disabled: !canEditConnection }" @click.left="changeConnectionType(type)")
           .badge(:style="{backgroundColor: type.color}")
           .name {{type.name}}
 </template>

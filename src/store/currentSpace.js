@@ -6,7 +6,7 @@ import moonphase from '@/moonphase.js'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
-import Vue from 'vue'
+import { nextTick } from 'vue'
 import randomColor from 'randomcolor'
 import nanoid from 'nanoid'
 import random from 'lodash-es/random'
@@ -28,16 +28,6 @@ export default {
     restoreSpace: (state, space) => {
       space = utils.removeRemovedCardsFromSpace(space)
       Object.assign(state, space)
-    },
-    // Added aug 2019, can safely remove this in aug 2020
-    updateBetaSpace: (state) => {
-      if (state.id === '1') {
-        const newId = nanoid()
-        state.id = newId
-        state.name = 'Hello Kinopio'
-        cache.updateBetaSpaceId(newId)
-        cache.updateSpace('name', state.name, state.id)
-      }
     },
 
     // Users
@@ -88,13 +78,7 @@ export default {
       state.collaborators = state.collaborators.filter(user => {
         return user.id !== oldUser.id
       })
-      const updatedSpace = utils.clone(state)
-      // same as updateSpace() to force reactivity
-      const updates = Object.keys(updatedSpace)
-      updates.forEach(key => {
-        Vue.set(state, key, updatedSpace[key])
-        cache.updateSpace(key, state[key], state.id)
-      })
+      cache.updateSpace('collaborators', state.collaborators, state.id)
     },
     // websocket receive
     updateUser: (state, updatedUser) => {
@@ -114,7 +98,7 @@ export default {
     updateSpace: (state, updatedSpace) => {
       const updates = Object.keys(updatedSpace)
       updates.forEach(key => {
-        Vue.set(state, key, updatedSpace[key])
+        state[key] = updatedSpace[key]
         cache.updateSpace(key, state[key], state.id)
       })
     },
@@ -128,13 +112,14 @@ export default {
       if (updatedCard.y) {
         updatedCard.y = Math.round(updatedCard.y)
       }
-      state.cards.map(card => {
+      state.cards = state.cards.map(card => {
         if (card.id === updatedCard.id) {
           const updates = Object.keys(updatedCard)
           updates.forEach(key => {
-            Vue.set(card, key, updatedCard[key])
+            card[key] = updatedCard[key]
           })
         }
+        return card
       })
       cache.updateSpace('cards', state.cards, state.id)
     },
@@ -162,10 +147,6 @@ export default {
       cache.updateSpace('cards', state.cards, state.id)
     },
     removeCard: (state, cardToRemove) => {
-      if (!state.removedCards) {
-        // migration oct 2019
-        Vue.set(state, 'removedCards', [])
-      }
       const card = state.cards.find(card => card.id === cardToRemove.id)
       state.cards = state.cards.filter(card => card.id !== cardToRemove.id)
       state.removedCards.unshift(card)
@@ -206,12 +187,7 @@ export default {
         if (connection.id === updatedConnection.id) {
           const updates = Object.keys(updatedConnection)
           updates.forEach(key => {
-            // update properties differently depending on whether it's existing or new
-            if (connection[key]) {
-              connection[key] = updatedConnection[key]
-            } else {
-              Vue.set(connection, key, updatedConnection[key])
-            }
+            connection[key] = updatedConnection[key]
           })
         }
       })
@@ -223,12 +199,7 @@ export default {
         if (connection.id === updatedConnection.id) {
           const updates = Object.keys(updatedConnection)
           updates.forEach(key => {
-            // update properties differently depending on whether it's existing or new
-            if (connection[key]) {
-              connection[key] = updatedConnection[key]
-            } else {
-              Vue.set(connection, key, updatedConnection[key])
-            }
+            connection[key] = updatedConnection[key]
           })
         }
       })
@@ -268,12 +239,7 @@ export default {
     updateLabelIsVisibleForConnection: (state, { connectionId, labelIsVisible }) => {
       state.connections.map(connection => {
         if (connection.id === connectionId) {
-          // update properties differently depending on whether it's existing or new
-          if (connection.labelIsVisible) {
-            connection.labelIsVisible = labelIsVisible
-          } else {
-            Vue.set(connection, 'labelIsVisible', labelIsVisible)
-          }
+          connection.labelIsVisible = labelIsVisible
         }
       })
       cache.updateSpace('connections', state.connections, state.id)
@@ -380,7 +346,7 @@ export default {
         await context.dispatch('createNewHelloSpace')
         context.dispatch('updateUserLastSpaceId')
       }
-      context.dispatch('updateWindowHistory', { isRemote })
+      context.commit('triggerUpdateWindowHistory', { isRemote }, { root: true })
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const shouldShow = context.rootState.currentUser.shouldShowNewUserNotification
       if (!currentUserIsSignedIn && shouldShow) {
@@ -459,7 +425,8 @@ export default {
         space = utils.normalizeSpaceMetaOnly(space)
         context.commit('updateOtherSpaces', space, { root: true })
         const linkedCard = links.find(link => link.linkToSpaceId === space.id)
-        Vue.nextTick(() => {
+        if (!linkedCard) { return }
+        nextTick(() => {
           context.dispatch('updateCardConnectionPaths', { cardId: linkedCard.id, shouldUpdateApi: canEditSpace })
         })
       })
@@ -528,7 +495,7 @@ export default {
         body: space
       }, { root: true })
       context.commit('addUserToSpace', user)
-      Vue.nextTick(() => {
+      nextTick(() => {
         context.dispatch('updateCardsDimensions')
       })
     },
@@ -540,10 +507,10 @@ export default {
       if (currentUserIsSignedIn) {
         await context.dispatch('api/createSpace', space, { root: true })
       }
-      context.dispatch('updateWindowHistory', { space, isRemote: currentUserIsSignedIn })
+      context.commit('triggerUpdateWindowHistory', { space, isRemote: currentUserIsSignedIn }, { root: true })
       context.commit('addUserToSpace', user)
       context.dispatch('loadBackground')
-      Vue.nextTick(() => {
+      nextTick(() => {
         context.dispatch('updateCardsDimensions')
       })
     },
@@ -556,21 +523,21 @@ export default {
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
       context.commit('clearSearch', null, { root: true })
       context.commit('restoreSpace', uniqueNewSpace)
-      Vue.nextTick(() => {
+      nextTick(() => {
         context.dispatch('updateUserLastSpaceId')
         context.dispatch('saveNewSpace')
         context.commit('notifyNewUser', false, { root: true })
         context.commit('triggerFocusSpaceDetailsName', null, { root: true })
       })
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
-      context.dispatch('updateWindowHistory', { space, isRemote: currentUserIsSignedIn })
+      context.commit('triggerUpdateWindowHistory', { space, isRemote: currentUserIsSignedIn }, { root: true })
     },
     addSpace: (context) => {
       const user = context.rootState.currentUser
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       context.dispatch('createNewSpace')
       const cards = context.state.cards
-      Vue.nextTick(() => {
+      nextTick(() => {
         if (cards.length) {
           context.dispatch('updateCardConnectionPaths', { cardId: cards[1].id, connections: context.state.connections })
         }
@@ -578,7 +545,7 @@ export default {
         context.dispatch('updateUserLastSpaceId')
         context.commit('notifyNewUser', false, { root: true })
         context.commit('notifySignUpToEditSpace', false, { root: true })
-        context.dispatch('updateWindowHistory', {})
+        context.commit('triggerUpdateWindowHistory', {}, { root: true })
       })
     },
     addNewJournalSpace: (context) => {
@@ -624,7 +591,7 @@ export default {
       context.commit('restoreSpace', space)
       context.dispatch('saveNewSpace')
       context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
-      context.dispatch('updateWindowHistory', {})
+      context.commit('triggerUpdateWindowHistory', {}, { root: true })
       context.dispatch('loadBackground')
     },
     getRemoteSpace: async (context, space) => {
@@ -694,23 +661,8 @@ export default {
       cache.removeSpace(space)
       context.commit('addNotification', { message: `You were removed as a collaborator from ${name}`, type: 'info' }, { root: true })
     },
-    updateWindowHistory: (context, { space, isRemote }) => {
-      space = space || context.state
-      const spaceUrl = utils.url(space)
-      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
-      const spaceHasUrl = currentUserIsSignedIn || isRemote
-      if (spaceHasUrl) {
-        context.commit('currentSpacePath', spaceUrl, { root: true })
-        if (navigator.standalone) { return }
-        window.history.pushState({ spaceId: space.id }, `${space.name} – Kinopio`, spaceUrl)
-      } else {
-        context.commit('currentSpacePath', '/', { root: true })
-        if (navigator.standalone) { return }
-        window.history.replaceState({}, '', '/')
-      }
-    },
     updateSpacePageSize: (context) => {
-      Vue.nextTick(() => {
+      nextTick(() => {
         context.dispatch('updateSpacePageSize', null, { root: true })
       })
     },
@@ -737,6 +689,7 @@ export default {
       context.commit('loadJournalSpaceTomorrow', false, { root: true })
     },
     loadSpace: async (context, { space }) => {
+      const timeStart = utils.normalizeToUnixTime(new Date())
       const emptySpace = utils.emptySpace(space.id)
       const cachedSpace = cache.space(space.id)
       const user = context.rootState.currentUser
@@ -750,12 +703,12 @@ export default {
       context.commit('restoreSpace', utils.normalizeSpace(cachedSpace))
       context.dispatch('updateSpacePageSize')
       context.dispatch('loadBackground')
-      context.commit('history/clear', null, { root: true })
+      context.commit('undoHistory/clear', null, { root: true })
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (remoteSpace) {
         // restore remote space
         context.commit('restoreSpace', utils.normalizeSpace(remoteSpace))
-        context.dispatch('history/playback', null, { root: true })
+        context.dispatch('undoHistory/playback', null, { root: true })
         context.dispatch('checkIfShouldNotifySignUpToEditSpace', remoteSpace)
         context.commit('broadcast/joinSpaceRoom', null, { root: true })
         context.dispatch('checkIfShouldNotifySpaceIsRemoved', remoteSpace)
@@ -775,10 +728,12 @@ export default {
         context.dispatch('showCardDetails', cardId)
       }
       context.commit('currentUser/updateFavoriteSpaceIsEdited', space.id, { root: true })
-      Vue.nextTick(() => {
+      nextTick(() => {
         context.dispatch('updateIncorrectCardConnectionPaths', { shouldUpdateApi: Boolean(remoteSpace) })
         context.dispatch('scrollCardsIntoView')
       })
+      const timeEnd = utils.normalizeToUnixTime(new Date())
+      console.log(`🐇 space loaded in ${timeEnd - timeStart}ms, cards ${context.state.cards.length}, connections ${context.state.connections.length}`)
     },
     loadLastSpace: (context) => {
       const user = context.rootState.currentUser
@@ -807,7 +762,7 @@ export default {
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
       await context.dispatch('loadSpace', { space })
-      context.dispatch('updateWindowHistory', { space, isRemote })
+      context.commit('triggerUpdateWindowHistory', { space, isRemote }, { root: true })
       const userIsMember = context.rootGetters['currentUser/isSpaceMember']
       if (!userIsMember) { return }
       context.dispatch('api/addToQueue', {
@@ -907,7 +862,7 @@ export default {
         x: Math.max(card.x - 100, 0),
         y: Math.max(card.y - 100, 0)
       }
-      Vue.nextTick(() => {
+      nextTick(() => {
         window.scrollTo(position.x, position.y)
       })
     },
@@ -974,7 +929,7 @@ export default {
       const update = { name: 'createCard', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
-      context.commit('history/add', update, { root: true })
+      context.commit('undoHistory/add', update, { root: true })
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         delta: 1
@@ -997,7 +952,7 @@ export default {
         const update = { name: 'createCard', body: card }
         context.dispatch('api/addToQueue', update, { root: true })
         context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
-        context.commit('history/add', update, { root: true })
+        context.commit('undoHistory/add', update, { root: true })
       })
     },
     // shim for history/playback
@@ -1027,7 +982,7 @@ export default {
       const update = { name: 'createCard', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
-      context.commit('history/add', update, { root: true })
+      context.commit('undoHistory/add', update, { root: true })
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         delta: 1
       }, { root: true })
@@ -1057,7 +1012,7 @@ export default {
       const update = { name: 'updateCard', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('broadcast/update', { updates: card, type: 'updateCard' }, { root: true })
-      context.commit('history/add', update, { root: true })
+      context.commit('undoHistory/add', update, { root: true })
     },
     updateCardsDimensions: (context) => {
       let cards = utils.clone(context.state.cards)
@@ -1131,7 +1086,7 @@ export default {
         context.commit('removeCard', card)
         const update = { name: 'removeCard', body: card }
         context.dispatch('api/addToQueue', update, { root: true })
-        context.commit('history/add', update, { root: true })
+        context.commit('undoHistory/add', update, { root: true })
       } else {
         context.dispatch('removeCardPermanent', card)
       }
@@ -1163,7 +1118,7 @@ export default {
       const update = { name: 'restoreRemovedCard', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('broadcast/update', { updates: card, type: 'restoreRemovedCard' }, { root: true })
-      context.commit('history/add', update, { root: true })
+      context.commit('undoHistory/add', update, { root: true })
     },
     restoreRemovedSpace: (context, space) => {
       cache.restoreRemovedSpace(space)
@@ -1234,7 +1189,7 @@ export default {
           }
         }
         context.dispatch('api/addToQueue', update, { root: true })
-        context.commit('history/add', update, { root: true })
+        context.commit('undoHistory/add', update, { root: true })
         connections = connections.concat(context.getters.cardConnections(card.id))
       })
       connections = uniqBy(connections, 'id')
@@ -1302,7 +1257,7 @@ export default {
         connection.userId = context.rootState.currentUser.id
         connection.connectionTypeId = connectionType.id
         context.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
-        context.commit('history/add', { name: 'addConnection', body: connection }, { root: true })
+        context.commit('undoHistory/add', { name: 'addConnection', body: connection }, { root: true })
         context.commit('broadcast/update', { updates: connection, type: 'addConnection' }, { root: true })
         context.commit('addConnection', connection)
       }
@@ -1376,7 +1331,7 @@ export default {
       const update = { name: 'removeConnection', body: connection }
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('broadcast/update', { updates: connection, type: 'removeConnection' }, { root: true })
-      context.commit('history/add', update, { root: true })
+      context.commit('undoHistory/add', update, { root: true })
     },
     updateConnectionTypeForConnection: (context, { connectionId, connectionTypeId }) => {
       const updates = { connectionId, connectionTypeId }
@@ -1386,7 +1341,7 @@ export default {
       }
       const update = { name: 'updateConnection', body: connection }
       context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('history/add', update, { root: true })
+      context.commit('undoHistory/add', update, { root: true })
       context.commit('updateConnectionTypeForConnection', updates)
       context.commit('broadcast/update', { updates, type: 'updateConnectionTypeForConnection' }, { root: true })
     },
@@ -1398,7 +1353,7 @@ export default {
       }
       const update = { name: 'updateConnection', body: connection }
       context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('history/add', update, { root: true })
+      context.commit('undoHistory/add', update, { root: true })
       context.commit('updateLabelIsVisibleForConnection', updates)
       context.commit('broadcast/update', { updates, type: 'updateLabelIsVisibleForConnection' }, { root: true })
     },
@@ -1422,14 +1377,14 @@ export default {
       context.commit('addConnectionType', connectionType)
       context.commit('broadcast/update', { updates: connectionType, type: 'addConnectionType' }, { root: true })
       context.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
-      context.commit('history/add', { name: 'addConnectionType', body: connectionType }, { root: true })
+      context.commit('undoHistory/add', { name: 'addConnectionType', body: connectionType }, { root: true })
     },
     updateConnectionType: (context, connectionType) => {
       context.commit('updateConnectionType', connectionType)
       context.commit('broadcast/update', { updates: connectionType, type: 'updateConnectionType' }, { root: true })
       const update = { name: 'updateConnectionType', body: connectionType }
       context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('history/add', update, { root: true })
+      context.commit('undoHistory/add', update, { root: true })
     },
     removeUnusedConnectionTypes: (context) => {
       const connectionTypes = context.state.connectionTypes
@@ -1439,7 +1394,7 @@ export default {
       removeConnectionTypes.forEach(type => {
         const update = { name: 'removeConnectionType', body: type }
         context.dispatch('api/addToQueue', update, { root: true })
-        context.commit('history/add', update, { root: true })
+        context.commit('undoHistory/add', update, { root: true })
         context.commit('removeConnectionType', type)
         context.commit('broadcast/update', { updates: type, type: 'removeConnectionType' }, { root: true })
       })
@@ -1448,7 +1403,7 @@ export default {
     // Background
 
     loadBackground: (context) => {
-      const element = document.getElementById('app')
+      const element = document.querySelector('.app')
       if (!element) { return }
       const background = context.state.background
       if (utils.urlIsImage(background)) {
@@ -1459,7 +1414,7 @@ export default {
       context.dispatch('updateBackgroundZoom')
     },
     updateBackgroundZoom: async (context) => {
-      const element = document.getElementById('app')
+      const element = document.querySelector('.app')
       if (!element) { return }
       const defaultBackground = {
         width: 310,
@@ -1497,7 +1452,7 @@ export default {
       const update = { name: 'addTag', body: tag }
       const broadcastUpdate = { updates: tag, type: 'addTag' }
       context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('history/add', update, { root: true })
+      context.commit('undoHistory/add', update, { root: true })
       context.commit('broadcast/update', broadcastUpdate, { root: true })
       context.commit('remoteTagsIsFetched', false, { root: true })
     },
@@ -1506,7 +1461,7 @@ export default {
       const update = { name: 'removeTag', body: tag }
       const broadcastUpdate = { updates: tag, type: 'removeTag' }
       context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('history/add', update, { root: true })
+      context.commit('undoHistory/add', update, { root: true })
       context.commit('broadcast/update', broadcastUpdate, { root: true })
       context.commit('remoteTagsIsFetched', false, { root: true })
     },
@@ -1514,7 +1469,7 @@ export default {
       context.commit('removeTags', tag)
       const update = { name: 'removeTags', body: tag }
       context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('history/add', update, { root: true })
+      context.commit('undoHistory/add', update, { root: true })
       context.commit('remoteTagsIsFetched', false, { root: true })
     },
     updateTagNameColor: (context, tag) => {
@@ -1522,7 +1477,7 @@ export default {
       const update = { name: 'updateTagNameColor', body: tag }
       const broadcastUpdate = { updates: tag, type: 'updateTagNameColor' }
       context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('history/add', update, { root: true })
+      context.commit('undoHistory/add', update, { root: true })
       context.commit('broadcast/update', broadcastUpdate, { root: true })
       context.commit('remoteTagsIsFetched', false, { root: true })
     },
@@ -1548,7 +1503,6 @@ export default {
       const clients = state.clients.length
       const total = users + collaborators + spectators + clients
       const shouldBroadcast = Boolean(total > 2) // currentUser and currentClient
-      console.log('🌺 shouldBroadcast', shouldBroadcast, 'clientCount', total)
       return shouldBroadcast
     },
     shouldUpdateApi: (state, getters, rootState, rootGetters) => {

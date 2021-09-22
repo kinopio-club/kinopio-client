@@ -89,7 +89,7 @@ export default {
     width 100%
     position relative
     display flex
-    align-items start !important
+    align-items flex-start !important
     color var(--primary)
     text-decoration none
     word-break break-word

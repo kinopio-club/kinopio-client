@@ -231,14 +231,13 @@ export default {
       if (this.loading) { return }
       const newSpaceName = this.newSpaceName || words.randomUniqueName()
       const items = this.selectedItems()
-      let selectedSpace = this.selectedSpace
       if (this.isCardsCreatedIsOverLimit()) {
         this.cardsCreatedIsOverLimit = true
         return
       }
       // action
       if (this.toNewSpace) {
-        selectedSpace = await this.createNewSpace(items, newSpaceName)
+        const selectedSpace = await this.createNewSpace(items, newSpaceName)
         this.notifyNewSpaceSuccess(selectedSpace)
       } else {
         await this.copyToSelectedSpace(items)

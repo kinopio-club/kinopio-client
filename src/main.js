@@ -1,17 +1,16 @@
-import Vue from 'vue'
 import App from './App.vue'
-
 import router from './router'
 import store from './store/store'
 
-// import devtools from '@vue/devtools'
+import { createApp, h } from 'vue'
 
-// if (process.env.NODE_ENV === 'development') {
-//   devtools.connect()
-// }
+// Create global app instance
+const app = createApp({
+  render () {
+    return h(App)
+  }
+})
 
-new Vue({
-  router,
-  store,
-  render: function (h) { return h(App) }
-}).$mount('#app')
+app.use(router)
+app.use(store)
+app.mount('#app')

@@ -9,23 +9,22 @@ dialog.more-filters.narrow(v-if="visible" :open="visible" ref="dialog" :style="{
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="allItems" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredItems")
     ul.results-list
       //- Tags
-      template(v-for="tag in itemsFiltered.tags")
+      template(v-for="tag in itemsFiltered.tags" :key="tag.id")
         li(:class="{ active: tagIsActive(tag) }" @click.left="toggleFilteredTag(tag)" tabindex="0" v-on:keyup.enter="toggleFilteredTag(tag)")
           input(type="checkbox" :checked="isSelected(tag)")
           .badge(:style="{backgroundColor: tag.color}") {{tag.name}}
       //- Connection Types
-      template(v-for="type in itemsFiltered.connectionTypes")
-        li(:class="{ active: connectionTypeIsActive(type) }" @click.left="toggleFilteredConnectionType(type)" :key="type.id" tabindex="0" v-on:keyup.enter="toggleFilteredConnectionType(type)")
+      template(v-for="type in itemsFiltered.connectionTypes" :key="type.id")
+        li(:class="{ active: connectionTypeIsActive(type) }" @click.left="toggleFilteredConnectionType(type)" tabindex="0" v-on:keyup.enter="toggleFilteredConnectionType(type)")
           input(type="checkbox" :checked="isSelected(type)")
           .badge(:style="{backgroundColor: type.color}")
           .name {{type.name}}
       //- Frames
-      template(v-for="(frame in itemsFiltered.frames")
-        li.frames-list(:class="{active: frameIsActive(frame)}" @click.left="toggleFilteredCardFrame(frame)" :key="frame.id" tabindex="0" v-on:keyup.enter="toggleFilteredCardFrame(frame)")
+      template(v-for="(frame in itemsFiltered.frames" :key="frame.id")
+        li.frames-list(:class="{active: frameIsActive(frame)}" @click.left="toggleFilteredCardFrame(frame)" tabindex="0" v-on:keyup.enter="toggleFilteredCardFrame(frame)")
           input(type="checkbox" :checked="isSelected(frame)")
           .badge
-            template
-              img(:src="frameBadge(frame).path")
+            FrameBadge(:frame="frame")
           .name {{frame.name}}
 
 </template>
@@ -34,14 +33,15 @@ dialog.more-filters.narrow(v-if="visible" :open="visible" ref="dialog" :style="{
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import frames from '@/data/frames.js'
 import utils from '@/utils.js'
+import FrameBadge from '@/components/FrameBadge.vue'
 
 import uniq from 'lodash-es/uniq'
 
 export default {
   name: 'MoreFilters',
   components: {
-    User: () => import('@/components/User.vue'),
-    ResultsFilter
+    ResultsFilter,
+    FrameBadge
   },
   props: {
     visible: Boolean
@@ -64,7 +64,7 @@ export default {
   },
   computed: {
     connectionTypes () {
-      return this.$store.state.currentSpace.connectionTypes
+      return utils.clone(this.$store.state.currentSpace.connectionTypes)
     },
     frames () {
       const cards = utils.clone(this.$store.state.currentSpace.cards)
@@ -72,7 +72,7 @@ export default {
       framesInUse = uniq(framesInUse.filter(frame => frame))
       return framesInUse.map(frame => frames[frame])
     },
-    tags () { return this.$store.getters['currentSpace/spaceTags']() },
+    tags () { return utils.clone(this.$store.getters['currentSpace/spaceTags']()) },
     allItems () {
       const tags = this.tags.map(tag => {
         tag.isTag = true
@@ -201,16 +201,11 @@ export default {
     frameIsActive (frame) {
       const frames = this.$store.state.filteredFrameIds
       return frames.includes(frame.id)
-    },
-    frameBadge (frame) {
-      return {
-        path: require(`@/assets/frames/${frame.badge}`)
-      }
     }
   },
   watch: {
-    visible (visible) {
-      if (visible) {
+    visible (value) {
+      if (value) {
         this.updateDialogHeight()
         this.updateResultsSectionHeight()
       }

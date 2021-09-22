@@ -1,6 +1,8 @@
 <template lang="pug">
 dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
+    p About
+  section
     .row
       p Spatial thinking for new ideas and hard problems
     .row
@@ -62,6 +64,7 @@ import utils from '@/utils.js'
 import dayjs from 'dayjs'
 
 const initTime = dayjs(new Date())
+let checkKinopioUpdatesIntervalTimer
 
 export default {
   name: 'About',
@@ -107,9 +110,12 @@ export default {
     const newStuff = data.contents
     this.newStuff = newStuff.slice(0, 5)
     this.checkNewStuffIsUpdated(newStuff[0].id)
-    setInterval(() => {
+    checkKinopioUpdatesIntervalTimer = setInterval(() => {
       this.checkIfKinopioUpdatesAreAvailable()
     }, 1000 * 60 * 60 * 24) // 24 hours
+  },
+  beforeUnmount () {
+    clearInterval(checkKinopioUpdatesIntervalTimer)
   },
   computed: {
     newStuffIsUpdated () { return this.$store.state.newStuffIsUpdated }

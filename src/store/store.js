@@ -3,22 +3,19 @@ import cache from '@/cache.js'
 // store modules
 import api from '@/store/api.js'
 import broadcast from '@/store/broadcast.js'
-import history from '@/store/history.js'
+import undoHistory from '@/store/undoHistory.js'
 import currentUser from '@/store/currentUser.js'
 import currentSpace from '@/store/currentSpace.js'
 import upload from '@/store/upload.js'
 // store plugins
 import websocket from '@/store/plugins/websocket.js'
 
-import Vue from 'vue'
-import Vuex from 'vuex'
+import { createStore } from 'vuex'
 import nanoid from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
 
-Vue.use(Vuex)
-
-export default new Vuex.Store({
-  strict: process.env.NODE_ENV !== 'production',
+const store = createStore({
+  strict: import.meta.env.MODE !== 'production',
   state: {
     pageHeight: 0,
     pageWidth: 0,
@@ -362,6 +359,7 @@ export default new Vuex.Store({
     triggerShowPreviousSearchCard: () => {},
     triggerMoreFiltersIsNotVisible: () => {},
     triggerShowConnectionDetails: (state, options) => {},
+    triggerUpdateWindowHistory: (state, options) => {},
 
     // Cards
 
@@ -1063,10 +1061,12 @@ export default new Vuex.Store({
   modules: {
     api,
     broadcast,
-    history,
+    undoHistory,
     currentUser,
     currentSpace,
     upload
   },
   plugins: [websocket()]
 })
+
+export default store

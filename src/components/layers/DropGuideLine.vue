@@ -17,7 +17,7 @@ const centerLineY = lineMaxHeight / 2
 let isReverse = false
 
 export default {
-  name: 'DropGuides',
+  name: 'DropGuideLine',
   props: {
     currentCursor: Object,
     uploadIsDraggedOver: Boolean
@@ -44,6 +44,10 @@ export default {
     this.updateCanvasSize()
     window.addEventListener('load', this.updateCanvasSize)
     window.addEventListener('resize', this.updateCanvasSize)
+  },
+  beforeUnmount () {
+    window.removeEventListener('load', this.updateCanvasSize)
+    window.removeEventListener('resize', this.updateCanvasSize)
   },
   computed: {
     viewportWidth () { return this.$store.state.viewportWidth },

@@ -13,21 +13,20 @@ span.space-list-wrap
     @selectItem="selectItemFromFilter"
   )
   ul.results-list.space-list
-    template(v-for="(space in spacesFiltered")
+    template(v-for="space in spacesFiltered" :key="space.id")
       a(:href="space.url")
         li(
           @click.left.prevent.stop="selectSpace(space)"
           :class="{ active: spaceIsActive(space), hover: focusOnId === space.id }"
-          :key="space.id"
           tabindex="0"
-          v-on:keyup.enter="selectSpace(space)"
+          @keyup.enter="selectSpace(space)"
         )
           //- User(s)
           template(v-if="showOtherUsers")
             .users
               User(:user="user(space)" :isClickable="false" :key="user(space).id")
-              template(v-for="otherUser in space.otherUsers")
-                User(:user="otherUser" :isClickable="false" :key="otherUser.id")
+              template(v-for="otherUser in space.otherUsers" :key="otherUser.id")
+                User(:user="otherUser" :isClickable="false")
           template(v-else-if="showUser")
             User(:user="user(space)" :isClickable="false" :key="user(space).id")
           template(v-else-if="showCollaborator(space)")
@@ -50,26 +49,33 @@ span.space-list-wrap
           //- space details
           .name
             span {{space.name}}
-            img.icon.privacy-icon(v-if="spaceIsNotClosed(space)" :src="privacyIcon(space)")
+            PrivacyIcon(:privacy="space.privacy" :closedIsNotVisible="true")
             img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
 
 </template>
 
 <script>
-import privacy from '@/data/privacy.js'
 import templates from '@/data/templates.js'
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import MoonPhase from '@/components/MoonPhase.vue'
 import utils from '@/utils.js'
+import { defineAsyncComponent } from 'vue'
+import PrivacyIcon from '@/components/PrivacyIcon.vue'
 
 import last from 'lodash-es/last'
+const User = defineAsyncComponent({
+  loader: () => import('@/components/User.vue')
+})
+
+let unsubscribe
 
 export default {
   name: 'SpaceList',
   components: {
-    User: () => import('@/components/User.vue'),
+    User,
     ResultsFilter,
-    MoonPhase
+    MoonPhase,
+    PrivacyIcon
   },
   props: {
     spaces: Array,
@@ -85,7 +91,7 @@ export default {
     parentIsPinned: Boolean
   },
   mounted () {
-    this.$store.subscribe((mutation, state) => {
+    unsubscribe = this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerPickerNavigationKey') {
         const key = mutation.payload
         const spaces = this.spaces
@@ -102,8 +108,12 @@ export default {
         const spaces = this.spaces
         const currentSpace = spaces.find(space => space.id === this.focusOnId)
         this.selectSpace(currentSpace)
+        this.$store.commit('shouldPreventNextEnterKey', true)
       }
     })
+  },
+  beforeUnmount () {
+    unsubscribe()
   },
   data () {
     return {
@@ -180,17 +190,6 @@ export default {
       const templateSpaceIds = templates.spaces().map(template => template.id)
       return templateSpaceIds.includes(space.id)
     },
-    spaceIsNotClosed (space) {
-      return space.privacy !== 'closed'
-    },
-    privacyIcon (space) {
-      const privacyState = privacy.states().find(state => {
-        return state.name === space.privacy
-      })
-      if (privacyState) {
-        return require(`@/assets/${privacyState.icon}.svg`)
-      }
-    },
     showInExplore (space) {
       if (this.hideExploreBadge) { return }
       if (space.privacy === 'private') { return }
@@ -256,11 +255,14 @@ export default {
     }
   },
   watch: {
-    spaces (spaces) {
-      const cardDetailsIsVisible = this.$store.state.cardDetailsIsVisibleForCardId
-      if (spaces && cardDetailsIsVisible) {
-        this.focusOnId = spaces[0].id
-      }
+    spaces: {
+      handler (spaces) {
+        const cardDetailsIsVisible = this.$store.state.cardDetailsIsVisibleForCardId
+        if (spaces && cardDetailsIsVisible) {
+          this.focusOnId = spaces[0].id
+        }
+      },
+      deep: true
     }
   }
 }

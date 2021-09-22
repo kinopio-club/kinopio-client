@@ -2,8 +2,8 @@
 span
   ResultsFilter(:items="users" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredUsers")
   ul.results-list.user-list
-    template(v-for="user in usersFiltered")
-      li(:key="user.id" @click.left.stop="selectUser($event, user)" :tabindex="tabIndex" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user), 'is-not-clickable': !isClickable }")
+    template(v-for="user in usersFiltered" :key="user.id")
+      li(@click.left.stop="selectUser($event, user)" :tabindex="tabIndex" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user), 'is-not-clickable': !isClickable }")
         .badge(:style="{background: user.color}" :class="{'narrow-badge': showRemoveUser}")
           User(:user="user" :isClickable="false")
           .name {{user.name}}
@@ -13,11 +13,15 @@ span
 
 <script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
+import { defineAsyncComponent } from 'vue'
+const User = defineAsyncComponent({
+  loader: () => import('@/components/User.vue')
+})
 
 export default {
   name: 'UserList',
   components: {
-    User: () => import('@/components/User.vue'),
+    User,
     ResultsFilter
   },
   props: {

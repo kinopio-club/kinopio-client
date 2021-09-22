@@ -131,14 +131,16 @@ export default {
     stripUrlPath () {
       title = document.title
       pathname = window.location.pathname
+      let url = '/'
       if (this.isJournalPath) {
-        window.history.replaceState({}, title, '/journal')
-      } else {
-        window.history.replaceState({}, title, '/')
+        url = '/journal'
       }
+      // temporary url change for bookmarking, doesn't update vue-router history
+      history.replaceState(history.state, '', url)
     },
     restoreUrlPath () {
-      window.history.replaceState({}, title, pathname)
+      // temporary url change for bookmarking, doesn't update vue-router history
+      history.replaceState({}, title, pathname)
     },
     updateCurrentDeviceView () {
       if (utils.isMobile()) {

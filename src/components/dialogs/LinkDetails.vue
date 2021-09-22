@@ -4,9 +4,9 @@ dialog.link-details.narrow(v-if="isVisible" :open="isVisible" :style="styles" re
     button(@click="showCardDetails(null)") Edit Card
   section
     .container-wrap(v-if="space.url")
-      .background-wrap(v-if="space.background")
+      .background-wrap(@click.left.stop="changeSpace" @keyup.enter.prevent="changeSpace")
         a(:href="space.url")
-          img.background(:src="space.background" @click.left.prevent="changeSpace" v-on:keyup.enter.prevent="changeSpace")
+          BackgroundPreview(:space="space" :isButton="true" :buttonIsActive="linkIsCurrentSpace")
       .meta-wrap
         a(:href="space.url")
           button(@click.prevent="changeSpace" v-on:keyup.enter.prevent="changeSpace" :class="{active: linkIsCurrentSpace}")
@@ -37,6 +37,7 @@ dialog.link-details.narrow(v-if="isVisible" :open="isVisible" :style="styles" re
 import User from '@/components/User.vue'
 import UserList from '@/components/UserList.vue'
 import MoonPhase from '@/components/MoonPhase.vue'
+import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -54,7 +55,8 @@ export default {
     User,
     UserList,
     Loader,
-    MoonPhase
+    MoonPhase,
+    BackgroundPreview
   },
   props: {
     visible: Boolean,
@@ -228,6 +230,7 @@ export default {
     margin-top 6px
   .container-wrap
     display flex
+    align-items flex-start
   .secondary
     background-color var(--secondary-background)
   .badges-wrap
@@ -244,18 +247,8 @@ export default {
     height 100px !important
     overflow scroll
   .background-wrap
-    width 30%
+    max-width 30%
     margin-right 6px
-    .background
-      width 100%
-      border-radius 3px
-      cursor pointer
-      &:hover
-        box-shadow var(--button-hover-shadow)
-        background var(--secondary-hover-background)
-      &:active
-        box-shadow var(--button-active-inset-shadow)
-        background var(--secondary-active-background)
   .icon.private
     margin-left 6px
 </style>

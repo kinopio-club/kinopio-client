@@ -1,5 +1,5 @@
 <template lang='pug'>
-#app.app(
+.app(
   @mousemove="broadcastCursor"
   @touchmove="broadcastCursor"
   @touchstart="isTouchDevice"
@@ -14,6 +14,7 @@
   Footer
   TagDetails
   LinkDetails
+  WindowHistoryHandler
   KeyboardShortcutsHandler
   .preload
     .logo-hover
@@ -30,6 +31,7 @@
 import Header from '@/components/Header.vue'
 import MagicPaint from '@/components/layers/MagicPaint.vue'
 import Footer from '@/components/Footer.vue'
+import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
 import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
 import LinkDetails from '@/components/dialogs/LinkDetails.vue'
@@ -42,12 +44,13 @@ export default {
     MagicPaint,
     Footer,
     KeyboardShortcutsHandler,
+    WindowHistoryHandler,
     TagDetails,
     LinkDetails,
     OffscreenMarkers
   },
   created () {
-    console.log('🐢 kinopio-client build', this.buildHash)
+    console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'currentSpace/restoreSpace') {
         this.updateMetaDescription()
@@ -71,18 +74,8 @@ export default {
       return color
     },
     spaceName () { return this.$store.state.currentSpace.name },
-    pageName () {
-      const spaceName = this.spaceName
-      if (spaceName === 'Hello Kinopio') {
-        return 'Kinopio'
-      } else if (spaceName) {
-        return `${spaceName} – Kinopio`
-      } else {
-        return 'Kinopio'
-      }
-    },
     isDevelopment () {
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.MODE === 'development') {
         return true
       } else {
         return false
@@ -97,15 +90,15 @@ export default {
       return size + 'px'
     },
     buildHash () {
-      const regex = /(app\.)([a-z0-9])\w+/
+      const regex = /(index\.)([a-z0-9])\w+/
       const scripts = Array.from(document.querySelectorAll('script'))
       const path = scripts.find(script => {
         const src = script.src
-        return src.includes('app')
+        return src.includes('index')
       })
       if (!path) { return }
-      let hash = path.src.match(regex)[0] // app.768db305407f4c847d44
-      return hash.replace('app.', '') // 768db305407f4c847d44
+      let hash = path.src.match(regex)[0] // index.xyzabc123.js
+      return hash.replace('index.', '') // xyzabc123
     },
     pageCursor () {
       if (this.$store.state.currentUserIsPanning) {
@@ -142,11 +135,6 @@ export default {
       } else {
         metaDescription.setAttribute('content', topLeftCard.name)
       }
-    }
-  },
-  watch: {
-    pageName (pageName) {
-      document.title = pageName
     }
   }
 }

@@ -116,6 +116,13 @@ export default {
     window.addEventListener('scroll', this.updatePositionOffsetByPinchZoom)
     window.addEventListener('scroll', this.cancelLocking)
   },
+  beforeUnmount () {
+    window.removeEventListener('mouseup', this.stopPainting)
+    window.removeEventListener('touchend', this.stopPainting)
+    window.removeEventListener('scroll', this.updateCirclesWithScroll)
+    window.removeEventListener('scroll', this.updatePositionOffsetByPinchZoom)
+    window.removeEventListener('scroll', this.cancelLocking)
+  },
   data () {
     return {
       pinchZoomOffsetTop: 0,
@@ -152,7 +159,7 @@ export default {
       if (pinnedDialogs.length !== dialogs.length) {
         return true
       } else {
-
+        return false
       }
     },
     updatePositionOffsetByPinchZoom () {

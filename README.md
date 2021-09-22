@@ -24,8 +24,6 @@ $ npm run serve
 $ http://kinopio.local:8080
 ```
 
-You can also run `vue ui` (in bash)
-
 ## Debugging
 
 	npm run lint

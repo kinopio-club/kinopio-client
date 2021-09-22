@@ -18,23 +18,30 @@ let tlds = tldsList.join(String.raw`)|(\.`)
 tlds = String.raw`(\.` + tlds + ')'
 
 export default {
+  assetUrl (path, type) {
+    if (type) {
+      return `@/assets/${path}.${type}`
+    } else {
+      return `@/assets/${path}`
+    }
+  },
   kinopioDomain () {
     let domain = 'https://kinopio.club'
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.MODE === 'development') {
       domain = 'http://kinopio.local:8080'
     }
     return domain
   },
   host () {
     let host = 'https://kinopio-server.herokuapp.com'
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.MODE === 'development') {
       host = 'http://kinopio.local:3000'
     }
     return host
   },
   websocketHost () {
     let host = 'wss://kinopio-server.herokuapp.com'
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.MODE === 'development') {
       host = 'ws://kinopio.local:3000'
     }
     return host
@@ -751,7 +758,7 @@ export default {
   },
   journalSpaceDateFromName (name) {
     // https://regexr.com/6471p
-    const datePattern = new RegExp(/^[A-z]+ [A-z]+ [0-9]+\/[0-9]{2}/g)
+    const datePattern = new RegExp(/^['A-Za-z]+ ['A-Za-z]+ [0-9]+\/[0-9]{2}/g)
     let matches = name.match(datePattern)
     if (matches) {
       return matches[0]
@@ -865,7 +872,7 @@ export default {
   urlIsCurrencyFloat (url) {
     // https://regexr.com/5bfgm
     // matches currencySymbol numbers '.' numbers
-    const currencyFloatPattern = new RegExp(/^[$€£₾₺₴₦₪R¥元₹¥₱₩฿₫₿ɱŁΞ]{1}[0-9]+\.[0-9]+/g)
+    const currencyFloatPattern = new RegExp(/^[$€£₾₺₴₦₪R¥元₹₱₩฿₫₿ɱŁΞ]{1}[0-9]+\.[0-9]+/g)
     if (url.match(currencyFloatPattern)) {
       return true
     }
@@ -993,7 +1000,7 @@ export default {
   urlIsSpace (url) {
     if (!url) { return }
     let spaceUrlPattern
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.MODE === 'development') {
       // https://regexr.com/5hjc2
       spaceUrlPattern = new RegExp(/(?:kinopio\.local:.*\/)(.*)\b/gi)
     } else {
@@ -1002,7 +1009,7 @@ export default {
       // no 'invite?' after 'club' (no invite links)
       // alphanumber and '-' characters after
       // until whitespace or end of string
-      spaceUrlPattern = new RegExp(/(https:\/\/kinopio\.club\/)(?:(?!invite\?).)([A-z0-9-]*)/gi)
+      spaceUrlPattern = new RegExp(/(https:\/\/kinopio\.club\/)(?:(?!invite\?).)(['A-Za-z0-9-]*)/gi)
     }
     const isSpaceUrl = url.match(spaceUrlPattern)
     return Boolean(isSpaceUrl)
@@ -1012,7 +1019,7 @@ export default {
     if (!this.urlIsFile(url)) { return }
     // https://regexr.com/4rjtu
     // /filename.pdf from end of string
-    const filePattern = new RegExp(/\/[A-z0-9-]+\.[A-z.0-9-]+$/gim)
+    const filePattern = new RegExp(/\/[A-Za-z0-9-]+\.[A-Za-z.0-9-]+$/gim)
     let file = url.match(filePattern)
 
     if (!file) { return }

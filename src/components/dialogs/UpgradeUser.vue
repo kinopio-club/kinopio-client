@@ -53,15 +53,19 @@ dialog.upgrade-user.narrow(v-if="visible" :open="visible" @click.left.stop @keyd
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import { defineAsyncComponent } from 'vue'
 
 import { loadStripe } from '@stripe/stripe-js/pure'
+const User = defineAsyncComponent({
+  loader: () => import('@/components/User.vue')
+})
 
 // https://stripe.com/docs/billing/subscriptions/fixed-price
 let stripePublishableKey, stripe, elements, cardNumber, cardExpiry, cardCvc
 let customer, paymentMethod, subscription
 let invoice, paymentIntent
 
-if (process.env.NODE_ENV === 'development') {
+if (import.meta.env.MODE === 'development') {
   stripePublishableKey = 'pk_test_51IiftNDFIr5ywhwoBAVavNoA1ig4RdmmC73ZEuuuOAPxN5DHJyXsNpNtYhuUN885xoEHmq97HNaqfhJHFQh87IrH00F8eStuuX'
 } else {
   stripePublishableKey = 'pk_live_51IiftNDFIr5ywhwo9dUo1W2kZ2dwjWRUVh1QcUJ3YWc9ZAobDziUKWldKbthPtZbiq33kfRHQYrnBhvMlsomfOsB00f6Qvgm3B'
@@ -70,7 +74,7 @@ if (process.env.NODE_ENV === 'development') {
 export default {
   name: 'UpgradeUser',
   components: {
-    User: () => import('@/components/User.vue'),
+    User,
     Loader
   },
   props: {
@@ -115,7 +119,7 @@ export default {
     },
     priceId () {
       let monthly, yearly
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.MODE === 'development') {
         monthly = 'price_1IjPHfDFIr5ywhwoFUltkq7s'
         yearly = 'price_1IjPHQDFIr5ywhwoFMHQ3tPq'
       } else {

@@ -124,7 +124,7 @@ export default {
     debouncedUpdateLinks: debounce(async function () {
       const spaceId = this.$store.state.currentSpace.id
       const links = await this.$store.dispatch('api/getCardsWithLinkToSpaceId', spaceId) || []
-      if (links) {
+      if (links.length) {
         this.spaces = links.spaces
       }
       this.loading = false

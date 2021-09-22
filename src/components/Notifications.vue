@@ -3,7 +3,11 @@ aside.notifications(@click.left="closeAllDialogs")
   .item(v-for="item in items" v-bind:key="item.id" :data-notification-id="item.id" :class="item.type")
     p
       span.label-badge(v-if="item.label") {{item.label}}
-      img.icon(v-if="item.icon" :src="icon(item.icon).path" :class="item.icon")
+      template(v-if="item.icon")
+        img.icon(v-if="item.icon === 'open'" src="@/assets/open.svg" class="open")
+        img.icon(v-else-if="item.icon === 'press-and-hold'" src="@/assets/press-and-hold.svg" class="press-and-hold")
+        img.icon(v-else-if="item.icon === 'add'" src="@/assets/add.svg" class="add")
+        img.icon(v-else-if="item.icon === 'cut'" src="@/assets/cut.svg" class="cut")
       span {{item.message}}
 
   .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
@@ -18,7 +22,7 @@ aside.notifications(@click.left="closeAllDialogs")
 
   .persistent-item.success(v-if="notifySignUpToEditSpace" ref="readOnly" :class="{'notification-jiggle': readOnlyJiggle}")
     p
-      img.icon(:src="privacyIcon" :class="privacyName")
+      PrivacyIcon(:privacy="privacyState.name")
       template(v-if="spacePrivacyIsOpen")
         span This space is open to edits, but you'll need to sign up or in first
       template(v-else)
@@ -105,11 +109,15 @@ import cache from '@/cache.js'
 import privacy from '@/data/privacy.js'
 import utils from '@/utils.js'
 import templates from '@/data/templates.js'
+import PrivacyIcon from '@/components/PrivacyIcon.vue'
 
 let wasOffline
 
 export default {
   name: 'Notifications',
+  components: {
+    PrivacyIcon
+  },
   data () {
     return {
       readOnlyJiggle: false,
@@ -170,8 +178,6 @@ export default {
         return state.name === this.$store.state.currentSpace.privacy
       })
     },
-    privacyIcon () { return require(`@/assets/${this.privacyState.icon}.svg`) },
-    privacyName () { return this.privacyState.name },
     spacePrivacyIsOpen () { return this.privacyName === 'open' },
     cardsCreatedCountFromLimit () {
       const cardsCreatedLimit = this.$store.state.cardsCreatedLimit
@@ -189,11 +195,6 @@ export default {
     }
   },
   methods: {
-    icon (icon) {
-      return {
-        path: require(`@/assets/${icon}.svg`)
-      }
-    },
     closeAllDialogs () {
       this.$store.dispatch('closeAllDialogs', 'Notifications.closeAllDialogs')
     },
