@@ -3,7 +3,7 @@ import cache from '@/cache.js'
 // store modules
 import api from '@/store/api.js'
 import broadcast from '@/store/broadcast.js'
-import history from '@/store/history.js'
+import undoHistory from '@/store/undoHistory.js'
 import currentUser from '@/store/currentUser.js'
 import currentSpace from '@/store/currentSpace.js'
 import upload from '@/store/upload.js'
@@ -1061,7 +1061,7 @@ const store = createStore({
   modules: {
     api,
     broadcast,
-    history,
+    undoHistory,
     currentUser,
     currentSpace,
     upload
