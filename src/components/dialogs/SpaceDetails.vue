@@ -66,6 +66,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
       .button-wrap.toggle-filters(v-if="spacesHasJournalSpace")
         button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible || spaceFiltersIsActive }")
           img.icon(src="@/assets/filter.svg")
+          .badge.info.filter-is-active(v-if="spaceFiltersIsActive")
         SpaceFilters(:visible="spaceFiltersIsVisible" :spaces="filteredSpaces")
 
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
@@ -500,4 +501,9 @@ export default {
     &.active
       background-color var(--primary-background)
       background-size cover
+  .filter-is-active
+    margin 0
+    margin-left 5px
+    padding-top 0
+    padding-bottom 0
 </style>
