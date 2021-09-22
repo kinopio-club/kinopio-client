@@ -19,7 +19,7 @@ span.space-list-wrap
           @click.left.prevent.stop="selectSpace(space)"
           :class="{ active: spaceIsActive(space), hover: focusOnId === space.id }"
           tabindex="0"
-          v-on:keyup.enter="selectSpace(space)"
+          @keyup.enter="selectSpace(space)"
         )
           //- User(s)
           template(v-if="showOtherUsers")
@@ -67,6 +67,8 @@ const User = defineAsyncComponent({
   loader: () => import('@/components/User.vue')
 })
 
+let unsubscribe
+
 export default {
   name: 'SpaceList',
   components: {
@@ -89,7 +91,7 @@ export default {
     parentIsPinned: Boolean
   },
   mounted () {
-    this.$store.subscribe((mutation, state) => {
+    unsubscribe = this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerPickerNavigationKey') {
         const key = mutation.payload
         const spaces = this.spaces
@@ -109,6 +111,9 @@ export default {
         this.$store.commit('shouldPreventNextEnterKey', true)
       }
     })
+  },
+  beforeUnmount () {
+    unsubscribe()
   },
   data () {
     return {
