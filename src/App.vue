@@ -50,7 +50,7 @@ export default {
     OffscreenMarkers
   },
   created () {
-    // console.log('🐢 kinopio-client build', this.buildHash)
+    console.log('🐢 kinopio-client build', this.buildHash, import.meta.env.MODE)
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'currentSpace/restoreSpace') {
         this.updateMetaDescription()
@@ -89,17 +89,17 @@ export default {
       const size = Math.max(this.$store.state.pageHeight, this.$store.state.viewportHeight)
       return size + 'px'
     },
-    // buildHash () {
-    //   const regex = /(app\.)([a-z0-9])\w+/
-    //   const scripts = Array.from(document.querySelectorAll('script'))
-    //   const path = scripts.find(script => {
-    //     const src = script.src
-    //     return src.includes('app')
-    //   })
-    //   if (!path) { return }
-    //   let hash = path.src.match(regex)[0] // app.768db305407f4c847d44
-    //   return hash.replace('app.', '') // 768db305407f4c847d44
-    // },
+    buildHash () {
+      const regex = /(app\.)([a-z0-9])\w+/
+      const scripts = Array.from(document.querySelectorAll('script'))
+      const path = scripts.find(script => {
+        const src = script.src
+        return src.includes('app')
+      })
+      if (!path) { return }
+      let hash = path.src.match(regex)[0] // app.768db305407f4c847d44
+      return hash.replace('app.', '') // 768db305407f4c847d44
+    },
     pageCursor () {
       if (this.$store.state.currentUserIsPanning) {
         return 'grabbing'

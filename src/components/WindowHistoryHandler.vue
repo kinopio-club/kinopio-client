@@ -20,7 +20,6 @@ export default {
   },
   methods: {
     async updateWindowHistory ({ space, isRemote }) {
-      console.log('🚛', space, isRemote) // TEMP LOG
       space = space || this.currentSpace
       const spaceUrl = utils.url(space)
       const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
