@@ -49,6 +49,7 @@ import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 
 let startCursor, prevCursor, endCursor, shouldCancel
+let processQueueIntervalTimer
 
 export default {
   name: 'Space',
@@ -98,7 +99,6 @@ export default {
     window.addEventListener('offline', this.updateIsOnline)
 
     this.addInteractionBlur()
-    this.startProcessQueueTimer()
 
     window.addEventListener('unload', this.unloadPage)
     window.addEventListener('popstate', this.loadSpaceOnBackOrForward)
@@ -110,6 +110,11 @@ export default {
     if (utils.isAndroid()) {
       this.$store.commit('addNotification', { message: 'Android is currenly only partially supported. You may experience scrolling issues', type: 'danger' })
     }
+
+    // retry failed sync operations every 5 seconds
+    processQueueIntervalTimer = setInterval(() => {
+      this.$store.dispatch('api/processQueueOperations')
+    }, 5000)
   },
   beforeUnmount () {
     window.removeEventListener('mousemove', this.interact)
@@ -121,6 +126,7 @@ export default {
     window.removeEventListener('offline', this.updateIsOnline)
     window.removeEventListener('unload', this.unloadPage)
     window.removeEventListener('popstate', this.loadSpaceOnBackOrForward)
+    clearInterval(processQueueIntervalTimer)
   },
   data () {
     return {
@@ -201,13 +207,6 @@ export default {
     blur (event) {
       event.target.blur()
     },
-    startProcessQueueTimer () {
-      // retry failed sync operations every 5 seconds
-      setInterval(() => {
-        this.$store.dispatch('api/processQueueOperations')
-      }, 5000)
-    },
-
     initInteractions (event) {
       if (this.eventIsFromTextarea(event)) {
         shouldCancel = true

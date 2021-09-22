@@ -125,6 +125,7 @@ import utils from '@/utils.js'
 
 const maxIterations = 30
 let currentIteration, updatePositionTimer
+let updateNotificationsIntervalTimer
 
 export default {
   name: 'Header',
@@ -210,12 +211,13 @@ export default {
   mounted () {
     window.addEventListener('scroll', this.updatePositionInVisualViewport)
     this.updateNotifications()
-    setInterval(() => {
+    updateNotificationsIntervalTimer = setInterval(() => {
       this.updateNotifications()
     }, 1000 * 60 * 10) // 10 minutes
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.updatePositionInVisualViewport)
+    clearInterval(updateNotificationsIntervalTimer)
   },
   computed: {
     shouldShowNewStuffIsUpdated () {
