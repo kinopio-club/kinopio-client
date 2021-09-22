@@ -29,7 +29,6 @@ dialog.add-space.narrow(
       label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
         input(type="checkbox" v-model="newSpacesAreBlank")
         span New Spaces Are Blank
-
     .row
       .segmented-buttons
         button(@click="addJournalSpace")

@@ -1,7 +1,7 @@
 <template lang="pug">
 .templates(v-if="visible" :open="visible" @click.left.stop)
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    SpaceList(:spaces="spacesFiltered" :showCategory="true" @selectSpace="changeSpace")
+    SpaceList(:spaces="spaces" :showCategory="true" @selectSpace="changeSpace")
 </template>
 
 <script>
@@ -27,7 +27,6 @@ export default {
   },
   data () {
     return {
-      filteredSpaces: [],
       resultsSectionHeight: null
     }
   },
@@ -43,13 +42,6 @@ export default {
         space.fullName = `${space.category} – ${space.name}`
         return space
       })
-    },
-    spacesFiltered () {
-      if (this.filter) {
-        return this.filteredSpaces
-      } else {
-        return this.spaces
-      }
     }
   },
   methods: {

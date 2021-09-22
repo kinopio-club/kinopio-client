@@ -49,7 +49,8 @@ span.space-list-wrap
           //- space details
           .name
             span {{space.name}}
-            PrivacyIcon(:privacy="space.privacy" :closedIsNotVisible="true")
+            template(v-if='space.privacy')
+              PrivacyIcon(:privacy="space.privacy" :closedIsNotVisible="true")
             img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
 
 </template>
