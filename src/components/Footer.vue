@@ -69,6 +69,7 @@ import utils from '@/utils.js'
 
 const maxIterations = 30
 let currentIteration, updatePositionTimer
+let updateFavoritesIntervalTimer, updateLiveSpacesIntervalTimer
 
 export default {
   name: 'Footer',
@@ -126,16 +127,18 @@ export default {
     window.addEventListener('online', this.updateLiveSpaces)
     this.updateFavorites()
     this.updateLiveSpaces()
-    setInterval(() => {
+    updateFavoritesIntervalTimer = setInterval(() => {
       this.updateFavorites()
     }, 1000 * 60 * 10) // 10 minutes
-    setInterval(() => {
+    updateLiveSpacesIntervalTimer = setInterval(() => {
       this.updateLiveSpaces()
     }, 1000 * 60 * 5) // 5 minutes
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.updatePositionInVisualViewport)
     window.removeEventListener('online', this.updateLiveSpaces)
+    clearInterval(updateFavoritesIntervalTimer)
+    clearInterval(updateLiveSpacesIntervalTimer)
   },
   computed: {
     currentUser () { return this.$store.state.currentUser },
