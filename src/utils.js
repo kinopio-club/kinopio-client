@@ -826,6 +826,7 @@ export default {
     // matches (text after /) twice
     const urlPattern = new RegExp(/\/([^?\s/]+)\/{0,1}([^?\s/]+){0,1}/i)
     let matches = path.match(urlPattern)
+    if (!matches) { return }
     matches = {
       spaceUrl: matches[1],
       cardId: matches[2]

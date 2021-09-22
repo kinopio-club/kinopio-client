@@ -888,6 +888,7 @@ const store = createStore({
   actions: {
     updateSpaceAndCardUrlToLoad: (context, path) => {
       const matches = utils.spaceAndCardIdFromUrl(path)
+      if (!matches) { return }
       if (matches.cardId) {
         context.commit('loadSpaceShowDetailsForCardId', matches.cardId)
       }
