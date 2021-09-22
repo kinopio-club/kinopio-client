@@ -133,6 +133,10 @@ export default {
       this.updateLiveSpaces()
     }, 1000 * 60 * 5) // 5 minutes
   },
+  beforeUnmount () {
+    window.removeEventListener('scroll', this.updatePositionInVisualViewport)
+    window.removeEventListener('online', this.updateLiveSpaces)
+  },
   computed: {
     currentUser () { return this.$store.state.currentUser },
     favoriteSpacesEditedCount () {

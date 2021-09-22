@@ -214,6 +214,9 @@ export default {
       this.updateNotifications()
     }, 1000 * 60 * 10) // 10 minutes
   },
+  beforeUnmount () {
+    window.removeEventListener('scroll', this.updatePositionInVisualViewport)
+  },
   computed: {
     shouldShowNewStuffIsUpdated () {
       const newStuffIsUpdated = this.$store.state.newStuffIsUpdated

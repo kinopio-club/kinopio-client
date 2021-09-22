@@ -45,6 +45,10 @@ export default {
     window.addEventListener('load', this.updateCanvasSize)
     window.addEventListener('resize', this.updateCanvasSize)
   },
+  beforeUnmount () {
+    window.removeEventListener('load', this.updateCanvasSize)
+    window.removeEventListener('resize', this.updateCanvasSize)
+  },
   computed: {
     viewportWidth () { return this.$store.state.viewportWidth },
     viewportHeight () { return this.$store.state.viewportHeight },

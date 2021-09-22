@@ -137,10 +137,6 @@ export default {
         this.updateWithRemoteSpaces()
       }
       this.excludeCurrentSpace()
-      this.checkIfShouldFilterSpacesBySearch()
-    },
-    checkIfShouldFilterSpacesBySearch () {
-      if (!this.parentIsCardDetails) { }
     },
     async updateWithRemoteSpaces () {
       if (!this.spaces.length) {

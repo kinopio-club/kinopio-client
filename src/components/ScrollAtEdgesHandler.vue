@@ -38,6 +38,14 @@ export default {
     window.addEventListener('mouseup', this.stopInteractions)
     window.addEventListener('touchend', this.stopInteractions)
   },
+  beforeUnmount () {
+    window.removeEventListener('mousedown', this.initInteractions)
+    window.removeEventListener('touchstart', this.initInteractions)
+    window.removeEventListener('mousemove', this.interact)
+    window.removeEventListener('touchmove', this.interact)
+    window.removeEventListener('mouseup', this.stopInteractions)
+    window.removeEventListener('touchend', this.stopInteractions)
+  },
   computed: {
     viewportHeight () { return this.$store.state.viewportHeight },
     viewportWidth () { return this.$store.state.viewportWidth },

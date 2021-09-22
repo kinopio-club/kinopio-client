@@ -111,6 +111,17 @@ export default {
       this.$store.commit('addNotification', { message: 'Android is currenly only partially supported. You may experience scrolling issues', type: 'danger' })
     }
   },
+  beforeUnmount () {
+    window.removeEventListener('mousemove', this.interact)
+    window.removeEventListener('touchmove', this.interact)
+    window.removeEventListener('mouseup', this.stopInteractions)
+    window.removeEventListener('touchend', this.stopInteractions)
+    window.removeEventListener('resize', this.updatePageSizes)
+    window.removeEventListener('online', this.updateIsOnline)
+    window.removeEventListener('offline', this.updateIsOnline)
+    window.removeEventListener('unload', this.unloadPage)
+    window.removeEventListener('popstate', this.loadSpaceOnBackOrForward)
+  },
   data () {
     return {
       currentConnectionPath: undefined,

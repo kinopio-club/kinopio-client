@@ -20,12 +20,20 @@ export default {
     window.addEventListener('keyup', this.handleShortcuts)
     // event.metaKey only works on keydown
     window.addEventListener('keydown', this.handleMetaKeyShortcuts)
-
     window.addEventListener('wheel', this.handleMouseWheelEvents, { passive: false })
     window.addEventListener('mousedown', this.handleMouseDownEvents)
     window.addEventListener('mousemove', this.handleMouseMoveEvents)
     window.addEventListener('mouseup', this.handleMouseUpEvents)
     window.addEventListener('scroll', this.handleScrollEvents)
+  },
+  beforeUnmount () {
+    window.removeEventListener('keyup', this.handleShortcuts)
+    window.removeEventListener('keydown', this.handleMetaKeyShortcuts)
+    window.removeEventListener('wheel', this.handleMouseWheelEvents, { passive: false })
+    window.removeEventListener('mousedown', this.handleMouseDownEvents)
+    window.removeEventListener('mousemove', this.handleMouseMoveEvents)
+    window.removeEventListener('mouseup', this.handleMouseUpEvents)
+    window.removeEventListener('scroll', this.handleScrollEvents)
   },
   computed: {
   },

@@ -30,6 +30,9 @@ export default {
     window.addEventListener('scroll', this.updateOffscreenCards)
     this.updateOffscreenCards()
   },
+  beforeUnmount () {
+    window.removeEventListener('scroll', this.updateOffscreenCards)
+  },
   data () {
     return {
       offscreenCards: [],
