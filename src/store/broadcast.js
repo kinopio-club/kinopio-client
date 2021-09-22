@@ -1,6 +1,8 @@
 // client → [broadcast] → websocket → server
 
 let reconnectAttempts = 0
+let reconnectTime
+const maxTime = 30 * 1000 // 30 seconds
 
 const self = {
   namespaced: true,
@@ -20,7 +22,8 @@ const self = {
       setTimeout(() => {
         context.commit('reconnect')
         reconnectAttempts += 1
-      }, Math.min(5000 * reconnectAttempts), 30 * 1000)
+        reconnectTime = 5000 * reconnectAttempts // 5 seconds * n
+      }, Math.min(reconnectTime, maxTime))
     }
   }
 }
