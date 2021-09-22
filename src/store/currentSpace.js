@@ -346,7 +346,7 @@ export default {
         await context.dispatch('createNewHelloSpace')
         context.dispatch('updateUserLastSpaceId')
       }
-      context.dispatch('updateWindowHistory', { isRemote })
+      context.commit('triggerUpdateWindowHistory', { isRemote }, { root: true })
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const shouldShow = context.rootState.currentUser.shouldShowNewUserNotification
       if (!currentUserIsSignedIn && shouldShow) {
@@ -507,7 +507,7 @@ export default {
       if (currentUserIsSignedIn) {
         await context.dispatch('api/createSpace', space, { root: true })
       }
-      context.dispatch('updateWindowHistory', { space, isRemote: currentUserIsSignedIn })
+      context.commit('triggerUpdateWindowHistory', { space, isRemote: currentUserIsSignedIn }, { root: true })
       context.commit('addUserToSpace', user)
       context.dispatch('loadBackground')
       nextTick(() => {
@@ -530,7 +530,7 @@ export default {
         context.commit('triggerFocusSpaceDetailsName', null, { root: true })
       })
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
-      context.dispatch('updateWindowHistory', { space, isRemote: currentUserIsSignedIn })
+      context.commit('triggerUpdateWindowHistory', { space, isRemote: currentUserIsSignedIn }, { root: true })
     },
     addSpace: (context) => {
       const user = context.rootState.currentUser
@@ -545,7 +545,7 @@ export default {
         context.dispatch('updateUserLastSpaceId')
         context.commit('notifyNewUser', false, { root: true })
         context.commit('notifySignUpToEditSpace', false, { root: true })
-        context.dispatch('updateWindowHistory', {})
+        context.commit('triggerUpdateWindowHistory', {}, { root: true })
       })
     },
     addNewJournalSpace: (context) => {
@@ -591,7 +591,7 @@ export default {
       context.commit('restoreSpace', space)
       context.dispatch('saveNewSpace')
       context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
-      context.dispatch('updateWindowHistory', {})
+      context.commit('triggerUpdateWindowHistory', {}, { root: true })
       context.dispatch('loadBackground')
     },
     getRemoteSpace: async (context, space) => {
@@ -660,9 +660,6 @@ export default {
       context.dispatch('loadLastSpace')
       cache.removeSpace(space)
       context.commit('addNotification', { message: `You were removed as a collaborator from ${name}`, type: 'info' }, { root: true })
-    },
-    updateWindowHistory: (context, { space, isRemote }) => {
-      context.commit('triggerUpdateWindowHistory', { space, isRemote }, { root: true })
     },
     updateSpacePageSize: (context) => {
       nextTick(() => {
@@ -765,7 +762,7 @@ export default {
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
       await context.dispatch('loadSpace', { space })
-      context.dispatch('updateWindowHistory', { space, isRemote })
+      context.commit('triggerUpdateWindowHistory', { space, isRemote }, { root: true })
       const userIsMember = context.rootGetters['currentUser/isSpaceMember']
       if (!userIsMember) { return }
       context.dispatch('api/addToQueue', {

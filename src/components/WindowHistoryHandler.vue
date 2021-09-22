@@ -6,14 +6,9 @@ import utils from '@/utils.js'
 
 export default {
   name: 'WindowHistoryHandler',
-  mounted () {
-    console.log('🌹', this.$router, this.$store.state.currentSpace) // TEMP LOG
-  },
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerUpdateWindowHistory') {
-        console.log('🌹', this.$router) // TEMP LOG
-        console.log('🌸', mutation.payload) // TEMP LOG
         this.updateWindowHistory(mutation.payload)
         this.updateWindowTitle()
       }
