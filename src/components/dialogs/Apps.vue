@@ -135,9 +135,11 @@ export default {
       if (this.isJournalPath) {
         url = '/journal'
       }
+      // temporary url change for bookmarking, doesn't update vue-router history
       history.replaceState(history.state, '', url)
     },
     restoreUrlPath () {
+      // temporary url change for bookmarking, doesn't update vue-router history
       history.replaceState({}, title, pathname)
     },
     updateCurrentDeviceView () {
