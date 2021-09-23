@@ -77,11 +77,6 @@ export default {
         prevCursor = this.$store.state.triggeredDrawConnectionFrame
         this.drawConnection()
       }
-      if (mutation.type === 'currentUserIsDrawingConnection') {
-        if (mutation.payload === true) {
-          this.$store.commit('updateCardMap')
-        }
-      }
     })
   },
   mounted () {
@@ -297,7 +292,7 @@ export default {
     checkCurrentConnectionSuccess () {
       const cursor = this.cursor()
       const zoom = this.$store.getters.spaceCounterZoomDecimal
-      const cardMap = this.$store.state.newCardMap
+      const cardMap = this.$store.state.cardMap
       const connectionToCard = cardMap.find(card => {
         const xValues = {
           value: cursor.x,

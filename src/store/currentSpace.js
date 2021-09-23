@@ -693,6 +693,7 @@ export default {
       const emptySpace = utils.emptySpace(space.id)
       const cachedSpace = cache.space(space.id)
       const user = context.rootState.currentUser
+      context.commit('clearCardMap', null, { root: true })
       context.commit('userHasScrolled', false, { root: true })
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       context.commit('clearAllNotifications', null, { root: true })

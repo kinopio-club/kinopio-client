@@ -141,8 +141,6 @@ export default {
       if (!this.playheadIsBeingDragged) { return }
       this.playheadIsBeingDragged = false
       this.movePlayhead(event)
-      // this.$store.commit('updateCardMap')
-      // this.$emit('endMovePlayhead', this.value)
     },
     stopMovingPlayhead () {
       this.playheadIsBeingDragged = false

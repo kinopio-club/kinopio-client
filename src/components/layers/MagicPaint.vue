@@ -139,7 +139,7 @@ export default {
     pageWidth () { return this.$store.state.pageWidth },
     viewportHeight () { return this.$store.state.viewportHeight },
     viewportWidth () { return this.$store.state.viewportWidth },
-    cardMap () { return this.$store.state.newCardMap },
+    cardMap () { return this.$store.state.cardMap },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     isPanning () { return this.$store.state.currentUserIsPanningReady }

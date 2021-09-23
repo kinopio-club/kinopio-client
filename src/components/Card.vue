@@ -729,10 +729,10 @@ export default {
       changes.forEach(change => {
         if (change.intersectionRatio > 0) {
           this.isCardInViewport = true
-          this.$store.commit('addToNewCardMap', this.card)
+          this.$store.commit('addToCardMap', this.card)
         } else {
           this.isCardInViewport = false
-          this.$store.commit('removeFromNewCardMap', this.card)
+          this.$store.commit('removeFromCardMap', this.card)
         }
       })
     },

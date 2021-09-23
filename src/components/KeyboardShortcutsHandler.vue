@@ -277,7 +277,6 @@ export default {
         initialPosition.y = window.pageYOffset + 80
       }
       initialPosition = this.updateWithZoom(initialPosition)
-      this.$store.commit('updateCardMap')
       const position = this.nonOverlappingCardPosition(initialPosition)
       this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
       if (childCard) {
@@ -311,7 +310,6 @@ export default {
         y: window.pageYOffset + rect.y + rect.height + incrementPosition
       }
       initialPosition = this.updateWithZoom(initialPosition)
-      this.$store.commit('updateCardMap')
       const position = this.nonOverlappingCardPosition(initialPosition)
       this.$store.dispatch('currentSpace/addCard', { position })
       this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)
@@ -322,7 +320,7 @@ export default {
 
     // recursive
     nonOverlappingCardPosition (position) {
-      const cardMap = this.$store.state.newCardMap
+      const cardMap = this.$store.state.cardMap
       const overlappingCard = cardMap.find(card => {
         const isBetweenX = utils.isBetween({
           value: position.x,
@@ -431,7 +429,7 @@ export default {
       }
       let closestDistanceFromCenter = Math.max(viewportWidth, viewportHeight)
       let closestCard
-      const cardMap = this.$store.state.newCardMap
+      const cardMap = this.$store.state.cardMap
       cardMap.forEach(card => {
         const toPosition = utils.rectCenter(card)
         const distance = utils.distanceBetweenTwoPoints(viewportCenter, toPosition)
@@ -445,7 +443,7 @@ export default {
     },
 
     currentFocusedCard () {
-      const cardMap = this.$store.state.newCardMap
+      const cardMap = this.$store.state.cardMap
       let lastCardId = this.$store.state.parentCardId || this.$store.state.childCardId
       let lastCard = cardMap.filter(card => card.cardId === lastCardId)
       if (lastCard.length) {
@@ -456,8 +454,7 @@ export default {
     },
 
     focusCard (direction) {
-      this.$store.commit('updateCardMap')
-      const cardMap = this.$store.state.newCardMap
+      const cardMap = this.$store.state.cardMap
       const originCard = this.currentFocusedCard()
       let focusableCards
       if (direction === 'left') {

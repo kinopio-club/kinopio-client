@@ -33,8 +33,7 @@ const store = createStore({
     shouldHideFooter: false,
     shouldExplicitlyHideFooter: false,
     isTouchDevice: false,
-    cardMap: {},
-    newCardMap: [],
+    cardMap: [],
     cardsCreatedLimit: 100,
     prevCursorPosition: { x: 0, y: 0 },
     spaceZoomPercent: 100,
@@ -260,35 +259,15 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean', origin: 'isTouchDevice' })
       state.isTouchDevice = value
     },
-    updateCardMap: (state) => {
-      // state.cardMap = utils.cardMap()
+    clearCardMap: (state) => {
+      state.cardMap = []
     },
-    // updateNewCardMap: (state) => {
-    //   let cards = utils.clone(state.currentSpace.cards)
-    //   cards.map(card => {
-    //     return {
-    //       id: card.id,
-    //       x: card.x,
-    //       y: card.y,
-    //       width: card.width,
-    //       height: card.height
-    //     }
-    //   })
-    //   state.newCardMap = cards
-    // },
-    addToNewCardMap: (state, card) => {
+    addToCardMap: (state, card) => {
       card = utils.clone(card)
-      card = {
-        id: card.id,
-        x: card.x,
-        y: card.y,
-        width: card.width,
-        height: card.height
-      }
-      state.newCardMap.push(card)
+      state.cardMap.push(card)
     },
-    removeFromNewCardMap: (state, card) => {
-      state.newCardMap = state.newCardMap.filter(cardInMap => cardInMap.id !== card.id)
+    removeFromCardMap: (state, card) => {
+      state.cardMap = state.cardMap.filter(cardInMap => cardInMap.id !== card.id)
     },
     prevCursorPosition: (state, cursor) => {
       state.prevCursorPosition = cursor
