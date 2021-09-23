@@ -291,7 +291,8 @@ export default {
     },
     checkCurrentConnectionSuccess () {
       const cursor = this.cursor()
-      let elements = document.elementsFromPoint(cursor.x, cursor.y)
+      const zoom = this.$store.getters.spaceZoomDecimal
+      let elements = document.elementsFromPoint(cursor.x * zoom, cursor.y * zoom)
       const cardElement = elements.find(element => {
         return element.nodeName === 'ARTICLE' // cards are <article>s
       })
