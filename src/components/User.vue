@@ -1,5 +1,5 @@
 <template lang="pug">
-.user(:data-user-id="user.id" @keydown.stop.enter="toggleUserDetails" :class="{ active: userDetailsIsVisible}")
+.user(:data-user-id="user.id" ref="element" @keydown.stop.enter="toggleUserDetails" :class="{ active: userDetailsIsVisible}")
   .user-avatar.anon-avatar(
     @mouseup.left.stop="toggleUserDetails"
     @touchend.stop="toggleUserDetails"
@@ -15,6 +15,7 @@
 
 <script>
 import UserDetails from '@/components/dialogs/UserDetails.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'User',
@@ -37,7 +38,10 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
-        this.userDetailsIsVisible = false
+        const element = this.$refs.element
+        if (!element) { return }
+        const isVisible = utils.isElementInViewport(element)
+        if (!isVisible) { this.userDetailsIsVisible = false }
       }
     })
   },

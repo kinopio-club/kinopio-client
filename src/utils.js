@@ -444,6 +444,10 @@ export default {
     const isInViewportY = isStartInViewportY && isEndInViewportY
     return isInViewportX && isInViewportY
   },
+  isElementInViewport (element) {
+    const rect = element.getBoundingClientRect()
+    return this.isCardInViewport(rect)
+  },
   updateCardDimentions (card) {
     const element = document.querySelector(`article [data-card-id="${card.id}"]`)
     const rect = element.getBoundingClientRect()

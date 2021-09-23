@@ -280,6 +280,7 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
+        if (!this.visible) { return }
         this.framePickerIsVisible = false
         this.imagePickerIsVisible = false
         this.cardTipsIsVisible = false

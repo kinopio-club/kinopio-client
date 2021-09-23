@@ -1,5 +1,5 @@
 <template lang="pug">
-.search-wrap.results-filter(v-if="shouldShowFilter" @mouseup.stop @touchend.stop)
+.search-wrap.results-filter(v-if="shouldShowFilter" @mouseup.stop @touchend.stop ref="element")
   template(v-if="isLoading")
     Loader(:visible="true")
   template(v-else)
@@ -52,6 +52,8 @@ export default {
     }
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
+        const element = this.$refs.element
+        if (!element) { return }
         if (this.filterIsPersistent) { return }
         if (this.parentIsPinned) { return }
         this.clearFilter()

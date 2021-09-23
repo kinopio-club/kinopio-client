@@ -93,6 +93,8 @@ export default {
     shouldRestoreUrlPath = true
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
+        const element = this.$refs.dialog
+        if (!element) { return }
         if (shouldRestoreUrlPath) {
           shouldRestoreUrlPath = false
           this.restoreUrlPath()

@@ -228,6 +228,8 @@ export default {
         }
       }
       if (mutation.type === 'closeAllDialogs') {
+        const isVisible = utils.isCardInViewport(this.card)
+        if (!isVisible) { return }
         this.userDetailsIsVisible = false
       }
     })
