@@ -291,33 +291,23 @@ export default {
     },
     checkCurrentConnectionSuccess () {
       const cursor = this.cursor()
-      const zoom = this.$store.getters.spaceCounterZoomDecimal
-      const cardMap = this.$store.state.cardMap
-      const connectionToCard = cardMap.find(card => {
-        const xValues = {
-          value: cursor.x,
-          min: (card.x - window.scrollX) * zoom,
-          max: (card.x - window.scrollX + card.width) * zoom
-        }
-        const yValues = {
-          value: cursor.y,
-          min: (card.y - window.scrollY) * zoom,
-          max: (card.y - window.scrollY + card.height) * zoom
-        }
-        const inXRange = utils.isBetween(xValues)
-        const inYRange = utils.isBetween(yValues)
-        return inXRange && inYRange
+      let elements = document.elementsFromPoint(cursor.x, cursor.y)
+      const cardElement = elements.find(element => {
+        return element.nodeName === 'ARTICLE' // cards are <article>s
       })
       let updates = { id: this.$store.state.currentUser.id }
-      if (!connectionToCard) {
+      let isCurrentConnectionConnected
+      if (cardElement) {
+        isCurrentConnectionConnected = this.$store.state.currentConnection.startCardId !== cardElement.dataset.cardId
+      }
+      if (!cardElement) {
         this.$store.commit('currentConnectionSuccess', {})
         updates.endCardId = null
         this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
-        return
-      }
-      if (this.$store.state.currentConnection.startCardId !== connectionToCard.id) {
-        this.$store.commit('currentConnectionSuccess', connectionToCard)
-        updates.endCardId = connectionToCard.id
+      } else if (isCurrentConnectionConnected) {
+        const card = this.$store.getters['currentSpace/cardById'](cardElement.dataset.cardId)
+        this.$store.commit('currentConnectionSuccess', card)
+        updates.endCardId = card.id
         this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
       } else {
         this.$store.commit('currentConnectionSuccess', {})
