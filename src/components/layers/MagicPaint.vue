@@ -49,7 +49,7 @@ const maxIterations = 200 // higher is longer paint fade time
 const rateOfIterationDecay = 0.03 // higher is faster tail decay
 let paintingCircles = []
 let paintingCanvas, paintingContext, startCursor, paintingCirclesTimer
-let prevScroll, viewportCardMap
+let prevScroll
 
 // remote painting
 let remotePaintingCircles = []
@@ -139,7 +139,7 @@ export default {
     pageWidth () { return this.$store.state.pageWidth },
     viewportHeight () { return this.$store.state.viewportHeight },
     viewportWidth () { return this.$store.state.viewportWidth },
-    cardMap () { return this.$store.state.cardMap },
+    cardMap () { return this.$store.state.newCardMap },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     isPanning () { return this.$store.state.currentUserIsPanningReady }
@@ -167,20 +167,11 @@ export default {
       this.pinchZoomOffsetTop = window.visualViewport.offsetTop
       this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
     },
-    updateViewportCardMap () {
-      const cardMap = utils.clone(this.cardMap)
-      if (!utils.objectHasKeys(cardMap)) { return }
-      viewportCardMap = utils.clone(this.cardMap)
-      viewportCardMap = viewportCardMap.filter(card => {
-        return utils.isCardInViewport(card)
-      })
-    },
     updatePrevScrollPosition () {
       prevScroll = {
         x: window.scrollX,
         y: window.scrollY
       }
-      this.updateViewportCardMap()
     },
     updateCirclePositions (circles, scrollDelta) {
       return circles.map(circle => {
@@ -307,8 +298,6 @@ export default {
     },
     startPainting (event) {
       if (this.isPanning) { return }
-      this.$store.commit('updateCardMap')
-      this.updateViewportCardMap()
       startCursor = utils.cursorPositionInViewport(event)
       this.currentCursor = utils.cursorPositionInViewport(event)
       const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)
@@ -418,7 +407,7 @@ export default {
     },
     selectCards (point, shouldToggle) {
       if (this.userCantEditSpace) { return }
-      const cardMap = viewportCardMap || this.cardMap
+      const cardMap = this.cardMap
       cardMap.forEach(card => {
         const x = {
           value: point.x + window.scrollX,

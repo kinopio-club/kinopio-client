@@ -663,7 +663,7 @@ export default {
     },
     updateSpacePageSize: (context) => {
       nextTick(() => {
-        context.dispatch('updateSpacePageSize', null, { root: true })
+        context.commit('updateSpacePageSize', null, { root: true })
       })
     },
     removeEmptyCards: (context) => {

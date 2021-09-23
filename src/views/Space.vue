@@ -297,8 +297,8 @@ export default {
     checkCurrentConnectionSuccess () {
       const cursor = this.cursor()
       const zoom = this.$store.getters.spaceCounterZoomDecimal
-      const cardMap = this.$store.state.cardMap
-      const connection = cardMap.find(card => {
+      const cardMap = this.$store.state.newCardMap
+      const connectionToCard = cardMap.find(card => {
         const xValues = {
           value: cursor.x,
           min: (card.x - window.scrollX) * zoom,
@@ -314,15 +314,15 @@ export default {
         return inXRange && inYRange
       })
       let updates = { id: this.$store.state.currentUser.id }
-      if (!connection) {
+      if (!connectionToCard) {
         this.$store.commit('currentConnectionSuccess', {})
         updates.endCardId = null
         this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
         return
       }
-      if (this.$store.state.currentConnection.startCardId !== connection.cardId) {
-        this.$store.commit('currentConnectionSuccess', connection)
-        updates.endCardId = connection.cardId
+      if (this.$store.state.currentConnection.startCardId !== connectionToCard.id) {
+        this.$store.commit('currentConnectionSuccess', connectionToCard)
+        updates.endCardId = connectionToCard.id
         this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
       } else {
         this.$store.commit('currentConnectionSuccess', {})
@@ -335,8 +335,8 @@ export default {
     createConnection () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
       const startCardId = this.$store.state.currentConnection.startCardId
-      const endCardId = currentConnectionSuccess.cardId
-      if (currentConnectionSuccess.cardId) {
+      const endCardId = currentConnectionSuccess.id
+      if (currentConnectionSuccess.id) {
         const path = utils.connectionBetweenCards(startCardId, endCardId)
         const connection = { startCardId, endCardId, path }
         this.addConnection(connection)

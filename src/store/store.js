@@ -34,6 +34,7 @@ const store = createStore({
     shouldExplicitlyHideFooter: false,
     isTouchDevice: false,
     cardMap: {},
+    newCardMap: [],
     cardsCreatedLimit: 100,
     prevCursorPosition: { x: 0, y: 0 },
     spaceZoomPercent: 100,
@@ -176,12 +177,11 @@ const store = createStore({
       state.maxPageSizeWidth = width
       state.maxPageSizeHeight = height
     },
-    updateSpacePageSize: (state, { maxX, maxY }) => {
+    updateSpacePageSize: (state) => {
       const extraScrollArea = 160
-      state.pageWidth = maxX + extraScrollArea
-      state.pageHeight = maxY + extraScrollArea
+      state.pageWidth = extraScrollArea
+      state.pageHeight = extraScrollArea
     },
-
     pageHeight: (state, height) => {
       utils.typeCheck({ value: height, type: 'number', origin: 'pageHeight' })
       state.pageHeight = height
@@ -261,7 +261,34 @@ const store = createStore({
       state.isTouchDevice = value
     },
     updateCardMap: (state) => {
-      state.cardMap = utils.cardMap()
+      // state.cardMap = utils.cardMap()
+    },
+    // updateNewCardMap: (state) => {
+    //   let cards = utils.clone(state.currentSpace.cards)
+    //   cards.map(card => {
+    //     return {
+    //       id: card.id,
+    //       x: card.x,
+    //       y: card.y,
+    //       width: card.width,
+    //       height: card.height
+    //     }
+    //   })
+    //   state.newCardMap = cards
+    // },
+    addToNewCardMap: (state, card) => {
+      card = utils.clone(card)
+      card = {
+        id: card.id,
+        x: card.x,
+        y: card.y,
+        width: card.width,
+        height: card.height
+      }
+      state.newCardMap.push(card)
+    },
+    removeFromNewCardMap: (state, card) => {
+      state.newCardMap = state.newCardMap.filter(cardInMap => cardInMap.id !== card.id)
     },
     prevCursorPosition: (state, cursor) => {
       state.prevCursorPosition = cursor
@@ -926,22 +953,6 @@ const store = createStore({
       context.commit('broadcast/updateUser', { user: utils.userMeta(user, space), type: 'updateUserPresence' }, { root: true })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteCardDetailsVisible' })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteConnectionDetailsVisible' })
-    },
-    updateSpacePageSize: (context) => {
-      let maxX = 0
-      let maxY = 0
-      context.commit('updateCardMap')
-      context.state.cardMap.forEach(card => {
-        const cardX = card.x + card.width
-        const cardY = card.y + card.height
-        if (cardX > maxX) {
-          maxX = cardX
-        }
-        if (cardY > maxY) {
-          maxY = cardY
-        }
-      })
-      context.commit('updateSpacePageSize', { maxX, maxY })
     },
     toggleCardSelected: (context, cardId) => {
       const previousMultipleCardsSelectedIds = context.state.previousMultipleCardsSelectedIds

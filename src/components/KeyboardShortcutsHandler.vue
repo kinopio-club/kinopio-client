@@ -322,7 +322,7 @@ export default {
 
     // recursive
     nonOverlappingCardPosition (position) {
-      const cardMap = this.$store.state.cardMap
+      const cardMap = this.$store.state.newCardMap
       const overlappingCard = cardMap.find(card => {
         const isBetweenX = utils.isBetween({
           value: position.x,
@@ -431,7 +431,7 @@ export default {
       }
       let closestDistanceFromCenter = Math.max(viewportWidth, viewportHeight)
       let closestCard
-      const cardMap = this.$store.state.cardMap
+      const cardMap = this.$store.state.newCardMap
       cardMap.forEach(card => {
         const toPosition = utils.rectCenter(card)
         const distance = utils.distanceBetweenTwoPoints(viewportCenter, toPosition)
@@ -445,7 +445,7 @@ export default {
     },
 
     currentFocusedCard () {
-      const cardMap = this.$store.state.cardMap
+      const cardMap = this.$store.state.newCardMap
       let lastCardId = this.$store.state.parentCardId || this.$store.state.childCardId
       let lastCard = cardMap.filter(card => card.cardId === lastCardId)
       if (lastCard.length) {
@@ -457,7 +457,7 @@ export default {
 
     focusCard (direction) {
       this.$store.commit('updateCardMap')
-      const cardMap = this.$store.state.cardMap
+      const cardMap = this.$store.state.newCardMap
       const originCard = this.currentFocusedCard()
       let focusableCards
       if (direction === 'left') {

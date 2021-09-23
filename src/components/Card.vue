@@ -228,8 +228,7 @@ export default {
         }
       }
       if (mutation.type === 'closeAllDialogs') {
-        const isVisible = utils.isCardInViewport(this.card)
-        if (!isVisible) { return }
+        if (!this.isCardInViewport) { return }
         this.userDetailsIsVisible = false
       }
     })
@@ -239,9 +238,12 @@ export default {
       let card = { id: this.card.id }
       this.$store.dispatch('currentSpace/updateCard', card)
     }
+    let observer = new IntersectionObserver(this.checkIsCardInViewport)
+    observer.observe(this.$refs.card)
   },
   data () {
     return {
+      isCardInViewport: false,
       isRemoteConnecting: false,
       remoteConnectionColor: '',
       uploadIsDraggedOver: false,
@@ -548,7 +550,7 @@ export default {
     isConnectingTo () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
       if (currentConnectionSuccess) {
-        return currentConnectionSuccess.cardId === this.id
+        return currentConnectionSuccess.id === this.id
       } else {
         return false
       }
@@ -723,6 +725,17 @@ export default {
     }
   },
   methods: {
+    checkIsCardInViewport (changes, observer) {
+      changes.forEach(change => {
+        if (change.intersectionRatio > 0) {
+          this.isCardInViewport = true
+          this.$store.commit('addToNewCardMap', this.card)
+        } else {
+          this.isCardInViewport = false
+          this.$store.commit('removeFromNewCardMap', this.card)
+        }
+      })
+    },
     connectionIsBeingDragged (connection) {
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
       const currentDraggingCardId = this.$store.state.currentDraggingCardId
