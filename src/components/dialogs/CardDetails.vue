@@ -303,7 +303,7 @@ export default {
     const element = this.$refs.dialog
     if (element) {
       this.scrollIntoViewAndFocus()
-      this.$emit('broadcastShowCardDetails')
+      this.broadcastShowCardDetails()
       this.updatePreviousTags()
       this.updatePinchCounterZoomDecimal()
     }
@@ -524,6 +524,13 @@ export default {
     collaborationInfoIsVisible () { return this.$store.state.currentUser.shouldShowCardCollaborationInfo }
   },
   methods: {
+    broadcastShowCardDetails () {
+      const updates = {
+        cardId: this.card.id,
+        userId: this.$store.state.currentUser.id
+      }
+      this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
+    },
     addFile (file) {
       const cardId = this.card.id
       const spaceId = this.$store.state.currentSpace.id

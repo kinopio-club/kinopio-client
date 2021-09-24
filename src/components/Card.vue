@@ -150,7 +150,7 @@ article(:style="position" :data-card-id="id" ref="card")
         img.icon.cancel(src="@/assets/add.svg")
         span Space is Read Only
 
-  CardDetails(:card="card" @broadcastShowCardDetails="broadcastShowCardDetails")
+  CardDetails(:card="card")
 
   //- Meta Info
   .meta-container(v-if="filterShowUsers || filterShowDateUpdated || isInSearchResultsCards")
@@ -1187,13 +1187,6 @@ export default {
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
       this.$store.dispatch('closeAllDialogs', 'spaceDetails.changeSpace')
-    },
-    broadcastShowCardDetails () {
-      const updates = {
-        cardId: this.card.id,
-        userId: this.$store.state.currentUser.id
-      }
-      this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
     },
     removeCommentBrackets (name) {
       if (!this.nameIsComment) {
