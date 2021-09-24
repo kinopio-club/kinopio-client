@@ -230,6 +230,11 @@ export default {
       if (mutation.type === 'closeAllDialogs') {
         this.userDetailsIsVisible = false
       }
+      if (mutation.type === 'triggerUploadComplete') {
+        let { cardId, url } = mutation.payload
+        if (cardId !== this.card.id) { return }
+        this.addFile({ url })
+      }
     })
   },
   mounted () {
@@ -721,6 +726,36 @@ export default {
     }
   },
   methods: {
+    addFile (file) {
+      let name = this.card.name
+      const url = file.url
+      const urlType = utils.urlType(url)
+      const checkbox = utils.checkboxFromString(name)
+      const previousUrls = utils.urlsFromString(name, true) || []
+      let isReplaced
+      previousUrls.forEach(previousUrl => {
+        if (utils.urlType(previousUrl) === urlType) {
+          name = name.replace(previousUrl.trim(), url)
+          isReplaced = true
+        }
+      })
+      if (!isReplaced) {
+        // prepend url to name
+        name = utils.trim(name)
+        name = `${url}\n\n${name}`
+      }
+      // ensure checkbox is first
+      if (checkbox) {
+        name = name.replace(checkbox, '')
+        name = `${checkbox} ${name}`
+      }
+      // update name
+      this.$store.dispatch('currentSpace/updateCard', {
+        id: this.card.id,
+        name: utils.trim(name)
+      })
+      this.$store.commit('triggerUpdatePositionInVisualViewport')
+    },
     connectionIsBeingDragged (connection) {
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
       const currentDraggingCardId = this.$store.state.currentDraggingCardId

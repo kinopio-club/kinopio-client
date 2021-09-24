@@ -187,7 +187,7 @@ export default {
           context.commit('addNotification', { message: error.message, type: 'danger' }, { root: true })
         }
       }))
-      // update card names
+      // remove placeholder from card names
       files.forEach((file, index) => {
         const cardId = cardIds[index]
         context.dispatch('currentSpace/repaceInCardName', {

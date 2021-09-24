@@ -285,11 +285,6 @@ export default {
         this.cardTipsIsVisible = false
         this.hidePickers()
       }
-      if (mutation.type === 'triggerUploadComplete') {
-        let { cardId, url } = mutation.payload
-        if (cardId !== this.card.id) { return }
-        this.addFile({ url })
-      }
       if (mutation.type === 'triggerUnloadPage' && this.visible) {
         this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', this.card.id)
       }
@@ -528,6 +523,15 @@ export default {
     collaborationInfoIsVisible () { return this.$store.state.currentUser.shouldShowCardCollaborationInfo }
   },
   methods: {
+    addFile (file) {
+      const cardId = this.card.id
+      const spaceId = this.$store.state.currentSpace.id
+      this.$store.commit('triggerUploadComplete', {
+        cardId,
+        spaceId,
+        url: file.url
+      })
+    },
     selectionStartPosition () {
       let startPosition = this.lastSelectionStartPosition
       if (this.$refs.name) {
@@ -1030,32 +1034,6 @@ export default {
     },
     triggerUpgradeUserIsVisible () {
       this.$store.commit('triggerUpgradeUserIsVisible')
-    },
-    addFile (file) {
-      let name = this.card.name
-      const url = file.url
-      const urlType = utils.urlType(url)
-      const checkbox = utils.checkboxFromString(name)
-      const previousUrls = utils.urlsFromString(name, true) || []
-      let isReplaced
-      previousUrls.forEach(previousUrl => {
-        if (utils.urlType(previousUrl) === urlType) {
-          name = name.replace(previousUrl.trim(), url)
-          isReplaced = true
-        }
-      })
-      if (!isReplaced) {
-        // prepend url to name
-        name = utils.trim(name)
-        name = `${url}\n\n${name}`
-      }
-      // ensure checkbox is first
-      if (checkbox) {
-        name = name.replace(checkbox, '')
-        name = `${checkbox} ${name}`
-      }
-      this.updateCardName(utils.trim(name))
-      this.triggerUpdatePositionInVisualViewport()
     },
     clearErrors () {
       this.error.signUpToUpload = false
