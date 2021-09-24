@@ -12,7 +12,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.prevent.enter.exact
 
         @compositionend="updateCompositionEventEndTime"
-        @keyup.enter.exact="closeCard"
+        @keyup.enter.exact="handleEnterKey"
         @keyup.stop.esc
         @keydown.esc="closeCardAndFocus"
 
@@ -891,36 +891,27 @@ export default {
       // https://stackoverflow.com/questions/51226598/what-is-javascripts-compositionevent-please-give-examples
       compositionEventEndTime = event.timeStamp
     },
-    closeCard (event) {
-      if (this.$store.state.shouldPreventNextEnterKey) {
-        event.stopPropagation()
-        this.$store.commit('shouldPreventNextEnterKey', false)
-        return
-      }
-      if (this.tag.pickerIsVisible || this.space.pickerIsVisible) {
-        this.hidePickers()
-        event.stopPropagation()
-        return
-      }
-      if (this.insertedLineBreak) {
-        this.insertedLineBreak = false
-        event.stopPropagation()
-        return
-      }
+    handleEnterKey (event) {
       const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 200
-      if (isCompositionEvent) {
-        event.stopPropagation()
-        return
+      if (this.$store.state.shouldPreventNextEnterKey) {
+        this.$store.commit('shouldPreventNextEnterKey', false)
+      } else if (this.tag.pickerIsVisible || this.space.pickerIsVisible) {
+        this.hidePickers()
+      } else if (this.insertedLineBreak) {
+        this.insertedLineBreak = false
+      } else if (isCompositionEvent) {
+
+      } else {
+        this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCard')
+        this.$store.commit('triggerAddCard')
       }
-      this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCard')
-      this.$store.commit('triggerAddCard')
     },
     closeCardAndFocus (event) {
       if (this.tag.pickerIsVisible || this.space.pickerIsVisible) {
         this.hidePickers()
         return
       }
-      this.closeCard(event)
+      this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCardAndFocus')
       document.querySelector(`.card[data-card-id="${this.card.id}"]`).focus()
     },
     removeCard () {
