@@ -433,12 +433,14 @@ export default {
     selectConnectionPaths (point, shouldToggle) {
       const zoom = this.spaceCounterZoomDecimal
       const paths = document.querySelectorAll('svg .connection-path')
+      const pointX = (point.x + window.scrollX) * zoom
+      const pointY = (point.y + window.scrollY) * zoom
       paths.forEach(path => {
         const pathId = path.dataset.id
         const svg = document.querySelector('svg.connections')
         let svgPoint = svg.createSVGPoint()
-        svgPoint.x = (point.x + window.scrollX) * zoom
-        svgPoint.y = (point.y + window.scrollY) * zoom
+        svgPoint.x = pointX
+        svgPoint.y = pointY
         const isSelected = path.isPointInStroke(svgPoint)
         if (isSelected) {
           if (shouldToggle) {
