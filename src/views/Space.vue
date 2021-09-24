@@ -292,10 +292,7 @@ export default {
     checkCurrentConnectionSuccess () {
       const cursor = this.cursor()
       const zoom = this.$store.getters.spaceZoomDecimal
-      let elements = document.elementsFromPoint(cursor.x * zoom, cursor.y * zoom)
-      const cardElement = elements.find(element => {
-        return element.nodeName === 'ARTICLE' // cards are <article>s
-      })
+      const cardElement = utils.cardElementFromPosition(cursor.x * zoom, cursor.y * zoom)
       let updates = { id: this.$store.state.currentUser.id }
       let isCurrentConnectionConnected
       if (cardElement) {

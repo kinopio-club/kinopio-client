@@ -468,6 +468,13 @@ export default {
     })
     return shortestDistanceCard
   },
+  cardElementFromPosition (x, y) {
+    let elements = document.elementsFromPoint(x, y)
+    const cardElement = elements.find(element => {
+      return element.nodeName === 'ARTICLE' // cards are <article>s
+    })
+    return cardElement
+  },
 
   // Connection Path Utils 🐙
 
