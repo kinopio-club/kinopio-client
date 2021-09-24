@@ -732,6 +732,7 @@ export default {
       nextTick(() => {
         context.dispatch('updateIncorrectCardConnectionPaths', { shouldUpdateApi: Boolean(remoteSpace) })
         context.dispatch('scrollCardsIntoView')
+        context.dispatch('updatePageSizes', null, { root: true })
       })
       const timeEnd = utils.normalizeToUnixTime(new Date())
       console.log(`🐇 space loaded in ${timeEnd - timeStart}ms, cards ${context.state.cards.length}, connections ${context.state.connections.length}`)
