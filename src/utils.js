@@ -1398,6 +1398,7 @@ export default {
     return Boolean(comment)
   },
   removeMarkdownCodeblocksFromString (string) {
+    if (!string) { return '' }
     const segments = this.markdownSegments(string)
     segments.forEach(segment => {
       if (segment.type === 'codeBlock' || segment.type === 'code') {

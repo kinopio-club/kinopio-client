@@ -150,8 +150,6 @@ article(:style="position" :data-card-id="id" ref="card")
         img.icon.cancel(src="@/assets/add.svg")
         span Space is Read Only
 
-  CardDetails(:card="card")
-
   //- Meta Info
   .meta-container(v-if="filterShowUsers || filterShowDateUpdated || isInSearchResultsCards")
     //- Search result
@@ -179,7 +177,6 @@ article(:style="position" :data-card-id="id" ref="card")
 
 <script>
 import utils from '@/utils.js'
-import CardDetails from '@/components/dialogs/CardDetails.vue'
 import Frames from '@/components/Frames.vue'
 import Loader from '@/components/Loader.vue'
 import Audio from '@/components/Audio.vue'
@@ -202,7 +199,6 @@ let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
 
 export default {
   components: {
-    CardDetails,
     Frames,
     Loader,
     Audio,
@@ -1112,7 +1108,6 @@ export default {
       this.$store.commit('parentCardId', this.id)
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
       this.$store.commit('currentUserIsDraggingCard', false)
-      this.broadcastShowCardDetails()
       this.updatePreviousResultCardId()
     },
     updatePreviousResultCardId () {

@@ -210,6 +210,7 @@ import qs from '@aguezz/qs-parse'
 import nanoid from 'nanoid'
 import debounce from 'lodash-es/debounce'
 
+let previousCard
 let previousTags = []
 let compositionEventEndTime = 0
 
@@ -230,9 +231,6 @@ export default {
     MediaPreview,
     User,
     CardCollaborationInfo
-  },
-  props: {
-    card: Object // name, x, y, z
   },
   data () {
     return {
@@ -298,18 +296,12 @@ export default {
       }
     })
   },
-  mounted () {
-    // for new cards only
-    const element = this.$refs.dialog
-    if (element) {
-      this.scrollIntoViewAndFocus()
-      this.broadcastShowCardDetails()
-      this.updatePreviousTags()
-      this.updatePinchCounterZoomDecimal()
-    }
-  },
   computed: {
-    visible () { return this.$store.state.cardDetailsIsVisibleForCardId === this.card.id },
+    card () {
+      const cardId = this.$store.state.cardDetailsIsVisibleForCardId
+      return this.$store.getters['currentSpace/cardById'](cardId) || {}
+    },
+    visible () { return utils.objectHasKeys(this.card) },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     cardIsCreatedByCurrentUser () { return this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](this.card) },
     spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
@@ -490,7 +482,9 @@ export default {
       } else {
         zoom = this.spaceCounterZoomDecimal
       }
-      return { transform: `scale(${zoom})` }
+      const left = `${this.card.x + 8}px`
+      const top = `${this.card.y + 8}px`
+      return { transform: `scale(${zoom})`, left, top }
     },
     cardUrlPreviewIsVisible () {
       const isErrorUrl = this.card.urlPreviewErrorUrl && this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl
@@ -564,7 +558,7 @@ export default {
       shouldCancelOpening = false
     },
     startOpening () {
-      if (this.$store.state.preventCardDetailsOpeningAnimation) {
+      if (this.$store.state.preventCardDetailsOpeningAnimation || !this.card.name) {
         this.$store.commit('preventCardDetailsOpeningAnimation', false)
         return
       }
@@ -939,7 +933,8 @@ export default {
       })
     },
     cardIsEmpty () {
-      return !this.card.name
+      const card = this.$store.getters['currentSpace/cardById'](previousCard.id)
+      return !card.name
     },
     toggleFramePickerIsVisible () {
       const isVisible = this.framePickerIsVisible
@@ -1457,9 +1452,13 @@ export default {
   },
   watch: {
     visible (visible) {
+      if (this.card.id) {
+        previousCard = utils.clone(this.card)
+      }
       this.updatePinchCounterZoomDecimal()
       this.$nextTick(() => {
         if (visible) {
+          this.broadcastShowCardDetails()
           this.clearErrors()
           this.scrollIntoViewAndFocus()
           this.updatePreviousTags()
@@ -1485,7 +1484,7 @@ export default {
         this.$store.commit('shouldPreventNextEnterKey', false)
       }
       if (!visible && this.cardIsEmpty()) {
-        this.$store.dispatch('currentSpace/removeCard', this.card)
+        this.$store.dispatch('currentSpace/removeCard', { id: previousCard.id })
       }
       this.$store.dispatch('updatePageSizes')
     },
