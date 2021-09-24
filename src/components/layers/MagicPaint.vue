@@ -423,9 +423,9 @@ export default {
         const isBetweenY = utils.isBetween(y)
         if (isBetweenX && isBetweenY) {
           if (shouldToggle) {
-            this.$store.dispatch('toggleCardSelected', card.cardId)
+            this.$store.dispatch('toggleCardSelected', card.id)
           } else {
-            this.$store.dispatch('addToMultipleCardsSelected', card.cardId)
+            this.$store.dispatch('addToMultipleCardsSelected', card.id)
           }
         }
       })
