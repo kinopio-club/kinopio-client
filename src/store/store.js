@@ -366,6 +366,7 @@ const store = createStore({
     triggerMoreFiltersIsNotVisible: () => {},
     triggerShowConnectionDetails: (state, options) => {},
     triggerUpdateWindowHistory: (state, options) => {},
+    triggerAddCard: () => {},
 
     // Cards
 

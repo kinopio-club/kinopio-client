@@ -16,6 +16,13 @@ let prevCursorPosition
 
 export default {
   name: 'KeyboardShortcutsHandler',
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerAddCard') {
+        this.addCard()
+      }
+    })
+  },
   mounted () {
     window.addEventListener('keyup', this.handleShortcuts)
     // event.metaKey only works on keydown
@@ -42,15 +49,10 @@ export default {
     handleShortcuts (event) {
       const key = event.key
       // console.warn('🎹', key)
-      const isFromCardName = event.target.closest('dialog.card-details')
       const isFromCard = event.target.classList[0] === 'card'
       const isSpaceScope = event.target.tagName === 'BODY'
-      const isCardScope = isFromCard || isFromCardName
-      // Enter
-      if (key === 'Enter' && (isSpaceScope || isCardScope)) {
-        this.addCard()
       // ?
-      } else if (key === '?' && isSpaceScope) {
+      if (key === '?' && isSpaceScope) {
         this.$store.commit('triggerKeyboardShortcutsIsVisible')
       } else if (key === 'n' && isSpaceScope) {
         this.$store.dispatch('currentSpace/addSpace')

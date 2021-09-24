@@ -2,6 +2,8 @@ import utils from '@/utils.js'
 
 import nanoid from 'nanoid'
 
+const placeholder = '⬬⬭'
+
 export default {
   namespaced: true,
   state: {
@@ -156,7 +158,7 @@ export default {
             x: currentCursor.x + (index * positionOffset),
             y: currentCursor.y + (index * positionOffset)
           },
-          name: '⬬⬭',
+          name: placeholder,
           id: cardId
         }, { root: true })
         const fileName = utils.normalizeFileUrl(file.name)
@@ -185,12 +187,12 @@ export default {
           context.commit('addNotification', { message: error.message, type: 'danger' }, { root: true })
         }
       }))
-      // update card names
+      // remove placeholder from card names
       files.forEach((file, index) => {
         const cardId = cardIds[index]
         context.dispatch('currentSpace/repaceInCardName', {
           cardId,
-          match: '⬬⬭',
+          match: placeholder,
           replace: ''
         }, { root: true })
       })

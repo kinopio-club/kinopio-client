@@ -12,7 +12,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.prevent.enter.exact
 
         @compositionend="updateCompositionEventEndTime"
-        @keyup.enter.exact="closeCard"
+        @keyup.enter.exact="handleEnterKey"
         @keyup.stop.esc
         @keydown.esc="closeCardAndFocus"
 
@@ -286,11 +286,6 @@ export default {
         this.cardTipsIsVisible = false
         this.hidePickers()
       }
-      if (mutation.type === 'triggerUploadComplete') {
-        let { cardId, url } = mutation.payload
-        if (cardId !== this.card.id) { return }
-        this.addFile({ url })
-      }
       if (mutation.type === 'triggerUnloadPage' && this.visible) {
         this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', this.card.id)
       }
@@ -529,6 +524,15 @@ export default {
     collaborationInfoIsVisible () { return this.$store.state.currentUser.shouldShowCardCollaborationInfo }
   },
   methods: {
+    addFile (file) {
+      const cardId = this.card.id
+      const spaceId = this.$store.state.currentSpace.id
+      this.$store.commit('triggerUploadComplete', {
+        cardId,
+        spaceId,
+        url: file.url
+      })
+    },
     selectionStartPosition () {
       let startPosition = this.lastSelectionStartPosition
       if (this.$refs.name) {
@@ -888,35 +892,27 @@ export default {
       // https://stackoverflow.com/questions/51226598/what-is-javascripts-compositionevent-please-give-examples
       compositionEventEndTime = event.timeStamp
     },
-    closeCard (event) {
+    handleEnterKey (event) {
+      const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 200
       if (this.$store.state.shouldPreventNextEnterKey) {
-        event.stopPropagation()
         this.$store.commit('shouldPreventNextEnterKey', false)
-        return
-      }
-      if (this.tag.pickerIsVisible || this.space.pickerIsVisible) {
+      } else if (this.tag.pickerIsVisible || this.space.pickerIsVisible) {
         this.hidePickers()
-        event.stopPropagation()
-        return
-      }
-      if (this.insertedLineBreak) {
+      } else if (this.insertedLineBreak) {
         this.insertedLineBreak = false
-        event.stopPropagation()
-        return
+      } else if (isCompositionEvent) {
+
+      } else {
+        this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCard')
+        this.$store.commit('triggerAddCard')
       }
-      const isCompositionEvent = Math.abs(event.timeStamp - compositionEventEndTime) < 200
-      if (isCompositionEvent) {
-        event.stopPropagation()
-        return
-      }
-      this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCard')
     },
     closeCardAndFocus (event) {
       if (this.tag.pickerIsVisible || this.space.pickerIsVisible) {
         this.hidePickers()
         return
       }
-      this.closeCard(event)
+      this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCardAndFocus')
       document.querySelector(`.card[data-card-id="${this.card.id}"]`).focus()
     },
     removeCard () {
@@ -1031,32 +1027,6 @@ export default {
     },
     triggerUpgradeUserIsVisible () {
       this.$store.commit('triggerUpgradeUserIsVisible')
-    },
-    addFile (file) {
-      let name = this.card.name
-      const url = file.url
-      const urlType = utils.urlType(url)
-      const checkbox = utils.checkboxFromString(name)
-      const previousUrls = utils.urlsFromString(name, true) || []
-      let isReplaced
-      previousUrls.forEach(previousUrl => {
-        if (utils.urlType(previousUrl) === urlType) {
-          name = name.replace(previousUrl.trim(), url)
-          isReplaced = true
-        }
-      })
-      if (!isReplaced) {
-        // prepend url to name
-        name = utils.trim(name)
-        name = `${url}\n\n${name}`
-      }
-      // ensure checkbox is first
-      if (checkbox) {
-        name = name.replace(checkbox, '')
-        name = `${checkbox} ${name}`
-      }
-      this.updateCardName(utils.trim(name))
-      this.triggerUpdatePositionInVisualViewport()
     },
     clearErrors () {
       this.error.signUpToUpload = false
