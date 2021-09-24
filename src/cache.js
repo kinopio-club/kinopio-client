@@ -9,7 +9,7 @@ export default {
     try {
       window.localStorage[key] = JSON.stringify(value)
     } catch (error) {
-      console.warn('storeLocal could not save to localStorage')
+      console.warn('storeLocal could not save to localStorage', error)
       if (this.user().apiKey) {
         console.log('🐇 pruning localStorage spaces')
         const currentSpaceId = utils.spaceIdFromUrl()
