@@ -907,12 +907,13 @@ export default {
         event.stopPropagation()
         return
       }
-      const isCompositionEvent = Math.abs(event.timeStamp - compositionEventEndTime) < 200
+      const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 200
       if (isCompositionEvent) {
         event.stopPropagation()
         return
       }
       this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCard')
+      this.$store.commit('triggerAddCard')
     },
     closeCardAndFocus (event) {
       if (this.tag.pickerIsVisible || this.space.pickerIsVisible) {
