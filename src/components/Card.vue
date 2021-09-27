@@ -160,6 +160,7 @@ article(:style="position" :data-card-id="id" ref="card")
       .badge.user-badge.button-badge(
         v-if="filterShowUsers"
         :style="{background: createdByUser.color}"
+        :class="{active: userDetailsIsVisible}"
         @mouseup.left.stop
         @touchend.stop
         @click.left.prevent.stop="toggleUserDetailsIsVisible"
@@ -167,7 +168,6 @@ article(:style="position" :data-card-id="id" ref="card")
       )
         User(:user="createdByUser" :isClickable="false")
         .name {{createdByUser.name}}
-      UserDetails(:visible="userDetailsIsVisible" :user="createdByUser")
     //- Date
     .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
       img.icon.time(src="@/assets/time.svg")
@@ -182,7 +182,6 @@ import Loader from '@/components/Loader.vue'
 import Audio from '@/components/Audio.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import User from '@/components/User.vue'
-import UserDetails from '@/components/dialogs/UserDetails.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 
@@ -203,7 +202,6 @@ export default {
     Loader,
     Audio,
     User,
-    UserDetails,
     NameSegment,
     UrlPreview
   },
@@ -222,10 +220,6 @@ export default {
           scrollIntoView.scroll(element, isTouchDevice)
           scrollIntoView.scroll(element, isTouchDevice)
         }
-      }
-      if (mutation.type === 'closeAllDialogs') {
-        if (!this.isCardInViewport) { return }
-        this.userDetailsIsVisible = false
       }
       if (mutation.type === 'triggerUploadComplete') {
         let { cardId, url } = mutation.payload
@@ -249,7 +243,6 @@ export default {
       remoteConnectionColor: '',
       uploadIsDraggedOver: false,
       isPlayingAudio: false,
-      userDetailsIsVisible: false,
       preventDraggedButtonBadgeFromShowingDetails: false,
       error: {
         sizeLimit: false,
@@ -298,16 +291,16 @@ export default {
     filterShowUsers () { return this.$store.state.currentUser.filterShowUsers },
     filterShowDateUpdated () { return this.$store.state.currentUser.filterShowDateUpdated },
     createdByUser () {
+      // same as userDetailsWrap.cardCreatedByUser
       const userId = this.card.userId
       let user = this.$store.getters['currentSpace/userById'](userId)
-      if (user) {
-        return user
-      } else {
-        return {
+      if (!user) {
+        user = {
           name: '',
           color: '#cdcdcd' // secondary-active-background
         }
       }
+      return user
     },
     connectorIsVisible () {
       const spaceIsOpen = this.$store.state.currentSpace.privacy === 'open' && this.currentUserIsSignedIn
@@ -723,7 +716,8 @@ export default {
         opacity: this.lockingAlpha,
         borderRadius: borderRadius
       }
-    }
+    },
+    userDetailsIsVisible () { return this.$store.state.cardUserDetailsIsVisibleForCardId === this.id }
   },
   methods: {
     checkIsCardInViewport (changes, observer) {
@@ -920,18 +914,14 @@ export default {
     },
     toggleUserDetailsIsVisible () {
       if (isMultiTouch) { return }
-      const value = !this.userDetailsIsVisible
+      let cardId = this.id
+      if (this.userDetailsIsVisible) {
+        cardId = ''
+      }
       this.$store.dispatch('closeAllDialogs', 'Card.toggleUserDetailsIsVisible')
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)
       this.$store.commit('currentUserIsDraggingCard', false)
-      this.userDetailsIsVisible = value
-      this.$nextTick(() => {
-        if (this.userDetailsIsVisible) {
-          const element = document.querySelector('dialog.user-details')
-          const isTouchDevice = this.$store.state.isTouchDevice
-          scrollIntoView.scroll(element, isTouchDevice)
-        }
-      })
+      this.$store.commit('cardUserDetailsIsVisibleForCardId', cardId)
     },
     toggleFilterShowAbsoluteDates () {
       this.$store.dispatch('currentSpace/incrementCardZ', this.id)

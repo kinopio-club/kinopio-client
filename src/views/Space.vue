@@ -29,6 +29,7 @@ main.space(
     template(v-for="card in cards")
       Card(:card="card")
   CardDetails
+  CardUserDetails
   ConnectionDetails
   MultipleSelectedActions
   ScrollAtEdgesHandler
@@ -38,6 +39,7 @@ main.space(
 <script>
 import Card from '@/components/Card.vue'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
+import CardUserDetails from '@/components/dialogs/CardUserDetails.vue'
 import Connection from '@/components/Connection.vue'
 import ConnectionLabel from '@/components/ConnectionLabel.vue'
 import UserLabel from '@/components/UserLabel.vue'
@@ -58,6 +60,7 @@ export default {
   components: {
     Card,
     CardDetails,
+    CardUserDetails,
     Connection,
     ConnectionLabel,
     UserLabel,
