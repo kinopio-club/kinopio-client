@@ -964,9 +964,11 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteCardsSelected' }, { root: true })
     },
     clearMultipleSelected: (context) => {
-      context.commit('clearMultipleSelected')
-      const space = utils.clone(context.rootState.currentSpace)
-      const user = utils.clone(context.rootState.currentUser)
+      if (context.state.multipleCardsSelectedIds.length || context.state.multipleConnectionsSelectedIds.length) {
+        context.commit('clearMultipleSelected')
+      }
+      const space = context.rootState.currentSpace
+      const user = context.rootState.currentUser
       context.commit('broadcast/updateStore', { user: utils.userMeta(user, space), type: 'clearRemoteMultipleSelected' }, { root: true })
     },
     toggleMultipleConnectionsSelected: (context, connectionId) => {
