@@ -407,17 +407,22 @@ export default {
     },
     selectCards (point, shouldToggle) {
       if (this.userCantEditSpace) { return }
+      const zoom = this.spaceCounterZoomDecimal
       const cardMap = this.cardMap
       cardMap.forEach(card => {
+        const cardX = card.x
+        const cardY = card.y
+        const pointX = (point.x + window.scrollX) * zoom
+        const pointY = (point.y + window.scrollY) * zoom
         const x = {
-          value: point.x + window.scrollX,
-          min: card.x - circleSelectionRadius,
-          max: card.x + card.width + circleSelectionRadius
+          value: pointX,
+          min: cardX - circleSelectionRadius,
+          max: cardX + card.width + circleSelectionRadius
         }
         const y = {
-          value: point.y + window.scrollY,
-          min: card.y - circleSelectionRadius,
-          max: card.y + card.height + circleSelectionRadius
+          value: pointY,
+          min: cardY - circleSelectionRadius,
+          max: cardY + card.height + circleSelectionRadius
         }
         const isBetweenX = utils.isBetween(x)
         const isBetweenY = utils.isBetween(y)
