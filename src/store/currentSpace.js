@@ -728,7 +728,7 @@ export default {
     restoreSpaceComplete: (context, { space, isRemote, timeStart }) => {
       context.commit('isLoadingSpace', false, { root: true })
       const timeEnd = utils.normalizeToUnixTime(new Date())
-      console.log(`🐇 space loaded in ${timeEnd - timeStart}ms, cards ${context.state.cards.length}, connections ${context.state.connections.length}`, '🌏 is remote: ', isRemote)
+      console.log(`🐇 space: ${space.name}, loaded in ${timeEnd - timeStart}ms, cards ${context.state.cards.length}, connections ${context.state.connections.length}`, '🌏 is remote: ', isRemote)
     },
     loadSpace: async (context, { space }) => {
       const emptySpace = utils.emptySpace(space.id)
