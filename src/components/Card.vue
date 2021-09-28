@@ -1,5 +1,5 @@
 <template lang="pug">
-article(:style="position" :data-card-id="id" ref="card")
+article(:style="position" :data-card-id="id" ref="card" v-memo="[card.name, card.x, card.y, isConnectingTo, isConnectingFrom, isRemoteConnecting, isBeingDragged, isRemoteCardDragging, uploadIsDraggedOver, isFiltered, selectedColor, remoteUploadDraggedOverCardColor, isSelected, isRemoteSelected, isRemoteCardDetailsVisible]")
   .card(
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
