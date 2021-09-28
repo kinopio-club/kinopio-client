@@ -711,6 +711,10 @@ export default {
       })
       // restore connections
       chunks = utils.splitArrayIntoChunks(connections, chunkSize)
+      if (!chunks.length) {
+        context.dispatch('restoreSpaceComplete', { space, isRemote, timeStart })
+        return
+      }
       chunks.forEach((chunk, index) => {
         defer(function () {
           context.commit('restoreConnections', chunk)
