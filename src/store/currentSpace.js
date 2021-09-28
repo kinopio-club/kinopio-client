@@ -684,7 +684,6 @@ export default {
       } else {
         context.dispatch('addNewJournalSpace')
       }
-      // todo reset state
       context.commit('loadJournalSpace', false, { root: true })
       context.commit('loadJournalSpaceTomorrow', false, { root: true })
     },
@@ -693,13 +692,14 @@ export default {
       const emptySpace = utils.emptySpace(space.id)
       const cachedSpace = cache.space(space.id)
       const user = context.rootState.currentUser
+      // clear state
       context.commit('clearCardMap', null, { root: true })
       context.commit('userHasScrolled', false, { root: true })
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       context.commit('clearAllNotifications', null, { root: true })
       context.commit('clearSpaceFilters', null, { root: true })
-      // restore local space
       context.commit('clearSearch', null, { root: true })
+      // restore local space
       context.commit('restoreSpace', emptySpace)
       context.commit('restoreSpace', utils.normalizeSpace(cachedSpace))
       context.dispatch('updateSpacePageSize')
