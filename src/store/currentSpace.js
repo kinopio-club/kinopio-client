@@ -692,7 +692,8 @@ export default {
       context.commit('loadJournalSpace', false, { root: true })
       context.commit('loadJournalSpaceTomorrow', false, { root: true })
     },
-    restoreSpaceInChunks: (context, space) => {
+    restoreSpaceInChunks: (context, { space, isRemote }) => {
+      if (!utils.objectHasKeys(space)) { return }
       const chunkSize = 50
       const cards = space.cards
       const connections = space.connections
@@ -716,7 +717,7 @@ export default {
           if (index === chunks.length - 1) {
             context.commit('isLoadingSpace', false, { root: true })
             const timeEnd = utils.normalizeToUnixTime(new Date())
-            console.log(`🐇 space loaded in ${timeEnd - timeStart}ms, cards ${context.state.cards.length}, connections ${context.state.connections.length}`)
+            console.log(`🐇 space loaded in ${timeEnd - timeStart}ms, cards ${context.state.cards.length}, connections ${context.state.connections.length}`, '🌏 is remote: ', isRemote)
           }
         })
       })
@@ -734,15 +735,16 @@ export default {
       context.commit('clearSearch', null, { root: true })
       // restore local space
       context.commit('restoreSpace', emptySpace)
-      context.dispatch('restoreSpaceInChunks', utils.normalizeSpace(cachedSpace))
+      context.dispatch('restoreSpaceInChunks', { space: utils.normalizeSpace(cachedSpace) })
       context.dispatch('updateSpacePageSize')
       context.dispatch('loadBackground')
       context.commit('undoHistory/clear', null, { root: true })
       // restore remote space
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
-      if (remoteSpace) {
+      const remoteSpaceIsUpdated = remoteSpace.editedAt !== cachedSpace.editedAt
+      if (remoteSpace && remoteSpaceIsUpdated) {
         context.commit('restoreSpace', emptySpace)
-        context.dispatch('restoreSpaceInChunks', utils.normalizeSpace(remoteSpace))
+        context.dispatch('restoreSpaceInChunks', { space: utils.normalizeSpace(remoteSpace), isRemote: true })
         context.dispatch('undoHistory/playback', null, { root: true })
         context.dispatch('checkIfShouldNotifySignUpToEditSpace', remoteSpace)
         context.commit('broadcast/joinSpaceRoom', null, { root: true })
