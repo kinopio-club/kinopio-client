@@ -1,5 +1,5 @@
 <template lang="pug">
-article(:style="position" :data-card-id="id" ref="card" v-memo="[card.name, card.x, card.y, isConnectingTo, isConnectingFrom, isRemoteConnecting, isBeingDragged, isRemoteCardDragging, uploadIsDraggedOver, isFiltered, selectedColor, remoteUploadDraggedOverCardColor, isSelected, isRemoteSelected, isRemoteCardDetailsVisible]")
+article(:style="position" :data-card-id="id" ref="card" v-memo="[card.name, card.x, card.y, isConnectingTo, isConnectingFrom, isRemoteConnecting, isBeingDragged, isFiltered, selectedColor, isSelectedOrDragging]")
   .card(
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
@@ -30,11 +30,11 @@ article(:style="position" :data-card-id="id" ref="card" v-memo="[card.name, card
 
     template(v-if="!nameIsComment")
       //- Video
-      video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
+      video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}")
         source(:src="formats.video")
       //- Image
-      img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
-      img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
+      img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}")
+      img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelectedOrDragging}")
 
     span.card-content-wrap
       //- Comment
@@ -60,10 +60,10 @@ article(:style="position" :data-card-id="id" ref="card" v-memo="[card.name, card
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
             //- Image
-            img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
-            img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
+            img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}")
+            img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelectedOrDragging}")
             //- Video
-            video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
+            video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}")
               source(:src="formats.video")
 
           span(v-if="!commentIsVisible") …
@@ -119,7 +119,7 @@ article(:style="position" :data-card-id="id" ref="card" v-memo="[card.name, card
         :card="card"
         :user="createdByUser"
         :isImageCard="Boolean(formats.image || formats.video)"
-        :isSelected="isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor"
+        :isSelected="isSelectedOrDragging"
       )
 
     //- Upload Progress
@@ -265,6 +265,9 @@ export default {
     }
   },
   computed: {
+    isSelectedOrDragging () {
+      return this.isSelected || this.isRemoteSelected || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.uploadIsDraggedOver || this.remoteUploadDraggedOverCardColor
+    },
     shouldUpdateDimensions () {
       return Boolean(!this.card.width || !this.card.height)
     },
