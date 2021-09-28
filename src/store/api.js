@@ -322,7 +322,8 @@ const self = {
     },
     getSpace: async (context, { space, shouldRequestRemote }) => {
       try {
-        if (!shouldRequest({ shouldRequestRemote })) { return }
+        const apiKey = context.rootState.currentUser.apiKey
+        if (!shouldRequest({ shouldRequestRemote, apiKey })) { return }
         console.log('🛬 getting remote space', space.id)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(40000, fetch(`${host}/space/${space.id}`, options))
@@ -334,7 +335,8 @@ const self = {
     getSpaces: async (context, { spaceIds, shouldRequestRemote }) => {
       const max = 60
       try {
-        if (!shouldRequest({ shouldRequestRemote })) { return }
+        const apiKey = context.rootState.currentUser.apiKey
+        if (!shouldRequest({ shouldRequestRemote, apiKey })) { return }
         spaceIds = spaceIds.slice(0, max)
         console.log('🛬🛬 getting remote spaces', spaceIds)
         if (!spaceIds.length) { return }
