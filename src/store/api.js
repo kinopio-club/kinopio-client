@@ -44,9 +44,9 @@ const squashQueue = (queue) => {
   return squashed
 }
 
-const shouldRequest = (shouldRequestRemote) => {
+const shouldRequest = ({ shouldRequestRemote, apiKey }) => {
   const isOnline = window.navigator.onLine
-  const currentUserIsSignedIn = cache.user().apiKey
+  const currentUserIsSignedIn = Boolean(apiKey)
   if (isOnline && shouldRequestRemote) {
     return true
   }
@@ -137,9 +137,10 @@ const self = {
 
     processQueueOperations: async (context) => {
       let body
+      const apiKey = context.rootState.currentUser.apiKey
       const queue = cache.queue()
       const queueBuffer = cache.queueBuffer()
-      if (!shouldRequest() || !queue.length) { return }
+      if (!shouldRequest({ apiKey }) || !queue.length) { return }
       if (queueBuffer.length) {
         body = queueBuffer
       } else {
@@ -207,7 +208,8 @@ const self = {
     // User
 
     getUser: async (context) => {
-      if (!shouldRequest()) { return }
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/user`, options)
@@ -217,7 +219,8 @@ const self = {
       }
     },
     getUserFavorites: async (context) => {
-      if (!shouldRequest()) { return }
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/user/favorites`, options)
@@ -227,7 +230,8 @@ const self = {
       }
     },
     getUserSpaces: async (context) => {
-      if (!shouldRequest()) { return }
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/user/spaces`, options)
@@ -239,7 +243,8 @@ const self = {
       }
     },
     getUserRemovedSpaces: async (context) => {
-      if (!shouldRequest()) { return }
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/user/removed-spaces`, options)
@@ -249,7 +254,8 @@ const self = {
       }
     },
     removeUserPermanent: async (context) => {
-      if (!shouldRequest()) { return }
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'DELETE', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/user/permanent`, options)
@@ -281,7 +287,8 @@ const self = {
       }
     },
     updateUserFavorites: async (context, body) => {
-      if (!shouldRequest()) { return }
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/user/favorites`, options)
@@ -315,7 +322,7 @@ const self = {
     },
     getSpace: async (context, { space, shouldRequestRemote }) => {
       try {
-        if (!shouldRequest(shouldRequestRemote)) { return }
+        if (!shouldRequest({ shouldRequestRemote })) { return }
         console.log('🛬 getting remote space', space.id)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(40000, fetch(`${host}/space/${space.id}`, options))
@@ -327,7 +334,7 @@ const self = {
     getSpaces: async (context, { spaceIds, shouldRequestRemote }) => {
       const max = 60
       try {
-        if (!shouldRequest(shouldRequestRemote)) { return }
+        if (!shouldRequest({ shouldRequestRemote })) { return }
         spaceIds = spaceIds.slice(0, max)
         console.log('🛬🛬 getting remote spaces', spaceIds)
         if (!spaceIds.length) { return }
@@ -385,7 +392,8 @@ const self = {
       }
     },
     getSpaceRemovedCards: async (context, space) => {
-      if (!shouldRequest()) { return }
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/space/${space.id}/removed-cards`, options)
@@ -395,7 +403,8 @@ const self = {
       }
     },
     getSpaceCollaboratorKey: async (context, space) => {
-      if (!shouldRequest()) { return }
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/space/${space.id}/collaborator-key`, options)
@@ -405,7 +414,8 @@ const self = {
       }
     },
     addSpaceCollaborator: async (context, { spaceId, collaboratorKey }) => {
-      if (!shouldRequest()) { return }
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
       const userId = context.rootState.currentUser.id
       try {
         const body = { userId, spaceId }
@@ -418,7 +428,8 @@ const self = {
       }
     },
     removeSpaceCollaborator: async (context, { space, user }) => {
-      if (!shouldRequest()) { return }
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
       try {
         const body = {
           spaceId: space.id,
@@ -435,7 +446,8 @@ const self = {
     // Card
 
     getCardsWithLinkToSpaceId: async (context, spaceId) => {
-      if (!shouldRequest()) { return }
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/card/by-link-to-space/${spaceId}`, options)
@@ -445,7 +457,8 @@ const self = {
       }
     },
     updateCards: async (context, body) => {
-      if (!shouldRequest()) { return }
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/card/multiple`, options)
@@ -458,7 +471,8 @@ const self = {
     // ConnectionType
 
     updateConnectionTypes: async (context, body) => {
-      if (!shouldRequest()) { return }
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/connection-type/multiple`, options)
@@ -471,7 +485,8 @@ const self = {
     // Connection
 
     updateConnections: async (context, body) => {
-      if (!shouldRequest()) { return }
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/connection/multiple`, options)
@@ -484,7 +499,8 @@ const self = {
     // Tag
 
     getCardsWithTag: async (context, name) => {
-      if (!shouldRequest()) { return }
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
       name = encodeURI(name)
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
@@ -495,7 +511,8 @@ const self = {
       }
     },
     getUserTags: async (context) => {
-      if (!shouldRequest()) { return }
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/user/tags`, options)
@@ -505,7 +522,8 @@ const self = {
       }
     },
     // updateUserTagsColor: async (context, tag) => {
-    //   if (!shouldRequest()) { return }
+    // const apiKey = context.rootState.currentUser.apiKey
+    //   if (!shouldRequest({apiKey})) { return }
     //   try {
     //     const options = await context.dispatch('requestOptions', { method: 'PATCH', space: context.rootState.currentSpace, tag })
     //     const response = await fetch(`${host}/tags/color`, options)
@@ -588,7 +606,8 @@ const self = {
     // Notifications
 
     getNotifications: async (context) => {
-      if (!shouldRequest()) { return }
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/notification`, options)
