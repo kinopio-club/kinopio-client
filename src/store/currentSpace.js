@@ -14,6 +14,7 @@ import last from 'lodash-es/last'
 import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
 import sortBy from 'lodash-es/sortBy'
+import defer from 'lodash-es/defer'
 import dayjs from 'dayjs'
 
 let otherSpacesQueue = [] // id
@@ -28,6 +29,12 @@ export default {
     restoreSpace: (state, space) => {
       space = utils.removeRemovedCardsFromSpace(space)
       Object.assign(state, space)
+    },
+    restoreCards: (state, cards) => {
+      state.cards = state.cards.concat(cards)
+    },
+    restoreConnections: (state, connections) => {
+      state.connections = state.connections.concat(connections)
     },
 
     // Users
@@ -601,7 +608,6 @@ export default {
       const currentSpaceIsRemote = utils.currentSpaceIsRemote(space, user)
       let remoteSpace
       try {
-        context.commit('isLoadingSpace', true, { root: true })
         if (currentUserIsSignedIn) {
           remoteSpace = await context.dispatch('api/getSpace', { space }, { root: true })
         } else if (collaboratorKey) {
@@ -627,7 +633,6 @@ export default {
           context.commit('notifyConnectionError', true, { root: true })
         }
       }
-      context.commit('isLoadingSpace', false, { root: true })
       if (!remoteSpace) { return }
       // only restore current space
       if (remoteSpace.id !== context.state.id) { return }
@@ -687,8 +692,36 @@ export default {
       context.commit('loadJournalSpace', false, { root: true })
       context.commit('loadJournalSpaceTomorrow', false, { root: true })
     },
-    loadSpace: async (context, { space }) => {
+    restoreSpaceInChunks: (context, space) => {
+      const chunkSize = 50
+      const cards = space.cards
+      const connections = space.connections
       const timeStart = utils.normalizeToUnixTime(new Date())
+      space.cards = []
+      space.connections = []
+      context.commit('isLoadingSpace', true, { root: true })
+      context.commit('restoreSpace', space)
+      // restore cards
+      let chunks = utils.splitArrayIntoChunks(cards, chunkSize)
+      chunks.forEach(chunk => {
+        defer(function () {
+          context.commit('restoreCards', chunk)
+        })
+      })
+      // restore connections
+      chunks = utils.splitArrayIntoChunks(connections, chunkSize)
+      chunks.forEach((chunk, index) => {
+        defer(function () {
+          context.commit('restoreConnections', chunk)
+          if (index === chunks.length - 1) {
+            context.commit('isLoadingSpace', false, { root: true })
+            const timeEnd = utils.normalizeToUnixTime(new Date())
+            console.log(`🐇 space loaded in ${timeEnd - timeStart}ms, cards ${context.state.cards.length}, connections ${context.state.connections.length}`)
+          }
+        })
+      })
+    },
+    loadSpace: async (context, { space }) => {
       const emptySpace = utils.emptySpace(space.id)
       const cachedSpace = cache.space(space.id)
       const user = context.rootState.currentUser
@@ -701,14 +734,15 @@ export default {
       context.commit('clearSearch', null, { root: true })
       // restore local space
       context.commit('restoreSpace', emptySpace)
-      context.commit('restoreSpace', utils.normalizeSpace(cachedSpace))
+      context.dispatch('restoreSpaceInChunks', utils.normalizeSpace(cachedSpace))
       context.dispatch('updateSpacePageSize')
       context.dispatch('loadBackground')
       context.commit('undoHistory/clear', null, { root: true })
+      // restore remote space
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (remoteSpace) {
-        // restore remote space
-        context.commit('restoreSpace', utils.normalizeSpace(remoteSpace))
+        context.commit('restoreSpace', emptySpace)
+        context.dispatch('restoreSpaceInChunks', utils.normalizeSpace(remoteSpace))
         context.dispatch('undoHistory/playback', null, { root: true })
         context.dispatch('checkIfShouldNotifySignUpToEditSpace', remoteSpace)
         context.commit('broadcast/joinSpaceRoom', null, { root: true })
@@ -734,8 +768,6 @@ export default {
         context.dispatch('scrollCardsIntoView')
         context.dispatch('updatePageSizes', null, { root: true })
       })
-      const timeEnd = utils.normalizeToUnixTime(new Date())
-      console.log(`🐇 space loaded in ${timeEnd - timeStart}ms, cards ${context.state.cards.length}, connections ${context.state.connections.length}`)
     },
     loadLastSpace: (context) => {
       const user = context.rootState.currentUser

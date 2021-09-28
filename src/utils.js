@@ -6,6 +6,7 @@ import uniqBy from 'lodash-es/uniqBy'
 import random from 'lodash-es/random'
 import last from 'lodash-es/last'
 import sortBy from 'lodash-es/sortBy'
+import times from 'lodash-es/times'
 
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -265,6 +266,17 @@ export default {
     let merged = base.concat(updated)
     merged = uniqBy(merged, key)
     return merged
+  },
+  splitArrayIntoChunks (array, chunkSize) {
+    let numberOfChunks = Math.ceil(array.length / chunkSize)
+    let chunks = []
+    times(numberOfChunks, function (index) {
+      const start = index * chunkSize
+      const end = (index + 1) * chunkSize
+      const chunk = array.slice(start, end)
+      chunks.push(chunk)
+    })
+    return chunks
   },
   findInArrayOfObjects (array, key, value) {
     return array.find(item => item[key] === value)
