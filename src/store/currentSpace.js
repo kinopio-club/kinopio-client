@@ -714,13 +714,17 @@ export default {
       chunks.forEach((chunk, index) => {
         defer(function () {
           context.commit('restoreConnections', chunk)
-          if (index === chunks.length - 1) {
-            context.commit('isLoadingSpace', false, { root: true })
-            const timeEnd = utils.normalizeToUnixTime(new Date())
-            console.log(`🐇 space loaded in ${timeEnd - timeStart}ms, cards ${context.state.cards.length}, connections ${context.state.connections.length}`, '🌏 is remote: ', isRemote)
+          const isRestoreComplete = index === chunks.length - 1
+          if (isRestoreComplete) {
+            context.dispatch('restoreSpaceComplete', { space, isRemote, timeStart })
           }
         })
       })
+    },
+    restoreSpaceComplete: (context, { space, isRemote, timeStart }) => {
+      context.commit('isLoadingSpace', false, { root: true })
+      const timeEnd = utils.normalizeToUnixTime(new Date())
+      console.log(`🐇 space loaded in ${timeEnd - timeStart}ms, cards ${context.state.cards.length}, connections ${context.state.connections.length}`, '🌏 is remote: ', isRemote)
     },
     loadSpace: async (context, { space }) => {
       const emptySpace = utils.emptySpace(space.id)
