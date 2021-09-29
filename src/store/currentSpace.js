@@ -793,6 +793,7 @@ export default {
       const cachedSpace = cache.space(space.id)
       const user = context.rootState.currentUser
       // clear state
+      context.commit('notifySpaceIsRemoved', false, { root: true })
       context.commit('spaceUrlToLoad', '', { root: true })
       context.commit('clearCardMap', null, { root: true })
       context.commit('userHasScrolled', false, { root: true })
@@ -807,7 +808,7 @@ export default {
       // restore remote space
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (!remoteSpace) { return }
-      const remoteSpaceIsUpdated = remoteSpace.editedAt !== cachedSpace.editedAt
+      const remoteSpaceIsUpdated = remoteSpace.editedAt !== cachedSpace.editedAt || remoteSpace.cards.length !== cachedSpace.cards.length
       if (remoteSpaceIsUpdated) {
         context.commit('restoreSpace', emptySpace)
         context.dispatch('restoreSpaceInChunks', { space: utils.normalizeSpace(remoteSpace), isRemote: true })
