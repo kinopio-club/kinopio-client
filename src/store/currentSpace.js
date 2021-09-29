@@ -756,7 +756,13 @@ export default {
     restoreSpaceComplete: (context, { space, isRemote, timeStart }) => {
       context.commit('isLoadingSpace', false, { root: true })
       const timeEnd = utils.normalizeToUnixTime(new Date())
-      console.log(`🐇 space: ${space.name}, loaded in ${timeEnd - timeStart}ms, cards ${context.state.cards.length}, connections ${context.state.connections.length}`, '🌏 is remote: ', isRemote)
+      let emoji = '🐇'
+      let isRemoteText = ''
+      if (isRemote) {
+        emoji = '🐇🌏'
+        isRemoteText = ', is remote: true'
+      }
+      console.log(`${emoji} space: ${space.name}, loaded in ${timeEnd - timeStart}ms, cards ${context.state.cards.length}, connections ${context.state.connections.length}${isRemoteText}`)
       context.dispatch('updateSpacePageSize')
       if (isRemote) {
         context.dispatch('undoHistory/playback', null, { root: true })
