@@ -694,7 +694,7 @@ export default {
     },
     restoreSpaceInChunks: (context, { space, isRemote }) => {
       if (!utils.objectHasKeys(space)) { return }
-      const chunkSize = 30
+      const chunkSize = 50
       const timeStart = utils.normalizeToUnixTime(new Date())
       // sort by distance from viewport origin
       const origin = { x: window.scrollX, y: window.scrollY }
@@ -711,32 +711,42 @@ export default {
         return connection
       })
       connections = sortBy(connections, ['distanceFromOrigin'])
-      // init
+      // init space
       space.cards = []
       space.connections = []
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('restoreSpace', space)
       context.dispatch('loadBackground')
-      // restore cards
-      let chunks = utils.splitArrayIntoChunks(cards, chunkSize)
-      chunks.forEach(chunk => {
-        defer(function () {
-          if (space.id !== context.state.id) { return }
-          context.commit('restoreCards', chunk) // spaceid
-        })
-      })
-      // restore connections
-      chunks = utils.splitArrayIntoChunks(connections, chunkSize)
-      if (!chunks.length) {
-        if (space.id !== context.state.id) { return }
-        context.dispatch('restoreSpaceComplete', { space, isRemote, timeStart })
-        return
+      // init chunks
+      const cardChunks = utils.splitArrayIntoChunks(cards, chunkSize)
+      const connectionChunks = utils.splitArrayIntoChunks(connections, chunkSize)
+      let primaryIsCards = true
+      let primaryChunks = cardChunks
+      let secondaryChunks = connectionChunks
+      if (connectionChunks.length > cardChunks.length) {
+        primaryIsCards = false
+        primaryChunks = connectionChunks
+        secondaryChunks = cardChunks
       }
-      chunks.forEach((chunk, index) => {
+      // restore space
+      primaryChunks.forEach((chunk, index) => {
         defer(function () {
           if (space.id !== context.state.id) { return }
-          context.commit('restoreConnections', chunk) // spaceid
-          const isRestoreComplete = index === chunks.length - 1
+          // primary
+          if (primaryIsCards) {
+            context.commit('restoreCards', chunk)
+          } else {
+            context.commit('restoreConnections', chunk)
+          }
+          // secondary
+          chunk = secondaryChunks[index]
+          if (chunk && primaryIsCards) {
+            context.commit('restoreConnections', chunk)
+          } else if (chunk) {
+            context.commit('restoreCards', chunk)
+          }
+          // complete
+          const isRestoreComplete = index === primaryChunks.length - 1
           if (isRestoreComplete) {
             context.dispatch('restoreSpaceComplete', { space, isRemote, timeStart })
           }
