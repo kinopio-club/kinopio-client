@@ -233,12 +233,9 @@ export default {
       let card = { id: this.card.id }
       this.$store.dispatch('currentSpace/updateCard', card)
     }
-    let observer = new IntersectionObserver(this.checkIsCardInViewport)
-    observer.observe(this.$refs.card)
   },
   data () {
     return {
-      isCardInViewport: false,
       isRemoteConnecting: false,
       remoteConnectionColor: '',
       uploadIsDraggedOver: false,
@@ -723,17 +720,6 @@ export default {
     userDetailsIsVisible () { return this.$store.state.cardUserDetailsIsVisibleForCardId === this.id }
   },
   methods: {
-    checkIsCardInViewport (changes, observer) {
-      changes.forEach(change => {
-        if (change.intersectionRatio > 0) {
-          this.isCardInViewport = true
-          this.$store.commit('addToCardMap', this.card)
-        } else {
-          this.isCardInViewport = false
-          this.$store.commit('removeFromCardMap', this.card)
-        }
-      })
-    },
     addFile (file) {
       let name = this.card.name
       const url = file.url

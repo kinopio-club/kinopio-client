@@ -795,7 +795,7 @@ export default {
       // clear state
       context.commit('notifySpaceIsRemoved', false, { root: true })
       context.commit('spaceUrlToLoad', '', { root: true })
-      context.commit('clearCardMap', null, { root: true })
+      context.commit('cardMap', [], { root: true })
       context.commit('userHasScrolled', false, { root: true })
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       context.commit('clearAllNotifications', null, { root: true })

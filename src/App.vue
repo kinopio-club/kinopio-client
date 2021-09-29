@@ -38,6 +38,8 @@ import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import utils from '@/utils.js'
 
+import debounce from 'lodash-es/debounce'
+
 export default {
   components: {
     Header,
@@ -54,6 +56,7 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'currentSpace/restoreSpace') {
         this.updateMetaDescription()
+        this.debouncedUpdateCardMap()
       }
     })
   },
@@ -63,8 +66,13 @@ export default {
     setTimeout(() => {
       window.addEventListener('scroll', this.updateUserHasScrolled)
     }, 100)
+    window.addEventListener('scroll', this.debouncedUpdateCardMap)
     this.updateMetaDescription()
     this.$store.dispatch('currentSpace/updateBackgroundZoom')
+  },
+  beforeUnmount () {
+    window.removeEventListener('scroll', this.updateUserHasScrolled)
+    window.removeEventListener('scroll', this.debouncedUpdateCardMap)
   },
   computed: {
     backgroundTint () {
@@ -135,6 +143,16 @@ export default {
       } else {
         metaDescription.setAttribute('content', topLeftCard.name)
       }
+    },
+    debouncedUpdateCardMap: debounce(async function () {
+      this.updateCardMap()
+    }, 500),
+    updateCardMap () {
+      const cards = this.$store.state.currentSpace.cards
+      const cardMap = cards.filter(card => {
+        return utils.isCardInViewport(card)
+      })
+      this.$store.commit('cardMap', cardMap)
     }
   }
 }

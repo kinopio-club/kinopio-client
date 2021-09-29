@@ -260,15 +260,24 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean', origin: 'isTouchDevice' })
       state.isTouchDevice = value
     },
-    clearCardMap: (state) => {
-      state.cardMap = []
+    cardMap: (state, cardMap) => {
+      utils.typeCheck({ value: cardMap, type: 'array', origin: 'cardMap' })
+      state.cardMap = cardMap
     },
     addToCardMap: (state, card) => {
       card = utils.clone(card)
       state.cardMap.push(card)
     },
     removeFromCardMap: (state, card) => {
-      state.cardMap = state.cardMap.filter(cardInMap => cardInMap.id !== card.id)
+      state.cardMap = state.cardMap.filter(prevCard => prevCard.id !== card.id)
+    },
+    updateCardInCardMap: (state, card) => {
+      state.cardMap = state.cardMap.map(prevCard => {
+        if (prevCard.id === card.id) {
+          return card
+        }
+        return prevCard
+      })
     },
     prevCursorPosition: (state, cursor) => {
       state.prevCursorPosition = cursor
