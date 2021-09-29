@@ -702,6 +702,7 @@ export default {
       space.connections = []
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('restoreSpace', space)
+      context.dispatch('loadBackground')
       // restore cards
       let chunks = utils.splitArrayIntoChunks(cards, chunkSize)
       chunks.forEach(chunk => {
@@ -732,12 +733,37 @@ export default {
       context.commit('isLoadingSpace', false, { root: true })
       const timeEnd = utils.normalizeToUnixTime(new Date())
       console.log(`🐇 space: ${space.name}, loaded in ${timeEnd - timeStart}ms, cards ${context.state.cards.length}, connections ${context.state.connections.length}`, '🌏 is remote: ', isRemote)
+      context.dispatch('updateSpacePageSize')
+      if (isRemote) {
+        context.dispatch('undoHistory/playback', null, { root: true })
+        context.dispatch('checkIfShouldNotifySignUpToEditSpace', space)
+        context.dispatch('checkIfShouldNotifySpaceIsRemoved', space)
+        if (cache.getAllSpaces().length) {
+          context.commit('notifyNewUser', false, { root: true })
+        } else {
+          context.commit('notifyNewUser', true, { root: true })
+        }
+      }
+      context.commit('broadcast/joinSpaceRoom', null, { root: true })
+      context.dispatch('updateOtherUsers')
+      context.dispatch('updateOtherSpaces')
+      const cardId = context.rootState.loadSpaceShowDetailsForCardId
+      if (cardId) {
+        context.dispatch('showCardDetails', cardId)
+      }
+      context.commit('currentUser/updateFavoriteSpaceIsEdited', space.id, { root: true })
+      nextTick(() => {
+        context.dispatch('updateIncorrectCardConnectionPaths', { shouldUpdateApi: isRemote })
+        context.dispatch('scrollCardsIntoView')
+        context.dispatch('updatePageSizes', null, { root: true })
+      })
     },
     loadSpace: async (context, { space }) => {
       const emptySpace = utils.emptySpace(space.id)
       const cachedSpace = cache.space(space.id)
       const user = context.rootState.currentUser
       // clear state
+      context.commit('spaceUrlToLoad', '', { root: true })
       context.commit('clearCardMap', null, { root: true })
       context.commit('userHasScrolled', false, { root: true })
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
@@ -747,40 +773,15 @@ export default {
       // restore local space
       context.commit('restoreSpace', emptySpace)
       context.dispatch('restoreSpaceInChunks', { space: utils.normalizeSpace(cachedSpace) })
-      context.dispatch('updateSpacePageSize')
-      context.dispatch('loadBackground')
       context.commit('undoHistory/clear', null, { root: true })
       // restore remote space
       const remoteSpace = await context.dispatch('getRemoteSpace', space)
+      if (!remoteSpace) { return }
       const remoteSpaceIsUpdated = remoteSpace.editedAt !== cachedSpace.editedAt
-      if (remoteSpace && remoteSpaceIsUpdated) {
+      if (remoteSpaceIsUpdated) {
         context.commit('restoreSpace', emptySpace)
         context.dispatch('restoreSpaceInChunks', { space: utils.normalizeSpace(remoteSpace), isRemote: true })
-        context.dispatch('undoHistory/playback', null, { root: true })
-        context.dispatch('checkIfShouldNotifySignUpToEditSpace', remoteSpace)
-        context.commit('broadcast/joinSpaceRoom', null, { root: true })
-        context.dispatch('checkIfShouldNotifySpaceIsRemoved', remoteSpace)
-        if (cache.getAllSpaces().length) {
-          context.commit('notifyNewUser', false, { root: true })
-        } else {
-          context.commit('notifyNewUser', true, { root: true })
-        }
       }
-      context.commit('spaceUrlToLoad', '', { root: true })
-      context.dispatch('updateSpacePageSize')
-      context.dispatch('loadBackground')
-      context.dispatch('updateOtherUsers')
-      context.dispatch('updateOtherSpaces')
-      const cardId = context.rootState.loadSpaceShowDetailsForCardId
-      if (cardId) {
-        context.dispatch('showCardDetails', cardId)
-      }
-      context.commit('currentUser/updateFavoriteSpaceIsEdited', space.id, { root: true })
-      nextTick(() => {
-        context.dispatch('updateIncorrectCardConnectionPaths', { shouldUpdateApi: Boolean(remoteSpace) })
-        context.dispatch('scrollCardsIntoView')
-        context.dispatch('updatePageSizes', null, { root: true })
-      })
     },
     loadLastSpace: (context) => {
       const user = context.rootState.currentUser
