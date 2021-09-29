@@ -20,6 +20,7 @@ import dayjs from 'dayjs'
 let otherSpacesQueue = [] // id
 let spectatorIdleTimers = []
 let notifiedCardAdded = []
+let isLoadingRemoteSpace
 
 export default {
   namespaced: true,
@@ -732,6 +733,7 @@ export default {
       primaryChunks.forEach((chunk, index) => {
         defer(function () {
           if (space.id !== context.state.id) { return }
+          if (!isRemote && isLoadingRemoteSpace) { return }
           // primary
           if (primaryIsCards) {
             context.commit('restoreCards', chunk)
@@ -760,9 +762,9 @@ export default {
       let isRemoteText = ''
       if (isRemote) {
         emoji = '🐇🌏'
-        isRemoteText = ', is remote: true'
+        isRemoteText = 'is remote: true'
       }
-      console.log(`${emoji} space loaded in ${timeEnd - timeStart}ms, cards ${context.state.cards.length}, connections ${context.state.connections.length}${isRemoteText}, space name: ${space.name}`)
+      console.log(`${emoji} space loaded in ${timeEnd - timeStart}ms, cards ${context.state.cards.length}, connections ${context.state.connections.length}, space name: ${space.name}, ${isRemoteText}`)
       context.dispatch('updateSpacePageSize')
       if (isRemote) {
         context.dispatch('undoHistory/playback', null, { root: true })
@@ -793,6 +795,7 @@ export default {
       const cachedSpace = cache.space(space.id)
       const user = context.rootState.currentUser
       // clear state
+      isLoadingRemoteSpace = false
       context.commit('notifySpaceIsRemoved', false, { root: true })
       context.commit('spaceUrlToLoad', '', { root: true })
       context.commit('cardMap', [], { root: true })
@@ -810,6 +813,7 @@ export default {
       if (!remoteSpace) { return }
       const remoteSpaceIsUpdated = remoteSpace.editedAt !== cachedSpace.editedAt || remoteSpace.cards.length !== cachedSpace.cards.length
       if (remoteSpaceIsUpdated) {
+        isLoadingRemoteSpace = true
         context.commit('restoreSpace', emptySpace)
         context.dispatch('restoreSpaceInChunks', { space: utils.normalizeSpace(remoteSpace), isRemote: true })
       }
