@@ -706,18 +706,21 @@ export default {
       let chunks = utils.splitArrayIntoChunks(cards, chunkSize)
       chunks.forEach(chunk => {
         defer(function () {
-          context.commit('restoreCards', chunk)
+          if (space.id !== context.state.id) { return }
+          context.commit('restoreCards', chunk) // spaceid
         })
       })
       // restore connections
       chunks = utils.splitArrayIntoChunks(connections, chunkSize)
       if (!chunks.length) {
+        if (space.id !== context.state.id) { return }
         context.dispatch('restoreSpaceComplete', { space, isRemote, timeStart })
         return
       }
       chunks.forEach((chunk, index) => {
         defer(function () {
-          context.commit('restoreConnections', chunk)
+          if (space.id !== context.state.id) { return }
+          context.commit('restoreConnections', chunk) // spaceid
           const isRestoreComplete = index === chunks.length - 1
           if (isRestoreComplete) {
             context.dispatch('restoreSpaceComplete', { space, isRemote, timeStart })
