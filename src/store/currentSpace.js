@@ -923,13 +923,13 @@ export default {
         height: utils.emptyCard().height
       }
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
-      context.commit('createCard', card)
       card.spaceId = context.state.id
       card = utils.clone(card)
       const update = { name: 'createCard', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
       context.commit('undoHistory/add', update, { root: true })
+      context.commit('createCard', card)
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         delta: 1
@@ -948,11 +948,11 @@ export default {
           frameId: card.frameId || 0,
           userId: context.rootState.currentUser.id
         }
-        context.commit('createCard', card)
         const update = { name: 'createCard', body: card }
         context.dispatch('api/addToQueue', update, { root: true })
         context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
         context.commit('undoHistory/add', update, { root: true })
+        context.commit('createCard', card)
       })
     },
     // shim for history/playback
@@ -978,7 +978,6 @@ export default {
           context.dispatch('addTag', tag)
         })
       }
-      context.commit('createCard', card)
       const update = { name: 'createCard', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
@@ -986,6 +985,7 @@ export default {
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         delta: 1
       }, { root: true })
+      context.commit('createCard', card)
     },
     repaceInCardName: (context, { cardId, match, replace }) => {
       const card = context.getters.cardById(cardId)
@@ -997,7 +997,6 @@ export default {
     },
     updateCard: (context, card) => {
       card = utils.clone(card)
-      context.commit('updateCard', card)
       // prevent null position
       const cardKeys = Object.keys(card)
       if (cardKeys.includes('x') || cardKeys.includes('y')) {
@@ -1013,6 +1012,7 @@ export default {
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('broadcast/update', { updates: card, type: 'updateCard' }, { root: true })
       context.commit('undoHistory/add', update, { root: true })
+      context.commit('updateCard', card)
     },
     updateCardsDimensions: (context) => {
       let cards = utils.clone(context.state.cards)
