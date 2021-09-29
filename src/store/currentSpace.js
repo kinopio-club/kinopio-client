@@ -762,7 +762,7 @@ export default {
         emoji = '🐇🌏'
         isRemoteText = ', is remote: true'
       }
-      console.log(`${emoji} space: ${space.name}, loaded in ${timeEnd - timeStart}ms, cards ${context.state.cards.length}, connections ${context.state.connections.length}${isRemoteText}`)
+      console.log(`${emoji} space loaded in ${timeEnd - timeStart}ms, cards ${context.state.cards.length}, connections ${context.state.connections.length}${isRemoteText}, space name: ${space.name}`)
       context.dispatch('updateSpacePageSize')
       if (isRemote) {
         context.dispatch('undoHistory/playback', null, { root: true })
