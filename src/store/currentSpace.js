@@ -694,17 +694,24 @@ export default {
     },
     restoreSpaceInChunks: (context, { space, isRemote }) => {
       if (!utils.objectHasKeys(space)) { return }
-      const chunkSize = 50
-      // sort cards by top-left position
+      const chunkSize = 30
+      const timeStart = utils.normalizeToUnixTime(new Date())
+      // sort by distance from viewport origin
+      const origin = { x: window.scrollX, y: window.scrollY }
       let cards = space.cards
-      const origin = { x: 0, y: 0 }
       cards = cards.map(card => {
         card.distanceFromOrigin = utils.distanceBetweenTwoPoints(card, origin)
         return card
       })
       cards = sortBy(cards, ['distanceFromOrigin'])
-      const connections = space.connections
-      const timeStart = utils.normalizeToUnixTime(new Date())
+      let connections = space.connections
+      connections = connections.map(connection => {
+        const coords = utils.coordsFromConnectionPath(connection.path)
+        connection.distanceFromOrigin = utils.distanceBetweenTwoPoints(coords, origin)
+        return connection
+      })
+      connections = sortBy(connections, ['distanceFromOrigin'])
+      // init
       space.cards = []
       space.connections = []
       context.commit('isLoadingSpace', true, { root: true })
