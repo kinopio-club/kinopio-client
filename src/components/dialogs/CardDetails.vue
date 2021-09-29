@@ -934,6 +934,7 @@ export default {
     },
     cardIsEmpty () {
       const card = this.$store.getters['currentSpace/cardById'](previousCard.id)
+      if (!card) { return true }
       return !card.name
     },
     toggleFramePickerIsVisible () {
