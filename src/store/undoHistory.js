@@ -2,24 +2,23 @@ import uniq from 'lodash-es/uniq'
 
 import utils from '@/utils.js'
 
+let items = []
+
 const self = {
   namespaced: true,
-  state: {
-    items: []
-  },
   mutations: {
     add: (state, item) => {
       utils.typeCheck({ value: item, type: 'object', origin: 'history add' })
-      state.items.push(item)
+      items.push(item)
     },
     clear: (state) => {
-      state.items = []
+      items = []
     }
   },
   actions: {
     playback: (context) => {
       let cardIds = []
-      context.state.items.forEach(item => {
+      items.forEach(item => {
         context.dispatch(`currentSpace/${item.name}`, item.body, { root: true })
         const isCard = item.name === 'updateCard'
         const cardExists = Boolean(document.querySelector(`article [data-card-id="${item.body.id}"]`))
