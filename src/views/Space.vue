@@ -240,7 +240,6 @@ export default {
         this.drawConnection()
       }
       prevCursor = utils.cursorPositionInViewport(event)
-      this.$store.commit('prevCursorPosition', utils.cursorPositionInPage(event))
     },
     checkShouldShowDetails () {
       if (!utils.cursorsAreClose(startCursor, endCursor)) {
@@ -465,6 +464,7 @@ export default {
         this.$store.commit('broadcast/updateStore', { updates: { id: this.$store.state.currentUser.id }, type: 'removeRemoteCurrentConnection' })
       }
       this.updatePageSizes()
+      this.$store.commit('prevCursorPosition', utils.cursorPositionInPage(event))
       this.currentConnectionPath = undefined
       prevCursor = undefined
     }
