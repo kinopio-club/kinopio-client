@@ -394,7 +394,7 @@ export default {
     return new Date(date).getTime()
   },
   shortRelativeTime (date) {
-    this.typeCheck({ value: date, type: 'string', origin: 'shortRelativeTime' })
+    date = date.toString()
     let time = dayjs(date).fromNow(true)
     // https://day.js.org/docs/en/customization/relative-time
     time = time.replace('a few seconds', 'now')

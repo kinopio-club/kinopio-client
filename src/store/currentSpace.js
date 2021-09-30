@@ -120,15 +120,13 @@ export default {
       if (updatedCard.y) {
         updatedCard.y = Math.round(updatedCard.y)
       }
-      state.cards = state.cards.map(card => {
-        if (card.id === updatedCard.id) {
-          const updates = Object.keys(updatedCard)
-          updates.forEach(key => {
-            card[key] = updatedCard[key]
-          })
-        }
-        return card
+      const index = state.cards.findIndex(card => card.id === updatedCard.id)
+      const card = utils.clone(state.cards[index])
+      const updates = Object.keys(updatedCard)
+      updates.forEach(key => {
+        card[key] = updatedCard[key]
       })
+      state.cards[index] = card
       cache.updateSpace('cards', state.cards, state.id)
     },
     moveCards: (state, { cards, delta }) => {
@@ -1079,7 +1077,6 @@ export default {
       })
     },
     updateCard: (context, card) => {
-      card = utils.clone(card)
       context.commit('updateCard', card)
       // prevent null position
       const cardKeys = Object.keys(card)
