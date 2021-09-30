@@ -697,13 +697,13 @@ export default {
       const timeStart = utils.normalizeToUnixTime(new Date())
       // sort by distance from viewport origin
       const origin = { x: window.scrollX, y: window.scrollY }
-      let cards = space.cards
+      let cards = space.cards || []
       cards = cards.map(card => {
         card.distanceFromOrigin = utils.distanceBetweenTwoPoints(card, origin)
         return card
       })
       cards = sortBy(cards, ['distanceFromOrigin'])
-      let connections = space.connections
+      let connections = space.connections || []
       connections = connections.map(connection => {
         const coords = utils.coordsFromConnectionPath(connection.path)
         connection.distanceFromOrigin = utils.distanceBetweenTwoPoints(coords, origin)
