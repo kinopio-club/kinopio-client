@@ -130,12 +130,12 @@ export default {
       cache.updateSpace('cards', state.cards, state.id)
     },
     moveCards: (state, { cards, delta }) => {
-      const maxOffset = 0
+      cards = utils.clone(cards)
       cards.forEach(card => {
-        card.x += delta.x || 0
-        card.y += delta.y || 0
-        card.x = Math.max(card.x, maxOffset)
-        card.y = Math.max(card.y, maxOffset)
+        card.x = card.x + delta.x
+        card.y = card.y + delta.y
+        const index = state.cards.findIndex(stateCard => stateCard.id === card.id)
+        state.cards[index] = card
       })
       cache.updateSpaceCardsDebounced(state.cards, state.id)
     },
@@ -1227,14 +1227,14 @@ export default {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
       }
-      let cards
+      let cardIds
       let connections = []
       if (multipleCardsSelectedIds.length) {
-        cards = multipleCardsSelectedIds
+        cardIds = multipleCardsSelectedIds
       } else {
-        cards = [currentDraggingCardId]
+        cardIds = [currentDraggingCardId]
       }
-      cards = cards.map(cardId => context.getters.cardById(cardId))
+      let cards = cardIds.map(cardId => context.getters.cardById(cardId))
       // prevent cards bunching up at 0
       cards.forEach(card => {
         if (card.x === 0) { delta.x = Math.max(0, delta.x) }
