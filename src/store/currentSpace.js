@@ -1465,6 +1465,10 @@ export default {
       context.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
       context.commit('undoHistory/add', { name: 'addConnectionType', body: connectionType }, { root: true })
     },
+    // shim for undoHistory.playback
+    removeConnectionType: (context, type) => {
+      context.commit('removeConnectionType', type)
+    },
     updateConnectionType: (context, connectionType) => {
       context.commit('updateConnectionType', connectionType)
       context.commit('broadcast/update', { updates: connectionType, type: 'updateConnectionType' }, { root: true })
