@@ -51,7 +51,7 @@ const sendEvent = (store, mutation, type) => {
   if (showDebugMessages && !hidden.includes(updates.type)) {
     console.log('🌜', updates)
   }
-  const space = utils.clone(store.state.currentSpace)
+  const space = store.state.currentSpace
   websocket.send(JSON.stringify({
     message,
     updates,
