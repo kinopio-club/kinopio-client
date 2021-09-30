@@ -1017,6 +1017,7 @@ export default {
       }, { root: true })
       context.dispatch('checkIfShouldNotifyCardsCreatedIsNearLimit')
       context.dispatch('notifyCollaboratorsCardUpdated', { cardId: id, type: 'createCard' })
+      context.commit('addToCardMap', card, { root: true })
     },
     addMultipleCards: (context, newCards) => {
       newCards.forEach(card => {
@@ -1034,6 +1035,7 @@ export default {
         context.dispatch('api/addToQueue', update, { root: true })
         context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
         context.commit('undoHistory/add', update, { root: true })
+        context.commit('addToCardMap', card, { root: true })
       })
     },
     // shim for history/playback
@@ -1182,6 +1184,7 @@ export default {
       if (!context.rootGetters['currentUser/cardsCreatedIsOverLimit']) {
         context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
       }
+      context.commit('removeFromCardMap', card, { root: true })
     },
     removeCardPermanent: (context, card) => {
       context.commit('removeCardPermanent', card)
@@ -1199,6 +1202,7 @@ export default {
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('broadcast/update', { updates: card, type: 'restoreRemovedCard' }, { root: true })
       context.commit('undoHistory/add', update, { root: true })
+      context.commit('addToCardMap', card, { root: true })
     },
     restoreRemovedSpace: (context, space) => {
       cache.restoreRemovedSpace(space)
@@ -1236,6 +1240,7 @@ export default {
         if (card.x === 0) { delta.x = Math.max(0, delta.x) }
         if (card.y === 0) { delta.y = Math.max(0, delta.y) }
         connections = connections.concat(context.getters.cardConnections(card.id))
+        context.commit('updateCardInCardMap', card, { root: true })
       })
       connections = uniqBy(connections, 'id')
       context.commit('moveCards', { cards, delta })

@@ -265,7 +265,6 @@ const store = createStore({
       state.cardMap = cardMap
     },
     addToCardMap: (state, card) => {
-      card = utils.clone(card)
       state.cardMap.push(card)
     },
     removeFromCardMap: (state, card) => {
