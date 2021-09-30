@@ -14,6 +14,8 @@ aside.offscreen-markers(:style="styles")
 <script>
 import utils from '@/utils.js'
 
+import debounce from 'lodash-es/debounce'
+
 const maxIterations = 30
 let currentIteration, updatePositionTimer
 
@@ -27,11 +29,11 @@ export default {
         updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
       }
     })
-    window.addEventListener('scroll', this.updateOffscreenCards)
-    this.updateOffscreenCards()
+    window.addEventListener('scroll', this.debouncedUpdateOffscreenCards)
+    this.debouncedUpdateOffscreenCards()
   },
   beforeUnmount () {
-    window.removeEventListener('scroll', this.updateOffscreenCards)
+    window.removeEventListener('scroll', this.debouncedUpdateOffscreenCards)
   },
   data () {
     return {
@@ -102,7 +104,7 @@ export default {
   methods: {
     updatePositionFrame () {
       currentIteration++
-      this.updateOffscreenCards()
+      this.debouncedUpdateOffscreenCards()
       if (currentIteration < maxIterations) {
         window.requestAnimationFrame(this.updatePositionFrame)
       } else {
@@ -115,6 +117,9 @@ export default {
         return card.direction === direction
       })
     },
+    debouncedUpdateOffscreenCards: debounce(async function () {
+      this.updateOffscreenCards()
+    }, 100),
     updateOffscreenCards () {
       const markerHeight = 16
       const markerWidth = 12
@@ -168,7 +173,7 @@ export default {
   },
   watch: {
     spaceZoomDecimal (value) {
-      this.updateOffscreenCards()
+      this.debouncedUpdateOffscreenCards()
     }
   }
 }
