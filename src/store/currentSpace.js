@@ -1069,6 +1069,7 @@ export default {
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         delta: 1
       }, { root: true })
+      context.commit('addToCardMap', card, { root: true })
     },
     repaceInCardName: (context, { cardId, match, replace }) => {
       const card = context.getters.cardById(cardId)
