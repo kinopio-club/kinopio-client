@@ -210,7 +210,7 @@ import qs from '@aguezz/qs-parse'
 import nanoid from 'nanoid'
 import debounce from 'lodash-es/debounce'
 
-let previousCard
+let previousCard = {}
 let previousTags = []
 let compositionEventEndTime = 0
 
@@ -375,7 +375,7 @@ export default {
     isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] },
     name: {
       get () {
-        return this.card.name
+        return this.card.name || previousCard.name || ''
       },
       set (newName) {
         this.updateCardName(newName)
@@ -914,7 +914,7 @@ export default {
         return
       }
       this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCardAndFocus')
-      document.querySelector(`.card[data-card-id="${this.card.id}"]`).focus()
+      document.querySelector(`.card[data-card-id="${previousCard.id}"]`).focus()
     },
     removeCard () {
       if (!this.canEditCard) { return }
