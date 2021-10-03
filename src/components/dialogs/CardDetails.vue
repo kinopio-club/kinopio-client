@@ -210,7 +210,7 @@ import qs from '@aguezz/qs-parse'
 import nanoid from 'nanoid'
 import debounce from 'lodash-es/debounce'
 
-let previousCard = {}
+let prevCardId
 let previousTags = []
 let compositionEventEndTime = 0
 
@@ -273,19 +273,17 @@ export default {
       openingAlpha: 0,
       shouldTriggerCloseChildComponents: '',
       previousSelectedTag: {}
+      // visible: false
     }
   },
   created () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'closeAllDialogs') {
-        if (!this.visible) { return }
-        this.framePickerIsVisible = false
-        this.imagePickerIsVisible = false
-        this.cardTipsIsVisible = false
-        this.hidePickers()
-      }
       if (mutation.type === 'triggerUnloadPage' && this.visible) {
         this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', this.card.id)
+      } else if (mutation.type === 'cardDetailsIsVisibleForCardId') {
+        const cardId = mutation.payload
+        prevCardId = cardId
+        this.openCard(cardId)
       }
     })
   },
@@ -375,7 +373,7 @@ export default {
     isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] },
     name: {
       get () {
-        return this.card.name || previousCard.name || ''
+        return this.card.name || ''
       },
       set (newName) {
         this.updateCardName(newName)
@@ -847,9 +845,7 @@ export default {
       this.$store.dispatch('currentSpace/notifyCollaboratorsCardUpdated', { cardId: this.card.id, type: 'updateCard' })
       this.notifiedMembers = true
     },
-    updateCardMap () {
-      const cardId = this.card.id || previousCard.id
-      if (!cardId) { return }
+    updateCardMap (cardId) {
       let card = this.$store.getters['currentSpace/cardById'](cardId)
       card = utils.clone(card)
       card = utils.updateCardDimentions(card)
@@ -922,7 +918,7 @@ export default {
         return
       }
       this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCardAndFocus')
-      document.querySelector(`.card[data-card-id="${previousCard.id}"]`).focus()
+      document.querySelector(`.card[data-card-id="${prevCardId}"]`).focus()
     },
     removeCard () {
       if (!this.canEditCard) { return }
@@ -939,11 +935,6 @@ export default {
       textareas.forEach(textarea => {
         textarea.style.height = textarea.scrollHeight + modifier + 'px'
       })
-    },
-    cardIsEmpty () {
-      const card = this.$store.getters['currentSpace/cardById'](previousCard.id)
-      if (!card) { return true }
-      return !card.name
     },
     toggleFramePickerIsVisible () {
       const isVisible = this.framePickerIsVisible
@@ -1000,11 +991,12 @@ export default {
       this.shouldTriggerCloseChildComponents = nanoid()
       this.closeCardDialogs()
     },
-    closeCardDialogs () {
+    closeCardDialogs (shouldSkipGlobalDialogs) {
       this.framePickerIsVisible = false
       this.imagePickerIsVisible = false
       this.cardTipsIsVisible = false
       this.hidePickers()
+      if (shouldSkipGlobalDialogs) { return }
       this.hideTagDetailsIsVisible()
       this.hideLinkDetailsIsVisible()
     },
@@ -1457,48 +1449,48 @@ export default {
     },
     updatePinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
+    },
+    openCard (cardId) {
+      this.$nextTick(() => {
+        this.broadcastShowCardDetails()
+        this.clearErrors()
+        this.scrollIntoViewAndFocus()
+        this.updatePreviousTags()
+        this.updateNameSplitIntoCardsCount()
+        this.$nextTick(() => {
+          this.startOpening()
+        })
+      })
+      this.previousSelectedTag = {}
+      this.updateMediaUrls()
+      const connections = this.$store.getters['currentSpace/cardConnections'](cardId)
+      this.$store.commit('updateCurrentCardConnections', connections)
+    },
+    closeCard () {
+      const cardId = prevCardId
+      this.closeCardDialogs(true)
+      this.removeTrackingQueryStrings()
+      this.cancelOpening()
+      this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', cardId)
+      this.$store.commit('updateCurrentCardConnections')
+      this.$store.commit('triggerUpdatePositionInVisualViewport')
+      this.$store.commit('shouldPreventNextEnterKey', false)
+      const card = this.$store.getters['currentSpace/cardById'](cardId)
+      const cardHasName = Boolean(card.name)
+      if (!cardHasName) {
+        this.$store.dispatch('currentSpace/removeCard', { id: cardId })
+      }
+      this.$store.dispatch('updatePageSizes')
+      this.$nextTick(() => {
+        this.updateCardMap(cardId)
+      })
     }
   },
   watch: {
     visible (visible) {
-      if (this.card.id) {
-        previousCard = utils.clone(this.card)
-      }
-      this.updatePinchCounterZoomDecimal()
-      this.$nextTick(() => {
-        if (visible) {
-          this.broadcastShowCardDetails()
-          this.clearErrors()
-          this.scrollIntoViewAndFocus()
-          this.updatePreviousTags()
-          this.updateNameSplitIntoCardsCount()
-          this.$nextTick(() => {
-            this.startOpening()
-          })
-        } else {
-          this.removeTrackingQueryStrings()
-          this.cancelOpening()
-        }
-      })
-      if (visible) {
-        this.previousSelectedTag = {}
-        this.updateMediaUrls()
-        const connections = this.$store.getters['currentSpace/cardConnections'](this.card.id)
-        this.$store.commit('updateCurrentCardConnections', connections)
-      }
       if (!visible) {
-        this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', this.card.id)
-        this.$store.commit('updateCurrentCardConnections')
-        this.$store.commit('triggerUpdatePositionInVisualViewport')
-        this.$store.commit('shouldPreventNextEnterKey', false)
+        this.closeCard()
       }
-      if (!visible && this.cardIsEmpty()) {
-        this.$store.dispatch('currentSpace/removeCard', { id: previousCard.id })
-      }
-      this.$store.dispatch('updatePageSizes')
-      this.$nextTick(() => {
-        this.updateCardMap()
-      })
     },
     // https://v3.vuejs.org/guide/migration/watch.html
     // watching arrays doesn't work for changes anymore (only whole replacement, unless 'deep', option is specified)
