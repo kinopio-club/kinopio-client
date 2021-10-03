@@ -847,6 +847,14 @@ export default {
       this.$store.dispatch('currentSpace/notifyCollaboratorsCardUpdated', { cardId: this.card.id, type: 'updateCard' })
       this.notifiedMembers = true
     },
+    updateCardMap () {
+      const cardId = this.card.id || previousCard.id
+      if (!cardId) { return }
+      let card = this.$store.getters['currentSpace/cardById'](cardId)
+      card = utils.clone(card)
+      card = utils.updateCardDimentions(card)
+      this.$store.commit('updateCardInCardMap', card)
+    },
     updateSpaceLink () {
       let link = this.validUrls.filter(url => utils.urlIsSpace(url))[0]
       const shouldRemoveLink = this.card.linkToSpaceId && !link
@@ -1488,6 +1496,9 @@ export default {
         this.$store.dispatch('currentSpace/removeCard', { id: previousCard.id })
       }
       this.$store.dispatch('updatePageSizes')
+      this.$nextTick(() => {
+        this.updateCardMap()
+      })
     },
     // https://v3.vuejs.org/guide/migration/watch.html
     // watching arrays doesn't work for changes anymore (only whole replacement, unless 'deep', option is specified)
