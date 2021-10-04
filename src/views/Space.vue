@@ -262,7 +262,7 @@ export default {
     },
     dragCard () {
       const prevCursor = this.cursor()
-      this.$store.dispatch('currentSpace/dragCards', {
+      this.$store.dispatch('currentCards/drag', {
         endCursor,
         prevCursor: prevCursor
       })

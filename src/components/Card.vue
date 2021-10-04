@@ -231,7 +231,8 @@ export default {
   mounted () {
     if (this.shouldUpdateDimensions) {
       let card = { id: this.card.id }
-      this.$store.dispatch('currentSpace/updateCard', card)
+      // this.$store.dispatch('currentSpace/updateCard', card)
+      this.$store.dispatch('currentCards/update', card)
     }
   },
   data () {
@@ -263,6 +264,7 @@ export default {
   },
   computed: {
     shouldJiggle () {
+      // console.log(this.isConnectingTo, this.isConnectingFrom, this.isRemoteConnecting, this.isBeingDragged, this.isRemoteCardDragging)
       return this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.isRemoteCardDragging
     },
     isSelectedOrDragging () {
@@ -285,6 +287,8 @@ export default {
     z () { return this.card.z },
     commentIsVisible () { return this.card.commentIsVisible },
     connectionTypes () { return this.$store.getters['currentSpace/cardConnectionTypes'](this.id) },
+    // this.$store.dispatch('currentCards/update', card)
+
     newConnectionColor () { return this.$store.state.currentConnectionColor },
     name () {
       this.updateMediaUrls()
@@ -546,7 +550,7 @@ export default {
     },
     isConnectingTo () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
-      if (currentConnectionSuccess) {
+      if (utils.objectHasKeys(currentConnectionSuccess)) {
         return currentConnectionSuccess.id === this.id
       } else {
         return false
@@ -555,7 +559,7 @@ export default {
     isConnectingFrom () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
       const currentConnection = this.$store.state.currentConnection
-      if (currentConnectionSuccess) {
+      if (utils.objectHasKeys(currentConnectionSuccess)) {
         return currentConnection.startCardId === this.id
       } else {
         return false
@@ -747,10 +751,14 @@ export default {
         name = `${checkbox} ${name}`
       }
       // update name
-      this.$store.dispatch('currentSpace/updateCard', {
+      this.$store.dispatch('currentCards/update', {
         id: this.card.id,
         name: utils.trim(name)
       })
+      // this.$store.dispatch('currentSpace/updateCard', {
+      //   id: this.card.id,
+      //   name: utils.trim(name)
+      // })
       this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
     connectionIsBeingDragged (connection) {
@@ -869,7 +877,7 @@ export default {
     },
     async uploadFile (event) {
       this.removeUploadIsDraggedOver()
-      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
+      this.$store.dispatch('currentCards/incrementZ', this.id)
       // pre-upload errors
       if (!this.currentUserIsSignedIn) {
         this.error.signUpToUpload = true
@@ -911,12 +919,12 @@ export default {
         cardId = ''
       }
       this.$store.dispatch('closeAllDialogs', 'Card.toggleUserDetailsIsVisible')
-      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
+      this.$store.dispatch('currentCards/incrementZ', this.id)
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.commit('cardUserDetailsIsVisibleForCardId', cardId)
     },
     toggleFilterShowAbsoluteDates () {
-      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
+      this.$store.dispatch('currentCards/incrementZ', this.id)
       this.$store.dispatch('closeAllDialogs', 'Card.toggleFilterShowAbsoluteDates')
       const value = !this.$store.state.currentUser.filterShowAbsoluteDates
       this.$store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
@@ -1014,7 +1022,7 @@ export default {
       this.$store.dispatch('clearMultipleSelected')
       const cardId = this.id
       this.$store.dispatch('currentSpace/toggleCommentIsVisible', cardId)
-      this.$store.dispatch('currentSpace/incrementCardZ', cardId)
+      this.$store.dispatch('currentCards/incrementZ', cardId)
       this.updateCardConnectionPathsIfOpenSpace()
     },
     updateCardConnectionPathsIfOpenSpace () {
@@ -1057,7 +1065,7 @@ export default {
       this.$store.commit('parentCardId', this.id)
       this.$store.commit('childCardId', '')
       this.checkIfShouldDragMultipleCards(event)
-      this.$store.dispatch('currentSpace/incrementSelectedCardsZ')
+      this.$store.dispatch('currentCards/incrementSelectedZs')
     },
     showCardDetails (event) {
       if (this.$store.state.currentUserIsPainting) { return }
@@ -1078,7 +1086,7 @@ export default {
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       this.$store.dispatch('closeAllDialogs', 'Card.showCardDetails')
       this.$store.dispatch('clearMultipleSelected')
-      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
+      this.$store.dispatch('currentCards/incrementZ', this.id)
       const nodeName = event.target.nodeName
       if (nodeName === 'LABEL') { return } // checkbox
       if (nodeName === 'A' && event.touches) {
@@ -1105,7 +1113,7 @@ export default {
       if (isMultiTouch) { return }
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
       if (this.preventDraggedButtonBadgeFromShowingDetails) { return }
-      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
+      this.$store.dispatch('currentCards/incrementZ', this.id)
       this.$store.dispatch('closeAllDialogs', 'Card.showTagDetailsIsVisible')
       this.$store.commit('currentUserIsDraggingCard', false)
       const tagRect = event.target.getBoundingClientRect()
@@ -1122,7 +1130,7 @@ export default {
     showLinkDetailsIsVisible ({ event, link }) {
       if (isMultiTouch) { return }
       if (this.preventDraggedButtonBadgeFromShowingDetails) { return }
-      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
+      this.$store.dispatch('currentCards/incrementZ', this.id)
       this.$store.dispatch('closeAllDialogs', 'Card.showLinkDetailsIsVisible')
       this.$store.commit('currentUserIsDraggingCard', false)
       const linkRect = event.target.getBoundingClientRect()
