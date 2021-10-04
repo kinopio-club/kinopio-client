@@ -7,6 +7,7 @@ import undoHistory from '@/store/undoHistory.js'
 import currentUser from '@/store/currentUser.js'
 import currentSpace from '@/store/currentSpace.js'
 import currentCards from '@/store/currentCards.js'
+import currentConnections from '@/store/currentConnections.js'
 import upload from '@/store/upload.js'
 // store plugins
 import websocket from '@/store/plugins/websocket.js'
@@ -1073,6 +1074,7 @@ const store = createStore({
     currentUser,
     currentSpace,
     currentCards,
+    currentConnections,
     upload
   },
   plugins: [websocket()]
