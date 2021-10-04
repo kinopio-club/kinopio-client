@@ -441,6 +441,13 @@ export default {
 
   // Cards
 
+  normalizeCards (cards) {
+    let normalizedCards = {}
+    cards.forEach(card => {
+      normalizedCards[card.id] = card
+    })
+    return normalizedCards
+  },
   emptyCard () {
     return { width: 76, height: 32 }
   },
