@@ -143,13 +143,13 @@ export default {
         transform: `scale(${this.spaceZoomDecimal})`
       }
     },
-    cards () { return this.$store.state.currentSpace.cards },
+    cards () { return this.$store.getters['currentCards/all'] },
     isPainting () { return this.$store.state.currentUserIsPainting },
     isPanningReady () { return this.$store.state.currentUserIsPanningReady },
     spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
     isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
     isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
-    connections () { return this.$store.state.currentSpace.connections },
+    connections () { return this.$store.getters['currentConnections/all'] },
     viewportHeight () { return this.$store.state.viewportHeight },
     viewportWidth () { return this.$store.state.viewportWidth },
     pageHeight () { return this.$store.state.pageHeight },

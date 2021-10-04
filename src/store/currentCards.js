@@ -9,12 +9,12 @@ import cache from '@/cache.js'
 export default {
   namespaced: true,
   state: {
-    cardIds: [],
+    ids: [],
     cards: {}
   },
   mutations: {
     clear: (state) => {
-      state.cardIds = []
+      state.ids = []
       state.cards = {}
     },
     update: (state, card) => {
@@ -30,8 +30,8 @@ export default {
         cardIds.push(card.id)
         state.cards[card.id] = card
       })
-      state.cardIds = state.cardIds.concat(cardIds)
-      // console.log('🍅',state.cards, state.cardIds)
+      state.ids = state.ids.concat(cardIds)
+      // console.log('🍅',state.cards, state.ids)
 
       // [{id, name, blah}]
 
@@ -111,11 +111,10 @@ export default {
   },
   getters: {
     byId: (state) => (id) => {
-      console.log(id)
       return state.cards[id]
     },
     all: (state) => {
-      return state.cardIds.map(id => state.cards[id])
+      return state.ids.map(id => state.cards[id])
     }
   }
 }

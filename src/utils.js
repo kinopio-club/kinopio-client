@@ -497,6 +497,13 @@ export default {
 
   // Connection Path Utils 🐙
 
+  normalizeConnections (connections) {
+    let normalizedConnections = {}
+    connections.forEach(connection => {
+      normalizedConnections[connection.id] = connection
+    })
+    return normalizedConnections
+  },
   spaceZoomDecimal () {
     const floatPattern = /[+-]?\d+(\.\d+)?/g
     const element = document.querySelector('.space')
@@ -507,7 +514,6 @@ export default {
   spaceCounterZoomDecimal () {
     return 1 / this.spaceZoomDecimal()
   },
-
   connectorCoords (cardId) {
     const element = document.querySelector(`.connector[data-card-id="${cardId}"] button`)
     if (!element) { return }

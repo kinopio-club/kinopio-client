@@ -9,12 +9,12 @@
 export default {
   namespaced: true,
   state: {
-    connectionIds: [],
+    ids: [],
     connections: {}
   },
   mutations: {
     clear: (state) => {
-      state.connectionIds = []
+      state.ids = []
       state.connections = {}
     },
     update: (state, connection) => {
@@ -30,8 +30,8 @@ export default {
         connectionIds.push(connection.id)
         state.connections[connection.id] = connection
       })
-      state.connectionIds = state.connectionIds.concat(connectionIds)
-      // console.log('🍅',state.connections, state.connectionIds)
+      state.ids = state.ids.concat(connectionIds)
+      console.log('🍅', state.connections, state.ids)
     }
 
     // add: (state, item) => {
@@ -49,7 +49,7 @@ export default {
       return state.connections[id]
     },
     all: (state) => {
-      return state.connectionIds.map(id => state.connections[id])
+      return state.ids.map(id => state.connections[id])
     }
   }
 }
