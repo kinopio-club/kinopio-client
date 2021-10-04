@@ -847,6 +847,7 @@ export default {
     },
     updateCardMap (cardId) {
       let card = this.$store.getters['currentSpace/cardById'](cardId)
+      if (!card) { return }
       card = utils.clone(card)
       card = utils.updateCardDimentions(card)
       this.$store.commit('updateCardInCardMap', card)
