@@ -20,8 +20,8 @@ dialog.narrow.multiple-selected-actions(
         img.icon.connector-icon(v-else src="@/assets/connector-open.svg")
         span Connect
       //- Frames
-      .button-wrap(:class="{active: framePickerIsVisible}" @click.left.stop="toggleFramePickerIsVisible")
-        button Frames
+      .button-wrap(@click.left.stop="toggleFramePickerIsVisible")
+        button(:class="{active: framePickerIsVisible}") Frames
         FramePicker(:visible="framePickerIsVisible" :cards="cards")
     .row.edit-connection-types(v-if="connectionsIsSelected")
       //- Type Color
