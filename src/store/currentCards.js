@@ -21,11 +21,17 @@ export default {
       state.removedCards = []
     },
     update: (state, card) => {
+      if (card.x) {
+        card.x = Math.round(card.x)
+      }
+      if (card.y) {
+        card.y = Math.round(card.y)
+      }
       const keys = Object.keys(card)
       keys.forEach(key => {
         state.cards[card.id][key] = card[key]
       })
-      // debounce ls?
+      cache.updateSpaceCardsDebounced(state.cards, currentSpaceId)
     },
     restore: (state, cards) => {
       let cardIds = []
@@ -34,28 +40,13 @@ export default {
         state.cards[card.id] = card
       })
       state.ids = state.ids.concat(cardIds)
-      // console.log('🍅',state.cards, state.ids)
-
-      // [{id, name, blah}]
-
-      // [id,id2,id3]
-      // {
-
-      // id: {
-      //   name, blah
-      // },
-      // id: {
-      //   name, blah
-      // },
-
-      // }
     },
     move: (state, { cards, delta, spaceId }) => {
       cards.forEach(card => {
         state.cards[card.id].x = card.x + delta.x
         state.cards[card.id].y = card.y + delta.y
       })
-      cache.updateSpaceCardsDebounced(state.cards, spaceId)
+      cache.updateSpaceCardsDebounced(state.cards, currentSpaceId)
     },
     // add: (state, item) => {
     //   utils.typeCheck({ value: item, type: 'object', origin: 'history add' })
@@ -71,8 +62,7 @@ export default {
       state.removedCards.unshift(card)
       // const spaceId =
       cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
-      const cards = utils.denormalizeCards(state.cards)
-      cache.updateSpace('cards', cards, currentSpaceId)
+      cache.updateSpace('cards', state.cards, currentSpaceId)
     },
     // removedCards: (state, removedCards) => {
     //   state.removedCards = removedCards
@@ -87,8 +77,7 @@ export default {
         state.removedCards = state.removedCards.filter(removedCard => card.id !== removedCard.id)
         cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
       } else {
-        const cards = utils.denormalizeCards(state.cards)
-        cache.updateSpace('cards', cards, currentSpaceId)
+        cache.updateSpace('cards', state.cards, currentSpaceId)
       }
     },
     removeAllRemovedPermanent: (state) => {
@@ -102,8 +91,7 @@ export default {
       state.ids.push(card.id)
       card = utils.normalizeCards(card)
       state.cards[card.id] = card
-      const cards = utils.denormalizeCards(state.cards)
-      cache.updateSpace('cards', cards, currentSpaceId)
+      cache.updateSpace('cards', state.cards, currentSpaceId)
       // update removed
       state.removedCards.splice(index, 1)
       cache.updateSpace('removedCards', state.removedCards, currentSpaceId)

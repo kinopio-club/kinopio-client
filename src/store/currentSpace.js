@@ -115,33 +115,35 @@ export default {
 
     // Cards
 
-    updateCard: (state, updatedCard) => {
-      if (updatedCard.x) {
-        updatedCard.x = Math.round(updatedCard.x)
-      }
-      if (updatedCard.y) {
-        updatedCard.y = Math.round(updatedCard.y)
-      }
-      const index = state.cards.findIndex(card => card.id === updatedCard.id)
-      const card = utils.clone(state.cards[index])
-      const updates = Object.keys(updatedCard)
-      updates.forEach(key => {
-        card[key] = updatedCard[key]
-      })
-      state.cards[index] = card
-      cache.updateSpace('cards', state.cards, state.id)
-    },
+    // currentCard/update
+    // updateCard: (state, updatedCard) => {
+    //   if (updatedCard.x) {
+    //     updatedCard.x = Math.round(updatedCard.x)
+    //   }
+    //   if (updatedCard.y) {
+    //     updatedCard.y = Math.round(updatedCard.y)
+    //   }
+    //   const index = state.cards.findIndex(card => card.id === updatedCard.id)
+    //   const card = utils.clone(state.cards[index])
+    //   const updates = Object.keys(updatedCard)
+    //   updates.forEach(key => {
+    //     card[key] = updatedCard[key]
+    //   })
+    //   state.cards[index] = card
+    //   cache.updateSpace('cards', state.cards, state.id)
+    // },
     // currentCard/move
-    moveCards: (state, { cards, delta }) => {
-      cards = utils.clone(cards)
-      cards.forEach(card => {
-        card.x = card.x + delta.x
-        card.y = card.y + delta.y
-        const index = state.cards.findIndex(stateCard => stateCard.id === card.id)
-        state.cards[index] = card
-      })
-      cache.updateSpaceCardsDebounced(state.cards, state.id)
-    },
+    // moveCards: (state, { cards, delta }) => {
+    //   cards = utils.clone(cards)
+    //   cards.forEach(card => {
+    //     card.x = card.x + delta.x
+    //     card.y = card.y + delta.y
+    //     const index = state.cards.findIndex(stateCard => stateCard.id === card.id)
+    //     state.cards[index] = card
+    //   })
+    //   cache.updateSpaceCardsDebounced(state.cards, state.id)
+    // },
+
     moveCardsBroadcast: (state, { cards, delta }) => {
       cards.forEach(updated => {
         const card = state.cards.find(card => card.id === updated.id)

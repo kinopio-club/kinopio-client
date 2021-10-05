@@ -81,6 +81,9 @@ export default {
       console.warn('🚑 could not updateSpace cache because cachedSpace does not exist')
       return
     }
+    if (key === 'cards') {
+      value = utils.denormalizeCards(value)
+    }
     space[key] = value
     space.cacheDate = Date.now()
     this.storeLocal(`space-${spaceId}`, space)
@@ -91,6 +94,7 @@ export default {
       console.warn('🚑 could not updateSpace cache because cachedSpace does not exist')
       return
     }
+    cards = utils.denormalizeCards(cards)
     space.cards = cards
     space.cacheDate = Date.now()
     this.storeLocal(`space-${spaceId}`, space)
