@@ -297,7 +297,7 @@ export default {
   computed: {
     card () {
       const cardId = this.$store.state.cardDetailsIsVisibleForCardId
-      return this.$store.getters['currentSpace/cardById'](cardId) || {}
+      return this.$store.getters['currentCards/byId'](cardId) || {}
     },
     visible () { return utils.objectHasKeys(this.card) },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
@@ -846,7 +846,7 @@ export default {
       this.notifiedMembers = true
     },
     updateCardMap (cardId) {
-      let card = this.$store.getters['currentSpace/cardById'](cardId)
+      let card = this.$store.getters['currentCards/byId'](cardId)
       if (!card) { return }
       card = utils.clone(card)
       card = utils.updateCardDimentions(card)
@@ -1476,7 +1476,7 @@ export default {
       this.$store.commit('updateCurrentCardConnections')
       this.$store.commit('triggerUpdatePositionInVisualViewport')
       this.$store.commit('shouldPreventNextEnterKey', false)
-      const card = this.$store.getters['currentSpace/cardById'](cardId)
+      const card = this.$store.getters['currentCards/byId'](cardId)
       const cardHasName = Boolean(card.name)
       if (!cardHasName) {
         this.$store.dispatch('currentSpace/removeCard', { id: cardId })

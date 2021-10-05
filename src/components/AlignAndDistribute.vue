@@ -60,7 +60,7 @@ export default {
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     cards () {
       const cards = this.multipleCardsSelectedIds.map(cardId => {
-        let card = this.$store.getters['currentSpace/cardById'](cardId)
+        let card = this.$store.getters['currentCards/byId'](cardId)
         card = utils.clone(card)
         const element = document.querySelector(`article [data-card-id="${cardId}"]`)
         const rect = element.getBoundingClientRect()

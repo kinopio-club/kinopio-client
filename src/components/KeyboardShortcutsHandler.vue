@@ -494,7 +494,7 @@ export default {
     // Remove
 
     removeCardById (cardId) {
-      const card = this.$store.getters['currentSpace/cardById'](cardId)
+      const card = this.$store.getters['currentCards/byId'](cardId)
       this.$store.dispatch('currentSpace/removeCard', card)
     },
 
@@ -506,7 +506,7 @@ export default {
 
     canEditCardById (cardId) {
       const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
-      const card = this.$store.getters['currentSpace/cardById'](cardId)
+      const card = this.$store.getters['currentCards/byId'](cardId)
       const cardIsCreatedByCurrentUser = this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](card)
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (isSpaceMember) { return true }
@@ -558,7 +558,7 @@ export default {
     copyCards () {
       const cardIds = this.focusedCardIds()
       const cards = cardIds.map(cardId => {
-        let card = this.$store.getters['currentSpace/cardById'](cardId)
+        let card = this.$store.getters['currentCards/byId'](cardId)
         return card
       })
       this.$store.commit('addToCopiedCards', cards)

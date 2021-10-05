@@ -115,8 +115,8 @@ export default {
     canNativeShare () { return Boolean(navigator.share) },
     currentCard () {
       let currentCardId = this.cardDetailsIsVisibleForCardId
-      const currentCard = this.$store.getters['currentSpace/cardById'](currentCardId)
-      const linkCard = this.$store.getters['currentSpace/cardById'](this.$store.state.currentSelectedLink.cardId)
+      const currentCard = this.$store.getters['currentCards/byId'](currentCardId)
+      const linkCard = this.$store.getters['currentCards/byId'](this.$store.state.currentSelectedLink.cardId)
       return currentCard || linkCard
     },
     currentSpaceId () { return this.$store.state.currentSpace.id },

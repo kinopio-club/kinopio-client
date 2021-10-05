@@ -308,7 +308,7 @@ export default {
         updates.endCardId = null
         this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
       } else if (isCurrentConnectionConnected) {
-        const card = this.$store.getters['currentSpace/cardById'](cardElement.dataset.cardId)
+        const card = this.$store.getters['currentCards/byId'](cardElement.dataset.cardId)
         this.$store.commit('currentConnectionSuccess', card)
         updates.endCardId = card.id
         this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })

@@ -32,7 +32,7 @@ export default {
     cardId () { return this.$store.state.cardUserDetailsIsVisibleForCardId },
     card () {
       if (!this.cardId) { return }
-      return this.$store.getters['currentSpace/cardById'](this.cardId)
+      return this.$store.getters['currentCards/byId'](this.cardId)
     },
     cardCreatedByUser () {
       if (!this.card) { return }

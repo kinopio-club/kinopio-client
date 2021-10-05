@@ -221,7 +221,7 @@ export default {
       }
     },
     selectItem () {
-      const card = this.$store.getters['currentSpace/cardById'](this.previousResultCardId)
+      const card = this.$store.getters['currentCards/byId'](this.previousResultCardId)
       this.$store.commit('shouldPreventNextEnterKey', true)
       this.$store.dispatch('closeAllDialogs', 'Search.selectItem')
       this.selectCard(card)

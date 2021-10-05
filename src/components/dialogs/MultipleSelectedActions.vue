@@ -121,7 +121,7 @@ export default {
     multipleCardsIsSelected () { return Boolean(this.multipleCardsSelectedIds.length > 1) },
     cards () {
       return this.multipleCardsSelectedIds.map(cardId => {
-        return this.$store.getters['currentSpace/cardById'](cardId)
+        return this.$store.getters['currentCards/byId'](cardId)
       })
     },
     editableCards () {
@@ -234,7 +234,7 @@ export default {
     },
     exportData () {
       const cards = this.multipleCardsSelectedIds.map(cardId => {
-        return this.$store.getters['currentSpace/cardById'](cardId)
+        return this.$store.getters['currentCards/byId'](cardId)
       })
       return { 'cards': cards }
     },

@@ -1086,7 +1086,6 @@ export default {
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       this.$store.dispatch('closeAllDialogs', 'Card.showCardDetails')
       this.$store.dispatch('clearMultipleSelected')
-      this.$store.dispatch('currentCards/incrementZ', this.id)
       const nodeName = event.target.nodeName
       if (nodeName === 'LABEL') { return } // checkbox
       if (nodeName === 'A' && event.touches) {
