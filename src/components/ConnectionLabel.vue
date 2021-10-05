@@ -68,7 +68,7 @@ export default {
     },
     isCardsFilteredByFrame () {
       const frameIds = this.$store.state.filteredFrameIds
-      const cards = utils.clone(this.$store.state.currentSpace.cards)
+      const cards = utils.clone(this.$store.getters['currentCards/all'])
       const startCardId = this.connection.startCardId
       const endCardId = this.connection.endCardId
       const startCard = cards.filter(card => card.id === startCardId)[0]

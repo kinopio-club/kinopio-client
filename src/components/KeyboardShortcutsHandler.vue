@@ -589,7 +589,7 @@ export default {
         this.$store.commit('addToMultipleCardsSelected', cardId)
       })
       this.$nextTick(() => {
-        const newCard = last(this.$store.state.currentSpace.cards)
+        const newCard = last(this.$store.getters['currentCards/all'])
         this.scrollIntoView(newCard)
       })
     },
@@ -601,7 +601,7 @@ export default {
       if (!canEditSpace) { return }
       const zoom = this.$store.getters.spaceZoomDecimal
       const cursor = this.$store.state.prevCursorPosition
-      let cards = utils.clone(this.$store.state.currentSpace.cards)
+      let cards = utils.clone(this.$store.getters['currentCards/all'])
       cards = cards.filter(card => (card.y * zoom) > cursor.y)
       cards = cards.map(card => card.id)
       this.$store.commit('multipleSelectedActionsPosition', cursor)
@@ -614,7 +614,7 @@ export default {
     selectAllCards () {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
-      let cards = utils.clone(this.$store.state.currentSpace.cards)
+      let cards = utils.clone(this.$store.getters['currentCards/all'])
       cards = cards.map(card => card.id)
       const dialogOffset = {
         width: 200 / 2,

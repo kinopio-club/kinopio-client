@@ -106,7 +106,7 @@ export default {
       return cards
     },
     recentlyUpdatedCards () {
-      let cards = utils.clone(this.$store.state.currentSpace.cards)
+      let cards = utils.clone(this.$store.getters['currentCards/all'])
       cards = cards.filter(card => card.name)
       cards = cards.map(card => {
         const date = card.nameUpdatedAt || card.createdAt

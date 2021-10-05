@@ -136,7 +136,7 @@ export default {
     updateMetaDescription () {
       let description = 'Kinopio is your spatial thinking tool for new ideas and hard problems.'
       const metaDescription = document.querySelector('meta[name=description]')
-      const cards = this.$store.state.currentSpace.cards
+      const cards = this.$store.getters['currentCards/all']
       const topLeftCard = utils.topLeftCard(cards)
       if (!topLeftCard.name) {
         metaDescription.setAttribute('content', description)
@@ -148,7 +148,7 @@ export default {
       this.updateCardMap()
     }, 500),
     updateCardMap () {
-      const cards = this.$store.state.currentSpace.cards
+      const cards = this.$store.getters['currentCards/all']
       const cardMap = cards.filter(card => {
         return utils.isCardInViewport(card)
       })

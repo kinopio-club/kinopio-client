@@ -123,7 +123,7 @@ export default {
     },
     isCardsFilteredByFrame () {
       const frameIds = this.$store.state.filteredFrameIds
-      const cards = utils.clone(this.$store.state.currentSpace.cards)
+      const cards = utils.clone(this.$store.getters['currentCards/all'])
       const startCard = cards.filter(card => card.id === this.startCardId)[0]
       const endCard = cards.filter(card => card.id === this.endCardId)[0]
       const startCardInFilter = frameIds.includes(startCard.frameId)

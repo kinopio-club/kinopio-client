@@ -124,7 +124,7 @@ export default {
       const markerHeight = 16
       const markerWidth = 12
       const zoom = this.spaceZoomDecimal
-      let cards = utils.clone(this.$store.state.currentSpace.cards)
+      let cards = utils.clone(this.$store.getters['currentCards/all'])
       cards = cards.map(card => {
         const element = document.querySelector(`article [data-card-id="${card.id}"]`)
         if (!element) { return card }
