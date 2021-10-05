@@ -273,7 +273,6 @@ export default {
       openingAlpha: 0,
       shouldTriggerCloseChildComponents: '',
       previousSelectedTag: {}
-      // visible: false
     }
   },
   created () {

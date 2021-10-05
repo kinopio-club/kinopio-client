@@ -218,7 +218,6 @@ export default {
           const element = this.$refs.card
           const isTouchDevice = this.$store.state.isTouchDevice
           scrollIntoView.scroll(element, isTouchDevice)
-          scrollIntoView.scroll(element, isTouchDevice)
         }
       }
       if (mutation.type === 'triggerUploadComplete') {

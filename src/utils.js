@@ -593,14 +593,12 @@ export default {
     return -endValue * (elaspedTime /= duration) * (elaspedTime - 2) + startValue
   },
   highestCardZ (cards) {
-    console.time('❤️highestCardZ')
     let highestCardZ = 0
     cards.forEach(card => {
       if (card.z > highestCardZ) {
         highestCardZ = card.z
       }
     })
-    console.timeEnd('❤️highestCardZ')
     return highestCardZ
   },
 
