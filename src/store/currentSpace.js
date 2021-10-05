@@ -153,10 +153,11 @@ export default {
       })
       cache.updateSpace('cards', state.cards, state.id)
     },
-    createCard: (state, card) => {
-      state.cards.push(card)
-      cache.updateSpace('cards', state.cards, state.id)
-    },
+    // currentCards/create
+    // createCard: (state, card) => {
+    //   state.cards.push(card)
+    //   cache.updateSpace('cards', state.cards, state.id)
+    // },
 
     // removeCard: (state, cardToRemove) => {
     //   const card = state.cards.find(card => card.id === cardToRemove.id)
@@ -1017,43 +1018,44 @@ export default {
 
     // Cards
 
-    addCard: (context, { position, isParentCard, name, id }) => {
-      utils.typeCheck({ value: position, type: 'object', origin: 'addCard' })
-      if (context.getters.shouldPreventAddCard) {
-        context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
-        return
-      }
-      let cards = context.state.cards
-      const highestCardZ = utils.highestCardZ(cards)
-      let card = {
-        id: id || nanoid(),
-        x: position.x,
-        y: position.y,
-        z: highestCardZ + 1,
-        name: name || '',
-        frameId: 0,
-        userId: context.rootState.currentUser.id,
-        urlPreviewIsVisible: true,
-        commentIsVisible: true,
-        width: utils.emptyCard().width,
-        height: utils.emptyCard().height
-      }
-      context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
-      context.commit('createCard', card)
-      card.spaceId = context.state.id
-      card = utils.clone(card)
-      const update = { name: 'createCard', body: card }
-      context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
-      context.commit('undoHistory/add', update, { root: true })
-      if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
-      context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        delta: 1
-      }, { root: true })
-      context.dispatch('checkIfShouldNotifyCardsCreatedIsNearLimit')
-      context.dispatch('notifyCollaboratorsCardUpdated', { cardId: id, type: 'createCard' })
-      context.commit('addToCardMap', card, { root: true })
-    },
+    // currentCards/add
+    // addCard: (context, { position, isParentCard, name, id }) => {
+    //   utils.typeCheck({ value: position, type: 'object', origin: 'addCard' })
+    //   if (context.getters.shouldPreventAddCard) {
+    //     context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
+    //     return
+    //   }
+    //   let cards = context.state.cards
+    //   const highestCardZ = utils.highestCardZ(cards)
+    //   let card = {
+    //     id: id || nanoid(),
+    //     x: position.x,
+    //     y: position.y,
+    //     z: highestCardZ + 1,
+    //     name: name || '',
+    //     frameId: 0,
+    //     userId: context.rootState.currentUser.id,
+    //     urlPreviewIsVisible: true,
+    //     commentIsVisible: true,
+    //     width: utils.emptyCard().width,
+    //     height: utils.emptyCard().height
+    //   }
+    //   context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
+    //   context.commit('createCard', card)
+    //   card.spaceId = context.state.id
+    //   card = utils.clone(card)
+    //   const update = { name: 'createCard', body: card }
+    //   context.dispatch('api/addToQueue', update, { root: true })
+    //   context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
+    //   context.commit('undoHistory/add', update, { root: true })
+    //   if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
+    //   context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+    //     delta: 1
+    //   }, { root: true })
+    //   context.dispatch('checkIfShouldNotifyCardsCreatedIsNearLimit')
+    //   context.dispatch('notifyCollaboratorsCardUpdated', { cardId: id, type: 'createCard' })
+    //   context.commit('addToCardMap', card, { root: true })
+    // },
     addMultipleCards: (context, newCards) => {
       newCards.forEach(card => {
         card = {

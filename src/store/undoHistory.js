@@ -19,7 +19,11 @@ const self = {
     playback: (context) => {
       let cardIds = []
       items.forEach(item => {
-        context.dispatch(`currentSpace/${item.name}`, item.body, { root: true })
+        let origin = `currentSpace/${item.name}`
+        if (item.origin) {
+          origin = item.origin
+        }
+        context.dispatch(origin, item.body, { root: true })
         const isCard = item.name === 'updateCard'
         const cardExists = Boolean(document.querySelector(`article [data-card-id="${item.body.id}"]`))
         if (isCard && cardExists) {

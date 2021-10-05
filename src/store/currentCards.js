@@ -1,6 +1,8 @@
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
+import nanoid from 'nanoid'
+
 // import debounce from 'lodash-es/debounce'
 
 // normalized state
@@ -33,6 +35,10 @@ export default {
       })
       cache.updateSpaceCardsDebounced(state.cards, currentSpaceId)
     },
+    create: (state, card) => {
+      state.ids.push(card.id)
+      state.cards[card.id] = card
+    },
     restore: (state, cards) => {
       let cardIds = []
       cards.forEach(card => {
@@ -48,10 +54,6 @@ export default {
       })
       cache.updateSpaceCardsDebounced(state.cards, currentSpaceId)
     },
-    // add: (state, item) => {
-    //   utils.typeCheck({ value: item, type: 'object', origin: 'history add' })
-    //   items.push(item)
-    // },
 
     // cards
     remove: (state, cardToRemove) => {
@@ -113,11 +115,52 @@ export default {
         }
       }
       context.commit('update', card)
-      const update = { name: 'updateCard', body: card }
+      const update = { name: 'updateCard', origin: 'currentCards/update', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('broadcast/update', { updates: card, type: 'updateCard' }, { root: true })
       context.commit('undoHistory/add', update, { root: true })
     },
+    add: (context, { position, isParentCard, name, id }) => {
+      utils.typeCheck({ value: position, type: 'object', origin: 'addCard' })
+      if (context.rootGetters['currentSpace/shouldPreventAddCard']) {
+        context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
+        return
+      }
+
+      let cards = context.getters.all
+      const highestCardZ = utils.highestCardZ(cards)
+      let card = {
+        id: id || nanoid(),
+        x: position.x,
+        y: position.y,
+        z: highestCardZ + 1,
+        name: name || '',
+        frameId: 0,
+        userId: context.rootState.currentUser.id,
+        urlPreviewIsVisible: true,
+        commentIsVisible: true,
+        width: utils.emptyCard().width,
+        height: utils.emptyCard().height
+      }
+      context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
+      context.commit('create', card)
+
+      card.spaceId = currentSpaceId
+      // card = utils.clone(card)
+      const update = { name: 'createCard', origin: 'currentCards/add', body: card }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
+      context.commit('undoHistory/add', update, { root: true })
+
+      if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
+      context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+        delta: 1
+      }, { root: true })
+      context.dispatch('currentSpace/checkIfShouldNotifyCardsCreatedIsNearLimit', null, { root: true })
+      context.dispatch('currentSpace/notifyCollaboratorsCardUpdated', { cardId: id, type: 'createCard' }, { root: true })
+      context.commit('addToCardMap', card, { root: true })
+    },
+
     drag: (context, { endCursor, prevCursor, delta }) => {
       const spaceId = context.rootState.currentSpace.id
       const currentDraggingCardId = context.rootState.currentDraggingCardId
@@ -209,7 +252,7 @@ export default {
       const cardHasContent = Boolean(card.name)
       if (cardHasContent) {
         context.commit('remove', card)
-        const update = { name: 'removeCard', body: card }
+        const update = { name: 'removeCard', origin: 'currentCards/remove', body: card }
         context.dispatch('api/addToQueue', update, { root: true })
         context.commit('undoHistory/add', update, { root: true })
       } else {
@@ -241,7 +284,7 @@ export default {
     },
     restoreRemoved: (context, card) => {
       context.commit('restoreRemovedCard', card)
-      const update = { name: 'restoreRemovedCard', body: card }
+      const update = { name: 'restoreRemovedCard', origin: 'currentCards/restoreRemoved', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('broadcast/update', { updates: card, type: 'restoreRemovedCard' }, { root: true })
       context.commit('undoHistory/add', update, { root: true })

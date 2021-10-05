@@ -363,7 +363,7 @@ export default {
         return
       }
       this.normalizeSpaceCardsZ()
-      this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
+      this.$store.dispatch('currentCards/add', { position, isParentCard })
       this.$store.commit('childCardId', '')
     },
     eventIsFromTextarea (event) {

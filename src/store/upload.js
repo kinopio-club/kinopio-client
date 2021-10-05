@@ -153,7 +153,7 @@ export default {
         const positionOffset = 20
         const cardId = nanoid()
         cardIds.push(cardId)
-        context.dispatch('currentSpace/addCard', {
+        context.dispatch('currentCards/add', {
           position: {
             x: currentCursor.x + (index * positionOffset),
             y: currentCursor.y + (index * positionOffset)

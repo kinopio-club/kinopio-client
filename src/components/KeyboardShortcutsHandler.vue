@@ -280,7 +280,7 @@ export default {
       }
       initialPosition = this.updateWithZoom(initialPosition)
       const position = this.nonOverlappingCardPosition(initialPosition)
-      this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
+      this.$store.dispatch('currentCards/add', { position, isParentCard })
       if (childCard) {
         this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)
         this.$nextTick(() => {
@@ -313,7 +313,7 @@ export default {
       }
       initialPosition = this.updateWithZoom(initialPosition)
       const position = this.nonOverlappingCardPosition(initialPosition)
-      this.$store.dispatch('currentSpace/addCard', { position })
+      this.$store.dispatch('currentCards/add', { position })
       this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)
       this.$nextTick(() => {
         this.addConnection(baseCardId)
