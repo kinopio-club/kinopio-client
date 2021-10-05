@@ -806,10 +806,6 @@ export default {
         context.dispatch('scrollCardsIntoView')
         context.dispatch('updatePageSizes', null, { root: true })
       })
-      // normalize all Zs
-      // sort all by zs
-      // normalize z-s to order, if z != index update card w z=index value
-      // should only have to run one time on new clients
     },
     loadSpace: async (context, { space }) => {
       const emptySpace = utils.emptySpace(space.id)
@@ -830,13 +826,13 @@ export default {
       context.dispatch('restoreSpaceInChunks', { space: utils.normalizeSpace(cachedSpace) })
       context.commit('undoHistory/clear', null, { root: true })
       // restore remote space
-      const remoteSpace = await context.dispatch('getRemoteSpace', space)
+      let remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (!remoteSpace) { return }
       const remoteSpaceIsUpdated = remoteSpace.editedAt !== cachedSpace.editedAt || remoteSpace.cards.length !== cachedSpace.cards.length
       if (remoteSpaceIsUpdated) {
         isLoadingRemoteSpace = true
-        context.commit('restoreSpace', emptySpace)
-        context.dispatch('restoreSpaceInChunks', { space: utils.normalizeSpace(remoteSpace), isRemote: true })
+        remoteSpace = utils.normalizeSpace(remoteSpace)
+        context.dispatch('restoreSpaceInChunks', { space: remoteSpace, isRemote: true })
       }
     },
     loadLastSpace: (context) => {

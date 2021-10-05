@@ -21,14 +21,24 @@ const joinSpaceRoom = (store, mutation) => {
   const space = utils.clone(store.state.currentSpace)
   const user = utils.clone(store.state.currentUser)
   const currentSpaceIsRemote = utils.currentSpaceIsRemote(space, user)
-  if (!currentSpaceIsRemote) { return }
-  if (currentSpaceRoom === space.id) { return }
+  if (!currentSpaceIsRemote) {
+    store.commit('isJoiningSpace', false)
+    return
+  }
+  if (currentSpaceRoom === space.id) {
+    store.commit('isJoiningSpace', false)
+    return
+  }
   if (websocket.readyState === 0) {
     console.warn('🚑 joinSpaceRoom cancelled because websocket not ready', websocket.readyState)
+    store.commit('isJoiningSpace', false)
     return
   }
   const spaceIsLoadedOrCached = Boolean(store.state.currentSpace.cards.length) // proxy for checking if user can view space
-  if (!spaceIsLoadedOrCached) { return }
+  if (!spaceIsLoadedOrCached) {
+    store.commit('isJoiningSpace', false)
+    return
+  }
   currentSpaceRoom = space.id
   websocket.send(JSON.stringify({
     message: 'joinSpaceRoom',
