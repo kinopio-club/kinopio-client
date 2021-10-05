@@ -335,7 +335,7 @@ export default {
             id: card.id,
             name: `[] ${card.name}`
           }
-          this.$store.dispatch('currentSpace/updateCard', update)
+          this.$store.dispatch('currentCards/update', update)
         }
       })
       this.cardsHaveCheckboxes = true
@@ -393,7 +393,7 @@ export default {
     },
     remove () {
       this.editableConnections.forEach(connection => this.$store.dispatch('currentSpace/removeConnection', connection))
-      this.editableCards.forEach(card => this.$store.dispatch('currentSpace/removeCard', card))
+      this.editableCards.forEach(card => this.$store.dispatch('currentCards/remove', card))
       this.$store.dispatch('closeAllDialogs', 'MultipleSelectedActions.remove')
       this.$store.dispatch('clearMultipleSelected')
     },

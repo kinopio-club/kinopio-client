@@ -205,18 +205,18 @@ export default {
       this.$store.commit('currentSpace/removedCards', remoteCards)
     },
     restoreCard (card) {
-      this.$store.dispatch('currentSpace/restoreRemovedCard', card)
+      this.$store.dispatch('currentCards/restoreRemoved', card)
       this.$nextTick(() => {
         this.scrollIntoView(card)
       })
       this.updateLocalRemovedCards()
     },
     removeCardPermanent (card) {
-      this.$store.dispatch('currentSpace/removeCardPermanent', card)
+      this.$store.dispatch('currentCards/removePermanent', card)
       this.updateLocalRemovedCards()
     },
     removeAllCardsPermanent () {
-      this.$store.dispatch('currentSpace/removeAllRemovedCardsPermanent')
+      this.$store.dispatch('currentCards/removeAllRemovedPermanent')
       this.updateLocalRemovedCards()
     },
 

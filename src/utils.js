@@ -448,6 +448,14 @@ export default {
     })
     return normalizedCards
   },
+  denormalizeCards (normalizedCards) {
+    let cards = []
+    const ids = Object.keys(normalizedCards)
+    ids.forEach(id => {
+      cards.push(normalizedCards[id])
+    })
+    return cards
+  },
   emptyCard () {
     return { width: 76, height: 32 }
   },

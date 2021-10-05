@@ -74,7 +74,7 @@ export default {
         id: this.card.id,
         urlPreviewIsVisible: false
       }
-      this.$store.dispatch('currentSpace/updateCard', update)
+      this.$store.dispatch('currentCards/update', update)
       this.$store.commit('removeUrlPreviewLoadingForCardIds', this.card.id)
     }
   }

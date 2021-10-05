@@ -31,9 +31,11 @@ export default {
       space = utils.removeRemovedCardsFromSpace(space)
       Object.assign(state, space)
     },
-    restoreCards: (state, cards) => {
-      state.cards = state.cards.concat(cards)
-    },
+    // currentCards/restore
+    // restoreCards: (state, cards) => {
+    //   state.cards = state.cards.concat(cards)
+    // },
+    // currentConnections/restore
     restoreConnections: (state, connections) => {
       state.connections = state.connections.concat(connections)
     },
@@ -153,38 +155,39 @@ export default {
       state.cards.push(card)
       cache.updateSpace('cards', state.cards, state.id)
     },
-    removeCard: (state, cardToRemove) => {
-      const card = state.cards.find(card => card.id === cardToRemove.id)
-      state.cards = state.cards.filter(card => card.id !== cardToRemove.id)
-      state.removedCards.unshift(card)
-      cache.updateSpace('removedCards', state.removedCards, state.id)
-      cache.updateSpace('cards', state.cards, state.id)
-    },
-    removedCards: (state, removedCards) => {
-      state.removedCards = removedCards
-    },
-    removeCardPermanent: (state, cardToRemove) => {
-      state.cards = state.cards.filter(card => card.id !== cardToRemove.id)
-      const fromRemovedCards = state.removedCards.find(card => card.id === cardToRemove.id)
-      if (fromRemovedCards) {
-        state.removedCards = state.removedCards.filter(card => card.id !== cardToRemove.id)
-        cache.updateSpace('removedCards', state.removedCards, state.id)
-      } else {
-        cache.updateSpace('cards', state.cards, state.id)
-      }
-    },
-    removeAllRemovedCardsPermanent: (state) => {
-      state.removedCards = []
-      cache.updateSpace('removedCards', state.removedCards, state.id)
-    },
-    restoreRemovedCard: (state, cardToRestore) => {
-      const index = state.removedCards.findIndex(card => card.id === cardToRestore.id)
-      const card = state.removedCards[index]
-      state.cards.push(card)
-      state.removedCards.splice(index, 1)
-      cache.updateSpace('cards', state.cards, state.id)
-      cache.updateSpace('removedCards', state.removedCards, state.id)
-    },
+
+    // removeCard: (state, cardToRemove) => {
+    //   const card = state.cards.find(card => card.id === cardToRemove.id)
+    //   state.cards = state.cards.filter(card => card.id !== cardToRemove.id)
+    //   state.removedCards.unshift(card)
+    //   cache.updateSpace('removedCards', state.removedCards, state.id)
+    //   cache.updateSpace('cards', state.cards, state.id)
+    // },
+    // removedCards: (state, removedCards) => {
+    //   state.removedCards = removedCards
+    // },
+    // removeCardPermanent: (state, cardToRemove) => {
+    //   state.cards = state.cards.filter(card => card.id !== cardToRemove.id)
+    //   const fromRemovedCards = state.removedCards.find(card => card.id === cardToRemove.id)
+    //   if (fromRemovedCards) {
+    //     state.removedCards = state.removedCards.filter(card => card.id !== cardToRemove.id)
+    //     cache.updateSpace('removedCards', state.removedCards, state.id)
+    //   } else {
+    //     cache.updateSpace('cards', state.cards, state.id)
+    //   }
+    // },
+    // removeAllRemovedCardsPermanent: (state) => {
+    //   state.removedCards = []
+    //   cache.updateSpace('removedCards', state.removedCards, state.id)
+    // },
+    // restoreRemovedCard: (state, cardToRestore) => {
+    //   const index = state.removedCards.findIndex(card => card.id === cardToRestore.id)
+    //   const card = state.removedCards[index]
+    //   state.cards.push(card)
+    //   state.removedCards.splice(index, 1)
+    //   cache.updateSpace('cards', state.cards, state.id)
+    //   cache.updateSpace('removedCards', state.removedCards, state.id)
+    // },
 
     // Connections
 
@@ -675,7 +678,7 @@ export default {
       let cards = context.state.cards
       cards.forEach(card => {
         if (!card.name) {
-          context.dispatch('removeCard', card)
+          context.dispatch('currentCards/remove', card, { root: true })
         }
       })
     },
@@ -727,6 +730,7 @@ export default {
       connections = sortBy(connections, ['distanceFromOrigin'])
       // init space
       context.commit('currentCards/clear', null, { root: true })
+      context.dispatch('currentCards/updateSpaceId', space.id, { root: true })
       context.commit('currentConnections/clear', null, { root: true })
       space.cards = []
       space.connections = []
@@ -1101,7 +1105,7 @@ export default {
       context.commit('addToCardMap', card, { root: true })
     },
     repaceInCardName: (context, { cardId, match, replace }) => {
-      const card = context.getters.cardById(cardId)
+      const card = context.rootGetters['currentCards/byId'](cardId)
       const name = card.name.replace(match, replace)
       context.dispatch('updateCard', {
         id: cardId,
@@ -1152,7 +1156,7 @@ export default {
     toggleCardChecked (context, { cardId, value }) {
       utils.typeCheck({ value, type: 'boolean', origin: 'toggleCardChecked' })
       utils.typeCheck({ value: cardId, type: 'string', origin: 'toggleCardChecked' })
-      const card = context.getters.cardById(cardId)
+      const card = context.rootGetters['currentCards/byId'](cardId)
       let name = card.name
       const checkbox = utils.checkboxFromString(name)
       name = name.replace(checkbox, '')
@@ -1167,6 +1171,7 @@ export default {
         nameUpdatedAt: new Date()
       })
     },
+    // currentCards/clearAllZs
     // clearAllCardsZ: (context) => {
     //   let cards = context.state.cards
     //   cards.forEach(card => {
@@ -1177,6 +1182,7 @@ export default {
     //     context.commit('updateCard', body)
     //   })
     // },
+    // currentCards/incrementZ
     // incrementCardZ: (context, cardId) => {
     //   const maxInt = Number.MAX_SAFE_INTEGER - 1000
     //   let cards = context.state.cards
@@ -1193,48 +1199,54 @@ export default {
     //   context.dispatch('api/addToQueue', update, { root: true })
     //   context.commit('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
     // },
-    removeCard: (context, card) => {
-      const cardHasContent = Boolean(card.name)
-      if (cardHasContent) {
-        context.commit('removeCard', card)
-        const update = { name: 'removeCard', body: card }
-        context.dispatch('api/addToQueue', update, { root: true })
-        context.commit('undoHistory/add', update, { root: true })
-      } else {
-        context.dispatch('removeCardPermanent', card)
-      }
-      context.commit('broadcast/update', { updates: card, type: 'removeCard' }, { root: true })
-      context.dispatch('removeConnectionsFromCard', card)
-      context.commit('triggerUpdatePositionInVisualViewport', null, { root: true })
-      const cardIsUpdatedByCurrentUser = card.userId === context.rootState.currentUser.id
-      if (cardIsUpdatedByCurrentUser) {
-        context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-          delta: -1
-        }, { root: true })
-      }
-      if (!context.rootGetters['currentUser/cardsCreatedIsOverLimit']) {
-        context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
-      }
-      context.commit('removeFromCardMap', card, { root: true })
-    },
-    removeCardPermanent: (context, card) => {
-      context.commit('removeCardPermanent', card)
-      context.commit('removeTagsFromCard', card)
-      context.dispatch('api/addToQueue', { name: 'removeCardPermanent', body: card }, { root: true })
-    },
-    removeAllRemovedCardsPermanent: (context) => {
-      context.commit('removeTagsFromAllRemovedCardsPermanent')
-      context.commit('removeAllRemovedCardsPermanent')
-      context.dispatch('api/addToQueue', { name: 'removeAllRemovedCardsPermanentFromSpace', body: {} }, { root: true })
-    },
-    restoreRemovedCard: (context, card) => {
-      context.commit('restoreRemovedCard', card)
-      const update = { name: 'restoreRemovedCard', body: card }
-      context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('broadcast/update', { updates: card, type: 'restoreRemovedCard' }, { root: true })
-      context.commit('undoHistory/add', update, { root: true })
-      context.commit('addToCardMap', card, { root: true })
-    },
+    // currentCards/remove
+    // removeCard: (context, card) => {
+    //   const cardHasContent = Boolean(card.name)
+    //   if (cardHasContent) {
+    //     context.commit('remove', card)
+    //     const update = { name: 'removeCard', body: card }
+    //     context.dispatch('api/addToQueue', update, { root: true })
+    //     context.commit('undoHistory/add', update, { root: true })
+    //   } else {
+    //     context.dispatch('currentCards/removePermanent', card, { root: true })
+    //   }
+    //   context.commit('broadcast/update', { updates: card, type: 'removeCard' }, { root: true })
+    //   context.dispatch('removeConnectionsFromCard', card)
+    //   context.commit('triggerUpdatePositionInVisualViewport', null, { root: true })
+    //   const cardIsUpdatedByCurrentUser = card.userId === context.rootState.currentUser.id
+    //   if (cardIsUpdatedByCurrentUser) {
+    //     context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+    //       delta: -1
+    //     }, { root: true })
+    //   }
+    //   if (!context.rootGetters['currentUser/cardsCreatedIsOverLimit']) {
+    //     context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
+    //   }
+    //   context.commit('removeFromCardMap', card, { root: true })
+    // },
+
+    // currentCards/removePermanent
+    // removeCardPermanent: (context, card) => {
+    //   context.commit('removePermanent', card)
+    //   context.commit('removeTagsFromCard', card)
+    //   context.dispatch('api/addToQueue', { name: 'removeCardPermanent', body: card }, { root: true })
+    // },
+    // currentCards/removeAllRemovedPermanent
+    // removeAllRemovedCardsPermanent: (context) => {
+    //   context.commit('removeTagsFromAllRemovedCardsPermanent')
+    //   context.commit('removeAllRemovedCardsPermanent')
+    //   context.dispatch('api/addToQueue', { name: 'removeAllRemovedCardsPermanentFromSpace', body: {} }, { root: true })
+    // },
+    // currentCards/restoreRemoved
+    // restoreRemovedCard: (context, card) => {
+    //   context.commit('restoreRemovedCard', card)
+    //   const update = { name: 'restoreRemovedCard', body: card }
+    //   context.dispatch('api/addToQueue', update, { root: true })
+    //   context.commit('broadcast/update', { updates: card, type: 'restoreRemovedCard' }, { root: true })
+    //   context.commit('undoHistory/add', update, { root: true })
+    //   context.commit('addToCardMap', card, { root: true })
+    // },
+
     // currentCards/drag
     // dragCards: (context, { endCursor, prevCursor, delta }) => {
     //   const currentDraggingCardId = context.rootState.currentDraggingCardId
@@ -1256,7 +1268,7 @@ export default {
     //   } else {
     //     cardIds = [currentDraggingCardId]
     //   }
-    //   let cards = cardIds.map(cardId => context.getters.cardById(cardId))
+    //   let cards = cardIds.map(cardId => context.rootGetters['currentCards/byId'](cardId))
     //   // prevent cards bunching up at 0
     //   cards.forEach(card => {
     //     if (card.x === 0) { delta.x = Math.max(0, delta.x) }
@@ -1284,7 +1296,7 @@ export default {
       } else {
         cards = [currentDraggingCardId]
       }
-      cards = cards.map(cardId => context.getters.cardById(cardId))
+      cards = cards.map(cardId => context.rootGetters['currentCards/byId'](cardId))
       cards = cards.filter(card => card)
       cards.forEach(card => {
         const update = { name: 'updateCard',
@@ -1303,7 +1315,7 @@ export default {
       context.commit('updateConnectionPaths', connections)
       context.commit('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths' }, { root: true })
     },
-    // currentCard/incrementZIndexes
+    // currentCard/incrementZ
     // incrementSelectedCardsZ: (context) => {
     //   const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
     //   const currentDraggingCardId = context.rootState.currentDraggingCardId
@@ -1344,7 +1356,7 @@ export default {
 
     toggleCommentIsVisible: (context, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'toggleCommentIsVisible' })
-      const card = context.getters.cardById(cardId)
+      const card = context.rootGetters['currentCards/byId'](cardId)
       const value = !card.commentIsVisible
       context.dispatch('updateCard', {
         id: cardId,
@@ -1594,7 +1606,7 @@ export default {
       context.commit('remoteTagsIsFetched', false, { root: true })
     },
     removeUnusedTagsFromCard: (context, cardId) => {
-      const card = context.getters.cardById(cardId)
+      const card = context.rootGetters['currentCards/byId'](cardId)
       if (!card) { return }
       const cardTagNames = utils.tagsFromStringWithoutBrackets(card.name) || []
       const tagsInCard = context.getters.tagsInCard({ id: cardId })
@@ -1629,9 +1641,10 @@ export default {
     },
 
     // Cards
-    cardById: (state) => (id) => {
-      return state.cards.find(card => card.id === id)
-    },
+    // currentCards/byId
+    // cardById: (state) => (id) => {
+    //   return state.cards.find(card => card.id === id)
+    // },
     cardsWithSpaceLinks: (state) => {
       let cards = state.cards
       let links = cards.filter(card => utils.idIsValid(card.linkToSpaceId))

@@ -150,7 +150,7 @@ export default {
     },
     removeCards (cards) {
       cards.forEach(card => {
-        this.$store.dispatch('currentSpace/removeCard', card)
+        this.$store.dispatch('currentCards/remove', card)
         this.$store.dispatch('currentSpace/removeConnectionsFromCard', card)
       })
     },

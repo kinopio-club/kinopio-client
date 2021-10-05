@@ -230,7 +230,7 @@ export default {
   mounted () {
     if (this.shouldUpdateDimensions) {
       let card = { id: this.card.id }
-      // this.$store.dispatch('currentSpace/updateCard', card)
+      // this.$store.dispatch('currentCards/update', card)
       this.$store.dispatch('currentCards/update', card)
     }
   },
@@ -754,7 +754,7 @@ export default {
         id: this.card.id,
         name: utils.trim(name)
       })
-      // this.$store.dispatch('currentSpace/updateCard', {
+      // this.$store.dispatch('currentCards/update', {
       //   id: this.card.id,
       //   name: utils.trim(name)
       // })
@@ -973,7 +973,7 @@ export default {
     },
     removeCard () {
       if (this.canEditCard) {
-        this.$store.dispatch('currentSpace/removeCard', this.card)
+        this.$store.dispatch('currentCards/remove', this.card)
       }
     },
     closeAllDialogs () {

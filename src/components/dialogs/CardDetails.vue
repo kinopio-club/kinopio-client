@@ -281,6 +281,7 @@ export default {
         this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', this.card.id)
       } else if (mutation.type === 'cardDetailsIsVisibleForCardId') {
         const cardId = mutation.payload
+        if (!cardId) { return }
         prevCardId = cardId
         this.openCard(cardId)
       }
@@ -753,7 +754,7 @@ export default {
         })
         newCards.forEach(card => {
           card = utils.updateCardDimentions(card)
-          this.$store.dispatch('currentSpace/updateCard', {
+          this.$store.dispatch('currentCards/update', {
             id: card.id,
             y: card.y
           })
@@ -818,7 +819,7 @@ export default {
         id: this.card.id,
         name: `[] ${this.card.name}`
       }
-      this.$store.dispatch('currentSpace/updateCard', update)
+      this.$store.dispatch('currentCards/update', update)
     },
     updateCardName (newName) {
       const cardId = this.$store.state.cardDetailsIsVisibleForCardId
@@ -832,7 +833,7 @@ export default {
         nameUpdatedAt: new Date(),
         nameUpdatedByUserId: userId
       }
-      this.$store.dispatch('currentSpace/updateCard', card)
+      this.$store.dispatch('currentCards/update', card)
       this.$nextTick(() => {
         this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.card.id, shouldUpdateApi: true })
       })
@@ -859,7 +860,7 @@ export default {
           id: this.card.id,
           linkToSpaceId: null
         }
-        this.$store.dispatch('currentSpace/updateCard', update)
+        this.$store.dispatch('currentCards/update', update)
         return
       }
       if (!link) { return }
@@ -870,7 +871,7 @@ export default {
         id: this.card.id,
         linkToSpaceId
       }
-      this.$store.dispatch('currentSpace/updateCard', update)
+      this.$store.dispatch('currentCards/update', update)
       this.debouncedSaveOtherSpace(linkToSpaceId)
     },
     debouncedSaveOtherSpace: debounce(async function (linkToSpaceId) {
@@ -922,7 +923,7 @@ export default {
     },
     removeCard () {
       if (!this.canEditCard) { return }
-      this.$store.dispatch('currentSpace/removeCard', this.card)
+      this.$store.dispatch('currentCards/remove', this.card)
       this.$store.commit('cardDetailsIsVisibleForCardId', '')
       this.triggerUpdatePositionInVisualViewport()
     },
@@ -1384,7 +1385,7 @@ export default {
         urlPreviewErrorUrl: url,
         urlPreviewUrl: url
       }
-      this.$store.dispatch('currentSpace/updateCard', update)
+      this.$store.dispatch('currentCards/update', update)
     },
     debouncedUpdateUrlPreview: debounce(async function (url) {
       try {
@@ -1413,7 +1414,7 @@ export default {
         }
         const maxImageLength = 350
         if (data.image.length >= maxImageLength) { return }
-        this.$store.dispatch('currentSpace/updateCard', update)
+        this.$store.dispatch('currentCards/update', update)
       } catch (error) {
         console.warn('🚑', error, url)
         this.updateUrlPreviewErrorUrl(url)
@@ -1428,7 +1429,7 @@ export default {
         urlPreviewDescription: ''
       }
       this.$store.commit('removeUrlPreviewLoadingForCardIds', this.card.id)
-      this.$store.dispatch('currentSpace/updateCard', update)
+      this.$store.dispatch('currentCards/update', update)
     },
     toggleUrlPreviewIsVisible () {
       const value = !this.card.urlPreviewIsVisible
@@ -1436,7 +1437,7 @@ export default {
         id: this.card.id,
         urlPreviewIsVisible: value
       }
-      this.$store.dispatch('currentSpace/updateCard', update)
+      this.$store.dispatch('currentCards/update', update)
     },
     removeHiddenQueryString (url) {
       if (!url) { return }
@@ -1476,9 +1477,10 @@ export default {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
       this.$store.commit('shouldPreventNextEnterKey', false)
       const card = this.$store.getters['currentCards/byId'](cardId)
+      if (!card) { return }
       const cardHasName = Boolean(card.name)
       if (!cardHasName) {
-        this.$store.dispatch('currentSpace/removeCard', { id: cardId })
+        this.$store.dispatch('currentCards/remove', { id: cardId })
       }
       this.$store.dispatch('updatePageSizes')
       this.$nextTick(() => {

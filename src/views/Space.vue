@@ -348,7 +348,7 @@ export default {
       const isNormalized = uniq(zList).length === zList.length
       if (isNormalized) { return }
       sorted.forEach((card, index) => {
-        this.$store.dispatch('currentSpace/updateCard', { id: card.id, z: index })
+        this.$store.dispatch('currentCards/update', { id: card.id, z: index })
       })
     },
     addCard (position) {

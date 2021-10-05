@@ -495,7 +495,7 @@ export default {
 
     removeCardById (cardId) {
       const card = this.$store.getters['currentCards/byId'](cardId)
-      this.$store.dispatch('currentSpace/removeCard', card)
+      this.$store.dispatch('currentCards/remove', card)
     },
 
     clearAllSelectedCards () {
@@ -549,7 +549,7 @@ export default {
       const removedCards = this.$store.state.currentSpace.removedCards
       if (removedCards.length) {
         const card = removedCards[0]
-        this.$store.dispatch('currentSpace/restoreRemovedCard', card)
+        this.$store.dispatch('currentCards/restoreRemoved', card)
       }
     },
 
