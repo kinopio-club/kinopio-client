@@ -850,7 +850,7 @@ export default {
       if (!card) { return }
       card = utils.clone(card)
       card = utils.updateCardDimentions(card)
-      this.$store.commit('updateCardInCardMap', card)
+      this.$store.commit('currentCards/updateCardInCardMap', card)
     },
     updateSpaceLink () {
       let link = this.validUrls.filter(url => utils.urlIsSpace(url))[0]

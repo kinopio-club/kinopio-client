@@ -56,7 +56,7 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'currentSpace/restoreSpace') {
         this.updateMetaDescription()
-        this.debouncedUpdateCardMap()
+        // this.debouncedUpdateCardMap()
       }
     })
   },
@@ -145,15 +145,8 @@ export default {
       }
     },
     debouncedUpdateCardMap: debounce(async function () {
-      this.updateCardMap()
-    }, 500),
-    updateCardMap () {
-      const cards = this.$store.getters['currentCards/all']
-      const cardMap = cards.filter(card => {
-        return utils.isCardInViewport(card)
-      })
-      this.$store.commit('cardMap', cardMap)
-    }
+      this.$store.dispatch('currentCards/refreshCardMap')
+    }, 500)
   }
 }
 </script>

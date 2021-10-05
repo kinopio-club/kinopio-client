@@ -770,6 +770,7 @@ export default {
           } else if (chunk) {
             context.commit('currentCards/restore', chunk, { root: true })
           }
+          context.dispatch('currentCards/refreshCardMap', null, { root: true })
           // complete
           const isRestoreComplete = index === primaryChunks.length - 1
           if (isRestoreComplete) {
@@ -823,7 +824,6 @@ export default {
       isLoadingRemoteSpace = false
       context.commit('notifySpaceIsRemoved', false, { root: true })
       context.commit('spaceUrlToLoad', '', { root: true })
-      context.commit('cardMap', [], { root: true })
       context.commit('userHasScrolled', false, { root: true })
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       context.commit('clearAllNotifications', null, { root: true })
@@ -1055,7 +1055,7 @@ export default {
     //   }, { root: true })
     //   context.dispatch('checkIfShouldNotifyCardsCreatedIsNearLimit')
     //   context.dispatch('notifyCollaboratorsCardUpdated', { cardId: id, type: 'createCard' })
-    //   context.commit('addToCardMap', card, { root: true })
+    //   context.commit('currentCards/addToCardMap', card, { root: true })
     // },
     addMultipleCards: (context, newCards) => {
       newCards.forEach(card => {
@@ -1073,7 +1073,7 @@ export default {
         context.dispatch('api/addToQueue', update, { root: true })
         context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
         context.commit('undoHistory/add', update, { root: true })
-        context.commit('addToCardMap', card, { root: true })
+        context.commit('currentCards/addToCardMap', card, { root: true })
       })
     },
     // shim for history/playback
@@ -1107,7 +1107,7 @@ export default {
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         delta: 1
       }, { root: true })
-      context.commit('addToCardMap', card, { root: true })
+      context.commit('currentCards/addToCardMap', card, { root: true })
     },
     repaceInCardName: (context, { cardId, match, replace }) => {
       const card = context.rootGetters['currentCards/byId'](cardId)
@@ -1227,7 +1227,7 @@ export default {
     //   if (!context.rootGetters['currentUser/cardsCreatedIsOverLimit']) {
     //     context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
     //   }
-    //   context.commit('removeFromCardMap', card, { root: true })
+    //   context.commit('currentCards/removeFromCardMap', card, { root: true })
     // },
 
     // currentCards/removePermanent
@@ -1249,7 +1249,7 @@ export default {
     //   context.dispatch('api/addToQueue', update, { root: true })
     //   context.commit('broadcast/update', { updates: card, type: 'restoreRemovedCard' }, { root: true })
     //   context.commit('undoHistory/add', update, { root: true })
-    //   context.commit('addToCardMap', card, { root: true })
+    //   context.commit('currentCards/addToCardMap', card, { root: true })
     // },
 
     // currentCards/drag
@@ -1279,7 +1279,7 @@ export default {
     //     if (card.x === 0) { delta.x = Math.max(0, delta.x) }
     //     if (card.y === 0) { delta.y = Math.max(0, delta.y) }
     //     connections = connections.concat(context.getters.cardConnections(card.id))
-    //     context.commit('updateCardInCardMap', card, { root: true })
+    //     context.commit('currentCards/updateCardInCardMap', card, { root: true })
     //   })
     //   connections = uniqBy(connections, 'id')
     //   context.commit('moveCards', { cards, delta })

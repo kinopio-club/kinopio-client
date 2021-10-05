@@ -14,13 +14,15 @@ export default {
   state: {
     ids: [],
     cards: {},
-    removedCards: [] // denormalized
+    removedCards: [], // denormalized
+    cardMap: []
   },
   mutations: {
     clear: (state) => {
       state.ids = []
       state.cards = {}
       state.removedCards = []
+      state.cardMap = []
     },
     update: (state, card) => {
       if (card.x) {
@@ -110,6 +112,27 @@ export default {
         card.y = updated.y
       })
       cache.updateSpace('cards', state.cards, currentSpaceId)
+    },
+
+    // card map
+
+    cardMap: (state, cardMap) => {
+      utils.typeCheck({ value: cardMap, type: 'array', origin: 'cardMap' })
+      state.cardMap = cardMap
+    },
+    addToCardMap: (state, card) => {
+      state.cardMap.push(card)
+    },
+    removeFromCardMap: (state, card) => {
+      state.cardMap = state.cardMap.filter(prevCard => prevCard.id !== card.id)
+    },
+    updateCardInCardMap: (state, card) => {
+      state.cardMap = state.cardMap.map(prevCard => {
+        if (prevCard.id === card.id) {
+          return card
+        }
+        return prevCard
+      })
     }
 
   },
@@ -160,7 +183,6 @@ export default {
       context.commit('create', card)
 
       card.spaceId = currentSpaceId
-      // card = utils.clone(card)
       const update = { name: 'createCard', origin: 'currentCards/add', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
@@ -172,7 +194,7 @@ export default {
       }, { root: true })
       context.dispatch('currentSpace/checkIfShouldNotifyCardsCreatedIsNearLimit', null, { root: true })
       context.dispatch('currentSpace/notifyCollaboratorsCardUpdated', { cardId: id, type: 'createCard' }, { root: true })
-      context.commit('addToCardMap', card, { root: true })
+      context.commit('currentCards/addToCardMap', card, { root: true })
     },
 
     drag: (context, { endCursor, prevCursor, delta }) => {
@@ -206,7 +228,7 @@ export default {
         if (card.x === 0) { delta.x = Math.max(0, delta.x) }
         if (card.y === 0) { delta.y = Math.max(0, delta.y) }
         // connections = connections.concat(context.getters.cardConnections(card.id))
-        // context.commit('updateCardInCardMap', card, { root: true })
+        // context.commit('currentCards/updateCardInCardMap', card, { root: true })
       })
       // connections = uniqBy(connections, 'id')
       context.commit('move', { cards, delta, spaceId })
@@ -284,7 +306,7 @@ export default {
       if (!context.rootGetters['currentUser/cardsCreatedIsOverLimit']) {
         context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
       }
-      context.commit('removeFromCardMap', card, { root: true })
+      context.commit('currentCards/removeFromCardMap', card, { root: true })
     },
     removePermanent: (context, card) => {
       context.commit('removePermanent', card)
@@ -302,7 +324,17 @@ export default {
       context.dispatch('api/addToQueue', update, { root: true })
       context.commit('broadcast/update', { updates: card, type: 'restoreRemovedCard' }, { root: true })
       context.commit('undoHistory/add', update, { root: true })
-      context.commit('addToCardMap', card, { root: true })
+      context.commit('currentCards/addToCardMap', card, { root: true })
+    },
+
+    // card map
+
+    refreshCardMap: (context) => {
+      const cards = context.getters.all
+      const cardMap = cards.filter(card => {
+        return utils.isCardInViewport(card)
+      })
+      context.commit('cardMap', cardMap)
     }
 
   },

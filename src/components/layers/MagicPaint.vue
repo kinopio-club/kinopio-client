@@ -139,7 +139,6 @@ export default {
     pageWidth () { return this.$store.state.pageWidth },
     viewportHeight () { return this.$store.state.viewportHeight },
     viewportWidth () { return this.$store.state.viewportWidth },
-    cardMap () { return this.$store.state.cardMap },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     isPanning () { return this.$store.state.currentUserIsPanningReady }
@@ -408,7 +407,7 @@ export default {
     selectCards (point, shouldToggle) {
       if (this.userCantEditSpace) { return }
       const zoom = this.spaceCounterZoomDecimal
-      const cardMap = this.cardMap
+      const cardMap = this.$store.state.currentCards.cardMap
       cardMap.forEach(card => {
         const cardX = card.x
         const cardY = card.y
