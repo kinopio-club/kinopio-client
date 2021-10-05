@@ -15,7 +15,8 @@
 
 <script>
 import UserDetails from '@/components/dialogs/UserDetails.vue'
-import utils from '@/utils.js'
+
+let unsubscribe
 
 export default {
   name: 'User',
@@ -35,15 +36,15 @@ export default {
       userDetailsIsVisible: false
     }
   },
-  created () {
-    this.$store.subscribe((mutation, state) => {
+  mounted () {
+    unsubscribe = this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
-        const element = this.$refs.element
-        if (!element) { return }
-        const isVisible = utils.isElementInViewport(element)
-        if (!isVisible) { this.userDetailsIsVisible = false }
+        this.userDetailsIsVisible = false
       }
     })
+  },
+  beforeUnmount () {
+    unsubscribe()
   },
   computed: {
     isCurrentUser () {
