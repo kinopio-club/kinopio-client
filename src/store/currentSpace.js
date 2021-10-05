@@ -144,15 +144,16 @@ export default {
     //   cache.updateSpaceCardsDebounced(state.cards, state.id)
     // },
 
-    moveCardsBroadcast: (state, { cards, delta }) => {
-      cards.forEach(updated => {
-        const card = state.cards.find(card => card.id === updated.id)
-        if (!card) { return }
-        card.x = updated.x
-        card.y = updated.y
-      })
-      cache.updateSpace('cards', state.cards, state.id)
-    },
+    // currentCardse/moveBroadcast
+    // moveCardsBroadcast: (state, { cards, delta }) => {
+    //   cards.forEach(updated => {
+    //     const card = state.cards.find(card => card.id === updated.id)
+    //     if (!card) { return }
+    //     card.x = updated.x
+    //     card.y = updated.y
+    //   })
+    //   cache.updateSpace('cards', state.cards, state.id)
+    // },
     // currentCards/create
     // createCard: (state, card) => {
     //   state.cards.push(card)

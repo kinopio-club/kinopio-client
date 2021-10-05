@@ -156,7 +156,7 @@ export default function createWebSocketPlugin () {
           } else if (message === 'updateConnectionPaths') {
             store.commit('currentSpace/updateConnectionPathsBroadcast', updates)
           } else if (message === 'moveCards') {
-            store.commit('currentSpace/moveCardsBroadcast', updates)
+            store.commit('currentCards/moveBroadcast', updates)
           // other
           } else if (data.type === 'store') {
             store.commit(`${message}`, updates)

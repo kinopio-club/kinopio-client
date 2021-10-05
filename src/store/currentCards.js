@@ -55,7 +55,8 @@ export default {
       cache.updateSpaceCardsDebounced(state.cards, currentSpaceId)
     },
 
-    // cards
+    // remove
+
     remove: (state, cardToRemove) => {
       const card = state.cards[cardToRemove.id]
       state.ids = state.ids.filter(id => id !== card.id)
@@ -97,7 +98,20 @@ export default {
       // update removed
       state.removedCards.splice(index, 1)
       cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
+    },
+
+    // broadcast
+
+    moveBroadcast: (state, { cards, delta }) => {
+      cards.forEach(updated => {
+        const card = state.cards[updated.id]
+        if (!card) { return }
+        card.x = updated.x
+        card.y = updated.y
+      })
+      cache.updateSpace('cards', state.cards, currentSpaceId)
     }
+
   },
   actions: {
     updateSpaceId: (context, spaceId) => {
