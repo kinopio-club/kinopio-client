@@ -282,7 +282,7 @@ export default {
       const path = utils.connectionPathBetweenCoords(start, end)
       this.checkCurrentConnectionSuccess()
       this.currentConnectionPath = path
-      const connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
+      const connectionType = this.$store.getters['currentConnections/typeForNewConnections']
       this.currentConnectionColor = connectionType.color
       this.$store.commit('currentConnectionColor', connectionType.color)
       const updates = {
@@ -317,7 +317,7 @@ export default {
       }
     },
     addConnection (connection) {
-      const type = this.$store.getters['currentSpace/connectionTypeForNewConnections']
+      const type = this.$store.getters['currentConnections/typeForNewConnections']
       this.$store.dispatch('currentConnections/add', { connection, type })
     },
     createConnection () {

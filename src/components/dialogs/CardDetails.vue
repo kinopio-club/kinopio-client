@@ -1464,7 +1464,7 @@ export default {
       })
       this.previousSelectedTag = {}
       this.updateMediaUrls()
-      const connections = this.$store.getters['currentSpace/cardConnections'](cardId)
+      const connections = this.$store.getters['currentConnections/byCardId'](cardId)
       this.$store.commit('updateCurrentCardConnections', connections)
     },
     closeCard () {

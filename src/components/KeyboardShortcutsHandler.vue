@@ -345,7 +345,7 @@ export default {
     },
 
     addConnectionType () {
-      const hasConnectionType = Boolean(this.$store.getters['currentSpace/connectionTypeForNewConnections'])
+      const hasConnectionType = Boolean(this.$store.getters['currentConnections/typeForNewConnections'])
       const shouldUseLastConnectionType = this.$store.state.currentUser.shouldUseLastConnectionType
       if ((shouldUseLastConnectionType || useSiblingConnectionType) && hasConnectionType) { return }
       this.$store.dispatch('currentSpace/addConnectionType')
@@ -369,7 +369,7 @@ export default {
         path: utils.connectionBetweenCards(baseCardId, currentCardId)
       }
       this.addConnectionType()
-      const type = this.$store.getters['currentSpace/connectionTypeForNewConnections']
+      const type = this.$store.getters['currentConnections/typeForNewConnections']
       this.$store.dispatch('currentConnections/add', { connection, type })
     },
 
@@ -516,7 +516,7 @@ export default {
 
     canEditConnectionById (connectionId) {
       const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
-      const connection = this.$store.getters['currentSpace/connectionById'](connectionId)
+      const connection = this.$store.getters['currentConnections/byId'](connectionId)
       const connectionIsCreatedByCurrentUser = this.$store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (isSpaceMember) { return true }
@@ -529,7 +529,7 @@ export default {
       const cardIds = this.focusedCardIds()
       selectedConnectionIds.forEach(connectionId => {
         if (this.canEditConnectionById(connectionId)) {
-          const connection = this.$store.getters['currentSpace/connectionById'](connectionId)
+          const connection = this.$store.getters['currentConnections/byId'](connectionId)
           this.$store.dispatch('currentConnections/remove', connection)
         }
       })

@@ -10,7 +10,6 @@ import { nextTick } from 'vue'
 import randomColor from 'randomcolor'
 import nanoid from 'nanoid'
 import random from 'lodash-es/random'
-import last from 'lodash-es/last'
 import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
 import sortBy from 'lodash-es/sortBy'
@@ -1034,7 +1033,6 @@ export default {
 
     // Cards
 
-    // TODO POST THIS to currentCards
     // currentCards/add
     // addCard: (context, { position, isParentCard, name, id }) => {
     //   utils.typeCheck({ value: position, type: 'object', origin: 'addCard' })
@@ -1073,6 +1071,7 @@ export default {
     //   context.dispatch('notifyCollaboratorsCardUpdated', { cardId: id, type: 'createCard' })
     //   context.commit('currentCards/addToCardMap', card, { root: true })
     // },
+    // currentCards/addMultiple
     addMultipleCards: (context, newCards) => {
       newCards.forEach(card => {
         card = {
@@ -1327,7 +1326,7 @@ export default {
           }
         }
         context.dispatch('api/addToQueue', update, { root: true })
-        connections = connections.concat(context.getters.cardConnections(card.id))
+        connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
       })
       connections = uniqBy(connections, 'id')
       context.commit('currentConnections/updatePaths', connections, { root: true })
@@ -1717,36 +1716,42 @@ export default {
     //   return Boolean(existing.length)
     // },
     // byCardId
-    cardConnections: (state) => (cardId) => {
-      return state.connections.filter(connection => {
-        let start = connection.startCardId === cardId
-        let end = connection.endCardId === cardId
-        return start || end
-      })
-    },
+    // cardConnections: (state) => (cardId) => {
+    //   return state.connections.filter(connection => {
+    //     let start = connection.startCardId === cardId
+    //     let end = connection.endCardId === cardId
+    //     return start || end
+    //   })
+    // },
 
-    connectionById: (state) => (id) => {
-      return state.connections.find(connection => connection.id === id)
-    },
+    // byId
+    // connectionById: (state) => (id) => {
+    //   return state.connections.find(connection => connection.id === id)
+    // },
 
     // Connection Types
-    connectionTypeById: (state) => (id) => {
-      return state.connectionTypes.find(type => type.id === id)
-    },
-    lastConnectionType: (state) => {
-      return last(state.connectionTypes)
-    },
-    cardConnectionTypes: (state, getters) => (cardId) => {
-      const connections = getters.cardConnections(cardId)
-      const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
-      return state.connectionTypes.filter(type => {
-        return connectionTypeIds.includes(type.id)
-      })
-    },
-    connectionTypeForNewConnections: (state, getters, rootState) => {
-      const lastConnectionType = getters.lastConnectionType
-      return lastConnectionType
-    },
+    // typeById
+    // connectionTypeById: (state) => (id) => {
+    //   return state.connectionTypes.find(type => type.id === id)
+    // },
+    // lastConnectionType: (state) => {
+    //   return last(state.connectionTypes)
+    // },
+    // allTypes
+    // cardConnectionTypes: (state, getters) => (cardId) => {
+    //   const connections = [] // getters.byCardId(cardId) //
+    //   const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
+    //   return state.connectionTypes.filter(type => {
+    //     return connectionTypeIds.includes(type.id)
+    //   })
+    // },
+
+    // typeForNewConnections
+    // connectionTypeForNewConnections: (state, getters, rootState) => {
+    //   // last(state.connectionTypes)
+    //   const lastConnectionType = getters.lastConnectionType
+    //   return lastConnectionType
+    // },
 
     // Users
     members: (state, getters, rootState) => (excludeCurrentUser) => {

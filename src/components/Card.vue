@@ -285,7 +285,7 @@ export default {
     y () { return this.card.y },
     z () { return this.card.z },
     commentIsVisible () { return this.card.commentIsVisible },
-    connectionTypes () { return this.$store.getters['currentSpace/cardConnectionTypes'](this.id) },
+    connectionTypes () { return this.$store.getters['currentConnections/allTypes'] },
     // this.$store.dispatch('currentCards/update', card)
 
     newConnectionColor () { return this.$store.state.currentConnectionColor },
@@ -349,7 +349,7 @@ export default {
     },
     connectedToConnectionDetailsIsVisibleColor () {
       const connectionId = this.$store.state.connectionDetailsIsVisibleForConnectionId
-      const connection = this.$store.getters['currentSpace/connectionById'](connectionId)
+      const connection = this.$store.getters['currentConnections/byId'](connectionId)
       if (!connection) { return }
       const isConnected = connection.startCardId === this.id || connection.endCardId === this.id
       if (!isConnected) { return }
@@ -650,7 +650,7 @@ export default {
       }
     },
     hasConnections () {
-      const connections = this.$store.getters['currentSpace/cardConnections'](this.id)
+      const connections = this.$store.getters['currentConnections/byCardId'](this.id)
       return Boolean(connections.length)
     },
 
@@ -989,7 +989,7 @@ export default {
     addConnectionType (event) {
       const shouldUseLastConnectionType = this.$store.state.currentUser.shouldUseLastConnectionType
       const shiftKey = event.shiftKey
-      const connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
+      const connectionType = this.$store.getters['currentConnections/typeForNewConnections']
       if (!connectionType) {
         this.$store.dispatch('currentSpace/addConnectionType')
       }

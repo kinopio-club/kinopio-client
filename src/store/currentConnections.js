@@ -3,6 +3,7 @@ import cache from '@/cache.js'
 
 import nanoid from 'nanoid'
 import randomColor from 'randomcolor'
+import last from 'lodash-es/last'
 
 // import debounce from 'lodash-es/debounce'
 
@@ -247,7 +248,6 @@ export default {
         context.dispatch('removeType', type)
       })
     }
-
   },
   getters: {
     byId: (state) => (id) => {
@@ -263,7 +263,6 @@ export default {
     allTypes: (state) => {
       return state.typeIds.map(id => state.types[id])
     },
-
     isExistingPath: (state, getters) => ({ startCardId, endCardId }) => {
       const connections = getters.all
       const existing = connections.filter(connection => {
@@ -273,7 +272,6 @@ export default {
       })
       return Boolean(existing.length)
     },
-
     byCardId: (state, getters) => (cardId) => {
       const connections = getters.all
       return connections.filter(connection => {
@@ -281,7 +279,10 @@ export default {
         let end = connection.endCardId === cardId
         return start || end
       })
+    },
+    typeForNewConnections: (state, getters, rootState) => {
+      const typeId = last(state.typeIds)
+      return state.types[typeId]
     }
-    // TODO port currentspace connection/type getters
   }
 }

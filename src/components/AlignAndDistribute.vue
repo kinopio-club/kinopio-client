@@ -81,7 +81,7 @@ export default {
     },
     connections () {
       return this.multipleConnectionsSelectedIds.map(id => {
-        return this.$store.getters['currentSpace/connectionById'](id)
+        return this.$store.getters['currentConnections/byId'](id)
       })
     },
     canEditAll () {

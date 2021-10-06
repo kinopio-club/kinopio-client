@@ -151,7 +151,7 @@ export default {
     connectionsIsSelected () { return Boolean(this.multipleConnectionsSelectedIds.length) },
     connections () {
       return this.multipleConnectionsSelectedIds.map(id => {
-        return this.$store.getters['currentSpace/connectionById'](id)
+        return this.$store.getters['currentConnections/byId'](id)
       })
     },
     editableConnections () {
@@ -166,7 +166,7 @@ export default {
     },
     connectionTypes () {
       const connectionTypes = uniq(this.multipleConnectionsSelectedIds.map(id => {
-        const connection = this.$store.getters['currentSpace/connectionById'](id)
+        const connection = this.$store.getters['currentConnections/byId'](id)
         return this.$store.getters['currentConnections/typeById'](connection.connectionTypeId)
       }))
       return connectionTypes
