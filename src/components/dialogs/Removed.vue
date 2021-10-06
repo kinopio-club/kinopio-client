@@ -188,7 +188,7 @@ export default {
       this.updateRemovedCards()
     },
     updateLocalRemovedCards () {
-      this.removedCards = this.$store.state.currentSpace.removedCards
+      this.removedCards = this.$store.state.currentCards.removedCards
     },
     updateRemovedCards () {
       this.updateLocalRemovedCards()
@@ -202,7 +202,7 @@ export default {
       this.loading.cards = false
       if (!utils.arrayExists(remoteCards)) { return }
       this.removedCards = remoteCards
-      this.$store.commit('currentSpace/removedCards', remoteCards)
+      this.$store.commit('currentCards/removedCards', remoteCards)
     },
     restoreCard (card) {
       this.$store.dispatch('currentCards/restoreRemoved', card)

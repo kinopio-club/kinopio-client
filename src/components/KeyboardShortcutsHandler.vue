@@ -546,7 +546,7 @@ export default {
     // Undo
 
     restoreLastRemovedCard () {
-      const removedCards = this.$store.state.currentSpace.removedCards
+      const removedCards = this.$store.state.currentCards.removedCards
       if (removedCards.length) {
         const card = removedCards[0]
         this.$store.dispatch('currentCards/restoreRemoved', card)
