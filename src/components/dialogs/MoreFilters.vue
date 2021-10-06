@@ -64,7 +64,7 @@ export default {
   },
   computed: {
     connectionTypes () {
-      return utils.clone(this.$store.state.currentSpace.connectionTypes)
+      return utils.clone(this.$store.getters['currentConnections/allTypes'])
     },
     frames () {
       const cards = utils.clone(this.$store.getters['currentCards/all'])

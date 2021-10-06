@@ -116,7 +116,10 @@ export default function createWebSocketPlugin () {
           console.warn('🌌', event)
           store.commit('isReconnectingToBroadcast', true)
         }
-        // receive
+        // receive 🌜
+
+        // TODO websockets send mutation handlers (eg 'currentCards/xyz', replaces need for this unwieldly if/else chain)
+
         websocket.onmessage = ({ data }) => {
           data = JSON.parse(data)
           if (data.clientId === clientId) { return }
@@ -154,9 +157,11 @@ export default function createWebSocketPlugin () {
             store.commit('triggerUpdateStopRemoteUserDropGuideLine', updates)
           // cards and connections
           } else if (message === 'updateConnectionPaths') {
-            store.commit('currentSpace/updateConnectionPathsBroadcast', updates)
+            store.commit('currentConnections/updatePaths', updates)
           } else if (message === 'moveCards') {
             store.commit('currentCards/moveBroadcast', updates)
+          } else if (message === 'updateConnectionPaths') {
+            store.commit('currentConnections/updatePathsBroadcast', updates)
           // other
           } else if (data.type === 'store') {
             store.commit(`${message}`, updates)
@@ -168,7 +173,8 @@ export default function createWebSocketPlugin () {
         }
       }
 
-      // send
+      // send 🌛
+
       if (mutation.type === 'broadcast/joinSpaceRoom') {
         if (!currentUserIsConnected) {
           store.commit('broadcast/connect')

@@ -18,12 +18,31 @@ export default {
     cardMap: []
   },
   mutations: {
+
+    // init
+
     clear: (state) => {
       state.ids = []
       state.cards = {}
       state.removedCards = []
       state.cardMap = []
     },
+    create: (state, card) => {
+      state.ids.push(card.id)
+      state.cards[card.id] = card
+      cache.updateSpace('cards', state.cards, currentSpaceId)
+    },
+    restore: (state, cards) => {
+      let cardIds = []
+      cards.forEach(card => {
+        cardIds.push(card.id)
+        state.cards[card.id] = card
+      })
+      state.ids = state.ids.concat(cardIds)
+    },
+
+    // update
+
     update: (state, card) => {
       if (card.x) {
         card.x = Math.round(card.x)
@@ -36,18 +55,6 @@ export default {
         state.cards[card.id][key] = card[key]
       })
       cache.updateSpaceCardsDebounced(state.cards, currentSpaceId)
-    },
-    create: (state, card) => {
-      state.ids.push(card.id)
-      state.cards[card.id] = card
-    },
-    restore: (state, cards) => {
-      let cardIds = []
-      cards.forEach(card => {
-        cardIds.push(card.id)
-        state.cards[card.id] = card
-      })
-      state.ids = state.ids.concat(cardIds)
     },
     move: (state, { cards, delta, spaceId }) => {
       cards.forEach(card => {
@@ -62,10 +69,8 @@ export default {
     remove: (state, cardToRemove) => {
       const card = state.cards[cardToRemove.id]
       state.ids = state.ids.filter(id => id !== card.id)
-      // state.cards = state.cards.filter(id => id !== card.id)
       delete state.cards[card.id]
       state.removedCards.unshift(card)
-      // const spaceId =
       cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
       cache.updateSpace('cards', state.cards, currentSpaceId)
     },
@@ -137,26 +142,15 @@ export default {
 
   },
   actions: {
+
+    // init
+
     updateSpaceId: (context, spaceId) => {
       currentSpaceId = spaceId
     },
-    update: (context, card) => {
-      // prevent null position
-      const keys = Object.keys(card)
-      if (keys.includes('x') || keys.includes('y')) {
-        if (!card.x) {
-          delete card.x
-        }
-        if (!card.y) {
-          delete card.y
-        }
-      }
-      context.commit('update', card)
-      const update = { name: 'updateCard', origin: 'currentCards/update', body: card }
-      context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('broadcast/update', { updates: card, type: 'updateCard' }, { root: true })
-      context.commit('undoHistory/add', update, { root: true })
-    },
+
+    // create
+
     add: (context, { position, isParentCard, name, id }) => {
       utils.typeCheck({ value: position, type: 'object', origin: 'addCard' })
       if (context.rootGetters['currentSpace/shouldPreventAddCard']) {
@@ -183,10 +177,9 @@ export default {
       context.commit('create', card)
 
       card.spaceId = currentSpaceId
-      const update = { name: 'createCard', origin: 'currentCards/add', body: card }
+      const update = { name: 'createCard', mutation: 'currentCards/add', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
-      context.commit('undoHistory/add', update, { root: true })
+      context.dispatch('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
 
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
@@ -194,9 +187,27 @@ export default {
       }, { root: true })
       context.dispatch('currentSpace/checkIfShouldNotifyCardsCreatedIsNearLimit', null, { root: true })
       context.dispatch('currentSpace/notifyCollaboratorsCardUpdated', { cardId: id, type: 'createCard' }, { root: true })
-      context.commit('currentCards/addToCardMap', card, { root: true })
+      context.commit('addToCardMap', card)
     },
 
+    // update
+
+    update: (context, card) => {
+      // prevent null position
+      const keys = Object.keys(card)
+      if (keys.includes('x') || keys.includes('y')) {
+        if (!card.x) {
+          delete card.x
+        }
+        if (!card.y) {
+          delete card.y
+        }
+      }
+      context.commit('update', card)
+      const update = { name: 'updateCard', mutation: 'currentCards/update', body: card }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.dispatch('broadcast/update', { updates: card, type: 'updateCard' }, { root: true })
+    },
     drag: (context, { endCursor, prevCursor, delta }) => {
       const spaceId = context.rootState.currentSpace.id
       const currentDraggingCardId = context.rootState.currentDraggingCardId
@@ -228,14 +239,14 @@ export default {
         if (card.x === 0) { delta.x = Math.max(0, delta.x) }
         if (card.y === 0) { delta.y = Math.max(0, delta.y) }
         // connections = connections.concat(context.getters.cardConnections(card.id))
-        // context.commit('currentCards/updateCardInCardMap', card, { root: true })
+        // context.commit('updateCardInCardMap', card)
       })
       // connections = uniqBy(connections, 'id')
       context.commit('move', { cards, delta, spaceId })
       context.commit('cardsWereDragged', true, { root: true })
-      // context.commit('updateConnectionPaths', connections)
-      context.commit('broadcast/update', { updates: { cards, delta }, type: 'moveCards' }, { root: true })
-      // context.commit('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths' }, { root: true })
+      // context.commit('currentConnections/updatePaths', connections, { root: true })
+      context.dispatch('broadcast/update', { updates: { cards, delta }, type: 'moveCards' }, { root: true })
+      // context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths' }, { root: true })
       // connections.forEach(connection => {
       //   context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
       // })
@@ -261,7 +272,7 @@ export default {
         const update = { name: 'updateCard', body }
         context.commit('update', body)
         context.dispatch('api/addToQueue', update, { root: true })
-        context.commit('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
+        context.dispatch('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
       })
     },
     incrementZ: (context, id) => {
@@ -279,7 +290,7 @@ export default {
       if (!userCanEdit) { return }
       const update = { name: 'updateCard', body }
       context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
+      context.dispatch('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
     },
 
     // remove
@@ -288,14 +299,13 @@ export default {
       const cardHasContent = Boolean(card.name)
       if (cardHasContent) {
         context.commit('remove', card)
-        const update = { name: 'removeCard', origin: 'currentCards/remove', body: card }
+        const update = { name: 'removeCard', mutation: 'currentCards/remove', body: card }
         context.dispatch('api/addToQueue', update, { root: true })
-        context.commit('undoHistory/add', update, { root: true })
       } else {
         context.dispatch('removePermanent', card)
       }
-      context.commit('broadcast/update', { updates: card, type: 'removeCard' }, { root: true })
-      // context.dispatch('removeConnectionsFromCard', card)
+      context.dispatch('broadcast/update', { updates: card, type: 'removeCard' }, { root: true })
+      // context.dispatch('currentConnections/removeFromCard', card)
       context.commit('triggerUpdatePositionInVisualViewport', null, { root: true })
       const cardIsUpdatedByCurrentUser = card.userId === context.rootState.currentUser.id
       if (cardIsUpdatedByCurrentUser) {
@@ -320,10 +330,9 @@ export default {
     },
     restoreRemoved: (context, card) => {
       context.commit('restoreRemovedCard', card)
-      const update = { name: 'restoreRemovedCard', origin: 'currentCards/restoreRemoved', body: card }
+      const update = { name: 'restoreRemovedCard', mutation: 'currentCards/restoreRemoved', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('broadcast/update', { updates: card, type: 'restoreRemovedCard' }, { root: true })
-      context.commit('undoHistory/add', update, { root: true })
+      context.dispatch('broadcast/update', { updates: card, type: 'restoreRemovedCard' }, { root: true })
       context.commit('currentCards/addToCardMap', card, { root: true })
     },
 
@@ -336,6 +345,8 @@ export default {
       })
       context.commit('cardMap', cardMap)
     }
+
+    // TODO port/group rest of currentspace card actions
 
   },
   getters: {

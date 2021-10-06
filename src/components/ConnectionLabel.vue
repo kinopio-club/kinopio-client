@@ -38,7 +38,7 @@ export default {
     visible () { return this.connection.labelIsVisible },
     id () { return this.connection.id },
     connectionTypeId () { return this.connection.connectionTypeId },
-    connectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.connectionTypeId) },
+    connectionType () { return this.$store.getters['currentConnections/typeById'](this.connectionTypeId) },
     typeColor () {
       if (this.connectionType) {
         return this.connectionType.color

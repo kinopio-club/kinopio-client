@@ -151,7 +151,7 @@ export default {
     removeCards (cards) {
       cards.forEach(card => {
         this.$store.dispatch('currentCards/remove', card)
-        this.$store.dispatch('currentSpace/removeConnectionsFromCard', card)
+        this.$store.dispatch('currentConnections/removeFromCard', card)
       })
     },
     notifySuccess () {
@@ -167,18 +167,23 @@ export default {
       this.$store.commit('notifyMoveOrCopyToSpace', true)
     },
     selectedItems () {
-      const currentSpace = utils.clone(this.$store.state.currentSpace)
+      // const currentSpace = utils.clone(this.$store.state.currentSpace)
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
-      const cards = currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
-      const connections = currentSpace.connections.filter(connection => {
+
+      // let cards = []
+      const cards = multipleCardsSelectedIds.map(id => this.$store.getters.currentCards.byId(id))
+
+      // const cards = currentSpace.cards.filter(card => multipleCardsSelectedIds.includes(card.id))
+      const connections = this.$store.getters.currentConnections.all.filter(connection => {
         const isStartCardMatch = multipleCardsSelectedIds.includes(connection.startCardId)
         const isEndCardMatch = multipleCardsSelectedIds.includes(connection.endCardId)
         return isStartCardMatch && isEndCardMatch
       })
       const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
-      const connectionTypes = currentSpace.connectionTypes.filter(type => {
-        return connectionTypeIds.includes(type.id)
-      })
+      const connectionTypes = connectionTypeIds.map(id => this.$store.getters.currentConnections.byTypeId(id))
+      // currentSpace.connectionTypes.filter(type => {
+      //   return connectionTypeIds.includes(type.id)
+      // })
       return { cards, connectionTypes, connections }
     },
 

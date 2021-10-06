@@ -369,8 +369,8 @@ export default {
         path: utils.connectionBetweenCards(baseCardId, currentCardId)
       }
       this.addConnectionType()
-      const connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
-      this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
+      const type = this.$store.getters['currentSpace/connectionTypeForNewConnections']
+      this.$store.dispatch('currentConnections/add', { connection, type })
     },
 
     // Keyboard Arrows
@@ -530,7 +530,7 @@ export default {
       selectedConnectionIds.forEach(connectionId => {
         if (this.canEditConnectionById(connectionId)) {
           const connection = this.$store.getters['currentSpace/connectionById'](connectionId)
-          this.$store.dispatch('currentSpace/removeConnection', connection)
+          this.$store.dispatch('currentConnections/remove', connection)
         }
       })
       cardIds.forEach(cardId => {

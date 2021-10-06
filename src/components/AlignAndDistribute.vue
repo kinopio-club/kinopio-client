@@ -468,7 +468,7 @@ export default {
         const multipleConnectionsSelectedIds = utils.clone(this.multipleConnectionsSelectedIds)
         this.$store.commit('clearMultipleSelected')
         multipleCardsSelectedIds.forEach(cardId => {
-          this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId, shouldUpdateApi: true })
+          this.$store.dispatch('currentConnections/updatePaths', { cardId, shouldUpdateApi: true })
         })
         this.$store.commit('multipleCardsSelectedIds', multipleCardsSelectedIds)
         this.$store.commit('multipleConnectionsSelectedIds', multipleConnectionsSelectedIds)

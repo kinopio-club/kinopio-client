@@ -24,6 +24,10 @@ const self = {
         reconnectAttempts += 1
         reconnectTime = 5000 * reconnectAttempts // 5 seconds * n
       }, Math.min(reconnectTime, maxTime))
+    },
+    update: (context, update) => {
+      context.commit('undoHistory/add', update, { root: true })
+      context.commit('update', update)
     }
   }
 }

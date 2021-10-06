@@ -35,14 +35,14 @@ export default {
   },
   computed: {
     connectionTypes () {
-      return this.$store.state.currentSpace.connectionTypes
+      return this.$store.getters['currentConnections/allTypes']
     }
   },
   methods: {
     changeConnectionTypes (type) {
       this.selectedConnections.forEach(connection => {
-        this.$store.dispatch('currentSpace/updateConnectionTypeForConnection', {
-          connectionId: connection.id,
+        this.$store.dispatch('currentConnections/update', {
+          id: connection.id,
           connectionTypeId: type.id
         })
       })

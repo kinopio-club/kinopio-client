@@ -91,8 +91,8 @@ export default {
   computed: {
     visible () { return Boolean(this.$store.state.connectionDetailsIsVisibleForConnectionId) },
     labelIsVisible () { return this.currentConnection.labelIsVisible },
-    currentConnectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.currentConnection.connectionTypeId) },
-    connectionTypes () { return this.$store.state.currentSpace.connectionTypes },
+    currentConnectionType () { return this.$store.getters['currentConnections/typeById'](this.currentConnection.connectionTypeId) },
+    connectionTypes () { return this.$store.getters['currentConnections/allTypes'] },
     typeColor () { return this.currentConnectionType.color },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
@@ -115,10 +115,8 @@ export default {
       }
     },
     currentConnection () {
-      let connections = this.$store.state.currentSpace.connections
-      return connections.find(connection => {
-        return connection.id === this.$store.state.connectionDetailsIsVisibleForConnectionId
-      })
+      const id = this.$store.state.connectionDetailsIsVisibleForConnectionId
+      return this.$store.getters['currentConnections/byId'](id)
     },
     canEditConnection () {
       const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
@@ -183,21 +181,21 @@ export default {
       return Boolean(type.id === this.currentConnection.connectionTypeId)
     },
     removeConnection () {
-      this.$store.dispatch('currentSpace/removeConnection', this.currentConnection)
+      this.$store.dispatch('currentConnections/remove', this.currentConnection)
       this.$store.dispatch('closeAllDialogs', 'ConnectionDetails.removeConnection')
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
     },
     changeConnectionType (type) {
-      this.$store.dispatch('currentSpace/updateConnectionTypeForConnection', {
-        connectionId: this.currentConnection.id,
+      this.$store.dispatch('currentConnections/update', {
+        id: this.currentConnection.id,
         connectionTypeId: type.id
       })
-      this.$store.commit('currentSpace/reorderConnectionTypeToLast', type)
+      this.$store.commit('currentSpace/reorderTypeToEnd', type)
     },
     toggleLabelIsVisible () {
       const newValue = !this.labelIsVisible
-      this.$store.dispatch('currentSpace/updateLabelIsVisibleForConnection', {
-        connectionId: this.currentConnection.id,
+      this.$store.dispatch('currentConnections/update', {
+        id: this.currentConnection.id,
         labelIsVisible: newValue
       })
     },
@@ -284,7 +282,7 @@ export default {
         if (this.visible) {
           this.colorPickerIsVisible = false
           this.scrollIntoViewAndFocus()
-          this.$store.commit('currentSpace/reorderConnectionTypeToLast', this.currentConnectionType)
+          this.$store.commit('currentSpace/reorderTypeToEnd', this.currentConnectionType)
         } else {
           this.$store.commit('shouldHideConnectionOutline', false)
         }

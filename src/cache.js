@@ -81,7 +81,8 @@ export default {
       console.warn('🚑 could not updateSpace cache because cachedSpace does not exist')
       return
     }
-    if (key === 'cards') {
+    const normalizeKeys = ['cards', 'connections', 'connectionTypes']
+    if (normalizeKeys.includes(key)) {
       value = utils.denormalizeCards(value)
     }
     space[key] = value

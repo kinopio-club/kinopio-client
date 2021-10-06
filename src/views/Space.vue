@@ -106,7 +106,7 @@ export default {
 
     document.fonts.ready.then(event => {
       this.$store.commit('webfontIsLoaded', true)
-      this.updateIncorrectCardConnectionPaths()
+      this.correctCardConnectionPaths()
     })
     if (utils.isAndroid()) {
       this.$store.commit('addNotification', { message: 'Android is currenly only partially supported. You may experience scrolling issues', type: 'danger' })
@@ -170,11 +170,11 @@ export default {
     updateVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
-    updateIncorrectCardConnectionPaths () {
+    correctCardConnectionPaths () {
       const space = utils.clone(this.$store.state.currentSpace)
       const user = utils.clone(this.$store.state.currentUser)
       const currentSpaceIsRemote = utils.currentSpaceIsRemote(space, user)
-      this.$store.dispatch('currentSpace/updateIncorrectCardConnectionPaths', { shouldUpdateApi: currentSpaceIsRemote })
+      this.$store.dispatch('currentConnections/correctPaths', { shouldUpdateApi: currentSpaceIsRemote })
     },
     loadSpaceOnBackOrForward (event) {
       const url = window.location.href
@@ -317,8 +317,8 @@ export default {
       }
     },
     addConnection (connection) {
-      const connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
-      this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
+      const type = this.$store.getters['currentSpace/connectionTypeForNewConnections']
+      this.$store.dispatch('currentConnections/add', { connection, type })
     },
     createConnection () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess

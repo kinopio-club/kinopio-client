@@ -835,7 +835,7 @@ export default {
       }
       this.$store.dispatch('currentCards/update', card)
       this.$nextTick(() => {
-        this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.card.id, shouldUpdateApi: true })
+        this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
       })
       this.updateMediaUrls()
       this.updateTags()

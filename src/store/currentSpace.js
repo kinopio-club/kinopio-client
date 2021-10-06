@@ -36,9 +36,9 @@ export default {
     //   state.cards = state.cards.concat(cards)
     // },
     // currentConnections/restore
-    restoreConnections: (state, connections) => {
-      state.connections = state.connections.concat(connections)
-    },
+    // restoreConnections: (state, connections) => {
+    //   state.connections = state.connections.concat(connections)
+    // },
 
     // Users
 
@@ -195,101 +195,115 @@ export default {
 
     // Connections
 
-    updateConnection: (state, updatedConnection) => {
-      // ⤵ same as updateConnectionReadOnly, but with cache.updateSpace
-      state.connections.map(connection => {
-        if (connection.id === updatedConnection.id) {
-          const updates = Object.keys(updatedConnection)
-          updates.forEach(key => {
-            connection[key] = updatedConnection[key]
-          })
-        }
-      })
-      cache.updateSpace('connections', state.connections, state.id)
-    },
-    updateConnectionReadOnly: (state, updatedConnection) => {
-      // ⤴ same as updateConnection, without cache.updateSpace
-      state.connections.map(connection => {
-        if (connection.id === updatedConnection.id) {
-          const updates = Object.keys(updatedConnection)
-          updates.forEach(key => {
-            connection[key] = updatedConnection[key]
-          })
-        }
-      })
-    },
-    updateConnectionPaths: (state, connections) => {
-      connections.forEach(connection => {
-        connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
-        connection.spaceId = state.id
-      })
-      cache.updateSpaceConnectionsDebounced(state.connections, state.id)
-    },
-    updateConnectionPathsBroadcast: (state, { connections }) => {
-      connections.forEach(updated => {
-        state.connections.find(connection => connection.id === updated.id).path = updated.path
-      })
-      cache.updateSpace('connections', state.connections, state.id)
-    },
-    addConnection: (state, connection) => {
-      state.connections.push(connection)
-      cache.updateSpace('connections', state.connections, state.id)
-    },
-    removeConnection: (state, connectionToRemove) => {
-      const connections = state.connections.filter(connection => {
-        return connection.id !== connectionToRemove.id
-      })
-      state.connections = connections
-      cache.updateSpace('connections', state.connections, state.id)
-    },
-    updateConnectionTypeForConnection: (state, { connectionId, connectionTypeId }) => {
-      state.connections.map(connection => {
-        if (connection.id === connectionId) {
-          connection.connectionTypeId = connectionTypeId
-        }
-      })
-      cache.updateSpace('connections', state.connections, state.id)
-    },
-    updateLabelIsVisibleForConnection: (state, { connectionId, labelIsVisible }) => {
-      state.connections.map(connection => {
-        if (connection.id === connectionId) {
-          connection.labelIsVisible = labelIsVisible
-        }
-      })
-      cache.updateSpace('connections', state.connections, state.id)
-    },
+    // currentConnections/update
+    // updateConnection: (state, updatedConnection) => {
+    //   // ⤵ same as updateConnectionReadOnly, but with cache.updateSpace
+    //   state.connections.map(connection => {
+    //     if (connection.id === updatedConnection.id) {
+    //       const updates = Object.keys(updatedConnection)
+    //       updates.forEach(key => {
+    //         connection[key] = updatedConnection[key]
+    //       })
+    //     }
+    //   })
+    //   cache.updateSpace('connections', state.connections, state.id)
+    // },
+    // currentConnections/updateReadOnly
+    // updateConnectionReadOnly: (state, updatedConnection) => {
+    //   // ⤴ same as updateConnection, without cache.updateSpace
+    //   state.connections.map(connection => {
+    //     if (connection.id === updatedConnection.id) {
+    //       const updates = Object.keys(updatedConnection)
+    //       updates.forEach(key => {
+    //         connection[key] = updatedConnection[key]
+    //       })
+    //     }
+    //   })
+    // },
+    // currentConnections/updatePaths
+    // updateConnectionPaths: (state, connections) => {
+    //   connections.forEach(connection => {
+    //     connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
+    //     connection.spaceId = state.id
+    //   })
+    //   cache.updateSpaceConnectionsDebounced(state.connections, state.id)
+    // },
+
+    // currentConnections/updatePathsBroadcast
+    // updateConnectionPathsBroadcast: (state, { connections }) => {
+    //   connections.forEach(updated => {
+    //     state.connections.find(connection => connection.id === updated.id).path = updated.path
+    //   })
+    //   cache.updateSpace('connections', state.connections, state.id)
+    // },
+    // currentConnections/create
+    // addConnection: (state, connection) => {
+    //   state.connections.push(connection)
+    //   cache.updateSpace('connections', state.connections, state.id)
+    // },
+    // currentConnections/remove
+    // removeConnection: (state, connectionToRemove) => {
+    //   const connections = state.connections.filter(connection => {
+    //     return connection.id !== connectionToRemove.id
+    //   })
+    //   state.connections = connections
+    //   cache.updateSpace('connections', state.connections, state.id)
+    // },
+    // REPLACE currentConnections/update -> change params to just {id, connectionTypeId}
+    // updateConnectionTypeForConnection: (state, { connectionId, connectionTypeId }) => {
+    //   state.connections.map(connection => {
+    //     if (connection.id === connectionId) {
+    //       connection.connectionTypeId = connectionTypeId
+    //     }
+    //   })
+    //   cache.updateSpace('connections', state.connections, state.id)
+    // },
+    // REPLACE currentConnections/update => change params to just {id, labelIsVisible}
+    // updateLabelIsVisibleForConnection: (state, { connectionId, labelIsVisible }) => {
+    //   state.connections.map(connection => {
+    //     if (connection.id === connectionId) {
+    //       connection.labelIsVisible = labelIsVisible
+    //     }
+    //   })
+    //   cache.updateSpace('connections', state.connections, state.id)
+    // },
 
     // Connection Types
 
-    addConnectionType: (state, connectionType) => {
-      state.connectionTypes.push(connectionType)
-      cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
-    },
-    removeConnectionType: (state, connectionType) => {
-      state.connectionTypes = state.connectionTypes.filter(type => {
-        return connectionType.id !== type.id
-      })
-      cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
-    },
-    updateConnectionType: (state, updatedType) => {
-      state.connectionTypes.map(type => {
-        if (type.id === updatedType.id) {
-          const updates = Object.keys(updatedType)
-          updates.forEach(key => {
-            type[key] = updatedType[key]
-          })
-        }
-      })
-      cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
-    },
-    reorderConnectionTypeToLast: (state, connectionType) => {
-      state.connectionTypes = state.connectionTypes.filter(type => {
-        return connectionType.id !== type.id
-      })
-      state.connectionTypes.push(connectionType)
-    },
+    // currentConnections/createType
+    // addConnectionType: (state, connectionType) => {
+    //   state.connectionTypes.push(connectionType)
+    //   cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
+    // },
+    // currentConnections/removeType
+    // removeConnectionType: (state, connectionType) => {
+    //   state.connectionTypes = state.connectionTypes.filter(type => {
+    //     return connectionType.id !== type.id
+    //   })
+    //   cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
+    // },
+    // currentConnections/upateType
+    // updateConnectionType: (state, updatedType) => {
+    //   state.connectionTypes.map(type => {
+    //     if (type.id === updatedType.id) {
+    //       const updates = Object.keys(updatedType)
+    //       updates.forEach(key => {
+    //         type[key] = updatedType[key]
+    //       })
+    //     }
+    //   })
+    //   cache.updateSpace('connectionTypes', state.connectionTypes, state.id)
+    // },
+    // currentConnections/reorderTypeToEnd
+    // reorderConnectionTypeToLast: (state, connectionType) => {
+    //   state.connectionTypes = state.connectionTypes.filter(type => {
+    //     return connectionType.id !== type.id
+    //   })
+    //   state.connectionTypes.push(connectionType)
+    // },
 
     // Tags
+    // TODO new component???
 
     addTag: (state, tag) => {
       state.tags.push(tag)
@@ -441,7 +455,7 @@ export default {
         const linkedCard = links.find(link => link.linkToSpaceId === space.id)
         if (!linkedCard) { return }
         nextTick(() => {
-          context.dispatch('updateCardConnectionPaths', { cardId: linkedCard.id, shouldUpdateApi: canEditSpace })
+          context.dispatch('currentConnections/updatePaths', { cardId: linkedCard.id, shouldUpdateApi: canEditSpace })
         })
       })
       otherSpacesQueue = []
@@ -553,7 +567,7 @@ export default {
       const cards = context.state.cards
       nextTick(() => {
         if (cards.length) {
-          context.dispatch('updateCardConnectionPaths', { cardId: cards[1].id, connections: context.state.connections })
+          context.dispatch('currentConnections/updatePaths', { cardId: cards[1].id, connections: context.state.connections })
         }
         context.dispatch('saveNewSpace')
         context.dispatch('updateUserLastSpaceId')
@@ -735,6 +749,7 @@ export default {
       // init space
       context.commit('currentCards/clear', null, { root: true })
       context.dispatch('currentCards/updateSpaceId', space.id, { root: true })
+      context.dispatch('currentConnections/updateSpaceId', space.id, { root: true })
       context.commit('currentConnections/clear', null, { root: true })
       space.cards = []
       space.connections = []
@@ -811,7 +826,7 @@ export default {
       }
       context.commit('currentUser/updateFavoriteSpaceIsEdited', space.id, { root: true })
       nextTick(() => {
-        context.dispatch('updateIncorrectCardConnectionPaths', { shouldUpdateApi: isRemote })
+        context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
         context.dispatch('scrollCardsIntoView')
         context.dispatch('updatePageSizes', null, { root: true })
       })
@@ -860,7 +875,7 @@ export default {
         updatedSpace.name = updates.name
       }
       context.commit('updateSpace', updates)
-      context.commit('broadcast/update', { updates, type: 'updateSpace' }, { root: true })
+      context.dispatch('broadcast/update', { updates, type: 'updateSpace' }, { root: true })
       context.dispatch('api/addToQueue', {
         name: 'updateSpace',
         body: updates
@@ -945,7 +960,7 @@ export default {
     removeCollaboratorFromSpace: (context, user) => {
       const space = utils.clone(context.state)
       const userName = user.name || 'User'
-      context.commit('broadcast/update', { user, type: 'userLeftSpace' }, { root: true })
+      context.dispatch('broadcast/update', { user, type: 'userLeftSpace' }, { root: true })
       context.dispatch('api/removeSpaceCollaborator', { space, user }, { root: true })
       context.commit('removeCollaboratorFromSpace', user)
       const isCurrentUser = user.id === context.rootState.currentUser.id
@@ -985,7 +1000,7 @@ export default {
       })
     },
 
-    // Card Count
+    // User Card Count
 
     checkIfShouldNotifyCardsCreatedIsNearLimit: (context) => {
       const spaceUserIsUpgraded = context.getters.spaceUserIsUpgraded
@@ -1047,7 +1062,7 @@ export default {
     //   card = utils.clone(card)
     //   const update = { name: 'createCard', body: card }
     //   context.dispatch('api/addToQueue', update, { root: true })
-    //   context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
+    //   context.dispatch('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
     //   context.commit('undoHistory/add', update, { root: true })
     //   if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
     //   context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
@@ -1071,15 +1086,14 @@ export default {
         context.commit('createCard', card)
         const update = { name: 'createCard', body: card }
         context.dispatch('api/addToQueue', update, { root: true })
-        context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
-        context.commit('undoHistory/add', update, { root: true })
+        context.dispatch('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
         context.commit('currentCards/addToCardMap', card, { root: true })
       })
     },
-    // shim for history/playback
-    createCard: (context, card) => {
-      context.commit('createCard', card)
-    },
+    // shim for history/playback, removed
+    // createCard: (context, card) => {
+    //   context.commit('createCard', card)
+    // },
     pasteCard: (context, { card, cardId }) => {
       utils.typeCheck({ value: card, type: 'object', origin: 'pasteCard' })
       card = utils.clone(card)
@@ -1102,8 +1116,7 @@ export default {
       context.commit('createCard', card)
       const update = { name: 'createCard', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
-      context.commit('undoHistory/add', update, { root: true })
+      context.dispatch('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         delta: 1
       }, { root: true })
@@ -1133,7 +1146,7 @@ export default {
     //   card = utils.updateCardDimentions(card)
     //   const update = { name: 'updateCard', body: card }
     //   context.dispatch('api/addToQueue', update, { root: true })
-    //   context.commit('broadcast/update', { updates: card, type: 'updateCard' }, { root: true })
+    //   context.dispatch('broadcast/update', { updates: card, type: 'updateCard' }, { root: true })
     //   context.commit('undoHistory/add', update, { root: true })
     // },
     updateCardsDimensions: (context) => {
@@ -1153,7 +1166,7 @@ export default {
           }
           const update = { name: 'updateCard', body }
           context.dispatch('api/addToQueue', update, { root: true })
-          context.commit('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
+          context.dispatch('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
           context.commit('updateCard', body)
         }
       })
@@ -1183,7 +1196,7 @@ export default {
     //     const body = { id: card.id, z: 0 }
     //     const update = { name: 'updateCard', body }
     //     context.dispatch('api/addToQueue', update, { root: true })
-    //     context.commit('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
+    //     context.dispatch('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
     //     context.commit('updateCard', body)
     //   })
     // },
@@ -1202,7 +1215,7 @@ export default {
     //   context.commit('updateCard', body)
     //   if (!userCanEdit) { return }
     //   context.dispatch('api/addToQueue', update, { root: true })
-    //   context.commit('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
+    //   context.dispatch('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
     // },
     // currentCards/remove
     // removeCard: (context, card) => {
@@ -1215,7 +1228,7 @@ export default {
     //   } else {
     //     context.dispatch('currentCards/removePermanent', card, { root: true })
     //   }
-    //   context.commit('broadcast/update', { updates: card, type: 'removeCard' }, { root: true })
+    //   context.dispatch('broadcast/update', { updates: card, type: 'removeCard' }, { root: true })
     //   context.dispatch('removeConnectionsFromCard', card)
     //   context.commit('triggerUpdatePositionInVisualViewport', null, { root: true })
     //   const cardIsUpdatedByCurrentUser = card.userId === context.rootState.currentUser.id
@@ -1247,7 +1260,7 @@ export default {
     //   context.commit('restoreRemovedCard', card)
     //   const update = { name: 'restoreRemovedCard', body: card }
     //   context.dispatch('api/addToQueue', update, { root: true })
-    //   context.commit('broadcast/update', { updates: card, type: 'restoreRemovedCard' }, { root: true })
+    //   context.dispatch('broadcast/update', { updates: card, type: 'restoreRemovedCard' }, { root: true })
     //   context.commit('undoHistory/add', update, { root: true })
     //   context.commit('currentCards/addToCardMap', card, { root: true })
     // },
@@ -1285,8 +1298,8 @@ export default {
     //   context.commit('moveCards', { cards, delta })
     //   context.commit('cardsWereDragged', true, { root: true })
     //   context.commit('updateConnectionPaths', connections)
-    //   context.commit('broadcast/update', { updates: { cards, delta }, type: 'moveCards' }, { root: true })
-    //   context.commit('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths' }, { root: true })
+    //   context.dispatch('broadcast/update', { updates: { cards, delta }, type: 'moveCards' }, { root: true })
+    //   context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths' }, { root: true })
     //   connections.forEach(connection => {
     //     context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
     //   })
@@ -1313,12 +1326,11 @@ export default {
           }
         }
         context.dispatch('api/addToQueue', update, { root: true })
-        context.commit('undoHistory/add', update, { root: true })
         connections = connections.concat(context.getters.cardConnections(card.id))
       })
       connections = uniqBy(connections, 'id')
-      context.commit('updateConnectionPaths', connections)
-      context.commit('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths' }, { root: true })
+      context.commit('currentConnections/updatePaths', connections, { root: true })
+      context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths' }, { root: true })
     },
     // currentCard/incrementZ
     // incrementSelectedCardsZ: (context) => {
@@ -1330,6 +1342,8 @@ export default {
     //     context.dispatch('incrementCardZ', currentDraggingCardId)
     //   }
     // },
+
+    // TODO move to currentcards
     showCardDetails: (context, cardId) => {
       context.dispatch('incrementCardZ', cardId)
       context.commit('cardDetailsIsVisibleForCardId', cardId, { root: true })
@@ -1358,7 +1372,7 @@ export default {
     },
 
     // Comments
-
+    // TODO move to currentcards
     toggleCommentIsVisible: (context, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'toggleCommentIsVisible' })
       const card = context.rootGetters['currentCards/byId'](cardId)
@@ -1371,149 +1385,156 @@ export default {
 
     // Connections
 
-    addConnection: (context, { connection, connectionType }) => {
-      const connectionAlreadyExists = context.getters.connectionAlreadyExists({
-        startCardId: connection.startCardId,
-        endCardId: connection.endCardId
-      })
-      if (!connectionAlreadyExists) {
-        connection.id = connection.id || nanoid()
-        connection.spaceId = context.state.id
-        connection.userId = context.rootState.currentUser.id
-        connection.connectionTypeId = connectionType.id
-        context.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
-        context.commit('undoHistory/add', { name: 'addConnection', body: connection }, { root: true })
-        context.commit('broadcast/update', { updates: connection, type: 'addConnection' }, { root: true })
-        context.commit('addConnection', connection)
-      }
-    },
-    updateCardConnectionPaths: (context, { cardId, shouldUpdateApi, connections }) => {
-      const spaceId = context.state.id
-      connections = utils.clone(connections || context.getters.cardConnections(cardId))
-      connections.map(connection => {
-        connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
-        connection.spaceId = spaceId
-        if (shouldUpdateApi) {
-          context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
-        }
-        context.commit('broadcast/update', { updates: connection, type: 'updateConnection' }, { root: true })
-        const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
-        if (userCanEdit) {
-          context.commit('updateConnection', connection)
-        } else {
-          context.commit('updateConnectionReadOnly', connection)
-        }
-      })
-    },
-    updateIncorrectCardConnectionPaths: (context, { shouldUpdateApi }) => {
-      if (!context.rootState.webfontIsLoaded) { return }
-      const cardIds = context.state.cards.map(card => card.id)
-      let connections = []
-      context.state.connections.forEach(connection => {
-        const startCardExists = cardIds.includes(connection.startCardId)
-        const endCardExists = cardIds.includes(connection.endCardId)
-        if (!startCardExists || !endCardExists) {
-          context.dispatch('removeOrphanConnections', { connection, shouldUpdateApi })
-          return
-        }
-        const updatedPath = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
-        if (!updatedPath) { return }
-        if (updatedPath === connection.path) { return }
-        connections.push(connection)
-      })
-      context.dispatch('updateCardConnectionPaths', { connections, shouldUpdateApi })
-    },
-    removeOrphanConnections: (context, { connection, shouldUpdateApi }) => {
-      if (shouldUpdateApi) {
-        context.dispatch('removeConnection', connection)
-      } else {
-        context.commit('removeConnection', connection)
-      }
-    },
-    removeConnectionsFromCard: (context, card) => {
-      context.state.connections.forEach(connection => {
-        if (connection.startCardId === card.id || connection.endCardId === card.id) {
-          context.dispatch('removeConnection', connection)
-        }
-      })
-    },
-    removeSelectedConnectionsFromCard: (context, cardId) => {
-      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
-      const connections = context.state.connections
-      connections.map(connection => {
-        const { startCardId, endCardId } = connection
-        const startMatch = startCardId === cardId && multipleCardsSelectedIds.includes(endCardId)
-        const endMatch = endCardId === cardId && multipleCardsSelectedIds.includes(startCardId)
-        const connectedToSelected = startMatch || endMatch
-        if (connectedToSelected) {
-          context.commit('removeFromMultipleConnectionsSelected', connection.id, { root: true })
-          context.dispatch('removeConnection', connection)
-        }
-      })
-    },
-    removeConnection: (context, connection) => {
-      context.commit('removeConnection', connection)
-      const update = { name: 'removeConnection', body: connection }
-      context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('broadcast/update', { updates: connection, type: 'removeConnection' }, { root: true })
-      context.commit('undoHistory/add', update, { root: true })
-    },
-    updateConnectionTypeForConnection: (context, { connectionId, connectionTypeId }) => {
-      const updates = { connectionId, connectionTypeId }
-      const connection = {
-        id: connectionId,
-        connectionTypeId
-      }
-      const update = { name: 'updateConnection', body: connection }
-      context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('undoHistory/add', update, { root: true })
-      context.commit('updateConnectionTypeForConnection', updates)
-      context.commit('broadcast/update', { updates, type: 'updateConnectionTypeForConnection' }, { root: true })
-    },
-    updateLabelIsVisibleForConnection: (context, { connectionId, labelIsVisible }) => {
-      const updates = { connectionId, labelIsVisible }
-      const connection = {
-        id: connectionId,
-        labelIsVisible
-      }
-      const update = { name: 'updateConnection', body: connection }
-      context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('undoHistory/add', update, { root: true })
-      context.commit('updateLabelIsVisibleForConnection', updates)
-      context.commit('broadcast/update', { updates, type: 'updateLabelIsVisibleForConnection' }, { root: true })
-    },
+    // currentConnections/add
+    // addConnection: (context, { connection, connectionType }) => {
+    //   const connectionAlreadyExists = context.getters.connectionAlreadyExists({
+    //     startCardId: connection.startCardId,
+    //     endCardId: connection.endCardId
+    //   })
+    //   if (!connectionAlreadyExists) {
+    //     connection.id = connection.id || nanoid()
+    //     connection.spaceId = context.state.id
+    //     connection.userId = context.rootState.currentUser.id
+    //     connection.connectionTypeId = connectionType.id
+    //     context.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
+    //     context.commit('undoHistory/add', { name: 'addConnection', body: connection }, { root: true })
+    //     context.dispatch('broadcast/update', { updates: connection, type: 'addConnection' }, { root: true })
+    //     context.commit('create', connection)
+    //   }
+    // },
+    // currentConnections/updatePaths
+    // updateCardConnectionPaths: (context, { cardId, shouldUpdateApi, connections }) => {
+    //   const spaceId = context.state.id
+    //   connections = utils.clone(connections || context.getters.cardConnections(cardId))
+    //   connections.map(connection => {
+    //     connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
+    //     connection.spaceId = spaceId
+    //     if (shouldUpdateApi) {
+    //       context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
+    //     }
+    //     context.dispatch('broadcast/update', { updates: connection, type: 'updateConnection' }, { root: true })
+    //     const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
+    //     if (userCanEdit) {
+    //       context.commit('currentConnections/update', connection, { root: true })
+    //     } else {
+    //       context.commit('currentConnections/updateReadOnly', connection, { root: true })        }
+    //   })
+    // },
+    // currentConnections/correctPaths
+    // updateIncorrectCardConnectionPaths: (context, { shouldUpdateApi }) => {
+    //   if (!context.rootState.webfontIsLoaded) { return }
+    //   const cardIds = context.state.cards.map(card => card.id)
+    //   let connections = []
+    //   context.state.connections.forEach(connection => {
+    //     const startCardExists = cardIds.includes(connection.startCardId)
+    //     const endCardExists = cardIds.includes(connection.endCardId)
+    //     if (!startCardExists || !endCardExists) {
+    //       context.dispatch('removeOrphanConnections', { connection, shouldUpdateApi })
+    //       return
+    //     }
+    //     const updatedPath = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
+    //     if (!updatedPath) { return }
+    //     if (updatedPath === connection.path) { return }
+    //     connections.push(connection)
+    //   })
+    //   context.dispatch('updatePaths', { connections, shouldUpdateApi })
+    // },
+    // // replaced in /correctPaths
+    // removeOrphanConnections: (context, { connection, shouldUpdateApi }) => {
+    //   if (shouldUpdateApi) {
+    //     context.dispatch('removeConnection', connection)
+    //   } else {
+    //     context.commit('currentConnections/remove', connection, { root: true })
+    //   }
+    // },
+    // currentConnections/removeFromCard
+    // removeConnectionsFromCard: (context, card) => {
+    //   context.state.connections.forEach(connection => {
+    //     if (connection.startCardId === card.id || connection.endCardId === card.id) {
+    //       context.dispatch('removeConnection', connection)
+    //     }
+    //   })
+    // },
+    // currentConnections/removeFromMultipleCards
+    // removeSelectedConnectionsFromCard: (context, cardId) => {
+    //   const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
+    //   const connections = context.state.connections
+    //   connections.map(connection => {
+    //     const { startCardId, endCardId } = connection
+    //     const startMatch = startCardId === cardId && multipleCardsSelectedIds.includes(endCardId)
+    //     const endMatch = endCardId === cardId && multipleCardsSelectedIds.includes(startCardId)
+    //     const connectedToSelected = startMatch || endMatch
+    //     if (connectedToSelected) {
+    //       context.commit('removeFromMultipleConnectionsSelected', connection.id, { root: true })
+    //       context.dispatch('removeConnection', connection)
+    //     }
+    //   })
+    // },
+    // remove
+    // removeConnection: (context, connection) => {
+    //   context.commit('currentConnections/remove', connection, { root: true })
+    //   const update = { name: 'removeConnection', body: connection }
+    //   context.dispatch('api/addToQueue', update, { root: true })
+    //   context.dispatch('broadcast/update', { updates: connection, type: 'removeConnection' }, { root: true })
+    //   context.commit('undoHistory/add', update, { root: true })
+    // },
+    // REPLACE w /update {id, connectionTypeId}
+    // updateConnectionTypeForConnection: (context, { connectionId, connectionTypeId }) => {
+    //   const updates = { connectionId, connectionTypeId }
+    //   const connection = {
+    //     id: connectionId,
+    //     connectionTypeId
+    //   }
+    //   const update = { name: 'updateConnection', body: connection }
+    //   context.dispatch('api/addToQueue', update, { root: true })
+    //   context.commit('undoHistory/add', update, { root: true })
+    //   context.commit('currentConnections/update', connection)
+    //   context.dispatch('broadcast/update', { updates, type: 'updateConnectionTypeForConnection', mutation: 'currentConnections/update' }, { root: true }) //
+    // },
+    // REPLACE w /update {id, labelIsVisible}
+    // updateLabelIsVisibleForConnection: (context, { connectionId, labelIsVisible }) => {
+    //   const updates = { connectionId, labelIsVisible }
+    //   const connection = {
+    //     id: connectionId,
+    //     labelIsVisible
+    //   }
+    //   const update = { name: 'updateConnection', body: connection }
+    //   context.dispatch('api/addToQueue', update, { root: true })
+    //   context.commit('undoHistory/add', update, { root: true })
+    //   context.commit('currentConnections/update', connection)
+    //   context.dispatch('broadcast/update', { updates, type: 'updateLabelIsVisibleForConnection', mutation: 'currentConnections/update' }, { root: true }) //
+    // },
 
     // Connection Types
-
-    addConnectionType: (context, options) => {
-      const types = context.state.connectionTypes
-      let connectionType = {
-        id: nanoid(),
-        name: `Connection Type ${types.length + 1}`,
-        color: randomColor({ luminosity: 'light' }),
-        spaceId: context.state.id
-      }
-      if (options) {
-        const keys = Object.keys(options)
-        keys.forEach(key => {
-          connectionType[key] = options[key]
-        })
-      }
-      context.commit('addConnectionType', connectionType)
-      context.commit('broadcast/update', { updates: connectionType, type: 'addConnectionType' }, { root: true })
-      context.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
-      context.commit('undoHistory/add', { name: 'addConnectionType', body: connectionType }, { root: true })
-    },
+    // currentConnections/addType
+    // addConnectionType: (context, options) => {
+    //   const types = context.state.connectionTypes
+    //   let connectionType = {
+    //     id: nanoid(),
+    //     name: `Connection Type ${types.length + 1}`,
+    //     color: randomColor({ luminosity: 'light' }),
+    //     spaceId: context.state.id
+    //   }
+    //   if (options) {
+    //     const keys = Object.keys(options)
+    //     keys.forEach(key => {
+    //       connectionType[key] = options[key]
+    //     })
+    //   }
+    //   context.commit('create', connectionType) //
+    //   context.dispatch('broadcast/update', { updates: connectionType, type: 'addConnectionType' }, { root: true })
+    //   context.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
+    //   context.commit('undoHistory/add', { name: 'addConnectionType', body: connectionType }, { root: true }) // origin
+    // },
     // shim for undoHistory.playback
     removeConnectionType: (context, type) => {
-      context.commit('removeConnectionType', type)
+      context.commit('removeType', type) //
     },
     updateConnectionType: (context, connectionType) => {
-      context.commit('updateConnectionType', connectionType)
-      context.commit('broadcast/update', { updates: connectionType, type: 'updateConnectionType' }, { root: true })
+      context.commit('updateType', connectionType) //
+      context.dispatch('broadcast/update', { updates: connectionType, type: 'updateConnectionType' }, { root: true }) // origin
       const update = { name: 'updateConnectionType', body: connectionType }
       context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('undoHistory/add', update, { root: true })
     },
     removeUnusedConnectionTypes: (context) => {
       const connectionTypes = context.state.connectionTypes
@@ -1523,9 +1544,8 @@ export default {
       removeConnectionTypes.forEach(type => {
         const update = { name: 'removeConnectionType', body: type }
         context.dispatch('api/addToQueue', update, { root: true })
-        context.commit('undoHistory/add', update, { root: true })
-        context.commit('removeConnectionType', type)
-        context.commit('broadcast/update', { updates: type, type: 'removeConnectionType' }, { root: true })
+        context.commit('removeType', type)
+        context.dispatch('broadcast/update', { updates: type, type: 'removeConnectionType' }, { root: true }) // origin
       })
     },
 
@@ -1581,8 +1601,7 @@ export default {
       const update = { name: 'addTag', body: tag }
       const broadcastUpdate = { updates: tag, type: 'addTag' }
       context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('undoHistory/add', update, { root: true })
-      context.commit('broadcast/update', broadcastUpdate, { root: true })
+      context.dispatch('broadcast/update', broadcastUpdate, { root: true })
       context.commit('remoteTagsIsFetched', false, { root: true })
     },
     removeTag: (context, tag) => {
@@ -1590,15 +1609,13 @@ export default {
       const update = { name: 'removeTag', body: tag }
       const broadcastUpdate = { updates: tag, type: 'removeTag' }
       context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('undoHistory/add', update, { root: true })
-      context.commit('broadcast/update', broadcastUpdate, { root: true })
+      context.dispatch('broadcast/update', broadcastUpdate, { root: true })
       context.commit('remoteTagsIsFetched', false, { root: true })
     },
     removeTags: (context, tag) => {
       context.commit('removeTags', tag)
       const update = { name: 'removeTags', body: tag }
       context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('undoHistory/add', update, { root: true })
       context.commit('remoteTagsIsFetched', false, { root: true })
     },
     updateTagNameColor: (context, tag) => {
@@ -1606,8 +1623,7 @@ export default {
       const update = { name: 'updateTagNameColor', body: tag }
       const broadcastUpdate = { updates: tag, type: 'updateTagNameColor' }
       context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('undoHistory/add', update, { root: true })
-      context.commit('broadcast/update', broadcastUpdate, { root: true })
+      context.dispatch('broadcast/update', broadcastUpdate, { root: true })
       context.commit('remoteTagsIsFetched', false, { root: true })
     },
     removeUnusedTagsFromCard: (context, cardId) => {
@@ -1688,14 +1704,16 @@ export default {
     },
 
     // Connections
-    connectionAlreadyExists: (state) => ({ startCardId, endCardId }) => {
-      const existing = state.connections.filter(connection => {
-        let start = connection.startCardId === startCardId
-        let end = connection.endCardId === endCardId
-        return start && end
-      })
-      return Boolean(existing.length)
-    },
+
+    // connectionAlreadyExists: (state) => ({ startCardId, endCardId }) => {
+    //   const existing = state.connections.filter(connection => {
+    //     let start = connection.startCardId === startCardId
+    //     let end = connection.endCardId === endCardId
+    //     return start && end
+    //   })
+    //   return Boolean(existing.length)
+    // },
+    // byCardId
     cardConnections: (state) => (cardId) => {
       return state.connections.filter(connection => {
         let start = connection.startCardId === cardId
@@ -1703,6 +1721,7 @@ export default {
         return start || end
       })
     },
+
     connectionById: (state) => (id) => {
       return state.connections.find(connection => connection.id === id)
     },

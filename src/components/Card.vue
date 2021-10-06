@@ -353,29 +353,29 @@ export default {
       if (!connection) { return }
       const isConnected = connection.startCardId === this.id || connection.endCardId === this.id
       if (!isConnected) { return }
-      const connectionType = this.$store.getters['currentSpace/connectionTypeById'](connection.connectionTypeId)
+      const connectionType = this.$store.getters['currentConnections/typeById'](connection.connectionTypeId)
       return connectionType.color
     },
     connectedToCardBeingDraggedColor () {
       const isDraggingCard = this.$store.state.currentUserIsDraggingCard
       if (!isDraggingCard) { return }
       if (this.isBeingDragged) { return }
-      let connections = this.$store.state.currentSpace.connections
+      let connections = this.$store.getters['currentConnections/all']
       connections = connections.filter(connection => this.connectionIsBeingDragged(connection))
       const connection = connections.find(connection => connection.startCardId === this.id || connection.endCardId === this.id)
       if (!connection) { return }
-      const connectionType = this.$store.getters['currentSpace/connectionTypeById'](connection.connectionTypeId)
+      const connectionType = this.$store.getters['currentConnections/typeById'](connection.connectionTypeId)
       return connectionType.color
     },
     connectedToCardDetailsVisibleColor () {
       if (this.currentCardDetailsIsVisible) { return }
       const visibleCardId = this.$store.state.cardDetailsIsVisibleForCardId
-      let connections = this.$store.state.currentSpace.connections
+      let connections = this.$store.getters['currentConnections/all']
       connections = connections.filter(connection => connection.startCardId === visibleCardId || connection.endCardId === visibleCardId)
       connections = connections.filter(connection => connection.startCardId === this.id || connection.endCardId === this.id)
       const connection = connections[0]
       if (!connection) { return }
-      const connectionType = this.$store.getters['currentSpace/connectionTypeById'](connection.connectionTypeId)
+      const connectionType = this.$store.getters['currentConnections/typeById'](connection.connectionTypeId)
       return connectionType.color
     },
     dateUpdatedAt () {
@@ -788,7 +788,7 @@ export default {
       this.$nextTick(() => {
         this.$nextTick(() => {
           if (this.prevNameLineMinWidth !== width) {
-            this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.card.id, shouldUpdateApi: true })
+            this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
           }
           this.prevNameLineMinWidth = width
         })
@@ -799,7 +799,7 @@ export default {
       if (!isMeta) { return }
       if (!this.canEditSpace) { return }
       this.$store.dispatch('closeAllDialogs', 'Card.selectAllConnectedCards')
-      const connections = this.$store.state.currentSpace.connections
+      const connections = this.$store.getters['currentConnections/all']
       let selectedCards = [this.card.id]
       let shouldSearch = true
       while (shouldSearch) {
@@ -1030,7 +1030,7 @@ export default {
       if (spaceIsOpen && !isSpaceMember) {
         this.$nextTick(() => {
           this.$nextTick(() => {
-            this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.id, shouldUpdateApi: true })
+            this.$store.dispatch('currentConnections/updatePaths', { cardId: this.id, shouldUpdateApi: true })
           })
         })
       }

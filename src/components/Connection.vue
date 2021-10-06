@@ -44,7 +44,7 @@ export default {
       if (mutation.type === 'currentSpace/moveCard') {
         this.cancelAnimation()
       }
-      if (mutation.type === 'currentSpace/removeConnection') {
+      if (mutation.type === 'currentConnections/remove') {
         this.controlCurve = undefined
       }
       if (mutation.type === 'triggerShowConnectionDetails') {
@@ -66,7 +66,7 @@ export default {
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     id () { return this.connection.id },
-    connectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.connectionTypeId) },
+    connectionType () { return this.$store.getters['currentConnections/typeById'](this.connectionTypeId) },
     connectionTypeId () { return this.connection.connectionTypeId },
     startCardId () { return this.connection.startCardId },
     endCardId () { return this.connection.endCardId },
@@ -149,7 +149,7 @@ export default {
   methods: {
     removeConnection () {
       if (!this.isSpaceMember) { return }
-      this.$store.dispatch('currentSpace/removeConnection', this.connection)
+      this.$store.dispatch('currentConnections/remove', this.connection)
       this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
     },
     checkIsMultiTouch (event) {
