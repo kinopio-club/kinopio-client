@@ -17,13 +17,18 @@ const self = {
 
       // ?TODO explicitly allow adding events addcard, removecard, etc. (eg no painting)
 
-      // missing undo scenarios
+      // - dont add removepermanent of empty cards on close to undo stack
+
+      // missing undo scenarios:
       // https://club.kinopio.club/t/can-i-undo-an-accidental-connect/264
       // - move card, to prev pos (recorded after drag)
       // - move multiple cards, to prev pos (recorded after drag)
       // - reconnect disconnected cards
       // - restore removed connection
       // - restore multiple cards and connections together - for when multiple selected items are removed
+      // - remove pasted cards
+      // - restore cut cards
+
       items.push(item)
     },
     clear: (state) => {
@@ -52,6 +57,8 @@ const self = {
       //   context.dispatch('currentConnections/updatePaths', { cardId }, { root: true })
       // })
     }
+    // undo
+    // undo last item in items
   }
 }
 

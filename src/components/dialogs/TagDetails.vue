@@ -334,7 +334,7 @@ export default {
         this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
       } else {
         const cardId = card.id || this.currentTag.cardId
-        this.$store.dispatch('currentSpace/showCardDetails', cardId)
+        this.$store.dispatch('currentCards/showCardDetails', cardId)
       }
     },
     toggleColorPicker () {

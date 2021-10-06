@@ -523,7 +523,7 @@ export default {
       }, { root: true })
       context.commit('addUserToSpace', user)
       nextTick(() => {
-        context.dispatch('updateCardsDimensions')
+        context.dispatch('currentCards/updateDimensions', { root: true })
       })
     },
     saveImportedSpace: async (context) => {
@@ -538,7 +538,7 @@ export default {
       context.commit('addUserToSpace', user)
       context.dispatch('loadBackground')
       nextTick(() => {
-        context.dispatch('updateCardsDimensions')
+        context.dispatch('currentCards/updateDimensions', { root: true })
       })
     },
     duplicateSpace: (context) => {
@@ -821,7 +821,7 @@ export default {
       context.dispatch('updateOtherSpaces')
       const cardId = context.rootState.loadSpaceShowDetailsForCardId
       if (cardId) {
-        context.dispatch('showCardDetails', cardId)
+        context.dispatch('currentCards/showCardDetails', cardId)
       }
       context.commit('currentUser/updateFavoriteSpaceIsEdited', space.id, { root: true })
       nextTick(() => {
@@ -895,7 +895,7 @@ export default {
       context.dispatch('updateUserLastSpaceId')
       const cardId = context.rootState.loadSpaceShowDetailsForCardId
       if (cardId) {
-        context.dispatch('showCardDetails', cardId)
+        context.dispatch('currentCards/showCardDetails', cardId)
       }
     },
     updateUserLastSpaceId: (context) => {
@@ -1072,64 +1072,66 @@ export default {
     //   context.commit('currentCards/addToCardMap', card, { root: true })
     // },
     // currentCards/addMultiple
-    addMultipleCards: (context, newCards) => {
-      newCards.forEach(card => {
-        card = {
-          id: card.id || nanoid(),
-          x: card.x,
-          y: card.y,
-          z: context.rootGetters['currentCards/all'].length + 1,
-          name: card.name,
-          frameId: card.frameId || 0,
-          userId: context.rootState.currentUser.id
-        }
-        context.commit('createCard', card)
-        const update = { name: 'createCard', body: card }
-        context.dispatch('api/addToQueue', update, { root: true })
-        context.dispatch('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
-        context.commit('currentCards/addToCardMap', card, { root: true })
-      })
-    },
+    // addMultipleCards: (context, newCards) => {
+    //   newCards.forEach(card => {
+    //     card = {
+    //       id: card.id || nanoid(),
+    //       x: card.x,
+    //       y: card.y,
+    //       z: context.rootGetters['currentCards/all'].length + 1,
+    //       name: card.name,
+    //       frameId: card.frameId || 0,
+    //       userId: context.rootState.currentUser.id
+    //     }
+    //     context.commit('createCard', card)
+    //     const update = { name: 'createCard', body: card }
+    //     context.dispatch('api/addToQueue', update, { root: true })
+    //     context.dispatch('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
+    //     context.commit('currentCards/addToCardMap', card, { root: true })
+    //   })
+    // },
     // shim for history/playback, removed
     // createCard: (context, card) => {
     //   context.commit('createCard', card)
     // },
-    pasteCard: (context, { card, cardId }) => {
-      utils.typeCheck({ value: card, type: 'object', origin: 'pasteCard' })
-      card = utils.clone(card)
-      card.id = cardId || nanoid()
-      card.spaceId = context.state.id
-      const existingCards = context.rootGetters['currentCards/all']
-      utils.uniqueCardPosition(card, existingCards)
-      const tags = utils.tagsFromStringWithoutBrackets(card.name)
-      if (tags) {
-        tags.forEach(tag => {
-          tag = utils.newTag({
-            name: tag,
-            defaultColor: context.rootState.currentUser.color,
-            cardId: card.id,
-            spaceId: context.state.id
-          })
-          context.dispatch('addTag', tag)
-        })
-      }
-      context.commit('createCard', card)
-      const update = { name: 'createCard', body: card }
-      context.dispatch('api/addToQueue', update, { root: true })
-      context.dispatch('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
-      context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        delta: 1
-      }, { root: true })
-      context.commit('currentCards/addToCardMap', card, { root: true })
-    },
-    repaceInCardName: (context, { cardId, match, replace }) => {
-      const card = context.rootGetters['currentCards/byId'](cardId)
-      const name = card.name.replace(match, replace)
-      context.dispatch('updateCard', {
-        id: cardId,
-        name
-      })
-    },
+    // currentCards/paste
+    // pasteCard: (context, { card, cardId }) => {
+    //   utils.typeCheck({ value: card, type: 'object', origin: 'pasteCard' })
+    //   card = utils.clone(card)
+    //   card.id = cardId || nanoid()
+    //   card.spaceId = context.state.id
+    //   const existingCards = context.rootGetters['currentCards/all']
+    //   utils.uniqueCardPosition(card, existingCards)
+    //   const tags = utils.tagsFromStringWithoutBrackets(card.name)
+    //   if (tags) {
+    //     tags.forEach(tag => {
+    //       tag = utils.newTag({
+    //         name: tag,
+    //         defaultColor: context.rootState.currentUser.color,
+    //         cardId: card.id,
+    //         spaceId: context.state.id
+    //       })
+    //       context.dispatch('addTag', tag)
+    //     })
+    //   }
+    //   context.commit('createCard', card)
+    //   const update = { name: 'createCard', body: card }
+    //   context.dispatch('api/addToQueue', update, { root: true })
+    //   context.dispatch('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
+    //   context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+    //     delta: 1
+    //   }, { root: true })
+    //   context.commit('currentCards/addToCardMap', card, { root: true })
+    // },
+    // replaceInName
+    // repaceInCardName: (context, { cardId, match, replace }) => {
+    //   const card = context.rootGetters['currentCards/byId'](cardId)
+    //   const name = card.name.replace(match, replace)
+    //   context.dispatch('updateCard', {
+    //     id: cardId,
+    //     name
+    //   })
+    // },
     // currentCard/update
     // updateCard: (context, card) => {
     //   context.commit('updateCard', card)
@@ -1149,46 +1151,48 @@ export default {
     //   context.dispatch('broadcast/update', { updates: card, type: 'updateCard' }, { root: true })
     //   context.commit('undoHistory/add', update, { root: true })
     // },
-    updateCardsDimensions: (context) => {
-      let cards = utils.clone(context.rootGetters['currentCards/all'])
-      cards.forEach(card => {
-        const prevDimensions = {
-          width: card.width,
-          height: card.height
-        }
-        card = utils.updateCardDimentions(card)
-        const dimensionsChanged = card.width !== prevDimensions.width || card.height !== prevDimensions.height
-        if (dimensionsChanged) {
-          const body = {
-            id: card.id,
-            width: Math.ceil(card.width),
-            height: Math.ceil(card.height)
-          }
-          const update = { name: 'updateCard', body }
-          context.dispatch('api/addToQueue', update, { root: true })
-          context.dispatch('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
-          context.commit('updateCard', body)
-        }
-      })
-    },
-    toggleCardChecked (context, { cardId, value }) {
-      utils.typeCheck({ value, type: 'boolean', origin: 'toggleCardChecked' })
-      utils.typeCheck({ value: cardId, type: 'string', origin: 'toggleCardChecked' })
-      const card = context.rootGetters['currentCards/byId'](cardId)
-      let name = card.name
-      const checkbox = utils.checkboxFromString(name)
-      name = name.replace(checkbox, '')
-      if (value) {
-        name = `[x] ${name}`
-      } else {
-        name = `[] ${name}`
-      }
-      context.dispatch('updateCard', {
-        id: cardId,
-        name,
-        nameUpdatedAt: new Date()
-      })
-    },
+    // updateDimensions
+    // updateCardsDimensions: (context) => {
+    //   let cards = utils.clone(context.rootGetters['currentCards/all'])
+    //   cards.forEach(card => {
+    //     const prevDimensions = {
+    //       width: card.width,
+    //       height: card.height
+    //     }
+    //     card = utils.updateCardDimentions(card)
+    //     const dimensionsChanged = card.width !== prevDimensions.width || card.height !== prevDimensions.height
+    //     if (dimensionsChanged) {
+    //       const body = {
+    //         id: card.id,
+    //         width: Math.ceil(card.width),
+    //         height: Math.ceil(card.height)
+    //       }
+    //       const update = { name: 'updateCard', body }
+    //       context.dispatch('api/addToQueue', update, { root: true })
+    //       context.dispatch('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
+    //       context.commit('updateCard', body)
+    //     }
+    //   })
+    // },
+    // toggleChecked
+    // toggleCardChecked (context, { cardId, value }) {
+    //   utils.typeCheck({ value, type: 'boolean', origin: 'toggleCardChecked' })
+    //   utils.typeCheck({ value: cardId, type: 'string', origin: 'toggleCardChecked' })
+    //   const card = context.rootGetters['currentCards/byId'](cardId)
+    //   let name = card.name
+    //   const checkbox = utils.checkboxFromString(name)
+    //   name = name.replace(checkbox, '')
+    //   if (value) {
+    //     name = `[x] ${name}`
+    //   } else {
+    //     name = `[] ${name}`
+    //   }
+    //   context.dispatch('updateCard', {
+    //     id: cardId,
+    //     name,
+    //     nameUpdatedAt: new Date()
+    //   })
+    // },
     // currentCards/clearAllZs
     // clearAllCardsZ: (context) => {
     //   let cards = context.rootGetters['currentCards/all']
@@ -1304,34 +1308,35 @@ export default {
     //     context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
     //   })
     // },
-    updateAfterDragWithPositions: (context) => {
-      const currentDraggingCardId = context.rootState.currentDraggingCardId
-      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
-      let cards
-      let connections = []
-      if (multipleCardsSelectedIds.length) {
-        cards = multipleCardsSelectedIds
-      } else {
-        cards = [currentDraggingCardId]
-      }
-      cards = cards.map(cardId => context.rootGetters['currentCards/byId'](cardId))
-      cards = cards.filter(card => card)
-      cards.forEach(card => {
-        const update = { name: 'updateCard',
-          body: {
-            id: card.id,
-            x: card.x,
-            y: card.y,
-            z: card.z
-          }
-        }
-        context.dispatch('api/addToQueue', update, { root: true })
-        connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
-      })
-      connections = uniqBy(connections, 'id')
-      context.commit('currentConnections/updatePaths', connections, { root: true })
-      context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths' }, { root: true })
-    },
+    // updateDragged
+    // updateAfterDragWithPositions: (context) => {
+    //   const currentDraggingCardId = context.rootState.currentDraggingCardId
+    //   const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
+    //   let cards
+    //   let connections = []
+    //   if (multipleCardsSelectedIds.length) {
+    //     cards = multipleCardsSelectedIds
+    //   } else {
+    //     cards = [currentDraggingCardId]
+    //   }
+    //   cards = cards.map(cardId => context.rootGetters['currentCards/byId'](cardId))
+    //   cards = cards.filter(card => card)
+    //   cards.forEach(card => {
+    //     const update = { name: 'updateCard',
+    //       body: {
+    //         id: card.id,
+    //         x: card.x,
+    //         y: card.y,
+    //         z: card.z
+    //       }
+    //     }
+    //     context.dispatch('api/addToQueue', update, { root: true })
+    //     connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
+    //   })
+    //   connections = uniqBy(connections, 'id')
+    //   context.commit('currentConnections/updatePaths', connections, { root: true })
+    //   context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths' }, { root: true })
+    // },
     // currentCard/incrementZ
     // incrementSelectedCardsZ: (context) => {
     //   const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
@@ -1343,13 +1348,13 @@ export default {
     //   }
     // },
 
-    // TODO move to currentcards
-    showCardDetails: (context, cardId) => {
-      context.dispatch('incrementCardZ', cardId)
-      context.commit('cardDetailsIsVisibleForCardId', cardId, { root: true })
-      context.commit('parentCardId', cardId, { root: true })
-      context.commit('loadSpaceShowDetailsForCardId', '', { root: true })
-    },
+    // currentCards/showCardDetails
+    // showCardDetails: (context, cardId) => {
+    //   context.dispatch('incrementCardZ', cardId)
+    //   context.commit('cardDetailsIsVisibleForCardId', cardId, { root: true })
+    //   context.commit('parentCardId', cardId, { root: true })
+    //   context.commit('loadSpaceShowDetailsForCardId', '', { root: true })
+    // },
     notifyCollaboratorsCardUpdated: (context, { cardId, type }) => {
       if (context.state.name === 'Hello Kinopio') { return }
       if (notifiedCardAdded.includes(cardId)) { return }
@@ -1372,16 +1377,16 @@ export default {
     },
 
     // Comments
-    // TODO move to currentcards
-    toggleCommentIsVisible: (context, cardId) => {
-      utils.typeCheck({ value: cardId, type: 'string', origin: 'toggleCommentIsVisible' })
-      const card = context.rootGetters['currentCards/byId'](cardId)
-      const value = !card.commentIsVisible
-      context.dispatch('updateCard', {
-        id: cardId,
-        commentIsVisible: value
-      })
-    },
+    // currentcards/toggleComment
+    // toggleCommentIsVisible: (context, cardId) => {
+    //   utils.typeCheck({ value: cardId, type: 'string', origin: 'toggleCommentIsVisible' })
+    //   const card = context.rootGetters['currentCards/byId'](cardId)
+    //   const value = !card.commentIsVisible
+    //   context.dispatch('updateCard', {
+    //     id: cardId,
+    //     commentIsVisible: value
+    //   })
+    // },
 
     // Connections
 

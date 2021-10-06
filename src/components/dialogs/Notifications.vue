@@ -154,7 +154,7 @@ export default {
         this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
         this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
       } else {
-        this.$store.dispatch('currentSpace/showCardDetails', card.id)
+        this.$store.dispatch('currentCards/showCardDetails', card.id)
       }
       this.$emit('markAsRead', notification.id)
     },

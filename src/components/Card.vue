@@ -907,7 +907,7 @@ export default {
       if (!this.canEditSpace) { return }
       const value = !this.isChecked
       this.$store.dispatch('closeAllDialogs', 'Card.toggleCardChecked')
-      this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.id, value })
+      this.$store.dispatch('currentCards/toggleChecked', { cardId: this.id, value })
       this.cancelLocking()
       this.$store.commit('currentUserIsDraggingCard', false)
     },
@@ -1020,7 +1020,7 @@ export default {
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.dispatch('clearMultipleSelected')
       const cardId = this.id
-      this.$store.dispatch('currentSpace/toggleCommentIsVisible', cardId)
+      this.$store.dispatch('currentCards/toggleCommentIsVisible', cardId)
       this.$store.dispatch('currentCards/incrementZ', cardId)
       this.updateCardConnectionPathsIfOpenSpace()
     },

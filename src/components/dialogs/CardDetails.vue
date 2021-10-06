@@ -439,7 +439,7 @@ export default {
         return utils.nameIsChecked(this.name)
       },
       set (value) {
-        this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.card.id, value })
+        this.$store.dispatch('currentCards/toggleChecked', { cardId: this.card.id, value })
       }
     },
     cardPendingUpload () {
@@ -743,7 +743,7 @@ export default {
     addSplitCards (newCards) {
       const spaceBetweenCards = 12
       let prevCard = utils.clone(this.card)
-      this.$store.dispatch('currentSpace/addMultipleCards', newCards)
+      this.$store.dispatch('currentCards/addMultiple', newCards)
       this.$nextTick(() => {
         newCards = newCards.map(card => {
           const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)

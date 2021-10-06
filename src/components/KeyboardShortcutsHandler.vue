@@ -585,7 +585,7 @@ export default {
       this.$store.commit('multipleSelectedActionsIsVisible', false)
       cards.forEach(card => {
         const cardId = nanoid()
-        this.$store.dispatch('currentSpace/pasteCard', { card, cardId })
+        this.$store.dispatch('currentCards/paste', { card, cardId })
         this.$store.commit('addToMultipleCardsSelected', cardId)
       })
       this.$nextTick(() => {

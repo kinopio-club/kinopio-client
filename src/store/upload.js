@@ -190,7 +190,7 @@ export default {
       // remove placeholder from card names
       files.forEach((file, index) => {
         const cardId = cardIds[index]
-        context.dispatch('currentSpace/repaceInCardName', {
+        context.dispatch('currentCards/repaceInName', {
           cardId,
           match: placeholder,
           replace: ''

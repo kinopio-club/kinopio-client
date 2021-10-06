@@ -139,7 +139,7 @@ export default {
       },
       set (value) {
         this.cards.forEach(card => {
-          this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: card.id, value })
+          this.$store.dispatch('currentCards/toggleChecked', { cardId: card.id, value })
         })
         this.checkCardsCheckboxIsChecked()
       }

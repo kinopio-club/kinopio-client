@@ -165,7 +165,7 @@ export default {
       } else {
         const cardId = card.id || this.currentTag.cardId
         this.$store.dispatch('closeAllDialogs', 'showCardDetails')
-        this.$store.dispatch('currentSpace/showCardDetails', cardId)
+        this.$store.dispatch('currentCards/showCardDetails', cardId)
       }
     },
     changeSpace () {

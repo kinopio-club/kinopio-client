@@ -2,6 +2,7 @@ import utils from '@/utils.js'
 import cache from '@/cache.js'
 
 import nanoid from 'nanoid'
+import uniqBy from 'lodash-es/uniqBy'
 
 // import debounce from 'lodash-es/debounce'
 
@@ -189,6 +190,49 @@ export default {
       context.dispatch('currentSpace/notifyCollaboratorsCardUpdated', { cardId: id, type: 'createCard' }, { root: true })
       context.commit('addToCardMap', card)
     },
+    addMultiple: (context, newCards) => {
+      newCards.forEach(card => {
+        card = {
+          id: card.id || nanoid(),
+          x: card.x,
+          y: card.y,
+          z: card.z || context.state.ids.length + 1,
+          name: card.name,
+          frameId: card.frameId || 0,
+          userId: context.rootState.currentUser.id
+        }
+        context.commit('createCard', card)
+        context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
+        context.dispatch('broadcast/update', { updates: card, type: 'createCard', action: 'currentCards/addMultiple' }, { root: true })
+        context.commit('addToCardMap', 'card')
+      })
+    },
+    paste: (context, { card, cardId }) => {
+      utils.typeCheck({ value: card, type: 'object', origin: 'pasteCard' })
+      card.id = cardId || nanoid()
+      card.spaceId = currentSpaceId
+      const prevCards = context.getters.all
+      utils.uniqueCardPosition(card, prevCards)
+      const tags = utils.tagsFromStringWithoutBrackets(card.name)
+      if (tags) {
+        tags.forEach(tag => {
+          tag = utils.newTag({
+            name: tag,
+            defaultColor: context.rootState.currentUser.color,
+            cardId: card.id,
+            spaceId: context.state.id
+          })
+          context.dispatch('currentSpace/addTag', tag, { root: true }) // TODO to tag module?
+        })
+      }
+      context.commit('create', card)
+      context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
+      context.dispatch('broadcast/update', { updates: card, type: 'createCard', action: 'currentCards/paste' }, { root: true })
+      context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+        delta: 1
+      }, { root: true })
+      context.commit('addToCardMap', card)
+    },
 
     // update
 
@@ -204,10 +248,67 @@ export default {
         }
       }
       context.commit('update', card)
-      const update = { name: 'updateCard', action: 'currentCards/update', body: card }
-      context.dispatch('api/addToQueue', update, { root: true })
-      context.dispatch('broadcast/update', { updates: card, type: 'updateCard' }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'updateCard', body: card }, { root: true })
+      context.dispatch('broadcast/update', { updates: card, type: 'updateCard', action: 'currentCards/update' }, { root: true })
     },
+    replaceInName: (context, { cardId, match, replace }) => {
+      const card = context.getters.byId(cardId)
+      const name = card.name.replace(match, replace)
+      context.dispatch('update', {
+        id: cardId,
+        name
+      })
+    },
+    updateDimensions: (context) => {
+      let cards = context.getters.all
+      cards.forEach(card => {
+        const prevDimensions = {
+          width: card.width,
+          height: card.height
+        }
+        card = utils.updateCardDimentions(card)
+        const dimensionsChanged = card.width !== prevDimensions.width || card.height !== prevDimensions.height
+        if (!dimensionsChanged) { return }
+        const body = {
+          id: card.id,
+          width: Math.ceil(card.width),
+          height: Math.ceil(card.height)
+        }
+        context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
+        context.dispatch('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
+        context.commit('update', body)
+      })
+    },
+    toggleChecked (context, { cardId, value }) {
+      utils.typeCheck({ value, type: 'boolean', origin: 'toggleChecked' })
+      utils.typeCheck({ value: cardId, type: 'string', origin: 'toggleChecked' })
+      const card = context.getters.byId(cardId)
+      let name = card.name
+      const checkbox = utils.checkboxFromString(name)
+      name = name.replace(checkbox, '')
+      if (value) {
+        name = `[x] ${name}`
+      } else {
+        name = `[] ${name}`
+      }
+      context.dispatch('update', {
+        id: cardId,
+        name,
+        nameUpdatedAt: new Date()
+      })
+    },
+    toggleCommentIsVisible: (context, cardId) => {
+      utils.typeCheck({ value: cardId, type: 'string', origin: 'toggleCommentIsVisible' })
+      const card = context.getters.byId(cardId)
+      const value = !card.commentIsVisible
+      context.dispatch('updateCard', {
+        id: cardId,
+        commentIsVisible: value
+      })
+    },
+
+    // drag
+
     drag: (context, { endCursor, prevCursor, delta }) => {
       const spaceId = context.rootState.currentSpace.id
       const currentDraggingCardId = context.rootState.currentDraggingCardId
@@ -251,6 +352,34 @@ export default {
       //   context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
       // })
     },
+    afterDrag: (context) => {
+      const currentDraggingCardId = context.rootState.currentDraggingCardId
+      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
+      let cards
+      let connections = []
+      if (multipleCardsSelectedIds.length) {
+        cards = multipleCardsSelectedIds
+      } else {
+        cards = [currentDraggingCardId]
+      }
+      cards = cards.map(id => context.getters.byId(id))
+      cards = cards.filter(card => card)
+      cards.forEach(card => {
+        const update = { name: 'updateCard',
+          body: {
+            id: card.id,
+            x: card.x,
+            y: card.y,
+            z: card.z
+          }
+        }
+        context.dispatch('api/addToQueue', update, { root: true })
+        connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
+      })
+      connections = uniqBy(connections, 'id')
+      context.commit('currentConnections/updatePaths', connections, { root: true })
+      context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', action: 'currentCards/dragged' }, { root: true })
+    },
 
     // z-index
 
@@ -264,9 +393,7 @@ export default {
       }
     },
     clearAllZs: (context) => {
-      // let cards = context.state.cards
       let cards = context.getters.all
-      // todo make more efficient w ids array
       cards.forEach(card => {
         const body = { id: card.id, z: 0 }
         const update = { name: 'updateCard', body }
@@ -278,7 +405,6 @@ export default {
     incrementZ: (context, id) => {
       const maxInt = Number.MAX_SAFE_INTEGER - 1000
       let cards = context.getters.all
-      // console.log('🎑',cards)
       let highestCardZ = utils.highestCardZ(cards)
       if (highestCardZ > maxInt) {
         context.dispatch('clearAllZs')
@@ -336,6 +462,15 @@ export default {
       context.commit('currentCards/addToCardMap', card, { root: true })
     },
 
+    // card details
+
+    showCardDetails: (context, cardId) => {
+      context.dispatch('incrementZ', cardId)
+      context.commit('cardDetailsIsVisibleForCardId', cardId, { root: true })
+      context.commit('parentCardId', cardId, { root: true })
+      context.commit('loadSpaceShowDetailsForCardId', '', { root: true })
+    },
+
     // card map
 
     refreshCardMap: (context) => {
@@ -345,9 +480,6 @@ export default {
       })
       context.commit('cardMap', cardMap)
     }
-
-    // TODO port/group rest of currentspace card actions
-
   },
   getters: {
     byId: (state) => (id) => {
