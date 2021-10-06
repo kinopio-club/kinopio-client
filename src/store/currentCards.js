@@ -487,6 +487,20 @@ export default {
     },
     all: (state) => {
       return state.ids.map(id => state.cards[id])
+    },
+    withSpaceLinks: (state, getters) => {
+      let cards = getters.all
+      return cards.filter(card => utils.idIsValid(card.linkToSpaceId))
+    },
+    withTagName: (state, getters) => (tagName) => {
+      let cards = getters.all
+      return cards.filter(card => {
+        const tags = utils.tagsFromStringWithoutBrackets(card.name)
+        if (tags) {
+          return tags.includes(tagName)
+        }
+      })
     }
+
   }
 }

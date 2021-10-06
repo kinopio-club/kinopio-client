@@ -254,7 +254,7 @@ export default {
     },
     async updateCards () {
       this.cards = []
-      const cardsInCurrentSpace = utils.clone(this.$store.getters['currentSpace/cardsWithTagName'](this.name))
+      const cardsInCurrentSpace = utils.clone(this.$store.getters['currentCards/withTagName'](this.name))
       const cardsInCachedSpaces = cache.allCardsByTagName(this.name)
       // cache cards
       let cacheCards = cardsInCurrentSpace.concat(cardsInCachedSpaces)

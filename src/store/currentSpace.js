@@ -437,7 +437,7 @@ export default {
       if (spaceId) {
         links = [{ linkToSpaceId: spaceId }]
       } else {
-        links = context.getters.cardsWithSpaceLinks
+        links = context.rootGetters['currentCards/withSpaceLinks']
       }
       if (!links.length) { return }
       links.forEach(link => {
@@ -1673,20 +1673,22 @@ export default {
     // cardById: (state) => (id) => {
     //   return state.cards.find(card => card.id === id)
     // },
-    cardsWithSpaceLinks: (state) => {
-      let cards = state.cards
-      let links = cards.filter(card => utils.idIsValid(card.linkToSpaceId))
-      return links
-    },
-    cardsWithTagName: (state, getters) => (tagName) => {
-      let cards = state.cards
-      return cards.filter(card => {
-        const tags = utils.tagsFromStringWithoutBrackets(card.name)
-        if (tags) {
-          return tags.includes(tagName)
-        }
-      })
-    },
+    // currentCards/withSpaceLinks
+    // cardsWithSpaceLinks: (state) => {
+    //   let cards = state.cards
+    //   let links = cards.filter(card => utils.idIsValid(card.linkToSpaceId))
+    //   return links
+    // },
+    // currentCards/withTagName
+    // cardsWithTagName: (state) => (tagName) => {
+    //   let cards = state.cards
+    //   return cards.filter(card => {
+    //     const tags = utils.tagsFromStringWithoutBrackets(card.name)
+    //     if (tags) {
+    //       return tags.includes(tagName)
+    //     }
+    //   })
+    // },
 
     // Tags
     tags: (state, getters, rootState) => {
