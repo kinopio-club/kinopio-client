@@ -53,7 +53,7 @@ export default {
       })
     },
     addConnectionType () {
-      this.$store.dispatch('currentSpace/addConnectionType', { color: this.nextConnectionTypeColor })
+      this.$store.dispatch('currentConnections/addType', { color: this.nextConnectionTypeColor })
       const types = utils.clone(this.connectionTypes)
       const newType = last(types)
       this.changeConnectionTypes(newType)

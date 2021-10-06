@@ -285,9 +285,7 @@ export default {
     y () { return this.card.y },
     z () { return this.card.z },
     commentIsVisible () { return this.card.commentIsVisible },
-    connectionTypes () { return this.$store.getters['currentConnections/allTypes'] },
-    // this.$store.dispatch('currentCards/update', card)
-
+    connectionTypes () { return this.$store.getters['currentConnections/typesByCardId'](this.id) },
     newConnectionColor () { return this.$store.state.currentConnectionColor },
     name () {
       this.updateMediaUrls()
@@ -991,16 +989,16 @@ export default {
       const shiftKey = event.shiftKey
       const connectionType = this.$store.getters['currentConnections/typeForNewConnections']
       if (!connectionType) {
-        this.$store.dispatch('currentSpace/addConnectionType')
+        this.$store.dispatch('currentConnections/addType')
       }
       if (shouldUseLastConnectionType && shiftKey) {
-        this.$store.dispatch('currentSpace/addConnectionType')
+        this.$store.dispatch('currentConnections/addType')
         return
       }
       if (shiftKey || shouldUseLastConnectionType) {
         return
       }
-      this.$store.dispatch('currentSpace/addConnectionType')
+      this.$store.dispatch('currentConnections/addType')
     },
     startConnecting (event) {
       if (!this.canEditSpace) { return }

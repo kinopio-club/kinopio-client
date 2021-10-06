@@ -306,7 +306,7 @@ export default {
       const shiftKey = event.shiftKey
       const shouldAddType = !connectionType || (shouldUseLastConnectionType && shiftKey) || (!shouldUseLastConnectionType && !shiftKey)
       if (shouldAddType) {
-        this.$store.dispatch('currentSpace/addConnectionType')
+        this.$store.dispatch('currentConnections/addType')
       }
       connectionType = last(this.$store.getters['currentConnections/allTypes'])
       return connectionType

@@ -845,7 +845,8 @@ export default {
       context.commit('clearSearch', null, { root: true })
       // restore local space
       context.commit('restoreSpace', emptySpace)
-      context.dispatch('restoreSpaceInChunks', { space: utils.normalizeSpace(cachedSpace) })
+      space = utils.normalizeSpace(cachedSpace)
+      context.dispatch('restoreSpaceInChunks', { space })
       context.commit('undoHistory/clear', null, { root: true })
       // restore remote space
       let remoteSpace = await context.dispatch('getRemoteSpace', space)

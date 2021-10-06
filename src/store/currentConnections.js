@@ -161,7 +161,7 @@ export default {
       context.dispatch('broadcast/update', { updates: connection, type: 'updateConnectionTypeForConnection', action: 'currentConnections/update' }, { root: true })
     },
     updatePaths: (context, { cardId, shouldUpdateApi, connections }) => {
-      connections = connections || context.getters.byCardId(cardId)
+      connections = utils.clone(connections || context.getters.byCardId(cardId))
       connections.map(connection => {
         connection.path = utils.connectionBetweenCards(connection.startCardId, connection.endCardId)
         connection.spaceId = currentSpaceId
@@ -256,7 +256,6 @@ export default {
     all: (state) => {
       return state.ids.map(id => state.connections[id])
     },
-
     typeById: (state) => (id) => {
       return state.types[id]
     },
@@ -278,6 +277,14 @@ export default {
         let start = connection.startCardId === cardId
         let end = connection.endCardId === cardId
         return start || end
+      })
+    },
+    typesByCardId: (state, getters) => (cardId) => {
+      const connections = getters.byCardId(cardId)
+      const types = getters.allTypes
+      const typeIds = connections.map(connection => connection.connectionTypeId)
+      return types.filter(type => {
+        return typeIds.includes(type.id)
       })
     },
     typeForNewConnections: (state, getters, rootState) => {

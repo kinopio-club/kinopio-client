@@ -348,7 +348,7 @@ export default {
       const hasConnectionType = Boolean(this.$store.getters['currentConnections/typeForNewConnections'])
       const shouldUseLastConnectionType = this.$store.state.currentUser.shouldUseLastConnectionType
       if ((shouldUseLastConnectionType || useSiblingConnectionType) && hasConnectionType) { return }
-      this.$store.dispatch('currentSpace/addConnectionType')
+      this.$store.dispatch('currentConnections/addType')
       useSiblingConnectionType = true
     },
 
