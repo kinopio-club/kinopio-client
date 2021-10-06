@@ -135,7 +135,7 @@ export default {
           id: this.currentConnectionType.id,
           name: newName
         }
-        this.$store.dispatch('currentSpace/updateConnectionType', connectionType)
+        this.$store.dispatch('currentConnections/updateType', connectionType)
       }
     },
     connectionTypesFiltered () {
@@ -183,7 +183,7 @@ export default {
     removeConnection () {
       this.$store.dispatch('currentConnections/remove', this.currentConnection)
       this.$store.dispatch('closeAllDialogs', 'ConnectionDetails.removeConnection')
-      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
+      this.$store.dispatch('currentConnections/removeUnusedTypes')
     },
     changeConnectionType (type) {
       this.$store.dispatch('currentConnections/update', {
@@ -210,7 +210,7 @@ export default {
         id: this.currentConnectionType.id,
         color: newColor
       }
-      this.$store.dispatch('currentSpace/updateConnectionType', connectionType)
+      this.$store.dispatch('currentConnections/updateType', connectionType)
     },
     focusName () {
       this.$nextTick(() => {
@@ -277,7 +277,7 @@ export default {
   },
   watch: {
     currentConnection (current) {
-      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
+      this.$store.dispatch('currentConnections/removeUnusedTypes')
       this.$nextTick(() => {
         if (this.visible) {
           this.colorPickerIsVisible = false

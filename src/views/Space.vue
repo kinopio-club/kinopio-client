@@ -329,7 +329,7 @@ export default {
         const connection = { startCardId, endCardId, path }
         this.addConnection(connection)
       } else {
-        this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
+        this.$store.dispatch('currentConnections/removeUnusedTypes')
       }
     },
     // shouldContinueConnecting (event) {

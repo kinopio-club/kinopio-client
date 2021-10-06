@@ -412,7 +412,7 @@ export default {
       }
     },
     updateOtherUsers: async (context) => {
-      const cards = utils.clone(context.state.cards)
+      const cards = utils.clone(context.rootGetters['currentCards/all'])
       let userIds = []
       const spaceMemberIds = utils.clone(context.state.users).map(user => user.id)
       const spaceCollaboratorIds = utils.clone(context.state.collaborators).map(user => user.id)
@@ -564,7 +564,7 @@ export default {
       const user = context.rootState.currentUser
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       context.dispatch('createNewSpace')
-      const cards = context.state.cards
+      const cards = context.rootGetters['currentCards/all']
       nextTick(() => {
         if (cards.length) {
           context.dispatch('currentConnections/updatePaths', { cardId: cards[1].id, connections: context.state.connections })
@@ -693,7 +693,7 @@ export default {
       })
     },
     removeEmptyCards: (context) => {
-      let cards = context.state.cards
+      let cards = context.rootGetters['currentCards/all']
       cards.forEach(card => {
         if (!card.name) {
           context.dispatch('currentCards/remove', card, { root: true })
@@ -976,7 +976,7 @@ export default {
     scrollCardsIntoView: (context) => {
       if (context.rootState.userHasScrolled) { return }
       const origin = { x: 0, y: 0 }
-      let cards = utils.clone(context.state.cards)
+      let cards = utils.clone(context.rootGetters['currentCards/all'])
       cards = cards.map(card => {
         card = {
           x: card.x,
@@ -1034,6 +1034,7 @@ export default {
 
     // Cards
 
+    // TODO POST THIS to currentCards
     // currentCards/add
     // addCard: (context, { position, isParentCard, name, id }) => {
     //   utils.typeCheck({ value: position, type: 'object', origin: 'addCard' })
@@ -1041,7 +1042,7 @@ export default {
     //     context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
     //     return
     //   }
-    //   let cards = context.state.cards
+    //   let cards = context.rootGetters['currentCards/all']
     //   const highestCardZ = utils.highestCardZ(cards)
     //   let card = {
     //     id: id || nanoid(),
@@ -1078,7 +1079,7 @@ export default {
           id: card.id || nanoid(),
           x: card.x,
           y: card.y,
-          z: context.state.cards.length + 1,
+          z: context.rootGetters['currentCards/all'].length + 1,
           name: card.name,
           frameId: card.frameId || 0,
           userId: context.rootState.currentUser.id
@@ -1099,7 +1100,7 @@ export default {
       card = utils.clone(card)
       card.id = cardId || nanoid()
       card.spaceId = context.state.id
-      const existingCards = context.state.cards
+      const existingCards = context.rootGetters['currentCards/all']
       utils.uniqueCardPosition(card, existingCards)
       const tags = utils.tagsFromStringWithoutBrackets(card.name)
       if (tags) {
@@ -1150,7 +1151,7 @@ export default {
     //   context.commit('undoHistory/add', update, { root: true })
     // },
     updateCardsDimensions: (context) => {
-      let cards = utils.clone(context.state.cards)
+      let cards = utils.clone(context.rootGetters['currentCards/all'])
       cards.forEach(card => {
         const prevDimensions = {
           width: card.width,
@@ -1191,7 +1192,7 @@ export default {
     },
     // currentCards/clearAllZs
     // clearAllCardsZ: (context) => {
-    //   let cards = context.state.cards
+    //   let cards = context.rootGetters['currentCards/all']
     //   cards.forEach(card => {
     //     const body = { id: card.id, z: 0 }
     //     const update = { name: 'updateCard', body }
@@ -1203,7 +1204,7 @@ export default {
     // currentCards/incrementZ
     // incrementCardZ: (context, cardId) => {
     //   const maxInt = Number.MAX_SAFE_INTEGER - 1000
-    //   let cards = context.state.cards
+    //   let cards = context.rootGetters['currentCards/all']
     //   let highestCardZ = utils.highestCardZ(cards)
     //   if (highestCardZ > maxInt) {
     //     context.dispatch('clearAllCardsZ')
@@ -1423,7 +1424,7 @@ export default {
     // currentConnections/correctPaths
     // updateIncorrectCardConnectionPaths: (context, { shouldUpdateApi }) => {
     //   if (!context.rootState.webfontIsLoaded) { return }
-    //   const cardIds = context.state.cards.map(card => card.id)
+    //   const cardIds = context.rootGetters['currentCards/all'].map(card => card.id)
     //   let connections = []
     //   context.state.connections.forEach(connection => {
     //     const startCardExists = cardIds.includes(connection.startCardId)
@@ -1526,28 +1527,30 @@ export default {
     //   context.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
     //   context.commit('undoHistory/add', { name: 'addConnectionType', body: connectionType }, { root: true }) // origin
     // },
-    // shim for undoHistory.playback
-    removeConnectionType: (context, type) => {
-      context.commit('removeType', type) //
-    },
-    updateConnectionType: (context, connectionType) => {
-      context.commit('updateType', connectionType) //
-      context.dispatch('broadcast/update', { updates: connectionType, type: 'updateConnectionType' }, { root: true }) // origin
-      const update = { name: 'updateConnectionType', body: connectionType }
-      context.dispatch('api/addToQueue', update, { root: true })
-    },
-    removeUnusedConnectionTypes: (context) => {
-      const connectionTypes = context.state.connectionTypes
-      const connections = context.state.connections
-      const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
-      const removeConnectionTypes = connectionTypes.filter(type => !connectionTypeIds.includes(type.id))
-      removeConnectionTypes.forEach(type => {
-        const update = { name: 'removeConnectionType', body: type }
-        context.dispatch('api/addToQueue', update, { root: true })
-        context.commit('removeType', type)
-        context.dispatch('broadcast/update', { updates: type, type: 'removeConnectionType' }, { root: true }) // origin
-      })
-    },
+    // remove shim
+    // removeConnectionType: (context, type) => {
+    //   context.commit('removeType', type) //
+    // },
+    // currentConnections/updateType
+    // updateConnectionType: (context, connectionType) => {
+    //   context.commit('updateType', connectionType) //
+    //   context.dispatch('broadcast/update', { updates: connectionType, type: 'updateConnectionType' }, { root: true }) // origin
+    //   const update = { name: 'updateConnectionType', body: connectionType }
+    //   context.dispatch('api/addToQueue', update, { root: true })
+    // },
+    // currentConnections/removeUnusedTypes
+    // removeUnusedConnectionTypes: (context) => {
+    //   const connectionTypes = context.state.connectionTypes
+    //   const connections = context.state.connections
+    //   const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
+    //   const removeConnectionTypes = connectionTypes.filter(type => !connectionTypeIds.includes(type.id))
+    //   removeConnectionTypes.forEach(type => {
+    //     const update = { name: 'removeConnectionType', body: type }
+    //     context.dispatch('api/addToQueue', update, { root: true })
+    //     context.commit('removeType', type)
+    //     context.dispatch('broadcast/update', { updates: type, type: 'removeConnectionType', mutation: 'currentConnections/removeType' }, { root: true }) // origin
+    //   })
+    // },
 
     // Background
 

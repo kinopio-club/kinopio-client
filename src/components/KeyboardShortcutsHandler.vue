@@ -538,7 +538,7 @@ export default {
           this.removeCardById(cardId)
         }
       })
-      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
+      this.$store.dispatch('currentConnections/removeUnusedTypes')
       this.clearAllSelectedCards()
       this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.remove')
     },

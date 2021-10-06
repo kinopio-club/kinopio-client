@@ -150,7 +150,7 @@ export default {
     removeConnection () {
       if (!this.isSpaceMember) { return }
       this.$store.dispatch('currentConnections/remove', this.connection)
-      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
+      this.$store.dispatch('currentConnections/removeUnusedTypes')
     },
     checkIsMultiTouch (event) {
       isMultiTouch = false

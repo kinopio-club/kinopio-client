@@ -177,7 +177,7 @@ export default {
       context.commit('create', card)
 
       card.spaceId = currentSpaceId
-      const update = { name: 'createCard', mutation: 'currentCards/add', body: card }
+      const update = { name: 'createCard', action: 'currentCards/add', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
       context.dispatch('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
 
@@ -204,7 +204,7 @@ export default {
         }
       }
       context.commit('update', card)
-      const update = { name: 'updateCard', mutation: 'currentCards/update', body: card }
+      const update = { name: 'updateCard', action: 'currentCards/update', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
       context.dispatch('broadcast/update', { updates: card, type: 'updateCard' }, { root: true })
     },
@@ -299,7 +299,7 @@ export default {
       const cardHasContent = Boolean(card.name)
       if (cardHasContent) {
         context.commit('remove', card)
-        const update = { name: 'removeCard', mutation: 'currentCards/remove', body: card }
+        const update = { name: 'removeCard', action: 'currentCards/remove', body: card }
         context.dispatch('api/addToQueue', update, { root: true })
       } else {
         context.dispatch('removePermanent', card)
@@ -330,7 +330,7 @@ export default {
     },
     restoreRemoved: (context, card) => {
       context.commit('restoreRemovedCard', card)
-      const update = { name: 'restoreRemovedCard', mutation: 'currentCards/restoreRemoved', body: card }
+      const update = { name: 'restoreRemovedCard', action: 'currentCards/restoreRemoved', body: card }
       context.dispatch('api/addToQueue', update, { root: true })
       context.dispatch('broadcast/update', { updates: card, type: 'restoreRemovedCard' }, { root: true })
       context.commit('currentCards/addToCardMap', card, { root: true })

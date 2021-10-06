@@ -389,7 +389,7 @@ export default {
       cardIds.forEach(cardId => {
         this.$store.dispatch('currentConnections/removeFromSelectedCard', cardId)
       })
-      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
+      this.$store.dispatch('currentConnections/removeUnusedTypes')
     },
     remove () {
       this.editableConnections.forEach(connection => this.$store.dispatch('currentConnections/remove', connection))
@@ -414,7 +414,7 @@ export default {
           this.checkIsCardsConnected()
           this.checkCardsHaveCheckboxes()
           this.checkCardsCheckboxIsChecked()
-          this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
+          this.$store.dispatch('currentConnections/removeUnusedTypes')
           this.scrollIntoView()
           this.closeDialogs()
         }

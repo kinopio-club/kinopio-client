@@ -9,6 +9,12 @@ const self = {
   mutations: {
     add: (state, item) => {
       utils.typeCheck({ value: item, type: 'object', origin: 'history add' })
+      // {action} is a websocket broadcast directive to other clients
+      // for undo: maybe each broadcast has a {undoAction} attr? or maybe that's better defined here?
+
+      // -> to use actions: because on undo you want to broadcast change too
+      // but then it'll add itself back into the undo stack .. which might be what i want?
+
       // ?TODO explicitly allow adding events addcard, removecard, etc. (eg no painting)
       items.push(item)
     },

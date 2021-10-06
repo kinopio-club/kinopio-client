@@ -257,7 +257,7 @@ export default {
           shouldIncrement: true
         })
       }
-      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
+      this.$store.dispatch('currentConnections/removeUnusedTypes')
       this.$store.dispatch('clearMultipleSelected')
       this.$store.dispatch('closeAllDialogs', 'MoveOrCopyToSpace.moveOrCopyToSpace')
     },

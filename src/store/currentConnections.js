@@ -111,8 +111,6 @@ export default {
   },
   actions: {
 
-    // TODO port currentspace connection/type actions
-
     // init
 
     updateSpaceId: (context, spaceId) => {
@@ -132,7 +130,7 @@ export default {
       connection.userId = context.rootState.currentUser.id
       connection.connectionTypeId = type.id
       context.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
-      context.dispatch('broadcast/update', { updates: connection, type: 'addConnection', mutation: 'currentConnections/create' }, { root: true })
+      context.dispatch('broadcast/update', { updates: connection, type: 'addConnection', action: 'currentConnections/add' }, { root: true })
       context.commit('create', connection)
     },
     addType: (context, options) => {
@@ -149,7 +147,7 @@ export default {
         })
       }
       context.commit('createType', connectionType)
-      context.dispatch('broadcast/update', { updates: connectionType, type: 'addConnectionType', mutation: 'currentConnections/createType' }, { root: true })
+      context.dispatch('broadcast/update', { updates: connectionType, type: 'addConnectionType', action: 'currentConnections/addType' }, { root: true })
       context.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
     },
 
@@ -159,7 +157,7 @@ export default {
       context.commit('update', connection)
       const update = { name: 'updateConnection', body: connection }
       context.dispatch('api/addToQueue', update, { root: true })
-      context.dispatch('broadcast/update', { updates: connection, type: 'updateConnectionTypeForConnection', mutation: 'currentConnections/update' }, { root: true })
+      context.dispatch('broadcast/update', { updates: connection, type: 'updateConnectionTypeForConnection', action: 'currentConnections/update' }, { root: true })
     },
     updatePaths: (context, { cardId, shouldUpdateApi, connections }) => {
       connections = connections || context.getters.byCardId(cardId)
@@ -171,7 +169,7 @@ export default {
         }
         const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
         if (userCanEdit) {
-          context.dispatch('broadcast/update', { updates: connection, type: 'updateConnection', mutation: 'currentConnections/update' }, { root: true })
+          context.dispatch('broadcast/update', { updates: connection, type: 'updateConnection', action: 'currentConnections/updatePaths' }, { root: true })
           context.commit('update', connection)
         } else {
           context.commit('updateReadOnly', connection)
@@ -200,6 +198,12 @@ export default {
       })
       context.dispatch('updatePaths', { connections, shouldUpdateApi })
     },
+    updateType: (context, type) => {
+      context.commit('updateType', type)
+      context.dispatch('broadcast/update', { updates: type, type: 'updateConnectionType', action: 'currentConnections/updateType' }, { root: true })
+      const update = { name: 'updateConnectionType', body: type }
+      context.dispatch('api/addToQueue', update, { root: true })
+    },
 
     // remove
 
@@ -212,7 +216,7 @@ export default {
     },
     removeFromSelectedCard: (context, cardId) => {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
-      const connections = context.state.connections
+      const connections = context.getters.all
       connections.map(connection => {
         const { startCardId, endCardId } = connection
         const start = startCardId === cardId && multipleCardsSelectedIds.includes(endCardId)
@@ -228,7 +232,20 @@ export default {
       context.commit('remove', connection)
       const update = { name: 'removeConnection', body: connection }
       context.dispatch('api/addToQueue', update, { root: true })
-      context.dispatch('broadcast/update', { updates: connection, type: 'removeConnection', mutation: 'currentConnections/remove' }, { root: true })
+      context.dispatch('broadcast/update', { updates: connection, type: 'removeConnection', action: 'currentConnections/remove' }, { root: true })
+    },
+    removeType: (context, type) => {
+      const update = { name: 'removeConnectionType', body: type }
+      context.dispatch('api/addToQueue', update, { root: true })
+      context.commit('removeType', type)
+      context.dispatch('broadcast/update', { updates: type, type: 'removeConnectionType', action: 'currentConnections/removeType' }, { root: true })
+    },
+    removeUnusedTypes: (context) => {
+      const types = context.getters.allTypes
+      const typesToRemove = types.filter(type => !context.state.typeIds.includes(type.id))
+      typesToRemove.forEach(type => {
+        context.dispatch('removeType', type)
+      })
     }
 
   },
