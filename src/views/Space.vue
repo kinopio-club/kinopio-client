@@ -3,8 +3,6 @@ main.space(
   :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady}"
   @mousedown.left="initInteractions"
   @touchstart="initInteractions"
-  @mouseup.left="stopInteractions"
-  @touchstop="stopInteractions"
   @gesturestart="updateVisualViewport"
   @gesturechange="updateVisualViewport"
   :style="styles"
