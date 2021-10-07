@@ -66,7 +66,7 @@ export default {
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     id () { return this.connection.id },
-    connectionType () { return this.$store.getters['currentConnections/typeById'](this.connectionTypeId) },
+    connectionType () { return this.$store.getters['currentConnections/typeByTypeId'](this.connectionTypeId) },
     connectionTypeId () { return this.connection.connectionTypeId },
     startCardId () { return this.connection.startCardId },
     endCardId () { return this.connection.endCardId },

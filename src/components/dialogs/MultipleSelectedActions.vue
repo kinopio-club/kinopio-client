@@ -167,13 +167,13 @@ export default {
     connectionTypes () {
       const connectionTypes = uniq(this.multipleConnectionsSelectedIds.map(id => {
         const connection = this.$store.getters['currentConnections/byId'](id)
-        return this.$store.getters['currentConnections/typeById'](connection.connectionTypeId)
+        return this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
       }))
       return connectionTypes
     },
     editableConnectionTypes () {
       return uniq(this.editableConnections.map(connection => {
-        return this.$store.getters['currentConnections/typeById'](connection.connectionTypeId)
+        return this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
       }))
     },
     allLabelsAreVisible () {

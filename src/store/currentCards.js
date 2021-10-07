@@ -28,11 +28,6 @@ export default {
       state.removedCards = []
       state.cardMap = []
     },
-    create: (state, card) => {
-      state.ids.push(card.id)
-      state.cards[card.id] = card
-      cache.updateSpace('cards', state.cards, currentSpaceId)
-    },
     restore: (state, cards) => {
       let cardIds = []
       cards.forEach(card => {
@@ -40,6 +35,14 @@ export default {
         state.cards[card.id] = card
       })
       state.ids = state.ids.concat(cardIds)
+    },
+
+    // create
+
+    create: (state, card) => {
+      state.ids.push(card.id)
+      state.cards[card.id] = card
+      cache.updateSpace('cards', state.cards, currentSpaceId)
     },
 
     // update
@@ -100,7 +103,7 @@ export default {
       const index = state.removedCards.findIndex(removedCard => card.id === removedCard.id)
       // restore
       state.ids.push(card.id)
-      card = utils.normalizeCards(card)
+      card = utils.normalizeItems(card)
       state.cards[card.id] = card
       cache.updateSpace('cards', state.cards, currentSpaceId)
       // update removed

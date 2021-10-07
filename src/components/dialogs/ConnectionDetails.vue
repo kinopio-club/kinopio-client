@@ -91,7 +91,7 @@ export default {
   computed: {
     visible () { return Boolean(this.$store.state.connectionDetailsIsVisibleForConnectionId) },
     labelIsVisible () { return this.currentConnection.labelIsVisible },
-    currentConnectionType () { return this.$store.getters['currentConnections/typeById'](this.currentConnection.connectionTypeId) },
+    currentConnectionType () { return this.$store.getters['currentConnections/typeByConnection'](this.currentConnection) },
     connectionTypes () { return this.$store.getters['currentConnections/allTypes'] },
     typeColor () { return this.currentConnectionType.color },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },

@@ -37,10 +37,19 @@ export default {
         state.connections[connection.id] = connection
       })
       state.ids = state.ids.concat(connectionIds)
-      console.log('🍅', state.connections, state.ids)
+    },
+    restoreMatchingTypes: (state, { connections, types }) => {
+      const typesToRestore = connections.map(connection => connection.connectionTypeId)
+      let typeIds = []
+      typesToRestore.forEach(id => {
+        if (typeIds.includes(id)) { return }
+        typeIds.push(id)
+        state.types[id] = types[id]
+      })
+      state.typeIds = state.typeIds.concat(typeIds)
     },
 
-    // restoreTypes: (state, types) => {},
+    // create
 
     create: (state, connection) => {
       state.ids.push(connection.id)
@@ -256,7 +265,7 @@ export default {
     all: (state) => {
       return state.ids.map(id => state.connections[id])
     },
-    typeById: (state) => (id) => {
+    typeByTypeId: (state) => (id) => {
       return state.types[id]
     },
     allTypes: (state) => {
@@ -290,6 +299,10 @@ export default {
     typeForNewConnections: (state, getters, rootState) => {
       const typeId = last(state.typeIds)
       return state.types[typeId]
+    },
+    typeByConnection: (state, getters) => (connection) => {
+      connection = getters.byId(connection.id)
+      return getters.typeByTypeId(connection.connectionTypeId)
     }
   }
 }

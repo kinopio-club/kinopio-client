@@ -351,7 +351,7 @@ export default {
       if (!connection) { return }
       const isConnected = connection.startCardId === this.id || connection.endCardId === this.id
       if (!isConnected) { return }
-      const connectionType = this.$store.getters['currentConnections/typeById'](connection.connectionTypeId)
+      const connectionType = this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
       return connectionType.color
     },
     connectedToCardBeingDraggedColor () {
@@ -362,7 +362,7 @@ export default {
       connections = connections.filter(connection => this.connectionIsBeingDragged(connection))
       const connection = connections.find(connection => connection.startCardId === this.id || connection.endCardId === this.id)
       if (!connection) { return }
-      const connectionType = this.$store.getters['currentConnections/typeById'](connection.connectionTypeId)
+      const connectionType = this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
       return connectionType.color
     },
     connectedToCardDetailsVisibleColor () {
@@ -373,7 +373,7 @@ export default {
       connections = connections.filter(connection => connection.startCardId === this.id || connection.endCardId === this.id)
       const connection = connections[0]
       if (!connection) { return }
-      const connectionType = this.$store.getters['currentConnections/typeById'](connection.connectionTypeId)
+      const connectionType = this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
       return connectionType.color
     },
     dateUpdatedAt () {

@@ -439,23 +439,26 @@ export default {
     return Math.round(angleDegrees)
   },
 
+  // normalize items
+
+  normalizeItems (items) {
+    let normalizedItems = {}
+    items.forEach(item => {
+      normalizedItems[item.id] = item
+    })
+    return normalizedItems
+  },
+  denormalizeItems (normalizedItems) {
+    let items = []
+    const ids = Object.keys(normalizedItems)
+    ids.forEach(id => {
+      items.push(normalizedItems[id])
+    })
+    return items
+  },
+
   // Cards
 
-  normalizeCards (cards) {
-    let normalizedCards = {}
-    cards.forEach(card => {
-      normalizedCards[card.id] = card
-    })
-    return normalizedCards
-  },
-  denormalizeCards (normalizedCards) {
-    let cards = []
-    const ids = Object.keys(normalizedCards)
-    ids.forEach(id => {
-      cards.push(normalizedCards[id])
-    })
-    return cards
-  },
   emptyCard () {
     return { width: 76, height: 32 }
   },
@@ -505,13 +508,6 @@ export default {
 
   // Connection Path Utils 🐙
 
-  normalizeConnections (connections) {
-    let normalizedConnections = {}
-    connections.forEach(connection => {
-      normalizedConnections[connection.id] = connection
-    })
-    return normalizedConnections
-  },
   spaceZoomDecimal () {
     const floatPattern = /[+-]?\d+(\.\d+)?/g
     const element = document.querySelector('.space')

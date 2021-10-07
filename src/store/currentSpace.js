@@ -660,7 +660,6 @@ export default {
       const isSpaceMember = context.rootGetters['currentUser/isSpaceMember'](remoteSpace)
       const canEditSpace = context.rootGetters['currentUser/canEditSpace'](remoteSpace)
       if (isSpaceMember && !remoteSpace.isRemoved) {
-        console.log('🌌', remoteSpace)
         cache.saveSpace(remoteSpace)
       } else if (!isSpaceMember && canEditSpace) {
         context.commit('addNotification', { message: 'This space is open, which means you can add to it too', icon: 'open', type: 'success' }, { root: true })
@@ -715,6 +714,7 @@ export default {
     restoreSpaceInChunks: (context, { space, isRemote }) => {
       // TODO merge strategy for isRemote?, updating each card that's diff?
       if (!utils.objectHasKeys(space)) { return }
+      console.log('🌌 Restoring space', space, { 'isRemote': isRemote })
       const chunkSize = 50
       const timeStart = utils.normalizeToUnixTime(new Date())
       const origin = { x: window.scrollX, y: window.scrollY }
@@ -723,10 +723,10 @@ export default {
       let ids
       // Oct 2020 migration
       if (Array.isArray(cards)) {
-        cards = utils.normalizeCards(cards)
+        cards = utils.normalizeItems(cards)
       }
       if (Array.isArray(connections)) {
-        connections = utils.normalizeConnections(connections)
+        connections = utils.normalizeItems(connections)
       }
       // sort cards by distance from viewport origin
       ids = Object.keys(cards)
@@ -756,6 +756,7 @@ export default {
       context.commit('restoreSpace', space)
       context.dispatch('loadBackground')
       // init chunks
+      const connectionTypes = utils.normalizeItems(space.connectionTypes)
       const cardChunks = utils.splitArrayIntoChunks(cards, chunkSize)
       const connectionChunks = utils.splitArrayIntoChunks(connections, chunkSize)
       let primaryIsCards = true
@@ -781,6 +782,7 @@ export default {
           chunk = secondaryChunks[index]
           if (chunk && primaryIsCards) {
             context.commit('currentConnections/restore', chunk, { root: true })
+            context.commit('currentConnections/restoreMatchingTypes', { connections: chunk, types: connectionTypes }, { root: true })
           } else if (chunk) {
             context.commit('currentCards/restore', chunk, { root: true })
           }

@@ -28,6 +28,7 @@ const self = {
       // - restore multiple cards and connections together - for when multiple selected items are removed
       // - remove pasted cards
       // - restore cut cards
+      // - undo card name change (recorded on card close)
 
       items.push(item)
     },
