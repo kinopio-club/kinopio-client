@@ -56,7 +56,6 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'currentSpace/restoreSpace') {
         this.updateMetaDescription()
-        // this.debouncedUpdateCardMap()
       }
     })
   },
