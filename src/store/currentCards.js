@@ -310,9 +310,9 @@ export default {
       })
     },
 
-    // drag
+    // move
 
-    drag: (context, { endCursor, prevCursor, delta }) => {
+    move: (context, { endCursor, prevCursor, delta }) => {
       const spaceId = context.rootState.currentSpace.id
       const currentDraggingCardId = context.rootState.currentDraggingCardId
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
@@ -327,35 +327,32 @@ export default {
         y: endCursor.y - prevCursor.y
       }
       let cardIds
-      // let connections = []
+      let connections = []
       if (multipleCardsSelectedIds.length) {
         cardIds = multipleCardsSelectedIds
       } else {
         cardIds = [currentDraggingCardId]
       }
-
       let cards = cardIds.map(id => context.getters.byId(id))
-
-      // console.log('🔵', cardIds, cards)
 
       // prevent cards bunching up at 0
       cards.forEach(card => {
         if (card.x === 0) { delta.x = Math.max(0, delta.x) }
         if (card.y === 0) { delta.y = Math.max(0, delta.y) }
-        // connections = connections.concat(context.getters.cardConnections(card.id))
-        // context.commit('updateCardInCardMap', card)
+        connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
+        context.commit('updateCardInCardMap', card)
       })
-      // connections = uniqBy(connections, 'id')
+      connections = uniqBy(connections, 'id')
       context.commit('move', { cards, delta, spaceId })
       context.commit('cardsWereDragged', true, { root: true })
-      // context.commit('currentConnections/updatePaths', connections, { root: true })
-      context.dispatch('broadcast/update', { updates: { cards, delta }, type: 'moveCards' }, { root: true })
-      // context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths' }, { root: true })
-      // connections.forEach(connection => {
-      //   context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
-      // })
+      context.commit('currentConnections/updatePaths', connections, { root: true })
+      context.dispatch('broadcast/update', { updates: { cards, delta }, type: 'moveCards', action: 'currentCards/move' }, { root: true })
+      context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths' }, { root: true })
+      connections.forEach(connection => {
+        context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
+      })
     },
-    afterDrag: (context) => {
+    afterMove: (context) => {
       const currentDraggingCardId = context.rootState.currentDraggingCardId
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       let cards
@@ -381,7 +378,7 @@ export default {
       })
       connections = uniqBy(connections, 'id')
       context.commit('currentConnections/updatePaths', connections, { root: true })
-      context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', action: 'currentCards/dragged' }, { root: true })
+      context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', action: 'currentCards/moveged' }, { root: true })
     },
 
     // z-index

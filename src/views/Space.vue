@@ -262,7 +262,7 @@ export default {
     },
     dragCard () {
       const prevCursor = this.cursor()
-      this.$store.dispatch('currentCards/drag', {
+      this.$store.dispatch('currentCards/move', {
         endCursor,
         prevCursor: prevCursor
       })
@@ -319,6 +319,7 @@ export default {
     addConnection (connection) {
       const type = this.$store.getters['currentConnections/typeForNewConnections']
       this.$store.dispatch('currentConnections/add', { connection, type })
+      this.$store.dispatch('currentConnections/addType', type)
     },
     createConnection () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
@@ -454,7 +455,7 @@ export default {
       this.$store.commit('currentUserIsPainting', false)
       this.$store.commit('currentUserIsPaintingLocked', false)
       if (this.isDraggingCard) {
-        this.$store.dispatch('currentCards/afterDrag')
+        this.$store.dispatch('currentCards/afterMove')
       }
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.commit('currentConnectionSuccess', {})

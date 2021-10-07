@@ -67,14 +67,14 @@ export default {
     update: (state, connection) => {
       const keys = Object.keys(connection)
       keys.forEach(key => {
-        state.connections[connection.id] = connection[key]
+        state.connections[connection.id][key] = connection[key]
       })
       cache.updateSpace('connections', state.connections, currentSpaceId)
     },
     updateReadOnly: (state, connection) => {
       const keys = Object.keys(connection)
       keys.forEach(key => {
-        state.connections[connection.id] = connection[key]
+        state.connections[connection.id][key] = connection[key]
       })
     },
     updatePaths: (state, connections) => {
@@ -143,17 +143,17 @@ export default {
       context.dispatch('broadcast/update', { updates: connection, type: 'addConnection', action: 'currentConnections/add' }, { root: true })
       context.commit('create', connection)
     },
-    addType: (context, options) => {
+    addType: (context, type) => {
       let connectionType = {
         id: nanoid(),
         name: `Connection Type ${context.state.typeIds.length + 1}`,
         color: randomColor({ luminosity: 'light' }),
         spaceId: context.state.id
       }
-      if (options) {
-        const keys = Object.keys(options)
+      if (type) {
+        const keys = Object.keys(type)
         keys.forEach(key => {
-          connectionType[key] = options[key]
+          connectionType[key] = type[key]
         })
       }
       context.commit('createType', connectionType)
@@ -188,8 +188,8 @@ export default {
     },
     correctPaths: (context, { shouldUpdateApi }) => {
       if (!context.rootState.webfontIsLoaded) { return }
+      if (!context.getters.all.length) { return }
       const cardIds = context.rootState.currentCards.ids
-
       let connections = []
       context.getters.all.forEach(connection => {
         const startCard = cardIds.includes(connection.startCardId)
@@ -266,7 +266,8 @@ export default {
       return state.ids.map(id => state.connections[id])
     },
     typeByTypeId: (state) => (id) => {
-      return state.types[id]
+      let type = state.types[id]
+      return type
     },
     allTypes: (state) => {
       return state.typeIds.map(id => state.types[id])
@@ -301,7 +302,6 @@ export default {
       return state.types[typeId]
     },
     typeByConnection: (state, getters) => (connection) => {
-      connection = getters.byId(connection.id)
       return getters.typeByTypeId(connection.connectionTypeId)
     }
   }

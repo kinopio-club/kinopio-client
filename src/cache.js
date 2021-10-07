@@ -90,6 +90,7 @@ export default {
     this.storeLocal(`space-${spaceId}`, space)
   },
   updateSpaceCardsDebounced: debounce(function (cards, spaceId) {
+    cards = utils.denormalizeItems(cards)
     let space = this.space(spaceId)
     if (!utils.objectHasKeys(space)) {
       console.warn('🚑 could not updateSpace cache because cachedSpace does not exist')
@@ -101,6 +102,7 @@ export default {
     this.storeLocal(`space-${spaceId}`, space)
   }, 200),
   updateSpaceConnectionsDebounced: debounce(function (connections, spaceId) {
+    connections = utils.denormalizeItems(connections)
     let space = this.space(spaceId)
     if (!utils.objectHasKeys(space)) {
       console.warn('🚑 could not updateSpace cache because cachedSpace does not exist')

@@ -487,7 +487,7 @@ export default {
       space.id = nanoid()
       space = cache.updateIdsInSpace(space)
       context.commit('clearSearch', null, { root: true })
-      context.commit('restoreSpace', space)
+      context.dispatch('restoreSpaceInChunks', { space })
       context.commit('addUserToSpace', user)
       context.dispatch('updateOtherUsers')
       context.dispatch('updateOtherSpaces')
@@ -510,7 +510,7 @@ export default {
       const nullCardUsers = true
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
       context.commit('clearSearch', null, { root: true })
-      context.commit('restoreSpace', uniqueNewSpace)
+      context.dispatch('restoreSpaceInChunks', { uniqueNewSpace })
       context.dispatch('loadBackground')
     },
     saveNewSpace: (context) => {
@@ -549,7 +549,7 @@ export default {
       const nullCardUsers = true
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
       context.commit('clearSearch', null, { root: true })
-      context.commit('restoreSpace', uniqueNewSpace)
+      context.dispatch('restoreSpaceInChunks', { uniqueNewSpace })
       nextTick(() => {
         context.dispatch('updateUserLastSpaceId')
         context.dispatch('saveNewSpace')
@@ -566,7 +566,7 @@ export default {
       const cards = context.rootGetters['currentCards/all']
       nextTick(() => {
         if (cards.length) {
-          context.dispatch('currentConnections/updatePaths', { cardId: cards[1].id, connections: context.state.connections })
+          context.dispatch('currentConnections/updatePaths', { cardId: cards[1].id, connections: context.rootGetters['currentConnections/all'] })
         }
         context.dispatch('saveNewSpace')
         context.dispatch('updateUserLastSpaceId')
@@ -777,6 +777,7 @@ export default {
             context.commit('currentCards/restore', chunk, { root: true })
           } else {
             context.commit('currentConnections/restore', chunk, { root: true })
+            context.commit('currentConnections/restoreMatchingTypes', { connections: chunk, types: connectionTypes }, { root: true })
           }
           // secondary
           chunk = secondaryChunks[index]
@@ -1272,7 +1273,7 @@ export default {
     //   context.commit('currentCards/addToCardMap', card, { root: true })
     // },
 
-    // currentCards/drag
+    // currentCards/move
     // dragCards: (context, { endCursor, prevCursor, delta }) => {
     //   const currentDraggingCardId = context.rootState.currentDraggingCardId
     //   const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
@@ -1433,7 +1434,7 @@ export default {
     //   if (!context.rootState.webfontIsLoaded) { return }
     //   const cardIds = context.rootGetters['currentCards/all'].map(card => card.id)
     //   let connections = []
-    //   context.state.connections.forEach(connection => {
+    //   context.rootGetters['currentConnections/all'].forEach(connection => {
     //     const startCardExists = cardIds.includes(connection.startCardId)
     //     const endCardExists = cardIds.includes(connection.endCardId)
     //     if (!startCardExists || !endCardExists) {
@@ -1457,7 +1458,7 @@ export default {
     // },
     // currentConnections/removeFromCard
     // removeConnectionsFromCard: (context, card) => {
-    //   context.state.connections.forEach(connection => {
+    //   context.rootGetters['currentConnections/all'].forEach(connection => {
     //     if (connection.startCardId === card.id || connection.endCardId === card.id) {
     //       context.dispatch('removeConnection', connection)
     //     }
@@ -1466,7 +1467,7 @@ export default {
     // currentConnections/removeFromMultipleCards
     // removeSelectedConnectionsFromCard: (context, cardId) => {
     //   const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
-    //   const connections = context.state.connections
+    //   const connections = context.rootGetters['currentConnections/all']
     //   connections.map(connection => {
     //     const { startCardId, endCardId } = connection
     //     const startMatch = startCardId === cardId && multipleCardsSelectedIds.includes(endCardId)
@@ -1548,7 +1549,7 @@ export default {
     // currentConnections/removeUnusedTypes
     // removeUnusedConnectionTypes: (context) => {
     //   const connectionTypes = context.state.connectionTypes
-    //   const connections = context.state.connections
+    //   const connections = context.rootGetters['currentConnections/all']
     //   const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
     //   const removeConnectionTypes = connectionTypes.filter(type => !connectionTypeIds.includes(type.id))
     //   removeConnectionTypes.forEach(type => {
