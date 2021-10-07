@@ -454,7 +454,7 @@ export default {
         const linkedCard = links.find(link => link.linkToSpaceId === space.id)
         if (!linkedCard) { return }
         nextTick(() => {
-          context.dispatch('currentConnections/updatePaths', { cardId: linkedCard.id, shouldUpdateApi: canEditSpace })
+          context.dispatch('currentConnections/updatePaths', { cardId: linkedCard.id, shouldUpdateApi: canEditSpace }, { root: true })
         })
       })
       otherSpacesQueue = []
@@ -566,7 +566,7 @@ export default {
       const cards = context.rootGetters['currentCards/all']
       nextTick(() => {
         if (cards.length) {
-          context.dispatch('currentConnections/updatePaths', { cardId: cards[1].id, connections: context.rootGetters['currentConnections/all'] })
+          context.dispatch('currentConnections/updatePaths', { cardId: cards[1].id, connections: context.rootGetters['currentConnections/all'] }, { root: true })
         }
         context.dispatch('saveNewSpace')
         context.dispatch('updateUserLastSpaceId')
@@ -721,14 +721,8 @@ export default {
       let cards = space.cards || []
       let connections = space.connections || []
       let ids
-      // Oct 2020 migration
-      if (Array.isArray(cards)) {
-        cards = utils.normalizeItems(cards)
-      }
-      if (Array.isArray(connections)) {
-        connections = utils.normalizeItems(connections)
-      }
-      // sort cards by distance from viewport origin
+      cards = utils.normalizeItems(cards)
+      connections = utils.normalizeItems(connections)
       ids = Object.keys(cards)
       cards = ids.map(id => {
         const card = cards[id]

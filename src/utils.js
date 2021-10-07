@@ -442,6 +442,7 @@ export default {
   // normalize items
 
   normalizeItems (items) {
+    if (!this.arrayExists(items)) { return items }
     let normalizedItems = {}
     items.forEach(item => {
       normalizedItems[item.id] = item
