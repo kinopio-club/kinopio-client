@@ -4,8 +4,6 @@ import cache from '@/cache.js'
 import nanoid from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
 
-// import debounce from 'lodash-es/debounce'
-
 // normalized state
 // https://github.com/vuejs/vuejs.org/issues/1636
 let currentSpaceId
@@ -85,7 +83,6 @@ export default {
       const card = state.cards[cardToRemove.id]
       state.ids = state.ids.filter(id => id !== card.id)
       delete state.cards[card.id]
-      // state.cards = state.cards.filter(id => id !== card.id)
       const isRemoved = state.removedCards.find(removedCard => card.id === removedCard.id)
       if (isRemoved) {
         state.removedCards = state.removedCards.filter(removedCard => card.id !== removedCard.id)
@@ -431,7 +428,7 @@ export default {
         context.dispatch('removePermanent', card)
       }
       context.dispatch('broadcast/update', { updates: card, type: 'removeCard' }, { root: true })
-      // context.dispatch('currentConnections/removeFromCard', card)
+      // context.dispatch('currentConnections/removeFromCard', card, { root: true })
       context.commit('triggerUpdatePositionInVisualViewport', null, { root: true })
       const cardIsUpdatedByCurrentUser = card.userId === context.rootState.currentUser.id
       if (cardIsUpdatedByCurrentUser) {

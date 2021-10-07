@@ -5,8 +5,6 @@ import nanoid from 'nanoid'
 import randomColor from 'randomcolor'
 import last from 'lodash-es/last'
 
-// import debounce from 'lodash-es/debounce'
-
 // normalized state
 // https://github.com/vuejs/vuejs.org/issues/1636
 
@@ -17,7 +15,7 @@ export default {
   state: {
     ids: [],
     connections: {},
-    typeIds: [], // todo restoreTypes, called by currentSpace/restoreinchunks
+    typeIds: [],
     types: {}
   },
   mutations: {
