@@ -619,17 +619,18 @@ export default {
         }
       }
       context.commit('broadcast/joinSpaceRoom', null, { root: true })
-      context.dispatch('updateOtherUsers')
-      context.dispatch('updateOtherSpaces')
-      const cardId = context.rootState.loadSpaceShowDetailsForCardId
-      if (cardId) {
-        context.dispatch('currentCards/showCardDetails', cardId)
+      const showCardId = context.rootState.loadSpaceShowDetailsForCardId
+      if (showCardId) {
+        context.dispatch('currentCards/showCardDetails', showCardId)
       }
       context.commit('currentUser/updateFavoriteSpaceIsEdited', space.id, { root: true })
       nextTick(() => {
-        context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
         context.dispatch('scrollCardsIntoView')
         context.dispatch('updatePageSizes', null, { root: true })
+        // deferrable async tasks
+        context.dispatch('updateOtherUsers')
+        context.dispatch('updateOtherSpaces')
+        context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
       })
     },
     loadSpace: async (context, { space }) => {
