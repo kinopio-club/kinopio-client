@@ -4,6 +4,7 @@ import cache from '@/cache.js'
 import nanoid from 'nanoid'
 import randomColor from 'randomcolor'
 import last from 'lodash-es/last'
+import uniq from 'lodash-es/uniq'
 
 // normalized state
 // https://github.com/vuejs/vuejs.org/issues/1636
@@ -268,7 +269,8 @@ export default {
       return type
     },
     allTypes: (state) => {
-      return state.typeIds.map(id => state.types[id])
+      const typeIds = uniq(state.typeIds)
+      return typeIds.map(id => state.types[id])
     },
     isExistingPath: (state, getters) => ({ startCardId, endCardId }) => {
       const connections = getters.all
