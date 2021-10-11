@@ -262,6 +262,7 @@ export default {
     },
     updateDimensions: (context) => {
       let cards = context.getters.all
+      cards = utils.clone(cards)
       cards.forEach(card => {
         const prevDimensions = {
           width: card.width,

@@ -312,7 +312,7 @@ export default {
       const nullCardUsers = true
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
       context.commit('clearSearch', null, { root: true })
-      context.dispatch('restoreSpaceInChunks', { uniqueNewSpace })
+      context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
       context.dispatch('loadBackground')
     },
     saveNewSpace: (context) => {
@@ -325,7 +325,7 @@ export default {
       }, { root: true })
       context.commit('addUserToSpace', user)
       nextTick(() => {
-        context.dispatch('currentCards/updateDimensions', { root: true })
+        context.dispatch('currentCards/updateDimensions', null, { root: true })
       })
     },
     saveImportedSpace: async (context) => {
@@ -340,7 +340,7 @@ export default {
       context.commit('addUserToSpace', user)
       context.dispatch('loadBackground')
       nextTick(() => {
-        context.dispatch('currentCards/updateDimensions', { root: true })
+        context.dispatch('currentCards/updateDimensions', null, { root: true })
       })
     },
     duplicateSpace: (context) => {
@@ -366,16 +366,16 @@ export default {
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       context.dispatch('createNewSpace')
       const cards = context.rootGetters['currentCards/all']
-      nextTick(() => {
-        if (cards.length) {
-          context.dispatch('currentConnections/updatePaths', { cardId: cards[1].id, connections: context.rootGetters['currentConnections/all'] }, { root: true })
-        }
-        context.dispatch('saveNewSpace')
-        context.dispatch('updateUserLastSpaceId')
-        context.commit('notifyNewUser', false, { root: true })
-        context.commit('notifySignUpToEditSpace', false, { root: true })
-        context.commit('triggerUpdateWindowHistory', {}, { root: true })
-      })
+      // nextTick(() => {
+      if (cards.length) {
+        context.dispatch('currentConnections/updatePaths', { cardId: cards[1].id, connections: context.rootGetters['currentConnections/all'] }, { root: true })
+      }
+      context.dispatch('saveNewSpace')
+      context.dispatch('updateUserLastSpaceId')
+      context.commit('notifyNewUser', false, { root: true })
+      context.commit('notifySignUpToEditSpace', false, { root: true })
+      context.commit('triggerUpdateWindowHistory', {}, { root: true })
+      // })
     },
     addNewJournalSpace: (context) => {
       const user = context.rootState.currentUser
@@ -514,7 +514,6 @@ export default {
       context.commit('loadJournalSpaceTomorrow', false, { root: true })
     },
     restoreSpaceInChunks: (context, { space, isRemote }) => {
-      // TODO merge strategy for isRemote?, updating each card that's diff?
       if (!utils.objectHasKeys(space)) { return }
       console.log('🌌 Restoring space', space, { 'isRemote': isRemote })
       const chunkSize = 50
