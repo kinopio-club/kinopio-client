@@ -283,7 +283,7 @@ export default {
         const cardId = mutation.payload
         if (!cardId) { return }
         prevCardId = cardId
-        this.openCard(cardId)
+        this.showCard(cardId)
       }
     })
   },
@@ -1451,7 +1451,7 @@ export default {
     updatePinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
     },
-    openCard (cardId) {
+    showCard (cardId) {
       this.$nextTick(() => {
         this.broadcastShowCardDetails()
         this.clearErrors()
