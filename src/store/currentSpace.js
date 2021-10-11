@@ -619,10 +619,6 @@ export default {
         }
       }
       context.commit('broadcast/joinSpaceRoom', null, { root: true })
-      const showCardId = context.rootState.loadSpaceShowDetailsForCardId
-      if (showCardId) {
-        context.dispatch('currentCards/showCardDetails', showCardId)
-      }
       context.commit('currentUser/updateFavoriteSpaceIsEdited', space.id, { root: true })
       nextTick(() => {
         context.dispatch('scrollCardsIntoView')
@@ -702,7 +698,7 @@ export default {
       context.dispatch('updateUserLastSpaceId')
       const cardId = context.rootState.loadSpaceShowDetailsForCardId
       if (cardId) {
-        context.dispatch('currentCards/showCardDetails', cardId)
+        context.dispatch('currentCards/showCardDetails', cardId, { root: true })
       }
     },
     updateUserLastSpaceId: (context) => {

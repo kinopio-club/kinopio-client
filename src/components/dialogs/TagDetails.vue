@@ -334,6 +334,7 @@ export default {
         this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
       } else {
         const cardId = card.id || this.currentTag.cardId
+        this.$store.commit('preventCardDetailsOpeningAnimation', false)
         this.$store.dispatch('currentCards/showCardDetails', cardId)
       }
     },

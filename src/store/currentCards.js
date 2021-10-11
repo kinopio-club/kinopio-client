@@ -46,6 +46,8 @@ export default {
     // update
 
     update: (state, card) => {
+      if (!state.cards.length) { return }
+      if (!utils.objectHasKeys(card)) { return }
       if (card.x) {
         card.x = Math.round(card.x)
       }

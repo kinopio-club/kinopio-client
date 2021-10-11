@@ -230,8 +230,13 @@ export default {
   mounted () {
     if (this.shouldUpdateDimensions) {
       let card = { id: this.card.id }
-      // this.$store.dispatch('currentCards/update', card)
       this.$store.dispatch('currentCards/update', card)
+    }
+    const shouldShowDetails = this.$store.state.loadSpaceShowDetailsForCardId === this.card.id
+    if (shouldShowDetails) {
+      this.$store.dispatch('closeAllDialogs', 'card.mounted')
+      this.$store.commit('preventCardDetailsOpeningAnimation', false)
+      this.$store.dispatch('currentCards/showCardDetails', this.card.id)
     }
   },
   data () {
