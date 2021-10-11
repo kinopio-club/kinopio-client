@@ -93,7 +93,7 @@ export default {
     updateType: (state, type) => {
       const keys = Object.keys(type)
       keys.forEach(key => {
-        state.types[type.id] = type[key]
+        state.types[type.id][key] = type[key]
       })
       cache.updateSpace('connectionTypes', state.types, currentSpaceId)
     },
