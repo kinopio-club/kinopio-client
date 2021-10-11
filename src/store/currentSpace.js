@@ -634,8 +634,9 @@ export default {
     },
     loadSpace: async (context, { space }) => {
       const emptySpace = utils.emptySpace(space.id)
-      const cachedSpace = cache.space(space.id)
+      const cachedSpace = cache.space(space.id) || space
       const user = context.rootState.currentUser
+      cachedSpace.id = cachedSpace.id || space.id
       // clear state
       isLoadingRemoteSpace = false
       context.commit('notifySpaceIsRemoved', false, { root: true })
@@ -685,6 +686,7 @@ export default {
       }, { root: true })
     },
     changeSpace: async (context, { space, isRemote }) => {
+      console.log('🚟 Change space', { space, isRemote })
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
       await context.dispatch('loadSpace', { space })
