@@ -428,7 +428,7 @@ export default {
         context.dispatch('removePermanent', card)
       }
       context.dispatch('broadcast/update', { updates: card, type: 'removeCard' }, { root: true })
-      // context.dispatch('currentConnections/removeFromCard', card, { root: true })
+      context.dispatch('currentConnections/removeFromCard', card, { root: true })
       context.commit('triggerUpdatePositionInVisualViewport', null, { root: true })
       const cardIsUpdatedByCurrentUser = card.userId === context.rootState.currentUser.id
       if (cardIsUpdatedByCurrentUser) {
