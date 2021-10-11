@@ -190,7 +190,7 @@ export default {
         id: this.currentConnection.id,
         connectionTypeId: type.id
       })
-      this.$store.commit('currentSpace/reorderTypeToEnd', type)
+      this.$store.commit('currentConnections/reorderTypeToEnd', type)
     },
     toggleLabelIsVisible () {
       const newValue = !this.labelIsVisible
@@ -282,7 +282,7 @@ export default {
         if (this.visible) {
           this.colorPickerIsVisible = false
           this.scrollIntoViewAndFocus()
-          this.$store.commit('currentSpace/reorderTypeToEnd', this.currentConnectionType)
+          this.$store.commit('currentConnections/reorderTypeToEnd', this.currentConnectionType)
         } else {
           this.$store.commit('shouldHideConnectionOutline', false)
         }

@@ -97,8 +97,8 @@ export default {
       cache.updateSpace('connectionTypes', state.types, currentSpaceId)
     },
     reorderTypeToEnd: (state, type) => {
-      delete state.types[type.id]
-      state.types.push(type.id)
+      state.typeIds.filter(id => id !== type.id)
+      state.typeIds.push(type.id)
     },
 
     // remove
