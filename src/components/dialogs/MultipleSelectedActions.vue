@@ -321,7 +321,10 @@ export default {
       return Boolean(existingConnection)
     },
     checkCardsHaveCheckboxes () {
-      const cardsWithCheckboxes = this.cards.filter(card => utils.checkboxFromString(card.name))
+      const cardsWithCheckboxes = this.cards.filter(card => {
+        if (!card) { return }
+        utils.checkboxFromString(card.name)
+      })
       this.cardsHaveCheckboxes = cardsWithCheckboxes.length === this.cards.length
     },
     checkCardsCheckboxIsChecked () {

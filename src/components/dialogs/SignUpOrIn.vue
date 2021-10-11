@@ -62,6 +62,8 @@ import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
 
+let shouldLoadLastSpace
+
 export default {
   name: 'SignUpOrIn',
   components: {
@@ -229,6 +231,7 @@ export default {
         // update user to remote user
         this.$store.commit('currentUser/updateUser', result)
         // update local spaces to remote user
+        this.removeHelloSpace()
         this.updateAllSpacesWithNewUserId()
         await this.createSpaces(result.apiKey)
         // add new spaces from remote
@@ -250,8 +253,22 @@ export default {
         this.$store.commit('hasRestoredFavorites', false)
         this.$store.dispatch('currentUser/restoreUserFavorites')
         this.$store.commit('triggerUpdateNotifications')
+        if (shouldLoadLastSpace) {
+          this.$store.dispatch('currentSpace/loadLastSpace')
+          this.$store.commit('triggerUpdateWindowHistory', { space: this.$store.state.currentSpace })
+        }
       } else {
         await this.handleErrors(result)
+      }
+    },
+
+    removeHelloSpace () {
+      const space = this.$store.state.currentSpace
+      const isHelloSpace = space.name === 'Hello Kinopio'
+      const spaceIsUnedited = !this.$store.state.hasEditedCurrentSpace
+      if (isHelloSpace && spaceIsUnedited) {
+        this.$store.dispatch('currentSpace/removeCurrentSpace')
+        shouldLoadLastSpace = true
       }
     },
 

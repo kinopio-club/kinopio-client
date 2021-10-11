@@ -250,6 +250,7 @@ export default {
       context.commit('update', card)
       context.dispatch('api/addToQueue', { name: 'updateCard', body: card }, { root: true })
       context.dispatch('broadcast/update', { updates: card, type: 'updateCard', action: 'currentCards/update' }, { root: true })
+      context.commit('hasEditedCurrentSpace', true, { root: true })
     },
     replaceInName: (context, { cardId, match, replace }) => {
       const card = context.getters.byId(cardId)
