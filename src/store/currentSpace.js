@@ -563,6 +563,10 @@ export default {
         secondaryChunks = cardChunks
       }
       // restore space
+      if (!primaryChunks.length) {
+        context.dispatch('restoreSpaceComplete', { space, isRemote, timeStart })
+        return
+      }
       primaryChunks.forEach((chunk, index) => {
         defer(function () {
           if (space.id !== context.state.id) { return }
