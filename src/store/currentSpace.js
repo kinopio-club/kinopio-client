@@ -516,7 +516,7 @@ export default {
     },
     restoreSpaceInChunks: (context, { space, isRemote, addCards, addConnections, addConnectionTypes }) => {
       if (!utils.objectHasKeys(space)) { return }
-      console.log('🌌 Restoring space', space, { 'isRemote': isRemote })
+      console.log('🌌 Restoring space', space, { 'isRemote': isRemote, addCards, addConnections, addConnectionTypes })
       const chunkSize = 50
       const timeStart = utils.normalizeToUnixTime(new Date())
       const origin = { x: window.scrollX, y: window.scrollY }
@@ -552,7 +552,6 @@ export default {
         context.commit('currentConnections/clear', null, { root: true })
       }
       context.commit('isLoadingSpace', true, { root: true })
-      console.log('❤️ TEMP', space, cards, connections, connectionTypes)
       context.commit('restoreSpace', space)
       context.dispatch('loadBackground')
       // split into chunks
@@ -683,8 +682,8 @@ export default {
           space: remoteSpace,
           isRemote: true,
           addCards: cardResults.addItems,
-          addConnections: connectionTypeReults.addItems,
-          addConnectionTypes: connectionResults.addItems
+          addConnectionTypes: connectionTypeReults.addItems,
+          addConnections: connectionResults.addItems
         })
       }
     },
