@@ -115,9 +115,8 @@ export default function createWebSocketPlugin () {
           console.warn('🌌', event)
           store.commit('isReconnectingToBroadcast', true)
         }
-        // receive 🌜
 
-        // TODO websockets send mutation handlers (eg 'currentCards/xyz', replaces need for this unwieldly if/else chain)
+        // receive 🌜
 
         websocket.onmessage = ({ data }) => {
           data = JSON.parse(data)
@@ -133,6 +132,8 @@ export default function createWebSocketPlugin () {
           // presence
           } else if (handler) {
             store.commit(handler, updates)
+            checkIfShouldUpdateLinkToSpaceId(store, data)
+          // users
           } else if (message === 'userJoinedRoom') {
             store.dispatch('currentSpace/addUserToJoinedSpace', user)
           } else if (message === 'updateUserPresence') {
@@ -146,29 +147,11 @@ export default function createWebSocketPlugin () {
             if (updates.user.id === store.state.currentUser.id) {
               store.dispatch('currentSpace/removeCurrentUserFromSpace', updates.user)
             }
-          // circles and position
-          } else if (message === 'addRemotePaintingCircle') {
-            store.commit('triggerAddRemotePaintingCircle', updates)
-          } else if (message === 'updateRemoteUserCursor') {
-            store.commit('triggerUpdateRemoteUserCursor', updates)
-          // drop guide lines
-          } else if (message === 'updateRemoteUserDropGuideLine') {
-            store.commit('triggerUpdateRemoteDropGuideLine', updates)
-          } else if (message === 'updateStopRemoteUserDropGuideLine') {
-            store.commit('triggerUpdateStopRemoteUserDropGuideLine', updates)
-          // cards and connections
-          } else if (message === 'updateConnectionPaths') {
-            store.commit('currentConnections/updatePaths', updates)
-          } else if (message === 'moveCards') {
-            store.commit('currentCards/moveBroadcast', updates)
-          } else if (message === 'updateConnectionPaths') {
-            store.commit('currentConnections/updatePathsBroadcast', updates)
           // other
           } else if (data.type === 'store') {
             store.commit(`${message}`, updates)
           } else {
             store.commit(`currentSpace/${message}`, updates)
-            checkIfShouldUpdateLinkToSpaceId(store, data)
             checkIfShouldUpdateBackground(store, data)
           }
         }

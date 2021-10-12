@@ -470,7 +470,8 @@ export default {
           iteration: circle.iteration,
           zoom: this.spaceZoomDecimal
         },
-        type: 'addRemotePaintingCircle'
+        type: 'addRemotePaintingCircle',
+        handler: 'triggerAddRemotePaintingCircle'
       })
     },
     createRemotePaintingCircle (circle) {
