@@ -88,7 +88,7 @@ export default {
       connections.forEach(connection => {
         state.connections[connection.id].path = connection.path
       })
-      cache.updateSpace('connections', state.connections, currentSpaceId)
+      cache.updateSpaceConnectionsDebounced(state.connections, currentSpaceId)
     },
     updateType: (state, type) => {
       const keys = Object.keys(type)
@@ -174,7 +174,7 @@ export default {
       connection.userId = context.rootState.currentUser.id
       connection.connectionTypeId = type.id
       context.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
-      context.dispatch('broadcast/update', { updates: connection, type: 'addConnection', handler: 'currentConnections/add' }, { root: true })
+      context.dispatch('broadcast/update', { updates: connection, type: 'addConnection', handler: 'currentConnections/create' }, { root: true })
       context.commit('create', connection)
     },
     addType: (context, type) => {
@@ -191,7 +191,7 @@ export default {
         })
       }
       context.commit('createType', connectionType)
-      context.dispatch('broadcast/update', { updates: connectionType, type: 'addConnectionType', handler: 'currentConnections/addType' }, { root: true })
+      context.dispatch('broadcast/update', { updates: connectionType, type: 'addConnectionType', handler: 'currentConnections/createType' }, { root: true })
       context.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
     },
 
@@ -199,8 +199,7 @@ export default {
 
     update: (context, connection) => {
       context.commit('update', connection)
-      const update = { name: 'updateConnection', body: connection }
-      context.dispatch('api/addToQueue', update, { root: true })
+      context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
       context.dispatch('broadcast/update', { updates: connection, type: 'updateConnectionTypeForConnection', handler: 'currentConnections/update' }, { root: true })
     },
     updatePaths: (context, { cardId, shouldUpdateApi, connections }) => {
@@ -213,7 +212,7 @@ export default {
         }
         const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
         if (userCanEdit) {
-          context.dispatch('broadcast/update', { updates: connection, type: 'updateConnection', handler: 'currentConnections/updatePaths' }, { root: true })
+          context.dispatch('broadcast/update', { updates: connection, type: 'updateConnection', handler: 'currentConnections/update' }, { root: true })
           context.commit('update', connection)
         } else {
           context.commit('updateReadOnly', connection)
@@ -245,8 +244,7 @@ export default {
     updateType: (context, type) => {
       context.commit('updateType', type)
       context.dispatch('broadcast/update', { updates: type, type: 'updateConnectionType', handler: 'currentConnections/updateType' }, { root: true })
-      const update = { name: 'updateConnectionType', body: type }
-      context.dispatch('api/addToQueue', update, { root: true })
+      context.dispatch('api/addToQueue', { name: 'updateConnectionType', body: type }, { root: true })
     },
 
     // remove
@@ -273,16 +271,14 @@ export default {
       })
     },
     remove: (context, connection) => {
-      context.commit('remove', connection)
-      const update = { name: 'removeConnection', body: connection }
-      context.dispatch('api/addToQueue', update, { root: true })
+      context.dispatch('api/addToQueue', { name: 'removeConnection', body: connection }, { root: true })
       context.dispatch('broadcast/update', { updates: connection, type: 'removeConnection', handler: 'currentConnections/remove' }, { root: true })
+      context.commit('remove', connection)
     },
     removeType: (context, type) => {
-      const update = { name: 'removeConnectionType', body: type }
-      context.dispatch('api/addToQueue', update, { root: true })
-      context.commit('removeType', type)
+      context.dispatch('api/addToQueue', { name: 'removeConnectionType', body: type }, { root: true })
       context.dispatch('broadcast/update', { updates: type, type: 'removeConnectionType', handler: 'currentConnections/removeType' }, { root: true })
+      context.commit('removeType', type)
     },
     removeUnusedTypes: (context) => {
       const types = context.getters.allTypes
