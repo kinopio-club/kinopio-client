@@ -552,7 +552,7 @@ export default {
         context.commit('currentConnections/clear', null, { root: true })
       }
       context.commit('isLoadingSpace', true, { root: true })
-      space = utils.removeUnusedKeysFromSpace(space)
+      console.log('❤️ TEMP', space, cards, connections, connectionTypes)
       context.commit('restoreSpace', space)
       context.dispatch('loadBackground')
       // split into chunks
