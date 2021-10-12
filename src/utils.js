@@ -1207,6 +1207,8 @@ export default {
     }
   },
   normalizeBroadcastUpdates (updates) {
+    const message = updates.type
+    const handler = updates.handler
     if (updates.body) {
       const keys = Object.keys(updates.body)
       keys.forEach(key => {
@@ -1221,7 +1223,9 @@ export default {
       })
       delete updates.updates
     }
-    return updates
+    delete updates.message
+    delete updates.handler
+    return { message, handler, updates }
   },
 
   // Upload

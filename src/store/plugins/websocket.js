@@ -54,16 +54,15 @@ const sendEvent = (store, mutation, type) => {
   if (!websocket || !currentUserIsConnected) { return }
   const shouldBroadcast = store.getters['currentSpace/shouldBroadcast']
   if (!shouldBroadcast) { return }
-  const message = mutation.payload.type
-  let updates = mutation.payload
-  updates = utils.normalizeBroadcastUpdates(updates)
+  const { message, handler, updates } = utils.normalizeBroadcastUpdates(mutation.payload)
   const hidden = ['updateRemoteUserCursor', 'addRemotePaintingCircle', 'clearRemoteCardDetailsVisible', 'clearRemoteConnectionDetailsVisible']
   if (showDebugMessages && !hidden.includes(updates.type)) {
-    console.log('🌜', updates)
+    console.log('🌜', message, handler, updates)
   }
   const space = store.state.currentSpace
   websocket.send(JSON.stringify({
     message,
+    handler,
     updates,
     clientId,
     space: utils.spaceMeta(space),
