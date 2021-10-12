@@ -123,7 +123,7 @@ export default {
       let updates = utils.cursorPositionInPage(event)
       updates.userId = this.$store.state.currentUser.id
       updates.zoom = this.$store.getters.spaceZoomDecimal
-      this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor' })
+      this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
     },
     isTouchDevice () {
       this.$store.commit('isTouchDevice', true)

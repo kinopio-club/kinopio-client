@@ -57,7 +57,7 @@ const sendEvent = (store, mutation, type) => {
   const { message, handler, updates } = utils.normalizeBroadcastUpdates(mutation.payload)
   const hidden = ['updateRemoteUserCursor', 'addRemotePaintingCircle', 'clearRemoteCardDetailsVisible', 'clearRemoteConnectionDetailsVisible']
   if (showDebugMessages && !hidden.includes(updates.type)) {
-    console.log('🌜', message, handler, updates)
+    console.log('🌜 sent', message, handler, updates)
   }
   const space = store.state.currentSpace
   websocket.send(JSON.stringify({
@@ -123,14 +123,16 @@ export default function createWebSocketPlugin () {
           data = JSON.parse(data)
           if (data.clientId === clientId) { return }
           if (data.message !== 'updateRemoteUserCursor' && showDebugMessages) {
-            console.log('🌛', data)
+            console.log('🌛 received', data)
           }
           if (data.space) {
             if (data.space.id !== store.state.currentSpace.id) { return }
           }
-          let { message, user, updates } = data
+          let { message, handler, user, updates } = data
           if (message === 'connected') {
           // presence
+          } else if (handler) {
+            store.commit(handler, updates)
           } else if (message === 'userJoinedRoom') {
             store.dispatch('currentSpace/addUserToJoinedSpace', user)
           } else if (message === 'updateUserPresence') {

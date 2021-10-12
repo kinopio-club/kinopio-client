@@ -46,7 +46,6 @@ export default {
     // update
 
     update: (state, card) => {
-      if (!state.cards.length) { return }
       if (!utils.objectHasKeys(card)) { return }
       if (card.x) {
         card.x = Math.round(card.x)
@@ -119,7 +118,7 @@ export default {
         card.x = updated.x
         card.y = updated.y
       })
-      cache.updateSpace('cards', state.cards, currentSpaceId)
+      cache.updateSpaceCardsDebounced(state.cards, currentSpaceId)
     },
 
     // card map
@@ -202,9 +201,8 @@ export default {
       context.commit('create', card)
 
       card.spaceId = currentSpaceId
-      const update = { name: 'createCard', handler: 'currentCards/add', body: card }
-      context.dispatch('api/addToQueue', update, { root: true })
-      context.dispatch('broadcast/update', { updates: card, type: 'createCard' }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'createCard', handler: 'currentCards/add', body: card }, { root: true })
+      context.dispatch('broadcast/update', { updates: card, type: 'createCard', handler: 'currentCards/create' }, { root: true })
 
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
@@ -227,7 +225,7 @@ export default {
         }
         context.commit('createCard', card)
         context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
-        context.dispatch('broadcast/update', { updates: card, type: 'createCard', handler: 'currentCards/addMultiple' }, { root: true })
+        context.dispatch('broadcast/update', { updates: card, type: 'createCard', handler: 'currentCards/create' }, { root: true })
         context.commit('addToCardMap', 'card')
       })
     },
@@ -251,7 +249,7 @@ export default {
       }
       context.commit('create', card)
       context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
-      context.dispatch('broadcast/update', { updates: card, type: 'createCard', handler: 'currentCards/paste' }, { root: true })
+      context.dispatch('broadcast/update', { updates: card, type: 'createCard', handler: 'currentCards/create' }, { root: true })
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         delta: 1
       }, { root: true })
@@ -301,7 +299,7 @@ export default {
           height: Math.ceil(card.height)
         }
         context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
-        context.dispatch('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
+        context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
         context.commit('update', body)
       })
     },
@@ -369,8 +367,8 @@ export default {
       context.commit('move', { cards, delta, spaceId })
       context.commit('cardsWereDragged', true, { root: true })
       context.commit('currentConnections/updatePaths', connections, { root: true })
-      context.dispatch('broadcast/update', { updates: { cards, delta }, type: 'moveCards', handler: 'currentCards/move' }, { root: true })
-      context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths' }, { root: true })
+      context.dispatch('broadcast/update', { updates: { cards, delta }, type: 'moveCards', handler: 'currentCards/moveBroadcast' }, { root: true })
+      context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
       connections.forEach(connection => {
         context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
       })
@@ -388,20 +386,16 @@ export default {
       cards = cards.map(id => context.getters.byId(id))
       cards = cards.filter(card => card)
       cards.forEach(card => {
-        const update = { name: 'updateCard',
-          body: {
-            id: card.id,
-            x: card.x,
-            y: card.y,
-            z: card.z
-          }
-        }
-        context.dispatch('api/addToQueue', update, { root: true })
+        const { id, x, y, z } = card
+        context.dispatch('api/addToQueue', {
+          name: 'updateCard',
+          body: { id, x, y, z }
+        }, { root: true })
         connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
       })
       connections = uniqBy(connections, 'id')
       context.commit('currentConnections/updatePaths', connections, { root: true })
-      context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentCards/moveged' }, { root: true })
+      context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
     },
 
     // z-index
@@ -419,10 +413,9 @@ export default {
       let cards = context.getters.all
       cards.forEach(card => {
         const body = { id: card.id, z: 0 }
-        const update = { name: 'updateCard', body }
         context.commit('update', body)
-        context.dispatch('api/addToQueue', update, { root: true })
-        context.dispatch('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
+        context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
+        context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
       })
     },
     incrementZ: (context, id) => {
@@ -437,9 +430,8 @@ export default {
       const body = { id, z: highestCardZ + 1 }
       context.commit('update', body)
       if (!userCanEdit) { return }
-      const update = { name: 'updateCard', body }
-      context.dispatch('api/addToQueue', update, { root: true })
-      context.dispatch('broadcast/update', { updates: body, type: 'updateCard' }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
+      context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
     },
 
     // remove
@@ -448,12 +440,11 @@ export default {
       const cardHasContent = Boolean(card.name)
       if (cardHasContent) {
         context.commit('remove', card)
-        const update = { name: 'removeCard', handler: 'currentCards/remove', body: card }
-        context.dispatch('api/addToQueue', update, { root: true })
+        context.dispatch('api/addToQueue', { name: 'removeCard', body: card }, { root: true })
       } else {
         context.dispatch('removePermanent', card)
       }
-      context.dispatch('broadcast/update', { updates: card, type: 'removeCard' }, { root: true })
+      context.dispatch('broadcast/update', { updates: card, type: 'removeCard', handler: 'currentCards/remove' }, { root: true })
       context.dispatch('currentConnections/removeFromCard', card, { root: true })
       context.commit('triggerUpdatePositionInVisualViewport', null, { root: true })
       const cardIsUpdatedByCurrentUser = card.userId === context.rootState.currentUser.id
@@ -479,9 +470,8 @@ export default {
     },
     restoreRemoved: (context, card) => {
       context.commit('restoreRemovedCard', card)
-      const update = { name: 'restoreRemovedCard', handler: 'currentCards/restoreRemoved', body: card }
-      context.dispatch('api/addToQueue', update, { root: true })
-      context.dispatch('broadcast/update', { updates: card, type: 'restoreRemovedCard' }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'restoreRemovedCard', body: card }, { root: true })
+      context.dispatch('broadcast/update', { updates: card, type: 'restoreRemovedCard', handler: 'currentCards/restoreRemoved' }, { root: true })
       context.commit('currentCards/addToCardMap', card, { root: true })
     },
 
