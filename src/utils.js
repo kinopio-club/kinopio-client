@@ -609,6 +609,14 @@ export default {
 
   // Spaces 🌙
 
+  spaceIsUnchanged (prevSpace, newSpace) {
+    if (!prevSpace.cards || !prevSpace.connections) { return false }
+    const isEditedAt = prevSpace.editedAt === newSpace.editedAt
+    const isCardLength = prevSpace.cards.length === newSpace.cards.length
+    const isConnectionLength = prevSpace.connections.length === newSpace.connections.length
+    const isUnchanged = isEditedAt && isCardLength && isConnectionLength
+    return isUnchanged
+  },
   mergeSpaceKeyValues ({ prevItems, newItems }) {
     const prevIds = prevItems.map(item => item.id)
     const newIds = newItems.map(item => item.id)

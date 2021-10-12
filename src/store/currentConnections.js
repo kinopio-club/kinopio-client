@@ -322,7 +322,8 @@ export default {
     },
     typesByCardId: (state, getters) => (cardId) => {
       const connections = getters.byCardId(cardId)
-      const types = getters.allTypes
+      let types = getters.allTypes
+      types = types.filter(type => Boolean(type))
       const typeIds = connections.map(connection => connection.connectionTypeId)
       return types.filter(type => {
         return typeIds.includes(type.id)

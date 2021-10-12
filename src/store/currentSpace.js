@@ -655,37 +655,36 @@ export default {
       // merge with remote space items updated, added, removed
       let remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (!remoteSpace) { return }
-      const remoteSpaceIsUpdated = remoteSpace.editedAt !== cachedSpace.editedAt
-      if (remoteSpaceIsUpdated) {
-        isLoadingRemoteSpace = true
-        remoteSpace = utils.normalizeSpace(remoteSpace)
-        // cards
-        const cards = context.rootGetters['currentCards/all']
-        const cardResults = utils.mergeSpaceKeyValues({ prevItems: cards, newItems: remoteSpace.cards })
-        context.dispatch('currentCards/mergeUnique', cardResults.updateItems, { root: true })
-        context.dispatch('currentCards/mergeRemove', cardResults.removeItems, { root: true })
-        // connectionTypes
-        const connectionTypes = context.rootGetters['currentConnections/allTypes']
-        const connectionTypeReults = utils.mergeSpaceKeyValues({ prevItems: connectionTypes, newItems: remoteSpace.connectionTypes })
-        context.dispatch('currentConnections/mergeUnique', { newItems: connectionTypeReults.updateItems, itemType: 'type' }, { root: true })
-        context.dispatch('currentConnections/mergeRemove', { removeItems: connectionTypeReults.removeItems, itemType: 'type' }, { root: true })
-        // connections
-        const connections = context.rootGetters['currentConnections/all']
-        const connectionResults = utils.mergeSpaceKeyValues({ prevItems: connections, newItems: remoteSpace.connections })
-        context.dispatch('currentConnections/mergeUnique', { newItems: connectionResults.updateItems, itemType: 'connection' }, { root: true })
-        context.dispatch('currentConnections/mergeRemove', { removeItems: connectionResults.removeItems, itemType: 'connection' }, { root: true })
-        console.log('🌷 TEMP merge remote cardResults', cardResults)
-        console.log('🌷 TEMP merge remote connectionTypeReults', connectionTypeReults)
-        console.log('🌷 TEMP merge remote connectionResults', connectionResults)
-        console.log('🌈 TEMP merge remote additems, card, types, connection', cardResults.addItems, connectionTypeReults.addItems, connectionResults.addItems, remoteSpace)
-        context.dispatch('restoreSpaceInChunks', {
-          space: remoteSpace,
-          isRemote: true,
-          addCards: cardResults.addItems,
-          addConnectionTypes: connectionTypeReults.addItems,
-          addConnections: connectionResults.addItems
-        })
-      }
+      const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
+      if (spaceIsUnchanged) { return }
+      isLoadingRemoteSpace = true
+      remoteSpace = utils.normalizeSpace(remoteSpace)
+      // cards
+      const cards = context.rootGetters['currentCards/all']
+      const cardResults = utils.mergeSpaceKeyValues({ prevItems: cards, newItems: remoteSpace.cards })
+      context.dispatch('currentCards/mergeUnique', cardResults.updateItems, { root: true })
+      context.dispatch('currentCards/mergeRemove', cardResults.removeItems, { root: true })
+      // connectionTypes
+      const connectionTypes = context.rootGetters['currentConnections/allTypes']
+      const connectionTypeReults = utils.mergeSpaceKeyValues({ prevItems: connectionTypes, newItems: remoteSpace.connectionTypes })
+      context.dispatch('currentConnections/mergeUnique', { newItems: connectionTypeReults.updateItems, itemType: 'type' }, { root: true })
+      context.dispatch('currentConnections/mergeRemove', { removeItems: connectionTypeReults.removeItems, itemType: 'type' }, { root: true })
+      // connections
+      const connections = context.rootGetters['currentConnections/all']
+      const connectionResults = utils.mergeSpaceKeyValues({ prevItems: connections, newItems: remoteSpace.connections })
+      context.dispatch('currentConnections/mergeUnique', { newItems: connectionResults.updateItems, itemType: 'connection' }, { root: true })
+      context.dispatch('currentConnections/mergeRemove', { removeItems: connectionResults.removeItems, itemType: 'connection' }, { root: true })
+      console.log('🌷 TEMP merge remote cardResults', cardResults)
+      console.log('🌷 TEMP merge remote connectionTypeReults', connectionTypeReults)
+      console.log('🌷 TEMP merge remote connectionResults', connectionResults)
+      console.log('🌈 TEMP merge remote additems, card, types, connection', cardResults.addItems, connectionTypeReults.addItems, connectionResults.addItems, remoteSpace)
+      context.dispatch('restoreSpaceInChunks', {
+        space: remoteSpace,
+        isRemote: true,
+        addCards: cardResults.addItems,
+        addConnectionTypes: connectionTypeReults.addItems,
+        addConnections: connectionResults.addItems
+      })
     },
     loadLastSpace: (context) => {
       const user = context.rootState.currentUser

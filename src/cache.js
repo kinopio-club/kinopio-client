@@ -78,7 +78,7 @@ export default {
   updateSpace (key, value, spaceId) {
     let space = this.space(spaceId)
     if (!utils.objectHasKeys(space)) {
-      console.warn('🚑 could not updateSpace cache because cachedSpace does not exist')
+      console.warn('🚑 could not updateSpace cache because cachedSpace does not exist (ignore if read-only or open)')
       return
     }
     const normalizeKeys = ['cards', 'connections', 'connectionTypes']
@@ -93,7 +93,7 @@ export default {
     cards = utils.denormalizeItems(cards)
     let space = this.space(spaceId)
     if (!utils.objectHasKeys(space)) {
-      console.warn('🚑 could not updateSpace cache because cachedSpace does not exist')
+      console.warn('🚑 could not updateSpace cache because cachedSpace does not exist (ignore if read-only or open)')
       return
     }
     cards = utils.denormalizeItems(cards)
@@ -105,7 +105,7 @@ export default {
     connections = utils.denormalizeItems(connections)
     let space = this.space(spaceId)
     if (!utils.objectHasKeys(space)) {
-      console.warn('🚑 could not updateSpace cache because cachedSpace does not exist')
+      console.warn('🚑 could not updateSpace cache because cachedSpace does not exist (ignore if read-only or open)')
       return
     }
     space.connections = connections
