@@ -181,6 +181,8 @@ export default {
   --button-hover-shadow 2px 2px 0 var(--heavy-shadow)
   --button-active-inset-shadow inset 0 1px 2px var(--heavy-shadow)
 
+  --serif-font recoleta, georgia, serif
+
 @font-face
   font-family 'OsakaMono-Kinopio'
   src url("assets/fonts/OsakaMono-Kinopio.woff2") format("woff2")
