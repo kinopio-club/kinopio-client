@@ -609,6 +609,29 @@ export default {
 
   // Spaces 🌙
 
+  mergeSpaceKeyValues ({ prevItems, newItems }) {
+    const prevIds = prevItems.map(item => item.id)
+    const newIds = newItems.map(item => item.id)
+    newItems = this.normalizeItems(newItems)
+    let addItems = []
+    let updateItems = []
+    let removeItems = []
+    newIds.forEach(id => {
+      const itemExists = prevIds.includes(id)
+      if (itemExists) {
+        updateItems.push(newItems[id])
+      } else {
+        addItems.push(newItems[id])
+      }
+    })
+    prevIds.forEach(id => {
+      const itemIsRemoved = !newIds.includes(id)
+      if (itemIsRemoved) {
+        removeItems.push(newItems[id])
+      }
+    })
+    return { addItems, updateItems, removeItems }
+  },
   emptySpace (spaceId) {
     return { id: spaceId, moonPhase: '', background: '', backgroundTint: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [] }
   },
@@ -718,7 +741,6 @@ export default {
     if (!this.objectHasKeys(space)) { return space }
     if (!this.arrayExists(space.connections)) { return space }
     const connections = space.connections.filter(connection => {
-      // const typeIds = space.connectionTypes.map(type => type.id)
       const hasTypeId = Boolean(connection.connectionTypeId)
       return hasTypeId
     })
@@ -780,6 +802,16 @@ export default {
       }
     })
     space.cards = cards
+    return space
+  },
+  removeUnusedKeysFromSpace (space) {
+    if (!space) { return }
+    const unusedKeys = ['cards', 'connections', 'connectionTypes']
+    unusedKeys.forEach(key => {
+      if (space[key]) {
+        delete space[key]
+      }
+    })
     return space
   },
 

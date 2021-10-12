@@ -28,6 +28,7 @@ export default {
 
     restoreSpace: (state, space) => {
       space = utils.removeRemovedCardsFromSpace(space)
+      space = utils.removeUnusedKeysFromSpace(space)
       Object.assign(state, space)
     },
 
@@ -513,45 +514,48 @@ export default {
       context.commit('loadJournalSpace', false, { root: true })
       context.commit('loadJournalSpaceTomorrow', false, { root: true })
     },
-    restoreSpaceInChunks: (context, { space, isRemote }) => {
+    restoreSpaceInChunks: (context, { space, isRemote, addCards, addConnections, addConnectionTypes }) => {
       if (!utils.objectHasKeys(space)) { return }
       console.log('🌌 Restoring space', space, { 'isRemote': isRemote })
       const chunkSize = 50
       const timeStart = utils.normalizeToUnixTime(new Date())
       const origin = { x: window.scrollX, y: window.scrollY }
-      let cards = space.cards || []
-      let connections = space.connections || []
-      let ids
+      // init items
+      let cards = addCards || space.cards || []
+      let connectionTypes = addConnectionTypes || space.connectionTypes || []
+      let connections = addConnections || space.connections || []
       cards = utils.normalizeItems(cards)
+      connectionTypes = utils.normalizeItems(connectionTypes)
       connections = utils.normalizeItems(connections)
-      ids = Object.keys(cards)
-      cards = ids.map(id => {
+      // sort cards
+      const cardIds = Object.keys(cards)
+      cards = cardIds.map(id => {
         const card = cards[id]
         card.distanceFromOrigin = utils.distanceBetweenTwoPoints(card, origin)
         return card
       })
       cards = sortBy(cards, ['distanceFromOrigin'])
-      // sort connections by distance from viewport origin
-      ids = Object.keys(connections)
-      connections = ids.map(id => {
+      // sort connections
+      const connectionIds = Object.keys(connections)
+      connections = connectionIds.map(id => {
         const connection = connections[id]
         const coords = utils.coordsFromConnectionPath(connection.path)
         connection.distanceFromOrigin = utils.distanceBetweenTwoPoints(coords, origin)
         return connection
       })
       connections = sortBy(connections, ['distanceFromOrigin'])
-      // init space
-      context.commit('currentCards/clear', null, { root: true })
-      context.dispatch('currentCards/updateSpaceId', space.id, { root: true })
-      context.dispatch('currentConnections/updateSpaceId', space.id, { root: true })
-      context.commit('currentConnections/clear', null, { root: true })
-      space.cards = []
-      space.connections = []
+      // restore space
+      if (!isRemote) {
+        context.commit('currentCards/clear', null, { root: true })
+        context.dispatch('currentCards/updateSpaceId', space.id, { root: true })
+        context.dispatch('currentConnections/updateSpaceId', space.id, { root: true })
+        context.commit('currentConnections/clear', null, { root: true })
+      }
       context.commit('isLoadingSpace', true, { root: true })
+      space = utils.removeUnusedKeysFromSpace(space)
       context.commit('restoreSpace', space)
       context.dispatch('loadBackground')
-      // init chunks
-      const connectionTypes = utils.normalizeItems(space.connectionTypes)
+      // split into chunks
       const cardChunks = utils.splitArrayIntoChunks(cards, chunkSize)
       const connectionChunks = utils.splitArrayIntoChunks(connections, chunkSize)
       let primaryIsCards = true
@@ -649,14 +653,39 @@ export default {
       space = utils.normalizeSpace(cachedSpace)
       context.dispatch('restoreSpaceInChunks', { space })
       context.commit('undoHistory/clear', null, { root: true })
-      // restore remote space
+      // merge with remote space items updated, added, removed
       let remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (!remoteSpace) { return }
-      const remoteSpaceIsUpdated = remoteSpace.editedAt !== cachedSpace.editedAt || remoteSpace.cards.length !== cachedSpace.cards.length
+      const remoteSpaceIsUpdated = remoteSpace.editedAt !== cachedSpace.editedAt
       if (remoteSpaceIsUpdated) {
         isLoadingRemoteSpace = true
         remoteSpace = utils.normalizeSpace(remoteSpace)
-        context.dispatch('restoreSpaceInChunks', { space: remoteSpace, isRemote: true })
+        // cards
+        const cards = context.rootGetters['currentCards/all']
+        const cardResults = utils.mergeSpaceKeyValues({ prevItems: cards, newItems: remoteSpace.cards })
+        context.dispatch('currentCards/mergeUnique', cardResults.updateItems, { root: true })
+        context.dispatch('currentCards/mergeRemove', cardResults.removeItems, { root: true })
+        // connectionTypes
+        const connectionTypes = context.rootGetters['currentConnections/allTypes']
+        const connectionTypeReults = utils.mergeSpaceKeyValues({ prevItems: connectionTypes, newItems: remoteSpace.connectionTypes })
+        context.dispatch('currentConnections/mergeUnique', { newItems: connectionTypeReults.updateItems, itemType: 'type' }, { root: true })
+        context.dispatch('currentConnections/mergeRemove', { removeItems: connectionTypeReults.removeItems, itemType: 'type' }, { root: true })
+        // connections
+        const connections = context.rootGetters['currentConnections/all']
+        const connectionResults = utils.mergeSpaceKeyValues({ prevItems: connections, newItems: remoteSpace.connections })
+        context.dispatch('currentConnections/mergeUnique', { newItems: connectionResults.updateItems, itemType: 'connection' }, { root: true })
+        context.dispatch('currentConnections/mergeRemove', { removeItems: connectionResults.removeItems, itemType: 'connection' }, { root: true })
+        console.log('🌷 TEMP merge remote cardResults', cardResults)
+        console.log('🌷 TEMP merge remote connectionTypeReults', connectionTypeReults)
+        console.log('🌷 TEMP merge remote connectionResults', connectionResults)
+        console.log('🌈 TEMP merge remote additems, card, types, connection', cardResults.addItems, connectionTypeReults.addItems, connectionResults.addItems, remoteSpace)
+        context.dispatch('restoreSpaceInChunks', {
+          space: remoteSpace,
+          isRemote: true,
+          addCards: cardResults.addItems,
+          addConnections: connectionTypeReults.addItems,
+          addConnectionTypes: connectionResults.addItems
+        })
       }
     },
     loadLastSpace: (context) => {

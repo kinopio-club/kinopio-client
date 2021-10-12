@@ -125,6 +125,41 @@ export default {
     updateSpaceId: (context, spaceId) => {
       currentSpaceId = spaceId
     },
+    mergeUnique: (context, { newItems, itemType }) => {
+      newItems.forEach(newItem => {
+        let shouldUpdate
+        let prevItem
+        if (itemType === 'connection') {
+          prevItem = context.getters.byId(newItem.id)
+        } else {
+          prevItem = context.getters.typeByTypeId(newItem.id)
+        }
+        let item = { id: newItem.id }
+        let keys = Object.keys(newItem)
+        keys = keys.filter(key => key !== 'id')
+        keys.forEach(key => {
+          if (prevItem[key] !== newItem[key]) {
+            item[key] = newItem[key]
+            shouldUpdate = true
+          }
+        })
+        if (!shouldUpdate) { return }
+        if (itemType === 'connection') {
+          context.commit('update', item)
+        } else {
+          context.commit('updateType', item)
+        }
+      })
+    },
+    mergeRemove: (context, { removeItems, itemType }) => {
+      removeItems.forEach(item => {
+        if (itemType === 'connection') {
+          context.commit('remove', item)
+        } else {
+          context.commit('removeType', item)
+        }
+      })
+    },
 
     // create
 

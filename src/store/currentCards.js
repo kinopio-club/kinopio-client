@@ -151,6 +151,28 @@ export default {
     updateSpaceId: (context, spaceId) => {
       currentSpaceId = spaceId
     },
+    mergeUnique: (context, newCards) => {
+      newCards.forEach(newCard => {
+        let shouldUpdate
+        let prevCard = context.getters.byId(newCard.id)
+        let card = { id: newCard.id }
+        let keys = Object.keys(newCard)
+        keys = keys.filter(key => key !== 'id')
+        keys.forEach(key => {
+          if (prevCard[key] !== newCard[key]) {
+            card[key] = newCard[key]
+            shouldUpdate = true
+          }
+        })
+        if (!shouldUpdate) { return }
+        context.commit('update', card)
+      })
+    },
+    mergeRemove: (context, removeCards) => {
+      removeCards.forEach(card => {
+        context.commit('remove', card)
+      })
+    },
 
     // create
 
