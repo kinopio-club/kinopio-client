@@ -28,7 +28,6 @@ export default {
 
     restoreSpace: (state, space) => {
       space = utils.removeRemovedCardsFromSpace(space)
-      space = utils.removeUnusedKeysFromSpace(space)
       Object.assign(state, space)
     },
 
@@ -367,7 +366,6 @@ export default {
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       context.dispatch('createNewSpace')
       const cards = context.rootGetters['currentCards/all']
-      // nextTick(() => {
       if (cards.length) {
         context.dispatch('currentConnections/updatePaths', { cardId: cards[1].id, connections: context.rootGetters['currentConnections/all'] }, { root: true })
       }
@@ -376,12 +374,11 @@ export default {
       context.commit('notifyNewUser', false, { root: true })
       context.commit('notifySignUpToEditSpace', false, { root: true })
       context.commit('triggerUpdateWindowHistory', {}, { root: true })
-      // })
     },
     addNewJournalSpace: (context) => {
       const user = context.rootState.currentUser
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
-      // journal date
+      // name
       let date = dayjs(new Date())
       if (context.rootState.loadJournalSpaceTomorrow) {
         date = date.add(1, 'day')
@@ -417,12 +414,12 @@ export default {
         card.spaceId = spaceId
         space.cards.push(card)
       })
+      // create space
       context.commit('clearSearch', null, { root: true })
-      context.commit('restoreSpace', space)
+      context.dispatch('restoreSpaceInChunks', { space })
       context.dispatch('saveNewSpace')
       context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
       context.commit('triggerUpdateWindowHistory', {}, { root: true })
-      context.dispatch('loadBackground')
     },
     getRemoteSpace: async (context, space) => {
       const collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
@@ -674,10 +671,7 @@ export default {
       const connectionResults = utils.mergeSpaceKeyValues({ prevItems: connections, newItems: remoteSpace.connections })
       context.dispatch('currentConnections/mergeUnique', { newItems: connectionResults.updateItems, itemType: 'connection' }, { root: true })
       context.dispatch('currentConnections/mergeRemove', { removeItems: connectionResults.removeItems, itemType: 'connection' }, { root: true })
-      console.log('🌷 TEMP merge remote cardResults', cardResults)
-      console.log('🌷 TEMP merge remote connectionTypeReults', connectionTypeReults)
-      console.log('🌷 TEMP merge remote connectionResults', connectionResults)
-      console.log('🌈 TEMP merge remote additems, card, types, connection', cardResults.addItems, connectionTypeReults.addItems, connectionResults.addItems, remoteSpace)
+      console.log('🍲 merge', { addCards: cardResults.addItems, addTypes: connectionTypeReults.addItems, addConnections: connectionResults.addItems, space: remoteSpace })
       context.dispatch('restoreSpaceInChunks', {
         space: remoteSpace,
         isRemote: true,
