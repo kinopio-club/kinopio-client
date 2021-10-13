@@ -191,12 +191,10 @@ const currentCards = {
         height: utils.emptyCard().height
       }
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
-      context.commit('create', card)
-
       card.spaceId = currentSpaceId
       context.dispatch('api/addToQueue', { name: 'createCard', handler: 'currentCards/add', body: card }, { root: true })
       context.dispatch('broadcast/update', { updates: card, type: 'createCard', handler: 'currentCards/create' }, { root: true })
-
+      context.commit('create', card)
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         delta: 1
@@ -216,9 +214,9 @@ const currentCards = {
           frameId: card.frameId || 0,
           userId: context.rootState.currentUser.id
         }
-        context.commit('create', card)
         context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
         context.dispatch('broadcast/update', { updates: card, type: 'createCard', handler: 'currentCards/create' }, { root: true })
+        context.commit('create', card)
       })
       context.dispatch('updateCardMap')
     },
@@ -240,12 +238,12 @@ const currentCards = {
           context.dispatch('currentSpace/addTag', tag, { root: true }) // TODO to tag module?
         })
       }
-      context.commit('create', card)
       context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
       context.dispatch('broadcast/update', { updates: card, type: 'createCard', handler: 'currentCards/create' }, { root: true })
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         delta: 1
       }, { root: true })
+      context.commit('create', card)
       context.dispatch('updateCardMap')
     },
 
@@ -262,10 +260,10 @@ const currentCards = {
           delete card.y
         }
       }
-      context.commit('update', card)
       context.dispatch('api/addToQueue', { name: 'updateCard', body: card }, { root: true })
       context.dispatch('broadcast/update', { updates: card, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
       context.commit('hasEditedCurrentSpace', true, { root: true })
+      context.commit('update', card)
     },
     replaceInName: (context, { cardId, match, replace }) => {
       const card = context.getters.byId(cardId)

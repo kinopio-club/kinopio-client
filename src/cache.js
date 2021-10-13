@@ -9,20 +9,23 @@ export default {
     try {
       window.localStorage[key] = JSON.stringify(value)
     } catch (error) {
-      console.warn('storeLocal could not save to localStorage', error)
-      if (this.user().apiKey) {
-        console.log('🐇 pruning localStorage spaces')
-        const currentSpaceId = utils.spaceIdFromUrl()
-        const keys = Object.keys(window.localStorage)
-        let spaceKeys = keys.filter(key => key.startsWith('space-') || key.startsWith('removed-space-'))
-        spaceKeys = spaceKeys.filter(key => key !== `space-${currentSpaceId}`)
-        spaceKeys.forEach(key => {
-          this.removeLocal(key)
-        })
-      } else {
-        const element = document.getElementById('notify-local-storage-is-full')
-        element.classList.remove('hidden')
-      }
+      console.warn('🚑 storeLocal could not save to localStorage', error)
+      this.pruneLocal()
+    }
+  },
+  pruneLocal () {
+    if (this.user().apiKey) {
+      const currentSpaceId = utils.spaceIdFromUrl()
+      const keys = Object.keys(window.localStorage)
+      let spaceKeys = keys.filter(key => key.startsWith('space-') || key.startsWith('removed-space-'))
+      spaceKeys = spaceKeys.filter(key => key !== `space-${currentSpaceId}`)
+      spaceKeys.forEach(key => {
+        this.removeLocal(key)
+      })
+      console.log('🐇 pruned localStorage spaces', spaceKeys)
+    } else {
+      const element = document.getElementById('notify-local-storage-is-full')
+      element.classList.remove('hidden')
     }
   },
   getLocal (key) {
@@ -39,6 +42,7 @@ export default {
   },
   removeAll () {
     window.localStorage.clear()
+    console.log('🚑 localStorage cleared')
   },
 
   // User
