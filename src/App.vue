@@ -40,6 +40,8 @@ import utils from '@/utils.js'
 
 import debounce from 'lodash-es/debounce'
 
+const cardmap = new Worker('web-workers/cardmap.js')
+
 export default {
   components: {
     Header,
@@ -68,6 +70,7 @@ export default {
     window.addEventListener('scroll', this.debouncedUpdateCardMap)
     this.updateMetaDescription()
     this.$store.dispatch('currentSpace/updateBackgroundZoom')
+    this.testworker()
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.updateUserHasScrolled)
@@ -117,6 +120,9 @@ export default {
     }
   },
   methods: {
+    testworker () {
+      cardmap.postMessage('hello world')
+    },
     broadcastCursor (event) {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
