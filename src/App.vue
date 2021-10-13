@@ -38,10 +38,6 @@ import LinkDetails from '@/components/dialogs/LinkDetails.vue'
 import OffscreenMarkers from '@/components/OffscreenMarkers.vue'
 import utils from '@/utils.js'
 
-import debounce from 'lodash-es/debounce'
-
-const cardmap = new Worker('web-workers/cardmap.js')
-
 export default {
   components: {
     Header,
@@ -67,14 +63,14 @@ export default {
     setTimeout(() => {
       window.addEventListener('scroll', this.updateUserHasScrolled)
     }, 100)
-    window.addEventListener('scroll', this.debouncedUpdateCardMap)
+    window.addEventListener('scroll', this.updateCardMap)
     this.updateMetaDescription()
     this.$store.dispatch('currentSpace/updateBackgroundZoom')
-    this.testworker()
+    this.updateCardMap()
   },
   beforeUnmount () {
     window.removeEventListener('scroll', this.updateUserHasScrolled)
-    window.removeEventListener('scroll', this.debouncedUpdateCardMap)
+    window.removeEventListener('scroll', this.updateCardMap)
   },
   computed: {
     backgroundTint () {
@@ -120,8 +116,8 @@ export default {
     }
   },
   methods: {
-    testworker () {
-      cardmap.postMessage('hello world')
+    updateCardMap () {
+      this.$store.dispatch('currentCards/updateCardMap')
     },
     broadcastCursor (event) {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
@@ -148,10 +144,7 @@ export default {
       } else {
         metaDescription.setAttribute('content', topLeftCard.name)
       }
-    },
-    debouncedUpdateCardMap: debounce(async function () {
-      this.$store.dispatch('currentCards/refreshCardMap')
-    }, 500)
+    }
   }
 }
 </script>

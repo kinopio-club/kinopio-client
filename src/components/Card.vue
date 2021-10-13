@@ -230,6 +230,7 @@ export default {
   mounted () {
     if (this.shouldUpdateDimensions) {
       let card = { id: this.card.id }
+      card = utils.updateCardDimentions(card)
       this.$store.dispatch('currentCards/update', card)
     }
     const shouldShowDetails = this.$store.state.loadSpaceShowDetailsForCardId === this.card.id

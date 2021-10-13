@@ -902,7 +902,6 @@ const store = createStore({
       }
       context.commit('spaceUrlToLoad', matches.spaceUrl)
     },
-
     updatePageSizes: (context) => {
       const paddingX = Math.min(400, (utils.visualViewport().width / 4) * 3) + 100
       const paddingY = Math.min(400, (utils.visualViewport().height / 4) * 3)

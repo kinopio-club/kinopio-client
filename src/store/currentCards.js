@@ -8,7 +8,13 @@ import uniqBy from 'lodash-es/uniqBy'
 // https://github.com/vuejs/vuejs.org/issues/1636
 let currentSpaceId
 
-export default {
+const cardMap = new Worker('web-workers/card-map.js')
+cardMap.addEventListener('message', event => {
+  const cardMap = event.data
+  currentCards.mutations.cardMap(currentCards.state, cardMap)
+})
+
+const currentCards = {
   namespaced: true,
   state: {
     ids: [],
@@ -126,22 +132,7 @@ export default {
     cardMap: (state, cardMap) => {
       utils.typeCheck({ value: cardMap, type: 'array', origin: 'cardMap' })
       state.cardMap = cardMap
-    },
-    addToCardMap: (state, card) => {
-      state.cardMap.push(card)
-    },
-    removeFromCardMap: (state, card) => {
-      state.cardMap = state.cardMap.filter(prevCard => prevCard.id !== card.id)
-    },
-    updateCardInCardMap: (state, card) => {
-      state.cardMap = state.cardMap.map(prevCard => {
-        if (prevCard.id === card.id) {
-          return card
-        }
-        return prevCard
-      })
     }
-
   },
   actions: {
 
@@ -210,7 +201,7 @@ export default {
       }, { root: true })
       context.dispatch('currentSpace/checkIfShouldNotifyCardsCreatedIsNearLimit', null, { root: true })
       context.dispatch('currentSpace/notifyCollaboratorsCardUpdated', { cardId: id, type: 'createCard' }, { root: true })
-      context.commit('addToCardMap', card)
+      context.dispatch('updateCardMap')
     },
     addMultiple: (context, newCards) => {
       newCards.forEach(card => {
@@ -226,8 +217,8 @@ export default {
         context.commit('createCard', card)
         context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
         context.dispatch('broadcast/update', { updates: card, type: 'createCard', handler: 'currentCards/create' }, { root: true })
-        context.commit('addToCardMap', 'card')
       })
+      context.dispatch('updateCardMap')
     },
     paste: (context, { card, cardId }) => {
       utils.typeCheck({ value: card, type: 'object', origin: 'pasteCard' })
@@ -253,7 +244,7 @@ export default {
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         delta: 1
       }, { root: true })
-      context.commit('addToCardMap', card)
+      context.dispatch('updateCardMap')
     },
 
     // update
@@ -361,7 +352,6 @@ export default {
         if (card.x === 0) { delta.x = Math.max(0, delta.x) }
         if (card.y === 0) { delta.y = Math.max(0, delta.y) }
         connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
-        context.commit('updateCardInCardMap', card)
       })
       connections = uniqBy(connections, 'id')
       context.commit('move', { cards, delta, spaceId })
@@ -372,6 +362,7 @@ export default {
       connections.forEach(connection => {
         context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
       })
+      context.dispatch('updateCardMap')
     },
     afterMove: (context) => {
       const currentDraggingCardId = context.rootState.currentDraggingCardId
@@ -456,7 +447,7 @@ export default {
       if (!context.rootGetters['currentUser/cardsCreatedIsOverLimit']) {
         context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
       }
-      context.commit('currentCards/removeFromCardMap', card, { root: true })
+      context.dispatch('updateCardMap')
     },
     removePermanent: (context, card) => {
       context.commit('removePermanent', card)
@@ -472,7 +463,7 @@ export default {
       context.commit('restoreRemovedCard', card)
       context.dispatch('api/addToQueue', { name: 'restoreRemovedCard', body: card }, { root: true })
       context.dispatch('broadcast/update', { updates: card, type: 'restoreRemovedCard', handler: 'currentCards/restoreRemoved' }, { root: true })
-      context.commit('currentCards/addToCardMap', card, { root: true })
+      context.dispatch('updateCardMap')
     },
 
     // card details
@@ -486,12 +477,12 @@ export default {
 
     // card map
 
-    refreshCardMap: (context) => {
-      const cards = context.getters.all
-      const cardMap = cards.filter(card => {
-        return utils.isCardInViewport(card)
-      })
-      context.commit('cardMap', cardMap)
+    updateCardMap: (context) => {
+      let cards = context.getters.all
+      cards = utils.clone(cards)
+      const viewport = utils.visualViewport()
+      const zoom = context.rootState.spaceZoomPercent / 100
+      cardMap.postMessage({ cards, viewport, zoom })
     }
   },
   getters: {
@@ -517,3 +508,5 @@ export default {
 
   }
 }
+
+export default currentCards

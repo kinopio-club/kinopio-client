@@ -586,7 +586,7 @@ export default {
           } else if (chunk) {
             context.commit('currentCards/restore', chunk, { root: true })
           }
-          context.dispatch('currentCards/refreshCardMap', null, { root: true })
+          context.dispatch('currentCards/updateCardMap', null, { root: true })
           // complete
           const isRestoreComplete = index === primaryChunks.length - 1
           if (isRestoreComplete) {
