@@ -850,6 +850,12 @@ export default {
       if (!card) { return }
       card = utils.clone(card)
       card = utils.updateCardDimentions(card)
+      card = {
+        id: card.id,
+        width: card.width,
+        height: card.height
+      }
+      this.$store.dispatch('currentCards/update', card)
       this.$store.dispatch('currentCards/updateCardMap')
     },
     updateSpaceLink () {
@@ -1418,6 +1424,7 @@ export default {
         const maxImageLength = 350
         if (data.image.length >= maxImageLength) { return }
         this.$store.dispatch('currentCards/update', update)
+        this.updateCardMap(cardId)
       } catch (error) {
         console.warn('🚑', error, url)
         this.updateUrlPreviewErrorUrl(url)
