@@ -273,8 +273,16 @@ const currentCards = {
         name
       })
     },
-    updateDimensions: (context) => {
-      let cards = context.getters.all
+    updateDimensions: (context, cardId) => {
+      utils.typeCheck({ value: cardId, type: 'string', origin: 'updateDimensions', allowUndefined: true })
+      let cards = []
+      if (cardId) {
+        const card = context.getters.byId(cardId)
+        if (!card) { return }
+        cards.push(card)
+      } else {
+        cards = context.getters.all
+      }
       cards = utils.clone(cards)
       cards.forEach(card => {
         const prevDimensions = {

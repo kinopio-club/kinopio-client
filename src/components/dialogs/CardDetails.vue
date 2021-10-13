@@ -846,10 +846,7 @@ export default {
       this.notifiedMembers = true
     },
     updateCardMap (cardId) {
-      let card = this.$store.getters['currentCards/byId'](cardId)
-      if (!card) { return }
-      card = utils.clone(card)
-      card = utils.updateCardDimentions(card)
+      this.$store.dispatch('currentCards/updateDimensions', cardId)
       this.$store.dispatch('currentCards/updateCardMap')
     },
     updateSpaceLink () {
