@@ -30,11 +30,11 @@ article(:style="position" :data-card-id="id" ref="card")
 
     template(v-if="!nameIsComment")
       //- Video
-      video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}")
+      video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}" @canplay="updateCardMap")
         source(:src="formats.video")
       //- Image
-      img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}")
-      img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelectedOrDragging}")
+      img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}" @load="updateCardMap")
+      img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelectedOrDragging}" @load="updateCardMap")
 
     span.card-content-wrap
       //- Comment
@@ -60,10 +60,10 @@ article(:style="position" :data-card-id="id" ref="card")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
             //- Image
-            img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}")
-            img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelectedOrDragging}")
+            img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}" @load="updateCardMap")
+            img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelectedOrDragging}" @load="updateCardMap")
             //- Video
-            video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}")
+            video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}" @canplay="updateCardMap")
               source(:src="formats.video")
 
           span(v-if="!commentIsVisible") …
@@ -730,6 +730,10 @@ export default {
     userDetailsIsVisible () { return this.$store.state.cardUserDetailsIsVisibleForCardId === this.id }
   },
   methods: {
+    updateCardMap () {
+      this.$store.dispatch('currentCards/updateDimensions', this.card.id)
+      this.$store.dispatch('currentCards/updateCardMap')
+    },
     addFile (file) {
       let name = this.card.name
       const url = file.url
