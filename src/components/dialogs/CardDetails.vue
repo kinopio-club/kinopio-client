@@ -1379,9 +1379,10 @@ export default {
       return image
     },
     updateUrlPreviewErrorUrl (url) {
-      this.$store.commit('removeUrlPreviewLoadingForCardIds', this.card.id)
+      const cardId = this.card.id || prevCardId
+      this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
       const update = {
-        id: this.card.id,
+        id: cardId,
         urlPreviewErrorUrl: url,
         urlPreviewUrl: url
       }
@@ -1397,15 +1398,17 @@ export default {
         }
         let cardUrl = this.validWebUrls[0]
         cardUrl = this.removeHiddenQueryString(cardUrl)
-        this.$store.commit('removeUrlPreviewLoadingForCardIds', this.card.id)
-        if (data.error || url !== cardUrl) {
+        const cardId = this.card.id || prevCardId
+        this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+        const urlIsIncorrect = (url !== cardUrl) && this.visible
+        if (data.error || urlIsIncorrect) {
           throw new Error(response.message)
         }
         console.log('🚗 link preview', data)
         if (!data.title) { return }
         const image = this.previewImage(data.image, data.image_x)
         const update = {
-          id: this.card.id,
+          id: cardId,
           urlPreviewUrl: url,
           urlPreviewImage: image,
           urlPreviewTitle: utils.truncated(data.title),
@@ -1421,14 +1424,15 @@ export default {
       }
     }, 350),
     clearUrlPreview () {
+      const cardId = this.card.id || prevCardId
       const update = {
-        id: this.card.id,
+        id: cardId,
         urlPreviewUrl: '',
         urlPreviewImage: '',
         urlPreviewTitle: '',
         urlPreviewDescription: ''
       }
-      this.$store.commit('removeUrlPreviewLoadingForCardIds', this.card.id)
+      this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
       this.$store.dispatch('currentCards/update', update)
     },
     toggleUrlPreviewIsVisible () {
