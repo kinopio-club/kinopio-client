@@ -76,6 +76,7 @@ const currentCards = {
     // remove
 
     remove: (state, cardToRemove) => {
+      if (!cardToRemove) { return }
       const card = state.cards[cardToRemove.id]
       state.ids = state.ids.filter(id => id !== card.id)
       delete state.cards[card.id]
@@ -87,6 +88,7 @@ const currentCards = {
       state.removedCards = removedCards
     },
     removePermanent: (state, cardToRemove) => {
+      if (!cardToRemove) { return }
       const card = state.cards[cardToRemove.id]
       state.ids = state.ids.filter(id => id !== card.id)
       delete state.cards[card.id]
@@ -214,7 +216,7 @@ const currentCards = {
           frameId: card.frameId || 0,
           userId: context.rootState.currentUser.id
         }
-        context.commit('createCard', card)
+        context.commit('create', card)
         context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
         context.dispatch('broadcast/update', { updates: card, type: 'createCard', handler: 'currentCards/create' }, { root: true })
       })
