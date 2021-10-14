@@ -28,9 +28,11 @@ export default {
         if (updatePositionTimer) { return }
         updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
       }
+      if (mutation.type === 'isLoadingSpace') {
+        this.updateOffscreenMarkers()
+      }
     })
     window.addEventListener('scroll', this.updateOffscreenMarkers)
-    this.updateOffscreenMarkers()
     offscreenMarkers.addEventListener('message', event => {
       this.offscreenCardsByDirection = event.data
     })
