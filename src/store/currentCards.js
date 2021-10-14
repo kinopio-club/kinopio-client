@@ -395,6 +395,7 @@ const currentCards = {
       connections = uniqBy(connections, 'id')
       context.commit('currentConnections/updatePaths', connections, { root: true })
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
+      context.dispatch('updateCardMap')
     },
 
     // z-index
