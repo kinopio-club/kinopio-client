@@ -60,11 +60,6 @@ export default {
       const pinchZoomOffsetLeft = viewport.offsetLeft
       const pinchZoomOffsetTop = viewport.offsetTop
       let styles = {}
-      if (this.$store.state.currentSpace.background) {
-        styles.opacity = 1
-      } else {
-        styles.opacity = 0.5
-      }
       if (pinchZoomScale > 1) {
         styles.transform = `translate(${pinchZoomOffsetLeft}px, ${pinchZoomOffsetTop}px) scale(${1 / pinchZoomScale})`
         styles['transform-origin'] = 'left top'
@@ -154,6 +149,9 @@ edge = 4px
   width 100%
   height 100%
   mix-blend-mode color-burn
+  pointer-events none
+  z-index 1
+  opacity 0.5
   .marker
     width width
     height height

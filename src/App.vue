@@ -6,8 +6,8 @@
   :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
 )
   #layout-viewport(:style="{ background: backgroundTint }")
-    OffscreenMarkers
   MagicPaint
+  OffscreenMarkers
   //- router-view is Space
   router-view
   Header
