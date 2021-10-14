@@ -32,8 +32,7 @@ export default {
     window.addEventListener('scroll', this.updateOffscreenMarkers)
     this.updateOffscreenMarkers()
     offscreenMarkers.addEventListener('message', event => {
-      console.log('🥀', event)
-      // this.markers =
+      this.offscreenCardsByDirection = event.data
     })
   },
   beforeUnmount () {
@@ -41,9 +40,17 @@ export default {
   },
   data () {
     return {
-      offscreenCards: [],
       viewport: {},
-      markers: {} // top: [], left, right, bottom
+      offscreenCardsByDirection: {
+        top: [],
+        left: [],
+        right: [],
+        bottom: [],
+        topleft: [],
+        topright: [],
+        bottomleft: [],
+        bottomright: []
+      }
     }
   },
   computed: {
@@ -70,7 +77,7 @@ export default {
     hasDirectionBottomLeft () { return this.hasDirection('bottomleft') },
     hasDirectionBottomRight () { return this.hasDirection('bottomright') },
     // top
-    offscreenCardsTop () { return this.offscreenCards.filter(card => card.direction === 'top') },
+    offscreenCardsTop () { return this.offscreenCardsByDirection.top },
     topMarkerOffset () {
       let cards = this.offscreenCardsTop
       if (!cards.length) { return }
@@ -79,7 +86,7 @@ export default {
       return average - this.viewport.pageLeft + 'px'
     },
     // left
-    offscreenCardsLeft () { return this.offscreenCards.filter(card => card.direction === 'left') },
+    offscreenCardsLeft () { return this.offscreenCardsByDirection.left },
     leftMarkerOffset () {
       let cards = this.offscreenCardsLeft
       if (!cards.length) { return }
@@ -88,7 +95,7 @@ export default {
       return average - this.viewport.pageTop + 'px'
     },
     // right
-    offscreenCardsRight () { return this.offscreenCards.filter(card => card.direction === 'right') },
+    offscreenCardsRight () { return this.offscreenCardsByDirection.right },
     rightMarkerOffset () {
       let cards = this.offscreenCardsRight
       if (!cards.length) { return }
@@ -97,7 +104,7 @@ export default {
       return average - this.viewport.pageTop + 'px'
     },
     // bottom
-    offscreenCardsBottom () { return this.offscreenCards.filter(card => card.direction === 'bottom') },
+    offscreenCardsBottom () { return this.offscreenCardsByDirection.bottom },
     bottomMarkerOffset () {
       let cards = this.offscreenCardsBottom
       if (!cards.length) { return }
@@ -118,9 +125,7 @@ export default {
       }
     },
     hasDirection (direction) {
-      return this.offscreenCards.find(card => {
-        return card.direction === direction
-      })
+      return Boolean(this.offscreenCardsByDirection[direction].length)
     },
     updateOffscreenMarkers () {
       let cards = this.$store.getters['currentCards/all']
@@ -128,6 +133,7 @@ export default {
       const viewport = utils.visualViewport()
       const zoom = this.spaceZoomDecimal
       offscreenMarkers.postMessage({ cards, viewport, zoom })
+      this.viewport = viewport
     }
   },
   watch: {
