@@ -373,6 +373,7 @@ const currentCards = {
       context.dispatch('updateCardMap')
     },
     afterMove: (context) => {
+      context.dispatch('updateCardMap')
       const currentDraggingCardId = context.rootState.currentDraggingCardId
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       let cards
@@ -395,7 +396,6 @@ const currentCards = {
       connections = uniqBy(connections, 'id')
       context.commit('currentConnections/updatePaths', connections, { root: true })
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
-      context.dispatch('updateCardMap')
     },
 
     // z-index
