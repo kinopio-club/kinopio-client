@@ -324,7 +324,7 @@ const currentCards = {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'toggleCommentIsVisible' })
       const card = context.getters.byId(cardId)
       const value = !card.commentIsVisible
-      context.dispatch('updateCard', {
+      context.dispatch('update', {
         id: cardId,
         commentIsVisible: value
       })
