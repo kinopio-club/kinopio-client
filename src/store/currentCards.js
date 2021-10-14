@@ -373,6 +373,7 @@ const currentCards = {
       context.dispatch('updateCardMap')
     },
     afterMove: (context) => {
+      context.dispatch('updateCardMap')
       const currentDraggingCardId = context.rootState.currentDraggingCardId
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       let cards
