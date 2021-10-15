@@ -104,16 +104,15 @@ const currentCards = {
       state.removedCards = []
       cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
     },
-    restoreRemovedCard: (state, cardToRestore) => {
-      let card = state.cards[cardToRestore.id]
-      const index = state.removedCards.findIndex(removedCard => card.id === removedCard.id)
+    restoreRemovedCard: (state, card) => {
       // restore
-      state.ids.push(card.id)
+      const cardId = card.id
+      state.ids.push(cardId)
       card = utils.normalizeItems(card)
-      state.cards[card.id] = card
+      state.cards[cardId] = card
       cache.updateSpace('cards', state.cards, currentSpaceId)
       // update removed
-      state.removedCards.splice(index, 1)
+      state.removedCards = state.removedCards.filter(removedCard => removedCard.id !== cardId)
       cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
     },
 

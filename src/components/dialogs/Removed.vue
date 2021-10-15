@@ -13,9 +13,7 @@ dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :sty
 
   section(v-if="!items.length")
     template(v-if="cardsVisible")
-      p Removed cards from
-        span !{' '}{{currentSpaceName}}!{' '}
-        span can be restored here
+      p Removed cards from {{currentSpaceName}} can be restored here
       p(v-if="!currentUserCanEditSpace")
         span.badge.info
           PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
