@@ -627,6 +627,8 @@ export default {
         context.dispatch('updateOtherUsers')
         context.dispatch('updateOtherSpaces')
         context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
+        context.dispatch('currentCards/updateDimensions', null, { root: true })
+        context.dispatch('currentCards/updateCardMap', null, { root: true })
       })
     },
     loadSpace: async (context, { space }) => {
