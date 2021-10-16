@@ -653,7 +653,6 @@ export default {
       context.commit('undoHistory/clear', null, { root: true })
       // merge with remote space items updated, added, removed
       let remoteSpace = await context.dispatch('getRemoteSpace', space)
-      console.log('⏰temp', cachedSpace, cache.space(space.id), space, remoteSpace)
       if (!remoteSpace) { return }
       const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
       if (spaceIsUnchanged) { return }
@@ -686,7 +685,6 @@ export default {
     loadLastSpace: async (context) => {
       let space
       const user = context.rootState.currentUser
-      console.log('🐸temp load last space, has cached space', cache.space(user.lastSpaceId))
       let spaceToRestore = cache.space(user.lastSpaceId)
       if (spaceToRestore.id) {
         space = spaceToRestore
