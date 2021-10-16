@@ -23,7 +23,7 @@ let isLoadingRemoteSpace
 
 export default {
   namespaced: true,
-  state: helloSpace,
+  state: utils.clone(helloSpace),
   mutations: {
 
     restoreSpace: (state, space) => {
@@ -716,6 +716,7 @@ export default {
     },
     changeSpace: async (context, { space, isRemote }) => {
       console.log('🚟 Change space', { space, isRemote })
+      context.commit('notifySpaceNotFound', false, { root: true })
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
       await context.dispatch('loadSpace', { space })
