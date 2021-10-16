@@ -682,13 +682,20 @@ export default {
         addConnections: connectionResults.addItems
       })
     },
-    loadLastSpace: (context) => {
+    loadLastSpace: async (context) => {
+      let space
       const user = context.rootState.currentUser
       let spaceToRestore = cache.space(user.lastSpaceId)
-      if (!spaceToRestore.id) {
-        spaceToRestore = { id: user.lastSpaceId }
+      if (spaceToRestore.id) {
+        space = spaceToRestore
+      } else if (user.lastSpaceId) {
+        space = { id: user.lastSpaceId }
       }
-      context.dispatch('loadSpace', { space: spaceToRestore })
+      if (space) {
+        context.dispatch('loadSpace', { space })
+      } else {
+        await context.dispatch('createNewHelloSpace')
+      }
       context.dispatch('updateUserLastSpaceId')
     },
     updateSpace: async (context, updates) => {
