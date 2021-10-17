@@ -436,6 +436,7 @@ const currentCards = {
     // remove
 
     remove: (context, card) => {
+      card = context.getters.byId(card.id)
       const cardHasContent = Boolean(card.name)
       if (cardHasContent) {
         context.commit('remove', card)
