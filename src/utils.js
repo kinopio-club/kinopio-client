@@ -192,7 +192,8 @@ export default {
     return cloned
   },
   typeCheck ({ value, type, allowUndefined, origin }) {
-    if (allowUndefined && value === undefined) {
+    const isUndefined = value === undefined || value === null
+    if (allowUndefined && isUndefined) {
       return true
     }
     if (type === 'array' && Array.isArray(value)) {
