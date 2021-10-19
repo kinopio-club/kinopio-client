@@ -176,8 +176,6 @@ export default {
     },
     loadSpaceOnBackOrForward (event) {
       const url = window.location.href
-      console.log('🍅🍅TEMP loadSpaceOnBackOrForward', event, utils.urlIsSpace(url))
-
       if (!utils.urlIsSpace(url)) { return }
       const spaceId = utils.spaceIdFromUrl(url)
       const space = { id: spaceId }
