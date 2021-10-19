@@ -114,7 +114,8 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerUploadComplete') {
-        let { spaceId, url } = mutation.payload
+        let { spaceId, url, cardId } = mutation.payload
+        if (cardId) { return }
         if (spaceId !== this.currentSpace.id) { return }
         this.updateSpaceBackground(url)
       }
