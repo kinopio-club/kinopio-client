@@ -1076,6 +1076,8 @@ export default {
     return Boolean(isFile)
   },
   urlIsSpace (url) {
+    console.log('🍅 TEMP urlIsSpace ', url, import.meta.env.MODE, import.meta.env)
+
     if (!url) { return }
     let spaceUrlPattern
     if (import.meta.env.MODE === 'development') {
