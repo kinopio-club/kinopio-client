@@ -264,14 +264,6 @@ const currentCards = {
       context.commit('hasEditedCurrentSpace', true, { root: true })
       context.commit('update', card)
     },
-    replaceInName: (context, { cardId, match, replace }) => {
-      const card = context.getters.byId(cardId)
-      const name = card.name.replace(match, replace)
-      context.dispatch('update', {
-        id: cardId,
-        name
-      })
-    },
     updateDimensions: (context, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'updateDimensions', allowUndefined: true })
       let cards = []
