@@ -269,7 +269,6 @@ export default {
   },
   computed: {
     shouldJiggle () {
-      // console.log(this.isConnectingTo, this.isConnectingFrom, this.isRemoteConnecting, this.isBeingDragged, this.isRemoteCardDragging)
       return this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.isRemoteCardDragging
     },
     isSelectedOrDragging () {
@@ -762,10 +761,6 @@ export default {
         id: this.card.id,
         name: utils.trim(name)
       })
-      // this.$store.dispatch('currentCards/update', {
-      //   id: this.card.id,
-      //   name: utils.trim(name)
-      // })
       this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
     connectionIsBeingDragged (connection) {
