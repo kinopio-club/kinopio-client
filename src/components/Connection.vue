@@ -44,7 +44,7 @@ export default {
       if (mutation.type === 'currentSpace/moveCard') {
         this.cancelAnimation()
       }
-      if (mutation.type === 'currentSpace/removeConnection') {
+      if (mutation.type === 'currentConnections/remove') {
         this.controlCurve = undefined
       }
       if (mutation.type === 'triggerShowConnectionDetails') {
@@ -66,7 +66,7 @@ export default {
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     id () { return this.connection.id },
-    connectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.connectionTypeId) },
+    connectionType () { return this.$store.getters['currentConnections/typeByTypeId'](this.connectionTypeId) },
     connectionTypeId () { return this.connection.connectionTypeId },
     startCardId () { return this.connection.startCardId },
     endCardId () { return this.connection.endCardId },
@@ -123,7 +123,7 @@ export default {
     },
     isCardsFilteredByFrame () {
       const frameIds = this.$store.state.filteredFrameIds
-      const cards = utils.clone(this.$store.state.currentSpace.cards)
+      const cards = utils.clone(this.$store.getters['currentCards/all'])
       const startCard = cards.filter(card => card.id === this.startCardId)[0]
       const endCard = cards.filter(card => card.id === this.endCardId)[0]
       const startCardInFilter = frameIds.includes(startCard.frameId)
@@ -149,8 +149,8 @@ export default {
   methods: {
     removeConnection () {
       if (!this.isSpaceMember) { return }
-      this.$store.dispatch('currentSpace/removeConnection', this.connection)
-      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
+      this.$store.dispatch('currentConnections/remove', this.connection)
+      this.$store.dispatch('currentConnections/removeUnusedTypes')
     },
     checkIsMultiTouch (event) {
       isMultiTouch = false

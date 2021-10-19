@@ -120,12 +120,14 @@ export default {
     },
     debouncedUpdateLinks: debounce(async function () {
       const spaceId = this.$store.state.currentSpace.id
-      const links = await this.$store.dispatch('api/getCardsWithLinkToSpaceId', spaceId) || []
+      const links = await this.$store.dispatch('api/getCardsWithLinkToSpaceId', spaceId)
+      this.loading = false
+      this.prevSpaceId = spaceId
+      if (!links) { return }
+      if (!links.spaces.length) { return }
       if (links.spaces.length) {
         this.spaces = links.spaces
       }
-      this.loading = false
-      this.prevSpaceId = spaceId
     }, 350, { leading: true }),
     updateResultsSectionHeight () {
       if (!this.visible) { return }

@@ -210,6 +210,7 @@ import qs from '@aguezz/qs-parse'
 import nanoid from 'nanoid'
 import debounce from 'lodash-es/debounce'
 
+let prevCardId
 let previousTags = []
 let compositionEventEndTime = 0
 
@@ -230,9 +231,6 @@ export default {
     MediaPreview,
     User,
     CardCollaborationInfo
-  },
-  props: {
-    card: Object // name, x, y, z
   },
   data () {
     return {
@@ -279,14 +277,13 @@ export default {
   },
   created () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'closeAllDialogs') {
-        this.framePickerIsVisible = false
-        this.imagePickerIsVisible = false
-        this.cardTipsIsVisible = false
-        this.hidePickers()
-      }
       if (mutation.type === 'triggerUnloadPage' && this.visible) {
         this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', this.card.id)
+      } else if (mutation.type === 'cardDetailsIsVisibleForCardId') {
+        const cardId = mutation.payload
+        if (!cardId) { return }
+        prevCardId = cardId
+        this.showCard(cardId)
       }
     })
   },
@@ -297,18 +294,12 @@ export default {
       }
     })
   },
-  mounted () {
-    // for new cards only
-    const element = this.$refs.dialog
-    if (element) {
-      this.scrollIntoViewAndFocus()
-      this.$emit('broadcastShowCardDetails')
-      this.updatePreviousTags()
-      this.updatePinchCounterZoomDecimal()
-    }
-  },
   computed: {
-    visible () { return this.$store.state.cardDetailsIsVisibleForCardId === this.card.id },
+    card () {
+      const cardId = this.$store.state.cardDetailsIsVisibleForCardId
+      return this.$store.getters['currentCards/byId'](cardId) || {}
+    },
+    visible () { return utils.objectHasKeys(this.card) },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     cardIsCreatedByCurrentUser () { return this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](this.card) },
     spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
@@ -382,7 +373,7 @@ export default {
     isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] },
     name: {
       get () {
-        return this.card.name
+        return this.card.name || ''
       },
       set (newName) {
         this.updateCardName(newName)
@@ -448,7 +439,7 @@ export default {
         return utils.nameIsChecked(this.name)
       },
       set (value) {
-        this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.card.id, value })
+        this.$store.dispatch('currentCards/toggleChecked', { cardId: this.card.id, value })
       }
     },
     cardPendingUpload () {
@@ -489,7 +480,9 @@ export default {
       } else {
         zoom = this.spaceCounterZoomDecimal
       }
-      return { transform: `scale(${zoom})` }
+      const left = `${this.card.x + 8}px`
+      const top = `${this.card.y + 8}px`
+      return { transform: `scale(${zoom})`, left, top }
     },
     cardUrlPreviewIsVisible () {
       const isErrorUrl = this.card.urlPreviewErrorUrl && this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl
@@ -523,6 +516,13 @@ export default {
     collaborationInfoIsVisible () { return this.$store.state.currentUser.shouldShowCardCollaborationInfo }
   },
   methods: {
+    broadcastShowCardDetails () {
+      const updates = {
+        cardId: this.card.id,
+        userId: this.$store.state.currentUser.id
+      }
+      this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
+    },
     addFile (file) {
       const cardId = this.card.id
       const spaceId = this.$store.state.currentSpace.id
@@ -556,7 +556,7 @@ export default {
       shouldCancelOpening = false
     },
     startOpening () {
-      if (this.$store.state.preventCardDetailsOpeningAnimation) {
+      if (this.$store.state.preventCardDetailsOpeningAnimation || !this.card.name) {
         this.$store.commit('preventCardDetailsOpeningAnimation', false)
         return
       }
@@ -743,7 +743,7 @@ export default {
     addSplitCards (newCards) {
       const spaceBetweenCards = 12
       let prevCard = utils.clone(this.card)
-      this.$store.dispatch('currentSpace/addMultipleCards', newCards)
+      this.$store.dispatch('currentCards/addMultiple', newCards)
       this.$nextTick(() => {
         newCards = newCards.map(card => {
           const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
@@ -754,7 +754,7 @@ export default {
         })
         newCards.forEach(card => {
           card = utils.updateCardDimentions(card)
-          this.$store.dispatch('currentSpace/updateCard', {
+          this.$store.dispatch('currentCards/update', {
             id: card.id,
             y: card.y
           })
@@ -819,7 +819,7 @@ export default {
         id: this.card.id,
         name: `[] ${this.card.name}`
       }
-      this.$store.dispatch('currentSpace/updateCard', update)
+      this.$store.dispatch('currentCards/update', update)
     },
     updateCardName (newName) {
       const cardId = this.$store.state.cardDetailsIsVisibleForCardId
@@ -833,9 +833,9 @@ export default {
         nameUpdatedAt: new Date(),
         nameUpdatedByUserId: userId
       }
-      this.$store.dispatch('currentSpace/updateCard', card)
+      this.$store.dispatch('currentCards/update', card)
       this.$nextTick(() => {
-        this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.card.id, shouldUpdateApi: true })
+        this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
       })
       this.updateMediaUrls()
       this.updateTags()
@@ -845,6 +845,10 @@ export default {
       this.$store.dispatch('currentSpace/notifyCollaboratorsCardUpdated', { cardId: this.card.id, type: 'updateCard' })
       this.notifiedMembers = true
     },
+    updateCardMap (cardId) {
+      this.$store.dispatch('currentCards/updateDimensions', cardId)
+      this.$store.dispatch('currentCards/updateCardMap')
+    },
     updateSpaceLink () {
       let link = this.validUrls.filter(url => utils.urlIsSpace(url))[0]
       const shouldRemoveLink = this.card.linkToSpaceId && !link
@@ -853,7 +857,7 @@ export default {
           id: this.card.id,
           linkToSpaceId: null
         }
-        this.$store.dispatch('currentSpace/updateCard', update)
+        this.$store.dispatch('currentCards/update', update)
         return
       }
       if (!link) { return }
@@ -864,7 +868,7 @@ export default {
         id: this.card.id,
         linkToSpaceId
       }
-      this.$store.dispatch('currentSpace/updateCard', update)
+      this.$store.dispatch('currentCards/update', update)
       this.debouncedSaveOtherSpace(linkToSpaceId)
     },
     debouncedSaveOtherSpace: debounce(async function (linkToSpaceId) {
@@ -912,11 +916,11 @@ export default {
         return
       }
       this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCardAndFocus')
-      document.querySelector(`.card[data-card-id="${this.card.id}"]`).focus()
+      document.querySelector(`.card[data-card-id="${prevCardId}"]`).focus()
     },
     removeCard () {
       if (!this.canEditCard) { return }
-      this.$store.dispatch('currentSpace/removeCard', this.card)
+      this.$store.dispatch('currentCards/remove', this.card)
       this.$store.commit('cardDetailsIsVisibleForCardId', '')
       this.triggerUpdatePositionInVisualViewport()
     },
@@ -929,9 +933,6 @@ export default {
       textareas.forEach(textarea => {
         textarea.style.height = textarea.scrollHeight + modifier + 'px'
       })
-    },
-    cardIsEmpty () {
-      return !this.card.name
     },
     toggleFramePickerIsVisible () {
       const isVisible = this.framePickerIsVisible
@@ -988,11 +989,12 @@ export default {
       this.shouldTriggerCloseChildComponents = nanoid()
       this.closeCardDialogs()
     },
-    closeCardDialogs () {
+    closeCardDialogs (shouldSkipGlobalDialogs) {
       this.framePickerIsVisible = false
       this.imagePickerIsVisible = false
       this.cardTipsIsVisible = false
       this.hidePickers()
+      if (shouldSkipGlobalDialogs) { return }
       this.hideTagDetailsIsVisible()
       this.hideLinkDetailsIsVisible()
     },
@@ -1374,13 +1376,14 @@ export default {
       return image
     },
     updateUrlPreviewErrorUrl (url) {
-      this.$store.commit('removeUrlPreviewLoadingForCardIds', this.card.id)
+      const cardId = this.card.id || prevCardId
+      this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
       const update = {
-        id: this.card.id,
+        id: cardId,
         urlPreviewErrorUrl: url,
         urlPreviewUrl: url
       }
-      this.$store.dispatch('currentSpace/updateCard', update)
+      this.$store.dispatch('currentCards/update', update)
     },
     debouncedUpdateUrlPreview: debounce(async function (url) {
       try {
@@ -1392,15 +1395,17 @@ export default {
         }
         let cardUrl = this.validWebUrls[0]
         cardUrl = this.removeHiddenQueryString(cardUrl)
-        this.$store.commit('removeUrlPreviewLoadingForCardIds', this.card.id)
-        if (data.error || url !== cardUrl) {
+        const cardId = this.card.id || prevCardId
+        this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+        const urlIsIncorrect = (url !== cardUrl) && this.visible
+        if (data.error || urlIsIncorrect) {
           throw new Error(response.message)
         }
         console.log('🚗 link preview', data)
         if (!data.title) { return }
         const image = this.previewImage(data.image, data.image_x)
         const update = {
-          id: this.card.id,
+          id: cardId,
           urlPreviewUrl: url,
           urlPreviewImage: image,
           urlPreviewTitle: utils.truncated(data.title),
@@ -1409,22 +1414,24 @@ export default {
         }
         const maxImageLength = 350
         if (data.image.length >= maxImageLength) { return }
-        this.$store.dispatch('currentSpace/updateCard', update)
+        this.$store.dispatch('currentCards/update', update)
+        this.updateCardMap(cardId)
       } catch (error) {
         console.warn('🚑', error, url)
         this.updateUrlPreviewErrorUrl(url)
       }
     }, 350),
     clearUrlPreview () {
+      const cardId = this.card.id || prevCardId
       const update = {
-        id: this.card.id,
+        id: cardId,
         urlPreviewUrl: '',
         urlPreviewImage: '',
         urlPreviewTitle: '',
         urlPreviewDescription: ''
       }
-      this.$store.commit('removeUrlPreviewLoadingForCardIds', this.card.id)
-      this.$store.dispatch('currentSpace/updateCard', update)
+      this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+      this.$store.dispatch('currentCards/update', update)
     },
     toggleUrlPreviewIsVisible () {
       const value = !this.card.urlPreviewIsVisible
@@ -1432,7 +1439,7 @@ export default {
         id: this.card.id,
         urlPreviewIsVisible: value
       }
-      this.$store.dispatch('currentSpace/updateCard', update)
+      this.$store.dispatch('currentCards/update', update)
     },
     removeHiddenQueryString (url) {
       if (!url) { return }
@@ -1445,41 +1452,49 @@ export default {
     },
     updatePinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
+    },
+    showCard (cardId) {
+      this.$nextTick(() => {
+        this.broadcastShowCardDetails()
+        this.clearErrors()
+        this.scrollIntoViewAndFocus()
+        this.updatePreviousTags()
+        this.updateNameSplitIntoCardsCount()
+        this.$nextTick(() => {
+          this.startOpening()
+        })
+      })
+      this.previousSelectedTag = {}
+      this.updateMediaUrls()
+      const connections = this.$store.getters['currentConnections/byCardId'](cardId)
+      this.$store.commit('updateCurrentCardConnections', connections)
+    },
+    closeCard () {
+      const cardId = prevCardId
+      this.closeCardDialogs(true)
+      this.removeTrackingQueryStrings()
+      this.cancelOpening()
+      this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', cardId)
+      this.$store.commit('updateCurrentCardConnections')
+      this.$store.commit('triggerUpdatePositionInVisualViewport')
+      this.$store.commit('shouldPreventNextEnterKey', false)
+      const card = this.$store.getters['currentCards/byId'](cardId)
+      if (!card) { return }
+      const cardHasName = Boolean(card.name)
+      if (!cardHasName) {
+        this.$store.dispatch('currentCards/remove', { id: cardId })
+      }
+      this.$store.dispatch('updatePageSizes')
+      this.$nextTick(() => {
+        this.updateCardMap(cardId)
+      })
     }
   },
   watch: {
     visible (visible) {
-      this.updatePinchCounterZoomDecimal()
-      this.$nextTick(() => {
-        if (visible) {
-          this.clearErrors()
-          this.scrollIntoViewAndFocus()
-          this.updatePreviousTags()
-          this.updateNameSplitIntoCardsCount()
-          this.$nextTick(() => {
-            this.startOpening()
-          })
-        } else {
-          this.removeTrackingQueryStrings()
-          this.cancelOpening()
-        }
-      })
-      if (visible) {
-        this.previousSelectedTag = {}
-        this.updateMediaUrls()
-        const connections = this.$store.getters['currentSpace/cardConnections'](this.card.id)
-        this.$store.commit('updateCurrentCardConnections', connections)
-      }
       if (!visible) {
-        this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', this.card.id)
-        this.$store.commit('updateCurrentCardConnections')
-        this.$store.commit('triggerUpdatePositionInVisualViewport')
-        this.$store.commit('shouldPreventNextEnterKey', false)
+        this.closeCard()
       }
-      if (!visible && this.cardIsEmpty()) {
-        this.$store.dispatch('currentSpace/removeCard', this.card)
-      }
-      this.$store.dispatch('updatePageSizes')
     },
     // https://v3.vuejs.org/guide/migration/watch.html
     // watching arrays doesn't work for changes anymore (only whole replacement, unless 'deep', option is specified)

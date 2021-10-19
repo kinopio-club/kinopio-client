@@ -35,7 +35,7 @@ export default {
           frameName: frame.name,
           id: card.id
         }
-        this.$store.dispatch('currentSpace/updateCard', card)
+        this.$store.dispatch('currentCards/update', card)
       })
     },
     frameIsSelected (frame) {

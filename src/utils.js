@@ -6,6 +6,7 @@ import uniqBy from 'lodash-es/uniqBy'
 import random from 'lodash-es/random'
 import last from 'lodash-es/last'
 import sortBy from 'lodash-es/sortBy'
+import times from 'lodash-es/times'
 
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -191,7 +192,8 @@ export default {
     return cloned
   },
   typeCheck ({ value, type, allowUndefined, origin }) {
-    if (allowUndefined && value === undefined) {
+    const isUndefined = value === undefined || value === null
+    if (allowUndefined && isUndefined) {
       return true
     }
     if (type === 'array' && Array.isArray(value)) {
@@ -265,6 +267,17 @@ export default {
     let merged = base.concat(updated)
     merged = uniqBy(merged, key)
     return merged
+  },
+  splitArrayIntoChunks (array, chunkSize) {
+    let numberOfChunks = Math.ceil(array.length / chunkSize)
+    let chunks = []
+    times(numberOfChunks, function (index) {
+      const start = index * chunkSize
+      const end = (index + 1) * chunkSize
+      const chunk = array.slice(start, end)
+      chunks.push(chunk)
+    })
+    return chunks
   },
   findInArrayOfObjects (array, key, value) {
     return array.find(item => item[key] === value)
@@ -382,7 +395,7 @@ export default {
     return new Date(date).getTime()
   },
   shortRelativeTime (date) {
-    this.typeCheck({ value: date, type: 'string', origin: 'shortRelativeTime' })
+    date = date.toString()
     let time = dayjs(date).fromNow(true)
     // https://day.js.org/docs/en/customization/relative-time
     time = time.replace('a few seconds', 'now')
@@ -427,6 +440,25 @@ export default {
     return Math.round(angleDegrees)
   },
 
+  // normalize items
+
+  normalizeItems (items) {
+    if (!this.arrayExists(items)) { return items }
+    let normalizedItems = {}
+    items.forEach(item => {
+      normalizedItems[item.id] = item
+    })
+    return normalizedItems
+  },
+  denormalizeItems (normalizedItems) {
+    let items = []
+    const ids = Object.keys(normalizedItems)
+    ids.forEach(id => {
+      items.push(normalizedItems[id])
+    })
+    return items
+  },
+
   // Cards
 
   emptyCard () {
@@ -443,6 +475,10 @@ export default {
     const isEndInViewportY = card.y < viewport.pageTop + viewport.height
     const isInViewportY = isStartInViewportY && isEndInViewportY
     return isInViewportX && isInViewportY
+  },
+  isElementInViewport (element) {
+    const rect = element.getBoundingClientRect()
+    return this.isCardInViewport(rect)
   },
   updateCardDimentions (card) {
     const element = document.querySelector(`article [data-card-id="${card.id}"]`)
@@ -464,6 +500,13 @@ export default {
     })
     return shortestDistanceCard
   },
+  cardElementFromPosition (x, y) {
+    let elements = document.elementsFromPoint(x, y)
+    const cardElement = elements.find(element => {
+      return element.nodeName === 'ARTICLE' // cards are <article>s
+    })
+    return cardElement
+  },
 
   // Connection Path Utils 🐙
 
@@ -477,7 +520,6 @@ export default {
   spaceCounterZoomDecimal () {
     return 1 / this.spaceZoomDecimal()
   },
-
   connectorCoords (cardId) {
     const element = document.querySelector(`.connector[data-card-id="${cardId}"] button`)
     if (!element) { return }
@@ -531,6 +573,17 @@ export default {
     const blankPattern = new RegExp(/( |\s|\t)+/gm)
     return string.split(blankPattern)
   },
+  coordsFromConnectionPath (path) {
+    // https://regexr.com/66idp
+    // matches first 2 digit groups in path: m295,284 q90,40 87,57
+    const pathCoordsPattern = new RegExp(/m([\d.]{1,}),([\d.]{1,})/)
+    let coords = path.match(pathCoordsPattern)
+    coords = {
+      x: coords[1],
+      y: coords[2]
+    }
+    return coords
+  },
 
   // Painting 🖌
 
@@ -545,22 +598,6 @@ export default {
     const endValue = 1
     return -endValue * (elaspedTime /= duration) * (elaspedTime - 2) + startValue
   },
-  cardMap () {
-    const cards = document.querySelectorAll('.card')
-    let cardMap = []
-    cards.forEach(card => {
-      const rect = card.getBoundingClientRect()
-      const mappedCard = {
-        cardId: card.dataset.cardId,
-        x: (window.scrollX) + (rect.x),
-        y: (window.scrollY) + (rect.y),
-        width: rect.width,
-        height: rect.height
-      }
-      cardMap.push(mappedCard)
-    })
-    return cardMap
-  },
   highestCardZ (cards) {
     let highestCardZ = 0
     cards.forEach(card => {
@@ -573,6 +610,37 @@ export default {
 
   // Spaces 🌙
 
+  spaceIsUnchanged (prevSpace, newSpace) {
+    if (!prevSpace.cards || !prevSpace.connections) { return false }
+    const isEditedAt = prevSpace.editedAt === newSpace.editedAt
+    const isCardLength = prevSpace.cards.length === newSpace.cards.length
+    const isConnectionLength = prevSpace.connections.length === newSpace.connections.length
+    const isUnchanged = isEditedAt && isCardLength && isConnectionLength
+    return isUnchanged
+  },
+  mergeSpaceKeyValues ({ prevItems, newItems }) {
+    const prevIds = prevItems.map(item => item.id)
+    const newIds = newItems.map(item => item.id)
+    newItems = this.normalizeItems(newItems)
+    let addItems = []
+    let updateItems = []
+    let removeItems = []
+    newIds.forEach(id => {
+      const itemExists = prevIds.includes(id)
+      if (itemExists) {
+        updateItems.push(newItems[id])
+      } else {
+        addItems.push(newItems[id])
+      }
+    })
+    prevIds.forEach(id => {
+      const itemIsRemoved = !newIds.includes(id)
+      if (itemIsRemoved) {
+        removeItems.push(newItems[id])
+      }
+    })
+    return { addItems, updateItems, removeItems }
+  },
   emptySpace (spaceId) {
     return { id: spaceId, moonPhase: '', background: '', backgroundTint: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [] }
   },
@@ -680,9 +748,8 @@ export default {
   },
   normalizeSpace (space) {
     if (!this.objectHasKeys(space)) { return space }
-    if (!space.connections) { return space }
+    if (!this.arrayExists(space.connections)) { return space }
     const connections = space.connections.filter(connection => {
-      // const typeIds = space.connectionTypes.map(type => type.id)
       const hasTypeId = Boolean(connection.connectionTypeId)
       return hasTypeId
     })
@@ -744,6 +811,16 @@ export default {
       }
     })
     space.cards = cards
+    return space
+  },
+  removeUnusedKeysFromSpace (space) {
+    if (!space) { return }
+    const unusedKeys = ['cards', 'connections', 'connectionTypes']
+    unusedKeys.forEach(key => {
+      if (space[key]) {
+        delete space[key]
+      }
+    })
     return space
   },
 
@@ -1139,6 +1216,8 @@ export default {
     }
   },
   normalizeBroadcastUpdates (updates) {
+    const message = updates.type
+    const handler = updates.handler
     if (updates.body) {
       const keys = Object.keys(updates.body)
       keys.forEach(key => {
@@ -1153,7 +1232,9 @@ export default {
       })
       delete updates.updates
     }
-    return updates
+    delete updates.message
+    delete updates.handler
+    return { message, handler, updates }
   },
 
   // Upload
@@ -1403,6 +1484,7 @@ export default {
     return Boolean(comment)
   },
   removeMarkdownCodeblocksFromString (string) {
+    if (!string) { return '' }
     const segments = this.markdownSegments(string)
     segments.forEach(segment => {
       if (segment.type === 'codeBlock' || segment.type === 'code') {

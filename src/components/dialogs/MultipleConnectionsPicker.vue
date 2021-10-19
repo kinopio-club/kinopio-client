@@ -35,14 +35,14 @@ export default {
   },
   computed: {
     connectionTypes () {
-      return this.$store.state.currentSpace.connectionTypes
+      return this.$store.getters['currentConnections/allTypes']
     }
   },
   methods: {
     changeConnectionTypes (type) {
       this.selectedConnections.forEach(connection => {
-        this.$store.dispatch('currentSpace/updateConnectionTypeForConnection', {
-          connectionId: connection.id,
+        this.$store.dispatch('currentConnections/update', {
+          id: connection.id,
           connectionTypeId: type.id
         })
       })
@@ -53,7 +53,7 @@ export default {
       })
     },
     addConnectionType () {
-      this.$store.dispatch('currentSpace/addConnectionType', { color: this.nextConnectionTypeColor })
+      this.$store.dispatch('currentConnections/addType', { color: this.nextConnectionTypeColor })
       const types = utils.clone(this.connectionTypes)
       const newType = last(types)
       this.changeConnectionTypes(newType)

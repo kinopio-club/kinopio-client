@@ -3,8 +3,6 @@ main.space(
   :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady}"
   @mousedown.left="initInteractions"
   @touchstart="initInteractions"
-  @mouseup.left="stopInteractions"
-  @touchstop="stopInteractions"
   @gesturestart="updateVisualViewport"
   @gesturechange="updateVisualViewport"
   :style="styles"
@@ -28,6 +26,8 @@ main.space(
   .cards
     template(v-for="card in cards")
       Card(:card="card")
+  CardDetails
+  CardUserDetails
   ConnectionDetails
   MultipleSelectedActions
   ScrollAtEdgesHandler
@@ -36,6 +36,8 @@ main.space(
 
 <script>
 import Card from '@/components/Card.vue'
+import CardDetails from '@/components/dialogs/CardDetails.vue'
+import CardUserDetails from '@/components/dialogs/CardUserDetails.vue'
 import Connection from '@/components/Connection.vue'
 import ConnectionLabel from '@/components/ConnectionLabel.vue'
 import UserLabel from '@/components/UserLabel.vue'
@@ -55,6 +57,8 @@ export default {
   name: 'Space',
   components: {
     Card,
+    CardDetails,
+    CardUserDetails,
     Connection,
     ConnectionLabel,
     UserLabel,
@@ -76,11 +80,6 @@ export default {
       if (mutation.type === 'triggeredDrawConnectionFrame') {
         prevCursor = this.$store.state.triggeredDrawConnectionFrame
         this.drawConnection()
-      }
-      if (mutation.type === 'currentUserIsDrawingConnection') {
-        if (mutation.payload === true) {
-          this.$store.commit('updateCardMap')
-        }
       }
     })
   },
@@ -105,7 +104,7 @@ export default {
 
     document.fonts.ready.then(event => {
       this.$store.commit('webfontIsLoaded', true)
-      this.updateIncorrectCardConnectionPaths()
+      this.correctCardConnectionPaths()
     })
     if (utils.isAndroid()) {
       this.$store.commit('addNotification', { message: 'Android is currenly only partially supported. You may experience scrolling issues', type: 'danger' })
@@ -142,13 +141,13 @@ export default {
         transform: `scale(${this.spaceZoomDecimal})`
       }
     },
-    cards () { return this.$store.state.currentSpace.cards },
+    cards () { return this.$store.getters['currentCards/all'] },
     isPainting () { return this.$store.state.currentUserIsPainting },
     isPanningReady () { return this.$store.state.currentUserIsPanningReady },
     spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
     isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
     isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
-    connections () { return this.$store.state.currentSpace.connections },
+    connections () { return this.$store.getters['currentConnections/all'] },
     viewportHeight () { return this.$store.state.viewportHeight },
     viewportWidth () { return this.$store.state.viewportWidth },
     pageHeight () { return this.$store.state.pageHeight },
@@ -169,11 +168,11 @@ export default {
     updateVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
-    updateIncorrectCardConnectionPaths () {
+    correctCardConnectionPaths () {
       const space = utils.clone(this.$store.state.currentSpace)
       const user = utils.clone(this.$store.state.currentUser)
       const currentSpaceIsRemote = utils.currentSpaceIsRemote(space, user)
-      this.$store.dispatch('currentSpace/updateIncorrectCardConnectionPaths', { shouldUpdateApi: currentSpaceIsRemote })
+      this.$store.dispatch('currentConnections/correctPaths', { shouldUpdateApi: currentSpaceIsRemote })
     },
     loadSpaceOnBackOrForward (event) {
       const url = window.location.href
@@ -239,7 +238,6 @@ export default {
         this.drawConnection()
       }
       prevCursor = utils.cursorPositionInViewport(event)
-      this.$store.commit('prevCursorPosition', utils.cursorPositionInPage(event))
     },
     checkShouldShowDetails () {
       if (!utils.cursorsAreClose(startCursor, endCursor)) {
@@ -262,7 +260,7 @@ export default {
     },
     dragCard () {
       const prevCursor = this.cursor()
-      this.$store.dispatch('currentSpace/dragCards', {
+      this.$store.dispatch('currentCards/move', {
         endCursor,
         prevCursor: prevCursor
       })
@@ -282,7 +280,7 @@ export default {
       const path = utils.connectionPathBetweenCoords(start, end)
       this.checkCurrentConnectionSuccess()
       this.currentConnectionPath = path
-      const connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
+      const connectionType = this.$store.getters['currentConnections/typeForNewConnections']
       this.currentConnectionColor = connectionType.color
       this.$store.commit('currentConnectionColor', connectionType.color)
       const updates = {
@@ -296,52 +294,41 @@ export default {
     },
     checkCurrentConnectionSuccess () {
       const cursor = this.cursor()
-      const zoom = this.$store.getters.spaceCounterZoomDecimal
-      const cardMap = this.$store.state.cardMap
-      const connection = cardMap.find(card => {
-        const xValues = {
-          value: cursor.x,
-          min: (card.x - window.scrollX) * zoom,
-          max: (card.x - window.scrollX + card.width) * zoom
-        }
-        const yValues = {
-          value: cursor.y,
-          min: (card.y - window.scrollY) * zoom,
-          max: (card.y - window.scrollY + card.height) * zoom
-        }
-        const inXRange = utils.isBetween(xValues)
-        const inYRange = utils.isBetween(yValues)
-        return inXRange && inYRange
-      })
+      const zoom = this.$store.getters.spaceZoomDecimal
+      const cardElement = utils.cardElementFromPosition(cursor.x * zoom, cursor.y * zoom)
       let updates = { id: this.$store.state.currentUser.id }
-      if (!connection) {
+      let isCurrentConnectionConnected
+      if (cardElement) {
+        isCurrentConnectionConnected = this.$store.state.currentConnection.startCardId !== cardElement.dataset.cardId
+      }
+      if (!cardElement) {
         this.$store.commit('currentConnectionSuccess', {})
         updates.endCardId = null
         this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
-        return
-      }
-      if (this.$store.state.currentConnection.startCardId !== connection.cardId) {
-        this.$store.commit('currentConnectionSuccess', connection)
-        updates.endCardId = connection.cardId
+      } else if (isCurrentConnectionConnected) {
+        const card = this.$store.getters['currentCards/byId'](cardElement.dataset.cardId)
+        this.$store.commit('currentConnectionSuccess', card)
+        updates.endCardId = card.id
         this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
       } else {
         this.$store.commit('currentConnectionSuccess', {})
       }
     },
     addConnection (connection) {
-      const connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
-      this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
+      const type = this.$store.getters['currentConnections/typeForNewConnections']
+      this.$store.dispatch('currentConnections/add', { connection, type })
+      this.$store.dispatch('currentConnections/addType', type)
     },
     createConnection () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
       const startCardId = this.$store.state.currentConnection.startCardId
-      const endCardId = currentConnectionSuccess.cardId
-      if (currentConnectionSuccess.cardId) {
+      const endCardId = currentConnectionSuccess.id
+      if (currentConnectionSuccess.id) {
         const path = utils.connectionBetweenCards(startCardId, endCardId)
         const connection = { startCardId, endCardId, path }
         this.addConnection(connection)
       } else {
-        this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
+        this.$store.dispatch('currentConnections/removeUnusedTypes')
       }
     },
     // shouldContinueConnecting (event) {
@@ -360,7 +347,7 @@ export default {
       const isNormalized = uniq(zList).length === zList.length
       if (isNormalized) { return }
       sorted.forEach((card, index) => {
-        this.$store.dispatch('currentSpace/updateCard', { id: card.id, z: index })
+        this.$store.dispatch('currentCards/update', { id: card.id, z: index })
       })
     },
     addCard (position) {
@@ -375,7 +362,7 @@ export default {
         return
       }
       this.normalizeSpaceCardsZ()
-      this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
+      this.$store.dispatch('currentCards/add', { position, isParentCard })
       this.$store.commit('childCardId', '')
     },
     eventIsFromTextarea (event) {
@@ -466,7 +453,7 @@ export default {
       this.$store.commit('currentUserIsPainting', false)
       this.$store.commit('currentUserIsPaintingLocked', false)
       if (this.isDraggingCard) {
-        this.$store.dispatch('currentSpace/updateAfterDragWithPositions')
+        this.$store.dispatch('currentCards/afterMove')
       }
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.commit('currentConnectionSuccess', {})
@@ -476,6 +463,7 @@ export default {
         this.$store.commit('broadcast/updateStore', { updates: { id: this.$store.state.currentUser.id }, type: 'removeRemoteCurrentConnection' })
       }
       this.updatePageSizes()
+      this.$store.commit('prevCursorPosition', utils.cursorPositionInPage(event))
       this.currentConnectionPath = undefined
       prevCursor = undefined
     }

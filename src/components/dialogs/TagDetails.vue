@@ -136,8 +136,8 @@ export default {
     cardDetailsIsVisibleForCardId () { return this.$store.state.cardDetailsIsVisibleForCardId },
     currentCard () {
       let currentCardId = this.cardDetailsIsVisibleForCardId
-      const currentCard = this.$store.getters['currentSpace/cardById'](currentCardId)
-      const tagCard = this.$store.getters['currentSpace/cardById'](this.$store.state.currentSelectedTag.cardId)
+      const currentCard = this.$store.getters['currentCards/byId'](currentCardId)
+      const tagCard = this.$store.getters['currentCards/byId'](this.$store.state.currentSelectedTag.cardId)
       return currentCard || tagCard
     },
     showEditCard () { return !this.cardDetailsIsVisibleForCardId && !this.visibleFromTagList },
@@ -254,7 +254,7 @@ export default {
     },
     async updateCards () {
       this.cards = []
-      const cardsInCurrentSpace = utils.clone(this.$store.getters['currentSpace/cardsWithTagName'](this.name))
+      const cardsInCurrentSpace = utils.clone(this.$store.getters['currentCards/withTagName'](this.name))
       const cardsInCachedSpaces = cache.allCardsByTagName(this.name)
       // cache cards
       let cacheCards = cardsInCurrentSpace.concat(cardsInCachedSpaces)
@@ -334,7 +334,8 @@ export default {
         this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
       } else {
         const cardId = card.id || this.currentTag.cardId
-        this.$store.dispatch('currentSpace/showCardDetails', cardId)
+        this.$store.commit('preventCardDetailsOpeningAnimation', false)
+        this.$store.dispatch('currentCards/showCardDetails', cardId)
       }
     },
     toggleColorPicker () {
@@ -416,7 +417,7 @@ export default {
     relativeDate (card) {
       let date = card.nameUpdatedAt || card.updatedAt
       if (!date) {
-        card = this.$store.getters['currentSpace/cardById'](card.id)
+        card = this.$store.getters['currentCards/byId'](card.id)
         if (!card) { return }
         date = card.nameUpdatedAt || card.updatedAt
       }

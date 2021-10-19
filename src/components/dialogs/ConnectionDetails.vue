@@ -91,8 +91,8 @@ export default {
   computed: {
     visible () { return Boolean(this.$store.state.connectionDetailsIsVisibleForConnectionId) },
     labelIsVisible () { return this.currentConnection.labelIsVisible },
-    currentConnectionType () { return this.$store.getters['currentSpace/connectionTypeById'](this.currentConnection.connectionTypeId) },
-    connectionTypes () { return this.$store.state.currentSpace.connectionTypes },
+    currentConnectionType () { return this.$store.getters['currentConnections/typeByConnection'](this.currentConnection) },
+    connectionTypes () { return this.$store.getters['currentConnections/allTypes'] },
     typeColor () { return this.currentConnectionType.color },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     spacePrivacyIsOpen () { return this.$store.state.currentSpace.privacy === 'open' },
@@ -115,10 +115,8 @@ export default {
       }
     },
     currentConnection () {
-      let connections = this.$store.state.currentSpace.connections
-      return connections.find(connection => {
-        return connection.id === this.$store.state.connectionDetailsIsVisibleForConnectionId
-      })
+      const id = this.$store.state.connectionDetailsIsVisibleForConnectionId
+      return this.$store.getters['currentConnections/byId'](id)
     },
     canEditConnection () {
       const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
@@ -137,7 +135,7 @@ export default {
           id: this.currentConnectionType.id,
           name: newName
         }
-        this.$store.dispatch('currentSpace/updateConnectionType', connectionType)
+        this.$store.dispatch('currentConnections/updateType', connectionType)
       }
     },
     connectionTypesFiltered () {
@@ -173,7 +171,7 @@ export default {
       this.$store.dispatch('currentUser/shouldUseLastConnectionType', value)
     },
     addConnectionType () {
-      this.$store.dispatch('currentSpace/addConnectionType', { color: this.nextConnectionTypeColor })
+      this.$store.dispatch('currentConnections/addType', { color: this.nextConnectionTypeColor })
       const types = utils.clone(this.connectionTypes)
       const newType = last(types)
       this.changeConnectionType(newType)
@@ -183,21 +181,21 @@ export default {
       return Boolean(type.id === this.currentConnection.connectionTypeId)
     },
     removeConnection () {
-      this.$store.dispatch('currentSpace/removeConnection', this.currentConnection)
+      this.$store.dispatch('currentConnections/remove', this.currentConnection)
       this.$store.dispatch('closeAllDialogs', 'ConnectionDetails.removeConnection')
-      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
+      this.$store.dispatch('currentConnections/removeUnusedTypes')
     },
     changeConnectionType (type) {
-      this.$store.dispatch('currentSpace/updateConnectionTypeForConnection', {
-        connectionId: this.currentConnection.id,
+      this.$store.dispatch('currentConnections/update', {
+        id: this.currentConnection.id,
         connectionTypeId: type.id
       })
-      this.$store.commit('currentSpace/reorderConnectionTypeToLast', type)
+      this.$store.commit('currentConnections/reorderTypeToEnd', type)
     },
     toggleLabelIsVisible () {
       const newValue = !this.labelIsVisible
-      this.$store.dispatch('currentSpace/updateLabelIsVisibleForConnection', {
-        connectionId: this.currentConnection.id,
+      this.$store.dispatch('currentConnections/update', {
+        id: this.currentConnection.id,
         labelIsVisible: newValue
       })
     },
@@ -212,7 +210,7 @@ export default {
         id: this.currentConnectionType.id,
         color: newColor
       }
-      this.$store.dispatch('currentSpace/updateConnectionType', connectionType)
+      this.$store.dispatch('currentConnections/updateType', connectionType)
     },
     focusName () {
       this.$nextTick(() => {
@@ -279,12 +277,12 @@ export default {
   },
   watch: {
     currentConnection (current) {
-      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
+      this.$store.dispatch('currentConnections/removeUnusedTypes')
       this.$nextTick(() => {
         if (this.visible) {
           this.colorPickerIsVisible = false
           this.scrollIntoViewAndFocus()
-          this.$store.commit('currentSpace/reorderConnectionTypeToLast', this.currentConnectionType)
+          this.$store.commit('currentConnections/reorderTypeToEnd', this.currentConnectionType)
         } else {
           this.$store.commit('shouldHideConnectionOutline', false)
         }

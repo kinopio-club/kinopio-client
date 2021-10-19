@@ -178,7 +178,7 @@ export default {
         return state.name === this.$store.state.currentSpace.privacy
       })
     },
-    spacePrivacyIsOpen () { return this.privacyName === 'open' },
+    spacePrivacyIsOpen () { return this.privacyState === 'open' },
     cardsCreatedCountFromLimit () {
       const cardsCreatedLimit = this.$store.state.cardsCreatedLimit
       const cardsCreatedCount = this.$store.state.currentUser.cardsCreatedCount

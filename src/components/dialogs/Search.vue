@@ -106,7 +106,7 @@ export default {
       return cards
     },
     recentlyUpdatedCards () {
-      let cards = utils.clone(this.$store.state.currentSpace.cards)
+      let cards = utils.clone(this.$store.getters['currentCards/all'])
       cards = cards.filter(card => card.name)
       cards = cards.map(card => {
         const date = card.nameUpdatedAt || card.createdAt
@@ -180,7 +180,7 @@ export default {
     },
     selectCard (card) {
       this.$store.dispatch('closeAllDialogs', 'Search.selectCard')
-      this.$store.dispatch('currentSpace/showCardDetails', card.id)
+      this.$store.dispatch('currentCards/showCardDetails', card.id)
       this.focusItem(card)
     },
     closeDialogs () {
@@ -221,7 +221,7 @@ export default {
       }
     },
     selectItem () {
-      const card = this.$store.getters['currentSpace/cardById'](this.previousResultCardId)
+      const card = this.$store.getters['currentCards/byId'](this.previousResultCardId)
       this.$store.commit('shouldPreventNextEnterKey', true)
       this.$store.dispatch('closeAllDialogs', 'Search.selectItem')
       this.selectCard(card)

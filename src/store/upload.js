@@ -153,7 +153,7 @@ export default {
         const positionOffset = 20
         const cardId = nanoid()
         cardIds.push(cardId)
-        context.dispatch('currentSpace/addCard', {
+        context.dispatch('currentCards/add', {
           position: {
             x: currentCursor.x + (index * positionOffset),
             y: currentCursor.y + (index * positionOffset)
@@ -190,10 +190,11 @@ export default {
       // remove placeholder from card names
       files.forEach((file, index) => {
         const cardId = cardIds[index]
-        context.dispatch('currentSpace/repaceInCardName', {
-          cardId,
-          match: placeholder,
-          replace: ''
+        let card = context.rootGetters['currentCards/byId'](cardId)
+        const name = card.name.replace(placeholder, '')
+        context.dispatch('currentCards/update', {
+          id: cardId,
+          name
         }, { root: true })
       })
     }

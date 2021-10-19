@@ -21,14 +21,24 @@ const joinSpaceRoom = (store, mutation) => {
   const space = utils.clone(store.state.currentSpace)
   const user = utils.clone(store.state.currentUser)
   const currentSpaceIsRemote = utils.currentSpaceIsRemote(space, user)
-  if (!currentSpaceIsRemote) { return }
-  if (currentSpaceRoom === space.id) { return }
+  if (!currentSpaceIsRemote) {
+    store.commit('isJoiningSpace', false)
+    return
+  }
+  if (currentSpaceRoom === space.id) {
+    store.commit('isJoiningSpace', false)
+    return
+  }
   if (websocket.readyState === 0) {
     console.warn('🚑 joinSpaceRoom cancelled because websocket not ready', websocket.readyState)
+    store.commit('isJoiningSpace', false)
     return
   }
   const spaceIsLoadedOrCached = Boolean(store.state.currentSpace.cards.length) // proxy for checking if user can view space
-  if (!spaceIsLoadedOrCached) { return }
+  if (!spaceIsLoadedOrCached) {
+    store.commit('isJoiningSpace', false)
+    return
+  }
   currentSpaceRoom = space.id
   websocket.send(JSON.stringify({
     message: 'joinSpaceRoom',
@@ -44,16 +54,15 @@ const sendEvent = (store, mutation, type) => {
   if (!websocket || !currentUserIsConnected) { return }
   const shouldBroadcast = store.getters['currentSpace/shouldBroadcast']
   if (!shouldBroadcast) { return }
-  const message = mutation.payload.type
-  let updates = mutation.payload
-  updates = utils.normalizeBroadcastUpdates(updates)
+  const { message, handler, updates } = utils.normalizeBroadcastUpdates(mutation.payload)
   const hidden = ['updateRemoteUserCursor', 'addRemotePaintingCircle', 'clearRemoteCardDetailsVisible', 'clearRemoteConnectionDetailsVisible']
   if (showDebugMessages && !hidden.includes(updates.type)) {
-    console.log('🌜', updates)
+    console.log('🌜 sent', message, handler, updates)
   }
-  const space = utils.clone(store.state.currentSpace)
+  const space = store.state.currentSpace
   websocket.send(JSON.stringify({
     message,
+    handler,
     updates,
     clientId,
     space: utils.spaceMeta(space),
@@ -106,19 +115,25 @@ export default function createWebSocketPlugin () {
           console.warn('🌌', event)
           store.commit('isReconnectingToBroadcast', true)
         }
-        // receive
+
+        // receive 🌜
+
         websocket.onmessage = ({ data }) => {
           data = JSON.parse(data)
           if (data.clientId === clientId) { return }
           if (data.message !== 'updateRemoteUserCursor' && showDebugMessages) {
-            console.log('🌛', data)
+            console.log('🌛 received', data)
           }
           if (data.space) {
             if (data.space.id !== store.state.currentSpace.id) { return }
           }
-          let { message, user, updates } = data
+          let { message, handler, user, updates } = data
           if (message === 'connected') {
           // presence
+          } else if (handler) {
+            store.commit(handler, updates)
+            checkIfShouldUpdateLinkToSpaceId(store, data)
+          // users
           } else if (message === 'userJoinedRoom') {
             store.dispatch('currentSpace/addUserToJoinedSpace', user)
           } else if (message === 'updateUserPresence') {
@@ -132,33 +147,18 @@ export default function createWebSocketPlugin () {
             if (updates.user.id === store.state.currentUser.id) {
               store.dispatch('currentSpace/removeCurrentUserFromSpace', updates.user)
             }
-          // circles and position
-          } else if (message === 'addRemotePaintingCircle') {
-            store.commit('triggerAddRemotePaintingCircle', updates)
-          } else if (message === 'updateRemoteUserCursor') {
-            store.commit('triggerUpdateRemoteUserCursor', updates)
-          // drop guide lines
-          } else if (message === 'updateRemoteUserDropGuideLine') {
-            store.commit('triggerUpdateRemoteDropGuideLine', updates)
-          } else if (message === 'updateStopRemoteUserDropGuideLine') {
-            store.commit('triggerUpdateStopRemoteUserDropGuideLine', updates)
-          // cards and connections
-          } else if (message === 'updateConnectionPaths') {
-            store.commit('currentSpace/updateConnectionPathsBroadcast', updates)
-          } else if (message === 'moveCards') {
-            store.commit('currentSpace/moveCardsBroadcast', updates)
           // other
           } else if (data.type === 'store') {
             store.commit(`${message}`, updates)
           } else {
             store.commit(`currentSpace/${message}`, updates)
-            checkIfShouldUpdateLinkToSpaceId(store, data)
             checkIfShouldUpdateBackground(store, data)
           }
         }
       }
 
-      // send
+      // send 🌛
+
       if (mutation.type === 'broadcast/joinSpaceRoom') {
         if (!currentUserIsConnected) {
           store.commit('broadcast/connect')

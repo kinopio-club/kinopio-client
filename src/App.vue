@@ -6,8 +6,8 @@
   :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
 )
   #layout-viewport(:style="{ background: backgroundTint }")
-    OffscreenMarkers
   MagicPaint
+  OffscreenMarkers
   //- router-view is Space
   router-view
   Header
@@ -63,8 +63,14 @@ export default {
     setTimeout(() => {
       window.addEventListener('scroll', this.updateUserHasScrolled)
     }, 100)
+    window.addEventListener('scroll', this.updateCardMap)
     this.updateMetaDescription()
     this.$store.dispatch('currentSpace/updateBackgroundZoom')
+    this.updateCardMap()
+  },
+  beforeUnmount () {
+    window.removeEventListener('scroll', this.updateUserHasScrolled)
+    window.removeEventListener('scroll', this.updateCardMap)
   },
   computed: {
     backgroundTint () {
@@ -110,13 +116,16 @@ export default {
     }
   },
   methods: {
+    updateCardMap () {
+      this.$store.dispatch('currentCards/updateCardMap')
+    },
     broadcastCursor (event) {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
       let updates = utils.cursorPositionInPage(event)
       updates.userId = this.$store.state.currentUser.id
       updates.zoom = this.$store.getters.spaceZoomDecimal
-      this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor' })
+      this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
     },
     isTouchDevice () {
       this.$store.commit('isTouchDevice', true)
@@ -128,7 +137,7 @@ export default {
     updateMetaDescription () {
       let description = 'Kinopio is your spatial thinking tool for new ideas and hard problems.'
       const metaDescription = document.querySelector('meta[name=description]')
-      const cards = this.$store.state.currentSpace.cards
+      const cards = this.$store.getters['currentCards/all']
       const topLeftCard = utils.topLeftCard(cards)
       if (!topLeftCard.name) {
         metaDescription.setAttribute('content', description)
@@ -170,6 +179,8 @@ export default {
   --active-inset-shadow inset 0 2px 3px var(--light-shadow)
   --button-hover-shadow 2px 2px 0 var(--heavy-shadow)
   --button-active-inset-shadow inset 0 1px 2px var(--heavy-shadow)
+
+  --serif-font recoleta, georgia, serif
 
 @font-face
   font-family 'OsakaMono-Kinopio'

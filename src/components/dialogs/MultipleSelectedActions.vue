@@ -20,8 +20,8 @@ dialog.narrow.multiple-selected-actions(
         img.icon.connector-icon(v-else src="@/assets/connector-open.svg")
         span Connect
       //- Frames
-      .button-wrap(:class="{active: framePickerIsVisible}" @click.left.stop="toggleFramePickerIsVisible")
-        button Frames
+      .button-wrap(@click.left.stop="toggleFramePickerIsVisible")
+        button(:class="{active: framePickerIsVisible}") Frames
         FramePicker(:visible="framePickerIsVisible" :cards="cards")
     .row.edit-connection-types(v-if="connectionsIsSelected")
       //- Type Color
@@ -121,7 +121,7 @@ export default {
     multipleCardsIsSelected () { return Boolean(this.multipleCardsSelectedIds.length > 1) },
     cards () {
       return this.multipleCardsSelectedIds.map(cardId => {
-        return this.$store.getters['currentSpace/cardById'](cardId)
+        return this.$store.getters['currentCards/byId'](cardId)
       })
     },
     editableCards () {
@@ -139,7 +139,7 @@ export default {
       },
       set (value) {
         this.cards.forEach(card => {
-          this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: card.id, value })
+          this.$store.dispatch('currentCards/toggleChecked', { cardId: card.id, value })
         })
         this.checkCardsCheckboxIsChecked()
       }
@@ -151,7 +151,7 @@ export default {
     connectionsIsSelected () { return Boolean(this.multipleConnectionsSelectedIds.length) },
     connections () {
       return this.multipleConnectionsSelectedIds.map(id => {
-        return this.$store.getters['currentSpace/connectionById'](id)
+        return this.$store.getters['currentConnections/byId'](id)
       })
     },
     editableConnections () {
@@ -166,14 +166,14 @@ export default {
     },
     connectionTypes () {
       const connectionTypes = uniq(this.multipleConnectionsSelectedIds.map(id => {
-        const connection = this.$store.getters['currentSpace/connectionById'](id)
-        return this.$store.getters['currentSpace/connectionTypeById'](connection.connectionTypeId)
+        const connection = this.$store.getters['currentConnections/byId'](id)
+        return this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
       }))
       return connectionTypes
     },
     editableConnectionTypes () {
       return uniq(this.editableConnections.map(connection => {
-        return this.$store.getters['currentSpace/connectionTypeById'](connection.connectionTypeId)
+        return this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
       }))
     },
     allLabelsAreVisible () {
@@ -234,7 +234,7 @@ export default {
     },
     exportData () {
       const cards = this.multipleCardsSelectedIds.map(cardId => {
-        return this.$store.getters['currentSpace/cardById'](cardId)
+        return this.$store.getters['currentCards/byId'](cardId)
       })
       return { 'cards': cards }
     },
@@ -268,8 +268,8 @@ export default {
     toggleAllLabelsAreVisible () {
       const isVisible = !this.allLabelsAreVisible
       this.editableConnections.forEach(connection => {
-        this.$store.dispatch('currentSpace/updateLabelIsVisibleForConnection', {
-          connectionId: connection.id,
+        this.$store.dispatch('currentConnections/update', {
+          id: connection.id,
           labelIsVisible: isVisible
         })
       })
@@ -301,18 +301,18 @@ export default {
       this.framePickerIsVisible = false
     },
     connectionType (event) {
-      let connectionType = last(this.$store.state.currentSpace.connectionTypes)
+      let connectionType = last(this.$store.getters['currentConnections/allTypes'])
       const shouldUseLastConnectionType = this.$store.state.currentUser.shouldUseLastConnectionType
       const shiftKey = event.shiftKey
       const shouldAddType = !connectionType || (shouldUseLastConnectionType && shiftKey) || (!shouldUseLastConnectionType && !shiftKey)
       if (shouldAddType) {
-        this.$store.dispatch('currentSpace/addConnectionType')
+        this.$store.dispatch('currentConnections/addType')
       }
-      connectionType = last(this.$store.state.currentSpace.connectionTypes)
+      connectionType = last(this.$store.getters['currentConnections/allTypes'])
       return connectionType
     },
     connectionAlreadyExists (startCardId, endCardId) {
-      const connections = this.$store.state.currentSpace.connections
+      const connections = this.$store.getters['currentConnections/all']
       const existingConnection = connections.find(connection => {
         const isStart = connection.startCardId === startCardId
         const isEnd = connection.endCardId === endCardId
@@ -321,7 +321,10 @@ export default {
       return Boolean(existingConnection)
     },
     checkCardsHaveCheckboxes () {
-      const cardsWithCheckboxes = this.cards.filter(card => utils.checkboxFromString(card.name))
+      const cardsWithCheckboxes = this.cards.filter(card => {
+        if (!card) { return }
+        utils.checkboxFromString(card.name)
+      })
       this.cardsHaveCheckboxes = cardsWithCheckboxes.length === this.cards.length
     },
     checkCardsCheckboxIsChecked () {
@@ -335,7 +338,7 @@ export default {
             id: card.id,
             name: `[] ${card.name}`
           }
-          this.$store.dispatch('currentSpace/updateCard', update)
+          this.$store.dispatch('currentCards/update', update)
         }
       })
       this.cardsHaveCheckboxes = true
@@ -378,22 +381,22 @@ export default {
         }
       })
       connections = connections.filter(Boolean)
-      const connectionType = this.connectionType(event)
+      const type = this.connectionType(event)
       connections.forEach(connection => {
-        this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
+        this.$store.dispatch('currentConnections/add', { connection, type })
         this.$store.dispatch('addToMultipleConnectionsSelected', connection.id)
       })
     },
     disconnectCards () {
       const cardIds = this.multipleCardsSelectedIds
       cardIds.forEach(cardId => {
-        this.$store.dispatch('currentSpace/removeSelectedConnectionsFromCard', cardId)
+        this.$store.dispatch('currentConnections/removeFromSelectedCard', cardId)
       })
-      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
+      this.$store.dispatch('currentConnections/removeUnusedTypes')
     },
     remove () {
-      this.editableConnections.forEach(connection => this.$store.dispatch('currentSpace/removeConnection', connection))
-      this.editableCards.forEach(card => this.$store.dispatch('currentSpace/removeCard', card))
+      this.editableConnections.forEach(connection => this.$store.dispatch('currentConnections/remove', connection))
+      this.editableCards.forEach(card => this.$store.dispatch('currentCards/remove', card))
       this.$store.dispatch('closeAllDialogs', 'MultipleSelectedActions.remove')
       this.$store.dispatch('clearMultipleSelected')
     },
@@ -414,7 +417,7 @@ export default {
           this.checkIsCardsConnected()
           this.checkCardsHaveCheckboxes()
           this.checkCardsCheckboxIsChecked()
-          this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
+          this.$store.dispatch('currentConnections/removeUnusedTypes')
           this.scrollIntoView()
           this.closeDialogs()
         }

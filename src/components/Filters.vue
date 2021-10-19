@@ -51,7 +51,7 @@ export default {
   },
   computed: {
     frames () {
-      const cards = utils.clone(this.$store.state.currentSpace.cards)
+      const cards = utils.clone(this.$store.getters['currentCards/all'])
       let framesInUse = cards.map(card => card.frameId)
       framesInUse = uniq(framesInUse.filter(frame => frame))
       return framesInUse.map(frame => frames[frame])

@@ -22,6 +22,9 @@ import User from '@/components/User.vue'
 import utils from '@/utils.js'
 import scrollIntoView from '@/scroll-into-view.js'
 
+let dateIsUpdated
+let updatedAbsoluteDate
+
 export default {
   name: 'CardCollaborationInfo',
   components: {
@@ -42,6 +45,10 @@ export default {
       userDetailsIsVisibleForUpdatedByUser: false
     }
   },
+  mounted () {
+    dateIsUpdated = false
+    updatedAbsoluteDate = ''
+  },
   computed: {
     isUpdatedByDifferentUser () { return this.createdByUser.id !== this.updatedByUser.id },
     dateUpdatedAt () {
@@ -49,16 +56,31 @@ export default {
       const showAbsoluteDate = this.$store.state.currentUser.filterShowAbsoluteDates
       if (date) {
         if (showAbsoluteDate) {
-          return new Date(date).toLocaleString()
+          return this.absoluteDate(date)
         } else {
-          return utils.shortRelativeTime(date)
+          return this.relativeDate(date)
         }
       } else {
-        return 'Just now'
+        return 'now'
       }
     }
   },
   methods: {
+    absoluteDate (date) {
+      if (dateIsUpdated && updatedAbsoluteDate) {
+        return updatedAbsoluteDate
+      }
+      dateIsUpdated = true
+      updatedAbsoluteDate = new Date(date).toLocaleString()
+      return updatedAbsoluteDate
+    },
+    relativeDate (date) {
+      if (dateIsUpdated) {
+        return 'now'
+      }
+      dateIsUpdated = true
+      return utils.shortRelativeTime(date)
+    },
     closeDialogs () {
       this.closeComponentDialogs()
       this.$emit('closeDialogs')

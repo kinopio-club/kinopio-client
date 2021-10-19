@@ -125,19 +125,19 @@ export default {
       border-radius 3px
       margin-right 0
     h1
-      font-family recoleta
+      font-family var(--serif-font)
       font-size 22px
       font-weight bold
       margin 0
       display inline-block
     h2
-      font-family recoleta
+      font-family var(--serif-font)
       font-weight normal
       font-size 20px
       margin 0
       display inline-block
     h3
-      font-family recoleta
+      font-family var(--serif-font)
       font-weight normal
       font-size 16px
       margin 0

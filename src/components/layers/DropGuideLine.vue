@@ -218,15 +218,15 @@ export default {
       updates.x = this.currentCursor.x + window.scrollX
       updates.y = this.currentCursor.y + window.scrollY
       updates.userId = this.$store.state.currentUser.id
-      this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor' })
+      this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
       updates.curve = curve
       updates.color = color
       updates.frameId = nanoid()
-      this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserDropGuideLine' })
+      this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserDropGuideLine', handler: 'triggerUpdateRemoteDropGuideLine' })
     },
     broadcastStopPaintingGuide () {
       const updates = { userId: this.$store.state.currentUser.id }
-      this.$store.commit('broadcast/update', { updates, type: 'updateStopRemoteUserDropGuideLine' })
+      this.$store.commit('broadcast/update', { updates, type: 'updateStopRemoteUserDropGuideLine', handler: 'triggerUpdateStopRemoteUserDropGuideLine' })
     }
   },
   watch: {

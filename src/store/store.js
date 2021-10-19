@@ -6,6 +6,8 @@ import broadcast from '@/store/broadcast.js'
 import undoHistory from '@/store/undoHistory.js'
 import currentUser from '@/store/currentUser.js'
 import currentSpace from '@/store/currentSpace.js'
+import currentCards from '@/store/currentCards.js'
+import currentConnections from '@/store/currentConnections.js'
 import upload from '@/store/upload.js'
 // store plugins
 import websocket from '@/store/plugins/websocket.js'
@@ -33,7 +35,6 @@ const store = createStore({
     shouldHideFooter: false,
     shouldExplicitlyHideFooter: false,
     isTouchDevice: false,
-    cardMap: {},
     cardsCreatedLimit: 100,
     prevCursorPosition: { x: 0, y: 0 },
     spaceZoomPercent: 100,
@@ -73,6 +74,8 @@ const store = createStore({
     childCardId: '',
     remoteCardDetailsVisible: [],
     preventCardDetailsOpeningAnimation: true,
+    cardUserDetailsIsVisibleForCardId: '',
+    hasEditedCurrentSpace: false,
 
     // connecting
     currentConnection: {}, // startCardId, startConnectorRect
@@ -176,12 +179,11 @@ const store = createStore({
       state.maxPageSizeWidth = width
       state.maxPageSizeHeight = height
     },
-    updateSpacePageSize: (state, { maxX, maxY }) => {
+    updateSpacePageSize: (state) => {
       const extraScrollArea = 160
-      state.pageWidth = maxX + extraScrollArea
-      state.pageHeight = maxY + extraScrollArea
+      state.pageWidth = extraScrollArea
+      state.pageHeight = extraScrollArea
     },
-
     pageHeight: (state, height) => {
       utils.typeCheck({ value: height, type: 'number', origin: 'pageHeight' })
       state.pageHeight = height
@@ -259,9 +261,6 @@ const store = createStore({
     isTouchDevice: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'isTouchDevice' })
       state.isTouchDevice = value
-    },
-    updateCardMap: (state) => {
-      state.cardMap = utils.cardMap()
     },
     prevCursorPosition: (state, cursor) => {
       state.prevCursorPosition = cursor
@@ -407,6 +406,14 @@ const store = createStore({
     preventCardDetailsOpeningAnimation: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'preventCardDetailsOpeningAnimation' })
       state.preventCardDetailsOpeningAnimation = value
+    },
+    cardUserDetailsIsVisibleForCardId: (state, cardId) => {
+      utils.typeCheck({ cardId, type: 'string', origin: 'cardUserDetailsIsVisibleForCardId', allowUndefined: true })
+      state.cardUserDetailsIsVisibleForCardId = cardId
+    },
+    hasEditedCurrentSpace: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'hasEditedCurrentSpace' })
+      state.hasEditedCurrentSpace = value
     },
 
     // Connecting
@@ -895,7 +902,6 @@ const store = createStore({
       }
       context.commit('spaceUrlToLoad', matches.spaceUrl)
     },
-
     updatePageSizes: (context) => {
       const paddingX = Math.min(400, (utils.visualViewport().width / 4) * 3) + 100
       const paddingY = Math.min(400, (utils.visualViewport().height / 4) * 3)
@@ -928,22 +934,6 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteCardDetailsVisible' })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteConnectionDetailsVisible' })
     },
-    updateSpacePageSize: (context) => {
-      let maxX = 0
-      let maxY = 0
-      context.commit('updateCardMap')
-      context.state.cardMap.forEach(card => {
-        const cardX = card.x + card.width
-        const cardY = card.y + card.height
-        if (cardX > maxX) {
-          maxX = cardX
-        }
-        if (cardY > maxY) {
-          maxY = cardY
-        }
-      })
-      context.commit('updateSpacePageSize', { maxX, maxY })
-    },
     toggleCardSelected: (context, cardId) => {
       const previousMultipleCardsSelectedIds = context.state.previousMultipleCardsSelectedIds
       const cardIsSelected = previousMultipleCardsSelectedIds.includes(cardId)
@@ -974,9 +964,11 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteCardsSelected' }, { root: true })
     },
     clearMultipleSelected: (context) => {
-      context.commit('clearMultipleSelected')
-      const space = utils.clone(context.rootState.currentSpace)
-      const user = utils.clone(context.rootState.currentUser)
+      if (context.state.multipleCardsSelectedIds.length || context.state.multipleConnectionsSelectedIds.length) {
+        context.commit('clearMultipleSelected')
+      }
+      const space = context.rootState.currentSpace
+      const user = context.rootState.currentUser
       context.commit('broadcast/updateStore', { user: utils.userMeta(user, space), type: 'clearRemoteMultipleSelected' }, { root: true })
     },
     toggleMultipleConnectionsSelected: (context, connectionId) => {
@@ -1066,6 +1058,8 @@ const store = createStore({
     undoHistory,
     currentUser,
     currentSpace,
+    currentCards,
+    currentConnections,
     upload
   },
   plugins: [websocket()]

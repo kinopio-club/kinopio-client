@@ -293,7 +293,6 @@ export default {
       context.commit('currentSpace/updateCollaborator', user, { root: true })
     },
     lastSpaceId: (context, spaceId) => {
-      context.commit('notifySpaceNotFound', false, { root: true })
       context.commit('lastSpaceId', spaceId)
       cache.updateUser('lastSpaceId', spaceId)
       context.dispatch('api/addToQueue', { name: 'updateUser',

@@ -9,20 +9,23 @@ export default {
     try {
       window.localStorage[key] = JSON.stringify(value)
     } catch (error) {
-      console.warn('storeLocal could not save to localStorage', error)
-      if (this.user().apiKey) {
-        const currentSpaceId = utils.spaceIdFromUrl()
-        const keys = Object.keys(window.localStorage)
-        let spaceKeys = keys.filter(key => key.startsWith('space-') || key.startsWith('removed-space-'))
-        spaceKeys = spaceKeys.filter(key => key !== `space-${currentSpaceId}`)
-        spaceKeys.forEach(key => {
-          this.removeLocal(key)
-        })
-        console.log('🐇 pruned localStorage spaces', spaceKeys)
-      } else {
-        const element = document.getElementById('notify-local-storage-is-full')
-        element.classList.remove('hidden')
-      }
+      console.warn('🚑 storeLocal could not save to localStorage', error)
+      this.pruneLocal()
+    }
+  },
+  pruneLocal () {
+    if (this.user().apiKey) {
+      const currentSpaceId = utils.spaceIdFromUrl()
+      const keys = Object.keys(window.localStorage)
+      let spaceKeys = keys.filter(key => key.startsWith('space-') || key.startsWith('removed-space-'))
+      spaceKeys = spaceKeys.filter(key => key !== `space-${currentSpaceId}`)
+      spaceKeys.forEach(key => {
+        this.removeLocal(key)
+      })
+      console.log('🐇 pruned localStorage spaces', spaceKeys)
+    } else {
+      const element = document.getElementById('notify-local-storage-is-full')
+      element.classList.remove('hidden')
     }
   },
   getLocal (key) {
@@ -79,27 +82,34 @@ export default {
   updateSpace (key, value, spaceId) {
     let space = this.space(spaceId)
     if (!utils.objectHasKeys(space)) {
-      console.warn('🚑 could not updateSpace cache because cachedSpace does not exist')
+      console.warn('🚑 could not updateSpace cache because cachedSpace does not exist (ignore if read-only or open)')
       return
+    }
+    const normalizeKeys = ['cards', 'connections', 'connectionTypes']
+    if (normalizeKeys.includes(key)) {
+      value = utils.denormalizeItems(value)
     }
     space[key] = value
     space.cacheDate = Date.now()
     this.storeLocal(`space-${spaceId}`, space)
   },
   updateSpaceCardsDebounced: debounce(function (cards, spaceId) {
+    cards = utils.denormalizeItems(cards)
     let space = this.space(spaceId)
     if (!utils.objectHasKeys(space)) {
-      console.warn('🚑 could not updateSpace cache because cachedSpace does not exist')
+      console.warn('🚑 could not updateSpace cache because cachedSpace does not exist (ignore if read-only or open)')
       return
     }
+    cards = utils.denormalizeItems(cards)
     space.cards = cards
     space.cacheDate = Date.now()
     this.storeLocal(`space-${spaceId}`, space)
   }, 200),
   updateSpaceConnectionsDebounced: debounce(function (connections, spaceId) {
+    connections = utils.denormalizeItems(connections)
     let space = this.space(spaceId)
     if (!utils.objectHasKeys(space)) {
-      console.warn('🚑 could not updateSpace cache because cachedSpace does not exist')
+      console.warn('🚑 could not updateSpace cache because cachedSpace does not exist (ignore if read-only or open)')
       return
     }
     space.connections = connections

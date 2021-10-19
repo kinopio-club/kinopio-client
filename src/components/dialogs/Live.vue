@@ -90,5 +90,7 @@ export default {
     margin-left 3px
   .space-list
     .users
-      flex-wrap nowrap
+      max-width 120px
+      flex-wrap wrap
+      justify-content flex-start
 </style>

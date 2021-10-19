@@ -13,9 +13,7 @@ dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :sty
 
   section(v-if="!items.length")
     template(v-if="cardsVisible")
-      p Removed cards from
-        span !{' '}{{currentSpaceName}}!{' '}
-        span can be restored here
+      p Removed cards from {{currentSpaceName}} can be restored here
       p(v-if="!currentUserCanEditSpace")
         span.badge.info
           PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
@@ -188,7 +186,7 @@ export default {
       this.updateRemovedCards()
     },
     updateLocalRemovedCards () {
-      this.removedCards = this.$store.state.currentSpace.removedCards
+      this.removedCards = this.$store.state.currentCards.removedCards
     },
     updateRemovedCards () {
       this.updateLocalRemovedCards()
@@ -202,21 +200,21 @@ export default {
       this.loading.cards = false
       if (!utils.arrayExists(remoteCards)) { return }
       this.removedCards = remoteCards
-      this.$store.commit('currentSpace/removedCards', remoteCards)
+      this.$store.commit('currentCards/removedCards', remoteCards)
     },
     restoreCard (card) {
-      this.$store.dispatch('currentSpace/restoreRemovedCard', card)
+      this.$store.dispatch('currentCards/restoreRemoved', card)
       this.$nextTick(() => {
         this.scrollIntoView(card)
       })
       this.updateLocalRemovedCards()
     },
     removeCardPermanent (card) {
-      this.$store.dispatch('currentSpace/removeCardPermanent', card)
+      this.$store.dispatch('currentCards/removePermanent', card)
       this.updateLocalRemovedCards()
     },
     removeAllCardsPermanent () {
-      this.$store.dispatch('currentSpace/removeAllRemovedCardsPermanent')
+      this.$store.dispatch('currentCards/removeAllRemovedPermanent')
       this.updateLocalRemovedCards()
     },
 

@@ -279,9 +279,8 @@ export default {
         initialPosition.y = window.pageYOffset + 80
       }
       initialPosition = this.updateWithZoom(initialPosition)
-      this.$store.commit('updateCardMap')
       const position = this.nonOverlappingCardPosition(initialPosition)
-      this.$store.dispatch('currentSpace/addCard', { position, isParentCard })
+      this.$store.dispatch('currentCards/add', { position, isParentCard })
       if (childCard) {
         this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)
         this.$nextTick(() => {
@@ -313,9 +312,8 @@ export default {
         y: window.pageYOffset + rect.y + rect.height + incrementPosition
       }
       initialPosition = this.updateWithZoom(initialPosition)
-      this.$store.commit('updateCardMap')
       const position = this.nonOverlappingCardPosition(initialPosition)
-      this.$store.dispatch('currentSpace/addCard', { position })
+      this.$store.dispatch('currentCards/add', { position })
       this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)
       this.$nextTick(() => {
         this.addConnection(baseCardId)
@@ -324,7 +322,7 @@ export default {
 
     // recursive
     nonOverlappingCardPosition (position) {
-      const cardMap = this.$store.state.cardMap
+      const cardMap = this.$store.state.currentCards.cardMap
       const overlappingCard = cardMap.find(card => {
         const isBetweenX = utils.isBetween({
           value: position.x,
@@ -347,10 +345,10 @@ export default {
     },
 
     addConnectionType () {
-      const hasConnectionType = Boolean(this.$store.getters['currentSpace/connectionTypeForNewConnections'])
+      const hasConnectionType = Boolean(this.$store.getters['currentConnections/typeForNewConnections'])
       const shouldUseLastConnectionType = this.$store.state.currentUser.shouldUseLastConnectionType
       if ((shouldUseLastConnectionType || useSiblingConnectionType) && hasConnectionType) { return }
-      this.$store.dispatch('currentSpace/addConnectionType')
+      this.$store.dispatch('currentConnections/addType')
       useSiblingConnectionType = true
     },
 
@@ -371,8 +369,8 @@ export default {
         path: utils.connectionBetweenCards(baseCardId, currentCardId)
       }
       this.addConnectionType()
-      const connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
-      this.$store.dispatch('currentSpace/addConnection', { connection, connectionType })
+      const type = this.$store.getters['currentConnections/typeForNewConnections']
+      this.$store.dispatch('currentConnections/add', { connection, type })
     },
 
     // Keyboard Arrows
@@ -409,7 +407,7 @@ export default {
         }
       })
       if (closestCard) {
-        this.$store.commit('parentCardId', closestCard.cardId)
+        this.$store.commit('parentCardId', closestCard.id)
         return closestCard
       } else {
         return originCard
@@ -433,7 +431,8 @@ export default {
       }
       let closestDistanceFromCenter = Math.max(viewportWidth, viewportHeight)
       let closestCard
-      const cardMap = this.$store.state.cardMap
+      const cardMap = this.$store.state.currentCards.cardMap
+      if (!cardMap.length) { return }
       cardMap.forEach(card => {
         const toPosition = utils.rectCenter(card)
         const distance = utils.distanceBetweenTwoPoints(viewportCenter, toPosition)
@@ -442,24 +441,24 @@ export default {
           closestCard = card
         }
       })
-      this.$store.commit('parentCardId', closestCard.cardId)
+      this.$store.commit('parentCardId', closestCard.id)
       return closestCard
     },
 
     currentFocusedCard () {
-      const cardMap = this.$store.state.cardMap
+      const cardMap = this.$store.state.currentCards.cardMap
       let lastCardId = this.$store.state.parentCardId || this.$store.state.childCardId
-      let lastCard = cardMap.filter(card => card.cardId === lastCardId)
-      if (lastCard.length) {
-        return lastCard[0]
+      let lastCard = cardMap.find(card => card.id === lastCardId)
+      if (lastCard) {
+        return lastCard
       } else {
         return this.closestCardToViewportCenter()
       }
     },
 
     focusCard (direction) {
-      this.$store.commit('updateCardMap')
-      const cardMap = this.$store.state.cardMap
+      const cardMap = this.$store.state.currentCards.cardMap
+      if (!cardMap.length) { return }
       const originCard = this.currentFocusedCard()
       let focusableCards
       if (direction === 'left') {
@@ -483,9 +482,9 @@ export default {
           return isOnTopSide
         })
       }
-      focusableCards = focusableCards.filter(card => card.cardId !== this.$store.state.parentCardId)
+      focusableCards = focusableCards.filter(card => card.id !== this.$store.state.parentCardId)
       const closestCard = this.closestCardToOriginCard(originCard, direction, focusableCards)
-      document.querySelector(`.card[data-card-id="${closestCard.cardId}"]`).focus()
+      document.querySelector(`.card[data-card-id="${closestCard.id}"]`).focus()
     },
 
     focusedCardIds () {
@@ -495,8 +494,8 @@ export default {
     // Remove
 
     removeCardById (cardId) {
-      const card = this.$store.getters['currentSpace/cardById'](cardId)
-      this.$store.dispatch('currentSpace/removeCard', card)
+      const card = this.$store.getters['currentCards/byId'](cardId)
+      this.$store.dispatch('currentCards/remove', card)
     },
 
     clearAllSelectedCards () {
@@ -507,7 +506,7 @@ export default {
 
     canEditCardById (cardId) {
       const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
-      const card = this.$store.getters['currentSpace/cardById'](cardId)
+      const card = this.$store.getters['currentCards/byId'](cardId)
       const cardIsCreatedByCurrentUser = this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](card)
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (isSpaceMember) { return true }
@@ -517,7 +516,7 @@ export default {
 
     canEditConnectionById (connectionId) {
       const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
-      const connection = this.$store.getters['currentSpace/connectionById'](connectionId)
+      const connection = this.$store.getters['currentConnections/byId'](connectionId)
       const connectionIsCreatedByCurrentUser = this.$store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (isSpaceMember) { return true }
@@ -530,8 +529,8 @@ export default {
       const cardIds = this.focusedCardIds()
       selectedConnectionIds.forEach(connectionId => {
         if (this.canEditConnectionById(connectionId)) {
-          const connection = this.$store.getters['currentSpace/connectionById'](connectionId)
-          this.$store.dispatch('currentSpace/removeConnection', connection)
+          const connection = this.$store.getters['currentConnections/byId'](connectionId)
+          this.$store.dispatch('currentConnections/remove', connection)
         }
       })
       cardIds.forEach(cardId => {
@@ -539,7 +538,7 @@ export default {
           this.removeCardById(cardId)
         }
       })
-      this.$store.dispatch('currentSpace/removeUnusedConnectionTypes')
+      this.$store.dispatch('currentConnections/removeUnusedTypes')
       this.clearAllSelectedCards()
       this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.remove')
     },
@@ -547,10 +546,10 @@ export default {
     // Undo
 
     restoreLastRemovedCard () {
-      const removedCards = this.$store.state.currentSpace.removedCards
+      const removedCards = this.$store.state.currentCards.removedCards
       if (removedCards.length) {
         const card = removedCards[0]
-        this.$store.dispatch('currentSpace/restoreRemovedCard', card)
+        this.$store.dispatch('currentCards/restoreRemoved', card)
       }
     },
 
@@ -559,7 +558,7 @@ export default {
     copyCards () {
       const cardIds = this.focusedCardIds()
       const cards = cardIds.map(cardId => {
-        let card = this.$store.getters['currentSpace/cardById'](cardId)
+        let card = this.$store.getters['currentCards/byId'](cardId)
         return card
       })
       this.$store.commit('addToCopiedCards', cards)
@@ -586,11 +585,11 @@ export default {
       this.$store.commit('multipleSelectedActionsIsVisible', false)
       cards.forEach(card => {
         const cardId = nanoid()
-        this.$store.dispatch('currentSpace/pasteCard', { card, cardId })
+        this.$store.dispatch('currentCards/paste', { card, cardId })
         this.$store.commit('addToMultipleCardsSelected', cardId)
       })
       this.$nextTick(() => {
-        const newCard = last(this.$store.state.currentSpace.cards)
+        const newCard = last(this.$store.getters['currentCards/all'])
         this.scrollIntoView(newCard)
       })
     },
@@ -602,7 +601,7 @@ export default {
       if (!canEditSpace) { return }
       const zoom = this.$store.getters.spaceZoomDecimal
       const cursor = this.$store.state.prevCursorPosition
-      let cards = utils.clone(this.$store.state.currentSpace.cards)
+      let cards = utils.clone(this.$store.getters['currentCards/all'])
       cards = cards.filter(card => (card.y * zoom) > cursor.y)
       cards = cards.map(card => card.id)
       this.$store.commit('multipleSelectedActionsPosition', cursor)
@@ -615,7 +614,7 @@ export default {
     selectAllCards () {
       const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
-      let cards = utils.clone(this.$store.state.currentSpace.cards)
+      let cards = utils.clone(this.$store.getters['currentCards/all'])
       cards = cards.map(card => card.id)
       const dialogOffset = {
         width: 200 / 2,

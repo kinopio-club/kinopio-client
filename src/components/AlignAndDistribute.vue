@@ -60,7 +60,7 @@ export default {
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     cards () {
       const cards = this.multipleCardsSelectedIds.map(cardId => {
-        let card = this.$store.getters['currentSpace/cardById'](cardId)
+        let card = this.$store.getters['currentCards/byId'](cardId)
         card = utils.clone(card)
         const element = document.querySelector(`article [data-card-id="${cardId}"]`)
         const rect = element.getBoundingClientRect()
@@ -81,7 +81,7 @@ export default {
     },
     connections () {
       return this.multipleConnectionsSelectedIds.map(id => {
-        return this.$store.getters['currentSpace/connectionById'](id)
+        return this.$store.getters['currentConnections/byId'](id)
       })
     },
     canEditAll () {
@@ -301,7 +301,7 @@ export default {
           if (this.shouldAutoDistribute) {
             card.x = previousRightSide + spaceBetweenCards
           }
-          this.$store.dispatch('currentSpace/updateCard', card)
+          this.$store.dispatch('currentCards/update', card)
         }
         newCards.push(card)
       })
@@ -320,7 +320,7 @@ export default {
           if (this.shouldAutoDistribute) {
             card.y = previousBottomSide + spaceBetweenCards
           }
-          this.$store.dispatch('currentSpace/updateCard', card)
+          this.$store.dispatch('currentCards/update', card)
         }
       })
       this.updateConnectionPaths()
@@ -339,7 +339,7 @@ export default {
           if (this.shouldAutoDistribute) {
             card.y = previousBottomSide + spaceBetweenCards
           }
-          this.$store.dispatch('currentSpace/updateCard', card)
+          this.$store.dispatch('currentCards/update', card)
         }
       })
       this.updateConnectionPaths()
@@ -354,7 +354,7 @@ export default {
           const previousCard = cards[index - 1]
           card = utils.clone(card)
           card.x = previousCard.x + previousCard.width + averageDistance
-          this.$store.dispatch('currentSpace/updateCard', card)
+          this.$store.dispatch('currentCards/update', card)
         }
       })
       this.updateConnectionPaths()
@@ -374,7 +374,7 @@ export default {
           if (this.shouldAutoDistribute) {
             card.y = previousBottomSide + spaceBetweenCards
           }
-          this.$store.dispatch('currentSpace/updateCard', card)
+          this.$store.dispatch('currentCards/update', card)
         }
         newCards.push(card)
       })
@@ -393,7 +393,7 @@ export default {
             card.x = previousRightSide + spaceBetweenCards
           }
           card.y = origin.y + (origin.height / 2) - (card.height / 2)
-          this.$store.dispatch('currentSpace/updateCard', card)
+          this.$store.dispatch('currentCards/update', card)
         }
       })
       this.updateConnectionPaths()
@@ -411,7 +411,7 @@ export default {
           if (this.shouldAutoDistribute) {
             card.x = previousRightSide + spaceBetweenCards
           }
-          this.$store.dispatch('currentSpace/updateCard', card)
+          this.$store.dispatch('currentCards/update', card)
         }
       })
       this.updateConnectionPaths()
@@ -426,7 +426,7 @@ export default {
           const previousCard = cards[index - 1]
           card = utils.clone(card)
           card.y = previousCard.y + previousCard.height + averageDistance
-          this.$store.dispatch('currentSpace/updateCard', card)
+          this.$store.dispatch('currentCards/update', card)
         }
       })
       this.updateConnectionPaths()
@@ -468,7 +468,7 @@ export default {
         const multipleConnectionsSelectedIds = utils.clone(this.multipleConnectionsSelectedIds)
         this.$store.commit('clearMultipleSelected')
         multipleCardsSelectedIds.forEach(cardId => {
-          this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId, shouldUpdateApi: true })
+          this.$store.dispatch('currentConnections/updatePaths', { cardId, shouldUpdateApi: true })
         })
         this.$store.commit('multipleCardsSelectedIds', multipleCardsSelectedIds)
         this.$store.commit('multipleConnectionsSelectedIds', multipleConnectionsSelectedIds)

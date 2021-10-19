@@ -18,7 +18,7 @@
             button.visit-button
               img.icon.visit(src="@/assets/visit.svg")
 
-      img.preview-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected, 'side-image': isImageCard || parentIsCardDetails}")
+      img.preview-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected, 'side-image': isImageCard || parentIsCardDetails}" @load="updateCardMap")
       .text(v-if="isNotGithubRepo" :class="{'side-text badge': !isImageCard && !parentIsCardDetails && card.urlPreviewImage}" :style="{background: selectedColor}")
         img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
         img.icon.favicon.open(v-else src="@/assets/open.svg")
@@ -74,8 +74,12 @@ export default {
         id: this.card.id,
         urlPreviewIsVisible: false
       }
-      this.$store.dispatch('currentSpace/updateCard', update)
+      this.$store.dispatch('currentCards/update', update)
       this.$store.commit('removeUrlPreviewLoadingForCardIds', this.card.id)
+    },
+    updateCardMap () {
+      this.$store.dispatch('currentCards/updateDimensions', this.card.id)
+      this.$store.dispatch('currentCards/updateCardMap')
     }
   }
 }

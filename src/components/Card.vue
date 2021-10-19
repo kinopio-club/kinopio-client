@@ -11,7 +11,7 @@ article(:style="position" :data-card-id="id" ref="card")
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
 
-    :class="{jiggle: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || isRemoteCardDragging, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': isAudioCard, 'is-playing-audio': isPlayingAudio}",
+    :class="{jiggle: shouldJiggle, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': isAudioCard, 'is-playing-audio': isPlayingAudio}",
     :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor || selectedColorUpload || remoteCardDraggingColor || remoteUploadDraggedOverCardColor }"
     :data-card-id="id"
     :data-card-x="x"
@@ -30,11 +30,11 @@ article(:style="position" :data-card-id="id" ref="card")
 
     template(v-if="!nameIsComment")
       //- Video
-      video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
+      video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}" @canplay="updateCardMap")
         source(:src="formats.video")
       //- Image
-      img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
-      img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
+      img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}" @load="updateCardMap")
+      img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelectedOrDragging}" @load="updateCardMap")
 
     span.card-content-wrap
       //- Comment
@@ -60,10 +60,10 @@ article(:style="position" :data-card-id="id" ref="card")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
             //- Image
-            img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
-            img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
+            img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}" @load="updateCardMap")
+            img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelectedOrDragging}" @load="updateCardMap")
             //- Video
-            video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor}")
+            video(v-if="Boolean(formats.video)" autoplay loop muted playsinline :key="formats.video" :class="{selected: isSelectedOrDragging}" @canplay="updateCardMap")
               source(:src="formats.video")
 
           span(v-if="!commentIsVisible") …
@@ -119,7 +119,7 @@ article(:style="position" :data-card-id="id" ref="card")
         :card="card"
         :user="createdByUser"
         :isImageCard="Boolean(formats.image || formats.video)"
-        :isSelected="isSelected || isRemoteSelected || isRemoteCardDetailsVisible || isRemoteCardDragging || uploadIsDraggedOver || remoteUploadDraggedOverCardColor"
+        :isSelected="isSelectedOrDragging"
       )
 
     //- Upload Progress
@@ -150,8 +150,6 @@ article(:style="position" :data-card-id="id" ref="card")
         img.icon.cancel(src="@/assets/add.svg")
         span Space is Read Only
 
-  CardDetails(:card="card" @broadcastShowCardDetails="broadcastShowCardDetails")
-
   //- Meta Info
   .meta-container(v-if="filterShowUsers || filterShowDateUpdated || isInSearchResultsCards")
     //- Search result
@@ -162,6 +160,7 @@ article(:style="position" :data-card-id="id" ref="card")
       .badge.user-badge.button-badge(
         v-if="filterShowUsers"
         :style="{background: createdByUser.color}"
+        :class="{active: userDetailsIsVisible}"
         @mouseup.left.stop
         @touchend.stop
         @click.left.prevent.stop="toggleUserDetailsIsVisible"
@@ -169,7 +168,6 @@ article(:style="position" :data-card-id="id" ref="card")
       )
         User(:user="createdByUser" :isClickable="false")
         .name {{createdByUser.name}}
-      UserDetails(:visible="userDetailsIsVisible" :user="createdByUser")
     //- Date
     .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
       img.icon.time(src="@/assets/time.svg")
@@ -179,13 +177,11 @@ article(:style="position" :data-card-id="id" ref="card")
 
 <script>
 import utils from '@/utils.js'
-import CardDetails from '@/components/dialogs/CardDetails.vue'
 import Frames from '@/components/Frames.vue'
 import Loader from '@/components/Loader.vue'
 import Audio from '@/components/Audio.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import User from '@/components/User.vue'
-import UserDetails from '@/components/dialogs/UserDetails.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 
@@ -202,12 +198,10 @@ let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
 
 export default {
   components: {
-    CardDetails,
     Frames,
     Loader,
     Audio,
     User,
-    UserDetails,
     NameSegment,
     UrlPreview
   },
@@ -224,11 +218,7 @@ export default {
           const element = this.$refs.card
           const isTouchDevice = this.$store.state.isTouchDevice
           scrollIntoView.scroll(element, isTouchDevice)
-          scrollIntoView.scroll(element, isTouchDevice)
         }
-      }
-      if (mutation.type === 'closeAllDialogs') {
-        this.userDetailsIsVisible = false
       }
       if (mutation.type === 'triggerUploadComplete') {
         let { cardId, url } = mutation.payload
@@ -240,7 +230,14 @@ export default {
   mounted () {
     if (this.shouldUpdateDimensions) {
       let card = { id: this.card.id }
-      this.$store.dispatch('currentSpace/updateCard', card)
+      card = utils.updateCardDimentions(card)
+      this.$store.dispatch('currentCards/update', card)
+    }
+    const shouldShowDetails = this.$store.state.loadSpaceShowDetailsForCardId === this.card.id
+    if (shouldShowDetails) {
+      this.$store.dispatch('closeAllDialogs', 'card.mounted')
+      this.$store.commit('preventCardDetailsOpeningAnimation', false)
+      this.$store.dispatch('currentCards/showCardDetails', this.card.id)
     }
   },
   data () {
@@ -249,7 +246,6 @@ export default {
       remoteConnectionColor: '',
       uploadIsDraggedOver: false,
       isPlayingAudio: false,
-      userDetailsIsVisible: false,
       preventDraggedButtonBadgeFromShowingDetails: false,
       error: {
         sizeLimit: false,
@@ -272,6 +268,12 @@ export default {
     }
   },
   computed: {
+    shouldJiggle () {
+      return this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.isRemoteCardDragging
+    },
+    isSelectedOrDragging () {
+      return this.isSelected || this.isRemoteSelected || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.uploadIsDraggedOver || this.remoteUploadDraggedOverCardColor
+    },
     shouldUpdateDimensions () {
       return Boolean(!this.card.width || !this.card.height)
     },
@@ -288,7 +290,7 @@ export default {
     y () { return this.card.y },
     z () { return this.card.z },
     commentIsVisible () { return this.card.commentIsVisible },
-    connectionTypes () { return this.$store.getters['currentSpace/cardConnectionTypes'](this.id) },
+    connectionTypes () { return this.$store.getters['currentConnections/typesByCardId'](this.id) },
     newConnectionColor () { return this.$store.state.currentConnectionColor },
     name () {
       this.updateMediaUrls()
@@ -298,16 +300,16 @@ export default {
     filterShowUsers () { return this.$store.state.currentUser.filterShowUsers },
     filterShowDateUpdated () { return this.$store.state.currentUser.filterShowDateUpdated },
     createdByUser () {
+      // same as userDetailsWrap.cardCreatedByUser
       const userId = this.card.userId
       let user = this.$store.getters['currentSpace/userById'](userId)
-      if (user) {
-        return user
-      } else {
-        return {
+      if (!user) {
+        user = {
           name: '',
           color: '#cdcdcd' // secondary-active-background
         }
       }
+      return user
     },
     connectorIsVisible () {
       const spaceIsOpen = this.$store.state.currentSpace.privacy === 'open' && this.currentUserIsSignedIn
@@ -350,33 +352,33 @@ export default {
     },
     connectedToConnectionDetailsIsVisibleColor () {
       const connectionId = this.$store.state.connectionDetailsIsVisibleForConnectionId
-      const connection = this.$store.getters['currentSpace/connectionById'](connectionId)
+      const connection = this.$store.getters['currentConnections/byId'](connectionId)
       if (!connection) { return }
       const isConnected = connection.startCardId === this.id || connection.endCardId === this.id
       if (!isConnected) { return }
-      const connectionType = this.$store.getters['currentSpace/connectionTypeById'](connection.connectionTypeId)
+      const connectionType = this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
       return connectionType.color
     },
     connectedToCardBeingDraggedColor () {
       const isDraggingCard = this.$store.state.currentUserIsDraggingCard
       if (!isDraggingCard) { return }
       if (this.isBeingDragged) { return }
-      let connections = this.$store.state.currentSpace.connections
+      let connections = this.$store.getters['currentConnections/all']
       connections = connections.filter(connection => this.connectionIsBeingDragged(connection))
       const connection = connections.find(connection => connection.startCardId === this.id || connection.endCardId === this.id)
       if (!connection) { return }
-      const connectionType = this.$store.getters['currentSpace/connectionTypeById'](connection.connectionTypeId)
+      const connectionType = this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
       return connectionType.color
     },
     connectedToCardDetailsVisibleColor () {
       if (this.currentCardDetailsIsVisible) { return }
       const visibleCardId = this.$store.state.cardDetailsIsVisibleForCardId
-      let connections = this.$store.state.currentSpace.connections
+      let connections = this.$store.getters['currentConnections/all']
       connections = connections.filter(connection => connection.startCardId === visibleCardId || connection.endCardId === visibleCardId)
       connections = connections.filter(connection => connection.startCardId === this.id || connection.endCardId === this.id)
       const connection = connections[0]
       if (!connection) { return }
-      const connectionType = this.$store.getters['currentSpace/connectionTypeById'](connection.connectionTypeId)
+      const connectionType = this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
       return connectionType.color
     },
     dateUpdatedAt () {
@@ -550,8 +552,8 @@ export default {
     },
     isConnectingTo () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
-      if (currentConnectionSuccess) {
-        return currentConnectionSuccess.cardId === this.id
+      if (utils.objectHasKeys(currentConnectionSuccess)) {
+        return currentConnectionSuccess.id === this.id
       } else {
         return false
       }
@@ -559,7 +561,7 @@ export default {
     isConnectingFrom () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
       const currentConnection = this.$store.state.currentConnection
-      if (currentConnectionSuccess) {
+      if (utils.objectHasKeys(currentConnectionSuccess)) {
         return currentConnection.startCardId === this.id
       } else {
         return false
@@ -651,7 +653,7 @@ export default {
       }
     },
     hasConnections () {
-      const connections = this.$store.getters['currentSpace/cardConnections'](this.id)
+      const connections = this.$store.getters['currentConnections/byCardId'](this.id)
       return Boolean(connections.length)
     },
 
@@ -723,9 +725,14 @@ export default {
         opacity: this.lockingAlpha,
         borderRadius: borderRadius
       }
-    }
+    },
+    userDetailsIsVisible () { return this.$store.state.cardUserDetailsIsVisibleForCardId === this.id }
   },
   methods: {
+    updateCardMap () {
+      this.$store.dispatch('currentCards/updateDimensions', this.card.id)
+      this.$store.dispatch('currentCards/updateCardMap')
+    },
     addFile (file) {
       let name = this.card.name
       const url = file.url
@@ -750,7 +757,7 @@ export default {
         name = `${checkbox} ${name}`
       }
       // update name
-      this.$store.dispatch('currentSpace/updateCard', {
+      this.$store.dispatch('currentCards/update', {
         id: this.card.id,
         name: utils.trim(name)
       })
@@ -784,7 +791,7 @@ export default {
       this.$nextTick(() => {
         this.$nextTick(() => {
           if (this.prevNameLineMinWidth !== width) {
-            this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.card.id, shouldUpdateApi: true })
+            this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
           }
           this.prevNameLineMinWidth = width
         })
@@ -795,7 +802,7 @@ export default {
       if (!isMeta) { return }
       if (!this.canEditSpace) { return }
       this.$store.dispatch('closeAllDialogs', 'Card.selectAllConnectedCards')
-      const connections = this.$store.state.currentSpace.connections
+      const connections = this.$store.getters['currentConnections/all']
       let selectedCards = [this.card.id]
       let shouldSearch = true
       while (shouldSearch) {
@@ -872,7 +879,7 @@ export default {
     },
     async uploadFile (event) {
       this.removeUploadIsDraggedOver()
-      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
+      this.$store.dispatch('currentCards/incrementZ', this.id)
       // pre-upload errors
       if (!this.currentUserIsSignedIn) {
         this.error.signUpToUpload = true
@@ -903,27 +910,23 @@ export default {
       if (!this.canEditSpace) { return }
       const value = !this.isChecked
       this.$store.dispatch('closeAllDialogs', 'Card.toggleCardChecked')
-      this.$store.dispatch('currentSpace/toggleCardChecked', { cardId: this.id, value })
+      this.$store.dispatch('currentCards/toggleChecked', { cardId: this.id, value })
       this.cancelLocking()
       this.$store.commit('currentUserIsDraggingCard', false)
     },
     toggleUserDetailsIsVisible () {
       if (isMultiTouch) { return }
-      const value = !this.userDetailsIsVisible
+      let cardId = this.id
+      if (this.userDetailsIsVisible) {
+        cardId = ''
+      }
       this.$store.dispatch('closeAllDialogs', 'Card.toggleUserDetailsIsVisible')
-      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
+      this.$store.dispatch('currentCards/incrementZ', this.id)
       this.$store.commit('currentUserIsDraggingCard', false)
-      this.userDetailsIsVisible = value
-      this.$nextTick(() => {
-        if (this.userDetailsIsVisible) {
-          const element = document.querySelector('dialog.user-details')
-          const isTouchDevice = this.$store.state.isTouchDevice
-          scrollIntoView.scroll(element, isTouchDevice)
-        }
-      })
+      this.$store.commit('cardUserDetailsIsVisibleForCardId', cardId)
     },
     toggleFilterShowAbsoluteDates () {
-      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
+      this.$store.dispatch('currentCards/incrementZ', this.id)
       this.$store.dispatch('closeAllDialogs', 'Card.toggleFilterShowAbsoluteDates')
       const value = !this.$store.state.currentUser.filterShowAbsoluteDates
       this.$store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
@@ -973,7 +976,7 @@ export default {
     },
     removeCard () {
       if (this.canEditCard) {
-        this.$store.dispatch('currentSpace/removeCard', this.card)
+        this.$store.dispatch('currentCards/remove', this.card)
       }
     },
     closeAllDialogs () {
@@ -989,18 +992,18 @@ export default {
     addConnectionType (event) {
       const shouldUseLastConnectionType = this.$store.state.currentUser.shouldUseLastConnectionType
       const shiftKey = event.shiftKey
-      const connectionType = this.$store.getters['currentSpace/connectionTypeForNewConnections']
+      const connectionType = this.$store.getters['currentConnections/typeForNewConnections']
       if (!connectionType) {
-        this.$store.dispatch('currentSpace/addConnectionType')
+        this.$store.dispatch('currentConnections/addType')
       }
       if (shouldUseLastConnectionType && shiftKey) {
-        this.$store.dispatch('currentSpace/addConnectionType')
+        this.$store.dispatch('currentConnections/addType')
         return
       }
       if (shiftKey || shouldUseLastConnectionType) {
         return
       }
-      this.$store.dispatch('currentSpace/addConnectionType')
+      this.$store.dispatch('currentConnections/addType')
     },
     startConnecting (event) {
       if (!this.canEditSpace) { return }
@@ -1020,8 +1023,8 @@ export default {
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.dispatch('clearMultipleSelected')
       const cardId = this.id
-      this.$store.dispatch('currentSpace/toggleCommentIsVisible', cardId)
-      this.$store.dispatch('currentSpace/incrementCardZ', cardId)
+      this.$store.dispatch('currentCards/toggleCommentIsVisible', cardId)
+      this.$store.dispatch('currentCards/incrementZ', cardId)
       this.updateCardConnectionPathsIfOpenSpace()
     },
     updateCardConnectionPathsIfOpenSpace () {
@@ -1030,7 +1033,7 @@ export default {
       if (spaceIsOpen && !isSpaceMember) {
         this.$nextTick(() => {
           this.$nextTick(() => {
-            this.$store.dispatch('currentSpace/updateCardConnectionPaths', { cardId: this.id, shouldUpdateApi: true })
+            this.$store.dispatch('currentConnections/updatePaths', { cardId: this.id, shouldUpdateApi: true })
           })
         })
       }
@@ -1064,7 +1067,7 @@ export default {
       this.$store.commit('parentCardId', this.id)
       this.$store.commit('childCardId', '')
       this.checkIfShouldDragMultipleCards(event)
-      this.$store.dispatch('currentSpace/incrementSelectedCardsZ')
+      this.$store.dispatch('currentCards/incrementSelectedZs')
     },
     showCardDetails (event) {
       if (this.$store.state.currentUserIsPainting) { return }
@@ -1085,7 +1088,6 @@ export default {
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       this.$store.dispatch('closeAllDialogs', 'Card.showCardDetails')
       this.$store.dispatch('clearMultipleSelected')
-      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
       const nodeName = event.target.nodeName
       if (nodeName === 'LABEL') { return } // checkbox
       if (nodeName === 'A' && event.touches) {
@@ -1097,7 +1099,6 @@ export default {
       this.$store.commit('parentCardId', this.id)
       event.stopPropagation() // only stop propagation if cardDetailsIsVisible
       this.$store.commit('currentUserIsDraggingCard', false)
-      this.broadcastShowCardDetails()
       this.updatePreviousResultCardId()
     },
     updatePreviousResultCardId () {
@@ -1113,7 +1114,7 @@ export default {
       if (isMultiTouch) { return }
       if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
       if (this.preventDraggedButtonBadgeFromShowingDetails) { return }
-      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
+      this.$store.dispatch('currentCards/incrementZ', this.id)
       this.$store.dispatch('closeAllDialogs', 'Card.showTagDetailsIsVisible')
       this.$store.commit('currentUserIsDraggingCard', false)
       const tagRect = event.target.getBoundingClientRect()
@@ -1130,7 +1131,7 @@ export default {
     showLinkDetailsIsVisible ({ event, link }) {
       if (isMultiTouch) { return }
       if (this.preventDraggedButtonBadgeFromShowingDetails) { return }
-      this.$store.dispatch('currentSpace/incrementCardZ', this.id)
+      this.$store.dispatch('currentCards/incrementZ', this.id)
       this.$store.dispatch('closeAllDialogs', 'Card.showLinkDetailsIsVisible')
       this.$store.commit('currentUserIsDraggingCard', false)
       const linkRect = event.target.getBoundingClientRect()
@@ -1172,13 +1173,6 @@ export default {
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
       this.$store.dispatch('closeAllDialogs', 'spaceDetails.changeSpace')
-    },
-    broadcastShowCardDetails () {
-      const updates = {
-        cardId: this.card.id,
-        userId: this.$store.state.currentUser.id
-      }
-      this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
     },
     removeCommentBrackets (name) {
       if (!this.nameIsComment) {

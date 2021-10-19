@@ -49,7 +49,7 @@ const maxIterations = 200 // higher is longer paint fade time
 const rateOfIterationDecay = 0.03 // higher is faster tail decay
 let paintingCircles = []
 let paintingCanvas, paintingContext, startCursor, paintingCirclesTimer
-let prevScroll, viewportCardMap
+let prevScroll
 
 // remote painting
 let remotePaintingCircles = []
@@ -139,7 +139,6 @@ export default {
     pageWidth () { return this.$store.state.pageWidth },
     viewportHeight () { return this.$store.state.viewportHeight },
     viewportWidth () { return this.$store.state.viewportWidth },
-    cardMap () { return this.$store.state.cardMap },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     isPanning () { return this.$store.state.currentUserIsPanningReady }
@@ -167,20 +166,11 @@ export default {
       this.pinchZoomOffsetTop = window.visualViewport.offsetTop
       this.pinchZoomOffsetLeft = window.visualViewport.offsetLeft
     },
-    updateViewportCardMap () {
-      const cardMap = utils.clone(this.cardMap)
-      if (!utils.objectHasKeys(cardMap)) { return }
-      viewportCardMap = utils.clone(this.cardMap)
-      viewportCardMap = viewportCardMap.filter(card => {
-        return utils.isCardInViewport(card)
-      })
-    },
     updatePrevScrollPosition () {
       prevScroll = {
         x: window.scrollX,
         y: window.scrollY
       }
-      this.updateViewportCardMap()
     },
     updateCirclePositions (circles, scrollDelta) {
       return circles.map(circle => {
@@ -307,8 +297,6 @@ export default {
     },
     startPainting (event) {
       if (this.isPanning) { return }
-      this.$store.commit('updateCardMap')
-      this.updateViewportCardMap()
       startCursor = utils.cursorPositionInViewport(event)
       this.currentCursor = utils.cursorPositionInViewport(event)
       const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)
@@ -418,25 +406,30 @@ export default {
     },
     selectCards (point, shouldToggle) {
       if (this.userCantEditSpace) { return }
-      const cardMap = viewportCardMap || this.cardMap
+      const zoom = this.spaceCounterZoomDecimal
+      const cardMap = this.$store.state.currentCards.cardMap
       cardMap.forEach(card => {
+        const cardX = card.x
+        const cardY = card.y
+        const pointX = (point.x + window.scrollX) * zoom
+        const pointY = (point.y + window.scrollY) * zoom
         const x = {
-          value: point.x + window.scrollX,
-          min: card.x - circleSelectionRadius,
-          max: card.x + card.width + circleSelectionRadius
+          value: pointX,
+          min: cardX - circleSelectionRadius,
+          max: cardX + card.width + circleSelectionRadius
         }
         const y = {
-          value: point.y + window.scrollY,
-          min: card.y - circleSelectionRadius,
-          max: card.y + card.height + circleSelectionRadius
+          value: pointY,
+          min: cardY - circleSelectionRadius,
+          max: cardY + card.height + circleSelectionRadius
         }
         const isBetweenX = utils.isBetween(x)
         const isBetweenY = utils.isBetween(y)
         if (isBetweenX && isBetweenY) {
           if (shouldToggle) {
-            this.$store.dispatch('toggleCardSelected', card.cardId)
+            this.$store.dispatch('toggleCardSelected', card.id)
           } else {
-            this.$store.dispatch('addToMultipleCardsSelected', card.cardId)
+            this.$store.dispatch('addToMultipleCardsSelected', card.id)
           }
         }
       })
@@ -444,12 +437,14 @@ export default {
     selectConnectionPaths (point, shouldToggle) {
       const zoom = this.spaceCounterZoomDecimal
       const paths = document.querySelectorAll('svg .connection-path')
+      const pointX = (point.x + window.scrollX) * zoom
+      const pointY = (point.y + window.scrollY) * zoom
       paths.forEach(path => {
         const pathId = path.dataset.id
         const svg = document.querySelector('svg.connections')
         let svgPoint = svg.createSVGPoint()
-        svgPoint.x = (point.x + window.scrollX) * zoom
-        svgPoint.y = (point.y + window.scrollY) * zoom
+        svgPoint.x = pointX
+        svgPoint.y = pointY
         const isSelected = path.isPointInStroke(svgPoint)
         if (isSelected) {
           if (shouldToggle) {
@@ -475,7 +470,8 @@ export default {
           iteration: circle.iteration,
           zoom: this.spaceZoomDecimal
         },
-        type: 'addRemotePaintingCircle'
+        type: 'addRemotePaintingCircle',
+        handler: 'triggerAddRemotePaintingCircle'
       })
     },
     createRemotePaintingCircle (circle) {

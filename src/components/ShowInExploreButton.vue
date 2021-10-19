@@ -47,7 +47,7 @@ export default {
     showInExplore () { return this.$store.state.currentSpace.showInExplore },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     spaceIsHelloKinopio () { return this.$store.getters['currentSpace/isHelloKinopio'] },
-    spaceCardsCount () { return this.$store.state.currentSpace.cards.length }
+    spaceCardsCount () { return this.$store.getters['currentCards/all'].length }
   },
   methods: {
     checkIfShouldShowInExplore () {

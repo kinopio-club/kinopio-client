@@ -49,6 +49,7 @@ export default {
         }
       }
       if (mutation.type === 'triggerPickerSelect') {
+        if (!this.search) { return }
         const searchTag = [{
           name: this.search,
           color: this.searchTagColor

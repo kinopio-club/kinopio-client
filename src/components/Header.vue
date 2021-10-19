@@ -322,7 +322,7 @@ export default {
   },
   methods: {
     showCardDetails (card) {
-      this.$store.dispatch('currentSpace/showCardDetails', card.id)
+      this.$store.dispatch('currentCards/showCardDetails', card.id)
       this.$store.commit('previousResultCardId', card.id)
     },
     showNextSearchCard () {

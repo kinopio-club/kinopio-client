@@ -14,6 +14,8 @@ aside.offscreen-markers(:style="styles")
 <script>
 import utils from '@/utils.js'
 
+const offscreenMarkers = new Worker('web-workers/offscreen-markers.js')
+
 const maxIterations = 30
 let currentIteration, updatePositionTimer
 
@@ -26,17 +28,31 @@ export default {
         if (updatePositionTimer) { return }
         updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
       }
+      if (mutation.type === 'isLoadingSpace') {
+        this.updateOffscreenMarkers()
+      }
     })
-    window.addEventListener('scroll', this.updateOffscreenCards)
-    this.updateOffscreenCards()
+    window.addEventListener('scroll', this.updateOffscreenMarkers)
+    offscreenMarkers.addEventListener('message', event => {
+      this.offscreenCardsByDirection = event.data
+    })
   },
   beforeUnmount () {
-    window.removeEventListener('scroll', this.updateOffscreenCards)
+    window.removeEventListener('scroll', this.updateOffscreenMarkers)
   },
   data () {
     return {
-      offscreenCards: [],
-      viewport: {}
+      viewport: {},
+      offscreenCardsByDirection: {
+        top: [],
+        left: [],
+        right: [],
+        bottom: [],
+        topleft: [],
+        topright: [],
+        bottomleft: [],
+        bottomright: []
+      }
     }
   },
   computed: {
@@ -46,11 +62,6 @@ export default {
       const pinchZoomOffsetLeft = viewport.offsetLeft
       const pinchZoomOffsetTop = viewport.offsetTop
       let styles = {}
-      if (this.$store.state.currentSpace.background) {
-        styles.opacity = 1
-      } else {
-        styles.opacity = 0.5
-      }
       if (pinchZoomScale > 1) {
         styles.transform = `translate(${pinchZoomOffsetLeft}px, ${pinchZoomOffsetTop}px) scale(${1 / pinchZoomScale})`
         styles['transform-origin'] = 'left top'
@@ -63,7 +74,7 @@ export default {
     hasDirectionBottomLeft () { return this.hasDirection('bottomleft') },
     hasDirectionBottomRight () { return this.hasDirection('bottomright') },
     // top
-    offscreenCardsTop () { return this.offscreenCards.filter(card => card.direction === 'top') },
+    offscreenCardsTop () { return this.offscreenCardsByDirection.top },
     topMarkerOffset () {
       let cards = this.offscreenCardsTop
       if (!cards.length) { return }
@@ -72,7 +83,7 @@ export default {
       return average - this.viewport.pageLeft + 'px'
     },
     // left
-    offscreenCardsLeft () { return this.offscreenCards.filter(card => card.direction === 'left') },
+    offscreenCardsLeft () { return this.offscreenCardsByDirection.left },
     leftMarkerOffset () {
       let cards = this.offscreenCardsLeft
       if (!cards.length) { return }
@@ -81,7 +92,7 @@ export default {
       return average - this.viewport.pageTop + 'px'
     },
     // right
-    offscreenCardsRight () { return this.offscreenCards.filter(card => card.direction === 'right') },
+    offscreenCardsRight () { return this.offscreenCardsByDirection.right },
     rightMarkerOffset () {
       let cards = this.offscreenCardsRight
       if (!cards.length) { return }
@@ -90,7 +101,7 @@ export default {
       return average - this.viewport.pageTop + 'px'
     },
     // bottom
-    offscreenCardsBottom () { return this.offscreenCards.filter(card => card.direction === 'bottom') },
+    offscreenCardsBottom () { return this.offscreenCardsByDirection.bottom },
     bottomMarkerOffset () {
       let cards = this.offscreenCardsBottom
       if (!cards.length) { return }
@@ -102,7 +113,7 @@ export default {
   methods: {
     updatePositionFrame () {
       currentIteration++
-      this.updateOffscreenCards()
+      this.updateOffscreenMarkers()
       if (currentIteration < maxIterations) {
         window.requestAnimationFrame(this.updatePositionFrame)
       } else {
@@ -111,64 +122,20 @@ export default {
       }
     },
     hasDirection (direction) {
-      return this.offscreenCards.find(card => {
-        return card.direction === direction
-      })
+      return Boolean(this.offscreenCardsByDirection[direction].length)
     },
-    updateOffscreenCards () {
-      const markerHeight = 16
-      const markerWidth = 12
+    updateOffscreenMarkers () {
+      let cards = this.$store.getters['currentCards/all']
+      cards = utils.clone(cards)
+      const viewport = utils.visualViewport()
       const zoom = this.spaceZoomDecimal
-      let cards = utils.clone(this.$store.state.currentSpace.cards)
-      cards = cards.map(card => {
-        const element = document.querySelector(`article [data-card-id="${card.id}"]`)
-        if (!element) { return card }
-        const rect = element.getBoundingClientRect()
-        card.x = card.x + (rect.width / 2) - (markerWidth / 2)
-        card.x = card.x * zoom
-        card.y = card.y + (rect.height / 2) - (markerHeight / 2)
-        card.y = card.y * zoom
-        card.direction = this.direction(card)
-        return card
-      })
-      this.offscreenCards = cards || []
-    },
-    direction (card) {
-      this.viewport = utils.visualViewport()
-      const scrollX = this.viewport.pageLeft
-      const scrollY = this.viewport.pageTop
-      let x = ''
-      let y = ''
-      //           │        │
-      //                       top-right
-      //           │  top   │
-      //
-      // ─ ─ ─ ─ ─ ┼────────┼ ─ ─ ─ ─ ─
-      //           │        │
-      //    left   │Viewport│  right
-      //           │        │
-      // ─ ─ ─ ─ ─ ┼────────┼ ─ ─ ─ ─ ─
-      //
-      //           │ bottom │
-      //
-      //           │        │
-
-      if (card.y > (this.viewport.height + scrollY)) {
-        y = 'bottom'
-      } else if (card.y < scrollY) {
-        y = 'top'
-      }
-      if (card.x > (this.viewport.width + scrollX)) {
-        x = 'right'
-      } else if (card.x < scrollX) {
-        x = 'left'
-      }
-      return y + x
+      offscreenMarkers.postMessage({ cards, viewport, zoom })
+      this.viewport = viewport
     }
   },
   watch: {
     spaceZoomDecimal (value) {
-      this.updateOffscreenCards()
+      this.updateOffscreenMarkers()
     }
   }
 }
@@ -184,6 +151,9 @@ edge = 4px
   width 100%
   height 100%
   mix-blend-mode color-burn
+  pointer-events none
+  z-index 1
+  opacity 0.5
   .marker
     width width
     height height
