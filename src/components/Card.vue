@@ -368,6 +368,7 @@ export default {
       const connection = connections.find(connection => connection.startCardId === this.id || connection.endCardId === this.id)
       if (!connection) { return }
       const connectionType = this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
+      if (!connectionType) { return }
       return connectionType.color
     },
     connectedToCardDetailsVisibleColor () {
