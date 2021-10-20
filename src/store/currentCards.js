@@ -67,8 +67,8 @@ const currentCards = {
     },
     move: (state, { cards, delta, spaceId }) => {
       cards.forEach(card => {
-        state.cards[card.id].x = card.x + delta.x
-        state.cards[card.id].y = card.y + delta.y
+        state.cards[card.id].x = Math.max(0, card.x + delta.x)
+        state.cards[card.id].y = Math.max(0, card.y + delta.y)
       })
       cache.updateSpaceCardsDebounced(state.cards, currentSpaceId)
     },

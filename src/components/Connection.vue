@@ -41,7 +41,7 @@ export default {
           this.cancelAnimation()
         }
       }
-      if (mutation.type === 'currentSpace/moveCard') {
+      if (mutation.type === 'currentCards/move') {
         this.cancelAnimation()
       }
       if (mutation.type === 'currentConnections/remove') {
