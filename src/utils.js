@@ -619,6 +619,8 @@ export default {
     return isUnchanged
   },
   mergeSpaceKeyValues ({ prevItems, newItems }) {
+    prevItems = prevItems.filter(Boolean(prevItems))
+    newItems = newItems.filter(Boolean(newItems))
     const prevIds = prevItems.map(item => item.id)
     const newIds = newItems.map(item => item.id)
     newItems = this.normalizeItems(newItems)
