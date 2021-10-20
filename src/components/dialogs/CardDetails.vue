@@ -906,6 +906,7 @@ export default {
       } else if (isCompositionEvent) {
 
       } else {
+        this.updateCardMap(this.card.id)
         this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCard')
         this.$store.commit('triggerAddCard')
       }
