@@ -363,7 +363,6 @@ const currentCards = {
         } else {
           card.y = Math.max(0, card.y + delta.y)
         }
-        console.log(card.x, card.y)
         return card
       })
       // update
