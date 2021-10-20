@@ -105,6 +105,7 @@ export default {
     // remove
 
     remove: (state, connectionToRemove) => {
+      if (!connectionToRemove) { return }
       const connection = state.connections[connectionToRemove.id]
       state.ids = state.ids.filter(id => id !== connection.id)
       delete state.connections[connection.id]
