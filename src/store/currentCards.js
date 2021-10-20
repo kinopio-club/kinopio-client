@@ -36,6 +36,8 @@ const currentCards = {
       let cardIds = []
       cards.forEach(card => {
         cardIds.push(card.id)
+        card.x = card.x || 100
+        card.y = card.y || 100
         state.cards[card.id] = card
       })
       state.ids = state.ids.concat(cardIds)
