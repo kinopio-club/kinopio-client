@@ -65,16 +65,13 @@ const currentCards = {
       })
       cache.updateSpaceCardsDebounced(state.cards, currentSpaceId)
     },
-    move: (state, { cards, delta, spaceId }) => {
+    move: (state, { cards, spaceId }) => {
       cards.forEach(card => {
-        state.cards[card.id].x = Math.max(0, card.x + delta.x)
-        state.cards[card.id].y = Math.max(0, card.y + delta.y)
+        state.cards[card.id].x = card.x
+        state.cards[card.id].y = card.y
       })
       cache.updateSpaceCardsDebounced(state.cards, currentSpaceId)
     },
-
-    // remove
-
     remove: (state, cardToRemove) => {
       if (!cardToRemove) { return }
       const card = state.cards[cardToRemove.id]
@@ -118,7 +115,7 @@ const currentCards = {
 
     // broadcast
 
-    moveBroadcast: (state, { cards, delta }) => {
+    moveBroadcast: (state, { cards }) => {
       cards.forEach(updated => {
         const card = state.cards[updated.id]
         if (!card) { return }
@@ -345,18 +342,36 @@ const currentCards = {
         cardIds = [currentDraggingCardId]
       }
       let cards = cardIds.map(id => context.getters.byId(id))
-
       // prevent cards bunching up at 0
       cards.forEach(card => {
         if (card.x === 0) { delta.x = Math.max(0, delta.x) }
         if (card.y === 0) { delta.y = Math.max(0, delta.y) }
         connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
       })
+      // prevent cards with null or negative positions
+      cards = utils.clone(cards)
+      cards = cards.map(card => {
+        // x
+        if (card.x === undefined || card.x === null) {
+          delete card.x
+        } else {
+          card.x = Math.max(0, card.x + delta.x)
+        }
+        // y
+        if (card.y === undefined || card.y === null) {
+          delete card.y
+        } else {
+          card.y = Math.max(0, card.y + delta.y)
+        }
+        console.log(card.x, card.y)
+        return card
+      })
+      // update
+      context.commit('move', { cards, spaceId })
       connections = uniqBy(connections, 'id')
-      context.commit('move', { cards, delta, spaceId })
       context.commit('cardsWereDragged', true, { root: true })
       context.commit('currentConnections/updatePaths', connections, { root: true })
-      context.dispatch('broadcast/update', { updates: { cards, delta }, type: 'moveCards', handler: 'currentCards/moveBroadcast' }, { root: true })
+      context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveBroadcast' }, { root: true })
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
       connections.forEach(connection => {
         context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
