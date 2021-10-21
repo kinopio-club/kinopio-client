@@ -47,7 +47,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
       button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
         img.icon.visit(src="@/assets/export.svg")
         span Export
-      Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="currentSpace" @updateSpaces="updateSpaces")
+      Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData" @updateSpaces="updateSpaces")
 
   section.results-actions
     .row
