@@ -577,6 +577,7 @@ export default {
     // https://regexr.com/66idp
     // matches first 2 digit groups in path: m295,284 q90,40 87,57
     const pathCoordsPattern = new RegExp(/m([\d.]{1,}),([\d.]{1,})/)
+    console.log('🌈TEMP', path)
     let coords = path.match(pathCoordsPattern)
     coords = {
       x: coords[1],
