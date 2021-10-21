@@ -538,7 +538,6 @@ export default {
           const startId = connection.startCardId
           const endId = connection.endCardId
           connection.path = utils.connectionBetweenCards(startId, endId)
-          console.log('🦄TEMP', startId, endId, connection.path)
         }
         return connection
       })
