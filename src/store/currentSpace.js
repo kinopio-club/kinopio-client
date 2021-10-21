@@ -329,6 +329,7 @@ export default {
       })
     },
     saveImportedSpace: async (context) => {
+      context.commit('isLoadingSpace', true, { root: true })
       const space = utils.clone(context.state)
       const user = context.rootState.currentUser
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
@@ -341,25 +342,19 @@ export default {
       context.dispatch('loadBackground')
       nextTick(() => {
         context.dispatch('currentCards/updateDimensions', null, { root: true })
+        context.commit('isLoadingSpace', false, { root: true })
       })
     },
-    duplicateSpace: (context) => {
+    duplicateSpace: async (context) => {
       const user = context.rootState.currentUser
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
+      context.commit('clearSearch', null, { root: true })
       let space = utils.clone(context.state)
       space = utils.clearSpaceMeta(space, 'copy')
       const nullCardUsers = true
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
-      context.commit('clearSearch', null, { root: true })
-      context.dispatch('restoreSpaceInChunks', { uniqueNewSpace })
-      nextTick(() => {
-        context.dispatch('updateUserLastSpaceId')
-        context.dispatch('saveNewSpace')
-        context.commit('notifyNewUser', false, { root: true })
-        context.commit('triggerFocusSpaceDetailsName', null, { root: true })
-      })
-      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
-      context.commit('triggerUpdateWindowHistory', { space, isRemote: currentUserIsSignedIn }, { root: true })
+      context.commit('restoreSpace', uniqueNewSpace)
+      await context.dispatch('saveImportedSpace')
     },
     addSpace: (context) => {
       const user = context.rootState.currentUser
