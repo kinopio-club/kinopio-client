@@ -624,6 +624,7 @@ export default {
     const prevIds = prevItems.map(item => item.id)
     const newIds = newItems.map(item => item.id)
     newItems = this.normalizeItems(newItems)
+    prevItems = this.normalizeItems(prevItems)
     let addItems = []
     let updateItems = []
     let removeItems = []
@@ -638,7 +639,7 @@ export default {
     prevIds.forEach(id => {
       const itemIsRemoved = !newIds.includes(id)
       if (itemIsRemoved) {
-        removeItems.push(newItems[id])
+        removeItems.push(prevItems[id])
       }
     })
     return { addItems, updateItems, removeItems }
