@@ -172,6 +172,7 @@ export default {
       return spaces
     },
     currentSpace () { return this.$store.state.currentSpace },
+    exportData () { return this.$store.getters['currentSpace/all'] },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     shouldShowInExplore () {
       const privacy = this.$store.state.currentSpace.privacy

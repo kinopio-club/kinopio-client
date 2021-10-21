@@ -974,6 +974,13 @@ export default {
   },
 
   getters: {
+    all: (state, getters, rootState, rootGetters) => {
+      let space = utils.clone(state)
+      space.cards = utils.clone(rootGetters['currentCards/all'])
+      space.connections = utils.clone(rootGetters['currentConnections/all'])
+      space.connectionTypes = utils.clone(rootGetters['currentConnections/allTypes'])
+      return space
+    },
 
     // meta
 
