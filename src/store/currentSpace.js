@@ -531,8 +531,15 @@ export default {
       const connectionIds = Object.keys(connections)
       connections = connectionIds.map(id => {
         const connection = connections[id]
-        const coords = utils.coordsFromConnectionPath(connection.path)
-        connection.distanceFromOrigin = utils.distanceBetweenTwoPoints(coords, origin)
+        if (connection.path) {
+          const coords = utils.coordsFromConnectionPath(connection.path)
+          connection.distanceFromOrigin = utils.distanceBetweenTwoPoints(coords, origin)
+        } else {
+          const startId = connection.startCardId
+          const endId = connection.endCardId
+          connection.path = utils.connectionBetweenCards(startId, endId)
+          console.log('🦄TEMP', startId, endId, connection.path)
+        }
         return connection
       })
       connections = sortBy(connections, ['distanceFromOrigin'])
