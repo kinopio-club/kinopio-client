@@ -16,6 +16,7 @@ aside.frames
     img.ichigotchi(src="@/assets/frames/tea-time/ichigotchi.png")
 
   .dead-to-me(v-if="isDeadToMe")
+    img.spooky-witch(src="@/assets/frames/dead-to-me/spooky-witch.png")
     img.tombstone(src="@/assets/frames/dead-to-me/tombstone.png")
     img.spooky-eyes(src="@/assets/frames/dead-to-me/spooky-eyes.png")
     img.ghost(src="@/assets/frames/dead-to-me/ghost.png")
@@ -49,6 +50,25 @@ export default {
   img
     pointer-events none
     position absolute
+  .dead-to-me
+    .tombstone
+      width 48px
+      left -33px
+      bottom -15px
+    .spooky-eyes
+      width 26px
+      bottom -14px
+      right 20px
+      transform rotate(10deg)
+    .ghost
+      width 50px
+      right -30px
+      top -15px
+    .spooky-witch
+      width 65px
+      left -40px
+      bottom 10px
+      z-index -1
   .garden-leaves
     .leaves
       left -20px
@@ -90,18 +110,4 @@ export default {
       right -12px
       bottom -8px
       transform rotate(12deg)
-  .dead-to-me
-    .tombstone
-      width 48px
-      left -33px
-      bottom -15px
-    .spooky-eyes
-      width 26px
-      bottom -14px
-      right 20px
-      transform rotate(10deg)
-    .ghost
-      width 50px
-      right -30px
-      top -15px
 </style>
