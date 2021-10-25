@@ -19,6 +19,11 @@ const frames = [
     id: 3,
     name: 'Tea Time',
     badge: 'frames/tea-time/pot.png'
+  },
+  {
+    id: 4,
+    name: 'Dead to Me',
+    badge: 'frames/dead-to-me/tombstone.png'
   }
 ]
 

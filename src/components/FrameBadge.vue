@@ -7,6 +7,8 @@
       img(src="@/assets/frames/magical-helper/hat.png")
     template(v-else-if="frame.id === 3")
       img(src="@/assets/frames/tea-time/pot.png")
+    template(v-else-if="frame.id === 4")
+      img(src="@/assets/frames/dead-to-me/spooky-eyes.png")
 </template>
 
 <script>

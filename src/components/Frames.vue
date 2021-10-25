@@ -14,6 +14,11 @@ aside.frames
     img.cloud(src="@/assets/frames/tea-time/cloud.png")
     img.pot(src="@/assets/frames/tea-time/pot.png")
     img.ichigotchi(src="@/assets/frames/tea-time/ichigotchi.png")
+
+  .dead-to-me(v-if="isDeadToMe")
+    img.tombstone(src="@/assets/frames/dead-to-me/tombstone.png")
+    img.spooky-eyes(src="@/assets/frames/dead-to-me/spooky-eyes.png")
+    img.ghost(src="@/assets/frames/dead-to-me/ghost.png")
 </template>
 
 <script>
@@ -30,6 +35,9 @@ export default {
     },
     isTeaTime () {
       return Boolean(this.card.frameId === 3)
+    },
+    isDeadToMe () {
+      return Boolean(this.card.frameId === 4)
     }
   }
 }
@@ -55,7 +63,6 @@ export default {
       top -17px
       right 22px
       z-index -1
-
   .magical-helper
     .cat
       width 32px
@@ -69,7 +76,6 @@ export default {
       width 23px
       right 28px
       top -15px
-
   .morning-brew
     .pot
       left -25px
@@ -84,4 +90,18 @@ export default {
       right -12px
       bottom -8px
       transform rotate(12deg)
+  .dead-to-me
+    .tombstone
+      width 48px
+      left -33px
+      bottom -15px
+    .spooky-eyes
+      width 26px
+      bottom -14px
+      right 20px
+      transform rotate(10deg)
+    .ghost
+      width 50px
+      right -30px
+      top -15px
 </style>
