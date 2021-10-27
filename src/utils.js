@@ -444,6 +444,7 @@ export default {
 
   normalizeItems (items) {
     if (!this.arrayExists(items)) { return items }
+    items = items.filter(item => Boolean(item))
     let normalizedItems = {}
     items.forEach(item => {
       normalizedItems[item.id] = item

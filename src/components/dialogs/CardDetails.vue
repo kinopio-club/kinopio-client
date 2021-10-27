@@ -907,6 +907,7 @@ export default {
 
       } else {
         this.updateCardMap(this.card.id)
+        this.closeCard()
         this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCard')
         this.$store.commit('triggerAddCard')
       }
