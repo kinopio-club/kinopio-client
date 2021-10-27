@@ -6,7 +6,7 @@ span.name-segment
         template(v-if="markdown.type === 'text'")
           span {{markdown.content}}
         template(v-else-if="markdown.type === 'link'")
-          a(:href="escapedUrl(markdown.result[2])") {{markdown.result[1]}}
+          a(@mouseup="updateShouldCancel" @click="shouldCancel" :href="escapedUrl(markdown.result[2])") {{markdown.result[1]}}
         template(v-else-if="markdown.type === 'bold'")
           strong {{markdown.content}}
         template(v-else-if="markdown.type === 'h1'")
@@ -58,6 +58,8 @@ span.name-segment
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
 
+let shouldCancel = false
+
 export default {
   name: 'NameSegment',
   components: {
@@ -92,6 +94,15 @@ export default {
         return null
       }
       return url
+    },
+    updateShouldCancel (event) {
+      shouldCancel = this.$store.state.preventDraggedCardFromShowingDetails
+    },
+    shouldCancel (event) {
+      if (shouldCancel) {
+        event.preventDefault()
+        shouldCancel = false
+      }
     }
   }
 }
@@ -106,6 +117,7 @@ export default {
       color var(--text-link)
       text-decoration underline
       text-decoration-thickness 1px // for firefox
+      -webkit-touch-callout none // for ios
       &:hover
         text-decoration none
     strong
