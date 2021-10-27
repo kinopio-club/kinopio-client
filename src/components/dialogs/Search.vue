@@ -43,6 +43,7 @@ import utils from '@/utils.js'
 import cache from '@/cache.js'
 
 import dayjs from 'dayjs'
+import orderBy from 'lodash-es/orderBy'
 
 const maxIterations = 30
 let currentIteration, updatePositionTimer
@@ -113,9 +114,7 @@ export default {
         card.updatedAt = dayjs(date)
         return card
       })
-      cards = cards.sort((a, b) => {
-        return a.updatedAt.isBefore(b.updatedAt)
-      })
+      cards = orderBy(cards, (a) => new Date(a.updatedAt), ['desc'])
       return cards
     },
     currentUser () { return this.$store.state.currentUser }
