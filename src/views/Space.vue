@@ -400,11 +400,15 @@ export default {
         this.$store.commit('shouldHideFooter', false)
       }
     },
-    showMultipleSelectedActions (position) {
+    showMultipleSelectedActions (event) {
       if (this.spaceIsReadOnly) { return }
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
-      this.$store.commit('multipleSelectedActionsPosition', position)
-      this.$store.commit('multipleSelectedActionsIsVisible', true)
+      const isMultipleSelected = this.$store.state.multipleCardsSelectedIds.length || this.$store.state.multipleConnectionsSelectedIds.length
+      if (isMultipleSelected) {
+        const position = utils.cursorPositionInPage(event)
+        this.$store.commit('multipleSelectedActionsPosition', position)
+        this.$store.commit('multipleSelectedActionsIsVisible', true)
+      }
     },
     stopInteractions (event) {
       // const temporaryDebugState = {
@@ -442,10 +446,7 @@ export default {
       } else if (this.$store.state.cardDetailsIsVisibleForCardId) {
         this.$store.dispatch('closeAllDialogs', 'Space.stopInteractions')
       }
-      if (this.$store.state.multipleCardsSelectedIds.length || this.$store.state.multipleConnectionsSelectedIds.length) {
-        const position = utils.cursorPositionInPage(event)
-        this.showMultipleSelectedActions(position)
-      }
+      this.showMultipleSelectedActions(event)
       this.$store.commit('importArenaChannelIsVisible', false)
       this.$store.commit('shouldAddCard', false)
       this.$store.commit('preventDraggedCardFromShowingDetails', false)
@@ -454,6 +455,7 @@ export default {
       this.$store.commit('currentUserIsPaintingLocked', false)
       if (this.isDraggingCard) {
         this.$store.dispatch('currentCards/afterMove')
+        this.showMultipleSelectedActions(event)
       }
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.commit('currentConnectionSuccess', {})
