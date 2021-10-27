@@ -40,7 +40,7 @@ article(:style="position" :data-card-id="id" ref="card")
       //- Comment
       .card-comment(v-if="nameIsComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- [·]
-        .checkbox-wrap(v-if="hasCheckbox" @click.left.prevent.stop="toggleCardChecked" @touchend.prevent.stop="toggleCardChecked")
+        .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend="toggleCardChecked")
           label(:class="{active: isChecked, disabled: !canEditSpace}")
             input(type="checkbox" v-model="checkboxState")
         //- Name
@@ -75,7 +75,7 @@ article(:style="position" :data-card-id="id" ref="card")
           Audio(:visible="Boolean(formats.audio)" :url="formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
         .name-wrap
           //- [·]
-          .checkbox-wrap(v-if="hasCheckbox" @click.left.prevent.stop="toggleCardChecked" @touchend.prevent.stop="toggleCardChecked")
+          .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend="toggleCardChecked")
             label(:class="{active: isChecked, disabled: !canEditSpace}")
               input(type="checkbox" v-model="checkboxState")
           //- Name
@@ -908,12 +908,14 @@ export default {
       }
     },
     toggleCardChecked () {
+      if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       if (!this.canEditSpace) { return }
       const value = !this.isChecked
       this.$store.dispatch('closeAllDialogs', 'Card.toggleCardChecked')
       this.$store.dispatch('currentCards/toggleChecked', { cardId: this.id, value })
       this.cancelLocking()
       this.$store.commit('currentUserIsDraggingCard', false)
+      event.stopPropagation()
     },
     toggleUserDetailsIsVisible () {
       if (isMultiTouch) { return }
@@ -1360,6 +1362,7 @@ article
         padding-top 8px
         padding-left 8px
         label
+          pointer-events none
           width 20px
           height 16px
           display flex

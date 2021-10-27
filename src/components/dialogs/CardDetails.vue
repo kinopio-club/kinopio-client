@@ -340,7 +340,10 @@ export default {
     },
     isInvitedButCannotEditSpace () { return this.$store.getters['currentUser/isInvitedButCannotEditSpace']() },
     maxCardLength () { return 300 },
-    currentCardLength () { return this.card.name.length },
+    currentCardLength () {
+      if (!this.card.name) { return 0 }
+      return this.card.name.length
+    },
     showCurrentCardLength () {
       const threshold = 50
       if (this.errorMaxCardLength) { return }
