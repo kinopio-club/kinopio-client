@@ -64,7 +64,7 @@ import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import utils from '@/utils.js'
 
 export default {
-  name: 'Restore',
+  name: 'Removed',
   components: {
     Loader,
     PrivacyIcon
@@ -100,13 +100,16 @@ export default {
       return this.removedCards.filter(card => card.name)
     },
     items () {
+      let items = []
       if (this.cardsVisible && !this.currentUserCanEditSpace) {
-        return []
+        items = []
       } else if (this.cardsVisible) {
-        return this.removedCardsWithName
+        items = this.removedCardsWithName
       } else {
-        return this.removedSpaces
+        items = this.removedSpaces
       }
+      items = items.filter(item => Boolean(item))
+      return items
     },
     currentSpace () { return this.$store.state.currentSpace },
     currentSpaceName () { return this.currentSpace.name },
@@ -238,7 +241,11 @@ export default {
       this.loading.spaces = false
       if (!removedSpaces) { return }
       removedSpaces = removedSpaces.map(remote => {
-        const localSpace = this.removedSpaces.find(local => local.id === remote.id)
+        const localSpace = this.removedSpaces.find(local => {
+          if (local) {
+            return local.id === remote.id
+          }
+        })
         if (localSpace) {
           return merge(remote, localSpace)
         } else {
