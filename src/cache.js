@@ -4,6 +4,8 @@ import debounce from 'lodash-es/debounce'
 
 import utils from '@/utils.js'
 
+const updateErrorMessage = '🚑 could not updateSpace cache because cachedSpace does not exist (ignore if space is read-only or open)'
+
 export default {
   storeLocal (key, value) {
     try {
@@ -82,7 +84,7 @@ export default {
   updateSpace (key, value, spaceId) {
     let space = this.space(spaceId)
     if (!utils.objectHasKeys(space)) {
-      console.warn('🚑 could not updateSpace cache because cachedSpace does not exist (ignore if read-only or open)')
+      console.warn(updateErrorMessage)
       return
     }
     const normalizeKeys = ['cards', 'connections', 'connectionTypes']
@@ -97,7 +99,7 @@ export default {
     cards = utils.denormalizeItems(cards)
     let space = this.space(spaceId)
     if (!utils.objectHasKeys(space)) {
-      console.warn('🚑 could not updateSpace cache because cachedSpace does not exist (ignore if read-only or open)')
+      console.warn(updateErrorMessage)
       return
     }
     cards = utils.denormalizeItems(cards)
@@ -109,7 +111,7 @@ export default {
     connections = utils.denormalizeItems(connections)
     let space = this.space(spaceId)
     if (!utils.objectHasKeys(space)) {
-      console.warn('🚑 could not updateSpace cache because cachedSpace does not exist (ignore if read-only or open)')
+      console.warn(updateErrorMessage)
       return
     }
     space.connections = connections

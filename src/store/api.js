@@ -444,6 +444,17 @@ const self = {
         console.error('🚒', error)
       }
     },
+    restoreRemovedSpace: async (context, space) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'PATCH', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/space/restore/${space.id}`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒', error)
+      }
+    },
 
     // Card
 

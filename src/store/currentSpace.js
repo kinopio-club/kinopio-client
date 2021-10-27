@@ -764,14 +764,11 @@ export default {
         body: space
       }, { root: true })
     },
-    restoreRemovedSpace: (context, space) => {
+    restoreRemovedSpace: async (context, space) => {
       cache.restoreRemovedSpace(space)
+      const restoredSpace = await context.dispatch('api/restoreRemovedSpace', space, { root: true })
+      space = restoredSpace || space
       context.dispatch('incrementCardsCreatedCountFromSpace', space)
-      context.dispatch('api/addToQueue', { name: 'restoreRemovedSpace',
-        body: {
-          id: space.id
-        } }, { root: true })
-      space.isRemoved = false
       context.dispatch('changeSpace', { space })
     },
     removeAllRemovedSpacesPermanent: (context) => {
