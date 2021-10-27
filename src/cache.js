@@ -5,10 +5,14 @@ import debounce from 'lodash-es/debounce'
 import utils from '@/utils.js'
 
 const updateErrorMessage = '🚑 could not updateSpace cache because cachedSpace does not exist (ignore if space is read-only or open)'
+let showDebugMessages = false
 
 export default {
   storeLocal (key, value) {
     try {
+      if (showDebugMessages) {
+        console.log('🏬 storeLocal', key, value)
+      }
       window.localStorage[key] = JSON.stringify(value)
     } catch (error) {
       console.warn('🚑 storeLocal could not save to localStorage', error)
