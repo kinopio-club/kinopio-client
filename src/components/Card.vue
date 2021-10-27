@@ -45,7 +45,7 @@ article(:style="position" :data-card-id="id" ref="card")
             input(type="checkbox" v-model="checkboxState")
         //- Name
         .badge.secondary
-          .toggle-comment-wrap(@mousedown.left="toggleCommentIsVisible" @touchstart="toggleCommentIsVisible")
+          .toggle-comment-wrap(@mouseup.left="toggleCommentIsVisible" @touchend="toggleCommentIsVisible")
             button.inline-button(:class="{active: commentIsVisible}" tabindex="-1")
               img.icon.view(v-if="commentIsVisible" src="@/assets/view-hidden.svg")
               img.icon.view(v-else src="@/assets/view.svg")
@@ -1019,6 +1019,7 @@ export default {
       this.$store.commit('currentUserIsDrawingConnection', true)
     },
     toggleCommentIsVisible (event) {
+      if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       if (utils.isMultiTouch(event)) { return }
       this.$store.dispatch('closeAllDialogs', 'Card.toggleComment')
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
