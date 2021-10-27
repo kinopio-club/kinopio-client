@@ -118,7 +118,7 @@ export default {
     addJournalSpace () {
       this.$store.dispatch('closeAllDialogs', 'addSpace.addJournalSpace')
       window.scrollTo(0, 0)
-      this.$store.dispatch('currentSpace/addNewJournalSpace')
+      this.$store.dispatch('currentSpace/addJournalSpace')
       this.$store.dispatch('currentSpace/updateSpacePageSize')
     },
     addSpace () {

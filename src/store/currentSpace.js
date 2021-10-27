@@ -315,6 +315,51 @@ export default {
       context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
       context.dispatch('loadBackground')
     },
+    createNewJournalSpace: (context) => {
+      // name
+      let date = dayjs(new Date())
+      if (context.rootState.loadJournalSpaceTomorrow) {
+        date = date.add(1, 'day')
+      }
+      const moonPhase = moonphase(date)
+      const day = `${moonPhase.emoji} ${date.format('dddd')}` // 🌘 Tuesday
+      // meta
+      const spaceId = nanoid()
+      let space = utils.emptySpace(spaceId)
+      space.name = utils.journalSpaceName(context.rootState.loadJournalSpaceTomorrow)
+      space.privacy = 'private'
+      space.moonPhase = moonPhase.name
+      space.removedCards = []
+      space.userId = context.rootState.currentUser.id
+      space.connectionTypes = []
+      space.connections = []
+      // cards
+      space.cards.push({ id: nanoid(), name: day, x: 60, y: 100, frameId: 0 })
+      const userPrompts = context.rootState.currentUser.journalPrompts
+      userPrompts.forEach(prompt => {
+        if (!prompt.name) { return }
+        let card = { id: nanoid() }
+        if (prompt.packId) {
+          const pack = context.rootGetters['currentUser/packById'](prompt.packId)
+          const randomPrompt = utils.randomPrompt(pack)
+          const tag = utils.packTag(pack, card.id, space)
+          if (tag) { space.tags.push(tag) }
+          card.name = `[[${prompt.name}]] ${randomPrompt}`
+        } else {
+          card.name = prompt.name
+        }
+        const position = utils.promptCardPosition(space.cards, card.name)
+        card.x = position.x
+        card.y = position.y
+        card.z = 0
+        card.spaceId = spaceId
+        space.cards.push(card)
+      })
+      context.commit('clearSearch', null, { root: true })
+      isLoadingRemoteSpace = false
+      context.dispatch('restoreSpaceInChunks', { space })
+      context.dispatch('loadBackground')
+    },
     saveNewSpace: (context) => {
       const space = utils.clone(context.state)
       const user = context.rootState.currentUser
@@ -370,50 +415,14 @@ export default {
       context.commit('notifySignUpToEditSpace', false, { root: true })
       context.commit('triggerUpdateWindowHistory', {}, { root: true })
     },
-    addNewJournalSpace: (context) => {
+    addJournalSpace: (context) => {
       const user = context.rootState.currentUser
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
-      // name
-      let date = dayjs(new Date())
-      if (context.rootState.loadJournalSpaceTomorrow) {
-        date = date.add(1, 'day')
-      }
-      const moonPhase = moonphase(date)
-      const day = `${moonPhase.emoji} ${date.format('dddd')}` // 🌘 Tuesday
-      // space meta
-      const spaceId = nanoid()
-      let space = utils.emptySpace(spaceId)
-      space.name = utils.journalSpaceName(context.rootState.loadJournalSpaceTomorrow)
-      space.privacy = 'private'
-      space.moonPhase = moonPhase.name
-      space.removedCards = []
-      // cards
-      space.cards.push({ id: nanoid(), name: day, x: 60, y: 100, frameId: 0 })
-      const userPrompts = context.rootState.currentUser.journalPrompts
-      userPrompts.forEach(prompt => {
-        if (!prompt.name) { return }
-        let card = { id: nanoid() }
-        if (prompt.packId) {
-          const pack = context.rootGetters['currentUser/packById'](prompt.packId)
-          const randomPrompt = utils.randomPrompt(pack)
-          const tag = utils.packTag(pack, card.id, space)
-          if (tag) { space.tags.push(tag) }
-          card.name = `[[${prompt.name}]] ${randomPrompt}`
-        } else {
-          card.name = prompt.name
-        }
-        const position = utils.promptCardPosition(space.cards, card.name)
-        card.x = position.x
-        card.y = position.y
-        card.z = 0
-        card.spaceId = spaceId
-        space.cards.push(card)
-      })
-      // create space
-      context.commit('clearSearch', null, { root: true })
-      context.dispatch('restoreSpaceInChunks', { space })
+      context.dispatch('createNewJournalSpace')
       context.dispatch('saveNewSpace')
-      context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
+      context.dispatch('updateUserLastSpaceId')
+      context.commit('notifyNewUser', false, { root: true })
+      context.commit('notifySignUpToEditSpace', false, { root: true })
       context.commit('triggerUpdateWindowHistory', {}, { root: true })
     },
     getRemoteSpace: async (context, space) => {
@@ -501,7 +510,7 @@ export default {
         const space = { id: journalSpace.id }
         context.dispatch('changeSpace', { space })
       } else {
-        context.dispatch('addNewJournalSpace')
+        context.dispatch('addJournalSpace')
       }
       context.commit('loadJournalSpace', false, { root: true })
       context.commit('loadJournalSpaceTomorrow', false, { root: true })
