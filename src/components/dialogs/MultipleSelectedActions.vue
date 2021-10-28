@@ -120,9 +120,11 @@ export default {
     cardsIsSelected () { return Boolean(this.multipleCardsSelectedIds.length > 0) },
     multipleCardsIsSelected () { return Boolean(this.multipleCardsSelectedIds.length > 1) },
     cards () {
-      return this.multipleCardsSelectedIds.map(cardId => {
+      let cards = this.multipleCardsSelectedIds.map(cardId => {
         return this.$store.getters['currentCards/byId'](cardId)
       })
+      cards = cards.filter(card => Boolean(card))
+      return cards
     },
     editableCards () {
       if (this.isSpaceMember) {
@@ -150,9 +152,11 @@ export default {
     multipleConnectionsSelectedIds () { return this.$store.state.multipleConnectionsSelectedIds },
     connectionsIsSelected () { return Boolean(this.multipleConnectionsSelectedIds.length) },
     connections () {
-      return this.multipleConnectionsSelectedIds.map(id => {
+      let connections = this.multipleConnectionsSelectedIds.map(id => {
         return this.$store.getters['currentConnections/byId'](id)
       })
+      connections = connections.filter(connection => Boolean(connection))
+      return connections
     },
     editableConnections () {
       const connections = this.connections
