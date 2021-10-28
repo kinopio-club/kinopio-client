@@ -1108,7 +1108,6 @@ export default {
       if (shouldTrigger) {
         this.$store.commit('triggerPickerSelect')
         event.preventDefault()
-        return
       }
       // prevent trailing ]
       if (event.key === ']' && this.tag.pickerIsVisible) {

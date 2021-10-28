@@ -49,13 +49,13 @@ export default {
         }
       }
       if (mutation.type === 'triggerPickerSelect') {
-        if (!this.search) { return }
         const searchTag = [{
           name: this.search,
           color: this.searchTagColor
         }]
         const tags = searchTag.concat(this.filteredTags)
-        const currentTag = tags.find(tag => tag.name === this.focusOnName)
+        const currentIndex = tags.findIndex(tag => tag.name === this.focusOnName)
+        const currentTag = tags[currentIndex]
         this.selectTag(currentTag)
       }
     })
