@@ -1458,6 +1458,9 @@ export default {
     updatePinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
     },
+    resetTextareaHeight () {
+      this.$refs.name.style.height = 'initial'
+    },
     showCard (cardId) {
       this.$nextTick(() => {
         this.broadcastShowCardDetails()
@@ -1465,6 +1468,7 @@ export default {
         this.scrollIntoViewAndFocus()
         this.updatePreviousTags()
         this.updateNameSplitIntoCardsCount()
+        this.resetTextareaHeight()
         this.$nextTick(() => {
           this.startOpening()
         })
