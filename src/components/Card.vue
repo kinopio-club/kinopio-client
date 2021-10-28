@@ -492,7 +492,7 @@ export default {
         name = name.replace(checkbox, '')
       }
       name = this.removeCommentBrackets(name)
-      return utils.trim(name)
+      return name
     },
     nameSegments () {
       let segments = utils.cardNameSegments(this.normalizedName)
