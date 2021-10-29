@@ -175,6 +175,7 @@ export default {
         await context.dispatch('createNewHelloSpace')
         context.dispatch('updateUserLastSpaceId')
       }
+      context.dispatch('updateModulesSpaceId')
       context.commit('triggerUpdateWindowHistory', { isRemote }, { root: true })
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const shouldShow = context.rootState.currentUser.shouldShowNewUserNotification
@@ -372,6 +373,7 @@ export default {
       nextTick(() => {
         context.dispatch('currentCards/updateDimensions', null, { root: true })
       })
+      context.dispatch('updateModulesSpaceId', space)
     },
     saveImportedSpace: async (context) => {
       context.commit('isLoadingSpace', true, { root: true })
@@ -385,6 +387,7 @@ export default {
       context.commit('triggerUpdateWindowHistory', { space, isRemote: currentUserIsSignedIn }, { root: true })
       context.commit('addUserToSpace', user)
       context.dispatch('loadBackground')
+      context.dispatch('updateModulesSpaceId', space)
       nextTick(() => {
         context.dispatch('currentCards/updateDimensions', null, { root: true })
         context.commit('isLoadingSpace', false, { root: true })
@@ -399,6 +402,7 @@ export default {
       const nullCardUsers = true
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
       context.commit('restoreSpace', uniqueNewSpace)
+      context.dispatch('updateModulesSpaceId', uniqueNewSpace)
       await context.dispatch('saveImportedSpace')
     },
     addSpace: (context) => {
@@ -515,6 +519,12 @@ export default {
       context.commit('loadJournalSpace', false, { root: true })
       context.commit('loadJournalSpaceTomorrow', false, { root: true })
     },
+    updateModulesSpaceId: (context, space) => {
+      space = space || context.state
+      console.log('💕 modules space id', space.id)
+      context.dispatch('currentCards/updateSpaceId', space.id, { root: true })
+      context.dispatch('currentConnections/updateSpaceId', space.id, { root: true })
+    },
     restoreSpaceInChunks: (context, { space, isRemote, addCards, addConnections, addConnectionTypes }) => {
       if (!utils.objectHasKeys(space)) { return }
       console.log('🌌 Restoring space', space, { 'isRemote': isRemote, addCards, addConnections, addConnectionTypes })
@@ -554,9 +564,8 @@ export default {
       // restore space
       if (!isRemote) {
         context.commit('currentCards/clear', null, { root: true })
-        context.dispatch('currentCards/updateSpaceId', space.id, { root: true })
-        context.dispatch('currentConnections/updateSpaceId', space.id, { root: true })
         context.commit('currentConnections/clear', null, { root: true })
+        context.dispatch('updateModulesSpaceId', space)
       }
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('restoreSpace', space)
@@ -641,7 +650,7 @@ export default {
         context.dispatch('currentCards/updateCardMap', null, { root: true })
       })
     },
-    loadSpace: async (context, { space }) => {
+    loadSpace: async (context, { space, isLocalSpaceOnly }) => {
       const emptySpace = utils.emptySpace(space.id)
       const cachedSpace = cache.space(space.id) || space
       const user = context.rootState.currentUser
@@ -662,6 +671,7 @@ export default {
       context.dispatch('restoreSpaceInChunks', { space })
       context.commit('undoHistory/clear', null, { root: true })
       // merge with remote space items updated, added, removed
+      if (isLocalSpaceOnly) { return }
       let remoteSpace = await context.dispatch('getRemoteSpace', space)
       if (!remoteSpace) { return }
       const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)

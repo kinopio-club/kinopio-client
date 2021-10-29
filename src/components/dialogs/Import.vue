@@ -105,7 +105,7 @@ export default {
       space = this.updateSpaceItemsUserId(space)
       const uniqueNewSpace = cache.updateIdsInSpace(space)
       cache.saveSpace(uniqueNewSpace)
-      this.$store.commit('currentSpace/restoreSpace', uniqueNewSpace)
+      this.$store.dispatch('currentSpace/loadSpace', { space: uniqueNewSpace, isLocalSpaceOnly: true })
       try {
         await this.$store.dispatch('currentSpace/saveImportedSpace')
       } catch (error) {
