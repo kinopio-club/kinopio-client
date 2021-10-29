@@ -203,10 +203,9 @@ export default {
       cards = this.mapRemoteItems(cards)
       connectionTypes = this.mapRemoteItems(connectionTypes)
       connections = this.mapRemoteItems(connections)
-      console.log('🚚 copy or move', cards, connectionTypes, connections)
-      await this.$store.dispatch('api/updateCards', cards)
-      await this.$store.dispatch('api/updateConnectionTypes', connectionTypes)
-      await this.$store.dispatch('api/updateConnections', connections)
+      await this.$store.dispatch('api/createCards', cards)
+      await this.$store.dispatch('api/createConnectionTypes', connectionTypes)
+      await this.$store.dispatch('api/createConnections', connections)
       const spaceIsCached = Boolean(cache.space(this.selectedSpace.id).cards)
       if (!spaceIsCached) {
         const space = { id: this.selectedSpace.id }
@@ -214,6 +213,7 @@ export default {
         cache.saveSpace(remoteSpace)
       }
       cache.addToSpace(newItems, this.selectedSpace.id)
+      console.log('🚚 copies created', newItems)
       this.loading = false
     },
 
@@ -231,7 +231,7 @@ export default {
         this.cardsCreatedIsOverLimit = true
         return
       }
-      // action
+      // copy
       if (this.toNewSpace) {
         const selectedSpace = await this.createNewSpace(items, newSpaceName)
         this.notifyNewSpaceSuccess(selectedSpace)
