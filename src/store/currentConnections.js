@@ -282,7 +282,8 @@ export default {
       context.commit('removeType', type)
     },
     removeUnusedTypes: (context) => {
-      const types = context.getters.allTypes
+      let types = context.getters.allTypes
+      types = types.filter(type => Boolean(type))
       const typesToRemove = types.filter(type => !context.state.typeIds.includes(type.id))
       typesToRemove.forEach(type => {
         context.dispatch('removeType', type)
