@@ -1413,7 +1413,7 @@ export default {
           urlPreviewUrl: url,
           urlPreviewImage: image,
           urlPreviewTitle: utils.truncated(data.title),
-          urlPreviewDescription: utils.truncated(data.description),
+          urlPreviewDescription: utils.truncated(data.description, 280),
           urlPreviewFavicon: data.icon
         }
         const maxImageLength = 350
