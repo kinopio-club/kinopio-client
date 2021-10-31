@@ -797,6 +797,7 @@ export default {
     removeTrackingQueryStrings (card) {
       const name = card.name
       const urls = utils.urlsFromString(name)
+      if (!urls) { return }
       urls.forEach(url => {
         url = url.trim()
         const queryString = utils.queryString(url)
