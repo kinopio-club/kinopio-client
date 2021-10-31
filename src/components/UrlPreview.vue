@@ -19,16 +19,16 @@
               img.icon.visit(src="@/assets/visit.svg")
 
       img.preview-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected, 'side-image': isImageCard || parentIsCardDetails}" @load="updateCardMap")
-      .text(v-if="isNotGithubRepo" :class="{'side-text badge': !isImageCard && !parentIsCardDetails && card.urlPreviewImage}" :style="{background: selectedColor}")
+      .text(:class="{'side-text badge': !isImageCard && !parentIsCardDetails && card.urlPreviewImage}" :style="{background: selectedColor}")
         img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
         img.icon.favicon.open(v-else src="@/assets/open.svg")
         .title {{filteredTitle}}
-        .description(v-if="shouldShowDescription") {{card.urlPreviewDescription}}
-
+        .description(v-if="description") {{description}}
 </template>
 
 <script>
 import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'UrlPreview',
@@ -49,23 +49,23 @@ export default {
       if (!this.isSelected) { return }
       return this.user.color
     },
-    shouldShowDescription () {
-      if (!this.card.urlPreviewDescription) { return }
-      const noPreviewImage = !this.card.urlPreviewImage
-      // https://regexr.com/5ror4
-      const domainPattern = new RegExp(/(?:(futureland.tv)|(spotify.com)|(twitter.com)|(wikipedia.org)|(tumblr.com)|(medium.com)|(overcast.com))/igm)
-      const isDomain = this.card.urlPreviewUrl.match(domainPattern)
-      return noPreviewImage || isDomain
-    },
     filteredTitle () {
       let title = this.card.urlPreviewTitle
       title = title.replace('on Twitter', '')
       return title
     },
-    isNotGithubRepo () {
+    description () {
+      let description = this.card.urlPreviewDescription
       const image = this.card.urlPreviewImage
-      if (image.includes('opengraph.githubassets.com')) { return false }
-      return true
+      const cardIsShort = this.card.height < 200
+      const isCardView = !this.parentIsCardDetails
+      if (isCardView) {
+        description = utils.truncated(description)
+      }
+      if (isCardView && image && cardIsShort) {
+        description = ''
+      }
+      return description
     }
   },
   methods: {
@@ -149,4 +149,7 @@ export default {
       padding 4px
     .visit-button
       margin-right 6px
+
+  .description-wrap
+    position relative
 </style>

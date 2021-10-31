@@ -106,12 +106,12 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         button(:disabled="!canEditCard" @click.left.stop="toggleUrlsIsVisible" :class="{active: urlsIsVisible}")
           img.icon(v-if="urlsIsVisible" src="@/assets/view-hidden.svg")
           img.icon(v-else src="@/assets/view.svg")
-          span URL
+          span Hide URL
       //- Split by Line Breaks
       .button-wrap(v-if="nameSplitIntoCardsCount")
         button(:disabled="!canEditCard" @click.left.stop="splitCards")
           img.icon(src="@/assets/split-vertically.svg")
-          span Split into {{nameSplitIntoCardsCount}} Cards
+          span Split Card ({{nameSplitIntoCardsCount}})
 
     .row.badges-row(v-if="tagsInCard.length || card.linkToSpaceId || nameIsComment || isInSearchResultsCards")
       //- Search result
@@ -1372,13 +1372,6 @@ export default {
       this.updateCardName(newName)
       this.moveCursorPastTagEnd()
     },
-    previewImage (image, width) {
-      const minWidth = 200
-      if (width < minWidth) { return '' }
-      const isTwitterIcon = image.includes('abs.twimg.com/responsive-web/client-web/icon-ios')
-      if (isTwitterIcon) { return '' }
-      return image
-    },
     updateUrlPreviewErrorUrl (url) {
       const cardId = this.card.id || prevCardId
       this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
@@ -1389,10 +1382,22 @@ export default {
       }
       this.$store.dispatch('currentCards/update', update)
     },
+    previewImage ({ thumbnail }) {
+      const minWidth = 200
+      if (!thumbnail) { return '' }
+      let image = thumbnail.find(item => item.media.width > minWidth)
+      return image.href || ''
+    },
+    previewFavicon ({ icon }) {
+      console.log('2', icon)
+      if (!icon) { return '' }
+      let image = icon.find(item => item.href) // TODO? always returns first result? consider file type, and size?
+      return image.href || ''
+    },
     debouncedUpdateUrlPreview: debounce(async function (url) {
       try {
-        const linkPreviewApiKey = 'a9f249ef6b59cc8ccdd19de6b167bafa'
-        const response = await fetch(`https://api.linkpreview.net/?key=${linkPreviewApiKey}&q=${encodeURIComponent(url)}&fields=icon,image_x`)
+        const apiKey = '0788beaa34f65adc0fe7ac'
+        const response = await fetch(`https://iframe.ly/api/iframely/?api_key=${apiKey}&url=${encodeURIComponent(url)}`)
         const data = await response.json()
         if (response.status !== 200) {
           throw new Error(response.status)
@@ -1406,18 +1411,15 @@ export default {
           throw new Error(response.message)
         }
         console.log('🚗 link preview', data)
-        if (!data.title) { return }
-        const image = this.previewImage(data.image, data.image_x)
+        const { links, meta } = data
         const update = {
           id: cardId,
           urlPreviewUrl: url,
-          urlPreviewImage: image,
-          urlPreviewTitle: utils.truncated(data.title),
-          urlPreviewDescription: utils.truncated(data.description, 280),
-          urlPreviewFavicon: data.icon
+          urlPreviewTitle: utils.truncated(meta.title),
+          urlPreviewDescription: utils.truncated(meta.description, 280),
+          urlPreviewImage: this.previewImage(links),
+          urlPreviewFavicon: this.previewFavicon(links)
         }
-        const maxImageLength = 350
-        if (data.image.length >= maxImageLength) { return }
         this.$store.dispatch('currentCards/update', update)
         this.updateCardMap(cardId)
       } catch (error) {
@@ -1458,6 +1460,7 @@ export default {
       this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
     },
     resetTextareaHeight () {
+      console.log(this.$refs.name)
       this.$refs.name.style.height = 'initial'
     },
     showCard (cardId) {
