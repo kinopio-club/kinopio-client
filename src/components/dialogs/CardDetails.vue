@@ -794,8 +794,10 @@ export default {
       this.pastedName = text
       this.wasPasted = true
     },
-    removeTrackingQueryStrings () {
-      this.validUrls.forEach(url => {
+    removeTrackingQueryStrings (card) {
+      const name = card.name
+      const urls = utils.urlsFromString(name)
+      urls.forEach(url => {
         url = url.trim()
         const queryString = utils.queryString(url)
         const domain = utils.urlWithoutQueryString(url)
@@ -803,13 +805,21 @@ export default {
           let queryObject = qs.decode(queryString)
           let keys = Object.keys(queryObject)
           keys = keys.filter(key => {
-            return key.startsWith('utm_') // google analytics
+            const trackingKeys = ['is_copy_url', 'is_from_webapp']
+            if (trackingKeys.includes(key)) {
+              return true
+            }
+            // google analytics
+            if (key.startsWith('utm_')) {
+              return true
+            }
           })
           keys.forEach(key => delete queryObject[key])
           const newUrl = qs.encode(domain, queryObject)
-          this.updateLink({
-            url,
-            newUrl
+          const newName = card.name.replace(url, newUrl)
+          this.$store.dispatch('currentCards/update', {
+            id: card.id,
+            name: newName
           })
         }
       })
@@ -1482,14 +1492,16 @@ export default {
     },
     closeCard () {
       const cardId = prevCardId
+      const card = this.$store.getters['currentCards/byId'](cardId)
       this.closeCardDialogs(true)
-      this.removeTrackingQueryStrings()
+      if (card) {
+        this.removeTrackingQueryStrings(card)
+      }
       this.cancelOpening()
       this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', cardId)
       this.$store.commit('updateCurrentCardConnections')
       this.$store.commit('triggerUpdatePositionInVisualViewport')
       this.$store.commit('shouldPreventNextEnterKey', false)
-      const card = this.$store.getters['currentCards/byId'](cardId)
       if (!card) { return }
       const cardHasName = Boolean(card.name)
       if (!cardHasName) {
