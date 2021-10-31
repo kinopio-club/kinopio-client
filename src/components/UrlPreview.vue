@@ -149,7 +149,4 @@ export default {
       padding 4px
     .visit-button
       margin-right 6px
-
-  .description-wrap
-    position relative
 </style>

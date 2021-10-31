@@ -1400,9 +1400,8 @@ export default {
       return image.href || ''
     },
     previewFavicon ({ icon }) {
-      console.log('2', icon)
       if (!icon) { return '' }
-      let image = icon.find(item => item.href) // TODO? always returns first result? consider file type, and size?
+      let image = icon.find(item => item.href)
       return image.href || ''
     },
     debouncedUpdateUrlPreview: debounce(async function (url) {
@@ -1471,7 +1470,6 @@ export default {
       this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
     },
     resetTextareaHeight () {
-      console.log(this.$refs.name)
       this.$refs.name.style.height = 'initial'
     },
     showCard (cardId) {
