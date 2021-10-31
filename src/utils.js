@@ -386,6 +386,7 @@ export default {
     return word
   },
   truncated (string, limit) {
+    if (!string) { return '' }
     limit = limit || 60
     if (string.length < limit) { return string }
     string = string.substring(0, limit) + '…'
