@@ -1427,7 +1427,7 @@ export default {
         const update = {
           id: cardId,
           urlPreviewUrl: url,
-          urlPreviewTitle: utils.truncated(meta.title),
+          urlPreviewTitle: utils.truncated(meta.title || meta.site),
           urlPreviewDescription: utils.truncated(meta.description, 280),
           urlPreviewImage: this.previewImage(links),
           urlPreviewFavicon: this.previewFavicon(links)
