@@ -338,6 +338,10 @@ export default {
     // https://regexr.com/5784j
     return string.replace(/\.$/g, '')
   },
+  removeTrailingSlash (string) {
+    // https://regexr.com/68l08
+    return string.replace(/\/$/g, '')
+  },
   pastTense (string) {
     const lastLetter = string.charAt(string.length - 1)
     // add test cases ad hoc from https://github.com/boo1ean/tensify
@@ -1004,7 +1008,7 @@ export default {
     // followed by alphanumerics
     // then trailing '/' or '-'
     // matches multiple urls and returns [urls]
-    const urlPattern = new RegExp(/(^|\n| )(http[s]?:\/\/)?[^\s(["<>]{2,}\.[^\s.[">,<]+\w\/?-?/igm)
+    const urlPattern = new RegExp(/(^|\n| )(http[s]?:\/\/)?[^\s(["<>]{2,}\.[^\s."><]+\w\/?-?/igm)
     let urls = string.match(urlPattern)
     if (!urls) { return }
     // filter out empty or non-urls
