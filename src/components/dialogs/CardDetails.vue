@@ -36,8 +36,8 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keyup="updatePickerSearch(null)"
 
         @keydown="updatePicker"
-        @keydown.down="triggerPickerNavigation"
-        @keydown.up="triggerPickerNavigation"
+        @keydown.down.stop="triggerPickerNavigation"
+        @keydown.up.stop="triggerPickerNavigation"
 
         @keydown.tab="triggerPickerSelectItem"
 
@@ -1085,9 +1085,11 @@ export default {
       const previousCharacter = this.name[cursorPosition - 1]
       const previousCharacterIsBlank = utils.hasBlankCharacters(previousCharacter)
       const key = event.key
+      const keyIsArrowUpOrDown = key === 'ArrowDown' || key === 'ArrowUp'
       const keyIsLettterOrNumber = key.length === 1
       const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets()
       const isCursorInsideSlashCommand = this.isCursorInsideSlashCommand()
+      if (keyIsArrowUpOrDown) { return }
       if (key === '(') {
         this.triggerCommentAddClosingBrackets()
       }

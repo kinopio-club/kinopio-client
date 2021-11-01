@@ -146,12 +146,9 @@ export default {
     },
 
     focusPreviousItem (tags, currentIndex) {
-      const firstItemIsFocused = this.search === this.focusOnName
       const firstItem = tags[0]
       const previousItem = tags[currentIndex - 1]
-      if (firstItemIsFocused) {
-        this.closeDialog()
-      } else if (previousItem) {
+      if (previousItem) {
         this.focusOnName = previousItem.name
       } else {
         this.focusOnName = firstItem.name
@@ -159,11 +156,8 @@ export default {
     },
     focusNextItem (tags, currentIndex) {
       const lastItem = last(tags)
-      const lastItemIsFocused = lastItem.name === this.focusOnName
       const nextItem = tags[currentIndex + 1]
-      if (lastItemIsFocused) {
-        this.closeDialog()
-      } else if (nextItem) {
+      if (nextItem) {
         this.focusOnName = nextItem.name
       } else {
         this.focusOnName = lastItem.name
