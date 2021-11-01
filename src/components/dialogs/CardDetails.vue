@@ -1400,7 +1400,8 @@ export default {
     previewImage ({ thumbnail }) {
       const minWidth = 200
       if (!thumbnail) { return '' }
-      let image = thumbnail.find(item => item.media.width > minWidth)
+      let image = thumbnail.find(item => item.href && (item.media.width > minWidth))
+      if (!image) { return '' }
       return image.href || ''
     },
     previewFavicon ({ icon }) {
