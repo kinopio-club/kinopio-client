@@ -12,7 +12,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.prevent.enter.exact
 
         @compositionend="updateCompositionEventEndTime"
-        @keyup.enter.exact="handleEnterKey"
+        @keydown.enter.exact="handleEnterKey"
         @keyup.stop.esc
         @keydown.esc="closeCardAndFocus"
 
@@ -38,11 +38,12 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown="updatePicker"
         @keydown.down="triggerPickerNavigation"
         @keydown.up="triggerPickerNavigation"
-        @keydown.enter="triggerPickerSelectItem"
+
         @keydown.tab="triggerPickerSelectItem"
 
         @focus="resetPinchCounterZoomDecimal"
       )
+
       TagPicker(
         :visible="tag.pickerIsVisible"
         :cursorPosition="cursorPosition"
@@ -916,6 +917,7 @@ export default {
       if (this.$store.state.shouldPreventNextEnterKey) {
         this.$store.commit('shouldPreventNextEnterKey', false)
       } else if (this.tag.pickerIsVisible || this.space.pickerIsVisible) {
+        this.triggerPickerSelectItem(event)
         this.hidePickers()
       } else if (this.insertedLineBreak) {
         this.insertedLineBreak = false
