@@ -634,6 +634,7 @@ export default {
       let newUrls = []
       this.urls.forEach(url => {
         url = url.trim()
+        url = utils.removeTrailingSlash(url)
         const isUrl = utils.urlType(url) === 'link'
         if (!isUrl) { return }
         const queryString = utils.queryString(url)
@@ -800,6 +801,7 @@ export default {
       if (!urls) { return }
       urls.forEach(url => {
         url = url.trim()
+        url = utils.removeTrailingSlash(url)
         const queryString = utils.queryString(url)
         const domain = utils.urlWithoutQueryString(url)
         if (queryString) {
