@@ -41,6 +41,7 @@ export default {
         const tags = searchTag.concat(this.filteredTags)
         const currentIndex = tags.findIndex(tag => tag.name === this.focusOnName)
         if (!utils.arrayHasItems(this.filteredTags)) {
+          console.log('🍓', this.filteredTags, tags)
           this.closeDialog('triggerPickerNavigationKey')
         } else if (key === 'ArrowUp') {
           this.focusPreviousItem(tags, currentIndex)
