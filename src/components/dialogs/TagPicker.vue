@@ -40,10 +40,7 @@ export default {
         }]
         const tags = searchTag.concat(this.filteredTags)
         const currentIndex = tags.findIndex(tag => tag.name === this.focusOnName)
-        if (!utils.arrayHasItems(this.filteredTags)) {
-          console.log('🍓', this.filteredTags, tags)
-          this.closeDialog('triggerPickerNavigationKey')
-        } else if (key === 'ArrowUp') {
+        if (key === 'ArrowUp') {
           this.focusPreviousItem(tags, currentIndex)
         } else if (key === 'ArrowDown') {
           this.focusNextItem(tags, currentIndex)
@@ -137,7 +134,7 @@ export default {
       tag = tag || searchTag
       this.$emit('selectTag', tag)
       if (shouldCloseDialog) {
-        this.closeDialog('selectTag')
+        this.closeDialog()
       }
     },
     scrollIntoView () {
@@ -164,8 +161,7 @@ export default {
         this.focusOnName = lastItem.name
       }
     },
-    closeDialog (origin) {
-      console.log('closeDialog', origin)
+    closeDialog () {
       this.$emit('closeDialog')
     }
   },
