@@ -34,7 +34,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialog" @
 
         //- space
         li.space-name(v-if="group.spaceId" :data-space-id="group.spaceId" @click="changeSpace(group.spaceId)" :class="{ active: spaceIsCurrentSpace(group.spaceId) }")
-          BackgroundPreview(:space="group.space")
+          BackgroundPreview(v-if="group.space" :space="group.space")
           span.badge.space-badge
             span {{group.spaceName}}
 
