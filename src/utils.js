@@ -33,8 +33,11 @@ export default {
     }
     return domain
   },
-  host () {
+  host (useKinopioUrl) {
     let host = 'https://kinopio-server.herokuapp.com'
+    if (useKinopioUrl) {
+      host = 'https://api.kinopio.club'
+    }
     if (import.meta.env.MODE === 'development') {
       host = 'http://kinopio.local:3000'
     }

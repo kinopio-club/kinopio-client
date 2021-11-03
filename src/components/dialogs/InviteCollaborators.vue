@@ -23,7 +23,7 @@ dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.left.st
 
     p(v-if="spaceIsPrivate")
       img.icon(src="@/assets/view.svg")
-      span Invited users can view private spaces without a Kinopio account
+      span Invitees can view private spaces without a Kinopio account
 
     template(v-if="!loading && !collaboratorKey")
       .row

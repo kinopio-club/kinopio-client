@@ -30,6 +30,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
       .button-wrap
         button(@click.left.stop="toggleRssFeedIsVisible" :class="{ active: rssFeedIsVisible }")
           span RSS Feed
+        RssFeed(:visible="rssFeedIsVisible")
     .row(v-if="isSpaceMember")
       .button-wrap
         button(@click.left.stop="toggleInviteCollaboratorsIsVisible" :class="{ active: inviteCollaboratorsIsVisible }")
@@ -51,6 +52,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
 <script>
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import InviteCollaborators from '@/components/dialogs/InviteCollaborators.vue'
+import RssFeed from '@/components/dialogs/RssFeed.vue'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import privacy from '@/data/privacy.js'
@@ -64,6 +66,7 @@ export default {
   components: {
     PrivacyButton,
     InviteCollaborators,
+    RssFeed,
     UserList,
     UserDetails
   },
