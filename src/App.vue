@@ -55,6 +55,9 @@ export default {
       if (mutation.type === 'currentSpace/restoreSpace') {
         this.updateMetaDescription()
       }
+      if (mutation.type === 'broadcast/joinSpaceRoom') {
+        this.updateMetaRSSFeed()
+      }
     })
   },
   mounted () {
@@ -144,6 +147,28 @@ export default {
       } else {
         metaDescription.setAttribute('content', topLeftCard.name)
       }
+    },
+    clearMetaRSSFeed () {
+      let link = document.querySelector("link[type='application/rss+xml']")
+      if (link) {
+        link.remove()
+      }
+    },
+    updateMetaRSSFeed () {
+      const spaceHasUrl = utils.spaceHasUrl()
+      const spaceIsPrivate = this.$store.state.currentSpace.privacy === 'private'
+      this.clearMetaRSSFeed()
+      if (!spaceHasUrl) { return }
+      if (spaceIsPrivate) { return }
+      const head = document.querySelector('head')
+      const spaceId = this.$store.state.currentSpace.id
+      const url = `${utils.host(true)}/space/${spaceId}/feed.json`
+      let link = document.createElement('link')
+      link.rel = 'alternative'
+      link.type = 'application/rss+xml'
+      link.title = 'JSON Feed'
+      link.href = url
+      head.appendChild(link)
     }
   }
 }
