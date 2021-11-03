@@ -1,9 +1,13 @@
 <template lang="pug">
-.community(v-if="visible" :open="visible" @click.left.stop)
+.community(v-if="visible" :open="visible" @click.left.stop='closeDialogs')
   section
     p
       img.icon.sunglasses(src="@/assets/sunglasses.svg")
       span Cool Community Spaces
+      .button-wrap
+        button.small-button(@click.stop="toggleExploreRssFeedIsVisible" :class="{active: exploreRssFeedIsVisible}")
+          span RSS
+        ExploreRssFeed(:visible="exploreRssFeedIsVisible")
     p(v-if="loading")
       Loader(:visible="loading")
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
@@ -13,13 +17,15 @@
 <script>
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
+import ExploreRssFeed from '@/components/dialogs/ExploreRssFeed.vue'
 import utils from '@/utils.js'
 
 export default {
   name: 'Community',
   components: {
     Loader,
-    SpaceList
+    SpaceList,
+    ExploreRssFeed
   },
   props: {
     visible: Boolean,
@@ -35,7 +41,8 @@ export default {
   },
   data () {
     return {
-      resultsSectionHeight: null
+      resultsSectionHeight: null,
+      exploreRssFeedIsVisible: false
     }
   },
   computed: {
@@ -44,6 +51,9 @@ export default {
     }
   },
   methods: {
+    closeDialogs () {
+      this.exploreRssFeedIsVisible = false
+    },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
     },
@@ -56,6 +66,9 @@ export default {
         let element = this.$refs.results
         this.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
       })
+    },
+    toggleExploreRssFeedIsVisible () {
+      this.exploreRssFeedIsVisible = !this.exploreRssFeedIsVisible
     }
   },
   watch: {
@@ -76,5 +89,10 @@ export default {
   .badge
     display flex
   button + a
+    margin-left 6px
+  .small-button
+    padding 0
+    padding-left 6px
+    padding-right 6px
     margin-left 6px
 </style>
