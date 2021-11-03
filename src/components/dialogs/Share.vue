@@ -25,11 +25,16 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
         img.icon.open(src="@/assets/open.svg")
         span {{privacyName(0)}}
 
-  section(v-if="spaceHasUrl && isSpaceMember")
-    .button-wrap
-      button(@click.left.stop="toggleInviteCollaboratorsIsVisible" :class="{ active: inviteCollaboratorsIsVisible }")
-        span Invite Collaborators
-      InviteCollaborators(:visible="inviteCollaboratorsIsVisible")
+  section(v-if="spaceHasUrl")
+    .row
+      .button-wrap
+        button(@click.left.stop="toggleRssFeedIsVisible" :class="{ active: rssFeedIsVisible }")
+          span RSS Feed
+    .row(v-if="isSpaceMember")
+      .button-wrap
+        button(@click.left.stop="toggleInviteCollaboratorsIsVisible" :class="{ active: inviteCollaboratorsIsVisible }")
+          span Invite Collaborators
+        InviteCollaborators(:visible="inviteCollaboratorsIsVisible")
   section.results-section.collaborators(v-if="spaceHasUrl && isSpaceMember && spaceHasCollaborators")
     UserList(:users="spaceCollaborators" :selectedUser="selectedUser" :showRemoveUser="true" @selectUser="showUserDetails" @removeUser="removeCollaborator" :isClickable="true")
     UserDetails(:visible="userDetailsIsVisible" :user="selectedUser" :userDetailsPosition="userDetailsPosition" :userDetailsIsFromList="true" @removedCollaborator="removedCollaborator")
@@ -83,7 +88,8 @@ export default {
       userDetailsIsVisible: false,
       spaceCollaborators: [],
       url: '',
-      dialogHeight: null
+      dialogHeight: null,
+      rssFeedIsVisible: false
     }
   },
   computed: {
@@ -144,9 +150,15 @@ export default {
       this.closeDialogs()
       this.inviteCollaboratorsIsVisible = !isVisible
     },
+    toggleRssFeedIsVisible () {
+      const isVisible = this.rssFeedIsVisible
+      this.closeDialogs()
+      this.rssFeedIsVisible = !isVisible
+    },
     closeDialogs () {
       this.privacyPickerIsVisible = false
       this.inviteCollaboratorsIsVisible = false
+      this.rssFeedIsVisible = false
       this.userDetailsIsNotVisible()
     },
     showUserDetails (event, user) {
