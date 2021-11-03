@@ -23,7 +23,7 @@ dialog.help-and-about.narrow(v-if="visible" :open="visible" @click.left.stop="cl
           button Help Site →
       .button-wrap
         a(href="https://help.kinopio.club/api")
-          button API →
+          button API Docs →
 
 </template>
 

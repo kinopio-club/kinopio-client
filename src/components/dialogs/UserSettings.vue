@@ -20,6 +20,11 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
   section
     .row
       .button-wrap
+        button(@click.left.stop="toggleApiInfoIsVisible" :class="{active: apiInfoIsVisible}")
+          span API Info
+        ApiInfo(:visible="apiInfoIsVisible")
+    .row
+      .button-wrap
         button(@click.left.stop="toggleUpdateEmailIsVisible" :class="{active: updateEmailIsVisible}")
           span Update Email
         UpdateEmail(:visible="updateEmailIsVisible")
@@ -54,6 +59,7 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
 <script>
 import UserBilling from '@/components/dialogs/UserBilling.vue'
 import UpdateEmail from '@/components/dialogs/UpdateEmail.vue'
+import ApiInfo from '@/components/dialogs/ApiInfo.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
 import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
 import Loader from '@/components/Loader.vue'
@@ -64,6 +70,7 @@ export default {
     Loader,
     UserBilling,
     UpdateEmail,
+    ApiInfo,
     NotificationSettings,
     ControlsSettings
   },
@@ -74,6 +81,7 @@ export default {
     return {
       userBillingIsVisible: false,
       updateEmailIsVisible: false,
+      apiInfoIsVisible: false,
       removeAllConfirmationVisible: false,
       loading: {
         removeUserPermanent: false
@@ -90,6 +98,7 @@ export default {
     closeDialogs () {
       this.userBillingIsVisible = false
       this.updateEmailIsVisible = false
+      this.apiInfoIsVisible = false
       this.notificationSettingsIsVisible = false
       this.controlsSettingsIsVisible = false
     },
@@ -126,6 +135,11 @@ export default {
       const isVisible = this.notificationSettingsIsVisible
       this.closeDialogs()
       this.notificationSettingsIsVisible = !isVisible
+    },
+    toggleApiInfoIsVisible () {
+      const isVisible = this.apiInfoIsVisible
+      this.closeDialogs()
+      this.apiInfoIsVisible = !isVisible
     }
   },
   watch: {
