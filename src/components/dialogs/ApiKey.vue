@@ -1,7 +1,7 @@
 <template lang="pug">
-dialog.narrow.api-info(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.narrow.api-key(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
-    p API Info
+    p API Key
   section(v-if="currentUserIsSignedIn")
     p.badge.danger Be careful with sharing your API Key
     p Anyone with your key can read, edit, and remove your cards and spaces
@@ -31,7 +31,7 @@ import cache from '@/cache.js'
 import utils from '@/utils.js'
 
 export default {
-  name: 'ApiInfo',
+  name: 'ApiKey',
   props: {
     visible: Boolean
   },
@@ -92,7 +92,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.api-info
+.api-key
   max-height calc(100vh - 190px)
   overflow auto
 </style>

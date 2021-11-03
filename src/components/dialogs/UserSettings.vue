@@ -20,9 +20,9 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
   section
     .row
       .button-wrap
-        button(@click.left.stop="toggleApiInfoIsVisible" :class="{active: apiInfoIsVisible}")
-          span API Info
-        ApiInfo(:visible="apiInfoIsVisible")
+        button(@click.left.stop="toggleApiKeyIsVisible" :class="{active: apiKeyIsVisible}")
+          span API Key
+        ApiKey(:visible="apiKeyIsVisible")
     .row
       .button-wrap
         button(@click.left.stop="toggleUpdateEmailIsVisible" :class="{active: updateEmailIsVisible}")
@@ -59,7 +59,7 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
 <script>
 import UserBilling from '@/components/dialogs/UserBilling.vue'
 import UpdateEmail from '@/components/dialogs/UpdateEmail.vue'
-import ApiInfo from '@/components/dialogs/ApiInfo.vue'
+import ApiKey from '@/components/dialogs/ApiKey.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
 import ControlsSettings from '@/components/dialogs/ControlsSettings.vue'
 import Loader from '@/components/Loader.vue'
@@ -70,7 +70,7 @@ export default {
     Loader,
     UserBilling,
     UpdateEmail,
-    ApiInfo,
+    ApiKey,
     NotificationSettings,
     ControlsSettings
   },
@@ -81,7 +81,7 @@ export default {
     return {
       userBillingIsVisible: false,
       updateEmailIsVisible: false,
-      apiInfoIsVisible: false,
+      apiKeyIsVisible: false,
       removeAllConfirmationVisible: false,
       loading: {
         removeUserPermanent: false
@@ -98,7 +98,7 @@ export default {
     closeDialogs () {
       this.userBillingIsVisible = false
       this.updateEmailIsVisible = false
-      this.apiInfoIsVisible = false
+      this.apiKeyIsVisible = false
       this.notificationSettingsIsVisible = false
       this.controlsSettingsIsVisible = false
     },
@@ -136,10 +136,10 @@ export default {
       this.closeDialogs()
       this.notificationSettingsIsVisible = !isVisible
     },
-    toggleApiInfoIsVisible () {
-      const isVisible = this.apiInfoIsVisible
+    toggleApiKeyIsVisible () {
+      const isVisible = this.apiKeyIsVisible
       this.closeDialogs()
-      this.apiInfoIsVisible = !isVisible
+      this.apiKeyIsVisible = !isVisible
     }
   },
   watch: {
