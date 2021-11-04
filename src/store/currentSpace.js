@@ -693,7 +693,13 @@ export default {
       const connectionResults = utils.mergeSpaceKeyValues({ prevItems: connections, newItems: remoteSpace.connections })
       context.dispatch('currentConnections/mergeUnique', { newItems: connectionResults.updateItems, itemType: 'connection' }, { root: true })
       context.dispatch('currentConnections/mergeRemove', { removeItems: connectionResults.removeItems, itemType: 'connection' }, { root: true })
-      console.log('🍲 merge', { addCards: cardResults.addItems, addTypes: connectionTypeReults.addItems, addConnections: connectionResults.addItems, space: remoteSpace })
+      console.log('🎑 Merge space', {
+        cards: cardResults,
+        types: connectionTypeReults,
+        connections: connectionResults,
+        localSpace: space,
+        space: remoteSpace
+      })
       context.dispatch('restoreSpaceInChunks', {
         space: remoteSpace,
         isRemote: true,

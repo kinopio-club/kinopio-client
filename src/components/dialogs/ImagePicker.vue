@@ -384,7 +384,7 @@ export default {
       this.resultsSectionHeight = null
     },
     normalizeResults (data, service) {
-      console.log('🎑', service, data)
+      console.log('🍓', service, data)
       const arena = service === 'arena' && this.serviceIsArena
       const giphy = service === 'giphy' && (this.serviceIsStickers || this.serviceIsGifs)
       const backgrounds = service === 'backgrounds' && this.serviceIsBackgrounds
