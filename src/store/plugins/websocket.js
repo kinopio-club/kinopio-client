@@ -76,6 +76,12 @@ const checkIfShouldUpdateLinkToSpaceId = (store, { message, updates }) => {
   }
 }
 
+const checkIfShouldUpdateCardMap = (store, handler) => {
+  if (handler.includes('currentCards')) {
+    store.dispatch('currentCards/updateCardMap')
+  }
+}
+
 const checkIfShouldUpdateBackground = (store, { message, updates }) => {
   const updateKeys = Object.keys(updates)
   updateKeys.forEach(key => {
@@ -133,6 +139,7 @@ export default function createWebSocketPlugin () {
           } else if (handler) {
             store.commit(handler, updates)
             checkIfShouldUpdateLinkToSpaceId(store, data)
+            checkIfShouldUpdateCardMap(store, handler)
           // users
           } else if (message === 'userJoinedRoom') {
             store.dispatch('currentSpace/addUserToJoinedSpace', user)
