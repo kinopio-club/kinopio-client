@@ -103,11 +103,10 @@ const currentCards = {
       state.removedCards = []
       cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
     },
-    restoreRemovedCard: (state, card) => {
+    restoreRemoved: (state, card) => {
       // restore
       const cardId = card.id
       state.ids.push(cardId)
-      card = utils.normalizeItems(card)
       state.cards[cardId] = card
       cache.updateSpace('cards', state.cards, currentSpaceId)
       // update removed
@@ -477,9 +476,9 @@ const currentCards = {
       context.dispatch('api/addToQueue', { name: 'removeAllRemovedCardsPermanentFromSpace', body: {} }, { root: true })
     },
     restoreRemoved: (context, card) => {
-      context.commit('restoreRemovedCard', card)
-      context.dispatch('api/addToQueue', { name: 'restoreRemovedCard', body: card }, { root: true })
-      context.dispatch('broadcast/update', { updates: card, type: 'restoreRemovedCard', handler: 'currentCards/restoreRemoved' }, { root: true })
+      context.commit('restoreRemoved', card)
+      context.dispatch('api/addToQueue', { name: 'restoreRemoved', body: card }, { root: true })
+      context.dispatch('broadcast/update', { updates: card, type: 'restoreRemoved', handler: 'currentCards/restoreRemoved' }, { root: true })
       context.dispatch('updateCardMap')
     },
 
