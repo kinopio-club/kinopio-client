@@ -16,11 +16,11 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keyup.stop.esc
         @keydown.esc="closeCardAndFocus"
 
-        @keyup.stop.backspace="checkIfShouldShowPicker"
-        @keyup.stop.up="checkIfShouldHidePicker"
-        @keyup.stop.down="checkIfShouldHidePicker"
-        @keyup.stop.left="checkIfShouldHidePicker"
-        @keyup.stop.right="checkIfShouldHidePicker"
+        @keydown.stop.backspace="checkIfShouldShowPicker"
+        @keydown.stop.up="checkIfShouldHidePicker"
+        @keydown.stop.down="checkIfShouldHidePicker"
+        @keydown.stop.left="checkIfShouldHidePicker"
+        @keydown.stop.right="checkIfShouldHidePicker"
 
         data-type="name"
         :maxlength="maxCardLength"
@@ -279,7 +279,7 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerUnloadPage' && this.visible) {
-        this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', this.card.id)
+        this.closeCard()
       } else if (mutation.type === 'cardDetailsIsVisibleForCardId') {
         const cardId = mutation.payload
         if (!cardId) { return }
@@ -1035,7 +1035,6 @@ export default {
       this.hideSpacePicker()
     },
     hideTagPicker () {
-      this.tag.pickerSearch = ''
       this.tag.pickerIsVisible = false
       this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', this.card.id)
     },
@@ -1232,12 +1231,14 @@ export default {
       this.hideSpacePicker()
       this.$nextTick(() => {
         this.focusName(position)
+        this.$store.commit('shouldPreventNextEnterKey', false)
       })
     },
 
     // [[Tags]]
 
     showTagPicker () {
+      this.tag.pickerSearch = ''
       this.closeDialogs()
       const nameRect = this.$refs.name.getBoundingClientRect()
       this.tag.pickerPosition = {
@@ -1388,6 +1389,7 @@ export default {
       }
       this.updateCardName(newName)
       this.moveCursorPastTagEnd()
+      this.$store.commit('shouldPreventNextEnterKey', false)
     },
     updateUrlPreviewErrorUrl (url) {
       const cardId = this.card.id || prevCardId
