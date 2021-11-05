@@ -6,7 +6,7 @@ dialog.narrow.api-key(v-if="visible" :open="visible" @click.left.stop ref="dialo
     p.badge.danger Be careful with sharing your API Key
     p Anyone with your key can read, edit, and remove your cards and spaces
     button(v-if="!keyIsRevealed" @click="revealKey")
-      img.icon.privacy-icon(src="@/assets/lock.svg")
+      img.icon.view(src="@/assets/view.svg")
       span Reveal API Key
     template(v-if="keyIsRevealed")
       p
