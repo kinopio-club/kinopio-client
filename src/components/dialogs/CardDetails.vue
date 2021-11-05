@@ -16,7 +16,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keyup.stop.esc
         @keydown.esc="closeCardAndFocus"
 
-        @keydown.stop.backspace="checkIfShouldShowPicker"
+        @keyup.stop.backspace="checkIfShouldShowPicker"
         @keydown.stop.up="checkIfShouldHidePicker"
         @keydown.stop.down="checkIfShouldHidePicker"
         @keydown.stop.left="checkIfShouldHidePicker"
