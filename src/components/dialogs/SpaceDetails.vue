@@ -93,6 +93,7 @@ import debounce from 'lodash-es/debounce'
 let shouldUpdateFavorites = true
 const maxIterations = 30
 let currentIteration, updatePositionTimer
+const offsetfooterHeight = 50
 
 export default {
   name: 'SpaceDetails',
@@ -420,13 +421,13 @@ export default {
     updateDialogHeight () {
       this.$nextTick(() => {
         let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeight(element)
+        this.dialogHeight = utils.elementHeight(element) - offsetfooterHeight
       })
     },
     updateResultsSectionHeight () {
       this.$nextTick(() => {
         let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeight(element) - 2
+        this.resultsSectionHeight = utils.elementHeight(element) - 2 - offsetfooterHeight
       })
     }
   },
