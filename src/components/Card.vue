@@ -970,6 +970,7 @@ export default {
       name = name || '.'
       const nameLines = name.match(/[^\n]+/g)
       let longestLineLength = 0
+      if (!nameLines) { return longestLineLength }
       nameLines.forEach(line => {
         if (line.length > longestLineLength) {
           longestLineLength = line.length
