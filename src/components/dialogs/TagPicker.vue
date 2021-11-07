@@ -33,6 +33,7 @@ export default {
   mounted () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerPickerNavigationKey') {
+        if (!this.visible) { return }
         const key = mutation.payload
         const searchTag = [{
           name: this.search,
@@ -47,6 +48,7 @@ export default {
         }
       }
       if (mutation.type === 'triggerPickerSelect') {
+        if (!this.visible) { return }
         let tags = this.filteredTags
         if (this.search) {
           const searchTag = [{
