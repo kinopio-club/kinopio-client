@@ -47,17 +47,22 @@ export default {
         }
       }
       if (mutation.type === 'triggerPickerSelect') {
-        const searchTag = [{
-          name: this.search,
-          color: this.searchTagColor
-        }]
-        const tags = searchTag.concat(this.filteredTags)
+        let tags = this.filteredTags
+        if (this.search) {
+          const searchTag = [{
+            name: this.search,
+            color: this.searchTagColor
+          }]
+          tags = searchTag.concat(this.filteredTags)
+        }
         const currentIndex = tags.findIndex(tag => tag.name === this.focusOnName)
         const currentTag = tags[currentIndex]
         console.log('🎹 triggerPickerSelect', {
           search: this.search,
+          focusOnName: this.focusOnName,
           currentTag,
-          tags
+          tags,
+          currentIndex
         })
         this.selectTag(currentTag)
       }
