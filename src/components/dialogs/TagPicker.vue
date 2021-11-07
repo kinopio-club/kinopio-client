@@ -25,13 +25,15 @@ import utils from '@/utils.js'
 import fuzzy from 'fuzzy'
 import last from 'lodash-es/last'
 
+let unsubscribe
+
 export default {
   name: 'TagPicker',
   components: {
     Loader
   },
   mounted () {
-    this.$store.subscribe((mutation, state) => {
+    unsubscribe = this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerPickerNavigationKey') {
         if (!this.visible) { return }
         const key = mutation.payload
@@ -69,6 +71,9 @@ export default {
         this.selectTag(currentTag)
       }
     })
+  },
+  beforeUnmount () {
+    unsubscribe()
   },
   props: {
     visible: Boolean,
