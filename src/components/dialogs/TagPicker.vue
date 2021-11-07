@@ -54,6 +54,11 @@ export default {
         const tags = searchTag.concat(this.filteredTags)
         const currentIndex = tags.findIndex(tag => tag.name === this.focusOnName)
         const currentTag = tags[currentIndex]
+        console.log('🎹 triggerPickerSelect', {
+          search: this.search,
+          currentTag,
+          tags
+        })
         this.selectTag(currentTag)
       }
     })

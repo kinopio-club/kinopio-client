@@ -39,7 +39,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.down.stop="triggerPickerNavigation"
         @keydown.up.stop="triggerPickerNavigation"
 
-        @keydown.tab="triggerPickerSelectItem"
+        @keydown.tab.exact="triggerPickerSelectItem"
 
         @focus="resetPinchCounterZoomDecimal"
       )
@@ -914,9 +914,14 @@ export default {
     },
     handleEnterKey (event) {
       const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 200
+      const pickersIsVisible = this.tag.pickerIsVisible || this.space.pickerIsVisible
+      console.log('🎹 enter', {
+        shouldPreventNextEnterKey: this.$store.state.shouldPreventNextEnterKey,
+        pickersIsVisible
+      })
       if (this.$store.state.shouldPreventNextEnterKey) {
         this.$store.commit('shouldPreventNextEnterKey', false)
-      } else if (this.tag.pickerIsVisible || this.space.pickerIsVisible) {
+      } else if (pickersIsVisible) {
         this.triggerPickerSelectItem(event)
         this.hidePickers()
       } else if (this.insertedLineBreak) {
@@ -927,11 +932,13 @@ export default {
         this.updateCardMap(this.card.id)
         this.closeCard()
         this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCard')
+        this.$store.commit('shouldPreventNextEnterKey', false)
         this.$store.commit('triggerAddCard')
       }
     },
     closeCardAndFocus (event) {
-      if (this.tag.pickerIsVisible || this.space.pickerIsVisible) {
+      const pickersIsVisible = this.tag.pickerIsVisible || this.space.pickerIsVisible
+      if (pickersIsVisible) {
         this.hidePickers()
         return
       }

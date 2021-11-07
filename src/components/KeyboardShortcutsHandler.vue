@@ -102,9 +102,12 @@ export default {
       const isFromCard = event.target.classList[0] === 'card'
       const isCardScope = isFromCard || isFromCardName
       const isSpaceScope = event.target.tagName === 'BODY'
-      // Shift-Enter
+      // Enter
       if (event.shiftKey && key === 'Enter' && (isSpaceScope || isCardScope)) {
         this.addChildCard()
+      } else if (key === 'Enter' && isSpaceScope) {
+        this.addCard()
+      // Shift-Enter
       // Undo
       } else if (isMeta && key === 'z' && isSpaceScope) {
         event.preventDefault()
@@ -305,7 +308,6 @@ export default {
         this.addCard()
         return
       }
-      this.$store.commit('shouldPreventNextEnterKey', true)
       const rect = baseCard.getBoundingClientRect()
       let initialPosition = {
         x: window.pageXOffset + rect.x + rect.width + incrementPosition,

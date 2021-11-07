@@ -135,9 +135,10 @@ export default {
   },
   computed: {
     styles () {
+      const zoom = 1 / this.spaceZoomDecimal
       return {
-        width: `${this.pageWidth}px`,
-        height: `${this.pageHeight}px`,
+        width: `${this.pageWidth * zoom}px`,
+        height: `${this.pageHeight * zoom}px`,
         transform: `scale(${this.spaceZoomDecimal})`
       }
     },
