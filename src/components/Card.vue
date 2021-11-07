@@ -40,7 +40,7 @@ article(:style="position" :data-card-id="id" ref="card")
       //- Comment
       .card-comment(v-if="nameIsComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- [·]
-        .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend="toggleCardChecked")
+        .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
           label(:class="{active: isChecked, disabled: !canEditSpace}")
             input(type="checkbox" v-model="checkboxState")
         //- Name
@@ -75,7 +75,7 @@ article(:style="position" :data-card-id="id" ref="card")
           Audio(:visible="Boolean(formats.audio)" :url="formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
         .name-wrap
           //- [·]
-          .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend="toggleCardChecked")
+          .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
             label(:class="{active: isChecked, disabled: !canEditSpace}")
               input(type="checkbox" v-model="checkboxState")
           //- Name
