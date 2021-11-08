@@ -111,7 +111,9 @@ import utils from '@/utils.js'
 import templates from '@/data/templates.js'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 
-let wasOffline
+import dayjs from 'dayjs'
+
+let pageWasOffline, pageWasHidden
 
 export default {
   name: 'Notifications',
@@ -146,16 +148,22 @@ export default {
         const isOnline = Boolean(mutation.payload)
         if (!isOnline) {
           console.log('☎️ is offline', !isOnline)
-          wasOffline = true
-        } else if (isOnline && wasOffline) {
+          pageWasOffline = true
+        } else if (isOnline && pageWasOffline) {
           this.checkIfShouldNotifySpaceOutOfSync()
-          wasOffline = false
+          pageWasOffline = false
         }
       }
       if (mutation.type === 'currentSpace/restoreSpace') {
         this.notifySpaceOutOfSync = false
       }
     })
+  },
+  mounted () {
+    window.addEventListener('visibilitychange', this.updatePageVisibilityChange)
+  },
+  beforeUnmount () {
+    window.removeEventListener('visibilitychange', this.updatePageVisibilityChange)
   },
   computed: {
     items () { return this.$store.state.notifications },
@@ -195,6 +203,13 @@ export default {
     }
   },
   methods: {
+    updatePageVisibilityChange (event) {
+      if (document.visibilityState === 'hidden') {
+        pageWasHidden = true
+      } else if (pageWasHidden) {
+        this.checkIfShouldNotifySpaceOutOfSync()
+      }
+    },
     closeAllDialogs () {
       this.$store.dispatch('closeAllDialogs', 'Notifications.closeAllDialogs')
     },
@@ -267,8 +282,17 @@ export default {
       } else {
         remoteSpace = await this.$store.dispatch('api/getSpaceAnonymously', space)
       }
-      console.log('☎️ spaceUpdatedAt local remote', space.updatedAt === remoteSpace.updatedAt, space.updatedAt, remoteSpace.updatedAt)
-      if (space.updatedAt !== remoteSpace.updatedAt) {
+      const spaceUpdatedAt = dayjs(space.updatedAt)
+      const remoteSpaceUpdatedAt = dayjs(remoteSpace.updatedAt)
+      const hoursDelta = spaceUpdatedAt.diff(remoteSpaceUpdatedAt, 'hour') // hourDelta
+      const updatedAtIsChanged = hoursDelta >= 1
+      console.log('☎️ checkIfShouldNotifySpaceOutOfSync', {
+        hoursDelta,
+        updatedAtIsChanged,
+        spaceUpdatedAt: space.updatedAt,
+        remoteSpaceUpdatedAt: remoteSpace.updatedAt
+      })
+      if (updatedAtIsChanged) {
         this.notifySpaceOutOfSync = true
       }
     },
