@@ -22,19 +22,6 @@ dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :sty
       p Removed spaces can be restored here
 
   section.results-section(v-if="items.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    .button-wrap
-      button(v-if="!removeAllConfirmationIsVisible" @click.left.stop="showRemoveAllConfirmation")
-        img.icon(src="@/assets/remove.svg")
-        span Remove All
-      .remove-confirmation(v-if="removeAllConfirmationIsVisible")
-        p Permanently remove all removed {{removeAllTypeLabel}}?
-        .segmented-buttons
-          button(@click.left.stop="hideRemoveAllConfirmation")
-            span Cancel
-          button.danger(@click.left.stop="removeAllPermanent")
-            img.icon(src="@/assets/remove.svg")
-            span Remove All
-
     ul.results-list
       template(v-for="item in items" :key="item.id")
         li(@click.left="restore(item)" tabindex="0" v-on:keyup.enter="restore(item)")
@@ -83,7 +70,6 @@ export default {
   data () {
     return {
       removeConfirmationVisibleForId: '',
-      removeAllConfirmationIsVisible: false,
       cardsVisible: true,
       removedSpaces: [],
       removedCards: [],
@@ -113,32 +99,11 @@ export default {
     },
     currentSpace () { return this.$store.state.currentSpace },
     currentSpaceName () { return this.currentSpace.name },
-    removeAllTypeLabel () {
-      if (this.cardsVisible) {
-        return 'cards'
-      } else {
-        return 'spaces'
-      }
-    },
     currentUserCanEditSpace () {
       return this.$store.getters['currentUser/canEditSpace']()
     }
   },
   methods: {
-    showRemoveAllConfirmation () {
-      this.removeAllConfirmationIsVisible = true
-    },
-    hideRemoveAllConfirmation () {
-      this.removeAllConfirmationIsVisible = false
-    },
-    removeAllPermanent () {
-      if (this.cardsVisible) {
-        this.removeAllCardsPermanent()
-      } else {
-        this.removeAllSpacesPermanent()
-      }
-      this.hideRemoveAllConfirmation()
-    },
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
       const isTouchDevice = this.$store.state.isTouchDevice
@@ -216,10 +181,6 @@ export default {
       this.$store.dispatch('currentCards/removePermanent', card)
       this.updateLocalRemovedCards()
     },
-    removeAllCardsPermanent () {
-      this.$store.dispatch('currentCards/removeAllRemovedPermanent')
-      this.updateLocalRemovedCards()
-    },
 
     // Spaces
 
@@ -272,7 +233,6 @@ export default {
       if (visible) {
         this.updateRemovedCards()
         this.updateRemovedSpaces()
-        this.removeAllConfirmationIsVisible = false
         this.updateDialogHeight()
         this.updateResultsSectionHeight()
       }
