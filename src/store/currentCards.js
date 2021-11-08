@@ -468,8 +468,8 @@ const currentCards = {
     },
     restoreRemoved: (context, card) => {
       context.commit('restoreRemoved', card)
-      context.dispatch('api/addToQueue', { name: 'restoreRemoved', body: card }, { root: true })
-      context.dispatch('broadcast/update', { updates: card, type: 'restoreRemoved', handler: 'currentCards/restoreRemoved' }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'restoreRemovedCard', body: card }, { root: true })
+      context.dispatch('broadcast/update', { updates: card, type: 'restoreRemovedCard', handler: 'currentCards/restoreRemoved' }, { root: true })
       context.dispatch('updateCardMap')
     },
 
