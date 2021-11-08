@@ -99,10 +99,6 @@ const currentCards = {
         cache.updateSpace('cards', state.cards, currentSpaceId)
       }
     },
-    removeAllRemovedPermanent: (state) => {
-      state.removedCards = []
-      cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
-    },
     restoreRemoved: (state, card) => {
       // restore
       const cardId = card.id
@@ -469,11 +465,6 @@ const currentCards = {
       context.commit('removePermanent', card)
       // context.commit('removeTagsFromCard', card)
       context.dispatch('api/addToQueue', { name: 'removeCardPermanent', body: card }, { root: true })
-    },
-    removeAllRemovedPermanent: (context) => {
-      // context.commit('removeTagsFromAllRemovedCardsPermanent')
-      context.commit('removeAllRemovedPermanent')
-      context.dispatch('api/addToQueue', { name: 'removeAllRemovedCardsPermanentFromSpace', body: {} }, { root: true })
     },
     restoreRemoved: (context, card) => {
       context.commit('restoreRemoved', card)
