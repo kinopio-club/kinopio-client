@@ -15,7 +15,7 @@ export default {
       }
       window.localStorage[key] = JSON.stringify(value)
     } catch (error) {
-      console.warn('🚑 storeLocal could not save to localStorage', error)
+      console.error('🚑 storeLocal could not save to localStorage', error)
       this.pruneLocal()
     }
   },
@@ -28,7 +28,11 @@ export default {
       spaceKeys.forEach(key => {
         this.removeLocal(key)
       })
-      console.log('🐇 pruned localStorage spaces', spaceKeys)
+      console.log('🐇 pruned localStorage spaces', {
+        currentSpaceId,
+        keys,
+        spaceKeys
+      })
     } else {
       const element = document.getElementById('notify-local-storage-is-full')
       element.classList.remove('hidden')
