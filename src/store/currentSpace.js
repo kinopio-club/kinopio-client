@@ -521,13 +521,13 @@ export default {
     },
     updateModulesSpaceId: (context, space) => {
       space = space || context.state
-      console.log('💕 modules space id', space.id)
+      console.log('💕 update modules space id', space.id)
       context.dispatch('currentCards/updateSpaceId', space.id, { root: true })
       context.dispatch('currentConnections/updateSpaceId', space.id, { root: true })
     },
     restoreSpaceInChunks: (context, { space, isRemote, addCards, addConnections, addConnectionTypes }) => {
       if (!utils.objectHasKeys(space)) { return }
-      console.log('🌌 Restoring space', space, { 'isRemote': isRemote, addCards, addConnections, addConnectionTypes })
+      console.log('🌱 Restoring space', space, { 'isRemote': isRemote, addCards, addConnections, addConnectionTypes })
       const chunkSize = 50
       const timeStart = utils.normalizeToUnixTime(new Date())
       const origin = { x: window.scrollX, y: window.scrollY }
@@ -617,10 +617,10 @@ export default {
     restoreSpaceComplete: (context, { space, isRemote, timeStart }) => {
       context.commit('isLoadingSpace', false, { root: true })
       const timeEnd = utils.normalizeToUnixTime(new Date())
-      let emoji = '🥦'
+      let emoji = '🌳'
       let isRemoteText = ''
       if (isRemote) {
-        emoji = '🥦🌏'
+        emoji = '🌳🌏'
         isRemoteText = 'is remote: true'
       }
       let cards = context.rootState.currentCards.ids.length
