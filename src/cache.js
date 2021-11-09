@@ -15,7 +15,7 @@ export default {
       }
       window.localStorage[key] = JSON.stringify(value)
     } catch (error) {
-      console.error('🚑 storeLocal could not save to localStorage', error)
+      console.error('🚑 storeLocal could not save to localStorage', { key, value }, error)
       this.pruneLocal()
     }
   },
