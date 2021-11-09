@@ -25,14 +25,18 @@ export default {
       const keys = Object.keys(window.localStorage)
       let spaceKeys = keys.filter(key => key.startsWith('space-') || key.startsWith('removed-space-'))
       spaceKeys = spaceKeys.filter(key => key !== `space-${currentSpaceId}`)
-      spaceKeys.forEach(key => {
-        this.removeLocal(key)
-      })
-      console.log('🐇 pruned localStorage spaces', {
-        localStorage: window.localStorage,
+      console.log('🍾 pruning localStorage spaces', {
+        length: JSON.stringify(window.localStorage).length,
         currentSpaceId,
         keys,
         spaceKeys
+      })
+      spaceKeys.forEach(key => {
+        this.removeLocal(key)
+      })
+      console.log('🥂 pruned localStorage spaces', {
+        length: JSON.stringify(window.localStorage).length,
+        localStorageKeys: Object.keys(window.localStorage)
       })
     } else {
       const element = document.getElementById('notify-local-storage-is-full')
