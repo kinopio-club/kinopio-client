@@ -95,7 +95,7 @@ const self = {
         'Cache-Control': 'must-revalidate, no-store, no-cache, private'
       })
       const collaboratorKey = normalizeCollaboratorKey(options.space)
-      const apiKey = options.apiKey || cache.user().apiKey
+      const apiKey = context.rootState.currentUser.apiKey
       if (collaboratorKey) {
         headers.append('Space-Authorization', collaboratorKey)
       }
@@ -369,7 +369,7 @@ const self = {
         let removedSpaces = cache.getAllRemovedSpaces()
         removedSpaces = removedSpaces.map(space => {
           space.isRemoved = true
-          space.removedByUserId = cache.user().id
+          space.removedByUserId = context.rootState.currentUser.id
           return space
         })
         removedSpaces.forEach(space => spaces.push(space))
@@ -667,10 +667,10 @@ const self = {
 
     updateArenaAccessToken: async (context, arenaReturnedCode) => {
       try {
-        const currentUserIsSignedIn = cache.user().apiKey
+        const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
         let userId
         if (currentUserIsSignedIn) {
-          userId = cache.user().id
+          userId = context.rootState.currentUser.id
         }
         const body = {
           userId,
