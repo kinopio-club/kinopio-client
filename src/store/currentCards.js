@@ -3,6 +3,7 @@ import cache from '@/cache.js'
 
 import nanoid from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
+import uniq from 'lodash-es/uniq'
 
 // normalized state
 // https://github.com/vuejs/vuejs.org/issues/1636
@@ -511,8 +512,21 @@ const currentCards = {
           return tags.includes(tagName)
         }
       })
+    },
+    userIds: (state, getters) => {
+      const cards = getters.all
+      let users = []
+      cards.forEach(card => {
+        users.push(card.userId)
+        users.push(card.nameUpdatedByUserId)
+      })
+      users = users.filter(user => Boolean(user))
+      users = uniq(users)
+      return users
+    },
+    users: (state, getters, rootState, rootGetters) => {
+      return getters.userIds.map(id => rootGetters['currentSpace/userById'](id))
     }
-
   }
 }
 

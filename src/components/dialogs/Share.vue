@@ -36,8 +36,14 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
         button(@click.left.stop="toggleInviteCollaboratorsIsVisible" :class="{ active: inviteCollaboratorsIsVisible }")
           span Invite Collaborators
         InviteCollaborators(:visible="inviteCollaboratorsIsVisible")
-  section.results-section.collaborators(v-if="spaceHasUrl && isSpaceMember && spaceHasCollaborators")
-    UserList(:users="spaceCollaborators" :selectedUser="selectedUser" :showRemoveUser="true" @selectUser="showUserDetails" @removeUser="removeCollaborator" :isClickable="true")
+
+  section.results-section.collaborators(v-if="spaceHasCollaborators || spaceHasOtherCardUsers")
+    // collaborators
+    template(v-if="spaceHasCollaborators")
+      UserList(:users="spaceCollaborators" :selectedUser="selectedUser" :showRemoveUser="isSpaceMember" @selectUser="showUserDetails" @removeUser="removeCollaborator" :isClickable="true")
+    // card users
+    template(v-if="spaceHasOtherCardUsers")
+      UserList(:users="spaceOtherCardUsers" :selectedUser="selectedUser" :showRemoveUser="isSpaceMember" @selectUser="showUserDetails" @removeUser="removeCollaborator" :isClickable="true")
     UserDetails(:visible="userDetailsIsVisible" :user="selectedUser" :userDetailsPosition="userDetailsPosition" :userDetailsIsFromList="true" @removedCollaborator="removedCollaborator")
 
   section(v-if="!spaceHasUrl")
@@ -89,7 +95,6 @@ export default {
       selectedUser: {},
       userDetailsPosition: {},
       userDetailsIsVisible: false,
-      spaceCollaborators: [],
       url: '',
       dialogHeight: null,
       rssFeedIsVisible: false
@@ -114,9 +119,25 @@ export default {
       const currentSpace = this.$store.state.currentSpace
       return this.$store.getters['currentUser/isSpaceMember'](currentSpace)
     },
+    spaceCollaborators () { return this.$store.state.currentSpace.collaborators },
     spaceHasCollaborators () {
       return Boolean(this.spaceCollaborators.length)
-    }
+    },
+    spaceOtherCardUsers () {
+      const currentUserId = this.$store.state.currentUser.id
+      let users = this.$store.getters['currentCards/users']
+      // remove currentUser
+      users = users.filter(user => user.id !== currentUserId)
+      // remove collaborators
+      users = users.filter(user => {
+        const isCollaborator = this.spaceCollaborators.find(collaborator => {
+          return collaborator.id === user.id
+        })
+        return !isCollaborator
+      })
+      return users
+    },
+    spaceHasOtherCardUsers () { return Boolean(this.spaceOtherCardUsers.length) }
   },
   methods: {
     privacyName (number) {
@@ -182,15 +203,11 @@ export default {
       if (isCurrentUser) {
         this.$store.dispatch('closeAllDialogs', 'Share.removedCollaborator')
       }
-      this.updateSpaceCollaborators()
+      this.userDetailsIsNotVisible()
     },
     async removeCollaborator (user) {
       this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
       this.removedCollaborator(user)
-    },
-    updateSpaceCollaborators () {
-      this.userDetailsIsNotVisible()
-      this.spaceCollaborators = this.$store.state.currentSpace.collaborators
     },
     updateDialogHeight () {
       if (!this.visible) { return }
@@ -214,7 +231,7 @@ export default {
       this.updateSpaceHasUrl()
       this.closeDialogs()
       if (visible) {
-        this.updateSpaceCollaborators()
+        this.userDetailsIsNotVisible()
         this.updateUrl()
         this.updateDialogHeight()
       }
