@@ -635,7 +635,7 @@ export default {
           context.commit('notifyNewUser', false, { root: true })
         } else {
           context.commit('notifyNewUser', true, { root: true })
-          console.log('✨ notifyNewUser', cache.getAllSpaces())
+          console.log('💁‍♀️ notifyNewUser', cache.getAllSpaces())
         }
       }
       context.commit('broadcast/joinSpaceRoom', null, { root: true })
