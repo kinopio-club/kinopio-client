@@ -617,15 +617,21 @@ export default {
     restoreSpaceComplete: (context, { space, isRemote, timeStart }) => {
       context.commit('isLoadingSpace', false, { root: true })
       const timeEnd = utils.normalizeToUnixTime(new Date())
-      let emoji = '🐇'
+      let emoji = '🥦'
       let isRemoteText = ''
       if (isRemote) {
-        emoji = '🐇🌏'
+        emoji = '🥦🌏'
         isRemoteText = 'is remote: true'
       }
       let cards = context.rootState.currentCards.ids.length
       let connections = context.rootState.currentConnections.ids.length
-      console.log(`${emoji} space loaded in ${timeEnd - timeStart}ms, cards ${cards}, connections ${connections}, space name: ${space.name}, ${isRemoteText}`)
+      console.log(`${emoji} space loaded in ${timeEnd - timeStart}ms,`, {
+        cards,
+        connections,
+        spaceName: space.name,
+        isRemoteText,
+        cardUsers: context.rootGetters['currentCards/userIds']
+      })
       context.dispatch('updateSpacePageSize')
       if (isRemote) {
         context.dispatch('undoHistory/playback', null, { root: true })
