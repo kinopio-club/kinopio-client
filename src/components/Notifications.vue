@@ -206,7 +206,9 @@ export default {
     updatePageVisibilityChange (event) {
       if (document.visibilityState === 'hidden') {
         pageWasHidden = true
-      } else if (pageWasHidden) {
+        return
+      }
+      if (pageWasHidden) {
         this.checkIfShouldNotifySpaceOutOfSync()
       }
     },
