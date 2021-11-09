@@ -29,6 +29,7 @@ export default {
         this.removeLocal(key)
       })
       console.log('🐇 pruned localStorage spaces', {
+        localStorage: window.localStorage,
         currentSpaceId,
         keys,
         spaceKeys
