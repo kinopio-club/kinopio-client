@@ -16,6 +16,7 @@ article(:style="position" :data-card-id="id" ref="card")
     :data-card-id="id"
     :data-card-x="x"
     :data-card-y="y"
+    :data-name-updated-at="updatedAt"
     tabindex="0"
     :data-droppable="true"
     @dragenter="checkIfUploadIsDraggedOver"
@@ -382,8 +383,9 @@ export default {
       const connectionType = this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
       return connectionType.color
     },
+    updatedAt () { return this.card.nameUpdatedAt || this.card.createdAt },
     dateUpdatedAt () {
-      const date = this.card.nameUpdatedAt || this.card.createdAt
+      const date = this.updatedAt
       const showAbsoluteDate = this.$store.state.currentUser.filterShowAbsoluteDates
       if (date) {
         if (showAbsoluteDate) {
