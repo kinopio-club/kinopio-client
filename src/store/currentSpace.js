@@ -618,18 +618,16 @@ export default {
       context.commit('isLoadingSpace', false, { root: true })
       const timeEnd = utils.normalizeToUnixTime(new Date())
       let emoji = '🌳'
-      let isRemoteText = ''
       if (isRemote) {
         emoji = '🌳🌏'
-        isRemoteText = 'is remote: true'
       }
       let cards = context.rootState.currentCards.ids.length
       let connections = context.rootState.currentConnections.ids.length
-      console.log(`${emoji} space loaded in ${timeEnd - timeStart}ms,`, {
+      console.log(`${emoji} Restore space complete in ${timeEnd - timeStart}ms,`, {
         cards,
         connections,
         spaceName: space.name,
-        isRemoteText,
+        isRemote,
         cardUsers: context.rootGetters['currentCards/userIds']
       })
       context.dispatch('updateSpacePageSize')

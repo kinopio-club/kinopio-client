@@ -301,7 +301,6 @@ export default {
       spaces = this.normalizeLiveSpaces(spaces)
       this.liveSpaces = spaces
       this.isLoadingLiveSpaces = false
-      console.log('📽', this.liveSpaces)
     },
     normalizeLiveSpaces (spaces) {
       let normalizedSpaces = []
