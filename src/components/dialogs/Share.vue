@@ -43,7 +43,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
       UserList(:users="spaceCollaborators" :selectedUser="selectedUser" :showRemoveUser="isSpaceMember" @selectUser="showUserDetails" @removeUser="removeCollaborator" :isClickable="true")
     // card users
     template(v-if="spaceHasOtherCardUsers")
-      UserList(:users="spaceOtherCardUsers" :selectedUser="selectedUser" :showRemoveUser="isSpaceMember" @selectUser="showUserDetails" @removeUser="removeCollaborator" :isClickable="true")
+      UserList(:users="spaceOtherCardUsers" :selectedUser="selectedUser" :isClickable="true")
     UserDetails(:visible="userDetailsIsVisible" :user="selectedUser" :userDetailsPosition="userDetailsPosition" :userDetailsIsFromList="true" @removedCollaborator="removedCollaborator")
 
   section(v-if="!spaceHasUrl")
