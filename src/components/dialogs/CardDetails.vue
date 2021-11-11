@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="closeDialogs" @keyup.stop.backspace="removeCard" :style="styles")
+dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="closeDialogs" @keyup.stop.backspace="removeCard" :style="styles" :data-card-id="card.id")
   .opening-frame(v-if="isOpening" :style="openingFrameStyle")
   section
     .textarea-wrap
@@ -282,6 +282,9 @@ export default {
         this.closeCard()
       } else if (mutation.type === 'cardDetailsIsVisibleForCardId') {
         const cardId = mutation.payload
+        if (prevCardId) {
+          this.updateCardMap(prevCardId)
+        }
         if (!cardId) { return }
         prevCardId = cardId
         this.showCard(cardId)
@@ -929,7 +932,6 @@ export default {
       } else if (isCompositionEvent) {
 
       } else {
-        this.updateCardMap(this.card.id)
         this.closeCard()
         this.$store.dispatch('closeAllDialogs', 'CardDetails.closeCard')
         this.$store.commit('shouldPreventNextEnterKey', false)
