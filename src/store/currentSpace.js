@@ -836,21 +836,22 @@ export default {
     },
     scrollCardsIntoView: (context) => {
       if (context.rootState.userHasScrolled) { return }
-      const origin = { x: 0, y: 0 }
+      const origin = { x: window.scrollX, y: window.scrollY }
       let cards = utils.clone(context.rootGetters['currentCards/all'])
       cards = cards.map(card => {
         card = {
           x: card.x,
           y: card.y,
-          distanceFromOrigin: utils.distanceBetweenTwoPoints(card, origin)
+          distanceFromOrigin: utils.distanceBetweenTwoPoints(card, origin),
+          name: card.name //
         }
         return card
       })
       cards = sortBy(cards, ['distanceFromOrigin'])
       const card = cards[0]
       if (!card) { return }
-      const xIsVisible = context.rootState.viewportWidth + window.scrollX > card.x
-      const yIsVisible = context.rootState.viewportHeight + window.scrollY > card.y
+      const xIsVisible = utils.isBetween({ value: card.x, min: origin.x, max: context.rootState.viewportWidth + origin.x })
+      const yIsVisible = utils.isBetween({ value: card.y, min: origin.y, max: context.rootState.viewportHeight + origin.y })
       if (xIsVisible && yIsVisible) { return }
       const position = {
         x: Math.max(card.x - 100, 0),
