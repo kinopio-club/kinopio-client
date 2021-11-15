@@ -148,7 +148,6 @@ export default {
     cards () { return this.$store.getters['currentCards/all'] },
     cardOverlaps () {
       const threshold = 10
-      // TODO to webworker later, so not really perf sensitive
       let cards = this.cards.map((card, index) => {
         return { x: card.x, y: card.y, index }
       })
