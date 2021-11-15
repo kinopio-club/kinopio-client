@@ -149,7 +149,7 @@ export default {
     cardOverlaps () {
       const threshold = 20
       let cards = this.cards.map((card, index) => {
-        return { x: card.x, y: card.y, index }
+        return { id: card.id, x: card.x, y: card.y, index }
       })
       let overlaps = []
       cards.forEach(origin => {
@@ -176,9 +176,10 @@ export default {
       overlaps = overlaps.filter(group => group.length > 1)
       overlaps = overlaps.map(group => {
         let { x, y } = group.reduce((previousValue, currentValue) => this.mergeOverlapGroup(previousValue, currentValue))
+        let ids = group.map(item => item.id)
         x = x - (threshold / 2)
         y = y - (threshold / 2)
-        return { x, y, length: group.length }
+        return { x, y, length: group.length, ids }
       })
       return overlaps
     },
