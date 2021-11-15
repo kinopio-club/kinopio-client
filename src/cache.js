@@ -13,9 +13,9 @@ export default {
       if (showDebugMessages) {
         console.log('🏬 storeLocal', key, value)
       }
-      window.localStorage[key] = JSON.stringify(value)
+      window.localStorage.setItem(key, JSON.stringify(value))
     } catch (error) {
-      console.error('🚑 storeLocal could not save to localStorage', { key, value }, error)
+      console.error('🚒 storeLocal could not save to localStorage', { key, value, valueType: typeof value }, error)
       this.pruneLocal()
     }
   },
@@ -30,6 +30,7 @@ export default {
       })
       spaceKeys = spaceKeys.filter(key => key !== `space-${currentSpaceId}`)
       console.log('🍾 pruning localStorage spaces', {
+        localStorage: window.localStorage,
         length: JSON.stringify(window.localStorage).length,
         currentSpaceId,
         keys,
@@ -39,6 +40,7 @@ export default {
         this.removeLocal(key)
       })
       console.log('🥂 pruned localStorage spaces', {
+        localStorage: window.localStorage,
         length: JSON.stringify(window.localStorage).length,
         localStorageKeys: Object.keys(window.localStorage)
       })
