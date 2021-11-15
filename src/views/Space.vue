@@ -147,7 +147,7 @@ export default {
     },
     cards () { return this.$store.getters['currentCards/all'] },
     cardOverlaps () {
-      const threshold = 10
+      const threshold = 20
       let cards = this.cards.map((card, index) => {
         return { x: card.x, y: card.y, index }
       })
@@ -176,8 +176,8 @@ export default {
       overlaps = overlaps.filter(group => group.length > 1)
       overlaps = overlaps.map(group => {
         let { x, y } = group.reduce((previousValue, currentValue) => this.mergeOverlapGroup(previousValue, currentValue))
-        x = x - threshold
-        y = y - threshold
+        x = x - (threshold / 2)
+        y = y - (threshold / 2)
         return { x, y, length: group.length }
       })
       return overlaps
