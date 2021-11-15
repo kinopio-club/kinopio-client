@@ -147,6 +147,7 @@ export default {
     },
     cards () { return this.$store.getters['currentCards/all'] },
     cardOverlaps () {
+      console.time('cardOverlaps')
       const threshold = 10
       let cards = this.cards.map((card, index) => {
         return { x: card.x, y: card.y, index }
@@ -180,6 +181,7 @@ export default {
         y = y - threshold
         return { x, y, length: group.length }
       })
+      console.timeEnd('cardOverlaps')
       return overlaps
     },
     isPainting () { return this.$store.state.currentUserIsPainting },
