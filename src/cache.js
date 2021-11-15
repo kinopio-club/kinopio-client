@@ -23,7 +23,11 @@ export default {
     if (this.user().apiKey) {
       const currentSpaceId = utils.spaceIdFromUrl()
       const keys = Object.keys(window.localStorage)
-      let spaceKeys = keys.filter(key => key.startsWith('space-') || key.startsWith('removed-space-'))
+      let spaceKeys = keys.filter(key => {
+        const isSpace = key.startsWith('space-') || key.startsWith('removed-space-')
+        console.log('🍾 prune key', key, isSpace)
+        return isSpace
+      })
       spaceKeys = spaceKeys.filter(key => key !== `space-${currentSpaceId}`)
       console.log('🍾 pruning localStorage spaces', {
         length: JSON.stringify(window.localStorage).length,
