@@ -44,10 +44,9 @@ export default {
         length: JSON.stringify(window.localStorage).length,
         localStorageKeys: Object.keys(window.localStorage)
       })
-    } else {
-      const element = document.getElementById('notify-local-storage-is-full')
-      element.classList.remove('hidden')
     }
+    const element = document.getElementById('notify-local-storage-is-full')
+    element.classList.remove('hidden')
   },
   getLocal (key) {
     try {

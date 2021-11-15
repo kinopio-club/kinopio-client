@@ -91,10 +91,11 @@ aside.notifications(@click.left="closeAllDialogs")
       img.icon(src="@/assets/add.svg")
       span Use Template
 
-  .persistent-item.danger.hidden#notify-local-storage-is-full(v-if="!currentUserIsSignedIn")
-    p Cannot save changes because your localStorage is full, sign up to fix
+  .persistent-item.danger.hidden#notify-local-storage-is-full
+    p Local storage error has occured, please refresh
     .row
-      button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
+      .button-wrap
+        button(@click.left="refreshBrowser") Refresh
 
   .item.success(v-if="notifyMoveOrCopyToSpace" @animationend="resetNotifyMoveOrCopyToSpace")
     p {{notifyMoveOrCopyToSpaceDetails.message}}
