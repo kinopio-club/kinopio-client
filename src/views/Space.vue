@@ -25,7 +25,7 @@ main.space(
     UserLabel(:user="user")
   .cards
     template(v-for="overlap in cardOverlaps")
-      .badge.label-badge.card-overlap-indicator(:style="{ left: overlap.x + 'px', top: overlap.y + 'px' }")
+      .badge.label-badge.card-overlap-indicator(:style="{ left: overlap.x + 'px', top: overlap.y + 'px' }" @click.left="selectOverlap(overlap)")
         span {{overlap.length}}
     template(v-for="card in cards")
       Card(:card="card")
@@ -462,6 +462,16 @@ export default {
         this.$store.commit('multipleSelectedActionsIsVisible', true)
       }
     },
+    selectOverlap (overlap) {
+      const threshold = 20
+      const position = {
+        x: overlap.x + threshold,
+        y: overlap.y + threshold
+      }
+      this.$store.commit('multipleCardsSelectedIds', overlap.ids)
+      this.$store.commit('multipleSelectedActionsPosition', position)
+      this.$store.commit('multipleSelectedActionsIsVisible', true)
+    },
     stopInteractions (event) {
       // const temporaryDebugState = {
       //   event: event,
@@ -535,6 +545,8 @@ export default {
   .card-overlap-indicator
     position absolute
     z-index calc(var(--max-z) - 60)
+    pointer-events all
+    cursor pointer
     span
       line-height 1.5
 
