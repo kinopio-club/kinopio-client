@@ -24,6 +24,9 @@ main.space(
   template(v-for="user in spaceMembers")
     UserLabel(:user="user")
   .cards
+    template(v-for="overlap in cardOverlaps")
+      .badge.label-badge.card-overlap-indicator xyz
+      //- {{overlap.count}}
     template(v-for="card in cards")
       Card(:card="card")
   CardDetails
@@ -143,6 +146,35 @@ export default {
       }
     },
     cards () { return this.$store.getters['currentCards/all'] },
+    cardOverlaps () {
+      // to webworker later, so not really perf sensitive
+      let cards = this.cards.map(card => {
+        return { x: card.x, y: card.y } // remove id?
+      })
+      let overlaps = [] // {position: {x, y}}
+      // find overlaps
+
+      cards.forEach((card, index) => {
+        // const overlap = overlaps.filter(item => this.isPositionEqual(card, item))
+        // cards.filter(comparisonCard => )
+
+        // delete cards[index]
+        cards.splice(index, 1)
+        cards.forEach((subCard, subIndex) => {
+          if (this.isPositionEqual(card, subCard)) {
+            overlaps.push(subCard)
+            cards.splice(subIndex, 1)
+          }
+        })
+      })
+
+      console.log('☮️☮️', cards, overlaps)
+      return true
+      // get count
+
+      // let overlaps =
+      // const overlaps = intersectionWith()
+    },
     isPainting () { return this.$store.state.currentUserIsPainting },
     isPanningReady () { return this.$store.state.currentUserIsPanningReady },
     spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
@@ -166,6 +198,11 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
+    isPositionEqual (card, subCard) {
+      const x = card.x === subCard.x
+      const y = card.y === subCard.y
+      return x && y
+    },
     updateVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
