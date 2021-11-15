@@ -1033,6 +1033,9 @@ export default {
       this.$store.dispatch('currentCards/toggleCommentIsVisible', cardId)
       this.$store.dispatch('currentCards/incrementZ', cardId)
       this.updateCardConnectionPathsIfOpenSpace()
+      this.$nextTick(() => {
+        this.updateCardMap()
+      })
     },
     updateCardConnectionPathsIfOpenSpace () {
       const spaceIsOpen = this.$store.state.currentSpace.privacy === 'open'
