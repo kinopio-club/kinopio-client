@@ -24,6 +24,9 @@ main.space(
   template(v-for="user in spaceMembers")
     UserLabel(:user="user")
   .cards
+    template(v-for="overlap in cardOverlaps")
+      .badge.label-badge.card-overlap-indicator(:style="{ left: overlap.x + 'px', top: overlap.y + 'px' }")
+        span {{overlap.length}}
     template(v-for="card in cards")
       Card(:card="card")
   CardDetails
@@ -143,6 +146,42 @@ export default {
       }
     },
     cards () { return this.$store.getters['currentCards/all'] },
+    cardOverlaps () {
+      const threshold = 20
+      let cards = this.cards.map((card, index) => {
+        return { x: card.x, y: card.y, index }
+      })
+      let overlaps = []
+      cards.forEach(origin => {
+        if (!origin) { return }
+        const group = cards.filter((card, index) => {
+          if (!card) { return }
+          const x = utils.isBetween({
+            value: origin.x,
+            min: card.x - threshold,
+            max: card.x + threshold
+          })
+          const y = utils.isBetween({
+            value: origin.y,
+            min: card.y - threshold,
+            max: card.y + threshold
+          })
+          return x && y
+        })
+        group.forEach(card => {
+          cards[card.index] = undefined
+        })
+        overlaps.push(group)
+      })
+      overlaps = overlaps.filter(group => group.length > 1)
+      overlaps = overlaps.map(group => {
+        let { x, y } = group.reduce((previousValue, currentValue) => this.mergeOverlapGroup(previousValue, currentValue))
+        x = x - (threshold / 2)
+        y = y - (threshold / 2)
+        return { x, y, length: group.length }
+      })
+      return overlaps
+    },
     isPainting () { return this.$store.state.currentUserIsPainting },
     isPanningReady () { return this.$store.state.currentUserIsPanningReady },
     spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
@@ -166,6 +205,17 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
+    mergeOverlapGroup (previousValue, currentValue) {
+      let x = previousValue.x || 0
+      if (currentValue.x > x) {
+        x = currentValue.x
+      }
+      let y = previousValue.y || 0
+      if (currentValue.y > y) {
+        y = currentValue.y
+      }
+      return { x, y }
+    },
     updateVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
@@ -481,6 +531,11 @@ export default {
   pointer-events none // so that painting can receive events
   position relative // used by svg connections
   transform-origin top left
+  .card-overlap-indicator
+    position absolute
+    z-index calc(var(--max-z) - 60)
+    span
+      line-height 1.5
 
 .is-interacting
   pointer-events all
