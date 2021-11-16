@@ -113,6 +113,8 @@ export default {
       this.$store.commit('addNotification', { message: 'Android is currenly only partially supported. You may experience scrolling issues', type: 'danger' })
     }
 
+    this.$store.dispatch('currentUser/restoreUserFavorites')
+
     // retry failed sync operations every 5 seconds
     processQueueIntervalTimer = setInterval(() => {
       this.$store.dispatch('api/processQueueOperations')
