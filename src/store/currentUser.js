@@ -253,6 +253,7 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser', body: updates }, { root: true })
     },
     cardsCreatedCountUpdateBy: (context, { delta, shouldIncrement }) => {
+      if (context.getters.shouldPreventCardsCreatedCountUpdate) { return }
       const count = context.state.cardsCreatedCount + delta
       context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCount', body: { delta } }, { root: true })
       context.commit('cardsCreatedCount', count)
@@ -589,6 +590,13 @@ export default {
     packById: (state, getters) => (packId) => {
       packId = packId.toString()
       return promptPacks.find(pack => pack.packId === packId)
+    },
+    shouldPreventCardsCreatedCountUpdate: (state, getters, rootState, rootGetters) => {
+      const spaceUserIsUpgraded = rootGetters['currentSpace/spaceUserIsUpgraded']
+      const spaceUserIsCurrentUser = rootGetters['currentSpace/spaceUserIsCurrentUser']
+      if (spaceUserIsUpgraded && !spaceUserIsCurrentUser) {
+        return true
+      }
     }
   }
 }
