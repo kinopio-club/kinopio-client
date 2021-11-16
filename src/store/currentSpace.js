@@ -560,10 +560,6 @@ export default {
         return connection
       })
       connections = sortBy(connections, ['distanceFromOrigin'])
-
-      // TODO TEMP sequence or race condition: can a connection be restored if it's card doesn't exist? or it's type?
-      console.log('🌈 restoreSpaceInChunks → connections logging (TEMP)', connections, isRemote)
-
       // restore space
       if (!isRemote) {
         context.commit('currentCards/clear', null, { root: true })
@@ -597,14 +593,14 @@ export default {
           if (primaryIsCards) {
             context.commit('currentCards/restore', chunk, { root: true })
           } else {
-            context.commit('currentConnections/restore', chunk, { root: true })
             context.commit('currentConnections/restoreMatchingTypes', { connections: chunk, types: connectionTypes }, { root: true })
+            context.commit('currentConnections/restore', chunk, { root: true })
           }
           // secondary
           chunk = secondaryChunks[index]
           if (chunk && primaryIsCards) {
-            context.commit('currentConnections/restore', chunk, { root: true })
             context.commit('currentConnections/restoreMatchingTypes', { connections: chunk, types: connectionTypes }, { root: true })
+            context.commit('currentConnections/restore', chunk, { root: true })
           } else if (chunk) {
             context.commit('currentCards/restore', chunk, { root: true })
           }
