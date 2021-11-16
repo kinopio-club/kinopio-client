@@ -204,6 +204,11 @@ export default {
     }
   },
   methods: {
+    localStorageErrorIsVisible () {
+      const element = document.getElementById('notify-local-storage-is-full')
+      const isHidden = element.className.includes('hidden')
+      return Boolean(!isHidden)
+    },
     updatePageVisibilityChange (event) {
       if (document.visibilityState === 'hidden') {
         pageWasHidden = true
@@ -311,6 +316,15 @@ export default {
       const space = { id: spaceId }
       this.$store.dispatch('currentSpace/changeSpace', { space })
       this.$store.dispatch('closeAllDialogs', 'notifications.changeSpace')
+    }
+  },
+  watch: {
+    notifyNewUser (value) {
+      const shouldShowNewUserNotification = this.$store.state.currentUser.shouldShowNewUserNotification
+      const shouldHide = !shouldShowNewUserNotification || this.localStorageErrorIsVisible()
+      if (shouldHide) {
+        this.$store.commit('notifyNewUser', false)
+      }
     }
   }
 }
