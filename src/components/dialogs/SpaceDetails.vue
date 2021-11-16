@@ -15,11 +15,11 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
             .badge.info
               Loader(:visible="true")
               span {{remotePendingUpload.percentComplete}}%
-          Background(:visible="backgroundIsVisible" @updateSpaces="updateSpaces")
+          Background(:visible="backgroundIsVisible" @updateSpaces="updateLocalSpaces")
         input(ref="name" placeholder="name" v-model="spaceName")
       .row.privacy-row
-        PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
-        ShowInExploreButton(@updateSpaces="updateSpaces")
+        PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateLocalSpaces")
+        ShowInExploreButton(@updateSpaces="updateLocalSpaces")
 
     template(v-if="!isSpaceMember")
       .row.space-meta-row.not-space-member
@@ -47,7 +47,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
       button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
         img.icon.visit(src="@/assets/export.svg")
         span Export
-      Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData" @updateSpaces="updateSpaces")
+      Export(:visible="exportIsVisible" :exportTitle="spaceName" :exportData="exportData" @updateSpaces="updateLocalSpaces")
 
   section.results-actions
     .row
@@ -61,7 +61,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
       .button-wrap
         button(@click.left.stop="toggleImportIsVisible" :class="{ active: importIsVisible }")
           span Import
-        Import(:visible="importIsVisible" @updateSpaces="updateSpaces" @closeDialog="closeDialogs")
+        Import(:visible="importIsVisible" @updateSpaces="updateLocalSpaces" @closeDialog="closeDialogs")
       //- Filters
       .button-wrap.toggle-filters(v-if="spacesHasJournalSpace")
         button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible || spaceFiltersIsActive }")
@@ -186,7 +186,7 @@ export default {
       },
       set (newName) {
         this.$store.dispatch('currentSpace/updateSpace', { name: newName })
-        this.updateSpaces()
+        this.updateLocalSpaces()
       }
     },
     isSpaceMember () {
@@ -238,7 +238,7 @@ export default {
     addSpace () {
       window.scrollTo(0, 0)
       this.$store.dispatch('currentSpace/addSpace')
-      this.updateSpaces()
+      this.updateLocalSpaces()
       this.$store.commit('triggerFocusSpaceDetailsName')
     },
     toggleExportIsVisible () {
@@ -299,7 +299,7 @@ export default {
       if (utils.arrayExists(this.remoteSpaces)) {
         this.remoteSpaces = this.remoteSpaces.filter(space => space.id !== currentSpaceId)
       }
-      this.updateSpaces()
+      this.updateLocalSpaces()
       this.changeToLastSpace()
     },
     orderByFavoriteSpaces (spaces) {
@@ -325,10 +325,10 @@ export default {
       spaces = this.orderByFavoriteSpaces(spaces)
       return spaces
     },
-    updateSpaces () {
-      this.debouncedUpdateSpaces()
+    updateLocalSpaces () {
+      this.debouncedUpdateLocalSpaces()
     },
-    debouncedUpdateSpaces: debounce(async function () {
+    debouncedUpdateLocalSpaces: debounce(async function () {
       this.$nextTick(() => {
         const currentUser = this.$store.state.currentUser
         let userSpaces = cache.getAllSpaces().filter(space => {
@@ -394,7 +394,7 @@ export default {
       const duplicatedSpaceName = this.$store.state.currentSpace.name + ' copy'
       this.$store.dispatch('currentSpace/duplicateSpace')
       this.$store.commit('addNotification', { message: `${duplicatedSpaceName} is now yours to edit`, type: 'success' })
-      this.updateSpaces()
+      this.updateLocalSpaces()
       this.updateWithRemoteSpaces()
     },
     updateHeights () {
@@ -434,7 +434,7 @@ export default {
   watch: {
     visible (visible) {
       if (visible) {
-        this.updateSpaces()
+        this.updateLocalSpaces()
         this.updateWithRemoteSpaces()
         this.closeDialogs()
         this.updateFavorites()
