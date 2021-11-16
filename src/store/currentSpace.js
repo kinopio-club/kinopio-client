@@ -560,6 +560,10 @@ export default {
         return connection
       })
       connections = sortBy(connections, ['distanceFromOrigin'])
+
+      // TODO TEMP sequence or race condition: can a connection be restored if it's card doesn't exist? or it's type?
+      console.log('🌈 restoreSpaceInChunks → connections logging (TEMP)', connections, isRemote)
+
       // restore space
       if (!isRemote) {
         context.commit('currentCards/clear', null, { root: true })
