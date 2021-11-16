@@ -401,8 +401,7 @@ export default {
       space = utils.clearSpaceMeta(space, 'copy')
       const nullCardUsers = true
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
-      context.commit('restoreSpace', uniqueNewSpace)
-      context.dispatch('updateModulesSpaceId', uniqueNewSpace)
+      context.dispatch('loadSpace', { space: uniqueNewSpace, isLocalSpaceOnly: true })
       await context.dispatch('saveImportedSpace')
     },
     addSpace: (context) => {
