@@ -22,8 +22,8 @@ dialog.narrow.notification-settings(v-if="visible" :open="visible" @click.left.s
       Loader(:visible="isLoading")
 
       template(v-if="unsubscribedSpaces.length")
-        .row Unsubscribed from:
-        SpaceList(:spaces="unsubscribedSpaces" :showUser="true" @selectSpace="changeSpace" :showRemoveSpace="true" :removeSpaceLabel="removeSpaceLabel" @removeSpace="resubscribeToSpace")
+        .row Resubscribe to:
+        SpaceList(:spaces="unsubscribedSpaces" :showUser="true" @selectSpace="changeSpace" :showCheckmarkSpace="true" @checkmarkSpace="resubscribeToSpace")
 
 </template>
 
@@ -59,8 +59,7 @@ export default {
     isSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     shouldEmailNotifications () { return this.$store.state.currentUser.shouldEmailNotifications },
-    shouldEmailBulletin () { return this.$store.state.currentUser.shouldEmailBulletin },
-    removeSpaceLabel () { return 'Resubscribe to notifications' }
+    shouldEmailBulletin () { return this.$store.state.currentUser.shouldEmailBulletin }
   },
   methods: {
     toggleShouldEmailNotifications () {

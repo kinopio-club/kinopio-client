@@ -10,7 +10,7 @@ span.space-list-wrap
     @updateFilteredItems="updateFilteredSpaces"
     @focusNextItem="focusNextItemFromFilter"
     @focusPreviousItem="focusPreviousItemFromFilter"
-    @selectItem="selectItemFromFilter"
+    @selectItem.stop="selectItemFromFilter"
   )
   ul.results-list.space-list
     template(v-for="space in spacesFiltered" :key="space.id")
@@ -52,8 +52,8 @@ span.space-list-wrap
             template(v-if='space.privacy')
               PrivacyIcon(:privacy="space.privacy" :closedIsNotVisible="true")
             img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
-          button.button-remove(v-if="showRemoveSpace" @mousedown.left.stop="removeSpace(space)" @touchstart.stop="removeSpace(space)" :title="removeSpaceLabel")
-            img.icon.remove(src="@/assets/remove.svg")
+          button.button-checkmark(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
+            img.icon.checkmark(src="@/assets/checkmark.svg")
 
 </template>
 
@@ -92,8 +92,7 @@ export default {
     isLoading: Boolean,
     parentIsSpaceDetails: Boolean,
     parentIsPinned: Boolean,
-    showRemoveSpace: Boolean,
-    removeSpaceLabel: String
+    showCheckmarkSpace: Boolean
   },
   data () {
     return {
@@ -257,14 +256,18 @@ export default {
       this.focusPreviousItem(currentIndex)
     },
     selectItemFromFilter () {
+      if (shouldPreventSelectSpace) {
+        shouldPreventSelectSpace = false
+        return
+      }
       const spaces = this.spacesFiltered
       const space = spaces.find(space => space.id === this.focusOnId)
       this.$store.commit('shouldPreventNextEnterKey', true)
       this.selectSpace(space)
     },
-    removeSpace (space) {
+    checkmarkSpace (space) {
       shouldPreventSelectSpace = true
-      this.$emit('removeSpace', space)
+      this.$emit('checkmarkSpace', space)
     }
   },
   watch: {
@@ -344,6 +347,10 @@ export default {
     min-width initial
     min-height initial
 
-  .button-remove
+  .button-checkmark
     margin-left auto
+
+  .checkmark
+    vertical-align 1px
+    width 10px
 </style>
