@@ -52,6 +52,8 @@ span.space-list-wrap
             template(v-if='space.privacy')
               PrivacyIcon(:privacy="space.privacy" :closedIsNotVisible="true")
             img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
+          button.button-remove(v-if="showRemoveSpace" @mousedown.left.stop="removeSpace(space)" @touchstart.stop="removeSpace(space)" :title="removeSpaceLabel")
+            img.icon.remove(src="@/assets/remove.svg")
 
 </template>
 
@@ -68,7 +70,7 @@ const User = defineAsyncComponent({
   loader: () => import('@/components/User.vue')
 })
 
-let unsubscribe
+let unsubscribe, shouldPreventSelectSpace
 
 export default {
   name: 'SpaceList',
@@ -89,7 +91,16 @@ export default {
     hideFilter: Boolean,
     isLoading: Boolean,
     parentIsSpaceDetails: Boolean,
-    parentIsPinned: Boolean
+    parentIsPinned: Boolean,
+    showRemoveSpace: Boolean,
+    removeSpaceLabel: String
+  },
+  data () {
+    return {
+      filter: '',
+      filteredSpaces: [],
+      focusOnId: ''
+    }
   },
   mounted () {
     unsubscribe = this.$store.subscribe((mutation, state) => {
@@ -115,13 +126,6 @@ export default {
   },
   beforeUnmount () {
     unsubscribe()
-  },
-  data () {
-    return {
-      filter: '',
-      filteredSpaces: [],
-      focusOnId: ''
-    }
   },
   computed: {
     currentUser () { return this.$store.state.currentUser },
@@ -232,6 +236,10 @@ export default {
       }
     },
     selectSpace (space) {
+      if (shouldPreventSelectSpace) {
+        shouldPreventSelectSpace = false
+        return
+      }
       this.$emit('selectSpace', space)
     },
     closeDialog () {
@@ -253,6 +261,10 @@ export default {
       const space = spaces.find(space => space.id === this.focusOnId)
       this.$store.commit('shouldPreventNextEnterKey', true)
       this.selectSpace(space)
+    },
+    removeSpace (space) {
+      shouldPreventSelectSpace = true
+      this.$emit('removeSpace', space)
     }
   },
   watch: {
@@ -331,4 +343,7 @@ export default {
     padding 0
     min-width initial
     min-height initial
+
+  .button-remove
+    margin-left auto
 </style>
