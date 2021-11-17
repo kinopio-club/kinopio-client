@@ -28,7 +28,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
           button.change-color(@click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
             .current-color(:style="{ background: userColor }")
           ColorPicker(:currentColor="userColor" :visible="colorPickerIsVisible" @selectedColor="updateUserColor")
-        input.name(placeholder="What's your name?" v-model="userName" name="Name" maxlength=100)
+        input.name.user-details-name(placeholder="What's your name?" v-model="userName" name="Name" maxlength=100)
       .row
         textarea(ref="description" placeholder="Tell us about yourself" v-model="userDescription" name="Description" maxlength=220 rows="1")
       .row
@@ -334,7 +334,7 @@ export default {
   &.right-side
     left initial
     right 8px
-  .name
+  .user-details-name
     margin-left 6px
   .error-message
     margin-top 10px
