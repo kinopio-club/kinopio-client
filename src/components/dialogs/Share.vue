@@ -1,7 +1,13 @@
 <template lang="pug">
 dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
-    p Share
+    p
+      span Share
+      .button-wrap(v-if="spaceHasUrl")
+        button.small-button(@click.left.stop="toggleSpaceRssFeedIsVisible" :class="{ active: spaceRssFeedIsVisible }")
+          span RSS
+        SpaceRssFeed(:visible="spaceRssFeedIsVisible")
+
   section(v-if="spaceHasUrl")
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
     template(v-if="!spaceIsPrivate")
@@ -25,17 +31,11 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
         img.icon.open(src="@/assets/open.svg")
         span {{privacyName(0)}}
 
-  section(v-if="spaceHasUrl")
-    .row
-      .button-wrap
-        button(@click.left.stop="toggleRssFeedIsVisible" :class="{ active: rssFeedIsVisible }")
-          span RSS Feed
-        RssFeed(:visible="rssFeedIsVisible")
-    .row(v-if="isSpaceMember")
-      .button-wrap
-        button(@click.left.stop="toggleInviteCollaboratorsIsVisible" :class="{ active: inviteCollaboratorsIsVisible }")
-          span Invite Collaborators
-        InviteCollaborators(:visible="inviteCollaboratorsIsVisible")
+  section(v-if="spaceHasUrl && isSpaceMember")
+    .button-wrap
+      button(@click.left.stop="toggleInviteCollaboratorsIsVisible" :class="{ active: inviteCollaboratorsIsVisible }")
+        span Invite Collaborators
+      InviteCollaborators(:visible="inviteCollaboratorsIsVisible")
 
   section.results-section.collaborators(v-if="spaceHasCollaborators || spaceHasOtherCardUsers")
     // collaborators
@@ -58,7 +58,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
 <script>
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import InviteCollaborators from '@/components/dialogs/InviteCollaborators.vue'
-import RssFeed from '@/components/dialogs/RssFeed.vue'
+import SpaceRssFeed from '@/components/dialogs/SpaceRssFeed.vue'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import privacy from '@/data/privacy.js'
@@ -72,7 +72,7 @@ export default {
   components: {
     PrivacyButton,
     InviteCollaborators,
-    RssFeed,
+    SpaceRssFeed,
     UserList,
     UserDetails
   },
@@ -97,7 +97,7 @@ export default {
       userDetailsIsVisible: false,
       url: '',
       dialogHeight: null,
-      rssFeedIsVisible: false
+      spaceRssFeedIsVisible: false
     }
   },
   computed: {
@@ -174,15 +174,15 @@ export default {
       this.closeDialogs()
       this.inviteCollaboratorsIsVisible = !isVisible
     },
-    toggleRssFeedIsVisible () {
-      const isVisible = this.rssFeedIsVisible
+    toggleSpaceRssFeedIsVisible () {
+      const isVisible = this.spaceRssFeedIsVisible
       this.closeDialogs()
-      this.rssFeedIsVisible = !isVisible
+      this.spaceRssFeedIsVisible = !isVisible
     },
     closeDialogs () {
       this.privacyPickerIsVisible = false
       this.inviteCollaboratorsIsVisible = false
-      this.rssFeedIsVisible = false
+      this.spaceRssFeedIsVisible = false
       this.userDetailsIsNotVisible()
     },
     showUserDetails (event, user) {
@@ -269,4 +269,9 @@ export default {
       margin-left 6px
   .privacy-button + input
     margin-top 10px
+  .small-button
+    padding 0
+    padding-left 6px
+    padding-right 6px
+    margin-left 6px
 </style>

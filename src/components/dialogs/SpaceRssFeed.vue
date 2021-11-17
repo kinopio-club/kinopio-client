@@ -1,7 +1,7 @@
 <template lang="pug">
-dialog.narrow.rss(v-if="visible" :open="visible" @click.left.stop)
+dialog.narrow.space-rss-feed(v-if="visible" :open="visible" @click.left.stop)
   section
-    p RSS Feed
+    p Space RSS Feed
 
   section
     p Subscribe to cards recently created or updated
@@ -63,4 +63,6 @@ export default {
 </script>
 
 <style lang="stylus">
+.space-rss-feed
+  margin-left -1rem
 </style>

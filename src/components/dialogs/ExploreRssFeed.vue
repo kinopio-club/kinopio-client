@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.explore-rss(v-if="visible" :open="visible" @click.left.stop)
+dialog.narrow.explore-rss-feed(v-if="visible" :open="visible" @click.left.stop)
   section
     p Explore RSS Feed
 
@@ -51,7 +51,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-.explore-rss
+.explore-rss-feed
   bottom initial
   top 8px
   @media(max-width 400px)
