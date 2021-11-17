@@ -10,7 +10,7 @@ span.space-list-wrap
     @updateFilteredItems="updateFilteredSpaces"
     @focusNextItem="focusNextItemFromFilter"
     @focusPreviousItem="focusPreviousItemFromFilter"
-    @selectItem="selectItemFromFilter"
+    @selectItem.stop="selectItemFromFilter"
   )
   ul.results-list.space-list
     template(v-for="space in spacesFiltered" :key="space.id")
@@ -52,6 +52,8 @@ span.space-list-wrap
             template(v-if='space.privacy')
               PrivacyIcon(:privacy="space.privacy" :closedIsNotVisible="true")
             img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
+          button.button-checkmark(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
+            img.icon.checkmark(src="@/assets/checkmark.svg")
 
 </template>
 
@@ -68,7 +70,7 @@ const User = defineAsyncComponent({
   loader: () => import('@/components/User.vue')
 })
 
-let unsubscribe
+let unsubscribe, shouldPreventSelectSpace
 
 export default {
   name: 'SpaceList',
@@ -89,7 +91,15 @@ export default {
     hideFilter: Boolean,
     isLoading: Boolean,
     parentIsSpaceDetails: Boolean,
-    parentIsPinned: Boolean
+    parentIsPinned: Boolean,
+    showCheckmarkSpace: Boolean
+  },
+  data () {
+    return {
+      filter: '',
+      filteredSpaces: [],
+      focusOnId: ''
+    }
   },
   mounted () {
     unsubscribe = this.$store.subscribe((mutation, state) => {
@@ -115,13 +125,6 @@ export default {
   },
   beforeUnmount () {
     unsubscribe()
-  },
-  data () {
-    return {
-      filter: '',
-      filteredSpaces: [],
-      focusOnId: ''
-    }
   },
   computed: {
     currentUser () { return this.$store.state.currentUser },
@@ -232,6 +235,10 @@ export default {
       }
     },
     selectSpace (space) {
+      if (shouldPreventSelectSpace) {
+        shouldPreventSelectSpace = false
+        return
+      }
       this.$emit('selectSpace', space)
     },
     closeDialog () {
@@ -249,10 +256,18 @@ export default {
       this.focusPreviousItem(currentIndex)
     },
     selectItemFromFilter () {
+      if (shouldPreventSelectSpace) {
+        shouldPreventSelectSpace = false
+        return
+      }
       const spaces = this.spacesFiltered
       const space = spaces.find(space => space.id === this.focusOnId)
       this.$store.commit('shouldPreventNextEnterKey', true)
       this.selectSpace(space)
+    },
+    checkmarkSpace (space) {
+      shouldPreventSelectSpace = true
+      this.$emit('checkmarkSpace', space)
     }
   },
   watch: {
@@ -331,4 +346,11 @@ export default {
     padding 0
     min-width initial
     min-height initial
+
+  .button-checkmark
+    margin-left auto
+
+  .checkmark
+    vertical-align 1px
+    width 10px
 </style>

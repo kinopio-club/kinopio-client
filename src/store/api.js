@@ -253,6 +253,29 @@ const self = {
         console.error('🚒', error)
       }
     },
+    getSpacesNotificationUnsubscribed: async (context) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/user/spaces-notification-unsubscribed`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒', error)
+      }
+    },
+    spaceNotificationResubscribe: async (context, space) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      const user = context.rootState.currentUser
+      if (!shouldRequest({ apiKey })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/space/${space.id}/notification-resubscribe?userId=${user.id}`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒', error)
+      }
+    },
     removeUserPermanent: async (context) => {
       const apiKey = context.rootState.currentUser.apiKey
       if (!shouldRequest({ apiKey })) { return }
