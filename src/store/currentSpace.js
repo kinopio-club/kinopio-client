@@ -364,6 +364,7 @@ export default {
     saveNewSpace: (context) => {
       const space = utils.clone(context.state)
       const user = context.rootState.currentUser
+      console.log('✨ saveNewSpace', space, user)
       cache.saveSpace(space)
       context.dispatch('api/addToQueue', {
         name: 'createSpace',
