@@ -238,14 +238,14 @@ export default {
     })
     return longest
   },
-  updateObject (object, value) {
-    this.typeCheck({ value, type: 'object', origin: 'updateObject' })
-    const keys = Object.keys(value)
+  updateObject (object, updates) {
+    this.typeCheck({ value: updates, type: 'object', origin: 'updateObject' })
+    const keys = Object.keys(updates)
     if (keys.length === 0) {
       object = {}
     } else {
       keys.forEach(key => {
-        object[key] = value[key]
+        object[key] = updates[key]
       })
     }
     return object
