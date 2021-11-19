@@ -10,7 +10,7 @@ span.space-list-wrap
     @updateFilteredItems="updateFilteredSpaces"
     @focusNextItem="focusNextItemFromFilter"
     @focusPreviousItem="focusPreviousItemFromFilter"
-    @selectItem.stop="selectItemFromFilter"
+    @selectItem="selectItemFromFilter"
   )
   ul.results-list.space-list
     template(v-for="space in spacesFiltered" :key="space.id")
