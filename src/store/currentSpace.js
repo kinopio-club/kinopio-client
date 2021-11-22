@@ -450,6 +450,7 @@ export default {
         console.warn('🚑', error.status, error)
         if (error.status === 404) {
           context.commit('notifySpaceNotFound', true, { root: true })
+          context.dispatch('loadLastSpace')
         }
         if (error.status === 401) {
           context.commit('notifySpaceNotFound', true, { root: true })
