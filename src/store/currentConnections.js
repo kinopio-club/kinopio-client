@@ -30,20 +30,18 @@ export default {
       state.types = {}
     },
     restore: (state, connections) => {
-      let connectionIds = []
+      let ids = []
       connections.forEach(connection => {
-        connectionIds.push(connection.id)
+        ids.push(connection.id)
         state.connections[connection.id] = connection
       })
-      state.ids = state.ids.concat(connectionIds)
+      state.ids = state.ids.concat(ids)
     },
-    restoreMatchingTypes: (state, { connections, types }) => {
-      const typesToRestore = connections.map(connection => connection.connectionTypeId)
+    restoreTypes: (state, types) => {
       let typeIds = []
-      typesToRestore.forEach(id => {
-        if (typeIds.includes(id)) { return }
-        typeIds.push(id)
-        state.types[id] = types[id]
+      types.forEach(type => {
+        typeIds.push(type.id)
+        state.types[type.id] = type
       })
       state.typeIds = state.typeIds.concat(typeIds)
     },
