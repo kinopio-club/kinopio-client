@@ -6,7 +6,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
     .user-info
       .row
         User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id" :shouldCloseAllDialogs="false")
-        p.name {{user.name}}
+        p.name.user-details-name {{user.name}}
       .row(v-if="user.description")
         textarea(ref="description" :value="user.description" disabled)
       .row.website(v-if="user.website")
