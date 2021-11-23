@@ -354,8 +354,10 @@ export default {
     newConnectionType (connection) {
       const newType = this.$store.getters['currentConnections/typeForNewConnections']
       console.warn('🚑 connection was missing type', { cardId: this.id, connection, newType })
-      connection = utils.clone(connection)
-      connection.connectionTypeId = newType.id
+      connection = {
+        id: connection.id,
+        connectionTypeId: newType.id
+      }
       this.$store.dispatch('currentConnections/update', connection)
       return newType
     },
@@ -378,7 +380,7 @@ export default {
       if (this.isBeingDragged) { return }
       let connections = this.$store.getters['currentConnections/all']
       connections = connections.filter(connection => this.connectionIsBeingDragged(connection))
-      let connection = connections.find(connection => connection.startCardId === this.id || connection.endCardId === this.id)
+      const connection = connections.find(connection => connection.startCardId === this.id || connection.endCardId === this.id)
       if (!connection) { return }
       const connectionType = this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
       if (!connectionType) {
