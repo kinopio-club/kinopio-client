@@ -353,7 +353,7 @@ export default {
     },
     newConnectionType (connection) {
       const newType = this.$store.getters['currentConnections/typeForNewConnections']
-      console.warn('🚑 connection was missing type', { cardId: this.id, connectionTypeId: connection.connectionTypeId, newType })
+      console.warn('🚑 connection was missing type', { cardId: this.id, connection, newType })
       connection = utils.clone(connection)
       connection.connectionTypeId = newType.id
       this.$store.dispatch('currentConnections/update', connection)
