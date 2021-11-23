@@ -351,11 +351,11 @@ export default {
       if (!color) { return }
       return { background: color }
     },
-    newConnectionType (connection) {
+    updateTypeForConnection (connectionId) {
       const newType = this.$store.getters['currentConnections/typeForNewConnections']
-      console.warn('🚑 connection was missing type', { cardId: this.id, connection, newType })
-      connection = {
-        id: connection.id,
+      console.warn('🚑 connection was missing type', { cardId: this.id, connectionId, newType })
+      const connection = {
+        id: connectionId,
         connectionTypeId: newType.id
       }
       this.$store.dispatch('currentConnections/update', connection)
@@ -369,7 +369,7 @@ export default {
       if (!isConnected) { return }
       const connectionType = this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
       if (!connectionType) {
-        const newType = this.newConnectionType(connection)
+        const newType = this.updateTypeForConnection(connection.id)
         return newType.color
       }
       return connectionType.color
@@ -384,7 +384,7 @@ export default {
       if (!connection) { return }
       const connectionType = this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
       if (!connectionType) {
-        const newType = this.newConnectionType(connection)
+        const newType = this.updateTypeForConnection(connection.id)
         return newType.color
       }
       return connectionType.color
@@ -399,7 +399,7 @@ export default {
       if (!connection) { return }
       const connectionType = this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
       if (!connectionType) {
-        const newType = this.newConnectionType(connection)
+        const newType = this.updateTypeForConnection(connection.id)
         return newType.color
       }
       return connectionType.color
