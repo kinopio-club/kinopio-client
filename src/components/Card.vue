@@ -351,16 +351,6 @@ export default {
       if (!color) { return }
       return { background: color }
     },
-    updateTypeForConnection (connectionId) {
-      const newType = this.$store.getters['currentConnections/typeForNewConnections']
-      console.warn('🚑 connection was missing type', { cardId: this.id, connectionId, newType })
-      const connection = {
-        id: connectionId,
-        connectionTypeId: newType.id
-      }
-      this.$store.dispatch('currentConnections/update', connection)
-      return newType
-    },
     connectedToConnectionDetailsIsVisibleColor () {
       const connectionId = this.$store.state.connectionDetailsIsVisibleForConnectionId
       const connection = this.$store.getters['currentConnections/byId'](connectionId)
@@ -756,6 +746,16 @@ export default {
     userDetailsIsVisible () { return this.$store.state.cardUserDetailsIsVisibleForCardId === this.id }
   },
   methods: {
+    updateTypeForConnection (connectionId) {
+      const newType = this.$store.getters['currentConnections/typeForNewConnections']
+      console.warn('🚑 connection was missing type', { cardId: this.id, connectionId, newType })
+      const connection = {
+        id: connectionId,
+        connectionTypeId: newType.id
+      }
+      this.$store.dispatch('currentConnections/update', connection)
+      return newType
+    },
     updateCardMap () {
       this.$store.dispatch('currentCards/updateDimensions', this.card.id)
       this.$store.dispatch('currentCards/updateCardMap')
