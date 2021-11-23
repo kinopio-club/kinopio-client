@@ -35,6 +35,8 @@ aside.notifications(@click.left="closeAllDialogs")
     .row
       button(@click.left.stop="triggerSpaceDetailsVisible") Your Spaces
       button(v-if="!currentUserIsSignedIn" @click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
+      button(@click.left="removeNotifySpaceNotFound")
+        img.icon.cancel(src="@/assets/add.svg")
 
   .persistent-item(v-if="notifySpaceIsRemoved")
     p This space is removed
@@ -245,6 +247,9 @@ export default {
     removeNotifyNewUser () {
       this.$store.commit('notifyNewUser', false)
       this.$store.commit('currentUser/shouldShowNewUserNotification', false)
+    },
+    removeNotifySpaceNotFound () {
+      this.$store.commit('notifySpaceNotFound', false)
     },
     triggerSpaceDetailsVisible () {
       this.$store.commit('triggerSpaceDetailsVisible')

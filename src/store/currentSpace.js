@@ -450,6 +450,7 @@ export default {
         console.warn('🚑', error.status, error)
         if (error.status === 404) {
           context.commit('notifySpaceNotFound', true, { root: true })
+          context.dispatch('loadLastSpace')
         }
         if (error.status === 401) {
           context.commit('notifySpaceNotFound', true, { root: true })
@@ -536,7 +537,6 @@ export default {
       let connectionTypes = addConnectionTypes || space.connectionTypes || []
       let connections = addConnections || space.connections || []
       cards = utils.normalizeItems(cards)
-      connectionTypes = utils.normalizeItems(connectionTypes)
       connections = utils.normalizeItems(connections)
       // sort cards
       const cardIds = Object.keys(cards)
@@ -586,6 +586,7 @@ export default {
         context.dispatch('restoreSpaceComplete', { space, isRemote, timeStart })
         return
       }
+      context.commit('currentConnections/restoreTypes', connectionTypes, { root: true })
       primaryChunks.forEach((chunk, index) => {
         defer(function () {
           if (space.id !== context.state.id) { return }
@@ -594,13 +595,11 @@ export default {
           if (primaryIsCards) {
             context.commit('currentCards/restore', chunk, { root: true })
           } else {
-            context.commit('currentConnections/restoreMatchingTypes', { connections: chunk, types: connectionTypes }, { root: true })
             context.commit('currentConnections/restore', chunk, { root: true })
           }
           // secondary
           chunk = secondaryChunks[index]
           if (chunk && primaryIsCards) {
-            context.commit('currentConnections/restoreMatchingTypes', { connections: chunk, types: connectionTypes }, { root: true })
             context.commit('currentConnections/restore', chunk, { root: true })
           } else if (chunk) {
             context.commit('currentCards/restore', chunk, { root: true })
