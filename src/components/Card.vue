@@ -359,7 +359,6 @@ export default {
       if (!isConnected) { return }
       const connectionType = this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
       if (!connectionType) {
-        console.warn('🍅0', connectionId, connection)
         const newType = this.updateTypeForConnection(connectionId)
         return newType.color
       }
@@ -375,7 +374,6 @@ export default {
       if (!connection) { return }
       const connectionType = this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
       if (!connectionType) {
-        console.warn('🍅', connection.id)
         const newType = this.updateTypeForConnection(connection.id)
         return newType.color
       }
@@ -391,7 +389,6 @@ export default {
       if (!connection) { return }
       const connectionType = this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
       if (!connectionType) {
-        console.warn('🍅🍅', connection.id)
         const newType = this.updateTypeForConnection(connection.id)
         return newType.color
       }
