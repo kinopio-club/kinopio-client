@@ -351,6 +351,14 @@ export default {
       if (!color) { return }
       return { background: color }
     },
+    newConnectionType (connection) {
+      const newType = this.$store.getters['currentConnections/typeForNewConnections']
+      console.warn('🚑 connection was missing type', { cardId: this.id, connectionTypeId: connection.connectionTypeId, newType })
+      connection = utils.clone(connection)
+      connection.connectionTypeId = newType.id
+      this.$store.dispatch('currentConnections/update', connection)
+      return newType
+    },
     connectedToConnectionDetailsIsVisibleColor () {
       const connectionId = this.$store.state.connectionDetailsIsVisibleForConnectionId
       const connection = this.$store.getters['currentConnections/byId'](connectionId)
@@ -358,6 +366,10 @@ export default {
       const isConnected = connection.startCardId === this.id || connection.endCardId === this.id
       if (!isConnected) { return }
       const connectionType = this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
+      if (!connectionType) {
+        const newType = this.newConnectionType(connection)
+        return newType.color
+      }
       return connectionType.color
     },
     connectedToCardBeingDraggedColor () {
@@ -366,10 +378,13 @@ export default {
       if (this.isBeingDragged) { return }
       let connections = this.$store.getters['currentConnections/all']
       connections = connections.filter(connection => this.connectionIsBeingDragged(connection))
-      const connection = connections.find(connection => connection.startCardId === this.id || connection.endCardId === this.id)
+      let connection = connections.find(connection => connection.startCardId === this.id || connection.endCardId === this.id)
       if (!connection) { return }
       const connectionType = this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
-      if (!connectionType) { return }
+      if (!connectionType) {
+        const newType = this.newConnectionType(connection)
+        return newType.color
+      }
       return connectionType.color
     },
     connectedToCardDetailsVisibleColor () {
@@ -381,6 +396,10 @@ export default {
       const connection = connections[0]
       if (!connection) { return }
       const connectionType = this.$store.getters['currentConnections/typeByTypeId'](connection.connectionTypeId)
+      if (!connectionType) {
+        const newType = this.newConnectionType(connection)
+        return newType.color
+      }
       return connectionType.color
     },
     updatedAt () { return this.card.nameUpdatedAt || this.card.createdAt },
