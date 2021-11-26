@@ -55,7 +55,7 @@ export default {
       if (this.loading) { return }
       if (this.templatesIsVisible) { return }
       this.loading = true
-      this.spaces = await this.$store.dispatch('api/getNewSpaces')
+      this.spaces = await this.$store.dispatch('api/getExploreSpaces')
       this.newSpaces = this.spaces
       this.loading = false
     },
