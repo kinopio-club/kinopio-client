@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.narrow.notification-settings(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
-    p Notification Settings
+    p Notifications
   template(v-if="!currentUserIsSignedIn")
     section
       p After you sign up you'll be able to manage your notification settings here
@@ -13,6 +13,13 @@ dialog.narrow.notification-settings(v-if="visible" :open="visible" @click.left.s
         label(:class="{active: shouldEmailBulletin}" @click.left.prevent="toggleShouldEmailBulletin" @keydown.stop.enter="toggleShouldEmailBulletin")
           input(type="checkbox" v-model="shouldEmailBulletin")
           span Email Bulletins
+    section
+      .row Review cards you've created or updated this week
+      .row
+        label(:class="{active: shouldEmailWeeklyReview}" @click.left.prevent="toggleShouldEmailWeeklyReview" @keydown.stop.enter="toggleShouldEmailWeeklyReview")
+          input(type="checkbox" v-model="shouldEmailWeeklyReview")
+          span Email Weekly Review
+
     section
       .row Updates when collaborators add cards to your spaces
       .row
@@ -59,7 +66,8 @@ export default {
     isSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     shouldEmailNotifications () { return this.$store.state.currentUser.shouldEmailNotifications },
-    shouldEmailBulletin () { return this.$store.state.currentUser.shouldEmailBulletin }
+    shouldEmailBulletin () { return this.$store.state.currentUser.shouldEmailBulletin },
+    shouldEmailWeeklyReview () { return this.$store.state.currentUser.shouldEmailWeeklyReview }
   },
   methods: {
     toggleShouldEmailNotifications () {
@@ -69,6 +77,10 @@ export default {
     toggleShouldEmailBulletin () {
       const value = !this.shouldEmailBulletin
       this.$store.dispatch('currentUser/shouldEmailBulletin', value)
+    },
+    toggleShouldEmailWeeklyReview () {
+      const value = !this.shouldEmailWeeklyReview
+      this.$store.dispatch('currentUser/shouldEmailWeeklyReview', value)
     },
     triggerSignUpOrInIsVisible () {
       this.$store.dispatch('closeAllDialogs', 'UserSettings.triggerSignUpOrInIsVisible')

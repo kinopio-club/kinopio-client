@@ -34,6 +34,8 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
           span Billing
         UserBilling(:visible="userBillingIsVisible")
 
+  //- Delete Account
+  section
     .row
       button.danger(v-if="!removeAllConfirmationVisible" @click.left="toggleRemoveAllConfirmationVisible")
         img.icon(src="@/assets/remove.svg")
