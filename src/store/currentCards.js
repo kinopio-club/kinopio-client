@@ -4,6 +4,7 @@ import cache from '@/cache.js'
 import nanoid from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
+import { nextTick } from 'vue'
 
 // normalized state
 // https://github.com/vuejs/vuejs.org/issues/1636
@@ -275,7 +276,9 @@ const currentCards = {
           width: card.width,
           height: card.height
         }
-        card = utils.updateCardDimentions(card)
+        nextTick(() => {
+          card = utils.updateCardDimentions(card)
+        })
         const dimensionsChanged = card.width !== prevDimensions.width || card.height !== prevDimensions.height
         if (!dimensionsChanged) { return }
         const body = {
