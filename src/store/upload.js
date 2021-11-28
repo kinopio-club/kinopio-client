@@ -196,6 +196,8 @@ export default {
           id: cardId,
           name
         }, { root: true })
+        context.dispatch('currentCards/updateDimensions', cardId, { root: true })
+        context.dispatch('currentCards/updateCardMap', null, { root: true })
       })
     }
   }
