@@ -278,17 +278,17 @@ const currentCards = {
         }
         nextTick(() => {
           card = utils.updateCardDimentions(card)
+          const dimensionsChanged = card.width !== prevDimensions.width || card.height !== prevDimensions.height
+          if (!dimensionsChanged) { return }
+          const body = {
+            id: card.id,
+            width: Math.ceil(card.width),
+            height: Math.ceil(card.height)
+          }
+          context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
+          context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
+          context.commit('update', body)
         })
-        const dimensionsChanged = card.width !== prevDimensions.width || card.height !== prevDimensions.height
-        if (!dimensionsChanged) { return }
-        const body = {
-          id: card.id,
-          width: Math.ceil(card.width),
-          height: Math.ceil(card.height)
-        }
-        context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
-        context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
-        context.commit('update', body)
       })
     },
     toggleChecked (context, { cardId, value }) {
