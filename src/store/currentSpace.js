@@ -535,6 +535,7 @@ export default {
       // init items
       let cards = addCards || space.cards || []
       let connectionTypes = addConnectionTypes || space.connectionTypes || []
+      connectionTypes = connectionTypes.filter(type => Boolean(type))
       let connections = addConnections || space.connections || []
       cards = utils.normalizeItems(cards)
       connections = utils.normalizeItems(connections)
