@@ -14,7 +14,7 @@ dialog.narrow.notification-settings(v-if="visible" :open="visible" @click.left.s
           input(type="checkbox" v-model="shouldEmailBulletin")
           span Email Bulletins
     section
-      .row Review cards you've created or updated this week
+      .row Review cards you've created and updated this week
       .row
         label(:class="{active: shouldEmailWeeklyReview}" @click.left.prevent="toggleShouldEmailWeeklyReview" @keydown.stop.enter="toggleShouldEmailWeeklyReview")
           input(type="checkbox" v-model="shouldEmailWeeklyReview")
