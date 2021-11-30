@@ -4,6 +4,7 @@ import cache from '@/cache.js'
 import nanoid from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
+import { nextTick } from 'vue'
 
 // normalized state
 // https://github.com/vuejs/vuejs.org/issues/1636
@@ -275,17 +276,19 @@ const currentCards = {
           width: card.width,
           height: card.height
         }
-        card = utils.updateCardDimentions(card)
-        const dimensionsChanged = card.width !== prevDimensions.width || card.height !== prevDimensions.height
-        if (!dimensionsChanged) { return }
-        const body = {
-          id: card.id,
-          width: Math.ceil(card.width),
-          height: Math.ceil(card.height)
-        }
-        context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
-        context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
-        context.commit('update', body)
+        nextTick(() => {
+          card = utils.updateCardDimentions(card)
+          const dimensionsChanged = card.width !== prevDimensions.width || card.height !== prevDimensions.height
+          if (!dimensionsChanged) { return }
+          const body = {
+            id: card.id,
+            width: Math.ceil(card.width),
+            height: Math.ceil(card.height)
+          }
+          context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
+          context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
+          context.commit('update', body)
+        })
       })
     },
     toggleChecked (context, { cardId, value }) {

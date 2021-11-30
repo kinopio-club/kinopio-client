@@ -1388,6 +1388,7 @@ article
       .checkbox-wrap
         padding-top 8px
         padding-left 8px
+        padding-bottom 8px
         label
           pointer-events none
           width 20px
