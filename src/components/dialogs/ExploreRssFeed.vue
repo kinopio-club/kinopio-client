@@ -37,7 +37,7 @@ export default {
     },
     updateUrl () {
       this.urlIsCopied = false
-      this.url = `${utils.host(true)}/space/new-spaces/feed.json`
+      this.url = `${utils.host(true)}/space/explore-spaces/feed.json`
     }
   },
   watch: {

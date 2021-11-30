@@ -323,11 +323,11 @@ const self = {
 
     // Space
 
-    getNewSpaces: async (context) => {
+    getExploreSpaces: async (context) => {
       try {
         console.log('🛬 getting new spaces')
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await utils.timeout(40000, fetch(`${host}/space/new-spaces`, options))
+        const response = await utils.timeout(40000, fetch(`${host}/space/explore-spaces`, options))
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒', error)

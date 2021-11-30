@@ -30,6 +30,7 @@ export default {
     newSpacesAreBlank: false,
     shouldEmailNotifications: true,
     shouldEmailBulletin: true,
+    shouldEmailWeeklyReview: true,
     shouldShowMoreAlignOptions: false,
     shouldShowCardCollaborationInfo: false,
     shouldInvertZoomDirection: false,
@@ -197,6 +198,10 @@ export default {
     shouldEmailBulletin: (state, value) => {
       state.shouldEmailBulletin = value
       cache.updateUser('shouldEmailBulletin', value)
+    },
+    shouldEmailWeeklyReview: (state, value) => {
+      state.shouldEmailWeeklyReview = value
+      cache.updateUser('shouldEmailWeeklyReview', value)
     },
     shouldShowMoreAlignOptions: (state, value) => {
       state.shouldShowMoreAlignOptions = value
@@ -474,6 +479,14 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldEmailBulletin: value
+        } }, { root: true })
+    },
+    shouldEmailWeeklyReview: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldEmailWeeklyReview' })
+      context.commit('shouldEmailWeeklyReview', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldEmailWeeklyReview: value
         } }, { root: true })
     },
     shouldShowMoreAlignOptions: (context, value) => {

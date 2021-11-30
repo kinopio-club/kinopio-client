@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
-    p Controls Settings
+    p Controls
   section
     .row(v-if="!isMobile")
       label(:class="{active: shouldInvertZoomDirection}" @click.left.prevent="toggleShouldInvertZoomDirection" @keydown.stop.enter="toggleShouldInvertZoomDirection")
