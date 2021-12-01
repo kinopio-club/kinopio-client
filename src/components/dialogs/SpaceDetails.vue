@@ -19,7 +19,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
         input(ref="name" placeholder="name" v-model="spaceName")
       .row.privacy-row
         PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateLocalSpaces")
-        ShowInExploreButton(@updateSpaces="updateLocalSpaces")
+        AddToExplore(@updateSpaces="updateLocalSpaces")
 
     template(v-if="!isSpaceMember")
       .row.space-meta-row.not-space-member
@@ -83,7 +83,7 @@ import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import SpaceFilters from '@/components/dialogs/SpaceFilters.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
-import ShowInExploreButton from '@/components/ShowInExploreButton.vue'
+import AddToExplore from '@/components/AddToExplore.vue'
 import templates from '@/data/templates.js'
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
@@ -105,7 +105,7 @@ export default {
     SpaceFilters,
     SpaceList,
     PrivacyButton,
-    ShowInExploreButton,
+    AddToExplore,
     Loader,
     BackgroundPreview
   },

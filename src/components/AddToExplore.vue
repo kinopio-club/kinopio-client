@@ -1,9 +1,9 @@
 <template lang="pug">
-.button-wrap.show-in-explore(v-if="isSpaceMember")
-  label(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
-    input(type="checkbox" v-model="showInExplore")
+.button-wrap.add-to-explore(v-if="isSpaceMember")
+  button(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
-    span In Explore
+    span(v-if="showInExplore") In Explore
+    span(v-else) Add to Explore
 
   template(v-if="error.userNeedsToSignUpOrIn")
     p
@@ -14,12 +14,12 @@
   template(v-else-if="error.spaceMustBeEdited")
     p
       span.badge.info Edit and rename this space
-      span to show in explore
+      span to add to explore
 
   template(v-else-if="error.spaceCardsMinimum")
     p
       span.badge.info Space needs more than 10 cards
-      span to show in explore
+      span to add to explore
 
 </template>
 
@@ -96,7 +96,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.show-in-explore
+.add-to-explore
   input
     vertical-align -1px !important
 </style>
