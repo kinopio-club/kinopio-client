@@ -402,6 +402,26 @@ const currentCards = {
       connections = uniqBy(connections, 'id')
       context.commit('currentConnections/updatePaths', connections, { root: true })
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
+      context.dispatch('checkIfShouldIncreasePageSize', { cardId: currentDraggingCardId })
+    },
+    checkIfShouldIncreasePageSize: (context, { cardId, multiplier }) => {
+      multiplier = multiplier || 4
+      const card = context.getters.byId(cardId)
+      const zoom = context.rootGetters.spaceZoomDecimal
+      let thresholdHeight = (context.rootState.viewportHeight * zoom) / multiplier
+      let thresholdWidth = (context.rootState.viewportWidth * zoom) / multiplier
+      const pageWidth = context.rootState.pageWidth
+      const pageHeight = context.rootState.pageHeight
+      const shouldIncreasePageWidth = (card.x + card.width + thresholdWidth) > pageWidth
+      const shouldIncreasePageHeight = (card.y + card.height + thresholdHeight) > pageHeight
+      if (shouldIncreasePageWidth) {
+        const width = pageWidth + thresholdWidth
+        context.commit('pageWidth', width, { root: true })
+      }
+      if (shouldIncreasePageHeight) {
+        const height = pageHeight + thresholdHeight
+        context.commit('pageHeight', height, { root: true })
+      }
     },
 
     // z-index
@@ -495,6 +515,7 @@ const currentCards = {
       const zoom = context.rootState.spaceZoomPercent / 100
       cardMap.postMessage({ cards, viewport, zoom })
     }
+
   },
   getters: {
     byId: (state) => (id) => {

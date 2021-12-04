@@ -1500,6 +1500,7 @@ export default {
         this.resetTextareaHeight()
         this.$nextTick(() => {
           this.startOpening()
+          this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId, multiplier: 2 })
         })
       })
       this.previousSelectedTag = {}
@@ -1527,6 +1528,7 @@ export default {
       this.$store.dispatch('updatePageSizes')
       this.$nextTick(() => {
         this.updateCardMap(cardId)
+        this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId })
       })
     }
   },
@@ -1536,8 +1538,6 @@ export default {
         this.closeCard()
       }
     },
-    // https://v3.vuejs.org/guide/migration/watch.html
-    // watching arrays doesn't work for changes anymore (only whole replacement, unless 'deep', option is specified)
     validWebUrls: {
       handler (urls) {
         let url = urls[0]
@@ -1552,6 +1552,8 @@ export default {
           this.debouncedUpdateUrlPreview(url)
         }
       },
+      // https://v3.vuejs.org/guide/migration/watch.html
+      // watching arrays doesn't work for changes anymore (only whole replacement, unless 'deep', option is specified)
       deep: true
     }
   }

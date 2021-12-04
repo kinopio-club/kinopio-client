@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.image-picker(
+dialog.image-picker(
   v-if="visible"
   :open="visible"
   @click.left.stop
@@ -9,7 +9,7 @@ dialog.narrow.image-picker(
 )
   section(v-if="!isBackgroundImage" ref="cardImageServiceSection")
     //- card images
-    .row
+    .row.title-row-flex
       .segmented-buttons
         button(@click.left.stop="toggleServiceIsStickers" :class="{active : serviceIsStickers}" title="stickers")
           img.icon.sticker(src="@/assets/sticker.svg")
@@ -48,7 +48,7 @@ dialog.narrow.image-picker(
 
   //- background images
   section(v-if="isBackgroundImage" ref="serviceSection")
-    .row
+    .row.title-row-flex
       .segmented-buttons
         button(@click.left.stop="toggleServiceIsBackgrounds" :class="{active : serviceIsBackgrounds}")
           span Backgrounds
@@ -649,5 +649,9 @@ export default {
 
   .animated-button-wrap
     margin 8px
+
+  .title-row-flex
+    display flex
+    justify-content space-between
 
 </style>
