@@ -126,6 +126,7 @@ export default {
     spaceOtherCardUsers () {
       const currentUserId = this.$store.state.currentUser.id
       let users = this.$store.getters['currentCards/users']
+      users = users.filter(user => Boolean(user))
       // remove currentUser
       users = users.filter(user => user.id !== currentUserId)
       // remove collaborators
