@@ -4,7 +4,7 @@ dialog.image-picker(
   :open="visible"
   @click.left.stop
   ref="dialog"
-  :class="{'background-image-picker' : isBackgroundImage, 'right-side': showOnRightSide}"
+  :class="{'background-image-picker' : isBackgroundImage }"
   :style="{'max-height': dialogHeight + 'px', 'min-height': minDialogHeight + 'px'}"
 )
   section(v-if="!isBackgroundImage" ref="cardImageServiceSection")
@@ -159,7 +159,6 @@ export default {
       search: '',
       service: 'stickers', // 'stickers', 'gifs', 'arena', 'backgrounds'
       loading: false,
-      showOnRightSide: false,
       minDialogHeight: null,
       dialogHeight: null,
       resultsSectionHeight: null,
@@ -498,14 +497,6 @@ export default {
         }
       }
     },
-    checkIfShouldBeOnRightSide () {
-      this.showOnRightSide = false
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.showOnRightSide = utils.elementShouldBeOnRightSide(element)
-      })
-    },
     heightIsSignificantlyDifferent (height) {
       const thresholdDelta = 100
       if (!this.resultsSectionHeight) { return true }
@@ -566,7 +557,6 @@ export default {
             this.updateHeightFromFooter()
             return
           }
-          this.checkIfShouldBeOnRightSide()
           this.searchService()
           this.focusSearchInput()
         }
@@ -639,10 +629,6 @@ export default {
 
   &.background-image-picker
     padding-top 4px
-
-  &.right-side
-    left initial
-    right 8px
 
   .sticker
     vertical-align -2px
