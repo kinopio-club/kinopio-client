@@ -1500,7 +1500,7 @@ export default {
         this.resetTextareaHeight()
         this.$nextTick(() => {
           this.startOpening()
-          this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId, multiplier: 2 })
+          this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId })
         })
       })
       this.previousSelectedTag = {}

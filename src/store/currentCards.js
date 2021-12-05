@@ -404,12 +404,11 @@ const currentCards = {
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
       context.dispatch('checkIfShouldIncreasePageSize', { cardId: currentDraggingCardId })
     },
-    checkIfShouldIncreasePageSize: (context, { cardId, multiplier }) => {
-      multiplier = multiplier || 4
+    checkIfShouldIncreasePageSize: (context, { cardId }) => {
       const card = context.getters.byId(cardId)
       const zoom = context.rootGetters.spaceZoomDecimal
-      let thresholdHeight = (context.rootState.viewportHeight * zoom) / multiplier
-      let thresholdWidth = (context.rootState.viewportWidth * zoom) / multiplier
+      let thresholdHeight = (context.rootState.viewportHeight * zoom) / 4
+      let thresholdWidth = (context.rootState.viewportWidth * zoom) / 4
       const pageWidth = context.rootState.pageWidth
       const pageHeight = context.rootState.pageHeight
       const shouldIncreasePageWidth = (card.x + card.width + thresholdWidth) > pageWidth
