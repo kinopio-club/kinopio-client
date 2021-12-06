@@ -71,7 +71,6 @@ const store = createStore({
 
     currentUserIsResizingCard: false,
     currentUserIsResizingCardIds: [],
-    cardResizeIStartPosition: {},
 
     // cards
     shouldAddCard: false,
@@ -481,10 +480,6 @@ const store = createStore({
     currentUserIsResizingCardIds: (state, cardIds) => {
       utils.typeCheck({ value: cardIds, type: 'array', origin: 'currentUserIsResizingCardIds' })
       state.currentUserIsResizingCardIds = cardIds
-    },
-    cardResizeIStartPosition: (state, position) => {
-      utils.typeCheck({ value: position, type: 'object', origin: 'cardResizeIStartPosition' })
-      state.cardResizeIStartPosition = position
     },
 
     // Dragging

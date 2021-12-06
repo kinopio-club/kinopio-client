@@ -1066,7 +1066,6 @@ export default {
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.dispatch('clearMultipleSelected')
       this.$store.commit('currentUserIsResizingCard', true)
-      this.$store.commit('cardResizeIStartPosition', utils.cursorPositionInPage(event))
       this.$store.commit('currentUserIsResizingCardIds', [this.id])
       // TODO if multiple cards selected then add them in here
       // TODODO during resize only change cards that are resizable

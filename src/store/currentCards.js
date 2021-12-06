@@ -319,6 +319,21 @@ const currentCards = {
       })
     },
 
+    // resize
+
+    resize: (context, { cardIds, deltaX }) => {
+      console.log('♥️', cardIds, deltaX)
+      cardIds.forEach(cardId => {
+        const card = context.getters.byId(cardId)
+        let width = card.resizeWidth || card.width
+        width = width + deltaX
+        context.dispatch('update', {
+          id: cardId,
+          resizeWidth: width
+        })
+      })
+    },
+
     // move
 
     move: (context, { endCursor, prevCursor, delta }) => {

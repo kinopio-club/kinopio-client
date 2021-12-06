@@ -283,6 +283,11 @@ export default {
         endCursor.x = prevCursor.x
       }
     },
+    resizeCards () {
+      const cardIds = this.$store.state.currentUserIsResizingCardIds
+      const deltaX = endCursor.x - prevCursor.x
+      this.$store.dispatch('currentCards/resize', { cardIds, deltaX })
+    },
     interact (event) {
       endCursor = utils.cursorPositionInViewport(event)
       if (this.isDraggingCard) {
@@ -293,12 +298,7 @@ export default {
         this.drawConnection()
       }
       if (this.isResizingCard) {
-        const cardIds = this.$store.state.currentUserIsResizingCardIds
-        const startPosition = this.$store.state.cardResizeIStartPosition
-        const xDelta = endCursor.x - startPosition.x
-        const yDelta = endCursor.y - startPosition.y
-
-        console.log('♥️', cardIds, startPosition, endCursor, xDelta, yDelta)
+        this.resizeCards()
       }
       prevCursor = utils.cursorPositionInViewport(event)
     },
