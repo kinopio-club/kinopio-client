@@ -1,5 +1,5 @@
 <template lang="pug">
-article(:style="position" :data-card-id="id" ref="card")
+article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': isResizing}")
   .card(
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
@@ -281,6 +281,7 @@ export default {
     }
   },
   computed: {
+    isResizing () { return this.$store.state.currentUserIsResizingCard },
     resizeWidth () {
       if (!this.resizeIsVisible) { return }
       const resizeWidth = this.card.resizeWidth
@@ -1374,6 +1375,9 @@ article
   pointer-events all
   position absolute
   max-width 235px
+  &.is-resizing
+    *
+      outline none
   .card
     border-radius 3px
     user-select none
