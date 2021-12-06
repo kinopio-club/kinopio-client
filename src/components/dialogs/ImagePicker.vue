@@ -99,19 +99,6 @@ dialog.image-picker(
           a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
             button.small-button {{image.sourceUserName}} →
 
-    template(v-if="serviceIsBackgrounds")
-      .button-wrap.animated-button-wrap
-        button(:class="{active: animatedBackgroundsVisible}" @click.left.prevent="toggleAnimatedBackgroundsVisible" @keydown.stop.enter="toggleAnimatedBackgroundsVisible")
-          img.icon(v-if="animatedBackgroundsVisible" src="@/assets/view.svg")
-          img.icon(v-else src="@/assets/view-hidden.svg")
-          span Animated
-      ul.results-list.image-list(v-if="animatedBackgroundsVisible")
-        template(v-for="image in animatedBackgroundImages" :key="image.id")
-          li(@click.left="selectImage(image)" tabindex="0" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
-            img(:src="image.previewUrl")
-            a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
-              button.small-button {{image.sourceUserName}} →
-
 </template>
 
 <script>
@@ -119,7 +106,6 @@ import scrollIntoView from '@/scroll-into-view.js'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import backgroundImages from '@/data/backgroundImages.json'
-import backgroundImagesAnimated from '@/data/backgroundImagesAnimated.json'
 
 import debounce from 'lodash-es/debounce'
 import sampleSize from 'lodash-es/sampleSize'
@@ -169,9 +155,7 @@ export default {
         sizeLimit: false,
         unknownUploadError: false
       },
-      backgroundsIsStatic: true,
-      animatedBackgroundsVisible: false,
-      animatedBackgroundImages: []
+      backgroundsIsStatic: true
     }
   },
   computed: {
@@ -240,17 +224,6 @@ export default {
       this.service = 'backgrounds'
       this.searchAgainBackgrounds()
     },
-    toggleAnimatedBackgroundsVisible () {
-      this.animatedBackgroundsVisible = !this.animatedBackgroundsVisible
-      this.searchAgainBackgrounds()
-      if (this.animatedBackgroundsVisible) {
-        const results = this.$refs.results
-        const currentY = results.scrollHeight
-        this.$nextTick(() => {
-          results.scrollTop = currentY
-        })
-      }
-    },
     toggleServiceIsArena () {
       this.service = 'arena'
       this.searchAgain()
@@ -266,9 +239,6 @@ export default {
     searchAgainBackgrounds () {
       let images
       images = backgroundImages
-      if (this.animatedBackgroundsVisible) {
-        this.normalizeBackgroundImages(backgroundImagesAnimated)
-      }
       this.normalizeResults(images, 'backgrounds')
     },
     searchAgain () {
@@ -433,13 +403,6 @@ export default {
         this.scrollIntoView()
       }
     },
-    normalizeBackgroundImages (images) {
-      this.animatedBackgroundImages = images.map(image => {
-        image.sourceUserName = null
-        image.previewUrl = image.url
-        return image
-      })
-    },
     focusSearchInput () {
       if (utils.isMobile()) { return }
       const element = this.$refs.searchInput
@@ -548,7 +511,6 @@ export default {
   },
   watch: {
     visible (visible) {
-      this.animatedBackgroundsVisible = false
       this.$nextTick(() => {
         if (visible) {
           this.search = this.initialSearch
@@ -558,6 +520,7 @@ export default {
             return
           }
           this.searchService()
+
           this.focusSearchInput()
         }
       })
@@ -632,9 +595,6 @@ export default {
 
   .sticker
     vertical-align -2px
-
-  .animated-button-wrap
-    margin 8px
 
   .title-row-flex
     display flex
