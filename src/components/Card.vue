@@ -12,7 +12,7 @@ article(:style="position" :data-card-id="id" ref="card")
     @keyup.stop.backspace="removeCard"
 
     :class="{jiggle: shouldJiggle, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': isAudioCard, 'is-playing-audio': isPlayingAudio}",
-    :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor || selectedColorUpload || remoteCardDraggingColor || remoteUploadDraggedOverCardColor }"
+    :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor || selectedColorUpload || remoteCardDraggingColor || remoteUploadDraggedOverCardColor, width: resizeWidth, 'max-width': resizeWidth}"
     :data-card-id="id"
     :data-card-x="x"
     :data-card-y="y"
@@ -37,7 +37,7 @@ article(:style="position" :data-card-id="id" ref="card")
       img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}" @load="updateCardMap")
       img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelectedOrDragging}" @load="updateCardMap")
 
-    span.card-content-wrap
+    span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
       //- Comment
       .card-comment(v-if="nameIsComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- [·]
@@ -281,6 +281,12 @@ export default {
     }
   },
   computed: {
+    resizeWidth () {
+      if (!this.resizeIsVisible) { return }
+      const resizeWidth = this.card.resizeWidth
+      if (!resizeWidth) { return }
+      return resizeWidth + 'px'
+    },
     resizeIsVisible () {
       return Boolean(this.formats.image || this.formats.video) && this.canEditCard
     },

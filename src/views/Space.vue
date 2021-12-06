@@ -287,6 +287,11 @@ export default {
       const cardIds = this.$store.state.currentUserIsResizingCardIds
       const deltaX = endCursor.x - prevCursor.x
       this.$store.dispatch('currentCards/resize', { cardIds, deltaX })
+      this.$store.dispatch('currentCards/updateCardMap')
+      cardIds.forEach(cardId => {
+        this.$store.dispatch('currentCards/updateDimensions', cardId)
+        this.$store.dispatch('currentConnections/updatePaths', { cardId, shouldUpdateApi: true })
+      })
     },
     interact (event) {
       endCursor = utils.cursorPositionInViewport(event)

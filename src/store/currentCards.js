@@ -322,11 +322,12 @@ const currentCards = {
     // resize
 
     resize: (context, { cardIds, deltaX }) => {
-      console.log('♥️', cardIds, deltaX)
+      const minImageWidth = 64
       cardIds.forEach(cardId => {
         const card = context.getters.byId(cardId)
         let width = card.resizeWidth || card.width
         width = width + deltaX
+        width = Math.max(minImageWidth, width)
         context.dispatch('update', {
           id: cardId,
           resizeWidth: width
