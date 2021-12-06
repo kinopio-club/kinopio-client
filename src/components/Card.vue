@@ -1074,6 +1074,7 @@ export default {
       this.$store.dispatch('clearMultipleSelected')
       this.$store.commit('currentUserIsResizingCard', true)
       this.$store.commit('currentUserIsResizingCardIds', [this.id])
+      this.$store.dispatch('currentCards/incrementZ', this.id)
       // TODO if multiple cards selected then add them in here
       // TODODO during resize only change cards that are resizable
     },
