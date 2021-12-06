@@ -406,6 +406,7 @@ const currentCards = {
     },
     checkIfShouldIncreasePageSize: (context, { cardId }) => {
       const card = context.getters.byId(cardId)
+      if (!card) { return }
       const zoom = context.rootGetters.spaceZoomDecimal
       let thresholdHeight = (context.rootState.viewportHeight * zoom) / 4
       let thresholdWidth = (context.rootState.viewportWidth * zoom) / 4

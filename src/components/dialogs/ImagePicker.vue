@@ -422,7 +422,6 @@ export default {
     },
     scrollIntoView () {
       if (!this.visible) { return }
-      if (utils.isMobile()) { return }
       if (this.isBackgroundImage) {
         this.updateHeightFromFooter()
         return
@@ -518,9 +517,10 @@ export default {
             this.toggleServiceIsBackgrounds()
             this.updateHeightFromFooter()
             return
+          } else {
+            this.scrollIntoView()
           }
           this.searchService()
-
           this.focusSearchInput()
         }
       })
