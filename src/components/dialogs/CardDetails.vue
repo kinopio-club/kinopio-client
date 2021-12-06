@@ -983,6 +983,9 @@ export default {
       this.closeDialogs()
       const isVisible = !this.$store.state.currentUser.shouldShowCardCollaborationInfo
       this.$store.dispatch('currentUser/shouldShowCardCollaborationInfo', isVisible)
+      this.$nextTick(() => {
+        this.scrollIntoView()
+      })
     },
     focusName (position) {
       const element = this.$refs.name
