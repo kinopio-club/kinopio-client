@@ -123,7 +123,7 @@ article(:style="position" :data-card-id="id" ref="card")
           //- doubleclick="clearResize"
           button.inline-button(tabindex="-1")
             //- class="{ active: isResizing
-            img.connector-icon(src="@/assets/connector-closed.svg")
+            img.resize-icon(src="@/assets/resize.svg")
             // TODO resize.svg
 
     .url-preview-wrap(v-if="cardUrlPreviewIsVisible && !isHiddenInComment")
@@ -1507,6 +1507,10 @@ article
       position absolute
       left 4px
       top 2px
+    .resize-icon
+      position absolute
+      left 4px
+      top 4.5px
     .arrow-icon
       position absolute
       left 5px
