@@ -488,7 +488,9 @@ export default {
       return {
         left: `${this.x}px`,
         top: `${this.y}px`,
-        zIndex: z
+        zIndex: z,
+        width: this.resizeWidth,
+        maxWidth: this.resizeWidth
       }
     },
     canEditCard () {
