@@ -71,6 +71,7 @@ const store = createStore({
 
     currentUserIsResizingCard: false,
     currentUserIsResizingCardIds: [],
+    remoteUserResizingCards: [],
 
     // cards
     shouldAddCard: false,
@@ -480,6 +481,13 @@ const store = createStore({
     currentUserIsResizingCardIds: (state, cardIds) => {
       utils.typeCheck({ value: cardIds, type: 'array', origin: 'currentUserIsResizingCardIds' })
       state.currentUserIsResizingCardIds = cardIds
+    },
+    removeRemoteUserResizingCards: (state, update) => {
+      state.remoteUserResizingCards = state.remoteUserResizingCards.filter(remoteUser => remoteUser.userId !== update.userId)
+    },
+    updateRemoteUserResizingCards: (state, update) => {
+      state.remoteUserResizingCards = state.remoteUserResizingCards.filter(remoteUser => remoteUser.userId !== update.userId)
+      state.remoteUserResizingCards = state.remoteUserResizingCards.concat(update)
     },
 
     // Dragging

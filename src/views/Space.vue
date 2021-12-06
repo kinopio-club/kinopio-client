@@ -502,6 +502,7 @@ export default {
       //   currentConnection: this.$store.state.currentConnection
       // }
       console.log('💣 stopInteractions') // stopInteractions and Space/stopPainting are run on all mouse and touch end events
+      const currentUser = this.$store.state.currentUser
       this.addInteractionBlur()
       if (event.touches) {
         this.$store.commit('triggerUpdatePositionInVisualViewport')
@@ -524,7 +525,10 @@ export default {
       this.$store.commit('shouldAddCard', false)
       this.$store.commit('preventDraggedCardFromShowingDetails', false)
       this.$store.commit('currentUserIsDrawingConnection', false)
-      this.$store.commit('currentUserIsResizingCard', false)
+      if (this.$store.state.currentUserIsResizingCard) {
+        this.$store.commit('currentUserIsResizingCard', false)
+        this.$store.commit('broadcast/updateStore', { updates: { userId: currentUser.id }, type: 'removeRemoteUserResizingCards' })
+      }
       this.$store.commit('currentUserIsPainting', false)
       this.$store.commit('currentUserIsPaintingLocked', false)
       if (this.isDraggingCard) {
@@ -536,7 +540,7 @@ export default {
       const isCurrentConnection = utils.objectHasKeys(this.$store.state.currentConnection)
       if (isCurrentConnection) {
         this.$store.commit('currentConnection', {})
-        this.$store.commit('broadcast/updateStore', { updates: { id: this.$store.state.currentUser.id }, type: 'removeRemoteCurrentConnection' })
+        this.$store.commit('broadcast/updateStore', { updates: { id: currentUser.id }, type: 'removeRemoteCurrentConnection' })
       }
       this.updatePageSizes()
       this.$store.commit('prevCursorPosition', utils.cursorPositionInPage(event))

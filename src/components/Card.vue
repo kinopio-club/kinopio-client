@@ -12,7 +12,7 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
     @keyup.stop.backspace="removeCard"
 
     :class="{jiggle: shouldJiggle, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': isAudioCard, 'is-playing-audio': isPlayingAudio}",
-    :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor || selectedColorUpload || remoteCardDraggingColor || remoteUploadDraggedOverCardColor, width: resizeWidth, 'max-width': resizeWidth}"
+    :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor || selectedColorUpload || remoteCardDraggingColor || remoteUploadDraggedOverCardColor || remoteUserResizingCardsColor, width: resizeWidth, 'max-width': resizeWidth}"
     :data-card-id="id"
     :data-card-x="x"
     :data-card-y="y"
@@ -298,7 +298,7 @@ export default {
       return this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.isRemoteCardDragging
     },
     isSelectedOrDragging () {
-      return this.isSelected || this.isRemoteSelected || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.uploadIsDraggedOver || this.remoteUploadDraggedOverCardColor
+      return this.isSelected || this.isRemoteSelected || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.uploadIsDraggedOver || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor
     },
     shouldUpdateDimensions () {
       return Boolean(!this.card.width || !this.card.height)
@@ -682,6 +682,17 @@ export default {
       const draggingCard = remoteCardsDragging.find(card => card.cardId === this.id)
       if (draggingCard) {
         const user = this.$store.getters['currentSpace/userById'](draggingCard.userId)
+        return user.color
+      } else {
+        return undefined
+      }
+    },
+    remoteUserResizingCardsColor () {
+      const remoteUserResizingCards = this.$store.state.remoteUserResizingCards
+      if (!remoteUserResizingCards.length) { return }
+      let user = remoteUserResizingCards.find(user => user.cardIds.includes(this.id))
+      if (user) {
+        user = this.$store.getters['currentSpace/userById'](user.userId)
         return user.color
       } else {
         return undefined
@@ -1082,10 +1093,16 @@ export default {
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.dispatch('clearMultipleSelected')
       this.$store.commit('currentUserIsResizingCard', true)
-      this.$store.commit('currentUserIsResizingCardIds', [this.id])
       this.$store.dispatch('currentCards/incrementZ', this.id)
-      // TODO if multiple cards selected then add them in here
+
+      // TODO [this.id] : if multiple cards selected then add them in here
       // TODODO during resize only change cards that are resizable
+      this.$store.commit('currentUserIsResizingCardIds', [this.id])
+      const updates = {
+        userId: this.$store.state.currentUser.id,
+        cardIds: [this.id]
+      }
+      this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingCards' })
     },
     toggleCommentIsVisible (event) {
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
