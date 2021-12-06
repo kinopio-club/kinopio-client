@@ -375,7 +375,13 @@ export default {
     },
     cardButtonsWrapStyle () {
       if (!this.resizeIsVisible) { return }
-      return { height: this.card.height + 'px' }
+      const zoom = this.$store.getters.spaceCounterZoomDecimal
+      let cardHeight = this.card.height
+      const element = this.$refs.card
+      if (element) {
+        cardHeight = element.getBoundingClientRect().height
+      }
+      return { height: (cardHeight * zoom) + 'px' }
     },
     connectedToConnectionDetailsIsVisibleColor () {
       const connectionId = this.$store.state.connectionDetailsIsVisibleForConnectionId
