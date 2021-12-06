@@ -86,7 +86,7 @@ article(:style="position" :data-card-id="id" ref="card")
             Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
-      span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}")
+      span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}" :style="{height: card.height + 'px'}")
         //- Url →
         a.url-wrap(:href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" v-if="cardButtonUrl && !nameIsComment" :class="{'connector-is-visible': connectorIsVisible}")
           .url.inline-button-wrap
@@ -113,6 +113,16 @@ article(:style="position" :data-card-id="id" ref="card")
               img.connector-icon(src="@/assets/connector-closed.svg")
             template(v-else)
               img.connector-icon(src="@/assets/connector-open.svg")
+        //- resize
+        .inline-button-wrap.resize-button-wrap(v-if="resizeIsVisible")
+          //- && !isBeingDragged
+          //- @mousedown.left="startResizing"
+          //- doubleclick="clearResize"
+          //- @touchstart="startResizing" , have to hold to trigger, like mobile move
+          button.inline-button(tabindex="-1")
+            //- class="{ active: isResizing
+            img.connector-icon(src="@/assets/connector-closed.svg")
+            // resize.svg
 
     .url-preview-wrap(v-if="cardUrlPreviewIsVisible && !isHiddenInComment")
       UrlPreview(
@@ -269,6 +279,9 @@ export default {
     }
   },
   computed: {
+    resizeIsVisible () {
+      return Boolean(this.formats.image || this.formats.video) && this.canEditCard
+    },
     shouldJiggle () {
       return this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.isRemoteCardDragging
     },
@@ -1425,6 +1438,7 @@ article
 
     .connector
       position relative
+      height 32px
       .connector-glow
         position absolute
         width 36px
@@ -1548,6 +1562,13 @@ article
       margin-top 8px
       margin-left 8px
 
+  .resize-button-wrap
+    position absolute
+    right 0px
+    bottom 0px
+    cursor ew-resize
+    button
+      cursor ew-resize
   .meta-container
     margin-top -6px
     display flex
