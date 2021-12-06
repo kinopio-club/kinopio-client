@@ -284,6 +284,7 @@ export default {
       }
     },
     resizeCards () {
+      if (!prevCursor) { return }
       const cardIds = this.$store.state.currentUserIsResizingCardIds
       const deltaX = endCursor.x - prevCursor.x
       this.$store.dispatch('currentCards/resize', { cardIds, deltaX })

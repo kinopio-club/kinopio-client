@@ -119,12 +119,9 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
           @mousedown.left.stop="startResizing"
           @touchstart.stop="startResizing"
         )
-          //- , have to hold to trigger, like mobile move
           //- doubleclick="clearResize"
           button.inline-button(tabindex="-1")
-            //- class="{ active: isResizing
             img.resize-icon(src="@/assets/resize.svg")
-            // TODO resize.svg
 
     .url-preview-wrap(v-if="cardUrlPreviewIsVisible && !isHiddenInComment")
       UrlPreview(
@@ -1091,10 +1088,8 @@ export default {
       if (utils.isMultiTouch(event)) { return }
       this.$store.dispatch('closeAllDialogs', 'Card.startResizing')
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
-      this.$store.dispatch('clearMultipleSelected')
-      this.$store.commit('currentUserIsResizingCard', true)
       this.$store.dispatch('currentCards/incrementZ', this.id)
-
+      this.$store.commit('currentUserIsResizingCard', true)
       // TODO [this.id] : if multiple cards selected then add them in here
       // TODODO during resize only change cards that are resizable
       this.$store.commit('currentUserIsResizingCardIds', [this.id])
@@ -1351,7 +1346,7 @@ export default {
     },
     updateCurrentTouchPosition (event) {
       currentTouchPosition = utils.cursorPositionInViewport(event)
-      if (this.isBeingDragged) {
+      if (this.isBeingDragged || this.isResizing) {
         event.preventDefault() // allows dragging cards without scrolling
       }
     },
@@ -1402,6 +1397,7 @@ article
   pointer-events all
   position absolute
   max-width 235px
+  -webkit-touch-callout none
   &.is-resizing
     *
       outline none
