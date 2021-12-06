@@ -189,6 +189,7 @@ export default {
     isPanningReady () { return this.$store.state.currentUserIsPanningReady },
     spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
     isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
+    isResizingCard () { return this.$store.state.currentUserIsResizingCard },
     isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
     connections () { return this.$store.getters['currentConnections/all'] },
     viewportHeight () { return this.$store.state.viewportHeight },
@@ -196,7 +197,7 @@ export default {
     pageHeight () { return this.$store.state.pageHeight },
     pageWidth () { return this.$store.state.pageWidth },
     isInteracting () {
-      if (this.isDraggingCard || this.isDrawingConnection) {
+      if (this.isDraggingCard || this.isDrawingConnection || this.isResizingCard) {
         return true
       } else { return false }
     },
@@ -290,6 +291,14 @@ export default {
       }
       if (this.isDrawingConnection) {
         this.drawConnection()
+      }
+      if (this.isResizingCard) {
+        const cardIds = this.$store.state.currentUserIsResizingCardIds
+        const startPosition = this.$store.state.cardResizeIStartPosition
+        const xDelta = endCursor.x - startPosition.x
+        const yDelta = endCursor.y - startPosition.y
+
+        console.log('♥️', cardIds, startPosition, endCursor, xDelta, yDelta)
       }
       prevCursor = utils.cursorPositionInViewport(event)
     },
@@ -515,6 +524,7 @@ export default {
       this.$store.commit('shouldAddCard', false)
       this.$store.commit('preventDraggedCardFromShowingDetails', false)
       this.$store.commit('currentUserIsDrawingConnection', false)
+      this.$store.commit('currentUserIsResizingCard', false)
       this.$store.commit('currentUserIsPainting', false)
       this.$store.commit('currentUserIsPaintingLocked', false)
       if (this.isDraggingCard) {

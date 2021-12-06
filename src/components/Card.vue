@@ -114,15 +114,17 @@ article(:style="position" :data-card-id="id" ref="card")
             template(v-else)
               img.connector-icon(src="@/assets/connector-open.svg")
         //- resize
-        .inline-button-wrap.resize-button-wrap(v-if="resizeIsVisible")
-          //- && !isBeingDragged
-          //- @mousedown.left="startResizing"
+        .resize-button-wrap.inline-button-wrap(
+          v-if="resizeIsVisible"
+          @mousedown.left.stop="startResizing"
+          @touchstart.stop="startResizing"
+        )
+          //- , have to hold to trigger, like mobile move
           //- doubleclick="clearResize"
-          //- @touchstart="startResizing" , have to hold to trigger, like mobile move
           button.inline-button(tabindex="-1")
             //- class="{ active: isResizing
             img.connector-icon(src="@/assets/connector-closed.svg")
-            // resize.svg
+            // TODO resize.svg
 
     .url-preview-wrap(v-if="cardUrlPreviewIsVisible && !isHiddenInComment")
       UrlPreview(
@@ -1057,6 +1059,18 @@ export default {
       }
       this.$store.commit('currentUserIsDrawingConnection', true)
     },
+    startResizing (event) {
+      if (!this.canEditSpace) { return }
+      if (utils.isMultiTouch(event)) { return }
+      this.$store.dispatch('closeAllDialogs', 'Card.startResizing')
+      this.$store.commit('preventDraggedCardFromShowingDetails', true)
+      this.$store.dispatch('clearMultipleSelected')
+      this.$store.commit('currentUserIsResizingCard', true)
+      this.$store.commit('cardResizeIStartPosition', utils.cursorPositionInPage(event))
+      this.$store.commit('currentUserIsResizingCardIds', [this.id])
+      // TODO if multiple cards selected then add them in here
+      // TODODO during resize only change cards that are resizable
+    },
     toggleCommentIsVisible (event) {
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       if (utils.isMultiTouch(event)) { return }
@@ -1233,6 +1247,7 @@ export default {
 
     // Touch
 
+    // TODO notifyPressAndHoldToResize
     notifyPressAndHoldToDrag () {
       const isDrawingConnection = this.$store.state.currentUserIsDrawingConnection
       if (isDrawingConnection) { return }
@@ -1569,6 +1584,8 @@ article
     cursor ew-resize
     button
       cursor ew-resize
+    img
+      -webkit-user-drag none
   .meta-container
     margin-top -6px
     display flex

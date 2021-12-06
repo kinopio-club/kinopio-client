@@ -67,6 +67,12 @@ const store = createStore({
     currentUserIsPanningReady: false,
     currentUserIsPanning: false,
 
+    // resizing
+
+    currentUserIsResizingCard: false,
+    currentUserIsResizingCardIds: [],
+    cardResizeIStartPosition: {},
+
     // cards
     shouldAddCard: false,
     cardDetailsIsVisibleForCardId: '',
@@ -464,6 +470,21 @@ const store = createStore({
     currentUserIsPaintingLocked: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsPaintingLocked' })
       state.currentUserIsPaintingLocked = value
+    },
+
+    // Resizing
+
+    currentUserIsResizingCard: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsResizingCard' })
+      state.currentUserIsResizingCard = value
+    },
+    currentUserIsResizingCardIds: (state, cardIds) => {
+      utils.typeCheck({ value: cardIds, type: 'array', origin: 'currentUserIsResizingCardIds' })
+      state.currentUserIsResizingCardIds = cardIds
+    },
+    cardResizeIStartPosition: (state, position) => {
+      utils.typeCheck({ value: position, type: 'object', origin: 'cardResizeIStartPosition' })
+      state.cardResizeIStartPosition = position
     },
 
     // Dragging
