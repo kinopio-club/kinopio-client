@@ -86,7 +86,7 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
             Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
-      span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}" :style="{height: card.height + 'px'}")
+      span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}" :style="cardButtonsWrapStyle")
         //- Url →
         a.url-wrap(:href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" v-if="cardButtonUrl && !nameIsComment" :class="{'connector-is-visible': connectorIsVisible}")
           .url.inline-button-wrap
@@ -243,7 +243,7 @@ export default {
   mounted () {
     if (this.shouldUpdateDimensions) {
       let card = { id: this.card.id }
-      card = utils.updateCardDimentions(card)
+      card = utils.updateCardDimensions(card)
       this.$store.dispatch('currentCards/update', card)
     }
     const shouldShowDetails = this.$store.state.loadSpaceShowDetailsForCardId === this.card.id
@@ -372,6 +372,10 @@ export default {
       const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor || this.connectedToConnectionDetailsIsVisibleColor
       if (!color) { return }
       return { background: color }
+    },
+    cardButtonsWrapStyle () {
+      if (!this.resizeIsVisible) { return }
+      return { height: this.card.height + 'px' }
     },
     connectedToConnectionDetailsIsVisibleColor () {
       const connectionId = this.$store.state.connectionDetailsIsVisibleForConnectionId

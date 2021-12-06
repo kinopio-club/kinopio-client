@@ -277,7 +277,7 @@ const currentCards = {
           height: card.height
         }
         nextTick(() => {
-          card = utils.updateCardDimentions(card)
+          card = utils.updateCardDimensions(card)
           const dimensionsChanged = card.width !== prevDimensions.width || card.height !== prevDimensions.height
           if (!dimensionsChanged) { return }
           const body = {
@@ -332,7 +332,10 @@ const currentCards = {
           id: cardId,
           resizeWidth: width
         })
+        context.dispatch('updateDimensions', cardId)
+        context.dispatch('currentConnections/updatePaths', { cardId, shouldUpdateApi: true }, { root: true })
       })
+      context.dispatch('updateCardMap')
     },
 
     // move
