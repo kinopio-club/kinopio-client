@@ -328,10 +328,9 @@ const currentCards = {
         let width = card.resizeWidth || card.width
         width = width + deltaX
         width = Math.max(minImageWidth, width)
-        context.dispatch('update', {
-          id: cardId,
-          resizeWidth: width
-        })
+        const updates = { id: cardId, resizeWidth: width }
+        context.dispatch('update', updates)
+        context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
         context.dispatch('updateDimensions', cardId)
         context.dispatch('currentConnections/updatePaths', { cardId, shouldUpdateApi: true }, { root: true })
       })

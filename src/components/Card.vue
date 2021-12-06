@@ -115,7 +115,7 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
               img.connector-icon(src="@/assets/connector-open.svg")
         //- resize
         .resize-button-wrap.inline-button-wrap(
-          v-if="resizeIsVisible"
+          v-if="resizeControlIsVisible"
           @mousedown.left.stop="startResizing"
           @touchstart.stop="startResizing"
         )
@@ -289,7 +289,10 @@ export default {
       return resizeWidth + 'px'
     },
     resizeIsVisible () {
-      return Boolean(this.formats.image || this.formats.video) && this.canEditCard
+      return Boolean(this.formats.image || this.formats.video)
+    },
+    resizeControlIsVisible () {
+      return this.resizeIsVisible && this.canEditCard
     },
     shouldJiggle () {
       return this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.isRemoteCardDragging
