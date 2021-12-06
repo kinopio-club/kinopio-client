@@ -399,8 +399,10 @@ export default {
         })
       }
       if (!this.isBackgroundImage) {
-        this.updateHeightFromDialog()
-        this.scrollIntoView()
+        this.$nextTick(() => {
+          this.updateHeightFromDialog()
+          this.scrollIntoView()
+        })
       }
     },
     focusSearchInput () {
