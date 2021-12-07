@@ -251,7 +251,7 @@ export default {
       if (defaultArenaBlocksData) {
         data = defaultArenaBlocksData
       } else {
-        const defaultChannels = ['mood-imagined', 'good-w8twljfeosy', 'natur-i0sr6kdr1xq', 'colon-caret-bracket-vdm6ix4mr_8', 'ggggraphic']
+        const defaultChannels = ['mood-imagined', 'good-w8twljfeosy', 'natur-i0sr6kdr1xq', 'ggggraphic']
         const channel = sample(defaultChannels)
         url = new URL(`https://api.are.na/v2/channels/${channel}/contents`)
         params = {
@@ -261,7 +261,9 @@ export default {
         const response = await fetch(url)
         data = await response.json()
         data.blocks = data.contents
-        data.blocks = data.blocks.filter(block => block.image)
+        data.blocks = data.blocks.filter(block => {
+          return block.image && block.class !== 'Link'
+        })
         data.blocks = data.blocks.map(block => {
           let image = {}
           image.image = block.image
@@ -358,7 +360,9 @@ export default {
       const giphy = service === 'giphy' && (this.serviceIsStickers || this.serviceIsGifs)
       const backgrounds = service === 'backgrounds' && this.serviceIsBackgrounds
       if (arena) {
-        data.blocks = data.blocks.filter(image => Boolean(image.image))
+        data.blocks = data.blocks.filter(image => {
+          return Boolean(image.image) && image.class !== 'Link'
+        })
         this.images = data.blocks.map(image => {
           const url = image.image.original.url
           let username
