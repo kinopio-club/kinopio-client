@@ -336,6 +336,18 @@ const currentCards = {
       })
       context.dispatch('updateCardMap')
     },
+    removeResize: (context, { cardIds }) => {
+      cardIds.forEach(cardId => {
+        const updates = { id: cardId, resizeWidth: null }
+        context.dispatch('update', updates)
+        context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
+        nextTick(() => {
+          context.dispatch('updateDimensions', cardId)
+          context.dispatch('currentConnections/updatePaths', { cardId, shouldUpdateApi: true }, { root: true })
+        })
+      })
+      context.dispatch('updateCardMap')
+    },
 
     // move
 

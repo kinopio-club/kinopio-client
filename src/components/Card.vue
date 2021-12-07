@@ -118,8 +118,8 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
           v-if="resizeControlIsVisible"
           @mousedown.left.stop="startResizing"
           @touchstart.stop="startResizing"
+          @dblclick="removeResize"
         )
-          //- doubleclick="clearResize"
           button.inline-button(tabindex="-1")
             img.resize-icon(src="@/assets/resize.svg")
 
@@ -1115,6 +1115,14 @@ export default {
         cardIds: cardIds
       }
       this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingCards' })
+    },
+    removeResize () {
+      let cardIds = [this.id]
+      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
+      if (multipleCardsSelectedIds.length) {
+        cardIds = multipleCardsSelectedIds
+      }
+      this.$store.dispatch('currentCards/removeResize', { cardIds })
     },
     toggleCommentIsVisible (event) {
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
