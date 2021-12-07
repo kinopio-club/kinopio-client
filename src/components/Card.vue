@@ -1096,12 +1096,15 @@ export default {
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
       this.$store.dispatch('currentCards/incrementZ', this.id)
       this.$store.commit('currentUserIsResizingCard', true)
-      // TODO [this.id] : if multiple cards selected then add them in here
-      // TODODO during resize only change cards that are resizable
-      this.$store.commit('currentUserIsResizingCardIds', [this.id])
+      let cardIds = [this.id]
+      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
+      if (multipleCardsSelectedIds.length) {
+        cardIds = multipleCardsSelectedIds
+      }
+      this.$store.commit('currentUserIsResizingCardIds', cardIds)
       const updates = {
         userId: this.$store.state.currentUser.id,
-        cardIds: [this.id]
+        cardIds: cardIds
       }
       this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingCards' })
     },
@@ -1281,7 +1284,6 @@ export default {
 
     // Touch
 
-    // TODO notifyPressAndHoldToResize
     notifyPressAndHoldToDrag () {
       const isDrawingConnection = this.$store.state.currentUserIsDrawingConnection
       if (isDrawingConnection) { return }
