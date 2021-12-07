@@ -82,6 +82,4 @@ export default {
     .card-details-buttons
       margin-left 6px
       display flex
-      .visit
-        vertical-align middle
 </style>
