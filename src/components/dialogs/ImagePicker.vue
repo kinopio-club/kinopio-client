@@ -145,7 +145,7 @@ export default {
       search: '',
       service: 'stickers', // 'stickers', 'gifs', 'arena', 'backgrounds'
       loading: false,
-      minDialogHeight: null,
+      minDialogHeight: 400,
       dialogHeight: null,
       resultsSectionHeight: null,
       error: {
@@ -348,7 +348,7 @@ export default {
       this.error.unknownUploadError = false
     },
     clearHeights () {
-      this.minDialogHeight = null
+      this.minDialogHeight = 400
       this.dialogHeight = null
       this.resultsSectionHeight = null
     },
