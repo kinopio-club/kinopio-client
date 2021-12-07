@@ -97,7 +97,7 @@ dialog.image-picker(
         li(@click.left="selectImage(image)" tabindex="0" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
           img(:src="image.previewUrl")
           a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
-            button.small-button {{image.sourceUserName}} →
+            button.small-button →
 
 </template>
 
@@ -563,8 +563,8 @@ export default {
       top 6px
       right 10px
       padding 0px
-      padding-left 6px
-      padding-right 5px
+      padding-left 4px
+      padding-right 3px
       max-width 80%
 
   .error-container
