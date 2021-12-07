@@ -12,7 +12,7 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
     @keyup.stop.backspace="removeCard"
 
     :class="{jiggle: shouldJiggle, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': isAudioCard, 'is-playing-audio': isPlayingAudio}",
-    :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor || selectedColorUpload || remoteCardDraggingColor || remoteUploadDraggedOverCardColor || remoteUserResizingCardsColor, width: resizeWidth, 'max-width': resizeWidth}"
+    :style="cardStyle"
     :data-card-id="id"
     :data-card-x="x"
     :data-card-y="y"
@@ -367,6 +367,14 @@ export default {
     },
     currentCardDetailsIsVisible () {
       return this.id === this.$store.state.cardDetailsIsVisibleForCardId
+    },
+    cardStyle () {
+      const color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor
+      return {
+        background: color,
+        width: this.resizeWidth,
+        maxWidth: this.resizeWidth
+      }
     },
     connectorGlowStyle () {
       const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor || this.connectedToConnectionDetailsIsVisibleColor
@@ -1443,7 +1451,7 @@ article
       align-items flex-start
       justify-content space-between
     .card-content
-      min-width 40px
+      min-width 28px
       width 100%
     .extra-name-padding
       margin-right 8px
