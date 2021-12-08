@@ -43,6 +43,7 @@ const store = createStore({
     webfontIsLoaded: false,
     userHasScrolled: false,
     shouldPreventNextEnterKey: false,
+    isEmbedMode: false,
 
     // search
     searchIsVisible: false,
@@ -288,6 +289,10 @@ const store = createStore({
     shouldPreventNextEnterKey: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'shouldPreventNextEnterKey' })
       state.shouldPreventNextEnterKey = value
+    },
+    isEmbedMode: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'isEmbedMode' })
+      state.isEmbedMode = value
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'searchIsVisible' })

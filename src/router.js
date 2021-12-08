@@ -130,6 +130,18 @@ const router = createRouter({
         store.dispatch('updateSpaceAndCardUrlToLoad', path)
         next()
       }
+    }, {
+      path: '/embed',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        const urlParams = new URLSearchParams(window.location.search)
+        const spaceId = urlParams.get('spaceId')
+        const zoom = urlParams.get('zoom')
+        store.commit('spaceUrlToLoad', spaceId)
+        store.commit('spaceZoomPercent', zoom)
+        store.commit('isEmbedMode', true)
+        next()
+      }
     }
     // {
     //   path: '/legal',
