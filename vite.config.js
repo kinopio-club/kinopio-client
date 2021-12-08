@@ -10,6 +10,10 @@ export default defineConfig({
   },
   plugins: [createVuePlugin()], // .vue support
   server: {
-    port: 8080
+    port: 8080,
+    fs: {
+      // Allow serving files from one level up to the project root
+      allow: ['..']
+    }
   }
 })
