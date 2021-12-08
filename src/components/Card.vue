@@ -1543,6 +1543,9 @@ article
 
     &.is-playing-audio
       animation bounce 1.2s infinite ease-in-out forwards
+    @media (prefers-reduced-motion)
+      &.is-playing-audio
+        animation none
 
     .audio-wrap
       margin-top 8px
@@ -1610,6 +1613,10 @@ article
 
 .jiggle
   animation jiggle 0.5s infinite ease-out forwards
+@media (prefers-reduced-motion)
+  .jiggle
+    animation none
+
 @keyframes jiggle
   0%
     transform rotate(0deg)
