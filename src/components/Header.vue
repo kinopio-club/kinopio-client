@@ -1,6 +1,14 @@
 <template lang="pug">
 header(:style="visualViewportPosition")
-  nav
+  nav.embed-nav(v-if="isEmbed")
+    a(:href="currentSpaceUrl")
+      button
+        .logo
+          .logo-image
+        MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
+        span {{currentSpaceName}} →
+
+  nav(v-if="!isEmbed")
     .logo-about
       .button-wrap
         .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active : aboutIsVisible}" tabindex="0")
@@ -25,7 +33,6 @@ header(:style="visualViewportPosition")
             MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
             span {{currentSpaceName}}
             PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
-            //- explore
             img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
           SpaceDetails(:visible="spaceDetailsIsVisible")
           ImportArenaChannel(:visible="importArenaChannelIsVisible")
@@ -69,12 +76,12 @@ header(:style="visualViewportPosition")
     .top
       .top-buttons-wrap
         //- Share
-        .button-wrap
+        .button-wrap(v-if="!isEmbed")
           button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
             span Share
           Share(:visible="shareIsVisible")
         //- Notifications
-        .button-wrap
+        .button-wrap(v-if="!isEmbed")
           button(@click.left.stop="toggleNotificationsIsVisible" :class="{active : notificationsIsVisible}")
             span {{notificationsUnreadCount}}
           Notifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead" @updateNotifications="updateNotifications")
@@ -88,7 +95,7 @@ header(:style="visualViewportPosition")
         User(v-if="!currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
         User(v-for="user in spectators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
 
-    .bottom
+    .bottom(v-if="!isEmbed")
       ResetPassword
       //- Sign Up or In
       .button-wrap(v-if="!currentUserIsSignedIn && isOnline")
@@ -221,6 +228,8 @@ export default {
     clearInterval(updateNotificationsIntervalTimer)
   },
   computed: {
+    isEmbed () { return this.$store.state.isEmbed },
+    currentSpaceUrl () { return this.$store.getters['currentSpace/url'] },
     shouldShowNewStuffIsUpdated () {
       const newStuffIsUpdated = this.$store.state.newStuffIsUpdated
       const isNotDefaultSpace = !this.$store.getters['currentSpace/isHelloKinopio']
@@ -551,6 +560,16 @@ header
     &.active
       .down-arrow
         transform translateY(5px)
+
+  .embed-nav
+    .logo
+      display inline-flex
+      vertical-align -3px
+      margin-right 5px
+      > .logo-image
+        min-width initial
+        width 17px
+        height 15px
 
   .left-arrow
     transform rotate(90deg)
