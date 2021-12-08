@@ -1,0 +1,69 @@
+<template lang="pug">
+dialog.narrow.embed(v-if="visible" :open="visible" @click.left.stop)
+  section
+    p Embed
+
+  section
+    p yolo
+    //- p Subscribe to cards recently created or updated
+    //- p(v-if="spaceIsPrivate")
+    //-   img.icon(src="@/assets/view.svg")
+    //-   span Space RSS Feeds are only available on public spaces
+
+    //- template(v-if="!spaceIsPrivate")
+    //-   p
+    //-     input.url-textarea(ref="url" v-model="url")
+    //-     button(@click.left="copyUrl")
+    //-       span Copy RSS Feed Url
+    //-   .row(v-if="urlIsCopied")
+    //-     .badge.success.success-message Url Copied
+
+</template>
+
+<script>
+// import utils from '@/utils.js'
+
+export default {
+  name: 'Embed',
+  props: {
+    visible: Boolean
+  }
+  // data () {
+  //   return {
+  //     urlIsCopied: false,
+  //     url: ''
+  //   }
+  // },
+  // computed: {
+  //   spaceIsPrivate () {
+  //     return this.$store.state.currentSpace.privacy === 'private'
+  //   }
+  // },
+  // methods: {
+  //   copyUrl () {
+  //     const element = this.$refs.url
+  //     element.select()
+  //     element.setSelectionRange(0, 99999) // for mobile
+  //     document.execCommand('copy')
+  //     this.urlIsCopied = true
+  //   },
+  //   updateUrl () {
+  //     const spaceId = this.$store.state.currentSpace.id
+  //     this.urlIsCopied = false
+  //     this.url = `${utils.host(true)}/space/${spaceId}/feed.json`
+  //   }
+  // },
+  // watch: {
+  //   visible (visible) {
+  //     if (visible) {
+  //       this.updateUrl()
+  //     }
+  //   }
+  // }
+}
+</script>
+
+<style lang="stylus">
+// .embed
+//   margin-left -1rem
+</style>

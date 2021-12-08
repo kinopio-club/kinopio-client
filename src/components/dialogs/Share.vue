@@ -12,15 +12,26 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
     template(v-if="!spaceIsPrivate")
       input.url-textarea(ref="url" v-model="url")
-      button(@click.left="copyUrl" v-if="!canNativeShare")
-        span Copy Url
-      .segmented-buttons(v-if="canNativeShare")
+      //- Copy Url and Embed
+      .row(v-if="canNativeShare")
+        .segmented-buttons
+          button(@click.left="copyUrl")
+            span Copy Url
+          button(@click.left="shareUrl")
+            img.icon(src="@/assets/share.svg")
+        .button-wrap
+          button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
+            span Embed
+          Embed(:visible="embedIsVisible")
+      .row(v-if="!canNativeShare")
         button(@click.left="copyUrl")
           span Copy Url
-        button(@click.left="shareUrl")
-          img.icon(src="@/assets/share.svg")
-      .row
-        .badge.success.success-message(v-if="urlIsCopied") Url Copied
+        .button-wrap
+          button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: embedIsVisible }")
+            span Embed
+          Embed(:visible="embedIsVisible")
+
+      .badge.success.success-message(v-if="urlIsCopied") Url Copied
     p.share-private(v-if="spaceIsPrivate")
       span To share this space publically, set the privacy to
       span.badge.info
@@ -59,6 +70,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import InviteCollaborators from '@/components/dialogs/InviteCollaborators.vue'
 import SpaceRssFeed from '@/components/dialogs/SpaceRssFeed.vue'
+import Embed from '@/components/dialogs/Embed.vue'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import privacy from '@/data/privacy.js'
@@ -73,6 +85,7 @@ export default {
     PrivacyButton,
     InviteCollaborators,
     SpaceRssFeed,
+    Embed,
     UserList,
     UserDetails
   },
@@ -97,7 +110,8 @@ export default {
       userDetailsIsVisible: false,
       url: '',
       dialogHeight: null,
-      spaceRssFeedIsVisible: false
+      spaceRssFeedIsVisible: false,
+      embedIsVisible: false
     }
   },
   computed: {
@@ -180,10 +194,16 @@ export default {
       this.closeDialogs()
       this.spaceRssFeedIsVisible = !isVisible
     },
+    toggleEmbedIsVisible () {
+      const isVisible = this.embedIsVisible
+      this.closeDialogs()
+      this.embedIsVisible = !isVisible
+    },
     closeDialogs () {
       this.privacyPickerIsVisible = false
       this.inviteCollaboratorsIsVisible = false
       this.spaceRssFeedIsVisible = false
+      this.embedIsVisible = false
       this.userDetailsIsNotVisible()
     },
     showUserDetails (event, user) {
@@ -251,13 +271,12 @@ export default {
     display inline-block
     &.danger
       background-color var(--danger-background)
-  .success-message
-    margin-top 10px
   .privacy-button + .textarea
     margin-top 10px
   .description
     margin-top 3px
-  dialog.privacy-picker
+  dialog.privacy-picker,
+  dialog.embed
     left initial
     right 8px
   dialog.user-details
