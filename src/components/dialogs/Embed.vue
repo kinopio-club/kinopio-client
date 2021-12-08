@@ -12,9 +12,9 @@ dialog.narrow.embed(v-if="visible" :open="visible" @click.left.stop)
 
     template(v-if="iframeIsVisible")
       textarea(ref="iframe") {{iframe}}
-      button(@click="copy") Copy Embed Code
+      button(@click="copy") Copy Code
       .row(v-if="isCopied")
-        .badge.success.success-message Embed Copied
+        .badge.success.success-message Code Copied
 
     template(v-if="!iframeIsVisible")
       input.url-textarea(ref="url" v-model="url")
