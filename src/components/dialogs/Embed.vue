@@ -34,11 +34,14 @@ export default {
   data () {
     return {
       iframeIsVisible: true,
-      isCopied: false,
-      url: ''
+      isCopied: false
     }
   },
   computed: {
+    url () {
+      const spaceId = this.$store.state.currentSpace.id
+      return `${utils.kinopioDomain()}/embed/?spaceId=${spaceId}&zoom=100`
+    },
     iframe () {
       return `<div class="kinopio-embed" style="height: 420px; width: 100%;">
   <iframe src="${this.url}" style="height: 100%; width: 100%; border: 0; border-radius: 5px;">
@@ -54,10 +57,6 @@ export default {
     toggleUrlIsVisible () {
       this.iframeIsVisible = false
       this.isCopied = false
-    },
-    updateEmbeds () {
-      const spaceId = this.$store.state.currentSpace.id
-      this.url = `${utils.kinopioDomain()}/embed/?spaceId=${spaceId}&zoom=100`
     },
     copy () {
       let element
@@ -75,7 +74,6 @@ export default {
   watch: {
     visible (visible) {
       if (visible) {
-        this.updateEmbeds()
         this.toggleIframeIsVisible()
       }
     }
