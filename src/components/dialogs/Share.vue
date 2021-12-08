@@ -108,13 +108,13 @@ export default {
       selectedUser: {},
       userDetailsPosition: {},
       userDetailsIsVisible: false,
-      url: '',
       dialogHeight: null,
       spaceRssFeedIsVisible: false,
       embedIsVisible: false
     }
   },
   computed: {
+    url () { return this.$store.getters['currentSpace/url'] },
     spaceName () { return this.$store.state.currentSpace.name },
     spacePrivacy () { return this.$store.state.currentSpace.privacy },
     canEditSpace () {
@@ -241,9 +241,6 @@ export default {
       const hasCurrentSpacePath = this.$store.state.currentSpacePath !== '/'
       const hasWindowUrl = window.location.href !== (window.location.origin + '/')
       this.spaceHasUrl = hasCurrentSpacePath || hasWindowUrl
-    },
-    updateUrl () {
-      this.url = `${window.location.origin}/${this.$store.state.currentSpacePath}`
     }
   },
   watch: {
@@ -253,7 +250,6 @@ export default {
       this.closeDialogs()
       if (visible) {
         this.userDetailsIsNotVisible()
-        this.updateUrl()
         this.updateDialogHeight()
       }
     }

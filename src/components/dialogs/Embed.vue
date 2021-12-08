@@ -2,68 +2,96 @@
 dialog.narrow.embed(v-if="visible" :open="visible" @click.left.stop)
   section
     p Embed
-
   section
-    p yolo
-    //- p Subscribe to cards recently created or updated
-    //- p(v-if="spaceIsPrivate")
-    //-   img.icon(src="@/assets/view.svg")
-    //-   span Space RSS Feeds are only available on public spaces
+    .row
+      .segmented-buttons
+        button(@click="toggleIframeIsVisible" :class="{ active: iframeIsVisible }")
+          span iFrame
+        button(@click="toggleUrlIsVisible" :class="{ active: !iframeIsVisible }")
+          span Url
 
-    //- template(v-if="!spaceIsPrivate")
-    //-   p
-    //-     input.url-textarea(ref="url" v-model="url")
-    //-     button(@click.left="copyUrl")
-    //-       span Copy RSS Feed Url
-    //-   .row(v-if="urlIsCopied")
-    //-     .badge.success.success-message Url Copied
+    template(v-if="iframeIsVisible")
+      textarea(ref="iframe") {{iframe}}
+      button(@click="copy") Copy Embed Code
+      .row(v-if="isCopied")
+        .badge.success.success-message Embed Copied
 
+    template(v-if="!iframeIsVisible")
+      input.url-textarea(ref="url" v-model="url")
+      button(@click="copy") Copy Url
+      .row(v-if="isCopied")
+        .badge.success.success-message Url Copied
 </template>
 
 <script>
-// import utils from '@/utils.js'
+import utils from '@/utils.js'
 
 export default {
   name: 'Embed',
   props: {
     visible: Boolean
+  },
+  data () {
+    return {
+      iframeIsVisible: true,
+      isCopied: false,
+      url: ''
+    }
+  },
+  computed: {
+    iframe () {
+      return `<div class="kinopio-embed" style="height: 420px; width: 100%;">
+  <iframe src="${this.url}" style="height: 100%; width: 100%; border: 0; border-radius: 5px;">
+  </iframe>
+</div>`
+    }
+  },
+  methods: {
+    toggleIframeIsVisible () {
+      this.iframeIsVisible = true
+      this.isCopied = false
+    },
+    toggleUrlIsVisible () {
+      this.iframeIsVisible = false
+      this.isCopied = false
+    },
+    updateEmbeds () {
+      const spaceId = this.$store.state.currentSpace.id
+      this.url = `${utils.kinopioDomain()}/embed/?spaceId=${spaceId}&zoom=100`
+    },
+    copy () {
+      let element
+      if (this.iframeIsVisible) {
+        element = this.$refs.iframe
+      } else {
+        element = this.$refs.url
+      }
+      element.select()
+      element.setSelectionRange(0, 99999) // for mobile
+      document.execCommand('copy')
+      this.isCopied = true
+    }
+  },
+  watch: {
+    visible (visible) {
+      if (visible) {
+        this.updateEmbeds()
+        this.toggleIframeIsVisible()
+      }
+    }
   }
-  // data () {
-  //   return {
-  //     urlIsCopied: false,
-  //     url: ''
-  //   }
-  // },
-  // computed: {
-  //   spaceIsPrivate () {
-  //     return this.$store.state.currentSpace.privacy === 'private'
-  //   }
-  // },
-  // methods: {
-  //   copyUrl () {
-  //     const element = this.$refs.url
-  //     element.select()
-  //     element.setSelectionRange(0, 99999) // for mobile
-  //     document.execCommand('copy')
-  //     this.urlIsCopied = true
-  //   },
-  //   updateUrl () {
-  //     const spaceId = this.$store.state.currentSpace.id
-  //     this.urlIsCopied = false
-  //     this.url = `${utils.host(true)}/space/${spaceId}/feed.json`
-  //   }
-  // },
-  // watch: {
-  //   visible (visible) {
-  //     if (visible) {
-  //       this.updateUrl()
-  //     }
-  //   }
-  // }
 }
 </script>
 
 <style lang="stylus">
-// .embed
-//   margin-left -1rem
+.embed
+  textarea
+    background-color var(--secondary-background)
+    border 0
+    border-radius 3px
+    padding 4px
+    margin-bottom 10px
+    height 100px
+  .success-message
+    margin-top 10px
 </style>
