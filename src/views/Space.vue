@@ -53,6 +53,8 @@ import utils from '@/utils.js'
 import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 
+const cardOverlaps = new Worker('web-workers/card-overlaps.js')
+
 let startCursor, prevCursor, endCursor, shouldCancel
 let processQueueIntervalTimer
 
@@ -114,11 +116,19 @@ export default {
     }
 
     this.$store.dispatch('currentUser/restoreUserFavorites')
+    window.addEventListener('scroll', this.updateCardOverlaps)
+    window.addEventListener('resize', this.updateCardOverlaps)
+    // this.updateCardOverlaps()
+    // TODO ensure runs on load and when space is changed/loaded, also via browser back/forward
 
     // retry failed sync operations every 5 seconds
     processQueueIntervalTimer = setInterval(() => {
       this.$store.dispatch('api/processQueueOperations')
     }, 5000)
+
+    cardOverlaps.addEventListener('message', event => {
+      // this.cardOverlaps = event.data
+    })
   },
   beforeUnmount () {
     window.removeEventListener('mousemove', this.interact)
@@ -130,12 +140,15 @@ export default {
     window.removeEventListener('offline', this.updateIsOnline)
     window.removeEventListener('unload', this.unloadPage)
     window.removeEventListener('popstate', this.loadSpaceOnBackOrForward)
+    window.removeEventListener('scroll', this.updateCardOverlaps)
+    window.removeEventListener('resize', this.updateCardOverlaps)
     clearInterval(processQueueIntervalTimer)
   },
   data () {
     return {
       currentConnectionPath: undefined,
       currentConnectionColor: undefined
+      // cardOverlaps: {}
     }
   },
   computed: {
@@ -148,6 +161,7 @@ export default {
       }
     },
     cards () { return this.$store.getters['currentCards/all'] },
+
     cardOverlaps () {
       const threshold = 20
       let cards = this.cards.map((card, index) => {
@@ -208,6 +222,14 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
+    updateCardOverlaps () {
+      let cards = this.$store.getters['currentCards/all']
+      cards = utils.clone(cards)
+      const viewport = utils.visualViewport()
+      const zoom = this.spaceZoomDecimal
+      console.log('🌙', cards, viewport, zoom)
+      cardOverlaps.postMessage({ cards, viewport, zoom })
+    },
     mergeOverlapGroup (previousValue, currentValue) {
       let x = previousValue.x || 0
       if (currentValue.x > x) {
