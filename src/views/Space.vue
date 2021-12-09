@@ -120,6 +120,7 @@ export default {
     window.addEventListener('resize', this.updateCardOverlaps)
     // this.updateCardOverlaps()
     // TODO ensure runs on load and when space is changed/loaded, also via browser back/forward
+    // and on card drag and resize (from subscribe to store.triggerUpdateCardOverlaps?)
 
     // retry failed sync operations every 5 seconds
     processQueueIntervalTimer = setInterval(() => {
@@ -227,7 +228,6 @@ export default {
       cards = utils.clone(cards)
       const viewport = utils.visualViewport()
       const zoom = this.spaceZoomDecimal
-      console.log('🌙', cards, viewport, zoom)
       cardOverlaps.postMessage({ cards, viewport, zoom })
     },
     mergeOverlapGroup (previousValue, currentValue) {
