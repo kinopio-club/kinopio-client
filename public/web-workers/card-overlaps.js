@@ -17,76 +17,112 @@ self.onmessage = function (event) {
       height: card.height
     }
   })
-
+  console.log('❤️❤️❤️❤️')
   let groups = [] // [[card1, card2, card5], [card3, card4]]
-
-  newCards.forEach(card1 => {
-    newCards.forEach(card2 => {
-      if (card1.id === card2.id) { return }
-
-      const isOverlap = isCardsOverlapping(card1, card2)
-      if (isOverlap) {
-        groups = updateGroups(groups, card1, card2)
-      }
-    })
+  newCards.forEach(card => {
+    const group = isCardsOverlappingGroup(card, groups)
+    if (group) {
+      console.log('🫁 ADD TO EXISTING GROUP', group.index, groups[group.index], card)
+      groups[group.index].push(card)
+    } else {
+      console.log('🌴 NEW GROUP', groups, card)
+      groups.push([card])
+    }
   })
   console.log('🍉', groups)
   // self.postMessage(groups)
 }
 
-const updateGroups = (groups, card1, card2) => {
-  const index1 = existingGroupIndex(groups, card1)
-  const index2 = existingGroupIndex(groups, card2)
-  console.log('🥳', index1, index2)
-  // let index = undefined
-  let index, card
-  if (typeof index1 === 'number' && typeof index2 === 'number') {
-    return groups
-  } else if (typeof index1 === 'number') {
-    index = index1
-    card = card2
-  } else if (typeof index2 === 'number') {
-    index = index2
-    card = card1
-  }
-  if (typeof index === 'number') {
-    console.log('🍆 existing', index, card, groups[index])
-    groups[index].push(card)
-  } else {
-    console.log('⏰ new', index, card1, card2)
-    groups.push([card1, card2])
-  }
-  return groups
-}
-
-// const isIndex = (index) => {
-//   // if (index !== 'number') { return }
-//   if (index < 0) { return }
-//   return true
-// }
-
-const existingGroupIndex = (groups, card) => {
-  const index = groups.findIndex(group => {
-    const cardIds = group.map(prevCard => prevCard.id)
-    return cardIds.includes(card.id)
+const isCardsOverlappingGroup = (card, groups) => {
+  const index = groups.findIndex(groupCards => {
+    return groupCards.find(groupCard => {
+      const isOverlap = isCardsOverlapping(groupCard, card) || isCardsOverlapping(card, groupCard)
+      return isOverlap
+    })
   })
   if (index < 0) { return }
-  return index
+  return { index }
 }
 
 const isCardsOverlapping = (card1, card2) => {
-  const isOverlapX = isBetween({
+  const xStart = isBetween({
     value: card1.x,
     min: card2.x,
     max: card2.x + card2.width
   })
-  const isOverlapY = isBetween({
+  const xEnd = isBetween({
+    value: card1.x + card1.width,
+    min: card2.x,
+    max: card2.x + card2.width
+  })
+  const yStart = isBetween({
     value: card1.y,
     min: card2.y,
     max: card2.y + card2.height
   })
-  return isOverlapX && isOverlapY
+  const yEnd = isBetween({
+    value: card1.y,
+    min: card2.y,
+    max: card2.y + card2.height
+  })
+  const x = xStart || xEnd
+  const y = yStart || yEnd
+  return x && y
 }
+
+// const updateGroups = (groups, card1, card2) => {
+//   const index1 = existingGroupIndex(groups, card1)
+//   const index2 = existingGroupIndex(groups, card2)
+//   console.log('🥳', index1, index2)
+//   // let index = undefined
+//   let index, card
+//   if (typeof index1 === 'number' && typeof index2 === 'number') {
+//     return groups
+//   } else if (typeof index1 === 'number') {
+//     index = index1
+//     card = card2
+//   } else if (typeof index2 === 'number') {
+//     index = index2
+//     card = card1
+//   }
+//   if (typeof index === 'number') {
+//     console.log('🍆 existing', index, card, groups[index])
+//     groups[index].push(card)
+//   } else {
+//     console.log('⏰ new', index, card1, card2)
+//     groups.push([card1, card2])
+//   }
+//   return groups
+// }
+
+// // const isIndex = (index) => {
+// //   // if (index !== 'number') { return }
+// //   if (index < 0) { return }
+// //   return true
+// // }
+
+// const existingGroupIndex = (groups, card) => {
+//   const index = groups.findIndex(group => {
+//     const cardIds = group.map(prevCard => prevCard.id)
+//     return cardIds.includes(card.id)
+//   })
+//   if (index < 0) { return }
+//   return index
+// }
+
+// const isCardsOverlapping = (card1, card2) => {
+//   const isOverlapX = isBetween({
+//     value: card1.x,
+//     min: card2.x,
+//     max: card2.x + card2.width
+//   })
+//   const isOverlapY = isBetween({
+//     value: card1.y,
+//     min: card2.y,
+//     max: card2.y + card2.height
+//   })
+//   return isOverlapX && isOverlapY
+// }
 
 // based on utils.isBetween
 const isBetween = ({ value, min, max }) => {
