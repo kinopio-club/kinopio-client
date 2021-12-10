@@ -383,6 +383,7 @@ export default {
     },
     cardButtonsWrapStyle () {
       if (!this.resizeIsVisible) { return }
+      if (this.nameIsComment) { return }
       const zoom = this.$store.getters.spaceCounterZoomDecimal
       let cardHeight = this.card.height
       const element = this.$refs.card
