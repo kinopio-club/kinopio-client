@@ -128,7 +128,7 @@ export default {
     }, 5000)
 
     cardOverlaps.addEventListener('message', event => {
-      // this.cardOverlaps = event.data
+      this.cardOverlaps = event.data
     })
   },
   beforeUnmount () {
@@ -148,8 +148,8 @@ export default {
   data () {
     return {
       currentConnectionPath: undefined,
-      currentConnectionColor: undefined
-      // cardOverlaps: {}
+      currentConnectionColor: undefined,
+      cardOverlaps: []
     }
   },
   computed: {
@@ -162,44 +162,6 @@ export default {
       }
     },
     cards () { return this.$store.getters['currentCards/all'] },
-
-    cardOverlaps () {
-      const threshold = 20
-      let cards = this.cards.map((card, index) => {
-        return { id: card.id, x: card.x, y: card.y, index }
-      })
-      let overlaps = []
-      cards.forEach(origin => {
-        if (!origin) { return }
-        const group = cards.filter((card, index) => {
-          if (!card) { return }
-          const x = utils.isBetween({
-            value: origin.x,
-            min: card.x - threshold,
-            max: card.x + threshold
-          })
-          const y = utils.isBetween({
-            value: origin.y,
-            min: card.y - threshold,
-            max: card.y + threshold
-          })
-          return x && y
-        })
-        group.forEach(card => {
-          cards[card.index] = undefined
-        })
-        overlaps.push(group)
-      })
-      overlaps = overlaps.filter(group => group.length > 1)
-      overlaps = overlaps.map(group => {
-        let { x, y } = group.reduce((previousValue, currentValue) => this.mergeOverlapGroup(previousValue, currentValue))
-        let ids = group.map(item => item.id)
-        x = x - (threshold / 2)
-        y = y - (threshold / 2)
-        return { x, y, length: group.length, ids }
-      })
-      return overlaps
-    },
     isPainting () { return this.$store.state.currentUserIsPainting },
     isPanningReady () { return this.$store.state.currentUserIsPanningReady },
     spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },

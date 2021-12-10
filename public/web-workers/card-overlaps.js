@@ -1,6 +1,7 @@
 // group cards into overlap groups
 
 self.onmessage = function (event) {
+  const offset = 10
   const { cards, viewport } = event.data
   let newCards = cards.filter(card => isCardInViewport(card, viewport))
   newCards = newCards.map(card => {
@@ -22,6 +23,20 @@ self.onmessage = function (event) {
       groups.push([card])
     }
   })
+  groups = groups.filter(group => group.length > 1)
+  groups = groups.map(group => {
+    const cards = group.sort((a, b) => {
+      return b.x < a.x
+    })
+    const ids = cards.map(card => card.id)
+    return {
+      x: cards[0].x - offset,
+      y: cards[0].y - offset,
+      length: ids.length,
+      ids
+    }
+  })
+
   self.postMessage(groups)
 }
 
