@@ -85,6 +85,8 @@ export default {
       if (mutation.type === 'triggeredDrawConnectionFrame') {
         prevCursor = this.$store.state.triggeredDrawConnectionFrame
         this.drawConnection()
+      } else if (mutation.type === 'currentSpace/restoreSpace') {
+        this.updateCardOverlaps()
       }
     })
   },
@@ -118,9 +120,7 @@ export default {
     this.$store.dispatch('currentUser/restoreUserFavorites')
     window.addEventListener('scroll', this.updateCardOverlaps)
     window.addEventListener('resize', this.updateCardOverlaps)
-    // this.updateCardOverlaps()
-    // TODO ensure runs on load and when space is changed/loaded, also via browser back/forward
-    // and on card drag and resize (from subscribe to store.triggerUpdateCardOverlaps?)
+    this.updateCardOverlaps()
 
     // retry failed sync operations every 5 seconds
     processQueueIntervalTimer = setInterval(() => {
@@ -189,7 +189,7 @@ export default {
       let cards = this.$store.getters['currentCards/all']
       cards = utils.clone(cards)
       const viewport = utils.visualViewport()
-      const zoom = this.spaceZoomDecimal
+      const zoom = this.$store.getters.spaceCounterZoomDecimal
       cardOverlaps.postMessage({ cards, viewport, zoom })
     },
     mergeOverlapGroup (previousValue, currentValue) {
@@ -275,6 +275,7 @@ export default {
       if (this.isDrawingConnection) {
         this.drawConnection()
       }
+      this.updateCardOverlaps()
       prevCursor = utils.cursorPositionInViewport(event)
     },
     checkShouldShowDetails () {

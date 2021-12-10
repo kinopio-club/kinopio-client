@@ -2,8 +2,8 @@
 
 self.onmessage = function (event) {
   const offset = 10
-  const { cards, viewport } = event.data
-  let newCards = cards.filter(card => isCardInViewport(card, viewport))
+  const { cards, viewport, zoom } = event.data
+  let newCards = cards.filter(card => isCardInViewport(card, viewport, zoom))
   newCards = newCards.map(card => {
     return {
       id: card.id,
@@ -83,7 +83,9 @@ const isBetween = ({ value, min, max }) => {
 }
 
 // based on utils.isCardInViewport
-const isCardInViewport = (card, viewport) => {
+const isCardInViewport = (card, viewport, zoom) => {
+  viewport.width = viewport.width * zoom
+  viewport.height = viewport.height * zoom
   // x
   const isStartInViewportX = card.x > viewport.pageLeft || card.x + card.width > viewport.pageLeft
   const isEndInViewportX = card.x < viewport.pageLeft + viewport.width
