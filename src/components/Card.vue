@@ -240,6 +240,10 @@ export default {
       this.$store.commit('preventCardDetailsOpeningAnimation', false)
       this.$store.dispatch('currentCards/showCardDetails', this.card.id)
     }
+    if (this.card.updateDataOnNextLoad) {
+      this.$store.commit('addUrlPreviewLoadingForCardIds', this.card.id)
+      this.updateUrlPreview()
+    }
   },
   data () {
     return {
@@ -335,6 +339,14 @@ export default {
         return link
       }
       return this.formats.file
+    },
+    webUrl () {
+      const link = this.formats.link
+      if (utils.urlIsValidTld(link) && !utils.urlIsSpace(link)) {
+        return link
+      } else {
+        return null
+      }
     },
     isHiddenInComment () {
       if (this.nameIsComment && !this.commentIsVisible) {
@@ -538,8 +550,9 @@ export default {
       return segments
     },
     cardUrlPreviewIsVisible () {
-      const isErrorUrl = this.card.urlPreviewErrorUrl && this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl
-      return Boolean(this.card.urlPreviewIsVisible && this.card.urlPreviewUrl && !isErrorUrl)
+      const cardHasUrlPreviewInfo = Boolean(this.card.urlPreviewTitle || this.card.urlPreviewDescription || this.card.urlPreviewImage)
+      const isErrorUrl = this.card.urlPreviewErrorUrl && (this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl)
+      return Boolean(this.card.urlPreviewIsVisible && this.card.urlPreviewUrl && cardHasUrlPreviewInfo && !isErrorUrl)
     },
     tags () {
       return this.nameSegments.filter(segment => {
@@ -719,8 +732,9 @@ export default {
       const cardIds = this.$store.state.urlPreviewLoadingForCardIds
       let isLoading = cardIds.find(cardId => cardId === this.card.id)
       isLoading = Boolean(isLoading)
-      const isErrorUrl = this.card.urlPreviewErrorUrl && this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl
-      return isLoading && this.card.urlPreviewIsVisible && !isErrorUrl
+      if (!isLoading) { return }
+      const isErrorUrl = this.card.urlPreviewErrorUrl && (this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl)
+      return isLoading && !isErrorUrl
     },
     lockingFrameStyle () {
       const initialPadding = 65 // matches initialLockCircleRadius in magicPaint
@@ -1331,6 +1345,66 @@ export default {
       }
       const userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
+    },
+
+    // url preview
+
+    async updateUrlPreview () {
+      const cardId = this.card.id
+      const url = this.webUrl
+      if (!url) { return }
+      try {
+        let response = await this.$store.dispatch('api/urlPreview', url)
+        this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+        let { data } = response
+        console.log('🚗 link preview', data)
+        const { links, meta } = data
+        this.updateUrlPreviewSuccess({ links, meta, cardId, url })
+      } catch (error) {
+        console.warn('🚑', error, url)
+        this.updateUrlPreviewErrorUrl(url)
+      }
+    },
+    nameIncludesUrl (url) {
+      const name = this.card.name
+      return name.includes(url)
+    },
+    previewImage ({ thumbnail }) {
+      const minWidth = 200
+      if (!thumbnail) { return '' }
+      let image = thumbnail.find(item => item.href && (item.media.width > minWidth))
+      if (!image) { return '' }
+      return image.href || ''
+    },
+    previewFavicon ({ icon }) {
+      if (!icon) { return '' }
+      let image = icon.find(item => item.href)
+      return image.href || ''
+    },
+    updateUrlPreviewSuccess ({ links, meta, cardId, url }) {
+      if (!this.nameIncludesUrl(url)) { return }
+      const update = {
+        id: cardId,
+        urlPreviewUrl: url,
+        urlPreviewTitle: utils.truncated(meta.title || meta.site),
+        urlPreviewDescription: utils.truncated(meta.description, 280),
+        urlPreviewImage: this.previewImage(links),
+        urlPreviewFavicon: this.previewFavicon(links),
+        updateDataOnNextLoad: false
+      }
+      this.$store.dispatch('currentCards/update', update)
+      this.updateCardMap()
+    },
+    updateUrlPreviewErrorUrl (url) {
+      const cardId = this.card.id
+      this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+      const update = {
+        id: cardId,
+        urlPreviewErrorUrl: url,
+        urlPreviewUrl: url,
+        updateDataOnNextLoad: false
+      }
+      this.$store.dispatch('currentCards/update', update)
     }
   }
 }
