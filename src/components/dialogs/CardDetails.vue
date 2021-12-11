@@ -1422,39 +1422,43 @@ export default {
       let image = icon.find(item => item.href)
       return image.href || ''
     },
+    urlIsIncorrect (url) {
+      let cardUrl = this.validWebUrls[0]
+      cardUrl = this.removeHiddenQueryString(cardUrl)
+      return (url !== cardUrl) && this.visible
+    },
     debouncedUpdateUrlPreview: debounce(async function (url) {
       try {
-        const apiKey = '0788beaa34f65adc0fe7ac'
-        const response = await fetch(`https://iframe.ly/api/iframely/?api_key=${apiKey}&url=${encodeURIComponent(url)}`)
-        const data = await response.json()
-        if (response.status !== 200) {
-          throw new Error(response.status)
-        }
-        let cardUrl = this.validWebUrls[0]
-        cardUrl = this.removeHiddenQueryString(cardUrl)
-        const cardId = this.card.id || prevCardId
-        this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-        const urlIsIncorrect = (url !== cardUrl) && this.visible
-        if (data.error || urlIsIncorrect) {
-          throw new Error(response.message)
-        }
+        let cardId = this.card.id || prevCardId
+        let response = await this.$store.dispatch('api/urlPreview', url)
+        url = response.url
+        const data = response.data
         console.log('🚗 link preview', data)
-        const { links, meta } = data
-        const update = {
-          id: cardId,
-          urlPreviewUrl: url,
-          urlPreviewTitle: utils.truncated(meta.title || meta.site),
-          urlPreviewDescription: utils.truncated(meta.description, 280),
-          urlPreviewImage: this.previewImage(links),
-          urlPreviewFavicon: this.previewFavicon(links)
+        this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+        const urlIsIncorrect = this.urlIsIncorrect(url)
+        if (data.error || urlIsIncorrect) {
+          throw new Error(response.response.message)
         }
-        this.$store.dispatch('currentCards/update', update)
-        this.updateCardMap(cardId)
+        const { links, meta } = data
+        this.updateUrlPreview({ links, meta, cardId, url })
       } catch (error) {
         console.warn('🚑', error, url)
         this.updateUrlPreviewErrorUrl(url)
       }
     }, 350),
+
+    updateUrlPreview ({ links, meta, cardId, url }) {
+      const update = {
+        id: cardId,
+        urlPreviewUrl: url,
+        urlPreviewTitle: utils.truncated(meta.title || meta.site),
+        urlPreviewDescription: utils.truncated(meta.description, 280),
+        urlPreviewImage: this.previewImage(links),
+        urlPreviewFavicon: this.previewFavicon(links)
+      }
+      this.$store.dispatch('currentCards/update', update)
+      this.updateCardMap(cardId)
+    },
     clearUrlPreview () {
       const cardId = this.card.id || prevCardId
       const update = {

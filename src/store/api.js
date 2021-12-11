@@ -661,7 +661,6 @@ const self = {
         console.error('🚒', error)
       }
     },
-
     createMultiplePresignedPosts: async (context, body) => {
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
@@ -706,6 +705,19 @@ const self = {
         console.error('🚒', error)
         context.commit('triggerArenaAuthenticationError', null, { root: true })
         context.commit('isAuthenticatingWithArena', false, { root: true })
+      }
+    },
+    urlPreview: async (context, url) => {
+      try {
+        const apiKey = '0788beaa34f65adc0fe7ac'
+        const response = await fetch(`https://iframe.ly/api/iframely/?api_key=${apiKey}&url=${encodeURIComponent(url)}`)
+        if (response.status !== 200) {
+          throw new Error(response.status)
+        }
+        const data = await normalizeResponse(response)
+        return { url, data, response }
+      } catch (error) {
+        console.error('🚒', error)
       }
     }
 
