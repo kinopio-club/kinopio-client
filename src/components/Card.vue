@@ -213,15 +213,13 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'updateRemoteCurrentConnection' || mutation.type === 'removeRemoteCurrentConnection') {
         this.updateRemoteConnections()
-      }
-      if (mutation.type === 'triggerScrollCardIntoView') {
+      } else if (mutation.type === 'triggerScrollCardIntoView') {
         if (mutation.payload === this.card.id) {
           const element = this.$refs.card
           const isTouchDevice = this.$store.state.isTouchDevice
           scrollIntoView.scroll(element, isTouchDevice)
         }
-      }
-      if (mutation.type === 'triggerUploadComplete') {
+      } else if (mutation.type === 'triggerUploadComplete') {
         let { cardId, url } = mutation.payload
         if (cardId !== this.card.id) { return }
         this.addFile({ url })
@@ -239,10 +237,6 @@ export default {
       this.$store.dispatch('closeAllDialogs', 'card.mounted')
       this.$store.commit('preventCardDetailsOpeningAnimation', false)
       this.$store.dispatch('currentCards/showCardDetails', this.card.id)
-    }
-    if (this.card.updateDataOnNextLoad) {
-      this.$store.commit('addUrlPreviewLoadingForCardIds', this.card.id)
-      this.updateUrlPreview()
     }
   },
   data () {
@@ -343,6 +337,14 @@ export default {
     webUrl () {
       const link = this.formats.link
       if (utils.urlIsValidTld(link) && !utils.urlIsSpace(link)) {
+        return link
+      } else {
+        return null
+      }
+    },
+    spaceUrl () {
+      const link = this.formats.link
+      if (utils.urlIsSpace(link)) {
         return link
       } else {
         return null
@@ -1347,13 +1349,54 @@ export default {
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
     },
 
+    updateUrlData () {
+      this.updateSpaceLink()
+      this.updateUrlPreview()
+    },
+
+    // space link
+
+    updateSpaceLink () {
+      let url = this.spaceUrl
+      const shouldRemoveLink = this.card.linkToSpaceId && !url
+      if (shouldRemoveLink) {
+        const update = {
+          id: this.card.id,
+          linkToSpaceId: null
+        }
+        this.$store.dispatch('currentCards/update', update)
+        return
+      }
+      if (!url) { return }
+      const linkToSpaceId = utils.spaceIdFromUrl(url) || null
+      const linkExists = linkToSpaceId === this.card.linkToSpaceId
+      if (linkExists) { return }
+      const update = {
+        id: this.card.id,
+        linkToSpaceId
+      }
+      this.$store.dispatch('currentCards/update', update)
+      this.$store.dispatch('currentSpace/saveOtherSpace', { spaceId: linkToSpaceId })
+    },
+
     // url preview
 
     async updateUrlPreview () {
+      if (!this.canEditCard) { return }
+      this.$store.commit('addUrlPreviewLoadingForCardIds', this.card.id)
       const cardId = this.card.id
-      const url = this.webUrl
-      if (!url) { return }
+      let url = this.webUrl
+      if (!url) {
+        this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+        return
+      }
+      const shouldUpdate = this.shouldUpdateUrlPreview(url)
+      if (!shouldUpdate) {
+        this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+        return
+      }
       try {
+        url = this.removeHiddenQueryString(url)
         let response = await this.$store.dispatch('api/urlPreview', url)
         this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
         let { data } = response
@@ -1364,6 +1407,19 @@ export default {
         console.warn('🚑', error, url)
         this.updateUrlPreviewErrorUrl(url)
       }
+    },
+    shouldUpdateUrlPreview (url) {
+      const previewIsVisible = this.card.urlPreviewIsVisible
+      const isNotPreviewUrl = url !== this.card.urlPreviewUrl
+      const isNotErrorUrl = url !== this.card.urlPreviewErrorUrl
+      const isNotKinopioUrl = !url.startsWith('https://kinopio.club')
+      return previewIsVisible && isNotPreviewUrl && isNotErrorUrl && isNotKinopioUrl
+    },
+    removeHiddenQueryString (url) {
+      if (!url) { return }
+      url = url.replace('?hidden=true', '')
+      url = url.replace('&hidden=true', '')
+      return url
     },
     nameIncludesUrl (url) {
       const name = this.card.name
@@ -1389,8 +1445,7 @@ export default {
         urlPreviewTitle: utils.truncated(meta.title || meta.site),
         urlPreviewDescription: utils.truncated(meta.description, 280),
         urlPreviewImage: this.previewImage(links),
-        urlPreviewFavicon: this.previewFavicon(links),
-        updateDataOnNextLoad: false
+        urlPreviewFavicon: this.previewFavicon(links)
       }
       this.$store.dispatch('currentCards/update', update)
       this.updateCardMap()
@@ -1401,10 +1456,21 @@ export default {
       const update = {
         id: cardId,
         urlPreviewErrorUrl: url,
-        urlPreviewUrl: url,
-        updateDataOnNextLoad: false
+        urlPreviewUrl: url
       }
       this.$store.dispatch('currentCards/update', update)
+    }
+  },
+  watch: {
+    // https://v3.vuejs.org/guide/migration/watch.html
+    // watching arrays doesn't work for changes anymore (only whole replacement, unless 'deep', option is specified)
+    formats: {
+      handler (urls) {
+        if (urls.link) {
+          this.updateUrlData()
+        }
+      },
+      deep: true
     }
   }
 }
