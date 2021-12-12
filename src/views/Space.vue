@@ -8,7 +8,8 @@ main.space(
   :style="styles"
 )
   svg.connections
-    CurrentConnection
+    template(v-for="startCardId in currentConnectionStartCardIds")
+      CurrentConnection(:startCardId="startCardId" :startCursor="startCursor")
     template(v-for="connection in remoteCurrentConnections")
       Connection(:connection="connection")
     template(v-for="connection in connections")
@@ -48,7 +49,7 @@ import utils from '@/utils.js'
 import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 
-let startCursor, prevCursor, endCursor, shouldCancel
+let prevCursor, endCursor, shouldCancel
 let processQueueIntervalTimer
 
 export default {
@@ -120,6 +121,11 @@ export default {
     window.removeEventListener('popstate', this.loadSpaceOnBackOrForward)
     clearInterval(processQueueIntervalTimer)
   },
+  data () {
+    return {
+      startCursor: {}
+    }
+  },
   computed: {
     styles () {
       const zoom = 1 / this.spaceZoomDecimal
@@ -167,6 +173,7 @@ export default {
       })
       return overlaps
     },
+    currentConnectionStartCardIds () { return this.$store.state.currentConnectionStartCardIds },
     isPainting () { return this.$store.state.currentUserIsPainting },
     isPanningReady () { return this.$store.state.currentUserIsPanningReady },
     spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
@@ -249,14 +256,14 @@ export default {
         shouldCancel = false
       }
       if (this.spaceIsReadOnly) { return }
-      startCursor = utils.cursorPositionInViewport(event)
+      this.startCursor = utils.cursorPositionInViewport(event)
     },
 
     constrainCursorToAxis (event) {
       if (!event.shiftKey) { return }
       const delta = {
-        x: Math.abs(endCursor.x - startCursor.x),
-        y: Math.abs(endCursor.y - startCursor.y)
+        x: Math.abs(endCursor.x - this.startCursor.x),
+        y: Math.abs(endCursor.y - this.startCursor.y)
       }
       if (delta.x > delta.y) {
         endCursor.y = prevCursor.y
@@ -273,7 +280,7 @@ export default {
       prevCursor = utils.cursorPositionInViewport(event)
     },
     checkShouldShowDetails () {
-      if (!utils.cursorsAreClose(startCursor, endCursor)) {
+      if (!utils.cursorsAreClose(this.startCursor, endCursor)) {
         this.$store.commit('preventDraggedCardFromShowingDetails', true)
       }
     },
@@ -283,7 +290,7 @@ export default {
       if (utils.objectHasKeys(prevCursor)) {
         cursor = prevCursor
       } else {
-        cursor = startCursor
+        cursor = this.startCursor
       }
       cursor = {
         x: cursor.x * zoom,

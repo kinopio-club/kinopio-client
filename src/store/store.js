@@ -79,7 +79,7 @@ const store = createStore({
     hasEditedCurrentSpace: false,
 
     // connecting
-    currentConnection: {}, // startCardId, startConnectorRect
+    currentConnectionStartCardIds: [],
     currentConnectionSuccess: {},
     currentConnectionCursorStart: {},
     connectionDetailsPosition: {}, // x, y
@@ -435,10 +435,9 @@ const store = createStore({
       utils.typeCheck({ value: object, type: 'object', origin: 'currentConnectionCursorStart' })
       state.currentConnectionCursorStart = object
     },
-    currentConnection: (state, updates) => {
-      let object = state.currentConnection
-      object = utils.updateObject(object, updates)
-      state.currentConnection = object
+    currentConnectionStartCardIds: (state, cardIds) => {
+      utils.typeCheck({ value: cardIds, type: 'array', origin: 'currentConnectionStartCardIds' })
+      state.currentConnectionStartCardIds = cardIds
     },
     updateRemoteCurrentConnection: (state, updates) => {
       const keys = Object.keys(updates)

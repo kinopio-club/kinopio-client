@@ -12,10 +12,14 @@ path.current-connection(
 <script>
 import utils from '@/utils.js'
 
-let prevCursor, startCursor
+let prevCursor
 
 export default {
   name: 'CurrentConnection',
+  props: {
+    startCardId: String,
+    startCursor: Object
+  },
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggeredDrawConnectionFrame') {
@@ -63,7 +67,7 @@ export default {
       if (utils.objectHasKeys(prevCursor)) {
         cursor = prevCursor
       } else {
-        cursor = startCursor
+        cursor = this.startCursor
       }
       cursor = {
         x: cursor.x * zoom,
@@ -80,7 +84,7 @@ export default {
           y: end.y * zoom
         }
       }
-      const startCardId = this.$store.state.currentConnection.startCardId
+      const startCardId = this.startCardId
       const start = utils.connectorCoords(startCardId)
       const path = utils.connectionPathBetweenCoords(start, end)
       this.checkCurrentConnectionSuccess()
@@ -104,7 +108,7 @@ export default {
       let updates = { id: this.$store.state.currentUser.id }
       let isCurrentConnectionConnected
       if (cardElement) {
-        isCurrentConnectionConnected = this.$store.state.currentConnection.startCardId !== cardElement.dataset.cardId
+        isCurrentConnectionConnected = this.startCardId !== cardElement.dataset.cardId
       }
       if (!cardElement) {
         this.$store.commit('currentConnectionSuccess', {})
@@ -124,26 +128,29 @@ export default {
       this.$store.dispatch('currentConnections/add', { connection, type })
       this.$store.dispatch('currentConnections/addType', type)
     },
-    createConnection () {
+    createConnections () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
-      const startCardId = this.$store.state.currentConnection.startCardId
+      const startCardIds = this.$store.state.currentConnectionStartCardIds
       const endCardId = currentConnectionSuccess.id
       if (currentConnectionSuccess.id) {
-        const path = utils.connectionBetweenCards(startCardId, endCardId)
-        const connection = { startCardId, endCardId, path }
-        this.addConnection(connection)
+        startCardIds.forEach(startCardId => {
+          const path = utils.connectionBetweenCards(startCardId, endCardId)
+          const connection = { startCardId, endCardId, path }
+          this.addConnection(connection)
+        })
       } else {
         this.$store.dispatch('currentConnections/removeUnusedTypes')
       }
     },
     stopInteractions (event) {
       if (this.isDrawingConnection) {
-        this.createConnection()
+        this.createConnections()
+        this.$store.dispatch('clearMultipleSelected')
       }
       this.$store.commit('currentConnectionSuccess', {})
-      const isCurrentConnection = utils.objectHasKeys(this.$store.state.currentConnection)
+      const isCurrentConnection = this.$store.state.currentConnectionStartCardIds.length
       if (isCurrentConnection) {
-        this.$store.commit('currentConnection', {})
+        this.$store.commit('currentConnectionStartCardIds', [])
         this.$store.commit('broadcast/updateStore', { updates: { id: this.$store.state.currentUser.id }, type: 'removeRemoteCurrentConnection' })
       }
       this.$store.commit('currentUserIsDrawingConnection', false)
