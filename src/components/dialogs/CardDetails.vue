@@ -983,6 +983,9 @@ export default {
       this.closeDialogs()
       const isVisible = !this.$store.state.currentUser.shouldShowCardCollaborationInfo
       this.$store.dispatch('currentUser/shouldShowCardCollaborationInfo', isVisible)
+      this.$nextTick(() => {
+        this.scrollIntoView()
+      })
     },
     focusName (position) {
       const element = this.$refs.name
@@ -1500,6 +1503,7 @@ export default {
         this.resetTextareaHeight()
         this.$nextTick(() => {
           this.startOpening()
+          this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId })
         })
       })
       this.previousSelectedTag = {}
@@ -1527,6 +1531,7 @@ export default {
       this.$store.dispatch('updatePageSizes')
       this.$nextTick(() => {
         this.updateCardMap(cardId)
+        this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId })
       })
     }
   },
@@ -1536,8 +1541,6 @@ export default {
         this.closeCard()
       }
     },
-    // https://v3.vuejs.org/guide/migration/watch.html
-    // watching arrays doesn't work for changes anymore (only whole replacement, unless 'deep', option is specified)
     validWebUrls: {
       handler (urls) {
         let url = urls[0]
@@ -1552,6 +1555,8 @@ export default {
           this.debouncedUpdateUrlPreview(url)
         }
       },
+      // https://v3.vuejs.org/guide/migration/watch.html
+      // watching arrays doesn't work for changes anymore (only whole replacement, unless 'deep', option is specified)
       deep: true
     }
   }

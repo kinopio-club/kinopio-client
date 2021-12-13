@@ -400,6 +400,7 @@ export default {
     display inline-block
     color var(--primary-background)
     margin-right 6px
+    font-size 12px
 
 @keyframes notificationJiggle
   0%
