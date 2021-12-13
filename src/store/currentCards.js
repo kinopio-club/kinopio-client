@@ -277,7 +277,7 @@ const currentCards = {
           height: card.height
         }
         nextTick(() => {
-          card = utils.updateCardDimentions(card)
+          card = utils.updateCardDimensions(card)
           const dimensionsChanged = card.width !== prevDimensions.width || card.height !== prevDimensions.height
           if (!dimensionsChanged) { return }
           const body = {
@@ -317,6 +317,36 @@ const currentCards = {
         id: cardId,
         commentIsVisible: value
       })
+    },
+
+    // resize
+
+    resize: (context, { cardIds, deltaX }) => {
+      const minImageWidth = 64
+      cardIds.forEach(cardId => {
+        const card = context.getters.byId(cardId)
+        let width = card.resizeWidth || card.width
+        width = width + deltaX
+        width = Math.max(minImageWidth, width)
+        const updates = { id: cardId, resizeWidth: width }
+        context.dispatch('update', updates)
+        context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
+        context.dispatch('updateDimensions', cardId)
+        context.dispatch('currentConnections/updatePaths', { cardId, shouldUpdateApi: true }, { root: true })
+      })
+      context.dispatch('updateCardMap')
+    },
+    removeResize: (context, { cardIds }) => {
+      cardIds.forEach(cardId => {
+        const updates = { id: cardId, resizeWidth: null }
+        context.dispatch('update', updates)
+        context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
+        nextTick(() => {
+          context.dispatch('updateDimensions', cardId)
+          context.dispatch('currentConnections/updatePaths', { cardId, shouldUpdateApi: true }, { root: true })
+        })
+      })
+      context.dispatch('updateCardMap')
     },
 
     // move

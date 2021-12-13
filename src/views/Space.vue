@@ -189,6 +189,7 @@ export default {
     isPanningReady () { return this.$store.state.currentUserIsPanningReady },
     spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
     isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
+    isResizingCard () { return this.$store.state.currentUserIsResizingCard },
     isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
     connections () { return this.$store.getters['currentConnections/all'] },
     viewportHeight () { return this.$store.state.viewportHeight },
@@ -196,7 +197,7 @@ export default {
     pageHeight () { return this.$store.state.pageHeight },
     pageWidth () { return this.$store.state.pageWidth },
     isInteracting () {
-      if (this.isDraggingCard || this.isDrawingConnection) {
+      if (this.isDraggingCard || this.isDrawingConnection || this.isResizingCard) {
         return true
       } else { return false }
     },
@@ -282,6 +283,12 @@ export default {
         endCursor.x = prevCursor.x
       }
     },
+    resizeCards () {
+      if (!prevCursor) { return }
+      const cardIds = this.$store.state.currentUserIsResizingCardIds
+      const deltaX = endCursor.x - prevCursor.x
+      this.$store.dispatch('currentCards/resize', { cardIds, deltaX })
+    },
     interact (event) {
       endCursor = utils.cursorPositionInViewport(event)
       if (this.isDraggingCard) {
@@ -290,6 +297,9 @@ export default {
       }
       if (this.isDrawingConnection) {
         this.drawConnection()
+      }
+      if (this.isResizingCard) {
+        this.resizeCards()
       }
       prevCursor = utils.cursorPositionInViewport(event)
     },
@@ -493,6 +503,7 @@ export default {
       //   currentConnection: this.$store.state.currentConnection
       // }
       console.log('💣 stopInteractions') // stopInteractions and Space/stopPainting are run on all mouse and touch end events
+      const currentUser = this.$store.state.currentUser
       this.addInteractionBlur()
       if (event.touches) {
         this.$store.commit('triggerUpdatePositionInVisualViewport')
@@ -515,6 +526,10 @@ export default {
       this.$store.commit('shouldAddCard', false)
       this.$store.commit('preventDraggedCardFromShowingDetails', false)
       this.$store.commit('currentUserIsDrawingConnection', false)
+      if (this.$store.state.currentUserIsResizingCard) {
+        this.$store.commit('currentUserIsResizingCard', false)
+        this.$store.commit('broadcast/updateStore', { updates: { userId: currentUser.id }, type: 'removeRemoteUserResizingCards' })
+      }
       this.$store.commit('currentUserIsPainting', false)
       this.$store.commit('currentUserIsPaintingLocked', false)
       if (this.isDraggingCard) {
@@ -526,7 +541,7 @@ export default {
       const isCurrentConnection = utils.objectHasKeys(this.$store.state.currentConnection)
       if (isCurrentConnection) {
         this.$store.commit('currentConnection', {})
-        this.$store.commit('broadcast/updateStore', { updates: { id: this.$store.state.currentUser.id }, type: 'removeRemoteCurrentConnection' })
+        this.$store.commit('broadcast/updateStore', { updates: { id: currentUser.id }, type: 'removeRemoteCurrentConnection' })
       }
       this.updatePageSizes()
       this.$store.commit('prevCursorPosition', utils.cursorPositionInPage(event))
