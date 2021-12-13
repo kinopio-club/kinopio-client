@@ -489,7 +489,7 @@ export default {
     const rect = element.getBoundingClientRect()
     return this.isCardInViewport(rect)
   },
-  updateCardDimentions (card) {
+  updateCardDimensions (card) {
     const element = document.querySelector(`article [data-card-id="${card.id}"]`)
     const rect = element.getBoundingClientRect()
     card.width = Math.ceil(rect.width)

@@ -178,6 +178,7 @@ export default {
     isPanningReady () { return this.$store.state.currentUserIsPanningReady },
     spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
     isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
+    isResizingCard () { return this.$store.state.currentUserIsResizingCard },
     isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
     connections () { return this.$store.getters['currentConnections/all'] },
     viewportHeight () { return this.$store.state.viewportHeight },
@@ -185,7 +186,7 @@ export default {
     pageHeight () { return this.$store.state.pageHeight },
     pageWidth () { return this.$store.state.pageWidth },
     isInteracting () {
-      if (this.isDraggingCard || this.isDrawingConnection) {
+      if (this.isDraggingCard || this.isDrawingConnection || this.isResizingCard) {
         return true
       } else { return false }
     },
@@ -271,11 +272,20 @@ export default {
         endCursor.x = prevCursor.x
       }
     },
+    resizeCards () {
+      if (!prevCursor) { return }
+      const cardIds = this.$store.state.currentUserIsResizingCardIds
+      const deltaX = endCursor.x - prevCursor.x
+      this.$store.dispatch('currentCards/resize', { cardIds, deltaX })
+    },
     interact (event) {
       endCursor = utils.cursorPositionInViewport(event)
       if (this.isDraggingCard) {
         this.constrainCursorToAxis(event)
         this.dragCard()
+      }
+      if (this.isResizingCard) {
+        this.resizeCards()
       }
       prevCursor = utils.cursorPositionInViewport(event)
     },
@@ -401,6 +411,7 @@ export default {
       //   isDraggingCard: this.isDraggingCard,
       // }
       console.log('💣 stopInteractions') // stopInteractions and Space/stopPainting are run on all mouse and touch end events
+      const currentUser = this.$store.state.currentUser
       this.addInteractionBlur()
       if (event.touches) {
         this.$store.commit('triggerUpdatePositionInVisualViewport')
@@ -418,6 +429,10 @@ export default {
       this.$store.commit('importArenaChannelIsVisible', false)
       this.$store.commit('shouldAddCard', false)
       this.$store.commit('preventDraggedCardFromShowingDetails', false)
+      if (this.$store.state.currentUserIsResizingCard) {
+        this.$store.commit('currentUserIsResizingCard', false)
+        this.$store.commit('broadcast/updateStore', { updates: { userId: currentUser.id }, type: 'removeRemoteUserResizingCards' })
+      }
       this.$store.commit('currentUserIsPainting', false)
       this.$store.commit('currentUserIsPaintingLocked', false)
       if (this.isDraggingCard) {

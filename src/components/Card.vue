@@ -1,5 +1,5 @@
 <template lang="pug">
-article(:style="position" :data-card-id="id" ref="card")
+article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': isResizing}")
   .card(
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
@@ -12,7 +12,7 @@ article(:style="position" :data-card-id="id" ref="card")
     @keyup.stop.backspace="removeCard"
 
     :class="{jiggle: shouldJiggle, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': isAudioCard, 'is-playing-audio': isPlayingAudio}",
-    :style="{background: selectedColor || remoteCardDetailsVisibleColor || remoteSelectedColor || selectedColorUpload || remoteCardDraggingColor || remoteUploadDraggedOverCardColor }"
+    :style="cardStyle"
     :data-card-id="id"
     :data-card-x="x"
     :data-card-y="y"
@@ -37,7 +37,7 @@ article(:style="position" :data-card-id="id" ref="card")
       img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}" @load="updateCardMap")
       img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelectedOrDragging}" @load="updateCardMap")
 
-    span.card-content-wrap
+    span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
       //- Comment
       .card-comment(v-if="nameIsComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
         //- [·]
@@ -86,7 +86,7 @@ article(:style="position" :data-card-id="id" ref="card")
             Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
-      span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}")
+      span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}" :style="cardButtonsWrapStyle")
         //- Url →
         a.url-wrap(:href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" v-if="cardButtonUrl && !nameIsComment" :class="{'connector-is-visible': connectorIsVisible}")
           .url.inline-button-wrap
@@ -113,6 +113,15 @@ article(:style="position" :data-card-id="id" ref="card")
               img.connector-icon(src="@/assets/connector-closed.svg")
             template(v-else)
               img.connector-icon(src="@/assets/connector-open.svg")
+        //- resize
+        .resize-button-wrap.inline-button-wrap(
+          v-if="resizeControlIsVisible"
+          @mousedown.left.stop="startResizing"
+          @touchstart.stop="startResizing"
+          @dblclick="removeResize"
+        )
+          button.inline-button(tabindex="-1")
+            img.resize-icon(src="@/assets/resize.svg")
 
     .url-preview-wrap(v-if="cardUrlPreviewIsVisible && !isHiddenInComment")
       UrlPreview(
@@ -231,7 +240,7 @@ export default {
   mounted () {
     if (this.shouldUpdateDimensions) {
       let card = { id: this.card.id }
-      card = utils.updateCardDimentions(card)
+      card = utils.updateCardDimensions(card)
       this.$store.dispatch('currentCards/update', card)
     }
     const shouldShowDetails = this.$store.state.loadSpaceShowDetailsForCardId === this.card.id
@@ -269,11 +278,24 @@ export default {
     }
   },
   computed: {
+    isResizing () { return this.$store.state.currentUserIsResizingCard },
+    resizeWidth () {
+      if (!this.resizeIsVisible) { return }
+      const resizeWidth = this.card.resizeWidth
+      if (!resizeWidth) { return }
+      return resizeWidth + 'px'
+    },
+    resizeIsVisible () {
+      return Boolean(this.formats.image || this.formats.video)
+    },
+    resizeControlIsVisible () {
+      return this.resizeIsVisible && this.canEditCard
+    },
     shouldJiggle () {
       return this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.isRemoteCardDragging
     },
     isSelectedOrDragging () {
-      return this.isSelected || this.isRemoteSelected || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.uploadIsDraggedOver || this.remoteUploadDraggedOverCardColor
+      return this.isSelected || this.isRemoteSelected || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.uploadIsDraggedOver || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor
     },
     shouldUpdateDimensions () {
       return Boolean(!this.card.width || !this.card.height)
@@ -346,10 +368,29 @@ export default {
     currentCardDetailsIsVisible () {
       return this.id === this.$store.state.cardDetailsIsVisibleForCardId
     },
+    cardStyle () {
+      const color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor
+      return {
+        background: color,
+        width: this.resizeWidth,
+        maxWidth: this.resizeWidth
+      }
+    },
     connectorGlowStyle () {
       const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor || this.connectedToConnectionDetailsIsVisibleColor
       if (!color) { return }
       return { background: color }
+    },
+    cardButtonsWrapStyle () {
+      if (!this.resizeIsVisible) { return }
+      if (this.nameIsComment) { return }
+      const zoom = this.$store.getters.spaceCounterZoomDecimal
+      let cardHeight = this.card.height
+      const element = this.$refs.card
+      if (element) {
+        cardHeight = element.getBoundingClientRect().height
+      }
+      return { height: (cardHeight * zoom) + 'px' }
     },
     connectedToConnectionDetailsIsVisibleColor () {
       const connectionId = this.$store.state.connectionDetailsIsVisibleForConnectionId
@@ -466,7 +507,9 @@ export default {
       return {
         left: `${this.x}px`,
         top: `${this.y}px`,
-        zIndex: z
+        zIndex: z,
+        width: this.resizeWidth,
+        maxWidth: this.resizeWidth
       }
     },
     canEditCard () {
@@ -651,6 +694,17 @@ export default {
       const draggingCard = remoteCardsDragging.find(card => card.cardId === this.id)
       if (draggingCard) {
         const user = this.$store.getters['currentSpace/userById'](draggingCard.userId)
+        return user.color
+      } else {
+        return undefined
+      }
+    },
+    remoteUserResizingCardsColor () {
+      const remoteUserResizingCards = this.$store.state.remoteUserResizingCards
+      if (!remoteUserResizingCards.length) { return }
+      let user = remoteUserResizingCards.find(user => user.cardIds.includes(this.id))
+      if (user) {
+        user = this.$store.getters['currentSpace/userById'](user.userId)
         return user.color
       } else {
         return undefined
@@ -1046,6 +1100,33 @@ export default {
       }
       this.$store.commit('currentUserIsDrawingConnection', true)
     },
+    startResizing (event) {
+      if (!this.canEditSpace) { return }
+      if (utils.isMultiTouch(event)) { return }
+      this.$store.dispatch('closeAllDialogs', 'Card.startResizing')
+      this.$store.commit('preventDraggedCardFromShowingDetails', true)
+      this.$store.dispatch('currentCards/incrementZ', this.id)
+      this.$store.commit('currentUserIsResizingCard', true)
+      let cardIds = [this.id]
+      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
+      if (multipleCardsSelectedIds.length) {
+        cardIds = multipleCardsSelectedIds
+      }
+      this.$store.commit('currentUserIsResizingCardIds', cardIds)
+      const updates = {
+        userId: this.$store.state.currentUser.id,
+        cardIds: cardIds
+      }
+      this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingCards' })
+    },
+    removeResize () {
+      let cardIds = [this.id]
+      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
+      if (multipleCardsSelectedIds.length) {
+        cardIds = multipleCardsSelectedIds
+      }
+      this.$store.dispatch('currentCards/removeResize', { cardIds })
+    },
     toggleCommentIsVisible (event) {
       if (this.$store.state.preventDraggedCardFromShowingDetails) { return }
       if (utils.isMultiTouch(event)) { return }
@@ -1292,7 +1373,7 @@ export default {
     },
     updateCurrentTouchPosition (event) {
       currentTouchPosition = utils.cursorPositionInViewport(event)
-      if (this.isBeingDragged) {
+      if (this.isBeingDragged || this.isResizing) {
         event.preventDefault() // allows dragging cards without scrolling
       }
     },
@@ -1343,6 +1424,10 @@ article
   pointer-events all
   position absolute
   max-width 235px
+  -webkit-touch-callout none
+  &.is-resizing
+    *
+      outline none
   .card
     border-radius 3px
     user-select none
@@ -1377,7 +1462,7 @@ article
       align-items flex-start
       justify-content space-between
     .card-content
-      min-width 40px
+      min-width 28px
       width 100%
     .extra-name-padding
       margin-right 8px
@@ -1427,6 +1512,7 @@ article
 
     .connector
       position relative
+      height 32px
       .connector-glow
         position absolute
         width 36px
@@ -1475,6 +1561,10 @@ article
       position absolute
       left 4px
       top 2px
+    .resize-icon
+      position absolute
+      left 4px
+      top 4.5px
     .arrow-icon
       position absolute
       left 5px
@@ -1553,6 +1643,15 @@ article
       margin-top 8px
       margin-left 8px
 
+  .resize-button-wrap
+    position absolute
+    right 0px
+    bottom 0px
+    cursor ew-resize
+    button
+      cursor ew-resize
+    img
+      -webkit-user-drag none
   .meta-container
     margin-top -6px
     display flex
