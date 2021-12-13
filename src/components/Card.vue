@@ -222,15 +222,13 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'updateRemoteCurrentConnection' || mutation.type === 'removeRemoteCurrentConnection') {
         this.updateRemoteConnections()
-      }
-      if (mutation.type === 'triggerScrollCardIntoView') {
+      } else if (mutation.type === 'triggerScrollCardIntoView') {
         if (mutation.payload === this.card.id) {
           const element = this.$refs.card
           const isTouchDevice = this.$store.state.isTouchDevice
           scrollIntoView.scroll(element, isTouchDevice)
         }
-      }
-      if (mutation.type === 'triggerUploadComplete') {
+      } else if (mutation.type === 'triggerUploadComplete') {
         let { cardId, url } = mutation.payload
         if (cardId !== this.card.id) { return }
         this.addFile({ url })
@@ -357,6 +355,22 @@ export default {
         return link
       }
       return this.formats.file
+    },
+    webUrl () {
+      const link = this.formats.link
+      if (utils.urlIsValidTld(link) && !utils.urlIsSpace(link)) {
+        return link
+      } else {
+        return null
+      }
+    },
+    spaceUrl () {
+      const link = this.formats.link
+      if (utils.urlIsSpace(link)) {
+        return link
+      } else {
+        return null
+      }
     },
     isHiddenInComment () {
       if (this.nameIsComment && !this.commentIsVisible) {
@@ -581,8 +595,9 @@ export default {
       return segments
     },
     cardUrlPreviewIsVisible () {
-      const isErrorUrl = this.card.urlPreviewErrorUrl && this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl
-      return Boolean(this.card.urlPreviewIsVisible && this.card.urlPreviewUrl && !isErrorUrl)
+      const cardHasUrlPreviewInfo = Boolean(this.card.urlPreviewTitle || this.card.urlPreviewDescription || this.card.urlPreviewImage)
+      const isErrorUrl = this.card.urlPreviewErrorUrl && (this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl)
+      return Boolean(this.card.urlPreviewIsVisible && this.card.urlPreviewUrl && cardHasUrlPreviewInfo && !isErrorUrl)
     },
     tags () {
       return this.nameSegments.filter(segment => {
@@ -773,8 +788,9 @@ export default {
       const cardIds = this.$store.state.urlPreviewLoadingForCardIds
       let isLoading = cardIds.find(cardId => cardId === this.card.id)
       isLoading = Boolean(isLoading)
-      const isErrorUrl = this.card.urlPreviewErrorUrl && this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl
-      return isLoading && this.card.urlPreviewIsVisible && !isErrorUrl
+      if (!isLoading) { return }
+      const isErrorUrl = this.card.urlPreviewErrorUrl && (this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl)
+      return isLoading && !isErrorUrl
     },
     lockingFrameStyle () {
       const initialPadding = 65 // matches initialLockCircleRadius in magicPaint
@@ -1412,6 +1428,130 @@ export default {
       }
       const userId = this.$store.state.currentUser.id
       this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
+    },
+
+    updateUrlData () {
+      this.updateSpaceLink()
+      this.updateUrlPreview()
+    },
+
+    // space link
+
+    updateSpaceLink () {
+      let url = this.spaceUrl
+      const shouldRemoveLink = this.card.linkToSpaceId && !url
+      if (shouldRemoveLink) {
+        const update = {
+          id: this.card.id,
+          linkToSpaceId: null
+        }
+        this.$store.dispatch('currentCards/update', update)
+        return
+      }
+      if (!url) { return }
+      const linkToSpaceId = utils.spaceIdFromUrl(url) || null
+      const linkExists = linkToSpaceId === this.card.linkToSpaceId
+      if (linkExists) { return }
+      const update = {
+        id: this.card.id,
+        linkToSpaceId
+      }
+      this.$store.dispatch('currentCards/update', update)
+      this.$store.dispatch('currentSpace/saveOtherSpace', { spaceId: linkToSpaceId })
+    },
+
+    // url preview
+
+    async updateUrlPreview () {
+      if (!this.canEditCard) { return }
+      this.$store.commit('addUrlPreviewLoadingForCardIds', this.card.id)
+      const cardId = this.card.id
+      let url = this.webUrl
+      if (!url) {
+        this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+        return
+      }
+      const shouldUpdate = this.shouldUpdateUrlPreview(url)
+      if (!shouldUpdate) {
+        this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+        return
+      }
+      try {
+        url = this.removeHiddenQueryString(url)
+        let response = await this.$store.dispatch('api/urlPreview', url)
+        this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+        let { data } = response
+        console.log('🚗 link preview', data)
+        const { links, meta } = data
+        this.updateUrlPreviewSuccess({ links, meta, cardId, url })
+      } catch (error) {
+        console.warn('🚑', error, url)
+        this.updateUrlPreviewErrorUrl(url)
+      }
+    },
+    shouldUpdateUrlPreview (url) {
+      const previewIsVisible = this.card.urlPreviewIsVisible
+      const isNotPreviewUrl = url !== this.card.urlPreviewUrl
+      const isNotErrorUrl = url !== this.card.urlPreviewErrorUrl
+      const isNotKinopioUrl = !url.startsWith('https://kinopio.club')
+      return previewIsVisible && isNotPreviewUrl && isNotErrorUrl && isNotKinopioUrl
+    },
+    removeHiddenQueryString (url) {
+      if (!url) { return }
+      url = url.replace('?hidden=true', '')
+      url = url.replace('&hidden=true', '')
+      return url
+    },
+    nameIncludesUrl (url) {
+      const name = this.card.name
+      return name.includes(url)
+    },
+    previewImage ({ thumbnail }) {
+      const minWidth = 200
+      if (!thumbnail) { return '' }
+      let image = thumbnail.find(item => item.href && (item.media.width > minWidth))
+      if (!image) { return '' }
+      return image.href || ''
+    },
+    previewFavicon ({ icon }) {
+      if (!icon) { return '' }
+      let image = icon.find(item => item.href)
+      return image.href || ''
+    },
+    updateUrlPreviewSuccess ({ links, meta, cardId, url }) {
+      if (!this.nameIncludesUrl(url)) { return }
+      const update = {
+        id: cardId,
+        urlPreviewUrl: url,
+        urlPreviewTitle: utils.truncated(meta.title || meta.site),
+        urlPreviewDescription: utils.truncated(meta.description, 280),
+        urlPreviewImage: this.previewImage(links),
+        urlPreviewFavicon: this.previewFavicon(links)
+      }
+      this.$store.dispatch('currentCards/update', update)
+      this.updateCardMap()
+    },
+    updateUrlPreviewErrorUrl (url) {
+      const cardId = this.card.id
+      this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+      const update = {
+        id: cardId,
+        urlPreviewErrorUrl: url,
+        urlPreviewUrl: url
+      }
+      this.$store.dispatch('currentCards/update', update)
+    }
+  },
+  watch: {
+    // https://v3.vuejs.org/guide/migration/watch.html
+    // watching arrays doesn't work for changes anymore (only whole replacement, unless 'deep', option is specified)
+    formats: {
+      handler (urls) {
+        if (urls.link) {
+          this.updateUrlData()
+        }
+      },
+      deep: true
     }
   }
 }
