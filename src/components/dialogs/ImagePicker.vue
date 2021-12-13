@@ -1,15 +1,15 @@
 <template lang="pug">
-dialog.narrow.image-picker(
+dialog.image-picker(
   v-if="visible"
   :open="visible"
   @click.left.stop
   ref="dialog"
-  :class="{'background-image-picker' : isBackgroundImage, 'right-side': showOnRightSide}"
+  :class="{'background-image-picker' : isBackgroundImage }"
   :style="{'max-height': dialogHeight + 'px', 'min-height': minDialogHeight + 'px'}"
 )
   section(v-if="!isBackgroundImage" ref="cardImageServiceSection")
     //- card images
-    .row
+    .row.title-row-flex
       .segmented-buttons
         button(@click.left.stop="toggleServiceIsStickers" :class="{active : serviceIsStickers}" title="stickers")
           img.icon.sticker(src="@/assets/sticker.svg")
@@ -48,7 +48,7 @@ dialog.narrow.image-picker(
 
   //- background images
   section(v-if="isBackgroundImage" ref="serviceSection")
-    .row
+    .row.title-row-flex
       .segmented-buttons
         button(@click.left.stop="toggleServiceIsBackgrounds" :class="{active : serviceIsBackgrounds}")
           span Backgrounds
@@ -97,20 +97,7 @@ dialog.narrow.image-picker(
         li(@click.left="selectImage(image)" tabindex="0" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
           img(:src="image.previewUrl")
           a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
-            button.small-button {{image.sourceUserName}} →
-
-    template(v-if="serviceIsBackgrounds")
-      .button-wrap.animated-button-wrap
-        button(:class="{active: animatedBackgroundsVisible}" @click.left.prevent="toggleAnimatedBackgroundsVisible" @keydown.stop.enter="toggleAnimatedBackgroundsVisible")
-          img.icon(v-if="animatedBackgroundsVisible" src="@/assets/view.svg")
-          img.icon(v-else src="@/assets/view-hidden.svg")
-          span Animated
-      ul.results-list.image-list(v-if="animatedBackgroundsVisible")
-        template(v-for="image in animatedBackgroundImages" :key="image.id")
-          li(@click.left="selectImage(image)" tabindex="0" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
-            img(:src="image.previewUrl")
-            a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
-              button.small-button {{image.sourceUserName}} →
+            button.small-button →
 
 </template>
 
@@ -119,7 +106,6 @@ import scrollIntoView from '@/scroll-into-view.js'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import backgroundImages from '@/data/backgroundImages.json'
-import backgroundImagesAnimated from '@/data/backgroundImagesAnimated.json'
 
 import debounce from 'lodash-es/debounce'
 import sampleSize from 'lodash-es/sampleSize'
@@ -159,8 +145,7 @@ export default {
       search: '',
       service: 'stickers', // 'stickers', 'gifs', 'arena', 'backgrounds'
       loading: false,
-      showOnRightSide: false,
-      minDialogHeight: null,
+      minDialogHeight: 400,
       dialogHeight: null,
       resultsSectionHeight: null,
       error: {
@@ -170,9 +155,7 @@ export default {
         sizeLimit: false,
         unknownUploadError: false
       },
-      backgroundsIsStatic: true,
-      animatedBackgroundsVisible: false,
-      animatedBackgroundImages: []
+      backgroundsIsStatic: true
     }
   },
   computed: {
@@ -241,17 +224,6 @@ export default {
       this.service = 'backgrounds'
       this.searchAgainBackgrounds()
     },
-    toggleAnimatedBackgroundsVisible () {
-      this.animatedBackgroundsVisible = !this.animatedBackgroundsVisible
-      this.searchAgainBackgrounds()
-      if (this.animatedBackgroundsVisible) {
-        const results = this.$refs.results
-        const currentY = results.scrollHeight
-        this.$nextTick(() => {
-          results.scrollTop = currentY
-        })
-      }
-    },
     toggleServiceIsArena () {
       this.service = 'arena'
       this.searchAgain()
@@ -267,9 +239,6 @@ export default {
     searchAgainBackgrounds () {
       let images
       images = backgroundImages
-      if (this.animatedBackgroundsVisible) {
-        this.normalizeBackgroundImages(backgroundImagesAnimated)
-      }
       this.normalizeResults(images, 'backgrounds')
     },
     searchAgain () {
@@ -282,7 +251,7 @@ export default {
       if (defaultArenaBlocksData) {
         data = defaultArenaBlocksData
       } else {
-        const defaultChannels = ['mood-imagined', 'good-w8twljfeosy', 'natur-i0sr6kdr1xq', 'colon-caret-bracket-vdm6ix4mr_8', 'ggggraphic']
+        const defaultChannels = ['mood-imagined', 'good-w8twljfeosy', 'natur-i0sr6kdr1xq', 'ggggraphic']
         const channel = sample(defaultChannels)
         url = new URL(`https://api.are.na/v2/channels/${channel}/contents`)
         params = {
@@ -292,7 +261,9 @@ export default {
         const response = await fetch(url)
         data = await response.json()
         data.blocks = data.contents
-        data.blocks = data.blocks.filter(block => block.image)
+        data.blocks = data.blocks.filter(block => {
+          return block.image && block.class !== 'Link'
+        })
         data.blocks = data.blocks.map(block => {
           let image = {}
           image.image = block.image
@@ -379,7 +350,7 @@ export default {
       this.error.unknownUploadError = false
     },
     clearHeights () {
-      this.minDialogHeight = null
+      this.minDialogHeight = 400
       this.dialogHeight = null
       this.resultsSectionHeight = null
     },
@@ -389,7 +360,9 @@ export default {
       const giphy = service === 'giphy' && (this.serviceIsStickers || this.serviceIsGifs)
       const backgrounds = service === 'backgrounds' && this.serviceIsBackgrounds
       if (arena) {
-        data.blocks = data.blocks.filter(image => Boolean(image.image))
+        data.blocks = data.blocks.filter(image => {
+          return Boolean(image.image) && image.class !== 'Link'
+        })
         this.images = data.blocks.map(image => {
           const url = image.image.original.url
           let username
@@ -430,16 +403,11 @@ export default {
         })
       }
       if (!this.isBackgroundImage) {
-        this.updateHeightFromDialog()
-        this.scrollIntoView()
+        this.$nextTick(() => {
+          this.updateHeightFromDialog()
+          this.scrollIntoView()
+        })
       }
-    },
-    normalizeBackgroundImages (images) {
-      this.animatedBackgroundImages = images.map(image => {
-        image.sourceUserName = null
-        image.previewUrl = image.url
-        return image
-      })
     },
     focusSearchInput () {
       if (utils.isMobile()) { return }
@@ -460,7 +428,6 @@ export default {
     },
     scrollIntoView () {
       if (!this.visible) { return }
-      if (utils.isMobile()) { return }
       if (this.isBackgroundImage) {
         this.updateHeightFromFooter()
         return
@@ -497,14 +464,6 @@ export default {
           this.error.unknownUploadError = true
         }
       }
-    },
-    checkIfShouldBeOnRightSide () {
-      this.showOnRightSide = false
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.showOnRightSide = utils.elementShouldBeOnRightSide(element)
-      })
     },
     heightIsSignificantlyDifferent (height) {
       const thresholdDelta = 100
@@ -557,7 +516,6 @@ export default {
   },
   watch: {
     visible (visible) {
-      this.animatedBackgroundsVisible = false
       this.$nextTick(() => {
         if (visible) {
           this.search = this.initialSearch
@@ -565,8 +523,9 @@ export default {
             this.toggleServiceIsBackgrounds()
             this.updateHeightFromFooter()
             return
+          } else {
+            this.scrollIntoView()
           }
-          this.checkIfShouldBeOnRightSide()
           this.searchService()
           this.focusSearchInput()
         }
@@ -608,8 +567,8 @@ export default {
       top 6px
       right 10px
       padding 0px
-      padding-left 6px
-      padding-right 5px
+      padding-left 4px
+      padding-right 3px
       max-width 80%
 
   .error-container
@@ -640,14 +599,11 @@ export default {
   &.background-image-picker
     padding-top 4px
 
-  &.right-side
-    left initial
-    right 8px
-
   .sticker
     vertical-align -2px
 
-  .animated-button-wrap
-    margin 8px
+  .title-row-flex
+    display flex
+    justify-content space-between
 
 </style>

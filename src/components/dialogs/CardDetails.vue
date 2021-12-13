@@ -760,7 +760,7 @@ export default {
           return card
         })
         newCards.forEach(card => {
-          card = utils.updateCardDimentions(card)
+          card = utils.updateCardDimensions(card)
           this.$store.dispatch('currentCards/update', {
             id: card.id,
             y: card.y
@@ -956,6 +956,9 @@ export default {
       this.closeDialogs()
       const isVisible = !this.$store.state.currentUser.shouldShowCardCollaborationInfo
       this.$store.dispatch('currentUser/shouldShowCardCollaborationInfo', isVisible)
+      this.$nextTick(() => {
+        this.scrollIntoView()
+      })
     },
     focusName (position) {
       const element = this.$refs.name
@@ -1412,6 +1415,7 @@ export default {
         this.resetTextareaHeight()
         this.$nextTick(() => {
           this.startOpening()
+          this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId })
         })
       })
       this.previousSelectedTag = {}
@@ -1439,6 +1443,7 @@ export default {
       this.$store.dispatch('updatePageSizes')
       this.$nextTick(() => {
         this.updateCardMap(cardId)
+        this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId })
       })
     }
   },
