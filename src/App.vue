@@ -404,6 +404,7 @@ dialog
   border 1px solid var(--primary)
   box-shadow var(--hover-shadow)
   border-radius 3px
+  overscroll-behavior-y contain
   &.narrow
     width 203px
   button,
