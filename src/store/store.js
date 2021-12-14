@@ -446,18 +446,25 @@ const store = createStore({
       state.currentConnectionStartCardIds = cardIds
     },
     updateRemoteCurrentConnection: (state, updates) => {
-      const keys = Object.keys(updates)
-      const id = updates.id
-      let connection = state.remoteCurrentConnections.find(remoteConnection => remoteConnection.id === id) || {}
-      state.remoteCurrentConnections = state.remoteCurrentConnections.filter(remoteConnection => remoteConnection.id !== id)
-      keys.forEach(key => {
-        connection[key] = updates[key]
+      utils.typeCheck({ value: updates, type: 'object', origin: 'updateRemoteCurrentConnection' })
+      const index = state.remoteCurrentConnections.findIndex(remoteConnection => {
+        const isUserId = remoteConnection.userId === updates.userId
+        const isStartCardId = remoteConnection.startCardId === updates.startCardId
+        return isUserId && isStartCardId
       })
-      state.remoteCurrentConnections.push(connection)
+      if (index >= 0) {
+        let connection = state.remoteCurrentConnections[index]
+        const keys = Object.keys(updates)
+        keys.forEach(key => {
+          connection[key] = updates[key]
+        })
+        state.remoteCurrentConnections[index] = connection
+      } else {
+        state.remoteCurrentConnections.push(updates)
+      }
     },
     removeRemoteCurrentConnection: (state, updates) => {
-      const id = updates.id
-      state.remoteCurrentConnections = state.remoteCurrentConnections.filter(remoteConnection => remoteConnection.id !== id)
+      state.remoteCurrentConnections = state.remoteCurrentConnections.filter(remoteConnection => remoteConnection.userId !== updates.userId)
     },
     updateCurrentCardConnections: (state, connections) => {
       connections = connections || []

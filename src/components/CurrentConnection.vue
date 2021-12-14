@@ -93,7 +93,7 @@ export default {
       this.currentConnectionColor = connectionType.color
       this.$store.commit('currentConnectionColor', connectionType.color)
       const updates = {
-        id: this.$store.state.currentUser.id,
+        userId: this.$store.state.currentUser.id,
         connectionTypeId: connectionType.id,
         color: connectionType.color,
         startCardId,
@@ -105,7 +105,7 @@ export default {
       const cursor = this.cursor()
       const zoom = this.spaceZoomDecimal
       const cardElement = utils.cardElementFromPosition(cursor.x * zoom, cursor.y * zoom)
-      let updates = { id: this.$store.state.currentUser.id }
+      let updates = { userId: this.$store.state.currentUser.id }
       let isCurrentConnectionConnected
       if (cardElement) {
         isCurrentConnectionConnected = this.startCardId !== cardElement.dataset.cardId
@@ -151,7 +151,8 @@ export default {
       const isCurrentConnection = this.$store.state.currentConnectionStartCardIds.length
       if (isCurrentConnection) {
         this.$store.commit('currentConnectionStartCardIds', [])
-        this.$store.commit('broadcast/updateStore', { updates: { id: this.$store.state.currentUser.id }, type: 'removeRemoteCurrentConnection' })
+        const updates = { userId: this.$store.state.currentUser.id }
+        this.$store.commit('broadcast/updateStore', { updates, type: 'removeRemoteCurrentConnection' })
       }
       this.$store.commit('currentUserIsDrawingConnection', false)
       this.currentConnectionPath = undefined
