@@ -139,7 +139,7 @@ const router = createRouter({
         const zoom = urlParams.get('zoom')
         store.commit('spaceUrlToLoad', spaceId)
         store.commit('spaceZoomPercent', zoom)
-        store.commit('isEmbedMode', true)
+        store.commit('isEmbed', true)
         next()
       }
     }

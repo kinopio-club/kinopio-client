@@ -1,6 +1,6 @@
 <template lang="pug">
 .footer-wrap(:style="visualViewportPosition")
-  .left
+  .left(v-if="!isEmbed")
     footer
       Notifications
       section(v-if="isVisible")
@@ -50,7 +50,7 @@
             span Mobile Tips
           MobileTips(:visible="mobileTipsIsVisible")
 
-  .right(v-if="!isMobileOrTouch")
+  .right(v-if="!isMobileOrTouch" :class="{'is-embed': isEmbed}")
     SpaceZoom
 </template>
 
@@ -141,6 +141,7 @@ export default {
     clearInterval(updateLiveSpacesIntervalTimer)
   },
   computed: {
+    isEmbed () { return this.$store.state.isEmbed },
     currentUser () { return this.$store.state.currentUser },
     favoriteSpacesEditedCount () {
       let favoriteSpaces = utils.clone(this.currentUser.favoriteSpaces)
@@ -345,6 +346,9 @@ export default {
     pointer-events all
     @media(max-width 460px)
      display none
+    &.is-embed
+      position absolute
+      right 0
   &.is-mobile
     margin-bottom 10px
   &.is-mobile-standalone
