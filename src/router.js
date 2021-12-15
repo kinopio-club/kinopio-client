@@ -136,7 +136,13 @@ const router = createRouter({
       beforeEnter: (to, from, next) => {
         const urlParams = new URLSearchParams(window.location.search)
         const spaceId = urlParams.get('spaceId')
-        const zoom = urlParams.get('zoom')
+        const zoomLimit = {
+          min: 40,
+          max: 100
+        }
+        let zoom = urlParams.get('zoom')
+        zoom = Math.max(zoomLimit.min, zoom)
+        zoom = Math.min(zoomLimit.max, zoom)
         store.commit('spaceUrlToLoad', spaceId)
         store.commit('spaceZoomPercent', zoom)
         store.commit('isEmbed', true)
