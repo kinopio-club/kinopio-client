@@ -7,6 +7,12 @@ header(:style="visualViewportPosition")
           .logo-image
         MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
         span {{currentSpaceName}} →
+    .right
+      .space-users
+        .users
+          User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
+          User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
+          User(v-for="user in collaborators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
 
   nav(v-if="!isEmbed")
     .left
@@ -640,6 +646,7 @@ header
   .right
     display flex
     .space-users
+      display flex
       > .users
         padding-right 6px
         max-width 40vw
