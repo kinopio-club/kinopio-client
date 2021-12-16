@@ -43,7 +43,7 @@ const store = createStore({
     webfontIsLoaded: false,
     userHasScrolled: false,
     shouldPreventNextEnterKey: false,
-    isEmbedMode: false,
+    isEmbed: false,
 
     // search
     searchIsVisible: false,
@@ -67,6 +67,12 @@ const store = createStore({
     currentUserIsHoveringOverConnectionId: '',
     currentUserIsPanningReady: false,
     currentUserIsPanning: false,
+
+    // resizing
+
+    currentUserIsResizingCard: false,
+    currentUserIsResizingCardIds: [],
+    remoteUserResizingCards: [],
 
     // cards
     shouldAddCard: false,
@@ -290,9 +296,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean', origin: 'shouldPreventNextEnterKey' })
       state.shouldPreventNextEnterKey = value
     },
-    isEmbedMode: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'isEmbedMode' })
-      state.isEmbedMode = value
+    isEmbed: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'isEmbed' })
+      state.isEmbed = value
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'searchIsVisible' })
@@ -469,6 +475,24 @@ const store = createStore({
     currentUserIsPaintingLocked: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsPaintingLocked' })
       state.currentUserIsPaintingLocked = value
+    },
+
+    // Resizing
+
+    currentUserIsResizingCard: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsResizingCard' })
+      state.currentUserIsResizingCard = value
+    },
+    currentUserIsResizingCardIds: (state, cardIds) => {
+      utils.typeCheck({ value: cardIds, type: 'array', origin: 'currentUserIsResizingCardIds' })
+      state.currentUserIsResizingCardIds = cardIds
+    },
+    removeRemoteUserResizingCards: (state, update) => {
+      state.remoteUserResizingCards = state.remoteUserResizingCards.filter(remoteUser => remoteUser.userId !== update.userId)
+    },
+    updateRemoteUserResizingCards: (state, update) => {
+      state.remoteUserResizingCards = state.remoteUserResizingCards.filter(remoteUser => remoteUser.userId !== update.userId)
+      state.remoteUserResizingCards = state.remoteUserResizingCards.concat(update)
     },
 
     // Dragging

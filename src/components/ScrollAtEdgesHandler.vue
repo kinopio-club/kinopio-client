@@ -54,8 +54,10 @@ export default {
     currentUserIsPainting () { return this.$store.state.currentUserIsPainting },
     isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
     isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
+    isResizingCard () { return this.$store.state.currentUserIsResizingCard },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
-    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
+    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
+    shouldPreventResize () { return this.currentUserIsPainting || this.isDrawingConnection || this.isResizingCard }
   },
   methods: {
     initInteractions (event) {
@@ -153,7 +155,7 @@ export default {
       }
     },
     increasePageWidth (delta) {
-      if (this.currentUserIsPainting || this.isDrawingConnection) { return }
+      if (this.shouldPreventResize) { return }
       const cursorIsRightSideOfPage = (this.pageWidth - prevCursorPage.x) < scrollAreaWidth
       if (cursorIsRightSideOfPage) {
         const pageWidth = this.pageWidth
@@ -162,7 +164,7 @@ export default {
       }
     },
     increasePageHeight (delta) {
-      if (this.currentUserIsPainting || this.isDrawingConnection) { return }
+      if (this.shouldPreventResize) { return }
       const cursorIsBottomSideOfPage = (this.pageHeight - prevCursorPage.y) < scrollAreaHeight
       if (cursorIsBottomSideOfPage) {
         const pageHeight = this.pageHeight

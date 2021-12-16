@@ -209,7 +209,6 @@ import utils from '@/utils.js'
 
 import qs from '@aguezz/qs-parse'
 import nanoid from 'nanoid'
-import debounce from 'lodash-es/debounce'
 
 let prevCardId
 let previousTags = []
@@ -412,7 +411,7 @@ export default {
         return urlHasProtocol && !isLinode && !isSpace
       })
       if (!urls.length && this.card.urlPreviewUrl) {
-        this.clearUrlPreview()
+        this.removeUrlPreview()
       }
       return urls
     },
@@ -761,7 +760,7 @@ export default {
           return card
         })
         newCards.forEach(card => {
-          card = utils.updateCardDimentions(card)
+          card = utils.updateCardDimensions(card)
           this.$store.dispatch('currentCards/update', {
             id: card.id,
             y: card.y
@@ -859,7 +858,6 @@ export default {
       })
       this.updateMediaUrls()
       this.updateTags()
-      this.updateSpaceLink()
       if (this.notifiedMembers) { return }
       if (this.createdByUser.id !== this.$store.state.currentUser.id) { return }
       this.$store.dispatch('currentSpace/notifyCollaboratorsCardUpdated', { cardId: this.card.id, type: 'updateCard' })
@@ -869,31 +867,6 @@ export default {
       this.$store.dispatch('currentCards/updateDimensions', cardId)
       this.$store.dispatch('currentCards/updateCardMap')
     },
-    updateSpaceLink () {
-      let link = this.validUrls.filter(url => utils.urlIsSpace(url))[0]
-      const shouldRemoveLink = this.card.linkToSpaceId && !link
-      if (shouldRemoveLink) {
-        const update = {
-          id: this.card.id,
-          linkToSpaceId: null
-        }
-        this.$store.dispatch('currentCards/update', update)
-        return
-      }
-      if (!link) { return }
-      const linkToSpaceId = utils.spaceIdFromUrl(link) || null
-      const linkExists = linkToSpaceId === this.card.linkToSpaceId
-      if (linkExists) { return }
-      const update = {
-        id: this.card.id,
-        linkToSpaceId
-      }
-      this.$store.dispatch('currentCards/update', update)
-      this.debouncedSaveOtherSpace(linkToSpaceId)
-    },
-    debouncedSaveOtherSpace: debounce(async function (linkToSpaceId) {
-      this.$store.dispatch('currentSpace/saveOtherSpace', { spaceId: linkToSpaceId })
-    }, 250),
     checkIfIsInsertLineBreak (event) {
       const lineBreakInserted = event.ctrlKey || event.altKey
       if (!lineBreakInserted) {
@@ -983,6 +956,9 @@ export default {
       this.closeDialogs()
       const isVisible = !this.$store.state.currentUser.shouldShowCardCollaborationInfo
       this.$store.dispatch('currentUser/shouldShowCardCollaborationInfo', isVisible)
+      this.$nextTick(() => {
+        this.scrollIntoView()
+      })
     },
     focusName (position) {
       const element = this.$refs.name
@@ -1400,62 +1376,7 @@ export default {
       this.moveCursorPastTagEnd()
       this.$store.commit('shouldPreventNextEnterKey', false)
     },
-    updateUrlPreviewErrorUrl (url) {
-      const cardId = this.card.id || prevCardId
-      this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-      const update = {
-        id: cardId,
-        urlPreviewErrorUrl: url,
-        urlPreviewUrl: url
-      }
-      this.$store.dispatch('currentCards/update', update)
-    },
-    previewImage ({ thumbnail }) {
-      const minWidth = 200
-      if (!thumbnail) { return '' }
-      let image = thumbnail.find(item => item.href && (item.media.width > minWidth))
-      if (!image) { return '' }
-      return image.href || ''
-    },
-    previewFavicon ({ icon }) {
-      if (!icon) { return '' }
-      let image = icon.find(item => item.href)
-      return image.href || ''
-    },
-    debouncedUpdateUrlPreview: debounce(async function (url) {
-      try {
-        const apiKey = '0788beaa34f65adc0fe7ac'
-        const response = await fetch(`https://iframe.ly/api/iframely/?api_key=${apiKey}&url=${encodeURIComponent(url)}`)
-        const data = await response.json()
-        if (response.status !== 200) {
-          throw new Error(response.status)
-        }
-        let cardUrl = this.validWebUrls[0]
-        cardUrl = this.removeHiddenQueryString(cardUrl)
-        const cardId = this.card.id || prevCardId
-        this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-        const urlIsIncorrect = (url !== cardUrl) && this.visible
-        if (data.error || urlIsIncorrect) {
-          throw new Error(response.message)
-        }
-        console.log('🚗 link preview', data)
-        const { links, meta } = data
-        const update = {
-          id: cardId,
-          urlPreviewUrl: url,
-          urlPreviewTitle: utils.truncated(meta.title || meta.site),
-          urlPreviewDescription: utils.truncated(meta.description, 280),
-          urlPreviewImage: this.previewImage(links),
-          urlPreviewFavicon: this.previewFavicon(links)
-        }
-        this.$store.dispatch('currentCards/update', update)
-        this.updateCardMap(cardId)
-      } catch (error) {
-        console.warn('🚑', error, url)
-        this.updateUrlPreviewErrorUrl(url)
-      }
-    }, 350),
-    clearUrlPreview () {
+    removeUrlPreview () {
       const cardId = this.card.id || prevCardId
       const update = {
         id: cardId,
@@ -1474,12 +1395,6 @@ export default {
         urlPreviewIsVisible: value
       }
       this.$store.dispatch('currentCards/update', update)
-    },
-    removeHiddenQueryString (url) {
-      if (!url) { return }
-      url = url.replace('?hidden=true', '')
-      url = url.replace('&hidden=true', '')
-      return url
     },
     resetPinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', 1)
@@ -1500,6 +1415,7 @@ export default {
         this.resetTextareaHeight()
         this.$nextTick(() => {
           this.startOpening()
+          this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId })
         })
       })
       this.previousSelectedTag = {}
@@ -1527,6 +1443,7 @@ export default {
       this.$store.dispatch('updatePageSizes')
       this.$nextTick(() => {
         this.updateCardMap(cardId)
+        this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId })
       })
     }
   },
@@ -1535,24 +1452,6 @@ export default {
       if (!visible) {
         this.closeCard()
       }
-    },
-    // https://v3.vuejs.org/guide/migration/watch.html
-    // watching arrays doesn't work for changes anymore (only whole replacement, unless 'deep', option is specified)
-    validWebUrls: {
-      handler (urls) {
-        let url = urls[0]
-        if (!url) { return }
-        url = this.removeHiddenQueryString(url)
-        const previewIsVisible = this.card.urlPreviewIsVisible
-        const isNotPreviewUrl = url !== this.card.urlPreviewUrl
-        const isNotErrorUrl = url !== this.card.urlPreviewErrorUrl
-        const isNotKinopioUrl = !url.startsWith('https://kinopio.club')
-        if (previewIsVisible && isNotPreviewUrl && isNotErrorUrl && isNotKinopioUrl) {
-          this.$store.commit('addUrlPreviewLoadingForCardIds', this.card.id)
-          this.debouncedUpdateUrlPreview(url)
-        }
-      },
-      deep: true
     }
   }
 }

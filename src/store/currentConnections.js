@@ -280,9 +280,11 @@ export default {
       context.commit('removeType', type)
     },
     removeUnusedTypes: (context) => {
+      const connections = context.getters.all
+      let usedTypes = connections.map(connection => connection.connectionTypeId)
       let types = context.getters.allTypes
       types = types.filter(type => Boolean(type))
-      const typesToRemove = types.filter(type => !context.state.typeIds.includes(type.id))
+      const typesToRemove = types.filter(type => !usedTypes.includes(type.id))
       typesToRemove.forEach(type => {
         context.dispatch('removeType', type)
       })

@@ -2,7 +2,8 @@
 .media-preview(v-if="visible")
   //- Image
   .row(v-if="formats.image")
-    img.image(:src="formats.image")
+    a(:href="formats.image")
+      img.image(:src="formats.image")
     .card-details-buttons
       .button-wrap
         a(:href="formats.image")
@@ -13,8 +14,9 @@
           img.icon(src="@/assets/remove.svg")
   //- Video
   .row(v-if="formats.video")
-    video.video(autoplay loop muted playsinline)
-      source(:src="formats.video")
+    a(:href="formats.video")
+      video.video(autoplay loop muted playsinline)
+        source(:src="formats.video")
     .card-details-buttons
       .button-wrap
         a(:href="formats.video")
@@ -82,6 +84,4 @@ export default {
     .card-details-buttons
       margin-left 6px
       display flex
-      .visit
-        vertical-align middle
 </style>
