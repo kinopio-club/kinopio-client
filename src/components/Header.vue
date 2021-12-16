@@ -1,7 +1,7 @@
 <template lang="pug">
 header(:style="visualViewportPosition")
   nav.embed-nav(v-if="isEmbed")
-    a(:href="currentSpaceUrl")
+    a(:href="currentSpaceUrl" @mousedown.left.stop="openKinopio" @touchstart.stop="openKinopio")
       button
         .logo
           .logo-image
@@ -338,6 +338,11 @@ export default {
     }
   },
   methods: {
+    openKinopio () {
+      const url = this.currentSpaceUrl
+      const title = `${this.currentSpaceName} – Kinopio`
+      window.open(url, title)
+    },
     showCardDetails (card) {
       this.$store.dispatch('currentCards/showCardDetails', card.id)
       this.$store.commit('previousResultCardId', card.id)
