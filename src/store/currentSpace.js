@@ -1035,6 +1035,11 @@ export default {
       const isFavoriteSpace = favoriteSpaces.filter(space => space.id === state.id)
       return Boolean(isFavoriteSpace.length)
     },
+    url: (state) => {
+      const domain = utils.kinopioDomain()
+      const spaceUrl = utils.url({ name: state.name, id: state.id })
+      return `${domain}/${spaceUrl}`
+    },
 
     // tags
 

@@ -67,11 +67,13 @@ export default {
     // bind events to window to receive events when mouse is outside window
     window.addEventListener('mousemove', this.dragPlayhead)
     window.addEventListener('mouseup', this.endMovePlayhead)
+    window.addEventListener('touchend', this.endMovePlayhead)
     this.updateButtonPosition()
   },
   beforeUnmount () {
     window.removeEventListener('mousemove', this.dragPlayhead)
     window.removeEventListener('mouseup', this.endMovePlayhead)
+    window.removeEventListener('touchend', this.endMovePlayhead)
   },
   computed: {
     integerValue () {

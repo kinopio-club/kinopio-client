@@ -1,104 +1,119 @@
 <template lang="pug">
 header(:style="visualViewportPosition")
-  nav
-    .logo-about
-      .button-wrap
-        .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active : aboutIsVisible}" tabindex="0")
+  nav.embed-nav(v-if="isEmbed")
+    a(:href="currentSpaceUrl")
+      button
+        .logo
           .logo-image
-            .label-badge(v-if="shouldShowNewStuffIsUpdated")
-              span NEW
-          img.down-arrow(src="@/assets/down-arrow.svg")
-        About(:visible="aboutIsVisible")
-        KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
-    .space-meta-rows
-      .space-details-row.segmented-buttons
-        //- Space
-        .button-wrap
-          button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
-            .badge.info(v-show="currentSpaceIsTemplate")
-              span Template
-            .badge-wrap(v-if="!userCanEditSpace && !currentSpaceIsTemplate")
-              .badge.info(:class="{'invisible': readOnlyJiggle}")
-                span Read Only
-              .badge.info.invisible-badge(ref="readOnly" :class="{'badge-jiggle': readOnlyJiggle, 'invisible': !readOnlyJiggle}")
-                span Read Only
-            MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
-            span {{currentSpaceName}}
-            PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
-            //- explore
-            img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
-          SpaceDetails(:visible="spaceDetailsIsVisible")
-          ImportArenaChannel(:visible="importArenaChannelIsVisible")
-        //- State
-        .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
-          button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
-            Loader(:visible="spaceHasStatus")
-            .badge.success.space-status-success(v-if="!spaceHasStatus")
-          SpaceStatus(:visible="spaceStatusIsVisible")
-        //- Offline
-        .button-wrap(v-if="!isOnline")
-          button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
-            img.icon.offline(src="@/assets/offline.svg")
-          Offline(:visible="offlineIsVisible")
+        MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
+        span {{currentSpaceName}} →
+    .right
+      .space-users
+        .users
+          User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
+          User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
+          User(v-for="user in collaborators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
 
-      .space-functions-row.segmented-buttons
-        //- Add Space
+  nav(v-if="!isEmbed")
+    .left
+      .logo-about
         .button-wrap
-          button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
-            img.icon(src="@/assets/add.svg")
-          AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
-        //- Search
-        .button-wrap
-          button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
-            img.icon.search(v-if="!searchResultsCount" src="@/assets/search.svg")
-            .badge.search.search-count-badge(v-if="searchResultsCount")
-              img.icon.search(src="@/assets/search.svg")
-              span {{searchResultsCount}}
-            span.badge.info(v-if="totalFiltersActive")
-              img.icon(src="@/assets/filter.svg")
-              span {{totalFiltersActive}}
-          Search(:visible="searchIsVisible")
-        button(@click="showPreviousSearchCard" v-if="searchResultsCount")
-          img.icon.left-arrow(src="@/assets/down-arrow.svg")
-        button(@click="showNextSearchCard" v-if="searchResultsCount")
-          img.icon.right-arrow(src="@/assets/down-arrow.svg")
-        button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters")
-          img.icon.cancel(src="@/assets/add.svg")
+          .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active : aboutIsVisible}" tabindex="0")
+            .logo-image
+              .label-badge(v-if="shouldShowNewStuffIsUpdated")
+                span NEW
+            img.down-arrow(src="@/assets/down-arrow.svg")
+          About(:visible="aboutIsVisible")
+          KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
+      .space-meta-rows
+        .space-details-row.segmented-buttons
+          //- Space
+          .button-wrap
+            button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
+              .badge.info(v-show="currentSpaceIsTemplate")
+                span Template
+              .badge-wrap(v-if="!userCanEditSpace && !currentSpaceIsTemplate")
+                .badge.info(:class="{'invisible': readOnlyJiggle}")
+                  span Read Only
+                .badge.info.invisible-badge(ref="readOnly" :class="{'badge-jiggle': readOnlyJiggle, 'invisible': !readOnlyJiggle}")
+                  span Read Only
+              MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
+              span {{currentSpaceName}}
+              PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
+              img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
+            SpaceDetails(:visible="spaceDetailsIsVisible")
+            ImportArenaChannel(:visible="importArenaChannelIsVisible")
+          //- State
+          .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
+            button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
+              Loader(:visible="spaceHasStatus")
+              .badge.success.space-status-success(v-if="!spaceHasStatus")
+            SpaceStatus(:visible="spaceStatusIsVisible")
+          //- Offline
+          .button-wrap(v-if="!isOnline")
+            button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
+              img.icon.offline(src="@/assets/offline.svg")
+            Offline(:visible="offlineIsVisible")
 
-  aside
-    .top
-      .top-buttons-wrap
+        .space-functions-row.segmented-buttons
+          //- Add Space
+          .button-wrap
+            button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
+              img.icon(src="@/assets/add.svg")
+            AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
+          //- Search
+          .button-wrap
+            button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
+              img.icon.search(v-if="!searchResultsCount" src="@/assets/search.svg")
+              .badge.search.search-count-badge(v-if="searchResultsCount")
+                img.icon.search(src="@/assets/search.svg")
+                span {{searchResultsCount}}
+              span.badge.info(v-if="totalFiltersActive")
+                img.icon(src="@/assets/filter.svg")
+                span {{totalFiltersActive}}
+            Search(:visible="searchIsVisible")
+          button(@click="showPreviousSearchCard" v-if="searchResultsCount")
+            img.icon.left-arrow(src="@/assets/down-arrow.svg")
+          button(@click="showNextSearchCard" v-if="searchResultsCount")
+            img.icon.right-arrow(src="@/assets/down-arrow.svg")
+          button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters")
+            img.icon.cancel(src="@/assets/add.svg")
+
+    .right
+      .space-users
+        .users
+          User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
+          User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
+          User(v-for="user in collaborators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
+          UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs" :dialogOnRight="true")
+        .users.spectators(v-if="!isEmbed")
+          User(v-if="!currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
+          User(v-for="user in spectators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
+
+      .controls(v-if="!isEmbed")
         //- Share
-        .button-wrap
-          button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
-            span Share
-          Share(:visible="shareIsVisible")
-        //- Notifications
-        .button-wrap
-          button(@click.left.stop="toggleNotificationsIsVisible" :class="{active : notificationsIsVisible}")
-            span {{notificationsUnreadCount}}
-          Notifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead" @updateNotifications="updateNotifications")
-      .users
-        User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
-        User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
-        User(v-for="user in collaborators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
-        UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs" :dialogOnRight="true")
+        .top-controls
+          .button-wrap
+            button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
+              span Share
+            Share(:visible="shareIsVisible")
+          //- Notifications
+          .button-wrap
+            button(@click.left.stop="toggleNotificationsIsVisible" :class="{active : notificationsIsVisible}")
+              span {{notificationsUnreadCount}}
+            Notifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead" @updateNotifications="updateNotifications")
 
-      .users.spectators
-        User(v-if="!currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
-        User(v-for="user in spectators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
-
-    .bottom
-      ResetPassword
-      //- Sign Up or In
-      .button-wrap(v-if="!currentUserIsSignedIn && isOnline")
-        button(@click.left.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}")
-          span Sign Up or In
-          Loader(:visible="loadingSignUpOrIn")
-        SignUpOrIn(:visible="signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
-      .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
-        button(@click.left.stop="triggerUpgradeUserIsVisible")
-          span Upgrade
+        .bottom-controls
+          ResetPassword
+          //- Sign Up or In
+          .button-wrap(v-if="!currentUserIsSignedIn && isOnline")
+            button(@click.left.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}")
+              span Sign Up or In
+              Loader(:visible="loadingSignUpOrIn")
+            SignUpOrIn(:visible="signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
+          .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
+            button(@click.left.stop="triggerUpgradeUserIsVisible")
+              span Upgrade
 
 </template>
 
@@ -221,6 +236,8 @@ export default {
     clearInterval(updateNotificationsIntervalTimer)
   },
   computed: {
+    isEmbed () { return this.$store.state.isEmbed },
+    currentSpaceUrl () { return this.$store.getters['currentSpace/url'] },
     shouldShowNewStuffIsUpdated () {
       const newStuffIsUpdated = this.$store.state.newStuffIsUpdated
       const isNotDefaultSpace = !this.$store.getters['currentSpace/isHelloKinopio']
@@ -523,6 +540,8 @@ header
       pointer-events all
   nav
     display flex
+    flex-grow 4
+    justify-content space-between
   .logo-about
     position relative
     display inline-block
@@ -552,6 +571,16 @@ header
       .down-arrow
         transform translateY(5px)
 
+  .embed-nav
+    .logo
+      display inline-flex
+      vertical-align -3px
+      margin-right 5px
+      > .logo-image
+        min-width initial
+        width 17px
+        height 15px
+
   .left-arrow
     transform rotate(90deg)
     vertical-align 1px
@@ -566,13 +595,14 @@ header
 
   .space-details-row
     margin-top 8px
+    display initial
     @media(max-width 414px)
-      max-width calc(100vw - 200px)
+      max-width calc(100% - 200px)
     button
       white-space nowrap
       overflow hidden
       text-overflow ellipsis
-      max-width 100%
+      max-width 30vw
     dialog
       max-width initial
     > .button-wrap
@@ -611,28 +641,32 @@ header
   aside
     display flex
     flex-direction column
-  .top
+  .left
     display flex
-    flex-direction row-reverse
-    > .users
-      padding-right 6px
-      max-width 40vw
+  .right
+    display flex
+    .space-users
       display flex
-      flex-wrap wrap
-      justify-content flex-end
-      align-content flex-start
+      > .users
+        padding-right 6px
+        max-width 40vw
+        display flex
+        flex-wrap wrap
+        justify-content flex-end
+        align-content flex-start
 
-  .top-buttons-wrap
+  .controls
     display inline-table
     .button-wrap + .button-wrap
       margin-left 6px
 
-  .bottom
+  .bottom-controls
     margin-top 5px
     display flex
     justify-content flex-end
     > .button-wrap
       display inline-block
+      margin-left -2em
 
   button
     .explore
