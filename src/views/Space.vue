@@ -53,6 +53,8 @@ import utils from '@/utils.js'
 import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 
+const cardOverlaps = new Worker('web-workers/card-overlaps.js')
+
 let startCursor, prevCursor, endCursor, shouldCancel
 let processQueueIntervalTimer
 
@@ -83,6 +85,8 @@ export default {
       if (mutation.type === 'triggeredDrawConnectionFrame') {
         prevCursor = this.$store.state.triggeredDrawConnectionFrame
         this.drawConnection()
+      } else if (mutation.type === 'currentSpace/restoreSpace') {
+        this.updateCardOverlaps()
       }
     })
   },
@@ -114,11 +118,18 @@ export default {
     }
 
     this.$store.dispatch('currentUser/restoreUserFavorites')
+    window.addEventListener('scroll', this.updateCardOverlaps)
+    window.addEventListener('resize', this.updateCardOverlaps)
+    this.updateCardOverlaps()
 
     // retry failed sync operations every 5 seconds
     processQueueIntervalTimer = setInterval(() => {
       this.$store.dispatch('api/processQueueOperations')
     }, 5000)
+
+    cardOverlaps.addEventListener('message', event => {
+      this.cardOverlaps = event.data
+    })
   },
   beforeUnmount () {
     window.removeEventListener('mousemove', this.interact)
@@ -130,12 +141,15 @@ export default {
     window.removeEventListener('offline', this.updateIsOnline)
     window.removeEventListener('unload', this.unloadPage)
     window.removeEventListener('popstate', this.loadSpaceOnBackOrForward)
+    window.removeEventListener('scroll', this.updateCardOverlaps)
+    window.removeEventListener('resize', this.updateCardOverlaps)
     clearInterval(processQueueIntervalTimer)
   },
   data () {
     return {
       currentConnectionPath: undefined,
-      currentConnectionColor: undefined
+      currentConnectionColor: undefined,
+      cardOverlaps: []
     }
   },
   computed: {
@@ -148,43 +162,6 @@ export default {
       }
     },
     cards () { return this.$store.getters['currentCards/all'] },
-    cardOverlaps () {
-      const threshold = 20
-      let cards = this.cards.map((card, index) => {
-        return { id: card.id, x: card.x, y: card.y, index }
-      })
-      let overlaps = []
-      cards.forEach(origin => {
-        if (!origin) { return }
-        const group = cards.filter((card, index) => {
-          if (!card) { return }
-          const x = utils.isBetween({
-            value: origin.x,
-            min: card.x - threshold,
-            max: card.x + threshold
-          })
-          const y = utils.isBetween({
-            value: origin.y,
-            min: card.y - threshold,
-            max: card.y + threshold
-          })
-          return x && y
-        })
-        group.forEach(card => {
-          cards[card.index] = undefined
-        })
-        overlaps.push(group)
-      })
-      overlaps = overlaps.filter(group => group.length > 1)
-      overlaps = overlaps.map(group => {
-        let { x, y } = group.reduce((previousValue, currentValue) => this.mergeOverlapGroup(previousValue, currentValue))
-        let ids = group.map(item => item.id)
-        x = x - (threshold / 2)
-        y = y - (threshold / 2)
-        return { x, y, length: group.length, ids }
-      })
-      return overlaps
-    },
     isPainting () { return this.$store.state.currentUserIsPainting },
     isPanningReady () { return this.$store.state.currentUserIsPanningReady },
     spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
@@ -209,6 +186,13 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
   },
   methods: {
+    updateCardOverlaps () {
+      let cards = this.$store.getters['currentCards/all']
+      cards = utils.clone(cards)
+      const viewport = utils.visualViewport()
+      const zoom = this.$store.getters.spaceCounterZoomDecimal
+      cardOverlaps.postMessage({ cards, viewport, zoom })
+    },
     mergeOverlapGroup (previousValue, currentValue) {
       let x = previousValue.x || 0
       if (currentValue.x > x) {
@@ -301,6 +285,7 @@ export default {
       if (this.isResizingCard) {
         this.resizeCards()
       }
+      this.updateCardOverlaps()
       prevCursor = utils.cursorPositionInViewport(event)
     },
     checkShouldShowDetails () {

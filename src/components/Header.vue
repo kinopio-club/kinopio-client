@@ -72,40 +72,41 @@ header(:style="visualViewportPosition")
         button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters")
           img.icon.cancel(src="@/assets/add.svg")
 
-  aside
-    .top
-      .top-buttons-wrap
+    .right
+      .space-users
+        .users
+          User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
+          User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
+          User(v-for="user in collaborators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
+          UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs" :dialogOnRight="true")
+        .users.spectators(v-if="!isEmbed")
+          User(v-if="!currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
+          User(v-for="user in spectators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
+
+      .controls(v-if="!isEmbed")
         //- Share
-        .button-wrap(v-if="!isEmbed")
-          button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
-            span Share
-          Share(:visible="shareIsVisible")
-        //- Notifications
-        .button-wrap(v-if="!isEmbed")
-          button(@click.left.stop="toggleNotificationsIsVisible" :class="{active : notificationsIsVisible}")
-            span {{notificationsUnreadCount}}
-          Notifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead" @updateNotifications="updateNotifications")
-      .users
-        User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
-        User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
-        User(v-for="user in collaborators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
-        UpgradeUser(:visible="upgradeUserIsVisible" @closeDialog="closeAllDialogs" :dialogOnRight="true")
+        .top-controls
+          .button-wrap
+            button(@click.left.stop="toggleShareIsVisible" :class="{active : shareIsVisible}")
+              span Share
+            Share(:visible="shareIsVisible")
+          //- Notifications
+          .button-wrap
+            button(@click.left.stop="toggleNotificationsIsVisible" :class="{active : notificationsIsVisible}")
+              span {{notificationsUnreadCount}}
+            Notifications(:visible="notificationsIsVisible" :loading="notificationsIsLoading" :notifications="notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead" @updateNotifications="updateNotifications")
 
-      .users.spectators(v-if="!isEmbed")
-        User(v-if="!currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0")
-        User(v-for="user in spectators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0")
-
-    .bottom(v-if="!isEmbed")
-      ResetPassword
-      //- Sign Up or In
-      .button-wrap(v-if="!currentUserIsSignedIn && isOnline")
-        button(@click.left.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}")
-          span Sign Up or In
-          Loader(:visible="loadingSignUpOrIn")
-        SignUpOrIn(:visible="signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
-      .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
-        button(@click.left.stop="triggerUpgradeUserIsVisible")
-          span Upgrade
+        .bottom-controls
+          ResetPassword
+          //- Sign Up or In
+          .button-wrap(v-if="!currentUserIsSignedIn && isOnline")
+            button(@click.left.stop="toggleSignUpOrInIsVisible" :class="{active : signUpOrInIsVisible}")
+              span Sign Up or In
+              Loader(:visible="loadingSignUpOrIn")
+            SignUpOrIn(:visible="signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
+          .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
+            button(@click.left.stop="triggerUpgradeUserIsVisible")
+              span Upgrade
 
 </template>
 
@@ -532,6 +533,7 @@ header
       pointer-events all
   nav
     display flex
+    flex-grow 4
   .logo-about
     position relative
     display inline-block
@@ -585,13 +587,14 @@ header
 
   .space-details-row
     margin-top 8px
+    display initial
     @media(max-width 414px)
-      max-width calc(100vw - 200px)
+      max-width calc(100% - 200px)
     button
       white-space nowrap
       overflow hidden
       text-overflow ellipsis
-      max-width 100%
+      max-width 30vw
     dialog
       max-width initial
     > .button-wrap
@@ -630,28 +633,29 @@ header
   aside
     display flex
     flex-direction column
-  .top
+  .right
     display flex
-    flex-direction row-reverse
-    > .users
-      padding-right 6px
-      max-width 40vw
-      display flex
-      flex-wrap wrap
-      justify-content flex-end
-      align-content flex-start
+    .space-users
+      > .users
+        padding-right 6px
+        max-width 40vw
+        display flex
+        flex-wrap wrap
+        justify-content flex-end
+        align-content flex-start
 
-  .top-buttons-wrap
+  .controls
     display inline-table
     .button-wrap + .button-wrap
       margin-left 6px
 
-  .bottom
+  .bottom-controls
     margin-top 5px
     display flex
     justify-content flex-end
     > .button-wrap
       display inline-block
+      margin-left -2em
 
   button
     .explore
