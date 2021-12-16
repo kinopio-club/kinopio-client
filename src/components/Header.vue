@@ -9,68 +9,69 @@ header(:style="visualViewportPosition")
         span {{currentSpaceName}} →
 
   nav(v-if="!isEmbed")
-    .logo-about
-      .button-wrap
-        .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active : aboutIsVisible}" tabindex="0")
-          .logo-image
-            .label-badge(v-if="shouldShowNewStuffIsUpdated")
-              span NEW
-          img.down-arrow(src="@/assets/down-arrow.svg")
-        About(:visible="aboutIsVisible")
-        KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
-    .space-meta-rows
-      .space-details-row.segmented-buttons
-        //- Space
+    .left
+      .logo-about
         .button-wrap
-          button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
-            .badge.info(v-show="currentSpaceIsTemplate")
-              span Template
-            .badge-wrap(v-if="!userCanEditSpace && !currentSpaceIsTemplate")
-              .badge.info(:class="{'invisible': readOnlyJiggle}")
-                span Read Only
-              .badge.info.invisible-badge(ref="readOnly" :class="{'badge-jiggle': readOnlyJiggle, 'invisible': !readOnlyJiggle}")
-                span Read Only
-            MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
-            span {{currentSpaceName}}
-            PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
-            img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
-          SpaceDetails(:visible="spaceDetailsIsVisible")
-          ImportArenaChannel(:visible="importArenaChannelIsVisible")
-        //- State
-        .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
-          button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
-            Loader(:visible="spaceHasStatus")
-            .badge.success.space-status-success(v-if="!spaceHasStatus")
-          SpaceStatus(:visible="spaceStatusIsVisible")
-        //- Offline
-        .button-wrap(v-if="!isOnline")
-          button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
-            img.icon.offline(src="@/assets/offline.svg")
-          Offline(:visible="offlineIsVisible")
+          .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active : aboutIsVisible}" tabindex="0")
+            .logo-image
+              .label-badge(v-if="shouldShowNewStuffIsUpdated")
+                span NEW
+            img.down-arrow(src="@/assets/down-arrow.svg")
+          About(:visible="aboutIsVisible")
+          KeyboardShortcuts(:visible="keyboardShortcutsIsVisible")
+      .space-meta-rows
+        .space-details-row.segmented-buttons
+          //- Space
+          .button-wrap
+            button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
+              .badge.info(v-show="currentSpaceIsTemplate")
+                span Template
+              .badge-wrap(v-if="!userCanEditSpace && !currentSpaceIsTemplate")
+                .badge.info(:class="{'invisible': readOnlyJiggle}")
+                  span Read Only
+                .badge.info.invisible-badge(ref="readOnly" :class="{'badge-jiggle': readOnlyJiggle, 'invisible': !readOnlyJiggle}")
+                  span Read Only
+              MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
+              span {{currentSpaceName}}
+              PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
+              img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
+            SpaceDetails(:visible="spaceDetailsIsVisible")
+            ImportArenaChannel(:visible="importArenaChannelIsVisible")
+          //- State
+          .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
+            button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
+              Loader(:visible="spaceHasStatus")
+              .badge.success.space-status-success(v-if="!spaceHasStatus")
+            SpaceStatus(:visible="spaceStatusIsVisible")
+          //- Offline
+          .button-wrap(v-if="!isOnline")
+            button(@click.left="toggleOfflineIsVisible" :class="{ active: offlineIsVisible}")
+              img.icon.offline(src="@/assets/offline.svg")
+            Offline(:visible="offlineIsVisible")
 
-      .space-functions-row.segmented-buttons
-        //- Add Space
-        .button-wrap
-          button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
-            img.icon(src="@/assets/add.svg")
-          AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
-        //- Search
-        .button-wrap
-          button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
-            img.icon.search(v-if="!searchResultsCount" src="@/assets/search.svg")
-            .badge.search.search-count-badge(v-if="searchResultsCount")
-              img.icon.search(src="@/assets/search.svg")
-              span {{searchResultsCount}}
-            span.badge.info(v-if="totalFiltersActive")
-              img.icon(src="@/assets/filter.svg")
-              span {{totalFiltersActive}}
-          Search(:visible="searchIsVisible")
-        button(@click="showPreviousSearchCard" v-if="searchResultsCount")
-          img.icon.left-arrow(src="@/assets/down-arrow.svg")
-        button(@click="showNextSearchCard" v-if="searchResultsCount")
-          img.icon.right-arrow(src="@/assets/down-arrow.svg")
-        button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters")
-          img.icon.cancel(src="@/assets/add.svg")
+        .space-functions-row.segmented-buttons
+          //- Add Space
+          .button-wrap
+            button(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: addSpaceIsVisible }")
+              img.icon(src="@/assets/add.svg")
+            AddSpace(:visible="addSpaceIsVisible" :shouldAddSpaceDirectly="true")
+          //- Search
+          .button-wrap
+            button.search-button(@click.stop="toggleSearchIsVisible" :class="{active : searchIsVisible}")
+              img.icon.search(v-if="!searchResultsCount" src="@/assets/search.svg")
+              .badge.search.search-count-badge(v-if="searchResultsCount")
+                img.icon.search(src="@/assets/search.svg")
+                span {{searchResultsCount}}
+              span.badge.info(v-if="totalFiltersActive")
+                img.icon(src="@/assets/filter.svg")
+                span {{totalFiltersActive}}
+            Search(:visible="searchIsVisible")
+          button(@click="showPreviousSearchCard" v-if="searchResultsCount")
+            img.icon.left-arrow(src="@/assets/down-arrow.svg")
+          button(@click="showNextSearchCard" v-if="searchResultsCount")
+            img.icon.right-arrow(src="@/assets/down-arrow.svg")
+          button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters")
+            img.icon.cancel(src="@/assets/add.svg")
 
     .right
       .space-users
@@ -534,6 +535,7 @@ header
   nav
     display flex
     flex-grow 4
+    justify-content space-between
   .logo-about
     position relative
     display inline-block
@@ -633,6 +635,8 @@ header
   aside
     display flex
     flex-direction column
+  .left
+    display flex
   .right
     display flex
     .space-users
