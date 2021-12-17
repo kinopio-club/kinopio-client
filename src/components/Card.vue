@@ -632,9 +632,9 @@ export default {
     },
     isConnectingFrom () {
       const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
-      const currentConnection = this.$store.state.currentConnection
+      const currentConnectionStartCardIds = this.$store.state.currentConnectionStartCardIds
       if (utils.objectHasKeys(currentConnectionSuccess)) {
-        return currentConnection.startCardId === this.id
+        return currentConnectionStartCardIds.find(cardId => cardId === this.id)
       } else {
         return false
       }
@@ -1081,9 +1081,12 @@ export default {
     },
     createCurrentConnection (event) {
       const cursor = utils.cursorPositionInViewport(event)
-      this.$store.commit('currentConnection', {
-        startCardId: this.id
-      })
+      const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
+      let cardIds = [this.id]
+      if (multipleCardsSelectedIds.length) {
+        cardIds = multipleCardsSelectedIds
+      }
+      this.$store.commit('currentConnectionStartCardIds', cardIds)
       this.$store.commit('currentConnectionCursorStart', cursor)
     },
     addConnectionType (event) {
@@ -1107,7 +1110,6 @@ export default {
       if (utils.isMultiTouch(event)) { return }
       this.$store.dispatch('closeAllDialogs', 'Card.startConnecting')
       this.$store.commit('preventDraggedCardFromShowingDetails', true)
-      this.$store.dispatch('clearMultipleSelected')
       if (!this.$store.state.currentUserIsDrawingConnection) {
         this.addConnectionType(event)
         this.createCurrentConnection(event)

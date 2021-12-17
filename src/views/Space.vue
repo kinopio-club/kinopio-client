@@ -8,13 +8,8 @@ main.space(
   :style="styles"
 )
   svg.connections
-    path.current-connection(
-      v-if="isDrawingConnection"
-      fill="none"
-      stroke-width="5"
-      :stroke="currentConnectionColor"
-      :d="currentConnectionPath"
-    )
+    template(v-for="startCardId in currentConnectionStartCardIds")
+      CurrentConnection(:startCardId="startCardId" :startCursor="startCursor")
     template(v-for="connection in remoteCurrentConnections")
       Connection(:connection="connection")
     template(v-for="connection in connections")
@@ -41,6 +36,7 @@ main.space(
 import Card from '@/components/Card.vue'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import CardUserDetails from '@/components/dialogs/CardUserDetails.vue'
+import CurrentConnection from '@/components/CurrentConnection.vue'
 import Connection from '@/components/Connection.vue'
 import ConnectionLabel from '@/components/ConnectionLabel.vue'
 import UserLabel from '@/components/UserLabel.vue'
@@ -55,7 +51,7 @@ import uniq from 'lodash-es/uniq'
 
 const cardOverlaps = new Worker('web-workers/card-overlaps.js')
 
-let startCursor, prevCursor, endCursor, shouldCancel
+let prevCursor, endCursor, shouldCancel
 let processQueueIntervalTimer
 
 export default {
@@ -64,6 +60,7 @@ export default {
     Card,
     CardDetails,
     CardUserDetails,
+    CurrentConnection,
     Connection,
     ConnectionLabel,
     UserLabel,
@@ -82,10 +79,7 @@ export default {
   },
   created () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggeredDrawConnectionFrame') {
-        prevCursor = this.$store.state.triggeredDrawConnectionFrame
-        this.drawConnection()
-      } else if (mutation.type === 'currentSpace/restoreSpace') {
+      if (mutation.type === 'currentSpace/restoreSpace') {
         this.updateCardOverlaps()
       }
     })
@@ -147,8 +141,7 @@ export default {
   },
   data () {
     return {
-      currentConnectionPath: undefined,
-      currentConnectionColor: undefined,
+      startCursor: {},
       cardOverlaps: []
     }
   },
@@ -162,6 +155,7 @@ export default {
       }
     },
     cards () { return this.$store.getters['currentCards/all'] },
+    currentConnectionStartCardIds () { return this.$store.state.currentConnectionStartCardIds },
     isPainting () { return this.$store.state.currentUserIsPainting },
     isPanningReady () { return this.$store.state.currentUserIsPanningReady },
     spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
@@ -252,14 +246,14 @@ export default {
         shouldCancel = false
       }
       if (this.spaceIsReadOnly) { return }
-      startCursor = utils.cursorPositionInViewport(event)
+      this.startCursor = utils.cursorPositionInViewport(event)
     },
 
     constrainCursorToAxis (event) {
       if (!event.shiftKey) { return }
       const delta = {
-        x: Math.abs(endCursor.x - startCursor.x),
-        y: Math.abs(endCursor.y - startCursor.y)
+        x: Math.abs(endCursor.x - this.startCursor.x),
+        y: Math.abs(endCursor.y - this.startCursor.y)
       }
       if (delta.x > delta.y) {
         endCursor.y = prevCursor.y
@@ -279,9 +273,6 @@ export default {
         this.constrainCursorToAxis(event)
         this.dragCard()
       }
-      if (this.isDrawingConnection) {
-        this.drawConnection()
-      }
       if (this.isResizingCard) {
         this.resizeCards()
       }
@@ -289,7 +280,7 @@ export default {
       prevCursor = utils.cursorPositionInViewport(event)
     },
     checkShouldShowDetails () {
-      if (!utils.cursorsAreClose(startCursor, endCursor)) {
+      if (!utils.cursorsAreClose(this.startCursor, endCursor)) {
         this.$store.commit('preventDraggedCardFromShowingDetails', true)
       }
     },
@@ -299,7 +290,7 @@ export default {
       if (utils.objectHasKeys(prevCursor)) {
         cursor = prevCursor
       } else {
-        cursor = startCursor
+        cursor = this.startCursor
       }
       cursor = {
         x: cursor.x * zoom,
@@ -315,81 +306,6 @@ export default {
       })
       this.checkShouldShowDetails()
     },
-    drawConnection () {
-      const zoom = this.$store.getters.spaceZoomDecimal
-      let end = this.cursor()
-      if (zoom !== 1) {
-        end = {
-          x: end.x * zoom,
-          y: end.y * zoom
-        }
-      }
-      const startCardId = this.$store.state.currentConnection.startCardId
-      const start = utils.connectorCoords(startCardId)
-      const path = utils.connectionPathBetweenCoords(start, end)
-      this.checkCurrentConnectionSuccess()
-      this.currentConnectionPath = path
-      const connectionType = this.$store.getters['currentConnections/typeForNewConnections']
-      this.currentConnectionColor = connectionType.color
-      this.$store.commit('currentConnectionColor', connectionType.color)
-      const updates = {
-        id: this.$store.state.currentUser.id,
-        connectionTypeId: connectionType.id,
-        color: connectionType.color,
-        startCardId,
-        path
-      }
-      this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
-    },
-    checkCurrentConnectionSuccess () {
-      const cursor = this.cursor()
-      const zoom = this.$store.getters.spaceZoomDecimal
-      const cardElement = utils.cardElementFromPosition(cursor.x * zoom, cursor.y * zoom)
-      let updates = { id: this.$store.state.currentUser.id }
-      let isCurrentConnectionConnected
-      if (cardElement) {
-        isCurrentConnectionConnected = this.$store.state.currentConnection.startCardId !== cardElement.dataset.cardId
-      }
-      if (!cardElement) {
-        this.$store.commit('currentConnectionSuccess', {})
-        updates.endCardId = null
-        this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
-      } else if (isCurrentConnectionConnected) {
-        const card = this.$store.getters['currentCards/byId'](cardElement.dataset.cardId)
-        this.$store.commit('currentConnectionSuccess', card)
-        updates.endCardId = card.id
-        this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
-      } else {
-        this.$store.commit('currentConnectionSuccess', {})
-      }
-    },
-    addConnection (connection) {
-      const type = this.$store.getters['currentConnections/typeForNewConnections']
-      this.$store.dispatch('currentConnections/add', { connection, type })
-      this.$store.dispatch('currentConnections/addType', type)
-    },
-    createConnection () {
-      const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
-      const startCardId = this.$store.state.currentConnection.startCardId
-      const endCardId = currentConnectionSuccess.id
-      if (currentConnectionSuccess.id) {
-        const path = utils.connectionBetweenCards(startCardId, endCardId)
-        const connection = { startCardId, endCardId, path }
-        this.addConnection(connection)
-      } else {
-        this.$store.dispatch('currentConnections/removeUnusedTypes')
-      }
-    },
-    // shouldContinueConnecting (event) {
-    //   const cursorStart = this.$store.state.currentConnectionCursorStart
-    //   const cursorEnd = utils.cursorPositionInViewport(event)
-    //   if (!this.isDrawingConnection) { return }
-    //   if (cursorStart.x === cursorEnd.x && cursorStart.y === cursorEnd.y) {
-    //     return true
-    //   } else {
-    //     return false
-    //   }
-    // },
     normalizeSpaceCardsZ () {
       const sorted = sortBy(this.cards, ['z'])
       const zList = sorted.map(card => card.z)
@@ -478,14 +394,11 @@ export default {
       //   shouldAddCard: this.$store.state.shouldAddCard,
       //   cardDetailsIsVisibleForCardId: this.$store.state.cardDetailsIsVisibleForCardId,
       //   multipleCardsSelectedIds: this.$store.state.multipleCardsSelectedIds,
-      //   multipleConnectionsSelectedIds: this.$store.state.multipleConnectionsSelectedIds,
       //   preventDraggedCardFromShowingDetails: this.$store.state.preventDraggedCardFromShowingDetails,
       //   currentDraggingCardId: this.$store.state.currentDraggingCardId,
-      //   currentUserIsDrawingConnection: this.$store.state.currentUserIsDrawingConnection,
       //   currentUserIsPainting: this.$store.state.currentUserIsPainting,
       //   currentUserIsPaintingLocked: this.$store.state.currentUserIsPainting,
       //   isDraggingCard: this.isDraggingCard,
-      //   currentConnection: this.$store.state.currentConnection
       // }
       console.log('💣 stopInteractions') // stopInteractions and Space/stopPainting are run on all mouse and touch end events
       const currentUser = this.$store.state.currentUser
@@ -495,10 +408,6 @@ export default {
       }
       this.checkIfShouldHideFooter(event)
       if (this.shouldCancel(event)) { return }
-      // if (this.shouldContinueConnecting(event)) { return }
-      if (this.isDrawingConnection) {
-        this.createConnection()
-      }
       // add or close card
       if (this.$store.state.shouldAddCard) {
         const position = utils.cursorPositionInPage(event)
@@ -510,7 +419,6 @@ export default {
       this.$store.commit('importArenaChannelIsVisible', false)
       this.$store.commit('shouldAddCard', false)
       this.$store.commit('preventDraggedCardFromShowingDetails', false)
-      this.$store.commit('currentUserIsDrawingConnection', false)
       if (this.$store.state.currentUserIsResizingCard) {
         this.$store.commit('currentUserIsResizingCard', false)
         this.$store.commit('broadcast/updateStore', { updates: { userId: currentUser.id }, type: 'removeRemoteUserResizingCards' })
@@ -522,15 +430,8 @@ export default {
         this.showMultipleSelectedActions(event)
       }
       this.$store.commit('currentUserIsDraggingCard', false)
-      this.$store.commit('currentConnectionSuccess', {})
-      const isCurrentConnection = utils.objectHasKeys(this.$store.state.currentConnection)
-      if (isCurrentConnection) {
-        this.$store.commit('currentConnection', {})
-        this.$store.commit('broadcast/updateStore', { updates: { id: currentUser.id }, type: 'removeRemoteCurrentConnection' })
-      }
       this.updatePageSizes()
       this.$store.commit('prevCursorPosition', utils.cursorPositionInPage(event))
-      this.currentConnectionPath = undefined
       prevCursor = undefined
     }
   }
@@ -569,7 +470,5 @@ svg.connections,
   path
     pointer-events all
     cursor pointer
-    &.current-connection
-      pointer-events none
 
 </style>
