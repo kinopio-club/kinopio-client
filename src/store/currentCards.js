@@ -179,6 +179,7 @@ const currentCards = {
         z: highestCardZ + 1,
         name: name || '',
         frameId: 0,
+        color: '',
         userId: context.rootState.currentUser.id,
         urlPreviewIsVisible: true,
         commentIsVisible: true,

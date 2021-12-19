@@ -34,7 +34,7 @@
         :style="{'background-color': selectedColor}"
       )
   .row
-    span.badge(:class="{info: isPlaying, status: !isPlaying}" :style="{background: selectedColor}")
+    span.badge(:class="{info: isPlaying, status: !isPlaying}" :style="{background: selectedColor || 'pink'}")
       img.icon(v-if="!isPlaying" src="@/assets/autoplay.svg")
       Loader(:visible="isPlaying")
       span {{currentTime}}/{{totalTime}}

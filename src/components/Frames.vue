@@ -20,8 +20,6 @@ aside.frames
     img.tombstone(src="@/assets/frames/dead-to-me/tombstone.png")
     img.spooky-eyes(src="@/assets/frames/dead-to-me/spooky-eyes.png")
     img.ghost(src="@/assets/frames/dead-to-me/ghost.png")
-
-  .color-frame
 </template>
 
 <script>
@@ -112,12 +110,4 @@ export default {
       right -12px
       bottom -8px
       transform rotate(12deg)
-  .color-frame
-    width 100%
-    height 100%
-    position absolute
-    border-radius 3px
-    border 4px solid transparent
-    // border-color pink
-    pointer-events none
 </style>
