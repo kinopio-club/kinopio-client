@@ -7,7 +7,7 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
     p(v-if="isCancelled")
       span.badge.success Downgraded to free
     p After you upgrade your account you'll be able to manage your payment details here
-    button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+    button(@click.left="triggerUpgradeUserIsVisible") Upgrade
 
   section(v-if="isUpgraded")
     .loading-stripe(v-if="loading.gettingBillingInfo")

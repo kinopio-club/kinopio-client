@@ -195,7 +195,7 @@ const self = {
       return fetch(`${host}/user/reset-password`, options)
     },
     updatePassword: async (context, { password, apiKey }) => {
-      const body = { password }
+      const body = { password, apiKey }
       const options = await context.dispatch('requestOptions', { body, method: 'PATCH', apiKey, space: context.rootState.currentSpace })
       return fetch(`${host}/user/update-password`, options)
     },
