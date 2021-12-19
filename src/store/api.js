@@ -215,7 +215,7 @@ const self = {
         const response = await fetch(`${host}/user`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 getUser', error)
       }
     },
     getUserFavorites: async (context) => {
@@ -226,7 +226,7 @@ const self = {
         const response = await fetch(`${host}/user/favorites`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 getUserFavorites', error)
       }
     },
     getUserSpaces: async (context) => {
@@ -239,7 +239,7 @@ const self = {
         let spaces = await normalizeResponse(response)
         return utils.AddCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 getUserSpaces', error)
       }
     },
     getUserRemovedSpaces: async (context) => {
@@ -250,7 +250,7 @@ const self = {
         const response = await fetch(`${host}/user/removed-spaces`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 getUserRemovedSpaces', error)
       }
     },
     getSpacesNotificationUnsubscribed: async (context) => {
@@ -261,7 +261,7 @@ const self = {
         const response = await fetch(`${host}/user/spaces-notification-unsubscribed`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 getSpacesNotificationUnsubscribed', error)
       }
     },
     spaceNotificationResubscribe: async (context, space) => {
@@ -273,7 +273,7 @@ const self = {
         const response = await fetch(`${host}/space/${space.id}/notification-resubscribe?userId=${user.id}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 spaceNotificationResubscribe', error)
       }
     },
     removeUserPermanent: async (context) => {
@@ -284,7 +284,7 @@ const self = {
         const response = await fetch(`${host}/user/permanent`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 removeUserPermanent', error)
       }
     },
     getPublicUser: async (context, user) => {
@@ -293,7 +293,7 @@ const self = {
         const response = await fetch(`${host}/user/public/${user.id}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 getPublicUser', error)
       }
     },
     getPublicUsers: async (context, userIds) => {
@@ -306,7 +306,7 @@ const self = {
         const response = await utils.timeout(40000, fetch(`${host}/user/public/multiple?userIds=${userIds}`, options))
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 getPublicUsers', error)
       }
     },
     updateUserFavorites: async (context, body) => {
@@ -317,7 +317,7 @@ const self = {
         const response = await fetch(`${host}/user/favorites`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 updateUserFavorites', error)
       }
     },
 
@@ -330,7 +330,7 @@ const self = {
         const response = await utils.timeout(40000, fetch(`${host}/space/explore-spaces`, options))
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 getExploreSpaces', error)
       }
     },
     getLiveSpaces: async (context) => {
@@ -340,7 +340,7 @@ const self = {
         const response = await utils.timeout(40000, fetch(`${host}/space/live-spaces`, options))
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 getLiveSpaces', error)
       }
     },
     getSpace: async (context, { space, shouldRequestRemote }) => {
@@ -352,7 +352,7 @@ const self = {
         const response = await utils.timeout(40000, fetch(`${host}/space/${space.id}`, options))
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 getSpace', error)
       }
     },
     getSpaces: async (context, { spaceIds, shouldRequestRemote }) => {
@@ -368,7 +368,7 @@ const self = {
         const response = await utils.timeout(40000, fetch(`${host}/space/multiple?spaceIds=${spaceIds}`, options))
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 getSpaces', error)
       }
     },
     getSpaceAnonymously: async (context, space) => {
@@ -382,7 +382,7 @@ const self = {
         const response = await utils.timeout(40000, fetch(`${host}/space/${space.id}`, options))
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 getSpaceAnonymously', error)
       }
     },
     createSpaces: async (context) => {
@@ -402,7 +402,7 @@ const self = {
         const response = await fetch(`${host}/space/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 createSpaces', error)
       }
     },
     createSpace: async (context, space) => {
@@ -413,7 +413,7 @@ const self = {
         const response = await fetch(`${host}/space`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 createSpace', error)
       }
     },
     getSpaceRemovedCards: async (context, space) => {
@@ -424,7 +424,7 @@ const self = {
         const response = await fetch(`${host}/space/${space.id}/removed-cards`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 getSpaceRemovedCards', error)
       }
     },
     getSpaceCollaboratorKey: async (context, space) => {
@@ -435,7 +435,7 @@ const self = {
         const response = await fetch(`${host}/space/${space.id}/collaborator-key`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 getSpaceCollaboratorKey', error)
       }
     },
     addSpaceCollaborator: async (context, { spaceId, collaboratorKey }) => {
@@ -449,7 +449,7 @@ const self = {
         const response = await fetch(`${host}/space/collaborator`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 addSpaceCollaborator', error)
       }
     },
     removeSpaceCollaborator: async (context, { space, user }) => {
@@ -464,7 +464,7 @@ const self = {
         const response = await fetch(`${host}/space/collaborator`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 removeSpaceCollaborator', error)
       }
     },
     restoreRemovedSpace: async (context, space) => {
@@ -475,7 +475,7 @@ const self = {
         const response = await fetch(`${host}/space/restore/${space.id}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 restoreRemovedSpace', error)
       }
     },
 
@@ -489,7 +489,7 @@ const self = {
         const response = await fetch(`${host}/card/by-link-to-space/${spaceId}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 getCardsWithLinkToSpaceId', error)
       }
     },
     updateCards: async (context, body) => {
@@ -500,7 +500,7 @@ const self = {
         const response = await fetch(`${host}/card/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 updateCards', error)
       }
     },
     createCards: async (context, body) => {
@@ -511,7 +511,7 @@ const self = {
         const response = await fetch(`${host}/card/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 createCards', error)
       }
     },
 
@@ -525,7 +525,7 @@ const self = {
         const response = await fetch(`${host}/connection-type/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 updateConnectionTypes', error)
       }
     },
     createConnectionTypes: async (context, body) => {
@@ -536,7 +536,7 @@ const self = {
         const response = await fetch(`${host}/connection-type/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 createConnectionTypes', error)
       }
     },
 
@@ -550,7 +550,7 @@ const self = {
         const response = await fetch(`${host}/connection/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 updateConnections', error)
       }
     },
     createConnections: async (context, body) => {
@@ -561,7 +561,7 @@ const self = {
         const response = await fetch(`${host}/connection/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 createConnections', error)
       }
     },
 
@@ -576,7 +576,7 @@ const self = {
         const response = await fetch(`${host}/card/by-tag-name/${name}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 getCardsWithTag', error)
       }
     },
     getUserTags: async (context) => {
@@ -587,7 +587,7 @@ const self = {
         const response = await fetch(`${host}/user/tags`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 getUserTags', error)
       }
     },
     // updateUserTagsColor: async (context, tag) => {
@@ -598,7 +598,7 @@ const self = {
     //     const response = await fetch(`${host}/tags/color`, options)
     //     return normalizeResponse(response)
     //   } catch (error) {
-    //     console.error('🚒', error)
+    //     console.error('🚒 updateUserTagsColor', error)
     //   }
     // },
 
@@ -610,7 +610,7 @@ const self = {
         const response = await fetch(`${host}/billing/create-customer`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 createCustomer', error)
       }
     },
     createSubscription: async (context, body) => {
@@ -619,7 +619,7 @@ const self = {
         const response = await fetch(`${host}/billing/create-subscription`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 createSubscription', error)
       }
     },
     updateSubscription: async (context, body) => {
@@ -628,7 +628,7 @@ const self = {
         const response = await fetch(`${host}/billing/update-subscription`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 updateSubscription', error)
       }
     },
     cancelSubscription: async (context, body) => {
@@ -637,7 +637,7 @@ const self = {
         const response = await fetch(`${host}/billing/cancel-subscription`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 cancelSubscription', error)
       }
     },
     subscriptionInfo: async (context, body) => {
@@ -646,7 +646,7 @@ const self = {
         const response = await fetch(`${host}/billing/retrieve-subscription-info`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 subscriptionInfo', error)
       }
     },
 
@@ -658,7 +658,7 @@ const self = {
         const response = await fetch(`${host}/upload/presigned-post`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 createPresignedPost', error)
       }
     },
     createMultiplePresignedPosts: async (context, body) => {
@@ -667,7 +667,7 @@ const self = {
         const response = await fetch(`${host}/upload/presigned-post/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 createMultiplePresignedPosts', error)
       }
     },
 
@@ -681,7 +681,7 @@ const self = {
         const response = await fetch(`${host}/notification`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 getNotifications', error)
       }
     },
 
@@ -702,7 +702,7 @@ const self = {
         const response = await fetch(`${host}/user/update-arena-access-token`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 updateArenaAccessToken', error)
         context.commit('triggerArenaAuthenticationError', null, { root: true })
         context.commit('isAuthenticatingWithArena', false, { root: true })
       }
@@ -717,7 +717,7 @@ const self = {
         const data = await normalizeResponse(response)
         return { url, data, response }
       } catch (error) {
-        console.error('🚒', error)
+        console.error('🚒 urlPreview', error)
       }
     }
 
