@@ -298,6 +298,10 @@ export default {
     async updateLiveSpaces () {
       this.isLoadingLiveSpaces = true
       let spaces = await this.$store.dispatch('api/getLiveSpaces')
+      if (!spaces || !spaces.length) {
+        this.isLoadingLiveSpaces = false
+        return
+      }
       spaces = spaces.filter(space => space.user.id !== this.currentUser.id)
       spaces = this.normalizeLiveSpaces(spaces)
       this.liveSpaces = spaces
