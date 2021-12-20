@@ -579,13 +579,13 @@ const self = {
         console.error('🚒 getCardsWithTag', error)
       }
     },
-    getUserTags: async (context, shouldCheckTags) => {
+    getUserTags: async (context, removeUnusedTags) => {
       const apiKey = context.rootState.currentUser.apiKey
       if (!shouldRequest({ apiKey })) { return }
       try {
         let params = ''
-        if (shouldCheckTags) {
-          params = '?shouldCheckTags=true'
+        if (removeUnusedTags) {
+          params = '?removeUnusedTags=true'
         }
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/user/tags${params}`, options)
