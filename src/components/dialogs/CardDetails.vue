@@ -400,7 +400,9 @@ export default {
     validUrls () {
       if (!this.urls) { return [] }
       return this.urls.filter(url => {
-        return utils.urlType(url) === 'link'
+        const isLink = utils.urlType(url) === 'link'
+        const isValidTld = utils.urlIsValidTld(url)
+        return isLink && isValidTld
       })
     },
     validWebUrls () {
