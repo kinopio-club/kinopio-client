@@ -9,6 +9,7 @@ span.tag-list(@click.left="closeDialogs")
       @focusNextItem="focusNextItem"
       @focusPreviousItem="focusPreviousItem"
       @selectItem="selectItem"
+      :isLoading="isLoading"
     )
     ul.results-list
       template(v-for="tag in tagsFiltered" :key="tag.id")
@@ -22,7 +23,6 @@ span.tag-list(@click.left="closeDialogs")
         )
           .badge(:style="{backgroundColor: tag.color, 'pointerEvents': 'none'}")
             span {{tag.name}}
-      Loader(:visible="isLoading")
   p.info(v-if="!tags")
     span Type
     span {{' '}}
@@ -32,14 +32,12 @@ span.tag-list(@click.left="closeDialogs")
 
 <script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
-import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
 export default {
   name: 'TagList',
   components: {
-    ResultsFilter,
-    Loader
+    ResultsFilter
   },
   props: {
     tags: Array,
