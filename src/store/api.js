@@ -579,12 +579,16 @@ const self = {
         console.error('🚒 getCardsWithTag', error)
       }
     },
-    getUserTags: async (context) => {
+    getUserTags: async (context, shouldCheckTags) => {
       const apiKey = context.rootState.currentUser.apiKey
       if (!shouldRequest({ apiKey })) { return }
       try {
+        let params = ''
+        if (shouldCheckTags) {
+          params = '?shouldCheckTags=true'
+        }
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/user/tags`, options)
+        const response = await fetch(`${host}/user/tags${params}`, options)
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒 getUserTags', error)

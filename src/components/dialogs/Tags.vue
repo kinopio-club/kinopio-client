@@ -138,7 +138,7 @@ export default {
         remoteTags = this.$store.state.remoteTags
       } else {
         this.isLoadingRemoteTags = true
-        remoteTags = await this.$store.dispatch('api/getUserTags') || []
+        remoteTags = await this.$store.dispatch('api/getUserTags', true) || []
         this.$store.commit('remoteTags', remoteTags)
         this.$store.commit('remoteTagsIsFetched', true)
         this.isLoadingRemoteTags = false
