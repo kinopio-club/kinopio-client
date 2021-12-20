@@ -590,6 +590,18 @@ const self = {
         console.error('🚒 getUserTags', error)
       }
     },
+    removeUnusedUserTags: async (context) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/user/tags/remove-unused`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒 getUserTags', error)
+      }
+    },
+
     // updateUserTagsColor: async (context, tag) => {
     // const apiKey = context.rootState.currentUser.apiKey
     //   if (!shouldRequest({apiKey})) { return }

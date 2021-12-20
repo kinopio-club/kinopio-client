@@ -11,6 +11,14 @@ dialog.tags.narrow(@click.stop v-if="visible" :open="visible" ref="dialog" :styl
       label(:class="{ active: currentSpaceTagsIsVisibleOnly }")
         input(type="checkbox" v-model="currentSpaceTagsIsVisibleOnly")
         span In Current Space
+    .button-wrap
+      button(@click.left="toggleTagsOptionsIsVisible" :class="{active: tagsOptionsIsVisible}")
+        span …
+    .row(v-if="tagsOptionsIsVisible")
+      .button-wrap
+        button(@click.left="removedUnusedTags" :class="{active: hasRemovedUnusedTags}")
+          span Remove Unused Tags
+          Loader(:visible="isRemovingUnusedTags")
     TagList(:tags="filteredTags" :isLoading="isLoadingRemoteTags" :parentIsPinned="isPinnedDialog")
   section(v-else)
     p Use tags to help cards stand out, and to connect ideas across spaces.
@@ -22,6 +30,7 @@ dialog.tags.narrow(@click.stop v-if="visible" :open="visible" ref="dialog" :styl
 
 <script>
 import TagList from '@/components/TagList.vue'
+import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -31,7 +40,8 @@ import debounce from 'lodash-es/debounce'
 export default {
   name: 'Links',
   components: {
-    TagList
+    TagList,
+    Loader
   },
   props: {
     visible: Boolean
@@ -70,7 +80,10 @@ export default {
       dialogHeight: null,
       tags: [],
       isLoadingRemoteTags: false,
-      currentSpaceTagsIsVisibleOnly: false
+      currentSpaceTagsIsVisibleOnly: false,
+      tagsOptionsIsVisible: false,
+      hasRemovedUnusedTags: false,
+      isRemovingUnusedTags: false
     }
   },
   computed: {
@@ -85,6 +98,16 @@ export default {
     isPinnedDialog () { return this.$store.state.tagsIsPinnedDialog }
   },
   methods: {
+    async removedUnusedTags () {
+      if (this.hasRemovedUnusedTags) { return }
+      this.hasRemovedUnusedTags = true
+      this.isRemovingUnusedTags = true
+      await this.$store.dispatch('api/removeUnusedUserTags')
+      this.updateTags()
+    },
+    toggleTagsOptionsIsVisible () {
+      this.tagsOptionsIsVisible = !this.tagsOptionsIsVisible
+    },
     toggleIsPinnedDialog () {
       const isPinned = !this.isPinnedDialog
       this.$store.commit('tagsIsPinnedDialog', isPinned)
@@ -174,8 +197,11 @@ export default {
   > .results-section
     border-top 1px solid var(--primary)
     padding-top 4px
-    > .button-wrap
+    .button-wrap
       padding 4px
+      margin-left 0
+    .row
+      margin-bottom 0
   &.is-pinned
     z-index 0
     left -86px
