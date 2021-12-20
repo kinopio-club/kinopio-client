@@ -1506,7 +1506,8 @@ export default {
     },
     nameIncludesUrl (url) {
       const name = this.card.name
-      return name.includes(url)
+      const normalizedUrl = utils.removeTrailingSlash(url)
+      return name.includes(url) || name.includes(normalizedUrl)
     },
     previewImage ({ thumbnail }) {
       const minWidth = 200
