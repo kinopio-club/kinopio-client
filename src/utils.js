@@ -1381,7 +1381,7 @@ export default {
     return {
       // https://regexr.com/5jmf1
       // matches [text](url)
-      linkPattern: /\[([^[]+)\]\(([^)]+)\)/gmi,
+      linkPattern: /\[([^[]+)\]\(([^\n]+)\)/gmi,
       // https://regexr.com/5jmeu
       // matches **text**
       boldPattern: /(\*\*)(.*?)\1/gmi,

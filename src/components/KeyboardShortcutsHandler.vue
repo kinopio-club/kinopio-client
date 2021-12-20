@@ -265,10 +265,18 @@ export default {
       const parentCardId = this.$store.state.parentCardId
       const parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
       const childCardId = this.$store.state.childCardId
-      const childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
+      let childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
+      const childCardData = this.$store.getters['currentCards/byId'](childCardId)
+      const shouldOutdentChildToParent = childCard && !childCardData
       let initialPosition = {}
       let isParentCard = true
-      if (childCard) {
+      if (shouldOutdentChildToParent) {
+        const rect = childCard.getBoundingClientRect()
+        const parentRect = parentCard.getBoundingClientRect()
+        initialPosition.x = window.pageXOffset + parentRect.x
+        initialPosition.y = window.pageYOffset + rect.y
+        childCard = false
+      } else if (childCard) {
         isParentCard = false
         const rect = childCard.getBoundingClientRect()
         initialPosition.x = window.pageXOffset + rect.x
