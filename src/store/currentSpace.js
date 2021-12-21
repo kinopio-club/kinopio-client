@@ -296,6 +296,7 @@ export default {
       context.dispatch('updateOtherSpaces')
     },
     createNewSpace: (context) => {
+      window.scrollTo(0, 0)
       let space = utils.clone(newSpace)
       space.name = words.randomUniqueName()
       space.id = nanoid()
