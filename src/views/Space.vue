@@ -272,11 +272,12 @@ export default {
       if (this.isDraggingCard) {
         this.constrainCursorToAxis(event)
         this.dragCard()
+        this.updateCardOverlaps()
       }
       if (this.isResizingCard) {
         this.resizeCards()
+        this.updateCardOverlaps()
       }
-      this.updateCardOverlaps()
       prevCursor = utils.cursorPositionInViewport(event)
     },
     checkShouldShowDetails () {

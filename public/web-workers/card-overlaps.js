@@ -40,6 +40,7 @@ self.onmessage = function (event) {
   self.postMessage(groups)
 }
 
+// [[ group [-]]-card2-]
 const isCardsOverlappingGroup = (card, groups) => {
   const index = groups.findIndex(groupCards => {
     return groupCards.find(groupCard => {
@@ -51,6 +52,7 @@ const isCardsOverlappingGroup = (card, groups) => {
   return { index }
 }
 
+// [ card1 [-]-card2-]
 const isCardsOverlapping = (card1, card2) => {
   const xStart = isBetween({
     value: card1.x,
