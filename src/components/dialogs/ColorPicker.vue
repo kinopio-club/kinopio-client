@@ -26,6 +26,14 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" @click.left.stop)
           span G
         button(@click="updateHue('blue')" :class="{active: hueIsBlue}")
           span B
+      .button-wrap
+        button
+          span SP
+    .segmented-buttons
+      button
+        span light
+      button
+        span dark
 </template>
 
 <script>
@@ -142,9 +150,10 @@ export default {
   .refresh
     margin 0
     height 11px
-  .segmented-buttons
-    margin 0
-    margin-left 6px
+  .row
+    .segmented-buttons
+      margin 0
+      margin-left 6px
   .inline-color-badge
     width 83%
 </style>
