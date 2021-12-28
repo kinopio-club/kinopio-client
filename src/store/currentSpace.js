@@ -394,6 +394,7 @@ export default {
         context.dispatch('currentCards/updateDimensions', null, { root: true })
         context.commit('isLoadingSpace', false, { root: true })
       })
+      context.commit('triggerUpdateCardOverlaps', null, { root: true })
     },
     duplicateSpace: async (context) => {
       const user = context.rootState.currentUser
@@ -654,6 +655,7 @@ export default {
         context.dispatch('currentConnections/correctPaths', { shouldUpdateApi: isRemote }, { root: true })
         context.dispatch('currentCards/updateDimensions', null, { root: true })
         context.dispatch('currentCards/updateCardMap', null, { root: true })
+        context.commit('triggerUpdateCardOverlaps', null, { root: true })
       })
     },
     loadSpace: async (context, { space, isLocalSpaceOnly }) => {

@@ -79,7 +79,7 @@ export default {
   },
   created () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'currentSpace/restoreSpace') {
+      if (mutation.type === 'triggerUpdateCardOverlaps') {
         this.updateCardOverlaps()
       }
     })
