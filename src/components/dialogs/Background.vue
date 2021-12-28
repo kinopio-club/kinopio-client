@@ -75,16 +75,19 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
       .arrow-up
       .badge.status You should tint this background
 
-    //- template v-if bk or tint is set
-    .row
-      //- button Set as Default
-      .segmented-buttons
-        button.active set as default
-        button
-          img.icon.cancel(src="@/assets/add.svg")
-    // v-if showsuccessdefaultupdated
-    .row
-      .badge.success Default background for new spaces set
+    // default
+    template(v-if="spaceHasBackground")
+      .row
+        button(v-if="!userHasDefaults" @click="updateUserSpaceDefaults")
+          span Set as Default
+        .segmented-buttons(v-if="userHasDefaults")
+          button(@click="updateUserSpaceDefaults" :class="{active: currentIsDefault}")
+            span Set as Default
+          button(@click="removeUserSpaceDefaults")
+            img.icon.cancel(src="@/assets/add.svg")
+
+      .row(v-if="success.defaultsIsUpdated")
+        .badge.success Default background for new spaces set
 
 </template>
 
@@ -118,6 +121,9 @@ export default {
         userIsOffline: false,
         sizeLimit: false,
         unknownUploadError: false
+      },
+      success: {
+        defaultsIsUpdated: false
       },
       backgroundTint: ''
     }
@@ -182,9 +188,42 @@ export default {
         const isBackground = this.background === image.url
         return isBackground && image.shouldTint
       })
+    },
+    spaceHasBackground () {
+      const background = this.currentSpace.background
+      const backgroundTint = this.currentSpace.backgroundTint
+      return background || backgroundTint
+    },
+    spaceHasDefaultBackground () {
+      const user = this.$store.state.currentUser
+      const background = user.defaultSpaceBackground
+      const backgroundTint = user.defaultSpaceBackgroundTint
+      return background || backgroundTint
+    },
+    userHasDefaults () {
+      const user = this.$store.state.currentUser
+      return Boolean(user.defaultSpaceBackground || user.defaultSpaceBackgroundTint)
+    },
+    currentIsDefault () {
+      const user = this.$store.state.currentUser
+      const background = this.currentSpace.background
+      const backgroundTint = this.currentSpace.backgroundTint
+      const currentBackgroundIsDefault = user.defaultSpaceBackground === background
+      const currentBackgroundTintIsDefault = user.defaultSpaceBackgroundTint === backgroundTint
+      return currentBackgroundIsDefault && currentBackgroundTintIsDefault
     }
   },
   methods: {
+    updateUserSpaceDefaults () {
+      const background = this.currentSpace.background
+      const backgroundTint = this.currentSpace.backgroundTint
+      this.$store.dispatch('currentUser/update', { defaultSpaceBackground: background, defaultSpaceBackgroundTint: backgroundTint })
+      this.success.defaultsIsUpdated = true
+    },
+    removeUserSpaceDefaults () {
+      this.$store.dispatch('currentUser/update', { defaultSpaceBackground: null, defaultSpaceBackgroundTint: null })
+      this.clearSuccesses()
+    },
     toggleColorPicker () {
       const isVisible = this.colorPickerIsVisible
       this.closeDialogs()
@@ -217,22 +256,28 @@ export default {
       this.$store.dispatch('currentSpace/updateSpace', { background: url })
       this.$store.dispatch('currentSpace/loadBackground')
       this.updatePageSizes()
+      this.clearSuccesses()
     },
     removeBackgroundTint () {
       this.updateBackgroundTint('')
       this.closeDialogs()
       this.$emit('updateSpaces')
+      this.clearSuccesses()
     },
     updateBackgroundTint (value) {
       this.backgroundTint = value
       this.$store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
       this.updatePageSizes()
       this.$emit('updateSpaces')
+      this.clearSuccesses()
     },
     updatePageSizes () {
       this.$nextTick(() => {
         this.$store.dispatch('updatePageSizes')
       })
+    },
+    clearSuccesses () {
+      this.success.defaultsIsUpdated = false
     },
     clearErrors () {
       this.error.isNotImageUrl = false
@@ -272,6 +317,7 @@ export default {
     },
     async uploadFile () {
       this.clearErrors()
+      this.clearSuccesses()
       const spaceId = this.currentSpace.id
       const input = this.$refs.input
       const file = input.files[0]
@@ -297,6 +343,7 @@ export default {
         this.backgroundTint = this.currentSpace.backgroundTint
         this.closeDialogs()
         this.clearErrors()
+        this.clearSuccesses()
       } else {
         if (this.error.isNotImageUrl) {
           this.removeBackground()

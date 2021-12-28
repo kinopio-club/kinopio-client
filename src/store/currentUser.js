@@ -38,7 +38,9 @@ export default {
     shouldShowNewUserNotification: true,
     dialogFavoritesFilters: null, // null, 'currentUser', 'otherUsers'
     dialogSpaceFilters: null, // null, journals, spaces
-    dialogSpaceFilterByUser: {}
+    dialogSpaceFilterByUser: {},
+    defaultSpaceBackground: undefined,
+    defaultSpaceBackgroundTint: undefined
   },
   mutations: {
     color: (state, value) => {
@@ -234,6 +236,14 @@ export default {
     dialogSpaceFilterByUser: (state, value) => {
       state.dialogSpaceFilterByUser = value
       cache.updateUser('dialogSpaceFilterByUser', value)
+    },
+    defaultSpaceBackground: (state, value) => {
+      state.defaultSpaceBackground = value
+      cache.updateUser('defaultSpaceBackground', value)
+    },
+    defaultSpaceBackgroundTint: (state, value) => {
+      state.defaultSpaceBackgroundTint = value
+      cache.updateUser('defaultSpaceBackgroundTint', value)
     }
   },
   actions: {
