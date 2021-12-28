@@ -70,13 +70,14 @@ const isCardsOverlapping = (card1, card2) => {
     max: card2.y + card2.height
   })
   const yEnd = isBetween({
-    value: card1.y,
+    value: card1.y + card1.height,
     min: card2.y,
     max: card2.y + card2.height
   })
   const x = xStart || xEnd
   const y = yStart || yEnd
-  return x && y
+  const isOverlap = x && y
+  return isOverlap
 }
 
 // based on utils.isBetween
