@@ -75,6 +75,17 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
       .arrow-up
       .badge.status You should tint this background
 
+    //- template v-if bk or tint is set
+    .row
+      //- button Set as Default
+      .segmented-buttons
+        button.active set as default
+        button
+          img.icon.cancel(src="@/assets/add.svg")
+    // v-if showsuccessdefaultupdated
+    .row
+      .badge.success Default background for new spaces set
+
 </template>
 
 <script>
