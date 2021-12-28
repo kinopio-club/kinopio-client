@@ -27,8 +27,8 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" @click.left.stop)
         button(@click="updateHue('blue')" :class="{active: hueIsBlue}")
           span B
       .button-wrap
-        button
-          span SP
+        input(type="color" v-model="hexColor")
+        img.spectrum.icon(src="@/assets/spectrum.png")
     .segmented-buttons
       button
         span light
@@ -156,4 +156,13 @@ export default {
       margin-left 6px
   .inline-color-badge
     width 83%
+  input[type="color"]
+    width 26px
+  .spectrum
+    top 5px
+    left 7px
+    position absolute
+    width 13px
+    height 13px
+    pointer-events none
 </style>

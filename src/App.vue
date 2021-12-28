@@ -277,6 +277,7 @@ textarea,
     border-bottom 0
 
 button,
+input[type="color"],
 label // used for checkbox buttons
   touch-action manipulation
   text-align left
