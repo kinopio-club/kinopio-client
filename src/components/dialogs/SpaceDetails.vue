@@ -488,10 +488,8 @@ export default {
         top 6px
         left 6px
   .background-tint
-    width 22px
-    height 22px
-    top 1px
-    left 1px
+    width 24px
+    height 24px
     position absolute
     pointer-events none
   .background-button
