@@ -671,6 +671,7 @@ export default {
       context.commit('clearSpaceFilters', null, { root: true })
       context.commit('clearSearch', null, { root: true })
       context.commit('hasEditedCurrentSpace', false, { root: true })
+      context.commit('shouldPreventNextEnterKey', false, { root: true })
       // restore local space
       context.commit('restoreSpace', emptySpace)
       space = utils.normalizeSpace(cachedSpace)
