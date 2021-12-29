@@ -74,6 +74,7 @@ export default {
     top 0
     left 0
     mix-blend-mode multiply
+    border-radius 3px
   .background-image
     height 100%
     width 100%
@@ -97,7 +98,8 @@ export default {
     &:active
       box-shadow var(--button-active-inset-shadow)
       background var(--secondary-active-background)
-
+    .background-tint
+      border-radius 4px
   button
     width 24px
     height 24px

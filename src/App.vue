@@ -277,6 +277,7 @@ textarea,
     border-bottom 0
 
 button,
+input[type="color"],
 label // used for checkbox buttons
   touch-action manipulation
   text-align left
@@ -300,13 +301,13 @@ label // used for checkbox buttons
   &.hover,
   &:focus
     box-shadow var(--button-hover-shadow)
-    background var(--secondary-hover-background)
+    background-color var(--secondary-hover-background)
     outline none
   &:active,
   &.active
     box-shadow var(--button-active-inset-shadow)
     color var(--primary)
-    background var(--secondary-active-background)
+    background-color var(--secondary-active-background)
   .badge
     display inline
     vertical-align 0
@@ -314,10 +315,10 @@ label // used for checkbox buttons
     &:hover,
     &.hover,
     &:focus
-      background var(--danger-hover-background)
+      background-color var(--danger-hover-background)
     &:active,
     &.active
-      background var(--danger-active-background)
+      background-color var(--danger-active-background)
   &.success
     background var(--success-background)
   .loader

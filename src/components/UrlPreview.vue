@@ -76,6 +76,9 @@ export default {
       }
       this.$store.dispatch('currentCards/update', update)
       this.$store.commit('removeUrlPreviewLoadingForCardIds', this.card.id)
+      this.$nextTick(() => {
+        this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
+      })
     },
     updateCardMap () {
       this.$store.dispatch('currentCards/updateDimensions', this.card.id)

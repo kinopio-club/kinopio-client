@@ -15,8 +15,17 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" @click.left.stop)
       template(v-for="color in colors")
         button.color(:style="{backgroundColor: color}" @click.left="select(color)")
     .row
+      // shuffle
       button(@click.left="shuffleColors")
         img.refresh.icon(src="@/assets/refresh.svg")
+      // luminosity
+      .segmented-buttons.luminosity-picker
+        button(:class="{active: luminosity === 'light'}" @click="updateLuminosity('light')")
+          img.icon(src="@/assets/light.svg")
+        button(:class="{active: luminosity === 'dark'}" @click="updateLuminosity('dark')")
+          img.icon(src="@/assets/dark.svg")
+    .row
+      // hue
       .segmented-buttons
         button(@click="resetHue" :class="{active: hueIsAll}")
           span All
@@ -26,6 +35,11 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" @click.left.stop)
           span G
         button(@click="updateHue('blue')" :class="{active: hueIsBlue}")
           span B
+      // spectrum
+      .button-wrap
+        input(type="color" v-model="hexColor")
+        img.spectrum.icon(src="@/assets/spectrum.png")
+
 </template>
 
 <script>
@@ -49,7 +63,8 @@ export default {
         red: [],
         green: [],
         blue: []
-      }
+      },
+      luminosity: 'light'
     }
   },
   computed: {
@@ -71,11 +86,17 @@ export default {
     hueIsBlue () { return this.currentHue === 'blue' }
   },
   methods: {
+    updateLuminosity (value) {
+      if (this.luminosity === value) { return }
+      this.luminosity = value
+      this.shuffleColors()
+    },
     removeColor () {
       this.$emit('removeColor')
     },
     shuffleColors () {
-      this.colors = randomColor({ luminosity: 'light', count: 14, hue: this.currentHue })
+      const luminosity = this.luminosity
+      this.colors = randomColor({ luminosity, count: 14, hue: this.currentHue })
       if (this.shouldLightenColors) {
         this.colors = this.colors.map(color => shader(color, 0.4))
       }
@@ -105,8 +126,9 @@ export default {
     },
     updateButtonHues () {
       const hues = ['red', 'green', 'blue']
+      const luminosity = this.luminosity
       hues.forEach(hue => {
-        this.buttonHues[hue] = randomColor({ luminosity: 'light', count: 2, hue })
+        this.buttonHues[hue] = randomColor({ luminosity, count: 2, hue })
       })
     },
     resetPinchCounterZoomDecimal () {
@@ -143,8 +165,18 @@ export default {
     margin 0
     height 11px
   .segmented-buttons
-    margin 0
+    margin-top 0
+  .luminosity-picker
     margin-left 6px
   .inline-color-badge
     width 83%
+  input[type="color"]
+    width 26px
+  .spectrum
+    top 5px
+    left 7px
+    position absolute
+    width 13px
+    height 13px
+    pointer-events none
 </style>
