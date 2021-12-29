@@ -1,10 +1,10 @@
 <template lang="pug">
 dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
   section
-    p Background
+    BackgroundPreview(:space="currentSpace")
+    span Background
 
   section(@mouseup.stop @touchend.stop)
-    BackgroundPreview(:space="currentSpace")
     textarea(
       v-if="canEditSpace"
       ref="background"
@@ -349,7 +349,7 @@ export default {
   &.narrow
     width 215px
   .background-preview
-    margin-bottom 5px
+    margin-right 6px
   section
     position relative
   textarea
