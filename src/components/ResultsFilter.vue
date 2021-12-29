@@ -43,7 +43,8 @@ export default {
   data () {
     return {
       filter: '',
-      filteredItems: []
+      filteredItems: [],
+      forceShowFilter: false
     }
   },
   created () {
@@ -62,7 +63,10 @@ export default {
         this.clearFilter()
       }
       if (mutation.type === 'triggerFocusResultsFilter') {
-        this.focusFilterInput()
+        this.forceShowFilter = true
+        this.$nextTick(() => {
+          this.focusFilterInput()
+        })
       }
     })
   },
@@ -71,7 +75,7 @@ export default {
       return this.placeholder || 'Search'
     },
     shouldShowFilter () {
-      if (this.showFilter) {
+      if (this.showFilter || this.forceShowFilter) {
         return true
       } else if (this.hideFilter || !this.isManyItems) {
         return false
