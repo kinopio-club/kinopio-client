@@ -71,10 +71,6 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
         button(:disabled="!canEditSpace" @click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
 
-    .row(v-if="shouldTintBackground")
-      .arrow-up
-      .badge.status You should tint this background
-
     // default
     template(v-if="spaceHasBackground")
       .row
@@ -97,7 +93,6 @@ import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
-import backgroundImages from '@/data/backgroundImages.json'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 
 export default {
@@ -191,13 +186,6 @@ export default {
         return '#e3e3e3' // --secondary-background
       }
       return this.backgroundTint
-    },
-    shouldTintBackground () {
-      if (this.backgroundTint) { return }
-      return backgroundImages.find(image => {
-        const isBackground = this.background === image.url
-        return isBackground && image.shouldTint
-      })
     },
     spaceHasBackground () {
       const background = this.currentSpace.background
