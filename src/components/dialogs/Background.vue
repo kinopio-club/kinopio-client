@@ -74,17 +74,12 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
     // default
     template(v-if="spaceHasBackground")
       .row
-        button.button-default(v-if="!userHasDefaults" @click="updateUserDefaults")
+        label(:class="{active: currentIsUserDefaults}" @click.left.prevent="updateUserDefaults" @keydown.stop.enter="updateUserDefaults")
+          input(type="checkbox" v-model="currentIsUserDefaults")
           span Set as Default
-        .segmented-buttons(v-if="userHasDefaults")
-          button.button-default(@click="updateUserDefaults" :class="{ active: currentIsUserDefaults }")
-            BackgroundPreview(:space="spaceDefaults")
-            span Update Default
-          button(@click="removeUserDefaults")
-            img.icon.cancel(src="@/assets/add.svg")
-
-      .row(v-if="success.userDefaultsIsUpdated")
-        .badge.success Default background for new spaces set
+      .row(v-if="userHasDefaults")
+        BackgroundPreview(:space="spaceDefaults")
+        span Default background for new spaces
 
 </template>
 
@@ -206,7 +201,10 @@ export default {
       const background = this.currentSpace.background
       const backgroundTint = this.currentSpace.backgroundTint
       const isUnchanged = background === this.defaultSpaceBackground && backgroundTint === this.defaultSpaceBackgroundTint
-      if (isUnchanged) { return }
+      if (isUnchanged) {
+        this.removeUserDefaults()
+        return
+      }
       this.$store.dispatch('currentUser/update', { defaultSpaceBackground: background, defaultSpaceBackgroundTint: backgroundTint })
       this.success.userDefaultsIsUpdated = true
     },
@@ -390,13 +388,4 @@ export default {
   @media(max-width 500px)
     .image-picker
       left -20px
-
-  button
-    .background-preview
-      margin 0
-      .preview-wrap
-        width 15px
-        height 15px
-        margin-right 6px
-        vertical-align -3px
 </style>
