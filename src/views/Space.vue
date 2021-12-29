@@ -377,6 +377,7 @@ export default {
       }
     },
     selectOverlap (overlap) {
+      this.$store.dispatch('closeAllDialogs', 'Space.selectOverlap')
       const threshold = 20
       const position = {
         x: overlap.x + threshold,
