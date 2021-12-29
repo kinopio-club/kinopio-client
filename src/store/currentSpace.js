@@ -311,6 +311,7 @@ export default {
         space.cards[1].y = random(180, 200)
       }
       space.userId = context.rootState.currentUser.id
+      space = utils.spaceDefaultBackground(space, context.rootState.currentUser)
       const nullCardUsers = true
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
       context.commit('clearSearch', null, { root: true })
@@ -335,6 +336,7 @@ export default {
       space.userId = context.rootState.currentUser.id
       space.connectionTypes = []
       space.connections = []
+      space = utils.spaceDefaultBackground(space, context.rootState.currentUser)
       // cards
       space.cards.push({ id: nanoid(), name: day, x: 60, y: 100, frameId: 0 })
       const userPrompts = context.rootState.currentUser.journalPrompts
