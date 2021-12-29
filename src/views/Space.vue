@@ -377,6 +377,7 @@ export default {
       }
     },
     selectOverlap (overlap) {
+      this.$store.dispatch('closeAllDialogs', 'Space.selectOverlap')
       const threshold = 20
       const position = {
         x: overlap.x + threshold,
@@ -448,7 +449,7 @@ export default {
   transform-origin top left
   .card-overlap-indicator
     position absolute
-    z-index calc(var(--max-z) - 60)
+    z-index calc(var(--max-z) - 70)
     pointer-events all
     cursor pointer
     span

@@ -1,10 +1,10 @@
 <template lang="pug">
 dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
   section
-    p Background
+    BackgroundPreview(:space="currentSpace")
+    span Background
 
   section(@mouseup.stop @touchend.stop)
-    BackgroundPreview(:space="currentSpace")
     textarea(
       v-if="canEditSpace"
       ref="background"
@@ -71,9 +71,20 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
         button(:disabled="!canEditSpace" @click.left.stop="selectFile") Upload
         input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
 
-    .row(v-if="shouldTintBackground")
-      .arrow-up
-      .badge.status You should tint this background
+    // default
+    template(v-if="spaceHasBackground")
+      .row
+        button.button-default(v-if="!userHasDefaults" @click="updateUserDefaults")
+          span Set as Default
+        .segmented-buttons(v-if="userHasDefaults")
+          button.button-default(@click="updateUserDefaults" :class="{ active: currentIsUserDefaults }")
+            BackgroundPreview(:space="spaceDefaults")
+            span Update Default
+          button(@click="removeUserDefaults")
+            img.icon.cancel(src="@/assets/add.svg")
+
+      .row(v-if="success.userDefaultsIsUpdated")
+        .badge.success Default background for new spaces set
 
 </template>
 
@@ -82,7 +93,6 @@ import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
-import backgroundImages from '@/data/backgroundImages.json'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 
 export default {
@@ -107,6 +117,9 @@ export default {
         userIsOffline: false,
         sizeLimit: false,
         unknownUploadError: false
+      },
+      success: {
+        userDefaultsIsUpdated: false
       },
       backgroundTint: ''
     }
@@ -134,6 +147,15 @@ export default {
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     currentSpace () { return this.$store.state.currentSpace },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    currentUser () { return this.$store.state.currentUser },
+    defaultSpaceBackground () { return this.currentUser.defaultSpaceBackground },
+    defaultSpaceBackgroundTint () { return this.currentUser.defaultSpaceBackgroundTint },
+    spaceDefaults () {
+      return {
+        background: this.defaultSpaceBackground,
+        backgroundTint: this.defaultSpaceBackgroundTint
+      }
+    },
     background: {
       get () {
         return this.currentSpace.background
@@ -165,15 +187,33 @@ export default {
       }
       return this.backgroundTint
     },
-    shouldTintBackground () {
-      if (this.backgroundTint) { return }
-      return backgroundImages.find(image => {
-        const isBackground = this.background === image.url
-        return isBackground && image.shouldTint
-      })
+    spaceHasBackground () {
+      const background = this.currentSpace.background
+      const backgroundTint = this.currentSpace.backgroundTint
+      return background || backgroundTint
+    },
+    userHasDefaults () {
+      return Boolean(this.defaultSpaceBackground || this.defaultSpaceBackgroundTint)
+    },
+    currentIsUserDefaults () {
+      const backgroundIsDefault = this.defaultSpaceBackground === this.currentSpace.background
+      const backgroundTintIsDefault = this.currentUser.defaultSpaceBackgroundTint === this.currentSpace.backgroundTint
+      return backgroundIsDefault && backgroundTintIsDefault
     }
   },
   methods: {
+    updateUserDefaults () {
+      const background = this.currentSpace.background
+      const backgroundTint = this.currentSpace.backgroundTint
+      const isUnchanged = background === this.defaultSpaceBackground && backgroundTint === this.defaultSpaceBackgroundTint
+      if (isUnchanged) { return }
+      this.$store.dispatch('currentUser/update', { defaultSpaceBackground: background, defaultSpaceBackgroundTint: backgroundTint })
+      this.success.userDefaultsIsUpdated = true
+    },
+    removeUserDefaults () {
+      this.$store.dispatch('currentUser/update', { defaultSpaceBackground: null, defaultSpaceBackgroundTint: null })
+      this.clearSuccesses()
+    },
     toggleColorPicker () {
       const isVisible = this.colorPickerIsVisible
       this.closeDialogs()
@@ -206,22 +246,28 @@ export default {
       this.$store.dispatch('currentSpace/updateSpace', { background: url })
       this.$store.dispatch('currentSpace/loadBackground')
       this.updatePageSizes()
+      this.clearSuccesses()
     },
     removeBackgroundTint () {
       this.updateBackgroundTint('')
       this.closeDialogs()
       this.$emit('updateSpaces')
+      this.clearSuccesses()
     },
     updateBackgroundTint (value) {
       this.backgroundTint = value
       this.$store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
       this.updatePageSizes()
       this.$emit('updateSpaces')
+      this.clearSuccesses()
     },
     updatePageSizes () {
       this.$nextTick(() => {
         this.$store.dispatch('updatePageSizes')
       })
+    },
+    clearSuccesses () {
+      this.success.userDefaultsIsUpdated = false
     },
     clearErrors () {
       this.error.isNotImageUrl = false
@@ -261,6 +307,7 @@ export default {
     },
     async uploadFile () {
       this.clearErrors()
+      this.clearSuccesses()
       const spaceId = this.currentSpace.id
       const input = this.$refs.input
       const file = input.files[0]
@@ -286,6 +333,7 @@ export default {
         this.backgroundTint = this.currentSpace.backgroundTint
         this.closeDialogs()
         this.clearErrors()
+        this.clearSuccesses()
       } else {
         if (this.error.isNotImageUrl) {
           this.removeBackground()
@@ -301,7 +349,7 @@ export default {
   &.narrow
     width 215px
   .background-preview
-    margin-bottom 5px
+    margin-right 6px
   section
     position relative
   textarea
@@ -342,4 +390,13 @@ export default {
   @media(max-width 500px)
     .image-picker
       left -20px
+
+  button
+    .background-preview
+      margin 0
+      .preview-wrap
+        width 15px
+        height 15px
+        margin-right 6px
+        vertical-align -3px
 </style>

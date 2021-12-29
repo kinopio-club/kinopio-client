@@ -22,11 +22,11 @@ export default {
     space: Object
   },
   computed: {
-    backgroundTint () { return this.space.backgroundTint },
     backgroundTintStyles () {
-      if (this.backgroundTint) {
+      const color = this.space.backgroundTint
+      if (color) {
         return {
-          background: this.backgroundTint
+          background: color
         }
       } else {
         return {}

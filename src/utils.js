@@ -653,6 +653,17 @@ export default {
     })
     return { addItems, updateItems, removeItems }
   },
+  spaceDefaultBackground (space, currentUser) {
+    const background = currentUser.defaultSpaceBackground
+    const backgroundTint = currentUser.defaultSpaceBackgroundTint
+    if (background) {
+      space.background = background
+    }
+    if (backgroundTint) {
+      space.backgroundTint = backgroundTint
+    }
+    return space
+  },
   emptySpace (spaceId) {
     return { id: spaceId, moonPhase: '', background: '', backgroundTint: '', cards: [], connections: [], connectionTypes: [], tags: [], users: [], userId: '', collaborators: [], spectators: [], clients: [] }
   },
