@@ -448,7 +448,7 @@ export default {
   transform-origin top left
   .card-overlap-indicator
     position absolute
-    z-index calc(var(--max-z) - 60)
+    z-index calc(var(--max-z) - 70)
     pointer-events all
     cursor pointer
     span

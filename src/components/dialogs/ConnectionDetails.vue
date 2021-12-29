@@ -302,6 +302,7 @@ export default {
 
 <style lang="stylus">
 .connection-details
+  z-index var(--max-z)
   transform-origin top left
   .type-name
     margin-left 6px

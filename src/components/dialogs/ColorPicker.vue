@@ -172,6 +172,7 @@ export default {
     width 83%
   input[type="color"]
     width 26px
+    padding 10px
   .spectrum
     top 5px
     left 7px
