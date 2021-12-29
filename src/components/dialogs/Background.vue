@@ -78,11 +78,12 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
     // default
     template(v-if="spaceHasBackground")
       .row
-        button(v-if="!userHasDefaults" @click="updateUserDefaults")
+        button.button-default(v-if="!userHasDefaults" @click="updateUserDefaults")
           span Set as Default
         .segmented-buttons(v-if="userHasDefaults")
-          button(@click="updateUserDefaults" :class="{active: currentIsUserDefaults}")
-            span Set as Default
+          button.button-default(@click="updateUserDefaults" :class="{ active: currentIsUserDefaults }")
+            BackgroundPreview(:space="spaceDefaults")
+            span Update Default
           button(@click="removeUserDefaults")
             img.icon.cancel(src="@/assets/add.svg")
 
@@ -151,6 +152,15 @@ export default {
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     currentSpace () { return this.$store.state.currentSpace },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    currentUser () { return this.$store.state.currentUser },
+    defaultSpaceBackground () { return this.currentUser.defaultSpaceBackground },
+    defaultSpaceBackgroundTint () { return this.currentUser.defaultSpaceBackgroundTint },
+    spaceDefaults () {
+      return {
+        background: this.defaultSpaceBackground,
+        backgroundTint: this.defaultSpaceBackgroundTint
+      }
+    },
     background: {
       get () {
         return this.currentSpace.background
@@ -201,15 +211,14 @@ export default {
       const backgroundIsDefault = this.defaultSpaceBackground === this.currentSpace.background
       const backgroundTintIsDefault = this.currentUser.defaultSpaceBackgroundTint === this.currentSpace.backgroundTint
       return backgroundIsDefault && backgroundTintIsDefault
-    },
-    currentUser () { return this.$store.state.currentUser },
-    defaultSpaceBackground () { return this.currentUser.defaultSpaceBackground },
-    defaultSpaceBackgroundTint () { return this.currentUser.defaultSpaceBackgroundTint }
+    }
   },
   methods: {
     updateUserDefaults () {
       const background = this.currentSpace.background
       const backgroundTint = this.currentSpace.backgroundTint
+      const isUnchanged = background === this.defaultSpaceBackground && backgroundTint === this.defaultSpaceBackgroundTint
+      if (isUnchanged) { return }
       this.$store.dispatch('currentUser/update', { defaultSpaceBackground: background, defaultSpaceBackgroundTint: backgroundTint })
       this.success.userDefaultsIsUpdated = true
     },
@@ -393,4 +402,13 @@ export default {
   @media(max-width 500px)
     .image-picker
       left -20px
+
+  button
+    .background-preview
+      margin 0
+      .preview-wrap
+        width 15px
+        height 15px
+        margin-right 6px
+        vertical-align -3px
 </style>
