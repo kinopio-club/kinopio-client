@@ -9,6 +9,8 @@
   )
     .label-badge(v-if="isCurrentUser && !hideYouLabel")
       span YOU
+    .label-badge(v-if="labelBadge")
+      span {{labelBadge}}
   template(v-if="isClickable")
     UserDetails(:visible="userDetailsIsVisible" :user="user" :detailsOnRight="detailsOnRight")
 </template>
@@ -29,7 +31,8 @@ export default {
     detailsOnRight: Boolean,
     shouldCloseAllDialogs: Boolean,
     hideYouLabel: Boolean,
-    isSmall: Boolean
+    isSmall: Boolean,
+    labelBadge: String
   },
   data () {
     return {
@@ -103,7 +106,7 @@ export default {
       height 16px
   .label-badge
     bottom -7px
-    width 100%
+    width initial
 button
   .user
     margin 0

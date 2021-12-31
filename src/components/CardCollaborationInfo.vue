@@ -4,14 +4,17 @@
     img.icon.time(src="@/assets/time.svg")
     span.name {{dateUpdatedAt}}
   .users
-    .badge.button-badge(:style="{background: createdByUser.color}" title="Created by" @click.left.stop="toggleUserDetails(createdByUser)")
-      User(:user="createdByUser" :isClickable="false" :detailsOnRight="true" :isSmall="true")
-      span.name {{createdByUser.name}}
-      UserDetails(:visible="userDetailsIsVisibleForCreatedByUser" :user="createdByUser")
+    //- created by
+    template(v-if="createdByUserIsNotEmpty")
+      .badge.button-badge(:style="{background: createdByUser.color}" title="Created by" @click.left.stop="toggleUserDetails(createdByUser)")
+        User(:user="createdByUser" :isClickable="false" :detailsOnRight="true" :isSmall="true" :hideYouLabel="true" :labelBadge="'Creator'")
+        span.name {{createdByUser.name}}
+        UserDetails(:visible="userDetailsIsVisibleForCreatedByUser" :user="createdByUser")
+    //- updated by
     template(v-if="isUpdatedByDifferentUser")
       .badge.button-badge(:style="{background: updatedByUser.color}" title="Last edited by" @click.left.stop="toggleUserDetails(updatedByUser)")
         img.icon(src="@/assets/brush.svg")
-        User(:user="updatedByUser" :isClickable="false" :detailsOnRight="true" :isSmall="true")
+        User(:user="updatedByUser" :isClickable="false" :detailsOnRight="true" :isSmall="true" :hideYouLabel="true" :labelBadge="'Updater'")
         span.name {{updatedByUser.name}}
         UserDetails(:visible="userDetailsIsVisibleForUpdatedByUser" :user="updatedByUser")
 </template>
@@ -50,6 +53,7 @@ export default {
     updatedAbsoluteDate = ''
   },
   computed: {
+    createdByUserIsNotEmpty () { return utils.objectHasKeys(this.createdByUser) },
     isUpdatedByDifferentUser () { return this.createdByUser.id !== this.updatedByUser.id },
     dateUpdatedAt () {
       const date = this.card.nameUpdatedAt || this.card.createdAt
