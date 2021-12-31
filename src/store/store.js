@@ -372,6 +372,7 @@ const store = createStore({
     triggerUpdateWindowHistory: (state, options) => {},
     triggerAddCard: () => {},
     triggerUpdateCardOverlaps: () => {},
+    triggerCardDetailsCloseDialogs: () => {},
 
     // Cards
 

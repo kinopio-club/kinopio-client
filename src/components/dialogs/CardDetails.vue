@@ -89,17 +89,18 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         button(:disabled="!canEditCard" @click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}")
           img.icon.flower(src="@/assets/flower.svg")
         ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addFile")
-      //- Frames
+      //- Style
       .button-wrap
-        button(:disabled="!canEditCard" @click.left.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible}")
-          span Frame
-        FramePicker(:visible="framePickerIsVisible" :cards="[card]")
+        button(:disabled="!canEditCard" @click.left.stop="toggleCardStyleActionsIsVisible" :class="{active : cardStyleActionsIsVisible}")
+          span Style
+
       //- Toggle Collaboration Info
       .button-wrap
         button.toggle-collaboration-info(@click.left.stop="toggleCollaborationInfoIsVisible" :class="{active : collaborationInfoIsVisible}")
           img.down-arrow(src="@/assets/down-arrow.svg")
 
-    CardCollaborationInfo(:visible="collaborationInfoIsVisible" @closeDialogs="closeCardDialogs" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :triggerCloseComponent="shouldTriggerCloseChildComponents")
+    CardStyleActions(:visible="cardStyleActionsIsVisible" :cards="[card]" :parentElement="parentElement" @closeDialogs="closeDialogs")
+    CardCollaborationInfo(:visible="collaborationInfoIsVisible" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
 
     .row(v-if="nameSplitIntoCardsCount || hasUrls")
       //- Show Url
@@ -194,7 +195,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
 </template>
 
 <script>
-import FramePicker from '@/components/dialogs/FramePicker.vue'
+import CardStyleActions from '@/components/CardStyleActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import CardTips from '@/components/dialogs/CardTips.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
@@ -221,7 +222,7 @@ let openingAnimationTimer, openingStartTime, shouldCancelOpening
 export default {
   name: 'CardDetails',
   components: {
-    FramePicker,
+    CardStyleActions,
     ImagePicker,
     CardTips,
     TagPicker,
@@ -235,7 +236,7 @@ export default {
   data () {
     return {
       lastSelectionStartPosition: 0,
-      framePickerIsVisible: false,
+      cardStyleActionsIsVisible: false,
       imagePickerIsVisible: false,
       cardTipsIsVisible: false,
       initialSearch: '',
@@ -271,7 +272,6 @@ export default {
       isOpening: false,
       openingPercent: 0,
       openingAlpha: 0,
-      shouldTriggerCloseChildComponents: '',
       previousSelectedTag: {}
     }
   },
@@ -298,6 +298,7 @@ export default {
     })
   },
   computed: {
+    parentElement () { return this.$refs.dialog },
     card () {
       const cardId = this.$store.state.cardDetailsIsVisibleForCardId
       return this.$store.getters['currentCards/byId'](cardId) || {}
@@ -938,10 +939,10 @@ export default {
         textarea.style.height = textarea.scrollHeight + modifier + 'px'
       })
     },
-    toggleFramePickerIsVisible () {
-      const isVisible = this.framePickerIsVisible
+    toggleCardStyleActionsIsVisible () {
+      const isVisible = this.cardStyleActionsIsVisible
       this.closeDialogs()
-      this.framePickerIsVisible = !isVisible
+      this.cardStyleActionsIsVisible = !isVisible
     },
     toggleCardTipsIsVisible () {
       const isVisible = this.cardTipsIsVisible
@@ -992,12 +993,8 @@ export default {
       this.$store.commit('triggerUpdateMagicPaintPositionOffset')
       this.triggerUpdatePositionInVisualViewport()
     },
-    closeDialogs () {
-      this.shouldTriggerCloseChildComponents = nanoid()
-      this.closeCardDialogs()
-    },
-    closeCardDialogs (shouldSkipGlobalDialogs) {
-      this.framePickerIsVisible = false
+    closeDialogs (shouldSkipGlobalDialogs) {
+      this.$store.commit('triggerCardDetailsCloseDialogs')
       this.imagePickerIsVisible = false
       this.cardTipsIsVisible = false
       this.hidePickers()
@@ -1429,7 +1426,7 @@ export default {
     closeCard () {
       const cardId = prevCardId
       const card = this.$store.getters['currentCards/byId'](cardId)
-      this.closeCardDialogs(true)
+      this.closeDialogs(true)
       if (card) {
         this.removeTrackingQueryStrings(card)
       }
