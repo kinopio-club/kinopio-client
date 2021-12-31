@@ -7,7 +7,7 @@
     :class="{ clickable: isClickable, active: userDetailsIsVisible, 'is-small': isSmall }"
     :style="{backgroundColor: user.color}"
   )
-    .label-badge(v-if="isCurrentUser && !hideYouLabel")
+    .label-badge.you-badge(v-if="isCurrentUser && !hideYouLabel")
       span YOU
     .label-badge(v-if="labelBadge")
       span {{labelBadge}}
@@ -107,6 +107,8 @@ export default {
   .label-badge
     bottom -7px
     width initial
+  .you-badge
+    width 100%
 button
   .user
     margin 0
