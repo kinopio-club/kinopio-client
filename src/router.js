@@ -147,7 +147,6 @@ const router = createRouter({
         store.commit('spaceZoomPercent', zoom)
         store.commit('isEmbed', true)
         next()
-        window.scrollTo(0, 0)
       }
     }
     // {
