@@ -3,16 +3,16 @@ dialog.card-style-actions(v-if="visible" :open="visible" ref="dialog" @click.lef
   section
     //- Frame
     .button-wrap
-      button(:disabled="!canEditSome" @click.left.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible || cardsHaveFrames}")
+      button(:disabled="!canEditSome" @click.left.stop="toggleFramePickerIsVisible" :class="{ active : framePickerIsVisible || isFrames }")
         span Frame
       FramePicker(:visible="framePickerIsVisible" :cards="cards")
     //- h1
     .button-wrap
-      button(:disabled="!canEditSome" @click="toggleHeader('h1')")
+      button(:disabled="!canEditSome" @click="toggleHeader('h1')" :class="{ active: isH1 }")
         span h1
     //- h2
     .button-wrap
-      button(:disabled="!canEditSome" @click="toggleHeader('h2')")
+      button(:disabled="!canEditSome" @click="toggleHeader('h2')" :class="{ active: isH2 }")
           span h2
     //- Tag
     .button-wrap.hidden
@@ -30,7 +30,7 @@ dialog.card-style-actions(v-if="visible" :open="visible" ref="dialog" @click.lef
 <script>
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import scrollIntoView from '@/scroll-into-view.js'
-// import utils from '@/utils.js'
+import utils from '@/utils.js'
 
 export default {
   name: 'CardStyleActions',
@@ -78,25 +78,56 @@ export default {
       const cards = this.numberOfSelectedCardsCreatedByCurrentUser > 0
       return cards
     },
-    cardsHaveFrames () {
+    isFrames () {
       const cards = this.cards.filter(card => card.frameId)
       return Boolean(cards.length)
+    },
+    isH1 () {
+      const pattern = 'h1Pattern'
+      return this.isHeader(pattern)
+    },
+    isH2 () {
+      const pattern = 'h2Pattern'
+      return this.isHeader(pattern)
     }
   },
   methods: {
+    isHeader (pattern) {
+      let cards = utils.clone(this.cards)
+      cards = cards.filter(card => {
+        const name = this.normalizedName(card.name).trim()
+        const result = utils.markdown()[pattern].exec(name)
+        return Boolean(result)
+      })
+      return Boolean(cards.length)
+    },
+    normalizedName (name) {
+      name = utils.removeMarkdownCodeblocksFromString(name) || ''
+      const urls = utils.urlsFromString(name) || []
+      urls.forEach(url => {
+        name = name.replace(url, '')
+      })
+      const tags = utils.tagsFromString(name) || []
+      tags.forEach(tag => {
+        name = name.replace(tag, '')
+      })
+      const checkbox = utils.checkboxFromString(name) || ''
+      name = name.replace(checkbox, '')
+      return name
+    },
+
     toggleHeader (hType) {
       let markdown = '#'
       if (hType === 'h2') {
         markdown = '##'
       }
       // let cards = utils.clone(this.cards)
+      // cards = cards.map(card => card.name = utils.removeMarkdownCodeblocksFromString(card.name))
+
+      // for each card get pos for the trailing text (until the next space or `) and insert `# ` before that
 
       console.log(hType, markdown)
     },
-
-    // TODO nameWithoutCodeBlocks (name) {
-
-    // },
 
     toggleFramePickerIsVisible () {
       const isVisible = this.framePickerIsVisible
