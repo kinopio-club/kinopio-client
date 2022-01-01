@@ -1,23 +1,36 @@
 <template lang="pug">
-.row.card-style-actions(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
-  //- Frame
-  .button-wrap
-    button(:disabled="!canEditCard" @click.left.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible || cardsHaveFrames}")
-      span Frame
-    FramePicker(:visible="framePickerIsVisible" :cards="cards")
-  //- h1
-  .button-wrap
-    button(:disabled="!canEditCard")
-      span h1
-  //- h2
-  .button-wrap
-    button(:disabled="!canEditCard")
-        span h2
+dialog.card-style-actions(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs")
+  section
+    //- Frame
+    .button-wrap
+      button(:disabled="!canEditSome" @click.left.stop="toggleFramePickerIsVisible" :class="{active : framePickerIsVisible || cardsHaveFrames}")
+        span Frame
+      FramePicker(:visible="framePickerIsVisible" :cards="cards")
+    //- h1
+    .button-wrap
+      button(:disabled="!canEditSome" @click="toggleHeader('h1')")
+        span h1
+    //- h2
+    .button-wrap
+      button(:disabled="!canEditSome" @click="toggleHeader('h2')")
+          span h2
+    //- Tag
+    .button-wrap.hidden
+      button
+        span Tag
+    //- Color
+    .button-wrap.hidden
+      //- @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}"
+      button.change-color(:disabled="!canEditSome")
+        .current-color(:style="{ background: '#c9c9c9' }")
+      //- ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="true")
+
 </template>
 
 <script>
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import scrollIntoView from '@/scroll-into-view.js'
+// import utils from '@/utils.js'
 
 export default {
   name: 'CardStyleActions',
@@ -27,8 +40,7 @@ export default {
   props: {
     visible: Boolean,
     backgroundColor: String,
-    cards: Array,
-    parentElement: Object
+    cards: Array
   },
   data () {
     return {
@@ -38,11 +50,14 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerCardDetailsCloseDialogs' && this.visible) {
-        this.closeComponentDialogs()
+        this.closeDialogs()
       }
     })
   },
   computed: {
+    // styles () {
+    //   const color
+    // },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     canEditCard () {
@@ -67,24 +82,32 @@ export default {
       const cards = this.cards.filter(card => card.frameId)
       return Boolean(cards.length)
     }
-
   },
   methods: {
+    toggleHeader (hType) {
+      let markdown = '#'
+      if (hType === 'h2') {
+        markdown = '##'
+      }
+      // let cards = utils.clone(this.cards)
+
+      console.log(hType, markdown)
+    },
+
+    // TODO nameWithoutCodeBlocks (name) {
+
+    // },
+
     toggleFramePickerIsVisible () {
       const isVisible = this.framePickerIsVisible
       this.closeDialogs()
       this.framePickerIsVisible = !isVisible
     },
     closeDialogs () {
-      this.closeComponentDialogs()
-      this.$emit('closeDialogs')
-    },
-    closeComponentDialogs () {
       this.framePickerIsVisible = false
     },
-    scrollParentIntoView () {
-      const element = this.parentElement
-      console.log('💖', element)
+    scrollIntoView () {
+      const element = this.$refs.dialog
       if (!element) { return }
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
@@ -94,7 +117,7 @@ export default {
     visible (visible) {
       this.$nextTick(() => {
         if (visible) {
-          this.scrollParentIntoView()
+          this.scrollIntoView()
         }
       })
     }
@@ -103,4 +126,10 @@ export default {
 </script>
 
 <style lang="stylus">
+.card-style-actions
+  background-color var(--secondary-background)
+  width 141px // temp
+  left -96px // temp
+  .button-wrap
+    vertical-align middle
 </style>

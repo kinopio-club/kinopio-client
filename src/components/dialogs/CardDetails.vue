@@ -93,13 +93,13 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       .button-wrap
         button(:disabled="!canEditCard" @click.left.stop="toggleCardStyleActionsIsVisible" :class="{active : cardStyleActionsIsVisible}")
           span Style
+        CardStyleActions(:visible="cardStyleActionsIsVisible" :cards="[card]" @closeDialogs="closeDialogs")
 
       //- Toggle Collaboration Info
       .button-wrap
         button.toggle-collaboration-info(@click.left.stop="toggleCollaborationInfoIsVisible" :class="{active : collaborationInfoIsVisible}")
           img.down-arrow(src="@/assets/down-arrow.svg")
 
-    CardStyleActions(:visible="cardStyleActionsIsVisible" :cards="[card]" :parentElement="parentElement" @closeDialogs="closeDialogs")
     CardCollaborationInfo(:visible="collaborationInfoIsVisible" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
 
     .row(v-if="nameSplitIntoCardsCount || hasUrls")
@@ -195,7 +195,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
 </template>
 
 <script>
-import CardStyleActions from '@/components/CardStyleActions.vue'
+import CardStyleActions from '@/components/dialogs/CardStyleActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import CardTips from '@/components/dialogs/CardTips.vue'
 import TagPicker from '@/components/dialogs/TagPicker.vue'
@@ -997,6 +997,7 @@ export default {
       this.$store.commit('triggerCardDetailsCloseDialogs')
       this.imagePickerIsVisible = false
       this.cardTipsIsVisible = false
+      this.cardStyleActionsIsVisible = false
       this.hidePickers()
       if (shouldSkipGlobalDialogs) { return }
       this.hideTagDetailsIsVisible()
