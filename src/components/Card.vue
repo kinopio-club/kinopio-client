@@ -121,7 +121,7 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
           @dblclick="removeResize"
         )
           button.inline-button(tabindex="-1")
-            img.resize-icon(src="@/assets/resize.svg")
+            img.resize-icon.icon(src="@/assets/resize.svg")
 
     .url-preview-wrap(v-if="cardUrlPreviewIsVisible && !isHiddenInComment")
       UrlPreview(

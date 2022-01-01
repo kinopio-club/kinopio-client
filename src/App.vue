@@ -527,6 +527,7 @@ dialog
   vertical-align -1px
   user-drag none
   -webkit-user-drag none
+  pointer-events none
 
 .icon + span
   margin-left 5px
