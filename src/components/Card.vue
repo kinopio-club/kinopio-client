@@ -1288,21 +1288,17 @@ export default {
     },
     openUrl (event, url) {
       this.$store.dispatch('closeAllDialogs', 'Card.openUrl')
-      const metaKey = event.metaKey || event.ctrlKey
-      let shouldOpenInNewTab = this.$store.state.currentUser.shouldOpenLinksInNewTab
-      if (metaKey && !shouldOpenInNewTab) {
-        shouldOpenInNewTab = true
-      } else if (metaKey && shouldOpenInNewTab) {
-        shouldOpenInNewTab = false
-      }
+      const shouldOpenInNewTab = this.$store.state.currentUser.shouldOpenLinksInNewTab
       if (shouldOpenInNewTab) {
+        event.preventDefault()
         window.open(url) // opens url in new tab
       } else {
         if (utils.urlIsSpace(url)) {
+          event.preventDefault()
           const spaceId = utils.spaceIdFromUrl(url)
           this.changeSpace({ id: spaceId })
         } else {
-          // open url in current tab
+          // open url natively
         }
       }
     },

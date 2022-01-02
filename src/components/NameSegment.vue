@@ -108,7 +108,7 @@ export default {
         event.preventDefault()
         shouldCancel = false
       }
-      // open url in current tab
+      // open url natively
     }
   }
 }
