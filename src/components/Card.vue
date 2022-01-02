@@ -1287,6 +1287,7 @@ export default {
       return space
     },
     openUrl (event, url) {
+      this.$store.dispatch('closeAllDialogs', 'Card.openUrl')
       const shouldOpenInNewTab = event.metaKey || event.ctrlKey
       if (shouldOpenInNewTab) {
         return // opens url in current tab
@@ -1303,7 +1304,6 @@ export default {
       } else {
         window.location.href = url
       }
-      this.$store.dispatch('closeAllDialogs', 'Card.openUrl')
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
