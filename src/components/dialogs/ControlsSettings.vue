@@ -10,7 +10,7 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
     .row
       label(:class="{active: shouldOpenLinksInNewTab}" @click.left.prevent="toggleShouldOpenLinksInNewTab" @keydown.stop.enter="toggleShouldOpenLinksInNewTab")
         input(type="checkbox" v-model="shouldOpenLinksInNewTab")
-        span Open Urls in New Tabs
+        span Open Card URLs in New Tabs
 
 </template>
 
@@ -69,5 +69,5 @@ export default {
 <style lang="stylus">
 .controls-settings
   overflow auto
-  width 210px
+  width 218px
 </style>
