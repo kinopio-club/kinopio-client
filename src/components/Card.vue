@@ -1288,21 +1288,22 @@ export default {
     },
     openUrl (event, url) {
       this.$store.dispatch('closeAllDialogs', 'Card.openUrl')
-      const shouldOpenInNewTab = event.metaKey || event.ctrlKey
+      const metaKey = event.metaKey || event.ctrlKey
+      let shouldOpenInNewTab = this.$store.state.currentUser.shouldOpenLinksInNewTab
+      if (metaKey && !shouldOpenInNewTab) {
+        shouldOpenInNewTab = true
+      } else if (metaKey && shouldOpenInNewTab) {
+        shouldOpenInNewTab = false
+      }
       if (shouldOpenInNewTab) {
-        return // opens url in current tab
-      } else {
-        event.preventDefault()
-      }
-      if (this.$store.state.currentUser.shouldOpenLinksInNewTab) {
         window.open(url) // opens url in new tab
-        return
-      }
-      if (utils.urlIsSpace(url)) {
-        const spaceId = utils.spaceIdFromUrl(url)
-        this.changeSpace({ id: spaceId })
       } else {
-        window.location.href = url
+        if (utils.urlIsSpace(url)) {
+          const spaceId = utils.spaceIdFromUrl(url)
+          this.changeSpace({ id: spaceId })
+        } else {
+          // open url in current tab
+        }
       }
     },
     changeSpace (space) {
