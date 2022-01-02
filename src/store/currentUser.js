@@ -218,6 +218,10 @@ export default {
       state.shouldInvertZoomDirection = value
       cache.updateUser('shouldInvertZoomDirection', value)
     },
+    shouldOpenLinksInNewTab: (state, value) => {
+      state.shouldOpenLinksInNewTab = value
+      cache.updateUser('shouldOpenLinksInNewTab', value)
+    },
     shouldUseLastConnectionType: (state, value) => {
       state.shouldUseLastConnectionType = value
       cache.updateUser('shouldUseLastConnectionType', value)
@@ -522,6 +526,14 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldInvertZoomDirection: value
+        } }, { root: true })
+    },
+    shouldOpenLinksInNewTab: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldOpenLinksInNewTab' })
+      context.commit('shouldOpenLinksInNewTab', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldOpenLinksInNewTab: value
         } }, { root: true })
     },
     shouldUseLastConnectionType: (context, value) => {

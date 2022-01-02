@@ -7,6 +7,11 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
       label(:class="{active: shouldInvertZoomDirection}" @click.left.prevent="toggleShouldInvertZoomDirection" @keydown.stop.enter="toggleShouldInvertZoomDirection")
         input(type="checkbox" v-model="shouldInvertZoomDirection")
         span Invert Zoom Direction
+    .row
+      label(:class="{active: shouldOpenLinksInNewTab}" @click.left.prevent="toggleShouldOpenLinksInNewTab" @keydown.stop.enter="toggleShouldOpenLinksInNewTab")
+        input(type="checkbox" v-model="shouldOpenLinksInNewTab")
+        span Open Urls in New Tabs
+
 </template>
 
 <script>
@@ -31,12 +36,17 @@ export default {
   },
   computed: {
     isMobile () { return utils.isMobile() },
-    shouldInvertZoomDirection () { return this.$store.state.currentUser.shouldInvertZoomDirection }
+    shouldInvertZoomDirection () { return this.$store.state.currentUser.shouldInvertZoomDirection },
+    shouldOpenLinksInNewTab () { return this.$store.state.currentUser.shouldOpenLinksInNewTab }
   },
   methods: {
     toggleShouldInvertZoomDirection () {
       const value = !this.shouldInvertZoomDirection
       this.$store.dispatch('currentUser/shouldInvertZoomDirection', value)
+    },
+    toggleShouldOpenLinksInNewTab () {
+      const value = !this.shouldOpenLinksInNewTab
+      this.$store.dispatch('currentUser/shouldOpenLinksInNewTab', value)
     },
     updateDialogHeight () {
       if (!this.visible) { return }
