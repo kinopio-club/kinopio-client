@@ -36,6 +36,7 @@ export default {
     shouldInvertZoomDirection: false,
     shouldUseLastConnectionType: false,
     shouldShowNewUserNotification: true,
+    shouldOpenLinksInNewTab: false,
     dialogFavoritesFilters: null, // null, 'currentUser', 'otherUsers'
     dialogSpaceFilters: null, // null, journals, spaces
     dialogSpaceFilterByUser: {},

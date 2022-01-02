@@ -1289,9 +1289,13 @@ export default {
     openUrl (event, url) {
       const shouldOpenInNewTab = event.metaKey || event.ctrlKey
       if (shouldOpenInNewTab) {
-        return
+        return // opens url in current tab
       } else {
         event.preventDefault()
+      }
+      if (this.$store.state.currentUser.shouldOpenLinksInNewTab) {
+        window.open(url) // opens url in new tab
+        return
       }
       if (utils.urlIsSpace(url)) {
         const spaceId = utils.spaceIdFromUrl(url)
@@ -1299,6 +1303,7 @@ export default {
       } else {
         window.location.href = url
       }
+      this.$store.dispatch('closeAllDialogs', 'Card.openUrl')
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space, isRemote: true })
