@@ -8,11 +8,11 @@ dialog.card-style-actions(v-if="visible" :open="visible" ref="dialog" @click.lef
       FramePicker(:visible="framePickerIsVisible" :cards="cards")
     //- h1
     .button-wrap
-      button(:disabled="!canEditSome" @click="toggleHeader('h1')" :class="{ active: isH1 }")
+      button(:disabled="!canEditSome" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }")
         span h1
     //- h2
     .button-wrap
-      button(:disabled="!canEditSome" @click="toggleHeader('h2')" :class="{ active: isH2 }")
+      button(:disabled="!canEditSome" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }")
           span h2
     //- Tag
     .button-wrap.hidden
@@ -84,22 +84,24 @@ export default {
     },
     isH1 () {
       const pattern = 'h1Pattern'
-      return this.isHeader(pattern)
+      const cards = this.cardsWithPattern(pattern)
+      return Boolean(cards.length)
     },
     isH2 () {
       const pattern = 'h2Pattern'
-      return this.isHeader(pattern)
+      const cards = this.cardsWithPattern(pattern)
+      return Boolean(cards.length)
     }
   },
   methods: {
-    isHeader (pattern) {
+    cardsWithPattern (pattern) {
       let cards = utils.clone(this.cards)
       cards = cards.filter(card => {
-        const name = this.normalizedName(card.name).trim()
+        const name = this.normalizedName(card.name)
         const result = utils.markdown()[pattern].exec(name)
         return Boolean(result)
       })
-      return Boolean(cards.length)
+      return cards
     },
     normalizedName (name) {
       name = utils.removeMarkdownCodeblocksFromString(name) || ''
@@ -113,21 +115,65 @@ export default {
       })
       const checkbox = utils.checkboxFromString(name) || ''
       name = name.replace(checkbox, '')
+      name = name.trim()
       return name
     },
 
-    toggleHeader (hType) {
-      let markdown = '#'
-      if (hType === 'h2') {
-        markdown = '##'
+    toggleHeader (pattern) {
+      // let markdown = '#'
+      // if (hType === 'h2') {
+      //   markdown = '##'
+      // }
+
+      let cards = this.cardsWithPattern(pattern)
+      // const isNone = cards.length === 0
+      const shouldPrependPattern = cards.length < this.cards.length
+      if (shouldPrependPattern) {
+        this.prepend(pattern)
+        // add to all that dont have it
+      } else {
+        // then remove all
       }
+
+      // return
+      // if no cards w h1, then
+      // if some cards w h1 ,
+
+      // if all cards w h1,
+
+      // let cards = utils.clone(this.cards)
+      // cards = cards.filter(card => {
+      //   const name = this.normalizedName(card.name)
+      //   const result = utils.markdown()[pattern].exec(name)
+      //   return Boolean(result)
+      // })
+
       // let cards = utils.clone(this.cards)
       // cards = cards.map(card => card.name = utils.removeMarkdownCodeblocksFromString(card.name))
 
       // for each card get pos for the trailing text (until the next space or `) and insert `# ` before that
 
-      console.log(hType, markdown)
+      // console.log(hType, markdown)
     },
+    prepend (pattern) {
+      let prepend = '# '
+      if (pattern === 'h2Pattern') {
+        prepend = '## '
+      }
+      this.cards.forEach(card => {
+        const name = this.normalizedName(card.name)
+        if (!name) { return }
+        let isPattern = utils.markdown()[pattern].exec(name)
+        if (isPattern) { return }
+        console.log('🙅‍♀️ to prepend:', name, prepend)
+        // isPattern = Boolean(isPattern)
+        // console.log(name, isPattern)
+      })
+    },
+
+    // remove
+    // appendTag (tag)
+    // removeTag (tag)
 
     toggleFramePickerIsVisible () {
       const isVisible = this.framePickerIsVisible
