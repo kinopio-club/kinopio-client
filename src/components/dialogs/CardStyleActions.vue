@@ -160,6 +160,11 @@ export default {
         id: cardId,
         name: newName
       })
+      this.$nextTick(() => {
+        this.$store.dispatch('currentCards/updateDimensions', cardId)
+        this.$store.dispatch('currentCards/updateCardMap')
+        this.$store.dispatch('currentConnections/updatePaths', { cardId, shouldUpdateApi: true })
+      })
     },
     prependToNameSegment ({ pattern, card, nameSegment }) {
       const markdown = this.markdown(pattern)
