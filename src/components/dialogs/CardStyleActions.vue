@@ -58,11 +58,13 @@ export default {
   computed: {
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
-    canEditCard () {
-      if (this.isSpaceMember) { return true }
-      if (this.canEditSome) { return true }
-      return false
-    },
+
+    // move method or use/make getter
+    // canEditCard (card) {
+    //   if (this.isSpaceMember) { return true }
+    //   if (this.canEditSome) { return true }
+    //   return false
+    // },
 
     numberOfSelectedCardsCreatedByCurrentUser () {
       const cards = this.cards.filter(Boolean)
@@ -152,6 +154,7 @@ export default {
       const index = card.name.indexOf(nameSegment)
       const newName = utils.insertStringAtIndex(card.name, markdown, index)
       console.log('🙅‍♀️ to prepend:', card.name, nameSegment, markdown, index, newName) // TEMP
+      // TODO check if user can edit card, canEditCard
       this.$store.dispatch('currentCards/update', {
         id: card.id,
         name: newName
