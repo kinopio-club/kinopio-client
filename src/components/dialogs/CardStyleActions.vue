@@ -117,54 +117,61 @@ export default {
       name = name.trim()
       return name
     },
+    removePattern (pattern) {
+      if (pattern === 'h1Pattern') {
+        return 'h2Pattern'
+      } else if (pattern === 'h2Pattern') {
+        return 'h1Pattern'
+      }
+    },
+    markdown (pattern) {
+      if (pattern === 'h1Pattern') {
+        return '# '
+      } else if (pattern === 'h2Pattern') {
+        return '## '
+      }
+    },
     toggleHeader (pattern) {
       let cards = this.cardsWithPattern(pattern)
       const shouldPrepend = cards.length < this.cards.length
       if (shouldPrepend) {
-        this.updateName({ pattern, shouldPrepend })
+        const removePattern = this.removePattern(pattern)
+        this.removeFromCards(removePattern)
+        this.prependToCards(pattern)
       } else {
-        this.removeFromName(pattern)
+        this.removeFromCards(pattern)
       }
     },
-    markdown (pattern) {
-      let markdown
-      if (pattern === 'h1Pattern') {
-        markdown = '# '
-      } else if (pattern === 'h2Pattern') {
-        markdown = '## '
-      }
-      return markdown
-    },
-    updateName ({ pattern, shouldPrepend }) {
+    prependToCards (pattern) {
       this.cards.forEach(card => {
         const name = this.normalizedName(card.name) || ''
         let patternExists = utils.markdown()[pattern].exec(name)
         if (patternExists) {
           return // skip
         }
-        if (shouldPrepend) {
-          this.prependToNameSegment({ pattern, card, nameSegment: name })
-        } else {
-          // TODO LATER appendToNameSegment (for tags)
-        }
+        this.prependToNameSegment({ pattern, card, nameSegment: name })
+      })
+    },
+    updateCardName (cardId, newName) {
+      // TODO check if user can edit card, canEditCard
+      this.$store.dispatch('currentCards/update', {
+        id: cardId,
+        name: newName
       })
     },
     prependToNameSegment ({ pattern, card, nameSegment }) {
       const markdown = this.markdown(pattern)
-      const index = card.name.indexOf(nameSegment)
+      let index = card.name.indexOf(nameSegment)
       const newName = utils.insertStringAtIndex(card.name, markdown, index)
       console.log('🙅‍♀️ to prepend:', card.name, nameSegment, markdown, index, newName) // TEMP
-      // TODO check if user can edit card, canEditCard
-      this.$store.dispatch('currentCards/update', {
-        id: card.id,
-        name: newName
-      })
+      this.updateCardName(card.id, newName)
     },
-    removeFromName (pattern) {
+    removeFromCards (pattern) {
+      // nameSegment = string.replace(markdown, '')
       // TODO
       const markdown = this.markdown(pattern)
       this.cards.forEach(card => {
-        console.log('😈 remove from card names', markdown, card.name)
+        console.log('😈 remove from card names', markdown, card.name) // TEMP
       })
     },
     toggleFramePickerIsVisible () {
