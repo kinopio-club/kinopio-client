@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.card-style-actions(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs")
+dialog.card-style-actions(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs" :style="styles")
   section
     //- Frame
     .button-wrap
@@ -56,6 +56,11 @@ export default {
     })
   },
   computed: {
+    styles () {
+      return {
+        backgroundColor: this.backgroundColor
+      }
+    },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     numberOfSelectedCardsCreatedByCurrentUser () {
