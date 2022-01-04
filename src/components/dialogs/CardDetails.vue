@@ -999,7 +999,7 @@ export default {
       this.cardTipsIsVisible = false
       this.cardStyleActionsIsVisible = false
       this.hidePickers()
-      if (shouldSkipGlobalDialogs) { return }
+      if (shouldSkipGlobalDialogs === true) { return }
       this.hideTagDetailsIsVisible()
       this.hideLinkDetailsIsVisible()
     },
