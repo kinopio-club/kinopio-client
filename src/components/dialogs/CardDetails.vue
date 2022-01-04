@@ -93,7 +93,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       .button-wrap
         button(:disabled="!canEditCard" @click.left.stop="toggleCardStyleActionsIsVisible" :class="{active : cardStyleActionsIsVisible}")
           span Style
-        // TODO save button/relative position in store and move this to global space
         CardStyleActions(:visible="cardStyleActionsIsVisible" :cards="[card]" @closeDialogs="closeDialogs")
 
       //- Toggle Collaboration Info
