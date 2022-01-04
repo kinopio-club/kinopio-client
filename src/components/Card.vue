@@ -268,6 +268,7 @@ export default {
         link: '',
         file: ''
       },
+      linkToPreview: '',
       prevNameLineMinWidth: 0,
       nameIsOnlyMarkdownLink: false,
       isLocking: true,
@@ -937,6 +938,7 @@ export default {
           this.formats.file = url
         } else {
           this.formats.link = url
+          this.linkToPreview = url
         }
       })
     },
@@ -1540,15 +1542,8 @@ export default {
     }
   },
   watch: {
-    // https://v3.vuejs.org/guide/migration/watch.html
-    // watching arrays doesn't work for changes anymore (only whole replacement, unless 'deep', option is specified)
-    formats: {
-      handler (urls) {
-        if (urls.link) {
-          this.updateUrlData()
-        }
-      },
-      deep: true
+    linkToPreview (value) {
+      this.updateUrlData()
     }
   }
 }
