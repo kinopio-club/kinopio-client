@@ -153,7 +153,9 @@ export default {
       })
     },
     updateCardName (cardId, newName) {
-      // TODO check if user can edit card, canEditCard
+      const card = this.$store.getters['currentCards/byId'](cardId)
+      const canEditCard = this.$store.getters['currentUser/canEditCard'](card)
+      if (!canEditCard) { return }
       this.$store.dispatch('currentCards/update', {
         id: cardId,
         name: newName

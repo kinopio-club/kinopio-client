@@ -526,13 +526,7 @@ export default {
         maxWidth: this.resizeWidth
       }
     },
-    canEditCard () {
-      const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
-      const cardIsCreatedByCurrentUser = this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](this.card)
-      if (isSpaceMember) { return true }
-      if (this.canEditSpace && cardIsCreatedByCurrentUser) { return true }
-      return false
-    },
+    canEditCard () { return this.$store.getters['currentUser/canEditCard'](this.card) },
     normalizedName () {
       // name without urls and checkbox text
       let name = this.name
