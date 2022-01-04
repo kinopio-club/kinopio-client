@@ -167,11 +167,12 @@ export default {
       this.updateCardName(card.id, newName)
     },
     removeFromCards (pattern) {
-      // nameSegment = string.replace(markdown, '')
-      // TODO
       const markdown = this.markdown(pattern)
       this.cards.forEach(card => {
-        console.log('😈 remove from card names', markdown, card.name) // TEMP
+        const newName = card.name.replace(markdown, '')
+        console.log('😈 remove from card names', markdown, card.name, newName) // TEMP
+        if (newName === card.name) { return }
+        this.updateCardName(card.id, newName)
       })
     },
     toggleFramePickerIsVisible () {
