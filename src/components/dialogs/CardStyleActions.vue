@@ -14,6 +14,7 @@ dialog.card-style-actions(v-if="visible" :open="visible" ref="dialog" @click.lef
     .button-wrap
       button(:disabled="!canEditSome" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }")
           span h2
+    //- TODO LATER
     //- Tag
     .button-wrap.hidden
       button
@@ -55,9 +56,6 @@ export default {
     })
   },
   computed: {
-    // styles () {
-    //   const color
-    // },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     canEditCard () {
@@ -95,8 +93,7 @@ export default {
   },
   methods: {
     cardsWithPattern (pattern) {
-      let cards = utils.clone(this.cards)
-      cards = cards.filter(card => {
+      const cards = this.cards.filter(card => {
         const name = this.normalizedName(card.name)
         const result = utils.markdown()[pattern].exec(name)
         return Boolean(result)
@@ -118,63 +115,55 @@ export default {
       name = name.trim()
       return name
     },
-
     toggleHeader (pattern) {
-      // let markdown = '#'
-      // if (hType === 'h2') {
-      //   markdown = '##'
-      // }
-
       let cards = this.cardsWithPattern(pattern)
-      // const isNone = cards.length === 0
-      const shouldPrependPattern = cards.length < this.cards.length
-      if (shouldPrependPattern) {
-        this.prepend(pattern)
-        // add to all that dont have it
+      const shouldPrepend = cards.length < this.cards.length
+      if (shouldPrepend) {
+        this.updateName({ pattern, shouldPrepend })
       } else {
-        // then remove all
+        this.removeFromName(pattern)
       }
-
-      // return
-      // if no cards w h1, then
-      // if some cards w h1 ,
-
-      // if all cards w h1,
-
-      // let cards = utils.clone(this.cards)
-      // cards = cards.filter(card => {
-      //   const name = this.normalizedName(card.name)
-      //   const result = utils.markdown()[pattern].exec(name)
-      //   return Boolean(result)
-      // })
-
-      // let cards = utils.clone(this.cards)
-      // cards = cards.map(card => card.name = utils.removeMarkdownCodeblocksFromString(card.name))
-
-      // for each card get pos for the trailing text (until the next space or `) and insert `# ` before that
-
-      // console.log(hType, markdown)
     },
-    prepend (pattern) {
-      let prepend = '# '
-      if (pattern === 'h2Pattern') {
-        prepend = '## '
+    markdown (pattern) {
+      let markdown
+      if (pattern === 'h1Pattern') {
+        markdown = '# '
+      } else if (pattern === 'h2Pattern') {
+        markdown = '## '
       }
+      return markdown
+    },
+    updateName ({ pattern, shouldPrepend }) {
       this.cards.forEach(card => {
-        const name = this.normalizedName(card.name)
-        if (!name) { return }
-        let isPattern = utils.markdown()[pattern].exec(name)
-        if (isPattern) { return }
-        console.log('🙅‍♀️ to prepend:', name, prepend)
-        // isPattern = Boolean(isPattern)
-        // console.log(name, isPattern)
+        const name = this.normalizedName(card.name) || ''
+        let patternExists = utils.markdown()[pattern].exec(name)
+        if (patternExists) {
+          return // skip
+        }
+        if (shouldPrepend) {
+          this.prependToNameSegment({ pattern, card, nameSegment: name })
+        } else {
+          // TODO LATER appendToNameSegment (for tags)
+        }
       })
     },
-
-    // remove
-    // appendTag (tag)
-    // removeTag (tag)
-
+    prependToNameSegment ({ pattern, card, nameSegment }) {
+      const markdown = this.markdown(pattern)
+      const index = card.name.indexOf(nameSegment)
+      const newName = utils.insertStringAtIndex(card.name, markdown, index)
+      console.log('🙅‍♀️ to prepend:', card.name, nameSegment, markdown, index, newName) // TEMP
+      this.$store.dispatch('currentCards/update', {
+        id: card.id,
+        name: newName
+      })
+    },
+    removeFromName (pattern) {
+      // TODO
+      const markdown = this.markdown(pattern)
+      this.cards.forEach(card => {
+        console.log('😈 remove from card names', markdown, card.name)
+      })
+    },
     toggleFramePickerIsVisible () {
       const isVisible = this.framePickerIsVisible
       this.closeDialogs()
