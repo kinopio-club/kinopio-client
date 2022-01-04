@@ -58,14 +58,6 @@ export default {
   computed: {
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
-
-    // move method or use/make getter
-    // canEditCard (card) {
-    //   if (this.isSpaceMember) { return true }
-    //   if (this.canEditSome) { return true }
-    //   return false
-    // },
-
     numberOfSelectedCardsCreatedByCurrentUser () {
       const cards = this.cards.filter(Boolean)
       const cardsCreatedByCurrentUser = cards.filter(card => {
@@ -169,15 +161,14 @@ export default {
     prependToNameSegment ({ pattern, card, nameSegment }) {
       const markdown = this.markdown(pattern)
       let index = card.name.indexOf(nameSegment)
+      if (index < 0) { index = 0 }
       const newName = utils.insertStringAtIndex(card.name, markdown, index)
-      console.log('🙅‍♀️ to prepend:', card.name, nameSegment, markdown, index, newName) // TEMP
       this.updateCardName(card.id, newName)
     },
     removeFromCards (pattern) {
       const markdown = this.markdown(pattern)
       this.cards.forEach(card => {
         const newName = card.name.replace(markdown, '')
-        console.log('😈 remove from card names', markdown, card.name, newName) // TEMP
         if (newName === card.name) { return }
         this.updateCardName(card.id, newName)
       })
