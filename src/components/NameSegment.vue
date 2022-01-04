@@ -6,7 +6,7 @@ span.name-segment
         template(v-if="markdown.type === 'text'")
           span {{markdown.content}}
         template(v-else-if="markdown.type === 'link'")
-          a(@mouseup="updateShouldCancel" @click="shouldCancel" :href="escapedUrl(markdown.result[2])") {{markdown.result[1]}}
+          a(@mouseup="updateShouldCancel" @click="openUrl($event, escapedUrl(markdown.result[2]))" :href="escapedUrl(markdown.result[2])") {{markdown.result[1]}}
         template(v-else-if="markdown.type === 'bold'")
           strong {{markdown.content}}
         template(v-else-if="markdown.type === 'h1'")
@@ -98,11 +98,17 @@ export default {
     updateShouldCancel (event) {
       shouldCancel = this.$store.state.preventDraggedCardFromShowingDetails
     },
-    shouldCancel (event) {
+    openUrl (event, url) {
+      this.$store.dispatch('closeAllDialogs', 'NameSegment.openUrl')
+      if (this.$store.state.currentUser.shouldOpenLinksInNewTab) {
+        window.open(url) // opens url in new tab
+        event.preventDefault()
+      }
       if (shouldCancel) {
         event.preventDefault()
         shouldCancel = false
       }
+      // open url natively
     }
   }
 }

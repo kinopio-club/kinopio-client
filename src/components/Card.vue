@@ -1287,17 +1287,19 @@ export default {
       return space
     },
     openUrl (event, url) {
-      const shouldOpenInNewTab = event.metaKey || event.ctrlKey
+      this.$store.dispatch('closeAllDialogs', 'Card.openUrl')
+      const shouldOpenInNewTab = this.$store.state.currentUser.shouldOpenLinksInNewTab
       if (shouldOpenInNewTab) {
-        return
-      } else {
         event.preventDefault()
-      }
-      if (utils.urlIsSpace(url)) {
-        const spaceId = utils.spaceIdFromUrl(url)
-        this.changeSpace({ id: spaceId })
+        window.open(url) // opens url in new tab
       } else {
-        window.location.href = url
+        if (utils.urlIsSpace(url)) {
+          event.preventDefault()
+          const spaceId = utils.spaceIdFromUrl(url)
+          this.changeSpace({ id: spaceId })
+        } else {
+          // open url natively
+        }
       }
     },
     changeSpace (space) {
