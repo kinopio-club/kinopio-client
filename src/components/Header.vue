@@ -32,17 +32,18 @@ header(:style="visualViewportPosition")
             button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{active : spaceDetailsIsVisible}")
               .badge.info(v-show="currentSpaceIsTemplate")
                 span Template
-              .badge-wrap(v-if="!userCanEditSpace && !currentSpaceIsTemplate")
-                .badge.info(:class="{'invisible': readOnlyJiggle}")
-                  span Read Only
-                .badge.info.invisible-badge(ref="readOnly" :class="{'badge-jiggle': readOnlyJiggle, 'invisible': !readOnlyJiggle}")
-                  span Read Only
               MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
               span {{currentSpaceName}}
               PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
               img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
             SpaceDetails(:visible="spaceDetailsIsVisible")
             ImportArenaChannel(:visible="importArenaChannelIsVisible")
+            //- Read Only badge
+            .label-badge.read-only-badge-wrap(v-if="!userCanEditSpace && !currentSpaceIsTemplate")
+              span(:class="{'invisible': readOnlyJiggle}")
+                span Read Only
+              span.invisible-badge(ref="readOnly" :class="{'badge-jiggle': readOnlyJiggle, 'invisible': !readOnlyJiggle}")
+                span Read Only
           //- State
           .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
             button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
@@ -681,18 +682,23 @@ header
       width 16px
       vertical-align baseline
 
-  .badge-wrap
-    position relative
-    display inline
+  .read-only-badge-wrap
+    pointer-events none
+    position absolute
+    background-color var(--info-background)
+    bottom -8px
+    left 5px
+    z-index 1
+    span
+      width 100%
+      color var(--primary)
 
   .invisible
     visibility hidden
 
   .invisible-badge
-    display block !important
     position absolute
-    left 0
-    top -2px
+    left 3px
 
   .users
     > .upgrade-user

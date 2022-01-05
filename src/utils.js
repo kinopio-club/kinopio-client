@@ -399,6 +399,9 @@ export default {
     string = string.substring(0, limit) + '…'
     return string
   },
+  insertStringAtIndex (string, insert, index) {
+    return string.substr(0, index) + insert + string.substr(index)
+  },
   normalizeToUnixTime (date) {
     return new Date(date).getTime()
   },

@@ -39,7 +39,7 @@ export default {
     createdByUser: Object,
     updatedByUser: Object,
     card: Object,
-    triggerCloseComponent: String
+    parentElement: Object
   },
   data () {
     return {
@@ -47,6 +47,13 @@ export default {
       userDetailsIsVisibleForCreatedByUser: false,
       userDetailsIsVisibleForUpdatedByUser: false
     }
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerCardDetailsCloseDialogs' && this.visible) {
+        this.closeComponentDialogs()
+      }
+    })
   },
   mounted () {
     dateIsUpdated = false
@@ -122,16 +129,24 @@ export default {
     },
     scrollIntoView () {
       const element = document.querySelector('dialog.user-details')
-      console.log(element)
+      const isTouchDevice = this.$store.state.isTouchDevice
+      scrollIntoView.scroll(element, isTouchDevice)
+    },
+    scrollParentIntoView () {
+      const element = this.parentElement
+      console.log('♥️', element)
+      if (!element) { return }
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
     }
   },
   watch: {
-    triggerCloseComponent (value) {
-      if (this.visible) {
-        this.closeComponentDialogs()
-      }
+    visible (visible) {
+      this.$nextTick(() => {
+        if (visible) {
+          this.scrollParentIntoView()
+        }
+      })
     }
   }
 }

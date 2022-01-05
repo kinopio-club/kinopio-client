@@ -268,6 +268,7 @@ export default {
         link: '',
         file: ''
       },
+      linkToPreview: '',
       prevNameLineMinWidth: 0,
       nameIsOnlyMarkdownLink: false,
       isLocking: true,
@@ -526,13 +527,7 @@ export default {
         maxWidth: this.resizeWidth
       }
     },
-    canEditCard () {
-      const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
-      const cardIsCreatedByCurrentUser = this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](this.card)
-      if (isSpaceMember) { return true }
-      if (this.canEditSpace && cardIsCreatedByCurrentUser) { return true }
-      return false
-    },
+    canEditCard () { return this.$store.getters['currentUser/canEditCard'](this.card) },
     normalizedName () {
       // name without urls and checkbox text
       let name = this.name
@@ -943,6 +938,7 @@ export default {
           this.formats.file = url
         } else {
           this.formats.link = url
+          this.linkToPreview = url
         }
       })
     },
@@ -1548,15 +1544,8 @@ export default {
     }
   },
   watch: {
-    // https://v3.vuejs.org/guide/migration/watch.html
-    // watching arrays doesn't work for changes anymore (only whole replacement, unless 'deep', option is specified)
-    formats: {
-      handler (urls) {
-        if (urls.link) {
-          this.updateUrlData()
-        }
-      },
-      deep: true
+    linkToPreview (value) {
+      this.updateUrlData()
     }
   }
 }

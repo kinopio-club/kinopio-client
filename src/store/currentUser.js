@@ -576,6 +576,14 @@ export default {
       const isNoUser = !card.userId && !card.nameUpdatedByUserId
       return isCreatedByUser || isUpdatedByUser || isNoUser
     },
+    canEditCard: (state, getters, rootState, rootGetters) => (card) => {
+      const isSpaceMember = getters.isSpaceMember
+      if (isSpaceMember) { return true }
+      const canEditSpace = getters.canEditSpace
+      const cardIsCreatedByCurrentUser = getters.cardIsCreatedByCurrentUser(card)
+      if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
+      return false
+    },
     connectionIsCreatedByCurrentUser: (state, getters, rootState) => (connection) => {
       return state.id === connection.userId
     },

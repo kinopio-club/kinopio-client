@@ -7,6 +7,7 @@ dialog.narrow.multiple-selected-actions(
   :style="styles"
 )
   section(v-if="cardsIsSelected || connectionsIsSelected")
+    //- Edit Cards
     .row(v-if="cardsIsSelected")
       //- [·]
       .button-wrap.cards-checkboxes
@@ -19,10 +20,13 @@ dialog.narrow.multiple-selected-actions(
         img.icon.connector-icon(v-if="cardsIsConnected" src="@/assets/connector-closed.svg")
         img.icon.connector-icon(v-else src="@/assets/connector-open.svg")
         span Connect
-      //- Frames
-      .button-wrap(@click.left.stop="toggleFramePickerIsVisible")
-        button(:class="{active: framePickerIsVisible}") Frames
-        FramePicker(:visible="framePickerIsVisible" :cards="cards")
+      //- Style
+      .button-wrap
+        button(:disabled="!canEditSome.cards" @click.left.stop="toggleCardStyleActionsIsVisible" :class="{active : cardStyleActionsIsVisible}")
+          span Style
+        CardStyleActions(:visible="cardStyleActionsIsVisible" :cards="cards" :backgroundColor="userColor" @closeDialogs="closeDialogs")
+
+    //- Edit Connections
     .row.edit-connection-types(v-if="connectionsIsSelected")
       //- Type Color
       .button-wrap
@@ -31,7 +35,6 @@ dialog.narrow.multiple-selected-actions(
             template(v-for="type in connectionTypes")
               .current-color(:style="{ background: type.color }")
         MultipleConnectionsPicker(:visible="multipleConnectionsPickerVisible" :selectedConnections="editableConnections" :selectedConnectionTypes="editableConnectionTypes")
-
       //- Labels
       button(:disabled="!canEditSome.connections" :class="{active: allLabelsAreVisible}" @click.left="toggleAllLabelsAreVisible")
         img.icon(v-if="allLabelsAreVisible" src="@/assets/view.svg")
@@ -74,7 +77,7 @@ import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 import MoveOrCopyCards from '@/components/dialogs/MoveOrCopyCards.vue'
 import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
-import FramePicker from '@/components/dialogs/FramePicker.vue'
+import CardStyleActions from '@/components/dialogs/CardStyleActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
 
 export default {
@@ -82,7 +85,7 @@ export default {
   components: {
     MoveOrCopyCards,
     MultipleConnectionsPicker,
-    FramePicker,
+    CardStyleActions,
     AlignAndDistribute
   },
   data () {
@@ -90,7 +93,7 @@ export default {
       copyCardsIsVisible: false,
       moveCardsIsVisible: false,
       multipleConnectionsPickerVisible: false,
-      framePickerIsVisible: false,
+      cardStyleActionsIsVisible: false,
       cardsIsConnected: false,
       cardsHaveCheckboxes: false,
       cardsCheckboxIsChecked: false,
@@ -293,16 +296,16 @@ export default {
       this.closeDialogs()
       this.multipleConnectionsPickerVisible = !isVisible
     },
-    toggleFramePickerIsVisible () {
-      const isVisible = this.framePickerIsVisible
+    toggleCardStyleActionsIsVisible () {
+      const isVisible = this.cardStyleActionsIsVisible
       this.closeDialogs()
-      this.framePickerIsVisible = !isVisible
+      this.cardStyleActionsIsVisible = !isVisible
     },
     closeDialogs () {
       this.copyCardsIsVisible = false
       this.moveCardsIsVisible = false
       this.multipleConnectionsPickerVisible = false
-      this.framePickerIsVisible = false
+      this.cardStyleActionsIsVisible = false
     },
     connectionType (event) {
       let connectionType = last(this.$store.getters['currentConnections/allTypes'])
