@@ -134,7 +134,6 @@ export default {
     },
     scrollParentIntoView () {
       const element = this.parentElement
-      console.log('♥️', element)
       if (!element) { return }
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
