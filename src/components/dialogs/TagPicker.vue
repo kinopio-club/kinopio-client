@@ -9,6 +9,9 @@ dialog.narrow.tag-picker(v-if="visible" :open="visible" @click.left.stop ref="di
       li(v-if="search" @click="selectTag(null, true)" @touchend.stop :class="{hover: focusOnName === search}")
         .badge.tag-badge(:style="{backgroundColor: searchTagColor}")
           span {{search}}
+          .badge.label-badge(v-if="!searchTagMatch")
+            span New Tag
+
       li(v-for="tag in filteredTags" @click="selectTag(tag, true)" @touchend.stop :class="{hover: focusOnName === tag.name}")
         .badge.tag-badge(:style="{backgroundColor: tag.color}")
           span {{tag.name}}
@@ -24,6 +27,7 @@ import utils from '@/utils.js'
 
 import fuzzy from 'fuzzy'
 import last from 'lodash-es/last'
+import randomColor from 'randomcolor'
 
 let unsubscribe
 
@@ -85,7 +89,8 @@ export default {
     return {
       tags: [],
       loading: false,
-      focusOnName: ''
+      focusOnName: '',
+      randomColor: ''
     }
   },
   computed: {
@@ -107,14 +112,22 @@ export default {
       tags = filtered.map(item => item.original)
       return tags.slice(0, 5)
     },
-    searchTagColor () {
+    searchTagMatch () {
       let tag = this.tags.find(tag => {
         return tag.name === this.search
       })
       if (tag) {
+        return tag
+      } else {
+        return null
+      }
+    },
+    searchTagColor () {
+      let tag = this.searchTagMatch
+      if (tag) {
         return tag.color
       } else {
-        return this.currentUserColor
+        return this.randomColor
       }
     }
   },
@@ -185,6 +198,7 @@ export default {
   watch: {
     visible (visible) {
       if (visible) {
+        this.randomColor = randomColor({ luminosity: 'light' })
         this.updateTags()
         this.$nextTick(() => {
           this.scrollIntoView()
@@ -207,4 +221,9 @@ export default {
   .results-section
     &:first-child
       padding-top 4px
+  .label-badge
+    bottom -10px
+    min-height 12px
+    width max-content
+    z-index 1
 </style>
