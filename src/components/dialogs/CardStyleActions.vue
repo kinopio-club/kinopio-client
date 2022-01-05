@@ -16,7 +16,7 @@ dialog.card-style-actions(v-if="visible" :open="visible" ref="dialog" @click.lef
           span h2
     //- TODO LATER
     //- Tag
-    .button-wrap.hidden
+    .button-wrap
       button
         span Tag
     //- Color
@@ -208,8 +208,8 @@ export default {
 <style lang="stylus">
 .card-style-actions
   background-color var(--secondary-background)
-  width 141px // temp
-  left -96px // temp
+  width 184px // temp
+  left -138px // temp
   .button-wrap
     vertical-align middle
 </style>
