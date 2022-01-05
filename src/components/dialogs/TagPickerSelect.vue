@@ -1,26 +1,29 @@
 <template lang="pug">
 dialog.narrow.tag-picker-select(v-if="visible" :open="visible" ref="dialog" @click.left.stop)
-  section
-    p yolo taglist
-  //- section.results-section
-  //-   ul.results-list
-  //-     template(v-for="frame in frames" :key="frame.id")
-  //-       li(:class="{active: frameIsSelected(frame)}" @click.left="changeCardFrame(frame)" tabindex="0" v-on:keyup.enter="changeCardFrame(frame)")
-  //-         FrameBadge(:frame="frame")
-  //-         .name {{frame.name}}
+  TagList(:tags="tags" :isLoading="loading" :shouldEmitSelectTag="true" @selectTag="selectTag")
 </template>
 
 <script>
+import TagList from '@/components/TagList.vue'
 import scrollIntoView from '@/scroll-into-view.js'
+import cache from '@/cache.js'
+// import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'TagPickerSelectOnly',
-  // components: {
-  // FrameBadge
-  // },
+  components: {
+    TagList
+  },
   props: {
     visible: Boolean,
     cards: Array
+  },
+  data () {
+    return {
+      tags: [],
+      loading: false
+    }
   },
   // computed: {
   //   frames () {
@@ -28,24 +31,40 @@ export default {
   //   }
   // },
   methods: {
-    // changeCardFrame (frame) {
-    //   this.cards.forEach(card => {
-    //     card = {
-    //       frameId: frame.id,
-    //       frameName: frame.name,
-    //       id: card.id
-    //     }
-    //     this.$store.dispatch('currentCards/update', card)
-    //   })
-    // },
-    // frameIsSelected (frame) {
-    //   const cardFrameIds = this.cards.map(card => card.frameId)
-    //   return cardFrameIds.includes(frame.id)
-    // },
     scrollIntoView () {
       const element = this.$refs.dialog
       const isTouchDevice = this.$store.state.isTouchDevice
       scrollIntoView.scroll(element, isTouchDevice)
+    },
+    selectTag (tag) {
+      console.log('🐢', tag)
+    },
+
+    // same as TagPicker
+
+    updateTags () {
+      const spaceTags = this.$store.getters['currentSpace/spaceTags']()
+      this.tags = spaceTags || []
+      const cachedTags = cache.allTags()
+      const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })
+      this.tags = mergedTags
+      this.updateRemoteTags()
+    },
+    async updateRemoteTags () {
+      if (!this.currentUserIsSignedIn) { return }
+      const remoteTagsIsFetched = this.$store.state.remoteTagsIsFetched
+      let remoteTags
+      if (remoteTagsIsFetched) {
+        remoteTags = this.$store.state.remoteTags
+      } else {
+        this.loading = true
+        remoteTags = await this.$store.dispatch('api/getUserTags') || []
+        this.$store.commit('remoteTags', remoteTags)
+        this.$store.commit('remoteTagsIsFetched', true)
+        this.loading = false
+      }
+      const mergedTags = utils.mergeArrays({ previous: this.tags, updated: remoteTags, key: 'name' })
+      this.tags = mergedTags
     }
   },
   watch: {
@@ -53,6 +72,7 @@ export default {
       this.$nextTick(() => {
         if (visible) {
           this.scrollIntoView()
+          this.updateTags()
         }
       })
     }
