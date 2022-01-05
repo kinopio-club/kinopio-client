@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.tag-picker-select(v-if="visible" :open="visible" ref="dialog" @click.left.stop)
+dialog.narrow.tag-picker-style-actions(v-if="visible" :open="visible" ref="dialog" @click.left.stop)
   TagList(:tags="tags" :isLoading="loading" :shouldEmitSelectTag="true" @selectTag="selectTag")
 </template>
 
@@ -11,7 +11,7 @@ import cache from '@/cache.js'
 import utils from '@/utils.js'
 
 export default {
-  name: 'TagPickerSelectOnly',
+  name: 'TagPickerStyleActions',
   components: {
     TagList
   },
@@ -32,9 +32,11 @@ export default {
   // },
   methods: {
     scrollIntoView () {
-      const element = this.$refs.dialog
-      const isTouchDevice = this.$store.state.isTouchDevice
-      scrollIntoView.scroll(element, isTouchDevice)
+      this.$nextTick(() => {
+        const element = this.$refs.dialog
+        const isTouchDevice = this.$store.state.isTouchDevice
+        scrollIntoView.scroll(element, isTouchDevice)
+      })
     },
     selectTag (tag) {
       console.log('🐢', tag)
@@ -65,16 +67,15 @@ export default {
       }
       const mergedTags = utils.mergeArrays({ previous: this.tags, updated: remoteTags, key: 'name' })
       this.tags = mergedTags
+      this.scrollIntoView()
     }
   },
   watch: {
     visible (visible) {
-      this.$nextTick(() => {
-        if (visible) {
-          this.scrollIntoView()
-          this.updateTags()
-        }
-      })
+      if (visible) {
+        this.scrollIntoView()
+        this.updateTags()
+      }
     }
   }
 }
