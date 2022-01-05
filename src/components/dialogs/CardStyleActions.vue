@@ -17,8 +17,10 @@ dialog.card-style-actions(v-if="visible" :open="visible" ref="dialog" @click.lef
     //- TODO LATER
     //- Tag
     .button-wrap
-      button
+      button(:disabled="!canEditSome" @click.left.stop="toggleTagPickerIsVisible" :class="{ active: tagPickerIsVisible }")
         span Tag
+      TagPickerSelect(:visible="tagPickerIsVisible" :cards="cards")
+
     //- Color
     .button-wrap.hidden
       //- @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}"
@@ -30,13 +32,15 @@ dialog.card-style-actions(v-if="visible" :open="visible" ref="dialog" @click.lef
 
 <script>
 import FramePicker from '@/components/dialogs/FramePicker.vue'
+import TagPickerSelect from '@/components/dialogs/TagPickerSelect.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
 export default {
   name: 'CardStyleActions',
   components: {
-    FramePicker
+    FramePicker,
+    TagPickerSelect
   },
   props: {
     visible: Boolean,
@@ -45,7 +49,8 @@ export default {
   },
   data () {
     return {
-      framePickerIsVisible: false
+      framePickerIsVisible: false,
+      tagPickerIsVisible: false
     }
   },
   created () {
@@ -183,8 +188,14 @@ export default {
       this.closeDialogs()
       this.framePickerIsVisible = !isVisible
     },
+    toggleTagPickerIsVisible () {
+      const isVisible = this.tagPickerIsVisible
+      this.closeDialogs()
+      this.tagPickerIsVisible = !isVisible
+    },
     closeDialogs () {
       this.framePickerIsVisible = false
+      this.tagPickerIsVisible = false
     },
     scrollIntoView () {
       const element = this.$refs.dialog
