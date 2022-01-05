@@ -475,7 +475,7 @@ export default {
   .tag-title-row
     justify-content space-between
     align-items flex-start
-    .row
+    > .row
       margin 0
   .toggle-filter
     min-width 45px

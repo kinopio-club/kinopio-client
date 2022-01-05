@@ -116,6 +116,8 @@ export default {
 
 <style lang="stylus">
 .name-segment
+  > .button-badge
+    vertical-align 1px
   .markdown
     word-break break-word
     white-space pre-wrap
