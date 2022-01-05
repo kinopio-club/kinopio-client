@@ -1316,6 +1316,7 @@ export default {
           this.$store.dispatch('currentSpace/updateTagNameColor', tag)
         } else {
           tag = this.$store.getters['currentSpace/tagByName'](tagName)
+          tag = utils.clone(tag)
           tag.color = this.previousSelectedTag.color || tag.color
         }
         return tag
