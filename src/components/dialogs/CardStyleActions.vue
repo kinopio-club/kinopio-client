@@ -77,17 +77,17 @@ export default {
     },
     isFrames () {
       const cards = this.cards.filter(card => card.frameId)
-      return Boolean(cards.length)
+      return Boolean(cards.length === this.cards.length)
     },
     isH1 () {
       const pattern = 'h1Pattern'
       const cards = this.cardsWithPattern(pattern)
-      return Boolean(cards.length)
+      return Boolean(cards.length === this.cards.length)
     },
     isH2 () {
       const pattern = 'h2Pattern'
       const cards = this.cardsWithPattern(pattern)
-      return Boolean(cards.length)
+      return Boolean(cards.length === this.cards.length)
     }
   },
   methods: {
