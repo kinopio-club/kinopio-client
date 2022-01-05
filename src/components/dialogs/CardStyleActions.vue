@@ -26,7 +26,7 @@ dialog.card-style-actions(v-if="visible" :open="visible" ref="dialog" @click.lef
       //- @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}"
       button.change-color(:disabled="!canEditSome")
         .current-color(:style="{ background: '#c9c9c9' }")
-      //- ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="true")
+      //- ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint")
 
 </template>
 
