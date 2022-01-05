@@ -51,6 +51,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         :search="tag.pickerSearch"
         @closeDialog="hideTagPicker"
         @selectTag="updateTagBracketsWithTag"
+        @currentTag="updateCurrentSearchTag"
       )
       SpacePicker(
         :visible="space.pickerIsVisible"
@@ -272,7 +273,8 @@ export default {
       isOpening: false,
       openingPercent: 0,
       openingAlpha: 0,
-      previousSelectedTag: {}
+      previousSelectedTag: {},
+      currentSearchTag: {}
     }
   },
   created () {
@@ -1309,8 +1311,12 @@ export default {
         let tag
         if (this.previousSelectedTag.name === tagName) {
           tag = this.previousSelectedTag
+        } else if (this.currentSearchTag.name === tagName) {
+          tag = this.currentSearchTag
+          this.$store.dispatch('currentSpace/updateTagNameColor', tag)
         } else {
           tag = this.$store.getters['currentSpace/tagByName'](tagName)
+          tag.color = this.previousSelectedTag.color || tag.color
         }
         return tag
       })
@@ -1328,6 +1334,8 @@ export default {
         })
         if (this.previousSelectedTag.name === tagName) {
           tag.color = this.previousSelectedTag.color
+        } else if (this.currentSearchTag.name === tagName) {
+          tag.color = this.currentSearchTag.color
         }
         this.$store.dispatch('currentSpace/addTag', tag)
       })
@@ -1356,6 +1364,10 @@ export default {
       })
       this.$store.commit('currentSelectedTag', tag)
       this.$store.commit('tagDetailsIsVisible', true)
+    },
+    updateCurrentSearchTag (tag) {
+      this.currentSearchTag = tag
+      this.updatePreviousTags()
     },
     updateTagBracketsWithTag (tag) {
       this.previousSelectedTag = tag

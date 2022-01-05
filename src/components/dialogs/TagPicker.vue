@@ -43,7 +43,7 @@ export default {
         const key = mutation.payload
         const searchTag = [{
           name: this.search,
-          color: this.currentUserColor
+          color: this.searchTagColor
         }]
         const tags = searchTag.concat(this.filteredTags)
         const currentIndex = tags.findIndex(tag => tag.name === this.focusOnName)
@@ -94,7 +94,6 @@ export default {
     }
   },
   computed: {
-    currentUserColor () { return this.$store.state.currentUser.color },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     filteredTags () {
       let tags = this.tags.filter(tag => {
@@ -207,6 +206,8 @@ export default {
     },
     search (newSearch) {
       this.focusOnName = newSearch
+      const currentTag = { name: newSearch, color: this.searchTagColor }
+      this.$emit('currentTag', currentTag)
     }
   }
 }
