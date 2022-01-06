@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.tag-picker-style-actions(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs")
+dialog.narrow.tag-picker-style-actions(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs" :style="{'max-height': dialogHeight + 'px'}")
   section
     .row
       button(@click="toggleNewTagIsVisible" :class="{ active: newTagIsVisible }")
@@ -11,14 +11,14 @@ dialog.narrow.tag-picker-style-actions(v-if="visible" :open="visible" ref="dialo
           button.change-color(@click.stop="toggleColorPickerIsVisible")
             .current-color(:style="{ background: newTagColor }")
           ColorPicker(:currentColor="newTagColor" :visible="colorPickerIsVisible" @selectedColor="updateNewTagColor")
-        input(placeholder="name" v-model="newTagName" @keyup.space.prevent @keyup.escape.stop="toggleNewTagIsVisible" @keyup.stop)
+        input(placeholder="name" v-model="newTagName" @keyup.space.prevent @keyup.escape.stop="toggleNewTagIsVisible" @keyup.stop @keyup.enter.exact="createNewTag")
       .row
         button(@click="createNewTag")
           span Create New Tag
       .row(v-if="errorNewTagNameIsBlank")
         .badge.danger Tag name cannot be blank
-
-  TagList(:tags="tags" :isLoading="loading" :shouldEmitSelectTag="true" @selectTag="selectTag")
+  section.results-section(v-if="tags.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
+    TagList(:tags="tags" :isLoading="loading" :shouldEmitSelectTag="true" @selectTag="selectTag")
 </template>
 
 <script>
@@ -40,8 +40,18 @@ export default {
     visible: Boolean,
     cards: Array
   },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'updatePageSizes') {
+        this.updateDialogHeight()
+        this.updateResultsSectionHeight()
+      }
+    })
+  },
   data () {
     return {
+      resultsSectionHeight: null,
+      dialogHeight: null,
       tags: [],
       loading: false,
       newTagIsVisible: false,
@@ -51,11 +61,6 @@ export default {
       errorNewTagNameIsBlank: false
     }
   },
-  // computed: {
-  //   frames () {
-  //     return frames
-  //   }
-  // },
   methods: {
     scrollIntoView () {
       this.$nextTick(() => {
@@ -64,22 +69,45 @@ export default {
         scrollIntoView.scroll(element, isTouchDevice)
       })
     },
-    createNewTag () {
-      this.errorNewTagNameIsBlank = false
-      if (!this.newTagName) {
-        this.errorNewTagNameIsBlank = true
-      }
-      // create tag w name and color
-      // get the model version?
-      // selectTag
+    updateTagColor (tag) {
+      this.$store.dispatch('currentSpace/updateTagNameColor', tag)
+      this.tags = this.tags.map(item => {
+        if (item.tagName === tag.name) {
+          item.color = tag.color
+        }
+        return item
+      })
     },
     selectTag (tag) {
       this.closeDialogs()
       console.log('🐢', tag)
     },
+    createNewTag () {
+      this.errorNewTagNameIsBlank = false
+      if (!this.newTagName) {
+        this.errorNewTagNameIsBlank = true
+        return
+      }
+      let tag = this.tags.find(item => item.name === this.newTagName)
+      if (tag) {
+        tag.color = this.newTagColor
+        this.updateTagColor(tag)
+      } else {
+        tag = {
+          name: this.newTagName,
+          color: this.newTagColor
+        }
+        this.$store.dispatch('currentSpace/addTag', tag)
+        this.tags.unshift(tag)
+      }
+      this.clearState()
+      this.selectTag(tag)
+    },
     toggleNewTagIsVisible () {
       this.newTagIsVisible = !this.newTagIsVisible
       this.newTagColor = randomColor({ luminosity: 'light' })
+      this.updateDialogHeight()
+      this.updateResultsSectionHeight()
     },
     toggleColorPickerIsVisible () {
       this.colorPickerIsVisible = !this.colorPickerIsVisible
@@ -94,6 +122,23 @@ export default {
       this.newTagIsVisible = false
       this.errorNewTagNameIsBlank = false
       this.newTagName = ''
+    },
+
+    // same as Tags
+
+    updateDialogHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.dialog
+        this.dialogHeight = utils.elementHeight(element)
+      })
+    },
+    updateResultsSectionHeight () {
+      if (!this.visible) { return }
+      this.$nextTick(() => {
+        let element = this.$refs.results
+        this.resultsSectionHeight = utils.elementHeight(element, true)
+      })
     },
 
     // same as TagPicker
@@ -127,8 +172,10 @@ export default {
   watch: {
     visible (visible) {
       if (visible) {
+        this.updateDialogHeight()
         this.scrollIntoView()
         this.updateTags()
+        this.updateResultsSectionHeight()
         this.clearState()
         this.closeDialogs()
       }
