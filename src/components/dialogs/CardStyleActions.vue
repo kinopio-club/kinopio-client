@@ -23,7 +23,7 @@ dialog.card-style-actions(v-if="visible" :open="visible" ref="dialog" @click.lef
     .button-wrap(@click.left.stop="toggleColorPickerIsVisible" :class="{active: colorPickerIsVisible}")
       button.change-color(:disabled="!canEditSome")
         .current-color(:style="{ background: cardsBackgroundColor }")
-      ColorPicker(:currentColor="cardsBackgroundColor" :visible="colorPickerIsVisible" :removeIsVisible="true" @selectedColor="updateCardsBackgroundColor" @removeColor="removeCardsBackgroundColor")
+      ColorPicker(:currentColor="cardsBackgroundColor" :visible="colorPickerIsVisible" :removeIsVisible="true" :otherColors="spaceCardBackgroundColors" @selectedColor="updateCardsBackgroundColor" @removeColor="removeCardsBackgroundColor")
 </template>
 
 <script>
@@ -81,6 +81,7 @@ export default {
     },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
+    spaceCardBackgroundColors () { return this.$store.getters['currentCards/backgroundColors'] },
     numberOfSelectedCardsCreatedByCurrentUser () {
       const cards = this.cards.filter(Boolean)
       const cardsCreatedByCurrentUser = cards.filter(card => {

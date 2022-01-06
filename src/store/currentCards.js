@@ -595,6 +595,12 @@ const currentCards = {
     },
     users: (state, getters, rootState, rootGetters) => {
       return getters.userIds.map(id => rootGetters['currentSpace/userById'](id))
+    },
+    backgroundColors: (state, getters) => {
+      const cards = getters.all
+      let colors = cards.map(card => card.backgroundColor)
+      colors = colors.filter(color => Boolean(color))
+      return uniq(colors)
     }
   }
 }
