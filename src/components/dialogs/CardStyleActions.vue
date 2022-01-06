@@ -35,6 +35,8 @@ import utils from '@/utils.js'
 
 import uniq from 'lodash-es/uniq'
 
+const defaultCardBackgroundColor = '#c9c9c9'
+
 export default {
   name: 'CardStyleActions',
   components: {
@@ -51,8 +53,7 @@ export default {
     return {
       framePickerIsVisible: false,
       tagPickerIsVisible: false,
-      colorPickerIsVisible: false,
-      defaultCardBackgroundColor: '#c9c9c9'
+      colorPickerIsVisible: false
     }
   },
   created () {
@@ -76,7 +77,7 @@ export default {
       if (cardsHaveColors && colorsAreEqual) {
         return colors[0]
       } else {
-        return this.defaultCardBackgroundColor
+        return defaultCardBackgroundColor
       }
     },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
