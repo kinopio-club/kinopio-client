@@ -14,33 +14,33 @@ dialog.card-style-actions(v-if="visible" :open="visible" ref="dialog" @click.lef
     .button-wrap
       button(:disabled="!canEditSome" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }")
           span h2
-    //- TODO LATER
     //- Tag
     .button-wrap
       button(:disabled="!canEditSome" @click.left.stop="toggleTagPickerIsVisible" :class="{ active: tagPickerIsVisible }")
         span Tag
       TagPickerStyleActions(:visible="tagPickerIsVisible" :cards="cards")
-
     //- Color
-    .button-wrap.hidden
-      //- @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}"
+    .button-wrap(@click.left.stop="toggleColorPickerIsVisible" :class="{active: colorPickerIsVisible}")
       button.change-color(:disabled="!canEditSome")
-        .current-color(:style="{ background: '#c9c9c9' }")
-      //- ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint")
-
+        .current-color(:style="{ background: cardsBackgroundColor }")
+      ColorPicker(:currentColor="cardsBackgroundColor" :visible="colorPickerIsVisible" :removeIsVisible="true" @selectedColor="updateCardsBackgroundColor" @removeColor="removeCardsBackgroundColor")
 </template>
 
 <script>
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import TagPickerStyleActions from '@/components/dialogs/TagPickerStyleActions.vue'
+import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
+
+import uniq from 'lodash-es/uniq'
 
 export default {
   name: 'CardStyleActions',
   components: {
     FramePicker,
-    TagPickerStyleActions
+    TagPickerStyleActions,
+    ColorPicker
   },
   props: {
     visible: Boolean,
@@ -50,7 +50,9 @@ export default {
   data () {
     return {
       framePickerIsVisible: false,
-      tagPickerIsVisible: false
+      tagPickerIsVisible: false,
+      colorPickerIsVisible: false,
+      defaultCardBackgroundColor: '#c9c9c9'
     }
   },
   created () {
@@ -64,6 +66,17 @@ export default {
     styles () {
       return {
         backgroundColor: this.backgroundColor
+      }
+    },
+    cardsBackgroundColor () {
+      let colors = this.cards.map(card => card.backgroundColor)
+      colors = colors.filter(color => Boolean(color))
+      const cardsHaveColors = colors.length === this.cards.length
+      const colorsAreEqual = uniq(colors).length === 1
+      if (cardsHaveColors && colorsAreEqual) {
+        return colors[0]
+      } else {
+        return this.defaultCardBackgroundColor
       }
     },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
@@ -96,6 +109,26 @@ export default {
     }
   },
   methods: {
+    updateCardsBackgroundColor (color) {
+      this.cards.forEach(card => {
+        if (card.backgroundColor === color) { return }
+        card = {
+          id: card.id,
+          backgroundColor: color
+        }
+        this.$store.dispatch('currentCards/update', card)
+      })
+    },
+    removeCardsBackgroundColor () {
+      this.cards.forEach(card => {
+        if (!card.backgroundColor) { return }
+        card = {
+          id: card.id,
+          backgroundColor: ''
+        }
+        this.$store.dispatch('currentCards/update', card)
+      })
+    },
     cardsWithPattern (pattern) {
       const cards = this.cards.filter(card => {
         const name = this.normalizedName(card.name)
@@ -183,9 +216,15 @@ export default {
       this.closeDialogs()
       this.tagPickerIsVisible = !isVisible
     },
+    toggleColorPickerIsVisible () {
+      const isVisible = this.colorPickerIsVisible
+      this.closeDialogs()
+      this.colorPickerIsVisible = !isVisible
+    },
     closeDialogs () {
       this.framePickerIsVisible = false
       this.tagPickerIsVisible = false
+      this.colorPickerIsVisible = false
     },
     scrollIntoView () {
       const element = this.$refs.dialog

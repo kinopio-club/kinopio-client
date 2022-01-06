@@ -100,7 +100,7 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
           @touchstart="startConnecting"
         )
           .connector-glow(:style="connectorGlowStyle" tabindex="-1")
-          button.inline-button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: selectedColor}" tabindex="-1")
+          button.inline-button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: selectedColor || card.backgroundColor}" tabindex="-1")
             .connected-colors
               template(v-if="isConnectingTo || isConnectingFrom")
                 .color(:style="{ background: newConnectionColor}")
@@ -384,7 +384,7 @@ export default {
       return this.id === this.$store.state.cardDetailsIsVisibleForCardId
     },
     cardStyle () {
-      const color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor
+      const color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || this.card.backgroundColor
       return {
         background: color,
         width: this.resizeWidth,
