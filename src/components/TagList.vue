@@ -68,7 +68,10 @@ export default {
   methods: {
     tagIsActive (tag) {
       const isTagDetails = this.tagDetailsTag.name === tag.name
-      const isCurrentTag = this.currentTags.includes(tag.name)
+      let isCurrentTag
+      if (this.currentTags) {
+        isCurrentTag = this.currentTags.includes(tag.name)
+      }
       return isTagDetails || isCurrentTag
     },
     tagIsFocused (tag) {

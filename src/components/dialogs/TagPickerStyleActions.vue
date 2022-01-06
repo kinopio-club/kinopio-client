@@ -203,9 +203,9 @@ export default {
     visible (visible) {
       if (visible) {
         this.updateDialogHeight()
-        this.scrollIntoView()
         this.updateTags()
         this.updateResultsSectionHeight()
+        this.scrollIntoView()
         this.clearState()
         this.closeDialogs()
       }
@@ -216,6 +216,9 @@ export default {
 
 <style lang="stylus">
 .tag-picker-style-actions
+  min-height 200px
+  .results-section
+    min-height 158px
   .change-color
     margin-right 6px
 </style>
