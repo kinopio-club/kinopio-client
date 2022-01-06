@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.color-picker(v-if="visible" :open="visible" @click.left.stop)
+dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.left.stop)
   section(v-if="removeIsVisible")
     .row
       .badge.inline-color-badge(:style="{backgroundColor: currentColor}")
@@ -43,6 +43,8 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" @click.left.stop)
 </template>
 
 <script>
+import scrollIntoView from '@/scroll-into-view.js'
+
 import randomColor from 'randomcolor'
 import validHexColor from 'valid-hex-color'
 import shader from 'shader'
@@ -136,12 +138,21 @@ export default {
     },
     triggerUpdatePositionInVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
+    },
+    scrollIntoView () {
+      this.$nextTick(() => {
+        const element = this.$refs.dialog
+        if (!element) { return }
+        const isTouchDevice = this.$store.state.isTouchDevice
+        scrollIntoView.scroll(element, isTouchDevice)
+      })
     }
   },
   watch: {
     visible (visible) {
       this.shuffleColors()
       this.updateButtonHues()
+      this.scrollIntoView()
     }
   }
 }
