@@ -156,17 +156,7 @@ export default {
     },
     updateCardName (cardId, newName) {
       const card = this.$store.getters['currentCards/byId'](cardId)
-      const canEditCard = this.$store.getters['currentUser/canEditCard'](card)
-      if (!canEditCard) { return }
-      this.$store.dispatch('currentCards/update', {
-        id: cardId,
-        name: newName
-      })
-      this.$nextTick(() => {
-        this.$store.dispatch('currentCards/updateDimensions', cardId)
-        this.$store.dispatch('currentCards/updateCardMap')
-        this.$store.dispatch('currentConnections/updatePaths', { cardId, shouldUpdateApi: true })
-      })
+      this.$store.dispatch('currentCards/updateCardName', { card, newName })
     },
     prependToNameSegment ({ pattern, card, nameSegment }) {
       const markdown = this.markdown(pattern)

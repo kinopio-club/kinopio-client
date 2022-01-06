@@ -94,18 +94,25 @@ export default {
       const tagString = `[[${tag.name}]]`
       const cardsWithTag = this.cards.filter(card => card.name.includes(tagString))
       const shouldRemove = this.cards.length === cardsWithTag.length
-      console.log('🐢', tag, this.cards, cardsWithTag, shouldRemove)
-
-      // if shouldRemove
-      // remove tag from cards
-      // return
-
+      console.log('🐢', tag, this.cards, cardsWithTag, shouldRemove) // TEMP
+      if (shouldRemove) {
+        this.removeFromCards(tagString)
+      }
+      // appendToCards(tagString)
       // cards.forEach card
       // remove from all , replace w ''
       // append to all
       // if name is diff
       // update card name (see h1toggle in styles)
       // cardmap, etc.
+    },
+    removeFromCards (tagString) {
+      console.log('🍅 removeFromCards:', tagString) // TEMP
+      this.cards.forEach(card => {
+        const newName = card.name.replace(tagString, '').trim()
+        if (newName === card.name) { return }
+        this.$store.dispatch('currentCards/updateCardName', { card, newName })
+      })
     },
     createNewTag () {
       this.errorNewTagNameIsBlank = false
