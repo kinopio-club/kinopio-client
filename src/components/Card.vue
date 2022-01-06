@@ -80,7 +80,7 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
             label(:class="{active: isChecked, disabled: !canEditSpace}")
               input(type="checkbox" v-model="checkboxState")
           //- Name
-          p.name.name-segments(v-if="normalizedName" :style="{background: selectedColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image || formats.video)}")
+          p.name.name-segments(v-if="normalizedName" :style="{background: selectedColor || card.backgroundColor, minWidth: nameLineMinWidth + 'px'}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': Boolean(formats.image || formats.video)}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" @showLinkDetailsIsVisible="showLinkDetailsIsVisible")
             Loader(:visible="isLoadingUrlPreview")
@@ -384,7 +384,11 @@ export default {
       return this.id === this.$store.state.cardDetailsIsVisibleForCardId
     },
     cardStyle () {
-      const color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || this.card.backgroundColor
+      let backgroundColor
+      if (!this.isVisualCard) {
+        backgroundColor = this.card.backgroundColor
+      }
+      const color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || backgroundColor
       return {
         background: color,
         width: this.resizeWidth,
