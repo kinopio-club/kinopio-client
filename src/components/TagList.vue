@@ -19,7 +19,7 @@ span.tag-list(@click.left="closeDialogs")
           @click.left.stop="selectTag($event, tag)"
           @touchend.stop="selectTag($event, tag)"
           v-on:keyup.enter="selectTag($event, tag)"
-          :class="{ active: tagDetailsTag.name === tag.name, hover: tagIsFocused(tag) }"
+          :class="{ active: tagIsActive(tag), hover: tagIsFocused(tag) }"
         )
           .badge(:style="{backgroundColor: tag.color, 'pointerEvents': 'none'}")
             span {{tag.name}}
@@ -43,7 +43,8 @@ export default {
     tags: Array,
     isLoading: Boolean,
     parentIsPinned: Boolean,
-    shouldEmitSelectTag: Boolean
+    shouldEmitSelectTag: Boolean,
+    currentTags: Array
   },
   data () {
     return {
@@ -65,6 +66,11 @@ export default {
     }
   },
   methods: {
+    tagIsActive (tag) {
+      const isTagDetails = this.tagDetailsTag.name === tag.name
+      const isCurrentTag = this.currentTags.includes(tag.name)
+      return isTagDetails || isCurrentTag
+    },
     tagIsFocused (tag) {
       return this.focusOnId === tag.id
     },

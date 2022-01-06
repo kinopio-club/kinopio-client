@@ -18,7 +18,7 @@ dialog.narrow.tag-picker-style-actions(v-if="visible" :open="visible" ref="dialo
       .row(v-if="errorNewTagNameIsBlank")
         .badge.danger Tag name cannot be blank
   section.results-section(v-if="tags.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    TagList(:tags="tags" :isLoading="loading" :shouldEmitSelectTag="true" @selectTag="selectTag")
+    TagList(:tags="tags" :isLoading="loading" :shouldEmitSelectTag="true" :currentTags="currentTags" @selectTag="selectTag")
 </template>
 
 <script>
@@ -29,6 +29,7 @@ import utils from '@/utils.js'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 
 import randomColor from 'randomcolor'
+import uniq from 'lodash-es/uniq'
 
 export default {
   name: 'TagPickerStyleActions',
@@ -61,6 +62,16 @@ export default {
       errorNewTagNameIsBlank: false
     }
   },
+  computed: {
+    currentTags () {
+      let currentTags = []
+      this.cards.forEach(card => {
+        const tags = utils.tagsFromStringWithoutBrackets(card.name) || []
+        currentTags = currentTags.concat(tags)
+      })
+      return uniq(currentTags)
+    }
+  },
   methods: {
     scrollIntoView () {
       this.$nextTick(() => {
@@ -80,7 +91,21 @@ export default {
     },
     selectTag (tag) {
       this.closeDialogs()
-      console.log('🐢', tag)
+      const tagString = `[[${tag.name}]]`
+      const cardsWithTag = this.cards.filter(card => card.name.includes(tagString))
+      const shouldRemove = this.cards.length === cardsWithTag.length
+      console.log('🐢', tag, this.cards, cardsWithTag, shouldRemove)
+
+      // if shouldRemove
+      // remove tag from cards
+      // return
+
+      // cards.forEach card
+      // remove from all , replace w ''
+      // append to all
+      // if name is diff
+      // update card name (see h1toggle in styles)
+      // cardmap, etc.
     },
     createNewTag () {
       this.errorNewTagNameIsBlank = false
