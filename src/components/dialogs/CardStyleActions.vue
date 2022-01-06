@@ -20,7 +20,7 @@ dialog.card-style-actions(v-if="visible" :open="visible" ref="dialog" @click.lef
         span Tag
       TagPickerStyleActions(:visible="tagPickerIsVisible" :cards="cards")
     //- Color
-    .button-wrap(@click.left.stop="toggleColorPickerIsVisible" :class="{active: colorPickerIsVisible}")
+    .button-wrap.hidden(@click.left.stop="toggleColorPickerIsVisible" :class="{active: colorPickerIsVisible}")
       button.change-color(:disabled="!canEditSome")
         .current-color(:style="{ background: cardsBackgroundColor }")
       ColorPicker(:currentColor="cardsBackgroundColor" :visible="colorPickerIsVisible" :removeIsVisible="true" :otherColors="spaceCardBackgroundColors" @selectedColor="updateCardsBackgroundColor" @removeColor="removeCardsBackgroundColor")
