@@ -16,10 +16,10 @@ span.tag-list(@click.left="closeDialogs")
         li(
           :data-tag-id="tag.id"
           tabindex="0"
-          @click.left.stop="toggleTagDetailsIsVisible($event, tag)"
-          @touchend.stop="toggleTagDetailsIsVisible($event, tag)"
-          v-on:keyup.enter="toggleTagDetailsIsVisible($event, tag)"
-          :class="{ active: tagDetailsTag.name === tag.name, hover: tagIsFocused(tag) }"
+          @click.left.stop="selectTag($event, tag)"
+          @touchend.stop="selectTag($event, tag)"
+          v-on:keyup.enter="selectTag($event, tag)"
+          :class="{ active: tagIsActive(tag), hover: tagIsFocused(tag) }"
         )
           .badge(:style="{backgroundColor: tag.color, 'pointerEvents': 'none'}")
             span {{tag.name}}
@@ -42,7 +42,9 @@ export default {
   props: {
     tags: Array,
     isLoading: Boolean,
-    parentIsPinned: Boolean
+    parentIsPinned: Boolean,
+    shouldEmitSelectTag: Boolean,
+    currentTags: Array
   },
   data () {
     return {
@@ -64,6 +66,14 @@ export default {
     }
   },
   methods: {
+    tagIsActive (tag) {
+      const isTagDetails = this.tagDetailsTag.name === tag.name
+      let isCurrentTag
+      if (this.currentTags) {
+        isCurrentTag = this.currentTags.includes(tag.name)
+      }
+      return isTagDetails || isCurrentTag
+    },
     tagIsFocused (tag) {
       return this.focusOnId === tag.id
     },
@@ -93,7 +103,11 @@ export default {
       this.$store.commit('tagDetailsIsVisible', value)
       this.$store.commit('tagDetailsIsVisibleFromTagList', value)
     },
-    toggleTagDetailsIsVisible (event, tag) {
+    selectTag (event, tag) {
+      if (this.shouldEmitSelectTag) {
+        this.$emit('selectTag', tag)
+        return
+      }
       this.closeDialogs()
       this.$nextTick(() => {
         this.updatePosition(event, tag)
@@ -142,7 +156,7 @@ export default {
     selectItem () {
       const tags = this.tagsFiltered
       const index = tags.findIndex(tags => tags.id === this.focusOnId)
-      this.toggleTagDetailsIsVisible(null, tags[index])
+      this.selectTag(null, tags[index])
     },
     focusItem (tag) {
       this.focusOnId = tag.id

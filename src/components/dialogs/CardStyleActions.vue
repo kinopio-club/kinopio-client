@@ -14,29 +14,35 @@ dialog.card-style-actions(v-if="visible" :open="visible" ref="dialog" @click.lef
     .button-wrap
       button(:disabled="!canEditSome" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }")
           span h2
-    //- TODO LATER
     //- Tag
-    .button-wrap.hidden
-      button
+    .button-wrap
+      button(:disabled="!canEditSome" @click.left.stop="toggleTagPickerIsVisible" :class="{ active: tagPickerIsVisible }")
         span Tag
+      TagPickerStyleActions(:visible="tagPickerIsVisible" :cards="cards")
     //- Color
-    .button-wrap.hidden
-      //- @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}"
+    .button-wrap.hidden(@click.left.stop="toggleColorPickerIsVisible" :class="{active: colorPickerIsVisible}")
       button.change-color(:disabled="!canEditSome")
-        .current-color(:style="{ background: '#c9c9c9' }")
-      //- ColorPicker(:currentColor="backgroundTint || '#fff'" :visible="colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="true")
-
+        .current-color(:style="{ background: cardsBackgroundColor }")
+      ColorPicker(:currentColor="cardsBackgroundColor" :visible="colorPickerIsVisible" :removeIsVisible="true" :otherColors="spaceCardBackgroundColors" @selectedColor="updateCardsBackgroundColor" @removeColor="removeCardsBackgroundColor")
 </template>
 
 <script>
 import FramePicker from '@/components/dialogs/FramePicker.vue'
+import TagPickerStyleActions from '@/components/dialogs/TagPickerStyleActions.vue'
+import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
+
+import uniq from 'lodash-es/uniq'
+
+const defaultCardBackgroundColor = '#c9c9c9'
 
 export default {
   name: 'CardStyleActions',
   components: {
-    FramePicker
+    FramePicker,
+    TagPickerStyleActions,
+    ColorPicker
   },
   props: {
     visible: Boolean,
@@ -45,7 +51,9 @@ export default {
   },
   data () {
     return {
-      framePickerIsVisible: false
+      framePickerIsVisible: false,
+      tagPickerIsVisible: false,
+      colorPickerIsVisible: false
     }
   },
   created () {
@@ -61,8 +69,20 @@ export default {
         backgroundColor: this.backgroundColor
       }
     },
+    cardsBackgroundColor () {
+      let colors = this.cards.map(card => card.backgroundColor)
+      colors = colors.filter(color => Boolean(color))
+      const cardsHaveColors = colors.length === this.cards.length
+      const colorsAreEqual = uniq(colors).length === 1
+      if (cardsHaveColors && colorsAreEqual) {
+        return colors[0]
+      } else {
+        return defaultCardBackgroundColor
+      }
+    },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
+    spaceCardBackgroundColors () { return this.$store.getters['currentCards/backgroundColors'] },
     numberOfSelectedCardsCreatedByCurrentUser () {
       const cards = this.cards.filter(Boolean)
       const cardsCreatedByCurrentUser = cards.filter(card => {
@@ -91,6 +111,26 @@ export default {
     }
   },
   methods: {
+    updateCardsBackgroundColor (color) {
+      this.cards.forEach(card => {
+        if (card.backgroundColor === color) { return }
+        card = {
+          id: card.id,
+          backgroundColor: color
+        }
+        this.$store.dispatch('currentCards/update', card)
+      })
+    },
+    removeCardsBackgroundColor () {
+      this.cards.forEach(card => {
+        if (!card.backgroundColor) { return }
+        card = {
+          id: card.id,
+          backgroundColor: ''
+        }
+        this.$store.dispatch('currentCards/update', card)
+      })
+    },
     cardsWithPattern (pattern) {
       const cards = this.cards.filter(card => {
         const name = this.normalizedName(card.name)
@@ -151,17 +191,7 @@ export default {
     },
     updateCardName (cardId, newName) {
       const card = this.$store.getters['currentCards/byId'](cardId)
-      const canEditCard = this.$store.getters['currentUser/canEditCard'](card)
-      if (!canEditCard) { return }
-      this.$store.dispatch('currentCards/update', {
-        id: cardId,
-        name: newName
-      })
-      this.$nextTick(() => {
-        this.$store.dispatch('currentCards/updateDimensions', cardId)
-        this.$store.dispatch('currentCards/updateCardMap')
-        this.$store.dispatch('currentConnections/updatePaths', { cardId, shouldUpdateApi: true })
-      })
+      this.$store.dispatch('currentCards/updateCardName', { card, newName })
     },
     prependToNameSegment ({ pattern, card, nameSegment }) {
       const markdown = this.markdown(pattern)
@@ -183,8 +213,20 @@ export default {
       this.closeDialogs()
       this.framePickerIsVisible = !isVisible
     },
+    toggleTagPickerIsVisible () {
+      const isVisible = this.tagPickerIsVisible
+      this.closeDialogs()
+      this.tagPickerIsVisible = !isVisible
+    },
+    toggleColorPickerIsVisible () {
+      const isVisible = this.colorPickerIsVisible
+      this.closeDialogs()
+      this.colorPickerIsVisible = !isVisible
+    },
     closeDialogs () {
       this.framePickerIsVisible = false
+      this.tagPickerIsVisible = false
+      this.colorPickerIsVisible = false
     },
     scrollIntoView () {
       const element = this.$refs.dialog
@@ -208,8 +250,8 @@ export default {
 <style lang="stylus">
 .card-style-actions
   background-color var(--secondary-background)
-  width 141px // temp
-  left -96px // temp
+  width 184px // temp
+  left -138px // temp
   .button-wrap
     vertical-align middle
 </style>

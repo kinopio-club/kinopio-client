@@ -260,6 +260,21 @@ const currentCards = {
       context.commit('hasEditedCurrentSpace', true, { root: true })
       context.commit('update', card)
     },
+
+    updateCardName (context, { card, newName }) {
+      const canEditCard = context.rootGetters['currentUser/canEditCard'](card)
+      if (!canEditCard) { return }
+      context.dispatch('update', {
+        id: card.id,
+        name: newName
+      })
+      nextTick(() => {
+        context.dispatch('updateDimensions', card.id)
+        context.dispatch('updateCardMap')
+        context.dispatch('currentConnections/updatePaths', { cardId: card.id, shouldUpdateApi: true }, { root: true })
+      })
+    },
+
     updateDimensions: (context, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'updateDimensions', allowUndefined: true })
       let cards = []
@@ -580,6 +595,12 @@ const currentCards = {
     },
     users: (state, getters, rootState, rootGetters) => {
       return getters.userIds.map(id => rootGetters['currentSpace/userById'](id))
+    },
+    backgroundColors: (state, getters) => {
+      const cards = getters.all
+      let colors = cards.map(card => card.backgroundColor)
+      colors = colors.filter(color => Boolean(color))
+      return uniq(colors)
     }
   }
 }

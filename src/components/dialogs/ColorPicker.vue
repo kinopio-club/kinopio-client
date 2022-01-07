@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.color-picker(v-if="visible" :open="visible" @click.left.stop)
+dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.left.stop)
   section(v-if="removeIsVisible")
     .row
       .badge.inline-color-badge(:style="{backgroundColor: currentColor}")
@@ -11,9 +11,13 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" @click.left.stop)
       input(v-model="hexColor" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport")
 
   section
+    .other-colors(v-if="otherColors")
+      template(v-for="color in otherColors")
+        button.color(:style="{backgroundColor: color}" @click.left="select(color)")
     .colors
       template(v-for="color in colors")
         button.color(:style="{backgroundColor: color}" @click.left="select(color)")
+
     .row
       // shuffle
       button(@click.left="shuffleColors")
@@ -43,6 +47,8 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" @click.left.stop)
 </template>
 
 <script>
+import scrollIntoView from '@/scroll-into-view.js'
+
 import randomColor from 'randomcolor'
 import validHexColor from 'valid-hex-color'
 import shader from 'shader'
@@ -53,7 +59,8 @@ export default {
     currentColor: String,
     visible: Boolean,
     removeIsVisible: Boolean,
-    shouldLightenColors: Boolean
+    shouldLightenColors: Boolean,
+    otherColors: Array
   },
   data () {
     return {
@@ -136,12 +143,21 @@ export default {
     },
     triggerUpdatePositionInVisualViewport () {
       this.$store.commit('triggerUpdatePositionInVisualViewport')
+    },
+    scrollIntoView () {
+      this.$nextTick(() => {
+        const element = this.$refs.dialog
+        if (!element) { return }
+        const isTouchDevice = this.$store.state.isTouchDevice
+        scrollIntoView.scroll(element, isTouchDevice)
+      })
     }
   },
   watch: {
     visible (visible) {
       this.shuffleColors()
       this.updateButtonHues()
+      this.scrollIntoView()
     }
   }
 }
@@ -154,6 +170,9 @@ export default {
     flex-wrap wrap
     justify-content space-evenly
     margin-bottom 8px
+  .other-colors
+    margin-bottom 8px
+    margin-left 2px
   .color
     width 30px
     height 22px

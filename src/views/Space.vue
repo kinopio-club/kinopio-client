@@ -301,11 +301,23 @@ export default {
     },
     dragCard () {
       const prevCursor = this.cursor()
+      const shouldPrevent = this.checkIfShouldPreventInteraction()
+      if (shouldPrevent) { return }
       this.$store.dispatch('currentCards/move', {
         endCursor,
         prevCursor: prevCursor
       })
       this.checkShouldShowDetails()
+    },
+    checkIfShouldPreventInteraction () {
+      if (this.spaceIsReadOnly) {
+        const position = this.cursor()
+        const notificationWithPosition = document.querySelector('.notifications-with-position .item')
+        if (!notificationWithPosition) {
+          this.$store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info' })
+        }
+        return true
+      }
     },
     normalizeSpaceCardsZ () {
       const sorted = sortBy(this.cards, ['z'])
