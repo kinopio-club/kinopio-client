@@ -120,7 +120,7 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
           @touchstart.stop="startResizing"
           @dblclick="removeResize"
         )
-          button.inline-button(tabindex="-1")
+          button.inline-button(tabindex="-1" :style="{background: selectedColor || card.backgroundColor}")
             img.resize-icon.icon(src="@/assets/resize.svg")
 
     .url-preview-wrap(v-if="cardUrlPreviewIsVisible && !isHiddenInComment")
