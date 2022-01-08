@@ -1498,7 +1498,8 @@ export default {
       const isNotPreviewUrl = url !== this.card.urlPreviewUrl
       const isNotErrorUrl = url !== this.card.urlPreviewErrorUrl
       const isNotKinopioUrl = !url.startsWith('https://kinopio.club')
-      return previewIsVisible && isNotPreviewUrl && isNotErrorUrl && isNotKinopioUrl
+      const isLocalhostUrl = url.match(utils.localhostUrlPattern())
+      return previewIsVisible && isNotPreviewUrl && isNotErrorUrl && isNotKinopioUrl && !isLocalhostUrl
     },
     removeHiddenQueryString (url) {
       if (!url) { return }

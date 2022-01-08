@@ -982,6 +982,8 @@ export default {
     }
   },
   urlIsValidTld (url) {
+    const isLocalhostUrl = url.match(this.localhostUrlPattern())
+    if (isLocalhostUrl) { return true }
     // https://regexr.com/5v6s9
     const regex = '(' + tlds + ')' + String.raw`(\?|\/| |$|\s)`
     const tldPattern = new RegExp(regex)
@@ -1007,6 +1009,14 @@ export default {
     let urls = string.match(urlPattern)
     return urls[0]
   },
+  localhostUrlPattern () {
+    // https://regexr.com/6cujp
+    // start, newline, or space
+    // http://localhost:
+    // then port numbers
+    // then the rest of the url path
+    return new RegExp(/(^|\n| )(http?:\/\/localhost:)[^\s."><]+\w\/?-?/igm)
+  },
   urlsFromString (string, skipProtocolCheck) {
     if (!string) { return [] }
     // remove markdown links
@@ -1021,13 +1031,16 @@ export default {
     // start, newline, or space
     // optionally starts with http/s protocol
     // followed by alphanumerics
-    // then '.''
+    // then '.'
     // followed by alphanumerics
     // then trailing '/' or '-'
     // matches multiple urls and returns [urls]
     const urlPattern = new RegExp(/(^|\n| )(http[s]?:\/\/)?[^\s(["<>]{2,}\.[^\s."><]+\w\/?-?/igm)
-    let urls = string.match(urlPattern)
-    if (!urls) { return }
+    let localhostUrls = string.match(this.localhostUrlPattern()) || []
+    let urls = string.match(urlPattern) || []
+    urls = urls.concat(localhostUrls)
+    urls = urls.filter(url => Boolean(url))
+    if (!urls.length) { return }
     // filter out empty or non-urls
     urls = urls.map(url => this.trim(url))
     urls = urls.filter(url => {
