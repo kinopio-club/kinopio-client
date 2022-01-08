@@ -1015,7 +1015,7 @@ export default {
     // http://localhost:
     // then port numbers
     // then the rest of the url path
-    return new RegExp(/(^|\n| )(http?:\/\/localhost:)[^\s."><]+\w\/?-?/igm)
+    return new RegExp(/(^|\n| )(http:\/\/localhost:)[^\s."><]+\w\/?-?/igm)
   },
   urlsFromString (string, skipProtocolCheck) {
     if (!string) { return [] }
