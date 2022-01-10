@@ -208,6 +208,9 @@ export default {
       this.focusOnName = newSearch
       const currentTag = { name: newSearch, color: this.searchTagColor }
       this.$emit('currentTag', currentTag)
+    },
+    randomColor (color) {
+      this.$emit('newTagColor', this.randomColor)
     }
   }
 }

@@ -52,6 +52,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @closeDialog="hideTagPicker"
         @selectTag="updateTagBracketsWithTag"
         @currentTag="updateCurrentSearchTag"
+        @newTagColor="updateNewTagColor"
       )
       SpacePicker(
         :visible="space.pickerIsVisible"
@@ -274,7 +275,8 @@ export default {
       openingPercent: 0,
       openingAlpha: 0,
       previousSelectedTag: {},
-      currentSearchTag: {}
+      currentSearchTag: {},
+      newTagColor: ''
     }
   },
   created () {
@@ -1321,6 +1323,9 @@ export default {
         return tag
       })
     },
+    updateNewTagColor (color) {
+      this.newTagColor = color
+    },
     addNewTags (newTagNames) {
       const previousTagNames = previousTags.map(tag => tag.name)
       const addTagsNames = newTagNames.filter(newTagName => !previousTagNames.includes(newTagName))
@@ -1328,7 +1333,7 @@ export default {
         let tag
         tag = utils.newTag({
           name: tagName,
-          defaultColor: this.$store.state.currentUser.color,
+          defaultColor: this.newTagColor || this.$store.state.currentUser.color,
           cardId: this.card.id,
           spaceId: this.$store.state.currentSpace.id
         })
