@@ -29,7 +29,6 @@ import utils from '@/utils.js'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 
 import randomColor from 'randomcolor'
-import uniq from 'lodash-es/uniq'
 
 export default {
   name: 'TagPickerStyleActions',
@@ -63,14 +62,7 @@ export default {
     }
   },
   computed: {
-    currentTags () {
-      let currentTags = []
-      this.cards.forEach(card => {
-        const tags = utils.tagsFromStringWithoutBrackets(card.name) || []
-        currentTags = currentTags.concat(tags)
-      })
-      return uniq(currentTags)
-    }
+    currentTags () { return this.$store.getters['currentSpace/tags'] || [] }
   },
   methods: {
     scrollIntoView () {
@@ -174,7 +166,7 @@ export default {
     // same as TagPicker
 
     updateTags () {
-      const spaceTags = this.$store.getters['currentSpace/spaceTags']()
+      const spaceTags = this.$store.getters['currentSpace/spaceTags']
       this.tags = spaceTags || []
       const cachedTags = cache.allTags()
       const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })

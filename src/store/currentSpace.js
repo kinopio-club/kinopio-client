@@ -1063,7 +1063,7 @@ export default {
       const tags = getters.tags
       return tags.filter(tag => tag.cardId === card.id)
     },
-    spaceTags: (state, getters) => (card) => {
+    spaceTags: (state, getters) => {
       let tags = state.tags
       tags = uniqBy(tags, 'name')
       return tags

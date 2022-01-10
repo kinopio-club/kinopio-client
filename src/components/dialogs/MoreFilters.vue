@@ -72,7 +72,7 @@ export default {
       framesInUse = uniq(framesInUse.filter(frame => frame))
       return framesInUse.map(frame => frames[frame])
     },
-    tags () { return utils.clone(this.$store.getters['currentSpace/spaceTags']()) },
+    tags () { return utils.clone(this.$store.getters['currentSpace/spaceTags']) },
     allItems () {
       const tags = this.tags.map(tag => {
         tag.isTag = true

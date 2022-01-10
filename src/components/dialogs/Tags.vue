@@ -77,7 +77,7 @@ export default {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     filteredTags () {
       if (this.currentSpaceTagsIsVisibleOnly) {
-        return this.$store.getters['currentSpace/spaceTags']()
+        return this.$store.getters['currentSpace/spaceTags']
       } else {
         return this.tags
       }
@@ -123,7 +123,7 @@ export default {
       })
     },
     updateTags () {
-      const spaceTags = this.$store.getters['currentSpace/spaceTags']()
+      const spaceTags = this.$store.getters['currentSpace/spaceTags']
       this.tags = spaceTags || []
       const cachedTags = cache.allTags()
       const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })
