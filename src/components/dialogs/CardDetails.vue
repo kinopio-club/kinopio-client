@@ -1313,7 +1313,6 @@ export default {
           tag = this.previousSelectedTag
         } else if (this.currentSearchTag.name === tagName) {
           tag = this.currentSearchTag
-          this.$store.dispatch('currentSpace/updateTagNameColor', tag)
         } else {
           tag = this.$store.getters['currentSpace/tagByName'](tagName)
           tag = utils.clone(tag)

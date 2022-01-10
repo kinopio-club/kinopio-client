@@ -1066,7 +1066,6 @@ export default {
     spaceTags: (state, getters) => (card) => {
       let tags = state.tags
       tags = uniqBy(tags, 'name')
-      tags.reverse()
       return tags
     },
 
