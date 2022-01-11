@@ -20,7 +20,7 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
             .button-wrap
             input(placeholder="name" v-model="newSpaceName" @keyup.space.prevent @keyup.escape.stop="toggleNewSpaceIsVisible" @keyup.stop @keyup.enter.exact="createNewSpace")
           .row
-            button(@click="createNewSpaceInSpaceList")
+            button(@click="createNewSpace")
               span Create New Space
               Loader(:visible="isLoadingNewSpace")
     // Select Search
@@ -47,13 +47,17 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
 </template>
 
 <script>
-import { defineAsyncComponent } from 'vue'
 import scrollIntoView from '@/scroll-into-view.js'
-import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
 import words from '@/data/words.js'
+import newSpace from '@/data/new.json'
+import cache from '@/cache.js'
+import utils from '@/utils.js'
 
+import nanoid from 'nanoid'
 import fuzzy from 'fuzzy'
+
+import { defineAsyncComponent } from 'vue'
 const User = defineAsyncComponent({
   loader: () => import('@/components/User.vue')
 })
@@ -184,31 +188,25 @@ export default {
     toggleNewSpaceIsVisible () {
       this.newSpaceIsVisible = !this.newSpaceIsVisible
     },
-    async createNewSpaceInSpaceList () {
+    async createNewSpace () {
+      if (this.isLoadingNewSpace) { return }
       if (!this.newSpaceName) {
         this.newSpaceName = words.randomUniqueName()
       }
-      // const space = await this.createNewSpace()
-      // prepend to top of space list (this.updateSpacesWithNewSpace(space))
-      // this.selectSpace(space)
-      // this.clearState()
-    },
-    async createNewSpace () {
-      console.log('🐙', this.newSpaceName)
-      // this.isLoadingNewSpace = true
-      // items = utils.clone(items)
-      // let space = utils.clone(newSpace)
-      // space.name = newSpaceName
-      // space.id = nanoid()
-      // space.cards = items.cards
-      // space.connectionTypes = items.connectionTypes
-      // space.connections = items.connections
-      // space.userId = this.$store.state.currentUser.id
-      // space = cache.updateIdsInSpace(space)
-      // console.log('🚚 create new space', space)
-      // await this.$store.dispatch('api/createSpace', space)
-      // this.isLoadingNewSpace = false
-      // return space
+      const currentUser = this.$store.state.currentUser
+      const user = { id: currentUser.id, color: currentUser.color, name: currentUser.name }
+      this.isLoadingNewSpace = true
+      let space = utils.clone(newSpace)
+      space.name = this.newSpaceName
+      space.id = nanoid()
+      space.url = utils.url({ name: space.name, id: space.id })
+      space.userId = user.id
+      space.users.push(user)
+      space = cache.updateIdsInSpace(space)
+      console.log('🚚 create new space', space)
+      await this.$store.dispatch('api/createSpace', space)
+      this.isLoadingNewSpace = false
+      this.selectSpace(space)
     },
     clearState () {
       this.newSpaceIsVisible = false
