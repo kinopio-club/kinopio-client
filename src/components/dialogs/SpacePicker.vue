@@ -8,6 +8,22 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
       button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
 
   template(v-else)
+    // New Space
+    template(v-if="shouldShowNewSpace")
+      section.new-space-section
+        .row
+          button(@click="toggleNewSpaceIsVisible" :class="{ active: newSpaceIsVisible }")
+            img.icon(src="@/assets/add.svg")
+            span New Space
+        template(v-if="newSpaceIsVisible")
+          .row
+            .button-wrap
+            input(placeholder="name" v-model="newSpaceName" @keyup.space.prevent @keyup.escape.stop="toggleNewSpaceIsVisible" @keyup.stop @keyup.enter.exact="createNewSpace")
+          .row
+            button(@click="createNewSpaceInSpaceList")
+              span Create New Space
+              Loader(:visible="isLoadingNewSpace")
+    // Select Search
     section.info-section(v-if="parentIsCardDetails && !search")
       p
         img.icon.search(src="@/assets/search.svg")
@@ -31,10 +47,11 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
 </template>
 
 <script>
+import { defineAsyncComponent } from 'vue'
 import scrollIntoView from '@/scroll-into-view.js'
 import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
-import { defineAsyncComponent } from 'vue'
+import words from '@/data/words.js'
 
 import fuzzy from 'fuzzy'
 const User = defineAsyncComponent({
@@ -62,12 +79,16 @@ export default {
     parentIsCardDetails: Boolean,
     position: Object,
     search: String,
-    cursorPosition: Number
+    cursorPosition: Number,
+    shouldShowNewSpace: Boolean
   },
   data () {
     return {
       isLoading: false,
-      spaces: []
+      spaces: [],
+      newSpaceIsVisible: false,
+      newSpaceName: '',
+      isLoadingNewSpace: false
     }
   },
   computed: {
@@ -159,11 +180,45 @@ export default {
     triggerSignUpOrInIsVisible () {
       this.$store.dispatch('closeAllDialogs', 'SpacePicker.triggerSignUpOrInIsVisible')
       this.$store.commit('triggerSignUpOrInIsVisible')
+    },
+    toggleNewSpaceIsVisible () {
+      this.newSpaceIsVisible = !this.newSpaceIsVisible
+    },
+    async createNewSpaceInSpaceList () {
+      if (!this.newSpaceName) {
+        this.newSpaceName = words.randomUniqueName()
+      }
+      // const space = await this.createNewSpace()
+      // prepend to top of space list (this.updateSpacesWithNewSpace(space))
+      // this.selectSpace(space)
+      // this.clearState()
+    },
+    async createNewSpace () {
+      console.log('🐙', this.newSpaceName)
+      // this.isLoadingNewSpace = true
+      // items = utils.clone(items)
+      // let space = utils.clone(newSpace)
+      // space.name = newSpaceName
+      // space.id = nanoid()
+      // space.cards = items.cards
+      // space.connectionTypes = items.connectionTypes
+      // space.connections = items.connections
+      // space.userId = this.$store.state.currentUser.id
+      // space = cache.updateIdsInSpace(space)
+      // console.log('🚚 create new space', space)
+      // await this.$store.dispatch('api/createSpace', space)
+      // this.isLoadingNewSpace = false
+      // return space
+    },
+    clearState () {
+      this.newSpaceIsVisible = false
+      this.newSpaceName = words.randomUniqueName()
     }
   },
   watch: {
     visible (visible) {
       this.$nextTick(() => {
+        this.clearState()
         if (visible) {
           this.updateSpaces()
           this.scrollIntoView()
@@ -195,4 +250,7 @@ export default {
       margin-right 6px
   .info-section
     padding-bottom 4px
+    border-top 0
+  .new-space-section
+    padding-bottom 5px
 </style>
