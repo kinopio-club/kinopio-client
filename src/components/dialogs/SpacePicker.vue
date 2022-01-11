@@ -15,7 +15,7 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
     template(v-if="newSpaceIsVisible")
       .row
         .button-wrap
-        input(placeholder="name" v-model="newSpaceName" @keyup.space.prevent @keyup.escape.stop="toggleNewSpaceIsVisible" @keyup.stop @keyup.enter.exact="createNewSpace")
+        input(placeholder="name" ref="newSpaceName" v-model="newSpaceName" @keyup.space.prevent @keyup.escape.stop="toggleNewSpaceIsVisible" @keyup.stop @keyup.enter.exact="createNewSpace")
       .row
         button(@click="createNewSpace")
           span Create New Space
@@ -185,6 +185,11 @@ export default {
     },
     toggleNewSpaceIsVisible () {
       this.newSpaceIsVisible = !this.newSpaceIsVisible
+      if (this.newSpaceIsVisible) {
+        this.$nextTick(() => {
+          this.focusNewSpaceNameInput()
+        })
+      }
     },
     async createNewSpace () {
       if (this.isLoadingNewSpace) { return }
@@ -213,6 +218,12 @@ export default {
     clearState () {
       this.newSpaceIsVisible = false
       this.newSpaceName = words.randomUniqueName()
+    },
+    focusNewSpaceNameInput () {
+      const element = this.$refs.newSpaceName
+      if (!element) { return }
+      element.focus()
+      element.setSelectionRange(0, 99999)
     }
   },
   watch: {
