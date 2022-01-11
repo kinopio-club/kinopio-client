@@ -6,37 +6,56 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
         span To link to a space,
         span.badge.info you need to Sign Up or In
       button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
-
-  template(v-else)
-    section.info-section(v-if="parentIsCardDetails && !search")
-      p
-        img.icon.search(src="@/assets/search.svg")
-        span Type to search spaces {{search}}
-    section.results-section
-      Loader(:visible="loading")
-      SpaceList(
-        v-if="filteredSpaces.length"
-        :hideFilter="hideFilter"
-        :spaces="filteredSpaces"
-        :showUserIfCurrentUserIsCollaborator="showUserIfCurrentUserIsCollaborator"
-        :selectedSpace="selectedSpace"
-        @selectSpace="selectSpace"
-        :search="search"
-      )
-      .error-container(v-if="!filteredSpaces.length && !loading")
-        User(:user="activeUser" :isClickable="false" :key="activeUser.id")
-        span(v-if="activeUserIsCurrentUser && search") has no spaces matching {{search}}
-        span(v-else-if="activeUserIsCurrentUser") has no spaces
-        span(v-else) has no public spaces
+  // New Space
+  section.new-space-section(v-if="shouldShowNewSpace")
+    .row
+      button(@click="toggleNewSpaceIsVisible" :class="{ active: newSpaceIsVisible }")
+        img.icon(src="@/assets/add.svg")
+        span New Space
+    template(v-if="newSpaceIsVisible")
+      .row
+        .button-wrap
+        input(placeholder="name" ref="newSpaceName" v-model="newSpaceName" @keyup.space.prevent @keyup.escape.stop="toggleNewSpaceIsVisible" @keyup.stop @keyup.enter.exact="createNewSpace")
+      .row
+        button(@click="createNewSpace")
+          span Create New Space
+          Loader(:visible="isLoadingNewSpace")
+  // Type to Search
+  section.info-section(v-if="parentIsCardDetails && !search")
+    p
+      img.icon.search(src="@/assets/search.svg")
+      span Type to search spaces {{search}}
+  // Space List
+  section.results-section
+    Loader(:visible="loading")
+    SpaceList(
+      v-if="filteredSpaces.length"
+      :hideFilter="hideFilter"
+      :spaces="filteredSpaces"
+      :showUserIfCurrentUserIsCollaborator="showUserIfCurrentUserIsCollaborator"
+      :selectedSpace="selectedSpace"
+      @selectSpace="selectSpace"
+      :search="search"
+    )
+    .error-container(v-if="!filteredSpaces.length && !loading")
+      User(:user="activeUser" :isClickable="false" :key="activeUser.id")
+      span(v-if="activeUserIsCurrentUser && search") has no spaces matching {{search}}
+      span(v-else-if="activeUserIsCurrentUser") has no spaces
+      span(v-else) has no public spaces
 </template>
 
 <script>
 import scrollIntoView from '@/scroll-into-view.js'
-import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
-import { defineAsyncComponent } from 'vue'
+import words from '@/data/words.js'
+import newSpace from '@/data/new.json'
+import cache from '@/cache.js'
+import utils from '@/utils.js'
 
+import nanoid from 'nanoid'
 import fuzzy from 'fuzzy'
+
+import { defineAsyncComponent } from 'vue'
 const User = defineAsyncComponent({
   loader: () => import('@/components/User.vue')
 })
@@ -62,12 +81,16 @@ export default {
     parentIsCardDetails: Boolean,
     position: Object,
     search: String,
-    cursorPosition: Number
+    cursorPosition: Number,
+    shouldShowNewSpace: Boolean
   },
   data () {
     return {
       isLoading: false,
-      spaces: []
+      spaces: [],
+      newSpaceIsVisible: false,
+      newSpaceName: '',
+      isLoadingNewSpace: false
     }
   },
   computed: {
@@ -159,11 +182,54 @@ export default {
     triggerSignUpOrInIsVisible () {
       this.$store.dispatch('closeAllDialogs', 'SpacePicker.triggerSignUpOrInIsVisible')
       this.$store.commit('triggerSignUpOrInIsVisible')
+    },
+    toggleNewSpaceIsVisible () {
+      this.newSpaceIsVisible = !this.newSpaceIsVisible
+      if (this.newSpaceIsVisible) {
+        this.$nextTick(() => {
+          this.focusNewSpaceNameInput()
+        })
+      }
+    },
+    async createNewSpace () {
+      if (this.isLoadingNewSpace) { return }
+      if (!this.newSpaceName) {
+        this.newSpaceName = words.randomUniqueName()
+      }
+      const currentUser = this.$store.state.currentUser
+      const user = { id: currentUser.id, color: currentUser.color, name: currentUser.name }
+      this.isLoadingNewSpace = true
+      let space = utils.clone(newSpace)
+      space.name = this.newSpaceName
+      space.id = nanoid()
+      space.url = utils.url({ name: space.name, id: space.id })
+      space.userId = user.id
+      space.users.push(user)
+      space.cards = []
+      space.connections = []
+      space.connectionTypes = []
+      space = utils.spaceDefaultBackground(space, currentUser)
+      space = cache.updateIdsInSpace(space)
+      console.log('🚚 create new space', space)
+      await this.$store.dispatch('api/createSpace', space)
+      this.isLoadingNewSpace = false
+      this.selectSpace(space)
+    },
+    clearState () {
+      this.newSpaceIsVisible = false
+      this.newSpaceName = words.randomUniqueName()
+    },
+    focusNewSpaceNameInput () {
+      const element = this.$refs.newSpaceName
+      if (!element) { return }
+      element.focus()
+      element.setSelectionRange(0, 99999)
     }
   },
   watch: {
     visible (visible) {
       this.$nextTick(() => {
+        this.clearState()
         if (visible) {
           this.updateSpaces()
           this.scrollIntoView()
@@ -195,4 +261,7 @@ export default {
       margin-right 6px
   .info-section
     padding-bottom 4px
+    border-top 0
+  .new-space-section
+    padding-bottom 5px
 </style>

@@ -11,7 +11,7 @@ dialog.narrow.tag-picker-style-actions(v-if="visible" :open="visible" ref="dialo
           button.change-color(@click.stop="toggleColorPickerIsVisible")
             .current-color(:style="{ background: newTagColor }")
           ColorPicker(:currentColor="newTagColor" :visible="colorPickerIsVisible" @selectedColor="updateNewTagColor")
-        input(placeholder="name" v-model="newTagName" @keyup.space.prevent @keyup.escape.stop="toggleNewTagIsVisible" @keyup.stop @keyup.enter.exact="createNewTag")
+        input(placeholder="name" ref="newTagName" v-model="newTagName" @keyup.space.prevent @keyup.escape.stop="toggleNewTagIsVisible" @keyup.stop @keyup.enter.exact="createNewTag")
       .row
         button(@click="createNewTag")
           span Create New Tag
@@ -130,6 +130,11 @@ export default {
       this.newTagColor = randomColor({ luminosity: 'light' })
       this.updateDialogHeight()
       this.updateResultsSectionHeight()
+      if (this.newTagIsVisible) {
+        this.$nextTick(() => {
+          this.focusNewTagNameInput()
+        })
+      }
     },
     toggleColorPickerIsVisible () {
       this.colorPickerIsVisible = !this.colorPickerIsVisible
@@ -144,6 +149,12 @@ export default {
       this.newTagIsVisible = false
       this.errorNewTagNameIsBlank = false
       this.newTagName = ''
+    },
+    focusNewTagNameInput () {
+      const element = this.$refs.newTagName
+      if (!element) { return }
+      element.focus()
+      element.setSelectionRange(0, 99999)
     },
 
     // same as Tags
@@ -201,6 +212,9 @@ export default {
         this.clearState()
         this.closeDialogs()
       }
+    },
+    newTagName (value) {
+      this.errorNewTagNameIsBlank = false
     }
   }
 }
