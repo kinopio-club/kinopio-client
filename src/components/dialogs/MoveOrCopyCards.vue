@@ -2,6 +2,8 @@
 dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs")
   section
     .row
+      p {{actionLabelCapitalized}} to
+    .row
       .button-wrap
         button(@click.left.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}")
           span {{selectedSpace.name}}
@@ -82,6 +84,7 @@ export default {
         return 'copy'
       }
     },
+    actionLabelCapitalized () { return utils.capitalizeFirstLetter(this.actionLabel) },
     buttonLabel () {
       const actionLabel = this.capitalize(this.actionLabel) // copy, move
       const pluralCard = this.capitalize(this.pluralCard) // card, cards
