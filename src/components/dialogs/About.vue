@@ -50,6 +50,10 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
       .button-wrap
         a(href="https://pketh.org")
           button Blog →
+      .button-wrap
+        a(href="https://help.kinopio.club/api/")
+          button API →
+
     //- img(src="https://us-east-1.linodeobjects.com/kinopio-uploads/I6_0lhntYrv5i1-Rky61H/image.gif")
 
 </template>
