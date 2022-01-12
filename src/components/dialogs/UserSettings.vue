@@ -50,6 +50,7 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
           span if you just want to cancel your paid subscription
         .segmented-buttons
           button(@click.left="toggleRemoveAllConfirmationVisible")
+            img.icon.cancel(src="@/assets/add.svg")
             span Cancel
           button.danger(@click.left="removeUserPermanent")
             img.icon(src="@/assets/remove.svg")

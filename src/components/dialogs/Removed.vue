@@ -22,6 +22,11 @@ dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :sty
       p Removed spaces can be restored here
 
   section.results-section(v-if="items.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
+    section.results-actions
+      button.danger(@click="toggleRemoveAllIsVisible" v-if="!removeAllIsVisible")
+        img.icon(src="@/assets/remove.svg")
+        span Remove All
+
     ul.results-list
       template(v-for="item in items" :key="item.id")
         li(@click.left="restore(item)" tabindex="0" v-on:keyup.enter="restore(item)")
@@ -35,7 +40,7 @@ dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :sty
             p Permanently remove?
             .segmented-buttons
               button(@click.left.stop="hideRemoveConfirmation")
-                span Cancel
+                img.icon.cancel(src="@/assets/add.svg")
               button.danger(@click.left.stop="removePermanent(item)")
                 img.icon(src="@/assets/remove.svg")
                 span Remove
@@ -78,7 +83,8 @@ export default {
         spaces: false
       },
       resultsSectionHeight: null,
-      dialogHeight: null
+      dialogHeight: null,
+      removeAllIsVisible: false
     }
   },
   computed: {
@@ -104,6 +110,9 @@ export default {
     }
   },
   methods: {
+    toggleRemoveAllIsVisible () {
+      this.removeAllIsVisible = !this.removeAllIsVisible
+    },
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
       const isTouchDevice = this.$store.state.isTouchDevice
@@ -151,6 +160,7 @@ export default {
 
     showCards () {
       this.cardsVisible = true
+      this.removeAllIsVisible = false
       this.updateRemovedCards()
     },
     updateLocalRemovedCards () {
@@ -186,6 +196,7 @@ export default {
 
     showSpaces () {
       this.cardsVisible = false
+      this.removeAllIsVisible = false
       this.updateRemovedSpaces()
     },
     updateLocalRemovedSpaces () {
@@ -231,6 +242,7 @@ export default {
   watch: {
     visible (visible) {
       if (visible) {
+        this.removeAllIsVisible = false
         this.updateRemovedCards()
         this.updateRemovedSpaces()
         this.updateDialogHeight()
@@ -268,4 +280,6 @@ export default {
       margin-top 5px
   .badge
     min-width 19px
+  .results-actions
+    padding 4px
 </style>
