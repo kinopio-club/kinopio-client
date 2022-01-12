@@ -268,6 +268,8 @@ export default {
         }
       })
       images = images.filter(image => Boolean(image))
+      const max = 30
+      images = images.slice(0, max)
       this.images = images
     },
     searchAgainBackgrounds () {
