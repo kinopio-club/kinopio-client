@@ -387,5 +387,5 @@ export default {
 
   @media(max-width 500px)
     .image-picker
-      left -20px
+      left -68px
 </style>
