@@ -36,6 +36,7 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
       :selectedSpace="selectedSpace"
       @selectSpace="selectSpace"
       :search="search"
+      @focusBeforeFirstItem="handleFocusBeforeFirstItem"
     )
     .error-container(v-if="!filteredSpaces.length && !loading")
       User(:user="activeUser" :isClickable="false" :key="activeUser.id")
@@ -147,6 +148,10 @@ export default {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
+    handleFocusBeforeFirstItem () {
+      if (this.newSpaceIsVisible) { return }
+      this.toggleNewSpaceIsVisible()
+    },
     excludeCurrentSpace () {
       if (!this.shouldExcludeCurrentSpace) { return }
       const currentSpace = this.$store.state.currentSpace
