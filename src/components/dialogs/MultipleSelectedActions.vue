@@ -31,6 +31,7 @@ dialog.narrow.multiple-selected-actions(
       //- Type Color
       .button-wrap
         button.change-color(:disabled="!canEditSome.connections" @click.left.stop="toggleMultipleConnectionsPickerVisible")
+          img.icon(src="@/assets/connection-path.svg")
           .segmented-colors.icon
             template(v-for="type in connectionTypes")
               .current-color(:style="{ background: type.color }")
@@ -462,4 +463,7 @@ export default {
     margin-right 6px
     .change-color
       height 24px
+      padding-top 3px
+      .segmented-colors
+        margin-left 5px
 </style>
