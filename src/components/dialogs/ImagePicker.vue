@@ -52,6 +52,8 @@ dialog.image-picker(
       .segmented-buttons
         button(@click.left.stop="toggleServiceIsBackgrounds" :class="{active : serviceIsBackgrounds}")
           span Backgrounds
+        button(@click.left.stop="toggleServiceIsRecent" :class="{active : serviceIsRecent}")
+          span Recent
         button(@click.left.stop="toggleServiceIsArena" :class="{active : serviceIsArena}")
           img.icon(src="@/assets/search.svg")
 
@@ -61,7 +63,7 @@ dialog.image-picker(
 
   //- search box
   section.results-section.search-input-wrap(ref="searchSection")
-    .search-wrap(v-if="!serviceIsBackgrounds")
+    .search-wrap(v-if="serviceHasSearch")
       img.icon.search(v-if="!loading" src="@/assets/search.svg" @click.left="focusSearchInput")
       Loader(:visible="loading")
       input(
@@ -106,10 +108,12 @@ import scrollIntoView from '@/scroll-into-view.js'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import backgroundImages from '@/data/backgroundImages.json'
+import cache from '@/cache.js'
 
 import debounce from 'lodash-es/debounce'
 import sampleSize from 'lodash-es/sampleSize'
 import sample from 'lodash-es/sample'
+import uniq from 'lodash-es/uniq'
 
 let defaultArenaBlocksData
 const numberOfImages = 25
@@ -143,7 +147,7 @@ export default {
     return {
       images: [],
       search: '',
-      service: 'stickers', // 'stickers', 'gifs', 'arena', 'backgrounds'
+      service: 'stickers', // 'stickers', 'gifs', 'arena', 'backgrounds', 'spaces'
       loading: false,
       minDialogHeight: 400,
       dialogHeight: null,
@@ -197,6 +201,12 @@ export default {
     serviceIsBackgrounds () {
       return this.service === 'backgrounds'
     },
+    serviceIsRecent () {
+      return this.service === 'recent'
+    },
+    serviceHasSearch () {
+      return !this.serviceIsBackgrounds && !this.serviceIsRecent
+    },
     isNoSearchResults () {
       if (this.error.unknownServerError || this.error.userIsOffline) {
         return false
@@ -224,6 +234,10 @@ export default {
       this.service = 'backgrounds'
       this.searchAgainBackgrounds()
     },
+    toggleServiceIsRecent () {
+      this.service = 'recent'
+      this.updateCachedSpaceBackgrounds()
+    },
     toggleServiceIsArena () {
       this.service = 'arena'
       this.searchAgain()
@@ -235,6 +249,26 @@ export default {
     toggleServiceIsGifs () {
       this.service = 'gifs'
       this.searchAgain()
+    },
+    updateCachedSpaceBackgrounds () {
+      let spaces = cache.getAllSpaces()
+      spaces = spaces.filter(space => space.id !== this.$store.state.currentSpace.id)
+      let images = []
+      spaces.forEach(space => {
+        if (!space.background) { return }
+        images.push(space.background)
+      })
+      images = uniq(images)
+      images = images.map(url => {
+        const backgroundImage = backgroundImages.find(item => item.url === url)
+        if (backgroundImage) { return }
+        return {
+          url,
+          previewUrl: url
+        }
+      })
+      images = images.filter(image => Boolean(image))
+      this.images = images
     },
     searchAgainBackgrounds () {
       let images
@@ -359,26 +393,24 @@ export default {
       const arena = service === 'arena' && this.serviceIsArena
       const giphy = service === 'giphy' && (this.serviceIsStickers || this.serviceIsGifs)
       const backgrounds = service === 'backgrounds' && this.serviceIsBackgrounds
+      // are.na
       if (arena) {
         data.blocks = data.blocks.filter(image => {
           return Boolean(image.image) && image.class !== 'Link'
         })
         this.images = data.blocks.map(image => {
           const url = image.image.original.url
-          let username
-          if (image.user) {
-            username = image.user.username
-          }
           return {
             id: image.id,
             sourcePageUrl: `https://www.are.na/block/${image.id}`,
-            sourceUserName: username,
             previewUrl: image.image.display.url,
             url: url + '?img=.jpg'
           }
         })
+      // giphy
       } else if (giphy) {
         this.images = data.map(image => {
+          // stickers
           if (this.serviceIsStickers) {
             return {
               isVideo: true,
@@ -386,6 +418,7 @@ export default {
               previewUrl: image.images.fixed_height_small.url,
               url: utils.urlWithoutQueryString(image.images.original.url)
             }
+          // gifs
           } else {
             return {
               isVideo: true,
@@ -395,9 +428,9 @@ export default {
             }
           }
         })
+      // backgrounds
       } else if (backgrounds) {
         this.images = data.map(image => {
-          image.sourceUserName = null
           image.previewUrl = image.previewUrl || image.url
           return image
         })
