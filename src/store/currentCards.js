@@ -324,6 +324,17 @@ const currentCards = {
         nameUpdatedAt: new Date()
       })
     },
+    removeChecked: (context, cardId) => {
+      utils.typeCheck({ value: cardId, type: 'string', origin: 'toggleChecked' })
+      const card = context.getters.byId(cardId)
+      let name = card.name
+      name = name.replace('[x]', '').trim()
+      context.dispatch('update', {
+        id: cardId,
+        name,
+        nameUpdatedAt: new Date()
+      })
+    },
     toggleCommentIsVisible: (context, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string', origin: 'toggleCommentIsVisible' })
       const card = context.getters.byId(cardId)
