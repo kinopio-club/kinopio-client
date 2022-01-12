@@ -147,7 +147,7 @@ export default {
     return {
       images: [],
       search: '',
-      service: 'stickers', // 'stickers', 'gifs', 'arena', 'backgrounds', 'spaces'
+      service: 'stickers', // 'stickers', 'gifs', 'arena', 'backgrounds', 'recent'
       loading: false,
       minDialogHeight: 400,
       dialogHeight: null,
@@ -236,7 +236,7 @@ export default {
     },
     toggleServiceIsRecent () {
       this.service = 'recent'
-      this.updateCachedSpaceBackgrounds()
+      this.updateImagesFromCachedSpace()
     },
     toggleServiceIsArena () {
       this.service = 'arena'
@@ -250,7 +250,7 @@ export default {
       this.service = 'gifs'
       this.searchAgain()
     },
-    updateCachedSpaceBackgrounds () {
+    updateImagesFromCachedSpace () {
       let spaces = cache.getAllSpaces()
       spaces = spaces.filter(space => space.id !== this.$store.state.currentSpace.id)
       let images = []
