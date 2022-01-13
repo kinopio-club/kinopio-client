@@ -214,7 +214,7 @@ export default {
       this.updateLocalRemovedCards()
     },
     deleteCardPermanent (card) {
-      this.$store.dispatch('currentCards/removePermanent', card)
+      this.$store.dispatch('currentCards/deletePermanent', card)
       this.updateLocalRemovedCards()
     },
     deleteAllCardsPermanent () {

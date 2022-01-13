@@ -88,13 +88,13 @@ const currentCards = {
     removedCards: (state, removedCards) => {
       state.removedCards = removedCards
     },
-    removePermanent: (state, cardToRemove) => {
-      if (!cardToRemove) { return }
-      const card = state.cards[cardToRemove.id]
+    deletePermanent: (state, cardToDelete) => {
+      if (!cardToDelete) { return }
+      const card = state.cards[cardToDelete.id]
       state.ids = state.ids.filter(id => id !== card.id)
       delete state.cards[card.id]
-      const isRemoved = state.removedCards.find(removedCard => card.id === removedCard.id)
-      if (isRemoved) {
+      const isDeleted = state.removedCards.find(removedCard => card.id === removedCard.id)
+      if (isDeleted) {
         state.removedCards = state.removedCards.filter(removedCard => card.id !== removedCard.id)
         cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
       } else {
@@ -514,7 +514,7 @@ const currentCards = {
         context.commit('remove', card)
         context.dispatch('api/addToQueue', { name: 'removeCard', body: card }, { root: true })
       } else {
-        context.dispatch('removePermanent', card)
+        context.dispatch('deletePermanent', card)
       }
       context.dispatch('broadcast/update', { updates: card, type: 'removeCard', handler: 'currentCards/remove' }, { root: true })
       context.dispatch('currentConnections/removeFromCard', card, { root: true })
@@ -530,10 +530,9 @@ const currentCards = {
       }
       context.dispatch('updateCardMap')
     },
-    removePermanent: (context, card) => {
-      context.commit('removePermanent', card)
-      // context.commit('removeTagsFromCard', card)
-      context.dispatch('api/addToQueue', { name: 'removeCardPermanent', body: card }, { root: true })
+    deletePermanent: (context, card) => {
+      context.commit('deletePermanent', card)
+      context.dispatch('api/addToQueue', { name: 'deleteCardPermanent', body: card }, { root: true })
     },
     restoreRemoved: (context, card) => {
       context.commit('restoreRemoved', card)
