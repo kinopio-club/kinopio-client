@@ -264,7 +264,7 @@ export default {
       this.updateLocalRemovedSpaces()
     },
     deleteAllSpacesPermanent () {
-      this.$store.dispatch('currentSpace/removeAllRemovedSpacesPermanent')
+      this.$store.dispatch('currentSpace/deleteAllRemovedSpacesPermanent')
       this.updateLocalRemovedSpaces()
     }
   },

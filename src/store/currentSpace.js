@@ -798,11 +798,11 @@ export default {
       context.dispatch('incrementCardsCreatedCountFromSpace', space)
       context.dispatch('changeSpace', { space })
     },
-    removeAllRemovedSpacesPermanent: (context) => {
+    deleteAllRemovedSpacesPermanent: (context) => {
       const userId = context.rootState.currentUser.id
       const removedSpaces = cache.getAllRemovedSpaces()
       removedSpaces.forEach(space => cache.deleteSpacePermanent(space))
-      context.dispatch('api/addToQueue', { name: 'removeAllRemovedSpacesPermanentFromUser', body: { userId } }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'deleteAllRemovedSpacesPermanentFromUser', body: { userId } }, { root: true })
     },
     checkIfShouldNotifySpaceIsRemoved: (context, space) => {
       const canEdit = context.rootGetters['currentUser/canEditSpace']()
