@@ -23,7 +23,7 @@ dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :sty
 
   section.results-section(v-if="items.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     section.results-actions
-      button.danger(@click="toggleDeleteAllConfirmationIsVisible" v-if="!deleteAllConfirmationIsVisible")
+      button(@click="toggleDeleteAllConfirmationIsVisible" v-if="!deleteAllConfirmationIsVisible")
         img.icon(src="@/assets/remove.svg")
         span Delete All
       template(v-if="deleteAllConfirmationIsVisible")
@@ -35,7 +35,7 @@ dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :sty
             span Cancel
           button.danger(@click.left.stop="deleteAllPermanent")
             img.icon(src="@/assets/remove.svg")
-            span Delete
+            span Delete All
 
     ul.results-list
       template(v-for="item in items" :key="item.id")
