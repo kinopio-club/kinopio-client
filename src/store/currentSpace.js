@@ -485,7 +485,7 @@ export default {
       context.dispatch('currentUser/removeFavorite', { type: 'space', item: space }, { root: true })
       if (currentUserIsRemovedFromSpace) {
         context.commit('currentUser/resetLastSpaceId', null, { root: true })
-        cache.removeSpacePermanent(space)
+        cache.deleteSpacePermanent(space)
         const emptySpace = utils.emptySpace(space.id)
         context.commit('restoreSpace', emptySpace)
       }
@@ -784,10 +784,10 @@ export default {
         body: { id: space.id }
       }, { root: true })
     },
-    removeSpacePermanent: (context, space) => {
-      cache.removeSpacePermanent(space)
+    deleteSpacePermanent: (context, space) => {
+      cache.deleteSpacePermanent(space)
       context.dispatch('api/addToQueue', {
-        name: 'removeSpacePermanent',
+        name: 'deleteSpacePermanent',
         body: space
       }, { root: true })
     },
@@ -801,7 +801,7 @@ export default {
     removeAllRemovedSpacesPermanent: (context) => {
       const userId = context.rootState.currentUser.id
       const removedSpaces = cache.getAllRemovedSpaces()
-      removedSpaces.forEach(space => cache.removeSpacePermanent(space))
+      removedSpaces.forEach(space => cache.deleteSpacePermanent(space))
       context.dispatch('api/addToQueue', { name: 'removeAllRemovedSpacesPermanentFromUser', body: { userId } }, { root: true })
     },
     checkIfShouldNotifySpaceIsRemoved: (context, space) => {
@@ -834,7 +834,7 @@ export default {
       if (isCurrentUser) {
         context.dispatch('loadLastSpace')
         cache.removeInvitedSpace(space)
-        cache.removeSpacePermanent(space)
+        cache.deleteSpacePermanent(space)
         context.commit('addNotification', { message: `You left ${space.name}`, type: 'success' }, { root: true })
       } else {
         context.commit('addNotification', { message: `${userName} removed from space`, type: 'success' }, { root: true })

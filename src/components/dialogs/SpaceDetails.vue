@@ -343,7 +343,7 @@ export default {
       const remoteSpaceIds = remoteSpaces.map(space => space.id)
       const spacesToRemove = this.spaces.filter(space => !remoteSpaceIds.includes(space.id))
       spacesToRemove.forEach(spaceToRemove => {
-        cache.removeSpacePermanent(spaceToRemove)
+        cache.deleteSpacePermanent(spaceToRemove)
       })
     },
     updateWithExistingRemoteSpaces (userSpaces) {
