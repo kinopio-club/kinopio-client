@@ -46,7 +46,7 @@ aside.notifications(@click.left="closeAllDialogs")
         span Restore
       button.danger(@click.left="removeSpacePermanent")
         img.icon(src="@/assets/remove.svg")
-        span Permanently Remove
+        span Permanently Delete
 
   .persistent-item.danger(v-if="notifyConnectionError")
     p A connection error has occured, please refresh

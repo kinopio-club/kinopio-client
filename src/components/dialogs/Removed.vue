@@ -23,9 +23,21 @@ dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :sty
 
   section.results-section(v-if="items.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     section.results-actions
-      button.danger(@click="toggleRemoveAllIsVisible" v-if="!removeAllIsVisible")
+      button.danger(@click="toggleDeleteAllConfirmationIsVisible" v-if="!deleteAllConfirmationIsVisible")
         img.icon(src="@/assets/remove.svg")
-        span Remove All
+        span Delete All
+      template(v-if="deleteAllConfirmationIsVisible")
+        p
+          span Permanently delete all removed {{cardsOrSpacesLabel}}{{' '}}
+          span(v-if="cardsVisible") and images
+          span ?
+        .segmented-buttons
+          button(@click.left.stop="toggleDeleteAllConfirmationIsVisible")
+            img.icon.cancel(src="@/assets/add.svg")
+            span Cancel
+          button.danger(@click.left.stop="deleteAllPermanent")
+            img.icon(src="@/assets/remove.svg")
+            span Delete
 
     ul.results-list
       template(v-for="item in items" :key="item.id")
@@ -37,13 +49,13 @@ dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :sty
             img.icon(src="@/assets/remove.svg")
 
           .remove-confirmation(v-if="isRemoveConfirmationVisible(item)")
-            p Permanently remove?
+            p Permanently delete?
             .segmented-buttons
               button(@click.left.stop="hideRemoveConfirmation")
                 img.icon.cancel(src="@/assets/add.svg")
-              button.danger(@click.left.stop="removePermanent(item)")
+              button.danger(@click.left.stop="deletePermanent(item)")
                 img.icon(src="@/assets/remove.svg")
-                span Remove
+                span Delete
 </template>
 
 <script>
@@ -84,12 +96,19 @@ export default {
       },
       resultsSectionHeight: null,
       dialogHeight: null,
-      removeAllIsVisible: false
+      deleteAllConfirmationIsVisible: false
     }
   },
   computed: {
     removedCardsWithName () {
       return this.removedCards.filter(card => card.name)
+    },
+    cardsOrSpacesLabel () {
+      if (this.cardsVisible) {
+        return 'cards'
+      } else {
+        return 'spaces'
+      }
     },
     items () {
       let items = []
@@ -110,8 +129,8 @@ export default {
     }
   },
   methods: {
-    toggleRemoveAllIsVisible () {
-      this.removeAllIsVisible = !this.removeAllIsVisible
+    toggleDeleteAllConfirmationIsVisible () {
+      this.deleteAllConfirmationIsVisible = !this.deleteAllConfirmationIsVisible
     },
     scrollIntoView (card) {
       const element = document.querySelector(`article [data-card-id="${card.id}"]`)
@@ -134,11 +153,18 @@ export default {
     hideRemoveConfirmation () {
       this.removeConfirmationVisibleForId = ''
     },
-    removePermanent (item) {
+    deletePermanent (item) {
       if (this.cardsVisible) {
-        this.removeCardPermanent(item)
+        this.deleteCardPermanent(item)
       } else {
-        this.removeSpacePermanent(item)
+        this.deleteSpacePermanent(item)
+      }
+    },
+    deleteAllPermanent () {
+      if (this.cardsVisible) {
+        this.deleteAllCardsPermanent()
+      } else {
+        this.deleteAllSpacesPermanent()
       }
     },
     updateDialogHeight () {
@@ -160,7 +186,7 @@ export default {
 
     showCards () {
       this.cardsVisible = true
-      this.removeAllIsVisible = false
+      this.deleteAllConfirmationIsVisible = false
       this.updateRemovedCards()
     },
     updateLocalRemovedCards () {
@@ -187,16 +213,19 @@ export default {
       })
       this.updateLocalRemovedCards()
     },
-    removeCardPermanent (card) {
+    deleteCardPermanent (card) {
       this.$store.dispatch('currentCards/removePermanent', card)
       this.updateLocalRemovedCards()
+    },
+    deleteAllCardsPermanent () {
+      console.log('🍓')
     },
 
     // Spaces
 
     showSpaces () {
       this.cardsVisible = false
-      this.removeAllIsVisible = false
+      this.deleteAllConfirmationIsVisible = false
       this.updateRemovedSpaces()
     },
     updateLocalRemovedSpaces () {
@@ -230,11 +259,11 @@ export default {
       this.$store.dispatch('currentSpace/restoreRemovedSpace', space)
       this.updateLocalRemovedSpaces()
     },
-    removeSpacePermanent (space) {
+    deleteSpacePermanent (space) {
       this.$store.dispatch('currentSpace/removeSpacePermanent', space)
       this.updateLocalRemovedSpaces()
     },
-    removeAllSpacesPermanent () {
+    deleteAllSpacesPermanent () {
       this.$store.dispatch('currentSpace/removeAllRemovedSpacesPermanent')
       this.updateLocalRemovedSpaces()
     }
@@ -242,7 +271,7 @@ export default {
   watch: {
     visible (visible) {
       if (visible) {
-        this.removeAllIsVisible = false
+        this.deleteAllConfirmationIsVisible = false
         this.updateRemovedCards()
         this.updateRemovedSpaces()
         this.updateDialogHeight()
