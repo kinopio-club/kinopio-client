@@ -124,7 +124,7 @@ export default {
       })
       cache.updateSpace('tags', state.tags, state.id)
     },
-    removeTagsFromAllRemovedCardsPermanent: (state) => {
+    deleteTagsFromAllRemovedCardsPermanent: (state) => {
       const cardIds = state.removedCards.map(card => card.id)
       state.tags = state.tags.filter(spaceTag => {
         return !cardIds.includes(spaceTag.cardId)
