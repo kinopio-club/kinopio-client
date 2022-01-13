@@ -216,7 +216,8 @@ export default {
       this.updateLocalRemovedCards()
     },
     deleteAllCardsPermanent () {
-      console.log('🍓')
+      this.$store.dispatch('currentCards/deleteAllRemoved')
+      this.updateLocalRemovedCards()
     },
 
     // Spaces

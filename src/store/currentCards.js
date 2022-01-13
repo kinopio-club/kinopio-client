@@ -93,8 +93,8 @@ const currentCards = {
       const card = state.cards[cardToDelete.id]
       state.ids = state.ids.filter(id => id !== card.id)
       delete state.cards[card.id]
-      const isDeleted = state.removedCards.find(removedCard => card.id === removedCard.id)
-      if (isDeleted) {
+      const shouldDelete = state.removedCards.find(removedCard => card.id === removedCard.id)
+      if (shouldDelete) {
         state.removedCards = state.removedCards.filter(removedCard => card.id !== removedCard.id)
         cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
       } else {
@@ -533,6 +533,13 @@ const currentCards = {
     deletePermanent: (context, card) => {
       context.commit('deletePermanent', card)
       context.dispatch('api/addToQueue', { name: 'deleteCardPermanent', body: card }, { root: true })
+    },
+    deleteAllRemoved: (context) => {
+      const spaceId = context.rootState.currentSpace.id
+      const userId = context.rootState.currentUser.id
+      const removedCards = context.state.removedCards
+      removedCards.forEach(card => context.commit('deletePermanent', card))
+      context.dispatch('api/addToQueue', { name: 'deleteAllRemovedCardsFromSpace', body: { userId, spaceId } }, { root: true })
     },
     restoreRemoved: (context, card) => {
       context.commit('restoreRemoved', card)
