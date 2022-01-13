@@ -28,9 +28,7 @@ dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :sty
         span Delete All
       template(v-if="deleteAllConfirmationIsVisible")
         p
-          span Permanently delete all removed {{cardsOrSpacesLabel}}{{' '}}
-          span(v-if="cardsVisible") and images
-          span ?
+          span Permanently delete all removed {{cardsOrSpacesLabel}} and uploads?
         .segmented-buttons
           button(@click.left.stop="toggleDeleteAllConfirmationIsVisible")
             img.icon.cancel(src="@/assets/add.svg")
