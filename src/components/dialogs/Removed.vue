@@ -4,14 +4,15 @@ dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :sty
     .segmented-buttons
       button(@click.left="showCards" :class="{active: cardsVisible}")
         img.icon(src="@/assets/remove.svg")
-        span Cards
-        Loader(:visible="loading.cards")
+        span Cards in this Space
       button(@click.left="showSpaces" :class="{active: !cardsVisible}")
         img.icon(src="@/assets/remove.svg")
         span Spaces
-        Loader(:visible="loading.spaces")
 
   section(v-if="!items.length")
+    .row(v-if="isLoading")
+      Loader(:visible="loading.cards")
+      Loader(:visible="loading.spaces")
     template(v-if="cardsVisible")
       p Removed cards from {{currentSpaceName}} can be restored here
       p(v-if="!currentUserCanEditSpace")
@@ -23,6 +24,9 @@ dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :sty
 
   section.results-section(v-if="items.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     section.results-actions
+      .row(v-if="isLoading")
+        Loader(:visible="loading.cards")
+        Loader(:visible="loading.spaces")
       button(@click="toggleDeleteAllConfirmationIsVisible" v-if="!deleteAllConfirmationIsVisible")
         img.icon(src="@/assets/remove.svg")
         span Delete All
@@ -98,6 +102,9 @@ export default {
     }
   },
   computed: {
+    isLoading () {
+      return this.loading.cards || this.loading.spaces
+    },
     removedCardsWithName () {
       return this.removedCards.filter(card => card.name)
     },
