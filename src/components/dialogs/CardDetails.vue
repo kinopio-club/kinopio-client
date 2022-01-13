@@ -453,7 +453,11 @@ export default {
         return utils.nameIsChecked(this.name)
       },
       set (value) {
-        this.$store.dispatch('currentCards/toggleChecked', { cardId: this.card.id, value })
+        if (utils.nameIsChecked(this.name)) {
+          this.$store.dispatch('currentCards/removeChecked', this.card.id)
+        } else {
+          this.$store.dispatch('currentCards/toggleChecked', { cardId: this.card.id, value })
+        }
       }
     },
     cardPendingUpload () {
