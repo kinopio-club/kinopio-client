@@ -25,14 +25,14 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
         ApiKey(:visible="apiKeyIsVisible")
     .row
       .button-wrap
-        button(@click.left.stop="toggleUpdateEmailIsVisible" :class="{active: updateEmailIsVisible}")
-          span Update Email
-        UpdateEmail(:visible="updateEmailIsVisible")
-    .row
-      .button-wrap
         button(@click.left.stop="toggleUserBillingIsVisible" :class="{active: userBillingIsVisible}")
           span Billing
         UserBilling(:visible="userBillingIsVisible")
+    .row
+      .button-wrap
+        button(@click.left.stop="toggleUpdateEmailIsVisible" :class="{active: updateEmailIsVisible}")
+          span Update Email
+        UpdateEmail(:visible="updateEmailIsVisible")
 
   //- Delete Account
   section
