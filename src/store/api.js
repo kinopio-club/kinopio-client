@@ -713,8 +713,8 @@ const self = {
     },
     urlPreview: async (context, url) => {
       try {
-        const apiKey = '0788beaa34f65adc0fe7ac'
-        const response = await fetch(`https://iframe.ly/api/iframely/?api_key=${apiKey}&url=${encodeURIComponent(url)}`)
+        const iframelyHost = 'https://iframely.kinopio.club'
+        const response = await fetch(`${iframelyHost}/iframely/?url=${encodeURIComponent(url)}`)
         if (response.status !== 200) {
           throw new Error(response.status)
         }
