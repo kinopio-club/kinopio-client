@@ -823,8 +823,10 @@ export default {
       return newType
     },
     updateCardMap () {
-      this.$store.dispatch('currentCards/updateDimensions', this.card.id)
-      this.$store.dispatch('currentCards/updateCardMap')
+      this.$nextTick(() => {
+        this.$store.dispatch('currentCards/updateDimensions', this.card.id)
+        this.$store.dispatch('currentCards/updateCardMap')
+      })
     },
     addFile (file) {
       let name = this.card.name
