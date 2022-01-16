@@ -141,7 +141,7 @@ export default {
     viewportWidth () { return this.$store.state.viewportWidth },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
-    isPanning () { return this.$store.state.currentUserIsPanningReady }
+    isPanning () { return this.$store.state.currentUserIsPanningReady || this.$store.state.shouldMouseMovePan }
   },
   methods: {
     dialogIsVisible () {
@@ -289,6 +289,7 @@ export default {
       if (event.shiftKey) {
         shouldToggle = true
       }
+      if (this.$store.state.shouldMouseMovePan) { return }
       this.selectCards(circle, shouldToggle)
       this.selectConnections(circle, shouldToggle)
       this.selectCardsAndConnectionsBetweenCircles(circle, shouldToggle)
@@ -576,7 +577,12 @@ export default {
         this.$store.commit('triggeredPaintFramePosition', { x: startCursor.x, y: startCursor.y })
         console.log('🔒 lockingAnimationFrame locked')
         lockingStartTime = undefined
+        this.shouldMouseMovePan()
       }
+    },
+    shouldMouseMovePan () {
+      if (this.$store.state.isTouchDevice) { return }
+      this.$store.commit('shouldMouseMovePan', true)
     },
 
     // Initial Circles
