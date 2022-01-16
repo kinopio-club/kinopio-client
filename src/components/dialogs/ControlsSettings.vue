@@ -11,6 +11,10 @@ dialog.controls-settings(v-if="visible" :open="visible" @click.left.stop ref="di
       label(:class="{active: shouldOpenLinksInNewTab}" @click.left.prevent="toggleShouldOpenLinksInNewTab" @keydown.stop.enter="toggleShouldOpenLinksInNewTab")
         input(type="checkbox" v-model="shouldOpenLinksInNewTab")
         span Open Card URLs in New Tabs
+    .row
+      label(:class="{active: shouldRightMouseButtonPan}" @click.left.prevent="toggleShouldRightMouseButtonPan" @keydown.stop.enter="toggleShouldRightMouseButtonPan")
+        input(type="checkbox" v-model="shouldRightMouseButtonPan")
+        span Right mouse button pans
 
 </template>
 
@@ -37,7 +41,8 @@ export default {
   computed: {
     isMobile () { return utils.isMobile() },
     shouldInvertZoomDirection () { return this.$store.state.currentUser.shouldInvertZoomDirection },
-    shouldOpenLinksInNewTab () { return this.$store.state.currentUser.shouldOpenLinksInNewTab }
+    shouldOpenLinksInNewTab () { return this.$store.state.currentUser.shouldOpenLinksInNewTab },
+    shouldRightMouseButtonPan () { return this.$store.state.currentUser.shouldRightMouseButtonPan }
   },
   methods: {
     toggleShouldInvertZoomDirection () {
@@ -47,6 +52,10 @@ export default {
     toggleShouldOpenLinksInNewTab () {
       const value = !this.shouldOpenLinksInNewTab
       this.$store.dispatch('currentUser/shouldOpenLinksInNewTab', value)
+    },
+    toggleShouldRightMouseButtonPan () {
+      const value = !this.shouldRightMouseButtonPan
+      this.$store.dispatch('currentUser/shouldRightMouseButtonPan', value)
     },
     updateDialogHeight () {
       if (!this.visible) { return }

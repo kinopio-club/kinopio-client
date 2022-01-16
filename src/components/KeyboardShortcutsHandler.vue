@@ -11,6 +11,7 @@ import nanoid from 'nanoid'
 const incrementPosition = 12
 let useSiblingConnectionType
 let browserZoomLevel = 0
+let disableContextMenu = false
 
 let prevCursorPosition
 
@@ -32,6 +33,7 @@ export default {
     window.addEventListener('mousemove', this.handleMouseMoveEvents)
     window.addEventListener('mouseup', this.handleMouseUpEvents)
     window.addEventListener('scroll', this.handleScrollEvents)
+    window.addEventListener('contextmenu', this.handleContextMenuEvents)
   },
   beforeUnmount () {
     window.removeEventListener('keyup', this.handleShortcuts)
@@ -203,7 +205,16 @@ export default {
     },
     // on mouse down
     handleMouseDownEvents (event) {
-      if (this.$store.state.currentUserIsPanningReady) {
+      const rightMouseButton = 2
+      const isRightClick = rightMouseButton === event.button
+      const isSpaceScope = event.target.id === 'magic-painting'
+      const shouldRightMouseButtonPan = this.$store.state.currentUser.shouldRightMouseButtonPan
+      if (shouldRightMouseButtonPan && isRightClick && isSpaceScope) {
+        event.preventDefault()
+        this.$store.commit('currentUserIsPanning', true)
+        disableContextMenu = true
+        return false
+      } else if (this.$store.state.currentUserIsPanningReady) {
         event.preventDefault()
         this.$store.commit('currentUserIsPanning', true)
       }
@@ -232,6 +243,15 @@ export default {
     // on scroll
     handleScrollEvents (event) {
       prevCursorPosition = undefined
+    },
+    // on native context menu
+    handleContextMenuEvents (event) {
+      const shouldRightMouseButtonPan = this.$store.state.currentUser.shouldRightMouseButtonPan
+      if (shouldRightMouseButtonPan && disableContextMenu) {
+        disableContextMenu = false
+        event.preventDefault()
+        return false
+      }
     },
 
     scrollIntoView (card) {

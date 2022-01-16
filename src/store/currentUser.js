@@ -37,6 +37,7 @@ export default {
     shouldUseLastConnectionType: false,
     shouldShowNewUserNotification: true,
     shouldOpenLinksInNewTab: false,
+    shouldRightMouseButtonPan: false,
     dialogFavoritesFilters: null, // null, 'currentUser', 'otherUsers'
     dialogSpaceFilters: null, // null, journals, spaces
     dialogSpaceFilterByUser: {},
@@ -221,6 +222,10 @@ export default {
     shouldOpenLinksInNewTab: (state, value) => {
       state.shouldOpenLinksInNewTab = value
       cache.updateUser('shouldOpenLinksInNewTab', value)
+    },
+    shouldRightMouseButtonPan: (state, value) => {
+      state.shouldRightMouseButtonPan = value
+      cache.updateUser('shouldRightMouseButtonPan', value)
     },
     shouldUseLastConnectionType: (state, value) => {
       state.shouldUseLastConnectionType = value
@@ -534,6 +539,14 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldOpenLinksInNewTab: value
+        } }, { root: true })
+    },
+    shouldRightMouseButtonPan: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'shouldRightMouseButtonPan' })
+      context.commit('shouldRightMouseButtonPan', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldRightMouseButtonPan: value
         } }, { root: true })
     },
     shouldUseLastConnectionType: (context, value) => {
