@@ -132,7 +132,7 @@ export default {
   },
   methods: {
     updateTags () {
-      const spaceTags = this.$store.getters['currentSpace/spaceTags']()
+      const spaceTags = this.$store.getters['currentSpace/spaceTags']
       this.tags = spaceTags || []
       const cachedTags = cache.allTags()
       const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })
@@ -208,6 +208,9 @@ export default {
       this.focusOnName = newSearch
       const currentTag = { name: newSearch, color: this.searchTagColor }
       this.$emit('currentTag', currentTag)
+    },
+    randomColor (color) {
+      this.$emit('newTagColor', this.randomColor)
     }
   }
 }

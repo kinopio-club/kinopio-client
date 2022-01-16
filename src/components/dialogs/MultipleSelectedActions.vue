@@ -13,7 +13,7 @@ dialog.narrow.multiple-selected-actions(
       .button-wrap.cards-checkboxes
         label(v-if="cardsHaveCheckboxes" :class="{active: cardsCheckboxIsChecked}" tabindex="0")
           input(type="checkbox" v-model="cardCheckboxes" tabindex="-1")
-        label(v-else @click.left.prevent="addCheckboxToCards" @keydown.stop.enter="addCheckboxToCards" tabindex="0")
+        label(v-if="!cardsHaveCheckboxes" @click.left.prevent="addCheckboxToCards" @keydown.stop.enter="addCheckboxToCards" tabindex="0")
           input.add(type="checkbox" tabindex="-1")
       //- Connect
       button(v-if="multipleCardsIsSelected" :class="{active: cardsIsConnected}" @click.left.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards")
@@ -31,6 +31,7 @@ dialog.narrow.multiple-selected-actions(
       //- Type Color
       .button-wrap
         button.change-color(:disabled="!canEditSome.connections" @click.left.stop="toggleMultipleConnectionsPickerVisible")
+          img.icon(src="@/assets/connection-path.svg")
           .segmented-colors.icon
             template(v-for="type in connectionTypes")
               .current-color(:style="{ background: type.color }")
@@ -143,9 +144,16 @@ export default {
         return this.cardsCheckboxIsChecked
       },
       set (value) {
-        this.cards.forEach(card => {
-          this.$store.dispatch('currentCards/toggleChecked', { cardId: card.id, value })
-        })
+        if (this.cardsCheckboxIsChecked) {
+          this.cards.forEach(card => {
+            this.$store.dispatch('currentCards/removeChecked', card.id)
+          })
+        } else {
+          this.cards.forEach(card => {
+            this.$store.dispatch('currentCards/toggleChecked', { cardId: card.id, value })
+          })
+        }
+        this.checkCardsHaveCheckboxes()
         this.checkCardsCheckboxIsChecked()
       }
     },
@@ -330,7 +338,7 @@ export default {
     checkCardsHaveCheckboxes () {
       const cardsWithCheckboxes = this.cards.filter(card => {
         if (!card) { return }
-        utils.checkboxFromString(card.name)
+        return utils.checkboxFromString(card.name)
       })
       this.cardsHaveCheckboxes = cardsWithCheckboxes.length === this.cards.length
     },
@@ -418,17 +426,17 @@ export default {
   },
   watch: {
     visible (visible) {
-      this.$nextTick(() => {
-        if (visible) {
+      if (visible) {
+        this.checkCardsHaveCheckboxes()
+        this.checkCardsCheckboxIsChecked()
+        this.$nextTick(() => {
           this.updatePinchCounterZoomDecimal()
           this.checkIsCardsConnected()
-          this.checkCardsHaveCheckboxes()
-          this.checkCardsCheckboxIsChecked()
           this.$store.dispatch('currentConnections/removeUnusedTypes')
           this.scrollIntoView()
           this.closeDialogs()
-        }
-      })
+        })
+      }
     }
   }
 }
@@ -462,4 +470,7 @@ export default {
     margin-right 6px
     .change-color
       height 24px
+      padding-top 3px
+      .segmented-colors
+        margin-left 5px
 </style>

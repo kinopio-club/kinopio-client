@@ -577,7 +577,7 @@ export default {
       return isCreatedByUser || isUpdatedByUser || isNoUser
     },
     canEditCard: (state, getters, rootState, rootGetters) => (card) => {
-      const isSpaceMember = getters.isSpaceMember
+      const isSpaceMember = getters.isSpaceMember()
       if (isSpaceMember) { return true }
       const canEditSpace = getters.canEditSpace
       const cardIsCreatedByCurrentUser = getters.cardIsCreatedByCurrentUser(card)

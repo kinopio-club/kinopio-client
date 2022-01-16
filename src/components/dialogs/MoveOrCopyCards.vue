@@ -2,42 +2,22 @@
 dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs")
   section
     .row
-      .segmented-buttons
-        button(@click.left.stop="hideToNewSpace" :class="{active: !toNewSpace}")
-          span Space
-        button(@click.left.stop="showToNewSpace" :class="{active: toNewSpace}")
-          img.icon(src="@/assets/add.svg")
-          span New Space
+      p {{actionLabelCapitalized}} to
+    .row
+      .button-wrap
+        button(@click.left.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}")
+          span {{selectedSpace.name}}
+          img.down-arrow(src="@/assets/down-arrow.svg")
+        SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" :shouldShowNewSpace="true" @selectSpace="updateSelectedSpace")
+    button(@click.left="moveOrCopyToSpace" :class="{active: loading}")
+      img.icon.visit(src="@/assets/visit.svg")
+      span {{buttonLabel}}
+      Loader(:visible="loading")
 
-    //- To New Space
-    template(v-if="toNewSpace")
-      .row
-        input(placeholder="name" v-model="newSpaceName" @keyup.space.prevent)
-      button(@click.left="moveOrCopyToSpace" :class="{active: loading}")
-        img.icon.visit(src="@/assets/visit.svg")
-        span {{buttonLabel}}
-        Loader(:visible="loading")
-
-    //- To Existing Space
-    template(v-if="!toNewSpace")
-      template(v-if="!spaces.length")
-        span.badge.danger No Other Spaces
-      template(v-if="spaces.length")
-        .row
-          .button-wrap
-            button(@click.left.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}")
-              span {{selectedSpace.name}}
-              img.down-arrow(src="@/assets/down-arrow.svg")
-            SpacePicker(:visible="spacePickerIsVisible" :selectedSpace="selectedSpace" @selectSpace="updateSelectedSpace")
-        button(@click.left="moveOrCopyToSpace" :class="{active: loading}")
-          img.icon.visit(src="@/assets/visit.svg")
-          span {{buttonLabel}}
-          Loader(:visible="loading")
-
-    .error-card-limit(v-if="cardsCreatedIsOverLimit")
-      .badge.danger Out of Cards
-      p To add more cards you'll need to upgrade for $5/month
-      button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
+  .error-card-limit(v-if="cardsCreatedIsOverLimit")
+    .badge.danger Out of Cards
+    p To add more cards you'll need to upgrade for $5/month
+    button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
   //- Copy Card Names
   section(v-if="!actionIsMove")
@@ -55,9 +35,6 @@ import cache from '@/cache.js'
 import utils from '@/utils.js'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
-import words from '@/data/words.js'
-import newSpace from '@/data/new.json'
-import nanoid from 'nanoid'
 import join from 'lodash-es/join'
 
 export default {
@@ -78,8 +55,6 @@ export default {
       selectedSpace: {},
       spacePickerIsVisible: false,
       loading: false,
-      toNewSpace: false,
-      newSpaceName: '',
       textIsCopied: false,
       cardsCreatedIsOverLimit: false
     }
@@ -109,6 +84,7 @@ export default {
         return 'copy'
       }
     },
+    actionLabelCapitalized () { return utils.capitalizeFirstLetter(this.actionLabel) },
     buttonLabel () {
       const actionLabel = this.capitalize(this.actionLabel) // copy, move
       const pluralCard = this.capitalize(this.pluralCard) // card, cards
@@ -136,14 +112,6 @@ export default {
       element.setSelectionRange(0, 99999) // for mobile
       document.execCommand('copy')
       this.textIsCopied = true
-    },
-    hideToNewSpace () {
-      this.closeDialogs()
-      this.toNewSpace = false
-    },
-    showToNewSpace () {
-      this.closeDialogs()
-      this.toNewSpace = true
     },
     toggleSpacePickerIsVisible () {
       this.spacePickerIsVisible = !this.spacePickerIsVisible
@@ -178,23 +146,6 @@ export default {
       const connectionTypes = connectionTypeIds.map(id => this.$store.getters['currentConnections/typeByTypeId'](id))
       return { cards, connectionTypes, connections }
     },
-    async createNewSpace (items, newSpaceName) {
-      this.loading = true
-      items = utils.clone(items)
-      let space = utils.clone(newSpace)
-      space.name = newSpaceName
-      space.id = nanoid()
-      space.cards = items.cards
-      space.connectionTypes = items.connectionTypes
-      space.connections = items.connections
-      space.userId = this.$store.state.currentUser.id
-      space = cache.updateIdsInSpace(space)
-      console.log('🚚 create new space', space)
-      await this.$store.dispatch('api/createSpace', space)
-      this.loading = false
-      return space
-    },
-
     async copyToSelectedSpace (items) {
       this.loading = true
       const nullCardUsers = true
@@ -216,30 +167,20 @@ export default {
       console.log('🚚 copies created', newItems)
       this.loading = false
     },
-
     isCardsCreatedIsOverLimit () {
       if (this.actionIsMove) { return }
       const items = this.selectedItems().cards.length
       return this.$store.getters['currentUser/cardsCreatedWillBeOverLimit'](items)
     },
-
     async moveOrCopyToSpace () {
       if (this.loading) { return }
-      const newSpaceName = this.newSpaceName || words.randomUniqueName()
       const items = this.selectedItems()
       if (this.isCardsCreatedIsOverLimit()) {
         this.cardsCreatedIsOverLimit = true
         return
       }
-      // copy
-      if (this.toNewSpace) {
-        const selectedSpace = await this.createNewSpace(items, newSpaceName)
-        this.notifyNewSpaceSuccess(selectedSpace)
-      } else {
-        await this.copyToSelectedSpace(items)
-        this.notifySuccess()
-      }
-      // cleanup
+      await this.copyToSelectedSpace(items)
+      this.notifySuccess()
       if (this.actionIsMove) {
         this.removeCards(items.cards)
       } else {
@@ -267,9 +208,6 @@ export default {
         return spaceIsNotCurrent && spaceHasId
       })
       this.selectedSpace = this.spaces[0]
-      if (!this.spaces.length) {
-        this.toNewSpace = true
-      }
     },
     updateSelectedSpace (space) {
       this.selectedSpace = space
@@ -291,7 +229,6 @@ export default {
           this.closeDialogs()
           this.scrollIntoView()
           this.updateSpaces()
-          this.newSpaceName = words.randomUniqueName()
           this.textIsCopied = false
         }
       })

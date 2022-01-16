@@ -72,7 +72,7 @@ dialog.narrow.background(v-if="visible" :open="visible" @click.left.stop="closeD
         input.hidden(type="file" ref="input" @change="uploadFile" accept="image/*")
 
     // default
-    template(v-if="spaceHasBackground")
+    template(v-if="spaceHasBackground || userHasDefaults")
       .row
         label(:class="{active: currentIsUserDefaults}" @click.left.prevent="updateUserDefaults" @keydown.stop.enter="updateUserDefaults")
           input(type="checkbox" v-model="currentIsUserDefaults")
@@ -387,5 +387,5 @@ export default {
 
   @media(max-width 500px)
     .image-picker
-      left -20px
+      left -68px
 </style>

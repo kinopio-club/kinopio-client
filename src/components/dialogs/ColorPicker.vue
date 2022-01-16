@@ -3,12 +3,12 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
   section(v-if="removeIsVisible")
     .row
       .badge.inline-color-badge(:style="{backgroundColor: currentColor}")
-        input(v-model="hexColor" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport")
+        input(v-model="hexColor" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport" @keyup.stop.backspace)
       button(@click="removeColor")
         img.icon(src="@/assets/remove.svg")
   section(v-if="!removeIsVisible")
     .badge(:style="{backgroundColor: currentColor}")
-      input(v-model="hexColor" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport")
+      input(v-model="hexColor" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport" @keyup.stop.backspace)
 
   section
     .other-colors(v-if="otherColors")

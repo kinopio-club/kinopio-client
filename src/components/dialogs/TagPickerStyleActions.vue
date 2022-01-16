@@ -11,7 +11,7 @@ dialog.narrow.tag-picker-style-actions(v-if="visible" :open="visible" ref="dialo
           button.change-color(@click.stop="toggleColorPickerIsVisible")
             .current-color(:style="{ background: newTagColor }")
           ColorPicker(:currentColor="newTagColor" :visible="colorPickerIsVisible" @selectedColor="updateNewTagColor")
-        input(placeholder="name" v-model="newTagName" @keyup.space.prevent @keyup.escape.stop="toggleNewTagIsVisible" @keyup.stop @keyup.enter.exact="createNewTag")
+        input(placeholder="name" ref="newTagName" v-model="newTagName" @keyup.space.prevent @keyup.escape.stop="toggleNewTagIsVisible" @keyup.stop @keyup.enter.exact="createNewTag")
       .row
         button(@click="createNewTag")
           span Create New Tag
@@ -29,7 +29,6 @@ import utils from '@/utils.js'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 
 import randomColor from 'randomcolor'
-import uniq from 'lodash-es/uniq'
 
 export default {
   name: 'TagPickerStyleActions',
@@ -63,14 +62,7 @@ export default {
     }
   },
   computed: {
-    currentTags () {
-      let currentTags = []
-      this.cards.forEach(card => {
-        const tags = utils.tagsFromStringWithoutBrackets(card.name) || []
-        currentTags = currentTags.concat(tags)
-      })
-      return uniq(currentTags)
-    }
+    currentTags () { return this.$store.getters['currentSpace/tags'] || [] }
   },
   methods: {
     scrollIntoView () {
@@ -138,6 +130,11 @@ export default {
       this.newTagColor = randomColor({ luminosity: 'light' })
       this.updateDialogHeight()
       this.updateResultsSectionHeight()
+      if (this.newTagIsVisible) {
+        this.$nextTick(() => {
+          this.focusNewTagNameInput()
+        })
+      }
     },
     toggleColorPickerIsVisible () {
       this.colorPickerIsVisible = !this.colorPickerIsVisible
@@ -152,6 +149,12 @@ export default {
       this.newTagIsVisible = false
       this.errorNewTagNameIsBlank = false
       this.newTagName = ''
+    },
+    focusNewTagNameInput () {
+      const element = this.$refs.newTagName
+      if (!element) { return }
+      element.focus()
+      element.setSelectionRange(0, 99999)
     },
 
     // same as Tags
@@ -174,7 +177,7 @@ export default {
     // same as TagPicker
 
     updateTags () {
-      const spaceTags = this.$store.getters['currentSpace/spaceTags']()
+      const spaceTags = this.$store.getters['currentSpace/spaceTags']
       this.tags = spaceTags || []
       const cachedTags = cache.allTags()
       const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })
@@ -209,6 +212,9 @@ export default {
         this.clearState()
         this.closeDialogs()
       }
+    },
+    newTagName (value) {
+      this.errorNewTagNameIsBlank = false
     }
   }
 }

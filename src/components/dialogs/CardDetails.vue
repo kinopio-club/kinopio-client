@@ -52,6 +52,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @closeDialog="hideTagPicker"
         @selectTag="updateTagBracketsWithTag"
         @currentTag="updateCurrentSearchTag"
+        @newTagColor="updateNewTagColor"
       )
       SpacePicker(
         :visible="space.pickerIsVisible"
@@ -60,6 +61,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         :position="space.pickerPosition"
         :search="space.pickerSearch"
         :shouldExcludeCurrentSpace="true"
+        :shouldShowNewSpace="true"
         @closeDialog="hideSpacePicker"
         @selectSpace="replaceSlashCommandWithSpaceUrl"
       )
@@ -274,7 +276,8 @@ export default {
       openingPercent: 0,
       openingAlpha: 0,
       previousSelectedTag: {},
-      currentSearchTag: {}
+      currentSearchTag: {},
+      newTagColor: ''
     }
   },
   created () {
@@ -450,7 +453,11 @@ export default {
         return utils.nameIsChecked(this.name)
       },
       set (value) {
-        this.$store.dispatch('currentCards/toggleChecked', { cardId: this.card.id, value })
+        if (utils.nameIsChecked(this.name)) {
+          this.$store.dispatch('currentCards/removeChecked', this.card.id)
+        } else {
+          this.$store.dispatch('currentCards/toggleChecked', { cardId: this.card.id, value })
+        }
       }
     },
     cardPendingUpload () {
@@ -1313,7 +1320,6 @@ export default {
           tag = this.previousSelectedTag
         } else if (this.currentSearchTag.name === tagName) {
           tag = this.currentSearchTag
-          this.$store.dispatch('currentSpace/updateTagNameColor', tag)
         } else {
           tag = this.$store.getters['currentSpace/tagByName'](tagName)
           tag = utils.clone(tag)
@@ -1322,6 +1328,9 @@ export default {
         return tag
       })
     },
+    updateNewTagColor (color) {
+      this.newTagColor = color
+    },
     addNewTags (newTagNames) {
       const previousTagNames = previousTags.map(tag => tag.name)
       const addTagsNames = newTagNames.filter(newTagName => !previousTagNames.includes(newTagName))
@@ -1329,7 +1338,7 @@ export default {
         let tag
         tag = utils.newTag({
           name: tagName,
-          defaultColor: this.$store.state.currentUser.color,
+          defaultColor: this.newTagColor || this.$store.state.currentUser.color,
           cardId: this.card.id,
           spaceId: this.$store.state.currentSpace.id
         })

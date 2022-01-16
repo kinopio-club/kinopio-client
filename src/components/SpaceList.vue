@@ -219,6 +219,7 @@ export default {
         this.focusOnId = previousItem.id
       } else {
         this.focusOnId = firstItem.id
+        this.$emit('focusBeforeFirstItem')
       }
     },
     focusNextItem (currentIndex) {
