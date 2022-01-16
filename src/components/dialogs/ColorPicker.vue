@@ -80,7 +80,9 @@ export default {
         return this.currentColor
       },
       set (color) {
-        if (validHexColor.check(color)) {
+        if (color === 'transparent') {
+          this.select(color)
+        } else if (validHexColor.check(color)) {
           this.updateColorFromInput(color)
         } else if (validHexColor.check('#' + color)) {
           this.updateColorFromInput('#' + color)
