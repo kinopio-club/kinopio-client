@@ -214,7 +214,6 @@ export default {
 .add-space
   &.short
     top -68px !important
-  overflow scroll
   max-height calc(100vh - 230px)
   .textarea
     background-color var(--secondary-background)
