@@ -90,7 +90,7 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
         //- Url →
         a.url-wrap(:href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" v-if="cardButtonUrl && !nameIsComment" :class="{'connector-is-visible': connectorIsVisible}")
           .url.inline-button-wrap
-            button.inline-button(:style="{background: selectedColor}" tabindex="-1")
+            button.inline-button(:style="{background: selectedColor || card.backgroundColor}" tabindex="-1")
               img.icon.visit.arrow-icon(src="@/assets/visit.svg")
         //- Connector
         .connector.inline-button-wrap(
