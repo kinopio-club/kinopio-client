@@ -1514,7 +1514,15 @@ export default {
     previewImage ({ thumbnail }) {
       const minWidth = 200
       if (!thumbnail) { return '' }
-      let image = thumbnail.find(item => item.href && (item.media.width > minWidth))
+      let image = thumbnail.find(item => {
+        let shouldSkipImage = false
+        if (item.media) {
+          if (item.media.width < minWidth) {
+            shouldSkipImage = true
+          }
+        }
+        return item.href && !shouldSkipImage
+      })
       if (!image) { return '' }
       return image.href || ''
     },
