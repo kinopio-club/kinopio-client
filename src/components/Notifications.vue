@@ -10,6 +10,16 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon(v-else-if="item.icon === 'cut'" src="@/assets/cut.svg" class="cut")
       span {{item.message}}
 
+  .persistent-item.danger.hidden#notify-local-storage-is-full
+    p Local storage error has occured, please refresh
+    .row
+      .button-wrap
+        button(@click.left="refreshBrowser") Refresh
+
+  .persistent-item(v-if="currentUserIsPaintingLocked" :style="{ background: currentUserColor}")
+    img.icon(v-if="isTouchDevice" src="@/assets/brush.svg")
+    img.icon(v-if="!isTouchDevice" src="@/assets/hand.svg")
+
   .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
     p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade for $5/month
     .row
@@ -93,12 +103,6 @@ aside.notifications(@click.left="closeAllDialogs")
       img.icon(src="@/assets/add.svg")
       span Use Template
 
-  .persistent-item.danger.hidden#notify-local-storage-is-full
-    p Local storage error has occured, please refresh
-    .row
-      .button-wrap
-        button(@click.left="refreshBrowser") Refresh
-
   .item.success(v-if="notifyMoveOrCopyToSpace" @animationend="resetNotifyMoveOrCopyToSpace")
     p {{notifyMoveOrCopyToSpaceDetails.message}}
     .row
@@ -181,9 +185,12 @@ export default {
     notifyKinopioUpdatesAreAvailable () { return this.$store.state.notifyKinopioUpdatesAreAvailable },
     notifyMoveOrCopyToSpace () { return this.$store.state.notifyMoveOrCopyToSpace },
     notifyMoveOrCopyToSpaceDetails () { return this.$store.state.notifyMoveOrCopyToSpaceDetails },
+    currentUserIsPaintingLocked () { return this.$store.state.currentUserIsPaintingLocked },
     currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     },
+    isTouchDevice () { return this.$store.state.isTouchDevice },
+    currentUserColor () { return this.$store.state.currentUser.color },
     privacyState () {
       return privacy.states().find(state => {
         return state.name === this.$store.state.currentSpace.privacy
@@ -385,7 +392,7 @@ export default {
     margin-left 6px
 
   .hidden
-    display: none
+    display none
 
   .notification-jiggle
     animation-name notificationJiggle
