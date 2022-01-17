@@ -1,15 +1,4 @@
 <template lang="pug">
-//- SpaceDetailsInfo(@updateSpaces="updateSpaces")
-
-//- prop: shouldHideExplore=bool, isSpaceMember=bool
-//- backgroundIsVisible,
-
-//- pendingUpload, remotePendingUpload, spaceName
-//- toggleBackgroundIsVisible, @updateSpaces="updateSpaces"
-//- BackgroundPreview, Background
-
-//- .space-details-info. .uploading-container-footer
-
 template(v-if="isSpaceMember")
   .row.space-details-info(@click.left="closeDialogs")
     .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
@@ -126,9 +115,6 @@ export default {
 
 <style lang="stylus">
 .space-details-info
-  // button.disabled
-  //   opacity 0.5
-  //   pointer-events none
   > .button-wrap + input
     margin 0
   > .button-wrap

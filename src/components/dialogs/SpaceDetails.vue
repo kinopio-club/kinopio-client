@@ -2,45 +2,6 @@
 dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
     SpaceDetailsInfo(@updateSpaces="updateLocalSpaces")
-
-    //- prop: shouldHideExplore=bool, isSpaceMember=bool
-    //- backgroundIsVisible, pendingUpload, remotePendingUpload, spaceName
-    //- toggleBackgroundIsVisible, @updateSpaces="updateSpaces"
-    //- BackgroundPreview, Background
-
-    //- .space-meta-row. .uploading-container-footer
-
-    //- template(v-if="isSpaceMember")
-    //-   .row.space-meta-row
-    //-     .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
-    //-       BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
-    //-       //- Background Upload Progress
-    //-       .uploading-container-footer(v-if="pendingUpload")
-    //-         .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
-    //-           Loader(:visible="true")
-    //-           span {{pendingUpload.percentComplete}}%
-    //-       //- Background Remote Upload Progress
-    //-       .uploading-container-footer(v-if="remotePendingUpload")
-    //-         .badge.info
-    //-           Loader(:visible="true")
-    //-           span {{remotePendingUpload.percentComplete}}%
-    //-       Background(:visible="backgroundIsVisible" @updateSpaces="updateLocalSpaces")
-    //-     input(ref="name" placeholder="name" v-model="spaceName")
-    //-   .row.privacy-row
-    //-     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateLocalSpaces")
-    //-     AddToExplore(@updateSpaces="updateLocalSpaces")
-
-    //- template(v-if="!isSpaceMember")
-    //-   .row.space-meta-row.not-space-member
-    //-     .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
-    //-       BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
-    //-       Background(:visible="backgroundIsVisible")
-    //-     p {{spaceName}}
-    //-   .row(v-if="shouldShowInExplore")
-    //-     .badge.status.explore-message
-    //-       img.icon.sunglasses(src="@/assets/sunglasses.svg")
-    //-       span In Explore
-
     //- Remove
     .button-wrap(v-if="isSpaceMember")
       button(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
