@@ -1486,8 +1486,8 @@ export default {
         url = this.removeHiddenQueryString(url)
         let response = await this.$store.dispatch('api/urlPreview', url)
         this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-        let { data } = response
-        console.log('🚗 link preview', data)
+        let { data, host } = response
+        console.log('🚗 link preview', host, data)
         const { links, meta } = data
         this.updateUrlPreviewSuccess({ links, meta, cardId, url })
       } catch (error) {
@@ -1517,7 +1517,15 @@ export default {
     previewImage ({ thumbnail }) {
       const minWidth = 200
       if (!thumbnail) { return '' }
-      let image = thumbnail.find(item => item.href && (item.media.width > minWidth))
+      let image = thumbnail.find(item => {
+        let shouldSkipImage = false
+        if (item.media) {
+          if (item.media.width < minWidth) {
+            shouldSkipImage = true
+          }
+        }
+        return item.href && !shouldSkipImage
+      })
       if (!image) { return '' }
       return image.href || ''
     },
