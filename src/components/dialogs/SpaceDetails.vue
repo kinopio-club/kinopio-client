@@ -1,7 +1,7 @@
 <template lang="pug">
 dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
-    SpaceDetailsInfo(@updateSpaces="updateLocalSpaces")
+    SpaceDetailsInfo(@updateSpaces="updateLocalSpaces" @closeDialogs="closeDialogs")
     //- Remove
     .button-wrap(v-if="isSpaceMember")
       button(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
@@ -195,6 +195,7 @@ export default {
       this.importIsVisible = false
       this.addSpaceIsVisible = false
       this.spaceFiltersIsVisible = false
+      this.$store.commit('triggerSpaceDetailsCloseDialogs')
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space })

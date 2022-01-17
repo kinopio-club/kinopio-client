@@ -1,6 +1,6 @@
 <template lang="pug">
 template(v-if="isSpaceMember")
-  .row.space-details-info(@click.left="closeDialogs")
+  .row.space-details-info(@click.left="closeDialogsAndEmit")
     .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
       BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
       //- Background Upload Progress
@@ -20,7 +20,7 @@ template(v-if="isSpaceMember")
     AddToExplore(@updateSpaces="updateSpaces")
 
 template(v-if="!isSpaceMember")
-  .row.space-details-info.not-space-member(@click.left="closeDialogs")
+  .row.space-details-info.not-space-member(@click.left="closeDialogsAndEmit")
     .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
       BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
       Background(:visible="backgroundIsVisible")
@@ -40,7 +40,7 @@ import AddToExplore from '@/components/AddToExplore.vue'
 
 export default {
   name: 'SpaceDetailsInfo',
-  emits: ['updateSpaces'],
+  emits: ['updateSpaces', 'closeDialogs'],
   components: {
     Background,
     BackgroundPreview,
@@ -56,6 +56,13 @@ export default {
       backgroundIsVisible: false,
       privacyPickerIsVisible: false
     }
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerSpaceDetailsCloseDialogs') {
+        this.closeDialogs()
+      }
+    })
   },
   computed: {
     spaceName: {
@@ -94,17 +101,21 @@ export default {
   methods: {
     toggleBackgroundIsVisible () {
       const isVisible = this.backgroundIsVisible
-      this.closeDialogs()
+      this.closeDialogsAndEmit()
       this.backgroundIsVisible = !isVisible
     },
     togglePrivacyPickerIsVisible () {
       const isVisible = this.privacyPickerIsVisible
-      this.closeDialogs()
+      this.closeDialogsAndEmit()
       this.privacyPickerIsVisible = !isVisible
     },
     closeDialogs () {
       this.backgroundIsVisible = false
       this.privacyPickerIsVisible = false
+    },
+    closeDialogsAndEmit () {
+      this.closeDialogs()
+      this.$emit('closeDialogs')
     },
     updateSpaces () {
       this.$emit('updateSpaces')
