@@ -378,6 +378,7 @@ const store = createStore({
     triggerAddCard: () => {},
     triggerUpdateCardOverlaps: () => {},
     triggerCardDetailsCloseDialogs: () => {},
+    triggerSpaceDetailsCloseDialogs: () => {},
 
     // Cards
 
