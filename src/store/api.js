@@ -713,18 +713,23 @@ const self = {
     },
     urlPreview: async (context, url) => {
       try {
-        const iframelyHost = 'https://iframely.kinopio.club'
-        const response = await fetch(`${iframelyHost}/iframely/?url=${encodeURIComponent(url)}`)
+        let host = 'https://iframely.kinopio.club/iframely'
+        const apiKey = '0788beaa34f65adc0fe7ac'
+        const denyList = ['youtube', 'twitter', 'facebook', 'instagram']
+        const shouldUseIFramely = denyList.find(item => url.includes(item))
+        if (shouldUseIFramely) {
+          host = 'https://iframe.ly/api/iframely'
+        }
+        const response = await fetch(`${host}/?url=${encodeURIComponent(url)}&api_key=${apiKey}`)
         if (response.status !== 200) {
           throw new Error(response.status)
         }
         const data = await normalizeResponse(response)
-        return { url, data, response }
+        return { url, data, response, host }
       } catch (error) {
         console.error('🚒 urlPreview', error)
       }
     }
-
   }
 }
 
