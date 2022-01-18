@@ -91,11 +91,13 @@ const currentCards = {
     deletePermanent: (state, cardToDelete) => {
       if (!cardToDelete) { return }
       const card = state.cards[cardToDelete.id]
-      state.ids = state.ids.filter(id => id !== card.id)
-      delete state.cards[card.id]
-      const shouldDelete = state.removedCards.find(removedCard => card.id === removedCard.id)
+      if (card) {
+        state.ids = state.ids.filter(id => id !== card.id)
+        delete state.cards[card.id]
+      }
+      const shouldDelete = state.removedCards.find(removedCard => cardToDelete.id === removedCard.id)
       if (shouldDelete) {
-        state.removedCards = state.removedCards.filter(removedCard => card.id !== removedCard.id)
+        state.removedCards = state.removedCards.filter(removedCard => cardToDelete.id !== removedCard.id)
         cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
       } else {
         cache.updateSpace('cards', state.cards, currentSpaceId)
