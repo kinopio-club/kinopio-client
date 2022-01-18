@@ -158,7 +158,7 @@ export default {
     },
     deletePermanent (item) {
       if (this.cardsVisible) {
-        this.deleteCardPermanent(item)
+        this.deleteCard(item)
       } else {
         this.deleteSpace(item)
       }
@@ -216,8 +216,8 @@ export default {
       })
       this.updateLocalRemovedCards()
     },
-    deleteCardPermanent (card) {
-      this.$store.dispatch('currentCards/deletePermanent', card)
+    deleteCard (card) {
+      this.$store.dispatch('currentCards/deleteCard', card)
       this.updateLocalRemovedCards()
     },
     deleteAllCardsPermanent () {

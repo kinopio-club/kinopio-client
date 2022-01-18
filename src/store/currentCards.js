@@ -88,7 +88,7 @@ const currentCards = {
     removedCards: (state, removedCards) => {
       state.removedCards = removedCards
     },
-    deletePermanent: (state, cardToDelete) => {
+    deleteCard: (state, cardToDelete) => {
       if (!cardToDelete) { return }
       const card = state.cards[cardToDelete.id]
       if (card) {
@@ -516,7 +516,7 @@ const currentCards = {
         context.commit('remove', card)
         context.dispatch('api/addToQueue', { name: 'removeCard', body: card }, { root: true })
       } else {
-        context.dispatch('deletePermanent', card)
+        context.dispatch('deleteCard', card)
       }
       context.dispatch('broadcast/update', { updates: card, type: 'removeCard', handler: 'currentCards/remove' }, { root: true })
       context.dispatch('currentConnections/removeFromCard', card, { root: true })
@@ -532,15 +532,15 @@ const currentCards = {
       }
       context.dispatch('updateCardMap')
     },
-    deletePermanent: (context, card) => {
-      context.commit('deletePermanent', card)
-      context.dispatch('api/addToQueue', { name: 'deleteCardPermanent', body: card }, { root: true })
+    deleteCard: (context, card) => {
+      context.commit('deleteCard', card)
+      context.dispatch('api/addToQueue', { name: 'deleteCard', body: card }, { root: true })
     },
     deleteAllRemoved: (context) => {
       const spaceId = context.rootState.currentSpace.id
       const userId = context.rootState.currentUser.id
       const removedCards = context.state.removedCards
-      removedCards.forEach(card => context.commit('deletePermanent', card))
+      removedCards.forEach(card => context.commit('deleteCard', card))
       context.dispatch('api/addToQueue', { name: 'deleteAllRemovedCardsFromSpace', body: { userId, spaceId } }, { root: true })
     },
     restoreRemoved: (context, card) => {
