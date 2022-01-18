@@ -160,7 +160,7 @@ export default {
       if (this.cardsVisible) {
         this.deleteCardPermanent(item)
       } else {
-        this.deleteSpacePermanent(item)
+        this.deleteSpace(item)
       }
     },
     deleteAllPermanent () {
@@ -263,8 +263,8 @@ export default {
       this.$store.dispatch('currentSpace/restoreRemovedSpace', space)
       this.updateLocalRemovedSpaces()
     },
-    deleteSpacePermanent (space) {
-      this.$store.dispatch('currentSpace/deleteSpacePermanent', space)
+    deleteSpace (space) {
+      this.$store.dispatch('currentSpace/deleteSpace', space)
       this.updateLocalRemovedSpaces()
     },
     deleteAllSpacesPermanent () {

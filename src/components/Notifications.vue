@@ -44,7 +44,7 @@ aside.notifications(@click.left="closeAllDialogs")
       button(@click.left="restoreSpace")
         img.icon(src="@/assets/undo.svg")
         span Restore
-      button.danger(@click.left="deleteSpacePermanent")
+      button.danger(@click.left="deleteSpace")
         img.icon(src="@/assets/remove.svg")
         span Permanently Delete
 
@@ -262,9 +262,9 @@ export default {
       this.$store.dispatch('currentSpace/restoreRemovedSpace', space)
       this.$store.commit('notifySpaceIsRemoved', false)
     },
-    deleteSpacePermanent () {
+    deleteSpace () {
       const space = this.$store.state.currentSpace
-      this.$store.dispatch('currentSpace/deleteSpacePermanent', space)
+      this.$store.dispatch('currentSpace/deleteSpace', space)
       this.$store.commit('notifySpaceIsRemoved', false)
       const firstSpace = cache.getAllSpaces()[0]
       this.$store.dispatch('currentSpace/loadSpace', { space: firstSpace })
