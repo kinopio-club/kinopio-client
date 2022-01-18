@@ -35,7 +35,7 @@ dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :sty
           button(@click.left.stop="toggleDeleteAllConfirmationIsVisible")
             img.icon.cancel(src="@/assets/add.svg")
             span Cancel
-          button.danger(@click.left.stop="deleteAllPermanent")
+          button.danger(@click.left.stop="deleteAll")
             img.icon(src="@/assets/remove.svg")
             span Delete All
 
@@ -53,7 +53,7 @@ dialog.removed(v-if="visible" :open="visible" @click.left.stop ref="dialog" :sty
             .segmented-buttons
               button(@click.left.stop="hideRemoveConfirmation")
                 img.icon.cancel(src="@/assets/add.svg")
-              button.danger(@click.left.stop="deletePermanent(item)")
+              button.danger(@click.left.stop="deleteItem(item)")
                 img.icon(src="@/assets/remove.svg")
                 span Delete
 </template>
@@ -156,18 +156,18 @@ export default {
     hideRemoveConfirmation () {
       this.removeConfirmationVisibleForId = ''
     },
-    deletePermanent (item) {
+    deleteItem (item) {
       if (this.cardsVisible) {
         this.deleteCard(item)
       } else {
         this.deleteSpace(item)
       }
     },
-    deleteAllPermanent () {
+    deleteAll () {
       if (this.cardsVisible) {
-        this.deleteAllCardsPermanent()
+        this.deleteAllCards()
       } else {
-        this.deleteAllSpacesPermanent()
+        this.deleteAllSpaces()
       }
     },
     updateDialogHeight () {
@@ -220,7 +220,7 @@ export default {
       this.$store.dispatch('currentCards/deleteCard', card)
       this.updateLocalRemovedCards()
     },
-    deleteAllCardsPermanent () {
+    deleteAllCards () {
       this.$store.dispatch('currentCards/deleteAllRemoved')
       this.updateLocalRemovedCards()
     },
@@ -267,8 +267,8 @@ export default {
       this.$store.dispatch('currentSpace/deleteSpace', space)
       this.updateLocalRemovedSpaces()
     },
-    deleteAllSpacesPermanent () {
-      this.$store.dispatch('currentSpace/deleteAllRemovedSpacesPermanent')
+    deleteAllSpaces () {
+      this.$store.dispatch('currentSpace/deleteAllRemovedSpaces')
       this.updateLocalRemovedSpaces()
     }
   },
