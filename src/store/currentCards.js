@@ -541,7 +541,7 @@ const currentCards = {
       const userId = context.rootState.currentUser.id
       const removedCards = context.state.removedCards
       removedCards.forEach(card => context.commit('deleteCard', card))
-      context.dispatch('api/addToQueue', { name: 'deleteAllRemovedCardsFromSpace', body: { userId, spaceId } }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'deleteAllRemovedCards', body: { userId, spaceId } }, { root: true })
     },
     restoreRemoved: (context, card) => {
       context.commit('restoreRemoved', card)

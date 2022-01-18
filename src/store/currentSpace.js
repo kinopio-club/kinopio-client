@@ -802,7 +802,7 @@ export default {
       const userId = context.rootState.currentUser.id
       const removedSpaces = cache.getAllRemovedSpaces()
       removedSpaces.forEach(space => cache.deleteSpace(space))
-      context.dispatch('api/addToQueue', { name: 'deleteAllRemovedSpacesFromUser', body: { userId } }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'deleteAllRemovedSpaces', body: { userId } }, { root: true })
     },
     checkIfShouldNotifySpaceIsRemoved: (context, space) => {
       const canEdit = context.rootGetters['currentUser/canEditSpace']()
