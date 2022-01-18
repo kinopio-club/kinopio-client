@@ -2,7 +2,7 @@
 dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs")
   section
     .row
-      p {{actionLabelCapitalized}} to
+      p {{actionLabelCapitalized}} {{pluralCard}} to space
     .row
       .button-wrap
         button(@click.left.stop="toggleSpacePickerIsVisible" :class="{active: spacePickerIsVisible}")
@@ -23,9 +23,10 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialog" @cl
   section(v-if="!actionIsMove")
     textarea(ref="text") {{text()}}
     button(@click.left="copyText")
-      span Copy Card Names
+      img.icon.cut(src="@/assets/cut.svg")
+      span Copy Content
     .row
-      .badge.success(v-if="textIsCopied") Card Names Copied
+      .badge.success(v-if="textIsCopied") Card Content Copied
 
 </template>
 
