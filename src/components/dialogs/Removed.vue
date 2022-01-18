@@ -199,6 +199,9 @@ export default {
       this.updateLocalRemovedCards()
       this.loadRemoteRemovedCards()
     },
+    removeRemovedCard (card) {
+      this.removedCards = this.removedCards.filter(removedCard => removedCard.id !== card.id)
+    },
     async loadRemoteRemovedCards () {
       if (!this.currentUserCanEditSpace) { return }
       this.loading.cards = true
@@ -214,15 +217,15 @@ export default {
       this.$nextTick(() => {
         this.scrollIntoView(card)
       })
-      this.updateLocalRemovedCards()
+      this.removeRemovedCard(card)
     },
     deleteCard (card) {
       this.$store.dispatch('currentCards/deleteCard', card)
-      this.updateLocalRemovedCards()
+      this.removeRemovedCard(card)
     },
     deleteAllCards () {
       this.$store.dispatch('currentCards/deleteAllRemoved')
-      this.updateLocalRemovedCards()
+      this.removedCards = []
     },
 
     // Spaces
@@ -238,6 +241,9 @@ export default {
     updateRemovedSpaces () {
       this.updateLocalRemovedSpaces()
       this.loadRemoteRemovedSpaces()
+    },
+    removeRemovedSpace (space) {
+      this.removedSpaces = this.removedSpaces.filter(removedSpace => removedSpace.id !== space.id)
     },
     async loadRemoteRemovedSpaces () {
       let removedSpaces
@@ -261,15 +267,15 @@ export default {
     },
     restoreSpace (space) {
       this.$store.dispatch('currentSpace/restoreRemovedSpace', space)
-      this.updateLocalRemovedSpaces()
+      this.removeRemovedSpace(space)
     },
     deleteSpace (space) {
       this.$store.dispatch('currentSpace/deleteSpace', space)
-      this.updateLocalRemovedSpaces()
+      this.removeRemovedSpace(space)
     },
     deleteAllSpaces () {
       this.$store.dispatch('currentSpace/deleteAllRemovedSpaces')
-      this.updateLocalRemovedSpaces()
+      this.removedSpaces = []
     }
   },
   watch: {
