@@ -54,9 +54,9 @@ aside.notifications(@click.left="closeAllDialogs")
       button(@click.left="restoreSpace")
         img.icon(src="@/assets/undo.svg")
         span Restore
-      button.danger(@click.left="removeSpacePermanent")
+      button.danger(@click.left="deleteSpace")
         img.icon(src="@/assets/remove.svg")
-        span Permanently Remove
+        span Permanently Delete
 
   .persistent-item.danger(v-if="notifyConnectionError")
     p A connection error has occured, please refresh
@@ -269,9 +269,9 @@ export default {
       this.$store.dispatch('currentSpace/restoreRemovedSpace', space)
       this.$store.commit('notifySpaceIsRemoved', false)
     },
-    removeSpacePermanent () {
+    deleteSpace () {
       const space = this.$store.state.currentSpace
-      this.$store.dispatch('currentSpace/removeSpacePermanent', space)
+      this.$store.dispatch('currentSpace/deleteSpace', space)
       this.$store.commit('notifySpaceIsRemoved', false)
       const firstSpace = cache.getAllSpaces()[0]
       this.$store.dispatch('currentSpace/loadSpace', { space: firstSpace })

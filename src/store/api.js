@@ -276,7 +276,7 @@ const self = {
         console.error('🚒 spaceNotificationResubscribe', error)
       }
     },
-    removeUserPermanent: async (context) => {
+    deleteUserPermanent: async (context) => {
       const apiKey = context.rootState.currentUser.apiKey
       if (!shouldRequest({ apiKey })) { return }
       try {
@@ -284,7 +284,7 @@ const self = {
         const response = await fetch(`${host}/user/permanent`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 removeUserPermanent', error)
+        console.error('🚒 deleteUserPermanent', error)
       }
     },
     getPublicUser: async (context, user) => {

@@ -25,36 +25,42 @@ dialog.user-settings.narrow(v-if="visible" :open="visible" ref="dialog" @click.l
         ApiKey(:visible="apiKeyIsVisible")
     .row
       .button-wrap
-        button(@click.left.stop="toggleUpdateEmailIsVisible" :class="{active: updateEmailIsVisible}")
-          span Update Email
-        UpdateEmail(:visible="updateEmailIsVisible")
-    .row
-      .button-wrap
         button(@click.left.stop="toggleUserBillingIsVisible" :class="{active: userBillingIsVisible}")
           span Billing
         UserBilling(:visible="userBillingIsVisible")
+    .row
+      .button-wrap
+        button(@click.left.stop="toggleUpdateEmailIsVisible" :class="{active: updateEmailIsVisible}")
+          span Update Email
+        UpdateEmail(:visible="updateEmailIsVisible")
 
   //- Delete Account
   section
     .row
-      button.danger(v-if="!removeAllConfirmationVisible" @click.left="toggleRemoveAllConfirmationVisible")
+      button.danger(v-if="!deleteAllConfirmationVisible" @click.left="toggleDeleteAllConfirmationVisible")
         img.icon(src="@/assets/remove.svg")
-        span Remove All Your Data
-      span(v-if="removeAllConfirmationVisible")
+        span Delete All Your Data
+      span(v-if="deleteAllConfirmationVisible")
         p
-          span.badge.danger Permanently remove
+          span.badge.danger Permanently delete
           span(v-if="isSignedIn") all your spaces and user data from this computer and Kinopio's servers?
           span(v-else) all your spaces and user data from this computer?
-        p(v-if="isUpgraded")
-          span.badge.info.badge-billing Use Billing ⤴
-          span if you just want to cancel your paid subscription
+        p.badge.secondary(v-if="isUpgraded")
+          //- span.badge.info.badge-billing Use Billing ⤴
+          //- .row.billing-cancel
+          span Or cancel paid subscription
+          .row.billing-cancel
+            button(@click.left.stop="toggleUserBillingIsVisible")
+              span Billing
+
         .segmented-buttons
-          button(@click.left="toggleRemoveAllConfirmationVisible")
+          button(@click.left="toggleDeleteAllConfirmationVisible")
+            img.icon.cancel(src="@/assets/add.svg")
             span Cancel
-          button.danger(@click.left="removeUserPermanent")
+          button.danger(@click.left="deleteUserPermanent")
             img.icon(src="@/assets/remove.svg")
-            span Remove All
-            Loader(:visible="loading.removeUserPermanent")
+            span Delete All
+            Loader(:visible="loading.deleteUserPermanent")
 
 </template>
 
@@ -84,9 +90,9 @@ export default {
       userBillingIsVisible: false,
       updateEmailIsVisible: false,
       apiKeyIsVisible: false,
-      removeAllConfirmationVisible: false,
+      deleteAllConfirmationVisible: false,
       loading: {
-        removeUserPermanent: false
+        deleteUserPermanent: false
       },
       notificationSettingsIsVisible: false,
       controlsSettingsIsVisible: false
@@ -104,18 +110,18 @@ export default {
       this.notificationSettingsIsVisible = false
       this.controlsSettingsIsVisible = false
     },
-    toggleRemoveAllConfirmationVisible () {
-      this.removeAllConfirmationVisible = !this.removeAllConfirmationVisible
+    toggleDeleteAllConfirmationVisible () {
+      this.deleteAllConfirmationVisible = !this.deleteAllConfirmationVisible
     },
-    async removeUserPermanent () {
-      this.loading.removeUserPermanent = true
+    async deleteUserPermanent () {
+      this.loading.deleteUserPermanent = true
       if (this.$store.state.currentUser.isUpgraded) {
         await this.$store.dispatch('api/cancelSubscription', {
           userId: this.$store.state.currentUser.id
         })
       }
-      await this.$store.dispatch('api/removeUserPermanent')
-      this.loading.removeUserPermanent = false
+      await this.$store.dispatch('api/deleteUserPermanent')
+      this.loading.deleteUserPermanent = false
       this.$emit('removeUser')
     },
     toggleControlsSettingsIsVisible () {
@@ -147,7 +153,7 @@ export default {
   watch: {
     visible (value) {
       if (value) {
-        this.removeAllConfirmationVisible = false
+        this.deleteAllConfirmationVisible = false
         this.closeDialogs()
       }
     }
@@ -159,4 +165,7 @@ export default {
   @media(max-height 500px)
     .user-settings
       top -100px !important
+  .billing-cancel
+    margin-top 2px
+    padding-bottom 2px
 </style>

@@ -20,7 +20,7 @@ main.space(
     UserLabel(:user="user")
   .cards
     template(v-for="overlap in cardOverlaps")
-      .badge.label-badge.card-overlap-indicator(:style="{ left: overlap.x + 'px', top: overlap.y + 'px' }" @click.left="selectOverlap(overlap)")
+      .badge.label-badge.card-overlap-indicator(v-if="canEditSpace" :style="{ left: overlap.x + 'px', top: overlap.y + 'px' }" @click.left="selectOverlap(overlap)")
         span {{overlap.length}}
     template(v-for="card in cards")
       Card(:card="card")
@@ -159,6 +159,7 @@ export default {
     isPainting () { return this.$store.state.currentUserIsPainting },
     isPanningReady () { return this.$store.state.currentUserIsPanningReady },
     spaceIsReadOnly () { return !this.$store.getters['currentUser/canEditSpace']() },
+    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
     isResizingCard () { return this.$store.state.currentUserIsResizingCard },
     isDraggingCard () { return this.$store.state.currentUserIsDraggingCard },
