@@ -17,8 +17,12 @@ aside.notifications(@click.left="closeAllDialogs")
         button(@click.left="refreshBrowser") Refresh
 
   .persistent-item(v-if="currentUserIsPaintingLocked" :style="{ background: currentUserColor}")
-    img.icon(v-if="isTouchDevice" src="@/assets/brush.svg")
-    img.icon(v-if="!isTouchDevice" src="@/assets/hand.svg")
+    template(v-if="isTouchDevice")
+      img.icon(src="@/assets/brush.svg")
+      span Hold and drag to paint
+    template(v-else)
+      img.icon(src="@/assets/hand.svg")
+      span Hold and drag to pan
 
   .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
     p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade for $5/month
