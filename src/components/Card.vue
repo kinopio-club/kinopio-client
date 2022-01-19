@@ -1861,6 +1861,7 @@ article
     top -5px
     left -5px
     pointer-events none
+    z-index 1
     img
       width 10px
       height 10px
