@@ -208,8 +208,7 @@ export default {
       const rightMouseButton = 2
       const isRightClick = rightMouseButton === event.button
       const isSpaceScope = event.target.id === 'magic-painting'
-      const shouldRightMouseButtonPan = this.$store.state.currentUser.shouldRightMouseButtonPan
-      if (shouldRightMouseButtonPan && isRightClick && isSpaceScope) {
+      if (isRightClick && isSpaceScope) {
         event.preventDefault()
         this.$store.commit('currentUserIsPanning', true)
         disableContextMenu = true
@@ -222,7 +221,7 @@ export default {
     // on mouse move
     handleMouseMoveEvents (event) {
       const speed = 2
-      if (this.$store.state.currentUserIsPanning || this.$store.state.shouldMouseMovePan) {
+      if (this.$store.state.currentUserIsPanning) {
         event.preventDefault()
         if (!prevCursorPosition) {
           prevCursorPosition = utils.cursorPositionInPage(event)
@@ -246,8 +245,7 @@ export default {
     },
     // on native context menu
     handleContextMenuEvents (event) {
-      const shouldRightMouseButtonPan = this.$store.state.currentUser.shouldRightMouseButtonPan
-      if (shouldRightMouseButtonPan && disableContextMenu) {
+      if (disableContextMenu) {
         disableContextMenu = false
         event.preventDefault()
         return false
