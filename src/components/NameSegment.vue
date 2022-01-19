@@ -33,6 +33,7 @@ span.name-segment
     @touchend.stop="showTagDetailsIsVisible($event, segment)"
     @keyup.stop.enter="showTagDetailsIsVisible($event, segment)"
     :data-tag-id="segment.id"
+    :data-tag-name="segment.name"
   ) {{segment.name}}
   //- Link
   a.link-badge-url(v-if="segment.isLink" :href="segment.name")
