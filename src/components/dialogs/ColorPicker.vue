@@ -48,9 +48,9 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
 
 <script>
 import scrollIntoView from '@/scroll-into-view.js'
+import utils from '@/utils.js'
 
 import randomColor from 'randomcolor'
-import validHexColor from 'valid-hex-color'
 import shader from 'shader'
 
 export default {
@@ -82,9 +82,9 @@ export default {
       set (color) {
         if (color === 'transparent') {
           this.select(color)
-        } else if (validHexColor.check(color)) {
+        } else if (utils.isValidHexColor(color)) {
           this.updateColorFromInput(color)
-        } else if (validHexColor.check('#' + color)) {
+        } else if (utils.isValidHexColor('#' + color)) {
           this.updateColorFromInput('#' + color)
         }
       }

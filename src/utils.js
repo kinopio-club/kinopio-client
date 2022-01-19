@@ -209,6 +209,13 @@ export default {
       return true
     }
   },
+  isValidHexColor (hex) {
+    // adapted from https://github.com/RobertJGabriel/valid-hex-color
+    if (typeof hex !== 'string') { return }
+    const hexPattern = /^#([A-Fa-f0-9]{3}([A-Fa-f0-9]{3})?)$/
+    let result = hexPattern.test(hex)
+    return result
+  },
   arrayExists (array) {
     this.typeCheck({ value: array, type: 'array', allowUndefined: true, origin: 'arrayExists' })
     if (!array) {
