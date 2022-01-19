@@ -16,10 +16,9 @@ aside.notifications(@click.left="closeAllDialogs")
       .button-wrap
         button(@click.left="refreshBrowser") Refresh
 
-  .persistent-item(v-if="currentUserIsPaintingLocked" :style="{ background: currentUserColor}")
-    template(v-if="isTouchDevice")
-      img.icon(src="@/assets/brush.svg")
-      span Hold and drag to paint
+  .persistent-item(v-if="currentUserIsPaintingLocked && isTouchDevice" :style="{ background: currentUserColor}")
+    img.icon(src="@/assets/brush.svg")
+    span Hold and drag to paint
 
   .persistent-item(v-if="currentUserIsPanning" :style="{ background: currentUserColor}")
     img.icon(src="@/assets/hand.svg")
