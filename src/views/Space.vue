@@ -418,7 +418,6 @@ export default {
       console.log('💣 stopInteractions') // stopInteractions and Space/stopPainting are run on all mouse and touch end events
       const currentUser = this.$store.state.currentUser
       this.addInteractionBlur()
-      this.$store.commit('shouldMouseMovePan', false)
       if (event.touches) {
         this.$store.commit('triggerUpdatePositionInVisualViewport')
       }

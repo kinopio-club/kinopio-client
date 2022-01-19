@@ -20,9 +20,10 @@ aside.notifications(@click.left="closeAllDialogs")
     template(v-if="isTouchDevice")
       img.icon(src="@/assets/brush.svg")
       span Hold and drag to paint
-    template(v-else)
-      img.icon(src="@/assets/hand.svg")
-      span Hold and drag to pan
+
+  .persistent-item(v-if="currentUserIsPanning" :style="{ background: currentUserColor}")
+    img.icon(src="@/assets/hand.svg")
+    span Hold and drag to pan
 
   .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
     p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade for $5/month
@@ -190,6 +191,7 @@ export default {
     notifyMoveOrCopyToSpace () { return this.$store.state.notifyMoveOrCopyToSpace },
     notifyMoveOrCopyToSpaceDetails () { return this.$store.state.notifyMoveOrCopyToSpaceDetails },
     currentUserIsPaintingLocked () { return this.$store.state.currentUserIsPaintingLocked },
+    currentUserIsPanning () { return this.$store.state.currentUserIsPanning },
     currentUserIsSignedIn () {
       return this.$store.getters['currentUser/isSignedIn']
     },
