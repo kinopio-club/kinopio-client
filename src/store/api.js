@@ -276,7 +276,7 @@ const self = {
         console.error('🚒 spaceNotificationResubscribe', error)
       }
     },
-    removeUserPermanent: async (context) => {
+    deleteUserPermanent: async (context) => {
       const apiKey = context.rootState.currentUser.apiKey
       if (!shouldRequest({ apiKey })) { return }
       try {
@@ -284,7 +284,7 @@ const self = {
         const response = await fetch(`${host}/user/permanent`, options)
         return normalizeResponse(response)
       } catch (error) {
-        console.error('🚒 removeUserPermanent', error)
+        console.error('🚒 deleteUserPermanent', error)
       }
     },
     getPublicUser: async (context, user) => {
@@ -713,18 +713,23 @@ const self = {
     },
     urlPreview: async (context, url) => {
       try {
+        let host = 'https://iframely.kinopio.club/iframely'
         const apiKey = '0788beaa34f65adc0fe7ac'
-        const response = await fetch(`https://iframe.ly/api/iframely/?api_key=${apiKey}&url=${encodeURIComponent(url)}`)
+        const denyList = ['youtube', 'twitter', 'facebook', 'instagram']
+        const shouldUseIFramely = denyList.find(item => url.includes(item))
+        if (shouldUseIFramely) {
+          host = 'https://iframe.ly/api/iframely'
+        }
+        const response = await fetch(`${host}/?url=${encodeURIComponent(url)}&api_key=${apiKey}`)
         if (response.status !== 200) {
           throw new Error(response.status)
         }
         const data = await normalizeResponse(response)
-        return { url, data, response }
+        return { url, data, response, host }
       } catch (error) {
         console.error('🚒 urlPreview', error)
       }
     }
-
   }
 }
 

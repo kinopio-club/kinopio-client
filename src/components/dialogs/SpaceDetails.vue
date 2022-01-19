@@ -1,37 +1,7 @@
 <template lang="pug">
 dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section
-    template(v-if="isSpaceMember")
-      .row.space-meta-row
-        .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
-          BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
-          //- Background Upload Progress
-          .uploading-container-footer(v-if="pendingUpload")
-            .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
-              Loader(:visible="true")
-              span {{pendingUpload.percentComplete}}%
-          //- Background Remote Upload Progress
-          .uploading-container-footer(v-if="remotePendingUpload")
-            .badge.info
-              Loader(:visible="true")
-              span {{remotePendingUpload.percentComplete}}%
-          Background(:visible="backgroundIsVisible" @updateSpaces="updateLocalSpaces")
-        input(ref="name" placeholder="name" v-model="spaceName")
-      .row.privacy-row
-        PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateLocalSpaces")
-        AddToExplore(@updateSpaces="updateLocalSpaces")
-
-    template(v-if="!isSpaceMember")
-      .row.space-meta-row.not-space-member
-        .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
-          BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
-          Background(:visible="backgroundIsVisible")
-        p {{spaceName}}
-      .row(v-if="shouldShowInExplore")
-        .badge.status.explore-message
-          img.icon.sunglasses(src="@/assets/sunglasses.svg")
-          span In Explore
-
+    SpaceDetailsInfo(@updateSpaces="updateLocalSpaces" @closeDialogs="closeDialogs")
     //- Remove
     .button-wrap(v-if="isSpaceMember")
       button(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
@@ -75,18 +45,14 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
 
 <script>
 import cache from '@/cache.js'
+import SpaceDetailsInfo from '@/components/SpaceDetailsInfo.vue'
 import Export from '@/components/dialogs/Export.vue'
 import Import from '@/components/dialogs/Import.vue'
 import AddSpace from '@/components/dialogs/AddSpace.vue'
-import Background from '@/components/dialogs/Background.vue'
-import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import SpaceFilters from '@/components/dialogs/SpaceFilters.vue'
 import SpaceList from '@/components/SpaceList.vue'
-import PrivacyButton from '@/components/PrivacyButton.vue'
-import AddToExplore from '@/components/AddToExplore.vue'
 import templates from '@/data/templates.js'
 import utils from '@/utils.js'
-import Loader from '@/components/Loader.vue'
 
 import debounce from 'lodash-es/debounce'
 
@@ -98,16 +64,12 @@ const offsetfooterHeight = 50
 export default {
   name: 'SpaceDetails',
   components: {
+    SpaceDetailsInfo,
     Export,
     Import,
     AddSpace,
-    Background,
     SpaceFilters,
-    SpaceList,
-    PrivacyButton,
-    AddToExplore,
-    Loader,
-    BackgroundPreview
+    SpaceList
   },
   props: {
     visible: Boolean
@@ -137,8 +99,6 @@ export default {
       exportIsVisible: false,
       importIsVisible: false,
       addSpaceIsVisible: false,
-      privacyPickerIsVisible: false,
-      backgroundIsVisible: false,
       isLoadingRemoteSpaces: false,
       remoteSpaces: [],
       resultsSectionHeight: null,
@@ -149,6 +109,7 @@ export default {
     }
   },
   computed: {
+    spaceName () { return this.$store.state.currentSpace.name },
     dialogSpaceFilters () { return this.$store.state.currentUser.dialogSpaceFilters },
     dialogSpaceFilterByUser () { return this.$store.state.currentUser.dialogSpaceFilterByUser },
     spaceFiltersIsActive () {
@@ -180,15 +141,6 @@ export default {
       if (privacy === 'private') { return false }
       return this.$store.state.currentSpace.showInExplore
     },
-    spaceName: {
-      get () {
-        return this.$store.state.currentSpace.name
-      },
-      set (newName) {
-        this.$store.dispatch('currentSpace/updateSpace', { name: newName })
-        this.updateLocalSpaces()
-      }
-    },
     isSpaceMember () {
       const currentSpace = this.$store.state.currentSpace
       return this.$store.getters['currentUser/isSpaceMember'](currentSpace)
@@ -205,24 +157,6 @@ export default {
       const id = this.$store.state.currentSpace.id
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(id)
-    },
-    pendingUpload () {
-      const currentSpace = this.$store.state.currentSpace
-      const pendingUploads = this.$store.state.upload.pendingUploads
-      return pendingUploads.find(upload => {
-        const isCurrentSpace = upload.spaceId === currentSpace.id
-        const isInProgress = upload.percentComplete < 100
-        return isCurrentSpace && isInProgress
-      })
-    },
-    remotePendingUpload () {
-      const currentSpace = this.$store.state.currentSpace
-      let remotePendingUploads = this.$store.state.remotePendingUploads
-      return remotePendingUploads.find(upload => {
-        const inProgress = upload.percentComplete < 100
-        const isSpace = upload.spaceId === currentSpace.id
-        return inProgress && isSpace
-      })
     },
     spacesHasJournalSpace () {
       const journal = this.spaces.find(space => space.moonPhase)
@@ -256,23 +190,12 @@ export default {
       this.closeDialogs()
       this.addSpaceIsVisible = !isVisible
     },
-    togglePrivacyPickerIsVisible () {
-      const isVisible = this.privacyPickerIsVisible
-      this.closeDialogs()
-      this.privacyPickerIsVisible = !isVisible
-    },
-    toggleBackgroundIsVisible () {
-      const isVisible = this.backgroundIsVisible
-      this.closeDialogs()
-      this.backgroundIsVisible = !isVisible
-    },
     closeDialogs () {
       this.exportIsVisible = false
       this.importIsVisible = false
       this.addSpaceIsVisible = false
-      this.privacyPickerIsVisible = false
-      this.backgroundIsVisible = false
       this.spaceFiltersIsVisible = false
+      this.$store.commit('triggerSpaceDetailsCloseDialogs')
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space })
@@ -343,7 +266,7 @@ export default {
       const remoteSpaceIds = remoteSpaces.map(space => space.id)
       const spacesToRemove = this.spaces.filter(space => !remoteSpaceIds.includes(space.id))
       spacesToRemove.forEach(spaceToRemove => {
-        cache.removeSpacePermanent(spaceToRemove)
+        cache.deleteSpace(spaceToRemove)
       })
     },
     updateWithExistingRemoteSpaces (userSpaces) {
@@ -459,34 +382,6 @@ export default {
   button.disabled
     opacity 0.5
     pointer-events none
-  .space-meta-row
-    > .button-wrap + input
-      margin 0
-    > .button-wrap
-      padding-right 6px
-      > button
-        width 24px
-        height 24px
-        background-size cover
-        background-position center
-    > .button-wrap + p
-      margin-top 0
-    &.not-space-member
-      margin 0
-      margin-bottom 10px
-  .uploading-container-footer
-    position absolute
-    top 15px
-    left 8px
-    width 100px
-    pointer-events none
-    z-index 1
-    .badge
-      display inline-block
-      &.absolute
-        position absolute
-        top 6px
-        left 6px
   .filter-is-active
     margin 0
     margin-left 5px

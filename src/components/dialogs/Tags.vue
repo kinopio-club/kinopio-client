@@ -43,7 +43,7 @@ export default {
         'currentSpace/removeTag',
         'currentSpace/removeTags',
         'currentSpace/removeTagsFromCard',
-        'currentSpace/removeTagsFromAllRemovedCardsPermanent'
+        'currentSpace/deleteTagsFromAllRemovedCardsPermanent'
       ]
 
       if (mutation.type === 'updatePageSizes') {

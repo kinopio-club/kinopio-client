@@ -222,7 +222,7 @@ export default {
     // on mouse move
     handleMouseMoveEvents (event) {
       const speed = 2
-      if (this.$store.state.currentUserIsPanning) {
+      if (this.$store.state.currentUserIsPanning || this.$store.state.shouldMouseMovePan) {
         event.preventDefault()
         if (!prevCursorPosition) {
           prevCursorPosition = utils.cursorPositionInPage(event)

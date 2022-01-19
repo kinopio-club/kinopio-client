@@ -1,11 +1,6 @@
 <template lang="pug">
 dialog.card-style-actions(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs" :style="styles")
   section
-    //- Frame
-    .button-wrap
-      button(:disabled="!canEditSome" @click.left.stop="toggleFramePickerIsVisible" :class="{ active : framePickerIsVisible || isFrames }")
-        span Frame
-      FramePicker(:visible="framePickerIsVisible" :cards="cards")
     //- h1
     .button-wrap
       button(:disabled="!canEditSome" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }")
@@ -19,6 +14,11 @@ dialog.card-style-actions(v-if="visible" :open="visible" ref="dialog" @click.lef
       button(:disabled="!canEditSome" @click.left.stop="toggleTagPickerIsVisible" :class="{ active: tagPickerIsVisible }")
         span Tag
       TagPickerStyleActions(:visible="tagPickerIsVisible" :cards="cards")
+    //- Frame
+    .button-wrap
+      button(:disabled="!canEditSome" @click.left.stop="toggleFramePickerIsVisible" :class="{ active : framePickerIsVisible || isFrames }")
+        span Frame
+      FramePicker(:visible="framePickerIsVisible" :cards="cards")
     //- Color
     .button-wrap(@click.left.stop="toggleColorPickerIsVisible")
       button.change-color(:disabled="!canEditSome" :class="{active: colorPickerIsVisible}")

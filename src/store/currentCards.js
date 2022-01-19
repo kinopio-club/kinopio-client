@@ -88,14 +88,16 @@ const currentCards = {
     removedCards: (state, removedCards) => {
       state.removedCards = removedCards
     },
-    removePermanent: (state, cardToRemove) => {
-      if (!cardToRemove) { return }
-      const card = state.cards[cardToRemove.id]
-      state.ids = state.ids.filter(id => id !== card.id)
-      delete state.cards[card.id]
-      const isRemoved = state.removedCards.find(removedCard => card.id === removedCard.id)
-      if (isRemoved) {
-        state.removedCards = state.removedCards.filter(removedCard => card.id !== removedCard.id)
+    deleteCard: (state, cardToDelete) => {
+      if (!cardToDelete) { return }
+      const card = state.cards[cardToDelete.id]
+      if (card) {
+        state.ids = state.ids.filter(id => id !== card.id)
+        delete state.cards[card.id]
+      }
+      const shouldDelete = state.removedCards.find(removedCard => cardToDelete.id === removedCard.id)
+      if (shouldDelete) {
+        state.removedCards = state.removedCards.filter(removedCard => cardToDelete.id !== removedCard.id)
         cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
       } else {
         cache.updateSpace('cards', state.cards, currentSpaceId)
@@ -525,7 +527,7 @@ const currentCards = {
         context.commit('remove', card)
         context.dispatch('api/addToQueue', { name: 'removeCard', body: card }, { root: true })
       } else {
-        context.dispatch('removePermanent', card)
+        context.dispatch('deleteCard', card)
       }
       context.dispatch('broadcast/update', { updates: card, type: 'removeCard', handler: 'currentCards/remove' }, { root: true })
       context.dispatch('currentConnections/removeFromCard', card, { root: true })
@@ -541,10 +543,16 @@ const currentCards = {
       }
       context.dispatch('updateCardMap')
     },
-    removePermanent: (context, card) => {
-      context.commit('removePermanent', card)
-      // context.commit('removeTagsFromCard', card)
-      context.dispatch('api/addToQueue', { name: 'removeCardPermanent', body: card }, { root: true })
+    deleteCard: (context, card) => {
+      context.commit('deleteCard', card)
+      context.dispatch('api/addToQueue', { name: 'deleteCard', body: card }, { root: true })
+    },
+    deleteAllRemoved: (context) => {
+      const spaceId = context.rootState.currentSpace.id
+      const userId = context.rootState.currentUser.id
+      const removedCards = context.state.removedCards
+      removedCards.forEach(card => context.commit('deleteCard', card))
+      context.dispatch('api/addToQueue', { name: 'deleteAllRemovedCards', body: { userId, spaceId } }, { root: true })
     },
     restoreRemoved: (context, card) => {
       context.commit('restoreRemoved', card)
