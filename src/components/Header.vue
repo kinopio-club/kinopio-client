@@ -683,6 +683,7 @@ header
       vertical-align baseline
 
   .read-only-badge-wrap
+    min-width 58px
     pointer-events none
     position absolute
     background-color var(--info-background)
