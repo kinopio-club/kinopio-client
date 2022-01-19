@@ -209,7 +209,8 @@ const currentCards = {
           z: card.z || context.state.ids.length + 1,
           name: card.name,
           frameId: card.frameId || 0,
-          userId: context.rootState.currentUser.id
+          userId: context.rootState.currentUser.id,
+          backgroundColor: card.backgroundColor
         }
         context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
         context.dispatch('broadcast/update', { updates: card, type: 'createCard', handler: 'currentCards/create' }, { root: true })

@@ -216,6 +216,24 @@ export default {
     let result = hexPattern.test(hex)
     return result
   },
+  numberOfLeadingTabs (string) {
+    // https://regexr.com/6dl8u
+    // matches /t tab characters at start of string
+    const tabPattern = /^(\t)+/g
+    const match = string.match(tabPattern)
+    if (!match) { return 0 }
+    const tabs = match[0].length
+    return tabs
+  },
+  numberOfLeadingDoubleSpaces (string) {
+    // https://regexr.com/6dl9m
+    // matches two space characters at start of string
+    const doubleSpacesPattern = /^( {2})+/g
+    const match = string.match(doubleSpacesPattern)
+    if (!match) { return 0 }
+    const doubleSpaces = match[0].length / 2
+    return doubleSpaces
+  },
   arrayExists (array) {
     this.typeCheck({ value: array, type: 'array', allowUndefined: true, origin: 'arrayExists' })
     if (!array) {
