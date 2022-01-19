@@ -26,6 +26,9 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
     @drop.prevent.stop="uploadFile"
     @click="selectAllConnectedCards"
   )
+    .selected-user-avatar(v-if="isSelectedOrDragging" :style="{backgroundColor: selectedColor || remoteSelectedColor}")
+      img(src="@/assets/anon-avatar.svg")
+
     .locking-frame(v-if="isLocking" :style="lockingFrameStyle")
     Frames(:card="card")
 
@@ -1850,6 +1853,17 @@ article
     position absolute
     z-index -1
     pointer-events none
+
+  .selected-user-avatar
+    padding 0 3px
+    border-radius 3px
+    position absolute
+    top -5px
+    left -5px
+    pointer-events none
+    img
+      width 10px
+      height 10px
 
 @keyframes bounce
   0%
