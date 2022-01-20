@@ -706,7 +706,6 @@ export default {
       if (!string) { return }
       let paragraphs = string.split('\n')
       paragraphs = paragraphs.filter(paragraph => Boolean(paragraph.length))
-      paragraphs = paragraphs.map(paragraph => paragraph.trim())
       return paragraphs
     },
     splitCards (event, isPreview) {
@@ -745,12 +744,16 @@ export default {
       cardNames = cardNames.flat()
       cardNames = cardNames.filter(name => Boolean(name.length))
       let newCards = cardNames.map(cardName => {
+        const indentAmount = 50
+        const indentLevel = utils.numberOfLeadingTabs(cardName) || utils.numberOfLeadingDoubleSpaces(cardName)
+        const indentX = indentLevel * indentAmount
         return {
           id: nanoid(),
-          name: cardName,
-          x: this.card.x,
+          name: cardName.trim(),
+          x: this.card.x + indentX,
           y: this.card.y,
-          frameId: this.card.frameId
+          frameId: this.card.frameId,
+          backgroundColor: this.card.backgroundColor
         }
       })
       if (isPreview) { return newCards }
