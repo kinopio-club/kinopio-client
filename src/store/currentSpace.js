@@ -315,6 +315,7 @@ export default {
       const nullCardUsers = true
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
       context.commit('clearSearch', null, { root: true })
+      isLoadingRemoteSpace = false
       context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
       context.dispatch('loadBackground')
     },
@@ -406,6 +407,7 @@ export default {
       space = utils.clearSpaceMeta(space, 'copy')
       const nullCardUsers = true
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
+      isLoadingRemoteSpace = false
       context.dispatch('loadSpace', { space: uniqueNewSpace, isLocalSpaceOnly: true })
       await context.dispatch('saveImportedSpace')
     },
