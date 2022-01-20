@@ -400,10 +400,10 @@ export default {
       context.commit('triggerUpdateCardOverlaps', null, { root: true })
     },
     duplicateSpace: async (context) => {
+      let space = cache.space(context.state.id)
       const user = context.rootState.currentUser
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       context.commit('clearSearch', null, { root: true })
-      let space = utils.clone(context.state)
       space = utils.clearSpaceMeta(space, 'copy')
       const nullCardUsers = true
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)

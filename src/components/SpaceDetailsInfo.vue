@@ -96,6 +96,11 @@ export default {
         const isSpace = upload.spaceId === currentSpace.id
         return inProgress && isSpace
       })
+    },
+    shouldShowInExplore () {
+      const privacy = this.$store.state.currentSpace.privacy
+      if (privacy === 'private') { return false }
+      return this.$store.state.currentSpace.showInExplore
     }
   },
   methods: {
