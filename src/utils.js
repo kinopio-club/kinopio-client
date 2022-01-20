@@ -1332,6 +1332,17 @@ export default {
     }
   },
 
+  indexesOf (string, search) {
+    // adapted from https://stackoverflow.com/a/3410549
+    const searchPattern = new RegExp(search, 'gi')
+    let results = []
+    while (searchPattern.exec(string)) {
+      const position = searchPattern.lastIndex - search.length + 1
+      results.push(position)
+    }
+    return results
+  },
+
   // Name Segments 🎫
 
   cardNameSegments (name) {
@@ -1349,18 +1360,23 @@ export default {
     let badges = []
     let segments = []
     tags.forEach(tag => {
-      const startPosition = name.indexOf(tag)
-      const endPosition = name.indexOf(tag) + tag.length
+      // remove previous duplicate tag names
+      let startPositions = this.indexesOf(name, tag)
+      badges.forEach(badge => {
+        startPositions = startPositions.filter(position => position > badge.startPosition)
+      })
+      const startPosition = startPositions[0]
+      const endPosition = startPosition + tag.length
       badges.push({ tag, startPosition, endPosition, isTag: true })
     })
     links.forEach(link => {
       const startPosition = name.indexOf(link)
-      const endPosition = name.indexOf(link) + link.length
+      const endPosition = startPosition + link.length
       badges.push({ link, startPosition, endPosition, isLink: true })
     })
     files.forEach(file => {
       const startPosition = name.indexOf(file)
-      const endPosition = name.indexOf(file) + file.length
+      const endPosition = startPosition + file.length
       badges.push({ file, startPosition, endPosition, isFile: true })
     })
     badges = sortBy(badges, ['startPosition'])
