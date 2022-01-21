@@ -263,6 +263,15 @@ export default {
     })
     return longest
   },
+  arrayToString (array) {
+    // ['yo', 'lo'] to 'yo lo'
+    // const string = array
+    let string = ''
+    array.forEach(item => {
+      string = string + item + ' '
+    })
+    return string.trim()
+  },
   updateObject (object, updates) {
     this.typeCheck({ value: updates, type: 'object', origin: 'updateObject' })
     const keys = Object.keys(updates)

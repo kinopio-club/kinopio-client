@@ -1,5 +1,5 @@
 <template lang="pug">
-span.name-segment
+span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTagColor" :data-tag-name="dataTagName")
   template(v-if="segment.isText && segment.content")
     span.markdown(v-if="segment.markdown")
       template(v-for="markdown in segment.markdown")
@@ -71,7 +71,25 @@ export default {
   },
   computed: {
     currentSelectedTag () { return this.$store.state.currentSelectedTag },
-    currentSelectedLink () { return this.$store.state.currentSelectedLink }
+    currentSelectedLink () { return this.$store.state.currentSelectedLink },
+    dataMarkdownType () {
+      if (this.segment.isTag) { return 'tag' }
+      if (this.segment.isLink) { return 'link' }
+      let markdown = this.segment.markdown.filter(item => Boolean(item.content))
+      const segmentIsEmpty = !utils.arrayExists(markdown)
+      if (segmentIsEmpty) { return 'text' }
+      let types = markdown.map(item => item.type)
+      types = utils.arrayToString(types)
+      return types
+    },
+    dataTagColor () {
+      if (!this.segment.isTag) { return }
+      return this.segment.color
+    },
+    dataTagName () {
+      if (!this.segment.isTag) { return }
+      return this.segment.name
+    }
   },
   methods: {
     showTagDetailsIsVisible (event, tag) {

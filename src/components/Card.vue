@@ -25,6 +25,10 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
     @dragend="removeUploadIsDraggedOver"
     @drop.prevent.stop="uploadFile"
     @click="selectAllConnectedCards"
+
+    :data-checkbox="hasCheckbox"
+    :data-background-color="card.backgroundColor"
+    :data-tags="dataTags"
   )
     .selected-user-avatar(v-if="isSelectedOrDragging" :style="{backgroundColor: selectedColor || remoteSelectedColor}")
       img(src="@/assets/anon-avatar.svg")
@@ -281,6 +285,13 @@ export default {
   },
   computed: {
     isResizing () { return this.$store.state.currentUserIsResizingCard },
+    dataTags () {
+      let tags = utils.tagsFromStringWithoutBrackets(this.card.name)
+      if (!tags) { return }
+      tags = tags.map(tag => utils.normalizeString(tag))
+      tags = utils.arrayToString(tags)
+      return tags
+    },
     resizeWidth () {
       if (!this.resizeIsVisible) { return }
       const resizeWidth = this.card.resizeWidth

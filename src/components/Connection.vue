@@ -6,6 +6,7 @@ path.connection-path(
   :data-start-card="startCardId"
   :data-end-card="endCardId"
   :data-id="id"
+  :data-type-name="typeName"
   :key="id"
   :d="path"
   @mousedown.left="startDraggingConnection"
@@ -82,9 +83,12 @@ export default {
       }
     },
     typeColor () {
-      if (this.connectionType) {
-        return this.connectionType.color
-      } else { return undefined }
+      if (!this.connectionType) { return }
+      return this.connectionType.color
+    },
+    typeName () {
+      if (!this.connectionType) { return }
+      return this.connectionType.name
     },
     isSelected () {
       const selectedIds = this.$store.state.multipleConnectionsSelectedIds
