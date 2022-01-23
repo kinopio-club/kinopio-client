@@ -18,7 +18,6 @@ cardMap.addEventListener('message', event => {
 })
 
 const updateCardMapDebounced = debounce(function ({ cards, viewport, zoom }) {
-  console.log('updateCardMapDebounced', { cards, viewport, zoom })
   cardMap.postMessage({ cards, viewport, zoom })
 }, 200)
 
