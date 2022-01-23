@@ -351,6 +351,7 @@ const currentCards = {
         id: cardId,
         commentIsVisible: value
       })
+      context.dispatch('updateDimensionsAndMap', cardId)
     },
 
     // resize
@@ -584,6 +585,12 @@ const currentCards = {
       const viewport = utils.visualViewport()
       const zoom = context.rootState.spaceZoomPercent / 100
       updateCardMapDebounced({ cards, viewport, zoom })
+    },
+    updateDimensionsAndMap: (context, cardId) => {
+      nextTick(() => {
+        context.dispatch('updateDimensions', cardId)
+        context.dispatch('updateCardMap')
+      })
     }
   },
   getters: {

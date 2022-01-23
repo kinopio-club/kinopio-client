@@ -836,12 +836,6 @@ export default {
       this.$store.dispatch('currentConnections/update', connection)
       return newType
     },
-    updateCardMap () {
-      this.$nextTick(() => {
-        this.$store.dispatch('currentCards/updateDimensions', this.card.id)
-        this.$store.dispatch('currentCards/updateCardMap')
-      })
-    },
     addFile (file) {
       let name = this.card.name
       const url = file.url
@@ -1169,9 +1163,6 @@ export default {
       this.$store.dispatch('currentCards/toggleCommentIsVisible', cardId)
       this.$store.dispatch('currentCards/incrementZ', cardId)
       this.updateCardConnectionPathsIfOpenSpace()
-      this.$nextTick(() => {
-        this.updateCardMap()
-      })
     },
     updateCardConnectionPathsIfOpenSpace () {
       const spaceIsOpen = this.$store.state.currentSpace.privacy === 'open'
