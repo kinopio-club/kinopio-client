@@ -30,7 +30,7 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
     :data-background-color="card.backgroundColor"
     :data-tags="dataTags"
   )
-    .selected-user-avatar(v-if="isSelectedOrDragging" :style="{backgroundColor: selectedColor || remoteSelectedColor}")
+    .selected-user-avatar(v-if="isRemoteSelected || isRemoteCardDetailsVisible" :style="{backgroundColor: remoteSelectedColor}")
       img(src="@/assets/anon-avatar.svg")
 
     .locking-frame(v-if="isLocking" :style="lockingFrameStyle")
