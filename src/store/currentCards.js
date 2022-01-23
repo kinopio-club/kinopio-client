@@ -12,11 +12,12 @@ import { nextTick } from 'vue'
 let currentSpaceId
 
 const cardMap = new Worker('web-workers/card-map.js')
+// receive
 cardMap.addEventListener('message', event => {
   const cardMap = event.data
   currentCards.mutations.cardMap(currentCards.state, cardMap)
 })
-
+// send
 const updateCardMapDebounced = debounce(function ({ cards, viewport, zoom }) {
   cardMap.postMessage({ cards, viewport, zoom })
 }, 200)
