@@ -18,7 +18,7 @@
             button.visit-button
               img.icon.visit(src="@/assets/visit.svg")
 
-      img.preview-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected, 'side-image': isImageCard || parentIsCardDetails}" @load="updateCardMap")
+      img.preview-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected, 'side-image': isImageCard || parentIsCardDetails}" @load="updateDimensionsAndMap")
       .text(:class="{'side-text badge': !isImageCard && !parentIsCardDetails && card.urlPreviewImage}" :style="{background: selectedColor}")
         img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
         img.icon.favicon.open(v-else src="@/assets/open.svg")
@@ -80,9 +80,8 @@ export default {
         this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
       })
     },
-    updateCardMap () {
-      this.$store.dispatch('currentCards/updateDimensions', this.card.id)
-      this.$store.dispatch('currentCards/updateCardMap')
+    updateDimensionsAndMap () {
+      this.$store.dispatch('currentCards/updateDimensionsAndMap', this.card.id)
     }
   }
 }
