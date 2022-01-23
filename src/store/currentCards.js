@@ -4,6 +4,7 @@ import cache from '@/cache.js'
 import nanoid from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
+import debounce from 'lodash-es/debounce'
 import { nextTick } from 'vue'
 
 // normalized state
@@ -15,6 +16,11 @@ cardMap.addEventListener('message', event => {
   const cardMap = event.data
   currentCards.mutations.cardMap(currentCards.state, cardMap)
 })
+
+const updateCardMapDebounced = debounce(function ({ cards, viewport, zoom }) {
+  console.log('updateCardMapDebounced', { cards, viewport, zoom })
+  cardMap.postMessage({ cards, viewport, zoom })
+}, 200)
 
 const currentCards = {
   namespaced: true,
@@ -578,9 +584,8 @@ const currentCards = {
       cards = utils.clone(cards)
       const viewport = utils.visualViewport()
       const zoom = context.rootState.spaceZoomPercent / 100
-      cardMap.postMessage({ cards, viewport, zoom })
+      updateCardMapDebounced({ cards, viewport, zoom })
     }
-
   },
   getters: {
     byId: (state) => (id) => {
