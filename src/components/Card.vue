@@ -243,7 +243,8 @@ export default {
     })
   },
   mounted () {
-    if (this.shouldUpdateDimensions) {
+    const cardIsMissingDimensions = Boolean(!this.card.width || !this.card.height)
+    if (cardIsMissingDimensions) {
       let card = { id: this.card.id }
       card = utils.updateCardDimensions(card)
       this.$store.dispatch('currentCards/update', card)
@@ -309,9 +310,6 @@ export default {
     },
     isSelectedOrDragging () {
       return this.isSelected || this.isRemoteSelected || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.uploadIsDraggedOver || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor
-    },
-    shouldUpdateDimensions () {
-      return Boolean(!this.card.width || !this.card.height)
     },
     isInSearchResultsCards () {
       const results = this.$store.state.searchResultsCards
