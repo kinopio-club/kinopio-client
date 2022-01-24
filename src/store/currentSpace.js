@@ -398,6 +398,7 @@ export default {
         context.commit('isLoadingSpace', false, { root: true })
       })
       context.commit('triggerUpdateCardOverlaps', null, { root: true })
+      context.dispatch('incrementCardsCreatedCountFromSpace', space)
     },
     duplicateSpace: async (context) => {
       let space = cache.space(context.state.id)
