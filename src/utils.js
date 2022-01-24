@@ -1120,6 +1120,11 @@ export default {
     if (!url) { return }
     // append space to match as an end character
     url = url + ' '
+    // https://regexr.com/6dv93
+    // matches wikipedia.org/wiki/ABC_123#/media/File
+    const wikipediaMediaPagePattern = new RegExp(/wikipedia.org\/wiki\/[A-Zaz_0-9:]+#\/media\/File/igm)
+    const isPage = url.match(wikipediaMediaPagePattern)
+    if (isPage) { return }
     // https://regexr.com/4rjtu
     // match an extension
     // which much be followed by either end of line, space, or ? (for qs) char
