@@ -14,7 +14,7 @@ aside.offscreen-markers(:style="styles")
 <script>
 import utils from '@/utils.js'
 
-const offscreenMarkers = new Worker('web-workers/offscreen-markers.js')
+const offscreenMarkers = new Worker('/web-workers/offscreen-markers.js')
 
 const maxIterations = 30
 let currentIteration, updatePositionTimer

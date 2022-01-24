@@ -27,7 +27,7 @@ export default {
       if (spaceHasUrl) {
         this.$store.commit('currentSpacePath', spaceUrl, { root: true })
         if (navigator.standalone) { return }
-        await this.$router.push(spaceUrl)
+        await this.$router.push('/' + spaceUrl)
         const state = utils.clone(this.$store.state)
         history.replaceState({ ...history.state, ...state }, '')
       } else {

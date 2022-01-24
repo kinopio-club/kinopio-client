@@ -11,7 +11,7 @@ import { nextTick } from 'vue'
 // https://github.com/vuejs/vuejs.org/issues/1636
 let currentSpaceId
 
-const cardMap = new Worker('web-workers/card-map.js')
+const cardMap = new Worker('/web-workers/card-map.js')
 // receive
 cardMap.addEventListener('message', event => {
   const cardMap = event.data

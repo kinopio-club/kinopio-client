@@ -49,7 +49,7 @@ import utils from '@/utils.js'
 import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 
-const cardOverlaps = new Worker('web-workers/card-overlaps.js')
+const cardOverlaps = new Worker('/web-workers/card-overlaps.js')
 
 let prevCursor, endCursor, shouldCancel
 let processQueueIntervalTimer
