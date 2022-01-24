@@ -277,11 +277,7 @@ const currentCards = {
         id: card.id,
         name: newName
       })
-      nextTick(() => {
-        context.dispatch('updateDimensions', card.id)
-        context.dispatch('updateCardMap')
-        context.dispatch('currentConnections/updatePaths', { cardId: card.id, shouldUpdateApi: true }, { root: true })
-      })
+      context.dispatch('updateDimensionsAndMap', card.id)
     },
 
     updateDimensions: (context, cardId) => {
@@ -367,22 +363,16 @@ const currentCards = {
         const updates = { id: cardId, resizeWidth: width }
         context.dispatch('update', updates)
         context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
-        context.dispatch('updateDimensions', cardId)
-        context.dispatch('currentConnections/updatePaths', { cardId, shouldUpdateApi: true }, { root: true })
+        context.dispatch('updateDimensionsAndMap', cardId)
       })
-      context.dispatch('updateCardMap')
     },
     removeResize: (context, { cardIds }) => {
       cardIds.forEach(cardId => {
         const updates = { id: cardId, resizeWidth: null }
         context.dispatch('update', updates)
         context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
-        nextTick(() => {
-          context.dispatch('updateDimensions', cardId)
-          context.dispatch('currentConnections/updatePaths', { cardId, shouldUpdateApi: true }, { root: true })
-        })
+        context.dispatch('updateDimensionsAndMap', cardId)
       })
-      context.dispatch('updateCardMap')
     },
 
     // move
@@ -591,6 +581,7 @@ const currentCards = {
       nextTick(() => {
         context.dispatch('updateDimensions', cardId)
         context.dispatch('updateCardMap')
+        context.dispatch('currentConnections/updatePaths', { cardId, shouldUpdateApi: true }, { root: true })
       })
     }
   },
