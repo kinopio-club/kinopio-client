@@ -1016,6 +1016,8 @@ export default {
       this.$store.dispatch('currentCards/toggleChecked', { cardId: this.id, value })
       this.cancelLocking()
       this.$store.commit('currentUserIsDraggingCard', false)
+      const userId = this.$store.state.currentUser.id
+      this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
       event.stopPropagation()
     },
     toggleUserDetailsIsVisible () {

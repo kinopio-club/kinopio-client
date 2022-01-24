@@ -333,7 +333,7 @@ const currentCards = {
       })
     },
     removeChecked: (context, cardId) => {
-      utils.typeCheck({ value: cardId, type: 'string', origin: 'toggleChecked' })
+      utils.typeCheck({ value: cardId, type: 'string', origin: 'removeChecked' })
       const card = context.getters.byId(cardId)
       let name = card.name
       name = name.replace('[x]', '').trim()
