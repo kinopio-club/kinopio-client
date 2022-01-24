@@ -177,13 +177,6 @@ export default {
       }
       context.dispatch('updateModulesSpaceId')
       context.commit('triggerUpdateWindowHistory', { isRemote }, { root: true })
-      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
-      const shouldShow = context.rootState.currentUser.shouldShowNewUserNotification
-      if (!currentUserIsSignedIn && shouldShow) {
-        context.commit('notifyNewUser', true, { root: true })
-      } else {
-        context.commit('notifyNewUser', false, { root: true })
-      }
     },
 
     // Users and otherSpaces
@@ -422,7 +415,6 @@ export default {
       }
       context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
-      context.commit('notifyNewUser', false, { root: true })
       context.commit('notifySignUpToEditSpace', false, { root: true })
       context.commit('triggerUpdateWindowHistory', {}, { root: true })
     },
@@ -432,7 +424,6 @@ export default {
       context.dispatch('createNewJournalSpace')
       context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
-      context.commit('notifyNewUser', false, { root: true })
       context.commit('notifySignUpToEditSpace', false, { root: true })
       context.commit('triggerUpdateWindowHistory', {}, { root: true })
     },
@@ -642,12 +633,6 @@ export default {
         context.dispatch('undoHistory/playback', null, { root: true })
         context.dispatch('checkIfShouldNotifySignUpToEditSpace', space)
         context.dispatch('checkIfShouldNotifySpaceIsRemoved', space)
-        if (cache.getAllSpaces().length) {
-          context.commit('notifyNewUser', false, { root: true })
-        } else {
-          context.commit('notifyNewUser', true, { root: true })
-          console.log('💁‍♀️ notifyNewUser', cache.getAllSpaces())
-        }
       }
       context.commit('broadcast/joinSpaceRoom', null, { root: true })
       context.commit('currentUser/updateFavoriteSpaceIsEdited', space.id, { root: true })

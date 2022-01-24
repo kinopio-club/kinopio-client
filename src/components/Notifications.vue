@@ -87,21 +87,6 @@ aside.notifications(@click.left="closeAllDialogs")
       .button-wrap
         button(@click.left="refreshBrowser") Refresh
 
-  .persistent-item.success(ref="newUser" v-if="notifyNewUser")
-    p Welcome to Kinopio, a space for thinking
-    .row
-      .button-wrap(v-if="!userHasSpaces")
-        button(@click.left="createNewHelloSpace")
-          img.icon(src="@/assets/add.svg")
-          span Space
-      .button-wrap
-        a(href="https://help.kinopio.club/about")
-          button
-            span About Kinopio →
-      .button-wrap
-        button(@click.left="removeNotifyNewUser")
-          img.icon.cancel(src="@/assets/add.svg")
-
   .persistent-item.info(v-if="currentSpaceIsTemplate" ref="template" :class="{'notification-jiggle': readOnlyJiggle}")
     button(@click.left="duplicateSpace")
       img.icon(src="@/assets/add.svg")
@@ -182,7 +167,6 @@ export default {
     notifyConnectionError () { return this.$store.state.notifyConnectionError },
     notifyServerCouldNotSave () { return this.$store.state.notifyServerCouldNotSave },
     notifySpaceIsRemoved () { return this.$store.state.notifySpaceIsRemoved },
-    notifyNewUser () { return this.$store.state.notifyNewUser },
     notifySignUpToEditSpace () { return this.$store.state.notifySignUpToEditSpace },
     notifyCardsCreatedIsNearLimit () { return this.$store.state.notifyCardsCreatedIsNearLimit },
     notifyCardsCreatedIsOverLimit () { return this.$store.state.notifyCardsCreatedIsOverLimit },
@@ -211,10 +195,6 @@ export default {
       const id = this.$store.state.currentSpace.id
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(id)
-    },
-    userHasSpaces () {
-      let userSpaces = cache.getAllSpaces()
-      return Boolean(userSpaces.length)
     }
   },
   methods: {
@@ -256,10 +236,6 @@ export default {
     removeReadOnlyJiggle () {
       this.readOnlyJiggle = false
     },
-    removeNotifyNewUser () {
-      this.$store.commit('notifyNewUser', false)
-      this.$store.commit('currentUser/shouldShowNewUserNotification', false)
-    },
     removeNotifySpaceNotFound () {
       this.$store.commit('notifySpaceNotFound', false)
     },
@@ -280,10 +256,6 @@ export default {
       this.$store.commit('notifySpaceIsRemoved', false)
       const firstSpace = cache.getAllSpaces()[0]
       this.$store.dispatch('currentSpace/loadSpace', { space: firstSpace })
-    },
-    createNewHelloSpace () {
-      this.$store.commit('notifyNewUser', false)
-      window.location.href = '/'
     },
     resetNotifyCardsCreatedIsNearLimit () {
       this.$store.commit('notifyCardsCreatedIsNearLimit', false)
@@ -333,15 +305,6 @@ export default {
       const space = { id: spaceId }
       this.$store.dispatch('currentSpace/changeSpace', { space })
       this.$store.dispatch('closeAllDialogs', 'notifications.changeSpace')
-    }
-  },
-  watch: {
-    notifyNewUser (value) {
-      const shouldShowNewUserNotification = this.$store.state.currentUser.shouldShowNewUserNotification
-      const shouldHide = !shouldShowNewUserNotification || this.localStorageErrorIsVisible()
-      if (shouldHide) {
-        this.$store.commit('notifyNewUser', false)
-      }
     }
   }
 }

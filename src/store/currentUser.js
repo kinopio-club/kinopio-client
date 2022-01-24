@@ -35,7 +35,6 @@ export default {
     shouldShowCardCollaborationInfo: false,
     shouldInvertZoomDirection: false,
     shouldUseLastConnectionType: false,
-    shouldShowNewUserNotification: true,
     shouldOpenLinksInNewTab: false,
     shouldRightMouseButtonPan: false,
     dialogFavoritesFilters: null, // null, 'currentUser', 'otherUsers'
@@ -230,10 +229,6 @@ export default {
     shouldUseLastConnectionType: (state, value) => {
       state.shouldUseLastConnectionType = value
       cache.updateUser('shouldUseLastConnectionType', value)
-    },
-    shouldShowNewUserNotification: (state, value) => {
-      state.shouldShowNewUserNotification = value
-      cache.updateUser('shouldShowNewUserNotification', value)
     },
     dialogFavoritesFilters: (state, value) => {
       state.dialogFavoritesFilters = value

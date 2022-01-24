@@ -151,7 +151,6 @@ const store = createStore({
     notifyConnectionError: false,
     notifyServerCouldNotSave: false,
     notifySpaceIsRemoved: false,
-    notifyNewUser: false,
     notifySignUpToEditSpace: false,
     notifyCardsCreatedIsNearLimit: false,
     notifyCardsCreatedIsOverLimit: false,
@@ -820,10 +819,6 @@ const store = createStore({
     notifySpaceIsRemoved: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'notifySpaceIsRemoved' })
       state.notifySpaceIsRemoved = value
-    },
-    notifyNewUser: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'notifyNewUser' })
-      state.notifyNewUser = value
     },
     notifySignUpToEditSpace: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'notifySignUpToEditSpace' })
