@@ -1289,6 +1289,7 @@ export default {
           url: spaceId
         }
       }
+      this.$store.dispatch('currentCards/updateDimensionsAndMap', this.card.id)
       return space
     },
     openUrl (event, url) {
