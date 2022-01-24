@@ -37,12 +37,7 @@ aside.notifications(@click.left="closeAllDialogs")
   .persistent-item.success(v-if="notifySignUpToEditSpace" ref="readOnly" :class="{'notification-jiggle': readOnlyJiggle}")
     p
       PrivacyIcon(:privacy="privacyState.name")
-      template(v-if="spacePrivacyIsOpen")
-        span This space is open to edits, but you'll need to sign up or in first
-      template(v-else)
-        span You're invited to edit this space, but you'll need to sign up or in first
-    .row
-      button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In
+      button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In to Edit
 
   .persistent-item.danger(v-if="notifySpaceNotFound")
     p Space could not be found, or is private
@@ -185,7 +180,6 @@ export default {
         return state.name === this.$store.state.currentSpace.privacy
       })
     },
-    spacePrivacyIsOpen () { return this.privacyState === 'open' },
     cardsCreatedCountFromLimit () {
       const cardsCreatedLimit = this.$store.state.cardsCreatedLimit
       const cardsCreatedCount = this.$store.state.currentUser.cardsCreatedCount
