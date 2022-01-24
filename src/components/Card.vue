@@ -1551,6 +1551,9 @@ export default {
       this.$store.dispatch('currentCards/update', update)
       this.updateCardMap()
     },
+    updateCardMap () {
+      this.$store.dispatch('currentCards/updateDimensionsAndMap', this.card.id)
+    },
     updateUrlPreviewErrorUrl (url) {
       const cardId = this.card.id
       this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
