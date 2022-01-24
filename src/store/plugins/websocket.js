@@ -17,6 +17,7 @@ if (import.meta.env.MODE === 'development') {
 }
 
 const joinSpaceRoom = (store, mutation) => {
+  console.log('🌙 joining', websocket)
   if (!websocket) { return }
   const space = utils.clone(store.state.currentSpace)
   const user = utils.clone(store.state.currentUser)
@@ -188,6 +189,7 @@ export default function createWebSocketPlugin () {
       } else if (mutation.type === 'broadcast/close') {
         closeWebsocket(store)
       } else if (mutation.type === 'broadcast/reconnect') {
+        console.log('🌝 reconnecting')
         closeWebsocket(store)
         currentUserIsConnected = false
         currentSpaceRoom = null
