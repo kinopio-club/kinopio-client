@@ -1363,6 +1363,9 @@ export default {
 
   indexesOf (string, search) {
     // adapted from https://stackoverflow.com/a/3410549
+    if (this.tagsFromString(search)) {
+      search = this.tagsFromStringWithoutBrackets(search)[0]
+    }
     const searchPattern = new RegExp(search, 'gi')
     let results = []
     while (searchPattern.exec(string)) {
