@@ -75,6 +75,7 @@ export default {
     dataMarkdownType () {
       if (this.segment.isTag) { return 'tag' }
       if (this.segment.isLink) { return 'link' }
+      if (!this.segment.markdown) { return 'text' }
       let markdown = this.segment.markdown.filter(item => Boolean(item.content))
       const segmentIsEmpty = !utils.arrayExists(markdown)
       if (segmentIsEmpty) { return 'text' }
