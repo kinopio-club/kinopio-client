@@ -1363,13 +1363,11 @@ export default {
 
   indexesOf (string, search) {
     // adapted from https://stackoverflow.com/a/3410549
-    if (this.tagsFromString(search)) {
-      search = this.tagsFromStringWithoutBrackets(search)[0]
-    }
-    const searchPattern = new RegExp(search, 'gi')
+    search = search.replaceAll('[', '\\[')
+    const searchPattern = new RegExp(search, 'gim')
     let results = []
     while (searchPattern.exec(string)) {
-      const position = searchPattern.lastIndex - search.length + 1
+      const position = searchPattern.lastIndex - search.length + 2
       results.push(position)
     }
     return results
