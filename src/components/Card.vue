@@ -30,7 +30,7 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
     :data-background-color="card.backgroundColor"
     :data-tags="dataTags"
   )
-    .selected-user-avatar(v-if="isRemoteSelected || isRemoteCardDetailsVisible" :style="{backgroundColor: remoteSelectedColor}")
+    .selected-user-avatar(v-if="isRemoteSelected || isRemoteCardDetailsVisible" :style="{backgroundColor: remoteSelectedColor || remoteCardDetailsVisibleColor}")
       img(src="@/assets/anon-avatar.svg")
 
     .locking-frame(v-if="isLocking" :style="lockingFrameStyle")
@@ -243,7 +243,8 @@ export default {
     })
   },
   mounted () {
-    if (this.shouldUpdateDimensions) {
+    const cardIsMissingDimensions = Boolean(!this.card.width || !this.card.height)
+    if (cardIsMissingDimensions) {
       let card = { id: this.card.id }
       card = utils.updateCardDimensions(card)
       this.$store.dispatch('currentCards/update', card)
@@ -309,9 +310,6 @@ export default {
     },
     isSelectedOrDragging () {
       return this.isSelected || this.isRemoteSelected || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.uploadIsDraggedOver || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor
-    },
-    shouldUpdateDimensions () {
-      return Boolean(!this.card.width || !this.card.height)
     },
     isInSearchResultsCards () {
       const results = this.$store.state.searchResultsCards
@@ -836,12 +834,6 @@ export default {
       this.$store.dispatch('currentConnections/update', connection)
       return newType
     },
-    updateCardMap () {
-      this.$nextTick(() => {
-        this.$store.dispatch('currentCards/updateDimensions', this.card.id)
-        this.$store.dispatch('currentCards/updateCardMap')
-      })
-    },
     addFile (file) {
       let name = this.card.name
       const url = file.url
@@ -1169,9 +1161,6 @@ export default {
       this.$store.dispatch('currentCards/toggleCommentIsVisible', cardId)
       this.$store.dispatch('currentCards/incrementZ', cardId)
       this.updateCardConnectionPathsIfOpenSpace()
-      this.$nextTick(() => {
-        this.updateCardMap()
-      })
     },
     updateCardConnectionPathsIfOpenSpace () {
       const spaceIsOpen = this.$store.state.currentSpace.privacy === 'open'
@@ -1300,6 +1289,7 @@ export default {
           url: spaceId
         }
       }
+      this.$store.dispatch('currentCards/updateDimensionsAndMap', this.card.id)
       return space
     },
     openUrl (event, url) {

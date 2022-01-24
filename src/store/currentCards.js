@@ -12,13 +12,13 @@ import { nextTick } from 'vue'
 let currentSpaceId
 
 const cardMap = new Worker('web-workers/card-map.js')
+// receive
 cardMap.addEventListener('message', event => {
   const cardMap = event.data
   currentCards.mutations.cardMap(currentCards.state, cardMap)
 })
-
+// send
 const updateCardMapDebounced = debounce(function ({ cards, viewport, zoom }) {
-  console.log('updateCardMapDebounced', { cards, viewport, zoom })
   cardMap.postMessage({ cards, viewport, zoom })
 }, 200)
 
@@ -268,6 +268,9 @@ const currentCards = {
       context.dispatch('broadcast/update', { updates: card, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
       context.commit('hasEditedCurrentSpace', true, { root: true })
       context.commit('update', card)
+      if (card.name) {
+        context.dispatch('updateDimensionsAndMap', card.id)
+      }
     },
 
     updateCardName (context, { card, newName }) {
@@ -277,11 +280,7 @@ const currentCards = {
         id: card.id,
         name: newName
       })
-      nextTick(() => {
-        context.dispatch('updateDimensions', card.id)
-        context.dispatch('updateCardMap')
-        context.dispatch('currentConnections/updatePaths', { cardId: card.id, shouldUpdateApi: true }, { root: true })
-      })
+      context.dispatch('updateDimensionsAndMap', card.id)
     },
 
     updateDimensions: (context, cardId) => {
@@ -352,6 +351,7 @@ const currentCards = {
         id: cardId,
         commentIsVisible: value
       })
+      context.dispatch('updateDimensionsAndMap', cardId)
     },
 
     // resize
@@ -366,22 +366,16 @@ const currentCards = {
         const updates = { id: cardId, resizeWidth: width }
         context.dispatch('update', updates)
         context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
-        context.dispatch('updateDimensions', cardId)
-        context.dispatch('currentConnections/updatePaths', { cardId, shouldUpdateApi: true }, { root: true })
+        context.dispatch('updateDimensionsAndMap', cardId)
       })
-      context.dispatch('updateCardMap')
     },
     removeResize: (context, { cardIds }) => {
       cardIds.forEach(cardId => {
         const updates = { id: cardId, resizeWidth: null }
         context.dispatch('update', updates)
         context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
-        nextTick(() => {
-          context.dispatch('updateDimensions', cardId)
-          context.dispatch('currentConnections/updatePaths', { cardId, shouldUpdateApi: true }, { root: true })
-        })
+        context.dispatch('updateDimensionsAndMap', cardId)
       })
-      context.dispatch('updateCardMap')
     },
 
     // move
@@ -585,6 +579,13 @@ const currentCards = {
       const viewport = utils.visualViewport()
       const zoom = context.rootState.spaceZoomPercent / 100
       updateCardMapDebounced({ cards, viewport, zoom })
+    },
+    updateDimensionsAndMap: (context, cardId) => {
+      nextTick(() => {
+        context.dispatch('updateDimensions', cardId)
+        context.dispatch('updateCardMap')
+        context.dispatch('currentConnections/updatePaths', { cardId, shouldUpdateApi: true }, { root: true })
+      })
     }
   },
   getters: {

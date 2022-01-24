@@ -879,8 +879,7 @@ export default {
       this.notifiedMembers = true
     },
     updateCardMap (cardId) {
-      this.$store.dispatch('currentCards/updateDimensions', cardId)
-      this.$store.dispatch('currentCards/updateCardMap')
+      this.$store.dispatch('currentCards/updateDimensionsAndMap', cardId)
     },
     checkIfIsInsertLineBreak (event) {
       const lineBreakInserted = event.ctrlKey || event.altKey

@@ -527,7 +527,9 @@ export default {
     return this.isCardInViewport(rect)
   },
   updateCardDimensions (card) {
+    if (!card) { return }
     const element = document.querySelector(`article [data-card-id="${card.id}"]`)
+    if (!element) { return }
     const rect = element.getBoundingClientRect()
     card.width = Math.ceil(rect.width)
     card.height = Math.ceil(rect.height)
