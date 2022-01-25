@@ -116,10 +116,15 @@ export default {
       this.$store.commit('shouldExplicitlyHideFooter', value)
     },
     addJournalSpace () {
-      this.$store.dispatch('closeAllDialogs', 'addSpace.addJournalSpace')
-      window.scrollTo(0, 0)
-      this.$store.dispatch('currentSpace/addJournalSpace')
-      this.$store.dispatch('currentSpace/updateSpacePageSize')
+      this.$emit('closeDialogs')
+      this.$emit('addJournalSpace')
+      if (this.shouldAddSpaceDirectly) {
+        this.$store.dispatch('closeAllDialogs', 'addSpace.addJournalSpace')
+        window.scrollTo(0, 0)
+        this.$store.dispatch('currentSpace/addJournalSpace')
+        this.$store.dispatch('currentSpace/updateSpacePageSize')
+        this.$store.commit('triggerSpaceDetailsInfoIsVisible')
+      }
     },
     addSpace () {
       const noUserSpaces = !cache.getAllSpaces().length
@@ -134,6 +139,7 @@ export default {
         window.scrollTo(0, 0)
         this.$store.dispatch('currentSpace/addSpace')
         this.$store.dispatch('currentSpace/updateSpacePageSize')
+        this.$store.commit('triggerSpaceDetailsInfoIsVisible')
       }
     },
     toggleNewSpacesAreBlank () {

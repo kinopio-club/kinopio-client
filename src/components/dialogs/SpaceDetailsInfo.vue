@@ -1,0 +1,35 @@
+<template lang="pug">
+dialog.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog")
+  section
+    SpaceDetailsInfo(:shouldHideExplore="true" @closeDialogs="closeDialogs")
+</template>
+
+<script>
+import SpaceDetailsInfo from '@/components/SpaceDetailsInfo.vue'
+
+export default {
+  name: 'SpaceDetails',
+  components: {
+    SpaceDetailsInfo
+  },
+  props: {
+    visible: Boolean
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerSpaceDetailsInfoIsVisible') {
+        this.$nextTick(() => {
+          this.$store.commit('triggerFocusSpaceDetailsName')
+        })
+      }
+    })
+  },
+  methods: {
+    closeDialogs () {
+      this.$store.commit('triggerSpaceDetailsCloseDialogs')
+    }
+  }
+}
+</script>
+<style lang="stylus">
+</style>

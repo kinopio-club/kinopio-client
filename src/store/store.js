@@ -337,6 +337,7 @@ const store = createStore({
       state.isAuthenticatingWithArena = value
     },
     triggerSpaceDetailsVisible: () => {},
+    triggerSpaceDetailsInfoIsVisible: () => {},
     triggerFocusResultsFilter: () => {},
     triggerFocusSpaceDetailsName: () => {},
     triggerSignUpOrInIsVisible: () => {},

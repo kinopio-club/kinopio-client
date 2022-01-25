@@ -17,7 +17,7 @@ template(v-if="isSpaceMember")
     input(ref="name" placeholder="name" v-model="spaceName")
   .row.privacy-row
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
-    AddToExplore(@updateSpaces="updateSpaces")
+    AddToExplore(v-if="!shouldHideExplore" @updateSpaces="updateSpaces")
 
 template(v-if="!isSpaceMember")
   .row.space-details-info.not-space-member(@click.left="closeDialogsAndEmit")
@@ -49,7 +49,7 @@ export default {
     AddToExplore
   },
   props: {
-    // shouldHideExplore: Boolean
+    shouldHideExplore: Boolean
   },
   data () {
     return {
@@ -61,6 +61,15 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerSpaceDetailsCloseDialogs') {
         this.closeDialogs()
+      } else if (mutation.type === 'triggerFocusSpaceDetailsName') {
+        this.$nextTick(() => {
+          this.$nextTick(() => {
+            const element = this.$refs.name
+            if (!element) { return }
+            element.focus()
+            element.setSelectionRange(0, element.value.length)
+          })
+        })
       }
     })
   },
@@ -158,4 +167,6 @@ export default {
         position absolute
         top 6px
         left 6px
+  .privacy-button
+    min-width 24px
 </style>

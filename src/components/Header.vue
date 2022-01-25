@@ -38,6 +38,7 @@ header(:style="visualViewportPosition")
               img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
             SpaceDetails(:visible="spaceDetailsIsVisible")
             ImportArenaChannel(:visible="importArenaChannelIsVisible")
+            SpaceDetailsInfo(:visible="spaceDetailsInfoIsVisible")
             //- Read Only badge
             .label-badge.read-only-badge-wrap(v-if="!userCanEditSpace && !currentSpaceIsTemplate")
               span(:class="{'invisible': readOnlyJiggle}")
@@ -121,6 +122,7 @@ header(:style="visualViewportPosition")
 <script>
 import About from '@/components/dialogs/About.vue'
 import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
+import SpaceDetailsInfo from '@/components/dialogs/SpaceDetailsInfo.vue'
 import SpaceStatus from '@/components/dialogs/SpaceStatus.vue'
 import Offline from '@/components/dialogs/Offline.vue'
 import MoonPhase from '@/components/MoonPhase.vue'
@@ -149,6 +151,7 @@ export default {
   components: {
     About,
     SpaceDetails,
+    SpaceDetailsInfo,
     SpaceStatus,
     Offline,
     User,
@@ -169,6 +172,7 @@ export default {
     return {
       aboutIsVisible: false,
       spaceDetailsIsVisible: false,
+      spaceDetailsInfoIsVisible: false,
       signUpOrInIsVisible: false,
       shareIsVisible: false,
       notificationsIsVisible: false,
@@ -188,39 +192,31 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'closeAllDialogs') {
         this.closeAllDialogs()
-      }
-      if (mutation.type === 'triggerSpaceDetailsVisible') {
+      } else if (mutation.type === 'triggerSpaceDetailsVisible') {
         this.spaceDetailsIsVisible = true
-      }
-      if (mutation.type === 'triggerSignUpOrInIsVisible') {
+      } else if (mutation.type === 'triggerSpaceDetailsInfoIsVisible') {
+        this.spaceDetailsInfoIsVisible = true
+      } else if (mutation.type === 'triggerSignUpOrInIsVisible') {
         this.signUpOrInIsVisible = true
-      }
-      if (mutation.type === 'triggerKeyboardShortcutsIsVisible') {
+      } else if (mutation.type === 'triggerKeyboardShortcutsIsVisible') {
         this.keyboardShortcutsIsVisible = true
-      }
-      if (mutation.type === 'triggerUpgradeUserIsVisible') {
+      } else if (mutation.type === 'triggerUpgradeUserIsVisible') {
         this.upgradeUserIsVisible = true
-      }
-      if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
+      } else if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
         currentIteration = 0
         if (updatePositionTimer) { return }
         updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
-      }
-      if (mutation.type === 'currentUserIsPainting') {
+      } else if (mutation.type === 'currentUserIsPainting') {
         if (state.currentUserIsPainting) {
           this.addReadOnlyJiggle()
         }
-      }
-      if (mutation.type === 'triggerReadOnlyJiggle') {
+      } else if (mutation.type === 'triggerReadOnlyJiggle') {
         this.addReadOnlyJiggle()
-      }
-      if (mutation.type === 'triggerUpdateNotifications') {
+      } else if (mutation.type === 'triggerUpdateNotifications') {
         this.updateNotifications()
-      }
-      if (mutation.type === 'triggerShowNextSearchCard') {
+      } else if (mutation.type === 'triggerShowNextSearchCard') {
         this.showNextSearchCard()
-      }
-      if (mutation.type === 'triggerShowPreviousSearchCard') {
+      } else if (mutation.type === 'triggerShowPreviousSearchCard') {
         this.showPreviousSearchCard()
       }
     })
@@ -397,6 +393,7 @@ export default {
     closeAllDialogs () {
       this.aboutIsVisible = false
       this.spaceDetailsIsVisible = false
+      this.spaceDetailsInfoIsVisible = false
       this.signUpOrInIsVisible = false
       this.shareIsVisible = false
       this.keyboardShortcutsIsVisible = false
