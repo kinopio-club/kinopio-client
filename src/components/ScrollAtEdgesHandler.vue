@@ -184,6 +184,7 @@ export default {
     },
     scrollBy (delta) {
       const zoom = this.spaceCounterZoomDecimal
+      const currentUserIsBoxSelecting = this.$store.state.currentUserIsBoxSelecting
       delta.left = delta.x * 1.1
       delta.top = delta.y
       delta.x = delta.x * zoom
@@ -195,7 +196,7 @@ export default {
       if (this.isDrawingConnection) {
         this.$store.commit('triggeredDrawConnectionFrame', cursor)
       }
-      if (this.currentUserIsPainting) {
+      if (this.currentUserIsPainting && !currentUserIsBoxSelecting) {
         this.$store.commit('triggeredPaintFramePosition', cursor)
       }
       window.scrollBy(delta)

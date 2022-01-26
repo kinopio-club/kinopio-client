@@ -1,4 +1,6 @@
 <template lang="pug">
+.box-selecting
+  .box-select(v-if="currentUserIsBoxSelecting" :style="currentUserStyles")
 </template>
 
 <script>
@@ -20,7 +22,18 @@ export default {
     currentUserIsBoxSelecting () { return this.$store.state.currentUserIsBoxSelecting },
     currentUserBoxSelectStart () { return this.$store.state.currentUserBoxSelectStart },
     currentUserBoxSelectEnd () { return this.$store.state.currentUserBoxSelectEnd },
-    userCantEditSpace () { return !this.$store.getters['currentUser/canEditSpace']() }
+    userCantEditSpace () { return !this.$store.getters['currentUser/canEditSpace']() },
+    currentUserStyles () {
+      const x = {
+        left: this.currentUserBoxSelectStart.x + 'px',
+        top: this.currentUserBoxSelectStart.y + 'px',
+        width: Math.abs(this.currentUserBoxSelectStart.x - this.currentUserBoxSelectEnd.x) + 'px',
+        height: Math.abs(this.currentUserBoxSelectStart.y - this.currentUserBoxSelectEnd.y) + 'px',
+        backgroundColor: this.$store.state.currentUser.color
+      }
+      console.log(x)
+      return x
+    }
   },
   methods: {
     selectCards (start, end) {
@@ -86,4 +99,13 @@ export default {
 </script>
 
 <style lang="stylus">
+.box-selecting
+  pointer-events none
+  position absolute
+  top 0
+  left 0
+  width 100%
+  height 100%
+  .box-select
+    position absolute
 </style>
