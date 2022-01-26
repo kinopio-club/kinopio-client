@@ -209,7 +209,17 @@ export default {
       const rightMouseButton = 2
       const isRightClick = rightMouseButton === event.button
       const isSpaceScope = event.target.id === 'magic-painting'
-      if (isRightClick && isSpaceScope) {
+      const isCardsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)
+      const isConnectionsSelected = Boolean(this.$store.state.multipleConnectionsSelectedIds.length)
+      const shouldBoxSelect = event.shiftKey && isSpaceScope && !isCardsSelected && !isConnectionsSelected
+      const shouldPan = isRightClick && isSpaceScope
+      const position = utils.cursorPositionInPage(event)
+      if (shouldBoxSelect) {
+        event.preventDefault()
+        this.$store.commit('currentUserIsBoxSelecting', true)
+        this.$store.commit('currentUserBoxSelectEnd', position)
+        this.$store.commit('currentUserBoxSelectStart', position)
+      } else if (shouldPan) {
         event.preventDefault()
         this.$store.commit('currentUserIsPanning', true)
         disableContextMenu = true
@@ -222,12 +232,14 @@ export default {
     // on mouse move
     handleMouseMoveEvents (event) {
       const speed = 2
-      if (this.$store.state.currentUserIsPanning) {
+      const position = utils.cursorPositionInPage(event)
+      if (this.$store.state.currentUserIsBoxSelecting) {
+        this.$store.commit('currentUserBoxSelectEnd', position)
+      } else if (this.$store.state.currentUserIsPanning) {
         event.preventDefault()
         if (!prevCursorPosition) {
-          prevCursorPosition = utils.cursorPositionInPage(event)
+          prevCursorPosition = position
         }
-        const position = utils.cursorPositionInPage(event)
         const delta = {
           x: Math.ceil((prevCursorPosition.x - position.x) * speed),
           y: Math.ceil((prevCursorPosition.y - position.y) * speed)
@@ -239,6 +251,7 @@ export default {
     handleMouseUpEvents (event) {
       prevCursorPosition = undefined
       this.$store.commit('currentUserIsPanning', false)
+      this.$store.commit('currentUserIsBoxSelecting', false)
     },
     // on scroll
     handleScrollEvents (event) {

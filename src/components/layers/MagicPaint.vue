@@ -141,7 +141,8 @@ export default {
     viewportWidth () { return this.$store.state.viewportWidth },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
-    isPanning () { return this.$store.state.currentUserIsPanningReady }
+    isPanning () { return this.$store.state.currentUserIsPanningReady },
+    isBoxSelecting () { return this.$store.state.currentUserIsBoxSelecting }
   },
   methods: {
     dialogIsVisible () {
@@ -270,6 +271,7 @@ export default {
 
     painting (event) {
       if (this.isPanning) { return }
+      if (this.isBoxSelecting) { return }
       if (!this.$store.state.currentUserIsPainting) { return }
       if (this.$store.getters.shouldScrollAtEdges(event)) {
         event.preventDefault() // prevents touch swipe viewport scrolling
@@ -297,6 +299,7 @@ export default {
     },
     startPainting (event) {
       if (this.isPanning) { return }
+      if (this.isBoxSelecting) { return }
       startCursor = utils.cursorPositionInViewport(event)
       this.currentCursor = utils.cursorPositionInViewport(event)
       const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)

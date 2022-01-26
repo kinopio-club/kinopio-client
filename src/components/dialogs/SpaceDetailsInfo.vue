@@ -8,7 +8,7 @@ dialog.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dia
 import SpaceDetailsInfo from '@/components/SpaceDetailsInfo.vue'
 
 export default {
-  name: 'SpaceDetails',
+  name: 'SpaceDetailsInfoDialog',
   components: {
     SpaceDetailsInfo
   },

@@ -68,8 +68,13 @@ const store = createStore({
     currentUserIsPanningReady: false,
     currentUserIsPanning: false,
 
-    // resizing
+    // box selecting
+    currentUserIsBoxSelecting: false,
+    currentUserBoxSelectStart: {},
+    currentUserBoxSelectEnd: {},
+    // remoteUserBoxSelects: [],
 
+    // resizing
     currentUserIsResizingCard: false,
     currentUserIsResizingCardIds: [],
     remoteUserResizingCards: [],
@@ -484,6 +489,21 @@ const store = createStore({
     currentUserIsPaintingLocked: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsPaintingLocked' })
       state.currentUserIsPaintingLocked = value
+    },
+
+    // box selecting
+
+    currentUserIsBoxSelecting: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsBoxSelecting' })
+      state.currentUserIsBoxSelecting = value
+    },
+    currentUserBoxSelectStart: (state, object) => {
+      utils.typeCheck({ value: object, type: 'object', origin: 'currentUserBoxSelectStart' })
+      state.currentUserBoxSelectStart = object
+    },
+    currentUserBoxSelectEnd: (state, object) => {
+      utils.typeCheck({ value: object, type: 'object', origin: 'currentUserBoxSelectEnd' })
+      state.currentUserBoxSelectEnd = object
     },
 
     // Resizing
