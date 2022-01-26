@@ -5,12 +5,16 @@
 
 <script>
 
+let selectableCards = {}
+
 export default {
   name: 'BoxSelecting',
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'currentUserBoxSelectEnd') {
         this.selectCards()
+      } else if (mutation.type === 'currentUserBoxSelectStart') {
+        this.updateSelectableCards()
       }
     })
   },
@@ -22,7 +26,6 @@ export default {
     userCantEditSpace () { return !this.$store.getters['currentUser/canEditSpace']() },
     currentUserStyles () {
       const { start, end } = this.orderedPoints(this.start, this.end)
-      console.log('🍅', start, end)
       const styles = {
         left: start.x + 'px',
         top: start.y + 'px',
@@ -30,7 +33,6 @@ export default {
         height: Math.abs(start.y - end.y) + 'px',
         backgroundColor: this.$store.state.currentUser.color
       }
-      // console.log(styles)
       return styles
     }
   },
@@ -55,13 +57,13 @@ export default {
       //      y greater     │      y greater
       //                    │
       //                    │
-      let relativePosition
+      let relativePosition = 'bottomRight'
       if (end.x <= start.x && end.y <= start.y) {
         relativePosition = 'topLeft'
       } else if (end.x >= start.x && end.y <= start.y) {
         relativePosition = 'topRight'
       } else if (end.x <= start.x && end.y >= start.y) {
-        relativePosition = 'bottomleft'
+        relativePosition = 'bottomLeft'
       }
       let newStart, newEnd
       if (relativePosition === 'topLeft') {
@@ -70,20 +72,49 @@ export default {
       } else if (relativePosition === 'topRight') {
         newStart = { x: start.x, y: end.y }
         newEnd = { x: end.x, y: start.y }
-      } else if (relativePosition === 'bottomleft') {
+      } else if (relativePosition === 'bottomLeft') {
         newStart = { x: end.x, y: start.y }
         newEnd = { x: start.x, y: end.y }
       } else {
         newStart = start
         newEnd = end
       }
-      return { start: newStart, end: newEnd }
+      return { start: newStart, end: newEnd, relativePosition }
+    },
+    updateSelectableCards () {
+      const origin = this.start
+      const cardMap = this.$store.state.currentCards.cardMap
+      selectableCards = { topLeft: [], topRight: [], bottomLeft: [], bottomRight: [] }
+      cardMap.forEach(card => {
+        const { x, y, height, width } = card
+        const isTop = y <= origin.y
+        const isBottom = (y >= origin.y || y + height >= origin.y)
+        const isLeft = x <= origin.x
+        const isRight = (x >= origin.x || x + width >= origin.x)
+        // group into quadrants
+        if (isTop && isLeft) { selectableCards.topLeft.push(card) }
+        if (isTop && isRight) { selectableCards.topRight.push(card) }
+        if (isBottom && isLeft) { selectableCards.bottomLeft.push(card) }
+        if (isBottom && isRight) { selectableCards.bottomRight.push(card) }
+      })
     },
     selectCards () {
-      // const { start, end } = this.orderedPoints(this.start, this.end)
+      const { start, end, relativePosition } = this.orderedPoints(this.start, this.end)
+      let cards = selectableCards[relativePosition]
+      // let selectedCards = []
 
-      // const cardMap = this.$store.state.currentCards.cardMap
+      console.log('🍅', start, end, relativePosition, cards)
+
+      // cards.forEach(card => {
+
+      // })
+
+      // match selectedCards
+
+      // uniq cards
+      //       this.$store.dispatch('multipleCardsSelectedIds', [cardIds])
     }
+
     // selectCards (point, shouldToggle) {
     //   if (this.userCantEditSpace) { return }
     //   const cardMap = this.$store.state.currentCards.cardMap
