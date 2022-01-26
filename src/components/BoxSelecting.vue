@@ -4,6 +4,8 @@
 </template>
 
 <script>
+import { getOverlapSize } from 'overlap-area'
+import uniqBy from 'lodash-es/uniqBy'
 
 let selectableCards = {}
 
@@ -26,17 +28,29 @@ export default {
     userCantEditSpace () { return !this.$store.getters['currentUser/canEditSpace']() },
     currentUserStyles () {
       const { start, end } = this.orderedPoints(this.start, this.end)
+      const { left, top, width, height } = this.box(start, end)
       const styles = {
-        left: start.x + 'px',
-        top: start.y + 'px',
-        width: Math.abs(start.x - end.x) + 'px',
-        height: Math.abs(start.y - end.y) + 'px',
+        left: left + 'px',
+        top: top + 'px',
+        width: width + 'px',
+        height: height + 'px',
         backgroundColor: this.$store.state.currentUser.color
       }
       return styles
     }
   },
   methods: {
+    box (start, end) {
+      return {
+        x: start.x,
+        y: start.y,
+        left: start.x,
+        top: start.y,
+        width: Math.abs(start.x - end.x),
+        height: Math.abs(start.y - end.y)
+      }
+    },
+
     orderedPoints (start, end) {
       //                    │
       //                    │
@@ -98,53 +112,34 @@ export default {
         if (isBottom && isRight) { selectableCards.bottomRight.push(card) }
       })
     },
+    points (rect) {
+      const { x, y, height, width } = rect
+      const x1 = x
+      const x2 = x + width
+      const y1 = y
+      const y2 = y + height
+      return [
+        [x1, y1],
+        [x2, y1],
+        [x2, y2],
+        [x1, y2]
+      ]
+    },
     selectCards () {
       const { start, end, relativePosition } = this.orderedPoints(this.start, this.end)
+      const box = this.box(start, end)
+      const boxPoints = this.points(box)
       let cards = selectableCards[relativePosition]
-      // let selectedCards = []
-
-      console.log('🍅', start, end, relativePosition, cards)
-
-      // cards.forEach(card => {
-
-      // })
-
-      // match selectedCards
-
-      // uniq cards
-      //       this.$store.dispatch('multipleCardsSelectedIds', [cardIds])
+      if (!cards) { return }
+      let selectedCards = cards.filter(card => {
+        const cardPoints = this.points(card)
+        return Boolean(getOverlapSize(boxPoints, cardPoints))
+      })
+      selectedCards = uniqBy(selectedCards, 'id')
+      const selectedCardsIds = selectedCards.map(card => card.id)
+      console.log('🌷', selectedCardsIds)
+      //  TODO this.$store.dispatch('multipleCardsSelectedIds', [cardIds])
     }
-
-    // selectCards (point, shouldToggle) {
-    //   if (this.userCantEditSpace) { return }
-    //   const cardMap = this.$store.state.currentCards.cardMap
-
-    // cardMap.forEach(card => {
-    //   const cardX = card.x
-    //   const cardY = card.y
-    //   const pointX = (point.x + window.scrollX) * zoom
-    //   const pointY = (point.y + window.scrollY) * zoom
-    //   const x = {
-    //     value: pointX,
-    //     min: cardX - circleSelectionRadius,
-    //     max: cardX + card.width + circleSelectionRadius
-    //   }
-    //   const y = {
-    //     value: pointY,
-    //     min: cardY - circleSelectionRadius,
-    //     max: cardY + card.height + circleSelectionRadius
-    //   }
-    //   const isBetweenX = utils.isBetween(x)
-    //   const isBetweenY = utils.isBetween(y)
-    //   if (isBetweenX && isBetweenY) {
-    //     if (shouldToggle) {
-    //       this.$store.dispatch('toggleCardSelected', card.id)
-    //     } else {
-    //       this.$store.dispatch('addToMultipleCardsSelected', card.id)
-    //     }
-    //   }
-    // })
-    // },
 
     // selectConnectionPaths (point, shouldToggle) {
     //   const zoom = this.spaceCounterZoomDecimal

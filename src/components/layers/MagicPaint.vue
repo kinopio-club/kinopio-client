@@ -282,6 +282,7 @@ export default {
       this.createPaintingCircle(event)
     },
     createPaintingCircle (event) {
+      if (this.isBoxSelecting) { return }
       const currentUserIsPaintingLocked = this.$store.state.currentUserIsPaintingLocked
       if (event.touches && !currentUserIsPaintingLocked) { return }
       let color = this.$store.state.currentUser.color
