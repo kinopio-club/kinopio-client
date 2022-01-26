@@ -1017,6 +1017,15 @@ const store = createStore({
       }
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteCardsSelected' }, { root: true })
     },
+    multipleCardsSelectedIds: (context, cardIds) => {
+      utils.typeCheck({ value: cardIds, type: 'array', origin: 'multipleCardsSelectedIds' })
+      context.commit('multipleCardsSelectedIds', cardIds)
+      const updates = {
+        userId: context.rootState.currentUser.id,
+        cardIds
+      }
+      context.commit('broadcast/updateStore', { updates, type: 'multipleCardsSelectedIds' }, { root: true })
+    },
     clearMultipleSelected: (context) => {
       if (context.state.multipleCardsSelectedIds.length || context.state.multipleConnectionsSelectedIds.length) {
         context.commit('clearMultipleSelected')

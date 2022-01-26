@@ -20,7 +20,6 @@ export default {
       }
     })
   },
-  // TODO on mouse up/currentbox select end if selections = open multi actions
   computed: {
     currentUserIsBoxSelecting () { return this.$store.state.currentUserIsBoxSelecting },
     start () { return this.$store.state.currentUserBoxSelectStart },
@@ -97,9 +96,9 @@ export default {
     },
     updateSelectableCards () {
       const origin = this.start
-      const cardMap = this.$store.state.currentCards.cardMap
+      const cards = this.$store.getters['currentCards/all']
       selectableCards = { topLeft: [], topRight: [], bottomLeft: [], bottomRight: [] }
-      cardMap.forEach(card => {
+      cards.forEach(card => {
         const { x, y, height, width } = card
         const isTop = y <= origin.y
         const isBottom = (y >= origin.y || y + height >= origin.y)
@@ -137,8 +136,7 @@ export default {
       })
       selectedCards = uniqBy(selectedCards, 'id')
       const selectedCardsIds = selectedCards.map(card => card.id)
-      console.log('🌷', selectedCardsIds)
-      //  TODO this.$store.dispatch('multipleCardsSelectedIds', [cardIds])
+      this.$store.dispatch('multipleCardsSelectedIds', selectedCardsIds)
     }
 
     // selectConnectionPaths (point, shouldToggle) {
