@@ -10,36 +10,79 @@ export default {
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'currentUserBoxSelectEnd') {
-        const start = this.currentUserBoxSelectStart
-        const end = this.currentUserBoxSelectEnd
-        this.selectCards(start, end)
-        // this.selectConnectionPaths(start, end)
+        this.selectCards()
       }
     })
   },
-  // on mouse up/currentbox select end if selections = open multi actions
+  // TODO on mouse up/currentbox select end if selections = open multi actions
   computed: {
     currentUserIsBoxSelecting () { return this.$store.state.currentUserIsBoxSelecting },
-    currentUserBoxSelectStart () { return this.$store.state.currentUserBoxSelectStart },
-    currentUserBoxSelectEnd () { return this.$store.state.currentUserBoxSelectEnd },
+    start () { return this.$store.state.currentUserBoxSelectStart },
+    end () { return this.$store.state.currentUserBoxSelectEnd },
     userCantEditSpace () { return !this.$store.getters['currentUser/canEditSpace']() },
     currentUserStyles () {
-      const x = {
-        left: this.currentUserBoxSelectStart.x + 'px',
-        top: this.currentUserBoxSelectStart.y + 'px',
-        width: Math.abs(this.currentUserBoxSelectStart.x - this.currentUserBoxSelectEnd.x) + 'px',
-        height: Math.abs(this.currentUserBoxSelectStart.y - this.currentUserBoxSelectEnd.y) + 'px',
+      const { start, end } = this.orderedPoints(this.start, this.end)
+      console.log('🍅', start, end)
+      const styles = {
+        left: start.x + 'px',
+        top: start.y + 'px',
+        width: Math.abs(start.x - end.x) + 'px',
+        height: Math.abs(start.y - end.y) + 'px',
         backgroundColor: this.$store.state.currentUser.color
       }
-      console.log(x)
-      return x
+      // console.log(styles)
+      return styles
     }
   },
   methods: {
-    selectCards (start, end) {
-      // const cardMap = this.$store.state.currentCards.cardMap
+    orderedPoints (start, end) {
+      //                    │
+      //                    │
+      //       topLeft      │      topRight
+      //                    │
+      //                    │
+      //   end: x less &    │   end: x greater &
+      //       y less       │       y less
+      //                    │
+      //                    │
+      // ───────────────────┼─────────────────────
+      //                    │
+      //                    │    bottomRight
+      //      bottomLeft    │     (default)
+      //                    │
+      //                    │
+      //    end: x less &   │   end: x greater &
+      //      y greater     │      y greater
+      //                    │
+      //                    │
+      let relativePosition
+      if (end.x <= start.x && end.y <= start.y) {
+        relativePosition = 'topLeft'
+      } else if (end.x >= start.x && end.y <= start.y) {
+        relativePosition = 'topRight'
+      } else if (end.x <= start.x && end.y >= start.y) {
+        relativePosition = 'bottomleft'
+      }
+      let newStart, newEnd
+      if (relativePosition === 'topLeft') {
+        newStart = end
+        newEnd = start
+      } else if (relativePosition === 'topRight') {
+        newStart = { x: start.x, y: end.y }
+        newEnd = { x: end.x, y: start.y }
+      } else if (relativePosition === 'bottomleft') {
+        newStart = { x: end.x, y: start.y }
+        newEnd = { x: start.x, y: end.y }
+      } else {
+        newStart = start
+        newEnd = end
+      }
+      return { start: newStart, end: newEnd }
+    },
+    selectCards () {
+      // const { start, end } = this.orderedPoints(this.start, this.end)
 
-      console.log(start, end)
+      // const cardMap = this.$store.state.currentCards.cardMap
     }
     // selectCards (point, shouldToggle) {
     //   if (this.userCantEditSpace) { return }
