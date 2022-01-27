@@ -8,6 +8,7 @@ import { getOverlapSize } from 'overlap-area'
 import uniqBy from 'lodash-es/uniqBy'
 
 let selectableCards = {}
+let previouslySelectedCardIds = []
 
 export default {
   name: 'BoxSelecting',
@@ -17,6 +18,9 @@ export default {
         this.selectCards()
       } else if (mutation.type === 'currentUserBoxSelectStart') {
         this.updateSelectableCards()
+        // TODO connections
+      } else if (mutation.type === 'currentUserIsBoxSelecting' && mutation.payload) {
+        this.updatePreviouslySelectedItems()
       }
     })
   },
@@ -39,6 +43,10 @@ export default {
     }
   },
   methods: {
+    updatePreviouslySelectedItems () {
+      previouslySelectedCardIds = this.$store.state.multipleCardsSelectedIds
+      // TODO prevconnections
+    },
     box (start, end) {
       return {
         x: start.x,
@@ -124,6 +132,17 @@ export default {
         [x1, y2]
       ]
     },
+    mergePreviouslySelectedCards (selectedCardIds) {
+      previouslySelectedCardIds.forEach(id => {
+        const index = selectedCardIds.indexOf(id)
+        if (index >= 0) {
+          selectedCardIds.splice(index, 1)
+        } else {
+          selectedCardIds.push(id)
+        }
+      })
+      return selectedCardIds
+    },
     selectCards () {
       const { start, end, relativePosition } = this.orderedPoints(this.start, this.end)
       const box = this.box(start, end)
@@ -135,8 +154,9 @@ export default {
         return Boolean(getOverlapSize(boxPoints, cardPoints))
       })
       selectedCards = uniqBy(selectedCards, 'id')
-      const selectedCardsIds = selectedCards.map(card => card.id)
-      this.$store.dispatch('multipleCardsSelectedIds', selectedCardsIds)
+      let selectedCardIds = selectedCards.map(card => card.id)
+      selectedCardIds = this.mergePreviouslySelectedCards(selectedCardIds)
+      this.$store.dispatch('multipleCardsSelectedIds', selectedCardIds)
     }
 
     // selectConnectionPaths (point, shouldToggle) {

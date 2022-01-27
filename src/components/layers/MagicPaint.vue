@@ -311,6 +311,9 @@ export default {
       if (!multipleCardsIsSelected && !this.dialogIsVisible()) {
         this.$store.commit('shouldAddCard', true)
       }
+      if (!event.shiftKey) {
+        this.$store.dispatch('clearMultipleSelected')
+      }
       this.$store.commit('previousMultipleCardsSelectedIds', utils.clone(this.$store.state.multipleCardsSelectedIds))
       this.$store.commit('previousMultipleConnectionsSelectedIds', utils.clone(this.$store.state.multipleConnectionsSelectedIds))
       this.$store.dispatch('closeAllDialogs', 'MagicPaint.startPainting')
