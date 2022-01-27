@@ -6,21 +6,26 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       .badge.keyboard-shortcut ?
 
   section
-    //- Search and Jump
+
+    //- Navigate
     .section-title
-      .badge.info Search and Jump
+      .badge.info Navigate
     article
       .row
         .badge.title
-          img.icon(src="@/assets/search.svg")
-          span Search/Jump-to Spaces
-        .badge.keyboard-shortcut {{meta}}–K
+          img.icon.hand(src="@/assets/hand.svg")
+          span Drag to Pan
+        .badge.keyboard-shortcut Space/Right-Click Drag
     article
       .row
         .badge.title
-          img.icon(src="@/assets/search.svg")
-          span Search/Jump-to Cards
-        .badge.keyboard-shortcut {{meta}}–F
+          img.icon.magnifying-glass(src="@/assets/magnifying-glass.svg")
+          span Zoom In or Out
+        .badge.keyboard-shortcut {{meta}}-+/-, {{meta}}-Scroll
+      .row(v-if="!isMobile")
+        label(:class="{active: shouldInvertZoomDirection}" @click.left.prevent="toggleShouldInvertZoomDirection" @keydown.stop.enter="toggleShouldInvertZoomDirection")
+          input(type="checkbox" v-model="shouldInvertZoomDirection")
+          span Invert Zoom Direction
 
     //- Edit
     .section-title
@@ -66,6 +71,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
     //- Select
     .section-title
       .badge.info Select
+    article
+      .row
+        .badge.title
+          img.icon(src="@/assets/box-select.svg")
+          span Box Select
+        .badge.keyboard-shortcut Shift-Drag
     article
       .row
         .badge.title
@@ -136,6 +147,22 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
         span.badge.keyboard-shortcut Shift-Click
         span 'Connect' button to use {{lastOrNewConnectionTypeControlSetting}} connection type
 
+    //- Search and Jump
+    .section-title
+      .badge.info Search and Jump
+    article
+      .row
+        .badge.title
+          img.icon(src="@/assets/search.svg")
+          span Search/Jump-to Spaces
+        .badge.keyboard-shortcut {{meta}}–K
+    article
+      .row
+        .badge.title
+          img.icon(src="@/assets/search.svg")
+          span Search/Jump-to Cards
+        .badge.keyboard-shortcut {{meta}}–F
+
     //- General
     .section-title
       .badge.info General
@@ -145,22 +172,6 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           img.icon(src="@/assets/add.svg")
           span New Space
         .badge.keyboard-shortcut N
-    article
-      .row
-        .badge.title
-          img.icon.hand(src="@/assets/hand.svg")
-          span Drag to Pan
-        .badge.keyboard-shortcut Space
-    article
-      .row
-        .badge.title
-          img.icon.magnifying-glass(src="@/assets/magnifying-glass.svg")
-          span Zoom In or Out
-        .badge.keyboard-shortcut {{meta}}-+/-, {{meta}}-Scroll
-      .row(v-if="!isMobile")
-        label(:class="{active: shouldInvertZoomDirection}" @click.left.prevent="toggleShouldInvertZoomDirection" @keydown.stop.enter="toggleShouldInvertZoomDirection")
-          input(type="checkbox" v-model="shouldInvertZoomDirection")
-          span Invert Zoom Direction
     article
       .row
         .badge.title
