@@ -26,8 +26,8 @@ export default {
   },
   computed: {
     currentUserIsBoxSelecting () { return this.$store.state.currentUserIsBoxSelecting },
-    start () { return this.$store.state.currentUserBoxSelectStart },
-    end () { return this.$store.state.currentUserBoxSelectEnd },
+    start () { return this.zoom(this.$store.state.currentUserBoxSelectStart) },
+    end () { return this.zoom(this.$store.state.currentUserBoxSelectEnd) },
     userCantEditSpace () { return !this.$store.getters['currentUser/canEditSpace']() },
     currentUserStyles () {
       const { start, end } = this.orderedPoints(this.start, this.end)
@@ -40,9 +40,17 @@ export default {
         backgroundColor: this.$store.state.currentUser.color
       }
       return styles
-    }
+    },
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal }
   },
   methods: {
+    zoom (point) {
+      const zoom = this.spaceCounterZoomDecimal
+      return {
+        x: Math.ceil(point.x * zoom),
+        y: Math.ceil(point.y * zoom)
+      }
+    },
     updatePreviouslySelectedItems () {
       previouslySelectedCardIds = this.$store.state.multipleCardsSelectedIds
       // TODO prevconnections
