@@ -209,9 +209,7 @@ export default {
       const rightMouseButton = 2
       const isRightClick = rightMouseButton === event.button
       const isSpaceScope = event.target.id === 'magic-painting'
-      const isCardsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)
-      const isConnectionsSelected = Boolean(this.$store.state.multipleConnectionsSelectedIds.length)
-      const shouldBoxSelect = event.shiftKey && isSpaceScope && !isCardsSelected && !isConnectionsSelected
+      const shouldBoxSelect = event.shiftKey && isSpaceScope
       const shouldPan = isRightClick && isSpaceScope
       const position = utils.cursorPositionInPage(event)
       if (shouldBoxSelect) {
