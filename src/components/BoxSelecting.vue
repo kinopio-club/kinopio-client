@@ -234,6 +234,7 @@ export default {
 
 <style lang="stylus">
 .box-selecting
+  z-index -1
   pointer-events none
   position absolute
   top 0
