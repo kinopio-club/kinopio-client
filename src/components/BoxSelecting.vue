@@ -8,19 +8,22 @@ import { getOverlapSize } from 'overlap-area'
 import uniqBy from 'lodash-es/uniqBy'
 
 let selectableCards = {}
+let selectableConnections = {}
 let previouslySelectedCardIds = []
 
 export default {
   name: 'BoxSelecting',
   created () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'currentUserBoxSelectEnd') {
-        this.selectCards()
+      if (mutation.type === 'currentUserIsBoxSelecting' && mutation.payload) {
+        this.updatePreviouslySelectedItems()
       } else if (mutation.type === 'currentUserBoxSelectStart') {
         this.updateSelectableCards()
-        // TODO connections
-      } else if (mutation.type === 'currentUserIsBoxSelecting' && mutation.payload) {
-        this.updatePreviouslySelectedItems()
+        this.updateSelectableConnections()
+        console.log('🌈', selectableConnections)
+      } else if (mutation.type === 'currentUserBoxSelectEnd') {
+        this.selectCards()
+        this.selectconnections()
       }
     })
   },
@@ -110,22 +113,43 @@ export default {
       }
       return { start: newStart, end: newEnd, relativePosition }
     },
-    updateSelectableCards () {
+    selectableItems (items) {
       const origin = this.start
-      const cards = this.$store.getters['currentCards/all']
-      selectableCards = { topLeft: [], topRight: [], bottomLeft: [], bottomRight: [] }
-      cards.forEach(card => {
-        const { x, y, height, width } = card
+      let selectableItems = { topLeft: [], topRight: [], bottomLeft: [], bottomRight: [] }
+      items.forEach(item => {
+        const { x, y, height, width } = item
         const isTop = y <= origin.y
         const isBottom = (y >= origin.y || y + height >= origin.y)
         const isLeft = x <= origin.x
         const isRight = (x >= origin.x || x + width >= origin.x)
         // group into quadrants
-        if (isTop && isLeft) { selectableCards.topLeft.push(card) }
-        if (isTop && isRight) { selectableCards.topRight.push(card) }
-        if (isBottom && isLeft) { selectableCards.bottomLeft.push(card) }
-        if (isBottom && isRight) { selectableCards.bottomRight.push(card) }
+        if (isTop && isLeft) { selectableItems.topLeft.push(item) }
+        if (isTop && isRight) { selectableItems.topRight.push(item) }
+        if (isBottom && isLeft) { selectableItems.bottomLeft.push(item) }
+        if (isBottom && isRight) { selectableItems.bottomRight.push(item) }
       })
+      return selectableItems
+    },
+    updateSelectableCards () {
+      const cards = this.$store.getters['currentCards/all']
+      selectableCards = this.selectableItems(cards)
+    },
+    updateSelectableConnections () {
+      const paths = document.querySelectorAll('svg .connection-path')
+      let connections = []
+      paths.forEach(path => {
+        const pathId = path.dataset.id
+        const rect = path.getBoundingClientRect()
+        const connection = {
+          id: pathId,
+          x: rect.x + window.scrollX,
+          y: rect.y + window.scrollY,
+          width: Math.ceil(rect.width),
+          height: Math.ceil(rect.height)
+        }
+        connections.push(connection)
+      })
+      selectableConnections = this.selectableItems(connections)
     },
     points (rect) {
       const { x, y, height, width } = rect
