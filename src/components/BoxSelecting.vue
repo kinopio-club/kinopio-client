@@ -4,12 +4,16 @@
 </template>
 
 <script>
+import utils from '@/utils.js'
+
 import { getOverlapSize } from 'overlap-area'
 import uniqBy from 'lodash-es/uniqBy'
+import quadratic from 'adaptive-quadratic-curve'
 
 let selectableCards = {}
 let selectableConnections = {}
 let previouslySelectedCardIds = []
+let previouslySelectedConnectionIds = []
 
 export default {
   name: 'BoxSelecting',
@@ -20,10 +24,11 @@ export default {
       } else if (mutation.type === 'currentUserBoxSelectStart') {
         this.updateSelectableCards()
         this.updateSelectableConnections()
-        console.log('🌈', selectableConnections)
       } else if (mutation.type === 'currentUserBoxSelectEnd') {
-        this.selectCards()
-        this.selectconnections()
+        const { start, end, relativePosition } = this.orderedPoints(this.start, this.end)
+        const box = this.box(start, end)
+        this.selectCards(box, relativePosition)
+        this.selectconnections(box, relativePosition)
       }
     })
   },
@@ -56,7 +61,7 @@ export default {
     },
     updatePreviouslySelectedItems () {
       previouslySelectedCardIds = this.$store.state.multipleCardsSelectedIds
-      // TODO prevconnections
+      previouslySelectedConnectionIds = this.$store.state.multipleConnectionsSelectedIds
     },
     box (start, end) {
       return {
@@ -164,20 +169,24 @@ export default {
         [x1, y2]
       ]
     },
-    mergePreviouslySelectedCards (selectedCardIds) {
-      previouslySelectedCardIds.forEach(id => {
-        const index = selectedCardIds.indexOf(id)
+    mergePreviouslySelected (selectedIds, type) {
+      let previouslySelectedIds
+      if (type === 'cards') {
+        previouslySelectedIds = previouslySelectedCardIds
+      } else {
+        previouslySelectedIds = previouslySelectedConnectionIds
+      }
+      previouslySelectedIds.forEach(id => {
+        const index = selectedIds.indexOf(id)
         if (index >= 0) {
-          selectedCardIds.splice(index, 1)
+          selectedIds.splice(index, 1)
         } else {
-          selectedCardIds.push(id)
+          selectedIds.push(id)
         }
       })
-      return selectedCardIds
+      return selectedIds
     },
-    selectCards () {
-      const { start, end, relativePosition } = this.orderedPoints(this.start, this.end)
-      const box = this.box(start, end)
+    selectCards (box, relativePosition) {
       const boxPoints = this.points(box)
       let cards = selectableCards[relativePosition]
       if (!cards) { return }
@@ -186,33 +195,39 @@ export default {
         return Boolean(getOverlapSize(boxPoints, cardPoints))
       })
       selectedCards = uniqBy(selectedCards, 'id')
-      let selectedCardIds = selectedCards.map(card => card.id)
-      selectedCardIds = this.mergePreviouslySelectedCards(selectedCardIds)
-      this.$store.dispatch('multipleCardsSelectedIds', selectedCardIds)
+      let selectedIds = selectedCards.map(card => card.id)
+      selectedIds = this.mergePreviouslySelected(selectedIds, 'cards')
+      this.$store.dispatch('multipleCardsSelectedIds', selectedIds)
+    },
+    pointsAlongPath (connection) {
+      const element = document.querySelector(`svg .connection-path[data-id='${connection.id}']`)
+      const start = [element.pathSegList[0].x, element.pathSegList[0].y]
+      const startX = start[0]
+      const startY = start[1]
+      const c1 = [startX + element.pathSegList[1].x1, startY + element.pathSegList[1].y1]
+      const end = [startX + element.pathSegList[1].x, startY + element.pathSegList[1].y]
+      const scale = 2
+      return quadratic(start, c1, end, scale) // [[x1,x2], [x2,x2], …]
+    },
+    selectconnections (box, relativePosition) {
+      let connections = selectableConnections[relativePosition]
+      if (!connections) { return }
+      let selectedConnections = connections.filter(connection => {
+        const pointsAlongPath = this.pointsAlongPath(connection)
+        const isSelected = pointsAlongPath.find(point => {
+          const x = Math.round(point[0])
+          const y = Math.round(point[1])
+          const xIsInBox = utils.isBetween({ value: x, min: box.x, max: box.x + box.width })
+          const yIsInBox = utils.isBetween({ value: y, min: box.y, max: box.y + box.height })
+          return xIsInBox && yIsInBox
+        })
+        return Boolean(isSelected)
+      })
+      selectedConnections = uniqBy(selectedConnections, 'id')
+      let selectedIds = selectedConnections.map(connection => connection.id)
+      selectedIds = this.mergePreviouslySelected(selectedIds, 'connections')
+      this.$store.dispatch('multipleConnectionsSelectedIds', selectedIds)
     }
-
-    // selectConnectionPaths (point, shouldToggle) {
-    //   const zoom = this.spaceCounterZoomDecimal
-    //   const paths = document.querySelectorAll('svg .connection-path')
-    //   const pointX = (point.x + window.scrollX) * zoom
-    //   const pointY = (point.y + window.scrollY) * zoom
-    //   paths.forEach(path => {
-    //     const pathId = path.dataset.id
-    //     const svg = document.querySelector('svg.connections')
-    //     let svgPoint = svg.createSVGPoint()
-    //     svgPoint.x = pointX
-    //     svgPoint.y = pointY
-    //     const isSelected = path.isPointInStroke(svgPoint)
-    //     if (isSelected) {
-    //       if (shouldToggle) {
-    //         this.$store.dispatch('toggleMultipleConnectionsSelected', pathId)
-    //       } else {
-    //         this.$store.dispatch('addToMultipleConnectionsSelected', pathId)
-    //       }
-    //     }
-    //   })
-    // },
-
   }
 }
 </script>

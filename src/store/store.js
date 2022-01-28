@@ -1064,6 +1064,15 @@ const store = createStore({
       }
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteConnectionsSelected' }, { root: true })
     },
+    multipleConnectionsSelectedIds: (context, connectionIds) => {
+      utils.typeCheck({ value: connectionIds, type: 'array', origin: 'multipleConnectionsSelectedIds' })
+      context.commit('multipleConnectionsSelectedIds', connectionIds)
+      const updates = {
+        userId: context.rootState.currentUser.id,
+        connectionIds
+      }
+      context.commit('broadcast/updateStore', { updates, type: 'multipleConnectionsSelectedIds' }, { root: true })
+    },
     connectionDetailsIsVisibleForConnectionId: (context, connectionId) => {
       context.commit('connectionDetailsIsVisibleForConnectionId', connectionId)
       const updates = {
