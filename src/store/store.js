@@ -132,8 +132,8 @@ const store = createStore({
     multipleCardsSelectedIds: [],
     previousMultipleCardsSelectedIds: [],
     previousMultipleConnectionsSelectedIds: [],
-    remoteCardsSelected: [],
-    remoteConnectionsSelected: [],
+    remoteCardsSelected: [], // [{ cardId, userId }, …]
+    remoteConnectionsSelected: [], // [{ connectionId, userId }, …]
     multipleConnectionsSelectedIds: [],
     triggeredPaintFramePosition: {},
 
@@ -731,6 +731,26 @@ const store = createStore({
         return !cardIsUpdate
       })
     },
+    updateRemoteCardsSelected: (state, update) => {
+      state.remoteCardsSelected = state.remoteCardsSelected.filter(card => card.userId !== update.userId)
+      const updates = update.cardIds.map(cardId => {
+        return {
+          userId: update.userId,
+          cardId
+        }
+      })
+      state.remoteCardsSelected = state.remoteCardsSelected.concat(updates)
+    },
+    updateRemoteConnectionsSelected: (state, update) => {
+      state.remoteConnectionsSelected = state.remoteConnectionsSelected.filter(connection => connection.userId !== update.userId)
+      const updates = update.connectionIds.map(connectionId => {
+        return {
+          userId: update.userId,
+          connectionId
+        }
+      })
+      state.remoteConnectionsSelected = state.remoteConnectionsSelected.concat(updates)
+    },
     addToRemoteConnectionsSelected: (state, update) => {
       utils.typeCheck({ value: update, type: 'object', origin: 'addToRemoteConnectionsSelected' })
       delete update.type
@@ -1024,7 +1044,7 @@ const store = createStore({
         userId: context.rootState.currentUser.id,
         cardIds
       }
-      context.commit('broadcast/updateStore', { updates, type: 'multipleCardsSelectedIds' }, { root: true })
+      context.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardsSelected' }, { root: true })
     },
     clearMultipleSelected: (context) => {
       if (context.state.multipleCardsSelectedIds.length || context.state.multipleConnectionsSelectedIds.length) {
@@ -1071,7 +1091,7 @@ const store = createStore({
         userId: context.rootState.currentUser.id,
         connectionIds
       }
-      context.commit('broadcast/updateStore', { updates, type: 'multipleConnectionsSelectedIds' }, { root: true })
+      context.commit('broadcast/updateStore', { updates, type: 'updateRemoteConnectionsSelected' }, { root: true })
     },
     connectionDetailsIsVisibleForConnectionId: (context, connectionId) => {
       context.commit('connectionDetailsIsVisibleForConnectionId', connectionId)
