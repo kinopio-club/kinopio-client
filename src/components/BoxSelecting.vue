@@ -1,6 +1,8 @@
 <template lang="pug">
 .box-selecting
   .box-select(v-if="currentUserIsBoxSelecting" :style="currentUserStyles")
+  template(v-for="style in previousBoxStyles")
+    .box-select.hide-me(:style="style" @animationend="removePreviousBoxStyle")
 </template>
 
 <script>
@@ -11,6 +13,7 @@ import uniqBy from 'lodash-es/uniqBy'
 import quadratic from 'adaptive-quadratic-curve'
 import hexToRgba from 'hex-to-rgba'
 
+let shouldSelect
 let selectableCards = {}
 let selectableConnections = {}
 let previouslySelectedCardIds = []
@@ -20,8 +23,16 @@ export default {
   name: 'BoxSelecting',
   created () {
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'currentUserIsBoxSelecting' && mutation.payload) {
-        this.updatePreviouslySelectedItems()
+      if (mutation.type === 'currentUserIsBoxSelecting') {
+        const isSelecting = mutation.payload
+        if (isSelecting) {
+          shouldSelect = true
+          this.updatePreviouslySelectedItems()
+        } else {
+          if (!shouldSelect) { return }
+          shouldSelect = false
+          this.previousBoxStyles.push(this.currentUserStyles)
+        }
       } else if (mutation.type === 'currentUserBoxSelectStart') {
         this.updateSelectableCards()
         this.updateSelectableConnections()
@@ -35,7 +46,8 @@ export default {
   },
   data () {
     return {
-      direction: 'to bottom right'
+      direction: 'to bottom right',
+      previousBoxStyles: []
     }
   },
   computed: {
@@ -62,6 +74,9 @@ export default {
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal }
   },
   methods: {
+    removePreviousBoxStyle () {
+      this.previousBoxStyles.shift()
+    },
     zoom (point) {
       const zoom = this.spaceCounterZoomDecimal
       return {
@@ -264,4 +279,11 @@ export default {
   height 100%
   .box-select
     position absolute
+  .hide-me
+    animation-name hideme
+    animation-duration 0.5s
+    animation-iteration-count 1
+    animation-direction forward
+    animation-fill-mode forwards
+    animation-timing-function ease-out
 </style>
