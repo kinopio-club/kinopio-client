@@ -3,6 +3,11 @@
   .box-select(v-if="currentUserIsBoxSelecting" :style="currentUserStyles")
   template(v-for="style in previousBoxStyles")
     .box-select.hide-me(:style="style" @animationend="removePreviousBoxStyle")
+  //- remote
+  template(v-for="style in remoteUserBoxSelectStyles")
+    .box-select(:style="style")
+  template(v-for="style in remotePreviousUserBoxSelectStyles")
+    .box-select.hide-me(:style="style" @animationend="removePreviousRemoteBoxStyle")
 </template>
 
 <script>
@@ -12,8 +17,9 @@ import { getOverlapSize } from 'overlap-area'
 import uniqBy from 'lodash-es/uniqBy'
 import quadratic from 'adaptive-quadratic-curve'
 import hexToRgba from 'hex-to-rgba'
+import nanoid from 'nanoid'
 
-let shouldSelect
+let shouldSelect, currentBoxSelectId
 let selectableCards = {}
 let selectableConnections = {}
 let previouslySelectedCardIds = []
@@ -25,22 +31,29 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'currentUserIsBoxSelecting') {
         const isSelecting = mutation.payload
+        // start selection
         if (isSelecting) {
           shouldSelect = true
+          currentBoxSelectId = nanoid()
           this.updatePreviouslySelectedItems()
+          this.updateSelectableCards()
+          this.updateSelectableConnections()
+        // end selection
         } else {
           if (!shouldSelect) { return }
           shouldSelect = false
           this.previousBoxStyles.push(this.currentUserStyles)
+          this.broadcast('updateRemotePreviousBoxSelectStyles')
         }
-      } else if (mutation.type === 'currentUserBoxSelectStart') {
-        this.updateSelectableCards()
-        this.updateSelectableConnections()
+      // on move
       } else if (mutation.type === 'currentUserBoxSelectEnd') {
         const { start, end, relativePosition } = this.orderedPoints(this.start, this.end)
         const box = this.box(start, end)
         this.selectCards(box, relativePosition)
         this.selectconnections(box, relativePosition)
+        this.$nextTick(() => {
+          this.broadcast('updateRemoteUserBoxSelectStyles')
+        })
       }
     })
   },
@@ -67,15 +80,25 @@ export default {
         top: top + 'px',
         width: width + 'px',
         height: height + 'px',
-        background: gradient
+        background: gradient,
+        userId: this.$store.state.currentUser.id,
+        currentBoxSelectId: currentBoxSelectId
       }
       return styles
     },
-    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal }
+    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
+    remoteUserBoxSelectStyles () { return this.$store.state.remoteUserBoxSelectStyles },
+    remotePreviousUserBoxSelectStyles () { return this.$store.state.remotePreviousUserBoxSelectStyles }
   },
   methods: {
+    broadcast (operation) {
+      this.$store.commit('broadcast/update', { updates: this.currentUserStyles, type: operation, handler: operation })
+    },
     removePreviousBoxStyle () {
       this.previousBoxStyles.shift()
+    },
+    removePreviousRemoteBoxStyle () {
+      this.$store.commit('removeRemotePreviousBoxSelectStyle')
     },
     zoom (point) {
       const zoom = this.spaceCounterZoomDecimal

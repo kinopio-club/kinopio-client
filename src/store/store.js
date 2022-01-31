@@ -72,7 +72,8 @@ const store = createStore({
     currentUserIsBoxSelecting: false,
     currentUserBoxSelectStart: {},
     currentUserBoxSelectEnd: {},
-    // remoteUserBoxSelects: [],
+    remoteUserBoxSelectStyles: [],
+    remotePreviousUserBoxSelectStyles: [],
 
     // resizing
     currentUserIsResizingCard: false,
@@ -504,6 +505,20 @@ const store = createStore({
     currentUserBoxSelectEnd: (state, object) => {
       utils.typeCheck({ value: object, type: 'object', origin: 'currentUserBoxSelectEnd' })
       state.currentUserBoxSelectEnd = object
+    },
+    updateRemoteUserBoxSelectStyles: (state, object) => {
+      utils.typeCheck({ value: object, type: 'object', origin: 'updateRemoteUserBoxSelectStyles' })
+      state.remoteUserBoxSelectStyles = state.remoteUserBoxSelectStyles.filter(styles => styles.currentBoxSelectId !== object.currentBoxSelectId)
+      state.remoteUserBoxSelectStyles.push(object)
+    },
+    updateRemotePreviousBoxSelectStyles: (state, object) => {
+      utils.typeCheck({ value: object, type: 'object', origin: 'updateRemotePreviousBoxSelectStyles' })
+      state.remoteUserBoxSelectStyles = state.remoteUserBoxSelectStyles.filter(styles => styles.currentBoxSelectId !== object.currentBoxSelectId)
+      state.remotePreviousUserBoxSelectStyles = state.remotePreviousUserBoxSelectStyles.filter(styles => styles.currentBoxSelectId !== object.currentBoxSelectId)
+      state.remotePreviousUserBoxSelectStyles.push(object)
+    },
+    removeRemotePreviousBoxSelectStyle: (state) => {
+      state.remotePreviousUserBoxSelectStyles.shift()
     },
 
     // Resizing
