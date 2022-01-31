@@ -262,6 +262,7 @@ export default {
     },
     pointsAlongPath (connection) {
       const element = document.querySelector(`svg .connection-path[data-id='${connection.id}']`)
+      if (!element) { return }
       const start = [element.pathSegList[0].x, element.pathSegList[0].y]
       const startX = start[0]
       const startY = start[1]
@@ -275,6 +276,7 @@ export default {
       if (!connections) { return }
       let selectedConnections = connections.filter(connection => {
         const pointsAlongPath = this.pointsAlongPath(connection)
+        if (!pointsAlongPath) { return }
         const isSelected = pointsAlongPath.find(point => {
           const x = Math.round(point[0])
           const y = Math.round(point[1])
