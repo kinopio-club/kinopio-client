@@ -31,13 +31,11 @@ export default {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'currentUserIsBoxSelecting') {
         const isSelecting = mutation.payload
-        // start selection
+        // before start selection
         if (isSelecting) {
           shouldSelect = true
           currentBoxSelectId = nanoid()
           this.updatePreviouslySelectedItems()
-          this.updateSelectableCards()
-          this.updateSelectableConnections()
         // end selection
         } else {
           if (!shouldSelect) { return }
@@ -45,6 +43,10 @@ export default {
           this.previousBoxStyles.push(this.currentUserStyles)
           this.broadcast('updateRemotePreviousBoxSelectStyles')
         }
+      // start selection
+      } else if (mutation.type === 'currentUserBoxSelectStart') {
+        this.updateSelectableCards()
+        this.updateSelectableConnections()
       // on move
       } else if (mutation.type === 'currentUserBoxSelectEnd') {
         const { start, end, relativePosition } = this.orderedPoints(this.start, this.end)
