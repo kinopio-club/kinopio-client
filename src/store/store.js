@@ -722,7 +722,7 @@ const store = createStore({
       state.remoteCardsSelected.push(update)
     },
     removeFromRemoteCardsSelected: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'addToRemoteCardsSelected' })
+      utils.typeCheck({ value: update, type: 'object', origin: 'removeFromRemoteCardsSelected' })
       delete update.type
       state.remoteCardsSelected = state.remoteCardsSelected.filter(card => {
         const cardIsSelected = card.cardId === update.cardId
