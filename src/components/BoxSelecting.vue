@@ -9,6 +9,7 @@ import utils from '@/utils.js'
 import { getOverlapSize } from 'overlap-area'
 import uniqBy from 'lodash-es/uniqBy'
 import quadratic from 'adaptive-quadratic-curve'
+import hexToRgba from 'hex-to-rgba'
 
 let selectableCards = {}
 let selectableConnections = {}
@@ -32,6 +33,11 @@ export default {
       }
     })
   },
+  data () {
+    return {
+      direction: 'to bottom right'
+    }
+  },
   computed: {
     currentUserIsBoxSelecting () { return this.$store.state.currentUserIsBoxSelecting },
     start () { return this.zoom(this.$store.state.currentUserBoxSelectStart) },
@@ -40,12 +46,16 @@ export default {
     currentUserStyles () {
       const { start, end } = this.orderedPoints(this.start, this.end)
       const { left, top, width, height } = this.box(start, end)
-      const styles = {
+      const color = this.$store.state.currentUser.color
+      const color1 = hexToRgba(color, 0.5)
+      const color2 = hexToRgba(color, 1)
+      const gradient = `radial-gradient(farthest-corner at ${this.direction}, ${color1}, ${color2})`
+      let styles = {
         left: left + 'px',
         top: top + 'px',
         width: width + 'px',
         height: height + 'px',
-        backgroundColor: this.$store.state.currentUser.color
+        background: gradient
       }
       return styles
     },
@@ -73,7 +83,17 @@ export default {
         height: Math.abs(start.y - end.y)
       }
     },
-
+    updateDirection (position) {
+      if (position === 'bottomLeft') {
+        this.direction = 'right top'
+      } else if (position === 'topLeft') {
+        this.direction = 'right bottom'
+      } else if (position === 'topRight') {
+        this.direction = 'left bottom'
+      } else {
+        this.direction = 'left top'
+      }
+    },
     orderedPoints (start, end) {
       //                    │
       //                    │
@@ -116,6 +136,7 @@ export default {
         newStart = start
         newEnd = end
       }
+      this.updateDirection(relativePosition)
       return { start: newStart, end: newEnd, relativePosition }
     },
     selectableItems (items) {
