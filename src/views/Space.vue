@@ -30,6 +30,7 @@ main.space(
   MultipleSelectedActions
   ScrollAtEdgesHandler
   NotificationsWithPosition
+  BoxSelecting
 </template>
 
 <script>
@@ -44,6 +45,7 @@ import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
 import ScrollAtEdgesHandler from '@/components/ScrollAtEdgesHandler.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
+import BoxSelecting from '@/components/BoxSelecting.vue'
 import utils from '@/utils.js'
 
 import sortBy from 'lodash-es/sortBy'
@@ -67,7 +69,8 @@ export default {
     ConnectionDetails,
     MultipleSelectedActions,
     ScrollAtEdgesHandler,
-    NotificationsWithPosition
+    NotificationsWithPosition,
+    BoxSelecting
   },
   beforeCreate () {
     this.$store.dispatch('currentUser/init')

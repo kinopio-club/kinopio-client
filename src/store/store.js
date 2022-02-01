@@ -68,8 +68,14 @@ const store = createStore({
     currentUserIsPanningReady: false,
     currentUserIsPanning: false,
 
-    // resizing
+    // box selecting
+    currentUserIsBoxSelecting: false,
+    currentUserBoxSelectStart: {},
+    currentUserBoxSelectEnd: {},
+    remoteUserBoxSelectStyles: [],
+    remotePreviousUserBoxSelectStyles: [],
 
+    // resizing
     currentUserIsResizingCard: false,
     currentUserIsResizingCardIds: [],
     remoteUserResizingCards: [],
@@ -127,8 +133,8 @@ const store = createStore({
     multipleCardsSelectedIds: [],
     previousMultipleCardsSelectedIds: [],
     previousMultipleConnectionsSelectedIds: [],
-    remoteCardsSelected: [],
-    remoteConnectionsSelected: [],
+    remoteCardsSelected: [], // [{ cardId, userId }, …]
+    remoteConnectionsSelected: [], // [{ connectionId, userId }, …]
     multipleConnectionsSelectedIds: [],
     triggeredPaintFramePosition: {},
 
@@ -486,6 +492,35 @@ const store = createStore({
       state.currentUserIsPaintingLocked = value
     },
 
+    // box selecting
+
+    currentUserIsBoxSelecting: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'currentUserIsBoxSelecting' })
+      state.currentUserIsBoxSelecting = value
+    },
+    currentUserBoxSelectStart: (state, object) => {
+      utils.typeCheck({ value: object, type: 'object', origin: 'currentUserBoxSelectStart' })
+      state.currentUserBoxSelectStart = object
+    },
+    currentUserBoxSelectEnd: (state, object) => {
+      utils.typeCheck({ value: object, type: 'object', origin: 'currentUserBoxSelectEnd' })
+      state.currentUserBoxSelectEnd = object
+    },
+    updateRemoteUserBoxSelectStyles: (state, object) => {
+      utils.typeCheck({ value: object, type: 'object', origin: 'updateRemoteUserBoxSelectStyles' })
+      state.remoteUserBoxSelectStyles = state.remoteUserBoxSelectStyles.filter(styles => styles.currentBoxSelectId !== object.currentBoxSelectId)
+      state.remoteUserBoxSelectStyles.push(object)
+    },
+    updateRemotePreviousBoxSelectStyles: (state, object) => {
+      utils.typeCheck({ value: object, type: 'object', origin: 'updateRemotePreviousBoxSelectStyles' })
+      state.remoteUserBoxSelectStyles = state.remoteUserBoxSelectStyles.filter(styles => styles.currentBoxSelectId !== object.currentBoxSelectId)
+      state.remotePreviousUserBoxSelectStyles = state.remotePreviousUserBoxSelectStyles.filter(styles => styles.currentBoxSelectId !== object.currentBoxSelectId)
+      state.remotePreviousUserBoxSelectStyles.push(object)
+    },
+    removeRemotePreviousBoxSelectStyle: (state) => {
+      state.remotePreviousUserBoxSelectStyles.shift()
+    },
+
     // Resizing
 
     currentUserIsResizingCard: (state, value) => {
@@ -702,7 +737,7 @@ const store = createStore({
       state.remoteCardsSelected.push(update)
     },
     removeFromRemoteCardsSelected: (state, update) => {
-      utils.typeCheck({ value: update, type: 'object', origin: 'addToRemoteCardsSelected' })
+      utils.typeCheck({ value: update, type: 'object', origin: 'removeFromRemoteCardsSelected' })
       delete update.type
       state.remoteCardsSelected = state.remoteCardsSelected.filter(card => {
         const cardIsSelected = card.cardId === update.cardId
@@ -710,6 +745,26 @@ const store = createStore({
         const cardIsUpdate = cardIsSelected && selectedByUser
         return !cardIsUpdate
       })
+    },
+    updateRemoteCardsSelected: (state, update) => {
+      state.remoteCardsSelected = state.remoteCardsSelected.filter(card => card.userId !== update.userId)
+      const updates = update.cardIds.map(cardId => {
+        return {
+          userId: update.userId,
+          cardId
+        }
+      })
+      state.remoteCardsSelected = state.remoteCardsSelected.concat(updates)
+    },
+    updateRemoteConnectionsSelected: (state, update) => {
+      state.remoteConnectionsSelected = state.remoteConnectionsSelected.filter(connection => connection.userId !== update.userId)
+      const updates = update.connectionIds.map(connectionId => {
+        return {
+          userId: update.userId,
+          connectionId
+        }
+      })
+      state.remoteConnectionsSelected = state.remoteConnectionsSelected.concat(updates)
     },
     addToRemoteConnectionsSelected: (state, update) => {
       utils.typeCheck({ value: update, type: 'object', origin: 'addToRemoteConnectionsSelected' })
@@ -997,6 +1052,15 @@ const store = createStore({
       }
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteCardsSelected' }, { root: true })
     },
+    multipleCardsSelectedIds: (context, cardIds) => {
+      utils.typeCheck({ value: cardIds, type: 'array', origin: 'multipleCardsSelectedIds' })
+      context.commit('multipleCardsSelectedIds', cardIds)
+      const updates = {
+        userId: context.rootState.currentUser.id,
+        cardIds
+      }
+      context.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardsSelected' }, { root: true })
+    },
     clearMultipleSelected: (context) => {
       if (context.state.multipleCardsSelectedIds.length || context.state.multipleConnectionsSelectedIds.length) {
         context.commit('clearMultipleSelected')
@@ -1034,6 +1098,15 @@ const store = createStore({
         connectionId
       }
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteConnectionsSelected' }, { root: true })
+    },
+    multipleConnectionsSelectedIds: (context, connectionIds) => {
+      utils.typeCheck({ value: connectionIds, type: 'array', origin: 'multipleConnectionsSelectedIds' })
+      context.commit('multipleConnectionsSelectedIds', connectionIds)
+      const updates = {
+        userId: context.rootState.currentUser.id,
+        connectionIds
+      }
+      context.commit('broadcast/updateStore', { updates, type: 'updateRemoteConnectionsSelected' }, { root: true })
     },
     connectionDetailsIsVisibleForConnectionId: (context, connectionId) => {
       context.commit('connectionDetailsIsVisibleForConnectionId', connectionId)

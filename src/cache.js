@@ -10,22 +10,34 @@ let showDebugMessages = false
 export default {
   storeLocal (key, value) {
     try {
+      if (typeof value !== 'string') {
+        value = JSON.stringify(value)
+      }
       if (showDebugMessages) {
         console.log('🏬 storeLocal', key, value)
       }
-      window.localStorage.setItem(key, JSON.stringify(value))
+      window.localStorage.setItem(key, value)
     } catch (error) {
+      showDebugMessages = true
       console.error('🚒 storeLocal could not save to localStorage', { key, value, valueType: typeof value }, error)
       this.pruneLocal()
     }
   },
+  notifyCouldNotSave () {
+    const element = document.getElementById('notify-local-storage-is-full')
+    element.classList.remove('hidden')
+  },
   pruneLocal () {
     if (this.user().apiKey) {
       const currentSpaceId = utils.spaceIdFromUrl()
+      if (!currentSpaceId) {
+        console.error('🚒 prune error could not get currentSpaceId', currentSpaceId)
+        this.notifyCouldNotSave()
+        return
+      }
       const keys = Object.keys(window.localStorage)
       let spaceKeys = keys.filter(key => {
         const isSpace = key.startsWith('space-') || key.startsWith('removed-space-')
-        console.log('🍾 prune key', key, isSpace)
         return isSpace
       })
       spaceKeys = spaceKeys.filter(key => key !== `space-${currentSpaceId}`)
@@ -34,7 +46,7 @@ export default {
         length: JSON.stringify(window.localStorage).length,
         currentSpaceId,
         keys,
-        spaceKeys
+        spaceKeysToRemove: spaceKeys
       })
       spaceKeys.forEach(key => {
         this.removeLocal(key)
@@ -42,11 +54,10 @@ export default {
       console.log('🥂 pruned localStorage spaces', {
         localStorage: window.localStorage,
         length: JSON.stringify(window.localStorage).length,
-        localStorageKeys: Object.keys(window.localStorage)
+        currentLocalStorageKeys: Object.keys(window.localStorage)
       })
     }
-    const element = document.getElementById('notify-local-storage-is-full')
-    element.classList.remove('hidden')
+    this.notifyCouldNotSave()
   },
   getLocal (key) {
     try {
