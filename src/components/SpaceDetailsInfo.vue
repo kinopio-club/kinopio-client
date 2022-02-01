@@ -1,6 +1,7 @@
 <template lang="pug">
 template(v-if="isSpaceMember")
   .row.space-details-info(@click.left="closeDialogsAndEmit")
+    //- Background
     .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
       BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
       //- Background Upload Progress
@@ -14,7 +15,14 @@ template(v-if="isSpaceMember")
           Loader(:visible="true")
           span {{remotePendingUpload.percentComplete}}%
       Background(:visible="backgroundIsVisible" @updateSpaces="updateSpaces")
+    //- Journal Date
+    .button-wrap.date-picker-button(v-if="isCurrentSpaceJournal")
+      button(@click.left.stop="toggleDatePickerIsVisible" :class="{active: datePickerIsVisible}")
+        MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
+      DatePicker(:visible="datePickerIsVisible" :date="journalDate" :title="'Journal Date'")
+    //- Name
     input(ref="name" placeholder="name" v-model="spaceName")
+  //- Privacy
   .row.privacy-row
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
     AddToExplore(v-if="!shouldHideExplore" @updateSpaces="updateSpaces")
@@ -37,6 +45,8 @@ import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import Loader from '@/components/Loader.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
+import DatePicker from '@/components/dialogs/DatePicker.vue'
+import MoonPhase from '@/components/MoonPhase.vue'
 
 export default {
   name: 'SpaceDetailsInfo',
@@ -46,7 +56,9 @@ export default {
     BackgroundPreview,
     Loader,
     PrivacyButton,
-    AddToExplore
+    AddToExplore,
+    DatePicker,
+    MoonPhase
   },
   props: {
     shouldHideExplore: Boolean
@@ -54,7 +66,8 @@ export default {
   data () {
     return {
       backgroundIsVisible: false,
-      privacyPickerIsVisible: false
+      privacyPickerIsVisible: false,
+      datePickerIsVisible: false
     }
   },
   created () {
@@ -110,6 +123,12 @@ export default {
       const privacy = this.$store.state.currentSpace.privacy
       if (privacy === 'private') { return false }
       return this.$store.state.currentSpace.showInExplore
+    },
+    isCurrentSpaceJournal () { return Boolean(this.currentSpace.moonPhase) },
+    journalDate () {
+      if (!this.isCurrentSpaceJournal) { return }
+      return new Date()
+      // TODO returns a Date object , from name or today Date
     }
   },
   methods: {
@@ -123,9 +142,15 @@ export default {
       this.closeDialogsAndEmit()
       this.privacyPickerIsVisible = !isVisible
     },
+    toggleDatePickerIsVisible () {
+      const isVisible = this.datePickerIsVisible
+      this.closeDialogsAndEmit()
+      this.datePickerIsVisible = !isVisible
+    },
     closeDialogs () {
       this.backgroundIsVisible = false
       this.privacyPickerIsVisible = false
+      this.datePickerIsVisible = false
     },
     closeDialogsAndEmit () {
       this.closeDialogs()
@@ -169,4 +194,10 @@ export default {
         left 6px
   .privacy-button
     min-width 24px
+  .date-picker-button
+    margin-left 0 !important
+    > button
+      padding 5px
+      padding-top 4px
+      padding-left 6px
 </style>

@@ -60,13 +60,13 @@ export default {
   .background-tint
     mix-blend-mode multiply
   .preview-wrap
-    height 24px
-    width 24px
+    height 15px
+    width 15px
     position relative
     border-radius 3px
     overflow hidden
     display inline-block
-    vertical-align middle
+    vertical-align -3px
   .background-tint
     height 100%
     width 100%
