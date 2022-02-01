@@ -277,6 +277,7 @@ export default {
       let selectedConnections = connections.filter(connection => {
         const pointsAlongPath = this.pointsAlongPath(connection)
         if (!pointsAlongPath) { return }
+        if (!pointsAlongPath.length) { return }
         const isSelected = pointsAlongPath.find(point => {
           const x = Math.round(point[0])
           const y = Math.round(point[1])
