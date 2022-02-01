@@ -10,11 +10,13 @@ import times from 'lodash-es/times'
 
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
 
 // https://data.iana.org/TLD/tlds-alpha-by-domain.txt
 // Updated Jun 9 2021 UTC
 import tldsList from '@/data/tlds.json'
 dayjs.extend(relativeTime)
+dayjs.extend(customParseFormat)
 let tlds = tldsList.join(String.raw`)|(\.`)
 tlds = String.raw`(\.` + tlds + ')'
 
@@ -894,14 +896,29 @@ export default {
     if (isTomorrow) {
       date = date.add(1, 'day')
     }
+    return this.journalSpaceNameFromDate(date)
+  },
+  journalSpaceNameFromDate (date) {
     return `${date.format('dddd MMM D/YY')}` // Thursday Oct 8/20
   },
   journalSpaceDateFromName (name) {
     // https://regexr.com/6471p
+    // matches Sunday Sept 1/20 from start
     const datePattern = new RegExp(/^['A-Za-z]+ ['A-Za-z]+ [0-9]+\/[0-9]{2}/g)
     let matches = name.match(datePattern)
     if (matches) {
       return matches[0]
+    }
+  },
+  JournalSpaceDeteObjectFromName (name) {
+    name = this.journalSpaceDateFromName(name)
+    // https://regexr.com/6egn6
+    // matches Sept 1/20
+    const datePattern = new RegExp(/[A-z]+ [0-9]+\/[0-9]{2}/g)
+    let matches = name.match(datePattern)
+    if (matches) {
+      const match = matches[0]
+      return dayjs(match, 'MMM D/YY')
     }
   },
   randomPrompt (pack) {

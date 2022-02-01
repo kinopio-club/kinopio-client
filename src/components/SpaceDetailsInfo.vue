@@ -19,7 +19,7 @@ template(v-if="isSpaceMember")
     .button-wrap.date-picker-button(v-if="isCurrentSpaceJournal")
       button(@click.left.stop="toggleDatePickerIsVisible" :class="{active: datePickerIsVisible}")
         MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
-      DatePicker(:visible="datePickerIsVisible" :date="journalDate" :title="'Journal Date'")
+      DatePicker(:visible="datePickerIsVisible" :date="journalDate" :title="'Journal Date'" @date="updateJournalNameWithDate")
     //- Name
     input(ref="name" placeholder="name" v-model="spaceName")
   //- Privacy
@@ -47,6 +47,7 @@ import PrivacyButton from '@/components/PrivacyButton.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import DatePicker from '@/components/dialogs/DatePicker.vue'
 import MoonPhase from '@/components/MoonPhase.vue'
+import utils from '@/utils.js'
 
 export default {
   name: 'SpaceDetailsInfo',
@@ -127,11 +128,15 @@ export default {
     isCurrentSpaceJournal () { return Boolean(this.currentSpace.moonPhase) },
     journalDate () {
       if (!this.isCurrentSpaceJournal) { return }
-      return new Date()
-      // TODO returns a Date object , from name or today Date
+      let date = utils.JournalSpaceDeteObjectFromName(this.currentSpace.name)
+      return date || new Date()
     }
   },
   methods: {
+    updateJournalNameWithDate (date) {
+      const name = utils.journalSpaceNameFromDate(date)
+      console.log('🐸', date, name)
+    },
     toggleBackgroundIsVisible () {
       const isVisible = this.backgroundIsVisible
       this.closeDialogsAndEmit()
