@@ -5,7 +5,7 @@ dialog.tags.narrow(@click.stop v-if="visible" :open="visible" ref="dialog" :styl
       p Tags
       .button-wrap(@click.left="toggleIsPinnedDialog"  :class="{active: isPinnedDialog}" title="Pin dialog")
         button
-          img.icon(src="@/assets/pin.svg")
+          img.icon.pin(src="@/assets/pin.svg")
   section.results-section(v-if="tags.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     .button-wrap(@click.left.prevent="toggleCurrentSpaceTagsIsVisibleOnly" @keydown.stop.enter="toggleCurrentSpaceTagsIsVisibleOnly")
       label(:class="{ active: currentSpaceTagsIsVisibleOnly }")

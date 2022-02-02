@@ -715,6 +715,9 @@ code
   vertical-align -3px
   height 13px
 
+.pin
+  vertical-align 0
+
 .hidden
   display none
 

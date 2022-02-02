@@ -15,6 +15,13 @@ template(v-if="isSpaceMember")
           span {{remotePendingUpload.percentComplete}}%
       Background(:visible="backgroundIsVisible" @updateSpaces="updateSpaces")
     input(ref="name" placeholder="name" v-model="spaceName")
+    //- Pin Dialog
+    .title-row
+      .button-wrap.pin-button-wrap
+        button
+          img.icon.pin(src="@/assets/pin.svg")
+          //- (@click.left="toggleIsPinnedDialog"  :class="{active: isPinnedDialog}" title="Pin dialog")
+
   .row.privacy-row
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
     AddToExplore(v-if="!shouldHideExplore" @updateSpaces="updateSpaces")
@@ -55,6 +62,7 @@ export default {
     return {
       backgroundIsVisible: false,
       privacyPickerIsVisible: false
+      // dialogIsPinned: false
     }
   },
   created () {
@@ -169,4 +177,13 @@ export default {
         left 6px
   .privacy-button
     min-width 24px
+  .title-row
+    margin-left 6px
+    .pin-button-wrap
+      padding-left 6px
+      padding-top 4px
+      padding-bottom 4px
+      margin-top -13px
+      button
+        width 23px
 </style>
