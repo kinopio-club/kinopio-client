@@ -5,12 +5,11 @@ dialog.narrow.spaces-meta-options(v-if="visible" :open="visible" ref="dialog" :c
       .segmented-buttons
         button.active Tags
         button Links
-
-      .button-wrap
         button
           img.icon(src="@/assets/remove.svg")
           span Removed
 
+  Tags(:visible="tagsIsVisible")
     //- Removed
 
     //- .button-wrap
@@ -31,11 +30,14 @@ dialog.narrow.spaces-meta-options(v-if="visible" :open="visible" ref="dialog" :c
 </template>
 
 <script>
-// import cache from '@/cache.js'
+import Tags from '@/components/Tags.vue'
 import utils from '@/utils.js'
 
 export default {
   name: 'SpacesMetaOptions',
+  components: {
+    Tags
+  },
   props: {
     visible: Boolean
   },
@@ -48,7 +50,8 @@ export default {
   },
   data () {
     return {
-      showOnRightSide: false
+      showOnRightSide: false,
+      tagsIsVisible: false
     }
   },
   computed: {
@@ -69,9 +72,12 @@ export default {
   watch: {
     visible (visible) {
       if (visible) {
-        // this.queue = cache.queue()
         this.checkIfShouldBeOnRightSide()
+        this.tagsIsVisible = true
+      } else {
+        this.tagsIsVisible = false
       }
+      console.log(this.tagsIsVisible)
     }
   }
 }
