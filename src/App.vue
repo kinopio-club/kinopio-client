@@ -342,6 +342,10 @@ label // used for checkbox buttons
     //     box-shadow var(--button-active-inset-shadow)
     //     background var(--secondary-active-background)
 
+textarea
+  &[disabled]
+    color var(--primary)
+
 .inline-button
   background-color transparent
   cursor cell

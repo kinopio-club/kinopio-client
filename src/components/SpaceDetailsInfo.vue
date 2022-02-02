@@ -13,9 +13,16 @@
         Loader(:visible="true")
         span {{remotePendingUpload.percentComplete}}%
     Background(:visible="backgroundIsVisible" @updateSpaces="updateSpaces")
-  input(ref="name" placeholder="name" v-model="spaceName")
-  //- TODO multi-line-capable textarea, disable/read-only-txt if not spacemember. no line breaks: enter = blur
-
+  //- Name
+  .textarea-wrap
+    textarea.name(
+      :disabled="!canEditSpace"
+      ref="name"
+      rows="1"
+      placeholder="name"
+      v-model="spaceName"
+      @keydown.enter.stop.prevent
+    )
   //- Pin Dialog
   .title-row(v-if="!shouldHidePin")
     .button-wrap.pin-button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
@@ -51,11 +58,8 @@ export default {
     shouldHideExplore: Boolean,
     shouldHidePin: Boolean
   },
-  data () {
-    return {
-      backgroundIsVisible: false,
-      privacyPickerIsVisible: false
-    }
+  mounted () {
+    this.textareaSizes()
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -73,12 +77,19 @@ export default {
       }
     })
   },
+  data () {
+    return {
+      backgroundIsVisible: false,
+      privacyPickerIsVisible: false
+    }
+  },
   computed: {
     spaceName: {
       get () {
         return this.$store.state.currentSpace.name
       },
       set (newName) {
+        this.textareaSizes()
         this.$store.dispatch('currentSpace/updateSpace', { name: newName })
         this.updateSpaces()
       }
@@ -110,6 +121,11 @@ export default {
     dialogIsPinned () { return this.$store.state.spaceDetailsDialogIsPinned }
   },
   methods: {
+    textareaSizes () {
+      const element = this.$refs.name
+      const modifier = 1
+      element.style.height = element.scrollHeight + modifier + 'px'
+    },
     toggleDialogIsPinned () {
       const isPinned = !this.dialogIsPinned
       this.$store.commit('spaceDetailsDialogIsPinned', isPinned)
@@ -145,7 +161,9 @@ export default {
 <style lang="stylus">
 .space-details-info
   align-items flex-start !important
-  > .button-wrap + input
+  textarea
+    margin 0
+  > .button-wrap + textarea
     margin 0
   > .button-wrap
     padding-right 6px
