@@ -6,33 +6,36 @@ dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.left.st
 
   section
     p Invite Collaborators
-
   section
     Loader(:visible="loading")
-
     template(v-if="!loading && collaboratorKey")
+      //- Input
       .row
         input.url-textarea(ref="url" v-model="url")
-      button(v-if="!canNativeShare" @click.left="copyUrl")
-        span Copy Invite Url
-      .segmented-buttons(v-if="canNativeShare")
-        button(@click.left="copyUrl" :disabled="loading")
+      //- Copy Button
+      .row(v-if="!canNativeShare" @click.left="copyUrl")
+        button
           span Copy Invite Url
-        button(@click.left="shareUrl" :disabled="loading")
-          img.icon(src="@/assets/share.svg")
-
-    p(v-if="spaceIsPrivate")
-      img.icon(src="@/assets/view.svg")
-      span Invitees can view private spaces without a Kinopio account
-
+      .row(v-if="canNativeShare")
+        .segmented-buttons
+          button(@click.left="copyUrl" :disabled="loading")
+            span Copy Invite Url
+          button(@click.left="shareUrl" :disabled="loading")
+            img.icon(src="@/assets/share.svg")
+    //- Status
     template(v-if="!loading && !collaboratorKey")
       .row
         .badge.danger シ_ _)シ Something went wrong
       button(@click="updateCollaboratorKey") Try Again
-
     .row
       .badge.success.success-message(v-if="urlIsCopied") Url Copied
-
+    .row.align-top(v-if="spaceIsPrivate")
+      img.icon.lock(src="@/assets/lock.svg")
+      span Invitees won't need an account to view private spaces
+    .row(v-if="currentUserIsUpgraded")
+      p
+        .badge.success Upgraded
+        span Because your account is upgraded, invitees can create cards here for free
 </template>
 
 <script>
@@ -58,12 +61,9 @@ export default {
   computed: {
     // only works in https, supported by safari and android chrome
     // https://caniuse.com/#feat=web-share
-    canNativeShare () {
-      return Boolean(navigator.share)
-    },
-    spaceIsPrivate () {
-      return this.$store.state.currentSpace.privacy === 'private'
-    }
+    canNativeShare () { return Boolean(navigator.share) },
+    spaceIsPrivate () { return this.$store.state.currentSpace.privacy === 'private' },
+    currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded }
   },
   methods: {
     copyUrl () {
@@ -115,4 +115,6 @@ export default {
   right 8px
   max-height calc(100vh - 180px)
   overflow auto
+  .lock
+    margin-top 2px
 </style>
