@@ -16,7 +16,7 @@ template(v-if="isSpaceMember")
       Background(:visible="backgroundIsVisible" @updateSpaces="updateSpaces")
     input(ref="name" placeholder="name" v-model="spaceName")
     //- Pin Dialog
-    .title-row
+    .title-row(v-if="!shouldHidePin")
       .button-wrap.pin-button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
         button
           img.icon.pin(src="@/assets/pin.svg")
@@ -30,6 +30,12 @@ template(v-if="!isSpaceMember")
       BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
       Background(:visible="backgroundIsVisible")
     p {{spaceName}}
+    //- Pin Dialog
+    .title-row(v-if="!shouldHidePin")
+      .button-wrap.pin-button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
+        button
+          img.icon.pin(src="@/assets/pin.svg")
+
   .row(v-if="shouldShowInExplore")
     .badge.status.explore-message
       img.icon.sunglasses(src="@/assets/sunglasses.svg")
@@ -54,7 +60,8 @@ export default {
     AddToExplore
   },
   props: {
-    shouldHideExplore: Boolean
+    shouldHideExplore: Boolean,
+    shouldHidePin: Boolean
   },
   data () {
     return {
@@ -153,6 +160,7 @@ export default {
 
 <style lang="stylus">
 .space-details-info
+  align-items flex-start !important
   > .button-wrap + input
     margin 0
   > .button-wrap
@@ -185,10 +193,6 @@ export default {
   .title-row
     margin-left 6px
     .pin-button-wrap
-      padding-left 6px
-      padding-top 4px
-      padding-bottom 4px
-      margin-top -13px
       button
         width 23px
 </style>
