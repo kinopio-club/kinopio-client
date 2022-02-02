@@ -161,7 +161,7 @@ export default {
 <style lang="stylus">
 .space-details-info
   align-items flex-start !important
-  textarea
+  textarea.name
     margin 0
   > .button-wrap + textarea
     margin 0
