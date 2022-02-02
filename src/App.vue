@@ -343,8 +343,12 @@ label // used for checkbox buttons
     //     background var(--secondary-active-background)
 
 textarea
-  &[disabled]
+  &[disabled],
+  &:disabled
     color var(--primary)
+    -webkit-text-fill-color var(--primary)
+    opacity 1
+    -webkit-opacity 1
 
 .inline-button
   background-color transparent
