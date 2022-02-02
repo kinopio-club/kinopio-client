@@ -263,11 +263,20 @@ export default {
     pointsAlongPath (connection) {
       const element = document.querySelector(`svg .connection-path[data-id='${connection.id}']`)
       if (!element) { return }
-      const start = [element.pathSegList[0].x, element.pathSegList[0].y]
+      const pathData = element.getPathData()
+      let m, q
+      pathData.forEach(data => {
+        if (data.type === 'm') {
+          m = data.values
+        } else if (data.type === 'q') {
+          q = data.values
+        }
+      })
+      const start = [m[0], m[1]]
       const startX = start[0]
       const startY = start[1]
-      const c1 = [startX + element.pathSegList[1].x1, startY + element.pathSegList[1].y1]
-      const end = [startX + element.pathSegList[1].x, startY + element.pathSegList[1].y]
+      const c1 = [startX + q[0], startY + q[1]]
+      const end = [startX + q[2], startY + q[3]]
       const scale = 2
       return quadratic(start, c1, end, scale) // [[x1,x2], [x2,x2], …]
     },
