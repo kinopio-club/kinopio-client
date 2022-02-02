@@ -92,10 +92,7 @@ export default {
   methods: {
     toggleDialogIsPinned () {
       const isPinned = !this.dialogIsPinned
-      this.$store.commit('linksDialogIsPinned', isPinned)
-      if (!isPinned) {
-        this.$store.dispatch('closeAllDialogs', 'Tags.toggleDialogIsPinned')
-      }
+      this.$store.dispatch('linksDialogIsPinned', isPinned)
     },
     toggleCurrentUserSpacesIsVisibleOnly () {
       this.currentUserSpacesIsVisibleOnly = !this.currentUserSpacesIsVisibleOnly
@@ -147,6 +144,11 @@ export default {
     },
     loading (loading) {
       this.updateResultsSectionHeight()
+    },
+    dialogIsPinned (value) {
+      if (!value) {
+        this.$store.dispatch('closeAllDialogs', 'Links.dialogIsPinned')
+      }
     }
   }
 }

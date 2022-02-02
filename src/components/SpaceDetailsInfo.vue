@@ -128,7 +128,7 @@ export default {
     },
     toggleDialogIsPinned () {
       const isPinned = !this.dialogIsPinned
-      this.$store.commit('spaceDetailsDialogIsPinned', isPinned)
+      this.$store.dispatch('spaceDetailsDialogIsPinned', isPinned)
       if (!isPinned) {
         this.$store.dispatch('closeAllDialogs', 'SpaceDetails.toggleDialogIsPinned')
       }

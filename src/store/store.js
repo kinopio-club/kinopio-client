@@ -638,6 +638,11 @@ const store = createStore({
 
     // Pinned Dialogs
 
+    unpinAllDialogs: (state) => {
+      state.linksDialogIsPinned = false
+      state.tagsDialogIsPinned = false
+      state.spaceDetailsDialogIsPinned = false
+    },
     linksDialogIsPinned: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'linksDialogIsPinned' })
       state.linksDialogIsPinned = value
@@ -1120,9 +1125,25 @@ const store = createStore({
         connectionId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteConnectionDetailsVisible' }, { root: true })
+    },
+
+    // Pinned Dialogs
+    linksDialogIsPinned: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'linksDialogIsPinned' })
+      context.commit('unpinAllDialogs')
+      context.commit('linksDialogIsPinned', value)
+    },
+    tagsDialogIsPinned: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'tagsDialogIsPinned' })
+      context.commit('unpinAllDialogs')
+      context.commit('tagsDialogIsPinned', value)
+    },
+    spaceDetailsDialogIsPinned: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'spaceDetailsDialogIsPinned' })
+      context.commit('unpinAllDialogs')
+      context.commit('spaceDetailsDialogIsPinned', value)
     }
   },
-
   getters: {
     shouldScrollAtEdges: (state, getters) => (event) => {
       let isPainting

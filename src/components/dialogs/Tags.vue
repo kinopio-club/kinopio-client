@@ -87,10 +87,7 @@ export default {
   methods: {
     toggleDialogIsPinned () {
       const isPinned = !this.dialogIsPinned
-      this.$store.commit('tagsDialogIsPinned', isPinned)
-      if (!isPinned) {
-        this.$store.dispatch('closeAllDialogs', 'Tags.toggleDialogIsPinned')
-      }
+      this.$store.dispatch('tagsDialogIsPinned', isPinned)
     },
     toggleCurrentSpaceTagsIsVisibleOnly () {
       this.currentSpaceTagsIsVisibleOnly = !this.currentSpaceTagsIsVisibleOnly
@@ -164,6 +161,11 @@ export default {
     },
     isLoadingRemoteTags (value) {
       this.updateResultsSectionHeight()
+    },
+    dialogIsPinned (value) {
+      if (!value) {
+        this.$store.dispatch('closeAllDialogs', 'Tags.dialogIsPinned')
+      }
     }
   }
 }

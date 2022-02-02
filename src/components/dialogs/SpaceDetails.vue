@@ -161,7 +161,8 @@ export default {
     spacesHasJournalSpace () {
       const journal = this.spaces.find(space => space.moonPhase)
       return Boolean(journal)
-    }
+    },
+    dialogIsPinned () { return this.$store.state.spaceDetailsDialogIsPinned }
   },
   methods: {
     toggleSpaceFiltersIsVisible () {
@@ -368,6 +369,11 @@ export default {
         this.closeDialogs()
         this.updateFavorites()
         this.updateHeights()
+      }
+    },
+    dialogIsPinned (value) {
+      if (!value) {
+        this.$store.dispatch('closeAllDialogs', 'SpaceDetails.dialogIsPinned')
       }
     }
   }
