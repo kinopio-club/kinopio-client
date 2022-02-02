@@ -26,29 +26,29 @@
               span(v-if="favoriteSpacesEditedCount") {{favoriteSpacesEditedCount}}
           Favorites(:visible="favoritesIsVisible")
 
-      section.controls(v-if="isVisible")
-        //- Removed
-        .button-wrap
-          button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
-            img.refresh.icon(src="@/assets/remove.svg")
-            span Removed
-          Removed(:visible="removedIsVisible")
-        //- Tags and Links
-        .button-wrap
-          .segmented-buttons
-            button(@click.left="toggleTagsIsVisible" :class="{ active: tagsIsVisible}")
-              span Tags
-            button(@click.left="toggleLinksIsVisible" :class="{ active: linksIsVisible}")
-              span Links
-          Links(:visible="linksIsVisible")
-          Tags(:visible="tagsIsVisible")
-
         //- Mobile Tips
         .button-wrap(v-if="isMobileOrTouch" :style="{zIndex: mobileTipsZIndex}")
           button(@click.left="toggleMobileTipsIsVisible" :class="{ active: mobileTipsIsVisible}")
             img.icon(src="@/assets/press-and-hold.svg")
             span Mobile Tips
           MobileTips(:visible="mobileTipsIsVisible")
+
+      //- section.controls(v-if="isVisible")
+      //-   //- Removed
+      //-   .button-wrap
+      //-     button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
+      //-       img.refresh.icon(src="@/assets/remove.svg")
+      //-       span Removed
+      //-     Removed(:visible="removedIsVisible")
+      //-   //- Tags and Links
+      //-   .button-wrap
+      //-     .segmented-buttons
+      //-       button(@click.left="toggleTagsIsVisible" :class="{ active: tagsIsVisible}")
+      //-         span Tags
+      //-       button(@click.left="toggleLinksIsVisible" :class="{ active: linksIsVisible}")
+      //-         span Links
+      //-     Links(:visible="linksIsVisible")
+      //-     Tags(:visible="tagsIsVisible")
 
   .right(v-if="!isMobileOrTouch" :class="{'is-embed': isEmbed}")
     SpaceZoom
@@ -364,8 +364,11 @@ footer
   .undo
     margin 0
     height 11px
-  .controls
-    margin-top 6px
+  .sunglasses
+    height 12px
+
+  // .controls
+  //   margin-top 6px
   > section
     display flex
     > .button-wrap

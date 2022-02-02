@@ -45,6 +45,12 @@ header(:style="visualViewportPosition")
                 span Read Only
               span.invisible-badge(ref="readOnly" :class="{'badge-jiggle': readOnlyJiggle, 'invisible': !readOnlyJiggle}")
                 span Read Only
+          //- Soaces Meta Options
+          .button-wrap
+            button(@click.left.stop="toggleSpacesMetaOptionsIsVisible" :class="{ active: spacesMetaOptionsIsVisible}")
+              img.icon.down-arrow(src="@/assets/down-arrow.svg")
+            SpacesMetaOptions(:visible="spacesMetaOptionsIsVisible")
+
           //- State
           .button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
             button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active : spaceStatusIsVisible}")
@@ -125,6 +131,7 @@ import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
 import SpaceDetailsInfo from '@/components/dialogs/SpaceDetailsInfo.vue'
 import SpaceStatus from '@/components/dialogs/SpaceStatus.vue'
 import Offline from '@/components/dialogs/Offline.vue'
+import SpacesMetaOptions from '@/components/dialogs/SpacesMetaOptions.vue'
 import MoonPhase from '@/components/MoonPhase.vue'
 import User from '@/components/User.vue'
 import SignUpOrIn from '@/components/dialogs/SignUpOrIn.vue'
@@ -154,6 +161,7 @@ export default {
     SpaceDetailsInfo,
     SpaceStatus,
     Offline,
+    SpacesMetaOptions,
     User,
     SignUpOrIn,
     ResetPassword,
@@ -185,7 +193,8 @@ export default {
       readOnlyJiggle: false,
       notifications: [],
       notificationsIsLoading: true,
-      addSpaceIsVisible: false
+      addSpaceIsVisible: false,
+      spacesMetaOptionsIsVisible: false
     }
   },
   created () {
@@ -402,6 +411,7 @@ export default {
       this.offlineIsVisible = false
       this.notificationsIsVisible = false
       this.addSpaceIsVisible = false
+      this.spacesMetaOptionsIsVisible = false
     },
     updatePositionFrame () {
       currentIteration++
@@ -467,6 +477,11 @@ export default {
       const isVisible = this.addSpaceIsVisible
       this.$store.dispatch('closeAllDialogs', 'Header.toggleAddSpaceIsVisible')
       this.addSpaceIsVisible = !isVisible
+    },
+    toggleSpacesMetaOptionsIsVisible () {
+      const isVisible = this.spacesMetaOptionsIsVisible
+      this.$store.dispatch('closeAllDialogs', 'Header.toggleSpacesMetaOptionsIsVisible')
+      this.spacesMetaOptionsIsVisible = !isVisible
     },
     toggleSpaceStatusIsVisible () {
       const isVisible = this.spaceStatusIsVisible
@@ -573,6 +588,10 @@ header
     &.active
       .down-arrow
         transform translateY(5px)
+
+  .space-meta-rows
+    .down-arrow
+      padding 0
 
   .embed-nav
     .logo
