@@ -378,9 +378,6 @@ footer
       &:first-child
         margin-left 0
 
-  .sunglasses
-    vertical-align middle
-
   .segmented-buttons
     .down-arrow
       padding 0

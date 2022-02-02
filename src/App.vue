@@ -421,7 +421,8 @@ dialog
   label + label,
   label + .button-wrap,
   .button-wrap + label,
-  .segmented-buttons + .button-wrap
+  .segmented-buttons + .button-wrap,
+  .button-wrap + .segmented-buttons
     margin-left 6px
   .title-row
     display flex
