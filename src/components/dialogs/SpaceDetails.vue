@@ -376,9 +376,6 @@ export default {
 
 <style lang="stylus">
 .space-details
-  .privacy-row
-    display flex
-    align-items flex-start
   .privacy-button
     > button
       height 24px

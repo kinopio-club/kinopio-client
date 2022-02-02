@@ -468,6 +468,8 @@ dialog
       margin-bottom 0
     &:last-child
       margin-bottom 0
+    &.align-top
+      align-items flex-start
   section
     padding 8px
     &:first-child
@@ -636,6 +638,8 @@ code
     min-height initial
     min-width initial
     background-color var(--secondary-background)
+  &.last-child
+    margin 0
 
   input
     margin 0

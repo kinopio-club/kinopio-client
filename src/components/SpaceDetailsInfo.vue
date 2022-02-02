@@ -1,45 +1,33 @@
 <template lang="pug">
-template(v-if="isSpaceMember")
-  .row.space-details-info(@click.left="closeDialogsAndEmit")
-    .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
-      BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
-      //- Background Upload Progress
-      .uploading-container-footer(v-if="pendingUpload")
-        .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
-          Loader(:visible="true")
-          span {{pendingUpload.percentComplete}}%
-      //- Background Remote Upload Progress
-      .uploading-container-footer(v-if="remotePendingUpload")
-        .badge.info
-          Loader(:visible="true")
-          span {{remotePendingUpload.percentComplete}}%
-      Background(:visible="backgroundIsVisible" @updateSpaces="updateSpaces")
-    input(ref="name" placeholder="name" v-model="spaceName")
-    //- Pin Dialog
-    .title-row(v-if="!shouldHidePin")
-      .button-wrap.pin-button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
-        button
-          img.icon.pin(src="@/assets/pin.svg")
-  .row.privacy-row
-    PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
-    AddToExplore(v-if="!shouldHideExplore" @updateSpaces="updateSpaces")
+.row.space-details-info(@click.left="closeDialogsAndEmit")
+  .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
+    BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
+    //- Background Upload Progress
+    .uploading-container-footer(v-if="pendingUpload")
+      .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
+        Loader(:visible="true")
+        span {{pendingUpload.percentComplete}}%
+    //- Background Remote Upload Progress
+    .uploading-container-footer(v-if="remotePendingUpload")
+      .badge.info
+        Loader(:visible="true")
+        span {{remotePendingUpload.percentComplete}}%
+    Background(:visible="backgroundIsVisible" @updateSpaces="updateSpaces")
+  input(ref="name" placeholder="name" v-model="spaceName")
+  //- TODO multi-line-capable textarea, disable/read-only-txt if not spacemember. no line breaks: enter = blur
 
-template(v-if="!isSpaceMember")
-  .row.space-details-info.not-space-member(@click.left="closeDialogsAndEmit")
-    .button-wrap(@click.left.stop="toggleBackgroundIsVisible")
-      BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
-      Background(:visible="backgroundIsVisible")
-    p {{spaceName}}
-    //- Pin Dialog
-    .title-row(v-if="!shouldHidePin")
-      .button-wrap.pin-button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
-        button
-          img.icon.pin(src="@/assets/pin.svg")
+  //- Pin Dialog
+  .title-row(v-if="!shouldHidePin")
+    .button-wrap.pin-button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
+      button
+        img.icon.pin(src="@/assets/pin.svg")
+.row.align-top
+  //- Privacy
+  PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
+  //- Explore
+  AddToExplore(v-if="!shouldHideExplore" @updateSpaces="updateSpaces")
+  .badge.info.last-child(v-if="!canEditSpace") Read Only
 
-  .row(v-if="shouldShowInExplore")
-    .badge.status.explore-message
-      img.icon.sunglasses(src="@/assets/sunglasses.svg")
-      span In Explore
 </template>
 
 <script>
@@ -96,6 +84,7 @@ export default {
       }
     },
     currentSpace () { return this.$store.state.currentSpace },
+    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     isSpaceMember () {
       const currentSpace = this.$store.state.currentSpace
       return this.$store.getters['currentUser/isSpaceMember'](currentSpace)
@@ -117,11 +106,6 @@ export default {
         const isSpace = upload.spaceId === currentSpace.id
         return inProgress && isSpace
       })
-    },
-    shouldShowInExplore () {
-      const privacy = this.$store.state.currentSpace.privacy
-      if (privacy === 'private') { return false }
-      return this.$store.state.currentSpace.showInExplore
     },
     dialogIsPinned () { return this.$store.state.spaceDetailsDialogIsPinned }
   },
