@@ -2,14 +2,14 @@
 dialog.narrow.spaces-meta-options(v-if="visible" :open="visible" ref="dialog" :class="{'right-side': showOnRightSide}")
   section
     .row
+      .segmented-buttons
+        button.active Tags
+        button Links
+
       .button-wrap
         button
           img.icon(src="@/assets/remove.svg")
           span Removed
-
-      .segmented-buttons
-        button Tags
-        button Links
 
     //- Removed
 
