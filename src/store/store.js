@@ -118,6 +118,7 @@ const store = createStore({
     // pinned dialogs
     linksDialogIsPinned: false,
     tagsDialogIsPinned: false,
+    spaceDetailsDialogIsPinned: false,
 
     // dragging
     currentDraggingCardId: '',
@@ -644,6 +645,10 @@ const store = createStore({
     tagsDialogIsPinned: (state, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'tagsDialogIsPinned' })
       state.tagsDialogIsPinned = value
+    },
+    spaceDetailsDialogIsPinned: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'spaceDetailsDialogIsPinned' })
+      state.spaceDetailsDialogIsPinned = value
     },
 
     // Connection Details

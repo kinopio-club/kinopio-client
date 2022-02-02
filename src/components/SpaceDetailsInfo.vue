@@ -17,11 +17,9 @@ template(v-if="isSpaceMember")
     input(ref="name" placeholder="name" v-model="spaceName")
     //- Pin Dialog
     .title-row
-      .button-wrap.pin-button-wrap
+      .button-wrap.pin-button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
         button
           img.icon.pin(src="@/assets/pin.svg")
-          //- (@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
-
   .row.privacy-row
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
     AddToExplore(v-if="!shouldHideExplore" @updateSpaces="updateSpaces")
@@ -62,7 +60,6 @@ export default {
     return {
       backgroundIsVisible: false,
       privacyPickerIsVisible: false
-      // dialogIsPinned: false
     }
   },
   created () {
@@ -118,9 +115,17 @@ export default {
       const privacy = this.$store.state.currentSpace.privacy
       if (privacy === 'private') { return false }
       return this.$store.state.currentSpace.showInExplore
-    }
+    },
+    dialogIsPinned () { return this.$store.state.spaceDetailsDialogIsPinned }
   },
   methods: {
+    toggleDialogIsPinned () {
+      const isPinned = !this.dialogIsPinned
+      this.$store.commit('spaceDetailsDialogIsPinned', isPinned)
+      if (!isPinned) {
+        this.$store.dispatch('closeAllDialogs', 'SpaceDetails.toggleDialogIsPinned')
+      }
+    },
     toggleBackgroundIsVisible () {
       const isVisible = this.backgroundIsVisible
       this.closeDialogsAndEmit()
