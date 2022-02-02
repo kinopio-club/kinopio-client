@@ -1,9 +1,9 @@
 <template lang="pug">
-dialog.links.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="isPinnedDialog" :class="{'is-pinned': isPinnedDialog}")
+dialog.links.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
   section
     .title-row
       p Spaces that Link Here
-      .button-wrap(@click.left="toggleIsPinnedDialog"  :class="{active: isPinnedDialog}" title="Pin dialog")
+      .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
         button
           img.icon.pin(src="@/assets/pin.svg")
 
@@ -12,7 +12,7 @@ dialog.links.narrow(v-if="visible" :open="visible" ref="dialog" :style="{'max-he
       label(:class="{ active: currentUserSpacesIsVisibleOnly }")
         input(type="checkbox" v-model="currentUserSpacesIsVisibleOnly")
         User(:user="currentUser" :isClickable="false" :hideYouLabel="true")
-    SpaceList(:spaces="filteredSpaces" :showUser="true" @selectSpace="changeSpace" :parentIsPinned="isPinnedDialog")
+    SpaceList(:spaces="filteredSpaces" :showUser="true" @selectSpace="changeSpace" :parentIsPinned="dialogIsPinned")
 
   section(v-else-if="loading")
     Loader(:visible="loading")
@@ -87,14 +87,14 @@ export default {
         return false
       }
     },
-    isPinnedDialog () { return this.$store.state.linksIsPinnedDialog }
+    dialogIsPinned () { return this.$store.state.linksDialogIsPinned }
   },
   methods: {
-    toggleIsPinnedDialog () {
-      const isPinned = !this.isPinnedDialog
-      this.$store.commit('linksIsPinnedDialog', isPinned)
+    toggleDialogIsPinned () {
+      const isPinned = !this.dialogIsPinned
+      this.$store.commit('linksDialogIsPinned', isPinned)
       if (!isPinned) {
-        this.$store.dispatch('closeAllDialogs', 'Tags.toggleIsPinnedDialog')
+        this.$store.dispatch('closeAllDialogs', 'Tags.toggleDialogIsPinned')
       }
     },
     toggleCurrentUserSpacesIsVisibleOnly () {

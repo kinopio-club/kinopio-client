@@ -116,8 +116,8 @@ const store = createStore({
     currentSelectedLink: {},
 
     // pinned dialogs
-    linksIsPinnedDialog: false,
-    tagsIsPinnedDialog: false,
+    linksDialogIsPinned: false,
+    tagsDialogIsPinned: false,
 
     // dragging
     currentDraggingCardId: '',
@@ -637,13 +637,13 @@ const store = createStore({
 
     // Pinned Dialogs
 
-    linksIsPinnedDialog: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'linksIsPinnedDialog' })
-      state.linksIsPinnedDialog = value
+    linksDialogIsPinned: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'linksDialogIsPinned' })
+      state.linksDialogIsPinned = value
     },
-    tagsIsPinnedDialog: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'tagsIsPinnedDialog' })
-      state.tagsIsPinnedDialog = value
+    tagsDialogIsPinned: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'tagsDialogIsPinned' })
+      state.tagsDialogIsPinned = value
     },
 
     // Connection Details

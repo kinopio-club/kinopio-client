@@ -20,7 +20,7 @@ template(v-if="isSpaceMember")
       .button-wrap.pin-button-wrap
         button
           img.icon.pin(src="@/assets/pin.svg")
-          //- (@click.left="toggleIsPinnedDialog"  :class="{active: isPinnedDialog}" title="Pin dialog")
+          //- (@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
 
   .row.privacy-row
     PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showIconOnly="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateSpaces="updateSpaces")
