@@ -30,11 +30,14 @@ dialog.narrow.invite-collaborators(v-if="visible" :open="visible" @click.left.st
     .row
       .badge.success.success-message(v-if="urlIsCopied") Url Copied
     .row.align-top(v-if="spaceIsPrivate")
-      img.icon.lock(src="@/assets/lock.svg")
-      span Invitees won't need an account to view private spaces
+      p
+        .badge.info
+          img.icon.view(src="@/assets/view.svg")
+          img.icon.lock(src="@/assets/lock.svg")
+        span Invitees don't need an account to view private spaces
     .row(v-if="currentUserIsUpgraded")
       p
-        .badge.success Upgraded
+        .badge.success Free Cards
         span Because your account is upgraded, invitees can create cards here for free
 </template>
 
@@ -117,4 +120,7 @@ export default {
   overflow auto
   .lock
     margin-top 2px
+    padding-right 2px
+  .view
+    margin-right 4px
 </style>
