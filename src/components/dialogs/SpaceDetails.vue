@@ -214,6 +214,7 @@ export default {
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space })
       this.$store.dispatch('closeAllDialogs', 'spaceDetails.changeSpace')
+      this.closeDialogs()
     },
     changeToLastSpace () {
       const currentSpace = this.$store.state.currentSpace

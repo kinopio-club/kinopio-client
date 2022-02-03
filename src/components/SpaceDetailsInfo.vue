@@ -59,7 +59,7 @@ export default {
     shouldHidePin: Boolean
   },
   mounted () {
-    this.textareaSizes()
+    this.textareaSize()
   },
   created () {
     this.$store.subscribe((mutation, state) => {
@@ -73,6 +73,14 @@ export default {
             element.focus()
             element.setSelectionRange(0, element.value.length)
           })
+        })
+      } else if (mutation.type === 'currentSpace/restoreSpace') {
+        // reset and update textareaSize
+        if (!this.dialogIsPinned) { return }
+        const element = this.$refs.name
+        element.style.height = 0
+        this.$nextTick(() => {
+          this.textareaSize()
         })
       }
     })
@@ -89,7 +97,7 @@ export default {
         return this.$store.state.currentSpace.name
       },
       set (newName) {
-        this.textareaSizes()
+        this.textareaSize()
         this.$store.dispatch('currentSpace/updateSpace', { name: newName })
         this.updateSpaces()
       }
@@ -121,7 +129,7 @@ export default {
     dialogIsPinned () { return this.$store.state.spaceDetailsDialogIsPinned }
   },
   methods: {
-    textareaSizes () {
+    textareaSize () {
       const element = this.$refs.name
       const modifier = 1
       element.style.height = element.scrollHeight + modifier + 'px'
