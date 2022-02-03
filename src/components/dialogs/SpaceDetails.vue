@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style")
   section
     SpaceDetailsInfo(@updateSpaces="updateLocalSpaces" @closeDialogs="closeDialogs")
     //- Remove
@@ -109,6 +109,13 @@ export default {
     }
   },
   computed: {
+    style () {
+      let style = { maxHeight: this.dialogHeight + 'px' }
+      if (this.dialogIsPinned) {
+        style.left = '-65px'
+      }
+      return style
+    },
     spaceName () { return this.$store.state.currentSpace.name },
     dialogSpaceFilters () { return this.$store.state.currentUser.dialogSpaceFilters },
     dialogSpaceFilterByUser () { return this.$store.state.currentUser.dialogSpaceFilterByUser },
