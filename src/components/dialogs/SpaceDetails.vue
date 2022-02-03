@@ -55,6 +55,7 @@ import templates from '@/data/templates.js'
 import utils from '@/utils.js'
 
 import debounce from 'lodash-es/debounce'
+import dayjs from 'dayjs'
 
 let shouldUpdateFavorites = true
 const maxIterations = 30
@@ -275,6 +276,7 @@ export default {
           return this.$store.getters['currentUser/canEditSpace'](space)
         })
         userSpaces = this.updateWithExistingRemoteSpaces(userSpaces)
+        userSpaces = this.sortSpacesByEditedAt(userSpaces)
         userSpaces = this.updateFavoriteSpaces(userSpaces)
         this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(userSpaces, currentUser)
       })
@@ -297,15 +299,24 @@ export default {
       })
       return spaces
     },
+    sortSpacesByEditedAt (spaces) {
+      const sortedSpaces = spaces.sort((a, b) => {
+        const bEditedAt = dayjs(b.editedAt).unix()
+        const aEditedAt = dayjs(a.editedAt).unix()
+        return bEditedAt - aEditedAt
+      })
+      return sortedSpaces
+    },
     async updateWithRemoteSpaces () {
       this.isLoadingRemoteSpaces = true
       this.remoteSpaces = await this.$store.dispatch('api/getUserSpaces')
       this.isLoadingRemoteSpaces = false
       if (!this.remoteSpaces) { return }
       this.removeRemovedCachedSpaces(this.remoteSpaces)
+      this.sortSpacesByEditedAt(this.remoteSpaces)
       const spaces = this.updateFavoriteSpaces(this.remoteSpaces)
       this.spaces = spaces
-      this.updateCachedSpacesUpdatedAt()
+      this.updateCachedSpacesDate()
     },
     updateJournalSpaces () {
       const journalSpaces = this.spaces.filter(space => space.moonPhase)
@@ -315,13 +326,13 @@ export default {
       const nonJournalSpaces = this.spaces.filter(space => !space.moonPhase)
       this.nonJournalSpaces = nonJournalSpaces
     },
-    updateCachedSpacesUpdatedAt () {
+    updateCachedSpacesDate () {
       this.spaces.forEach(space => {
         const cachedSpace = cache.space(space.id)
         const isCachedSpace = utils.objectHasKeys(cachedSpace)
-        const shouldUpdateDate = space.updatedAt !== cachedSpace.updatedAt
-        if (isCachedSpace && shouldUpdateDate) {
-          cache.updateSpace('updatedAt', space.updatedAt, space.id)
+        const shouldUpdate = space.editedAt !== cachedSpace.editedAt
+        if (isCachedSpace && shouldUpdate) {
+          cache.updateSpace('editedAt', space.editedAt, space.id)
         }
       })
     },
