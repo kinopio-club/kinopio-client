@@ -85,9 +85,11 @@ export default {
             element.setSelectionRange(0, element.value.length)
           })
         })
-      }
-      if (mutation.type === 'updatePageSizes') {
+      } else if (mutation.type === 'updatePageSizes') {
         this.updateHeights()
+      } else if (mutation.type === 'currentUser/favoriteSpaces') {
+        if (!this.visible) { return }
+        this.updateLocalSpaces()
       }
     })
   },
