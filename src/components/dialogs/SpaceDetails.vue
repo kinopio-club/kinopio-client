@@ -33,7 +33,7 @@ dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDia
           span Import
         Import(:visible="importIsVisible" @updateSpaces="updateLocalSpaces" @closeDialog="closeDialogs")
       //- Filters
-      .button-wrap.toggle-filters(v-if="spacesHasJournalSpace")
+      .button-wrap.toggle-filters
         button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible || spaceFiltersIsActive }")
           img.icon(src="@/assets/filter.svg")
           .badge.info.filter-is-active(v-if="spaceFiltersIsActive")
@@ -167,10 +167,6 @@ export default {
       const id = this.$store.state.currentSpace.id
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(id)
-    },
-    spacesHasJournalSpace () {
-      const journal = this.spaces.find(space => space.moonPhase)
-      return Boolean(journal)
     },
     dialogIsPinned () { return this.$store.state.spaceDetailsDialogIsPinned }
   },

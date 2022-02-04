@@ -1024,9 +1024,9 @@ const store = createStore({
     clearSpaceFilters: (context) => {
       context.commit('clearSpaceFilters')
     },
-    closeAllDialogs: (context, value) => {
-      const logging = value || 'Store.closeAllDialogs'
-      context.commit('closeAllDialogs', logging)
+    closeAllDialogs: (context, origin) => {
+      origin = origin || 'Store.closeAllDialogs'
+      context.commit('closeAllDialogs', origin)
       const space = utils.clone(context.rootState.currentSpace)
       const user = utils.clone(context.rootState.currentUser)
       context.commit('broadcast/updateUser', { user: utils.userMeta(user, space), type: 'updateUserPresence' }, { root: true })
