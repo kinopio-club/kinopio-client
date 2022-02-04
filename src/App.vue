@@ -399,7 +399,6 @@ p
     vertical-align middle
 
 dialog
-  transition left 0.1s
   width 250px
   left 8px
   top 8px
@@ -415,6 +414,8 @@ dialog
   box-shadow var(--hover-shadow)
   border-radius 3px
   overscroll-behavior-y contain
+  &.is-pinnable
+    transition left 0.1s
   &.narrow
     width 203px
   button,
