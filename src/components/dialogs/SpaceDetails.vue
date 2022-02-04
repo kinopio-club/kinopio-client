@@ -381,11 +381,6 @@ export default {
         this.updateFavorites()
         this.updateHeights()
       }
-    },
-    dialogIsPinned (value) {
-      if (!value) {
-        this.$store.dispatch('closeAllDialogs', 'SpaceDetails.dialogIsPinned')
-      }
     }
   }
 }

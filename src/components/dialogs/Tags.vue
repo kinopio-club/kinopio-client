@@ -49,17 +49,13 @@ export default {
       if (mutation.type === 'updatePageSizes') {
         this.updateDialogHeight()
         this.updateResultsSectionHeight()
-      }
-      if (mutation.type === 'currentSpace/removeTags') {
+      } else if (mutation.type === 'currentSpace/removeTags') {
         this.removeTag(mutation.payload)
-      }
-      if (mutation.type === 'currentSpace/updateTagNameColor') {
+      } else if (mutation.type === 'currentSpace/updateTagNameColor') {
         this.updateTagColor(mutation.payload)
-      }
-      if (tagMutations.includes(mutation.type) && this.visible) {
+      } else if (tagMutations.includes(mutation.type) && this.visible) {
         this.updateTags()
-      }
-      if (mutation.type === 'shouldHideFooter' && this.visible) {
+      } else if (mutation.type === 'shouldHideFooter' && this.visible) {
         this.updateTags()
       }
     })
@@ -161,11 +157,6 @@ export default {
     },
     isLoadingRemoteTags (value) {
       this.updateResultsSectionHeight()
-    },
-    dialogIsPinned (value) {
-      if (!value) {
-        this.$store.dispatch('closeAllDialogs', 'Tags.dialogIsPinned')
-      }
     }
   }
 }

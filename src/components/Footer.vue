@@ -101,25 +101,16 @@ export default {
   },
   mounted () {
     this.$store.subscribe((mutation, state) => {
-      const linksDialogIsPinned = this.$store.state.linksDialogIsPinned
-      const tagsDialogIsPinned = this.$store.state.tagsDialogIsPinned
       if (mutation.type === 'closeAllDialogs') {
-        this.removedIsVisible = false
-        this.favoritesIsVisible = false
-        this.exploreIsVisible = false
-        this.liveIsVisible = false
-        this.mobileTipsIsVisible = false
-        if (!linksDialogIsPinned) {
-          this.linksIsVisible = false
-        }
-        if (!tagsDialogIsPinned) {
-          this.tagsIsVisible = false
-        }
-      }
-      if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
+        this.closeDialogs()
+      } else if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
         currentIteration = 0
         if (updatePositionTimer) { return }
         updatePositionTimer = window.requestAnimationFrame(this.updatePositionFrame)
+      } else if (mutation.type === 'unpinOtherDialogs') {
+        this.$nextTick(() => {
+          this.closeDialogs(mutation.payload)
+        })
       }
     })
     this.updatePositionInVisualViewport()
@@ -185,11 +176,9 @@ export default {
     isMobileStandalone () {
       return utils.isMobile() && navigator.standalone // is homescreen app
     },
-    dialogsArePinned () {
-      const linksDialogIsPinned = this.$store.state.linksDialogIsPinned
-      const tagsDialogIsPinned = this.$store.state.tagsDialogIsPinned
-      return linksDialogIsPinned || tagsDialogIsPinned
-    },
+    linksDialogIsPinned () { return this.$store.state.linksDialogIsPinned },
+    tagsDialogIsPinned () { return this.$store.state.tagsDialogIsPinned },
+    dialogsArePinned () { return this.linksDialogIsPinned || this.tagsDialogIsPinned },
     mobileTipsZIndex () {
       if (this.mobileTipsIsVisible) {
         return 0
@@ -200,6 +189,19 @@ export default {
     }
   },
   methods: {
+    closeDialogs (exclude) {
+      this.removedIsVisible = false
+      this.favoritesIsVisible = false
+      this.exploreIsVisible = false
+      this.liveIsVisible = false
+      this.mobileTipsIsVisible = false
+      if (!this.tagsDialogIsPinned && exclude !== 'tags') {
+        this.tagsIsVisible = false
+      }
+      if (!this.linksDialogIsPinned && exclude !== 'links') {
+        this.linksIsVisible = false
+      }
+    },
     updatePositionFrame () {
       currentIteration++
       this.updatePositionInVisualViewport()

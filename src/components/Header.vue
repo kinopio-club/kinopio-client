@@ -218,6 +218,10 @@ export default {
         this.showNextSearchCard()
       } else if (mutation.type === 'triggerShowPreviousSearchCard') {
         this.showPreviousSearchCard()
+      } else if (mutation.type === 'unpinOtherDialogs') {
+        if (mutation.payload !== 'spaceDetails') {
+          this.closeAllDialogs()
+        }
       }
     })
   },

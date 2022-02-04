@@ -138,9 +138,6 @@ export default {
     toggleDialogIsPinned () {
       const isPinned = !this.dialogIsPinned
       this.$store.dispatch('spaceDetailsDialogIsPinned', isPinned)
-      if (!isPinned) {
-        this.$store.dispatch('closeAllDialogs', 'SpaceDetails.toggleDialogIsPinned')
-      }
     },
     toggleBackgroundIsVisible () {
       const isVisible = this.backgroundIsVisible

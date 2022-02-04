@@ -47,8 +47,7 @@ export default {
       if (mutation.type === 'updatePageSizes') {
         this.updateDialogHeight()
         this.updateResultsSectionHeight()
-      }
-      if (mutation.type === 'currentSpace/restoreSpace' && this.visible) {
+      } else if (mutation.type === 'currentSpace/restoreSpace' && this.visible) {
         this.updateLinks()
       }
     })
@@ -144,11 +143,6 @@ export default {
     },
     loading (loading) {
       this.updateResultsSectionHeight()
-    },
-    dialogIsPinned (value) {
-      if (!value) {
-        this.$store.dispatch('closeAllDialogs', 'Links.dialogIsPinned')
-      }
     }
   }
 }

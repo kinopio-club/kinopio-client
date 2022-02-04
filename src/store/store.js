@@ -638,7 +638,8 @@ const store = createStore({
 
     // Pinned Dialogs
 
-    unpinAllDialogs: (state) => {
+    unpinOtherDialogs: (state, exclude) => {
+      console.log('📌 unpin dialogs except', exclude)
       state.linksDialogIsPinned = false
       state.tagsDialogIsPinned = false
       state.spaceDetailsDialogIsPinned = false
@@ -1130,17 +1131,17 @@ const store = createStore({
     // Pinned Dialogs
     linksDialogIsPinned: (context, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'linksDialogIsPinned' })
-      context.commit('unpinAllDialogs')
+      context.commit('unpinOtherDialogs', 'links')
       context.commit('linksDialogIsPinned', value)
     },
     tagsDialogIsPinned: (context, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'tagsDialogIsPinned' })
-      context.commit('unpinAllDialogs')
+      context.commit('unpinOtherDialogs', 'tags')
       context.commit('tagsDialogIsPinned', value)
     },
     spaceDetailsDialogIsPinned: (context, value) => {
       utils.typeCheck({ value, type: 'boolean', origin: 'spaceDetailsDialogIsPinned' })
-      context.commit('unpinAllDialogs')
+      context.commit('unpinOtherDialogs', 'spaceDetails')
       context.commit('spaceDetailsDialogIsPinned', value)
     }
   },
