@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style")
   section
     SpaceDetailsInfo(@updateSpaces="updateLocalSpaces" @closeDialogs="closeDialogs")
     //- Remove
@@ -55,6 +55,7 @@ import templates from '@/data/templates.js'
 import utils from '@/utils.js'
 
 import debounce from 'lodash-es/debounce'
+import dayjs from 'dayjs'
 
 let shouldUpdateFavorites = true
 const maxIterations = 30
@@ -85,9 +86,11 @@ export default {
             element.setSelectionRange(0, element.value.length)
           })
         })
-      }
-      if (mutation.type === 'updatePageSizes') {
+      } else if (mutation.type === 'updatePageSizes') {
         this.updateHeights()
+      } else if (mutation.type === 'currentUser/favoriteSpaces') {
+        if (!this.visible) { return }
+        this.updateLocalSpaces()
       }
     })
   },
@@ -109,6 +112,13 @@ export default {
     }
   },
   computed: {
+    style () {
+      let style = { maxHeight: this.dialogHeight + 'px' }
+      if (this.dialogIsPinned) {
+        style.left = '-65px'
+      }
+      return style
+    },
     spaceName () { return this.$store.state.currentSpace.name },
     dialogSpaceFilters () { return this.$store.state.currentUser.dialogSpaceFilters },
     dialogSpaceFilterByUser () { return this.$store.state.currentUser.dialogSpaceFilterByUser },
@@ -161,7 +171,8 @@ export default {
     spacesHasJournalSpace () {
       const journal = this.spaces.find(space => space.moonPhase)
       return Boolean(journal)
-    }
+    },
+    dialogIsPinned () { return this.$store.state.spaceDetailsDialogIsPinned }
   },
   methods: {
     toggleSpaceFiltersIsVisible () {
@@ -206,6 +217,7 @@ export default {
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', { space })
       this.$store.dispatch('closeAllDialogs', 'spaceDetails.changeSpace')
+      this.closeDialogs()
     },
     changeToLastSpace () {
       const currentSpace = this.$store.state.currentSpace
@@ -264,6 +276,7 @@ export default {
           return this.$store.getters['currentUser/canEditSpace'](space)
         })
         userSpaces = this.updateWithExistingRemoteSpaces(userSpaces)
+        userSpaces = this.sortSpacesByEditedAt(userSpaces)
         userSpaces = this.updateFavoriteSpaces(userSpaces)
         this.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(userSpaces, currentUser)
       })
@@ -286,15 +299,24 @@ export default {
       })
       return spaces
     },
+    sortSpacesByEditedAt (spaces) {
+      const sortedSpaces = spaces.sort((a, b) => {
+        const bEditedAt = dayjs(b.editedAt).unix()
+        const aEditedAt = dayjs(a.editedAt).unix()
+        return bEditedAt - aEditedAt
+      })
+      return sortedSpaces
+    },
     async updateWithRemoteSpaces () {
       this.isLoadingRemoteSpaces = true
       this.remoteSpaces = await this.$store.dispatch('api/getUserSpaces')
       this.isLoadingRemoteSpaces = false
       if (!this.remoteSpaces) { return }
       this.removeRemovedCachedSpaces(this.remoteSpaces)
+      this.sortSpacesByEditedAt(this.remoteSpaces)
       const spaces = this.updateFavoriteSpaces(this.remoteSpaces)
       this.spaces = spaces
-      this.updateCachedSpacesUpdatedAt()
+      this.updateCachedSpacesDate()
     },
     updateJournalSpaces () {
       const journalSpaces = this.spaces.filter(space => space.moonPhase)
@@ -304,13 +326,13 @@ export default {
       const nonJournalSpaces = this.spaces.filter(space => !space.moonPhase)
       this.nonJournalSpaces = nonJournalSpaces
     },
-    updateCachedSpacesUpdatedAt () {
+    updateCachedSpacesDate () {
       this.spaces.forEach(space => {
         const cachedSpace = cache.space(space.id)
         const isCachedSpace = utils.objectHasKeys(cachedSpace)
-        const shouldUpdateDate = space.updatedAt !== cachedSpace.updatedAt
-        if (isCachedSpace && shouldUpdateDate) {
-          cache.updateSpace('updatedAt', space.updatedAt, space.id)
+        const shouldUpdate = space.editedAt !== cachedSpace.editedAt
+        if (isCachedSpace && shouldUpdate) {
+          cache.updateSpace('editedAt', space.editedAt, space.id)
         }
       })
     },
@@ -369,6 +391,11 @@ export default {
         this.updateFavorites()
         this.updateHeights()
       }
+    },
+    dialogIsPinned (value) {
+      if (!value) {
+        this.$store.dispatch('closeAllDialogs', 'SpaceDetails.dialogIsPinned')
+      }
     }
   }
 }
@@ -376,9 +403,6 @@ export default {
 
 <style lang="stylus">
 .space-details
-  .privacy-row
-    display flex
-    align-items flex-start
   .privacy-button
     > button
       height 24px

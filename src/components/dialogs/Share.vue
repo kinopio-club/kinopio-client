@@ -38,7 +38,7 @@ dialog.narrow.share(v-if="visible" :open="visible" @click.left.stop="closeDialog
         img.icon.closed(src="@/assets/unlock.svg")
         span {{privacyName(1)}}
       span or
-      span.badge.success
+      span.badge.success.last-child
         img.icon.open(src="@/assets/open.svg")
         span {{privacyName(0)}}
 
@@ -283,6 +283,8 @@ export default {
   .share-private
     .badge
       margin-left 6px
+    .last-child
+      margin 0
   .privacy-button + input
     margin-top 10px
   .small-button

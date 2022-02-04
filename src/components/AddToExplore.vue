@@ -1,4 +1,8 @@
 <template lang="pug">
+.badge.status.explore-message(v-if="showInExplore && !isSpaceMember")
+  img.icon.sunglasses(src="@/assets/sunglasses.svg")
+  span In Explore
+
 .button-wrap.add-to-explore(v-if="isSpaceMember")
   button(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
@@ -26,6 +30,7 @@
 <script>
 export default {
   name: 'ShowInExploreButton',
+  emits: ['updateSpaces'],
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'currentSpace/restoreSpace') {

@@ -391,8 +391,8 @@ export default {
       this.readOnlyJiggle = false
     },
     closeAllDialogs () {
+      const spaceDetailsDialogIsPinned = this.$store.state.spaceDetailsDialogIsPinned
       this.aboutIsVisible = false
-      this.spaceDetailsIsVisible = false
       this.spaceDetailsInfoIsVisible = false
       this.signUpOrInIsVisible = false
       this.shareIsVisible = false
@@ -402,6 +402,9 @@ export default {
       this.offlineIsVisible = false
       this.notificationsIsVisible = false
       this.addSpaceIsVisible = false
+      if (!spaceDetailsDialogIsPinned) {
+        this.spaceDetailsIsVisible = false
+      }
     },
     updatePositionFrame () {
       currentIteration++

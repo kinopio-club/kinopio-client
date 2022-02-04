@@ -101,18 +101,18 @@ export default {
   },
   mounted () {
     this.$store.subscribe((mutation, state) => {
-      const linksIsPinnedDialog = this.$store.state.linksIsPinnedDialog
-      const tagsIsPinnedDialog = this.$store.state.tagsIsPinnedDialog
+      const linksDialogIsPinned = this.$store.state.linksDialogIsPinned
+      const tagsDialogIsPinned = this.$store.state.tagsDialogIsPinned
       if (mutation.type === 'closeAllDialogs') {
         this.removedIsVisible = false
         this.favoritesIsVisible = false
         this.exploreIsVisible = false
         this.liveIsVisible = false
         this.mobileTipsIsVisible = false
-        if (!linksIsPinnedDialog) {
+        if (!linksDialogIsPinned) {
           this.linksIsVisible = false
         }
-        if (!tagsIsPinnedDialog) {
+        if (!tagsDialogIsPinned) {
           this.tagsIsVisible = false
         }
       }
@@ -186,9 +186,9 @@ export default {
       return utils.isMobile() && navigator.standalone // is homescreen app
     },
     dialogsArePinned () {
-      const linksIsPinnedDialog = this.$store.state.linksIsPinnedDialog
-      const tagsIsPinnedDialog = this.$store.state.tagsIsPinnedDialog
-      return linksIsPinnedDialog || tagsIsPinnedDialog
+      const linksDialogIsPinned = this.$store.state.linksDialogIsPinned
+      const tagsDialogIsPinned = this.$store.state.tagsDialogIsPinned
+      return linksDialogIsPinned || tagsDialogIsPinned
     },
     mobileTipsZIndex () {
       if (this.mobileTipsIsVisible) {

@@ -1,17 +1,17 @@
 <template lang="pug">
-dialog.tags.narrow(@click.stop v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="isPinnedDialog" :class="{'is-pinned': isPinnedDialog}")
+dialog.tags.narrow(@click.stop v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
   section
     .title-row
       p Tags
-      .button-wrap(@click.left="toggleIsPinnedDialog"  :class="{active: isPinnedDialog}" title="Pin dialog")
+      .button-wrap(@click.left="toggleDialogIsPinned"  :class="{active: dialogIsPinned}" title="Pin dialog")
         button
-          img.icon(src="@/assets/pin.svg")
+          img.icon.pin(src="@/assets/pin.svg")
   section.results-section(v-if="tags.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     .button-wrap(@click.left.prevent="toggleCurrentSpaceTagsIsVisibleOnly" @keydown.stop.enter="toggleCurrentSpaceTagsIsVisibleOnly")
       label(:class="{ active: currentSpaceTagsIsVisibleOnly }")
         input(type="checkbox" v-model="currentSpaceTagsIsVisibleOnly")
         span In Current Space
-    TagList(:tags="filteredTags" :isLoading="isLoadingRemoteTags" :parentIsPinned="isPinnedDialog")
+    TagList(:tags="filteredTags" :isLoading="isLoadingRemoteTags" :parentIsPinned="dialogIsPinned")
   section(v-else)
     p Use tags to help cards stand out, and to connect ideas across spaces.
     p Type
@@ -82,15 +82,12 @@ export default {
         return this.tags
       }
     },
-    isPinnedDialog () { return this.$store.state.tagsIsPinnedDialog }
+    dialogIsPinned () { return this.$store.state.tagsDialogIsPinned }
   },
   methods: {
-    toggleIsPinnedDialog () {
-      const isPinned = !this.isPinnedDialog
-      this.$store.commit('tagsIsPinnedDialog', isPinned)
-      if (!isPinned) {
-        this.$store.dispatch('closeAllDialogs', 'Tags.toggleIsPinnedDialog')
-      }
+    toggleDialogIsPinned () {
+      const isPinned = !this.dialogIsPinned
+      this.$store.dispatch('tagsDialogIsPinned', isPinned)
     },
     toggleCurrentSpaceTagsIsVisibleOnly () {
       this.currentSpaceTagsIsVisibleOnly = !this.currentSpaceTagsIsVisibleOnly
@@ -164,6 +161,11 @@ export default {
     },
     isLoadingRemoteTags (value) {
       this.updateResultsSectionHeight()
+    },
+    dialogIsPinned (value) {
+      if (!value) {
+        this.$store.dispatch('closeAllDialogs', 'Tags.dialogIsPinned')
+      }
     }
   }
 }

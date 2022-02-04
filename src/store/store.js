@@ -116,8 +116,9 @@ const store = createStore({
     currentSelectedLink: {},
 
     // pinned dialogs
-    linksIsPinnedDialog: false,
-    tagsIsPinnedDialog: false,
+    linksDialogIsPinned: false,
+    tagsDialogIsPinned: false,
+    spaceDetailsDialogIsPinned: false,
 
     // dragging
     currentDraggingCardId: '',
@@ -637,13 +638,22 @@ const store = createStore({
 
     // Pinned Dialogs
 
-    linksIsPinnedDialog: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'linksIsPinnedDialog' })
-      state.linksIsPinnedDialog = value
+    unpinAllDialogs: (state) => {
+      state.linksDialogIsPinned = false
+      state.tagsDialogIsPinned = false
+      state.spaceDetailsDialogIsPinned = false
     },
-    tagsIsPinnedDialog: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', origin: 'tagsIsPinnedDialog' })
-      state.tagsIsPinnedDialog = value
+    linksDialogIsPinned: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'linksDialogIsPinned' })
+      state.linksDialogIsPinned = value
+    },
+    tagsDialogIsPinned: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'tagsDialogIsPinned' })
+      state.tagsDialogIsPinned = value
+    },
+    spaceDetailsDialogIsPinned: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'spaceDetailsDialogIsPinned' })
+      state.spaceDetailsDialogIsPinned = value
     },
 
     // Connection Details
@@ -1115,9 +1125,25 @@ const store = createStore({
         connectionId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteConnectionDetailsVisible' }, { root: true })
+    },
+
+    // Pinned Dialogs
+    linksDialogIsPinned: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'linksDialogIsPinned' })
+      context.commit('unpinAllDialogs')
+      context.commit('linksDialogIsPinned', value)
+    },
+    tagsDialogIsPinned: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'tagsDialogIsPinned' })
+      context.commit('unpinAllDialogs')
+      context.commit('tagsDialogIsPinned', value)
+    },
+    spaceDetailsDialogIsPinned: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'spaceDetailsDialogIsPinned' })
+      context.commit('unpinAllDialogs')
+      context.commit('spaceDetailsDialogIsPinned', value)
     }
   },
-
   getters: {
     shouldScrollAtEdges: (state, getters) => (event) => {
       let isPainting

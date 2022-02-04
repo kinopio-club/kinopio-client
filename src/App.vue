@@ -342,6 +342,14 @@ label // used for checkbox buttons
     //     box-shadow var(--button-active-inset-shadow)
     //     background var(--secondary-active-background)
 
+textarea
+  &[disabled],
+  &:disabled
+    color var(--primary)
+    -webkit-text-fill-color var(--primary)
+    opacity 1
+    -webkit-opacity 1
+
 .inline-button
   background-color transparent
   cursor cell
@@ -468,6 +476,8 @@ dialog
       margin-bottom 0
     &:last-child
       margin-bottom 0
+    &.align-top
+      align-items flex-start
   section
     padding 8px
     &:first-child
@@ -636,6 +646,8 @@ code
     min-height initial
     min-width initial
     background-color var(--secondary-background)
+  &.last-child
+    margin 0
 
   input
     margin 0
@@ -714,6 +726,9 @@ code
 .flower
   vertical-align -3px
   height 13px
+
+.pin
+  vertical-align 0
 
 .hidden
   display none

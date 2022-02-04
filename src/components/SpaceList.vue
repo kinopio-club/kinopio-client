@@ -177,6 +177,10 @@ export default {
       this.filter = filter
       const spaces = this.spacesFiltered || this.spaces
       if (!spaces.length) { return }
+      if (!filter) {
+        this.focusOnId = ''
+        return
+      }
       this.focusOnId = spaces[0].id
     },
     spaceIsActive (space) {
