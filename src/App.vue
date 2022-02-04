@@ -399,6 +399,7 @@ p
     vertical-align middle
 
 dialog
+  transition all 0.1s
   width 250px
   left 8px
   top 8px

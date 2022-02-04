@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style" :data-is-pinned="dialogIsPinned")
+dialog.narrow.space-details(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog" :style="style" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
   section
     SpaceDetailsInfo(@updateSpaces="updateLocalSpaces" @closeDialogs="closeDialogs")
     //- Remove
@@ -112,13 +112,7 @@ export default {
     }
   },
   computed: {
-    style () {
-      let style = { maxHeight: this.dialogHeight + 'px' }
-      if (this.dialogIsPinned) {
-        style.left = '-65px'
-      }
-      return style
-    },
+    style () { return { maxHeight: this.dialogHeight + 'px' } },
     spaceName () { return this.$store.state.currentSpace.name },
     dialogSpaceFilters () { return this.$store.state.currentUser.dialogSpaceFilters },
     dialogSpaceFilterByUser () { return this.$store.state.currentUser.dialogSpaceFilterByUser },
@@ -413,4 +407,6 @@ export default {
     margin-left 5px
     padding-top 0
     padding-bottom 0
+  &.is-pinned
+    left -65px
 </style>

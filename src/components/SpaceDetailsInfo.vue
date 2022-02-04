@@ -78,6 +78,7 @@ export default {
         // reset and update textareaSize
         if (!this.dialogIsPinned) { return }
         const element = this.$refs.name
+        if (!element) { return }
         element.style.height = 0
         this.$nextTick(() => {
           this.textareaSize()
