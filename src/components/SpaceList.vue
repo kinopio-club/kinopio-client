@@ -19,8 +19,11 @@ span.space-list-wrap
           @click.left.prevent.stop="selectSpace(space)"
           :class="{ active: spaceIsActive(space), hover: focusOnId === space.id }"
           tabindex="0"
-          @keyup.enter="selectSpace(space)"
+          @keyup.enter="selectSpace(space.id)"
         )
+          Loader(:visible="isLoadingSpace(space)")
+          //-
+
           //- User(s)
           template(v-if="showOtherUsers")
             .users
@@ -64,6 +67,7 @@ import MoonPhase from '@/components/MoonPhase.vue'
 import utils from '@/utils.js'
 import { defineAsyncComponent } from 'vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
+import Loader from '@/components/Loader.vue'
 
 import last from 'lodash-es/last'
 const User = defineAsyncComponent({
@@ -78,7 +82,8 @@ export default {
     User,
     ResultsFilter,
     MoonPhase,
-    PrivacyIcon
+    PrivacyIcon,
+    Loader
   },
   props: {
     spaces: Array,
@@ -189,6 +194,10 @@ export default {
       } else {
         return this.spaceIsCurrentSpace(space)
       }
+    },
+    isLoadingSpace (space) {
+      const isLoadingSpace = this.$store.state.isLoadingSpace
+      return isLoadingSpace && this.spaceIsCurrentSpace(space)
     },
     spaceIsCurrentSpace (space) {
       const currentSpace = this.$store.state.currentSpace.id
@@ -358,4 +367,12 @@ export default {
   .checkmark
     vertical-align 1px
     width 10px
+
+  li
+    position relative
+    .loader
+      position absolute
+      width 13px
+      height 13px
+      top 5px
 </style>
