@@ -1492,6 +1492,7 @@ export default {
         url = this.removeHiddenQueryString(url)
         let response = await this.$store.dispatch('api/urlPreview', url)
         this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+        if (!response) { return }
         let { data, host } = response
         console.log('🚗 link preview', host, data)
         const { links, meta } = data
