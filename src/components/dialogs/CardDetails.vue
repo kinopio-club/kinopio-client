@@ -1428,6 +1428,7 @@ export default {
       this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
     },
     resetTextareaHeight () {
+      if (!this.visible) { return }
       this.$refs.name.style.height = 'initial'
     },
     showCard (cardId) {
