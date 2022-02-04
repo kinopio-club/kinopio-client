@@ -7,9 +7,9 @@ dialog.tags.narrow(@click.stop v-if="visible" :open="visible" ref="dialog" :styl
         button
           img.icon.pin(src="@/assets/pin.svg")
   section.results-section(v-if="tags.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    .button-wrap(@click.left.prevent="toggleCurrentSpaceTagsIsVisibleOnly" @keydown.stop.enter="toggleCurrentSpaceTagsIsVisibleOnly")
-      label(:class="{ active: currentSpaceTagsIsVisibleOnly }")
-        input(type="checkbox" v-model="currentSpaceTagsIsVisibleOnly")
+    .button-wrap(@click.left.prevent="toggleShouldShowCurrentSpaceTags" @keydown.stop.enter="toggleShouldShowCurrentSpaceTags")
+      label(:class="{ active: shouldShowCurrentSpaceTags }")
+        input(type="checkbox" v-model="shouldShowCurrentSpaceTags")
         span In Current Space
     TagList(:tags="filteredTags" :isLoading="isLoadingRemoteTags" :parentIsPinned="dialogIsPinned")
   section(v-else)
@@ -65,14 +65,14 @@ export default {
       resultsSectionHeight: null,
       dialogHeight: null,
       tags: [],
-      isLoadingRemoteTags: false,
-      currentSpaceTagsIsVisibleOnly: false
+      isLoadingRemoteTags: false
     }
   },
   computed: {
+    shouldShowCurrentSpaceTags () { return this.$store.state.currentUser.shouldShowCurrentSpaceTags },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     filteredTags () {
-      if (this.currentSpaceTagsIsVisibleOnly) {
+      if (this.shouldShowCurrentSpaceTags) {
         return this.$store.getters['currentSpace/spaceTags']
       } else {
         return this.tags
@@ -85,8 +85,9 @@ export default {
       const isPinned = !this.dialogIsPinned
       this.$store.dispatch('tagsDialogIsPinned', isPinned)
     },
-    toggleCurrentSpaceTagsIsVisibleOnly () {
-      this.currentSpaceTagsIsVisibleOnly = !this.currentSpaceTagsIsVisibleOnly
+    toggleShouldShowCurrentSpaceTags () {
+      const value = !this.shouldShowCurrentSpaceTags
+      this.$store.dispatch('currentUser/update', { shouldShowCurrentSpaceTags: value })
     },
     removeTag (tagToRemove) {
       this.$store.commit('tagDetailsIsVisible', false)

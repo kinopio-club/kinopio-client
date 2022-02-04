@@ -37,6 +37,7 @@ export default {
     shouldUseLastConnectionType: false,
     shouldOpenLinksInNewTab: false,
     shouldRightMouseButtonPan: false,
+    shouldShowCurrentSpaceTags: false,
     dialogFavoritesFilters: null, // null, 'currentUser', 'otherUsers'
     dialogSpaceFilters: null, // null, journals, spaces
     dialogSpaceFilterByUser: {},
@@ -225,6 +226,10 @@ export default {
     shouldRightMouseButtonPan: (state, value) => {
       state.shouldRightMouseButtonPan = value
       cache.updateUser('shouldRightMouseButtonPan', value)
+    },
+    shouldShowCurrentSpaceTags: (state, value) => {
+      state.shouldShowCurrentSpaceTags = value
+      cache.updateUser('shouldShowCurrentSpaceTags', value)
     },
     shouldUseLastConnectionType: (state, value) => {
       state.shouldUseLastConnectionType = value
