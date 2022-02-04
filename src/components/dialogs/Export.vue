@@ -14,13 +14,17 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
       span Duplicate Space
     .badge.success(v-if="spaceIsDuplicated") {{duplicatedSpaceName}} duplicated
   section
-    p Download
-    button(@click.left="downloadTxt")
-      span.badge.info txt
-      span Card Names
-    button(@click.left="downloadJSON")
-      span.badge.info json
-      span All Data
+    p
+      span.badge.info txt and json
+    button Download Space
+    button Download All Spaces
+
+    //- button(@click.left="downloadTxt")
+    //-   span.badge.info txt
+    //-   span Card Names
+    //- button(@click.left="downloadJSON")
+    //-   span.badge.info json
+    //-   span All Data
     a#export-downlaod-anchor.hidden
 
 </template>
