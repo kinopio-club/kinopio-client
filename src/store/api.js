@@ -734,19 +734,28 @@ const self = {
     // Downloads
 
     downloadCurrentSpace: async (context) => {
-      // const apiKey = context.rootState.currentUser.apiKey
-      // if (!shouldRequest({ apiKey })) { return }
-      // try {
-      //   const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-      //   const response = await fetch(`${host}/space/download`, options)
-      //   return normalizeResponse(response)
-      // } catch (error) {
-      //   console.error('🚒 getUser', error)
-      // }
+      const apiKey = context.rootState.currentUser.apiKey
+      const spaceId = context.rootState.currentSpace.id
+      if (!shouldRequest({ apiKey })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/space/download/${spaceId}`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒 downloadCurrentSpace', error)
+      }
     },
 
     downloadAllSpaces: async (context) => {
-
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/space/download-all`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒 downloadCurrentSpace', error)
+      }
     }
 
   }

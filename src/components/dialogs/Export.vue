@@ -34,6 +34,8 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
         span Download All Spaces
         Loader(:visible="isLoadingAllSpaces")
     a#export-downlaod-anchor.hidden
+    .error-container(v-if="unknownServerError")
+      .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
 </template>
 
@@ -68,7 +70,8 @@ export default {
       duplicatedSpaceName: '',
       dialogHeight: null,
       isLoadingCurrentSpace: false,
-      isLoadingAllSpaces: false
+      isLoadingAllSpaces: false,
+      unknownServerError: false
     }
   },
   computed: {
@@ -102,14 +105,23 @@ export default {
     },
     async downloadCurrentSpaceRemote () {
       if (this.isLoadingCurrentSpace) { return }
+      this.unknownServerError = false
       this.isLoadingCurrentSpace = true
-      // await downloadCurrentSpace
-      // this.isLoadingCurrentSpace = false
+      try {
+        const response = await this.$store.dispatch('api/downloadCurrentSpace')
+        console.log(response)
+      } catch (error) {
+        console.error(error)
+        this.unknownServerError = true
+      }
+      this.isLoadingCurrentSpace = false
     },
     async downloadAllSpacesRemote () {
       if (this.isLoadingAllSpaces) { return }
+      this.unknownServerError = false
       this.isLoadingAllSpaces = true
       // await downloadAllSpaces
+      // TODO
     },
     // downloadTxt () {
     //   const data = this.text()
@@ -180,4 +192,6 @@ export default {
     margin-top 10px
   .hidden
     display none
+  .error-container
+    margin-top 10px
 </style>
