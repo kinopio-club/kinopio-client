@@ -729,7 +729,26 @@ const self = {
       } catch (error) {
         console.error('🚒 urlPreview', error)
       }
+    },
+
+    // Downloads
+
+    downloadCurrentSpace: async (context) => {
+      // const apiKey = context.rootState.currentUser.apiKey
+      // if (!shouldRequest({ apiKey })) { return }
+      // try {
+      //   const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+      //   const response = await fetch(`${host}/space/download`, options)
+      //   return normalizeResponse(response)
+      // } catch (error) {
+      //   console.error('🚒 getUser', error)
+      // }
+    },
+
+    downloadAllSpaces: async (context) => {
+
     }
+
   }
 }
 

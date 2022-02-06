@@ -27,20 +27,28 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
     template(v-if="currentUserIsSignedIn")
       p
         span.badge.info json and txt
-      button(@click.left="downloadSpaceRemote") Download Space
-      button(@click.left="downloadAllSpacesRemote") Download All Spaces
+      button(@click.left="downloadCurrentSpaceRemote" :class="{ active: isLoadingCurrentSpace }")
+        span Download Space
+        Loader(:visible="isLoadingCurrentSpace")
+      button(@click.left="downloadAllSpacesRemote" :class="{ active: isLoadingAllSpaces }")
+        span Download All Spaces
+        Loader(:visible="isLoadingAllSpaces")
     a#export-downlaod-anchor.hidden
 
 </template>
 
 <script>
-import join from 'lodash-es/join'
-
 import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
+import Loader from '@/components/Loader.vue'
+
+import join from 'lodash-es/join'
 
 export default {
   name: 'Export',
+  components: {
+    Loader
+  },
   props: {
     visible: Boolean,
     exportTitle: String, // space-name, 3 Cards
@@ -58,7 +66,9 @@ export default {
       textIsCopied: false,
       spaceIsDuplicated: false,
       duplicatedSpaceName: '',
-      dialogHeight: null
+      dialogHeight: null,
+      isLoadingCurrentSpace: false,
+      isLoadingAllSpaces: false
     }
   },
   computed: {
@@ -90,9 +100,16 @@ export default {
       downloadAnchor.setAttribute('download', `${fileName}.json`)
       downloadAnchor.click()
     },
-    downloadSpaceRemote () {
+    async downloadCurrentSpaceRemote () {
+      if (this.isLoadingCurrentSpace) { return }
+      this.isLoadingCurrentSpace = true
+      // await downloadCurrentSpace
+      // this.isLoadingCurrentSpace = false
     },
-    downloadAllSpacesRemote () {
+    async downloadAllSpacesRemote () {
+      if (this.isLoadingAllSpaces) { return }
+      this.isLoadingAllSpaces = true
+      // await downloadAllSpaces
     },
     // downloadTxt () {
     //   const data = this.text()
