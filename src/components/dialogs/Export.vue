@@ -13,18 +13,22 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
       img.icon(src="@/assets/add.svg")
       span Duplicate Space
     .badge.success(v-if="spaceIsDuplicated") {{duplicatedSpaceName}} duplicated
-  section
-    p
-      span.badge.info txt and json
-    button Download Space
-    button Download All Spaces
 
-    //- button(@click.left="downloadTxt")
-    //-   span.badge.info txt
-    //-   span Card Names
-    //- button(@click.left="downloadJSON")
-    //-   span.badge.info json
-    //-   span All Data
+  section
+    // anon user
+    template(v-if="!currentUserIsSignedIn")
+      p
+        span.badge.info json
+      button(@click.left="downloadLocalJSON") Download Space
+      p
+        span Sign Up or In for more export options
+      button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
+    // signed in user
+    template(v-if="currentUserIsSignedIn")
+      p
+        span.badge.info json and txt
+      button(@click.left="downloadSpaceRemote") Download Space
+      button(@click.left="downloadAllSpacesRemote") Download All Spaces
     a#export-downlaod-anchor.hidden
 
 </template>
@@ -57,6 +61,9 @@ export default {
       dialogHeight: null
     }
   },
+  computed: {
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
+  },
   methods: {
     fileName () {
       const spaceName = this.$store.state.currentSpace.name
@@ -75,7 +82,7 @@ export default {
       document.execCommand('copy')
       this.textIsCopied = true
     },
-    downloadJSON () {
+    downloadLocalJSON () {
       const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.exportData))
       const downloadAnchor = document.getElementById('export-downlaod-anchor')
       const fileName = this.fileName()
@@ -83,15 +90,19 @@ export default {
       downloadAnchor.setAttribute('download', `${fileName}.json`)
       downloadAnchor.click()
     },
-    downloadTxt () {
-      const data = this.text()
-      const text = 'data:text/plain;charset=utf-8,' + encodeURIComponent(data)
-      const downloadAnchor = document.getElementById('export-downlaod-anchor')
-      const fileName = this.fileName()
-      downloadAnchor.setAttribute('href', text)
-      downloadAnchor.setAttribute('download', `${fileName}.txt`)
-      downloadAnchor.click()
+    downloadSpaceRemote () {
     },
+    downloadAllSpacesRemote () {
+    },
+    // downloadTxt () {
+    //   const data = this.text()
+    //   const text = 'data:text/plain;charset=utf-8,' + encodeURIComponent(data)
+    //   const downloadAnchor = document.getElementById('export-downlaod-anchor')
+    //   const fileName = this.fileName()
+    //   downloadAnchor.setAttribute('href', text)
+    //   downloadAnchor.setAttribute('download', `${fileName}.txt`)
+    //   downloadAnchor.click()
+    // },
     scrollIntoView () {
       const element = this.$refs.dialog
       const isTouchDevice = this.$store.state.isTouchDevice
@@ -109,6 +120,10 @@ export default {
         let element = this.$refs.dialog
         this.dialogHeight = utils.elementHeight(element)
       })
+    },
+    triggerSignUpOrInIsVisible () {
+      this.$store.dispatch('closeAllDialogs', 'ShowInExploreButton.triggerSignUpOrInIsVisible')
+      this.$store.commit('triggerSignUpOrInIsVisible')
     }
   },
   watch: {

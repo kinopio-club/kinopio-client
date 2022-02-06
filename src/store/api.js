@@ -172,7 +172,7 @@ const self = {
       }
     },
 
-    // Sign In or Up
+    // Sign Up or In
 
     signUp: async (context, { email, password, currentUser }) => {
       const body = currentUser
