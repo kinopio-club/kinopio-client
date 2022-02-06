@@ -740,7 +740,7 @@ const self = {
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/space/${spaceId}/download`, options)
-        return normalizeResponse(response)
+        return response.blob()
       } catch (error) {
         console.error('🚒 downloadCurrentSpace', error)
       }
@@ -752,7 +752,7 @@ const self = {
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/space/download-all`, options)
-        return normalizeResponse(response)
+        return response.blob()
       } catch (error) {
         console.error('🚒 downloadCurrentSpace', error)
       }

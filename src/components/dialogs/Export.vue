@@ -97,10 +97,18 @@ export default {
     },
     downloadLocalJSON () {
       const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.exportData))
-      const downloadAnchor = document.getElementById('export-downlaod-anchor')
       const fileName = this.fileName()
+      const downloadAnchor = document.getElementById('export-downlaod-anchor')
       downloadAnchor.setAttribute('href', json)
       downloadAnchor.setAttribute('download', `${fileName}.json`)
+      downloadAnchor.click()
+    },
+    downloadBlob (blob) {
+      const blobUrl = window.URL.createObjectURL(blob)
+      const fileName = this.fileName()
+      const downloadAnchor = document.getElementById('export-downlaod-anchor')
+      downloadAnchor.setAttribute('href', blobUrl)
+      downloadAnchor.setAttribute('download', `${fileName}.zip`)
       downloadAnchor.click()
     },
     async downloadCurrentSpaceRemote () {
@@ -108,10 +116,10 @@ export default {
       this.unknownServerError = false
       this.isLoadingCurrentSpace = true
       try {
-        const response = await this.$store.dispatch('api/downloadCurrentSpace')
-        console.log(response)
+        const blob = await this.$store.dispatch('api/downloadCurrentSpace')
+        this.downloadBlob(blob)
       } catch (error) {
-        console.error(error)
+        console.error('🚒', error)
         this.unknownServerError = true
       }
       this.isLoadingCurrentSpace = false
@@ -120,18 +128,15 @@ export default {
       if (this.isLoadingAllSpaces) { return }
       this.unknownServerError = false
       this.isLoadingAllSpaces = true
-      // await downloadAllSpaces
-      // TODO
+      try {
+        const blob = await this.$store.dispatch('api/downloadAllSpaces')
+        this.downloadBlob(blob)
+      } catch (error) {
+        console.error('🚒', error)
+        this.unknownServerError = true
+      }
+      this.isLoadingAllSpaces = false
     },
-    // downloadTxt () {
-    //   const data = this.text()
-    //   const text = 'data:text/plain;charset=utf-8,' + encodeURIComponent(data)
-    //   const downloadAnchor = document.getElementById('export-downlaod-anchor')
-    //   const fileName = this.fileName()
-    //   downloadAnchor.setAttribute('href', text)
-    //   downloadAnchor.setAttribute('download', `${fileName}.txt`)
-    //   downloadAnchor.click()
-    // },
     scrollIntoView () {
       const element = this.$refs.dialog
       const isTouchDevice = this.$store.state.isTouchDevice
