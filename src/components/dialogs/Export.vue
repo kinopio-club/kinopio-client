@@ -34,7 +34,9 @@ dialog.narrow.export(v-if="visible" :open="visible" @click.left.stop ref="dialog
         span Download All Spaces
         Loader(:visible="isLoadingAllSpaces")
     a#export-downlaod-anchor.hidden
-    .error-container(v-if="unknownServerError")
+    .info-container(v-if="isLoadingAllSpaces")
+      .badge.info This will take a minute or so…
+    .info-container(v-if="unknownServerError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
 </template>
@@ -103,9 +105,9 @@ export default {
       downloadAnchor.setAttribute('download', `${fileName}.json`)
       downloadAnchor.click()
     },
-    downloadBlob (blob) {
+    downloadBlob (blob, fileName) {
       const blobUrl = window.URL.createObjectURL(blob)
-      const fileName = this.fileName()
+      fileName = fileName || this.fileName()
       const downloadAnchor = document.getElementById('export-downlaod-anchor')
       downloadAnchor.setAttribute('href', blobUrl)
       downloadAnchor.setAttribute('download', `${fileName}.zip`)
@@ -130,7 +132,7 @@ export default {
       this.isLoadingAllSpaces = true
       try {
         const blob = await this.$store.dispatch('api/downloadAllSpaces')
-        this.downloadBlob(blob)
+        this.downloadBlob(blob, 'kinopio-spaces')
       } catch (error) {
         console.error('🚒', error)
         this.unknownServerError = true
@@ -197,6 +199,6 @@ export default {
     margin-top 10px
   .hidden
     display none
-  .error-container
+  .info-container
     margin-top 10px
 </style>
