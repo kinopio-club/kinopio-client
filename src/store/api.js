@@ -715,8 +715,8 @@ const self = {
       try {
         let host = 'https://iframely.kinopio.club/iframely'
         const apiKey = '0788beaa34f65adc0fe7ac'
-        const denyList = ['youtube', 'twitter', 'facebook', 'instagram']
-        const shouldUseIFramely = denyList.find(item => url.includes(item))
+        const fallbackList = ['youtube', 'twitter', 'facebook', 'instagram', 'wikipedia']
+        const shouldUseIFramely = fallbackList.find(item => url.includes(item))
         if (shouldUseIFramely) {
           host = 'https://iframe.ly/api/iframely'
         }
