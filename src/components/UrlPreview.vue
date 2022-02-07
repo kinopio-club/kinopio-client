@@ -17,9 +17,11 @@
           a(:href="card.urlPreviewUrl")
             button.visit-button
               img.icon.visit(src="@/assets/visit.svg")
-
-      img.preview-image(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected, 'side-image': isImageCard || parentIsCardDetails}" @load="updateDimensionsAndMap")
-      .text(:class="{'side-text badge': !isImageCard && !parentIsCardDetails && card.urlPreviewImage}" :style="{background: selectedColor}")
+      //- image
+      img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
+      img.preview-image(v-if="shouldLoadUrlPreviewImage" :src="card.urlPreviewImage" :class="{selected: isSelected, 'side-image': isImageCard || parentIsCardDetails}" @load="updateDimensionsAndMap")
+      //- info
+      .text(:class="{'side-text badge': !isImageCard && !parentIsCardDetails && shouldLoadUrlPreviewImage}" :style="{background: selectedColor}")
         img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
         img.icon.favicon.open(v-else src="@/assets/open.svg")
         .title {{filteredTitle}}
@@ -44,6 +46,11 @@ export default {
     user: Object,
     isImageCard: Boolean
   },
+  data () {
+    return {
+      imageCanLoad: false
+    }
+  },
   computed: {
     selectedColor () {
       if (!this.isSelected) { return }
@@ -66,9 +73,15 @@ export default {
         description = ''
       }
       return description
+    },
+    shouldLoadUrlPreviewImage () {
+      return this.card.urlPreviewImage && this.imageCanLoad
     }
   },
   methods: {
+    updateImageCanLoad () {
+      this.imageCanLoad = true
+    },
     hidePreview () {
       const update = {
         id: this.card.id,
