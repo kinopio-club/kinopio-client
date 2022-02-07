@@ -172,7 +172,7 @@ const self = {
       }
     },
 
-    // Sign In or Up
+    // Sign Up or In
 
     signUp: async (context, { email, password, currentUser }) => {
       const body = currentUser
@@ -729,7 +729,35 @@ const self = {
       } catch (error) {
         console.error('🚒 urlPreview', error)
       }
+    },
+
+    // Downloads
+
+    downloadCurrentSpace: async (context) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      const spaceId = context.rootState.currentSpace.id
+      if (!shouldRequest({ apiKey })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/space/${spaceId}/download`, options)
+        return response.blob()
+      } catch (error) {
+        console.error('🚒 downloadCurrentSpace', error)
+      }
+    },
+
+    downloadAllSpaces: async (context) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      if (!shouldRequest({ apiKey })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/space/download-all`, options)
+        return response.blob()
+      } catch (error) {
+        console.error('🚒 downloadCurrentSpace', error)
+      }
     }
+
   }
 }
 
