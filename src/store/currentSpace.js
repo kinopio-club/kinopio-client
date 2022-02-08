@@ -293,6 +293,7 @@ export default {
       let space = utils.clone(newSpace)
       space.name = words.randomUniqueName()
       space.id = nanoid()
+      space.createdAt = new Date()
       space.editedAt = new Date()
       const newSpacesAreBlank = context.rootState.currentUser.newSpacesAreBlank
       if (newSpacesAreBlank) {
