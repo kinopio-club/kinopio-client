@@ -991,7 +991,7 @@ export default {
       }
       if (!this.canEditSpace) {
         this.error.spaceIsReadOnly = true
-        this.$store.commit('addNotification', { message: 'You can only upload files on spaces you can edit', type: 'info' }, { root: true })
+        this.$store.commit('addNotification', { message: 'You can only upload files on spaces you can edit', type: 'info' })
         return
       }
       const file = event.dataTransfer.files[0]
