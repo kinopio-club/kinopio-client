@@ -111,10 +111,10 @@ export default {
       cards = cards.filter(card => card.name)
       cards = cards.map(card => {
         const date = card.nameUpdatedAt || card.createdAt
-        card.updatedAt = dayjs(date)
+        card.date = dayjs(date)
         return card
       })
-      cards = orderBy(cards, (a) => new Date(a.updatedAt), ['desc'])
+      cards = orderBy(cards, (a) => new Date(a.date), ['desc'])
       return cards
     },
     currentUser () { return this.$store.state.currentUser }
