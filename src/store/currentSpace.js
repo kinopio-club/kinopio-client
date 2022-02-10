@@ -763,8 +763,6 @@ export default {
     },
     updateUserLastSpaceId: (context) => {
       const space = context.state
-      const canEdit = context.rootGetters['currentUser/canEditSpace']()
-      if (space.isRemoved || !canEdit) { return }
       context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
     },
     removeCurrentSpace: (context) => {
