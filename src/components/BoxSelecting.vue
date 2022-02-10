@@ -248,6 +248,7 @@ export default {
       return selectedIds
     },
     selectCards (box, relativePosition) {
+      if (this.userCantEditSpace) { return }
       const boxPoints = this.points(box)
       let cards = selectableCards[relativePosition]
       if (!cards) { return }
@@ -281,6 +282,7 @@ export default {
       return quadratic(start, c1, end, scale) // [[x1,x2], [x2,x2], …]
     },
     selectconnections (box, relativePosition) {
+      if (this.userCantEditSpace) { return }
       let connections = selectableConnections[relativePosition]
       if (!connections) { return }
       let selectedConnections = connections.filter(connection => {
