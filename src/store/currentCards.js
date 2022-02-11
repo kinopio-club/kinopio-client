@@ -54,6 +54,10 @@ const currentCards = {
     // create
 
     create: (state, card) => {
+      if (!card.id) {
+        console.warn('🚑 could not create card', card)
+        return
+      }
       state.ids.push(card.id)
       state.cards[card.id] = card
       cache.updateSpace('cards', state.cards, currentSpaceId)
@@ -63,6 +67,10 @@ const currentCards = {
 
     update: (state, card) => {
       if (!utils.objectHasKeys(card)) { return }
+      if (!card.id) {
+        console.warn('🚑 could not update card', card)
+        return
+      }
       if (card.x) {
         card.x = Math.round(card.x)
       }

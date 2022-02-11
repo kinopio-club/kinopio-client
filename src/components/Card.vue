@@ -1546,6 +1546,11 @@ export default {
     },
     updateUrlPreviewSuccess ({ links, meta, cardId, url }) {
       if (!this.nameIncludesUrl(url)) { return }
+      cardId = cardId || this.card.id
+      if (!cardId) {
+        console.warn('🚑 could not updateUrlPreviewSuccess', cardId, this.card)
+        return
+      }
       const update = {
         id: cardId,
         urlPreviewUrl: url,
