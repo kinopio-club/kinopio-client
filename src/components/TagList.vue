@@ -89,11 +89,14 @@ export default {
       }
       let position = {
         x: rect.x + (rect.width / 2) + window.scrollX,
-        y: rect.y + 8 + window.scrollY
+        y: rect.y + 8 + window.scrollY,
+        pageX: window.scrollX,
+        pageY: window.scrollY
       }
       const minY = ((viewport.height * viewport.scale) / 2) + window.scrollY
       position.y = Math.min(position.y, minY)
       this.$store.commit('tagDetailsPosition', position)
+      this.$store.commit('tagDetailsPositionShouldUpdate', true)
     },
     updateTagDetailsTag (tag) {
       this.tagDetailsTag = tag

@@ -94,7 +94,7 @@ const store = createStore({
     currentConnectionStartCardIds: [],
     currentConnectionSuccess: {},
     currentConnectionCursorStart: {},
-    connectionDetailsPosition: {}, // x, y
+    connectionDetailsPosition: {}, // x, y, pageX, pageY
     connectionDetailsIsVisibleForConnectionId: '',
     currentConnectionColor: '',
     triggeredDrawConnectionFrame: {},
@@ -106,6 +106,7 @@ const store = createStore({
     tagDetailsIsVisible: false,
     tagDetailsIsVisibleFromTagList: false,
     tagDetailsPosition: {}, // x, y
+    tagDetailsPositionShouldUpdate: false,
     currentSelectedTag: {},
     remoteTags: [],
     remoteTagsIsFetched: false,
@@ -607,6 +608,10 @@ const store = createStore({
     tagDetailsPosition: (state, position) => {
       utils.typeCheck({ value: position, type: 'object', origin: 'tagDetailsPosition' })
       state.tagDetailsPosition = position
+    },
+    tagDetailsPositionShouldUpdate: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', origin: 'tagDetailsPositionShouldUpdate' })
+      state.tagDetailsPositionShouldUpdate = value
     },
     currentSelectedTag: (state, tag) => {
       utils.typeCheck({ value: tag, type: 'object', origin: 'currentSelectedTag' })

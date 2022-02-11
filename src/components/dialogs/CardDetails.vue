@@ -1372,7 +1372,9 @@ export default {
       const tagRect = event.target.getBoundingClientRect()
       this.$store.commit('tagDetailsPosition', {
         x: window.scrollX + tagRect.x + 2,
-        y: window.scrollY + tagRect.y + tagRect.height - 2
+        y: window.scrollY + tagRect.y + tagRect.height - 2,
+        pageX: window.scrollX,
+        pageY: window.scrollY
       })
       this.$store.commit('currentSelectedTag', tag)
       this.$store.commit('tagDetailsIsVisible', true)

@@ -83,6 +83,12 @@ export default {
     Loader,
     ResultsFilter
   },
+  mounted () {
+    window.addEventListener('scroll', this.updatePosition)
+  },
+  beforeUnmount () {
+    window.removeEventListener('scroll', this.updatePosition)
+  },
   data () {
     return {
       colorPickerIsVisible: false,
@@ -91,7 +97,8 @@ export default {
       loading: false,
       cards: [],
       dialogHeight: null,
-      resultsSectionHeight: null
+      resultsSectionHeight: null,
+      newPosition: {}
     }
   },
   computed: {
@@ -110,15 +117,21 @@ export default {
     currentSpaceId () { return this.$store.state.currentSpace.id },
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     pinchCounterZoomDecimal () { return this.$store.state.pinchCounterZoomDecimal },
+    position () {
+      if (utils.objectHasKeys(this.newPosition)) {
+        return this.newPosition
+      } else {
+        return this.$store.state.tagDetailsPosition
+      }
+    },
     styles () {
-      const position = this.$store.state.tagDetailsPosition
       const isChildDialog = this.cardDetailsIsVisibleForCardId || this.visibleFromTagList
       let zoom = this.$store.getters.spaceZoomDecimal
       if (isChildDialog) {
         zoom = 1
       }
-      const x = zoom * position.x
-      const y = zoom * position.y
+      const x = zoom * this.position.x
+      const y = zoom * this.position.y
       let scale
       if (utils.isSignificantlyPinchZoomed()) {
         scale = this.pinchCounterZoomDecimal
@@ -199,6 +212,18 @@ export default {
     }
   },
   methods: {
+    updatePosition () {
+      if (!this.$store.state.tagDetailsPositionShouldUpdate) { return }
+      const origin = this.$store.state.tagDetailsPosition
+      const delta = {
+        x: window.scrollX - origin.pageX,
+        y: window.scrollY - origin.pageY
+      }
+      this.newPosition = {
+        x: origin.x + delta.x,
+        y: origin.y + delta.y
+      }
+    },
     toggleFilteredInSpace () {
       const filtered = this.$store.state.filteredTagNames
       const tagName = this.currentTag.name
@@ -427,12 +452,18 @@ export default {
   watch: {
     currentTag (tag) {
       if (tag && this.visible) {
+        this.newPosition = {}
         this.updateCards()
         this.updatePinchCounterZoomDecimal()
         this.closeDialogs()
         this.$nextTick(() => {
           this.scrollIntoView()
         })
+      }
+    },
+    visible (visible) {
+      if (!visible) {
+        this.$store.commit('tagDetailsPositionShouldUpdate', false)
       }
     }
   }
