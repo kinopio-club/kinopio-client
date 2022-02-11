@@ -44,6 +44,16 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
       img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}" @load="updateCardMap")
       img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelectedOrDragging}" @load="updateCardMap")
 
+    //- resize
+    .resize-button-wrap.inline-button-wrap(
+      v-if="resizeControlIsVisible"
+      @mousedown.left.stop="startResizing"
+      @touchstart.stop="startResizing"
+      @dblclick="removeResize"
+    )
+      button.inline-button(tabindex="-1" :style="{background: selectedColor || card.backgroundColor}")
+        img.resize-icon.icon(src="@/assets/resize.svg")
+
     span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
       //- Comment
       .card-comment(v-if="nameIsComment" :class="{'extra-name-padding': !cardButtonsIsVisible}")
@@ -93,7 +103,7 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
             Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
-      span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}" :style="cardButtonsWrapStyle")
+      span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}")
         //- Url →
         a.url-wrap(:href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" v-if="cardButtonUrl && !nameIsComment" :class="{'connector-is-visible': connectorIsVisible}")
           .url.inline-button-wrap
@@ -120,16 +130,6 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
               img.connector-icon(src="@/assets/connector-closed.svg")
             template(v-else)
               img.connector-icon(src="@/assets/connector-open.svg")
-        //- resize
-        .resize-button-wrap.inline-button-wrap(
-          v-if="resizeControlIsVisible"
-          @mousedown.left.stop="startResizing"
-          @touchstart.stop="startResizing"
-          @dblclick="removeResize"
-        )
-          button.inline-button(tabindex="-1" :style="{background: selectedColor || card.backgroundColor}")
-            img.resize-icon.icon(src="@/assets/resize.svg")
-
     .url-preview-wrap(v-if="cardUrlPreviewIsVisible && !isHiddenInComment")
       UrlPreview(
         :visible="cardUrlPreviewIsVisible"
@@ -411,17 +411,6 @@ export default {
       const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor || this.connectedToConnectionDetailsIsVisibleColor
       if (!color) { return }
       return { background: color }
-    },
-    cardButtonsWrapStyle () {
-      if (!this.resizeIsVisible) { return }
-      if (this.nameIsComment) { return }
-      const zoom = this.$store.getters.spaceCounterZoomDecimal
-      let cardHeight = this.card.height
-      const element = this.$refs.card
-      if (element) {
-        cardHeight = element.getBoundingClientRect().height
-      }
-      return { height: (cardHeight * zoom) + 'px' }
     },
     connectedToConnectionDetailsIsVisibleColor () {
       const connectionId = this.$store.state.connectionDetailsIsVisibleForConnectionId
