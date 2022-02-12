@@ -26,7 +26,7 @@
 <script>
 import Loader from '@/components/Loader.vue'
 
-import fuzzy from 'fuzzy'
+import fuzzy from '@/libs/fuzzy.js'
 
 export default {
   name: 'ResultsFilter',
