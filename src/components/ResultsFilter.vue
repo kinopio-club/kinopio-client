@@ -103,7 +103,11 @@ export default {
           }
         }
         const filtered = fuzzy.filter(this.filter, this.items, options)
-        const items = filtered.map(item => item.original)
+        const items = filtered.map(item => {
+          let result = item.original
+          result.matchIndexes = item.indices
+          return result
+        })
         this.$emit('updateFilteredItems', items)
       }
     }

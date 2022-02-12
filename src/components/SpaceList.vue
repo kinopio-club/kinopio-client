@@ -51,7 +51,10 @@ span.space-list-wrap
           .badge.info.inline-badge(v-else-if="spaceIsTemplate(space)") Template
           //- space details
           .name
-            span {{space.name}}
+            span(v-if="this.filter")
+              NameMatch(:name="space.name" :indexes="space.matchIndexes")
+            span(v-else)
+              span {{space.name}}
             template(v-if='space.privacy')
               PrivacyIcon(:privacy="space.privacy" :closedIsNotVisible="true")
             img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
@@ -68,6 +71,7 @@ import utils from '@/utils.js'
 import { defineAsyncComponent } from 'vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import Loader from '@/components/Loader.vue'
+import NameMatch from '@/components/NameMatch.vue'
 
 import last from 'lodash-es/last'
 const User = defineAsyncComponent({
@@ -83,7 +87,8 @@ export default {
     ResultsFilter,
     MoonPhase,
     PrivacyIcon,
-    Loader
+    Loader,
+    NameMatch
   },
   props: {
     spaces: Array,
