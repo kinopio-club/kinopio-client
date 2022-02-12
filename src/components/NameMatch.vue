@@ -1,7 +1,7 @@
 <template lang="pug">
-span.name-match hi {{name}}
-//- for each index (num) in indexes
-//- for each segment in segments
+span.name-match
+  template(v-for="segment in nameSegments")
+    span(:class="{ match: segment.isMatch }") {{ segment.character }}
 </template>
 
 <script>
@@ -12,17 +12,24 @@ export default {
     indexes: Array
   },
   computed: {
-    // createdByUserIsNotEmpty () { return utils.objectHasKeys(this.createdByUser) },
-    segments () {
-      return [{ name: 'asdf', isMatch: true }]
+    nameSegments () {
+      // indexes [0, 1, 4] = highlight characters at 0, 1, and 4
+      let segments = this.name.split('')
+      segments = segments.map((character, index) => {
+        let isMatch
+        if (this.indexes.includes(index)) {
+          isMatch = true
+        }
+        return { character, isMatch }
+      })
+      return segments
     }
   }
 }
 </script>
 
 <style lang="stylus">
-// .name-match
-//   .users
-//     display flex
-//     flex-wrap wrap
+.name-match
+  .match
+    background-color var(--search-background)
 </style>
