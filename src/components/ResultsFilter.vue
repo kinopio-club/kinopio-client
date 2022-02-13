@@ -25,6 +25,7 @@
 
 <script>
 import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
 
 import fuzzy from '@/libs/fuzzy.js'
 
@@ -104,7 +105,7 @@ export default {
         }
         const filtered = fuzzy.filter(this.filter, this.items, options)
         const items = filtered.map(item => {
-          let result = item.original
+          let result = utils.clone(item.original)
           result.matchIndexes = item.indices
           return result
         })
