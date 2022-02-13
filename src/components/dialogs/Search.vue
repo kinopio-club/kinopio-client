@@ -30,7 +30,7 @@ dialog.search(@click="closeDialogs" v-if="visible" :open="visible" ref="dialog" 
           span.card-info
             template(v-for="segment in card.nameSegments")
               img.card-image(v-if="segment.isImage" :src="segment.url")
-              NameSegment(:segment="segment")
+              NameSegment(:segment="segment" :search="search")
 
 </template>
 

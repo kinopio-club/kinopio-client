@@ -6,7 +6,7 @@ span.name-match
 
 <script>
 export default {
-  name: 'NameMatchFilter',
+  name: 'NameMatch',
   props: {
     name: String,
     indexes: Array
