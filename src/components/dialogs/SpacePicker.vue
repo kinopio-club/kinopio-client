@@ -142,7 +142,11 @@ export default {
         }
       }
       const filtered = fuzzy.filter(this.search, spaces, options)
-      spaces = filtered.map(item => item.original)
+      spaces = filtered.map(item => {
+        let result = utils.clone(item.original)
+        result.matchIndexes = item.indices
+        return result
+      })
       return spaces
     },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
