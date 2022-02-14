@@ -1,29 +1,35 @@
 <template lang="pug">
 dialog.card-style-actions(v-if="visible" :open="visible" ref="dialog" @click.left.stop="closeDialogs" :style="styles")
   section
-    //- h1
-    .button-wrap
-      button(:disabled="!canEditSome" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }")
-        span h1
-    //- h2
-    .button-wrap
-      button(:disabled="!canEditSome" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }")
-          span h2
-    //- Tag
-    .button-wrap
-      button(:disabled="!canEditSome" @click.left.stop="toggleTagPickerIsVisible" :class="{ active: tagPickerIsVisible }")
-        span Tag
-      TagPickerStyleActions(:visible="tagPickerIsVisible" :cards="cards")
-    //- Frame
-    .button-wrap
-      button(:disabled="!canEditSome" @click.left.stop="toggleFramePickerIsVisible" :class="{ active : framePickerIsVisible || isFrames }")
-        span Frame
-      FramePicker(:visible="framePickerIsVisible" :cards="cards")
-    //- Color
-    .button-wrap(@click.left.stop="toggleColorPickerIsVisible")
-      button.change-color(:disabled="!canEditSome" :class="{active: colorPickerIsVisible}")
-        .current-color(:style="{ background: cardsBackgroundColor }")
-      ColorPicker(:currentColor="cardsBackgroundColor" :visible="colorPickerIsVisible" :removeIsVisible="true" :otherColors="spaceCardBackgroundColors" @selectedColor="updateCardsBackgroundColor" @removeColor="removeCardsBackgroundColor")
+    .row
+      //- h1
+      .button-wrap
+        button(:disabled="!canEditSome" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }")
+          span h1
+      //- h2
+      .button-wrap
+        button(:disabled="!canEditSome" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }")
+            span h2
+      //- Tag
+      .button-wrap
+        button(:disabled="!canEditSome" @click.left.stop="toggleTagPickerIsVisible" :class="{ active: tagPickerIsVisible }")
+          span Tag
+        TagPickerStyleActions(:visible="tagPickerIsVisible" :cards="cards")
+      //- Frame
+      .button-wrap
+        button(:disabled="!canEditSome" @click.left.stop="toggleFramePickerIsVisible" :class="{ active : framePickerIsVisible || isFrames }")
+          span Frame
+        FramePicker(:visible="framePickerIsVisible" :cards="cards")
+      //- Color
+      .button-wrap(@click.left.stop="toggleColorPickerIsVisible")
+        button.change-color(:disabled="!canEditSome" :class="{active: colorPickerIsVisible}")
+          .current-color(:style="{ background: cardsBackgroundColor }")
+        ColorPicker(:currentCollock.svor="cardsBackgroundColor" :visible="colorPickerIsVisible" :removeIsVisible="true" :otherColors="spaceCardBackgroundColors" @selectedColor="updateCardsBackgroundColor" @removeColor="removeCardsBackgroundColor")
+    .row
+      //- Lock
+      .button-wrap
+        button(:disabled="!canEditSome" @click="toggleIsLocked" :class="{active: isLocked}")
+          img.icon(src="@/assets/lock.svg")
 </template>
 
 <script>
@@ -108,6 +114,10 @@ export default {
       const pattern = 'h2Pattern'
       const cards = this.cardsWithPattern(pattern)
       return Boolean(cards.length === this.cards.length)
+    },
+    isLocked () {
+      const cards = this.cards.filter(card => card.isLocked)
+      return Boolean(cards.length === this.cards.length)
     }
   },
   methods: {
@@ -178,6 +188,19 @@ export default {
       } else {
         this.removeFromCards(pattern)
       }
+    },
+    toggleIsLocked () {
+      let isLocked = true
+      if (this.isLocked) {
+        isLocked = false
+      }
+      this.cards.forEach(card => {
+        card = {
+          id: card.id,
+          isLocked
+        }
+        this.$store.dispatch('currentCards/update', card)
+      })
     },
     prependToCards (pattern) {
       this.cards.forEach(card => {

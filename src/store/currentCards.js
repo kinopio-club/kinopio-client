@@ -199,7 +199,8 @@ const currentCards = {
         urlPreviewIsVisible: true,
         commentIsVisible: true,
         width: utils.emptyCard().width,
-        height: utils.emptyCard().height
+        height: utils.emptyCard().height,
+        isLocked: false
       }
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       card.spaceId = currentSpaceId
