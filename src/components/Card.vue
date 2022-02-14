@@ -309,6 +309,7 @@ export default {
       return Boolean(this.formats.image || this.formats.video)
     },
     resizeControlIsVisible () {
+      if (this.card.isLocked) { return }
       return this.resizeIsVisible && this.canEditCard
     },
     shouldJiggle () {
@@ -1829,14 +1830,12 @@ article
     right 0px
     bottom 0px
     display flex
-    flex-direction row-reverse
     .resize-button-wrap
       cursor ew-resize
       button
         cursor ew-resize
     .lock-button-wrap
       cursor pointer
-      padding-right 0
       button
         cursor pointer
     img
