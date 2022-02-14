@@ -16,7 +16,7 @@
     "dayjs": "^1.9.1",
     "hex-to-rgba": "^2.0.1",
     "lodash-es": "^4.17.15",
-    "nanoid": "^2.0.3",
+    "nanoid": "^3.1.31",
     "overlap-area": "^1.0.0",
     "randomcolor": "^0.5.4",
     "shader": "^1.0.0",
