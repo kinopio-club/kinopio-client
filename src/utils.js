@@ -1,7 +1,7 @@
 // functional methods that can see dom, but can't access components or store
 import cache from '@/cache.js'
 
-import nanoid from 'nanoid'
+import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
 import random from 'lodash-es/random'
 import last from 'lodash-es/last'

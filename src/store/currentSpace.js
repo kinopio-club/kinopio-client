@@ -8,7 +8,7 @@ import cache from '@/cache.js'
 
 import { nextTick } from 'vue'
 import randomColor from 'randomcolor'
-import nanoid from 'nanoid'
+import { nanoid } from 'nanoid'
 import random from 'lodash-es/random'
 import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'

@@ -1,7 +1,7 @@
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
-import nanoid from 'nanoid'
+import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'

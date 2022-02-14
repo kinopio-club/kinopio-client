@@ -3,7 +3,7 @@ import utils from '@/utils.js'
 
 import debounce from 'lodash-es/debounce'
 import merge from 'lodash-es/merge'
-import nanoid from 'nanoid'
+import { nanoid } from 'nanoid'
 
 let host = 'https://kinopio-server.herokuapp.com'
 if (import.meta.env.MODE === 'development') {

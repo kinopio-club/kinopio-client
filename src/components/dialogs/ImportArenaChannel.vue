@@ -44,7 +44,7 @@ import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
-import nanoid from 'nanoid'
+import { nanoid } from 'nanoid'
 
 let arena = {}
 // arena apps registered to hi@kinopio.club

@@ -70,7 +70,7 @@ dialog.narrow.multiple-selected-actions(
 </template>
 
 <script>
-import nanoid from 'nanoid'
+import { nanoid } from 'nanoid'
 import last from 'lodash-es/last'
 import uniq from 'lodash-es/uniq'
 

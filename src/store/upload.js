@@ -1,6 +1,6 @@
 import utils from '@/utils.js'
 
-import nanoid from 'nanoid'
+import { nanoid } from 'nanoid'
 
 const placeholder = '⬬⬭'
 

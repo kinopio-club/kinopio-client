@@ -212,7 +212,7 @@ import scrollIntoView from '@/scroll-into-view.js'
 import utils from '@/utils.js'
 
 import qs from '@aguezz/qs-parse'
-import nanoid from 'nanoid'
+import { nanoid } from 'nanoid'
 
 let prevCardId
 let previousTags = []
