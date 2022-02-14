@@ -54,7 +54,7 @@ import cache from '@/cache.js'
 import utils from '@/utils.js'
 
 import nanoid from 'nanoid'
-import fuzzy from 'fuzzy'
+import fuzzy from '@/libs/fuzzy.js'
 
 import { defineAsyncComponent } from 'vue'
 const User = defineAsyncComponent({
@@ -142,7 +142,11 @@ export default {
         }
       }
       const filtered = fuzzy.filter(this.search, spaces, options)
-      spaces = filtered.map(item => item.original)
+      spaces = filtered.map(item => {
+        let result = utils.clone(item.original)
+        result.matchIndexes = item.indices
+        return result
+      })
       return spaces
     },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }

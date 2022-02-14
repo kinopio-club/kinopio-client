@@ -1,6 +1,7 @@
 <template lang="pug">
 span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTagColor" :data-tag-name="dataTagName")
   template(v-if="segment.isText && segment.content")
+    //- Name markdown
     span.markdown(v-if="segment.markdown")
       template(v-for="markdown in segment.markdown")
         template(v-if="markdown.type === 'text'")
@@ -23,7 +24,11 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
           pre {{markdown.content}}
         template(v-else-if="markdown.type === 'code'")
           code {{markdown.content}}
-    span(v-if="!segment.markdown") {{segment.content}}
+    //- Name results list
+    template(v-if="!segment.markdown")
+      span(v-if="search")
+        NameMatch(:name="segment.content" :indexes="matchIndexes(segment.content)")
+      span(v-else) {{segment.content}}
   //- Tags
   span.badge.button-badge(
     v-if="segment.isTag"
@@ -57,17 +62,22 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
 
 <script>
 import User from '@/components/User.vue'
+import NameMatch from '@/components/NameMatch.vue'
 import utils from '@/utils.js'
+
+import fuzzy from '@/libs/fuzzy.js'
 
 let shouldCancel = false
 
 export default {
   name: 'NameSegment',
   components: {
-    User
+    User,
+    NameMatch
   },
   props: {
-    segment: Object
+    segment: Object,
+    search: String
   },
   computed: {
     currentSelectedTag () { return this.$store.state.currentSelectedTag },
@@ -93,6 +103,19 @@ export default {
     }
   },
   methods: {
+    matchIndexes (name) {
+      if (!name) { return [] }
+      const options = {
+        pre: '',
+        post: ''
+      }
+      const filtered = fuzzy.filter(this.search, [name], options)
+      if (filtered.length) {
+        return filtered[0].indices
+      } else {
+        return []
+      }
+    },
     showTagDetailsIsVisible (event, tag) {
       this.$emit('showTagDetailsIsVisible', { event, tag })
     },

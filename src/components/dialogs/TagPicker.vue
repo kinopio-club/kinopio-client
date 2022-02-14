@@ -25,7 +25,7 @@ import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
-import fuzzy from 'fuzzy'
+import fuzzy from '@/libs/fuzzy.js'
 import last from 'lodash-es/last'
 import randomColor from 'randomcolor'
 
