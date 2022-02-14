@@ -514,6 +514,8 @@ const currentCards = {
       })
     },
     incrementZ: (context, id) => {
+      const card = context.getters.byId(id)
+      if (card.isLocked) { return }
       const maxInt = Number.MAX_SAFE_INTEGER - 1000
       let cards = context.getters.all
       let highestCardZ = utils.highestCardZ(cards)
