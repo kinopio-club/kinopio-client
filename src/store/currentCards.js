@@ -412,6 +412,7 @@ const currentCards = {
       let cards = cardIds.map(id => context.getters.byId(id))
       // prevent cards bunching up at 0
       cards.forEach(card => {
+        if (!card) { return }
         if (card.x === 0) { delta.x = Math.max(0, delta.x) }
         if (card.y === 0) { delta.y = Math.max(0, delta.y) }
         connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
