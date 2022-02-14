@@ -44,15 +44,20 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
       img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}" @load="updateCardMap")
       img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelectedOrDragging}" @load="updateCardMap")
 
-    //- resize
-    .resize-button-wrap.inline-button-wrap(
-      v-if="resizeControlIsVisible"
-      @mousedown.left.stop="startResizing"
-      @touchstart.stop="startResizing"
-      @dblclick="removeResize"
-    )
-      button.inline-button(tabindex="-1" :style="{background: selectedColor || card.backgroundColor}")
-        img.resize-icon.icon(src="@/assets/resize.svg")
+    .bottom-button-wrap
+      //- resize
+      .resize-button-wrap.inline-button-wrap(
+        v-if="resizeControlIsVisible"
+        @mousedown.left.stop="startResizing"
+        @touchstart.stop="startResizing"
+        @dblclick="removeResize"
+      )
+        button.inline-button.resize-button(tabindex="-1" :style="{background: selectedColor || card.backgroundColor}")
+          img.resize-icon.icon(src="@/assets/resize.svg")
+      //- lock
+      .lock-button-wrap.inline-button-wrap(v-if="card.isLocked" @mouseup.left.stop="unlockCard" @touchend.stop="unlockCard")
+        button.inline-button(tabindex="-1" :style="{background: selectedColor || card.backgroundColor}")
+          img.icon(src="@/assets/lock.svg")
 
     span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
       //- Comment
@@ -868,6 +873,13 @@ export default {
         name: utils.trim(name)
       })
       this.$store.commit('triggerUpdatePositionInVisualViewport')
+    },
+    unlockCard () {
+      this.$store.commit('currentUserIsDraggingCard', false)
+      this.$store.dispatch('currentCards/update', {
+        id: this.card.id,
+        isLocked: false
+      })
     },
     connectionIsBeingDragged (connection) {
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
@@ -1812,13 +1824,21 @@ article
       margin-top 8px
       margin-left 8px
 
-  .resize-button-wrap
+  .bottom-button-wrap
     position absolute
     right 0px
     bottom 0px
-    cursor ew-resize
-    button
+    display flex
+    flex-direction row-reverse
+    .resize-button-wrap
       cursor ew-resize
+      button
+        cursor ew-resize
+    .lock-button-wrap
+      cursor pointer
+      padding-right 0
+      button
+        cursor pointer
     img
       -webkit-user-drag none
   .meta-container
