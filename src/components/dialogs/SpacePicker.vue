@@ -53,7 +53,7 @@ import newSpace from '@/data/new.json'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 
-import nanoid from 'nanoid'
+import { nanoid } from 'nanoid'
 import fuzzy from '@/libs/fuzzy.js'
 
 import { defineAsyncComponent } from 'vue'

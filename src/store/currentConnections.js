@@ -1,7 +1,7 @@
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
-import nanoid from 'nanoid'
+import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
 import last from 'lodash-es/last'
 import uniq from 'lodash-es/uniq'

@@ -5,7 +5,7 @@
 // 🌛 Send
 // 🌜 Receive
 
-import nanoid from 'nanoid'
+import { nanoid } from 'nanoid'
 
 import utils from '@/utils.js'
 

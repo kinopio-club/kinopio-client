@@ -62,7 +62,7 @@ import cache from '@/cache.js'
 import Templates from '@/components/Templates.vue'
 
 import last from 'lodash-es/last'
-import nanoid from 'nanoid'
+import { nanoid } from 'nanoid'
 
 export default {
   name: 'AddSpace',

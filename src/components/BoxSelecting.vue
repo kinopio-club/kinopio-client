@@ -17,7 +17,7 @@ import { getOverlapSize } from 'overlap-area'
 import uniqBy from 'lodash-es/uniqBy'
 import quadratic from 'adaptive-quadratic-curve'
 import hexToRgba from 'hex-to-rgba'
-import nanoid from 'nanoid'
+import { nanoid } from 'nanoid'
 
 let shouldSelect, currentBoxSelectId
 let selectableCards = {}

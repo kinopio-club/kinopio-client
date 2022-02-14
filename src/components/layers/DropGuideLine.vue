@@ -4,7 +4,7 @@ aside
   canvas#remote-drop-guide-line.remote-drop-guide-line
 </template>
 <script>
-import nanoid from 'nanoid'
+import { nanoid } from 'nanoid'
 
 let canvas, context, remoteCanvas, remoteContext, paintingGuidesTimer, remotePaintingGuidesTimer
 

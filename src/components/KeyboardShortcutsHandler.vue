@@ -6,7 +6,7 @@ import utils from '@/utils.js'
 
 import scrollIntoView from '@/scroll-into-view.js'
 import last from 'lodash-es/last'
-import nanoid from 'nanoid'
+import { nanoid } from 'nanoid'
 
 const incrementPosition = 12
 let useSiblingConnectionType

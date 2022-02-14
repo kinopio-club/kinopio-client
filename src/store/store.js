@@ -13,7 +13,7 @@ import upload from '@/store/upload.js'
 import websocket from '@/store/plugins/websocket.js'
 
 import { createStore } from 'vuex'
-import nanoid from 'nanoid'
+import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
 
 const store = createStore({

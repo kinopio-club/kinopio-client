@@ -3,7 +3,7 @@ import cache from '@/cache.js'
 import promptPacks from '@/data/promptPacks.json'
 
 import randomColor from 'randomcolor'
-import nanoid from 'nanoid'
+import { nanoid } from 'nanoid'
 
 export default {
   namespaced: true,
