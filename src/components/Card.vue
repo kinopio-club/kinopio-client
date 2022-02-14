@@ -212,6 +212,7 @@ let currentTouchPosition = {}
 const lockingPreDuration = 100 // ms
 const lockingDuration = 100 // ms
 let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
+const defaultCardPosition = 100
 
 export default {
   components: {
@@ -320,8 +321,22 @@ export default {
     currentSelectedLink () { return this.$store.state.currentSelectedLink },
     canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
     id () { return this.card.id },
-    x () { return this.card.x || 100 },
-    y () { return this.card.y || 100 },
+    x () {
+      const x = this.card.x
+      if (x === undefined || x === null) {
+        return defaultCardPosition
+      } else {
+        return x
+      }
+    },
+    y () {
+      const y = this.card.y
+      if (y === undefined || y === null) {
+        return defaultCardPosition
+      } else {
+        return y
+      }
+    },
     z () { return this.card.z },
     commentIsVisible () { return this.card.commentIsVisible },
     connectionTypes () { return this.$store.getters['currentConnections/typesByCardId'](this.id) },
