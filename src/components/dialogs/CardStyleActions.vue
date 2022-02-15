@@ -201,6 +201,7 @@ export default {
         }
         this.$store.dispatch('currentCards/update', card)
       })
+      this.$store.dispatch('currentCards/updateCardMap')
     },
     prependToCards (pattern) {
       this.cards.forEach(card => {

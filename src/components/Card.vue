@@ -889,6 +889,7 @@ export default {
         id: this.card.id,
         isLocked: false
       })
+      this.$store.dispatch('currentCards/updateCardMap')
     },
     connectionIsBeingDragged (connection) {
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
@@ -1720,11 +1721,11 @@ article
         height 0
         padding 0
         button
-          width: 0;
-          height: 0;
-          min-width: 0;
-          padding: 0;
-          border: none;
+          width 0
+          height 0
+          min-width 0
+          padding 0
+          border none
       .connector-glow
         position absolute
         width 36px
