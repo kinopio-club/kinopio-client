@@ -104,7 +104,7 @@ import PrivacyIcon from '@/components/PrivacyIcon.vue'
 
 import dayjs from 'dayjs'
 
-let pageWasOffline, pageWasHidden
+let pageWasOffline, pageWasHidden, checkIfShouldNotifySpaceOutOfSyncIntervalTimer
 
 export default {
   name: 'Notifications',
@@ -152,9 +152,13 @@ export default {
   },
   mounted () {
     window.addEventListener('visibilitychange', this.updatePageVisibilityChange)
+    checkIfShouldNotifySpaceOutOfSyncIntervalTimer = setInterval(() => {
+      this.checkIfShouldNotifySpaceOutOfSync()
+    }, 1000 * 60 * 60 * 1) // 1 hour
   },
   beforeUnmount () {
     window.removeEventListener('visibilitychange', this.updatePageVisibilityChange)
+    clearInterval(checkIfShouldNotifySpaceOutOfSyncIntervalTimer)
   },
   computed: {
     items () { return this.$store.state.notifications },
