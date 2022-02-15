@@ -50,9 +50,7 @@ export default {
     unsubscribe()
   },
   computed: {
-    isCurrentUser () {
-      return this.user.id === this.$store.state.currentUser.id
-    }
+    isCurrentUser () { return this.user.id === this.$store.state.currentUser.id }
   },
   methods: {
     // displaySide () {

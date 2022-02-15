@@ -15,10 +15,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
           span {{user.website}}
           button.inline-button
             img.icon.visit.arrow-icon(src="@/assets/visit.svg")
-
-    .row.badges(v-if="user.isSpectator || user.isUpgraded")
-      .badge.status(v-if="user.isSpectator") Spectator
-      .badge.success(v-if="user.isUpgraded") Upgraded
+    UserBadges(:user="user")
 
   //- Current User
   template(v-if="isCurrentUser ")
@@ -36,10 +33,9 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
         a(:href="websiteUrl" v-if="websiteUrl")
           button.inline-button
             img.icon.visit.arrow-icon(src="@/assets/visit.svg")
-      .row.badges(v-if="user.isSpectator || user.isUpgraded")
-        .badge.status(v-if="user.isSpectator") Spectator
-        .badge.success(v-if="user.isUpgraded") Upgraded
+      UserBadges(:user="user")
 
+    //- Unlimited cards from member
     section.upgrade(v-if="!currentUserIsUpgraded")
       p {{cardsCreatedCount}}/{{cardsCreatedLimit}} cards created
       progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
@@ -106,6 +102,7 @@ import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
 import Loader from '@/components/Loader.vue'
+import UserBadges from '@/components/UserBadges.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 import { defineAsyncComponent } from 'vue'
@@ -120,6 +117,7 @@ export default {
     UserSettings,
     User,
     Loader,
+    UserBadges,
     SpacePicker,
     UpgradeUser
   },
@@ -340,8 +338,6 @@ export default {
     margin-top 10px
   .moon
     vertical-align -2px
-  .badges
-    margin-top 10px
 
   .upgrade
     progress
