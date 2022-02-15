@@ -1638,14 +1638,7 @@ article
     &.active
       box-shadow var(--active-shadow)
     &.is-locked
-      cursor default
-      .name
-        cursor default
-      &:hover,
-      &.hover,
-      &:active,
-      &.active
-        box-shadow none
+      pointer-events none
     .card-comment
       > .badge
         margin 0
@@ -1881,6 +1874,7 @@ article
       -webkit-user-drag none
 
   .lock-button-wrap
+    pointer-events all
     cursor pointer
     button
       cursor pointer
