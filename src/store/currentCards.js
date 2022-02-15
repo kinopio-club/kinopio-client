@@ -199,7 +199,8 @@ const currentCards = {
         urlPreviewIsVisible: true,
         commentIsVisible: true,
         width: utils.emptyCard().width,
-        height: utils.emptyCard().height
+        height: utils.emptyCard().height,
+        isLocked: false
       }
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       card.spaceId = currentSpaceId
@@ -513,6 +514,8 @@ const currentCards = {
       })
     },
     incrementZ: (context, id) => {
+      const card = context.getters.byId(id)
+      if (card.isLocked) { return }
       const maxInt = Number.MAX_SAFE_INTEGER - 1000
       let cards = context.getters.all
       let highestCardZ = utils.highestCardZ(cards)

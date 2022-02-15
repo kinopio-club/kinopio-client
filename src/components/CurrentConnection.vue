@@ -116,6 +116,7 @@ export default {
         this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
       } else if (isCurrentConnectionConnected) {
         const card = this.$store.getters['currentCards/byId'](cardElement.dataset.cardId)
+        if (card.isLocked) { return }
         this.$store.commit('currentConnectionSuccess', card)
         updates.endCardId = card.id
         this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })

@@ -1,5 +1,5 @@
 <template lang="pug">
-article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': isResizing}")
+article(:style="positionStyle" :data-card-id="id" ref="card" :class="{'is-resizing': isResizing}")
   .card(
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
@@ -11,7 +11,7 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
 
-    :class="{jiggle: shouldJiggle, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': isAudioCard, 'is-playing-audio': isPlayingAudio}",
+    :class="{jiggle: shouldJiggle, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': isAudioCard, 'is-playing-audio': isPlayingAudio, 'is-locked': card.isLocked}",
     :style="cardStyle"
     :data-card-id="id"
     :data-card-x="x"
@@ -44,15 +44,16 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
       img.image(v-if="pendingUploadDataUrl" :src="pendingUploadDataUrl" :class="{selected: isSelectedOrDragging}" @load="updateCardMap")
       img.image(v-else-if="Boolean(formats.image)" :src="formats.image" :class="{selected: isSelectedOrDragging}" @load="updateCardMap")
 
-    //- resize
-    .resize-button-wrap.inline-button-wrap(
-      v-if="resizeControlIsVisible"
-      @mousedown.left.stop="startResizing"
-      @touchstart.stop="startResizing"
-      @dblclick="removeResize"
-    )
-      button.inline-button(tabindex="-1" :style="{background: selectedColor || card.backgroundColor}")
-        img.resize-icon.icon(src="@/assets/resize.svg")
+    .bottom-button-wrap
+      //- resize
+      .resize-button-wrap.inline-button-wrap(
+        v-if="resizeControlIsVisible"
+        @mousedown.left.stop="startResizing"
+        @touchstart.stop="startResizing"
+        @dblclick="removeResize"
+      )
+        button.inline-button.resize-button(tabindex="-1" :style="{background: selectedColor || card.backgroundColor}")
+          img.resize-icon.icon(src="@/assets/resize.svg")
 
     span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
       //- Comment
@@ -104,32 +105,41 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
 
       //- Right buttons
       span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}")
-        //- Url →
-        a.url-wrap(:href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" v-if="cardButtonUrl && !nameIsComment" :class="{'connector-is-visible': connectorIsVisible}")
-          .url.inline-button-wrap
-            button.inline-button(:style="{background: selectedColor || card.backgroundColor}" tabindex="-1")
-              img.icon.visit.arrow-icon(src="@/assets/visit.svg")
-        //- Connector
-        .connector.inline-button-wrap(
-          v-if="connectorIsVisible"
-          :data-card-id="id"
-          @mousedown.left="startConnecting"
-          @touchstart="startConnecting"
-        )
-          .connector-glow(:style="connectorGlowStyle" tabindex="-1")
-          button.inline-button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: selectedColor || card.backgroundColor}" tabindex="-1")
-            .connected-colors
-              template(v-if="isConnectingTo || isConnectingFrom")
-                .color(:style="{ background: newConnectionColor}")
-              template(v-else-if="isRemoteConnecting")
-                .color(:style="{ background: remoteConnectionColor }")
-              template(v-else v-for="type in connectionTypes")
-                .color(:style="{ background: type.color}")
+        //- lock
+        .lock-button-wrap.inline-button-wrap(v-if="card.isLocked" @mouseup.left.stop="unlockCard" @touchend.stop="unlockCard")
+          button.inline-button(tabindex="-1" :style="{background: selectedColor || card.backgroundColor}")
+            img.icon.lock-icon(src="@/assets/lock.svg")
+        template(v-if="card.isLocked")
+          //- maintain connections when card is locked
+          .connector.invisible(:data-card-id="id")
+            button
+        template(v-else)
+          //- Url →
+          a.url-wrap(v-if="cardButtonUrl && !nameIsComment" :href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}")
+            .url.inline-button-wrap
+              button.inline-button(:style="{background: selectedColor || card.backgroundColor}" tabindex="-1")
+                img.icon.visit.arrow-icon(src="@/assets/visit.svg")
+          //- Connector
+          .connector.inline-button-wrap(
+            v-if="connectorIsVisible"
+            :data-card-id="id"
+            @mousedown.left="startConnecting"
+            @touchstart="startConnecting"
+          )
+            .connector-glow(:style="connectorGlowStyle" tabindex="-1")
+            button.inline-button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: selectedColor || card.backgroundColor}" tabindex="-1")
+              .connected-colors
+                template(v-if="isConnectingTo || isConnectingFrom")
+                  .color(:style="{ background: newConnectionColor}")
+                template(v-else-if="isRemoteConnecting")
+                  .color(:style="{ background: remoteConnectionColor }")
+                template(v-else v-for="type in connectionTypes")
+                  .color(:style="{ background: type.color}")
 
-            template(v-if="hasConnections")
-              img.connector-icon(src="@/assets/connector-closed.svg")
-            template(v-else)
-              img.connector-icon(src="@/assets/connector-open.svg")
+              template(v-if="hasConnections")
+                img.connector-icon(src="@/assets/connector-closed.svg")
+              template(v-else)
+                img.connector-icon(src="@/assets/connector-open.svg")
     .url-preview-wrap(v-if="cardUrlPreviewIsVisible && !isHiddenInComment")
       UrlPreview(
         :visible="cardUrlPreviewIsVisible"
@@ -304,6 +314,7 @@ export default {
       return Boolean(this.formats.image || this.formats.video)
     },
     resizeControlIsVisible () {
+      if (this.card.isLocked) { return }
       return this.resizeIsVisible && this.canEditCard
     },
     shouldJiggle () {
@@ -371,7 +382,7 @@ export default {
       }
     },
     cardButtonsIsVisible () {
-      if (this.connectorIsVisible || Boolean(this.formats.link || this.formats.file)) {
+      if (this.connectorIsVisible || this.card.isLocked || Boolean(this.formats.link || this.formats.file)) {
         return true
       } else {
         return false
@@ -527,24 +538,32 @@ export default {
       }
     },
     isChecked () { return utils.nameIsChecked(this.name) },
-    hasCheckbox () { return utils.checkboxFromString(this.name) },
+    hasCheckbox () {
+      if (this.card.isLocked) { return }
+      return utils.checkboxFromString(this.name)
+    },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     checkboxState: {
       get () {
         return this.isChecked
       }
     },
-    position () {
+    positionStyle () {
       let z = this.z
+      let pointerEvents = 'auto'
       if (this.currentCardDetailsIsVisible) {
         z = 2147483646 // max z
+      } else if (this.card.isLocked) {
+        z = -1
+        pointerEvents = 'none'
       }
       return {
         left: `${this.x}px`,
         top: `${this.y}px`,
         zIndex: z,
         width: this.resizeWidth,
-        maxWidth: this.resizeWidth
+        maxWidth: this.resizeWidth,
+        pointerEvents
       }
     },
     canEditCard () { return this.$store.getters['currentUser/canEditCard'](this.card) },
@@ -869,6 +888,19 @@ export default {
       })
       this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
+    unlockCard (event) {
+      if (!this.canEditCard) {
+        const position = utils.cursorPositionInPage(event)
+        this.$store.commit('addNotificationWithPosition', { message: 'Card is Read Only', position, type: 'info' }, { root: true })
+        return
+      }
+      this.$store.commit('currentUserIsDraggingCard', false)
+      this.$store.dispatch('currentCards/update', {
+        id: this.card.id,
+        isLocked: false
+      })
+      this.$store.dispatch('currentCards/updateCardMap')
+    },
     connectionIsBeingDragged (connection) {
       const multipleCardsSelectedIds = this.$store.state.multipleCardsSelectedIds
       const currentDraggingCardId = this.$store.state.currentDraggingCardId
@@ -1087,6 +1119,7 @@ export default {
       return longestLineLength
     },
     removeCard () {
+      if (this.card.isLocked) { return }
       if (this.canEditCard) {
         this.$store.dispatch('currentCards/remove', this.card)
       }
@@ -1190,6 +1223,7 @@ export default {
     },
     startDraggingCard (event) {
       isMultiTouch = false
+      if (this.card.isLocked) { return }
       if (this.$store.state.currentUserIsPanningReady) { return }
       if (!this.canEditCard) { return }
       if (utils.isMultiTouch(event)) {
@@ -1212,6 +1246,7 @@ export default {
       this.$store.dispatch('currentCards/incrementSelectedZs')
     },
     showCardDetails (event) {
+      if (this.card.isLocked) { return }
       if (this.$store.state.currentUserIsPainting) { return }
       if (isMultiTouch) { return }
       if (this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning) { return }
@@ -1337,6 +1372,7 @@ export default {
     // Touch
 
     notifyPressAndHoldToDrag () {
+      if (this.card.isLocked) { return }
       const isDrawingConnection = this.$store.state.currentUserIsDrawingConnection
       if (isDrawingConnection) { return }
       const hasNotified = this.$store.state.hasNotifiedPressAndHoldToDrag
@@ -1355,6 +1391,7 @@ export default {
       shouldCancelLocking = false
     },
     startLocking (event) {
+      if (this.card.isLocked) { return }
       this.updateTouchPosition(event)
       this.updateCurrentTouchPosition(event)
       if (this.isSelected) {
@@ -1682,6 +1719,15 @@ article
     .connector
       position relative
       height 32px
+      &.invisible
+        height 0
+        padding 0
+        button
+          width 0
+          height 0
+          min-width 0
+          padding 0
+          border none
       .connector-glow
         position absolute
         width 36px
@@ -1734,6 +1780,11 @@ article
       position absolute
       left 4px
       top 4.5px
+    .lock-icon
+      position absolute
+      left 5.5px
+      top 2px
+      height 10px
     .arrow-icon
       position absolute
       left 5px
@@ -1767,6 +1818,12 @@ article
       &:active,
       &.active
         background-color var(--secondary-background)
+      &.is-locked
+        &:hover,
+        &.hover,
+        &:active,
+        &.active
+          background-color transparent
       .image,
       video
         border-radius 3px
@@ -1812,15 +1869,24 @@ article
       margin-top 8px
       margin-left 8px
 
-  .resize-button-wrap
+  .bottom-button-wrap
     position absolute
     right 0px
     bottom 0px
-    cursor ew-resize
-    button
+    display flex
+    .resize-button-wrap
       cursor ew-resize
+      button
+        cursor ew-resize
     img
       -webkit-user-drag none
+
+  .lock-button-wrap
+    pointer-events all
+    cursor pointer
+    button
+      cursor pointer
+
   .meta-container
     margin-top -6px
     display flex
