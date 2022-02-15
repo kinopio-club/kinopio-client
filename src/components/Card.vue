@@ -11,7 +11,7 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
     @keyup.stop.enter="showCardDetails"
     @keyup.stop.backspace="removeCard"
 
-    :class="{jiggle: shouldJiggle, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': isAudioCard, 'is-playing-audio': isPlayingAudio}",
+    :class="{jiggle: shouldJiggle, active: isConnectingTo || isConnectingFrom || isRemoteConnecting || isBeingDragged || uploadIsDraggedOver, 'filtered': isFiltered, 'media-card': isVisualCard || pendingUploadDataUrl, 'audio-card': isAudioCard, 'is-playing-audio': isPlayingAudio, 'is-locked': card.isLocked}",
     :style="cardStyle"
     :data-card-id="id"
     :data-card-x="x"
@@ -57,7 +57,7 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
       //- lock
       .lock-button-wrap.inline-button-wrap(v-if="card.isLocked" @mouseup.left.stop="unlockCard" @touchend.stop="unlockCard")
         button.inline-button(tabindex="-1" :style="{background: selectedColor || card.backgroundColor}")
-          img.icon(src="@/assets/lock.svg")
+          img.icon.lock-icon(src="@/assets/lock.svg")
 
     span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
       //- Comment
@@ -108,7 +108,7 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
             Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
-      span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}")
+      span.card-buttons-wrap(v-if="!card.isLocked" :class="{'tappable-area': nameIsOnlyMarkdownLink}")
         //- Url →
         a.url-wrap(:href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" v-if="cardButtonUrl && !nameIsComment" :class="{'connector-is-visible': connectorIsVisible}")
           .url.inline-button-wrap
@@ -533,7 +533,10 @@ export default {
       }
     },
     isChecked () { return utils.nameIsChecked(this.name) },
-    hasCheckbox () { return utils.checkboxFromString(this.name) },
+    hasCheckbox () {
+      if (this.card.isLocked) { return }
+      return utils.checkboxFromString(this.name)
+    },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     checkboxState: {
       get () {
@@ -1100,6 +1103,7 @@ export default {
       return longestLineLength
     },
     removeCard () {
+      if (this.card.isLocked) { return }
       if (this.canEditCard) {
         this.$store.dispatch('currentCards/remove', this.card)
       }
@@ -1203,6 +1207,7 @@ export default {
     },
     startDraggingCard (event) {
       isMultiTouch = false
+      if (this.card.isLocked) { return }
       if (this.$store.state.currentUserIsPanningReady) { return }
       if (!this.canEditCard) { return }
       if (utils.isMultiTouch(event)) {
@@ -1225,6 +1230,7 @@ export default {
       this.$store.dispatch('currentCards/incrementSelectedZs')
     },
     showCardDetails (event) {
+      if (this.card.isLocked) { return }
       if (this.$store.state.currentUserIsPainting) { return }
       if (isMultiTouch) { return }
       if (this.$store.state.currentUserIsPanningReady || this.$store.state.currentUserIsPanning) { return }
@@ -1368,6 +1374,7 @@ export default {
       shouldCancelLocking = false
     },
     startLocking (event) {
+      if (this.card.isLocked) { return }
       this.updateTouchPosition(event)
       this.updateCurrentTouchPosition(event)
       if (this.isSelected) {
@@ -1623,6 +1630,16 @@ article
     &:active,
     &.active
       box-shadow var(--active-shadow)
+    &.is-locked
+      cursor default
+      .name
+        cursor default
+      &:hover,
+      &.hover,
+      &:active,
+      &.active
+        box-shadow none
+        background-color transparent !important
     .card-comment
       > .badge
         margin 0
@@ -1747,6 +1764,11 @@ article
       position absolute
       left 4px
       top 4.5px
+    .lock-icon
+      position absolute
+      left 5.5px
+      top 2px
+      height 10px
     .arrow-icon
       position absolute
       left 5px
