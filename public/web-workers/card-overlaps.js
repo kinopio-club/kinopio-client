@@ -3,7 +3,10 @@
 self.onmessage = function (event) {
   const offset = 10
   const { cards, viewport, zoom } = event.data
-  let newCards = cards.filter(card => isCardInViewport(card, viewport, zoom))
+  let newCards = cards.filter(card => {
+    if (card.isLocked) { return }
+    return isCardInViewport(card, viewport, zoom)
+  })
   newCards = newCards.map(card => {
     return {
       id: card.id,
