@@ -1362,6 +1362,7 @@ export default {
     // Touch
 
     notifyPressAndHoldToDrag () {
+      if (this.card.isLocked) { return }
       const isDrawingConnection = this.$store.state.currentUserIsDrawingConnection
       if (isDrawingConnection) { return }
       const hasNotified = this.$store.state.hasNotifiedPressAndHoldToDrag
