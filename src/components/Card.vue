@@ -54,10 +54,6 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
       )
         button.inline-button.resize-button(tabindex="-1" :style="{background: selectedColor || card.backgroundColor}")
           img.resize-icon.icon(src="@/assets/resize.svg")
-      //- lock
-      .lock-button-wrap.inline-button-wrap(v-if="card.isLocked" @mouseup.left.stop="unlockCard" @touchend.stop="unlockCard")
-        button.inline-button(tabindex="-1" :style="{background: selectedColor || card.backgroundColor}")
-          img.icon.lock-icon(src="@/assets/lock.svg")
 
     span.card-content-wrap(:style="{width: resizeWidth, 'max-width': resizeWidth }")
       //- Comment
@@ -108,33 +104,42 @@ article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': 
             Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
-      span.card-buttons-wrap(v-if="!card.isLocked" :class="{'tappable-area': nameIsOnlyMarkdownLink}")
-        //- Url →
-        a.url-wrap(:href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" v-if="cardButtonUrl && !nameIsComment" :class="{'connector-is-visible': connectorIsVisible}")
-          .url.inline-button-wrap
-            button.inline-button(:style="{background: selectedColor || card.backgroundColor}" tabindex="-1")
-              img.icon.visit.arrow-icon(src="@/assets/visit.svg")
-        //- Connector
-        .connector.inline-button-wrap(
-          v-if="connectorIsVisible"
-          :data-card-id="id"
-          @mousedown.left="startConnecting"
-          @touchstart="startConnecting"
-        )
-          .connector-glow(:style="connectorGlowStyle" tabindex="-1")
-          button.inline-button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: selectedColor || card.backgroundColor}" tabindex="-1")
-            .connected-colors
-              template(v-if="isConnectingTo || isConnectingFrom")
-                .color(:style="{ background: newConnectionColor}")
-              template(v-else-if="isRemoteConnecting")
-                .color(:style="{ background: remoteConnectionColor }")
-              template(v-else v-for="type in connectionTypes")
-                .color(:style="{ background: type.color}")
+      span.card-buttons-wrap(:class="{'tappable-area': nameIsOnlyMarkdownLink}")
+        //- lock
+        .lock-button-wrap.inline-button-wrap(v-if="card.isLocked" @mouseup.left.stop="unlockCard" @touchend.stop="unlockCard")
+          button.inline-button(tabindex="-1" :style="{background: selectedColor || card.backgroundColor}")
+            img.icon.lock-icon(src="@/assets/lock.svg")
+        template(v-if="card.isLocked")
+          //- maintain connections when card is locked
+          .connector.invisible(:data-card-id="id")
+            button
+        template(v-else)
+          //- Url →
+          a.url-wrap(v-if="cardButtonUrl && !nameIsComment" :href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}")
+            .url.inline-button-wrap
+              button.inline-button(:style="{background: selectedColor || card.backgroundColor}" tabindex="-1")
+                img.icon.visit.arrow-icon(src="@/assets/visit.svg")
+          //- Connector
+          .connector.inline-button-wrap(
+            v-if="connectorIsVisible"
+            :data-card-id="id"
+            @mousedown.left="startConnecting"
+            @touchstart="startConnecting"
+          )
+            .connector-glow(:style="connectorGlowStyle" tabindex="-1")
+            button.inline-button(:class="{ active: isConnectingTo || isConnectingFrom}" :style="{background: selectedColor || card.backgroundColor}" tabindex="-1")
+              .connected-colors
+                template(v-if="isConnectingTo || isConnectingFrom")
+                  .color(:style="{ background: newConnectionColor}")
+                template(v-else-if="isRemoteConnecting")
+                  .color(:style="{ background: remoteConnectionColor }")
+                template(v-else v-for="type in connectionTypes")
+                  .color(:style="{ background: type.color}")
 
-            template(v-if="hasConnections")
-              img.connector-icon(src="@/assets/connector-closed.svg")
-            template(v-else)
-              img.connector-icon(src="@/assets/connector-open.svg")
+              template(v-if="hasConnections")
+                img.connector-icon(src="@/assets/connector-closed.svg")
+              template(v-else)
+                img.connector-icon(src="@/assets/connector-open.svg")
     .url-preview-wrap(v-if="cardUrlPreviewIsVisible && !isHiddenInComment")
       UrlPreview(
         :visible="cardUrlPreviewIsVisible"
@@ -1639,7 +1644,6 @@ article
       &:active,
       &.active
         box-shadow none
-        background-color transparent !important
     .card-comment
       > .badge
         margin 0
@@ -1712,6 +1716,15 @@ article
     .connector
       position relative
       height 32px
+      &.invisible
+        height 0
+        padding 0
+        button
+          width: 0;
+          height: 0;
+          min-width: 0;
+          padding: 0;
+          border: none;
       .connector-glow
         position absolute
         width 36px
@@ -1856,12 +1869,14 @@ article
       cursor ew-resize
       button
         cursor ew-resize
-    .lock-button-wrap
-      cursor pointer
-      button
-        cursor pointer
     img
       -webkit-user-drag none
+
+  .lock-button-wrap
+    cursor pointer
+    button
+      cursor pointer
+
   .meta-container
     margin-top -6px
     display flex

@@ -4,6 +4,7 @@ self.onmessage = function (event) {
   const { cards, viewport, zoom } = event.data
   // console.log('🗾', event.data)
   const cardMap = cards.filter(card => {
+    if (card.isLocked) { return }
     card = {
       id: card.id,
       x: card.x * zoom,
