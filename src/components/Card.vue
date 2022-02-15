@@ -1815,6 +1815,12 @@ article
       &:active,
       &.active
         background-color var(--secondary-background)
+      &.is-locked
+        &:hover,
+        &.hover,
+        &:active,
+        &.active
+          background-color transparent
       .image,
       video
         border-radius 3px
