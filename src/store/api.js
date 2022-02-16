@@ -115,8 +115,6 @@ const self = {
     addToQueue: (context, { name, body }) => {
       body = utils.clone(body)
       body.spaceId = context.rootState.currentSpace.id
-      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
-      if (!currentUserIsSignedIn) { return }
       let queue = cache.queue()
       const request = {
         name,
@@ -140,11 +138,11 @@ const self = {
       const apiKey = context.rootState.currentUser.apiKey
       const queue = cache.queue()
       const queueBuffer = cache.queueBuffer()
-      if (!shouldRequest({ apiKey }) || !queue.length) { return }
       if (queueBuffer.length) {
         body = queueBuffer
       } else {
         body = squashQueue(queue)
+        context.dispatch('undoHistory/add', body, { root: true })
         cache.saveQueueBuffer(body)
         cache.clearQueue()
       }
@@ -152,6 +150,7 @@ const self = {
         item.operationId = nanoid()
         return item
       })
+      if (!shouldRequest({ apiKey }) || !queue.length) { return }
       try {
         console.log(`🛫 sending operations`, body)
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
