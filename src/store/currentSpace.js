@@ -632,7 +632,6 @@ export default {
       })
       context.dispatch('updateSpacePageSize')
       if (isRemote) {
-        context.dispatch('undoHistory/playback', null, { root: true })
         context.dispatch('checkIfShouldNotifySignUpToEditSpace', space)
         context.dispatch('checkIfShouldNotifySpaceIsRemoved', space)
       }
@@ -671,7 +670,7 @@ export default {
       context.commit('restoreSpace', emptySpace)
       space = utils.normalizeSpace(cachedSpace)
       context.dispatch('restoreSpaceInChunks', { space })
-      context.commit('undoHistory/clear', null, { root: true })
+      context.dispatch('undoHistory/clear', null, { root: true })
       // merge with remote space items updated, added, removed
       if (isLocalSpaceOnly) { return }
       let remoteSpace = await context.dispatch('getRemoteSpace', space)

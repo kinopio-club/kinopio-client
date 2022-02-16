@@ -1,56 +1,49 @@
-// import uniq from 'lodash-es/uniq'
+let history = [] // [new → old]
 
-import utils from '@/utils.js'
-
-let items = []
+const shouldAddUndo = (operation) => {
+  const { body, name } = operation
+  console.log('♥️', body, name, operation)
+  if (name === 'updateCard') {
+    // const keys = [name, x, y]
+    // Object.keys(body) included in keys
+    return true
+  } // else if
+}
 
 const self = {
   namespaced: true,
-  mutations: {
-    add: (state, item) => {
-      utils.typeCheck({ value: item, type: 'object', origin: 'history add' })
-      // {action} is a websocket broadcast directive to other clients
-      // for undo: maybe each broadcast has a {undoAction} attr? or maybe that's better defined here?
-
-      // -> to use actions: because on undo you want to broadcast change too
-      // but then it'll add itself back into the undo stack .. which might be what i want?
-
-      // ?TODO explicitly allow adding events addcard, removecard, etc. (eg no painting)
-
-      // - dont add removepermanent of empty cards on close to undo stack
-
-      // missing undo scenarios:
-      // https://club.kinopio.club/t/can-i-undo-an-accidental-connect/264
-      // - move card, to prev pos (recorded after drag)
-      // - move multiple cards, to prev pos (recorded after drag)
-      // - reconnect disconnected cards
-      // - restore removed connection
-      // - restore multiple cards and connections together - for when multiple selected items are removed
-      // - remove pasted cards
-      // - restore cut cards
-      // - undo card name change (recorded on card close)
-
-      items.push(item)
-    },
-    clear: (state) => {
-      items = []
-    }
-  },
   actions: {
-    playback: (context) => {
-      console.log('▶️TEMP', items)
+    add: (context, operations) => {
+      const max = 30
+      operations = operations.filter(operation => shouldAddUndo(operation))
+      operations.forEach(operation => history.unshift(operation))
+      history = history.slice(0, max)
+
+      console.log('😈', operations, history)
+    },
+    clear: (context) => {
+      history = []
+    },
+
+    redo: (context) => {
+      console.log('▶️TEMP', history)
+      // const operation = history.shift()
+
+      // if operation name === 'updateCard'
+      // also update cardmap, and connected paths, ?restore urls
+
       // let cardIds = []
       // temp disable playback
-      // items.forEach(item => {
-      //   let origin = `currentSpace/${item.name}`
-      //   if (item.origin) {
-      //     origin = item.origin
+      // operations.forEach(operation => {
+      //   let origin = `currentSpace/${operation.name}`
+      //   if (operation.origin) {
+      //     origin = operation.origin
       //   }
-      //   context.dispatch(origin, item.body, { root: true })
-      //   const isCard = item.name === 'updateCard'
-      //   const cardExists = Boolean(document.querySelector(`article [data-card-id="${item.body.id}"]`))
+      //   context.dispatch(origin, operation.body, { root: true })
+      //   const isCard = operation.name === 'updateCard'
+      //   const cardExists = Boolean(document.querySelector(`article [data-card-id="${operation.body.id}"]`))
       //   if (isCard && cardExists) {
-      //     cardIds.push(item.body.id)
+      //     cardIds.push(operation.body.id)
       //   }
       // })
       // cardIds = uniq(cardIds)
@@ -58,8 +51,6 @@ const self = {
       //   context.dispatch('currentConnections/updatePaths', { cardId }, { root: true })
       // })
     }
-    // undo
-    // undo last item in items
   }
 }
 
