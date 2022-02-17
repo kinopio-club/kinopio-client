@@ -936,6 +936,7 @@ export default {
     },
     removeCard () {
       if (!this.canEditCard) { return }
+      this.$store.dispatch('history/resume')
       this.$store.dispatch('currentCards/remove', this.card)
       this.$store.commit('cardDetailsIsVisibleForCardId', '')
       this.triggerUpdatePositionInVisualViewport()
@@ -1475,7 +1476,9 @@ export default {
         this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId })
       })
       this.$store.dispatch('history/resume')
-      this.$store.dispatch('history/updateCards', [card])
+      if (card.name) {
+        this.$store.dispatch('history/updateCards', [card])
+      }
     }
   },
   watch: {

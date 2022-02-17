@@ -46,7 +46,7 @@ const self = {
       state.patches.push(patch)
       state.pointer = state.pointer + 1
       if (showDebugMessages) {
-        console.log('▶️', patch, state.patches, state.pointer)
+        console.log('▶️ new patch, patches, pointer', patch, state.patches, state.pointer)
       }
     },
     clear: (state) => {
@@ -70,7 +70,7 @@ const self = {
   },
   actions: {
     moveCards: (context, cards) => {
-      if (context.isPaused) { return }
+      if (context.state.isPaused) { return }
       const patch = cards.map(card => {
         // move patch
         const keys = Object.keys(card)
@@ -88,7 +88,7 @@ const self = {
       context.commit('add', patch)
     },
     updateCards: (context, cards) => {
-      if (context.isPaused) { return }
+      if (context.state.isPaused) { return }
       let patch = cards.map(card => {
         const snapshot = cardsSnapshot[card.id]
         // create patch
@@ -100,7 +100,7 @@ const self = {
         }
         // update patch
         let keys = Object.keys(card)
-        let updatedKeys = keys.filter(key => card[key] !== snapshot[key])
+        let updatedKeys = keys.filter(key => card[key] !== snapshot[key] && key !== 'nameUpdatedAt')
         if (!updatedKeys.length) { return }
         updatedKeys.unshift('id')
         let prev = {}
@@ -134,7 +134,6 @@ const self = {
       context.commit(pointer, { increment: true })
     },
     pause: (context) => {
-      // TEMP ?not sure if pausing/isPaused should be replaced by history/createSapshot, if all undo actions are explicit/grouped? remove redundant resume calls
       context.commit('isPaused', true)
       const cards = utils.clone(context.rootState.currentCards.cards)
       cardsSnapshot = cards

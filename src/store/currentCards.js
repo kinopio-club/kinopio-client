@@ -277,6 +277,7 @@ const currentCards = {
       context.dispatch('broadcast/update', { updates: card, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
       context.commit('hasEditedCurrentSpace', true, { root: true })
       context.commit('update', card)
+      context.dispatch('history/updateCards', [card], { root: true })
       if (card.name) {
         context.dispatch('updateDimensionsAndMap', card.id)
       }
@@ -476,6 +477,7 @@ const currentCards = {
       context.commit('currentConnections/updatePaths', connections, { root: true })
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
       context.dispatch('checkIfShouldIncreasePageSize', { cardId: currentDraggingCardId })
+      context.dispatch('history/resume', null, { root: true })
       context.dispatch('history/moveCards', cards, { root: true })
     },
     checkIfShouldIncreasePageSize: (context, { cardId }) => {
@@ -560,6 +562,7 @@ const currentCards = {
         context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
       }
       context.dispatch('updateCardMap')
+      context.dispatch('history/updateCards', [card], { root: true })
     },
     deleteCard: (context, card) => {
       context.commit('deleteCard', card)
