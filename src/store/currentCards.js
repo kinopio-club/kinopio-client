@@ -458,13 +458,17 @@ const currentCards = {
       } else {
         cards = [currentDraggingCardId]
       }
-      cards = cards.map(id => context.getters.byId(id))
+      cards = cards.map(id => {
+        let card = context.getters.byId(id)
+        if (!card) { return }
+        const { x, y, z } = card
+        return { id, x, y, z }
+      })
       cards = cards.filter(card => card)
       cards.forEach(card => {
-        const { id, x, y, z } = card
         context.dispatch('api/addToQueue', {
           name: 'updateCard',
-          body: { id, x, y, z }
+          body: card
         }, { root: true })
         connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
       })
@@ -472,6 +476,7 @@ const currentCards = {
       context.commit('currentConnections/updatePaths', connections, { root: true })
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
       context.dispatch('checkIfShouldIncreasePageSize', { cardId: currentDraggingCardId })
+      context.dispatch('history/moveCards', cards, { root: true })
     },
     checkIfShouldIncreasePageSize: (context, { cardId }) => {
       const card = context.getters.byId(cardId)
