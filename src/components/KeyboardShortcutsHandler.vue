@@ -177,6 +177,7 @@ export default {
         }
         event.preventDefault()
         this.$store.commit('triggerSpaceZoomIn')
+      // Panning
       } else if (key === ' ' && isSpaceScope) {
         event.preventDefault()
         if (!this.$store.state.currentUserIsPanningReady) {

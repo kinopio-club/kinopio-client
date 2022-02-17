@@ -81,12 +81,10 @@ export default {
           clientY: position.y
         }
         this.createPaintingCircle(event)
-      }
-      if (mutation.type === 'triggerUpdateMagicPaintPositionOffset') {
+      } else if (mutation.type === 'triggerUpdateMagicPaintPositionOffset') {
         this.updatePositionOffsetByPinchZoom()
         this.updateCirclesWithScroll()
-      }
-      if (mutation.type === 'triggerAddRemotePaintingCircle') {
+      } else if (mutation.type === 'triggerAddRemotePaintingCircle') {
         let circle = mutation.payload
         delete circle.type
         this.createRemotePaintingCircle(circle)

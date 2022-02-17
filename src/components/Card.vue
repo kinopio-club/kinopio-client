@@ -1,5 +1,5 @@
 <template lang="pug">
-article(:style="position" :data-card-id="id" ref="card" :class="{'is-resizing': isResizing}")
+article(:style="positionStyle" :data-card-id="id" ref="card" :class="{'is-resizing': isResizing}")
   .card(
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
@@ -382,7 +382,7 @@ export default {
       }
     },
     cardButtonsIsVisible () {
-      if (this.connectorIsVisible || Boolean(this.formats.link || this.formats.file)) {
+      if (this.connectorIsVisible || this.card.isLocked || Boolean(this.formats.link || this.formats.file)) {
         return true
       } else {
         return false
@@ -548,17 +548,22 @@ export default {
         return this.isChecked
       }
     },
-    position () {
+    positionStyle () {
       let z = this.z
+      let pointerEvents = 'auto'
       if (this.currentCardDetailsIsVisible) {
         z = 2147483646 // max z
+      } else if (this.card.isLocked) {
+        z = -1
+        pointerEvents = 'none'
       }
       return {
         left: `${this.x}px`,
         top: `${this.y}px`,
         zIndex: z,
         width: this.resizeWidth,
-        maxWidth: this.resizeWidth
+        maxWidth: this.resizeWidth,
+        pointerEvents
       }
     },
     canEditCard () { return this.$store.getters['currentUser/canEditCard'](this.card) },
@@ -883,7 +888,12 @@ export default {
       })
       this.$store.commit('triggerUpdatePositionInVisualViewport')
     },
-    unlockCard () {
+    unlockCard (event) {
+      if (!this.canEditCard) {
+        const position = utils.cursorPositionInPage(event)
+        this.$store.commit('addNotificationWithPosition', { message: 'Card is Read Only', position, type: 'info' }, { root: true })
+        return
+      }
       this.$store.commit('currentUserIsDraggingCard', false)
       this.$store.dispatch('currentCards/update', {
         id: this.card.id,
@@ -1362,6 +1372,7 @@ export default {
     // Touch
 
     notifyPressAndHoldToDrag () {
+      if (this.card.isLocked) { return }
       const isDrawingConnection = this.$store.state.currentUserIsDrawingConnection
       if (isDrawingConnection) { return }
       const hasNotified = this.$store.state.hasNotifiedPressAndHoldToDrag
@@ -1636,15 +1647,6 @@ article
     &:active,
     &.active
       box-shadow var(--active-shadow)
-    &.is-locked
-      cursor default
-      .name
-        cursor default
-      &:hover,
-      &.hover,
-      &:active,
-      &.active
-        box-shadow none
     .card-comment
       > .badge
         margin 0
@@ -1880,6 +1882,7 @@ article
       -webkit-user-drag none
 
   .lock-button-wrap
+    pointer-events all
     cursor pointer
     button
       cursor pointer
