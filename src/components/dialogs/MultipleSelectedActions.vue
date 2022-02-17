@@ -81,6 +81,8 @@ import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsP
 import CardStyleActions from '@/components/dialogs/CardStyleActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
 
+let prevCards
+
 export default {
   name: 'MultipleSelectedActions',
   components: {
@@ -128,6 +130,7 @@ export default {
         return this.$store.getters['currentCards/byId'](cardId)
       })
       cards = cards.filter(card => Boolean(card))
+      prevCards = cards
       return cards
     },
     editableCards () {
@@ -436,6 +439,10 @@ export default {
           this.scrollIntoView()
           this.closeDialogs()
         })
+        this.$store.dispatch('history/pause')
+      } else {
+        this.$store.dispatch('history/resume')
+        this.$store.dispatch('history/updateCards', prevCards)
       }
     }
   }

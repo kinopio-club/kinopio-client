@@ -38,6 +38,9 @@ const self = {
   },
   mutations: {
     add: (state, patch) => {
+      utils.typeCheck({ value: patch, type: 'array', origin: 'history/add' })
+      patch = patch.filter(item => Boolean(item))
+      if (!patch.length) { return }
       // TODO remove patches above pointer
       // add patch and update pointer
       state.patches.push(patch)
@@ -67,7 +70,9 @@ const self = {
   },
   actions: {
     moveCards: (context, cards) => {
+      if (context.isPaused) { return }
       const patch = cards.map(card => {
+        // move patch
         const keys = Object.keys(card)
         const snapshot = cardsSnapshot[card.id]
         let prev = {}
@@ -83,17 +88,18 @@ const self = {
       context.commit('add', patch)
     },
     updateCards: (context, cards) => {
-      const patch = cards.map(card => {
+      if (context.isPaused) { return }
+      let patch = cards.map(card => {
         const snapshot = cardsSnapshot[card.id]
-        // newly created card has no prev
+        // create patch
         if (!snapshot) {
           return {
             action: 'createdCard',
             new: card
           }
         }
-        // create patch with card updates
-        const keys = Object.keys(card)
+        // update patch
+        let keys = Object.keys(card)
         let updatedKeys = keys.filter(key => card[key] !== snapshot[key])
         if (!updatedKeys.length) { return }
         updatedKeys.unshift('id')
@@ -106,7 +112,7 @@ const self = {
         return {
           action: 'updatedCard',
           prev,
-          new: card
+          new: updates
         }
       })
       context.commit('add', patch)
@@ -135,7 +141,6 @@ const self = {
     },
     resume: (context) => {
       context.commit('isPaused', false)
-      // console.log(cardsSnapshot)
     }
   }
 }
