@@ -43,7 +43,7 @@ const self = {
       state.patches.push(patch)
       state.pointer = state.pointer + 1
       if (showDebugMessages) {
-        console.log('⏺', patch, state.patches, state.pointer)
+        console.log('▶️', patch, state.patches, state.pointer)
       }
     },
     clear: (state) => {
@@ -53,6 +53,7 @@ const self = {
     },
     isPaused: (state, value) => {
       state.isPaused = value
+      console.log('⏸', state.isPaused)
     },
     pointer: (state, { increment, decrement }) => {
       if (increment) {
@@ -74,15 +75,41 @@ const self = {
           prev[key] = snapshot[key]
         })
         return {
-          type: 'moveCards',
+          action: 'movedCard',
           prev,
           new: card
         }
       })
       context.commit('add', patch)
     },
-    createCards: (context, cards) => {
-
+    updateCards: (context, cards) => {
+      const patch = cards.map(card => {
+        const snapshot = cardsSnapshot[card.id]
+        // newly created card has no prev
+        if (!snapshot) {
+          return {
+            action: 'createdCard',
+            new: card
+          }
+        }
+        // create patch with card updates
+        const keys = Object.keys(card)
+        let updatedKeys = keys.filter(key => card[key] !== snapshot[key])
+        if (!updatedKeys.length) { return }
+        updatedKeys.unshift('id')
+        let prev = {}
+        let updates = {}
+        updatedKeys.forEach(key => {
+          prev[key] = snapshot[key]
+          updates[key] = card[key]
+        })
+        return {
+          action: 'updatedCard',
+          prev,
+          new: card
+        }
+      })
+      context.commit('add', patch)
     },
     undo: (context) => {
       const { isPaused, pointer, patches } = context.state
@@ -101,7 +128,7 @@ const self = {
       context.commit(pointer, { increment: true })
     },
     pause: (context) => {
-      // TEMP ?not sure if pausing should be replaced by history/createSapshot, if all undo actions are explicit/grouped? remove redundant resume calls
+      // TEMP ?not sure if pausing/isPaused should be replaced by history/createSapshot, if all undo actions are explicit/grouped? remove redundant resume calls
       context.commit('isPaused', true)
       const cards = utils.clone(context.rootState.currentCards.cards)
       cardsSnapshot = cards

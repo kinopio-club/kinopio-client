@@ -1450,6 +1450,7 @@ export default {
       this.updateMediaUrls()
       const connections = this.$store.getters['currentConnections/byCardId'](cardId)
       this.$store.commit('updateCurrentCardConnections', connections)
+      this.$store.dispatch('history/pause')
     },
     closeCard () {
       const cardId = prevCardId
@@ -1473,6 +1474,8 @@ export default {
         this.updateCardMap(cardId)
         this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId })
       })
+      this.$store.dispatch('history/resume')
+      this.$store.dispatch('history/updateCards', [card])
     }
   },
   watch: {
