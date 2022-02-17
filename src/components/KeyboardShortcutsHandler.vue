@@ -112,9 +112,12 @@ export default {
         this.addCard()
       // Shift-Enter
       // Undo
+      } else if (event.shiftKey && isMeta && key === 'z' && isSpaceScope) {
+        event.preventDefault()
+        this.$store.dispatch('history/redo')
       } else if (isMeta && key === 'z' && isSpaceScope) {
         event.preventDefault()
-        this.restoreLastRemovedCard()
+        this.$store.dispatch('history/undo')
       // Copy
       } else if (isMeta && key === 'c' && (isSpaceScope || isFromCard)) {
         if (this.focusedCardIds().length) {
@@ -582,16 +585,6 @@ export default {
       this.$store.dispatch('currentConnections/removeUnusedTypes')
       this.clearAllSelectedCards()
       this.$store.dispatch('closeAllDialogs', 'KeyboardShortcutsHandler.remove')
-    },
-
-    // Undo
-
-    restoreLastRemovedCard () {
-      const removedCards = this.$store.state.currentCards.removedCards
-      if (removedCards.length) {
-        const card = removedCards[0]
-        this.$store.dispatch('currentCards/restoreRemoved', card)
-      }
     },
 
     // Copy

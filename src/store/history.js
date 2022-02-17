@@ -45,6 +45,7 @@ const self = {
       // add patch and update pointer
       state.patches.push(patch)
       state.pointer = state.pointer + 1
+      // TODO trim the earlier patches once state.patches.length > max (30)
       if (showDebugMessages) {
         console.log('▶️ new patch, patches, pointer', patch, state.patches, state.pointer)
       }
@@ -69,10 +70,23 @@ const self = {
     }
   },
   actions: {
+    // Recording
+
+    pause: (context) => {
+      context.commit('isPaused', true)
+      const cards = utils.clone(context.rootState.currentCards.cards)
+      cardsSnapshot = cards
+    },
+    resume: (context) => {
+      context.commit('isPaused', false)
+    },
+
+    // Patching
+
     moveCards: (context, cards) => {
       if (context.state.isPaused) { return }
       const patch = cards.map(card => {
-        // move patch
+        // + move patch
         const keys = Object.keys(card)
         const snapshot = cardsSnapshot[card.id]
         let prev = {}
@@ -91,14 +105,14 @@ const self = {
       if (context.state.isPaused) { return }
       let patch = cards.map(card => {
         const snapshot = cardsSnapshot[card.id]
-        // create patch
+        // + create patch
         if (!snapshot) {
           return {
             action: 'createdCard',
             new: card
           }
         }
-        // update patch
+        // + update patch
         let keys = Object.keys(card)
         let updatedKeys = keys.filter(key => card[key] !== snapshot[key] && key !== 'nameUpdatedAt')
         if (!updatedKeys.length) { return }
@@ -117,29 +131,30 @@ const self = {
       })
       context.commit('add', patch)
     },
+
+    // Playback
+
+    // ..todo playback methods here..
+
+    // Undo and Redo
+
     undo: (context) => {
       const { isPaused, pointer, patches } = context.state
       if (isPaused) { return }
-      if (pointer === 0) { return }
-      console.log('😈', patches)
-      // take history patch before pointer
-      // move pointer back one
+      const pointerIsMin = pointer === 0
+      if (pointerIsMin) { return }
+      // TODO apply prev history patch at pointer
+      console.log('TODO undo', patches, pointer)
       context.commit(pointer, { decrement: true })
     },
     redo: (context) => {
       const { isPaused, pointer, patches } = context.state
       if (isPaused) { return }
-      if (pointer === patches.length) { }
-      // move pointer - 1 or 0
+      const pointerIsMax = pointer === patches.length
+      if (pointerIsMax) { return }
       context.commit(pointer, { increment: true })
-    },
-    pause: (context) => {
-      context.commit('isPaused', true)
-      const cards = utils.clone(context.rootState.currentCards.cards)
-      cardsSnapshot = cards
-    },
-    resume: (context) => {
-      context.commit('isPaused', false)
+      console.log('TODO redo', patches, pointer)
+      // TODO apply new history patch at next context.state.pointer
     }
   }
 }
