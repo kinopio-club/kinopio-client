@@ -26,7 +26,7 @@ const currentCards = {
   namespaced: true,
   state: {
     ids: [],
-    cards: {},
+    cards: {}, // {id, {card}}
     removedCards: [], // denormalized
     cardMap: []
   },
