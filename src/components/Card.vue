@@ -1244,7 +1244,6 @@ export default {
       this.$store.commit('childCardId', '')
       this.checkIfShouldDragMultipleCards(event)
       this.$store.dispatch('currentCards/incrementSelectedZs')
-      this.$store.dispatch('history/pause')
     },
     showCardDetails (event) {
       if (this.card.isLocked) { return }

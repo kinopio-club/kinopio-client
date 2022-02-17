@@ -304,6 +304,7 @@ export default {
       return cursor
     },
     dragCard () {
+      this.$store.dispatch('history/pause')
       const prevCursor = this.cursor()
       const shouldPrevent = this.checkIfShouldPreventInteraction()
       if (shouldPrevent) { return }

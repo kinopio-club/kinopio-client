@@ -774,18 +774,21 @@ export default {
           prevCard = card
           return card
         })
-        newCards.forEach(card => {
+        newCards = newCards.map(card => {
           card = utils.updateCardDimensions(card)
           this.$store.dispatch('currentCards/update', {
             id: card.id,
             y: card.y
           })
+          return card
         })
         this.$store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
           delta: newCards.length,
           shouldIncrement: true
         })
         this.$store.dispatch('closeAllDialogs', 'CardDetails.addSplitCards')
+        this.$store.dispatch('history/resume')
+        this.$store.dispatch('history/updateCards', [newCards])
       })
     },
     async uploadFile (file) {
