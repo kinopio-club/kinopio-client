@@ -1,7 +1,28 @@
 // adapted from https://twitter.com/steveruizok/status/1487052071685734410
 
-// each history patch contains 'new' and 'prev' changes
-// the current position in history is a 'pointer' to a patch index
+// each `patch` contains `new` and `prev` changes
+// the current position in history is a patch index `pointer`
+//
+//                    ┌──────────────────────┐
+//                    │                      │
+//                    │ PREV                 │
+//                    │ Patch 1              │
+//                    │ [{action prev, new}] │
+//                    │                      │
+//                    ├──────────────────────┤
+//                    │                      │
+//                    │ PREV                 │
+//                    │ Patch 2              │
+//                    │ [{…}]                │       ▲
+//                    │                      │       │
+//                    ├──────────────────────┤       │
+//                    │                      │░  ┌ ─ ─ ─   ┌ ─ ─ ─
+//  ┌─────────┐       │ NEW                  │░    Undo │    Redo │
+//  │ Pointer │──────▶│ Patch 3              │░  └ ─ ─ ─   └ ─ ─ ─
+//  └─────────┘░      │ [{…}]                │░                │
+//   ░░░░░░░░░░░      │                      │░                │
+//                    └──────────────────────┘░                ▼
+//                     ░░░░░░░░░░░░░░░░░░░░░░░░
 
 import utils from '@/utils.js'
 
