@@ -109,10 +109,10 @@ article(:style="positionStyle" :data-card-id="id" ref="card" :class="{'is-resizi
         .lock-button-wrap.inline-button-wrap(v-if="card.isLocked" @mouseup.left.stop="unlockCard" @touchend.stop="unlockCard")
           button.inline-button(tabindex="-1" :style="{background: selectedColor || card.backgroundColor}")
             img.icon.lock-icon(src="@/assets/lock.svg")
-        template(v-if="card.isLocked")
           //- maintain connections when card is locked
           .connector.invisible(:data-card-id="id")
             button
+
         template(v-else)
           //- Url →
           a.url-wrap(v-if="cardButtonUrl && !nameIsComment" :href="cardButtonUrl" @click.left.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}")
@@ -554,7 +554,7 @@ export default {
       if (this.currentCardDetailsIsVisible) {
         z = 2147483646 // max z
       } else if (this.card.isLocked) {
-        z = -1
+        z = 0
         pointerEvents = 'none'
       }
       return {
@@ -1721,8 +1721,14 @@ article
       position relative
       height 32px
       &.invisible
-        height 0
+        height 32px
+        width 36px
         padding 0
+        position absolute
+        left 0
+        top 0
+        background transparent
+        pointer-events none
         button
           width 0
           height 0
@@ -1885,6 +1891,7 @@ article
   .lock-button-wrap
     pointer-events all
     cursor pointer
+    position relative
     button
       cursor pointer
 
