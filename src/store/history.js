@@ -1,8 +1,12 @@
 // adapted from https://twitter.com/steveruizok/status/1487052071685734410
 
-// import utils from '@/utils.js'
+// each history patch contains 'new' and 'prev' changes
+// the current position in history is a 'pointer' to a patch index
+
+import utils from '@/utils.js'
 
 let cardsSnapshot = {}
+let showDebugMessages = true
 
 const self = {
   namespaced: true,
@@ -13,8 +17,13 @@ const self = {
   },
   mutations: {
     add: (state, patch) => {
+      // TODO remove patches above pointer
+      // add patch and update pointer
       state.patches.push(patch)
       state.pointer = state.pointer + 1
+      if (showDebugMessages) {
+        console.log('⏺', patch, state.patches, state.pointer)
+      }
     },
     clear: (state) => {
       state.patches = []
@@ -23,46 +32,62 @@ const self = {
     },
     isPaused: (state, value) => {
       state.isPaused = value
+    },
+    pointer: (state, { increment, decrement }) => {
+      if (increment) {
+        state.pointer = state.pointer + 1
+        state.pointer = Math.min(state.patches.length, state.pointer)
+      } else if (decrement) {
+        state.pointer = state.pointer - 1
+        state.pointer = Math.max(0, state.pointer)
+      }
     }
   },
   actions: {
     moveCards: (context, cards) => {
-      console.log('🐸', cards, cardsSnapshot)
-      // Each time the document changes, we generate a "snapshot" and compare it with our previous snapshot in order to create a "patch" that describes how to get from the current snapshot back to the previous.
-      // generate a http://jsonpatch.com
+      const patch = cards.map(card => {
+        const keys = Object.keys(card)
+        const snapshot = cardsSnapshot[card.id]
+        let prev = {}
+        keys.forEach(key => {
+          prev[key] = snapshot[key]
+        })
+        return {
+          type: 'moveCards',
+          prev,
+          new: card
+        }
+      })
+      context.commit('add', patch)
+    },
+    createCards: (context, cards) => {
 
-      // [
-      //   { "op": "replace", "path": "/baz", "value": "boo" },
-      //   { "op": "add", "path": "/hello", "value": ["world"] },
-      //   { "op": "remove", "path": "/foo" }
-      // ]
-
-      // the patch describes all the steps to restore the previous version/snapshot
-
-      // context.commit('add', patch)
     },
     undo: (context) => {
       const { isPaused, pointer, patches } = context.state
       if (isPaused) { return }
       if (pointer === 0) { return }
-      console.log(patches)
+      console.log('😈', patches)
       // take history patch before pointer
       // move pointer back one
+      context.commit(pointer, { decrement: true })
     },
     redo: (context) => {
       const { isPaused, pointer, patches } = context.state
       if (isPaused) { return }
       if (pointer === patches.length) { }
-      // move pointer
+      // move pointer - 1 or 0
+      context.commit(pointer, { increment: true })
     },
     pause: (context) => {
+      // TEMP ?not sure if pausing should be replaced by history/createSapshot, if all undo actions are explicit/grouped? remove redundant resume calls
       context.commit('isPaused', true)
-      const cards = context.rootState.currentCards.cards
+      const cards = utils.clone(context.rootState.currentCards.cards)
       cardsSnapshot = cards
     },
     resume: (context) => {
       context.commit('isPaused', false)
-      console.log(cardsSnapshot)
+      // console.log(cardsSnapshot)
     }
   }
 }
