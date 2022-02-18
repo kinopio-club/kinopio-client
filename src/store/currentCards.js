@@ -562,6 +562,8 @@ const currentCards = {
         context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
       }
       context.dispatch('updateCardMap')
+      card = utils.clone(card)
+      card.isRemoved = true
       context.dispatch('history/patch', { cards: [card] }, { root: true })
     },
     deleteCard: (context, card) => {
