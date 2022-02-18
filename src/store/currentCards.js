@@ -277,7 +277,7 @@ const currentCards = {
       context.dispatch('broadcast/update', { updates: card, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
       context.commit('hasEditedCurrentSpace', true, { root: true })
       context.commit('update', card)
-      context.dispatch('history/patch', { cards: [card] }, { root: true })
+      context.dispatch('history/add', { cards: [card] }, { root: true })
       if (card.name) {
         context.dispatch('updateDimensionsAndMap', card.id)
       }
@@ -478,7 +478,7 @@ const currentCards = {
       context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
       context.dispatch('checkIfShouldIncreasePageSize', { cardId: currentDraggingCardId })
       context.dispatch('history/resume', null, { root: true })
-      context.dispatch('history/patch', { cards }, { root: true })
+      context.dispatch('history/add', { cards }, { root: true })
     },
     checkIfShouldIncreasePageSize: (context, { cardId }) => {
       const card = context.getters.byId(cardId)
@@ -564,7 +564,7 @@ const currentCards = {
       context.dispatch('updateCardMap')
       card = utils.clone(card)
       card.isRemoved = true
-      context.dispatch('history/patch', { cards: [card] }, { root: true })
+      context.dispatch('history/add', { cards: [card] }, { root: true })
     },
     deleteCard: (context, card) => {
       context.commit('deleteCard', card)

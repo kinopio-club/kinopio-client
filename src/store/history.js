@@ -40,7 +40,7 @@ const normalizeCardUpdates = (card) => {
   // updatedCard
   } else {
     let keys = Object.keys(card)
-    const ignoreKeys = ['nameUpdatedAt', 'height', 'width']
+    const ignoreKeys = ['nameUpdatedAt', 'height', 'width', 'urlPreviewDescription', 'urlPreviewFavicon', 'urlPreviewImage', 'urlPreviewTitle', 'urlPreviewUrl']
     let updatedKeys = keys.filter(key => card[key] !== snapshot[key] && !ignoreKeys.includes(key))
     if (!updatedKeys.length) { return }
     updatedKeys.unshift('id')
@@ -83,10 +83,15 @@ const self = {
       state.patches = []
       state.pointer = 0
       snapshots = { cards: {}, connections: {}, connectionTypes: {} }
+      if (showDebugMessages) {
+        console.log('⏏️ history cleared')
+      }
     },
     isPaused: (state, value) => {
       state.isPaused = value
-      console.log('⏸', state.isPaused)
+      if (showDebugMessages) {
+        console.log('⏸ history paused', state.isPaused)
+      }
     },
     pointer: (state, { increment, decrement }) => {
       if (increment) {
@@ -99,6 +104,10 @@ const self = {
     }
   },
   actions: {
+    reset: (context) => {
+      context.commit('clear')
+      context.dispatch('snapshots')
+    },
     snapshots: (context) => {
       const cards = utils.clone(context.rootState.currentCards.cards)
       snapshots.cards = cards
@@ -110,7 +119,7 @@ const self = {
     resume: (context) => {
       context.commit('isPaused', false)
     },
-    patch: (context, { cards, connections, connectionTypes }) => {
+    add: (context, { cards, connections, connectionTypes }) => {
       if (context.state.isPaused) { return }
       let patch = []
       cards = cards.map(card => {

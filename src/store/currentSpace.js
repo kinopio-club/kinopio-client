@@ -616,6 +616,7 @@ export default {
     },
     restoreSpaceComplete: (context, { space, isRemote, timeStart }) => {
       context.commit('isLoadingSpace', false, { root: true })
+      context.dispatch('history/reset', null, { root: true })
       const timeEnd = utils.normalizeToUnixTime(new Date())
       let emoji = '🌳'
       if (isRemote) {
@@ -668,6 +669,7 @@ export default {
       context.commit('shouldPreventNextEnterKey', false, { root: true })
       // restore local space
       context.commit('restoreSpace', emptySpace)
+      context.dispatch('history/reset', null, { root: true })
       space = utils.normalizeSpace(cachedSpace)
       context.dispatch('restoreSpaceInChunks', { space })
       // merge with remote space items updated, added, removed
