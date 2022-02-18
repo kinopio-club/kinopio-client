@@ -413,6 +413,7 @@ export default {
       this.$store.dispatch('currentConnections/removeUnusedTypes')
     },
     remove () {
+      this.$store.dispatch('history/resume')
       this.editableConnections.forEach(connection => this.$store.dispatch('currentConnections/remove', connection))
       this.editableCards.forEach(card => this.$store.dispatch('currentCards/remove', card))
       this.$store.dispatch('closeAllDialogs', 'MultipleSelectedActions.remove')
