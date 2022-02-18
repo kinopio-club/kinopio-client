@@ -569,6 +569,7 @@ export default {
     },
 
     remove () {
+      this.$store.dispatch('history/resume')
       const selectedConnectionIds = this.$store.state.multipleConnectionsSelectedIds
       const cardIds = this.focusedCardIds()
       selectedConnectionIds.forEach(connectionId => {
