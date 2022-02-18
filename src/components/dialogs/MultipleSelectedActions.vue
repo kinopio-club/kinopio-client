@@ -442,7 +442,7 @@ export default {
         this.$store.dispatch('history/pause')
       } else {
         this.$store.dispatch('history/resume')
-        this.$store.dispatch('history/updateCards', prevCards)
+        this.$store.dispatch('history/patch', { cards: prevCards })
       }
     }
   }

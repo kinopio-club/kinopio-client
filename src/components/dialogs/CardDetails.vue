@@ -788,7 +788,7 @@ export default {
         })
         this.$store.dispatch('closeAllDialogs', 'CardDetails.addSplitCards')
         this.$store.dispatch('history/resume')
-        this.$store.dispatch('history/updateCards', [newCards])
+        this.$store.dispatch('history/patch', { cards: [newCards] })
       })
     },
     async uploadFile (file) {
@@ -1480,7 +1480,7 @@ export default {
       })
       this.$store.dispatch('history/resume')
       if (card.name) {
-        this.$store.dispatch('history/updateCards', [card])
+        this.$store.dispatch('history/patch', { cards: [card] })
       }
     }
   },

@@ -1,24 +1,24 @@
 // adapted from https://twitter.com/steveruizok/status/1487052071685734410
 
-// each `patch` contains `new` and `prev` changes
+// each `patch` contains `new` and `prev` updates
 // the current position in history is a patch index `pointer`
 //
 //                    ┌──────────────────────┐
 //                    │                      │
 //                    │ PREV                 │
-//                    │ Patch 1              │
+//                    │ Patch 0              │
 //                    │ [{action prev, new}] │
 //                    │                      │
 //                    ├──────────────────────┤
 //                    │                      │
 //                    │ PREV                 │
-//                    │ Patch 2              │
+//                    │ Patch 1              │
 //                    │ [{…}]                │       ▲
 //                    │                      │       │
 //                    ├──────────────────────┤       │
 //                    │                      │░  ┌ ─ ─ ─   ┌ ─ ─ ─
 //  ┌─────────┐       │ NEW                  │░    Undo │    Redo │
-//  │ Pointer │──────▶│ Patch 3              │░  └ ─ ─ ─   └ ─ ─ ─
+//  │ Pointer │──────▶│ Patch 2              │░  └ ─ ─ ─   └ ─ ─ ─
 //  └─────────┘░      │ [{…}]                │░                │
 //   ░░░░░░░░░░░      │                      │░                │
 //                    └──────────────────────┘░                ▼
@@ -28,6 +28,14 @@ import utils from '@/utils.js'
 
 let cardsSnapshot = {}
 let showDebugMessages = true
+
+// const cardUpdate = (card) => {
+// return {
+//   action: 'updatedCard',
+//   prev,
+//   new: updates
+// }
+// }
 
 const self = {
   namespaced: true,
@@ -83,27 +91,10 @@ const self = {
 
     // Patching
 
-    moveCards: (context, cards) => {
-      if (context.state.isPaused) { return }
-      const patch = cards.map(card => {
-        // + move patch
-        const keys = Object.keys(card)
-        const snapshot = cardsSnapshot[card.id]
-        let prev = {}
-        keys.forEach(key => {
-          prev[key] = snapshot[key]
-        })
-        return {
-          action: 'movedCard',
-          prev,
-          new: card
-        }
-      })
-      context.commit('add', patch)
-    },
-    updateCards: (context, cards) => {
+    patch: (context, { cards, connections, connectionTypes }) => {
       if (context.state.isPaused) { return }
       let patch = cards.map(card => {
+        // TODO return cardUpdate(card)
         const snapshot = cardsSnapshot[card.id]
         // + create patch
         if (!snapshot) {
