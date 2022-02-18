@@ -214,7 +214,7 @@ import utils from '@/utils.js'
 import qs from '@aguezz/qs-parse'
 import { nanoid } from 'nanoid'
 
-let prevCardId
+let prevCardId, prevCardName
 let previousTags = []
 let compositionEventEndTime = 0
 
@@ -1455,6 +1455,7 @@ export default {
       const connections = this.$store.getters['currentConnections/byCardId'](cardId)
       this.$store.commit('updateCurrentCardConnections', connections)
       this.$store.dispatch('history/pause')
+      prevCardName = this.card.name
     },
     closeCard () {
       const cardId = prevCardId
@@ -1479,7 +1480,7 @@ export default {
         this.$store.dispatch('currentCards/checkIfShouldIncreasePageSize', { cardId })
       })
       this.$store.dispatch('history/resume')
-      if (card.name) {
+      if (card.name || prevCardName) {
         this.$store.dispatch('history/patch', { cards: [card] })
       }
     }
