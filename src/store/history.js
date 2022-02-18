@@ -40,7 +40,8 @@ const normalizeCardUpdates = (card) => {
   // updatedCard
   } else {
     let keys = Object.keys(card)
-    let updatedKeys = keys.filter(key => card[key] !== snapshot[key] && key !== 'nameUpdatedAt')
+    const ignoreKeys = ['nameUpdatedAt', 'height', 'width']
+    let updatedKeys = keys.filter(key => card[key] !== snapshot[key] && !ignoreKeys.includes(key))
     if (!updatedKeys.length) { return }
     updatedKeys.unshift('id')
     let prev = {}
