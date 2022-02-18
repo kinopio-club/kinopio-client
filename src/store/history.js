@@ -26,33 +26,34 @@
 
 import utils from '@/utils.js'
 
-let cardsSnapshot = {}
 let showDebugMessages = true
+let snapshots = { cards: {}, connections: {}, connectionTypes: {} }
 
 const normalizeCardUpdates = (card) => {
-  const snapshot = cardsSnapshot[card.id]
+  const snapshot = snapshots.cards[card.id]
   // createdCard
   if (!snapshot) {
     return {
       action: 'createdCard',
       new: card
     }
-  }
   // updatedCard
-  let keys = Object.keys(card)
-  let updatedKeys = keys.filter(key => card[key] !== snapshot[key] && key !== 'nameUpdatedAt')
-  if (!updatedKeys.length) { return }
-  updatedKeys.unshift('id')
-  let prev = {}
-  let updates = {}
-  updatedKeys.forEach(key => {
-    prev[key] = snapshot[key]
-    updates[key] = card[key]
-  })
-  return {
-    action: 'updatedCard',
-    prev,
-    new: updates
+  } else {
+    let keys = Object.keys(card)
+    let updatedKeys = keys.filter(key => card[key] !== snapshot[key] && key !== 'nameUpdatedAt')
+    if (!updatedKeys.length) { return }
+    updatedKeys.unshift('id')
+    let prev = {}
+    let updates = {}
+    updatedKeys.forEach(key => {
+      prev[key] = snapshot[key]
+      updates[key] = card[key]
+    })
+    return {
+      action: 'updatedCard',
+      prev,
+      new: updates
+    }
   }
 }
 
@@ -80,7 +81,7 @@ const self = {
     clear: (state) => {
       state.patches = []
       state.pointer = 0
-      cardsSnapshot = {}
+      snapshots = { cards: {}, connections: {}, connectionTypes: {} }
     },
     isPaused: (state, value) => {
       state.isPaused = value
@@ -97,10 +98,13 @@ const self = {
     }
   },
   actions: {
+    snapshots: (context) => {
+      const cards = utils.clone(context.rootState.currentCards.cards)
+      snapshots.cards = cards
+    },
     pause: (context) => {
       context.commit('isPaused', true)
-      const cards = utils.clone(context.rootState.currentCards.cards)
-      cardsSnapshot = cards
+      context.dispatch('snapshots')
     },
     resume: (context) => {
       context.commit('isPaused', false)
