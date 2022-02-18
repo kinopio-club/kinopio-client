@@ -1,7 +1,7 @@
 // adapted from https://twitter.com/steveruizok/status/1487052071685734410
 
 // each `patch` contains `new` and `prev` updates
-// the current position in history is a patch index `pointer`
+// `pointer` is the current position in history
 //
 //                    ┌──────────────────────┐
 //                    │                      │
@@ -29,13 +29,32 @@ import utils from '@/utils.js'
 let cardsSnapshot = {}
 let showDebugMessages = true
 
-// const cardUpdate = (card) => {
-// return {
-//   action: 'updatedCard',
-//   prev,
-//   new: updates
-// }
-// }
+const normalizeCardUpdates = (card) => {
+  const snapshot = cardsSnapshot[card.id]
+  // createdCard
+  if (!snapshot) {
+    return {
+      action: 'createdCard',
+      new: card
+    }
+  }
+  // updatedCard
+  let keys = Object.keys(card)
+  let updatedKeys = keys.filter(key => card[key] !== snapshot[key] && key !== 'nameUpdatedAt')
+  if (!updatedKeys.length) { return }
+  updatedKeys.unshift('id')
+  let prev = {}
+  let updates = {}
+  updatedKeys.forEach(key => {
+    prev[key] = snapshot[key]
+    updates[key] = card[key]
+  })
+  return {
+    action: 'updatedCard',
+    prev,
+    new: updates
+  }
+}
 
 const self = {
   namespaced: true,
@@ -78,8 +97,6 @@ const self = {
     }
   },
   actions: {
-    // Recording
-
     pause: (context) => {
       context.commit('isPaused', true)
       const cards = utils.clone(context.rootState.currentCards.cards)
@@ -88,47 +105,17 @@ const self = {
     resume: (context) => {
       context.commit('isPaused', false)
     },
-
-    // Patching
-
     patch: (context, { cards, connections, connectionTypes }) => {
       if (context.state.isPaused) { return }
-      let patch = cards.map(card => {
-        // TODO return cardUpdate(card)
-        const snapshot = cardsSnapshot[card.id]
-        // + create patch
-        if (!snapshot) {
-          return {
-            action: 'createdCard',
-            new: card
-          }
-        }
-        // + update patch
-        let keys = Object.keys(card)
-        let updatedKeys = keys.filter(key => card[key] !== snapshot[key] && key !== 'nameUpdatedAt')
-        if (!updatedKeys.length) { return }
-        updatedKeys.unshift('id')
-        let prev = {}
-        let updates = {}
-        updatedKeys.forEach(key => {
-          prev[key] = snapshot[key]
-          updates[key] = card[key]
-        })
-        return {
-          action: 'updatedCard',
-          prev,
-          new: updates
-        }
+      let patch = []
+      cards = cards.map(card => {
+        return normalizeCardUpdates(card)
       })
+      patch = patch.concat(cards)
       context.commit('add', patch)
     },
-
     // Playback
-
     // ..todo playback methods here..
-
-    // Undo and Redo
-
     undo: (context) => {
       const { isPaused, pointer, patches } = context.state
       if (isPaused) { return }
