@@ -34,7 +34,7 @@ const normalizeCardUpdates = (card) => {
   // createdCard
   if (!snapshot) {
     return {
-      action: 'createdCard',
+      update: 'createdCard',
       new: card
     }
   // updatedCard
@@ -50,7 +50,7 @@ const normalizeCardUpdates = (card) => {
       updates[key] = card[key]
     })
     return {
-      action: 'updatedCard',
+      update: 'updatedCard',
       prev,
       new: updates
     }
