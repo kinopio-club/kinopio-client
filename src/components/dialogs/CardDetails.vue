@@ -743,12 +743,17 @@ export default {
       })
       cardNames = cardNames.flat()
       cardNames = cardNames.filter(name => Boolean(name.length))
-      let newCards = cardNames.map(cardName => {
+      // create new split cards
+      let newCards = cardNames.map((cardName, index) => {
         const indentAmount = 50
         const indentLevel = utils.numberOfLeadingTabs(cardName) || utils.numberOfLeadingDoubleSpaces(cardName)
         const indentX = indentLevel * indentAmount
+        let id = nanoid()
+        if (index === 0) {
+          id = this.card.id
+        }
         return {
-          id: nanoid(),
+          id,
           name: cardName.trim(),
           x: this.card.x + indentX,
           y: this.card.y,
@@ -759,6 +764,9 @@ export default {
       if (isPreview) { return newCards }
       this.pastedName = ''
       this.updateCardName(newCards[0].name)
+      this.$store.dispatch('history/resume')
+      this.$store.dispatch('history/add', { cards: newCards })
+      this.$store.dispatch('history/pause')
       newCards.shift()
       this.addSplitCards(newCards)
     },
@@ -787,8 +795,6 @@ export default {
           shouldIncrement: true
         })
         this.$store.dispatch('closeAllDialogs', 'CardDetails.addSplitCards')
-        this.$store.dispatch('history/resume')
-        this.$store.dispatch('history/patch', { cards: [newCards] })
       })
     },
     async uploadFile (file) {
@@ -1454,8 +1460,8 @@ export default {
       this.updateMediaUrls()
       const connections = this.$store.getters['currentConnections/byCardId'](cardId)
       this.$store.commit('updateCurrentCardConnections', connections)
-      this.$store.dispatch('history/pause')
       prevCardName = this.card.name
+      this.$store.dispatch('history/pause')
     },
     closeCard () {
       const cardId = prevCardId
@@ -1481,7 +1487,7 @@ export default {
       })
       this.$store.dispatch('history/resume')
       if (card.name || prevCardName) {
-        this.$store.dispatch('history/patch', { cards: [card] })
+        this.$store.dispatch('history/add', { cards: [card] })
       }
     }
   },
