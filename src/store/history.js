@@ -85,13 +85,13 @@ const self = {
       state.pointer = 0
       state.snapshots = { cards: {}, connections: {}, connectionTypes: {} }
       if (showDebugMessages) {
-        console.log('⏏️ history cleared')
+        console.log('⏹ history cleared')
       }
     },
     isPaused: (state, value) => {
       state.isPaused = value
       if (showDebugMessages) {
-        console.log('⏸ history paused', state.isPaused)
+        console.log('⏸ history is paused', state.isPaused)
       }
     },
     pointer: (state, { increment, decrement }) => {

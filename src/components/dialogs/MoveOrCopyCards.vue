@@ -180,6 +180,7 @@ export default {
         this.cardsCreatedIsOverLimit = true
         return
       }
+      this.$store.dispatch('history/resume')
       await this.copyToSelectedSpace(items)
       this.notifySuccess()
       if (this.actionIsMove) {

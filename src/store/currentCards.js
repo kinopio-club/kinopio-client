@@ -542,6 +542,9 @@ const currentCards = {
       card = context.getters.byId(card.id)
       const cardHasContent = Boolean(card.name)
       if (cardHasContent) {
+        card = utils.clone(card)
+        card.isRemoved = true
+        context.dispatch('history/add', { cards: [card] }, { root: true })
         context.commit('remove', card)
         context.dispatch('api/addToQueue', { name: 'removeCard', body: card }, { root: true })
       } else {
@@ -560,9 +563,6 @@ const currentCards = {
         context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
       }
       context.dispatch('updateCardMap')
-      card = utils.clone(card)
-      card.isRemoved = true
-      context.dispatch('history/add', { cards: [card] }, { root: true })
     },
     deleteCard: (context, card) => {
       context.commit('deleteCard', card)
